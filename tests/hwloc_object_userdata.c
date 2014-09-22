@@ -59,7 +59,7 @@ static void import_cb(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_
     assert(length == 16);
     memcpy(tmp, buffer, 16);
     tmp[16] = '\0';
-    
+
     val = strtoull(buffer, NULL, 0);
 
     switch (val) {
@@ -85,7 +85,7 @@ static void import_cb(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_
     assert(RANDOMSTRINGLENGTH-i == (unsigned) length);
     err = memcmp(buffer, randomstring+(i+1)/2, length);
     assert(!err);
-    
+
   } else
     assert(0);
 }

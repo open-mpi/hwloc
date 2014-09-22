@@ -7,7 +7,7 @@ dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
 dnl Copyright (c) 2004-2012 The Regents of the University of California.
 dnl                         All rights reserved.
-dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
+dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart,
 dnl                         University of Stuttgart.  All rights reserved.
 dnl Copyright © 2006-2014 Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2012  Blue Brain Project, BBP/EPFL. All rights reserved.
@@ -36,7 +36,7 @@ AC_DEFUN([HWLOC_SETUP_CORE],[
 EOF])
 
     # If no prefix was defined, set a good value
-    m4_ifval([$1], 
+    m4_ifval([$1],
              [m4_define([hwloc_config_prefix],[$1/])],
              [m4_define([hwloc_config_prefix], [])])
 
@@ -151,9 +151,9 @@ EOF])
 #endif
 ])
     AC_DEFINE([_HPUX_SOURCE], [1], [Are we building for HP-UX?])
-    
+
     AC_LANG_PUSH([C])
-    
+
     # Check to see if we're producing a 32 or 64 bit executable by
     # checking the sizeof void*.  Note that AC CHECK_SIZEOF even works
     # when cross compiling (!), according to the AC 2.64 docs.  This
@@ -188,7 +188,7 @@ EOF])
 	  hwloc_components="$hwloc_components linuxpci"
 	  AC_DEFINE(HWLOC_HAVE_LINUXPCI, 1, [Define to 1 if building the Linux PCI component])
 	  hwloc_linuxpci_happy=yes
-	fi				    
+	fi
         ;;
       *-*-irix*)
         AC_DEFINE(HWLOC_IRIX_SYS, 1, [Define to 1 on Irix])
@@ -290,7 +290,7 @@ EOF])
         ;;
     esac
     AC_SUBST(HWLOC_MS_LIB_ARCH)
-    
+
     AC_CHECK_SIZEOF([unsigned long])
     AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_LONG], $ac_cv_sizeof_unsigned_long, [The size of `unsigned long', as computed by sizeof])
     AC_CHECK_SIZEOF([unsigned int])
@@ -363,12 +363,12 @@ EOF])
 
     AC_CHECK_FUNCS([strftime])
     AC_CHECK_FUNCS([setlocale])
-    
+
     AC_CHECK_HEADER([stdint.h], [
       AC_DEFINE([HWLOC_HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
     ])
     AC_CHECK_HEADERS([sys/mman.h])
-    
+
     old_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$CPPFLAGS -D_WIN32_WINNT=0x0601"
     AC_CHECK_TYPES([KAFFINITY,
@@ -391,18 +391,18 @@ EOF])
     AC_CHECK_LIB([gdi32], [main],
                  [HWLOC_LIBS="-lgdi32 $HWLOC_LIBS"
                   AC_DEFINE([HAVE_LIBGDI32], 1, [Define to 1 if we have -lgdi32])])
-    
+
     AC_CHECK_HEADER([windows.h], [
       AC_DEFINE([HWLOC_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
     ])
-    
+
     AC_CHECK_HEADERS([sys/lgrp_user.h], [
       AC_CHECK_LIB([lgrp], [lgrp_latency_cookie],
                    [HWLOC_LIBS="-llgrp $HWLOC_LIBS"
                     AC_DEFINE([HAVE_LIBLGRP], 1, [Define to 1 if we have -llgrp])])
     ])
     AC_CHECK_HEADERS([kstat.h], [
-      AC_CHECK_LIB([kstat], [main], 
+      AC_CHECK_LIB([kstat], [main],
                    [HWLOC_LIBS="-lkstat $HWLOC_LIBS"
                     AC_DEFINE([HAVE_LIBKSTAT], 1, [Define to 1 if we have -lkstat])])
     ])
@@ -423,7 +423,7 @@ EOF])
     		_SC_PAGESIZE,
     		_SC_PAGE_SIZE,
     		_SC_LARGE_PAGESIZE],,[:],[[#include <unistd.h>]])
-    
+
     AC_HAVE_HEADERS([mach/mach_host.h])
     AC_HAVE_HEADERS([mach/mach_init.h], [
       AC_CHECK_FUNCS([host_info])
@@ -482,7 +482,7 @@ EOF])
     if test "x$hwloc_thread_t" != "x" ; then
       AC_DEFINE_UNQUOTED(hwloc_thread_t, $hwloc_thread_t, [Define this to the thread ID type])
     fi
-    
+
     _HWLOC_CHECK_DECL([sched_setaffinity], [
       AC_DEFINE([HWLOC_HAVE_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides a prototype of sched_setaffinity()])
       AS_IF([test "$HWLOC_STRICT_ARGS_CFLAGS" = "FAIL"],[
@@ -507,7 +507,7 @@ EOF])
 #define _GNU_SOURCE
 #include <sched.h>
 ]])
-    
+
     AC_MSG_CHECKING([for working CPU_SET])
     AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
@@ -517,7 +517,7 @@ EOF])
 	[AC_DEFINE([HWLOC_HAVE_CPU_SET], [1], [Define to 1 if the CPU_SET macro works])
          AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])])
-    
+
     AC_MSG_CHECKING([for working CPU_SET_S])
     AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
@@ -555,7 +555,7 @@ EOF])
     AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
 
     AC_PATH_PROG([BASH], [bash])
-    
+
     AC_CHECK_FUNCS([ffs], [
       _HWLOC_CHECK_DECL([ffs],[
         AC_DEFINE([HWLOC_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
@@ -568,10 +568,10 @@ EOF])
         dnl We can't use AC_TRY_LINK because the failure does not appear until
         dnl run/load time and there is currently no precedent for AC_TRY_RUN
         dnl use in hwloc.  --PHH
-        dnl For now, we're going with "all gccfss compilers are broken". 
+        dnl For now, we're going with "all gccfss compilers are broken".
         dnl Better to be safe and correct; it's not like this is
         dnl performance-critical code, after all.
-        AC_DEFINE([HWLOC_HAVE_BROKEN_FFS], [1], 
+        AC_DEFINE([HWLOC_HAVE_BROKEN_FFS], [1],
                   [Define to 1 if your `ffs' function is known to be broken.])
       fi
     ])
@@ -581,7 +581,7 @@ EOF])
       ])
       AC_DEFINE([HWLOC_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
     ])
-    
+
     AC_CHECK_FUNCS([fls], [
       _HWLOC_CHECK_DECL([fls],[
         AC_DEFINE([HWLOC_HAVE_DECL_FLS], [1], [Define to 1 if function `fls' is declared by system headers])
@@ -594,7 +594,7 @@ EOF])
       ])
       AC_DEFINE([HWLOC_HAVE_FLSL], [1], [Define to 1 if you have the `flsl' function.])
     ])
-    
+
     AC_CHECK_FUNCS([clz], [
       _HWLOC_CHECK_DECL([clz],[
         AC_DEFINE([HWLOC_HAVE_DECL_CLZ], [1], [Define to 1 if function `clz' is declared by system headers])
@@ -607,7 +607,7 @@ EOF])
       ])
       AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
     ])
-    
+
     AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
 
     AC_CHECK_HEADERS([malloc.h])
@@ -845,7 +845,7 @@ EOF])
     CPPFLAGS=$CPPFLAGS_save
     LIBS=$LIBS_save
 
-    # GL Support 
+    # GL Support
     hwloc_gl_happy=no
     if test "x$enable_gl" != "xno"; then
 	hwloc_gl_happy=yes
@@ -872,15 +872,15 @@ EOF])
                 AC_MSG_WARN([find appropriate support])
                 AC_MSG_ERROR([Cannot continue])
             ])
- 	fi      
+        fi
     fi
     # don't add LIBS/CFLAGS yet, depends on plugins
-    
+
     # libxml2 support
     hwloc_libxml2_happy=
     if test "x$enable_libxml2" != "xno"; then
-        HWLOC_PKG_CHECK_MODULES([LIBXML2], [libxml-2.0], [xmlNewDoc], 
-                                [hwloc_libxml2_happy=yes], 
+        HWLOC_PKG_CHECK_MODULES([LIBXML2], [libxml-2.0], [xmlNewDoc],
+                                [hwloc_libxml2_happy=yes],
                                 [hwloc_libxml2_happy=no])
     fi
     if test "x$hwloc_libxml2_happy" = "xyes"; then
@@ -1124,7 +1124,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
                        [test "x$hwloc_have_sched_setaffinity" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_PTHREAD],
                        [test "x$hwloc_have_pthread" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS], 
+        AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS],
                        [test "x$hwloc_have_libibverbs" = "xyes"])
 	AM_CONDITIONAL([HWLOC_HAVE_CUDA],
 		       [test "x$hwloc_have_cuda" = "xyes"])
@@ -1145,9 +1145,9 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 
         AM_CONDITIONAL([HWLOC_BUILD_DOXYGEN],
                        [test "x$hwloc_generate_doxs" = "xyes"])
-        AM_CONDITIONAL([HWLOC_BUILD_README], 
+        AM_CONDITIONAL([HWLOC_BUILD_README],
                        [test "x$hwloc_generate_readme" = "xyes" -a \( "x$hwloc_install_doxs" = "xyes" -o "x$hwloc_generate_doxs" = "xyes" \) ])
-        AM_CONDITIONAL([HWLOC_INSTALL_DOXYGEN], 
+        AM_CONDITIONAL([HWLOC_INSTALL_DOXYGEN],
                        [test "x$hwloc_install_doxs" = "xyes"])
 
         AM_CONDITIONAL([HWLOC_HAVE_LINUX], [test "x$hwloc_linux" = "xyes"])

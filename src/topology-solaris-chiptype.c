@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2009-2010 Oracle and/or its affiliates.  All rights reserved. 
+ * Copyright (c) 2009-2010 Oracle and/or its affiliates.  All rights reserved.
  * Copyright (c) 2013 Université Bordeaux 1.  All rights reserved.
  *
  * $COPYRIGHT$
- * 
+ *
  * Additional copyrights may follow
- * 
+ *
  * $HEADER$
  */
 
@@ -261,9 +261,9 @@ static int probe_cpu(picl_nodehdl_t node_hdl, void* dummy_arg __hwloc_attribute_
 	  if (p_info.type == PICL_PTYPE_CHARSTRING) {
             val = picl_get_propval(p_hdl, &string_val, sizeof(string_val));
             if (val == PICL_SUCCESS) {
-            }	  
+            }
 	  }
-	} 
+	}
       }
     }
 
@@ -316,10 +316,10 @@ Initializes, gets the root, then walks the picl tree looking for information
 Currently, the "core" class is only needed for OPL systems
 *****************************************************************************/
 char *hwloc_solaris_get_chip_model(void) {
-    
+
     if (called_cpu_probe) {
 	if (dss_chip_mode != MODE_UNKNOWN) { /* SPARC chip */
-	    strncpy(dss_chip_model, sparc_modes[dss_chip_mode], 
+	    strncpy(dss_chip_model, sparc_modes[dss_chip_mode],
 		    PICL_PROPNAMELEN_MAX);
 	}
     } else {

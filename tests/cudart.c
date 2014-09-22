@@ -54,7 +54,7 @@ int main(void)
     value = hwloc_obj_get_info_by_name(osdev, "CoProcType");
     err = strcmp(value, "CUDA");
     assert(!err);
-    
+
     value = hwloc_obj_get_info_by_name(osdev, "GPUModel");
     printf("found OSDev model %s\n", value);
 

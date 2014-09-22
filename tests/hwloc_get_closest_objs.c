@@ -13,7 +13,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* 
+/*
  * check hwloc_get_closest_objs()
  *
  * - get the last object of the last level

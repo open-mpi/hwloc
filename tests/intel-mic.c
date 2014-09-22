@@ -40,7 +40,7 @@ int main(void)
     value = hwloc_obj_get_info_by_name(osdev, "CoProcType");
     err = strcmp(value, "MIC");
     assert(!err);
-    
+
     value = hwloc_obj_get_info_by_name(osdev, "MICFamily");
     printf("found MICFamily %s\n", value);
     value = hwloc_obj_get_info_by_name(osdev, "MICSKU");

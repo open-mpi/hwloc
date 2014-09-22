@@ -71,12 +71,12 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       EndPaint(hwnd, &ps);
       break;
     }
-    case WM_LBUTTONDOWN: 
+    case WM_LBUTTONDOWN:
       state = 1;
       x = GET_X_LPARAM(lparam);
       y = GET_Y_LPARAM(lparam);
       break;
-    case WM_LBUTTONUP: 
+    case WM_LBUTTONUP:
       state = 0;
       break;
     case WM_MOUSEMOVE:

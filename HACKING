@@ -26,7 +26,7 @@ Notes to developers:
   - w3m or lynx (to generate the README)
 
   On Debian systems, the following packages should be enough:
-    doxygen ghostscript texlive-latex-base texlive-latex-recommended 
+    doxygen ghostscript texlive-latex-base texlive-latex-recommended
     texlive-fonts-recommended texlive-font-utils transfig w3m
   On RedHat systems:
     ghostscript doxygen transfig tetex tetex-latex w3m

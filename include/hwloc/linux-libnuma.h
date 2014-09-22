@@ -27,7 +27,7 @@ extern "C" {
 /** \defgroup hwlocality_linux_libnuma_ulongs Interoperability with Linux libnuma unsigned long masks
  *
  * This interface helps converting between Linux libnuma unsigned long masks
- * and hwloc cpusets and nodesets. 
+ * and hwloc cpusets and nodesets.
  *
  * It also offers a consistent behavior on non-NUMA machines
  * or non-NUMA-aware kernels by assuming that the machines have a single
@@ -205,7 +205,7 @@ hwloc_nodeset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_nodeset
 /** \defgroup hwlocality_linux_libnuma_bitmask Interoperability with Linux libnuma bitmask
  *
  * This interface helps converting between Linux libnuma bitmasks
- * and hwloc cpusets and nodesets. 
+ * and hwloc cpusets and nodesets.
  *
  * It also offers a consistent behavior on non-NUMA machines
  * or non-NUMA-aware kernels by assuming that the machines have a single

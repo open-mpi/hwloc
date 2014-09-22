@@ -27,7 +27,7 @@ include_hwloc_HEADERS = \
         hwloc/rename.h \
         hwloc/deprecated.h
 include_hwloc_autogendir = $(includedir)/hwloc/autogen
-nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h 
+nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h
 
 noinst_HEADERS = \
         private/private.h \

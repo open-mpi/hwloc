@@ -7,7 +7,7 @@
 # license below.
 
 # pkg.m4 - Macros to locate and utilise pkg-config.            -*- Autoconf -*-
-# 
+#
 # Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,7 @@ if test -n "$PKG_CONFIG"; then
 		AC_MSG_RESULT([no])
 		PKG_CONFIG=""
 	fi
-		
+
 fi[]dnl
 ])# HWLOC_PKG_PROG_PKG_CONFIG
 
@@ -138,7 +138,7 @@ See the pkg-config man page for more details.])
         _HWLOC_PKG_SHORT_ERRORS_SUPPORTED
         if test $HWLOC_pkg_short_errors_supported = yes; then
             HWLOC_[]$1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "$2" 2>&1`
-        else 
+        else
             HWLOC_[]$1[]_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "$2" 2>&1`
         fi
         # Put the nasty error message in config.log where it belongs
@@ -189,7 +189,7 @@ To get pkg-config, see <http://pkg-config.freedesktop.org/>.])],
         AS_IF([test "$hwloc_result" = "yes"],
               [HWLOC_[]$1[]_CFLAGS=$HWLOC_pkg_cv_HWLOC_[]$1[]_CFLAGS
                HWLOC_[]$1[]_LIBS=$HWLOC_pkg_cv_HWLOC_[]$1[]_LIBS
-               AC_MSG_RESULT([yes])            
+               AC_MSG_RESULT([yes])
                ifelse([$4], , :, [$4])],
               [AC_MSG_RESULT([no])
                ifelse([$5], , :, [$5])])

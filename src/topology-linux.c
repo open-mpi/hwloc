@@ -223,7 +223,7 @@ hwloc_opendirat(const char *path, int fsroot_fd)
    it, but still preserve compiler parameter checking */
 static __hwloc_inline int
 hwloc_open(const char *p, int d __hwloc_attribute_unused)
-{ 
+{
 #ifdef HAVE_OPENAT
     return hwloc_openat(p, d);
 #else
@@ -233,7 +233,7 @@ hwloc_open(const char *p, int d __hwloc_attribute_unused)
 
 static __hwloc_inline FILE *
 hwloc_fopen(const char *p, const char *m, int d __hwloc_attribute_unused)
-{ 
+{
 #ifdef HAVE_OPENAT
     return hwloc_fopenat(p, m, d);
 #else
@@ -243,9 +243,9 @@ hwloc_fopen(const char *p, const char *m, int d __hwloc_attribute_unused)
 
 /* Static inline version of access so that we can use openat if we have
    it, but still preserve compiler parameter checking */
-static __hwloc_inline int 
+static __hwloc_inline int
 hwloc_access(const char *p, int m, int d __hwloc_attribute_unused)
-{ 
+{
 #ifdef HAVE_OPENAT
     return hwloc_accessat(p, m, d);
 #else
@@ -277,7 +277,7 @@ hwloc_lstat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
    it, but still preserve compiler parameter checking */
 static __hwloc_inline DIR *
 hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
-{ 
+{
 #ifdef HAVE_OPENAT
     return hwloc_opendirat(p, d);
 #else
@@ -2288,7 +2288,7 @@ hwloc__get_dmi_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
 
 /* Reads the entire file and returns bytes read if bytes_read != NULL
  * Returned pointer can be freed by using free().  */
-static void * 
+static void *
 hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
 {
   char *fname = NULL;
@@ -2348,7 +2348,7 @@ hwloc_read_str(const char *p, const char *p1, int root_fd)
 }
 
 /* Reads first 32bit bigendian value */
-static ssize_t 
+static ssize_t
 hwloc_read_unit32be(const char *p, const char *p1, uint32_t *buf, int root_fd)
 {
   size_t cb = 0;
@@ -2554,7 +2554,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
         hwloc_read_unit32be(cpu, "linux,phandle", &phandle, root_fd);
 
     if (0 == strcmp(device_type, "cache")) {
-      add_device_tree_cpus_node(&cpus, NULL, l2_cache, phandle, dirent->d_name); 
+      add_device_tree_cpus_node(&cpus, NULL, l2_cache, phandle, dirent->d_name);
     }
     else if (0 == strcmp(device_type, "cpu")) {
       /* Found CPU */

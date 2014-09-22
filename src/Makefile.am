@@ -20,7 +20,7 @@ noinst_LTLIBRARIES = libhwloc_embedded.la
 endif
 
 pluginsdir = @HWLOC_PLUGINS_DIR@
-plugins_LTLIBRARIES = 
+plugins_LTLIBRARIES =
 plugins_ldflags = -module -avoid-version -lltdl
 AM_CPPFLAGS += -DHWLOC_PLUGINS_PATH=\"$(HWLOC_PLUGINS_PATH)\"
 

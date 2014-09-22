@@ -51,7 +51,7 @@ hwloc_xml_callbacks_reset(void)
 {
   hwloc_nolibxml_callbacks = NULL;
   hwloc_libxml_callbacks = NULL;
-}			       
+}
 
 /************************************************
  ********* XML import (common routines) *********

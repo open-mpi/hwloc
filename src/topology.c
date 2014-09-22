@@ -2992,7 +2992,7 @@ hwloc_topology_is_thissystem(struct hwloc_topology *topology)
 }
 
 unsigned
-hwloc_topology_get_depth(struct hwloc_topology *topology) 
+hwloc_topology_get_depth(struct hwloc_topology *topology)
 {
   return topology->nb_levels;
 }

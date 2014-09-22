@@ -6,15 +6,15 @@ dnl                         Corporation.  All rights reserved.
 dnl Copyright (c) 2004-2005 The University of Tennessee and The University
 dnl                         of Tennessee Research Foundation.  All rights
 dnl                         reserved.
-dnl Copyright (c) 2004-2005 High Performance Computing Center Stuttgart, 
+dnl Copyright (c) 2004-2005 High Performance Computing Center Stuttgart,
 dnl                         University of Stuttgart.  All rights reserved.
 dnl Copyright (c) 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright (c) 2011      Cisco Systems, Inc.  All rights reserved.
 dnl $COPYRIGHT$
-dnl 
+dnl
 dnl Additional copyrights may follow
-dnl 
+dnl
 dnl $HEADER$
 dnl
 
@@ -48,7 +48,7 @@ AC_DEFUN([_HWLOC_C_COMPILER_VENDOR], [
 m4_ifndef([AC_LANG_DEFINES_PROVIDED],
 	  [m4_define([AC_LANG_DEFINES_PROVIDED])])
 
-# HWLOC_IFDEF_IFELSE(symbol, [action-if-defined], 
+# HWLOC_IFDEF_IFELSE(symbol, [action-if-defined],
 #                   [action-if-not-defined])
 # ----------------------------------------------
 # Run compiler to determine if preprocessor symbol "symbol" is
@@ -61,7 +61,7 @@ choke me
 #endif], [$2], [$3])])
 
 
-# HWLOC_IF_IFELSE(symbol, [action-if-defined], 
+# HWLOC_IF_IFELSE(symbol, [action-if-defined],
 #                [action-if-not-defined])
 # ----------------------------------------------
 # Run compiler to determine if preprocessor symbol "symbol" is
@@ -91,27 +91,27 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
 
     # Intel
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IF_IFELSE([defined(__INTEL_COMPILER) || defined(__ICC)], 
+          [HWLOC_IF_IFELSE([defined(__INTEL_COMPILER) || defined(__ICC)],
                [hwloc_check_compiler_vendor_result="intel"])])
 
     # GNU
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([__GNUC__], 
+          [HWLOC_IFDEF_IFELSE([__GNUC__],
                [hwloc_check_compiler_vendor_result="gnu"])])
 
     # Borland Turbo C
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([__TURBOC__], 
+          [HWLOC_IFDEF_IFELSE([__TURBOC__],
                [hwloc_check_compiler_vendor_result="borland"])])
 
     # Borland C++
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([__BORLANDC__], 
+          [HWLOC_IFDEF_IFELSE([__BORLANDC__],
                [hwloc_check_compiler_vendor_result="borland"])])
 
     # Comeau C++
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([__COMO__], 
+          [HWLOC_IFDEF_IFELSE([__COMO__],
                [hwloc_check_compiler_vendor_result="comeau"])])
 
     # Compaq C/C++
@@ -125,12 +125,12 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
 
     # Cray C/C++
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([_CRAYC], 
+          [HWLOC_IFDEF_IFELSE([_CRAYC],
                [hwloc_check_compiler_vendor_result="cray"])])
 
     # Diab C/C++
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([__DCC__], 
+          [HWLOC_IFDEF_IFELSE([__DCC__],
                [hwloc_check_compiler_vendor_result="diab"])])
 
     # Digital Mars
@@ -172,20 +172,20 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
 
     # MIPSpro (SGI)
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IF_IFELSE([defined(sgi) || defined(__sgi)], 
+          [HWLOC_IF_IFELSE([defined(sgi) || defined(__sgi)],
                [hwloc_check_compiler_vendor_result="sgi"])])
 
     # MPW C++
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IF_IFELSE([defined(__MRC__) || defined(MPW_C) || defined(MPW_CPLUS)], 
+          [HWLOC_IF_IFELSE([defined(__MRC__) || defined(MPW_C) || defined(MPW_CPLUS)],
                [hwloc_check_compiler_vendor_result="mpw"])])
 
     # Microsoft
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [# Always use C compiler when checking for Microsoft, as 
+          [# Always use C compiler when checking for Microsoft, as
            # Visual C++ doesn't recognize .cc as a C++ file.
            AC_LANG_PUSH(C)
-           HWLOC_IF_IFELSE([defined(_MSC_VER) || defined(__MSC_VER)], 
+           HWLOC_IF_IFELSE([defined(_MSC_VER) || defined(__MSC_VER)],
                [hwloc_check_compiler_vendor_result="microsoft"])
            AC_LANG_POP(C)])
 
@@ -201,7 +201,7 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
 
     # Portland Group
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([__PGI], 
+          [HWLOC_IFDEF_IFELSE([__PGI],
                [hwloc_check_compiler_vendor_result="portland group"])])
 
     # SAS/C

@@ -173,7 +173,7 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
     indexes = calloc(nbobjs, sizeof(unsigned));
     distances = calloc(nbobjs*nbobjs, sizeof(float));
     tmp = string;
-    
+
     /* parse indexes */
     for(i=0; i<nbobjs; i++) {
       indexes[i] = strtoul(tmp, &next, 0);

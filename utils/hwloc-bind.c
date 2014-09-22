@@ -398,7 +398,7 @@ int main(int argc, char *argv[])
 
   ret = execvp(argv[0], argv);
   if (ret) {
-      fprintf(stderr, "%s: Failed to launch executable \"%s\"\n", 
+      fprintf(stderr, "%s: Failed to launch executable \"%s\"\n",
               callname, argv[0]);
       perror("execvp");
   }

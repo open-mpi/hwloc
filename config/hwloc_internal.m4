@@ -7,7 +7,7 @@ dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
 dnl Copyright (c) 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
-dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
+dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart,
 dnl                         University of Stuttgart.  All rights reserved.
 dnl Copyright © 2010-2014 Inria.  All rights reserved.
 dnl Copyright © 2006-2014 Cisco Systems, Inc.  All rights reserved.
@@ -52,7 +52,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
 
     # Cairo?
     AC_ARG_ENABLE([cairo],
-                  AS_HELP_STRING([--disable-cairo], 
+                  AS_HELP_STRING([--disable-cairo],
                                  [Disable the Cairo back-end of hwloc's lstopo command]))
 
     # CPUID
@@ -62,7 +62,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
 
     # XML using libxml2?
     AC_ARG_ENABLE([libxml2],
-                  AS_HELP_STRING([--disable-libxml2], 
+                  AS_HELP_STRING([--disable-libxml2],
 		                 [Do not use libxml2 for XML support, use a custom minimalistic support]))
 
     # PCI?
@@ -123,22 +123,22 @@ EOF
 	   test "x$enable_doxygen" = x && enable_doxygen=no],
           [AC_MSG_RESULT([yes])
 	   test "x$enable_doxygen" = x && enable_doxygen=yes])
-    
+
     # Generating the doxygen output requires a few tools.  If we
     # don't have all of them, refuse the build the docs.
     AC_ARG_VAR([DOXYGEN], [Location of the doxygen program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([DOXYGEN], [doxygen])
     HWLOC_DOXYGEN_VERSION=`doxygen --version 2> /dev/null`
-    
+
     AC_ARG_VAR([PDFLATEX], [Location of the pdflatex program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([PDFLATEX], [pdflatex])
-    
+
     AC_ARG_VAR([MAKEINDEX], [Location of the makeindex program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([MAKEINDEX], [makeindex])
-    
+
     AC_ARG_VAR([FIG2DEV], [Location of the fig2dev program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([FIG2DEV], [fig2dev])
-    
+
     AC_ARG_VAR([GS], [Location of the gs program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([GS], [gs])
 
@@ -151,7 +151,7 @@ EOF
     AC_MSG_RESULT([$hwloc_generate_doxs])
     AS_IF([test "x$hwloc_generate_doxs" = xyes -a "x$HWLOC_DOXYGEN_VERSION" = x1.6.2],
                  [hwloc_generate_doxs="no"; AC_MSG_WARN([doxygen 1.6.2 has broken short name support, disabling])])
-    
+
     # Linux and OS X take different sed arguments.
     AC_PROG_SED
     AC_MSG_CHECKING([if the sed -i option requires an argument])
@@ -173,7 +173,7 @@ EOF
     AC_PATH_TOOL([W3M], [w3m])
     AC_ARG_VAR([LYNX], [Location of the lynx program (required to building the top-level hwloc README file)])
     AC_PATH_TOOL([LYNX], [lynx])
-    
+
     AC_MSG_CHECKING([if can build top-level README])
     AS_IF([test "x$W3M" != "x"],
           [hwloc_generate_readme=yes
@@ -184,13 +184,13 @@ EOF
                  [hwloc_generate_readme=no])])
     AC_SUBST(HWLOC_W3_GENERATOR)
     AC_MSG_RESULT([$hwloc_generate_readme])
-    
+
     # If any one of the above tools is missing, we will refuse to make dist.
     AC_MSG_CHECKING([if will build doxygen docs])
     AS_IF([test "x$hwloc_generate_doxs" = "xyes" -a "x$enable_doxygen" != "xno"],
           [], [hwloc_generate_doxs=no])
     AC_MSG_RESULT([$hwloc_generate_doxs])
-    
+
     # See if we want to install the doxygen docs
     AC_MSG_CHECKING([if will install doxygen docs])
     AS_IF([test "x$hwloc_generate_doxs" = "xyes" -o \
@@ -200,7 +200,7 @@ EOF
           [hwloc_install_doxs=yes],
           [hwloc_install_doxs=no])
     AC_MSG_RESULT([$hwloc_install_doxs])
-    
+
     # For the common developer case, if we're in a developer checkout and
     # using the GNU compilers, turn on maximum warnings unless
     # specifically disabled by the user.
@@ -261,7 +261,7 @@ EOF
                               [hwloc_cairo_happy=yes],
                               [hwloc_cairo_happy=no])
     fi
-    
+
     if test "x$hwloc_cairo_happy" = "xyes"; then
         AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
     else

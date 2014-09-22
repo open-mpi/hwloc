@@ -47,7 +47,7 @@ lstopo_no_graphics_SOURCES = \
 	lstopo-text.c \
 	lstopo-xml.c
 
-lstopo_no_graphics_CFLAGS = 
+lstopo_no_graphics_CFLAGS =
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 lstopo_SOURCES = $(lstopo_no_graphics_SOURCES)
 lstopo_CPPFLAGS = $(AM_CPPFLAGS)

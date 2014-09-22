@@ -184,7 +184,7 @@ typedef union hwloc_topology_diff_u {
  * \note The output diff can only be exported to XML or passed to
  * hwloc_topology_diff_apply() if 0 was returned, i.e. if no entry of type
  * HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX is listed.
- * 
+ *
  * \note The output diff may be modified by removing some entries from
  * the list. The removed entries should be freed by passing them to
  * to hwloc_topology_diff_destroy() (possible as another list).

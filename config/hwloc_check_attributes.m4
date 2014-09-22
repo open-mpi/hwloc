@@ -18,26 +18,26 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 # - Redistributions of source code must retain the above copyright
 #   notice, this list of conditions and the following disclaimer.
-# 
+#
 # - Redistributions in binary form must reproduce the above copyright
 #   notice, this list of conditions and the following disclaimer listed
 #   in this license in the documentation and/or other materials
 #   provided with the distribution.
-# 
+#
 # - Neither the name of the copyright holders nor the names of its
 #   contributors may be used to endorse or promote products derived from
 #   this software without specific prior written permission.
-# 
+#
 # The copyright holders provide no reassurances that the source code
 # provided does not infringe any patent, copyright, or any other
 # intellectual property rights of third parties.  The copyright holders
 # disclaim any liability to any recipient for claims brought against
 # recipient by any third party for infringement of that parties
 # intellectual property rights.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -52,14 +52,14 @@
 #
 
 #
-# Search the generated warnings for 
+# Search the generated warnings for
 # keywords regarding skipping or ignoring certain attributes
 #   Intel: ignore
 #   Sun C++: skip
 #
 AC_DEFUN([_HWLOC_ATTRIBUTE_FAIL_SEARCH],[
     # Be safe for systems that have ancient Autoconf's (e.g., RHEL5)
-    m4_ifdef([AC_PROG_GREP], 
+    m4_ifdef([AC_PROG_GREP],
              [AC_REQUIRE([AC_PROG_GREP])],
              [GREP=grep])
 
@@ -86,7 +86,7 @@ AC_DEFUN([_HWLOC_ATTRIBUTE_FAIL_SEARCH],[
 # regarding unused function in main file)
 #       static int usage (int * argument);
 #
-# The last argument is for specific CFLAGS, that need to be set 
+# The last argument is for specific CFLAGS, that need to be set
 # for the compiler to generate a warning on the cross-check.
 # This may need adaption for future compilers / CFLAG-settings.
 #
@@ -107,7 +107,7 @@ AC_DEFUN([_HWLOC_CHECK_SPECIFIC_ATTRIBUTE], [
                         _HWLOC_ATTRIBUTE_FAIL_SEARCH([$1])
                        ],
                        [hwloc_cv___attribute__[$1]=0])
-        
+
         #
         # If the attribute is supported by both compilers,
         # try to recompile a *cross-check*, IFF defined.
@@ -154,7 +154,7 @@ AC_DEFUN([_HWLOC_CHECK_SPECIFIC_ATTRIBUTE], [
 # attribute most often fail with a warning (when the warning
 # level is set).
 # The compilers output is parsed in _HWLOC_ATTRIBUTE_FAIL_SEARCH
-# 
+#
 # To add a new attributes __NAME__ add the
 #   hwloc_cv___attribute__NAME
 # add a new check with _HWLOC_CHECK_SPECIFIC_ATTRIBUTE (possibly with a cross-check)

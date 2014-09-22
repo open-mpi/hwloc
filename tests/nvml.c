@@ -64,7 +64,7 @@ int main(void)
     assert(!err);
 
     assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_GPU);
-   
+
     value = hwloc_obj_get_info_by_name(osdev, "GPUModel");
     printf("found OSDev model %s\n", value);
 
