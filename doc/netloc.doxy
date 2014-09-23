@@ -1,0 +1,1192 @@
+/*
+ * Copyright © 2013-2014 University of Wisconsin-La Crosse.
+ *                         All rights reserved.
+ * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
+ *
+ * Copyright © 2014 Inria.  All rights reserved.
+ * See COPYING in top-level directory.
+ *
+ * $HEADER$
+ */
+/*! \mainpage Network Locality
+
+<h1 class="sub">Portable abstraction of network topologies for high-performance computing</h1>
+
+<hr>
+
+
+<!-- ********************************************* -->
+\htmlonly
+<div class="section" id="introduction">
+\endhtmlonly
+\section Introduction
+
+The Portable Network Locality (netloc) software package provides network
+topology discovery tools, and an abstract representation of those networks
+topologies for a range of network types and configurations. It is provided as a
+companion to the Portable Hardware Locality (hwloc) package. These two software
+packages work together to provide a comprehensive view of the HPC system
+topology, spanning from the processor cores in one server to the cores in
+another - including the complex network(s) in between.
+
+Towards this end, netloc is divided into three components:
+<ul>
+ <li>Network topology discovery tools for each network type and discovery
+ technique (called readers)
+ <li>Merging hwloc server topology information with that network topology
+information to produce a unified map of an entire computing system (even if
+that system includes multiple networks of different types, and servers that are
+on at least one of those networks).
+ <li>A portable C API for higher-level software to query, traverse, and
+ manipulate the abstract representation of the network topology and unified map
+(represented as a graph)
+</ul>
+
+\image html netloc-design-small.png
+\image latex netloc-design-small.png "" width=9cm
+
+The network topology graph not only provides information about the physical
+nodes and edges in the network topology, but also information about the paths
+between nodes (both physical and logical, where available). Since the type of
+analysis (e.g., graph partitioning) required of this graph is often
+application-specific, netloc limits the amount of analysis it performs and
+leaves further analysis to higher level applications and libraries built upon
+this service. Additionally, the \ref tools_lsnettopo tool can display and export
+this network topology information in a variety of formats (e.g., GraphML and
+GEXF file formats) providing developers with an additional mechanism to access
+the data for further analysis.
+
+Similar to hwloc, netloc primarily aims at helping applications with gathering
+information about modern computing and networking hardware so as to exploit it
+accordingly and efficiently.
+
+\subsection supportednetworks Supported Networks
+
+The following networks are currently supported:
+
+<ul>
+<li>InfiniBand (See \ref tools_reader_ib).
+<li>OpenFlow-managed Ethernet newtworks (See \ref tools_reader_of).
+Below are the supported OpenFlow controllers:
+  <ul>
+  <li><a href="http://www.cisco.com/c/en/us/products/cloud-systems-management/extensible-network-controller-xnc/index.html">Cisco XNC</a>
+  <li><a href="http://www.projectfloodlight.org/floodlight/">Floodlight</a>
+  <li><a href="http://www.opendaylight.org/">OpenDaylight</a>
+  </ul>
+<li>Static (User Defined) (See \ref tools_reader_static).
+</ul>
+
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="installation">
+\endhtmlonly
+\section installation Installation
+
+The typical installation follows the following pattern:
+
+\verbatim
+shell$ ./configure [options...]
+shell$ make
+shell$ make install
+\endverbatim
+
+
+\subsection configuration Configure Parameters
+
+There are a few configuration options available. See ./configure --help for
+a complete list.
+
+\verbatim
+ --prefix=<directory>
+   Install netloc into the base directory specified.
+
+ --with-jansson=<directory>
+   Installation directory of the Jansson JSON parsing library.
+   http://www.digip.org/jansson/
+
+ --with-hwloc=<directory>
+   Installation directory of the hwloc library.
+   http://www.open-mpi.org/projects/hwloc/
+\endverbatim
+
+A small number of API unit tests and testing data have been made available
+as part of this distribution. To compile these tests use the following
+command:
+
+\verbatim
+shell$ make check
+shell$ cd tests
+# Run all of the programs compiled in this directory
+\endverbatim
+
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="interface">
+\endhtmlonly
+\section interface Programming Interface
+
+The netloc model separates network topology discovery mechanism from the
+mechanism for querying that network topology data via the netloc API. The
+reason for this separation is due to the need, for some networks, to run the
+discovery mechanism in a privileged mode.
+
+Follow the link(s) below that best suit your intended use of netloc:
+<ul>
+  <li> \ref termsanddefs (A good place to start)
+  <li> \ref apiuser : For developers integrating netloc topology data into
+  their application(s).
+  <li> \ref apicli : For information on how to discover network topology data
+  for your network.
+  <li> \ref apireader : For developers interested in supporting a new type of
+  network or extend support for existing networks in netloc.
+</ul>
+
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="bugs">
+\endhtmlonly
+\section bugs Questions and Bugs
+
+Questions should be sent to the netloc users and/or developers mailing list
+(http://www.open-mpi.org/community/lists/netloc.php).
+
+Bug reports should be reported in the tracker
+(https://git.open-mpi.org/trac/netloc/).
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+\page apiuser End-User API
+
+There are a series of steps that a user must move through to gain access to the
+network topology information.
+<ol start="0">
+  <li> Run a netloc Reader tool to generate the \c .ndat file containing the
+  network information (\ref apicli). You will need to know the directory in
+  which the \c .ndat files are contained.
+  <li> Access \ref apiusermetadata <br>
+  This provides a lightweight discovery mechanism for choosing the network(s)
+  about which to gather more detailed information.
+  <li> Access the \ref apiusertopo <br>
+  This opaque handle provides access to the detailed topology information.
+  <li> Use the \ref apiuserquery <br>
+  This interfaces allow you to access various components of the network
+  topology including nodes, edges, and paths.
+</ol>
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apiusermetadata">
+\endhtmlonly
+\section apiusermetadata Network Metadata
+
+The following interfaces allow the application to find available network
+information and choose the subset of those networks for further investigation.
+they
+<ul>
+ <li> \ref netloc_find_network : Find a specific network
+ <li> \ref netloc_foreach_network : Iterate through all available networks.
+</ul>
+
+\code
+    char **search_uris = NULL;
+    int num_uris = 1, ret;
+    netloc_network_t *tmp_network = NULL;
+
+    // Specify where to search for network data
+    search_uris = (char**)malloc(sizeof(char*) * num_uris );
+    search_uris[0] = strdup("file://data/");
+
+    // Find a specific InfiniBand network
+    tmp_network = netloc_dt_network_t_construct();
+    tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
+    tmp_network->subnet_id    = strdup("fe80:0000:0000:0000");
+
+    // Search for the specific network
+    ret = netloc_find_network(search_uris[0], tmp_network);
+    if( NETLOC_SUCCESS != ret ) {
+        fprintf(stderr, "Error: network not found!\n");
+        netloc_dt_network_t_destruct(tmp_network);
+        return NETLOC_ERROR;
+    }
+
+    printf("\tFound Network: %s\n", netloc_pretty_print_network_t(tmp_network));
+
+    // Cleanup (Do this only once finished querying the network)
+    netloc_dt_network_t_destruct(tmp_network);
+    tmp_network = NULL;
+\endcode
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apiusertopo">
+\endhtmlonly
+\section apiusertopo Network Topology Handle
+
+The following interfaces attach a topology handle to a specific network
+discovered during the metadata discovery process (\ref apiusermetadata).
+they
+<ul>
+ <li> \ref netloc_attach : Attach to a specific network.
+ <li> \ref netloc_detach : Detach from the network.
+ <li> \ref netloc_access_network_ref : Access the network handle associated
+ with this topology.
+</ul>
+
+(Note the code below is continued from the \ref apiusermetadata section.)
+\code
+    netloc_topology_t topology;
+
+    // Attach to the network
+    ret = netloc_attach(&topology, *tmp_network);
+    if( NETLOC_SUCCESS != ret ) {
+        fprintf(stderr, "Error: netloc_attach returned an error (%d)\n", ret);
+        return ret;
+    }
+
+    // Query the network topology (see next section, below)
+    // ...
+
+    // Detach from the network
+    ret = netloc_detach(topology);
+    if( NETLOC_SUCCESS != ret ) {
+        fprintf(stderr, "Error: netloc_detach returned an error (%d)\n", ret);
+        return ret;
+    }
+\endcode
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apiuserquery">
+\endhtmlonly
+\section apiuserquery Network Topology Query Interfaces
+
+The following interfaces query the network topology using the netloc topology
+handle.
+they
+<ul>
+ <li> \ref netloc_get_all_nodes : Access all of the nodes in the network topology.
+ <li> \ref netloc_get_all_switch_nodes : Access only those nodes identified as
+ switches.
+ <li> \ref netloc_get_all_host_nodes : Access only those nodes identified as
+ hosts.
+ <li> \ref netloc_get_all_edges : Access all of the edges in the topology.
+ <li> \ref netloc_get_node_by_physical_id : Find a node by their physical
+ identifier.
+ <li> \ref netloc_get_path : Access the physical or logical path between two
+ nodes.
+</ul>
+
+A few of these interfaces return a lookup table of information for collections
+of similar data types. The following functionality allows the user to tranverse
+this collection.
+<ul>
+ <li> \ref netloc_dt_lookup_table_iterator_t_construct : Create an iterator for
+ a lookup table.
+ <li> \ref netloc_dt_lookup_table_iterator_t_destruct : Destroy a previously
+ created iterator.
+ <li> \ref netloc_lookup_table_destroy : Destroy a lookup table returned by the
+ query API.
+ <li> \ref netloc_lookup_table_size : Access the used size of the lookup table
+ (number of entries).
+ <li> \ref netloc_lookup_table_access : Access a specific entry in the table.
+ <li> \ref netloc_lookup_table_iterator_next_key : Get the next key and advance
+ the iterator.
+ <li> \ref netloc_lookup_table_iterator_next_entry : Get the next entry and
+ advance the iterator.
+ <li> \ref netloc_lookup_table_iterator_at_end : Check if the iterator is at
+ the end of the collection.
+ <li> \ref netloc_lookup_table_iterator_reset : Reset the iterator to the
+ beginning of the collection.
+</ul>
+
+(Note the code below assumes a topology handle is attached, per \ref apiusertopo section.)
+\code
+    netloc_topology_t topology;
+    // Assume that the 'topology' handle is attached to a network.
+
+    netloc_dt_lookup_table_t nodes = NULL;
+    netloc_dt_lookup_table_iterator_t hti = NULL;
+    const char * key = NULL;
+    netloc_node_t *node = NULL;
+
+    // Access all of the nodes in the topology
+    ret = netloc_get_all_nodes(topology, &nodes);
+    if( NETLOC_SUCCESS != ret ) {
+        fprintf(stderr, "Error: get_all_nodes returned %d\n", ret);
+        return ret;
+    }
+
+    // Display all of the nodes found
+    hti = netloc_dt_lookup_table_iterator_t_construct( nodes );
+    while( !netloc_lookup_table_iterator_at_end(hti) ) {
+        // Access the data by key (could also access by entry in the example)
+        key = netloc_lookup_table_iterator_next_key(hti);
+        if( NULL == key ) {
+            break;
+        }
+
+        node = (netloc_node_t*)netloc_lookup_table_access(nodes, key);
+        if( NETLOC_NODE_TYPE_INVALID == node->node_type ) {
+            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_pretty_print_node_t(node));
+            return NETLOC_ERROR;
+        }
+
+        printf("Found: %s\n", netloc_pretty_print_node_t(node));
+    }
+
+    /* Cleanup */
+    netloc_dt_lookup_table_iterator_t_destruct(hti);
+    netloc_lookup_table_destroy(nodes);
+    free(nodes);
+    nodes = NULL;
+\endcode
+
+<!-- ********************************************* -->
+
+\htmlonly
+</div><div class="section" id="apiuserexample">
+\endhtmlonly
+\section apiuserexample Example Programs
+
+The following small C example (named ``netloc_hello.c'') accesses a specific
+network and searches for a specific node by its physical identifier (e.g., MAC
+address, GUID).
+
+\include "netloc_hello.c"
+
+
+The following C example (named ``netloc_nodes.c'') is an accumulation of
+the inline examples above to display all of the nodes in a single network.
+
+\include "netloc_nodes.c"
+
+
+The following small C example (named ``netloc_all.c'') prints all of the
+nodes in all of the network topologies discovered.
+
+\include "netloc_all.c"
+
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+\page apicli Command Line Tools and Network Readers
+
+<!-- ********************************************* -->
+
+\htmlonly
+</div><div class="section" id="tools_lsnettopo">
+\endhtmlonly
+\section tools_lsnettopo lsnettopo
+
+The \c lsnettopo command provides a description of the network information discovered.
+This command will list the network topology summary information for all
+networks in the specified directory. The network topology information is
+displayed to the console or can be exported in a variety of formats (e.g.,
+GraphML and GEXF file formats) providing developers with an additional
+mechanism to access the data for further analysis.
+
+\verbatim
+shell$ lsnettopo data/
+Network: ETH-unknown
+  Type    : Ethernet
+  Subnet  : unknown
+  Hosts   :   8
+  Switches:   7
+---------------------------------------------------
+shell$
+shell$ lsnettopo data/ --export gexf
+Network: ETH-unknown
+         Filename: ETH-unknown.gexf
+shell$
+shell$ lsnettopo data/ -f
+Network: ETH-unknown
+  Type    : Ethernet
+  Subnet  : unknown
+  Hosts   :   8
+  Switches:   7
+---------------------------------------------------
+
+Information by Host
+---------------------
+00:00:00:00:00:02 (  Host) on port  -1  [-> 1/1 <-]  00:00:00:00:00:00:00:03 (Switch) on port   2
+00:00:00:00:00:07 (  Host) on port  -1  [-> 1/1 <-]  00:00:00:00:00:00:00:07 (Switch) on port   1
+00:00:00:00:00:03 (  Host) on port  -1  [-> 1/1 <-]  00:00:00:00:00:00:00:04 (Switch) on port   1
+00:00:00:00:00:06 (  Host) on port  -1  [-> 1/1 <-]  00:00:00:00:00:00:00:06 (Switch) on port   2
+00:00:00:00:00:08 (  Host) on port  -1  [-> 1/1 <-]  00:00:00:00:00:00:00:07 (Switch) on port   2
+00:00:00:00:00:05 (  Host) on port  -1  [-> 1/1 <-]  00:00:00:00:00:00:00:06 (Switch) on port   1
+00:00:00:00:00:01 (  Host) on port  -1  [-> 1/1 <-]  00:00:00:00:00:00:00:03 (Switch) on port   1
+00:00:00:00:00:04 (  Host) on port  -1  [-> 1/1 <-]  00:00:00:00:00:00:00:04 (Switch) on port   2
+
+Information by Switch
+---------------------
+00:00:00:00:00:00:00:06 (Switch) on port   3  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:05 (Switch) on port   1
+00:00:00:00:00:00:00:06 (Switch) on port   2  [-> 1/1 <-]  00:00:00:00:00:06 (  Host) on port  -1
+00:00:00:00:00:00:00:06 (Switch) on port   1  [-> 1/1 <-]  00:00:00:00:00:05 (  Host) on port  -1
+00:00:00:00:00:00:00:03 (Switch) on port   2  [-> 1/1 <-]  00:00:00:00:00:02 (  Host) on port  -1
+00:00:00:00:00:00:00:03 (Switch) on port   3  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:02 (Switch) on port   1
+00:00:00:00:00:00:00:03 (Switch) on port   1  [-> 1/1 <-]  00:00:00:00:00:01 (  Host) on port  -1
+00:00:00:00:00:00:00:07 (Switch) on port   1  [-> 1/1 <-]  00:00:00:00:00:07 (  Host) on port  -1
+00:00:00:00:00:00:00:07 (Switch) on port   2  [-> 1/1 <-]  00:00:00:00:00:08 (  Host) on port  -1
+00:00:00:00:00:00:00:07 (Switch) on port   3  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:05 (Switch) on port   2
+00:00:00:00:00:00:00:02 (Switch) on port   2  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:04 (Switch) on port   3
+00:00:00:00:00:00:00:02 (Switch) on port   1  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:03 (Switch) on port   3
+00:00:00:00:00:00:00:02 (Switch) on port   3  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:01 (Switch) on port   1
+00:00:00:00:00:00:00:04 (Switch) on port   1  [-> 1/1 <-]  00:00:00:00:00:03 (  Host) on port  -1
+00:00:00:00:00:00:00:04 (Switch) on port   3  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:02 (Switch) on port   2
+00:00:00:00:00:00:00:04 (Switch) on port   2  [-> 1/1 <-]  00:00:00:00:00:04 (  Host) on port  -1
+00:00:00:00:00:00:00:05 (Switch) on port   3  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:01 (Switch) on port   2
+00:00:00:00:00:00:00:05 (Switch) on port   1  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:06 (Switch) on port   3
+00:00:00:00:00:00:00:05 (Switch) on port   2  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:07 (Switch) on port   3
+00:00:00:00:00:00:00:01 (Switch) on port   1  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:02 (Switch) on port   3
+00:00:00:00:00:00:00:01 (Switch) on port   2  [-> 10000000000/1 <-]  00:00:00:00:00:00:00:05 (Switch) on port   3
+------------------------------------------------------------------------------
+\endverbatim
+
+\subsection tools_lsnettopo_cli Command Line Interface
+
+There are a few command line options available. See <tt>lsnettopo --help</tt>
+for a complete list.
+
+\verbatim
+<input directory>             (Optional)
+   Path to directory where the netloc .dat files are placed.
+   Detected as the first unknown option on the command line
+   Default: ./
+
+--full | -f                   (Optional)
+   Full output, in addition to the brief overview
+   Default: disabled
+
+--export | -e <export_type>   (Optional)
+   Export the data in the specified format type.
+   Supported Format Types
+     screen  (Default)
+        Display to the terminal
+     GraphML
+        File extension .graphml
+        http://graphml.graphdrawing.org/
+     GEXF
+        File extension .gexf
+        http://gexf.net/
+
+--verbose | -v                (Optional)
+   Verbose output.
+
+--help | -h                   (Optional)
+   Display a help message.
+\endverbatim
+
+<!-- ********************************************* -->
+
+\htmlonly
+</div><div class="section" id="tools_reader_static">
+\endhtmlonly
+\section tools_reader_static Reader: Static (User Defined)
+
+The \c netloc_reader_static tool processes data from a user supplied input
+file. This reader is useful for users on networks that do not (yet) have a
+netloc reader or, due to restricted access, the user cannot run the necessary
+reader. The format of the input file is specified below.
+
+<ul>
+ <li> \c netloc_reader_static : Static specification of the network topology information.
+</ul>
+
+\verbatim
+shell$ netloc_reader_static -i example-2-nodes.json -o netloc/
+  Input file       : example-2-nodes.json
+  Output Directory : ./
+Parsing the input file...
+        Processing: Network Information...
+        Processing: Node Information...
+        Processing: Edge Information...
+Status: Computing Physical Paths
+Status: Validating the output...
+        Number of hosts   :    2
+        Number of switches:    1
+        Number of edges   :    4
+shell$
+shell$  lsnettopo netloc/
+Network: ETH-unknown (version 1)
+  Type    : Ethernet
+  Subnet  : unknown
+  Hosts   :   2
+  Switches:   1
+---------------------------------------------------
+\endverbatim
+
+\subsection tools_reader_static_cli Command Line Interfaces (netloc_reader_static)
+
+There are a few command line options available. See <tt>netloc_reader_static --help</tt>
+for a complete list.
+
+\verbatim
+--input | -i <filename>
+   The JSON input file describing the network nodes and edges.
+
+--outdir | -o <output directory>       (Optional)
+   Path to directory where output .dat filess are placed by the tool.
+   Default: "./"
+
+--progress | -p
+   Show progress of processing node and edge information
+   Default: disabled
+
+--help | -h                            (Optional)
+   Display a help message.
+\endverbatim
+
+\subsection tools_reader_static_json JSON Format
+
+Below is the <a href="http://json-schema.org/">JSON schema</a> for the input file.
+
+\verbinclude "../tools/reader_static/netloc_reader_static_schema.json"
+
+Below is an example of the expected format of the JSON input file with two nodes and one swich.
+
+\verbinclude "../tools/reader_static/example-2-nodes.json"
+
+
+
+<!-- ********************************************* -->
+
+\htmlonly
+</div><div class="section" id="tools_reader_ib">
+\endhtmlonly
+\section tools_reader_ib Reader: InfiniBand
+
+The following tools are available for discovering the network topology of an
+InfiniBand network.
+<ul>
+ <li> \c netloc_ib_gather_raw : Call the \c ibnetdiscover and \c ibroutes tools
+ to generate the necessary raw data files.
+ <li> \c netloc_ib_extract_dats : This command simplifies the use of the
+ \c netloc_reader_ib tool by processing all subnet data generated from the
+ \c netloc_ib_gather_raw tool..
+ <li> \c netloc_reader_ib : Processes raw data from the \c ibnetdiscover and
+ \c ibroutes tools. The resulting \c .ndat files are used as abstract
+ representations of the network graph
+</ul>
+
+\verbatim
+Normal way to use this:
+* Get some hwloc outputs from some nodes (at least enough nodes to make all subnets available)
+  and store them as <hostname>.xml in a single directory
+  shell$ ssh node001 lstopo ~/mycluster-data/hwloc/node001.xml
+
+* Run netloc-ib-gather-raw.pl --hwloc-dir <hwloc XML directory> --raw-dir <raw IB output directory>
+  - If you cannot run the entire script as root, add --sudo to run ib* programs as root.
+  - If some subnets are not accessible from the local node, they will be skipped.
+    Add --verbose to see where you could run the same command to discover other subnets.
+  - If one subnet doesn't work for some reason, use --force-subnet instead of --hwloc-dir.
+
+* Make sure netloc_ib_reader and friends are in PATH
+
+* Run netloc-ib-extract-dats.pl --raw-dir <output directory> --out-dir <netloc output directory>
+\endverbatim
+
+
+Example using \c netloc_ib_gather_raw and \c netloc_ib_extract_dats:
+
+\verbatim
+shell$ netloc_ib_gather_raw --hwloc-dir hwloc/ --raw-dir ib-raw/
+shell$
+shell$ netloc_ib_extract_dats --raw-dir ib-raw --out-dir netloc
+----------------------------------------------------------------------
+Processing Subnet: 3333:3333:3333:3333
+----------------------------------------------------------------------
+--------------- General Network Information
+----------------------------------------------------------------------
+Processing Subnet: 2222:2222:2222:2222
+----------------------------------------------------------------------
+--------------- General Network Information
+shell$
+shell$  lsnettopo netloc/
+Network: IB-2222:2222:2222:2222
+  Type    : InfiniBand
+  Subnet  : 2222:2222:2222:2222
+  Hosts   :   38
+  Switches:   12
+---------------------------------------------------
+
+Network: IB-3333:3333:3333:3333
+  Type    : InfiniBand
+  Subnet  : 3333:3333:3333:3333
+  Hosts   :   27
+  Switches:   18
+---------------------------------------------------
+\endverbatim
+
+Example using \c netloc_ib_gather_raw and \c netloc_reader_ib to only process
+one of the subnets.
+
+\verbatim
+shell$ netloc-ib-gather-raw.pl --hwloc-dir hwloc/ --raw-dir ib-raw/
+shell$
+shell$ netloc_reader_ib --subnet 2222:2222:2222:2222 \
+            --outdir dat_files/ \
+            --file ib-raw/ib-subnet-2222\:2222\:2222\:2222.txt \
+            --routedir ib-raw/ibroutes-2222\:2222\:2222\:2222/
+  Output Directory   : dat_files/
+  Subnet             : 2222:2222:2222:2222
+  ibnetdiscover File : ib-raw/ib-subnet-2222:2222:2222:2222.txt
+  ibroutes Directory : ib-raw/ibroutes-2222:2222:2222:2222/
+Status: Querying the ibnetdiscover data for subnet 2222:2222:2222:2222...
+Status: Processing Node Information
+Status: Computing Physical Paths
+Status: Querying the ibroutes data for subnet 2222:2222:2222:2222...
+Status: Processing Logical Paths
+Status: Validating the output...
+        Number of hosts   :   38
+        Number of switches:   12
+        Number of edges   :  220
+shell$
+shell$  lsnettopo dat_files/
+Network: IB-2222:2222:2222:2222
+  Type    : InfiniBand
+  Subnet  : 2222:2222:2222:2222
+  Hosts   :   38
+  Switches:   12
+---------------------------------------------------
+\endverbatim
+
+
+\subsection tools_gather_ib_cli Command Line Interfaces (netloc_ib_gather_raw)
+
+There are a few command line options available. See <tt>netloc_ib_gather_raw</tt>
+for a complete list.
+
+\verbatim
+Output directory for raw IB data must be specified with
+ --out-dir <dir>
+
+Input must be one of these
+ --hwloc-dir <dir>
+    Specifies that <dir> contains the hwloc XML exports of the some nodes,
+    The list of IB subnets should be guessed from there.
+
+ --force-subnet [<subnet>:]<board>:<port> to force the discovery
+    Force discovery on local board <board> port <port>, and optionally force the
+    subnet id <subnet> instead of reading it from the first GID.
+    Examples: --force-subnet mlx4_0:1
+              --force-subnet fe80:0000:0000:0000:mlx4_0:1
+
+Other options
+ --sudo
+    Pass sudo to internal ibnetdiscover and ibroute invocations.
+    Useful when the entire script cannot run as root.
+
+ --ibnetdiscover --ibroute
+    Specify exact location of programs. Default is /usr/bin/<program>
+
+ --ignore-errors
+    Ignore errors from ibnetdiscover and ibroute, assume their outputs are ok
+
+ --verbose
+    Add verbose messages
+
+ --dry-run
+    Do not actually run programs
+\endverbatim
+
+
+\subsection tools_extract_ib_cli Command Line Interfaces (netloc_ib_extract_dats)
+
+There are a few command line options available. See <tt>netloc_ib_extract_dats --help</tt>
+for a complete list.
+
+\verbatim
+ --raw-dir <dir>               (Optional)
+   Input directory with raw IB data must be specified with
+   Default is ./ib-raw
+
+ --out-dir <dir>               (Optional)
+   Output directory for netloc data can be specified with
+   Default is ./netloc
+
+ --verbose | -v                (Optional)
+   Verbose and progress information
+
+ --help | -h                   (Optional)
+   Display a help message.
+\endverbatim
+
+
+\subsection tools_reader_ib_cli Command Line Interfaces (netloc_reader_ib)
+
+There are a few command line options available. See <tt>netloc_reader_ib --help</tt>
+for a complete list.
+
+\verbatim
+--file <input file>
+   The file containing the ibnetdiscover data
+
+--routedir <path to routing files>  (Optional)
+   Path to the file containing ibroutes data.
+   Information for each host should be stored in a separate file.
+   Default: Exclude logical routing information
+
+--subnet <subnet id>
+   The subset id of the network
+
+--outdir <output directory>         (Optional)
+   Path to directory where output .dat files are placed.
+   Default: ./
+
+--progress | -p                     (Optional)
+   Display a progress percentage while processing the network files.
+
+--help | -h                         (Optional)
+   Display a help message.
+\endverbatim
+
+
+<!-- ********************************************* -->
+
+\htmlonly
+</div><div class="section" id="tools_reader_of">
+\endhtmlonly
+\section tools_reader_of Reader: OpenFlow-managed Ethernet
+
+The \c netloc_reader_of tool processes data from a supported OpenFlow
+controller to discover information about an Ethernet network. The controller
+must be running and reachable from the machine running this tool.
+
+<ul>
+ <li> \c netloc_reader_of : Contact the OpenFlow controller and extract the
+ network topology information.
+</ul>
+
+\verbatim
+shell$ netloc_reader_of --controller opendaylight -o netloc/
+shell$
+shell$  lsnettopo netloc/
+Network: ETH-unknown
+  Type    : Ethernet
+  Subnet  : unknown
+  Hosts   :   8
+  Switches:   7
+---------------------------------------------------
+\endverbatim
+
+\subsection tools_reader_of_cli Command Line Interfaces (netloc_reader_of)
+
+There are a few command line options available. See <tt>netloc_reader_of --help</tt>
+for a complete list.
+
+\verbatim
+--controller | -c <cname>
+   Name of the controller to use to access the OpenFlow network
+   information. See below for options.
+   Supported Controllers
+      opendaylight:
+         Attach to the OpenDaylight controller for network information.
+
+      floodlight:
+         Attach to the Floodlight controller for network information.
+
+      xnc:
+         Attach to the Cisco XNC controller for network information.
+
+--subnet | -s <subnet id>              (Optional)
+   The subnet id of the network
+   Default: "unknown"
+
+--outdir | -o <output directory>       (Optional)
+   Path to directory where output .dat filess are placed by the tool.
+   Default: "./"
+
+--addr | -a <IP Address:Port>          (Optional)
+   IP address and port of the controller
+   Default: 127.0.0.1:8080
+
+--username | -u <username>             (Optional)
+   Username for authorization to the controller
+   Default: <none>
+
+--password | -p <password>             (Optional)
+   Password for authorization to the controller
+   Default: <none>
+
+--help | -h                            (Optional)
+   Display a help message.
+\endverbatim
+
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+\page apireader Reader (Data Collection) API
+
+There are a series of steps that a developer will need to go through to create
+a new netloc reader. The basic steps are below.
+<ol start="0">
+  <li> Access the node and edge information from your network. The remainder of
+  this section assumes that you have this information and are trying to convert
+  it into netloc .ndat files.
+  <li> \ref apireader_phase1 :<br>
+  Setup the network information on the \ref netloc_network_t handle.
+  <li> \ref apireader_phase2 :<br>
+  Setup a data collection handle (\ref netloc_data_collection_handle_t)
+  associated with that network along with the output directory for the .ndat
+  files.
+  <li> \ref apireader_phase3 :<br>
+  Create a \ref netloc_node_t object for each addressable network endpoint
+  (e.g., MAC Address, GUID) in the system.
+  <li> \ref apireader_phase4 :<br>
+  Add the \ref netloc_node_t object to the collection.
+  <li> \ref apireader_phase5 :<br>
+  Create a \ref netloc_edge_t object for each unidirectional edge between
+  \ref netloc_node_t objects.
+  <li> \ref apireader_phase6 :<br>
+  Add the \ref netloc_edge_t object to the source \ref netloc_node_t
+  object.
+  <li> \ref apireader_phase7 :<br>
+  Compute the shortest physical paths between all nodes.
+  <li> \ref apireader_phase8 :<br>
+  Append logical paths between all nodes.
+  <li> \ref apireader_phase9 :<br>
+  Close the data collection handle to write the data to the .ndat files in
+  the specified output directory.
+</ol>
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase1">
+\endhtmlonly
+\section apireader_phase1 Setup Network Information
+
+The following interfaces are useful in setting up the network information.
+Note that the network information pertains to a single network type and subnet.
+they
+<ul>
+ <li> \ref netloc_network_t : Network handle.
+ <li> \ref netloc_dt_network_t_construct : Constructor for the network handle.
+ <li> \ref netloc_dt_network_t_destruct : Destructor for the network handle.
+</ul>
+
+\code
+    netloc_network_t *network = NULL;
+
+    network = netloc_dt_network_t_construct();
+
+    network->network_type = NETLOC_NETWORK_TYPE_ETHERNET;
+    network->subnet_id    = strdup("unknown");
+    network->version      = strdup("1");
+    network->description  = strdup("This is an example");
+    network->data_uri     = strdup("file://.");
+\endcode
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase2">
+\endhtmlonly
+\section apireader_phase2 Setup Data Collection Handle
+
+The following interfaces are useful in setting up the data collection handle
+and associating it with the network information.
+they
+<ul>
+ <li> \ref netloc_data_collection_handle_t : Data Collection handle.
+ <li> \ref netloc_dc_create : Creates the handle and associates it with the
+ specified network.
+</ul>
+
+\code
+    netloc_data_collection_handle_t *dc_handle = NULL;
+
+    dc_handle = netloc_dc_create(network, outdir);
+
+    // After which the network can be destructed
+    netloc_dt_network_t_destruct(network);
+    network = NULL;
+\endcode
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase3">
+\endhtmlonly
+\section apireader_phase3 Create netloc Nodes
+
+The following interfaces are useful in creating a \ref netloc_node_t for each
+addressable network endpoing (e.g., MAC address, GUID).
+they
+<ul>
+ <li> \ref netloc_node_t : Node type.
+ <li> \ref netloc_dt_node_t_construct : Constructor for the node type.
+ <li> \ref netloc_dt_node_t_destruct : Destructor for the node type.
+ <li> \ref netloc_encode_node_type : Encode the node type (e.g., Switch, Host)
+</ul>
+
+\code
+    netloc_node_t *node = NULL;
+
+    node = netloc_dt_node_t_construct();
+
+    // fill in the necessary fields. For example,
+    node->network_type = dc_handle->network->network_type;
+    node->subnet_id    = strdup(dc_handle->network->subnet_id);
+    node->node_type    = netloc_encode_node_type("CA")
+    node->logical_id   = strdup("10.0.0.2");
+    node->physical_id  = strdup("00:00:00:00:00:02");
+    node->description  = strdup("eth0 on node02")
+\endcode
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase4">
+\endhtmlonly
+\section apireader_phase4 Add the Node to the collection
+
+The following interfaces are useful in adding the \ref netloc_node_t object to
+the data collection.
+they
+<ul>
+ <li> \ref netloc_dc_append_node : Append the neloc node to the collection.
+</ul>
+
+\code
+    netloc_dc_append_node(dc_handle, node);
+
+    // You can destroy the node, since it is copied internally
+    netloc_dt_node_t_destruct(node);
+\endcode
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase5">
+\endhtmlonly
+\section apireader_phase5 Create edges between the nodes
+
+The following interfaces are useful in creating \ref netloc_edge_t objects
+representing the links between nodes.
+they
+<ul>
+ <li> \ref netloc_edge_t : Netloc edge type.
+ <li> \ref netloc_dt_edge_t_construct : Edge constructor.
+</ul>
+
+\code
+    netloc_edge_t *edge = NULL;
+
+    edge = netloc_dt_edge_t_construct();
+
+    // fill in the necessary fields. For example,
+    edge->src_node_id    = strdup(node->physical_id);
+    edge->src_node_type  = NETLOC_NODE_TYPE_HOST;
+    edge->src_port_id    = strdup("-1");
+
+    edge->dest_node_id   = strdup(dst_node->physical_id);
+    edge->dest_node_type = NETLOC_NODE_TYPE_SWITCH;
+    edge->dest_port_id   = strdup("5");
+
+    edge->speed          = strdup("100000");
+    edge->width          = strdup("1");
+    edge->description    = strdup("node02 to switch");
+\endcode
+
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase6">
+\endhtmlonly
+\section apireader_phase6 Add the edges to the collection
+
+The following interfaces are useful in adding the \ref netloc_edge_t objects to
+the data collection. Note that the edge is always associated with the source
+node.
+<ul>
+ <li> \ref netloc_dc_get_node_by_physical_id : Access a reference to the stored
+ \ref netloc_node_t object with the specified physical identifier.
+ <li> \ref netloc_dc_append_edge_to_node : Add the edge to the node in the data
+ collection.
+</ul>
+
+\code
+    // You need the node reference of the source node to attach the edge.
+    // We always attach the edge to the source node which can always be
+    // accessed by its physical ID
+    node = netloc_dc_get_node_by_physical_id(dc_handle, "00:00:00:00:00:02");
+
+    // Now add the edge to the node on the handle
+    netloc_dc_append_edge_to_node(dc_handle, node, edge);
+
+    // You can destroy the edge, since it is copied internally
+    netloc_dt_edge_t_destruct(edge);
+\endcode
+
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase7">
+\endhtmlonly
+\section apireader_phase7 (Optional) Physical Paths
+
+The following interfaces are useful in constructing the physical path
+information between nodes. Note that all of the nodes and edges must be
+attached to the data collection handle before this will work.
+<ul>
+ <li> \ref netloc_dc_compute_path_between_nodes : Compute the physical paths
+ between the two nodes specified.
+ Final parameter is "false" indicating a physical path computation.
+ <li> \ref netloc_dc_append_path : Append a path between two nodes to the data
+ collection.
+ Final parameter is "false" indicating a physical path addition.
+</ul>
+
+\code
+   netloc_node_t *cur_src_node = NULL;
+   netloc_node_t *cur_dst_node = NULL;
+   int num_edges = 0;
+   netloc_edge_t **edges = NULL;
+
+   // Access the node objects
+   cur_src_node = netloc_dc_get_node_by_physical_id(dc_handle, "00:00:00:00:00:01");
+   cur_dst_node = netloc_dc_get_node_by_physical_id(dc_handle, "00:00:00:00:00:02");
+
+   // Use the netloc library to compute the physical paths between nodes
+   netloc_dc_compute_path_between_nodes(dc_handle,
+                                        cur_src_node,
+                                        cur_dst_node,
+                                        &num_edges,
+                                        &edges,
+                                        false);
+
+    // Store the path on the data collection handle
+    netloc_dc_append_path(dc_handle,
+                          cur_src_node->physical_id,
+                          cur_dst_node->physical_id,
+                          num_edges,
+                          edges,
+                          false);
+
+    // Cleanup
+    num_edges = 0;
+    free(edges);
+    edges = NULL;
+\endcode
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase8">
+\endhtmlonly
+\section apireader_phase8 (Optional) Logical Paths
+
+The following interfaces are useful in constructing the logical path
+information between nodes.
+
+\todo JJH Logical paths have not been well tested.
+
+<ul>
+ <li> \ref netloc_dc_compute_path_between_nodes : Compute the physical paths
+ between the two nodes specified.
+ Final parameter is "ture" indicating a logical path computation.
+ <li> \ref netloc_dc_append_path : Append a path between two nodes to the data
+ collection.
+ Final parameter is "true" indicating a logical path addition.
+</ul>
+
+\code
+    // TODO
+\endcode
+
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="apireader_phase9">
+\endhtmlonly
+\section apireader_phase9 Close the data collection
+
+The following interfaces are useful in closing the data collection. This will
+write the data to the .ndat files in the directory specified on the data
+collection handle.
+<ul>
+ <li> \ref netloc_dc_close : Close the data collection and write out the netloc
+ .ndat files.
+</ul>
+
+\code
+    // Close the data collection
+    netloc_dc_close(dc_handle);
+
+    // Cleanup the handle when we are finished with it.
+    netloc_dt_data_collection_handle_t_destruct(dc_handle);
+    dc_handle = NULL;
+\endcode
+
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+\page termsanddefs Terms and Definitions
+
+<dl>
+
+<dt>netloc network handle (\ref netloc_network_t)</dt>
+  <dd>
+  Represents a lightweight handle to a single network subnet at a single point
+  in time. It is from this handle that the user can access metadata about the
+  network and create a netloc topology handle (\ref netloc_topology_t).
+
+  This handle can be thought of as a tuple of information: network type,
+  network subnet, and version/timestamp.
+  </dd>
+
+<dt>netloc topology handle (\ref netloc_topology_t)</dt>
+  <dd>
+  An opaque data structure containing detailed network topology information.
+  This handle is used by all of the network topology query APIs.
+  </dd>
+
+<dt>netloc node (\ref netloc_node_t)</dt>
+  <dd>
+  Represents the concept of a node (a.k.a., vertex, endpoint) within a network
+  graph. This could be a server NIC or a network switch.
+
+  If a server has more than one NIC then there are multiple netloc nodes for
+  this server, one for each NIC. This is because some networks cannot
+  distinguish node boundaries. In order to group multiple netloc nodes together
+  into a logical server the netloc topology data will need to to be mapped with
+  the hwloc data using the map API.
+  </dd>
+
+<dt>netloc edge (\ref netloc_edge_t)</dt>
+  <dd>
+  Represents the concept of a directed edge withing a network graph.
+  These are the physical connections between two netloc nodes (\ref
+  netloc_node_t).
+  </dd>
+
+<dt>Physical Path (\ref netloc_node_t::physical_paths)</dt>
+  <dd>
+  Represents the shortest physical path from one netloc node to another.
+  This path does not take into account higher level routing rules that might be
+  in place in the network. The path is represented as a series of 'hops'
+  through the network where each 'hop' is a \ref netloc_edge_t object (from
+  which you can access the source and destination \ref netloc_node_t).
+
+  Path information is only calculated between servers, not between switches in
+  the network.
+  </dd>
+
+<dt>Logical Path (\ref netloc_node_t::logical_paths)</dt>
+  <dd>
+  Represents the logical path from one netloc node to another. This path takes
+  into account the higher level routing rules that are in place in the
+  network. Some network configurations do not provide this information, so it
+  is possible that the logical path(s) for a given \ref netloc_node_t is empty.
+
+  Currently only one logical path between any two netloc nodes is
+  captured. Path information is only calculated between servers, not between
+  switches in the network.
+  </dd>
+
+</dl>
+
+
+*/

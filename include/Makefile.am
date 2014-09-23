@@ -1,6 +1,6 @@
 # Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux 1
-# Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -9,6 +9,11 @@
 
 if HWLOC_BUILD_STANDALONE
 include_HEADERS = hwloc.h
+
+if BUILD_NETLOC
+include_HEADERS += netloc.h
+endif
+
 include_hwlocdir = $(includedir)/hwloc
 include_hwloc_HEADERS = \
         hwloc/bitmap.h \
@@ -29,13 +34,24 @@ include_hwloc_HEADERS = \
 include_hwloc_autogendir = $(includedir)/hwloc/autogen
 nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h
 
+if BUILD_NETLOC
+include_netlocdir = $(includedir)/netloc
+include_netloc_HEADERS = \
+        netloc/dc.h \
+        netloc/map.h \
+        netloc/rename.h \
+        netloc/rename_map.h
+endif
+
 noinst_HEADERS = \
         private/private.h \
         private/debug.h \
         private/misc.h \
         private/xml.h \
         private/components.h \
-        private/cpuid-x86.h
+        private/cpuid-x86.h \
+        private/netloc.h \
+        private/map.h
 
 if HWLOC_HAVE_LINUX
 include_hwloc_HEADERS += \

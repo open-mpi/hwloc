@@ -7,6 +7,7 @@
 PROJECT_NUMBER = @PACKAGE_VERSION@
 
 INPUT          = \
+		@top_srcdir@/doc/main.doxy \
 		@top_srcdir@/doc/hwloc.doxy \
 		@top_srcdir@/include/hwloc.h \
 		@top_srcdir@/include/hwloc/helper.h \
@@ -23,9 +24,13 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/gl.h \
 		@top_srcdir@/include/hwloc/intel-mic.h \
 		@top_srcdir@/include/hwloc/openfabrics-verbs.h \
-		@top_srcdir@/include/hwloc/myriexpress.h
+		@top_srcdir@/include/hwloc/myriexpress.h \
+		@top_srcdir@/doc/netloc.doxy \
+		@top_srcdir@/include/netloc.h \
+		@top_srcdir@/include/netloc_dc.h \
+		@top_srcdir@/include/netloc_map.h
 
-EXAMPLE_PATH   = @top_srcdir@/doc
+EXAMPLE_PATH   = @top_srcdir@/doc @top_srcdir@/tests/netloc
 
 IMAGE_PATH     = @top_srcdir@/doc/images images
 

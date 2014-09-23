@@ -31,7 +31,9 @@ PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png
 BUILT_IMAGES = images/diagram.png images/diagram.eps
 
 EXTRA_DIST = \
+        main.doxy \
         hwloc.doxy \
+        netloc.doxy \
         README.sed \
         doxygen.css \
         doxygen.cfg \
@@ -44,6 +46,7 @@ EXTRA_DIST = \
         images/ppc64-without-smt.pdf \
         images/ppc64-full-with-smt.png \
         images/ppc64-full-with-smt.pdf \
+        images/netloc-design-small.png \
         www.open-mpi.org.cfg \
         www.open-mpi.org-css.inc \
         www.open-mpi.org-footer.inc \
@@ -65,6 +68,7 @@ if HWLOC_BUILD_DOXYGEN
 hwloc_include_dir = $(HWLOC_top_srcdir)/include
 
 dox_inputs = $(DOX_CONFIG) \
+       $(srcdir)/main.doxy \
        $(srcdir)/hwloc.doxy \
        $(hwloc_include_dir)/hwloc.h \
        $(hwloc_include_dir)/hwloc/helper.h \
@@ -81,7 +85,11 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/gl.h \
        $(hwloc_include_dir)/hwloc/intel-mic.h \
        $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
-       $(hwloc_include_dir)/hwloc/myriexpress.h
+       $(hwloc_include_dir)/hwloc/myriexpress.h \
+       $(srcdir)/netloc.doxy \
+       $(hwloc_include_dir)/netloc.h \
+       $(hwloc_include_dir)/netloc/dc.h \
+       $(hwloc_include_dir)/netloc/map.h
 
 #
 # Create the images that we need for the PDF output and the HTML

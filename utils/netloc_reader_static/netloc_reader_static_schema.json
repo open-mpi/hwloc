@@ -1,0 +1,150 @@
+{
+    "type":"object",
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "description": "netloc_reader_static JSON Schema. Schema initial generated from http://jsonschema.net",
+    "required":true,
+    "properties":{
+        "network_info": {
+            "type":"object",
+            "description": "General Information about the network subnet",
+            "required":true,
+            "properties":{
+                "description": {
+                    "type":"string",
+                    "description": "Description of the network",
+                    "default": "",
+                    "required":false
+                },
+                "network_type": {
+                    "type":"string",
+                    "enum": ["ETH", "IB"],
+                    "description": "Type of network. ETH = Ethernet, IB = InfiniBand",
+                    "required":true
+                },
+                "subnet_id": {
+                    "type":"string",
+                    "description": "Subnet Identifier",
+                    "default": "unknown",
+                    "required":false
+                },
+                "version": {
+                    "type":"string",
+                    "description": "Version of network information",
+                    "default": "1",
+                    "required":false
+                }
+            }
+        },
+        "node_info": {
+            "type":"object",
+            "description": "Information about every endpoint (addressable network device or switch) in the system",
+            "uniqueItems": true,
+            "required":true,
+            "properties":{
+                "nodes": {
+                    "type":"array",
+                    "description": "List of nodes in the system",
+                    "minitems": "1",
+                    "required":true,
+                    "items":
+                        {
+                            "type":"object",
+                            "required":true,
+                            "properties":{
+                                "description": {
+                                    "type":"string",
+                                    "description": "Description of the node",
+                                    "default": "",
+                                    "required":false
+                                },
+                                "logical_id": {
+                                    "type":"string",
+                                    "description": "Logical Identifier (e.g., IP Address)",
+                                    "default": "(Duplicate of Physical ID)",
+                                    "required":false
+                                },
+                                "physical_id": {
+                                    "type":"string",
+                                    "description": "Physical Identifier (e.g., MAC Address, GUID)",
+                                    "required":true
+                                },
+                                "type": {
+                                    "type":"string",
+                                    "enum": ["CA", "SW"],
+                                    "description": "Type of the endpoint. CA = Host endpoint, SW = Switch",
+                                    "required":true
+                                }
+                            }
+                        }
+                }
+            }
+        },
+        "edge_info": {
+            "type":"object",
+            "description": "Information about every edge in the network",
+            "required":true,
+            "properties":{
+                "edges": {
+                    "type":"array",
+                    "description": "Array of edges in the network",
+                    "minitems": "1",
+                    "uniqueItems": true,
+                    "required":true,
+                    "items":
+                        {
+                            "type":"object",
+                            "required":true,
+                            "properties":{
+                                "description": {
+                                    "type":"string",
+                                    "description": "Description of the edge",
+                                    "default": "",
+                                    "required":false
+                                },
+                                "bidirectional": {
+                                    "type":"boolean",
+                                    "description": "If the edge is bidirectional. If so then there is no need to have two edges listed.",
+                                    "default": "false",
+                                    "required":false
+                                },
+                                "dest_node_id": {
+                                    "type":"string",
+                                    "description": "Destination Node Physical ID",
+                                    "required":true
+                                },
+                                "dest_port": {
+                                    "type":"integer",
+                                    "description": "Destination Port",
+                                    "default": "-1",
+                                    "required":false
+                                },
+                                "source_node_id": {
+                                    "type":"string",
+                                    "description": "Source Node Physical ID",
+                                    "required":true
+                                },
+                                "source_port": {
+                                    "type":"integer",
+                                    "description": "Source Port",
+                                    "default": "-1",
+                                    "required":false
+                                },
+                                "speed": {
+                                    "type":"string",
+                                    "description": "Speed of the link",
+                                    "default": "1",
+                                    "required":false
+                                },
+                                "width": {
+                                    "type":"string",
+                                    "description": "Width of the link",
+                                    "default": "1",
+                                    "required":false
+                                }
+                            }
+                        }
+                }
+            }
+        }
+    }
+}

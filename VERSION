@@ -40,3 +40,4 @@ date="Unreleased developer copy"
 # format.
 
 libhwloc_so_version=0:0:0
+libnetloc_so_version=0:0:0
