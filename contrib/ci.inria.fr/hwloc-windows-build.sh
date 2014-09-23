@@ -27,7 +27,7 @@ make
 make install
 #make install-winball || true # not needed anymore in v1.7+
 make check
-utils/lstopo-no-graphics -v
+utils/lstopo/lstopo-no-graphics -v
 cd ..
 zip -r ../${winball}.zip ${winball}
 test -f ${winball}/lib/libhwloc.lib || false
@@ -44,7 +44,7 @@ make
 make install
 #make install-winball || true # not needed anymore in v1.7+
 make check
-utils/lstopo-no-graphics -v
+utils/lstopo/lstopo-no-graphics -v
 cd ..
 zip -r ../${winball}.zip ${winball}
 test -f ${winball}/lib/libhwloc.lib || false
