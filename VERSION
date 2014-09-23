@@ -22,7 +22,7 @@ release=0
 # requirement is that it must be entirely printable ASCII characters
 # and have no white space.
 
-greek=a1
+greek=rc1
 
 # The date when this release was created
 
@@ -39,4 +39,4 @@ date="Unreleased developer copy"
 # 2. Version numbers are described in the Libtool current:revision:age
 # format.
 
-libhwloc_so_version=0:0:0
+libhwloc_so_version=11:0:6

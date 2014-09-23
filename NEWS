@@ -20,9 +20,6 @@ in v0.9.1).
 Version 1.10.0
 --------------
 * API
-  + hwloc_distrib() does not ignore any objects anymore when there are
-    too many of them. They get merged with others instead.
-    Thanks to Tim Creech for reporting the issue.
   + Add hwloc_topology_export_synthetic() to export a topology to a
     synthetic string without using lstopo. See the Synthetic topologies
     section in the documentation.
@@ -32,6 +29,9 @@ Version 1.10.0
   + Add hwloc_get_numanode_obj_by_os_index() and document that this function
     as well as hwloc_get_pu_obj_by_os_index() are good at converting
     nodesets and cpusets into objects.
+  + hwloc_distrib() does not ignore any objects anymore when there are
+    too many of them. They get merged with others instead.
+    Thanks to Tim Creech for reporting the issue.
 * Tools
   + hwloc-bind --get <command-line> now executes the command after displaying
     the binding instead of ignoring the command entirely.
@@ -49,7 +49,7 @@ Version 1.10.0
   + Add the doc/examples/ subdirectory with several real-life examples,
     including the already existing hwloc-hello.C for basics.
     Thanks to Rob Aulwes for the suggestion.
-  + Improve the document of CPU and memory binding in the API.
+  + Improve the documentation of CPU and memory binding in the API.
   + Add a FAQ entry about operating system errors, especially on AMD
     platforms with buggy cache information.
   + Add a FAQ entry about loading many topologies in a single program.
