@@ -18,6 +18,10 @@ EXTRA_DIST = \
 
 SUBDIRS = include hwloc
 
+if BUILD_NETLOC
+SUBDIRS += netloc
+endif
+
 if HWLOC_BUILD_STANDALONE
 SUBDIRS += utils tests
 # We need doc/ if HWLOC_BUILD_DOXYGEN, or during make install if HWLOC_INSTALL_DOXYGEN.
@@ -34,8 +38,13 @@ if HWLOC_BUILD_STANDALONE
 if !HWLOC_HAVE_WINDOWS
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hwloc.pc
-endif
-endif
+if BUILD_NETLOC
+# JMS Need to compare hwloc.pc and netloc.pc -- I think netloc.pc is
+# missing some things.
+pkgconfig_DATA += netloc.pc
+endif BUILD_NETLOC
+endif !HWLOC_HAVE_WINDOWS
+endif HWLOC_BUILD_STANDALONE
 
 # Only install the valgrind suppressions file if we're building in
 # standalone mode

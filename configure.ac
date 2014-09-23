@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -40,11 +40,6 @@ AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE([1.11 dist-bzip2 subdir-objects foreign tar-ustar parallel-tests -Wall -Werror])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-# We want new Libtool.  None of that old stuff.  Pfft.
-m4_ifdef([LT_PREREQ], [],
-	 [m4_fatal([libtool version 2.2.6 or higher is required], [63])])
-LT_PREREQ([2.2.6])
-
 AC_LANG([C])
 AC_USE_SYSTEM_EXTENSIONS
 
@@ -80,7 +75,6 @@ VERSION="${PACKAGE_VERSION}"
 # For standalone configurations, we also include a .so version number.
 
 . $srcdir/VERSION
-AC_SUBST([libhwloc_so_version])
 
 ####################################################################
 # Setup the configure-results header file
@@ -108,17 +102,36 @@ AH_BOTTOM([
 ])
 
 ####################################################################
-# Setup C compiler
+# Setup Libtool
 ####################################################################
 
-CFLAGS_save="$CFLAGS"
-AC_PROG_CC
-AC_PROG_CXX
-AM_PROG_CC_C_O
-CFLAGS="$CFLAGS_save"
+# We want new Libtool.  None of that old stuff.  Pfft.
+m4_ifdef([LT_PREREQ], [],
+         [m4_fatal([libtool version 2.2.6 or higher is required], [63])])
+LT_PREREQ([2.2.6])
+
+# Setup libtool, but disable F77, Java and Windows Resource
+# Compiler support -- we don't need that stuff.
+AM_ENABLE_SHARED
+AM_DISABLE_STATIC
+
 # This did not exist pre AM 1.11.x (where x is somewhere >0 and <3),
 # but it is necessary in AM 1.12.x.
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+
+LT_INIT([dlopen win32-dll])
+LT_LANG([C])
+LT_LANG([C++])
+
+####################################################################
+# Setup C, C++ compilers
+####################################################################
+
+CFLAGS_save=$CFLAGS
+AC_PROG_CC
+AM_PROG_CC_C_O
+AC_PROG_CC_C99
+CFLAGS=$CFLAGS_save
 
 AC_ARG_VAR(CC_FOR_BUILD,[build system C compiler])
 AS_IF([test -z "$CC_FOR_BUILD"],[
@@ -150,14 +163,58 @@ AS_IF([test "$enable_embedded_mode" != "yes"],
 # Setup for the hwloc API
 ####################################################################
 
+AC_SUBST([libhwloc_so_version])
+
 # Setup the hwloc core
 HWLOC_SETUP_CORE([], [], [AC_MSG_ERROR([Cannot build hwloc core])], [1])
+
+####################################################################
+# Setup the netloc API
+####################################################################
+
+AC_SUBST([libnetloc_so_version])
+
+AC_ARG_ENABLE([netloc],
+              [AC_HELP_STRING([--enable-netloc],
+                              [The Netloc functionality is enabled by default, but will be silently skipped it if cannot be built (e.g., not supported on your platform).  Using --enable-netloc will cause configure to abort if Netloc cannot be build.  Using --disable-netloc will cause configure to skip attempting to build netloc at all.])
+              ])
+
+AS_IF([test "$enable_netloc" != "no"],
+      [NETLOC_SETUP_CORE([], [],
+           [AS_IF([test "$enable_netloc" = "yes"],
+                  [AC_MSG_ERROR([Cannot build netloc core])])
+           ],
+           [1])
+      ])
+
+####################################################################
+# Setup the rest of the infrastructure
+####################################################################
 
 # Setup hwloc's docs, utils, and tests
 AS_IF([test "$hwloc_mode" = "standalone"],
       [HWLOC_SETUP_DOCS
        HWLOC_SETUP_UTILS
        HWLOC_SETUP_TESTS])
+
+#
+# SED_I
+# Linux and OS X take different sed arguments.
+#
+AC_PROG_SED
+AC_MSG_CHECKING([if the sed -i option requires an argument])
+    rm -f conftest
+    cat > conftest <<EOF
+hello
+EOF
+$SED -i -e s/hello/goodbye/ conftest 2> /dev/null
+AS_IF([test -f conftest-e],
+      [SED_I="$SED -i ''"
+       AC_MSG_RESULT([yes])],
+      [SED_I="$SED -i"
+       AC_MSG_RESULT([no])])
+rm -f conftest conftest-e
+AC_SUBST([SED_I])
 
 cat <<EOF
 
@@ -168,6 +225,7 @@ EOF
 
 # Run the AM_CONDITIONALs
 HWLOC_DO_AM_CONDITIONALS
+NETLOC_DO_AM_CONDITIONALS
 
 ####################################################################
 # Final output
@@ -177,13 +235,6 @@ HWLOC_DO_AM_CONDITIONALS
 CFLAGS="$HWLOC_EMBEDDED_CFLAGS $CFLAGS"
 CPPFLAGS="$HWLOC_EMBEDDED_CPPFLAGS $CPPFLAGS"
 LIBS="$HWLOC_EMBEDDED_LIBS $LIBS"
-
-# Setup libtool, but disable C++, F77, Java and Windows Resource
-# Compiler support -- we don't need that stuff.
-AM_ENABLE_SHARED
-AM_DISABLE_STATIC
-AM_PROG_LIBTOOL([dlopen win32-dll])
-LT_LANG([C])
 
 # Party on
 AC_OUTPUT
@@ -219,6 +270,7 @@ Hwloc optional build support status (more details can be found above):
 Probe / display I/O devices:$hwloc_probeio_list
 Graphical output (Cairo):    $hwloc_cairo_happy
 XML input / output:          $hwloc_xml_status
+Netloc functionality:        $netloc_happy
 EOF
 
 # Linux specific support

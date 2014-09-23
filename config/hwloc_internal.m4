@@ -322,7 +322,16 @@ EOF
         hwloc_config_prefix[utils/Makefile]
         hwloc_config_prefix[utils/hwloc/Makefile]
         hwloc_config_prefix[utils/lstopo/Makefile]
-        hwloc_config_prefix[hwloc.pc])
+        hwloc_config_prefix[hwloc.pc]
+
+        hwloc_config_prefix[utils/lsmap/Makefile]
+        hwloc_config_prefix[utils/lsnettopo/Makefile]
+        hwloc_config_prefix[utils/netloc_gather_ib/Makefile]
+        hwloc_config_prefix[utils/netloc_reader_ib/Makefile]
+        hwloc_config_prefix[utils/netloc_reader_of/Makefile]
+        hwloc_config_prefix[utils/netloc_reader_static/Makefile]
+        hwloc_config_prefix[netloc.pc]
+   )
 ])dnl
 
 #-----------------------------------------------------------------------
@@ -332,7 +341,7 @@ AC_DEFUN([HWLOC_SETUP_TESTS],[
     cat <<EOF
 
 ###
-### Configuring hwloc tests
+### Configuring tests
 ###
 EOF
 
@@ -402,7 +411,10 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh]
         hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh]
-        hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh])
+        hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh]
+
+        hwloc_config_prefix[tests/netloc/Makefile]
+    )
 
     AC_CONFIG_COMMANDS([chmoding-scripts], [
 chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \

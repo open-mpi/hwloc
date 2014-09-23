@@ -1,0 +1,7 @@
+/*
+ * Just for the moment, include the two .doxy files.
+ * Need to do better integration of these two files.
+ */
+
+\include hwloc.doxy
+\include netloc.doxy
