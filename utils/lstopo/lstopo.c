@@ -234,7 +234,22 @@ static void add_process_objects(hwloc_topology_t topology)
 void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] ... [ filename.format ]\n\n", name);
-  fprintf (where, "See lstopo(1) for more details.\n\n");
+  fprintf (where, "See lstopo(1) for more details.\n");
+
+  fprintf (where, "\nDefault output is "
+#ifdef LSTOPO_HAVE_GRAPHICS
+#ifdef HWLOC_WIN_SYS
+		  "graphical"
+#elif CAIRO_HAS_XLIB_SURFACE && (defined HWLOC_HAVE_X11_KEYSYM)
+		  "graphical (X11) if DISPLAY is set, console otherwise"
+#else
+		  "console"
+#endif
+#else
+		  "console"
+#endif
+		  ".\n");
+
   fprintf (where, "Supported output file formats: console, txt, fig"
 #ifdef LSTOPO_HAVE_GRAPHICS
 #if CAIRO_HAS_PDF_SURFACE
