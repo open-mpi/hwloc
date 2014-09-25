@@ -692,6 +692,7 @@ EOF])
 
       AS_IF([test "$hwloc_pci_happy" = "yes"],
          [HWLOC_PCIACCESS_REQUIRES=pciaccess
+          hwloc_pci_lib=pciaccess
           hwloc_components="$hwloc_components pci"
           hwloc_pci_component_maybeplugin=1])
     fi
