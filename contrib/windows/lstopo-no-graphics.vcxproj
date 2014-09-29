@@ -43,7 +43,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;NDEBUG;WIN64;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include;..\..\utils</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\utils\hwloc;..\..\utils\lstopo</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <ManifestFile>$(IntDir)$(TargetFileName).intermediate.manifest</ManifestFile>
@@ -64,12 +64,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\utils\lstopo.c" />
-    <ClCompile Include="..\..\utils\lstopo-color.c" />
-    <ClCompile Include="..\..\utils\lstopo-draw.c" />
-    <ClCompile Include="..\..\utils\lstopo-fig.c" />
-    <ClCompile Include="..\..\utils\lstopo-text.c" />
-    <ClCompile Include="..\..\utils\lstopo-xml.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo-color.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo-draw.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo-fig.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo-text.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo-xml.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hwloc\autogen\config.h" />
@@ -87,8 +87,8 @@
     <ClInclude Include="..\..\include\private\misc.h" />
     <ClInclude Include="..\..\include\private\private.h" />
     <ClInclude Include="..\..\include\private\xml.h" />
-    <ClInclude Include="..\..\utils\misc.h" />
-    <ClInclude Include="..\..\utils\lstopo.h" />
+    <ClInclude Include="..\..\utils\hwloc\misc.h" />
+    <ClInclude Include="..\..\utils\lstopo\lstopo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\utils\hwloc-assembler.c">
+    <ClCompile Include="..\..\utils\hwloc\hwloc-assembler.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

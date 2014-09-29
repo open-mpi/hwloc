@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\utils\hwloc-distances.c">
+    <ClCompile Include="..\..\utils\hwloc\hwloc-distances.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,7 +65,7 @@
     <ClInclude Include="..\..\include\hwloc\autogen\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\utils\misc.h">
+    <ClInclude Include="..\..\utils\hwloc\misc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

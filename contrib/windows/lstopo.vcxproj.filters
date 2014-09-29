@@ -15,25 +15,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\utils\lstopo.c">
+    <ClCompile Include="..\..\utils\lstopo\lstopo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\utils\lstopo-color.c">
+    <ClCompile Include="..\..\utils\lstopo\lstopo-color.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\utils\lstopo-draw.c">
+    <ClCompile Include="..\..\utils\lstopo\lstopo-draw.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\utils\lstopo-fig.c">
+    <ClCompile Include="..\..\utils\lstopo\lstopo-fig.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\utils\lstopo-text.c">
+    <ClCompile Include="..\..\utils\lstopo\lstopo-text.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\utils\lstopo-xml.c">
+    <ClCompile Include="..\..\utils\lstopo\lstopo-xml.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\utils\lstopo-windows.c">
+    <ClCompile Include="..\..\utils\lstopo\lstopo-windows.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,10 +83,10 @@
     <ClInclude Include="..\..\include\hwloc\autogen\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\utils\misc.h">
+    <ClInclude Include="..\..\utils\hwloc\misc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\utils\lstopo.h">
+    <ClInclude Include="..\..\utils\lstopo\lstopo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
