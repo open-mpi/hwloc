@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\utils\hwloc-patch.c">
+    <ClCompile Include="..\..\utils\hwloc\hwloc-patch.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

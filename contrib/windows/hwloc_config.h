@@ -19,6 +19,7 @@
 #define __hwloc_attribute_const
 #define __hwloc_attribute_pure
 #define __hwloc_attribute_deprecated
+#define __hwloc_attribute_may_alias
 
 /* Defined to 1 if you have the `windows.h' header. */
 #define HWLOC_HAVE_WINDOWS_H 1

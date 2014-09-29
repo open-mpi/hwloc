@@ -43,7 +43,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;NDEBUG;WIN64;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include;..\..\utils</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\utils\hwloc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <ManifestFile>$(IntDir)$(TargetFileName).intermediate.manifest</ManifestFile>
@@ -64,7 +64,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\utils\hwloc-bind.c" />
+    <ClCompile Include="..\..\utils\hwloc\hwloc-bind.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hwloc\autogen\config.h" />
@@ -82,8 +82,8 @@
     <ClInclude Include="..\..\include\private\misc.h" />
     <ClInclude Include="..\..\include\private\private.h" />
     <ClInclude Include="..\..\include\private\xml.h" />
-    <ClInclude Include="..\..\utils\misc.h" />
-    <ClInclude Include="..\..\utils\hwloc-calc.h" />
+    <ClInclude Include="..\..\utils\hwloc\misc.h" />
+    <ClInclude Include="..\..\utils\hwloc\hwloc-calc.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

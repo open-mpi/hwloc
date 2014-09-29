@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\utils\hwloc-bind.c">
+    <ClCompile Include="..\..\utils\hwloc\hwloc-bind.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,10 +65,10 @@
     <ClInclude Include="..\..\include\hwloc\autogen\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\utils\misc.h">
+    <ClInclude Include="..\..\utils\hwloc\misc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\utils\hwloc-calc.h">
+    <ClInclude Include="..\..\utils\hwloc\hwloc-calc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

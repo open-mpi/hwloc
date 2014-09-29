@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\utils\hwloc-diff.c">
+    <ClCompile Include="..\..\utils\hwloc\hwloc-diff.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
