@@ -10,7 +10,7 @@
 #                         University of Stuttgart.  All rights reserved.
 # Copyright © 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
-# Copyright © 2008-2013 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2008-2014 Cisco Systems, Inc.  All rights reserved.
 # $COPYRIGHT$
 #
 # Additional copyrights may follow
@@ -43,13 +43,7 @@ else
 	p" < "$srcfile"`
 	eval "$ompi_vers"
 
-        # Only include the release version if it isn't 0
-        if test $HWLOC_RELEASE_VERSION -ne 0 ; then
-            HWLOC_VERSION="$HWLOC_MAJOR_VERSION.$HWLOC_MINOR_VERSION.$HWLOC_RELEASE_VERSION"
-        else
-            HWLOC_VERSION="$HWLOC_MAJOR_VERSION.$HWLOC_MINOR_VERSION"
-        fi
-        HWLOC_VERSION="${HWLOC_VERSION}${HWLOC_GREEK_VERSION}"
+        HWLOC_VERSION="$HWLOC_MAJOR_VERSION.$HWLOC_MINOR_VERSION.$HWLOC_RELEASE_VERSION${HWLOC_GREEK_VERSION}"
 
         # If HWLOC_SNAPSHOT=1, then use HWLOC_SNAPSHOT_VERSION
         if test "$HWLOC_SNAPSHOT" = "1"; then
