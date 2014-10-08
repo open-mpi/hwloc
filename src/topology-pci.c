@@ -127,11 +127,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
     pci_device_cfg_read(pcidev, config_space_cache, 0, CONFIG_SPACE_CACHESIZE, NULL);
 
     /* try to read the domain */
-#if (defined HWLOC_HAVE_LIBPCIACCESS) || (defined HWLOC_HAVE_PCIDEV_DOMAIN)
     domain = pcidev->domain;
-#else
-    domain = 0; /* default domain number */
-#endif
 
     /* try to read the device_class */
     device_class = pcidev->device_class >> 8;

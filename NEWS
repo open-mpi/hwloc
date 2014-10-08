@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.10.1
+--------------
+* Fix the gathering of PCI domains. Thanks to James Custer for reporting
+  the issue and providing a patch.
+
+
 Version 1.10.0
 --------------
 * API
