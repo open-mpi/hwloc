@@ -59,8 +59,12 @@ TESTS = \
         test-hwloc-ls.sh
 endif !HWLOC_HAVE_MINGW32
 
+if HWLOC_HAVE_CAIRO
+# only installed when lstopo is built with Cairo/X11 support
+# so that no terminal is required
 APPLICATIONSdir = @datarootdir@/applications
-dist_APPLICATIONS_DATA = hwloc-ls.desktop
+dist_APPLICATIONS_DATA = lstopo.desktop
+endif
 
 .1in.1:
 	@ echo Creating $@ man page...
