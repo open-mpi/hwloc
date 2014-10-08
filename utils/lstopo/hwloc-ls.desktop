@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=Hardware Locality ls
-comment=Show hardware topology
-Exec=hwloc-ls
-Terminal=false
-Type=Application
-Categories=Application;System;
-Keywords=System;Utility;
