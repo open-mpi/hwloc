@@ -20,39 +20,15 @@ network graph for the netloc API.
 Command Line Interface:
 -----------------------
 
---controller | -c <cname>
-   Name of the controller to use to access the OpenFlow network
-   information. See below for options.
-   Supported Controllers
-      noop:
-         Do not read new information. Just verify the .ndat files in the
-         output directory.
-
-      opendaylight:
-         Attach to the OpenDaylight controller for network information.
-
-      floodlight:
-         Attach to the Floodlight controller for network information.
-
---subnet | -s <subnet id>              (Optional)
-   The subnet id of the network
-   Default: "unknown"
+--input | -i <input file>              (Required)
+   The input JSON file to process.
 
 --outdir | -o <output directory>       (Optional)
    Path to directory where output .dat filess are placed by the tool.
    Default: "./"
 
---addr | -a <IP Address:Port>          (Optional)
-   IP address and port of the controller
-   Default: 127.0.0.1:8080
-
---username | -u <username>             (Optional)
-   Username for authorization to the controller
-   Default: <none>
-
---password | -p <password>             (Optional)
-   Password for authorization to the controller
-   Default: <none>
+--progress | -p                        (Optional)
+   Display progress while processing the file.
 
 --help | -h                   (Optional)
    Display a help message.
@@ -61,5 +37,4 @@ Command Line Interface:
 Examples:
 ---------
 
-shell$ netloc_reader_of --controller floodlight \
-           --outdir ../dat_files/
+shell$ ./netloc_reader_static -i example-2-nodes.json
