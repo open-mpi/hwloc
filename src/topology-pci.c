@@ -117,9 +117,6 @@ hwloc_look_pci(struct hwloc_backend *backend)
     unsigned short tmp16;
     char name[128];
     unsigned offset;
-#ifdef HWLOC_HAVE_PCI_FIND_CAP
-    struct pci_cap *cap;
-#endif
 
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
@@ -146,12 +143,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
     obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
 
     obj->attr->pcidev.linkspeed = 0; /* unknown */
-#ifdef HWLOC_HAVE_PCI_FIND_CAP
-    cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
-    offset = cap ? cap->addr : 0;
-#else
     offset = hwloc_pci_find_cap(config_space_cache, PCI_CAP_ID_EXP);
-#endif /* HWLOC_HAVE_PCI_FIND_CAP */
 
     if (0xffff == pcidev->vendor_id && 0xffff == pcidev->device_id) {
       /* SR-IOV puts ffff:ffff in Virtual Function config space.
