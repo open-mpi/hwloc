@@ -1,4 +1,4 @@
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2012, 2014 Université Bordeaux 1
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -50,7 +50,7 @@ lstopo_win_CFLAGS = $(lstopo_CFLAGS) -mwindows
 lstopo_win_LDADD = $(lstopo_LDADD)
 endif
 
-man1_pages = lstopo.1
+man1_pages = lstopo-no-graphics.1
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS = $(man1_pages)
 
@@ -79,9 +79,9 @@ if !HWLOC_HAVE_CAIRO
 endif
 endif
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1
-	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1
-	rm -f $(DESTDIR)$(man1dir)/lstopo-no-graphics.1
-	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 lstopo-no-graphics.1
+	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo-no-graphics.1 hwloc-ls.1
+	rm -f $(DESTDIR)$(man1dir)/lstopo.1
+	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo-no-graphics.1 lstopo.1
 
 uninstall-local:
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT)
@@ -90,7 +90,7 @@ if !HWLOC_HAVE_CAIRO
 	rm -f $(DESTDIR)$(bindir)/lstopo$(EXEEXT)
 endif
 endif
-	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/lstopo-no-graphics.1
+	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/lstopo.1
 
 distclean-local:
 	rm -f $(nodist_man_MANS)
