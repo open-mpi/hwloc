@@ -22,7 +22,7 @@ int main(void)
   const struct hwloc_topology_support *support;
   int nbnodes;
   hwloc_obj_t obj;
-  char *buffer;
+  char *buffer, *s;
   unsigned i;
   int err;
 
@@ -67,9 +67,9 @@ int main(void)
   }
 
   /* print the corresponding NUMA nodes */
-  hwloc_bitmap_asprintf(&buffer, set);
-  printf("bound to nodeset %s with contains:\n", buffer);
-  free(buffer);
+  hwloc_bitmap_asprintf(&s, set);
+  printf("bound to nodeset %s with contains:\n", s);
+  free(s);
   hwloc_bitmap_foreach_begin(i, set) {
     obj = hwloc_get_numanode_obj_by_os_index(topology, i);
     printf("  node #%u (OS index %u) with %lld bytes of memory\n",
@@ -124,9 +124,9 @@ int main(void)
 	 policy, HWLOC_MEMBIND_REPLICATE, HWLOC_MEMBIND_BIND);
 
   /* print the corresponding NUMA nodes */
-  hwloc_bitmap_asprintf(&buffer, set);
-  printf("buffer bound to nodeset %s with contains:\n", buffer);
-  free(buffer);
+  hwloc_bitmap_asprintf(&s, set);
+  printf("buffer bound to nodeset %s with contains:\n", s);
+  free(s);
   hwloc_bitmap_foreach_begin(i, set) {
     obj = hwloc_get_numanode_obj_by_os_index(topology, i);
     printf("  node #%u (OS index %u) with %lld bytes of memory\n",
