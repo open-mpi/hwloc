@@ -52,6 +52,7 @@ int main(void)
     fprintf(stderr, "failed to get cpu binding\n");
     hwloc_bitmap_free(set);
     hwloc_topology_destroy(topology);
+    return EXIT_FAILURE;
   }
 
   /* display the processing units that cannot be used by this process */
@@ -89,6 +90,7 @@ int main(void)
     hwloc_bitmap_free(set);
     hwloc_bitmap_free(set2);
     hwloc_topology_destroy(topology);
+    return EXIT_FAILURE;
   }
   /* sanity checks that are not actually needed but help the reader */
   /* this thread runs within the process binding */
@@ -111,6 +113,7 @@ int main(void)
     hwloc_bitmap_free(set);
     hwloc_bitmap_free(set2);
     hwloc_topology_destroy(topology);
+    return EXIT_FAILURE;
   }
   /* reprint the PU where that thread runs */
   err = hwloc_get_last_cpu_location(topology, set2, HWLOC_CPUBIND_THREAD);
@@ -119,6 +122,7 @@ int main(void)
     hwloc_bitmap_free(set);
     hwloc_bitmap_free(set2);
     hwloc_topology_destroy(topology);
+    return EXIT_FAILURE;
   }
   /* print the logical number of the PU where that thread runs */
   /* extract the PU OS index from the bitmap */
