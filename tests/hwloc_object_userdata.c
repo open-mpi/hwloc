@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2014 Inria.  All rights reserved.
- * Copyright © 2009 Université Bordeaux 1
+ * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */

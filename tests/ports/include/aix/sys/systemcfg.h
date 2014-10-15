@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011 Université Bordeaux 1
+ * Copyright © 2011 Université Bordeaux
  * See COPYING in top-level directory.
  */
 

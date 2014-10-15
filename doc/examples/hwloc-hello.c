@@ -4,7 +4,7 @@
  * for more details.
  *
  * Copyright © 2009-2014 Inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  *

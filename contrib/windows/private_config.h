@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
  * Copyright © 2009-2014 Inria.  All rights reserved.
- * Copyright © 2009, 2011, 2012 Université Bordeaux 1.  All rights reserved.
+ * Copyright © 2009, 2011, 2012 Université Bordeaux.  All rights reserved.
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
  *

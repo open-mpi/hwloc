@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 inria.  All rights reserved.
- * Copyright © Université Bordeaux 1
+ * Copyright © Université Bordeaux
  * See COPYING in top-level directory.
  */
 

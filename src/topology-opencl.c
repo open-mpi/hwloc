@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012-2014 Inria.  All rights reserved.
- * Copyright © 2013 Université Bordeaux 1.  All right reserved.
+ * Copyright © 2013 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
 
