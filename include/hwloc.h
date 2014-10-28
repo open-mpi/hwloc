@@ -549,7 +549,7 @@ struct hwloc_distances_s {
   unsigned nbobjs;		/**< \brief Number of objects considered in the matrix.
 				 * It is the number of descendant objects at \p relative_depth
 				 * below the containing object.
-				 * It corresponds to the result of hwloc_get_nbobjs_inside_cpuset_by_depth. */
+				 * It corresponds to the result of hwloc_get_nbobjs_inside_cpuset_by_depth(). */
 
   float *latency;		/**< \brief Matrix of latencies between objects, stored as a one-dimension array.
 				 * May be \c NULL if the distances considered here are not latencies.
@@ -694,7 +694,7 @@ enum hwloc_topology_flags_e {
  /** \brief Detect the whole system, ignore reservations and offline settings.
    *
    * Gather all resources, even if some were disabled by the administrator.
-   * For instance, ignore Linux Cpusets and gather all processors and memory nodes,
+   * For instance, ignore Linux Cgroup/Cpusets and gather all processors and memory nodes,
    * and ignore the fact that some resources may be offline.
    * \hideinitializer
    */
