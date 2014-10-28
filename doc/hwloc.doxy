@@ -606,7 +606,6 @@ The documentation chapters include
 <li> \ref envvar
 <li> \ref cpu_mem_bind
 <li> \ref iodevices
-<li> \ref multinode
 <li> \ref attributes
 <li> \ref xml
 <li> \ref synthetic
@@ -870,21 +869,6 @@ hwloc-compress-dir compresses an entire directory of XML
 files by using hwloc-diff to save the differences between
 topologies instead of entire topologies.
 
-\section cli_hwloc_assembler hwloc-assembler
-
-hwloc-assembler combines several XML topology files into a single
-multi-node XML topology.
-It may then be used later as input with hwloc_topology_set_xml()
-or with the HWLOC_XMLFILE environment variable.
-See \ref multinode for details.
-
-\section cli_hwloc_assembler_remote hwloc-assembler-remote
-
-hwloc-assembler-remote is a frontend to hwloc-assembler.
-It takes care of contacting the given list of remote hosts
-(through ssh) and retrieving their topologies as XML before
-assembling them with hwloc-assembler.
-
 
 
 
@@ -1006,8 +990,6 @@ following environment variables.
   distance from the i-th object to the j-th object.
   These distance values must use a dot as a decimal separator.</li>
   </ul>
-
-  Note that distances are ignored in multi-node topologies.
   </dd>
 
 <dt>HWLOC_PCI_&lt;domain&gt;_&lt;bus&gt;_LOCALCPUS=&lt;cpuset&gt;</dt>
@@ -1380,171 +1362,6 @@ Machine (24GB)
   NUMANode L#1 (P#1 12GB) + Package L#1 + L3 L#1 (8192KB)
     L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
     L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
-\endverbatim
-
-
-
-
-\page multinode Multi-node Topologies
-
-hwloc is usually used for consulting and manipulating single machine
-topologies. This includes large systems as long as a single instance of
-the operating system manages the entire system. However it is sometimes
-desirable to have multiple independent hosts inside the same topology,
-for instance when applying algorithms to an entire cluster topology.
-hwloc therefore offers the ability to agregate multiple host topologies
-into a single global one.
-
-\section multinode_cpusets Multi-node Objects Specifities
-
-A multi-node topology contains several single-node topologies.
-Those are assembled by making their own root objects (usually
-Machine object) children of higher objects.
-These higher objects include at least the root of the global
-topology (usually a System object).
-Some intermediate objects may also exists, for instance to
-represent switches in a large fabric.
-
-There are actually three possible types of objects that have different
-properties with respect to cpusets, nodesets and binding.
-Indeed those cpusets and nodesets were designed for execution and memory
-binding within a single operating system. Binding on another system or
-across several different systems would be meaningless.
-
-<dl>
-<dt>Local objects</dt>
-<dd>
- Any object that corresponds to the local machine may be manipulated
- as usual.
- Obviously, if the multi-node topology does not contain the local
- machine topology, no such local object exists.
-</dd>
-<dt>Objects from other nodes</dt>
-<dd>
- Any object that comes from inside another node is represented as
- usual but its cpusets and nodesets should not be used for binding
- since binding on another system makes no sense.
-</dd>
-<dt>Objects above single nodes</dt>
-<dd>
- Any object above single-node topologies does not have any cpuset or
- nodeset pointer because binding across multiple systems makes no sense.
- This includes the glocal root object of a multi-node topology and possibly
- some intermediate objects between this global root and the local root
- of single-node topologies.
-</dd>
-</dl>
-
-It is important to keep this in mind before binding using multi-node
-topologies.
-To make sure binding on an object is possible, one should first check
-that its cpuset or nodeset pointer is not NULL.
-Then, one should check whether the object is indeed local.
-
-To find out which machine a given object corresponds to, one may look
-at the info attributes of the parent Machine object. The <tt>HostName</tt>
-info is usually available in Machine objects, it may be retrieved with the
-following code:
-\verbatim
-  hwloc_obj_t machine_obj;
-  obj = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_MACHINE, obj);
-  if (machine_obj)
-    return hwloc_obj_get_info_by_name(machine_obj, "HostName");
-  else
-    return NULL;
-\endverbatim
-The hwloc assembler scripts (see below) also add <tt>AssemblerName</tt>
-and <tt>AssemblerIndex</tt> info attributes to the Machine objects to
-identify the corresponding host name and index during assembly.
-
-\section multinode_tools Assembling topologies with command-line tools
-
-One way to manipulate multinode topologies is to retrieve
-other nodes' topologies as XML files and combine them as a
-global XML topology.
-It may then be loaded with hwloc_topology_set_xml() or with
-the HWLOC_XMLFILE environment variable.
-
-The hwloc-assembler and hwloc-assembler-remote utilities
-offer the ability to combine XML topologies or remote
-nodes' topologies (see \ref tools).
-
-\section multinode_interface Assembling topologies with the programming interface
-
-The hwloc programming interface offers the ability to build multinode
-topologies using the <em>custom</em> interface.
-A new multinode topology has to be initialized with hwloc_topology_init()
-and then set to custom with hwloc_topology_set_custom().
-Topologies and objects mat then be assembled.
-Later, the custom topology is finalized as usual with hwloc_topology_load().
-
-A custom topology starts with a single root object of type System.
-It may be modified by inserting a new child object with
-hwloc_custom_insert_group_object_by_parent() or by duplicating
-another topology with hwloc_custom_insert_topology().
-Both of these operations require to specify the parent object
-in the custom topology where the insertion will take place.
-This parent may be either the root
-(returned by hwloc_get_root_obj())
-or an already-inserted object
-(returned by hwloc_custom_insert_group_object_by_parent()).
-
-Ideally, any existing object in the custom topology could be the parent.
-However, special care should be taken when traversing the topology
-to find such an object because most links between objects
-(children, siblings, cousins) are not setup until hwloc_topology_load()
-is invoked.
-
-\section multinode_example Example of assembly with the programming interface
-
-If the topologies of two hosts have been previously gathered in XML
-files <tt>host1.xml</tt> and <tt>host2.xml</tt>, the global topology
-may be assembled with the following code.
-
-\verbatim
-hwloc_topology_t host1, host2, global;
-
-/* initialize global topology */
-hwloc_topology_init(&global);
-hwloc_topology_set_custom(global);
-
-/* insert host1 entire topology below the global topology root */
-hwloc_topology_init(&host1);
-hwloc_topology_load(host1);
-hwloc_custom_insert_topology(global, hwloc_get_root_obj(global),
-                             host1, NULL);
-hwloc_topology_destroy(host1);
-
-/* insert host2 entire topology below the global topology root */
-hwloc_topology_init(&host2);
-hwloc_topology_load(host2);
-hwloc_custom_insert_topology(global, hwloc_get_root_obj(global),
-                             host2, NULL);
-hwloc_topology_destroy(host2);
-
-/* load and play with the global topology */
-hwloc_topology_load(global);
-...
-\endverbatim
-
-If a intermediate object such as a switch should be inserted
-above one of the host topologies:
-\verbatim
-...
-/* insert a switch object below the global topology root */
-hwloc_obj_t sw =
-   hwloc_custom_insert_group_object_by_parent(global,
-                              hwloc_get_root_obj(global), 0);
-
-/* insert host2 entire topology below the switch */
-hwloc_topology_init(&host2);
-hwloc_topology_load(host2);
-hwloc_custom_insert_topology(global, switch, host2, NULL);
-hwloc_topology_destroy(host2);
-
-/* load and play with the global topology */
-hwloc_topology_load(global);
-...
 \endverbatim
 
 
@@ -2171,7 +1988,7 @@ may be set to get verbose messages about component registration
 \section plugins_select Selecting which components to use
 
 Once topology configuration functions such as
-<tt>hwloc_topology_set_custom()</tt> have been taken care of,
+<tt>hwloc_topology_set_synthetic()</tt> have been taken care of,
 the priority order of the remaining components may be changed
 through the  <tt>HWLOC_COMPONENTS</tt> environment
 variable (component names must be separated by commas).
@@ -2358,10 +2175,6 @@ environment variable (see \ref envvar).
 <dt>synthetic</dt>
 <dd>
  Synthetic topology support (see \ref synthetic) is always built statically.
-</dd>
-<dt>custom</dt>
-<dd>
- Custom topology support (see \ref multinode) is always built statically.
 </dd>
 <dt>xml</dt>
 <dd>

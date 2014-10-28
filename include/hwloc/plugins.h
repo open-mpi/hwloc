@@ -30,7 +30,7 @@ typedef enum hwloc_disc_component_type_e {
    * \hideinitializer */
   HWLOC_DISC_COMPONENT_TYPE_CPU = (1<<0),
 
-  /** \brief xml, synthetic or custom,
+  /** \brief xml or synthetic,
    * platform-specific components such as bgq.
    * Anything the discovers CPU and everything else.
    * No misc backend is expected to complement a global component.
@@ -79,7 +79,7 @@ struct hwloc_disc_component {
    * 50 for native OS (or platform) components,
    * 45 for x86,
    * 40 for no-OS fallback,
-   * 30 for global components (xml/synthetic/custom),
+   * 30 for global components (xml, synthetic),
    * 20 for pci,
    * 10 for other misc components (opencl etc.).
    */
@@ -123,11 +123,6 @@ struct hwloc_backend {
 
   /** \brief Backend flags, as an OR'ed set of HWLOC_BACKEND_FLAG_* */
   unsigned long flags;
-
-  /** \brief Backend-specific 'is_custom' property.
-   * Shortcut on !strcmp(..->component->name, "custom").
-   * Only the custom component should touch this. */
-  int is_custom;
 
   /** \brief Backend-specific 'is_thissystem' property.
    * Set to 0 or 1 if the backend should enforce the thissystem flag when it gets enabled.

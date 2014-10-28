@@ -905,27 +905,6 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
 
-/** \brief Prepare the topology for custom assembly.
- *
- * The topology then contains a single root object.
- * It must then be built by inserting other topologies with
- * hwloc_custom_insert_topology() or single objects with
- * hwloc_custom_insert_group_object_by_parent().
- * hwloc_topology_load() must be called to finalize the new
- * topology as usual.
- *
- * \note If nothing is inserted in the topology,
- * hwloc_topology_load() will fail with errno set to EINVAL.
- *
- * \note The cpuset and nodeset of the root object are NULL because
- * these sets are meaningless when assembling multiple topologies.
- *
- * \note On success, the custom component replaces the previously enabled
- * component (if any), but the topology is not actually modified until
- * hwloc_topology_load().
- */
-HWLOC_DECLSPEC int hwloc_topology_set_custom(hwloc_topology_t topology);
-
 /** \brief Provide a distance matrix.
  *
  * Provide the matrix of distances between a set of objects of the given type.
@@ -2123,64 +2102,6 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  * This is useful for keeping a backup while modifying a topology.
  */
 HWLOC_DECLSPEC int hwloc_topology_dup(hwloc_topology_t *newtopology, hwloc_topology_t oldtopology);
-
-/** @} */
-
-
-
-/** \defgroup hwlocality_custom Building Custom Topologies
- *
- * A custom topology may be initialized by calling hwloc_topology_set_custom()
- * after hwloc_topology_init(). It may then be modified by inserting objects
- * or entire topologies. Once done assembling, hwloc_topology_load() should
- * be invoked as usual to finalize the topology.
- * @{
- */
-
-/** \brief Insert an existing topology inside a custom topology
- *
- * Duplicate the existing topology \p oldtopology inside a new
- * custom topology \p newtopology as a leaf of object \p newparent.
- *
- * If \p oldroot is not \c NULL, duplicate \p oldroot and all its
- * children instead of the entire \p oldtopology. Passing the root
- * object of \p oldtopology in \p oldroot is equivalent to passing
- * \c NULL.
- *
- * The custom topology \p newtopology must have been prepared with
- * hwloc_topology_set_custom() and not loaded with hwloc_topology_load()
- * yet.
- *
- * \p newparent may be either the root of \p newtopology or an object
- * that was added through hwloc_custom_insert_group_object_by_parent().
- *
- * \note The cpuset and nodeset of the \p newparent object are not
- * modified based on the contents of \p oldtopology.
- */
-HWLOC_DECLSPEC int hwloc_custom_insert_topology(hwloc_topology_t newtopology, hwloc_obj_t newparent, hwloc_topology_t oldtopology, hwloc_obj_t oldroot);
-
-/** \brief Insert a new group object inside a custom topology
- *
- * An object with type ::HWLOC_OBJ_GROUP is inserted as a new child
- * of object \p parent.
- *
- * \p groupdepth is the depth attribute to be given to the new object.
- * It may for instance be 0 for top-level groups, 1 for their children,
- * and so on.
- *
- * The custom topology \p newtopology must have been prepared with
- * hwloc_topology_set_custom() and not loaded with hwloc_topology_load()
- * yet.
- *
- * \p parent may be either the root of \p topology or an object that
- * was added earlier through hwloc_custom_insert_group_object_by_parent().
- *
- * \note The cpuset and nodeset of the new group object are NULL because
- * these sets are meaningless when assembling multiple topologies.
- *
- * \note The cpuset and nodeset of the \p parent object are not modified.
- */
-HWLOC_DECLSPEC hwloc_obj_t hwloc_custom_insert_group_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, int groupdepth);
 
 /** @} */
 

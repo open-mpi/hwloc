@@ -36,7 +36,6 @@ check_PROGRAMS = hwloc_list_components \
         hwloc_get_last_cpu_location \
         hwloc_object_userdata \
         hwloc_synthetic \
-        hwloc_custom \
         hwloc_backends \
         hwloc_pci_backend \
         hwloc_is_thissystem \

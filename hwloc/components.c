@@ -655,7 +655,6 @@ hwloc_backend_alloc(struct hwloc_disc_component *component)
   backend->get_obj_cpuset = NULL;
   backend->notify_new_object = NULL;
   backend->disable = NULL;
-  backend->is_custom = 0;
   backend->is_thissystem = -1;
   backend->next = NULL;
   backend->envvar_forced = 0;

@@ -337,7 +337,6 @@ man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xmlbuffer.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_custom.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_distance_matrix.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_is_thissystem.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_discovery_support.3 \
@@ -444,12 +443,6 @@ man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_dup.3
-
-man3_customdir = $(man3dir)
-man3_custom_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_custom.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_custom_insert_topology.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_custom_insert_group_object_by_parent.3
 
 man3_xmlexportdir = $(man3dir)
 man3_xmlexport_DATA = \
@@ -728,7 +721,6 @@ $(man3_object_strings_DATA): $(DOX_TAG)
 $(man3_cpubinding_DATA): $(DOX_TAG)
 $(man3_membinding_DATA): $(DOX_TAG)
 $(man3_tinker_DATA): $(DOX_TAG)
-$(man3_custom_DATA): $(DOX_TAG)
 $(man3_xmlexport_DATA): $(DOX_TAG)
 $(man3_syntheticexport_DATA): $(DOX_TAG)
 $(man3_bitmap_DATA): $(DOX_TAG)

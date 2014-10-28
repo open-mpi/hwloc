@@ -14,7 +14,6 @@ LDADD = $(HWLOC_top_builddir)/hwloc/libhwloc.la
 
 EXTRA_DIST = \
         test-hwloc-annotate.input test-hwloc-annotate.output \
-        test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-assembler.output \
         test-hwloc-calc.output \
         test-hwloc-compress-dir.input.tar.gz test-hwloc-compress-dir.output.tar.gz \
         test-hwloc-diffpatch.input1 test-hwloc-diffpatch.input2 \
@@ -26,7 +25,6 @@ noinst_HEADERS = misc.h
 
 bin_PROGRAMS = \
         hwloc-annotate \
-        hwloc-assembler \
         hwloc-bind \
         hwloc-calc \
         hwloc-diff \
@@ -40,12 +38,11 @@ hwloc_calc_SOURCES = \
         hwloc-calc.h \
         hwloc-calc.c
 
-bin_SCRIPTS = hwloc-assembler-remote hwloc-compress-dir
+bin_SCRIPTS = hwloc-compress-dir
 
 if !HWLOC_HAVE_MINGW32
 TESTS = \
         test-hwloc-annotate.sh \
-        test-hwloc-assembler.sh \
         test-hwloc-calc.sh \
         test-hwloc-compress-dir.sh \
         test-hwloc-diffpatch.sh \
@@ -64,8 +61,6 @@ nodist_man_MANS = $(man7_pages)
 
 man1_pages = \
         hwloc-annotate.1 \
-        hwloc-assembler.1 \
-        hwloc-assembler-remote.1 \
         hwloc-bind.1 \
         hwloc-calc.1 \
         hwloc-compress-dir.1 \
@@ -109,9 +104,8 @@ endif HWLOC_HAVE_LINUX
 	  > $@ < $<
 
 install-exec-hook: install-man
-	$(SED) -e 's/HWLOC_top_builddir\/utils\/hwloc/bindir/' -e 's/HWLOC_top_builddir\/utils\/lstopo/bindir/' -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/hwloc-assembler-remote > $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp && mv -f $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp $(DESTDIR)$(bindir)/hwloc-assembler-remote
 	$(SED) -e 's/HWLOC_top_builddir\/utils\/hwloc/bindir/' -e 's/HWLOC_top_builddir\/utils\/lstopo/bindir/' -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/hwloc-compress-dir > $(DESTDIR)$(bindir)/hwloc-compress-dir.tmp && mv -f $(DESTDIR)$(bindir)/hwloc-compress-dir.tmp $(DESTDIR)$(bindir)/hwloc-compress-dir
-	chmod +x $(DESTDIR)$(bindir)/hwloc-assembler-remote $(DESTDIR)$(bindir)/hwloc-compress-dir
+	chmod +x $(DESTDIR)$(bindir)/hwloc-compress-dir
 
 distclean-local:
 	rm -f $(nodist_man_MANS)

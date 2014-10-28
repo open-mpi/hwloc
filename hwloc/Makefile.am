@@ -39,7 +39,6 @@ sources = \
         base64.c \
         topology-noos.c \
         topology-synthetic.c \
-        topology-custom.c \
         topology-xml.c \
         topology-xml-nolibxml.c
 ldflags =

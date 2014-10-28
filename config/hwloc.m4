@@ -166,7 +166,7 @@ EOF])
     # List of components to be built, either statically or dynamically.
     # To be enlarged below.
     #
-    hwloc_components="noos xml synthetic custom xml_nolibxml"
+    hwloc_components="noos xml synthetic xml_nolibxml"
 
     #
     # Check OS support

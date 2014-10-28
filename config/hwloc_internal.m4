@@ -400,10 +400,8 @@ int foo(void) {
         hwloc_config_prefix[tests/hwloc/linux/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/xml/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/wrapper.sh]
-        hwloc_config_prefix[utils/hwloc/hwloc-assembler-remote]
         hwloc_config_prefix[utils/hwloc/hwloc-compress-dir]
         hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh]
-        hwloc_config_prefix[utils/hwloc/test-hwloc-assembler.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh]
@@ -422,10 +420,8 @@ chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
       ]hwloc_config_prefix[tests/hwloc/linux/hwloc-gather-topology \
       ]hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh \
       ]hwloc_config_prefix[tests/hwloc/wrapper.sh \
-      ]hwloc_config_prefix[utils/hwloc/hwloc-assembler-remote \
       ]hwloc_config_prefix[utils/hwloc/hwloc-compress-dir \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh \
-      ]hwloc_config_prefix[utils/hwloc/test-hwloc-assembler.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh \
