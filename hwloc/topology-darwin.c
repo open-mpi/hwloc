@@ -75,7 +75,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 
     if (nprocs == npackages * logical_per_package)
       for (i = 0; i < npackages; i++) {
-        obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, i);
+        obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, i);
         obj->cpuset = hwloc_bitmap_alloc();
         for (cpu = i*logical_per_package; cpu < (i+1)*logical_per_package; cpu++)
           hwloc_bitmap_set(obj->cpuset, cpu);

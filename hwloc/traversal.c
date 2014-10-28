@@ -184,7 +184,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_MISC: return "Misc";
     case HWLOC_OBJ_GROUP: return "Group";
     case HWLOC_OBJ_NODE: return "NUMANode";
-    case HWLOC_OBJ_SOCKET: return "Socket";
+    case HWLOC_OBJ_PACKAGE: return "Package";
     case HWLOC_OBJ_CACHE: return "Cache";
     case HWLOC_OBJ_CORE: return "Core";
     case HWLOC_OBJ_BRIDGE: return "Bridge";
@@ -203,7 +203,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Misc")) return HWLOC_OBJ_MISC;
   if (!strcasecmp(string, "Group")) return HWLOC_OBJ_GROUP;
   if (!strcasecmp(string, "NUMANode") || !strcasecmp(string, "Node")) return HWLOC_OBJ_NODE;
-  if (!strcasecmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
+  if (!strcasecmp(string, "Package") || !strcasecmp(string, "Socket") /* backward compat with v1.10 */) return HWLOC_OBJ_PACKAGE;
   if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
   if (!strcasecmp(string, "PU")) return HWLOC_OBJ_PU;
@@ -229,8 +229,9 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
   } else if (!hwloc_strncasecmp(string, "node", 1)
 	     || !hwloc_strncasecmp(string, "numa", 1)) { /* matches node and numanode */
     type = HWLOC_OBJ_NODE;
-  } else if (!hwloc_strncasecmp(string, "socket", 2)) {
-    type = HWLOC_OBJ_SOCKET;
+  } else if (!hwloc_strncasecmp(string, "package", 2)
+	     || !hwloc_strncasecmp(string, "socket", 2)) { /* backward compat with v1.10 */
+    type = HWLOC_OBJ_PACKAGE;
   } else if (!hwloc_strncasecmp(string, "core", 2)) {
     type = HWLOC_OBJ_CORE;
   } else if (!hwloc_strncasecmp(string, "pu", 2)) {
@@ -458,7 +459,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_SYSTEM:
   case HWLOC_OBJ_MACHINE:
   case HWLOC_OBJ_NODE:
-  case HWLOC_OBJ_SOCKET:
+  case HWLOC_OBJ_PACKAGE:
   case HWLOC_OBJ_CORE:
   case HWLOC_OBJ_PU:
     return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));

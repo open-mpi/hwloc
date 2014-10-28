@@ -538,7 +538,7 @@ static const unsigned obj_type_order[] = {
     /* first entry is HWLOC_OBJ_SYSTEM */  0,
     /* next entry is HWLOC_OBJ_MACHINE */  1,
     /* next entry is HWLOC_OBJ_NODE */     3,
-    /* next entry is HWLOC_OBJ_SOCKET */   4,
+    /* next entry is HWLOC_OBJ_PACKAGE */  4,
     /* next entry is HWLOC_OBJ_CACHE */    5,
     /* next entry is HWLOC_OBJ_CORE */     6,
     /* next entry is HWLOC_OBJ_PU */       10,
@@ -554,7 +554,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_MACHINE,
   HWLOC_OBJ_GROUP,
   HWLOC_OBJ_NODE,
-  HWLOC_OBJ_SOCKET,
+  HWLOC_OBJ_PACKAGE,
   HWLOC_OBJ_CACHE,
   HWLOC_OBJ_CORE,
   HWLOC_OBJ_BRIDGE,
@@ -570,7 +570,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
  * Always keep Machine/PU/PCIDev/OSDev
  * then System/Node
  * then Core
- * then Socket
+ * then Package
  * then Cache
  * then always drop Group/Misc/Bridge.
  *
@@ -580,7 +580,7 @@ static const int obj_type_priority[] = {
   /* first entry is HWLOC_OBJ_SYSTEM */     80,
   /* next entry is HWLOC_OBJ_MACHINE */     100,
   /* next entry is HWLOC_OBJ_NODE */        80,
-  /* next entry is HWLOC_OBJ_SOCKET */      40,
+  /* next entry is HWLOC_OBJ_PACKAGE */     40,
   /* next entry is HWLOC_OBJ_CACHE */       20,
   /* next entry is HWLOC_OBJ_CORE */        60,
   /* next entry is HWLOC_OBJ_PU */          100,

@@ -20,7 +20,7 @@
     <info name="DMIBIOSDate" value="10/03/2006"/>
     <info name="DMISysVendor" value="Dell Computer Corporation"/>
     <info name="Backend" value="Linux"/>
-    <object type="Socket" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">
+    <object type="Package" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">
       <info name="CPUModel" value="Intel(R) Xeon(TM) CPU 3.00GHz"/>
       <object type="Cache" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
         <object type="Cache" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">

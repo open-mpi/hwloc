@@ -30,9 +30,9 @@
 #define DARKER_EPOXY_G_COLOR ((DARK_EPOXY_G_COLOR * 100) / 110)
 #define DARKER_EPOXY_B_COLOR ((DARK_EPOXY_B_COLOR * 100) / 110)
 
-#define SOCKET_R_COLOR 0xde
-#define SOCKET_G_COLOR 0xde
-#define SOCKET_B_COLOR 0xde
+#define PACKAGE_R_COLOR 0xde
+#define PACKAGE_G_COLOR 0xde
+#define PACKAGE_B_COLOR 0xde
 
 #define MEMORY_R_COLOR 0xef
 #define MEMORY_G_COLOR 0xdf
@@ -486,10 +486,10 @@ lstopo_set_object_color(struct draw_methods *methods,
     s->bg2.b = MEMORY_B_COLOR;
     break;
 
-  case HWLOC_OBJ_SOCKET:
-    s->bg.r = SOCKET_R_COLOR;
-    s->bg.g = SOCKET_G_COLOR;
-    s->bg.b = SOCKET_B_COLOR;
+  case HWLOC_OBJ_PACKAGE:
+    s->bg.r = PACKAGE_R_COLOR;
+    s->bg.g = PACKAGE_G_COLOR;
+    s->bg.b = PACKAGE_B_COLOR;
     break;
 
   case HWLOC_OBJ_CORE:
@@ -874,7 +874,7 @@ core_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 }
 
 static void
-socket_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+package_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
@@ -1200,7 +1200,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_SYSTEM: return system_draw;
     case HWLOC_OBJ_MACHINE: return machine_draw;
     case HWLOC_OBJ_NODE: return node_draw;
-    case HWLOC_OBJ_SOCKET: return socket_draw;
+    case HWLOC_OBJ_PACKAGE: return package_draw;
     case HWLOC_OBJ_CACHE: return cache_draw;
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PU: return pu_draw;
@@ -1269,7 +1269,7 @@ output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_t
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
-  methods->declare_color(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR);
+  methods->declare_color(output, PACKAGE_R_COLOR, PACKAGE_G_COLOR, PACKAGE_B_COLOR);
   methods->declare_color(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR);
   methods->declare_color(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR);
   methods->declare_color(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR);

@@ -24,7 +24,7 @@
     <info name="OSVersion" value="#1 SMP Fri Sep 17 21:50:19 UTC 2010"/>
     <info name="HostName" value="emmett"/>
     <info name="Architecture" value="x86_64"/>
-    <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000055" complete_cpuset="0x00000055" online_cpuset="0x00000055" allowed_cpuset="0x00000055">
+    <object type="Package" os_level="-1" os_index="0" cpuset="0x00000055" complete_cpuset="0x00000055" online_cpuset="0x00000055" allowed_cpuset="0x00000055">
       <object type="Cache" os_level="-1" cpuset="0x00000011" complete_cpuset="0x00000011" online_cpuset="0x00000011" allowed_cpuset="0x00000011" cache_size="4194304" depth="2" cache_linesize="64">
         <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1" cache_linesize="64">
           <object type="Core" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001">
@@ -50,7 +50,7 @@
         </object>
       </object>
     </object>
-    <object type="Socket" os_level="-1" os_index="1" cpuset="0x000000aa" complete_cpuset="0x000000aa" online_cpuset="0x000000aa" allowed_cpuset="0x000000aa">
+    <object type="Package" os_level="-1" os_index="1" cpuset="0x000000aa" complete_cpuset="0x000000aa" online_cpuset="0x000000aa" allowed_cpuset="0x000000aa">
       <object type="Cache" os_level="-1" cpuset="0x00000022" complete_cpuset="0x00000022" online_cpuset="0x00000022" allowed_cpuset="0x00000022" cache_size="4194304" depth="2" cache_linesize="64">
         <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1" cache_linesize="64">
           <object type="Core" os_level="-1" os_index="0" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002">

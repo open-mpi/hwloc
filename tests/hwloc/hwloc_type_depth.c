@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -43,9 +43,9 @@ int main(void)
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NODE) == HWLOC_TYPE_DEPTH_UNKNOWN);
   assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_NODE) == 3);
   assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_NODE) == 4);
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET) == HWLOC_TYPE_DEPTH_UNKNOWN);
-  assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SOCKET) == 3);
-  assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_SOCKET) == 4);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE) == HWLOC_TYPE_DEPTH_UNKNOWN);
+  assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PACKAGE) == 3);
+  assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_PACKAGE) == 4);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_CACHE) == HWLOC_TYPE_DEPTH_MULTIPLE);
   assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_CACHE) == HWLOC_TYPE_DEPTH_MULTIPLE);
   assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_CACHE) == HWLOC_TYPE_DEPTH_MULTIPLE);

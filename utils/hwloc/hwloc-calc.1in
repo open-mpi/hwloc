@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2013 Inria.  All rights reserved.
+.\" Copyright © 2010-2014 Inria.  All rights reserved.
 .\" Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-CALC "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
@@ -62,9 +62,9 @@ objects are strictly included inside the input objects.
 Find the list of objects of type <type2> that intersect the CPU set and
 report the space-separated list of their hierarchical indexes with respect
 to <type1>, <type2>, etc.
-For instance, if \fIsocket.core\fR is given, the output would be
-\fISocket:1.Core:2 Socket:2.Core:3\fR if the input contains the third
-core of the second socket and the fourth core of the third socket.
+For instance, if \fIpackage.core\fR is given, the output would be
+\fIPackage:1.Core:2 Package:2.Core:3\fR if the input contains the third
+core of the second package and the fourth core of the third package.
 .TP
 \fB\-\-largest\fR
 Report (in a human readable format) the list of largest objects which exactly
@@ -170,15 +170,15 @@ hwloc(7) directly apply to the hwloc-calc utility.
 hwloc-calc's operation is best described through several examples.
 .
 .PP
-To display the (physical) CPU mask corresponding to the second socket:
+To display the (physical) CPU mask corresponding to the second package:
 
-    $ hwloc-calc socket:1
+    $ hwloc-calc package:1
     0x000000f0
 
-To display the (physical) CPU mask corresponding to the third socket, excluding
+To display the (physical) CPU mask corresponding to the third pacakge, excluding
 its even numbered logical processors:
 
-    $ hwloc-calc socket:2 ~PU:even
+    $ hwloc-calc package:2 ~PU:even
     0x00000c00
 
 To combine two (physical) CPU masks:
@@ -187,9 +187,9 @@ To combine two (physical) CPU masks:
     0xff00ffff
 
 To display the list of logical numbers of processors included in the second
-socket:
+package:
 
-    $ hwloc-calc --intersect PU socket:1
+    $ hwloc-calc --intersect PU package:1
     4,5,6,7
 
 To bind GNU OpenMP threads logically over the whole machine, we need to use
@@ -214,19 +214,19 @@ To display the set of CPUs near network interface eth0:
     $ hwloc-calc os=eth0
     0x00005555
 
-To display the indexes of sockets near PCI device whose bus ID is 0000:01:02.0:
+To display the indexes of packages near PCI device whose bus ID is 0000:01:02.0:
 
-    $ hwloc-calc pci=0000:01:02.0 --intersect Socket
+    $ hwloc-calc pci=0000:01:02.0 --intersect Package
     1
 
-To display the list of per-socket cores that intersect the input:
+To display the list of per-package cores that intersect the input:
 
-    $ hwloc-calc 0x00003c00 --hierarchical socket.core
-    Socket:2.Core:1 Socket:3.Core:0
+    $ hwloc-calc 0x00003c00 --hierarchical package.core
+    Package:2.Core:1 Package:3.Core:0
 
-To display the (physical) CPU mask of the entire topology except the third socket:
+To display the (physical) CPU mask of the entire topology except the third package:
 
-    $ hwloc-calc all ~socket:3
+    $ hwloc-calc all ~package:3
     0x0000f0ff
 
 To combine both physical and logical indexes as input:
@@ -234,19 +234,19 @@ To combine both physical and logical indexes as input:
     $ hwloc-calc PU:2 --physical-input PU:3
     0x0000000c
 
-To synthetize a set of cores into largest objects on a 2-node 2-socket 2-core machine:
+To synthetize a set of cores into largest objects on a 2-node 2-package 2-core machine:
 
     $ hwloc-calc core:0 --largest
     Core:0
     $ hwloc-calc core:0-1 --largest
-    Socket:0
+    Package:0
     $ hwloc-calc core:4-7 --largest
     NUMANode:1
     $ hwloc-calc core:2-6 --largest
-    Socket:1 Socket:2 Core:6
-    $ hwloc-calc socket:2 --largest
-    Socket:2
-    $ hwloc-calc socket:2-3 --largest
+    Package:1 Package:2 Core:6
+    $ hwloc-calc pack:2 --largest
+    Package:2
+    $ hwloc-calc package:2-3 --largest
     NUMANode:1
 
 To get the set of first threads of all cores:

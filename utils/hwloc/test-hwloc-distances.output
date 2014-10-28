@@ -1,5 +1,5 @@
 
-Latency matrix between 2 Sockets (depth 1) by physical indexes (below Machine P#0):
+Latency matrix between 2 Packages (depth 1) by physical indexes (below Machine P#0):
   index     0     1
       0 780000.000 1520000.000
       1 15200.000 1.000

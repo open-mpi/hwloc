@@ -24,7 +24,7 @@
     <info name="OSVersion" value="#1 SMP Sun Jul 24 02:24:44 UTC 2011"/>
     <info name="HostName" value="rhododendron"/>
     <info name="Architecture" value="x86_64"/>
-    <object type="Socket" os_level="-1" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f">
+    <object type="Package" os_level="-1" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f">
       <object type="Cache" os_level="-1" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f" cache_size="4194304" depth="3" cache_linesize="64" cache_associativity="8" cache_type="0">
         <object type="Cache" os_level="-1" cpuset="0x00000005" complete_cpuset="0x00000005" online_cpuset="0x00000005" allowed_cpuset="0x00000005" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="Cache" os_level="-1" cpuset="0x00000005" complete_cpuset="0x00000005" online_cpuset="0x00000005" allowed_cpuset="0x00000005" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">

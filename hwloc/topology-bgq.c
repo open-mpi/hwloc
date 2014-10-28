@@ -49,8 +49,8 @@ hwloc_look_bgq(struct hwloc_backend *backend)
     topology->levels[0][0]->nodeset = set;
     topology->levels[0][0]->memory.local_memory = 16ULL*1024*1024*1024ULL;
 
-    /* socket */
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, 0);
+    /* package */
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, 0);
     set = hwloc_bitmap_alloc();
     hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);
     obj->cpuset = set;

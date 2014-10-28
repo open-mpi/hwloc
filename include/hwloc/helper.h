@@ -350,7 +350,7 @@ hwloc_get_next_obj_covering_cpuset_by_type(hwloc_topology_t topology, hwloc_cons
  * Be sure to see the figure in \ref termsanddefs that shows a
  * complete topology tree, including depths, child/sibling/cousin
  * relationships, and an example of an asymmetric topology where one
- * socket has fewer caches than its peers.
+ * package has fewer caches than its peers.
  */
 
 /** \brief Returns the ancestor object of \p obj at depth \p depth. */
@@ -538,7 +538,7 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute
  * Be sure to see the figure in \ref termsanddefs that shows a
  * complete topology tree, including depths, child/sibling/cousin
  * relationships, and an example of an asymmetric topology where one
- * socket has fewer caches than its peers.
+ * package has fewer caches than its peers.
  */
 
 /** \brief Returns the object of type ::HWLOC_OBJ_PU with \p os_index.
@@ -604,8 +604,8 @@ HWLOC_DECLSPEC unsigned hwloc_get_closest_objs (hwloc_topology_t topology, hwloc
  * object of type \p type2 and logical index \p idx2.  Indexes are specified
  * within the parent, not withing the entire system.
  *
- * For instance, if type1 is SOCKET, idx1 is 2, type2 is CORE and idx2
- * is 3, return the fourth core object below the third socket.
+ * For instance, if type1 is PACKAGE, idx1 is 2, type2 is CORE and idx2
+ * is 3, return the fourth core object below the third package.
  *
  * \note This function requires these objects to have a CPU set.
  */
@@ -636,9 +636,9 @@ hwloc_get_obj_below_by_type (hwloc_topology_t topology,
  * object to find the index-th object of the given type.
  * Indexes are specified within the parent, not withing the entire system.
  *
- * For instance, if nr is 3, typev contains NODE, SOCKET and CORE,
+ * For instance, if nr is 3, typev contains NODE, PACKAGE and CORE,
  * and idxv contains 0, 1 and 2, return the third core object below
- * the second socket below the first NUMA node.
+ * the second package below the first NUMA node.
  *
  * \note This function requires all these objects and the root object
  * to have a CPU set.

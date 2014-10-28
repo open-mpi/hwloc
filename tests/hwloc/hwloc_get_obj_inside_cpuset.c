@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -28,7 +28,7 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
-  hwloc_topology_set_synthetic (topology, "nodes:2 sockets:3 caches:4 cores:5 6");
+  hwloc_topology_set_synthetic (topology, "nodes:2 pack:3 caches:4 cores:5 6");
 
   err = hwloc_topology_load (topology);
   if (err)
@@ -58,7 +58,7 @@ main (void)
   assert(!obj);
 
 
-  /* check there are 20 cores inside first socket */
+  /* check there are 20 cores inside first package */
   root = hwloc_get_obj_by_depth(topology, 2, 0);
   assert(hwloc_get_nbobjs_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_CORE) == 20);
 
@@ -67,28 +67,28 @@ main (void)
   assert(hwloc_get_nbobjs_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_CACHE) == 12);
 
 
-  /* check first PU of second socket */
+  /* check first PU of second package */
   root = hwloc_get_obj_by_depth(topology, 2, 1);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PU, 0);
   assert(obj == hwloc_get_obj_by_depth(topology, 5, 4*5*6));
   idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
   assert(idx == 0);
 
-  /* check third core of third socket */
+  /* check third core of third package */
   root = hwloc_get_obj_by_depth(topology, 2, 2);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_CORE, 2);
   assert(obj == hwloc_get_obj_by_depth(topology, 4, 2*4*5+2));
   idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
   assert(idx == 2);
 
-  /* check first socket of second node */
+  /* check first package of second node */
   root = hwloc_get_obj_by_depth(topology, 1, 1);
-  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_SOCKET, 0);
+  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PACKAGE, 0);
   assert(obj == hwloc_get_obj_by_depth(topology, 2, 3));
   idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
   assert(idx == 0);
 
-  /* there is no node inside sockets */
+  /* there is no node inside packages */
   root = hwloc_get_obj_by_depth(topology, 2, 0);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_NODE, 0);
   assert(!obj);

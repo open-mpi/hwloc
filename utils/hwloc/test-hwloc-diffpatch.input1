@@ -34,7 +34,7 @@
     <object type="NUMANode" os_index="0" cpuset="0x00000055" complete_cpuset="0x00000055" online_cpuset="0x00000055" allowed_cpuset="0x00000055" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="12875255808">
       <page_type size="4096" count="3143373"/>
       <page_type size="2097152" count="0"/>
-      <object type="Socket" os_index="0" cpuset="0x00000055" complete_cpuset="0x00000055" online_cpuset="0x00000055" allowed_cpuset="0x00000055" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
+      <object type="Package" os_index="0" cpuset="0x00000055" complete_cpuset="0x00000055" online_cpuset="0x00000055" allowed_cpuset="0x00000055" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
         <info name="CPUModel" value="Intel(R) Xeon(R) CPU           X5550  @ 2.67GHz"/>
         <object type="Cache" cpuset="0x00000055" complete_cpuset="0x00000055" online_cpuset="0x00000055" allowed_cpuset="0x00000055" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="8388608" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">
           <object type="Cache" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
@@ -124,7 +124,7 @@
     <object type="NUMANode" os_index="1" cpuset="0x000000aa" complete_cpuset="0x000000aa" online_cpuset="0x000000aa" allowed_cpuset="0x000000aa" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" local_memory="12884901888">
       <page_type size="4096" count="3145728"/>
       <page_type size="2097152" count="0"/>
-      <object type="Socket" os_index="1" cpuset="0x000000aa" complete_cpuset="0x000000aa" online_cpuset="0x000000aa" allowed_cpuset="0x000000aa" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
+      <object type="Package" os_index="1" cpuset="0x000000aa" complete_cpuset="0x000000aa" online_cpuset="0x000000aa" allowed_cpuset="0x000000aa" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
         <info name="CPUModel" value="Intel(R) Xeon(R) CPU           X5550  @ 2.67GHz"/>
         <object type="Cache" cpuset="0x000000aa" complete_cpuset="0x000000aa" online_cpuset="0x000000aa" allowed_cpuset="0x000000aa" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="8388608" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">
           <object type="Cache" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">

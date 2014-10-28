@@ -24,7 +24,7 @@
       <latency value="1.000000"/>
     </distances>
     <object type="NUMANode" os_index="0" cpuset="0x00555555" complete_cpuset="0x00555555" online_cpuset="0x00555555" allowed_cpuset="0x00555555" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="12817362944">
-      <object type="Socket" os_index="0" cpuset="0x00555555" complete_cpuset="0x00555555" online_cpuset="0x00555555" allowed_cpuset="0x00555555" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
+      <object type="Package" os_index="0" cpuset="0x00555555" complete_cpuset="0x00555555" online_cpuset="0x00555555" allowed_cpuset="0x00555555" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
         <info name="CPUModel" value="Intel(R) Xeon(R) CPU           X5680  @ 3.33GHz"/>
         <object type="Cache" cpuset="0x00555555" complete_cpuset="0x00555555" online_cpuset="0x00555555" allowed_cpuset="0x00555555" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="12582912" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">
           <object type="Cache" cpuset="0x00001001" complete_cpuset="0x00001001" online_cpuset="0x00001001" allowed_cpuset="0x00001001" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
@@ -91,7 +91,7 @@
       </object>
     </object>
     <object type="NUMANode" os_index="1" cpuset="0x00aaaaaa" complete_cpuset="0x00aaaaaa" online_cpuset="0x00aaaaaa" allowed_cpuset="0x00aaaaaa" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" local_memory="12884901888">
-      <object type="Socket" os_index="1" cpuset="0x00aaaaaa" complete_cpuset="0x00aaaaaa" online_cpuset="0x00aaaaaa" allowed_cpuset="0x00aaaaaa" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
+      <object type="Package" os_index="1" cpuset="0x00aaaaaa" complete_cpuset="0x00aaaaaa" online_cpuset="0x00aaaaaa" allowed_cpuset="0x00aaaaaa" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
         <info name="CPUModel" value="Intel(R) Xeon(R) CPU           X5680  @ 3.33GHz"/>
         <object type="Cache" cpuset="0x00aaaaaa" complete_cpuset="0x00aaaaaa" online_cpuset="0x00aaaaaa" allowed_cpuset="0x00aaaaaa" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="12582912" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">
           <object type="Cache" cpuset="0x00002002" complete_cpuset="0x00002002" online_cpuset="0x00002002" allowed_cpuset="0x00002002" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">

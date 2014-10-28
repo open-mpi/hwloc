@@ -33,7 +33,7 @@
     <object type="NUMANode" os_index="0" cpuset="0x00ff00ff" complete_cpuset="0x00ff00ff" online_cpuset="0x00ff00ff" allowed_cpuset="0x00ff00ff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="34330173440">
       <page_type size="4096" count="8381390"/>
       <page_type size="2097152" count="0"/>
-      <object type="Socket" os_index="0" cpuset="0x00ff00ff" complete_cpuset="0x00ff00ff" online_cpuset="0x00ff00ff" allowed_cpuset="0x00ff00ff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
+      <object type="Package" os_index="0" cpuset="0x00ff00ff" complete_cpuset="0x00ff00ff" online_cpuset="0x00ff00ff" allowed_cpuset="0x00ff00ff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
         <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-2650 0 @ 2.00GHz"/>
         <info name="CPUType" value="x86_64"/>
         <object type="Cache" cpuset="0x00ff00ff" complete_cpuset="0x00ff00ff" online_cpuset="0x00ff00ff" allowed_cpuset="0x00ff00ff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
@@ -107,7 +107,7 @@
     <object type="NUMANode" os_index="1" cpuset="0xff00ff00" complete_cpuset="0xff00ff00" online_cpuset="0xff00ff00" allowed_cpuset="0xff00ff00" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" local_memory="34359738368">
       <page_type size="4096" count="8388608"/>
       <page_type size="2097152" count="0"/>
-      <object type="Socket" os_index="1" cpuset="0xff00ff00" complete_cpuset="0xff00ff00" online_cpuset="0xff00ff00" allowed_cpuset="0xff00ff00" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
+      <object type="Package" os_index="1" cpuset="0xff00ff00" complete_cpuset="0xff00ff00" online_cpuset="0xff00ff00" allowed_cpuset="0xff00ff00" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
         <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-2650 0 @ 2.00GHz"/>
         <info name="CPUType" value="x86_64"/>
         <object type="Cache" cpuset="0xff00ff00" complete_cpuset="0xff00ff00" online_cpuset="0xff00ff00" allowed_cpuset="0xff00ff00" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
