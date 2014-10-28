@@ -24,6 +24,8 @@ Version 1.10.1
 * Change hwloc-ls.desktop into a lstopo.desktop and only install it if
   lstopo is built with Cairo/X11 support. It cannot work with a non-graphical
   lstopo or hwloc-ls.
+* Fix the merging of identical parent and child in presence of Misc objects.
+  Thanks to Dave Love for reporting the issue.
 
 
 Version 1.10.0
