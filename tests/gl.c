@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2013 Inria.  All rights reserved.
+ * Copyright © 2012-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -41,7 +41,7 @@ int main(void)
   /* Perform topology detection */
   hwloc_topology_load(topology);
 
-  /* Case 1: Get the cpusets of the sockets connecting the PCI devices in the topology */
+  /* Case 1: Get the cpusets of the packages connecting the PCI devices in the topology */
   nr_pcidev = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PCI_DEVICE);
   for (i = 0; i < nr_pcidev; ++i) {
       pcidev = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PCI_DEVICE, i);

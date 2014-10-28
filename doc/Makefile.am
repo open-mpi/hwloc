@@ -257,7 +257,7 @@ man3_object_types_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OS_DEVICE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PU.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PCI_DEVICE.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PACKAGE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_TYPE_MAX.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_t.3 \

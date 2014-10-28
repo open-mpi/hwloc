@@ -537,7 +537,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    id = procInfo[i].NumaNode.NodeNumber;
 	    break;
 	  case RelationProcessorPackage:
-	    type = HWLOC_OBJ_SOCKET;
+	    type = HWLOC_OBJ_PACKAGE;
 	    break;
 	  case RelationCache:
 	    type = HWLOC_OBJ_CACHE;
@@ -650,7 +650,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    id = procInfo->NumaNode.NodeNumber;
 	    break;
 	  case RelationProcessorPackage:
-	    type = HWLOC_OBJ_SOCKET;
+	    type = HWLOC_OBJ_PACKAGE;
             num = procInfo->Processor.GroupCount;
             GroupMask = procInfo->Processor.GroupMask;
 	    break;

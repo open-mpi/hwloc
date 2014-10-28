@@ -18,7 +18,7 @@ int main(void)
 
   printf("Loading the local topology...\n");
   hwloc_topology_init(&local);
-  hwloc_topology_set_synthetic(local, "node:2 socket:2 cache:1 core:2 cache:2 pu:2");
+  hwloc_topology_set_synthetic(local, "node:2 pack:2 cache:1 core:2 cache:2 pu:2");
   hwloc_topology_load(local);
 
   printf("Try to create an empty custom topology...\n");
@@ -69,8 +69,8 @@ int main(void)
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_MACHINE) == 8);
   assert(hwloc_get_depth_type(global, 4) == HWLOC_OBJ_NODE);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_NODE) == 16);
-  assert(hwloc_get_depth_type(global, 5) == HWLOC_OBJ_SOCKET);
-  assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_SOCKET) == 32);
+  assert(hwloc_get_depth_type(global, 5) == HWLOC_OBJ_PACKAGE);
+  assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_PACKAGE) == 32);
   assert(hwloc_get_depth_type(global, 6) == HWLOC_OBJ_CACHE);
   assert(hwloc_get_nbobjs_by_depth(global, 6) == 32);
   assert(hwloc_get_depth_type(global, 7) == HWLOC_OBJ_CORE);

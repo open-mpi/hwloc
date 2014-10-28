@@ -452,7 +452,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 static int
 hwloc_look_kstat(struct hwloc_topology *topology)
 {
-  /* FIXME this assumes that all sockets are identical */
+  /* FIXME this assumes that all packages are identical */
   char *CPUType = hwloc_solaris_get_chip_type();
   char *CPUModel = hwloc_solaris_get_chip_model();
 
@@ -464,7 +464,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   unsigned Pproc_max = 0;
   unsigned Pproc_alloc = 256;
   struct hwloc_solaris_Pproc {
-    unsigned Lsock, Psock, Lcore, Lproc;
+    unsigned Lpkg, Ppkg, Lcore, Lproc;
   } * Pproc = malloc(Pproc_alloc * sizeof(*Pproc));
 
   unsigned Lproc_num = 0;
@@ -476,22 +476,22 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   unsigned Lcore_num = 0;
   unsigned Lcore_alloc = 256;
   struct hwloc_solaris_Lcore {
-    unsigned Pcore, Psock;
+    unsigned Pcore, Ppkg;
   } * Lcore = malloc(Lcore_alloc * sizeof(*Lcore));
 
-  unsigned Lsock_num = 0;
-  unsigned Lsock_alloc = 256;
-  struct hwloc_solaris_Lsock {
-    unsigned Psock;
-  } * Lsock = malloc(Lsock_alloc * sizeof(*Lsock));
+  unsigned Lpkg_num = 0;
+  unsigned Lpkg_alloc = 256;
+  struct hwloc_solaris_Lpkg {
+    unsigned Ppkg;
+  } * Lpkg = malloc(Lpkg_alloc * sizeof(*Lpkg));
 
-  unsigned sockid, coreid, cpuid;
+  unsigned pkgid, coreid, cpuid;
   unsigned i;
 
   for (i = 0; i < Pproc_alloc; i++) {
     Pproc[i].Lproc = -1;
-    Pproc[i].Lsock = -1;
-    Pproc[i].Psock = -1;
+    Pproc[i].Lpkg = -1;
+    Pproc[i].Ppkg = -1;
     Pproc[i].Lcore = -1;
   }
 
@@ -500,7 +500,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     free(Pproc);
     free(Lproc);
     free(Lcore);
-    free(Lsock);
+    free(Lpkg);
     return 0;
   }
 
@@ -524,8 +524,8 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	Pproc = realloc(Pproc, Pproc_alloc * sizeof(*Pproc));
 	for(i = Pproc_alloc/2; i < Pproc_alloc; i++) {
 	  Pproc[i].Lproc = -1;
-	  Pproc[i].Lsock = -1;
-	  Pproc[i].Psock = -1;
+	  Pproc[i].Lpkg = -1;
+	  Pproc[i].Ppkg = -1;
 	  Pproc[i].Lcore = -1;
 	}
       }
@@ -559,26 +559,26 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	stat = (kstat_named_t *) kstat_data_lookup(ksp, "chip_id");
 	if (!stat)
 	  {
-	    if (Lsock_num)
-	      fprintf(stderr, "could not read socket id for CPU%u: %s\n", cpuid, strerror(errno));
+	    if (Lpkg_num)
+	      fprintf(stderr, "could not read package id for CPU%u: %s\n", cpuid, strerror(errno));
 	    else
-	      hwloc_debug("could not read socket id for CPU%u: %s\n", cpuid, strerror(errno));
+	      hwloc_debug("could not read package id for CPU%u: %s\n", cpuid, strerror(errno));
 	    look_chips = 0;
 	    continue;
 	  }
 	switch (stat->data_type) {
 	  case KSTAT_DATA_INT32:
-	    sockid = stat->value.i32;
+	    pkgid = stat->value.i32;
 	    break;
 	  case KSTAT_DATA_UINT32:
-	    sockid = stat->value.ui32;
+	    pkgid = stat->value.ui32;
 	    break;
 #ifdef _INT64_TYPE
 	  case KSTAT_DATA_UINT64:
-	    sockid = stat->value.ui64;
+	    pkgid = stat->value.ui64;
 	    break;
 	  case KSTAT_DATA_INT64:
-	    sockid = stat->value.i64;
+	    pkgid = stat->value.i64;
 	    break;
 #endif
 	  default:
@@ -586,18 +586,18 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    look_chips = 0;
 	    continue;
 	}
-	Pproc[cpuid].Psock = sockid;
-	for (i = 0; i < Lsock_num; i++)
-	  if (sockid == Lsock[i].Psock)
+	Pproc[cpuid].Ppkg = pkgid;
+	for (i = 0; i < Lpkg_num; i++)
+	  if (pkgid == Lpkg[i].Ppkg)
 	    break;
-	Pproc[cpuid].Lsock = i;
-	hwloc_debug("%u on socket %u (%u)\n", cpuid, i, sockid);
-	if (i == Lsock_num) {
-	  if (Lsock_num == Lsock_alloc) {
-	    Lsock_alloc *= 2;
-	    Lsock = realloc(Lsock, Lsock_alloc * sizeof(*Lsock));
+	Pproc[cpuid].Lpkg = i;
+	hwloc_debug("%u on package %u (%u)\n", cpuid, i, pkgid);
+	if (i == Lpkg_num) {
+	  if (Lpkg_num == Lpkg_alloc) {
+	    Lpkg_alloc *= 2;
+	    Lpkg = realloc(Lpkg, Lpkg_alloc * sizeof(*Lpkg));
 	  }
-	  Lsock[Lsock_num++].Psock = sockid;
+	  Lpkg[Lpkg_num++].Ppkg = pkgid;
 	}
       } while(0);
 
@@ -634,7 +634,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    continue;
 	}
 	for (i = 0; i < Lcore_num; i++)
-	  if (coreid == Lcore[i].Pcore && Pproc[cpuid].Psock == Lcore[i].Psock)
+	  if (coreid == Lcore[i].Pcore && Pproc[cpuid].Ppkg == Lcore[i].Ppkg)
 	    break;
 	Pproc[cpuid].Lcore = i;
 	hwloc_debug("%u on core %u (%u)\n", cpuid, i, coreid);
@@ -643,7 +643,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    Lcore_alloc *= 2;
 	    Lcore = realloc(Lcore, Lcore_alloc * sizeof(*Lcore));
 	  }
-	  Lcore[Lcore_num].Psock = Pproc[cpuid].Psock;
+	  Lcore[Lcore_num].Ppkg = Pproc[cpuid].Ppkg;
 	  Lcore[Lcore_num++].Pcore = coreid;
 	}
       } while(0);
@@ -656,18 +656,18 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   if (look_chips) {
     struct hwloc_obj *obj;
     unsigned j,k;
-    hwloc_debug("%d Sockets\n", Lsock_num);
-    for (j = 0; j < Lsock_num; j++) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock[j].Psock);
+    hwloc_debug("%d Packages\n", Lpkg_num);
+    for (j = 0; j < Lpkg_num; j++) {
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, Lpkg[j].Ppkg);
       if (CPUType)
 	hwloc_obj_add_info(obj, "CPUType", CPUType);
       if (CPUModel)
 	hwloc_obj_add_info(obj, "CPUModel", CPUModel);
       obj->cpuset = hwloc_bitmap_alloc();
       for(k=0; k<Pproc_max; k++)
-	if (Pproc[k].Lsock == j)
+	if (Pproc[k].Lpkg == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
-      hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", j, obj->cpuset);
+      hwloc_debug_1arg_bitmap("Package %d has cpuset %s\n", j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");
@@ -709,7 +709,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   free(Pproc);
   free(Lproc);
   free(Lcore);
-  free(Lsock);
+  free(Lpkg);
 
   return Lproc_num > 0;
 }

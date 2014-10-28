@@ -17,6 +17,14 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.11.0
+--------------
+* Major changes
+  + Socket objects are renamed into Package to align with the terminology
+    used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"
+    name are still supported for backward compatibility.
+
+
 Version 1.10.0
 --------------
 * API

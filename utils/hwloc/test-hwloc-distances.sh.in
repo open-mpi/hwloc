@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2012-2013 Inria.  All rights reserved.
+# Copyright © 2012-2014 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -35,10 +35,10 @@ set -e
   $distances -i "pu:4"
   echo
 
-  HWLOC_Socket_DISTANCES=0,1:23.4,45.6,0.456,0.00003
-  export HWLOC_Socket_DISTANCES
-  $distances -i "sock:2 pu:2" -p
-  HWLOC_Socket_DISTANCES=none
+  HWLOC_Package_DISTANCES=0,1:23.4,45.6,0.456,0.00003
+  export HWLOC_Package_DISTANCES
+  $distances -i "pack:2 pu:2" -p
+  HWLOC_Package_DISTANCES=none
   echo
 
   HWLOC_PU_DISTANCES=0-15:2*2*4

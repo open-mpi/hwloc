@@ -83,13 +83,13 @@ int main(void)
 
     /*****************************************************************
      * Third example:
-     * Print the number of sockets.
+     * Print the number of packages.
      *****************************************************************/
-    depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
+    depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE);
     if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-        printf("*** The number of sockets is unknown\n");
+        printf("*** The number of packages is unknown\n");
     } else {
-        printf("*** %u socket(s)\n", 
+        printf("*** %u package(s)\n",
                hwloc_get_nbobjs_by_depth(topology, depth));
     }
 

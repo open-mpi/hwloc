@@ -25,7 +25,7 @@
     <info name="HostName" value="rhododendron"/>
     <info name="Architecture" value="x86_64"/>
     <info name="Foo" value="Bar"/>
-    <object type="Socket" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f">
+    <object type="Package" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f">
       <info name="CPUModel" value="Intel(R) Core(TM) i7 CPU       M 620  @ 2.67GHz"/>
       <info name="CPUType" value="x86_64"/>
       <info name="Foo2" value="Bar3"/>

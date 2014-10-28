@@ -153,18 +153,18 @@ command line are described in hwloc(7).
 .
 .PP
 To run the echo command on the first logical processor of the second
-socket:
+package:
 
-    hwloc-bind socket:1.pu:0 -- echo hello
+    hwloc-bind package:1.pu:0 -- echo hello
 
 which is exactly equivalent to
 
-    hwloc-bind socket:1.pu:0 echo hello
+    hwloc-bind package:1.pu:0 echo hello
 
-To bind the "echo" command to the first core of the second socket and
-the second core of the first socket:
+To bind the "echo" command to the first core of the second package and
+the second core of the first package:
 
-    hwloc-bind socket:1.core:0 socket:0.core:1 echo hello
+    hwloc-bind package:1.core:0 package:0.core:1 echo hello
 
 Note that binding the "echo" command to multiple processors is
 probably meaningless (because "echo" is likely implemented as a
@@ -172,34 +172,34 @@ single-threaded application); these examples just serve to show what
 hwloc-bind can do.
 .
 .PP
-To run on the first three sockets on the second and third nodes:
+To run on the first three packages on the second and third nodes:
 
-    hwloc-bind node:1-2.socket:0:3 echo hello
+    hwloc-bind node:1-2.package:0:3 echo hello
 
 which is also equivalent to:
 
-    hwloc-bind node:1-2.socket:0-2 echo hello
+    hwloc-bind node:1-2.package:0-2 echo hello
 
 Note that if you attempt to bind to objects that do not exist,
 hwloc-bind will not warn unless
 .I -v
 was specified.
 
-To run on processor with physical index 2 in socket with physical index 1:
+To run on processor with physical index 2 in package with physical index 1:
 
-    hwloc-bind --physical socket:1.core:2 echo hello
+    hwloc-bind --physical package:1.core:2 echo hello
 
-To run on odd cores within even sockets:
+To run on odd cores within even packages:
 
-    hwloc-bind socket:even.core:odd echo hello
+    hwloc-bind package:even.core:odd echo hello
 
-To run on the first socket, except on its second and fifth cores:
+To run on the first package, except on its second and fifth cores:
 
-    hwloc-bind socket:0 ~socket:0.core:1 ~socket:0.core:4 echo hello
+    hwloc-bind package:0 ~package:0.core:1 ~package:0.core:4 echo hello
 
-To run anywhere except on the first socket:
+To run anywhere except on the first package:
 
-    hwloc-bind all ~socket:0 echo hello
+    hwloc-bind all ~package:0 echo hello
 
 To run on a core near the network interface named eth0:
 
@@ -216,7 +216,7 @@ To bind memory on second memory node and run on first node (when supported by th
 The --get option can report current bindings.  This example shows
 nesting hwloc-bind invocations to set a binding and then report it:
 
-    hwloc-bind node:1.socket:2 hwloc-bind --get
+    hwloc-bind node:1.package:2 hwloc-bind --get
 
 On one of the hwloc developer's machines, this example
 .
@@ -228,7 +228,7 @@ Locations may also be specified as a hex bit mask (typically generated
 by hwloc-calc).  For example:
 
     hwloc-bind 0x00004444,0x44000000 echo hello
-    hwloc-bind `hwloc-calc node:1.socket:2` echo hello
+    hwloc-bind `hwloc-calc node:1.package:2` echo hello
 
 Memory binding may also be reported:
 

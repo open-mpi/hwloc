@@ -181,7 +181,7 @@ typedef enum {
 			  * A set of processors around memory which the
 			  * processors can directly access.
 			  */
-  HWLOC_OBJ_SOCKET,	/**< \brief Socket, physical package, or chip.
+  HWLOC_OBJ_PACKAGE,	/**< \brief Physical package, what goes into a socket.
 			  * In the physical meaning, i.e. that you can add
 			  * or remove physically.
 			  */
@@ -290,12 +290,12 @@ typedef enum hwloc_obj_osdev_type_e {
  * can not be compared (because neither is usually contained in the other),
  * HWLOC_TYPE_UNORDERED is returned.  Object types containing CPUs can always
  * be compared (usually, a system contains machines which contain nodes which
- * contain sockets which contain caches, which contain cores, which contain
+ * contain packages which contain caches, which contain cores, which contain
  * processors).
  *
  * \note HWLOC_OBJ_PU will always be the deepest.
  * \note This does not mean that the actual topology will respect that order:
- * e.g. as of today cores may also contain caches, and sockets may also contain
+ * e.g. as of today cores may also contain caches, and packages may also contain
  * nodes. This is thus just to be seen as a fallback comparison method.
  */
 HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2) __hwloc_attribute_const;
@@ -1069,7 +1069,7 @@ HWLOC_DECLSPEC void * hwloc_topology_get_userdata(hwloc_topology_t topology);
  * Be sure to see the figure in \ref termsanddefs that shows a
  * complete topology tree, including depths, child/sibling/cousin
  * relationships, and an example of an asymmetric topology where one
- * socket has fewer caches than its peers.
+ * package has fewer caches than its peers.
  */
 
 /** \brief Get the depth of the hierarchical tree of objects.
@@ -1202,7 +1202,7 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
 
 /** \brief Return an object type and attributes from a type string.
  *
- * Convert strings such as "socket" or "cache" into the corresponding types.
+ * Convert strings such as "Package" or "Cache" into the corresponding types.
  * Matching is case-insensitive, and only the first letters are actually
  * required to match.
  *

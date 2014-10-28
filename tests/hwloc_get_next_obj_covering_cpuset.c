@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -60,14 +60,14 @@ main (void)
   err = hwloc_topology_init (&topology);
   if (err)
     return EXIT_FAILURE;
-  hwloc_topology_set_synthetic (topology, "nodes:2 socket:5 cores:3 4");
+  hwloc_topology_set_synthetic (topology, "nodes:2 pack:5 cores:3 4");
   err = hwloc_topology_load (topology);
   if (err)
     return EXIT_FAILURE;
 
   hwloc_bitmap_sscanf(set, "0ff08000");
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE);
   assert(depth == 2);
   obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, NULL);
   assert(obj == hwloc_get_obj_by_depth(topology, depth, 1));

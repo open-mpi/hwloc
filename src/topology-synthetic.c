@@ -457,8 +457,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	switch (data->level[i+1].type) {
 	case HWLOC_OBJ_PU: type = HWLOC_OBJ_CORE; break;
 	case HWLOC_OBJ_CORE: type = HWLOC_OBJ_CACHE; break;
-	case HWLOC_OBJ_CACHE: type = HWLOC_OBJ_SOCKET; break;
-	case HWLOC_OBJ_SOCKET: type = HWLOC_OBJ_NODE; break;
+	case HWLOC_OBJ_CACHE: type = HWLOC_OBJ_PACKAGE; break;
+	case HWLOC_OBJ_PACKAGE: type = HWLOC_OBJ_NODE; break;
 	case HWLOC_OBJ_NODE:
 	case HWLOC_OBJ_GROUP: type = HWLOC_OBJ_GROUP; break;
 	case HWLOC_OBJ_MACHINE:
@@ -591,7 +591,7 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
     break;
   case HWLOC_OBJ_NODE:
     break;
-  case HWLOC_OBJ_SOCKET:
+  case HWLOC_OBJ_PACKAGE:
     break;
   case HWLOC_OBJ_CACHE:
     obj->attr->cache.depth = curlevel->depth;
@@ -655,7 +655,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_NODE:
       break;
-    case HWLOC_OBJ_SOCKET:
+    case HWLOC_OBJ_PACKAGE:
       break;
     case HWLOC_OBJ_CACHE:
       break;

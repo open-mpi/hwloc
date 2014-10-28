@@ -7,7 +7,7 @@
     <page_type size="17179869184" count="1"/>
     <info name="infowithvalue" value="value"/>
     <info name="infowithoutvalue" value=""/>
-    <object type="Socket" os_index="0" cpuset="0x00001111" complete_cpuset="0x00001111" online_cpuset="0x00001111" allowed_cpuset="0x00001111">
+    <object type="Package" os_index="0" cpuset="0x00001111" complete_cpuset="0x00001111" online_cpuset="0x00001111" allowed_cpuset="0x00001111">
       <object type="Cache" cpuset="0x00001111" complete_cpuset="0x00001111" online_cpuset="0x00001111" allowed_cpuset="0x00001111" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
         <object type="Cache" cpuset="0x00000101" complete_cpuset="0x00000101" online_cpuset="0x00000101" allowed_cpuset="0x00000101" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="Cache" cpuset="0x00000101" complete_cpuset="0x00000101" online_cpuset="0x00000101" allowed_cpuset="0x00000101" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
@@ -27,7 +27,7 @@
         </object>
       </object>
     </object>
-    <object type="Socket" os_index="1" cpuset="0x00002222" complete_cpuset="0x00002222" online_cpuset="0x00002222" allowed_cpuset="0x00002222">
+    <object type="Package" os_index="1" cpuset="0x00002222" complete_cpuset="0x00002222" online_cpuset="0x00002222" allowed_cpuset="0x00002222">
       <object type="Cache" cpuset="0x00002222" complete_cpuset="0x00002222" online_cpuset="0x00002222" allowed_cpuset="0x00002222" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
         <object type="Cache" cpuset="0x00000202" complete_cpuset="0x00000202" online_cpuset="0x00000202" allowed_cpuset="0x00000202" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="Cache" cpuset="0x00000202" complete_cpuset="0x00000202" online_cpuset="0x00000202" allowed_cpuset="0x00000202" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
@@ -47,7 +47,7 @@
         </object>
       </object>
     </object>
-    <object type="Socket" os_index="2" cpuset="0x00004444" complete_cpuset="0x00004444" online_cpuset="0x00004444" allowed_cpuset="0x00004444">
+    <object type="Package" os_index="2" cpuset="0x00004444" complete_cpuset="0x00004444" online_cpuset="0x00004444" allowed_cpuset="0x00004444">
       <object type="Cache" cpuset="0x00004444" complete_cpuset="0x00004444" online_cpuset="0x00004444" allowed_cpuset="0x00004444" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
         <object type="Cache" cpuset="0x00000404" complete_cpuset="0x00000404" online_cpuset="0x00000404" allowed_cpuset="0x00000404" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="Cache" cpuset="0x00000404" complete_cpuset="0x00000404" online_cpuset="0x00000404" allowed_cpuset="0x00000404" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
@@ -67,7 +67,7 @@
         </object>
       </object>
     </object>
-    <object type="Socket" os_index="3" cpuset="0x00008888" complete_cpuset="0x00008888" online_cpuset="0x00008888" allowed_cpuset="0x00008888">
+    <object type="Package" os_index="3" cpuset="0x00008888" complete_cpuset="0x00008888" online_cpuset="0x00008888" allowed_cpuset="0x00008888">
       <object type="Cache" cpuset="0x00008888" complete_cpuset="0x00008888" online_cpuset="0x00008888" allowed_cpuset="0x00008888" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
         <object type="Cache" cpuset="0x00000808" complete_cpuset="0x00000808" online_cpuset="0x00000808" allowed_cpuset="0x00000808" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="Cache" cpuset="0x00000808" complete_cpuset="0x00000808" online_cpuset="0x00000808" allowed_cpuset="0x00000808" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">

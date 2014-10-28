@@ -42,7 +42,7 @@ struct procinfo {
   unsigned max_log_proc;
   unsigned max_nbcores;
   unsigned max_nbthreads;
-  unsigned socketid;
+  unsigned packageid;
   unsigned nodeid;
   unsigned unitid;
   unsigned logprocid;
@@ -127,9 +127,9 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   else
     infos->max_log_proc = 1;
   hwloc_debug("APIC ID 0x%02x max_log_proc %u\n", infos->apicid, infos->max_log_proc);
-  infos->socketid = infos->apicid / infos->max_log_proc;
+  infos->packageid = infos->apicid / infos->max_log_proc;
   infos->logprocid = infos->apicid % infos->max_log_proc;
-  hwloc_debug("phys %u thread %u\n", infos->socketid, infos->logprocid);
+  hwloc_debug("phys %u thread %u\n", infos->packageid, infos->logprocid);
 
   memset(regs, 0, sizeof(regs));
   regs[0] = 0;
@@ -368,8 +368,8 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 	}
 	apic_shift = apic_nextshift;
       }
-      infos->socketid = apic_id >> apic_shift;
-      hwloc_debug("x2APIC remainder: %d\n", infos->socketid);
+      infos->packageid = apic_id >> apic_shift;
+      hwloc_debug("x2APIC remainder: %d\n", infos->packageid);
     } else
       infos->otherids = NULL;
   } else
@@ -399,7 +399,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 {
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
   unsigned i, j, l, level, type;
-  unsigned nbsockets = 0;
+  unsigned nbpackages = 0;
   int one = -1;
 
   for (i = 0; i < nbprocs; i++)
@@ -418,84 +418,84 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
    * Only annotate existing objects for now.
    */
 
-  /* Look for sockets */
+  /* Look for packages */
   if (fulldiscovery) {
-    hwloc_bitmap_t sockets_cpuset = hwloc_bitmap_dup(complete_cpuset);
-    hwloc_bitmap_t socket_cpuset;
-    hwloc_obj_t socket;
+    hwloc_bitmap_t packages_cpuset = hwloc_bitmap_dup(complete_cpuset);
+    hwloc_bitmap_t package_cpuset;
+    hwloc_obj_t package;
 
-    while ((i = hwloc_bitmap_first(sockets_cpuset)) != (unsigned) -1) {
-      unsigned socketid = infos[i].socketid;
+    while ((i = hwloc_bitmap_first(packages_cpuset)) != (unsigned) -1) {
+      unsigned packageid = infos[i].packageid;
 
-      socket_cpuset = hwloc_bitmap_alloc();
+      package_cpuset = hwloc_bitmap_alloc();
       for (j = i; j < nbprocs; j++) {
-        if (infos[j].socketid == socketid) {
-          hwloc_bitmap_set(socket_cpuset, j);
-          hwloc_bitmap_clr(sockets_cpuset, j);
+        if (infos[j].packageid == packageid) {
+          hwloc_bitmap_set(package_cpuset, j);
+          hwloc_bitmap_clr(packages_cpuset, j);
         }
       }
-      socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, socketid);
-      socket->cpuset = socket_cpuset;
+      package = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, packageid);
+      package->cpuset = package_cpuset;
 
-      hwloc_x86_add_cpuinfos(socket, &infos[i], 0);
+      hwloc_x86_add_cpuinfos(package, &infos[i], 0);
 
-      hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
-          socketid, socket_cpuset);
-      hwloc_insert_object_by_cpuset(topology, socket);
-      nbsockets++;
+      hwloc_debug_1arg_bitmap("os package %u has cpuset %s\n",
+          packageid, package_cpuset);
+      hwloc_insert_object_by_cpuset(topology, package);
+      nbpackages++;
     }
-    hwloc_bitmap_free(sockets_cpuset);
+    hwloc_bitmap_free(packages_cpuset);
 
   } else {
-    /* Annotate sockets previously-existing sockets */
-    hwloc_obj_t socket = NULL;
+    /* Annotate packages previously-existing packages */
+    hwloc_obj_t package = NULL;
     int same = 1;
-    nbsockets = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_SOCKET);
-    /* check whether all sockets have the same info */
+    nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
+    /* check whether all packages have the same info */
     for(i=1; i<nbprocs; i++) {
       if (strcmp(infos[i].cpumodel, infos[0].cpumodel)) {
 	same = 0;
 	break;
       }
     }
-    /* now iterate over sockets and annotate them */
-    while ((socket = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_SOCKET, socket)) != NULL) {
-      if (socket->os_index == (unsigned) -1) {
-	/* try to fix the socket OS index if unknown.
+    /* now iterate over packages and annotate them */
+    while ((package = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PACKAGE, package)) != NULL) {
+      if (package->os_index == (unsigned) -1) {
+	/* try to fix the package OS index if unknown.
 	 * FIXME: ideally, we should check all bits in case x86 and the native backend disagree.
 	 */
 	for(i=0; i<nbprocs; i++) {
-	  if (hwloc_bitmap_isset(socket->cpuset, i)) {
-	    socket->os_index = infos[i].socketid;
+	  if (hwloc_bitmap_isset(package->cpuset, i)) {
+	    package->os_index = infos[i].packageid;
 	    break;
 	  }
 	}
       }
       for(i=0; i<nbprocs; i++) {
-	/* if there's a single socket, it's the one we want.
+	/* if there's a single package, it's the one we want.
 	 * if the index is ok, it's the one we want.
-	 * if the index is unknown but all sockets have the same id, that's fine
+	 * if the index is unknown but all packages have the same id, that's fine
 	 */
-	if (nbsockets == 1 || infos[i].socketid == socket->os_index || (same && socket->os_index == (unsigned) -1)) {
-	  hwloc_x86_add_cpuinfos(socket, &infos[i], 1);
+	if (nbpackages == 1 || infos[i].packageid == package->os_index || (same && package->os_index == (unsigned) -1)) {
+	  hwloc_x86_add_cpuinfos(package, &infos[i], 1);
 	  break;
 	}
       }
     }
   }
-  /* If there was no socket, annotate the Machine instead */
-  if ((!nbsockets) && infos[0].cpumodel[0]) {
+  /* If there was no package, annotate the Machine instead */
+  if ((!nbpackages) && infos[0].cpumodel[0]) {
     hwloc_x86_add_cpuinfos(hwloc_get_root_obj(topology), &infos[0], 1);
   }
 
-  /* Look for Numa nodes inside sockets */
+  /* Look for Numa nodes inside packages */
   if (fulldiscovery) {
     hwloc_bitmap_t nodes_cpuset = hwloc_bitmap_dup(complete_cpuset);
     hwloc_bitmap_t node_cpuset;
     hwloc_obj_t node;
 
     while ((i = hwloc_bitmap_first(nodes_cpuset)) != (unsigned) -1) {
-      unsigned socketid = infos[i].socketid;
+      unsigned packageid = infos[i].packageid;
       unsigned nodeid = infos[i].nodeid;
 
       if (nodeid == (unsigned)-1) {
@@ -510,7 +510,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 	  continue;
 	}
 
-        if (infos[j].socketid == socketid && infos[j].nodeid == nodeid) {
+        if (infos[j].packageid == packageid && infos[j].nodeid == nodeid) {
           hwloc_bitmap_set(node_cpuset, j);
           hwloc_bitmap_clr(nodes_cpuset, j);
         }
@@ -524,14 +524,14 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
     hwloc_bitmap_free(nodes_cpuset);
   }
 
-  /* Look for Compute units inside sockets */
+  /* Look for Compute units inside packages */
   if (fulldiscovery) {
     hwloc_bitmap_t units_cpuset = hwloc_bitmap_dup(complete_cpuset);
     hwloc_bitmap_t unit_cpuset;
     hwloc_obj_t unit;
 
     while ((i = hwloc_bitmap_first(units_cpuset)) != (unsigned) -1) {
-      unsigned socketid = infos[i].socketid;
+      unsigned packageid = infos[i].packageid;
       unsigned unitid = infos[i].unitid;
 
       if (unitid == (unsigned)-1) {
@@ -546,7 +546,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 	  continue;
 	}
 
-        if (infos[j].socketid == socketid && infos[j].unitid == unitid) {
+        if (infos[j].packageid == packageid && infos[j].unitid == unitid) {
           hwloc_bitmap_set(unit_cpuset, j);
           hwloc_bitmap_clr(units_cpuset, j);
         }
@@ -597,7 +597,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
     hwloc_obj_t core;
 
     while ((i = hwloc_bitmap_first(cores_cpuset)) != (unsigned) -1) {
-      unsigned socketid = infos[i].socketid;
+      unsigned packageid = infos[i].packageid;
       unsigned coreid = infos[i].coreid;
 
       if (coreid == (unsigned) -1) {
@@ -612,7 +612,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 	  continue;
 	}
 
-        if (infos[j].socketid == socketid && infos[j].coreid == coreid) {
+        if (infos[j].packageid == packageid && infos[j].coreid == coreid) {
           hwloc_bitmap_set(core_cpuset, j);
           hwloc_bitmap_clr(cores_cpuset, j);
         }
@@ -644,7 +644,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 	hwloc_obj_t cache;
 
 	while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
-	  unsigned socketid = infos[i].socketid;
+	  unsigned packageid = infos[i].packageid;
 
 	  for (l = 0; l < infos[i].numcaches; l++) {
 	    if (infos[i].cache[l].level == level && infos[i].cache[l].type == type)
@@ -672,7 +672,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 		hwloc_bitmap_clr(caches_cpuset, j);
 		continue;
 	      }
-	      if (infos[j].socketid == socketid && infos[j].apicid / infos[j].cache[l2].nbthreads_sharing == cacheid) {
+	      if (infos[j].packageid == packageid && infos[j].apicid / infos[j].cache[l2].nbthreads_sharing == cacheid) {
 		hwloc_bitmap_set(cache_cpuset, j);
 		hwloc_bitmap_clr(caches_cpuset, j);
 	      }
@@ -838,7 +838,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
     goto out;
   for (i = 0; i < nbprocs; i++) {
     infos[i].nodeid = (unsigned) -1;
-    infos[i].socketid = (unsigned) -1;
+    infos[i].packageid = (unsigned) -1;
     infos[i].unitid = (unsigned) -1;
     infos[i].coreid = (unsigned) -1;
     infos[i].threadid = (unsigned) -1;

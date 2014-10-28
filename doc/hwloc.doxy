@@ -19,7 +19,7 @@
 
 hwloc provides command line tools and a C API to obtain the
 hierarchical map of key computing elements, such as: NUMA memory
-nodes, shared caches, processor sockets, processor cores,
+nodes, shared caches, processor packages, processor cores,
 processing units (logical processors or "threads")
 and even I/O devices.
 hwloc also gathers various attributes such as
@@ -207,7 +207,7 @@ PKG_CONFIG_PATH to the ./configure command line, like this:
 \endhtmlonly
 \section cli_examples CLI Examples
 
-On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool
+On a 4-package 2-core machine with hyperthreading, the \c lstopo tool
 may show the following graphical output:
 
 \image html dudley.png
@@ -217,28 +217,28 @@ Here's the equivalent output in textual form:
 
 \verbatim
 Machine (16GB)
-  Socket L#0 + L3 L#0 (4096KB)
+  Package L#0 + L3 L#0 (4096KB)
     L2 L#0 (1024KB) + L1 L#0 (16KB) + Core L#0
       PU L#0 (P#0)
       PU L#1 (P#8)
     L2 L#1 (1024KB) + L1 L#1 (16KB) + Core L#1
       PU L#2 (P#4)
       PU L#3 (P#12)
-  Socket L#1 + L3 L#1 (4096KB)
+  Package L#1 + L3 L#1 (4096KB)
     L2 L#2 (1024KB) + L1 L#2 (16KB) + Core L#2
       PU L#4 (P#1)
       PU L#5 (P#9)
     L2 L#3 (1024KB) + L1 L#3 (16KB) + Core L#3
       PU L#6 (P#5)
       PU L#7 (P#13)
-  Socket L#2 + L3 L#2 (4096KB)
+  Package L#2 + L3 L#2 (4096KB)
     L2 L#4 (1024KB) + L1 L#4 (16KB) + Core L#4
       PU L#8 (P#2)
       PU L#9 (P#10)
     L2 L#5 (1024KB) + L1 L#5 (16KB) + Core L#5
       PU L#10 (P#6)
       PU L#11 (P#14)
-  Socket L#3 + L3 L#3 (4096KB)
+  Package L#3 + L3 L#3 (4096KB)
     L2 L#6 (1024KB) + L1 L#6 (16KB) + Core L#6
       PU L#12 (P#3)
       PU L#13 (P#11)
@@ -249,7 +249,7 @@ Machine (16GB)
 
 Finally, here's the equivalent output in XML.  Long lines were
 artificially broken for document clarity (in the real output, each XML
-tag is on a single line), and only socket #0 is shown for brevity:
+tag is on a single line), and only package #0 is shown for brevity:
 
 \verbatim
 <?xml version="1.0" encoding="UTF-8"?>
@@ -262,7 +262,7 @@ tag is on a single line), and only socket #0 is shown for brevity:
       local_memory="16648183808">
     <page_type size="4096" count="4064498"/>
     <page_type size="2097152" count="0"/>
-    <object type="Socket" os_index="0" cpuset="0x00001111" ... >
+    <object type="Package" os_index="0" cpuset="0x00001111" ... >
       <object type="Cache" cpuset="0x00001111" ...
           cache_size="4194304" depth="3" cache_linesize="64">
         <object type="Cache" cpuset="0x00000101" ...
@@ -295,12 +295,12 @@ tag is on a single line), and only socket #0 is shown for brevity:
         </object>
       </object>
     </object>
-    <!-- ...other sockets listed here ... -->
+    <!-- ...other packages listed here ... -->
   </object>
 </topology>
 \endverbatim
 
-On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may show
+On a 4-package 2-core Opteron NUMA machine, the \c lstopo tool may show
 the following graphical output:
 
 \image html hagrid.png
@@ -310,16 +310,16 @@ Here's the equivalent output in textual form:
 
 \verbatim
 Machine (32GB)
-  NUMANode L#0 (P#0 8190MB) + Socket L#0
+  NUMANode L#0 (P#0 8190MB) + Package L#0
     L2 L#0 (1024KB) + L1 L#0 (64KB) + Core L#0 + PU L#0 (P#0)
     L2 L#1 (1024KB) + L1 L#1 (64KB) + Core L#1 + PU L#1 (P#1)
-  NUMANode L#1 (P#1 8192MB) + Socket L#1
+  NUMANode L#1 (P#1 8192MB) + Package L#1
     L2 L#2 (1024KB) + L1 L#2 (64KB) + Core L#2 + PU L#2 (P#2)
     L2 L#3 (1024KB) + L1 L#3 (64KB) + Core L#3 + PU L#3 (P#3)
-  NUMANode L#2 (P#2 8192MB) + Socket L#2
+  NUMANode L#2 (P#2 8192MB) + Package L#2
     L2 L#4 (1024KB) + L1 L#4 (64KB) + Core L#4 + PU L#4 (P#4)
     L2 L#5 (1024KB) + L1 L#5 (64KB) + Core L#5 + PU L#5 (P#5)
-  NUMANode L#3 (P#3 8192MB) + Socket L#3
+  NUMANode L#3 (P#3 8192MB) + Package L#3
     L2 L#6 (1024KB) + L1 L#6 (64KB) + Core L#6 + PU L#6 (P#6)
     L2 L#7 (1024KB) + L1 L#7 (64KB) + Core L#7 + PU L#7 (P#7)
 \endverbatim
@@ -342,7 +342,7 @@ breaks were added and only PU #0 is shown for brevity:
         nodeset="0x00000001" ... local_memory="7514177536">
       <page_type size="4096" count="1834516"/>
       <page_type size="2097152" count="0"/>
-      <object type="Socket" os_index="0" cpuset="0x00000003" ... >
+      <object type="Package" os_index="0" cpuset="0x00000003" ... >
         <object type="Cache" cpuset="0x00000001" ...
             cache_size="1048576" depth="2" cache_linesize="64">
           <object type="Cache" cpuset="0x00000001" ...
@@ -359,8 +359,8 @@ breaks were added and only PU #0 is shown for brevity:
 </topology>
 \endverbatim
 
-On a 2-socket quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
-each socket):
+On a 2-package quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
+each package):
 
 \image html emmett.png
 \image latex emmett.png "" width=7cm
@@ -369,14 +369,14 @@ Here's the same output in textual form:
 
 \verbatim
 Machine (16GB)
-  Socket L#0
+  Package L#0
     L2 L#0 (4096KB)
       L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
       L1 L#1 (32KB) + Core L#1 + PU L#1 (P#4)
     L2 L#1 (4096KB)
       L1 L#2 (32KB) + Core L#2 + PU L#2 (P#2)
       L1 L#3 (32KB) + Core L#3 + PU L#3 (P#6)
-  Socket L#1
+  Package L#1
     L2 L#2 (4096KB)
       L1 L#4 (32KB) + Core L#4 + PU L#4 (P#1)
       L1 L#5 (32KB) + Core L#5 + PU L#5 (P#5)
@@ -397,7 +397,7 @@ And the same output in XML (line breaks added, only PU #0 shown):
       dmi_board_name="0NR282" local_memory="16865292288">
     <page_type size="4096" count="4117503"/>
     <page_type size="2097152" count="0"/>
-    <object type="Socket" os_index="0" cpuset="0x00000055" ... >
+    <object type="Package" os_index="0" cpuset="0x00000055" ... >
       <object type="Cache" cpuset="0x00000011" ...
           cache_size="4194304" depth="2" cache_linesize="64">
         <object type="Cache" cpuset="0x00000001" ...
@@ -469,7 +469,7 @@ information.  For example, on an PPC64-based system with 32 cores
 (each with 2 hardware threads) running a default 2.6.18-based kernel
 from RHEL 5.4, hwloc is only able to glean information about NUMA
 nodes and processor units (PUs).  No information about caches,
-sockets, or cores is available.
+packages, or cores is available.
 
 Similarly, Operating System have varying support for CPU and memory binding,
 e.g. while some Operating Systems provide interfaces for all kinds of CPU and
@@ -546,7 +546,7 @@ LDLIBS += $(pkg-config --libs hwloc)
 cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 \endverbatim
 
-On a machine with 4GB of RAM and 2 processor sockets -- each socket of
+On a machine with 4GB of RAM and 2 processor packages -- each package of
 which has two processing cores -- the output from running \c
 hwloc-hello could be something like the following:
 
@@ -555,8 +555,8 @@ shell$ ./hwloc-hello
 *** Objects at level 0
 Index 0: Machine(3938MB)
 *** Objects at level 1
-Index 0: Socket#0
-Index 1: Socket#1
+Index 0: Package#0
+Index 1: Package#1
 *** Objects at level 2
 Index 0: Core#0
 Index 1: Core#1
@@ -569,17 +569,17 @@ Index 2: PU#2
 Index 3: PU#3
 *** Printing overall tree
 Machine(3938MB)
-  Socket#0
+  Package#0
     Core#0
       PU#0
     Core#1
       PU#1
-  Socket#1
+  Package#1
     Core#3
       PU#2
     Core#2
       PU#3
-*** 2 socket(s)
+*** 2 package(s)
 shell$ 
 \endverbatim
 
@@ -777,7 +777,7 @@ Make sure to have had a look at those too!
 </dl>
 
 The following diagram can help to understand the vocabulary of the relationships
-by showing the example of a machine with two dual core sockets (with no
+by showing the example of a machine with two dual core packages (with no
 hardware threads); thus, a topology with 4 levels. Each box with rounded corner
 corresponds to one hwloc_obj_t, containing the values of the different integer
 fields (depth, logical_index, etc.), and arrows show to which other hwloc_obj_t
@@ -825,7 +825,7 @@ lstopo to read in that XML file and display it on a different system).
 
 hwloc-bind binds processes to specific hardware objects through a
 flexible syntax.  A simple example is binding an executable to
-specific cores (or sockets or bitmaps or ...).  The hwloc-bind(1) man
+specific cores (or packages or bitmaps or ...).  The hwloc-bind(1) man
 page provides much more detail on what is possible.
 
 hwloc-bind can also be used to retrieve the current process' binding.
@@ -1023,7 +1023,7 @@ following environment variables.
 <dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:distance,...</dt>
   <dd>sets a distance matrix for objects of the given type and physical indexes.
   The type should be given as its case-sensitive stringified value
-  (e.g. <tt>NUMANode</tt>, <tt>Socket</tt>, <tt>Cache</tt>, <tt>Core</tt>, <tt>PU</tt>).
+  (e.g. <tt>NUMANode</tt>, <tt>Package</tt>, <tt>Cache</tt>, <tt>Core</tt>, <tt>PU</tt>).
   If another distance matrix already exists for the given type,
   either because the user specified it or because the OS offers it,
   it will be replaced by the given one.
@@ -1220,9 +1220,9 @@ When I/O discovery is enabled and supported, some additional objects
 (types <tt>::HWLOC_OBJ_BRIDGE</tt>, <tt>::HWLOC_OBJ_PCI_DEVICE</tt> and
 <tt>::HWLOC_OBJ_OS_DEVICE</tt>)
 are added to the topology as a child of the object they are close to.
-For instance, if a I/O Hub is connected to a socket, the corresponding
+For instance, if a I/O Hub is connected to a package, the corresponding
 hwloc bridge object (and its PCI bridges and devices children) is inserted
-as a child of the corresponding hwloc socket object.
+as a child of the corresponding hwloc package object.
 
 These new objects have neither CPU sets nor node sets (NULL pointers) because
 they are not directly usable by the user applications.
@@ -1363,8 +1363,8 @@ device they use.
 
 \section iodevices_examples Examples
 
-The following picture shows a dual-socket dual-core host whose
-PCI bus is connected to the first socket and NUMA node.
+The following picture shows a dual-package dual-core host whose
+PCI bus is connected to the first package and NUMA node.
 
 \image html devel09-pci.png
 \image latex devel09-pci.pdf "" width=\textwidth
@@ -1394,7 +1394,7 @@ Here is the corresponding textual output:
 \verbatim
 Machine (24GB)
   NUMANode L#0 (P#0 12GB)
-    Socket L#0 + L3 L#0 (8192KB)
+    Package L#0 + L3 L#0 (8192KB)
       L2 L#0 (256KB) + L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
       L2 L#1 (256KB) + L1 L#1 (32KB) + Core L#1 + PU L#1 (P#2)
     HostBridge
@@ -1413,7 +1413,7 @@ Machine (24GB)
         Net "ib0"
         Net "ib1"
         Net "mlx4_0"
-  NUMANode L#1 (P#1 12GB) + Socket L#1 + L3 L#1 (8192KB)
+  NUMANode L#1 (P#1 12GB) + Package L#1 + L3 L#1 (8192KB)
     L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
     L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
 \endverbatim
@@ -1639,23 +1639,23 @@ placed.
 <dd>The description string that was given to hwloc to build this
 synthetic topology.
 </dd>
-<dt>CPUModel (Socket or Machine)</dt>
+<dt>CPUModel (Package or Machine)</dt>
 <dd>The processor model name.
-Usually added to Socket objects, but can be in Machine instead if
-hwloc failed to discover any socket.
+Usually added to Package objects, but can be in Machine instead if
+hwloc failed to discover any package.
 </dd>
-<dt>CPUType (Socket)</dt>
+<dt>CPUType (Package)</dt>
 <dd>
 A Solaris-specific general processor type name, such as "i86pc".
 </dd>
-<dt>CPUVendor, CPUModelNumber, CPUFamilyNumber (Socket or Machine)</dt>
+<dt>CPUVendor, CPUModelNumber, CPUFamilyNumber (Package or Machine)</dt>
 <dd>The processor vendor name, model number, and family number.
 Currently available for x86 and Xeon Phi processors on most systems,
 and for ia64 processors on Linux.
-Usually added to Socket objects, but can be in Machine instead if
-hwloc failed to discover any socket.
+Usually added to Package objects, but can be in Machine instead if
+hwloc failed to discover any package.
 </dd>
-<dt>CPURevision (Socket)</dt>
+<dt>CPURevision (Package)</dt>
 <dd>
 A POWER/PowerPC-specific general processor revision number,
 currently only available on Linux.
@@ -1665,8 +1665,8 @@ currently only available on Linux.
 <dd>Some POWER/PowerPC-specific attributes describing the platform
 and processor.
 Currently only available on Linux.
-Usually added to Socket objects, but can be in Machine instead if
-hwloc failed to discover any socket.
+Usually added to Package objects, but can be in Machine instead if
+hwloc failed to discover any package.
 </dd>
 <dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
@@ -1836,16 +1836,16 @@ Aside from loading XML topologies, hwloc also enables the building of
 listing the arity of each levels.
 
 For instance, lstopo may create a topology made of 2 NUMA nodes,
-containing a single socket each, with one cache above two
+containing a single package each, with one cache above two
 single-threaded cores:
 
 \verbatim
-$ lstopo -i "node:2 sock:1 cache:1 core:2 pu:1" -
+$ lstopo -i "node:2 pack:1 cache:1 core:2 pu:1" -
 Machine (2048MB)
-  NUMANode L#0 (P#0 1024MB) + Socket L#0 + L2 L#0 (4096KB)
+  NUMANode L#0 (P#0 1024MB) + Package L#0 + L2 L#0 (4096KB)
     Core L#0 + PU L#0 (P#0)
     Core L#1 + PU L#1 (P#1)
-  NUMANode L#1 (P#1 1024MB) + Socket L#1 + L2 L#1 (4096KB)
+  NUMANode L#1 (P#1 1024MB) + Package L#1 + L2 L#1 (4096KB)
     Core L#2 + PU L#2 (P#2)
     Core L#3 + PU L#3 (P#3)
 \endverbatim
@@ -1865,7 +1865,7 @@ the number of such children under each object of the previous level.
 That is why the above topology contains 4 cores (2 cores times 2 nodes).
 
 These type names must be written as
-<tt>machine</tt>, <tt>node</tt>, <tt>socket</tt>, <tt>core</tt>,
+<tt>machine</tt>, <tt>node</tt>, <tt>package</tt>, <tt>core</tt>,
 <tt>cache</tt>, <tt>pu</tt>, <tt>misc</tt>, <tt>group</tt>.
 They do not need to be written case-sensitively, nor entirely
 (as long as there is no ambiguity, 2 characters such as <tt>ma</tt>
@@ -1900,7 +1900,7 @@ space-separated attributes. For instance:
 </li>
 <li>
  <tt>PU:2(indexes=numa:core)</tt> specifies 2 PU children whose
- OS indexes are interleaved by NUMA node first and then by socket.
+ OS indexes are interleaved by NUMA node first and then by package.
 </li>
 <li>
  Attributes in parentheses at the very beginning of the description
@@ -1935,7 +1935,7 @@ The lstopo tool may also perform such an export by forcing the output format.
 
 \verbatim
 $ lstopo --of synthetic --no-io
-Socket:1 Cache:1 Cache:2 Cache:1 Cache:1 Core:1 PU:2 
+Package:1 Cache:1 Cache:2 Cache:1 Cache:1 Core:1 PU:2 
 \endverbatim
 
 The exported string may be passed back to hwloc for recreating
@@ -2622,7 +2622,7 @@ Loading a XML topology is usually much faster than querying multiple
 files or calling multiple functions of the operating system.
 It is also possible to manipulate such XML files with the C programming
 interface, and the import/export may also be directed to memory buffer
-(that may for instance be transmitted between applications through a socket).
+(that may for instance be transmitted between applications through a package).
 See also \ref xml.
 
 
@@ -2784,10 +2784,10 @@ hwloc Core objects directly:
 /* get the number of cores */
 unsigned nbcores = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
 ...
-/* get the third core below the first socket */
-hwloc_obj_t socket, core;
-socket = hwloc_get_obj_by_type(topology, HWLOC_OBJ_SOCKET, 0);
-core = hwloc_get_obj_inside_cpuset_by_type(topology, socket->cpuset,
+/* get the third core below the first package */
+hwloc_obj_t package, core;
+package = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 0);
+core = hwloc_get_obj_inside_cpuset_by_type(topology, package->cpuset,
                                            HWLOC_OBJ_CORE, 2);
 \endverbatim
 
