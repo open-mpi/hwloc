@@ -3086,6 +3086,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
   obj = hwloc_get_root_obj(topology);
   assert(obj);
   assert(!obj->parent);
+  assert(obj->cpuset);
 
   depth = hwloc_topology_get_depth(topology);
 

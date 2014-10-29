@@ -92,13 +92,10 @@ unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_o
       nextparent = parent->parent;
       if (!nextparent)
 	goto out;
-      if (!nextparent->cpuset || !hwloc_bitmap_isequal(parent->cpuset, nextparent->cpuset))
+      if (!hwloc_bitmap_isequal(parent->cpuset, nextparent->cpuset))
 	break;
       parent = nextparent;
     }
-
-    if (!nextparent->cpuset)
-      break;
 
     /* traverse src's objects and find those that are in nextparent and were not in parent */
     for(i=0; i<src_nbobjects; i++) {
@@ -165,7 +162,7 @@ hwloc_get_largest_objs_inside_cpuset (struct hwloc_topology *topology, hwloc_con
 {
   struct hwloc_obj *current = topology->levels[0][0];
 
-  if (!current->cpuset || !hwloc_bitmap_isincluded(set, current->cpuset))
+  if (!hwloc_bitmap_isincluded(set, current->cpuset))
     return -1;
 
   if (max <= 0)
