@@ -21,6 +21,9 @@
 extern "C" {
 #endif
 
+/* forward compat with v2.0 Socket->Package renaming */
+#define HWLOC_OBJ_PACKAGE HWLOC_OBJ_SOCKET
+
 /** \brief Return an object type from the string
  *
  * \return -1 if unrecognized.

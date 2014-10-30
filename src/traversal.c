@@ -203,7 +203,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Misc")) return HWLOC_OBJ_MISC;
   if (!strcasecmp(string, "Group")) return HWLOC_OBJ_GROUP;
   if (!strcasecmp(string, "NUMANode") || !strcasecmp(string, "Node")) return HWLOC_OBJ_NODE;
-  if (!strcasecmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
+  if (!strcasecmp(string, "Socket") || !strcasecmp(string, "Package") /* forward compat with v2.0 */) return HWLOC_OBJ_SOCKET;
   if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
   if (!strcasecmp(string, "PU")) return HWLOC_OBJ_PU;
@@ -229,7 +229,8 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
   } else if (!hwloc_strncasecmp(string, "node", 1)
 	     || !hwloc_strncasecmp(string, "numa", 1)) { /* matches node and numanode */
     type = HWLOC_OBJ_NODE;
-  } else if (!hwloc_strncasecmp(string, "socket", 2)) {
+  } else if (!hwloc_strncasecmp(string, "socket", 2)
+	     || !hwloc_strncasecmp(string, "package", 2)) { /* forward compat with v2.0 */
     type = HWLOC_OBJ_SOCKET;
   } else if (!hwloc_strncasecmp(string, "core", 2)) {
     type = HWLOC_OBJ_CORE;

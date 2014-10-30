@@ -26,6 +26,7 @@ Version 1.10.1
   lstopo or hwloc-ls.
 * Fix the merging of identical parent and child in presence of Misc objects.
   Thanks to Dave Love for reporting the issue.
+* Add support for the renaming of Socket into Package in future releases.
 
 
 Version 1.10.0
