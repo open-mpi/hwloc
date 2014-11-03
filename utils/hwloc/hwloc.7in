@@ -203,7 +203,7 @@ hardware threads).
 The additional
 .B system
 type can be used when several machines form an overall single system image
-(SSI), such as Kerrighed.
+(SSI).
 .PP
 I/O devices are not listed here since they are not identified using
 tuples as explained in \fBLocation Specification\fR.

@@ -45,7 +45,6 @@ sysfs_outputs = \
 		16em64t-4s2c2t_ncaches.output \
 		16em64t-4s2c2t_merge.output \
 		16em64t-4s2c2t.xml.output \
-		16em64t-2m4c2t.output \
 		16ia64-8n2s.output \
 		24em64t-2n6c2t+2mic.olddriver.output \
 		32em64t-2n8c+1mic.output \
@@ -101,7 +100,6 @@ sysfs_tarballs = \
 		16em64t-4s2c2t-offlines.tar.bz2 \
 		16em64t-4s2c2t-offlines.xml.source \
 		16em64t-4s2c2t-offlines_noadmin.source \
-		16em64t-2m4c2t.tar.bz2 \
 		16em64t-4s2c2t_merge.source \
 		16em64t-4s2c2t_ncaches.source \
 		16em64t-4s2c2t.xml.source \

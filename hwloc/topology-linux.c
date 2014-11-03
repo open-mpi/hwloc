@@ -293,12 +293,6 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 int
 hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_const_bitmap_t hwloc_set __hwloc_attribute_unused)
 {
-  /* TODO Kerrighed: Use
-   * int migrate (pid_t pid, int destination_node);
-   * int migrate_self (int destination_node);
-   * int thread_migrate (int thread_id, int destination_node);
-   */
-
   /* The resulting binding is always strict */
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
@@ -453,7 +447,6 @@ int
 hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_bitmap_t hwloc_set __hwloc_attribute_unused)
 {
   int err __hwloc_attribute_unused;
-  /* TODO Kerrighed */
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
   cpu_set_t *plinux_set;
@@ -801,11 +794,6 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
     errno = ENOSYS;
     return -1;
   }
-  /* TODO Kerrighed: Use
-   * int migrate (pid_t pid, int destination_node);
-   * int migrate_self (int destination_node);
-   * int thread_migrate (int thread_id, int destination_node);
-   */
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
   /* Use a separate block so that we can define specific variable
@@ -900,7 +888,6 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
     errno = ENOSYS;
     return -1;
   }
-  /* TODO Kerrighed */
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
   /* Use a separate block so that we can define specific variable
@@ -2007,44 +1994,6 @@ hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
     }
     closedir(dir);
     memory->page_types_len = index_;
-  }
-}
-
-static void
-hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology,
-				      struct hwloc_linux_backend_data_s *data,
-				      unsigned long node, struct hwloc_obj_memory_s *memory)
-{
-  char path[128];
-  uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
-
-  if (topology->is_thissystem) {
-    memory->page_types_len = 2;
-    memory->page_types = malloc(2*sizeof(*memory->page_types));
-    memset(memory->page_types, 0, 2*sizeof(*memory->page_types));
-    /* Try to get the hugepage size from sysconf in case we fail to get it from /proc/meminfo later */
-#ifdef HAVE__SC_LARGE_PAGESIZE
-    memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
-#endif
-    memory->page_types[0].size = hwloc_getpagesize();
-  }
-
-  snprintf(path, sizeof(path), "/proc/nodes/node%lu/meminfo", node);
-  hwloc_parse_meminfo_info(data, path, 0 /* no prefix */,
-			   &memory->local_memory,
-			   &meminfo_hugepages_count, &meminfo_hugepages_size,
-			   memory->page_types == NULL);
-
-  if (memory->page_types) {
-    uint64_t remaining_local_memory = memory->local_memory;
-    if (meminfo_hugepages_size) {
-      memory->page_types[1].size = meminfo_hugepages_size;
-      memory->page_types[1].count = meminfo_hugepages_count;
-      remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
-    } else {
-      memory->page_types_len = 1;
-    }
-    memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
 }
 
@@ -3751,7 +3700,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = backend->private_data;
-  DIR *nodes_dir;
   unsigned nbnodes;
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
   int err;
@@ -3776,50 +3724,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     free(cpuset_mntpnt);
   }
 
-  nodes_dir = hwloc_opendir("/proc/nodes", data->root_fd);
-  if (nodes_dir) {
-    /* Kerrighed */
-    struct dirent *dirent;
-    char path[128];
-    hwloc_obj_t machine;
-    hwloc_bitmap_t machine_online_set;
-
-    /* replace top-level object type with SYSTEM and add some MACHINE underneath */
-
-    topology->levels[0][0]->type = HWLOC_OBJ_SYSTEM;
-    topology->levels[0][0]->name = strdup("Kerrighed");
-
-    /* No cpuset support for now.  */
-    /* No sys support for now.  */
-    while ((dirent = readdir(nodes_dir)) != NULL) {
-      unsigned long node;
-      if (strncmp(dirent->d_name, "node", 4))
-	continue;
-      machine_online_set = hwloc_bitmap_alloc();
-      node = strtoul(dirent->d_name+4, NULL, 0);
-      snprintf(path, sizeof(path), "/proc/nodes/node%lu/cpuinfo", node);
-      err = look_cpuinfo(topology, data, path, machine_online_set);
-      if (err < 0) {
-        hwloc_bitmap_free(machine_online_set);
-        continue;
-      }
-      hwloc_bitmap_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
-      machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
-      machine->cpuset = machine_online_set;
-      hwloc_debug_1arg_bitmap("machine number %lu has cpuset %s\n",
-		 node, machine_online_set);
-
-      /* Get the machine memory attributes */
-      hwloc_get_kerrighed_node_meminfo_info(topology, data, node, &machine->memory);
-
-      /* Gather DMI info */
-      /* FIXME: get the right DMI info of each machine */
-      hwloc__get_dmi_info(data, machine);
-
-      hwloc_insert_object_by_cpuset(topology, machine);
-    }
-    closedir(nodes_dir);
-  } else {
     /* Get the machine memory attributes */
     hwloc_get_procfs_meminfo_info(topology, data, &topology->levels[0][0]->memory);
 
@@ -3866,7 +3770,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
     /* Gather DMI info */
     hwloc__get_dmi_info(data, topology->levels[0][0]);
-  }
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Linux");
   if (cpuset_name) {

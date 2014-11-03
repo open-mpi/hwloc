@@ -24,10 +24,10 @@ Version 1.11.0
   + Socket objects are renamed into Package to align with the terminology
     used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"
     name are still supported for backward compatibility.
+  + Remove Kerrighed support from the Linux backend.
 * API
   + The almost-unused "os_level" attribute has been removed from the
     hwloc_obj structure.
-
 
 
 Version 1.10.0
