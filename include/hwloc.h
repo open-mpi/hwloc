@@ -372,11 +372,11 @@ struct hwloc_obj {
   struct hwloc_obj *first_child;	/**< \brief First child */
   struct hwloc_obj *last_child;		/**< \brief Last child */
 
-  /* misc */
-  void *userdata;			/**< \brief Application-given private data pointer,
-					 * initialized to \c NULL, use it as you wish.
-					 * See hwloc_topology_set_userdata_export_callback()
-					 * if you wish to export this field to XML. */
+  int symmetric_subtree;		/**< \brief Set if the subtree of objects below this object is symmetric,
+					  * which means all children and their children have identical subtrees.
+					  * If set in the topology root object, lstopo may export the topology
+					  * as a synthetic string.
+					  */
 
   /* cpusets and nodesets */
   hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
@@ -472,11 +472,11 @@ struct hwloc_obj {
   struct hwloc_obj_info_s *infos;	/**< \brief Array of stringified info type=name. */
   unsigned infos_count;			/**< \brief Size of infos array. */
 
-  int symmetric_subtree;		/**< \brief Set if the subtree of objects below this object is symmetric,
-					  * which means all children and their children have identical subtrees.
-					  * If set in the topology root object, lstopo may export the topology
-					  * as a synthetic string.
-					  */
+  /* misc */
+  void *userdata;			/**< \brief Application-given private data pointer,
+					 * initialized to \c NULL, use it as you wish.
+					 * See hwloc_topology_set_userdata_export_callback()
+					 * if you wish to export this field to XML. */
 };
 /**
  * \brief Convenience typedef; a pointer to a struct hwloc_obj.
