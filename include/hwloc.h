@@ -355,7 +355,6 @@ struct hwloc_obj {
 					 */
   unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects,
 					 * could be a "cousin_rank" since it's the rank within the "cousin" list below */
-  signed os_level;			/**< \brief OS-provided physical level, -1 if unknown or meaningless */
 
   /* cousins are all objects of the same type (and depth) across the entire topology */
   struct hwloc_obj *next_cousin;	/**< \brief Next object of same type and depth */

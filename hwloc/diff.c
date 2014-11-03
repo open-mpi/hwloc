@@ -185,8 +185,6 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 	}
 	/* ignore memory page_types */
 
-	/* ignore os_level */
-
 	/* type-specific attrs */
 	switch (obj1->type) {
 	default:

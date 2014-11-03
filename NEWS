@@ -19,10 +19,15 @@ in v0.9.1).
 
 Version 1.11.0
 --------------
+* The ABI of the library has changed.
 * Major changes
   + Socket objects are renamed into Package to align with the terminology
     used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"
     name are still supported for backward compatibility.
+* API
+  + The almost-unused "os_level" attribute has been removed from the
+    hwloc_obj structure.
+
 
 
 Version 1.10.0

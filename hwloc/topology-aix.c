@@ -619,7 +619,6 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
      * bindprocessor functions numbers them from 0... */
     obj = hwloc_alloc_setup_object(type, i - (type == HWLOC_OBJ_PU));
     obj->cpuset = hwloc_bitmap_alloc();
-    obj->os_level = sdl;
     maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
     for (j = 0; j < maxcpus; j++) {
       if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))

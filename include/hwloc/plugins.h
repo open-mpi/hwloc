@@ -322,7 +322,6 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed os_index)
   memset(obj, 0, sizeof(*obj));
   obj->type = type;
   obj->os_index = os_index;
-  obj->os_level = -1;
   obj->attr = malloc(sizeof(*obj->attr));
   memset(obj->attr, 0, sizeof(*obj->attr));
   /* do not allocate the cpuset here, let the caller do it */

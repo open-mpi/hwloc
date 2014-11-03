@@ -580,7 +580,6 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 	  }
 	  unknown_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, unknownid);
 	  unknown_obj->cpuset = unknown_cpuset;
-	  unknown_obj->os_level = level;
 	  hwloc_debug_2args_bitmap("os unknown%d %u has cpuset %s\n",
 	      level, unknownid, unknown_cpuset);
 	  hwloc_insert_object_by_cpuset(topology, unknown_obj);

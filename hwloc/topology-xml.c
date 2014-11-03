@@ -67,7 +67,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
   }
 
   else if (!strcmp(name, "os_level"))
-    obj->os_level = strtoul(value, NULL, 10);
+    { /* ignored since v2.0 but still allowed for backward compat with v1.10 */ }
   else if (!strcmp(name, "os_index"))
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cpuset")) {
@@ -964,10 +964,6 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   parentstate->new_child(parentstate, &state, "object");
 
   state.new_prop(&state, "type", hwloc_obj_type_string(obj->type));
-  if (obj->os_level != -1) {
-    sprintf(tmp, "%d", obj->os_level);
-    state.new_prop(&state, "os_level", tmp);
-  }
   if (obj->os_index != (unsigned) -1) {
     sprintf(tmp, "%u", obj->os_index);
     state.new_prop(&state, "os_index", tmp);
