@@ -17,13 +17,18 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
-Version 1.11.0
+Version 2.0
 --------------
 * The ABI of the library has changed.
 * Major changes
   + Socket objects are renamed into Package to align with the terminology
     used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"
     name are still supported for backward compatibility.
+  + Add the experimental netloc subproject. It is enabled by default when
+    supported and can be disabled with --disable-netloc.
+    See the documentation for details.
+  + Remove the custom interface for assembling the topologies of different
+    nodes as well as the hwloc-assembler tools.
   + Remove Kerrighed support from the Linux backend.
 * API
   + The almost-unused "os_level" attribute has been removed from the
