@@ -137,6 +137,7 @@ EOF
 if [ x$gatherio = x1 ]; then
   cat << EOF | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 /sys/bus/pci/devices/
+/sys/bus/pci/slots/
 /sys/block/
 /sys/class/block/
 /sys/class/dma/
