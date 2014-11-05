@@ -2894,7 +2894,12 @@ To check whether the hwloc version is at least 1.5, you should use:
 #endif
 \endverbatim
 
-One important change in hwloc 1.5 is the removal of the deprecated
+New releases usually never remove or modify the existing interface
+to preserve the ABI of the library.
+There are two exceptions to this rule:
+First hwloc 2.0 brought significant longstanding fixes to the API
+(see the NEWS file in the source directory for details).
+Secondly hwloc 1.5 removed the deprecated
 cpuset API, which was superseded by the new bitmap API since hwloc 1.1.
 If your code must work with very old hwloc releases, you should use
 the latest bitmap API anyway. Then, use something similar to the
