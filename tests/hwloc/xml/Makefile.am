@@ -13,7 +13,6 @@ xml_inputs = \
         16em64t-4s2c2t.xml \
         16em64t-4s2c2t-offlines.xml \
         24em64t-2n6c2t-pci.xml \
-        8em64t-2mi2ma2c.xml \
         32em64t-2n8c2t-pci-noio.xml \
         32em64t-2n8c2t-pci-normalio.xml \
         32em64t-2n8c2t-pci-wholeio.xml \
