@@ -21,6 +21,9 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <setjmp.h>
+#ifdef HWLOC_LINUX_SYS
+#include <dirent.h>
+#endif
 
 #include <pciaccess.h>
 
@@ -78,6 +81,9 @@ hwloc_look_pci(struct hwloc_backend *backend)
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
+#ifdef HWLOC_LINUX_SYS
+  DIR *dir;
+#endif
 
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
@@ -245,6 +251,39 @@ hwloc_look_pci(struct hwloc_backend *backend)
   /* finalize device scanning */
   pci_iterator_destroy(iter);
   pci_system_cleanup();
+
+#ifdef HWLOC_LINUX_SYS
+  dir = opendir("/sys/bus/pci/slots/");
+  if (dir) {
+    struct dirent *dirent;
+    while ((dirent = readdir(dir)) != NULL) {
+      char path[64];
+      FILE *file;
+      if (dirent->d_name[0] == '.')
+	continue;
+      snprintf(path, sizeof(path), "/sys/bus/pci/slots/%s/address", dirent->d_name);
+      file = fopen(path, "r");
+      if (file) {
+	unsigned domain, bus, dev;
+	if (fscanf(file, "%x:%x:%x", &domain, &bus, &dev) == 3) {
+	  hwloc_obj_t obj = first_obj;
+	  while (obj) {
+	    if (obj->attr->pcidev.domain == domain
+		&& obj->attr->pcidev.bus == bus
+		&& obj->attr->pcidev.dev == dev
+		&& obj->attr->pcidev.func == 0) {
+	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
+	      break;
+	    }
+	    obj = obj->next_sibling;
+	  }
+	}
+	fclose(file);
+      }
+    }
+    closedir(dir);
+  }
+#endif
 
   return hwloc_insert_pci_device_list(backend, first_obj);
 }

@@ -1671,6 +1671,9 @@ hwloc failed to discover any package.
 <dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
 </dd>
+<dt>PCISlot</dt>
+<dd>The name/number of the physical slot where the PCI device is plugged.
+</dd>
 <dt>CoProcType (Co-Processor OS devices)</dt>
 <dd>The type of co-processor, for instance <tt>"MIC"</tt>, <tt>"CUDA"</tt>
  or <tt>"OpenCL"</tt>.
