@@ -4769,6 +4769,36 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 
   closedir(dir);
 
+  dir = hwloc_opendir("/sys/bus/pci/slots/", root_fd);
+  if (dir) {
+    while ((dirent = readdir(dir)) != NULL) {
+      char path[64];
+      FILE *file;
+      if (dirent->d_name[0] == '.')
+	continue;
+      snprintf(path, sizeof(path), "/sys/bus/pci/slots/%s/address", dirent->d_name);
+      file = hwloc_fopen(path, "r", root_fd);
+      if (file) {
+	unsigned domain, bus, dev;
+	if (fscanf(file, "%x:%x:%x", &domain, &bus, &dev) == 3) {
+	  hwloc_obj_t obj = first_obj;
+	  while (obj) {
+	    if (obj->attr->pcidev.domain == domain
+		&& obj->attr->pcidev.bus == bus
+		&& obj->attr->pcidev.dev == dev
+		&& obj->attr->pcidev.func == 0) {
+	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
+	      break;
+	    }
+	    obj = obj->next_sibling;
+	  }
+	}
+	fclose(file);
+      }
+    }
+    closedir(dir);
+  }
+
   res = hwloc_insert_pci_device_list(backend, first_obj);
 
  out_with_rootfd:

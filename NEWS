@@ -33,6 +33,9 @@ Version 2.0
 * API
   + The almost-unused "os_level" attribute has been removed from the
     hwloc_obj structure.
+* Misc
+  + Add a PCISlot attribute to PCI devices on Linux when supported to
+    identify the physical PCI slot where the board is plugged.
 
 
 Version 1.10.0
