@@ -243,6 +243,7 @@
         <object type="Bridge" os_index="524320" bridge_type="1-1" depth="0" bridge_pci="0000:[81-81]" pci_busid="0000:80:02.0" pci_type="0604 [8086:3c04] [0000:0000] 07" pci_link_speed="0.000000"/>
         <object type="Bridge" os_index="524322" bridge_type="1-1" depth="0" bridge_pci="0000:[82-82]" pci_busid="0000:80:02.2" pci_type="0604 [8086:3c06] [0000:0000] 07" pci_link_speed="0.000000">
           <object type="PCIDev" os_index="532480" pci_busid="0000:82:00.0" pci_type="0280 [15b3:1003] [15b3:0059] 00" pci_link_speed="0.000000">
+            <info name="PCISlot" value="01"/>
             <object type="OSDev" name="ib0" osdev_type="2">
               <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:00:02:c9:03:00:f9:bf:a1"/>
               <info name="Port" value="1"/>
@@ -259,6 +260,7 @@
         </object>
         <object type="Bridge" os_index="524336" bridge_type="1-1" depth="0" bridge_pci="0000:[83-83]" pci_busid="0000:80:03.0" pci_type="0604 [8086:3c08] [0000:0000] 07" pci_link_speed="0.000000">
           <object type="PCIDev" os_index="536576" pci_busid="0000:83:00.0" pci_type="0b40 [8086:225c] [8086:2500] 10" pci_link_speed="0.000000">
+            <info name="PCISlot" value="02"/>
             <object type="OSDev" name="mic0" osdev_type="5">
               <info name="CoProcType" value="MIC"/>
               <info name="MICFamily" value="Knights Corner"/>
