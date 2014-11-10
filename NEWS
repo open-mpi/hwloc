@@ -21,6 +21,8 @@ Version 1.10.1
 --------------
 * Fix the gathering of PCI domains. Thanks to James Custer for reporting
   the issue and providing a patch.
+* Don't forget to setup NUMA node object nodesets in x86 backend (for BSDs)
+  and OSF/Tru64 backend.
 * Change hwloc-ls.desktop into a lstopo.desktop and only install it if
   lstopo is built with Cairo/X11 support. It cannot work with a non-graphical
   lstopo or hwloc-ls.
