@@ -44,10 +44,15 @@ hwloc_look_bgq(struct hwloc_backend *backend)
     }
 
     /* a single memory bank */
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
+    set = hwloc_bitmap_alloc();
+    hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);
+    obj->cpuset = set;
     set = hwloc_bitmap_alloc();
     hwloc_bitmap_set(set, 0);
-    topology->levels[0][0]->nodeset = set;
-    topology->levels[0][0]->memory.local_memory = 16ULL*1024*1024*1024ULL;
+    obj->nodeset = set;
+    obj->memory.local_memory = 16ULL*1024*1024*1024ULL;
+    hwloc_insert_object_by_cpuset(topology, obj);
 
     /* package */
     obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, 0);
