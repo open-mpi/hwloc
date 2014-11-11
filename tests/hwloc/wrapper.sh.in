@@ -11,4 +11,7 @@ HWLOC_top_builddir="@HWLOC_top_builddir@"
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH
 
+HWLOC_DEBUG_CHECK=1
+export HWLOC_DEBUG_CHECK
+
 "$@"

@@ -16,6 +16,9 @@ distances="$builddir/hwloc-distances"
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
 export HWLOC_PLUGINS_PATH
 
+HWLOC_DEBUG_CHECK=1
+export HWLOC_DEBUG_CHECK
+
 # make sure we use default numeric formats
 LANG=C
 LC_ALL=C

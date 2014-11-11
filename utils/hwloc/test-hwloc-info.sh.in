@@ -18,6 +18,9 @@ info="$builddir/hwloc-info"
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
 export HWLOC_PLUGINS_PATH
 
+HWLOC_DEBUG_CHECK=1
+export HWLOC_DEBUG_CHECK
+
 : ${TMPDIR=/tmp}
 {
   tmp=`

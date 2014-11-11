@@ -19,6 +19,9 @@ xmldir="$HWLOC_top_srcdir/tests/hwloc/xml"
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwlo
 export HWLOC_PLUGINS_PATH
 
+HWLOC_DEBUG_CHECK=1
+export HWLOC_DEBUG_CHECK
+
 : ${TMPDIR=/tmp}
 {
   tmp=`
