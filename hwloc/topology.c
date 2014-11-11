@@ -2997,10 +2997,10 @@ hwloc__check_children(struct hwloc_obj *parent)
   assert(parent->last_child == parent->children[parent->arity-1]);
   assert(parent->last_child->next_sibling == NULL);
 
-  /* check that parent->cpuset == exclusive OR of children
-   * (can be wrong for complete_cpuset since disallowed/offline/unknown PUs can be removed)
-   */
   if (parent->cpuset) {
+    /* check that parent->cpuset == exclusive OR of children
+     * (can be wrong for complete_cpuset since disallowed/offline/unknown PUs can be removed)
+     */
     hwloc_bitmap_t remaining_parent_set = hwloc_bitmap_dup(parent->cpuset);
     for(j=0; j<parent->arity; j++) {
       if (!parent->children[j]->cpuset)
@@ -3011,6 +3011,11 @@ hwloc__check_children(struct hwloc_obj *parent)
     }
     assert(hwloc_bitmap_iszero(remaining_parent_set));
     hwloc_bitmap_free(remaining_parent_set);
+
+  } else {
+    /* check that children have no cpuset if the parent has none */
+    for(j=0; j<parent->arity; j++)
+      assert(!parent->children[j]->cpuset);
   }
 
   /* check that children complete_cpuset are properly ordered, empty ones may be anywhere
