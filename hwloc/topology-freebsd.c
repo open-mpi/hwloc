@@ -173,6 +173,8 @@ hwloc_freebsd_node_meminfo_info(struct hwloc_topology *topology)
        size_t len = sizeof(physmem);
        sysctl(mib, 2, &physmem, &len, NULL, 0);
        topology->levels[0][0]->memory.local_memory = physmem;
+       /* we don't know anything about NUMA nodes in this backend.
+        * let another backend or the core move that memory to the right NUMA node */
 }
 #endif
 

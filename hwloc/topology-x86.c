@@ -494,6 +494,8 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
     hwloc_bitmap_t node_cpuset;
     hwloc_obj_t node;
 
+    /* FIXME: if there's memory inside the root object, divide it into NUMA nodes? */
+
     while ((i = hwloc_bitmap_first(nodes_cpuset)) != (unsigned) -1) {
       unsigned packageid = infos[i].packageid;
       unsigned nodeid = infos[i].nodeid;

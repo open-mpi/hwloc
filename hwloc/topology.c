@@ -2418,14 +2418,32 @@ next_cpubackend:
   hwloc_debug("%s", "\nPropagate offline and disallowed cpus down and up\n");
   propagate_unused_cpuset(topology->levels[0][0], NULL);
 
-  if (topology->levels[0][0]->complete_nodeset && hwloc_bitmap_iszero(topology->levels[0][0]->complete_nodeset)) {
-    /* No nodeset, drop all of them */
-    hwloc_bitmap_free(topology->levels[0][0]->nodeset);
-    topology->levels[0][0]->nodeset = NULL;
-    hwloc_bitmap_free(topology->levels[0][0]->complete_nodeset);
-    topology->levels[0][0]->complete_nodeset = NULL;
-    hwloc_bitmap_free(topology->levels[0][0]->allowed_nodeset);
-    topology->levels[0][0]->allowed_nodeset = NULL;
+  /* Backends must allocate root->*nodeset.
+   *
+   * Most of them call hwloc_alloc_obj_cpusets() on the root to do so.
+   * root->complete_nodeset is empty by default, and filled by the core
+   * when NUMA nodes are added with insert_by_cpuset().
+   * root->allowed_nodeset is everything by default, unless reduced by backends.
+   *
+   * The XML backend takes care of everything to properly support old XML input
+   * with missing nodesets and/or NUMA nodes. It checks nodesets and fix them if needed.
+   */
+  assert(topology->levels[0][0]->nodeset);
+  assert(topology->levels[0][0]->complete_nodeset);
+  assert(topology->levels[0][0]->allowed_nodeset);
+  /* If there's no NUMA node, add one with all the memory */
+  if (hwloc_bitmap_iszero(topology->levels[0][0]->complete_nodeset)) {
+    hwloc_obj_t node = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
+    node->cpuset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset); /* requires root cpuset to be initialized above */
+    node->complete_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->complete_cpuset); /* requires root cpuset to be initialized above */
+    node->allowed_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->allowed_cpuset); /* requires root cpuset to be initialized above */
+    node->online_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->online_cpuset); /* requires root cpuset to be initialized above */
+    node->nodeset = hwloc_bitmap_alloc();
+    /* other nodesets will be filled below */
+    hwloc_bitmap_set(node->nodeset, 0);
+    node->memory.local_memory = topology->levels[0][0]->memory.local_memory;
+    topology->levels[0][0]->memory.local_memory = 0;
+    hwloc_insert_object_by_cpuset(topology, node);
   }
   hwloc_debug("%s", "\nPropagate nodesets\n");
   propagate_nodeset(topology->levels[0][0], NULL);
