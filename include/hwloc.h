@@ -667,7 +667,7 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 /** \brief Ignore an object type.
  *
  * Ignore all objects from the given type.
- * The bottom-level type HWLOC_OBJ_PU may not be ignored.
+ * The bottom-level type HWLOC_OBJ_PU and the HWLOC_OBJ_NUMANODE level may not be ignored.
  * The top-level object of the hierarchy will never be ignored, even if this function
  * succeeds.
  * I/O objects may not be ignored, topology flags should be used to configure
@@ -679,7 +679,7 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_o
  *
  * Ignore all objects from the given type as long as they do not bring any structure:
  * Each ignored object should have a single children or be the only child of its parent.
- * The bottom-level type HWLOC_OBJ_PU may not be ignored.
+ * The bottom-level type HWLOC_OBJ_PU and the HWLOC_OBJ_NUMANODE level may not be ignored.
  * I/O objects may not be ignored, topology flags should be used to configure
  * their discovery instead.
  */

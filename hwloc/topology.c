@@ -2718,8 +2718,8 @@ hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t typ
     return -1;
   }
 
-  if (type == HWLOC_OBJ_PU) {
-    /* we need the PU level */
+  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE) {
+    /* we need the PU and NUMA levels */
     errno = EINVAL;
     return -1;
   } else if (hwloc_obj_type_is_io(type)) {
@@ -2740,8 +2740,8 @@ hwloc_topology_ignore_type_keep_structure(struct hwloc_topology *topology, hwloc
     return -1;
   }
 
-  if (type == HWLOC_OBJ_PU) {
-    /* we need the PU level */
+  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE) {
+    /* we need the PU and NUMA levels */
     errno = EINVAL;
     return -1;
   } else if (hwloc_obj_type_is_io(type)) {
@@ -2759,7 +2759,7 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
 {
   unsigned type;
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
-    if (type != HWLOC_OBJ_PU
+    if (type != HWLOC_OBJ_PU && type != HWLOC_OBJ_NUMANODE
 	&& !hwloc_obj_type_is_io((hwloc_obj_type_t) type))
       topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
