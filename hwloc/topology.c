@@ -3129,6 +3129,13 @@ hwloc_topology_check(struct hwloc_topology *topology)
   /* check that other levels are not PU */
   for(i=1; i<hwloc_topology_get_depth(topology)-1; i++)
     assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_PU);
+  /* check that we have a NUMA level */
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
+  assert(depth < hwloc_topology_get_depth(topology));
+  /* check that other levels are not NUMA */
+  for(i=0; i<hwloc_topology_get_depth(topology)-1; i++)
+    if (i != depth)
+      assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_NUMANODE);
 
   /* top-level specific checks */
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
