@@ -16,6 +16,9 @@
 #include <sys/param.h>
 #include <pthread.h>
 #include <sched.h>
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
 
 #include <hwloc.h>
 #include <private/private.h>
@@ -130,6 +133,18 @@ hwloc_netbsd_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hw
   return hwloc_netbsd_get_thread_cpubind(topology, pthread_self(), hwloc_cpuset, flags);
 }
 
+#if (defined HAVE_SYSCTL) && (defined HAVE_SYS_SYSCTL_H)
+static void
+hwloc_netbsd_node_meminfo_info(struct hwloc_topology *topology)
+{
+  int mib[2] = { CTL_HW, HW_PHYSMEM64 };
+  unsigned long physmem;
+  size_t len = sizeof(physmem);
+  sysctl(mib, 2, &physmem, &len, NULL, 0);
+  topology->levels[0][0]->memory.local_memory = physmem;
+}
+#endif
+
 static int
 hwloc_look_netbsd(struct hwloc_backend *backend)
 {
@@ -143,8 +158,9 @@ hwloc_look_netbsd(struct hwloc_backend *backend)
   }
 
   /* Add NetBSD specific information */
-
-
+#if (defined HAVE_SYSCTL) && (defined HAVE_SYS_SYSCTL_H)
+  hwloc_netbsd_node_meminfo_info(topology);
+#endif
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "NetBSD");
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology, NULL);

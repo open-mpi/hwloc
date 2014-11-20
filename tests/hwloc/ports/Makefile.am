@@ -1,4 +1,4 @@
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -98,10 +98,13 @@ libhwloc_port_hpux_la_CPPFLAGS = $(common_CPPFLAGS) \
 nodist_libhwloc_port_netbsd_la_SOURCES = topology-netbsd.c
 libhwloc_port_netbsd_la_SOURCES = \
         include/netbsd/pthread.h \
-        include/netbsd/sched.h
+        include/netbsd/sched.h \
+        include/freebsd/sys/sysctl.h
 libhwloc_port_netbsd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/netbsd \
-        -DHWLOC_NETBSD_SYS
+        -DHWLOC_NETBSD_SYS \
+        -DHAVE_SYS_SYSCTL_H \
+        -DHAVE_SYSCTL
 
 nodist_libhwloc_port_osf_la_SOURCES = topology-osf.c
 libhwloc_port_osf_la_SOURCES = \
