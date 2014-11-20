@@ -169,8 +169,10 @@ static void
 hwloc_freebsd_node_meminfo_info(struct hwloc_topology *topology)
 {
        int mib[2] = { CTL_HW, HW_PHYSMEM };
-       size_t len = sizeof(topology->levels[0][0]->memory.local_memory);
-       sysctl(mib, 2, &topology->levels[0][0]->memory.local_memory, &len, NULL, 0);
+       unsigned long physmem;
+       size_t len = sizeof(physmem);
+       sysctl(mib, 2, &physmem, &len, NULL, 0);
+       topology->levels[0][0]->memory.local_memory = physmem;
 }
 #endif
 
