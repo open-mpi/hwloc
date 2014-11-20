@@ -23,6 +23,8 @@ Version 1.11.0
   + Socket objects are renamed into Package to align with the terminology
     used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"
     name are still supported for backward compatibility.
+* Backends
+  + Gather total machine memory on NetBSD.
 * Misc
   + Add a PCISlot attribute to PCI devices on Linux when supported to
     identify the physical PCI slot where the board is plugged.
