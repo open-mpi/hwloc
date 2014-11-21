@@ -99,7 +99,7 @@ nodist_libhwloc_port_netbsd_la_SOURCES = topology-netbsd.c
 libhwloc_port_netbsd_la_SOURCES = \
         include/netbsd/pthread.h \
         include/netbsd/sched.h \
-        include/freebsd/sys/sysctl.h
+        include/netbsd/sys/sysctl.h
 libhwloc_port_netbsd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/netbsd \
         -DHWLOC_NETBSD_SYS \
