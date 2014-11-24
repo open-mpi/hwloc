@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -39,9 +39,9 @@ int main(void)
   nomembutcpunodeset = hwloc_bitmap_alloc();
   nomembutcpucpuset = hwloc_bitmap_alloc();
   /* gather all nodes if any, or the whole system if no nodes */
-  if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE)) {
+  if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE)) {
     node = NULL;
-    while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, node)) != NULL) {
+    while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) != NULL) {
       hwloc_bitmap_or(set, set, node->cpuset);
       if (hwloc_bitmap_iszero(node->cpuset)) {
 	if (node->memory.local_memory)
@@ -73,7 +73,7 @@ int main(void)
   hwloc_bitmap_free(set);
 
   /* convert full stuff between nodeset and libnuma */
-  if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE)) {
+  if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE)) {
     set = hwloc_bitmap_dup(hwloc_get_root_obj(topology)->complete_nodeset);
   } else {
     set = hwloc_bitmap_alloc();
@@ -154,7 +154,7 @@ int main(void)
   hwloc_bitmap_free(set);
 
   /* convert first node (with CPU and memory) between cpuset/nodeset and libnuma */
-  node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, NULL);
+  node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, NULL);
   while (node && (!node->memory.local_memory || hwloc_bitmap_iszero(node->cpuset)))
     /* skip nodes with no cpus or no memory to avoid strange libnuma behaviors */
     node = node->next_sibling;

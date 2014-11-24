@@ -562,7 +562,7 @@ hwloc_get_pu_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
   return NULL;
 }
 
-/** \brief Returns the object of type ::HWLOC_OBJ_NODE with \p os_index.
+/** \brief Returns the object of type ::HWLOC_OBJ_NUMANODE with \p os_index.
  *
  * This function is useful for converting a nodeset into the NUMA node
  * objects it contains.
@@ -577,7 +577,7 @@ static __hwloc_inline hwloc_obj_t
 hwloc_get_numanode_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
 {
   hwloc_obj_t obj = NULL;
-  while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, obj)) != NULL)
+  while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, obj)) != NULL)
     if (obj->os_index == os_index)
       return obj;
   return NULL;
@@ -921,7 +921,7 @@ hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
 static __hwloc_inline void
 hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
 {
-	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
 	hwloc_obj_t obj;
 
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
@@ -949,7 +949,7 @@ hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset,
 static __hwloc_inline void
 hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
 {
-	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
 	hwloc_obj_t obj;
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN )
 		return;
@@ -970,7 +970,7 @@ hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpus
 static __hwloc_inline void
 hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
 {
-	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
 	hwloc_obj_t obj;
 
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN ) {
@@ -1001,7 +1001,7 @@ hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwl
 static __hwloc_inline void
 hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
 {
-	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
 	hwloc_obj_t obj;
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN )
 		return;

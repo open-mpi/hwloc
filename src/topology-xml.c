@@ -299,7 +299,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       case HWLOC_OBJ_CACHE:
 	obj->attr->cache.size = lvalue << 10;
 	break;
-      case HWLOC_OBJ_NODE:
+      case HWLOC_OBJ_NUMANODE:
       case HWLOC_OBJ_MACHINE:
       case HWLOC_OBJ_SYSTEM:
 	obj->memory.local_memory = lvalue << 10;
@@ -313,7 +313,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
   else if (!strcmp(name, "huge_page_size_kB")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     switch (obj->type) {
-      case HWLOC_OBJ_NODE:
+      case HWLOC_OBJ_NUMANODE:
       case HWLOC_OBJ_MACHINE:
       case HWLOC_OBJ_SYSTEM:
 	if (!obj->memory.page_types) {
@@ -331,7 +331,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
   else if (!strcmp(name, "huge_page_free")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     switch (obj->type) {
-      case HWLOC_OBJ_NODE:
+      case HWLOC_OBJ_NUMANODE:
       case HWLOC_OBJ_MACHINE:
       case HWLOC_OBJ_SYSTEM:
 	if (!obj->memory.page_types) {

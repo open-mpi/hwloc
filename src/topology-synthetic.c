@@ -458,8 +458,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	case HWLOC_OBJ_PU: type = HWLOC_OBJ_CORE; break;
 	case HWLOC_OBJ_CORE: type = HWLOC_OBJ_CACHE; break;
 	case HWLOC_OBJ_CACHE: type = HWLOC_OBJ_PACKAGE; break;
-	case HWLOC_OBJ_PACKAGE: type = HWLOC_OBJ_NODE; break;
-	case HWLOC_OBJ_NODE:
+	case HWLOC_OBJ_PACKAGE: type = HWLOC_OBJ_NUMANODE; break;
+	case HWLOC_OBJ_NUMANODE:
 	case HWLOC_OBJ_GROUP: type = HWLOC_OBJ_GROUP; break;
 	case HWLOC_OBJ_MACHINE:
 	case HWLOC_OBJ_MISC: type = HWLOC_OBJ_MISC; break;
@@ -479,7 +479,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       case HWLOC_OBJ_GROUP:
 	group_depth++;
 	break;
-      case HWLOC_OBJ_NODE:
+      case HWLOC_OBJ_NUMANODE:
 	nb_node_levels++;
 	break;
       case HWLOC_OBJ_MACHINE:
@@ -548,7 +548,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	  curlevel->memorysize = 256*1024 << (2*curlevel->depth);
       }
 
-    } else if (type == HWLOC_OBJ_NODE && !curlevel->memorysize) {
+    } else if (type == HWLOC_OBJ_NUMANODE && !curlevel->memorysize) {
       /* 1GB in memory nodes. */
       curlevel->memorysize = 1024*1024*1024;
     }
@@ -589,7 +589,7 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
     break;
   case HWLOC_OBJ_MACHINE:
     break;
-  case HWLOC_OBJ_NODE:
+  case HWLOC_OBJ_NUMANODE:
     break;
   case HWLOC_OBJ_PACKAGE:
     break;
@@ -653,7 +653,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_MACHINE:
       break;
-    case HWLOC_OBJ_NODE:
+    case HWLOC_OBJ_NUMANODE:
       break;
     case HWLOC_OBJ_PACKAGE:
       break;
@@ -682,7 +682,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       hwloc__look_synthetic(topology, data, level + 1, obj->cpuset);
   }
 
-  if (type == HWLOC_OBJ_NODE) {
+  if (type == HWLOC_OBJ_NUMANODE) {
     obj->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(obj->nodeset, os_index);
   }
@@ -920,7 +920,7 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
 	     prefix, (unsigned long long) obj->memory.local_memory);
     prefix = separator;
   }
-  if (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NODE) {
+  if (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE) {
     hwloc_obj_t cur = obj;
     while (cur) {
       if (cur->os_index != cur->logical_index) {

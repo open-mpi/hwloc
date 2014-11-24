@@ -403,7 +403,7 @@ hwloc_aix_get_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   int res = -1;
   int depth, n, i;
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   if (depth < 0) {
     errno = EXDEV;
     return -1;
@@ -626,7 +626,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	hwloc_bitmap_set(obj->cpuset, j);
     }
     switch(type) {
-      case HWLOC_OBJ_NODE:
+      case HWLOC_OBJ_NUMANODE:
 	obj->nodeset = hwloc_bitmap_alloc();
 	hwloc_bitmap_set(obj->nodeset, i);
 	obj->memory.local_memory = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
@@ -736,7 +736,7 @@ hwloc_look_aix(struct hwloc_backend *backend)
       if (i == rs_getinfo(NULL, R_MCMSDL, 0))
 	{
 	  hwloc_debug("looking AIX node sdl %d\n", i);
-	  look_rset(i, HWLOC_OBJ_NODE, topology, i);
+	  look_rset(i, HWLOC_OBJ_NUMANODE, topology, i);
 	  known = 1;
 	}
 #      ifdef R_L2CSDL

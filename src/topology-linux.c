@@ -2748,7 +2748,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    continue;
 	  }
 
-          node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
+          node = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, osnode);
           node->cpuset = cpuset;
           node->nodeset = hwloc_bitmap_alloc();
           hwloc_bitmap_set(node->nodeset, osnode);
@@ -2795,7 +2795,7 @@ look_sysfsnode(struct hwloc_topology *topology,
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, data->root_fd);
       }
 
-      hwloc_distances_set(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
+      hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
   }
 
  out:

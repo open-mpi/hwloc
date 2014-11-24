@@ -40,17 +40,17 @@ main (void)
 
   hwloc_bitmap_sscanf(set, "00008f18");
 
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, NULL);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NUMANODE, NULL);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 1));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NUMANODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 2));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NUMANODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 4));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NUMANODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 5));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NUMANODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 7));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NUMANODE, obj);
   assert(!obj);
 
   hwloc_topology_destroy (topology);

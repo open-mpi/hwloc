@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011 inria.  All rights reserved.
+ * Copyright © 2011-2014 Inria.  All rights reserved.
  * Copyright © 2011 Université Bordeaux.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -22,7 +22,7 @@ static void check(unsigned nbnodes, unsigned nbcores, unsigned nbpus)
   /* sanity checks */
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   assert(depth == 1);
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_CORE);
   assert(depth == 2);
@@ -30,7 +30,7 @@ static void check(unsigned nbnodes, unsigned nbcores, unsigned nbpus)
   assert(depth == 3);
 
   /* actual checks */
-  nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
+  nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
   assert(nb == nbnodes);
   nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
   assert(nb == nbcores);
@@ -45,7 +45,7 @@ static void check_distances(unsigned nbnodes, unsigned nbcores)
   const struct hwloc_distances_s *distance;
 
   /* node distance */
-  distance = hwloc_get_whole_distance_matrix_by_type(topology, HWLOC_OBJ_NODE);
+  distance = hwloc_get_whole_distance_matrix_by_type(topology, HWLOC_OBJ_NUMANODE);
   if (nbnodes >= 2) {
     assert(distance);
     assert(distance->nbobjs == nbnodes);
@@ -84,7 +84,7 @@ int main(void)
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:3 core:2 pu:4");
-  hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_NODE, 3, node_indexes, node_distances);
+  hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_NUMANODE, 3, node_indexes, node_distances);
   hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 6, core_indexes, core_distances);
   hwloc_topology_load(topology);
 

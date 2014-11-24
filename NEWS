@@ -23,6 +23,9 @@ Version 1.11.0
   + Socket objects are renamed into Package to align with the terminology
     used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"
     name are still supported for backward compatibility.
+  + HWLOC_OBJ_NODE is replaced with HWLOC_OBJ_NUMANODE for clarification.
+    HWLOC_OBJ_NODE is still supported for backward compatibility.
+    "Node" and "NUMANode" strings are supported as in earlier releases.
 * Backends
   + Gather total machine memory on NetBSD.
 * Misc

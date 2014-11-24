@@ -282,7 +282,7 @@ hwloc_look_osf(struct hwloc_backend *backend)
       }
 
       indexes[radid] = radid;
-      nodes[radid] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, radid);
+      nodes[radid] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, radid);
       obj->nodeset = hwloc_bitmap_alloc();
       hwloc_bitmap_set(obj->nodeset, radid);
       obj->cpuset = hwloc_bitmap_alloc();
@@ -327,7 +327,7 @@ hwloc_look_osf(struct hwloc_backend *backend)
       }
     }
 
-    hwloc_distances_set(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
+    hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
   }
   radsetdestroy(&radset2);
   radsetdestroy(&radset);

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Inria.  All rights reserved.
+ * Copyright © 2013-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -47,7 +47,7 @@ int main(void)
   hwloc_obj_add_info(obj, "Foo", "Bar2");
   obj->memory.local_memory += 128*4096;
 
-  obj = hwloc_get_obj_by_type(topo2, HWLOC_OBJ_NODE, 0);
+  obj = hwloc_get_obj_by_type(topo2, HWLOC_OBJ_NUMANODE, 0);
   if (obj)
     obj->memory.local_memory += 32*4096;
   printf("check that topo2 is now properly diff'ed\n");
@@ -70,10 +70,10 @@ int main(void)
   assert(!err);
   err = strcmp(tmpdiff->obj_attr.diff.string.newvalue, "Bar2");
   assert(!err);
-  if (hwloc_get_nbobjs_by_type(topo1, HWLOC_OBJ_NODE) > 0) {
+  if (hwloc_get_nbobjs_by_type(topo1, HWLOC_OBJ_NUMANODE) > 0) {
     tmpdiff = tmpdiff->generic.next;
     assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-    assert(tmpdiff->obj_attr.obj_depth == (unsigned) hwloc_get_type_depth(topo1, HWLOC_OBJ_NODE));
+    assert(tmpdiff->obj_attr.obj_depth == (unsigned) hwloc_get_type_depth(topo1, HWLOC_OBJ_NUMANODE));
     assert(tmpdiff->obj_attr.obj_index == 0);
     assert(tmpdiff->obj_attr.diff.generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE);
     assert(tmpdiff->obj_attr.diff.uint64.newvalue - tmpdiff->obj_attr.diff.uint64.oldvalue == 32*4096);
@@ -137,10 +137,10 @@ int main(void)
   assert(!err);
   err = strcmp(tmpdiff->obj_attr.diff.string.newvalue, "Bar2");
   assert(!err);
-  if (hwloc_get_nbobjs_by_type(topo1, HWLOC_OBJ_NODE) > 0) {
+  if (hwloc_get_nbobjs_by_type(topo1, HWLOC_OBJ_NUMANODE) > 0) {
     tmpdiff = tmpdiff->generic.next;
     assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-    assert(tmpdiff->obj_attr.obj_depth == (unsigned) hwloc_get_type_depth(topo1, HWLOC_OBJ_NODE));
+    assert(tmpdiff->obj_attr.obj_depth == (unsigned) hwloc_get_type_depth(topo1, HWLOC_OBJ_NUMANODE));
     assert(tmpdiff->obj_attr.obj_index == 0);
     assert(tmpdiff->obj_attr.diff.generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE);
     assert(tmpdiff->obj_attr.diff.uint64.newvalue - tmpdiff->obj_attr.diff.uint64.oldvalue == 32*4096);
@@ -169,7 +169,7 @@ int main(void)
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
   tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-  if (hwloc_get_nbobjs_by_type(topo1, HWLOC_OBJ_NODE) > 0) {
+  if (hwloc_get_nbobjs_by_type(topo1, HWLOC_OBJ_NUMANODE) > 0) {
     tmpdiff = tmpdiff->generic.next;
     assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
   }
@@ -187,7 +187,7 @@ int main(void)
   assert(err == 0);
   assert(diff);
   err = hwloc_topology_diff_apply(topo2, diff, HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE);
-  if (hwloc_get_nbobjs_by_type(topo1, HWLOC_OBJ_NODE) > 0)
+  if (hwloc_get_nbobjs_by_type(topo1, HWLOC_OBJ_NUMANODE) > 0)
     assert(err == -4);
   else
     assert(err == -3);

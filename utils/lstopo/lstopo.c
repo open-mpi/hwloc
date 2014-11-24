@@ -382,7 +382,7 @@ main (int argc, char *argv[])
     force_orient[i] = LSTOPO_ORIENT_NONE;
   force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;
   force_orient[HWLOC_OBJ_CACHE] = LSTOPO_ORIENT_HORIZ;
-  force_orient[HWLOC_OBJ_NODE] = LSTOPO_ORIENT_HORIZ;
+  force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
 
   /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
