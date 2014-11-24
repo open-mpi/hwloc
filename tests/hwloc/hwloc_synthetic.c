@@ -96,8 +96,8 @@ int main(void)
   hwloc_topology_load(topology);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
-  assert(err == 42);
-  err = strcmp("Package:2 Core:2 PU:2(indexes=4*2:2*2:1*2)", buffer);
+  assert(err == 72);
+  err = strcmp("NUMANode:1(memory=1073741824) Package:2 Core:2 PU:2(indexes=4*2:2*2:1*2)", buffer);
   assert(!err);
 
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0)->os_index == 0);
@@ -115,13 +115,13 @@ int main(void)
 
 
   hwloc_topology_init(&topology);
-  err = hwloc_topology_set_synthetic(topology, "pack:2 core:2 pu:2(indexes=0,4,2,6,1,3,5,7)");
+  err = hwloc_topology_set_synthetic(topology, "pack:2 numa:2 core:1 pu:2(indexes=0,4,2,6,1,3,5,7)");
   assert(!err);
   hwloc_topology_load(topology);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
-  assert(err == 46);
-  err = strcmp("Package:2 Core:2 PU:2(indexes=0,4,2,6,1,3,5,7)", buffer);
+  assert(err == 76);
+  err = strcmp("Package:2 NUMANode:2(memory=1073741824) Core:1 PU:2(indexes=0,4,2,6,1,3,5,7)", buffer);
   assert(!err);
 
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0)->os_index == 0);

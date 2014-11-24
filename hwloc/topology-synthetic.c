@@ -522,6 +522,30 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     nb_machine_levels++;
   }
 
+  /* enforce a NUMA level */
+  if (!nb_node_levels) {
+    /* insert a NUMA level and the machine level */
+    if (data->level[1].type == HWLOC_OBJ_MACHINE)
+      /* there's an explicit machine level after the automatic system root, insert below both */
+      i = 2;
+    else
+      /* insert below the automatic machine root */
+      i = 1;
+    if (verbose)
+      fprintf(stderr, "Inserting a NUMA level with a single object at depth %u\n", i);
+    /* move existing levels by one */
+    memmove(&data->level[i+1], &data->level[i], (count*i)*sizeof(struct hwloc_synthetic_level_data_s));
+    data->level[i].type = HWLOC_OBJ_NUMANODE;
+    data->level[i].index_string = NULL;
+    data->level[i].index_array = NULL;
+    data->level[i].memorysize = 0;
+    data->level[i].totalwidth = data->level[i-1].totalwidth;
+    /* update arity to insert a single NUMA node per parent */
+    data->level[i].arity = data->level[i-1].arity;
+    data->level[i-1].arity = 1;
+    count++;
+  }
+
   if (cache_depth == 1)
     /* if there is a single cache level, make it L2 */
     cache_depth = 2;

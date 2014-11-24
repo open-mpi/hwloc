@@ -1662,6 +1662,8 @@ The root object does not appear in the string.
 A Machine object is used by default, and a System object replaces it
 if a Machine level is specified in the string.
 
+A NUMA level (with a single NUMA node) is automatically added if needed.
+
 Cache level depths are automatically chosen by hwloc (only a L2 first,
 then a L1 under it, then L3 above, then L4 etc.) unless they are specified.
 Memory and cache sizes are also automatically chosen.
@@ -1719,7 +1721,7 @@ The lstopo tool may also perform such an export by forcing the output format.
 
 \verbatim
 $ lstopo --of synthetic --no-io
-Package:1 Cache:1 Cache:2 Cache:1 Cache:1 Core:1 PU:2 
+NUMANode:1 Package:1 Cache:1 Cache:2 Cache:1 Cache:1 Core:1 PU:2
 \endverbatim
 
 The exported string may be passed back to hwloc for recreating
