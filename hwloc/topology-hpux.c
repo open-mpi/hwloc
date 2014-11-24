@@ -43,7 +43,7 @@ hwloc_hpux_find_ldom(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set)
     return -1;
 
   obj = hwloc_get_first_largest_obj_inside_cpuset(topology, hwloc_set);
-  if (!hwloc_bitmap_isequal(obj->cpuset, hwloc_set) || obj->type != HWLOC_OBJ_NODE) {
+  if (!hwloc_bitmap_isequal(obj->cpuset, hwloc_set) || obj->type != HWLOC_OBJ_NUMANODE) {
     /* Does not correspond to exactly one node */
     return -1;
   }
@@ -190,7 +190,7 @@ hwloc_look_hpux(struct hwloc_backend *backend)
       MPC_GETFIRSTLDOM_SYS : MPC_GETFIRSTLDOM, 0, 0);
     while (currentnode != -1 && i < nbnodes) {
       hwloc_debug("node %d is %d\n", i, currentnode);
-      nodes[i] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, currentnode);
+      nodes[i] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, currentnode);
       obj->cpuset = hwloc_bitmap_alloc();
       obj->nodeset = hwloc_bitmap_alloc();
       hwloc_bitmap_set(obj->nodeset, currentnode);

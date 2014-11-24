@@ -40,9 +40,9 @@ int main(void)
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == 4);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PU) == 7);
 
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NODE) == HWLOC_TYPE_DEPTH_UNKNOWN);
-  assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_NODE) == 3);
-  assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_NODE) == 4);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE) == HWLOC_TYPE_DEPTH_UNKNOWN);
+  assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_NUMANODE) == 3);
+  assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_NUMANODE) == 4);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE) == HWLOC_TYPE_DEPTH_UNKNOWN);
   assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PACKAGE) == 3);
   assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_PACKAGE) == 4);

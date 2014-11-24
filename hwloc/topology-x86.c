@@ -515,7 +515,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
           hwloc_bitmap_clr(nodes_cpuset, j);
         }
       }
-      node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, nodeid);
+      node = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, nodeid);
       node->cpuset = node_cpuset;
       node->nodeset = hwloc_bitmap_alloc();
       hwloc_bitmap_set(node->nodeset, nodeid);

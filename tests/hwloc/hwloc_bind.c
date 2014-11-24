@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -202,7 +202,7 @@ int main(void)
   testmem3(set);
   hwloc_bitmap_free(set);
 
-  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 0);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
   if (obj) {
     set = hwloc_bitmap_dup(obj->cpuset);
     hwloc_bitmap_asprintf(&str, set);
@@ -211,7 +211,7 @@ int main(void)
 
     testmem3(set);
 
-    obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 1);
+    obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1);
     if (obj) {
       hwloc_bitmap_or(set, set, obj->cpuset);
       hwloc_bitmap_asprintf(&str, set);

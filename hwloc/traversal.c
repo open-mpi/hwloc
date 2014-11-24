@@ -180,7 +180,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_MACHINE: return "Machine";
     case HWLOC_OBJ_MISC: return "Misc";
     case HWLOC_OBJ_GROUP: return "Group";
-    case HWLOC_OBJ_NODE: return "NUMANode";
+    case HWLOC_OBJ_NUMANODE: return "NUMANode";
     case HWLOC_OBJ_PACKAGE: return "Package";
     case HWLOC_OBJ_CACHE: return "Cache";
     case HWLOC_OBJ_CORE: return "Core";
@@ -199,7 +199,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Machine")) return HWLOC_OBJ_MACHINE;
   if (!strcasecmp(string, "Misc")) return HWLOC_OBJ_MISC;
   if (!strcasecmp(string, "Group")) return HWLOC_OBJ_GROUP;
-  if (!strcasecmp(string, "NUMANode") || !strcasecmp(string, "Node")) return HWLOC_OBJ_NODE;
+  if (!strcasecmp(string, "NUMANode") || !strcasecmp(string, "Node")) return HWLOC_OBJ_NUMANODE;
   if (!strcasecmp(string, "Package") || !strcasecmp(string, "Socket") /* backward compat with v1.10 */) return HWLOC_OBJ_PACKAGE;
   if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
@@ -225,7 +225,7 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     type = HWLOC_OBJ_MACHINE;
   } else if (!hwloc_strncasecmp(string, "node", 1)
 	     || !hwloc_strncasecmp(string, "numa", 1)) { /* matches node and numanode */
-    type = HWLOC_OBJ_NODE;
+    type = HWLOC_OBJ_NUMANODE;
   } else if (!hwloc_strncasecmp(string, "package", 2)
 	     || !hwloc_strncasecmp(string, "socket", 2)) { /* backward compat with v1.10 */
     type = HWLOC_OBJ_PACKAGE;
@@ -455,7 +455,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_MISC:
   case HWLOC_OBJ_SYSTEM:
   case HWLOC_OBJ_MACHINE:
-  case HWLOC_OBJ_NODE:
+  case HWLOC_OBJ_NUMANODE:
   case HWLOC_OBJ_PACKAGE:
   case HWLOC_OBJ_CORE:
   case HWLOC_OBJ_PU:

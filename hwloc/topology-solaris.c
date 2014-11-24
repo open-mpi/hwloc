@@ -49,7 +49,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
       return -1;
 #ifdef HAVE_LIBLGRP
     if (!(flags & HWLOC_CPUBIND_NOMEMBIND)) {
-      int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+      int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
       if (depth >= 0) {
 	int n = hwloc_get_nbobjs_by_depth(topology, depth);
 	int i;
@@ -66,7 +66,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 
 #ifdef HAVE_LIBLGRP
   if (!(flags & HWLOC_CPUBIND_NOMEMBIND)) {
-    int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+    int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
     if (depth >= 0) {
       int n = hwloc_get_nbobjs_by_depth(topology, depth);
       int i;
@@ -141,7 +141,7 @@ static int
 hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   processorid_t binding;
-  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   int n;
   int i;
 
@@ -214,7 +214,7 @@ hwloc_solaris_set_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t i
     return -1;
   }
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   if (depth < 0) {
     errno = EXDEV;
     return -1;
@@ -257,7 +257,7 @@ hwloc_solaris_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_node
 static int
 hwloc_solaris_get_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
-  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   int n;
   int i;
 
@@ -361,7 +361,7 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
     cpuids = malloc(sizeof(processorid_t) * n);
     assert(cpuids != NULL);
 
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, lgrp);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, lgrp);
     obj->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(obj->nodeset, lgrp);
     obj->cpuset = hwloc_bitmap_alloc();
@@ -439,7 +439,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 	for (j = 0; j < curlgrp; j++)
           distances[i*curlgrp+j] = (float) lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
-      hwloc_distances_set(topology, HWLOC_OBJ_NODE, curlgrp, indexes, glob_lgrps, distances, 0 /* OS cannot force */);
+      hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, curlgrp, indexes, glob_lgrps, distances, 0 /* OS cannot force */);
     }
 #endif /* HAVE_LGRP_LATENCY_COOKIE */
   }

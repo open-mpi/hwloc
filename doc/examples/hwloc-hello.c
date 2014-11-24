@@ -149,12 +149,12 @@ int main(void)
      * memory to the last NUMA node.
      *****************************************************************/
     /* Get last node. */
-    n = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
+    n = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
     if (n) {
         void *m;
         size = 1024*1024;
 
-        obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, n - 1);
+        obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, n - 1);
         m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
                 HWLOC_MEMBIND_DEFAULT, 0);
         hwloc_free(topology, m, size);

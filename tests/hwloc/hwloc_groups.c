@@ -36,7 +36,7 @@ int main(void)
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 1);
   /* 3 node at depth 2 */
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   assert(depth == 2);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 3);
@@ -44,7 +44,7 @@ int main(void)
   obj = hwloc_get_root_obj(topology);
   assert(obj->arity == 2);
   /* check its children */
-  assert(obj->children[0]->type == HWLOC_OBJ_NODE);
+  assert(obj->children[0]->type == HWLOC_OBJ_NUMANODE);
   assert(obj->children[0]->depth == 2);
   assert(obj->children[0]->arity == 1);
   assert(obj->children[1]->type == HWLOC_OBJ_GROUP);
@@ -64,7 +64,7 @@ int main(void)
   hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_PACKAGE, 5, indexes, distances);
   hwloc_topology_load(topology);
   /* 1 node at depth 1 */
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   assert(depth == 1);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 1);
@@ -82,7 +82,7 @@ int main(void)
   obj = hwloc_get_root_obj(topology);
   assert(obj->arity == 1);
   obj = obj->children[0];
-  assert(obj->type == HWLOC_OBJ_NODE);
+  assert(obj->type == HWLOC_OBJ_NUMANODE);
   assert(obj->arity == 3);
   /* check its children */
   assert(obj->children[0]->type == HWLOC_OBJ_GROUP);

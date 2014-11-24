@@ -190,7 +190,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
       for (i = 0; i < n; i++) {
         /* cacheconfig tells us how many cpus share it, let's iterate on each cache */
         for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
-          obj = hwloc_alloc_setup_object(i?HWLOC_OBJ_CACHE:HWLOC_OBJ_NODE, j);
+          obj = hwloc_alloc_setup_object(i?HWLOC_OBJ_CACHE:HWLOC_OBJ_NUMANODE, j);
           if (!i) {
             obj->nodeset = hwloc_bitmap_alloc();
             hwloc_bitmap_set(obj->nodeset, j);

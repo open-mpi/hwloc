@@ -90,7 +90,7 @@ int main(void)
     /* could not allocate replicated memory, manually allocate of each node by iterating over them */
     printf("manually allocating memory on each node\n");
     obj = NULL;
-    while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, obj)) != NULL) {
+    while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, obj)) != NULL) {
       buffer = hwloc_alloc_membind_nodeset(topology, 4096, obj->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_STRICT);
       if (!buffer) {
 	fprintf(stderr, "failed to manually allocate memory on node %u\n", obj->os_index);
@@ -135,7 +135,7 @@ int main(void)
   hwloc_bitmap_free(set);
 
   /* try to migrate the buffer to the first node */
-  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 0);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
   err = hwloc_set_area_membind_nodeset(topology, buffer, 4096, obj->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_MIGRATE);
   if (err < 0) {
     fprintf(stderr, "failed to migrate buffer\n");

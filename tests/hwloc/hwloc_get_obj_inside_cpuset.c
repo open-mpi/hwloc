@@ -90,7 +90,7 @@ main (void)
 
   /* there is no node inside packages */
   root = hwloc_get_obj_by_depth(topology, 2, 0);
-  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_NODE, 0);
+  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_NUMANODE, 0);
   assert(!obj);
 
   hwloc_topology_destroy (topology);

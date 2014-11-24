@@ -23,6 +23,8 @@ extern "C" {
 
 /* backward compat with v1.10 before Socket->Package renaming */
 #define HWLOC_OBJ_SOCKET HWLOC_OBJ_PACKAGE
+/* backward compat with v1.10 before Node->NUMANode clarification */
+#define HWLOC_OBJ_NODE HWLOC_OBJ_NUMANODE
 
 /** \brief Return an object type from the string
  *

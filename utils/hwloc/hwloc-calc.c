@@ -331,7 +331,7 @@ int main(int argc, char *argv[])
       }
       if (!strcmp(argv[0], "--nodelist")) {
 	/* backward compat with 1.0 */
-	intersecttype = HWLOC_OBJ_NODE;
+	intersecttype = HWLOC_OBJ_NUMANODE;
         goto next;
       }
       if (!strcmp(argv[0], "--largest")  || !strcmp(argv[0], "--objects") /* backward compat with 1.0 */) {

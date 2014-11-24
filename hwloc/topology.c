@@ -537,7 +537,7 @@ enum hwloc_type_cmp_e {
 static const unsigned obj_type_order[] = {
     /* first entry is HWLOC_OBJ_SYSTEM */  0,
     /* next entry is HWLOC_OBJ_MACHINE */  1,
-    /* next entry is HWLOC_OBJ_NODE */     3,
+    /* next entry is HWLOC_OBJ_NUMANODE */ 3,
     /* next entry is HWLOC_OBJ_PACKAGE */  4,
     /* next entry is HWLOC_OBJ_CACHE */    5,
     /* next entry is HWLOC_OBJ_CORE */     6,
@@ -553,7 +553,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_SYSTEM,
   HWLOC_OBJ_MACHINE,
   HWLOC_OBJ_GROUP,
-  HWLOC_OBJ_NODE,
+  HWLOC_OBJ_NUMANODE,
   HWLOC_OBJ_PACKAGE,
   HWLOC_OBJ_CACHE,
   HWLOC_OBJ_CORE,
@@ -579,7 +579,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
 static const int obj_type_priority[] = {
   /* first entry is HWLOC_OBJ_SYSTEM */     80,
   /* next entry is HWLOC_OBJ_MACHINE */     100,
-  /* next entry is HWLOC_OBJ_NODE */        80,
+  /* next entry is HWLOC_OBJ_NUMANODE */    80,
   /* next entry is HWLOC_OBJ_PACKAGE */     40,
   /* next entry is HWLOC_OBJ_CACHE */       20,
   /* next entry is HWLOC_OBJ_CORE */        60,
@@ -872,7 +872,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	}
 	assert(!obj->userdata); /* user could not set userdata here (we're before load() */
 	switch(obj->type) {
-	  case HWLOC_OBJ_NODE:
+	  case HWLOC_OBJ_NUMANODE:
 	    /* Do not check these, it may change between calls */
 	    merge_sizes(obj, child, memory.local_memory);
 	    merge_sizes(obj, child, memory.total_memory);
@@ -1573,7 +1573,7 @@ apply_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
   hwloc_obj_t child, *temp;
 
   if (sys) {
-    if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
+    if (obj->type == HWLOC_OBJ_NUMANODE && obj->os_index != (unsigned) -1 &&
         !hwloc_bitmap_isset(sys->allowed_nodeset, obj->os_index)) {
       hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
       obj->memory.local_memory = 0;
@@ -1698,7 +1698,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
   for_each_child_safe(child, obj, pchild)
     remove_empty(topology, pchild);
 
-  if (obj->type != HWLOC_OBJ_NODE
+  if (obj->type != HWLOC_OBJ_NUMANODE
       && !obj->first_child /* only remove if all children were removed above, so that we don't remove parents of NUMAnode */
       && !hwloc_obj_type_is_io(obj->type) && obj->type != HWLOC_OBJ_MISC
       && obj->cpuset /* don't remove if no cpuset at all, there's likely a good reason why it's different from having an empty cpuset */
@@ -1747,7 +1747,7 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
   if (dropping) {
     hwloc_debug("%s", "\nRemoving object during restrict");
     print_object(topology, 0, obj);
-    if (obj->type == HWLOC_OBJ_NODE)
+    if (obj->type == HWLOC_OBJ_NUMANODE)
       hwloc_bitmap_set(droppednodeset, obj->os_index);
     /* remove the object from the tree (no need to remove from levels, they will be entirely rebuilt by the caller) */
     unlink_and_free_single_object(pobj);
@@ -3133,7 +3133,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
 	assert(hwloc_bitmap_weight(obj->cpuset) == 1);
 	assert(hwloc_bitmap_first(obj->cpuset) == (int) obj->os_index);
       }
-      if (obj->type == HWLOC_OBJ_NODE) {
+      if (obj->type == HWLOC_OBJ_NUMANODE) {
 	assert(obj->nodeset);
 	assert(hwloc_bitmap_weight(obj->nodeset) == 1);
 	assert(hwloc_bitmap_first(obj->nodeset) == (int) obj->os_index);

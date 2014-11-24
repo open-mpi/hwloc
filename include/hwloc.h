@@ -176,7 +176,7 @@ typedef enum {
 			  * A set of processors and memory with cache
 			  * coherency.
 			  */
-  HWLOC_OBJ_NODE,	/**< \brief NUMA node.
+  HWLOC_OBJ_NUMANODE,	/**< \brief NUMA node.
 			  * A set of processors around memory which the
 			  * processors can directly access.
 			  */

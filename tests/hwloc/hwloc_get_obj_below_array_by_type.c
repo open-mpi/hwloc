@@ -38,7 +38,7 @@ main (void)
 
 
   /* find the first thread */
-  typev[0] = HWLOC_OBJ_NODE;   idxv[0] = 0;
+  typev[0] = HWLOC_OBJ_NUMANODE;   idxv[0] = 0;
   typev[1] = HWLOC_OBJ_PACKAGE; idxv[1] = 0;
   typev[2] = HWLOC_OBJ_CORE;   idxv[2] = 0;
   typev[3] = HWLOC_OBJ_PU;   idxv[3] = 0;
@@ -46,7 +46,7 @@ main (void)
   assert(obj == hwloc_get_obj_by_depth(topology, 4, 0));
 
   /* find the last core */
-  typev[0] = HWLOC_OBJ_NODE;   idxv[0] = 2;
+  typev[0] = HWLOC_OBJ_NUMANODE;   idxv[0] = 2;
   typev[1] = HWLOC_OBJ_PACKAGE; idxv[1] = 2;
   typev[2] = HWLOC_OBJ_CORE;   idxv[2] = 2;
   obj = hwloc_get_obj_below_array_by_type(topology, 3, typev, idxv);
@@ -58,7 +58,7 @@ main (void)
   obj = hwloc_get_obj_below_array_by_type(topology, 1, typev, idxv);
   assert(obj == hwloc_get_obj_by_depth(topology, 2, 2));
 
-  typev[0] = HWLOC_OBJ_NODE;   idxv[0] = 2;
+  typev[0] = HWLOC_OBJ_NUMANODE;   idxv[0] = 2;
   typev[1] = HWLOC_OBJ_CORE;   idxv[1] = 2;
   obj = hwloc_get_obj_below_array_by_type(topology, 2, typev, idxv);
   assert(obj == hwloc_get_obj_by_depth(topology, 3, 20));

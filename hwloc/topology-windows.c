@@ -533,7 +533,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	id = -1;
 	switch (procInfo[i].Relationship) {
 	  case RelationNumaNode:
-	    type = HWLOC_OBJ_NODE;
+	    type = HWLOC_OBJ_NUMANODE;
 	    id = procInfo[i].NumaNode.NodeNumber;
 	    break;
 	  case RelationProcessorPackage:
@@ -559,7 +559,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
 
 	switch (type) {
-	  case HWLOC_OBJ_NODE:
+	  case HWLOC_OBJ_NUMANODE:
 	    {
 	      ULONGLONG avail;
 	      obj->nodeset = hwloc_bitmap_alloc();
@@ -644,7 +644,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	id = -1;
 	switch (procInfo->Relationship) {
 	  case RelationNumaNode:
-	    type = HWLOC_OBJ_NODE;
+	    type = HWLOC_OBJ_NUMANODE;
             num = 1;
             GroupMask = &procInfo->NumaNode.GroupMask;
 	    id = procInfo->NumaNode.NodeNumber;
@@ -695,7 +695,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	hwloc_debug("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
 
 	switch (type) {
-	  case HWLOC_OBJ_NODE:
+	  case HWLOC_OBJ_NUMANODE:
 	    {
 	      ULONGLONG avail;
 	      obj->nodeset = hwloc_bitmap_alloc();

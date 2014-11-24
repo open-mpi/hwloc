@@ -75,7 +75,7 @@ int main(void)
   assert(!err);
 
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 1)->os_index == 5);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 1)->os_index == 2);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1)->os_index == 2);
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 12)->os_index == 3);
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 13)->os_index == 11);
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 14)->os_index == 19);

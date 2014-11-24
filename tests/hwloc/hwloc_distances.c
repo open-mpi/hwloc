@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2011 inria.  All rights reserved.
+ * Copyright © 2010-2014 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -73,7 +73,7 @@ int main(void)
   }
 
   /* check that hwloc_get_latency works fine on numa distances */
-  distances = hwloc_get_whole_distance_matrix_by_type(topology, HWLOC_OBJ_NODE);
+  distances = hwloc_get_whole_distance_matrix_by_type(topology, HWLOC_OBJ_NUMANODE);
   if (!distances || !distances->latency) {
     fprintf(stderr, "No NUMA distance matrix!\n");
     return -1;
@@ -83,8 +83,8 @@ int main(void)
   nbobjs = distances->nbobjs;
   for(i=0; i<nbobjs; i++)
     for(j=0; j<nbobjs; j++) {
-      obj1 = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, i);
-      obj2 = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, j);
+      obj1 = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
+      obj2 = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, j);
       err = hwloc_get_latency(topology, obj1, obj2, &d1, &d2);
       assert(!err);
       assert(d1 == distances->latency[i*nbobjs+j]);

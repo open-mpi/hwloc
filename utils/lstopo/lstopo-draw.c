@@ -339,7 +339,7 @@ RECURSE_BEGIN(obj, border) \
 
 /* Pack objects in a grid */
 #define RECURSE_RECT(obj, methods, separator, border) do {\
-  if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NODE) { \
+  if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NUMANODE) { \
     /* Nodes shouldn't be put with an arbitrary geometry, as NUMA distances may not be that way */ \
     int pvert = prefer_vert(topology, logical, level, output, depth, x, y, separator); \
     if (pvert) \
@@ -477,7 +477,7 @@ lstopo_set_object_color(struct draw_methods *methods,
     s->bg.b = MISC_B_COLOR;
     break;
 
-  case HWLOC_OBJ_NODE:
+  case HWLOC_OBJ_NUMANODE:
     s->bg.r = NODE_R_COLOR;
     s->bg.g = NODE_G_COLOR;
     s->bg.b = NODE_B_COLOR;
@@ -1199,7 +1199,7 @@ get_type_fun(hwloc_obj_type_t type)
   switch (type) {
     case HWLOC_OBJ_SYSTEM: return system_draw;
     case HWLOC_OBJ_MACHINE: return machine_draw;
-    case HWLOC_OBJ_NODE: return node_draw;
+    case HWLOC_OBJ_NUMANODE: return node_draw;
     case HWLOC_OBJ_PACKAGE: return package_draw;
     case HWLOC_OBJ_CACHE: return cache_draw;
     case HWLOC_OBJ_CORE: return core_draw;
