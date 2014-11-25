@@ -591,6 +591,16 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     return -1;
   }
 
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
+    if (!obj->nodeset) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "invalid NUMA node object P#%u without nodeset\n",
+		obj->os_index);
+      return -1;
+    }
+    data->nbnumanodes++;
+  }
+
   if (obj->parent) {
     /* root->parent is NULL, and root is already inserted */
     hwloc_insert_object_by_parent(topology, obj->parent /* filled by the caller */, obj);
@@ -831,6 +841,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
   hwloc_localeswitch_init();
 
   data->first_distances = data->last_distances = NULL;
+  data->nbnumanodes = 0;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -851,6 +862,30 @@ hwloc_look_xml(struct hwloc_backend *backend)
   if (!root->cpuset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid root object without cpuset\n");
+    goto err;
+  }
+
+  if (!data->nbnumanodes) {
+    /* before 2.0, XML could have no NUMA node objects and no nodesets */
+    hwloc_obj_t numa;
+    if (!root->nodeset)
+      root->nodeset = hwloc_bitmap_alloc();
+    if (!root->allowed_nodeset)
+      root->allowed_nodeset = hwloc_bitmap_alloc();
+    if (!root->complete_nodeset)
+      root->complete_nodeset = hwloc_bitmap_alloc();
+    numa = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
+    numa->cpuset = hwloc_bitmap_dup(root->cpuset);
+    numa->nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_set(numa->nodeset, 0);
+    /* insert by cpuset so that the root nodesets are updated */
+    hwloc_insert_object_by_cpuset(topology, numa);
+  }
+
+  /* make sure we have a nodeset now. if we got NUMA nodes without nodeset, something bad happened */
+  if (!root->nodeset) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "invalid root object without nodeset\n");
     goto err;
   }
 

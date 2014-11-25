@@ -23,6 +23,9 @@ int main(void)
 
   err = hwloc_topology_init(&topology);
   assert(!err);
+  /* temporary needed until the core insert a NUMA level as XML now does */
+  err = hwloc_topology_set_synthetic(topology, "NUMANode:2 Socket:1 L3Cache:1 L2Cache:8 L1dCache:1 L1iCache:1 Core:1 PU:2");
+  assert(!err);
   err = hwloc_topology_load(topology);
   assert(!err);
   hwloc_topology_check(topology);
