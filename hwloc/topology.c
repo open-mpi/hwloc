@@ -1406,50 +1406,6 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     propagate_unused_cpuset(child, sys);
 }
 
-/* Force full nodeset for non-NUMA machines */
-static void
-add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
-{
-  hwloc_obj_t child, *temp;
-
-  /* I/O devices (and their children) have no sets */
-  if (hwloc_obj_type_is_io(obj->type))
-    return;
-
-  if (parent_has_sets && obj->type != HWLOC_OBJ_MISC) {
-    /* non-MISC object must have cpuset if parent has one. */
-    assert(obj->cpuset);
-  }
-
-  /* other sets must be consistent with main cpuset:
-   * check cpusets and add nodesets if needed.
-   *
-   * MISC may have no sets at all (if added by parent), or usual ones (if added by cpuset),
-   * but that's not easy to detect, so just make sure sets are consistent as usual.
-   */
-  if (obj->cpuset) {
-    assert(obj->online_cpuset);
-    assert(obj->complete_cpuset);
-    assert(obj->allowed_cpuset);
-    if (!obj->nodeset)
-      obj->nodeset = hwloc_bitmap_alloc_full();
-    if (!obj->complete_nodeset)
-      obj->complete_nodeset = hwloc_bitmap_alloc_full();
-    if (!obj->allowed_nodeset)
-      obj->allowed_nodeset = hwloc_bitmap_alloc_full();
-  } else {
-    assert(!obj->online_cpuset);
-    assert(!obj->complete_cpuset);
-    assert(!obj->allowed_cpuset);
-    assert(!obj->nodeset);
-    assert(!obj->complete_nodeset);
-    assert(!obj->allowed_nodeset);
-  }
-
-  for_each_child_safe(child, obj, temp)
-    add_default_object_sets(child, obj->cpuset != NULL);
-}
-
 /* Setup object cpusets/nodesets by OR'ing its children. */
 HWLOC_DECLSPEC int
 hwloc_fill_object_sets(hwloc_obj_t obj)
@@ -2460,9 +2416,6 @@ next_cpubackend:
 
     print_objects(topology, 0, topology->levels[0][0]);
   }
-
-  hwloc_debug("%s", "\nAdd default object sets\n");
-  add_default_object_sets(topology->levels[0][0], 0);
 
   /* Now connect handy pointers to make remaining discovery easier. */
   hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
