@@ -625,8 +625,8 @@ static const hwloc_obj_type_t obj_order_type[] = {
  */
 static const int obj_type_priority[] = {
   /* first entry is HWLOC_OBJ_SYSTEM */     80,
-  /* next entry is HWLOC_OBJ_MACHINE */     100,
-  /* next entry is HWLOC_OBJ_NUMANODE */    80,
+  /* next entry is HWLOC_OBJ_MACHINE */     90,
+  /* next entry is HWLOC_OBJ_NUMANODE */    100,
   /* next entry is HWLOC_OBJ_PACKAGE */     40,
   /* next entry is HWLOC_OBJ_CACHE */       20,
   /* next entry is HWLOC_OBJ_CORE */        60,
