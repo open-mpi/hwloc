@@ -799,11 +799,12 @@ hwloc_look_xml(struct hwloc_backend *backend)
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_xml_backend_data_s *data = backend->private_data;
   struct hwloc__xml_import_state_s state, childstate;
+  struct hwloc_obj *root = topology->levels[0][0];
   char *tag;
   hwloc_localeswitch_declare;
   int ret;
 
-  assert(!topology->levels[0][0]->cpuset);
+  assert(!root->cpuset);
 
   hwloc_localeswitch_init();
 
@@ -817,7 +818,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
   ret = state.find_child(&state, &childstate, &tag);
   if (ret < 0 || !ret || strcmp(tag, "object"))
     goto failed;
-  ret = hwloc__xml_import_object(topology, data, topology->levels[0][0], &childstate);
+  ret = hwloc__xml_import_object(topology, data, root, &childstate);
   if (ret < 0)
     goto failed;
   state.close_child(&childstate);
