@@ -2300,13 +2300,20 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
 void hwloc_alloc_obj_cpusets(hwloc_obj_t obj)
 {
-  obj->cpuset = hwloc_bitmap_alloc_full();
-  obj->complete_cpuset = hwloc_bitmap_alloc();
-  obj->online_cpuset = hwloc_bitmap_alloc_full();
-  obj->allowed_cpuset = hwloc_bitmap_alloc_full();
-  obj->nodeset = hwloc_bitmap_alloc();
-  obj->complete_nodeset = hwloc_bitmap_alloc();
-  obj->allowed_nodeset = hwloc_bitmap_alloc_full();
+  if (!obj->cpuset)
+    obj->cpuset = hwloc_bitmap_alloc_full();
+  if (!obj->complete_cpuset)
+    obj->complete_cpuset = hwloc_bitmap_alloc();
+  if (!obj->online_cpuset)
+    obj->online_cpuset = hwloc_bitmap_alloc_full();
+  if (!obj->allowed_cpuset)
+    obj->allowed_cpuset = hwloc_bitmap_alloc_full();
+  if (!obj->nodeset)
+    obj->nodeset = hwloc_bitmap_alloc();
+  if (!obj->complete_nodeset)
+    obj->complete_nodeset = hwloc_bitmap_alloc();
+  if (!obj->allowed_nodeset)
+    obj->allowed_nodeset = hwloc_bitmap_alloc_full();
 }
 
 /* Main discovery loop */

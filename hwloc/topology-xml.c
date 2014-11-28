@@ -889,6 +889,9 @@ hwloc_look_xml(struct hwloc_backend *backend)
     goto err;
   }
 
+  /* allocate default cpusets and nodesets if missing, the core will restrict them */
+  hwloc_alloc_obj_cpusets(root);
+
   /* keep the "Backend" information intact */
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
