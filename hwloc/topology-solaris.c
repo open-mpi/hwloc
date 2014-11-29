@@ -50,14 +50,12 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 #ifdef HAVE_LIBLGRP
     if (!(flags & HWLOC_CPUBIND_NOMEMBIND)) {
       int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-      if (depth >= 0) {
-	int n = hwloc_get_nbobjs_by_depth(topology, depth);
-	int i;
-
-	for (i = 0; i < n; i++) {
-	  hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
-	  lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
-	}
+      int n, i;
+      assert (depth >= 0);
+      n = hwloc_get_nbobjs_by_depth(topology, depth);
+      for (i = 0; i < n; i++) {
+	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+	lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
       }
     }
 #endif /* HAVE_LIBLGRP */
@@ -67,39 +65,36 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 #ifdef HAVE_LIBLGRP
   if (!(flags & HWLOC_CPUBIND_NOMEMBIND)) {
     int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-    if (depth >= 0) {
-      int n = hwloc_get_nbobjs_by_depth(topology, depth);
-      int i;
-      int ok;
-      hwloc_bitmap_t target = hwloc_bitmap_alloc();
+    int n, i, ok;
+    assert(depth >= 0);
+    n = hwloc_get_nbobjs_by_depth(topology, depth);
+    hwloc_bitmap_t target = hwloc_bitmap_alloc();
+    for (i = 0; i < n; i++) {
+      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+      if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set))
+	hwloc_bitmap_or(target, target, obj->cpuset);
+    }
+
+    ok = hwloc_bitmap_isequal(target, hwloc_set);
+    hwloc_bitmap_free(target);
+
+    if (ok) {
+      /* Ok, managed to achieve hwloc_set by just combining NUMA nodes */
 
       for (i = 0; i < n; i++) {
-	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
-        if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set))
-          hwloc_bitmap_or(target, target, obj->cpuset);
-      }
+        hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
 
-      ok = hwloc_bitmap_isequal(target, hwloc_set);
-      hwloc_bitmap_free(target);
-
-      if (ok) {
-        /* Ok, managed to achieve hwloc_set by just combining NUMA nodes */
-
-        for (i = 0; i < n; i++) {
-          hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
-
-          if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set)) {
-            lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
-          } else {
-            if (flags & HWLOC_CPUBIND_STRICT)
-              lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
-            else
-              lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_WEAK);
-          }
+        if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set)) {
+          lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
+        } else {
+          if (flags & HWLOC_CPUBIND_STRICT)
+            lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
+          else
+            lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_WEAK);
         }
-
-        return 0;
       }
+
+      return 0;
     }
   }
 #endif /* HAVE_LIBLGRP */
@@ -145,10 +140,7 @@ hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
   int n;
   int i;
 
-  if (depth < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
+  assert(depth >= 0);
 
   /* first check if processor_bind() was used to bind to a single processor rather than to an lgroup */
   if ( processor_bind(idtype, id, PBIND_QUERY, &binding) == 0 && binding != PBIND_NONE ) {
@@ -215,10 +207,7 @@ hwloc_solaris_set_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t i
   }
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  if (depth < 0) {
-    errno = EXDEV;
-    return -1;
-  }
+  assert(depth >= 0);
   n = hwloc_get_nbobjs_by_depth(topology, depth);
 
   for (i = 0; i < n; i++) {
@@ -261,10 +250,7 @@ hwloc_solaris_get_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t i
   int n;
   int i;
 
-  if (depth < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
+  assert(depth >= 0);
 
   hwloc_bitmap_zero(nodeset);
   n = hwloc_get_nbobjs_by_depth(topology, depth);

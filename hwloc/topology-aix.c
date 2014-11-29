@@ -404,10 +404,7 @@ hwloc_aix_get_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   int depth, n, i;
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  if (depth < 0) {
-    errno = EXDEV;
-    return -1;
-  }
+  assert(depth >= 0);
   n = hwloc_get_nbobjs_by_depth(topology, depth);
 
   rset = rs_alloc(RS_EMPTY);

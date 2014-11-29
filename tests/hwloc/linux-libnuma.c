@@ -38,23 +38,19 @@ int main(void)
   nocpubutmemnodeset = hwloc_bitmap_alloc();
   nomembutcpunodeset = hwloc_bitmap_alloc();
   nomembutcpucpuset = hwloc_bitmap_alloc();
-  /* gather all nodes if any, or the whole system if no nodes */
-  if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE)) {
-    node = NULL;
-    while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) != NULL) {
-      hwloc_bitmap_or(set, set, node->cpuset);
-      if (hwloc_bitmap_iszero(node->cpuset)) {
-	if (node->memory.local_memory)
-	  hwloc_bitmap_set(nocpubutmemnodeset, node->os_index);
-	else
-	  hwloc_bitmap_set(nocpunomemnodeset, node->os_index);
-      } else if (!node->memory.local_memory) {
-	hwloc_bitmap_set(nomembutcpunodeset, node->os_index);
-	hwloc_bitmap_or(nomembutcpucpuset, nomembutcpucpuset, node->cpuset);
-      }
+  /* gather all nodes if any */
+  node = NULL;
+  while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) != NULL) {
+    hwloc_bitmap_or(set, set, node->cpuset);
+    if (hwloc_bitmap_iszero(node->cpuset)) {
+      if (node->memory.local_memory)
+        hwloc_bitmap_set(nocpubutmemnodeset, node->os_index);
+      else
+	hwloc_bitmap_set(nocpunomemnodeset, node->os_index);
+    } else if (!node->memory.local_memory) {
+      hwloc_bitmap_set(nomembutcpunodeset, node->os_index);
+      hwloc_bitmap_or(nomembutcpucpuset, nomembutcpucpuset, node->cpuset);
     }
-  } else {
-    hwloc_bitmap_or(set, set, hwloc_topology_get_complete_cpuset(topology));
   }
 
   set2 = hwloc_bitmap_alloc();
@@ -73,12 +69,7 @@ int main(void)
   hwloc_bitmap_free(set);
 
   /* convert full stuff between nodeset and libnuma */
-  if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE)) {
-    set = hwloc_bitmap_dup(hwloc_get_root_obj(topology)->complete_nodeset);
-  } else {
-    set = hwloc_bitmap_alloc();
-    hwloc_bitmap_fill(set);
-  }
+  set = hwloc_bitmap_dup(hwloc_get_root_obj(topology)->complete_nodeset);
 
   set2 = hwloc_bitmap_alloc();
   hwloc_nodeset_from_linux_libnuma_bitmask(topology, set2, numa_all_nodes_ptr);

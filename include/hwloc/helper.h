@@ -913,19 +913,9 @@ static __hwloc_inline void
 hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-	hwloc_obj_t obj;
-
-	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-		 if (hwloc_bitmap_iszero(_cpuset))
-			hwloc_bitmap_zero(nodeset);
-		else
-			/* Assume the whole system */
-			hwloc_bitmap_fill(nodeset);
-		return;
-	}
-
+	hwloc_obj_t obj = NULL;
+	assert(depth != HWLOC_TYPE_DEPTH_UNKNOWN);
 	hwloc_bitmap_zero(nodeset);
-	obj = NULL;
 	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, _cpuset, depth, obj)) != NULL)
 		hwloc_bitmap_set(nodeset, obj->os_index);
 }
@@ -941,11 +931,9 @@ static __hwloc_inline void
 hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-	hwloc_obj_t obj;
-	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN )
-		return;
+	hwloc_obj_t obj = NULL;
+	assert(depth != HWLOC_TYPE_DEPTH_UNKNOWN);
 	hwloc_bitmap_zero(nodeset);
-	obj = NULL;
 	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, _cpuset, depth, obj)) != NULL)
 		hwloc_bitmap_set(nodeset, obj->os_index);
 }
@@ -962,19 +950,9 @@ static __hwloc_inline void
 hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-	hwloc_obj_t obj;
-
-	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN ) {
-		if (hwloc_bitmap_iszero(nodeset))
-			hwloc_bitmap_zero(_cpuset);
-		else
-			/* Assume the whole system */
-			hwloc_bitmap_fill(_cpuset);
-		return;
-	}
-
+	hwloc_obj_t obj = NULL;
+	assert(depth != HWLOC_TYPE_DEPTH_UNKNOWN);
 	hwloc_bitmap_zero(_cpuset);
-	obj = NULL;
 	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
 		if (hwloc_bitmap_isset(nodeset, obj->os_index))
 			/* no need to check obj->cpuset because objects in levels always have a cpuset */
@@ -993,11 +971,9 @@ static __hwloc_inline void
 hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-	hwloc_obj_t obj;
-	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN )
-		return;
+	hwloc_obj_t obj = NULL;
+	assert(depth != HWLOC_TYPE_DEPTH_UNKNOWN);
 	hwloc_bitmap_zero(_cpuset);
-	obj = NULL;
 	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
 		if (hwloc_bitmap_isset(nodeset, obj->os_index))
 			/* no need to check obj->cpuset because objects in levels always have a cpuset */

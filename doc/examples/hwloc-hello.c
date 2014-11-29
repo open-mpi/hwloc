@@ -37,6 +37,7 @@ int main(void)
     int levels;
     char string[128];
     int topodepth;
+    void *m;
     hwloc_topology_t topology;
     hwloc_cpuset_t cpuset;
     hwloc_obj_t obj;
@@ -148,22 +149,19 @@ int main(void)
      * Allocate some memory on the last NUMA node, bind some existing
      * memory to the last NUMA node.
      *****************************************************************/
-    /* Get last node. */
+    /* Get last node. There's always at least one. */
     n = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
-    if (n) {
-        void *m;
-        size = 1024*1024;
+    obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, n - 1);
 
-        obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, n - 1);
-        m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
-                HWLOC_MEMBIND_DEFAULT, 0);
-        hwloc_free(topology, m, size);
+    size = 1024*1024;
+    m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
+                                    HWLOC_MEMBIND_DEFAULT, 0);
+    hwloc_free(topology, m, size);
 
-        m = malloc(size);
-        hwloc_set_area_membind_nodeset(topology, m, size, obj->nodeset,
-                HWLOC_MEMBIND_DEFAULT, 0);
-        free(m);
-    }
+    m = malloc(size);
+    hwloc_set_area_membind_nodeset(topology, m, size, obj->nodeset,
+                                   HWLOC_MEMBIND_DEFAULT, 0);
+    free(m);
 
     /* Destroy topology object. */
     hwloc_topology_destroy(topology);

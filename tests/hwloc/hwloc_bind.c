@@ -203,25 +203,24 @@ int main(void)
   hwloc_bitmap_free(set);
 
   obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
+  assert(obj);
+  set = hwloc_bitmap_dup(obj->cpuset);
+  hwloc_bitmap_asprintf(&str, set);
+  printf("cpuset set is %s\n", str);
+  free(str);
+
+  testmem3(set);
+
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1);
   if (obj) {
-    set = hwloc_bitmap_dup(obj->cpuset);
+    hwloc_bitmap_or(set, set, obj->cpuset);
     hwloc_bitmap_asprintf(&str, set);
     printf("cpuset set is %s\n", str);
     free(str);
 
     testmem3(set);
-
-    obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1);
-    if (obj) {
-      hwloc_bitmap_or(set, set, obj->cpuset);
-      hwloc_bitmap_asprintf(&str, set);
-      printf("cpuset set is %s\n", str);
-      free(str);
-
-      testmem3(set);
-    }
-    hwloc_bitmap_free(set);
   }
+  hwloc_bitmap_free(set);
 
   hwloc_topology_destroy(topology);
   return 0;
