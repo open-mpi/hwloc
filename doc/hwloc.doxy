@@ -175,12 +175,12 @@ On a 4-package 2-core machine with hyperthreading, the \c lstopo tool
 may show the following graphical output:
 
 \image html dudley.png
-\image latex dudley.png "" width=9cm
+\image latex dudley.png "" width=\textwidth
 
 Here's the equivalent output in textual form:
 
 \verbatim
-Machine (16GB)
+Machine + NUMANode L#0 (P#0)
   Package L#0 + L3 L#0 (4096KB)
     L2 L#0 (1024KB) + L1 L#0 (16KB) + Core L#0
       PU L#0 (P#0)
@@ -327,12 +327,12 @@ On a 2-package quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
 each package):
 
 \image html emmett.png
-\image latex emmett.png "" width=7cm
+\image latex emmett.png "" width=\textwidth
 
 Here's the same output in textual form:
 
 \verbatim
-Machine (16GB)
+Machine (16GB) + NUMANode L#0 (P#0)
   Package L#0
     L2 L#0 (4096KB)
       L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
@@ -517,33 +517,37 @@ hwloc-hello could be something like the following:
 \verbatim
 shell$ ./hwloc-hello
 *** Objects at level 0
-Index 0: Machine(3938MB)
+Index 0: Machine
 *** Objects at level 1
+Index 0: NUMANode#0(3938MB)
+*** Objects at level 2
 Index 0: Package#0
 Index 1: Package#1
-*** Objects at level 2
+*** Objects at level 3
 Index 0: Core#0
 Index 1: Core#1
 Index 2: Core#3
 Index 3: Core#2
-*** Objects at level 3
+*** Objects at level 4
 Index 0: PU#0
 Index 1: PU#1
 Index 2: PU#2
 Index 3: PU#3
 *** Printing overall tree
-Machine(3938MB)
-  Package#0
-    Core#0
-      PU#0
-    Core#1
-      PU#1
-  Package#1
-    Core#3
-      PU#2
-    Core#2
-      PU#3
+Machine
+  NUMANode#0(3938MB)
+    Package#0
+      Core#0
+        PU#0
+      Core#1
+        PU#1
+    Package#1
+      Core#3
+        PU#2
+      Core#2
+        PU#3
 *** 2 package(s)
+*** Logical processor 0 has 0 caches totaling 0KB
 shell$ 
 \endverbatim
 

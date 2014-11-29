@@ -179,6 +179,9 @@ typedef enum {
   HWLOC_OBJ_NUMANODE,	/**< \brief NUMA node.
 			  * A set of processors around memory which the
 			  * processors can directly access.
+			  *
+			  * There is always at one such object in the topology
+			  * even if the machine is not NUMA.
 			  */
   HWLOC_OBJ_PACKAGE,	/**< \brief Physical package, what goes into a socket.
 			  * In the physical meaning, i.e. that you can add
