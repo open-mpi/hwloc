@@ -211,58 +211,9 @@ Machine + NUMANode L#0 (P#0)
       PU L#15 (P#15)
 \endverbatim
 
-Finally, here's the equivalent output in XML.  Long lines were
-artificially broken for document clarity (in the real output, each XML
-tag is on a single line), and only package #0 is shown for brevity:
-
-\verbatim
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE topology SYSTEM "hwloc.dtd">
-<topology>
-  <object type="Machine" os_index="0" cpuset="0x0000ffff" 
-      complete_cpuset="0x0000ffff" online_cpuset="0x0000ffff" 
-      allowed_cpuset="0x0000ffff" 
-      dmi_board_vendor="Dell Computer Corporation" dmi_board_name="0RD318" 
-      local_memory="16648183808">
-    <page_type size="4096" count="4064498"/>
-    <page_type size="2097152" count="0"/>
-    <object type="Package" os_index="0" cpuset="0x00001111" ... >
-      <object type="Cache" cpuset="0x00001111" ...
-          cache_size="4194304" depth="3" cache_linesize="64">
-        <object type="Cache" cpuset="0x00000101" ...
-            cache_size="1048576" depth="2" cache_linesize="64">
-          <object type="Cache" cpuset="0x00000101" ...
-              cache_size="16384" depth="1" cache_linesize="64">
-            <object type="Core" os_index="0" ... >
-              <object type="PU" os_index="0" cpuset="0x00000001" 
-                  complete_cpuset="0x00000001" online_cpuset="0x00000001" 
-                  allowed_cpuset="0x00000001"/>
-              <object type="PU" os_index="8" cpuset="0x00000100"
-                  complete_cpuset="0x00000100" online_cpuset="0x00000100" 
-                  allowed_cpuset="0x00000100"/>
-            </object>
-          </object>
-        </object>
-        <object type="Cache" cpuset="0x00001010" ...
-            cache_size="1048576" depth="2" cache_linesize="64">
-          <object type="Cache" cpuset="0x00001010" 
-              cache_size="16384" depth="1" cache_linesize="64">
-            <object type="Core" os_index="1" cpuset="0x00001010" ... >
-              <object type="PU" os_index="4" cpuset="0x00000010" 
-                  complete_cpuset="0x00000010" online_cpuset="0x00000010" 
-                  allowed_cpuset="0x00000010"/>
-              <object type="PU" os_index="12" cpuset="0x00001000" 
-                  complete_cpuset="0x00001000" online_cpuset="0x00001000" 
-                  allowed_cpuset="0x00001000"/>
-            </object>
-          </object>
-        </object>
-      </object>
-    </object>
-    <!-- ...other packages listed here ... -->
-  </object>
-</topology>
-\endverbatim
+Note that there is also an equivalent output in XML that is meant for
+exporting/importing topologies but it is hardly readable to human-beings
+(see \ref xml for details).
 
 On a 4-package 2-core Opteron NUMA machine, the \c lstopo tool may show
 the following graphical output:
@@ -286,41 +237,6 @@ Machine (32GB)
   NUMANode L#3 (P#3 8192MB) + Package L#3
     L2 L#6 (1024KB) + L1 L#6 (64KB) + Core L#6 + PU L#6 (P#6)
     L2 L#7 (1024KB) + L1 L#7 (64KB) + Core L#7 + PU L#7 (P#7)
-\endverbatim
-
-And here's the equivalent output in XML.  Similar to above, line
-breaks were added and only PU #0 is shown for brevity:
-
-\verbatim
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE topology SYSTEM "hwloc.dtd">
-<topology>
-  <object type="Machine" os_index="0" cpuset="0x000000ff" 
-      complete_cpuset="0x000000ff" online_cpuset="0x000000ff" 
-      allowed_cpuset="0x000000ff" nodeset="0x000000ff" 
-      complete_nodeset="0x000000ff" allowed_nodeset="0x000000ff" 
-      dmi_board_vendor="TYAN Computer Corp" dmi_board_name="S4881 ">
-    <page_type size="4096" count="0"/>
-    <page_type size="2097152" count="0"/>
-    <object type="NUMANode" os_index="0" cpuset="0x00000003" ...
-        nodeset="0x00000001" ... local_memory="7514177536">
-      <page_type size="4096" count="1834516"/>
-      <page_type size="2097152" count="0"/>
-      <object type="Package" os_index="0" cpuset="0x00000003" ... >
-        <object type="Cache" cpuset="0x00000001" ...
-            cache_size="1048576" depth="2" cache_linesize="64">
-          <object type="Cache" cpuset="0x00000001" ...
-              cache_size="65536" depth="1" cache_linesize="64">
-            <object type="Core" os_index="0" ... >
-              <object type="PU" os_index="0" cpuset="0x00000001" 
-                  complete_cpuset="0x00000001" online_cpuset="0x00000001" 
-                  allowed_cpuset="0x00000001" nodeset="0x00000001" 
-                  complete_nodeset="0x00000001" allowed_nodeset="0x00000001"/>
-            </object>
-          </object>
-        </object>
-  <!-- ...more objects listed here ... -->
-</topology>
 \endverbatim
 
 On a 2-package quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
@@ -347,42 +263,6 @@ Machine (16GB) + NUMANode L#0 (P#0)
     L2 L#3 (4096KB)
       L1 L#6 (32KB) + Core L#6 + PU L#6 (P#3)
       L1 L#7 (32KB) + Core L#7 + PU L#7 (P#7)
-\endverbatim
-
-And the same output in XML (line breaks added, only PU #0 shown):
-
-\verbatim
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE topology SYSTEM "hwloc.dtd">
-<topology>
-  <object type="Machine" os_index="0" cpuset="0x000000ff" 
-      complete_cpuset="0x000000ff" online_cpuset="0x000000ff" 
-      allowed_cpuset="0x000000ff" dmi_board_vendor="Dell Inc." 
-      dmi_board_name="0NR282" local_memory="16865292288">
-    <page_type size="4096" count="4117503"/>
-    <page_type size="2097152" count="0"/>
-    <object type="Package" os_index="0" cpuset="0x00000055" ... >
-      <object type="Cache" cpuset="0x00000011" ...
-          cache_size="4194304" depth="2" cache_linesize="64">
-        <object type="Cache" cpuset="0x00000001" ...
-            cache_size="32768" depth="1" cache_linesize="64">
-          <object type="Core" os_index="0" ... >
-            <object type="PU" os_index="0" cpuset="0x00000001" 
-                complete_cpuset="0x00000001" online_cpuset="0x00000001" 
-                allowed_cpuset="0x00000001"/>
-          </object>
-        </object>
-        <object type="Cache" cpuset="0x00000010" ...
-            cache_size="32768" depth="1" cache_linesize="64">
-          <object type="Core" os_index="1" ... >
-            <object type="PU" os_index="4" cpuset="0x00000010" ...
-                complete_cpuset="0x00000010" online_cpuset="0x00000010" 
-                allowed_cpuset="0x00000010"/>
-          </object>
-        </object>
-      </object>
-  <!-- ...more objects listed here ... -->
-</topology>
 \endverbatim
 
 \htmlonly
