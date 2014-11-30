@@ -569,6 +569,28 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
   }
 
+  if (obj->cpuset && obj->parent && !obj->parent->cpuset) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "invalid object %s P#%u with cpuset while parent has none\n",
+	      hwloc_obj_type_string(obj->type), obj->os_index);
+    return -1;
+  }
+  if (obj->nodeset && obj->parent && !obj->parent->nodeset) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "invalid object %s P#%u with nodeset while parent has none\n",
+	      hwloc_obj_type_string(obj->type), obj->os_index);
+    return -1;
+  }
+
+  if (!obj->cpuset
+      && obj->type != HWLOC_OBJ_BRIDGE && obj->type != HWLOC_OBJ_PCI_DEVICE
+      && obj->type != HWLOC_OBJ_OS_DEVICE && obj->type != HWLOC_OBJ_MISC) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "invalid non-I/O object %s P#%u without cpuset\n",
+	      hwloc_obj_type_string(obj->type), obj->os_index);
+    return -1;
+  }
+
   if (obj->parent) {
     /* root->parent is NULL, and root is already inserted */
     hwloc_insert_object_by_parent(topology, obj->parent /* filled by the caller */, obj);
@@ -825,6 +847,12 @@ hwloc_look_xml(struct hwloc_backend *backend)
 
   /* find end of topology tag */
   state.close_tag(&state);
+
+  if (!root->cpuset) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "invalid root object without cpuset\n");
+    goto err;
+  }
 
   /* keep the "Backend" information intact */
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
