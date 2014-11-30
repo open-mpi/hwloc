@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -32,12 +32,16 @@ int main(void)
   hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
   obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test by cpuset under root");
   assert(obj);
+  obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test2 by cpuset under root");
+  assert(obj);
   hwloc_bitmap_free(cpuset);
 
   /* insert by cpuset below first available PU */
   cpuset = hwloc_bitmap_alloc();
   hwloc_bitmap_set(cpuset, hwloc_bitmap_first(hwloc_topology_get_topology_cpuset(topology)));
   obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test by cpuset under first available PU");
+  assert(obj);
+  obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test2 by cpuset under first available PU");
   assert(obj);
   hwloc_bitmap_free(cpuset);
 
