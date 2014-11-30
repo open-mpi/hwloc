@@ -3014,26 +3014,22 @@ hwloc__check_children(struct hwloc_obj *parent)
     /* check that parent->cpuset == exclusive OR of children
      * (can be wrong for complete_cpuset since disallowed/offline/unknown PUs can be removed)
      */
-    hwloc_bitmap_t remaining_parent_set = hwloc_bitmap_dup(parent->cpuset);
+    hwloc_bitmap_t remaining_parent_cpuset = hwloc_bitmap_dup(parent->cpuset);
     for(j=0; j<parent->arity; j++) {
       if (!parent->children[j]->cpuset)
 	continue;
       /* check that child cpuset is included in the reminder of the parent */
-      assert(hwloc_bitmap_isincluded(parent->children[j]->cpuset, remaining_parent_set));
-      hwloc_bitmap_andnot(remaining_parent_set, remaining_parent_set, parent->children[j]->cpuset);
+      assert(hwloc_bitmap_isincluded(parent->children[j]->cpuset, remaining_parent_cpuset));
+      hwloc_bitmap_andnot(remaining_parent_cpuset, remaining_parent_cpuset, parent->children[j]->cpuset);
     }
-    if (parent->type == HWLOC_OBJ_PU) {
+
+    if (parent->type == HWLOC_OBJ_PU)
       /* if parent is a PU, its os_index bit may remain.
-       * it may be in a Misc child inserted by cpuset, or could be in no child */
-      if (hwloc_bitmap_weight(remaining_parent_set) == 1)
-	assert((unsigned) hwloc_bitmap_first(remaining_parent_set) == parent->os_index);
-      else
-	assert(hwloc_bitmap_iszero(remaining_parent_set));
-    } else {
-      /* nothing remains */
-      assert(hwloc_bitmap_iszero(remaining_parent_set));
-    }
-    hwloc_bitmap_free(remaining_parent_set);
+       * or it could already have been removed by a Misc child inserted by cpuset. */
+      hwloc_bitmap_clr(remaining_parent_cpuset, parent->os_index);
+    /* nothing remains */
+    assert(hwloc_bitmap_iszero(remaining_parent_cpuset));
+    hwloc_bitmap_free(remaining_parent_cpuset);
 
   } else {
     /* check that children have no cpuset if the parent has none */
