@@ -2988,17 +2988,22 @@ hwloc__check_children(struct hwloc_obj *parent)
   assert(parent->last_child == parent->children[parent->arity-1]);
   assert(parent->last_child->next_sibling == NULL);
 
+  /* we already checked in the caller that objects have either all sets or none */
   if (parent->cpuset) {
     /* check that parent->cpuset == exclusive OR of children
      * (can be wrong for complete_cpuset since disallowed/offline/unknown PUs can be removed)
      */
     hwloc_bitmap_t remaining_parent_cpuset = hwloc_bitmap_dup(parent->cpuset);
+    hwloc_bitmap_t remaining_parent_nodeset = hwloc_bitmap_dup(parent->nodeset);
     for(j=0; j<parent->arity; j++) {
       if (!parent->children[j]->cpuset)
 	continue;
       /* check that child cpuset is included in the reminder of the parent */
       assert(hwloc_bitmap_isincluded(parent->children[j]->cpuset, remaining_parent_cpuset));
       hwloc_bitmap_andnot(remaining_parent_cpuset, remaining_parent_cpuset, parent->children[j]->cpuset);
+      /* check that child cpuset is included in the parent (multiple children may have the same nodeset when we're below a NUMA node) */
+      assert(hwloc_bitmap_isincluded(parent->children[j]->nodeset, parent->nodeset));
+      hwloc_bitmap_andnot(remaining_parent_nodeset, remaining_parent_nodeset, parent->children[j]->nodeset);
     }
 
     if (parent->type == HWLOC_OBJ_PU)
@@ -3009,8 +3014,16 @@ hwloc__check_children(struct hwloc_obj *parent)
     assert(hwloc_bitmap_iszero(remaining_parent_cpuset));
     hwloc_bitmap_free(remaining_parent_cpuset);
 
+    if (parent->type == HWLOC_OBJ_NUMANODE)
+      /* if parent is a NUMA node, its os_index bit may remain.
+       * or it could already have been removed by a child. */
+      hwloc_bitmap_clr(remaining_parent_nodeset, parent->os_index);
+    /* nothing remains */
+    assert(hwloc_bitmap_iszero(remaining_parent_nodeset));
+    hwloc_bitmap_free(remaining_parent_nodeset);
+
   } else {
-    /* check that children have no cpuset if the parent has none */
+    /* check that children have no sets if the parent has none */
     for(j=0; j<parent->arity; j++)
       assert(!parent->children[j]->cpuset);
   }
@@ -3117,28 +3130,44 @@ hwloc_topology_check(struct hwloc_topology *topology)
 	assert(prev->next_cousin == obj);
 	assert(obj->prev_cousin == prev);
       }
-      if (obj->complete_cpuset) {
-        if (obj->cpuset)
-          assert(hwloc_bitmap_isincluded(obj->cpuset, obj->complete_cpuset));
-        if (obj->online_cpuset)
-          assert(hwloc_bitmap_isincluded(obj->online_cpuset, obj->complete_cpuset));
-        if (obj->allowed_cpuset)
-          assert(hwloc_bitmap_isincluded(obj->allowed_cpuset, obj->complete_cpuset));
-      }
-      if (obj->complete_nodeset) {
-        if (obj->nodeset)
-          assert(hwloc_bitmap_isincluded(obj->nodeset, obj->complete_nodeset));
-        if (obj->allowed_nodeset)
-          assert(hwloc_bitmap_isincluded(obj->allowed_nodeset, obj->complete_nodeset));
-      }
-      /* check that PUs and NUMA nodes have cpuset/nodeset */
+      /* check that PUs and NUMA nodes have correct cpuset/nodeset */
       if (obj->type == HWLOC_OBJ_PU) {
-	assert(obj->cpuset);
 	assert(hwloc_bitmap_weight(obj->cpuset) == 1);
 	assert(hwloc_bitmap_first(obj->cpuset) == (int) obj->os_index);
       }
       if (obj->type == HWLOC_OBJ_NUMANODE) {
-	assert(obj->nodeset);
+	assert(hwloc_bitmap_weight(obj->nodeset) == 1);
+	assert(hwloc_bitmap_first(obj->nodeset) == (int) obj->os_index);
+      }
+      /* check that all objects have a cpuset except I/O and Misc */
+      if (hwloc_obj_type_is_io(obj->type)) {
+	assert(!obj->cpuset);
+      } else if (obj->type != HWLOC_OBJ_MISC) {
+	assert(obj->cpuset);
+      } else {
+	/* Misc may have cpusets or not */
+      }
+      /* there's other cpusets and nodesets if and only if there's a main cpuset */
+      assert(!!obj->cpuset == !!obj->complete_cpuset);
+      assert(!!obj->cpuset == !!obj->allowed_cpuset);
+      assert(!!obj->cpuset == !!obj->online_cpuset);
+      assert(!!obj->cpuset == !!obj->nodeset);
+      assert(!!obj->nodeset == !!obj->complete_nodeset);
+      assert(!!obj->nodeset == !!obj->allowed_nodeset);
+      /* check that complete/allowed/inline sets are larger than the main sets */
+      if (obj->cpuset) {
+	assert(hwloc_bitmap_isincluded(obj->cpuset, obj->complete_cpuset));
+	assert(hwloc_bitmap_isincluded(obj->online_cpuset, obj->complete_cpuset));
+	assert(hwloc_bitmap_isincluded(obj->allowed_cpuset, obj->complete_cpuset));
+	assert(hwloc_bitmap_isincluded(obj->nodeset, obj->complete_nodeset));
+	assert(hwloc_bitmap_isincluded(obj->allowed_nodeset, obj->complete_nodeset));
+      }
+      /* check that PUs and NUMA nodes have correct cpuset/nodeset */
+      if (obj->type == HWLOC_OBJ_PU) {
+	assert(hwloc_bitmap_weight(obj->cpuset) == 1);
+	assert(hwloc_bitmap_first(obj->cpuset) == (int) obj->os_index);
+      }
+      if (obj->type == HWLOC_OBJ_NUMANODE) {
 	assert(hwloc_bitmap_weight(obj->nodeset) == 1);
 	assert(hwloc_bitmap_first(obj->nodeset) == (int) obj->os_index);
       }
