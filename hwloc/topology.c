@@ -331,6 +331,16 @@ void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *val
   hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
 
+/* Traverse children of a parent in a safe way: reread the next pointer as
+ * appropriate to prevent crash on child deletion:  */
+#define for_each_child_safe(child, parent, pchild) \
+  for (pchild = &(parent)->first_child, child = *pchild; \
+       child; \
+       /* Check whether the current child was not dropped.  */ \
+       (*pchild == child ? pchild = &(child->next_sibling) : NULL), \
+       /* Get pointer to next childect.  */ \
+        child = *pchild)
+
 /* Free an object and all its content.  */
 void
 hwloc_free_unlinked_object(hwloc_obj_t obj)
@@ -353,6 +363,43 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
   hwloc_bitmap_free(obj->complete_nodeset);
   hwloc_bitmap_free(obj->allowed_nodeset);
   free(obj);
+}
+
+/* Remove an object from its parent and free it.
+ * Only updates next_sibling/first_child pointers,
+ * so may only be used during early discovery.
+ * Children are inserted where the object was.
+ */
+static void
+unlink_and_free_single_object(hwloc_obj_t *pparent)
+{
+  hwloc_obj_t parent = *pparent;
+  hwloc_obj_t child = parent->first_child;
+  /* Replace object with its list of children */
+  if (child) {
+    *pparent = child;
+    while (child->next_sibling)
+      child = child->next_sibling;
+    child->next_sibling = parent->next_sibling;
+  } else
+    *pparent = parent->next_sibling;
+  hwloc_free_unlinked_object(parent);
+}
+
+/* Remove an object and its children from its parent and free them.
+ * Only updates next_sibling/first_child pointers,
+ * so may only be used during early discovery.
+ */
+static void
+unlink_and_free_object_and_children(hwloc_obj_t *pobj)
+{
+  hwloc_obj_t obj = *pobj, child, *pchild;
+
+  for_each_child_safe(child, obj, pchild)
+    unlink_and_free_object_and_children(pchild);
+
+  *pobj = obj->next_sibling;
+  hwloc_free_unlinked_object(obj);
 }
 
 static void
@@ -1169,16 +1216,6 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
   return obj;
 }
 
-/* Traverse children of a parent in a safe way: reread the next pointer as
- * appropriate to prevent crash on child deletion:  */
-#define for_each_child_safe(child, parent, pchild) \
-  for (pchild = &(parent)->first_child, child = *pchild; \
-       child; \
-       /* Check whether the current child was not dropped.  */ \
-       (*pchild == child ? pchild = &(child->next_sibling) : NULL), \
-       /* Get pointer to next childect.  */ \
-        child = *pchild)
-
 /* Append I/O devices below this object to their list */
 static void
 append_iodevs(hwloc_topology_t topology, hwloc_obj_t obj)
@@ -1605,27 +1642,6 @@ remove_unused_cpusets(hwloc_obj_t obj)
     remove_unused_cpusets(child);
 }
 
-/* Remove an object from its parent and free it.
- * Only updates next_sibling/first_child pointers,
- * so may only be used during early discovery.
- * Children are inserted where the object was.
- */
-static void
-unlink_and_free_single_object(hwloc_obj_t *pparent)
-{
-  hwloc_obj_t parent = *pparent;
-  hwloc_obj_t child = parent->first_child;
-  /* Replace object with its list of children */
-  if (child) {
-    *pparent = child;
-    while (child->next_sibling)
-      child = child->next_sibling;
-    child->next_sibling = parent->next_sibling;
-  } else
-    *pparent = parent->next_sibling;
-  hwloc_free_unlinked_object(parent);
-}
-
 static void
 reorder_children(hwloc_obj_t parent)
 {
@@ -1674,22 +1690,6 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pparent)
   }
 
   return dropped;
-}
-
-/* Remove an object and its children from its parent and free them.
- * Only updates next_sibling/first_child pointers,
- * so may only be used during early discovery.
- */
-static void
-unlink_and_free_object_and_children(hwloc_obj_t *pobj)
-{
-  hwloc_obj_t obj = *pobj, child, *pchild;
-
-  for_each_child_safe(child, obj, pchild)
-    unlink_and_free_object_and_children(pchild);
-
-  *pobj = obj->next_sibling;
-  hwloc_free_unlinked_object(obj);
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
