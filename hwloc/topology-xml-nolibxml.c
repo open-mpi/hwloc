@@ -119,12 +119,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
   int namelen;
 
   childstate->parent = state;
-  childstate->next_attr = state->next_attr;
-  childstate->find_child = state->find_child;
-  childstate->close_tag = state->close_tag;
-  childstate->close_child = state->close_child;
-  childstate->get_content = state->get_content;
-  childstate->close_content = state->close_content;
+  childstate->global = state->global;
 
   /* auto-closed tags have no children */
   if (nstate->closed)
@@ -274,12 +269,12 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   if (strncmp(buffer, "<topology>", 10))
     goto failed;
 
-  state->next_attr = hwloc__nolibxml_import_next_attr;
-  state->find_child = hwloc__nolibxml_import_find_child;
-  state->close_tag = hwloc__nolibxml_import_close_tag;
-  state->close_child = hwloc__nolibxml_import_close_child;
-  state->get_content = hwloc__nolibxml_import_get_content;
-  state->close_content = hwloc__nolibxml_import_close_content;
+  state->global->next_attr = hwloc__nolibxml_import_next_attr;
+  state->global->find_child = hwloc__nolibxml_import_find_child;
+  state->global->close_tag = hwloc__nolibxml_import_close_tag;
+  state->global->close_child = hwloc__nolibxml_import_close_child;
+  state->global->get_content = hwloc__nolibxml_import_get_content;
+  state->global->close_content = hwloc__nolibxml_import_close_content;
   state->parent = NULL;
   nstate->closed = 0;
   nstate->tagbuffer = buffer+10;
@@ -408,17 +403,18 @@ out:
 }
 
 static int
-hwloc_nolibxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbuflen,
+hwloc_nolibxml_import_diff(struct hwloc__xml_import_state_s *state,
+			   const char *xmlpath, const char *xmlbuffer, int xmlbuflen,
 			   hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
-  struct hwloc__xml_import_state_s state, childstate;
-  hwloc__nolibxml_import_state_data_t nstate = (void*) state.data;
+  hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
+  struct hwloc__xml_import_state_s childstate;
   char *refname = NULL;
   char *buffer, *tmp, *tag;
   size_t buflen;
   int ret;
 
-  assert(sizeof(*nstate) <= sizeof(state.data));
+  assert(sizeof(*nstate) <= sizeof(state->data));
 
   if (xmlbuffer) {
     buffer = malloc(xmlbuflen);
@@ -442,20 +438,20 @@ hwloc_nolibxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbu
     tmp++;
   }
 
-  state.next_attr = hwloc__nolibxml_import_next_attr;
-  state.find_child = hwloc__nolibxml_import_find_child;
-  state.close_tag = hwloc__nolibxml_import_close_tag;
-  state.close_child = hwloc__nolibxml_import_close_child;
-  state.get_content = hwloc__nolibxml_import_get_content;
-  state.close_content = hwloc__nolibxml_import_close_content;
-  state.parent = NULL;
+  state->global->next_attr = hwloc__nolibxml_import_next_attr;
+  state->global->find_child = hwloc__nolibxml_import_find_child;
+  state->global->close_tag = hwloc__nolibxml_import_close_tag;
+  state->global->close_child = hwloc__nolibxml_import_close_child;
+  state->global->get_content = hwloc__nolibxml_import_get_content;
+  state->global->close_content = hwloc__nolibxml_import_close_content;
+  state->parent = NULL;
   nstate->closed = 0;
   nstate->tagbuffer = tmp;
   nstate->tagname = NULL;
   nstate->attrbuffer = NULL;
 
   /* find root */
-  ret = hwloc__nolibxml_import_find_child(&state, &childstate, &tag);
+  ret = hwloc__nolibxml_import_find_child(state, &childstate, &tag);
   if (ret < 0)
     goto out_with_buffer;
   if (strcmp(tag, "topologydiff"))

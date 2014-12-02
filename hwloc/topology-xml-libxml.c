@@ -86,12 +86,7 @@ hwloc__libxml_import_find_child(hwloc__xml_import_state_t state,
   hwloc__libxml_import_state_data_t lchildstate = (void*) childstate->data;
   xmlNode *child;
   childstate->parent = state;
-  childstate->next_attr = state->next_attr;
-  childstate->find_child = state->find_child;
-  childstate->close_tag = state->close_tag;
-  childstate->close_child = state->close_child;
-  childstate->get_content = state->get_content;
-  childstate->close_content = state->close_content;
+  childstate->global = state->global;
   if (!lstate->child)
     return 0;
   child = lstate->child->next;
@@ -182,12 +177,12 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
     goto failed;
   }
 
-  state->next_attr = hwloc__libxml_import_next_attr;
-  state->find_child = hwloc__libxml_import_find_child;
-  state->close_tag = hwloc__libxml_import_close_tag;
-  state->close_child = hwloc__libxml_import_close_child;
-  state->get_content = hwloc__libxml_import_get_content;
-  state->close_content = hwloc__libxml_import_close_content;
+  state->global->next_attr = hwloc__libxml_import_next_attr;
+  state->global->find_child = hwloc__libxml_import_find_child;
+  state->global->close_tag = hwloc__libxml_import_close_tag;
+  state->global->close_child = hwloc__libxml_import_close_child;
+  state->global->get_content = hwloc__libxml_import_get_content;
+  state->global->close_content = hwloc__libxml_import_close_content;
   state->parent = NULL;
   lstate->node = root_node;
   lstate->child = root_node->children;
@@ -199,17 +194,16 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
 }
 
 static int
-hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbuflen, hwloc_topology_diff_t *firstdiffp, char **refnamep)
+hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xmlpath, const char *xmlbuffer, int xmlbuflen, hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
-  struct hwloc__xml_import_state_s state;
-  hwloc__libxml_import_state_data_t lstate = (void*) state.data;
+  hwloc__libxml_import_state_data_t lstate = (void*) state->data;
   char *refname = NULL;
   xmlDoc *doc = NULL;
   xmlNode* root_node;
   xmlDtd *dtd;
   int ret;
 
-  assert(sizeof(*lstate) <= sizeof(state.data));
+  assert(sizeof(*lstate) <= sizeof(state->data));
 
   LIBXML_TEST_VERSION;
   hwloc_libxml2_disable_stderrwarnings();
@@ -247,20 +241,20 @@ hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbufl
     goto out_with_doc;
   }
 
-  state.next_attr = hwloc__libxml_import_next_attr;
-  state.find_child = hwloc__libxml_import_find_child;
-  state.close_tag = hwloc__libxml_import_close_tag;
-  state.close_child = hwloc__libxml_import_close_child;
-  state.get_content = hwloc__libxml_import_get_content;
-  state.close_content = hwloc__libxml_import_close_content;
-  state.parent = NULL;
+  state->global->next_attr = hwloc__libxml_import_next_attr;
+  state->global->find_child = hwloc__libxml_import_find_child;
+  state->global->close_tag = hwloc__libxml_import_close_tag;
+  state->global->close_child = hwloc__libxml_import_close_child;
+  state->global->get_content = hwloc__libxml_import_get_content;
+  state->global->close_content = hwloc__libxml_import_close_content;
+  state->parent = NULL;
   lstate->node = root_node;
   lstate->child = root_node->children;
   lstate->attr = NULL;
 
   while (1) {
     char *attrname, *attrvalue;
-    if (state.next_attr(&state, &attrname, &attrvalue) < 0)
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
       break;
     if (!strcmp(attrname, "refname")) {
       free(refname);
@@ -269,7 +263,7 @@ hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbufl
       goto out_with_doc;
   }
 
-  ret = hwloc__xml_import_diff(&state, firstdiffp);
+  ret = hwloc__xml_import_diff(state, firstdiffp);
   if (refnamep && !ret)
     *refnamep = refname;
   else
