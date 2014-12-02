@@ -31,6 +31,8 @@ Version 1.10.1
 * Add support for the renaming of Socket into Package in future releases.
 * Fix cpuid-x86 build error with gcc -O3 on x86-32. Thanks to Thomas Van Doren
   for reporting the issue.
+* Fix some misordering of children when merging with ignore_keep_structure()
+  in partially allowed topologies.
 * Fix an overzealous assertion in the debug code when running on a single-PU
   host with I/O. Thanks to Thomas Van Doren for reporting the issue.
 
