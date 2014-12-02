@@ -1636,6 +1636,28 @@ unlink_and_free_single_object(hwloc_obj_t *pparent)
   hwloc_free_unlinked_object(parent);
 }
 
+static void
+reorder_children(hwloc_obj_t parent)
+{
+  /* move the children list on the side */
+  hwloc_obj_t *prev, child, children = parent->first_child;
+  parent->first_child = NULL;
+  while (children) {
+    /* dequeue child */
+    child = children;
+    children = child->next_sibling;
+    /* find where to enqueue it */
+    prev = &parent->first_child;
+    while (*prev
+	   && (!child->cpuset || !(*prev)->cpuset
+	       || hwloc__object_cpusets_compare_first(child, *prev) > 0))
+      prev = &((*prev)->next_sibling);
+    /* enqueue */
+    child->next_sibling = *prev;
+    *prev = child;
+  }
+}
+
 /* Remove all ignored objects.  */
 static int
 remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pparent)
@@ -1657,25 +1679,8 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pparent)
     dropped = 1;
 
   } else if (dropped_children) {
-    /* we keep this object but its children changed, reorder them by cpuset */
-
-    /* move the children list on the side */
-    hwloc_obj_t *prev, children = parent->first_child;
-    parent->first_child = NULL;
-    while (children) {
-      /* dequeue child */
-      child = children;
-      children = child->next_sibling;
-      /* find where to enqueue it */
-      prev = &parent->first_child;
-      while (*prev
-	     && (!child->cpuset || !(*prev)->cpuset
-		 || hwloc__object_cpusets_compare_first(child, *prev) > 0))
-	prev = &((*prev)->next_sibling);
-      /* enqueue */
-      child->next_sibling = *prev;
-      *prev = child;
-    }
+    /* we keep this object but its children changed, reorder them by complete_cpuset */
+    reorder_children(parent);
   }
 
   return dropped;
