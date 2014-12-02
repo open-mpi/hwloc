@@ -1664,16 +1664,19 @@ reorder_children(hwloc_obj_t parent)
   }
 }
 
-/* Remove all ignored objects.  */
+/* Remove objects that are ignored in any case.
+ * Returns 1 if *pparent were replaced, which means the caller need to reorder its children.
+ * Returns 0 otherwise.
+ */
 static int
-remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pparent)
+ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
   hwloc_obj_t parent = *pparent, child, *pchild;
   int dropped_children = 0;
   int dropped = 0;
 
   for_each_child_safe(child, parent, pchild)
-    dropped_children += remove_ignored(topology, pchild);
+    dropped_children += ignore_type_always(topology, pchild);
 
   if ((parent != topology->levels[0][0] &&
        topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS)
@@ -1715,12 +1718,12 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
   }
 }
 
-/*
- * Merge with the only child if either the parent or the child has a type to be
- * ignored while keeping structure
+/* Remove objects that are ignored with keep structure flag.
+ * Returns 1 if *pparent were replaced, which means the caller need to reorder its children.
+ * Returns 0 otherwise.
  */
 static int
-merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
+ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
   hwloc_obj_t parent = *pparent, child, *pchild, ios;
   int replacechild = 0, replaceparent = 0, droppedchildren = 0;
@@ -1730,7 +1733,7 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
     return 0;
 
   for_each_child_safe(child, parent, pchild)
-    droppedchildren += merge_useless_child(topology, pchild);
+    droppedchildren += ignore_type_keep_structure(topology, pchild);
 
   if (droppedchildren)
     reorder_children(parent);
@@ -2489,7 +2492,7 @@ next_noncpubackend:
   /* Removed some stuff */
 
   hwloc_debug("%s", "\nRemoving ignored objects\n");
-  remove_ignored(topology, &topology->levels[0][0]);
+  ignore_type_always(topology, &topology->levels[0][0]);
   print_objects(topology, 0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
@@ -2501,7 +2504,7 @@ next_noncpubackend:
   print_objects(topology, 0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
-  merge_useless_child(topology, &topology->levels[0][0]);
+  ignore_type_keep_structure(topology, &topology->levels[0][0]);
   print_objects(topology, 0, topology->levels[0][0]);
 
   /* Reconnect things after all these changes */
