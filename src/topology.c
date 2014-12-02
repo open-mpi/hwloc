@@ -1810,20 +1810,23 @@ can_merge_group(hwloc_topology_t topology, hwloc_obj_t obj)
  * Merge with the only child if either the parent or the child has a type to be
  * ignored while keeping structure
  */
-static void
+static int
 merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
   hwloc_obj_t parent = *pparent, child, *pchild, ios;
-  int replacechild = 0, replaceparent = 0;
+  int replacechild = 0, replaceparent = 0, droppedchildren = 0;
+
+  if (!parent->first_child)
+    /* There are no child, nothing to merge. */
+    return 0;
 
   for_each_child_safe(child, parent, pchild)
-    merge_useless_child(topology, pchild);
+    droppedchildren += merge_useless_child(topology, pchild);
+
+  if (droppedchildren)
+    reorder_children(parent);
 
   child = parent->first_child;
-  if (!child)
-    /* There are no child, nothing to merge. */
-    return;
-
   /* we don't merge if there are multiple "important" children.
    * non-important ones are at the end of the list.
    * look at the second child to find out.
@@ -1834,7 +1837,7 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
       /* Misc objects without cpuset may be ignored as well */
       && !(child->next_sibling->type == HWLOC_OBJ_MISC && !child->next_sibling->cpuset))
       /* There are several children that prevent from merging */
-    return;
+    return 0;
 
   /* There is one important child, and some children that may be ignored
    * during merging because they can be attached to anything with the same locality.
@@ -1892,6 +1895,8 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
       pchild = &((*pchild)->next_sibling);
     *pchild = ios;
   }
+
+  return replaceparent ? 1 : 0;
 }
 
 static void
