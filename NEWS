@@ -57,6 +57,7 @@ Version 2.0
 * Backends
   + Gather total machine memory on NetBSD.
 * Misc
+  + Prefix verbose XML import errors with the source name;
   + Groups may have a GroupType info attribute to display something else
     than "Group" in lstopo.
   + XML and Synthetic export functions have moved to hwloc/export.h,
