@@ -59,7 +59,8 @@ hwloc_xml_callbacks_reset(void)
 
 static void
 hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
-			      const char *name, const char *value)
+			      const char *name, const char *value,
+			      hwloc__xml_import_state_t state)
 {
   if (!strcmp(name, "type")) {
     /* already handled */
@@ -99,7 +100,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     if (obj->type == HWLOC_OBJ_CACHE)
       obj->attr->cache.size = lvalue;
     else if (hwloc__xml_verbose())
-      fprintf(stderr, "ignoring cache_size attribute for non-cache object type\n");
+      fprintf(stderr, "%s: ignoring cache_size attribute for non-cache object type\n",
+	      state->global->msgprefix);
   }
 
   else if (!strcmp(name, "cache_linesize")) {
@@ -107,7 +109,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     if (obj->type == HWLOC_OBJ_CACHE)
       obj->attr->cache.linesize = lvalue;
     else if (hwloc__xml_verbose())
-      fprintf(stderr, "ignoring cache_linesize attribute for non-cache object type\n");
+      fprintf(stderr, "%s: ignoring cache_linesize attribute for non-cache object type\n",
+	      state->global->msgprefix);
   }
 
   else if (!strcmp(name, "cache_associativity")) {
@@ -115,7 +118,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     if (obj->type == HWLOC_OBJ_CACHE)
       obj->attr->cache.associativity = lvalue;
     else if (hwloc__xml_verbose())
-      fprintf(stderr, "ignoring cache_associativity attribute for non-cache object type\n");
+      fprintf(stderr, "%s: ignoring cache_associativity attribute for non-cache object type\n",
+	      state->global->msgprefix);
   }
 
   else if (!strcmp(name, "cache_type")) {
@@ -126,9 +130,11 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	  || lvalue == HWLOC_OBJ_CACHE_INSTRUCTION)
 	obj->attr->cache.type = (hwloc_obj_cache_type_t) lvalue;
       else
-	fprintf(stderr, "ignoring invalid cache_type attribute %ld\n", lvalue);
+	fprintf(stderr, "%s: ignoring invalid cache_type attribute %ld\n",
+		state->global->msgprefix, lvalue);
     } else if (hwloc__xml_verbose())
-      fprintf(stderr, "ignoring cache_type attribute for non-cache object type\n");
+      fprintf(stderr, "%s: ignoring cache_type attribute for non-cache object type\n",
+	      state->global->msgprefix);
   }
 
   else if (!strcmp(name, "local_memory"))
@@ -148,7 +154,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	break;
       default:
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring depth attribute for object type without depth\n");
+	  fprintf(stderr, "%s: ignoring depth attribute for object type without depth\n",
+		  state->global->msgprefix);
 	break;
     }
   }
@@ -161,7 +168,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       if (sscanf(value, "%04x:%02x:%02x.%01x",
 		 &domain, &bus, &dev, &func) != 4) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring invalid pci_busid format string %s\n", value);
+	  fprintf(stderr, "%s: ignoring invalid pci_busid format string %s\n",
+		  state->global->msgprefix, value);
       } else {
 	obj->attr->pcidev.domain = domain;
 	obj->attr->pcidev.bus = bus;
@@ -172,7 +180,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
     default:
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring pci_busid attribute for non-PCI object\n");
+	fprintf(stderr, "%s: ignoring pci_busid attribute for non-PCI object\n",
+		state->global->msgprefix);
       break;
     }
   }
@@ -185,7 +194,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       if (sscanf(value, "%04x [%04x:%04x] [%04x:%04x] %02x",
 		 &classid, &vendor, &device, &subvendor, &subdevice, &revision) != 6) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring invalid pci_type format string %s\n", value);
+	  fprintf(stderr, "%s: ignoring invalid pci_type format string %s\n",
+		  state->global->msgprefix, value);
       } else {
 	obj->attr->pcidev.class_id = classid;
 	obj->attr->pcidev.vendor_id = vendor;
@@ -198,7 +208,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
     default:
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring pci_type attribute for non-PCI object\n");
+	fprintf(stderr, "%s: ignoring pci_type attribute for non-PCI object\n",
+		state->global->msgprefix);
       break;
     }
   }
@@ -212,7 +223,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
     default:
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring pci_link_speed attribute for non-PCI object\n");
+	fprintf(stderr, "%s: ignoring pci_link_speed attribute for non-PCI object\n",
+		state->global->msgprefix);
       break;
     }
   }
@@ -223,7 +235,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       unsigned upstream_type, downstream_type;
       if (sscanf(value, "%u-%u", &upstream_type, &downstream_type) != 2) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring invalid bridge_type format string %s\n", value);
+	  fprintf(stderr, "%s: ignoring invalid bridge_type format string %s\n",
+		  state->global->msgprefix, value);
       } else {
 	obj->attr->bridge.upstream_type = (hwloc_obj_bridge_type_t) upstream_type;
 	obj->attr->bridge.downstream_type = (hwloc_obj_bridge_type_t) downstream_type;
@@ -232,7 +245,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
     default:
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring bridge_type attribute for non-bridge object\n");
+	fprintf(stderr, "%s: ignoring bridge_type attribute for non-bridge object\n",
+		state->global->msgprefix);
       break;
     }
   }
@@ -244,7 +258,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       if (sscanf(value, "%04x:[%02x-%02x]",
 		 &domain, &secbus, &subbus) != 3) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring invalid bridge_pci format string %s\n", value);
+	  fprintf(stderr, "%s: ignoring invalid bridge_pci format string %s\n",
+		  state->global->msgprefix, value);
       } else {
 	obj->attr->bridge.downstream.pci.domain = domain;
 	obj->attr->bridge.downstream.pci.secondary_bus = secbus;
@@ -254,7 +269,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
     default:
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring bridge_pci attribute for non-bridge object\n");
+	fprintf(stderr, "%s: ignoring bridge_pci attribute for non-bridge object\n",
+		state->global->msgprefix);
       break;
     }
   }
@@ -265,14 +281,16 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       unsigned osdev_type;
       if (sscanf(value, "%u", &osdev_type) != 1) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring invalid osdev_type format string %s\n", value);
+	  fprintf(stderr, "%s: ignoring invalid osdev_type format string %s\n",
+		  state->global->msgprefix, value);
       } else
 	obj->attr->osdev.type = (hwloc_obj_osdev_type_t) osdev_type;
       break;
     }
     default:
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring osdev_type attribute for non-osdev object\n");
+	fprintf(stderr, "%s: ignoring osdev_type attribute for non-osdev object\n",
+		state->global->msgprefix);
       break;
     }
   }
@@ -306,7 +324,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	break;
       default:
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring memory_kB attribute for object type without memory\n");
+	  fprintf(stderr, "%s: ignoring memory_kB attribute for object type without memory\n",
+		  state->global->msgprefix);
 	break;
     }
   }
@@ -324,7 +343,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	break;
       default:
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring huge_page_size_kB attribute for object type without huge pages\n");
+	  fprintf(stderr, "%s: ignoring huge_page_size_kB attribute for object type without huge pages\n",
+		  state->global->msgprefix);
 	break;
     }
   }
@@ -342,7 +362,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	break;
       default:
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring huge_page_free attribute for object type without huge pages\n");
+	  fprintf(stderr, "%s: ignoring huge_page_free attribute for object type without huge pages\n",
+		  state->global->msgprefix);
 	break;
     }
   }
@@ -353,7 +374,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 
 
   else if (hwloc__xml_verbose())
-    fprintf(stderr, "ignoring unknown object attribute %s\n", name);
+    fprintf(stderr, "%s: ignoring unknown object attribute %s\n",
+	    state->global->msgprefix, name);
 }
 
 
@@ -567,7 +589,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       /* type needed first */
       if (obj->type == (hwloc_obj_type_t)-1)
         return -1;
-      hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue);
+      hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue, state);
     }
   }
 
@@ -801,7 +823,8 @@ hwloc__xml_import_diff(hwloc__xml_import_state_t state,
 
 static int
 hwloc_xml__handle_distances(struct hwloc_topology *topology,
-			    struct hwloc_xml_backend_data_s *data)
+			    struct hwloc_xml_backend_data_s *data,
+			    const char *msgprefix)
 {
   struct hwloc_xml_imported_distances_s *xmldist, *next = data->first_distances;
 
@@ -820,8 +843,8 @@ hwloc_xml__handle_distances(struct hwloc_topology *topology,
     if (nbobjs != xmldist->distances.nbobjs) {
       /* distances invalid, drop */
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring invalid distance matrix with %u objs instead of %u\n",
-		xmldist->distances.nbobjs, nbobjs);
+	fprintf(stderr, "%s: ignoring invalid distance matrix with %u objs instead of %u\n",
+		msgprefix, xmldist->distances.nbobjs, nbobjs);
       free(xmldist->distances.latency);
     } else {
       /* distances valid, add it to the internal OS distances list for grouping */
@@ -885,7 +908,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
   /* if we added some distances, we must check them, and make them groupable */
-  if (hwloc_xml__handle_distances(topology, data) < 0)
+  if (hwloc_xml__handle_distances(topology, data, data->msgprefix) < 0)
     goto err;
   data->first_distances = data->last_distances = NULL;
   topology->support.discovery->pu = 1;
@@ -897,7 +920,8 @@ hwloc_look_xml(struct hwloc_backend *backend)
   if (data->look_failed)
     data->look_failed(data);
   if (hwloc__xml_verbose())
-    fprintf(stderr, "XML component discovery failed.\n");
+    fprintf(stderr, "%s: XML component discovery failed.\n",
+	    data->msgprefix);
  err:
   hwloc_localeswitch_fini();
   return -1;
@@ -912,11 +936,19 @@ hwloc_topology_diff_load_xml(hwloc_topology_t topology __hwloc_attribute_unused,
   struct hwloc__xml_import_state_s state;
   struct hwloc_xml_backend_data_s fakedata; /* only for storing global info during parsing */
   hwloc_localeswitch_declare;
+  const char *basename;
   char *env;
   int force_nolibxml;
   int ret;
 
   state.global = &fakedata;
+
+  basename = strrchr(xmlpath, '/');
+  if (basename)
+    basename++;
+  else
+    basename = xmlpath;
+  fakedata.msgprefix = strdup(basename);
 
   if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
     errno = ENOSYS;
@@ -941,6 +973,8 @@ retry:
   }
 
   hwloc_localeswitch_fini();
+
+  free(fakedata.msgprefix);
   return ret;
 }
 
@@ -958,6 +992,7 @@ hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_u
   int ret;
 
   state.global = &fakedata;
+  fakedata.msgprefix = "xmldiffbuffer";
 
   if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
     errno = ENOSYS;
@@ -1508,6 +1543,7 @@ hwloc_xml_backend_disable(struct hwloc_backend *backend)
 {
   struct hwloc_xml_backend_data_s *data = backend->private_data;
   data->backend_exit(data);
+  free(data->msgprefix);
   free(data);
 }
 
@@ -1524,6 +1560,7 @@ hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
   const char * xmlpath = (const char *) _data1;
   const char * xmlbuffer = (const char *) _data2;
   int xmlbuflen = (int)(uintptr_t) _data3;
+  const char *basename;
   int err;
 
   if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
@@ -1551,6 +1588,17 @@ hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
   backend->disable = hwloc_xml_backend_disable;
   backend->is_thissystem = 0;
 
+  if (xmlpath) {
+    basename = strrchr(xmlpath, '/');
+    if (basename)
+      basename++;
+    else
+      basename = xmlpath;
+  } else {
+    basename = "xmlbuffer";
+  }
+  data->msgprefix = strdup(basename);
+
   env = getenv("HWLOC_NO_LIBXML_IMPORT");
   force_nolibxml = (env && atoi(env));
 retry:
@@ -1569,6 +1617,7 @@ retry:
   return backend;
 
  out_with_data:
+  free(data->msgprefix);
   free(data);
  out_with_backend:
   free(backend);

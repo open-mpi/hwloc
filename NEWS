@@ -31,6 +31,7 @@ Version 1.11.0
 * Misc
   + Actually remove disallowed NUMA nodes from nodesets when the whole-system
     flag isn't enabled.
+  + Prefix verbose XML import errors with the source name;
   + Groups may have a GroupType info attribute to display something else
     than "Group" in lstopo.
   + Add a PCISlot attribute to PCI devices on Linux when supported to

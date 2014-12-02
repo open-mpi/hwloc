@@ -41,6 +41,7 @@ struct hwloc_xml_backend_data_s {
   void (*close_child)(struct hwloc__xml_import_state_s * state);
   int (*get_content)(struct hwloc__xml_import_state_s * state, char **beginp, size_t expected_length);
   void (*close_content)(struct hwloc__xml_import_state_s * state);
+  char * msgprefix;
   void *data; /* libxml2 doc, or nolibxml buffer */
   struct hwloc_xml_imported_distances_s {
     hwloc_obj_t root;
