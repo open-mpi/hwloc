@@ -38,6 +38,7 @@ sysfs_outputs = \
 		16amd64-8n2c-cpusets.xml.output \
 		16amd64-8n2c-cpusets_noadmin.output \
 		16em64t-4s2ca2c-cpusetreorder.output \
+		16em64t-4s2ca2c-cpusetreorder-merge.output \
 		16em64t-4s2c2t.output \
 		16em64t-4s2c2t-offlines.output \
 		16em64t-4s2c2t-offlines.xml.output \
@@ -97,6 +98,7 @@ sysfs_tarballs = \
 		16amd64-8n2c-cpusets.xml.source \
 		16amd64-8n2c-cpusets_noadmin.source \
 		16em64t-4s2ca2c-cpusetreorder.tar.bz2 \
+		16em64t-4s2ca2c-cpusetreorder-merge.source \
 		16em64t-4s2c2t.tar.bz2 \
 		16em64t-4s2c2t-offlines.tar.bz2 \
 		16em64t-4s2c2t-offlines.xml.source \
@@ -137,6 +139,7 @@ sysfs_options = \
 		16amd64-4n4c-cgroup-distance-merge.options \
 		16amd64-8n2c-cpusets.xml.options \
 		16amd64-8n2c-cpusets_noadmin.options \
+		16em64t-4s2ca2c-cpusetreorder-merge.options \
 		16em64t-4s2c2t-offlines.xml.options \
 		16em64t-4s2c2t-offlines_noadmin.options \
 		16em64t-4s2c2t_ncaches.options \
