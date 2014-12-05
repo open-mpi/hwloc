@@ -158,7 +158,7 @@ depth 0:	1 Machine (type #1)
       depth 6:	28 L1iCache (type #4)
        depth 7:	28 Core (type #5)
         depth 8:	28 PU (type #6)
-latency matrix between NUMANodes (depth 2) by logical indexes:
+relative latency matrix between NUMANodes (depth 2) by logical indexes:
   index     0     1     2     3
       0 1.000 2.100 3.100 3.100
       1 2.100 1.000 3.100 3.100

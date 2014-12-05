@@ -216,7 +216,7 @@ depth 0:	1 Machine (type #1)
   depth 2:	16 Socket (type #3)
    depth 3:	96 Core (type #5)
     depth 4:	96 PU (type #6)
-latency matrix between NUMANodes (depth 1) by logical indexes:
+relative latency matrix between NUMANodes (depth 1) by logical indexes:
   index     0     1     2     3
       0 1.000 2.600 2.600 2.600
       1 2.600 1.000 2.600 2.600
