@@ -874,11 +874,13 @@ hwloc_look_xml(struct hwloc_backend *backend)
       root->allowed_nodeset = hwloc_bitmap_alloc();
     if (!root->complete_nodeset)
       root->complete_nodeset = hwloc_bitmap_alloc();
+    /* add a NUMA node and move the root memory there */
     numa = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
     numa->cpuset = hwloc_bitmap_dup(root->cpuset);
     numa->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(numa->nodeset, 0);
-    /* insert by cpuset so that the root nodesets are updated */
+    memcpy(&numa->memory, &topology->levels[0][0]->memory, sizeof(numa->memory));
+    memset(&topology->levels[0][0]->memory, 0, sizeof(numa->memory));
     hwloc_insert_object_by_cpuset(topology, numa);
   }
 
