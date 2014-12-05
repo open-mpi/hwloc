@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2012-2013 Inria.  All rights reserved.
+.\" Copyright © 2012-2014 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-DISTANCES "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
@@ -64,6 +64,21 @@ Report version and exit.
 .SH DESCRIPTION
 .
 hwloc-distances displays also distance matrices attached to the topology.
+The value in the i-th row and j-th column is the distance from
+object #i to object #j.
+.
+.PP
+Unless defined by the user, matrices currently always contain relative
+latencies between NUMA nodes (which may or may not be accurate).
+See the definition of \fIstruct hwloc_distances_s\fR in \fIinclude/hwloc.h\fR
+or the documentation for details.
+.
+.PP
+These latencies are normalized to the latency of a local (non-NUMA) access.
+Hence 3.5 in row #i column #j means that the latency from cores in NUMA node
+#i to memory in NUMA node #j is 3.5 higher than the latency from cores
+to their local memory.
+.
 A breadth-first traversal of the topology is performed starting from
 the root to find all distance matrices.
 .
