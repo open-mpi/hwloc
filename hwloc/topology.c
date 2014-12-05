@@ -2397,8 +2397,8 @@ next_cpubackend:
     node->nodeset = hwloc_bitmap_alloc();
     /* other nodesets will be filled below */
     hwloc_bitmap_set(node->nodeset, 0);
-    node->memory.local_memory = topology->levels[0][0]->memory.local_memory;
-    topology->levels[0][0]->memory.local_memory = 0;
+    memcpy(&node->memory, &topology->levels[0][0]->memory, sizeof(node->memory));
+    memset(&topology->levels[0][0]->memory, 0, sizeof(node->memory));
     hwloc_insert_object_by_cpuset(topology, node);
   }
   hwloc_debug("%s", "\nPropagate nodesets\n");
