@@ -192,7 +192,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int overwri
       distances = hwloc_get_whole_distance_matrix_by_depth(topology, depth);
       if (!distances || !distances->latency)
         continue;
-      printf("latency matrix between %ss (depth %u) by %s indexes:\n",
+      printf("relative latency matrix between %ss (depth %u) by %s indexes:\n",
 	     hwloc_obj_type_string(hwloc_get_depth_type(topology, depth)),
 	     depth,
 	     logical ? "logical" : "physical");
