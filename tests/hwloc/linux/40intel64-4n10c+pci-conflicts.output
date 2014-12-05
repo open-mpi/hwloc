@@ -228,7 +228,7 @@ depth 0:	1 Machine (type #1)
 Special depth -3:	2 Bridge (type #9)
 Special depth -4:	1 PCI Device (type #10)
 Special depth -5:	1 OS Device (type #11)
-latency matrix between NUMANodes (depth 2) by logical indexes:
+relative latency matrix between NUMANodes (depth 2) by logical indexes:
   index     0     1     2     3
       0 1.000 4.000 8.000 8.000
       1 4.000 1.000 8.000 8.000
