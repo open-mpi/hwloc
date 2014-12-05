@@ -35,6 +35,7 @@ Version 1.10.1
   in partially allowed topologies.
 * Fix an overzealous assertion in the debug code when running on a single-PU
   host with I/O. Thanks to Thomas Van Doren for reporting the issue.
+* Fix support for future very large caches in the x86 backend.
 * Clarify the documentation of distance matrices in hwloc.h and in the manpage
   of the hwloc-distances. Thanks to Dave Love for the suggestion.
 
