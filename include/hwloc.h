@@ -540,8 +540,7 @@ union hwloc_obj_attr_u {
  * distances are available for all objects in the machine.
  *
  * If the \p latency pointer is not \c NULL, the pointed array contains
- * memory latencies (non-zero values), as defined by the ACPI SLIT
- * specification.
+ * memory latencies (non-zero values), see below.
  *
  * In the future, some other types of distances may be considered.
  * In these cases, \p latency may be \c NULL.
@@ -556,6 +555,13 @@ struct hwloc_distances_s {
 
   float *latency;		/**< \brief Matrix of latencies between objects, stored as a one-dimension array.
 				 * May be \c NULL if the distances considered here are not latencies.
+				 *
+				 * Unless defined by the user, this currently contains latencies
+				 * between NUMA nodes (as reported in the System Locality Distance Information Table
+				 * (SLIT) in the ACPI specification), which may or may not be accurate.
+				 * It corresponds to the latency for accessing the memory of one node
+				 * from a core in another node.
+				 *
 				 * Values are normalized to get 1.0 as the minimal value in the matrix.
 				 * Latency from i-th to j-th object is stored in slot i*nbobjs+j.
 				 */
