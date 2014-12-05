@@ -33,7 +33,7 @@ struct cacheinfo {
   unsigned linepart;
   int ways;
   unsigned sets;
-  unsigned size;
+  unsigned long size;
 };
 
 struct procinfo {
@@ -65,7 +65,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
 {
   struct cacheinfo *cache;
   unsigned cachenum;
-  unsigned size = 0;
+  unsigned long size = 0;
 
   if (level == 1)
     size = ((cpuid >> 24)) << 10;
@@ -101,7 +101,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
   cache->size = size;
   cache->sets = 0;
 
-  hwloc_debug("cache L%u t%u linesize %u ways %u size %uKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
+  hwloc_debug("cache L%u t%u linesize %u ways %u size %luKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
 }
 
 /* Fetch information from the processor itself thanks to cpuid and store it in
@@ -194,7 +194,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
 
     for (cachenum = 0; ; cachenum++) {
-      unsigned linesize, linepart, ways, sets;
+      unsigned long linesize, linepart, ways, sets;
       unsigned type;
       eax = 0x8000001d;
       ecx = cachenum;
@@ -222,7 +222,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
 
-      hwloc_debug("cache %u type %u L%u t%u c%u linesize %u linepart %u ways %u sets %u, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
+      hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
       cache++;
     }
@@ -263,7 +263,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
 
     for (cachenum = 0; ; cachenum++) {
-      unsigned linesize, linepart, ways, sets;
+      unsigned long linesize, linepart, ways, sets;
       unsigned type;
       eax = 0x04;
       ecx = cachenum;
@@ -290,7 +290,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
 
-      hwloc_debug("cache %u type %u L%u t%u c%u linesize %u linepart %u ways %u sets %u, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
+      hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
       infos->max_nbthreads = infos->max_log_proc / infos->max_nbcores;
       hwloc_debug("thus %u threads\n", infos->max_nbthreads);
       infos->threadid = infos->logprocid % infos->max_nbthreads;
