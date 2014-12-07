@@ -172,6 +172,11 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop type '%s'\n", tmp);
 	  goto out_with_loops;
 	}
+	if (type == HWLOC_OBJ_MISC) {
+	  if (verbose)
+	    fprintf(stderr, "Misc object type disallowed in synthetic index interleaving loop type '%s'\n", tmp);
+	  goto out_with_loops;
+	}
 	for(i=0; i<curleveldepth; i++) {
 	  if (type != data->level[i].type)
 	    continue;
@@ -387,6 +392,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	errno = EINVAL;
 	goto error;
       }
+      if (type == HWLOC_OBJ_MISC) {
+	if (verbose)
+	  fprintf(stderr, "Synthetic string with disallow object type at '%s'\n", pos);
+	errno = EINVAL;
+	goto error;
+      }
 
       next_pos = strchr(pos, ':');
       if (!next_pos) {
@@ -460,9 +471,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	case HWLOC_OBJ_CACHE: type = HWLOC_OBJ_PACKAGE; break;
 	case HWLOC_OBJ_PACKAGE: type = HWLOC_OBJ_NUMANODE; break;
 	case HWLOC_OBJ_NUMANODE:
-	case HWLOC_OBJ_GROUP: type = HWLOC_OBJ_GROUP; break;
 	case HWLOC_OBJ_MACHINE:
-	case HWLOC_OBJ_MISC: type = HWLOC_OBJ_MISC; break;
+	case HWLOC_OBJ_GROUP: type = HWLOC_OBJ_GROUP; break;
 	default:
 	  assert(0);
 	}
@@ -575,8 +585,6 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
 				 hwloc_obj_t obj)
 {
   switch (obj->type) {
-  case HWLOC_OBJ_MISC:
-    break;
   case HWLOC_OBJ_GROUP:
     obj->attr->group.depth = curlevel->depth;
     break;
@@ -603,6 +611,7 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
     break;
   case HWLOC_OBJ_PU:
     break;
+  case HWLOC_OBJ_MISC:
   case HWLOC_OBJ_TYPE_MAX:
     /* Should never happen */
     assert(0);
@@ -640,8 +649,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 
   /* pre-hooks */
   switch (type) {
-    case HWLOC_OBJ_MISC:
-      break;
     case HWLOC_OBJ_GROUP:
       break;
     case HWLOC_OBJ_SYSTEM:
@@ -663,6 +670,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_PU:
       break;
+    case HWLOC_OBJ_MISC:
     case HWLOC_OBJ_TYPE_MAX:
       /* Should never happen */
       assert(0);
