@@ -1888,11 +1888,13 @@ Each item may be followed parentheses containing a list of
 space-separated attributes. For instance:
 <ul>
 <li>
- <tt>L2iCache:2(size=32768)</tt> specifies 2 children
+ <tt>L2iCache:2(size=32kB)</tt> specifies 2 children
  of 32kB level-2 instruction caches.
+ The size may be specified in bytes (without any unit suffix) or as TB, GB, MB or kB.
 </li>
 <li>
- <tt>NUMANode:3(memory=16777216)</tt> specifies 3 NUMA nodes with 16MB each.
+ <tt>NUMANode:3(memory=16MB)</tt> specifies 3 NUMA nodes with 16MB each.
+ The size may be specified in bytes (without any unit suffix) or as TB, GB, MB or kB.
 </li>
 <li>
  <tt>PU:2(indexes=0,2,1,3)</tt> specifies 2 PU children and the

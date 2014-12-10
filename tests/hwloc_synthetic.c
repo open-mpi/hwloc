@@ -65,13 +65,13 @@ int main(void)
 
   hwloc_topology_init(&topology);
   err = hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_ICACHES);
-  err = hwloc_topology_set_synthetic(topology, "sock:2(indexes=3,5) numa:2(memory=262144 indexes=sock) l3u:1 l2:2 l1i:1(size=16384) l1dcache:2 core:1 pu:2(indexes=l2)");
+  err = hwloc_topology_set_synthetic(topology, "sock:2(indexes=3,5) numa:2(memory=256GB indexes=pack) l3u:1(size=20mb) l2:2 l1i:1(size=16kB) l1dcache:2 core:1 pu:2(indexes=l2)");
   assert(!err);
   hwloc_topology_load(topology);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
-  assert(err == 174);
-  err = strcmp("Socket:2 NUMANode:2(memory=262144 indexes=2*2:1*2) L3Cache:1(size=16777216) L2Cache:2(size=4194304) L1iCache:1(size=16384) L1dCache:2(size=32768) Core:1 PU:2(indexes=4*8:1*4)", buffer);
+  assert(err == 180);
+  err = strcmp("Socket:2 NUMANode:2(memory=274877906944 indexes=2*2:1*2) L3Cache:1(size=20971520) L2Cache:2(size=4194304) L1iCache:1(size=16384) L1dCache:2(size=32768) Core:1 PU:2(indexes=4*8:1*4)", buffer);
   assert(!err);
 
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_SOCKET, 1)->os_index == 5);
