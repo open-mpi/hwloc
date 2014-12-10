@@ -281,6 +281,29 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
   return;
 }
 
+static hwloc_uint64_t
+hwloc_synthetic_parse_memory_attr(const char *attr, const char **endp)
+{
+  const char *endptr;
+  hwloc_uint64_t size;
+  size = strtoull(attr, (char **) &endptr, 0);
+  if (!hwloc_strncasecmp(endptr, "TB", 2)) {
+    size <<= 40;
+    endptr += 2;
+  } else if (!hwloc_strncasecmp(endptr, "GB", 2)) {
+    size <<= 30;
+    endptr += 2;
+  } else if (!hwloc_strncasecmp(endptr, "MB", 2)) {
+    size <<= 20;
+    endptr += 2;
+  } else if (!hwloc_strncasecmp(endptr, "kB", 2)) {
+    size <<= 10;
+    endptr += 2;
+  }
+  *endp = endptr;
+  return size;
+}
+
 static int
 hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
 				  struct hwloc_synthetic_level_data_s *curlevel,
@@ -302,10 +325,10 @@ hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
 
   while (')' != *attrs) {
     if (HWLOC_OBJ_CACHE == type && !strncmp("size=", attrs, 5)) {
-      memorysize = strtoull(attrs+5, (char**) &attrs, 0);
+      memorysize = hwloc_synthetic_parse_memory_attr(attrs+5, &attrs);
 
     } else if (HWLOC_OBJ_CACHE != type && !strncmp("memory=", attrs, 7)) {
-      memorysize = strtoull(attrs+7, (char**) &attrs, 0);
+      memorysize = hwloc_synthetic_parse_memory_attr(attrs+7, &attrs);
 
     } else if (!strncmp("indexes=", attrs, 8)) {
       index_string = attrs+8;
