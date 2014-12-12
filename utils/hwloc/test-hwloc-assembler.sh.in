@@ -7,6 +7,7 @@
 # See COPYING in top-level directory.
 #
 
+VERSION="@VERSION@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 assembler="$HWLOC_top_builddir/utils/hwloc/hwloc-assembler"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
@@ -39,5 +40,9 @@ $assembler $file \
 	--name input1 $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.input1 \
 	--name input2 $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.input2 \
 	--name input1again $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.input1
+
+# filter hwlocVersion since it often changes
+sed -e '/<info name=\"hwlocVersion\" value=\"'$VERSION'\"\/>/d' -i $file
+
 diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.output "$file"
 rm -rf "$tmp"

@@ -1612,6 +1612,12 @@ the state of a port #1 (value is 4 when active),
 the LID and LID mask count of port #2,
 and GID #1 of port #3.
 </dd>
+<dt>hwlocVersion</dt>
+<dd>The version number of the hwloc library that was used to generate
+the topology. If the topology was loaded from XML, this is not the hwloc
+version that loaded it, but rather the first hwloc instance that exported
+the topology to XML earlier.
+</dd>
 </dl>
 
 Here is a non-exhaustive list of user-provided info attributes
