@@ -3,15 +3,16 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2013 Inria.  All rights reserved.
-# Copyright © 2009-2011 Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2011 Université Bordeaux
+# Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
 # Check the conformance of `lstopo' for all the Linux sysfs
 # hierarchies available here.  Return true on success.
 
+VERSION="@VERSION@"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 lstopo="$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics"
@@ -49,7 +50,11 @@ test_topology ()
     opts="-v -"
     [ -r "$options" ] && opts=`cat $options`
 
-    if ! "$lstopo" $opts > "$output"
+    if ! "$lstopo" $opts \
+	| sed	-e 's/ hwlocVersion='$VERSION'//' \
+	| grep -v "<info name=\"hwlocVersion\" value=\"$VERSION\"\/>" \
+	> "$output"
+	# filtered hwlocVersion since it often changes
     then
 	result=1
     else
