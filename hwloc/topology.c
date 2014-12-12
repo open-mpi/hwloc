@@ -2490,6 +2490,13 @@ next_noncpubackend:
   hwloc_distances_finalize_os(topology);
   hwloc_distances_finalize_logical(topology);
 
+  /* add some identification attributes if not loading from XML */
+  if (topology->backends
+      && strcmp(topology->backends->component->name, "xml")) {
+    /* add a hwlocVersion */
+    hwloc_obj_add_info(topology->levels[0][0], "hwlocVersion", VERSION);
+  }
+
   /*
    * Now set binding hooks according to topology->is_thissystem
    * what the native OS backend offers.
