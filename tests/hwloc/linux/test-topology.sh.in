@@ -52,7 +52,11 @@ test_topology ()
 
     if ! "$lstopo" $opts \
 	| sed	-e 's/ hwlocVersion='$VERSION'//' \
+		-e 's/ ProcessName=lstopo-no-graphics//' \
+		-e 's/ ProcessName=lt-lstopo-no-graphics//' \
 	| grep -v "<info name=\"hwlocVersion\" value=\"$VERSION\"\/>" \
+	| grep -v "<info name=\"ProcessName\" value=\"lstopo-no-graphics\"\/>" \
+	| grep -v "<info name=\"ProcessName\" value=\"lt-lstopo-no-graphics\"\/>" \
 	> "$output"
 	# filtered hwlocVersion since it often changes
     then
