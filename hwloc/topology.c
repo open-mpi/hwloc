@@ -72,7 +72,7 @@ void hwloc_report_os_error(const char *msg, int line)
 
     if (!reported && !hwloc_hide_errors()) {
         fprintf(stderr, "****************************************************************************\n");
-        fprintf(stderr, "* hwloc has encountered what looks like an error from the operating system.\n");
+        fprintf(stderr, "* hwloc %s has encountered what looks like an error from the operating system.\n", HWLOC_VERSION);
         fprintf(stderr, "*\n");
         fprintf(stderr, "* %s\n", msg);
         fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
@@ -1097,7 +1097,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 	  hwloc_bitmap_asprintf(&a, curcpuset);
 	hwloc_bitmap_asprintf(&b, obj->cpuset);
         fprintf(stderr, "****************************************************************************\n");
-        fprintf(stderr, "* hwloc has encountered an out-of-order topology discovery.\n");
+        fprintf(stderr, "* hwloc %s has encountered an out-of-order topology discovery.\n", HWLOC_VERSION);
         fprintf(stderr, "* An object with (complete) cpuset %s was inserted after object with %s\n",
 		b, a ? a : "no cpuset");
         fprintf(stderr, "* Please check that your input topology (XML file, etc.) is valid.\n");

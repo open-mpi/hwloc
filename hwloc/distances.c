@@ -502,7 +502,7 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
       hwloc_bitmap_asprintf(&a, cpuset);
       hwloc_bitmap_asprintf(&b, nodeset);
       fprintf(stderr, "****************************************************************************\n");
-      fprintf(stderr, "* hwloc has encountered an error when adding a distance matrix to the topology.\n");
+      fprintf(stderr, "* hwloc %s has encountered an error when adding a distance matrix to the topology.\n", HWLOC_VERSION);
       fprintf(stderr, "*\n");
       fprintf(stderr, "* hwloc_distances__finalize_logical() could not find any object covering\n");
       fprintf(stderr, "* cpuset %s and nodeset %s\n", a, b);
@@ -647,7 +647,7 @@ static void hwloc_report_user_distance_error(const char *msg, int line)
 
     if (!reported && !hwloc_hide_errors()) {
         fprintf(stderr, "****************************************************************************\n");
-        fprintf(stderr, "* hwloc has encountered what looks like an error from user-given distances.\n");
+        fprintf(stderr, "* hwloc %s has encountered what looks like an error from user-given distances.\n", HWLOC_VERSION);
         fprintf(stderr, "*\n");
         fprintf(stderr, "* %s\n", msg);
         fprintf(stderr, "* Error occurred in topology.c line %d\n", line);

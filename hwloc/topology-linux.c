@@ -2856,7 +2856,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 		hwloc_bitmap_asprintf(&a, curpackage->cpuset);
 		hwloc_bitmap_asprintf(&b, packageset);
 		fprintf(stderr, "****************************************************************************\n");
-		fprintf(stderr, "* hwloc has detected buggy sysfs package information: Two packages have\n");
+		fprintf(stderr, "* hwloc %s has detected buggy sysfs package information: Two packages have\n", HWLOC_VERSION);
 		fprintf(stderr, "* the same physical package id %u but different core_siblings %s and %s\n",
 			mypackageid, a, b);
 		fprintf(stderr, "* hwloc is merging these packages into a single one assuming your Linux kernel\n");
