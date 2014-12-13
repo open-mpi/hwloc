@@ -43,6 +43,8 @@ $assembler $file \
 
 # filter hwlocVersion since it often changes
 sed -e '/<info name=\"hwlocVersion\" value=\"'$VERSION'\"\/>/d' -i $file
+# filter ProcessName since it may be hwloc-info or lt-hwloc-info
+sed -e '/<info name=\"ProcessName\" value=\"hwloc-assembler\"\/>/d' -e '/<info name=\"ProcessName\" value=\"lt-hwloc-assembler\"\/>/d' -i $file
 
 diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.output "$file"
 rm -rf "$tmp"

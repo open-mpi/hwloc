@@ -1618,6 +1618,12 @@ the topology. If the topology was loaded from XML, this is not the hwloc
 version that loaded it, but rather the first hwloc instance that exported
 the topology to XML earlier.
 </dd>
+<dt>ProcessName</dt>
+<dd>The name of the process that contains the hwloc library that was used
+to generate the topology. If the topology was from XML, this is not the
+hwloc version that loaded it, but rather the first process that exported
+the topology to XML earlier.
+</dd>
 </dl>
 
 Here is a non-exhaustive list of user-provided info attributes
