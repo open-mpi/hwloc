@@ -627,6 +627,8 @@ extern "C" {
 
 #define hwloc_obj_add_info_nodup HWLOC_NAME(obj_add_info_nodup)
 
+#define hwloc_progname HWLOC_NAME(progname)
+
 /* private/solaris-chiptype.h */
 
 #define hwloc_solaris_get_chip_type HWLOC_NAME(solaris_get_chip_type)
