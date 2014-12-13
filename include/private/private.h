@@ -313,4 +313,9 @@ extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwl
 
 extern void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *value, int nodup);
 
+/* Return the name of the currently running program, if supported.
+ * If not NULL, must be freed by the caller.
+ */
+extern char * hwloc_progname(struct hwloc_topology *topology);
+
 #endif /* HWLOC_PRIVATE_H */
