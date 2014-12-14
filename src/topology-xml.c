@@ -553,6 +553,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 			 hwloc_obj_t obj,
 			 hwloc__xml_import_state_t state)
 {
+  hwloc_obj_t parent = obj->parent;
+
   /* process attributes */
   while (1) {
     char *attrname, *attrvalue;
@@ -569,8 +571,45 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
   }
 
-  if (obj->parent) {
+  if (parent) {
     /* root->parent is NULL, and root is already inserted */
+
+    /* warn if inserting out-of-order */
+    hwloc_obj_t *current;
+    for (current = &parent->first_child; *current; current = &(*current)->next_sibling) {
+      hwloc_bitmap_t curcpuset = (*current)->cpuset;
+      if (obj->cpuset && (!curcpuset || hwloc__object_cpusets_compare_first(obj, *current) < 0)) {
+	static int reported = 0;
+	if (!reported && !hwloc_hide_errors()) {
+	  char *c1, *cc1, t1[64];
+	  char *c2 = NULL, *cc2 = NULL, t2[64];
+	  hwloc_bitmap_asprintf(&c1, obj->cpuset);
+	  hwloc_bitmap_asprintf(&cc1, obj->complete_cpuset);
+	  hwloc_obj_type_snprintf(t1, sizeof(t1), obj, 0);
+	  if (curcpuset)
+	    hwloc_bitmap_asprintf(&c2, curcpuset);
+	  if ((*current)->complete_cpuset)
+	    hwloc_bitmap_asprintf(&cc2, (*current)->complete_cpuset);
+	  hwloc_obj_type_snprintf(t2, sizeof(t2), *current, 0);
+	  fprintf(stderr, "****************************************************************************\n");
+	  fprintf(stderr, "* hwloc %s has encountered an out-of-order XML topology load.\n", HWLOC_VERSION);
+	  fprintf(stderr, "* Object %s cpuset %s complete %s\n",
+		  t1, c1, cc1);
+	  fprintf(stderr, "* was inserted after object %s with %s and %s.\n",
+		  t2, c2 ? c2 : "none", cc2 ? cc2 : "none");
+	  fprintf(stderr, "* Please check that your input topology XML file is valid.\n");
+	  fprintf(stderr, "****************************************************************************\n");
+	  free(c1);
+	  free(cc1);
+	  if (c2)
+	    free(c2);
+	  if (cc2)
+	    free(cc2);
+	  reported = 1;
+	}
+      }
+    }
+
     hwloc_insert_object_by_parent(topology, obj->parent /* filled by the caller */, obj);
     /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
   }

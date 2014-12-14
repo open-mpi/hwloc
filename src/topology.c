@@ -407,6 +407,9 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
   while ((child = hwloc_get_next_child(newtopology, src, child)) != NULL)
     hwloc__duplicate_objects(newtopology, newobj, child);
 
+  /* no need to check the children order here, the source topology
+   * is supposed to be OK already, and we have debug asserts.
+   */
   hwloc_insert_object_by_parent(newtopology, newparent, newobj);
 }
 
@@ -757,7 +760,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
  *
  * This is the sane way to compare object among a horizontal level.
  */
-static int
+int
 hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   if (obj1->complete_cpuset && obj2->complete_cpuset)
@@ -1049,30 +1052,13 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   hwloc_obj_t child, next_child = obj->first_child;
   hwloc_obj_t *current;
 
-  /* Append to the end of the list */
-  for (current = &parent->first_child; *current; current = &(*current)->next_sibling) {
-    hwloc_bitmap_t curcpuset = (*current)->cpuset;
-    if (obj->cpuset && (!curcpuset || hwloc__object_cpusets_compare_first(obj, *current) < 0)) {
-      static int reported = 0;
-      if (!reported && !hwloc_hide_errors()) {
-	char *a = NULL, *b;
-	if (curcpuset)
-	  hwloc_bitmap_asprintf(&a, curcpuset);
-	hwloc_bitmap_asprintf(&b, obj->cpuset);
-        fprintf(stderr, "****************************************************************************\n");
-        fprintf(stderr, "* hwloc %s has encountered an out-of-order topology discovery.\n", HWLOC_VERSION);
-        fprintf(stderr, "* An object with (complete) cpuset %s was inserted after object with %s\n",
-		b, a ? a : "no cpuset");
-        fprintf(stderr, "* Please check that your input topology (XML file, etc.) is valid.\n");
-        fprintf(stderr, "****************************************************************************\n");
-	if (a)
-	  free(a);
-	free(b);
-	reported = 1;
-      }
-    }
-  }
-
+  /* Append to the end of the list.
+   * The caller takes care of inserting children in the right cpuset order.
+   * XML checks the order.
+   * Duplicating doesn't need to check the order since the source topology is supposed to be OK already.
+   * Other callers just insert random objects such as I/O or Misc.
+   */
+  for (current = &parent->first_child; *current; current = &(*current)->next_sibling);
   *current = obj;
   obj->next_sibling = NULL;
   obj->first_child = NULL;
