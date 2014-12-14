@@ -308,6 +308,10 @@ HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_top
  * The cpuset is completely ignored, so strange objects such as I/O devices should
  * preferably be inserted with this.
  *
+ * When used for "normal" children with cpusets (when importing from XML
+ * when duplicating a topology), the caller should make sure children are inserted
+ * in order.
+ *
  * The given object may have children.
  *
  * Remember to call topology_connect() afterwards to fix handy pointers.
