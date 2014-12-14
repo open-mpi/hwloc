@@ -804,7 +804,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
  *
  * This is the sane way to compare object among a horizontal level.
  */
-static int
+int
 hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   if (obj1->complete_cpuset && obj2->complete_cpuset)

@@ -137,6 +137,8 @@ extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
 extern void hwloc_connect_children(hwloc_obj_t obj);
 extern int hwloc_connect_levels(hwloc_topology_t topology);
 
+extern int hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2);
+
 extern void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 extern void hwloc_topology_clear(struct hwloc_topology *topology);
 
