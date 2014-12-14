@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Inria.  All rights reserved.
+ * Copyright © 2013-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 			argc--;
 			argv++;
 		} else if (!strcmp (argv[0], "--version")) {
-			printf("%s %s\n", callname, VERSION);
+			printf("%s %s\n", callname, HWLOC_VERSION);
 			exit(EXIT_SUCCESS);
 		} else {
 			fprintf(stderr, "Unrecognized options: %s\n", argv[0]);
