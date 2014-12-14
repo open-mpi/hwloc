@@ -555,7 +555,7 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[0], "--ps") || !strcmp (argv[0], "--top"))
         top = 1;
       else if (!strcmp (argv[0], "--version")) {
-          printf("%s %s\n", callname, VERSION);
+          printf("%s %s\n", callname, HWLOC_VERSION);
           exit(EXIT_SUCCESS);
       } else if (!strcmp (argv[0], "--output-format") || !strcmp (argv[0], "--of")) {
 	if (argc < 2) {

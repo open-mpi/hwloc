@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
         goto next;
       }
       else if (!strcmp (argv[0], "--version")) {
-          printf("%s %s\n", callname, VERSION);
+          printf("%s %s\n", callname, HWLOC_VERSION);
           exit(EXIT_SUCCESS);
       }
       if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
