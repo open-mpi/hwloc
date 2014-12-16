@@ -11,6 +11,7 @@
 # Copyright © 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
 # Copyright © 2008-2014 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2014 Inria.  All rights reserved.
 # $COPYRIGHT$
 #
 # Additional copyrights may follow
@@ -34,6 +35,10 @@ else
 	s/^minor/HWLOC_MINOR_VERSION/
 	s/^release/HWLOC_RELEASE_VERSION/
 	s/^greek/HWLOC_GREEK_VERSION/
+	s/\\\${major}/\\\${HWLOC_MAJOR_VERSION}/
+	s/\\\${minor}/\\\${HWLOC_MINOR_VERSION}/
+	s/\\\${release}/\\\${HWLOC_RELEASE_VERSION}/
+	s/\\\${greek}/\\\${HWLOC_GREEK_VERSION}/
 	s/^date/HWLOC_RELEASE_DATE/
 	s/^snapshot_version/HWLOC_SNAPSHOT_VERSION/
 	s/^snapshot/HWLOC_SNAPSHOT/
