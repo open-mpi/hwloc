@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux 1
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -47,40 +47,6 @@ LT_PREREQ([2.2.6])
 
 AC_LANG([C])
 AC_USE_SYSTEM_EXTENSIONS
-
-####################################################################
-# Version information
-####################################################################
-
-# Make configure depend on the VERSION file, since it's used in AC_INIT
-AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
-
-# Get the version of hwloc that we are installing
-AC_MSG_CHECKING([for hwloc version])
-HWLOC_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION`"
-if test "$?" != "0"; then
-    AC_MSG_ERROR([Cannot continue])
-fi
-HWLOC_RELEASE_DATE="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release-date`"
-AC_SUBST(HWLOC_VERSION)
-AC_SUBST(HWLOC_RELEASE_DATE)
-AC_MSG_RESULT([$HWLOC_VERSION])
-
-# Override/fixup the version numbers set by AC_INIT, since on
-# developer builds, there's no good way to know what the version is
-# before running configure :(.  We only use the base version number
-# for the version set in AC_INIT.  This will always match reality
-# because we add the VERSION file (the only way to change the
-# major.minor.release{greek}) into the configure dependencies.
-
-PACKAGE_VERSION="$HWLOC_VERSION"
-PACKAGE_STRING="${PACKAGE_NAME} ${PACKAGE_VERSION}"
-VERSION="${PACKAGE_VERSION}"
-
-# For standalone configurations, we also include a .so version number.
-
-. $srcdir/VERSION
-AC_SUBST([libhwloc_so_version])
 
 ####################################################################
 # Setup the configure-results header file
@@ -168,6 +134,31 @@ EOF
 
 # Run the AM_CONDITIONALs
 HWLOC_DO_AM_CONDITIONALS
+
+####################################################################
+# Version information
+####################################################################
+
+# HWLOC_VERSION was setup by HWLOC_SETUP_CORE above.
+
+# Make configure depend on the VERSION file, since it's used in AC_INIT
+AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
+
+# Override/fixup the version numbers set by AC_INIT, since on
+# developer builds, there's no good way to know what the version is
+# before running configure :(.  We only use the base version number
+# for the version set in AC_INIT.  This will always match reality
+# because we add the VERSION file (the only way to change the
+# major.minor.release{greek}) into the configure dependencies.
+
+PACKAGE_VERSION="$HWLOC_VERSION"
+PACKAGE_STRING="${PACKAGE_NAME} ${PACKAGE_VERSION}"
+VERSION="${PACKAGE_VERSION}"
+
+# For standalone configurations, we also include a .so version number.
+
+. $srcdir/VERSION
+AC_SUBST([libhwloc_so_version])
 
 ####################################################################
 # Final output

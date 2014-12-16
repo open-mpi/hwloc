@@ -78,6 +78,19 @@ EOF])
         AC_MSG_NOTICE([Detected VPATH build])
     fi
 
+    # Get the version of hwloc that we are installing
+    AC_MSG_CHECKING([for hwloc version])
+    HWLOC_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION`"
+    if test "$?" != "0"; then
+        AC_MSG_ERROR([Cannot continue])
+    fi
+    HWLOC_RELEASE_DATE="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release-date`"
+    AC_SUBST(HWLOC_VERSION)
+    AC_DEFINE_UNQUOTED([HWLOC_VERSION], ["$HWLOC_VERSION"],
+                       [The library version, always available, even in embedded mode, contrary to VERSION])
+    AC_SUBST(HWLOC_RELEASE_DATE)
+    AC_MSG_RESULT([$HWLOC_VERSION])
+
     # Debug mode?
     AC_MSG_CHECKING([if want hwloc maintainer support])
     hwloc_debug=
