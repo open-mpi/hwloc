@@ -40,6 +40,8 @@ Version 1.10.1
   in future releases.
 * Clarify the documentation of distance matrices in hwloc.h and in the manpage
   of the hwloc-distances. Thanks to Dave Love for the suggestion.
+* Improve some error messages by displaying more information about the
+  hwloc library in use.
 
 
 Version 1.10.0
