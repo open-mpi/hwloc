@@ -1,6 +1,7 @@
 /*
  * Copyright © 2013      University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2014 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -236,6 +237,8 @@ static int search_uri(const char * search_uri,
         /*
          * Skip directories
          */
+	/* FIXME: if !_DIRENT_HAVE_D_TYPE, don't use d_type, do a lstat instead */
+	/* FIXME: if d_type == DT_UNKNOWN, do a lstat */
         if( DT_DIR == dir_entry->d_type ) {
             continue;
         }
