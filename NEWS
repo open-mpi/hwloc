@@ -42,6 +42,8 @@ Version 1.10.1
   of the hwloc-distances. Thanks to Dave Love for the suggestion.
 * Improve some error messages by displaying more information about the
   hwloc library in use.
+* Document how to deal with the ABI break when upgrading to the upcoming 2.0
+  See "How do I handle ABI breaks and API upgrades ?" in the FAQ.
 
 
 Version 1.10.0
