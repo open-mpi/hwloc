@@ -2595,40 +2595,46 @@ You should pass the following command-line option to Valgrind to use it:
 \endverbatim
 
 
-\section faq_upgrade How do I handle API upgrades?
+\section faq_upgrade How do I handle ABI breaks and API upgrades?
 
 The hwloc interface is extended with every new major release.
 Any application using the hwloc API should be prepared to check at
 compile-time whether some features are available in the currently
 installed hwloc distribution.
 
-To check whether the hwloc version is at least 1.5, you should use:
+For instance, to check whether the hwloc version is at least 1.10, you should use:
 \verbatim
 #include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00010500
+#if HWLOC_API_VERSION >= 0x00010a00
 ...
 #endif
 \endverbatim
 
-New releases usually never remove or modify the existing interface
-to preserve the ABI of the library.
-There are two exceptions to this rule:
-First hwloc 2.0 brought significant longstanding fixes to the API
+The hwloc interface was deeply modified in release 2.0
+to fix several issues of the 1.x interface
 (see the NEWS file in the source directory for details).
-Secondly hwloc 1.5 removed the deprecated
-cpuset API, which was superseded by the new bitmap API since hwloc 1.1.
-If your code must work with very old hwloc releases, you should use
-the latest bitmap API anyway. Then, use something similar to the
-following code to support old cpuset-only hwloc versions:
+The ABI was broken, which means
+<b>applications must be recompiled against the new 2.0 interface</b>.
+
+To check that you are not mixing old/recent headers with a recent/old runtime library:
 \verbatim
 #include <hwloc.h>
-#if HWLOC_API_VERSION < 0x00010100
-#define hwloc_bitmap_alloc hwloc_cpuset_alloc
+#if HWLOC_API_VERSION >= 0x00020000
+  /* headers are recent */
+  if (hwloc_get_api_version() < 0x20000)
+    ... error out, the hwloc runtime library is older than 2.0 ...
+#else
+  /* headers are pre-2.0 */
+  if (hwloc_get_api_version() >= 0x20000)
+    ... error out, the hwloc runtime library is more recent than 2.0 ...
 #endif
 \endverbatim
 
-hwloc 0.9 did not define any <tt>HWLOC_API_VERSION</tt> but this very old
-release probably does not deserve support from your application anymore.
+You should not try to remain compatible with very old releases such as
+1.1.x or earlier because <tt>HWLOC_API_VERSION</tt> was added in 1.0.0
+and <tt>hwloc_get_api_version()</tt> came only in 1.1.1.
+Also do not use the old cpuset API since it was deprecated and superseded
+by the bitmap API in 1.1, and later removed in 1.5.
 
 
 \section faq_bgq How do I build hwloc for BlueGene/Q?

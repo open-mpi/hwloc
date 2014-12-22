@@ -19,7 +19,10 @@ in v0.9.1).
 
 Version 2.0
 --------------
-* The ABI of the library has changed.
+* The ABI of the library has changed. For instance some hwloc_obj fields
+  were reordered.
+  - HWLOC_API_VERSION and hwloc_get_api_version() now give 0x00020000.
+  - See "How do I handle ABI breaks and API upgrades ?" in the FAQ.
 * Major changes
   + Socket objects are renamed into Package to align with the terminology
     used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"

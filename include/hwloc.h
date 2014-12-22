@@ -78,13 +78,13 @@ extern "C" {
  */
 
 /** \brief Indicate at build time which hwloc API version is being used. */
-#define HWLOC_API_VERSION 0x00010a00
+#define HWLOC_API_VERSION 0x00020000
 
 /** \brief Indicate at runtime which hwloc API version was used at build time. */
 HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
 
 /** \brief Current component and plugin ABI version (see hwloc/plugins.h) */
-#define HWLOC_COMPONENT_ABI 4
+#define HWLOC_COMPONENT_ABI 5
 
 /** @} */
 
