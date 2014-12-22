@@ -31,6 +31,8 @@ Version 1.11.0
 * Misc
   + Add a PCISlot attribute to PCI devices on Linux when supported to
     identify the physical PCI slot where the board is plugged.
+  * Document how to deal with the ABI break when upgrading to the upcoming 2.0
+    See "How do I handle ABI breaks and API upgrades ?" in the FAQ.
 
 
 Version 1.10.0
