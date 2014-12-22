@@ -443,34 +443,6 @@ void hwloc_distances_finalize_os(struct hwloc_topology *topology)
  * into exported logical distances attached to objects
  */
 
-static hwloc_obj_t
-hwloc_get_obj_covering_cpuset_nodeset(struct hwloc_topology *topology,
-				      hwloc_const_cpuset_t cpuset,
-				      hwloc_const_nodeset_t nodeset)
-{
-  hwloc_obj_t parent = hwloc_get_root_obj(topology), child;
-
-  assert(cpuset);
-  assert(nodeset);
-  assert(hwloc_bitmap_isincluded(cpuset, parent->cpuset));
-  assert(!nodeset || hwloc_bitmap_isincluded(nodeset, parent->nodeset));
-
- trychildren:
-  child = parent->first_child;
-  while (child) {
-    /* look for a child with a cpuset containing ours.
-     * if it has a nodeset, it must also contain ours.
-     */
-    if (child->cpuset && hwloc_bitmap_isincluded(cpuset, child->cpuset)
-	&& (!child->nodeset || hwloc_bitmap_isincluded(nodeset, child->nodeset))) {
-      parent = child;
-      goto trychildren;
-    }
-    child = child->next_sibling;
-  }
-  return parent;
-}
-
 static void
 hwloc_distances__finalize_logical(struct hwloc_topology *topology,
 				  unsigned nbobjs,
@@ -493,8 +465,11 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
     if (objs[i]->nodeset)
       hwloc_bitmap_or(nodeset, nodeset, objs[i]->nodeset);
   }
-  /* find the object covering cpuset AND nodeset (can't use hwloc_get_obj_covering_cpuset()) */
-  root = hwloc_get_obj_covering_cpuset_nodeset(topology, cpuset, nodeset);
+  /* find the object covering cpuset, we'll take care of the nodeset later */
+  root = hwloc_get_obj_covering_cpuset(topology, cpuset);
+  /* walk up to find a parent that also covers the nodeset */
+  while (root && !hwloc_bitmap_isincluded(nodeset, root->nodeset))
+    root = root->parent;
   if (!root) {
     /* should not happen, ignore the distance matrix and report an error. */
     if (!hwloc_hide_errors()) {
