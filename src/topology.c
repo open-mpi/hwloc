@@ -891,7 +891,8 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
           return NULL;
         }
         merge_index(obj, child, os_index, unsigned);
-	if (obj->os_index != child->os_index) {
+	if (obj->os_index != child->os_index
+	    && (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE)) {
 	  static int reported = 0;
 	  if (!reported && !hwloc_hide_errors()) {
 	    fprintf(stderr, "Cannot merge similar %s objects with different OS indexes %u and %u\n",
@@ -900,6 +901,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	  }
           return NULL;
         }
+        merge_index(obj, child, os_index, unsigned);
 	if (obj->distances_count) {
 	  if (child->distances_count) {
 	    child->distances_count += obj->distances_count;
