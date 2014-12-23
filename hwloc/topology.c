@@ -937,7 +937,7 @@ static struct hwloc_obj *
 hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj,
 			        hwloc_report_error_t report_error)
 {
-  hwloc_obj_t child, container, *cur_children, *obj_children, next_child = NULL;
+  hwloc_obj_t child, *cur_children, *obj_children, next_child = NULL;
   int put;
 
   /* Make sure we haven't gone too deep.  */
@@ -946,8 +946,9 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     return NULL;
   }
 
-  /* Check whether OBJ is included in some child.  */
-  container = NULL;
+  /* Check whether OBJ is included in some child.
+   * The list is already sorted by cpuset, and there's no intersection between siblings.
+   */
   for (child = cur->first_child; child; child = child->next_sibling) {
     switch (hwloc_obj_cmp(obj, child)) {
       case HWLOC_OBJ_EQUAL:
@@ -964,25 +965,11 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	merge_insert_equal(obj, child);
 	/* Already present, no need to insert.  */
 	return child;
+
       case HWLOC_OBJ_INCLUDED:
-	if (container) {
-          if (report_error) {
-	    char containerstr[512];
-	    char childstr[512];
-	    char objstr[512];
-	    char msg[2048];
-	    hwloc__report_error_format_obj(containerstr, sizeof(containerstr), container);
-	    hwloc__report_error_format_obj(childstr, sizeof(childstr), child);
-	    hwloc__report_error_format_obj(objstr, sizeof(objstr), obj);
-	    snprintf(msg, sizeof(msg), "%s included in both %s and %s!", objstr, containerstr, childstr);
-	    report_error(msg, __LINE__);
-	  }
-	  /* We can't handle that.  */
-	  return NULL;
-	}
-	/* This child contains OBJ.  */
-	container = child;
-	break;
+	/* OBJ is strictly contained is some child of CUR, go deeper.  */
+	return hwloc___insert_object_by_cpuset(topology, child, obj, report_error);
+
       case HWLOC_OBJ_INTERSECTS:
         if (report_error) {
 	  char childstr[512];
@@ -1002,11 +989,6 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	/* OBJ will be alongside CHILD.  */
 	break;
     }
-  }
-
-  if (container) {
-    /* OBJ is strictly contained is some child of CUR, go deeper.  */
-    return hwloc___insert_object_by_cpuset(topology, container, obj, report_error);
   }
 
   /*
