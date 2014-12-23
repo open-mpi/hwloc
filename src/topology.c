@@ -916,17 +916,8 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	  obj->distances = NULL;
 	}
 	if (obj->infos_count) {
-	  if (child->infos_count) {
-	    child->infos_count += obj->infos_count;
-	    child->infos = realloc(child->infos, child->infos_count * sizeof(*child->infos));
-	    memcpy(child->infos + obj->infos_count, obj->infos, obj->infos_count * sizeof(*child->infos));
-	    free(obj->infos);
-	  } else {
-	    child->infos_count = obj->infos_count;
-	    child->infos = obj->infos;
-	  }
-	  obj->infos_count = 0;
-	  obj->infos = NULL;
+	  hwloc__move_infos(&child->infos, &child->infos_count,
+			    &obj->infos, &obj->infos_count);
 	}
 	if (obj->name) {
 	  if (child->name)
