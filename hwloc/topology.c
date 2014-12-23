@@ -849,6 +849,68 @@ hwloc__report_error_format_obj(char *buf, size_t buflen, hwloc_obj_t obj)
 #define check_sizes(new, old, field)
 #endif
 
+static void
+merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
+{
+  merge_index(new, old, os_index, unsigned);
+
+  if (new->distances_count) {
+    if (old->distances_count) {
+      old->distances_count += new->distances_count;
+      old->distances = realloc(old->distances, old->distances_count * sizeof(*old->distances));
+      memcpy(old->distances + new->distances_count, new->distances, new->distances_count * sizeof(*old->distances));
+      free(new->distances);
+    } else {
+      old->distances_count = new->distances_count;
+      old->distances = new->distances;
+    }
+    new->distances_count = 0;
+    new->distances = NULL;
+  }
+
+  if (new->infos_count) {
+    hwloc__move_infos(&old->infos, &old->infos_count,
+		      &new->infos, &new->infos_count);
+  }
+
+  if (new->name) {
+    if (old->name)
+      free(old->name);
+    old->name = new->name;
+    new->name = NULL;
+  }
+
+  assert(!new->userdata); /* user could not set userdata here (we're before load() */
+
+  switch(new->type) {
+  case HWLOC_OBJ_NUMANODE:
+    /* Do not check these, it may change between calls */
+    merge_sizes(new, old, memory.local_memory);
+    merge_sizes(new, old, memory.total_memory);
+    /* if both newects have a page_types array, just keep the biggest one for now */
+    if (new->memory.page_types_len && old->memory.page_types_len)
+      hwloc_debug("%s", "merging page_types by keeping the biggest one only\n");
+    if (new->memory.page_types_len < old->memory.page_types_len) {
+      free(new->memory.page_types);
+    } else {
+      free(old->memory.page_types);
+      old->memory.page_types_len = new->memory.page_types_len;
+      old->memory.page_types = new->memory.page_types;
+      new->memory.page_types = NULL;
+      new->memory.page_types_len = 0;
+    }
+    break;
+  case HWLOC_OBJ_CACHE:
+    merge_sizes(new, old, attr->cache.size);
+    check_sizes(new, old, attr->cache.size);
+    merge_sizes(new, old, attr->cache.linesize);
+    check_sizes(new, old, attr->cache.linesize);
+    break;
+  default:
+    break;
+  }
+}
+
 /* Try to insert OBJ in CUR, recurse if needed.
  * Returns the object if it was inserted,
  * the remaining object it was merged,
@@ -881,59 +943,8 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	    reported = 1;
 	  }
           return NULL;
-        }
-        merge_index(obj, child, os_index, unsigned);
-	if (obj->distances_count) {
-	  if (child->distances_count) {
-	    child->distances_count += obj->distances_count;
-	    child->distances = realloc(child->distances, child->distances_count * sizeof(*child->distances));
-	    memcpy(child->distances + obj->distances_count, obj->distances, obj->distances_count * sizeof(*child->distances));
-	    free(obj->distances);
-	  } else {
-	    child->distances_count = obj->distances_count;
-	    child->distances = obj->distances;
-	  }
-	  obj->distances_count = 0;
-	  obj->distances = NULL;
 	}
-	if (obj->infos_count) {
-	  hwloc__move_infos(&child->infos, &child->infos_count,
-			    &obj->infos, &obj->infos_count);
-	}
-	if (obj->name) {
-	  if (child->name)
-	    free(child->name);
-	  child->name = obj->name;
-	  obj->name = NULL;
-	}
-	assert(!obj->userdata); /* user could not set userdata here (we're before load() */
-	switch(obj->type) {
-	  case HWLOC_OBJ_NUMANODE:
-	    /* Do not check these, it may change between calls */
-	    merge_sizes(obj, child, memory.local_memory);
-	    merge_sizes(obj, child, memory.total_memory);
-	    /* if both objects have a page_types array, just keep the biggest one for now */
-	    if (obj->memory.page_types_len && child->memory.page_types_len)
-	      hwloc_debug("%s", "merging page_types by keeping the biggest one only\n");
-	    if (obj->memory.page_types_len < child->memory.page_types_len) {
-	      free(obj->memory.page_types);
-	    } else {
-	      free(child->memory.page_types);
-	      child->memory.page_types_len = obj->memory.page_types_len;
-	      child->memory.page_types = obj->memory.page_types;
-	      obj->memory.page_types = NULL;
-	      obj->memory.page_types_len = 0;
-	    }
-	    break;
-	  case HWLOC_OBJ_CACHE:
-	    merge_sizes(obj, child, attr->cache.size);
-	    check_sizes(obj, child, attr->cache.size);
-	    merge_sizes(obj, child, attr->cache.linesize);
-	    check_sizes(obj, child, attr->cache.linesize);
-	    break;
-	  default:
-	    break;
-	}
+	merge_insert_equal(obj, child);
 	/* Already present, no need to insert.  */
 	return child;
       case HWLOC_OBJ_INCLUDED:
