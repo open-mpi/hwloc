@@ -575,6 +575,7 @@ extern "C" {
 #define hwloc_connect_levels HWLOC_NAME(connect_levels)
 
 #define hwloc__object_cpusets_compare_first HWLOC_NAME(_object_cpusets_compare_first)
+#define hwloc__reorder_children HWLOC_NAME(_reorder_children)
 
 #define hwloc_topology_setup_defaults HWLOC_NAME(topology_setup_defaults)
 #define hwloc_topology_clear HWLOC_NAME(topology_clear)

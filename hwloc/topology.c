@@ -1087,8 +1087,8 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 
   /* Append to the end of the list.
    * The caller takes care of inserting children in the right cpuset order.
-   * XML checks the order.
    * Duplicating doesn't need to check the order since the source topology is supposed to be OK already.
+   * XML reorders if needed.
    * Other callers just insert random objects such as I/O or Misc.
    */
   for (current = &parent->first_child; *current; current = &(*current)->next_sibling);
@@ -1538,8 +1538,8 @@ remove_unused_sets(hwloc_obj_t obj)
     remove_unused_sets(child);
 }
 
-static void
-reorder_children(hwloc_obj_t parent)
+void
+hwloc__reorder_children(hwloc_obj_t parent)
 {
   /* move the children list on the side */
   hwloc_obj_t *prev, child, children = parent->first_child;
@@ -1585,7 +1585,7 @@ ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
 
   } else if (dropped_children) {
     /* we keep this object but its children changed, reorder them by complete_cpuset */
-    reorder_children(parent);
+    hwloc__reorder_children(parent);
   }
 
   return dropped;
@@ -1632,7 +1632,7 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
     droppedchildren += ignore_type_keep_structure(topology, pchild);
 
   if (droppedchildren)
-    reorder_children(parent);
+    hwloc__reorder_children(parent);
 
   child = parent->first_child;
   /* we don't merge if there are multiple "important" children.
