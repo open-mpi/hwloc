@@ -777,21 +777,46 @@ static int
 hwloc_obj_cmp_sets(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   hwloc_bitmap_t set1, set2;
+  int res = HWLOC_OBJ_DIFFERENT;
 
-  /* compare cpusets if possible, or fallback to nodeset, or return */
-  if (obj1->cpuset && !hwloc_bitmap_iszero(obj1->cpuset)
-      && obj2->cpuset && !hwloc_bitmap_iszero(obj2->cpuset)) {
-    set1 = obj1->cpuset;
-    set2 = obj2->cpuset;
-  } else if (obj1->nodeset && !hwloc_bitmap_iszero(obj1->nodeset)
-	     && obj2->nodeset && !hwloc_bitmap_iszero(obj2->nodeset)) {
-    set1 = obj1->nodeset;
-    set2 = obj2->nodeset;
-  } else {
-    return HWLOC_OBJ_DIFFERENT;
+  /* compare cpusets first */
+  set1 = obj1->cpuset;
+  set2 = obj2->cpuset;
+  if (set1 && set2 && !hwloc_bitmap_iszero(set1) && !hwloc_bitmap_iszero(set2)) {
+    res = hwloc_bitmap_compare_inclusion(set1, set2);
+    if (res == HWLOC_OBJ_INTERSECTS)
+      return HWLOC_OBJ_INTERSECTS;
   }
 
-  return hwloc_bitmap_compare_inclusion(set1, set2);
+  /* then compare nodesets, and combine the results */
+  set1 = obj1->nodeset;
+  set2 = obj2->nodeset;
+  if (set1 && set2 && !hwloc_bitmap_iszero(set1) && !hwloc_bitmap_iszero(set2)) {
+    int noderes = hwloc_bitmap_compare_inclusion(set1, set2);
+    /* deal with conflicting cpusets/nodesets inclusions */
+    if (noderes == HWLOC_OBJ_INCLUDED) {
+      if (res == HWLOC_OBJ_CONTAINS)
+	/* contradicting order for cpusets and nodesets */
+	return HWLOC_OBJ_INTERSECTS;
+      res = HWLOC_OBJ_INCLUDED;
+
+    } else if (noderes == HWLOC_OBJ_CONTAINS) {
+      if (res == HWLOC_OBJ_INCLUDED)
+	/* contradicting order for cpusets and nodesets */
+	return HWLOC_OBJ_INTERSECTS;
+      res = HWLOC_OBJ_CONTAINS;
+
+    } else if (noderes == HWLOC_OBJ_INTERSECTS) {
+      return HWLOC_OBJ_INTERSECTS;
+
+    } else {
+      /* nodesets are different, keep the cpuset order */
+      /* FIXME: with upcoming multiple levels of NUMA, we may have to report INCLUDED or CONTAINED here */
+
+    }
+  }
+
+  return res;
 }
 
 /* Compare object cpusets based on complete_cpuset if defined (always correctly ordered),
