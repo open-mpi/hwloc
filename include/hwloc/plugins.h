@@ -304,8 +304,9 @@ HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_top
  * preferably be inserted with this.
  *
  * When used for "normal" children with cpusets (when importing from XML
- * when duplicating a topology), the caller should make sure children are inserted
- * in order.
+ * when duplicating a topology), the caller should make sure that:
+ * - children are inserted in order,
+ * - children cpusets do not intersect.
  *
  * The given object may have children.
  *

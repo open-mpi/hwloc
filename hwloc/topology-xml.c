@@ -594,6 +594,14 @@ static void hwloc__xml_import_report_outoforder(hwloc_topology_t topology, hwloc
   free(progname);
 }
 
+static int hwloc__object_cpusets_intersect(hwloc_obj_t obj1, hwloc_obj_t obj2)
+{
+  if (obj1->complete_cpuset && obj2->complete_cpuset)
+    return hwloc_bitmap_intersects(obj1->complete_cpuset, obj2->complete_cpuset);
+  else
+    return hwloc_bitmap_intersects(obj1->cpuset, obj2->cpuset);
+}
+
 static int
 hwloc__xml_import_object(hwloc_topology_t topology,
 			 struct hwloc_xml_backend_data_s *data,
@@ -653,7 +661,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (parent) {
     /* root->parent is NULL, and root is already inserted */
 
-    /* warn if inserting out-of-order */
+    /* warn if inserting out-of-order or if children intersects,
+     * so that the core doesn't have to deal with crappy children list.
+     */
     int outoforder = 0;
     hwloc_obj_t *current;
     for (current = &parent->first_child; *current; current = &(*current)->next_sibling) {
@@ -664,6 +674,14 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	  hwloc__xml_import_report_outoforder(topology, obj, *current);
 	  reported = 1;
 	}
+      }
+      if (obj->cpuset && (!(*current)->cpuset || hwloc__object_cpusets_intersect(obj, *current))) {
+	if (hwloc__xml_verbose()) {
+	  fprintf(stderr, "intersecting children %s P#%u and %s P#%u\n",
+		  hwloc_obj_type_string(obj->type), obj->os_index,
+		  hwloc_obj_type_string((*current)->type), (*current)->os_index);
+	}
+	return -1;
       }
     }
 

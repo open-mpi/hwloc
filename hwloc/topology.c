@@ -1086,10 +1086,10 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   hwloc_obj_t *current;
 
   /* Append to the end of the list.
-   * The caller takes care of inserting children in the right cpuset order.
+   * The caller takes care of inserting children in the right cpuset order, without intersection between them.
    * Duplicating doesn't need to check the order since the source topology is supposed to be OK already.
-   * XML reorders if needed.
-   * Other callers just insert random objects such as I/O or Misc.
+   * XML reorders if needed, and fails on intersecting siblings.
+   * Other callers just insert random objects such as I/O or Misc, no cpuset issue there.
    */
   for (current = &parent->first_child; *current; current = &(*current)->next_sibling);
   *current = obj;
