@@ -928,8 +928,12 @@ static struct hwloc_obj *
 hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj,
 			        hwloc_report_error_t report_error)
 {
-  hwloc_obj_t child, *cur_children, *obj_children, next_child = NULL;
-  int put;
+  hwloc_obj_t child, next_child = NULL;
+  /* These will always point to the pointer to their next last child. */
+  hwloc_obj_t *cur_children = &cur->first_child;
+  hwloc_obj_t *obj_children = &obj->first_child;
+  /* Pointer where OBJ should be put */
+  hwloc_obj_t *putp = NULL; /* OBJ position isn't found yet */
 
   /* Make sure we haven't gone too deep.  */
   if (!hwloc_bitmap_isincluded(obj->cpuset, cur->cpuset)) {
@@ -937,10 +941,13 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     return NULL;
   }
 
-  /* Check whether OBJ is included in some child.
+  /* Iteration with prefetching to be completely safe against CHILD removal.
    * The list is already sorted by cpuset, and there's no intersection between siblings.
    */
-  for (child = cur->first_child; child; child = child->next_sibling) {
+  for (child = cur->first_child, child ? next_child = child->next_sibling : NULL;
+       child;
+       child = next_child, child ? next_child = child->next_sibling : NULL) {
+
     switch (hwloc_obj_cmp(obj, child)) {
       case HWLOC_OBJ_EQUAL:
         merge_index(obj, child, os_level, signed);
@@ -982,77 +989,56 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	  snprintf(msg, sizeof(msg), "%s intersects with %s without inclusion!", objstr, childstr);
 	  report_error(msg, __LINE__);
 	}
-	/* We can't handle that.  */
-	return NULL;
-      case HWLOC_OBJ_CONTAINS:
-	/* OBJ will be above CHILD.  */
-	break;
-      case HWLOC_OBJ_DIFFERENT:
-	/* OBJ will be alongside CHILD.  */
-	break;
-    }
-  }
-
-  /*
-   * Children of CUR are either completely different from or contained into
-   * OBJ. Take those that are contained (keeping sorting order), and sort OBJ
-   * along those that are different.
-   */
-
-  /* OBJ is not put yet.  */
-  put = 0;
-
-  /* These will always point to the pointer to their next last child. */
-  cur_children = &cur->first_child;
-  obj_children = &obj->first_child;
-
-  /* Construct CUR's and OBJ's children list.  */
-
-  /* Iteration with prefetching to be completely safe against CHILD removal.  */
-  for (child = cur->first_child, child ? next_child = child->next_sibling : NULL;
-       child;
-       child = next_child, child ? next_child = child->next_sibling : NULL) {
-
-    switch (hwloc_obj_cmp(obj, child)) {
+	goto putback;
 
       case HWLOC_OBJ_DIFFERENT:
-	/* Leave CHILD in CUR.  */
-	if (!put && (!child->cpuset || hwloc__object_cpusets_compare_first(obj, child) < 0)) {
-	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
-	  *cur_children = obj;
-	  cur_children = &obj->next_sibling;
-	  put = 1;
-	}
-	/* Now put CHILD in CUR's children.  */
-	*cur_children = child;
+        /* OBJ should be a child of CUR before CHILD, mark its position if not found yet. */
+	if (!putp && (!child->cpuset || hwloc__object_cpusets_compare_first(obj, child) < 0))
+	  /* Don't insert yet, there could be intersect errors later */
+	  putp = cur_children;
+	/* Advance cur_children.  */
 	cur_children = &child->next_sibling;
 	break;
 
       case HWLOC_OBJ_CONTAINS:
-	/* OBJ contains CHILD, put the latter in the former.  */
+	/* OBJ contains CHILD, remove CHILD from CUR */
+	*cur_children = child->next_sibling;
+	child->next_sibling = NULL;
+	/* Put CHILD in OBJ */
 	*obj_children = child;
 	obj_children = &child->next_sibling;
 	break;
-
-      case HWLOC_OBJ_EQUAL:
-      case HWLOC_OBJ_INCLUDED:
-      case HWLOC_OBJ_INTERSECTS:
-	/* Shouldn't ever happen as we have handled them above.  */
-	abort();
     }
   }
+  /* cur/obj_children points to last CUR/OBJ child next_sibling pointer, which must be NULL. */
+  assert(!*obj_children);
+  assert(!*cur_children);
 
-  /* Put OBJ last in CUR's children if not already done so.  */
-  if (!put) {
-    *cur_children = obj;
-    cur_children = &obj->next_sibling;
-  }
-
-  /* Close children lists.  */
-  *obj_children = NULL;
-  *cur_children = NULL;
+  /* Put OBJ where it belongs, or in last in CUR's children.  */
+  if (!putp)
+    putp = cur_children;
+  obj->next_sibling = *putp;
+  *putp = obj;
 
   return obj;
+
+ putback:
+  /* Put-back OBJ children in CUR and return an error. */
+  if (putp)
+    cur_children = putp; /* No need to try to insert before where OBJ was supposed to go */
+  else
+    cur_children = &cur->first_child; /* Start from the beginning */
+  /* We can insert in order, but there can be holes in the middle. */
+  while ((child = obj->first_child) != NULL) {
+    /* Remove from OBJ */
+    obj->first_child = child->next_sibling;
+    /* Find child position in CUR, and insert. */
+    while (*cur_children && (*cur_children)->cpuset && hwloc__object_cpusets_compare_first(*cur_children, child) < 0)
+      cur_children = &(*cur_children)->next_sibling;
+    child->next_sibling = *cur_children;
+    *cur_children = child;
+  }
+  return NULL;
 }
 
 /* insertion routine that lets you change the error reporting callback */
