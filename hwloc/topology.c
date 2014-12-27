@@ -739,8 +739,13 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
   int res = HWLOC_OBJ_DIFFERENT;
 
   /* compare cpusets first */
-  set1 = obj1->cpuset;
-  set2 = obj2->cpuset;
+  if (obj1->complete_cpuset && obj2->complete_cpuset) {
+    set1 = obj1->complete_cpuset;
+    set2 = obj2->complete_cpuset;
+  } else {
+    set1 = obj1->cpuset;
+    set2 = obj2->cpuset;
+  }
   if (set1 && set2 && !hwloc_bitmap_iszero(set1) && !hwloc_bitmap_iszero(set2)) {
     res = hwloc_bitmap_compare_inclusion(set1, set2);
     if (res == HWLOC_OBJ_INTERSECTS)
@@ -748,8 +753,13 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
   }
 
   /* then compare nodesets, and combine the results */
-  set1 = obj1->nodeset;
-  set2 = obj2->nodeset;
+  if (obj1->complete_nodeset && obj2->complete_nodeset) {
+    set1 = obj1->complete_nodeset;
+    set2 = obj2->complete_nodeset;
+  } else {
+    set1 = obj1->nodeset;
+    set2 = obj2->nodeset;
+  }
   if (set1 && set2 && !hwloc_bitmap_iszero(set1) && !hwloc_bitmap_iszero(set2)) {
     int noderes = hwloc_bitmap_compare_inclusion(set1, set2);
     /* deal with conflicting cpusets/nodesets inclusions */
