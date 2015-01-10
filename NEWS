@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2014 Inria.  All rights reserved.
+Copyright © 2009-2015 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux 1
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -32,6 +32,7 @@ Version 1.10.1
 * Fix cpuid-x86 build error with gcc -O3 on x86-32. Thanks to Thomas Van Doren
   for reporting the issue.
 * Fix support for future very large caches in the x86 backend.
+* Fix vendor/device names for SR-IOV PCI devices on Linux.
 * Change hwloc-ls.desktop into a lstopo.desktop and only install it if
   lstopo is built with Cairo/X11 support. It cannot work with a non-graphical
   lstopo or hwloc-ls.
