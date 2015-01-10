@@ -135,22 +135,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
     /* try to read the device_class */
     device_class = pcidev->device_class >> 8;
 
-    /* might be useful for debugging (note that domain might be truncated) */
-    os_index = (domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
-
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
-    obj->attr->pcidev.domain = domain;
-    obj->attr->pcidev.bus = pcidev->bus;
-    obj->attr->pcidev.dev = pcidev->dev;
-    obj->attr->pcidev.func = pcidev->func;
-    obj->attr->pcidev.vendor_id = pcidev->vendor_id;
-    obj->attr->pcidev.device_id = pcidev->device_id;
-    obj->attr->pcidev.class_id = device_class;
-    obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
-
-    obj->attr->pcidev.linkspeed = 0; /* unknown */
-    offset = hwloc_pci_find_cap(config_space_cache, PCI_CAP_ID_EXP);
-
+    /* fixup SR-IOV buggy VF device/vendor IDs */
     if (0xffff == pcidev->vendor_id && 0xffff == pcidev->device_id) {
       /* SR-IOV puts ffff:ffff in Virtual Function config space.
        * The actual VF device ID is stored at a special (dynamic) location in the Physical Function config space.
@@ -158,7 +143,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
        *
        * libpciaccess just returns ffff:ffff, needs to be fixed.
        * linuxpci is OK because sysfs files are already fixed the kernel.
-       * pciutils is OK when it uses those Linux sysfs files.
+       * (pciutils is OK when it uses those Linux sysfs files.)
        *
        * Reading these files is an easy way to work around the libpciaccess issue on Linux,
        * but we have no way to know if this is caused by SR-IOV or not.
@@ -185,7 +170,8 @@ hwloc_look_pci(struct hwloc_backend *backend)
 	read = fread(value, 1, sizeof(value), file);
 	fclose(file);
 	if (read)
-	  obj->attr->pcidev.vendor_id = strtoul(value, NULL, 16);
+	  /* fixup the pciaccess struct so that pci_device_get_vendor_name() is correct later. */
+          pcidev->vendor_id = strtoul(value, NULL, 16);
       }
 
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/device",
@@ -195,10 +181,27 @@ hwloc_look_pci(struct hwloc_backend *backend)
 	read = fread(value, 1, sizeof(value), file);
 	fclose(file);
 	if (read)
-	  obj->attr->pcidev.device_id = strtoul(value, NULL, 16);
+	  /* fixup the pciaccess struct so that pci_device_get_device_name() is correct later. */
+          pcidev->device_id = strtoul(value, NULL, 16);
       }
 #endif
     }
+
+    /* might be useful for debugging (note that domain might be truncated) */
+    os_index = (domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
+
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
+    obj->attr->pcidev.domain = domain;
+    obj->attr->pcidev.bus = pcidev->bus;
+    obj->attr->pcidev.dev = pcidev->dev;
+    obj->attr->pcidev.func = pcidev->func;
+    obj->attr->pcidev.vendor_id = pcidev->vendor_id;
+    obj->attr->pcidev.device_id = pcidev->device_id;
+    obj->attr->pcidev.class_id = device_class;
+    obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
+
+    obj->attr->pcidev.linkspeed = 0; /* unknown */
+    offset = hwloc_pci_find_cap(config_space_cache, PCI_CAP_ID_EXP);
 
     if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE)
       hwloc_pci_find_linkspeed(config_space_cache, offset, &obj->attr->pcidev.linkspeed);
