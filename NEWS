@@ -33,6 +33,7 @@ Version 1.10.1
   for reporting the issue.
 * Fix support for future very large caches in the x86 backend.
 * Fix vendor/device names for SR-IOV PCI devices on Linux.
+* Fix an unlikely crash in case of buggy hierarchical distance matrix.
 * Change hwloc-ls.desktop into a lstopo.desktop and only install it if
   lstopo is built with Cairo/X11 support. It cannot work with a non-graphical
   lstopo or hwloc-ls.
