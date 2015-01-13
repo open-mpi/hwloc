@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -131,10 +131,8 @@ typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
  * Each bit may be converted into a NUMA node object using
  * hwloc_get_numanode_obj_by_os_index().
  *
- * When binding memory on a system without any NUMA node
- * (when the whole memory is considered as a single memory bank),
- * the nodeset may be either empty (no memory selected)
- * or full (whole system memory selected).
+ * When binding memory on a system without any NUMA node,
+ * the single main memory bank is considered as NUMA node #0.
  *
  * See also \ref hwlocality_helper_nodeset_convert.
  */
@@ -442,7 +440,7 @@ struct hwloc_obj {
                                           * these nodes may not be allowed for allocation, see allowed_nodeset.
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
-                                          * object, so \p nodeset is full.
+                                          * object, so only the first bit may be set in \p nodeset.
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
@@ -456,7 +454,7 @@ struct hwloc_obj {
                                           * somewhere under this object.
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
-                                          * object, so \p complete_nodeset is full.
+                                          * object, so only the first bit is set in \p complete_nodeset.
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
@@ -468,7 +466,7 @@ struct hwloc_obj {
                                           * restricted by administration rules.
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
-                                          * object, so \p allowed_nodeset is full.
+                                          * object, so only the first bit may be set in \p allowed_nodeset.
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
