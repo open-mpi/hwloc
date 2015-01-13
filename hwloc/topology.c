@@ -2270,12 +2270,6 @@ next_cpubackend:
     return -1;
   }
 
-  /*
-   * Group levels by distances
-   */
-  hwloc_distances_finalize_os(topology);
-  hwloc_group_by_distances(topology);
-
   /* Update objects cpusets and nodesets now that the CPU/GLOBAL backend populated PUs and nodes */
 
   hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
@@ -2321,6 +2315,16 @@ next_cpubackend:
     remove_unused_sets(topology->levels[0][0]);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
   }
+
+  /*
+   * All object cpusets and nodesets are properly set now.
+   */
+
+  /*
+   * Group levels by distances
+   */
+  hwloc_distances_finalize_os(topology);
+  hwloc_group_by_distances(topology);
 
   /* Now connect handy pointers to make remaining discovery easier. */
   hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
@@ -2372,7 +2376,7 @@ next_noncpubackend:
     hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
   }
 
-  /* Removed some stuff */
+  /* Remove some stuff */
 
   hwloc_debug("%s", "\nRemoving ignored objects\n");
   ignore_type_always(topology, &topology->levels[0][0]);
