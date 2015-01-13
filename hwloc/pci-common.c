@@ -216,7 +216,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
 				 struct hwloc_obj *hostbridge)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
-  struct hwloc_obj *parent;
+  hwloc_obj_t group_obj, parent;
   char *env;
   int err;
 
@@ -248,30 +248,32 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
   if (hwloc_bitmap_iszero(cpuset))
     hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
 
-  /* attach the hostbridge now that it contains the right objects */
-  parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
-  /* in the worst case, we got the root object */
-
-  if (hwloc_bitmap_isequal(cpuset, parent->cpuset)) {
-    /* this object has the right cpuset, but it could be a cache or so,
-     * go up as long as the cpuset is the same
-     */
-    while (parent->parent && hwloc_bitmap_isequal(parent->cpuset, parent->parent->cpuset))
-      parent = parent->parent;
-  } else {
-    /* the object we found is too large, insert an intermediate group */
-    hwloc_obj_t group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
-    if (group_obj) {
-      group_obj->cpuset = hwloc_bitmap_dup(cpuset);
-      group_obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
-      group_obj->attr->group.depth = (unsigned) -1;
-      parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
-      if (parent == group_obj)
-	/* if didn't get merged, setup its sets */
-	hwloc_obj_add_children_sets(group_obj);
-      if (!parent)
-	/* Failed to insert the parent, maybe a conflicting cpuset, attach to the root object instead */
-	parent = hwloc_get_root_obj(topology);
+  group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+  if (group_obj) {
+    group_obj->cpuset = hwloc_bitmap_dup(cpuset);
+    group_obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
+    group_obj->attr->group.depth = (unsigned) -1;
+    parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
+    if (parent == group_obj) {
+      /* group inserted without being merged, setup its sets */
+      hwloc_obj_add_children_sets(group_obj);
+    } else if (!parent) {
+      /* Failed to insert the parent, maybe a conflicting cpuset, attach to the root object instead */
+      parent = hwloc_get_root_obj(topology);
+    } else {
+      /* Got merged. This object has the right cpuset, but it could be a cache or so,
+       * go up as long as the (complete)cpuset is the same.
+       */
+      while (parent->parent) {
+	if (parent->complete_cpuset && parent->parent->complete_cpuset) {
+	  if (!hwloc_bitmap_isequal(parent->complete_cpuset, parent->parent->complete_cpuset))
+	    break;
+	} else {
+	  if (!hwloc_bitmap_isequal(parent->cpuset, parent->parent->cpuset))
+	    break;
+	}
+	parent = parent->parent;
+      }
     }
   }
 
