@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1578,32 +1578,7 @@ propagate_nodesets(hwloc_obj_t obj)
 }
 
 static void
-apply_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
-{
-  unsigned i;
-  hwloc_obj_t child, *temp;
-
-  if (sys) {
-    if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
-        !hwloc_bitmap_isset(sys->allowed_nodeset, obj->os_index)) {
-      hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
-      obj->memory.local_memory = 0;
-      obj->memory.total_memory = 0;
-      for(i=0; i<obj->memory.page_types_len; i++)
-	obj->memory.page_types[i].count = 0;
-    }
-  } else {
-    if (obj->allowed_nodeset) {
-      sys = obj;
-    }
-  }
-
-  for_each_child_safe(child, obj, temp)
-    apply_nodeset(child, sys);
-}
-
-static void
-remove_unused_cpusets(hwloc_obj_t obj)
+remove_unused_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child, *temp;
 
@@ -1611,9 +1586,21 @@ remove_unused_cpusets(hwloc_obj_t obj)
     hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->online_cpuset);
     hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->allowed_cpuset);
   }
+  if (obj->nodeset) {
+    hwloc_bitmap_and(obj->nodeset, obj->nodeset, obj->allowed_nodeset);
+  }
+  if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
+      !hwloc_bitmap_isset(obj->allowed_nodeset, obj->os_index)) {
+    unsigned i;
+    hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
+    obj->memory.local_memory = 0;
+    obj->memory.total_memory = 0;
+    for(i=0; i<obj->memory.page_types_len; i++)
+      obj->memory.page_types[i].count = 0;
+  }
 
   for_each_child_safe(child, obj, temp)
-    remove_unused_cpusets(child);
+    remove_unused_sets(child);
 }
 
 /* Remove an object from its parent and free it.
@@ -2518,12 +2505,8 @@ next_cpubackend:
   print_objects(topology, 0, topology->levels[0][0]);
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
-    hwloc_debug("%s", "\nRemoving unauthorized and offline cpusets from all cpusets\n");
-    remove_unused_cpusets(topology->levels[0][0]);
-
-    hwloc_debug("%s", "\nRemoving disallowed memory according to nodesets\n");
-    apply_nodeset(topology->levels[0][0], NULL);
-
+    hwloc_debug("%s", "\nRemoving unauthorized and offline sets from all sets\n");
+    remove_unused_sets(topology->levels[0][0]);
     print_objects(topology, 0, topology->levels[0][0]);
   }
 
