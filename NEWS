@@ -29,6 +29,8 @@ Version 1.11.0
 * Backends
   + Gather total machine memory on NetBSD.
 * Misc
+  + Actually remove disallowed NUMA nodes from nodesets when the whole-system
+    flag isn't enabled.
   + Add a PCISlot attribute to PCI devices on Linux when supported to
     identify the physical PCI slot where the board is plugged.
   * Document how to deal with the ABI break when upgrading to the upcoming 2.0
