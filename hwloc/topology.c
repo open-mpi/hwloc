@@ -1548,32 +1548,7 @@ propagate_nodesets(hwloc_obj_t obj)
 }
 
 static void
-apply_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
-{
-  unsigned i;
-  hwloc_obj_t child, *temp;
-
-  if (sys) {
-    if (obj->type == HWLOC_OBJ_NUMANODE && obj->os_index != (unsigned) -1 &&
-        !hwloc_bitmap_isset(sys->allowed_nodeset, obj->os_index)) {
-      hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
-      obj->memory.local_memory = 0;
-      obj->memory.total_memory = 0;
-      for(i=0; i<obj->memory.page_types_len; i++)
-	obj->memory.page_types[i].count = 0;
-    }
-  } else {
-    if (obj->allowed_nodeset) {
-      sys = obj;
-    }
-  }
-
-  for_each_child_safe(child, obj, temp)
-    apply_nodeset(child, sys);
-}
-
-static void
-remove_unused_cpusets(hwloc_obj_t obj)
+remove_unused_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child, *temp;
 
@@ -1581,9 +1556,21 @@ remove_unused_cpusets(hwloc_obj_t obj)
     hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->online_cpuset);
     hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->allowed_cpuset);
   }
+  if (obj->nodeset) {
+    hwloc_bitmap_and(obj->nodeset, obj->nodeset, obj->allowed_nodeset);
+  }
+  if (obj->type == HWLOC_OBJ_NUMANODE && obj->os_index != (unsigned) -1 &&
+      !hwloc_bitmap_isset(obj->allowed_nodeset, obj->os_index)) {
+    unsigned i;
+    hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
+    obj->memory.local_memory = 0;
+    obj->memory.total_memory = 0;
+    for(i=0; i<obj->memory.page_types_len; i++)
+      obj->memory.page_types[i].count = 0;
+  }
 
   for_each_child_safe(child, obj, temp)
-    remove_unused_cpusets(child);
+    remove_unused_sets(child);
 }
 
 static void
@@ -2396,12 +2383,8 @@ next_cpubackend:
   print_objects(topology, 0, topology->levels[0][0]);
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
-    hwloc_debug("%s", "\nRemoving unauthorized and offline cpusets from all cpusets\n");
-    remove_unused_cpusets(topology->levels[0][0]);
-
-    hwloc_debug("%s", "\nRemoving disallowed memory according to nodesets\n");
-    apply_nodeset(topology->levels[0][0], NULL);
-
+    hwloc_debug("%s", "\nRemoving unauthorized and offline sets from all sets\n");
+    remove_unused_sets(topology->levels[0][0]);
     print_objects(topology, 0, topology->levels[0][0]);
   }
 
@@ -3134,12 +3117,12 @@ hwloc_topology_check(struct hwloc_topology *topology)
       }
       /* check that PUs and NUMA nodes have correct cpuset/nodeset */
       if (obj->type == HWLOC_OBJ_PU) {
-	assert(hwloc_bitmap_weight(obj->cpuset) == 1);
-	assert(hwloc_bitmap_first(obj->cpuset) == (int) obj->os_index);
+	assert(hwloc_bitmap_weight(obj->complete_cpuset) == 1);
+	assert(hwloc_bitmap_first(obj->complete_cpuset) == (int) obj->os_index);
       }
       if (obj->type == HWLOC_OBJ_NUMANODE) {
-	assert(hwloc_bitmap_weight(obj->nodeset) == 1);
-	assert(hwloc_bitmap_first(obj->nodeset) == (int) obj->os_index);
+	assert(hwloc_bitmap_weight(obj->complete_nodeset) == 1);
+	assert(hwloc_bitmap_first(obj->complete_nodeset) == (int) obj->os_index);
       }
       /* check that all objects have a cpuset except I/O and Misc */
       if (hwloc_obj_type_is_io(obj->type)) {
