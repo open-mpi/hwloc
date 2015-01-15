@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.10.1
 --------------
+* Actually remove disallowed NUMA nodes from nodesets when the whole-system
+  flag isn't enabled.
 * Fix the gathering of PCI domains. Thanks to James Custer for reporting
   the issue and providing a patch.
 * Fix the merging of identical parent and child in presence of Misc objects.
