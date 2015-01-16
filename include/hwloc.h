@@ -391,28 +391,20 @@ struct hwloc_obj {
                                           * object and known how (the children path between this object and the PU
                                           * objects).
                                           *
-                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
-                                          * these CPUs may be offline, or not allowed for binding, see online_cpuset
-                                          * and allowed_cpuset.
+                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
+                                          * some of these CPUs may not be allowed for binding, see allowed_cpuset.
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
                                           *
-                                          * This includes not only the same as the cpuset field, but also the CPUs for
-                                          * which topology information is unknown or incomplete, and the CPUs that are
-                                          * ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
+                                          * This may include not only the same as the cpuset field, but also the CPUs for
+                                          * which topology information is unknown or incomplete, the offlines CPUS, and
+                                          * the CPUs that are ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag
+                                          * is not set.
                                           * Thus no corresponding PU object may be found in the topology, because the
                                           * precise position is undefined. It is however known that it would be somewhere
                                           * under this object.
-                                          *
-                                          * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
-                                          */
-  hwloc_cpuset_t online_cpuset;         /**< \brief The CPU set of online logical processors
-                                          *
-                                          * This includes the CPUs contained in this object that are online, i.e. draw
-                                          * power and can execute threads.  It may however not be allowed to bind to
-                                          * them due to administration rules, see allowed_cpuset.
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
@@ -421,8 +413,9 @@ struct hwloc_obj {
                                           * This includes the CPUs contained in this object which are allowed for
                                           * binding, i.e. passing them to the hwloc binding functions should not return
                                           * permission errors.  This is usually restricted by administration rules.
-                                          * Some of them may however be offline so binding to them may still not be
-                                          * possible, see online_cpuset.
+                                          *
+                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
+                                          * allowed_cpuset may be smaller than cpuset. Otherwise they are identical.
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
@@ -436,8 +429,8 @@ struct hwloc_obj {
                                           *
                                           * In the end, these nodes are those that are close to the current object.
                                           *
-                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
-                                          * these nodes may not be allowed for allocation, see allowed_nodeset.
+                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
+                                          * some of these nodes may not be allowed for allocation, see allowed_nodeset.
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
                                           * object, so only the first bit may be set in \p nodeset.
@@ -446,9 +439,10 @@ struct hwloc_obj {
                                           */
   hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,
                                           *
-                                          * This includes not only the same as the nodeset field, but also the NUMA
-                                          * nodes for which topology information is unknown or incomplete, and the nodes
-                                          * that are ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
+                                          * This may include not only the same as the nodeset field, but also the NUMA
+                                          * nodes for which topology information is unknown or incomplete, the offlines
+                                          * nodes, and the nodes that are ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM
+                                          * flag is not set.
                                           * Thus no corresponding NODE object may be found in the topology, because the
                                           * precise position is undefined. It is however known that it would be
                                           * somewhere under this object.
@@ -464,6 +458,9 @@ struct hwloc_obj {
                                           * allowed for memory allocation, i.e. passing them to NUMA node-directed
                                           * memory allocation should not return permission errors. This is usually
                                           * restricted by administration rules.
+                                          *
+                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
+                                          * allowed_nodeset may be smaller than nodeset. Otherwise they are identical.
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
                                           * object, so only the first bit may be set in \p allowed_nodeset.
@@ -701,11 +698,14 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t top
  * They may also be returned by hwloc_topology_get_flags().
  */
 enum hwloc_topology_flags_e {
- /** \brief Detect the whole system, ignore reservations and offline settings.
+ /** \brief Detect the whole system, ignore reservations.
    *
    * Gather all resources, even if some were disabled by the administrator.
-   * For instance, ignore Linux Cgroup/Cpusets and gather all processors and memory nodes,
-   * and ignore the fact that some resources may be offline.
+   * For instance, ignore Linux Cgroup/Cpusets and gather all processors and memory nodes.
+   *
+   * When this flag is set, each object has allowed_cpuset <= cpuset <= complete_cpuset.
+   * Otherwise allowed_cpuset = cpuset <= complete_cpuset.
+   * The same applies to nodesets.
    * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1UL<<0),

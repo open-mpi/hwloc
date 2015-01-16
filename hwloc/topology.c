@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -176,8 +176,7 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
 }
 
 /*
- * Use the given number of processors and the optional online cpuset if given
- * to set a PU level.
+ * Use the given number of processors to set a PU level.
  */
 void
 hwloc_setup_pu_level(struct hwloc_topology *topology,
@@ -218,11 +217,6 @@ print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unuse
   if (obj->complete_cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->complete_cpuset);
     hwloc_debug(" complete %s", cpuset);
-    free(cpuset);
-  }
-  if (obj->online_cpuset) {
-    hwloc_bitmap_asprintf(&cpuset, obj->online_cpuset);
-    hwloc_debug(" online %s", cpuset);
     free(cpuset);
   }
   if (obj->allowed_cpuset) {
@@ -359,7 +353,6 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
   free(obj->name);
   hwloc_bitmap_free(obj->cpuset);
   hwloc_bitmap_free(obj->complete_cpuset);
-  hwloc_bitmap_free(obj->online_cpuset);
   hwloc_bitmap_free(obj->allowed_cpuset);
   hwloc_bitmap_free(obj->nodeset);
   hwloc_bitmap_free(obj->complete_nodeset);
@@ -430,7 +423,6 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
   newobj->cpuset = hwloc_bitmap_dup(src->cpuset);
   newobj->complete_cpuset = hwloc_bitmap_dup(src->complete_cpuset);
   newobj->allowed_cpuset = hwloc_bitmap_dup(src->allowed_cpuset);
-  newobj->online_cpuset = hwloc_bitmap_dup(src->online_cpuset);
   newobj->nodeset = hwloc_bitmap_dup(src->nodeset);
   newobj->complete_nodeset = hwloc_bitmap_dup(src->complete_nodeset);
   newobj->allowed_nodeset = hwloc_bitmap_dup(src->allowed_nodeset);
@@ -805,7 +797,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 }
 
 /* Compare object cpusets based on complete_cpuset if defined (always correctly ordered),
- * or fallback to the main cpusets (only correctly ordered during early insert before disallowed/offline bits are cleared).
+ * or fallback to the main cpusets (only correctly ordered during early insert before disallowed bits are cleared).
  *
  * This is the sane way to compare object among a horizontal level.
  */
@@ -1147,7 +1139,6 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
   /* initialize default cpusets, we'll adjust them later */
   obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
   obj->allowed_cpuset = hwloc_bitmap_dup(cpuset);
-  obj->online_cpuset = hwloc_bitmap_dup(cpuset);
 
   obj = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
   if (!obj)
@@ -1165,8 +1156,6 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
 	hwloc_bitmap_or(obj->complete_cpuset, obj->complete_cpuset, child->complete_cpuset);
       if (child->allowed_cpuset)
 	hwloc_bitmap_or(obj->allowed_cpuset, obj->allowed_cpuset, child->allowed_cpuset);
-      if (child->online_cpuset)
-	hwloc_bitmap_or(obj->online_cpuset, obj->online_cpuset, child->online_cpuset);
       if (child->nodeset)
 	hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
       if (child->complete_nodeset)
@@ -1316,7 +1305,7 @@ collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     collect_proc_cpuset(child, sys);
 }
 
-/* While traversing down and up, propagate the offline/disallowed cpus by
+/* While traversing down and up, propagate the disallowed cpus by
  * and'ing them to and from the first object that has a cpuset */
 static void
 propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
@@ -1339,22 +1328,6 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 	hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, obj->cpuset);
       }
 
-      /* Update online cpusets */
-      if (obj->online_cpuset) {
-	/* Update ours */
-	hwloc_bitmap_and(obj->online_cpuset, obj->online_cpuset, sys->online_cpuset);
-
-	/* Update the given cpuset, but only what we know */
-	hwloc_bitmap_copy(mask, obj->cpuset);
-	hwloc_bitmap_not(mask, mask);
-	hwloc_bitmap_or(mask, mask, obj->online_cpuset);
-	hwloc_bitmap_and(sys->online_cpuset, sys->online_cpuset, mask);
-      } else {
-	/* Just take it as such */
-	obj->online_cpuset = hwloc_bitmap_dup(sys->online_cpuset);
-	hwloc_bitmap_and(obj->online_cpuset, obj->online_cpuset, obj->cpuset);
-      }
-
       /* Update allowed cpusets */
       if (obj->allowed_cpuset) {
 	/* Update ours */
@@ -1375,16 +1348,12 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     } else {
       /* This object is the root of a machine */
       sys = obj;
-      /* Apply complete cpuset to cpuset, online_cpuset and allowed_cpuset, it
+      /* Apply complete_cpuset to cpuset and allowed_cpuset, it
        * will automatically be applied below */
       if (obj->complete_cpuset)
         hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->complete_cpuset);
       else
         obj->complete_cpuset = hwloc_bitmap_dup(obj->cpuset);
-      if (obj->online_cpuset)
-        hwloc_bitmap_and(obj->online_cpuset, obj->online_cpuset, obj->complete_cpuset);
-      else
-        obj->online_cpuset = hwloc_bitmap_dup(obj->complete_cpuset);
       if (obj->allowed_cpuset)
         hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, obj->complete_cpuset);
       else
@@ -1409,11 +1378,6 @@ hwloc_fill_object_sets(hwloc_obj_t obj)
       if (!obj->complete_cpuset)
 	obj->complete_cpuset = hwloc_bitmap_alloc();
       hwloc_bitmap_or(obj->complete_cpuset, obj->complete_cpuset, child->complete_cpuset);
-    }
-    if (child->online_cpuset) {
-      if (!obj->online_cpuset)
-	obj->online_cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_or(obj->online_cpuset, obj->online_cpuset, child->online_cpuset);
     }
     if (child->allowed_cpuset) {
       if (!obj->allowed_cpuset)
@@ -1555,7 +1519,6 @@ remove_unused_sets(hwloc_obj_t obj)
   hwloc_obj_t child, *temp;
 
   if (obj->cpuset) {
-    hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->online_cpuset);
     hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->allowed_cpuset);
   }
   if (obj->nodeset) {
@@ -2237,8 +2200,6 @@ void hwloc_alloc_obj_cpusets(hwloc_obj_t obj)
     obj->cpuset = hwloc_bitmap_alloc_full();
   if (!obj->complete_cpuset)
     obj->complete_cpuset = hwloc_bitmap_alloc();
-  if (!obj->online_cpuset)
-    obj->online_cpuset = hwloc_bitmap_alloc_full();
   if (!obj->allowed_cpuset)
     obj->allowed_cpuset = hwloc_bitmap_alloc_full();
   if (!obj->nodeset)
@@ -2274,16 +2235,13 @@ hwloc_discover(struct hwloc_topology *topology)
    * initialized.
    */
 
-  /* A priori, All processors are visible in the topology, online, and allowed
+  /* A priori, All processors are visible in the topology, and allowed
    * for the application.
    *
    * - If some processors exist but topology information is unknown for them
    *   (and thus the backend couldn't create objects for them), they should be
    *   added to the complete_cpuset field of the lowest object where the object
    *   could reside.
-   *
-   * - If some processors are not online, they should be dropped from the
-   *   online_cpuset field.
    *
    * - If some processors are not allowed for the application (e.g. for
    *   administration reasons), they should be dropped from the allowed_cpuset
@@ -2292,7 +2250,7 @@ hwloc_discover(struct hwloc_topology *topology)
    * The same applies to the node sets complete_nodeset and allowed_cpuset.
    *
    * If such field doesn't exist yet, it can be allocated, and initialized to
-   * zero (for complete), or to full (for online and allowed). The values are
+   * zero (for complete), or to full (for allowed). The values are
    * automatically propagated to the whole tree after detection.
    */
 
@@ -2348,7 +2306,7 @@ next_cpubackend:
   hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
   collect_proc_cpuset(topology->levels[0][0], NULL);
 
-  hwloc_debug("%s", "\nPropagate offline and disallowed cpus down and up\n");
+  hwloc_debug("%s", "\nPropagate disallowed cpus down and up\n");
   propagate_unused_cpuset(topology->levels[0][0], NULL);
 
   /* Backends must allocate root->*nodeset.
@@ -2370,7 +2328,6 @@ next_cpubackend:
     node->cpuset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset); /* requires root cpuset to be initialized above */
     node->complete_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->complete_cpuset); /* requires root cpuset to be initialized above */
     node->allowed_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->allowed_cpuset); /* requires root cpuset to be initialized above */
-    node->online_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->online_cpuset); /* requires root cpuset to be initialized above */
     node->nodeset = hwloc_bitmap_alloc();
     /* other nodesets will be filled below */
     hwloc_bitmap_set(node->nodeset, 0);
@@ -2385,7 +2342,7 @@ next_cpubackend:
   print_objects(topology, 0, topology->levels[0][0]);
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
-    hwloc_debug("%s", "\nRemoving unauthorized and offline sets from all sets\n");
+    hwloc_debug("%s", "\nRemoving unauthorized sets from all sets\n");
     remove_unused_sets(topology->levels[0][0]);
     print_objects(topology, 0, topology->levels[0][0]);
   }
@@ -2844,8 +2801,6 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
     hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
   if (obj->complete_cpuset)
     hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
-  if (obj->online_cpuset)
-    hwloc_bitmap_andnot(obj->online_cpuset, obj->online_cpuset, droppedcpuset);
   if (obj->allowed_cpuset)
     hwloc_bitmap_andnot(obj->allowed_cpuset, obj->allowed_cpuset, droppedcpuset);
 
@@ -3137,17 +3092,20 @@ hwloc_topology_check(struct hwloc_topology *topology)
       /* there's other cpusets and nodesets if and only if there's a main cpuset */
       assert(!!obj->cpuset == !!obj->complete_cpuset);
       assert(!!obj->cpuset == !!obj->allowed_cpuset);
-      assert(!!obj->cpuset == !!obj->online_cpuset);
       assert(!!obj->cpuset == !!obj->nodeset);
       assert(!!obj->nodeset == !!obj->complete_nodeset);
       assert(!!obj->nodeset == !!obj->allowed_nodeset);
       /* check that complete/allowed/inline sets are larger than the main sets */
       if (obj->cpuset) {
 	assert(hwloc_bitmap_isincluded(obj->cpuset, obj->complete_cpuset));
-	assert(hwloc_bitmap_isincluded(obj->online_cpuset, obj->complete_cpuset));
-	assert(hwloc_bitmap_isincluded(obj->allowed_cpuset, obj->complete_cpuset));
 	assert(hwloc_bitmap_isincluded(obj->nodeset, obj->complete_nodeset));
-	assert(hwloc_bitmap_isincluded(obj->allowed_nodeset, obj->complete_nodeset));
+	if (topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
+	  assert(hwloc_bitmap_isincluded(obj->allowed_cpuset, obj->cpuset));
+	  assert(hwloc_bitmap_isincluded(obj->allowed_nodeset, obj->nodeset));
+	} else {
+	  assert(hwloc_bitmap_isequal(obj->allowed_cpuset, obj->cpuset));
+	  assert(hwloc_bitmap_isequal(obj->allowed_nodeset, obj->nodeset));
+	}
       }
       /* check children */
       hwloc__check_children(obj);

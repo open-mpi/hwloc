@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -791,23 +791,6 @@ static __hwloc_inline hwloc_const_cpuset_t
 hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
 {
   return hwloc_get_root_obj(topology)->cpuset;
-}
-
-/** \brief Get online CPU set
- *
- * \return the CPU set of online logical processors of the system. If the
- * topology is the result of a combination of several systems, NULL is
- * returned.
- *
- * \note The returned cpuset is not newly allocated and should thus not be
- * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
- */
-static __hwloc_inline hwloc_const_cpuset_t
-hwloc_topology_get_online_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
-static __hwloc_inline hwloc_const_cpuset_t
-hwloc_topology_get_online_cpuset(hwloc_topology_t topology)
-{
-  return hwloc_get_root_obj(topology)->online_cpuset;
 }
 
 /** \brief Get allowed CPU set

@@ -17,5 +17,4 @@ relative latency matrix between NUMANodes (depth 1) by logical indexes:
       2 2.000 2.000 1.000 2.000
       3 2.000 2.000 2.000 1.000
 12 processors not represented in topology: 0x0000fff0
-12 processors online but not allowed: 0x0000fff0
 Topology not from this system

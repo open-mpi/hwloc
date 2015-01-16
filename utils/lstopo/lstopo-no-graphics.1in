@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2014 Inria.  All rights reserved.
+.\" Copyright © 2009-2015 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -248,7 +248,7 @@ Send the output to a window or to the console depending on the environment.
 .TP
 .B console
 Send a text summary to stdout.
-Binding, unallowed or offline processors are only annotated in this mode
+Binding or unallowed processors are only annotated in this mode
 if verbose; see the COLORS section, below.
 .
 .TP
@@ -339,9 +339,6 @@ the given CPU is also not in this process CPU binding mask.
 .TP
 Red
 The CPU is not in the allowed set (see below).
-.TP
-Black
-The CPU is offline (not all OS's support displaying offline CPUs).
 .
 .PP
 The "allowed set" is the set of CPUs to which the current process is

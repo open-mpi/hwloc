@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -102,11 +102,9 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
     free(cpusetstr);
   }
 
-  /* annotate if the PU is forbidden/offline/running */
+  /* annotate if the PU is forbidden/running */
   if (l->type == HWLOC_OBJ_PU && verbose_mode >= 2) {
-    if (lstopo_pu_offline(l))
-      printf(" (offline)");
-    else if (lstopo_pu_forbidden(l))
+    if (lstopo_pu_forbidden(l))
       printf(" (forbidden)");
     else if (lstopo_pu_running(topology, l))
       printf(" (running)");
@@ -203,10 +201,9 @@ void output_console(hwloc_topology_t topology, const char *filename, int overwri
   if (verbose_mode > 1 && lstopo_show_only == (hwloc_obj_type_t)-1) {
     hwloc_const_bitmap_t complete = hwloc_topology_get_complete_cpuset(topology);
     hwloc_const_bitmap_t topo = hwloc_topology_get_topology_cpuset(topology);
-    hwloc_const_bitmap_t online = hwloc_topology_get_online_cpuset(topology);
     hwloc_const_bitmap_t allowed = hwloc_topology_get_allowed_cpuset(topology);
 
-    if (complete && !hwloc_bitmap_isequal(topo, complete)) {
+    if (!hwloc_bitmap_isequal(topo, complete)) {
       hwloc_bitmap_t unknown = hwloc_bitmap_alloc();
       char *unknownstr;
       hwloc_bitmap_copy(unknown, complete);
@@ -216,37 +213,15 @@ void output_console(hwloc_topology_t topology, const char *filename, int overwri
       free(unknownstr);
       hwloc_bitmap_free(unknown);
     }
-    if (complete && !hwloc_bitmap_isequal(online, complete)) {
-      hwloc_bitmap_t offline = hwloc_bitmap_alloc();
-      char *offlinestr;
-      hwloc_bitmap_copy(offline, complete);
-      hwloc_bitmap_andnot(offline, offline, online);
-      hwloc_bitmap_asprintf(&offlinestr, offline);
-      fprintf (output, "%d processors offline: %s\n", hwloc_bitmap_weight(offline), offlinestr);
-      free(offlinestr);
-      hwloc_bitmap_free(offline);
-    }
-    if (complete && !hwloc_bitmap_isequal(allowed, online)) {
-      if (!hwloc_bitmap_isincluded(online, allowed)) {
-        hwloc_bitmap_t forbidden = hwloc_bitmap_alloc();
-        char *forbiddenstr;
-        hwloc_bitmap_copy(forbidden, online);
-        hwloc_bitmap_andnot(forbidden, forbidden, allowed);
-        hwloc_bitmap_asprintf(&forbiddenstr, forbidden);
-        fprintf(output, "%d processors online but not allowed: %s\n", hwloc_bitmap_weight(forbidden), forbiddenstr);
-        free(forbiddenstr);
-        hwloc_bitmap_free(forbidden);
-      }
-      if (!hwloc_bitmap_isincluded(allowed, online)) {
-        hwloc_bitmap_t potential = hwloc_bitmap_alloc();
-        char *potentialstr;
-        hwloc_bitmap_copy(potential, allowed);
-        hwloc_bitmap_andnot(potential, potential, online);
-        hwloc_bitmap_asprintf(&potentialstr, potential);
-        fprintf(output, "%d processors allowed but not online: %s\n", hwloc_bitmap_weight(potential), potentialstr);
-        free(potentialstr);
-        hwloc_bitmap_free(potential);
-      }
+    if (!hwloc_bitmap_isequal(topo, allowed)) {
+      hwloc_bitmap_t disallowed = hwloc_bitmap_alloc();
+      char *disallowedstr;
+      hwloc_bitmap_copy(disallowed, topo);
+      hwloc_bitmap_andnot(disallowed, disallowed, allowed);
+      hwloc_bitmap_asprintf(&disallowedstr, disallowed);
+      fprintf(output, "%d processors represented but not allowed: %s\n", hwloc_bitmap_weight(disallowed), disallowedstr);
+      free(disallowedstr);
+      hwloc_bitmap_free(disallowed);
     }
     if (!hwloc_topology_is_thissystem(topology))
       fprintf (output, "Topology not from this system\n");

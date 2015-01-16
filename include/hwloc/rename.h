@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2014 Inria.  All rights reserved.
+ * Copyright © 2010-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -341,7 +341,6 @@ extern "C" {
 #define hwloc_alloc_membind_policy_nodeset HWLOC_NAME(alloc_membind_policy_nodeset)
 #define hwloc_topology_get_complete_cpuset HWLOC_NAME(topology_get_complete_cpuset)
 #define hwloc_topology_get_topology_cpuset HWLOC_NAME(topology_get_topology_cpuset)
-#define hwloc_topology_get_online_cpuset HWLOC_NAME(topology_get_online_cpuset)
 #define hwloc_topology_get_allowed_cpuset HWLOC_NAME(topology_get_allowed_cpuset)
 #define hwloc_topology_get_complete_nodeset HWLOC_NAME(topology_get_complete_nodeset)
 #define hwloc_topology_get_topology_nodeset HWLOC_NAME(topology_get_topology_nodeset)

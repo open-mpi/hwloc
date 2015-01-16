@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -53,10 +53,6 @@
 #define FORBIDDEN_R_COLOR 0xff
 #define FORBIDDEN_G_COLOR 0
 #define FORBIDDEN_B_COLOR 0
-
-#define OFFLINE_R_COLOR 0
-#define OFFLINE_G_COLOR 0
-#define OFFLINE_B_COLOR 0
 
 #define CACHE_R_COLOR 0xff
 #define CACHE_G_COLOR 0xff
@@ -435,7 +431,7 @@ static struct draw_methods getmax_draw_methods;
 static void
 lstopo_set_object_color(struct draw_methods *methods,
 			hwloc_topology_t topology __hwloc_attribute_unused,
-			hwloc_obj_t obj, int arg, /* PU status (0=normal, 1=running, 2=forbidden, 3=offline)
+			hwloc_obj_t obj, int arg, /* PU status (0=normal, 1=running, 2=forbidden)
 						   * Machine status (0=normal, 1=displayed as a root/System) */
 			struct style *s)
 {
@@ -520,12 +516,6 @@ lstopo_set_object_color(struct draw_methods *methods,
       s->bg.r = FORBIDDEN_R_COLOR;
       s->bg.g = FORBIDDEN_G_COLOR;
       s->bg.b = FORBIDDEN_B_COLOR;
-      break;
-    case 3:
-      s->bg.r = OFFLINE_R_COLOR;
-      s->bg.g = OFFLINE_G_COLOR;
-      s->bg.b = OFFLINE_B_COLOR;
-      s->t.r = s->t.g = s->t.b = 0xff;
       break;
     default:
       assert(0);
@@ -796,9 +786,7 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
 
-  if (lstopo_pu_offline(level))
-    colorarg = 3;
-  else if (lstopo_pu_forbidden(level))
+  if (lstopo_pu_forbidden(level))
     colorarg = 2;
   else if (lstopo_pu_running(topology, level))
     colorarg = 1;
@@ -1275,7 +1263,6 @@ output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_t
   methods->declare_color(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR);
   methods->declare_color(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR);
   methods->declare_color(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR);
-  methods->declare_color(output, OFFLINE_R_COLOR, OFFLINE_G_COLOR, OFFLINE_B_COLOR);
   methods->declare_color(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR);
   methods->declare_color(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR);
   methods->declare_color(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR);

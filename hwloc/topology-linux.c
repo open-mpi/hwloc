@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2010 IBM
@@ -2760,6 +2760,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	      struct hwloc_linux_cpuinfo_proc * cpuinfo_Lprocs, unsigned cpuinfo_numprocs)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
+  hwloc_bitmap_t unknownset; /* Set of cpus to clear */
 #define CPU_TOPOLOGY_STR_LEN 128
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
@@ -2775,6 +2776,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   else {
     struct dirent *dirent;
     cpuset = hwloc_bitmap_alloc();
+    unknownset = hwloc_bitmap_alloc();
 
     while ((dirent = readdir(dir)) != NULL) {
       unsigned long cpu;
@@ -2792,16 +2794,15 @@ look_sysfscpu(struct hwloc_topology *topology,
       fd = hwloc_fopen(str, "r", data->root_fd);
       if (fd) {
 	if (fgets(online, sizeof(online), fd)) {
-	  fclose(fd);
-	  if (atoi(online)) {
-	    hwloc_debug("os proc %lu is online\n", cpu);
-	  } else {
+	  if (!atoi(online)) {
+	    fclose(fd);
 	    hwloc_debug("os proc %lu is offline\n", cpu);
-            hwloc_bitmap_clr(topology->levels[0][0]->online_cpuset, cpu);
+	    hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, cpu);
+	    hwloc_bitmap_set(unknownset, cpu);
+	    continue;
 	  }
-	} else {
-	  fclose(fd);
 	}
+	fclose(fd);
       }
 
       /* check whether the kernel exports topology information for this cpu */
@@ -2809,6 +2810,8 @@ look_sysfscpu(struct hwloc_topology *topology,
       if (hwloc_access(str, X_OK, data->root_fd) < 0 && errno == ENOENT) {
 	hwloc_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
 		   cpu, path, cpu);
+	hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, cpu);
+	hwloc_bitmap_set(unknownset, cpu);
 	continue;
       }
 
@@ -2837,7 +2840,9 @@ look_sysfscpu(struct hwloc_topology *topology,
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       packageset = hwloc_parse_cpumap(str, data->root_fd);
-      if (packageset && hwloc_bitmap_first(packageset) == i) {
+      if (packageset) {
+       hwloc_bitmap_andnot(packageset, packageset, unknownset);
+       if (hwloc_bitmap_first(packageset) == i) {
         /* first cpu in this package, add the package */
 	struct hwloc_obj *package;
 
@@ -2898,6 +2903,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	packages = package;
 
 	packageset = NULL; /* don't free it */
+       }
       }
 package_done:
       hwloc_bitmap_free(packageset);
@@ -2910,8 +2916,9 @@ package_done:
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, data->root_fd);
       savedcoreset = coreset; /* store it for later work-arounds */
-
-      if (coreset && hwloc_bitmap_weight(coreset) > 1) {
+      if (coreset) {
+       hwloc_bitmap_andnot(coreset, coreset, unknownset);
+       if (hwloc_bitmap_weight(coreset) > 1) {
 	/* check if this is hyperthreading or different coreids */
 	unsigned siblingid, siblingcoreid;
 	hwloc_bitmap_t set = hwloc_bitmap_dup(coreset);
@@ -2922,10 +2929,8 @@ package_done:
 	hwloc_parse_sysfs_unsigned(str, &siblingcoreid, data->root_fd);
 	threadwithcoreid = (siblingcoreid != mycoreid);
 	hwloc_bitmap_free(set);
-      }
-
-
-      if (coreset && (hwloc_bitmap_first(coreset) == i || threadwithcoreid)) {
+       }
+       if (hwloc_bitmap_first(coreset) == i || threadwithcoreid) {
 	/* regular core */
         struct hwloc_obj *core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
 	if (threadwithcoreid) {
@@ -2939,22 +2944,25 @@ package_done:
                      mycoreid, coreset);
         hwloc_insert_object_by_cpuset(topology, core);
         coreset = NULL; /* don't free it */
+       }
       }
 
       /* look at the books */
       mybookid = 0; /* shut-up the compiler */
       sprintf(str, "%s/cpu%d/topology/book_id", path, i);
       if (hwloc_parse_sysfs_unsigned(str, &mybookid, data->root_fd) == 0) {
-
         sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
         bookset = hwloc_parse_cpumap(str, data->root_fd);
-        if (bookset && hwloc_bitmap_first(bookset) == i) {
+	if (bookset) {
+	 hwloc_bitmap_andnot(bookset, bookset, unknownset);
+         if (bookset && hwloc_bitmap_first(bookset) == i) {
           struct hwloc_obj *book = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, mybookid);
           book->cpuset = bookset;
           hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
                        mybookid, bookset);
           hwloc_insert_object_by_cpuset(topology, book);
           bookset = NULL; /* don't free it */
+	 }
         }
       }
 
@@ -3055,6 +3063,7 @@ package_done:
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, data->root_fd);
         if (cacheset) {
+	  hwloc_bitmap_andnot(cacheset, cacheset, unknownset);
           if (hwloc_bitmap_weight(cacheset) < 1) {
             /* mask is wrong (useful for many itaniums) */
             if (savedcoreset)
@@ -3423,7 +3432,7 @@ hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned nump
 static int
 look_cpuinfo(struct hwloc_topology *topology,
 	     struct hwloc_linux_backend_data_s *data,
-	     const char *path, hwloc_bitmap_t online_cpuset)
+	     const char *path)
 {
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   struct hwloc_obj_info_s *global_infos = NULL;
@@ -3440,7 +3449,6 @@ look_cpuinfo(struct hwloc_topology *topology,
   unsigned missingpkg;
   unsigned missingcore;
   unsigned i,j;
-  hwloc_bitmap_t cpuset;
 
   /* parse the entire cpuinfo first, fill the Lprocs array and numprocs */
   _numprocs = hwloc_linux_parse_cpuinfo(data, path, &Lprocs, &global_infos, &global_infos_count);
@@ -3466,13 +3474,10 @@ look_cpuinfo(struct hwloc_topology *topology,
     Lpkg_to_Ppkg[i] = -1;
   }
 
-  cpuset = hwloc_bitmap_alloc();
-
   /* create PU objects */
   for(Lproc=0; Lproc<numprocs; Lproc++) {
     unsigned long Pproc = Lprocs[Lproc].Pproc;
     hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, Pproc);
-    hwloc_bitmap_set(cpuset, Pproc);
     obj->cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_only(obj->cpuset, Pproc);
     hwloc_debug_2args_bitmap("cpu %lu (os %lu) has cpuset %s\n",
@@ -3481,11 +3486,6 @@ look_cpuinfo(struct hwloc_topology *topology,
   }
 
   topology->support.discovery->pu = 1;
-  hwloc_bitmap_copy(online_cpuset, cpuset);
-  hwloc_bitmap_free(cpuset);
-
-  hwloc_debug("%u online processors found\n", numprocs);
-  hwloc_debug_bitmap("online processor cpuset: %s\n", online_cpuset);
 
   hwloc_debug("%s", "\n * Topology summary *\n");
   hwloc_debug("%u processors)\n", numprocs);
@@ -3748,7 +3748,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 	    && hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, data->root_fd) < 0)) {
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16)
 	 * or not containing anything interesting */
-      err = look_cpuinfo(topology, data, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
+      err = look_cpuinfo(topology, data, "/proc/cpuinfo");
       if (err < 0)
 	hwloc_linux_fallback_pu_level(topology);
 

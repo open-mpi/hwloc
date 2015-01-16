@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -52,7 +52,6 @@ int main(void)
   hwlocset = hwloc_bitmap_alloc();
   hwloc_cpuset_from_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
   assert(hwloc_bitmap_isincluded(hwlocset, hwloc_topology_get_complete_cpuset(topology)));
-  hwloc_bitmap_andnot(hwlocset, hwlocset, hwloc_topology_get_online_cpuset(topology));
   hwloc_bitmap_andnot(hwlocset, hwlocset, hwloc_topology_get_allowed_cpuset(topology));
   assert(hwloc_bitmap_iszero(hwlocset));
   hwloc_bitmap_free(hwlocset);

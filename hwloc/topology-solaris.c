@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -504,6 +504,22 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	}
 
       hwloc_debug("cpu%u\n", cpuid);
+      hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, cpuid);
+
+      stat = (kstat_named_t *) kstat_data_lookup(ksp, "state");
+      if (!stat)
+          hwloc_debug("could not read state for CPU%u: %s\n", cpuid, strerror(errno));
+      else if (stat->data_type != KSTAT_DATA_CHAR)
+          hwloc_debug("unknown kstat type %d for cpu state\n", stat->data_type);
+      else
+        {
+          hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
+          if (strcmp(stat->value.c, "on-line")) {
+            /* not online */
+	    hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, cpuid);
+	    continue;
+	  }
+        }
 
       if (cpuid >= Pproc_alloc) {
 	Pproc_alloc *= 2;
@@ -526,19 +542,6 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
       if (cpuid >= Pproc_max)
         Pproc_max = cpuid + 1;
-
-      stat = (kstat_named_t *) kstat_data_lookup(ksp, "state");
-      if (!stat)
-          hwloc_debug("could not read state for CPU%u: %s\n", cpuid, strerror(errno));
-      else if (stat->data_type != KSTAT_DATA_CHAR)
-          hwloc_debug("unknown kstat type %d for cpu state\n", stat->data_type);
-      else
-        {
-          hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
-          if (strcmp(stat->value.c, "on-line"))
-            /* not online */
-            hwloc_bitmap_clr(topology->levels[0][0]->online_cpuset, cpuid);
-        }
 
       if (look_chips) do {
 	/* Get Chip ID */

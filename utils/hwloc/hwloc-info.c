@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -86,10 +86,6 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
   if (obj->complete_cpuset) {
     hwloc_bitmap_snprintf(s, sizeof(s), obj->complete_cpuset);
     printf("%s complete cpuset = %s\n", prefix, s);
-  }
-  if (obj->online_cpuset) {
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->online_cpuset);
-    printf("%s online cpuset = %s\n", prefix, s);
   }
   if (obj->allowed_cpuset) {
     hwloc_bitmap_snprintf(s, sizeof(s), obj->allowed_cpuset);

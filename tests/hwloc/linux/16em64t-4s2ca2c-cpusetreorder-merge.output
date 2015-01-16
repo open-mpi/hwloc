@@ -22,5 +22,4 @@ depth 0:	1 NUMANode (type #2)
   depth 2:	3 L2Cache (type #4)
    depth 3:	11 PU (type #6)
 5 processors not represented in topology: 0x0000d003
-5 processors online but not allowed: 0x0000d003
 Topology not from this system

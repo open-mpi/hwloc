@@ -50,6 +50,4 @@ depth 0:	1 Machine (type #1)
       depth 6:	7 Core (type #5)
        depth 7:	12 PU (type #6)
 4 processors not represented in topology: 0x00006024
-4 processors offline: 0x00006024
-4 processors allowed but not online: 0x00006024
 Topology not from this system

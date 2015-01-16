@@ -1,4 +1,4 @@
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009-2013 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -568,7 +568,6 @@ man3_helper_topology_sets_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_topology_sets.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_allowed_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_complete_nodeset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_get_online_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_topology_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_allowed_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_complete_cpuset.3 \

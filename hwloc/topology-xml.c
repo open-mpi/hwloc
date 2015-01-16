@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -77,8 +77,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     obj->complete_cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->complete_cpuset,value);
   } else if (!strcmp(name, "online_cpuset")) {
-    obj->online_cpuset = hwloc_bitmap_alloc();
-    hwloc_bitmap_sscanf(obj->online_cpuset, value);
+    { /* ignored since v2.0 but still allowed for backward compat with v1.10 */ }
   } else if (!strcmp(name, "allowed_cpuset")) {
     obj->allowed_cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->allowed_cpuset, value);
@@ -1102,11 +1101,6 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   if (obj->complete_cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->complete_cpuset);
     state.new_prop(&state, "complete_cpuset", cpuset);
-    free(cpuset);
-  }
-  if (obj->online_cpuset) {
-    hwloc_bitmap_asprintf(&cpuset, obj->online_cpuset);
-    state.new_prop(&state, "online_cpuset", cpuset);
     free(cpuset);
   }
   if (obj->allowed_cpuset) {

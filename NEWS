@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2014 Inria.  All rights reserved.
+Copyright © 2009-2015 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -36,6 +36,10 @@ Version 2.0
   + Add the experimental netloc subproject. It is enabled by default when
     supported and can be disabled with --disable-netloc.
     See the documentation for details.
+  + Remove the online_cpuset from struct hwloc_obj. Offline PUs get unknown
+    topologies on Linux nowadays, and wrong topology on Solaris. Other OS
+    do not support them. And one cannot do much about them anyway. Just keep
+    them in complete_cpuset.
   + Remove the custom interface for assembling the topologies of different
     nodes as well as the hwloc-assembler tools.
   + Remove Kerrighed support from the Linux backend.

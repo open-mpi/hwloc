@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2014 Inria.  All rights reserved.
+ * Copyright © 2013-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -150,7 +150,6 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 #define SETS_DIFFERENT(_set, _obj1, _obj2) _SETS_DIFFERENT((_obj1)->_set, (_obj2)->_set)
 	if (SETS_DIFFERENT(cpuset, obj1, obj2)
 	    || SETS_DIFFERENT(complete_cpuset, obj1, obj2)
-	    || SETS_DIFFERENT(online_cpuset, obj1, obj2)
 	    || SETS_DIFFERENT(allowed_cpuset, obj1, obj2)
 	    || SETS_DIFFERENT(nodeset, obj1, obj2)
 	    || SETS_DIFFERENT(complete_nodeset, obj1, obj2)

@@ -58,5 +58,4 @@ depth 0:	1 Machine (type #1)
       depth 6:	11 Core (type #5)
        depth 7:	11 PU (type #6)
 5 processors not represented in topology: 0x0000d003
-5 processors online but not allowed: 0x0000d003
 Topology not from this system

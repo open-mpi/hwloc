@@ -69,5 +69,4 @@ relative latency matrix between NUMANodes (depth 3) by logical indexes:
       6 8.000 8.000 8.000 8.000 4.000 4.000 1.000 2.000
       7 8.000 8.000 8.000 8.000 4.000 4.000 2.000 1.000
 26 processors not represented in topology: 0xffffffc0
-26 processors online but not allowed: 0xffffffc0
 Topology not from this system
