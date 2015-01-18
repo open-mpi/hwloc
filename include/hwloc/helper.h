@@ -760,9 +760,7 @@ hwloc_distrib(hwloc_topology_t topology,
  */
 /** \brief Get complete CPU set
  *
- * \return the complete CPU set of logical processors of the system. If the
- * topology is the result of a combination of several systems, NULL is
- * returned.
+ * \return the complete CPU set of logical processors of the system.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
@@ -779,8 +777,7 @@ hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
  *
  * \return the CPU set of logical processors of the system for which hwloc
  * provides topology information. This is equivalent to the cpuset of the
- * system object. If the topology is the result of a combination of several
- * systems, NULL is returned.
+ * system object.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
@@ -795,9 +792,7 @@ hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
 
 /** \brief Get allowed CPU set
  *
- * \return the CPU set of allowed logical processors of the system. If the
- * topology is the result of a combination of several systems, NULL is
- * returned.
+ * \return the CPU set of allowed logical processors of the system.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
@@ -812,9 +807,7 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
 
 /** \brief Get complete node set
  *
- * \return the complete node set of memory of the system. If the
- * topology is the result of a combination of several systems, NULL is
- * returned.
+ * \return the complete node set of memory of the system.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
@@ -831,8 +824,7 @@ hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
  *
  * \return the node set of memory of the system for which hwloc
  * provides topology information. This is equivalent to the nodeset of the
- * system object. If the topology is the result of a combination of several
- * systems, NULL is returned.
+ * system object.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
@@ -847,9 +839,7 @@ hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
 
 /** \brief Get allowed node set
  *
- * \return the node set of allowed memory of the system. If the
- * topology is the result of a combination of several systems, NULL is
- * returned.
+ * \return the node set of allowed memory of the system.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
