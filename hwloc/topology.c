@@ -1363,6 +1363,24 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 
 /* Setup object cpusets/nodesets by OR'ing its children. */
 HWLOC_DECLSPEC int
+hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src)
+{
+#define ADD_OTHER_OBJ_SET(_dst, _src, _set)			\
+  if ((_src)->_set) {						\
+    if (!(_dst)->_set)						\
+      (_dst)->_set = hwloc_bitmap_alloc();			\
+    hwloc_bitmap_or((_dst)->_set, (_dst)->_set, (_src)->_set);	\
+  }
+  ADD_OTHER_OBJ_SET(dst, src, cpuset);
+  ADD_OTHER_OBJ_SET(dst, src, complete_cpuset);
+  ADD_OTHER_OBJ_SET(dst, src, allowed_cpuset);
+  ADD_OTHER_OBJ_SET(dst, src, nodeset);
+  ADD_OTHER_OBJ_SET(dst, src, complete_nodeset);
+  ADD_OTHER_OBJ_SET(dst, src, allowed_nodeset);
+  return 0;
+}
+
+HWLOC_DECLSPEC int
 hwloc_fill_object_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
@@ -1370,31 +1388,7 @@ hwloc_fill_object_sets(hwloc_obj_t obj)
   child = obj->first_child;
   while (child) {
     assert(child->cpuset != NULL);
-    if (child->complete_cpuset) {
-      if (!obj->complete_cpuset)
-	obj->complete_cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_or(obj->complete_cpuset, obj->complete_cpuset, child->complete_cpuset);
-    }
-    if (child->allowed_cpuset) {
-      if (!obj->allowed_cpuset)
-	obj->allowed_cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_or(obj->allowed_cpuset, obj->allowed_cpuset, child->allowed_cpuset);
-    }
-    if (child->nodeset) {
-      if (!obj->nodeset)
-	obj->nodeset = hwloc_bitmap_alloc();
-      hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
-    }
-    if (child->complete_nodeset) {
-      if (!obj->complete_nodeset)
-	obj->complete_nodeset = hwloc_bitmap_alloc();
-      hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
-    }
-    if (child->allowed_nodeset) {
-      if (!obj->allowed_nodeset)
-	obj->allowed_nodeset = hwloc_bitmap_alloc();
-      hwloc_bitmap_or(obj->allowed_nodeset, obj->allowed_nodeset, child->allowed_nodeset);
-    }
+    hwloc_obj_add_other_obj_sets(obj, child);
     child = child->next_sibling;
   }
   return 0;

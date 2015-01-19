@@ -2124,6 +2124,16 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_top
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
 
+/** \brief Setup object cpusets/nodesets by OR'ing another object's sets.
+ *
+ * For each defined cpuset or nodeset in \p src, allocate the corresponding set
+ * in \p dst and add \p src (by OR'ing it).
+ *
+ * This function is convenient for building the sets of a Group of object before insertion
+ * as a new parent of multiple objects.
+ */
+HWLOC_DECLSPEC int hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src);
+
 /** @} */
 
 

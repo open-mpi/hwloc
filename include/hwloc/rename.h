@@ -146,6 +146,7 @@ extern "C" {
 #define hwloc_topology_restrict HWLOC_NAME(topology_restrict)
 #define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
 #define hwloc_topology_insert_misc_object_by_cpuset HWLOC_NAME(topology_insert_misc_object_by_cpuset)
+#define hwloc_obj_add_other_obj_sets HWLOC_NAME(obj_add_other_obj_sets)
 
 #define hwloc_topology_get_depth HWLOC_NAME(topology_get_depth)
 #define hwloc_get_type_depth HWLOC_NAME(get_type_depth)
