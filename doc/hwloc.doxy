@@ -2589,7 +2589,7 @@ of either software or hardware bugs), hwloc may fail to insert some objects
 in the topology because they cannot fit in the already built tree of resources.
 If so, hwloc will report a warning like the following.
 The object causing this error is ignored, the discovery continues but the
-resulting topology will miss some object and may be asymmetric
+resulting topology will miss some objects and may be asymmetric
 (see also \ref faq_asymmetric).
 
 \verbatim
@@ -2618,7 +2618,11 @@ The resulting topology will miss some L3 caches.
 If your application not care about cache sharing, or if you do not plan to
 request cache-aware binding in your process launcher, you may likely ignore
 this error.
-The warning may be hidden by setting HWLOC_HIDE_ERRORS=1 in your environment.
+
+Some platforms report similar warnings about conflicting Packages and NUMANodes.
+Upgrading the BIOS and/or the operating system may help.
+Otherwise, the warning may be hidden by setting HWLOC_HIDE_ERRORS=1
+in your environment.
 
 
 \section faq_privileged Does hwloc require privileged access?
