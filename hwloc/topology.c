@@ -1143,23 +1143,8 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
   hwloc_connect_children(topology->levels[0][0]);
 
   if ((child = obj->first_child) != NULL && child->cpuset) {
-    /* keep the main cpuset untouched, but update other cpusets and nodesets from children */
-    obj->nodeset = hwloc_bitmap_alloc();
-    obj->complete_nodeset = hwloc_bitmap_alloc();
-    obj->allowed_nodeset = hwloc_bitmap_alloc();
-    while (child) {
-      if (child->complete_cpuset)
-	hwloc_bitmap_or(obj->complete_cpuset, obj->complete_cpuset, child->complete_cpuset);
-      if (child->allowed_cpuset)
-	hwloc_bitmap_or(obj->allowed_cpuset, obj->allowed_cpuset, child->allowed_cpuset);
-      if (child->nodeset)
-	hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
-      if (child->complete_nodeset)
-	hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
-      if (child->allowed_nodeset)
-	hwloc_bitmap_or(obj->allowed_nodeset, obj->allowed_nodeset, child->allowed_nodeset);
-      child = child->next_sibling;
-    }
+    /* update sets from children (cpusets won't be modified) */
+    hwloc_obj_add_children_sets(obj);
   } else {
     /* copy the parent nodesets */
     obj->nodeset = hwloc_bitmap_dup(obj->parent->nodeset);
@@ -1381,7 +1366,7 @@ hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src)
 }
 
 HWLOC_DECLSPEC int
-hwloc_fill_object_sets(hwloc_obj_t obj)
+hwloc_obj_add_children_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
   assert(obj->cpuset != NULL);

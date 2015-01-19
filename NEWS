@@ -46,6 +46,8 @@ Version 2.0
 * API
   + The almost-unused "os_level" attribute has been removed from the
     hwloc_obj structure.
+* Plugin API
+  + hwloc_fill_object_sets() is renamed into hwloc_obj_add_children_sets().
 * Backends
   + Gather total machine memory on NetBSD.
 * Misc
