@@ -38,6 +38,7 @@ Version 1.10.1
 * Fix an unlikely crash in case of buggy hierarchical distance matrix.
 * Fix PU os_index on some AIX releases. Thanks to Hendryk Bockelmann and
   Erik Schnetter for helping debugging.
+* Fix hwloc_bitmap_isincluded() in case of infinite sets.
 * Change hwloc-ls.desktop into a lstopo.desktop and only install it if
   lstopo is built with Cairo/X11 support. It cannot work with a non-graphical
   lstopo or hwloc-ls.
