@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1160,4 +1160,119 @@ int hwloc_bitmap_weight(const struct hwloc_bitmap_s * set)
 	for(i=0; i<set->ulongs_count; i++)
 		weight += hwloc_weight_long(set->ulongs[i]);
 	return weight;
+}
+
+int hwloc_bitmap_compare_inclusion(const struct hwloc_bitmap_s * set1, const struct hwloc_bitmap_s * set2)
+{
+	const struct hwloc_bitmap_s *largest = set1->ulongs_count > set2->ulongs_count ? set1 : set2;
+	int result = HWLOC_BITMAP_EQUAL; /* means empty sets return equal */
+	int empty1 = 1;
+	int empty2 = 1;
+	unsigned i;
+
+	HWLOC__BITMAP_CHECK(set1);
+	HWLOC__BITMAP_CHECK(set2);
+
+	for(i=0; i<largest->ulongs_count; i++) {
+	  unsigned long val1 = HWLOC_SUBBITMAP_READULONG(set1, (unsigned) i);
+	  unsigned long val2 = HWLOC_SUBBITMAP_READULONG(set2, (unsigned) i);
+
+	  if (!val1) {
+	    if (!val2)
+	      /* both empty, no change */
+	      continue;
+
+	    /* val1 empty, val2 not */
+	    if (result == HWLOC_BITMAP_CONTAINS) {
+	      if (!empty2)
+		return HWLOC_BITMAP_INTERSECTS;
+	      result = HWLOC_BITMAP_DIFFERENT;
+	    } else if (result == HWLOC_BITMAP_EQUAL) {
+	      result = HWLOC_BITMAP_INCLUDED;
+	    }
+	    /* no change otherwise */
+
+	  } else if (!val2) {
+	    /* val2 empty, val1 not */
+	    if (result == HWLOC_BITMAP_INCLUDED) {
+	      if (!empty1)
+		return HWLOC_BITMAP_INTERSECTS;
+	      result = HWLOC_BITMAP_DIFFERENT;
+	    } else if (result == HWLOC_BITMAP_EQUAL) {
+	      result = HWLOC_BITMAP_CONTAINS;
+	    }
+	    /* no change otherwise */
+
+	  } else if (val1 == val2) {
+	    /* equal and not empty */
+	    if (result == HWLOC_BITMAP_DIFFERENT)
+	      return HWLOC_BITMAP_INTERSECTS;
+	    /* equal/contains/included unchanged */
+
+	  } else if ((val1 & val2) == val1) {
+	    /* included and not empty */
+	    if (result == HWLOC_BITMAP_CONTAINS || result == HWLOC_BITMAP_DIFFERENT)
+	      return HWLOC_BITMAP_INTERSECTS;
+	    /* equal/included unchanged */
+	    result = HWLOC_BITMAP_INCLUDED;
+
+	  } else if ((val1 & val2) == val2) {
+	    /* contains and not empty */
+	    if (result == HWLOC_BITMAP_INCLUDED || result == HWLOC_BITMAP_DIFFERENT)
+	      return HWLOC_BITMAP_INTERSECTS;
+	    /* equal/contains unchanged */
+	    result = HWLOC_BITMAP_CONTAINS;
+
+	  } else if ((val1 & val2) != 0) {
+	    /* intersects and not empty */
+	    return HWLOC_BITMAP_INTERSECTS;
+
+	  } else {
+	    /* different and not empty */
+
+	    /* equal/included/contains with non-empty sets means intersects */
+	    if (result == HWLOC_BITMAP_EQUAL && !empty1 /* implies !empty2 */)
+	      return HWLOC_BITMAP_INTERSECTS;
+	    if (result == HWLOC_BITMAP_INCLUDED && !empty1)
+	      return HWLOC_BITMAP_INTERSECTS;
+	    if (result == HWLOC_BITMAP_CONTAINS && !empty2)
+	      return HWLOC_BITMAP_INTERSECTS;
+	    /* otherwise means different */
+	    result = HWLOC_BITMAP_DIFFERENT;
+	  }
+
+	  empty1 &= !val1;
+	  empty2 &= !val2;
+	}
+
+	if (!set1->infinite) {
+	  if (set2->infinite) {
+	    /* set2 infinite only */
+	    if (result == HWLOC_BITMAP_CONTAINS) {
+	      if (!empty2)
+		return HWLOC_BITMAP_INTERSECTS;
+	      result = HWLOC_BITMAP_DIFFERENT;
+	    } else if (result == HWLOC_BITMAP_EQUAL) {
+	      result = HWLOC_BITMAP_INCLUDED;
+	    }
+	    /* no change otherwise */
+	  }
+	} else if (!set2->infinite) {
+	  /* set1 infinite only */
+	  if (result == HWLOC_BITMAP_INCLUDED) {
+	    if (!empty1)
+	      return HWLOC_BITMAP_INTERSECTS;
+	    result = HWLOC_BITMAP_DIFFERENT;
+	  } else if (result == HWLOC_BITMAP_EQUAL) {
+	    result = HWLOC_BITMAP_CONTAINS;
+	  }
+	  /* no change otherwise */
+	} else {
+	  /* both infinite */
+	  if (result == HWLOC_BITMAP_DIFFERENT)
+	    return HWLOC_BITMAP_INTERSECTS;
+	  /* equal/contains/included unchanged */
+	}
+
+	return result;
 }

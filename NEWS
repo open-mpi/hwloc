@@ -46,6 +46,8 @@ Version 1.11.0
   + Objects may have a Type info attribute to specific a better type name
     and display it in lstopo.
 * Misc
+  + Improve the performance of object insertion by cpuset for large
+    topologies.
   + Prefix verbose XML import errors with the source name.
   + Improve pkg-config checks and error messages.
 

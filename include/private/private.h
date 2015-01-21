@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -318,4 +318,13 @@ extern void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const ch
  */
 extern char * hwloc_progname(struct hwloc_topology *topology);
 
+#define HWLOC_BITMAP_EQUAL 0       /* Bitmaps are equal */
+#define HWLOC_BITMAP_INCLUDED 1    /* First bitmap included in second */
+#define HWLOC_BITMAP_CONTAINS 2    /* First bitmap contains second */
+#define HWLOC_BITMAP_INTERSECTS 3  /* Bitmaps intersect without any inclusion */
+#define HWLOC_BITMAP_DIFFERENT  4  /* Bitmaps do not intersect */
+
+/** \brief Compare bitmaps \p bitmap1 and \p bitmap2 from an inclusion point of view.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
 #endif /* HWLOC_PRIVATE_H */
