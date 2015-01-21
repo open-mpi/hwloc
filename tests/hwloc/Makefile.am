@@ -1,4 +1,4 @@
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -21,6 +21,7 @@ LOG_COMPILER = $(builddir)/wrapper.sh
 check_PROGRAMS = hwloc_list_components \
         hwloc_bitmap \
         hwloc_bitmap_string \
+        hwloc_bitmap_compare_inclusion \
         hwloc_get_closest_objs \
         hwloc_get_obj_covering_cpuset \
         hwloc_get_cache_covering_cpuset \
