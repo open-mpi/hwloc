@@ -903,7 +903,7 @@ int hwloc_bitmap_isincluded (const struct hwloc_bitmap_s *sub_set, const struct 
 	HWLOC__BITMAP_CHECK(sub_set);
 	HWLOC__BITMAP_CHECK(super_set);
 
-	for(i=0; i<sub_set->ulongs_count; i++)
+	for(i=0; i<sub_set->ulongs_count || i<super_set->ulongs_count; i++)
 		if (HWLOC_SUBBITMAP_READULONG(super_set, i) != (HWLOC_SUBBITMAP_READULONG(super_set, i) | HWLOC_SUBBITMAP_READULONG(sub_set, i)))
 			return 0;
 
