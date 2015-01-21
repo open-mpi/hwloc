@@ -629,6 +629,8 @@ extern "C" {
 
 #define hwloc_progname HWLOC_NAME(progname)
 
+#define hwloc_bitmap_compare_inclusion HWLOC_NAME(bitmap_compare_inclusion)
+
 /* private/solaris-chiptype.h */
 
 #define hwloc_solaris_get_chip_type HWLOC_NAME(solaris_get_chip_type)

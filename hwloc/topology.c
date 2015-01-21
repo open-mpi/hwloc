@@ -725,17 +725,18 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
  */
 
 enum hwloc_obj_cmp_e {
-  HWLOC_OBJ_EQUAL,	/**< \brief Equal */
-  HWLOC_OBJ_INCLUDED,	/**< \brief Strictly included into */
-  HWLOC_OBJ_CONTAINS,	/**< \brief Strictly contains */
-  HWLOC_OBJ_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
-  HWLOC_OBJ_DIFFERENT	/**< \brief No intersection */
+  HWLOC_OBJ_EQUAL = HWLOC_BITMAP_EQUAL,			/**< \brief Equal */
+  HWLOC_OBJ_INCLUDED = HWLOC_BITMAP_INCLUDED,		/**< \brief Strictly included into */
+  HWLOC_OBJ_CONTAINS = HWLOC_BITMAP_CONTAINS,		/**< \brief Strictly contains */
+  HWLOC_OBJ_INTERSECTS = HWLOC_BITMAP_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
+  HWLOC_OBJ_DIFFERENT = HWLOC_BITMAP_DIFFERENT		/**< \brief No intersection */
 };
 
 static int
 hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   hwloc_bitmap_t set1, set2;
+  int res;
 
   /* compare cpusets if possible, or fallback to nodeset, or return */
   if (obj1->cpuset && !hwloc_bitmap_iszero(obj1->cpuset)
@@ -750,50 +751,35 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
     return HWLOC_OBJ_DIFFERENT;
   }
 
-  if (hwloc_bitmap_isequal(set1, set2)) {
+  res = hwloc_bitmap_compare_inclusion(set1, set2);
+  if (res != HWLOC_BITMAP_EQUAL)
+    return res;
 
-    /* Same sets, subsort by type to have a consistent ordering.  */
+  /* Same sets, subsort by type to have a consistent ordering.  */
+  switch (hwloc_type_cmp(obj1, obj2)) {
+  case HWLOC_TYPE_DEEPER:
+    return HWLOC_OBJ_INCLUDED;
+  case HWLOC_TYPE_HIGHER:
+    return HWLOC_OBJ_CONTAINS;
 
-    switch (hwloc_type_cmp(obj1, obj2)) {
-      case HWLOC_TYPE_DEEPER:
+  case HWLOC_TYPE_EQUAL:
+    if (obj1->type == HWLOC_OBJ_MISC) {
+      /* Misc objects may vary by name */
+      int res = strcmp(obj1->name, obj2->name);
+      if (res < 0)
 	return HWLOC_OBJ_INCLUDED;
-      case HWLOC_TYPE_HIGHER:
+      if (res > 0)
 	return HWLOC_OBJ_CONTAINS;
-
-      case HWLOC_TYPE_EQUAL:
-        if (obj1->type == HWLOC_OBJ_MISC) {
-          /* Misc objects may vary by name */
-          int res = strcmp(obj1->name, obj2->name);
-          if (res < 0)
-            return HWLOC_OBJ_INCLUDED;
-          if (res > 0)
-            return HWLOC_OBJ_CONTAINS;
-          if (res == 0)
-            return HWLOC_OBJ_EQUAL;
-        }
-
-	/* Same sets and types!  Let's hope it's coherent.  */
+      if (res == 0)
 	return HWLOC_OBJ_EQUAL;
     }
 
-    /* For dumb compilers */
-    abort();
-
-  } else {
-
-    /* Different sets, sort by inclusion.  */
-
-    if (hwloc_bitmap_isincluded(set1, set2))
-      return HWLOC_OBJ_INCLUDED;
-
-    if (hwloc_bitmap_isincluded(set2, set1))
-      return HWLOC_OBJ_CONTAINS;
-
-    if (hwloc_bitmap_intersects(set1, set2))
-      return HWLOC_OBJ_INTERSECTS;
-
-    return HWLOC_OBJ_DIFFERENT;
+    /* Same sets and types!  Let's hope it's coherent.  */
+    return HWLOC_OBJ_EQUAL;
   }
+
+  /* For dumb compilers */
+  abort();
 }
 
 /* Compare object cpusets based on complete_cpuset if defined (always correctly ordered),
