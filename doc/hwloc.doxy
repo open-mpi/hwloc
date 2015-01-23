@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1799,8 +1799,9 @@ For reference, \ref hwloc_topology_t modification operations include
   after these functions return.  </dd>
 
 <dt>Runtime topology modifications</dt>
-  <dd><tt>hwloc_topology_insert_misc_object_by_*</tt> (see
-  \ref hwlocality_tinker) may modify the topology significantly by adding
+  <dd><tt>hwloc_topology_insert_misc_object_by_parent</tt>
+  and <tt>hwloc_topology_insert_group_object()</tt>
+  (see \ref hwlocality_tinker) may modify the topology significantly by adding
   objects inside the tree, changing the topology depth, etc.
   <tt>hwloc_topology_restrict</tt> modifies the topology even more
   dramatically by removing some objects.
@@ -2567,8 +2568,7 @@ These attributes are always exported to XML.
 However only character strings may be used as key names and values.
 
 It is also possible to insert Misc objects with custom names anywhere
-in the topology (<tt>hwloc_topology_insert_misc_object_by_cpuset()</tt>)
-or as a leaf of the topology (<tt>hwloc_topology_insert_misc_object_by_parent()</tt>).
+as a leaf of the topology (<tt>hwloc_topology_insert_misc_object_by_parent()</tt>).
 
 There is also a topology-specific userdata pointer that can be used
 to recognize different topologies by storing a custom pointer.

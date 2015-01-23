@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2014 Inria.  All rights reserved.
+ * Copyright © 2011-2015 Inria.  All rights reserved.
  * Copyright © 2011 Université Bordeaux.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -68,6 +68,7 @@ int main(void)
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   unsigned node_indexes[3], core_indexes[6];
   float node_distances[9], core_distances[36];
+  hwloc_obj_t obj;
   unsigned i,j;
   int err;
 
@@ -167,14 +168,17 @@ int main(void)
 
   hwloc_topology_destroy(topology);
 
-  /* check that restricting exactly on a Misc object keeps things coherent */
+  /* check that restricting exactly on a Group object keeps things coherent */
   printf("restricting to a Misc covering only the of the PU level\n");
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "pu:4");
   hwloc_topology_load(topology);
   hwloc_bitmap_zero(cpuset);
   hwloc_bitmap_set_range(cpuset, 1, 2);
-  hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "toto");
+  obj = hwloc_topology_alloc_group_object(topology);
+  obj->cpuset = hwloc_bitmap_dup(cpuset);
+  obj->name = strdup("toto");
+  hwloc_topology_insert_group_object(topology, obj);
   hwloc_topology_restrict(topology, cpuset, 0);
   hwloc_topology_check(topology);
   hwloc_topology_destroy(topology);

@@ -1108,50 +1108,48 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   }
 }
 
-/* Adds a misc object _after_ detection, and thus has to reconnect all the pointers */
 hwloc_obj_t
-hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
+hwloc_topology_alloc_group_object(struct hwloc_topology *topology __hwloc_attribute_unused)
 {
-  hwloc_obj_t obj, child;
+  hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+  if (!obj)
+    return NULL;
+  obj->attr->group.depth = -1;
+  return obj;
+}
+
+hwloc_obj_t
+hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
+{
+  hwloc_obj_t res;
 
   if (!topology->is_loaded) {
+    /* this could actually work, we would just need to disable connect_children/levels below */
     errno = EINVAL;
     return NULL;
   }
 
-  if (hwloc_bitmap_iszero(cpuset))
+  if ((!obj->cpuset || hwloc_bitmap_iszero(obj->cpuset))
+      && (!obj->complete_cpuset || hwloc_bitmap_iszero(obj->complete_cpuset))
+      && (!obj->nodeset || hwloc_bitmap_iszero(obj->nodeset))
+      && (!obj->complete_nodeset || hwloc_bitmap_iszero(obj->complete_nodeset))) {
+    hwloc_free_unlinked_object(obj);
+    errno = EINVAL;
     return NULL;
-  if (!hwloc_bitmap_isincluded(cpuset, hwloc_topology_get_topology_cpuset(topology)))
-    return NULL;
-
-  obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
-  if (name)
-    obj->name = strdup(name);
-
-  /* misc objects go in no level */
-  obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
-
-  obj->cpuset = hwloc_bitmap_dup(cpuset);
-  /* initialize default cpusets, we'll adjust them later */
-  obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
-  obj->allowed_cpuset = hwloc_bitmap_dup(cpuset);
-
-  obj = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
-  if (!obj)
-    return NULL;
-
-  hwloc_connect_children(topology->levels[0][0]);
-
-  if ((child = obj->first_child) != NULL && child->cpuset) {
-    /* update sets from children (cpusets won't be modified) */
-    hwloc_obj_add_children_sets(obj);
-  } else {
-    /* copy the parent nodesets */
-    obj->nodeset = hwloc_bitmap_dup(obj->parent->nodeset);
-    obj->complete_nodeset = hwloc_bitmap_dup(obj->parent->complete_nodeset);
-    obj->allowed_nodeset = hwloc_bitmap_dup(obj->parent->allowed_nodeset);
   }
 
+  res = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
+  if (!res)
+    return NULL;
+  if (res != obj)
+    /* merged */
+    return res;
+
+  /* properly inserted */
+  hwloc_obj_add_children_sets(obj);
+  hwloc_connect_children(topology->levels[0][0]);
+  if (hwloc_connect_levels(topology) < 0)
+    return NULL;
   return obj;
 }
 
@@ -2927,21 +2925,30 @@ hwloc__check_children(struct hwloc_obj *parent)
       hwloc_bitmap_andnot(remaining_parent_nodeset, remaining_parent_nodeset, parent->children[j]->nodeset);
     }
 
-    if (parent->type == HWLOC_OBJ_PU)
-      /* if parent is a PU, its os_index bit may remain.
-       * or it could already have been removed by a Misc child inserted by cpuset. */
-      hwloc_bitmap_clr(remaining_parent_cpuset, parent->os_index);
-    /* nothing remains */
-    assert(hwloc_bitmap_iszero(remaining_parent_cpuset));
-    hwloc_bitmap_free(remaining_parent_cpuset);
+    if (parent->type == HWLOC_OBJ_PU) {
+      /* if parent is a PU (with Misc children for instance),
+       * its os_index bit may remain in cpuset. */
+      assert(hwloc_bitmap_weight(remaining_parent_cpuset) == 1);
+      assert(hwloc_bitmap_first(remaining_parent_cpuset) == (int)parent->os_index);
+    } else {
+      /* nothing remains */
+      assert(hwloc_bitmap_iszero(remaining_parent_cpuset));
+      hwloc_bitmap_free(remaining_parent_cpuset);
+    }
 
     if (parent->type == HWLOC_OBJ_NUMANODE)
       /* if parent is a NUMA node, its os_index bit may remain.
        * or it could already have been removed by a child. */
       hwloc_bitmap_clr(remaining_parent_nodeset, parent->os_index);
-    /* nothing remains */
-    assert(hwloc_bitmap_iszero(remaining_parent_nodeset));
-    hwloc_bitmap_free(remaining_parent_nodeset);
+    if (parent->type == HWLOC_OBJ_PU) {
+      /* if parent is a PU (with Misc children for instance),
+       * one bit may remain in nodeset. */
+      assert(hwloc_bitmap_weight(remaining_parent_nodeset) == 1);
+    } else {
+      /* nothing remains */
+      assert(hwloc_bitmap_iszero(remaining_parent_nodeset));
+      hwloc_bitmap_free(remaining_parent_nodeset);
+    }
 
   } else {
     /* check that children have no sets if the parent has none */

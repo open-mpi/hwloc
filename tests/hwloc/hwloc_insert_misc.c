@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -16,7 +16,6 @@
 int main(void)
 {
   hwloc_topology_t topology, reload;
-  hwloc_bitmap_t cpuset;
   hwloc_obj_t obj;
   char *buf1, *buf2;
   int buflen1, buflen2, err;
@@ -26,24 +25,6 @@ int main(void)
   err = hwloc_topology_load(topology);
   assert(!err);
   hwloc_topology_check(topology);
-
-  /* insert by cpuset below root */
-  cpuset = hwloc_bitmap_alloc();
-  hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
-  obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test by cpuset under root");
-  assert(obj);
-  obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test2 by cpuset under root");
-  assert(obj);
-  hwloc_bitmap_free(cpuset);
-
-  /* insert by cpuset below first available PU */
-  cpuset = hwloc_bitmap_alloc();
-  hwloc_bitmap_set(cpuset, hwloc_bitmap_first(hwloc_topology_get_topology_cpuset(topology)));
-  obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test by cpuset under first available PU");
-  assert(obj);
-  obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test2 by cpuset under first available PU");
-  assert(obj);
-  hwloc_bitmap_free(cpuset);
 
   /* insert by parent below root */
   obj = hwloc_get_root_obj(topology);

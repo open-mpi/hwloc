@@ -2108,29 +2108,52 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
 
-/** \brief Add a MISC object to the topology
+/** \brief Allocate a Group object to insert later with hwloc_topology_insert_group_object().
  *
- * A new MISC object will be created and inserted into the topology at the
- * position given by bitmap \p cpuset. This offers a way to add new
- * intermediate levels to the topology hierarchy.
+ * This function returns a new Group object.
+ * The caller should (at least) initialize its sets before inserting the object.
+ * See hwloc_topology_insert_group_object().
  *
- * \p cpuset and \p name will be copied to setup the new object attributes.
+ * The caller may also set the object name before insertion.
  *
- * \return the newly-created object.
- * \return \c NULL if the insertion conflicts with the existing topology tree.
- *
- * \note If \p name contains some non-printable characters, they will
- * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
+ * The object will be destroyed if passed to hwloc_topology_insert_group_object()
+ * without any set defined.
  */
-HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t topology);
+
+/** \brief Add more structure to the topology by adding an intermediate Group
+ *
+ * The caller should first allocate a new Group object with hwloc_topology_alloc_group_object().
+ * Then it must initialize some of its sets to specify the final location of the Group
+ * in the topology.
+ * Then the object can be passed to this function for actual insertion in the topology.
+ *
+ * Either the cpuset or nodeset field (or both, if compatible) may be used to do so.
+ * If inserting with respect to the complete topology (including disallowed, offline
+ * or unknown object), complete_cpuset and/or complete_nodeset may be used instead.
+ * It grouping several objects, hwloc_obj_add_other_obj_sets() is an easy way to
+ * build the Group sets iteratively.
+ *
+ * \return The inserted object if it was properly inserted.
+ *
+ * \return An existing object if the Group was discarded because the topology already
+ * contained a object at the same location (the Group did not add any locality information).
+ *
+ * \return \c NULL if the insertion failed because of conflicting sets in topology tree.
+ *
+ * \return \c NULL if the object was discarded because no set was initialized in the Group
+ * before insert, or all of them were empty.
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_group_object(hwloc_topology_t topology, hwloc_obj_t group);
 
 /** \brief Setup object cpusets/nodesets by OR'ing another object's sets.
  *
  * For each defined cpuset or nodeset in \p src, allocate the corresponding set
- * in \p dst and add \p src (by OR'ing it).
+ * in \p dst and add \p src to it by OR'ing sets.
  *
- * This function is convenient for building the sets of a Group of object before insertion
- * as a new parent of multiple objects.
+ * This function is convenient between hwloc_topology_alloc_group_object()
+ * and hwloc_topology_insert_group_object(). It builds the sets of the new Group
+ * that will be inserted as a new intermediate parent of several objects.
  */
 HWLOC_DECLSPEC int hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src);
 
