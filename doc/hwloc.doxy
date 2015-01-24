@@ -1546,7 +1546,7 @@ That is why the above topology contains 4 cores (2 cores times 2 nodes).
 
 These type names must be written as
 <tt>machine</tt>, <tt>node</tt>, <tt>package</tt>, <tt>core</tt>,
-<tt>cache</tt>, <tt>pu</tt>, <tt>misc</tt>, <tt>group</tt>.
+<tt>cache</tt>, <tt>pu</tt>, <tt>group</tt>, <tt>misc</tt>.
 They do not need to be written case-sensitively, nor entirely
 (as long as there is no ambiguity, 2 characters such as <tt>ma</tt>
  select a Machine level).
@@ -1799,7 +1799,7 @@ For reference, \ref hwloc_topology_t modification operations include
   after these functions return.  </dd>
 
 <dt>Runtime topology modifications</dt>
-  <dd><tt>hwloc_topology_insert_misc_object_by_parent</tt>
+  <dd><tt>hwloc_topology_insert_misc_object()</tt>
   and <tt>hwloc_topology_insert_group_object()</tt>
   (see \ref hwlocality_tinker) may modify the topology significantly by adding
   objects inside the tree, changing the topology depth, etc.
@@ -2568,7 +2568,7 @@ These attributes are always exported to XML.
 However only character strings may be used as key names and values.
 
 It is also possible to insert Misc objects with custom names anywhere
-as a leaf of the topology (<tt>hwloc_topology_insert_misc_object_by_parent()</tt>).
+as a leaf of the topology (<tt>hwloc_topology_insert_misc_object()</tt>).
 
 There is also a topology-specific userdata pointer that can be used
 to recognize different topologies by storing a custom pointer.

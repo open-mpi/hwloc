@@ -145,7 +145,7 @@ extern "C" {
 #define HWLOC_RESTRICT_FLAG_ADAPT_IO HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_IO)
 #define hwloc_topology_restrict HWLOC_NAME(topology_restrict)
 
-#define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
+#define hwloc_topology_insert_misc_object HWLOC_NAME(topology_insert_misc_object)
 #define hwloc_topology_alloc_group_object HWLOC_NAME(topology_alloc_group_object)
 #define hwloc_topology_insert_group_object HWLOC_NAME(topology_insert_group_object)
 #define hwloc_obj_add_other_obj_sets HWLOC_NAME(obj_add_other_obj_sets)
@@ -505,6 +505,7 @@ extern "C" {
 #define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 #define hwloc_distributev HWLOC_NAME(distributev)
 #define hwloc_distribute HWLOC_NAME(distribute)
+#define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
 
 /* private/debug.h */
 

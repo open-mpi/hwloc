@@ -97,7 +97,7 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
     fprintf(stderr, "Inserting process `%s' below parent larger than cpuset %s\n", name, s);
     free(s);
   }
-  obj = hwloc_topology_insert_misc_object_by_parent(topology, group, name);
+  obj = hwloc_topology_insert_misc_object(topology, group, name);
   if (!obj)
     fprintf(stderr, "Failed to insert process `%s'\n", name);
 

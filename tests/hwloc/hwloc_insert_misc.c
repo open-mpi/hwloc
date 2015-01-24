@@ -28,16 +28,16 @@ int main(void)
 
   /* insert by parent below root */
   obj = hwloc_get_root_obj(topology);
-  obj = hwloc_topology_insert_misc_object_by_parent(topology, obj, "test by parent below root");
+  obj = hwloc_topology_insert_misc_object(topology, obj, "test by parent below root");
   assert(obj);
 
   /* insert by parent below previous Misc */
-  obj = hwloc_topology_insert_misc_object_by_parent(topology, obj, "test by parent below previous Misc");
+  obj = hwloc_topology_insert_misc_object(topology, obj, "test by parent below previous Misc");
   assert(obj);
 
   /* insert by parent below first PU */
   obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0);
-  obj = hwloc_topology_insert_misc_object_by_parent(topology, obj, "test by parent below first PU");
+  obj = hwloc_topology_insert_misc_object(topology, obj, "test by parent below first PU");
   assert(obj);
 
   hwloc_topology_check(topology);

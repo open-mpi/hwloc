@@ -1154,7 +1154,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
 }
 
 hwloc_obj_t
-hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, const char *name)
+hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t parent, const char *name)
 {
   hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
   if (name)

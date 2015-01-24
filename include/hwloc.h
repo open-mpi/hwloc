@@ -2106,7 +2106,7 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  * \note If \p name contains some non-printable characters, they will
  * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
-HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
 
 /** \brief Allocate a Group object to insert later with hwloc_topology_insert_group_object().
  *

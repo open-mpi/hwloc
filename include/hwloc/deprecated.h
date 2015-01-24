@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -92,6 +92,18 @@ static __hwloc_inline void
 hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *set, unsigned n, unsigned until)
 {
   hwloc_distrib(topology, roots, n_roots, set, n, until, 0);
+}
+
+/** \brief Insert a misc object by parent.
+ *
+ * Identical to hwloc_topology_insert_misc_object().
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name) __hwloc_attribute_deprecated;
+static __hwloc_inline hwloc_obj_t
+hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name)
+{
+  return hwloc_topology_insert_misc_object(topology, parent, name);
 }
 
 #ifdef __cplusplus
