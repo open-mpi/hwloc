@@ -305,6 +305,7 @@ man3_creation_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_init.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_dup.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3
 
 man3_configurationdir = $(man3dir)
@@ -432,8 +433,7 @@ man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_IO.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_MISC.3 \
         $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_dup.3
+        $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3
 
 man3_customdir = $(man3dir)
 man3_custom_DATA = \
