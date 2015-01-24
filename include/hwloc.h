@@ -624,6 +624,15 @@ HWLOC_DECLSPEC int hwloc_topology_load(hwloc_topology_t topology);
  */
 HWLOC_DECLSPEC void hwloc_topology_destroy (hwloc_topology_t topology);
 
+/** \brief Duplicate a topology.
+ *
+ * The entire topology structure as well as its objects
+ * are duplicated into a new one.
+ *
+ * This is useful for keeping a backup while modifying a topology.
+ */
+HWLOC_DECLSPEC int hwloc_topology_dup(hwloc_topology_t *newtopology, hwloc_topology_t oldtopology);
+
 /** \brief Run internal checks on a topology structure
  *
  * The program aborts if an inconsistency is detected in the given topology.
@@ -2105,15 +2114,6 @@ enum hwloc_restrict_flags_e {
  * destroyed with hwloc_topology_destroy() or configured and loaded again.
  */
 HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
-
-/** \brief Duplicate a topology.
- *
- * The entire topology structure as well as its objects
- * are duplicated into a new one.
- *
- * This is useful for keeping a backup while modifying a topology.
- */
-HWLOC_DECLSPEC int hwloc_topology_dup(hwloc_topology_t *newtopology, hwloc_topology_t oldtopology);
 
 /** @} */
 
