@@ -333,11 +333,6 @@ man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_flags.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_pid.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_xmlbuffer.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_distance_matrix.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_is_thissystem.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_discovery_support.3 \
@@ -432,6 +427,14 @@ man3_membinding_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_free.3
+
+man3_setsourcedir = $(man3dir)
+man3_setsource_DATA = \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_pid.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_xmlbuffer.3
 
 man3_tinkerdir = $(man3dir)
 man3_tinker_DATA = \
@@ -720,6 +723,7 @@ $(man3_object_strings_DATA): $(DOX_TAG)
 $(man3_cpubinding_DATA): $(DOX_TAG)
 $(man3_membinding_DATA): $(DOX_TAG)
 $(man3_tinker_DATA): $(DOX_TAG)
+$(man3_setsource_DATA): $(DOX_TAG)
 $(man3_xmlexport_DATA): $(DOX_TAG)
 $(man3_syntheticexport_DATA): $(DOX_TAG)
 $(man3_bitmap_DATA): $(DOX_TAG)

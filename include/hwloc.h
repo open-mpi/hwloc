@@ -602,7 +602,7 @@ HWLOC_DECLSPEC int hwloc_topology_init (hwloc_topology_t *topologyp);
 /** \brief Build the actual topology
  *
  * Build the actual topology once initialized with hwloc_topology_init() and
- * tuned with \ref hwlocality_configuration routines.
+ * tuned with \ref hwlocality_configuration and \ref hwlocality_setsource routines.
  * No other routine may be called earlier using this topology context.
  *
  * \param topology is the topology to be loaded with objects.
@@ -614,7 +614,7 @@ HWLOC_DECLSPEC int hwloc_topology_init (hwloc_topology_t *topologyp);
  *
  * \note This function may be called only once per topology.
  *
- * \sa hwlocality_configuration
+ * \sa hwlocality_configuration and hwlocality_setsource
  */
 HWLOC_DECLSPEC int hwloc_topology_load(hwloc_topology_t topology);
 
@@ -655,18 +655,6 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
  * Several functions can optionally be called between hwloc_topology_init() and
  * hwloc_topology_load() to configure how the detection should be performed,
  * e.g. to ignore some objects types, define a synthetic topology, etc.
- *
- * If none of them is called, the default is to detect all the objects of the
- * machine that the caller is allowed to access.
- *
- * This default behavior may also be modified through environment variables
- * if the application did not modify it already.
- * Setting HWLOC_XMLFILE in the environment enforces the discovery from a XML
- * file as if hwloc_topology_set_xml() had been called.
- * HWLOC_FSROOT switches to reading the topology from the specified Linux
- * filesystem root as if hwloc_topology_set_fsroot() had been called.
- * Finally, HWLOC_THISSYSTEM enforces the return value of
- * hwloc_topology_is_thissystem().
  *
  * @{
  */
@@ -796,135 +784,6 @@ HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned
  * \return the flags previously set with hwloc_topology_set_flags().
  */
 HWLOC_DECLSPEC unsigned long hwloc_topology_get_flags (hwloc_topology_t topology);
-
-/** \brief Change which pid the topology is viewed from
- *
- * On some systems, processes may have different views of the machine, for
- * instance the set of allowed CPUs. By default, hwloc exposes the view from
- * the current process. Calling hwloc_topology_set_pid() permits to make it
- * expose the topology of the machine from the point of view of another
- * process.
- *
- * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
- * and \p HANDLE on native Windows platforms.
- *
- * \note -1 is returned and errno is set to ENOSYS on platforms that do not
- * support this feature.
- */
-HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topology, hwloc_pid_t pid);
-
-/** \brief Change the file-system root path when building the topology from sysfs/procfs.
- *
- * On Linux system, use sysfs and procfs files as if they were mounted on the given
- * \p fsroot_path instead of the main file-system root. Setting the environment
- * variable HWLOC_FSROOT may also result in this behavior.
- * Not using the main file-system root causes hwloc_topology_is_thissystem()
- * to return 0.
- *
- * Note that this function does not actually load topology
- * information; it just tells hwloc where to load it from.  You'll
- * still need to invoke hwloc_topology_load() to actually load the
- * topology information.
- *
- * \return -1 with errno set to ENOSYS on non-Linux and on Linux systems that
- * do not support it.
- * \return -1 with the appropriate errno if \p fsroot_path cannot be used.
- *
- * \note For convenience, this backend provides empty binding hooks which just
- * return success.  To have hwloc still actually call OS-specific hooks, the
- * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
- * file is really the underlying system.
- *
- * \note On success, the Linux component replaces the previously enabled
- * component (if any), but the topology is not actually modified until
- * hwloc_topology_load().
- */
-HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
-
-/** \brief Enable synthetic topology.
- *
- * Gather topology information from the given \p description,
- * a space-separated string of numbers describing
- * the arity of each level.
- * Each number may be prefixed with a type and a colon to enforce the type
- * of a level.  If only some level types are enforced, hwloc will try to
- * choose the other types according to usual topologies, but it may fail
- * and you may have to specify more level types manually.
- * See also the \ref synthetic.
- *
- * If \p description was properly parsed and describes a valid topology
- * configuration, this function returns 0.
- * Otherwise -1 is returned and errno is set to EINVAL.
- *
- * Note that this function does not actually load topology
- * information; it just tells hwloc where to load it from.  You'll
- * still need to invoke hwloc_topology_load() to actually load the
- * topology information.
- *
- * \note For convenience, this backend provides empty binding hooks which just
- * return success.
- *
- * \note On success, the synthetic component replaces the previously enabled
- * component (if any), but the topology is not actually modified until
- * hwloc_topology_load().
- */
-HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict description);
-
-/** \brief Enable XML-file based topology.
- *
- * Gather topology information from the XML file given at \p xmlpath.
- * Setting the environment variable HWLOC_XMLFILE may also result in this behavior.
- * This file may have been generated earlier with hwloc_topology_export_xml()
- * or lstopo file.xml.
- *
- * Note that this function does not actually load topology
- * information; it just tells hwloc where to load it from.  You'll
- * still need to invoke hwloc_topology_load() to actually load the
- * topology information.
- *
- * \return -1 with errno set to EINVAL on failure to read the XML file.
- *
- * \note See also hwloc_topology_set_userdata_import_callback()
- * for importing application-specific object userdata.
- *
- * \note For convenience, this backend provides empty binding hooks which just
- * return success.  To have hwloc still actually call OS-specific hooks, the
- * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
- * file is really the underlying system.
- *
- * \note On success, the XML component replaces the previously enabled
- * component (if any), but the topology is not actually modified until
- * hwloc_topology_load().
- */
-HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
-
-/** \brief Enable XML based topology using a memory buffer (instead of
- * a file, as with hwloc_topology_set_xml()).
- *
- * Gather topology information from the XML memory buffer given at \p
- * buffer and of length \p size.  This buffer may have been filled
- * earlier with hwloc_topology_export_xmlbuffer().
- *
- * Note that this function does not actually load topology
- * information; it just tells hwloc where to load it from.  You'll
- * still need to invoke hwloc_topology_load() to actually load the
- * topology information.
- *
- * \return -1 with errno set to EINVAL on failure to read the XML buffer.
- *
- * \note See also hwloc_topology_set_userdata_import_callback()
- * for importing application-specific object userdata.
- *
- * \note For convenience, this backend provides empty binding hooks which just
- * return success.  To have hwloc still actually call OS-specific hooks, the
- * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
- * file is really the underlying system.
- *
- * \note On success, the XML component replaces the previously enabled
- * component (if any), but the topology is not actually modified until
- * hwloc_topology_load().
- */
-HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
 
 /** \brief Provide a distance matrix.
  *
@@ -2029,6 +1888,156 @@ hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cp
  * or hwloc_alloc_membind().
  */
 HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len);
+
+/** @} */
+
+
+
+/** \defgroup hwlocality_setsource Changing the Source of Topology Discovery
+ *
+ * If none of the functions below is called, the default is to detect all the objects
+ * of the machine that the caller is allowed to access.
+ *
+ * This default behavior may also be modified through environment variables
+ * if the application did not modify it already.
+ * Setting HWLOC_XMLFILE in the environment enforces the discovery from a XML
+ * file as if hwloc_topology_set_xml() had been called.
+ * HWLOC_FSROOT switches to reading the topology from the specified Linux
+ * filesystem root as if hwloc_topology_set_fsroot() had been called.
+ * Finally, HWLOC_THISSYSTEM enforces the return value of
+ * hwloc_topology_is_thissystem().
+ *
+ * @{
+ */
+
+/** \brief Change which pid the topology is viewed from
+ *
+ * On some systems, processes may have different views of the machine, for
+ * instance the set of allowed CPUs. By default, hwloc exposes the view from
+ * the current process. Calling hwloc_topology_set_pid() permits to make it
+ * expose the topology of the machine from the point of view of another
+ * process.
+ *
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
+ *
+ * \note -1 is returned and errno is set to ENOSYS on platforms that do not
+ * support this feature.
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topology, hwloc_pid_t pid);
+
+/** \brief Change the file-system root path when building the topology from sysfs/procfs.
+ *
+ * On Linux system, use sysfs and procfs files as if they were mounted on the given
+ * \p fsroot_path instead of the main file-system root. Setting the environment
+ * variable HWLOC_FSROOT may also result in this behavior.
+ * Not using the main file-system root causes hwloc_topology_is_thissystem()
+ * to return 0.
+ *
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
+ * \return -1 with errno set to ENOSYS on non-Linux and on Linux systems that
+ * do not support it.
+ * \return -1 with the appropriate errno if \p fsroot_path cannot be used.
+ *
+ * \note For convenience, this backend provides empty binding hooks which just
+ * return success.  To have hwloc still actually call OS-specific hooks, the
+ * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
+ * file is really the underlying system.
+ *
+ * \note On success, the Linux component replaces the previously enabled
+ * component (if any), but the topology is not actually modified until
+ * hwloc_topology_load().
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
+
+/** \brief Enable synthetic topology.
+ *
+ * Gather topology information from the given \p description,
+ * a space-separated string of numbers describing
+ * the arity of each level.
+ * Each number may be prefixed with a type and a colon to enforce the type
+ * of a level.  If only some level types are enforced, hwloc will try to
+ * choose the other types according to usual topologies, but it may fail
+ * and you may have to specify more level types manually.
+ * See also the \ref synthetic.
+ *
+ * If \p description was properly parsed and describes a valid topology
+ * configuration, this function returns 0.
+ * Otherwise -1 is returned and errno is set to EINVAL.
+ *
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
+ * \note For convenience, this backend provides empty binding hooks which just
+ * return success.
+ *
+ * \note On success, the synthetic component replaces the previously enabled
+ * component (if any), but the topology is not actually modified until
+ * hwloc_topology_load().
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict description);
+
+/** \brief Enable XML-file based topology.
+ *
+ * Gather topology information from the XML file given at \p xmlpath.
+ * Setting the environment variable HWLOC_XMLFILE may also result in this behavior.
+ * This file may have been generated earlier with hwloc_topology_export_xml()
+ * or lstopo file.xml.
+ *
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
+ * \return -1 with errno set to EINVAL on failure to read the XML file.
+ *
+ * \note See also hwloc_topology_set_userdata_import_callback()
+ * for importing application-specific object userdata.
+ *
+ * \note For convenience, this backend provides empty binding hooks which just
+ * return success.  To have hwloc still actually call OS-specific hooks, the
+ * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
+ * file is really the underlying system.
+ *
+ * \note On success, the XML component replaces the previously enabled
+ * component (if any), but the topology is not actually modified until
+ * hwloc_topology_load().
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
+
+/** \brief Enable XML based topology using a memory buffer (instead of
+ * a file, as with hwloc_topology_set_xml()).
+ *
+ * Gather topology information from the XML memory buffer given at \p
+ * buffer and of length \p size.  This buffer may have been filled
+ * earlier with hwloc_topology_export_xmlbuffer().
+ *
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
+ * \return -1 with errno set to EINVAL on failure to read the XML buffer.
+ *
+ * \note See also hwloc_topology_set_userdata_import_callback()
+ * for importing application-specific object userdata.
+ *
+ * \note For convenience, this backend provides empty binding hooks which just
+ * return success.  To have hwloc still actually call OS-specific hooks, the
+ * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
+ * file is really the underlying system.
+ *
+ * \note On success, the XML component replaces the previously enabled
+ * component (if any), but the topology is not actually modified until
+ * hwloc_topology_load().
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
 
 /** @} */
 

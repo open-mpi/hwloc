@@ -122,11 +122,6 @@ extern "C" {
 #define HWLOC_TOPOLOGY_FLAG_ICACHES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_ICACHES)
 
 #define hwloc_topology_set_flags HWLOC_NAME(topology_set_flags)
-#define hwloc_topology_set_fsroot HWLOC_NAME(topology_set_fsroot)
-#define hwloc_topology_set_pid HWLOC_NAME(topology_set_pid)
-#define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)
-#define hwloc_topology_set_xml HWLOC_NAME(topology_set_xml)
-#define hwloc_topology_set_xmlbuffer HWLOC_NAME(topology_set_xmlbuffer)
 #define hwloc_topology_set_distance_matrix HWLOC_NAME(topology_set_distance_matrix)
 
 #define hwloc_topology_discovery_support HWLOC_NAME(topology_discovery_support)
@@ -136,6 +131,12 @@ extern "C" {
 #define hwloc_topology_get_support HWLOC_NAME(topology_get_support)
 #define hwloc_topology_set_userdata HWLOC_NAME(topology_set_userdata)
 #define hwloc_topology_get_userdata HWLOC_NAME(topology_get_userdata)
+
+#define hwloc_topology_set_fsroot HWLOC_NAME(topology_set_fsroot)
+#define hwloc_topology_set_pid HWLOC_NAME(topology_set_pid)
+#define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)
+#define hwloc_topology_set_xml HWLOC_NAME(topology_set_xml)
+#define hwloc_topology_set_xmlbuffer HWLOC_NAME(topology_set_xmlbuffer)
 
 #define hwloc_topology_export_xml HWLOC_NAME(topology_export_xml)
 #define hwloc_topology_export_xmlbuffer HWLOC_NAME(topology_export_xmlbuffer)
