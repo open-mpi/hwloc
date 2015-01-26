@@ -139,19 +139,6 @@ extern "C" {
 #define hwloc_topology_set_userdata HWLOC_NAME(topology_set_userdata)
 #define hwloc_topology_get_userdata HWLOC_NAME(topology_get_userdata)
 
-#define hwloc_topology_export_xml HWLOC_NAME(topology_export_xml)
-#define hwloc_topology_export_xmlbuffer HWLOC_NAME(topology_export_xmlbuffer)
-#define hwloc_free_xmlbuffer HWLOC_NAME(free_xmlbuffer)
-#define hwloc_topology_set_userdata_export_callback HWLOC_NAME(topology_set_userdata_export_callback)
-#define hwloc_export_obj_userdata HWLOC_NAME(export_obj_userdata)
-#define hwloc_export_obj_userdata_base64 HWLOC_NAME(export_obj_userdata_base64)
-#define hwloc_topology_set_userdata_import_callback HWLOC_NAME(topology_set_userdata_import_callback)
-
-#define hwloc_topology_export_synthetic_flags_e HWLOC_NAME(topology_export_synthetic_flags_e)
-#define HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES HWLOC_NAME_CAPS(TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES)
-#define HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS HWLOC_NAME_CAPS(TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)
-#define hwloc_topology_export_synthetic HWLOC_NAME(topology_export_synthetic)
-
 #define hwloc_restrict_flags_e HWLOC_NAME(restrict_flags_e)
 #define HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_DISTANCES)
 #define HWLOC_RESTRICT_FLAG_ADAPT_MISC HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_MISC)
@@ -351,6 +338,21 @@ extern "C" {
 #define hwloc_get_whole_distance_matrix_by_type HWLOC_NAME(get_whole_distance_matrix_by_type)
 #define hwloc_get_distance_matrix_covering_obj_by_depth HWLOC_NAME(get_distance_matrix_covering_obj_by_depth)
 #define hwloc_get_latency HWLOC_NAME(get_latency)
+
+/* export.h */
+
+#define hwloc_topology_export_xml HWLOC_NAME(topology_export_xml)
+#define hwloc_topology_export_xmlbuffer HWLOC_NAME(topology_export_xmlbuffer)
+#define hwloc_free_xmlbuffer HWLOC_NAME(free_xmlbuffer)
+#define hwloc_topology_set_userdata_export_callback HWLOC_NAME(topology_set_userdata_export_callback)
+#define hwloc_export_obj_userdata HWLOC_NAME(export_obj_userdata)
+#define hwloc_export_obj_userdata_base64 HWLOC_NAME(export_obj_userdata_base64)
+#define hwloc_topology_set_userdata_import_callback HWLOC_NAME(topology_set_userdata_import_callback)
+
+#define hwloc_topology_export_synthetic_flags_e HWLOC_NAME(topology_export_synthetic_flags_e)
+#define HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES HWLOC_NAME_CAPS(TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES)
+#define HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS HWLOC_NAME_CAPS(TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)
+#define hwloc_topology_export_synthetic HWLOC_NAME(topology_export_synthetic)
 
 /* diff.h */
 

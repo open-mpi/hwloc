@@ -73,6 +73,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc.h \
        $(hwloc_include_dir)/hwloc/helper.h \
        $(hwloc_include_dir)/hwloc/bitmap.h \
+       $(hwloc_include_dir)/hwloc/export.h \
        $(hwloc_include_dir)/hwloc/diff.h \
        $(hwloc_include_dir)/hwloc/plugins.h \
        $(hwloc_include_dir)/hwloc/glibc-sched.h \

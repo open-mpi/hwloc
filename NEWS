@@ -49,6 +49,8 @@ Version 2.0
 * Backends
   + Gather total machine memory on NetBSD.
 * Misc
+  + XML and Synthetic export functions have moved to hwloc/export.h,
+    automatically included from hwloc.h.
   + Add a PCISlot attribute to PCI devices on Linux when supported to
     identify the physical PCI slot where the board is plugged.
 

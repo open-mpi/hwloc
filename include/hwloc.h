@@ -477,7 +477,7 @@ struct hwloc_obj {
   /* misc */
   void *userdata;			/**< \brief Application-given private data pointer,
 					 * initialized to \c NULL, use it as you wish.
-					 * See hwloc_topology_set_userdata_export_callback()
+					 * See hwloc_topology_set_userdata_export_callback() in hwloc/export.h
 					 * if you wish to export this field to XML. */
 };
 /**
@@ -875,7 +875,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_
  * as a value. See CUSTOM COLORS in the lstopo(1) manpage for details.
  *
  * \note If \p value contains some non-printable characters, they will
- * be dropped when exporting to XML, see hwloc_topology_export_xml().
+ * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
 HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
 
@@ -1717,7 +1717,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  *
  * Gather topology information from the XML file given at \p xmlpath.
  * Setting the environment variable HWLOC_XMLFILE may also result in this behavior.
- * This file may have been generated earlier with hwloc_topology_export_xml()
+ * This file may have been generated earlier with hwloc_topology_export_xml() in hwloc/export.h,
  * or lstopo file.xml.
  *
  * Note that this function does not actually load topology
@@ -1746,7 +1746,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
  *
  * Gather topology information from the XML memory buffer given at \p
  * buffer and of length \p size.  This buffer may have been filled
- * earlier with hwloc_topology_export_xmlbuffer().
+ * earlier with hwloc_topology_export_xmlbuffer() in hwloc/export.h.
  *
  * Note that this function does not actually load topology
  * information; it just tells hwloc where to load it from.  You'll
@@ -2104,7 +2104,7 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  * \return the newly-created object
  *
  * \note If \p name contains some non-printable characters, they will
- * be dropped when exporting to XML, see hwloc_topology_export_xml().
+ * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
 
@@ -2120,195 +2120,9 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_top
  * \return \c NULL if the insertion conflicts with the existing topology tree.
  *
  * \note If \p name contains some non-printable characters, they will
- * be dropped when exporting to XML, see hwloc_topology_export_xml().
+ * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
-
-/** @} */
-
-
-
-/** \defgroup hwlocality_xmlexport Exporting Topologies to XML
- * @{
- */
-
-/** \brief Export the topology into an XML file.
- *
- * This file may be loaded later through hwloc_topology_set_xml().
- *
- * \return -1 if a failure occured.
- *
- * \note See also hwloc_topology_set_userdata_export_callback()
- * for exporting application-specific object userdata.
- *
- * \note The topology-specific userdata pointer is ignored when exporting to XML.
- *
- * \note Only printable characters may be exported to XML string attributes.
- * Any other character, especially any non-ASCII character, will be silently
- * dropped.
- *
- * \note If \p name is "-", the XML output is sent to the standard output.
- */
-HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
-
-/** \brief Export the topology into a newly-allocated XML memory buffer.
- *
- * \p xmlbuffer is allocated by the callee and should be freed with
- * hwloc_free_xmlbuffer() later in the caller.
- *
- * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
- *
- * \return -1 if a failure occured.
- *
- * \note See also hwloc_topology_set_userdata_export_callback()
- * for exporting application-specific object userdata.
- *
- * \note The topology-specific userdata pointer is ignored when exporting to XML.
- *
- * \note Only printable characters may be exported to XML string attributes.
- * Any other character, especially any non-ASCII character, will be silently
- * dropped.
- */
-HWLOC_DECLSPEC int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen);
-
-/** \brief Free a buffer allocated by hwloc_topology_export_xmlbuffer() */
-HWLOC_DECLSPEC void hwloc_free_xmlbuffer(hwloc_topology_t topology, char *xmlbuffer);
-
-/** \brief Set the application-specific callback for exporting object userdata
- *
- * The object userdata pointer is not exported to XML by default because hwloc
- * does not know what it contains.
- *
- * This function lets applications set \p export_cb to a callback function
- * that converts this opaque userdata into an exportable string.
- *
- * \p export_cb is invoked during XML export for each object whose
- * \p userdata pointer is not \c NULL.
- * The callback should use hwloc_export_obj_userdata() or
- * hwloc_export_obj_userdata_base64() to actually export
- * something to XML (possibly multiple times per object).
- *
- * \p export_cb may be set to \c NULL if userdata should not be exported to XML.
- *
- * \note The topology-specific userdata pointer is ignored when exporting to XML.
- */
-HWLOC_DECLSPEC void hwloc_topology_set_userdata_export_callback(hwloc_topology_t topology,
-								void (*export_cb)(void *reserved, hwloc_topology_t topology, hwloc_obj_t obj));
-
-/** \brief Export some object userdata to XML
- *
- * This function may only be called from within the export() callback passed
- * to hwloc_topology_set_userdata_export_callback().
- * It may be invoked one of multiple times to export some userdata to XML.
- * The \p buffer content of length \p length is stored with optional name
- * \p name.
- *
- * When importing this XML file, the import() callback (if set) will be
- * called exactly as many times as hwloc_export_obj_userdata() was called
- * during export(). It will receive the corresponding \p name, \p buffer
- * and \p length arguments.
- *
- * \p reserved, \p topology and \p obj must be the first three parameters
- * that were given to the export callback.
- *
- * Only printable characters may be exported to XML string attributes.
- * If a non-printable character is passed in \p name or \p buffer,
- * the function returns -1 with errno set to EINVAL.
- *
- * If exporting binary data, the application should first encode into
- * printable characters only (or use hwloc_export_obj_userdata_base64()).
- * It should also take care of portability issues if the export may
- * be reimported on a different architecture.
- */
-HWLOC_DECLSPEC int hwloc_export_obj_userdata(void *reserved, hwloc_topology_t topology, hwloc_obj_t obj, const char *name, const void *buffer, size_t length);
-
-/** \brief Encode and export some object userdata to XML
- *
- * This function is similar to hwloc_export_obj_userdata() but it encodes
- * the input buffer into printable characters before exporting.
- * On import, decoding is automatically performed before the data is given
- * to the import() callback if any.
- *
- * This function may only be called from within the export() callback passed
- * to hwloc_topology_set_userdata_export_callback().
- *
- * The function does not take care of portability issues if the export
- * may be reimported on a different architecture.
- */
-HWLOC_DECLSPEC int hwloc_export_obj_userdata_base64(void *reserved, hwloc_topology_t topology, hwloc_obj_t obj, const char *name, const void *buffer, size_t length);
-
-/** \brief Set the application-specific callback for importing userdata
- *
- * On XML import, userdata is ignored by default because hwloc does not know
- * how to store it in memory.
- *
- * This function lets applications set \p import_cb to a callback function
- * that will get the XML-stored userdata and store it in the object as expected
- * by the application.
- *
- * \p import_cb is called during hwloc_topology_load() as many times as
- * hwloc_export_obj_userdata() was called during export. The topology
- * is not entirely setup yet. Object attributes are ready to consult,
- * but links between objects are not.
- *
- * \p import_cb may be \c NULL if userdata should be ignored during import.
- *
- * \note \p buffer contains \p length characters followed by a null byte ('\0').
- *
- * \note This function should be called before hwloc_topology_load().
- *
- * \note The topology-specific userdata pointer is ignored when importing from XML.
- */
-HWLOC_DECLSPEC void hwloc_topology_set_userdata_import_callback(hwloc_topology_t topology,
-								void (*import_cb)(hwloc_topology_t topology, hwloc_obj_t obj, const char *name, const void *buffer, size_t length));
-
-/** @} */
-
-
-/** \defgroup hwlocality_syntheticexport Exporting Topologies to Synthetic
- * @{
- */
-
-/** \brief Flags for exporting synthetic topologies.
- *
- * Flags to be given as a OR'ed set to hwloc_topology_export_synthetic().
- */
-enum hwloc_topology_export_synthetic_flags_e {
- /** \brief Export extended types such as L2dcache as basic types such as Cache.
-  *
-  * This is required if loading the synthetic description with hwloc < 1.9.
-  * \hideinitializer
-  */
- HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES = (1UL<<0),
-
- /** \brief Do not export level attributes.
-  *
-  * Ignore level attributes such as memory/cache sizes or PU indexes.
-  * This is required if loading the synthetic description with hwloc < 1.10.
-  * \hideinitializer
-  */
- HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS = (1UL<<1)
-};
-
-/** \brief Export the topology as a synthetic string.
- *
- * At most \p buflen characters will be written in \p buffer,
- * including the terminating \0.
- *
- * This exported string may be given back to hwloc_topology_set_synthetic().
- *
- * \p flags is a OR'ed set of hwloc_topology_export_synthetic_flags_e.
- *
- * \return The number of characters that were written,
- * not including the terminating \0.
- *
- * \return -1 if the topology could not be exported,
- * for instance if it is not symmetric.
- *
- * \note A 1024-byte buffer should be large enough for exporting
- * topologies in the vast majority of cases.
- */
-  HWLOC_DECLSPEC int hwloc_topology_export_synthetic(hwloc_topology_t topology, char *buffer, size_t buflen, unsigned long flags);
 
 /** @} */
 
@@ -2324,6 +2138,9 @@ enum hwloc_topology_export_synthetic_flags_e {
 
 /* inline code of some functions above */
 #include <hwloc/inlines.h>
+
+/* exporting to XML or synthetic */
+#include <hwloc/export.h>
 
 /* topology diffs */
 #include <hwloc/diff.h>

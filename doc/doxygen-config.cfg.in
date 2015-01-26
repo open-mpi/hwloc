@@ -1,4 +1,4 @@
-# Copyright © 2010-2014 Inria.  All rights reserved.
+# Copyright © 2010-2015 Inria.  All rights reserved.
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -13,6 +13,7 @@ INPUT          = \
 		@top_srcdir@/include/hwloc.h \
 		@top_srcdir@/include/hwloc/helper.h \
 		@top_srcdir@/include/hwloc/bitmap.h \
+		@top_srcdir@/include/hwloc/export.h \
 		@top_srcdir@/include/hwloc/diff.h \
 		@top_srcdir@/include/hwloc/plugins.h \
 		@top_srcdir@/include/hwloc/linux.h \
