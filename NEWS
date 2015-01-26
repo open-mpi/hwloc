@@ -37,6 +37,42 @@ Version 1.11.0
     See "How do I handle ABI breaks and API upgrades ?" in the FAQ.
 
 
+Version 1.10.1
+--------------
+* Actually remove disallowed NUMA nodes from nodesets when the whole-system
+  flag isn't enabled.
+* Fix the gathering of PCI domains. Thanks to James Custer for reporting
+  the issue and providing a patch.
+* Fix the merging of identical parent and child in presence of Misc objects.
+  Thanks to Dave Love for reporting the issue.
+* Fix some misordering of children when merging with ignore_keep_structure()
+  in partially allowed topologies.
+* Fix an overzealous assertion in the debug code when running on a single-PU
+  host with I/O. Thanks to Thomas Van Doren for reporting the issue.
+* Don't forget to setup NUMA node object nodesets in x86 backend (for BSDs)
+  and OSF/Tru64 backend.
+* Fix cpuid-x86 build error with gcc -O3 on x86-32. Thanks to Thomas Van Doren
+  for reporting the issue.
+* Fix support for future very large caches in the x86 backend.
+* Fix vendor/device names for SR-IOV PCI devices on Linux.
+* Fix an unlikely crash in case of buggy hierarchical distance matrix.
+* Fix PU os_index on some AIX releases. Thanks to Hendryk Bockelmann and
+  Erik Schnetter for helping debugging.
+* Fix hwloc_bitmap_isincluded() in case of infinite sets.
+* Change hwloc-ls.desktop into a lstopo.desktop and only install it if
+  lstopo is built with Cairo/X11 support. It cannot work with a non-graphical
+  lstopo or hwloc-ls.
+* Add support for the renaming of Socket into Package in future releases.
+* Add support for the replacement of HWLOC_OBJ_NODE with HWLOC_OBJ_NUMANODE
+  in future releases.
+* Clarify the documentation of distance matrices in hwloc.h and in the manpage
+  of the hwloc-distances. Thanks to Dave Love for the suggestion.
+* Improve some error messages by displaying more information about the
+  hwloc library in use.
+* Document how to deal with the ABI break when upgrading to the upcoming 2.0
+  See "How do I handle ABI breaks and API upgrades ?" in the FAQ.
+
+
 Version 1.10.0
 --------------
 * API
