@@ -650,276 +650,6 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 
 
 
-/** \defgroup hwlocality_configuration Topology Detection Configuration and Query
- *
- * Several functions can optionally be called between hwloc_topology_init() and
- * hwloc_topology_load() to configure how the detection should be performed,
- * e.g. to ignore some objects types, define a synthetic topology, etc.
- *
- * @{
- */
-
-/** \brief Ignore an object type.
- *
- * Ignore all objects from the given type.
- * The bottom-level type HWLOC_OBJ_PU and the HWLOC_OBJ_NUMANODE level may not be ignored.
- * The top-level object of the hierarchy will never be ignored, even if this function
- * succeeds.
- * I/O objects may not be ignored, topology flags should be used to configure
- * their discovery instead.
- */
-HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_t type);
-
-/** \brief Ignore an object type if it does not bring any structure.
- *
- * Ignore all objects from the given type as long as they do not bring any structure:
- * Each ignored object should have a single children or be the only child of its parent.
- * The bottom-level type HWLOC_OBJ_PU and the HWLOC_OBJ_NUMANODE level may not be ignored.
- * I/O objects may not be ignored, topology flags should be used to configure
- * their discovery instead.
- */
-HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
-
-/** \brief Ignore all objects that do not bring any structure.
- *
- * Ignore all objects that do not bring any structure:
- * Each ignored object should have a single children or be the only child of its parent.
- * I/O objects may not be ignored, topology flags should be used to configure
- * their discovery instead.
- */
-HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t topology);
-
-/** \brief Flags to be set onto a topology context before load.
- *
- * Flags should be given to hwloc_topology_set_flags().
- * They may also be returned by hwloc_topology_get_flags().
- */
-enum hwloc_topology_flags_e {
- /** \brief Detect the whole system, ignore reservations.
-   *
-   * Gather all resources, even if some were disabled by the administrator.
-   * For instance, ignore Linux Cgroup/Cpusets and gather all processors and memory nodes.
-   *
-   * When this flag is set, each object has allowed_cpuset <= cpuset <= complete_cpuset.
-   * Otherwise allowed_cpuset = cpuset <= complete_cpuset.
-   * The same applies to nodesets.
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1UL<<0),
-
- /** \brief Assume that the selected backend provides the topology for the
-   * system on which we are running.
-   *
-   * This forces hwloc_topology_is_thissystem to return 1, i.e. makes hwloc assume that
-   * the selected backend provides the topology for the system on which we are running,
-   * even if it is not the OS-specific backend but the XML backend for instance.
-   * This means making the binding functions actually call the OS-specific
-   * system calls and really do binding, while the XML backend would otherwise
-   * provide empty hooks just returning success.
-   *
-   * Setting the environment variable HWLOC_THISSYSTEM may also result in the
-   * same behavior.
-   *
-   * This can be used for efficiency reasons to first detect the topology once,
-   * save it to an XML file, and quickly reload it later through the XML
-   * backend, but still having binding functions actually do bind.
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1UL<<1),
-
-  /** \brief Detect PCI devices.
-   *
-   * By default, I/O devices are ignored. This flag enables I/O device
-   * detection using the pci backend. Only the common PCI devices (GPUs,
-   * NICs, block devices, ...) and host bridges (objects that connect the host
-   * objects to an I/O subsystem) will be added to the topology.
-   * Uncommon devices and other bridges (such as PCI-to-PCI bridges) will be
-   * ignored.
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_IO_DEVICES = (1UL<<2),
-
-  /** \brief Detect PCI bridges.
-   *
-   * This flag should be combined with HWLOC_TOPOLOGY_FLAG_IO_DEVICES to enable
-   * the detection of both common devices and of all useful bridges (bridges that
-   * have at least one device behind them).
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_IO_BRIDGES = (1UL<<3),
-
-  /** \brief Detect the whole PCI hierarchy.
-   *
-   * This flag enables detection of all I/O devices (even the uncommon ones)
-   * and bridges (even those that have no device behind them) using the pci
-   * backend.
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1UL<<4),
-
-  /** \brief Detect instruction caches.
-   *
-   * This flag enables detection of Instruction caches,
-   * instead of only Data and Unified caches.
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_ICACHES = (1UL<<5)
-};
-
-/** \brief Set OR'ed flags to non-yet-loaded topology.
- *
- * Set a OR'ed set of ::hwloc_topology_flags_e onto a topology that was not yet loaded.
- *
- * If this function is called multiple times, the last invokation will erase
- * and replace the set of flags that was previously set.
- *
- * The flags set in a topology may be retrieved with hwloc_topology_get_flags()
- */
-HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long flags);
-
-/** \brief Get OR'ed flags of a topology.
- *
- * Get the OR'ed set of ::hwloc_topology_flags_e of a topology.
- *
- * \return the flags previously set with hwloc_topology_set_flags().
- */
-HWLOC_DECLSPEC unsigned long hwloc_topology_get_flags (hwloc_topology_t topology);
-
-/** \brief Provide a distance matrix.
- *
- * Provide the matrix of distances between a set of objects of the given type.
- * The set may or may not contain all the existing objects of this type.
- * The objects are specified by their OS/physical index in the \p os_index
- * array. The \p distances matrix follows the same order.
- * The distance from object i to object j in the i*nbobjs+j.
- *
- * A single latency matrix may be defined for each type.
- * If another distance matrix already exists for the given type,
- * either because the user specified it or because the OS offers it,
- * it will be replaced by the given one.
- * If \p nbobjs is \c 0, \p os_index is \c NULL and \p distances is \c NULL,
- * the existing distance matrix for the given type is removed.
- *
- * \note Distance matrices are ignored in multi-node topologies.
- */
-HWLOC_DECLSPEC int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology,
-						      hwloc_obj_type_t type, unsigned nbobjs,
-						      unsigned *os_index, float *distances);
-
-/** \brief Does the topology context come from this system?
- *
- * \return 1 if this topology context was built using the system
- * running this program.
- * \return 0 instead (for instance if using another file-system root,
- * a XML topology file, or a synthetic topology).
- */
-HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology) __hwloc_attribute_pure;
-
-/** \brief Flags describing actual discovery support for this topology. */
-struct hwloc_topology_discovery_support {
-  /** \brief Detecting the number of PU objects is supported. */
-  unsigned char pu;
-};
-
-/** \brief Flags describing actual PU binding support for this topology. */
-struct hwloc_topology_cpubind_support {
-  /** Binding the whole current process is supported.  */
-  unsigned char set_thisproc_cpubind;
-  /** Getting the binding of the whole current process is supported.  */
-  unsigned char get_thisproc_cpubind;
-  /** Binding a whole given process is supported.  */
-  unsigned char set_proc_cpubind;
-  /** Getting the binding of a whole given process is supported.  */
-  unsigned char get_proc_cpubind;
-  /** Binding the current thread only is supported.  */
-  unsigned char set_thisthread_cpubind;
-  /** Getting the binding of the current thread only is supported.  */
-  unsigned char get_thisthread_cpubind;
-  /** Binding a given thread only is supported.  */
-  unsigned char set_thread_cpubind;
-  /** Getting the binding of a given thread only is supported.  */
-  unsigned char get_thread_cpubind;
-  /** Getting the last processors where the whole current process ran is supported */
-  unsigned char get_thisproc_last_cpu_location;
-  /** Getting the last processors where a whole process ran is supported */
-  unsigned char get_proc_last_cpu_location;
-  /** Getting the last processors where the current thread ran is supported */
-  unsigned char get_thisthread_last_cpu_location;
-};
-
-/** \brief Flags describing actual memory binding support for this topology. */
-struct hwloc_topology_membind_support {
-  /** Binding the whole current process is supported.  */
-  unsigned char set_thisproc_membind;
-  /** Getting the binding of the whole current process is supported.  */
-  unsigned char get_thisproc_membind;
-  /** Binding a whole given process is supported.  */
-  unsigned char set_proc_membind;
-  /** Getting the binding of a whole given process is supported.  */
-  unsigned char get_proc_membind;
-  /** Binding the current thread only is supported.  */
-  unsigned char set_thisthread_membind;
-  /** Getting the binding of the current thread only is supported.  */
-  unsigned char get_thisthread_membind;
-  /** Binding a given memory area is supported. */
-  unsigned char set_area_membind;
-  /** Getting the binding of a given memory area is supported.  */
-  unsigned char get_area_membind;
-  /** Allocating a bound memory area is supported. */
-  unsigned char alloc_membind;
-  /** First-touch policy is supported. */
-  unsigned char firsttouch_membind;
-  /** Bind policy is supported. */
-  unsigned char bind_membind;
-  /** Interleave policy is supported. */
-  unsigned char interleave_membind;
-  /** Replication policy is supported. */
-  unsigned char replicate_membind;
-  /** Next-touch migration policy is supported. */
-  unsigned char nexttouch_membind;
-
-  /** Migration flags is supported. */
-  unsigned char migrate_membind;
-};
-
-/** \brief Set of flags describing actual support for this topology.
- *
- * This is retrieved with hwloc_topology_get_support() and will be valid until
- * the topology object is destroyed.  Note: the values are correct only after
- * discovery.
- */
-struct hwloc_topology_support {
-  struct hwloc_topology_discovery_support *discovery;
-  struct hwloc_topology_cpubind_support *cpubind;
-  struct hwloc_topology_membind_support *membind;
-};
-
-/** \brief Retrieve the topology support. */
-HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
-
-/** \brief Set the topology-specific userdata pointer.
- *
- * Each topology may store one application-given private data pointer.
- * It is initialized to \c NULL.
- * hwloc will never modify it.
- *
- * Use it as you wish, after hwloc_topology_init() and until hwloc_topolog_destroy().
- *
- * This pointer is not exported to XML.
- */
-HWLOC_DECLSPEC void hwloc_topology_set_userdata(hwloc_topology_t topology, const void *userdata);
-
-/** \brief Retrieve the topology-specific userdata pointer.
- *
- * Retrieve the application-given private data pointer that was
- * previously set with hwloc_topology_set_userdata().
- */
-HWLOC_DECLSPEC void * hwloc_topology_get_userdata(hwloc_topology_t topology);
-
-/** @} */
-
-
-
 /** \defgroup hwlocality_levels Object levels, depths and types
  * @{
  *
@@ -2038,6 +1768,276 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
  * hwloc_topology_load().
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
+
+/** @} */
+
+
+
+/** \defgroup hwlocality_configuration Topology Detection Configuration and Query
+ *
+ * Several functions can optionally be called between hwloc_topology_init() and
+ * hwloc_topology_load() to configure how the detection should be performed,
+ * e.g. to ignore some objects types, define a synthetic topology, etc.
+ *
+ * @{
+ */
+
+/** \brief Flags to be set onto a topology context before load.
+ *
+ * Flags should be given to hwloc_topology_set_flags().
+ * They may also be returned by hwloc_topology_get_flags().
+ */
+enum hwloc_topology_flags_e {
+ /** \brief Detect the whole system, ignore reservations.
+   *
+   * Gather all resources, even if some were disabled by the administrator.
+   * For instance, ignore Linux Cgroup/Cpusets and gather all processors and memory nodes.
+   *
+   * When this flag is set, each object has allowed_cpuset <= cpuset <= complete_cpuset.
+   * Otherwise allowed_cpuset = cpuset <= complete_cpuset.
+   * The same applies to nodesets.
+   * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1UL<<0),
+
+ /** \brief Assume that the selected backend provides the topology for the
+   * system on which we are running.
+   *
+   * This forces hwloc_topology_is_thissystem to return 1, i.e. makes hwloc assume that
+   * the selected backend provides the topology for the system on which we are running,
+   * even if it is not the OS-specific backend but the XML backend for instance.
+   * This means making the binding functions actually call the OS-specific
+   * system calls and really do binding, while the XML backend would otherwise
+   * provide empty hooks just returning success.
+   *
+   * Setting the environment variable HWLOC_THISSYSTEM may also result in the
+   * same behavior.
+   *
+   * This can be used for efficiency reasons to first detect the topology once,
+   * save it to an XML file, and quickly reload it later through the XML
+   * backend, but still having binding functions actually do bind.
+   * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1UL<<1),
+
+  /** \brief Detect PCI devices.
+   *
+   * By default, I/O devices are ignored. This flag enables I/O device
+   * detection using the pci backend. Only the common PCI devices (GPUs,
+   * NICs, block devices, ...) and host bridges (objects that connect the host
+   * objects to an I/O subsystem) will be added to the topology.
+   * Uncommon devices and other bridges (such as PCI-to-PCI bridges) will be
+   * ignored.
+   * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_FLAG_IO_DEVICES = (1UL<<2),
+
+  /** \brief Detect PCI bridges.
+   *
+   * This flag should be combined with HWLOC_TOPOLOGY_FLAG_IO_DEVICES to enable
+   * the detection of both common devices and of all useful bridges (bridges that
+   * have at least one device behind them).
+   * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_FLAG_IO_BRIDGES = (1UL<<3),
+
+  /** \brief Detect the whole PCI hierarchy.
+   *
+   * This flag enables detection of all I/O devices (even the uncommon ones)
+   * and bridges (even those that have no device behind them) using the pci
+   * backend.
+   * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1UL<<4),
+
+  /** \brief Detect instruction caches.
+   *
+   * This flag enables detection of Instruction caches,
+   * instead of only Data and Unified caches.
+   * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_FLAG_ICACHES = (1UL<<5)
+};
+
+/** \brief Set OR'ed flags to non-yet-loaded topology.
+ *
+ * Set a OR'ed set of ::hwloc_topology_flags_e onto a topology that was not yet loaded.
+ *
+ * If this function is called multiple times, the last invokation will erase
+ * and replace the set of flags that was previously set.
+ *
+ * The flags set in a topology may be retrieved with hwloc_topology_get_flags()
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long flags);
+
+/** \brief Get OR'ed flags of a topology.
+ *
+ * Get the OR'ed set of ::hwloc_topology_flags_e of a topology.
+ *
+ * \return the flags previously set with hwloc_topology_set_flags().
+ */
+HWLOC_DECLSPEC unsigned long hwloc_topology_get_flags (hwloc_topology_t topology);
+
+/** \brief Does the topology context come from this system?
+ *
+ * \return 1 if this topology context was built using the system
+ * running this program.
+ * \return 0 instead (for instance if using another file-system root,
+ * a XML topology file, or a synthetic topology).
+ */
+HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology) __hwloc_attribute_pure;
+
+/** \brief Flags describing actual discovery support for this topology. */
+struct hwloc_topology_discovery_support {
+  /** \brief Detecting the number of PU objects is supported. */
+  unsigned char pu;
+};
+
+/** \brief Flags describing actual PU binding support for this topology. */
+struct hwloc_topology_cpubind_support {
+  /** Binding the whole current process is supported.  */
+  unsigned char set_thisproc_cpubind;
+  /** Getting the binding of the whole current process is supported.  */
+  unsigned char get_thisproc_cpubind;
+  /** Binding a whole given process is supported.  */
+  unsigned char set_proc_cpubind;
+  /** Getting the binding of a whole given process is supported.  */
+  unsigned char get_proc_cpubind;
+  /** Binding the current thread only is supported.  */
+  unsigned char set_thisthread_cpubind;
+  /** Getting the binding of the current thread only is supported.  */
+  unsigned char get_thisthread_cpubind;
+  /** Binding a given thread only is supported.  */
+  unsigned char set_thread_cpubind;
+  /** Getting the binding of a given thread only is supported.  */
+  unsigned char get_thread_cpubind;
+  /** Getting the last processors where the whole current process ran is supported */
+  unsigned char get_thisproc_last_cpu_location;
+  /** Getting the last processors where a whole process ran is supported */
+  unsigned char get_proc_last_cpu_location;
+  /** Getting the last processors where the current thread ran is supported */
+  unsigned char get_thisthread_last_cpu_location;
+};
+
+/** \brief Flags describing actual memory binding support for this topology. */
+struct hwloc_topology_membind_support {
+  /** Binding the whole current process is supported.  */
+  unsigned char set_thisproc_membind;
+  /** Getting the binding of the whole current process is supported.  */
+  unsigned char get_thisproc_membind;
+  /** Binding a whole given process is supported.  */
+  unsigned char set_proc_membind;
+  /** Getting the binding of a whole given process is supported.  */
+  unsigned char get_proc_membind;
+  /** Binding the current thread only is supported.  */
+  unsigned char set_thisthread_membind;
+  /** Getting the binding of the current thread only is supported.  */
+  unsigned char get_thisthread_membind;
+  /** Binding a given memory area is supported. */
+  unsigned char set_area_membind;
+  /** Getting the binding of a given memory area is supported.  */
+  unsigned char get_area_membind;
+  /** Allocating a bound memory area is supported. */
+  unsigned char alloc_membind;
+  /** First-touch policy is supported. */
+  unsigned char firsttouch_membind;
+  /** Bind policy is supported. */
+  unsigned char bind_membind;
+  /** Interleave policy is supported. */
+  unsigned char interleave_membind;
+  /** Replication policy is supported. */
+  unsigned char replicate_membind;
+  /** Next-touch migration policy is supported. */
+  unsigned char nexttouch_membind;
+
+  /** Migration flags is supported. */
+  unsigned char migrate_membind;
+};
+
+/** \brief Set of flags describing actual support for this topology.
+ *
+ * This is retrieved with hwloc_topology_get_support() and will be valid until
+ * the topology object is destroyed.  Note: the values are correct only after
+ * discovery.
+ */
+struct hwloc_topology_support {
+  struct hwloc_topology_discovery_support *discovery;
+  struct hwloc_topology_cpubind_support *cpubind;
+  struct hwloc_topology_membind_support *membind;
+};
+
+/** \brief Retrieve the topology support. */
+HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
+
+/** \brief Ignore an object type.
+ *
+ * Ignore all objects from the given type.
+ * The bottom-level type HWLOC_OBJ_PU and the HWLOC_OBJ_NUMANODE level may not be ignored.
+ * The top-level object of the hierarchy will never be ignored, even if this function
+ * succeeds.
+ * I/O objects may not be ignored, topology flags should be used to configure
+ * their discovery instead.
+ */
+HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_t type);
+
+/** \brief Ignore an object type if it does not bring any structure.
+ *
+ * Ignore all objects from the given type as long as they do not bring any structure:
+ * Each ignored object should have a single children or be the only child of its parent.
+ * The bottom-level type HWLOC_OBJ_PU and the HWLOC_OBJ_NUMANODE level may not be ignored.
+ * I/O objects may not be ignored, topology flags should be used to configure
+ * their discovery instead.
+ */
+HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
+
+/** \brief Ignore all objects that do not bring any structure.
+ *
+ * Ignore all objects that do not bring any structure:
+ * Each ignored object should have a single children or be the only child of its parent.
+ * I/O objects may not be ignored, topology flags should be used to configure
+ * their discovery instead.
+ */
+HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t topology);
+
+/** \brief Provide a distance matrix.
+ *
+ * Provide the matrix of distances between a set of objects of the given type.
+ * The set may or may not contain all the existing objects of this type.
+ * The objects are specified by their OS/physical index in the \p os_index
+ * array. The \p distances matrix follows the same order.
+ * The distance from object i to object j in the i*nbobjs+j.
+ *
+ * A single latency matrix may be defined for each type.
+ * If another distance matrix already exists for the given type,
+ * either because the user specified it or because the OS offers it,
+ * it will be replaced by the given one.
+ * If \p nbobjs is \c 0, \p os_index is \c NULL and \p distances is \c NULL,
+ * the existing distance matrix for the given type is removed.
+ *
+ * \note Distance matrices are ignored in multi-node topologies.
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology,
+						      hwloc_obj_type_t type, unsigned nbobjs,
+						      unsigned *os_index, float *distances);
+
+/** \brief Set the topology-specific userdata pointer.
+ *
+ * Each topology may store one application-given private data pointer.
+ * It is initialized to \c NULL.
+ * hwloc will never modify it.
+ *
+ * Use it as you wish, after hwloc_topology_init() and until hwloc_topolog_destroy().
+ *
+ * This pointer is not exported to XML.
+ */
+HWLOC_DECLSPEC void hwloc_topology_set_userdata(hwloc_topology_t topology, const void *userdata);
+
+/** \brief Retrieve the topology-specific userdata pointer.
+ *
+ * Retrieve the application-given private data pointer that was
+ * previously set with hwloc_topology_set_userdata().
+ */
+HWLOC_DECLSPEC void * hwloc_topology_get_userdata(hwloc_topology_t topology);
 
 /** @} */
 

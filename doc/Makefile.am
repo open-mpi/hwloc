@@ -318,30 +318,6 @@ man3_creation_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_dup.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3
 
-man3_configurationdir = $(man3dir)
-man3_configuration_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type_keep_structure.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_all_keep_structure.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IO_BRIDGES.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IO_DEVICES.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_IO.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_ICACHES.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_get_flags.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_distance_matrix.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_is_thissystem.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_discovery_support.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_membind_support.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_get_userdata.3
-
 man3_levelsdir = $(man3dir)
 man3_levels_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_levels.3 \
@@ -435,6 +411,30 @@ man3_setsource_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xmlbuffer.3
+
+man3_configurationdir = $(man3dir)
+man3_configuration_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IO_BRIDGES.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IO_DEVICES.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_IO.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_ICACHES.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_flags.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_is_thissystem.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_discovery_support.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_membind_support.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type_keep_structure.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_all_keep_structure.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_distance_matrix.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_userdata.3
 
 man3_tinkerdir = $(man3dir)
 man3_tinker_DATA = \

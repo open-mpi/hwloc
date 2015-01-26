@@ -108,9 +108,6 @@ extern "C" {
 #define hwloc_topology_destroy HWLOC_NAME(topology_destroy)
 #define hwloc_topology_dup HWLOC_NAME(topology_dup)
 #define hwloc_topology_check HWLOC_NAME(topology_check)
-#define hwloc_topology_ignore_type HWLOC_NAME(topology_ignore_type)
-#define hwloc_topology_ignore_type_keep_structure HWLOC_NAME(topology_ignore_type_keep_structure)
-#define hwloc_topology_ignore_all_keep_structure HWLOC_NAME(topology_ignore_all_keep_structure)
 
 #define hwloc_topology_flags_e HWLOC_NAME(topology_flags_e)
 
@@ -121,22 +118,26 @@ extern "C" {
 #define HWLOC_TOPOLOGY_FLAG_WHOLE_IO HWLOC_NAME_CAPS(TOPOLOGY_FLAG_WHOLE_IO)
 #define HWLOC_TOPOLOGY_FLAG_ICACHES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_ICACHES)
 
-#define hwloc_topology_set_flags HWLOC_NAME(topology_set_flags)
-#define hwloc_topology_set_distance_matrix HWLOC_NAME(topology_set_distance_matrix)
-
-#define hwloc_topology_discovery_support HWLOC_NAME(topology_discovery_support)
-#define hwloc_topology_cpubind_support HWLOC_NAME(topology_cpubind_support)
-#define hwloc_topology_membind_support HWLOC_NAME(topology_membind_support)
-#define hwloc_topology_support HWLOC_NAME(topology_support)
-#define hwloc_topology_get_support HWLOC_NAME(topology_get_support)
-#define hwloc_topology_set_userdata HWLOC_NAME(topology_set_userdata)
-#define hwloc_topology_get_userdata HWLOC_NAME(topology_get_userdata)
-
 #define hwloc_topology_set_fsroot HWLOC_NAME(topology_set_fsroot)
 #define hwloc_topology_set_pid HWLOC_NAME(topology_set_pid)
 #define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)
 #define hwloc_topology_set_xml HWLOC_NAME(topology_set_xml)
 #define hwloc_topology_set_xmlbuffer HWLOC_NAME(topology_set_xmlbuffer)
+
+#define hwloc_topology_set_flags HWLOC_NAME(topology_set_flags)
+#define hwloc_topology_is_thissystem HWLOC_NAME(topology_is_thissystem)
+#define hwloc_topology_get_flags HWLOC_NAME(topology_get_flags)
+#define hwloc_topology_discovery_support HWLOC_NAME(topology_discovery_support)
+#define hwloc_topology_cpubind_support HWLOC_NAME(topology_cpubind_support)
+#define hwloc_topology_membind_support HWLOC_NAME(topology_membind_support)
+#define hwloc_topology_support HWLOC_NAME(topology_support)
+#define hwloc_topology_get_support HWLOC_NAME(topology_get_support)
+#define hwloc_topology_ignore_type HWLOC_NAME(topology_ignore_type)
+#define hwloc_topology_ignore_type_keep_structure HWLOC_NAME(topology_ignore_type_keep_structure)
+#define hwloc_topology_ignore_all_keep_structure HWLOC_NAME(topology_ignore_all_keep_structure)
+#define hwloc_topology_set_distance_matrix HWLOC_NAME(topology_set_distance_matrix)
+#define hwloc_topology_set_userdata HWLOC_NAME(topology_set_userdata)
+#define hwloc_topology_get_userdata HWLOC_NAME(topology_get_userdata)
 
 #define hwloc_topology_export_xml HWLOC_NAME(topology_export_xml)
 #define hwloc_topology_export_xmlbuffer HWLOC_NAME(topology_export_xmlbuffer)
@@ -172,9 +173,6 @@ extern "C" {
 #define hwloc_get_depth_type HWLOC_NAME(get_depth_type)
 #define hwloc_get_nbobjs_by_depth HWLOC_NAME(get_nbobjs_by_depth)
 #define hwloc_get_nbobjs_by_type HWLOC_NAME(get_nbobjs_by_type)
-
-#define hwloc_topology_is_thissystem HWLOC_NAME(topology_is_thissystem)
-#define hwloc_topology_get_flags HWLOC_NAME(topology_get_flags)
 
 #define hwloc_get_obj_by_depth HWLOC_NAME(get_obj_by_depth )
 #define hwloc_get_obj_by_type HWLOC_NAME(get_obj_by_type )
