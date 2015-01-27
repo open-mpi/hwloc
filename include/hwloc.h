@@ -2038,39 +2038,6 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * @{
  */
 
-/** \brief Add a MISC object to the topology
- *
- * A new MISC object will be created and inserted into the topology at the
- * position given by bitmap \p cpuset. This offers a way to add new
- * intermediate levels to the topology hierarchy.
- *
- * \p cpuset and \p name will be copied to setup the new object attributes.
- *
- * \return the newly-created object.
- * \return \c NULL if the insertion conflicts with the existing topology tree.
- *
- * \note If \p name contains some non-printable characters, they will
- * be dropped when exporting to XML, see hwloc_topology_export_xml().
- */
-HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
-
-/** \brief Add a MISC object as a leaf of the topology
- *
- * A new MISC object will be created and inserted into the topology at the
- * position given by parent. It is appended to the list of existing children,
- * without ever adding any intermediate hierarchy level. This is useful for
- * annotating the topology without actually changing the hierarchy.
- *
- * \p name will be copied to the setup the new object attributes.
- * However, the new leaf object will not have any \p cpuset.
- *
- * \return the newly-created object
- *
- * \note If \p name contains some non-printable characters, they will
- * be dropped when exporting to XML, see hwloc_topology_export_xml().
- */
-HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
-
 /** \brief Flags to be given to hwloc_topology_restrict(). */
 enum hwloc_restrict_flags_e {
   /** \brief Adapt distance matrices according to objects being removed during restriction.
@@ -2114,6 +2081,39 @@ enum hwloc_restrict_flags_e {
  * destroyed with hwloc_topology_destroy() or configured and loaded again.
  */
 HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
+
+/** \brief Add a MISC object as a leaf of the topology
+ *
+ * A new MISC object will be created and inserted into the topology at the
+ * position given by parent. It is appended to the list of existing children,
+ * without ever adding any intermediate hierarchy level. This is useful for
+ * annotating the topology without actually changing the hierarchy.
+ *
+ * \p name will be copied to the setup the new object attributes.
+ * However, the new leaf object will not have any \p cpuset.
+ *
+ * \return the newly-created object
+ *
+ * \note If \p name contains some non-printable characters, they will
+ * be dropped when exporting to XML, see hwloc_topology_export_xml().
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
+
+/** \brief Add a MISC object to the topology
+ *
+ * A new MISC object will be created and inserted into the topology at the
+ * position given by bitmap \p cpuset. This offers a way to add new
+ * intermediate levels to the topology hierarchy.
+ *
+ * \p cpuset and \p name will be copied to setup the new object attributes.
+ *
+ * \return the newly-created object.
+ * \return \c NULL if the insertion conflicts with the existing topology tree.
+ *
+ * \note If \p name contains some non-printable characters, they will
+ * be dropped when exporting to XML, see hwloc_topology_export_xml().
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
 
 /** @} */
 

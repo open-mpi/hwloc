@@ -436,13 +436,13 @@ man3_membinding_DATA = \
 man3_tinkerdir = $(man3dir)
 man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_tinker.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_parent.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_IO.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_MISC.3 \
         $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3
+        $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_parent.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_cpuset.3
 
 man3_xmlexportdir = $(man3dir)
 man3_xmlexport_DATA = \
