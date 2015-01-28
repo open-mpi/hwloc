@@ -154,6 +154,7 @@ sysfs_options = \
 # modifying the environment of lstopo
 sysfs_envs = \
 		2i386-2t-hugepagesizecount.xml.env \
+		16amd64-8n2c-cpusets.xml.env \
 		32amd64-4s2n4c-cgroup.env \
 		32amd64-4s2n4c-cgroup.xml.env \
 		40intel64-2g2n4c+pci.env \
