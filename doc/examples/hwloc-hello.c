@@ -3,7 +3,7 @@
  * See other examples under doc/examples/ in the source tree
  * for more details.
  *
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -19,11 +19,17 @@
 static void print_children(hwloc_topology_t topology, hwloc_obj_t obj, 
                            int depth)
 {
-    char string[128];
+    char type[32], attr[1024];
     unsigned i;
 
-    hwloc_obj_snprintf(string, sizeof(string), topology, obj, "#", 0);
-    printf("%*s%s\n", 2*depth, "", string);
+    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+    printf("%*s%s", 2*depth, "", type);
+    if (obj->os_index != (unsigned) -1)
+      printf("#%u", obj->os_index);
+    hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 0);
+    if (*attr)
+      printf("(%s)", attr);
+    printf("\n");
     for (i = 0; i < obj->arity; i++) {
         print_children(topology, obj->children[i], depth + 1);
     }
@@ -68,9 +74,8 @@ int main(void)
         printf("*** Objects at level %d\n", depth);
         for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); 
              i++) {
-            hwloc_obj_snprintf(string, sizeof(string), topology,
-                       hwloc_get_obj_by_depth(topology, depth, i),
-                       "#", 0);
+            hwloc_obj_type_snprintf(string, sizeof(string),
+				    hwloc_get_obj_by_depth(topology, depth, i), 0);
             printf("Index %u: %s\n", i, string);
         }
     }
