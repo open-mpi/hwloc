@@ -30,7 +30,7 @@ extern "C" {
  *
  * \return -1 if unrecognized.
  */
-HWLOC_DECLSPEC hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) __hwloc_attribute_pure __hwloc_attribute_deprecated;
 
 /** \brief Stringify a given topology object into a human-readable form.
  *
@@ -54,7 +54,7 @@ HWLOC_DECLSPEC hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) _
  */
 HWLOC_DECLSPEC int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t size,
 				      hwloc_topology_t topology, hwloc_obj_t obj,
-				      const char * __hwloc_restrict indexprefix, int verbose);
+				      const char * __hwloc_restrict indexprefix, int verbose) __hwloc_attribute_deprecated;
 
 /** \brief Distribute \p n items over the topology under \p root
  *
@@ -72,6 +72,8 @@ HWLOC_DECLSPEC int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t siz
  * \note This function requires the \p root object to have a CPU set.
  */
 static __hwloc_inline void
+hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *set, unsigned n, unsigned until) __hwloc_attribute_deprecated;
+static __hwloc_inline void
 hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *set, unsigned n, unsigned until)
 {
   hwloc_distrib(topology, &root, 1, set, n, until, 0);
@@ -84,6 +86,8 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *se
  *
  * \note This function requires the \p roots objects to have a CPU set.
  */
+static __hwloc_inline void
+hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *set, unsigned n, unsigned until) __hwloc_attribute_deprecated;
 static __hwloc_inline void
 hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *set, unsigned n, unsigned until)
 {
