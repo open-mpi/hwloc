@@ -202,12 +202,17 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
 }
 
 static void
-print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unused, hwloc_obj_t obj)
+print_object(struct hwloc_topology *topology __hwloc_attribute_unused, int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
-  char line[256], *cpuset = NULL;
+  char type[64], idx[10], attr[1024], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
-  hwloc_obj_snprintf(line, sizeof(line), topology, obj, "#", 1);
-  hwloc_debug("%s", line);
+  hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+  if (obj->os_index != (unsigned) -1)
+    snprintf(idx, sizeof(idx), "#%u", obj->os_index);
+  else
+    *idx = '\0';
+  hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 1);
+  hwloc_debug("%s%s%s%s%s", type, idx, *attr ? "(" : "", attr, *attr ? ")" : "");
   if (obj->name)
     hwloc_debug(" name %s", obj->name);
   if (obj->cpuset) {
