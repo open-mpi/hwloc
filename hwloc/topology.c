@@ -200,8 +200,10 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
     }
 }
 
+#ifdef HWLOC_DEBUG
+/* Just for debugging.  */
 static void
-print_object(struct hwloc_topology *topology __hwloc_attribute_unused, int indent __hwloc_attribute_unused, hwloc_obj_t obj)
+hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
   char type[64], idx[10], attr[1024], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
@@ -249,16 +251,17 @@ print_object(struct hwloc_topology *topology __hwloc_attribute_unused, int inden
   hwloc_debug("%s", "\n");
 }
 
-/* Just for debugging.  */
 static void
-print_objects(struct hwloc_topology *topology __hwloc_attribute_unused, int indent __hwloc_attribute_unused, hwloc_obj_t obj __hwloc_attribute_unused)
+hwloc_debug_print_objects(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
-#ifdef HWLOC_DEBUG
-  print_object(topology, indent, obj);
+  hwloc_debug_print_object(indent, obj);
   for (obj = obj->first_child; obj; obj = obj->next_sibling)
-    print_objects(topology, indent + 1, obj);
-#endif
+    hwloc_debug_print_objects(indent + 1, obj);
 }
+#else /* !HWLOC_DEBUG */
+#define hwloc_debug_print_object(indent, obj) do { /* nothing */ } while (0)
+#define hwloc_debug_print_objects(indent, obj) do { /* nothing */ } while (0)
+#endif /* !HWLOC_DEBUG */
 
 void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count)
 {
@@ -1572,7 +1575,7 @@ ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
       || (parent->type == HWLOC_OBJ_CACHE && parent->attr->cache.type == HWLOC_OBJ_CACHE_INSTRUCTION
 	  && !(topology->flags & HWLOC_TOPOLOGY_FLAG_ICACHES))) {
     hwloc_debug("%s", "\nDropping ignored object ");
-    print_object(topology, 0, parent);
+    hwloc_debug_print_object(0, parent);
     unlink_and_free_single_object(pparent);
     dropped = 1;
 
@@ -1602,7 +1605,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
       && hwloc_bitmap_iszero(obj->cpuset)) {
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
-    print_object(topology, 0, obj);
+    hwloc_debug_print_object(0, obj);
     unlink_and_free_single_object(pobj);
   }
 }
@@ -1670,7 +1673,7 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
   if (replaceparent) {
     /* Replace parent with child */
     hwloc_debug("%s", "\nIgnoring parent ");
-    print_object(topology, 0, parent);
+    hwloc_debug_print_object(0, parent);
     if (parent == topology->levels[0][0]) {
       child->parent = NULL;
       child->depth = 0;
@@ -1682,7 +1685,7 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
   } else if (replacechild) {
     /* Replace child with parent */
     hwloc_debug("%s", "\nIgnoring child ");
-    print_object(topology, 0, child);
+    hwloc_debug_print_object(0, child);
     parent->first_child = child->first_child;
     hwloc_free_unlinked_object(child);
   }
@@ -2276,7 +2279,7 @@ hwloc_discover(struct hwloc_topology *topology)
       if (err > 0)
 	need_reconnect++;
     }
-    print_objects(topology, 0, topology->levels[0][0]);
+    hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_cpubackend:
     backend = backend->next;
@@ -2332,12 +2335,12 @@ next_cpubackend:
   propagate_nodeset(topology->levels[0][0], NULL);
   propagate_nodesets(topology->levels[0][0]);
 
-  print_objects(topology, 0, topology->levels[0][0]);
+  hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
     hwloc_debug("%s", "\nRemoving unauthorized sets from all sets\n");
     remove_unused_sets(topology->levels[0][0]);
-    print_objects(topology, 0, topology->levels[0][0]);
+    hwloc_debug_print_objects(0, topology->levels[0][0]);
   }
 
   /* Now connect handy pointers to make remaining discovery easier. */
@@ -2345,7 +2348,7 @@ next_cpubackend:
   hwloc_connect_children(topology->levels[0][0]);
   if (hwloc_connect_levels(topology) < 0)
     return -1;
-  print_objects(topology, 0, topology->levels[0][0]);
+  hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   /*
    * Additional discovery with other backends
@@ -2376,7 +2379,7 @@ next_cpubackend:
       if (err > 0)
 	need_reconnect++;
     }
-    print_objects(topology, 0, topology->levels[0][0]);
+    hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_noncpubackend:
     backend = backend->next;
@@ -2386,7 +2389,7 @@ next_noncpubackend:
   if (gotsomeio) {
     hwloc_drop_useless_io(topology, topology->levels[0][0]);
     hwloc_debug("%s", "\nNow reconnecting\n");
-    print_objects(topology, 0, topology->levels[0][0]);
+    hwloc_debug_print_objects(0, topology->levels[0][0]);
     hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
   }
 
@@ -2394,7 +2397,7 @@ next_noncpubackend:
 
   hwloc_debug("%s", "\nRemoving ignored objects\n");
   ignore_type_always(topology, &topology->levels[0][0]);
-  print_objects(topology, 0, topology->levels[0][0]);
+  hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
   remove_empty(topology, &topology->levels[0][0]);
@@ -2402,11 +2405,11 @@ next_noncpubackend:
     fprintf(stderr, "Topology became empty, aborting!\n");
     abort();
   }
-  print_objects(topology, 0, topology->levels[0][0]);
+  hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
   ignore_type_keep_structure(topology, &topology->levels[0][0]);
-  print_objects(topology, 0, topology->levels[0][0]);
+  hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   /* Reconnect things after all these changes */
   hwloc_connect_children(topology->levels[0][0]);
@@ -2811,7 +2814,7 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
 
   if (dropping) {
     hwloc_debug("%s", "\nRemoving object during restrict");
-    print_object(topology, 0, obj);
+    hwloc_debug_print_object(0, obj);
     if (obj->type == HWLOC_OBJ_NUMANODE)
       hwloc_bitmap_set(droppednodeset, obj->os_index);
     /* remove the object from the tree (no need to remove from levels, they will be entirely rebuilt by the caller) */
