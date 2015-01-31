@@ -105,8 +105,8 @@ Only show objects of the given type in the textual output.
 \fB\-\-ignore\fR <type>
 Ignore all objects of type <type> in the topology.
 hwloc supports ignoring any type except PUs, NUMA nodes and I/O devices.
-However lstopo still offers PU ignoring by hiding PU objects
-in the graphical and textual outputs.
+lstopo also offers PU ignoring by hiding PU objects in the graphical and textual outputs,
+but any object included a PU (for instance Misc) will be hidden as well.
 Note that PU may not be ignored in the XML output.
 Note also that the top-level object type cannot be ignored (usually Machine or System).
 .TP

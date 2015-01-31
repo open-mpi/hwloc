@@ -216,6 +216,10 @@ typedef enum {
   HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
 			  * Objects without particular meaning, that can e.g. be
 			  * added by the application for its own use.
+			  * These objects are not listed in the main children list,
+			  * but rather in the dedicated misc children list.
+			  * Misc objects may only have Misc objects as children,
+			  * and those are in the dedicated misc children list as well.
 			  */
 
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge.
@@ -367,11 +371,11 @@ struct hwloc_obj {
 
   /* children of the same parent are siblings, even if they may have different type and depth */
   struct hwloc_obj *parent;		/**< \brief Parent, \c NULL if root (system object) */
-  unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array */
+  unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array. Or the index in parent's Misc children list. */
   struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent */
   struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent */
 
-  /* children array below this object */
+  /* children array below this object (except Misc children) */
   unsigned arity;			/**< \brief Number of children */
   struct hwloc_obj **children;		/**< \brief Children, \c children[0 .. arity -1] */
   struct hwloc_obj *first_child;	/**< \brief First child */
@@ -382,6 +386,10 @@ struct hwloc_obj {
 					  * If set in the topology root object, lstopo may export the topology
 					  * as a synthetic string.
 					  */
+
+  /* specific list of Misc children */
+  unsigned misc_arity;			/**< \brief Number of Misc children */
+  struct hwloc_obj *misc_first_child;	/**< \brief First Misc child */
 
   /* cpusets and nodesets */
   hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
@@ -2097,7 +2105,7 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
 /** \brief Add a MISC object as a leaf of the topology
  *
  * A new MISC object will be created and inserted into the topology at the
- * position given by parent. It is appended to the list of existing children,
+ * position given by parent. It is appended to the list of existing Misc children,
  * without ever adding any intermediate hierarchy level. This is useful for
  * annotating the topology without actually changing the hierarchy.
  *

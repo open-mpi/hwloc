@@ -118,7 +118,7 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
 static void
 output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode)
 {
-  unsigned x;
+  hwloc_obj_t child;
   int group_identical = (verbose_mode <= 1) && !lstopo_show_cpuset;
   if (group_identical
       && parent && parent->arity == 1
@@ -132,22 +132,29 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
     i++;
   }
   output_console_obj(topology, l, output, logical, verbose_mode);
-  for (x=0; x<l->arity; x++)
-    if (l->children[x]->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
-      output_topology (topology, l->children[x], l, output, i, logical, verbose_mode);
+  for(child = l->first_child; child; child = child->next_sibling)
+    if (child->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
+      output_topology (topology, child, l, output, i, logical, verbose_mode);
+  for(child = l->misc_first_child; child; child = child->next_sibling)
+    output_topology (topology, child, l, output, i, logical, verbose_mode);
 }
 
 /* Recursive so that multiple depth types are properly shown */
 static void
 output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
-  unsigned x;
+  hwloc_obj_t child;
   if (lstopo_show_only == l->type) {
     output_console_obj (topology, l, output, logical, verbose_mode);
     fprintf (output, "\n");
   }
-  for (x=0; x<l->arity; x++)
-    output_only (topology, l->children[x], output, logical, verbose_mode);
+  for(child = l->first_child; child; child = child->next_sibling)
+    output_only (topology, child, output, logical, verbose_mode);
+  if (lstopo_show_only == HWLOC_OBJ_MISC) {
+    /* Misc can only contain other Misc, no need to recurse otherwise */
+    for(child = l->misc_first_child; child; child = child->next_sibling)
+      output_only (topology, child, output, logical, verbose_mode);
+  }
 }
 
 void output_console(hwloc_topology_t topology, const char *filename, int overwrite, int logical, int legend __hwloc_attribute_unused, int verbose_mode)

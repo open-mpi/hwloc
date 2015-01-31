@@ -143,6 +143,50 @@ typedef void (*foo_draw)(hwloc_topology_t topology, struct draw_methods *methods
 
 static foo_draw get_type_fun(hwloc_obj_type_t type);
 
+/* count all children, ignoring PUs if needed */
+static int count_children(hwloc_obj_t obj)
+{
+  unsigned total = obj->arity + obj->misc_arity;
+  if (lstopo_ignore_pus) {
+    unsigned i;
+    for (i = 0; i < obj->arity; i++)
+      if (obj->children[i]->type == HWLOC_OBJ_PU)
+	total--;
+  }
+  return total;
+}
+
+/* next child, in all children list
+ * statep is used to remember which list we currently are in.
+ * prev = NULL => not started yet
+ * prev != 0 and *statep = 0 => inside main list
+ * prev != 0 and *statep = 1 => inside misc list
+ */
+static hwloc_obj_t next_child(hwloc_obj_t parent, hwloc_obj_t prev, int *statep)
+{
+  hwloc_obj_t next;
+  int state = *statep;
+
+  if (!prev) {
+    state = 0;
+    next = parent->first_child;
+  } else {
+ again:
+    next = prev->next_sibling;
+  }
+  if (!next && state == 0) {
+    state = 1;
+    next = parent->misc_first_child;
+  }
+  if (next && next->type == HWLOC_OBJ_PU && lstopo_ignore_pus) {
+    prev = next;
+    goto again;
+  }
+
+  *statep = state;
+  return next;
+}
+
 /*
  * Helper to recurse into sublevels, either horizontally or vertically
  * Updates caller's totwidth/myheight and maxwidth/maxheight
@@ -150,33 +194,26 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
  */
 
 #define RECURSE_BEGIN(obj, border) do { \
-  hwloc_obj_t *subobjs = obj->children; \
-  unsigned numsubobjs = obj->arity; \
-  unsigned numignoredsubobjs = 0; \
+  hwloc_obj_t child; \
+  int childstate; \
+  unsigned numsubobjs = count_children(obj); \
   unsigned width, height; \
   unsigned maxwidth __hwloc_attribute_unused, maxheight __hwloc_attribute_unused; \
   unsigned i; \
   maxwidth = maxheight = 0; \
   totwidth = (border) + mywidth; \
   totheight = (border) + myheight; \
-  /* Count objects to ignore */ \
-  if (lstopo_ignore_pus) { \
-    for (i = 0; i < numsubobjs; i++) \
-      if (subobjs[i]->type == HWLOC_OBJ_PU) \
-        numignoredsubobjs++; \
-    numsubobjs -= numignoredsubobjs; \
-  } \
   if (numsubobjs) { \
 
-#define RECURSE_FOR() \
+#define RECURSE_FOR(obj) \
     /* Iterate over subobjects */ \
-    for (i = 0; i < numsubobjs+numignoredsubobjs; i++) { \
-      if (lstopo_ignore_pus && subobjs[i]->type == HWLOC_OBJ_PU) \
-	continue; \
+    for(i = 0, childstate = 0, child = next_child(obj, NULL, &childstate); \
+	child; \
+	i++, child = next_child(obj, child, &childstate)) { \
 
       /* Recursive call */
 #define RECURSE_CALL_FUN(methods) \
-      get_type_fun(subobjs[i]->type)(topology, methods, logical, subobjs[i], output, depth-1, x + totwidth, &width, y + totheight, &height) \
+      get_type_fun(child->type)(topology, methods, logical, child, output, depth-1, x + totwidth, &width, y + totheight, &height) \
 
 #define RECURSE_END_HORIZ(separator, border) \
       /* Add the subobject's width and separator */ \
@@ -232,14 +269,14 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 /* Pack objects horizontally */
 #define RECURSE_HORIZ(obj, methods, separator, border) \
   RECURSE_BEGIN(obj, border) \
-  RECURSE_FOR() \
+  RECURSE_FOR(obj) \
     RECURSE_CALL_FUN(methods); \
   RECURSE_END_HORIZ(separator, border)
 
 /* Pack objects vertically */
 #define RECURSE_VERT(obj, methods, separator, border) \
   RECURSE_BEGIN(obj, border) \
-  RECURSE_FOR() \
+  RECURSE_FOR(obj) \
     RECURSE_CALL_FUN(methods); \
   RECURSE_END_VERT(separator, border)
 
@@ -250,7 +287,7 @@ RECURSE_BEGIN(obj, border) \
     /* Total area for subobjects */ \
     unsigned area = 0; \
     unsigned rows, columns; \
-    RECURSE_FOR() \
+    RECURSE_FOR(obj) \
       RECURSE_CALL_FUN(&null_draw_methods); \
       obj_totwidth += width + (separator); \
       obj_totheight += height + (separator); \
@@ -301,9 +338,9 @@ RECURSE_BEGIN(obj, border) \
     } \
     \
     maxheight = 0; \
-    RECURSE_FOR() \
+    RECURSE_FOR(obj) \
       /* Newline? */ \
-      if (i && i%columns == 0) { \
+      if (i && i%columns == 0) {	\
         totwidth = (border) + mywidth; \
         /* Add the same height to all rows */ \
         totheight += maxheight + (separator); \
@@ -740,7 +777,7 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   if (level->arity > 0) {
     unsigned bottom = 0, top = 0;
     RECURSE_BEGIN(level, 0);
-    RECURSE_FOR()
+    RECURSE_FOR(level)
       RECURSE_CALL_FUN(methods);
 
       /* Line to PCI device */
@@ -753,16 +790,16 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
       /* Negotiated link speed */
       if (fontsize) {
         float speed = 0.;
-        if (subobjs[i]->type == HWLOC_OBJ_PCI_DEVICE)
-          speed = subobjs[i]->attr->pcidev.linkspeed;
-        if (subobjs[i]->type == HWLOC_OBJ_BRIDGE && subobjs[i]->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
-          speed = subobjs[i]->attr->bridge.upstream.pci.linkspeed;
+        if (child->type == HWLOC_OBJ_PCI_DEVICE)
+          speed = child->attr->pcidev.linkspeed;
+        if (child->type == HWLOC_OBJ_BRIDGE && child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
+          speed = child->attr->bridge.upstream.pci.linkspeed;
         if (speed != 0.) {
           char text[4];
           if (speed >= 10.)
-	    snprintf(text, sizeof(text), "%.0f", subobjs[i]->attr->pcidev.linkspeed);
+	    snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);
 	  else
-	    snprintf(text, sizeof(text), "%0.1f", subobjs[i]->attr->pcidev.linkspeed);
+	    snprintf(text, sizeof(text), "%0.1f", child->attr->pcidev.linkspeed);
           methods->text(output, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-1, x + 2*gridsize + gridsize, y + totheight, text);
         }
       }
@@ -975,7 +1012,7 @@ machine_draw(hwloc_topology_t topology, struct draw_methods *methods, int logica
     unsigned top = 0, bottom = 0; \
     unsigned center; \
     RECURSE_BEGIN(level, gridsize) \
-    RECURSE_FOR() \
+    RECURSE_FOR(level) \
       RECURSE_CALL_FUN(methods); \
       center = y + totheight + height / 2; \
       if (!top) \
@@ -989,7 +1026,7 @@ machine_draw(hwloc_topology_t topology, struct draw_methods *methods, int logica
     unsigned left = 0, right = 0; \
     unsigned center; \
     RECURSE_BEGIN(level, gridsize) \
-    RECURSE_FOR() \
+    RECURSE_FOR(level) \
       RECURSE_CALL_FUN(methods); \
       center = x + totwidth + width / 2; \
       if (!left) \
@@ -1091,10 +1128,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 
   DYNA_CHECK();
 
-  if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
-    NETWORK_DRAW_BEGIN();
-  else
-    RECURSE_HORIZ(level, &null_draw_methods, gridsize, 0);
+  RECURSE_HORIZ(level, &null_draw_methods, gridsize, 0);
 
   lstopo_set_object_color(methods, topology, level, 0, &style);
   methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, boxheight);
@@ -1109,10 +1143,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
     }
   }
 
-  if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
-    NETWORK_DRAW_END();
-  else
-    RECURSE_HORIZ(level, methods, gridsize, 0);
+  RECURSE_HORIZ(level, methods, gridsize, 0);
 
   DYNA_SAVE();
 }
