@@ -52,11 +52,14 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
   char type[32], *attr, phys[32] = "";
   unsigned idx = logical ? l->logical_index : l->os_index;
   const char *indexprefix = logical ? " L#" :  " P#";
+  const char *value;
   if (lstopo_show_cpuset < 2) {
     int len;
-    if (l->type == HWLOC_OBJ_MISC && l->name)
+    if (l->type == HWLOC_OBJ_MISC && l->name) {
       fprintf(output, "%s", l->name);
-    else {
+    } else if (l->type == HWLOC_OBJ_GROUP && (value = hwloc_obj_get_info_by_name(l, "GroupType")) != NULL) {
+      fprintf(output, "Group(%s)", value);
+    } else {
       hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
       fprintf(output, "%s", type);
     }

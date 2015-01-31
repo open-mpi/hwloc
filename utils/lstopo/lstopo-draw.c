@@ -404,12 +404,17 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 {
   unsigned idx = logical ? obj->logical_index : obj->os_index;
   const char *indexprefix = logical ? " L#" : " P#";
+  const char *value;
   char typestr[32];
   char indexstr[32]= "";
   char attrstr[256];
   char totmemstr[64] = "";
   int attrlen;
-  hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
+  if (obj->type == HWLOC_OBJ_GROUP && (value = hwloc_obj_get_info_by_name(obj, "GroupType")) != NULL) {
+    snprintf(typestr, sizeof(typestr), "%s", value);
+  } else {
+    hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
+  }
   if (idx != (unsigned)-1 && obj->depth != 0
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))

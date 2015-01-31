@@ -1397,6 +1397,11 @@ the state of a port #1 (value is 4 when active),
 the LID and LID mask count of port #2,
 and GID #1 of port #3.
 </dd>
+<dt>GroupType (Groups)</dt>
+<dd>A better type name than <em>Group</em>.
+This may be used to specify what a Group actually corresponds to.
+For instance Linux s390 books appear as <em>Book</em> instead of <em>Group</em> in lstopo.
+</dd>
 <dt>hwlocVersion</dt>
 <dd>The version number of the hwloc library that was used to generate
 the topology. If the topology was loaded from XML, this is not the hwloc
