@@ -721,8 +721,12 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
       obj_attr_oldvalue_s = attrvalue;
     else if (!strcmp(attrname, "obj_attr_newvalue"))
       obj_attr_newvalue_s = attrvalue;
-    else
+    else {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: ignoring unknown diff attribute %s\n",
+		state->global->msgprefix, attrname);
       return -1;
+    }
   }
 
   if (type_s) {
@@ -735,17 +739,29 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
       hwloc_topology_diff_t diff;
 
       /* obj_attr mandatory generic attributes */
-      if (!obj_depth_s || !obj_index_s || !obj_attr_type_s)
+      if (!obj_depth_s || !obj_index_s || !obj_attr_type_s) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: missing mandatory obj attr generic attributes\n",
+		  state->global->msgprefix);
 	break;
+      }
 
       /* obj_attr mandatory attributes common to all subtypes */
-      if (!obj_attr_oldvalue_s || !obj_attr_newvalue_s)
+      if (!obj_attr_oldvalue_s || !obj_attr_newvalue_s) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: missing mandatory obj attr value attributes\n",
+		  state->global->msgprefix);
 	break;
+      }
 
       /* mandatory attributes for obj_attr_info subtype */
       obj_attr_type = atoi(obj_attr_type_s);
-      if (obj_attr_type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO && !obj_attr_name_s)
+      if (obj_attr_type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO && !obj_attr_name_s) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: missing mandatory obj attr info name attribute\n",
+		  state->global->msgprefix);
 	break;
+      }
 
       /* now we know we have everything we need */
       diff = malloc(sizeof(*diff));
