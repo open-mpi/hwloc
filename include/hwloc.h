@@ -682,6 +682,8 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
  * The bottom-level type HWLOC_OBJ_PU may not be ignored.
  * The top-level object of the hierarchy will never be ignored, even if this function
  * succeeds.
+ * Group objects are always ignored if they do not bring any structure
+ * since they are designed to add structure to the topology.
  * I/O objects may not be ignored, topology flags should be used to configure
  * their discovery instead.
  */
