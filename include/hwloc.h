@@ -1987,6 +1987,8 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_o
  * The bottom-level type HWLOC_OBJ_PU and the HWLOC_OBJ_NUMANODE level may not be ignored.
  * I/O objects may not be ignored, topology flags should be used to configure
  * their discovery instead.
+ * Misc objects cannot be ignored based on the structure since they are only annotations
+ * outside of the main topology structure.
  */
 HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
 

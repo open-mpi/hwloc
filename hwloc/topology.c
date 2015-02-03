@@ -1156,7 +1156,14 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
 hwloc_obj_t
 hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t parent, const char *name)
 {
-  hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+  hwloc_obj_t obj;
+
+  if (topology->ignored_types[HWLOC_OBJ_MISC] == HWLOC_IGNORE_TYPE_ALWAYS) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
   if (name)
     obj->name = strdup(name);
 
@@ -2614,8 +2621,10 @@ hwloc_topology_ignore_type_keep_structure(struct hwloc_topology *topology, hwloc
     return -1;
   }
 
-  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE) {
-    /* we need the PU and NUMA levels */
+  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE || type == HWLOC_OBJ_MISC) {
+    /* We need the PU and NUMA levels.
+     * Misc are outside of the main topology structure, makes no sense.
+     */
     errno = EINVAL;
     return -1;
   } else if (hwloc_obj_type_is_io(type)) {
