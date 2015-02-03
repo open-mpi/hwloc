@@ -2117,10 +2117,12 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object(hwloc_topology_t to
  * The caller should (at least) initialize its sets before inserting the object.
  * See hwloc_topology_insert_group_object().
  *
- * The caller may also set the object name before insertion.
- * Custom name/value info pairs may also be added with hwloc_obj_add_info().
- * For instance the GroupType info key allows to display something else
+ * Custom name/value info pairs may be added with hwloc_obj_add_info() after
+ * insertion. For instance the GroupType info key allows to display something else
  * than "Group" as the type name for this object in lstopo.
+ *
+ * It is recommended not to set any other object attribute before insertion,
+ * since the Group may get discarded during insertion.
  *
  * The object will be destroyed if passed to hwloc_topology_insert_group_object()
  * without any set defined.
@@ -2143,7 +2145,8 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  * \return The inserted object if it was properly inserted.
  *
  * \return An existing object if the Group was discarded because the topology already
- * contained a object at the same location (the Group did not add any locality information).
+ * contained an object at the same location (the Group did not add any locality information).
+ * Any name/info key pair set before inserting is appended to the existing object.
  *
  * \return \c NULL if the insertion failed because of conflicting sets in topology tree.
  *

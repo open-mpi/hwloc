@@ -906,7 +906,9 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
     new->name = NULL;
   }
 
-  assert(!new->userdata); /* user could not set userdata here (we're before load() */
+  /* Ignore userdata. It will be NULL before load().
+   * It may be non-NULL if alloc+insert_group() after load().
+   */
 
   switch(new->type) {
   case HWLOC_OBJ_NUMANODE:
