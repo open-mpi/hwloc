@@ -1987,6 +1987,7 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_o
  * The bottom-level type HWLOC_OBJ_PU and the HWLOC_OBJ_NUMANODE level may not be ignored.
  * I/O objects may not be ignored, topology flags should be used to configure
  * their discovery instead.
+ * Group objects are always ignored in this case.
  * Misc objects cannot be ignored based on the structure since they are only annotations
  * outside of the main topology structure.
  */
@@ -2145,6 +2146,8 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  * contained a object at the same location (the Group did not add any locality information).
  *
  * \return \c NULL if the insertion failed because of conflicting sets in topology tree.
+ *
+ * \return \c NULL if Group objects are always ignored in the topology.
  *
  * \return \c NULL if the object was discarded because no set was initialized in the Group
  * before insert, or all of them were empty.

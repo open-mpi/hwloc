@@ -741,7 +741,7 @@ enum hwloc_obj_cmp_e {
 };
 
 static int
-hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
+hwloc_obj_cmp_sets(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   hwloc_bitmap_t set1, set2;
   int res = HWLOC_OBJ_DIFFERENT;
@@ -793,32 +793,33 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
     }
   }
 
-  if (res != HWLOC_OBJ_EQUAL)
-    return res;
-  
-  /* Same sets, subsort by type to have a consistent ordering.  */
-  switch (hwloc_type_cmp(obj1, obj2)) {
-  case HWLOC_TYPE_DEEPER:
-    return HWLOC_OBJ_INCLUDED;
-  case HWLOC_TYPE_HIGHER:
-    return HWLOC_OBJ_CONTAINS;
-  case HWLOC_TYPE_EQUAL:
-    if (obj1->type == HWLOC_OBJ_MISC) {
-      /* Misc objects may vary by name */
-      int res = strcmp(obj1->name, obj2->name);
-      if (res < 0)
-	return HWLOC_OBJ_INCLUDED;
-      if (res > 0)
-	return HWLOC_OBJ_CONTAINS;
-      if (res == 0)
-	return HWLOC_OBJ_EQUAL;
-    }
-    /* Same sets and types!  Let's hope it's coherent.  */
-    return HWLOC_OBJ_EQUAL;
-  }
+  return res;
+}
 
-  /* For dumb compilers */
-  abort();
+static int
+hwloc_obj_cmp_types(hwloc_obj_t obj1, hwloc_obj_t obj2)
+{
+  /* Same sets, subsort by type to have a consistent ordering.  */
+  int typeres = hwloc_type_cmp(obj1, obj2);
+  if (typeres == HWLOC_TYPE_DEEPER)
+    return HWLOC_OBJ_INCLUDED;
+  if (typeres == HWLOC_TYPE_HIGHER)
+    return HWLOC_OBJ_CONTAINS;
+
+  /* HWLOC_TYPE_EQUAL */
+
+  if (obj1->type == HWLOC_OBJ_MISC) {
+    /* Misc objects may vary by name */
+    int res = strcmp(obj1->name, obj2->name);
+    if (res < 0)
+      return HWLOC_OBJ_INCLUDED;
+    if (res > 0)
+      return HWLOC_OBJ_CONTAINS;
+    if (res == 0)
+      return HWLOC_OBJ_EQUAL;
+  }
+  /* Same sets and types!  Let's hope it's coherent.  */
+  return HWLOC_OBJ_EQUAL;
 }
 
 /* Compare object cpusets based on complete_cpuset if defined (always correctly ordered),
@@ -965,10 +966,31 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
        child;
        child = next_child, child ? next_child = child->next_sibling : NULL) {
 
-    switch (hwloc_obj_cmp(obj, child)) {
+    int res = hwloc_obj_cmp_sets(obj, child);
+
+    if (res == HWLOC_OBJ_EQUAL) {
+      if (obj->type == HWLOC_OBJ_GROUP && topology->is_loaded) {
+	/* Inserting a custom group after load().
+	 * Group are ignored keep_structure. ignored always are handled earlier. Non-ignored Groups isn't possible.
+	 */
+	assert(topology->ignored_types[HWLOC_OBJ_GROUP] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE);
+        /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not.
+	 * We can't immediately ignore when !topology->is_loaded because we don't know yet
+	 * if an object is useless for structure (some children could be added later).
+	 */
+	/* Keep EQUAL so that the Group gets merged. */
+      } else {
+	/* otherwise compare actual types to decide of the inclusion */
+	res = hwloc_obj_cmp_types(obj, child);
+      }
+    }
+
+    switch (res) {
       case HWLOC_OBJ_EQUAL:
-	if (obj->os_index != child->os_index
-	    && (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE)) {
+	/* Can be two objectswith same type. Or one Group and anything else. */
+	if (obj->type == child->type
+	    && (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE)
+	    && obj->os_index != child->os_index) {
 	  static int reported = 0;
 	  if (!reported && !hwloc_hide_errors()) {
 	    fprintf(stderr, "Cannot merge similar %s objects with different OS indexes %u and %u\n",
@@ -1125,6 +1147,13 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
 
   if (!topology->is_loaded) {
     /* this could actually work, we would just need to disable connect_children/levels below */
+    hwloc_free_unlinked_object(obj);
+    errno = EINVAL;
+    return NULL;
+  }
+
+  if (topology->ignored_types[HWLOC_OBJ_GROUP] == HWLOC_IGNORE_TYPE_ALWAYS) {
+    hwloc_free_unlinked_object(obj);
     errno = EINVAL;
     return NULL;
   }
