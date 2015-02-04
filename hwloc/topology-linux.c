@@ -3114,6 +3114,7 @@ package_done:
     look_powerpc_device_tree(topology, data);
 
   hwloc_bitmap_free(cpuset);
+  hwloc_bitmap_free(unknownset);
 
   return 0;
 }
