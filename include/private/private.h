@@ -57,6 +57,7 @@ struct hwloc_topology {
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
   int is_thissystem;
   int is_loaded;
+  int modified;                                         /* >0 if objects were added/removed recently, which means a reconnect is needed */
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
   void *userdata;
 

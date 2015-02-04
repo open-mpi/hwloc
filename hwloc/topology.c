@@ -532,6 +532,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   hwloc_connect_children(new->levels[0][0]);
   if (hwloc_connect_levels(new) < 0)
     goto out;
+  new->modified = 0;
 
   hwloc_distances_finalize_os(new);
   hwloc_distances_finalize_logical(new);
@@ -1049,6 +1050,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     putp = cur_children;
   obj->next_sibling = *putp;
   *putp = obj;
+  topology->modified = 1;
 
   return obj;
 
@@ -1115,6 +1117,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   *current = obj;
   obj->next_sibling = NULL;
   obj->first_child = NULL;
+  topology->modified = 1;
 
   /* Use the new object to insert children */
   parent = obj;
@@ -1181,6 +1184,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
   hwloc_connect_children(topology->levels[0][0]);
   if (hwloc_connect_levels(topology) < 0)
     return NULL;
+  topology->modified = 0;
   return obj;
 }
 
@@ -1208,6 +1212,7 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
 
   hwloc_connect_children(topology->levels[0][0]);
   /* no need to hwloc_connect_levels() since misc object are not in levels */
+  topology->modified = 0;
 
   return obj;
 }
@@ -1592,6 +1597,7 @@ ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
     hwloc_debug("%s", "\nDropping ignored object ");
     hwloc_debug_print_object(0, parent);
     unlink_and_free_single_object(pparent);
+    topology->modified = 1;
     dropped = 1;
 
   } else if (dropped_children) {
@@ -1622,6 +1628,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
     hwloc_debug("%s", "\nRemoving empty object ");
     hwloc_debug_print_object(0, obj);
     unlink_and_free_single_object(pobj);
+    topology->modified = 1;
   }
 }
 
@@ -1696,6 +1703,7 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
     *pparent = child;
     child->next_sibling = parent->next_sibling;
     hwloc_free_unlinked_object(parent);
+    topology->modified = 1;
 
   } else if (replacechild) {
     /* Replace child with parent */
@@ -1703,6 +1711,7 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
     hwloc_debug_print_object(0, child);
     parent->first_child = child->first_child;
     hwloc_free_unlinked_object(child);
+    topology->modified = 1;
   }
 
   if (ios) {
@@ -1721,10 +1730,12 @@ hwloc_drop_all_io(hwloc_topology_t topology, hwloc_obj_t root)
 {
   hwloc_obj_t child, *pchild;
   for_each_child_safe(child, root, pchild) {
-    if (hwloc_obj_type_is_io(child->type))
+    if (hwloc_obj_type_is_io(child->type)) {
       unlink_and_free_object_and_children(pchild);
-    else
+      topology->modified = 1;
+    } else {
       hwloc_drop_all_io(topology, child);
+    }
   }
 }
 
@@ -1756,8 +1767,10 @@ hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
 	    && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
 	    && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
 	    && baseclass != 0x0b /* PCI_BASE_CLASS_PROCESSOR */
-	    && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */)
+	    && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */) {
 	  unlink_and_free_object_and_children(pchild);
+	  topology->modified = 1;
+	}
       }
     }
   }
@@ -1774,6 +1787,7 @@ hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
 	if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
 	  *pchild = child->next_sibling;
 	  hwloc_free_unlinked_object(child);
+	  topology->modified = 1;
 	}
 
       } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST) {
@@ -1784,6 +1798,7 @@ hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
 	  for( ; grandchildren->next_sibling != NULL ; grandchildren = grandchildren->next_sibling);
 	  grandchildren->next_sibling = child->next_sibling;
 	  hwloc_free_unlinked_object(child);
+	  topology->modified = 1;
 	}
       }
     }
@@ -2243,7 +2258,8 @@ hwloc_discover(struct hwloc_topology *topology)
   struct hwloc_backend *backend;
   int gotsomeio = 0;
   unsigned discoveries = 0;
-  unsigned need_reconnect = 0;
+
+  topology->modified = 0; /* no need to reconnect yet */
 
   /* discover() callbacks should use hwloc_insert to add objects initialized
    * through hwloc_alloc_setup_object.
@@ -2293,12 +2309,12 @@ hwloc_discover(struct hwloc_topology *topology)
     if (!backend->discover)
       goto next_cpubackend;
 
-    if (need_reconnect && (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS)) {
+    if (topology->modified && (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS)) {
       hwloc_debug("Backend %s forcing a reconnect of levels\n", backend->component->name);
       hwloc_connect_children(topology->levels[0][0]);
       if (hwloc_connect_levels(topology) < 0)
 	return -1;
-      need_reconnect = 0;
+      topology->modified = 0;
     }
 
     err = backend->discover(backend);
@@ -2306,8 +2322,6 @@ hwloc_discover(struct hwloc_topology *topology)
       if (backend->component->type == HWLOC_DISC_COMPONENT_TYPE_GLOBAL)
         gotsomeio += err;
       discoveries++;
-      if (err > 0)
-	need_reconnect++;
     }
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
@@ -2379,9 +2393,12 @@ next_cpubackend:
 
   /* Now connect handy pointers to make remaining discovery easier. */
   hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
-  hwloc_connect_children(topology->levels[0][0]);
-  if (hwloc_connect_levels(topology) < 0)
-    return -1;
+  if (topology->modified) {
+    hwloc_connect_children(topology->levels[0][0]);
+    if (hwloc_connect_levels(topology) < 0)
+      return -1;
+    topology->modified = 0;
+  }
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   /*
@@ -2389,7 +2406,6 @@ next_cpubackend:
    */
 
   backend = topology->backends;
-  need_reconnect = 0;
   while (NULL != backend) {
     int err;
     if (backend->component->type == HWLOC_DISC_COMPONENT_TYPE_CPU
@@ -2399,19 +2415,17 @@ next_cpubackend:
     if (!backend->discover)
       goto next_noncpubackend;
 
-    if (need_reconnect && (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS)) {
+    if (topology->modified && (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS)) {
       hwloc_debug("Backend %s forcing a reconnect of levels\n", backend->component->name);
       hwloc_connect_children(topology->levels[0][0]);
       if (hwloc_connect_levels(topology) < 0)
 	return -1;
-      need_reconnect = 0;
+      topology->modified = 0;
     }
 
     err = backend->discover(backend);
     if (err >= 0) {
       gotsomeio += err;
-      if (err > 0)
-	need_reconnect++;
     }
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
@@ -2435,7 +2449,7 @@ next_noncpubackend:
 
   hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
   remove_empty(topology, &topology->levels[0][0]);
-  if (!topology->levels[0][0]) {
+    if (!topology->levels[0][0]) {
     fprintf(stderr, "Topology became empty, aborting!\n");
     abort();
   }
@@ -2446,9 +2460,13 @@ next_noncpubackend:
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   /* Reconnect things after all these changes */
-  hwloc_connect_children(topology->levels[0][0]);
-  if (hwloc_connect_levels(topology) < 0)
-    return -1;
+  if (topology->modified) {
+    /* Often raised because of Groups inserted for I/Os */
+    hwloc_connect_children(topology->levels[0][0]);
+    if (hwloc_connect_levels(topology) < 0)
+      return -1;
+    topology->modified = 0;
+  }
 
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");
@@ -2855,6 +2873,7 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
       hwloc_bitmap_set(droppednodeset, obj->os_index);
     /* remove the object from the tree (no need to remove from levels, they will be entirely rebuilt by the caller) */
     unlink_and_free_single_object(pobj);
+    topology->modified = 1;
     /* do not remove children. if they were to be removed, they would have been already */
   }
 }
@@ -2907,6 +2926,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_connect_children(topology->levels[0][0]);
   if (hwloc_connect_levels(topology) < 0)
     goto out;
+  topology->modified = 0;
 
   propagate_total_memory(topology->levels[0][0]);
   hwloc_distances_restrict(topology, flags);
@@ -3063,6 +3083,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   hwloc_obj_type_t type;
   unsigned i, j, depth;
+
+  assert(!topology->modified);
 
   /* check type orders */
   for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
