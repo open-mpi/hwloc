@@ -2972,15 +2972,25 @@ hwloc__check_children(struct hwloc_obj *parent)
   assert(parent->first_child);
   assert(parent->last_child);
 
+  /* sibling checks */
+  for(j=0; j<parent->arity; j++) {
+    assert(parent->children[j]->parent == parent);
+    assert(parent->children[j]->sibling_rank == j);
+  }
+
   /* first child specific checks */
-  assert(parent->first_child->sibling_rank == 0);
   assert(parent->first_child == parent->children[0]);
   assert(parent->first_child->prev_sibling == NULL);
 
   /* last child specific checks */
-  assert(parent->last_child->sibling_rank == parent->arity-1);
   assert(parent->last_child == parent->children[parent->arity-1]);
   assert(parent->last_child->next_sibling == NULL);
+
+  /* non-first or -last specific checks */
+  for(j=1; j<parent->arity; j++) {
+    assert(parent->children[j-1]->next_sibling == parent->children[j]);
+    assert(parent->children[j]->prev_sibling == parent->children[j-1]);
+  }
 
   /* we already checked in the caller that objects have either all sets or none */
   if (parent->cpuset) {
@@ -3046,14 +3056,6 @@ hwloc__check_children(struct hwloc_obj *parent)
       assert(prev_firstchild < firstchild);
       prev_firstchild = firstchild;
     }
-  }
-
-  /* checks for all children */
-  for(j=1; j<parent->arity; j++) {
-    assert(parent->children[j]->parent == parent);
-    assert(parent->children[j]->sibling_rank == j);
-    assert(parent->children[j-1]->next_sibling == parent->children[j]);
-    assert(parent->children[j]->prev_sibling == parent->children[j-1]);
   }
 }
 
