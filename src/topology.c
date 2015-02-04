@@ -1998,12 +1998,15 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
  * When this funtions return, all parent/children pointers are initialized.
  * The remaining fields (levels, cousins, logical_index, depth, ...) will
  * be setup later in hwloc_connect_levels().
+ *
+ * Can be called several times, so may have to update the array.
  */
 void
 hwloc_connect_children(hwloc_obj_t parent)
 {
-  unsigned n;
+  unsigned n, oldn = parent->arity;
   hwloc_obj_t child, prev_child = NULL;
+  int ok = 1;
 
   for (n = 0, child = parent->first_child;
        child;
@@ -2011,22 +2014,34 @@ hwloc_connect_children(hwloc_obj_t parent)
     child->parent = parent;
     child->sibling_rank = n;
     child->prev_sibling = prev_child;
+    /* already OK in the array? */
+    if (n >= oldn || parent->children[n] != child)
+      ok = 0;
+    /* recurse */
+    hwloc_connect_children(child);
   }
   parent->last_child = prev_child;
-
   parent->arity = n;
-  free(parent->children);
   if (!n) {
+    /* no need for an array anymore */
+    free(parent->children);
     parent->children = NULL;
     return;
   }
+  if (ok)
+    /* array is already OK (even if too large) */
+    return;
 
-  parent->children = malloc(n * sizeof(*parent->children));
+  /* alloc a larger array if needed */
+  if (oldn < n) {
+    free(parent->children);
+    parent->children = malloc(n * sizeof(*parent->children));
+  }
+  /* refill */
   for (n = 0, child = parent->first_child;
        child;
        n++,   child = child->next_sibling) {
     parent->children[n] = child;
-    hwloc_connect_children(child);
   }
 }
 
