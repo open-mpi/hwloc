@@ -132,12 +132,9 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
     i++;
   }
   output_console_obj(topology, l, output, logical, verbose_mode);
-  if (l->arity || (!i && !l->arity))
-    {
-      for (x=0; x<l->arity; x++)
-	if (l->children[x]->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
-	  output_topology (topology, l->children[x], l, output, i, logical, verbose_mode);
-  }
+  for (x=0; x<l->arity; x++)
+    if (l->children[x]->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
+      output_topology (topology, l->children[x], l, output, i, logical, verbose_mode);
 }
 
 /* Recursive so that multiple depth types are properly shown */
