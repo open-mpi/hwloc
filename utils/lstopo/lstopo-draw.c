@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2014 Inria.  All rights reserved.
- * Copyright © 2009-2013 Université Bordeaux 1
+ * Copyright © 2009-2013, 2015 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -382,10 +382,12 @@ struct dyna_save {
     if (save->fontsize == fontsize && save->gridsize == gridsize) { \
       *retwidth = save->width; \
       *retheight = save->height; \
+      return; \
+    } else { \
+      /* Changed size, drop the existing computation */ \
+      free(level->userdata); \
+      level->userdata = NULL; \
     } \
-    free(level->userdata); \
-    level->userdata = NULL; \
-    return; \
   } \
 } while (0)
 
