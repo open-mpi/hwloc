@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
- * Copyright © 2009-2013 Université Bordeaux
+ * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -382,10 +382,12 @@ struct dyna_save {
     if (save->fontsize == fontsize && save->gridsize == gridsize) { \
       *retwidth = save->width; \
       *retheight = save->height; \
+      return; \
+    } else { \
+      /* Changed size, drop the existing computation */ \
+      free(level->userdata); \
+      level->userdata = NULL; \
     } \
-    free(level->userdata); \
-    level->userdata = NULL; \
-    return; \
   } \
 } while (0)
 
@@ -1294,4 +1296,22 @@ void
 output_draw(struct draw_methods *methods, int logical, int legend, hwloc_topology_t topology, void *output)
 {
 	fig(topology, methods, logical, legend, hwloc_get_root_obj(topology), output, 100, 0, 0);
+}
+
+static void
+draw_clear(hwloc_topology_t topology, hwloc_obj_t level)
+{
+  unsigned i;
+
+  free(level->userdata);
+  level->userdata = NULL;
+
+  for (i = 0; i < level->arity; i++)
+    draw_clear(topology, level->children[i]);
+}
+
+void
+output_draw_clear(hwloc_topology_t topology)
+{
+  draw_clear(topology, hwloc_get_root_obj(topology));
 }
