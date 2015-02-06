@@ -1292,3 +1292,21 @@ output_draw(struct draw_methods *methods, int logical, int legend, hwloc_topolog
 {
 	fig(topology, methods, logical, legend, hwloc_get_root_obj(topology), output, 100, 0, 0);
 }
+
+static void
+draw_clear(hwloc_topology_t topology, hwloc_obj_t level)
+{
+  unsigned i;
+
+  free(level->userdata);
+  level->userdata = NULL;
+
+  for (i = 0; i < level->arity; i++)
+    draw_clear(topology, level->children[i]);
+}
+
+void
+output_draw_clear(hwloc_topology_t topology)
+{
+  draw_clear(topology, hwloc_get_root_obj(topology));
+}
