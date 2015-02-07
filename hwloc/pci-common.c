@@ -275,6 +275,9 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
 	parent = parent->parent;
       }
     }
+  } else {
+    /* Failed to create the Group, attach to the root object instead */
+    parent = hwloc_get_root_obj(topology);
   }
 
   hwloc_bitmap_free(cpuset);
