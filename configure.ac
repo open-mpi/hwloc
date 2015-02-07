@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -228,6 +228,17 @@ LIBS="$HWLOC_EMBEDDED_LIBS $LIBS"
 
 # Party on
 AC_OUTPUT
+
+# Warn if we didn't have pkg-config
+if test "x$PKG_CONFIG" = x; then
+  cat << EOF
+
+************************************************************************
+Could not detect/enable some features such as libxml2 and Cairo support
+because pkg-config isn't available.
+************************************************************************
+EOF
+fi
 
 # Show which optional support we'll be building
 hwloc_xml_status=basic
