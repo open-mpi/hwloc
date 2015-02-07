@@ -9,7 +9,7 @@ dnl Copyright © 2004-2012 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright © 2004-2008 High Performance Computing Center Stuttgart,
 dnl                         University of Stuttgart.  All rights reserved.
-dnl Copyright © 2006-2014 Cisco Systems, Inc.  All rights reserved.
+dnl Copyright © 2006-2015 Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2012  Blue Brain Project, BBP/EPFL. All rights reserved.
 dnl Copyright © 2012       Oracle and/or its affiliates.  All rights reserved.
 dnl See COPYING in top-level directory.
@@ -876,7 +876,9 @@ EOF])
              AC_CHECK_HEADERS([X11/Xutil.h],
                 [AC_CHECK_HEADERS([X11/keysym.h],
                     [AC_DEFINE([HWLOC_HAVE_X11_KEYSYM], [1], [Define to 1 if X11 headers including Xutil.h and keysym.h are available.])])
-                     AC_SUBST([HWLOC_X11_LIBS], ["-lX11"])
+                     AS_IF([test "x$X_LIBS" = "x"], [X_LIBS="-lX11"])
+                     AC_SUBST([HWLOC_X11_CPPFLAGS], [$(X_CFLAGS)])
+                     AC_SUBST([HWLOC_X11_LIBS], ["$(X_PRE_LIBS) $X_LIBS $(X_EXTRA_LIBS) "])
                 ], [], [#include <X11/Xlib.h>])
             ])
          ])
