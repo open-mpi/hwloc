@@ -380,6 +380,7 @@ insert_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newp
   tmp->parent = newparent;
   while (tmp->next_sibling) {
     tmp = tmp->next_sibling;
+    tmp->parent = newparent;
   }
   return &tmp->next_sibling;
 }
@@ -1055,6 +1056,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	/* Put CHILD in OBJ */
 	*obj_children = child;
 	obj_children = &child->next_sibling;
+	child->parent = obj;
 	break;
     }
   }
@@ -1067,8 +1069,9 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     putp = cur_children;
   obj->next_sibling = *putp;
   *putp = obj;
-  topology->modified = 1;
+  obj->parent = cur;
 
+  topology->modified = 1;
   return obj;
 
  putback:
@@ -1081,6 +1084,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   while ((child = obj->first_child) != NULL) {
     /* Remove from OBJ */
     obj->first_child = child->next_sibling;
+    obj->parent = cur;
     /* Find child position in CUR, and insert. */
     while (*cur_children && (*cur_children)->cpuset && hwloc__object_cpusets_compare_first(*cur_children, child) < 0)
       cur_children = &(*cur_children)->next_sibling;
@@ -1132,6 +1136,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
    */
   for (current = &parent->first_child; *current; current = &(*current)->next_sibling);
   *current = obj;
+  obj->parent = parent;
   obj->next_sibling = NULL;
   obj->first_child = NULL;
   topology->modified = 1;
@@ -1656,7 +1661,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
 static int
 ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
-  hwloc_obj_t parent = *pparent, child, *pchild, ios;
+  hwloc_obj_t parent = *pparent, child, *pchild, ios, tmp;
   int replacechild = 0, replaceparent = 0, droppedchildren = 0;
 
   if (!parent->first_child)
@@ -1714,7 +1719,6 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
     hwloc_debug("%s", "\nIgnoring parent ");
     hwloc_debug_print_object(0, parent);
     if (parent == topology->levels[0][0]) {
-      child->parent = NULL;
       child->depth = 0;
     }
     unlink_and_free_single_object(pparent);
@@ -1734,6 +1738,8 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
     while (*pchild)
       pchild = &((*pchild)->next_sibling);
     *pchild = ios;
+    for(tmp = ios; tmp; tmp = tmp->next_sibling)
+      tmp->parent = replaceparent ? child : parent;
   }
 
   return replaceparent ? 1 : 0;
@@ -1894,7 +1900,6 @@ hwloc_connect_children(hwloc_obj_t parent)
   for (n = 0, child = parent->first_child;
        child;
        n++,   prev_child = child, child = child->next_sibling) {
-    child->parent = parent;
     child->sibling_rank = n;
     child->prev_sibling = prev_child;
     /* already OK in the array? */
