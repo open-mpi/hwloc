@@ -1850,16 +1850,13 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
       child->parent = NULL;
       child->depth = 0;
     }
-    *pparent = child;
-    child->next_sibling = parent->next_sibling;
-    hwloc_free_unlinked_object(parent);
+    unlink_and_free_single_object(pparent);
 
   } else if (replacechild) {
     /* Replace child with parent */
     hwloc_debug("%s", "\nIgnoring child ");
     hwloc_debug_print_object(0, child);
-    parent->first_child = child->first_child;
-    hwloc_free_unlinked_object(child);
+    unlink_and_free_single_object(&parent->first_child);
   }
 
   if (ios) {
@@ -1925,23 +1922,16 @@ hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
     hwloc_drop_useless_io(topology, child);
 
     if (child->type == HWLOC_OBJ_BRIDGE) {
-      hwloc_obj_t grandchildren = child->first_child;
-
-      if (!grandchildren) {
+      if (!child->first_child) {
 	/* bridges with no children are removed if WHOLE_IO isn't given */
 	if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
-	  *pchild = child->next_sibling;
-	  hwloc_free_unlinked_object(child);
+	  unlink_and_free_single_object(pchild);
 	}
 
       } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST) {
 	/* only hostbridges are kept if WHOLE_IO or IO_BRIDGE are not given */
 	if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_BRIDGES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
-	  /* insert grandchildren in place of child */
-	  *pchild = grandchildren;
-	  for( ; grandchildren->next_sibling != NULL ; grandchildren = grandchildren->next_sibling);
-	  grandchildren->next_sibling = child->next_sibling;
-	  hwloc_free_unlinked_object(child);
+	  unlink_and_free_single_object(pchild);
 	}
       }
     }
