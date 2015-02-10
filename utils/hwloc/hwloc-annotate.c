@@ -18,6 +18,7 @@ static void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "    all, root, <type>:<logicalindex>, <type>:all\n");
 	fprintf(where, "  <annotation> may be:\n");
 	fprintf(where, "    info <name> <value>\n");
+	fprintf(where, "    misc <name>\n");
 	fprintf(where, "    none\n");
         fprintf(where, "Options:\n");
 	fprintf(where, "  --ci\tClear existing infos\n");
@@ -26,10 +27,12 @@ static void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 
 static char *infoname = NULL, *infovalue = NULL;
 
+static char *miscname = NULL;
+
 static int clearinfos = 0;
 static int replaceinfos = 0;
 
-static void apply(hwloc_obj_t obj)
+static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 {
 	unsigned i,j;
 	if (clearinfos) {
@@ -69,22 +72,25 @@ static void apply(hwloc_obj_t obj)
 		if (infovalue)
 			hwloc_obj_add_info(obj, infoname, infovalue);
 	}
+	if (miscname)
+		hwloc_topology_insert_misc_object(topology, obj, miscname);
 }
 
-static void apply_recursive(hwloc_obj_t obj)
+static void apply_recursive(hwloc_topology_t topology, hwloc_obj_t obj)
 {
 	unsigned i;
 	for(i=0; i<obj->arity; i++)
-		apply_recursive(obj->children[i]);
-	apply(obj);
+		apply_recursive(topology, obj->children[i]);
+	apply(topology, obj);
 }
 
 static void
-hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
+hwloc_calc_process_arg_info_cb(void *_data,
 			       hwloc_obj_t obj,
 			       int verbose __hwloc_attribute_unused)
 {
-	apply(obj);
+	hwloc_topology_t topology = _data;
+	apply(topology, obj);
 }
 
 int main(int argc, char *argv[])
@@ -137,6 +143,13 @@ int main(int argc, char *argv[])
 		infoname = argv[1];
 		infovalue = argc >= 3 ? argv[2] : NULL;
 
+	} else if (!strcmp(argv[0], "misc")) {
+		if (argc < 2) {
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
+		miscname = argv[1];
+
 	} else if (!strcmp(argv[0], "none")) {
 		/* do nothing (maybe clear) */
 	} else {
@@ -161,15 +174,15 @@ int main(int argc, char *argv[])
 	topodepth = hwloc_topology_get_depth(topology);
 
 	if (!strcmp(location, "all")) {
-		apply_recursive(hwloc_get_root_obj(topology));
+		apply_recursive(topology, hwloc_get_root_obj(topology));
 	} else if (!strcmp(location, "root")) {
-		apply(hwloc_get_root_obj(topology));
+		apply(topology, hwloc_get_root_obj(topology));
 	} else {
 		size_t typelen;
 		typelen = strspn(location, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 		if (typelen && (location[typelen] == ':' || location[typelen] == '=' || location[typelen] == '[')) {
 			err = hwloc_calc_process_type_arg(topology, topodepth, location, typelen, 1,
-							  hwloc_calc_process_arg_info_cb, NULL,
+							  hwloc_calc_process_arg_info_cb, topology,
 							  0);
 		}
 	}
