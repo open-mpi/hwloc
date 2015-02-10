@@ -368,6 +368,22 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
   free(obj);
 }
 
+/* insert the (non-empty) list of sibling starting at firstnew as new children of newparent,
+ * and return the address of the pointer to the next one
+ */
+static hwloc_obj_t *
+insert_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newparent)
+{
+  hwloc_obj_t tmp;
+  assert(firstnew);
+  *firstp = tmp = firstnew;
+  tmp->parent = newparent;
+  while (tmp->next_sibling) {
+    tmp = tmp->next_sibling;
+  }
+  return &tmp->next_sibling;
+}
+
 /* Remove an object from its parent and free it.
  * Only updates next_sibling/first_child pointers,
  * so may only be used during early discovery.
@@ -376,17 +392,18 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
 static void
 unlink_and_free_single_object(hwloc_obj_t *pparent)
 {
-  hwloc_obj_t parent = *pparent;
-  hwloc_obj_t child = parent->first_child;
-  /* Replace object with its list of children */
-  if (child) {
-    *pparent = child;
-    while (child->next_sibling)
-      child = child->next_sibling;
-    child->next_sibling = parent->next_sibling;
-  } else
-    *pparent = parent->next_sibling;
-  hwloc_free_unlinked_object(parent);
+  hwloc_obj_t old = *pparent;
+  hwloc_obj_t *lastp;
+
+  if (old->first_child)
+    /* insert old object children as new siblings below parent instead of old */
+    lastp = insert_siblings_list(pparent, old->first_child, old->parent);
+  else
+    lastp = pparent;
+  /* append old siblings back */
+  *lastp = old->next_sibling;
+
+  hwloc_free_unlinked_object(old);
 }
 
 /* Remove an object and its children from its parent and free them.
