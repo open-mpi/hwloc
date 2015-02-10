@@ -51,6 +51,9 @@ This is specified by the \fImode\fR:
 Specifies a new string info attribute whose name is \fIname\fR and
 value is \fIvalue\fR.
 .TP
+.B misc <name>
+Specifies a new Misc object name.
+.TP
 .B none
 No new annotation is added. This is useful when clearing existing attributes.
 .
@@ -93,10 +96,10 @@ Add an info attribute to all Core objects:
 
     $ hwloc-annotate input.xml output.xml Core:all info infoname infovalue
 
-Add an info attribute to the root object of the topology
+Add a Misc object named "foobar" under the root object of the topology
 and modify the input XML directly:
 
-    $ hwloc-annotate file.xml file.xml root info infoname infovalue
+    $ hwloc-annotate file.xml file.xml root misc foobar
 
 Add an info attribute to OS device #2 and #3:
 

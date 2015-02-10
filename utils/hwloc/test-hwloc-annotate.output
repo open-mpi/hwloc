@@ -42,6 +42,9 @@
                   <info name="Foo2" value="Bar2"/>
                   <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0">
                     <info name="Foo" value="Bar"/>
+                    <object type="Misc" name="pumisc">
+                      <info name="Foo" value="Bar"/>
+                    </object>
                   </object>
                   <object type="PU" os_index="2" cpuset="0x00000004" complete_cpuset="0x00000004" online_cpuset="0x00000004" allowed_cpuset="0x00000004" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0">
                     <info name="Foo" value="Bar"/>
@@ -124,6 +127,9 @@
           <info name="Foo" value="Bar"/>
         </object>
       </object>
+    </object>
+    <object type="Misc" name="rootmisc">
+      <info name="Foo" value="Bar"/>
     </object>
   </object>
 </topology>
