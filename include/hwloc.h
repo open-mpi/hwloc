@@ -702,7 +702,8 @@ enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_MULTIPLE = -2,   /**< \brief Objects of given type exist at different depth in the topology. \hideinitializer */
     HWLOC_TYPE_DEPTH_BRIDGE = -3,     /**< \brief Virtual depth for bridge object level. \hideinitializer */
     HWLOC_TYPE_DEPTH_PCI_DEVICE = -4, /**< \brief Virtual depth for PCI device object level. \hideinitializer */
-    HWLOC_TYPE_DEPTH_OS_DEVICE = -5   /**< \brief Virtual depth for software device object level. \hideinitializer */
+    HWLOC_TYPE_DEPTH_OS_DEVICE = -5,  /**< \brief Virtual depth for software device object level. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MISC = -6        /**< \brief Virtual depth for Misc object. \hideinitializer */
 };
 
 /** \brief Returns the depth of objects of type \p type or below

@@ -70,6 +70,9 @@ struct hwloc_topology {
   unsigned osdev_nbobjects;
   struct hwloc_obj **osdev_level;
   struct hwloc_obj *first_osdev, *last_osdev;
+  unsigned misc_nbobjects;
+  struct hwloc_obj **misc_level;
+  struct hwloc_obj *first_misc, *last_misc;
 
   struct hwloc_binding_hooks {
     int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);

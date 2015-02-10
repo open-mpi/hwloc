@@ -1204,8 +1204,6 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 
   if (obj->type == HWLOC_OBJ_MISC) {
     assert(!obj_next_child);
-    /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
-    obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
   } else {
     /* Recursively insert children below */
     while (obj_next_child) {
@@ -1269,6 +1267,8 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
   return obj;
 }
 
+static void hwloc_connect_misc_level(hwloc_topology_t topology);
+
 hwloc_obj_t
 hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t parent, const char *name)
 {
@@ -1288,13 +1288,10 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
   if (name)
     obj->name = strdup(name);
 
-  /* misc objects go in no level */
-  obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
-
   hwloc_insert_object_by_parent(topology, parent, obj);
 
   hwloc_connect_children(parent); /* FIXME: only connect misc children */
-  /* no need to hwloc_connect_levels() since misc object are not in levels */
+  hwloc_connect_misc_level(topology);
   topology->modified = 0;
 
   return obj;
@@ -2166,6 +2163,46 @@ hwloc_build_level_from_list(struct hwloc_obj *first, struct hwloc_obj ***levelp)
   return nb;
 }
 
+/* Append Misc object to their list */
+static void
+hwloc_list_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
+{
+  hwloc_obj_t child, *temp;
+
+  if (obj->type == HWLOC_OBJ_MISC) {
+    /* make sure we don't have remaining stale pointers from a previous load */
+    obj->next_cousin = NULL;
+    obj->prev_cousin = NULL;
+    obj->depth = HWLOC_TYPE_DEPTH_MISC;
+    /* Insert the main Misc list */
+    if (topology->first_misc) {
+      obj->prev_cousin = topology->last_misc;
+      obj->prev_cousin->next_cousin = obj;
+      topology->last_misc = obj;
+    } else {
+      topology->first_misc = topology->last_misc = obj;
+    }
+  }
+
+  for_each_child_safe(child, obj, temp)
+    hwloc_list_misc_objects(topology, child);
+  for_each_misc_child_safe(child, obj, temp)
+    hwloc_list_misc_objects(topology, child);
+}
+
+/* Build the Misc level */
+static void
+hwloc_connect_misc_level(hwloc_topology_t topology)
+{
+  free(topology->misc_level);
+  topology->misc_level = NULL;
+  topology->misc_nbobjects = 0;
+  topology->first_misc = topology->last_misc = NULL;
+  topology->type_depth[HWLOC_OBJ_MISC] = HWLOC_TYPE_DEPTH_MISC;
+  hwloc_list_misc_objects(topology, topology->levels[0][0]);
+  topology->misc_nbobjects = hwloc_build_level_from_list(topology->first_misc, &topology->misc_level);
+}
+
 /*
  * Do the remaining work that hwloc_connect_children() did not do earlier.
  */
@@ -2326,7 +2363,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
   topology->bridge_nbobjects = hwloc_build_level_from_list(topology->first_bridge, &topology->bridge_level);
   topology->pcidev_nbobjects = hwloc_build_level_from_list(topology->first_pcidev, &topology->pcidev_level);
   topology->osdev_nbobjects = hwloc_build_level_from_list(topology->first_osdev, &topology->osdev_level);
-  // FIXME Misc level
+
+  hwloc_connect_misc_level(topology);
 
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
 
@@ -2630,6 +2668,8 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->first_bridge = topology->last_bridge = NULL;
   topology->first_pcidev = topology->last_pcidev = NULL;
   topology->first_osdev = topology->last_osdev = NULL;
+  topology->misc_level = NULL;
+  topology->first_misc = topology->last_misc = NULL;
 
   /* Create the actual machine object, but don't touch its attributes yet
    * since the OS backend may still change the object into something else
@@ -2845,6 +2885,7 @@ hwloc_topology_clear (struct hwloc_topology *topology)
   free(topology->bridge_level);
   free(topology->pcidev_level);
   free(topology->osdev_level);
+  free(topology->misc_level);
 }
 
 void
@@ -3216,7 +3257,7 @@ hwloc__check_children_depth(struct hwloc_topology *topology, struct hwloc_obj *p
   }
   /* Misc children list */
   for(child = parent->misc_first_child; child; child = child->next_sibling) {
-    assert(child->depth == (unsigned) -1);
+    assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_MISC);
   }
 }
 

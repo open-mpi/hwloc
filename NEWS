@@ -50,6 +50,7 @@ Version 2.0
     hwloc_topology_insert_group_object() to precisely specify the location
     of an additional hierarchy level in the topology.
   + Misc objects are now stored in a dedicated children list.
+  + Misc objects have their own level and depth to iterate over all of them.
   + Misc objects may now only be inserted as a leaf object with
     hwloc_topology_insert_misc_object() which deprecates
     hwloc_topology_insert_misc_object_by_parent().
