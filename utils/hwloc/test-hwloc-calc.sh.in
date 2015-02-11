@@ -74,6 +74,8 @@ set -e
   echo
   $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os=eth6 os=eth4
   $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os=sdc os=sr0 ~os=sda
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os:7-8
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:10-11
   $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci'[1000:0062]':3:2
   $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci'[14e4:1639]':1
   $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci'[14e4:1639]':2-5

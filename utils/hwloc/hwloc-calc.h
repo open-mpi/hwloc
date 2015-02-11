@@ -96,8 +96,6 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
   if (depthattr == -1) {
     hwloc_obj_type_t realtype;
     /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
-    if (type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE || type == HWLOC_OBJ_BRIDGE)
-      return -1;
     depth = hwloc_get_type_or_above_depth(topology, type);
     if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
       if (verbose >= 0)
@@ -367,97 +365,116 @@ hwloc_calc_append_iodev(void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
   return 0;
 }
 
-static __hwloc_inline hwloc_obj_t
-hwloc_calc_find_next_pci_object(hwloc_topology_t topology, int vendor, int device,
-				hwloc_obj_t prev, unsigned index_, int wrap)
-{
-  unsigned i = 0;
-  hwloc_obj_t obj = prev;
-  while (1) {
-    obj = hwloc_get_next_pcidev(topology, obj);
-    if (obj == prev)
-      break; /* don't reuse the same object, even if wrap==1 */
-    if (!obj) {
-      if (!wrap)
-	break;
-      wrap = 0; /* wrap only once per call, to avoid infinite loops */
-      obj = hwloc_get_next_pcidev(topology, NULL);
-      if (!obj)
-	break;
-    }
-    if ((vendor == -1 || (int) obj->attr->pcidev.vendor_id == vendor)
-	&& (device == -1 || (int) obj->attr->pcidev.device_id == device))
-      if (++i == index_)
-        return obj;
-  }
-  return NULL;
-}
-
 static __hwloc_inline int
-hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string,
-				   void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
-				   int verbose)
+hwloc_calc_append_iodev_by_index(hwloc_topology_t topology, hwloc_obj_type_t type, int depth, const char *string,
+				 void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
+				 int verbose)
 {
-  hwloc_obj_t obj;
-  int vendor, device;
+  hwloc_obj_t obj, prev = NULL;
+  int pcivendor = -1, pcidevice = -1;
   const char *current, *dot;
   char *endp;
   int first = 0, step = 1, amount = 1, wrap = 0; /* assume the index suffix is `:0' by default */
-  int err, i, oldi, j;
+  int err, i, max;
 
-  current = string;
+  if (*string == '[') {
+    /* matching */
+    current = string+1;
 
-  /* try to match by [vendor:device] */
-  vendor = strtoul(current, &endp, 16);
-  if (*endp != ':')
-    goto failedvendordevice;
-  if (endp == current)
-    vendor = -1;
-  current = endp+1;
+    if (type == HWLOC_OBJ_PCI_DEVICE) {
+      /* try to match by [vendor:device] */
+      pcivendor = strtoul(current, &endp, 16);
+      if (*endp != ':') {
+	if (verbose >= 0)
+	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
+	return -1;
+      }
+      if (endp == current)
+	pcivendor = -1;
+      current = endp+1;
 
-  device = strtoul(current, &endp, 16);
-  if (*endp != ']')
-    goto failedvendordevice;
-  if (endp == current)
-    device = -1;
-  endp++;
-  if (*endp != ':' && *endp != '\0')
-    goto failedvendordevice;
+      pcidevice = strtoul(current, &endp, 16);
+      if (*endp != ']') {
+	if (verbose >= 0)
+	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
+      	return -1;
+      }
+      if (endp == current)
+	pcidevice = -1;
+      current = endp+1;
 
-  if (*endp != '\0') {
-    current = endp+1;
+      if (*current != ':' && *current != '\0') {
+	if (verbose >= 0)
+	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
+      	return -1;
+      }
+
+    } else {
+      /* no matching for non-PCI devices */
+      if (verbose >= 0)
+	fprintf(stderr, "invalid matching specification %s\n", string);
+      return -1;
+    }
+
+  } else {
+    /* no matching */
+    current = string;
+  }
+
+  if (*current != '\0') {
+    current++;
     err = hwloc_calc_parse_range(current,
 				 &first, &amount, &step, &wrap,
 				 &dot);
-    if (err < 0 || dot)
-      goto failedvendordevice;
-  }
-
-  obj = NULL;
-  for(oldi=-1, i=first, j=0; j<amount || amount == -1; oldi=i, i+=step, j++) {
-    obj = hwloc_calc_find_next_pci_object(topology, vendor, device, obj, i-oldi, wrap);
-    if (obj) {
-      if (verbose > 0)
-	printf("using matching PCI object #%d bus id %04x:%02x:%02x.%01x\n", i,
-	       obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-      hwloc_calc_append_iodev(cbfunc, cbdata, obj, verbose);
-    } else {
-      if (amount != -1)
-	if (verbose >= 0)
-	  fprintf(stderr, "no matching PCI object #%d\n", i);
-      break;
+    if (dot) {
+      fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
+      return -1;
     }
+    if (err < 0)
+      return -1;
   }
+
+  max = hwloc_get_nbobjs_by_depth(topology, depth);
+
+  for(i=0; i < max*(wrap+1); i++) {
+    if (i == max && wrap) {
+      i = 0;
+      wrap = 0;
+    }
+
+    obj = hwloc_get_obj_by_depth(topology, depth, i);
+    assert(obj);
+
+    if (obj == prev) /* already used that object, stop wrapping around */
+      break;
+
+    if (type == HWLOC_OBJ_PCI_DEVICE) {
+      if (pcivendor != -1 && (int) obj->attr->pcidev.vendor_id != pcivendor)
+	continue;
+      if (pcidevice != -1 && (int) obj->attr->pcidev.device_id != pcidevice)
+	continue;
+    }
+
+    if (first--)
+      continue;
+
+    /* ok, got one object */
+    if (verbose > 0)
+      printf("using matching PCI object #%d bus id %04x:%02x:%02x.%01x\n", i,
+	     obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
+    hwloc_calc_append_iodev(cbfunc, cbdata, obj, verbose);
+
+    if (!prev)
+      prev = obj;
+
+    amount--;
+    if (!amount)
+      break;
+
+    first = step-1;
+  }
+
   return 0;
-
- failedvendordevice:
-  /* TODO: more matching variants? vendor/device names? class?
-   * but we don't want some ugly and unmaintainable code
-   */
-
-  if (verbose >= 0)
-    fprintf(stderr, "invalid PCI device %s\n", string);
-  return -1;
 }
 
 static __hwloc_inline int
@@ -475,11 +492,16 @@ hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
 					arg, typelen,
 					&type,
 					verbose);
-  if (depth < 0) {
+
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+    return -1;
+
+  } else if (depth < 0) {
     /* if we didn't find a depth but found a type, handle special cases */
     hwloc_obj_t obj = NULL;
-    if (*sep == '[' && type == HWLOC_OBJ_PCI_DEVICE) {
-      return hwloc_calc_append_pci_object_range(topology, sep+1, cbfunc, cbdata, verbose);
+
+    if (*sep == ':' || *sep == '[') {
+      return hwloc_calc_append_iodev_by_index(topology, type, depth, sep, cbfunc, cbdata, verbose);
 
     } else if (*sep == '=' && type == HWLOC_OBJ_PCI_DEVICE) {
       /* try to match a busid */
