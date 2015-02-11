@@ -526,6 +526,19 @@ hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
       if (verbose >= 0)
 	fprintf(stderr, "invalid OS device %s\n", sep+1);
       return -1;
+
+    } else if (*sep == '=' && type == HWLOC_OBJ_MISC) {
+      /* try to match a Misc device name */
+      obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_MISC, 0);
+      while (obj) {
+	if (!strcmp(obj->name, sep+1))
+	  return hwloc_calc_append_iodev(cbfunc, cbdata, obj, verbose);
+	obj = obj->next_cousin;
+      }
+      if (verbose >= 0)
+	fprintf(stderr, "invalid Misc object %s\n", sep+1);
+      return -1;
+
     } else
       return -1;
   }
