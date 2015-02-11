@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -407,7 +407,7 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
 
   current = string;
 
-  /* try to match by vendor:device */
+  /* try to match by [vendor:device] */
   vendor = strtoul(current, &endp, 16);
   if (*endp != ':')
     goto failedvendordevice;
@@ -416,10 +416,13 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
   current = endp+1;
 
   device = strtoul(current, &endp, 16);
-  if (*endp != ':' && *endp != '\0')
+  if (*endp != ']')
     goto failedvendordevice;
   if (endp == current)
     device = -1;
+  endp++;
+  if (*endp != ':' && *endp != '\0')
+    goto failedvendordevice;
 
   if (*endp != '\0') {
     current = endp+1;
@@ -475,8 +478,7 @@ hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
   if (depth < 0) {
     /* if we didn't find a depth but found a type, handle special cases */
     hwloc_obj_t obj = NULL;
-    if (*sep == ':' && type == HWLOC_OBJ_PCI_DEVICE) {
-      /* FIXME: change to another syntax? */
+    if (*sep == '[' && type == HWLOC_OBJ_PCI_DEVICE) {
       return hwloc_calc_append_pci_object_range(topology, sep+1, cbfunc, cbdata, verbose);
 
     } else if (*sep == '=' && type == HWLOC_OBJ_PCI_DEVICE) {
@@ -543,7 +545,7 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 
   /* try to match a type/depth followed by a special character */
   typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-  if (typelen && (arg[typelen] == ':' || arg[typelen] == '=')) {
+  if (typelen && (arg[typelen] == ':' || arg[typelen] == '=' || arg[typelen] == '[')) {
     /* process type/depth */
     hwloc_bitmap_t newset = hwloc_bitmap_alloc();
     err = hwloc_calc_process_type_arg(topology, topodepth, arg, typelen, logical,

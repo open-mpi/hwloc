@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -81,9 +81,9 @@ set -e
   echo
   $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml os=eth6 os=eth4
   $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml os=sdc os=sr0 ~os=sda
-  $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci:1000:0062:3:2
-  $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci:14e4:1639:1
-  $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci:14e4:1639:2-5
+  $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci'[1000:0062]':3:2
+  $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci'[14e4:1639]':1
+  $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci'[14e4:1639]':2-5
   $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci=0000:62:00.1 pci=0000:02:00.1
   $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci=0000:62:00.1 xpci=0000:02:00.0
   $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci=0000:02:00.0 xpci=0000:02:00.1
