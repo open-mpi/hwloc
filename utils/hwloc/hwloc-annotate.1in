@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2013-2014 Inria.  All rights reserved.
+.\" Copyright © 2013-2015 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-ANNOTATE "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
@@ -97,6 +97,10 @@ Add an info attribute to the root object of the topology
 and modify the input XML directly:
 
     $ hwloc-annotate file.xml file.xml root info infoname infovalue
+
+Add an info attribute to OS device #2 and #3:
+
+    $ hwloc-annotate input.xml output.xml os:2-3 info infoname infovalue
 
 Change package objects to green with red text in the lstopo graphical output:
 

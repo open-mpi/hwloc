@@ -26,6 +26,8 @@ Version 1.11.0
   + HWLOC_OBJ_NODE is replaced with HWLOC_OBJ_NUMANODE for clarification.
     HWLOC_OBJ_NODE is still supported for backward compatibility.
     "Node" and "NUMANode" strings are supported as in earlier releases.
+* Tools
+  + hwloc-annotate may now operate on all types of objects, including I/O.
 * Backends
   + Gather total machine memory on NetBSD.
 * Misc
