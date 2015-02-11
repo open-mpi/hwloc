@@ -77,6 +77,7 @@
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="Core Processor Integrated Graphics Controller"/>
         <info name="Foo" value="Bar"/>
+        <info name="mypcidev" value="byindex"/>
         <object type="OSDev" name="controlD64" osdev_type="1">
           <info name="Foo" value="Bar"/>
         </object>
@@ -88,9 +89,11 @@
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="82577LM Gigabit Network Connection"/>
         <info name="Foo" value="Bar"/>
+        <info name="mypcidev" value="byindex"/>
         <object type="OSDev" name="eth0" osdev_type="2">
           <info name="Address" value="5c:26:0a:53:da:8c"/>
           <info name="Foo" value="Bar"/>
+          <info name="myosdev" value="byindex"/>
         </object>
       </object>
       <object type="Bridge" os_index="449" name="Intel Corporation 5 Series/3400 Series Chipset PCI Express Root Port 2" bridge_type="1-1" depth="1" bridge_pci="0000:[02-02]" pci_busid="0000:00:1c.1" pci_type="0604 [8086:3b44] [0000:0000] 05" pci_link_speed="0.000000">
@@ -101,9 +104,11 @@
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="Centrino Ultimate-N 6300"/>
           <info name="Foo" value="Bar"/>
+          <info name="mypcidev" value="bybusid"/>
           <object type="OSDev" name="wlan0" osdev_type="2">
             <info name="Address" value="00:24:d7:0f:bd:34"/>
             <info name="Foo" value="Bar"/>
+            <info name="myosdev" value="byindex"/>
           </object>
         </object>
       </object>

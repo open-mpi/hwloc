@@ -52,6 +52,8 @@ Version 2.0
   + Misc object may now only be inserted as a leaf object with
     hwloc_topology_insert_misc_object() which deprecates
     hwloc_topology_insert_misc_object_by_parent().
+* Tools
+  + hwloc-annotate may now operate on all types of objects, including I/O.
 * Plugin API
   + hwloc_fill_object_sets() is renamed into hwloc_obj_add_children_sets().
 * Backends
