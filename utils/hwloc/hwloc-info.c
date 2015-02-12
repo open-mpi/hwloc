@@ -418,7 +418,7 @@ main (int argc, char *argv[])
       } else {
 	/* try to match a type/depth followed by a special character */
 	typelen = strspn(argv[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=')) {
+	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=' || argv[0][typelen] == '[')) {
 	  err = hwloc_calc_process_type_arg(topology, topodepth, argv[0], typelen, logical,
 					    hwloc_calc_process_arg_info_cb, NULL,
 					    verbose_mode);

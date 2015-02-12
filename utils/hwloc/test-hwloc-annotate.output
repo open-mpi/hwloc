@@ -78,6 +78,7 @@
         <info name="PCIDevice" value="Core Processor Integrated Graphics Controller"/>
         <info name="Foo" value="Bar"/>
         <info name="mypcidev" value="byindex"/>
+        <info name="mypcidev" value="bymatch"/>
         <object type="OSDev" name="controlD64" osdev_type="1">
           <info name="Foo" value="Bar"/>
         </object>
