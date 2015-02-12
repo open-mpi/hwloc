@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -301,6 +301,7 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0105: return "ATA";
 	case 0x0106: return "SATA";
 	case 0x0107: return "SAS";
+	case 0x0108: return "NVMExp";
       }
       return "Stor";
     case 0x02:
@@ -312,6 +313,7 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0204: return "ISDN";
 	case 0x0205: return "WrdFip";
 	case 0x0206: return "PICMG";
+	case 0x0207: return "IB";
       }
       return "Net";
     case 0x03:
@@ -368,6 +370,7 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0803: return "RTC";
 	case 0x0804: return "HtPl";
 	case 0x0805: return "SD-HtPl";
+	case 0x0806: return "IOMMU";
       }
       return "Syst";
     case 0x09:
@@ -434,6 +437,10 @@ hwloc_pci_class_string(unsigned short class_id)
       return "Crypt";
     case 0x11:
       return "Signl";
+    case 0x12:
+      return "Accel";
+    case 0x13:
+      return "Instr";
     case 0xff:
       return "Oth";
   }
