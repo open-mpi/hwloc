@@ -1896,7 +1896,8 @@ hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
 	    && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
 	    && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
 	    && baseclass != 0x0b /* PCI_BASE_CLASS_PROCESSOR */
-	    && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */)
+	    && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */
+	    && baseclass != 0x12 /* Processing Accelerators */)
 	  unlink_and_free_object_and_children(pchild);
       }
     }
