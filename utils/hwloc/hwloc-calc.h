@@ -317,8 +317,13 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
 					      nextstring, typelen,
 					      &type,
 					      verbose);
-    if (nextdepth < 0)
+    if (nextdepth == HWLOC_TYPE_DEPTH_UNKNOWN || nextdepth == HWLOC_TYPE_DEPTH_MULTIPLE)
       return -1;
+    if (nextdepth < 0) {
+      if (verbose >= 0)
+	fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
+      return -1;
+    }
   }
 
   width = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, rootset, depth);
