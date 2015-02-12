@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012 Inria.  All rights reserved.
+ * Copyright © 2012-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -143,6 +143,7 @@ int main(int argc, char *argv[])
 	}
 
 	hwloc_topology_init(&topology);
+	hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES);
 	err = hwloc_topology_set_xml(topology, input);
 	if (err < 0)
 		goto out;

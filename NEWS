@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.10.2
+--------------
+* hwloc-annotate does not drop instruction caches and I/O devices from the
+  output anymore.
+
+
 Version 1.10.1
 --------------
 * Actually remove disallowed NUMA nodes from nodesets when the whole-system
