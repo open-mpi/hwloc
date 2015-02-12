@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 	} else {
 		size_t typelen;
 		typelen = strspn(location, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-		if (typelen && (location[typelen] == ':' || location[typelen] == '=')) {
+		if (typelen && (location[typelen] == ':' || location[typelen] == '=' || location[typelen] == '[')) {
 			err = hwloc_calc_process_type_arg(topology, topodepth, location, typelen, 1,
 							  hwloc_calc_process_arg_info_cb, NULL,
 							  0);
