@@ -493,7 +493,7 @@ hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
 					&type,
 					verbose);
 
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN && depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
     return -1;
 
   } else if (depth < 0) {
