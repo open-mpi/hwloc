@@ -161,6 +161,8 @@ int support_load_json(struct netloc_topology * topology)
             free(tmp_str);
         }
     }
+    netloc_dt_lookup_table_iterator_t_destruct(hti);
+    hti = NULL;
 
     // for each edge
     //   find the corresponding node, and point to it.
@@ -259,7 +261,7 @@ int support_load_json(struct netloc_topology * topology)
 
         if( NULL != node->logical_paths ) {
             netloc_lookup_table_destroy(node->logical_paths);
-	    free(node->logical_paths);
+            free(node->logical_paths);
             node->logical_paths = NULL;
         }
         node->logical_paths = netloc_dt_node_t_json_decode_paths(topology->edges, json_path);
