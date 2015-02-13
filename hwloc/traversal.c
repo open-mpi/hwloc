@@ -32,6 +32,8 @@ hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
       return HWLOC_OBJ_PCI_DEVICE;
     case HWLOC_TYPE_DEPTH_OS_DEVICE:
       return HWLOC_OBJ_OS_DEVICE;
+    case HWLOC_TYPE_DEPTH_MISC:
+      return HWLOC_OBJ_MISC;
     default:
       return (hwloc_obj_type_t) -1;
     }
@@ -49,6 +51,8 @@ hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, unsigned depth)
       return topology->pcidev_nbobjects;
     case HWLOC_TYPE_DEPTH_OS_DEVICE:
       return topology->osdev_nbobjects;
+    case HWLOC_TYPE_DEPTH_MISC:
+      return topology->misc_nbobjects;
     default:
       return 0;
     }
@@ -66,6 +70,8 @@ hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigne
       return idx < topology->pcidev_nbobjects ? topology->pcidev_level[idx] : NULL;
     case HWLOC_TYPE_DEPTH_OS_DEVICE:
       return idx < topology->osdev_nbobjects ? topology->osdev_level[idx] : NULL;
+    case HWLOC_TYPE_DEPTH_MISC:
+      return idx < topology->misc_nbobjects ? topology->misc_level[idx] : NULL;
     default:
       return NULL;
     }

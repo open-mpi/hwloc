@@ -550,10 +550,14 @@ Make sure to have had a look at those too!
 
 <dt>Children object(s)</dt>
   <dd>The object (or objects) contained in the current object because
-  their CPU set is included in the CPU set of the current object.</dd>
+  their CPU set is included in the CPU set of the current object.
+  Each object may also contain a separated list for Misc object children.
+  </dd>
 
 <dt>Arity</dt>
-  <dd>The number of children of an object.</dd>
+  <dd>The number of children of an object.
+  There is also a specific arity for Misc children.
+  </dd>
 
 <dt>Sibling objects</dt>
   <dd>Objects which have the same parent. They usually have the same type
@@ -735,8 +739,8 @@ of the topology.
 
 \section cli_hwloc_annotate hwloc-annotate
 
-hwloc-annotate may add object attributes such as string
-information (see \ref attributes_info for details).
+hwloc-annotate may add object attributes such as string information
+(see \ref attributes_info for details) or Misc children objects.
 It reads an input topology from a XML file and outputs
 the annotated topology as another XML file.
 
@@ -2574,6 +2578,9 @@ However only character strings may be used as key names and values.
 
 It is also possible to insert Misc objects with custom names anywhere
 as a leaf of the topology (<tt>hwloc_topology_insert_misc_object()</tt>).
+
+Misc objects and info attributes may also be added with the
+hwloc-annotate command-line tool.
 
 There is also a topology-specific userdata pointer that can be used
 to recognize different topologies by storing a custom pointer.

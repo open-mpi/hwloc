@@ -1176,6 +1176,7 @@ void
 hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj)
 {
   struct hwloc__xml_export_state_s state;
+  hwloc_obj_t child;
   char *cpuset = NULL;
   char tmp[255];
   unsigned i;
@@ -1331,11 +1332,10 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) &state, topology, obj);
 
-  if (obj->arity) {
-    unsigned x;
-    for (x=0; x<obj->arity; x++)
-      hwloc__xml_export_object (&state, topology, obj->children[x]);
-  }
+  for(child = obj->first_child; child; child = child->next_sibling)
+    hwloc__xml_export_object (&state, topology, child);
+  for(child = obj->misc_first_child; child; child = child->next_sibling)
+    hwloc__xml_export_object (&state, topology, child);
 
   state.end_object(&state, "object");
 }
