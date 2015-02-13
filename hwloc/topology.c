@@ -3019,8 +3019,8 @@ hwloc__check_children(struct hwloc_obj *parent)
     } else {
       /* nothing remains */
       assert(hwloc_bitmap_iszero(remaining_parent_cpuset));
-      hwloc_bitmap_free(remaining_parent_cpuset);
     }
+    hwloc_bitmap_free(remaining_parent_cpuset);
 
     if (parent->type == HWLOC_OBJ_NUMANODE)
       /* if parent is a NUMA node, its os_index bit may remain.
@@ -3033,8 +3033,8 @@ hwloc__check_children(struct hwloc_obj *parent)
     } else {
       /* nothing remains */
       assert(hwloc_bitmap_iszero(remaining_parent_nodeset));
-      hwloc_bitmap_free(remaining_parent_nodeset);
     }
+    hwloc_bitmap_free(remaining_parent_nodeset);
 
   } else {
     /* check that children have no sets if the parent has none */
