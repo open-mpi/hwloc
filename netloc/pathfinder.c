@@ -173,6 +173,14 @@ static int compute_shortest_path_dijkstra(netloc_data_collection_handle_t *handl
     /*
      * Initialize the data structures
      */
+    // Make sure to initialize the arrays
+    for( i = 0; i < netloc_lookup_table_size(handle->node_list); ++i){
+        distance[i] = INT_MAX;
+        not_seen[i] = true;
+        prev_node[i] = NULL;
+        prev_edge[i] = NULL;
+    }
+
     i = 0;
     hti = netloc_dt_lookup_table_iterator_t_construct(handle->node_list);
     while( !netloc_lookup_table_iterator_at_end(hti) ) {
