@@ -214,11 +214,13 @@ int netloc_lookup_table_entry_t_destruct(netloc_lookup_table_entry_t* hte, int d
 int netloc_dt_lookup_table_t_copy(struct netloc_dt_lookup_table *from, struct netloc_dt_lookup_table *to)
 {
     size_t i;
-    int dup = !(from->flags & NETLOC_LOOKUP_TABLE_FLAG_NO_STRDUP_KEY);
+    int dup;
 
     if( NULL == from || NULL == to ) {
         return NETLOC_ERROR;
     }
+
+    dup = !(from->flags & NETLOC_LOOKUP_TABLE_FLAG_NO_STRDUP_KEY);
 
     netloc_lookup_table_init(to, netloc_lookup_table_size(from), from->flags);
 
