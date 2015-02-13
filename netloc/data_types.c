@@ -737,12 +737,14 @@ netloc_node_t* netloc_dt_node_t_json_decode(struct netloc_dt_lookup_table *edge_
     node->num_edge_ids = json_array_size(edge_list);
     node->edge_ids = (int*)malloc(sizeof(int) * node->num_edge_ids);
     if( NULL == node->edge_ids ) {
+        netloc_dt_node_t_destruct(node);
         return NULL;
     }
 
     node->num_edges = node->num_edge_ids;
     node->edges = (netloc_edge_t**)malloc(sizeof(netloc_edge_t*) * node->num_edges);
     if( NULL == node->edges ) {
+        netloc_dt_node_t_destruct(node);
         return NULL;
     }
 
@@ -753,6 +755,7 @@ netloc_node_t* netloc_dt_node_t_json_decode(struct netloc_dt_lookup_table *edge_
         if( NULL == node->edges[i] ) {
             printf("Error: Failed to find edge UID %d for the following node\n",node->edge_ids[i]);
             printf("Error: \t%s\n", netloc_pretty_print_node_t(node));
+            netloc_dt_node_t_destruct(node);
             return NULL;
         }
 
