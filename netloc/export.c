@@ -139,13 +139,26 @@ int netloc_topology_export_graphml(struct netloc_topology * topology, const char
 
     /* Cleanup */
     netloc_dt_lookup_table_iterator_t_destruct(hti);
+    hti = NULL;
     netloc_lookup_table_destroy(nodes);
     free(nodes);
+    nodes = NULL;
 
     fprintf(fh, "\t</graph>\n");
     fprintf(fh, "</graphml>\n");
 
  cleanup:
+    if( NULL != hti ) {
+        netloc_dt_lookup_table_iterator_t_destruct(hti);
+        hti = NULL;
+    }
+
+    if( NULL != nodes ) {
+        netloc_lookup_table_destroy(nodes);
+        free(nodes);
+        nodes = NULL;
+    }
+
     if( NULL != fh ) {
         fclose(fh);
         fh = NULL;
@@ -276,12 +289,21 @@ int netloc_topology_export_gexf(struct netloc_topology * topology, const char * 
         }
     }
 
+    /* Cleanup */
+    netloc_dt_lookup_table_iterator_t_destruct(hti);
+    hti = NULL;
+
     fprintf(fh, "\t\t</edges>\n");
 
     fprintf(fh, "\t</graph>\n");
     fprintf(fh, "</gexf>\n");
 
  cleanup:
+    if( NULL != hti ) {
+        netloc_dt_lookup_table_iterator_t_destruct(hti);
+        hti = NULL;
+    }
+
     if( NULL != fh ) {
         fclose(fh);
         fh = NULL;
