@@ -844,6 +844,8 @@ struct netloc_dt_lookup_table * netloc_dt_node_t_json_decode_paths(struct netloc
          */
         edge_ids = (int*)malloc(sizeof(int) * (num_edges));
         if( NULL == edge_ids ) {
+            netloc_lookup_table_destroy(ht);
+            free(ht);
             return NULL;
         }
 
@@ -859,6 +861,8 @@ struct netloc_dt_lookup_table * netloc_dt_node_t_json_decode_paths(struct netloc
         if( NULL == edges ) {
             free(edge_ids);
             edge_ids = NULL;
+            netloc_lookup_table_destroy(ht);
+            free(ht);
             return NULL;
         }
 
@@ -875,6 +879,10 @@ struct netloc_dt_lookup_table * netloc_dt_node_t_json_decode_paths(struct netloc
 
                 free(edge_ids);
                 edge_ids = NULL;
+                free(edges);
+                edges = NULL;
+                netloc_lookup_table_destroy(ht);
+                free(ht);
                 return NULL;
             }
             free(edge_key);
