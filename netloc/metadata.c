@@ -215,10 +215,12 @@ static int search_uri(const char * search_uri,
     ret = stat(uri_str, &dstat);
     if( 0 != ret ) {
         fprintf(stderr, "Error: Cannot stat the directory <%s>.\n", uri_str);
+        free(uri_str);
         return NETLOC_ERROR;
     }
     if( !(dstat.st_mode & S_IFDIR) ) {
         fprintf(stderr, "Error: The URI does not point to a directory <%s>.\n", uri_str);
+        free(uri_str);
         return NETLOC_ERROR_NOTDIR;
     }
 
@@ -228,6 +230,7 @@ static int search_uri(const char * search_uri,
     dirp = opendir(uri_str);
     if( NULL == dirp ) {
         fprintf(stderr, "Error: Cannot open the directory <%s>.\n", uri_str);
+        free(uri_str);
         return NETLOC_ERROR_NOENT;
     }
 
@@ -294,6 +297,11 @@ static int search_uri(const char * search_uri,
             all_networks = (netloc_network_t**)realloc(all_networks, sizeof(netloc_network_t*)*all_num_networks);
             if( NULL == all_networks ) {
                 fprintf(stderr, "Error: Failed to allocate space for %d networks\n", all_num_networks);
+
+                closedir(dirp);
+                dirp = NULL;
+                netloc_dt_network_t_destruct(tmp_network);
+                free(uri_str);
                 return NETLOC_ERROR;
             }
             all_networks[all_num_networks-1] = tmp_network;
@@ -336,6 +344,19 @@ static int search_uri(const char * search_uri,
             (*num_networks)++;
             (*networks) = (netloc_network_t**)realloc((*networks), sizeof(netloc_network_t*)*(*num_networks));
             if( NULL == (*networks) ) {
+                while( i < all_num_networks ) {
+                    netloc_dt_network_t_destruct(all_networks[i]);
+                    all_networks[i] = NULL;
+                    ++i;
+                }
+
+                free(all_networks);
+                all_networks = NULL;
+
+                closedir(dirp);
+                dirp = NULL;
+                free(uri_str);
+
                 return NETLOC_ERROR;
             }
             (*networks)[(*num_networks)-1] = all_networks[i];
