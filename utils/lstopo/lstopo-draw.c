@@ -146,7 +146,7 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 /* count all children, ignoring PUs if needed */
 static int count_children(hwloc_obj_t obj)
 {
-  unsigned total = obj->arity + obj->misc_arity;
+  unsigned total = obj->arity + obj->io_arity + obj->misc_arity;
   if (lstopo_ignore_pus) {
     unsigned i;
     for (i = 0; i < obj->arity; i++)
@@ -176,6 +176,10 @@ static hwloc_obj_t next_child(hwloc_obj_t parent, hwloc_obj_t prev, int *statep)
   }
   if (!next && state == 0) {
     state = 1;
+    next = parent->io_first_child;
+  }
+  if (!next && state == 1) {
+    state = 2;
     next = parent->misc_first_child;
   }
   if (next && next->type == HWLOC_OBJ_PU && lstopo_ignore_pus) {
@@ -774,7 +778,7 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
   methods->line(output, 0, 0, 0, depth, x + gridsize, y + PCI_HEIGHT/2, x + 2*gridsize, y + PCI_HEIGHT/2);
 
-  if (level->arity > 0) {
+  if (level->io_arity > 0) {
     unsigned bottom = 0, top = 0;
     RECURSE_BEGIN(level, 0);
     RECURSE_FOR(level)
@@ -1325,6 +1329,8 @@ draw_clear(hwloc_topology_t topology, hwloc_obj_t level)
   level->userdata = NULL;
 
   for(child = level->first_child; child; child = child->next_sibling)
+    draw_clear(topology, child);
+  for(child = level->io_first_child; child; child = child->next_sibling)
     draw_clear(topology, child);
   for(child = level->misc_first_child; child; child = child->next_sibling)
     draw_clear(topology, child);

@@ -46,10 +46,12 @@ Version 2.0
 * API
   + The almost-unused "os_level" attribute has been removed from the
     hwloc_obj structure.
+  + I/O and Misc objects are now stored in a dedicated children list, only
+    normal children with non-NULL cpusets and nodesets are in the main
+    children list.
   + Replace hwloc_topology_insert_misc_object_by_cpuset() with
     hwloc_topology_insert_group_object() to precisely specify the location
     of an additional hierarchy level in the topology.
-  + Misc objects are now stored in a dedicated children list.
   + Misc objects have their own level and depth to iterate over all of them.
   + Misc objects may now only be inserted as a leaf object with
     hwloc_topology_insert_misc_object() which deprecates

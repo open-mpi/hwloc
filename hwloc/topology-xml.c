@@ -1334,6 +1334,8 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 
   for(child = obj->first_child; child; child = child->next_sibling)
     hwloc__xml_export_object (&state, topology, child);
+  for(child = obj->io_first_child; child; child = child->next_sibling)
+    hwloc__xml_export_object (&state, topology, child);
   for(child = obj->misc_first_child; child; child = child->next_sibling)
     hwloc__xml_export_object (&state, topology, child);
 

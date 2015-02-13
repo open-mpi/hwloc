@@ -135,6 +135,8 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
   for(child = l->first_child; child; child = child->next_sibling)
     if (child->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
       output_topology (topology, child, l, output, i, logical, verbose_mode);
+  for(child = l->io_first_child; child; child = child->next_sibling)
+    output_topology (topology, child, l, output, i, logical, verbose_mode);
   for(child = l->misc_first_child; child; child = child->next_sibling)
     output_topology (topology, child, l, output, i, logical, verbose_mode);
 }
@@ -150,6 +152,12 @@ output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical
   }
   for(child = l->first_child; child; child = child->next_sibling)
     output_only (topology, child, output, logical, verbose_mode);
+  if (lstopo_show_only == HWLOC_OBJ_BRIDGE || lstopo_show_only == HWLOC_OBJ_PCI_DEVICE
+      || lstopo_show_only == HWLOC_OBJ_OS_DEVICE || lstopo_show_only == HWLOC_OBJ_MISC) {
+    /* I/O can only contain other I/O or Misc, no need to recurse otherwise */
+    for(child = l->io_first_child; child; child = child->next_sibling)
+      output_only (topology, child, output, logical, verbose_mode);
+  }
   if (lstopo_show_only == HWLOC_OBJ_MISC) {
     /* Misc can only contain other Misc, no need to recurse otherwise */
     for(child = l->misc_first_child; child; child = child->next_sibling)

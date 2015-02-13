@@ -551,12 +551,12 @@ Make sure to have had a look at those too!
 <dt>Children object(s)</dt>
   <dd>The object (or objects) contained in the current object because
   their CPU set is included in the CPU set of the current object.
-  Each object may also contain a separated list for Misc object children.
+  Each object may also contain separated lists for I/O and Misc object children.
   </dd>
 
 <dt>Arity</dt>
   <dd>The number of children of an object.
-  There is also a specific arity for Misc children.
+  There are also specific arities for I/O and Misc children.
   </dd>
 
 <dt>Sibling objects</dt>

@@ -228,16 +228,22 @@ typedef enum {
 			  * Bridge objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
+			  * I/O objects are not listed in the main children list,
+			  * but rather in the dedicated io children list.
 			  */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
 			  * These objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
+			  * I/O objects are not listed in the main children list,
+			  * but rather in the dedicated io children list.
 			  */
   HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
 			  * These objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
+			  * I/O objects are not listed in the main children list,
+			  * but rather in the dedicated io children list.
 			  */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
@@ -371,11 +377,11 @@ struct hwloc_obj {
 
   /* children of the same parent are siblings, even if they may have different type and depth */
   struct hwloc_obj *parent;		/**< \brief Parent, \c NULL if root (system object) */
-  unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array. Or the index in parent's Misc children list. */
+  unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array. Or the index in parent's I/O or Misc children list. */
   struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent */
   struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent */
 
-  /* children array below this object (except Misc children) */
+  /* children array below this object (except I/O and Misc children) */
   unsigned arity;			/**< \brief Number of children */
   struct hwloc_obj **children;		/**< \brief Children, \c children[0 .. arity -1] */
   struct hwloc_obj *first_child;	/**< \brief First child */
@@ -386,6 +392,10 @@ struct hwloc_obj {
 					  * If set in the topology root object, lstopo may export the topology
 					  * as a synthetic string.
 					  */
+
+  /* specific list of I/O children */
+  unsigned io_arity;			/**< \brief Number of I/O children */
+  struct hwloc_obj *io_first_child;	/**< \brief First I/O child */
 
   /* specific list of Misc children */
   unsigned misc_arity;			/**< \brief Number of Misc children */
