@@ -678,7 +678,8 @@ void netloc_dc_pretty_print(netloc_data_collection_handle_t *handle)
         if( NULL == cur_node ) {
             break;
         }
-        display_node(cur_node, strdup(""));
+
+        display_node(cur_node, "");
 
         printf("Physical Paths\n");
         printf("--------------\n");
@@ -695,8 +696,10 @@ void netloc_dc_pretty_print(netloc_data_collection_handle_t *handle)
                 ++path_len;
             }
             display_path(cur_node->physical_id,
-                         key, path_len, path, strdup("\t"));
+                         key, path_len, path, "\t");
         }
+        netloc_dt_lookup_table_iterator_t_destruct(hti);
+        hti = NULL;
 
         printf("Logical Paths\n");
         printf("--------------\n");
@@ -713,8 +716,10 @@ void netloc_dc_pretty_print(netloc_data_collection_handle_t *handle)
                 ++path_len;
             }
             display_path(cur_node->physical_id,
-                         key, path_len, path, strdup("\t"));
+                         key, path_len, path, "\t");
         }
+        netloc_dt_lookup_table_iterator_t_destruct(hti);
+        hti = NULL;
     }
     netloc_dt_lookup_table_iterator_t_destruct(htin);
 }
@@ -731,7 +736,7 @@ static void display_node(netloc_node_t *node, char * prefix)
            netloc_pretty_print_node_t(node) );
 
     for(i = 0; i < node->num_edges; ++i ) {
-        display_edge(node->edges[i], strdup("\t"));
+        display_edge(node->edges[i], "\t");
     }
 }
 
