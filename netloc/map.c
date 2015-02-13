@@ -506,14 +506,15 @@ netloc_map__init_servers(struct netloc_map *map)
                     hwloc_topology_diff_destroy(validtopo, diff);
                     continue;
                 }
-                free(refname);
 
                 /* make sure the ref isn't compressed */
                 if (netloc_map__prepare_hwloc_topology(map, refserver) < 0) {
                     fprintf(stderr, "Failed to uncompress reference server %s topology\n", refname);
+                    free(refname);
                     hwloc_topology_diff_destroy(validtopo, diff);
                     continue;
                 }
+                free(refname);
 
                 err = hwloc_topology_dup(&topo, refserver->topology);
                 if (err < 0) {
