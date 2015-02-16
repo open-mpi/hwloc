@@ -3109,9 +3109,32 @@ hwloc_topology_get_depth(struct hwloc_topology *topology)
   return topology->nb_levels;
 }
 
+const struct hwloc_topology_support *
+hwloc_topology_get_support(struct hwloc_topology * topology)
+{
+  return &topology->support;
+}
+
+void hwloc_topology_set_userdata(struct hwloc_topology * topology, const void *userdata)
+{
+  topology->userdata = (void *) userdata;
+}
+
+void * hwloc_topology_get_userdata(struct hwloc_topology * topology)
+{
+  return topology->userdata;
+}
+
+/****************
+ * Debug Checks *
+ ****************/
+
+static void
+hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj);
+
 /* check children between a parent object */
 static void
-hwloc__check_children(struct hwloc_obj *parent)
+hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
 {
   unsigned j;
 
@@ -3129,23 +3152,24 @@ hwloc__check_children(struct hwloc_obj *parent)
 
   /* sibling checks */
   for(j=0; j<parent->arity; j++) {
-    assert(parent->children[j]->parent == parent);
-    assert(parent->children[j]->sibling_rank == j);
+    hwloc_obj_t child = parent->children[j];
+    assert(child->parent == parent);
+    assert(child->sibling_rank == j);
+    if (j)
+      assert(child->prev_sibling == parent->children[j-1]);
+    else
+      assert(!child->prev_sibling);
+    if (j == parent->arity-1)
+      assert(!child->next_sibling);
+    else
+      assert(child->next_sibling == parent->children[j+1]);
+    if (!hwloc_obj_type_is_io(child->type))
+      assert(child->depth > parent->depth);
+    /* recurse */
+    hwloc__check_object(topology, child);
   }
-
-  /* first child specific checks */
   assert(parent->first_child == parent->children[0]);
-  assert(parent->first_child->prev_sibling == NULL);
-
-  /* last child specific checks */
   assert(parent->last_child == parent->children[parent->arity-1]);
-  assert(parent->last_child->next_sibling == NULL);
-
-  /* non-first or -last specific checks */
-  for(j=1; j<parent->arity; j++) {
-    assert(parent->children[j-1]->next_sibling == parent->children[j]);
-    assert(parent->children[j]->prev_sibling == parent->children[j-1]);
-  }
 
   /* we already checked in the caller that objects have either all sets or none */
   if (parent->cpuset) {
@@ -3215,7 +3239,7 @@ hwloc__check_children(struct hwloc_obj *parent)
 }
 
 static void
-hwloc__check_misc_children(struct hwloc_obj *parent)
+hwloc__check_misc_children(hwloc_topology_t topology, hwloc_obj_t parent)
 {
   unsigned j;
   hwloc_obj_t child, prev;
@@ -3231,9 +3255,10 @@ hwloc__check_misc_children(struct hwloc_obj *parent)
   for(prev = NULL, child = parent->misc_first_child, j = 0;
       child;
       prev = child, child = child->next_sibling, j++) {
+    /* all children must be Misc */
     assert(child->type == HWLOC_OBJ_MISC);
-    assert(!child->cpuset);
-    assert(!child->first_child);
+
+    /* check siblings */
     assert(child->parent == parent);
     assert(child->sibling_rank == j);
     if (prev)
@@ -3241,30 +3266,113 @@ hwloc__check_misc_children(struct hwloc_obj *parent)
     assert(child->prev_sibling == prev);
     if (j == parent->misc_arity-1)
       assert(child->next_sibling == NULL);
+
+    /* only Misc children, recurse */
+    assert(!child->first_child);
+    hwloc__check_object(topology, child);
   }
+  /* check arity */
   assert(j == parent->misc_arity);
 }
 
 static void
-hwloc__check_children_depth(struct hwloc_topology *topology, struct hwloc_obj *parent)
+hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj)
 {
-  hwloc_obj_t child;
-  /* main children list */
-  for(child = parent->first_child; child; child = child->next_sibling) {
-    if (child->type == HWLOC_OBJ_BRIDGE)
-      assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_BRIDGE);
-    else if (child->type == HWLOC_OBJ_PCI_DEVICE)
-      assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_PCI_DEVICE);
-    else if (child->type == HWLOC_OBJ_OS_DEVICE)
-      assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_OS_DEVICE);
-    else if (parent->depth != (unsigned) -1)
-      assert(child->depth > parent->depth);
-    hwloc__check_children_depth(topology, child);
+  /* check that sets and depth */
+  if (hwloc_obj_type_is_io(obj->type) || obj->type == HWLOC_OBJ_MISC) {
+    assert(!obj->cpuset);
+    if (obj->type == HWLOC_OBJ_BRIDGE)
+      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_BRIDGE);
+    else if (obj->type == HWLOC_OBJ_PCI_DEVICE)
+      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_PCI_DEVICE);
+    else if (obj->type == HWLOC_OBJ_OS_DEVICE)
+      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_OS_DEVICE);
+    else if (obj->type == HWLOC_OBJ_MISC)
+      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_MISC);
+  } else {
+    assert(obj->cpuset);
+    assert((int) obj->depth >= 0);
   }
-  /* Misc children list */
-  for(child = parent->misc_first_child; child; child = child->next_sibling) {
-    assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_MISC);
+
+  /* there's other cpusets and nodesets if and only if there's a main cpuset */
+  assert(!!obj->cpuset == !!obj->complete_cpuset);
+  assert(!!obj->cpuset == !!obj->allowed_cpuset);
+  assert(!!obj->cpuset == !!obj->nodeset);
+  assert(!!obj->nodeset == !!obj->complete_nodeset);
+  assert(!!obj->nodeset == !!obj->allowed_nodeset);
+
+  /* check that complete/allowed/inline sets are larger than the main sets */
+  if (obj->cpuset) {
+    assert(hwloc_bitmap_isincluded(obj->cpuset, obj->complete_cpuset));
+    assert(hwloc_bitmap_isincluded(obj->nodeset, obj->complete_nodeset));
+    if (topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
+      assert(hwloc_bitmap_isincluded(obj->allowed_cpuset, obj->cpuset));
+      assert(hwloc_bitmap_isincluded(obj->allowed_nodeset, obj->nodeset));
+    } else {
+      assert(hwloc_bitmap_isequal(obj->allowed_cpuset, obj->cpuset));
+      assert(hwloc_bitmap_isequal(obj->allowed_nodeset, obj->nodeset));
+    }
   }
+
+  /* check children */
+  hwloc__check_children(topology, obj);
+  hwloc__check_misc_children(topology, obj);
+}
+
+static void
+hwloc__check_level(struct hwloc_topology *topology, unsigned depth)
+{
+  unsigned width = hwloc_get_nbobjs_by_depth(topology, depth);
+  struct hwloc_obj *prev = NULL;
+  hwloc_obj_t obj;
+  unsigned j;
+
+  /* check each object of the level */
+  for(j=0; j<width; j++) {
+    obj = hwloc_get_obj_by_depth(topology, depth, j);
+    /* check that the object is corrected placed horizontally and vertically */
+    assert(obj);
+    assert(obj->depth == depth);
+    assert(obj->logical_index == j);
+    /* check that all objects in the level have the same type */
+    if (prev) {
+      assert(hwloc_type_cmp(obj, prev) == HWLOC_TYPE_EQUAL);
+      assert(prev->next_cousin == obj);
+    }
+    assert(obj->prev_cousin == prev);
+
+    /* check that PUs and NUMA nodes have correct cpuset/nodeset */
+    if (obj->type == HWLOC_OBJ_PU) {
+      assert(hwloc_bitmap_weight(obj->complete_cpuset) == 1);
+      assert(hwloc_bitmap_first(obj->complete_cpuset) == (int) obj->os_index);
+    }
+    if (obj->type == HWLOC_OBJ_NUMANODE) {
+      assert(hwloc_bitmap_weight(obj->complete_nodeset) == 1);
+      assert(hwloc_bitmap_first(obj->complete_nodeset) == (int) obj->os_index);
+    }
+    prev = obj;
+  }
+  if (prev)
+    assert(prev->next_cousin == NULL);
+
+  if (width) {
+    /* check first object of the level */
+    obj = hwloc_get_obj_by_depth(topology, depth, 0);
+    assert(obj);
+    assert(!obj->prev_cousin);
+    /* check type */
+    assert(hwloc_get_depth_type(topology, depth) == obj->type);
+    assert(depth == (unsigned) hwloc_get_type_depth(topology, obj->type)
+	   || HWLOC_TYPE_DEPTH_MULTIPLE == hwloc_get_type_depth(topology, obj->type));
+    /* check last object of the level */
+    obj = hwloc_get_obj_by_depth(topology, depth, width-1);
+    assert(obj);
+    assert(!obj->next_cousin);
+  }
+
+  /* check last+1 object of the level */
+  obj = hwloc_get_obj_by_depth(topology, depth, width);
+  assert(!obj);
 }
 
 /* check a whole topology structure */
@@ -3274,6 +3382,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   hwloc_obj_type_t type;
   unsigned i, j, depth;
+
+  depth = hwloc_topology_get_depth(topology);
 
   assert(!topology->modified);
 
@@ -3287,16 +3397,24 @@ hwloc_topology_check(struct hwloc_topology *topology)
   }
 
   /* check that last level is PU */
-  assert(hwloc_get_depth_type(topology, hwloc_topology_get_depth(topology)-1) == HWLOC_OBJ_PU);
+  assert(hwloc_get_depth_type(topology, depth-1) == HWLOC_OBJ_PU);
+  assert(hwloc_get_nbobjs_by_depth(topology, depth-1) > 0);
+  for(j=0; j<hwloc_get_nbobjs_by_depth(topology, depth-1); j++) {
+    obj = hwloc_get_obj_by_depth(topology, depth-1, j);
+    assert(obj);
+    assert(obj->type == HWLOC_OBJ_PU);
+  }
   /* check that other levels are not PU */
-  for(i=1; i<hwloc_topology_get_depth(topology)-1; i++)
+  for(i=1; i<depth-1; i++)
     assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_PU);
+
   /* check that we have a NUMA level */
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert(depth < hwloc_topology_get_depth(topology));
+  j = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
+  assert(j < hwloc_topology_get_depth(topology));
+  assert(hwloc_get_depth_type(topology, j) == HWLOC_OBJ_NUMANODE);
   /* check that other levels are not NUMA */
-  for(i=0; i<hwloc_topology_get_depth(topology)-1; i++)
-    if (i != depth)
+  for(i=0; i<depth-1; i++)
+    if (i != j)
       assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_NUMANODE);
 
   /* top-level specific checks */
@@ -3305,113 +3423,16 @@ hwloc_topology_check(struct hwloc_topology *topology)
   assert(obj);
   assert(!obj->parent);
   assert(obj->cpuset);
-
-  depth = hwloc_topology_get_depth(topology);
+  assert(!obj->depth);
 
   /* check each level */
-  for(i=0; i<depth; i++) {
-    unsigned width = hwloc_get_nbobjs_by_depth(topology, i);
-    struct hwloc_obj *prev = NULL;
+  for(i=0; i<depth; i++)
+    hwloc__check_level(topology, i);
+  hwloc__check_level(topology, HWLOC_OBJ_BRIDGE);
+  hwloc__check_level(topology, HWLOC_OBJ_PCI_DEVICE);
+  hwloc__check_level(topology, HWLOC_OBJ_OS_DEVICE);
+  hwloc__check_level(topology, HWLOC_OBJ_MISC);
 
-    /* check each object of the level */
-    for(j=0; j<width; j++) {
-      obj = hwloc_get_obj_by_depth(topology, i, j);
-      /* check that the object is corrected placed horizontally and vertically */
-      assert(obj);
-      assert(obj->depth == i);
-      assert(obj->logical_index == j);
-      /* check that all objects in the level have the same type */
-      if (prev) {
-	assert(hwloc_type_cmp(obj, prev) == HWLOC_TYPE_EQUAL);
-	assert(prev->next_cousin == obj);
-	assert(obj->prev_cousin == prev);
-      }
-      /* check that PUs and NUMA nodes have correct cpuset/nodeset */
-      if (obj->type == HWLOC_OBJ_PU) {
-	assert(hwloc_bitmap_weight(obj->complete_cpuset) == 1);
-	assert(hwloc_bitmap_first(obj->complete_cpuset) == (int) obj->os_index);
-      }
-      if (obj->type == HWLOC_OBJ_NUMANODE) {
-	assert(hwloc_bitmap_weight(obj->complete_nodeset) == 1);
-	assert(hwloc_bitmap_first(obj->complete_nodeset) == (int) obj->os_index);
-      }
-      /* check that all objects have a cpuset except I/O */
-      if (hwloc_obj_type_is_io(obj->type)) {
-	assert(!obj->cpuset);
-      } else {
-	assert(obj->cpuset);
-      }
-      /* there's other cpusets and nodesets if and only if there's a main cpuset */
-      assert(!!obj->cpuset == !!obj->complete_cpuset);
-      assert(!!obj->cpuset == !!obj->allowed_cpuset);
-      assert(!!obj->cpuset == !!obj->nodeset);
-      assert(!!obj->nodeset == !!obj->complete_nodeset);
-      assert(!!obj->nodeset == !!obj->allowed_nodeset);
-      /* check that complete/allowed/inline sets are larger than the main sets */
-      if (obj->cpuset) {
-	assert(hwloc_bitmap_isincluded(obj->cpuset, obj->complete_cpuset));
-	assert(hwloc_bitmap_isincluded(obj->nodeset, obj->complete_nodeset));
-	if (topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
-	  assert(hwloc_bitmap_isincluded(obj->allowed_cpuset, obj->cpuset));
-	  assert(hwloc_bitmap_isincluded(obj->allowed_nodeset, obj->nodeset));
-	} else {
-	  assert(hwloc_bitmap_isequal(obj->allowed_cpuset, obj->cpuset));
-	  assert(hwloc_bitmap_isequal(obj->allowed_nodeset, obj->nodeset));
-	}
-      }
-      /* check children */
-      hwloc__check_children(obj);
-      hwloc__check_misc_children(obj);
-      prev = obj;
-    }
-
-    /* check first object of the level */
-    obj = hwloc_get_obj_by_depth(topology, i, 0);
-    assert(obj);
-    assert(!obj->prev_cousin);
-
-    /* check type */
-    assert(hwloc_get_depth_type(topology, i) == obj->type);
-    assert(i == (unsigned) hwloc_get_type_depth(topology, obj->type) ||
-           HWLOC_TYPE_DEPTH_MULTIPLE == hwloc_get_type_depth(topology, obj->type));
-
-    /* check last object of the level */
-    obj = hwloc_get_obj_by_depth(topology, i, width-1);
-    assert(obj);
-    assert(!obj->next_cousin);
-
-    /* check last+1 object of the level */
-    obj = hwloc_get_obj_by_depth(topology, i, width);
-    assert(!obj);
-  }
-
-  /* check bottom objects */
-  assert(hwloc_get_nbobjs_by_depth(topology, depth-1) > 0);
-  for(j=0; j<hwloc_get_nbobjs_by_depth(topology, depth-1); j++) {
-    obj = hwloc_get_obj_by_depth(topology, depth-1, j);
-    assert(obj);
-    /* bottom-level object must always be PU */
-    assert(obj->type == HWLOC_OBJ_PU);
-  }
-
-  /* check relative depths */
-  obj = hwloc_get_root_obj(topology);
-  assert(obj->depth == 0);
-  hwloc__check_children_depth(topology, obj);
-}
-
-const struct hwloc_topology_support *
-hwloc_topology_get_support(struct hwloc_topology * topology)
-{
-  return &topology->support;
-}
-
-void hwloc_topology_set_userdata(struct hwloc_topology * topology, const void *userdata)
-{
-  topology->userdata = (void *) userdata;
-}
-
-void * hwloc_topology_get_userdata(struct hwloc_topology * topology)
-{
-  return topology->userdata;
+  /* recurse and check the tree of children, and type-specific checks */
+  hwloc__check_object(topology, obj);
 }
