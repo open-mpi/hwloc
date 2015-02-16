@@ -254,11 +254,12 @@ hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 static void
 hwloc_debug_print_objects(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
+  hwloc_obj_t child;
   hwloc_debug_print_object(indent, obj);
-  for (obj = obj->first_child; obj; obj = obj->next_sibling)
-    hwloc_debug_print_objects(indent + 1, obj);
-  for (obj = obj->misc_first_child; obj; obj = obj->next_sibling)
-    hwloc_debug_print_objects(indent + 1, obj);
+  for (child = obj->first_child; child; child = child->next_sibling)
+    hwloc_debug_print_objects(indent + 1, child);
+  for (child = obj->misc_first_child; child; child = child->next_sibling)
+    hwloc_debug_print_objects(indent + 1, child);
 }
 #else /* !HWLOC_DEBUG */
 #define hwloc_debug_print_object(indent, obj) do { /* nothing */ } while (0)
