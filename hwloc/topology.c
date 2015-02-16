@@ -28,6 +28,7 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
+#include <private/misc.h>
 
 #ifdef HAVE_MACH_MACH_INIT_H
 #include <mach/mach_init.h>
@@ -336,6 +337,20 @@ void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *val
   if (nodup && hwloc_obj_get_info_by_name(obj, name))
     return;
   hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
+}
+
+static int hwloc_obj_type_is_special (hwloc_obj_type_t type)
+{
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_MISC + 1 == HWLOC_OBJ_BRIDGE);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE + 1 == HWLOC_OBJ_PCI_DEVICE);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE + 1 == HWLOC_OBJ_OS_DEVICE);
+  return type >= HWLOC_OBJ_MISC && type <= HWLOC_OBJ_OS_DEVICE;
+}
+static int hwloc_obj_type_is_io (hwloc_obj_type_t type)
+{
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE + 1 == HWLOC_OBJ_PCI_DEVICE);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE + 1 == HWLOC_OBJ_OS_DEVICE);
+  return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
 }
 
 /* Traverse children of a parent in a safe way: reread the next pointer as
@@ -729,11 +744,6 @@ static hwloc_obj_type_t hwloc_get_order_type(int order)
   return obj_order_type[order];
 }
 #endif
-
-static int hwloc_obj_type_is_io (hwloc_obj_type_t type)
-{
-  return type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE;
-}
 
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
@@ -3279,7 +3289,7 @@ static void
 hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj)
 {
   /* check that sets and depth */
-  if (hwloc_obj_type_is_io(obj->type) || obj->type == HWLOC_OBJ_MISC) {
+  if (hwloc_obj_type_is_special(obj->type)) {
     assert(!obj->cpuset);
     if (obj->type == HWLOC_OBJ_BRIDGE)
       assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_BRIDGE);
