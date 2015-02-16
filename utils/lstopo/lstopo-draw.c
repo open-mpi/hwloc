@@ -1319,13 +1319,15 @@ output_draw(struct draw_methods *methods, int logical, int legend, hwloc_topolog
 static void
 draw_clear(hwloc_topology_t topology, hwloc_obj_t level)
 {
-  unsigned i;
+  hwloc_obj_t child;
 
   free(level->userdata);
   level->userdata = NULL;
 
-  for (i = 0; i < level->arity; i++)
-    draw_clear(topology, level->children[i]);
+  for(child = level->first_child; child; child = child->next_sibling)
+    draw_clear(topology, child);
+  for(child = level->misc_first_child; child; child = child->next_sibling)
+    draw_clear(topology, child);
 }
 
 void
