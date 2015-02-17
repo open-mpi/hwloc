@@ -410,7 +410,10 @@ append_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newp
 /* Remove an object from its parent and free it.
  * Only updates next_sibling/first_child pointers,
  * so may only be used during early discovery.
- * Children are inserted where the object was.
+ *
+ * Children are inserted in the parent.
+ * If children should be inserted somewhere else (e.g. when merging with a child),
+ * the caller should move them before calling this function.
  */
 static void
 unlink_and_free_single_object(hwloc_obj_t *pparent)
@@ -443,7 +446,9 @@ unlink_and_free_single_object(hwloc_obj_t *pparent)
     /* append old siblings back */
     *lastp = old->next_sibling;
 
-    /* append old Misc children to parent */
+    /* append old Misc children to parent
+     * old->parent cannot be NULL (removing root), misc children should have been moved by the caller earlier.
+     */
     if (old->misc_first_child)
       append_siblings_list(&old->parent->misc_first_child, old->misc_first_child, old->parent);
   }
@@ -1792,6 +1797,11 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
     if (parent == topology->levels[0][0]) {
       child->depth = 0;
     }
+    /* move children to child, so that unlink_and_free_single_object() doesn't move them to the grandparent */
+    if (parent->misc_first_child) {
+      append_siblings_list(&child->misc_first_child, parent->misc_first_child, child);
+      parent->misc_first_child = NULL;
+    }
     unlink_and_free_single_object(pparent);
     topology->modified = 1;
 
@@ -3019,7 +3029,6 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
       hwloc_bitmap_set(droppednodeset, obj->os_index);
     if (obj->misc_first_child && !(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC))
       unlink_and_free_object_and_children(&obj->misc_first_child);
-    /* remove the object from the tree (no need to remove from levels, they will be entirely rebuilt by the caller) */
     unlink_and_free_single_object(pobj);
     topology->modified = 1;
     /* do not remove children. if they were to be removed, they would have been already */
