@@ -201,6 +201,9 @@ enum hwloc_topology_export_synthetic_flags_e {
  * \return -1 if the topology could not be exported,
  * for instance if it is not symmetric.
  *
+ * \note I/O and Misc children are ignored, the synthetic string only
+ * describes normal children.
+ *
  * \note A 1024-byte buffer should be large enough for exporting
  * topologies in the vast majority of cases.
  */

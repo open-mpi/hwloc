@@ -387,8 +387,10 @@ struct hwloc_obj {
   struct hwloc_obj *first_child;	/**< \brief First child */
   struct hwloc_obj *last_child;		/**< \brief Last child */
 
-  int symmetric_subtree;		/**< \brief Set if the subtree of objects below this object is symmetric,
+  int symmetric_subtree;		/**< \brief Set if the subtree of normal objects below this object is symmetric,
 					  * which means all children and their children have identical subtrees.
+					  * I/O and Misc children are ignored.
+					  *
 					  * If set in the topology root object, lstopo may export the topology
 					  * as a synthetic string.
 					  */

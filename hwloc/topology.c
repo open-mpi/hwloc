@@ -1899,6 +1899,7 @@ static void
 hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
 {
   hwloc_obj_t child, *array;
+  int ok;
 
   /* assume we're not symmetric by default */
   root->symmetric_subtree = 0;
@@ -1909,13 +1910,17 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
     return;
   }
 
-  /* look at children, and return if they are not symmetric */
-  child = NULL;
-  while ((child = hwloc_get_next_child(topology, root, child)) != NULL)
+  /* look at normal children only, I/O and Misc are ignored.
+   * return if any child is not symmetric.
+   */
+  ok = 1;
+  for(child = root->first_child; child; child = child->next_sibling) {
     hwloc_propagate_symmetric_subtree(topology, child);
-  while ((child = hwloc_get_next_child(topology, root, child)) != NULL)
     if (!child->symmetric_subtree)
-      return;
+      ok = 0;
+  }
+  if (!ok)
+    return;
   /* Misc and I/O children do not care about symmetric_subtree */
 
   /* now check that children subtrees are identical.

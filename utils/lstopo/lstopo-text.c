@@ -252,11 +252,24 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int overw
   int length;
   char sbuffer[1024];
   char * dbuffer = NULL;
+  unsigned nb1, nb2, nb3;
 
   if (!hwloc_get_root_obj(topology)->symmetric_subtree) {
     fprintf(stderr, "Cannot output assymetric topology in synthetic format.\n");
-    fprintf(stderr, "Adding --no-io may help making the topology symmetric.\n");
     return;
+  }
+
+  nb1 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_MISC);
+  if (nb1) {
+    fprintf(stderr, "Ignoring %u Misc objects.\n", nb1);
+    fprintf(stderr, "Passing --ignore Misc may remove them.\n");
+  }
+  nb1 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_BRIDGE);
+  nb2 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PCI_DEVICE);
+  nb3 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_OS_DEVICE);
+  if (nb1 || nb2 || nb3) {
+    fprintf(stderr, "Ignoring %u Bridge, %u PCI device and %u OS device objects\n", nb1, nb2, nb3);
+    fprintf(stderr, "Passing --no-io may remove them.\n");
   }
 
   length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), lstopo_export_synthetic_flags);
