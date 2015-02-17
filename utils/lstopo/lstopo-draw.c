@@ -156,39 +156,17 @@ static int count_children(hwloc_obj_t obj)
   return total;
 }
 
-/* next child, in all children list
- * statep is used to remember which list we currently are in.
- * prev = NULL => not started yet
- * prev != 0 and *statep = 0 => inside main list
- * prev != 0 and *statep = 1 => inside misc list
- */
-static hwloc_obj_t next_child(hwloc_obj_t parent, hwloc_obj_t prev, int *statep)
+/* next child, in all children list, ignoring PU if needed */
+static hwloc_obj_t next_child(hwloc_topology_t topology, hwloc_obj_t parent, hwloc_obj_t prev)
 {
-  hwloc_obj_t next;
-  int state = *statep;
-
-  if (!prev) {
-    state = 0;
-    next = parent->first_child;
-  } else {
- again:
-    next = prev->next_sibling;
-  }
-  if (!next && state == 0) {
-    state = 1;
-    next = parent->io_first_child;
-  }
-  if (!next && state == 1) {
-    state = 2;
-    next = parent->misc_first_child;
-  }
-  if (next && next->type == HWLOC_OBJ_PU && lstopo_ignore_pus) {
-    prev = next;
+  hwloc_obj_t obj = prev;
+again:
+  obj = hwloc_get_next_child(topology, parent, obj);
+  if (!obj)
+    return NULL;
+  if (obj->type == HWLOC_OBJ_PU && lstopo_ignore_pus)
     goto again;
-  }
-
-  *statep = state;
-  return next;
+  return obj;
 }
 
 /*
@@ -199,7 +177,6 @@ static hwloc_obj_t next_child(hwloc_obj_t parent, hwloc_obj_t prev, int *statep)
 
 #define RECURSE_BEGIN(obj, border) do { \
   hwloc_obj_t child; \
-  int childstate; \
   unsigned numsubobjs = count_children(obj); \
   unsigned width, height; \
   unsigned maxwidth __hwloc_attribute_unused, maxheight __hwloc_attribute_unused; \
@@ -211,9 +188,9 @@ static hwloc_obj_t next_child(hwloc_obj_t parent, hwloc_obj_t prev, int *statep)
 
 #define RECURSE_FOR(obj) \
     /* Iterate over subobjects */ \
-    for(i = 0, childstate = 0, child = next_child(obj, NULL, &childstate); \
+    for(i = 0, child = next_child(topology, obj, NULL); \
 	child; \
-	i++, child = next_child(obj, child, &childstate)) { \
+	i++, child = next_child(topology, obj, child)) { \
 
       /* Recursive call */
 #define RECURSE_CALL_FUN(methods) \

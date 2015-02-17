@@ -411,16 +411,36 @@ hwloc_obj_is_in_subtree (hwloc_topology_t topology __hwloc_attribute_unused, hwl
 
 /** \brief Return the next child.
  *
+ * Return the next child among the normal children list, then among the I/O
+ * children list, then among the Misc children list.
+ *
  * If \p prev is \c NULL, return the first child.
+ *
+ * Return \c NULL when there is no next child.
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t parent, hwloc_obj_t prev)
 {
-  if (!prev)
-    return parent->first_child;
-  if (prev->parent != parent)
-    return NULL;
-  return prev->next_sibling;
+  hwloc_obj_t obj;
+  int state = 0;
+  if (prev) {
+    if (prev->type == HWLOC_OBJ_MISC)
+      state = 2;
+    else if (prev->type == HWLOC_OBJ_BRIDGE || prev->type == HWLOC_OBJ_PCI_DEVICE || prev->type == HWLOC_OBJ_OS_DEVICE)
+      state = 1;
+    obj = prev->next_sibling;
+  } else {
+    obj = parent->first_child;
+  }
+  if (!obj && state == 0) {
+    obj = parent->io_first_child;
+    state = 1;
+  }
+  if (!obj && state == 1) {
+    obj = parent->misc_first_child;
+    state = 2;
+  }
+  return obj;
 }
 
 /** @} */

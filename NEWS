@@ -49,6 +49,8 @@ Version 2.0
   + I/O and Misc objects are now stored in a dedicated children list, only
     normal children with non-NULL cpusets and nodesets are in the main
     children list.
+    - hwloc_get_next_child() may still be used to iterate over these 3 lists
+      of children at once.
   + Replace hwloc_topology_insert_misc_object_by_cpuset() with
     hwloc_topology_insert_group_object() to precisely specify the location
     of an additional hierarchy level in the topology.
