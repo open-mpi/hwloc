@@ -76,7 +76,6 @@ static int hwloc_append_diff_obj_attr_string(hwloc_obj_t obj,
 					     hwloc_topology_diff_t *lastdiffp)
 {
 	hwloc_topology_diff_t newdiff;
-
 	newdiff = malloc(sizeof(*newdiff));
 	if (!newdiff)
 		return -1;
@@ -101,11 +100,6 @@ static int hwloc_append_diff_obj_attr_uint64(hwloc_obj_t obj,
 					     hwloc_topology_diff_t *lastdiffp)
 {
 	hwloc_topology_diff_t newdiff;
-
-	if (obj->type == HWLOC_OBJ_MISC)
-		/* TODO: add a custom level/depth for Misc */
-		return hwloc_append_diff_too_complex(obj, firstdiffp, lastdiffp);
-
 	newdiff = malloc(sizeof(*newdiff));
 	if (!newdiff)
 		return -1;
