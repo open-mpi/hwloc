@@ -21,6 +21,7 @@ Version 1.10.2
 --------------
 * hwloc-annotate does not drop instruction caches and I/O devices from the
   output anymore.
+* Fix Bridge-specific depth attribute.
 
 
 Version 1.10.1
