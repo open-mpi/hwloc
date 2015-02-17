@@ -1804,9 +1804,6 @@ ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
     /* Replace parent with child */
     hwloc_debug("%s", "\nIgnoring parent ");
     hwloc_debug_print_object(0, parent);
-    if (parent == topology->levels[0][0]) {
-      child->depth = 0;
-    }
     /* move children to child, so that unlink_and_free_single_object() doesn't move them to the grandparent */
     if (parent->misc_first_child) {
       append_siblings_list(&child->misc_first_child, parent->misc_first_child, child);
@@ -2233,7 +2230,7 @@ int
 hwloc_connect_levels(hwloc_topology_t topology)
 {
   unsigned l, i=0;
-  hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
+  hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj, root;
   unsigned n_objs, n_taken_objs, n_new_objs;
   int err;
 
@@ -2248,8 +2245,20 @@ hwloc_connect_levels(hwloc_topology_t topology)
   /* initialize all depth to unknown */
   for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
+
   /* initialize root type depth */
-  topology->type_depth[topology->levels[0][0]->type] = 0;
+  root = topology->levels[0][0];
+  root->depth = 0;
+  topology->type_depth[root->type] = 0;
+  /* root level */
+  root->logical_index = 0;
+  root->prev_cousin = NULL;
+  root->next_cousin = NULL;
+  /* root as a child of nothing */
+  root->parent = NULL;
+  root->sibling_rank = 0;
+  root->prev_sibling = NULL;
+  root->next_sibling = NULL;
 
   /* initialize I/O special levels */
   free(topology->bridge_level);
@@ -2699,9 +2708,6 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
    * (for instance System)
    */
   root_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, 0);
-  root_obj->depth = 0;
-  root_obj->logical_index = 0;
-  root_obj->sibling_rank = 0;
   topology->levels[0][0] = root_obj;
 }
 
