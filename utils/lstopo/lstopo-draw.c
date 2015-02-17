@@ -1120,7 +1120,7 @@ static void
 misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned boxheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
-  unsigned myheight = boxheight + (level->arity?gridsize:0), totheight;
+  unsigned myheight = boxheight + (level->misc_arity?gridsize:0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = level->name ? strlen(level->name) * fontsize : 6*fontsize;
   int vert = prefer_vert(topology, logical, level, output, depth, x, y, gridsize);
