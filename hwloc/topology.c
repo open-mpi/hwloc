@@ -3178,7 +3178,8 @@ hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
   assert(parent->last_child == parent->children[parent->arity-1]);
 
   /* we already checked in the caller that objects have either all sets or none */
-  if (parent->cpuset) {
+
+  {
     /* check that parent->cpuset == exclusive OR of children
      * (can be wrong for complete_cpuset since disallowed/offline/unknown PUs can be removed)
      */
@@ -3219,17 +3220,12 @@ hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
       assert(hwloc_bitmap_iszero(remaining_parent_nodeset));
     }
     hwloc_bitmap_free(remaining_parent_nodeset);
-
-  } else {
-    /* check that children have no sets if the parent has none */
-    for(j=0; j<parent->arity; j++)
-      assert(!parent->children[j]->cpuset);
   }
 
   /* check that children complete_cpuset are properly ordered, empty ones may be anywhere
    * (can be wrong for main cpuset since removed PUs can break the ordering).
    */
-  if (parent->complete_cpuset) {
+  {
     int firstchild;
     int prev_firstchild = -1; /* -1 works fine with first comparisons below */
     for(j=0; j<parent->arity; j++) {

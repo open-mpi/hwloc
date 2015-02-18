@@ -526,14 +526,16 @@ Make sure to have had a look at those too!
   processor numbers (as announced by the OS).  They are implemented as the
   ::hwloc_bitmap_t opaque structure.  hwloc CPU sets are just masks, they
   do \em not have any relation with an operating system actual binding notion like
-  Linux' cpusets.</dd>
+  Linux' cpusets.
+  I/O and Misc objects do not have CPU sets while all normal objects have a non-NULL one.</dd>
 
 <dt>Node set</dt>
   <dd>The set of NUMA memory nodes logically included in an object
   (if it makes sense).  They are always expressed using physical node
   numbers (as announced by the OS).  They are implemented with the
   ::hwloc_bitmap_t opaque structure.
-  as bitmaps.</dd>
+  as bitmaps.
+  I/O and Misc objects do not have Node sets while all normal objects have a non-NULL one.</dd>
 
 <dt>Bitmap</dt>
   <dd>A possibly-infinite set of bits used for describing sets of objects

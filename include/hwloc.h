@@ -220,30 +220,31 @@ typedef enum {
 			  * but rather in the dedicated misc children list.
 			  * Misc objects may only have Misc objects as children,
 			  * and those are in the dedicated misc children list as well.
+			  * Misc objects have NULL CPU and node sets.
 			  */
 
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge.
 			  * Any bridge that connects the host or an I/O bus,
 			  * to another I/O bus.
-			  * Bridge objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  * I/O objects are not listed in the main children list,
 			  * but rather in the dedicated io children list.
+			  * I/O objects have NULL CPU and node sets.
 			  */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
-			  * These objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  * I/O objects are not listed in the main children list,
 			  * but rather in the dedicated io children list.
+			  * I/O objects have NULL CPU and node sets.
 			  */
   HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
-			  * These objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  * I/O objects are not listed in the main children list,
 			  * but rather in the dedicated io children list.
+			  * I/O objects have NULL CPU and node sets.
 			  */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
@@ -414,6 +415,8 @@ struct hwloc_obj {
                                           * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
                                           * some of these CPUs may not be allowed for binding, see allowed_cpuset.
                                           *
+					  * \note All objects have non-NULL CPU and node sets except Misc and I/O objects.
+					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
@@ -455,6 +458,8 @@ struct hwloc_obj {
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
                                           * object, so only the first bit may be set in \p nodeset.
                                           *
+					  * \note All objects have non-NULL CPU and node sets except Misc and I/O objects.
+					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,

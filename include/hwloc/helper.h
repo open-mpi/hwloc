@@ -48,7 +48,7 @@ hwloc_get_first_largest_obj_inside_cpuset(hwloc_topology_t topology, hwloc_const
     /* while the object intersects without being included, look at its children */
     hwloc_obj_t child = obj->first_child;
     while (child) {
-      if (child->cpuset && hwloc_bitmap_intersects(child->cpuset, set))
+      if (hwloc_bitmap_intersects(child->cpuset, set))
 	break;
       child = child->next_sibling;
     }
@@ -83,7 +83,7 @@ hwloc_get_next_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_cons
 					   unsigned depth, hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
-  if (!next || !next->cpuset)
+  if (!next)
     return NULL;
   while (next && !hwloc_bitmap_isincluded(next->cpuset, set))
     next = next->next_cousin;
@@ -123,7 +123,7 @@ hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpu
 {
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   unsigned count = 0;
-  if (!obj || !obj->cpuset)
+  if (!obj)
     return NULL;
   while (obj) {
     if (hwloc_bitmap_isincluded(obj->cpuset, set)) {
@@ -172,7 +172,7 @@ hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_
 {
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   unsigned count = 0;
-  if (!obj || !obj->cpuset)
+  if (!obj)
     return 0;
   while (obj) {
     if (hwloc_bitmap_isincluded(obj->cpuset, set))
@@ -224,7 +224,7 @@ hwloc_get_obj_index_inside_cpuset (hwloc_topology_t topology __hwloc_attribute_u
 				   hwloc_obj_t obj)
 {
   int idx = 0;
-  if (!obj->cpuset || !hwloc_bitmap_isincluded(obj->cpuset, set))
+  if (!hwloc_bitmap_isincluded(obj->cpuset, set))
     return -1;
   /* count how many objects are inside the cpuset on the way from us to the beginning of the level */
   while ((obj = obj->prev_cousin) != NULL)
@@ -255,7 +255,7 @@ hwloc_get_child_covering_cpuset (hwloc_topology_t topology __hwloc_attribute_unu
 				hwloc_obj_t parent)
 {
   hwloc_obj_t child;
-  if (!parent->cpuset || hwloc_bitmap_iszero(set))
+  if (hwloc_bitmap_iszero(set))
     return NULL;
   child = parent->first_child;
   while (child) {
@@ -301,7 +301,7 @@ hwloc_get_next_obj_covering_cpuset_by_depth(hwloc_topology_t topology, hwloc_con
 					    unsigned depth, hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
-  if (!next || !next->cpuset)
+  if (!next)
     return NULL;
   while (next && !hwloc_bitmap_intersects(set, next->cpuset))
     next = next->next_cousin;
@@ -631,7 +631,7 @@ hwloc_get_obj_below_by_type (hwloc_topology_t topology,
 {
   hwloc_obj_t obj;
   obj = hwloc_get_obj_by_type (topology, type1, idx1);
-  if (!obj || !obj->cpuset)
+  if (!obj)
     return NULL;
   return hwloc_get_obj_inside_cpuset_by_type(topology, obj->cpuset, type2, idx2);
 }
@@ -662,7 +662,7 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
   hwloc_obj_t obj = hwloc_get_root_obj(topology);
   int i;
   for(i=0; i<nr; i++) {
-    if (!obj || !obj->cpuset)
+    if (!obj)
       return NULL;
     obj = hwloc_get_obj_inside_cpuset_by_type(topology, obj->cpuset, typev[i], idxv[i]);
   }
@@ -728,15 +728,12 @@ hwloc_distrib(hwloc_topology_t topology,
 
   tot_weight = 0;
   for (i = 0; i < n_roots; i++)
-    if (roots[i]->cpuset)
-      tot_weight += hwloc_bitmap_weight(roots[i]->cpuset);
+    tot_weight += hwloc_bitmap_weight(roots[i]->cpuset);
 
   for (i = 0, given = 0, givenweight = 0; i < n_roots; i++) {
     unsigned chunk, weight;
     hwloc_obj_t root = roots[flags & HWLOC_DISTRIB_FLAG_REVERSE ? n_roots-1-i : i];
     hwloc_cpuset_t cpuset = root->cpuset;
-    if (!cpuset)
-      continue;
     weight = hwloc_bitmap_weight(cpuset);
     if (!weight)
       continue;

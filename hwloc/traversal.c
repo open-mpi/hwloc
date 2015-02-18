@@ -142,12 +142,10 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_bi
     int ret;
 
     /* split out the cpuset part corresponding to this child and see if there's anything to do */
-    if (current->children[i]->cpuset) {
-      hwloc_bitmap_and(subset, subset, current->children[i]->cpuset);
-      if (hwloc_bitmap_iszero(subset)) {
-        hwloc_bitmap_free(subset);
-        continue;
-      }
+    hwloc_bitmap_and(subset, subset, current->children[i]->cpuset);
+    if (hwloc_bitmap_iszero(subset)) {
+      hwloc_bitmap_free(subset);
+      continue;
     }
 
     ret = hwloc__get_largest_objs_inside_cpuset (current->children[i], subset, res, max);
