@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -172,7 +172,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop type '%s'\n", tmp);
 	  goto out_with_loops;
 	}
-	if (type == HWLOC_OBJ_MISC) {
+	if (type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	  if (verbose)
 	    fprintf(stderr, "Misc object type disallowed in synthetic index interleaving loop type '%s'\n", tmp);
 	  goto out_with_loops;
@@ -415,9 +415,9 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	errno = EINVAL;
 	goto error;
       }
-      if (type == HWLOC_OBJ_MISC) {
+      if (type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	if (verbose)
-	  fprintf(stderr, "Synthetic string with disallow object type at '%s'\n", pos);
+	  fprintf(stderr, "Synthetic string with disallowed object type at '%s'\n", pos);
 	errno = EINVAL;
 	goto error;
       }
@@ -611,11 +611,6 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
   case HWLOC_OBJ_GROUP:
     obj->attr->group.depth = curlevel->depth;
     break;
-  case HWLOC_OBJ_BRIDGE:
-  case HWLOC_OBJ_PCI_DEVICE:
-  case HWLOC_OBJ_OS_DEVICE:
-    abort();
-    break;
   case HWLOC_OBJ_SYSTEM:
     break;
   case HWLOC_OBJ_MACHINE:
@@ -634,6 +629,9 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
     break;
   case HWLOC_OBJ_PU:
     break;
+  case HWLOC_OBJ_BRIDGE:
+  case HWLOC_OBJ_PCI_DEVICE:
+  case HWLOC_OBJ_OS_DEVICE:
   case HWLOC_OBJ_MISC:
   case HWLOC_OBJ_TYPE_MAX:
     /* Should never happen */
@@ -674,13 +672,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   switch (type) {
     case HWLOC_OBJ_GROUP:
       break;
-    case HWLOC_OBJ_SYSTEM:
-    case HWLOC_OBJ_BRIDGE:
-    case HWLOC_OBJ_PCI_DEVICE:
-    case HWLOC_OBJ_OS_DEVICE:
-      /* Shouldn't happen.  */
-      abort();
-      break;
     case HWLOC_OBJ_MACHINE:
       break;
     case HWLOC_OBJ_NODE:
@@ -693,6 +684,10 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_PU:
       break;
+    case HWLOC_OBJ_SYSTEM:
+    case HWLOC_OBJ_BRIDGE:
+    case HWLOC_OBJ_PCI_DEVICE:
+    case HWLOC_OBJ_OS_DEVICE:
     case HWLOC_OBJ_MISC:
     case HWLOC_OBJ_TYPE_MAX:
       /* Should never happen */

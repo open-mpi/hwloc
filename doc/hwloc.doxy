@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux 1
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1872,13 +1872,13 @@ That is why the above topology contains 4 cores (2 cores times 2 nodes).
 
 These type names must be written as
 <tt>machine</tt>, <tt>node</tt>, <tt>socket</tt>, <tt>core</tt>,
-<tt>cache</tt>, <tt>pu</tt>, <tt>misc</tt>, <tt>group</tt>.
+<tt>cache</tt>, <tt>pu</tt>, <tt>group</tt>.
 They do not need to be written case-sensitively, nor entirely
 (as long as there is no ambiguity, 2 characters such as <tt>ma</tt>
  select a Machine level).
 Type-specific attributes may also be given such as <tt>L2iCache</tt>
 (hwloc_obj_type_sscanf() is used for parsing the type names).
-Note that I/O objects are not available.
+Note that I/O and Misc objects are not available.
 
 The root object does not appear in the string.
 A Machine object is used by default, and a System object replaces it
