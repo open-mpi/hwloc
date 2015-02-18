@@ -54,6 +54,7 @@ $annotate $file $file os:2-3 info myosdev byindex
 $annotate $file $file pci:4:2 info mypcidev byindex
 $annotate $file $file pci=0000:02:00.0 info mypcidev bybusid
 $annotate $file $file 'pci[8086:0046]:all' info mypcidev bymatch
+$annotate $file $file bridge:all info mybridges all
 
 diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-annotate.output "$file"
 rm -rf "$tmp"

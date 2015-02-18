@@ -75,6 +75,7 @@
       </object>
     </object>
     <object type="Bridge" os_index="0" bridge_type="0-1" depth="0" bridge_pci="0000:[00-05]">
+      <info name="mybridges" value="all"/>
       <object type="PCIDev" os_index="32" name="Intel Corporation Core Processor Integrated Graphics Controller" pci_busid="0000:00:02.0" pci_type="0300 [8086:0046] [0028:000a] 02" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="Core Processor Integrated Graphics Controller"/>
@@ -95,6 +96,7 @@
       <object type="Bridge" os_index="449" name="Intel Corporation 5 Series/3400 Series Chipset PCI Express Root Port 2" bridge_type="1-1" depth="1" bridge_pci="0000:[02-02]" pci_busid="0000:00:1c.1" pci_type="0604 [8086:3b44] [0000:0000] 05" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="5 Series/3400 Series Chipset PCI Express Root Port 2"/>
+        <info name="mybridges" value="all"/>
         <object type="PCIDev" os_index="8192" name="Intel Corporation Centrino Ultimate-N 6300" pci_busid="0000:02:00.0" pci_type="0280 [8086:422b] [0086:0021] 35" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="Centrino Ultimate-N 6300"/>
