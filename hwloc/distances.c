@@ -462,8 +462,7 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
   nodeset = hwloc_bitmap_alloc();
   for(i=0; i<nbobjs; i++) {
     hwloc_bitmap_or(cpuset, cpuset, objs[i]->cpuset);
-    if (objs[i]->nodeset)
-      hwloc_bitmap_or(nodeset, nodeset, objs[i]->nodeset);
+    hwloc_bitmap_or(nodeset, nodeset, objs[i]->nodeset);
   }
   /* find the object covering cpuset, we'll take care of the nodeset later */
   root = hwloc_get_obj_covering_cpuset(topology, cpuset);
@@ -595,7 +594,6 @@ hwloc_clear_object_distances_one(struct hwloc_distances_s * distances)
 {
   free(distances->latency);
   free(distances);
-
 }
 
 void
