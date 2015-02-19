@@ -1148,7 +1148,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 
       case HWLOC_OBJ_DIFFERENT:
         /* OBJ should be a child of CUR before CHILD, mark its position if not found yet. */
-	if (!putp && (!child->cpuset || hwloc__object_cpusets_compare_first(obj, child) < 0))
+	if (!putp && hwloc__object_cpusets_compare_first(obj, child) < 0)
 	  /* Don't insert yet, there could be intersect errors later */
 	  putp = cur_children;
 	/* Advance cur_children.  */
@@ -1192,7 +1192,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     obj->first_child = child->next_sibling;
     obj->parent = cur;
     /* Find child position in CUR, and insert. */
-    while (*cur_children && (*cur_children)->cpuset && hwloc__object_cpusets_compare_first(*cur_children, child) < 0)
+    while (*cur_children && hwloc__object_cpusets_compare_first(*cur_children, child) < 0)
       cur_children = &(*cur_children)->next_sibling;
     child->next_sibling = *cur_children;
     *cur_children = child;
@@ -1654,9 +1654,7 @@ hwloc__reorder_children(hwloc_obj_t parent)
     children = child->next_sibling;
     /* find where to enqueue it */
     prev = &parent->first_child;
-    while (*prev
-	   && (!child->cpuset || !(*prev)->cpuset
-	       || hwloc__object_cpusets_compare_first(child, *prev) > 0))
+    while (*prev && hwloc__object_cpusets_compare_first(child, *prev) > 0)
       prev = &((*prev)->next_sibling);
     /* enqueue */
     child->next_sibling = *prev;
