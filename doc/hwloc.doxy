@@ -574,7 +574,9 @@ Make sure to have had a look at those too!
 
 <dt>Level</dt>
   <dd>Set of objects of the same type and depth. All these objects
-  are cousins.</dd>
+  are cousins.
+  I/O and Misc objects also have their own specific levels and depth.
+  </dd>
 
 <dt>Depth</dt>
   <dd>Nesting level in the object tree, starting from the root object.
@@ -1058,7 +1060,9 @@ For instance, if a I/O Hub is connected to a package, the corresponding
 hwloc bridge object (and its PCI bridges and devices children) is inserted
 as a child of the corresponding hwloc package object.
 
-These new objects have neither CPU sets nor node sets (NULL pointers) because
+<b>These children are not in the normal children list but rather in the I/O-specific
+children list.</b>
+They also have neither CPU sets nor node sets (NULL pointers) because
 they are not directly usable by the user applications.
 Moreover I/O hierarchies may be highly complex (asymmetric trees of bridges).
 So I/O objects are placed in specific levels with custom depths.
@@ -1070,7 +1074,7 @@ and hwloc_get_next_osdev() for convenience (see \ref hwlocality_advanced_io).
 An I/O hierarchy is organized as follows:
 A hostbridge object ( <tt>::HWLOC_OBJ_BRIDGE</tt> object with upstream
 type <em>Host</em> and downstream type <em>PCI</em>) is attached below
-a regular object (usually the entire machine or a NUMA node).
+a normal object (usually the entire machine or a NUMA node).
 There may be multiple hostbridges in the machine, attached to
 different places, but all I/O devices are below one of them.
 Each hostbridge contains one or several children, either other bridges
@@ -1169,7 +1173,7 @@ their CPU sets and node sets are NULL.
 Their locality must be retrieved by walking up the object tree
 (through the <tt>parent</tt> link) until an non-I/O object is found
 (see hwloc_get_non_io_ancestor_obj()).
-This regular object should have non-NULL CPU sets and node sets
+This normal object should have non-NULL CPU sets and node sets
 which describe the processing units and memory that are immediately
 close to the I/O device.
 For instance the path from a OS device to its locality may go
