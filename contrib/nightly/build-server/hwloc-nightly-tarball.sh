@@ -23,7 +23,7 @@ script_uri=contrib/nightly/make_snapshot_tarball
 if [ $# -eq 0 ] ; then
     # Branches v1.6 and earlier were not updated to build nightly
     # snapshots from git, so only check v1.7 and later
-    branches="master v1.7"
+    branches="master v1.7 v1.8 v1.9 v1.10"
 else
     branches=$@
 fi
