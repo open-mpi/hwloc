@@ -2992,21 +2992,18 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
   int dropping;
-  int modified = obj->complete_cpuset && hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset);
+  int modified = hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset);
 
   hwloc_clear_object_distances(obj);
 
-  if (obj->cpuset)
-    hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
-  if (obj->complete_cpuset)
-    hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
-  if (obj->allowed_cpuset)
-    hwloc_bitmap_andnot(obj->allowed_cpuset, obj->allowed_cpuset, droppedcpuset);
+  hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
+  hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
+  hwloc_bitmap_andnot(obj->allowed_cpuset, obj->allowed_cpuset, droppedcpuset);
 
   if (hwloc_obj_type_is_io(obj->type)) {
     dropping = droppingparent && !(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO);
   } else {
-    dropping = droppingparent || (obj->cpuset && hwloc_bitmap_iszero(obj->cpuset));
+    dropping = droppingparent || hwloc_bitmap_iszero(obj->cpuset);
   }
 
   if (modified) {
@@ -3037,15 +3034,12 @@ restrict_object_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_node
   hwloc_obj_t obj = *pobj, child, *pchild;
 
   /* if this object isn't modified, don't bother looking at children */
-  if (obj->complete_nodeset && !hwloc_bitmap_intersects(obj->complete_nodeset, droppednodeset))
+  if (!hwloc_bitmap_intersects(obj->complete_nodeset, droppednodeset))
     return;
 
-  if (obj->nodeset)
-    hwloc_bitmap_andnot(obj->nodeset, obj->nodeset, droppednodeset);
-  if (obj->complete_nodeset)
-    hwloc_bitmap_andnot(obj->complete_nodeset, obj->complete_nodeset, droppednodeset);
-  if (obj->allowed_nodeset)
-    hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, droppednodeset);
+  hwloc_bitmap_andnot(obj->nodeset, obj->nodeset, droppednodeset);
+  hwloc_bitmap_andnot(obj->complete_nodeset, obj->complete_nodeset, droppednodeset);
+  hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, droppednodeset);
 
   for_each_child_safe(child, obj, pchild)
     restrict_object_nodeset(topology, pchild, droppednodeset);
