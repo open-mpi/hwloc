@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -715,7 +715,6 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    }
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo->Cache.CacheSize;
-	    obj->attr->cache.associativity = procInfo->Cache.Associativity;
 	    obj->attr->cache.associativity = procInfo->Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo->Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo->Cache.LineSize;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
