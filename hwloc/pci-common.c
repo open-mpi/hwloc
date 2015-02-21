@@ -11,7 +11,7 @@
 #ifdef HWLOC_DEBUG
 static void
 hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
-			    struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
+			    struct hwloc_obj *pcidev)
 {
   char busid[14];
   snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
@@ -35,7 +35,7 @@ hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
 
 static void
 hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
-				      struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
+				      struct hwloc_obj *pcidev)
 {
   struct hwloc_backend *backend = cbdata;
 
@@ -47,23 +47,22 @@ hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
 
 static void
 hwloc_pci__traverse(void * cbdata, struct hwloc_obj *root,
-		    void (*cb)(void * cbdata, struct hwloc_obj *, int depth),
-		    int depth)
+		    void (*cb)(void * cbdata, struct hwloc_obj *))
 {
   struct hwloc_obj *child = root->first_child;
   while (child) {
-    cb(cbdata, child, depth);
+    cb(cbdata, child);
     if (child->type == HWLOC_OBJ_BRIDGE)
-      hwloc_pci__traverse(cbdata, child, cb, depth+1);
+      hwloc_pci__traverse(cbdata, child, cb);
     child = child->next_sibling;
   }
 }
 
 static void
 hwloc_pci_traverse(void * cbdata, struct hwloc_obj *root,
-		   void (*cb)(void * cbdata, struct hwloc_obj *, int depth))
+		   void (*cb)(void * cbdata, struct hwloc_obj *))
 {
-  hwloc_pci__traverse(cbdata, root, cb, 0);
+  hwloc_pci__traverse(cbdata, root, cb);
 }
 
 enum hwloc_pci_busid_comparison_e {
