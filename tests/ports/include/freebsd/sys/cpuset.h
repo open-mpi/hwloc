@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 Université Bordeaux
+ * Copyright © 2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -26,9 +27,9 @@ int cpuset_getid(cpulevel_t level, cpuwhich_t which, id_t id, cpusetid_t *setid)
 #undef CPU_ZERO
 #define CPU_ZERO(cpuset) (*(cpuset) = 0)
 #undef CPU_SET
-#define CPU_SET(cpu, cpuset) (*(cpuset) |= (1<<(cpu)))
+#define CPU_SET(cpu, cpuset) (*(cpuset) |= (1ULL<<(cpu)))
 #undef CPU_ISSET
-#define CPU_ISSET(cpu, cpuset) (*(cpuset) & (1<<(cpu)))
+#define CPU_ISSET(cpu, cpuset) (*(cpuset) & (1ULL<<(cpu)))
 
 int cpuset_getaffinity(cpulevel_t level, cpuwhich_t which, id_t id, size_t size, cpuset_t *cpuset);
 int cpuset_setaffinity(cpulevel_t level, cpuwhich_t which, id_t id, size_t size, const cpuset_t *cpuset);
