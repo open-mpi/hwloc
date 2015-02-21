@@ -8,6 +8,7 @@
 #include <hwloc/plugins.h>
 #include <private/debug.h>
 
+#ifdef HWLOC_DEBUG
 static void
 hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
 			    struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
@@ -30,6 +31,7 @@ hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
 		pcidev->attr->pcidev.subvendor_id, pcidev->attr->pcidev.subdevice_id,
 		pcidev->attr->pcidev.revision, pcidev->attr->pcidev.class_id);
 }
+#endif /* HWLOC_DEBUG */
 
 static void
 hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
@@ -299,8 +301,10 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
     hwloc_pci_add_object(&fakeparent, obj);
   }
 
+#ifdef HWLOC_DEBUG
   hwloc_debug("%s", "\nPCI hierarchy under fake parent:\n");
   hwloc_pci_traverse(NULL, &fakeparent, hwloc_pci_traverse_print_cb);
+#endif
 
   /* walk the hierarchy, and lookup OS devices */
   hwloc_pci_traverse(backend, &fakeparent, hwloc_pci_traverse_lookuposdevices_cb);
