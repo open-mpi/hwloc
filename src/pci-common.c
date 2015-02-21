@@ -11,22 +11,31 @@
 #ifdef HWLOC_DEBUG
 static void
 hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
-			    struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
+			    struct hwloc_obj *pcidev)
 {
   char busid[14];
+  hwloc_obj_t parent;
+
+  /* indent */
+  parent = pcidev->parent;
+  while (parent) {
+    hwloc_debug("%s", "  ");
+    parent = parent->parent;
+  }
+
   snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
            pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus, pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
 
   if (pcidev->type == HWLOC_OBJ_BRIDGE) {
     if (pcidev->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST)
-      hwloc_debug("%*s HostBridge", depth, "");
+      hwloc_debug("HostBridge");
     else
-      hwloc_debug("%*s %s Bridge [%04x:%04x]", depth, "", busid,
+      hwloc_debug("Bridge [%04x:%04x]", busid,
 		  pcidev->attr->pcidev.vendor_id, pcidev->attr->pcidev.device_id);
     hwloc_debug(" to %04x:[%02x:%02x]\n",
 		pcidev->attr->bridge.downstream.pci.domain, pcidev->attr->bridge.downstream.pci.secondary_bus, pcidev->attr->bridge.downstream.pci.subordinate_bus);
   } else
-    hwloc_debug("%*s %s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", depth, "", busid,
+    hwloc_debug("%s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", busid,
 		pcidev->attr->pcidev.vendor_id, pcidev->attr->pcidev.device_id,
 		pcidev->attr->pcidev.subvendor_id, pcidev->attr->pcidev.subdevice_id,
 		pcidev->attr->pcidev.revision, pcidev->attr->pcidev.class_id);
@@ -35,7 +44,7 @@ hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
 
 static void
 hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
-				      struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
+				      struct hwloc_obj *pcidev)
 {
   struct hwloc_backend *backend = cbdata;
 
@@ -47,23 +56,22 @@ hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
 
 static void
 hwloc_pci__traverse(void * cbdata, struct hwloc_obj *root,
-		    void (*cb)(void * cbdata, struct hwloc_obj *, int depth),
-		    int depth)
+		    void (*cb)(void * cbdata, struct hwloc_obj *))
 {
   struct hwloc_obj *child = root->first_child;
   while (child) {
-    cb(cbdata, child, depth);
+    cb(cbdata, child);
     if (child->type == HWLOC_OBJ_BRIDGE)
-      hwloc_pci__traverse(cbdata, child, cb, depth+1);
+      hwloc_pci__traverse(cbdata, child, cb);
     child = child->next_sibling;
   }
 }
 
 static void
 hwloc_pci_traverse(void * cbdata, struct hwloc_obj *root,
-		   void (*cb)(void * cbdata, struct hwloc_obj *, int depth))
+		   void (*cb)(void * cbdata, struct hwloc_obj *))
 {
-  hwloc_pci__traverse(cbdata, root, cb, 0);
+  hwloc_pci__traverse(cbdata, root, cb);
 }
 
 enum hwloc_pci_busid_comparison_e {
@@ -133,6 +141,8 @@ hwloc_pci_add_child_before(struct hwloc_obj *root, struct hwloc_obj *child, stru
   else
     root->first_child = new;
   new->next_sibling = child;
+
+  new->parent = root; /* so that hwloc_pci_traverse_print_cb() can indent by depth */
 }
 
 static void
@@ -288,6 +298,7 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
     return 0;
 
   /* first, organise object as tree under a fake parent object */
+  fakeparent.parent = NULL;
   fakeparent.first_child = NULL;
   fakeparent.last_child = NULL;
   while (first_obj) {
@@ -299,6 +310,7 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
 #ifdef HWLOC_DEBUG
   hwloc_debug("%s", "\nPCI hierarchy under fake parent:\n");
   hwloc_pci_traverse(NULL, &fakeparent, hwloc_pci_traverse_print_cb);
+  hwloc_debug("%s", "\n");
 #endif
 
   /* walk the hierarchy, and lookup OS devices */
