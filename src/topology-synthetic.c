@@ -137,11 +137,21 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number before '*'\n", tmp);
 	  goto out_with_loops;
 	}
+	if (!step) {
+	  if (verbose)
+	    fprintf(stderr, "Invalid interleaving loop with step 0 at '%s'\n", tmp);
+	  goto out_with_loops;
+	}
 	tmp2++;
 	nb = (unsigned) strtol(tmp2, &tmp3, 0);
 	if (tmp3 == tmp2 || (*tmp3 && *tmp3 != ':' && *tmp3 != ')' && *tmp3 != ' ')) {
 	  if (verbose)
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number between '*' and ':'\n", tmp);
+	  goto out_with_loops;
+	}
+	if (!nb) {
+	  if (verbose)
+	    fprintf(stderr, "Invalid interleaving loop with number 0 at '%s'\n", tmp2);
 	  goto out_with_loops;
 	}
 	loops[cur_loop].step = step;
@@ -224,11 +234,14 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 
 	loops[cur_loop].step = step;
 	loops[cur_loop].nb = nb;
+	assert(nb);
+	assert(step);
 	if (step < minstep)
 	  minstep = step;
 	nbs *= nb;
       }
     }
+    assert(nbs);
 
     if (nbs != total) {
       /* one loop of total/nbs steps is missing, add it if it's just the smallest one */
