@@ -1234,7 +1234,6 @@ hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 void
 hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj)
 {
-  hwloc_obj_t child, obj_next_child = obj->first_child;
   hwloc_obj_t *current;
 
   if (obj->type == HWLOC_OBJ_MISC) {
@@ -1256,19 +1255,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   *current = obj;
   obj->parent = parent;
   obj->next_sibling = NULL;
-  obj->first_child = NULL;
   topology->modified = 1;
-
-  if (obj->type == HWLOC_OBJ_MISC) {
-    assert(!obj_next_child);
-  } else {
-    /* Recursively insert children below */
-    while (obj_next_child) {
-      child = obj_next_child;
-      obj_next_child = child->next_sibling;
-      hwloc_insert_object_by_parent(topology, obj, child);
-    }
-  }
 }
 
 hwloc_obj_t

@@ -308,9 +308,8 @@ HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_top
  * - children are inserted in order,
  * - children cpusets do not intersect.
  *
- * The given object may have children.
- *
- * Remember to call topology_connect() afterwards to fix handy pointers.
+ * The given object may have normal, I/O or Misc children, as long as they are in order as well.
+ * These children must have valid parent and next_sibling pointers.
  */
 HWLOC_DECLSPEC void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
