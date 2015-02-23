@@ -18,7 +18,7 @@ hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
 
   /* indent */
   parent = pcidev->parent;
-  while (parent->parent) {
+  while (parent) {
     hwloc_debug("%s", "  ");
     parent = parent->parent;
   }
