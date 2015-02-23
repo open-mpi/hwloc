@@ -303,6 +303,7 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
     return 0;
 
   /* first, organise object as tree under a fake parent object */
+  fakeparent.parent = NULL;
   fakeparent.first_child = NULL;
   fakeparent.last_child = NULL;
   while (first_obj) {
