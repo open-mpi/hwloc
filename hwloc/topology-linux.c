@@ -3,6 +3,7 @@
  * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2015 Intel, Inc.  All rights reserved.
  * Copyright © 2010 IBM
  * See COPYING in top-level directory.
  */
@@ -4123,6 +4124,89 @@ hwloc_linux_lookup_drm_class(struct hwloc_backend *backend,
  * look for block objects below a pcidev in sysfs
  */
 
+static void
+hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
+				  struct hwloc_obj *obj, const char *osdevpath)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  FILE *fd;
+  char path[256];
+  char line[128];
+  char vendor[64] = "";
+  char model[64] = "";
+  char serial[64] = "";
+  char revision[64] = "";
+  unsigned major_id, minor_id;
+  char *tmp;
+
+  snprintf(path, sizeof(path), "%s/dev", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (!fd)
+    return;
+
+  if (NULL == fgets(line, sizeof(line), fd)) {
+    fclose(fd);
+    return;
+  }
+  fclose(fd);
+
+  if (sscanf(line, "%u:%u", &major_id, &minor_id) != 2)
+    return;
+  tmp = strchr(line, '\n');
+  if (tmp)
+    *tmp = '\0';
+  hwloc_obj_add_info(obj, "LinuxDeviceID", line);
+
+  snprintf(path, sizeof(path), "/run/udev/data/b%u:%u", major_id, minor_id);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (!fd)
+    return;
+
+  while (NULL != fgets(line, sizeof(line), fd)) {
+    tmp = strchr(line, '\n');
+    if (tmp)
+      *tmp = '\0';
+    if (!strncmp(line, "E:ID_VENDOR=", strlen("E:ID_VENDOR="))) {
+      strcpy(vendor, line+strlen("E:ID_VENDOR="));
+    } else if (!strncmp(line, "E:ID_MODEL=", strlen("E:ID_MODEL="))) {
+      strcpy(model, line+strlen("E:ID_MODEL="));
+    } else if (!strncmp(line, "E:ID_REVISION=", strlen("E:ID_REVISION="))) {
+      strcpy(revision, line+strlen("E:ID_REVISION="));
+    } else if (!strncmp(line, "E:ID_SERIAL_SHORT=", strlen("E:ID_SERIAL_SHORT="))) {
+      strcpy(serial, line+strlen("E:ID_SERIAL_SHORT="));
+    }
+    /* E:ID_TYPE= seems to always contain "disk" */
+  }
+  fclose(fd);
+
+  /* clear fake "ATA" vendor name */
+  if (!strcasecmp(vendor, "ATA"))
+    *vendor = '\0';
+  /* overwrite vendor name from model when possible */
+  if (!*vendor) {
+    if (!strncasecmp(model, "wd", 2))
+      strcpy(vendor, "Western Digital");
+    else if (!strncasecmp(model, "st", 2))
+      strcpy(vendor, "Seagate");
+    else if (!strncasecmp(model, "samsung", 7))
+      strcpy(vendor, "Samsung");
+    else if (!strncasecmp(model, "sandisk", 7))
+      strcpy(vendor, "SanDisk");
+    else if (!strncasecmp(model, "toshiba", 7))
+      strcpy(vendor, "Toshiba");
+  }
+
+  if (*vendor)
+    hwloc_obj_add_info(obj, "Vendor", vendor);
+  if (*model)
+    hwloc_obj_add_info(obj, "Model", model);
+  if (*revision)
+    hwloc_obj_add_info(obj, "Revision", revision);
+  if (*serial)
+    hwloc_obj_add_info(obj, "SerialNumber", serial);
+}
+
 /* block class objects are in
  * host%d/target%d:%d:%d/%d:%d:%d:%d/
  * or
@@ -4189,7 +4273,7 @@ hwloc_linux_lookup_host_block_class(struct hwloc_backend *backend,
 	strcpy(&path[pathlen+1], targetdirent->d_name);
 	pathlen += targetdlen = 1+strlen(targetdirent->d_name);
 	/* lookup block class for real */
-	res += hwloc_linux_class_readdir(backend, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", NULL);
+	res += hwloc_linux_class_readdir(backend, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", hwloc_linux_block_class_fillinfos);
 	/* restore parent path */
 	pathlen -= targetdlen;
 	path[pathlen] = '\0';

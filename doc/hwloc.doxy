@@ -1349,6 +1349,12 @@ hwloc failed to discover any package.
 <dt>PCISlot</dt>
 <dd>The name/number of the physical slot where the PCI device is plugged.
 </dd>
+<dt>Vendor, Model, Revision, SerialNumber</dt>
+<dd>The vendor and model names, and revision and serial numbers of a Block OS device.
+</dd>
+<dt>LinuxDeviceID</dt>
+<dd>The major/minor device number such as 8:0 on Linux for a Block OS device.
+</dd>
 <dt>CoProcType (Co-Processor OS devices)</dt>
 <dd>The type of co-processor, for instance <tt>"MIC"</tt>, <tt>"CUDA"</tt>
  or <tt>"OpenCL"</tt>.

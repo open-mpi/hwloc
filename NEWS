@@ -66,6 +66,8 @@ Version 2.0
 * Backends
   + Gather total machine memory on NetBSD.
 * Misc
+  + Add Vendor, Model, Revision, SerialNumber and LinuxDeviceID info attributes
+    to Block OS devices on Linux. Thanks to Vineet Pedaballe for the help.
   + Exporting to synthetic now ignores I/O and Misc objects.
   + Prefix verbose XML import errors with the source name;
   + Groups may have a GroupType info attribute to display something else
