@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1553,6 +1553,12 @@ hwloc failed to discover any package.
 </dd>
 <dt>PCISlot</dt>
 <dd>The name/number of the physical slot where the PCI device is plugged.
+</dd>
+<dt>Vendor, Model, Revision, SerialNumber</dt>
+<dd>The vendor and model names, and revision and serial numbers of a Block OS device.
+</dd>
+<dt>LinuxDeviceID</dt>
+<dd>The major/minor device number such as 8:0 on Linux for a Block OS device.
 </dd>
 <dt>CoProcType (Co-Processor OS devices)</dt>
 <dd>The type of co-processor, for instance <tt>"MIC"</tt>, <tt>"CUDA"</tt>
