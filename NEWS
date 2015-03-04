@@ -22,6 +22,8 @@ Version 1.10.2
 * hwloc-annotate does not drop instruction caches and I/O devices from the
   output anymore.
 * Fix Bridge-specific depth attribute.
+* Add CPUStepping info attribute on x86 processors,
+  thanks to Thomas Röhl for the suggestion.
 
 
 Version 1.10.1
