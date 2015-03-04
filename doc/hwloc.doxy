@@ -1323,10 +1323,10 @@ hwloc failed to discover any package.
 <dd>
 A Solaris-specific general processor type name, such as "i86pc".
 </dd>
-<dt>CPUVendor, CPUModelNumber, CPUFamilyNumber (Package or Machine)</dt>
-<dd>The processor vendor name, model number, and family number.
+<dt>CPUVendor, CPUModelNumber, CPUFamilyNumber, CPUStepping (Package or Machine)</dt>
+<dd>The processor vendor name, model number, family number, and stepping number.
 Currently available for x86 and Xeon Phi processors on most systems,
-and for ia64 processors on Linux.
+and for ia64 processors on Linux (except CPUStepping).
 Usually added to Package objects, but can be in Machine instead if
 hwloc failed to discover any package.
 </dd>

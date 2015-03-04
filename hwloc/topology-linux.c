@@ -3138,6 +3138,8 @@ hwloc_linux_parse_cpuinfo_x86(const char *prefix, const char *value,
     hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
   } else if (!strcmp("cpu family", prefix)) {
     hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
+  } else if (!strcmp("stepping", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUStepping", value);
   }
   return 0;
 }
