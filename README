@@ -26,7 +26,7 @@ hwloc supports the following operating systems:
 
   * Linux (including old kernels not having sysfs topology information, with
  knowledge of cpusets, offline CPUs, ScaleMP vSMP, NumaScale NumaConnect,
- and Kerrighed support)
+ and Kerrighed support) on all supported hardware, including Intel Xeon Phi.
   * Solaris
   * AIX
   * Darwin / OS X
@@ -86,14 +86,14 @@ Open MPI -- it is a wholly separate (and much smaller!) project and code base.
 It just happens to be hosted as part of the overall Open MPI project.
 
 Nightly development snapshots are available on the web site. Additionally, the
-code can be directly checked out of Subversion:
+code can be directly cloned from Git:
 
 shell$ git clone https://github.com/open-mpi/hwloc.git
 shell$ cd hwloc
 shell$ ./autogen.sh
 
 Note that GNU Autoconf >=2.63, Automake >=1.10 and Libtool >=2.2.6 are required
-when building from a Subversion checkout.
+when building from a Git clone.
 
 Installation by itself is the fairly common GNU-based process:
 
@@ -379,11 +379,11 @@ The complete API documentation is available in a full set of HTML pages, man
 pages, and self-contained PDF files (formatted for both both US letter and A4
 formats) in the source tarball in doc/doxygen-doc/.
 
-NOTE: If you are building the documentation from a Subversion checkout, you
-will need to have Doxygen and pdflatex installed -- the documentation will be
-built during the normal "make" process. The documentation is installed during
-"make install" to $prefix/share/doc/hwloc/ and your systems default man page
-tree (under $prefix, of course).
+NOTE: If you are building the documentation from a Git clone, you will need to
+have Doxygen and pdflatex installed -- the documentation will be built during
+the normal "make" process. The documentation is installed during "make install"
+to $prefix/share/doc/hwloc/ and your systems default man page tree (under
+$prefix, of course).
 
 Portability
 
@@ -451,7 +451,7 @@ core of the machine.
 
 /* Example hwloc API program.
  *
- * Copyright (c) 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright (c) 2009-2011 Universit?eacute; Bordeaux 1
  * Copyright (c) 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
