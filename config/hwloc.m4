@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2014 Inria.  All rights reserved.
+dnl Copyright © 2009-2015 Inria.  All rights reserved.
 dnl Copyright © 2009-2012 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -712,7 +712,7 @@ EOF])
     hwloc_pci_happy=no
     if test "x$enable_pci" != xno; then
       hwloc_pci_happy=yes
-      HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [:], [hwloc_pci_happy=no])
+      HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [pciaccess.h], [:], [hwloc_pci_happy=no])
 
       # Just for giggles, if we didn't find a pciaccess pkg-config,
       # just try looking for its header file and library.
@@ -914,7 +914,7 @@ EOF])
     # libxml2 support
     hwloc_libxml2_happy=
     if test "x$enable_libxml2" != "xno"; then
-        HWLOC_PKG_CHECK_MODULES([LIBXML2], [libxml-2.0], [xmlNewDoc],
+        HWLOC_PKG_CHECK_MODULES([LIBXML2], [libxml-2.0], [xmlNewDoc], [libxml/parser.h],
                                 [hwloc_libxml2_happy=yes],
                                 [hwloc_libxml2_happy=no])
     fi

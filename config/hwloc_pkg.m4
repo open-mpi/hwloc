@@ -1,4 +1,5 @@
 # Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2015 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 # hwloc modification to the following PKG_* macros -- add HWLOC_
@@ -108,7 +109,7 @@ fi[]dnl
 ])# _HWLOC_PKG_SHORT_ERRORS_SUPPORTED
 
 
-# HWLOC_PKG_CHECK_MODULES(VARIABLE-PREFIX, MODULES, [ACTION-IF-FOUND],
+# HWLOC_PKG_CHECK_MODULES(VARIABLE-PREFIX, MODULES, FUNCTION, HEADER, [ACTION-IF-FOUND],
 # [ACTION-IF-NOT-FOUND])
 #
 #
@@ -144,7 +145,7 @@ See the pkg-config man page for more details.])
         # Put the nasty error message in config.log where it belongs
 	echo "$HWLOC_[]$1[]_PKG_ERRORS" >&AS_MESSAGE_LOG_FD
 
-	ifelse([$5], , [AC_MSG_ERROR(dnl
+	ifelse([$6], , [AC_MSG_ERROR(dnl
 [Package requirements ($2) were not met:
 
 $HWLOC_$1_PKG_ERRORS
@@ -155,9 +156,9 @@ installed software in a non-standard prefix.
 _HWLOC_PKG_TEXT
 ])],
 		[AC_MSG_RESULT([no])
-                $5])
+                $6])
     elif test $HWLOC_pkg_failed = untried; then
-        ifelse([$5], , [AC_MSG_FAILURE(dnl
+        ifelse([$6], , [AC_MSG_FAILURE(dnl
 [The pkg-config script could not be found or is too old.  Make sure it
 is in your PATH or set the PKG_CONFIG environment variable to the full
 path to pkg-config.
@@ -166,7 +167,7 @@ _HWLOC_PKG_TEXT
 
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.])],
 		[AC_MSG_RESULT([cannot check without pkg-config])
-		$5])
+		$6])
     else
         AC_MSG_RESULT([yes])
 
@@ -177,12 +178,21 @@ To get pkg-config, see <http://pkg-config.freedesktop.org/>.])],
         # with CFLAGS=-m32 LDFLAGS=-m32.  pkg-config gave us valid
         # results, but we'll fail if we try to link.  So detect that
         # failure now.
+        # There are also cases on Mac where pkg-config returns paths
+        # that do not actually exists until some magic is applied.
+        # http://www.open-mpi.org/community/lists/hwloc-devel/2015/03/4402.php
+        # So check whether we find the header as well.
         hwloc_cflags_save=$CFLAGS
+        hwloc_cppflags_save=$CPPFLAGS
         hwloc_libs_save=$LIBS
         CFLAGS="$CFLAGS $HWLOC_pkg_cv_HWLOC_[]$1[]_CFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_pkg_cv_HWLOC_[]$1[]_CFLAGS"
         LIBS="$LIBS $HWLOC_pkg_cv_HWLOC_[]$1[]_LIBS"
-        AC_CHECK_FUNC([$3], [hwloc_result=yes], [hwloc_result=no])
+        AC_CHECK_HEADER([$4], [
+            AC_CHECK_FUNC([$3], [hwloc_result=yes], [hwloc_result=no])
+            ], [hwloc_result=no])
         CFLAGS=$hwloc_cflags_save
+        CPPFLAGS=$hwloc_cppflags_save
         LIBS=$hwloc_libs_save
 
         AC_MSG_CHECKING([for final $1 support])
@@ -190,8 +200,8 @@ To get pkg-config, see <http://pkg-config.freedesktop.org/>.])],
               [HWLOC_[]$1[]_CFLAGS=$HWLOC_pkg_cv_HWLOC_[]$1[]_CFLAGS
                HWLOC_[]$1[]_LIBS=$HWLOC_pkg_cv_HWLOC_[]$1[]_LIBS
                AC_MSG_RESULT([yes])
-               ifelse([$4], , :, [$4])],
+               ifelse([$5], , :, [$5])],
               [AC_MSG_RESULT([no])
-               ifelse([$5], , :, [$5])])
+               ifelse([$6], , :, [$6])])
     fi[]dnl
 ])# HWLOC_PKG_CHECK_MODULES
