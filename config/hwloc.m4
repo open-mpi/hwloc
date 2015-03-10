@@ -718,7 +718,7 @@ EOF])
       # just try looking for its header file and library.
       AS_IF([test "$hwloc_pci_happy" != "yes"],
          [AC_CHECK_HEADER([pciaccess.h],
-              [AC_CHECK_LIB([pciaccess], [pci_system_init],
+              [AC_CHECK_LIB([pciaccess], [pci_slot_match_iterator_create],
                    [hwloc_pci_happy=yes
                     HWLOC_PCIACCESS_LIBS="-lpciaccess"])
               ])
