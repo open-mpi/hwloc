@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # See COPYING in top-level directory.
 #
@@ -145,7 +145,8 @@ if [ x$gatherio = x1 ]; then
 /sys/class/net/
 /sys/class/mic/
 EOF
- ls -d /sys/devices/pci* | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
+  ls -d /sys/devices/pci* | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
+  ls -d /run/udev/data/b* | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
 fi
 
 # Get an entire mount point, after decoding its path
