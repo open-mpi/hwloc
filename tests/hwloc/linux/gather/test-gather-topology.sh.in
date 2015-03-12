@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2012-2014 Inria.  All rights reserved.
+# Copyright © 2012-2015 Inria.  All rights reserved.
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011 Université Bordeaux
 # See COPYING in top-level directory.
@@ -10,7 +10,7 @@
 
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 lstopo="$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics"
-gather="$HWLOC_top_builddir/tests/hwloc/linux/hwloc-gather-topology"
+gather="$HWLOC_top_builddir/utils/hwloc/hwloc-gather-topology"
 
 # make sure we use default numeric formats
 LANG=C

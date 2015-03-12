@@ -395,12 +395,12 @@ int foo(void) {
         hwloc_config_prefix[tests/hwloc/xml/Makefile]
         hwloc_config_prefix[tests/hwloc/ports/Makefile]
         hwloc_config_prefix[tests/hwloc/rename/Makefile]
-        hwloc_config_prefix[tests/hwloc/linux/hwloc-gather-topology]
         hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh]
         hwloc_config_prefix[tests/hwloc/linux/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/xml/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/wrapper.sh]
         hwloc_config_prefix[utils/hwloc/hwloc-compress-dir]
+        hwloc_config_prefix[utils/hwloc/hwloc-gather-topology]
         hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh]
@@ -417,10 +417,10 @@ int foo(void) {
     AC_CONFIG_COMMANDS([chmoding-scripts], [
 chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
       ]hwloc_config_prefix[tests/hwloc/xml/test-topology.sh \
-      ]hwloc_config_prefix[tests/hwloc/linux/hwloc-gather-topology \
       ]hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh \
       ]hwloc_config_prefix[tests/hwloc/wrapper.sh \
       ]hwloc_config_prefix[utils/hwloc/hwloc-compress-dir \
+      ]hwloc_config_prefix[utils/hwloc/hwloc-gather-topology \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh \
