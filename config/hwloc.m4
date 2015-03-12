@@ -589,7 +589,7 @@ EOF])
     # to pass in an empty 3rd argument, but we trust the output of
     # pkg-config, so just give it a value that will always work:
     # printf.
-    HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [printf], [], [:])
+    HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [printf], [stdio.h], [], [:])
 
     AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
     AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
