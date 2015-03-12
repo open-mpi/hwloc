@@ -24,6 +24,7 @@ Version 1.10.2
 * Fix Bridge-specific depth attribute.
 * Add CPUStepping info attribute on x86 processors,
   thanks to Thomas Röhl for the suggestion.
+* Fix lstopo path in hwloc-gather-topology after install.
 
 
 Version 1.10.1
