@@ -27,6 +27,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_LIBUDEV_H
+#include <libudev.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sched.h>
@@ -41,6 +44,9 @@
 struct hwloc_linux_backend_data_s {
   int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int is_real_fsroot; /* Boolean saying whether root_fd points to the real filesystem root of the system */
+#ifdef HAVE_LIBUDEV_H
+  struct udev *udev; /* Global udev context */
+#endif
 
   struct utsname utsname; /* fields contain \0 when unknown */
 
@@ -4158,6 +4164,32 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
     *tmp = '\0';
   hwloc_obj_add_info(obj, "LinuxDeviceID", line);
 
+#ifdef HAVE_LIBUDEV_H
+  if (data->udev) {
+    struct udev_device *dev;
+    const char *prop;
+    dev = udev_device_new_from_subsystem_sysname(data->udev, "block", obj->name);
+    if (!dev)
+      return;
+    prop = udev_device_get_property_value(dev, "ID_VENDOR");
+    if (prop)
+      strcpy(vendor, prop);
+    prop = udev_device_get_property_value(dev, "ID_MODEL");
+    if (prop)
+      strcpy(model, prop);
+    prop = udev_device_get_property_value(dev, "ID_REVISION");
+    if (prop)
+      strcpy(revision, prop);
+    prop = udev_device_get_property_value(dev, "ID_SERIAL_SHORT");
+    if (prop)
+      strcpy(serial, prop);
+    /* ID_TYPE= seems to always contain "disk" */
+
+    udev_device_unref(dev);
+  } else
+    /* fallback to reading files, works with any fsroot */
+#endif
+ {
   snprintf(path, sizeof(path), "/run/udev/data/b%u:%u", major_id, minor_id);
   fd = hwloc_fopen(path, "r", root_fd);
   if (!fd)
@@ -4179,6 +4211,7 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
     /* E:ID_TYPE= seems to always contain "disk" */
   }
   fclose(fd);
+ }
 
   /* clear fake "ATA" vendor name */
   if (!strcasecmp(vendor, "ATA"))
@@ -4604,6 +4637,10 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
 #ifdef HAVE_OPENAT
   close(data->root_fd);
 #endif
+#ifdef HAVE_LIBUDEV_H
+  if (data->udev)
+    udev_unref(data->udev);
+#endif
   free(data);
 }
 
@@ -4666,6 +4703,13 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   }
 #endif
   data->root_fd = root;
+
+#ifdef HAVE_LIBUDEV_H
+  data->udev = NULL;
+  if (data->is_real_fsroot) {
+    data->udev = udev_new();
+  }
+#endif
 
   data->deprecated_classlinks_model = -2; /* never tried */
   data->mic_need_directlookup = -1; /* not initialized */
