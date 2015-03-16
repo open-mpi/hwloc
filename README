@@ -128,6 +128,8 @@ The hwloc core may also benefit from the following development packages:
  exported by the same hwloc release). See Importing and exporting topologies
  from/to XML files for details. The relevant development package is usually
  libxml2-devel or libxml2-dev.
+  * libudev on Linux for easier discovery of OS device information. The
+ relevant development package is usually libudev-devel or libudev-dev.
   * libtool's ltdl library for dynamic plugin loading. The relevant development
  package is usually libtool-ltdl-devel or libltdl-dev.
 

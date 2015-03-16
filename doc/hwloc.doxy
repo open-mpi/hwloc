@@ -175,6 +175,10 @@ even if none of the above libraries can be used.
     The relevant development package is usually <tt>libxml2-devel</tt>
     or <tt>libxml2-dev</tt>.
 </li>
+<li>libudev on Linux for easier discovery of OS device information.
+    The relevant development package is usually <tt>libudev-devel</tt>
+    or <tt>libudev-dev</tt>.
+</li>
 <li>libtool's ltdl library for dynamic plugin loading.
   The relevant development package is usually <tt>libtool-ltdl-devel</tt>
   or <tt>libltdl-dev</tt>.

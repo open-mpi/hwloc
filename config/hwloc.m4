@@ -712,6 +712,11 @@ EOF])
       LIBS="$tmp_save_LIBS"
     fi
 
+    # Linux libudev support
+    AC_CHECK_HEADERS([libudev.h], [
+	AC_CHECK_LIB([udev], [udev_device_new_from_subsystem_sysname], [HWLOC_LIBS="$HWLOC_LIBS -ludev"])
+    ])
+
     # PCI support via libpciaccess.  NOTE: we do not support
     # libpci/pciutils because that library is GPL and is incompatible
     # with our BSD license.
