@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2014 Inria.  All rights reserved.
+Copyright © 2009-2015 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -19,27 +19,30 @@ in v0.9.1).
 
 Version 1.11.0
 --------------
-* Major changes
+* API
   + Socket objects are renamed into Package to align with the terminology
     used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"
     name are still supported for backward compatibility.
   + HWLOC_OBJ_NODE is replaced with HWLOC_OBJ_NUMANODE for clarification.
     HWLOC_OBJ_NODE is still supported for backward compatibility.
     "Node" and "NUMANode" strings are supported as in earlier releases.
-* Tools
-  + hwloc-annotate may now operate on all types of objects, including I/O.
-* Backends
-  + Gather total machine memory on NetBSD.
-* Misc
-  + Actually remove disallowed NUMA nodes from nodesets when the whole-system
-    flag isn't enabled.
-  + Prefix verbose XML import errors with the source name;
-  + Groups may have a GroupType info attribute to display something else
-    than "Group" in lstopo.
+* Detection improvements
+  + Fix Bridge-specific depth attribute.
   + Add a PCISlot attribute to PCI devices on Linux when supported to
     identify the physical PCI slot where the board is plugged.
-  * Document how to deal with the ABI break when upgrading to the upcoming 2.0
-    See "How do I handle ABI breaks and API upgrades ?" in the FAQ.
+  + Add CPUStepping info attribute on x86 processors,
+    thanks to Thomas Röhl for the suggestion.
+  + Gather total machine memory on NetBSD.
+* Tools
+  + hwloc-annotate may now operate on all types of objects, including I/O.
+  + hwloc-annotate does not drop instruction caches and I/O devices from the
+    output anymore.
+  + Fix lstopo path in hwloc-gather-topology after install.
+  + Groups may have a GroupType info attribute to display something else
+    than "Group" in lstopo.
+* Misc
+  + Prefix verbose XML import errors with the source name.
+  + Improve pkg-config checks and error messages.
 
 
 Version 1.10.1

@@ -2,7 +2,7 @@ Introduction
 
 hwloc provides command line tools and a C API to obtain the hierarchical map of
 key computing elements, such as: NUMA memory nodes, shared caches, processor
-sockets, processor cores, processing units (logical processors or "threads")
+packages, processor cores, processing units (logical processors or "threads")
 and even I/O devices. hwloc also gathers various attributes such as cache and
 memory information, and is portable across a variety of different operating
 systems and platforms. Additionally it may assemble the topologies of multiple
@@ -26,7 +26,7 @@ hwloc supports the following operating systems:
 
   * Linux (including old kernels not having sysfs topology information, with
  knowledge of cpusets, offline CPUs, ScaleMP vSMP, NumaScale NumaConnect,
- and Kerrighed support)
+ and Kerrighed support) on all supported hardware, including Intel Xeon Phi.
   * Solaris
   * AIX
   * Darwin / OS X
@@ -151,7 +151,7 @@ configure script may not find it be default. Try adding PKG_CONFIG_PATH to the
 
 CLI Examples
 
-On a 4-socket 2-core machine with hyperthreading, the lstopo tool may show the
+On a 4-package 2-core machine with hyperthreading, the lstopo tool may show the
 following graphical output:
 
 dudley.png
@@ -159,28 +159,28 @@ dudley.png
 Here's the equivalent output in textual form:
 
 Machine (16GB)
-  Socket L#0 + L3 L#0 (4096KB)
+  Package L#0 + L3 L#0 (4096KB)
  L2 L#0 (1024KB) + L1 L#0 (16KB) + Core L#0
    PU L#0 (P#0)
    PU L#1 (P#8)
  L2 L#1 (1024KB) + L1 L#1 (16KB) + Core L#1
    PU L#2 (P#4)
    PU L#3 (P#12)
-  Socket L#1 + L3 L#1 (4096KB)
+  Package L#1 + L3 L#1 (4096KB)
  L2 L#2 (1024KB) + L1 L#2 (16KB) + Core L#2
    PU L#4 (P#1)
    PU L#5 (P#9)
  L2 L#3 (1024KB) + L1 L#3 (16KB) + Core L#3
    PU L#6 (P#5)
    PU L#7 (P#13)
-  Socket L#2 + L3 L#2 (4096KB)
+  Package L#2 + L3 L#2 (4096KB)
  L2 L#4 (1024KB) + L1 L#4 (16KB) + Core L#4
    PU L#8 (P#2)
    PU L#9 (P#10)
  L2 L#5 (1024KB) + L1 L#5 (16KB) + Core L#5
    PU L#10 (P#6)
    PU L#11 (P#14)
-  Socket L#3 + L3 L#3 (4096KB)
+  Package L#3 + L3 L#3 (4096KB)
  L2 L#6 (1024KB) + L1 L#6 (16KB) + Core L#6
    PU L#12 (P#3)
    PU L#13 (P#11)
@@ -188,58 +188,11 @@ Machine (16GB)
    PU L#14 (P#7)
    PU L#15 (P#15)
 
-Finally, here's the equivalent output in XML. Long lines were artificially
-broken for document clarity (in the real output, each XML tag is on a single
-line), and only socket #0 is shown for brevity:
+Note that there is also an equivalent output in XML that is meant for exporting
+/importing topologies but it is hardly readable to human-beings (see Importing
+and exporting topologies from/to XML files for details).
 
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE topology SYSTEM "hwloc.dtd">
-<topology>
-  <object type="Machine" os_index="0" cpuset="0x0000ffff"
-   complete_cpuset="0x0000ffff" online_cpuset="0x0000ffff"
-   allowed_cpuset="0x0000ffff"
-   dmi_board_vendor="Dell Computer Corporation" dmi_board_name="0RD318"
-   local_memory="16648183808">
- <page_type size="4096" count="4064498"/>
- <page_type size="2097152" count="0"/>
- <object type="Socket" os_index="0" cpuset="0x00001111" ... >
-   <object type="Cache" cpuset="0x00001111" ...
-       cache_size="4194304" depth="3" cache_linesize="64">
-     <object type="Cache" cpuset="0x00000101" ...
-         cache_size="1048576" depth="2" cache_linesize="64">
-       <object type="Cache" cpuset="0x00000101" ...
-           cache_size="16384" depth="1" cache_linesize="64">
-         <object type="Core" os_index="0" ... >
-           <object type="PU" os_index="0" cpuset="0x00000001"
-               complete_cpuset="0x00000001" online_cpuset="0x00000001"
-               allowed_cpuset="0x00000001"/>
-           <object type="PU" os_index="8" cpuset="0x00000100"
-               complete_cpuset="0x00000100" online_cpuset="0x00000100"
-               allowed_cpuset="0x00000100"/>
-         </object>
-       </object>
-     </object>
-     <object type="Cache" cpuset="0x00001010" ...
-         cache_size="1048576" depth="2" cache_linesize="64">
-       <object type="Cache" cpuset="0x00001010"
-           cache_size="16384" depth="1" cache_linesize="64">
-         <object type="Core" os_index="1" cpuset="0x00001010" ... >
-           <object type="PU" os_index="4" cpuset="0x00000010"
-               complete_cpuset="0x00000010" online_cpuset="0x00000010"
-               allowed_cpuset="0x00000010"/>
-           <object type="PU" os_index="12" cpuset="0x00001000"
-               complete_cpuset="0x00001000" online_cpuset="0x00001000"
-               allowed_cpuset="0x00001000"/>
-         </object>
-       </object>
-     </object>
-   </object>
- </object>
- <!-- ...other sockets listed here ... -->
-  </object>
-</topology>
-
-On a 4-socket 2-core Opteron NUMA machine, the lstopo tool may show the
+On a 4-package 2-core Opteron NUMA machine, the lstopo tool may show the
 following graphical output:
 
 hagrid.png
@@ -247,108 +200,41 @@ hagrid.png
 Here's the equivalent output in textual form:
 
 Machine (32GB)
-  NUMANode L#0 (P#0 8190MB) + Socket L#0
+  NUMANode L#0 (P#0 8190MB) + Package L#0
  L2 L#0 (1024KB) + L1 L#0 (64KB) + Core L#0 + PU L#0 (P#0)
  L2 L#1 (1024KB) + L1 L#1 (64KB) + Core L#1 + PU L#1 (P#1)
-  NUMANode L#1 (P#1 8192MB) + Socket L#1
+  NUMANode L#1 (P#1 8192MB) + Package L#1
  L2 L#2 (1024KB) + L1 L#2 (64KB) + Core L#2 + PU L#2 (P#2)
  L2 L#3 (1024KB) + L1 L#3 (64KB) + Core L#3 + PU L#3 (P#3)
-  NUMANode L#2 (P#2 8192MB) + Socket L#2
+  NUMANode L#2 (P#2 8192MB) + Package L#2
  L2 L#4 (1024KB) + L1 L#4 (64KB) + Core L#4 + PU L#4 (P#4)
  L2 L#5 (1024KB) + L1 L#5 (64KB) + Core L#5 + PU L#5 (P#5)
-  NUMANode L#3 (P#3 8192MB) + Socket L#3
+  NUMANode L#3 (P#3 8192MB) + Package L#3
  L2 L#6 (1024KB) + L1 L#6 (64KB) + Core L#6 + PU L#6 (P#6)
  L2 L#7 (1024KB) + L1 L#7 (64KB) + Core L#7 + PU L#7 (P#7)
 
-And here's the equivalent output in XML. Similar to above, line breaks were
-added and only PU #0 is shown for brevity:
-
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE topology SYSTEM "hwloc.dtd">
-<topology>
-  <object type="Machine" os_index="0" cpuset="0x000000ff"
-   complete_cpuset="0x000000ff" online_cpuset="0x000000ff"
-   allowed_cpuset="0x000000ff" nodeset="0x000000ff"
-   complete_nodeset="0x000000ff" allowed_nodeset="0x000000ff"
-   dmi_board_vendor="TYAN Computer Corp" dmi_board_name="S4881 ">
- <page_type size="4096" count="0"/>
- <page_type size="2097152" count="0"/>
- <object type="NUMANode" os_index="0" cpuset="0x00000003" ...
-     nodeset="0x00000001" ... local_memory="7514177536">
-   <page_type size="4096" count="1834516"/>
-   <page_type size="2097152" count="0"/>
-   <object type="Socket" os_index="0" cpuset="0x00000003" ... >
-     <object type="Cache" cpuset="0x00000001" ...
-         cache_size="1048576" depth="2" cache_linesize="64">
-       <object type="Cache" cpuset="0x00000001" ...
-           cache_size="65536" depth="1" cache_linesize="64">
-         <object type="Core" os_index="0" ... >
-           <object type="PU" os_index="0" cpuset="0x00000001"
-               complete_cpuset="0x00000001" online_cpuset="0x00000001"
-               allowed_cpuset="0x00000001" nodeset="0x00000001"
-               complete_nodeset="0x00000001" allowed_nodeset="0x00000001"/>
-         </object>
-       </object>
-     </object>
-  <!-- ...more objects listed here ... -->
-</topology>
-
-On a 2-socket quad-core Xeon (pre-Nehalem, with 2 dual-core dies into each
-socket):
+On a 2-package quad-core Xeon (pre-Nehalem, with 2 dual-core dies into each
+package):
 
 emmett.png
 
 Here's the same output in textual form:
 
 Machine (16GB)
-  Socket L#0
+  Package L#0
  L2 L#0 (4096KB)
    L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
    L1 L#1 (32KB) + Core L#1 + PU L#1 (P#4)
  L2 L#1 (4096KB)
    L1 L#2 (32KB) + Core L#2 + PU L#2 (P#2)
    L1 L#3 (32KB) + Core L#3 + PU L#3 (P#6)
-  Socket L#1
+  Package L#1
  L2 L#2 (4096KB)
    L1 L#4 (32KB) + Core L#4 + PU L#4 (P#1)
    L1 L#5 (32KB) + Core L#5 + PU L#5 (P#5)
  L2 L#3 (4096KB)
    L1 L#6 (32KB) + Core L#6 + PU L#6 (P#3)
    L1 L#7 (32KB) + Core L#7 + PU L#7 (P#7)
-
-And the same output in XML (line breaks added, only PU #0 shown):
-
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE topology SYSTEM "hwloc.dtd">
-<topology>
-  <object type="Machine" os_index="0" cpuset="0x000000ff"
-   complete_cpuset="0x000000ff" online_cpuset="0x000000ff"
-   allowed_cpuset="0x000000ff" dmi_board_vendor="Dell Inc."
-   dmi_board_name="0NR282" local_memory="16865292288">
- <page_type size="4096" count="4117503"/>
- <page_type size="2097152" count="0"/>
- <object type="Socket" os_index="0" cpuset="0x00000055" ... >
-   <object type="Cache" cpuset="0x00000011" ...
-       cache_size="4194304" depth="2" cache_linesize="64">
-     <object type="Cache" cpuset="0x00000001" ...
-         cache_size="32768" depth="1" cache_linesize="64">
-       <object type="Core" os_index="0" ... >
-         <object type="PU" os_index="0" cpuset="0x00000001"
-             complete_cpuset="0x00000001" online_cpuset="0x00000001"
-             allowed_cpuset="0x00000001"/>
-       </object>
-     </object>
-     <object type="Cache" cpuset="0x00000010" ...
-         cache_size="32768" depth="1" cache_linesize="64">
-       <object type="Core" os_index="1" ... >
-         <object type="PU" os_index="4" cpuset="0x00000010" ...
-             complete_cpuset="0x00000010" online_cpuset="0x00000010"
-             allowed_cpuset="0x00000010"/>
-       </object>
-     </object>
-   </object>
-  <!-- ...more objects listed here ... -->
-</topology>
 
 Programming Interface
 
@@ -388,7 +274,7 @@ will only report a subset of this information. For example, on an PPC64-based
 system with 32 cores (each with 2 hardware threads) running a default
 2.6.18-based kernel from RHEL 5.4, hwloc is only able to glean information
 about NUMA nodes and processor units (PUs). No information about caches,
-sockets, or cores is available.
+packages, or cores is available.
 
 Similarly, Operating System have varying support for CPU and memory binding,
 e.g. while some Operating Systems provide interfaces for all kinds of CPU and
@@ -450,7 +336,7 @@ of the source tree.
  * See other examples under doc/examples/ in the source tree
  * for more details.
  *
- * Copyright (c) 2009-2014 Inria.  All rights reserved.
+ * Copyright (c) 2009-2015 Inria.  All rights reserved.
  * Copyright (c) 2009-2011 Universit?eacute; Bordeaux
  * Copyright (c) 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -466,11 +352,17 @@ of the source tree.
 static void print_children(hwloc_topology_t topology, hwloc_obj_t obj, 
                         int depth)
 {
- char string[128];
+ char type[32], attr[1024];
  unsigned i;
 
- hwloc_obj_snprintf(string, sizeof(string), topology, obj, "#", 0);
- printf("%*s%s\n", 2*depth, "", string);
+ hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+ printf("%*s%s", 2*depth, "", type);
+ if (obj->os_index != (unsigned) -1)
+   printf("#%u", obj->os_index);
+ hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 0);
+ if (*attr)
+   printf("(%s)", attr);
+ printf("\n");
  for (i = 0; i < obj->arity; i++) {
      print_children(topology, obj->children[i], depth + 1);
  }
@@ -514,9 +406,9 @@ int main(void)
      printf("*** Objects at level %d\n", depth);
      for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); 
           i++) {
-         hwloc_obj_snprintf(string, sizeof(string), topology,
-                    hwloc_get_obj_by_depth(topology, depth, i),
-                    "#", 0);
+         hwloc_obj_type_snprintf(string, sizeof(string),
+                                 hwloc_get_obj_by_depth
+(topology, depth, i), 0);
          printf("Index %u: %s\n", i, string);
      }
  }
@@ -530,13 +422,13 @@ int main(void)
 
  /*****************************************************************
   * Third example:
-  * Print the number of sockets.
+  * Print the number of packages.
   *****************************************************************/
- depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
+ depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE);
  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-     printf("*** The number of sockets is unknown\n");
+     printf("*** The number of packages is unknown\n");
  } else {
-     printf("*** %u socket(s)\n", 
+     printf("*** %u package(s)\n",
             hwloc_get_nbobjs_by_depth(topology, depth));
  }
 
@@ -596,12 +488,12 @@ int main(void)
   * memory to the last NUMA node.
   *****************************************************************/
  /* Get last node. */
- n = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
+ n = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
  if (n) {
      void *m;
      size = 1024*1024;
 
-     obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, n - 1);
+     obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, n - 1);
      m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
              HWLOC_MEMBIND_DEFAULT, 0);
      hwloc_free(topology, m, size);
@@ -626,7 +518,7 @@ CFLAGS += $(pkg-config --cflags hwloc)
 LDLIBS += $(pkg-config --libs hwloc)
 cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 
-On a machine with 4GB of RAM and 2 processor sockets -- each socket of which
+On a machine with 4GB of RAM and 2 processor packages -- each package of which
 has two processing cores -- the output from running hwloc-hello could be
 something like the following:
 
@@ -634,8 +526,8 @@ shell$ ./hwloc-hello
 *** Objects at level 0
 Index 0: Machine(3938MB)
 *** Objects at level 1
-Index 0: Socket#0
-Index 1: Socket#1
+Index 0: Package#0
+Index 1: Package#1
 *** Objects at level 2
 Index 0: Core#0
 Index 1: Core#1
@@ -648,17 +540,17 @@ Index 2: PU#2
 Index 3: PU#3
 *** Printing overall tree
 Machine(3938MB)
-  Socket#0
+  Package#0
  Core#0
    PU#0
  Core#1
    PU#1
-  Socket#1
+  Package#1
  Core#3
    PU#2
  Core#2
    PU#3
-*** 2 socket(s)
+*** 2 package(s)
 shell$
 
 Questions and Bugs
