@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # See COPYING in top-level directory.
 #
@@ -11,6 +11,7 @@ VERSION="@VERSION@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 assembler="$HWLOC_top_builddir/utils/hwloc/hwloc-assembler"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
+SED_I="@SED_I@"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH
@@ -42,9 +43,9 @@ $assembler $file \
 	--name input1again $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.input1
 
 # filter hwlocVersion since it often changes
-sed -e '/<info name=\"hwlocVersion\" value=\"'$VERSION'\"\/>/d' -i $file
+$SED_I -e '/<info name=\"hwlocVersion\" value=\"'$VERSION'\"\/>/d' $file
 # filter ProcessName since it may be hwloc-info or lt-hwloc-info
-sed -e '/<info name=\"ProcessName\" value=\"hwloc-assembler\"\/>/d' -e '/<info name=\"ProcessName\" value=\"lt-hwloc-assembler\"\/>/d' -i $file
+$SED_I -e '/<info name=\"ProcessName\" value=\"hwloc-assembler\"\/>/d' -e '/<info name=\"ProcessName\" value=\"lt-hwloc-assembler\"\/>/d' $file
 
 diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.output "$file"
 rm -rf "$tmp"
