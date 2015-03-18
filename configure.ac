@@ -187,25 +187,6 @@ AS_IF([test "$hwloc_mode" = "standalone"],
        HWLOC_SETUP_UTILS
        HWLOC_SETUP_TESTS])
 
-#
-# SED_I
-# Linux and OS X take different sed arguments.
-#
-AC_PROG_SED
-AC_MSG_CHECKING([if the sed -i option requires an argument])
-    rm -f conftest
-    cat > conftest <<EOF
-hello
-EOF
-$SED -i -e s/hello/goodbye/ conftest 2> /dev/null
-AS_IF([test -f conftest-e],
-      [SED_I="$SED -i ''"
-       AC_MSG_RESULT([yes])],
-      [SED_I="$SED -i"
-       AC_MSG_RESULT([no])])
-rm -f conftest conftest-e
-AC_SUBST([SED_I])
-
 cat <<EOF
 
 ###
