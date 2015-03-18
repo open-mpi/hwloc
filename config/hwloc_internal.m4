@@ -152,7 +152,7 @@ EOF
     AS_IF([test "x$hwloc_generate_doxs" = xyes -a "x$HWLOC_DOXYGEN_VERSION" = x1.6.2],
                  [hwloc_generate_doxs="no"; AC_MSG_WARN([doxygen 1.6.2 has broken short name support, disabling])])
 
-    AC_PROG_SED
+    AC_REQUIRE([AC_PROG_SED])
 
     # Making the top-level README requires w3m or lynx.
     AC_ARG_VAR([W3M], [Location of the w3m program (required to building the top-level hwloc README file)])
@@ -240,7 +240,7 @@ AC_DEFUN([HWLOC_SETUP_UTILS],[
 ###
 EOF
 
-    AC_PROG_SED
+    AC_REQUIRE([AC_PROG_SED])
 
     # Cairo support
     hwloc_cairo_happy=no
