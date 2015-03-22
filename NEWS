@@ -36,6 +36,9 @@ Version 1.11.0
   + Add CPUStepping info attribute on x86 processors,
     thanks to Thomas Röhl for the suggestion.
   + Gather total machine memory on NetBSD.
+  + Add "MemoryDevice" Misc objects with information about DIMMs, on Linux
+    when privileged and when I/O is enabled.
+    Thanks to Vineet Pedaballe for the help.
   + Ignore the device-tree on non-Power architectures to avoid buggy
     detection on ARM. Thanks to Orion Poplawski for reporting the issue.
 * Tools

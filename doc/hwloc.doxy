@@ -1626,6 +1626,10 @@ Block OS devices may have a Type of "Disk", "Tape", "Removable Media Device"
 or "Other".
 The Type attribute value is displayed instead of the default object type name in lstopo.
 </dd>
+<dt>Vendor, AssetTag, PartNumber, DeviceLocation, BankLocation (MemoryDevice Misc objects)</dt>
+<dd>
+Information about memory devices (DIMMs) extracted from SMBIOS.
+</dd>
 <dt>hwlocVersion</dt>
 <dd>The version number of the hwloc library that was used to generate
 the topology. If the topology was loaded from XML, this is not the hwloc
@@ -2644,7 +2648,8 @@ in your environment.
 hwloc discovers the topology by querying the operating system.
 Some minor features may require privileged access to the operation
 system.
-For instance PCI link speed discovery on Linux is reserved to root,
+For instance memory device and PCI link speed discovery on Linux
+is reserved to root,
 and the entire PCI discovery on FreeBSD requires access to the
 /dev/pci special file.
 
