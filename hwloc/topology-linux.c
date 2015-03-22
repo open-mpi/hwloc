@@ -2236,6 +2236,179 @@ hwloc__get_dmi_id_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
   hwloc__get_dmi_id_one_info(data, obj, path, pathlen, "sys_vendor", "DMISysVendor");
 }
 
+struct hwloc_firmware_dmi_mem_device_header {
+  unsigned char type;
+  unsigned char length;
+  unsigned char handle[2];
+  unsigned char phy_mem_handle[2];
+  unsigned char mem_err_handle[2];
+  unsigned char tot_width[2];
+  unsigned char dat_width[2];
+  unsigned char size[2];
+  unsigned char ff;
+  unsigned char dev_set;
+  unsigned char dev_loc_str_num;
+  unsigned char bank_loc_str_num;
+  unsigned char mem_type;
+  unsigned char type_detail[2];
+  unsigned char speed[2];
+  unsigned char manuf_str_num;
+  unsigned char serial_str_num;
+  unsigned char asset_tag_str_num;
+  unsigned char part_num_str_num;
+  /* don't include the following fields since we don't need them,
+   * some old implementations may miss them.
+   */
+};
+
+static int check_dmi_entry(const char *buffer)
+{
+  /* reject empty strings */
+  if (!*buffer)
+    return 0;
+  /* reject strings of spaces (at least Dell use this for empty memory slots) */
+  if (strspn(buffer, " ") == strlen(buffer))
+    return 0;
+  return 1;
+}
+
+static void
+hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
+					unsigned idx, const char *path, FILE *fd,
+					struct hwloc_firmware_dmi_mem_device_header *header)
+{
+  unsigned slen;
+  char buffer[256]; /* enough for memory device strings, or at least for each of them */
+  unsigned foff; /* offset in raw file */
+  unsigned boff; /* offset in buffer read from raw file */
+  unsigned i;
+  struct hwloc_obj_info_s *infos = NULL;
+  unsigned infos_count = 0;
+  hwloc_obj_t misc;
+  int foundinfo = 0;
+
+  hwloc__add_info(&infos, &infos_count, "Type", "MemoryModule");
+
+  /* start after the header */
+  foff = header->length;
+  i = 1;
+  while (1) {
+    /* read one buffer */
+    fseek(fd, foff, SEEK_SET);
+    if (!fgets(buffer, sizeof(buffer), fd))
+      break;
+    /* read string at the beginning of the buffer */
+    boff = 0;
+    while (1) {
+      /* stop on empty string */
+      if (!buffer[boff])
+        goto done;
+      /* stop if this string goes to the end of the buffer */
+      slen = strlen(buffer+boff);
+      if (boff + slen+1 == sizeof(buffer))
+        break;
+      /* string didn't get truncated, should be OK */
+      if (i == header->manuf_str_num) {
+	if (check_dmi_entry(buffer+boff)) {
+	  hwloc__add_info(&infos, &infos_count, "Vendor", buffer+boff);
+	  foundinfo = 1;
+	}
+      }	else if (i == header->serial_str_num) {
+	if (check_dmi_entry(buffer+boff)) {
+	  hwloc__add_info(&infos, &infos_count, "SerialNumber", buffer+boff);
+	  foundinfo = 1;
+	}
+      } else if (i == header->asset_tag_str_num) {
+	if (check_dmi_entry(buffer+boff)) {
+	  hwloc__add_info(&infos, &infos_count, "AssetTag", buffer+boff);
+	  foundinfo = 1;
+	}
+      } else if (i == header->part_num_str_num) {
+	if (check_dmi_entry(buffer+boff)) {
+	  hwloc__add_info(&infos, &infos_count, "PartNumber", buffer+boff);
+	  foundinfo = 1;
+	}
+      } else if (i == header->dev_loc_str_num) {
+	if (check_dmi_entry(buffer+boff)) {
+	  hwloc__add_info(&infos, &infos_count, "DeviceLocation", buffer+boff);
+	  /* only a location, not an actual info about the device */
+	}
+      } else if (i == header->bank_loc_str_num) {
+	if (check_dmi_entry(buffer+boff)) {
+	  hwloc__add_info(&infos, &infos_count, "BankLocation", buffer+boff);
+	  /* only a location, not an actual info about the device */
+	}
+      } else {
+	goto done;
+      }
+      /* next string in buffer */
+      boff += slen+1;
+      i++;
+    }
+    /* couldn't read a single full string from that buffer, we're screwed */
+    if (!boff) {
+      fprintf(stderr, "hwloc could read a DMI firmware entry #%u in %s\n",
+	      i, path);
+      break;
+    }
+    /* reread buffer after previous string */
+    foff += boff;
+  }
+
+done:
+  if (!foundinfo) {
+    /* found no actual info about the device. if there's only location info, the slot may be empty */
+    goto out_with_infos;
+  }
+
+  misc = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, idx);
+  if (!misc)
+    goto out_with_infos;
+
+  hwloc__move_infos(&misc->infos, &misc->infos_count, &infos, &infos_count);
+  /* FIXME: find a way to identify the corresponding NUMA node and attach these objects there.
+   * but it means we need to parse DeviceLocation=DIMM_B4 but these vary significantly
+   * with the vendor, and it's hard to be 100% sure 'B' is second socket.
+   * Examples at http://sourceforge.net/p/edac-utils/code/HEAD/tree/trunk/src/etc/labels.db
+   * or https://github.com/grondo/edac-utils/blob/master/src/etc/labels.db
+   */
+  hwloc_insert_object_by_parent(topology, hwloc_get_root_obj(topology), misc);
+  return;
+
+ out_with_infos:
+  hwloc__free_infos(infos, infos_count);
+}
+
+static void
+hwloc__get_firmware_dmi_memory_info(struct hwloc_topology *topology,
+				    struct hwloc_linux_backend_data_s *data)
+{
+  char path[128];
+  unsigned i;
+
+  for(i=0; ; i++) {
+    FILE *fd;
+    struct hwloc_firmware_dmi_mem_device_header header;
+    int err;
+
+    snprintf(path, sizeof(path), "/sys/firmware/dmi/entries/17-%u/raw", i);
+    fd = hwloc_fopen(path, "r", data->root_fd);
+    if (!fd)
+      break;
+
+    err = fread(&header, sizeof(header), 1, fd);
+    if (err != 1)
+      break;
+    if (header.length < sizeof(header)) {
+      /* invalid, or too old entry/spec that doesn't contain what we need */
+      break;
+    }
+
+    hwloc__get_firmware_dmi_memory_info_one(topology, i, path, fd, &header);
+
+    fclose(fd);
+  }
+}
 
 
 /***********************************
@@ -3748,6 +3921,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
   /* Gather DMI info */
   hwloc__get_dmi_id_info(data, topology->levels[0][0]);
+  if (hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO))
+    hwloc__get_firmware_dmi_memory_info(topology, data);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Linux");
   if (cpuset_name) {

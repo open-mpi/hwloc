@@ -215,7 +215,8 @@ typedef enum {
 
   HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
 			  * Objects without particular meaning, that can e.g. be
-			  * added by the application for its own use.
+			  * added by the application for its own use, or by hwloc
+			  * for miscellaneous objects such as MemoryDevice.
 			  * These objects are not listed in the main children list,
 			  * but rather in the dedicated misc children list.
 			  * Misc objects may only have Misc objects as children,
@@ -1852,6 +1853,7 @@ enum hwloc_topology_flags_e {
    * detection using the pci backend. Only the common PCI devices (GPUs,
    * NICs, block devices, ...) and host bridges (objects that connect the host
    * objects to an I/O subsystem) will be added to the topology.
+   * Additionally it also enables MemoryDevice misc objects.
    * Uncommon devices and other bridges (such as PCI-to-PCI bridges) will be
    * ignored.
    * \hideinitializer
