@@ -13,6 +13,8 @@ xml_outputs = \
         16em64t-4s2c2t.xml \
         16em64t-4s2c2t-offlines.xml \
         16em64t-4s2c2t.console.output \
+        16-2gr2gr2n2c+misc.xml \
+        16-2gr2gr2n2c+misc.console.output \
         24em64t-2n6c2t-pci.xml \
         32em64t-2n8c2t-pci-noio.xml \
         32em64t-2n8c2t-pci-normalio.xml \
@@ -28,6 +30,7 @@ xml_outputs = \
 # or a `xyz.source' file specifying its source file.
 xml_source = \
         16em64t-4s2c2t.console.source \
+        16-2gr2gr2n2c+misc.console.source \
         32em64t-2n8c2t-pci-noio.source \
         32em64t-2n8c2t-pci-normalio.source \
         192em64t-24n8c2t-distancegroups.source
@@ -36,6 +39,7 @@ xml_source = \
 # file modifying the behavior of lstopo
 xml_options = \
         16em64t-4s2c2t.console.options \
+        16-2gr2gr2n2c+misc.console.options \
         32em64t-2n8c2t-pci-noio.options \
         32em64t-2n8c2t-pci-wholeio.options
 
