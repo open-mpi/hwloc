@@ -4239,6 +4239,7 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
   char model[64] = "";
   char serial[64] = "";
   char revision[64] = "";
+  char blocktype[64] = "";
   unsigned major_id, minor_id;
   char *tmp;
 
@@ -4279,7 +4280,9 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
     prop = udev_device_get_property_value(dev, "ID_SERIAL_SHORT");
     if (prop)
       strcpy(serial, prop);
-    /* ID_TYPE= seems to always contain "disk" */
+    prop = udev_device_get_property_value(dev, "ID_TYPE");
+    if (prop)
+      strcpy(blocktype, prop);
 
     udev_device_unref(dev);
   } else
@@ -4303,8 +4306,9 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
       strcpy(revision, line+strlen("E:ID_REVISION="));
     } else if (!strncmp(line, "E:ID_SERIAL_SHORT=", strlen("E:ID_SERIAL_SHORT="))) {
       strcpy(serial, line+strlen("E:ID_SERIAL_SHORT="));
+    } else if (!strncmp(line, "E:ID_TYPE=", strlen("E:ID_TYPE="))) {
+      strcpy(blocktype, line+strlen("E:ID_TYPE="));
     }
-    /* E:ID_TYPE= seems to always contain "disk" */
   }
   fclose(fd);
  }
@@ -4334,6 +4338,15 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
     hwloc_obj_add_info(obj, "Revision", revision);
   if (*serial)
     hwloc_obj_add_info(obj, "SerialNumber", serial);
+
+  if (!strcmp(blocktype, "disk"))
+    hwloc_obj_add_info(obj, "Type", "Disk");
+  else if (!strcmp(blocktype, "tape"))
+    hwloc_obj_add_info(obj, "Type", "Tape");
+  else if (!strcmp(blocktype, "cd") || !strcmp(blocktype, "floppy") || !strcmp(blocktype, "optical"))
+    hwloc_obj_add_info(obj, "Type", "Removable Media Device");
+  else /* generic, usb mass storage/rbc, usb mass storage/scsi */
+    hwloc_obj_add_info(obj, "Type", "Other");
 }
 
 /* block class objects are in

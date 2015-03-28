@@ -1626,7 +1626,9 @@ and GID #1 of port #3.
 <dd>A better type name than the usual one.
 This may be used to specify where Groups come from.
 For instance Linux s390 <em>books</em> appear as Groups of type <em>Book</em>.
-This attribute value is displayed instead of the default object type name in lstopo.
+Block OS devices may have a Type of "Disk", "Tape", "Removable Media Device"
+or "Other".
+The Type attribute value is displayed instead of the default object type name in lstopo.
 </dd>
 <dt>hwlocVersion</dt>
 <dd>The version number of the hwloc library that was used to generate
