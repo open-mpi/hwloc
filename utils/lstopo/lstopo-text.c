@@ -49,24 +49,25 @@
 static void
 output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
-  char type[32], *attr, phys[32] = "";
   unsigned idx = logical ? l->logical_index : l->os_index;
   const char *indexprefix = logical ? " L#" :  " P#";
   const char *value;
   if (lstopo_show_cpuset < 2) {
+    char type[64], *attr, phys[32] = "";
     int len;
-    if (l->type == HWLOC_OBJ_MISC && l->name) {
-      fprintf(output, "%s", l->name);
-    } else if (l->type == HWLOC_OBJ_GROUP && (value = hwloc_obj_get_info_by_name(l, "GroupType")) != NULL) {
-      fprintf(output, "Group(%s)", value);
-    } else {
-      hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
+    value = hwloc_obj_get_info_by_name(l, "GroupType");
+    hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
+    if (l->type == HWLOC_OBJ_GROUP && value)
+      fprintf(output, "%s(%s)", type, value);
+    else
       fprintf(output, "%s", type);
-    }
     if (l->depth != 0 && idx != (unsigned)-1
+        && l->type != HWLOC_OBJ_MISC
         && l->type != HWLOC_OBJ_PCI_DEVICE
         && (l->type != HWLOC_OBJ_BRIDGE || l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
       fprintf(output, "%s%u", indexprefix, idx);
+    if (l->name && (l->type == HWLOC_OBJ_MISC || l->type == HWLOC_OBJ_GROUP))
+      fprintf(output, " %s", l->name);
     if (logical && l->os_index != (unsigned) -1 &&
 	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NUMANODE))
       snprintf(phys, sizeof(phys), "P#%u", l->os_index);
@@ -88,7 +89,8 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
 	      (unsigned long) hwloc_memory_size_printf_value(l->memory.total_memory, 0),
 	      hwloc_memory_size_printf_unit(l->memory.total_memory, 0));
     /* append the name */
-    if ((l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2) && l->name && l->type != HWLOC_OBJ_MISC)
+    if (l->name && (l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2)
+	&& l->type != HWLOC_OBJ_MISC && l->type != HWLOC_OBJ_GROUP)
       fprintf(output, " \"%s\"", l->name);
   }
   if (!l->cpuset)
