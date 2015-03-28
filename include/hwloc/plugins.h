@@ -229,7 +229,7 @@ struct hwloc_component {
    *
    * \return 0 on success, or a negative code on error.
    *
-   * \node If the component uses ltdl for loading its own plugins,
+   * \note If the component uses ltdl for loading its own plugins,
    * it should load/unload them only in init() and finalize(),
    * to avoid race conditions with hwloc's use of ltdl.
    */
