@@ -3011,7 +3011,7 @@ package_done:
           book->cpuset = bookset;
           hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
                        mybookid, bookset);
-	  hwloc_obj_add_info(book, "GroupType", "Book");
+          hwloc_obj_add_info(book, "Type", "Book");
           hwloc_insert_object_by_cpuset(topology, book);
           bookset = NULL; /* don't free it */
         }

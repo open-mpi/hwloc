@@ -427,8 +427,8 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     return snprintf(text, textlen, "%s", obj->name);
   }
 
-  /* for Group, GroupType replaces type */
-  if (obj->type == HWLOC_OBJ_GROUP && (value = hwloc_obj_get_info_by_name(obj, "GroupType")) != NULL) {
+  /* Type replaces the basic type name */
+  if ((value = hwloc_obj_get_info_by_name(obj, "Type")) != NULL) {
     snprintf(typestr, sizeof(typestr), "%s", value);
   } else {
     hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
