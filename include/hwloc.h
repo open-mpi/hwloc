@@ -2144,7 +2144,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object(hwloc_topology_t to
  * See hwloc_topology_insert_group_object().
  *
  * Custom name/value info pairs may be added with hwloc_obj_add_info() after
- * insertion. For instance the GroupType info key allows to display something else
+ * insertion. For instance the Type info key allows to display something else
  * than "Group" as the type name for this object in lstopo.
  *
  * It is recommended not to set any other object attribute before insertion,

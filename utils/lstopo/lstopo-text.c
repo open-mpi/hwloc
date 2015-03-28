@@ -55,9 +55,9 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
   if (lstopo_show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
     int len;
-    value = hwloc_obj_get_info_by_name(l, "GroupType");
+    value = hwloc_obj_get_info_by_name(l, "Type");
     hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
-    if (l->type == HWLOC_OBJ_GROUP && value)
+    if (value)
       fprintf(output, "%s(%s)", type, value);
     else
       fprintf(output, "%s", type);

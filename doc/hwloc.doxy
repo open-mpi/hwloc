@@ -1417,10 +1417,11 @@ the state of a port #1 (value is 4 when active),
 the LID and LID mask count of port #2,
 and GID #1 of port #3.
 </dd>
-<dt>GroupType (Groups)</dt>
-<dd>A better type name than <em>Group</em>.
-This may be used to specify what a Group actually corresponds to.
-For instance Linux s390 books appear as <em>Book</em> instead of <em>Group</em> in lstopo.
+<dt>Type</dt>
+<dd>A better type name than the usual one.
+This may be used to specify where Groups come from.
+For instance Linux s390 <em>books</em> appear as Groups of type <em>Book</em>.
+This attribute value is displayed instead of the default object type name in lstopo.
 </dd>
 <dt>hwlocVersion</dt>
 <dd>The version number of the hwloc library that was used to generate
