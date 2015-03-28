@@ -1,5 +1,5 @@
 Machine (P#0 local=2053992KB total=2053992KB Backend=Linux)
-  Group(Book) L#0 (P#4 GroupType=Book)
+  Group0(Book) L#0 (P#4 GroupType=Book)
     Package L#0
       Core L#0 (P#1)
         PU L#0 (P#0)
@@ -38,7 +38,7 @@ Machine (P#0 local=2053992KB total=2053992KB Backend=Linux)
     Package L#5
       Core L#15 (P#6)
         PU L#15 (P#15)
-  Group(Book) L#1 (P#3 GroupType=Book)
+  Group0(Book) L#1 (P#3 GroupType=Book)
     Package L#6
       Core L#16 (P#1)
         PU L#16 (P#16)
