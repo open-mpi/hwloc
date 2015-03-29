@@ -29,8 +29,8 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/myriexpress.h \
 		@top_srcdir@/doc/netloc.doxy \
 		@top_srcdir@/include/netloc.h \
-		@top_srcdir@/include/netloc_dc.h \
-		@top_srcdir@/include/netloc_map.h
+		@top_srcdir@/include/netloc/dc.h \
+		@top_srcdir@/include/netloc/map.h
 
 EXAMPLE_PATH   = @top_srcdir@/doc @top_srcdir@/tests/netloc
 
