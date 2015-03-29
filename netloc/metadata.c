@@ -1,7 +1,7 @@
 /*
  * Copyright © 2013      University of Wisconsin-La Crosse.
  *                         All rights reserved.
- * Copyright © 2014 Inria.  All rights reserved.
+ * Copyright © 2014-2015 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -237,14 +237,15 @@ static int search_uri(const char * search_uri,
     all_num_networks = 0;
 
     while( NULL != (dir_entry = readdir(dirp)) ) {
+#ifdef _DIRENT_HAVE_D_TYPE
         /*
-         * Skip directories
+         * Skip directories if the filesystem returns a useful d_type.
+         * Otherwise, continue and let the actual opening will fail later.
          */
-	/* FIXME: if !_DIRENT_HAVE_D_TYPE, don't use d_type, do a lstat instead */
-	/* FIXME: if d_type == DT_UNKNOWN, do a lstat */
         if( DT_DIR == dir_entry->d_type ) {
             continue;
         }
+#endif
 
         /*
          * Skip if does not end in .ndat extension

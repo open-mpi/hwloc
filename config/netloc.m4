@@ -2,7 +2,7 @@ dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 dnl
-dnl Copyright © 2014 Inria.  All rights reserved.
+dnl Copyright © 2014-2015 Inria.  All rights reserved.
 dnl See COPYING in top-level directory.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -81,10 +81,7 @@ EOF])
 ])dnl
 
 AC_DEFUN([NETLOC_CHECK_PLATFORM], [
-    AC_CHECK_DECLS([_DIRENT_HAVE_D_TYPE],,[:],[[#include <dirent.h>]])
     AC_MSG_CHECKING([if netloc supports this platform])
-    AS_IF([test "$ac_cv_have_decl__DIRENT_HAVE_D_TYPE" != "yes"],
-          [$1=no netloc_missing_reason=" (dirent->d_type missing)"])
     AS_IF([test "$hwloc_windows" = "yes"],
           [$1=no netloc_missing_reason=" (Windows platform)"])
     AC_MSG_RESULT([$$1$netloc_missing_reason])
