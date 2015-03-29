@@ -13,9 +13,9 @@
 <hr>
 
 \htmlonly
-<div class="section" id="hwloc-introduction">
+<div class="section" id="hwloc_summary">
 \endhtmlonly
-\section Introduction
+\section hwloc_summary hwloc Summary
 
 hwloc provides command line tools and a C API to obtain the
 hierarchical map of key computing elements within a node, such as: NUMA memory

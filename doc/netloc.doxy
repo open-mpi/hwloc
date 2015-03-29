@@ -18,9 +18,9 @@
 
 <!-- ********************************************* -->
 \htmlonly
-<div class="section" id="netloc_introduction">
+<div class="section" id="netloc_summary">
 \endhtmlonly
-\section netloc_introduction Netloc Introduction
+\section netloc_summary Netloc Summary
 
 The Portable Network Locality (netloc) software package provides network
 topology discovery tools, and an abstract representation of those networks
