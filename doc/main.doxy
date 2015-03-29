@@ -9,7 +9,7 @@
 \htmlonly
 <div class="section" id="introduction">
 \endhtmlonly
-\section Introduction
+\section Quick Introduction
 
 The Hardware Locality (hwloc) software project aims at easing the process
 of discovering hardware resources in parallel architectures.
