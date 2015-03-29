@@ -2,6 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2015 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -200,7 +201,7 @@ NETLOC_DECLSPEC int netloc_dc_append_node(netloc_data_collection_handle_t *handl
  *
  * This function makes a copy of the edge information before storing it on the node. So
  * the user may reuse the edge, and is responsible for calling the edge destructor when
- * finished with it (\ref netloc_dt_edge_t_destruct).
+ * finished with it (netloc_dt_edge_t_destruct()).
  *
  * \todo JJH It would be easy to allow the node parameter to be NULL and infer to node from the edge.
  * \todo JJH Add a check to make sure we only add edges to the source node.
@@ -225,7 +226,7 @@ NETLOC_DECLSPEC int netloc_dc_append_edge_to_node(netloc_data_collection_handle_
  *
  * This function makes a copy of the edge information before storing it on the node. So
  * the user may reuse the edge, and is responsible for calling the edge destructor when
- * finished with it (\ref netloc_dt_edge_t_destruct).
+ * finished with it (netloc_dt_edge_t_destruct()).
  *
  * \param handle A valid pointer to a data collection handle
  * \param phy_id The physical_id to search for

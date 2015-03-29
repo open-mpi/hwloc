@@ -894,8 +894,8 @@ addressable network endpoing (e.g., MAC address, GUID).
 they
 <ul>
  <li> \ref netloc_node_t : Node type.
- <li> \ref netloc_dt_node_t_construct : Constructor for the node type.
- <li> \ref netloc_dt_node_t_destruct : Destructor for the node type.
+ <li> netloc_dt_node_t_construct() : Constructor for the node type.
+ <li> netloc_dt_node_t_destruct() : Destructor for the node type.
  <li> \ref netloc_encode_node_type : Encode the node type (e.g., Switch, Host)
 </ul>
 
@@ -944,7 +944,8 @@ representing the links between nodes.
 they
 <ul>
  <li> \ref netloc_edge_t : Netloc edge type.
- <li> \ref netloc_dt_edge_t_construct : Edge constructor.
+ <li> netloc_dt_edge_t_construct() : Edge constructor.
+ <li> netloc_dt_edge_t_destruct() : Edge destructor.
 </ul>
 
 \code
