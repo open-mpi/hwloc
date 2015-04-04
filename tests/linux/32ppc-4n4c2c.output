@@ -1,4 +1,4 @@
-Machine (P#0 total=129236992KB Backend=Linux)
+Machine (P#0 total=129236992KB PlatformName=pSeries PlatformModel="CHRP IBM,9125-F2A" Backend=Linux Architecture=ppc)
   NUMANode L#0 (P#0 local=31195136KB total=31195136KB)
     L3Cache L#0 (size=32768KB linesize=128)
       L2Cache L#0 (size=4096KB linesize=128 ways=8)
