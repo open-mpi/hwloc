@@ -2247,18 +2247,12 @@ hwloc__get_dmi_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
 static void *
 hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
 {
-  char *fname = NULL;
+  char fname[256];
   char *ret = NULL;
   struct stat fs;
   int file = -1;
-  unsigned len;
 
-  len = strlen(p) + 1 + strlen(p1) + 1;
-  fname = malloc(len);
-  if (NULL == fname) {
-      return NULL;
-  }
-  snprintf(fname, len, "%s/%s", p, p1);
+  snprintf(fname, sizeof(fname), "%s/%s", p, p1);
 
   file = hwloc_open(fname, root_fd);
   if (-1 == file) {
@@ -2283,9 +2277,6 @@ hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
  out:
   close(file);
  out_no_close:
-  if (NULL != fname) {
-      free(fname);
-  }
   return ret;
 }
 
@@ -2455,7 +2446,6 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
 {
   device_tree_cpus_t cpus;
   const char ofroot[] = "/proc/device-tree/cpus";
-  size_t ofrootlen = sizeof(ofroot);
   unsigned int i;
   int root_fd = data->root_fd;
   DIR *dt = hwloc_opendir(ofroot, root_fd);
@@ -2475,28 +2465,22 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
   while (NULL != (dirent = readdir(dt))) {
     struct stat statbuf;
     int err;
-    char *cpu;
+    char cpu[256];
     char *device_type;
     uint32_t reg = -1, l2_cache = -1, phandle = -1;
-    unsigned len;
 
     if ('.' == dirent->d_name[0])
       continue;
 
-    len = ofrootlen + 1 + strlen(dirent->d_name) + 1;
-    cpu = malloc(len);
-    if (NULL == cpu) {
-      continue;
-    }
-    snprintf(cpu, len, "%s/%s", ofroot, dirent->d_name);
+    snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, dirent->d_name);
 
     err = hwloc_stat(cpu, &statbuf, root_fd);
     if (err < 0 || !S_ISDIR(statbuf.st_mode))
-      goto cont;
+      continue;
 
     device_type = hwloc_read_str(cpu, "device_type", root_fd);
     if (NULL == device_type)
-      goto cont;
+      continue;
 
     hwloc_read_unit32be(cpu, "reg", &reg, root_fd);
     if (hwloc_read_unit32be(cpu, "next-level-cache", &l2_cache, root_fd) == -1)
@@ -2549,8 +2533,6 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
       }
     }
     free(device_type);
-cont:
-    free(cpu);
   }
   closedir(dt);
 
@@ -2584,18 +2566,9 @@ cont:
     cpuset = hwloc_bitmap_alloc();
     if (0 == look_powerpc_device_tree_discover_cache(&cpus,
           cpus.p[i].phandle, &level, cpuset)) {
-      char *cpu;
-      unsigned len;
-
-      len = ofrootlen + 1 + strlen(cpus.p[i].name) + 1;
-      cpu = malloc(len);
-      if (NULL == cpu) {
-          return;
-      }
-      snprintf(cpu, len, "%s/%s", ofroot, cpus.p[i].name);
-
+      char cpu[256];
+      snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, cpus.p[i].name);
       try_add_cache_from_device_tree_cpu(topology, data, cpu, level, cpuset);
-      free(cpu);
     }
     hwloc_bitmap_free(cpuset);
   }
