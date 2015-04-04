@@ -864,12 +864,13 @@ int hwloc_bitmap_isfull(const struct hwloc_bitmap_s *set)
 
 int hwloc_bitmap_isequal (const struct hwloc_bitmap_s *set1, const struct hwloc_bitmap_s *set2)
 {
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	for(i=0; i<set1->ulongs_count || i<set2->ulongs_count; i++)
+	for(i=0; i<max_count; i++)
 		if (HWLOC_SUBBITMAP_READULONG(set1, i) != HWLOC_SUBBITMAP_READULONG(set2, i))
 			return 0;
 
@@ -881,12 +882,13 @@ int hwloc_bitmap_isequal (const struct hwloc_bitmap_s *set1, const struct hwloc_
 
 int hwloc_bitmap_intersects (const struct hwloc_bitmap_s *set1, const struct hwloc_bitmap_s *set2)
 {
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	for(i=0; i<set1->ulongs_count || i<set2->ulongs_count; i++)
+	for(i=0; i<max_count; i++)
 		if ((HWLOC_SUBBITMAP_READULONG(set1, i) & HWLOC_SUBBITMAP_READULONG(set2, i)) != HWLOC_SUBBITMAP_ZERO)
 			return 1;
 
@@ -898,12 +900,13 @@ int hwloc_bitmap_intersects (const struct hwloc_bitmap_s *set1, const struct hwl
 
 int hwloc_bitmap_isincluded (const struct hwloc_bitmap_s *sub_set, const struct hwloc_bitmap_s *super_set)
 {
+	unsigned max_count = sub_set->ulongs_count > super_set->ulongs_count ? sub_set->ulongs_count : super_set->ulongs_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(sub_set);
 	HWLOC__BITMAP_CHECK(super_set);
 
-	for(i=0; i<sub_set->ulongs_count || i<super_set->ulongs_count; i++)
+	for(i=0; i<max_count; i++)
 		if (HWLOC_SUBBITMAP_READULONG(super_set, i) != (HWLOC_SUBBITMAP_READULONG(super_set, i) | HWLOC_SUBBITMAP_READULONG(sub_set, i)))
 			return 0;
 
@@ -915,14 +918,14 @@ int hwloc_bitmap_isincluded (const struct hwloc_bitmap_s *sub_set, const struct 
 
 void hwloc_bitmap_or (struct hwloc_bitmap_s *res, const struct hwloc_bitmap_s *set1, const struct hwloc_bitmap_s *set2)
 {
-	const struct hwloc_bitmap_s *largest = set1->ulongs_count > set2->ulongs_count ? set1 : set2;
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(res);
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	hwloc_bitmap_realloc_by_ulongs(res, largest->ulongs_count); /* cannot reset since the output may also be an input */
+	hwloc_bitmap_realloc_by_ulongs(res, max_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<res->ulongs_count; i++)
 		res->ulongs[i] = HWLOC_SUBBITMAP_READULONG(set1, i) | HWLOC_SUBBITMAP_READULONG(set2, i);
@@ -932,14 +935,14 @@ void hwloc_bitmap_or (struct hwloc_bitmap_s *res, const struct hwloc_bitmap_s *s
 
 void hwloc_bitmap_and (struct hwloc_bitmap_s *res, const struct hwloc_bitmap_s *set1, const struct hwloc_bitmap_s *set2)
 {
-	const struct hwloc_bitmap_s *largest = set1->ulongs_count > set2->ulongs_count ? set1 : set2;
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(res);
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	hwloc_bitmap_realloc_by_ulongs(res, largest->ulongs_count); /* cannot reset since the output may also be an input */
+	hwloc_bitmap_realloc_by_ulongs(res, max_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<res->ulongs_count; i++)
 		res->ulongs[i] = HWLOC_SUBBITMAP_READULONG(set1, i) & HWLOC_SUBBITMAP_READULONG(set2, i);
@@ -949,14 +952,14 @@ void hwloc_bitmap_and (struct hwloc_bitmap_s *res, const struct hwloc_bitmap_s *
 
 void hwloc_bitmap_andnot (struct hwloc_bitmap_s *res, const struct hwloc_bitmap_s *set1, const struct hwloc_bitmap_s *set2)
 {
-	const struct hwloc_bitmap_s *largest = set1->ulongs_count > set2->ulongs_count ? set1 : set2;
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(res);
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	hwloc_bitmap_realloc_by_ulongs(res, largest->ulongs_count); /* cannot reset since the output may also be an input */
+	hwloc_bitmap_realloc_by_ulongs(res, max_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<res->ulongs_count; i++)
 		res->ulongs[i] = HWLOC_SUBBITMAP_READULONG(set1, i) & ~HWLOC_SUBBITMAP_READULONG(set2, i);
@@ -966,14 +969,14 @@ void hwloc_bitmap_andnot (struct hwloc_bitmap_s *res, const struct hwloc_bitmap_
 
 void hwloc_bitmap_xor (struct hwloc_bitmap_s *res, const struct hwloc_bitmap_s *set1, const struct hwloc_bitmap_s *set2)
 {
-	const struct hwloc_bitmap_s *largest = set1->ulongs_count > set2->ulongs_count ? set1 : set2;
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(res);
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	hwloc_bitmap_realloc_by_ulongs(res, largest->ulongs_count); /* cannot reset since the output may also be an input */
+	hwloc_bitmap_realloc_by_ulongs(res, max_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<res->ulongs_count; i++)
 		res->ulongs[i] = HWLOC_SUBBITMAP_READULONG(set1, i) ^ HWLOC_SUBBITMAP_READULONG(set2, i);
@@ -1102,12 +1105,13 @@ void hwloc_bitmap_singlify(struct hwloc_bitmap_s * set)
 
 int hwloc_bitmap_compare_first(const struct hwloc_bitmap_s * set1, const struct hwloc_bitmap_s * set2)
 {
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	for(i=0; i<set1->ulongs_count || i<set2->ulongs_count; i++) {
+	for(i=0; i<max_count; i++) {
 		unsigned long w1 = HWLOC_SUBBITMAP_READULONG(set1, i);
 		unsigned long w2 = HWLOC_SUBBITMAP_READULONG(set2, i);
 		if (w1 || w2) {
@@ -1127,7 +1131,7 @@ int hwloc_bitmap_compare_first(const struct hwloc_bitmap_s * set1, const struct 
 
 int hwloc_bitmap_compare(const struct hwloc_bitmap_s * set1, const struct hwloc_bitmap_s * set2)
 {
-	const struct hwloc_bitmap_s *largest = set1->ulongs_count > set2->ulongs_count ? set1 : set2;
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	int i;
 
 	HWLOC__BITMAP_CHECK(set1);
@@ -1136,7 +1140,7 @@ int hwloc_bitmap_compare(const struct hwloc_bitmap_s * set1, const struct hwloc_
 	if ((!set1->infinite) != (!set2->infinite))
 		return !!set1->infinite - !!set2->infinite;
 
-	for(i=largest->ulongs_count-1; i>=0; i--) {
+	for(i=max_count-1; i>=0; i--) {
 		unsigned long val1 = HWLOC_SUBBITMAP_READULONG(set1, (unsigned) i);
 		unsigned long val2 = HWLOC_SUBBITMAP_READULONG(set2, (unsigned) i);
 		if (val1 == val2)
@@ -1164,7 +1168,7 @@ int hwloc_bitmap_weight(const struct hwloc_bitmap_s * set)
 
 int hwloc_bitmap_compare_inclusion(const struct hwloc_bitmap_s * set1, const struct hwloc_bitmap_s * set2)
 {
-	const struct hwloc_bitmap_s *largest = set1->ulongs_count > set2->ulongs_count ? set1 : set2;
+	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
 	int result = HWLOC_BITMAP_EQUAL; /* means empty sets return equal */
 	int empty1 = 1;
 	int empty2 = 1;
@@ -1173,7 +1177,7 @@ int hwloc_bitmap_compare_inclusion(const struct hwloc_bitmap_s * set1, const str
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	for(i=0; i<largest->ulongs_count; i++) {
+	for(i=0; i<max_count; i++) {
 	  unsigned long val1 = HWLOC_SUBBITMAP_READULONG(set1, (unsigned) i);
 	  unsigned long val2 = HWLOC_SUBBITMAP_READULONG(set2, (unsigned) i);
 
