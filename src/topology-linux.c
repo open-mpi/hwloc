@@ -2505,27 +2505,19 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
 			 struct hwloc_linux_backend_data_s *data)
 {
   device_tree_cpus_t cpus;
-  const char *ofroot;
-  size_t ofrootlen;
+  const char ofroot[] = "/proc/device-tree/cpus";
+  size_t ofrootlen = sizeof(ofroot);
   unsigned int i;
   int root_fd = data->root_fd;
-  DIR *dt;
+  DIR *dt = hwloc_opendir(ofroot, root_fd);
   struct dirent *dirent;
+
+  if (NULL == dt)
+    return;
 
   /* only works for Power so far, and not useful on ARM */
   if (strncmp(data->utsname.machine, "ppc", 3))
     return;
-
-  ofroot = "/sys/firmware/devicetree/base/cpus";
-  ofrootlen = 34;
-  dt = hwloc_opendir(ofroot, root_fd);
-  if (NULL == dt) {
-    ofroot = "/proc/device-tree/cpus";
-    ofrootlen = 22;
-    dt = hwloc_opendir(ofroot, root_fd);
-    if (NULL == dt)
-      return;
-  }
 
   cpus.n = 0;
   cpus.p = NULL;
