@@ -2514,8 +2514,6 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
   cpus.allocated = 0;
 
   while (NULL != (dirent = readdir(dt))) {
-    struct stat statbuf;
-    int err;
     char cpu[256];
     char *device_type;
     uint32_t reg = -1, l2_cache = -1, phandle = -1;
@@ -2524,10 +2522,6 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
       continue;
 
     snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, dirent->d_name);
-
-    err = hwloc_stat(cpu, &statbuf, root_fd);
-    if (err < 0 || !S_ISDIR(statbuf.st_mode))
-      continue;
 
     device_type = hwloc_read_str(cpu, "device_type", root_fd);
     if (NULL == device_type)
