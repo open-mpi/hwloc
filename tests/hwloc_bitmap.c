@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -18,6 +18,9 @@ int main(void)
 
   /* check an empty bitmap */
   set = hwloc_bitmap_alloc();
+  assert(hwloc_bitmap_weight(set) == 0);
+  assert(hwloc_bitmap_first(set) == -1);
+  assert(hwloc_bitmap_last(set) == -1);
   assert(hwloc_bitmap_to_ulong(set) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
@@ -40,6 +43,9 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
   /* check a zeroed bitmap */
   hwloc_bitmap_zero(set);
+  assert(hwloc_bitmap_weight(set) == 0);
+  assert(hwloc_bitmap_first(set) == -1);
+  assert(hwloc_bitmap_last(set) == -1);
   assert(hwloc_bitmap_to_ulong(set) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
@@ -49,6 +55,9 @@ int main(void)
 
   /* check a full bitmap */
   set = hwloc_bitmap_alloc_full();
+  assert(hwloc_bitmap_weight(set) == -1);
+  assert(hwloc_bitmap_first(set) == 0);
+  assert(hwloc_bitmap_last(set) == -1);
   assert(hwloc_bitmap_to_ulong(set) == ~0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == ~0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == ~0UL);
@@ -67,6 +76,16 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  /* check a filled bitmap */
+  hwloc_bitmap_fill(set);
+  assert(hwloc_bitmap_weight(set) == -1);
+  assert(hwloc_bitmap_first(set) == 0);
+  assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_to_ith_ulong(set, 4) == ~0UL);
+  assert(hwloc_bitmap_to_ulong(set) == ~0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 0) == ~0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 1) == ~0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 23) == ~0UL);
   hwloc_bitmap_free(set);
 
   /* check ranges */
