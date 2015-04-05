@@ -891,7 +891,7 @@ int hwloc_bitmap_intersects (const struct hwloc_bitmap_s *set1, const struct hwl
 			return 1;
 
 	if (set1->infinite && set2->infinite)
-		return 0;
+		return 1;
 
 	return 0;
 }

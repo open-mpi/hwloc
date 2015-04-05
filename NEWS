@@ -26,6 +26,7 @@ Version 1.10.2
   detection on ARM. Thanks to Orion Poplawski for reporting the issue.
 * Add CPUStepping info attribute on x86 processors,
   thanks to Thomas Röhl for the suggestion.
+* Fix hwloc_bitmap_intersect() for two infinite bitmaps.
 * Fix lstopo path in hwloc-gather-topology after install.
 
 
