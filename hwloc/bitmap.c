@@ -567,6 +567,14 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
     size -= res;
   }
 
+  /* if didn't display anything, display 0x0 */
+  if (!ret) {
+    res = hwloc_snprintf(tmp, size, "0x0");
+    if (res < 0)
+      return -1;
+    ret += res;
+  }
+
   return ret;
 }
 
