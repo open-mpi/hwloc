@@ -244,12 +244,20 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
       res = size>0 ? size - 1 : 0;
     tmp += res;
     size -= res;
-    /* optimize a common case: full bitmap should appear as 0xf...f instead of 0xf...f,0xffffffff */
-    if (set->ulongs_count == 1 && set->ulongs[0] == HWLOC_SUBBITMAP_FULL)
-      return ret;
   }
 
   i=set->ulongs_count-1;
+
+  if (set->infinite) {
+    /* ignore starting FULL since we have 0xf...f already */
+    while (i>=0 && set->ulongs[i] == HWLOC_SUBBITMAP_FULL)
+      i--;
+  } else {
+    /* ignore starting ZERO except the last one */
+    while (i>=0 && set->ulongs[i] == HWLOC_SUBBITMAP_ZERO)
+      i--;
+  }
+
   while (i>=0 || accumed) {
     /* Refill accumulator */
     if (!accumed) {
@@ -287,6 +295,14 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
 
     tmp += res;
     size -= res;
+  }
+
+  /* if didn't display anything, display 0x0 */
+  if (!ret) {
+    res = hwloc_snprintf(tmp, size, "0x0");
+    if (res < 0)
+      return -1;
+    ret += res;
   }
 
   return ret;
@@ -513,12 +529,20 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
       res = size>0 ? size - 1 : 0;
     tmp += res;
     size -= res;
-    /* optimize a common case: full bitmap should appear as 0xf...f instead of 0xf...fffffffff */
-    if (set->ulongs_count == 1 && set->ulongs[0] == HWLOC_SUBBITMAP_FULL)
-      return ret;
   }
 
   i=set->ulongs_count-1;
+
+  if (set->infinite) {
+    /* ignore starting FULL since we have 0xf...f already */
+    while (i>=0 && set->ulongs[i] == HWLOC_SUBBITMAP_FULL)
+      i--;
+  } else {
+    /* ignore starting ZERO except the last one */
+    while (i>=1 && set->ulongs[i] == HWLOC_SUBBITMAP_ZERO)
+      i--;
+  }
+
   while (i>=0) {
     unsigned long val = set->ulongs[i--];
     if (started) {
