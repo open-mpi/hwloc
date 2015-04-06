@@ -896,15 +896,30 @@ int hwloc_bitmap_isfull(const struct hwloc_bitmap_s *set)
 
 int hwloc_bitmap_isequal (const struct hwloc_bitmap_s *set1, const struct hwloc_bitmap_s *set2)
 {
-	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
+	unsigned count1 = set1->ulongs_count;
+	unsigned count2 = set2->ulongs_count;
+	unsigned min_count = count1 < count2 ? count1 : count2;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	for(i=0; i<max_count; i++)
-		if (HWLOC_SUBBITMAP_READULONG(set1, i) != HWLOC_SUBBITMAP_READULONG(set2, i))
+	for(i=0; i<min_count; i++)
+		if (set1->ulongs[i] != set2->ulongs[i])
 			return 0;
+
+	if (count1 != count2) {
+		unsigned long w1 = set1->infinite ? HWLOC_SUBBITMAP_FULL : HWLOC_SUBBITMAP_ZERO;
+		unsigned long w2 = set2->infinite ? HWLOC_SUBBITMAP_FULL : HWLOC_SUBBITMAP_ZERO;
+		for(i=min_count; i<count1; i++) {
+			if (set1->ulongs[i] != w2)
+				return 0;
+		}
+		for(i=min_count; i<count2; i++) {
+			if (set2->ulongs[i] != w1)
+				return 0;
+		}
+	}
 
 	if (set1->infinite != set2->infinite)
 		return 0;
@@ -914,15 +929,30 @@ int hwloc_bitmap_isequal (const struct hwloc_bitmap_s *set1, const struct hwloc_
 
 int hwloc_bitmap_intersects (const struct hwloc_bitmap_s *set1, const struct hwloc_bitmap_s *set2)
 {
-	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
+	unsigned count1 = set1->ulongs_count;
+	unsigned count2 = set2->ulongs_count;
+	unsigned min_count = count1 < count2 ? count1 : count2;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	for(i=0; i<max_count; i++)
-		if ((HWLOC_SUBBITMAP_READULONG(set1, i) & HWLOC_SUBBITMAP_READULONG(set2, i)) != HWLOC_SUBBITMAP_ZERO)
+	for(i=0; i<min_count; i++)
+		if (set1->ulongs[i] & set2->ulongs[i])
 			return 1;
+
+	if (count1 != count2) {
+		if (set2->infinite) {
+			for(i=min_count; i<set1->ulongs_count; i++)
+				if (set1->ulongs[i])
+					return 1;
+		}
+		if (set1->infinite) {
+			for(i=min_count; i<set2->ulongs_count; i++)
+				if (set2->ulongs[i])
+					return 1;
+		}
+	}
 
 	if (set1->infinite && set2->infinite)
 		return 1;
@@ -932,15 +962,28 @@ int hwloc_bitmap_intersects (const struct hwloc_bitmap_s *set1, const struct hwl
 
 int hwloc_bitmap_isincluded (const struct hwloc_bitmap_s *sub_set, const struct hwloc_bitmap_s *super_set)
 {
-	unsigned max_count = sub_set->ulongs_count > super_set->ulongs_count ? sub_set->ulongs_count : super_set->ulongs_count;
+	unsigned super_count = super_set->ulongs_count;
+	unsigned sub_count = sub_set->ulongs_count;
+	unsigned min_count = super_count < sub_count ? super_count : sub_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(sub_set);
 	HWLOC__BITMAP_CHECK(super_set);
 
-	for(i=0; i<max_count; i++)
-		if (HWLOC_SUBBITMAP_READULONG(super_set, i) != (HWLOC_SUBBITMAP_READULONG(super_set, i) | HWLOC_SUBBITMAP_READULONG(sub_set, i)))
+	for(i=0; i<min_count; i++)
+		if (super_set->ulongs[i] != (super_set->ulongs[i] | sub_set->ulongs[i]))
 			return 0;
+
+	if (super_count != sub_count) {
+		if (!super_set->infinite)
+			for(i=min_count; i<sub_count; i++)
+				if (sub_set->ulongs[i])
+					return 0;
+		if (sub_set->infinite)
+			for(i=min_count; i<super_count; i++)
+				if (super_set->ulongs[i] != HWLOC_SUBBITMAP_FULL)
+					return 0;
+	}
 
 	if (sub_set->infinite && !super_set->infinite)
 		return 0;
@@ -1137,15 +1180,18 @@ void hwloc_bitmap_singlify(struct hwloc_bitmap_s * set)
 
 int hwloc_bitmap_compare_first(const struct hwloc_bitmap_s * set1, const struct hwloc_bitmap_s * set2)
 {
-	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
+	unsigned count1 = set1->ulongs_count;
+	unsigned count2 = set2->ulongs_count;
+	unsigned max_count = count1 > count2 ? count1 : count2;
+	unsigned min_count = count1 + count2 - max_count;
 	unsigned i;
 
 	HWLOC__BITMAP_CHECK(set1);
 	HWLOC__BITMAP_CHECK(set2);
 
-	for(i=0; i<max_count; i++) {
-		unsigned long w1 = HWLOC_SUBBITMAP_READULONG(set1, i);
-		unsigned long w2 = HWLOC_SUBBITMAP_READULONG(set2, i);
+	for(i=0; i<min_count; i++) {
+		unsigned long w1 = set1->ulongs[i];
+		unsigned long w2 = set2->ulongs[i];
 		if (w1 || w2) {
 			int _ffs1 = hwloc_ffsl(w1);
 			int _ffs2 = hwloc_ffsl(w2);
@@ -1156,14 +1202,36 @@ int hwloc_bitmap_compare_first(const struct hwloc_bitmap_s * set1, const struct 
 			return _ffs2-_ffs1;
 		}
 	}
-	if ((!set1->infinite) != (!set2->infinite))
-		return !!set1->infinite - !!set2->infinite;
-	return 0;
+
+	if (count1 != count2) {
+		if (min_count < count2) {
+			for(i=min_count; i<count2; i++) {
+				unsigned long w2 = set2->ulongs[i];
+				if (set1->infinite)
+					return -!(w2 & 1);
+				else if (w2)
+					return 1;
+			}
+		} else {
+			for(i=min_count; i<count1; i++) {
+				unsigned long w1 = set1->ulongs[i];
+				if (set2->infinite)
+					return !(w1 & 1);
+				else if (w1)
+					return -1;
+			}
+		}
+	}
+
+	return !!set1->infinite - !!set2->infinite;
 }
 
 int hwloc_bitmap_compare(const struct hwloc_bitmap_s * set1, const struct hwloc_bitmap_s * set2)
 {
-	unsigned max_count = set1->ulongs_count > set2->ulongs_count ? set1->ulongs_count : set2->ulongs_count;
+	unsigned count1 = set1->ulongs_count;
+	unsigned count2 = set2->ulongs_count;
+	unsigned max_count = count1 > count2 ? count1 : count2;
+	unsigned min_count = count1 + count2 - max_count;
 	int i;
 
 	HWLOC__BITMAP_CHECK(set1);
@@ -1172,9 +1240,29 @@ int hwloc_bitmap_compare(const struct hwloc_bitmap_s * set1, const struct hwloc_
 	if ((!set1->infinite) != (!set2->infinite))
 		return !!set1->infinite - !!set2->infinite;
 
-	for(i=max_count-1; i>=0; i--) {
-		unsigned long val1 = HWLOC_SUBBITMAP_READULONG(set1, (unsigned) i);
-		unsigned long val2 = HWLOC_SUBBITMAP_READULONG(set2, (unsigned) i);
+	if (count1 != count2) {
+		if (min_count < count2) {
+			unsigned long val1 = set1->infinite ? HWLOC_SUBBITMAP_FULL :  HWLOC_SUBBITMAP_ZERO;
+			for(i=max_count-1; i>=(signed) min_count; i--) {
+				unsigned long val2 = set2->ulongs[i];
+				if (val1 == val2)
+					continue;
+				return val1 < val2 ? -1 : 1;
+			}
+		} else {
+			unsigned long val2 = set2->infinite ? HWLOC_SUBBITMAP_FULL :  HWLOC_SUBBITMAP_ZERO;
+			for(i=max_count-1; i>=(signed) min_count; i--) {
+				unsigned long val1 = set1->ulongs[i];
+				if (val1 == val2)
+					continue;
+				return val1 < val2 ? -1 : 1;
+			}
+		}
+	}
+
+	for(i=min_count-1; i>=0; i--) {
+		unsigned long val1 = set1->ulongs[i];
+		unsigned long val2 = set2->ulongs[i];
 		if (val1 == val2)
 			continue;
 		return val1 < val2 ? -1 : 1;
