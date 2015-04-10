@@ -28,6 +28,7 @@ Version 1.10.2
   thanks to Thomas Röhl for the suggestion.
 * Fix hwloc_bitmap_intersect() for two infinite bitmaps.
 * Fix lstopo path in hwloc-gather-topology after install.
+* Add support for CUDA compute capability 5.x, thanks Benjamin Worpitz.
 
 
 Version 1.10.1
