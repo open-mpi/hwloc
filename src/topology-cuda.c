@@ -84,6 +84,8 @@ static unsigned hwloc_cuda_cores_per_MP(int major, int minor)
       break;
     case 3:
       return 192;
+    case 5:
+      return 128;
   }
   hwloc_debug("unknown compute capability %u.%u, disabling core display.\n", major, minor);
   return 0;
