@@ -1,4 +1,4 @@
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -24,6 +24,8 @@ check_LTLIBRARIES = \
         libhwloc-port-cuda.la \
         libhwloc-port-nvml.la \
         libhwloc-port-gl.la
+check_LIBRARIES = \
+	liblstopo-port-windows.a
 endif HWLOC_HAVE_LINUX
 
 # Note that AC_CONFIG_LINKS sets up the sym links for the files in
@@ -140,6 +142,14 @@ libhwloc_port_windows_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/windows \
         -DHWLOC_WIN_SYS \
         -DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+
+nodist_liblstopo_port_windows_a_SOURCES = lstopo-windows.c
+liblstopo_port_windows_a_SOURCES = \
+        include/windows/windowsx.h
+liblstopo_port_windows_a_CPPFLAGS = $(common_CPPFLAGS) \
+        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/windows \
+	-I$(HWLOC_top_srcdir)/utils/lstopo \
+        -DHWLOC_WIN_SYS
 
 nodist_libhwloc_port_opencl_la_SOURCES = topology-opencl.c
 libhwloc_port_opencl_la_SOURCES = \
