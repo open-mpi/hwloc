@@ -827,6 +827,13 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+
+    /* if two neighbor PUs have very different OS indexes, make the small one bigger
+     * to avoid boxes of different widths. useful for making the common case nicer.
+     */
+    if (!logical && level->os_index < 10 && hwloc_bitmap_last(level->parent->cpuset) >= 10)
+      n++;
+
     textwidth = get_textwidth(n, fontsize, gridsize);
   }
 
