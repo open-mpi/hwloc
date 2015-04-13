@@ -220,8 +220,8 @@ again:
     /* Add border on the right */ \
     totwidth += (border); \
   } \
-  if (totwidth < textwidth) \
-    totwidth = textwidth; \
+  if (totwidth < (border) + textwidth) \
+    totwidth = (border) + textwidth; \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
@@ -245,8 +245,8 @@ again:
   } \
   \
   /* Make sure there is width for the heading text */ \
-  if (totwidth < textwidth) \
-    totwidth = textwidth; \
+  if (totwidth < (border) + textwidth) \
+    totwidth = (border) + textwidth; \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
@@ -349,8 +349,8 @@ RECURSE_BEGIN(obj, border) \
     totheight += maxheight + (border); \
   } \
   /* Make sure there is width for the heading text */ \
-  if (totwidth < textwidth) \
-    totwidth = textwidth; \
+  if (totwidth < (border) + textwidth) \
+    totwidth = (border) + textwidth; \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
