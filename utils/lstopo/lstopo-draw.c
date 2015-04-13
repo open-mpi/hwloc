@@ -732,7 +732,7 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
     }
     textwidth = get_textwidth(n, fontsize, gridsize);
     totheight = gridsize + (fontsize + gridsize)*(nmorelines+1);
-    totwidth = gridsize + textwidth + gridsize;
+    totwidth = gridsize + textwidth;
   }
 
   *retwidth = totwidth;
