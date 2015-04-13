@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -19,8 +19,8 @@
 
 #define FIG_FACTOR 20
 
-static void *
-fig_start(void *output_, int width __hwloc_attribute_unused, int height __hwloc_attribute_unused)
+static void
+fig_init(void *output_)
 {
   FILE *output = output_;
   fprintf(output, "#FIG 3.2  Produced by hwloc's lstopo\n");
@@ -32,7 +32,6 @@ fig_start(void *output_, int width __hwloc_attribute_unused, int height __hwloc_
   fprintf(output, "Single\n");	/* single page */
   fprintf(output, "-2\n");	/* no transparent color */
   fprintf(output, "1200 2\n");	/* 1200 ppi resolution, upper left origin */
-  return output;
 }
 
 static int __hwloc_attribute_const
@@ -108,7 +107,8 @@ fig_text(void *output_, int r, int g, int b, int size, unsigned depth, unsigned 
 }
 
 static struct draw_methods fig_draw_methods = {
-  fig_start,
+  NULL, /* start */
+  fig_init,
   fig_declare_color,
   fig_box,
   fig_line,

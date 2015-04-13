@@ -23,7 +23,7 @@ typedef unsigned char BYTE, UCHAR;
 typedef unsigned short WORD, USHORT;
 typedef unsigned int UINT, UINT_PTR;
 typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD, *PDWORD_PTR;
-typedef long LONG_PTR;
+typedef long LONG, LONG_PTR;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)();
 typedef void *PVOID,*LPVOID;
@@ -65,8 +65,11 @@ typedef struct tagPAINTSTRUCT {
   HDC hdc;
 } PAINTSTRUCT, *LPPAINTSTRUCT;
 typedef struct _RECT {
-  void *dummy;
-} RECT;
+  LONG left;
+  LONG top;
+  LONG right;
+  LONG bottom;
+} RECT, *LPRECT;
 typedef void *HRGN;
 typedef struct tagPOINT {
   void *dummy;
@@ -134,6 +137,9 @@ BOOL MoveToEx(HDC hdc, int X, int Y, LPPOINT lpPoint);
 BOOL LineTo(HDC hdc, int nXEnd, int nYEnd);
 HFONT CreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet, DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily, LPCTSTR lpszFace);
 BOOL TextOut(HDC hdc, int nXStart, int nYStart, LPCTSTR lpString, int cchString);
+
+BOOL WINAPI GetWindowRect(HWND hWnd, LPRECT lpRect);
+BOOL WINAPI MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
 
 LRESULT DispatchMessage(const MSG *lpmsg);
 BOOL TranslateMessage(const MSG *lpMsg);

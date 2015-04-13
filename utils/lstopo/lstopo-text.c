@@ -335,24 +335,35 @@ struct cell {
 };
 
 struct display {
+  hwloc_topology_t topology;
+  int logical;
+  int legend;
   struct cell **cells;
   int width;
   int height;
   int utf8;
+  int drawing;
 };
 
+static struct draw_methods text_draw_methods;
+
 /* Allocate the off-screen buffer */
-static void *
-text_start(void *output __hwloc_attribute_unused, int width, int height)
+static void
+text_init(void *_output)
 {
+  struct display *disp = _output;
+  unsigned width, height;
   int j, i;
-  struct display *disp = malloc(sizeof(*disp));
+
+  /* compute the required size */
+  disp->drawing = 0;
+  output_draw(&text_draw_methods, disp->logical, disp->legend, disp->topology, disp);
+  width = disp->width;
+  height = disp->height;
+  disp->drawing = 1;
+
   /* terminals usually have narrow characters, so let's make them wider */
-  width /= (gridsize/2);
-  height /= gridsize;
   disp->cells = malloc(height * sizeof(*disp->cells));
-  disp->width = width;
-  disp->height = height;
   for (j = 0; j < height; j++) {
     disp->cells[j] = calloc(width, sizeof(**disp->cells));
     for (i = 0; i < width; i++)
@@ -361,7 +372,6 @@ text_start(void *output __hwloc_attribute_unused, int width, int height)
 #ifdef HAVE_NL_LANGINFO
   disp->utf8 = !strcmp(nl_langinfo(CODESET), "UTF-8");
 #endif /* HAVE_NL_LANGINFO */
-  return disp;
 }
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
@@ -434,13 +444,21 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
 static void
 text_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused)
 {
+  struct display *disp = output;
 #ifdef HWLOC_HAVE_LIBTERMCAP
-  int color = declare_color(r, g, b);
-  /* Yes, values seem to range from 0 to 1000 inclusive */
-  int rr = (r * 1001) / 256;
-  int gg = (g * 1001) / 256;
-  int bb = (b * 1001) / 256;
+  int color, rr, gg, bb;
   char *toput;
+#endif
+
+  if (!disp->drawing)
+    return;
+
+#ifdef HWLOC_HAVE_LIBTERMCAP
+  color = declare_color(r, g, b);
+  /* Yes, values seem to range from 0 to 1000 inclusive */
+  rr = (r * 1001) / 256;
+  gg = (g * 1001) / 256;
+  bb = (b * 1001) / 256;
 
   if (initc) {
     if ((toput = tparm(initc, color + 16, rr, gg, bb, 0, 0, 0, 0, 0)))
@@ -598,6 +616,18 @@ text_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unu
   x2 = x1 + width - 1;
   y2 = y1 + height - 1;
 
+  if (!disp->drawing) {
+    if (x1 >= disp->width)
+      disp->width = x1+1;
+    if (x2 >= disp->width)
+      disp->width = x2+1;
+    if (y1 >= disp->height)
+      disp->height = y1+1;
+    if (y2 >= disp->height)
+      disp->height = y2+1;
+    return;
+  }
+
   /* Corners */
   merge(disp, x1, y1, down|right, 0, r, g, b);
   merge(disp, x2, y1, down|left, 0, r, g, b);
@@ -645,6 +675,14 @@ text_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_
     y2 = z;
   }
 
+  if (!disp->drawing) {
+    if (x2 >= disp->width)
+      disp->width = x2+1;
+    if (y2 >= disp->height)
+      disp->height = y2+1;
+    return;
+  }
+
   /* vertical/horizontal should be enough, but should mix with existing
    * characters for better output ! */
 
@@ -677,6 +715,10 @@ static void
 text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct display *disp = output;
+
+  if (!disp->drawing)
+    return;
+
   x /= (gridsize/2);
   y /= gridsize;
 
@@ -696,7 +738,8 @@ text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, 
 }
 
 static struct draw_methods text_draw_methods = {
-  text_start,
+  NULL, /* start */
+  text_init,
   text_declare_color,
   text_box,
   text_line,
@@ -758,7 +801,14 @@ void output_text(hwloc_topology_t topology, const char *filename, int overwrite,
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
-  disp = output_draw_start(&text_draw_methods, logical, legend, topology, output);
+  disp = malloc(sizeof(*disp));
+  disp->width = 0;
+  disp->height = 0;
+  disp->topology = topology;
+  disp->logical = logical;
+  disp->legend = legend;
+
+  output_draw_start(&text_draw_methods, logical, legend, topology, disp);
   output_draw(&text_draw_methods, logical, legend, topology, disp);
 
   lfr = lfg = lfb = -1;
