@@ -206,8 +206,8 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
     /* Add border on the right */ \
     totwidth += (border); \
   } \
-  if (totwidth < textwidth) \
-    totwidth = textwidth; \
+  if (totwidth < (border) + textwidth) \
+    totwidth = (border) + textwidth; \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
@@ -231,8 +231,8 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
   } \
   \
   /* Make sure there is width for the heading text */ \
-  if (totwidth < textwidth) \
-    totwidth = textwidth; \
+  if (totwidth < (border) + textwidth) \
+    totwidth = (border) + textwidth; \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
@@ -335,8 +335,8 @@ RECURSE_BEGIN(obj, border) \
     totheight += maxheight + (border); \
   } \
   /* Make sure there is width for the heading text */ \
-  if (totwidth < textwidth) \
-    totwidth = textwidth; \
+  if (totwidth < (border) + textwidth) \
+    totwidth = (border) + textwidth; \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
