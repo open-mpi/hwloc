@@ -128,6 +128,7 @@ static void null_text(void *output __hwloc_attribute_unused, int r __hwloc_attri
 
 static struct draw_methods null_draw_methods = {
   null_start,
+  NULL, /* init */
   null_declare_color,
   null_box,
   null_line,
@@ -1311,18 +1312,25 @@ getmax_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribut
 
 static struct draw_methods getmax_draw_methods = {
   null_start,
+  NULL, /* init */
   null_declare_color,
   getmax_box,
   getmax_line,
   null_text,
 };
 
+/* FIXME won't need logical/legend/topo anymore */
 void *
 output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_topology_t topology, void *output)
 {
-  struct coords coords = { 0, 0 };
-  fig(topology, &getmax_draw_methods, logical, legend, hwloc_get_root_obj(topology), &coords, 100, 0, 0);
-  output = methods->start(output, coords.x, coords.y);
+  if (methods->init) {
+    methods->init(output);
+  } else {
+    assert(methods->start);
+    struct coords coords = { 0, 0 };
+    fig(topology, &getmax_draw_methods, logical, legend, hwloc_get_root_obj(topology), &coords, 100, 0, 0);
+    output = methods->start(output, coords.x, coords.y);
+  }
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
   methods->declare_color(output, PACKAGE_R_COLOR, PACKAGE_G_COLOR, PACKAGE_B_COLOR);
