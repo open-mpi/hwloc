@@ -351,7 +351,6 @@ windows_text(void *output, int r, int g, int b, int size, unsigned depth __hwloc
 }
 
 struct draw_methods windows_draw_methods = {
-  NULL, /* start */
   windows_init,
   windows_declare_color,
   windows_box,

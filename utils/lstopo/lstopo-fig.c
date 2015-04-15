@@ -107,7 +107,6 @@ fig_text(void *output_, int r, int g, int b, int size, unsigned depth, unsigned 
 }
 
 static struct draw_methods fig_draw_methods = {
-  NULL, /* start */
   fig_init,
   fig_declare_color,
   fig_box,
@@ -124,7 +123,7 @@ output_fig (hwloc_topology_t topology, const char *filename, int overwrite, int 
     return;
   }
 
-  output = output_draw_start(&fig_draw_methods, logical, legend, topology, output);
+  output_draw_start(&fig_draw_methods, logical, legend, topology, output);
   output_draw(&fig_draw_methods, logical, legend, topology, output);
 
   if (output != stdout)
