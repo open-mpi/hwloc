@@ -116,14 +116,12 @@ static int prefer_ratio(float ratio1, float ratio2) {
   return _ratio1 < _ratio2;
 }
 
-static void* null_start(void *output, int width __hwloc_attribute_unused, int height __hwloc_attribute_unused) { return output; }
 static void null_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused) { }
 static void null_box(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x __hwloc_attribute_unused, unsigned width __hwloc_attribute_unused, unsigned y __hwloc_attribute_unused, unsigned height __hwloc_attribute_unused) { }
 static void null_line(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1 __hwloc_attribute_unused, unsigned y1_arg __hwloc_attribute_unused, unsigned x2 __hwloc_attribute_unused, unsigned y2 __hwloc_attribute_unused) { }
 static void null_text(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x __hwloc_attribute_unused, unsigned y __hwloc_attribute_unused, const char *text __hwloc_attribute_unused) { }
 
 static struct draw_methods null_draw_methods = {
-  null_start,
   NULL, /* init */
   null_declare_color,
   null_box,
@@ -1271,66 +1269,11 @@ get_type_fun(hwloc_obj_type_t type)
   }
 }
 
-/*
- * Dummy drawing methods to get the bounding box.
- */
-
-struct coords {
-  unsigned x;
-  unsigned y;
-};
-
-static void
-getmax_box(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
-{
-  struct coords *coords = output;
-
-  if (x > coords->x)
-    coords->x = x;
-  if (x + width > coords->x)
-    coords->x = x + width;
-  if (y > coords->y)
-    coords->y = y;
-  if (y + height > coords->y)
-    coords->y = y + height;
-}
-
-static void
-getmax_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1_arg, unsigned y1_arg, unsigned x2_arg, unsigned y2_arg)
-{
-  struct coords *coords = output;
-
-  if (x1_arg > coords->x)
-    coords->x = x1_arg;
-  if (x2_arg > coords->x)
-    coords->x = x2_arg;
-  if (y1_arg > coords->y)
-    coords->y = y1_arg;
-  if (y2_arg > coords->y)
-    coords->y = y2_arg;
-}
-
-static struct draw_methods getmax_draw_methods = {
-  null_start,
-  NULL, /* init */
-  null_declare_color,
-  getmax_box,
-  getmax_line,
-  null_text,
-};
-
 /* FIXME won't need logical/legend/topo anymore */
-void *
+void
 output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_topology_t topology, void *output)
 {
-  if (methods->init) {
-    methods->init(output);
-  } else {
-    assert(methods->start);
-    struct coords coords = { 0, 0 };
-    fig(topology, &getmax_draw_methods, logical, legend, hwloc_get_root_obj(topology), &coords, 100, 0, 0);
-    output = methods->start(output, coords.x, coords.y);
-  }
+  methods->init(output);
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
   methods->declare_color(output, PACKAGE_R_COLOR, PACKAGE_G_COLOR, PACKAGE_B_COLOR);
@@ -1345,7 +1288,6 @@ output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_t
   methods->declare_color(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR);
   methods->declare_color(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR);
   methods->declare_color(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR);
-  return output;
 }
 
 void

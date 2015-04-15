@@ -28,7 +28,6 @@ FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
 extern output_method output_console, output_synthetic, output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
 
 struct draw_methods {
-  void* (*start) (void *output, int width, int height);
   void (*init) (void *output);
   void (*declare_color) (void *output, int r, int g, int b);
   void (*box) (void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height);
@@ -47,7 +46,7 @@ enum lstopo_orient_e {
 /* orientation of children within an object of the given type */
 extern enum lstopo_orient_e force_orient[];
 
-extern void *output_draw_start(struct draw_methods *draw_methods, int logical, int legend, struct hwloc_topology *topology, void *output);
+extern void output_draw_start(struct draw_methods *draw_methods, int logical, int legend, struct hwloc_topology *topology, void *output);
 extern void output_draw(struct draw_methods *draw_methods, int logical, int legend, struct hwloc_topology *topology, void *output);
 extern void output_draw_clear(struct hwloc_topology *topology);
 

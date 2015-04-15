@@ -738,7 +738,6 @@ text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, 
 }
 
 static struct draw_methods text_draw_methods = {
-  NULL, /* start */
   text_init,
   text_declare_color,
   text_box,

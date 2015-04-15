@@ -252,7 +252,6 @@ x11_init(void *_disp)
 }
 
 static struct draw_methods x11_draw_methods = {
-  NULL, /* start */
   x11_init,
   null_declare_color,
   topo_cairo_box,
@@ -471,7 +470,6 @@ png_init(void *_coutput)
 }
 
 static struct draw_methods png_draw_methods = {
-  NULL, /* start */
   png_init,
   null_declare_color,
   topo_cairo_box,
@@ -535,7 +533,6 @@ pdf_init(void *_coutput)
 }
 
 static struct draw_methods pdf_draw_methods = {
-  NULL, /* start */
   pdf_init,
   null_declare_color,
   topo_cairo_box,
@@ -599,7 +596,6 @@ ps_init(void *_coutput)
 }
 
 static struct draw_methods ps_draw_methods = {
-  NULL, /* start */
   ps_init,
   null_declare_color,
   topo_cairo_box,
@@ -663,7 +659,6 @@ svg_init(void *_coutput)
 }
 
 static struct draw_methods svg_draw_methods = {
-  NULL, /* start */
   svg_init,
   null_declare_color,
   topo_cairo_box,
