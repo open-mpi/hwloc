@@ -21,9 +21,22 @@ extern char ** lstopo_append_legends;
 extern unsigned lstopo_append_legends_nr;
 extern unsigned long lstopo_export_synthetic_flags;
 
-typedef void output_method (struct hwloc_topology *topology, const char *output, int overwrite, int logical, int legend, int verbose_mode);
-
 FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
+
+struct draw_methods;
+
+/* if embedded in backend-specific output structure, must be at the beginning */
+struct lstopo_output {
+  FILE *file;
+  hwloc_topology_t topology;
+  int logical;
+  int legend;
+  int overwrite;
+  int verbose_mode;
+  struct draw_methods *methods;
+};
+
+typedef void output_method (struct lstopo_output *output, const char *filename);
 
 extern output_method output_console, output_synthetic, output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
 
@@ -46,9 +59,9 @@ enum lstopo_orient_e {
 /* orientation of children within an object of the given type */
 extern enum lstopo_orient_e force_orient[];
 
-extern void output_draw_start(struct draw_methods *draw_methods, int logical, int legend, struct hwloc_topology *topology, void *output);
-extern void output_draw(struct draw_methods *draw_methods, int logical, int legend, struct hwloc_topology *topology, void *output);
-extern void output_draw_clear(struct hwloc_topology *topology);
+extern void output_draw_start(struct lstopo_output *output);
+extern void output_draw(struct lstopo_output *output);
+extern void output_draw_clear(struct lstopo_output *output);
 
 int rgb_to_color(int r, int g, int b) __hwloc_attribute_const;
 int declare_color(int r, int g, int b);

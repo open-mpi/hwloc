@@ -27,10 +27,8 @@ static struct color {
   HGDIOBJ brush;
 } *colors;
 
-struct woutput {
-  hwloc_topology_t topology;
-  int logical;
-  int legend;
+struct lstopo_windows_output {
+  struct lstopo_output loutput; /* must be at the beginning */
   int drawing;
   PAINTSTRUCT ps;
   HWND toplevel;
@@ -55,9 +53,7 @@ rgb_to_brush(int r, int g, int b)
 
 struct draw_methods windows_draw_methods;
 
-static hwloc_topology_t the_topology;
-static int the_logical;
-static int the_legend;
+static struct lstopo_windows_output the_output;
 static int state, control;
 static int x, y, x_delta, y_delta;
 static int finish;
@@ -74,13 +70,10 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
   int redraw = 0;
   switch (message) {
     case WM_PAINT: {
-      HDC hdc;
-      struct woutput woutput;
-      woutput.drawing = 1;
-      hdc = BeginPaint(hwnd, &woutput.ps);
-      windows_box(&woutput, 0xff, 0xff, 0xff, 0, 0, win_width, 0, win_height);
-      output_draw(&windows_draw_methods, the_logical, the_legend, the_topology, &woutput);
-      EndPaint(hwnd, &woutput.ps);
+      BeginPaint(hwnd, &the_output.ps);
+      windows_box(&the_output, 0xff, 0xff, 0xff, 0, 0, win_width, 0, win_height);
+      output_draw(&the_output.loutput);
+      EndPaint(hwnd, &the_output.ps);
       break;
     }
     case WM_LBUTTONDOWN:
@@ -209,7 +202,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 static void
 windows_init(void *output)
 {
-  struct woutput *woutput = output;
+  struct lstopo_windows_output *woutput = output;
   WNDCLASS wndclass;
   HWND toplevel;
   RECT toplevelrect;
@@ -233,7 +226,7 @@ windows_init(void *output)
   woutput->max_x = 0;
   woutput->max_y = 0;
   woutput->drawing = 0;
-  output_draw(&windows_draw_methods, woutput->logical, woutput->legend, woutput->topology, woutput);
+  output_draw(&woutput->loutput);
   woutput->drawing = 1;
 
   /* now update the window size */
@@ -265,7 +258,7 @@ windows_init(void *output)
 static void
 windows_declare_color(void *output, int r, int g, int b)
 {
-  struct woutput *woutput = output;
+  struct lstopo_windows_output *woutput = output;
   HBRUSH brush;
   COLORREF color;
 
@@ -290,7 +283,7 @@ windows_declare_color(void *output, int r, int g, int b)
 static void
 windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
 {
-  struct woutput *woutput = output;
+  struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
   if (!woutput->drawing) {
@@ -313,7 +306,7 @@ windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_
 static void
 windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
-  struct woutput *woutput = output;
+  struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
   if (!woutput->drawing) {
@@ -336,7 +329,7 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
 static void
 windows_text(void *output, int r, int g, int b, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
-  struct woutput *woutput = output;
+  struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
   HFONT font;
 
@@ -359,18 +352,16 @@ struct draw_methods windows_draw_methods = {
 };
 
 void
-output_windows (hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int overwrite __hwloc_attribute_unused, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
+output_windows (struct lstopo_output *loutput, const char *filename __hwloc_attribute_unused)
 {
-  struct woutput woutput;
   MSG msg;
 
-  memset(&woutput, 0, sizeof(woutput));
-  woutput.topology = the_topology = topology;
-  woutput.logical = the_logical = logical;
-  woutput.legend = the_legend = legend;
+  memset(&the_output, 0, sizeof(the_output));
+  memcpy(&the_output.loutput, loutput, sizeof(*loutput));
+  the_output.loutput.methods = &windows_draw_methods;
 
-  output_draw_start(&windows_draw_methods, logical, legend, topology, &woutput);
-  UpdateWindow(woutput.toplevel);
+  output_draw_start(&the_output.loutput);
+  UpdateWindow(the_output.toplevel);
   while (!finish && GetMessage(&msg, NULL, 0, 0)) {
     TranslateMessage(&msg);
     DispatchMessage(&msg);
