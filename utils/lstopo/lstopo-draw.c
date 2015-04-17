@@ -1269,10 +1269,10 @@ get_type_fun(hwloc_obj_type_t type)
   }
 }
 
-/* FIXME won't need logical/legend/topo anymore */
 void
-output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_topology_t topology, void *output)
+output_draw_start(struct lstopo_output *output)
 {
+  struct draw_methods *methods = output->methods;
   methods->init(output);
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
@@ -1292,9 +1292,9 @@ output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_t
 }
 
 void
-output_draw(struct draw_methods *methods, int logical, int legend, hwloc_topology_t topology, void *output)
+output_draw(struct lstopo_output *output)
 {
-	fig(topology, methods, logical, legend, hwloc_get_root_obj(topology), output, 100, 0, 0);
+  fig(output->topology, output->methods, output->logical, output->legend, hwloc_get_root_obj(output->topology), output, 100, 0, 0);
 }
 
 static void
@@ -1310,7 +1310,8 @@ draw_clear(hwloc_topology_t topology, hwloc_obj_t level)
 }
 
 void
-output_draw_clear(hwloc_topology_t topology)
+output_draw_clear(struct lstopo_output *loutput)
 {
+  hwloc_topology_t topology = loutput->topology;
   draw_clear(topology, hwloc_get_root_obj(topology));
 }

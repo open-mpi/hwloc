@@ -50,9 +50,6 @@ unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX];
 
-static int overwrite = 0;
-static int logical = -1;
-static unsigned int legend = 1;
 static unsigned int top = 0;
 
 FILE *open_output(const char *filename, int overwrite)
@@ -367,7 +364,6 @@ int
 main (int argc, char *argv[])
 {
   int err;
-  int verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   hwloc_topology_t topology;
   const char *filename = NULL;
   unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES | HWLOC_TOPOLOGY_FLAG_ICACHES;
@@ -378,8 +374,14 @@ main (int argc, char *argv[])
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   char *restrictstring = NULL;
+  struct lstopo_output loutput;
   int opt;
   unsigned i;
+
+  loutput.overwrite = 0;
+  loutput.logical = -1;
+  loutput.legend = 1;
+  loutput.verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
 
   for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
     force_orient[i] = LSTOPO_ORIENT_NONE;
@@ -412,18 +414,18 @@ main (int argc, char *argv[])
     {
       opt = 0;
       if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose")) {
-	verbose_mode++;
+	loutput.verbose_mode++;
       } else if (!strcmp (argv[0], "-s") || !strcmp (argv[0], "--silent")) {
-	verbose_mode--;
+	loutput.verbose_mode--;
       } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
       } else if (!strcmp (argv[0], "-f") || !strcmp (argv[0], "--force"))
-	overwrite = 1;
+	loutput.overwrite = 1;
       else if (!strcmp (argv[0], "-l") || !strcmp (argv[0], "--logical"))
-	logical = 1;
+	loutput.logical = 1;
       else if (!strcmp (argv[0], "-p") || !strcmp (argv[0], "--physical"))
-	logical = 0;
+	loutput.logical = 0;
       else if (!strcmp (argv[0], "-c") || !strcmp (argv[0], "--cpuset"))
 	lstopo_show_cpuset = 1;
       else if (!strcmp (argv[0], "-C") || !strcmp (argv[0], "--cpuset-only"))
@@ -535,7 +537,7 @@ main (int argc, char *argv[])
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-legend")) {
-	legend = 0;
+	loutput.legend = 0;
       }
       else if (!strcmp (argv[0], "--append-legend")) {
 	if (argc < 2) {
@@ -597,7 +599,7 @@ main (int argc, char *argv[])
     hwloc_topology_ignore_all_keep_structure(topology);
 
   if (input) {
-    err = hwloc_utils_enable_input_format(topology, input, input_format, verbose_mode > 1, callname);
+    err = hwloc_utils_enable_input_format(topology, input, input_format, loutput.verbose_mode > 1, callname);
     if (err)
       return err;
   }
@@ -658,80 +660,83 @@ main (int argc, char *argv[])
   if (output_format == LSTOPO_OUTPUT_DEFAULT) {
     if (lstopo_show_cpuset
         || lstopo_show_only != (hwloc_obj_type_t)-1
-        || verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
+        || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }
 
-  if (logical == -1) {
+  if (loutput.logical == -1) {
     if (output_format == LSTOPO_OUTPUT_CONSOLE)
-      logical = 1;
+      loutput.logical = 1;
     else if (output_format != LSTOPO_OUTPUT_DEFAULT)
-      logical = 0;
+      loutput.logical = 0;
   }
+
+  loutput.topology = topology;
+  loutput.file = NULL;
 
   switch (output_format) {
     case LSTOPO_OUTPUT_DEFAULT:
 #ifdef LSTOPO_HAVE_GRAPHICS
 #if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11_KEYSYM
       if (getenv("DISPLAY")) {
-        if (logical == -1)
-          logical = 0;
-        output_x11(topology, NULL, overwrite, logical, legend, verbose_mode);
+        if (loutput.logical == -1)
+          loutput.logical = 0;
+        output_x11(&loutput, NULL);
       } else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #ifdef HWLOC_WIN_SYS
       {
-        if (logical == -1)
-          logical = 0;
-        output_windows(topology, NULL, overwrite, logical, legend, verbose_mode);
+        if (loutput.logical == -1)
+          loutput.logical = 0;
+        output_windows(&loutput, NULL);
       }
 #endif
 #endif /* !LSTOPO_HAVE_GRAPHICS */
 #if !defined HWLOC_WIN_SYS || !defined LSTOPO_HAVE_GRAPHICS
       {
-        if (logical == -1)
-          logical = 1;
-        output_console(topology, NULL, overwrite, logical, legend, verbose_mode);
+        if (loutput.logical == -1)
+          loutput.logical = 1;
+        output_console(&loutput, NULL);
       }
 #endif
       break;
 
     case LSTOPO_OUTPUT_CONSOLE:
-      output_console(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_console(&loutput, filename);
       break;
     case LSTOPO_OUTPUT_SYNTHETIC:
-      output_synthetic(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_synthetic(&loutput, filename);
       break;
     case LSTOPO_OUTPUT_TEXT:
-      output_text(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_text(&loutput, filename);
       break;
     case LSTOPO_OUTPUT_FIG:
-      output_fig(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_fig(&loutput, filename);
       break;
 #ifdef LSTOPO_HAVE_GRAPHICS
 # if CAIRO_HAS_PNG_FUNCTIONS
     case LSTOPO_OUTPUT_PNG:
-      output_png(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_png(&loutput, filename);
       break;
 # endif /* CAIRO_HAS_PNG_FUNCTIONS */
 # if CAIRO_HAS_PDF_SURFACE
     case LSTOPO_OUTPUT_PDF:
-      output_pdf(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_pdf(&loutput, filename);
       break;
 # endif /* CAIRO_HAS_PDF_SURFACE */
 # if CAIRO_HAS_PS_SURFACE
     case LSTOPO_OUTPUT_PS:
-      output_ps(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_ps(&loutput, filename);
       break;
 #endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_SVG_SURFACE
     case LSTOPO_OUTPUT_SVG:
-      output_svg(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_svg(&loutput, filename);
       break;
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* LSTOPO_HAVE_GRAPHICS */
     case LSTOPO_OUTPUT_XML:
-      output_xml(topology, filename, overwrite, logical, legend, verbose_mode);
+      output_xml(&loutput, filename);
       break;
     default:
       fprintf(stderr, "file format not supported\n");
@@ -739,7 +744,7 @@ main (int argc, char *argv[])
       exit(EXIT_FAILURE);
   }
 
-  output_draw_clear(topology);
+  output_draw_clear(&loutput);
   hwloc_topology_destroy (topology);
 
   for(i=0; i<lstopo_append_legends_nr; i++)

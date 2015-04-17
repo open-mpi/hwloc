@@ -154,12 +154,15 @@ output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical
     output_only (topology, l->children[x], output, logical, verbose_mode);
 }
 
-void output_console(hwloc_topology_t topology, const char *filename, int overwrite, int logical, int legend __hwloc_attribute_unused, int verbose_mode)
+void output_console(struct lstopo_output *loutput, const char *filename)
 {
+  hwloc_topology_t topology = loutput->topology;
   unsigned topodepth;
+  int verbose_mode = loutput->verbose_mode;
+  int logical = loutput->logical;
   FILE *output;
 
-  output = open_output(filename, overwrite);
+  output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
@@ -258,8 +261,9 @@ void output_console(hwloc_topology_t topology, const char *filename, int overwri
     fclose(output);
 }
 
-void output_synthetic(hwloc_topology_t topology, const char *filename, int overwrite, int logical __hwloc_attribute_unused, int legend __hwloc_attribute_unused, int verbose_mode __hwloc_attribute_unused)
+void output_synthetic(struct lstopo_output *loutput, const char *filename)
 {
+  hwloc_topology_t topology = loutput->topology;
   FILE *output;
   int length;
   char sbuffer[1024];
@@ -285,7 +289,7 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int overw
       goto out;
   }
 
-  output = open_output(filename, overwrite);
+  output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     goto out;
@@ -331,10 +335,8 @@ struct cell {
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 };
 
-struct display {
-  hwloc_topology_t topology;
-  int logical;
-  int legend;
+struct lstopo_text_output {
+  struct lstopo_output loutput; /* must be at the beginning */
   struct cell **cells;
   int width;
   int height;
@@ -348,13 +350,13 @@ static struct draw_methods text_draw_methods;
 static void
 text_init(void *_output)
 {
-  struct display *disp = _output;
+  struct lstopo_text_output *disp = _output;
   unsigned width, height;
   int j, i;
 
   /* compute the required size */
   disp->drawing = 0;
-  output_draw(&text_draw_methods, disp->logical, disp->legend, disp->topology, disp);
+  output_draw(&disp->loutput);
   width = disp->width;
   height = disp->height;
   disp->drawing = 1;
@@ -441,7 +443,7 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
 static void
 text_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused)
 {
-  struct display *disp = output;
+  struct lstopo_text_output *disp = output;
 #ifdef HWLOC_HAVE_LIBTERMCAP
   int color, rr, gg, bb;
   char *toput;
@@ -469,7 +471,7 @@ text_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribut
 
 /* output text, erasing any previous content */
 static void
-put(struct display *disp, int x, int y, character c, int fr __hwloc_attribute_unused, int fg __hwloc_attribute_unused, int fb __hwloc_attribute_unused, int br __hwloc_attribute_unused, int bg __hwloc_attribute_unused, int bb __hwloc_attribute_unused)
+put(struct lstopo_text_output *disp, int x, int y, character c, int fr __hwloc_attribute_unused, int fg __hwloc_attribute_unused, int fb __hwloc_attribute_unused, int br __hwloc_attribute_unused, int bg __hwloc_attribute_unused, int bb __hwloc_attribute_unused)
 {
   if (x >= disp->width || y >= disp->height) {
     /* fprintf(stderr, "%"PRIchar" overflowed to (%d,%d)\n", c, x, y); */
@@ -500,7 +502,7 @@ enum {
 
 /* Convert a bar character into its directions */
 static int
-to_directions(struct display *disp, character c)
+to_directions(struct lstopo_text_output *disp, character c)
 {
 #ifdef HAVE_PUTWC
   if (disp->utf8) {
@@ -538,7 +540,7 @@ to_directions(struct display *disp, character c)
 
 /* Produce a bar character given the wanted directions */
 static character
-from_directions(struct display *disp, int direction)
+from_directions(struct lstopo_text_output *disp, int direction)
 {
 #ifdef HAVE_PUTWC
   if (disp->utf8) {
@@ -586,7 +588,7 @@ from_directions(struct display *disp, int direction)
 
 /* output bars, merging with existing bars: `andnot' are removed, `or' are added */
 static void
-merge(struct display *disp, int x, int y, int or, int andnot, int r, int g, int b)
+merge(struct lstopo_text_output *disp, int x, int y, int or, int andnot, int r, int g, int b)
 {
   character current;
   int directions;
@@ -603,7 +605,7 @@ merge(struct display *disp, int x, int y, int or, int andnot, int r, int g, int 
 static void
 text_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned width, unsigned y1, unsigned height)
 {
-  struct display *disp = output;
+  struct lstopo_text_output *disp = output;
   unsigned i, j;
   unsigned x2, y2;
   x1 /= (gridsize/2);
@@ -653,7 +655,7 @@ text_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unu
 static void
 text_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
-  struct display *disp = output;
+  struct lstopo_text_output *disp = output;
   unsigned i, j, z;
   x1 /= (gridsize/2);
   y1 /= gridsize;
@@ -711,7 +713,7 @@ text_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_
 static void
 text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
-  struct display *disp = output;
+  struct lstopo_text_output *disp = output;
 
   if (!disp->drawing)
     return;
@@ -742,10 +744,10 @@ static struct draw_methods text_draw_methods = {
   text_text,
 };
 
-void output_text(hwloc_topology_t topology, const char *filename, int overwrite, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
+void output_text(struct lstopo_output *loutput, const char *filename)
 {
   FILE *output;
-  struct display _disp, *disp = &_disp;
+  struct lstopo_text_output _disp, *disp = &_disp;
   int i, j;
   int lfr, lfg, lfb; /* Last foreground color */
   int lbr, lbg, lbb; /* Last background color */
@@ -754,7 +756,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int overwrite,
   char *tmp;
 #endif
 
-  output = open_output(filename, overwrite);
+  output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
@@ -797,14 +799,13 @@ void output_text(hwloc_topology_t topology, const char *filename, int overwrite,
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
+  memcpy(&disp->loutput, loutput, sizeof(*loutput));
+  disp->loutput.methods = &text_draw_methods;
   disp->width = 0;
   disp->height = 0;
-  disp->topology = topology;
-  disp->logical = logical;
-  disp->legend = legend;
 
-  output_draw_start(&text_draw_methods, logical, legend, topology, disp);
-  output_draw(&text_draw_methods, logical, legend, topology, disp);
+  output_draw_start(&disp->loutput);
+  output_draw(&disp->loutput);
 
   lfr = lfg = lfb = -1;
   lbr = lbg = lbb = -1;
