@@ -310,14 +310,12 @@ move_x11(struct display *disp, int logical, int legend, hwloc_topology_t topolog
 void
 output_x11(hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int overwrite __hwloc_attribute_unused, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
-  struct display *disp;
+  struct display _disp, *disp = &_disp;
   struct lstopo_cairo_output *coutput;
   int finish = 0;
   int state = 0;
   int x = 0, y = 0; /* shut warning down */
   int lastx, lasty;
-
-  disp = malloc(sizeof(*disp));
 
   coutput = &disp->coutput;
   memset(coutput, 0, sizeof(*coutput));
@@ -439,7 +437,6 @@ output_x11(hwloc_topology_t topology, const char *filename __hwloc_attribute_unu
   XDestroyWindow(disp->dpy, disp->top);
   XFreeCursor(disp->dpy, disp->hand);
   XCloseDisplay(disp->dpy);
-  free(disp);
 }
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 
