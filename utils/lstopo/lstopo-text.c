@@ -745,7 +745,7 @@ static struct draw_methods text_draw_methods = {
 void output_text(hwloc_topology_t topology, const char *filename, int overwrite, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output;
-  struct display *disp;
+  struct display _disp, *disp = &_disp;
   int i, j;
   int lfr, lfg, lfb; /* Last foreground color */
   int lbr, lbg, lbb; /* Last background color */
@@ -797,7 +797,6 @@ void output_text(hwloc_topology_t topology, const char *filename, int overwrite,
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
-  disp = malloc(sizeof(*disp));
   disp->width = 0;
   disp->height = 0;
   disp->topology = topology;
