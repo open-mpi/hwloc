@@ -117,6 +117,7 @@ static struct draw_methods fig_draw_methods = {
   fig_box,
   fig_line,
   fig_text,
+  NULL, /* textsize not supported, fallback to default estimation in get_textsize() */
 };
 
 void

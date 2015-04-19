@@ -736,12 +736,19 @@ text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, 
 #endif
 }
 
+void
+text_textsize(void *output __hwloc_attribute_unused, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned fontsize __hwloc_attribute_unused, unsigned *width)
+{
+  *width = textlength*(gridsize/2);
+}
+
 static struct draw_methods text_draw_methods = {
   text_init,
   text_declare_color,
   text_box,
   text_line,
   text_text,
+  text_textsize,
 };
 
 void output_text(struct lstopo_output *loutput, const char *filename)

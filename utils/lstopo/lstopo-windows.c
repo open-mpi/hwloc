@@ -226,7 +226,9 @@ windows_init(void *output)
   woutput->max_x = 0;
   woutput->max_y = 0;
   woutput->drawing = 0;
+  BeginPaint(toplevel, &woutput->ps);
   output_draw(&woutput->loutput);
+  EndPaint(toplevel, &woutput->ps);
   woutput->drawing = 1;
 
   /* now update the window size */
@@ -343,12 +345,28 @@ windows_text(void *output, int r, int g, int b, int size, unsigned depth __hwloc
   DeleteObject(font);
 }
 
+static void
+windows_textsize(void *output, const char *text, unsigned textlength, unsigned fontsize, unsigned *width)
+{
+  struct lstopo_windows_output *woutput = output;
+  PAINTSTRUCT *ps = &woutput->ps;
+  HFONT font;
+  SIZE size;
+
+  font = CreateFont(fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
+  SelectObject(ps->hdc, (HGDIOBJ) font);
+  GetTextExtentPoint32(ps->hdc, text, textlength, &size);
+  DeleteObject(font);
+  *width = size.cx;
+}
+
 struct draw_methods windows_draw_methods = {
   windows_init,
   windows_declare_color,
   windows_box,
   windows_line,
   windows_text,
+  windows_textsize,
 };
 
 void
