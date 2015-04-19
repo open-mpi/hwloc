@@ -70,9 +70,13 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
   int redraw = 0;
   switch (message) {
     case WM_PAINT: {
+      HFONT font;
       BeginPaint(hwnd, &the_output.ps);
+      font = CreateFont(fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
+      SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
       windows_box(&the_output, 0xff, 0xff, 0xff, 0, 0, win_width, 0, win_height);
       output_draw(&the_output.loutput);
+      DeleteObject(font);
       EndPaint(hwnd, &the_output.ps);
       break;
     }
@@ -207,6 +211,7 @@ windows_init(void *output)
   HWND toplevel;
   RECT toplevelrect;
   unsigned width, height;
+  HFONT font;
 
   /* create the toplevel window, with random size for now */
   memset(&wndclass, 0, sizeof(wndclass));
@@ -227,7 +232,10 @@ windows_init(void *output)
   woutput->max_y = 0;
   woutput->drawing = 0;
   BeginPaint(toplevel, &woutput->ps);
+  font = CreateFont(fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
+  SelectObject(woutput->ps.hdc, (HGDIOBJ) font);
   output_draw(&woutput->loutput);
+  DeleteObject(font);
   EndPaint(toplevel, &woutput->ps);
   woutput->drawing = 1;
 
@@ -329,34 +337,26 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
 }
 
 static void
-windows_text(void *output, int r, int g, int b, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
+windows_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
-  HFONT font;
 
   if (!woutput->drawing)
     return;
 
   SetTextColor(ps->hdc, RGB(r, g, b));
-  font = CreateFont(size, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
-  SelectObject(ps->hdc, (HGDIOBJ) font);
   TextOut(ps->hdc, x - x_delta, y - y_delta, text, strlen(text));
-  DeleteObject(font);
 }
 
 static void
-windows_textsize(void *output, const char *text, unsigned textlength, unsigned fontsize, unsigned *width)
+windows_textsize(void *output, const char *text, unsigned textlength, unsigned fontsize __hwloc_attribute_unused, unsigned *width)
 {
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
-  HFONT font;
   SIZE size;
 
-  font = CreateFont(fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
-  SelectObject(ps->hdc, (HGDIOBJ) font);
   GetTextExtentPoint32(ps->hdc, text, textlength, &size);
-  DeleteObject(font);
   *width = size.cx;
 }
 
