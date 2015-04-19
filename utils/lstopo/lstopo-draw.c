@@ -873,6 +873,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth += gridsize; /* artificially extend the minimal inner size because RECURSE_RECT() uses 0 as border when computing totwidth */
   }
 
   RECURSE_RECT(level, &null_draw_methods, separator, 0);
@@ -974,6 +975,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth += 2*gridsize; /* so artificially extend the minimal inner size to include space between space between epoxy and memory box */
   }
 
   /* Compute the size needed by sublevels */
