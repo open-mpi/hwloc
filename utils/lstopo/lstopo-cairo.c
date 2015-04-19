@@ -111,7 +111,7 @@ topo_cairo_line(void *_output, int r, int g, int b, unsigned depth __hwloc_attri
 }
 
 static void
-topo_cairo_text(void *_output, int r, int g, int b, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
+topo_cairo_text(void *_output, int r, int g, int b, int fontsize, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
@@ -119,19 +119,17 @@ topo_cairo_text(void *_output, int r, int g, int b, int size, unsigned depth __h
   if (!coutput->drawing)
     return;
 
-  cairo_move_to(c, x, y + size);
-  cairo_set_font_size(c, size);
+  cairo_move_to(c, x, y + fontsize);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
   cairo_show_text(c, text);
 }
 
 static void
-topo_cairo_textsize(void *_output, const char *text, unsigned textlength __hwloc_attribute_unused, unsigned fontsize, unsigned *width)
+topo_cairo_textsize(void *_output, const char *text, unsigned textlength __hwloc_attribute_unused, unsigned fontsize __hwloc_attribute_unused, unsigned *width)
 {
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
   cairo_text_extents_t extents;
-  cairo_set_font_size(c, fontsize);
   cairo_text_extents(c, text, &extents);
   *width = extents.width;
 }
@@ -153,6 +151,7 @@ topo_cairo_paint(struct lstopo_cairo_output *coutput)
   cairo_surface_t *cs = coutput->surface;
   cairo_t *c = cairo_create(cs);
   coutput->context = c;
+  cairo_set_font_size(c, fontsize);
   output_draw(&coutput->loutput);
   cairo_show_page(c);
   cairo_destroy(c);
