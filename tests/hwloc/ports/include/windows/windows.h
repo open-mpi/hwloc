@@ -74,6 +74,10 @@ typedef void *HRGN;
 typedef struct tagPOINT {
   void *dummy;
 } *LPPOINT;
+typedef struct _SIZE {
+  unsigned cx;
+  unsigned cy;
+} SIZE, *LPSIZE;
 
 /* This is to cope with linux using integers for hwloc_pid_t and hwloc_thread_t
 typedef PVOID HANDLE; */
@@ -137,6 +141,7 @@ BOOL MoveToEx(HDC hdc, int X, int Y, LPPOINT lpPoint);
 BOOL LineTo(HDC hdc, int nXEnd, int nYEnd);
 HFONT CreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet, DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily, LPCTSTR lpszFace);
 BOOL TextOut(HDC hdc, int nXStart, int nYStart, LPCTSTR lpString, int cchString);
+BOOL GetTextExtentPoint32(HDC hdc, LPCTSTR lpString, int c, LPSIZE lpSize);
 
 BOOL WINAPI GetWindowRect(HWND hWnd, LPRECT lpRect);
 BOOL WINAPI MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);

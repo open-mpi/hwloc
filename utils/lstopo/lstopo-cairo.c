@@ -125,6 +125,18 @@ topo_cairo_text(void *_output, int r, int g, int b, int size, unsigned depth __h
   cairo_show_text(c, text);
 }
 
+static void
+topo_cairo_textsize(void *_output, const char *text, unsigned textlength __hwloc_attribute_unused, unsigned fontsize, unsigned *width)
+{
+  struct lstopo_cairo_output *coutput = _output;
+  cairo_t *c = coutput->context;
+  cairo_text_extents_t extents;
+  cairo_set_font_size(c, fontsize);
+  cairo_text_extents(c, text, &extents);
+  *width = extents.width;
+}
+
+
 #if (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE)
 static cairo_status_t
 topo_cairo_write(void *closure, const unsigned char *data, unsigned int length)
@@ -253,6 +265,7 @@ static struct draw_methods x11_draw_methods = {
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
+  topo_cairo_textsize,
 };
 
 /** Clip coordinates of the visible part. */
@@ -467,6 +480,7 @@ static struct draw_methods png_draw_methods = {
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
+  topo_cairo_textsize,
 };
 
 void
@@ -529,6 +543,7 @@ static struct draw_methods pdf_draw_methods = {
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
+  topo_cairo_textsize,
 };
 
 void
@@ -591,6 +606,7 @@ static struct draw_methods ps_draw_methods = {
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
+  topo_cairo_textsize,
 };
 
 void
@@ -653,6 +669,7 @@ static struct draw_methods svg_draw_methods = {
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
+  topo_cairo_textsize,
 };
 
 void

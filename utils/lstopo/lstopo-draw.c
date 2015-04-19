@@ -94,8 +94,16 @@ struct style {
 	t2;	/* other text color */
 };
 
-unsigned get_textwidth(unsigned length, unsigned fontsize, unsigned gridsize)
+unsigned get_textwidth(void *output, struct draw_methods *methods,
+		       const char *text, unsigned length,
+		       unsigned fontsize, unsigned gridsize)
 {
+  struct lstopo_output *loutput = output;
+  if (loutput->methods->textsize) {
+    unsigned width;
+    loutput->methods->textsize(output, text, length, fontsize, &width);
+    return width + gridsize;
+  }
   return (length * fontsize * 3) / 4 + gridsize;
 }
 
@@ -127,6 +135,7 @@ static struct draw_methods null_draw_methods = {
   null_box,
   null_line,
   null_text,
+  NULL, /* no textsize needed, only native methods' textsize is used */
 };
 
 /*
@@ -627,7 +636,7 @@ pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
   }
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
@@ -724,12 +733,13 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
     }
 
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
     for(i=0; i<nmorelines; i++) {
       int nn = strlen(morelines[i]);
-      if (nn > n)
-	n = nn;
+      int ntextwidth = get_textwidth(output, methods, morelines[i], nn, fontsize, gridsize);
+      if (ntextwidth > textwidth)
+	textwidth = ntextwidth;
     }
-    textwidth = get_textwidth(n, fontsize, gridsize);
     totheight = gridsize + (fontsize + gridsize)*(nmorelines+1);
     totwidth = gridsize + textwidth;
   }
@@ -826,14 +836,8 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-
-    /* if two neighbor PUs have very different OS indexes, make the small one bigger
-     * to avoid boxes of different widths. useful for making the common case nicer.
-     */
-    if (!logical && level->os_index < 10 && hwloc_bitmap_last(level->parent->cpuset) >= 10)
-      n++;
-
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
+    /* FIXME: save min pu textwidth in output */
   }
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
@@ -872,7 +876,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
     textwidth += gridsize; /* artificially extend the minimal inner size because RECURSE_RECT() uses 0 as border when computing totwidth */
   }
 
@@ -904,7 +908,7 @@ core_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
   }
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
@@ -935,7 +939,7 @@ package_draw(hwloc_topology_t topology, struct draw_methods *methods, int logica
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
   }
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
@@ -974,7 +978,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
     textwidth += 2*gridsize; /* so artificially extend the minimal inner size to include space between space between epoxy and memory box */
   }
 
@@ -1012,7 +1016,7 @@ machine_draw(hwloc_topology_t topology, struct draw_methods *methods, int logica
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
   }
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
@@ -1085,7 +1089,7 @@ system_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
   }
 
   if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
@@ -1123,7 +1127,7 @@ group_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
   }
 
   if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
@@ -1162,7 +1166,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(n, fontsize, gridsize);
+    textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
   }
 
   RECURSE_HORIZ(level, &null_draw_methods, gridsize, 0);
