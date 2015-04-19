@@ -34,6 +34,7 @@ struct lstopo_output {
   int overwrite;
   int verbose_mode;
   struct draw_methods *methods;
+  unsigned min_pu_textwidth;
 };
 
 typedef void output_method (struct lstopo_output *output, const char *filename);

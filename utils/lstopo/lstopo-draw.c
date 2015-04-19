@@ -824,9 +824,11 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
 static void
 pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned textwidth = gridsize;
   unsigned mywidth = 0, totwidth;
+  unsigned textxoffset = 0;
   char text[64];
   int n;
   struct style style;
@@ -837,7 +839,13 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
-    /* FIXME: save min pu textwidth in output */
+    /* if smaller than other PU, artificially extend/shift it
+     * to make PU boxes nicer when vertically stacked.
+     */
+    if (textwidth < loutput->min_pu_textwidth) {
+      textxoffset = (loutput->min_pu_textwidth - textwidth) / 2;
+      textwidth = loutput->min_pu_textwidth;
+    }
   }
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
@@ -852,7 +860,7 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
   methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
 
   if (fontsize) {
-    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize + textxoffset, y + gridsize, text);
   }
 
   RECURSE_RECT(level, methods, 0, gridsize);
@@ -1296,9 +1304,35 @@ output_draw_start(struct lstopo_output *output)
   methods->declare_color(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR);
 }
 
+static void
+output_compute_pu_min_textwidth(struct lstopo_output *output)
+{
+  char text[64];
+  int n;
+  hwloc_topology_t topology = output->topology;
+  hwloc_obj_t lastpu;
+
+  if (!output->methods->textsize) {
+    output->min_pu_textwidth = 0;
+    return;
+  }
+
+  if (output->logical) {
+    unsigned depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
+    lastpu = hwloc_get_obj_by_depth(topology, HWLOC_OBJ_PU, hwloc_get_nbobjs_by_depth(topology, depth)-1);
+  } else {
+    unsigned lastidx = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
+    lastpu = hwloc_get_pu_obj_by_os_index(topology, lastidx);
+  }
+
+  n = lstopo_obj_snprintf(text, sizeof(text), lastpu, output->logical);
+  output->min_pu_textwidth = get_textwidth(output, output->methods, text, n, fontsize, gridsize);
+}
+
 void
 output_draw(struct lstopo_output *output)
 {
+  output_compute_pu_min_textwidth(output);
   fig(output->topology, output->methods, output->logical, output->legend, hwloc_get_root_obj(output->topology), output, 100, 0, 0);
 }
 
