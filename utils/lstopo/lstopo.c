@@ -311,6 +311,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --gridsize 10         Set size of margin between elements\n");
   fprintf (where, "  --horiz[=<type,...>]  Horizontal graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --vert[=<type,...>]   Vertical graphical layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "  --rect[=<type,...>]   Rectangular graphical layout with nearly 4/3 ratio\n");
   fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "Miscellaneous options:\n");
@@ -496,9 +497,13 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--vert"))
 	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  force_orient[i] = LSTOPO_ORIENT_VERT;
+      else if (!strcmp (argv[0], "--rect"))
+	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+	  force_orient[i] = LSTOPO_ORIENT_RECT;
       else if (!strncmp (argv[0], "--horiz=", 8)
-	       || !strncmp (argv[0], "--vert=", 7)) {
-	enum lstopo_orient_e orient = (argv[0][2] == 'h') ? LSTOPO_ORIENT_HORIZ : LSTOPO_ORIENT_VERT;
+	       || !strncmp (argv[0], "--vert=", 7)
+	       || !strncmp (argv[0], "--rect=", 7)) {
+	enum lstopo_orient_e orient = (argv[0][2] == 'h') ? LSTOPO_ORIENT_HORIZ : (argv[0][2] == 'v') ? LSTOPO_ORIENT_VERT : LSTOPO_ORIENT_RECT;
 	char *tmp = argv[0] + ((argv[0][2] == 'h') ? 8 : 7);
 	while (tmp) {
 	  char *end = strchr(tmp, ',');

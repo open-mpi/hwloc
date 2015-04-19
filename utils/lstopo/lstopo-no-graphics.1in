@@ -187,6 +187,12 @@ Vertical graphical layout instead of nearly 4/3 ratio.
 If a comma-separated list of types is given, the layout only
 applies to the corresponding containers.
 .TP
+\fB\-\-rect\fR, \fB\-\-rect\fR=<type1,...>
+Rectangular graphical layout with nearly 4/3 ratio,
+including when placing NUMA nodes.
+If a comma-separated list of types is given, the layout only
+applies to the corresponding containers.
+.TP
 \fB\-\-no\-legend\fR
 Remove the text legend at the bottom.
 .TP
@@ -399,7 +405,8 @@ in the particular case of NUMA nodes, the layout is always a flat
 rectangle, to avoid letting the user believe any particular NUMA
 topology (lstopo is not able to render that yet).
 .
-The layout of a level may be changed with \-\-vert and \-\-horiz.
+The layout of a level may be changed with \-\-vert, \-\-horiz,
+and \-\-rect.
 .
 .\" **************************
 .\"    Examples Section
