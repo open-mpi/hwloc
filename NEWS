@@ -39,6 +39,7 @@ Version 1.11.0
   + Ignore the device-tree on non-Power architectures to avoid buggy
     detection on ARM. Thanks to Orion Poplawski for reporting the issue.
 * Tools
+  + Add --rect to lstopo to force rectangular layout even for NUMA nodes.
   + hwloc-annotate may now operate on all types of objects, including I/O.
   + hwloc-annotate does not drop instruction caches and I/O devices from the
     output anymore.

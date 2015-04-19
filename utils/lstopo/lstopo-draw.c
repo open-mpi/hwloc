@@ -344,7 +344,7 @@ RECURSE_BEGIN(obj, border) \
 
 /* Pack objects in a grid */
 #define RECURSE_RECT(obj, methods, separator, border) do {\
-  if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NUMANODE) { \
+  if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NUMANODE && force_orient[obj->type] != LSTOPO_ORIENT_RECT) { \
     /* Nodes shouldn't be put with an arbitrary geometry, as NUMA distances may not be that way */ \
     int pvert = prefer_vert(topology, logical, level, output, depth, x, y, separator); \
     if (pvert) \

@@ -40,7 +40,8 @@ extern unsigned int gridsize, fontsize;
 enum lstopo_orient_e {
   LSTOPO_ORIENT_NONE = 0,
   LSTOPO_ORIENT_HORIZ,
-  LSTOPO_ORIENT_VERT
+  LSTOPO_ORIENT_VERT,
+  LSTOPO_ORIENT_RECT
 };
 /* orientation of children within an object of the given type */
 extern enum lstopo_orient_e force_orient[];
