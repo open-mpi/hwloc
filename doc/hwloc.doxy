@@ -490,6 +490,7 @@ The documentation chapters include
 <li> \ref envvar
 <li> \ref cpu_mem_bind
 <li> \ref iodevices
+<li> \ref miscobjs
 <li> \ref attributes
 <li> \ref xml
 <li> \ref synthetic
@@ -1257,6 +1258,58 @@ Machine (24GB)
     L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
     L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
 \endverbatim
+
+
+
+
+\page miscobjs Miscellaneous objects
+
+hwloc topologies may be annotated with Misc objects
+(of type <tt>HWLOC_OBJ_MISC</tt>)
+either automatically or by the user.
+This is an flexible way to annotate topologies with
+large sets of information since Misc objects may be inserted
+anywhere in the topology (to annotate specific objects or
+parts of the topology), even below other Misc objects, and each
+of them may contain multiple attributes (ee also \ref faq_annotate).
+
+These Misc objects may have a <tt>Type</tt> info attribute
+to replace <tt>Misc</tt> with something else in the lstopo
+output.
+
+\section miscobjs_auto Misc objects added by hwloc
+
+hwloc only uses Misc objects when other object types are not sufficient.
+This currently includes:
+<ul>
+<li>
+Memory devices (DIMMs), on Linux when privileged, and when I/O discovery is enabled.
+These objects have a <tt>Type</tt> info attribute of value <tt>MemoryDevice</tt>.
+They are currently always attached to the root object.
+Their attributes describe the DIMM vendor, model, etc.
+<tt>lstopo -v</tt> displays them as:
+\code
+Misc(MemoryModule) (P#1 Type=MemoryModule DeviceLocation="Bottom-Slot 2(right)" BankLocation="BANK 2" Vendor=Elpida SerialNumber=21733667 AssetTag=9876543210 PartNumber="EBJ81UG8EFU0-GN-F ")
+\endcode
+</li>
+<li>
+Displaying process binding in <tt>lstopo --top</tt>.
+These objects have a <tt>Type</tt> info attribute of value <tt>Process</tt>
+and a name attribute made of their PID and program name.
+They are attached below the object they are bound to.
+The textual <tt>lstopo</tt> displays them as:
+\code
+  PU L#0 (P#0)
+    Misc(Process) 4445 myprogram
+\endcode
+</li>
+</ul>
+
+\section miscobjs_annotate Annotating topologies with Misc objects
+
+The user may annotate hwloc topologies with its own Misc objects.
+This can be achieved with <tt>hwloc_topology_insert_misc_object()</tt>
+as well as hwloc-annotate command-line tool.
 
 
 
@@ -2597,10 +2650,7 @@ These attributes are always exported to XML.
 However only character strings may be used as key names and values.
 
 It is also possible to insert Misc objects with custom names anywhere
-as a leaf of the topology (<tt>hwloc_topology_insert_misc_object()</tt>).
-
-Misc objects and info attributes may also be added with the
-hwloc-annotate command-line tool.
+as a leaf of the topology (see \ref miscobjs).
 
 There is also a topology-specific userdata pointer that can be used
 to recognize different topologies by storing a custom pointer.
