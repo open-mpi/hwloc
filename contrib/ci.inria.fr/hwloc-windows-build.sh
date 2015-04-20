@@ -1,12 +1,32 @@
 #!/bin/sh
 
 #
-# Copyright © 20012-2014 Inria.  All rights reserved.
+# Copyright © 20012-2015 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
 set -e
 set -x
+
+check=1
+build32=1
+build64=1
+
+while test $# -gt 0; do
+  if test "$1" = "--no-check"; then
+    check=0
+  else if test "$1" = "--no-32"; then
+    build32=0
+  else if test "$1" = "--no-64"; then
+    build64=0
+  else if test "$1" = "--help"; then
+    echo "  --no-check"
+    echo "  --no-32"
+    echo "  --no-64"
+    echo "  --help"
+  fi fi fi fi
+  shift
+done
 
 oldPATH=$PATH
 
@@ -17,6 +37,8 @@ version=$(echo $basename | cut -d- -f2)
 test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
 tar xfz $tarball
 
+if test x$build32 = x1; then
+
 mkdir ${basename}/build32
 cd ${basename}/build32
 winball=hwloc-win32-build-${version}
@@ -26,13 +48,19 @@ export PATH=/c/Builds:/c/Builds/mingw32/bin/:/c/Builds/mingw64/bin/:/c/Builds/mi
 make
 make install
 #make install-winball || true # not needed anymore in v1.7+
-make check
+if test x$check = x1; then
+  make check
+fi
 utils/lstopo/lstopo-no-graphics -v
 cd ..
 zip -r ../${winball}.zip ${winball}
 test -f ${winball}/lib/libhwloc.lib || false
 cd ..
 
+fi
+
+
+if test x$build64 = x1; then
 
 mkdir ${basename}/build64
 cd ${basename}/build64
@@ -43,11 +71,15 @@ export PATH=/c/Builds:/c/Builds/mingw64/bin/:/c/Builds/mingw32/i686-w64-mingw32/
 make
 make install
 #make install-winball || true # not needed anymore in v1.7+
-make check
+if test x$check = x1; then
+  make check
+fi
 utils/lstopo/lstopo-no-graphics -v
 cd ..
 zip -r ../${winball}.zip ${winball}
 test -f ${winball}/lib/libhwloc.lib || false
 cd ..
+
+fi
 
 PATH=$oldPATH
