@@ -64,6 +64,7 @@ Version 1.11.0
     topologies.
   + Prefix verbose XML import errors with the source name.
   + Improve pkg-config checks and error messages.
+  + Add a "Miscellaneous objects" section in the documentation.
 
 
 Version 1.10.1

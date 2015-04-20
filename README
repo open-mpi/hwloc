@@ -595,6 +595,7 @@ The documentation chapters include
   * Environment Variables
   * CPU and Memory Binding Overview
   * I/O Devices
+  * Miscellaneous objects
   * Multi-node Topologies
   * Object attributes
   * Importing and exporting topologies from/to XML files
