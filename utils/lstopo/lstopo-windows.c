@@ -165,7 +165,9 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       }
       break;
     case WM_DESTROY:
-      PostQuitMessage(0);
+      /* only kill the program if closing the actual toplevel, not the fake one */
+      if (hwnd == the_output.toplevel)
+	PostQuitMessage(0);
       return 0;
     case WM_SIZE:
       win_width = LOWORD(lparam);
@@ -208,10 +210,12 @@ windows_init(void *output)
 {
   struct lstopo_windows_output *woutput = output;
   WNDCLASS wndclass;
-  HWND toplevel;
-  RECT toplevelrect;
+  HWND toplevel, faketoplevel;
   unsigned width, height;
   HFONT font;
+
+  /* make sure WM_DESTROY on the faketoplevel won't kill the program */
+  woutput->toplevel = NULL;
 
   /* create the toplevel window, with random size for now */
   memset(&wndclass, 0, sizeof(wndclass));
@@ -222,24 +226,24 @@ windows_init(void *output)
   wndclass.lpszClassName = "lstopo";
 
   RegisterClass(&wndclass);
-  toplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
-		  CW_USEDEFAULT, CW_USEDEFAULT,
-		  10, 10, NULL, NULL, NULL, NULL);
-  woutput->toplevel = toplevel;
 
   /* compute the maximal needed size, this may require the toplevel window in the future */
   woutput->max_x = 0;
   woutput->max_y = 0;
   woutput->drawing = 0;
-  BeginPaint(toplevel, &woutput->ps);
+  faketoplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
+			      CW_USEDEFAULT, CW_USEDEFAULT,
+			      10, 10, NULL, NULL, NULL, NULL);
+  BeginPaint(faketoplevel, &woutput->ps);
   font = CreateFont(fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
   SelectObject(woutput->ps.hdc, (HGDIOBJ) font);
   output_draw(&woutput->loutput);
   DeleteObject(font);
-  EndPaint(toplevel, &woutput->ps);
+  EndPaint(faketoplevel, &woutput->ps);
+  DestroyWindow(faketoplevel);
   woutput->drawing = 1;
 
-  /* now update the window size */
+  /* now create the actual toplevel with the sizes */
   width = woutput->max_x;
   height = woutput->max_y;
 
@@ -252,8 +256,10 @@ windows_init(void *output)
   if (win_height > GetSystemMetrics(SM_CYFULLSCREEN))
     win_height = GetSystemMetrics(SM_CYFULLSCREEN);
 
-  GetWindowRect(toplevel, &toplevelrect);
-  MoveWindow(toplevel, toplevelrect.left, toplevelrect.top, win_width, win_height, 0 /* nothing to redraw */);
+  toplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
+		  CW_USEDEFAULT, CW_USEDEFAULT,
+		  win_width, win_height, NULL, NULL, NULL, NULL);
+  woutput->toplevel = toplevel;
 
   the_width = width;
   the_height = height;

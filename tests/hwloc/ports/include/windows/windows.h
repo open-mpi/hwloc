@@ -132,6 +132,7 @@ HWND WINAPI CreateWindow(LPCTSTR lpClassName, LPCTSTR lpWindowName, DWORD dwStyl
 BOOL WINAPI ShowWindow(HWND hWnd, int nCmdShow);
 BOOL UpdateWindow(HWND hWnd);
 BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
+BOOL DestroyWindow(HWND hWnd);
 COLORREF RGB(BYTE byRed, BYTE byGreen, BYTE byBlue);
 HBRUSH CreateSolidBrush(COLORREF crColor);
 COLORREF SetBkColor(HDC hdc, COLORREF crColor);
@@ -142,9 +143,6 @@ BOOL LineTo(HDC hdc, int nXEnd, int nYEnd);
 HFONT CreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet, DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily, LPCTSTR lpszFace);
 BOOL TextOut(HDC hdc, int nXStart, int nYStart, LPCTSTR lpString, int cchString);
 BOOL GetTextExtentPoint32(HDC hdc, LPCTSTR lpString, int c, LPSIZE lpSize);
-
-BOOL WINAPI GetWindowRect(HWND hWnd, LPRECT lpRect);
-BOOL WINAPI MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
 
 LRESULT DispatchMessage(const MSG *lpmsg);
 BOOL TranslateMessage(const MSG *lpMsg);
