@@ -12,6 +12,7 @@
 #include <hwloc.h>
 
 extern int lstopo_ignore_pus;
+extern int lstopo_collapse;
 extern hwloc_obj_type_t lstopo_show_only;
 extern int lstopo_show_cpuset;
 extern int lstopo_show_taskset;

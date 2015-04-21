@@ -39,6 +39,9 @@ Version 1.11.0
   + Ignore the device-tree on non-Power architectures to avoid buggy
     detection on ARM. Thanks to Orion Poplawski for reporting the issue.
 * Tools
+  + lstopo now collapses identical PCI devices unless --no-collapse is
+    given. This avoids gigantic outputs when a PCI device contains dozens
+    of identical virtual functions.
   + Add --rect to lstopo to force rectangular layout even for NUMA nodes.
   + The lstopo ASCII art output is now called "ascii", for instance in
     "lstopo -.ascii". The former "txt" extension is retained for backward

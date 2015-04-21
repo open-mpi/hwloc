@@ -181,8 +181,16 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
     for (i = 0; i < numsubobjs; i++) \
       if (subobjs[i]->type == HWLOC_OBJ_PU) \
         numignoredsubobjs++; \
-    numsubobjs -= numignoredsubobjs; \
   } \
+  if (obj->type == HWLOC_OBJ_BRIDGE && lstopo_collapse) { \
+    for (i = 0; i < numsubobjs; i++) \
+      if (subobjs[i]->type == HWLOC_OBJ_PCI_DEVICE) { \
+	const char *collapsestr = hwloc_obj_get_info_by_name(subobjs[i], "lstopoCollapse"); \
+	if (collapsestr && !strcmp(collapsestr, "0")) \
+	  numignoredsubobjs++; \
+      } \
+  } \
+  numsubobjs -= numignoredsubobjs; \
   if (numsubobjs) { \
 
 #define RECURSE_FOR() \
@@ -190,6 +198,11 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
     for (i = 0; i < numsubobjs+numignoredsubobjs; i++) { \
       if (lstopo_ignore_pus && subobjs[i]->type == HWLOC_OBJ_PU) \
 	continue; \
+      if (lstopo_collapse && subobjs[i]->type == HWLOC_OBJ_PCI_DEVICE) { \
+	const char *collapsestr = hwloc_obj_get_info_by_name(subobjs[i], "lstopoCollapse"); \
+	if (collapsestr && !strcmp(collapsestr, "0")) \
+	  continue; \
+      }
 
       /* Recursive call */
 #define RECURSE_CALL_FUN(methods) \
@@ -620,21 +633,50 @@ pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_
   unsigned myheight = textheight;
   unsigned mywidth = 0;
   unsigned totwidth, totheight;
+  unsigned overlaidoffset = 0;
   struct style style;
-  char text[64];
+  char text[64], _text[64];
+  const char *collapsestr = hwloc_obj_get_info_by_name(level, "lstopoCollapse");
+  unsigned collapse = collapsestr ? atoi(collapsestr) : 1;
   int n;
 
   DYNA_CHECK();
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    if (collapse > 1) {
+      n = lstopo_obj_snprintf(_text, sizeof(_text), level, logical);
+      n = snprintf(text, sizeof(text), "%u x { %s }", collapse, _text);
+    } else {
+      n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    }
     textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
+  }
+
+  if (collapse > 1) {
+    /* additional depths and height for overlaid boxes */
+    depth -= 2;
+    if (collapse > 2) {
+      overlaidoffset = gridsize;
+    } else {
+      overlaidoffset = gridsize/2;
+    }
+    textwidth += overlaidoffset;
+    textheight += overlaidoffset;
+    myheight = textheight;
   }
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
   lstopo_set_object_color(methods, topology, level, 0, &style);
-  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
+
+  if (collapse > 1) {
+    methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth+2, x + overlaidoffset, *retwidth - overlaidoffset, y + overlaidoffset, *retheight - overlaidoffset);
+    if (collapse > 2)
+      methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth+1, x + overlaidoffset/2, *retwidth - overlaidoffset, y + overlaidoffset/2, *retheight - overlaidoffset);
+    methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth - overlaidoffset, y, *retheight - overlaidoffset);
+  } else {
+    methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
+  }
 
   if (fontsize)
     methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);

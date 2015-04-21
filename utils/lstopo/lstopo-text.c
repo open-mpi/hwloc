@@ -26,11 +26,18 @@
  */
 
 static void
-output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
+output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode, int collapsed)
 {
   unsigned idx = logical ? l->logical_index : l->os_index;
-  const char *indexprefix = logical ? " L#" :  " P#";
   const char *value;
+  char pidxstr[16] = "P#[collapsed]";
+  char lidxstr[16] = "L#[collapsed]";
+
+  if (!collapsed || l->type != HWLOC_OBJ_PCI_DEVICE) {
+    snprintf(pidxstr, sizeof(pidxstr), "P#%u", l->os_index);
+    snprintf(lidxstr, sizeof(lidxstr), "L#%u", l->logical_index);
+  }
+
   if (lstopo_show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
     int len;
@@ -44,12 +51,12 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
         && l->type != HWLOC_OBJ_MISC
         && l->type != HWLOC_OBJ_PCI_DEVICE
         && (l->type != HWLOC_OBJ_BRIDGE || l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
-      fprintf(output, "%s%u", indexprefix, idx);
+      fprintf(output, " %s", logical ? lidxstr : pidxstr);
     if (l->name && (l->type == HWLOC_OBJ_MISC || l->type == HWLOC_OBJ_GROUP))
       fprintf(output, " %s", l->name);
     if (logical && l->os_index != (unsigned) -1 &&
 	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NUMANODE))
-      snprintf(phys, sizeof(phys), "P#%u", l->os_index);
+      snprintf(phys, sizeof(phys), "%s", pidxstr);
     /* display attributes */
     len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode-1);
     attr = malloc(len+1);
@@ -103,6 +110,16 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
 {
   unsigned x;
   int group_identical = (verbose_mode <= 1) && !lstopo_show_cpuset;
+  unsigned collapse = 1;
+
+  if (l->type == HWLOC_OBJ_PCI_DEVICE) {
+    const char *collapsestr = hwloc_obj_get_info_by_name(l, "lstopoCollapse");
+    if (collapsestr)
+      collapse = atoi(collapsestr);
+    if (!collapse)
+      return;
+  }
+
   if (group_identical
       && parent && parent->arity == 1
       && l->cpuset && parent->cpuset && hwloc_bitmap_isequal(l->cpuset, parent->cpuset)) {
@@ -114,7 +131,13 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
     indent (output, 2*i);
     i++;
   }
-  output_console_obj(topology, l, output, logical, verbose_mode);
+
+  if (collapse > 1)
+    fprintf(output, "%u x { ", collapse);
+  output_console_obj(topology, l, output, logical, verbose_mode, collapse > 1);
+  if (collapse > 1)
+    fprintf(output, " }");
+
   for (x=0; x<l->arity; x++)
     if (l->children[x]->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
       output_topology (topology, l->children[x], l, output, i, logical, verbose_mode);
@@ -126,7 +149,7 @@ output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical
 {
   unsigned x;
   if (lstopo_show_only == l->type) {
-    output_console_obj (topology, l, output, logical, verbose_mode);
+    output_console_obj (topology, l, output, logical, verbose_mode, 0);
     fprintf (output, "\n");
   }
   for (x=0; x<l->arity; x++)

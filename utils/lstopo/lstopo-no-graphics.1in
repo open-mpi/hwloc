@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2014 Inria.  All rights reserved.
+.\" Copyright © 2009-2015 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -124,6 +124,11 @@ Do not consider administration limitations.
 .TP
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
+.TP
+\fB\-\-no\-collapse\fR
+Do not collapse identical PCI devices.
+By default, identical sibling PCI devices (such as many virtual functions
+inside a single physical device) are collapsed.
 .TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.

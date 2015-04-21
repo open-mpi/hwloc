@@ -41,6 +41,7 @@ hwloc_obj_type_t lstopo_show_only = (hwloc_obj_type_t) -1;
 int lstopo_show_cpuset = 0;
 int lstopo_show_taskset = 0;
 int lstopo_ignore_pus = 0;
+int lstopo_collapse = 1;
 unsigned long lstopo_export_synthetic_flags = 0;
 
 char **lstopo_append_legends = NULL;
@@ -230,6 +231,47 @@ static void add_process_objects(hwloc_topology_t topology)
 #endif /* HAVE_DIRENT_H */
 }
 
+static void
+lstopo_add_collapse_attributes(hwloc_topology_t topology)
+{
+  hwloc_obj_t obj, collapser = NULL;
+  unsigned collapsed = 0;
+  /* collapse identical PCI devs */
+  for(obj = hwloc_get_next_pcidev(topology, NULL); obj; obj = hwloc_get_next_pcidev(topology, obj)) {
+    if (collapser) {
+      if (!obj->arity
+	  && obj->parent == collapser->parent
+	  && obj->attr->pcidev.vendor_id == collapser->attr->pcidev.vendor_id
+	  && obj->attr->pcidev.device_id == collapser->attr->pcidev.device_id
+	  && obj->attr->pcidev.subvendor_id == collapser->attr->pcidev.subvendor_id
+	  && obj->attr->pcidev.subdevice_id == collapser->attr->pcidev.subdevice_id) {
+	/* collapse another one */
+	hwloc_obj_add_info(obj, "lstopoCollapse", "0");
+	collapsed++;
+	continue;
+      } else if (collapsed > 1) {
+	/* end this collapsing */
+	char text[10];
+	snprintf(text, sizeof(text), "%u", collapsed);
+	hwloc_obj_add_info(collapser, "lstopoCollapse", text);
+	collapser = NULL;
+	collapsed = 0;
+      }
+    }
+    if (!obj->arity) {
+      /* start a new collapsing */
+      collapser = obj;
+      collapsed = 1;
+    }
+  }
+  if (collapsed > 1) {
+    /* end this collapsing */
+    char text[10];
+    snprintf(text, sizeof(text), "%u", collapsed);
+    hwloc_obj_add_info(collapser, "lstopoCollapse", text);
+  }
+}
+
 void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] ... [ filename.format ]\n\n", name);
@@ -290,6 +332,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-icaches          Do not show instruction caches\n");
   fprintf (where, "  --merge               Do not show levels that do not have a hierarchical\n"
                   "                        impact\n");
+  fprintf (where, "  --no-collapse         Do not collapse identical PCI devices\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
   fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
@@ -474,6 +517,8 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
       else if (!strcmp (argv[0], "--merge"))
 	merge = 1;
+      else if (!strcmp (argv[0], "--no-collapse"))
+	lstopo_collapse = 0;
       else if (!strcmp (argv[0], "--thissystem"))
 	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
       else if (!strcmp (argv[0], "--restrict")) {
@@ -674,6 +719,9 @@ main (int argc, char *argv[])
 
   loutput.topology = topology;
   loutput.file = NULL;
+
+  if (output_format != LSTOPO_OUTPUT_XML && lstopo_collapse)
+    lstopo_add_collapse_attributes(topology);
 
   switch (output_format) {
     case LSTOPO_OUTPUT_DEFAULT:
