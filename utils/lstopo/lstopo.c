@@ -251,7 +251,7 @@ void usage(const char *name, FILE *where)
 #endif
 		  ".\n");
 
-  fprintf (where, "Supported output file formats: console, txt, fig"
+  fprintf (where, "Supported output file formats: console, ascii, fig"
 #ifdef LSTOPO_HAVE_GRAPHICS
 #if CAIRO_HAS_PDF_SURFACE
 		  ", pdf"
@@ -322,7 +322,7 @@ enum output_format {
   LSTOPO_OUTPUT_DEFAULT,
   LSTOPO_OUTPUT_CONSOLE,
   LSTOPO_OUTPUT_SYNTHETIC,
-  LSTOPO_OUTPUT_TEXT,
+  LSTOPO_OUTPUT_ASCII,
   LSTOPO_OUTPUT_FIG,
   LSTOPO_OUTPUT_PNG,
   LSTOPO_OUTPUT_PDF,
@@ -340,8 +340,9 @@ parse_output_format(const char *name, char *callname)
     return LSTOPO_OUTPUT_CONSOLE;
   else if (!strcasecmp(name, "synthetic"))
     return LSTOPO_OUTPUT_SYNTHETIC;
-  else if (!strcasecmp(name, "txt"))
-    return LSTOPO_OUTPUT_TEXT;
+  else if (!strcasecmp(name, "ascii")
+	   || !strcasecmp(name, "txt") /* backward compat with 1.10 */)
+    return LSTOPO_OUTPUT_ASCII;
   else if (!strcasecmp(name, "fig"))
     return LSTOPO_OUTPUT_FIG;
   else if (!strcasecmp(name, "png"))
@@ -709,8 +710,8 @@ main (int argc, char *argv[])
     case LSTOPO_OUTPUT_SYNTHETIC:
       output_synthetic(&loutput, filename);
       break;
-    case LSTOPO_OUTPUT_TEXT:
-      output_text(&loutput, filename);
+    case LSTOPO_OUTPUT_ASCII:
+      output_ascii(&loutput, filename);
       break;
     case LSTOPO_OUTPUT_FIG:
       output_fig(&loutput, filename);

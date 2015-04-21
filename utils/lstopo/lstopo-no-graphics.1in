@@ -258,8 +258,9 @@ Binding or unallowed processors are only annotated in this mode
 if verbose; see the COLORS section, below.
 .
 .TP
-.B txt
-Output an ASCII art representation of the map.
+.B ascii
+Output an ASCII art representation of the map
+(formerly called \fBtxt\fR).
 If outputting to stdout and if colors are supported on the terminal,
 the output will be colorized.
 .
@@ -330,7 +331,7 @@ graphical output formats are supported in your hwloc installation.
 .\"    Colors Section
 .\" **************************
 .SH COLORS
-Individual CPUs are colored in the semi-graphical and graphical output
+Individual CPUs are colored in the graphical output
 formats to indicate different characteristics:
 .TP
 Green
@@ -417,9 +418,9 @@ To display the machine topology in textual mode:
 
     lstopo-no-graphics
 
-To display the machine topology in pseudo-graphical mode:
+To display the machine topology in ascii-art mode:
 
-    lstopo-no-graphics -.txt
+    lstopo-no-graphics -.ascii
 
 To display in graphical mode (assuming that the DISPLAY environment
 variable is set to a relevant value):

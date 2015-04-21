@@ -658,7 +658,7 @@ tools.
 
 lstopo (also known as hwloc-ls) displays the
 hierarchical topology map of the current system.  The output may be
-graphical or textual, and can also be exported to numerous file
+graphical, ascii-art or textual, and can also be exported to numerous file
 formats such as PDF, PNG, XML, and others.
 Advanced graphical outputs require the "Cairo" development package
 (usually <tt>cairo-devel</tt> or <tt>libcairo2-dev</tt>).
