@@ -857,6 +857,10 @@ void output_text(struct lstopo_output *loutput, const char *filename)
     putcharacter('\n', output);
   }
 
+  for (j = 0; j < disp->height; j++)
+    free(disp->cells[j]);
+  free(disp->cells);
+
   if (output != stdout)
     fclose(output);
 }
