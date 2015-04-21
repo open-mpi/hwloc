@@ -125,6 +125,11 @@ Do not consider administration limitations.
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
 .TP
+\fB\-\-no\-collapse\fR
+Do not collapse identical PCI devices.
+By default, identical sibling PCI devices (such as many virtual functions
+inside a single physical device) are collapsed.
+.TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
 .TP
