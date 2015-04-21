@@ -40,6 +40,9 @@ Version 1.11.0
     detection on ARM. Thanks to Orion Poplawski for reporting the issue.
 * Tools
   + Add --rect to lstopo to force rectangular layout even for NUMA nodes.
+  + The lstopo ASCII art output is now called "ascii", for instance in
+    "lstopo -.ascii". The former "txt" extension is retained for backward
+    compatibility.
   + lstopo now automatically scales graphical box width to the inner text
     in Cairo, ASCII and Windows outputs.
   + hwloc-annotate may now operate on all types of objects, including I/O.

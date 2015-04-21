@@ -1,4 +1,4 @@
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009-2012, 2014 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -25,6 +25,7 @@ lstopo_no_graphics_SOURCES = \
         lstopo-color.c \
         lstopo-draw.c \
         lstopo-fig.c \
+        lstopo-ascii.c \
         lstopo-text.c \
         lstopo-xml.c
 
