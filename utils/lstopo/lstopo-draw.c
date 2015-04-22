@@ -1205,11 +1205,9 @@ group_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 static void
 misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned boxheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
-  unsigned myheight = boxheight + (level->misc_arity?gridsize:0), totheight;
+  unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
-  int vert = prefer_vert(topology, logical, level, output, depth, x, y, gridsize);
   char text[64];
   int n;
   struct style style;
@@ -1219,19 +1217,18 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
-    textwidth += gridsize; /* artificially extend the minimal inner size because RECURSE_RECT() uses 0 as border when computing totwidth */
   }
 
-  RECURSE_HORIZ(level, &null_draw_methods, gridsize, 0);
+  RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
 
   lstopo_set_object_color(methods, topology, level, 0, &style);
-  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, boxheight);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  RECURSE_HORIZ(level, methods, gridsize, 0);
+  RECURSE_HORIZ(level, methods, gridsize, gridsize);
 
   DYNA_SAVE();
 }
