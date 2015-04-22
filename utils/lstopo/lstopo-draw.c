@@ -1211,6 +1211,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
+    textwidth += gridsize; /* artificially extend the minimal inner size because RECURSE_RECT() uses 0 as border when computing totwidth */
   }
 
   if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
