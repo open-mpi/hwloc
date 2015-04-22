@@ -2649,8 +2649,13 @@ attributes may exist for each object, even with the same name.
 These attributes are always exported to XML.
 However only character strings may be used as key names and values.
 
-It is also possible to insert Misc objects with custom names anywhere
-as a leaf of the topology (see \ref miscobjs).
+It is also possible to insert Misc objects with a custom name
+anywhere as a leaf of the topology (see \ref miscobjs).
+And Misc objects may have their own userdata and info attributes
+just like any other object.
+
+The hwloc-annotate command-line tool may be used for adding
+Misc objects and info attributes.
 
 There is also a topology-specific userdata pointer that can be used
 to recognize different topologies by storing a custom pointer.
