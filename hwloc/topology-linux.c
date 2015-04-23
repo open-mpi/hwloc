@@ -2294,7 +2294,8 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
   i = 1;
   while (1) {
     /* read one buffer */
-    fseek(fd, foff, SEEK_SET);
+    if (fseek(fd, foff, SEEK_SET) < 0)
+      break;
     if (!fgets(buffer, sizeof(buffer), fd))
       break;
     /* read string at the beginning of the buffer */
