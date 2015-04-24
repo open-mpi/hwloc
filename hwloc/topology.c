@@ -1102,7 +1102,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 
     switch (res) {
       case HWLOC_OBJ_EQUAL:
-	/* Can be two objectswith same type. Or one Group and anything else. */
+	/* Can be two objects with same type. Or one Group and anything else. */
 	if (obj->type == child->type
 	    && (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE)
 	    && obj->os_index != child->os_index) {
