@@ -41,6 +41,8 @@ Version 1.11.0
     Thanks to Vineet Pedaballe for the help.
   + Ignore the device-tree on non-Power architectures to avoid buggy
     detection on ARM. Thanks to Orion Poplawski for reporting the issue.
+  + Work-around buggy Xeon E5v3 BIOS reporting invalid PCI-NUMA affinity
+    for the PCI links on the second processor.
 * Tools
   + lstopo now collapses identical PCI devices unless --no-collapse is
     given. This avoids gigantic outputs when a PCI device contains dozens
