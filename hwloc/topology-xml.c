@@ -639,11 +639,11 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       break;
     if (!strcmp(attrname, "type")) {
       if (hwloc_obj_type_sscanf(attrvalue, &obj->type, NULL, NULL, 0) < 0)
-        return -1;
+	goto error;
     } else {
       /* type needed first */
       if (obj->type == (hwloc_obj_type_t)-1)
-        return -1;
+	goto error;
       hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue, state);
     }
   }
@@ -652,13 +652,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with cpuset while parent has none\n",
 	      hwloc_obj_type_string(obj->type), obj->os_index);
-    return -1;
+    goto error;
   }
   if (obj->nodeset && parent && !parent->nodeset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with nodeset while parent has none\n",
 	      hwloc_obj_type_string(obj->type), obj->os_index);
-    return -1;
+    goto error;
   }
 
   if (!obj->cpuset
@@ -667,7 +667,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid non-I/O object %s P#%u without cpuset\n",
 	      hwloc_obj_type_string(obj->type), obj->os_index);
-    return -1;
+    goto error;
   }
 
   if (obj->type == HWLOC_OBJ_NUMANODE) {
@@ -675,7 +675,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       if (hwloc__xml_verbose())
 	fprintf(stderr, "invalid NUMA node object P#%u without nodeset\n",
 		obj->os_index);
-      return -1;
+      goto error;
     }
     data->nbnumanodes++;
   }
@@ -703,7 +703,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		  hwloc_obj_type_string(obj->type), obj->os_index,
 		  hwloc_obj_type_string((*current)->type), (*current)->os_index);
 	}
-	return -1;
+	goto error;
       }
     }
 
@@ -721,7 +721,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     ret = state->global->find_child(state, &childstate, &tag);
     if (ret < 0)
-      return -1;
+      goto error;
     if (!ret)
       break;
 
@@ -741,12 +741,16 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       ret = -1;
 
     if (ret < 0)
-      return ret;
+      goto error;
 
     state->global->close_child(&childstate);
   }
 
   return state->global->close_tag(state);
+
+ error:
+  hwloc_free_unlinked_object(obj);
+  return -1;
 }
 
 static int
