@@ -65,7 +65,7 @@ enum cpuid_type {
   unknown
 };
 
-static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpuid)
+static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, unsigned cpuid)
 {
   struct cacheinfo *cache;
   unsigned cachenum;
@@ -84,7 +84,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
   infos->cache = realloc(infos->cache, infos->numcaches*sizeof(*infos->cache));
   cache = &infos->cache[cachenum];
 
-  cache->type = 1;
+  cache->type = type;
   cache->level = level;
   if (level <= 2)
     cache->nbthreads_sharing = 1;
@@ -260,15 +260,16 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000005) {
       eax = 0x80000005;
       hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
-      fill_amd_cache(infos, 1, ecx);
+      fill_amd_cache(infos, 1, 1, ecx); /* L1d */
+      fill_amd_cache(infos, 1, 2, edx); /* L1i */
     }
 
     /* Intel doesn't actually provide 0x80000006 information */
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000006) {
       eax = 0x80000006;
       hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
-      fill_amd_cache(infos, 2, ecx);
-      fill_amd_cache(infos, 3, edx);
+      fill_amd_cache(infos, 2, 3, ecx); /* L2u */
+      fill_amd_cache(infos, 3, 3, edx); /* L3u */
     }
   }
 
