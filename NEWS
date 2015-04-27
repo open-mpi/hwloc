@@ -43,6 +43,7 @@ Version 1.11.0
     detection on ARM. Thanks to Orion Poplawski for reporting the issue.
   + Work-around buggy Xeon E5v3 BIOS reporting invalid PCI-NUMA affinity
     for the PCI links on the second processor.
+  + Add L1i and fix L2/L3 type on old AMD processors without topoext support.
 * Tools
   + lstopo now collapses identical PCI devices unless --no-collapse is
     given. This avoids gigantic outputs when a PCI device contains dozens
