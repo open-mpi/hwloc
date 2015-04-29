@@ -171,7 +171,7 @@ that hwloc is BSD-licensed).
 \endhtmlonly
 \section cli_examples CLI Examples
 
-On a 4-package 2-core machine with hyperthreading, the \c lstopo tool
+On a 4-package 2-core machine with hyper-threading, the \c lstopo tool
 may show the following graphical output:
 
 \image html dudley.png
@@ -2532,21 +2532,49 @@ the latencies between any pairs of NUMA nodes if the BIOS and/or operating
 system reports them.
 
 
-\section faq_smt How may I ignore symmetric multithreading, hyper-threading, ... ?
+\section faq_nosmt What happens to my topology if I disable symmetric multithreading, hyper-threading, etc. ?
 
 hwloc creates one PU (processing unit) object per hardware thread.
 If your machine supports symmetric multithreading, for instance Hyper-Threading,
-each Core object may contain multiple PU objects.
+each Core object may contain multiple PU objects:
 \verbatim
 $ lstopo -
 ...
+  Core L#0
+    PU L#0 (P#0)
+    PU L#1 (P#2)
   Core L#1
     PU L#2 (P#1)
     PU L#3 (P#3)
 \endverbatim
 
-If you need to ignore symmetric multithreading, you should likely manipulate
-hwloc Core objects directly:
+x86 machines usually offer the ability to disable hyper-threading in the BIOS.
+Or it can be disabled on the Linux kernel command-line at boot time,
+or later by writing in sysfs virtual files.
+
+If you do so, the hwloc topology structure does not significantly change,
+but some PU objects will not appear anymore.
+No level will disappear, you will see the same number of Core objects,
+but each of them will contain a single PU now.
+The PU level does not disappear either
+(remember that hwloc topologies always contain a PU level at the bottom of the topology)
+even if there is a single PU object per Core parent.
+\verbatim
+$ lstopo -
+...
+  Core L#0
+    PU L#0 (P#0)
+  Core L#1
+    PU L#1 (P#1)
+\endverbatim
+
+
+\section faq_smt How may I ignore symmetric multithreading, hyper-threading, etc. ?
+
+First, see \ref faq_nosmt for more information about multithreading.
+
+If you need to ignore symmetric multithreading in software,
+you should likely manipulate hwloc Core objects directly:
 \verbatim
 /* get the number of cores */
 unsigned nbcores = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);

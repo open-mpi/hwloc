@@ -133,7 +133,7 @@ int main(void)
         cpuset = hwloc_bitmap_dup(obj->cpuset);
 
         /* Get only one logical processor (in case the core is
-           SMT/hyperthreaded). */
+           SMT/hyper-threaded). */
         hwloc_bitmap_singlify(cpuset);
 
         /* And try to bind ourself there. */

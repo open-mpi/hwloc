@@ -3068,7 +3068,7 @@ package_done:
       if (coreset) {
        hwloc_bitmap_andnot(coreset, coreset, unknownset);
        if (hwloc_bitmap_weight(coreset) > 1) {
-	/* check if this is hyperthreading or different coreids */
+	/* check if this is hyper-threading or different coreids */
 	unsigned siblingid, siblingcoreid;
 	hwloc_bitmap_t set = hwloc_bitmap_dup(coreset);
 	hwloc_bitmap_clr(set, i);
