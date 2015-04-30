@@ -160,12 +160,12 @@ int main(void)
 
     size = 1024*1024;
     m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
-                                    HWLOC_MEMBIND_DEFAULT, 0);
+                                    HWLOC_MEMBIND_BIND, 0);
     hwloc_free(topology, m, size);
 
     m = malloc(size);
     hwloc_set_area_membind_nodeset(topology, m, size, obj->nodeset,
-                                   HWLOC_MEMBIND_DEFAULT, 0);
+                                   HWLOC_MEMBIND_BIND, 0);
     free(m);
 
     /* Destroy topology object. */
