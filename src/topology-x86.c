@@ -23,6 +23,7 @@
 #include <private/cpuid-x86.h>
 
 #define has_topoext(features) ((features)[6] & (1 << 22))
+#define has_x2apic(features) ((features)[4] & (1 << 21))
 
 struct cacheinfo {
   unsigned type;
@@ -341,7 +342,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     }
   }
 
-  if (cpuid_type == intel && highest_cpuid >= 0x0b) {
+  if (cpuid_type == intel && has_x2apic(features)) {
     unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
     for (level = 0; ; level++) {
       ecx = level;
