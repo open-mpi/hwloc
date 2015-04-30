@@ -120,6 +120,17 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
   infos->present = 1;
 
+  /* on return from this function, the following fields must be set in infos:
+   * packageid, nodeid, unitid, coreid, threadid, or -1
+   * apicid
+   * levels and levels slots in otherids[]
+   * numcaches and numcaches slots in caches[]
+   *
+   * max_log_proc, max_nbthreads, max_nbcores, logprocid
+   * are only used temporarily inside this function and its callees.
+   */
+
+  /* Get apicid, max_log_proc, packageid, logprocid from cpuid 0x01 */
   eax = 0x01;
   hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
   infos->apicid = ebx >> 24;
@@ -132,12 +143,14 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   infos->logprocid = infos->apicid % infos->max_log_proc;
   hwloc_debug("phys %u thread %u\n", infos->packageid, infos->logprocid);
 
+  /* Get cpu vendor string from cpuid 0x00 */
   memset(regs, 0, sizeof(regs));
   regs[0] = 0;
   hwloc_x86_cpuid(&regs[0], &regs[1], &regs[3], &regs[2]);
   memcpy(infos->cpuvendor, regs+1, 4*3);
   /* infos was calloc'ed, already ends with \0 */
 
+  /* Get cpu model/family/stepping numbers from cpuid 0x01 */
   memset(regs, 0, sizeof(regs));
   regs[0] = 1;
   hwloc_x86_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
@@ -155,6 +168,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   }
   infos->cpustepping = regs[0] & 0xf;
 
+  /* Get cpu model string from cpuid 0x80000002-4 */
   if (highest_ext_cpuid >= 0x80000004) {
     memset(regs, 0, sizeof(regs));
     regs[0] = 0x80000002;
@@ -169,7 +183,9 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     /* infos was calloc'ed, already ends with \0 */
   }
 
-  /* Intel doesn't actually provide 0x80000008 information */
+  /* Get core/thread information from cpuid 0x80000008
+   * (not supported on Intel)
+   */
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000008) {
     unsigned coreidsize;
     eax = 0x80000008;
@@ -192,7 +208,10 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   infos->numcaches = 0;
   infos->cache = NULL;
 
-  /* AMD topology extension */
+  /* Get apicid, nodeid, unitid from cpuid 0x8000001e
+   * and cache information from cpuid 0x8000001d
+   * (AMD topology extension)
+   */
   if (cpuid_type != intel && has_topoext(features)) {
     unsigned apic_id, node_id, nodes_per_proc, unit_id, cores_per_unit;
 
@@ -255,15 +274,16 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       cache++;
     }
   } else {
-    /* Intel doesn't actually provide 0x80000005 information */
+    /* If there's no topoext,
+     * get cache information from cpuid 0x80000005 and 0x80000006
+     * (not supported on Intel)
+     */
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000005) {
       eax = 0x80000005;
       hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
       fill_amd_cache(infos, 1, 1, ecx); /* L1d */
       fill_amd_cache(infos, 1, 2, edx); /* L1i */
     }
-
-    /* Intel doesn't actually provide 0x80000006 information */
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000006) {
       eax = 0x80000006;
       hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
@@ -272,7 +292,9 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     }
   }
 
-  /* AMD doesn't actually provide 0x04 information */
+  /* Get thread/core + cache information from cpuid 0x04
+   * (not supported on AMD)
+   */
   if (cpuid_type != amd && highest_cpuid >= 0x04) {
     for (cachenum = 0; ; cachenum++) {
       unsigned type;
@@ -334,6 +356,9 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     }
   }
 
+  /* Get package/core/thread information from cpuid 0x0b
+   * (Intel x2APIC)
+   */
   if (cpuid_type == intel && highest_cpuid >= 0x0b) {
     unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
     for (level = 0; ; level++) {
