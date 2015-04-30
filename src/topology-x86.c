@@ -136,7 +136,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   regs[0] = 0;
   hwloc_x86_cpuid(&regs[0], &regs[1], &regs[3], &regs[2]);
   memcpy(infos->cpuvendor, regs+1, 4*3);
-  infos->cpuvendor[12] = '\0';
+  /* infos was calloc'ed, already ends with \0 */
 
   memset(regs, 0, sizeof(regs));
   regs[0] = 1;
@@ -166,9 +166,8 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     regs[0] = 0x80000004;
     hwloc_x86_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
     memcpy(infos->cpumodel + 4*4*2, regs, 4*4);
-    infos->cpumodel[3*4*4] = 0;
-  } else
-    infos->cpumodel[0] = 0;
+    /* infos was calloc'ed, already ends with \0 */
+  }
 
   /* Intel doesn't actually provide 0x80000008 information */
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000008) {
@@ -373,10 +372,8 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       }
       infos->packageid = apic_id >> apic_shift;
       hwloc_debug("x2APIC remainder: %d\n", infos->packageid);
-    } else
-      infos->otherids = NULL;
-  } else
-    infos->otherids = NULL;
+    }
+  }
 }
 
 static void
