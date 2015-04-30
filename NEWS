@@ -24,15 +24,9 @@ Version 2.0
   - HWLOC_API_VERSION and hwloc_get_api_version() now give 0x00020000.
   - See "How do I handle ABI breaks and API upgrades ?" in the FAQ.
 * Major changes
-  + Socket objects are renamed into Package to align with the terminology
-    used by processor vendors. The old HWLOC_OBJ_SOCKET type and "Socket"
-    name are still supported for backward compatibility.
   + Topologies always have at least one NUMA object. On non-NUMA machines,
     a single NUMA object is added to describe the entire machine memory.
     The NUMA level cannot be ignored anymore.
-  + HWLOC_OBJ_NODE is replaced with HWLOC_OBJ_NUMANODE for clarification.
-    HWLOC_OBJ_NODE is still supported for backward compatibility.
-    "Node" and "NUMANode" strings are supported as in earlier releases.
   + Add the experimental netloc subproject. It is enabled by default when
     supported and can be disabled with --disable-netloc.
     See the documentation for details.
@@ -58,25 +52,12 @@ Version 2.0
   + Misc objects may now only be inserted as a leaf object with
     hwloc_topology_insert_misc_object() which deprecates
     hwloc_topology_insert_misc_object_by_parent().
-* Tools
-  + hwloc-annotate may now operate on all types of objects, including I/O.
-  + hwloc-annotate may now insert Misc objects in the topology.
 * Plugin API
   + hwloc_fill_object_sets() is renamed into hwloc_obj_add_children_sets().
-* Backends
-  + Gather total machine memory on NetBSD.
 * Misc
-  + Add Vendor, Model, Revision, SerialNumber, Type and LinuxDeviceID
-    info attributes to Block OS devices on Linux. Thanks to Vineet Pedaballe
-    for the help.
   + Exporting to synthetic now ignores I/O and Misc objects.
-  + Prefix verbose XML import errors with the source name;
-  + Objects may have a Type info attribute to specific a better type name
-    and display it in lstopo.
   + XML and Synthetic export functions have moved to hwloc/export.h,
     automatically included from hwloc.h.
-  + Add a PCISlot attribute to PCI devices on Linux when supported to
-    identify the physical PCI slot where the board is plugged.
 
 
 Version 1.10.1
