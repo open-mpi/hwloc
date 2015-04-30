@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -63,5 +63,9 @@ int pthread_ldom_bind_np(pthread_ldom_t *answer, pthread_ldom_t ldom, pthread_t 
 
 #define PTHREAD_BIND_ADVISORY_NP 0
 #define PTHREAD_BIND_FORCED_NP 1
+
+#define MAP_MEM_LOCAL 0
+#define MAP_MEM_INTERLEAVED 1
+#define MAP_MEM_FIRST_TOUCH 2
 
 #endif /* HWLOC_PORT_HPUX_SYS_MPCTL_H */
