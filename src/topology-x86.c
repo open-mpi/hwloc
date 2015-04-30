@@ -382,6 +382,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 	}
 	apic_shift = apic_nextshift;
       }
+      infos->apicid = apic_id;
       infos->socketid = apic_id >> apic_shift;
       hwloc_debug("x2APIC remainder: %d\n", infos->socketid);
     } else

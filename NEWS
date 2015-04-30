@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.10.2
 --------------
+* Add support for Intel Knights Landing Xeon Phi.
+  Thanks to Grzegorz Andrejczuk and Lukasz Anaczkowski.
 * hwloc-annotate does not drop instruction caches and I/O devices from the
   output anymore.
 * Fix Bridge-specific depth attribute.
