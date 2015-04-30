@@ -68,6 +68,9 @@ Version 1.11.0
     topologies.
   + Prefix verbose XML import errors with the source name.
   + Improve pkg-config checks and error messages.
+  + Fix the recommended way in documentation and examples to allocate memory
+    on some node, it should use HWLOC_MEMBIND_BIND.
+    Thanks to Nicolas Bouzat for reporting the issue.
   + Add a "Miscellaneous objects" section in the documentation.
   + Add a FAQ entry "What happens to my topology if I disable symmetric
     multithreading, hyper-threading, etc. ?" to the documentation.

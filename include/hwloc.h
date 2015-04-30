@@ -1579,7 +1579,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  *
  * \code
  * hwloc_alloc_membind_policy(topology, size, set,
- *                            HWLOC_MEMBIND_DEFAULT, 0);
+ *                            HWLOC_MEMBIND_BIND, 0);
  * \endcode
  *
  * Each hwloc memory binding function is available in two forms: one
@@ -1610,6 +1610,9 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  */
 typedef enum {
   /** \brief Reset the memory allocation policy to the system default.
+   * Depending on the operating system, this may correspond to
+   * HWLOC_MEMBIND_FIRSTTOUCH (Linux),
+   * or HWLOC_MEMBIND_BIND (AIX, HP-UX, OSF, Solaris, Windows).
    * \hideinitializer */
   HWLOC_MEMBIND_DEFAULT =	0,
 
