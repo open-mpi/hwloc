@@ -46,6 +46,7 @@ Version 1.11.0
   + Many fixes to the x86 backend:
     - Add L1i and fix L2/L3 type on old AMD processors without topoext support.
     - Fix Intel CPU family and model numbers when basic family isn't 6 or 15.
+    - Fix package IDs on recent AMD processors.
 * Tools
   + lstopo now collapses identical PCI devices unless --no-collapse is
     given. This avoids gigantic outputs when a PCI device contains dozens
