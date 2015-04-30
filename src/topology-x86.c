@@ -188,6 +188,13 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     /* Still no multithreaded AMD */
     infos->max_nbthreads = 1 ;
     hwloc_debug("and max # of threads: %u\n", infos->max_nbthreads);
+    /* The legacy max_log_proc is deprecated, it can be smaller than max_nbcores,
+     * which is the maximum number of cores that the processor could theoretically support
+     * (see "Multiple Core Calculation" in the AMD CPUID specification).
+     * Recompute socketid/logprocid/threadid/coreid accordingly.
+     */
+    infos->socketid = infos->apicid / infos->max_nbcores;
+    infos->logprocid = infos->apicid % infos->max_nbcores;
     infos->threadid = infos->logprocid % infos->max_nbthreads;
     infos->coreid = infos->logprocid / infos->max_nbthreads;
     hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
