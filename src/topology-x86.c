@@ -143,21 +143,11 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   infos->logprocid = infos->apicid % infos->max_log_proc;
   hwloc_debug("phys %u thread %u\n", infos->packageid, infos->logprocid);
 
-  /* Get cpu vendor string from cpuid 0x00 */
-  memset(regs, 0, sizeof(regs));
-  regs[0] = 0;
-  hwloc_x86_cpuid(&regs[0], &regs[1], &regs[3], &regs[2]);
-  memcpy(infos->cpuvendor, regs+1, 4*3);
-  /* infos was calloc'ed, already ends with \0 */
-
-  /* Get cpu model/family/stepping numbers from cpuid 0x01 */
-  memset(regs, 0, sizeof(regs));
-  regs[0] = 1;
-  hwloc_x86_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
-  _model          = (regs[0]>>4) & 0xf;
-  _extendedmodel  = (regs[0]>>16) & 0xf;
-  _family         = (regs[0]>>8) & 0xf;
-  _extendedfamily = (regs[0]>>20) & 0xff;
+  /* Get cpu model/family/stepping numbers from same cpuid */
+  _model          = (eax>>4) & 0xf;
+  _extendedmodel  = (eax>>16) & 0xf;
+  _family         = (eax>>8) & 0xf;
+  _extendedfamily = (eax>>20) & 0xff;
   if ((cpuid_type == intel || cpuid_type == amd) && _family == 0xf) {
     infos->cpufamilynumber = _family + _extendedfamily;
   } else {
@@ -169,7 +159,14 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   } else {
     infos->cpumodelnumber = _model;
   }
-  infos->cpustepping = regs[0] & 0xf;
+  infos->cpustepping = eax & 0xf;
+
+  /* Get cpu vendor string from cpuid 0x00 */
+  memset(regs, 0, sizeof(regs));
+  regs[0] = 0;
+  hwloc_x86_cpuid(&regs[0], &regs[1], &regs[3], &regs[2]);
+  memcpy(infos->cpuvendor, regs+1, 4*3);
+  /* infos was calloc'ed, already ends with \0 */
 
   /* Get cpu model string from cpuid 0x80000002-4 */
   if (highest_ext_cpuid >= 0x80000004) {
