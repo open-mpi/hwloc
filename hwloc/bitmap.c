@@ -19,10 +19,17 @@
 #include <errno.h>
 #include <ctype.h>
 
-/* TODO
- * - have a way to change the initial allocation size
+/*
+ * possible improvements:
+ * - have a way to change the initial allocation size:
+ *   add hwloc_bitmap_set_foo() to changes a global here,
+ *   and make the hwloc core call based on the early number of PUs
  * - preallocate inside the bitmap structure (so that the whole structure is a cacheline for instance)
  *   and allocate a dedicated array only later when reallocating larger
+ * - add a bitmap->ulongs_empty_first which guarantees that some first ulongs are empty,
+ *   making tests much faster for big bitmaps since there's no need to look at first ulongs.
+ *   no need for ulongs_empty_first to be exactly the max number of empty ulongs,
+ *   clearing bits that were set earlier isn't very common.
  */
 
 /* magic number */
