@@ -410,16 +410,16 @@ hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int nodup)
 {
   char number[8];
   hwloc_obj_add_info_nodup(obj, "CPUVendor", info->cpuvendor, nodup);
+  snprintf(number, sizeof(number), "%u", info->cpufamilynumber);
+  hwloc_obj_add_info_nodup(obj, "CPUFamilyNumber", number, nodup);
+  snprintf(number, sizeof(number), "%u", info->cpumodelnumber);
+  hwloc_obj_add_info_nodup(obj, "CPUModelNumber", number, nodup);
   if (info->cpumodel[0]) {
     const char *c = info->cpumodel;
     while (*c == ' ')
       c++;
     hwloc_obj_add_info_nodup(obj, "CPUModel", c, nodup);
   }
-  snprintf(number, sizeof(number), "%u", info->cpumodelnumber);
-  hwloc_obj_add_info_nodup(obj, "CPUModelNumber", number, nodup);
-  snprintf(number, sizeof(number), "%u", info->cpufamilynumber);
-  hwloc_obj_add_info_nodup(obj, "CPUFamilyNumber", number, nodup);
   snprintf(number, sizeof(number), "%u", info->cpustepping);
   hwloc_obj_add_info_nodup(obj, "CPUStepping", number, nodup);
 }
