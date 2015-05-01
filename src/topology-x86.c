@@ -158,12 +158,15 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   _extendedmodel  = (regs[0]>>16) & 0xf;
   _family         = (regs[0]>>8) & 0xf;
   _extendedfamily = (regs[0]>>20) & 0xff;
-  if (cpuid_type == intel
-      || (cpuid_type == amd && _family == 0xf)) {
+  if ((cpuid_type == intel || cpuid_type == amd) && _family == 0xf) {
     infos->cpufamilynumber = _family + _extendedfamily;
-    infos->cpumodelnumber = _model + (_extendedmodel << 4);
   } else {
     infos->cpufamilynumber = _family;
+  }
+  if ((cpuid_type == intel && (_family == 0x6 || _family == 0xf))
+      || (cpuid_type == amd && _family == 0xf)) {
+    infos->cpumodelnumber = _model + (_extendedmodel << 4);
+  } else {
     infos->cpumodelnumber = _model;
   }
   infos->cpustepping = regs[0] & 0xf;
