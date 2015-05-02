@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
 .\" Copyright © 2010 Jirka Hladky
-.\" Copyright © 2010-2011 inria.  All rights reserved.
+.\" Copyright © 2010-2015 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-GATHER-TOPOLOGY "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
@@ -19,8 +19,13 @@ and the lstopo output for later (possibly offline) usage
 .\" **************************
 .SH OPTIONS
 .
+.TP
+\fB\-\-io\fR
+Also gather I/O related files.
+The gathering may be much slower, and the generated archive may be much bigger.
+.TP
 \fB\-h\fR \fB\-\-help\fR
-display help message and exit
+Display help message and exit
 .
 .\" **************************
 .\"    Description Section
