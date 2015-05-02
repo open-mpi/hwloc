@@ -33,6 +33,9 @@ bin_PROGRAMS = \
         hwloc-info \
         hwloc-patch \
         hwloc-ps
+if HWLOC_HAVE_X86_CPUID
+bin_PROGRAMS += hwloc-gather-cpuid
+endif HWLOC_HAVE_X86_CPUID
 
 hwloc_calc_SOURCES = \
         hwloc-calc.h \
@@ -73,6 +76,10 @@ man1_pages = \
         hwloc-info.1 \
         hwloc-patch.1 \
         hwloc-ps.1
+if HWLOC_HAVE_X86_CPUID
+man1_pages += hwloc-gather-cpuid.1
+endif HWLOC_HAVE_X86_CPUID
+
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 
