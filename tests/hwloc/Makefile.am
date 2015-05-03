@@ -8,11 +8,15 @@ AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 SUBDIRS = . ports xml
-DIST_SUBDIRS = ports xml linux rename
+DIST_SUBDIRS = ports xml linux x86 rename
 
 if HWLOC_HAVE_LINUX
 SUBDIRS += linux
 endif HWLOC_HAVE_LINUX
+
+if HWLOC_HAVE_X86_CPUID
+SUBDIRS += x86
+endif HWLOC_HAVE_X86_CPUID
 
 LDADD =
 
