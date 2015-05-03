@@ -36,7 +36,10 @@ subdirectory \fIcpuid\fR of current directory,
 or in \fB<outdir>\fR if specified.
 .
 .PP
-These files can be used later to explore the machine topology offline.
+These files can be used later to explore the machine topology offline,
+for instance by setting the environment variable \fIHWLOC_CPUID_PATH\fR
+to the directory containing all output files,
+and by forcing the x86 backend with \fIHWLOC_COMPONENTS=x86,stop\fR.
 .
 .PP
 The directory contents may also be submitted to hwloc developers

@@ -727,13 +727,18 @@ currently running on the local machine.  By default, hwloc-ps only
 lists processes that are bound; unbound process (and Linux kernel
 threads) are not displayed.
 
-\section cli_hwloc_gather hwloc-gather-topology
+\section cli_hwloc_gather hwloc-gather-topology and hwloc-gather-cpuid
 
 hwloc-gather-topology is a Linux-specific tool that saves the
 relevant topology files of the current machine into a tarball
-(and the corresponding lstopo output). These files may be used
-later (possibly offline) for simulating or debugging a machine
-without actually running on it.
+(and the corresponding lstopo output).
+
+hwloc-gather-cpuid is a x86-specific tool that dumps the
+result of CPUID instructions on the current machine into
+a directory.
+
+These files may be used later (possibly offline) for simulating
+or debugging a machine without actually running on it.
 
 \section cli_hwloc_distances hwloc-distances
 
@@ -802,6 +807,13 @@ following environment variables.
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
+  </dd>
+
+<dt>HWLOC_CPUID_PATH=/path/to/cpuid/</dt>
+  <dd>forces the x86 backend to read dumped CPUIDs from the given directory
+  instead of executing actual x86 CPUID instructions.
+  This directory may have been saved previously from another machine
+  with <tt>hwloc-gather-cpuid</tt>.
   </dd>
 
 <dt>HWLOC_XML_VERBOSE=1</dt>
