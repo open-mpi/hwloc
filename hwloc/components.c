@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeau 1
  * See COPYING in top-level directory.
  */
@@ -515,7 +515,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
       s = strcspn(curenv, HWLOC_COMPONENT_SEPS);
       if (s) {
 	char *arg;
-	char c;
+	char c, d;
 
 	/* replace libpci with pci for backward compatibility with v1.6 */
 	if (!strncmp(curenv, "libpci", s)) {
@@ -545,19 +545,21 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 
 	arg = strchr(curenv, '=');
 	if (arg) {
+	  d = *arg;
 	  *arg = '\0';
-	  arg++;
 	}
 
 	comp = hwloc_disc_component_find(-1, curenv);
 	if (comp) {
-	  hwloc_disc_component_try_enable(topology, comp, arg, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings */);
+	  hwloc_disc_component_try_enable(topology, comp, arg ? arg+1 : NULL, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings */);
 	} else {
 	  fprintf(stderr, "Cannot find discovery component `%s'\n", curenv);
 	}
 
-	/* restore last char (the second loop below needs env to be unmodified) */
+	/* restore chars (the second loop below needs env to be unmodified) */
 	curenv[s] = c;
+	if (arg)
+	  *arg = d;
       }
 
 nextname:
