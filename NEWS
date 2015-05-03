@@ -58,6 +58,8 @@ Version 2.0
   + Exporting to synthetic now ignores I/O and Misc objects.
   + XML and Synthetic export functions have moved to hwloc/export.h,
     automatically included from hwloc.h.
+  + The old `libpci' component name from hwloc 1.6 is not supported anymore,
+    only the `pci' name from hwloc 1.7 is now recognized.
 
 
 Version 1.10.1
