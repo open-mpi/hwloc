@@ -74,6 +74,8 @@ Version 1.11.0
     topologies.
   + Prefix verbose XML import errors with the source name.
   + Improve pkg-config checks and error messages.
+  + Fix excluding after a component with an argument in the HWLOC_COMPONENTS
+    environment variable.
   + Fix the recommended way in documentation and examples to allocate memory
     on some node, it should use HWLOC_MEMBIND_BIND.
     Thanks to Nicolas Bouzat for reporting the issue.
