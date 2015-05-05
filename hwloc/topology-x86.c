@@ -24,6 +24,8 @@
 
 struct hwloc_x86_backend_data_s {
   unsigned nbprocs;
+  hwloc_bitmap_t apicid_set;
+  int apicid_unique;
 };
 
 #define has_topoext(features) ((features)[6] & (1 << 22))
@@ -115,8 +117,9 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, uns
 
 /* Fetch information from the processor itself thanks to cpuid and store it in
  * infos for summarize to analyze them globally */
-static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type)
+static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type)
 {
+  struct hwloc_x86_backend_data_s *data = backend->private_data;
   unsigned eax, ebx, ecx = 0, edx;
   unsigned cachenum;
   struct cacheinfo *cache;
@@ -426,6 +429,11 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
     }
   }
+
+  if (hwloc_bitmap_isset(data->apicid_set, infos->apicid))
+    data->apicid_unique = 0;
+  else
+    hwloc_bitmap_set(data->apicid_set, infos->apicid);
 }
 
 static void
@@ -805,13 +813,15 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
       hwloc_debug("could not bind to CPU%d: %s\n", i, strerror(errno));
       continue;
     }
-    look_proc(&infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
+    look_proc(backend, &infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
   }
 
   set_cpubind(topology, orig_cpuset, 0);
   hwloc_bitmap_free(set);
   hwloc_bitmap_free(orig_cpuset);
 
+  if (!data->apicid_unique)
+    fulldiscovery = 0;
   summarize(backend, infos, fulldiscovery);
   return fulldiscovery; /* success, but objects added only if fulldiscovery */
 }
@@ -961,7 +971,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
-    look_proc(&infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
+    look_proc(backend, &infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
     summarize(backend, infos, fulldiscovery);
     ret = fulldiscovery;
   }
@@ -1037,6 +1047,7 @@ static void
 hwloc_x86_backend_disable(struct hwloc_backend *backend)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
+  hwloc_bitmap_free(data->apicid_set);
   free(data);
 }
 
@@ -1063,6 +1074,10 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
   backend->flags = HWLOC_BACKEND_FLAG_NEED_LEVELS;
   backend->discover = hwloc_x86_discover;
   backend->disable = hwloc_x86_backend_disable;
+
+  /* default values */
+  data->apicid_set = hwloc_bitmap_alloc();
+  data->apicid_unique = 1;
 
   return backend;
 
