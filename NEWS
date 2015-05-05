@@ -51,6 +51,7 @@ Version 1.11.0
     - Fix Intel CPU family and model numbers when basic family isn't 6 or 15.
     - Fix package IDs on recent AMD processors.
     - Fix misc issues due to incomplete APIC IDs on x2APIC processors.
+    - Avoid buggy discovery on old SGI Altix UVs with non-unique APIC IDs.
 * Tools
   + lstopo now collapses identical PCI devices unless --no-collapse is
     given. This avoids gigantic outputs when a PCI device contains dozens
