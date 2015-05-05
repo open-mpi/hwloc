@@ -166,4 +166,4 @@ EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_option
 
 LOG_COMPILER = $(builddir)/test-topology.sh
 
-SUBDIRS = gather
+SUBDIRS = . gather
