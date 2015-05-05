@@ -22,6 +22,10 @@
 
 #include <private/cpuid-x86.h>
 
+struct hwloc_x86_backend_data_s {
+  unsigned nbprocs;
+};
+
 #define has_topoext(features) ((features)[6] & (1 << 22))
 #define has_x2apic(features) ((features)[4] & (1 << 21))
 
@@ -444,9 +448,11 @@ hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int nodup)
 }
 
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */
-static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigned nbprocs,
-		      int fulldiscovery)
+static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery)
 {
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  unsigned nbprocs = data->nbprocs;
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
   unsigned i, j, l, level, type;
   unsigned nbpackages = 0;
@@ -772,11 +778,14 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 }
 
 static int
-look_procs(struct hwloc_topology *topology, unsigned nbprocs, struct procinfo *infos, int fulldiscovery,
+look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery,
 	   unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type,
 	   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags),
 	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags))
 {
+  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  struct hwloc_topology *topology = backend->topology;
+  unsigned nbprocs = data->nbprocs;
   hwloc_bitmap_t orig_cpuset = hwloc_bitmap_alloc();
   hwloc_bitmap_t set;
   unsigned i;
@@ -802,7 +811,7 @@ look_procs(struct hwloc_topology *topology, unsigned nbprocs, struct procinfo *i
   hwloc_bitmap_free(set);
   hwloc_bitmap_free(orig_cpuset);
 
-  summarize(topology, infos, nbprocs, fulldiscovery);
+  summarize(backend, infos, fulldiscovery);
   return fulldiscovery; /* success, but objects added only if fulldiscovery */
 }
 
@@ -851,8 +860,10 @@ static int fake_set_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 }
 
 static
-int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldiscovery)
+int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
 {
+  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  unsigned nbprocs = data->nbprocs;
   unsigned eax, ebx, ecx = 0, edx;
   unsigned i;
   unsigned highest_cpuid;
@@ -940,7 +951,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
 
   hwloc_x86_os_state_save(&os_state);
 
-  ret = look_procs(topology, nbprocs, infos, fulldiscovery,
+  ret = look_procs(backend, infos, fulldiscovery,
 		   highest_cpuid, highest_ext_cpuid, features, cpuid_type,
 		   get_cpubind, set_cpubind);
   if (ret >= 0)
@@ -950,7 +961,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
     look_proc(&infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
-    summarize(topology, infos, nbprocs, fulldiscovery);
+    summarize(backend, infos, fulldiscovery);
     ret = fulldiscovery;
   }
 
@@ -969,10 +980,12 @@ out:
 static int
 hwloc_x86_discover(struct hwloc_backend *backend)
 {
+  struct hwloc_x86_backend_data_s *data = backend->private_data;
   struct hwloc_topology *topology = backend->topology;
-  unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
   int alreadypus = 0;
   int ret;
+
+  data->nbprocs = hwloc_fallback_nbprocessors(topology);
 
   if (!topology->is_thissystem) {
     hwloc_debug("%s", "\nno x86 detection (not thissystem)\n");
@@ -981,14 +994,14 @@ hwloc_x86_discover(struct hwloc_backend *backend)
 
   if (topology->levels[0][0]->cpuset) {
     /* somebody else discovered things */
-    if (topology->nb_levels == 2 && topology->level_nbobjects[1] == nbprocs) {
+    if (topology->nb_levels == 2 && topology->level_nbobjects[1] == data->nbprocs) {
       /* only PUs were discovered, as much as we would, complete the topology with everything else */
       alreadypus = 1;
       goto fulldiscovery;
     }
 
     /* several object types were added, we can't easily complete, just annotate a bit */
-    ret = hwloc_look_x86(topology, nbprocs, 0);
+    ret = hwloc_look_x86(backend, 0);
     if (ret)
       hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
     return 0;
@@ -998,11 +1011,11 @@ hwloc_x86_discover(struct hwloc_backend *backend)
   }
 
 fulldiscovery:
-  hwloc_look_x86(topology, nbprocs, 1);
+  hwloc_look_x86(backend, 1);
   /* if failed, just continue and create PUs */
 
   if (!alreadypus)
-    hwloc_setup_pu_level(topology, nbprocs);
+    hwloc_setup_pu_level(topology, data->nbprocs);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
 
@@ -1019,6 +1032,13 @@ fulldiscovery:
   return 1;
 }
 
+static void
+hwloc_x86_backend_disable(struct hwloc_backend *backend)
+{
+  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  free(data);
+}
+
 static struct hwloc_backend *
 hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
 				const void *_data1 __hwloc_attribute_unused,
@@ -1026,13 +1046,29 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
 				const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
+  struct hwloc_x86_backend_data_s *data;
 
   backend = hwloc_backend_alloc(component);
   if (!backend)
-    return NULL;
+    goto out;
+
+  data = malloc(sizeof(*data));
+  if (!data) {
+    errno = ENOMEM;
+    goto out_with_backend;
+  }
+
+  backend->private_data = data;
   backend->flags = HWLOC_BACKEND_FLAG_NEED_LEVELS;
   backend->discover = hwloc_x86_discover;
+  backend->disable = hwloc_x86_backend_disable;
+
   return backend;
+
+ out_with_backend:
+  free(backend);
+ out:
+  return NULL;
 }
 
 static struct hwloc_disc_component hwloc_x86_disc_component = {
