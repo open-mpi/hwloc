@@ -118,7 +118,6 @@ extern "C" {
 #define HWLOC_TOPOLOGY_FLAG_WHOLE_IO HWLOC_NAME_CAPS(TOPOLOGY_FLAG_WHOLE_IO)
 #define HWLOC_TOPOLOGY_FLAG_ICACHES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_ICACHES)
 
-#define hwloc_topology_set_fsroot HWLOC_NAME(topology_set_fsroot)
 #define hwloc_topology_set_pid HWLOC_NAME(topology_set_pid)
 #define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)
 #define hwloc_topology_set_xml HWLOC_NAME(topology_set_xml)

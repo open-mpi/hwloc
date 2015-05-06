@@ -797,8 +797,7 @@ following environment variables.
 
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
   <dd>switches to reading the topology from the specified
-  Linux filesystem root instead of the main file-system root, as if
-  hwloc_topology_set_fsroot() had been called.
+  Linux filesystem root instead of the main file-system root.
   Not using the main file-system root causes hwloc_topology_is_thissystem()
   to return 0.
   For convenience, this backend provides empty binding hooks which just

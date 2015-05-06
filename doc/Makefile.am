@@ -408,7 +408,6 @@ man3_membinding_DATA = \
 man3_setsourcedir = $(man3dir)
 man3_setsource_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_pid.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xmlbuffer.3

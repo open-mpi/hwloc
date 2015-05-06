@@ -1663,7 +1663,7 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * Setting HWLOC_XMLFILE in the environment enforces the discovery from a XML
  * file as if hwloc_topology_set_xml() had been called.
  * HWLOC_FSROOT switches to reading the topology from the specified Linux
- * filesystem root as if hwloc_topology_set_fsroot() had been called.
+ * filesystem root.
  * Finally, HWLOC_THISSYSTEM enforces the return value of
  * hwloc_topology_is_thissystem().
  *
@@ -1685,34 +1685,6 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * support this feature.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topology, hwloc_pid_t pid);
-
-/** \brief Change the file-system root path when building the topology from sysfs/procfs.
- *
- * On Linux system, use sysfs and procfs files as if they were mounted on the given
- * \p fsroot_path instead of the main file-system root. Setting the environment
- * variable HWLOC_FSROOT may also result in this behavior.
- * Not using the main file-system root causes hwloc_topology_is_thissystem()
- * to return 0.
- *
- * Note that this function does not actually load topology
- * information; it just tells hwloc where to load it from.  You'll
- * still need to invoke hwloc_topology_load() to actually load the
- * topology information.
- *
- * \return -1 with errno set to ENOSYS on non-Linux and on Linux systems that
- * do not support it.
- * \return -1 with the appropriate errno if \p fsroot_path cannot be used.
- *
- * \note For convenience, this backend provides empty binding hooks which just
- * return success.  To have hwloc still actually call OS-specific hooks, the
- * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
- * file is really the underlying system.
- *
- * \note On success, the Linux component replaces the previously enabled
- * component (if any), but the topology is not actually modified until
- * hwloc_topology_load().
- */
-HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
 
 /** \brief Enable synthetic topology.
  *

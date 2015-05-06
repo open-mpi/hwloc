@@ -131,7 +131,7 @@ int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
 
 /* Return the OS-provided number of processors.  Unlike other methods such as
    reading sysfs on Linux, this method is not virtualizable; thus it's only
-   used as a fall-back method, allowing `hwloc_set_fsroot ()' to
+   used as a fall-back method, allowing virtual backends (FSROOT, etc) to
    have the desired effect.  */
 unsigned
 hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
@@ -2720,15 +2720,6 @@ hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
   errno = ENOSYS;
   return -1;
 #endif /* HWLOC_LINUX_SYS */
-}
-
-int
-hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_path)
-{
-  return hwloc_disc_component_force_enable(topology,
-					   0 /* api */,
-					   HWLOC_DISC_COMPONENT_TYPE_CPU, "linux",
-					   fsroot_path, NULL, NULL);
 }
 
 int

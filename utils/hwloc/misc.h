@@ -173,17 +173,18 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     }
     break;
 
-  case HWLOC_UTILS_INPUT_FSROOT:
+  case HWLOC_UTILS_INPUT_FSROOT: {
 #ifdef HWLOC_LINUX_SYS
-    if (hwloc_topology_set_fsroot(topology, input)) {
-      perror("Setting source filesystem root");
-      return EXIT_FAILURE;
-    }
+    char *env;
+    asprintf(&env, "HWLOC_FSROOT=%s", input);
+    putenv(env);
+    free(env);
 #else /* HWLOC_LINUX_SYS */
     fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
     exit(EXIT_FAILURE);
 #endif /* HWLOC_LINUX_SYS */
     break;
+  }
 
   case HWLOC_UTILS_INPUT_SYNTHETIC:
     if (hwloc_topology_set_synthetic(topology, input)) {
