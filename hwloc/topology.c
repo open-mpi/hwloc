@@ -2896,25 +2896,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
     return -1;
   }
 
-  /* enforce backend anyway if a FORCE variable was given */
-  {
-    char *fsroot_path_env = getenv("HWLOC_FORCE_FSROOT");
-    if (fsroot_path_env)
-      hwloc_disc_component_force_enable(topology,
-					1 /* env force */,
-					HWLOC_DISC_COMPONENT_TYPE_CPU, "linux",
-					fsroot_path_env, NULL, NULL);
-  }
-  {
-    char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
-    if (xmlpath_env)
-      hwloc_disc_component_force_enable(topology,
-					1 /* env force */,
-					-1, "xml",
-					xmlpath_env, NULL, NULL);
-  }
-
-  /* only apply non-FORCE variables if we have not changed the backend yet */
+  /* only apply variables if we have not changed the backend yet */
   if (!topology->backends) {
     char *fsroot_path_env = getenv("HWLOC_FSROOT");
     if (fsroot_path_env)

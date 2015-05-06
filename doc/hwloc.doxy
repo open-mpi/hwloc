@@ -941,9 +941,6 @@ following environment variables.
 </dl>
 
 <!-- not documented:
- HWLOC_FORCE_FSROOT/XMLFILE
-  force backend anyway (while variables without FORCE in their name do not
-  force the backend if the default was already changed)
  HWLOC_LINUX_USE_CPUINFO
   uses /proc/cpuinfo instead of sysfs.
   may be useful in the doc for debugging?
