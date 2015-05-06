@@ -1662,8 +1662,11 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * if the application did not modify it already.
  * Setting HWLOC_XMLFILE in the environment enforces the discovery from a XML
  * file as if hwloc_topology_set_xml() had been called.
- * HWLOC_FSROOT switches to reading the topology from the specified Linux
+ * Setting HWLOC_SYNTHETIC enforces a synthetic topology as if
+ * hwloc_topology_set_synthetic() had been called.
+ * Setting HWLOC_FSROOT switches to reading the topology from the specified Linux
  * filesystem root.
+ *
  * Finally, HWLOC_THISSYSTEM enforces the return value of
  * hwloc_topology_is_thissystem().
  *
@@ -1696,6 +1699,9 @@ HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topo
  * choose the other types according to usual topologies, but it may fail
  * and you may have to specify more level types manually.
  * See also the \ref synthetic.
+ *
+ * Setting the environment variable HWLOC_SYNTHETIC
+ * may also result in this behavior.
  *
  * If \p description was properly parsed and describes a valid topology
  * configuration, this function returns 0.

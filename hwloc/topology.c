@@ -2896,7 +2896,20 @@ hwloc_topology_load (struct hwloc_topology *topology)
     return -1;
   }
 
-  /* only apply variables if we have not changed the backend yet */
+  /* Only apply variables if we have not changed the backend yet.
+   * Only the last one will be kept.
+   * Check for XML last (that's the one that may be set system-wide by administrators)
+   * so that it's only used if other variables are not set,
+   * to allow users to override easily.
+   */
+  if (!topology->backends) {
+    char *synthetic_env = getenv("HWLOC_SYNTHETIC");
+    if (synthetic_env)
+      hwloc_disc_component_force_enable(topology,
+					1 /* env force */,
+					-1, "synthetic",
+					synthetic_env, NULL, NULL);
+  }
   if (!topology->backends) {
     char *fsroot_path_env = getenv("HWLOC_FSROOT");
     if (fsroot_path_env)

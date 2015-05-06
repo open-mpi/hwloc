@@ -783,15 +783,11 @@ following environment variables.
   See also \ref xml.
   </dd>
 
-<dt>HWLOC_XML_VERBOSE=1</dt>
-<dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
-  <dd>enables verbose messages in the XML or synthetic topology backends.
-  hwloc XML backends (see \ref xml) can emit some error messages to
-  the error output stream.
-  Enabling these verbose messages within hwloc can be useful for
-  understanding failures to parse input XML topologies.
-  Similarly, enabling verbose messages in the synthetic topology
-  backend can help understand why the description string is invalid.
+<dt>HWLOC_SYNTHETIC=synthetic_description</dt>
+  <dd>enforces the discovery through a synthetic description string
+  as if hwloc_topology_set_synthetic() had been called.
+  For convenience, this backend provides empty binding hooks which just
+  return success.
   See also \ref synthetic.
   </dd>
 
@@ -804,6 +800,18 @@ following environment variables.
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
+  </dd>
+
+<dt>HWLOC_XML_VERBOSE=1</dt>
+<dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
+  <dd>enables verbose messages in the XML or synthetic topology backends.
+  hwloc XML backends (see \ref xml) can emit some error messages to
+  the error output stream.
+  Enabling these verbose messages within hwloc can be useful for
+  understanding failures to parse input XML topologies.
+  Similarly, enabling verbose messages in the synthetic topology
+  backend can help understand why the description string is invalid.
+  See also \ref synthetic.
   </dd>
 
 <dt>HWLOC_THISSYSTEM=1</dt>
@@ -1677,9 +1685,9 @@ ability by passing the synthetic description string to
 ::hwloc_topology_set_synthetic() before hwloc_topology_load().
 
 Synthetic topologies are created by the <tt>synthetic</tt> component.
-This component may be enabled by force by setting the HWLOC_COMPONENTS
+This component may be enabled by force by setting the HWLOC_SYNTHETIC
 environment variable to something such as
-<tt>synthetic="node:2 core:3 pu:4"</tt>.
+<tt>node:2 core:3 pu:4</tt>.
 
 Loading a synthetic topology disables binding support since the
 topology usually does not match the underlying hardware.

@@ -62,6 +62,8 @@ Version 2.0
     automatically included from hwloc.h.
   + The old `libpci' component name from hwloc 1.6 is not supported anymore,
     only the `pci' name from hwloc 1.7 is now recognized.
+  + Add HWLOC_SYNTHETIC environment variable to enforce a synthetic topology
+    as if hwloc_topology_set_synthetic() had been called.
 
 
 Version 1.10.1
