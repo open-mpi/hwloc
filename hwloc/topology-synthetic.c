@@ -817,8 +817,14 @@ hwloc_synthetic_component_instantiate(struct hwloc_disc_component *component,
   int err;
 
   if (!_data1) {
-    errno = EINVAL;
-    goto out;
+    char *env = getenv("HWLOC_SYNTHETIC");
+    if (env) {
+      /* 'synthetic' was given in HWLOC_COMPONENTS without a description */
+      _data1 = env;
+    } else {
+      errno = EINVAL;
+      goto out;
+    }
   }
 
   backend = hwloc_backend_alloc(component);

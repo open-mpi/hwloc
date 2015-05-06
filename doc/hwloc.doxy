@@ -925,17 +925,21 @@ following environment variables.
   list.
   If <tt>stop</tt> is met, the enabling loop immediately stops, no
   more component is enabled.
+
+  If <tt>xml</tt> or <tt>synthetic</tt> components are selected,
+  the corresponding XML filename or synthetic description string
+  should be pass in <tt>HWLOC_XMLFILE</tt> or <tt>HWLOC_SYNTHETIC</tt>
+  respectively.
+
+  Since this variable is the low-level and more generic way to
+  select components, it takes precedence over the application
+  selecting components with functions such as hwloc_topology_set_xml()
+  (or with environment variables).
+
   If the variable is set to an empty string, no specific component is
-  loaded first, all components are loaded in priority order,
-  this is strictly identical to not specifying any variable.
-  The <tt>xml</tt> component name may be followed by a XML file to
-  load (<tt>xml=file.xml</tt>).
-  The synthetic component may be followed by a basic synthetic topology
-  description (<tt>synthetic=node:2 pu:3</tt>, see \ref synthetic).
-  This variable does not take precedence over the application
-  selecting components with functions such as
-  hwloc_topology_set_xml().
-  See \ref plugins for details.
+  loaded first, all components are loaded in priority order.
+
+  See \ref plugins_select for details.
   </dd>
 
 <dt>HWLOC_COMPONENTS_VERBOSE=1</dt>
@@ -1976,14 +1980,19 @@ may be set to get verbose messages about component registration
 
 \section plugins_select Selecting which components to use
 
-Once topology configuration functions such as
-<tt>hwloc_topology_set_synthetic()</tt> have been taken care of,
-the priority order of the remaining components may be changed
-through the  <tt>HWLOC_COMPONENTS</tt> environment
-variable (component names must be separated by commas).
+If no topology configuration functions such as
+<tt>hwloc_topology_set_synthetic()</tt> have been called,
+plugins may be selected with environment variables such as
+<tt>HWLOC_XMLFILE</tt>, <tt>HWLOC_SYNTHETIC</tt> or
+<tt>HWLOC_FSROOT</tt> (see \ref envvar).
 
-Specifying <tt>x86</tt> in this variable will cause the <tt>x86</tt>
-component to take precedence over any other component,
+Finally, the environment variable <tt>HWLOC_COMPONENTS</tt>
+resets the list of selected components.
+If the variable is set and empty, the normal plugin priority order
+is used.
+
+If the variable is set to <tt>x86</tt> in this variable will cause
+the <tt>x86</tt> component to take precedence over any other component,
 including the native operating system component.
 It is therefore loaded first, before hwloc tries to load all remaining
 non-conflicting components.
@@ -1999,12 +2008,6 @@ name with <tt>-</tt> in the list. For instance <tt>x86,-pci</tt> will load the
 It is possible to prevent all remaining components from being loaded
 by placing <tt>stop</tt> in the environment variable.
 Only the components listed before this keyword will be enabled.
-
-Certain component names (<tt>xml</tt> and <tt>synthetic</tt>)
-accept an argument (e.g. <tt>xml=file.xml</tt>).
-These arguments behave exactly as if the corresponding string had
-been passed to <tt>hwloc_topology_set_xml()</tt>
-or <tt>hwloc_topology_set_synthetic()</tt>.
 
 \section plugins_load Loading components from plugins
 

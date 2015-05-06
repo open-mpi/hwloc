@@ -511,11 +511,15 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
     char *curenv = env;
     size_t s;
 
+    if (topology->backends) {
+      hwloc_backends_disable_all(topology);
+      excludes = 0;
+    }
+
     while (*curenv) {
       s = strcspn(curenv, HWLOC_COMPONENT_SEPS);
       if (s) {
-	char *arg;
-	char c, d;
+	char c;
 
 	if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR)
 	  goto nextname;
@@ -529,23 +533,15 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	c = curenv[s];
 	curenv[s] = '\0';
 
-	arg = strchr(curenv, '=');
-	if (arg) {
-	  d = *arg;
-	  *arg = '\0';
-	}
-
 	comp = hwloc_disc_component_find(-1, curenv);
 	if (comp) {
-	  hwloc_disc_component_try_enable(topology, comp, arg ? arg+1 : NULL, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings */);
+	  hwloc_disc_component_try_enable(topology, comp, NULL, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings */);
 	} else {
 	  fprintf(stderr, "Cannot find discovery component `%s'\n", curenv);
 	}
 
 	/* restore chars (the second loop below needs env to be unmodified) */
 	curenv[s] = c;
-	if (arg)
-	  *arg = d;
       }
 
 nextname:

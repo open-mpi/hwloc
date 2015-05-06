@@ -1686,8 +1686,14 @@ hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
   }
 
   if (!xmlpath && !xmlbuffer) {
-    errno = EINVAL;
-    goto out;
+    char *env = getenv("HWLOC_XMLFILE");
+    if (env) {
+      /* 'xml' was given in HWLOC_COMPONENTS without a filename */
+      xmlpath = env;
+    } else {
+      errno = EINVAL;
+      goto out;
+    }
   }
 
   backend = hwloc_backend_alloc(component);
