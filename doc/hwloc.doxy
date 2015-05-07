@@ -2175,14 +2175,14 @@ Usually the native operating system component
 is enabled first.
 Then hwloc looks for an architecture specific component
 (e.g. <tt>x86</tt>).
-Finally these also exist a basic component (<tt>no_os</tt>)
+Finally there also exist a basic component (<tt>no_os</tt>)
 that just tries to discover the number of PUs in the system.
 
 Each component discovers as much topology information as possible.
 Most of them, including most native OS components, do nothing
 unless the topology is still empty.
 Some others, such as <tt>x86</tt> and <tt>pci</tt>,
-can complete and annotate what other backends still earlier.
+can complete and annotate what other backends found earlier.
 
 Default priorities ensure that clever components are invoked first.
 Native operating system components have higher priorities,
