@@ -972,6 +972,9 @@ following environment variables.
  HWLOC_NO_LIBXML_EXPORT
  HWLOC_NO_LIBXML_IMPORT
   forces the use of the nolibxml XML backend instead of libxml2 if available
+ HWLOC_LIBXML_CLEANUP
+  cleanup libxml when ending import, to make valgrind happy
+  not enabled by default because somebody else may be using libxml
 -->
 
 

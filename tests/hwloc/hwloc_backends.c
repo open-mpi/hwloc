@@ -60,6 +60,8 @@ int main(void)
   int xmlbufok = 0, xmlfileok = 0, xmlfilefd;
   const char *orig_backend_name;
 
+  putenv("HWLOC_LIBXML_CLEANUP=");
+
   printf("trying to export topology to XML buffer and file for later...\n");
   hwloc_topology_init(&topology1);
   hwloc_topology_load(topology1);

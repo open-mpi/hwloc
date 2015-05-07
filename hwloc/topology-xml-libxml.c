@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -23,13 +23,28 @@
 
 static void hwloc_libxml2_error_callback(void * ctx __hwloc_attribute_unused, const char * msg __hwloc_attribute_unused, ...) { /* do nothing */ }
 
+/* by default, do not cleanup to avoid issues with concurrent libxml users */
+static int hwloc_libxml2_needs_cleanup = 0;
+
 static void
-hwloc_libxml2_disable_stderrwarnings(void)
+hwloc_libxml2_init_once(void)
 {
   static int first = 1;
   if (first) {
-    xmlSetGenericErrorFunc(NULL, hwloc__xml_verbose() ? xmlGenericError : hwloc_libxml2_error_callback);
     first = 0;
+    /* disable stderr warnings */
+    xmlSetGenericErrorFunc(NULL, hwloc__xml_verbose() ? xmlGenericError : hwloc_libxml2_error_callback);
+    /* enforce libxml2 cleanup ? */
+    if (getenv("HWLOC_LIBXML_CLEANUP"))
+      hwloc_libxml2_needs_cleanup = 1;
+  }
+}
+
+static void
+hwloc_libxml2_cleanup(void)
+{
+  if (hwloc_libxml2_needs_cleanup) {
+    xmlCleanupParser();
   }
 }
 
@@ -206,7 +221,7 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
   assert(sizeof(*lstate) <= sizeof(state->data));
 
   LIBXML_TEST_VERSION;
-  hwloc_libxml2_disable_stderrwarnings();
+  hwloc_libxml2_init_once();
 
   errno = 0; /* set to 0 so that we know if libxml2 changed it */
 
@@ -270,10 +285,12 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
     free(refname);
 
   xmlFreeDoc(doc);
+  hwloc_libxml2_cleanup();
   return ret;
 
 out_with_doc:
   xmlFreeDoc(doc);
+  hwloc_libxml2_cleanup();
 out:
   return -1; /* failed */
 }
@@ -286,6 +303,7 @@ static void
 hwloc_libxml_backend_exit(struct hwloc_xml_backend_data_s *bdata)
 {
   xmlFreeDoc((xmlDoc*)bdata->data);
+  hwloc_libxml2_cleanup();
 }
 
 static int
@@ -295,7 +313,7 @@ hwloc_libxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
   xmlDoc *doc = NULL;
 
   LIBXML_TEST_VERSION;
-  hwloc_libxml2_disable_stderrwarnings();
+  hwloc_libxml2_init_once();
 
   errno = 0; /* set to 0 so that we know if libxml2 changed it */
 
@@ -374,7 +392,7 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
   assert(sizeof(*data) <= sizeof(state.data));
 
   LIBXML_TEST_VERSION;
-  hwloc_libxml2_disable_stderrwarnings();
+  hwloc_libxml2_init_once();
 
   /* Creates a new document, a node and set it as a root node. */
   doc = xmlNewDoc(BAD_CAST "1.0");
@@ -407,6 +425,7 @@ hwloc_libxml_export_file(hwloc_topology_t topology, const char *filename)
   doc = hwloc__libxml2_prepare_export(topology);
   ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
+  hwloc_libxml2_cleanup();
 
   if (ret < 0) {
     if (!errno)
@@ -425,6 +444,7 @@ hwloc_libxml_export_buffer(hwloc_topology_t topology, char **xmlbuffer, int *buf
   doc = hwloc__libxml2_prepare_export(topology);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
+  hwloc_libxml2_cleanup();
   return 0;
 }
 
@@ -439,7 +459,7 @@ hwloc__libxml2_prepare_export_diff(hwloc_topology_diff_t diff, const char *refna
   assert(sizeof(*data) <= sizeof(state.data));
 
   LIBXML_TEST_VERSION;
-  hwloc_libxml2_disable_stderrwarnings();
+  hwloc_libxml2_init_once();
 
   /* Creates a new document, a node and set it as a root node. */
   doc = xmlNewDoc(BAD_CAST "1.0");
@@ -474,6 +494,7 @@ hwloc_libxml_export_diff_file(hwloc_topology_diff_t diff, const char *refname, c
   doc = hwloc__libxml2_prepare_export_diff(diff, refname);
   ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
+  hwloc_libxml2_cleanup();
 
   if (ret < 0) {
     if (!errno)
@@ -492,6 +513,7 @@ hwloc_libxml_export_diff_buffer(hwloc_topology_diff_t diff, const char *refname,
   doc = hwloc__libxml2_prepare_export_diff(diff, refname);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
+  hwloc_libxml2_cleanup();
   return 0;
 }
 

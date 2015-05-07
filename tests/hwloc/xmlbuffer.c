@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010 inria.  All rights reserved.
+ * Copyright © 2010-2015 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -76,6 +76,8 @@ static int one_test(void)
 int main(void)
 {
   int err;
+
+  putenv("HWLOC_LIBXML_CLEANUP=");
 
   printf("using default import and export\n");
   putenv("HWLOC_NO_LIBXML_IMPORT=0");

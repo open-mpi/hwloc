@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2014 Inria.  All rights reserved.
+ * Copyright © 2013-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -19,6 +19,8 @@ int main(void)
   int xmlbuflen;
   char *refname;
   int err;
+
+  putenv("HWLOC_LIBXML_CLEANUP=");
 
   hwloc_topology_init(&topo1);
   hwloc_topology_load(topo1);
