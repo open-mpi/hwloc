@@ -33,6 +33,11 @@ hwloc_utils_input_format_usage(FILE *where, int addspaces)
   fprintf (where, "                  %*sof another system\n",
 	   addspaces, " ");
 #endif
+#ifdef HWLOC_HAVE_X86_CPUID
+  fprintf (where, "  --input <directory>\n");
+  fprintf (where, "  -i <directory>  %*sRead topology from directory containing a CPUID dump\n",
+	   addspaces, " ");
+#endif
   fprintf (where, "  --input \"n:2 2\"\n");
   fprintf (where, "  -i \"n:2 2\"      %*sSimulate a fake hierarchy, here with 2 NUMA nodes of 2\n",
 	   addspaces, " ");
@@ -44,6 +49,9 @@ hwloc_utils_input_format_usage(FILE *where, int addspaces)
 #ifdef HWLOC_LINUX_SYS
 	   "fsroot, "
 #endif
+#ifdef HWLOC_HAVE_X86_CPUID
+	   "cpuid, "
+#endif
 	   "synthetic\n",
 	   addspaces, " ");
 }
@@ -52,7 +60,8 @@ enum hwloc_utils_input_format {
   HWLOC_UTILS_INPUT_DEFAULT,
   HWLOC_UTILS_INPUT_XML,
   HWLOC_UTILS_INPUT_FSROOT,
-  HWLOC_UTILS_INPUT_SYNTHETIC
+  HWLOC_UTILS_INPUT_SYNTHETIC,
+  HWLOC_UTILS_INPUT_CPUID
 };
 
 static __hwloc_inline enum hwloc_utils_input_format
@@ -66,6 +75,8 @@ hwloc_utils_parse_input_format(const char *name, const char *callname)
     return HWLOC_UTILS_INPUT_FSROOT;
   else if (!hwloc_strncasecmp(name, "synthetic", 1))
     return HWLOC_UTILS_INPUT_SYNTHETIC;
+  else if (!hwloc_strncasecmp(name, "cpuid", 1))
+    return HWLOC_UTILS_INPUT_CPUID;
 
   fprintf(stderr, "input format `%s' not supported\n", name);
   usage(callname, stderr);
@@ -134,6 +145,48 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
   return 0;
 }
 
+static __hwloc_inline enum hwloc_utils_input_format
+hwloc_utils_autodetect_input_format(const char *input, int verbose)
+{
+  struct stat inputst;
+  int err;
+  err = stat(input, &inputst);
+  if (err < 0) {
+    if (verbose > 0)
+      printf("assuming `%s' is a synthetic topology description\n", input);
+    return HWLOC_UTILS_INPUT_SYNTHETIC;
+  }
+  if (S_ISREG(inputst.st_mode)) {
+    if (verbose > 0)
+      printf("assuming `%s' is a XML file\n", input);
+    return HWLOC_UTILS_INPUT_XML;
+  }
+  if (S_ISDIR(inputst.st_mode)) {
+    char *childpath;
+    struct stat childst;
+    childpath = malloc(strlen(input) + 10); /* enough for appending /sys, /proc or /pu0 */
+    if (childpath) {
+      snprintf(childpath, strlen(input) + 10, "%s/pu0", input);
+      if (stat(childpath, &childst) == 0 && S_ISREG(childst.st_mode)) {
+	if (verbose > 0)
+	  printf("assuming `%s' is a cpuid dump\n", input);
+	free(childpath);
+	return HWLOC_UTILS_INPUT_CPUID;
+      }
+      snprintf(childpath, strlen(input) + 10, "%s/proc", input);
+      if (stat(childpath, &childst) == 0 && S_ISDIR(childst.st_mode)) {
+	if (verbose > 0)
+	  printf("assuming `%s' is a file-system root\n", input);
+	free(childpath);
+	return HWLOC_UTILS_INPUT_FSROOT;
+      }
+    }
+    free(childpath);
+  }
+  fprintf (stderr, "Unrecognized input file: %s\n", input);
+  return HWLOC_UTILS_INPUT_DEFAULT;
+}
+
 static __hwloc_inline int
 hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 				const char *input,
@@ -141,23 +194,8 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 				int verbose, const char *callname)
 {
   if (input_format == HWLOC_UTILS_INPUT_DEFAULT) {
-    struct stat inputst;
-    int err;
-    err = stat(input, &inputst);
-    if (err < 0) {
-      if (verbose > 0)
-	printf("assuming `%s' is a synthetic topology description\n", input);
-      input_format = HWLOC_UTILS_INPUT_SYNTHETIC;
-    } else if (S_ISDIR(inputst.st_mode)) {
-      if (verbose > 0)
-	printf("assuming `%s' is a file-system root\n", input);
-      input_format = HWLOC_UTILS_INPUT_FSROOT;
-    } else if (S_ISREG(inputst.st_mode)) {
-      if (verbose > 0)
-	printf("assuming `%s' is a XML file\n", input);
-      input_format = HWLOC_UTILS_INPUT_XML;
-    } else {
-      fprintf (stderr, "Unrecognized input file: %s\n", input);
+    input_format = hwloc_utils_autodetect_input_format(input, verbose);
+    if (input_format == HWLOC_UTILS_INPUT_DEFAULT) {
       usage (callname, stderr);
       return EXIT_FAILURE;
     }
@@ -182,6 +220,20 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
     exit(EXIT_FAILURE);
 #endif /* HWLOC_LINUX_SYS */
+    break;
+  }
+
+  case HWLOC_UTILS_INPUT_CPUID: {
+#ifdef HWLOC_HAVE_X86_CPUID
+    size_t len = strlen("HWLOC_CPUID_PATH=")+strlen(input)+1;
+    char *env = malloc(len);
+    snprintf(env, len, "HWLOC_CPUID_PATH=%s", input);
+    putenv(env);
+    putenv("HWLOC_COMPONENTS=x86,stop");
+#else
+    fprintf(stderr, "This installation of hwloc does not support loading from a cpuid dump, sorry.\n");
+    exit(EXIT_FAILURE);
+#endif
     break;
   }
 
