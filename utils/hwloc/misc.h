@@ -178,7 +178,6 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     char *env;
     asprintf(&env, "HWLOC_FSROOT=%s", input);
     putenv(env);
-    free(env);
 #else /* HWLOC_LINUX_SYS */
     fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
     exit(EXIT_FAILURE);
