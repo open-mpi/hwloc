@@ -60,7 +60,7 @@ int main(void)
   int xmlbufok = 0, xmlfileok = 0, xmlfilefd;
   const char *orig_backend_name;
 
-  putenv("HWLOC_LIBXML_CLEANUP=");
+  putenv("HWLOC_LIBXML_CLEANUP=1");
 
   printf("trying to export topology to XML buffer and file for later...\n");
   hwloc_topology_init(&topology1);
@@ -160,7 +160,7 @@ int main(void)
 
   /* componentsenv+init+load+destroy for testing defaults, overrides synthetic/xml/fsroot envs */
   printf("switching to default components by env and loading...\n");
-  putenv("HWLOC_COMPONENTS=");
+  putenv("HWLOC_COMPONENTS=,"); /* don't set to empty since it means 'unset' on windows */
   hwloc_topology_init(&topology2);
   hwloc_topology_load(topology2);
   assert_backend_name(topology2, orig_backend_name);

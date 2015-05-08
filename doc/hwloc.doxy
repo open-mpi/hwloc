@@ -936,8 +936,9 @@ following environment variables.
   selecting components with functions such as hwloc_topology_set_xml()
   (or with environment variables).
 
-  If the variable is set to an empty string, no specific component is
-  loaded first, all components are loaded in priority order.
+  If the variable is set to an empty string (or set to a single comma),
+  no specific component is loaded first, all components are loaded
+  in priority order.
 
   See \ref plugins_select for details.
   </dd>
@@ -1991,8 +1992,9 @@ plugins may be selected with environment variables such as
 
 Finally, the environment variable <tt>HWLOC_COMPONENTS</tt>
 resets the list of selected components.
-If the variable is set and empty, the normal plugin priority order
-is used.
+If the variable is set and empty (or set to a single comma separating nothing,
+since some operating systems do not accept empty variables),
+the normal plugin priority order is used.
 
 If the variable is set to <tt>x86</tt> in this variable will cause
 the <tt>x86</tt> component to take precedence over any other component,

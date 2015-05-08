@@ -77,7 +77,7 @@ int main(void)
 {
   int err;
 
-  putenv("HWLOC_LIBXML_CLEANUP=");
+  putenv("HWLOC_LIBXML_CLEANUP=1");
 
   printf("using default import and export\n");
   putenv("HWLOC_NO_LIBXML_IMPORT=0");

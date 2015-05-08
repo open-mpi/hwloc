@@ -20,7 +20,7 @@ int main(void)
   char *refname;
   int err;
 
-  putenv("HWLOC_LIBXML_CLEANUP=");
+  putenv("HWLOC_LIBXML_CLEANUP=1");
 
   hwloc_topology_init(&topo1);
   hwloc_topology_load(topo1);
