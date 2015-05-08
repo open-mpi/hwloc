@@ -40,7 +40,7 @@ netloc_map_create(netloc_map_t *mapp)
     if (!map)
         goto out;
 
-    char *verbose_env;
+    const char *verbose_env;
     verbose_env = getenv("NETLOC_MAP_VERBOSE");
     if (verbose_env)
         map->verbose_flags = strtoul(verbose_env, NULL, 0);

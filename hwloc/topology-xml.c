@@ -19,7 +19,7 @@ hwloc__xml_verbose(void)
   static int first = 1;
   static int verbose = 0;
   if (first) {
-    char *env = getenv("HWLOC_XML_VERBOSE");
+    const char *env = getenv("HWLOC_XML_VERBOSE");
     if (env)
       verbose = atoi(env);
     first = 0;
@@ -1061,7 +1061,7 @@ hwloc_topology_diff_load_xml(hwloc_topology_t topology __hwloc_attribute_unused,
   struct hwloc_xml_backend_data_s fakedata; /* only for storing global info during parsing */
   hwloc_localeswitch_declare;
   const char *basename;
-  char *env;
+  const char *env;
   int force_nolibxml;
   int ret;
 
@@ -1111,7 +1111,7 @@ hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_u
   struct hwloc__xml_import_state_s state;
   struct hwloc_xml_backend_data_s fakedata; /* only for storing global info during parsing */
   hwloc_localeswitch_declare;
-  char *env;
+  const char *env;
   int force_nolibxml;
   int ret;
 
@@ -1404,7 +1404,7 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
 int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
   hwloc_localeswitch_declare;
-  char *env;
+  const char *env;
   int force_nolibxml;
   int ret;
 
@@ -1436,7 +1436,7 @@ retry:
 int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
   hwloc_localeswitch_declare;
-  char *env;
+  const char *env;
   int force_nolibxml;
   int ret;
 
@@ -1472,7 +1472,7 @@ hwloc_topology_diff_export_xml(hwloc_topology_t topology __hwloc_attribute_unuse
 {
   hwloc_localeswitch_declare;
   hwloc_topology_diff_t tmpdiff;
-  char *env;
+  const char *env;
   int force_nolibxml;
   int ret;
 
@@ -1517,7 +1517,7 @@ hwloc_topology_diff_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute
 {
   hwloc_localeswitch_declare;
   hwloc_topology_diff_t tmpdiff;
-  char *env;
+  const char *env;
   int force_nolibxml;
   int ret;
 
@@ -1556,7 +1556,7 @@ retry:
 
 void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer)
 {
-  char *env;
+  const char *env;
   int force_nolibxml;
 
   if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
@@ -1672,7 +1672,7 @@ hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
 {
   struct hwloc_xml_backend_data_s *data;
   struct hwloc_backend *backend;
-  char *env;
+  const char *env;
   int force_nolibxml;
   const char * xmlpath = (const char *) _data1;
   const char * xmlbuffer = (const char *) _data2;
@@ -1686,7 +1686,7 @@ hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
   }
 
   if (!xmlpath && !xmlbuffer) {
-    char *env = getenv("HWLOC_XMLFILE");
+    env = getenv("HWLOC_XMLFILE");
     if (env) {
       /* 'xml' was given in HWLOC_COMPONENTS without a filename */
       xmlpath = env;

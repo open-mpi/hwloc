@@ -221,7 +221,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t group_obj, parent;
-  char *env;
+  const char *env;
   int err;
 
   /* override the cpuset with the environment if given */

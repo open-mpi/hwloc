@@ -2012,7 +2012,7 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
   uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
   struct stat st;
   int has_sysfs_hugepages = 0;
-  char *pagesize_env = getenv("HWLOC_DEBUG_PAGESIZE");
+  const char *pagesize_env = getenv("HWLOC_DEBUG_PAGESIZE");
   int types = 2;
   int err;
 
@@ -3782,7 +3782,7 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 {
   FILE *file;
   char line[128]; /* enough for utsname fields */
-  char *env;
+  const char *env;
 
   /* initialize to something sane */
   memset(&data->utsname, 0, sizeof(data->utsname));

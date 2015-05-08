@@ -2903,7 +2903,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
    * to allow users to override easily.
    */
   if (!topology->backends) {
-    char *synthetic_env = getenv("HWLOC_SYNTHETIC");
+    const char *synthetic_env = getenv("HWLOC_SYNTHETIC");
     if (synthetic_env)
       hwloc_disc_component_force_enable(topology,
 					1 /* env force */,
@@ -2911,7 +2911,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					synthetic_env, NULL, NULL);
   }
   if (!topology->backends) {
-    char *fsroot_path_env = getenv("HWLOC_FSROOT");
+    const char *fsroot_path_env = getenv("HWLOC_FSROOT");
     if (fsroot_path_env)
       hwloc_disc_component_force_enable(topology,
 					1 /* env force */,
@@ -2919,7 +2919,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					fsroot_path_env, NULL, NULL);
   }
   if (!topology->backends) {
-    char *xmlpath_env = getenv("HWLOC_XMLFILE");
+    const char *xmlpath_env = getenv("HWLOC_XMLFILE");
     if (xmlpath_env)
       hwloc_disc_component_force_enable(topology,
 					1 /* env force */,

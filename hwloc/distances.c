@@ -119,12 +119,12 @@ static int hwloc_distances__check_matrix(hwloc_topology_t __hwloc_restrict topol
 }
 
 static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
-					     hwloc_obj_type_t type, char *string)
+					     hwloc_obj_type_t type, const char *string)
 {
   /* the string format is: "index[0],...,index[N-1]:distance[0],...,distance[N*N-1]"
    * or "index[0],...,index[N-1]:X*Y" or "index[0],...,index[N-1]:X*Y*Z"
    */
-  char *tmp = string, *next;
+  const char *tmp = string, *next;
   unsigned *indexes;
   float *distances;
   unsigned nbobjs = 0, i, j, x, y, z;
@@ -176,7 +176,7 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
 
     /* parse indexes */
     for(i=0; i<nbobjs; i++) {
-      indexes[i] = strtoul(tmp, &next, 0);
+      indexes[i] = strtoul(tmp, (char **) &next, 0);
       tmp = next+1;
     }
   }
@@ -238,7 +238,8 @@ void hwloc_distances_set_from_env(struct hwloc_topology *topology)
 {
   hwloc_obj_type_t type;
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
-    char *env, envname[64];
+    const char *env;
+    char envname[64];
     snprintf(envname, sizeof(envname), "HWLOC_%s_DISTANCES", hwloc_obj_type_string(type));
     env = getenv(envname);
     if (env) {
@@ -890,7 +891,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
 {
   unsigned nbobjs;
   struct hwloc_os_distances_s * osdist;
-  char *env;
+  const char *env;
   float accuracies[5] = { 0.0f, 0.01f, 0.02f, 0.05f, 0.1f };
   unsigned nbaccuracies = 5;
   hwloc_obj_t group_obj;
