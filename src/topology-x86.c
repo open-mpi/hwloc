@@ -295,8 +295,10 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000006) {
       eax = 0x80000006;
       hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
-      fill_amd_cache(infos, 2, 3, ecx); /* L2u */
-      fill_amd_cache(infos, 3, 3, edx); /* L3u */
+      if (ecx & 0xf000)
+	fill_amd_cache(infos, 2, 3, ecx); /* L2u */
+      if (edx & 0xf000)
+	fill_amd_cache(infos, 3, 3, edx); /* L3u */
     }
   }
 
