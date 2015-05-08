@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2014 Inria.  All rights reserved.
+ * Copyright © 2013-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -378,7 +378,7 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
     static int verboseenv_checked = 0;
     static int verboseenv_value = 0;
     if (!verboseenv_checked) {
-      char *verboseenv = getenv("HWLOC_PLUGINS_VERBOSE");
+      const char *verboseenv = getenv("HWLOC_PLUGINS_VERBOSE");
       verboseenv_value = atoi(verboseenv);
       verboseenv_checked = 1;
     }

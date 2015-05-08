@@ -387,7 +387,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   int nb_machine_levels = 0, nb_node_levels = 0;
   int nb_pu_levels = 0;
   int verbose = 0;
-  char *env = getenv("HWLOC_SYNTHETIC_VERBOSE");
+  const char *env = getenv("HWLOC_SYNTHETIC_VERBOSE");
   int err;
   unsigned long totalarity = 1;
 

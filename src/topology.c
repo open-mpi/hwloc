@@ -2879,7 +2879,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
   /* enforce backend anyway if a FORCE variable was given */
   {
-    char *fsroot_path_env = getenv("HWLOC_FORCE_FSROOT");
+    const char *fsroot_path_env = getenv("HWLOC_FORCE_FSROOT");
     if (fsroot_path_env)
       hwloc_disc_component_force_enable(topology,
 					1 /* env force */,
@@ -2887,7 +2887,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					fsroot_path_env, NULL, NULL);
   }
   {
-    char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
+    const char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
     if (xmlpath_env)
       hwloc_disc_component_force_enable(topology,
 					1 /* env force */,
@@ -2897,7 +2897,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
   /* only apply non-FORCE variables if we have not changed the backend yet */
   if (!topology->backends) {
-    char *fsroot_path_env = getenv("HWLOC_FSROOT");
+    const char *fsroot_path_env = getenv("HWLOC_FSROOT");
     if (fsroot_path_env)
       hwloc_disc_component_force_enable(topology,
 					1 /* env force */,
@@ -2905,7 +2905,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					fsroot_path_env, NULL, NULL);
   }
   if (!topology->backends) {
-    char *xmlpath_env = getenv("HWLOC_XMLFILE");
+    const char *xmlpath_env = getenv("HWLOC_XMLFILE");
     if (xmlpath_env)
       hwloc_disc_component_force_enable(topology,
 					1 /* env force */,
