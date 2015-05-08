@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2014 Inria.  All rights reserved.
+ * Copyright © 2013-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -20,7 +20,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   unsigned i;
-  char *env;
+  const char *env;
 
   if (!topology->levels[0][0]->cpuset) {
     /* Nobody created objects yet, setup everything */
@@ -202,7 +202,7 @@ hwloc_bgq_component_instantiate(struct hwloc_disc_component *component,
 {
   struct utsname utsname;
   struct hwloc_backend *backend;
-  char *env;
+  const char *env;
   int err;
 
   env = getenv("HWLOC_FORCE_BGQ");

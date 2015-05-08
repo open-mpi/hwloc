@@ -189,9 +189,9 @@ hwloc_plugins_exit(void)
 static int
 hwloc_plugins_init(void)
 {
-  char *verboseenv;
+  const char *verboseenv;
   char *path = HWLOC_PLUGINS_PATH;
-  char *env;
+  const char *env;
   int err;
 
   verboseenv = getenv("HWLOC_PLUGINS_VERBOSE");
@@ -312,7 +312,7 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
 #ifdef HWLOC_HAVE_PLUGINS
   struct hwloc__plugin_desc *desc;
 #endif
-  char *verboseenv;
+  const char *verboseenv;
   unsigned i;
 
   HWLOC_COMPONENTS_LOCK();
@@ -495,9 +495,11 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   struct hwloc_backend *backend;
   unsigned excludes = 0;
   int tryall = 1;
-  char *env;
+  const char *_env;
+  char *env; /* we'll to modify the env value, so duplicate it */
 
-  env = getenv("HWLOC_COMPONENTS");
+  _env = getenv("HWLOC_COMPONENTS");
+  env = _env ? strdup(_env) : NULL;
 
   /* compute current excludes */
   backend = topology->backends;
@@ -611,6 +613,9 @@ nextcomp:
     }
     fprintf(stderr, "\n");
   }
+
+  if (env)
+    free(env);
 }
 
 void
@@ -718,7 +723,7 @@ void
 hwloc_backends_is_thissystem(struct hwloc_topology *topology)
 {
   struct hwloc_backend *backend;
-  char *local_env;
+  const char *local_env;
 
   /* Apply is_thissystem topology flag before we enforce envvar backends.
    * If the application changed the backend with set_foo(),
