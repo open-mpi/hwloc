@@ -111,13 +111,9 @@ The hwloc core may also benefit from the following development packages:
 
   * libnuma for memory binding and migration support on Linux (numactl-devel or
  libnuma-dev package).
-  * hwloc can use one of two different libraries for full I/O device discovery:
-
-  1. libpciaccess (BSD). The relevant development package is usually
-     libpciaccess-devel or libpciaccess-dev.
-
- On Linux, PCI discovery may still be performed even if none of the above
- libraries can be used.
+  * libpciaccess for full I/O device discovery (libpciaccess-devel or
+ libpciaccess-dev package). On Linux, PCI discovery may still be performed
+ (without vendor/device names) even if libpciaccess cannot be used.
 
   * the AMD OpenCL implementation for OpenCL device discovery.
   * the NVIDIA CUDA Toolkit for CUDA device discovery.
@@ -450,7 +446,7 @@ of the source tree.
  * See other examples under doc/examples/ in the source tree
  * for more details.
  *
- * Copyright (c) 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright (c) 2009-2011 Universit?eacute; Bordeaux 1
  * Copyright (c) 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
