@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -44,13 +44,12 @@ test_topology ()
 
     local output="`mktemp`"
 
-    export HWLOC_FSROOT="$dir"
     export HWLOC_DEBUG_CHECK=1
 
     opts="-v -"
     [ -r "$options" ] && opts=`cat $options`
 
-    if ! "$lstopo" $opts \
+    if ! "$lstopo" -i "$dir" --if fsroot $opts \
 	| sed	-e 's/ hwlocVersion='$VERSION'//' \
 		-e 's/ ProcessName=lstopo-no-graphics//' \
 		-e 's/ ProcessName=lt-lstopo-no-graphics//' \
