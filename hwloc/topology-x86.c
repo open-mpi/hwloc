@@ -296,9 +296,16 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       eax = 0x80000006;
       hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
       if (ecx & 0xf000)
+	/* This is actually supported on Intel but LinePerTag isn't returned in bits 8-11.
+	 * Could be useful if some Intels (at least before Core micro-architecture)
+	 * support this leaf without leaf 0x4.
+	 */
 	fill_amd_cache(infos, 2, 3, ecx); /* L2u */
       if (edx & 0xf000)
 	fill_amd_cache(infos, 3, 3, edx); /* L3u */
+      /* FIXME: AMD MagnyCours family 0x10 model 0x9 with 8 cores or more actually
+       * have the L3 split in two halves, and associativity is divided as well (48)
+       */
     }
   }
 
