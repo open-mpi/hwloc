@@ -95,6 +95,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--disable-libnuma],
                                  [Disable the Linux libnuma]))
 
+    # LibUdev
+    AC_ARG_ENABLE([libudev],
+                  AS_HELP_STRING([--disable-libudev],
+                                 [Disable the Linux libudev]))
+
     # Plugins
     AC_ARG_ENABLE([plugins],
                   AS_HELP_STRING([--enable-plugins=name,...],

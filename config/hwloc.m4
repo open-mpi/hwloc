@@ -707,9 +707,11 @@ EOF])
     fi
 
     # Linux libudev support
-    AC_CHECK_HEADERS([libudev.h], [
+    if test "x$enable_libudev" != xno; then
+      AC_CHECK_HEADERS([libudev.h], [
 	AC_CHECK_LIB([udev], [udev_device_new_from_subsystem_sysname], [HWLOC_LIBS="$HWLOC_LIBS -ludev"])
-    ])
+      ])
+    fi
 
     # PCI support via libpciaccess.  NOTE: we do not support
     # libpci/pciutils because that library is GPL and is incompatible
