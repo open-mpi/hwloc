@@ -74,7 +74,7 @@ endif
 	  -e 's/#HWLOC_DATE#/@HWLOC_RELEASE_DATE@/g' \
 	  > $@ < $<
 
-install-exec-hook: install-man
+install-exec-hook:
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT)
 	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo-no-graphics$(EXEEXT) hwloc-ls$(EXEEXT)
 if !HWLOC_HAVE_WINDOWS
@@ -83,6 +83,8 @@ if !HWLOC_HAVE_CAIRO
 	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo-no-graphics$(EXEEXT) lstopo$(EXEEXT) || true
 endif
 endif
+
+install-data-hook:
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1
 	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo-no-graphics.1 hwloc-ls.1
 	rm -f $(DESTDIR)$(man1dir)/lstopo.1
