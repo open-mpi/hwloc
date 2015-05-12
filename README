@@ -26,7 +26,8 @@ hwloc supports the following operating systems:
 
   * Linux (including old kernels not having sysfs topology information, with
  knowledge of cpusets, offline CPUs, ScaleMP vSMP, NumaScale NumaConnect,
- and Kerrighed support) on all supported hardware, including Intel Xeon Phi.
+ and Kerrighed support) on all supported hardware, including Intel Xeon Phi
+ (either standalone or as a coprocessor).
   * Solaris
   * AIX
   * Darwin / OS X
@@ -124,8 +125,9 @@ The hwloc core may also benefit from the following development packages:
  exported by the same hwloc release). See Importing and exporting topologies
  from/to XML files for details. The relevant development package is usually
  libxml2-devel or libxml2-dev.
-  * libudev on Linux for easier discovery of OS device information. The
- relevant development package is usually libudev-devel or libudev-dev.
+  * libudev on Linux for easier discovery of OS device information (otherwise
+ hwloc will try to manually parse udev raw files). The relevant development
+ package is usually libudev-devel or libudev-dev.
   * libtool's ltdl library for dynamic plugin loading. The relevant development
  package is usually libtool-ltdl-devel or libltdl-dev.
 
