@@ -171,7 +171,8 @@ The hwloc core may also benefit from the following development packages:
     The relevant development package is usually <tt>libxml2-devel</tt>
     or <tt>libxml2-dev</tt>.
 </li>
-<li>libudev on Linux for easier discovery of OS device information.
+<li>libudev on Linux for easier discovery of OS device information
+    (otherwise hwloc will try to manually parse udev raw files).
     The relevant development package is usually <tt>libudev-devel</tt>
     or <tt>libudev-dev</tt>.
 </li>

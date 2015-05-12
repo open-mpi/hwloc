@@ -33,6 +33,7 @@ Version 1.11.0
   + Add Vendor, Model, Revision, SerialNumber, Type and LinuxDeviceID
     info attributes to Block OS devices on Linux. Thanks to Vineet Pedaballe
     for the help.
+    - Add --disable-libudev to avoid dependency on the libudev library.
   + Add a PCISlot attribute to PCI devices on Linux when supported to
     identify the physical PCI slot where the board is plugged.
   + Add CPUStepping info attribute on x86 processors,
