@@ -49,7 +49,8 @@ hwloc supports the following operating systems:
 <ul>
 <li>Linux (including old kernels not having sysfs topology
 information, with knowledge of cpusets, offline CPUs, ScaleMP vSMP,
-and NumaScale NumaConnect) on all supported hardware, including Intel Xeon Phi.</li>
+and NumaScale NumaConnect) on all supported hardware, including Intel Xeon Phi
+(either standalone or as a coprocessor).</li>
 <li>Solaris</li>
 <li>AIX</li>
 <li>Darwin / OS X</li>
@@ -1451,12 +1452,14 @@ hwloc failed to discover any package.
 <dt>MICSerialNumber</dt>
 <dd>
  The serial number of an Intel Xeon Phi (MIC) coprocessor.
+ hwloc may run either inside the coprocessor itself, or on the host processor.
+ That attribute is set in both cases, so that the exact same coprocessor may be
+ identified from both point of views, even if there are multiple nodes with
+ multiple MICs.
  When running hwloc on the host, each hwloc OS device object that
  corresponds to a Xeon Phi gets such an attribute.
- When running hwloc inside a Xeon Phi, the root object of the topology
+ When running hwloc inside a Xeon Phi coprocessor, the root object of the topology
  gets this attribute.
- It enables easy identification of devices and topologies when multiples
- nodes and MICs are involved.
 </dd>
 <dt>MICFamily, MICSKU, MICActiveCores, MICMemorySize</dt>
 <dd>The family, SKU (model),
@@ -2797,10 +2800,11 @@ sysctl variable must be set to 1 to do so.
 Otherwise, only the number of logical processors will be detected.
 
 
-\section faq_phi How do I build for Intel Xeon Phi?
+\section faq_phi How do I build for Intel Xeon Phi coprocessor?
 
-Intel Xeon Phi usually runs a Linux environment but cross-compiling from the host is required.
-hwloc uses standard autotools options for cross-compiling:
+Intel Xeon Phi coprocessors usually runs a Linux environment but cross-compiling from the host is required.
+hwloc uses standard autotools options for cross-compiling.
+For instance, to build for a <em>Knights Corner (KNC)</em> coprocessor:
 
 If building with <tt>icc</tt>:
 \verbatim
