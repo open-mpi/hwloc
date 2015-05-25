@@ -15,6 +15,7 @@ cpuid_outputs = \
 	Intel-Nehalem-2xXeon-X5550.output \
 	Intel-Penryn-4xXeon-X7460.output \
 	Intel-Core-2xXeon-E5345.output \
+	Intel-KnightsCorner-XeonPhi-SE10P.output \
 	AMD-15h-Bulldozer-4xOpteron-6272.output \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.output \
 	AMD-K10-Istanbul-8xOpteron-8439SE.output \
@@ -34,6 +35,7 @@ cpuid_tarballs = \
 	Intel-Nehalem-2xXeon-X5550.tar.bz2 \
 	Intel-Penryn-4xXeon-X7460.tar.bz2 \
 	Intel-Core-2xXeon-E5345.tar.bz2 \
+	Intel-KnightsCorner-XeonPhi-SE10P.tar.bz2 \
 	AMD-15h-Bulldozer-4xOpteron-6272.tar.bz2 \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.tar.bz2 \
 	AMD-K10-Istanbul-8xOpteron-8439SE.tar.bz2 \
