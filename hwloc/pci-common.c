@@ -249,17 +249,18 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
 
   hwloc_debug_bitmap("Attaching hostbridge to cpuset %s\n", cpuset);
 
-  /* restrict to the existing topology cpuset to avoid errors later */
-  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+  /* restrict to the existing complete cpuset to avoid errors later */
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_complete_cpuset(topology));
 
   /* if the remaining cpuset is empty, take the root */
   if (hwloc_bitmap_iszero(cpuset))
-    hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
+    hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
 
   group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
   if (group_obj) {
-    group_obj->cpuset = hwloc_bitmap_dup(cpuset);
     group_obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
+    hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+    group_obj->cpuset = hwloc_bitmap_dup(cpuset);
     group_obj->attr->group.depth = (unsigned) -1;
     parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
     if (parent == group_obj) {
