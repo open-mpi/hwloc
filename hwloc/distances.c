@@ -453,22 +453,29 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
   float min = FLT_MAX, max = FLT_MIN;
   hwloc_obj_t root;
   float *matrix;
-  hwloc_cpuset_t cpuset;
-  hwloc_nodeset_t nodeset;
+  hwloc_cpuset_t cpuset, complete_cpuset;
+  hwloc_nodeset_t nodeset, complete_nodeset;
   unsigned relative_depth;
   int idx;
 
   /* find the root */
   cpuset = hwloc_bitmap_alloc();
+  complete_cpuset = hwloc_bitmap_alloc();
   nodeset = hwloc_bitmap_alloc();
+  complete_nodeset = hwloc_bitmap_alloc();
   for(i=0; i<nbobjs; i++) {
     hwloc_bitmap_or(cpuset, cpuset, objs[i]->cpuset);
+    hwloc_bitmap_or(complete_cpuset, complete_cpuset, objs[i]->complete_cpuset);
     hwloc_bitmap_or(nodeset, nodeset, objs[i]->nodeset);
+    hwloc_bitmap_or(complete_nodeset, complete_nodeset, objs[i]->complete_nodeset);
   }
   /* find the object covering cpuset, we'll take care of the nodeset later */
   root = hwloc_get_obj_covering_cpuset(topology, cpuset);
-  /* walk up to find a parent that also covers the nodeset */
-  while (root && !hwloc_bitmap_isincluded(nodeset, root->nodeset))
+  /* walk up to find a parent that also covers the nodeset and complete sets */
+  while (root &&
+	 (!hwloc_bitmap_isincluded(nodeset, root->nodeset)
+	  || !hwloc_bitmap_isincluded(complete_nodeset, root->complete_nodeset)
+	  || !hwloc_bitmap_isincluded(complete_cpuset, root->complete_cpuset)))
     root = root->parent;
   if (!root) {
     /* should not happen, ignore the distance matrix and report an error. */
@@ -493,15 +500,21 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
       free(b);
     }
     hwloc_bitmap_free(cpuset);
+    hwloc_bitmap_free(complete_cpuset);
     hwloc_bitmap_free(nodeset);
+    hwloc_bitmap_free(complete_nodeset);
     return;
   }
   /* ideally, root has the exact cpuset and nodeset.
    * but ignoring or other things that remove objects may cause the object array to reduce */
   assert(hwloc_bitmap_isincluded(cpuset, root->cpuset));
+  assert(hwloc_bitmap_isincluded(complete_cpuset, root->complete_cpuset));
   assert(hwloc_bitmap_isincluded(nodeset, root->nodeset));
+  assert(hwloc_bitmap_isincluded(complete_nodeset, root->complete_nodeset));
   hwloc_bitmap_free(cpuset);
+  hwloc_bitmap_free(complete_cpuset);
   hwloc_bitmap_free(nodeset);
+  hwloc_bitmap_free(complete_nodeset);
   if (root->depth >= objs[0]->depth) {
     /* strange topology led us to find invalid relative depth, ignore */
     return;
