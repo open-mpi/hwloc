@@ -159,6 +159,7 @@ libhwloc_port_opencl_la_CPPFLAGS = $(common_CPPFLAGS) \
 
 nodist_libhwloc_port_cuda_la_SOURCES = topology-cuda.c
 libhwloc_port_cuda_la_SOURCES = \
+        include/cuda/cuda.h \
         include/cuda/cuda_runtime_api.h
 libhwloc_port_cuda_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/cuda

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2014 Inria.  All rights reserved.
+ * Copyright © 2013-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -17,6 +17,7 @@ typedef unsigned cudaError_t;
 
 struct cudaDeviceProp {
   char * name;
+  int pciDomainID;
   int pciBusID;
   int pciDeviceID;
   size_t totalGlobalMem;
