@@ -1,4 +1,4 @@
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -149,6 +149,7 @@ libhwloc_port_opencl_la_CPPFLAGS = $(common_CPPFLAGS) \
 
 nodist_libhwloc_port_cuda_la_SOURCES = topology-cuda.c
 libhwloc_port_cuda_la_SOURCES = \
+	include/cuda/cuda.h \
 	include/cuda/cuda_runtime_api.h
 libhwloc_port_cuda_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-I$(HWLOC_top_srcdir)/tests/ports/include/cuda
