@@ -163,6 +163,8 @@ struct cacheinfo {
   int ways;
   unsigned sets;
   unsigned long size;
+  char inclusiveness;//DONE add inclusiveness
+
 };
 
 struct procinfo {
@@ -222,11 +224,15 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, uns
   cache->linesize = cpuid & 0xff;
   cache->linepart = 0;
   if (level == 1) {
+    cache->inclusiveness = 0;//DONE get inclusiveness old AMD ( suposed to be L1 false)
+
     cache->ways = (cpuid >> 16) & 0xff;
     if (cache->ways == 0xff)
       /* Fully associative */
       cache->ways = -1;
   } else {
+    cache->inclusiveness = 1;//DONE get inclusivenessold AMD ( suposed to be L2 L3 true)
+
     static const unsigned ways_tab[] = { 0, 1, 2, 0, 4, 0, 8, 0, 16, 0, 32, 48, 64, 96, 128, -1 };
     unsigned ways = (cpuid >> 12) & 0xf;
     cache->ways = ways_tab[ways];
@@ -405,6 +411,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
+      cache->inclusiveness = edx & 0x2;
+      //DONE get AMD inclusiveness here
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
@@ -495,6 +503,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
         cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
+      cache->inclusiveness = edx & 0x2;//DONE get intel inclusivity
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
@@ -886,6 +895,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
 		break;
 	    }
+            hwloc_obj_add_info(cache,"inclusiveness",infos[i].cache[l].inclusiveness?"true":"false");//DONE transfer inclusiveness
 	    cache->cpuset = cache_cpuset;
 	    hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 		level, cacheid, cache_cpuset);
@@ -897,6 +907,51 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     }
     level--;
   }
+
+  else{//XXX
+    hwloc_obj_t core;
+    for(core = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_CORE ,NULL);
+     core!=NULL;
+     core = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_CORE ,core)){
+      unsigned infoId;
+      for (infoId = 0; infoId<nbprocs;infoId++)
+        if(infos[infoId].present && core->os_index == infos[infoId].coreid)
+          break;
+      
+      int infoCacheId =-1;
+      int numCaches = infos[infoId].numcaches;
+      struct cacheinfo **caches = malloc(numCaches*sizeof(struct cacheinfo*));
+      unsigned i;
+      for(i = 0 ;i<numCaches;i++){
+        caches[i] = &infos->cache[i];
+      }
+      hwloc_obj_t cache;
+      for(cache = core;cache!=NULL;cache = cache->parent){
+        if(cache->type != HWLOC_OBJ_CACHE)
+          continue;
+        
+        unsigned char type = 0;
+        switch(cache->attr->cache.type){
+          case HWLOC_OBJ_CACHE_DATA : type = 1;
+            break;
+          case HWLOC_OBJ_CACHE_INSTRUCTION : type = 2;
+            break;
+          case HWLOC_OBJ_CACHE_UNIFIED : type = 3;
+            break;
+        }
+        int cacheMin =-1;  
+        for(i=++infoCacheId;i<numCaches;i++)
+          if(caches[i]->type == type && ( cacheMin ==-1 || caches[i]->level <= caches[cacheMin]->level))
+            cacheMin = i;
+        struct cacheinfo* temp =  caches[infoCacheId];
+        caches[infoCacheId] = caches[cacheMin];
+        caches[cacheMin] = temp;
+
+        hwloc_obj_add_info(cache,"inclusiveness",caches[infoCacheId]->inclusiveness?"true":"false");
+      }
+      free(caches);
+    }
+  }//XXX
 
   for (i = 0; i < nbprocs; i++) {
     free(infos[i].cache);
