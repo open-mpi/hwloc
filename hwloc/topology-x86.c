@@ -909,25 +909,27 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   }
 
   else{//XXX
-    hwloc_obj_t core;
-    for(core = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_CORE ,NULL);
-     core!=NULL;
-     core = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_CORE ,core)){
+    hwloc_obj_t pu;
+    for(pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,NULL);
+     pu!=NULL;
+     pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,pu)){
       unsigned infoId;
       for (infoId = 0; infoId<nbprocs;infoId++)
-        if(infos[infoId].present && core->os_index == infos[infoId].coreid)
+        if(infos[infoId].present && pu->os_index == infos[infoId].coreid)
           break;
       
       int infoCacheId =-1;
       int numCaches = infos[infoId].numcaches;
       struct cacheinfo **caches = malloc(numCaches*sizeof(struct cacheinfo*));
-      unsigned i;
+      int i;
       for(i = 0 ;i<numCaches;i++){
         caches[i] = &infos->cache[i];
       }
+
+
       hwloc_obj_t cache;
-      for(cache = core;cache!=NULL;cache = cache->parent){
-        if(cache->type != HWLOC_OBJ_CACHE)
+      for(cache = pu;cache!=NULL;cache = cache->parent){
+        if(cache->type != HWLOC_OBJ_CACHE)//TODO replace by a switch case
           continue;
         
         unsigned char type = 0;
@@ -939,13 +941,16 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
           case HWLOC_OBJ_CACHE_UNIFIED : type = 3;
             break;
         }
-        int cacheMin =-1;  
+        int cacheId =-1;  
         for(i=++infoCacheId;i<numCaches;i++)
-          if(caches[i]->type == type && ( cacheMin ==-1 || caches[i]->level <= caches[cacheMin]->level))
-            cacheMin = i;
+          if(caches[i]->level == cache->attr->cache.depth){ //DONE the level is exact, not always the type. If at the level there is a cache with the good type we return it. Else we return a random cache of the level. 
+            cacheId = i;
+            if(caches[i]->type == type)
+              break;
+          }
         struct cacheinfo* temp =  caches[infoCacheId];
-        caches[infoCacheId] = caches[cacheMin];
-        caches[cacheMin] = temp;
+        caches[infoCacheId] = caches[cacheId];
+        caches[cacheId] = temp;
 
         hwloc_obj_add_info(cache,"inclusiveness",caches[infoCacheId]->inclusiveness?"true":"false");
       }
