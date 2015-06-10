@@ -642,45 +642,93 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     }
     hwloc_bitmap_free(packages_cpuset);
 
-  } else {
-    /* Annotate packages previously-existing packages */
-    hwloc_obj_t package = NULL;
-    int same = 1;
-    nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
-    /* check whether all packages have the same info */
-    for(i=1; i<nbprocs; i++) {
-      if (strcmp(infos[i].cpumodel, infos[0].cpumodel)) {
-	same = 0;
-	break;
-      }
-    }
-    /* now iterate over packages and annotate them */
-    while ((package = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PACKAGE, package)) != NULL) {
-      if (package->os_index == (unsigned) -1) {
-	/* try to fix the package OS index if unknown.
-	 * FIXME: ideally, we should check all bits in case x86 and the native backend disagree.
-	 */
-	for(i=0; i<nbprocs; i++) {
-	  if (hwloc_bitmap_isset(package->cpuset, i)) {
-	    package->os_index = infos[i].packageid;
-	    break;
-	  }
-	}
-      }
-      for(i=0; i<nbprocs; i++) {
-	/* if there's a single package, it's the one we want.
-	 * if the index is ok, it's the one we want.
-	 * if the index is unknown but all packages have the same id, that's fine
-	 */
-	if (nbpackages == 1 || infos[i].packageid == package->os_index || (same && package->os_index == (unsigned) -1)) {
-	  hwloc_x86_add_cpuinfos(package, &infos[i], 1);
-	  break;
-	}
-      }
-    }
   }
+  if(!fulldiscovery){//XXX
+    hwloc_obj_t pu;
+    for(pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,NULL);
+     pu!=NULL;
+     pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,pu)){
+      unsigned infoId;
+      for (infoId = 0; infoId<nbprocs;infoId++)
+        if(infos[infoId].present && pu->os_index == infos[infoId].logprocid)
+          break;
+      
+      int numCaches = infos[infoId].numcaches;
+      struct cacheinfo **caches = malloc(numCaches*sizeof(struct cacheinfo*));
+      int i;
+      for(i = 0 ;i<numCaches;i++){
+        caches[i] = &(infos[infoId].cache[i]);
+      }
+
+
+      hwloc_obj_t object;
+      for(object = pu;object!=NULL;object = object->parent) {
+       // if(object->type != HWLOC_OBJ_CACHE)//TODO replace by a switch case
+       //   continue;
+        switch(object->type){//TODO replace by a switch case
+        case HWLOC_OBJ_CACHE:
+          {
+            unsigned char type = 0;
+            switch(object->attr->cache.type){
+              case HWLOC_OBJ_CACHE_DATA : type = 1;
+                break;
+              case HWLOC_OBJ_CACHE_INSTRUCTION : type = 2;
+                break;
+              case HWLOC_OBJ_CACHE_UNIFIED : type = 3;
+                break;
+            }
+            int cacheId =-1; 
+            for(i=0;i<numCaches;i++)
+              if(caches[i]->level == object->attr->cache.depth){ //DONE the level is exact, not always the type. If at the level there is a cache with the good type we return it. Else we return a random cache of the level. 
+                cacheId = i;
+                if(caches[i]->type == type)
+                  break;
+              }
+            hwloc_obj_add_info(object,"inclusiveness",caches[cacheId]->inclusiveness?"true":"false");
+
+          }
+          break;
+        case HWLOC_OBJ_PACKAGE:
+          { 
+            /* Annotate packages previously-existing packages */
+            static int same = -1;//if it's <0 nbpackages and same are still unknow
+            if (same < 0){
+              nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
+              /* check whether all packages have the same info */
+              same = 1;
+              for(i=1; i<nbprocs; i++) {
+                if (strcmp(infos[i].cpumodel, infos[0].cpumodel)) {
+	          same = 0;
+	          break;
+                }
+              }
+            }
+         //while ((package = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PACKAGE, package)) != NULL) {
+            // A t'on besoin de l'id? Pn sait déjà grace a topo-linux que le package contien le core.Note : juste pour verfier
+
+	    // FIXME: ideally, we should check all bits in case x86 and the native backend disagree. 
+	       
+ /* now annotate next package */
+	      /* if there's a single package, it's the one we want.
+	       * if the index is ok, it's the one we want.
+	       * if the index is unknown we already have the good info with the os_index of the cpu.
+	       */
+	    if (nbpackages == 1 || infos[i].packageid == object->os_index || object->os_index == (unsigned) -1) { //useless
+	      hwloc_x86_add_cpuinfos(object, &infos[infoId], 1);
+            }
+          }
+        break;
+	default:
+	break;
+	}
+      }
+      free(caches);
+    }
+  }//XXX
+
+
   /* If there was no package, annotate the Machine instead */
-  if ((!nbpackages) && infos[0].cpumodel[0]) {
+  if ((!nbpackages) && infos[0].cpumodel[0]) {//XXX what to do with this?
     hwloc_x86_add_cpuinfos(hwloc_get_root_obj(topology), &infos[0], 1);
   }
 
@@ -907,56 +955,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     }
     level--;
   }
-
-  else{//XXX
-    hwloc_obj_t pu;
-    for(pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,NULL);
-     pu!=NULL;
-     pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,pu)){
-      unsigned infoId;
-      for (infoId = 0; infoId<nbprocs;infoId++)
-        if(infos[infoId].present && pu->os_index == infos[infoId].coreid)
-          break;
-      
-      int infoCacheId =-1;
-      int numCaches = infos[infoId].numcaches;
-      struct cacheinfo **caches = malloc(numCaches*sizeof(struct cacheinfo*));
-      int i;
-      for(i = 0 ;i<numCaches;i++){
-        caches[i] = &infos->cache[i];
-      }
-
-
-      hwloc_obj_t cache;
-      for(cache = pu;cache!=NULL;cache = cache->parent){
-        if(cache->type != HWLOC_OBJ_CACHE)//TODO replace by a switch case
-          continue;
-        
-        unsigned char type = 0;
-        switch(cache->attr->cache.type){
-          case HWLOC_OBJ_CACHE_DATA : type = 1;
-            break;
-          case HWLOC_OBJ_CACHE_INSTRUCTION : type = 2;
-            break;
-          case HWLOC_OBJ_CACHE_UNIFIED : type = 3;
-            break;
-        }
-        int cacheId =-1;  
-        for(i=++infoCacheId;i<numCaches;i++)
-          if(caches[i]->level == cache->attr->cache.depth){ //DONE the level is exact, not always the type. If at the level there is a cache with the good type we return it. Else we return a random cache of the level. 
-            cacheId = i;
-            if(caches[i]->type == type)
-              break;
-          }
-        struct cacheinfo* temp =  caches[infoCacheId];
-        caches[infoCacheId] = caches[cacheId];
-        caches[cacheId] = temp;
-
-        hwloc_obj_add_info(cache,"inclusiveness",caches[infoCacheId]->inclusiveness?"true":"false");
-      }
-      free(caches);
-    }
-  }//XXX
 
   for (i = 0; i < nbprocs; i++) {
     free(infos[i].cache);
