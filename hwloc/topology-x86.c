@@ -614,38 +614,10 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
    * Only annotate existing objects for now.
    */
 
-  /* Look for packages */
-  if (fulldiscovery) {
-    hwloc_bitmap_t packages_cpuset = hwloc_bitmap_dup(complete_cpuset);
-    hwloc_bitmap_t package_cpuset;
-    hwloc_obj_t package;
-
-    while ((i = hwloc_bitmap_first(packages_cpuset)) != (unsigned) -1) {
-      unsigned packageid = infos[i].packageid;
-
-      package_cpuset = hwloc_bitmap_alloc();
-      for (j = i; j < nbprocs; j++) {
-        if (infos[j].packageid == packageid) {
-          hwloc_bitmap_set(package_cpuset, j);
-          hwloc_bitmap_clr(packages_cpuset, j);
-        }
-      }
-      package = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, packageid);
-      package->cpuset = package_cpuset;
-
-      hwloc_x86_add_cpuinfos(package, &infos[i], 0);
-
-      hwloc_debug_1arg_bitmap("os package %u has cpuset %s\n",
-          packageid, package_cpuset);
-      hwloc_insert_object_by_cpuset(topology, package);
-      nbpackages++;
-    }
-    hwloc_bitmap_free(packages_cpuset);
-
-  }
-  /*Anotate previously existing objects*/
-  if(!fulldiscovery){//XXX
+ /*Anotate previously existing objects*/
+  if(!fulldiscovery){
     hwloc_obj_t pu;
+    nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
     for(pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,NULL);
      pu!=NULL;
      pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU ,pu)){
@@ -683,37 +655,17 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
                 if(caches[i]->type == type)
                   break;
               }
-            printf("cacheid :%d\n",cacheId);
             hwloc_obj_add_info(object,"inclusiveness",caches[cacheId]->inclusiveness?"true":"false");
 
           }
           break;
         case HWLOC_OBJ_PACKAGE:
           { 
-            /* Annotate packages previously-existing packages */
-            static int same = -1;//if it's <0 nbpackages and same are still unknow
-            if (same < 0){
-              nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
-              /* check whether all packages have the same info */
-              same = 1;
-              for(i=1; i<nbprocs; i++) {
-                if (strcmp(infos[i].cpumodel, infos[0].cpumodel)) {
-	          same = 0;
-	          break;
-                }
-              }
-            }
-         //while ((package = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PACKAGE, package)) != NULL) {
-            // A t'on besoin de l'id? Pn sait déjà grace a topo-linux que le package contien le core.Note : juste pour verfier
-
+            /* Annotate packages previously-existing package */
 	    // FIXME: ideally, we should check all bits in case x86 and the native backend disagree. 
 	       
- /* now annotate next package */
-	      /* if there's a single package, it's the one we want.
-	       * if the index is ok, it's the one we want.
-	       * if the index is unknown we already have the good info with the os_index of the cpu.
-	       */
-	    if (nbpackages == 1 || infos[i].packageid == object->os_index || object->os_index == (unsigned) -1) { //useless
+            //We already know the pakage from topology-linux. We only check if the package detected by x86 doesn't disagree
+	    if (infos[i].packageid == object->os_index || object->os_index == (unsigned) -1) { 
 	      hwloc_x86_add_cpuinfos(object, &infos[infoId], 1);
             }
           }
@@ -724,11 +676,41 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       }
       free(caches);
     }
-  }//XXX
+  }
 
+
+  /* Look for packages */
+  if (fulldiscovery) {
+    hwloc_bitmap_t packages_cpuset = hwloc_bitmap_dup(complete_cpuset);
+    hwloc_bitmap_t package_cpuset;
+    hwloc_obj_t package;
+
+    while ((i = hwloc_bitmap_first(packages_cpuset)) != (unsigned) -1) {
+      unsigned packageid = infos[i].packageid;
+
+      package_cpuset = hwloc_bitmap_alloc();
+      for (j = i; j < nbprocs; j++) {
+        if (infos[j].packageid == packageid) {
+          hwloc_bitmap_set(package_cpuset, j);
+          hwloc_bitmap_clr(packages_cpuset, j);
+        }
+      }
+      package = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, packageid);
+      package->cpuset = package_cpuset;
+
+      hwloc_x86_add_cpuinfos(package, &infos[i], 0);
+
+      hwloc_debug_1arg_bitmap("os package %u has cpuset %s\n",
+          packageid, package_cpuset);
+      hwloc_insert_object_by_cpuset(topology, package);
+      nbpackages++;
+    }
+    hwloc_bitmap_free(packages_cpuset);
+
+  }
 
   /* If there was no package, annotate the Machine instead */
-  if ((!nbpackages) && infos[0].cpumodel[0]) {//XXX what to do with this?
+  if ((!nbpackages) && infos[0].cpumodel[0]) {
     hwloc_x86_add_cpuinfos(hwloc_get_root_obj(topology), &infos[0], 1);
   }
 
