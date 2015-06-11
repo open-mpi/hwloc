@@ -515,7 +515,8 @@ hwloc_topology_dup(hwloc_topology_t *newp,
 enum hwloc_type_cmp_e {
   HWLOC_TYPE_HIGHER,
   HWLOC_TYPE_DEEPER,
-  HWLOC_TYPE_EQUAL
+  HWLOC_TYPE_EQUAL,
+  HWLOC_TYPE_CMP_FAILED
 };
 
 /* WARNING: The indexes of this array MUST match the ordering that of
@@ -639,7 +640,7 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
   compare = hwloc_compare_types(type1, type2);
   if (compare == HWLOC_TYPE_UNORDERED)
-    return HWLOC_TYPE_EQUAL; /* we cannot do better */
+    return HWLOC_TYPE_CMP_FAILED; /* we cannot do better */
   if (compare > 0)
     return HWLOC_TYPE_DEEPER;
   if (compare < 0)
@@ -720,6 +721,8 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 	return HWLOC_OBJ_INCLUDED;
       case HWLOC_TYPE_HIGHER:
 	return HWLOC_OBJ_CONTAINS;
+      case HWLOC_TYPE_CMP_FAILED:
+        return HWLOC_OBJ_DIFFERENT;
 
       case HWLOC_TYPE_EQUAL:
         if (obj1->type == HWLOC_OBJ_MISC) {
