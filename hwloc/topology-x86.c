@@ -639,6 +639,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
         /* Annotate packages previously-existing cache */
         case HWLOC_OBJ_CACHE:
           {
+            if (hwloc_obj_get_info_by_name(object,"inclusiveness"))
+              break;
             unsigned char type = 0;
             switch(object->attr->cache.type){
               case HWLOC_OBJ_CACHE_DATA : type = 1;
