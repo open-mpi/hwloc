@@ -163,7 +163,7 @@ struct cacheinfo {
   int ways;
   unsigned sets;
   unsigned long size;
-  char inclusiveness;//DONE add inclusiveness
+  char inclusiveness;
 
 };
 
@@ -224,14 +224,14 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, uns
   cache->linesize = cpuid & 0xff;
   cache->linepart = 0;
   if (level == 1) {
-    cache->inclusiveness = 0;//DONE get inclusiveness old AMD ( suposed to be L1 false)
+    cache->inclusiveness = 0;//get inclusiveness old AMD ( suposed to be L1 false)
 
     cache->ways = (cpuid >> 16) & 0xff;
     if (cache->ways == 0xff)
       /* Fully associative */
       cache->ways = -1;
   } else {
-    cache->inclusiveness = 1;//DONE get inclusivenessold AMD ( suposed to be L2 L3 true)
+    cache->inclusiveness = 1;//get inclusivenessold AMD ( suposed to be L2 L3 true)
 
     static const unsigned ways_tab[] = { 0, 1, 2, 0, 4, 0, 8, 0, 16, 0, 32, 48, 64, 96, 128, -1 };
     unsigned ways = (cpuid >> 12) & 0xf;
@@ -412,7 +412,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
       cache->inclusiveness = edx & 0x2;
-      //DONE get AMD inclusiveness here
+
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
@@ -503,7 +503,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
         cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
-      cache->inclusiveness = edx & 0x2;//DONE get intel inclusivity
+      cache->inclusiveness = edx & 0x2;
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
@@ -643,15 +643,15 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     hwloc_bitmap_free(packages_cpuset);
 
   }
+  /*Anotate previously existing objects*/
   if(!fulldiscovery){//XXX
     hwloc_obj_t pu;
     for(pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,NULL);
      pu!=NULL;
-     pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,pu)){
-      unsigned infoId;
-      for (infoId = 0; infoId<nbprocs;infoId++)
-        if(infos[infoId].present && pu->os_index == infos[infoId].logprocid)
-          break;
+     pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU ,pu)){
+      unsigned infoId = pu->os_index;
+      if(infoId<0)
+        continue;
       
       int numCaches = infos[infoId].numcaches;
       struct cacheinfo **caches = malloc(numCaches*sizeof(struct cacheinfo*));
@@ -663,9 +663,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
       hwloc_obj_t object;
       for(object = pu;object!=NULL;object = object->parent) {
-       // if(object->type != HWLOC_OBJ_CACHE)//TODO replace by a switch case
-       //   continue;
-        switch(object->type){//TODO replace by a switch case
+        switch(object->type){
+        /* Annotate packages previously-existing cache */
         case HWLOC_OBJ_CACHE:
           {
             unsigned char type = 0;
@@ -679,11 +678,12 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
             }
             int cacheId =-1; 
             for(i=0;i<numCaches;i++)
-              if(caches[i]->level == object->attr->cache.depth){ //DONE the level is exact, not always the type. If at the level there is a cache with the good type we return it. Else we return a random cache of the level. 
+              if(caches[i]->level == object->attr->cache.depth){ // the level is exact, not always the type. If at the level there is a cache with the good type we return it. Else we return a random cache of the level. 
                 cacheId = i;
                 if(caches[i]->type == type)
                   break;
               }
+            printf("cacheid :%d\n",cacheId);
             hwloc_obj_add_info(object,"inclusiveness",caches[cacheId]->inclusiveness?"true":"false");
 
           }
@@ -943,7 +943,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
 		break;
 	    }
-            hwloc_obj_add_info(cache,"inclusiveness",infos[i].cache[l].inclusiveness?"true":"false");//DONE transfer inclusiveness
+            hwloc_obj_add_info(cache,"inclusiveness",infos[i].cache[l].inclusiveness?"true":"false");
 	    cache->cpuset = cache_cpuset;
 	    hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 		level, cacheid, cache_cpuset);
