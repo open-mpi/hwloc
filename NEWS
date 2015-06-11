@@ -76,6 +76,8 @@ Version 1.11.0
     thanks to Imre Kerr for reporting the problem.
   + Fix PCI Bridge-specific depth attribute.
   + Fix hwloc_bitmap_intersect() for two infinite bitmaps.
+  + Fix some corner case in the building of levels on large NUMA machines
+    with non-uniform NUMA groups and I/Os.
   + Improve the performance of object insertion by cpuset for large
     topologies.
   + Prefix verbose XML import errors with the source name.
