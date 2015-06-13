@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 	       roottypestring,
 	       logical ? " L#" :  " P#",
 	       logical ? obj->logical_index : obj->os_index);
-	hwloc_utils_print_distance_matrix(topology, obj, distances->nbobjs, distances->relative_depth, distances->latency, logical);
+	hwloc_utils_print_distance_matrix(stdout, topology, obj, distances->nbobjs, distances->relative_depth, distances->latency, logical);
       }
     }
   }
