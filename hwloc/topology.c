@@ -678,21 +678,6 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   return -1;
 }
 
-/*
- * How to compare objects based on types.
- *
- * Note that HIGHER/LOWER is only a (consistent) heuristic, used to sort
- * objects with same cpuset consistently.
- * Only EQUAL / not EQUAL can be relied upon.
- */
-
-enum hwloc_type_cmp_e {
-  HWLOC_TYPE_HIGHER,
-  HWLOC_TYPE_DEEPER,
-  HWLOC_TYPE_EQUAL,
-  HWLOC_TYPE_CMP_FAILED
-};
-
 /* WARNING: The indexes of this array MUST match the ordering that of
    the obj_order_type[] array, below.  Specifically, the values must
    be laid out such that:
@@ -800,7 +785,15 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
   return order1 - order2;
 }
 
-static enum hwloc_type_cmp_e
+enum hwloc_obj_cmp_e {
+  HWLOC_OBJ_EQUAL = HWLOC_BITMAP_EQUAL,			/**< \brief Equal */
+  HWLOC_OBJ_INCLUDED = HWLOC_BITMAP_INCLUDED,		/**< \brief Strictly included into */
+  HWLOC_OBJ_CONTAINS = HWLOC_BITMAP_CONTAINS,		/**< \brief Strictly contains */
+  HWLOC_OBJ_INTERSECTS = HWLOC_BITMAP_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
+  HWLOC_OBJ_DIFFERENT = HWLOC_BITMAP_DIFFERENT		/**< \brief No intersection */
+};
+
+static enum hwloc_obj_cmp_e
 hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   hwloc_obj_type_t type1 = obj1->type;
@@ -809,59 +802,51 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
   compare = hwloc_compare_types(type1, type2);
   if (compare == HWLOC_TYPE_UNORDERED)
-    return HWLOC_TYPE_CMP_FAILED; /* we cannot do better */
+    return HWLOC_OBJ_DIFFERENT; /* we cannot do better */
   if (compare > 0)
-    return HWLOC_TYPE_DEEPER;
+    return HWLOC_OBJ_INCLUDED;
   if (compare < 0)
-    return HWLOC_TYPE_HIGHER;
+    return HWLOC_OBJ_CONTAINS;
 
   /* Caches have the same types but can have different depths.  */
   if (type1 == HWLOC_OBJ_CACHE) {
     if (obj1->attr->cache.depth < obj2->attr->cache.depth)
-      return HWLOC_TYPE_DEEPER;
+      return HWLOC_OBJ_INCLUDED;
     else if (obj1->attr->cache.depth > obj2->attr->cache.depth)
-      return HWLOC_TYPE_HIGHER;
+      return HWLOC_OBJ_CONTAINS;
     else if (obj1->attr->cache.type > obj2->attr->cache.type)
       /* consider icache deeper than dcache and dcache deeper than unified */
-      return HWLOC_TYPE_DEEPER;
+      return HWLOC_OBJ_INCLUDED;
     else if (obj1->attr->cache.type < obj2->attr->cache.type)
       /* consider icache deeper than dcache and dcache deeper than unified */
-      return HWLOC_TYPE_HIGHER;
+      return HWLOC_OBJ_CONTAINS;
   }
 
   /* Group objects have the same types but can have different depths.  */
   if (type1 == HWLOC_OBJ_GROUP) {
     if (obj1->attr->group.depth == (unsigned) -1
 	|| obj2->attr->group.depth == (unsigned) -1)
-      return HWLOC_TYPE_EQUAL;
+      return HWLOC_OBJ_EQUAL;
     if (obj1->attr->group.depth < obj2->attr->group.depth)
-      return HWLOC_TYPE_DEEPER;
+      return HWLOC_OBJ_INCLUDED;
     else if (obj1->attr->group.depth > obj2->attr->group.depth)
-      return HWLOC_TYPE_HIGHER;
+      return HWLOC_OBJ_CONTAINS;
   }
 
   /* Bridges objects have the same types but can have different depths.  */
   if (type1 == HWLOC_OBJ_BRIDGE) {
     if (obj1->attr->bridge.depth < obj2->attr->bridge.depth)
-      return HWLOC_TYPE_DEEPER;
+      return HWLOC_OBJ_INCLUDED;
     else if (obj1->attr->bridge.depth > obj2->attr->bridge.depth)
-      return HWLOC_TYPE_HIGHER;
+      return HWLOC_OBJ_CONTAINS;
   }
 
-  return HWLOC_TYPE_EQUAL;
+  return HWLOC_OBJ_EQUAL;
 }
 
 /*
  * How to compare objects based on cpusets.
  */
-
-enum hwloc_obj_cmp_e {
-  HWLOC_OBJ_EQUAL = HWLOC_BITMAP_EQUAL,			/**< \brief Equal */
-  HWLOC_OBJ_INCLUDED = HWLOC_BITMAP_INCLUDED,		/**< \brief Strictly included into */
-  HWLOC_OBJ_CONTAINS = HWLOC_BITMAP_CONTAINS,		/**< \brief Strictly contains */
-  HWLOC_OBJ_INTERSECTS = HWLOC_BITMAP_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
-  HWLOC_OBJ_DIFFERENT = HWLOC_BITMAP_DIFFERENT		/**< \brief No intersection */
-};
 
 static int
 hwloc_obj_cmp_sets(hwloc_obj_t obj1, hwloc_obj_t obj2)
@@ -1081,21 +1066,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	 */
       } else {
 	/* otherwise compare actual types to decide of the inclusion */
-	int typeres = hwloc_type_cmp(obj, child);
-	switch (typeres) {
-	case HWLOC_TYPE_DEEPER:
-	  res = HWLOC_OBJ_INCLUDED;
-	  break;
-	case HWLOC_TYPE_HIGHER:
-	  res = HWLOC_OBJ_CONTAINS;
-	  break;
-	case HWLOC_TYPE_CMP_FAILED:
-	  res = HWLOC_OBJ_DIFFERENT;
-	  break;
-	case HWLOC_TYPE_EQUAL:
-	  /* Same sets and types!  Let's hope it's coherent.  */
-	  res = HWLOC_OBJ_EQUAL;
-	}
+	res = hwloc_type_cmp(obj, child);
       }
     }
 
@@ -2013,7 +1984,7 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
-  if (hwloc_type_cmp(root, obj) == HWLOC_TYPE_EQUAL)
+  if (hwloc_type_cmp(root, obj) == HWLOC_OBJ_EQUAL)
     return 1;
 
   for (child = root->first_child; child; child = child->next_sibling)
@@ -2038,7 +2009,7 @@ hwloc_level_take_objects(hwloc_obj_t top_obj,
   unsigned i, j;
 
   for (i = 0; i < n_current_objs; i++)
-    if (hwloc_type_cmp(top_obj, current_objs[i]) == HWLOC_TYPE_EQUAL) {
+    if (hwloc_type_cmp(top_obj, current_objs[i]) == HWLOC_OBJ_EQUAL) {
       /* Take it, add main children.  */
       taken_objs[taken_i++] = current_objs[i];
       for (j = 0; j < current_objs[i]->arity; j++)
@@ -2268,7 +2239,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     /* See if this is actually the topmost object */
     for (i = 0; i < n_objs; i++) {
-      if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
+      if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_OBJ_EQUAL) {
 	if (find_same_type(objs[i], top_obj)) {
 	  /* OBJS[i] is strictly above an object of the same type as TOP_OBJ, so it
 	   * is above TOP_OBJ.  */
@@ -2284,7 +2255,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
     n_taken_objs = 0;
     n_new_objs = 0;
     for (i = 0; i < n_objs; i++)
-      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
+      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_OBJ_EQUAL) {
 	n_taken_objs++;
 	n_new_objs += objs[i]->arity;
       }
@@ -3335,7 +3306,7 @@ hwloc__check_level(struct hwloc_topology *topology, unsigned depth)
     assert(obj->logical_index == j);
     /* check that all objects in the level have the same type */
     if (prev) {
-      assert(hwloc_type_cmp(obj, prev) == HWLOC_TYPE_EQUAL);
+      assert(hwloc_type_cmp(obj, prev) == HWLOC_OBJ_EQUAL);
       assert(prev->next_cousin == obj);
     }
     assert(obj->prev_cousin == prev);
