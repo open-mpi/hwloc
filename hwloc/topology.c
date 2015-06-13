@@ -922,22 +922,6 @@ hwloc_obj_cmp_sets(hwloc_obj_t obj1, hwloc_obj_t obj2)
   return res;
 }
 
-static int
-hwloc_obj_cmp_types(hwloc_obj_t obj1, hwloc_obj_t obj2)
-{
-  /* Same sets, subsort by type to have a consistent ordering.  */
-  int typeres = hwloc_type_cmp(obj1, obj2);
-  if (typeres == HWLOC_TYPE_DEEPER)
-    return HWLOC_OBJ_INCLUDED;
-  if (typeres == HWLOC_TYPE_HIGHER)
-    return HWLOC_OBJ_CONTAINS;
-  if (typeres == HWLOC_TYPE_CMP_FAILED)
-    return HWLOC_OBJ_DIFFERENT;
-
-  /* Same sets and types!  Let's hope it's coherent.  */
-  return HWLOC_OBJ_EQUAL;
-}
-
 /* Compare object cpusets based on complete_cpuset if defined (always correctly ordered),
  * or fallback to the main cpusets (only correctly ordered during early insert before disallowed bits are cleared).
  *
@@ -1097,7 +1081,21 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	 */
       } else {
 	/* otherwise compare actual types to decide of the inclusion */
-	res = hwloc_obj_cmp_types(obj, child);
+	int typeres = hwloc_type_cmp(obj, child);
+	switch (typeres) {
+	case HWLOC_TYPE_DEEPER:
+	  res = HWLOC_OBJ_INCLUDED;
+	  break;
+	case HWLOC_TYPE_HIGHER:
+	  res = HWLOC_OBJ_CONTAINS;
+	  break;
+	case HWLOC_TYPE_CMP_FAILED:
+	  res = HWLOC_OBJ_DIFFERENT;
+	  break;
+	case HWLOC_TYPE_EQUAL:
+	  /* Same sets and types!  Let's hope it's coherent.  */
+	  res = HWLOC_OBJ_EQUAL;
+	}
       }
     }
 
