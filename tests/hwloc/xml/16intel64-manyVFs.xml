@@ -7,12 +7,6 @@
     <info name="Architecture" value="x86_64"/>
     <info name="hwlocVersion" value="2.0.0a1-git"/>
     <info name="ProcessName" value="lt-lstopo-no-graphics"/>
-    <distances nbobjs="2" relative_depth="1" latency_base="10.000000">
-      <latency value="1.000000"/>
-      <latency value="2.000000"/>
-      <latency value="2.000000"/>
-      <latency value="1.000000"/>
-    </distances>
     <object type="NUMANode" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" allowed_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="68682809344">
       <page_type size="4096" count="16768264"/>
       <page_type size="2097152" count="0"/>
