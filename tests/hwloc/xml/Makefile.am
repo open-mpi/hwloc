@@ -22,6 +22,8 @@ xml_outputs = \
         32em64t-2n8c2t-pci-noio.xml \
         32em64t-2n8c2t-pci-normalio.xml \
         32em64t-2n8c2t-pci-wholeio.xml \
+        64intel64-3g2n+2n-irregulargroups+pci.xml \
+        64intel64-3g2n+2n-irregulargroups+pci.console.output \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t-distancegroups.xml \
         192em64t-24n8c2t-nodistancegroups.xml \
@@ -38,6 +40,7 @@ xml_source = \
         16intel64-manyVFs.console.nocollapse.source \
         32em64t-2n8c2t-pci-noio.source \
         32em64t-2n8c2t-pci-normalio.source \
+        64intel64-3g2n+2n-irregulargroups+pci.console.source \
         192em64t-24n8c2t-distancegroups.source
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
@@ -48,11 +51,14 @@ xml_options = \
         16intel64-manyVFs.console.nocollapse.options \
         16-2gr2gr2n2c+misc.console.options \
         32em64t-2n8c2t-pci-noio.options \
-        32em64t-2n8c2t-pci-wholeio.options
+        32em64t-2n8c2t-pci-wholeio.options \
+        64intel64-3g2n+2n-irregulargroups+pci.options \
+        64intel64-3g2n+2n-irregulargroups+pci.console.options
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 xml_envs = \
+        64intel64-3g2n+2n-irregulargroups+pci.console.env \
         192em64t-12gr2n8c2t-distancegroups.env \
         192em64t-24n8c2t-nodistancegroups.env \
         192em64t-24n8c2t-distancegroups.env
