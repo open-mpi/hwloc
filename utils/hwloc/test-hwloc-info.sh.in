@@ -3,13 +3,13 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
-VERSION="@VERSION@"
+HWLOC_VERSION="@HWLOC_VERSION@"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 srcdir="$HWLOC_top_srcdir/utils/hwloc"
@@ -48,7 +48,7 @@ set -e
   echo
   $info --if synthetic --input "node:2 core:2 ca:2 ca:2 pu:2" --ancestor l1 -s pu:7-10
 ) \
- | grep -v " info hwlocVersion = $VERSION" \
+ | grep -v " info hwlocVersion = $HWLOC_VERSION" \
  | grep -v " info ProcessName = hwloc-info" \
  | grep -v " info ProcessName = lt-hwloc-info" \
  > "$file"

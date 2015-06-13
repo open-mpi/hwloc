@@ -12,7 +12,7 @@
 # Check the conformance of `lstopo' for all the Linux sysfs
 # hierarchies available here.  Return true on success.
 
-VERSION="@VERSION@"
+HWLOC_VERSION="@HWLOC_VERSION@"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 lstopo="$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics"
@@ -50,10 +50,10 @@ test_topology ()
     [ -r "$options" ] && opts=`cat $options`
 
     if ! "$lstopo" -i "$dir" --if fsroot $opts \
-	| sed	-e 's/ hwlocVersion='$VERSION'//' \
+	| sed	-e 's/ hwlocVersion='$HWLOC_VERSION'//' \
 		-e 's/ ProcessName=lstopo-no-graphics//' \
 		-e 's/ ProcessName=lt-lstopo-no-graphics//' \
-	| grep -v "<info name=\"hwlocVersion\" value=\"$VERSION\"\/>" \
+	| grep -v "<info name=\"hwlocVersion\" value=\"$HWLOC_VERSION\"\/>" \
 	| grep -v "<info name=\"ProcessName\" value=\"lstopo-no-graphics\"\/>" \
 	| grep -v "<info name=\"ProcessName\" value=\"lt-lstopo-no-graphics\"\/>" \
 	> "$output"
