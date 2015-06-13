@@ -96,9 +96,9 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
   /* annotate if the PU is forbidden/running */
   if (l->type == HWLOC_OBJ_PU && verbose_mode >= 2) {
     if (lstopo_pu_forbidden(l))
-      printf(" (forbidden)");
+      fprintf(output, " (forbidden)");
     else if (lstopo_pu_running(topology, l))
-      printf(" (running)");
+      fprintf(output, " (running)");
   }
 }
 
@@ -212,11 +212,11 @@ void output_console(struct lstopo_output *loutput, const char *filename)
       distances = hwloc_get_whole_distance_matrix_by_depth(topology, depth);
       if (!distances || !distances->latency)
         continue;
-      printf("relative latency matrix between %ss (depth %u) by %s indexes:\n",
-	     hwloc_obj_type_string(hwloc_get_depth_type(topology, depth)),
-	     depth,
-	     logical ? "logical" : "physical");
-      hwloc_utils_print_distance_matrix(topology, hwloc_get_root_obj(topology), distances->nbobjs, depth, distances->latency, logical);
+      fprintf(output, "relative latency matrix between %ss (depth %u) by %s indexes:\n",
+	      hwloc_obj_type_string(hwloc_get_depth_type(topology, depth)),
+	      depth,
+	      logical ? "logical" : "physical");
+      hwloc_utils_print_distance_matrix(output, topology, hwloc_get_root_obj(topology), distances->nbobjs, depth, distances->latency, logical);
     }
   }
 
