@@ -2596,7 +2596,7 @@ next_noncpubackend:
   if (topology->backends
       && strcmp(topology->backends->component->name, "xml")) {
     /* add a hwlocVersion */
-    hwloc_obj_add_info(topology->levels[0][0], "hwlocVersion", VERSION);
+    hwloc_obj_add_info(topology->levels[0][0], "hwlocVersion", HWLOC_VERSION);
   }
 
   /*
