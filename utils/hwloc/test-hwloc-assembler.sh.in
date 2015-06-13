@@ -7,7 +7,7 @@
 # See COPYING in top-level directory.
 #
 
-VERSION="@VERSION@"
+HWLOC_VERSION="@HWLOC_VERSION@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 assembler="$HWLOC_top_builddir/utils/hwloc/hwloc-assembler"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
@@ -45,7 +45,7 @@ $assembler $file \
 # filter hwlocVersion since it often changes
 # filter ProcessName since it may be hwloc-info or lt-hwloc-info
 cat $file \
- | $SED -e '/<info name=\"hwlocVersion\" value=\"'$VERSION'\"\/>/d' \
+ | $SED -e '/<info name=\"hwlocVersion\" value=\"'$HWLOC_VERSION'\"\/>/d' \
  | $SED -e '/<info name=\"ProcessName\" value=\"hwloc-assembler\"\/>/d' -e '/<info name=\"ProcessName\" value=\"lt-hwloc-assembler\"\/>/d' \
  > ${file}.tmp
 mv -f ${file}.tmp $file
