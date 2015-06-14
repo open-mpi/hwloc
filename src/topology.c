@@ -2024,7 +2024,10 @@ hwloc_connect_children(hwloc_obj_t parent)
 }
 
 /*
- * Check whether there is an object below ROOT that has the same type as OBJ
+ * Check whether there is an object below ROOT that has the same type as OBJ.
+ * Only used for building levels.
+ * Stop at I/O or Misc since these don't go into levels, and we never have
+ * normal objects under them.
  */
 static int
 find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
@@ -2035,7 +2038,9 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
     return 1;
 
   for (child = root->first_child; child; child = child->next_sibling)
-    if (find_same_type(child, obj))
+    if (!hwloc_obj_type_is_io(child->type)
+	&& child->type != HWLOC_OBJ_MISC
+	&& find_same_type(child, obj))
       return 1;
 
   return 0;
