@@ -335,6 +335,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-collapse         Do not collapse identical PCI devices\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
+  fprintf (where, "  --restrict-flags <n>  Set the flags to be used during restrict\n");
   fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
   fprintf (where, "  --no-bridges          Do not any I/O bridge except hostbridges\n");
   fprintf (where, "  --whole-io            Show all I/O devices and bridges\n");
@@ -411,6 +412,7 @@ main (int argc, char *argv[])
   hwloc_topology_t topology;
   const char *filename = NULL;
   unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES | HWLOC_TOPOLOGY_FLAG_ICACHES;
+  unsigned long restrict_flags = 0;
   int merge = 0;
   int ignorecache = 0;
   char * callname;
@@ -527,6 +529,14 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	restrictstring = strdup(argv[1]);
+	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--restrict-flags")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	restrict_flags = (unsigned long) strtoull(argv[1], NULL, 0);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--export-synthetic-flags")) {
@@ -677,7 +687,7 @@ main (int argc, char *argv[])
     } else {
       hwloc_bitmap_sscanf(restrictset, restrictstring);
     }
-    err = hwloc_topology_restrict (topology, restrictset, 0);
+    err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
     if (err) {
       perror("Restricting the topology");
       /* fallthrough */
