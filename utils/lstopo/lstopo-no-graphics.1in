@@ -141,6 +141,11 @@ This option requires the use of the actual current machine topology
 (or any other topology with \fB\-\-thissystem\fR or with
 HWLOC_THISSYSTEM set to 1 in the environment).
 .TP
+\fB\-\-restrict\-flags\fR <flags>
+Enforce flags when restricting the topology.
+The default is \fB0\fR.
+These flags are passed to \fIhwloc_topology_restrict()\fR.
+.TP
 \fB\-\-no\-io\fB
 Do not show any I/O device or bridge.
 By default, common devices (GPUs, NICs, block devices, ...) and
