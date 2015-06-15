@@ -163,6 +163,8 @@ struct cacheinfo {
   int ways;
   unsigned sets;
   unsigned long size;
+  char inclusiveness;
+
 };
 
 struct procinfo {
@@ -222,11 +224,15 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, uns
   cache->linesize = cpuid & 0xff;
   cache->linepart = 0;
   if (level == 1) {
+    cache->inclusiveness = 0;//get inclusiveness old AMD ( suposed to be L1 false)
+
     cache->ways = (cpuid >> 16) & 0xff;
     if (cache->ways == 0xff)
       /* Fully associative */
       cache->ways = -1;
   } else {
+    cache->inclusiveness = 1;//get inclusivenessold AMD ( suposed to be L2 L3 true)
+
     static const unsigned ways_tab[] = { 0, 1, 2, 0, 4, 0, 8, 0, 16, 0, 32, 48, 64, 96, 128, -1 };
     unsigned ways = (cpuid >> 12) & 0xf;
     cache->ways = ways_tab[ways];
@@ -405,6 +411,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
+      cache->inclusiveness = edx & 0x2;
+
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
@@ -495,6 +503,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
         cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
+      cache->inclusiveness = edx & 0x2;
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
@@ -605,6 +614,73 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
    * Only annotate existing objects for now.
    */
 
+ /*Anotate previously existing objects*/
+  if(!fulldiscovery){
+    hwloc_obj_t pu;
+    nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
+    for(pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU  ,NULL);
+     pu!=NULL;
+     pu = hwloc_get_next_obj_by_type(topology,HWLOC_OBJ_PU ,pu)){
+      unsigned infoId = pu->os_index;
+      if(infoId<0)
+        continue;
+      
+      int numCaches = infos[infoId].numcaches;
+      struct cacheinfo **caches = malloc(numCaches*sizeof(struct cacheinfo*));
+      int i;
+      for(i = 0 ;i<numCaches;i++){
+        caches[i] = &(infos[infoId].cache[i]);
+      }
+
+
+      hwloc_obj_t object;
+      for(object = pu;object!=NULL;object = object->parent) {
+        switch(object->type){
+        /* Annotate packages previously-existing cache */
+        case HWLOC_OBJ_CACHE:
+          {
+            if (hwloc_obj_get_info_by_name(object,"inclusiveness"))
+              break;
+            unsigned char type = 0;
+            switch(object->attr->cache.type){
+              case HWLOC_OBJ_CACHE_DATA : type = 1;
+                break;
+              case HWLOC_OBJ_CACHE_INSTRUCTION : type = 2;
+                break;
+              case HWLOC_OBJ_CACHE_UNIFIED : type = 3;
+                break;
+            }
+            int cacheId =-1; 
+            for(i=0;i<numCaches;i++)
+              if(caches[i]->level == object->attr->cache.depth){ // the level is exact, not always the type. If at the level there is a cache with the good type we return it. Else we return a random cache of the level. 
+                cacheId = i;
+                if(caches[i]->type == type)
+                  break;
+              }
+            hwloc_obj_add_info(object,"inclusiveness",caches[cacheId]->inclusiveness?"true":"false");
+
+          }
+          break;
+        case HWLOC_OBJ_PACKAGE:
+          { 
+            /* Annotate packages previously-existing package */
+	    // FIXME: ideally, we should check all bits in case x86 and the native backend disagree. 
+	       
+            //We already know the pakage from topology-linux. We only check if the package detected by x86 doesn't disagree
+	    if (infos[i].packageid == object->os_index || object->os_index == (unsigned) -1) { 
+	      hwloc_x86_add_cpuinfos(object, &infos[infoId], 1);
+            }
+          }
+        break;
+	default:
+	break;
+	}
+      }
+      free(caches);
+    }
+  }
+
+
   /* Look for packages */
   if (fulldiscovery) {
     hwloc_bitmap_t packages_cpuset = hwloc_bitmap_dup(complete_cpuset);
@@ -633,43 +709,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     }
     hwloc_bitmap_free(packages_cpuset);
 
-  } else {
-    /* Annotate packages previously-existing packages */
-    hwloc_obj_t package = NULL;
-    int same = 1;
-    nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
-    /* check whether all packages have the same info */
-    for(i=1; i<nbprocs; i++) {
-      if (strcmp(infos[i].cpumodel, infos[0].cpumodel)) {
-	same = 0;
-	break;
-      }
-    }
-    /* now iterate over packages and annotate them */
-    while ((package = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PACKAGE, package)) != NULL) {
-      if (package->os_index == (unsigned) -1) {
-	/* try to fix the package OS index if unknown.
-	 * FIXME: ideally, we should check all bits in case x86 and the native backend disagree.
-	 */
-	for(i=0; i<nbprocs; i++) {
-	  if (hwloc_bitmap_isset(package->cpuset, i)) {
-	    package->os_index = infos[i].packageid;
-	    break;
-	  }
-	}
-      }
-      for(i=0; i<nbprocs; i++) {
-	/* if there's a single package, it's the one we want.
-	 * if the index is ok, it's the one we want.
-	 * if the index is unknown but all packages have the same id, that's fine
-	 */
-	if (nbpackages == 1 || infos[i].packageid == package->os_index || (same && package->os_index == (unsigned) -1)) {
-	  hwloc_x86_add_cpuinfos(package, &infos[i], 1);
-	  break;
-	}
-      }
-    }
   }
+
   /* If there was no package, annotate the Machine instead */
   if ((!nbpackages) && infos[0].cpumodel[0]) {
     hwloc_x86_add_cpuinfos(hwloc_get_root_obj(topology), &infos[0], 1);
@@ -886,6 +927,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
 		break;
 	    }
+            hwloc_obj_add_info(cache,"inclusiveness",infos[i].cache[l].inclusiveness?"true":"false");
 	    cache->cpuset = cache_cpuset;
 	    hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 		level, cacheid, cache_cpuset);
