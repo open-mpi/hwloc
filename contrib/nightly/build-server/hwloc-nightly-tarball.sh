@@ -23,13 +23,16 @@ script_uri=contrib/nightly/make_snapshot_tarball
 if [ $# -eq 0 ] ; then
     # Branches v1.6 and earlier were not updated to build nightly
     # snapshots from git, so only check v1.7 and later
-    branches="master v1.7 v1.8 v1.9 v1.10"
+    branches="master v1.7 v1.8 v1.9 v1.10 v1.11"
 else
     branches=$@
 fi
 
 # Build root - scratch space
 build_root=/home/mpiteam/hwloc/nightly-tarball-build-root
+
+# Coverity stuff
+coverity_token=`cat $HOME/coverity/hwloc-token.txt`
 
 export PATH=$HOME/local/bin:$PATH
 export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH
@@ -48,8 +51,15 @@ module use ~/modules
 mkdir -p $build_root
 cd $build_root
 
+pending_coverity=$build_root/tarballs-to-run-through-coverity.txt
+rm -f $pending_coverity
+touch $pending_coverity
+
 # Loop making them
 for branch in $branches; do
+    # Get the last tarball version that was made
+    prev_snapshot=`cat $outputroot/$branch/latest_snapshot.txt`
+
     # Form a URL-specific script name
     script=$branch-`basename $script_uri`
 
@@ -76,5 +86,26 @@ for branch in $branches; do
         $branch \
         >/dev/null 2>&1
 
+    # Did the script generate a new tarball?  If so, save it so that we can
+    # spawn the coverity checker on it afterwards.  Only for this for the
+    # master (for now).
+    latest_snapshot=`cat $outputroot/$branch/latest_snapshot.txt`
+    if test "$prev_snapshot" != "$latest_snapshot" && \
+        test "$branch" = "master"; then
+        echo "$outputroot/$branch/hwloc-$latest_snapshot.tar.bz2" >> $pending_coverity
+    fi
+
     module unload autotools tex-live
 done
+
+# If we had any new snapshots to send to coverity, process them now
+
+for tarball in `cat $pending_coverity`; do
+    $HOME/scripts/hwloc-nightly-coverity.pl \
+        --filename=$tarball \
+        --coverity-token=$coverity_token \
+        --verbose \
+        --logfile-dir=$HOME/coverity \
+        --make-args="-j8"
+done
+rm -f $pending_coverity

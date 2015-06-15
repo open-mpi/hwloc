@@ -71,7 +71,12 @@ sub safe_system {
         # If we die/fail, ensure to change out of the temp tree so
         # that it can be removed upon exit.
         chdir("/");
-        die "Command $cmd failed: exit status $rc";
+        print "Command $cmd failed: exit status $rc\n";
+        if (-f $stdout_file) {
+            print "Last command output:\n";
+            system("cat $stdout_file");
+        }
+        die "Cannot continue";
     }
     system("cat $stdout_file")
         if ($debug_arg && defined($stdout_file) && -f $stdout_file);
