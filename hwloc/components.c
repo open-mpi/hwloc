@@ -190,7 +190,7 @@ static int
 hwloc_plugins_init(void)
 {
   const char *verboseenv;
-  char *path = HWLOC_PLUGINS_PATH;
+  const char *path = HWLOC_PLUGINS_PATH;
   const char *env;
   int err;
 
