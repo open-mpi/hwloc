@@ -699,8 +699,10 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
   char morelines[3][64];
 
   if (fontsize) {
-    if (HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type) {
-      const char *coproctype = hwloc_obj_get_info_by_name(level, "CoProcType");
+    const char *coproctype;
+
+    if (HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type
+        && (coproctype = hwloc_obj_get_info_by_name(level, "CoProcType")) != NULL) {
 
       if (!strcmp(coproctype, "CUDA")) {
 	const char *value, *value2, *value3;
