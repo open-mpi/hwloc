@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.11.1
+--------------
+* hwloc-annotate does not drop unavailable resources from the output anymore
+  and those may be annotated as well.
+
+
 Version 1.11.0
 --------------
 * API

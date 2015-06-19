@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 	}
 
 	hwloc_topology_init(&topology);
-	hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES);
+	hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM | HWLOC_TOPOLOGY_FLAG_WHOLE_IO | HWLOC_TOPOLOGY_FLAG_ICACHES);
 	err = hwloc_topology_set_xml(topology, input);
 	if (err < 0)
 		goto out;
