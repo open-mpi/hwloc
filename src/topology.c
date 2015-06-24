@@ -920,8 +920,8 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 
     if (res == HWLOC_OBJ_EQUAL) {
       if (obj->type == HWLOC_OBJ_GROUP) {
-	/* Group are ignored keep_structure. ignored always are handled earlier. Non-ignored Groups isn't possible. */
-	assert(topology->ignored_types[HWLOC_OBJ_GROUP] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE);
+	/* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible. */
+	assert(topology->ignored_types[HWLOC_OBJ_GROUP] != HWLOC_IGNORE_TYPE_NEVER);
         /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not.
 	 *
 	 * Keep EQUAL so that the Group gets merged.

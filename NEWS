@@ -21,6 +21,8 @@ Version 1.11.1
 --------------
 * hwloc-annotate does not drop unavailable resources from the output anymore
   and those may be annotated as well.
+* Fix an overzealous assertion when intermediate Group object while Groups
+  are totally ignored.
 
 
 Version 1.11.0
