@@ -658,6 +658,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 			 hwloc_obj_t parent, hwloc_obj_t obj,
 			 hwloc__xml_import_state_t state)
 {
+  int ignored = 0;
+
   /* process attributes */
   while (1) {
     char *attrname, *attrvalue;
@@ -706,7 +708,12 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     data->nbnumanodes++;
   }
 
-  if (parent) {
+  if (0) {
+    /* FIXME may apply some ignore rules here, but don't ignore the root object */
+    ignored = 1;
+  }
+
+  if (parent && !ignored) {
     /* root->parent is NULL, and root is already inserted */
 
     /* warn if inserting out-of-order or if children intersects,
@@ -753,7 +760,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     if (!strcmp(tag, "object")) {
       hwloc_obj_t childobj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
-      ret = hwloc__xml_import_object(topology, data, obj, childobj, &childstate);
+      ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj, &childstate);
     } else if (!strcmp(tag, "page_type")) {
       ret = hwloc__xml_import_pagetype(topology, obj, &childstate);
     } else if (!strcmp(tag, "info")) {
@@ -770,6 +777,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     state->global->close_child(&childstate);
   }
+
+  if (ignored)
+    hwloc_free_unlinked_object(obj);
 
   return state->global->close_tag(state);
 
