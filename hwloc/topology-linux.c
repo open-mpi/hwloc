@@ -421,7 +421,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
     /* start from scratch, the topology isn't ready yet (complete_cpuset is missing (-1) or empty (0))*/
     nr_cpus = 1;
 
-  possible = fopen("/sys/devices/system/cpu/possible", "r");
+  possible = fopen("/sys/devices/system/cpu/possible", "r"); /* binding only supported in real fsroot, no need for data->root_fd */
   if (possible) {
     hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc();
     if (hwloc_linux_parse_cpuset_file(possible, possible_bitmap) == 0) {
@@ -4676,7 +4676,7 @@ hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend,
     /* read the entire class and find the max id of mic%u dirents */
     dir = hwloc_opendir("/sys/devices/virtual/mic", root_fd);
     if (!dir) {
-      dir = opendir("/sys/class/mic");
+      dir = hwloc_opendir("/sys/class/mic", root_fd);
       if (!dir)
 	return 0;
     }
