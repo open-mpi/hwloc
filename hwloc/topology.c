@@ -583,6 +583,8 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
   hwloc_insert_object_by_parent(newtopology, newparent, newobj);
 }
 
+static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
+
 int
 hwloc_topology_dup(hwloc_topology_t *newp,
 		   hwloc_topology_t old)
@@ -1266,6 +1268,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
   if (hwloc_connect_levels(topology) < 0)
     return NULL;
   topology->modified = 0;
+  hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   return obj;
 }
 
@@ -2324,8 +2327,6 @@ hwloc_connect_levels(hwloc_topology_t topology)
   hwloc_connect_io_levels(topology);
   hwloc_connect_misc_level(topology);
 
-  hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
-
   return 0;
 }
 
@@ -2569,6 +2570,9 @@ next_noncpubackend:
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");
   propagate_total_memory(topology->levels[0][0]);
+
+  /* setup the symmetric_subtree attribute */
+  hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
 
   /*
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology.
