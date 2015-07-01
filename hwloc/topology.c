@@ -1948,7 +1948,7 @@ hwloc_connect_children(hwloc_obj_t parent)
     parent->children[n] = child;
   }
 
-  /* Misc children list */
+  /* I/O children list */
  io:
 
   prev_child = NULL;
@@ -2180,6 +2180,7 @@ hwloc_connect_misc_level(hwloc_topology_t topology)
 
 /*
  * Do the remaining work that hwloc_connect_children() did not do earlier.
+ * Requires object arity and children list to be properly initialized (by hwloc_connect_children()).
  */
 int
 hwloc_connect_levels(hwloc_topology_t topology)
