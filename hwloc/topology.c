@@ -601,6 +601,7 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
 }
 
 static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
+static int hwloc_topology_reconnect(hwloc_topology_t topology, unsigned long flags __hwloc_attribute_unused);
 
 int
 hwloc_topology_dup(hwloc_topology_t *newp,
@@ -674,10 +675,8 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   /* no need to duplicate backends, topology is already loaded */
   new->backends = NULL;
 
-  hwloc_connect_children(new->levels[0][0]);
-  if (hwloc_connect_levels(new) < 0)
+  if (hwloc_topology_reconnect(new, 0) < 0)
     goto out;
-  new->modified = 0;
 
   hwloc_distances_finalize_os(new);
   hwloc_distances_finalize_logical(new);
@@ -1281,10 +1280,9 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
 
   /* properly inserted */
   hwloc_obj_add_children_sets(obj);
-  hwloc_connect_children(topology->levels[0][0]);
-  if (hwloc_connect_levels(topology) < 0)
+  if (hwloc_topology_reconnect(topology, 0) < 0)
     return NULL;
-  topology->modified = 0;
+
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   return obj;
 }
@@ -1312,9 +1310,10 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
 
   hwloc_insert_object_by_parent(topology, parent, obj);
 
-  hwloc_connect_children(parent); /* FIXME: only connect misc children */
-  hwloc_connect_misc_level(topology);
-  topology->modified = 0;
+  /* FIXME: only connect misc parent children and misc level,
+   * but this API is likely not performance critical anyway
+   */
+  hwloc_topology_reconnect(topology, 0);
 
   return obj;
 }
@@ -2341,8 +2340,24 @@ hwloc_connect_levels(hwloc_topology_t topology)
   if (objs)
     free(objs);
 
+  return 0;
+}
+
+static int
+hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags __hwloc_attribute_unused)
+{
+  if (!topology->modified)
+    return 0;
+
+  hwloc_connect_children(topology->levels[0][0]);
+
+  if (hwloc_connect_levels(topology) < 0)
+    return -1;
+
   hwloc_connect_io_levels(topology);
   hwloc_connect_misc_level(topology);
+
+  topology->modified = 0;
 
   return 0;
 }
@@ -2421,12 +2436,10 @@ hwloc_discover(struct hwloc_topology *topology)
     if (!backend->discover)
       goto next_cpubackend;
 
-    if (topology->modified && (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS)) {
+    if (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS) {
       hwloc_debug("Backend %s forcing a reconnect of levels\n", backend->component->name);
-      hwloc_connect_children(topology->levels[0][0]);
-      if (hwloc_connect_levels(topology) < 0)
+      if (hwloc_topology_reconnect(topology, 0) < 0)
 	return -1;
-      topology->modified = 0;
     }
 
     err = backend->discover(backend);
@@ -2505,12 +2518,8 @@ next_cpubackend:
 
   /* Now connect handy pointers to make remaining discovery easier. */
   hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
-  if (topology->modified) {
-    hwloc_connect_children(topology->levels[0][0]);
-    if (hwloc_connect_levels(topology) < 0)
-      return -1;
-    topology->modified = 0;
-  }
+  if (hwloc_topology_reconnect(topology, 0) < 0)
+    return -1;
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   /*
@@ -2527,12 +2536,10 @@ next_cpubackend:
     if (!backend->discover)
       goto next_noncpubackend;
 
-    if (topology->modified && (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS)) {
+    if (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS) {
       hwloc_debug("Backend %s forcing a reconnect of levels\n", backend->component->name);
-      hwloc_connect_children(topology->levels[0][0]);
-      if (hwloc_connect_levels(topology) < 0)
+      if (hwloc_topology_reconnect(topology, 0) < 0)
 	return -1;
-      topology->modified = 0;
     }
 
     err = backend->discover(backend);
@@ -2575,14 +2582,11 @@ next_noncpubackend:
   ignore_type_keep_structure(topology, &topology->levels[0][0]);
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
-  /* Reconnect things after all these changes */
-  if (topology->modified) {
-    /* Often raised because of Groups inserted for I/Os */
-    hwloc_connect_children(topology->levels[0][0]);
-    if (hwloc_connect_levels(topology) < 0)
-      return -1;
-    topology->modified = 0;
-  }
+  /* Reconnect things after all these changes.
+   * Often needed because of Groups inserted for I/Os.
+   */
+  if (hwloc_topology_reconnect(topology, 0) < 0)
+    return -1;
 
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");
@@ -3005,10 +3009,8 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_bitmap_free(droppedcpuset);
   hwloc_bitmap_free(droppednodeset);
 
-  hwloc_connect_children(topology->levels[0][0]);
-  if (hwloc_connect_levels(topology) < 0)
+  if (hwloc_topology_reconnect(topology, 0) < 0)
     goto out;
-  topology->modified = 0;
 
   propagate_total_memory(topology->levels[0][0]);
   hwloc_distances_restrict(topology, flags);
