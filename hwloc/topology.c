@@ -1287,8 +1287,6 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
   return obj;
 }
 
-static void hwloc_connect_misc_level(hwloc_topology_t topology);
-
 hwloc_obj_t
 hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t parent, const char *name)
 {
@@ -2076,16 +2074,30 @@ hwloc_build_level_from_list(struct hwloc_obj *first, struct hwloc_obj ***levelp)
   return nb;
 }
 
-/* Append I/O objects to their lists */
+/* Append I/O and Misc objects to their lists */
 static void
-hwloc_list_io_objects(hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t child, *temp;
 
-  if (hwloc_obj_type_is_io(obj->type)) {
-    /* make sure we don't have remaining stale pointers from a previous load */
+  if (obj->type == HWLOC_OBJ_MISC) {
     obj->next_cousin = NULL;
-    obj->prev_cousin = NULL;
+    obj->depth = HWLOC_TYPE_DEPTH_MISC;
+    /* Insert the main Misc list */
+    if (topology->first_misc) {
+      obj->prev_cousin = topology->last_misc;
+      obj->prev_cousin->next_cousin = obj;
+      topology->last_misc = obj;
+    } else {
+      obj->prev_cousin = NULL;
+      topology->first_misc = topology->last_misc = obj;
+    }
+    /* Recurse, Misc only have Misc children */
+    for_each_misc_child_safe(child, obj, temp)
+      hwloc_list_io_misc_objects(topology, child);
+
+  } else if (hwloc_obj_type_is_io(obj->type)) {
+    obj->next_cousin = NULL;
 
     if (obj->type == HWLOC_OBJ_BRIDGE) {
       obj->depth = HWLOC_TYPE_DEPTH_BRIDGE;
@@ -2095,6 +2107,7 @@ hwloc_list_io_objects(hwloc_topology_t topology, hwloc_obj_t obj)
 	obj->prev_cousin->next_cousin = obj;
 	topology->last_bridge = obj;
       } else {
+	obj->prev_cousin = NULL;
 	topology->first_bridge = topology->last_bridge = obj;
       }
 
@@ -2106,6 +2119,7 @@ hwloc_list_io_objects(hwloc_topology_t topology, hwloc_obj_t obj)
 	obj->prev_cousin->next_cousin = obj;
 	topology->last_pcidev = obj;
       } else {
+	obj->prev_cousin = NULL;
 	topology->first_pcidev = topology->last_pcidev = obj;
       }
 
@@ -2117,21 +2131,30 @@ hwloc_list_io_objects(hwloc_topology_t topology, hwloc_obj_t obj)
 	obj->prev_cousin->next_cousin = obj;
 	topology->last_osdev = obj;
       } else {
+	obj->prev_cousin = NULL;
 	topology->first_osdev = topology->last_osdev = obj;
       }
     }
-  }
+    /* Recurse, I/O only have I/O and Misc children */
+    for_each_io_child_safe(child, obj, temp)
+      hwloc_list_io_misc_objects(topology, child);
+    for_each_misc_child_safe(child, obj, temp)
+      hwloc_list_io_misc_objects(topology, child);
 
-  for_each_child_safe(child, obj, temp)
-    hwloc_list_io_objects(topology, child);
-  for_each_io_child_safe(child, obj, temp)
-    hwloc_list_io_objects(topology, child);
-  /* No I/O under Misc */
+  } else {
+    /* Recurse */
+    for_each_child_safe(child, obj, temp)
+      hwloc_list_io_misc_objects(topology, child);
+    for_each_io_child_safe(child, obj, temp)
+      hwloc_list_io_misc_objects(topology, child);
+    for_each_misc_child_safe(child, obj, temp)
+      hwloc_list_io_misc_objects(topology, child);
+  }
 }
 
 /* Build I/O levels */
 static void
-hwloc_connect_io_levels(hwloc_topology_t topology)
+hwloc_connect_io_misc_levels(hwloc_topology_t topology)
 {
   free(topology->bridge_level);
   topology->bridge_level = NULL;
@@ -2151,49 +2174,17 @@ hwloc_connect_io_levels(hwloc_topology_t topology)
   topology->first_osdev = topology->last_osdev = NULL;
   topology->type_depth[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_DEPTH_OS_DEVICE;
 
-  hwloc_list_io_objects(topology, topology->levels[0][0]);
-  topology->bridge_nbobjects = hwloc_build_level_from_list(topology->first_bridge, &topology->bridge_level);
-  topology->pcidev_nbobjects = hwloc_build_level_from_list(topology->first_pcidev, &topology->pcidev_level);
-  topology->osdev_nbobjects = hwloc_build_level_from_list(topology->first_osdev, &topology->osdev_level);
-}
-
-/* Append Misc object to their list */
-static void
-hwloc_list_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
-{
-  hwloc_obj_t child, *temp;
-
-  if (obj->type == HWLOC_OBJ_MISC) {
-    obj->depth = HWLOC_TYPE_DEPTH_MISC;
-    /* Insert the main Misc list */
-    if (topology->first_misc) {
-      obj->prev_cousin = topology->last_misc;
-      obj->prev_cousin->next_cousin = obj;
-      topology->last_misc = obj;
-    } else {
-      topology->first_misc = topology->last_misc = obj;
-    }
-  }
-
-  for_each_child_safe(child, obj, temp)
-    hwloc_list_misc_objects(topology, child);
-  for_each_io_child_safe(child, obj, temp)
-    hwloc_list_misc_objects(topology, child);
-  for_each_misc_child_safe(child, obj, temp)
-    hwloc_list_misc_objects(topology, child);
-}
-
-/* Build Misc level */
-static void
-hwloc_connect_misc_level(hwloc_topology_t topology)
-{
   free(topology->misc_level);
   topology->misc_level = NULL;
   topology->misc_nbobjects = 0;
   topology->first_misc = topology->last_misc = NULL;
   topology->type_depth[HWLOC_OBJ_MISC] = HWLOC_TYPE_DEPTH_MISC;
 
-  hwloc_list_misc_objects(topology, topology->levels[0][0]);
+  hwloc_list_io_misc_objects(topology, topology->levels[0][0]);
+
+  topology->bridge_nbobjects = hwloc_build_level_from_list(topology->first_bridge, &topology->bridge_level);
+  topology->pcidev_nbobjects = hwloc_build_level_from_list(topology->first_pcidev, &topology->pcidev_level);
+  topology->osdev_nbobjects = hwloc_build_level_from_list(topology->first_osdev, &topology->osdev_level);
   topology->misc_nbobjects = hwloc_build_level_from_list(topology->first_misc, &topology->misc_level);
 }
 
@@ -2354,8 +2345,7 @@ hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags __
   if (hwloc_connect_levels(topology) < 0)
     return -1;
 
-  hwloc_connect_io_levels(topology);
-  hwloc_connect_misc_level(topology);
+  hwloc_connect_io_misc_levels(topology);
 
   topology->modified = 0;
 
