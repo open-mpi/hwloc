@@ -4095,58 +4095,6 @@ trydeprecated:
 }
 
 /*
- * look for net objects below a pcidev in sysfs
- */
-static void
-hwloc_linux_net_class_fillinfos(struct hwloc_backend *backend,
-				struct hwloc_obj *obj, const char *osdevpath)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  int root_fd = data->root_fd;
-  FILE *fd;
-  struct stat st;
-  char path[256];
-  snprintf(path, sizeof(path), "%s/address", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char address[128];
-    if (fgets(address, sizeof(address), fd)) {
-      char *eol = strchr(address, '\n');
-      if (eol)
-        *eol = 0;
-      hwloc_obj_add_info(obj, "Address", address);
-    }
-    fclose(fd);
-  }
-  snprintf(path, sizeof(path), "%s/device/infiniband", osdevpath);
-  if (!hwloc_stat(path, &st, root_fd)) {
-    snprintf(path, sizeof(path), "%s/dev_id", osdevpath);
-    fd = hwloc_fopen(path, "r", root_fd);
-    if (fd) {
-      char hexid[16];
-      if (fgets(hexid, sizeof(hexid), fd)) {
-	char *eoid;
-	unsigned long port;
-	port = strtoul(hexid, &eoid, 0);
-	if (eoid != hexid) {
-	  char portstr[16];
-	  snprintf(portstr, sizeof(portstr), "%ld", port+1);
-	  hwloc_obj_add_info(obj, "Port", portstr);
-	}
-      }
-      fclose(fd);
-    }
-  }
-}
-
-static int
-hwloc_linux_lookup_net_class(struct hwloc_backend *backend,
-			     struct hwloc_obj *pcidev, const char *pcidevpath)
-{
-  return hwloc_linux_class_readdir(backend, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_NETWORK, "net", hwloc_linux_net_class_fillinfos);
-}
-
-/*
  * look for infiniband objects below a pcidev in sysfs
  */
 static void
@@ -4307,7 +4255,6 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend,
 	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
 	   obj->attr->pcidev.dev, obj->attr->pcidev.func);
 
-  res += hwloc_linux_lookup_net_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_openfabrics_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_dma_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_drm_class(backend, obj, pcidevpath);
@@ -4755,6 +4702,82 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend)
 }
 
 static void
+hwloc_linuxfs_net_class_fillinfos(int root_fd,
+				  struct hwloc_obj *obj, const char *osdevpath)
+{
+  FILE *fd;
+  struct stat st;
+  char path[256];
+  snprintf(path, sizeof(path), "%s/address", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char address[128];
+    if (fgets(address, sizeof(address), fd)) {
+      char *eol = strchr(address, '\n');
+      if (eol)
+        *eol = 0;
+      hwloc_obj_add_info(obj, "Address", address);
+    }
+    fclose(fd);
+  }
+  snprintf(path, sizeof(path), "%s/device/infiniband", osdevpath);
+  if (!hwloc_stat(path, &st, root_fd)) {
+    snprintf(path, sizeof(path), "%s/dev_id", osdevpath);
+    fd = hwloc_fopen(path, "r", root_fd);
+    if (fd) {
+      char hexid[16];
+      if (fgets(hexid, sizeof(hexid), fd)) {
+	char *eoid;
+	unsigned long port;
+	port = strtoul(hexid, &eoid, 0);
+	if (eoid != hexid) {
+	  char portstr[16];
+	  snprintf(portstr, sizeof(portstr), "%ld", port+1);
+	  hwloc_obj_add_info(obj, "Port", portstr);
+	}
+      }
+      fclose(fd);
+    }
+  }
+}
+
+static int
+hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  int res = 0;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/net", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    hwloc_obj_t obj, parent;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+
+    snprintf(path, sizeof(path), "/sys/class/net/%s", dirent->d_name);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    if (!parent)
+      continue;
+
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
+
+    hwloc_linuxfs_net_class_fillinfos(root_fd, obj, path);
+    res++;
+  }
+
+  closedir(dir);
+
+  return res;
+}
+
+static void
 hwloc_linuxfs_mic_class_fillinfos(int root_fd,
 				  struct hwloc_obj *obj, const char *osdevpath)
 {
@@ -5114,6 +5137,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   hwloc_linuxfs_pci_look_pcislots(backend);
 
   res += hwloc_linuxfs_lookup_block_class(backend);
+  res += hwloc_linuxfs_lookup_net_class(backend);
   res += hwloc_linuxfs_lookup_mic_class(backend);
 
   return res;
