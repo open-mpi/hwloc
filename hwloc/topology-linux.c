@@ -4094,29 +4094,6 @@ trydeprecated:
   return 0;
 }
 
-/* look for dma objects below a pcidev in sysfs */
-static int
-hwloc_linux_lookup_dma_class(struct hwloc_backend *backend,
-			     struct hwloc_obj *pcidev, const char *pcidevpath)
-{
-  return hwloc_linux_class_readdir(backend, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_DMA, "dma", NULL);
-}
-
-/* look for drm objects below a pcidev in sysfs */
-static int
-hwloc_linux_lookup_drm_class(struct hwloc_backend *backend,
-			     struct hwloc_obj *pcidev, const char *pcidevpath)
-{
-  return hwloc_linux_class_readdir(backend, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_GPU, "drm", NULL);
-
-  /* we could look at the "graphics" class too, but it doesn't help for proprietary drivers either */
-
-  /* GPU devices (even with a proprietary driver) seem to have a boot_vga field in their PCI device directory (since 2.6.30),
-   * so we could create a OS device for each PCI devices with such a field.
-   * boot_vga is actually created when class >> 8 == VGA (it contains 1 for boot vga device), so it's trivial anyway.
-   */
-}
-
 /*
  * backend callback for inserting objects inside a pci device
  */
@@ -4133,9 +4110,6 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend,
   snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
 	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
 	   obj->attr->pcidev.dev, obj->attr->pcidev.func);
-
-  res += hwloc_linux_lookup_dma_class(backend, obj, pcidevpath);
-  res += hwloc_linux_lookup_drm_class(backend, obj, pcidevpath);
 
   return res;
 }
@@ -4916,6 +4890,84 @@ hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend)
   return res;
 }
 
+static int
+hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  int res = 0;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/drm", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    hwloc_obj_t parent;
+    struct stat stbuf;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+
+    /* only keep main devices, not subdevices for outputs */
+    snprintf(path, sizeof(path), "/sys/class/drm/%s/dev", dirent->d_name);
+    if (hwloc_stat(path, &stbuf, root_fd) < 0)
+      continue;
+
+    /* FIXME: only keep cardX ? */
+
+    snprintf(path, sizeof(path), "/sys/class/drm/%s", dirent->d_name);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    if (!parent)
+      continue;
+
+    hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_GPU, dirent->d_name);
+
+    res++;
+  }
+
+  closedir(dir);
+
+  return res;
+}
+
+static int
+hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  int res = 0;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/dma", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    hwloc_obj_t parent;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+
+    snprintf(path, sizeof(path), "/sys/class/dma/%s", dirent->d_name);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    if (!parent)
+      continue;
+
+    hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_DMA, dirent->d_name);
+
+    res++;
+  }
+
+  closedir(dir);
+
+  return res;
+}
+
 #define HWLOC_PCI_REVISION_ID 0x08
 #define HWLOC_PCI_CAP_ID_EXP 0x10
 #define HWLOC_PCI_CLASS_NOT_DEFINED 0x0000
@@ -5167,6 +5219,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   res += hwloc_linuxfs_lookup_net_class(backend);
   res += hwloc_linuxfs_lookup_infiniband_class(backend);
   res += hwloc_linuxfs_lookup_mic_class(backend);
+  res += hwloc_linuxfs_lookup_drm_class(backend);
+  res += hwloc_linuxfs_lookup_dma_class(backend);
 
   return res;
 }
