@@ -49,8 +49,6 @@ struct hwloc_linux_backend_data_s {
 #endif
 
   struct utsname utsname; /* fields contain \0 when unknown */
-
-  int deprecated_classlinks_model; /* -2 if never tried, -1 if unknown, 0 if new (device contains class/name), 1 if old (device contains class:name) */
 };
 
 
@@ -3964,155 +3962,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
 /****************************************
  ***** Linux PCI backend callbacks ******
- ****************************************
- * Do not support changing the fsroot (use sysfs)
- */
-
-static hwloc_obj_t
-hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcidev, hwloc_obj_osdev_type_t type, const char *name)
-{
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
-  obj->name = strdup(name);
-  obj->logical_index = -1;
-  obj->attr->osdev.type = type;
-
-  hwloc_insert_object_by_parent(topology, pcidev, obj);
-  /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
-
-  return obj;
-}
-
-typedef void (*hwloc_linux_class_fillinfos_t)(struct hwloc_backend *backend, struct hwloc_obj *osdev, const char *osdevpath);
-
-/* cannot be used in fsroot-aware code, would have to move to a per-topology variable */
-
-static void
-hwloc_linux_check_deprecated_classlinks_model(struct hwloc_linux_backend_data_s *data)
-{
-  int root_fd = data->root_fd;
-  DIR *dir;
-  struct dirent *dirent;
-  char path[128];
-  struct stat st;
-
-  data->deprecated_classlinks_model = -1;
-
-  dir = hwloc_opendir("/sys/class/net", root_fd);
-  if (!dir)
-    return;
-  while ((dirent = readdir(dir)) != NULL) {
-    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, "..") || !strcmp(dirent->d_name, "lo"))
-      continue;
-    snprintf(path, sizeof(path), "/sys/class/net/%s/device/net/%s", dirent->d_name, dirent->d_name);
-    if (hwloc_stat(path, &st, root_fd) == 0) {
-      data->deprecated_classlinks_model = 0;
-      goto out;
-    }
-    snprintf(path, sizeof(path), "/sys/class/net/%s/device/net:%s", dirent->d_name, dirent->d_name);
-    if (hwloc_stat(path, &st, root_fd) == 0) {
-      data->deprecated_classlinks_model = 1;
-      goto out;
-    }
-  }
-out:
-  closedir(dir);
-}
-
-/* class objects that are immediately below pci devices:
- * look for objects of the given classname below a sysfs (pcidev) directory
- */
-static int
-hwloc_linux_class_readdir(struct hwloc_backend *backend,
-			  struct hwloc_obj *pcidev, const char *devicepath,
-			  hwloc_obj_osdev_type_t type, const char *classname,
-			  hwloc_linux_class_fillinfos_t fillinfo)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  int root_fd = data->root_fd;
-  size_t classnamelen = strlen(classname);
-  char path[256];
-  DIR *dir;
-  struct dirent *dirent;
-  hwloc_obj_t obj;
-  int res = 0, err;
-
-  if (data->deprecated_classlinks_model == -2)
-    hwloc_linux_check_deprecated_classlinks_model(data);
-
-  if (data->deprecated_classlinks_model != 1) {
-    /* modern sysfs: <device>/<class>/<name> */
-    struct stat st;
-    snprintf(path, sizeof(path), "%s/%s", devicepath, classname);
-
-    /* some very host kernel (2.6.9/RHEL4) have <device>/<class> symlink without any way to find <name>.
-     * make sure <device>/<class> is a directory to avoid this case.
-     */
-    err = hwloc_lstat(path, &st, root_fd);
-    if (err < 0 || !S_ISDIR(st.st_mode))
-      goto trydeprecated;
-
-    dir = hwloc_opendir(path, root_fd);
-    if (dir) {
-      data->deprecated_classlinks_model = 0;
-      while ((dirent = readdir(dir)) != NULL) {
-	if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
-	  continue;
-	obj = hwloc_linux_add_os_device(backend, pcidev, type, dirent->d_name);
-	if (fillinfo) {
-	  snprintf(path, sizeof(path), "%s/%s/%s", devicepath, classname, dirent->d_name);
-	  fillinfo(backend, obj, path);
-	}
-	res++;
-      }
-      closedir(dir);
-      return res;
-    }
-  }
-
-trydeprecated:
-  if (data->deprecated_classlinks_model != 0) {
-    /* deprecated sysfs: <device>/<class>:<name> */
-    dir = hwloc_opendir(devicepath, root_fd);
-    if (dir) {
-      while ((dirent = readdir(dir)) != NULL) {
-	if (strncmp(dirent->d_name, classname, classnamelen) || dirent->d_name[classnamelen] != ':')
-	  continue;
-	data->deprecated_classlinks_model = 1;
-	obj = hwloc_linux_add_os_device(backend, pcidev, type, dirent->d_name + classnamelen+1);
-	if (fillinfo) {
-	  snprintf(path, sizeof(path), "%s/%s", devicepath, dirent->d_name);
-	  fillinfo(backend, obj, path);
-	}
-	res++;
-      }
-      closedir(dir);
-      return res;
-    }
-  }
-
-  return 0;
-}
-
-/*
- * backend callback for inserting objects inside a pci device
- */
-static int
-hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend,
-				      struct hwloc_obj *obj)
-{
-  char pcidevpath[256];
-  int res = 0;
-
-  /* this callback is only used in the libpci backend for now */
-  assert(obj->type == HWLOC_OBJ_PCI_DEVICE);
-
-  snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
-	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
-	   obj->attr->pcidev.dev, obj->attr->pcidev.func);
-
-  return res;
-}
+ ****************************************/
 
 /*
  * backend callback for retrieving the location of a pci device
@@ -4183,7 +4033,6 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   backend->private_data = data;
   backend->discover = hwloc_look_linuxfs;
   backend->get_pci_busid_cpuset = hwloc_linux_backend_get_pci_busid_cpuset;
-  backend->notify_new_object = hwloc_linux_backend_notify_new_object;
   backend->disable = hwloc_linux_backend_disable;
 
   /* default values */
@@ -4225,8 +4074,6 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
     data->udev = udev_new();
   }
 #endif
-
-  data->deprecated_classlinks_model = -2; /* never tried */
 
   return backend;
 
@@ -4360,6 +4207,21 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 
   /* fallback to the root object */
   return hwloc_get_root_obj(topology);
+}
+
+static hwloc_obj_t
+hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcidev, hwloc_obj_osdev_type_t type, const char *name)
+{
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
+  obj->name = strdup(name);
+  obj->logical_index = -1;
+  obj->attr->osdev.type = type;
+
+  hwloc_insert_object_by_parent(topology, pcidev, obj);
+  /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
+
+  return obj;
 }
 
 static void
