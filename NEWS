@@ -57,6 +57,8 @@ Version 2.0
 * Plugin API
   + hwloc_fill_object_sets() is renamed into hwloc_obj_add_children_sets().
 * Misc
+  + Linux OS devices do not have to be attached through PCI anymore,
+    for instance enabling the discovery of NVDIMM block devices.
   + Exporting to synthetic now ignores I/O and Misc objects.
   + XML and Synthetic export functions have moved to hwloc/export.h,
     automatically included from hwloc.h.

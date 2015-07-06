@@ -4292,322 +4292,6 @@ hwloc_linux_lookup_drm_class(struct hwloc_backend *backend,
    */
 }
 
-/*
- * look for block objects below a pcidev in sysfs
- */
-
-static void
-hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
-				  struct hwloc_obj *obj, const char *osdevpath)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  int root_fd = data->root_fd;
-  FILE *fd;
-  char path[256];
-  char line[128];
-  char vendor[64] = "";
-  char model[64] = "";
-  char serial[64] = "";
-  char revision[64] = "";
-  char blocktype[64] = "";
-  unsigned major_id, minor_id;
-  char *tmp;
-
-  snprintf(path, sizeof(path), "%s/size", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char string[20];
-    if (fgets(string, sizeof(string), fd)) {
-      unsigned long long sectors = strtoull(string, NULL, 10);
-      char string[16];
-      /* linux always reports size in 512-byte units, we want kB */
-      snprintf(string, sizeof(string), "%llu", sectors / 2);
-      hwloc_obj_add_info(obj, "Size", string);
-    }
-    fclose(fd);
-  }
-
-  snprintf(path, sizeof(path), "%s/dev", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (!fd)
-    return;
-
-  if (NULL == fgets(line, sizeof(line), fd)) {
-    fclose(fd);
-    return;
-  }
-  fclose(fd);
-
-  if (sscanf(line, "%u:%u", &major_id, &minor_id) != 2)
-    return;
-  tmp = strchr(line, '\n');
-  if (tmp)
-    *tmp = '\0';
-  hwloc_obj_add_info(obj, "LinuxDeviceID", line);
-
-#ifdef HAVE_LIBUDEV_H
-  if (data->udev) {
-    struct udev_device *dev;
-    const char *prop;
-    dev = udev_device_new_from_subsystem_sysname(data->udev, "block", obj->name);
-    if (!dev)
-      return;
-    prop = udev_device_get_property_value(dev, "ID_VENDOR");
-    if (prop)
-      strcpy(vendor, prop);
-    prop = udev_device_get_property_value(dev, "ID_MODEL");
-    if (prop)
-      strcpy(model, prop);
-    prop = udev_device_get_property_value(dev, "ID_REVISION");
-    if (prop)
-      strcpy(revision, prop);
-    prop = udev_device_get_property_value(dev, "ID_SERIAL_SHORT");
-    if (prop)
-      strcpy(serial, prop);
-    prop = udev_device_get_property_value(dev, "ID_TYPE");
-    if (prop)
-      strcpy(blocktype, prop);
-
-    udev_device_unref(dev);
-  } else
-    /* fallback to reading files, works with any fsroot */
-#endif
- {
-  snprintf(path, sizeof(path), "/run/udev/data/b%u:%u", major_id, minor_id);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (!fd)
-    return;
-
-  while (NULL != fgets(line, sizeof(line), fd)) {
-    tmp = strchr(line, '\n');
-    if (tmp)
-      *tmp = '\0';
-    if (!strncmp(line, "E:ID_VENDOR=", strlen("E:ID_VENDOR="))) {
-      strncpy(vendor, line+strlen("E:ID_VENDOR="), sizeof(vendor));
-      vendor[sizeof(vendor)-1] = '\0';
-    } else if (!strncmp(line, "E:ID_MODEL=", strlen("E:ID_MODEL="))) {
-      strncpy(model, line+strlen("E:ID_MODEL="), sizeof(model));
-      model[sizeof(model)-1] = '\0';
-    } else if (!strncmp(line, "E:ID_REVISION=", strlen("E:ID_REVISION="))) {
-      strncpy(revision, line+strlen("E:ID_REVISION="), sizeof(revision));
-      revision[sizeof(revision)-1] = '\0';
-    } else if (!strncmp(line, "E:ID_SERIAL_SHORT=", strlen("E:ID_SERIAL_SHORT="))) {
-      strncpy(serial, line+strlen("E:ID_SERIAL_SHORT="), sizeof(serial));
-      serial[sizeof(serial)-1] = '\0';
-    } else if (!strncmp(line, "E:ID_TYPE=", strlen("E:ID_TYPE="))) {
-      strncpy(blocktype, line+strlen("E:ID_TYPE="), sizeof(blocktype));
-      blocktype[sizeof(blocktype)-1] = '\0';
-    }
-  }
-  fclose(fd);
- }
-
-  /* clear fake "ATA" vendor name */
-  if (!strcasecmp(vendor, "ATA"))
-    *vendor = '\0';
-  /* overwrite vendor name from model when possible */
-  if (!*vendor) {
-    if (!strncasecmp(model, "wd", 2))
-      strcpy(vendor, "Western Digital");
-    else if (!strncasecmp(model, "st", 2))
-      strcpy(vendor, "Seagate");
-    else if (!strncasecmp(model, "samsung", 7))
-      strcpy(vendor, "Samsung");
-    else if (!strncasecmp(model, "sandisk", 7))
-      strcpy(vendor, "SanDisk");
-    else if (!strncasecmp(model, "toshiba", 7))
-      strcpy(vendor, "Toshiba");
-  }
-
-  if (*vendor)
-    hwloc_obj_add_info(obj, "Vendor", vendor);
-  if (*model)
-    hwloc_obj_add_info(obj, "Model", model);
-  if (*revision)
-    hwloc_obj_add_info(obj, "Revision", revision);
-  if (*serial)
-    hwloc_obj_add_info(obj, "SerialNumber", serial);
-
-  if (!strcmp(blocktype, "disk"))
-    hwloc_obj_add_info(obj, "Type", "Disk");
-  else if (!strcmp(blocktype, "tape"))
-    hwloc_obj_add_info(obj, "Type", "Tape");
-  else if (!strcmp(blocktype, "cd") || !strcmp(blocktype, "floppy") || !strcmp(blocktype, "optical"))
-    hwloc_obj_add_info(obj, "Type", "Removable Media Device");
-  else /* generic, usb mass storage/rbc, usb mass storage/scsi */
-    hwloc_obj_add_info(obj, "Type", "Other");
-}
-
-/* block class objects are in
- * host%d/target%d:%d:%d/%d:%d:%d:%d/
- * or
- * host%d/port-%d:%d/end_device-%d:%d/target%d:%d:%d/%d:%d:%d:%d/
- * or
- * ide%d/%d.%d/
- * below pci devices */
-static int
-hwloc_linux_lookup_host_block_class(struct hwloc_backend *backend,
-				    struct hwloc_obj *pcidev, char *path, size_t pathlen)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  int root_fd = data->root_fd;
-  DIR *hostdir, *portdir, *targetdir;
-  struct dirent *hostdirent, *portdirent, *targetdirent;
-  size_t hostdlen, portdlen, targetdlen;
-  int dummy;
-  int res = 0;
-
-  hostdir = hwloc_opendir(path, root_fd);
-  if (!hostdir)
-    return 0;
-
-  while ((hostdirent = readdir(hostdir)) != NULL) {
-    if (sscanf(hostdirent->d_name, "port-%d:%d", &dummy, &dummy) == 2)
-    {
-      /* found host%d/port-%d:%d */
-      path[pathlen] = '/';
-      strcpy(&path[pathlen+1], hostdirent->d_name);
-      pathlen += hostdlen = 1+strlen(hostdirent->d_name);
-      portdir = hwloc_opendir(path, root_fd);
-      if (!portdir)
-	continue;
-      while ((portdirent = readdir(portdir)) != NULL) {
-	if (sscanf(portdirent->d_name, "end_device-%d:%d", &dummy, &dummy) == 2) {
-	  /* found host%d/port-%d:%d/end_device-%d:%d */
-	  path[pathlen] = '/';
-	  strcpy(&path[pathlen+1], portdirent->d_name);
-	  pathlen += portdlen = 1+strlen(portdirent->d_name);
-	  res += hwloc_linux_lookup_host_block_class(backend, pcidev, path, pathlen);
-	  /* restore parent path */
-	  pathlen -= portdlen;
-	  path[pathlen] = '\0';
-	}
-      }
-      closedir(portdir);
-      /* restore parent path */
-      pathlen -= hostdlen;
-      path[pathlen] = '\0';
-      continue;
-    } else if (sscanf(hostdirent->d_name, "target%d:%d:%d", &dummy, &dummy, &dummy) == 3) {
-      /* found host%d/target%d:%d:%d */
-      path[pathlen] = '/';
-      strcpy(&path[pathlen+1], hostdirent->d_name);
-      pathlen += hostdlen = 1+strlen(hostdirent->d_name);
-      targetdir = hwloc_opendir(path, root_fd);
-      if (!targetdir)
-	continue;
-      while ((targetdirent = readdir(targetdir)) != NULL) {
-	if (sscanf(targetdirent->d_name, "%d:%d:%d:%d", &dummy, &dummy, &dummy, &dummy) != 4)
-	  continue;
-	/* found host%d/target%d:%d:%d/%d:%d:%d:%d */
-	path[pathlen] = '/';
-	strcpy(&path[pathlen+1], targetdirent->d_name);
-	pathlen += targetdlen = 1+strlen(targetdirent->d_name);
-	/* lookup block class for real */
-	res += hwloc_linux_class_readdir(backend, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", hwloc_linux_block_class_fillinfos);
-	/* restore parent path */
-	pathlen -= targetdlen;
-	path[pathlen] = '\0';
-      }
-      closedir(targetdir);
-      /* restore parent path */
-      pathlen -= hostdlen;
-      path[pathlen] = '\0';
-    }
-  }
-  closedir(hostdir);
-
-  return res;
-}
-
-static int
-hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
-			       struct hwloc_obj *pcidev, const char *pcidevpath)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  int root_fd = data->root_fd;
-  size_t pathlen;
-  DIR *devicedir, *hostdir;
-  struct dirent *devicedirent, *hostdirent;
-  size_t devicedlen, hostdlen;
-  char path[256];
-  int dummy;
-  int res = 0;
-
-  strcpy(path, pcidevpath);
-  pathlen = strlen(path);
-
-  devicedir = hwloc_opendir(pcidevpath, root_fd);
-  if (!devicedir)
-    return 0;
-
-  while ((devicedirent = readdir(devicedir)) != NULL) {
-    if (sscanf(devicedirent->d_name, "ide%d", &dummy) == 1) {
-      /* found ide%d */
-      path[pathlen] = '/';
-      strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
-      hostdir = hwloc_opendir(path, root_fd);
-      if (!hostdir)
-	continue;
-      while ((hostdirent = readdir(hostdir)) != NULL) {
-	if (sscanf(hostdirent->d_name, "%d.%d", &dummy, &dummy) == 2) {
-	  /* found ide%d/%d.%d */
-	  path[pathlen] = '/';
-	  strcpy(&path[pathlen+1], hostdirent->d_name);
-	  pathlen += hostdlen = 1+strlen(hostdirent->d_name);
-	  /* lookup block class for real */
-	  res += hwloc_linux_class_readdir(backend, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", NULL);
-	  /* restore parent path */
-	  pathlen -= hostdlen;
-	  path[pathlen] = '\0';
-	}
-      }
-      closedir(hostdir);
-      /* restore parent path */
-      pathlen -= devicedlen;
-      path[pathlen] = '\0';
-    } else if (sscanf(devicedirent->d_name, "host%d", &dummy) == 1) {
-      /* found host%d */
-      path[pathlen] = '/';
-      strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
-      res += hwloc_linux_lookup_host_block_class(backend, pcidev, path, pathlen);
-      /* restore parent path */
-      pathlen -= devicedlen;
-      path[pathlen] = '\0';
-    } else if (sscanf(devicedirent->d_name, "ata%d", &dummy) == 1) {
-      /* found ata%d */
-      path[pathlen] = '/';
-      strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
-      hostdir = hwloc_opendir(path, root_fd);
-      if (!hostdir)
-	continue;
-      while ((hostdirent = readdir(hostdir)) != NULL) {
-	if (sscanf(hostdirent->d_name, "host%d", &dummy) == 1) {
-	  /* found ata%d/host%d */
-	  path[pathlen] = '/';
-	  strcpy(&path[pathlen+1], hostdirent->d_name);
-	  pathlen += hostdlen = 1+strlen(hostdirent->d_name);
-	  /* lookup block class for real */
-          res += hwloc_linux_lookup_host_block_class(backend, pcidev, path, pathlen);
-	  /* restore parent path */
-	  pathlen -= hostdlen;
-	  path[pathlen] = '\0';
-	}
-      }
-      closedir(hostdir);
-      /* restore parent path */
-      pathlen -= devicedlen;
-      path[pathlen] = '\0';
-    }
-  }
-  closedir(devicedir);
-
-  return res;
-}
-
 static void
 hwloc_linux_mic_class_fillinfos(struct hwloc_backend *backend,
 				struct hwloc_obj *obj, const char *osdevpath)
@@ -4770,7 +4454,6 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend,
   res += hwloc_linux_lookup_openfabrics_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_dma_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_drm_class(backend, obj, pcidevpath);
-  res += hwloc_linux_lookup_block_class(backend, obj, pcidevpath);
 
   if (data->mic_need_directlookup == -1) {
     struct stat st;
@@ -5042,6 +4725,197 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   return hwloc_get_root_obj(topology);
 }
 
+static void
+hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused, int root_fd,
+				    struct hwloc_obj *obj, const char *osdevpath)
+{
+#ifdef HAVE_LIBUDEV_H
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+#endif
+  FILE *fd;
+  char path[256];
+  char line[128];
+  char vendor[64] = "";
+  char model[64] = "";
+  char serial[64] = "";
+  char revision[64] = "";
+  char blocktype[64] = "";
+  unsigned major_id, minor_id;
+  char *tmp;
+
+  snprintf(path, sizeof(path), "%s/size", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char string[20];
+    if (fgets(string, sizeof(string), fd)) {
+      unsigned long long sectors = strtoull(string, NULL, 10);
+      char string[16];
+      /* linux always reports size in 512-byte units, we want kB */
+      snprintf(string, sizeof(string), "%llu", sectors / 2);
+      hwloc_obj_add_info(obj, "Size", string);
+    }
+    fclose(fd);
+  }
+
+  /* pmem have devtype containing nd_btt (granularity is in sector_size) or nd_namespace_io (byte-granularity) */
+
+  snprintf(path, sizeof(path), "%s/dev", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (!fd)
+    return;
+
+  if (NULL == fgets(line, sizeof(line), fd)) {
+    fclose(fd);
+    return;
+  }
+  fclose(fd);
+
+  if (sscanf(line, "%u:%u", &major_id, &minor_id) != 2)
+    return;
+  tmp = strchr(line, '\n');
+  if (tmp)
+    *tmp = '\0';
+  hwloc_obj_add_info(obj, "LinuxDeviceID", line);
+
+#ifdef HAVE_LIBUDEV_H
+  if (data->udev) {
+    struct udev_device *dev;
+    const char *prop;
+    dev = udev_device_new_from_subsystem_sysname(data->udev, "block", obj->name);
+    if (!dev)
+      return;
+    prop = udev_device_get_property_value(dev, "ID_VENDOR");
+    if (prop)
+      strcpy(vendor, prop);
+    prop = udev_device_get_property_value(dev, "ID_MODEL");
+    if (prop)
+      strcpy(model, prop);
+    prop = udev_device_get_property_value(dev, "ID_REVISION");
+    if (prop)
+      strcpy(revision, prop);
+    prop = udev_device_get_property_value(dev, "ID_SERIAL_SHORT");
+    if (prop)
+      strcpy(serial, prop);
+    prop = udev_device_get_property_value(dev, "ID_TYPE");
+    if (prop)
+      strcpy(blocktype, prop);
+
+    udev_device_unref(dev);
+  } else
+    /* fallback to reading files, works with any fsroot */
+#endif
+ {
+  snprintf(path, sizeof(path), "/run/udev/data/b%u:%u", major_id, minor_id);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (!fd)
+    return;
+
+  while (NULL != fgets(line, sizeof(line), fd)) {
+    tmp = strchr(line, '\n');
+    if (tmp)
+      *tmp = '\0';
+    if (!strncmp(line, "E:ID_VENDOR=", strlen("E:ID_VENDOR="))) {
+      strncpy(vendor, line+strlen("E:ID_VENDOR="), sizeof(vendor));
+      vendor[sizeof(vendor)-1] = '\0';
+    } else if (!strncmp(line, "E:ID_MODEL=", strlen("E:ID_MODEL="))) {
+      strncpy(model, line+strlen("E:ID_MODEL="), sizeof(model));
+      model[sizeof(model)-1] = '\0';
+    } else if (!strncmp(line, "E:ID_REVISION=", strlen("E:ID_REVISION="))) {
+      strncpy(revision, line+strlen("E:ID_REVISION="), sizeof(revision));
+      revision[sizeof(revision)-1] = '\0';
+    } else if (!strncmp(line, "E:ID_SERIAL_SHORT=", strlen("E:ID_SERIAL_SHORT="))) {
+      strncpy(serial, line+strlen("E:ID_SERIAL_SHORT="), sizeof(serial));
+      serial[sizeof(serial)-1] = '\0';
+    } else if (!strncmp(line, "E:ID_TYPE=", strlen("E:ID_TYPE="))) {
+      strncpy(blocktype, line+strlen("E:ID_TYPE="), sizeof(blocktype));
+      blocktype[sizeof(blocktype)-1] = '\0';
+    }
+  }
+  fclose(fd);
+ }
+
+  /* clear fake "ATA" vendor name */
+  if (!strcasecmp(vendor, "ATA"))
+    *vendor = '\0';
+  /* overwrite vendor name from model when possible */
+  if (!*vendor) {
+    if (!strncasecmp(model, "wd", 2))
+      strcpy(vendor, "Western Digital");
+    else if (!strncasecmp(model, "st", 2))
+      strcpy(vendor, "Seagate");
+    else if (!strncasecmp(model, "samsung", 7))
+      strcpy(vendor, "Samsung");
+    else if (!strncasecmp(model, "sandisk", 7))
+      strcpy(vendor, "SanDisk");
+    else if (!strncasecmp(model, "toshiba", 7))
+      strcpy(vendor, "Toshiba");
+  }
+
+  if (*vendor)
+    hwloc_obj_add_info(obj, "Vendor", vendor);
+  if (*model)
+    hwloc_obj_add_info(obj, "Model", model);
+  if (*revision)
+    hwloc_obj_add_info(obj, "Revision", revision);
+  if (*serial)
+    hwloc_obj_add_info(obj, "SerialNumber", serial);
+
+  if (!strcmp(blocktype, "disk"))
+    hwloc_obj_add_info(obj, "Type", "Disk");
+  else if (!strcmp(blocktype, "tape"))
+    hwloc_obj_add_info(obj, "Type", "Tape");
+  else if (!strcmp(blocktype, "cd") || !strcmp(blocktype, "floppy") || !strcmp(blocktype, "optical"))
+    hwloc_obj_add_info(obj, "Type", "Removable Media Device");
+  else /* generic, usb mass storage/rbc, usb mass storage/scsi */
+    hwloc_obj_add_info(obj, "Type", "Other");
+}
+
+static int
+hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  int res = 0;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/block", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    struct stat stbuf;
+    hwloc_obj_t obj, parent;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+
+    /* ignore partitions */
+    snprintf(path, sizeof(path), "/sys/class/block/%s/partition", dirent->d_name);
+    if (hwloc_stat(path, &stbuf, root_fd) >= 0)
+      continue;
+
+    snprintf(path, sizeof(path), "/sys/class/block/%s", dirent->d_name);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    if (!parent)
+      continue;
+
+    /* USB device are created here but removed later when USB PCI devices get filtered out
+     * (unless WHOLE_IO is enabled).
+     */
+
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+
+    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path);
+    res++;
+  }
+
+  closedir(dir);
+
+  return res;
+}
+
 #define HWLOC_PCI_REVISION_ID 0x08
 #define HWLOC_PCI_CAP_ID_EXP 0x10
 #define HWLOC_PCI_CLASS_NOT_DEFINED 0x0000
@@ -5288,6 +5162,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     res = hwloc_linuxfs_pci_look_pcidevices(backend);
 
   hwloc_linuxfs_pci_look_pcislots(backend);
+
+  res += hwloc_linuxfs_lookup_block_class(backend);
 
   return res;
 }
