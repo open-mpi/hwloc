@@ -224,6 +224,18 @@ hwloc_opendirat(const char *path, int fsroot_fd)
   return fdopendir(dir_fd);
 }
 
+static int
+hwloc_readlinkat(const char *path, char *buf, size_t buflen, int fsroot_fd)
+{
+  const char *relative_path;
+
+  relative_path = hwloc_checkat(path, fsroot_fd);
+  if (!relative_path)
+    return -1;
+
+  return readlinkat(fsroot_fd, relative_path, buf, buflen);
+}
+
 #endif /* HAVE_OPENAT */
 
 /* Static inline version of fopen so that we can use openat if we have
@@ -289,6 +301,16 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
     return hwloc_opendirat(p, d);
 #else
     return opendir(p);
+#endif
+}
+
+static __hwloc_inline int
+hwloc_readlink(const char *p, char *l, size_t ll, int d __hwloc_attribute_unused)
+{
+#ifdef HAVE_OPENAT
+  return hwloc_readlinkat(p, l, ll, d);
+#else
+  return readlink(p, l, ll);
 #endif
 }
 
@@ -4921,6 +4943,104 @@ const struct hwloc_component hwloc_linux_component = {
 /***********************************
  ******* Linux PCI component *******
  ***********************************/
+
+static hwloc_obj_t
+hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
+				const char *osdevpath, int allowvirtual)
+{
+  struct hwloc_topology *topology = backend->topology;
+  char path[256], buf[10];
+  FILE *file;
+  int foundpci;
+  unsigned pcidomain = 0, pcibus = 0, pcidev = 0, pcifunc = 0;
+  unsigned _pcidomain, _pcibus, _pcidev, _pcifunc;
+  hwloc_bitmap_t cpuset;
+  const char *tmp;
+  hwloc_obj_t parent;
+  int err;
+
+  err = hwloc_readlink(osdevpath, path, sizeof(path), root_fd);
+  if (err < 0)
+    return NULL;
+  path[err] = '\0';
+
+  if (!allowvirtual) {
+    if (strstr(path, "/virtual/"))
+      return NULL;
+  }
+
+  tmp = strstr(path, "/pci");
+  if (!tmp)
+    goto nopci;
+  tmp = strchr(tmp+4, '/');
+  if (!tmp)
+    goto nopci;
+  tmp++;
+
+  /* iterate through busid to find the last on" (previous ones are bridges) */
+  foundpci = 0;
+ nextpci:
+  if (sscanf(tmp+1, "%x:%x:%x.%x", &_pcidomain, &_pcibus, &_pcidev, &_pcifunc) == 4) {
+    foundpci = 1;
+    pcidomain = _pcidomain;
+    pcibus = _pcibus;
+    pcidev = _pcidev;
+    pcifunc = _pcifunc;
+    tmp += 13;
+    goto nextpci;
+  }
+  if (sscanf(tmp+1, "%x:%x.%x", &_pcibus, &_pcidev, &_pcifunc) == 3) {
+    foundpci = 1;
+    pcidomain = 0;
+    pcibus = _pcibus;
+    pcidev = _pcidev;
+    pcifunc = _pcifunc;
+    tmp += 8;
+    goto nextpci;
+  }
+
+  if (foundpci) {
+    /* attach to a PCI parent */
+    parent = hwloc_pci_belowroot_find_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
+    if (parent)
+      return parent;
+  }
+
+ nopci:
+  /* attach directly to the right NUMA node */
+  snprintf(path, sizeof(path), "%s/device/numa_node", osdevpath);
+  file = hwloc_fopen(path, "r", root_fd);
+  if (file) {
+    err = fread(buf, 1, sizeof(buf), file);
+    fclose(file);
+    if (err > 0) {
+      int node = atoi(buf);
+      if (node >= 0) {
+	parent = hwloc_get_numanode_obj_by_os_index(topology, node);
+	if (parent)
+	  return parent;
+      }
+    }
+  }
+
+  /* attach directly to the right cpuset */
+  cpuset = hwloc_bitmap_alloc();
+  snprintf(path, sizeof(path), "%s/device/local_cpus", osdevpath);
+  file = hwloc_fopen(path, "r", root_fd);
+  if (file) {
+    err = hwloc_linux_parse_cpumap_file(file, cpuset);
+    fclose(file);
+    if (!err) {
+      parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
+      hwloc_bitmap_free(cpuset);
+      if (parent)
+	return parent;
+    }
+  }
+
+  /* fallback to the root object */
+  return hwloc_get_root_obj(topology);
+}
 
 #define HWLOC_PCI_REVISION_ID 0x08
 #define HWLOC_PCI_CAP_ID_EXP 0x10

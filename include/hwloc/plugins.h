@@ -426,9 +426,22 @@ HWLOC_DECLSPEC void hwloc_pci_tree_insert_by_busid(struct hwloc_obj **treep, str
  * The core will move them to their actual PCI locality using hwloc_pci_belowroot_apply_locality()
  * at the end of the discovery.
  * In the meantime, other backends will easily lookup PCI objects (for instance to attach OS devices)
- * by manually looking at the topology root object io_first_child pointer.
+ * by using hwloc_pci_belowroot_find_by_busid() or by manually looking at the topology root object
+ * io_first_child pointer.
  */
 HWLOC_DECLSPEC int hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_obj *tree);
+
+/** \brief Find the PCI object that matches the bus ID.
+ *
+ * To be used after a PCI backend added PCI devices with hwloc_pci_tree_attach_belowroot()
+ * and before the core moves them to their actual location with hwloc_pci_belowroot_apply_locality().
+ *
+ * If no exactly matching object is found, return the container bridge if any, or NULL.
+ *
+ * \note This is semantically identical to hwloc_get_pcidev_by_busid() which only works
+ * after the topology is fully loaded.
+ */
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_belowroot_find_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 /** @} */
 
