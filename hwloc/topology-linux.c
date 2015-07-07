@@ -4935,6 +4935,7 @@ static int
 hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = NULL;
   struct hwloc_backend *tmpbackend;
   hwloc_obj_t first_obj = NULL, last_obj = NULL;
   int root_fd = -1;
@@ -4950,24 +4951,23 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     return 0;
   }
 
-  /* hackily find the linux backend to steal its fsroot */
+  /* hackily find the linux backend to steal its private_data (for fsroot) */
   tmpbackend = topology->backends;
   while (tmpbackend) {
     if (tmpbackend->component == &hwloc_linux_disc_component) {
-      root_fd = ((struct hwloc_linux_backend_data_s *) tmpbackend->private_data)->root_fd;
-      hwloc_debug("linuxpci backend stole linux backend root_fd %d\n", root_fd);
-      break;    }
+      data = tmpbackend->private_data;
+      break;
+    }
     tmpbackend = tmpbackend->next;
   }
-  /* take our own descriptor, either pointing to linux fsroot, or to / if not found */
-  if (root_fd >= 0)
-    root_fd = dup(root_fd);
-  else
-    root_fd = open("/", O_RDONLY | O_DIRECTORY);
+  assert(data);
+  backend->private_data = data;
+  root_fd = data->root_fd;
+  hwloc_debug("linuxpci backend stole linux backend root_fd %d\n", root_fd);
 
   dir = hwloc_opendir("/sys/bus/pci/devices/", root_fd);
   if (!dir)
-    goto out_with_rootfd;
+    goto out;
 
   while ((dirent = readdir(dir)) != NULL) {
     unsigned domain, bus, dev, func;
@@ -5109,8 +5109,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 
   res = hwloc_insert_pci_device_list(backend, first_obj);
 
- out_with_rootfd:
-  close(root_fd);
+ out:
   return res;
 }
 
@@ -5129,6 +5128,10 @@ hwloc_linuxpci_component_instantiate(struct hwloc_disc_component *component,
     return NULL;
   backend->flags = HWLOC_BACKEND_FLAG_NEED_LEVELS;
   backend->discover = hwloc_look_linuxfs_pci;
+  /* backend->private_data will point to the main linux private_data after load(),
+   * once the main linux component is instantiated for sure.
+   * it remains valid until the main linux component gets disabled during topology destroy.
+   */
   return backend;
 }
 
