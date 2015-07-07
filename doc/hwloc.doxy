@@ -3006,7 +3006,7 @@ If building with <tt>icc</tt>:
 ./configure CC="icc -mmic" --host=x86_64-k1om-linux --build=x86_64-unknown-linux-gnu
 \endverbatim
 
-If building with the Xeon Phi-specific GCC that comes with the MPSS environment\n
+If building with the Xeon Phi-specific GCC that comes with the MPSS environment,
 for instance <tt>/usr/linux-k1om-4.7/bin/x86_64-k1om-linux-gcc</tt>:
 \verbatim
 export PATH=$PATH:/usr/linux-k1om-4.7/bin/
