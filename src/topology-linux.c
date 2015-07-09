@@ -4387,6 +4387,19 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
   unsigned major_id, minor_id;
   char *tmp;
 
+  snprintf(path, sizeof(path), "%s/size", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char string[20];
+    if (fgets(string, sizeof(string), fd)) {
+      unsigned long long sectors = strtoull(string, NULL, 10);
+      /* linux always report size in 512-byte units */
+      obj->memory.local_memory = sectors * 512;
+      obj->memory.total_memory = sectors * 512;
+    }
+    fclose(fd);
+  }
+
   snprintf(path, sizeof(path), "%s/dev", osdevpath);
   fd = hwloc_fopen(path, "r", root_fd);
   if (!fd)

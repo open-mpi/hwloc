@@ -23,6 +23,7 @@ Version 1.11.1
   and those may be annotated as well.
 * Fix an overzealous assertion when intermediate Group object while Groups
   are totally ignored.
+* Add a Size attribute to Block OS devices on Linux and display it in lstopo.
 
 
 Version 1.11.0
