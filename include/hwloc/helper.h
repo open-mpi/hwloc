@@ -379,7 +379,7 @@ hwloc_get_ancestor_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unus
   return ancestor;
 }
 
-/** \brief Returns the common parent object to objects lvl1 and lvl2 */
+/** \brief Returns the common parent object to objects \p obj1 and \p obj2 */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_common_ancestor_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj1, hwloc_obj_t obj2) __hwloc_attribute_pure;
 static __hwloc_inline hwloc_obj_t
