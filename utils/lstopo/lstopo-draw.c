@@ -776,13 +776,16 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
 	  nmorelines++;
 	}
       }
-    } else if (HWLOC_OBJ_OSDEV_BLOCK == level->attr->osdev.type
-	       && level->memory.local_memory) {
-	  unsigned long long mb = level->memory.local_memory / 1048576;
-	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
-		   mb >= 10485760 ? "%llu TB" : mb >= 10240 ? "%llu GB" : "%llu MB",
-		   mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
-	  nmorelines++;
+    } else if (HWLOC_OBJ_OSDEV_BLOCK == level->attr->osdev.type) {
+      const char *value;
+      value = hwloc_obj_get_info_by_name(level, "Size");
+      if (value) {
+	unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	snprintf(morelines[nmorelines], sizeof(morelines[0]),
+		 mb >= 10485760 ? "%llu TB" : mb >= 10240 ? "%llu GB" : "%llu MB",
+		 mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
+	nmorelines++;
+      }
     }
 
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);

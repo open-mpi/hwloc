@@ -156,7 +156,8 @@
         <object type="Bridge" os_index="480" bridge_type="1-1" depth="1" bridge_pci="0000:[06-06]" pci_busid="0000:00:1e.0" pci_type="0604 [8086:244e] [0000:0000] a6" pci_link_speed="0.000000"/>
         <object type="PCIDev" os_index="496" pci_busid="0000:00:1f.0" pci_type="0601 [8086:1d41] [1028:0518] 06" pci_link_speed="0.000000"/>
         <object type="PCIDev" os_index="498" pci_busid="0000:00:1f.2" pci_type="0106 [8086:1d02] [1028:0518] 06" pci_link_speed="0.000000">
-          <object type="OSDev" name="sda" osdev_type="0" local_memory="250059350016">
+          <object type="OSDev" name="sda" osdev_type="0">
+            <info name="Size" value="244198584"/>
             <info name="LinuxDeviceID" value="8:0"/>
             <info name="Model" value="MTFDDAK256MAM-1K12"/>
             <info name="Revision" value="08TH"/>

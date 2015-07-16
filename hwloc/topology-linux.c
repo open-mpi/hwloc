@@ -4297,9 +4297,10 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
     char string[20];
     if (fgets(string, sizeof(string), fd)) {
       unsigned long long sectors = strtoull(string, NULL, 10);
-      /* linux always report size in 512-byte units */
-      obj->memory.local_memory = sectors * 512;
-      obj->memory.total_memory = sectors * 512;
+      char string[16];
+      /* linux always reports size in 512-byte units, we want kB */
+      snprintf(string, sizeof(string), "%llu", sectors / 2);
+      hwloc_obj_add_info(obj, "Size", string);
     }
     fclose(fd);
   }
