@@ -235,7 +235,7 @@
         <object type="PCIDev" os_index="0" pci_busid="0000:00:00.0" pci_type="0600 [8086:3407] [1028:02d3] 22" pci_link_speed="0.000000"/>
         <object type="Bridge" os_index="48" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:03.0" pci_type="0604 [8086:340a] [0000:0000] 22" pci_link_speed="0.000000">
           <object type="PCIDev" os_index="4096" pci_busid="0000:01:00.0" pci_type="0104 [1000:0079] [1028:1f17] 05" pci_link_speed="0.000000">
-            <object type="OSDev" name="sda" osdev_type="0">
+            <object type="OSDev" name="sda" osdev_type="0" local_memory="1798651772928">
               <info name="LinuxDeviceID" value="8:0"/>
             </object>
           </object>
@@ -284,7 +284,7 @@
         </object>
         <object type="PCIDev" os_index="496" pci_busid="0000:00:1f.0" pci_type="0601 [8086:3a18] [1028:02d3] 00" pci_link_speed="0.000000"/>
         <object type="PCIDev" os_index="498" pci_busid="0000:00:1f.2" pci_type="0101 [8086:3a20] [1028:02d3] 00" pci_link_speed="0.000000">
-          <object type="OSDev" name="sr0" osdev_type="0">
+          <object type="OSDev" name="sr0" osdev_type="0" local_memory="1073741312">
             <info name="LinuxDeviceID" value="11:0"/>
           </object>
         </object>
