@@ -76,7 +76,7 @@ HWLOC_DECLSPEC int hwloc_get_largest_objs_inside_cpuset (hwloc_topology_t topolo
  * return value in \p prev so as to obtain the next object in \p set.
  *
  * \note This function cannot work if objects at the given depth do
- * not have CPU sets (I/O objects).
+ * not have CPU sets (I/O or Misc objects).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_next_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -97,7 +97,7 @@ hwloc_get_next_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_cons
  * hwloc_get_next_obj_inside_cpuset_by_depth().
  *
  * \note This function cannot work if objects of the given type do
- * not have CPU sets (I/O objects).
+ * not have CPU sets (I/O or Misc objects).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_next_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -112,7 +112,7 @@ hwloc_get_next_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const
 /** \brief Return the (logically) \p idx -th object at depth \p depth included in CPU set \p set.
  *
  * \note This function cannot work if objects at the given depth do
- * not have CPU sets (I/O objects).
+ * not have CPU sets (I/O or Misc objects).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -143,7 +143,7 @@ hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpu
  * hwloc_get_obj_inside_cpuset_by_depth().
  *
  * \note This function cannot work if objects of the given type do
- * not have CPU sets (I/O objects).
+ * not have CPU sets (I/O or Misc objects).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -161,7 +161,7 @@ hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpus
 /** \brief Return the number of objects at depth \p depth included in CPU set \p set.
  *
  * \note This function cannot work if objects at the given depth do
- * not have CPU sets (I/O objects).
+ * not have CPU sets (I/O or Misc objects).
  */
 static __hwloc_inline unsigned
 hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -245,7 +245,7 @@ hwloc_get_obj_index_inside_cpuset (hwloc_topology_t topology __hwloc_attribute_u
  *
  * \return \c NULL if no child matches or if \p set is empty.
  *
- * \note This function cannot work if parent does not have a CPU set (I/O objects).
+ * \note This function cannot work if parent does not have a CPU set (I/O or Misc objects).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_child_covering_cpuset (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set,
@@ -294,7 +294,7 @@ hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t s
  * to obtain the next object covering at least another part of \p set.
  *
  * \note This function cannot work if objects at the given depth do
- * not have CPU sets (I/O objects).
+ * not have CPU sets (I/O or Misc objects).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_next_obj_covering_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -321,7 +321,7 @@ hwloc_get_next_obj_covering_cpuset_by_depth(hwloc_topology_t topology, hwloc_con
  * for each depth.
  *
  * \note This function cannot work if objects of the given type do
- * not have CPU sets (I/O objects).
+ * not have CPU sets (I/O or Misc objects).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_next_obj_covering_cpuset_by_type(hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -399,7 +399,7 @@ hwloc_get_common_ancestor_obj (hwloc_topology_t topology __hwloc_attribute_unuse
 /** \brief Returns true if \p obj is inside the subtree beginning with ancestor object \p subtree_root.
  *
  * \note This function cannot work if \p obj and \p subtree_root objects do
- * not have CPU sets (I/O objects).
+ * not have CPU sets (I/O or Misc objects).
  */
 static __hwloc_inline int
 hwloc_obj_is_in_subtree (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj, hwloc_obj_t subtree_root) __hwloc_attribute_pure;
