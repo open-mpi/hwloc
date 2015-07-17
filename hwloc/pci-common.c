@@ -216,8 +216,7 @@ hwloc_pci_fixup_hostbridge_parent(struct hwloc_topology *topology __hwloc_attrib
 }
 
 static struct hwloc_obj *
-hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_backend *backend,
-				 struct hwloc_obj *hostbridge)
+hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t group_obj, parent;
@@ -241,7 +240,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
     /* get the hostbridge cpuset by acking the OS backend.
      * it's not a PCI device, so we use its first child locality info.
      */
-    err = hwloc_backends_get_obj_cpuset(backend, hostbridge->io_first_child, cpuset);
+    err = hwloc_backends_get_obj_cpuset(topology, hostbridge->io_first_child, cpuset);
     if (err < 0)
       /* if we got nothing, assume the hostbridge is attached to the top of hierarchy */
       hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
@@ -378,7 +377,7 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
 		current_domain, current_bus, current_subordinate);
 
     /* attach the hostbridge where it belongs */
-    parent = hwloc_pci_find_hostbridge_parent(topology, backend, hostbridge);
+    parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge);
     hwloc_insert_object_by_parent(topology, parent, hostbridge);
   }
 

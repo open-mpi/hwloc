@@ -4775,7 +4775,6 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
  */
 static int
 hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
-				   struct hwloc_backend *caller __hwloc_attribute_unused,
 				   struct hwloc_obj *obj, hwloc_bitmap_t cpuset)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;

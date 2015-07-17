@@ -746,14 +746,13 @@ hwloc_backends_is_thissystem(struct hwloc_topology *topology)
 }
 
 int
-hwloc_backends_get_obj_cpuset(struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset)
+hwloc_backends_get_obj_cpuset(struct hwloc_topology *topology, struct hwloc_obj *obj, hwloc_bitmap_t cpuset)
 {
-  struct hwloc_topology *topology = caller->topology;
   struct hwloc_backend *backend = topology->backends;
   /* use the first backend's get_obj_cpuset callback */
   while (backend != NULL) {
     if (backend->get_obj_cpuset)
-      return backend->get_obj_cpuset(backend, caller, obj, cpuset);
+      return backend->get_obj_cpuset(backend, obj, cpuset);
     backend = backend->next;
   }
   return -1;
