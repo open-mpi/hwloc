@@ -178,6 +178,13 @@ hwloc_pci_add_object(struct hwloc_obj *parent, struct hwloc_obj **parent_io_firs
   *curp = new;
 }
 
+void
+hwloc_pci_tree_insert_by_busid(struct hwloc_obj **treep,
+			       struct hwloc_obj *obj)
+{
+  hwloc_pci_add_object(NULL /* no parent on top of tree */, treep, obj);
+}
+
 static struct hwloc_obj *
 hwloc_pci_fixup_busid_parent(struct hwloc_topology *topology __hwloc_attribute_unused,
 			     struct hwloc_pcidev_attr_s *busid,
@@ -262,24 +269,15 @@ hwloc_pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev
 }
 
 int
-hwloc_insert_pci_device_list(struct hwloc_backend *backend,
-			     struct hwloc_obj *first_obj)
+hwloc_pci_insert_tree(struct hwloc_backend *backend,
+		      struct hwloc_obj *tree)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_obj *obj, *tree;
   unsigned current_hostbridge;
 
-  if (!first_obj)
+  if (!tree)
     /* found nothing, exit */
     return 0;
-
-  /* first, organise object as tree */
-  tree = NULL;
-  while (first_obj) {
-    obj = first_obj;
-    first_obj = obj->next_sibling;
-    hwloc_pci_add_object(NULL /* no parent on top of tree */, &tree, obj);
-  }
 
 #ifdef HWLOC_DEBUG
   hwloc_debug("%s", "\nPCI hierarchy:\n");

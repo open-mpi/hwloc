@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -77,7 +77,7 @@ static int
 hwloc_look_pci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_obj *first_obj = NULL, *last_obj = NULL;
+  struct hwloc_obj *tree = NULL;
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
@@ -243,12 +243,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
 		device_class, pcidev->vendor_id, pcidev->device_id,
 		fullname && *fullname ? fullname : "??");
 
-    /* queue the object for now */
-    if (first_obj)
-      last_obj->next_sibling = obj;
-    else
-      first_obj = obj;
-    last_obj = obj;
+    hwloc_pci_tree_insert_by_busid(&tree, obj);
   }
 
   /* finalize device scanning */
@@ -269,7 +264,8 @@ hwloc_look_pci(struct hwloc_backend *backend)
       if (file) {
 	unsigned domain, bus, dev;
 	if (fscanf(file, "%x:%x:%x", &domain, &bus, &dev) == 3) {
-	  hwloc_obj_t obj = first_obj;
+	  hwloc_obj_t obj = tree;
+	  int cameup = 0;
 	  while (obj) {
 	    if (obj->attr->pcidev.domain == domain
 		&& obj->attr->pcidev.bus == bus
@@ -278,7 +274,16 @@ hwloc_look_pci(struct hwloc_backend *backend)
 	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
 	      break;
 	    }
-	    obj = obj->next_sibling;
+	    if (!cameup && obj->io_first_child) {
+	      obj = obj->io_first_child;
+	      cameup = 0;
+	    } else if (obj->next_sibling) {
+	      obj = obj->next_sibling;
+	      cameup = 0;
+	    } else {
+	      obj = obj->parent;
+	      cameup = 1;
+	    }
 	  }
 	}
 	fclose(file);
@@ -288,7 +293,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
   }
 #endif
 
-  return hwloc_insert_pci_device_list(backend, first_obj);
+  return hwloc_pci_insert_tree(backend, tree);
 }
 
 static struct hwloc_backend *

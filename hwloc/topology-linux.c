@@ -4932,7 +4932,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = NULL;
   struct hwloc_backend *tmpbackend;
-  hwloc_obj_t first_obj = NULL, last_obj = NULL;
+  hwloc_obj_t tree = NULL;
   int root_fd = -1;
   DIR *dir;
   struct dirent *dirent;
@@ -5063,11 +5063,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 	hwloc_pci_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
     }
 
-    if (first_obj)
-      last_obj->next_sibling = obj;
-    else
-      first_obj = obj;
-    last_obj = obj;
+    hwloc_pci_tree_insert_by_busid(&tree, obj);
   }
 
   closedir(dir);
@@ -5084,7 +5080,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
       if (file) {
 	unsigned domain, bus, dev;
 	if (fscanf(file, "%x:%x:%x", &domain, &bus, &dev) == 3) {
-	  hwloc_obj_t obj = first_obj;
+	  hwloc_obj_t obj = tree;
+	  int cameup = 0;
 	  while (obj) {
 	    if (obj->attr->pcidev.domain == domain
 		&& obj->attr->pcidev.bus == bus
@@ -5093,7 +5090,16 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
 	      break;
 	    }
-	    obj = obj->next_sibling;
+	    if (!cameup && obj->io_first_child) {
+	      obj = obj->io_first_child;
+	      cameup = 0;
+	    } else if (obj->next_sibling) {
+	      obj = obj->next_sibling;
+	      cameup = 0;
+	    } else {
+	      obj = obj->parent;
+	      cameup = 1;
+	    }
 	  }
 	}
 	fclose(file);
@@ -5102,7 +5108,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     closedir(dir);
   }
 
-  res = hwloc_insert_pci_device_list(backend, first_obj);
+  res = hwloc_pci_insert_tree(backend, tree);
 
  out:
   return res;

@@ -494,10 +494,11 @@ extern "C" {
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_obj_add_children_sets HWLOC_NAME(add_children_sets)
 
-#define hwloc_insert_pci_device_list HWLOC_NAME(insert_pci_device_list)
 #define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
 #define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
 #define hwloc_pci_prepare_bridge HWLOC_NAME(pci_prepare_bridge)
+#define hwloc_pci_tree_insert_by_busid HWLOC_NAME(pci_tree_insert_by_busid)
+#define hwloc_pci_insert_tree HWLOC_NAME(pci_insert_tree)
 
 /* hwloc/deprecated.h */
 
