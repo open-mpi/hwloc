@@ -46,12 +46,12 @@ static void
 hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
 				      struct hwloc_obj *pcidev)
 {
-  struct hwloc_backend *backend = cbdata;
+  struct hwloc_topology *topology = cbdata;
 
   if (pcidev->type == HWLOC_OBJ_BRIDGE)
     return;
 
-  hwloc_backends_notify_new_object(backend, pcidev);
+  hwloc_backends_notify_new_object(topology, pcidev);
 }
 
 static void
@@ -332,7 +332,7 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
 #endif
 
   /* walk the hierarchy, and lookup OS devices */
-  hwloc_pci_traverse(backend, &fakeparent, hwloc_pci_traverse_lookuposdevices_cb);
+  hwloc_pci_traverse(topology, &fakeparent, hwloc_pci_traverse_lookuposdevices_cb);
 
   /*
    * fakeparent lists all objects connected to any upstream bus in the machine.

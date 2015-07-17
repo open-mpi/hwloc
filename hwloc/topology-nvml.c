@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2014 Inria.  All rights reserved.
+ * Copyright © 2012-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -99,7 +99,7 @@ out:
 }
 
 static int
-hwloc_nvml_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc_backend *caller __hwloc_attribute_unused,
+hwloc_nvml_backend_notify_new_object(struct hwloc_backend *backend,
 				     struct hwloc_obj *pcidev)
 {
   struct hwloc_topology *topology = backend->topology;

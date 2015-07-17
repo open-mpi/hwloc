@@ -759,15 +759,15 @@ hwloc_backends_get_pci_busid_cpuset(struct hwloc_topology *topology, struct hwlo
 }
 
 int
-hwloc_backends_notify_new_object(struct hwloc_backend *caller, struct hwloc_obj *obj)
+hwloc_backends_notify_new_object(struct hwloc_topology *topology, struct hwloc_obj *obj)
 {
   struct hwloc_backend *backend;
   int res = 0;
 
-  backend = caller->topology->backends;
+  backend = topology->backends;
   while (NULL != backend) {
-    if (backend != caller && backend->notify_new_object)
-      res += backend->notify_new_object(backend, caller, obj);
+    if (backend->notify_new_object)
+      res += backend->notify_new_object(backend, obj);
     backend = backend->next;
   }
 

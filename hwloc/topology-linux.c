@@ -4730,7 +4730,7 @@ hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend,
  * backend callback for inserting objects inside a pci device
  */
 static int
-hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc_backend *caller __hwloc_attribute_unused,
+hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend,
 				      struct hwloc_obj *obj)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
