@@ -56,23 +56,23 @@ hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
 }
 
 static void
-hwloc_pci__traverse(void * cbdata, struct hwloc_obj *root,
+hwloc_pci__traverse(void * cbdata, struct hwloc_obj *tree,
 		    void (*cb)(void * cbdata, struct hwloc_obj *))
 {
-  struct hwloc_obj *child = root->io_first_child;
+  struct hwloc_obj *child = tree;
   while (child) {
     cb(cbdata, child);
-    if (child->type == HWLOC_OBJ_BRIDGE)
-      hwloc_pci__traverse(cbdata, child, cb);
+    if (child->type == HWLOC_OBJ_BRIDGE && child->io_first_child)
+      hwloc_pci__traverse(cbdata, child->io_first_child, cb);
     child = child->next_sibling;
   }
 }
 
 static void
-hwloc_pci_traverse(void * cbdata, struct hwloc_obj *root,
+hwloc_pci_traverse(void * cbdata, struct hwloc_obj *tree,
 		   void (*cb)(void * cbdata, struct hwloc_obj *))
 {
-  hwloc_pci__traverse(cbdata, root, cb);
+  hwloc_pci__traverse(cbdata, tree, cb);
 }
 
 enum hwloc_pci_busid_comparison_e {
@@ -127,11 +127,11 @@ hwloc_pci_compare_busids(struct hwloc_obj *a, struct hwloc_obj *b)
 }
 
 static void
-hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
+hwloc_pci_add_object(struct hwloc_obj *parent, struct hwloc_obj **parent_io_first_child_p, struct hwloc_obj *new)
 {
   struct hwloc_obj **curp, **childp;
 
-  curp = &root->io_first_child;
+  curp = parent_io_first_child_p;
   while (*curp) {
     enum hwloc_pci_busid_comparison_e comp = hwloc_pci_compare_busids(new, *curp);
     switch (comp) {
@@ -141,14 +141,14 @@ hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
       continue;
     case HWLOC_PCI_BUSID_INCLUDED:
       /* insert new below current bridge */
-      hwloc_pci_add_object(*curp, new);
+      hwloc_pci_add_object(*curp, &(*curp)->io_first_child, new);
       return;
     case HWLOC_PCI_BUSID_LOWER:
     case HWLOC_PCI_BUSID_SUPERSET: {
       /* insert new before current */
       new->next_sibling = *curp;
       *curp = new;
-      new->parent = root;
+      new->parent = parent;
       if (new->type == HWLOC_OBJ_BRIDGE) {
 	/* look at remaining siblings and move some below new */
 	childp = &new->io_first_child;
@@ -173,7 +173,7 @@ hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
     }
   }
   /* add to the end of the list if higher than everybody */
-  new->parent = root;
+  new->parent = parent;
   new->next_sibling = NULL;
   *curp = new;
 }
@@ -266,43 +266,41 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
 			     struct hwloc_obj *first_obj)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_obj fakeparent;
-  struct hwloc_obj *obj;
+  struct hwloc_obj *obj, *tree;
   unsigned current_hostbridge;
 
   if (!first_obj)
     /* found nothing, exit */
     return 0;
 
-  /* first, organise object as tree under a fake parent object */
-  fakeparent.parent = NULL;
-  fakeparent.io_first_child = NULL;
+  /* first, organise object as tree */
+  tree = NULL;
   while (first_obj) {
     obj = first_obj;
     first_obj = obj->next_sibling;
-    hwloc_pci_add_object(&fakeparent, obj);
+    hwloc_pci_add_object(NULL /* no parent on top of tree */, &tree, obj);
   }
 
 #ifdef HWLOC_DEBUG
-  hwloc_debug("%s", "\nPCI hierarchy under fake parent:\n");
-  hwloc_pci_traverse(NULL, &fakeparent, hwloc_pci_traverse_print_cb);
+  hwloc_debug("%s", "\nPCI hierarchy:\n");
+  hwloc_pci_traverse(NULL, tree, hwloc_pci_traverse_print_cb);
   hwloc_debug("%s", "\n");
 #endif
 
   /* walk the hierarchy, and lookup OS devices */
-  hwloc_pci_traverse(topology, &fakeparent, hwloc_pci_traverse_lookuposdevices_cb);
+  hwloc_pci_traverse(topology, tree, hwloc_pci_traverse_lookuposdevices_cb);
 
   /*
-   * fakeparent lists all objects connected to any upstream bus in the machine.
+   * tree points to all objects connected to any upstream bus in the machine.
    * We now create one real hostbridge object per upstream bus.
    * It's not actually a PCI device so we have to create it.
    */
   current_hostbridge = 0;
-  while (fakeparent.io_first_child) {
+  while (tree) {
     /* start a new host bridge */
     struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, current_hostbridge++);
     struct hwloc_obj **dstnextp = &hostbridge->io_first_child;
-    struct hwloc_obj **srcnextp = &fakeparent.io_first_child;
+    struct hwloc_obj **srcnextp = &tree;
     struct hwloc_obj *child = *srcnextp;
     struct hwloc_pcidev_attr_s *busid;
     struct hwloc_obj *parent;
@@ -313,7 +311,7 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
     hwloc_debug("Starting new PCI hostbridge %04x:%02x\n", current_domain, current_bus);
 
   next_child:
-    /* remove next child from fakeparent */
+    /* remove next child from tree */
     *srcnextp = child->next_sibling;
     /* append it to hostbridge */
     *dstnextp = child;
