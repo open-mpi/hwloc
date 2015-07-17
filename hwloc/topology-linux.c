@@ -4361,15 +4361,20 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
     if (tmp)
       *tmp = '\0';
     if (!strncmp(line, "E:ID_VENDOR=", strlen("E:ID_VENDOR="))) {
-      strcpy(vendor, line+strlen("E:ID_VENDOR="));
+      strncpy(vendor, line+strlen("E:ID_VENDOR="), sizeof(vendor));
+      vendor[sizeof(vendor)-1] = '\0';
     } else if (!strncmp(line, "E:ID_MODEL=", strlen("E:ID_MODEL="))) {
-      strcpy(model, line+strlen("E:ID_MODEL="));
+      strncpy(model, line+strlen("E:ID_MODEL="), sizeof(model));
+      model[sizeof(model)-1] = '\0';
     } else if (!strncmp(line, "E:ID_REVISION=", strlen("E:ID_REVISION="))) {
-      strcpy(revision, line+strlen("E:ID_REVISION="));
+      strncpy(revision, line+strlen("E:ID_REVISION="), sizeof(revision));
+      revision[sizeof(revision)-1] = '\0';
     } else if (!strncmp(line, "E:ID_SERIAL_SHORT=", strlen("E:ID_SERIAL_SHORT="))) {
-      strcpy(serial, line+strlen("E:ID_SERIAL_SHORT="));
+      strncpy(serial, line+strlen("E:ID_SERIAL_SHORT="), sizeof(serial));
+      serial[sizeof(serial)-1] = '\0';
     } else if (!strncmp(line, "E:ID_TYPE=", strlen("E:ID_TYPE="))) {
-      strcpy(blocktype, line+strlen("E:ID_TYPE="));
+      strncpy(blocktype, line+strlen("E:ID_TYPE="), sizeof(blocktype));
+      blocktype[sizeof(blocktype)-1] = '\0';
     }
   }
   fclose(fd);
