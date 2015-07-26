@@ -15,6 +15,8 @@
 #include <spi/include/kernel/location.h>
 #include <spi/include/kernel/process.h>
 
+#ifndef HWLOC_DISABLE_BGQ_PORT_TEST
+
 static int
 hwloc_look_bgq(struct hwloc_backend *backend)
 {
@@ -239,3 +241,5 @@ const struct hwloc_component hwloc_bgq_component = {
   0,
   &hwloc_bgq_disc_component
 };
+
+#endif /* !HWLOC_DISABLE_BGQ_PORT_TEST */
