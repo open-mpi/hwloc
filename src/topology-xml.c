@@ -998,6 +998,7 @@ hwloc_topology_diff_load_xml(hwloc_topology_t topology __hwloc_attribute_unused,
   fakedata.msgprefix = strdup(basename);
 
   if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    free(fakedata.msgprefix);
     errno = ENOSYS;
     return -1;
   }
