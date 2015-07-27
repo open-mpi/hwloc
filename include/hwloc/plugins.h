@@ -421,13 +421,14 @@ HWLOC_DECLSPEC int hwloc_pci_prepare_bridge(hwloc_obj_t obj, const unsigned char
  */
 HWLOC_DECLSPEC void hwloc_pci_tree_insert_by_busid(struct hwloc_obj **treep, struct hwloc_obj *obj);
 
-/** \brief Insert a list of PCI devices and bridges in the backend topology.
+/** \brief Add some hostbridges on top of the given tree of PCI objects and attach them to the root of the topology.
  *
- * Insert a tree of PCI objects starting at tree
- * Objects are placed under upstream bridges and then inserted in the topology
- * by calling the get_obj_cpuset() callback to find their locality.
+ * The core will move them to their actual PCI locality using hwloc_pci_belowroot_apply_locality()
+ * at the end of the discovery.
+ * In the meantime, other backends will easily lookup PCI objects (for instance to attach OS devices)
+ * by manually looking at the topology root object io_first_child pointer.
  */
-HWLOC_DECLSPEC int hwloc_pci_insert_tree(struct hwloc_backend *backend, struct hwloc_obj *tree);
+HWLOC_DECLSPEC int hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_obj *tree);
 
 /** @} */
 

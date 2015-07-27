@@ -498,7 +498,7 @@ extern "C" {
 #define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
 #define hwloc_pci_prepare_bridge HWLOC_NAME(pci_prepare_bridge)
 #define hwloc_pci_tree_insert_by_busid HWLOC_NAME(pci_tree_insert_by_busid)
-#define hwloc_pci_insert_tree HWLOC_NAME(pci_insert_tree)
+#define hwloc_pci_tree_attach_belowroot HWLOC_NAME(pci_tree_attach_belowroot)
 
 /* hwloc/deprecated.h */
 
@@ -586,6 +586,7 @@ extern "C" {
 #define hwloc_topology_clear HWLOC_NAME(topology_clear)
 
 #define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
+#define hwloc_pci_belowroot_apply_locality HWLOC_NAME(pci_belowroot_apply_locality)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)
 #define hwloc__find_info_slot HWLOC_NAME(_find_info_slot)

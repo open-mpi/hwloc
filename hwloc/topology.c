@@ -2618,6 +2618,8 @@ next_noncpubackend:
     backend = backend->next;
   }
 
+  hwloc_pci_belowroot_apply_locality(topology);
+
   /* if we got anything, filter interesting objects and update the tree */
   if (gotsomeio) {
     if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))

@@ -153,6 +153,13 @@ extern void hwloc_topology_clear(struct hwloc_topology *topology);
  */
 extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset);
 
+/* Move PCI objects currently attached to the root object ot their actual location.
+ * Called by the core at the end of hwloc_topology_load().
+ * Prior to this call, all PCI objects may be found below the root object.
+ * After this call and a reconnect of levels, all PCI objects are available through levels.
+ */
+extern int hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology);
+
 extern void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
 extern char ** hwloc__find_info_slot(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name);
 extern void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);

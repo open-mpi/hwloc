@@ -293,7 +293,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
   }
 #endif
 
-  return hwloc_pci_insert_tree(backend, tree);
+  return hwloc_pci_tree_attach_belowroot(topology, tree);
 }
 
 static struct hwloc_backend *

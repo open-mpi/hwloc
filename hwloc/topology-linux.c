@@ -5108,7 +5108,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     closedir(dir);
   }
 
-  res = hwloc_pci_insert_tree(backend, tree);
+  res = hwloc_pci_tree_attach_belowroot(backend->topology, tree);
 
  out:
   return res;

@@ -185,6 +185,87 @@ hwloc_pci_tree_insert_by_busid(struct hwloc_obj **treep,
   hwloc_pci_add_object(NULL /* no parent on top of tree */, treep, obj);
 }
 
+int
+hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_obj *old_tree)
+{
+  struct hwloc_obj **next_hb_p;
+  unsigned current_hostbridge;
+
+  if (!old_tree)
+    /* found nothing, exit */
+    return 0;
+
+#ifdef HWLOC_DEBUG
+  hwloc_debug("%s", "\nPCI hierarchy:\n");
+  hwloc_pci_traverse(NULL, old_tree, hwloc_pci_traverse_print_cb);
+  hwloc_debug("%s", "\n");
+#endif
+
+  next_hb_p = &hwloc_get_root_obj(topology)->io_first_child;
+  while (*next_hb_p)
+    next_hb_p = &((*next_hb_p)->next_sibling);
+
+  /*
+   * tree points to all objects connected to any upstream bus in the machine.
+   * We now create one real hostbridge object per upstream bus.
+   * It's not actually a PCI device so we have to create it.
+   */
+  current_hostbridge = 0;
+  while (old_tree) {
+    /* start a new host bridge */
+    struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, current_hostbridge++);
+    struct hwloc_obj **dstnextp = &hostbridge->io_first_child;
+    struct hwloc_obj **srcnextp = &old_tree;
+    struct hwloc_obj *child = *srcnextp;
+    unsigned short current_domain = child->attr->pcidev.domain;
+    unsigned char current_bus = child->attr->pcidev.bus;
+    unsigned char current_subordinate = current_bus;
+
+    hwloc_debug("Starting new PCI hostbridge %04x:%02x\n", current_domain, current_bus);
+
+  next_child:
+    /* remove next child from tree */
+    *srcnextp = child->next_sibling;
+    /* append it to hostbridge */
+    *dstnextp = child;
+    child->parent = hostbridge;
+    child->next_sibling = NULL;
+    dstnextp = &child->next_sibling;
+
+    /* walk this PCI hierarchy, and lookup OS devices */
+    hwloc_pci_traverse(topology, child, hwloc_pci_traverse_lookuposdevices_cb);
+
+    /* compute hostbridge secondary/subordinate buses */
+    if (child->type == HWLOC_OBJ_BRIDGE
+	&& child->attr->bridge.downstream.pci.subordinate_bus > current_subordinate)
+      current_subordinate = child->attr->bridge.downstream.pci.subordinate_bus;
+
+    /* use next child if it has the same domains/bus */
+    child = *srcnextp;
+    if (child
+	&& child->attr->pcidev.domain == current_domain
+	&& child->attr->pcidev.bus == current_bus)
+      goto next_child;
+
+    /* finish setting up this hostbridge */
+    hostbridge->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_HOST;
+    hostbridge->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
+    hostbridge->attr->bridge.downstream.pci.domain = current_domain;
+    hostbridge->attr->bridge.downstream.pci.secondary_bus = current_bus;
+    hostbridge->attr->bridge.downstream.pci.subordinate_bus = current_subordinate;
+    hwloc_debug("New PCI hostbridge %04x:[%02x-%02x]\n",
+		current_domain, current_bus, current_subordinate);
+
+    *next_hb_p = hostbridge;
+    next_hb_p = &hostbridge->next_sibling;
+    topology->modified = 1; /* needed in case somebody reconnects levels before the core calls hwloc_pci_belowroot_apply_locality()
+			     * or if hwloc_pci_belowroot_apply_locality() keeps hostbridges below root.
+			     */
+  }
+
+  return 1;
+}
+
 static struct hwloc_obj *
 hwloc_pci_fixup_busid_parent(struct hwloc_topology *topology __hwloc_attribute_unused,
 			     struct hwloc_pcidev_attr_s *busid,
@@ -269,89 +350,52 @@ hwloc_pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev
 }
 
 int
-hwloc_pci_insert_tree(struct hwloc_backend *backend,
-		      struct hwloc_obj *tree)
+hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology)
 {
-  struct hwloc_topology *topology = backend->topology;
-  unsigned current_hostbridge;
+  struct hwloc_obj *root = hwloc_get_root_obj(topology);
+  struct hwloc_obj **listp, *obj;
 
-  if (!tree)
-    /* found nothing, exit */
-    return 0;
-
-#ifdef HWLOC_DEBUG
-  hwloc_debug("%s", "\nPCI hierarchy:\n");
-  hwloc_pci_traverse(NULL, tree, hwloc_pci_traverse_print_cb);
-  hwloc_debug("%s", "\n");
-#endif
-
-  /* walk the hierarchy, and lookup OS devices */
-  hwloc_pci_traverse(topology, tree, hwloc_pci_traverse_lookuposdevices_cb);
-
-  /*
-   * tree points to all objects connected to any upstream bus in the machine.
-   * We now create one real hostbridge object per upstream bus.
-   * It's not actually a PCI device so we have to create it.
+  /* root->io_first_child contains some PCI hierarchies, any maybe some non-PCI things.
+   * insert the PCI trees according to their PCI-locality.
    */
-  current_hostbridge = 0;
-  while (tree) {
-    /* start a new host bridge */
-    struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, current_hostbridge++);
-    struct hwloc_obj **dstnextp = &hostbridge->io_first_child;
-    struct hwloc_obj **srcnextp = &tree;
-    struct hwloc_obj *child = *srcnextp;
+  listp = &root->io_first_child;
+  while ((obj = *listp) != NULL) {
     struct hwloc_pcidev_attr_s *busid;
     struct hwloc_obj *parent;
-    unsigned short current_domain = child->attr->pcidev.domain;
-    unsigned char current_bus = child->attr->pcidev.bus;
-    unsigned char current_subordinate = current_bus;
 
-    hwloc_debug("Starting new PCI hostbridge %04x:%02x\n", current_domain, current_bus);
+    /* skip non-PCI objects */
+    if (obj->type != HWLOC_OBJ_PCI_DEVICE
+	&& !(obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)
+	&& !(obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
+      listp = &obj->next_sibling;
+      continue;
+    }
 
-  next_child:
-    /* remove next child from tree */
-    *srcnextp = child->next_sibling;
-    /* append it to hostbridge */
-    *dstnextp = child;
-    child->parent = hostbridge;
-    child->next_sibling = NULL;
-    dstnextp = &child->next_sibling;
+    /* don't support PCI devices without hostbridges yet */
+    assert(obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI);
 
-    /* compute hostbridge secondary/subordinate buses */
-    if (child->type == HWLOC_OBJ_BRIDGE
-	&& child->attr->bridge.downstream.pci.subordinate_bus > current_subordinate)
-      current_subordinate = child->attr->bridge.downstream.pci.subordinate_bus;
-
-    /* use next child if it has the same domains/bus */
-    child = *srcnextp;
-    if (child
-	&& child->attr->pcidev.domain == current_domain
-	&& child->attr->pcidev.bus == current_bus)
-      goto next_child;
-
-    /* finish setting up this hostbridge */
-    hostbridge->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_HOST;
-    hostbridge->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
-    hostbridge->attr->bridge.downstream.pci.domain = current_domain;
-    hostbridge->attr->bridge.downstream.pci.secondary_bus = current_bus;
-    hostbridge->attr->bridge.downstream.pci.subordinate_bus = current_subordinate;
-    hwloc_debug("New PCI hostbridge %04x:[%02x-%02x]\n",
-		current_domain, current_bus, current_subordinate);
-
-    if (hostbridge->type == HWLOC_OBJ_PCI_DEVICE
-	|| (hostbridge->type == HWLOC_OBJ_BRIDGE
-	    && hostbridge->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
-      busid = &hostbridge->attr->pcidev;
+    if (obj->type == HWLOC_OBJ_PCI_DEVICE
+	|| (obj->type == HWLOC_OBJ_BRIDGE
+	    && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
+      busid = &obj->attr->pcidev;
     else
       /* hostbridges don't have a PCI busid for looking up locality */
-      busid = &hostbridge->io_first_child->attr->pcidev;
+      busid = &obj->io_first_child->attr->pcidev;
 
-    /* attach the hostbridge where it belongs */
+    /* attach the object (and children) where it belongs */
     parent = hwloc_pci_find_busid_parent(topology, busid);
-    hwloc_insert_object_by_parent(topology, parent, hostbridge);
+    if (parent == root) {
+      /* keep this object here */
+      listp = &obj->next_sibling;
+    } else {
+      /* dequeue this object */
+      *listp = obj->next_sibling;
+      obj->next_sibling = NULL;
+      hwloc_insert_object_by_parent(topology, parent, obj);
+    }
   }
 
-  return 1;
+  return 0;
 }
 
 #define HWLOC_PCI_STATUS 0x06
