@@ -1,4 +1,4 @@
-# Copyright © 2012      Inria.  All rights reserved.
+# Copyright © 2012-2015 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 # suppressions file to be passed to valgrind with
@@ -141,5 +141,21 @@
    obj:*libpciaccess*
    ...
    fun:hwloc_look_libpci
+}
+
+# libudev global hashes
+{
+   libudev_hashmap_property
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:udev_device_get_property_value
+}
+{
+   libudev_hashmap_sysname
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:udev_device_new_from_subsystem_sysname
 }
 
