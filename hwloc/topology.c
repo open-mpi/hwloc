@@ -2815,12 +2815,11 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
 void
 hwloc_topology_clear (struct hwloc_topology *topology)
 {
+  /* no need to set to NULL after free() since callers will call setup_defaults() or just destroy the rest of the topology */
   unsigned l;
   hwloc_free_object_and_children(topology->levels[0][0]);
-  for (l=0; l<topology->nb_levels; l++) {
+  for (l=0; l<topology->nb_levels; l++)
     free(topology->levels[l]);
-    topology->levels[l] = NULL;
-  }
   free(topology->bridge_level);
   free(topology->pcidev_level);
   free(topology->osdev_level);
