@@ -203,8 +203,11 @@ extern void hwloc_set_hpux_hooks(struct hwloc_binding_hooks *binding_hooks, stru
  */
 extern void hwloc_add_uname_info(struct hwloc_topology *topology, void *cached_uname);
 
-/* Free obj and its attributes assuming it doesn't have any children/parent anymore */
+/* Free obj and its attributes assuming it's not linked to a parent and doesn't have any child */
 extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
+
+/* Free obj and its children, assuming it's not linked to a parent */
+extern void hwloc_free_object_and_children(hwloc_obj_t obj);
 
 /* Duplicate src and its children under newparent in newtopology */
 extern void hwloc__duplicate_objects(struct hwloc_topology *newtopology, struct hwloc_obj *newparent, struct hwloc_obj *src);

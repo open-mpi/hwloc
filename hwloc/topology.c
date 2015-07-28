@@ -402,6 +402,34 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
   free(obj);
 }
 
+/* Remove an object and its children from its parent and free them.
+ * Only updates next_sibling/first_child pointers,
+ * so may only be used during early discovery or during destroy.
+ */
+static void
+unlink_and_free_object_and_children(hwloc_obj_t *pobj)
+{
+  hwloc_obj_t obj = *pobj, child, *pchild;
+
+  for_each_child_safe(child, obj, pchild)
+    unlink_and_free_object_and_children(pchild);
+  for_each_io_child_safe(child, obj, pchild)
+    unlink_and_free_object_and_children(pchild);
+  for_each_misc_child_safe(child, obj, pchild)
+    unlink_and_free_object_and_children(pchild);
+
+  *pobj = obj->next_sibling;
+  hwloc_free_unlinked_object(obj);
+}
+
+/* Free an object and its children without unlinking from parent.
+ */
+void
+hwloc_free_object_and_children(hwloc_obj_t obj)
+{
+  unlink_and_free_object_and_children(&obj);
+}
+
 /* insert the (non-empty) list of sibling starting at firstnew as new children of newparent,
  * and return the address of the pointer to the next one
  */
@@ -501,26 +529,6 @@ unlink_and_free_single_object(hwloc_obj_t *pparent)
   }
 
   hwloc_free_unlinked_object(old);
-}
-
-/* Remove an object and its children from its parent and free them.
- * Only updates next_sibling/first_child pointers,
- * so may only be used during early discovery.
- */
-static void
-unlink_and_free_object_and_children(hwloc_obj_t *pobj)
-{
-  hwloc_obj_t obj = *pobj, child, *pchild;
-
-  for_each_child_safe(child, obj, pchild)
-    unlink_and_free_object_and_children(pchild);
-  for_each_io_child_safe(child, obj, pchild)
-    unlink_and_free_object_and_children(pchild);
-  for_each_misc_child_safe(child, obj, pchild)
-    unlink_and_free_object_and_children(pchild);
-
-  *pobj = obj->next_sibling;
-  hwloc_free_unlinked_object(obj);
 }
 
 static void
@@ -2804,40 +2812,11 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
   return 0;
 }
 
-/* traverse the tree and free everything.
- * only use first_child/next_sibling so that it works before load()
- * and may be used when switching between backend.
- */
-static void
-hwloc_topology_clear_tree (struct hwloc_topology *topology, struct hwloc_obj *root)
-{
-  hwloc_obj_t child;
-  child = root->first_child;
-  while (child) {
-    hwloc_obj_t nextchild = child->next_sibling;
-    hwloc_topology_clear_tree (topology, child);
-    child = nextchild;
-  }
-  child = root->io_first_child;
-  while (child) {
-    hwloc_obj_t nextchild = child->next_sibling;
-    hwloc_topology_clear_tree (topology, child);
-    child = nextchild;
-  }
-  child = root->misc_first_child;
-  while (child) {
-    hwloc_obj_t nextchild = child->next_sibling;
-    hwloc_topology_clear_tree (topology, child);
-    child = nextchild;
-  }
-  hwloc_free_unlinked_object (root);
-}
-
 void
 hwloc_topology_clear (struct hwloc_topology *topology)
 {
   unsigned l;
-  hwloc_topology_clear_tree (topology, topology->levels[0][0]);
+  hwloc_free_object_and_children(topology->levels[0][0]);
   for (l=0; l<topology->nb_levels; l++) {
     free(topology->levels[l]);
     topology->levels[l] = NULL;

@@ -606,6 +606,7 @@ extern "C" {
 
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
+#define hwloc_free_object_and_children HWLOC_NAME(free_object_and_children)
 #define hwloc__duplicate_objects HWLOC_NAME(_duplicate_objects)
 
 #define hwloc_alloc_heap HWLOC_NAME(alloc_heap)
