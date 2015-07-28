@@ -209,6 +209,9 @@ extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
 /* Free obj and its children, assuming it's not linked to a parent */
 extern void hwloc_free_object_and_children(hwloc_obj_t obj);
 
+/* Free obj, its next siblings, and their children, assuming they're not linked to a parent */
+extern void hwloc_free_object_siblings_and_children(hwloc_obj_t obj);
+
 /* Duplicate src and its children under newparent in newtopology */
 extern void hwloc__duplicate_objects(struct hwloc_topology *newtopology, struct hwloc_obj *newparent, struct hwloc_obj *src);
 

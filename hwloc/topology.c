@@ -430,6 +430,15 @@ hwloc_free_object_and_children(hwloc_obj_t obj)
   unlink_and_free_object_and_children(&obj);
 }
 
+/* Free an object, its next siblings and their children without unlinking from parent.
+ */
+void
+hwloc_free_object_siblings_and_children(hwloc_obj_t obj)
+{
+  while (obj)
+    unlink_and_free_object_and_children(&obj);
+}
+
 /* insert the (non-empty) list of sibling starting at firstnew as new children of newparent,
  * and return the address of the pointer to the next one
  */
@@ -2944,11 +2953,9 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
     if (obj->type == HWLOC_OBJ_NUMANODE)
       hwloc_bitmap_set(droppednodeset, obj->os_index);
     if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO))
-      while (obj->io_first_child)
-	unlink_and_free_object_and_children(&obj->io_first_child);
+      hwloc_free_object_siblings_and_children(obj->io_first_child);
     if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC))
-      while (obj->misc_first_child)
-	unlink_and_free_object_and_children(&obj->misc_first_child);
+      hwloc_free_object_siblings_and_children(obj->misc_first_child);
     unlink_and_free_single_object(pobj);
     topology->modified = 1;
     /* do not remove children. if they were to be removed, they would have been already */
