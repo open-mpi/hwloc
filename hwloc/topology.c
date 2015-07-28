@@ -2965,10 +2965,12 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
     hwloc_debug_print_object(0, obj);
     if (obj->type == HWLOC_OBJ_NUMANODE)
       hwloc_bitmap_set(droppednodeset, obj->os_index);
-    if (obj->io_first_child && !(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO))
-      unlink_and_free_object_and_children(&obj->io_first_child);
-    if (obj->misc_first_child && !(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC))
-      unlink_and_free_object_and_children(&obj->misc_first_child);
+    if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO))
+      while (obj->io_first_child)
+	unlink_and_free_object_and_children(&obj->io_first_child);
+    if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC))
+      while (obj->misc_first_child)
+	unlink_and_free_object_and_children(&obj->misc_first_child);
     unlink_and_free_single_object(pobj);
     topology->modified = 1;
     /* do not remove children. if they were to be removed, they would have been already */
