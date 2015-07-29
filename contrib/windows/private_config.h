@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
  * Copyright © 2009-2014 Inria.  All rights reserved.
- * Copyright © 2009, 2011, 2012 Université Bordeaux.  All rights reserved.
+ * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
  *
@@ -514,8 +514,8 @@
 /* Define to 1 if X11 headers including Xutil.h and keysym.h are available. */
 /* #undef HWLOC_HAVE_X11_KEYSYM */
 
-/* Define to 1 if the _syscall3 macro works */
-/* #undef HWLOC_HAVE__SYSCALL3 */
+/* Define to 1 if function `syscall' is available */
+/* #undef HWLOC_HAVE_SYSCALL */
 
 /* Define to 1 on HP-UX */
 /* #undef HWLOC_HPUX_SYS */
