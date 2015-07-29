@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2014 Inria.  All rights reserved.
- * Copyright © 2009-2013 Université Bordeaux 1
+ * Copyright © 2009-2013, 2015 Université Bordeaux 1
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2010 IBM
  * See COPYING in top-level directory.
@@ -51,8 +51,8 @@ struct hwloc_linux_backend_data_s {
  * Misc Abstraction layers *
  ***************************/
 
-#if !(defined HWLOC_HAVE_SCHED_SETAFFINITY) && (defined HWLOC_HAVE__SYSCALL3)
-/* libc doesn't have support for sched_setaffinity, build system call
+#if !(defined HWLOC_HAVE_SCHED_SETAFFINITY) && (defined HWLOC_HAVE_SYSCALL)
+/* libc doesn't have support for sched_setaffinity, make system call
  * ourselves: */
 #    include <linux/unistd.h>
 #    ifndef __NR_sched_setaffinity
@@ -86,7 +86,7 @@ struct hwloc_linux_backend_data_s {
 #       endif
 #    endif
 #    ifndef sched_setaffinity
-       _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, const void *, mask)
+#      define sched_setaffinity(pid, lg, mask) syscall(__NR_sched_setaffinity, pid, lg, mask)
 #    endif
 #    ifndef __NR_sched_getaffinity
 #       ifdef __i386__
@@ -119,7 +119,7 @@ struct hwloc_linux_backend_data_s {
 #       endif
 #    endif
 #    ifndef sched_getaffinity
-       _syscall3(int, sched_getaffinity, pid_t, pid, unsigned int, lg, void *, mask)
+#      define sched_getaffinity(pid, lg, mask) (syscall(__NR_sched_getaffinity, pid, lg, mask) < 0 ? -1 : 0)
 #    endif
 #endif
 
@@ -337,7 +337,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
-#elif defined(HWLOC_HAVE__SYSCALL3)
+#elif defined(HWLOC_HAVE_SYSCALL)
   unsigned long mask = hwloc_bitmap_to_ulong(hwloc_set);
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
@@ -345,10 +345,10 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
-#else /* !_SYSCALL3 */
+#else /* !SYSCALL */
   errno = ENOSYS;
   return -1;
-#endif /* !_SYSCALL3 */
+#endif /* !SYSCALL */
 }
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
@@ -500,7 +500,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, &linux_set))
       hwloc_bitmap_set(hwloc_set, cpu);
-#elif defined(HWLOC_HAVE__SYSCALL3)
+#elif defined(HWLOC_HAVE_SYSCALL)
   unsigned long mask;
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
@@ -512,10 +512,10 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
     return -1;
 
   hwloc_bitmap_from_ulong(hwloc_set, mask);
-#else /* !_SYSCALL3 */
+#else /* !SYSCALL */
   errno = ENOSYS;
   return -1;
-#endif /* !_SYSCALL3 */
+#endif /* !SYSCALL */
 
   return 0;
 }
