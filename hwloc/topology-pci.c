@@ -77,7 +77,7 @@ static int
 hwloc_look_pci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_obj *tree = NULL;
+  struct hwloc_obj *tree = NULL, *tmp;
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
@@ -88,14 +88,22 @@ hwloc_look_pci(struct hwloc_backend *backend)
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
 
-  if (hwloc_get_next_pcidev(topology, NULL)) {
-    hwloc_debug("%s", "PCI objects already added, ignoring pci backend.\n");
-    return 0;
-  }
-
   if (!hwloc_topology_is_thissystem(topology)) {
     hwloc_debug("%s", "\nno PCI detection (not thissystem)\n");
     return 0;
+  }
+
+  /* don't do anything if another backend attached PCI already
+   * (they are attached to root until later in the core discovery)
+   */
+  tmp = hwloc_get_root_obj(topology)->io_first_child;
+  while (tmp) {
+    if (tmp->type == HWLOC_OBJ_PCI_DEVICE
+	|| (tmp->type == HWLOC_OBJ_BRIDGE && tmp->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
+      hwloc_debug("%s", "PCI objects already added, ignoring linuxpci backend.\n");
+      return 0;
+    }
+    tmp = tmp->next_sibling;
   }
 
   hwloc_debug("%s", "\nScanning PCI buses...\n");
@@ -309,7 +317,6 @@ hwloc_pci_component_instantiate(struct hwloc_disc_component *component,
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
-  backend->flags = HWLOC_BACKEND_FLAG_NEED_LEVELS;
   backend->discover = hwloc_look_pci;
   return backend;
 }
