@@ -4927,51 +4927,17 @@ const struct hwloc_component hwloc_linux_component = {
 #define HWLOC_PCI_CLASS_NOT_DEFINED 0x0000
 
 static int
-hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
+hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 {
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = NULL;
-  struct hwloc_backend *tmpbackend;
-  struct hwloc_obj *tmp;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
   hwloc_obj_t tree = NULL;
-  int root_fd = -1;
+  int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
-  int res = 0;
-
-  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
-    return 0;
-
-  /* don't do anything if another backend attached PCI already
-   * (they are attached to root until later in the core discovery)
-   */
-  tmp = hwloc_get_root_obj(topology)->io_first_child;
-  while (tmp) {
-    if (tmp->type == HWLOC_OBJ_PCI_DEVICE
-	|| (tmp->type == HWLOC_OBJ_BRIDGE && tmp->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
-      hwloc_debug("%s", "PCI objects already added, ignoring linuxpci backend.\n");
-      return 0;
-    }
-    tmp = tmp->next_sibling;
-  }
-
-  /* hackily find the linux backend to steal its private_data (for fsroot) */
-  tmpbackend = topology->backends;
-  while (tmpbackend) {
-    if (tmpbackend->component == &hwloc_linux_disc_component) {
-      data = tmpbackend->private_data;
-      break;
-    }
-    tmpbackend = tmpbackend->next;
-  }
-  assert(data);
-  backend->private_data = data;
-  root_fd = data->root_fd;
-  hwloc_debug("linuxpci backend stole linux backend root_fd %d\n", root_fd);
 
   dir = hwloc_opendir("/sys/bus/pci/devices/", root_fd);
   if (!dir)
-    goto out;
+    return 0;
 
   while ((dirent = readdir(dir)) != NULL) {
     unsigned domain, bus, dev, func;
@@ -5077,6 +5043,59 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 
   closedir(dir);
 
+  return hwloc_pci_tree_attach_belowroot(backend->topology, tree);
+}
+
+static hwloc_obj_t
+hwloc_linuxfs_pci_find_pcislot_obj(struct hwloc_obj *tree,
+				   unsigned domain, unsigned bus, unsigned dev)
+{
+  for ( ; tree; tree = tree->next_sibling) {
+    if (tree->type == HWLOC_OBJ_PCI_DEVICE
+	|| (tree->type == HWLOC_OBJ_BRIDGE
+	    && tree->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
+      if (tree->attr->pcidev.domain == domain
+	  && tree->attr->pcidev.bus == bus
+	  && tree->attr->pcidev.dev == dev
+	  && tree->attr->pcidev.func == 0)
+	/* that's the right bus id */
+	return tree;
+      if (tree->attr->pcidev.domain > domain
+	  || (tree->attr->pcidev.domain == domain
+	      && tree->attr->pcidev.bus > bus))
+	/* bus id too high, won't find anything later */
+	return NULL;
+      if (tree->type == HWLOC_OBJ_BRIDGE
+	  && tree->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
+	  && tree->attr->bridge.downstream.pci.domain == domain
+	  && tree->attr->bridge.downstream.pci.secondary_bus <= bus
+	  && tree->attr->bridge.downstream.pci.subordinate_bus >= bus)
+	/* not the right bus id, but it's included in the bus below that bridge */
+	return hwloc_linuxfs_pci_find_pcislot_obj(tree->io_first_child, domain, bus, dev);
+
+    } else if (tree->type == HWLOC_OBJ_BRIDGE
+	       && tree->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI
+	       && tree->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
+	       /* non-PCI to PCI bridge, just look at the subordinate bus */
+	       && tree->attr->bridge.downstream.pci.domain == domain
+	       && tree->attr->bridge.downstream.pci.secondary_bus <= bus
+	       && tree->attr->bridge.downstream.pci.subordinate_bus >= bus) {
+      /* contains our bus, recurse */
+      return hwloc_linuxfs_pci_find_pcislot_obj(tree->io_first_child, domain, bus, dev);
+    }
+  }
+  return NULL;
+}
+
+static int
+hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
+{
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  DIR *dir;
+  struct dirent *dirent;
+
   dir = hwloc_opendir("/sys/bus/pci/slots/", root_fd);
   if (dir) {
     while ((dirent = readdir(dir)) != NULL) {
@@ -5089,27 +5108,9 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
       if (file) {
 	unsigned domain, bus, dev;
 	if (fscanf(file, "%x:%x:%x", &domain, &bus, &dev) == 3) {
-	  hwloc_obj_t obj = tree;
-	  int cameup = 0;
-	  while (obj) {
-	    if (obj->attr->pcidev.domain == domain
-		&& obj->attr->pcidev.bus == bus
-		&& obj->attr->pcidev.dev == dev
-		&& obj->attr->pcidev.func == 0) {
-	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
-	      break;
-	    }
-	    if (!cameup && obj->io_first_child) {
-	      obj = obj->io_first_child;
-	      cameup = 0;
-	    } else if (obj->next_sibling) {
-	      obj = obj->next_sibling;
-	      cameup = 0;
-	    } else {
-	      obj = obj->parent;
-	      cameup = 1;
-	    }
-	  }
+	  hwloc_obj_t obj = hwloc_linuxfs_pci_find_pcislot_obj(hwloc_get_root_obj(topology)->io_first_child, domain, bus, dev);
+	  if (obj)
+	    hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
 	}
 	fclose(file);
       }
@@ -5117,9 +5118,57 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     closedir(dir);
   }
 
-  res = hwloc_pci_tree_attach_belowroot(backend->topology, tree);
+  return 0;
+}
 
- out:
+static int
+hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
+{
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = NULL;
+  struct hwloc_backend *tmpbackend;
+  struct hwloc_obj *tmp;
+  int root_fd = -1;
+  int needdiscovery;
+  int res = 0;
+
+  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+    return 0;
+
+  /* hackily find the linux backend to steal its private_data (for fsroot) */
+  tmpbackend = topology->backends;
+  while (tmpbackend) {
+    if (tmpbackend->component == &hwloc_linux_disc_component) {
+      data = tmpbackend->private_data;
+      break;
+    }
+    tmpbackend = tmpbackend->next;
+  }
+  assert(data);
+  backend->private_data = data;
+  root_fd = data->root_fd;
+  hwloc_debug("linuxpci backend stole linux backend root_fd %d\n", root_fd);
+
+  /* don't rediscovery PCI devices if another backend did it
+   * (they are attached to root until later in the core discovery)
+   */
+  needdiscovery = 1;
+  tmp = hwloc_get_root_obj(topology)->io_first_child;
+  while (tmp) {
+    if (tmp->type == HWLOC_OBJ_PCI_DEVICE
+	|| (tmp->type == HWLOC_OBJ_BRIDGE && tmp->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
+      hwloc_debug("%s", "PCI objects already added, ignoring linuxpci backend.\n");
+      needdiscovery = 0;
+      break;
+    }
+    tmp = tmp->next_sibling;
+  }
+
+  if (needdiscovery)
+    res = hwloc_linuxfs_pci_look_pcidevices(backend);
+
+  hwloc_linuxfs_pci_look_pcislots(backend);
+
   return res;
 }
 
