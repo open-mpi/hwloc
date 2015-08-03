@@ -4774,21 +4774,17 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
  * backend callback for retrieving the location of a pci device
  */
 static int
-hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
-				   struct hwloc_obj *obj, hwloc_bitmap_t cpuset)
+hwloc_linux_backend_get_pci_busid_cpuset(struct hwloc_backend *backend,
+					 struct hwloc_pcidev_attr_s *busid, hwloc_bitmap_t cpuset)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   char path[256];
   FILE *file;
   int err;
 
-  /* this callback is only used in the libpci backend for now */
-  assert(obj->type == HWLOC_OBJ_PCI_DEVICE
-	 || (obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI));
-
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
-	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
-	   obj->attr->pcidev.dev, obj->attr->pcidev.func);
+	   busid->domain, busid->bus,
+	   busid->dev, busid->func);
   file = hwloc_fopen(path, "r", data->root_fd);
   if (file) {
     err = hwloc_linux_parse_cpumap_file(file, cpuset);
@@ -4842,7 +4838,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
 
   backend->private_data = data;
   backend->discover = hwloc_look_linuxfs;
-  backend->get_obj_cpuset = hwloc_linux_backend_get_obj_cpuset;
+  backend->get_pci_busid_cpuset = hwloc_linux_backend_get_pci_busid_cpuset;
   backend->notify_new_object = hwloc_linux_backend_notify_new_object;
   backend->disable = hwloc_linux_backend_disable;
 

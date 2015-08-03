@@ -641,7 +641,7 @@ hwloc_backend_alloc(struct hwloc_disc_component *component)
   backend->component = component;
   backend->flags = 0;
   backend->discover = NULL;
-  backend->get_obj_cpuset = NULL;
+  backend->get_pci_busid_cpuset = NULL;
   backend->notify_new_object = NULL;
   backend->disable = NULL;
   backend->is_thissystem = -1;
@@ -746,13 +746,13 @@ hwloc_backends_is_thissystem(struct hwloc_topology *topology)
 }
 
 int
-hwloc_backends_get_obj_cpuset(struct hwloc_topology *topology, struct hwloc_obj *obj, hwloc_bitmap_t cpuset)
+hwloc_backends_get_pci_busid_cpuset(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid, hwloc_bitmap_t cpuset)
 {
   struct hwloc_backend *backend = topology->backends;
-  /* use the first backend's get_obj_cpuset callback */
+  /* use the first backend's get_pci_busid_cpuset callback */
   while (backend != NULL) {
-    if (backend->get_obj_cpuset)
-      return backend->get_obj_cpuset(backend, obj, cpuset);
+    if (backend->get_pci_busid_cpuset)
+      return backend->get_pci_busid_cpuset(backend, busid, cpuset);
     backend = backend->next;
   }
   return -1;

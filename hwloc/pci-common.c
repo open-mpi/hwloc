@@ -179,7 +179,7 @@ hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
 
 static struct hwloc_obj *
 hwloc_pci_fixup_hostbridge_parent(struct hwloc_topology *topology __hwloc_attribute_unused,
-				  struct hwloc_obj *hostbridge,
+				  struct hwloc_pcidev_attr_s *busid,
 				  struct hwloc_obj *parent)
 {
   /* Xeon E5v3 in cluster-on-die mode only have PCI on the first NUMA node of each package.
@@ -196,13 +196,13 @@ hwloc_pci_fixup_hostbridge_parent(struct hwloc_topology *topology __hwloc_attrib
 	fprintf(stderr, "****************************************************************************\n");
 	fprintf(stderr, "* hwloc %s has encountered an incorrect PCI locality information.\n", HWLOC_VERSION);
 	fprintf(stderr, "* PCI bus %04x:%02x is supposedly close to 2nd NUMA node of 1st package,\n",
-		hostbridge->io_first_child->attr->pcidev.domain, hostbridge->io_first_child->attr->pcidev.bus);
+		busid->domain, busid->bus);
 	fprintf(stderr, "* however hwloc believes this is impossible on this architecture.\n");
 	fprintf(stderr, "* Therefore the PCI bus will be moved to 1st NUMA node of 2nd package.\n");
 	fprintf(stderr, "*\n");
 	fprintf(stderr, "* If you feel this fixup is wrong, disable it by setting in your environment\n");
 	fprintf(stderr, "* HWLOC_PCI_%04x_%02x_LOCALCPUS= (empty value), and report the problem\n",
-		hostbridge->io_first_child->attr->pcidev.domain, hostbridge->io_first_child->attr->pcidev.bus);
+		busid->domain, busid->bus);
 	fprintf(stderr, "* to the hwloc's user mailing list together with the XML output of lstopo.\n");
 	fprintf(stderr, "*\n");
 	fprintf(stderr, "* You may silence this message by setting HWLOC_HIDE_ERRORS=1 in your environment.\n");
@@ -219,15 +219,24 @@ static struct hwloc_obj *
 hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+  struct hwloc_pcidev_attr_s *busid;
   hwloc_obj_t group_obj, parent;
   const char *env;
-  int err;
-
-  /* override the cpuset with the environment if given */
   int forced = 0;
   char envname[256];
+  int err;
+
+  if (hostbridge->type == HWLOC_OBJ_PCI_DEVICE
+      || (hostbridge->type == HWLOC_OBJ_BRIDGE
+	  && hostbridge->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
+    busid = &hostbridge->attr->pcidev;
+  else
+    /* hostbridges don't have a PCI busid for looking up locality */
+    busid = &hostbridge->io_first_child->attr->pcidev;
+
+  /* override the cpuset with the environment if given */
   snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS",
-	   hostbridge->io_first_child->attr->pcidev.domain, hostbridge->io_first_child->attr->pcidev.bus);
+	   busid->domain, busid->bus);
   env = getenv(envname);
   if (env)
     /* if env exists but is empty, don't let quirks change what the OS reports */
@@ -237,10 +246,8 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
     hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
     hwloc_bitmap_sscanf(cpuset, env);
   } else {
-    /* get the hostbridge cpuset by acking the OS backend.
-     * it's not a PCI device, so we use its first child locality info.
-     */
-    err = hwloc_backends_get_obj_cpuset(topology, hostbridge->io_first_child, cpuset);
+    /* get the hostbridge cpuset by asking the OS backend. */
+    err = hwloc_backends_get_pci_busid_cpuset(topology, busid, cpuset);
     if (err < 0)
       /* if we got nothing, assume the hostbridge is attached to the top of hierarchy */
       hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
@@ -284,7 +291,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
       }
 
       if (!forced)
-	parent = hwloc_pci_fixup_hostbridge_parent(topology, hostbridge, parent);
+	parent = hwloc_pci_fixup_hostbridge_parent(topology, busid, parent);
     }
   } else {
     /* Failed to create the Group, attach to the root object instead */
