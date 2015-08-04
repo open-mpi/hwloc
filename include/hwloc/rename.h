@@ -474,7 +474,7 @@ extern "C" {
 
 #define hwloc_backend_alloc HWLOC_NAME(backend_alloc)
 #define hwloc_backend_enable HWLOC_NAME(backend_enable)
-#define hwloc_backends_get_obj_cpuset HWLOC_NAME(backends_get_obj_cpuset)
+#define hwloc_backends_get_pci_busid_cpuset HWLOC_NAME(backends_get_pci_busid_cpuset)
 #define hwloc_backends_notify_new_object HWLOC_NAME(backends_notify_new_object)
 
 #define hwloc_component_type_e HWLOC_NAME(component_type_e)
