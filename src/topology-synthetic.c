@@ -455,6 +455,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       errno = EINVAL;
       goto error;
     }
+    if (!item) {
+      if (verbose)
+	fprintf(stderr,"Synthetic string with disallow 0 number of objects at '%s'\n", pos);
+      errno = EINVAL;
+      goto error;
+    }
     data->level[count-1].arity = (unsigned)item;
 
     totalarity *= item;
