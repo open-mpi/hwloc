@@ -24,6 +24,7 @@ Version 1.11.1
 * Fix an overzealous assertion when intermediate Group object while Groups
   are totally ignored.
 * Fix a memory leak on failure to load a xml diff file.
+* Fix some segfaults when inputting an invalid synthetic description.
 
 
 Version 1.11.0
