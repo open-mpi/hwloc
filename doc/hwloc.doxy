@@ -1666,6 +1666,7 @@ Note that I/O and Misc objects are not available.
 The root object does not appear in the string.
 A Machine object is used by default, and a System object replaces it
 if a Machine level is specified in the string.
+Therefore the System type cannot be used in the description string as well.
 
 A NUMA level (with a single NUMA node) is automatically added if needed.
 
