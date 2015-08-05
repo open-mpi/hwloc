@@ -557,7 +557,7 @@ Questions and Bugs
 
 Questions should be sent to the devel mailing list (http://www.open-mpi.org/
 community/lists/hwloc.php). Bug reports should be reported in the tracker (
-https://git.open-mpi.org/trac/hwloc/).
+https://github.com/open-mpi/hwloc/issues).
 
 If hwloc discovers an incorrect topology for your machine, the very first thing
 you should check is to ensure that you have the most recent updates installed
