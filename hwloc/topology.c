@@ -2946,10 +2946,14 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
     hwloc_debug_print_object(0, obj);
     if (obj->type == HWLOC_OBJ_NUMANODE)
       hwloc_bitmap_set(droppednodeset, obj->os_index);
-    if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO))
+    if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
       hwloc_free_object_siblings_and_children(obj->io_first_child);
-    if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC))
+      obj->io_first_child = NULL;
+    }
+    if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC)) {
       hwloc_free_object_siblings_and_children(obj->misc_first_child);
+      obj->misc_first_child = NULL;
+    }
     unlink_and_free_single_object(pobj);
     topology->modified = 1;
     /* do not remove children. if they were to be removed, they would have been already */
