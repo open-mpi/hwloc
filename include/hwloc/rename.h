@@ -584,6 +584,8 @@ extern "C" {
 #define hwloc_topology_setup_defaults HWLOC_NAME(topology_setup_defaults)
 #define hwloc_topology_clear HWLOC_NAME(topology_clear)
 
+#define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
+
 #define hwloc__add_info HWLOC_NAME(_add_info)
 #define hwloc__find_info_slot HWLOC_NAME(_find_info_slot)
 #define hwloc__move_infos HWLOC_NAME(_move_infos)

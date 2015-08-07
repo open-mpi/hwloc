@@ -147,6 +147,12 @@ extern void hwloc__reorder_children(hwloc_obj_t parent);
 extern void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 extern void hwloc_topology_clear(struct hwloc_topology *topology);
 
+/* Look for an object matching complete cpuset exactly, or insert one.
+ * Return NULL on failure.
+ * Return a good fallback (object above) on failure to insert.
+ */
+extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset);
+
 extern void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
 extern char ** hwloc__find_info_slot(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name);
 extern void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);
@@ -338,4 +344,5 @@ extern char * hwloc_progname(struct hwloc_topology *topology);
 /** \brief Compare bitmaps \p bitmap1 and \p bitmap2 from an inclusion point of view.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
+
 #endif /* HWLOC_PRIVATE_H */

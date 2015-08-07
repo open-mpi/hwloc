@@ -1316,6 +1316,82 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
   return obj;
 }
 
+/* assuming set is included in the topology complete_cpuset
+ * and all objects have a proper complete_cpuset,
+ * return the best one containing set.
+ * if some object are equivalent (same complete_cpuset), return the highest one.
+ */
+static hwloc_obj_t
+hwloc_get_highest_obj_covering_complete_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set)
+{
+  hwloc_obj_t current = hwloc_get_root_obj(topology);
+  hwloc_obj_t child;
+
+  if (hwloc_bitmap_isequal(set, current->complete_cpuset))
+    /* root cpuset is exactly what we want, no need to look at children, we want the highest */
+    return current;
+
+ recurse:
+  /* find the right child */
+  child = current->first_child;
+  while (child) {
+    if (hwloc_bitmap_isequal(set, child->complete_cpuset))
+      /* child puset is exactly what we want, no need to look at children, we want the highest */
+      return child;
+    if (hwloc_bitmap_isincluded(set, child->complete_cpuset))
+      break;
+    child = child->next_sibling;
+  }
+
+  if (child) {
+    current = child;
+    goto recurse;
+  }
+
+  /* no better child */
+  return current;
+}
+
+hwloc_obj_t
+hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset)
+{
+  hwloc_obj_t group_obj, largeparent, parent;
+
+  /* restrict to the existing complete cpuset to avoid errors later */
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_complete_cpuset(topology));
+  if (hwloc_bitmap_iszero(cpuset))
+    /* remaining cpuset is empty, invalid */
+    return NULL;
+
+  largeparent = hwloc_get_highest_obj_covering_complete_cpuset(topology, cpuset);
+  if (hwloc_bitmap_isequal(largeparent->complete_cpuset, cpuset))
+    /* Found a valid object (normal case) */
+    return largeparent;
+
+  /* we need to insert an intermediate group */
+  group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+  if (!group_obj)
+    /* Failed to insert the exact Group, fallback to largeparent */
+    return largeparent;
+
+  group_obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+  group_obj->cpuset = hwloc_bitmap_dup(cpuset);
+  group_obj->attr->group.depth = (unsigned) -1;
+  parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
+  if (!parent)
+    /* Failed to insert the Group, maybe a conflicting cpuset */
+    return largeparent;
+
+  /* Group couldn't get merged or we would have gotten the right largeparent earlier */
+  assert(parent == group_obj);
+
+  /* Group inserted without being merged, everything OK, setup its sets */
+  hwloc_obj_add_children_sets(group_obj);
+
+  return parent;
+}
+
 static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
 {
   const struct hwloc_obj_memory_page_type_s *a = _a;
