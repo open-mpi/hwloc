@@ -451,10 +451,10 @@ hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_
  * @{
  */
 
-/** \brief Find the depth of cache objects matching cache depth and type.
+/** \brief Find the depth of cache objects matching cache level and type.
  *
  * Return the depth of the topology level that contains cache objects
- * whose attributes match \p cachedepth and \p cachetype. This function
+ * whose attributes match \p cachelevel and \p cachetype. This function
  * intends to disambiguate the case where hwloc_get_type_depth() returns
  * \p HWLOC_TYPE_DEPTH_MULTIPLE.
  *
