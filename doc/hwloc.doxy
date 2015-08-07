@@ -2070,8 +2070,7 @@ Each discovery component is defined by a <tt>hwloc_disc_component</tt>
 structure which contains an <tt>instantiate()</tt> callback.
 This function is invoked when this component is actually used by a topology.
 It fills a new <tt>hwloc_backend</tt> structure that usually contains
-<tt>discover()</tt> and/or <tt>notify_new_object()</tt> callbacks taking
-care of the actual topology discovery.
+a <tt>discover()</tt> callback taking care of the actual topology discovery.
 
 \note If two discovery components have the same name, only the highest
 priority one is actually made available.

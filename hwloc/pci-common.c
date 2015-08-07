@@ -44,18 +44,6 @@ hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
 #endif /* HWLOC_DEBUG */
 
 static void
-hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
-				      struct hwloc_obj *pcidev)
-{
-  struct hwloc_topology *topology = cbdata;
-
-  if (pcidev->type == HWLOC_OBJ_BRIDGE)
-    return;
-
-  hwloc_backends_notify_new_object(topology, pcidev);
-}
-
-static void
 hwloc_pci__traverse(void * cbdata, struct hwloc_obj *tree,
 		    void (*cb)(void * cbdata, struct hwloc_obj *))
 {
@@ -231,9 +219,6 @@ hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_ob
     child->parent = hostbridge;
     child->next_sibling = NULL;
     dstnextp = &child->next_sibling;
-
-    /* walk this PCI hierarchy, and lookup OS devices */
-    hwloc_pci_traverse(topology, child, hwloc_pci_traverse_lookuposdevices_cb);
 
     /* compute hostbridge secondary/subordinate buses */
     if (child->type == HWLOC_OBJ_BRIDGE
