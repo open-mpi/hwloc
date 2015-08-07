@@ -51,8 +51,6 @@ struct hwloc_linux_backend_data_s {
   struct utsname utsname; /* fields contain \0 when unknown */
 
   int deprecated_classlinks_model; /* -2 if never tried, -1 if unknown, 0 if new (device contains class/name), 1 if old (device contains class:name) */
-  int mic_need_directlookup; /* if not tried yet, 0 if not needed, 1 if needed */
-  unsigned mic_directlookup_id_max; /* -1 if not tried yet, 0 if none to lookup, maxid+1 otherwise */
 };
 
 
@@ -4292,146 +4290,6 @@ hwloc_linux_lookup_drm_class(struct hwloc_backend *backend,
    */
 }
 
-static void
-hwloc_linux_mic_class_fillinfos(struct hwloc_backend *backend,
-				struct hwloc_obj *obj, const char *osdevpath)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  int root_fd = data->root_fd;
-  FILE *fd;
-  char path[256];
-
-  hwloc_obj_add_info(obj, "CoProcType", "MIC");
-
-  snprintf(path, sizeof(path), "%s/family", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char family[64];
-    if (fgets(family, sizeof(family), fd)) {
-      char *eol = strchr(family, '\n');
-      if (eol)
-        *eol = 0;
-      hwloc_obj_add_info(obj, "MICFamily", family);
-    }
-    fclose(fd);
-  }
-
-  snprintf(path, sizeof(path), "%s/sku", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char sku[64];
-    if (fgets(sku, sizeof(sku), fd)) {
-      char *eol = strchr(sku, '\n');
-      if (eol)
-        *eol = 0;
-      hwloc_obj_add_info(obj, "MICSKU", sku);
-    }
-    fclose(fd);
-  }
-
-  snprintf(path, sizeof(path), "%s/serialnumber", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char sn[64];
-    if (fgets(sn, sizeof(sn), fd)) {
-      char *eol = strchr(sn, '\n');
-      if (eol)
-        *eol = 0;
-      hwloc_obj_add_info(obj, "MICSerialNumber", sn);
-    }
-    fclose(fd);
-  }
-
-  snprintf(path, sizeof(path), "%s/active_cores", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char string[10];
-    if (fgets(string, sizeof(string), fd)) {
-      unsigned long count = strtoul(string, NULL, 16);
-      snprintf(string, sizeof(string), "%lu", count);
-      hwloc_obj_add_info(obj, "MICActiveCores", string);
-    }
-    fclose(fd);
-  }
-
-  snprintf(path, sizeof(path), "%s/memsize", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char string[20];
-    if (fgets(string, sizeof(string), fd)) {
-      unsigned long count = strtoul(string, NULL, 16);
-      snprintf(string, sizeof(string), "%lu", count);
-      hwloc_obj_add_info(obj, "MICMemorySize", string);
-    }
-    fclose(fd);
-  }
-}
-
-static int
-hwloc_linux_lookup_mic_class(struct hwloc_backend *backend,
-			     struct hwloc_obj *pcidev, const char *pcidevpath)
-{
-  return hwloc_linux_class_readdir(backend, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_COPROC, "mic", hwloc_linux_mic_class_fillinfos);
-}
-
-static int
-hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend,
-				   struct hwloc_obj *pcidev)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  int root_fd = data->root_fd;
-  char path[256];
-  struct stat st;
-  hwloc_obj_t obj;
-  unsigned idx;
-  int res = 0;
-
-  if (!data->mic_directlookup_id_max)
-    /* already tried, nothing to do */
-    return 0;
-
-  if (data->mic_directlookup_id_max == (unsigned) -1) {
-    /* never tried, find out the max id */
-    DIR *dir;
-    struct dirent *dirent;
-
-    /* make sure we never do this lookup again */
-    data->mic_directlookup_id_max = 0;
-
-    /* read the entire class and find the max id of mic%u dirents */
-    dir = hwloc_opendir("/sys/devices/virtual/mic", root_fd);
-    if (!dir) {
-      dir = hwloc_opendir("/sys/class/mic", root_fd);
-      if (!dir)
-	return 0;
-    }
-    while ((dirent = readdir(dir)) != NULL) {
-      if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
-	continue;
-      if (sscanf(dirent->d_name, "mic%u", &idx) != 1)
-	continue;
-      if (idx >= data->mic_directlookup_id_max)
-	data->mic_directlookup_id_max = idx+1;
-    }
-    closedir(dir);
-  }
-
-  /* now iterate over the mic ids and see if one matches our pcidev */
-  for(idx=0; idx<data->mic_directlookup_id_max; idx++) {
-    snprintf(path, sizeof(path), "/sys/class/mic/mic%u/pci_%02x:%02x.%02x",
-	     idx, pcidev->attr->pcidev.bus,  pcidev->attr->pcidev.dev,  pcidev->attr->pcidev.func);
-    if (hwloc_stat(path, &st, root_fd) < 0)
-      continue;
-    snprintf(path, sizeof(path), "mic%u", idx);
-    obj = hwloc_linux_add_os_device(backend, pcidev, HWLOC_OBJ_OSDEV_COPROC, path);
-    snprintf(path, sizeof(path), "/sys/class/mic/mic%u", idx);
-    hwloc_linux_mic_class_fillinfos(backend, obj, path);
-    res++;
-  }
-
-  return res;
-}
-
 /*
  * backend callback for inserting objects inside a pci device
  */
@@ -4439,7 +4297,6 @@ static int
 hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend,
 				      struct hwloc_obj *obj)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   char pcidevpath[256];
   int res = 0;
 
@@ -4454,23 +4311,6 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend,
   res += hwloc_linux_lookup_openfabrics_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_dma_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_drm_class(backend, obj, pcidevpath);
-
-  if (data->mic_need_directlookup == -1) {
-    struct stat st;
-    if (hwloc_stat("/sys/class/mic/mic0", &st, data->root_fd) == 0
-	&& hwloc_stat("/sys/class/mic/mic0/device/mic/mic0", &st, data->root_fd) == -1)
-      /* hwloc_linux_lookup_mic_class will fail because pcidev sysfs directories
-       * do not have mic/mic%u symlinks to mic devices (old mic driver).
-       * if so, try from the mic class.
-       */
-      data->mic_need_directlookup = 1;
-    else
-      data->mic_need_directlookup = 0;
-  }
-  if (data->mic_need_directlookup)
-    res += hwloc_linux_directlookup_mic_class(backend, obj);
-  else
-    res += hwloc_linux_lookup_mic_class(backend, obj, pcidevpath);
 
   return res;
 }
@@ -4588,8 +4428,6 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
 #endif
 
   data->deprecated_classlinks_model = -2; /* never tried */
-  data->mic_need_directlookup = -1; /* not initialized */
-  data->mic_directlookup_id_max = -1; /* not initialized */
 
   return backend;
 
@@ -4916,6 +4754,118 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend)
   return res;
 }
 
+static void
+hwloc_linuxfs_mic_class_fillinfos(int root_fd,
+				  struct hwloc_obj *obj, const char *osdevpath)
+{
+  FILE *fd;
+  char path[256];
+
+  hwloc_obj_add_info(obj, "CoProcType", "MIC");
+
+  snprintf(path, sizeof(path), "%s/family", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char family[64];
+    if (fgets(family, sizeof(family), fd)) {
+      char *eol = strchr(family, '\n');
+      if (eol)
+        *eol = 0;
+      hwloc_obj_add_info(obj, "MICFamily", family);
+    }
+    fclose(fd);
+  }
+
+  snprintf(path, sizeof(path), "%s/sku", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char sku[64];
+    if (fgets(sku, sizeof(sku), fd)) {
+      char *eol = strchr(sku, '\n');
+      if (eol)
+        *eol = 0;
+      hwloc_obj_add_info(obj, "MICSKU", sku);
+    }
+    fclose(fd);
+  }
+
+  snprintf(path, sizeof(path), "%s/serialnumber", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char sn[64];
+    if (fgets(sn, sizeof(sn), fd)) {
+      char *eol = strchr(sn, '\n');
+      if (eol)
+        *eol = 0;
+      hwloc_obj_add_info(obj, "MICSerialNumber", sn);
+    }
+    fclose(fd);
+  }
+
+  snprintf(path, sizeof(path), "%s/active_cores", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char string[10];
+    if (fgets(string, sizeof(string), fd)) {
+      unsigned long count = strtoul(string, NULL, 16);
+      snprintf(string, sizeof(string), "%lu", count);
+      hwloc_obj_add_info(obj, "MICActiveCores", string);
+    }
+    fclose(fd);
+  }
+
+  snprintf(path, sizeof(path), "%s/memsize", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char string[20];
+    if (fgets(string, sizeof(string), fd)) {
+      unsigned long count = strtoul(string, NULL, 16);
+      snprintf(string, sizeof(string), "%lu", count);
+      hwloc_obj_add_info(obj, "MICMemorySize", string);
+    }
+    fclose(fd);
+  }
+}
+
+static int
+hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  unsigned idx;
+  int res = 0;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/mic", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    hwloc_obj_t obj, parent;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+    if (sscanf(dirent->d_name, "mic%u", &idx) != 1)
+      continue;
+
+    snprintf(path, sizeof(path), "/sys/class/mic/mic%u", idx);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    if (!parent)
+      continue;
+
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_COPROC, dirent->d_name);
+
+    hwloc_linuxfs_mic_class_fillinfos(root_fd, obj, path);
+    res++;
+  }
+
+  closedir(dir);
+
+  return res;
+}
+
 #define HWLOC_PCI_REVISION_ID 0x08
 #define HWLOC_PCI_CAP_ID_EXP 0x10
 #define HWLOC_PCI_CLASS_NOT_DEFINED 0x0000
@@ -5164,6 +5114,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   hwloc_linuxfs_pci_look_pcislots(backend);
 
   res += hwloc_linuxfs_lookup_block_class(backend);
+  res += hwloc_linuxfs_lookup_mic_class(backend);
 
   return res;
 }
