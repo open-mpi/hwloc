@@ -41,7 +41,6 @@ hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
 		pcidev->attr->pcidev.subvendor_id, pcidev->attr->pcidev.subdevice_id,
 		pcidev->attr->pcidev.revision, pcidev->attr->pcidev.class_id);
 }
-#endif /* HWLOC_DEBUG */
 
 static void
 hwloc_pci__traverse(void * cbdata, struct hwloc_obj *tree,
@@ -62,6 +61,7 @@ hwloc_pci_traverse(void * cbdata, struct hwloc_obj *tree,
 {
   hwloc_pci__traverse(cbdata, tree, cb);
 }
+#endif /* HWLOC_DEBUG */
 
 enum hwloc_pci_busid_comparison_e {
   HWLOC_PCI_BUSID_LOWER,
