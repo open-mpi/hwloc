@@ -20,31 +20,27 @@
 
 #define HWLOC_GL_SERVER_MAX 10
 #define HWLOC_GL_SCREEN_MAX 10
-struct hwloc_gl_backend_data_s {
-  unsigned nr_display;
-  struct hwloc_gl_display_info_s {
-    char name[10];
-    unsigned port, device;
-    unsigned pcidomain, pcibus, pcidevice, pcifunc;
-    char *productname;
-  } display[HWLOC_GL_SERVER_MAX*HWLOC_GL_SCREEN_MAX];
-};
 
-static void
-hwloc_gl_query_devices(struct hwloc_gl_backend_data_s *data)
+static int
+hwloc_gl_discover(struct hwloc_backend *backend)
 {
+  struct hwloc_topology *topology = backend->topology;
+  unsigned i, res = 0;
   int err;
-  unsigned i,j;
 
-  /* mark the number of display as 0 in case we fail below,
-   * so that we don't try again later.
-   */
-  data->nr_display = 0;
+  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+    return 0;
+
+  if (!hwloc_topology_is_thissystem(topology)) {
+    hwloc_debug("%s", "\nno GL detection (not thissystem)\n");
+    return 0;
+  }
 
   for (i = 0; i < HWLOC_GL_SERVER_MAX; ++i) {
     Display* display;
     char displayName[10];
     int opcode, event, error;
+    unsigned j;
 
     /* open X server */
     snprintf(displayName, sizeof(displayName), ":%u", i);
@@ -59,7 +55,7 @@ hwloc_gl_query_devices(struct hwloc_gl_backend_data_s *data)
     }
 
     for (j = 0; j < (unsigned) ScreenCount(display) && j < HWLOC_GL_SCREEN_MAX; j++) {
-      struct hwloc_gl_display_info_s *info = &data->display[data->nr_display];
+      hwloc_obj_t osdev, parent;
       const int screen = j;
       unsigned int *ptr_binary_data;
       int data_length;
@@ -69,6 +65,7 @@ hwloc_gl_query_devices(struct hwloc_gl_backend_data_s *data)
       int nv_ctrl_pci_domain;
       int nv_ctrl_pci_func;
       char *productname;
+      char name[64];
 
       /* the server supports NV-CONTROL but it may contain non-NVIDIA screen that don't support it */
       if (!XNVCTRLIsNvScreen(display, screen))
@@ -115,98 +112,31 @@ hwloc_gl_query_devices(struct hwloc_gl_backend_data_s *data)
       err = XNVCTRLQueryTargetStringAttribute(display, NV_CTRL_TARGET_TYPE_GPU, gpu_number, 0,
                                               NV_CTRL_STRING_PRODUCT_NAME, &productname);
 
-      snprintf(info->name, sizeof(info->name), ":%u.%u", i, j);
-      info->port = i;
-      info->device = j;
-      info->pcidomain = nv_ctrl_pci_domain;
-      info->pcibus = nv_ctrl_pci_bus;
-      info->pcidevice = nv_ctrl_pci_device;
-      info->pcifunc = nv_ctrl_pci_func;
-      info->productname = productname;
+      snprintf(name, sizeof(name), ":%u.%u", i, j);
 
-      hwloc_debug("GL device %s (product %s) on PCI 0000:%02x:%02x.%u\n", info->name, productname,
+      osdev = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
+      osdev->name = strdup(name);
+      osdev->logical_index = -1;
+      osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
+      hwloc_obj_add_info(osdev, "Backend", "GL");
+      hwloc_obj_add_info(osdev, "GPUVendor", "NVIDIA Corporation");
+      if (productname)
+	hwloc_obj_add_info(osdev, "GPUModel", productname);
+
+      parent = hwloc_pci_belowroot_find_by_busid(topology, nv_ctrl_pci_domain, nv_ctrl_pci_bus, nv_ctrl_pci_device, nv_ctrl_pci_func);
+      if (!parent)
+	parent = hwloc_get_root_obj(topology);
+
+      hwloc_insert_object_by_parent(topology, parent, osdev);
+
+      hwloc_debug("GL device %s (product %s) on PCI 0000:%02x:%02x.%u\n", name, productname,
 		  nv_ctrl_pci_domain, nv_ctrl_pci_bus, nv_ctrl_pci_device, nv_ctrl_pci_func);
-
-      /* validate this device */
-      data->nr_display++;
+      res++;
     }
     XCloseDisplay(display);
   }
-}
-
-static int
-hwloc_gl_backend_notify_new_object(struct hwloc_backend *backend,
-				   struct hwloc_obj *pcidev)
-{
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_gl_backend_data_s *data = backend->private_data;
-  unsigned i, res;
-
-  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
-    return 0;
-
-  if (!hwloc_topology_is_thissystem(topology)) {
-    hwloc_debug("%s", "\nno GL detection (not thissystem)\n");
-    return 0;
-  }
-
-  if (HWLOC_OBJ_PCI_DEVICE != pcidev->type)
-    return 0;
-
-  if (data->nr_display == (unsigned) -1) {
-    /* first call, lookup all display */
-    hwloc_gl_query_devices(data);
-    /* if it fails, data->nr_display = 0 so we won't do anything below and in next callbacks */
-  }
-
-  if (!data->nr_display)
-    /* found no display */
-    return 0;
-
-  /* now the display array is ready to use */
-  res = 0;
-  for(i=0; i<data->nr_display; i++) {
-    struct hwloc_gl_display_info_s *info = &data->display[i];
-    hwloc_obj_t osdev;
-
-    if (info->pcidomain != pcidev->attr->pcidev.domain)
-      continue;
-    if (info->pcibus != pcidev->attr->pcidev.bus)
-      continue;
-    if (info->pcidevice != pcidev->attr->pcidev.dev)
-      continue;
-    if (info->pcifunc != pcidev->attr->pcidev.func)
-      continue;
-
-    osdev = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
-    osdev->name = strdup(info->name);
-    osdev->logical_index = -1;
-    osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
-    hwloc_obj_add_info(osdev, "Backend", "GL");
-    hwloc_obj_add_info(osdev, "GPUVendor", "NVIDIA Corporation");
-    if (info->productname)
-      hwloc_obj_add_info(osdev, "GPUModel", info->productname);
-    hwloc_insert_object_by_parent(topology, pcidev, osdev);
-
-    res++;
-    /* there may be others */
-  }
 
   return res;
-}
-
-static void
-hwloc_gl_backend_disable(struct hwloc_backend *backend)
-{
-  struct hwloc_gl_backend_data_s *data = backend->private_data;
-  unsigned i;
-  if (data->nr_display != (unsigned) -1) { /* could be -1 if --no-io */
-    for(i=0; i<data->nr_display; i++) {
-      struct hwloc_gl_display_info_s *info = &data->display[i];
-      free(info->productname);
-    }
-  }
-  free(backend->private_data);
 }
 
 static struct hwloc_backend *
@@ -216,26 +146,13 @@ hwloc_gl_component_instantiate(struct hwloc_disc_component *component,
 			       const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
-  struct hwloc_gl_backend_data_s *data;
 
   /* thissystem may not be fully initialized yet, we'll check flags in discover() */
 
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
-
-  data = malloc(sizeof(*data));
-  if (!data) {
-    free(backend);
-    return NULL;
-  }
-  /* the first callback will initialize those */
-  data->nr_display = (unsigned) -1; /* unknown yet */
-
-  backend->private_data = data;
-  backend->disable = hwloc_gl_backend_disable;
-
-  backend->notify_new_object = hwloc_gl_backend_notify_new_object;
+  backend->discover = hwloc_gl_discover;
   return backend;
 }
 
