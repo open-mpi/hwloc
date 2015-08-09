@@ -4265,13 +4265,30 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
     }
     fclose(fd);
   }
+
+  /* pmem have device/devtype containing "nd_btt" (sectors)
+   * or "nd_namespace_io" (byte-granularity).
+   * Note that device/sector_size in btt devices includes integrity metadata
+   * (512/4096 block + 0/N) while queue/hw_sector_size above is the user sectorsize
+   * without metadata.
+   */
+  snprintf(path, sizeof(path), "%s/device/devtype", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char string[32];
+    if (fgets(string, sizeof(string), fd)) {
+      if (!strncmp(string, "nd_", 3)) {
+	strcpy(blocktype, "NVDIMM"); /* Save the blocktype now since udev reports "" so far */
+	if (!strcmp(string, "nd_namespace_io"))
+	  sectorsize = 1;
+      }
+    }
+  }
   if (sectorsize) {
     char string[16];
     snprintf(string, sizeof(string), "%u", sectorsize);
     hwloc_obj_add_info(obj, "SectorSize", string);
   }
-
-  /* pmem have devtype containing nd_btt (granularity is in sector_size) or nd_namespace_io (byte-granularity) */
 
   snprintf(path, sizeof(path), "%s/dev", osdevpath);
   fd = hwloc_fopen(path, "r", root_fd);
@@ -4376,6 +4393,8 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 
   if (!strcmp(blocktype, "disk"))
     hwloc_obj_add_info(obj, "Type", "Disk");
+  else if (!strcmp(blocktype, "NVDIMM")) /* FIXME: set by us above, to workaround udev returning "" so far */
+    hwloc_obj_add_info(obj, "Type", "NVDIMM");
   else if (!strcmp(blocktype, "tape"))
     hwloc_obj_add_info(obj, "Type", "Tape");
   else if (!strcmp(blocktype, "cd") || !strcmp(blocktype, "floppy") || !strcmp(blocktype, "optical"))
