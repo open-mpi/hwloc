@@ -1428,8 +1428,9 @@ hwloc failed to discover any package.
 <dt>PCISlot</dt>
 <dd>The name/number of the physical slot where the PCI device is plugged.
 </dd>
-<dt>Vendor, Model, Revision, SerialNumber, Size</dt>
-<dd>The vendor and model names, revision, serial number, and size (in kB) of a Block OS device.
+<dt>Vendor, Model, Revision, SerialNumber, Size, SectorSize</dt>
+<dd>The vendor and model names, revision, serial number, size (in kB)
+and SectorSize (in bytes) of a Block OS device.
 </dd>
 <dt>LinuxDeviceID</dt>
 <dd>The major/minor device number such as 8:0 on Linux for a Block OS device.

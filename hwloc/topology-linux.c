@@ -4239,6 +4239,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   char serial[64] = "";
   char revision[64] = "";
   char blocktype[64] = "";
+  unsigned sectorsize = 0;
   unsigned major_id, minor_id;
   char *tmp;
 
@@ -4253,6 +4254,21 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
       hwloc_obj_add_info(obj, "Size", string);
     }
     fclose(fd);
+  }
+
+  snprintf(path, sizeof(path), "%s/queue/hw_sector_size", osdevpath);
+  fd = hwloc_fopen(path, "r", root_fd);
+  if (fd) {
+    char string[20];
+    if (fgets(string, sizeof(string), fd)) {
+      sectorsize = strtoul(string, NULL, 10);
+    }
+    fclose(fd);
+  }
+  if (sectorsize) {
+    char string[16];
+    snprintf(string, sizeof(string), "%u", sectorsize);
+    hwloc_obj_add_info(obj, "SectorSize", string);
   }
 
   /* pmem have devtype containing nd_btt (granularity is in sector_size) or nd_namespace_io (byte-granularity) */

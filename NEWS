@@ -59,6 +59,7 @@ Version 2.0
 * Misc
   + Linux OS devices do not have to be attached through PCI anymore,
     for instance enabling the discovery of NVDIMM block devices.
+  + Add a SectorSize attribute to block OS devices on Linux.
   + Exporting to synthetic now ignores I/O and Misc objects.
   + XML and Synthetic export functions have moved to hwloc/export.h,
     automatically included from hwloc.h.

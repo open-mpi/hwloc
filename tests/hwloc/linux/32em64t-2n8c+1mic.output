@@ -158,6 +158,7 @@
         <object type="PCIDev" os_index="498" pci_busid="0000:00:1f.2" pci_type="0106 [8086:1d02] [1028:0518] 06" pci_link_speed="0.000000">
           <object type="OSDev" name="sda" osdev_type="0">
             <info name="Size" value="244198584"/>
+            <info name="SectorSize" value="512"/>
             <info name="LinuxDeviceID" value="8:0"/>
             <info name="Model" value="MTFDDAK256MAM-1K12"/>
             <info name="Revision" value="08TH"/>
