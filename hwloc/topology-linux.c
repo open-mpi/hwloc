@@ -4778,6 +4778,7 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend)
       continue;
 
     /* FIXME: only keep cardX ? */
+    /* FIXME: drop cardX for proprietary drivers that get CUDA/OpenCL devices? */
 
     snprintf(path, sizeof(path), "/sys/class/drm/%s", dirent->d_name);
     parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
