@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2012 Inria.  All rights reserved.
+ * Copyright © 2011-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -71,8 +71,8 @@ int main(void)
   nb = get_nb_pcidev(HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO, 0, xmlbuf, xmlbuflen);
   assert(nb == nbwhole);
 
-  /* make sure we don't use linuxpci backend, it works fine when HWLOC_THISSYSTEM=0 */
-  putenv("HWLOC_COMPONENTS=-linuxpci");
+  /* make sure we don't use linuxio backend, it works fine when HWLOC_THISSYSTEM=0 */
+  putenv("HWLOC_COMPONENTS=-linuxio");
   /* with HWLOC_THISSYSTEM=0, won't get any object */
   nb = get_nb_pcidev(0, 0, NULL, 0);
   assert(!nb);

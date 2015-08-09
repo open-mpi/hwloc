@@ -4105,10 +4105,10 @@ const struct hwloc_component hwloc_linux_component = {
 
 
 
-#ifdef HWLOC_HAVE_LINUXPCI
+#ifdef HWLOC_HAVE_LINUXIO
 
 /***********************************
- ******* Linux PCI component *******
+ ******* Linux I/O component *******
  ***********************************/
 
 static hwloc_obj_t
@@ -5075,7 +5075,7 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 }
 
 static int
-hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
+hwloc_look_linuxfs_io(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = NULL;
@@ -5100,7 +5100,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   assert(data);
   backend->private_data = data;
   root_fd = data->root_fd;
-  hwloc_debug("linuxpci backend stole linux backend root_fd %d\n", root_fd);
+  hwloc_debug("linuxio backend stole linux backend root_fd %d\n", root_fd);
 
   /* don't rediscovery PCI devices if another backend did it
    * (they are attached to root until later in the core discovery)
@@ -5110,7 +5110,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   while (tmp) {
     if (tmp->type == HWLOC_OBJ_PCI_DEVICE
 	|| (tmp->type == HWLOC_OBJ_BRIDGE && tmp->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
-      hwloc_debug("%s", "PCI objects already added, ignoring linuxpci backend.\n");
+      hwloc_debug("%s", "PCI objects already added, ignoring linuxio PCI discovery.\n");
       needdiscovery = 0;
       break;
     }
@@ -5133,10 +5133,10 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 }
 
 static struct hwloc_backend *
-hwloc_linuxpci_component_instantiate(struct hwloc_disc_component *component,
-				     const void *_data1 __hwloc_attribute_unused,
-				     const void *_data2 __hwloc_attribute_unused,
-				     const void *_data3 __hwloc_attribute_unused)
+hwloc_linuxio_component_instantiate(struct hwloc_disc_component *component,
+				    const void *_data1 __hwloc_attribute_unused,
+				    const void *_data2 __hwloc_attribute_unused,
+				    const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
 
@@ -5145,7 +5145,7 @@ hwloc_linuxpci_component_instantiate(struct hwloc_disc_component *component,
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
-  backend->discover = hwloc_look_linuxfs_pci;
+  backend->discover = hwloc_look_linuxfs_io;
   /* backend->private_data will point to the main linux private_data after load(),
    * once the main linux component is instantiated for sure.
    * it remains valid until the main linux component gets disabled during topology destroy.
@@ -5153,21 +5153,21 @@ hwloc_linuxpci_component_instantiate(struct hwloc_disc_component *component,
   return backend;
 }
 
-static struct hwloc_disc_component hwloc_linuxpci_disc_component = {
+static struct hwloc_disc_component hwloc_linuxio_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_MISC,
-  "linuxpci",
+  "linuxio",
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
-  hwloc_linuxpci_component_instantiate,
+  hwloc_linuxio_component_instantiate,
   19, /* after pci */
   NULL
 };
 
-const struct hwloc_component hwloc_linuxpci_component = {
+const struct hwloc_component hwloc_linuxio_component = {
   HWLOC_COMPONENT_ABI,
   NULL, NULL,
   HWLOC_COMPONENT_TYPE_DISC,
   0,
-  &hwloc_linuxpci_disc_component
+  &hwloc_linuxio_disc_component
 };
 
-#endif /* HWLOC_HAVE_LINUXPCI */
+#endif /* HWLOC_HAVE_LINUXIO */

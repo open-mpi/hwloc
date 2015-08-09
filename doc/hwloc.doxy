@@ -2147,11 +2147,12 @@ environment variable (see \ref envvar).
  see \ref iodevices.
  <b>It may be built as a plugin</b>.
 </dd>
-<dt>linuxpci</dt>
+<dt>linuxio (former linuxpci)</dt>
 <dd>
- This component can probe PCI devices on Linux without the help of external
- libraries such as libpciaccess. Its priority is lower than the pci component
- because it misses device names.
+ This component can probe I/O devices on Linux.
+ It discovers PCI devices without the help of external libraries such as libpciaccess.
+ Its priority is lower than the pci component because it misses device names.
+ It also discovers many kinds of Linux-specific OS devices.
 </dd>
 <dt>opencl</dt>
 <dd>
