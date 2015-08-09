@@ -93,10 +93,12 @@ savelink() {
 
 # Gather the following list of files
 cat << EOF | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
+/proc/cmdline
 /proc/cpuinfo
 /proc/meminfo
 /proc/mounts
 /proc/stat
+/proc/version
 /proc/self/cpuset
 /proc/self/cgroup
 EOF
@@ -138,7 +140,6 @@ if [ x$gatherio = x1 ]; then
   cat << EOF | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 /sys/bus/pci/devices/
 /sys/bus/pci/slots/
-/sys/block/
 /sys/class/block/
 /sys/class/dma/
 /sys/class/drm/
