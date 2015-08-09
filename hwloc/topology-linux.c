@@ -4248,7 +4248,6 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
     char string[20];
     if (fgets(string, sizeof(string), fd)) {
       unsigned long long sectors = strtoull(string, NULL, 10);
-      char string[16];
       /* linux always reports size in 512-byte units, we want kB */
       snprintf(string, sizeof(string), "%llu", sectors / 2);
       hwloc_obj_add_info(obj, "Size", string);
