@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.11.1
 --------------
+* Fix a segfault when displaying logical indexes in the graphical lstopo,
+  thanks to Guillaume Mercier for reporting the issue.
 * hwloc-annotate does not drop unavailable resources from the output anymore
   and those may be annotated as well.
 * Fix an overzealous assertion when intermediate Group object while Groups
