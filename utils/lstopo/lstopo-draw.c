@@ -1373,7 +1373,7 @@ output_compute_pu_min_textwidth(struct lstopo_output *output)
 
   if (output->logical) {
     unsigned depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
-    lastpu = hwloc_get_obj_by_depth(topology, HWLOC_OBJ_PU, hwloc_get_nbobjs_by_depth(topology, depth)-1);
+    lastpu = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth)-1);
   } else {
     unsigned lastidx = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
     lastpu = hwloc_get_pu_obj_by_os_index(topology, lastidx);
