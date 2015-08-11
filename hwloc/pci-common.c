@@ -179,9 +179,9 @@ hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
 }
 
 static struct hwloc_obj *
-hwloc_pci_fixup_hostbridge_parent(struct hwloc_topology *topology __hwloc_attribute_unused,
-				  struct hwloc_pcidev_attr_s *busid,
-				  struct hwloc_obj *parent)
+hwloc_pci_fixup_busid_parent(struct hwloc_topology *topology __hwloc_attribute_unused,
+			     struct hwloc_pcidev_attr_s *busid,
+			     struct hwloc_obj *parent)
 {
   /* Xeon E5v3 in cluster-on-die mode only have PCI on the first NUMA node of each package.
    * but many dual-processor host report the second PCI hierarchy on 2nd NUMA of first package.
@@ -217,23 +217,14 @@ hwloc_pci_fixup_hostbridge_parent(struct hwloc_topology *topology __hwloc_attrib
 }
 
 static struct hwloc_obj *
-hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
+hwloc_pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
-  struct hwloc_pcidev_attr_s *busid;
   hwloc_obj_t parent;
   const char *env;
   int forced = 0;
   char envname[256];
   int err;
-
-  if (hostbridge->type == HWLOC_OBJ_PCI_DEVICE
-      || (hostbridge->type == HWLOC_OBJ_BRIDGE
-	  && hostbridge->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
-    busid = &hostbridge->attr->pcidev;
-  else
-    /* hostbridges don't have a PCI busid for looking up locality */
-    busid = &hostbridge->io_first_child->attr->pcidev;
 
   /* override the cpuset with the environment if given */
   snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS",
@@ -243,24 +234,24 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
     /* if env exists but is empty, don't let quirks change what the OS reports */
     forced = 1;
   if (env && *env) {
-    /* force the hostbridge cpuset */
+    /* force the cpuset */
     hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
     hwloc_bitmap_sscanf(cpuset, env);
   } else {
-    /* get the hostbridge cpuset by asking the OS backend. */
+    /* get the cpuset by asking the OS backend. */
     err = hwloc_backends_get_pci_busid_cpuset(topology, busid, cpuset);
     if (err < 0)
-      /* if we got nothing, assume the hostbridge is attached to the top of hierarchy */
+      /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
       hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
   }
 
-  hwloc_debug_bitmap("Attaching hostbridge to cpuset %s\n", cpuset);
+  hwloc_debug_bitmap("Attaching PCI tree to cpuset %s\n", cpuset);
 
   parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
   if (parent) {
     if (!forced)
       /* We found a valid parent. Check that the OS didn't report invalid locality */
-      parent = hwloc_pci_fixup_hostbridge_parent(topology, busid, parent);
+      parent = hwloc_pci_fixup_busid_parent(topology, busid, parent);
   } else {
     /* Fallback to root */
     parent = hwloc_get_root_obj(topology);
@@ -313,6 +304,7 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
     struct hwloc_obj **dstnextp = &hostbridge->io_first_child;
     struct hwloc_obj **srcnextp = &fakeparent.io_first_child;
     struct hwloc_obj *child = *srcnextp;
+    struct hwloc_pcidev_attr_s *busid;
     struct hwloc_obj *parent;
     unsigned short current_domain = child->attr->pcidev.domain;
     unsigned char current_bus = child->attr->pcidev.bus;
@@ -350,8 +342,16 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
     hwloc_debug("New PCI hostbridge %04x:[%02x-%02x]\n",
 		current_domain, current_bus, current_subordinate);
 
+    if (hostbridge->type == HWLOC_OBJ_PCI_DEVICE
+	|| (hostbridge->type == HWLOC_OBJ_BRIDGE
+	    && hostbridge->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
+      busid = &hostbridge->attr->pcidev;
+    else
+      /* hostbridges don't have a PCI busid for looking up locality */
+      busid = &hostbridge->io_first_child->attr->pcidev;
+
     /* attach the hostbridge where it belongs */
-    parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge);
+    parent = hwloc_pci_find_busid_parent(topology, busid);
     hwloc_insert_object_by_parent(topology, parent, hostbridge);
   }
 
