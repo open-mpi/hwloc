@@ -4171,6 +4171,10 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
     parent = hwloc_pci_belowroot_find_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
     if (parent)
       return parent;
+    /* attach to a normal (non-I/O) parent found by PCI affinity */
+    parent = hwloc_pci_find_busid_parent(topology, pcidomain, pcibus, pcidev, pcifunc);
+    if (parent)
+      return parent;
   }
 
  nopci:
@@ -4204,6 +4208,12 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 	return parent;
     }
   }
+
+  /* FIXME: {numa_node,local_cpus} may be missing when the device link points to a subdirectory.
+   * For instance, device of scsi blocks may point to foo/ata1/host0/target0:0:0/0:0:0:0/ instead of foo/
+   * In such case, we should look for device/../../../../{numa_node,local_cpus} instead of device/{numa_node,local_cpus}
+   * Not needed yet since scsi blocks use the PCI locality above.
+   */
 
   /* fallback to the root object */
   return hwloc_get_root_obj(topology);
