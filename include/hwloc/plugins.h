@@ -422,10 +422,25 @@ HWLOC_DECLSPEC int hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topolo
  *
  * If no exactly matching object is found, return the container bridge if any, or NULL.
  *
+ * On failure, it may be possible to find the PCI locality (instead of the PCI device)
+ * by calling hwloc_pci_find_busid_parent().
+ *
  * \note This is semantically identical to hwloc_get_pcidev_by_busid() which only works
  * after the topology is fully loaded.
  */
 HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_belowroot_find_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
+
+/** \brief Find the normal parent of a PCI bus ID.
+ *
+ * Look at PCI affinity to find out where the given PCI bus ID should be attached.
+ *
+ * This function should be used to attach an I/O device directly under a normal
+ * (non-I/O) object, instead of below a PCI object.
+ * It is usually used by backends when hwloc_pci_belowroot_find_by_busid() failed
+ * to find the hwloc object corresponding to this bus ID, for instance because
+ * PCI discovery is not supported on this platform.
+ */
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_busid_parent(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 /** @} */
 

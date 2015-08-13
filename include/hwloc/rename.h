@@ -499,6 +499,7 @@ extern "C" {
 #define hwloc_pci_tree_insert_by_busid HWLOC_NAME(pci_tree_insert_by_busid)
 #define hwloc_pci_tree_attach_belowroot HWLOC_NAME(pci_tree_attach_belowroot)
 #define hwloc_pci_belowroot_find_by_busid HWLOC_NAME(pci_belowroot_find_by_busid)
+#define hwloc_pci_find_busid_parent HWLOC_NAME(pci_find_busid_parent)
 
 /* hwloc/deprecated.h */
 

@@ -125,6 +125,8 @@ hwloc_gl_discover(struct hwloc_backend *backend)
 
       parent = hwloc_pci_belowroot_find_by_busid(topology, nv_ctrl_pci_domain, nv_ctrl_pci_bus, nv_ctrl_pci_device, nv_ctrl_pci_func);
       if (!parent)
+	parent = hwloc_pci_find_busid_parent(topology, nv_ctrl_pci_domain, nv_ctrl_pci_bus, nv_ctrl_pci_device, nv_ctrl_pci_func);
+      if (!parent)
 	parent = hwloc_get_root_obj(topology);
 
       hwloc_insert_object_by_parent(topology, parent, osdev);

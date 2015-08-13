@@ -290,7 +290,7 @@ hwloc_pci_fixup_busid_parent(struct hwloc_topology *topology __hwloc_attribute_u
 }
 
 static struct hwloc_obj *
-hwloc_pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid)
+hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t parent;
@@ -334,6 +334,18 @@ hwloc_pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev
   return parent;
 }
 
+struct hwloc_obj *
+hwloc_pci_find_busid_parent(struct hwloc_topology *topology,
+			    unsigned domain, unsigned bus, unsigned dev, unsigned func)
+{
+  struct hwloc_pcidev_attr_s busid;
+  busid.domain = domain;
+  busid.bus = bus;
+  busid.dev = dev;
+  busid.func = func;
+  return hwloc__pci_find_busid_parent(topology, &busid);
+}
+
 int
 hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology)
 {
@@ -368,7 +380,7 @@ hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology)
       busid = &obj->io_first_child->attr->pcidev;
 
     /* attach the object (and children) where it belongs */
-    parent = hwloc_pci_find_busid_parent(topology, busid);
+    parent = hwloc__pci_find_busid_parent(topology, busid);
     if (parent == root) {
       /* keep this object here */
       listp = &obj->next_sibling;
