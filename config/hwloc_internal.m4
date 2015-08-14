@@ -65,6 +65,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--disable-libxml2],
 		                 [Do not use libxml2 for XML support, use a custom minimalistic support]))
 
+    # I/O?
+    AC_ARG_ENABLE([io],
+                  AS_HELP_STRING([--disable-io],
+                                 [Disable I/O discovery entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, GL)]))
+
     # PCI?
     AC_ARG_ENABLE([pci],
                   AS_HELP_STRING([--disable-pci],

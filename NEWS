@@ -63,6 +63,8 @@ Version 2.0
   + Exporting to synthetic now ignores I/O and Misc objects.
   + XML and Synthetic export functions have moved to hwloc/export.h,
     automatically included from hwloc.h.
+  + Separate OS device discovery from PCI discovery. Only the latter is disabled
+    with --disable-pci at configure time. Both may be disabled with --disable-io.
   + The old `libpci' component name from hwloc 1.6 is not supported anymore,
     only the `pci' name from hwloc 1.7 is now recognized.
   + The `linuxpci' component is now renamed into `linuxio'.

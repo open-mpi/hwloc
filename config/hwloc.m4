@@ -197,12 +197,14 @@ EOF])
         hwloc_linux=yes
         AC_MSG_RESULT([Linux])
         hwloc_components="$hwloc_components linux"
-	hwloc_components="$hwloc_components linuxio"
-	AC_DEFINE(HWLOC_HAVE_LINUXIO, 1, [Define to 1 if building the Linux I/O component])
-	hwloc_linuxio_happy=yes
-	if test x$enable_pci != xno; then
-	  AC_DEFINE(HWLOC_HAVE_LINUXPCI, 1, [Define to 1 if enabling Linux-specific PCI discovery in the Linux I/O component])
-	  hwloc_linuxpci_happy=yes
+        if test "x$enable_io" != xno; then
+	  hwloc_components="$hwloc_components linuxio"
+	  AC_DEFINE(HWLOC_HAVE_LINUXIO, 1, [Define to 1 if building the Linux I/O component])
+	  hwloc_linuxio_happy=yes
+	  if test x$enable_pci != xno; then
+	    AC_DEFINE(HWLOC_HAVE_LINUXPCI, 1, [Define to 1 if enabling Linux-specific PCI discovery in the Linux I/O component])
+	    hwloc_linuxpci_happy=yes
+	  fi
 	fi
         ;;
       *-*-irix*)
@@ -717,7 +719,7 @@ EOF])
     # libpci/pciutils because that library is GPL and is incompatible
     # with our BSD license.
     hwloc_pci_happy=no
-    if test "x$enable_pci" != xno; then
+    if test "x$enable_io" != xno && test "x$enable_pci" != xno; then
       hwloc_pci_happy=yes
       HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [pciaccess.h], [:], [hwloc_pci_happy=no])
 
@@ -746,7 +748,7 @@ EOF])
 
     # OpenCL support
     hwloc_opencl_happy=no
-    if test "x$enable_opencl" != "xno"; then
+    if test "x$enable_io" != xno && test "x$enable_opencl" != "xno"; then
         hwloc_opencl_happy=yes
         AC_CHECK_HEADERS([CL/cl_ext.h], [
 	  AC_CHECK_LIB([OpenCL], [clGetDeviceIDs], [HWLOC_OPENCL_LIBS="-lOpenCL"], [hwloc_opencl_happy=no])
@@ -783,7 +785,7 @@ EOF])
     # CUDA support
     hwloc_have_cuda=no
     hwloc_have_cudart=no
-    if test "x$enable_cuda" != "xno"; then
+    if test "x$enable_io" != xno && test "x$enable_cuda" != "xno"; then
       AC_CHECK_HEADERS([cuda.h], [
         AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
@@ -832,7 +834,7 @@ EOF])
 
     # NVML support
     hwloc_nvml_happy=no
-    if test "x$enable_nvml" != "xno"; then
+    if test "x$enable_io" != xno && test "x$enable_nvml" != "xno"; then
 	hwloc_nvml_happy=yes
 	AC_CHECK_HEADERS([nvml.h], [
 	  AC_CHECK_LIB([nvidia-ml], [nvmlInit], [HWLOC_NVML_LIBS="-lnvidia-ml"], [hwloc_nvml_happy=no])
@@ -889,7 +891,7 @@ EOF])
 
     # GL Support
     hwloc_gl_happy=no
-    if test "x$enable_gl" != "xno"; then
+    if test "x$enable_io" != xno && test "x$enable_gl" != "xno"; then
 	hwloc_gl_happy=yes
 
 	AS_IF([test "$hwloc_enable_X11" != "yes"],
