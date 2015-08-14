@@ -4877,6 +4877,8 @@ hwloc__get_firmware_dmi_memory_info(struct hwloc_topology *topology,
   return res;
 }
 
+#ifdef HWLOC_HAVE_LINUXPCI
+
 #define HWLOC_PCI_REVISION_ID 0x08
 #define HWLOC_PCI_CAP_ID_EXP 0x10
 #define HWLOC_PCI_CLASS_NOT_DEFINED 0x0000
@@ -5075,6 +5077,7 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 
   return 0;
 }
+#endif /* HWLOC_HAVE_LINUXPCI */
 
 static int
 hwloc_look_linuxfs_io(struct hwloc_backend *backend)
@@ -5082,9 +5085,11 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = NULL;
   struct hwloc_backend *tmpbackend;
-  struct hwloc_obj *tmp;
   int root_fd = -1;
-  int needdiscovery;
+#ifdef HWLOC_HAVE_LINUXPCI
+  struct hwloc_obj *tmp;
+  int needpcidiscovery;
+#endif
   int res = 0;
 
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
@@ -5104,25 +5109,27 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   root_fd = data->root_fd;
   hwloc_debug("linuxio backend stole linux backend root_fd %d\n", root_fd);
 
+#ifdef HWLOC_HAVE_LINUXPCI
   /* don't rediscovery PCI devices if another backend did it
    * (they are attached to root until later in the core discovery)
    */
-  needdiscovery = 1;
+  needpcidiscovery = 1;
   tmp = hwloc_get_root_obj(topology)->io_first_child;
   while (tmp) {
     if (tmp->type == HWLOC_OBJ_PCI_DEVICE
 	|| (tmp->type == HWLOC_OBJ_BRIDGE && tmp->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
       hwloc_debug("%s", "PCI objects already added, ignoring linuxio PCI discovery.\n");
-      needdiscovery = 0;
+      needpcidiscovery = 0;
       break;
     }
     tmp = tmp->next_sibling;
   }
 
-  if (needdiscovery)
+  if (needpcidiscovery)
     res = hwloc_linuxfs_pci_look_pcidevices(backend);
 
   hwloc_linuxfs_pci_look_pcislots(backend);
+#endif /* HWLOC_HAVE_LINUXPCI */
 
   res += hwloc_linuxfs_lookup_block_class(backend);
   res += hwloc_linuxfs_lookup_net_class(backend);

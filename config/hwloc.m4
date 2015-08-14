@@ -197,10 +197,12 @@ EOF])
         hwloc_linux=yes
         AC_MSG_RESULT([Linux])
         hwloc_components="$hwloc_components linux"
+	hwloc_components="$hwloc_components linuxio"
+	AC_DEFINE(HWLOC_HAVE_LINUXIO, 1, [Define to 1 if building the Linux I/O component])
+	hwloc_linuxio_happy=yes
 	if test x$enable_pci != xno; then
-	  hwloc_components="$hwloc_components linuxio"
-	  AC_DEFINE(HWLOC_HAVE_LINUXIO, 1, [Define to 1 if building the Linux I/O component])
-	  hwloc_linuxio_happy=yes
+	  AC_DEFINE(HWLOC_HAVE_LINUXPCI, 1, [Define to 1 if enabling Linux-specific PCI discovery in the Linux I/O component])
+	  hwloc_linuxpci_happy=yes
 	fi
         ;;
       *-*-irix*)
