@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -50,6 +50,7 @@ void usage(const char *name, FILE *where)
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
+  int loaded = 0;
   unsigned depth;
   hwloc_bitmap_t cpubind_set, membind_set;
   int got_cpubind = 0, got_membind = 0;
@@ -74,10 +75,17 @@ int main(int argc, char *argv[])
   cpubind_set = hwloc_bitmap_alloc();
   membind_set = hwloc_bitmap_alloc();
 
-  hwloc_topology_init(&topology);
-  hwloc_topology_set_flags(topology, flags);
-  hwloc_topology_load(topology);
-  depth = hwloc_topology_get_depth(topology);
+  /* don't load now, in case some options change the config before the topology is actually used */
+#define LOADED() (loaded)
+#define ENSURE_LOADED() do { \
+  if (!loaded) { \
+    hwloc_topology_init(&topology); \
+    hwloc_topology_set_flags(topology, flags); \
+    hwloc_topology_load(topology); \
+    depth = hwloc_topology_get_depth(topology); \
+    loaded = 1; \
+  } \
+} while (0)
 
   callname = argv[0];
   /* skip argv[0], handle options */
@@ -182,12 +190,11 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--whole-system")) {
+	if (loaded) {
+	  fprintf(stderr, "Input option %s disallowed after options using the topology\n", argv[0]);
+	  exit(EXIT_FAILURE);
+	}
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
-	hwloc_topology_destroy(topology);
-	hwloc_topology_init(&topology);
-	hwloc_topology_set_flags(topology, flags);
-	hwloc_topology_load(topology);
-	depth = hwloc_topology_get_depth(topology);
 	goto next;
       }
       else if (!strcmp (argv[0], "--restrict")) {
@@ -199,6 +206,7 @@ int main(int argc, char *argv[])
 	}
 	restrictset = hwloc_bitmap_alloc();
 	hwloc_bitmap_sscanf(restrictset, argv[1]);
+	ENSURE_LOADED();
 	err = hwloc_topology_restrict (topology, restrictset, 0);
 	if (err) {
 	  perror("Restricting the topology");
@@ -215,6 +223,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
+    ENSURE_LOADED();
     ret = hwloc_calc_process_arg(topology, depth, argv[0], logical,
 				 working_on_cpubind ? cpubind_set : membind_set,
 				 verbose);
@@ -232,6 +241,8 @@ int main(int argc, char *argv[])
     argc -= opt+1;
     argv += opt+1;
   }
+
+  ENSURE_LOADED();
 
   if (pid_number > 0) {
     pid = hwloc_pid_from_number(pid_number, !(get_binding || get_last_cpu_location));
