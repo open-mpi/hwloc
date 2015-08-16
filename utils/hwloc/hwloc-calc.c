@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -193,10 +193,10 @@ static int hwloc_calc_check_type_depth(hwloc_topology_t topology, hwloc_obj_type
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
+  int loaded = 0;
   unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
-  int input_changed = 0;
   unsigned depth;
   hwloc_bitmap_t set;
   int cmdline_args = 0;
@@ -216,10 +216,21 @@ int main(int argc, char *argv[])
 
   set = hwloc_bitmap_alloc();
 
-  hwloc_topology_init(&topology);
-  hwloc_topology_set_flags(topology, flags);
-  hwloc_topology_load(topology);
-  depth = hwloc_topology_get_depth(topology);
+  /* don't load now, in case some options change the config before the topology is actually used */
+#define ENSURE_LOADED() do { \
+  if (!loaded) { \
+    hwloc_topology_init(&topology); \
+    hwloc_topology_set_flags(topology, flags); \
+    if (input) { \
+      err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname); \
+      if (err) \
+        return err; \
+    } \
+    hwloc_topology_load(topology); \
+    depth = hwloc_topology_get_depth(topology); \
+    loaded = 1; \
+  } \
+} while (0)
 
   callname = argv[0];
   /* skip argv[0], handle options */
@@ -237,8 +248,11 @@ int main(int argc, char *argv[])
         goto next;
       }
       if (!strcmp (argv[0], "--whole-system")) {
+	if (loaded) {
+	  fprintf(stderr, "Input option %s disallowed after options using the topology\n", argv[0]);
+	  exit(EXIT_FAILURE);
+	}
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
-	input_changed = 1;
 	goto next;
       }
       if (!strcmp(argv[0], "--help")) {
@@ -253,6 +267,7 @@ int main(int argc, char *argv[])
 	}
 	restrictset = hwloc_bitmap_alloc();
 	hwloc_bitmap_sscanf(restrictset, argv[1]);
+	ENSURE_LOADED();
 	err = hwloc_topology_restrict (topology, restrictset, 0);
 	if (err) {
 	  perror("Restricting the topology");
@@ -389,9 +404,12 @@ int main(int argc, char *argv[])
       if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					  &input, &input_format,
 					  callname)) {
+	if (loaded) {
+	  fprintf(stderr, "Input option %s \"%s\" disallowed after options using the topology\n", argv[0], argv[1]);
+	  exit(EXIT_FAILURE);
+	}
 	argv += opt;
 	argc -= opt;
-	input_changed = 1;
 	goto next;
       }
 
@@ -400,21 +418,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    if (input_changed) {
-      /* flags or input was changed */
-      hwloc_topology_destroy(topology);
-      hwloc_topology_init(&topology);
-      hwloc_topology_set_flags(topology, flags);
-      if (input) {
-	/* only update the input when actually using it */
-	err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
-	if (err)
-	  return err;
-      }
-      hwloc_topology_load(topology);
-      depth = hwloc_topology_get_depth(topology);
-      input_changed = 0;
-    }
+    ENSURE_LOADED();
 
     cmdline_args++;
     if (hwloc_calc_process_arg(topology, depth, argv[0], logicali, set, verbose) < 0)
@@ -424,6 +428,8 @@ int main(int argc, char *argv[])
     argc--;
     argv++;
   }
+
+  ENSURE_LOADED();
 
   if (hwloc_calc_check_type_depth(topology, numberoftype, &numberofdepth, "--number-of") < 0)
     goto out;
@@ -444,22 +450,6 @@ int main(int argc, char *argv[])
 #define HWLOC_CALC_LINE_LEN 64
     size_t len = HWLOC_CALC_LINE_LEN;
     char * line = malloc(len);
-
-    if (input_changed) {
-      /* flags or input was changed */
-      hwloc_topology_destroy(topology);
-      hwloc_topology_init(&topology);
-      hwloc_topology_set_flags(topology, flags);
-      if (input) {
-	/* only update the input when actually using it */
-	err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
-	if (err)
-	  return err;
-      }
-      hwloc_topology_load(topology);
-      depth = hwloc_topology_get_depth(topology);
-      input_changed = 0;
-    }
 
     while (1) {
       char *current, *tmpline;
