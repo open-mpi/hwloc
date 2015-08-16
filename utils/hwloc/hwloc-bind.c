@@ -106,28 +106,28 @@ int main(int argc, char *argv[])
 	verbose++;
 	goto next;
       }
-      else if (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")) {
+      if (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")) {
 	verbose--;
 	goto next;
       }
-      else if (!strcmp(argv[0], "--help")) {
+      if (!strcmp(argv[0], "--help")) {
         usage("hwloc-bind", stdout);
 	return EXIT_SUCCESS;
       }
-      else if (!strcmp(argv[0], "--single")) {
+      if (!strcmp(argv[0], "--single")) {
 	single = 1;
 	goto next;
       }
-      else if (!strcmp(argv[0], "-f") || !strcmp(argv[0], "--force")) {
+      if (!strcmp(argv[0], "-f") || !strcmp(argv[0], "--force")) {
 	force = 1;
 	goto next;
       }
-      else if (!strcmp(argv[0], "--strict")) {
+      if (!strcmp(argv[0], "--strict")) {
 	cpubind_flags |= HWLOC_CPUBIND_STRICT;
 	membind_flags |= HWLOC_MEMBIND_STRICT;
 	goto next;
       }
-      else if (!strcmp(argv[0], "--pid")) {
+      if (!strcmp(argv[0], "--pid")) {
         if (argc < 2) {
           usage ("hwloc-bind", stderr);
           exit(EXIT_FAILURE);
@@ -136,9 +136,9 @@ int main(int argc, char *argv[])
         opt = 1;
         goto next;
       }
-      else if (!strcmp (argv[0], "--version")) {
-          printf("%s %s\n", callname, HWLOC_VERSION);
-          exit(EXIT_SUCCESS);
+      if (!strcmp (argv[0], "--version")) {
+	printf("%s %s\n", callname, HWLOC_VERSION);
+	exit(EXIT_SUCCESS);
       }
       if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
         logical = 1;
@@ -152,23 +152,23 @@ int main(int argc, char *argv[])
         taskset = 1;
         goto next;
       }
-      else if (!strcmp (argv[0], "-e") || !strncmp (argv[0], "--get-last-cpu-location", 10)) {
+      if (!strcmp (argv[0], "-e") || !strncmp (argv[0], "--get-last-cpu-location", 10)) {
 	get_last_cpu_location = 1;
 	goto next;
       }
-      else if (!strcmp (argv[0], "--get")) {
+      if (!strcmp (argv[0], "--get")) {
 	get_binding = 1;
 	goto next;
       }
-      else if (!strcmp (argv[0], "--cpubind")) {
-	  working_on_cpubind = 1;
-	  goto next;
+      if (!strcmp (argv[0], "--cpubind")) {
+	working_on_cpubind = 1;
+	goto next;
       }
-      else if (!strcmp (argv[0], "--membind")) {
-	  working_on_cpubind = 0;
-	  goto next;
+      if (!strcmp (argv[0], "--membind")) {
+	working_on_cpubind = 0;
+	goto next;
       }
-      else if (!strcmp (argv[0], "--mempolicy")) {
+      if (!strcmp (argv[0], "--mempolicy")) {
 	if (!strncmp(argv[1], "default", 2))
 	  membind_policy = HWLOC_MEMBIND_DEFAULT;
 	else if (!strncmp(argv[1], "firsttouch", 2))
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 	opt = 1;
 	goto next;
       }
-      else if (!strcmp (argv[0], "--whole-system")) {
+      if (!strcmp (argv[0], "--whole-system")) {
 	if (loaded) {
 	  fprintf(stderr, "Input option %s disallowed after options using the topology\n", argv[0]);
 	  exit(EXIT_FAILURE);
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
 	goto next;
       }
-      else if (!strcmp (argv[0], "--restrict")) {
+      if (!strcmp (argv[0], "--restrict")) {
 	hwloc_bitmap_t restrictset;
 	int err;
 	if (argc < 2) {
