@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -68,15 +68,6 @@ int main(void)
   assert(hwloc_compare_types(HWLOC_OBJ_BRIDGE, HWLOC_OBJ_PCI_DEVICE) < 0);
   assert(hwloc_compare_types(HWLOC_OBJ_BRIDGE, HWLOC_OBJ_OS_DEVICE) < 0);
   assert(hwloc_compare_types(HWLOC_OBJ_PCI_DEVICE, HWLOC_OBJ_OS_DEVICE) < 0);
-
-  /* check that hwloc_get_hostbridge_by_pcibus() and hwloc_get_non_io_ancestor_obj work fine */
-  obj = NULL;
-  while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
-    assert(hwloc_get_hostbridge_by_pcibus(topology,
-					  obj->attr->pcidev.domain,
-					  obj->attr->pcidev.bus)->parent
-	   == hwloc_get_non_io_ancestor_obj(topology, obj));
-  }
 
   hwloc_topology_destroy(topology);
 

@@ -1215,28 +1215,6 @@ hwloc_bridge_covers_pcibus(hwloc_obj_t bridge,
     && bridge->attr->bridge.downstream.pci.subordinate_bus >= bus;
 }
 
-/** \brief Find the hostbridge that covers the given PCI bus.
- *
- * This is useful for finding the locality of a bus because
- * it is the hostbridge parent cpuset.
- */
-static __hwloc_inline hwloc_obj_t
-hwloc_get_hostbridge_by_pcibus(hwloc_topology_t topology,
-			       unsigned domain, unsigned bus)
-{
-  hwloc_obj_t obj = NULL;
-  while ((obj = hwloc_get_next_bridge(topology, obj)) != NULL) {
-    if (hwloc_bridge_covers_pcibus(obj, domain, bus)) {
-      /* found bridge covering this pcibus, make sure it's a hostbridge */
-      assert(obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST);
-      assert(obj->parent->type != HWLOC_OBJ_BRIDGE);
-      assert(obj->parent->cpuset);
-      return obj;
-    }
-  }
-  return NULL;
-}
-
 /** @} */
 
 

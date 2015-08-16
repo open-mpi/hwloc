@@ -603,8 +603,7 @@ man3_helper_advanced_io_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_get_pcidev_by_busidstring.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_osdev.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_bridge.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_bridge_covers_pcibus.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_hostbridge_by_pcibus.3
+        $(DOX_MAN_DIR)/man3/hwloc_bridge_covers_pcibus.3
 
 man3_diffdir = $(man3dir)
 man3_diff_DATA = \

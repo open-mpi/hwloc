@@ -234,7 +234,6 @@ extern "C" {
 #define hwloc_get_next_osdev HWLOC_NAME(get_next_osdev)
 #define hwloc_get_next_bridge HWLOC_NAME(get_next_bridge)
 #define hwloc_bridge_covers_pcibus HWLOC_NAME(bridge_covers_pcibus)
-#define hwloc_get_hostbridge_by_pcibus HWLOC_NAME(get_hostbridge_by_pcibus)
 
 /* hwloc/bitmap.h */
 
