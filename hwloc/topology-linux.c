@@ -5136,7 +5136,8 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   res += hwloc_linuxfs_lookup_infiniband_class(backend);
   res += hwloc_linuxfs_lookup_mic_class(backend);
   res += hwloc_linuxfs_lookup_drm_class(backend);
-  res += hwloc_linuxfs_lookup_dma_class(backend);
+  if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
+    res += hwloc_linuxfs_lookup_dma_class(backend);
   if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
     res += hwloc__get_firmware_dmi_memory_info(topology, data);
 
