@@ -4025,11 +4025,13 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
     fclose(file);
     if (!err) {
       parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-      hwloc_bitmap_free(cpuset);
-      if (parent)
+      if (parent) {
+        hwloc_bitmap_free(cpuset);
 	return parent;
+      }
     }
   }
+  hwloc_bitmap_free(cpuset);
 
   /* FIXME: {numa_node,local_cpus} may be missing when the device link points to a subdirectory.
    * For instance, device of scsi blocks may point to foo/ata1/host0/target0:0:0/0:0:0:0/ instead of foo/
