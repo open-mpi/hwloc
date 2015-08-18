@@ -343,15 +343,12 @@ void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *val
 
 static int hwloc_obj_type_is_special (hwloc_obj_type_t type)
 {
-  HWLOC_BUILD_ASSERT(HWLOC_OBJ_MISC + 1 == HWLOC_OBJ_BRIDGE);
-  HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE + 1 == HWLOC_OBJ_PCI_DEVICE);
-  HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE + 1 == HWLOC_OBJ_OS_DEVICE);
+  /* type contiguity is asserted in topology_check() */
   return type >= HWLOC_OBJ_MISC && type <= HWLOC_OBJ_OS_DEVICE;
 }
 static int hwloc_obj_type_is_io (hwloc_obj_type_t type)
 {
-  HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE + 1 == HWLOC_OBJ_PCI_DEVICE);
-  HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE + 1 == HWLOC_OBJ_OS_DEVICE);
+  /* type contiguity is asserted in topology_check() */
   return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
 }
 
@@ -3418,6 +3415,11 @@ hwloc_topology_check(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   hwloc_obj_type_t type;
   unsigned i, j, depth;
+
+  /* make sure we can use ranges to check types */
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_MISC + 1 == HWLOC_OBJ_BRIDGE);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE + 1 == HWLOC_OBJ_PCI_DEVICE);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE + 1 == HWLOC_OBJ_OS_DEVICE);
 
   depth = hwloc_topology_get_depth(topology);
 
