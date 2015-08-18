@@ -4117,6 +4117,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 	  sectorsize = 1;
       }
     }
+    fclose(fd);
   }
   if (sectorsize) {
     char string[16];
