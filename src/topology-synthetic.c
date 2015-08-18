@@ -136,6 +136,19 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     type = curlevel->type;
 
+    if (i == count-1 && type != HWLOC_OBJ_TYPE_UNKNOWN && type != HWLOC_OBJ_PU) {
+      if (verbose)
+	fprintf(stderr, "Synthetic string cannot use non-PU type for last level\n");
+      errno = EINVAL;
+      return -1;
+    }
+    if (i != count-1 && type == HWLOC_OBJ_PU) {
+      if (verbose)
+	fprintf(stderr, "Synthetic string cannot use PU type for non-last level\n");
+      errno = EINVAL;
+      return -1;
+    }
+
     if (type == HWLOC_OBJ_TYPE_UNKNOWN) {
       if (i == count-1)
 	type = HWLOC_OBJ_PU;
