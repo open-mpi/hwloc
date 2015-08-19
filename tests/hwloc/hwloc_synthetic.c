@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -51,12 +51,12 @@ int main(void)
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
   assert(err == 75);
-  err = strcmp("NUMANode:2(memory=1073741824) Package:3 L2Cache:4(size=4194304) Core:5 PU:6", buffer);
+  err = strcmp("Package:2 NUMANode:3(memory=1073741824) L2Cache:4(size=4194304) Core:5 PU:6", buffer);
   assert(!err);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS);
   assert(err == 40);
-  err = strcmp("NUMANode:2 Package:3 Cache:4 Core:5 PU:6", buffer);
+  err = strcmp("Package:2 NUMANode:3 Cache:4 Core:5 PU:6", buffer);
   assert(!err);
 
   hwloc_topology_destroy(topology);

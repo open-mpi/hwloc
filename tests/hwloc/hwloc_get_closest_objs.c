@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -70,8 +70,8 @@ main (void)
   ancestor = hwloc_get_common_ancestor_obj(topology, last, closest[found-1]);
   assert(hwloc_obj_is_in_subtree(topology, last, ancestor));
   assert(hwloc_obj_is_in_subtree(topology, closest[found-1], ancestor));
-  assert(ancestor == hwloc_get_root_obj(topology)->first_child);
-  printf("ancestor type %u depth %u number %u is system level\n",
+  assert(ancestor == hwloc_get_root_obj(topology));
+  printf("ancestor type %u depth %u number %u is the root object\n",
 	 ancestor->type, ancestor->depth, ancestor->logical_index);
 
   free(closest);

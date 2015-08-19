@@ -386,9 +386,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   const char *pos, *next_pos;
   unsigned long item, count;
   unsigned i;
-  int cache_depth = 0, group_depth = 0;
-  int nb_machine_levels = 0, nb_node_levels = 0;
-  int nb_pu_levels = 0;
+  int type_count[HWLOC_OBJ_TYPE_MAX];
+  unsigned unset;
   int verbose = 0;
   const char *env = getenv("HWLOC_SYNTHETIC_VERBOSE");
   int err;
@@ -504,98 +503,119 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     goto error;
   }
 
+  if (data->level[count-1].type != HWLOC_OBJ_TYPE_NONE && data->level[count-1].type != HWLOC_OBJ_PU) {
+    if (verbose)
+      fprintf(stderr, "Synthetic string cannot use non-PU type for last level\n");
+    errno = EINVAL;
+    return -1;
+  }
+  data->level[count-1].type = HWLOC_OBJ_PU;
+
+  for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++) {
+    type_count[i] = 0;
+  }
   for(i=count-1; i>0; i--) {
-    struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
-    hwloc_obj_type_t type;
-
-    type = curlevel->type;
-
-    if (i == count-1 && type != HWLOC_OBJ_TYPE_NONE && type != HWLOC_OBJ_PU) {
-      if (verbose)
-	fprintf(stderr, "Synthetic string cannot use non-PU type for last level\n");
-      errno = EINVAL;
-      return -1;
-    }
-    if (i != count-1 && type == HWLOC_OBJ_PU) {
-      if (verbose)
-	fprintf(stderr, "Synthetic string cannot use PU type for non-last level\n");
-      errno = EINVAL;
-      return -1;
-    }
-
-    if (type == HWLOC_OBJ_TYPE_NONE) {
-      if (i == count-1)
-	type = HWLOC_OBJ_PU;
-      else {
-	switch (data->level[i+1].type) {
-	case HWLOC_OBJ_PU: type = HWLOC_OBJ_CORE; break;
-	case HWLOC_OBJ_CORE: type = HWLOC_OBJ_CACHE; break;
-	case HWLOC_OBJ_CACHE: type = HWLOC_OBJ_PACKAGE; break;
-	case HWLOC_OBJ_PACKAGE: type = HWLOC_OBJ_NUMANODE; break;
-	case HWLOC_OBJ_NUMANODE:
-	case HWLOC_OBJ_MACHINE:
-	case HWLOC_OBJ_GROUP: type = HWLOC_OBJ_GROUP; break;
-	default:
-	  assert(0);
-	}
-      }
-      curlevel->type = type;
-    }
-    switch (type) {
-      case HWLOC_OBJ_PU:
-	nb_pu_levels++;
-	break;
-      case HWLOC_OBJ_CACHE:
-	cache_depth++;
-	break;
-      case HWLOC_OBJ_GROUP:
-	group_depth++;
-	break;
-      case HWLOC_OBJ_NUMANODE:
-	nb_node_levels++;
-	break;
-      case HWLOC_OBJ_MACHINE:
-	nb_machine_levels++;
-	break;
-      default:
-	break;
+    hwloc_obj_type_t type = data->level[i].type;
+    if (type != HWLOC_OBJ_TYPE_NONE) {
+      type_count[type]++;
     }
   }
 
-  if (!nb_pu_levels) {
+  /* sanity checks */
+  if (!type_count[HWLOC_OBJ_PU]) {
     if (verbose)
       fprintf(stderr, "Synthetic string missing ending number of PUs\n");
     errno = EINVAL;
     return -1;
-  }
-  if (nb_pu_levels > 1) {
+  } else if (type_count[HWLOC_OBJ_PU] > 1) {
     if (verbose)
-      fprintf(stderr, "Synthetic string can not have several PU levels\n");
+      fprintf(stderr, "Synthetic string cannot have several PU levels\n");
     errno = EINVAL;
     return -1;
   }
-  if (nb_node_levels > 1) {
+  if (type_count[HWLOC_OBJ_PACKAGE] > 1) {
     if (verbose)
-      fprintf(stderr, "Synthetic string can not have several NUMA node levels\n");
+      fprintf(stderr, "Synthetic string cannot have several package levels\n");
     errno = EINVAL;
     return -1;
   }
-  if (nb_machine_levels > 1) {
+  if (type_count[HWLOC_OBJ_NUMANODE] > 1) {
     if (verbose)
-      fprintf(stderr, "Synthetic string can not have several machine levels\n");
+      fprintf(stderr, "Synthetic string cannot have several NUMA node levels\n");
+    errno = EINVAL;
+    return -1;
+  }
+  if (type_count[HWLOC_OBJ_CORE] > 1) {
+    if (verbose)
+      fprintf(stderr, "Synthetic string cannot have several core levels\n");
+    errno = EINVAL;
+    return -1;
+  }
+  if (type_count[HWLOC_OBJ_MACHINE] > 1) {
+    if (verbose)
+      fprintf(stderr, "Synthetic string cannot have several machine levels\n");
     errno = EINVAL;
     return -1;
   }
 
-  if (nb_machine_levels)
+  /* initialize the top level (not specified in the string) */
+  if (type_count[HWLOC_OBJ_MACHINE] == 1) {
     data->level[0].type = HWLOC_OBJ_SYSTEM;
-  else {
+    type_count[HWLOC_OBJ_SYSTEM] = 1;
+  } else {
     data->level[0].type = HWLOC_OBJ_MACHINE;
-    nb_machine_levels++;
+    type_count[HWLOC_OBJ_MACHINE] = 1;
+  }
+
+  /* deal with missing intermediate levels */
+  unset = 0;
+  for(i=1; i<count-1; i++) {
+    if (data->level[i].type == HWLOC_OBJ_TYPE_NONE)
+      unset++;
+  }
+  if (unset && unset != count-2) {
+    if (verbose)
+      fprintf(stderr, "Synthetic string cannot mix unspecified and specified types for levels\n");
+    errno = EINVAL;
+    return -1;
+  }
+  if (unset) {
+    /* we want in priority: numa, package, core, up to 3 caches, groups */
+    unsigned neednuma = count >= 3;
+    unsigned needpack = count >= 4;
+    unsigned needcore = count >= 5;
+    unsigned needcaches = count < 6 ? 0 : count >= 8 ? 3 : count-5;
+    unsigned needgroups = count-2-neednuma-needpack-needcore-needcaches;
+    /* we place them in order: groups, package, numa, caches, core */
+    for(i = 0; i < needgroups; i++) {
+      unsigned depth = 1 + i;
+      data->level[depth].type = HWLOC_OBJ_GROUP;
+      type_count[HWLOC_OBJ_GROUP]++;
+    }
+    if (needpack) {
+      unsigned depth = 1 + needgroups;
+      data->level[depth].type = HWLOC_OBJ_PACKAGE;
+      type_count[HWLOC_OBJ_PACKAGE] = 1;
+    }
+    if (neednuma) {
+      unsigned depth = 1 + needgroups + needpack;
+      data->level[depth].type = HWLOC_OBJ_NUMANODE;
+      type_count[HWLOC_OBJ_NUMANODE] = 1;
+    }
+    for(i = 0; i < needcaches; i++) {
+      unsigned depth = 1 + needgroups + needpack + neednuma + i;
+      data->level[depth].type = HWLOC_OBJ_CACHE;
+      type_count[HWLOC_OBJ_CACHE]++;
+    }
+    if (needcore) {
+      unsigned depth = 1 + needgroups + needpack + neednuma + needcaches;
+      data->level[depth].type = HWLOC_OBJ_CORE;
+      type_count[HWLOC_OBJ_CORE] = 1;
+    }
   }
 
   /* enforce a NUMA level */
-  if (!nb_node_levels) {
+  if (!type_count[HWLOC_OBJ_NUMANODE]) {
     /* insert a NUMA level and the machine level */
     if (data->level[1].type == HWLOC_OBJ_MACHINE)
       /* there's an explicit machine level after the automatic system root, insert below both */
@@ -618,9 +638,9 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     count++;
   }
 
-  if (cache_depth == 1)
+  if (type_count[HWLOC_OBJ_CACHE] == 1)
     /* if there is a single cache level, make it L2 */
-    cache_depth = 2;
+    type_count[HWLOC_OBJ_CACHE] = 2;
 
   for (i=0; i<count; i++) {
     struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
@@ -628,11 +648,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     if (type == HWLOC_OBJ_GROUP) {
       if (curlevel->depth == (unsigned)-1)
-	curlevel->depth = group_depth--;
+	curlevel->depth = type_count[HWLOC_OBJ_GROUP]--;
 
     } else if (type == HWLOC_OBJ_CACHE) {
+      /* FIXME: we can have identical cache levels if mixing cache with and without level/type */
       if (curlevel->depth == (unsigned)-1)
-	curlevel->depth = cache_depth--;
+	curlevel->depth = type_count[HWLOC_OBJ_CACHE]--;
       if (curlevel->cachetype == (hwloc_obj_cache_type_t) -1)
 	curlevel->cachetype = curlevel->depth == 1 ? HWLOC_OBJ_CACHE_DATA : HWLOC_OBJ_CACHE_UNIFIED;
       if (!curlevel->memorysize) {

@@ -1673,12 +1673,10 @@ HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topo
 /** \brief Enable synthetic topology.
  *
  * Gather topology information from the given \p description,
- * a space-separated string of numbers describing
- * the arity of each level.
- * Each number may be prefixed with a type and a colon to enforce the type
- * of a level.  If only some level types are enforced, hwloc will try to
- * choose the other types according to usual topologies, but it may fail
- * and you may have to specify more level types manually.
+ * a space-separated string of <type:number> describing
+ * the object type and arity at each level.
+ * All types may be omitted (space-separated string of numbers) so that
+ * hwloc chooses all types according to usual topologies.
  * See also the \ref synthetic.
  *
  * Setting the environment variable HWLOC_SYNTHETIC

@@ -1692,7 +1692,16 @@ Type-specific attributes may also be given such as <tt>L2iCache</tt>
 (hwloc_obj_type_sscanf() is used for parsing the type names).
 Note that I/O and Misc objects are not available.
 
-The root object does not appear in the string.
+Instead of specifying the type of each level, it is possible to
+just specify the arities and let hwloc choose all types
+according to usual topologies. The following examples are therefore
+equivalent:
+\verbatim
+$ lstopo -i "2 3 4 5 6"
+$ lstopo -i "Package:2 NUMANode:3 L2Cache:4 Core:5 PU:6"
+\endverbatim
+
+The root object does not appear in the synthetic description string.
 A Machine object is used by default, and a System object replaces it
 if a Machine level is specified in the string.
 Therefore the System type cannot be used in the description string as well.
