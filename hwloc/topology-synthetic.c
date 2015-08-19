@@ -410,8 +410,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   }
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
-#define HWLOC_OBJ_TYPE_UNKNOWN ((hwloc_obj_type_t) -1)
-    hwloc_obj_type_t type = HWLOC_OBJ_TYPE_UNKNOWN;
+    hwloc_obj_type_t type = HWLOC_OBJ_TYPE_NONE;
     union hwloc_obj_attr_u attrs;
 
     /* initialize parent arity to 0 so that the levels are not infinite */
@@ -511,7 +510,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     type = curlevel->type;
 
-    if (i == count-1 && type != HWLOC_OBJ_TYPE_UNKNOWN && type != HWLOC_OBJ_PU) {
+    if (i == count-1 && type != HWLOC_OBJ_TYPE_NONE && type != HWLOC_OBJ_PU) {
       if (verbose)
 	fprintf(stderr, "Synthetic string cannot use non-PU type for last level\n");
       errno = EINVAL;
@@ -524,7 +523,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       return -1;
     }
 
-    if (type == HWLOC_OBJ_TYPE_UNKNOWN) {
+    if (type == HWLOC_OBJ_TYPE_NONE) {
       if (i == count-1)
 	type = HWLOC_OBJ_PU;
       else {

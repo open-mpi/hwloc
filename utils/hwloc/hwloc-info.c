@@ -23,7 +23,7 @@ static hwloc_pid_t pid;
 static int verbose_mode = 0;
 static int logical = 1;
 static int show_ancestors = 0;
-static hwloc_obj_type_t show_ancestor_type = (hwloc_obj_type_t) -1;
+static hwloc_obj_type_t show_ancestor_type = HWLOC_OBJ_TYPE_NONE;
 static int show_ancestor_attrdepth = -1;
 static hwloc_obj_cache_type_t show_ancestor_attrcachetype = (hwloc_obj_cache_type_t) -1;
 static int show_index_prefix = 0;
@@ -209,7 +209,7 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
       parent = parent->parent;
       level++;
     }
-  } else if (show_ancestor_type != (hwloc_obj_type_t) -1) {
+  } else if (show_ancestor_type != HWLOC_OBJ_TYPE_NONE) {
     char parents[128];
     hwloc_obj_t parent = obj;
     while (parent) {

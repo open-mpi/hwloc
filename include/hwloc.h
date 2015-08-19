@@ -732,7 +732,7 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 
 /** \brief Returns the type of objects at depth \p depth.
  *
- * \return -1 if depth \p depth does not exist.
+ * \return (hwloc_obj_type_t)-1 if depth \p depth does not exist.
  */
 HWLOC_DECLSPEC hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
 

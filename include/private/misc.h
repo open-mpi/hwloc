@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -38,6 +38,8 @@
 #error "unknown size for unsigned int."
 #endif
 
+/* internal-use-only value for when we don't know the type or don't have any value */
+#define HWLOC_OBJ_TYPE_NONE ((hwloc_obj_type_t) -1)
 
 /**
  * ffsl helpers.

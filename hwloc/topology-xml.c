@@ -670,7 +670,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	goto error;
     } else {
       /* type needed first */
-      if (obj->type == (hwloc_obj_type_t)-1)
+      if (obj->type == HWLOC_OBJ_TYPE_NONE)
 	goto error;
       hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue, state);
     }

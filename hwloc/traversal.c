@@ -35,7 +35,7 @@ hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
     case HWLOC_TYPE_DEPTH_MISC:
       return HWLOC_OBJ_MISC;
     default:
-      return (hwloc_obj_type_t) -1;
+      return HWLOC_OBJ_TYPE_NONE;
     }
   return topology->levels[depth][0]->type;
 }
@@ -211,7 +211,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Bridge")) return HWLOC_OBJ_BRIDGE;
   if (!strcasecmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
   if (!strcasecmp(string, "OSDev")) return HWLOC_OBJ_OS_DEVICE;
-  return (hwloc_obj_type_t) -1;
+  return HWLOC_OBJ_TYPE_NONE;
 }
 
 int

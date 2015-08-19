@@ -161,7 +161,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
 
 static int hwloc_calc_type_depth(const char *string, hwloc_obj_type_t *typep, int *depthp)
 {
-  hwloc_obj_type_t type = (hwloc_obj_type_t) -1; /* in case we match a depth */
+  hwloc_obj_type_t type = HWLOC_OBJ_TYPE_NONE; /* in case we match a depth */
   int depth = -1;
   if (hwloc_obj_type_sscanf(string, &type, NULL, 0) < 0) {
     char *endptr;
@@ -176,7 +176,7 @@ static int hwloc_calc_type_depth(const char *string, hwloc_obj_type_t *typep, in
 
 static int hwloc_calc_check_type_depth(hwloc_topology_t topology, hwloc_obj_type_t type, int *depthp, const char *caller)
 {
-  if (type != (hwloc_obj_type_t) -1) {
+  if (type != HWLOC_OBJ_TYPE_NONE) {
     int depth = hwloc_get_type_depth(topology, type);
     if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "unavailable %s type %s\n", caller, hwloc_obj_type_string(type));
@@ -200,8 +200,8 @@ int main(int argc, char *argv[])
   unsigned depth;
   hwloc_bitmap_t set;
   int cmdline_args = 0;
-  hwloc_obj_type_t numberoftype = (hwloc_obj_type_t) -1;
-  hwloc_obj_type_t intersecttype = (hwloc_obj_type_t) -1;
+  hwloc_obj_type_t numberoftype = HWLOC_OBJ_TYPE_NONE;
+  hwloc_obj_type_t intersecttype = HWLOC_OBJ_TYPE_NONE;
   hwloc_obj_type_t *hiertype = NULL;
   char *callname;
   char *outsep = NULL;

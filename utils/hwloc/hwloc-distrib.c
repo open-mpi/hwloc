@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   int singlify = 0;
   int verbose = 0;
   char *restrictstring = NULL;
-  hwloc_obj_type_t from_type = (hwloc_obj_type_t) -1, to_type = (hwloc_obj_type_t) -1;
+  hwloc_obj_type_t from_type = HWLOC_OBJ_TYPE_NONE, to_type = HWLOC_OBJ_TYPE_NONE;
   hwloc_topology_t topology;
   unsigned long flags = 0;
   unsigned long dflags = 0;
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
       free(restrictstring);
     }
 
-    if (from_type == (hwloc_obj_type_t) -1) {
+    if (from_type == HWLOC_OBJ_TYPE_NONE) {
       from_depth = 0;
     } else {
       from_depth = hwloc_get_type_depth(topology, from_type);
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
       }
     }
 
-    if (to_type == (hwloc_obj_type_t) -1) {
+    if (to_type == HWLOC_OBJ_TYPE_NONE) {
       to_depth = INT_MAX;
     } else {
       to_depth = hwloc_get_type_depth(topology, to_type);

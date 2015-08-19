@@ -37,7 +37,7 @@
 
 int lstopo_pid_number = -1;
 hwloc_pid_t lstopo_pid;
-hwloc_obj_type_t lstopo_show_only = (hwloc_obj_type_t) -1;
+hwloc_obj_type_t lstopo_show_only = HWLOC_OBJ_TYPE_NONE;
 int lstopo_show_cpuset = 0;
 int lstopo_show_taskset = 0;
 int lstopo_ignore_pus = 0;
@@ -621,7 +621,7 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
-  if (lstopo_show_only != (hwloc_obj_type_t)-1)
+  if (lstopo_show_only != HWLOC_OBJ_TYPE_NONE)
     merge = 0;
 
   hwloc_topology_set_flags(topology, flags);
@@ -697,7 +697,7 @@ main (int argc, char *argv[])
   /* if  the output format wasn't enforced, think a bit about what the user probably want */
   if (output_format == LSTOPO_OUTPUT_DEFAULT) {
     if (lstopo_show_cpuset
-        || lstopo_show_only != (hwloc_obj_type_t)-1
+        || lstopo_show_only != HWLOC_OBJ_TYPE_NONE
         || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }

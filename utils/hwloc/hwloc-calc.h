@@ -193,7 +193,7 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
       fprintf(stderr, "ignoring invalid depth %u\n", depth);
     return -1;
   }
-  *typep = (hwloc_obj_type_t) -1;
+  *typep = HWLOC_OBJ_TYPE_NONE;
   return depth;
 }
 
@@ -498,7 +498,7 @@ hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
 			    int verbose)
 {
   const char *sep = &arg[typelen];
-  hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
+  hwloc_obj_type_t type = HWLOC_OBJ_TYPE_NONE;
   int depth;
 
   depth = hwloc_calc_parse_depth_prefix(topology, topodepth,

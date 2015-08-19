@@ -8,6 +8,7 @@
 
 #include <private/autogen/config.h>
 #include <private/private.h>
+#include <private/misc.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -191,7 +192,7 @@ void output_console(struct lstopo_output *loutput, const char *filename)
    * if verbose_mode > 1, print both.
    */
 
-  if (lstopo_show_only != (hwloc_obj_type_t)-1) {
+  if (lstopo_show_only != HWLOC_OBJ_TYPE_NONE) {
     if (verbose_mode > 1)
       fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(lstopo_show_only));
     output_only (topology, hwloc_get_root_obj(topology), output, logical, verbose_mode);
@@ -200,11 +201,11 @@ void output_console(struct lstopo_output *loutput, const char *filename)
     fprintf(output, "\n");
   }
 
-  if ((verbose_mode > 1 || !verbose_mode) && lstopo_show_only == (hwloc_obj_type_t)-1) {
+  if ((verbose_mode > 1 || !verbose_mode) && lstopo_show_only == HWLOC_OBJ_TYPE_NONE) {
     hwloc_lstopo_show_summary(output, topology);
  }
 
-  if (verbose_mode > 1 && lstopo_show_only == (hwloc_obj_type_t)-1) {
+  if (verbose_mode > 1 && lstopo_show_only == HWLOC_OBJ_TYPE_NONE) {
     const struct hwloc_distances_s * distances;
     unsigned depth;
 
@@ -220,7 +221,7 @@ void output_console(struct lstopo_output *loutput, const char *filename)
     }
   }
 
-  if (verbose_mode > 1 && lstopo_show_only == (hwloc_obj_type_t)-1) {
+  if (verbose_mode > 1 && lstopo_show_only == HWLOC_OBJ_TYPE_NONE) {
     hwloc_const_bitmap_t complete = hwloc_topology_get_complete_cpuset(topology);
     hwloc_const_bitmap_t topo = hwloc_topology_get_topology_cpuset(topology);
     hwloc_const_bitmap_t allowed = hwloc_topology_get_allowed_cpuset(topology);
