@@ -163,7 +163,7 @@ static int hwloc_calc_type_depth(const char *string, hwloc_obj_type_t *typep, in
 {
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1; /* in case we match a depth */
   int depth = -1;
-  if (hwloc_obj_type_sscanf(string, &type, NULL, NULL, 0) < 0) {
+  if (hwloc_obj_type_sscanf(string, &type, NULL, 0) < 0) {
     char *endptr;
     depth = strtoul(string, &endptr, 0);
     if (*endptr)

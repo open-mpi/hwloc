@@ -666,7 +666,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
       break;
     if (!strcmp(attrname, "type")) {
-      if (hwloc_obj_type_sscanf(attrvalue, &obj->type, NULL, NULL, 0) < 0)
+      if (hwloc_obj_type_sscanf(attrvalue, &obj->type, NULL, 0) < 0)
 	goto error;
     } else {
       /* type needed first */

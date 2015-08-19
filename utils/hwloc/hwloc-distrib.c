@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	if (hwloc_obj_type_sscanf(argv[1], &type, NULL, NULL, 0) < 0)
+	if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	else
 	  hwloc_topology_ignore_type(topology, type);
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	if (hwloc_obj_type_sscanf(argv[1], &from_type, NULL, NULL, 0) < 0)
+	if (hwloc_obj_type_sscanf(argv[1], &from_type, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --from, ignoring.\n", argv[1]);
 	argc--;
 	argv++;
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	if (hwloc_obj_type_sscanf(argv[1], &to_type, NULL, NULL, 0) < 0)
+	if (hwloc_obj_type_sscanf(argv[1], &to_type, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --to, ignoring.\n", argv[1]);
 	argc--;
 	argv++;
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	if (hwloc_obj_type_sscanf(argv[1], &to_type, NULL, NULL, 0) < 0)
+	if (hwloc_obj_type_sscanf(argv[1], &to_type, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --at, ignoring.\n", argv[1]);
 	from_type = to_type;
 	argc--;

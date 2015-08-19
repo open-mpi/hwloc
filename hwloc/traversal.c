@@ -215,10 +215,11 @@ hwloc_obj_type_of_string (const char * string)
 }
 
 int
-hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthattrp, void *typeattrp, size_t typeattrsize)
+hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
+		      union hwloc_obj_attr_u *attrp, size_t attrsize)
 {
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
-  int depthattr = -1;
+  unsigned depthattr = (unsigned) -1;
   hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
   char *end;
 
@@ -273,11 +274,13 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     return -1;
 
   *typep = type;
-  if (depthattrp)
-    *depthattrp = depthattr;
-  if (typeattrp) {
-    if (type == HWLOC_OBJ_CACHE && sizeof(hwloc_obj_cache_type_t) <= typeattrsize)
-      memcpy(typeattrp, &cachetypeattr, sizeof(hwloc_obj_cache_type_t));
+  if (attrp) {
+    if (type == HWLOC_OBJ_CACHE && attrsize >= sizeof(attrp->cache)) {
+      attrp->cache.depth = depthattr;
+      attrp->cache.type = cachetypeattr;
+    } else if (type == HWLOC_OBJ_GROUP && attrsize >= sizeof(attrp->group)) {
+      attrp->group.depth = depthattr;
+    }
   }
 
   return 0;

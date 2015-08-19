@@ -87,11 +87,20 @@ hwloc_calc_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const
 
 static __hwloc_inline int
 hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
-			 int depthattr, hwloc_obj_cache_type_t cachetype /* -1 if not specified */,
+			 union hwloc_obj_attr_u *attrs,
 			 int verbose)
 {
+  hwloc_obj_cache_type_t cachetype = (hwloc_obj_cache_type_t) -1;
+  int depthattr = -1;
   int depth;
   int i;
+
+  if (type == HWLOC_OBJ_CACHE) {
+    depthattr = attrs->cache.depth;
+    cachetype = attrs->cache.type;
+  } else if (type == HWLOC_OBJ_GROUP) {
+    depthattr = attrs->group.depth;
+  }
 
   if (depthattr == -1) {
     hwloc_obj_type_t realtype;
@@ -152,8 +161,7 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
 {
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   hwloc_obj_type_t type;
-  hwloc_obj_cache_type_t cachetypeattr;
-  int depthattr;
+  union hwloc_obj_attr_u attrs;
   int depth;
   char *end;
   int err;
@@ -167,10 +175,10 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
   typestring[typelen] = '\0';
 
   /* try to match a type name */
-  err = hwloc_obj_type_sscanf(typestring, &type, &depthattr, &cachetypeattr, sizeof(cachetypeattr));
+  err = hwloc_obj_type_sscanf(typestring, &type, &attrs, sizeof(attrs));
   if (!err) {
     *typep = type;
-    return hwloc_calc_depth_of_type(topology, type, depthattr, cachetypeattr, verbose);
+    return hwloc_calc_depth_of_type(topology, type, &attrs, verbose);
   }
 
   /* try to match a numeric depth */

@@ -802,21 +802,20 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  * Matching is case-insensitive, and only the first letters are actually
  * required to match.
  *
- * Types that have specific attributes, for instance caches and groups,
- * may be returned in \p depthattrp and \p typeattrp. They are ignored
- * when these pointers are \c NULL.
+ * Type-specific attributes, for instance caches and groups, may be returned
+ * in \p attrp. They are ignored if this pointer is \c NULL.
  *
  * For instance "L2i" or "L2iCache" would return
- * type HWLOC_OBJ_CACHE in \p typep, 2 in \p depthattrp,
- * and HWLOC_OBJ_CACHE_TYPE_INSTRUCTION in \p typeattrp
- * (this last pointer should point to a hwloc_obj_cache_type_t).
- * "Group3" would return type HWLOC_OBJ_GROUP type and 3 in \p depthattrp.
+ * type HWLOC_OBJ_CACHE in \p typep, and 2 and HWLOC_OBJ_CACHE_TYPE_INSTRUCTION
+ * in the depth and type fields of attrp->cache (struct hwloc_cache_attr_s).
+ * "Group3" would return type HWLOC_OBJ_GROUP type and 3 in the depth field
+ * of attrp->group (struct hwloc_group_attr_s).
+ *
  * Attributes that are not specified in the string (for instance "Group"
  * without a depth, or "L2Cache" without a cache type) are set to -1.
  *
- * \p typeattrp is only filled if the size specified in \p typeattrsize
- * is large enough. It is currently only used for caches, and the required
- * size is at least the size of hwloc_obj_cache_type_t.
+ * \p attrp is only filled if its size specified in \p attrsize is large
+ * enough. It should be at least as large as union hwloc_obj_attr_u.
  *
  * \return 0 if a type was correctly identified, otherwise -1.
  *
@@ -824,8 +823,8 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  */
 HWLOC_DECLSPEC int hwloc_obj_type_sscanf(const char *string,
 					 hwloc_obj_type_t *typep,
-					 int *depthattrp,
-					 void *typeattrp, size_t typeattrsize);
+					 union hwloc_obj_attr_u *attrp,
+					 size_t attrsize);
 
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *

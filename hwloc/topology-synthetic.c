@@ -168,15 +168,14 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
     } else {
       /* interleaving as type1:type2:... */
       hwloc_obj_type_t type;
-      hwloc_obj_cache_type_t cachetypeattr;
-      int depthattr;
+      union hwloc_obj_attr_u attrs;
       int err;
 
       /* find level depths for each interleaving loop */
       tmp = attr;
       cur_loop = 0;
       while (tmp) {
-	err = hwloc_obj_type_sscanf(tmp, &type, &depthattr, &cachetypeattr, sizeof(cachetypeattr));
+	err = hwloc_obj_type_sscanf(tmp, &type, &attrs, sizeof(attrs));
 	if (err < 0) {
 	  if (verbose)
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop type '%s'\n", tmp);
@@ -190,14 +189,18 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	for(i=0; i<curleveldepth; i++) {
 	  if (type != data->level[i].type)
 	    continue;
-	  if ((type == HWLOC_OBJ_GROUP || type == HWLOC_OBJ_CACHE)
-	      && depthattr != -1
-	      && (unsigned) depthattr != data->level[i].depth)
+	  if (type == HWLOC_OBJ_GROUP
+	      && attrs.group.depth != (unsigned) -1
+	      && attrs.group.depth != data->level[i].depth)
 	    continue;
-	  if (type == HWLOC_OBJ_CACHE
-	      && cachetypeattr != (hwloc_obj_cache_type_t) -1
-	      && cachetypeattr != data->level[i].cachetype)
-	    continue;
+	  if (type == HWLOC_OBJ_CACHE) {
+	    if (attrs.cache.depth != (unsigned) -1
+		&& attrs.cache.depth != data->level[i].depth)
+	      continue;
+	    if (attrs.cache.type != (hwloc_obj_cache_type_t) -1
+		&& attrs.cache.type != data->level[i].cachetype)
+	      continue;
+	  }
 	  loops[cur_loop].level_depth = i;
 	  break;
 	}
@@ -409,8 +412,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   for (pos = description, count = 1; *pos; pos = next_pos) {
 #define HWLOC_OBJ_TYPE_UNKNOWN ((hwloc_obj_type_t) -1)
     hwloc_obj_type_t type = HWLOC_OBJ_TYPE_UNKNOWN;
-    int typedepth = -1;
-    hwloc_obj_cache_type_t cachetype = (hwloc_obj_cache_type_t) -1;
+    union hwloc_obj_attr_u attrs;
 
     /* initialize parent arity to 0 so that the levels are not infinite */
     data->level[count-1].arity = 0;
@@ -422,7 +424,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       break;
 
     if (*pos < '0' || *pos > '9') {
-      if (hwloc_obj_type_sscanf(pos, &type, &typedepth, &cachetype, sizeof(cachetype)) < 0) {
+      if (hwloc_obj_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
 	if (verbose)
 	  fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
 	errno = EINVAL;
@@ -445,8 +447,14 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       pos = next_pos + 1;
     }
     data->level[count].type = type;
-    data->level[count].depth = (unsigned) typedepth;
-    data->level[count].cachetype = cachetype;
+    data->level[count].depth = (unsigned) -1;
+    data->level[count].cachetype = (hwloc_obj_cache_type_t) -1;
+    if (type == HWLOC_OBJ_CACHE) {
+      data->level[count].depth = attrs.cache.depth;
+      data->level[count].cachetype = attrs.cache.type;
+    } else if (type == HWLOC_OBJ_GROUP) {
+      data->level[count].depth = attrs.group.depth;
+    }
 
     item = strtoul(pos, (char **)&next_pos, 0);
     if (next_pos == pos) {

@@ -298,16 +298,23 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--ancestors"))
 	show_ancestors = 1;
       else if (!strcmp (argv[0], "--ancestor")) {
+	union hwloc_obj_attr_u attrs;
 	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	err = hwloc_obj_type_sscanf(argv[1], &show_ancestor_type, &show_ancestor_attrdepth, &show_ancestor_attrcachetype, sizeof(show_ancestor_attrcachetype));
+	err = hwloc_obj_type_sscanf(argv[1], &show_ancestor_type, &attrs, sizeof(attrs));
         if (err < 0) {
           fprintf(stderr, "unrecognized --ancestor type %s\n", argv[1]);
           usage(callname, stderr);
           return EXIT_SUCCESS;
         }
+	if (show_ancestor_type == HWLOC_OBJ_CACHE) {
+	  show_ancestor_attrdepth = attrs.cache.depth;
+	  show_ancestor_attrcachetype = attrs.cache.type;
+	} else if (show_ancestor_type == HWLOC_OBJ_GROUP) {
+	  show_ancestor_attrdepth = attrs.group.depth;
+	}
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-icaches"))
