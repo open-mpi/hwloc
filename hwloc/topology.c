@@ -771,23 +771,10 @@ static const int obj_type_priority[] = {
   /* next entry is HWLOC_OBJ_OS_DEVICE */   100
 };
 
-static unsigned __hwloc_attribute_const
-hwloc_get_type_order(hwloc_obj_type_t type)
-{
-  return obj_type_order[type];
-}
-
-#if !defined(NDEBUG)
-static hwloc_obj_type_t hwloc_get_order_type(int order)
-{
-  return obj_order_type[order];
-}
-#endif
-
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
-  unsigned order1 = hwloc_get_type_order(type1);
-  unsigned order2 = hwloc_get_type_order(type2);
+  unsigned order1 = obj_type_order[type1];
+  unsigned order2 = obj_type_order[type2];
 
   /* I/O are only comparable with each others and with machine and system */
   if (hwloc_obj_type_is_io(type1)
