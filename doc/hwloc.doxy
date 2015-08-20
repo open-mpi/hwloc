@@ -1852,9 +1852,7 @@ if a Machine level is specified in the string.
 
 Cache level depths are automatically chosen by hwloc (only a L2 first,
 then a L1 under it, then L3 above, then L4 etc.) unless they are specified.
-Memory and cache sizes are also automatically chosen.
-The only way to modifying them is to export to XML and manually modify
-the file.
+Memory and cache sizes are also automatically chosen if needed.
 
 Each item may be followed parentheses containing a list of
 space-separated attributes. For instance:
