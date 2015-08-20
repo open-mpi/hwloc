@@ -709,11 +709,9 @@ hwloc_topology_dup(hwloc_topology_t *newp,
    We can't use C99 syntax to initialize this in a little safer manner
    -- bummer.  :-(
 
-   *************************************************************
-   *** DO NOT CHANGE THE ORDERING OF THIS ARRAY WITHOUT TRIPLE
-   *** CHECKING ITS CORRECTNESS!
-   *************************************************************
+   Correctness is asserted in hwloc_topology_init() when debug is enabled.
    */
+/***** Make sure you update obj_type_priority[] below as well. *****/
 static const unsigned obj_type_order[] = {
     /* first entry is HWLOC_OBJ_SYSTEM */  0,
     /* next entry is HWLOC_OBJ_MACHINE */  1,
@@ -743,6 +741,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_PU,
   HWLOC_OBJ_MISC,
 };
+/***** Make sure you update obj_type_priority[] below as well. *****/
 
 /* priority to be used when merging identical parent/children object
  * (in merge_useless_child), keep the highest priority one.
@@ -756,6 +755,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
  *
  * Some type won't actually ever be involved in such merging.
  */
+/***** Make sure you update this array when changing the list of types. *****/
 static const int obj_type_priority[] = {
   /* first entry is HWLOC_OBJ_SYSTEM */     80,
   /* next entry is HWLOC_OBJ_MACHINE */     90,
@@ -3421,18 +3421,20 @@ hwloc_topology_check(struct hwloc_topology *topology)
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE + 1 == HWLOC_OBJ_PCI_DEVICE);
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE + 1 == HWLOC_OBJ_OS_DEVICE);
 
+  /* make sure order and priority arrays have the right size */
+  HWLOC_BUILD_ASSERT(sizeof(obj_type_order)/sizeof(*obj_type_order) == HWLOC_OBJ_TYPE_MAX);
+  HWLOC_BUILD_ASSERT(sizeof(obj_order_type)/sizeof(*obj_order_type) == HWLOC_OBJ_TYPE_MAX);
+  HWLOC_BUILD_ASSERT(sizeof(obj_type_priority)/sizeof(*obj_type_priority) == HWLOC_OBJ_TYPE_MAX);
+
+  /* make sure order arrays are coherent */
+  for(type=0; type<HWLOC_OBJ_TYPE_MAX; type++)
+    assert(obj_order_type[obj_type_order[type]] == type);
+  for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+    assert(obj_type_order[obj_order_type[i]] == i);
+
   depth = hwloc_topology_get_depth(topology);
 
   assert(!topology->modified);
-
-  /* check type orders */
-  for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
-    assert(hwloc_get_order_type(hwloc_get_type_order(type)) == type);
-  }
-  for (i = hwloc_get_type_order(HWLOC_OBJ_SYSTEM);
-       i <= hwloc_get_type_order(HWLOC_OBJ_CORE); i++) {
-    assert(i == hwloc_get_type_order(hwloc_get_order_type(i)));
-  }
 
   /* check that last level is PU */
   assert(hwloc_get_depth_type(topology, depth-1) == HWLOC_OBJ_PU);

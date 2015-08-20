@@ -156,15 +156,6 @@ typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
  * hwloc_compare_types() instead.
  */
 typedef enum {
-    /* ***************************************************************
-       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
-
-       If new enum values are added here, you MUST also go update the
-       obj_type_order[] and obj_order_type[] arrays in src/topology.c.
-
-       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
-       *************************************************************** */
-
   HWLOC_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
   			  * The whole system that is accessible to hwloc.
 			  * That may comprise several machines in SSI systems.
@@ -249,15 +240,6 @@ typedef enum {
 			  */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
-
-    /* ***************************************************************
-       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
-
-       If new enum values are added here, you MUST also go update the
-       obj_type_order[] and obj_order_type[] arrays in src/topology.c.
-
-       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
-       *************************************************************** */
 } hwloc_obj_type_t;
 
 /** \brief Cache type. */
