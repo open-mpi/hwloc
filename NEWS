@@ -27,6 +27,11 @@ Version 2.0
   + Topologies always have at least one NUMA object. On non-NUMA machines,
     a single NUMA object is added to describe the entire machine memory.
     The NUMA level cannot be ignored anymore.
+  + The HWLOC_OBJ_CACHE type is replaced with 8 types HWLOC_OBJ_L[1-5]CACHE
+    and HWLOC_OBJ_L[1-3]ICACHE that remove the need to disambiguate levels
+    when looking for caches with _by_type() functions.
+    - New hwloc_obj_type_is_{,d,i}cache() functions may be used to check whether
+      a given type is a cache.
   + Add the experimental netloc subproject. It is enabled by default when
     supported and can be disabled with --disable-netloc.
     See the documentation for details.

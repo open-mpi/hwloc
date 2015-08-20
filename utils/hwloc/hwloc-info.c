@@ -108,7 +108,14 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
   }
 
   switch (obj->type) {
-  case HWLOC_OBJ_CACHE:
+  case HWLOC_OBJ_L1CACHE:
+  case HWLOC_OBJ_L2CACHE:
+  case HWLOC_OBJ_L3CACHE:
+  case HWLOC_OBJ_L4CACHE:
+  case HWLOC_OBJ_L5CACHE:
+  case HWLOC_OBJ_L1ICACHE:
+  case HWLOC_OBJ_L2ICACHE:
+  case HWLOC_OBJ_L3ICACHE:
     printf("%s attr cache depth = %u\n", prefix, obj->attr->cache.depth);
     switch (obj->attr->cache.type) {
     case HWLOC_OBJ_CACHE_UNIFIED: printf("%s attr cache type = Unified\n", prefix); break;
@@ -218,15 +225,6 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
 	    && show_ancestor_attrdepth != -1
 	    && show_ancestor_attrdepth != (int) parent->attr->group.depth)
 	  goto next;
-	if (parent->type == HWLOC_OBJ_CACHE
-	    && show_ancestor_attrdepth != -1
-	    && show_ancestor_attrdepth != (int) parent->attr->cache.depth)
-	  goto next;
-	if (parent->type == HWLOC_OBJ_CACHE
-	    && show_ancestor_attrcachetype != (hwloc_obj_cache_type_t) -1
-	    && parent->attr->cache.type != HWLOC_OBJ_CACHE_UNIFIED
-	    && show_ancestor_attrcachetype != parent->attr->cache.type)
-	  goto next;
 	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
 	if (verbose < 0)
 	  printf("%s%s:%u\n", prefix, parents, parent->logical_index);
@@ -309,7 +307,7 @@ main (int argc, char *argv[])
           usage(callname, stderr);
           return EXIT_SUCCESS;
         }
-	if (show_ancestor_type == HWLOC_OBJ_CACHE) {
+	if (hwloc_obj_type_is_cache(show_ancestor_type)) {
 	  show_ancestor_attrdepth = attrs.cache.depth;
 	  show_ancestor_attrcachetype = attrs.cache.type;
 	} else if (show_ancestor_type == HWLOC_OBJ_GROUP) {

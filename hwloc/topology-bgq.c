@@ -66,7 +66,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
   hwloc_insert_object_by_cpuset(topology, obj);
 
   /* shared L2 */
-  obj = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+  obj = hwloc_alloc_setup_object(HWLOC_OBJ_L2CACHE, -1);
   obj->cpuset = hwloc_bitmap_dup(set);
   obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
   obj->attr->cache.depth = 2;
@@ -84,7 +84,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
     obj->cpuset = set;
     hwloc_insert_object_by_cpuset(topology, obj);
     /* L1d */
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1CACHE, -1);
     obj->cpuset = hwloc_bitmap_dup(set);
     obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
     obj->attr->cache.depth = 1;
@@ -93,7 +93,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
     obj->attr->cache.associativity = 8;
     hwloc_insert_object_by_cpuset(topology, obj);
     /* L1i */
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
     obj->cpuset = hwloc_bitmap_dup(set);
     obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
     obj->attr->cache.depth = 1;

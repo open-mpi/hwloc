@@ -565,7 +565,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    type = HWLOC_OBJ_PACKAGE;
 	    break;
 	  case RelationCache:
-	    type = HWLOC_OBJ_CACHE;
+	    type = (procInfo[i].Cache.Type == CacheInstruction ? HWLOC_OBJ_L1ICACHE : HWLOC_OBJ_L1CACHE) + procInfo[i].Cache.Level - 1;
 	    break;
 	  case RelationProcessorCore:
 	    type = HWLOC_OBJ_CORE;
@@ -603,7 +603,14 @@ hwloc_look_windows(struct hwloc_backend *backend)
 #endif
 	      break;
 	    }
-	  case HWLOC_OBJ_CACHE:
+	  case HWLOC_OBJ_L1CACHE:
+	  case HWLOC_OBJ_L2CACHE:
+	  case HWLOC_OBJ_L3CACHE:
+	  case HWLOC_OBJ_L4CACHE:
+	  case HWLOC_OBJ_L5CACHE:
+	  case HWLOC_OBJ_L1ICACHE:
+	  case HWLOC_OBJ_L2ICACHE:
+	  case HWLOC_OBJ_L3ICACHE:
 	    obj->attr->cache.size = procInfo[i].Cache.Size;
 	    obj->attr->cache.associativity = procInfo[i].Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo[i].Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo[i].Cache.LineSize;
@@ -680,7 +687,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
             GroupMask = procInfo->Processor.GroupMask;
 	    break;
 	  case RelationCache:
-	    type = HWLOC_OBJ_CACHE;
+	    type = (procInfo->Cache.Type == CacheInstruction ? HWLOC_OBJ_L1ICACHE : HWLOC_OBJ_L1CACHE) + procInfo->Cache.Level - 1;
             num = 1;
             GroupMask = &procInfo->Cache.GroupMask;
 	    break;
@@ -748,7 +755,14 @@ hwloc_look_windows(struct hwloc_backend *backend)
 #endif
 	      break;
 	    }
-	  case HWLOC_OBJ_CACHE:
+	  case HWLOC_OBJ_L1CACHE:
+	  case HWLOC_OBJ_L2CACHE:
+	  case HWLOC_OBJ_L3CACHE:
+	  case HWLOC_OBJ_L4CACHE:
+	  case HWLOC_OBJ_L5CACHE:
+	  case HWLOC_OBJ_L1ICACHE:
+	  case HWLOC_OBJ_L2ICACHE:
+	  case HWLOC_OBJ_L3ICACHE:
 	    obj->attr->cache.size = procInfo->Cache.CacheSize;
 	    obj->attr->cache.associativity = procInfo->Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo->Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo->Cache.LineSize;

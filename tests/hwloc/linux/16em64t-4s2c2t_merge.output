@@ -29,6 +29,6 @@ NUMANode (P#0)
       PU L#15 (P#15)
 depth 0:	1 NUMANode (type #2)
  depth 1:	4 Package (type #3)
-  depth 2:	8 Core (type #5)
-   depth 3:	16 PU (type #6)
+  depth 2:	8 Core (type #4)
+   depth 3:	16 PU (type #5)
 Topology not from this system

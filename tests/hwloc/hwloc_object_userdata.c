@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -68,7 +68,7 @@ static void import_cb(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_
       obj->userdata = (void *)(uintptr_t) 0x4;
       break;
     case 0x2:
-      assert(obj->type == HWLOC_OBJ_CACHE);
+      assert(obj->type == HWLOC_OBJ_L2CACHE);
       obj->userdata = (void *)(uintptr_t) 0x5;
       break;
     case 0x3:

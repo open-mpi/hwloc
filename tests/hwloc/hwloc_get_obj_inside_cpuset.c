@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -28,7 +28,7 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
-  hwloc_topology_set_synthetic (topology, "nodes:2 pack:3 caches:4 cores:5 6");
+  hwloc_topology_set_synthetic (topology, "nodes:2 pack:3 l2:4 cores:5 6");
 
   err = hwloc_topology_load (topology);
   if (err)
@@ -64,7 +64,7 @@ main (void)
 
   /* check there are 12 caches inside last node */
   root = hwloc_get_obj_by_depth(topology, 1, 1);
-  assert(hwloc_get_nbobjs_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_CACHE) == 12);
+  assert(hwloc_get_nbobjs_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_L2CACHE) == 12);
 
 
   /* check first PU of second package */

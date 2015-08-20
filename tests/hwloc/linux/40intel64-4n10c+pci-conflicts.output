@@ -216,18 +216,18 @@ Machine (P#0 total=536857436KB Backend=Linux LinuxCgroup=/torque/513099.master.c
       PCI 1000:0079 (P#4096 busid=0000:01:00.0 class=0104(RAID))
         Block L#0 (Size=1756495872 SectorSize=512 LinuxDeviceID=8:0) "sda"
 depth 0:	1 Machine (type #1)
- depth 1:	2 Group0 (type #7)
+ depth 1:	2 Group0 (type #14)
   depth 2:	4 NUMANode (type #2)
    depth 3:	3 Package (type #3)
-    depth 4:	3 L3Cache (type #4)
-     depth 5:	40 L2Cache (type #4)
-      depth 6:	40 L1dCache (type #4)
-       depth 7:	40 L1iCache (type #4)
-        depth 8:	40 Core (type #5)
-         depth 9:	40 PU (type #6)
-Special depth -3:	2 Bridge (type #9)
-Special depth -4:	1 PCI Device (type #10)
-Special depth -5:	1 OS Device (type #11)
+    depth 4:	3 L3Cache (type #8)
+     depth 5:	40 L2Cache (type #7)
+      depth 6:	40 L1dCache (type #6)
+       depth 7:	40 L1iCache (type #11)
+        depth 8:	40 Core (type #4)
+         depth 9:	40 PU (type #5)
+Special depth -3:	2 Bridge (type #16)
+Special depth -4:	1 PCI Device (type #17)
+Special depth -5:	1 OS Device (type #18)
 relative latency matrix between NUMANodes (depth 2) by logical indexes:
   index     0     1     2     3
       0 1.000 4.000 8.000 8.000

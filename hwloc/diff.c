@@ -179,7 +179,14 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 	switch (obj1->type) {
 	default:
 		break;
-	case HWLOC_OBJ_CACHE:
+	case HWLOC_OBJ_L1CACHE:
+	case HWLOC_OBJ_L2CACHE:
+	case HWLOC_OBJ_L3CACHE:
+	case HWLOC_OBJ_L4CACHE:
+	case HWLOC_OBJ_L5CACHE:
+	case HWLOC_OBJ_L1ICACHE:
+	case HWLOC_OBJ_L2ICACHE:
+	case HWLOC_OBJ_L3ICACHE:
 		if (memcmp(obj1->attr, obj2->attr, sizeof(obj1->attr->cache)))
 			goto out_too_complex;
 		break;

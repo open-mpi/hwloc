@@ -31,6 +31,6 @@ Machine (P#0 Backend=Linux)
 depth 0:	1 Machine (type #1)
  depth 1:	1 NUMANode (type #2)
   depth 2:	4 Package (type #3)
-   depth 3:	8 Core (type #5)
-    depth 4:	16 PU (type #6)
+   depth 3:	8 Core (type #4)
+    depth 4:	16 PU (type #5)
 Topology not from this system

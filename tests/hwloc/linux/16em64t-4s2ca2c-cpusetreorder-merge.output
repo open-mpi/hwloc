@@ -19,7 +19,7 @@ NUMANode (P#0)
     PU L#10 (P#7)
 depth 0:	1 NUMANode (type #2)
  depth 1:	4 Package (type #3)
-  depth 2:	3 L2Cache (type #4)
-   depth 3:	11 PU (type #6)
+  depth 2:	3 L2Cache (type #7)
+   depth 3:	11 PU (type #5)
 5 processors not represented in topology: 0x0000d003
 Topology not from this system

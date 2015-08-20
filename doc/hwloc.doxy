@@ -516,7 +516,7 @@ Make sure to have had a look at those too!
 <dl>
 
 <dt>Object</dt>
-  <dd>Interesting kind of part of the system, such as a Core, a Cache,
+  <dd>Interesting kind of part of the system, such as a Core, a L2Cache,
   a Memory node, etc. The different types detected by hwloc are
   detailed in the ::hwloc_obj_type_t enumeration.
   
@@ -885,7 +885,7 @@ following environment variables.
 <dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:distance,...</dt>
   <dd>sets a distance matrix for objects of the given type and physical indexes.
   The type should be given as its case-sensitive stringified value
-  (e.g. <tt>NUMANode</tt>, <tt>Package</tt>, <tt>Cache</tt>, <tt>Core</tt>, <tt>PU</tt>).
+  (e.g. <tt>NUMANode</tt>, <tt>Package</tt>, <tt>L2Cache</tt>, <tt>Core</tt>, <tt>PU</tt>).
   If another distance matrix already exists for the given type,
   either because the user specified it or because the OS offers it,
   it will be replaced by the given one.
@@ -1380,9 +1380,9 @@ are available for object types, for instance their <tt>type</tt> or
 Each object also contains an <tt>attr</tt> field that, if non NULL,
 points to a union ::hwloc_obj_attr_u of type-specific attribute
 structures.
-For instance, a Cache object <tt>obj</tt> contains cache-specific
+For instance, a L2Cache object <tt>obj</tt> contains cache-specific
 information in <tt>obj->attr->cache</tt>, such as its size and
-associativity.
+associativity, cache type.
 See ::hwloc_obj_attr_u for details.
 
 \section attributes_info Custom string infos
@@ -1654,11 +1654,11 @@ Aside from loading XML topologies, hwloc also enables the building of
 listing the arity of each levels.
 
 For instance, lstopo may create a topology made of 2 NUMA nodes,
-containing a single package each, with one cache above two
+containing a single package each, with one L2 cache above two
 single-threaded cores:
 
 \verbatim
-$ lstopo -i "node:2 pack:1 cache:1 core:2 pu:1" -
+$ lstopo -i "node:2 pack:1 l2:1 core:2 pu:1" -
 Machine (2048MB)
   NUMANode L#0 (P#0 1024MB) + Package L#0 + L2 L#0 (4096KB)
     Core L#0 + PU L#0 (P#0)
@@ -1684,12 +1684,11 @@ That is why the above topology contains 4 cores (2 cores times 2 nodes).
 
 These type names must be written as
 <tt>machine</tt>, <tt>node</tt>, <tt>package</tt>, <tt>core</tt>,
-<tt>cache</tt>, <tt>pu</tt>, <tt>group</tt>.
+<tt>l2u</tt>, <tt>l1i</tt>, <tt>pu</tt>, <tt>group</tt>
+(hwloc_obj_type_sscanf() is used for parsing the type names).
 They do not need to be written case-sensitively, nor entirely
 (as long as there is no ambiguity, 2 characters such as <tt>ma</tt>
  select a Machine level).
-Type-specific attributes may also be given such as <tt>L2iCache</tt>
-(hwloc_obj_type_sscanf() is used for parsing the type names).
 Note that I/O and Misc objects are not available.
 
 Instead of specifying the type of each level, it is possible to
@@ -1707,10 +1706,6 @@ if a Machine level is specified in the string.
 Therefore the System type cannot be used in the description string as well.
 
 A NUMA level (with a single NUMA node) is automatically added if needed.
-
-Cache level depths are automatically chosen by hwloc (only a L2 first,
-then a L1 under it, then L3 above, then L4 etc.) unless they are specified.
-Memory and cache sizes are also automatically chosen if needed.
 
 Each item may be followed parentheses containing a list of
 space-separated attributes. For instance:
@@ -1765,7 +1760,7 @@ The lstopo tool may also perform such an export by forcing the output format.
 
 \verbatim
 $ lstopo --of synthetic --no-io
-NUMANode:1 Package:1 Cache:1 Cache:2 Cache:1 Cache:1 Core:1 PU:2
+NUMANode:1 Package:1 L3Cache:1 L2Cache:2 L1dCache:1 L1iCache:1 Core:1 PU:2
 \endverbatim
 
 The exported string may be passed back to hwloc for recreating
@@ -2696,11 +2691,9 @@ To understand how hwloc manages such cases, one should first remember
 the meaning of levels and cousin objects. All objects of the same type
 are gathered as horizontal levels with a given depth. They are also
 connected through the cousin pointers of the hwloc_obj structure.
-Some types, such as Caches or Groups, are annotated with a depth or
-level attribute (for instance L2 cache or Group1). Moreover caches
-have a type attribute (for instance L1i or L1d). Such
-attributes are also taken in account when gathering objects as
-horizontal levels.  To be clear: there will be one level for L1i
+Object attribute (cache depth and type, group depth) are also taken
+in account when gathering objects as horizontal levels.
+To be clear: there will be one level for L1i
 caches, another level for L1d caches, another one for L2, etc.
 
 If the topology is asymmetric (e.g., if a cache is missing in one of

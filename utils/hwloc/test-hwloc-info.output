@@ -1,7 +1,7 @@
 depth 0:	1 Machine (type #1)
  depth 1:	2 NUMANode (type #2)
-  depth 2:	6 Core (type #5)
-   depth 3:	24 PU (type #6)
+  depth 2:	6 Core (type #4)
+   depth 3:	24 PU (type #5)
 
 Core L#2
  type = Core
@@ -247,7 +247,7 @@ NUMANode L#0 = parent of PU L#9
  allowed nodeset = 0x00000001
 
 L2Cache L#3 = parent of PU L#12
- type = Cache
+ type = L2Cache
  full type = L2Cache
  logical index = 3
  os index = 3

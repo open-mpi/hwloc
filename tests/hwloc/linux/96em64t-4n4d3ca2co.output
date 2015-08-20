@@ -470,12 +470,12 @@ Machine (P#0 total=528473984KB Backend=Linux)
 depth 0:	1 Machine (type #1)
  depth 1:	4 NUMANode (type #2)
   depth 2:	16 Package (type #3)
-   depth 3:	16 L3Cache (type #4)
-    depth 4:	48 L2Cache (type #4)
-     depth 5:	96 L1dCache (type #4)
-      depth 6:	96 L1iCache (type #4)
-       depth 7:	96 Core (type #5)
-        depth 8:	96 PU (type #6)
+   depth 3:	16 L3Cache (type #8)
+    depth 4:	48 L2Cache (type #7)
+     depth 5:	96 L1dCache (type #6)
+      depth 6:	96 L1iCache (type #11)
+       depth 7:	96 Core (type #4)
+        depth 8:	96 PU (type #5)
 relative latency matrix between NUMANodes (depth 1) by logical indexes:
   index     0     1     2     3
       0 1.000 2.600 2.600 2.600

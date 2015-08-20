@@ -259,9 +259,16 @@ man3_object_typesdir = $(man3dir)
 man3_object_types_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_object_types.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_BRIDGE.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CACHE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CORE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_GROUP.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_L1CACHE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_L2CACHE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_L3CACHE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_L4CACHE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_L5CACHE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_L1ICACHE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_L2ICACHE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_L3ICACHE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MACHINE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MISC.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_NUMANODE.3 \

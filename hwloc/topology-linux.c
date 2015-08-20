@@ -2382,20 +2382,22 @@ look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
 
 static void
 try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
-				    unsigned int level, hwloc_obj_cache_type_t type,
+				    unsigned int level, hwloc_obj_cache_type_t ctype,
 				    uint32_t cache_line_size, uint32_t cache_size, uint32_t cache_sets,
 				    hwloc_bitmap_t cpuset)
 {
   struct hwloc_obj *c = NULL;
+  hwloc_obj_type_t otype;
 
   if (0 == cache_size)
     return;
 
-  c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+  otype = hwloc_cache_type_by_depth_type(level, ctype);
+  c = hwloc_alloc_setup_object(otype, -1);
   c->attr->cache.depth = level;
   c->attr->cache.linesize = cache_line_size;
   c->attr->cache.size = cache_size;
-  c->attr->cache.type = type;
+  c->attr->cache.type = ctype;
   if (cache_sets == 1)
     /* likely wrong, make it unknown */
     cache_sets = 0;
@@ -2405,7 +2407,7 @@ try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
     c->attr->cache.associativity = 0;
   c->cpuset = hwloc_bitmap_dup(cpuset);
   hwloc_debug_2args_bitmap("cache (%s) depth %d has cpuset %s\n",
-			   type == HWLOC_OBJ_CACHE_UNIFIED ? "unified" : (type == HWLOC_OBJ_CACHE_DATA ? "data" : "instruction"),
+			   ctype == HWLOC_OBJ_CACHE_UNIFIED ? "unified" : (ctype == HWLOC_OBJ_CACHE_DATA ? "data" : "instruction"),
 			   level, c->cpuset);
   hwloc_insert_object_by_cpuset(topology, c);
 }
@@ -2979,7 +2981,7 @@ package_done:
 	unsigned linesize = 0;
 	unsigned sets = 0, lines_per_tag = 1;
 	int depth; /* 0 for L1, .... */
-	hwloc_obj_cache_type_t type = HWLOC_OBJ_CACHE_UNIFIED; /* default */
+	hwloc_obj_cache_type_t ctype = HWLOC_OBJ_CACHE_UNIFIED; /* default */
 
 	/* get the cache level depth */
 	sprintf(mappath, "%s/cpu%d/cache/index%d/level", path, i, j);
@@ -3001,11 +3003,11 @@ package_done:
 	  if (fgets(str2, sizeof(str2), fd)) {
 	    fclose(fd);
 	    if (!strncmp(str2, "Data", 4))
-	      type = HWLOC_OBJ_CACHE_DATA;
+	      ctype = HWLOC_OBJ_CACHE_DATA;
 	    else if (!strncmp(str2, "Unified", 7))
-	      type = HWLOC_OBJ_CACHE_UNIFIED;
+	      ctype = HWLOC_OBJ_CACHE_UNIFIED;
 	    else if (!strncmp(str2, "Instruction", 11))
-	      type = HWLOC_OBJ_CACHE_INSTRUCTION;
+	      ctype = HWLOC_OBJ_CACHE_INSTRUCTION;
 	    else
 	      continue;
 	  } else {
@@ -3068,11 +3070,12 @@ package_done:
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
-            struct hwloc_obj *cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+	    hwloc_obj_type_t otype = hwloc_cache_type_by_depth_type(depth+1, ctype);
+            struct hwloc_obj *cache = hwloc_alloc_setup_object(otype, -1);
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
             cache->attr->cache.linesize = linesize;
-	    cache->attr->cache.type = type;
+	    cache->attr->cache.type = ctype;
 	    if (!linesize || !lines_per_tag || !sets)
 	      cache->attr->cache.associativity = 0; /* unknown */
 	    else if (sets == 1)

@@ -433,7 +433,8 @@ main (int argc, char *argv[])
   for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
     force_orient[i] = LSTOPO_ORIENT_NONE;
   force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;
-  force_orient[HWLOC_OBJ_CACHE] = LSTOPO_ORIENT_HORIZ;
+  for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+    force_orient[i] = LSTOPO_ORIENT_HORIZ;
   force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
 
   /* enable verbose backends */
@@ -627,9 +628,11 @@ main (int argc, char *argv[])
   hwloc_topology_set_flags(topology, flags);
 
   if (ignorecache > 1) {
-    hwloc_topology_ignore_type(topology, HWLOC_OBJ_CACHE);
+    for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+      hwloc_topology_ignore_type(topology, i);
   } else if (ignorecache) {
-    hwloc_topology_ignore_type_keep_structure(topology, HWLOC_OBJ_CACHE);
+    for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+      hwloc_topology_ignore_type_keep_structure(topology, i);
   }
   if (merge)
     hwloc_topology_ignore_all_keep_structure(topology);

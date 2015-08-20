@@ -555,7 +555,14 @@ lstopo_set_object_color(struct draw_methods *methods,
     s->bg.b = CORE_B_COLOR;
     break;
 
-  case HWLOC_OBJ_CACHE:
+  case HWLOC_OBJ_L1CACHE:
+  case HWLOC_OBJ_L2CACHE:
+  case HWLOC_OBJ_L3CACHE:
+  case HWLOC_OBJ_L4CACHE:
+  case HWLOC_OBJ_L5CACHE:
+  case HWLOC_OBJ_L1ICACHE:
+  case HWLOC_OBJ_L2ICACHE:
+  case HWLOC_OBJ_L3ICACHE:
     s->bg.r = CACHE_R_COLOR;
     s->bg.g = CACHE_G_COLOR;
     s->bg.b = CACHE_B_COLOR;
@@ -1324,7 +1331,14 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_MACHINE: return machine_draw;
     case HWLOC_OBJ_NUMANODE: return node_draw;
     case HWLOC_OBJ_PACKAGE: return package_draw;
-    case HWLOC_OBJ_CACHE: return cache_draw;
+    case HWLOC_OBJ_L1CACHE: return cache_draw;
+    case HWLOC_OBJ_L2CACHE: return cache_draw;
+    case HWLOC_OBJ_L3CACHE: return cache_draw;
+    case HWLOC_OBJ_L4CACHE: return cache_draw;
+    case HWLOC_OBJ_L5CACHE: return cache_draw;
+    case HWLOC_OBJ_L1ICACHE: return cache_draw;
+    case HWLOC_OBJ_L2ICACHE: return cache_draw;
+    case HWLOC_OBJ_L3ICACHE: return cache_draw;
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PU: return pu_draw;
     case HWLOC_OBJ_GROUP: return group_draw;

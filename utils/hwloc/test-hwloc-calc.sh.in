@@ -75,9 +75,9 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:33-37 --pulist --po
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:30-37 --nodelist --po --sep foo
   echo
-  $calc --if synthetic --input "numa:2 cache:2 pu:1" numa:0 cache:3
-  $calc --if synthetic --input "group:2 numa:2 cache:2 cache:2 pu:1" Group1:1 NUMA:0
-  $calc --if synthetic --input "group:2 numa:2 cache:2 cache:2 pu:1" l2:0-2 L1cache:13:3
+  $calc --if synthetic --input "numa:2 l3:2 pu:1" numa:0 l3u:3
+  $calc --if synthetic --input "group:2 numa:2 l2:2 l1d:2 pu:1" Group1:1 NUMA:0
+  $calc --if synthetic --input "group:2 numa:2 l2:2 l1d:2 pu:1" l2:0-2 L1cache:13:3
   echo
   $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml os=eth6 os=eth4
   $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml os=sdc os=sr0 ~os=sda

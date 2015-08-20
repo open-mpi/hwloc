@@ -90,40 +90,32 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 			 union hwloc_obj_attr_u *attrs,
 			 int verbose)
 {
-  hwloc_obj_cache_type_t cachetype = (hwloc_obj_cache_type_t) -1;
-  int depthattr = -1;
   int depth;
-  int i;
+  hwloc_obj_type_t realtype;
 
-  if (type == HWLOC_OBJ_CACHE) {
-    depthattr = attrs->cache.depth;
-    cachetype = attrs->cache.type;
-  } else if (type == HWLOC_OBJ_GROUP) {
-    depthattr = attrs->group.depth;
-  }
-
-  if (depthattr == -1) {
-    hwloc_obj_type_t realtype;
-    /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
-    depth = hwloc_get_type_or_above_depth(topology, type);
-    if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      if (verbose >= 0)
-	fprintf(stderr, "type %s has multiple possible depths\n", hwloc_obj_type_string(type));
-      return -1;
-    } else if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      if (verbose >= 0)
-	fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
-      return -1;
-    }
-    realtype = hwloc_get_depth_type(topology, depth);
-    if (type != realtype && verbose > 0)
-      fprintf(stderr, "using type %s (depth %d) instead of %s\n",
-	      hwloc_obj_type_string(realtype), depth, hwloc_obj_type_string(type));
-    return depth;
-
-  } else {
-    /* matched a type with a depth attribute, look at the first object of each level to find the depth */
-    if (type == HWLOC_OBJ_GROUP)
+  if (type == HWLOC_OBJ_GROUP) {
+    int depthattr = (int) attrs->group.depth;
+    if (depthattr == -1) {
+      hwloc_obj_type_t realtype;
+      /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
+      depth = hwloc_get_type_or_above_depth(topology, type);
+      if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+	if (verbose >= 0)
+	  fprintf(stderr, "type %s has multiple possible depths\n", hwloc_obj_type_string(type));
+	return -1;
+      } else if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+	if (verbose >= 0)
+	  fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
+	return -1;
+      }
+      realtype = hwloc_get_depth_type(topology, depth);
+      if (type != realtype && verbose > 0)
+	fprintf(stderr, "using type %s (depth %d) instead of %s\n",
+		hwloc_obj_type_string(realtype), depth, hwloc_obj_type_string(type));
+      return depth;
+    } else {
+      /* matched a type with a depth attribute, look at the first object of each level to find the depth */
+      int i;
       for(i=0; ; i++) {
 	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
 	if (!obj) {
@@ -136,21 +128,22 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 	    && (unsigned) depthattr == obj->attr->group.depth)
 	  return i;
       }
-    else if (type == HWLOC_OBJ_CACHE) {
-      depth = hwloc_get_cache_type_depth(topology, depthattr, cachetype);
-      if (verbose >= 0) {
-	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-	  fprintf(stderr, "Cache with custom depth %d and type %d does not exist\n", depthattr, cachetype);
-	else if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
-	  fprintf(stderr, "Cache with custom depth %d and type %d has multiple possible depths\n", depthattr, cachetype);
-      }
-      return depth;
-    } else
-      assert(0);
+    }
   }
 
-  /* cannot come here, we'll exit above first */
-  return -1;
+  /* matched an exact type, try to get the depth from the type if it exists and is unique */
+  depth = hwloc_get_type_or_above_depth(topology, type);
+  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE); /* only happens for HWLOC_OBJ_GROUP */
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+    if (verbose >= 0)
+      fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
+    return -1;
+  }
+  realtype = hwloc_get_depth_type(topology, depth);
+  if (type != realtype && verbose > 0)
+    fprintf(stderr, "using type %s (depth %d) instead of %s\n",
+	    hwloc_obj_type_string(realtype), depth, hwloc_obj_type_string(type));
+  return depth;
 }
 
 static __hwloc_inline int

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -35,7 +35,7 @@ int main(void)
   hwloc_bitmap_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(cache);
-  assert(cache->type == HWLOC_OBJ_CACHE);
+  assert(hwloc_obj_type_is_dcache(cache->type));
   assert(cache->logical_index == CPUINDEX/2/3);
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
   hwloc_bitmap_free(set);
@@ -52,7 +52,7 @@ int main(void)
   hwloc_bitmap_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(cache);
-  assert(cache->type == HWLOC_OBJ_CACHE);
+  assert(hwloc_obj_type_is_dcache(cache->type));
   assert(cache->logical_index == CPUINDEX1/2/3);
   assert(cache->logical_index == CPUINDEX2/2/3);
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));

@@ -152,12 +152,12 @@ Machine (P#0 total=66835164KB DMIProductName=UCSB-B200-M4 DMIProductVersion=0 DM
 depth 0:	1 Machine (type #1)
  depth 1:	2 Package (type #3)
   depth 2:	4 NUMANode (type #2)
-   depth 3:	4 L3Cache (type #4)
-    depth 4:	28 L2Cache (type #4)
-     depth 5:	28 L1dCache (type #4)
-      depth 6:	28 L1iCache (type #4)
-       depth 7:	28 Core (type #5)
-        depth 8:	28 PU (type #6)
+   depth 3:	4 L3Cache (type #8)
+    depth 4:	28 L2Cache (type #7)
+     depth 5:	28 L1dCache (type #6)
+      depth 6:	28 L1iCache (type #11)
+       depth 7:	28 Core (type #4)
+        depth 8:	28 PU (type #5)
 relative latency matrix between NUMANodes (depth 2) by logical indexes:
   index     0     1     2     3
       0 1.000 2.100 3.100 3.100

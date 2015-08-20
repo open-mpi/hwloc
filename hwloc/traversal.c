@@ -186,7 +186,14 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_GROUP: return "Group";
     case HWLOC_OBJ_NUMANODE: return "NUMANode";
     case HWLOC_OBJ_PACKAGE: return "Package";
-    case HWLOC_OBJ_CACHE: return "Cache";
+    case HWLOC_OBJ_L1CACHE: return "L1Cache";
+    case HWLOC_OBJ_L2CACHE: return "L2Cache";
+    case HWLOC_OBJ_L3CACHE: return "L3Cache";
+    case HWLOC_OBJ_L4CACHE: return "L4Cache";
+    case HWLOC_OBJ_L5CACHE: return "L5Cache";
+    case HWLOC_OBJ_L1ICACHE: return "L1iCache";
+    case HWLOC_OBJ_L2ICACHE: return "L2iCache";
+    case HWLOC_OBJ_L3ICACHE: return "L3iCache";
     case HWLOC_OBJ_CORE: return "Core";
     case HWLOC_OBJ_BRIDGE: return "Bridge";
     case HWLOC_OBJ_PCI_DEVICE: return "PCIDev";
@@ -205,7 +212,14 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Group")) return HWLOC_OBJ_GROUP;
   if (!strcasecmp(string, "NUMANode") || !strcasecmp(string, "Node")) return HWLOC_OBJ_NUMANODE;
   if (!strcasecmp(string, "Package") || !strcasecmp(string, "Socket") /* backward compat with v1.10 */) return HWLOC_OBJ_PACKAGE;
-  if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
+  if (!strcasecmp(string, "L1Cache")) return HWLOC_OBJ_L1CACHE;
+  if (!strcasecmp(string, "L2Cache")) return HWLOC_OBJ_L2CACHE;
+  if (!strcasecmp(string, "L3Cache")) return HWLOC_OBJ_L3CACHE;
+  if (!strcasecmp(string, "L4Cache")) return HWLOC_OBJ_L4CACHE;
+  if (!strcasecmp(string, "L5Cache")) return HWLOC_OBJ_L5CACHE;
+  if (!strcasecmp(string, "L1iCache")) return HWLOC_OBJ_L1ICACHE;
+  if (!strcasecmp(string, "L2iCache")) return HWLOC_OBJ_L2ICACHE;
+  if (!strcasecmp(string, "L3iCache")) return HWLOC_OBJ_L3ICACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
   if (!strcasecmp(string, "PU")) return HWLOC_OBJ_PU;
   if (!strcasecmp(string, "Bridge")) return HWLOC_OBJ_BRIDGE;
@@ -223,7 +237,7 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
   char *end;
 
-  /* types without depthattr */
+  /* types without a custom depth */
   if (!hwloc_strncasecmp(string, "system", 2)) {
     type = HWLOC_OBJ_SYSTEM;
   } else if (!hwloc_strncasecmp(string, "machine", 2)) {
@@ -248,18 +262,20 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
     type = HWLOC_OBJ_OS_DEVICE;
 
   /* types with depthattr */
-  } else if (!hwloc_strncasecmp(string, "cache", 2)) {
-    type = HWLOC_OBJ_CACHE;
-
   } else if ((string[0] == 'l' || string[0] == 'L') && string[1] >= '0' && string[1] <= '9') {
-    type = HWLOC_OBJ_CACHE;
     depthattr = strtol(string+1, &end, 10);
-    if (*end == 'd') {
-      cachetypeattr = HWLOC_OBJ_CACHE_DATA;
-    } else if (*end == 'i') {
-      cachetypeattr = HWLOC_OBJ_CACHE_INSTRUCTION;
-    } else if (*end == 'u') {
-      cachetypeattr = HWLOC_OBJ_CACHE_UNIFIED;
+    if (*end == 'i') {
+      if (depthattr >= 1 && depthattr <= 3) {
+	type = HWLOC_OBJ_L1ICACHE + depthattr-1;
+	cachetypeattr = HWLOC_OBJ_CACHE_INSTRUCTION;
+      } else
+	return -1;
+    } else {
+      if (depthattr >= 1 && depthattr <= 5) {
+	type = HWLOC_OBJ_L1CACHE + depthattr-1;
+	cachetypeattr = *end == 'd' ? HWLOC_OBJ_CACHE_DATA : HWLOC_OBJ_CACHE_UNIFIED;
+      } else
+	return -1;
     }
 
   } else if (!hwloc_strncasecmp(string, "group", 2)) {
@@ -270,19 +286,19 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 	&& string[length] >= '0' && string[length] <= '9') {
       depthattr = strtol(string+length, &end, 10);
     }
+
   } else
     return -1;
 
   *typep = type;
   if (attrp) {
-    if (type == HWLOC_OBJ_CACHE && attrsize >= sizeof(attrp->cache)) {
+    if (hwloc_obj_type_is_cache(type) && attrsize >= sizeof(attrp->cache)) {
       attrp->cache.depth = depthattr;
       attrp->cache.type = cachetypeattr;
     } else if (type == HWLOC_OBJ_GROUP && attrsize >= sizeof(attrp->group)) {
       attrp->group.depth = depthattr;
     }
   }
-
   return 0;
 }
 
@@ -474,10 +490,17 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_CORE:
   case HWLOC_OBJ_PU:
     return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
-  case HWLOC_OBJ_CACHE:
+  case HWLOC_OBJ_L1CACHE:
+  case HWLOC_OBJ_L2CACHE:
+  case HWLOC_OBJ_L3CACHE:
+  case HWLOC_OBJ_L4CACHE:
+  case HWLOC_OBJ_L5CACHE:
+  case HWLOC_OBJ_L1ICACHE:
+  case HWLOC_OBJ_L2ICACHE:
+  case HWLOC_OBJ_L3ICACHE:
     return hwloc_snprintf(string, size, "L%u%s%s", obj->attr->cache.depth,
 			  hwloc_obj_cache_type_letter(obj->attr->cache.type),
-			  verbose ? hwloc_obj_type_string(type): "");
+			  verbose ? "Cache" : "");
   case HWLOC_OBJ_GROUP:
 	  /* TODO: more pretty presentation? */
     if (obj->attr->group.depth != (unsigned) -1)
@@ -563,7 +586,14 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   /* printf type-specific attributes */
   res = 0;
   switch (obj->type) {
-  case HWLOC_OBJ_CACHE:
+  case HWLOC_OBJ_L1CACHE:
+  case HWLOC_OBJ_L2CACHE:
+  case HWLOC_OBJ_L3CACHE:
+  case HWLOC_OBJ_L4CACHE:
+  case HWLOC_OBJ_L5CACHE:
+  case HWLOC_OBJ_L1ICACHE:
+  case HWLOC_OBJ_L2ICACHE:
+  case HWLOC_OBJ_L3ICACHE:
     if (verbose) {
       char assoc[32];
       if (obj->attr->cache.associativity == -1)

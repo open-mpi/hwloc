@@ -6,5 +6,5 @@ Machine (P#0 Backend=Linux)
     PU L#3 (P#3)
 depth 0:	1 Machine (type #1)
  depth 1:	1 NUMANode (type #2)
-  depth 2:	4 PU (type #6)
+  depth 2:	4 PU (type #5)
 Topology not from this system

@@ -176,9 +176,7 @@ typedef enum {
 			  * In the physical meaning, i.e. that you can add
 			  * or remove physically.
 			  */
-  HWLOC_OBJ_CACHE,	/**< \brief Cache.
-			  * Can be L1i, L1d, L2, L3, ...
-			  */
+
   HWLOC_OBJ_CORE,	/**< \brief Core.
 			  * A computation unit (may be shared by several
 			  * logical processors).
@@ -191,6 +189,19 @@ typedef enum {
 			  * Objects of this kind are always reported and can
 			  * thus be used as fallback when others are not.
 			  */
+
+  HWLOC_OBJ_L1CACHE,	/**< \brief Level 1 Data (or Unified) Cache. */
+  HWLOC_OBJ_L2CACHE,	/**< \brief Level 2 Data (or Unified) Cache. */
+  HWLOC_OBJ_L3CACHE,	/**< \brief Level 3 Data (or Unified) Cache. */
+  HWLOC_OBJ_L4CACHE,	/**< \brief Level 4 Data (or Unified) Cache. */
+  HWLOC_OBJ_L5CACHE,	/**< \brief Level 5 Data (or Unified) Cache. */
+
+  HWLOC_OBJ_L1ICACHE,	/**< \brief Level 1 instruction Cache,
+			 * only when the HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
+  HWLOC_OBJ_L2ICACHE,	/**< \brief Level 2 instruction Cache,
+			 * only when the HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
+  HWLOC_OBJ_L3ICACHE,	/**< \brief Level 3 instruction Cache,
+			 * only when the HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
 
   HWLOC_OBJ_GROUP,	/**< \brief Group objects.
 			  * Objects which do not fit in the above but are
@@ -682,11 +693,8 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * If type is absent but a similar type is acceptable, see also
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  *
- * If some objects of the given type exist in different levels,
- * for instance L1 and L2 caches, or L1i and L1d caches,
- * the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
- * See hwloc_get_cache_type_depth() in hwloc/helper.h to better handle this
- * case.
+ * If HWLOC_OBJ_GROUP is given, the function may return HWLOC_TYPE_DEPTH_MULTIPLE
+ * if multiple levels of Groups exist.
  *
  * If an I/O object type is given, the function returns a virtual value
  * because I/O objects are stored in special levels that are not CPU-related.
@@ -699,7 +707,7 @@ HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_ty
 
 enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_UNKNOWN = -1,    /**< \brief No object of given type exists in the topology. \hideinitializer */
-    HWLOC_TYPE_DEPTH_MULTIPLE = -2,   /**< \brief Objects of given type exist at different depth in the topology. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MULTIPLE = -2,   /**< \brief Objects of given type exist at different depth in the topology (only for Groups). \hideinitializer */
     HWLOC_TYPE_DEPTH_BRIDGE = -3,     /**< \brief Virtual depth for bridge object level. \hideinitializer */
     HWLOC_TYPE_DEPTH_PCI_DEVICE = -4, /**< \brief Virtual depth for PCI device object level. \hideinitializer */
     HWLOC_TYPE_DEPTH_OS_DEVICE = -5,  /**< \brief Virtual depth for software device object level. \hideinitializer */
@@ -712,8 +720,8 @@ enum hwloc_get_type_depth_e {
  * function returns the depth of the first "present" object typically found
  * inside \p type.
  *
- * If some objects of the given type exist in different levels, for instance
- * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ * May return HWLOC_TYPE_DEPTH_MULTIPLE for HWLOC_OBJ_GROUP just like
+ * hwloc_get_type_depth().
  */
 static __hwloc_inline int
 hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
@@ -724,8 +732,8 @@ hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * function returns the depth of the first "present" object typically
  * containing \p type.
  *
- * If some objects of the given type exist in different levels, for instance
- * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ * May return HWLOC_TYPE_DEPTH_MULTIPLE for HWLOC_OBJ_GROUP just like
+ * hwloc_get_type_depth().
  */
 static __hwloc_inline int
 hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
@@ -798,7 +806,7 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
 
 /** \brief Return an object type and attributes from a type string.
  *
- * Convert strings such as "Package" or "Cache" into the corresponding types.
+ * Convert strings such as "Package" or "L1iCache" into the corresponding types.
  * Matching is case-insensitive, and only the first letters are actually
  * required to match.
  *
@@ -806,7 +814,7 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  * in \p attrp. They are ignored if this pointer is \c NULL.
  *
  * For instance "L2i" or "L2iCache" would return
- * type HWLOC_OBJ_CACHE in \p typep, and 2 and HWLOC_OBJ_CACHE_TYPE_INSTRUCTION
+ * type HWLOC_OBJ_L2ICACHE in \p typep, and 2 and HWLOC_OBJ_CACHE_TYPE_INSTRUCTION
  * in the depth and type fields of attrp->cache (struct hwloc_cache_attr_s).
  * "Group3" would return type HWLOC_OBJ_GROUP type and 3 in the depth field
  * of attrp->group (struct hwloc_group_attr_s).

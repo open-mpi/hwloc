@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static void print_children(hwloc_topology_t topology, hwloc_obj_t obj, 
+static void print_children(hwloc_topology_t topology, hwloc_obj_t obj,
                            int depth)
 {
     char type[32], attr[1024];
@@ -52,7 +52,7 @@ int main(void)
     hwloc_topology_init(&topology);
 
     /* ... Optionally, put detection configuration here to ignore
-       some objects types, define a synthetic topology, etc....  
+       some objects types, define a synthetic topology, etc....
 
        The default is to detect all the objects of the machine that
        the caller is allowed to access.  See Configure Topology
@@ -72,7 +72,7 @@ int main(void)
      *****************************************************************/
     for (depth = 0; depth < topodepth; depth++) {
         printf("*** Objects at level %d\n", depth);
-        for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); 
+        for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth);
              i++) {
             hwloc_obj_type_snprintf(string, sizeof(string),
 				    hwloc_get_obj_by_depth(topology, depth, i), 0);
@@ -109,11 +109,11 @@ int main(void)
     for (obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0);
          obj;
          obj = obj->parent)
-      if (obj->type == HWLOC_OBJ_CACHE) {
+      if (hwloc_obj_type_is_cache(obj->type)) {
         levels++;
         size += obj->attr->cache.size;
       }
-    printf("*** Logical processor 0 has %d caches totaling %luKB\n", 
+    printf("*** Logical processor 0 has %d caches totaling %luKB\n",
            levels, size / 1024);
 
     /*****************************************************************

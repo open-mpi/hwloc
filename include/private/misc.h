@@ -381,4 +381,19 @@ static __hwloc_inline int hwloc_strncasecmp(const char *s1, const char *s2, size
 #endif
 }
 
+static __hwloc_inline hwloc_obj_type_t hwloc_cache_type_by_depth_type(unsigned depth, hwloc_obj_cache_type_t type)
+{
+  if (type == HWLOC_OBJ_CACHE_INSTRUCTION) {
+    if (depth >= 1 && depth <= 3)
+      return HWLOC_OBJ_L1ICACHE + depth-1;
+    else
+      return HWLOC_OBJ_TYPE_NONE;
+  } else {
+    if (depth >= 1 && depth <= 5)
+      return HWLOC_OBJ_L1CACHE + depth-1;
+    else
+      return HWLOC_OBJ_TYPE_NONE;
+  }
+}
+
 #endif /* HWLOC_PRIVATE_MISC_H */

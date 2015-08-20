@@ -93,11 +93,11 @@ Machine (P#0 total=67106960KB DMIBoardVendor="TYAN Computer Corp" DMIBoardName="
 depth 0:	1 Machine (type #1)
  depth 1:	8 NUMANode (type #2)
   depth 2:	8 Package (type #3)
-   depth 3:	15 L2Cache (type #4)
-    depth 4:	15 L1dCache (type #4)
-     depth 5:	15 L1iCache (type #4)
-      depth 6:	15 Core (type #5)
-       depth 7:	15 PU (type #6)
+   depth 3:	15 L2Cache (type #7)
+    depth 4:	15 L1dCache (type #6)
+     depth 5:	15 L1iCache (type #11)
+      depth 6:	15 Core (type #4)
+       depth 7:	15 PU (type #5)
 relative latency matrix between NUMANodes (depth 1) by logical indexes:
   index     0     1     2     3     4     5     6     7
       0 1.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000

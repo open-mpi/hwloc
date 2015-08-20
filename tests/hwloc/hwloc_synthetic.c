@@ -55,8 +55,8 @@ int main(void)
   assert(!err);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS);
-  assert(err == 40);
-  err = strcmp("Package:2 NUMANode:3 Cache:4 Core:5 PU:6", buffer);
+  assert(err == 42);
+  err = strcmp("Package:2 NUMANode:3 L2Cache:4 Core:5 PU:6", buffer);
   assert(!err);
 
   hwloc_topology_destroy(topology);

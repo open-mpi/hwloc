@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -15,7 +15,7 @@
  * and hwloc_get_depth_type()
  */
 
-#define SYNTHETIC_TOPOLOGY_DESCRIPTION "machine:3 group:2 group:2 core:3 cache:2 cache:2 2"
+#define SYNTHETIC_TOPOLOGY_DESCRIPTION "machine:3 group:2 group:2 core:3 l3:2 l1:2 2"
 
 int main(void)
 {
@@ -33,8 +33,8 @@ int main(void)
   assert(hwloc_get_depth_type(topology, 3) == HWLOC_OBJ_GROUP);
   assert(hwloc_get_depth_type(topology, 4) == HWLOC_OBJ_GROUP);
   assert(hwloc_get_depth_type(topology, 5) == HWLOC_OBJ_CORE);
-  assert(hwloc_get_depth_type(topology, 6) == HWLOC_OBJ_CACHE);
-  assert(hwloc_get_depth_type(topology, 7) == HWLOC_OBJ_CACHE);
+  assert(hwloc_get_depth_type(topology, 6) == HWLOC_OBJ_L3CACHE);
+  assert(hwloc_get_depth_type(topology, 7) == HWLOC_OBJ_L1CACHE);
   assert(hwloc_get_depth_type(topology, 8) == HWLOC_OBJ_PU);
 
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_MACHINE) == 1);
@@ -44,9 +44,10 @@ int main(void)
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE) == HWLOC_TYPE_DEPTH_UNKNOWN);
   assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PACKAGE) == 4);
   assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_PACKAGE) == 5);
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_CACHE) == HWLOC_TYPE_DEPTH_MULTIPLE);
-  assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_CACHE) == HWLOC_TYPE_DEPTH_MULTIPLE);
-  assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_CACHE) == HWLOC_TYPE_DEPTH_MULTIPLE);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP) == HWLOC_TYPE_DEPTH_MULTIPLE);
+  assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_GROUP) == HWLOC_TYPE_DEPTH_MULTIPLE);
+  assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_GROUP) == HWLOC_TYPE_DEPTH_MULTIPLE);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_L3CACHE) == 6);
 
   hwloc_topology_destroy(topology);
 

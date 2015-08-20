@@ -1,7 +1,7 @@
 /* This example program looks for caches shared between this process
  * and another one based on their current binding.
  *
- * Copyright © 2014 Inria.  All rights reserved.
+ * Copyright © 2014-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     hwloc_topology_destroy(topology);
     return EXIT_FAILURE;
   }
-    
+
   /* find where the other process is running */
   hisset = hwloc_bitmap_alloc();
   if (!hisset) {
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
   /* display parents of type cache */
   while (obj) {
-    if (obj->type == HWLOC_OBJ_CACHE) {
+    if (hwloc_obj_type_is_cache(obj->type)) {
       char type[64];
       char attr[64];
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);

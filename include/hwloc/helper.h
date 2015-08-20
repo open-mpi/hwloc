@@ -451,12 +451,35 @@ hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_
  * @{
  */
 
+/** \brief Check whether an object is a Cache (Data, Unified or Instruction). */
+static __hwloc_inline int
+hwloc_obj_type_is_cache(hwloc_obj_type_t type)
+{
+  return (type >= HWLOC_OBJ_L1CACHE && type <= HWLOC_OBJ_L3ICACHE);
+}
+
+/** \brief Check whether an object is a Data or Unified Cache. */
+static __hwloc_inline int
+hwloc_obj_type_is_dcache(hwloc_obj_type_t type)
+{
+  return (type >= HWLOC_OBJ_L1CACHE && type <= HWLOC_OBJ_L5CACHE);
+}
+
+/** \brief Check whether an object is a Instruction Cache. */
+static __hwloc_inline int
+hwloc_obj_type_is_icache(hwloc_obj_type_t type)
+{
+  return (type >= HWLOC_OBJ_L1ICACHE && type <= HWLOC_OBJ_L3ICACHE);
+}
+
 /** \brief Find the depth of cache objects matching cache level and type.
  *
  * Return the depth of the topology level that contains cache objects
- * whose attributes match \p cachelevel and \p cachetype. This function
- * intends to disambiguate the case where hwloc_get_type_depth() returns
- * \p HWLOC_TYPE_DEPTH_MULTIPLE.
+ * whose attributes match \p cachelevel and \p cachetype.
+
+ * This function is identical to calling hwloc_get_type_depth() with the
+ * corresponding type such as HWLOC_OBJ_L1ICACHE, except that it may
+ * also return a Unified cache when looking for an instruction cache.
  *
  * If no cache level matches, \p HWLOC_TYPE_DEPTH_UNKNOWN is returned.
  *
@@ -480,7 +503,7 @@ hwloc_get_cache_type_depth (hwloc_topology_t topology,
     hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, 0);
     if (!obj)
       break;
-    if (obj->type != HWLOC_OBJ_CACHE || obj->attr->cache.depth != cachelevel)
+    if (!hwloc_obj_type_is_dcache(obj->type) || obj->attr->cache.depth != cachelevel)
       /* doesn't match, try next depth */
       continue;
     if (cachetype == (hwloc_obj_cache_type_t) -1) {
@@ -500,7 +523,7 @@ hwloc_get_cache_type_depth (hwloc_topology_t topology,
   return found;
 }
 
-/** \brief Get the first cache covering a cpuset \p set
+/** \brief Get the first data (or unified) cache covering a cpuset \p set
  *
  * \return \c NULL if no cache matches.
  */
@@ -511,14 +534,14 @@ hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t
 {
   hwloc_obj_t current = hwloc_get_obj_covering_cpuset(topology, set);
   while (current) {
-    if (current->type == HWLOC_OBJ_CACHE)
+    if (hwloc_obj_type_is_dcache(current->type))
       return current;
     current = current->parent;
   }
   return NULL;
 }
 
-/** \brief Get the first cache shared between an object and somebody else.
+/** \brief Get the first data (or unified) cache shared between an object and somebody else.
  *
  * \return \c NULL if no cache matches or if an invalid object is given.
  */
@@ -532,7 +555,7 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute
     return NULL;
   while (current) {
     if (!hwloc_bitmap_isequal(current->cpuset, obj->cpuset)
-        && current->type == HWLOC_OBJ_CACHE)
+        && hwloc_obj_type_is_dcache(current->type))
       return current;
     current = current->parent;
   }

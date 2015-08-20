@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -33,7 +33,7 @@ int main(void)
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(cache);
-  assert(cache->type == HWLOC_OBJ_CACHE);
+  assert(hwloc_obj_type_is_dcache(cache->type));
   assert(cache->logical_index == CPUINDEX/2/3);
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
@@ -62,7 +62,7 @@ int main(void)
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(cache);
-  assert(cache->type == HWLOC_OBJ_CACHE);
+  assert(hwloc_obj_type_is_dcache(cache->type));
   assert(cache->logical_index == CPUINDEX/2/1);
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 

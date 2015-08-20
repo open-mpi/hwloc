@@ -717,14 +717,21 @@ static const unsigned obj_type_order[] = {
     /* next entry is HWLOC_OBJ_MACHINE */  1,
     /* next entry is HWLOC_OBJ_NUMANODE */ 3,
     /* next entry is HWLOC_OBJ_PACKAGE */  4,
-    /* next entry is HWLOC_OBJ_CACHE */    5,
-    /* next entry is HWLOC_OBJ_CORE */     6,
-    /* next entry is HWLOC_OBJ_PU */       10,
+    /* next entry is HWLOC_OBJ_CORE */     13,
+    /* next entry is HWLOC_OBJ_PU */       17,
+    /* next entry is HWLOC_OBJ_L1CACHE */  11,
+    /* next entry is HWLOC_OBJ_L2CACHE */  9,
+    /* next entry is HWLOC_OBJ_L3CACHE */  7,
+    /* next entry is HWLOC_OBJ_L4CACHE */  6,
+    /* next entry is HWLOC_OBJ_L5CACHE */  5,
+    /* next entry is HWLOC_OBJ_L1ICACHE */ 12,
+    /* next entry is HWLOC_OBJ_L2ICACHE */ 10,
+    /* next entry is HWLOC_OBJ_L3ICACHE */ 8,
     /* next entry is HWLOC_OBJ_GROUP */    2,
-    /* next entry is HWLOC_OBJ_MISC */     11,
-    /* next entry is HWLOC_OBJ_BRIDGE */   7,
-    /* next entry is HWLOC_OBJ_PCI_DEVICE */  8,
-    /* next entry is HWLOC_OBJ_OS_DEVICE */   9
+    /* next entry is HWLOC_OBJ_MISC */     18,
+    /* next entry is HWLOC_OBJ_BRIDGE */   14,
+    /* next entry is HWLOC_OBJ_PCI_DEVICE */  15,
+    /* next entry is HWLOC_OBJ_OS_DEVICE */   16
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
@@ -733,7 +740,14 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_GROUP,
   HWLOC_OBJ_NUMANODE,
   HWLOC_OBJ_PACKAGE,
-  HWLOC_OBJ_CACHE,
+  HWLOC_OBJ_L5CACHE,
+  HWLOC_OBJ_L4CACHE,
+  HWLOC_OBJ_L3CACHE,
+  HWLOC_OBJ_L3ICACHE,
+  HWLOC_OBJ_L2CACHE,
+  HWLOC_OBJ_L2ICACHE,
+  HWLOC_OBJ_L1CACHE,
+  HWLOC_OBJ_L1ICACHE,
   HWLOC_OBJ_CORE,
   HWLOC_OBJ_BRIDGE,
   HWLOC_OBJ_PCI_DEVICE,
@@ -751,6 +765,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
  * then Core
  * then Package
  * then Cache
+ * then Instruction Caches
  * then always drop Group/Misc/Bridge.
  *
  * Some type won't actually ever be involved in such merging.
@@ -761,9 +776,16 @@ static const int obj_type_priority[] = {
   /* next entry is HWLOC_OBJ_MACHINE */     90,
   /* next entry is HWLOC_OBJ_NUMANODE */    100,
   /* next entry is HWLOC_OBJ_PACKAGE */     40,
-  /* next entry is HWLOC_OBJ_CACHE */       20,
   /* next entry is HWLOC_OBJ_CORE */        60,
   /* next entry is HWLOC_OBJ_PU */          100,
+  /* next entry is HWLOC_OBJ_L1CACHE */     20,
+  /* next entry is HWLOC_OBJ_L2CACHE */     20,
+  /* next entry is HWLOC_OBJ_L3CACHE */     20,
+  /* next entry is HWLOC_OBJ_L4CACHE */     20,
+  /* next entry is HWLOC_OBJ_L5CACHE */     20,
+  /* next entry is HWLOC_OBJ_L1ICACHE */    19,
+  /* next entry is HWLOC_OBJ_L2ICACHE */    19,
+  /* next entry is HWLOC_OBJ_L3ICACHE */    19,
   /* next entry is HWLOC_OBJ_GROUP */       0,
   /* next entry is HWLOC_OBJ_MISC */        0,
   /* next entry is HWLOC_OBJ_BRIDGE */      0,
@@ -809,20 +831,6 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
     return HWLOC_OBJ_INCLUDED;
   if (compare < 0)
     return HWLOC_OBJ_CONTAINS;
-
-  /* Caches have the same types but can have different depths.  */
-  if (type1 == HWLOC_OBJ_CACHE) {
-    if (obj1->attr->cache.depth < obj2->attr->cache.depth)
-      return HWLOC_OBJ_INCLUDED;
-    else if (obj1->attr->cache.depth > obj2->attr->cache.depth)
-      return HWLOC_OBJ_CONTAINS;
-    else if (obj1->attr->cache.type > obj2->attr->cache.type)
-      /* consider icache deeper than dcache and dcache deeper than unified */
-      return HWLOC_OBJ_INCLUDED;
-    else if (obj1->attr->cache.type < obj2->attr->cache.type)
-      /* consider icache deeper than dcache and dcache deeper than unified */
-      return HWLOC_OBJ_CONTAINS;
-  }
 
   /* Group objects have the same types but can have different depths.  */
   if (type1 == HWLOC_OBJ_GROUP) {
@@ -1015,7 +1023,14 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
       new->memory.page_types_len = 0;
     }
     break;
-  case HWLOC_OBJ_CACHE:
+  case HWLOC_OBJ_L1CACHE:
+  case HWLOC_OBJ_L2CACHE:
+  case HWLOC_OBJ_L3CACHE:
+  case HWLOC_OBJ_L4CACHE:
+  case HWLOC_OBJ_L5CACHE:
+  case HWLOC_OBJ_L1ICACHE:
+  case HWLOC_OBJ_L2ICACHE:
+  case HWLOC_OBJ_L3ICACHE:
     merge_sizes(new, old, attr->cache.size);
     check_sizes(new, old, attr->cache.size);
     merge_sizes(new, old, attr->cache.linesize);
@@ -1706,7 +1721,7 @@ ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
 
   if ((parent != topology->levels[0][0] &&
        topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS)
-      || (parent->type == HWLOC_OBJ_CACHE && parent->attr->cache.type == HWLOC_OBJ_CACHE_INSTRUCTION
+      || ((parent->type == HWLOC_OBJ_L1ICACHE || parent->type == HWLOC_OBJ_L2ICACHE || parent->type == HWLOC_OBJ_L3ICACHE)
 	  && !(topology->flags & HWLOC_TOPOLOGY_FLAG_ICACHES))) {
     hwloc_debug("%s", "\nDropping ignored object ");
     hwloc_debug_print_object(0, parent);
@@ -2362,10 +2377,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
     taken_objs[n_taken_objs-1]->next_cousin = NULL;
 
     /* One more level!  */
-    if (top_obj->type == HWLOC_OBJ_CACHE)
-      hwloc_debug("--- Cache level depth %u", top_obj->attr->cache.depth);
-    else
-      hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
+    hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
     hwloc_debug(" has number %u\n\n", topology->nb_levels);
 
     if (topology->type_depth[top_obj->type] == HWLOC_TYPE_DEPTH_UNKNOWN)
@@ -3330,6 +3342,8 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj)
     }
   }
 
+  /* check cache type/depth vs type */
+
   /* check children */
   hwloc__check_children(topology, obj);
   hwloc__check_io_children(topology, obj);
@@ -3401,6 +3415,14 @@ hwloc_topology_check(struct hwloc_topology *topology)
   unsigned i, j, depth;
 
   /* make sure we can use ranges to check types */
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_L2CACHE == HWLOC_OBJ_L1CACHE + 1);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_L3CACHE == HWLOC_OBJ_L2CACHE + 1);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_L4CACHE == HWLOC_OBJ_L3CACHE + 1);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_L5CACHE == HWLOC_OBJ_L4CACHE + 1);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_L1ICACHE == HWLOC_OBJ_L5CACHE + 1);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_L2ICACHE == HWLOC_OBJ_L1ICACHE + 1);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_L3ICACHE == HWLOC_OBJ_L2ICACHE + 1);
+
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_MISC + 1 == HWLOC_OBJ_BRIDGE);
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE + 1 == HWLOC_OBJ_PCI_DEVICE);
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE + 1 == HWLOC_OBJ_OS_DEVICE);

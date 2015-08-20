@@ -651,7 +651,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 #endif
 	/* TODO: obj->memory.page_types[1].count = rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
 	break;
-      case HWLOC_OBJ_CACHE:
+      case HWLOC_OBJ_L2CACHE:
 	obj->attr->cache.size = _system_configuration.L2_cache_size;
 	obj->attr->cache.associativity = _system_configuration.L2_cache_asc;
 
@@ -669,7 +669,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
       case HWLOC_OBJ_CORE:
       {
 	hwloc_obj_t obj2, obj3;
-	obj2 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, i);
+	obj2 = hwloc_alloc_setup_object(HWLOC_OBJ_L1CACHE, i);
 	obj2->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	obj2->attr->cache.size = _system_configuration.dcache_size;
 	obj2->attr->cache.associativity = _system_configuration.dcache_asc;
@@ -686,7 +686,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	  hwloc_debug("Adding an L1d cache for core %d\n", i);
 	  hwloc_insert_object_by_cpuset(topology, obj2);
 
-	  obj3 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, i);
+	  obj3 = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, i);
 	  obj3->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	  obj3->attr->cache.size = _system_configuration.icache_size;
 	  obj3->attr->cache.associativity = _system_configuration.icache_asc;
@@ -755,7 +755,7 @@ hwloc_look_aix(struct hwloc_backend *backend)
       if (i == rs_getinfo(NULL, R_L2CSDL, 0))
 	{
 	  hwloc_debug("looking AIX L2 sdl %d\n", i);
-	  look_rset(i, HWLOC_OBJ_CACHE, topology, i);
+	  look_rset(i, HWLOC_OBJ_L2CACHE, topology, i);
 	  known = 1;
 	}
 #      endif

@@ -852,6 +852,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	  /* Found a matching cache, now look for others sharing it */
 	  {
 	    unsigned cacheid = infos[i].apicid / infos[i].cache[l].nbthreads_sharing;
+	    hwloc_obj_type_t otype;
 
 	    cache_cpuset = hwloc_bitmap_alloc();
 	    for (j = i; j < nbprocs; j++) {
@@ -870,7 +871,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		hwloc_bitmap_clr(caches_cpuset, j);
 	      }
 	    }
-	    cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, cacheid);
+	    otype = hwloc_cache_type_by_depth_type(level, infos[i].cache[l].type);
+	    cache = hwloc_alloc_setup_object(otype, cacheid);
 	    cache->attr->cache.depth = level;
 	    cache->attr->cache.size = infos[i].cache[l].size;
 	    cache->attr->cache.linesize = infos[i].cache[l].linesize;

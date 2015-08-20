@@ -9,7 +9,7 @@ Machine (P#0 total=16777216KB DMIProductName=H8QM8 DMIProductVersion=1234567890 
   NUMANode L#3 (P#3 local=8388608KB total=8388608KB)
 depth 0:	1 Machine (type #1)
  depth 1:	4 NUMANode (type #2)
-  depth 2:	4 PU (type #6)
+  depth 2:	4 PU (type #5)
 relative latency matrix between NUMANodes (depth 1) by logical indexes:
   index     0     1     2     3
       0 1.000 2.000 2.000 2.000
