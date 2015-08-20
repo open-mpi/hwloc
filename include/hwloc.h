@@ -832,7 +832,7 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  * Attributes that are not specified in the string (for instance "Group"
  * without a depth, or "L2Cache" without a cache type) are set to -1.
  *
- * \p typeattrd is only filled if the size specified in \p typeattrsize
+ * \p typeattrp is only filled if the size specified in \p typeattrsize
  * is large enough. It is currently only used for caches, and the required
  * size is at least the size of hwloc_obj_cache_type_t.
  *
