@@ -92,7 +92,7 @@ ersion 1.11.0
     info attributes to Block OS devices on Linux. Thanks to Vineet Pedaballe
     for the help.
     - Add --disable-libudev to avoid dependency on the libudev library.
-  + Add "MemoryDevice" Misc objects with information about DIMMs, on Linux
+  + Add "MemoryModule" Misc objects with information about DIMMs, on Linux
     when privileged and when I/O is enabled.
     Thanks to Vineet Pedaballe for the help.
   + Add a PCISlot attribute to PCI devices on Linux when supported to
