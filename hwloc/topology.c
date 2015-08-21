@@ -160,7 +160,7 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
     n = -1;
 #elif defined(HWLOC_WIN_SYS)
   SYSTEM_INFO sysinfo;
-  GetSystemInfo(&sysinfo);
+  GetSystemInfo(&sysinfo); /* only in the current group, should only be used in 32bits mode (without multiple groups) */
   n = sysinfo.dwNumberOfProcessors;
 #else
 #ifdef __GNUC__
