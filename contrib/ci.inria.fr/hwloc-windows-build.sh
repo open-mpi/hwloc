@@ -6,79 +6,114 @@
 #
 
 set -e
-set -x
 
-check=1
-build32=1
-build64=1
+docheck=1
+dobuild32=1
+dobuild64=1
+dotar=1
+doconf=1
+confopts=
 
 while test $# -gt 0; do
   if test "$1" = "--no-check"; then
-    check=0
+    docheck=0
   else if test "$1" = "--no-32"; then
-    build32=0
+    dobuild32=0
   else if test "$1" = "--no-64"; then
-    build64=0
+    dobuild64=0
+  else if test "$1" = "--no-tar"; then
+    dotar=0
+  else if test "$1" = "--no-conf"; then
+    doconf=0
+  else if test "$1" = "--debug"; then
+    confopts="$confopts --enable-debug"
   else if test "$1" = "--help"; then
+    echo "  --debug"
     echo "  --no-check"
     echo "  --no-32"
     echo "  --no-64"
+    echo "  --no-tar"
+    echo "  --no-conf"
     echo "  --help"
-  fi fi fi fi
+    exit 0
+  fi fi fi fi fi fi fi
   shift
 done
 
+set -x
+
 oldPATH=$PATH
 
-tarball=$(ls -tr hwloc-*.tar.gz | tail -1)
-basename=$(basename $tarball .tar.gz)
-version=$(echo $basename | cut -d- -f2)
+if test x$dotar = x1; then
+  tarball=$(ls -tr hwloc-*.tar.gz | tail -1)
+  basename=$(basename $tarball .tar.gz)
+  version=$(echo $basename | cut -d- -f2)
 
-test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
-tar xfz $tarball
-
-if test x$build32 = x1; then
-
-mkdir ${basename}/build32
-cd ${basename}/build32
-winball=hwloc-win32-build-${version}
-prefix=${PWD}/../${winball}
-export PATH=/c/Builds:/c/Builds/mingw32/bin/:/c/Builds/mingw64/bin/:/c/Builds/mingw32/i686-w64-mingw32/lib:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE":$oldPATH
-../configure --prefix=$prefix --enable-static --host=i686-w64-mingw32 CC_FOR_BUILD=x86_64-w64-mingw32-gcc
-make
-make install
-#make install-winball || true # not needed anymore in v1.7+
-if test x$check = x1; then
-  make check
-fi
-utils/lstopo/lstopo-no-graphics -v
-cd ..
-zip -r ../${winball}.zip ${winball}
-test -f ${winball}/lib/libhwloc.lib || false
-cd ..
-
+  test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
+  tar xfz $tarball
+else
+  basename=./
+  version=custom
 fi
 
+if test x$dobuild32 = x1; then
 
-if test x$build64 = x1; then
+  mkdir ${basename}/build32 || true
+  cd ${basename}/build32
 
-mkdir ${basename}/build64
-cd ${basename}/build64
-winball=hwloc-win64-build-${version}
-prefix=${PWD}/../${winball}
-export PATH=/c/Builds:/c/Builds/mingw64/bin/:/c/Builds/mingw32/i686-w64-mingw32/lib/:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE":$oldPATH
-../configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32
-make
-make install
-#make install-winball || true # not needed anymore in v1.7+
-if test x$check = x1; then
-  make check
+  export PATH=/c/Builds:/c/Builds/mingw32/bin/:/c/Builds/mingw64/bin/:/c/Builds/mingw32/i686-w64-mingw32/lib:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE":$oldPATH
+  if test x$doconf = x1; then
+    winball=hwloc-win32-build-${version}
+    prefix=${PWD}/../${winball}
+    ../configure --prefix=$prefix --enable-static --host=i686-w64-mingw32 CC_FOR_BUILD=x86_64-w64-mingw32-gcc $confopts
+  fi
+
+  make
+  make install
+  #make install-winball || true # not needed anymore in v1.7+
+  if test x$docheck = x1; then
+    make check
+  fi
+  utils/lstopo/lstopo-no-graphics -v
+  winball=$(basename $(head config.log | sed -r -n -e 's/.*--prefix=([^ ]+).*/\1/p'))
+  cd ..
+
+  zip -r ../${winball}.zip ${winball}
+  test -f ${winball}/lib/libhwloc.lib || false
+  if test x$dotar = x1; then
+    cd ..
+  fi
+
 fi
-utils/lstopo/lstopo-no-graphics -v
-cd ..
-zip -r ../${winball}.zip ${winball}
-test -f ${winball}/lib/libhwloc.lib || false
-cd ..
+
+
+if test x$dobuild64 = x1; then
+
+  mkdir ${basename}/build64 || true
+  cd ${basename}/build64
+
+  export PATH=/c/Builds:/c/Builds/mingw64/bin/:/c/Builds/mingw32/i686-w64-mingw32/lib/:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE":$oldPATH
+  if test x$doconf = x1; then
+    winball=hwloc-win64-build-${version}
+    prefix=${PWD}/../${winball}
+    ../configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32 $confopts
+  fi
+
+  make
+  make install
+  #make install-winball || true # not needed anymore in v1.7+
+  if test x$docheck = x1; then
+    make check
+  fi
+  utils/lstopo/lstopo-no-graphics -v
+  winball=$(basename $(head config.log | sed -r -n -e 's/.*--prefix=([^ ]+).*/\1/p'))
+  cd ..
+
+  zip -r ../${winball}.zip ${winball}
+  test -f ${winball}/lib/libhwloc.lib || false
+  if test x$dotar = x1; then
+    cd ..
+  fi
 
 fi
 
