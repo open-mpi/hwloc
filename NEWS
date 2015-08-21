@@ -27,6 +27,7 @@ Version 1.11.1
   are totally ignored.
 * Fix a memory leak on failure to load a xml diff file.
 * Fix some segfaults when inputting an invalid synthetic description.
+* Fix support for more than 32 processors on 64bits Windows.
 
 
 Version 1.11.0
