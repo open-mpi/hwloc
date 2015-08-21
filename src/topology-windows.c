@@ -717,7 +717,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	  /* GROUP_AFFINITY.Mask is KAFFINITY, which is ULONG_PTR */
 	  hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, GroupMask[i].Group, GroupMask[i].Mask);
         }
-	hwloc_debug("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
+	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
 
 	switch (type) {
 	  case HWLOC_OBJ_NODE:
