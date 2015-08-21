@@ -1100,9 +1100,10 @@ But it misses PCI device names.
 \section iodevices_hierarchy I/O object hierarchy
 
 When I/O discovery is enabled and supported, some additional objects
-(types <tt>::HWLOC_OBJ_BRIDGE</tt>, <tt>::HWLOC_OBJ_PCI_DEVICE</tt> and
-<tt>::HWLOC_OBJ_OS_DEVICE</tt>)
-are added to the topology as a child of the object they are close to.
+are added to the topology (as a child of the object they are close to).
+The corresponding I/O object types are <tt>::HWLOC_OBJ_BRIDGE</tt>,
+<tt>::HWLOC_OBJ_PCI_DEVICE</tt>, and <tt>::HWLOC_OBJ_OS_DEVICE</tt>
+(and possibly <tt>::HWLOC_OBJ_MISC</tt>, see below).
 For instance, if a I/O Hub is connected to a package, the corresponding
 hwloc bridge object (and its PCI bridges and devices children) is inserted
 as a child of the corresponding hwloc package object.
@@ -1126,6 +1127,11 @@ Each hostbridge contains one or several children, either other bridges
 (usually PCI to PCI) or PCI devices (<tt>::HWLOC_OBJ_PCI_DEVICE</tt>).
 The number of bridges between the hostbridge and a PCI device depends
 on the machine and on the topology flags.
+
+I/O discovery also enables the discovery of miscellaneous devices
+such as memory modules (DIMMs).
+These are neither PCI nor OS handles, therefore they appear as Misc objects,
+see \ref miscobjs_auto.
 
 \section iodevices_osdev Software devices
 
@@ -1325,7 +1331,9 @@ hwloc only uses Misc objects when other object types are not sufficient.
 This currently includes:
 <ul>
 <li>
-Memory modules (DIMMs), on Linux when privileged, and when I/O discovery is enabled.
+Memory modules (DIMMs), on Linux when privileged and when
+<tt>dmi-sysfs</tt> is supported by the kernel,
+and when I/O discovery is enabled.
 These objects have a <tt>Type</tt> info attribute of value <tt>MemoryModule</tt>.
 They are currently always attached to the root object.
 Their attributes describe the DIMM vendor, model, etc.
