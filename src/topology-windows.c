@@ -505,10 +505,9 @@ hwloc_look_windows(struct hwloc_backend *backend)
   BOOL (WINAPI *GetLogicalProcessorInformationExProc)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
   BOOL (WINAPI *GetNumaAvailableMemoryNodeProc)(UCHAR Node, PULONGLONG AvailableBytes);
   BOOL (WINAPI *GetNumaAvailableMemoryNodeExProc)(USHORT Node, PULONGLONG AvailableBytes);
+  hwloc_bitmap_t groups_pu_set = NULL;
   SYSTEM_INFO SystemInfo;
-
   DWORD length;
-
   HMODULE kernel32;
 
   if (topology->levels[0][0]->cpuset)
@@ -701,6 +700,12 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	      /* KAFFINITY is ULONG_PTR */
 	      hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, id, mask);
 	      hwloc_debug_2args_bitmap("group %u %d bitmap %s\n", id, procInfo->Group.GroupInfo[id].ActiveProcessorCount, obj->cpuset);
+
+	      /* save the set of PUs so that we can create them at the end */
+	      if (!groups_pu_set)
+		groups_pu_set = hwloc_bitmap_alloc();
+	      hwloc_bitmap_or(groups_pu_set, groups_pu_set, obj->cpuset);
+
 	      hwloc_insert_object_by_cpuset(topology, obj);
 	    }
 	    continue;
@@ -765,10 +770,28 @@ hwloc_look_windows(struct hwloc_backend *backend)
       }
       free(procInfoTotal);
     }
+
   }
 
-  /* add PU objects */
-  hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
+  if (groups_pu_set) {
+    /* the system supports multiple Groups.
+     * PU indexes may be discontiguous, especially if Groups contain less than 64 procs.
+     */
+    hwloc_obj_t obj;
+    unsigned idx;
+    hwloc_bitmap_foreach_begin(idx, groups_pu_set) {
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, idx);
+      obj->cpuset = hwloc_bitmap_alloc();
+      hwloc_bitmap_only(obj->cpuset, idx);
+      hwloc_debug_1arg_bitmap("cpu %u has cpuset %s\n",
+			      idx, obj->cpuset);
+      hwloc_insert_object_by_cpuset(topology, obj);
+    } hwloc_bitmap_foreach_end();
+    hwloc_bitmap_free(groups_pu_set);
+  } else {
+    /* add PU objects, assuming they are contiguous */
+    hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
+  }
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Windows");
   if (topology->is_thissystem)
