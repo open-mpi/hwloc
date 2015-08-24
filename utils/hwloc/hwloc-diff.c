@@ -125,9 +125,9 @@ int main(int argc, char *argv[])
 	}
 	if (!j) {
 		if (output) {
-			err = hwloc_topology_diff_export_xml(NULL, firstdiff, refname, output);
+			err = hwloc_topology_diff_export_xml(firstdiff, refname, output);
 		} else {
-			err = hwloc_topology_diff_export_xmlbuffer(NULL, firstdiff, refname, &xmlbuffer, &xmlbuflen);
+			err = hwloc_topology_diff_export_xmlbuffer(firstdiff, refname, &xmlbuffer, &xmlbuflen);
 			if (!err) {
 				printf("%s\n", xmlbuffer);
 				hwloc_free_xmlbuffer(topo1, xmlbuffer);
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Failed to export topology diff %s\n", output);
 	}
 
-	hwloc_topology_diff_destroy(NULL, firstdiff);
+	hwloc_topology_diff_destroy(firstdiff);
 
 	hwloc_topology_destroy(topo2);
 	hwloc_topology_destroy(topo1);

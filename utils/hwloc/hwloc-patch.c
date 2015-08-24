@@ -26,7 +26,7 @@ static int hwloc_diff_read(const char *inputdiff,
 	int err;
 
 	if (strcmp(inputdiff, "-"))
-		return hwloc_topology_diff_load_xml(NULL, inputdiff, firstdiffp, refnamep);
+		return hwloc_topology_diff_load_xml(inputdiff, firstdiffp, refnamep);
 
 	buflen = 4096;
 	buffer = malloc(buflen+1); /* one more byte for the ending \0 */
@@ -50,7 +50,7 @@ static int hwloc_diff_read(const char *inputdiff,
 		readlen = buflen/2;
 	}
 
-	err = hwloc_topology_diff_load_xmlbuffer(NULL, buffer, (int)(offset+1), firstdiffp, refnamep);
+	err = hwloc_topology_diff_load_xmlbuffer(buffer, (int)(offset+1), firstdiffp, refnamep);
 	free(buffer);
 	return err;
 
@@ -154,13 +154,13 @@ int main(int argc, char *argv[])
 		goto out_with_diff;
 	}
 
-	hwloc_topology_diff_destroy(NULL, firstdiff);
+	hwloc_topology_diff_destroy(firstdiff);
 	hwloc_topology_destroy(topo);
 
 	exit(EXIT_SUCCESS);
 
 out_with_diff:
-	hwloc_topology_diff_destroy(NULL, firstdiff);
+	hwloc_topology_diff_destroy(firstdiff);
 out_with_topo:
 	hwloc_topology_destroy(topo);
 out:

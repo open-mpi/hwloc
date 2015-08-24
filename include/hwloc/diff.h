@@ -220,10 +220,8 @@ enum hwloc_topology_diff_apply_flags_e {
 HWLOC_DECLSPEC int hwloc_topology_diff_apply(hwloc_topology_t topology, hwloc_topology_diff_t diff, unsigned long flags);
 
 /** \brief Destroy a list of topology differences.
- *
- * \note The \p topology parameter may be \c NULL.
  */
-HWLOC_DECLSPEC int hwloc_topology_diff_destroy(hwloc_topology_t topology, hwloc_topology_diff_t diff);
+HWLOC_DECLSPEC int hwloc_topology_diff_destroy(hwloc_topology_diff_t diff);
 
 /** \brief Load a list of topology differences from a XML file.
  *
@@ -233,12 +231,10 @@ HWLOC_DECLSPEC int hwloc_topology_diff_destroy(hwloc_topology_t topology, hwloc_
  * This identifier is usually the name of the other XML file
  * that contains the reference topology.
  *
- * \note The \p topology parameter may be \c NULL.
- *
  * \note the pointer returned in refname should later be freed
  * by the caller.
  */
-HWLOC_DECLSPEC int hwloc_topology_diff_load_xml(hwloc_topology_t topology, const char *xmlpath, hwloc_topology_diff_t *diff, char **refname);
+HWLOC_DECLSPEC int hwloc_topology_diff_load_xml(const char *xmlpath, hwloc_topology_diff_t *diff, char **refname);
 
 /** \brief Export a list of topology differences to a XML file.
  *
@@ -248,10 +244,8 @@ HWLOC_DECLSPEC int hwloc_topology_diff_load_xml(hwloc_topology_t topology, const
  * This identifier is usually the name of the other XML file
  * that contains the reference topology.
  * This attribute is given back when reading the diff from XML.
- *
- * \note The \p topology parameter may be \c NULL.
  */
-HWLOC_DECLSPEC int hwloc_topology_diff_export_xml(hwloc_topology_t topology, hwloc_topology_diff_t diff, const char *refname, const char *xmlpath);
+HWLOC_DECLSPEC int hwloc_topology_diff_export_xml(hwloc_topology_diff_t diff, const char *refname, const char *xmlpath);
 
 /** \brief Load a list of topology differences from a XML buffer.
  *
@@ -261,12 +255,10 @@ HWLOC_DECLSPEC int hwloc_topology_diff_export_xml(hwloc_topology_t topology, hwl
  * This identifier is usually the name of the other XML file
  * that contains the reference topology.
  *
- * \note The \p topology parameter may be \c NULL.
- *
  * \note the pointer returned in refname should later be freed
  * by the caller.
   */
-HWLOC_DECLSPEC int hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology, const char *xmlbuffer, int buflen, hwloc_topology_diff_t *diff, char **refname);
+HWLOC_DECLSPEC int hwloc_topology_diff_load_xmlbuffer(const char *xmlbuffer, int buflen, hwloc_topology_diff_t *diff, char **refname);
 
 /** \brief Export a list of topology differences to a XML buffer.
  *
@@ -278,10 +270,8 @@ HWLOC_DECLSPEC int hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology,
  * This attribute is given back when reading the diff from XML.
  *
  * \note The XML buffer should later be freed with hwloc_free_xmlbuffer().
- *
- * \note The \p topology parameter may be \c NULL.
  */
-HWLOC_DECLSPEC int hwloc_topology_diff_export_xmlbuffer(hwloc_topology_t topology, hwloc_topology_diff_t diff, const char *refname, char **xmlbuffer, int *buflen);
+HWLOC_DECLSPEC int hwloc_topology_diff_export_xmlbuffer(hwloc_topology_diff_t diff, const char *refname, char **xmlbuffer, int *buflen);
 
 /** @} */
 

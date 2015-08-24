@@ -1116,8 +1116,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
 
 /* this can be the first XML call */
 int
-hwloc_topology_diff_load_xml(hwloc_topology_t topology __hwloc_attribute_unused,
-			     const char *xmlpath,
+hwloc_topology_diff_load_xml(const char *xmlpath,
 			     hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
   struct hwloc__xml_import_state_s state;
@@ -1163,8 +1162,7 @@ retry:
 
 /* this can be the first XML call */
 int
-hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused,
-				   const char *xmlbuffer, int buflen,
+hwloc_topology_diff_load_xmlbuffer(const char *xmlbuffer, int buflen,
 				   hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
   struct hwloc__xml_import_state_s state;
@@ -1520,8 +1518,7 @@ retry:
 
 /* this can be the first XML call */
 int
-hwloc_topology_diff_export_xml(hwloc_topology_t topology __hwloc_attribute_unused,
-			       hwloc_topology_diff_t diff, const char *refname,
+hwloc_topology_diff_export_xml(hwloc_topology_diff_t diff, const char *refname,
 			       const char *filename)
 {
   hwloc_localeswitch_declare;
@@ -1562,8 +1559,7 @@ retry:
 
 /* this can be the first XML call */
 int
-hwloc_topology_diff_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused,
-				     hwloc_topology_diff_t diff, const char *refname,
+hwloc_topology_diff_export_xmlbuffer(hwloc_topology_diff_t diff, const char *refname,
 				     char **xmlbuffer, int *buflen)
 {
   hwloc_localeswitch_declare;

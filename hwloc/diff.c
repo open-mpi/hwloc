@@ -7,8 +7,7 @@
 #include <private/private.h>
 #include <private/misc.h>
 
-int hwloc_topology_diff_destroy(hwloc_topology_t topology __hwloc_attribute_unused,
-				hwloc_topology_diff_t diff)
+int hwloc_topology_diff_destroy(hwloc_topology_diff_t diff)
 {
 	hwloc_topology_diff_t next;
 	while (diff) {

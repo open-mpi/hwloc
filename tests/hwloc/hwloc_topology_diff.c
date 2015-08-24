@@ -42,7 +42,7 @@ int main(void)
   assert(diff->generic.next == NULL);
   assert(diff->too_complex.obj_depth == 0);
   assert(diff->too_complex.obj_index == 0);
-  hwloc_topology_diff_destroy(topo1, diff);
+  hwloc_topology_diff_destroy(diff);
 
   printf("add a similar info to topo1, and change memory sizes\n");
   obj = hwloc_get_root_obj(topo2);
@@ -98,10 +98,10 @@ int main(void)
   assert(!diff2);
 
   printf("exporting and reloading diff from XML buffer without refname\n");
-  err = hwloc_topology_diff_export_xmlbuffer(NULL, diff, NULL, &xmlbuffer, &xmlbuflen);
+  err = hwloc_topology_diff_export_xmlbuffer(diff, NULL, &xmlbuffer, &xmlbuflen);
   assert(!err);
-  hwloc_topology_diff_destroy(topo1, diff);
-  err = hwloc_topology_diff_load_xmlbuffer(NULL, xmlbuffer, xmlbuflen, &diff2, &refname);
+  hwloc_topology_diff_destroy(diff);
+  err = hwloc_topology_diff_load_xmlbuffer(xmlbuffer, xmlbuflen, &diff2, &refname);
   assert(!err);
   assert(diff2);
   assert(!refname);
@@ -109,10 +109,10 @@ int main(void)
   hwloc_free_xmlbuffer(topo1, xmlbuffer);
 
   printf("exporting and reloading diff from XML buffer with refname\n");
-  err = hwloc_topology_diff_export_xmlbuffer(NULL, diff2, "foobar", &xmlbuffer, &xmlbuflen);
+  err = hwloc_topology_diff_export_xmlbuffer(diff2, "foobar", &xmlbuffer, &xmlbuflen);
   assert(!err);
-  hwloc_topology_diff_destroy(topo1, diff2);
-  err = hwloc_topology_diff_load_xmlbuffer(NULL, xmlbuffer, xmlbuflen, &diff, &refname);
+  hwloc_topology_diff_destroy(diff2);
+  err = hwloc_topology_diff_load_xmlbuffer(xmlbuffer, xmlbuflen, &diff, &refname);
   assert(!err);
   assert(diff);
   err = strcmp(refname, "foobar");
@@ -153,7 +153,7 @@ int main(void)
   assert(err == 0);
   assert(!diff2);
 
-  hwloc_topology_diff_destroy(topo1, diff);
+  hwloc_topology_diff_destroy(diff);
 
   printf("adding new key to the bottom of topo3\n");
   obj = hwloc_get_obj_by_type(topo3, HWLOC_OBJ_PU, 0);
@@ -172,7 +172,7 @@ int main(void)
   tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX);
   assert(tmpdiff->generic.next == NULL);
-  hwloc_topology_diff_destroy(topo1, diff);
+  hwloc_topology_diff_destroy(diff);
 
   printf("adding similar key to topo1\n");
   obj = hwloc_get_obj_by_type(topo1, HWLOC_OBJ_PU, 0);
@@ -184,7 +184,7 @@ int main(void)
   assert(diff);
   err = hwloc_topology_diff_apply(topo2, diff, HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE);
   assert(err == -4);
-  hwloc_topology_diff_destroy(topo1, diff);
+  hwloc_topology_diff_destroy(diff);
 
   hwloc_topology_destroy(topo3);
   hwloc_topology_destroy(topo2);
