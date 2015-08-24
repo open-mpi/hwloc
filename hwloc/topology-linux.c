@@ -5069,8 +5069,12 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 	unsigned domain, bus, dev;
 	if (fscanf(file, "%x:%x:%x", &domain, &bus, &dev) == 3) {
 	  hwloc_obj_t obj = hwloc_linuxfs_pci_find_pcislot_obj(hwloc_get_root_obj(topology)->io_first_child, domain, bus, dev);
-	  if (obj)
-	    hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
+	  if (obj) {
+	    while (obj && obj->attr->pcidev.dev == dev /* sibling have same domain+bus */) {
+	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
+	      obj = obj->next_sibling;
+	    }
+	  }
 	}
 	fclose(file);
       }
