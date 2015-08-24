@@ -307,7 +307,7 @@ static void (**hwloc_component_finalize_cbs)(unsigned long);
 static unsigned hwloc_component_finalize_cb_count;
 
 void
-hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
+hwloc_components_init(void)
 {
 #ifdef HWLOC_HAVE_PLUGINS
   struct hwloc__plugin_desc *desc;
@@ -319,7 +319,7 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
   assert((unsigned) -1 != hwloc_components_users);
   if (0 != hwloc_components_users++) {
     HWLOC_COMPONENTS_UNLOCK();
-    goto ok;
+    return;
   }
 
   verboseenv = getenv("HWLOC_COMPONENTS_VERBOSE");
@@ -403,8 +403,11 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
 #endif
 
   HWLOC_COMPONENTS_UNLOCK();
+}
 
- ok:
+void
+hwloc_backends_init(struct hwloc_topology *topology)
+{
   topology->backends = NULL;
 }
 
@@ -614,7 +617,7 @@ nextcomp:
 }
 
 void
-hwloc_components_destroy_all(struct hwloc_topology *topology __hwloc_attribute_unused)
+hwloc_components_fini(void)
 {
   unsigned i;
 

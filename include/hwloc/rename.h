@@ -553,11 +553,13 @@ extern "C" {
 #define hwloc_disc_component_force_enable HWLOC_NAME(disc_component_force_enable)
 #define hwloc_disc_components_enable_others HWLOC_NAME(disc_components_instantiate_others)
 
-#define hwloc_backends_disable_all HWLOC_NAME(backends_disable_all)
 #define hwloc_backends_is_thissystem HWLOC_NAME(backends_is_thissystem)
 
+#define hwloc_backends_init HWLOC_NAME(backends_init)
+#define hwloc_backends_disable_all HWLOC_NAME(backends_disable_all)
+
 #define hwloc_components_init HWLOC_NAME(components_init)
-#define hwloc_components_destroy_all HWLOC_NAME(components_destroy_all)
+#define hwloc_components_fini HWLOC_NAME(components_fini)
 
 /* private/private.h */
 
