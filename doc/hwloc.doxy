@@ -1325,8 +1325,8 @@ hwloc only uses Misc objects when other object types are not sufficient.
 This currently includes:
 <ul>
 <li>
-Memory devices (DIMMs), on Linux when privileged, and when I/O discovery is enabled.
-These objects have a <tt>Type</tt> info attribute of value <tt>MemoryDevice</tt>.
+Memory modules (DIMMs), on Linux when privileged, and when I/O discovery is enabled.
+These objects have a <tt>Type</tt> info attribute of value <tt>MemoryModule</tt>.
 They are currently always attached to the root object.
 Their attributes describe the DIMM vendor, model, etc.
 <tt>lstopo -v</tt> displays them as:
@@ -1685,9 +1685,9 @@ Block OS devices may have a Type of "Disk", "Tape", "Removable Media Device"
 or "Other".
 The Type attribute value is displayed instead of the default object type name in lstopo.
 </dd>
-<dt>Vendor, AssetTag, PartNumber, DeviceLocation, BankLocation (MemoryDevice Misc objects)</dt>
+<dt>Vendor, AssetTag, PartNumber, DeviceLocation, BankLocation (MemoryModule Misc objects)</dt>
 <dd>
-Information about memory devices (DIMMs) extracted from SMBIOS.
+Information about memory modules (DIMMs) extracted from SMBIOS.
 </dd>
 <dt>hwlocVersion</dt>
 <dd>The version number of the hwloc library that was used to generate
@@ -2705,7 +2705,7 @@ in your environment.
 hwloc discovers the topology by querying the operating system.
 Some minor features may require privileged access to the operation
 system.
-For instance memory device and PCI link speed discovery on Linux
+For instance memory module and PCI link speed discovery on Linux
 is reserved to root,
 and the entire PCI discovery on FreeBSD requires access to the
 /dev/pci special file.
