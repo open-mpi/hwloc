@@ -1059,41 +1059,58 @@ There are some examples under doc/examples/ in the source tree.
 hwloc usually manipulates processing units and memory but it can also
 discover I/O devices and report their locality as well.
 This is useful for placing I/O intensive applications on cores near the
-I/O devices they use.
+I/O devices they use, or for gathering information about all platform
+components.
 
 \section iodevices_enabling Enabling and requirements
 
-I/O discovery is disabled by default (except in lstopo) so as not to
-break legacy application by adding unexpected I/O objects to the topology.
+I/O discovery is disabled by default (except in lstopo) for performance
+reasons.
 It can be enabled by passing flags such as <tt>::HWLOC_TOPOLOGY_FLAG_IO_DEVICES</tt>
 to hwloc_topology_set_flags() before loading the topology.
 
 Note that I/O discovery requires significant help from the operating system.
 The pciaccess library (the development package is usually <tt>libpciaccess-devel</tt>
-or <tt>libpciaccess-dev</tt>) is needed to fully detect PCI devices and bridges,
-and the actual locality of these devices is only currently detected
-on Linux. Also, some operating systems require privileges for probing PCI
-devices, see \ref faq_privileged for details.
+or <tt>libpciaccess-dev</tt>) is needed to fully detect PCI devices and bridges.
+On Linux, PCI discovery may still be performed even if <tt>libpciaccess</tt> cannot
+be used. But it misses PCI device names.
+Moreover, some operating systems require privileges for probing PCI devices,
+see \ref faq_privileged for details.
 
-On Linux, PCI discovery may still be performed even
-if <tt>libpciaccess</tt> cannot be used.
-But it misses PCI device names.
+The actual locality of I/O devices is only currently detected on Linux.
+Other operating system will just reported I/O devices as being attached
+to the topology root object.
 
-\section iodevices_hierarchy I/O object hierarchy
+\section iodevices_objects I/O objects
 
 When I/O discovery is enabled and supported, some additional objects
-are added to the topology (as a child of the object they are close to).
-The corresponding I/O object types are <tt>::HWLOC_OBJ_BRIDGE</tt>,
-<tt>::HWLOC_OBJ_PCI_DEVICE</tt>, and <tt>::HWLOC_OBJ_OS_DEVICE</tt>
-(and possibly <tt>::HWLOC_OBJ_MISC</tt>, see below).
-For instance, if a I/O Hub is connected to a package, the corresponding
-hwloc bridge object (and its PCI bridges and devices children) is inserted
-as a child of the corresponding hwloc package object.
+are added to the topology.
+The corresponding I/O object types are:
+<ul><li>
+<tt>::HWLOC_OBJ_OS_DEVICE</tt> describes an operating-system-specific
+handle such as the <em>sda</em> drive or the <em>eth0</em> network interface.
+See \ref iodevices_osdev.
+</li><li>
+<tt>::HWLOC_OBJ_PCI_DEVICE</tt> and <tt>::HWLOC_OBJ_BRIDGE</tt> build up
+a PCI hierarchy made of devices and bridges.
+See \ref iodevices_pci.
+</li><li>
+<tt>::HWLOC_OBJ_MISC</tt> describes miscellaneous devices such as
+memory modules (DIMMs).
+These are neither PCI nor OS handles, therefore they appear as Misc objects.
+See \ref miscobjs_auto.
+</li></ul>
 
+hwloc tries to attach these new objects to normal objects
+(usually NUMA nodes) to match their actual physical location.
+For instance, if a I/O Hub is physically connected to a package,
+the corresponding hwloc bridge object (and its PCI bridges and devices children)
+is inserted as a child of the corresponding hwloc Package object.
 <b>These children are not in the normal children list but rather in the I/O-specific
 children list.</b>
-They also have neither CPU sets nor node sets (NULL pointers) because
-they are not directly usable by the user applications.
+
+I/O objects also have neither CPU sets nor node sets (NULL pointers) because
+they are not directly usable by the user applications for binding.
 Moreover I/O hierarchies may be highly complex (asymmetric trees of bridges).
 So I/O objects are placed in specific levels with custom depths.
 Their lists may still be traversed with regular helpers such as
@@ -1101,43 +1118,34 @@ hwloc_get_next_obj_by_type().
 However, hwloc offers some dedicated helpers such as hwloc_get_next_pcidev()
 and hwloc_get_next_osdev() for convenience (see \ref hwlocality_advanced_io).
 
-An I/O hierarchy is organized as follows:
-A hostbridge object ( <tt>::HWLOC_OBJ_BRIDGE</tt> object with upstream
-type <em>Host</em> and downstream type <em>PCI</em>) is attached below
-a normal object (usually the entire machine or a NUMA node).
-There may be multiple hostbridges in the machine, attached to
-different places, but all I/O devices are below one of them.
-Each hostbridge contains one or several children, either other bridges
-(usually PCI to PCI) or PCI devices (<tt>::HWLOC_OBJ_PCI_DEVICE</tt>).
-The number of bridges between the hostbridge and a PCI device depends
-on the machine and on the topology flags.
-
-I/O discovery also enables the discovery of miscellaneous devices
-such as memory modules (DIMMs).
-These are neither PCI nor OS handles, therefore they appear as Misc objects,
-see \ref miscobjs_auto.
-
-\section iodevices_osdev Software devices
+\section iodevices_osdev OS devices
 
 Although each PCI device is uniquely identified by its bus ID
-(e.g. 0000:01:02.3), the application can hardly find out which
-PCI device is actually used when manipulating software handle
+(e.g. 0000:01:02.3), a user-space application can hardly find out which
+PCI device it is actually using.
+Applications rather use software handles
 (such as the <em>eth0</em> network interface,
  the <em>sda</em> hard drive,
  or the <em>mlx4_0</em> OpenFabrics HCA).
 Therefore hwloc tries to add software devices
-(<tt>::HWLOC_OBJ_OS_DEVICE</tt>, also known as OS devices)
-below their PCI objects.
+(<tt>::HWLOC_OBJ_OS_DEVICE</tt>, also known as OS devices).
 
-hwloc first tries to discover the corresponding names,
-e.g. <em>eth0</em>, <em>sda</em> or <em>mlx4_0</em>,
-from the operating system.
+OS devices may be attached below PCI devices, but they may also be
+attached directly to normal objects.
+Indeed some OS devices are not related to PCI.
+For instance, NVDIMM block devices (such as <em>pmem0s</em> on Linux)
+are directly attached to their NUMA node.
+Also, if hwloc could not discover PCI for some reason, PCI-related
+OS devices may also be attached directly to normal objects.
+
+hwloc first tries to discover OS devices from the operating system,
+e.g. <em>eth0</em>, <em>sda</em> or <em>mlx4_0</em>.
 However, this ability is currently only available on Linux for some
 classes of devices.
 
 hwloc then tries to discover software devices through additional
 I/O components using external libraries.
-For instance proprietary graphics drivers do not offer any OS name,
+For instance proprietary graphics drivers do not expose any named OS device,
 but hwloc may still create one OS object per software handle when
 supported.
 For instance the <tt>opencl</tt> and <tt>cuda</tt> components may
@@ -1183,18 +1191,30 @@ components when I/O discovery is enabled and supported.
 </li>
 <li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
  <ul>
- <li><em>dma0chan0</em> (Linux component)</li>
+ <li><em>dma0chan0</em> (Linux component) when full I/O discovery is enabled (HWLOC_TOPOLOGY_FLAG_WHOLE_IO)</li>
  </ul>
 </li>
 </ul>
 
-When none of the above strategies is supported and enabled,
-hwloc cannot place any OS object inside PCI objects.
 Note that some PCI devices may contain multiple software devices
 (see the example below).
 
 See also \ref interoperability for managing these devices without
 considering them as hwloc objects.
+
+\section iodevices_pci PCI devices and bridges
+
+A PCI hierarchy is usually organized as follows:
+A hostbridge object ( <tt>::HWLOC_OBJ_BRIDGE</tt> object with upstream
+type <em>Host</em> and downstream type <em>PCI</em>) is attached below
+a normal object (usually the entire machine or a NUMA node).
+There may be multiple hostbridges in the machine, attached to
+different places, but all PCI devices are below one of them.
+
+Each hostbridge contains one or several children, either other bridges
+(usually PCI to PCI) or PCI devices (<tt>::HWLOC_OBJ_PCI_DEVICE</tt>).
+The number of bridges between the hostbridge and a PCI device depends
+on the machine and on the topology flags.
 
 \section iodevices_consult Consulting I/O devices and binding
 
@@ -1252,7 +1272,7 @@ are an unused IDE controller (no disk attached)
 and a graphic card (no corresponding software device reported
 to the user by the operating system).
 
-On the contrary, it should be noted three different software
+On the contrary, it should be noted that three different software
 devices were found for the last PCI device (<em>PCI 15b3:634a</em>).
 Indeed this OpenFabrics HCA PCI device object contains one
 one OpenFabrics software device (<em>mlx4_0</em>) and two virtual
@@ -1317,7 +1337,7 @@ This currently includes:
 <li>
 Memory modules (DIMMs), on Linux when privileged and when
 <tt>dmi-sysfs</tt> is supported by the kernel,
-and when I/O discovery is enabled.
+and when full I/O discovery is enabled (HWLOC_TOPOLOGY_FLAG_WHOLE_IO).
 These objects have a <tt>Type</tt> info attribute of value <tt>MemoryModule</tt>.
 They are currently always attached to the root object.
 Their attributes describe the DIMM vendor, model, etc.
