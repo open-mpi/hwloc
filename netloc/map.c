@@ -482,18 +482,18 @@ netloc_map__init_servers(struct netloc_map *map)
                 if (map->verbose_flags & NETLOC_MAP_VERBOSE_FLAG_COMPRESS)
                     printf("loading topology diff %s\n", filepath);
 
-                err = hwloc_topology_diff_load_xml(validtopo, filepath, &diff, &refname);
+                err = hwloc_topology_diff_load_xml(NULL, filepath, &diff, &refname);
                 free(filepath);
                 if (err < 0)
                     continue;
                 if (!refname) {
-                    hwloc_topology_diff_destroy(validtopo, diff);
+                    hwloc_topology_diff_destroy(NULL, diff);
                     continue;
                 }
                 refnamelen = strlen(refname);
                 if (strcmp(refname+refnamelen-4, ".xml")) {
                     free(refname);
-                    hwloc_topology_diff_destroy(validtopo, diff);
+                    hwloc_topology_diff_destroy(NULL, diff);
                     continue;
                 }
                 refname[refnamelen-4] = '\0';
@@ -505,7 +505,7 @@ netloc_map__init_servers(struct netloc_map *map)
                 if (!refserver) {
                     fprintf(stderr, "Could not find hwloc topology diff reference server %s\n", refname);
                     free(refname);
-                    hwloc_topology_diff_destroy(validtopo, diff);
+                    hwloc_topology_diff_destroy(NULL, diff);
                     continue;
                 }
 
@@ -513,27 +513,27 @@ netloc_map__init_servers(struct netloc_map *map)
                 if (netloc_map__prepare_hwloc_topology(map, refserver) < 0) {
                     fprintf(stderr, "Failed to uncompress reference server %s topology\n", refname);
                     free(refname);
-                    hwloc_topology_diff_destroy(validtopo, diff);
+                    hwloc_topology_diff_destroy(NULL, diff);
                     continue;
                 }
                 free(refname);
 
                 err = hwloc_topology_dup(&topo, refserver->topology);
                 if (err < 0) {
-                    hwloc_topology_diff_destroy(validtopo, diff);
+                    hwloc_topology_diff_destroy(NULL, diff);
                     continue;
                 }
 
                 err = hwloc_topology_diff_apply(topo, diff, 0);
                 if (err < 0) {
-                    hwloc_topology_diff_destroy(validtopo, diff);
+                    hwloc_topology_diff_destroy(NULL, diff);
                     hwloc_topology_destroy(topo);
                     continue;
                 }
 
                 server = netloc_map__init_server(map, topo, name);
                 if (!server) {
-                    hwloc_topology_diff_destroy(validtopo, diff);
+                    hwloc_topology_diff_destroy(NULL, diff);
                     hwloc_topology_destroy(topo);
                 } else {
                     /* ideally, we would walk up the chain of reference servers, but:
@@ -696,7 +696,7 @@ netloc_map__destroy_servers(struct netloc_map *map)
     while (curserver) {
         nextserver = curserver->next;
         if (curserver->topology_diff_refserver)
-            hwloc_topology_diff_destroy(curserver->topology, curserver->topology_diff);
+            hwloc_topology_diff_destroy(NULL, curserver->topology_diff);
         if (curserver->topology)
             hwloc_topology_destroy(curserver->topology);
         for(i=0; i<curserver->nr_ports; i++)

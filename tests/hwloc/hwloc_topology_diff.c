@@ -98,10 +98,10 @@ int main(void)
   assert(!diff2);
 
   printf("exporting and reloading diff from XML buffer without refname\n");
-  err = hwloc_topology_diff_export_xmlbuffer(topo1, diff, NULL, &xmlbuffer, &xmlbuflen);
+  err = hwloc_topology_diff_export_xmlbuffer(NULL, diff, NULL, &xmlbuffer, &xmlbuflen);
   assert(!err);
   hwloc_topology_diff_destroy(topo1, diff);
-  err = hwloc_topology_diff_load_xmlbuffer(topo1, xmlbuffer, xmlbuflen, &diff2, &refname);
+  err = hwloc_topology_diff_load_xmlbuffer(NULL, xmlbuffer, xmlbuflen, &diff2, &refname);
   assert(!err);
   assert(diff2);
   assert(!refname);
@@ -109,10 +109,10 @@ int main(void)
   hwloc_free_xmlbuffer(topo1, xmlbuffer);
 
   printf("exporting and reloading diff from XML buffer with refname\n");
-  err = hwloc_topology_diff_export_xmlbuffer(topo1, diff2, "foobar", &xmlbuffer, &xmlbuflen);
+  err = hwloc_topology_diff_export_xmlbuffer(NULL, diff2, "foobar", &xmlbuffer, &xmlbuflen);
   assert(!err);
   hwloc_topology_diff_destroy(topo1, diff2);
-  err = hwloc_topology_diff_load_xmlbuffer(topo1, xmlbuffer, xmlbuflen, &diff, &refname);
+  err = hwloc_topology_diff_load_xmlbuffer(NULL, xmlbuffer, xmlbuflen, &diff, &refname);
   assert(!err);
   assert(diff);
   err = strcmp(refname, "foobar");

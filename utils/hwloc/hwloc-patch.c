@@ -17,7 +17,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "  --version        Report version and exit\n");
 }
 
-static int hwloc_diff_read(hwloc_topology_t topo, const char *inputdiff,
+static int hwloc_diff_read(const char *inputdiff,
 			   hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
 	size_t buflen, offset, readlen;
@@ -26,7 +26,7 @@ static int hwloc_diff_read(hwloc_topology_t topo, const char *inputdiff,
 	int err;
 
 	if (strcmp(inputdiff, "-"))
-		return hwloc_topology_diff_load_xml(topo, inputdiff, firstdiffp, refnamep);
+		return hwloc_topology_diff_load_xml(NULL, inputdiff, firstdiffp, refnamep);
 
 	buflen = 4096;
 	buffer = malloc(buflen+1); /* one more byte for the ending \0 */
@@ -50,7 +50,7 @@ static int hwloc_diff_read(hwloc_topology_t topo, const char *inputdiff,
 		readlen = buflen/2;
 	}
 
-	err = hwloc_topology_diff_load_xmlbuffer(topo, buffer, (int)(offset+1), firstdiffp, refnamep);
+	err = hwloc_topology_diff_load_xmlbuffer(NULL, buffer, (int)(offset+1), firstdiffp, refnamep);
 	free(buffer);
 	return err;
 
@@ -107,19 +107,14 @@ int main(int argc, char *argv[])
 		argv++;
 	}
 
-	/* load a temporary topology so that we can play with diffs */
-	hwloc_topology_init(&topo);
-	hwloc_topology_load(topo);
-
 	/* load the diff and get the refname */
-	err = hwloc_diff_read(topo, inputdiff, &firstdiff, &refname);
+	err = hwloc_diff_read(inputdiff, &firstdiff, &refname);
 	if (err < 0) {
 		fprintf(stderr, "Failed to load XML topology diff %s\n", inputdiff);
 		goto out_with_topo;
 	}
 
-	/* switch to the actual input topology */
-	hwloc_topology_destroy(topo);
+	/* load the input topology */
 	hwloc_topology_init(&topo);
 	hwloc_topology_set_all_types_filter(topo, HWLOC_TYPE_FILTER_KEEP_ALL);
 	hwloc_topology_set_flags(topo, flags);
@@ -159,13 +154,13 @@ int main(int argc, char *argv[])
 		goto out_with_diff;
 	}
 
-	hwloc_topology_diff_destroy(topo, firstdiff);
+	hwloc_topology_diff_destroy(NULL, firstdiff);
 	hwloc_topology_destroy(topo);
 
 	exit(EXIT_SUCCESS);
 
 out_with_diff:
-	hwloc_topology_diff_destroy(topo, firstdiff);
+	hwloc_topology_diff_destroy(NULL, firstdiff);
 out_with_topo:
 	hwloc_topology_destroy(topo);
 out:
