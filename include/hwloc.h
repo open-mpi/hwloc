@@ -767,9 +767,9 @@ enum hwloc_topology_flags_e {
 
   /** \brief Detect the whole PCI hierarchy.
    *
-   * This flag enables detection of all I/O devices (even the uncommon ones)
-   * and bridges (even those that have no device behind them) using the pci
-   * backend.
+   * This flag enables detection of all I/O devices (even the uncommon ones
+   * such as DMA channels) and bridges (even those that have no device behind
+   * them) using the pci backend.
    * This implies HWLOC_TOPOLOGY_FLAG_IO_DEVICES.
    * \hideinitializer
    */
