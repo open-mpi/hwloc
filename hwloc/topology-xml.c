@@ -1108,11 +1108,8 @@ hwloc_topology_diff_load_xml(hwloc_topology_t topology __hwloc_attribute_unused,
     basename = xmlpath;
   fakedata.msgprefix = strdup(basename);
 
-  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
-    free(fakedata.msgprefix);
-    errno = ENOSYS;
-    return -1;
-  }
+  hwloc_components_init();
+  assert(hwloc_nolibxml_callbacks);
 
   hwloc_localeswitch_init();
 
@@ -1131,7 +1128,7 @@ retry:
   }
 
   hwloc_localeswitch_fini();
-
+  hwloc_components_fini();
   free(fakedata.msgprefix);
   return ret;
 }
@@ -1151,11 +1148,8 @@ hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_u
   state.global = &fakedata;
   fakedata.msgprefix = strdup("xmldiffbuffer");
 
-  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
-    free(fakedata.msgprefix);
-    errno = ENOSYS;
-    return -1;
-  }
+  hwloc_components_init();
+  assert(hwloc_nolibxml_callbacks);
 
   hwloc_localeswitch_init();
 
@@ -1174,7 +1168,7 @@ hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_u
   }
 
   hwloc_localeswitch_fini();
-
+  hwloc_components_fini();
   free(fakedata.msgprefix);
   return ret;
 }
@@ -1442,10 +1436,7 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
   int force_nolibxml;
   int ret;
 
-  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
-    errno = ENOSYS;
-    return -1;
-  }
+  assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
   hwloc_localeswitch_init();
 
@@ -1472,10 +1463,7 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
   int force_nolibxml;
   int ret;
 
-  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
-    errno = ENOSYS;
-    return -1;
-  }
+  assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
   hwloc_localeswitch_init();
 
@@ -1506,11 +1494,6 @@ hwloc_topology_diff_export_xml(hwloc_topology_t topology __hwloc_attribute_unuse
   int force_nolibxml;
   int ret;
 
-  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   tmpdiff = diff;
   while (tmpdiff) {
     if (tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX) {
@@ -1519,6 +1502,9 @@ hwloc_topology_diff_export_xml(hwloc_topology_t topology __hwloc_attribute_unuse
     }
     tmpdiff = tmpdiff->generic.next;
   }
+
+  hwloc_components_init();
+  assert(hwloc_nolibxml_callbacks);
 
   hwloc_localeswitch_init();
 
@@ -1535,6 +1521,7 @@ retry:
   }
 
   hwloc_localeswitch_fini();
+  hwloc_components_fini();
   return ret;
 }
 
@@ -1549,11 +1536,6 @@ hwloc_topology_diff_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute
   int force_nolibxml;
   int ret;
 
-  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   tmpdiff = diff;
   while (tmpdiff) {
     if (tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX) {
@@ -1562,6 +1544,9 @@ hwloc_topology_diff_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute
     }
     tmpdiff = tmpdiff->generic.next;
   }
+
+  hwloc_components_init();
+  assert(hwloc_nolibxml_callbacks);
 
   hwloc_localeswitch_init();
 
@@ -1578,6 +1563,7 @@ retry:
   }
 
   hwloc_localeswitch_fini();
+  hwloc_components_fini();
   return ret;
 }
 
@@ -1585,10 +1571,7 @@ void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, ch
 {
   int force_nolibxml;
 
-  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
-    errno = ENOSYS;
-    return ;
-  }
+  assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
   force_nolibxml = hwloc_nolibxml_export();
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
@@ -1705,10 +1688,7 @@ hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
   const char *basename;
   int err;
 
-  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
-    errno = ENOSYS;
-    goto out;
-  }
+  assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the component's topology */
 
   if (!xmlpath && !xmlbuffer) {
     env = getenv("HWLOC_XMLFILE");
