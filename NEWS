@@ -29,6 +29,7 @@ Version 1.11.1
 * Fix some segfaults when inputting an invalid synthetic description.
 * Fix support for more than 32 processors on 64bits Windows.
 * Fix the discovery of multiple processor groups on Windows.
+* Add the PCISlot attribute to all PCI functions instead of only the first one.
 
 
 Version 1.11.0

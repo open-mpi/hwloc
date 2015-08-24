@@ -5175,10 +5175,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 	  while (obj) {
 	    if (obj->attr->pcidev.domain == domain
 		&& obj->attr->pcidev.bus == bus
-		&& obj->attr->pcidev.dev == dev
-		&& obj->attr->pcidev.func == 0) {
+		&& obj->attr->pcidev.dev == dev) {
 	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
-	      break;
 	    }
 	    obj = obj->next_sibling;
 	  }

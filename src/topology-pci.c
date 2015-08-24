@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -273,10 +273,8 @@ hwloc_look_pci(struct hwloc_backend *backend)
 	  while (obj) {
 	    if (obj->attr->pcidev.domain == domain
 		&& obj->attr->pcidev.bus == bus
-		&& obj->attr->pcidev.dev == dev
-		&& obj->attr->pcidev.func == 0) {
+		&& obj->attr->pcidev.dev == dev) {
 	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
-	      break;
 	    }
 	    obj = obj->next_sibling;
 	  }
