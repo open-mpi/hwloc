@@ -209,7 +209,7 @@ static ULONG_PTR hwloc_bitmap_to_ULONG_PTR(hwloc_const_bitmap_t set)
 #endif
 }
 
-/* TODO: SetThreadIdealProcessor */
+/* TODO: SetThreadIdealProcessor{,Ex} */
 
 static int
 hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int flags)
@@ -227,8 +227,6 @@ hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
     return -1;
   return 0;
 }
-
-/* TODO: SetThreadGroupAffinity to get affinity */
 
 static int
 hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
@@ -255,6 +253,8 @@ hwloc_win_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_
   return ret;
 }
 
+/* TODO: GetThreadGroupAffinity */
+
 static int
 hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_const_bitmap_t hwloc_set, int flags)
 {
@@ -265,6 +265,7 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, h
   }
   /* TODO: groups, hard: has to manually bind all threads into the other group,
    * and the bind the process inside the group */
+  /* TODO: SetProcessGroupAffinity undocumented? */
   /* The resulting binding is always strict */
   mask = hwloc_bitmap_to_ULONG_PTR(hwloc_set);
   if (!SetProcessAffinityMask(proc, mask))
@@ -699,6 +700,10 @@ hwloc_look_windows(struct hwloc_backend *backend)
                   procInfo->Group.GroupInfo[id].ActiveProcessorCount, mask);
 	      /* KAFFINITY is ULONG_PTR */
 	      hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, id, mask);
+	      /* FIXME: what if running 32bits on a 64bits windows with 64-processor groups?
+	       * ULONG_PTR is 32bits, so half the group is invisible?
+	       * maybe scale id to id*8/sizeof(ULONG_PTR) so that groups are 64-PU aligned?
+	       */
 	      hwloc_debug_2args_bitmap("group %u %d bitmap %s\n", id, procInfo->Group.GroupInfo[id].ActiveProcessorCount, obj->cpuset);
 
 	      /* save the set of PUs so that we can create them at the end */
@@ -721,9 +726,9 @@ hwloc_look_windows(struct hwloc_backend *backend)
           hwloc_debug("%s#%u %d: mask %d:%lx\n", hwloc_obj_type_string(type), id, i, GroupMask[i].Group, GroupMask[i].Mask);
 	  /* GROUP_AFFINITY.Mask is KAFFINITY, which is ULONG_PTR */
 	  hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, GroupMask[i].Group, GroupMask[i].Mask);
+	  /* FIXME: scale id to id*8/sizeof(ULONG_PTR) as above? */
         }
 	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
-
 	switch (type) {
 	  case HWLOC_OBJ_NUMANODE:
 	    {
