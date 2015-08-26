@@ -95,16 +95,14 @@ savelink() {
 }
 
 # Gather the following list of files
-cat << EOF | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
-/proc/cmdline
-/proc/cpuinfo
-/proc/meminfo
-/proc/mounts
-/proc/stat
-/proc/version
-/proc/self/cpuset
-/proc/self/cgroup
-EOF
+savefile "$destdir/$basename" /proc/cmdline
+savefile "$destdir/$basename" /proc/cpuinfo
+savefile "$destdir/$basename" /proc/meminfo
+savefile "$destdir/$basename" /proc/mounts
+savefile "$destdir/$basename" /proc/stat
+savefile "$destdir/$basename" /proc/version
+savefile "$destdir/$basename" /proc/self/cpuset
+savefile "$destdir/$basename" /proc/self/cgroup
 
 # Get all files from the given directory
 # Ignore errors since some files may be missing, and some may be
@@ -127,29 +125,25 @@ savedir() {
 }
 
 # Gather the following list of directories
-cat << EOF | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
-/sys/devices/system/cpu/
-/sys/devices/system/node/
-/sys/bus/cpu/devices/
-/sys/bus/node/devices/
-/sys/class/dmi/id/
-/sys/devices/virtual/dmi/id/
-/sys/kernel/mm/hugepages/
-/proc/device-tree/cpus/
-EOF
+savedir "$destdir/$basename" /sys/devices/system/cpu/
+savedir "$destdir/$basename" /sys/devices/system/node/
+savedir "$destdir/$basename" /sys/bus/cpu/devices/
+savedir "$destdir/$basename" /sys/bus/node/devices/
+savedir "$destdir/$basename" /sys/class/dmi/id/
+savedir "$destdir/$basename" /sys/devices/virtual/dmi/id/ # we currently scan this one and the above
+savedir "$destdir/$basename" /sys/kernel/mm/hugepages/
+savedir "$destdir/$basename" /proc/device-tree/cpus/
 
 # Optionally gather I/O directories too
 if [ x$gatherio = x1 ]; then
-  cat << EOF | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
-/sys/bus/pci/devices/
-/sys/bus/pci/slots/
-/sys/class/block/
-/sys/class/dma/
-/sys/class/drm/
-/sys/class/infiniband/
-/sys/class/net/
-/sys/class/mic/
-EOF
+  savedir "$destdir/$basename" /sys/bus/pci/devices/
+  savedir "$destdir/$basename" /sys/bus/pci/slots/
+  savedir "$destdir/$basename" /sys/class/block/
+  savedir "$destdir/$basename" /sys/class/dma/
+  savedir "$destdir/$basename" /sys/class/drm/
+  savedir "$destdir/$basename" /sys/class/infiniband/
+  savedir "$destdir/$basename" /sys/class/net/
+  savedir "$destdir/$basename" /sys/class/mic/
   ls -d /sys/devices/pci* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
   ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
   ls -d /sys/firmware/dmi/entries/17-* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
