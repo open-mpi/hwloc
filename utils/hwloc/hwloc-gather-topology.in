@@ -147,6 +147,13 @@ if [ x$gatherio = x1 ]; then
   savedir "$destdir/$basename" /sys/class/mic/
   # gather all PCI stuff, lots of links (/sys/bus/pci/devices/* and /sys/class/foo/*) point there
   ls -d /sys/devices/pci* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
+  # gather what non-PCI class links point
+  readlink /sys/class/block/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/block/$path" ; done
+  readlink /sys/class/dma/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/dma/$path" ; done
+  readlink /sys/class/drm/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/drm/$path" ; done
+  readlink /sys/class/infiniband/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/infiniband/$path" ; done
+  readlink /sys/class/net/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/net/$path" ; done
+  readlink /sys/class/mic/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/mic/$path" ; done
   # udev block data
   ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
   # memory module dmi-sysfs information (root only)
