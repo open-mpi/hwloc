@@ -21,6 +21,9 @@ LANG=C
 LC_ALL=C
 export LANG LC_ALL
 
+# don't let ls append special chars after symlinks etc
+unalias -a ls
+
 gatherio=0
 
 if [ ! -x "$lstopo" ]
@@ -147,9 +150,9 @@ if [ x$gatherio = x1 ]; then
 /sys/class/net/
 /sys/class/mic/
 EOF
-  ls -d /sys/devices/pci* 2>/dev/null | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
+  ls -d /sys/devices/pci* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
   ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
-  ls -d /sys/firmware/dmi/entries/17-* 2>/dev/null | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
+  ls -d /sys/firmware/dmi/entries/17-* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 fi
 
 # Get an entire mount point, after decoding its path
