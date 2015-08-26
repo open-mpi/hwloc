@@ -138,14 +138,18 @@ savedir "$destdir/$basename" /proc/device-tree/cpus/
 if [ x$gatherio = x1 ]; then
   savedir "$destdir/$basename" /sys/bus/pci/devices/
   savedir "$destdir/$basename" /sys/bus/pci/slots/
+  # gather class links, we'll parse that the target path for PCI busids
   savedir "$destdir/$basename" /sys/class/block/
   savedir "$destdir/$basename" /sys/class/dma/
   savedir "$destdir/$basename" /sys/class/drm/
   savedir "$destdir/$basename" /sys/class/infiniband/
   savedir "$destdir/$basename" /sys/class/net/
   savedir "$destdir/$basename" /sys/class/mic/
+  # gather all PCI stuff, lots of links (/sys/bus/pci/devices/* and /sys/class/foo/*) point there
   ls -d /sys/devices/pci* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
+  # udev block data
   ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
+  # memory module dmi-sysfs information (root only)
   ls -d /sys/firmware/dmi/entries/17-* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 fi
 
