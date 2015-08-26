@@ -145,9 +145,9 @@ if [ x$gatherio = x1 ]; then
 /sys/class/net/
 /sys/class/mic/
 EOF
-  ls -d /sys/devices/pci* | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
-  ls -d /run/udev/data/b* | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
-  ls -d /sys/firmware/dmi/entries/17-* | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
+  ls -d /sys/devices/pci* 2>/dev/null | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
+  ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
+  ls -d /sys/firmware/dmi/entries/17-* 2>/dev/null | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 fi
 
 # Get an entire mount point, after decoding its path
