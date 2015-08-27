@@ -1073,7 +1073,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
   topology->support.discovery->pu = 1;
 
   hwloc_localeswitch_fini();
-  return 1;
+  return 0;
 
  failed:
   if (data->look_failed)

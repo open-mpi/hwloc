@@ -2476,7 +2476,6 @@ hwloc_discover(struct hwloc_topology *topology)
    */
   backend = topology->backends;
   while (NULL != backend) {
-    int err;
     if (backend->component->type != HWLOC_DISC_COMPONENT_TYPE_CPU
 	&& backend->component->type != HWLOC_DISC_COMPONENT_TYPE_GLOBAL)
       /* not yet */
@@ -2490,7 +2489,7 @@ hwloc_discover(struct hwloc_topology *topology)
 	return -1;
     }
 
-    err = backend->discover(backend);
+    backend->discover(backend);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_cpubackend:
@@ -2575,7 +2574,6 @@ next_cpubackend:
 
   backend = topology->backends;
   while (NULL != backend) {
-    int err;
     if (backend->component->type == HWLOC_DISC_COMPONENT_TYPE_CPU
 	|| backend->component->type == HWLOC_DISC_COMPONENT_TYPE_GLOBAL)
       /* already done above */
@@ -2589,7 +2587,7 @@ next_cpubackend:
 	return -1;
     }
 
-    err = backend->discover(backend);
+    backend->discover(backend);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_noncpubackend:

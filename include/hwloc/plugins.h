@@ -137,7 +137,8 @@ struct hwloc_backend {
   void (*disable)(struct hwloc_backend *backend);
 
   /** \brief Main discovery callback.
-   * returns > 0 if it modified the topology tree, -1 on error, 0 otherwise.
+   * returns -1 on error, either because it couldn't add its objects ot the existing topology,
+   * or because of an actual discovery/gathering failure.
    * May be NULL if type is HWLOC_DISC_COMPONENT_TYPE_MISC. */
   int (*discover)(struct hwloc_backend *backend);
 

@@ -113,7 +113,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend)
     hwloc_insert_object_by_parent(topology, parent, cuda_device);
   }
 
-  return nb;
+  return 0;
 }
 
 static struct hwloc_backend *

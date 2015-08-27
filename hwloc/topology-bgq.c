@@ -28,7 +28,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
-    return 0;
+    return -1;
 
 #define HWLOC_BGQ_CORES 17 /* spare core ignored for now */
 
@@ -112,7 +112,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "BGQ");
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology, NULL);
-  return 1;
+  return 0;
 }
 
 static int

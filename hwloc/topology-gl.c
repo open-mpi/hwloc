@@ -25,7 +25,7 @@ static int
 hwloc_gl_discover(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  unsigned i, res = 0;
+  unsigned i;
   int err;
 
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
@@ -133,12 +133,11 @@ hwloc_gl_discover(struct hwloc_backend *backend)
 
       hwloc_debug("GL device %s (product %s) on PCI 0000:%02x:%02x.%u\n", name, productname,
 		  nv_ctrl_pci_domain, nv_ctrl_pci_bus, nv_ctrl_pci_device, nv_ctrl_pci_func);
-      res++;
     }
     XCloseDisplay(display);
   }
 
-  return res;
+  return 0;
 }
 
 static struct hwloc_backend *

@@ -959,7 +959,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
   if (!data->apicid_unique)
     fulldiscovery = 0;
   summarize(backend, infos, fulldiscovery);
-  return fulldiscovery; /* success, but objects added only if fulldiscovery */
+  return 0;
 }
 
 #if defined HWLOC_FREEBSD_SYS && defined HAVE_CPUSET_SETID
@@ -1111,7 +1111,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
   ret = look_procs(backend, infos, fulldiscovery,
 		   highest_cpuid, highest_ext_cpuid, features, cpuid_type,
 		   get_cpubind, set_cpubind);
-  if (ret >= 0)
+  if (!ret)
     /* success, we're done */
     goto out_with_os_state;
 
@@ -1119,7 +1119,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
     /* only one processor, no need to bind */
     look_proc(backend, &infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
     summarize(backend, infos, fulldiscovery);
-    ret = fulldiscovery;
+    ret = 0;
   }
 
 out_with_os_state:

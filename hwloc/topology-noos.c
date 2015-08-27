@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -17,13 +17,13 @@ hwloc_look_noos(struct hwloc_backend *backend)
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
-    return 0;
+    return -1;
 
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
   hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology, NULL);
-  return 1;
+  return 0;
 }
 
 static struct hwloc_backend *

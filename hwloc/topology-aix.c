@@ -719,7 +719,7 @@ hwloc_look_aix(struct hwloc_backend *backend)
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
-    return 0;
+    return -1;
 
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
@@ -786,7 +786,7 @@ hwloc_look_aix(struct hwloc_backend *backend)
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "AIX");
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology, NULL);
-  return 1;
+  return 0;
 }
 
 void

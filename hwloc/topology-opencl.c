@@ -21,7 +21,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
   cl_platform_id *platform_ids = NULL;
   cl_uint nr_platforms;
   cl_int clret;
-  unsigned j, res = 0;
+  unsigned j;
 
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
@@ -152,12 +152,11 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 	parent = hwloc_get_root_obj(topology);
 
       hwloc_insert_object_by_parent(topology, parent, osdev);
-      res++;
     }
     free(device_ids);
   }
   free(platform_ids);
-  return res;
+  return 0;
 }
 
 static struct hwloc_backend *

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -197,7 +197,7 @@ hwloc_look_freebsd(struct hwloc_backend *backend)
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "FreeBSD");
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology, NULL);
-  return 1;
+  return 0;
 }
 
 void

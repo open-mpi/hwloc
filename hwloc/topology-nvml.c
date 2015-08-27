@@ -99,7 +99,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend)
   }
 
   nvmlShutdown();
-  return nb;
+  return 0;
 }
 
 static struct hwloc_backend *

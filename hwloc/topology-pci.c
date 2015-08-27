@@ -255,7 +255,8 @@ hwloc_look_pci(struct hwloc_backend *backend)
   pci_iterator_destroy(iter);
   pci_system_cleanup();
 
-  return hwloc_pci_tree_attach_belowroot(topology, tree);
+  hwloc_pci_tree_attach_belowroot(topology, tree);
+  return 0;
 }
 
 static struct hwloc_backend *

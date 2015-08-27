@@ -249,7 +249,7 @@ hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_ob
   }
 
   topology->need_pci_belowroot_apply_locality = 1;
-  return 1;
+  return 0;
 }
 
 static struct hwloc_obj *

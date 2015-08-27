@@ -3701,7 +3701,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
-    return 0;
+    return -1;
 
   hwloc_gather_system_info(topology, data);
 
@@ -3777,7 +3777,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   /* data->utsname was filled with real uname or \0, we can safely pass it */
   hwloc_add_uname_info(topology, &data->utsname);
 
-  return 1;
+  return 0;
 }
 
 
@@ -4243,7 +4243,6 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
-  int res = 0;
   DIR *dir;
   struct dirent *dirent;
 
@@ -4276,12 +4275,11 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend)
     obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
     hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path);
-    res++;
   }
 
   closedir(dir);
 
-  return res;
+  return 0;
 }
 
 static void
@@ -4329,7 +4327,6 @@ hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
-  int res = 0;
   DIR *dir;
   struct dirent *dirent;
 
@@ -4352,12 +4349,11 @@ hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend)
     obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
 
     hwloc_linuxfs_net_class_fillinfos(root_fd, obj, path);
-    res++;
   }
 
   closedir(dir);
 
-  return res;
+  return 0;
 }
 
 static void
@@ -4474,7 +4470,6 @@ hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
-  int res = 0;
   DIR *dir;
   struct dirent *dirent;
 
@@ -4501,12 +4496,11 @@ hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend)
     obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
 
     hwloc_linuxfs_infiniband_class_fillinfos(root_fd, obj, path);
-    res++;
   }
 
   closedir(dir);
 
-  return res;
+  return 0;
 }
 
 static void
@@ -4588,7 +4582,6 @@ hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend)
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   unsigned idx;
-  int res = 0;
   DIR *dir;
   struct dirent *dirent;
 
@@ -4613,12 +4606,11 @@ hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend)
     obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_COPROC, dirent->d_name);
 
     hwloc_linuxfs_mic_class_fillinfos(root_fd, obj, path);
-    res++;
   }
 
   closedir(dir);
 
-  return res;
+  return 0;
 }
 
 static int
@@ -4626,7 +4618,6 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
-  int res = 0;
   DIR *dir;
   struct dirent *dirent;
 
@@ -4656,13 +4647,11 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend)
       continue;
 
     hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_GPU, dirent->d_name);
-
-    res++;
   }
 
   closedir(dir);
 
-  return res;
+  return 0;
 }
 
 static int
@@ -4670,7 +4659,6 @@ hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
-  int res = 0;
   DIR *dir;
   struct dirent *dirent;
 
@@ -4691,13 +4679,11 @@ hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend)
       continue;
 
     hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_DMA, dirent->d_name);
-
-    res++;
   }
 
   closedir(dir);
 
-  return res;
+  return 0;
 }
 
 struct hwloc_firmware_dmi_mem_device_header {
@@ -4851,7 +4837,6 @@ hwloc__get_firmware_dmi_memory_info(struct hwloc_topology *topology,
 {
   char path[128];
   unsigned i;
-  unsigned res = 0;
 
   for(i=0; ; i++) {
     FILE *fd;
@@ -4872,12 +4857,12 @@ hwloc__get_firmware_dmi_memory_info(struct hwloc_topology *topology,
       break;
     }
 
-    res += hwloc__get_firmware_dmi_memory_info_one(topology, i, path, fd, &header);
+    hwloc__get_firmware_dmi_memory_info_one(topology, i, path, fd, &header);
 
     fclose(fd);
   }
 
-  return res;
+  return 0;
 }
 
 #ifdef HWLOC_HAVE_LINUXPCI
@@ -5009,7 +4994,8 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 
   closedir(dir);
 
-  return hwloc_pci_tree_attach_belowroot(backend->topology, tree);
+  hwloc_pci_tree_attach_belowroot(backend->topology, tree);
+  return 0;
 }
 
 static hwloc_obj_t
@@ -5103,7 +5089,6 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   struct hwloc_obj *tmp;
   int needpcidiscovery;
 #endif
-  int res = 0;
 
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
@@ -5139,22 +5124,22 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   }
 
   if (needpcidiscovery)
-    res = hwloc_linuxfs_pci_look_pcidevices(backend);
+    hwloc_linuxfs_pci_look_pcidevices(backend);
 
   hwloc_linuxfs_pci_look_pcislots(backend);
 #endif /* HWLOC_HAVE_LINUXPCI */
 
-  res += hwloc_linuxfs_lookup_block_class(backend);
-  res += hwloc_linuxfs_lookup_net_class(backend);
-  res += hwloc_linuxfs_lookup_infiniband_class(backend);
-  res += hwloc_linuxfs_lookup_mic_class(backend);
-  res += hwloc_linuxfs_lookup_drm_class(backend);
+  hwloc_linuxfs_lookup_block_class(backend);
+  hwloc_linuxfs_lookup_net_class(backend);
+  hwloc_linuxfs_lookup_infiniband_class(backend);
+  hwloc_linuxfs_lookup_mic_class(backend);
+  hwloc_linuxfs_lookup_drm_class(backend);
   if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
-    res += hwloc_linuxfs_lookup_dma_class(backend);
+    hwloc_linuxfs_lookup_dma_class(backend);
   if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
-    res += hwloc__get_firmware_dmi_memory_info(topology, data);
+    hwloc__get_firmware_dmi_memory_info(topology, data);
 
-  return res;
+  return 0;
 }
 
 static struct hwloc_backend *
