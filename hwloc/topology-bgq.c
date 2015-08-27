@@ -21,91 +21,91 @@ static int
 hwloc_look_bgq(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
+  hwloc_bitmap_t set;
+  hwloc_obj_t obj;
   unsigned i;
   const char *env;
 
-  if (!topology->levels[0][0]->cpuset) {
-    /* Nobody created objects yet, setup everything */
-    hwloc_bitmap_t set;
-    hwloc_obj_t obj;
+  if (topology->levels[0][0]->cpuset)
+    /* somebody discovered things */
+    return 0;
 
 #define HWLOC_BGQ_CORES 17 /* spare core ignored for now */
 
-    hwloc_alloc_obj_cpusets(topology->levels[0][0]);
-    /* mark the 17th core (OS-reserved) as disallowed */
-    hwloc_bitmap_clr_range(topology->levels[0][0]->allowed_cpuset, (HWLOC_BGQ_CORES-1)*4, HWLOC_BGQ_CORES*4-1);
+  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+  /* mark the 17th core (OS-reserved) as disallowed */
+  hwloc_bitmap_clr_range(topology->levels[0][0]->allowed_cpuset, (HWLOC_BGQ_CORES-1)*4, HWLOC_BGQ_CORES*4-1);
 
-    env = getenv("BG_THREADMODEL");
-    if (!env || atoi(env) != 2) {
-      /* process cannot use cores/threads outside of its Kernel_ThreadMask() */
-      uint64_t bgmask = Kernel_ThreadMask(Kernel_MyTcoord());
-      /* the mask is reversed, manually reverse it */
-      for(i=0; i<64; i++)
-	if (((bgmask >> i) & 1) == 0)
-	  hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, 63-i);
-    }
+  env = getenv("BG_THREADMODEL");
+  if (!env || atoi(env) != 2) {
+    /* process cannot use cores/threads outside of its Kernel_ThreadMask() */
+    uint64_t bgmask = Kernel_ThreadMask(Kernel_MyTcoord());
+    /* the mask is reversed, manually reverse it */
+    for(i=0; i<64; i++)
+      if (((bgmask >> i) & 1) == 0)
+	hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, 63-i);
+  }
 
-    /* a single memory bank */
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
+  /* a single memory bank */
+  obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
+  set = hwloc_bitmap_alloc();
+  hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);
+  obj->cpuset = set;
+  set = hwloc_bitmap_alloc();
+  hwloc_bitmap_set(set, 0);
+  obj->nodeset = set;
+  obj->memory.local_memory = 16ULL*1024*1024*1024ULL;
+  hwloc_insert_object_by_cpuset(topology, obj);
+
+  /* package */
+  obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, 0);
+  set = hwloc_bitmap_alloc();
+  hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);
+  obj->cpuset = set;
+  hwloc_obj_add_info(obj, "CPUModel", "IBM PowerPC A2");
+  hwloc_insert_object_by_cpuset(topology, obj);
+
+  /* shared L2 */
+  obj = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+  obj->cpuset = hwloc_bitmap_dup(set);
+  obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+  obj->attr->cache.depth = 2;
+  obj->attr->cache.size = 32*1024*1024;
+  obj->attr->cache.linesize = 128;
+  obj->attr->cache.associativity = 16;
+  hwloc_insert_object_by_cpuset(topology, obj);
+
+  /* Cores */
+  for(i=0; i<HWLOC_BGQ_CORES; i++) {
+    /* Core */
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, i);
     set = hwloc_bitmap_alloc();
-    hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);
+    hwloc_bitmap_set_range(set, i*4, i*4+3);
     obj->cpuset = set;
-    set = hwloc_bitmap_alloc();
-    hwloc_bitmap_set(set, 0);
-    obj->nodeset = set;
-    obj->memory.local_memory = 16ULL*1024*1024*1024ULL;
     hwloc_insert_object_by_cpuset(topology, obj);
-
-    /* package */
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, 0);
-    set = hwloc_bitmap_alloc();
-    hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);
-    obj->cpuset = set;
-    hwloc_obj_add_info(obj, "CPUModel", "IBM PowerPC A2");
-    hwloc_insert_object_by_cpuset(topology, obj);
-
-    /* shared L2 */
+    /* L1d */
     obj = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
     obj->cpuset = hwloc_bitmap_dup(set);
-    obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-    obj->attr->cache.depth = 2;
-    obj->attr->cache.size = 32*1024*1024;
-    obj->attr->cache.linesize = 128;
-    obj->attr->cache.associativity = 16;
+    obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
+    obj->attr->cache.depth = 1;
+    obj->attr->cache.size = 16*1024;
+    obj->attr->cache.linesize = 64;
+    obj->attr->cache.associativity = 8;
     hwloc_insert_object_by_cpuset(topology, obj);
-
-    /* Cores */
-    for(i=0; i<HWLOC_BGQ_CORES; i++) {
-      /* Core */
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, i);
-      set = hwloc_bitmap_alloc();
-      hwloc_bitmap_set_range(set, i*4, i*4+3);
-      obj->cpuset = set;
-      hwloc_insert_object_by_cpuset(topology, obj);
-      /* L1d */
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
-      obj->cpuset = hwloc_bitmap_dup(set);
-      obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
-      obj->attr->cache.depth = 1;
-      obj->attr->cache.size = 16*1024;
-      obj->attr->cache.linesize = 64;
-      obj->attr->cache.associativity = 8;
-      hwloc_insert_object_by_cpuset(topology, obj);
-      /* L1i */
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
-      obj->cpuset = hwloc_bitmap_dup(set);
-      obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
-      obj->attr->cache.depth = 1;
-      obj->attr->cache.size = 16*1024;
-      obj->attr->cache.linesize = 64;
-      obj->attr->cache.associativity = 4;
-      hwloc_insert_object_by_cpuset(topology, obj);
-      /* there's also a L1p "prefetch cache" of 4kB with 128B lines */
-    }
-
-    /* PUs */
-    hwloc_setup_pu_level(topology, HWLOC_BGQ_CORES*4);
+    /* L1i */
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+    obj->cpuset = hwloc_bitmap_dup(set);
+    obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+    obj->attr->cache.depth = 1;
+    obj->attr->cache.size = 16*1024;
+    obj->attr->cache.linesize = 64;
+    obj->attr->cache.associativity = 4;
+    hwloc_insert_object_by_cpuset(topology, obj);
+    /* there's also a L1p "prefetch cache" of 4kB with 128B lines */
   }
+
+  /* PUs */
+  hwloc_setup_pu_level(topology, HWLOC_BGQ_CORES*4);
 
   /* Add BGQ specific information */
 
