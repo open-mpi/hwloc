@@ -248,6 +248,7 @@ hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_ob
 			     */
   }
 
+  topology->need_pci_belowroot_apply_locality = 1;
   return 1;
 }
 
@@ -351,6 +352,10 @@ hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology)
 {
   struct hwloc_obj *root = hwloc_get_root_obj(topology);
   struct hwloc_obj **listp, *obj;
+
+  if (!topology->need_pci_belowroot_apply_locality)
+    return 0;
+  topology->need_pci_belowroot_apply_locality = 0;
 
   /* root->io_first_child contains some PCI hierarchies, any maybe some non-PCI things.
    * insert the PCI trees according to their PCI-locality.
