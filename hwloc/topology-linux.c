@@ -4898,7 +4898,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
   /* We could lookup /sys/devices/pci.../.../busid1/.../budid2 recursively
    * to build the hierarchy of bridges/devices directly.
    * But that would require readdirs in all bridge sysfs subdirectories.
-   * Do a single readdir in the linear list in /sys/bus/pci/devices/*
+   * Do a single readdir in the linear list in /sys/bus/pci/devices/...
    * and build the hierarchy manually instead.
    */
   dir = hwloc_opendir("/sys/bus/pci/devices/", root_fd);
