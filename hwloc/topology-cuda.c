@@ -59,7 +59,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend)
 
   cures = cudaGetDeviceCount(&nb);
   if (cures)
-    return 0;
+    return -1;
 
   for (i = 0; i < nb; i++) {
     int domain, bus, dev;

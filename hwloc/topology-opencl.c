@@ -33,15 +33,15 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 
   clret = clGetPlatformIDs(0, NULL, &nr_platforms);
   if (CL_SUCCESS != clret || !nr_platforms)
-    return 0;
+    return -1;
   hwloc_debug("%u OpenCL platforms\n", nr_platforms);
   platform_ids = malloc(nr_platforms * sizeof(*platform_ids));
   if (!platform_ids)
-    return 0;
+    return -1;
   clret = clGetPlatformIDs(nr_platforms, platform_ids, &nr_platforms);
   if (CL_SUCCESS != clret || !nr_platforms) {
     free(platform_ids);
-    return 0;
+    return -1;
   }
 
   for(j=0; j<nr_platforms; j++) {

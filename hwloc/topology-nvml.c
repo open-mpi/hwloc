@@ -30,7 +30,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend)
 
   ret = nvmlInit();
   if (NVML_SUCCESS != ret)
-    return 0;
+    return -1;
   ret = nvmlDeviceGetCount(&nb);
   if (NVML_SUCCESS != ret || !nb) {
     nvmlShutdown();
