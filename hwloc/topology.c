@@ -2433,7 +2433,6 @@ static int
 hwloc_discover(struct hwloc_topology *topology)
 {
   struct hwloc_backend *backend;
-  int gotsomeio = 0;
   unsigned discoveries = 0;
 
   topology->modified = 0; /* no need to reconnect yet */
@@ -2494,8 +2493,6 @@ hwloc_discover(struct hwloc_topology *topology)
 
     err = backend->discover(backend);
     if (err >= 0) {
-      if (backend->component->type == HWLOC_DISC_COMPONENT_TYPE_GLOBAL)
-        gotsomeio += err;
       discoveries++;
     }
     hwloc_debug_print_objects(0, topology->levels[0][0]);
@@ -2593,9 +2590,6 @@ next_cpubackend:
     }
 
     err = backend->discover(backend);
-    if (err >= 0) {
-      gotsomeio += err;
-    }
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_noncpubackend:
@@ -2604,20 +2598,22 @@ next_noncpubackend:
 
   hwloc_pci_belowroot_apply_locality(topology);
 
+  /* FIXME: filter I/O in backends and merge that code with ignoring below to avoid useless traversals */
   /* if we got anything, filter interesting objects and update the tree */
-  if (gotsomeio) {
-    if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
-      /* drop all I/O children */
-      hwloc_drop_all_io(topology, topology->levels[0][0]);
-    else
-      hwloc_drop_useless_io(topology, topology->levels[0][0]);
-    hwloc_debug("%s", "\nNow reconnecting\n");
-    hwloc_debug_print_objects(0, topology->levels[0][0]);
-    hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
-  }
+  if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+    /* drop all I/O children */
+    hwloc_drop_all_io(topology, topology->levels[0][0]);
+  else
+    hwloc_drop_useless_io(topology, topology->levels[0][0]);
+  hwloc_debug("%s", "\nNow reconnecting\n");
+  hwloc_debug_print_objects(0, topology->levels[0][0]);
+
+  /* FIXME merge with propagate memory and symmetric_subtree below */
+  hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
 
   /* Remove some stuff */
 
+  /* FIXME: merge these 2 steps? */
   hwloc_debug("%s", "\nRemoving ignored objects\n");
   ignore_type_always(topology, &topology->levels[0][0]);
   hwloc_debug_print_objects(0, topology->levels[0][0]);
