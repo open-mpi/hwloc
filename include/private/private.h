@@ -75,6 +75,7 @@ struct hwloc_topology {
   struct hwloc_obj *first_misc, *last_misc;
 
   int need_pci_belowroot_apply_locality;
+  struct hwloc_backend *get_pci_busid_cpuset_backend;
 
   struct hwloc_binding_hooks {
     int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);

@@ -473,7 +473,6 @@ extern "C" {
 
 #define hwloc_backend_alloc HWLOC_NAME(backend_alloc)
 #define hwloc_backend_enable HWLOC_NAME(backend_enable)
-#define hwloc_backends_get_pci_busid_cpuset HWLOC_NAME(backends_get_pci_busid_cpuset)
 
 #define hwloc_component_type_e HWLOC_NAME(component_type_e)
 #define HWLOC_COMPONENT_TYPE_DISC HWLOC_NAME_CAPS(COMPONENT_TYPE_DISC)
@@ -554,6 +553,7 @@ extern "C" {
 #define hwloc_disc_components_enable_others HWLOC_NAME(disc_components_instantiate_others)
 
 #define hwloc_backends_is_thissystem HWLOC_NAME(backends_is_thissystem)
+#define hwloc_backends_find_callbacks HWLOC_NAME(backends_find_callbacks)
 
 #define hwloc_backends_init HWLOC_NAME(backends_init)
 #define hwloc_backends_disable_all HWLOC_NAME(backends_disable_all)

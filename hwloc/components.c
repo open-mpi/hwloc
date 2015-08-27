@@ -760,17 +760,20 @@ hwloc_backends_is_thissystem(struct hwloc_topology *topology)
     topology->is_thissystem = atoi(local_env);
 }
 
-int
-hwloc_backends_get_pci_busid_cpuset(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid, hwloc_bitmap_t cpuset)
+void
+hwloc_backends_find_callbacks(struct hwloc_topology *topology)
 {
   struct hwloc_backend *backend = topology->backends;
   /* use the first backend's get_pci_busid_cpuset callback */
+  topology->get_pci_busid_cpuset_backend = NULL;
   while (backend != NULL) {
-    if (backend->get_pci_busid_cpuset)
-      return backend->get_pci_busid_cpuset(backend, busid, cpuset);
+    if (backend->get_pci_busid_cpuset) {
+      topology->get_pci_busid_cpuset_backend = backend;
+      return;
+    }
     backend = backend->next;
   }
-  return -1;
+  return;
 }
 
 void

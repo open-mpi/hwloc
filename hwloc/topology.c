@@ -2951,8 +2951,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
   /* instantiate all possible other backends now */
   hwloc_disc_components_enable_others(topology);
-  /* now that backends are enabled, update the thissystem flag */
+  /* now that backends are enabled, update the thissystem flag and some callbacks */
   hwloc_backends_is_thissystem(topology);
+  hwloc_backends_find_callbacks(topology);
 
   /* get distance matrix from the environment are store them (as indexes) in the topology.
    * indexes will be converted into objects later once the tree will be filled

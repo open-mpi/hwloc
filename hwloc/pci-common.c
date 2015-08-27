@@ -313,7 +313,11 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
     hwloc_bitmap_sscanf(cpuset, env);
   } else {
     /* get the cpuset by asking the OS backend. */
-    err = hwloc_backends_get_pci_busid_cpuset(topology, busid, cpuset);
+    struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
+    if (backend)
+      err = backend->get_pci_busid_cpuset(backend, busid, cpuset);
+    else
+      err = -1;
     if (err < 0)
       /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
       hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));

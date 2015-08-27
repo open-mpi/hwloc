@@ -161,13 +161,6 @@ HWLOC_DECLSPEC struct hwloc_backend * hwloc_backend_alloc(struct hwloc_disc_comp
 /** \brief Enable a previously allocated and setup backend. */
 HWLOC_DECLSPEC int hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *backend);
 
-/** \brief Used by backends discovery callbacks to request locality information from others.
- *
- * Traverse the list of enabled backends until one has a
- * get_pci_busid_cpuset() method, and call it.
- */
-HWLOC_DECLSPEC int hwloc_backends_get_pci_busid_cpuset(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid, hwloc_bitmap_t cpuset);
-
 /** @} */
 
 
