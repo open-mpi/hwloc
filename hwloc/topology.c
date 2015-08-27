@@ -2433,7 +2433,6 @@ static int
 hwloc_discover(struct hwloc_topology *topology)
 {
   struct hwloc_backend *backend;
-  unsigned discoveries = 0;
 
   topology->modified = 0; /* no need to reconnect yet */
 
@@ -2492,25 +2491,26 @@ hwloc_discover(struct hwloc_topology *topology)
     }
 
     err = backend->discover(backend);
-    if (err >= 0) {
-      discoveries++;
-    }
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_cpubackend:
     backend = backend->next;
   }
 
-  if (!discoveries) {
-    hwloc_debug("%s", "No CPU backend enabled or no discovery succeeded\n");
+  /* Update objects cpusets and nodesets now that the CPU/GLOBAL backend populated PUs and nodes */
+  hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
+  collect_proc_cpuset(topology->levels[0][0], NULL);
+
+  /* One backend should have allocated root cpusets with hwloc_alloc_obj_cpusets()
+   * and collect_proc_cpuset() should have set bits based on existing PUs.
+   */
+  if (!topology->levels[0][0]->cpuset || hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
+    printf("No PU added by any CPU and Global backend, aborting load\n");
+    hwloc_debug("%s", "No PU added by any CPU and global backend\n");
     errno = EINVAL;
     return -1;
   }
 
-  /* Update objects cpusets and nodesets now that the CPU/GLOBAL backend populated PUs and nodes */
-
-  hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
-  collect_proc_cpuset(topology->levels[0][0], NULL);
 
   hwloc_debug("%s", "\nPropagate disallowed cpus down and up\n");
   propagate_unused_cpuset(topology->levels[0][0], NULL);
