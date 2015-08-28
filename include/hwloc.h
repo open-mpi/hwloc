@@ -702,9 +702,8 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t to
 /** \brief Ignore all objects that do not bring any structure.
  *
  * Ignore all objects that do not bring any structure:
- * Each ignored object should have a single children or be the only child of its parent.
- * I/O objects may not be ignored, topology flags should be used to configure
- * their discovery instead.
+ * This is equivalent to calling hwloc_topology_ignore_type_keep_structure()
+ * for all object types.
  */
 HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t topology);
 

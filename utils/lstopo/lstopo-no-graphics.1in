@@ -115,6 +115,7 @@ Do not show caches.
 .TP
 \fB\-\-no\-useless\-caches\fR
 Do not show caches which do not have a hierarchical impact.
+This calls hwloc_topology_ignore_type_keep_structure() for cache objects.
 .TP
 \fB\-\-no\-icaches\fR
 Do not show Instruction caches, only Data and Unified caches are displayed.
@@ -124,6 +125,7 @@ Do not consider administration limitations.
 .TP
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
+This calls hwloc_topology_ignore_all_keep_structure().
 .TP
 \fB\-\-no\-collapse\fR
 Do not collapse identical PCI devices.
