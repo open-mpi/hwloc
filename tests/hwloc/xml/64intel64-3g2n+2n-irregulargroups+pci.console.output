@@ -44,17 +44,17 @@ Machine (P#0 total=259890340KB DMIProductName=UV2000 DMIProductVersion=SGI DMIBo
                 Core L#7 (P#7)
                   PU L#7 (P#7)
       Bridge Host->PCI L#0 (P#0 buses=0000:[00-0a])
-        Bridge PCI->PCI (P#48 busid=0000:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0000:[01-02] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode") "Intel Corporation Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode"
-          PCI 8086:1521 (P#4096 busid=0000:01:00.0 class=0200(Ether) PCIVendor="Intel Corporation" PCIDevice="I350 Gigabit Network Connection") "Intel Corporation I350 Gigabit Network Connection"
+        Bridge PCI->PCI (P#48 busid=0000:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0000:[01-02] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode")
+          PCI 8086:1521 (P#4096 busid=0000:01:00.0 class=0200(Ether) PCIVendor="Intel Corporation" PCIDevice="I350 Gigabit Network Connection")
             Network L#0 (Address=08:00:69:16:d0:b9) "eth0"
-          PCI 8086:1521 (P#4097 busid=0000:01:00.1 class=0200(Ether) PCIVendor="Intel Corporation" PCIDevice="I350 Gigabit Network Connection") "Intel Corporation I350 Gigabit Network Connection"
+          PCI 8086:1521 (P#4097 busid=0000:01:00.1 class=0200(Ether) PCIVendor="Intel Corporation" PCIDevice="I350 Gigabit Network Connection")
             Network L#1 (Address=08:00:69:16:d0:ba) "eth1"
-        Bridge PCI->PCI (P#448 busid=0000:00:1c.0 id=8086:1d1e class=0604(PCI_B) buses=0000:[05-09] PCIVendor="Intel Corporation" PCIDevice="Patsburg PCI Express Root Port 8") "Intel Corporation Patsburg PCI Express Root Port 8"
-          Bridge PCI->PCI (P#20480 busid=0000:05:00.0 id=1912:0013 class=0604(PCI_B) buses=0000:[06-09] PCIVendor="Renesas Technology Corp." PCIDevice="SH7757 PCIe Switch [PS]") "Renesas Technology Corp. SH7757 PCIe Switch [PS]"
-            Bridge PCI->PCI (P#24576 busid=0000:06:00.0 id=1912:0013 class=0604(PCI_B) buses=0000:[07-08] PCIVendor="Renesas Technology Corp." PCIDevice="SH7757 PCIe Switch [PS]") "Renesas Technology Corp. SH7757 PCIe Switch [PS]"
-              Bridge PCI->PCI (P#28672 busid=0000:07:00.0 id=1912:0012 class=0604(PCI_B) buses=0000:[08-08] PCIVendor="Renesas Technology Corp." PCIDevice="SH7757 PCIe-PCI Bridge [PPB]") "Renesas Technology Corp. SH7757 PCIe-PCI Bridge [PPB]"
-                PCI 102b:0534 (P#32768 busid=0000:08:00.0 class=0300(VGA) PCIVendor="Matrox Graphics, Inc." PCIDevice=G200eR2) "Matrox Graphics, Inc. G200eR2"
-        PCI 8086:1d02 (P#498 busid=0000:00:1f.2 class=0106(SATA) PCIVendor="Intel Corporation" PCIDevice="Patsburg 6-Port SATA AHCI Controller") "Intel Corporation Patsburg 6-Port SATA AHCI Controller"
+        Bridge PCI->PCI (P#448 busid=0000:00:1c.0 id=8086:1d1e class=0604(PCI_B) buses=0000:[05-09] PCIVendor="Intel Corporation" PCIDevice="Patsburg PCI Express Root Port 8")
+          Bridge PCI->PCI (P#20480 busid=0000:05:00.0 id=1912:0013 class=0604(PCI_B) buses=0000:[06-09] PCIVendor="Renesas Technology Corp." PCIDevice="SH7757 PCIe Switch [PS]")
+            Bridge PCI->PCI (P#24576 busid=0000:06:00.0 id=1912:0013 class=0604(PCI_B) buses=0000:[07-08] PCIVendor="Renesas Technology Corp." PCIDevice="SH7757 PCIe Switch [PS]")
+              Bridge PCI->PCI (P#28672 busid=0000:07:00.0 id=1912:0012 class=0604(PCI_B) buses=0000:[08-08] PCIVendor="Renesas Technology Corp." PCIDevice="SH7757 PCIe-PCI Bridge [PPB]")
+                PCI 102b:0534 (P#32768 busid=0000:08:00.0 class=0300(VGA) PCIVendor="Matrox Graphics, Inc." PCIDevice=G200eR2)
+        PCI 8086:1d02 (P#498 busid=0000:00:1f.2 class=0106(SATA) PCIVendor="Intel Corporation" PCIDevice="Patsburg 6-Port SATA AHCI Controller")
     NUMANode L#1 (P#1 local=32489472KB total=32489472KB)
       Package L#1 (P#1 CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=45 CPUModel="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz" CPUStepping=7)
         L3Cache L#1 (size=20480KB linesize=64 ways=20)
@@ -99,8 +99,8 @@ Machine (P#0 total=259890340KB DMIProductName=UV2000 DMIProductVersion=SGI DMIBo
                 Core L#15 (P#7)
                   PU L#15 (P#15)
       Bridge Host->PCI L#6 (P#1 buses=0001:[00-02])
-        Bridge PCI->PCI (P#1048624 busid=0001:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0001:[02-02] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode") "Intel Corporation Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode"
-          PCI 1000:0079 (P#1056768 busid=0001:02:00.0 class=0104(RAID) PCIVendor="LSI Logic / Symbios Logic" PCIDevice="MegaRAID SAS 2108 [Liberator]") "LSI Logic / Symbios Logic MegaRAID SAS 2108 [Liberator]"
+        Bridge PCI->PCI (P#1048624 busid=0001:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0001:[02-02] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode")
+          PCI 1000:0079 (P#1056768 busid=0001:02:00.0 class=0104(RAID) PCIVendor="LSI Logic / Symbios Logic" PCIDevice="MegaRAID SAS 2108 [Liberator]")
             Block L#2 (LinuxDeviceID=8:0) "sda"
   Group0 L#1 (total=64978944KB)
     NUMANode L#2 (P#2 local=32489472KB total=32489472KB)
@@ -233,8 +233,8 @@ Machine (P#0 total=259890340KB DMIProductName=UV2000 DMIProductVersion=SGI DMIBo
               Core L#39 (P#7)
                 PU L#39 (P#39) (forbidden)
     Bridge Host->PCI L#8 (P#2 buses=0002:[00-01])
-      Bridge PCI->PCI (P#2097200 busid=0002:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0002:[01-01] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode") "Intel Corporation Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode"
-        PCI 10de:11ba (P#2101248 busid=0002:01:00.0 class=0300(VGA) PCIVendor="nVidia Corporation") "nVidia Corporation"
+      Bridge PCI->PCI (P#2097200 busid=0002:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0002:[01-01] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode")
+        PCI 10de:11ba (P#2101248 busid=0002:01:00.0 class=0300(VGA) PCIVendor="nVidia Corporation")
   Group0 L#2 (total=64978944KB)
     NUMANode L#5 (P#5 local=32489472KB total=32489472KB)
       Package L#5 (P#6 CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=45 CPUModel="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz" CPUStepping=7)
@@ -280,8 +280,8 @@ Machine (P#0 total=259890340KB DMIProductName=UV2000 DMIProductVersion=SGI DMIBo
                 Core L#47 (P#7)
                   PU L#47 (P#47) (forbidden)
       Bridge Host->PCI L#10 (P#3 buses=0003:[00-02])
-        Bridge PCI->PCI (P#3145776 busid=0003:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0003:[01-02] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode") "Intel Corporation Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode"
-          PCI 1000:0072 (P#3149824 busid=0003:01:00.0 class=0107(SAS) PCIVendor="LSI Logic / Symbios Logic" PCIDevice="SAS2008 PCI-Express Fusion-MPT SAS-2 [Falcon]") "LSI Logic / Symbios Logic SAS2008 PCI-Express Fusion-MPT SAS-2 [Falcon]"
+        Bridge PCI->PCI (P#3145776 busid=0003:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0003:[01-02] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode")
+          PCI 1000:0072 (P#3149824 busid=0003:01:00.0 class=0107(SAS) PCIVendor="LSI Logic / Symbios Logic" PCIDevice="SAS2008 PCI-Express Fusion-MPT SAS-2 [Falcon]")
     NUMANode L#6 (P#6 local=32489472KB total=32489472KB)
       Package L#6 (P#7 CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=45 CPUModel="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz" CPUStepping=7)
         L3Cache L#6 (size=20480KB linesize=64 ways=20)
@@ -369,8 +369,8 @@ Machine (P#0 total=259890340KB DMIProductName=UV2000 DMIProductVersion=SGI DMIBo
               Core L#63 (P#7)
                 PU L#63 (P#63) (forbidden)
     Bridge Host->PCI L#12 (P#4 buses=0004:[00-01])
-      Bridge PCI->PCI (P#4194352 busid=0004:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0004:[01-01] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode") "Intel Corporation Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode"
-        PCI 10de:11ba (P#4198400 busid=0004:01:00.0 class=0300(VGA) PCIVendor="nVidia Corporation") "nVidia Corporation"
+      Bridge PCI->PCI (P#4194352 busid=0004:00:03.0 id=8086:3c08 class=0604(PCI_B) buses=0004:[01-01] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode")
+        PCI 10de:11ba (P#4198400 busid=0004:01:00.0 class=0300(VGA) PCIVendor="nVidia Corporation")
 depth 0:	1 Machine (type #1)
  depth 1:	3 Group0 (type #7)
   depth 2:	8 NUMANode (type #2)

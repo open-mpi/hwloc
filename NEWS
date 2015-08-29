@@ -62,6 +62,8 @@ Version 2.0
   + Add a SectorSize attribute to block OS devices on Linux.
   + Misc MemoryModule objects are only added when full I/O discovery is enabled
     (WHOLE_IO topology flag).
+  + Do not set PCI devices and bridges name automatically. Vendor and device
+    names are already in info attributes.
   + Exporting to synthetic now ignores I/O and Misc objects.
   + XML and Synthetic export functions have moved to hwloc/export.h,
     automatically included from hwloc.h.

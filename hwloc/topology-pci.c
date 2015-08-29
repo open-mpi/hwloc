@@ -119,14 +119,13 @@ hwloc_look_pci(struct hwloc_backend *backend)
        pcidev;
        pcidev = pci_device_next(iter))
   {
-    const char *vendorname, *devicename, *fullname;
+    const char *vendorname, *devicename;
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     struct hwloc_obj *obj;
     unsigned os_index;
     unsigned domain;
     unsigned device_class;
     unsigned short tmp16;
-    char name[128];
     unsigned offset;
 
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
@@ -235,18 +234,11 @@ hwloc_look_pci(struct hwloc_backend *backend)
     if (devicename && *devicename)
       hwloc_obj_add_info(obj, "PCIDevice", devicename);
 
-    /* generate or get the fullname */
-    snprintf(name, sizeof(name), "%s%s%s",
-	     vendorname ? vendorname : "",
-	     vendorname && devicename ? " " : "",
-	     devicename ? devicename : "");
-    fullname = name;
-    if (*name)
-      obj->name = strdup(name);
-    hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s\n",
+    hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s %s\n",
 		domain, pcidev->bus, pcidev->dev, pcidev->func,
 		device_class, pcidev->vendor_id, pcidev->device_id,
-		fullname && *fullname ? fullname : "??");
+		vendorname && *vendorname ? vendorname : "??",
+		devicename && *devicename ? devicename : "??");
 
     hwloc_pci_tree_insert_by_busid(&tree, obj);
   }
