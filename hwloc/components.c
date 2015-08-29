@@ -527,11 +527,11 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	char c;
 
 	/* replace linuxpci with linuxio for backward compatibility with pre-v2.0 */
-	if (!strncmp(curenv, "linuxpci", s)) {
+	if (!strncmp(curenv, "linuxpci", 8) && s == 8) {
 	  curenv[5] = 'i';
 	  curenv[6] = 'o';
 	  curenv[7] = *HWLOC_COMPONENT_SEPS;
-	} else if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, "linuxpci", s-1)) {
+	} else if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, "linuxpci", 8) && s == 9) {
 	  curenv[6] = 'i';
 	  curenv[7] = 'o';
 	  curenv[8] = *HWLOC_COMPONENT_SEPS;
