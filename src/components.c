@@ -529,7 +529,7 @@ nextname:
 	char *curenv = env;
 	while (*curenv) {
 	  size_t s = strcspn(curenv, HWLOC_COMPONENT_SEPS);
-	  if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, comp->name, s-1)) {
+	  if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, comp->name, s-1) && strlen(comp->name) == s-1) {
 	    if (hwloc_components_verbose)
 	      fprintf(stderr, "Excluding %s discovery component `%s' because of HWLOC_COMPONENTS environment variable\n",
 	    hwloc_disc_component_type_string(comp->type), comp->name);
