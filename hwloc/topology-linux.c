@@ -5102,7 +5102,10 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
     }
     tmpbackend = tmpbackend->next;
   }
-  assert(data);
+  if (!data) {
+    hwloc_debug("linuxio failed to find linux backend private_data, aborting instantiate()\n");
+    return -1;
+  }
   backend->private_data = data;
   root_fd = data->root_fd;
   hwloc_debug("linuxio backend stole linux backend root_fd %d\n", root_fd);
