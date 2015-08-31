@@ -4597,6 +4597,14 @@ hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
   strcpy(path, pcidevpath);
   pathlen = strlen(path);
 
+  /* look for a direct block device here (such as NVMe, something without controller subdirs in the middle) */
+  res += hwloc_linux_class_readdir(backend, pcidev, path,
+				   HWLOC_OBJ_OSDEV_BLOCK, "block",
+				   hwloc_linux_block_class_fillinfos);
+  if (res)
+    return res;
+  /* otherwise try to find controller subdirectories */
+
   devicedir = hwloc_opendir(pcidevpath, root_fd);
   if (!devicedir)
     return 0;
