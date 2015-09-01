@@ -177,7 +177,6 @@ int
 hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_obj *old_tree)
 {
   struct hwloc_obj **next_hb_p;
-  unsigned current_hostbridge;
 
   if (!old_tree)
     /* found nothing, exit */
@@ -198,10 +197,9 @@ hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_ob
    * We now create one real hostbridge object per upstream bus.
    * It's not actually a PCI device so we have to create it.
    */
-  current_hostbridge = 0;
   while (old_tree) {
     /* start a new host bridge */
-    struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, current_hostbridge++);
+    struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, -1);
     struct hwloc_obj **dstnextp = &hostbridge->io_first_child;
     struct hwloc_obj **srcnextp = &old_tree;
     struct hwloc_obj *child = *srcnextp;

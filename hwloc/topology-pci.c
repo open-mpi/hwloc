@@ -122,7 +122,6 @@ hwloc_look_pci(struct hwloc_backend *backend)
     const char *vendorname, *devicename;
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     struct hwloc_obj *obj;
-    unsigned os_index;
     unsigned domain;
     unsigned device_class;
     unsigned short tmp16;
@@ -191,10 +190,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
     }
 
-    /* might be useful for debugging (note that domain might be truncated) */
-    os_index = (domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
-
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, -1);
     obj->attr->pcidev.domain = domain;
     obj->attr->pcidev.bus = pcidev->bus;
     obj->attr->pcidev.dev = pcidev->dev;

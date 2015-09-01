@@ -4897,7 +4897,6 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     unsigned domain, bus, dev, func;
     hwloc_obj_t obj;
     struct hwloc_pcidev_attr_s *attr;
-    unsigned os_index;
     char path[64];
     char value[16];
     size_t read;
@@ -4906,8 +4905,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     if (sscanf(dirent->d_name, "%04x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
       continue;
 
-    os_index = (domain << 20) + (bus << 12) + (dev << 4) + func;
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, -1);
     if (!obj)
       break;
     attr = &obj->attr->pcidev;
