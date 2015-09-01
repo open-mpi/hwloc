@@ -809,6 +809,9 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   os_index = curlevel->next_os_index++;
   if (curlevel->index_array)
     os_index = curlevel->index_array[os_index];
+  else if (hwloc_obj_type_is_cache(type) || type == HWLOC_OBJ_GROUP)
+    /* don't enforce useless os_indexes for Caches and Groups */
+    os_index = -1;
   obj = hwloc_alloc_setup_object(type, os_index);
   obj->cpuset = hwloc_bitmap_alloc();
 

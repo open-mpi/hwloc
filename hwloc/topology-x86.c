@@ -872,7 +872,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	      }
 	    }
 	    otype = hwloc_cache_type_by_depth_type(level, infos[i].cache[l].type);
-	    cache = hwloc_alloc_setup_object(otype, cacheid);
+	    cache = hwloc_alloc_setup_object(otype, -1);
 	    cache->attr->cache.depth = level;
 	    cache->attr->cache.size = infos[i].cache[l].size;
 	    cache->attr->cache.linesize = infos[i].cache[l].linesize;

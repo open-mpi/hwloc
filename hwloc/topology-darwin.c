@@ -190,11 +190,13 @@ hwloc_look_darwin(struct hwloc_backend *backend)
       for (i = 0; i < n; i++) {
         /* cacheconfig tells us how many cpus share it, let's iterate on each cache */
         for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
-          obj = hwloc_alloc_setup_object(i?HWLOC_OBJ_L1CACHE+i-1:HWLOC_OBJ_NUMANODE, j);
-          if (!i) {
+	  if (!i) {
+	    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, j);
             obj->nodeset = hwloc_bitmap_alloc();
             hwloc_bitmap_set(obj->nodeset, j);
-          }
+          } else {
+	    obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1CACHE+i-1, -1);
+	  }
           obj->cpuset = hwloc_bitmap_alloc();
           for (cpu = j*cacheconfig[i];
                cpu < ((j+1)*cacheconfig[i]);
@@ -204,7 +206,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
           if (i == 1 && l1icachesize) {
             /* FIXME assuming that L1i and L1d are shared the same way. Darwin
              * does not yet provide a way to know.  */
-            hwloc_obj_t l1i = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, j);
+            hwloc_obj_t l1i = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
             l1i->cpuset = hwloc_bitmap_dup(obj->cpuset);
             hwloc_debug_1arg_bitmap("L1icache %u has cpuset %s\n",
                 j, l1i->cpuset);

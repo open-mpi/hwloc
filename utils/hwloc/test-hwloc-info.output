@@ -250,7 +250,6 @@ L2Cache L#3 = parent of PU L#12
  type = L2Cache
  full type = L2Cache
  logical index = 3
- os index = 3
  depth = 3
  sibling rank = 1
  children = 2
