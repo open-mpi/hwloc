@@ -801,7 +801,11 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
  * @{
  */
 
-/** \brief Return a stringified topology object type */
+/** \brief Return a stringified topology object type.
+ *
+ * The returned type is a constant that does not depend on any other object attribute
+ * contrary to hwloc_obj_type_snprintf().
+ */
 HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwloc_attribute_const;
 
 /** \brief Return an object type and attributes from a type string.
@@ -836,16 +840,21 @@ HWLOC_DECLSPEC int hwloc_obj_type_sscanf(const char *string,
 
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *
- * It differs from hwloc_obj_type_string() because it prints type attributes such
- * as cache depth and type.
+ * It differs from hwloc_obj_type_string() because it includes attributes
+ * such as the group depth or the bridge type.
+ *
+ * If \p verbose is 1, longer type names are used, e.g. L1Cache instead of L1.
+ *
+ * The output string may be parsed back by hwloc_obj_type_sscanf().
  *
  * If \p size is 0, \p string may safely be \c NULL.
  *
  * \return the number of character that were actually written if not truncating,
  * or that would have been written (not including the ending \\0).
  */
-HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj,
-				   int verbose);
+HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size,
+					   hwloc_obj_t obj,
+					   int verbose);
 
 /** \brief Stringify the attributes of a given topology object into a human-readable form.
  *

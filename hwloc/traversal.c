@@ -339,7 +339,6 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 			  hwloc_obj_cache_type_letter(obj->attr->cache.type),
 			  verbose ? "Cache" : "");
   case HWLOC_OBJ_GROUP:
-	  /* TODO: more pretty presentation? */
     if (obj->attr->group.depth != (unsigned) -1)
       return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->group.depth);
     else
