@@ -510,12 +510,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     else
       return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_BRIDGE:
-    if (verbose)
-      return snprintf(string, size, "Bridge %s->%s",
-		      obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCI" : "Host",
-		      "PCI");
-    else
-      return snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
+    return snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
   case HWLOC_OBJ_PCI_DEVICE:
     return snprintf(string, size, "PCI %04x:%04x",
 		    obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);

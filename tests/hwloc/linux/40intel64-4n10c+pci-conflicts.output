@@ -211,8 +211,8 @@ Machine (P#0 total=536857436KB Backend=Linux LinuxCgroup=/torque/513099.master.c
             L1iCache L#39 (size=32KB linesize=64 ways=4)
               Core L#39 (P#25)
                 PU L#39 (P#39)
-  Bridge Host->PCI L#0 (buses=0000:[00-01])
-    Bridge PCI->PCI (busid=0000:00:03.0 id=8086:340a class=0604(PCI_B) buses=0000:[01-01])
+  HostBridge L#0 (buses=0000:[00-01])
+    PCIBridge (busid=0000:00:03.0 id=8086:340a class=0604(PCI_B) buses=0000:[01-01])
       PCI 1000:0079 (busid=0000:01:00.0 class=0104(RAID))
         Block L#0 (Size=1756495872 SectorSize=512 LinuxDeviceID=8:0) "sda"
 depth 0:	1 Machine (type #1)
