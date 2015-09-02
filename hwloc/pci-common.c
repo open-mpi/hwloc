@@ -553,3 +553,163 @@ hwloc_pci_prepare_bridge(hwloc_obj_t obj,
 
   return 0;
 }
+
+const char *
+hwloc_pci_class_string(unsigned short class_id)
+{
+  /* See https://pci-ids.ucw.cz/read/PD/ */
+  switch ((class_id & 0xff00) >> 8) {
+    case 0x00:
+      switch (class_id) {
+	case 0x0001: return "VGA";
+      }
+      break;
+    case 0x01:
+      switch (class_id) {
+	case 0x0100: return "SCSI";
+	case 0x0101: return "IDE";
+	case 0x0102: return "Floppy";
+	case 0x0103: return "IPI";
+	case 0x0104: return "RAID";
+	case 0x0105: return "ATA";
+	case 0x0106: return "SATA";
+	case 0x0107: return "SAS";
+	case 0x0108: return "NVMExp";
+      }
+      return "Storage";
+    case 0x02:
+      switch (class_id) {
+	case 0x0200: return "Ethernet";
+	case 0x0201: return "TokenRing";
+	case 0x0202: return "FDDI";
+	case 0x0203: return "ATM";
+	case 0x0204: return "ISDN";
+	case 0x0205: return "WorldFip";
+	case 0x0206: return "PICMG";
+	case 0x0207: return "InfiniBand";
+      }
+      return "Network";
+    case 0x03:
+      switch (class_id) {
+	case 0x0300: return "VGA";
+	case 0x0301: return "XGA";
+	case 0x0302: return "3D";
+      }
+      return "Display";
+    case 0x04:
+      switch (class_id) {
+	case 0x0400: return "MultimediaVideo";
+	case 0x0401: return "MultimediaAudio";
+	case 0x0402: return "Telephony";
+	case 0x0403: return "AudioDevice";
+      }
+      return "Multimedia";
+    case 0x05:
+      switch (class_id) {
+	case 0x0500: return "RAM";
+	case 0x0501: return "Flash";
+      }
+      return "Memory";
+    case 0x06:
+      switch (class_id) {
+	case 0x0600: return "HostBridge";
+	case 0x0601: return "ISABridge";
+	case 0x0602: return "EISABridge";
+	case 0x0603: return "MicroChannelBridge";
+	case 0x0604: return "PCIBridge";
+	case 0x0605: return "PCMCIABridge";
+	case 0x0606: return "NubusBridge";
+	case 0x0607: return "CardBusBridge";
+	case 0x0608: return "RACEwayBridge";
+	case 0x0609: return "SemiTransparentPCIBridge";
+	case 0x060a: return "InfiniBandPCIHostBridge";
+      }
+      return "Bridge";
+    case 0x07:
+      switch (class_id) {
+	case 0x0700: return "Serial";
+	case 0x0701: return "Parallel";
+	case 0x0702: return "MultiportSerial";
+	case 0x0703: return "Model";
+	case 0x0704: return "GPIB";
+	case 0x0705: return "SmartCard";
+      }
+      return "Communication";
+    case 0x08:
+      switch (class_id) {
+	case 0x0800: return "PIC";
+	case 0x0801: return "DMA";
+	case 0x0802: return "Timer";
+	case 0x0803: return "RTC";
+	case 0x0804: return "PCIHotPlug";
+	case 0x0805: return "SDHost";
+	case 0x0806: return "IOMMU";
+      }
+      return "SystemPeripheral";
+    case 0x09:
+      switch (class_id) {
+	case 0x0900: return "Keyboard";
+	case 0x0901: return "DigitizerPen";
+	case 0x0902: return "Mouse";
+	case 0x0903: return "Scanern";
+	case 0x0904: return "Gameport";
+      }
+      return "Input";
+    case 0x0a:
+      return "DockingStation";
+    case 0x0b:
+      switch (class_id) {
+	case 0x0b00: return "386";
+	case 0x0b01: return "486";
+	case 0x0b02: return "Pentium";
+	case 0x0b10: return "Alpha";
+	case 0x0b20: return "PowerPC";
+	case 0x0b30: return "MIPS";
+	case 0x0b40: return "Co-Processor";
+      }
+      return "Processor";
+    case 0x0c:
+      switch (class_id) {
+	case 0x0c00: return "FireWire";
+	case 0x0c01: return "ACCESS";
+	case 0x0c02: return "SSA";
+	case 0x0c03: return "USB";
+	case 0x0c04: return "FiberChannel";
+	case 0x0c05: return "SMBus";
+	case 0x0c06: return "InfiniBand";
+	case 0x0c07: return "IPMI-SMIC";
+	case 0x0c08: return "SERCOS";
+	case 0x0c09: return "CANBUS";
+      }
+      return "SerialBus";
+    case 0x0d:
+      switch (class_id) {
+	case 0x0d00: return "IRDA";
+	case 0x0d01: return "ConsumerIR";
+	case 0x0d10: return "RF";
+	case 0x0d11: return "Bluetooth";
+	case 0x0d12: return "Broadband";
+	case 0x0d20: return "802.1a";
+	case 0x0d21: return "802.1b";
+      }
+      return "Wireless";
+    case 0x0e:
+      switch (class_id) {
+	case 0x0e00: return "I2O";
+      }
+      return "Intelligent";
+    case 0x0f:
+      return "Satellite";
+    case 0x10:
+      return "Encryption";
+    case 0x11:
+      return "SignalProcessing";
+    case 0x12:
+      return "ProcessingAccelerator";
+    case 0x13:
+      return "Instrumentation";
+    case 0x40:
+      return "Co-Processor";
+  }
+  return "Other";
+}

@@ -602,6 +602,7 @@ extern "C" {
 
 #define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
 #define hwloc_pci_belowroot_apply_locality HWLOC_NAME(pci_belowroot_apply_locality)
+#define hwloc_pci_class_string HWLOC_NAME(pci_class_string)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)
 #define hwloc__find_info_slot HWLOC_NAME(_find_info_slot)
