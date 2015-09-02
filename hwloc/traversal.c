@@ -512,8 +512,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_BRIDGE:
     return snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
   case HWLOC_OBJ_PCI_DEVICE:
-    return snprintf(string, size, "PCI %04x:%04x",
-		    obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
+    return hwloc_snprintf(string, size, "PCI");
   case HWLOC_OBJ_OS_DEVICE:
     switch (obj->attr->osdev.type) {
     case HWLOC_OBJ_OSDEV_BLOCK: return hwloc_snprintf(string, size, "Block");
@@ -644,8 +643,9 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
       if (!hwloc_obj_get_info_by_name(obj, "lstopoCollapse"))
 	snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
 		 obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-      res = snprintf(string, size, "busid=%s%sclass=%04x(%s)%s",
+      res = snprintf(string, size, "busid=%s%sid=%04x:%04x%sclass=%04x(%s)%s",
 		     busid, separator,
+		     obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id, separator,
 		     obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
     }
     break;
