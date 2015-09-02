@@ -526,7 +526,8 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     case HWLOC_OBJ_OSDEV_GPU: return hwloc_snprintf(string, size, "GPU");
     case HWLOC_OBJ_OSDEV_COPROC: return hwloc_snprintf(string, size, verbose ? "Co-Processor" : "CoProc");
     default:
-      *string = '\0';
+      if (size > 0)
+	*string = '\0';
       return 0;
     }
     break;
