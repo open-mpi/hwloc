@@ -222,7 +222,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "L3iCache")) return HWLOC_OBJ_L3ICACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
   if (!strcasecmp(string, "PU")) return HWLOC_OBJ_PU;
-  if (!strcasecmp(string, "Bridge")) return HWLOC_OBJ_BRIDGE;
+  if (!strcasecmp(string, "Bridge") || !strcasecmp(string, "HostBridge") || !strcasecmp(string, "PCIBridge")) return HWLOC_OBJ_BRIDGE;
   if (!strcasecmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
   if (!strcasecmp(string, "OSDev")) return HWLOC_OBJ_OS_DEVICE;
   return HWLOC_OBJ_TYPE_NONE;
@@ -254,7 +254,9 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
     type = HWLOC_OBJ_PU;
   } else if (!hwloc_strncasecmp(string, "misc", 2)) {
     type = HWLOC_OBJ_MISC;
-  } else if (!hwloc_strncasecmp(string, "bridge", 2)) {
+  } else if (!hwloc_strncasecmp(string, "bridge", 2)
+	     || !hwloc_strncasecmp(string, "hostbridge", 6)
+	     || !hwloc_strncasecmp(string, "pcibridge", 5)) {
     type = HWLOC_OBJ_BRIDGE;
   } else if (!hwloc_strncasecmp(string, "pci", 2)) {
     type = HWLOC_OBJ_PCI_DEVICE;
