@@ -103,7 +103,7 @@ fig_text(void *loutput_, int r, int g, int b, int size, unsigned depth, unsigned
 {
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
-  unsigned len = strlen(text);
+  int len = (int)strlen(text);
   int color = rgb_to_fig(r, g, b);
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;

@@ -469,7 +469,7 @@ hwloc_pci_find_linkspeed(const unsigned char *config,
    * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
    * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
    */
-  lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
+  lanespeed = speed <= 2 ? 2.5f * speed * 0.8f : 8.0f * 128/130; /* Gbit/s per lane */
   *linkspeed = lanespeed * width / 8; /* GB/s */
   return 0;
 }

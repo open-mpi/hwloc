@@ -241,7 +241,7 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
       return -1;
     ret += res;
     if (res >= size)
-      res = size>0 ? size - 1 : 0;
+      res = size>0 ? (int)size - 1 : 0;
     tmp += res;
     size -= res;
   }
@@ -291,7 +291,7 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
 #endif
 
     if (res >= size)
-      res = size>0 ? size - 1 : 0;
+      res = size>0 ? (int)size - 1 : 0;
 
     tmp += res;
     size -= res;
@@ -422,7 +422,7 @@ int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const
     ret += res;
 
     if (res >= size)
-      res = size>0 ? size - 1 : 0;
+      res = size>0 ? (int)size - 1 : 0;
 
     tmp += res;
     size -= res;
@@ -526,7 +526,7 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
       return -1;
     ret += res;
     if (res >= size)
-      res = size>0 ? size - 1 : 0;
+      res = size>0 ? (int)size - 1 : 0;
     tmp += res;
     size -= res;
   }
@@ -562,7 +562,7 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
       return -1;
     ret += res;
     if (res >= size)
-      res = size>0 ? size - 1 : 0;
+      res = size>0 ? (int)size - 1 : 0;
     tmp += res;
     size -= res;
   }
@@ -620,7 +620,7 @@ int hwloc_bitmap_taskset_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc
   }
   /* we know there are other characters now */
 
-  chars = strlen(current);
+  chars = (int)strlen(current);
   count = (chars * 4 + HWLOC_BITS_PER_LONG - 1) / HWLOC_BITS_PER_LONG;
 
   hwloc_bitmap_reset_by_ulongs(set, count);

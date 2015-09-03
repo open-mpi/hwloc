@@ -263,7 +263,7 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     }
 
   } else if (!hwloc_strncasecmp(string, "group", 2)) {
-    int length;
+    size_t length;
     type = HWLOC_OBJ_GROUP;
     length = strcspn(string, "0123456789");
     if (length <= 5 && !hwloc_strncasecmp(string, "group", length)
@@ -555,7 +555,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   if (ret > 0)
     prefix = separator;
   if (res >= tmplen)
-    res = tmplen>0 ? tmplen - 1 : 0;
+    res = tmplen>0 ? (int)tmplen - 1 : 0;
   tmp += res;
   tmplen -= res;
 
@@ -629,7 +629,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   if (ret > 0)
     prefix = separator;
   if (res >= tmplen)
-    res = tmplen>0 ? tmplen - 1 : 0;
+    res = tmplen>0 ? (int)tmplen - 1 : 0;
   tmp += res;
   tmplen -= res;
 
@@ -651,7 +651,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
         return -1;
       ret += res;
       if (res >= tmplen)
-        res = tmplen>0 ? tmplen - 1 : 0;
+        res = tmplen>0 ? (int)tmplen - 1 : 0;
       tmp += res;
       tmplen -= res;
       if (ret > 0)

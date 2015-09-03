@@ -458,7 +458,7 @@ hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, c
   page_size = SystemInfo.dwPageSize;
 
   start = (((uintptr_t) addr) / page_size) * page_size;
-  nb = (((uintptr_t) addr + len - start) + page_size - 1) / page_size;
+  nb = (unsigned)((((uintptr_t) addr + len - start) + page_size - 1) / page_size);
 
   if (!nb)
     nb = 1;

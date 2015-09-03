@@ -465,7 +465,7 @@ int main(int argc, char *argv[])
       char *current, *tmpline;
 
       /* stop if line is empty */
-      if (!fgets(line, len, stdin))
+      if (!fgets(line, (int)len, stdin))
 	break;
 
       /* keep reading until we get EOL */
@@ -473,7 +473,7 @@ int main(int argc, char *argv[])
       while (!strchr(tmpline, '\n')) {
 	line = realloc(line, len*2);
 	tmpline = line + len-1;
-	if (!fgets(tmpline, len+1, stdin))
+	if (!fgets(tmpline, (int)(len+1), stdin))
 	  break;
 	len *= 2;
       }

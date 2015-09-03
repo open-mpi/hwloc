@@ -178,7 +178,7 @@ hwloc_encode_to_base64(const char *src, size_t srclength, char *target, size_t t
 	if (datalength >= targsize)
 		return (-1);
 	target[datalength] = '\0';	/* Returned value doesn't count \0. */
-	return (datalength);
+	return (int)(datalength);
 }
 
 /* skips all whitespace anywhere.
@@ -213,7 +213,7 @@ hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 			if (target) {
 				if (tarindex >= targsize)
 					return (-1);
-				target[tarindex] = (pos - Base64) << 2;
+				target[tarindex] = (char)(pos - Base64) << 2;
 			}
 			state = 1;
 			break;

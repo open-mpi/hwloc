@@ -60,7 +60,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
   unsigned long length = curlevel->index_string_length;
   unsigned *array = NULL;
   struct hwloc_synthetic_intlv_loop_s * loops = NULL;
-  unsigned long i;
+  size_t i;
 
   if (!attr)
     return;
@@ -198,7 +198,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	      && cachetypeattr != (hwloc_obj_cache_type_t) -1
 	      && cachetypeattr != data->level[i].cachetype)
 	    continue;
-	  loops[cur_loop].level_depth = i;
+	  loops[cur_loop].level_depth = (unsigned)i;
 	  break;
 	}
 	if (i == curleveldepth) {
@@ -326,7 +326,7 @@ hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
   const char *next_pos;
   hwloc_uint64_t memorysize = 0;
   const char *index_string = NULL;
-  unsigned long index_string_length = 0;
+  size_t index_string_length = 0;
 
   next_pos = (const char *) strchr(attrs, ')');
   if (!next_pos) {
@@ -368,7 +368,7 @@ hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
 
   curlevel->memorysize = memorysize;
   curlevel->index_string = index_string;
-  curlevel->index_string_length = index_string_length;
+  curlevel->index_string_length = (unsigned long)index_string_length;
   *next_posp = next_pos+1;
   return 0;
 }
@@ -927,7 +927,7 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
     }
     ret += res;
     if (res >= tmplen)
-      res = tmplen>0 ? tmplen - 1 : 0;
+      res = tmplen>0 ? (int)tmplen - 1 : 0;
     tmp += res;
     tmplen -= res;
   }
@@ -950,7 +950,7 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
       return -1;
     ret += res;
     if (res >= tmplen)
-      res = tmplen>0 ? tmplen - 1 : 0;
+      res = tmplen>0 ? (int)tmplen - 1 : 0;
     tmp += res;
     tmplen -= res;
     cur = cur->next_cousin;
@@ -998,7 +998,7 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
       return -1;
     ret += res;
     if (res >= tmplen)
-      res = tmplen>0 ? tmplen - 1 : 0;
+      res = tmplen>0 ? (int)tmplen - 1 : 0;
     tmp += res;
     tmplen -= res;
 
@@ -1008,7 +1008,7 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
 	return -1;
       ret += res;
       if (res >= tmplen)
-	res = tmplen>0 ? tmplen - 1 : 0;
+	res = tmplen>0 ? (int)tmplen - 1 : 0;
       tmp += res;
       tmplen -= res;
 
@@ -1017,7 +1017,7 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
 	return -1;
       ret += res;
       if (res >= tmplen)
-	res = tmplen>0 ? tmplen - 1 : 0;
+	res = tmplen>0 ? (int)tmplen - 1 : 0;
       tmp += res;
       tmplen -= res;
     }
@@ -1072,7 +1072,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     if (ret > 0)
       prefix = separator;
     if (res >= tmplen)
-      res = tmplen>0 ? tmplen - 1 : 0;
+      res = tmplen>0 ? (int)tmplen - 1 : 0;
     tmp += res;
     tmplen -= res;
   }
@@ -1092,7 +1092,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
       return -1;
     ret += res;
     if (res >= tmplen)
-      res = tmplen>0 ? tmplen - 1 : 0;
+      res = tmplen>0 ? (int)tmplen - 1 : 0;
     tmp += res;
     tmplen -= res;
 
@@ -1103,7 +1103,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 	return -1;
       ret += res;
       if (res >= tmplen)
-	res = tmplen>0 ? tmplen - 1 : 0;
+	res = tmplen>0 ? (int)tmplen - 1 : 0;
       tmp += res;
       tmplen -= res;
     }

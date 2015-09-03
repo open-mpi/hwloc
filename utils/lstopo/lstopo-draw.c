@@ -771,8 +771,8 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
     for(i=0; i<nmorelines; i++) {
-      int nn = strlen(morelines[i]);
-      int ntextwidth = get_textwidth(output, methods, morelines[i], nn, fontsize, gridsize);
+      unsigned nn = (unsigned)strlen(morelines[i]);
+      unsigned ntextwidth = get_textwidth(output, methods, morelines[i], nn, fontsize, gridsize);
       if (ntextwidth > textwidth)
 	textwidth = ntextwidth;
     }
