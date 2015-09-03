@@ -643,7 +643,7 @@ lstopo_set_object_color(struct draw_methods *methods,
 }
 
 static void
-pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+pci_device_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned textwidth = gridsize;
   unsigned textheight = (fontsize ? fontsize + gridsize : 0);
@@ -662,7 +662,7 @@ pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_
   if (fontsize) {
     char busid[32];
     lstopo_obj_snprintf(_text, sizeof(_text), level, logical);
-    lstopo_busid_snprintf(busid, sizeof(busid), level, collapse);
+    lstopo_busid_snprintf(busid, sizeof(busid), level, collapse, topology->pci_nonzero_domains);
     if (collapse > 1) {
       n = snprintf(text, sizeof(text), "%u x { %s %s }", collapse, _text, busid);
     } else {

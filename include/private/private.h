@@ -74,6 +74,7 @@ struct hwloc_topology {
   struct hwloc_obj **misc_level;
   struct hwloc_obj *first_misc, *last_misc;
 
+  int pci_nonzero_domains;
   int need_pci_belowroot_apply_locality;
   struct hwloc_backend *get_pci_busid_cpuset_backend;
 

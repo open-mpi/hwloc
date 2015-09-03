@@ -239,6 +239,9 @@ hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_ob
     hwloc_debug("New PCI hostbridge %04x:[%02x-%02x]\n",
 		current_domain, current_bus, current_subordinate);
 
+    if (current_domain)
+      topology->pci_nonzero_domains = 1;
+
     *next_hb_p = hostbridge;
     next_hb_p = &hostbridge->next_sibling;
     topology->modified = 1; /* needed in case somebody reconnects levels before the core calls hwloc_pci_belowroot_apply_locality()

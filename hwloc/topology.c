@@ -2704,6 +2704,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->first_osdev = topology->last_osdev = NULL;
   topology->misc_level = NULL;
   topology->first_misc = topology->last_misc = NULL;
+  topology->pci_nonzero_domains = 0;
   topology->need_pci_belowroot_apply_locality = 0;
 
   /* Create the actual machine object, but don't touch its attributes yet
