@@ -20,7 +20,7 @@ typedef unsigned char BYTE, UCHAR;
 typedef unsigned short WORD, USHORT;
 typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD, *PDWORD_PTR;
 typedef const char *LPCSTR;
-typedef int (*FARPROC)();
+typedef int (*FARPROC)(void);
 typedef void *PVOID,*LPVOID;
 typedef ULONG_PTR SIZE_T;
 
