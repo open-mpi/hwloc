@@ -17,6 +17,11 @@
 
 #include "misc.h"
 
+#ifdef HWLOC_WIN_SYS
+#include <process.h>
+#define execvp(a,b) (int)_execvp((a), (const char * const *)(b))
+#endif
+
 void usage(const char *name, FILE *where)
 {
   fprintf(where, "Usage: %s [options] <location> -- command ...\n", name);
