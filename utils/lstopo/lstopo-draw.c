@@ -1326,6 +1326,8 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_MISC: return misc_draw;
     case HWLOC_OBJ_TYPE_MAX: assert(0);
   }
+  /* for dumb compilers */
+  return misc_draw;
 }
 
 void
