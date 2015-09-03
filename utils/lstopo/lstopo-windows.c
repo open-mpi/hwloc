@@ -352,7 +352,7 @@ windows_text(void *output, int r, int g, int b, int size __hwloc_attribute_unuse
     return;
 
   SetTextColor(ps->hdc, RGB(r, g, b));
-  TextOut(ps->hdc, x - x_delta, y - y_delta, text, strlen(text));
+  TextOut(ps->hdc, x - x_delta, y - y_delta, text, (int)strlen(text));
 }
 
 static void

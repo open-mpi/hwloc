@@ -48,7 +48,7 @@ static int hwloc_diff_read(hwloc_topology_t topo, const char *inputdiff,
 		readlen = buflen/2;
 	}
 
-	err = hwloc_topology_diff_load_xmlbuffer(topo, buffer, offset+1, firstdiffp, refnamep);
+	err = hwloc_topology_diff_load_xmlbuffer(topo, buffer, (int)(offset+1), firstdiffp, refnamep);
 	free(buffer);
 	return err;
 

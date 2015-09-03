@@ -80,7 +80,7 @@ ascii_init(void *_output)
 {
   struct lstopo_ascii_output *disp = _output;
   unsigned width, height;
-  int j, i;
+  unsigned j, i;
 
   /* compute the required size */
   disp->drawing = 0;
@@ -344,13 +344,13 @@ ascii_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_un
   y2 = y1 + height - 1;
 
   if (!disp->drawing) {
-    if (x1 >= disp->width)
+    if ((int)x1 >= disp->width)
       disp->width = x1+1;
-    if (x2 >= disp->width)
+    if ((int)x2 >= disp->width)
       disp->width = x2+1;
-    if (y1 >= disp->height)
+    if ((int)y1 >= disp->height)
       disp->height = y1+1;
-    if (y2 >= disp->height)
+    if ((int)y2 >= disp->height)
       disp->height = y2+1;
     return;
   }
@@ -403,9 +403,9 @@ ascii_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute
   }
 
   if (!disp->drawing) {
-    if (x2 >= disp->width)
+    if ((int)x2 >= disp->width)
       disp->width = x2+1;
-    if (y2 >= disp->height)
+    if ((int)y2 >= disp->height)
       disp->height = y2+1;
     return;
   }

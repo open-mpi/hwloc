@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -48,7 +48,7 @@ static int
 hwloc__nolibxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
 {
   hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
-  int namelen;
+  size_t namelen;
   size_t len, escaped;
   char *buffer, *value, *end;
 
@@ -116,7 +116,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
   hwloc__nolibxml_import_state_data_t nchildstate = (void*) childstate->data;
   char *buffer = nstate->tagbuffer;
   char *end;
-  int namelen;
+  size_t namelen;
 
   childstate->parent = state;
   childstate->global = state->global;
@@ -502,7 +502,7 @@ hwloc__nolibxml_export_update_buffer(hwloc__nolibxml_export_state_data_t ndata, 
   if (res >= 0) {
     ndata->written += res;
     if (res >= (int) ndata->remaining)
-      res = ndata->remaining>0 ? ndata->remaining-1 : 0;
+      res = ndata->remaining>0 ? (int)ndata->remaining-1 : 0;
     ndata->buffer += res;
     ndata->remaining -= res;
   }
@@ -511,7 +511,7 @@ hwloc__nolibxml_export_update_buffer(hwloc__nolibxml_export_state_data_t ndata, 
 static char *
 hwloc__nolibxml_export_escape_string(const char *src)
 {
-  int fulllen, sublen;
+  size_t fulllen, sublen;
   char *escaped, *dst;
 
   fulllen = strlen(src);
@@ -675,15 +675,15 @@ hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buf
 
   bufferlen = 16384; /* random guess for large enough default */
   buffer = malloc(bufferlen);
-  res = hwloc___nolibxml_prepare_export(topology, buffer, bufferlen);
+  res = hwloc___nolibxml_prepare_export(topology, buffer, (int)bufferlen);
 
   if (res > bufferlen) {
     buffer = realloc(buffer, res);
-    hwloc___nolibxml_prepare_export(topology, buffer, res);
+    hwloc___nolibxml_prepare_export(topology, buffer, (int)res);
   }
 
   *bufferp = buffer;
-  *buflenp = res;
+  *buflenp = (int)res;
   return 0;
 }
 
@@ -709,7 +709,7 @@ hwloc_nolibxml_export_file(hwloc_topology_t topology, const char *filename)
     }
   }
 
-  ret = fwrite(buffer, 1, bufferlen-1 /* don't write the ending \0 */, file);
+  ret = (int)fwrite(buffer, 1, bufferlen-1 /* don't write the ending \0 */, file);
   if (ret == bufferlen-1) {
     ret = 0;
   } else {
@@ -767,15 +767,15 @@ hwloc_nolibxml_export_diff_buffer(hwloc_topology_diff_t diff, const char *refnam
 
   bufferlen = 16384; /* random guess for large enough default */
   buffer = malloc(bufferlen);
-  res = hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, bufferlen);
+  res = hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, (int)bufferlen);
 
   if (res > bufferlen) {
     buffer = realloc(buffer, res);
-    hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, res);
+    hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, (int)res);
   }
 
   *bufferp = buffer;
-  *buflenp = res;
+  *buflenp = (int)res;
   return 0;
 }
 
@@ -801,7 +801,7 @@ hwloc_nolibxml_export_diff_file(hwloc_topology_diff_t diff, const char *refname,
     }
   }
 
-  ret = fwrite(buffer, 1, bufferlen-1 /* don't write the ending \0 */, file);
+  ret = (int)fwrite(buffer, 1, bufferlen-1 /* don't write the ending \0 */, file);
   if (ret == bufferlen-1) {
     ret = 0;
   } else {
