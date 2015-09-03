@@ -660,11 +660,13 @@ pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_
   DYNA_CHECK();
 
   if (fontsize) {
+    char busid[32];
+    lstopo_obj_snprintf(_text, sizeof(_text), level, logical);
+    lstopo_busid_snprintf(busid, sizeof(busid), level, collapse);
     if (collapse > 1) {
-      n = lstopo_obj_snprintf(_text, sizeof(_text), level, logical);
-      n = snprintf(text, sizeof(text), "%u x { %s }", collapse, _text);
+      n = snprintf(text, sizeof(text), "%u x { %s %s }", collapse, _text, busid);
     } else {
-      n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+      n = snprintf(text, sizeof(text), "%s %s", _text, busid);
     }
     textwidth = get_textwidth(output, methods, text, n, fontsize, gridsize);
   }
