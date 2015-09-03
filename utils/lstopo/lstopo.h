@@ -88,5 +88,39 @@ static __hwloc_inline int lstopo_pu_running(hwloc_topology_t topology, hwloc_obj
   return res;
 }
 
+static __hwloc_inline int lstopo_busid_snprintf(char *text, size_t textlen, hwloc_obj_t firstobj, unsigned collapse)
+{
+  hwloc_obj_t lastobj;
+  unsigned i;
+
+  /* single busid */
+  if (collapse <= 1)
+    return snprintf(text, textlen, "%04x:%02x:%02x.%01x",
+		    firstobj->attr->pcidev.domain,
+		    firstobj->attr->pcidev.bus,
+		    firstobj->attr->pcidev.dev,
+		    firstobj->attr->pcidev.func);
+
+  for(lastobj=firstobj, i=1; i<collapse; i++)
+    lastobj = lastobj->next_cousin;
+
+  /* multiple busid functions for same busid device */
+  if (firstobj->attr->pcidev.dev == lastobj->attr->pcidev.dev)
+    return snprintf(text, textlen, "%04x:%02x:%02x.%01x-%01x",
+		    firstobj->attr->pcidev.domain,
+		    firstobj->attr->pcidev.bus,
+		    firstobj->attr->pcidev.dev,
+		    firstobj->attr->pcidev.func,
+		    lastobj->attr->pcidev.func);
+
+  /* multiple busid devices */
+  return snprintf(text, textlen, "%04x:%02x:%02x.%01x-%02x.%01x",
+		  firstobj->attr->pcidev.domain,
+		  firstobj->attr->pcidev.bus,
+		  firstobj->attr->pcidev.dev,
+		  firstobj->attr->pcidev.func,
+		  lastobj->attr->pcidev.dev,
+		  lastobj->attr->pcidev.func);
+}
 
 #endif /* UTILS_LSTOPO_H */

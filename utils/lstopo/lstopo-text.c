@@ -27,17 +27,23 @@
  */
 
 static void
-output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode, int collapsed)
+output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode, int collapse)
 {
   unsigned idx = logical ? l->logical_index : l->os_index;
   const char *value;
-  char pidxstr[16] = "P#[collapsed]";
-  char lidxstr[16] = "L#[collapsed]";
+  char pidxstr[16];
+  char lidxstr[16];
+  char busidstr[32];
 
-  if (!collapsed || l->type != HWLOC_OBJ_PCI_DEVICE) {
+  if (collapse > 1 && l->type == HWLOC_OBJ_PCI_DEVICE) {
+    strcpy(pidxstr, "P#[collapsed]"); /* shouldn't be used, os_index should be -1 except if importing old XMLs */
+    snprintf(lidxstr, sizeof(lidxstr), "L#%u-%u", l->logical_index, l->logical_index+collapse-1);
+  } else {
     snprintf(pidxstr, sizeof(pidxstr), "P#%u", l->os_index);
     snprintf(lidxstr, sizeof(lidxstr), "L#%u", l->logical_index);
   }
+  if (l->type == HWLOC_OBJ_PCI_DEVICE)
+    lstopo_busid_snprintf(busidstr, sizeof(busidstr), l, collapse);
 
   if (lstopo_show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
@@ -62,9 +68,20 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
     *attr = '\0';
     hwloc_obj_attr_snprintf (attr, len+1, l, " ", verbose_mode-1);
     if (*phys || *attr) {
-      const char *separator = *phys != '\0' && *attr!= '\0' ? " " : "";
-      fprintf(output, " (%s%s%s)",
-	      phys, separator, attr);
+      fprintf(output, " (");
+      if (*phys)
+	fprintf(output, "%s", phys);
+      if (*phys && *attr)
+	fprintf(output, " ");
+      if (*attr) {
+	if (collapse > 1 && l->type == HWLOC_OBJ_PCI_DEVICE) {
+	  assert(!strncmp(attr, "busid=", 6));
+	  assert(!strncmp(attr+18, " id=", 4));
+	  fprintf(output, "busid=%s%s", busidstr, attr+18);
+	} else
+	  fprintf(output, "%s", attr);
+      }
+      fprintf(output, ")");
     }
     free(attr);
     /* display the root total_memory if not verbose (already shown)
@@ -131,7 +148,7 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
 
   if (collapse > 1)
     fprintf(output, "%u x { ", collapse);
-  output_console_obj(topology, l, output, logical, verbose_mode, collapse > 1);
+  output_console_obj(topology, l, output, logical, verbose_mode, collapse);
   if (collapse > 1)
     fprintf(output, " }");
 

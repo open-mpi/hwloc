@@ -637,14 +637,10 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_PCI_DEVICE:
     if (verbose) {
       char linkspeed[64]= "";
-      char busid[16] = "[collapsed]";
       if (obj->attr->pcidev.linkspeed)
         snprintf(linkspeed, sizeof(linkspeed), "%slink=%.2fGB/s", separator, obj->attr->pcidev.linkspeed);
-      if (!hwloc_obj_get_info_by_name(obj, "lstopoCollapse"))
-	snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
-		 obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-      res = snprintf(string, size, "busid=%s%sid=%04x:%04x%sclass=%04x(%s)%s",
-		     busid, separator,
+      res = snprintf(string, size, "busid=%04x:%02x:%02x.%01x%sid=%04x:%04x%sclass=%04x(%s)%s",
+		     obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
 		     obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id, separator,
 		     obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
     }
