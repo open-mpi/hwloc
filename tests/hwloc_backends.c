@@ -16,7 +16,14 @@
 #include <assert.h>
 
 #ifdef HWLOC_WIN_SYS
-#define mkstemp mktemp
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+static inline int mkstemp(char *name)
+{
+  mktemp(name);
+  return open(name, O_RDWR|O_CREAT, S_IRWXU);
+}
 #endif
 
 /* mostly useful with valgrind, to check if backend cleanup properly */
