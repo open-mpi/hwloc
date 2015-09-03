@@ -13,6 +13,15 @@
 
 #include <private/cpuid-x86.h>
 
+#ifdef HWLOC_WIN_SYS
+#include <direct.h>
+#define mkdir(name, mode) _mkdir(name)
+#include <io.h>
+#define access _access
+#define X_OK 00 /* meaningless */
+#define W_OK 02
+#endif
+
 static void dump_one_cpuid(FILE *output, unsigned *regs, unsigned inregmask)
 {
   unsigned i;
@@ -370,11 +379,7 @@ int main(int argc, const char * const argv[])
     path = NULL;
     pathlen = 0;
   } else {
-#ifdef HWLOC_WIN_SYS
-    err = _mkdir(basedir);
-#else
     err = mkdir(basedir, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
-#endif
     if (err < 0) {
       if (access(basedir, X_OK|W_OK) < 0) {
 	fprintf(stderr, "Could not create/open destination directory %s\n", basedir);
