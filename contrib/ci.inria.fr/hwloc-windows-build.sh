@@ -7,11 +7,12 @@
 
 set -e
 
-docheck=1
-dobuild32=1
-dobuild64=1
 dotar=1
 doconf=1
+dobuild32=1
+dobuild64=1
+docheck=1
+doinstall=1
 confopts=
 
 while test $# -gt 0; do
@@ -23,20 +24,23 @@ while test $# -gt 0; do
     dobuild64=0
   else if test "$1" = "--no-tar"; then
     dotar=0
+  else if test "$1" = "--no-install"; then
+    doinstall=0
   else if test "$1" = "--no-conf"; then
     doconf=0
   else if test "$1" = "--debug"; then
     confopts="$confopts --enable-debug"
   else if test "$1" = "--help"; then
-    echo "  --debug"
-    echo "  --no-check"
-    echo "  --no-32"
-    echo "  --no-64"
     echo "  --no-tar"
     echo "  --no-conf"
+    echo "  --debug"
+    echo "  --no-32"
+    echo "  --no-64"
+    echo "  --no-check"
+    echo "  --no-install"
     echo "  --help"
     exit 0
-  fi fi fi fi fi fi fi
+  fi fi fi fi fi fi fi fi
   shift
 done
 
@@ -69,17 +73,25 @@ if test x$dobuild32 = x1; then
   fi
 
   make
-  make install
-  #make install-winball || true # not needed anymore in v1.7+
+
   if test x$docheck = x1; then
     make check
   fi
-  utils/lstopo/lstopo-no-graphics -v
-  winball=$(basename $(head config.log | sed -r -n -e 's/.*--prefix=([^ ]+).*/\1/p'))
-  cd ..
 
-  zip -r ../${winball}.zip ${winball}
-  test -f ${winball}/lib/libhwloc.lib || false
+  if test x$doinstall = x1; then
+    make install
+    #make install-winball || true # not needed anymore in v1.7+
+    winball=$(basename $(head config.log | sed -r -n -e 's/.*--prefix=([^ ]+).*/\1/p'))
+    cd ..
+
+    zip -r ../${winball}.zip ${winball}
+    test -f ${winball}/lib/libhwloc.lib || false
+  else
+    cd ..
+  fi
+
+  build32/utils/lstopo/lstopo-no-graphics -v
+
   if test x$dotar = x1; then
     cd ..
   fi
@@ -100,17 +112,26 @@ if test x$dobuild64 = x1; then
   fi
 
   make
-  make install
-  #make install-winball || true # not needed anymore in v1.7+
+  utils/lstopo/lstopo-no-graphics -v
+
   if test x$docheck = x1; then
     make check
   fi
-  utils/lstopo/lstopo-no-graphics -v
-  winball=$(basename $(head config.log | sed -r -n -e 's/.*--prefix=([^ ]+).*/\1/p'))
-  cd ..
 
-  zip -r ../${winball}.zip ${winball}
-  test -f ${winball}/lib/libhwloc.lib || false
+  if test x$doinstall = x1; then
+    make install
+    #make install-winball || true # not needed anymore in v1.7+
+    winball=$(basename $(head config.log | sed -r -n -e 's/.*--prefix=([^ ]+).*/\1/p'))
+    cd ..
+
+    zip -r ../${winball}.zip ${winball}
+    test -f ${winball}/lib/libhwloc.lib || false
+  else
+    cd ..
+  fi
+
+  build64/utils/lstopo/lstopo-no-graphics -v
+
   if test x$dotar = x1; then
     cd ..
   fi
