@@ -396,4 +396,15 @@ static __hwloc_inline hwloc_obj_type_t hwloc_cache_type_by_depth_type(unsigned d
   }
 }
 
+static __hwloc_inline int hwloc_obj_type_is_special (hwloc_obj_type_t type)
+{
+  /* type contiguity is asserted in topology_check() */
+  return type >= HWLOC_OBJ_MISC && type <= HWLOC_OBJ_OS_DEVICE;
+}
+static __hwloc_inline int hwloc_obj_type_is_io (hwloc_obj_type_t type)
+{
+  /* type contiguity is asserted in topology_check() */
+  return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
+}
+
 #endif /* HWLOC_PRIVATE_MISC_H */

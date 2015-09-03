@@ -341,17 +341,6 @@ void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *val
   hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
 
-static int hwloc_obj_type_is_special (hwloc_obj_type_t type)
-{
-  /* type contiguity is asserted in topology_check() */
-  return type >= HWLOC_OBJ_MISC && type <= HWLOC_OBJ_OS_DEVICE;
-}
-static int hwloc_obj_type_is_io (hwloc_obj_type_t type)
-{
-  /* type contiguity is asserted in topology_check() */
-  return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
-}
-
 /* Traverse children of a parent in a safe way: reread the next pointer as
  * appropriate to prevent crash on child deletion:  */
 #define for_each_child_safe(child, parent, pchild) \
