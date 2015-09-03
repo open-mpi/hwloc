@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
       hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, j);
       unsigned k;
       char roottypestring[32];
-      hwloc_obj_type_snprintf (roottypestring, sizeof(roottypestring), obj, 0);
+      hwloc_obj_type_snprintf (roottypestring, sizeof(roottypestring), obj, 1);
       for(k=0; k<obj->distances_count; k++) {
 	struct hwloc_distances_s *distances = obj->distances[k];
 	if (!distances->latency)
