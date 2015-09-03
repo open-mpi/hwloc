@@ -62,6 +62,9 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
     if (logical && l->os_index != (unsigned) -1 &&
 	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NUMANODE))
       snprintf(phys, sizeof(phys), "%s", pidxstr);
+    if (l->type == HWLOC_OBJ_PCI_DEVICE && verbose_mode <= 1)
+      fprintf(output, " %s (%s)",
+	      busidstr, hwloc_pci_class_string(l->attr->pcidev.class_id));
     /* display attributes */
     len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode-1);
     attr = malloc(len+1);
