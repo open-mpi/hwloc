@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     hwloc_topology_destroy(topology);
     return EXIT_FAILURE;
   }
+  /* FIXME: on windows, hispid should be replaced with OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, hispid); */
   err = hwloc_get_proc_cpubind(topology, hispid, hisset, 0);
   if (err < 0) {
     fprintf(stderr, "failed to get his binding\n");
