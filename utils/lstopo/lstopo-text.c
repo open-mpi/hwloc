@@ -49,9 +49,7 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
     else
       fprintf(output, "%s", type);
     if (l->depth != 0 && idx != (unsigned)-1
-        && l->type != HWLOC_OBJ_MISC
-        && l->type != HWLOC_OBJ_PCI_DEVICE
-        && (l->type != HWLOC_OBJ_BRIDGE || l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
+	&& (verbose_mode >= 2 || !hwloc_obj_type_is_special(l->type)))
       fprintf(output, " %s", logical ? lidxstr : pidxstr);
     if (l->name && (l->type == HWLOC_OBJ_MISC || l->type == HWLOC_OBJ_GROUP))
       fprintf(output, " %s", l->name);

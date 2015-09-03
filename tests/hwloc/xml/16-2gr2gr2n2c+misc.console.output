@@ -22,7 +22,7 @@ Machine (P#0 total=8388608KB Backend=Synthetic SyntheticDescription="group:2 gro
           PU L#6 (P#6)
         Core L#7 (P#7)
           PU L#7 (P#7)
-    Misc MyName
+    Misc L#0 MyName
   Group2(MyBigGroup) L#1 (P#1 total=4194304KB Type=MyBigGroup)
     Group1(MySmallGroup) L#2 (P#2 total=2097152KB Type=MySmallGroup)
       NUMANode L#4 (P#4 local=1048576KB total=1048576KB)
@@ -46,7 +46,7 @@ Machine (P#0 total=8388608KB Backend=Synthetic SyntheticDescription="group:2 gro
           PU L#14 (P#14)
         Core L#15 (P#15)
           PU L#15 (P#15)
-      Misc(ReallyMisc) MyName2 (Type=ReallyMisc)
+      Misc(ReallyMisc) L#1 MyName2 (Type=ReallyMisc)
 depth 0:	1 Machine (type #1)
  depth 1:	2 Group2 (type #14)
   depth 2:	4 Group1 (type #14)
