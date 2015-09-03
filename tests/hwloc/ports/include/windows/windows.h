@@ -25,7 +25,7 @@ typedef unsigned int UINT, UINT_PTR;
 typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD, *PDWORD_PTR;
 typedef long LONG, LONG_PTR;
 typedef const char *LPCSTR;
-typedef int (*FARPROC)();
+typedef int (*FARPROC)(void);
 typedef void *PVOID,*LPVOID;
 typedef ULONG_PTR SIZE_T;
 typedef LONG_PTR LRESULT;

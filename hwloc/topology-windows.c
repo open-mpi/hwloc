@@ -345,9 +345,14 @@ hwloc_win_get_thisproc_membind(hwloc_topology_t topology, hwloc_nodeset_t nodese
   return hwloc_win_get_proc_membind(topology, GetCurrentProcess(), nodeset, policy, flags);
 }
 
-static LPVOID (WINAPI *VirtualAllocExNumaProc)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect, DWORD nndPreferred);
-static BOOL (WINAPI *VirtualFreeExProc)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType);
-static BOOL (WINAPI *QueryWorkingSetExProc)(HANDLE hProcess, PVOID pv, DWORD cb);
+typedef LPVOID (WINAPI *PFN_VIRTUALALLOCEXNUMA)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect, DWORD nndPreferred);
+PFN_VIRTUALALLOCEXNUMA VirtualAllocExNumaProc = NULL;
+
+typedef BOOL (WINAPI *PFN_VIRTUALFREEEX)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType);
+PFN_VIRTUALFREEEX VirtualFreeExProc = NULL;
+
+typedef BOOL (WINAPI *PFN_QUERYWORKINGSETEX)(HANDLE hProcess, PVOID pv, DWORD cb);
+PFN_QUERYWORKINGSETEX QueryWorkingSetExProc = NULL;
 
 static int hwloc_win_get_VirtualAllocExNumaProc(void) {
   if (VirtualAllocExNumaProc == NULL) {
@@ -361,14 +366,14 @@ static int hwloc_win_get_VirtualAllocExNumaProc(void) {
     }
 
     if (!alloc_fun || !free_fun) {
-      VirtualAllocExNumaProc = (FARPROC) -1;
+      VirtualAllocExNumaProc = (PFN_VIRTUALALLOCEXNUMA) -1;
       errno = ENOSYS;
       return -1;
     }
 
-    VirtualAllocExNumaProc = alloc_fun;
-    VirtualFreeExProc = free_fun;
-  } else if ((FARPROC) VirtualAllocExNumaProc == (FARPROC)-1) {
+    VirtualAllocExNumaProc = (PFN_VIRTUALALLOCEXNUMA)alloc_fun;
+    VirtualFreeExProc = (PFN_VIRTUALFREEEX)free_fun;
+  } else if (VirtualAllocExNumaProc == (PFN_VIRTUALALLOCEXNUMA)-1) {
     errno = ENOSYS;
     return -1;
   }
@@ -433,13 +438,13 @@ static int hwloc_win_get_QueryWorkingSetExProc(void) {
     }
 
     if (!fun) {
-      QueryWorkingSetExProc = (FARPROC) -1;
+      QueryWorkingSetExProc = (PFN_QUERYWORKINGSETEX) -1;
       errno = ENOSYS;
       return -1;
     }
 
-    QueryWorkingSetExProc = fun;
-  } else if ((FARPROC) QueryWorkingSetExProc == (FARPROC)-1) {
+    QueryWorkingSetExProc = (PFN_QUERYWORKINGSETEX)fun;
+  } else if (QueryWorkingSetExProc == (PFN_QUERYWORKINGSETEX)-1) {
     errno = ENOSYS;
     return -1;
   }
@@ -501,11 +506,19 @@ hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, c
 static int
 hwloc_look_windows(struct hwloc_backend *backend)
 {
+  typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATION)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
+  PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
+
+  typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATIONEX)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
+  PFN_GETLOGICALPROCESSORINFORMATIONEX GetLogicalProcessorInformationExProc;
+
+  typedef BOOL (WINAPI *PFN_GETNUMAAVAILABLEMEMORYNODE)(UCHAR Node, PULONGLONG AvailableBytes);
+  PFN_GETNUMAAVAILABLEMEMORYNODE GetNumaAvailableMemoryNodeProc;
+
+  typedef BOOL (WINAPI *PFN_GETNUMAAVAILABLEMEMORYNODEEX)(USHORT Node, PULONGLONG AvailableBytes);
+  PFN_GETNUMAAVAILABLEMEMORYNODEEX GetNumaAvailableMemoryNodeExProc;
+
   struct hwloc_topology *topology = backend->topology;
-  BOOL (WINAPI *GetLogicalProcessorInformationProc)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
-  BOOL (WINAPI *GetLogicalProcessorInformationExProc)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
-  BOOL (WINAPI *GetNumaAvailableMemoryNodeProc)(UCHAR Node, PULONGLONG AvailableBytes);
-  BOOL (WINAPI *GetNumaAvailableMemoryNodeExProc)(USHORT Node, PULONGLONG AvailableBytes);
   hwloc_bitmap_t groups_pu_set = NULL;
   SYSTEM_INFO SystemInfo;
   DWORD length;
@@ -521,10 +534,14 @@ hwloc_look_windows(struct hwloc_backend *backend)
 
   kernel32 = LoadLibrary("kernel32.dll");
   if (kernel32) {
-    GetLogicalProcessorInformationProc = GetProcAddress(kernel32, "GetLogicalProcessorInformation");
-    GetNumaAvailableMemoryNodeProc = GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
-    GetNumaAvailableMemoryNodeExProc = GetProcAddress(kernel32, "GetNumaAvailableMemoryNodeEx");
-    GetLogicalProcessorInformationExProc = GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
+    GetLogicalProcessorInformationProc =
+      (PFN_GETLOGICALPROCESSORINFORMATION)GetProcAddress(kernel32, "GetLogicalProcessorInformation");
+    GetNumaAvailableMemoryNodeProc =
+      (PFN_GETNUMAAVAILABLEMEMORYNODE)GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
+    GetNumaAvailableMemoryNodeExProc =
+      (PFN_GETNUMAAVAILABLEMEMORYNODEEX)GetProcAddress(kernel32, "GetNumaAvailableMemoryNodeEx");
+    GetLogicalProcessorInformationExProc =
+      (PFN_GETLOGICALPROCESSORINFORMATIONEX)GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
 
     if (!GetLogicalProcessorInformationExProc && GetLogicalProcessorInformationProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;
