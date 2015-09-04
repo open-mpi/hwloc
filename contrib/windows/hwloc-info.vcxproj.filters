@@ -44,9 +44,6 @@
     <ClInclude Include="..\..\include\private\components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\private\cpuid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\private\debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
