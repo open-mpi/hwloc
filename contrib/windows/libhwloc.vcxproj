@@ -198,6 +198,7 @@
     <ClCompile Include="..\..\hwloc\distances.c" />
     <ClCompile Include="..\..\hwloc\diff.c" />
     <ClCompile Include="..\..\hwloc\misc.c" />
+    <ClCompile Include="..\..\hwloc\pci-common.c" />
     <ClCompile Include="..\..\hwloc\topology-noos.c" />
     <ClCompile Include="..\..\hwloc\topology-synthetic.c" />
     <ClCompile Include="..\..\hwloc\topology-windows.c" />
