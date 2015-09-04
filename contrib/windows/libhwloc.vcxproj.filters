@@ -36,6 +36,9 @@
     <ClCompile Include="..\..\src\misc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\pci-common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\topology-custom.c">
       <Filter>Source Files</Filter>
     </ClCompile>

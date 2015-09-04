@@ -198,6 +198,7 @@
     <ClCompile Include="..\..\src\distances.c" />
     <ClCompile Include="..\..\src\diff.c" />
     <ClCompile Include="..\..\src\misc.c" />
+    <ClCompile Include="..\..\src\pci-common.c" />
     <ClCompile Include="..\..\src\topology-custom.c" />
     <ClCompile Include="..\..\src\topology-noos.c" />
     <ClCompile Include="..\..\src\topology-synthetic.c" />
