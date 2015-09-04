@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio Express 2012 for Windows Desktop
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libhwloc", "libhwloc.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB8D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lstopo-no-graphics", "lstopo-no-graphics.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB8E}"
@@ -79,9 +79,6 @@ Global
 		{9DE76C6D-4773-4766-9F93-69C56166CB8F}.Release|x64.ActiveCfg = Release|x64
 		{9DE76C6D-4773-4766-9F93-69C56166CB8F}.Release|x64.Build.0 = Release|x64
 		{9DE76C6D-4773-4766-9F93-69C56166CB8F}.ReleaseStatic|x64.ActiveCfg = Release|x64
-		{9DE76C6D-4773-4766-9F93-69C56166CB90}.Release|x64.ActiveCfg = Release|x64
-		{9DE76C6D-4773-4766-9F93-69C56166CB90}.Release|x64.Build.0 = Release|x64
-		{9DE76C6D-4773-4766-9F93-69C56166CB90}.ReleaseStatic|x64.ActiveCfg = Release|x64
 		{9DE76C6D-4773-4766-9F93-69C56166CB91}.Release|x64.ActiveCfg = Release|x64
 		{9DE76C6D-4773-4766-9F93-69C56166CB91}.Release|x64.Build.0 = Release|x64
 		{9DE76C6D-4773-4766-9F93-69C56166CB91}.ReleaseStatic|x64.ActiveCfg = Release|x64
@@ -106,6 +103,14 @@ Global
 		{9DE76C6D-4773-4766-9F93-69C56166CB98}.Release|x64.ActiveCfg = Release|x64
 		{9DE76C6D-4773-4766-9F93-69C56166CB98}.Release|x64.Build.0 = Release|x64
 		{9DE76C6D-4773-4766-9F93-69C56166CB98}.ReleaseStatic|x64.ActiveCfg = Release|x64
+		{9DE76C6D-4773-4766-9F93-69C56166CB99}.Release|x64.ActiveCfg = Release|x64
+		{9DE76C6D-4773-4766-9F93-69C56166CB99}.Release|x64.Build.0 = Release|x64
+		{9DE76C6D-4773-4766-9F93-69C56166CB99}.ReleaseStatic|x64.ActiveCfg = Release|x64
+		{9DE76C6D-4773-4766-9F93-69C56166CB99}.ReleaseStatic|x64.Build.0 = Release|x64
+		{9DE76C6D-4773-4766-9F93-69C56166CB9A}.Release|x64.ActiveCfg = Release|x64
+		{9DE76C6D-4773-4766-9F93-69C56166CB9A}.Release|x64.Build.0 = Release|x64
+		{9DE76C6D-4773-4766-9F93-69C56166CB9A}.ReleaseStatic|x64.ActiveCfg = Release|x64
+		{9DE76C6D-4773-4766-9F93-69C56166CB9A}.ReleaseStatic|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
