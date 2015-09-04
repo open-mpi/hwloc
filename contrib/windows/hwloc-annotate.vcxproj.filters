@@ -62,7 +62,7 @@
     <ClInclude Include="..\..\include\hwloc\autogen\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\utils\hwloc\hwloc-calc.h">
+    <ClInclude Include="..\..\utils\hwloc\misc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
