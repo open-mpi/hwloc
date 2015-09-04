@@ -23,7 +23,9 @@
 #include <private/cpuid-x86.h>
 
 #include <sys/types.h>
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 
 struct hwloc_x86_backend_data_s {
   unsigned nbprocs;
@@ -1201,6 +1203,7 @@ fulldiscovery:
 static int
 hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t set)
 {
+#ifndef HWLOC_WIN_SYS /* needs a lot of work */
   struct dirent *dirent;
   DIR *dir;
   char *path;
@@ -1264,6 +1267,7 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
 
 out_with_dir:
   closedir(dir);
+#endif /* HWLOC_WIN_SYS needs a lot of work */
   return -1;
 }
 
