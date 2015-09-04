@@ -13,11 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-annotate", "hwloc-ann
 		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-assembler", "hwloc-assembler.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB90}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-bind", "hwloc-bind.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB91}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
