@@ -84,7 +84,6 @@
     <ClInclude Include="..\..\include\hwloc\plugins.h" />
     <ClInclude Include="..\..\include\hwloc\rename.h" />
     <ClInclude Include="..\..\include\private\components.h" />
-    <ClInclude Include="..\..\include\private\cpuid.h" />
     <ClInclude Include="..\..\include\private\debug.h" />
     <ClInclude Include="..\..\include\private\misc.h" />
     <ClInclude Include="..\..\include\private\private.h" />
