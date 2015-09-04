@@ -199,7 +199,6 @@
     <ClCompile Include="..\..\src\diff.c" />
     <ClCompile Include="..\..\src\misc.c" />
     <ClCompile Include="..\..\src\topology-custom.c" />
-    <ClCompile Include="..\..\src\topology-fake.c" />
     <ClCompile Include="..\..\src\topology-noos.c" />
     <ClCompile Include="..\..\src\topology-synthetic.c" />
     <ClCompile Include="..\..\src\topology-windows.c" />

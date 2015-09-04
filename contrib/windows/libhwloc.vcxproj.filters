@@ -39,9 +39,6 @@
     <ClCompile Include="..\..\src\topology-custom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\topology-fake.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\topology-noos.c">
       <Filter>Source Files</Filter>
     </ClCompile>
