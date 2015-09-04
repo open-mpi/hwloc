@@ -1203,7 +1203,7 @@ fulldiscovery:
 static int
 hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t set)
 {
-#ifndef HWLOC_WIN_SYS /* needs a lot of work */
+#if !(defined HWLOC_WIN_SYS && !defined __MINGW32__) /* needs a lot of work */
   struct dirent *dirent;
   DIR *dir;
   char *path;
@@ -1267,7 +1267,7 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
 
 out_with_dir:
   closedir(dir);
-#endif /* HWLOC_WIN_SYS needs a lot of work */
+#endif /* HWLOC_WIN_SYS & !__MINGW32__ needs a lot of work */
   return -1;
 }
 
