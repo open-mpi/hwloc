@@ -58,6 +58,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lstopo-win", "lstopo-win.vc
 		{9DE76C6D-4773-4766-9F93-69C56166CB98} = {9DE76C6D-4773-4766-9F93-69C56166CB98}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-gather-cpuid", "hwloc-gather-cpuid.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB9A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		ReleaseDll|x64 = ReleaseDll|x64
