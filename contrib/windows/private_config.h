@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
@@ -579,7 +579,7 @@
 #define PACKAGE_NAME "hwloc"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "hwloc 1.7.2"
+#define PACKAGE_STRING "hwloc"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "hwloc"
@@ -588,7 +588,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.7.2"
+#define PACKAGE_VERSION HWLOC_VERSION
 
 /* The size of `unsigned int', as computed by sizeof. */
 #define SIZEOF_UNSIGNED_INT 4
@@ -642,7 +642,8 @@
 
 
 /* Version number of package */
-#define VERSION "1.9"
+#define HWLOC_VERSION "2.0.0"
+#define VERSION HWLOC_VERSION
 
 /* Define to 1 if the X Window System is missing or not being used. */
 #define X_DISPLAY_MISSING 1
