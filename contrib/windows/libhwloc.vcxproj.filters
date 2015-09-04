@@ -36,9 +36,6 @@
     <ClCompile Include="..\..\hwloc\misc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\hwloc\topology-custom.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\hwloc\topology-fake.c">
       <Filter>Source Files</Filter>
     </ClCompile>
