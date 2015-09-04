@@ -18,6 +18,9 @@
     <ClCompile Include="..\..\utils\lstopo\lstopo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\utils\lstopo\lstopo-ascii.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\utils\lstopo\lstopo-color.c">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -65,6 +65,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\utils\lstopo\lstopo.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo-ascii.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-color.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-draw.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-fig.c" />
