@@ -122,7 +122,6 @@ if test x$dobuild64 = x1; then
   fi
 
   make
-  utils/lstopo/lstopo-no-graphics -v
 
   if test x$docheck = x1; then
     make check
