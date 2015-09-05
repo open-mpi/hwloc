@@ -1,13 +1,14 @@
 #!/bin/sh
-
 #
-# Copyright © 20012-2015 Inria.  All rights reserved.
+# Copyright © 2012-2015 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
 set -e
+set -x
 
 dotar=1
+dokeeptar=0
 doconf=1
 dobuild32=1
 dobuild64=1
@@ -16,45 +17,54 @@ doinstall=1
 confopts=
 
 while test $# -gt 0; do
-  if test "$1" = "--no-check"; then
-    docheck=0
-  else if test "$1" = "--no-32"; then
-    dobuild32=0
-  else if test "$1" = "--no-64"; then
-    dobuild64=0
-  else if test "$1" = "--no-tar"; then
+  if test "$1" = "--no-tar"; then
     dotar=0
-  else if test "$1" = "--no-install"; then
-    doinstall=0
+  else if test "$1" = "--keep-tar"; then
+    dokeeptar=1
   else if test "$1" = "--no-conf"; then
     doconf=0
   else if test "$1" = "--debug"; then
     confopts="$confopts --enable-debug"
-  else if test "$1" = "--help"; then
-    echo "  --no-tar"
-    echo "  --no-conf"
-    echo "  --debug"
-    echo "  --no-32"
-    echo "  --no-64"
-    echo "  --no-check"
-    echo "  --no-install"
-    echo "  --help"
+  else if test "$1" = "--no-32"; then
+    dobuild32=0
+  else if test "$1" = "--no-64"; then
+    dobuild64=0
+  else if test "$1" = "--no-check"; then
+    docheck=0
+  else if test "$1" = "--no-install"; then
+    doinstall=0
+  else if test "$1" = "--help" -o "$1" = "-h"; then
+    echo "  --no-tar      Use current directory instead of latest hwloc-*.tar.gz"
+    echo "  --keep-tar    Don't delete tarball after unpacking"
+    echo "  --no-conf     Don't reconfigure tarball"
+    echo "  --debug       Enable debug"
+    echo "  --no-32       Don't build in 32bits"
+    echo "  --no-64       Don't build in 64bits"
+    echo "  --no-check    Don't run make check"
+    echo "  --no-install  Don't install"
+    echo "  --help        Show this help"
     exit 0
-  fi fi fi fi fi fi fi fi
+  fi fi fi fi fi fi fi fi fi
   shift
 done
-
-set -x
 
 oldPATH=$PATH
 
 if test x$dotar = x1; then
+  # remove everything but the last 10 builds
+  rm -rf $(ls | grep -v ^hwloc- | grep -v ^job-) || true
+  chmod u+w -R $(ls -td hwloc-* | tail -n +11) || true
+  rm -rf $(ls -td hwloc-* | tail -n +11) || true
+
+  # find the tarball and extract it
   tarball=$(ls -tr hwloc-*.tar.gz | tail -1)
   basename=$(basename $tarball .tar.gz)
   version=$(echo $basename | cut -d- -f2)
-
   test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
   tar xfz $tarball
+  if test x$dokeeptar = x0; then
+    rm $tarball
+  fi
 else
   basename=./
   version=custom
