@@ -442,7 +442,6 @@ chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
 	hwloc_config_prefix[tests/hwloc/ports/topology-solaris.c]:hwloc_config_prefix[hwloc/topology-solaris.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-solaris-chiptype.c]:hwloc_config_prefix[hwloc/topology-solaris-chiptype.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-aix.c]:hwloc_config_prefix[hwloc/topology-aix.c]
-	hwloc_config_prefix[tests/hwloc/ports/topology-osf.c]:hwloc_config_prefix[hwloc/topology-osf.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-windows.c]:hwloc_config_prefix[hwloc/topology-windows.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-darwin.c]:hwloc_config_prefix[hwloc/topology-darwin.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-freebsd.c]:hwloc_config_prefix[hwloc/topology-freebsd.c]

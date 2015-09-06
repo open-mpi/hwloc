@@ -1199,7 +1199,7 @@ typedef enum {
   /** \brief Reset the memory allocation policy to the system default.
    * Depending on the operating system, this may correspond to
    * HWLOC_MEMBIND_FIRSTTOUCH (Linux),
-   * or HWLOC_MEMBIND_BIND (AIX, HP-UX, OSF, Solaris, Windows).
+   * or HWLOC_MEMBIND_BIND (AIX, HP-UX, Solaris, Windows).
    * \hideinitializer */
   HWLOC_MEMBIND_DEFAULT =	0,
 

@@ -231,12 +231,6 @@ EOF])
         AC_MSG_RESULT([AIX])
         hwloc_components="$hwloc_components aix"
         ;;
-      *-*-osf*)
-        AC_DEFINE(HWLOC_OSF_SYS, 1, [Define to 1 on OSF])
-        hwloc_osf=yes
-        AC_MSG_RESULT([OSF])
-        hwloc_components="$hwloc_components osf"
-        ;;
       *-*-hpux*)
         AC_DEFINE(HWLOC_HPUX_SYS, 1, [Define to 1 on HP-UX])
         hwloc_hpux=yes
@@ -1202,7 +1196,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_NETBSD], [test "x$hwloc_netbsd" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_SOLARIS], [test "x$hwloc_solaris" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_AIX], [test "x$hwloc_aix" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_OSF], [test "x$hwloc_osf" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_HPUX], [test "x$hwloc_hpux" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_WINDOWS], [test "x$hwloc_windows" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_MINGW32], [test "x$target_os" = "xmingw32"])

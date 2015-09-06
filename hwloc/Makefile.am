@@ -1,4 +1,4 @@
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2015 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2012 Oracle and/or its affiliates.  All rights reserved.
@@ -128,11 +128,6 @@ if HWLOC_HAVE_AIX
 sources += topology-aix.c
 ldflags += -lpthread
 endif HWLOC_HAVE_AIX
-
-if HWLOC_HAVE_OSF
-sources += topology-osf.c
-ldflags += -lnuma -lpthread
-endif HWLOC_HAVE_OSF
 
 if HWLOC_HAVE_HPUX
 sources += topology-hpux.c

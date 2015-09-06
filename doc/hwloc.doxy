@@ -56,7 +56,6 @@ and NumaScale NumaConnect) on all supported hardware, including Intel Xeon Phi
 <li>Darwin / OS X</li>
 <li>FreeBSD and its variants (such as kFreeBSD/GNU)</li>
 <li>NetBSD</li>
-<li>OSF/1 (a.k.a., Tru64)</li>
 <li>HP-UX</li>
 <li>Microsoft Windows</li>
 <li>IBM BlueGene/Q Compute Node Kernel (CNK)</li>
@@ -2147,7 +2146,7 @@ environment variable (see \ref envvar).
 
 <dl>
 
-<dt>aix, darwin, freebsd, hpux, linux, netbsd, osf, solaris, windows</dt>
+<dt>aix, darwin, freebsd, hpux, linux, netbsd, solaris, windows</dt>
 <dd>
  Each officially supported operating system has its own native component,
  which is statically built when supported, and which is used by default.

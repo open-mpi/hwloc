@@ -17,7 +17,6 @@ check_LTLIBRARIES = \
         libhwloc-port-freebsd.la \
         libhwloc-port-hpux.la \
         libhwloc-port-netbsd.la \
-        libhwloc-port-osf.la \
         libhwloc-port-solaris.la \
         libhwloc-port-windows.la \
         libhwloc-port-opencl.la \
@@ -107,16 +106,6 @@ libhwloc_port_netbsd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -DHWLOC_NETBSD_SYS \
         -DHAVE_SYS_SYSCTL_H \
         -DHAVE_SYSCTL
-
-nodist_libhwloc_port_osf_la_SOURCES = topology-osf.c
-libhwloc_port_osf_la_SOURCES = \
-        include/osf/cpuset.h \
-        include/osf/numa.h \
-        include/osf/radset.h
-libhwloc_port_osf_la_CPPFLAGS = $(common_CPPFLAGS) \
-        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/osf \
-        -DHWLOC_OSF_SYS \
-        -DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
 
 nodist_libhwloc_port_solaris_la_SOURCES = topology-solaris.c topology-solaris-chiptype.c
 libhwloc_port_solaris_la_SOURCES = \

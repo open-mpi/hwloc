@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -151,7 +151,7 @@ hwloc_progname(struct hwloc_topology *topology __hwloc_attribute_unused)
   name = __progname; /* fallback for most unix, used for OpenBSD */
 #else
   /* TODO: _NSGetExecutablePath(path, &size) on Darwin */
-  /* TODO: AIX, HPUX, OSF */
+  /* TODO: AIX, HPUX */
   name = NULL;
 #endif
   if (!name)

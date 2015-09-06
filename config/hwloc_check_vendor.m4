@@ -11,6 +11,7 @@ dnl                         University of Stuttgart.  All rights reserved.
 dnl Copyright © 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright © 2011      Cisco Systems, Inc.  All rights reserved.
+dnl Copyright © 2015 Inria.  All rights reserved.
 dnl $COPYRIGHT$
 dnl
 dnl Additional copyrights may follow
@@ -115,6 +116,7 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
                [hwloc_check_compiler_vendor_result="comeau"])])
 
     # Compaq C/C++
+    # OSF part actually not needed anymore but doesn't hurt
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
           [HWLOC_IF_IFELSE([defined(__DECC) || defined(VAXC) || defined(__VAXC)],
                [hwloc_check_compiler_vendor_result="compaq"],

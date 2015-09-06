@@ -192,10 +192,6 @@ extern void hwloc_set_solaris_hooks(struct hwloc_binding_hooks *binding_hooks, s
 extern void hwloc_set_aix_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_AIX_SYS */
 
-#ifdef HWLOC_OSF_SYS
-extern void hwloc_set_osf_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
-#endif /* HWLOC_OSF_SYS */
-
 #ifdef HWLOC_WIN_SYS
 extern void hwloc_set_windows_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_WIN_SYS */

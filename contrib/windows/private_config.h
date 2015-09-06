@@ -529,9 +529,6 @@
 /* Define to 1 on *NETBSD */
 /* #undef HWLOC_NETBSD_SYS */
 
-/* Define to 1 on OSF */
-/* #undef HWLOC_OSF_SYS */
-
 /* The size of `unsigned int', as computed by sizeof */
 #define HWLOC_SIZEOF_UNSIGNED_INT 4
 

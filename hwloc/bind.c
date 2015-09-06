@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -705,10 +705,6 @@ hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_t
 #    ifdef HWLOC_AIX_SYS
     hwloc_set_aix_hooks(hooks, support);
 #    endif /* HWLOC_AIX_SYS */
-
-#    ifdef HWLOC_OSF_SYS
-    hwloc_set_osf_hooks(hooks, support);
-#    endif /* HWLOC_OSF_SYS */
 
 #    ifdef HWLOC_SOLARIS_SYS
     hwloc_set_solaris_hooks(hooks, support);
