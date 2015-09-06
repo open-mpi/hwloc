@@ -43,6 +43,7 @@ Version 2.0
     nodes as well as the hwloc-assembler tools.
   + Remove Kerrighed support from the Linux backend.
   + Remove Tru64 (OSF/1) support.
+    - Remove HWLOC_MEMBIND_REPLICATE which wasn't available anywhere else.
 * API
   + The almost-unused "os_level" attribute has been removed from the
     hwloc_obj structure.

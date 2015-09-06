@@ -1226,25 +1226,12 @@ typedef enum {
    * \hideinitializer */
   HWLOC_MEMBIND_INTERLEAVE =	3,
 
-  /** \brief Replicate memory on the given nodes; reads from this
-   * memory will attempt to be serviced from the NUMA node local to
-   * the reading thread. Replicating can be useful when multiple
-   * threads from the specified NUMA nodes will be sharing the same
-   * read-only data.
-   *
-   * This policy can only be used with existing memory allocations
-   * (i.e., the hwloc_set_*membind*() functions); it cannot be used
-   * with functions that allocate new memory (i.e., the hwloc_alloc*()
-   * functions).
-   * \hideinitializer */
-  HWLOC_MEMBIND_REPLICATE =	4,
-
   /** \brief For each page bound with this policy, by next time
    * it is touched (and next time only), it is moved from its current
    * location to the local NUMA node of the thread where the memory
    * reference occurred (if it needs to be moved at all).
    * \hideinitializer */
-  HWLOC_MEMBIND_NEXTTOUCH =	5,
+  HWLOC_MEMBIND_NEXTTOUCH =	4,
 
   /** \brief Returned by get_membind() functions when multiple
    * threads or parts of a memory area have differing memory binding
@@ -1951,8 +1938,6 @@ struct hwloc_topology_membind_support {
   unsigned char bind_membind;
   /** Interleave policy is supported. */
   unsigned char interleave_membind;
-  /** Replication policy is supported. */
-  unsigned char replicate_membind;
   /** Next-touch migration policy is supported. */
   unsigned char nexttouch_membind;
 

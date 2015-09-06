@@ -3,7 +3,7 @@
  * - manipulating nodesets
  * - memory binding and binding policies
  *
- * Copyright © 2014 Inria.  All rights reserved.
+ * Copyright © 2014-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -77,28 +77,31 @@ int main(void)
   } hwloc_bitmap_foreach_end();
   hwloc_bitmap_free(set);
 
-  /* allocate replicated memory of all nodes */
+  /* check alloc+bind support */
   support = hwloc_topology_get_support(topology);
-  buffer = NULL;
-  if (support->membind->replicate_membind) {
-    printf("replicated memory binding is supported\n");
-    buffer = hwloc_alloc_membind_nodeset(topology, 4096, cset, HWLOC_MEMBIND_REPLICATE, HWLOC_MEMBIND_STRICT);
+  if (support->membind->bind_membind) {
+    printf("BIND memory binding policy is supported\n");
   } else {
-    printf("replicated memory binding is NOT supported\n");
+    printf("BIND memory binding policy is NOT supported\n");
   }
-  if (!buffer) {
-    /* could not allocate replicated memory, manually allocate of each node by iterating over them */
-    printf("manually allocating memory on each node\n");
-    obj = NULL;
-    while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, obj)) != NULL) {
-      buffer = hwloc_alloc_membind_nodeset(topology, 4096, obj->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_STRICT);
-      if (!buffer) {
-	fprintf(stderr, "failed to manually allocate memory on node %u\n", obj->os_index);
-	hwloc_topology_destroy(topology);
-	return EXIT_SUCCESS;
-      }
-      /* now the application must manually manage these different buffers on different nodes */
+  if (support->membind->alloc_membind) {
+    printf("Allocating bound memory is supported\n");
+  } else {
+    printf("Allocating bound memory is NOT supported\n");
+  }
+
+  /* allocate memory of each nodes */
+  printf("allocating memory on each node\n");
+  obj = NULL;
+  buffer = NULL;
+  while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, obj)) != NULL) {
+    buffer = hwloc_alloc_membind_nodeset(topology, 4096, obj->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_STRICT);
+    if (!buffer) {
+      fprintf(stderr, "failed to allocate memory on node %u\n", obj->os_index);
+      hwloc_topology_destroy(topology);
+      return EXIT_SUCCESS;
     }
+    /* now the application must manually manage these different buffers on different nodes */
   }
 
   /* check where buffer is allocated */
@@ -118,10 +121,10 @@ int main(void)
 
   /* check the binding policy, it should be what we requested above,
    * but may be different if the implementation of different policies
-   * is identical for the current operating system.
+   * is identical for the current operating system (e.g. if BIND is the DEFAULT).
    */
-  printf("buffer membind policy is %d while we requested %d or %d\n",
-	 policy, HWLOC_MEMBIND_REPLICATE, HWLOC_MEMBIND_BIND);
+  printf("buffer membind policy is %d while we requested %d\n",
+	 policy, HWLOC_MEMBIND_BIND);
 
   /* print the corresponding NUMA nodes */
   hwloc_bitmap_asprintf(&s, set);

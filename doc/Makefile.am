@@ -388,7 +388,6 @@ man3_membinding_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_NEXTTOUCH.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_NOCPUBIND.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_PROCESS.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_REPLICATE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_STRICT.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_THREAD.3 \
         $(DOX_MAN_DIR)/man3/hwloc_membind_flags_t.3 \
