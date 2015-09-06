@@ -511,7 +511,6 @@ extern "C" {
 /* hwloc/deprecated.h */
 
 #define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
-#define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 #define hwloc_distributev HWLOC_NAME(distributev)
 #define hwloc_distribute HWLOC_NAME(distribute)
 #define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
