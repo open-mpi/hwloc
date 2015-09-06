@@ -64,6 +64,7 @@ Version 2.0
   + hwloc_obj_type_sscanf() now fills a object attribute union instead
     of some cache-specific fields.
   + Remove the long deprecated hwloc_obj_snprintf().
+  + hwloc_obj_cpuset_snprintf() is deprecated in favor of hwloc_bitmap_snprintf().
 * Plugin API
   + hwloc_fill_object_sets() is renamed into hwloc_obj_add_children_sets().
 * Misc

@@ -14,7 +14,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* check hwloc_bitmap_asprintf(), hwloc_obj_cpuset_snprintf() and hwloc_bitmap_sscanf() */
+/* check hwloc_bitmap_asprintf(), hwloc_bitmap_snprintf() and hwloc_bitmap_sscanf() */
 
 static void check_cpuset(hwloc_bitmap_t set, const char *expected1, const char *expected2, const char *expected3)
 {
@@ -123,20 +123,20 @@ int main(void)
   printf("system cpuset converted back and forth, ok\n");
 
   printf("truncating system cpuset to NULL buffer\n");
-  len = hwloc_obj_cpuset_snprintf(NULL, 0, 1, &obj);
+  len = hwloc_bitmap_snprintf(NULL, 0, obj->cpuset);
   assert(len == stringlen);
 
   printf("truncating system cpuset to 0 char (no modification)\n");
   memset(string, 'X', 1);
   string[1] = 0;
-  len = hwloc_obj_cpuset_snprintf(string, 0, 1, &obj);
+  len = hwloc_bitmap_snprintf(string, 0, obj->cpuset);
   assert(len == stringlen);
   assert(string[0] == 'X');
 
   printf("truncating system cpuset to 1 char (empty string)\n");
   memset(string, 'X', 2);
   string[2] = 0;
-  len = hwloc_obj_cpuset_snprintf(string, 1, 1, &obj);
+  len = hwloc_bitmap_snprintf(string, 1, obj->cpuset);
   printf("got %s\n", string);
   assert(len == stringlen);
   assert(string[0] == 0);
@@ -145,7 +145,7 @@ int main(void)
   printf("truncating system cpuset to 10 chars (single 32bit subset except last char)\n");
   memset(string, 'X', 11);
   string[11] = 0;
-  len = hwloc_obj_cpuset_snprintf(string, 10, 1, &obj);
+  len = hwloc_bitmap_snprintf(string, 10, obj->cpuset);
   printf("got %s\n", string);
   assert(len == stringlen);
   assert(string[8] == 'f');
@@ -155,7 +155,7 @@ int main(void)
   printf("truncating system cpuset to 11 chars (single 32bit subset)\n");
   memset(string, 'X', 12);
   string[12] = 0;
-  len = hwloc_obj_cpuset_snprintf(string, 11, 1, &obj);
+  len = hwloc_bitmap_snprintf(string, 11, obj->cpuset);
   printf("got %s\n", string);
   assert(len == stringlen);
   assert(string[9] == 'f');
@@ -165,7 +165,7 @@ int main(void)
   printf("truncating system cpuset to 23 chars (two 32bit subsets with ending comma)\n");
   memset(string, 'X', 24);
   string[24] = 0;
-  len = hwloc_obj_cpuset_snprintf(string, 23, 1, &obj);
+  len = hwloc_bitmap_snprintf(string, 23, obj->cpuset);
   printf("got %s\n", string);
   assert(len == stringlen);
   assert(string[20] == 'f');
@@ -176,7 +176,7 @@ int main(void)
   printf("truncating system cpuset to 51 chars (truncate to four and a half 32bit subsets)\n");
   memset(string, 'X', 52);
   string[52] = 0;
-  len = hwloc_obj_cpuset_snprintf(string, 51, 1, &obj);
+  len = hwloc_bitmap_snprintf(string, 51, obj->cpuset);
   printf("got %s\n", string);
   assert(len == stringlen);
   assert(string[49] == 'f');
@@ -184,13 +184,13 @@ int main(void)
   assert(string[51] == 'X');
 
   obj = hwloc_get_obj_by_depth(topology, depth-1, 0);
-  hwloc_obj_cpuset_snprintf(string, stringlen+1, 1, &obj);
+  hwloc_bitmap_snprintf(string, stringlen+1, obj->cpuset);
   printf("first cpu cpuset is %s\n", string);
   check_cpuset(obj->cpuset, NULL, NULL, NULL);
   printf("first cpu cpuset converted back and forth, ok\n");
 
   obj = hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1) - 1);
-  hwloc_obj_cpuset_snprintf(string, stringlen+1, 1, &obj);
+  hwloc_bitmap_snprintf(string, stringlen+1, obj->cpuset);
   printf("last cpu cpuset is %s\n", string);
   check_cpuset(obj->cpuset, NULL, NULL, NULL);
   printf("last cpu cpuset converted back and forth, ok\n");

@@ -870,15 +870,6 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
 HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * __hwloc_restrict separator,
 				   int verbose);
 
-/** \brief Stringify the cpuset containing a set of objects.
- *
- * If \p size is 0, \p string may safely be \c NULL.
- *
- * \return the number of character that were actually written if not truncating,
- * or that would have been written (not including the ending \\0).
- */
-HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, size_t nobj, const hwloc_obj_t * __hwloc_restrict objs);
-
 /** \brief Search the given key name in object infos and return the corresponding value.
  *
  * If multiple keys match the given name, only the first one is returned.

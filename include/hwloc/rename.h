@@ -178,7 +178,6 @@ extern "C" {
 #define hwloc_obj_type_sscanf HWLOC_NAME(obj_type_sscanf)
 #define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
 #define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
-#define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
 #define hwloc_obj_get_info_by_name HWLOC_NAME(obj_get_info_by_name)
 #define hwloc_obj_add_info HWLOC_NAME(obj_add_info)
 
@@ -514,6 +513,7 @@ extern "C" {
 #define hwloc_distributev HWLOC_NAME(distributev)
 #define hwloc_distribute HWLOC_NAME(distribute)
 #define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
+#define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
 
 /* private/debug.h */
 

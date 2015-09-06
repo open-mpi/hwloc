@@ -520,19 +520,3 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 
   return ret;
 }
-
-int hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_obj * const *objs)
-{
-  hwloc_bitmap_t set = hwloc_bitmap_alloc();
-  int res;
-  unsigned i;
-
-  hwloc_bitmap_zero(set);
-  for(i=0; i<nobj; i++)
-    if (objs[i]->cpuset)
-      hwloc_bitmap_or(set, set, objs[i]->cpuset);
-
-  res = hwloc_bitmap_snprintf(str, size, set);
-  hwloc_bitmap_free(set);
-  return res;
-}
