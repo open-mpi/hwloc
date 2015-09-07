@@ -193,7 +193,7 @@ enum hwloc_topology_export_synthetic_flags_e {
  *
  * This exported string may be given back to hwloc_topology_set_synthetic().
  *
- * \p flags is a OR'ed set of hwloc_topology_export_synthetic_flags_e.
+ * \p flags is a OR'ed set of ::hwloc_topology_export_synthetic_flags_e.
  *
  * \return The number of characters that were written,
  * not including the terminating \0.

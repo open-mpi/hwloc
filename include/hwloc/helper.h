@@ -478,20 +478,20 @@ hwloc_obj_type_is_icache(hwloc_obj_type_t type)
  * whose attributes match \p cachelevel and \p cachetype.
 
  * This function is identical to calling hwloc_get_type_depth() with the
- * corresponding type such as HWLOC_OBJ_L1ICACHE, except that it may
+ * corresponding type such as ::HWLOC_OBJ_L1ICACHE, except that it may
  * also return a Unified cache when looking for an instruction cache.
  *
- * If no cache level matches, \p HWLOC_TYPE_DEPTH_UNKNOWN is returned.
+ * If no cache level matches, ::HWLOC_TYPE_DEPTH_UNKNOWN is returned.
  *
- * If \p cachetype is \p HWLOC_OBJ_CACHE_UNIFIED, the depth of the
+ * If \p cachetype is ::HWLOC_OBJ_CACHE_UNIFIED, the depth of the
  * unique matching unified cache level is returned.
  *
- * If \p cachetype is \p HWLOC_OBJ_CACHE_DATA or \p HWLOC_OBJ_CACHE_INSTRUCTION,
+ * If \p cachetype is ::HWLOC_OBJ_CACHE_DATA or ::HWLOC_OBJ_CACHE_INSTRUCTION,
  * either a matching cache, or a unified cache is returned.
  *
  * If \p cachetype is \c -1, it is ignored and multiple levels may
  * match. The function returns either the depth of a uniquely matching
- * level or \p HWLOC_TYPE_DEPTH_MULTIPLE.
+ * level or ::HWLOC_TYPE_DEPTH_MULTIPLE.
  */
 static __hwloc_inline int
 hwloc_get_cache_type_depth (hwloc_topology_t topology,
@@ -935,7 +935,7 @@ hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset,
 
 /** \brief Convert a CPU set into a NUMA node set without handling non-NUMA cases
  *
- * This is the strict variant of ::hwloc_cpuset_to_nodeset. It does not fix
+ * This is the strict variant of hwloc_cpuset_to_nodeset(). It does not fix
  * non-NUMA cases. If the topology contains some NUMA nodes, behave exactly
  * the same. However, if the topology contains no NUMA nodes, return an empty
  * nodeset.
@@ -975,7 +975,7 @@ hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwl
 
 /** \brief Convert a NUMA node set into a CPU set without handling non-NUMA cases
  *
- * This is the strict variant of ::hwloc_cpuset_from_nodeset. It does not fix
+ * This is the strict variant of hwloc_cpuset_from_nodeset(). It does not fix
  * non-NUMA cases. If the topology contains some NUMA nodes, behave exactly
  * the same. However, if the topology contains no NUMA nodes, return an empty
  * cpuset.

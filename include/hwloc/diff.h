@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2014 Inria.  All rights reserved.
+ * Copyright © 2013-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -59,19 +59,19 @@ extern "C" {
  */
 typedef enum hwloc_topology_diff_obj_attr_type_e {
   /** \brief The object local memory is modified.
-   * The union is a hwloc_topology_diff_obj_attr_uint64_s
+   * The union is a hwloc_topology_diff_obj_attr_u::hwloc_topology_diff_obj_attr_uint64_s
    * (and the index field is ignored).
    */
   HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE,
 
   /** \brief The object name is modified.
-   * The union is a hwloc_topology_diff_obj_attr_string_s
+   * The union is a hwloc_topology_diff_obj_attr_u::hwloc_topology_diff_obj_attr_string_s
    * (and the name field is ignored).
    */
 
   HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME,
   /** \brief the value of an info attribute is modified.
-   * The union is a hwloc_topology_diff_obj_attr_string_s.
+   * The union is a hwloc_topology_diff_obj_attr_u::hwloc_topology_diff_obj_attr_string_s.
    */
   HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO
 } hwloc_topology_diff_obj_attr_type_t;
@@ -107,17 +107,17 @@ union hwloc_topology_diff_obj_attr_u {
 /** \brief Type of one element of a difference list.
  */
 typedef enum hwloc_topology_diff_type_e {
-  /*< \brief An object attribute was changed.
-  * The union is a hwloc_topology_diff_obj_attr_s.
-  */
+  /** \brief An object attribute was changed.
+   * The union is a hwloc_topology_diff_obj_attr_u::hwloc_topology_diff_obj_attr_s.
+   */
   HWLOC_TOPOLOGY_DIFF_OBJ_ATTR,
 
-  /*< \brief The difference is too complex,
+  /** \brief The difference is too complex,
    * it cannot be represented. The difference below
    * this object has not been checked.
    * hwloc_topology_diff_build() will return 1.
    *
-   * The union is a hwloc_topology_diff_too_complex_s.
+   * The union is a hwloc_topology_diff_obj_attr_u::hwloc_topology_diff_too_complex_s.
    */
   HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX
 } hwloc_topology_diff_type_t;
@@ -133,7 +133,7 @@ typedef union hwloc_topology_diff_u {
 
   /* A difference in an object attribute. */
   struct hwloc_topology_diff_obj_attr_s {
-    hwloc_topology_diff_type_t type; /* must be HWLOC_TOPOLOGY_DIFF_OBJ_ATTR */
+    hwloc_topology_diff_type_t type; /* must be ::HWLOC_TOPOLOGY_DIFF_OBJ_ATTR */
     union hwloc_topology_diff_u * next;
     /* List of attribute differences for a single object */
     unsigned obj_depth;
@@ -143,7 +143,7 @@ typedef union hwloc_topology_diff_u {
 
   /* A difference that is too complex. */
   struct hwloc_topology_diff_too_complex_s {
-    hwloc_topology_diff_type_t type; /* must be HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX */
+    hwloc_topology_diff_type_t type; /* must be ::HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX */
     union hwloc_topology_diff_u * next;
     /* Where we had to stop computing the diff in the first topology */
     unsigned obj_depth;
@@ -154,14 +154,14 @@ typedef union hwloc_topology_diff_u {
 
 /** \brief Compute the difference between 2 topologies.
  *
- * The difference is stored as a list of hwloc_topology_diff_t entries
+ * The difference is stored as a list of ::hwloc_topology_diff_t entries
  * starting at \p diff.
  * It is computed by doing a depth-first traversal of both topology trees
  * simultaneously.
  *
  * If the difference between 2 objects is too complex to be represented
  * (for instance if some objects have different types, or different numbers
- * of children), a special diff entry of type HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX
+ * of children), a special diff entry of type ::HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX
  * is queued.
  * The computation of the diff does not continue below these objects.
  * So each such diff entry means that the difference between two subtrees
@@ -173,7 +173,7 @@ typedef union hwloc_topology_diff_u {
  * between the topologies.
  *
  * \return 1 if the difference is too complex (see above). Some entries in
- * the list will be of type HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX.
+ * the list will be of type ::HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX.
  *
  * \return -1 on any other error.
  *
@@ -183,7 +183,7 @@ typedef union hwloc_topology_diff_u {
  *
  * \note The output diff can only be exported to XML or passed to
  * hwloc_topology_diff_apply() if 0 was returned, i.e. if no entry of type
- * HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX is listed.
+ * ::HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX is listed.
  *
  * \note The output diff may be modified by removing some entries from
  * the list. The removed entries should be freed by passing them to
@@ -202,7 +202,7 @@ enum hwloc_topology_diff_apply_flags_e {
 
 /** \brief Apply a topology diff to an existing topology.
  *
- * \p flags is an OR'ed set of hwloc_topology_diff_apply_flags_e.
+ * \p flags is an OR'ed set of ::hwloc_topology_diff_apply_flags_e.
  *
  * The new topology is modified in place. hwloc_topology_dup()
  * may be used to duplicate it before patching.
