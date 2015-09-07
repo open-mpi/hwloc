@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
   unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
-  unsigned depth;
+  unsigned depth = 0;
   hwloc_bitmap_t set;
   int cmdline_args = 0;
   hwloc_obj_type_t numberoftype = HWLOC_OBJ_TYPE_NONE;
