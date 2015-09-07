@@ -802,7 +802,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned
  */
 HWLOC_DECLSPEC unsigned long hwloc_topology_get_flags (hwloc_topology_t topology);
 
-/** \brief Change which pid the topology is viewed from
+/** \brief Change which process the topology is viewed from
  *
  * On some systems, processes may have different views of the machine, for
  * instance the set of allowed CPUs. By default, hwloc exposes the view from
@@ -1159,6 +1159,8 @@ static __hwloc_inline int
 hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
 
 /** \brief Returns the type of objects at depth \p depth.
+ *
+ * \p depth should between 0 and hwloc_topology_get_depth()-1.
  *
  * \return -1 if depth \p depth does not exist.
  */
