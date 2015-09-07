@@ -56,7 +56,7 @@ struct hwloc_disc_component {
    */
   const char *name;
 
-  /** \brief Component types to exclude, as an OR'ed set of HWLOC_DISC_COMPONENT_TYPE_*.
+  /** \brief Component types to exclude, as an OR'ed set of ::hwloc_disc_component_type_e.
    *
    * For a GLOBAL component, this usually includes all other types (~0).
    *
@@ -121,7 +121,7 @@ struct hwloc_backend {
   /** \private Reserved for the core. Used internally to list backends topology->backends. */
   struct hwloc_backend * next;
 
-  /** \brief Backend flags, as an OR'ed set of HWLOC_BACKEND_FLAG_* */
+  /** \brief Backend flags, as an OR'ed set of ::hwloc_backend_flag_e */
   unsigned long flags;
 
   /** \brief Backend-specific 'is_custom' property.
@@ -143,7 +143,7 @@ struct hwloc_backend {
 
   /** \brief Main discovery callback.
    * returns > 0 if it modified the topology tree, -1 on error, 0 otherwise.
-   * May be NULL if type is HWLOC_DISC_COMPONENT_TYPE_MISC. */
+   * May be NULL if type is ::HWLOC_DISC_COMPONENT_TYPE_MISC. */
   int (*discover)(struct hwloc_backend *backend);
 
   /** \brief Callback used by the PCI backend to retrieve the locality of a PCI object from the OS/cpu backend.
@@ -213,7 +213,7 @@ typedef enum hwloc_component_type_e {
  * or dynamically loaded as a plugin.
  */
 struct hwloc_component {
-  /** \brief Component ABI version, set to HWLOC_COMPONENT_ABI */
+  /** \brief Component ABI version, set to ::HWLOC_COMPONENT_ABI */
   unsigned abi;
 
   /** \brief Process-wide component initialization callback.

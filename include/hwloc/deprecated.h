@@ -81,7 +81,7 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *se
 
 /** \brief Distribute \p n items over the topology under \p roots
  *
- * This is the same as hwloc_distribute, but takes an array of roots instead of
+ * This is the same as hwloc_distribute(), but takes an array of roots instead of
  * just one root.
  *
  * \note This function requires the \p roots objects to have a CPU set.

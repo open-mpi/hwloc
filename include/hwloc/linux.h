@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -55,14 +55,14 @@ HWLOC_DECLSPEC int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t 
  * but uses a hwloc cpuset.
  *
  * \note This is equivalent to calling hwloc_get_proc_cpubind() with
- * HWLOC_CPUBIND_THREAD as flags.
+ * ::HWLOC_CPUBIND_THREAD as flags.
  */
 HWLOC_DECLSPEC int hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t set);
 
 /** \brief Get the last physical CPU where thread \p tid ran.
  *
  * \note This is equivalent to calling hwloc_get_proc_last_cpu_location() with
- * HWLOC_CPUBIND_THREAD as flags.
+ * ::HWLOC_CPUBIND_THREAD as flags.
  */
 HWLOC_DECLSPEC int hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology, pid_t tid, hwloc_bitmap_t set);
 

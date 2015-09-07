@@ -38,7 +38,7 @@ extern "C" {
  *
  * \note Several examples of using the bitmap API are available under the
  * doc/examples/ directory in the source tree.
- * Regression tests such as tests/hwloc_bitmap*.c also make intensive use
+ * Regression tests such as tests/hwloc/hwloc_bitmap*.c also make intensive use
  * of this API.
  * @{
  */
@@ -257,27 +257,35 @@ HWLOC_DECLSPEC int hwloc_bitmap_last(hwloc_const_bitmap_t bitmap) __hwloc_attrib
 HWLOC_DECLSPEC int hwloc_bitmap_weight(hwloc_const_bitmap_t bitmap) __hwloc_attribute_pure;
 
 /** \brief Loop macro iterating on bitmap \p bitmap
- * \hideinitializer
+ *
+ * The loop must start with hwloc_bitmap_foreach_begin() and end
+ * with hwloc_bitmap_foreach_end() followed by a terminating ';'.
  *
  * \p index is the loop variable; it should be an unsigned int.  The
  * first iteration will set \p index to the lowest index in the bitmap.
  * Successive iterations will iterate through, in order, all remaining
- * indexes that in the bitmap.  To be specific: each iteration will return a
+ * indexes set in the bitmap.  To be specific: each iteration will return a
  * value for \p index such that hwloc_bitmap_isset(bitmap, index) is true.
  *
  * The assert prevents the loop from being infinite if the bitmap is infinite.
+ *
+ * \hideinitializer
  */
 #define hwloc_bitmap_foreach_begin(id, bitmap) \
 do { \
         assert(hwloc_bitmap_weight(bitmap) != -1); \
         for (id = hwloc_bitmap_first(bitmap); \
              (unsigned) id != (unsigned) -1; \
-             id = hwloc_bitmap_next(bitmap, id)) { \
-/** \brief End of loop. Needs a terminating ';'.
- * \hideinitializer
+             id = hwloc_bitmap_next(bitmap, id)) {
+
+/** \brief End of loop macro iterating on a bitmap.
  *
- * \sa hwloc_bitmap_foreach_begin */
-#define hwloc_bitmap_foreach_end() \
+ * Needs a terminating ';'.
+ *
+ * \sa hwloc_bitmap_foreach_begin()
+ * \hideinitializer
+ */
+#define hwloc_bitmap_foreach_end()		\
         } \
 } while (0)
 
