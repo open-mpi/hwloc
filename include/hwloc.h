@@ -740,6 +740,8 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 
 /** \brief Returns the type of objects at depth \p depth.
  *
+ * \p depth should between 0 and hwloc_topology_get_depth()-1.
+ *
  * \return (hwloc_obj_type_t)-1 if depth \p depth does not exist.
  */
 HWLOC_DECLSPEC hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
@@ -770,8 +772,8 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, un
 /** \brief Returns the topology object at logical index \p idx with type \p type
  *
  * If no object for that type exists, \c NULL is returned.
- * If there are several levels with objects of that type, \c NULL is returned
- * and ther caller may fallback to hwloc_get_obj_by_depth().
+ * If there are several levels with objects of that type (::HWLOC_OBJ_GROUP),
+ * \c NULL is returned and the caller may fallback to hwloc_get_obj_by_depth().
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned idx) __hwloc_attribute_pure;
@@ -1649,7 +1651,7 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * @{
  */
 
-/** \brief Change which pid the topology is viewed from
+/** \brief Change which process the topology is viewed from.
  *
  * On some systems, processes may have different views of the machine, for
  * instance the set of allowed CPUs. By default, hwloc exposes the view from
