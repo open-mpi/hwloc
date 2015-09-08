@@ -409,6 +409,10 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
+  /* FIXME: check whether Windows execvp() passes INHERIT_PARENT_AFFINITY to CreateProcess()
+   * because we need to propagate processor group affinity. However process-wide affinity
+   * isn't supported with processor groups so far.
+   */
   ret = execvp(argv[0], argv);
   if (ret) {
       fprintf(stderr, "%s: Failed to launch executable \"%s\"\n",
