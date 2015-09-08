@@ -199,6 +199,9 @@ static PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
 typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATIONEX)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
 static PFN_GETLOGICALPROCESSORINFORMATIONEX GetLogicalProcessorInformationExProc;
 
+typedef BOOL (WINAPI *PFN_GETTHREADGROUPAFFINITY)(HANDLE hThread, PGROUP_AFFINITY GroupAffinity);
+static PFN_GETTHREADGROUPAFFINITY GetThreadGroupAffinityProc;
+
 typedef BOOL (WINAPI *PFN_GETNUMAAVAILABLEMEMORYNODE)(UCHAR Node, PULONGLONG AvailableBytes);
 static PFN_GETNUMAAVAILABLEMEMORYNODE GetNumaAvailableMemoryNodeProc;
 
@@ -230,6 +233,8 @@ static void hwloc_win_get_function_ptrs(void)
 	(PFN_GETCURRENTPROCESSORNUMBER) GetProcAddress(kernel32, "GetCurrentProcessorNumber");
       GetCurrentProcessorNumberExProc =
 	(PFN_GETCURRENTPROCESSORNUMBEREX) GetProcAddress(kernel32, "GetCurrentProcessorNumberEx");
+      GetThreadGroupAffinityProc =
+	(PFN_GETTHREADGROUPAFFINITY) GetProcAddress(kernel32, "GetThreadGroupAffinity");
       GetNumaAvailableMemoryNodeProc =
 	(PFN_GETNUMAAVAILABLEMEMORYNODE) GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
       GetNumaAvailableMemoryNodeExProc =
@@ -399,7 +404,43 @@ hwloc_win_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_
   return ret;
 }
 
-/* TODO: GetThreadGroupAffinity */
+
+/******************************
+ * get cpu/membind for threads
+ */
+
+  static int
+hwloc_win_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_cpuset_t set, int flags __hwloc_attribute_unused)
+{
+  GROUP_AFFINITY aff;
+
+  assert(GetThreadGroupAffinityProc);
+
+  if (!GetThreadGroupAffinityProc(thread, &aff))
+    return -1;
+  hwloc_bitmap_from_ith_ULONG_PTR(set, aff.Group, aff.Mask);
+  return 0;
+}
+
+static int
+hwloc_win_get_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int flags __hwloc_attribute_unused)
+{
+  return hwloc_win_get_thread_cpubind(topology, GetCurrentThread(), set, flags);
+}
+
+static int
+hwloc_win_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
+{
+  int ret;
+  hwloc_cpuset_t cpuset = hwloc_bitmap_alloc();
+  ret = hwloc_win_get_thread_cpubind(topology, GetCurrentThread(), cpuset, flags);
+  if (!ret) {
+    *policy = HWLOC_MEMBIND_BIND;
+    hwloc_cpuset_to_nodeset(topology, cpuset, nodeset);
+  }
+  hwloc_bitmap_free(cpuset);
+  return ret;
+}
 
 
 /********************************
@@ -945,6 +986,12 @@ hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
     hooks->set_thisproc_membind = hwloc_win_set_thisproc_membind;
     hooks->get_thisproc_membind = hwloc_win_get_thisproc_membind;
     hooks->set_thisthread_membind = hwloc_win_set_thisthread_membind;
+  }
+
+  if (GetThreadGroupAffinityProc) {
+    hooks->get_thread_cpubind = hwloc_win_get_thread_cpubind;
+    hooks->get_thisthread_cpubind = hwloc_win_get_thisthread_cpubind;
+    hooks->get_thisthread_membind = hwloc_win_get_thisthread_membind;
   }
 
   if (VirtualAllocExNumaProc) {
