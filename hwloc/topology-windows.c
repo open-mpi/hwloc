@@ -172,6 +172,63 @@ typedef struct _PSAPI_WORKING_SET_EX_INFORMATION {
 } PSAPI_WORKING_SET_EX_INFORMATION;
 #endif
 
+/* Function pointers */
+
+typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATION)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
+static PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
+
+typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATIONEX)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
+static PFN_GETLOGICALPROCESSORINFORMATIONEX GetLogicalProcessorInformationExProc;
+
+typedef BOOL (WINAPI *PFN_GETNUMAAVAILABLEMEMORYNODE)(UCHAR Node, PULONGLONG AvailableBytes);
+static PFN_GETNUMAAVAILABLEMEMORYNODE GetNumaAvailableMemoryNodeProc;
+
+typedef BOOL (WINAPI *PFN_GETNUMAAVAILABLEMEMORYNODEEX)(USHORT Node, PULONGLONG AvailableBytes);
+static PFN_GETNUMAAVAILABLEMEMORYNODEEX GetNumaAvailableMemoryNodeExProc;
+
+typedef LPVOID (WINAPI *PFN_VIRTUALALLOCEXNUMA)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect, DWORD nndPreferred);
+static PFN_VIRTUALALLOCEXNUMA VirtualAllocExNumaProc;
+
+typedef BOOL (WINAPI *PFN_VIRTUALFREEEX)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType);
+static PFN_VIRTUALFREEEX VirtualFreeExProc;
+
+typedef BOOL (WINAPI *PFN_QUERYWORKINGSETEX)(HANDLE hProcess, PVOID pv, DWORD cb);
+static PFN_QUERYWORKINGSETEX QueryWorkingSetExProc;
+
+static void hwloc_win_get_function_ptrs(void)
+{
+  static int done = 0;
+  if (!done) {
+    HMODULE kernel32;
+
+    kernel32 = LoadLibrary("kernel32.dll");
+    if (kernel32) {
+      GetLogicalProcessorInformationProc =
+	(PFN_GETLOGICALPROCESSORINFORMATION) GetProcAddress(kernel32, "GetLogicalProcessorInformation");
+      GetNumaAvailableMemoryNodeProc =
+	(PFN_GETNUMAAVAILABLEMEMORYNODE) GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
+      GetNumaAvailableMemoryNodeExProc =
+	(PFN_GETNUMAAVAILABLEMEMORYNODEEX) GetProcAddress(kernel32, "GetNumaAvailableMemoryNodeEx");
+      GetLogicalProcessorInformationExProc =
+	(PFN_GETLOGICALPROCESSORINFORMATIONEX)GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
+      VirtualAllocExNumaProc =
+	(PFN_VIRTUALALLOCEXNUMA) GetProcAddress(kernel32, "K32QueryWorkingSetEx");
+      VirtualAllocExNumaProc =*
+	(PFN_VIRTUALALLOCEXNUMA) GetProcAddress(kernel32, "VirtualAllocExNuma");
+      VirtualFreeExProc =
+	(PFN_VIRTUALFREEEX) GetProcAddress(kernel32, "VirtualFreeEx");
+    }
+
+    if (!VirtualAllocExNumaProc) {
+      HMODULE psapi = LoadLibrary("psapi.dll");
+      if (psapi)
+        VirtualAllocExNumaProc = (PFN_VIRTUALALLOCEXNUMA) GetProcAddress(psapi, "QueryWorkingSetEx");
+    }
+
+    done = 1;
+  }
+}
+
 /*
  * ULONG_PTR and DWORD_PTR are 64/32bits depending on the arch
  * while bitmaps use unsigned long (always 32bits)
@@ -345,42 +402,6 @@ hwloc_win_get_thisproc_membind(hwloc_topology_t topology, hwloc_nodeset_t nodese
   return hwloc_win_get_proc_membind(topology, GetCurrentProcess(), nodeset, policy, flags);
 }
 
-typedef LPVOID (WINAPI *PFN_VIRTUALALLOCEXNUMA)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect, DWORD nndPreferred);
-PFN_VIRTUALALLOCEXNUMA VirtualAllocExNumaProc = NULL;
-
-typedef BOOL (WINAPI *PFN_VIRTUALFREEEX)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType);
-PFN_VIRTUALFREEEX VirtualFreeExProc = NULL;
-
-typedef BOOL (WINAPI *PFN_QUERYWORKINGSETEX)(HANDLE hProcess, PVOID pv, DWORD cb);
-PFN_QUERYWORKINGSETEX QueryWorkingSetExProc = NULL;
-
-static int hwloc_win_get_VirtualAllocExNumaProc(void) {
-  if (VirtualAllocExNumaProc == NULL) {
-    FARPROC alloc_fun = NULL, free_fun = NULL;
-    HMODULE kernel32;
-
-    kernel32 = LoadLibrary("kernel32.dll");
-    if (kernel32) {
-      alloc_fun = GetProcAddress(kernel32, "VirtualAllocExNuma");
-      free_fun = GetProcAddress(kernel32, "VirtualFreeEx");
-    }
-
-    if (!alloc_fun || !free_fun) {
-      VirtualAllocExNumaProc = (PFN_VIRTUALALLOCEXNUMA) -1;
-      errno = ENOSYS;
-      return -1;
-    }
-
-    VirtualAllocExNumaProc = (PFN_VIRTUALALLOCEXNUMA)alloc_fun;
-    VirtualFreeExProc = (PFN_VIRTUALFREEEX)free_fun;
-  } else if (VirtualAllocExNumaProc == (PFN_VIRTUALALLOCEXNUMA)-1) {
-    errno = ENOSYS;
-    return -1;
-  }
-
-  return 0;
-}
-
 static void *
 hwloc_win_alloc(hwloc_topology_t topology __hwloc_attribute_unused, size_t len) {
   return VirtualAlloc(NULL, len, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE);
@@ -420,35 +441,6 @@ hwloc_win_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void 
     return 0;
   if (!VirtualFreeExProc(GetCurrentProcess(), addr, 0, MEM_RELEASE))
     return -1;
-  return 0;
-}
-
-static int hwloc_win_get_QueryWorkingSetExProc(void) {
-  if (QueryWorkingSetExProc == NULL) {
-    FARPROC fun = NULL;
-    HMODULE kernel32, psapi;
-
-    kernel32 = LoadLibrary("kernel32.dll");
-    if (kernel32)
-      fun = GetProcAddress(kernel32, "K32QueryWorkingSetEx");
-    if (!fun) {
-      psapi = LoadLibrary("psapi.dll");
-      if (psapi)
-        fun = GetProcAddress(psapi, "QueryWorkingSetEx");
-    }
-
-    if (!fun) {
-      QueryWorkingSetExProc = (PFN_QUERYWORKINGSETEX) -1;
-      errno = ENOSYS;
-      return -1;
-    }
-
-    QueryWorkingSetExProc = (PFN_QUERYWORKINGSETEX)fun;
-  } else if (QueryWorkingSetExProc == (PFN_QUERYWORKINGSETEX)-1) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   return 0;
 }
 
@@ -506,23 +498,12 @@ hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, c
 static int
 hwloc_look_windows(struct hwloc_backend *backend)
 {
-  typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATION)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
-  PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
-
-  typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATIONEX)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
-  PFN_GETLOGICALPROCESSORINFORMATIONEX GetLogicalProcessorInformationExProc;
-
-  typedef BOOL (WINAPI *PFN_GETNUMAAVAILABLEMEMORYNODE)(UCHAR Node, PULONGLONG AvailableBytes);
-  PFN_GETNUMAAVAILABLEMEMORYNODE GetNumaAvailableMemoryNodeProc;
-
-  typedef BOOL (WINAPI *PFN_GETNUMAAVAILABLEMEMORYNODEEX)(USHORT Node, PULONGLONG AvailableBytes);
-  PFN_GETNUMAAVAILABLEMEMORYNODEEX GetNumaAvailableMemoryNodeExProc;
-
   struct hwloc_topology *topology = backend->topology;
   hwloc_bitmap_t groups_pu_set = NULL;
   SYSTEM_INFO SystemInfo;
   DWORD length;
-  HMODULE kernel32;
+
+  hwloc_win_get_function_ptrs();
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
@@ -532,18 +513,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 
   GetSystemInfo(&SystemInfo);
 
-  kernel32 = LoadLibrary("kernel32.dll");
-  if (kernel32) {
-    GetLogicalProcessorInformationProc =
-      (PFN_GETLOGICALPROCESSORINFORMATION)GetProcAddress(kernel32, "GetLogicalProcessorInformation");
-    GetNumaAvailableMemoryNodeProc =
-      (PFN_GETNUMAAVAILABLEMEMORYNODE)GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
-    GetNumaAvailableMemoryNodeExProc =
-      (PFN_GETNUMAAVAILABLEMEMORYNODEEX)GetProcAddress(kernel32, "GetNumaAvailableMemoryNodeEx");
-    GetLogicalProcessorInformationExProc =
-      (PFN_GETLOGICALPROCESSORINFORMATIONEX)GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
-
-    if (!GetLogicalProcessorInformationExProc && GetLogicalProcessorInformationProc) {
+  if (!GetLogicalProcessorInformationExProc && GetLogicalProcessorInformationProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;
       unsigned id;
       unsigned i;
@@ -657,9 +627,9 @@ hwloc_look_windows(struct hwloc_backend *backend)
       }
 
       free(procInfo);
-    }
+  }
 
-    if (GetLogicalProcessorInformationExProc) {
+  if (GetLogicalProcessorInformationExProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX procInfoTotal, procInfo;
 
       unsigned id;
@@ -805,8 +775,6 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	hwloc_insert_object_by_cpuset(topology, obj);
       }
       free(procInfoTotal);
-    }
-
   }
 
   if (groups_pu_set) {
@@ -839,6 +807,8 @@ void
 hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
 			struct hwloc_topology_support *support)
 {
+  hwloc_win_get_function_ptrs();
+
   hooks->set_proc_cpubind = hwloc_win_set_proc_cpubind;
   hooks->get_proc_cpubind = hwloc_win_get_proc_cpubind;
   hooks->set_thread_cpubind = hwloc_win_set_thread_cpubind;
@@ -853,14 +823,14 @@ hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
   hooks->get_thisproc_membind = hwloc_win_get_thisproc_membind;
   hooks->set_thisthread_membind = hwloc_win_set_thisthread_membind;
 
-  if (!hwloc_win_get_VirtualAllocExNumaProc()) {
+  if (VirtualAllocExNumaProc) {
     hooks->alloc_membind = hwloc_win_alloc_membind;
     hooks->alloc = hwloc_win_alloc;
     hooks->free_membind = hwloc_win_free_membind;
     support->membind->bind_membind = 1;
   }
 
-  if (!hwloc_win_get_QueryWorkingSetExProc())
+  if (QueryWorkingSetExProc)
     hooks->get_area_membind = hwloc_win_get_area_membind;
 }
 
