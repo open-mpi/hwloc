@@ -355,6 +355,8 @@ hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 {
   DWORD_PTR mask;
 
+  assert(nr_processor_groups == 1);
+
   if (flags & HWLOC_CPUBIND_NOMEMBIND) {
     errno = ENOSYS;
     return -1;
@@ -408,6 +410,9 @@ static int
 hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   DWORD_PTR mask;
+
+  assert(nr_processor_groups == 1);
+
   if (flags & HWLOC_CPUBIND_NOMEMBIND) {
     errno = ENOSYS;
     return -1;
@@ -470,6 +475,9 @@ static int
 hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_bitmap_t hwloc_set, int flags)
 {
   DWORD_PTR proc_mask, sys_mask;
+
+  assert(nr_processor_groups == 1);
+
   if (flags & HWLOC_CPUBIND_NOMEMBIND) {
     errno = ENOSYS;
     return -1;
@@ -924,18 +932,20 @@ hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
   if (GetCurrentProcessorNumberExProc || (GetCurrentProcessorNumberProc && nr_processor_groups == 1))
     hooks->get_thisthread_last_cpu_location = hwloc_win_get_thisthread_last_cpu_location;
 
-  hooks->set_proc_cpubind = hwloc_win_set_proc_cpubind;
-  hooks->get_proc_cpubind = hwloc_win_get_proc_cpubind;
-  hooks->set_thread_cpubind = hwloc_win_set_thread_cpubind;
-  hooks->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
-  hooks->get_thisproc_cpubind = hwloc_win_get_thisproc_cpubind;
-  hooks->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
+  if (nr_processor_groups == 1) {
+    hooks->set_proc_cpubind = hwloc_win_set_proc_cpubind;
+    hooks->get_proc_cpubind = hwloc_win_get_proc_cpubind;
+    hooks->set_thread_cpubind = hwloc_win_set_thread_cpubind;
+    hooks->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
+    hooks->get_thisproc_cpubind = hwloc_win_get_thisproc_cpubind;
+    hooks->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
 
-  hooks->set_proc_membind = hwloc_win_set_proc_membind;
-  hooks->get_proc_membind = hwloc_win_get_proc_membind;
-  hooks->set_thisproc_membind = hwloc_win_set_thisproc_membind;
-  hooks->get_thisproc_membind = hwloc_win_get_thisproc_membind;
-  hooks->set_thisthread_membind = hwloc_win_set_thisthread_membind;
+    hooks->set_proc_membind = hwloc_win_set_proc_membind;
+    hooks->get_proc_membind = hwloc_win_get_proc_membind;
+    hooks->set_thisproc_membind = hwloc_win_set_thisproc_membind;
+    hooks->get_thisproc_membind = hwloc_win_get_thisproc_membind;
+    hooks->set_thisthread_membind = hwloc_win_set_thisthread_membind;
+  }
 
   if (VirtualAllocExNumaProc) {
     hooks->alloc_membind = hwloc_win_alloc_membind;

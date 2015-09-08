@@ -31,6 +31,7 @@ Version 1.11.1
 * Fix some segfaults when inputting an invalid synthetic description.
 * Many fixes and improvements in the Windows backend:
   + Add get_last_cpu_location() support for the current thread.
+  + Disable binding features when not supported with multiple processor groups.
 * Fix support for more than 32 processors on 64bits Windows.
 * Fix the discovery of multiple processor groups on Windows.
 * Fix/update the Visual Studio support under contrib/windows.
