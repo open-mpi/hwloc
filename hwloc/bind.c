@@ -23,9 +23,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-/* TODO: HWLOC_GNU_SYS, HWLOC_IRIX_SYS,
- *
- * IRIX: see MP_MUSTRUN / _DSM_MUSTRUN, pthread_setrunon_np, /hw, procss_cpulink, numa_create
+/* TODO: HWLOC_GNU_SYS,
  *
  * We could use glibc's sched_setaffinity generically when it is available
  *

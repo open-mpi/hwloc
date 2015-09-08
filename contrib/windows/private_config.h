@@ -520,9 +520,6 @@
 /* Define to 1 on HP-UX */
 /* #undef HWLOC_HPUX_SYS */
 
-/* Define to 1 on Irix */
-/* #undef HWLOC_IRIX_SYS */
-
 /* Define to 1 on Linux */
 /* #undef HWLOC_LINUX_SYS */
 
