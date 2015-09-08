@@ -304,6 +304,11 @@ static ULONG_PTR hwloc_bitmap_to_ULONG_PTR(hwloc_const_bitmap_t set)
 #endif
 }
 
+
+/********************
+ * last_cpu_location
+ */
+
 static int
 hwloc_win_get_thisthread_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int flags __hwloc_attribute_unused)
 {
@@ -326,6 +331,10 @@ hwloc_win_get_thisthread_last_cpu_location(hwloc_topology_t topology __hwloc_att
  * OpenThread(THREAD_SET_INFORMATION|THREAD_QUERY_INFORMATION, FALSE, te32.th32ThreadID) to get a handle.
  */
 
+
+/******************************
+ * set cpu/membind for threads
+ */
 
 /* TODO: SetThreadIdealProcessor{,Ex} */
 
@@ -373,6 +382,11 @@ hwloc_win_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_
 
 /* TODO: GetThreadGroupAffinity */
 
+
+/********************************
+ * set cpu/membind for processes
+ */
+
 static int
 hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_const_bitmap_t hwloc_set, int flags)
 {
@@ -389,6 +403,12 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, h
   if (!SetProcessAffinityMask(proc, mask))
     return -1;
   return 0;
+}
+
+static int
+hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
+{
+  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, flags);
 }
 
 static int
@@ -409,6 +429,17 @@ hwloc_win_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
   hwloc_bitmap_free(cpuset);
   return ret;
 }
+
+static int
+hwloc_win_set_thisproc_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  return hwloc_win_set_proc_membind(topology, GetCurrentProcess(), nodeset, policy, flags);
+}
+
+
+/********************************
+ * get cpu/membind for processes
+ */
 
 static int
 hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_bitmap_t hwloc_set, int flags)
@@ -440,18 +471,6 @@ hwloc_win_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nod
 }
 
 static int
-hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
-{
-  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, flags);
-}
-
-static int
-hwloc_win_set_thisproc_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
-{
-  return hwloc_win_set_proc_membind(topology, GetCurrentProcess(), nodeset, policy, flags);
-}
-
-static int
 hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_cpuset, int flags)
 {
   return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), hwloc_cpuset, flags);
@@ -462,6 +481,11 @@ hwloc_win_get_thisproc_membind(hwloc_topology_t topology, hwloc_nodeset_t nodese
 {
   return hwloc_win_get_proc_membind(topology, GetCurrentProcess(), nodeset, policy, flags);
 }
+
+
+/************************
+ * membind alloc/free
+ */
 
 static void *
 hwloc_win_alloc(hwloc_topology_t topology __hwloc_attribute_unused, size_t len) {
@@ -504,6 +528,11 @@ hwloc_win_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void 
     return -1;
   return 0;
 }
+
+
+/**********************
+ * membind for areas
+ */
 
 static int
 hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
@@ -555,6 +584,11 @@ hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, c
     return 0;
   }
 }
+
+
+/*************************
+ * discovery
+ */
 
 static int
 hwloc_look_windows(struct hwloc_backend *backend)
