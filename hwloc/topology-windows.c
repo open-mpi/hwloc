@@ -172,12 +172,26 @@ typedef struct _PSAPI_WORKING_SET_EX_INFORMATION {
 } PSAPI_WORKING_SET_EX_INFORMATION;
 #endif
 
+#ifndef HAVE_PROCESSOR_NUMBER
+typedef struct _PROCESSOR_NUMBER {
+  WORD Group;
+  BYTE Number;
+  BYTE Reserved;
+} PROCESSOR_NUMBER, *PPROCESSOR_NUMBER;
+#endif
+
 /* Function pointers */
 
 typedef WORD (WINAPI *PFN_GETACTIVEPROCESSORGROUPCOUNT)(void);
 static PFN_GETACTIVEPROCESSORGROUPCOUNT GetActiveProcessorGroupCountProc;
 
 static unsigned long nr_processor_groups = 1;
+
+typedef DWORD (WINAPI *PFN_GETCURRENTPROCESSORNUMBER)(void);
+static PFN_GETCURRENTPROCESSORNUMBER GetCurrentProcessorNumberProc;
+
+typedef VOID (WINAPI *PFN_GETCURRENTPROCESSORNUMBEREX)(PPROCESSOR_NUMBER);
+static PFN_GETCURRENTPROCESSORNUMBEREX GetCurrentProcessorNumberExProc;
 
 typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATION)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
 static PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
@@ -212,6 +226,10 @@ static void hwloc_win_get_function_ptrs(void)
 	(PFN_GETACTIVEPROCESSORGROUPCOUNT) GetProcAddress(kernel32, "GetActiveProcessorGroupCount");
       GetLogicalProcessorInformationProc =
 	(PFN_GETLOGICALPROCESSORINFORMATION) GetProcAddress(kernel32, "GetLogicalProcessorInformation");
+      GetCurrentProcessorNumberProc =
+	(PFN_GETCURRENTPROCESSORNUMBER) GetProcAddress(kernel32, "GetCurrentProcessorNumber");
+      GetCurrentProcessorNumberExProc =
+	(PFN_GETCURRENTPROCESSORNUMBEREX) GetProcAddress(kernel32, "GetCurrentProcessorNumberEx");
       GetNumaAvailableMemoryNodeProc =
 	(PFN_GETNUMAAVAILABLEMEMORYNODE) GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
       GetNumaAvailableMemoryNodeExProc =
@@ -254,6 +272,16 @@ static void hwloc_bitmap_from_ULONG_PTR(hwloc_bitmap_t set, ULONG_PTR mask)
 #endif
 }
 
+static void hwloc_bitmap_from_ith_ULONG_PTR(hwloc_bitmap_t set, unsigned i, ULONG_PTR mask)
+{
+#if SIZEOF_VOID_P == 8
+  hwloc_bitmap_from_ith_ulong(set, 2*i, mask & 0xffffffff);
+  hwloc_bitmap_set_ith_ulong(set, 2*i+1, mask >> 32);
+#else
+  hwloc_bitmap_from_ith_ulong(set, i, mask);
+#endif
+}
+
 static void hwloc_bitmap_set_ith_ULONG_PTR(hwloc_bitmap_t set, unsigned i, ULONG_PTR mask)
 {
 #if SIZEOF_VOID_P == 8
@@ -275,6 +303,29 @@ static ULONG_PTR hwloc_bitmap_to_ULONG_PTR(hwloc_const_bitmap_t set)
   return hwloc_bitmap_to_ulong(set);
 #endif
 }
+
+static int
+hwloc_win_get_thisthread_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int flags __hwloc_attribute_unused)
+{
+  assert(GetCurrentProcessorNumberExProc || (GetCurrentProcessorNumberProc && nr_processor_groups == 1));
+
+  if (nr_processor_groups > 1 || !GetCurrentProcessorNumberProc) {
+    PROCESSOR_NUMBER num;
+    GetCurrentProcessorNumberExProc(&num);
+    hwloc_bitmap_from_ith_ULONG_PTR(set, num.Group, ((ULONG_PTR)1) << num.Number);
+    return 0;
+  }
+
+  hwloc_bitmap_from_ith_ULONG_PTR(set, 0, ((ULONG_PTR)1) << GetCurrentProcessorNumberProc());
+  return 0;
+}
+
+/* TODO: hwloc_win_get_thisproc_last_cpu_location() using
+ * CreateToolhelp32Snapshot(), Thread32First/Next()
+ * th.th32OwnerProcessID == GetCurrentProcessId() for filtering within process
+ * OpenThread(THREAD_SET_INFORMATION|THREAD_QUERY_INFORMATION, FALSE, te32.th32ThreadID) to get a handle.
+ */
+
 
 /* TODO: SetThreadIdealProcessor{,Ex} */
 
@@ -819,13 +870,15 @@ hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
 {
   hwloc_win_get_function_ptrs();
 
+  if (GetCurrentProcessorNumberExProc || (GetCurrentProcessorNumberProc && nr_processor_groups == 1))
+    hooks->get_thisthread_last_cpu_location = hwloc_win_get_thisthread_last_cpu_location;
+
   hooks->set_proc_cpubind = hwloc_win_set_proc_cpubind;
   hooks->get_proc_cpubind = hwloc_win_get_proc_cpubind;
   hooks->set_thread_cpubind = hwloc_win_set_thread_cpubind;
   hooks->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
   hooks->get_thisproc_cpubind = hwloc_win_get_thisproc_cpubind;
   hooks->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
-  /* TODO: get_last_cpu_location: use GetCurrentProcessorNumber */
 
   hooks->set_proc_membind = hwloc_win_set_proc_membind;
   hooks->get_proc_membind = hwloc_win_get_proc_membind;
