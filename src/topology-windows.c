@@ -174,6 +174,11 @@ typedef struct _PSAPI_WORKING_SET_EX_INFORMATION {
 
 /* Function pointers */
 
+typedef WORD (WINAPI *PFN_GETACTIVEPROCESSORGROUPCOUNT)(void);
+static PFN_GETACTIVEPROCESSORGROUPCOUNT GetActiveProcessorGroupCountProc;
+
+static unsigned long nr_processor_groups = 1;
+
 typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATION)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
 static PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
 
@@ -203,6 +208,8 @@ static void hwloc_win_get_function_ptrs(void)
 
     kernel32 = LoadLibrary("kernel32.dll");
     if (kernel32) {
+      GetActiveProcessorGroupCountProc =
+	(PFN_GETACTIVEPROCESSORGROUPCOUNT) GetProcAddress(kernel32, "GetActiveProcessorGroupCount");
       GetLogicalProcessorInformationProc =
 	(PFN_GETLOGICALPROCESSORINFORMATION) GetProcAddress(kernel32, "GetLogicalProcessorInformation");
       GetNumaAvailableMemoryNodeProc =
@@ -218,6 +225,9 @@ static void hwloc_win_get_function_ptrs(void)
       VirtualFreeExProc =
 	(PFN_VIRTUALFREEEX) GetProcAddress(kernel32, "VirtualFreeEx");
     }
+
+    if (GetActiveProcessorGroupCountProc)
+      nr_processor_groups = GetActiveProcessorGroupCountProc();
 
     if (!VirtualAllocExNumaProc) {
       HMODULE psapi = LoadLibrary("psapi.dll");
