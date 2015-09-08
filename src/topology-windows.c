@@ -305,6 +305,18 @@ static ULONG_PTR hwloc_bitmap_to_ULONG_PTR(hwloc_const_bitmap_t set)
 }
 
 
+/**************************************************************
+ * hwloc PU numbering with respect to Windows processor groups
+ *
+ * Everywhere below we reserve 64 physical indexes per processor groups because that's
+ * the maximum (MAXIMUM_PROC_PER_GROUP). Windows may actually use less bits than that
+ * in some groups (either to avoid splitting NUMA nodes across groups, or because of OS
+ * tweaks such as "bcdedit /set groupsize 8") but we keep some unused indexes for simplicity.
+ * That means PU physical indexes and cpusets may be non-contigous.
+ * That also means hwloc_fallback_nbprocessors() below must return the last PU index + 1
+ * instead the actual number of processors.
+ */
+
 /********************
  * last_cpu_location
  */
@@ -347,7 +359,10 @@ hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
     errno = ENOSYS;
     return -1;
   }
-  /* TODO: groups SetThreadGroupAffinity */
+  /* TODO if set covers multiple groups, return error */
+  /* TODO use SetThreadGroupAffinity() if available */
+  /* TODO or fallback to SetThreadAffinityMask() if nr_processor_groups == 1 */
+  /* TODO or maybe fallback to SetThreadAffinityMask() if setting inside the current group? */
   /* The resulting binding is always strict */
   mask = hwloc_bitmap_to_ULONG_PTR(hwloc_set);
   if (!SetThreadAffinityMask(thread, mask))
@@ -397,8 +412,17 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, h
     errno = ENOSYS;
     return -1;
   }
-  /* TODO: groups, hard: has to manually bind all threads into the other group,
-   * and the bind the process inside the group */
+
+  /* TODO: SetThreadGroupAffinity() for all threads doesn't enforce the whole process affinity,
+   * maybe because of process-specific resource locality */
+  /* TODO: if we are in a single group (check with GetProcessGroupAffinity()),
+   * SetProcessAffinityMask() changes the binding within that same group.
+   */
+  /* TODO: NtSetInformationProcess() works very well for binding to any mask in a single group,
+   * but it's an internal routine.
+   */
+  /* TODO: checks whether hwloc-bind.c needs to pass INHERIT_PARENT_AFFINITY to CreateProcess() instead of execvp(). */
+
   /* The resulting binding is always strict */
   mask = hwloc_bitmap_to_ULONG_PTR(hwloc_set);
   if (!SetProcessAffinityMask(proc, mask))
@@ -450,7 +474,17 @@ hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, h
     errno = ENOSYS;
     return -1;
   }
-  /* TODO: groups, GetProcessGroupAffinity, or merge SetThreadGroupAffinity for all threads */
+
+  /* TODO: if we are in a single group (check with GetProcessGroupAffinity()),
+   * GetProcessAffinityMask() gives the mask within that group.
+   */
+  /* TODO: if we are in multiple groups, GetProcessGroupAffinity() gives their IDs,
+   * but we don't know their masks.
+   */
+  /* TODO: GetThreadGroupAffinity() for all threads can be smaller than the whole process affinity,
+   * maybe because of process-specific resource locality.
+   */
+
   if (!GetProcessAffinityMask(proc, &proc_mask, &sys_mask))
     return -1;
   hwloc_bitmap_from_ULONG_PTR(hwloc_set, proc_mask);

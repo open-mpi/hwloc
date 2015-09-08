@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2015 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -401,6 +401,10 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
+  /* FIXME: check whether Windows execvp() passes INHERIT_PARENT_AFFINITY to CreateProcess()
+   * because we need to propagate processor group affinity. However process-wide affinity
+   * isn't supported with processor groups so far.
+   */
   ret = execvp(argv[0], argv);
   if (ret) {
       fprintf(stderr, "%s: Failed to launch executable \"%s\"\n",
