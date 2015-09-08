@@ -398,7 +398,8 @@ EOF])
                     GROUP_RELATIONSHIP,
                     SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX,
 		    PSAPI_WORKING_SET_EX_BLOCK,
-		    PSAPI_WORKING_SET_EX_INFORMATION],
+		    PSAPI_WORKING_SET_EX_INFORMATION,
+		    PROCESSOR_NUMBER],
                     [],[],[[#include <windows.h>]])
     CPPFLAGS="$old_CPPFLAGS"
     AC_CHECK_LIB([gdi32], [main],

@@ -232,6 +232,9 @@
    */
 /* #undef HAVE_PSAPI_WORKING_SET_EX_INFORMATION */
 
+/* Define to 1 if the system has the type `PROCESSOR_NUMBER'. */
+#define HAVE_PROCESSOR_NUMBER 1
+
 /* Define to 1 if you have the <pthread_np.h> header file. */
 /* #undef HAVE_PTHREAD_NP_H */
 
