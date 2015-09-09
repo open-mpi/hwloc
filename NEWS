@@ -30,6 +30,7 @@ Version 1.11.1
 * Fix a memory leak on failure to load a xml diff file.
 * Fix some segfaults when inputting an invalid synthetic description.
 * Many fixes and improvements in the Windows backend:
+  + Add thread binding set support in case of multiple process groups.
   + Add thread binding get support.
   + Add get_last_cpu_location() support for the current thread.
   + Disable binding features when not supported with multiple processor groups.
