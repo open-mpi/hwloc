@@ -199,6 +199,9 @@ static PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
 typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATIONEX)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
 static PFN_GETLOGICALPROCESSORINFORMATIONEX GetLogicalProcessorInformationExProc;
 
+typedef BOOL (WINAPI *PFN_SETTHREADGROUPAFFINITY)(HANDLE hThread, const GROUP_AFFINITY *GroupAffinity, PGROUP_AFFINITY PreviousGroupAffinity);
+static PFN_SETTHREADGROUPAFFINITY SetThreadGroupAffinityProc;
+
 typedef BOOL (WINAPI *PFN_GETTHREADGROUPAFFINITY)(HANDLE hThread, PGROUP_AFFINITY GroupAffinity);
 static PFN_GETTHREADGROUPAFFINITY GetThreadGroupAffinityProc;
 
@@ -233,6 +236,8 @@ static void hwloc_win_get_function_ptrs(void)
 	(PFN_GETCURRENTPROCESSORNUMBER) GetProcAddress(kernel32, "GetCurrentProcessorNumber");
       GetCurrentProcessorNumberExProc =
 	(PFN_GETCURRENTPROCESSORNUMBEREX) GetProcAddress(kernel32, "GetCurrentProcessorNumberEx");
+      SetThreadGroupAffinityProc =
+	(PFN_SETTHREADGROUPAFFINITY) GetProcAddress(kernel32, "SetThreadGroupAffinity");
       GetThreadGroupAffinityProc =
 	(PFN_GETTHREADGROUPAFFINITY) GetProcAddress(kernel32, "GetThreadGroupAffinity");
       GetNumaAvailableMemoryNodeProc =
@@ -309,6 +314,34 @@ static ULONG_PTR hwloc_bitmap_to_ULONG_PTR(hwloc_const_bitmap_t set)
 #endif
 }
 
+static ULONG_PTR hwloc_bitmap_to_ith_ULONG_PTR(hwloc_const_bitmap_t set, unsigned i)
+{
+#if SIZEOF_VOID_P == 8
+  ULONG_PTR up = hwloc_bitmap_to_ith_ulong(set, 2*i+1);
+  up <<= 32;
+  up |= hwloc_bitmap_to_ith_ulong(set, 2*i);
+  return up;
+#else
+  return hwloc_bitmap_to_ith_ulong(set, i);
+#endif
+}
+
+/* convert set into index+mask if all set bits are in the same ULONG.
+ * otherwise return -1.
+ */
+static int hwloc_bitmap_to_single_ULONG_PTR(hwloc_const_bitmap_t set, unsigned *index, ULONG_PTR *mask)
+{
+  unsigned first_ulp, last_ulp;
+  if (hwloc_bitmap_weight(set) == -1)
+    return -1;
+  first_ulp = hwloc_bitmap_first(set) / (sizeof(ULONG_PTR)*8);
+  last_ulp = hwloc_bitmap_last(set) / (sizeof(ULONG_PTR)*8);
+  if (first_ulp != last_ulp)
+    return -1;
+  *mask = hwloc_bitmap_to_ith_ULONG_PTR(set, first_ulp);
+  *index = first_ulp;
+  return 0;
+}
 
 /**************************************************************
  * hwloc PU numbering with respect to Windows processor groups
@@ -359,21 +392,34 @@ static int
 hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   DWORD_PTR mask;
-
-  assert(nr_processor_groups == 1);
+  unsigned group;
 
   if (flags & HWLOC_CPUBIND_NOMEMBIND) {
     errno = ENOSYS;
     return -1;
   }
-  /* TODO if set covers multiple groups, return error */
-  /* TODO use SetThreadGroupAffinity() if available */
-  /* TODO or fallback to SetThreadAffinityMask() if nr_processor_groups == 1 */
-  /* TODO or maybe fallback to SetThreadAffinityMask() if setting inside the current group? */
-  /* The resulting binding is always strict */
-  mask = hwloc_bitmap_to_ULONG_PTR(hwloc_set);
-  if (!SetThreadAffinityMask(thread, mask))
+
+  if (hwloc_bitmap_to_single_ULONG_PTR(hwloc_set, &group, &mask) < 0) {
+    errno = ENOSYS;
     return -1;
+  }
+
+  assert(nr_processor_groups == 1 || SetThreadGroupAffinityProc);
+
+  if (nr_processor_groups > 1) {
+    GROUP_AFFINITY aff;
+    memset(&aff, 0, sizeof(aff)); /* we get Invalid Parameter error if Reserved field isn't cleared */
+    aff.Group = group;
+    aff.Mask = mask;
+    if (!SetThreadGroupAffinityProc(thread, &aff, NULL))
+      return -1;
+
+  } else {
+    /* SetThreadAffinityMask() only changes the mask inside the current processor group */
+    /* The resulting binding is always strict */
+    if (!SetThreadAffinityMask(thread, mask))
+      return -1;
+  }
   return 0;
 }
 
@@ -992,18 +1038,18 @@ hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
   if (nr_processor_groups == 1) {
     hooks->set_proc_cpubind = hwloc_win_set_proc_cpubind;
     hooks->get_proc_cpubind = hwloc_win_get_proc_cpubind;
-    hooks->set_thread_cpubind = hwloc_win_set_thread_cpubind;
     hooks->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
     hooks->get_thisproc_cpubind = hwloc_win_get_thisproc_cpubind;
-    hooks->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
-
     hooks->set_proc_membind = hwloc_win_set_proc_membind;
     hooks->get_proc_membind = hwloc_win_get_proc_membind;
     hooks->set_thisproc_membind = hwloc_win_set_thisproc_membind;
     hooks->get_thisproc_membind = hwloc_win_get_thisproc_membind;
+  }
+  if (nr_processor_groups == 1 || SetThreadGroupAffinityProc) {
+    hooks->set_thread_cpubind = hwloc_win_set_thread_cpubind;
+    hooks->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
     hooks->set_thisthread_membind = hwloc_win_set_thisthread_membind;
   }
-
   if (GetThreadGroupAffinityProc) {
     hooks->get_thread_cpubind = hwloc_win_get_thread_cpubind;
     hooks->get_thisthread_cpubind = hwloc_win_get_thisthread_cpubind;
