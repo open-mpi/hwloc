@@ -4856,7 +4856,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
       fclose(file);
 
       /* is this a bridge? */
-      hwloc_pci_prepare_bridge(obj, config_space_cache);
+      if (hwloc_pci_prepare_bridge(obj, config_space_cache) < 0)
+	continue;
 
       /* get the revision */
       attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
