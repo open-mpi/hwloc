@@ -31,6 +31,8 @@ Version 1.11.1
 * Fix the discovery of multiple processor groups on Windows.
 * Fix/update the Visual Studio support under contrib/windows.
   Thanks to Eloi Gaudry for the help.
+* Ignore PCI bridges reporting buggy secondary-subordinate bus numbers.
+  Thanks to George Bosilca for reporting the issue.
 * Detect block devices directly attached to PCI without a controller,
   for instance NVMe disks. Thanks to Barry M. Tannenbaum.
 * Add the PCISlot attribute to all PCI functions instead of only the first one.
