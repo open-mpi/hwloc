@@ -390,6 +390,8 @@ HWLOC_DECLSPEC int hwloc_pci_find_linkspeed(const unsigned char *config, unsigne
 /** \brief Modify the PCI device object into a bridge and fill its attribute if a bridge is found in the PCI config space.
  *
  * This function requires 64 bytes of common configuration header at the beginning of config.
+ *
+ * Returns -1 and destroys /p obj if bridge fields are invalid.
  */
 HWLOC_DECLSPEC int hwloc_pci_prepare_bridge(hwloc_obj_t obj, const unsigned char *config);
 
