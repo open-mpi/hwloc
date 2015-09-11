@@ -2,7 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
- * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2011-2015 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -447,7 +447,7 @@ hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
 void *
 hwloc_alloc_heap(hwloc_topology_t topology __hwloc_attribute_unused, size_t len)
 {
-  void *p;
+  void *p = NULL;
 #if defined(hwloc_getpagesize) && defined(HAVE_POSIX_MEMALIGN)
   errno = posix_memalign(&p, hwloc_getpagesize(), len);
   if (errno)
