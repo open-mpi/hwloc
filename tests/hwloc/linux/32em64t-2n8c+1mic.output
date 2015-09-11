@@ -150,7 +150,6 @@
         <object type="PCIDev" pci_busid="0000:00:05.0" pci_type="0880 [8086:3c28] [1028:0518] 07" pci_link_speed="0.000000"/>
         <object type="PCIDev" pci_busid="0000:00:05.2" pci_type="0880 [8086:3c2a] [1028:0518] 07" pci_link_speed="0.000000"/>
         <object type="PCIDev" pci_busid="0000:00:05.4" pci_type="0800 [8086:3c2c] [1028:0518] 07" pci_link_speed="0.000000"/>
-        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[03-03]" pci_busid="0000:00:11.0" pci_type="0604 [8086:1d3e] [0000:0000] 06" pci_link_speed="0.000000"/>
         <object type="PCIDev" pci_busid="0000:00:16.0" pci_type="0780 [8086:1d3a] [1028:0518] 05" pci_link_speed="0.000000"/>
         <object type="PCIDev" pci_busid="0000:00:16.1" pci_type="0780 [8086:1d3b] [1028:0518] 05" pci_link_speed="0.000000"/>
         <object type="PCIDev" pci_busid="0000:00:1a.0" pci_type="0c03 [8086:1d2d] [1028:0518] 06" pci_link_speed="0.000000"/>
