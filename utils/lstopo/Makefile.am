@@ -37,7 +37,7 @@ lstopo_LDADD = $(lstopo_no_graphics_LDADD)
 if HWLOC_HAVE_CAIRO
 bin_PROGRAMS += lstopo
 lstopo_SOURCES += lstopo-cairo.c
-lstopo_CPPFLAGS += -DLSTOPO_HAVE_GRAPHICS
+lstopo_CPPFLAGS += -DLSTOPO_HAVE_GRAPHICS $(HWLOC_X11_CPPFLAGS)
 lstopo_CFLAGS = $(lstopo_no_graphics_CFLAGS) $(HWLOC_CAIRO_CFLAGS)
 lstopo_LDADD += $(HWLOC_CAIRO_LIBS) $(HWLOC_X11_LIBS)
 endif

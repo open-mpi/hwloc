@@ -31,6 +31,8 @@ Version 1.11.1
 * Fix the discovery of multiple processor groups on Windows.
 * Fix/update the Visual Studio support under contrib/windows.
   Thanks to Eloi Gaudry for the help.
+* Fix lstopo linking with X11 libraries, for instance on Mac OS X.
+  Thanks to Scott Atchley and Pierre Ramet for reporting the issue.
 * Ignore PCI bridges reporting buggy secondary-subordinate bus numbers.
   Thanks to George Bosilca for reporting the issue.
 * Detect block devices directly attached to PCI without a controller,
