@@ -621,6 +621,10 @@ extern "C" {
 #define hwloc_set_netbsd_hooks HWLOC_NAME(set_netbsd_hooks)
 #define hwloc_set_hpux_hooks HWLOC_NAME(set_hpux_hooks)
 
+#define hwloc_look_hardwired_fujitsu_k HWLOC_NAME(look_hardwired_fujitsu_k)
+#define hwloc_look_hardwired_fujitsu_fx10 HWLOC_NAME(look_hardwired_fujitsu_fx10)
+#define hwloc_look_hardwired_fujitsu_fx100 HWLOC_NAME(look_hardwired_fujitsu_fx100)
+
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
 #define hwloc_free_object_and_children HWLOC_NAME(free_object_and_children)

@@ -3693,6 +3693,52 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
   }
 }
 
+/* returns 0 on success, -1 on non-match or error during hardwired load */
+static int
+hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
+{
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  FILE *fd;
+  char line[128];
+
+  if (getenv("HWLOC_NO_HARDWIRED_TOPOLOGY"))
+    return -1;
+
+  if (!strcmp(data->utsname.machine, "s64fx")) {
+    /* Fujistu K-computer, FX10, and FX100 use specific processors
+     * whose Linux topology support is broken until 4.1 (acc455cffa75070d55e74fc7802b49edbc080e92and)
+     * and existing machines will likely never be fixed by kernel upgrade.
+     */
+
+    /* /proc/cpuinfo starts with one of these lines:
+     * "cpu             : Fujitsu SPARC64 VIIIfx"
+     * "cpu             : Fujitsu SPARC64 XIfx"
+     * "cpu             : Fujitsu SPARC64 IXfx"
+     */
+    fd = hwloc_fopen("/proc/cpuinfo", "r", data->root_fd);
+    if (!fd)
+      return -1;
+
+    if (!fgets(line, sizeof(line), fd)) {
+      fclose(fd);
+      return -1;
+    }
+    fclose(fd);
+
+    if (strncmp(line, "cpu	", 4))
+      return -1;
+
+    if (strstr(line, "Fujitsu SPARC64 VIIIfx"))
+      return hwloc_look_hardwired_fujitsu_k(topology);
+    else if (strstr(line, "Fujitsu SPARC64 IXfx"))
+      return hwloc_look_hardwired_fujitsu_fx10(topology);
+    else if (strstr(line, "FUJITSU SPARC64 XIfx"))
+      return hwloc_look_hardwired_fujitsu_fx100(topology);
+  }
+  return -1;
+}
+
 static int
 hwloc_look_linuxfs(struct hwloc_backend *backend)
 {
@@ -3738,7 +3784,11 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
           topology->levels[0][0]->memory.page_types[i].count = 0;
     }
 
-    /* Gather the list of cpus now */
+  /* Gather the list of cpus now */
+  err = hwloc_linux_try_hardwired_cpuinfo(backend);
+  if (!err)
+    goto done;
+
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
 	|| (hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, data->root_fd) < 0
 	    && hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, data->root_fd) < 0
@@ -3765,6 +3815,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 			&global_infos, &global_infos_count);
       hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
     }
+
+ done:
 
   /* Gather DMI info */
   hwloc__get_dmi_id_info(data, topology->levels[0][0]);
