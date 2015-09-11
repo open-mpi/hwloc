@@ -118,7 +118,7 @@ sources += topology-solaris-chiptype.c
 endif HWLOC_HAVE_SOLARIS
 
 if HWLOC_HAVE_LINUX
-sources += topology-linux.c
+sources += topology-linux.c topology-hardwired.c
 endif HWLOC_HAVE_LINUX
 
 if HWLOC_HAVE_BGQ

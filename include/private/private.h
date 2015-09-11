@@ -192,6 +192,10 @@ extern void hwloc_set_netbsd_hooks(struct hwloc_binding_hooks *binding_hooks, st
 extern void hwloc_set_hpux_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_HPUX_SYS */
 
+extern int hwloc_look_hardwired_fujitsu_k(struct hwloc_topology *topology);
+extern int hwloc_look_hardwired_fujitsu_fx10(struct hwloc_topology *topology);
+extern int hwloc_look_hardwired_fujitsu_fx100(struct hwloc_topology *topology);
+
 /* Insert uname-specific names/values in the object infos array.
  * If cached_uname isn't NULL, it is used as a struct utsname instead of recalling uname.
  * Any field that starts with \0 is ignored.
