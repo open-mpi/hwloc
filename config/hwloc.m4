@@ -878,7 +878,7 @@ EOF])
                     [AC_DEFINE([HWLOC_HAVE_X11_KEYSYM], [1], [Define to 1 if X11 headers including Xutil.h and keysym.h are available.])
                      HWLOC_X11_CPPFLAGS="$X_CFLAGS"
                      AC_SUBST([HWLOC_X11_CPPFLAGS])
-                     HWLOC_X11_LIBS="$X_PRE_LIBS -lX11 $X_LIBS $X_EXTRA_LIBS"
+                     HWLOC_X11_LIBS="$X_PRE_LIBS $X_LIBS -lX11 $X_EXTRA_LIBS"
                      AC_SUBST([HWLOC_X11_LIBS])])
                 ], [], [#include <X11/Xlib.h>])
             ])
