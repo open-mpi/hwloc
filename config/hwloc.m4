@@ -849,8 +849,11 @@ EOF])
              # lstopo needs more
              AC_CHECK_HEADERS([X11/Xutil.h],
                 [AC_CHECK_HEADERS([X11/keysym.h],
-                    [AC_DEFINE([HWLOC_HAVE_X11_KEYSYM], [1], [Define to 1 if X11 headers including Xutil.h and keysym.h are available.])])
-                     AC_SUBST([HWLOC_X11_LIBS], ["-lX11"])
+                    [AC_DEFINE([HWLOC_HAVE_X11_KEYSYM], [1], [Define to 1 if X11 headers including Xutil.h and keysym.h are available.])
+                     HWLOC_X11_CPPFLAGS="$X_CFLAGS"
+                     AC_SUBST([HWLOC_X11_CPPFLAGS])
+                     HWLOC_X11_LIBS="$X_PRE_LIBS $X_LIBS -lX11 $X_EXTRA_LIBS"
+                     AC_SUBST([HWLOC_X11_LIBS])])
                 ], [], [#include <X11/Xlib.h>])
             ])
          ])
