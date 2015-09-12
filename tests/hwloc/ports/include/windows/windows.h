@@ -120,6 +120,7 @@ BOOL GetNumaAvailableMemoryNode(UCHAR Node, PULONGLONG AvailableBytes);
 
 typedef struct _SYSTEM_INFO {
   DWORD dwPageSize;
+  DWORD_PTR dwActiveProcessorMask;
   DWORD dwNumberOfProcessors;
 } SYSTEM_INFO, *LPSYSTEM_INFO;
 

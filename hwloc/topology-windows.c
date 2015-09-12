@@ -1025,8 +1025,20 @@ hwloc_look_windows(struct hwloc_backend *backend)
     } hwloc_bitmap_foreach_end();
     hwloc_bitmap_free(groups_pu_set);
   } else {
-    /* add PU objects, assuming they are contiguous. */
-    hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
+    /* no processor groups */
+    SYSTEM_INFO sysinfo;
+    hwloc_obj_t obj;
+    unsigned idx;
+    GetSystemInfo(&sysinfo);
+    for(idx=0; idx<32; idx++)
+      if (sysinfo.dwActiveProcessorMask & (((DWORD_PTR)1)<<idx)) {
+	obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, idx);
+	obj->cpuset = hwloc_bitmap_alloc();
+	hwloc_bitmap_only(obj->cpuset, idx);
+	hwloc_debug_1arg_bitmap("cpu %u has cpuset %s\n",
+				idx, obj->cpuset);
+	hwloc_insert_object_by_cpuset(topology, obj);
+      }
   }
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Windows");
