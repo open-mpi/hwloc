@@ -66,6 +66,7 @@ BOOL GetNumaAvailableMemoryNode(UCHAR Node, PULONGLONG AvailableBytes);
 
 typedef struct _SYSTEM_INFO {
   DWORD dwPageSize;
+  DWORD dwNumberOfProcessors;
 } SYSTEM_INFO, *LPSYSTEM_INFO;
 
 void WINAPI GetSystemInfo(LPSYSTEM_INFO lpSystemInfo);

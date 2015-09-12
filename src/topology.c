@@ -132,6 +132,7 @@ int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
    reading sysfs on Linux, this method is not virtualizable; thus it's only
    used as a fall-back method, allowing `hwloc_set_fsroot ()' to
    have the desired effect.  */
+#ifndef HWLOC_WIN_SYS /* The windows implementation is in topology-windows.c */
 unsigned
 hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
   int n;
@@ -157,10 +158,6 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
   static int name[2] = {CTL_HW, HW_NPCU};
   if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name)), &n)
     n = -1;
-#elif defined(HWLOC_WIN_SYS)
-  SYSTEM_INFO sysinfo;
-  GetSystemInfo(&sysinfo); /* only in the current group, should only be used in 32bits mode (without multiple groups) */
-  n = sysinfo.dwNumberOfProcessors;
 #else
 #ifdef __GNUC__
 #warning No known way to discover number of available processors on this system
@@ -174,6 +171,7 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
     n = 1;
   return n;
 }
+#endif /* !HWLOC_WIN_SYS */
 
 /*
  * Use the given number of processors and the optional online cpuset if given

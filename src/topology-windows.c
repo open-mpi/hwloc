@@ -33,6 +33,10 @@ typedef enum _PROCESSOR_CACHE_TYPE {
 #define CACHE_FULLY_ASSOCIATIVE 0xFF
 #endif
 
+#ifndef MAXIMUM_PROC_PER_GROUP /* missing in MinGW */
+#define MAXIMUM_PROC_PER_GROUP 64
+#endif
+
 #ifndef HAVE_CACHE_DESCRIPTOR
 typedef struct _CACHE_DESCRIPTOR {
   BYTE Level;
@@ -187,6 +191,9 @@ static PFN_GETACTIVEPROCESSORGROUPCOUNT GetActiveProcessorGroupCountProc;
 
 static unsigned long nr_processor_groups = 1;
 
+typedef WORD (WINAPI *PFN_GETACTIVEPROCESSORCOUNT)(WORD);
+static PFN_GETACTIVEPROCESSORCOUNT GetActiveProcessorCountProc;
+
 typedef DWORD (WINAPI *PFN_GETCURRENTPROCESSORNUMBER)(void);
 static PFN_GETCURRENTPROCESSORNUMBER GetCurrentProcessorNumberProc;
 
@@ -230,6 +237,8 @@ static void hwloc_win_get_function_ptrs(void)
     if (kernel32) {
       GetActiveProcessorGroupCountProc =
 	(PFN_GETACTIVEPROCESSORGROUPCOUNT) GetProcAddress(kernel32, "GetActiveProcessorGroupCount");
+      GetActiveProcessorCountProc =
+	(PFN_GETACTIVEPROCESSORCOUNT) GetProcAddress(kernel32, "GetActiveProcessorCount");
       GetLogicalProcessorInformationProc =
 	(PFN_GETLOGICALPROCESSORINFORMATION) GetProcAddress(kernel32, "GetLogicalProcessorInformation");
       GetCurrentProcessorNumberProc =
@@ -1000,7 +1009,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
     } hwloc_bitmap_foreach_end();
     hwloc_bitmap_free(groups_pu_set);
   } else {
-    /* add PU objects, assuming they are contiguous */
+    /* add PU objects, assuming they are contiguous. */
     hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
   }
 
@@ -1081,3 +1090,30 @@ const struct hwloc_component hwloc_windows_component = {
   0,
   &hwloc_windows_disc_component
 };
+
+unsigned
+hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
+  int n;
+  SYSTEM_INFO sysinfo;
+
+  /* by default, ignore groups (return only the number in the current group) */
+  GetSystemInfo(&sysinfo);
+  n = sysinfo.dwNumberOfProcessors; /* FIXME could be non-contigous, rather return a mask from dwActiveProcessorMask? */
+
+  hwloc_win_get_function_ptrs();
+
+  if (nr_processor_groups > 1) {
+    /* assume n-1 groups are complete, since that's how we store things in cpusets */
+    if (GetActiveProcessorCountProc)
+      n = MAXIMUM_PROC_PER_GROUP*(nr_processor_groups-1)
+	+ GetActiveProcessorCountProc((WORD)nr_processor_groups-1);
+    else
+      n = MAXIMUM_PROC_PER_GROUP*nr_processor_groups;
+  }
+
+  if (n >= 1)
+    topology->support.discovery->pu = 1;
+  else
+    n = 1;
+  return n;
+}
