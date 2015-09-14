@@ -821,6 +821,20 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     hwloc_bitmap_free(cores_cpuset);
   }
 
+  /* Look for PUs */
+  if (fulldiscovery) {
+    unsigned i;
+    hwloc_debug("%s", "\n\n * CPU cpusets *\n\n");
+    for (i=0; i<nbprocs; i++)
+      if(infos[i].present) { /* Only add present PU. We don't know if others actually exist */
+       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
+       obj->cpuset = hwloc_bitmap_alloc();
+       hwloc_bitmap_only(obj->cpuset, i);
+       hwloc_debug_1arg_bitmap("PU %u has cpuset %s\n", i, obj->cpuset);
+       hwloc_insert_object_by_cpuset(topology, obj);
+     }
+  }
+
   /* Look for caches */
   /* First find max level */
   level = 0;
@@ -1176,11 +1190,11 @@ hwloc_x86_discover(struct hwloc_backend *backend)
   }
 
 fulldiscovery:
-  hwloc_look_x86(backend, 1);
-  /* if failed, just continue and create PUs */
-
-  if (!alreadypus)
-    hwloc_setup_pu_level(topology, data->nbprocs);
+  if (hwloc_look_x86(backend, 1) < 0) {
+    /* if failed, create PUs */
+    if (!alreadypus)
+      hwloc_setup_pu_level(topology, data->nbprocs);
+  }
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
 
