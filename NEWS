@@ -25,19 +25,19 @@ Version 1.11.1
   thanks to Guillaume Mercier for reporting the issue.
 * hwloc-annotate does not drop unavailable resources from the output anymore
   and those may be annotated as well.
-* Fix an overzealous assertion when intermediate Group object while Groups
-  are totally ignored.
+* Fix an overzealous assertion when inserting an intermediate Group object
+  while Groups are totally ignored.
 * Fix a memory leak on failure to load a xml diff file.
 * Fix some segfaults when inputting an invalid synthetic description.
 * Many fixes and improvements in the Windows backend:
+  + Fix the discovery of more than 32 processors and multiple processor
+    groups. Thanks to Barry M. Tannenbaum for the help.
   + Add thread binding set support in case of multiple process groups.
   + Add thread binding get support.
   + Add get_last_cpu_location() support for the current thread.
-  + Disable binding features when not supported with multiple processor groups.
-* Fix support for more than 32 processors on 64bits Windows.
-* Fix the discovery of multiple processor groups on Windows.
-* Fix/update the Visual Studio support under contrib/windows.
-  Thanks to Eloi Gaudry for the help.
+  + Disable the unsupported process binding in case of multiple processor groups.
+  + Fix/update the Visual Studio support under contrib/windows.
+    Thanks to Eloi Gaudry for the help.
 * Fix lstopo linking with X11 libraries, for instance on Mac OS X.
   Thanks to Scott Atchley and Pierre Ramet for reporting the issue.
 * Ignore PCI bridges reporting buggy secondary-subordinate bus numbers.
