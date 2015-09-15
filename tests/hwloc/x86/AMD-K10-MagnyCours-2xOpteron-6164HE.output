@@ -10,7 +10,7 @@
         <info name="CPUModelNumber" value="9"/>
         <info name="CPUModel" value="AMD Opteron(tm) Processor 6164 HE"/>
         <info name="CPUStepping" value="1"/>
-        <object type="L3Cache" cpuset="0x00000fff" complete_cpuset="0x00000fff" allowed_cpuset="0x00000fff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="10485760" depth="3" cache_linesize="64" cache_associativity="96" cache_type="0">
+        <object type="L3Cache" cpuset="0x0000003f" complete_cpuset="0x0000003f" allowed_cpuset="0x0000003f" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="5242880" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
           <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="524288" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
             <object type="L1Cache" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
               <object type="L1iCache" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
@@ -65,6 +65,8 @@
               </object>
             </object>
           </object>
+        </object>
+        <object type="L3Cache" cpuset="0x00000fc0" complete_cpuset="0x00000fc0" allowed_cpuset="0x00000fc0" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="5242880" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
           <object type="L2Cache" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="524288" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
             <object type="L1Cache" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
               <object type="L1iCache" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
@@ -127,7 +129,7 @@
         <info name="CPUModelNumber" value="9"/>
         <info name="CPUModel" value="AMD Opteron(tm) Processor 6164 HE"/>
         <info name="CPUStepping" value="1"/>
-        <object type="L3Cache" cpuset="0x00fff000" complete_cpuset="0x00fff000" allowed_cpuset="0x00fff000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="10485760" depth="3" cache_linesize="64" cache_associativity="96" cache_type="0">
+        <object type="L3Cache" cpuset="0x0003f000" complete_cpuset="0x0003f000" allowed_cpuset="0x0003f000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="5242880" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
           <object type="L2Cache" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="524288" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
             <object type="L1Cache" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
               <object type="L1iCache" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
@@ -182,6 +184,8 @@
               </object>
             </object>
           </object>
+        </object>
+        <object type="L3Cache" cpuset="0x00fc0000" complete_cpuset="0x00fc0000" allowed_cpuset="0x00fc0000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="5242880" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
           <object type="L2Cache" cpuset="0x00040000" complete_cpuset="0x00040000" allowed_cpuset="0x00040000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="524288" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
             <object type="L1Cache" cpuset="0x00040000" complete_cpuset="0x00040000" allowed_cpuset="0x00040000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
               <object type="L1iCache" cpuset="0x00040000" complete_cpuset="0x00040000" allowed_cpuset="0x00040000" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">

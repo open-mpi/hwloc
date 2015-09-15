@@ -236,6 +236,20 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, uns
   cache->size = size;
   cache->sets = 0;
 
+  if (infos->cpufamilynumber== 0x10 && infos->cpumodelnumber == 0x9
+      && level == 3
+      && (cache->ways == -1 || (cache->ways % 2 == 0)) && cache->nbthreads_sharing >= 8) {
+    /* Fix AMD family 0x10 model 0x9 (Magny-Cours) with 8 or 12 cores.
+     * The L3 (and its associativity) is actually split into two halves).
+     */
+    if (cache->nbthreads_sharing == 16)
+      cache->nbthreads_sharing = 12; /* nbthreads_sharing is a power of 2 but the processor actually has 8 or 12 cores */
+    cache->nbthreads_sharing /= 2;
+    cache->size /= 2;
+    if (cache->ways != -1)
+      cache->ways /= 2;
+  }
+
   hwloc_debug("cache L%u t%u linesize %u ways %u size %luKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
 }
 
@@ -434,9 +448,6 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	fill_amd_cache(infos, 2, 3, ecx); /* L2u */
       if (edx & 0xf000)
 	fill_amd_cache(infos, 3, 3, edx); /* L3u */
-      /* FIXME: AMD MagnyCours family 0x10 model 0x9 with 8 cores or more actually
-       * have the L3 split in two halves, and associativity is divided as well (48)
-       */
     }
   }
 
@@ -867,7 +878,15 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
 	  /* Found a matching cache, now look for others sharing it */
 	  {
-	    unsigned cacheid = infos[i].apicid / infos[i].cache[l].nbthreads_sharing;
+	    /* AMD Magny-Cours 12-cores processor reserve APIC ids as AAAAAABBBBBB....
+	     * among first L3 (A), second L3 (B), and unexisting cores (.).
+	     * On multi-socket servers, L3 in non-first sockets may have APIC id ranges
+	     * such as [16-21] that are not aligned on multiple of nbthreads_sharing (6).
+	     * That means, we can't just compare apicid/nbthreads_sharing to identify siblings.
+	     * Hence we use apicid%max_log_proc instead of apicid to restore the alignment.
+	     * Works because we also compare packageid to identify siblings.
+	     */
+	    unsigned cacheid = (infos[i].apicid % infos[i].max_log_proc) / infos[i].cache[l].nbthreads_sharing;
 	    hwloc_obj_type_t otype;
 
 	    cache_cpuset = hwloc_bitmap_alloc();
@@ -882,7 +901,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		hwloc_bitmap_clr(caches_cpuset, j);
 		continue;
 	      }
-	      if (infos[j].packageid == packageid && infos[j].apicid / infos[j].cache[l2].nbthreads_sharing == cacheid) {
+	      if (infos[j].packageid == packageid && (infos[j].apicid % infos[j].max_log_proc) / infos[j].cache[l2].nbthreads_sharing == cacheid) {
 		hwloc_bitmap_set(cache_cpuset, j);
 		hwloc_bitmap_clr(caches_cpuset, j);
 	      }
