@@ -1,1 +1,1 @@
-- -p --ignore Core --ignore Cache --ignore Package --no-io
+- -p --ignore Core --no-caches --ignore Package --no-io
