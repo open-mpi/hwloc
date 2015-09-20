@@ -915,7 +915,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
   unsigned j;
 #endif
 
-  if (topology->ignored_types[HWLOC_OBJ_GROUP] == HWLOC_IGNORE_TYPE_ALWAYS)
+  if (topology->type_filter[HWLOC_OBJ_GROUP] == HWLOC_TYPE_FILTER_KEEP_NONE)
     return;
 
   env = getenv("HWLOC_GROUPING");

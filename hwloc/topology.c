@@ -622,7 +622,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   hwloc_topology_init(&new);
 
   new->flags = old->flags;
-  memcpy(new->ignored_types, old->ignored_types, sizeof(old->ignored_types));
+  memcpy(new->type_filter, old->type_filter, sizeof(old->type_filter));
   new->is_thissystem = old->is_thissystem;
   new->is_loaded = 1;
   new->pid = old->pid;
@@ -1074,7 +1074,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     if (res == HWLOC_OBJ_EQUAL) {
       if (obj->type == HWLOC_OBJ_GROUP) {
 	/* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible. */
-	assert(topology->ignored_types[HWLOC_OBJ_GROUP] != HWLOC_IGNORE_TYPE_NEVER);
+	assert(topology->type_filter[HWLOC_OBJ_GROUP] != HWLOC_TYPE_FILTER_KEEP_ALL);
         /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not,
 	 * while some callers need to know (at least hwloc_topology_insert_group()).
 	 *
@@ -1255,7 +1255,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     return NULL;
   }
 
-  if (topology->ignored_types[HWLOC_OBJ_GROUP] == HWLOC_IGNORE_TYPE_ALWAYS) {
+  if (topology->type_filter[HWLOC_OBJ_GROUP] == HWLOC_TYPE_FILTER_KEEP_NONE) {
     hwloc_free_unlinked_object(obj);
     errno = EINVAL;
     return NULL;
@@ -1295,7 +1295,7 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
 {
   hwloc_obj_t obj;
 
-  if (topology->ignored_types[HWLOC_OBJ_MISC] == HWLOC_IGNORE_TYPE_ALWAYS) {
+  if (topology->type_filter[HWLOC_OBJ_MISC] == HWLOC_TYPE_FILTER_KEEP_NONE) {
     errno = EINVAL;
     return NULL;
   }
@@ -1726,7 +1726,7 @@ ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
     ignore_type_always(topology, pchild);
 
   if ((parent != topology->levels[0][0] &&
-       topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS)
+       topology->type_filter[parent->type] == HWLOC_TYPE_FILTER_KEEP_NONE)
       || ((parent->type == HWLOC_OBJ_L1ICACHE || parent->type == HWLOC_OBJ_L2ICACHE || parent->type == HWLOC_OBJ_L3ICACHE)
 	  && !(topology->flags & HWLOC_TOPOLOGY_FLAG_ICACHES))) {
     hwloc_debug("%s", "\nDropping ignored object ");
@@ -1795,10 +1795,10 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
     hwloc_obj_type_t type2 = topology->levels[i][0]->type;
 
     /* Check whether parents and/or children can be replaced */
-    if (topology->ignored_types[type1] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE)
+    if (topology->type_filter[type1] == HWLOC_TYPE_FILTER_KEEP_STRUCTURE)
       /* Parents can be ignored in favor of children.  */
       replaceparent = 1;
-    if (topology->ignored_types[type2] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE)
+    if (topology->type_filter[type2] == HWLOC_TYPE_FILTER_KEEP_STRUCTURE)
       /* Children can be ignored in favor of parents.  */
       replacechild = 1;
     if (!replacechild && !replaceparent)
@@ -2758,7 +2758,7 @@ next_noncpubackend:
   if (hwloc_topology_reconnect(topology, 0) < 0)
     return -1;
 
-  hwloc_debug("%s", "\nRemoving levels with HWLOC_IGNORE_TYPE_KEEP_STRUCTURE\n");
+  hwloc_debug("%s", "\nRemoving levels with HWLOC_TYPE_FILTER_KEEP_STRUCTURE\n");
   hwloc_filter_levels_keep_structure(topology);
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
@@ -2841,11 +2841,12 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->levels[0][0] = root_obj;
 }
 
+static void hwloc__topology_filter_init(struct hwloc_topology *topology);
+
 int
 hwloc_topology_init (struct hwloc_topology **topologyp)
 {
   struct hwloc_topology *topology;
-  int i;
 
   topology = malloc (sizeof (struct hwloc_topology));
   if(!topology)
@@ -2869,10 +2870,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->levels = calloc(topology->nb_levels_allocated, sizeof(*topology->levels));
   topology->level_nbobjects = calloc(topology->nb_levels_allocated, sizeof(*topology->level_nbobjects));
 
-  /* Only ignore useless cruft by default */
-  for(i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++)
-    topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
-  topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
+  hwloc__topology_filter_init(topology);
 
   hwloc_distances_init(topology);
 
@@ -2948,60 +2946,91 @@ hwloc_topology_get_flags (struct hwloc_topology *topology)
   return topology->flags;
 }
 
-int
-hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t type)
+static void
+hwloc__topology_filter_init(struct hwloc_topology *topology)
 {
-  if (type >= HWLOC_OBJ_TYPE_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE) {
-    /* we need the PU and NUMA levels */
-    errno = EINVAL;
-    return -1;
-  } else if (hwloc_obj_type_is_io(type)) {
-    /* I/O devices aren't in any level, use topology flags to ignore them */
-    errno = EINVAL;
-    return -1;
-  }
-
-  topology->ignored_types[type] = HWLOC_IGNORE_TYPE_ALWAYS;
-  return 0;
-}
-
-int
-hwloc_topology_ignore_type_keep_structure(struct hwloc_topology *topology, hwloc_obj_type_t type)
-{
-  if (type >= HWLOC_OBJ_TYPE_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE || type == HWLOC_OBJ_MISC) {
-    /* We need the PU and NUMA levels.
-     * Misc are outside of the main topology structure, makes no sense.
-     */
-    errno = EINVAL;
-    return -1;
-  } else if (hwloc_obj_type_is_io(type)) {
-    /* I/O devices aren't in any level, use topology flags to ignore them */
-    errno = EINVAL;
-    return -1;
-  }
-
-  topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
-  return 0;
-}
-
-int
-hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
-{
-  unsigned type;
+  hwloc_obj_type_t type;
+  /* Only ignore useless cruft by default */
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
-    if (type != HWLOC_OBJ_PU && type != HWLOC_OBJ_NUMANODE
-	&& !hwloc_obj_type_is_io((hwloc_obj_type_t) type))
-      topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
+    topology->type_filter[type] = HWLOC_TYPE_FILTER_KEEP_ALL;
+  topology->type_filter[HWLOC_OBJ_GROUP] = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
+}
+
+static int
+hwloc__topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e filter)
+{
+  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE) {
+    if (filter != HWLOC_TYPE_FILTER_KEEP_ALL) {
+      /* we need the PU and NUMA levels */
+      errno = EINVAL;
+      return -1;
+    }
+  } else if (type == HWLOC_OBJ_MISC) {
+    if (filter == HWLOC_TYPE_FILTER_KEEP_STRUCTURE) {
+      /* Misc are outside of the main topology structure, makes no sense. */
+      errno = EINVAL;
+      return -1;
+    }
+  } else if (type == HWLOC_OBJ_GROUP) {
+    if (filter == HWLOC_TYPE_FILTER_KEEP_ALL) {
+      /* Groups are always ignored, at least keep_structure */
+      errno = EINVAL;
+      return -1;
+    }
+  } else if (hwloc_obj_type_is_io(type)) {
+    /* I/O devices aren't in any level, use topology flags to ignore them */
+    errno = EINVAL;
+    return -1;
+  }
+  topology->type_filter[type] = filter;
+  return 0;
+}
+
+int
+hwloc_topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e filter)
+{
+  if ((unsigned) type >= HWLOC_OBJ_TYPE_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+  if (hwloc_obj_type_is_io(type)) {
+    /* I/O devices aren't in any level, use topology flags to ignore them */
+    errno = EINVAL;
+    return -1;
+  }
+  if (topology->is_loaded) {
+    errno = EBUSY;
+    return -1;
+  }
+  return hwloc__topology_set_type_filter(topology, type, filter);
+}
+
+int
+hwloc_topology_set_all_types_filter(struct hwloc_topology *topology, enum hwloc_type_filter_e filter)
+{
+  hwloc_obj_type_t type;
+  if (topology->is_loaded) {
+    errno = EBUSY;
+    return -1;
+  }
+  for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
+    hwloc__topology_set_type_filter(topology, type, filter);
+  return 0;
+}
+
+int
+hwloc_topology_get_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e *filterp)
+{
+  if (type >= HWLOC_OBJ_TYPE_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+  if (hwloc_obj_type_is_io(type)) {
+    /* I/O devices aren't in any level, use topology flags to ignore them */
+    errno = EINVAL;
+    return -1;
+  }
+  *filterp = topology->type_filter[type];
   return 0;
 }
 

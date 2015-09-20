@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	else
-	  hwloc_topology_ignore_type(topology, type);
+	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
 	argc--;
 	argv++;
 	goto next;

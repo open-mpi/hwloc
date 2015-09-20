@@ -434,9 +434,13 @@ man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_membind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type_keep_structure.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_all_keep_structure.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_type_filter_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TYPE_FILTER_KEEP_ALL.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TYPE_FILTER_KEEP_NONE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TYPE_FILTER_KEEP_STRUCTURE.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_type_filter.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_all_types_filter.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_type_filter.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_distance_matrix.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_userdata.3

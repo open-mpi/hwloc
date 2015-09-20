@@ -214,7 +214,7 @@ typedef enum {
 			  * way.  And hwloc may insert such objects to group
 			  * NUMA nodes according to their distances.
 			  *
-			  * These objects are ignored when they do not bring
+			  * These objects are removed when they do not bring
 			  * any structure.
 			  */
 
@@ -1960,38 +1960,59 @@ struct hwloc_topology_support {
 /** \brief Retrieve the topology support. */
 HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
 
-/** \brief Ignore an object type.
+/** \brief Type filtering flags.
  *
- * Ignore all objects from the given type.
- * The bottom-level type ::HWLOC_OBJ_PU and the ::HWLOC_OBJ_NUMANODE level may not be ignored.
- * The top-level object of the hierarchy will never be ignored, even if this function
- * succeeds.
+ * By default, most objects are kept (::HWLOC_TYPE_FILTER_KEEP_ALL).
+ * Instruction caches are ignored by default (::HWLOC_TYPE_FILTER_KEEP_NONE).
+ * Group levels are ignored unless they bring structure (::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
+ *
+ * Not applicable to I/O types, topology flags should be used to configure
+ * their discovery instead.
+ *
+ * Note that group objects are also ignored individually (without the entire level)
+ * when they do not bring structure.
+ */
+enum hwloc_type_filter_e {
+  /** \brief Keep all objects of this type.
+   *
+   * Cannot be set for ::HWLOC_OBJ_GROUP (groups are designed only to add more structure to the topology).
+   * \hideinitializer
+   */
+  HWLOC_TYPE_FILTER_KEEP_ALL = 0,
+
+  /** \brief Ignore all objects of this type.
+   *
+   * The bottom-level type ::HWLOC_OBJ_PU and the ::HWLOC_OBJ_NUMANODE type may not be ignored.
+   * The top-level object of the hierarchy will never actually be removed even if its type is ignored.
+   * \hideinitializer
+   */
+  HWLOC_TYPE_FILTER_KEEP_NONE = 1,
+
+  /** \brief Only ignore objects if their entire level does not bring any structure.
+   *
+   * Ignore the entire level from the given type as long as it does not bring any structure:
+   * Each object in the level should have a single child or be the only child of its parent.
+   * \hideinitializer
+   */
+  HWLOC_TYPE_FILTER_KEEP_STRUCTURE = 2
+};
+
+/** \brief Set the filtering for the given object type.
+ *
  * I/O objects may not be ignored, topology flags should be used to configure
  * their discovery instead.
  */
-HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_t type);
+HWLOC_DECLSPEC int hwloc_topology_set_type_filter(hwloc_topology_t topology, hwloc_obj_type_t type, enum hwloc_type_filter_e filter);
 
-/** \brief Ignore an object type if it does not bring any structure.
- *
- * Ignore a level from the given type as long as it does not bring any structure:
- * Each object of the level should have a single child or be the only child of its parent.
- * The bottom-level type ::HWLOC_OBJ_PU and the ::HWLOC_OBJ_NUMANODE level may not be ignored.
- * I/O objects may not be ignored, topology flags should be used to configure
- * their discovery instead.
- * Group levels are always ignored if they do not bring any structure
- * since they are designed to add structure to the topology.
- * Misc objects cannot be ignored based on the structure since they are only annotations
- * outside of the main topology structure.
+/** \brief Get the current filtering for the given object type.
  */
-HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
+HWLOC_DECLSPEC int hwloc_topology_get_type_filter(hwloc_topology_t topology, hwloc_obj_type_t type, enum hwloc_type_filter_e *filter);
 
-/** \brief Ignore all objects that do not bring any structure.
+/** \brief Set the filtering for all object types.
  *
- * Ignore all levels that do not bring any structure:
- * This is equivalent to calling hwloc_topology_ignore_type_keep_structure()
- * for all object types.
+ * If some types do not support this filtering, they are silently ignored.
  */
-HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t topology);
+HWLOC_DECLSPEC int hwloc_topology_set_all_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter);
 
 /** \brief Provide a distance matrix.
  *
@@ -2099,6 +2120,8 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  *
  * \return \c NULL on error.
  *
+ * \return \c NULL if Misc objects are filtered-out of the topology (::HWLOC_TYPE_FILTERED_KEEP_NONE).
+ *
  * \note If \p name contains some non-printable characters, they will
  * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
@@ -2143,7 +2166,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  *
  * \return \c NULL if the insertion failed because of conflicting sets in topology tree.
  *
- * \return \c NULL if Group objects are always ignored in the topology.
+ * \return \c NULL if Group objects are filtered-out of the topology (::HWLOC_TYPE_FILTERED_KEEP_NONE).
  *
  * \return \c NULL if the object was discarded because no set was initialized in the Group
  * before insert, or all of them were empty.

@@ -502,7 +502,7 @@ main (int argc, char *argv[])
 	else if (type == HWLOC_OBJ_PU)
 	  lstopo_ignore_pus = 1;
 	else
-	  hwloc_topology_ignore_type(topology, type);
+	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-caches"))
@@ -633,13 +633,13 @@ main (int argc, char *argv[])
 
   if (ignorecache > 1) {
     for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
-      hwloc_topology_ignore_type(topology, i);
+      hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_NONE);
   } else if (ignorecache) {
     for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
-      hwloc_topology_ignore_type_keep_structure(topology, i);
+      hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
   }
   if (merge)
-    hwloc_topology_ignore_all_keep_structure(topology);
+    hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
 
   if (input) {
     err = hwloc_utils_enable_input_format(topology, input, input_format, loutput.verbose_mode > 1, callname);

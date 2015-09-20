@@ -39,12 +39,6 @@
 #endif
 #include <string.h>
 
-enum hwloc_ignore_type_e {
-  HWLOC_IGNORE_TYPE_NEVER = 0,
-  HWLOC_IGNORE_TYPE_KEEP_STRUCTURE,
-  HWLOC_IGNORE_TYPE_ALWAYS
-};
-
 struct hwloc_topology {
   unsigned nb_levels;					/* Number of horizontal levels */
   unsigned nb_levels_allocated;				/* Number of levels allocated and zeroed in level_nbobjects and levels below */
@@ -53,7 +47,7 @@ struct hwloc_topology {
   struct hwloc_obj ***levels;				/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbobjects[l]] */
   unsigned long flags;
   int type_depth[HWLOC_OBJ_TYPE_MAX];
-  enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
+  enum hwloc_type_filter_e type_filter[HWLOC_OBJ_TYPE_MAX];
   int is_thissystem;
   int is_loaded;
   int modified;                                         /* >0 if objects were added/removed recently, which means a reconnect is needed */

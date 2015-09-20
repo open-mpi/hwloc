@@ -1949,7 +1949,7 @@ For reference, ::hwloc_topology_t modification operations include
 
 <dt>Locating topologies</dt>
 
-  <dd><tt>hwloc_topology_ignore*</tt>, <tt>hwloc_topology_set*</tt>
+  <dd><tt>hwloc_topology_set_*</tt>
   (see \ref hwlocality_configuration) do not modify the topology
   directly, but they do modify internal structures describing the
   behavior of the upcoming invocation of <tt>hwloc_topology_load()</tt>.

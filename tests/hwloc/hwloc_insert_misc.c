@@ -90,7 +90,7 @@ int main(void)
   assert(!err);
   err = hwloc_topology_set_synthetic(topology2, "NUMA:2 pack:2 core:2 pu:2"); /* must keep the same topology string to avoid SyntheticDescription info difference */
   assert(!err);
-  err = hwloc_topology_ignore_type(topology2, HWLOC_OBJ_PACKAGE);
+  err = hwloc_topology_set_type_filter(topology2, HWLOC_OBJ_PACKAGE, HWLOC_TYPE_FILTER_KEEP_NONE);
   assert(!err);
   err = hwloc_topology_load(topology2);
   assert(!err);
@@ -103,9 +103,9 @@ int main(void)
   assert(!err);
   err = hwloc_topology_set_xmlbuffer(reload, buf1, buflen1);
   assert(!err);
-  err = hwloc_topology_ignore_type(reload, HWLOC_OBJ_PACKAGE);
+  err = hwloc_topology_set_type_filter(reload, HWLOC_OBJ_PACKAGE, HWLOC_TYPE_FILTER_KEEP_NONE);
   assert(!err);
-  err = hwloc_topology_ignore_type(reload, HWLOC_OBJ_MISC);
+  err = hwloc_topology_set_type_filter(reload, HWLOC_OBJ_MISC, HWLOC_TYPE_FILTER_KEEP_NONE);
   assert(!err);
   err = hwloc_topology_load(reload);
   assert(!err);
@@ -140,7 +140,7 @@ int main(void)
   assert(!err);
   err = hwloc_topology_set_xmlbuffer(reload, buf1, buflen1);
   assert(!err);
-  err = hwloc_topology_ignore_type(reload, HWLOC_OBJ_PACKAGE);
+  err = hwloc_topology_set_type_filter(reload, HWLOC_OBJ_PACKAGE, HWLOC_TYPE_FILTER_KEEP_NONE);
   assert(!err);
   err = hwloc_topology_load(reload);
   assert(!err);

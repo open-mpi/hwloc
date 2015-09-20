@@ -138,9 +138,15 @@ extern "C" {
 #define hwloc_topology_membind_support HWLOC_NAME(topology_membind_support)
 #define hwloc_topology_support HWLOC_NAME(topology_support)
 #define hwloc_topology_get_support HWLOC_NAME(topology_get_support)
-#define hwloc_topology_ignore_type HWLOC_NAME(topology_ignore_type)
-#define hwloc_topology_ignore_type_keep_structure HWLOC_NAME(topology_ignore_type_keep_structure)
-#define hwloc_topology_ignore_all_keep_structure HWLOC_NAME(topology_ignore_all_keep_structure)
+
+#define hwloc_type_filter_e HWLOC_NAME(type_filter_e)
+#define HWLOC_TYPE_FILTER_KEEP_ALL HWLOC_NAME_CAPS(TYPE_FILTER_KEEP_ALL)
+#define HWLOC_TYPE_FILTER_KEEP_NONE HWLOC_NAME_CAPS(TYPE_FILTER_KEEP_NONE)
+#define HWLOC_TYPE_FILTER_KEEP_STRUCTURE HWLOC_NAME_CAPS(TYPE_FILTER_KEEP_STRUCTURE)
+#define hwloc_topology_set_type_filter HWLOC_NAME(topology_set_type_filter)
+#define hwloc_topology_get_type_filter HWLOC_NAME(topology_get_type_filter)
+#define hwloc_topology_set_all_types_filter HWLOC_NAME(topology_set_all_types_filter)
+
 #define hwloc_topology_set_distance_matrix HWLOC_NAME(topology_set_distance_matrix)
 #define hwloc_topology_set_userdata HWLOC_NAME(topology_set_userdata)
 #define hwloc_topology_get_userdata HWLOC_NAME(topology_get_userdata)
@@ -574,12 +580,6 @@ extern "C" {
 #define hwloc_components_fini HWLOC_NAME(components_fini)
 
 /* private/private.h */
-
-#define hwloc_ignore_type_e HWLOC_NAME(ignore_type_e)
-
-#define HWLOC_IGNORE_TYPE_NEVER HWLOC_NAME_CAPS(IGNORE_TYPE_NEVER)
-#define HWLOC_IGNORE_TYPE_KEEP_STRUCTURE HWLOC_NAME_CAPS(IGNORE_TYPE_KEEP_STRUCTURE)
-#define HWLOC_IGNORE_TYPE_ALWAYS HWLOC_NAME_CAPS(IGNORE_TYPE_ALWAYS)
 
 #define hwloc_os_distances_s HWLOC_NAME(os_distances_s)
 
