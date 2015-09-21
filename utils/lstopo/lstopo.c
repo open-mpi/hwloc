@@ -493,6 +493,10 @@ main (int argc, char *argv[])
 	hwloc_obj_type_t type;
 	if (argc < 2)
 	  goto out_usagefailure;
+	if (!strcasecmp(argv[1], "cache")) {
+	  fprintf(stderr, "--ignore Cache not supported anymore, use --no-caches instead.\n");
+	  goto out_usagefailure;
+	}
 	if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	else if (type == HWLOC_OBJ_PU)
