@@ -278,8 +278,6 @@ main (int argc, char *argv[])
   if (err)
     return EXIT_FAILURE;
 
-  hwloc_topology_set_flags(topology, flags);
-
   while (argc >= 1) {
     opt = 0;
     if (*argv[0] == '-') {
