@@ -140,6 +140,11 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 				enum hwloc_utils_input_format input_format,
 				int verbose, const char *callname)
 {
+  if (input_format == HWLOC_UTILS_INPUT_DEFAULT && !strcmp(input, "-.xml")) {
+    input_format = HWLOC_UTILS_INPUT_XML;
+    input = "-";
+  }
+
   if (input_format == HWLOC_UTILS_INPUT_DEFAULT) {
     struct stat inputst;
     int err;

@@ -47,6 +47,7 @@ Version 1.11.1
 * Detect block devices directly attached to PCI without a controller,
   for instance NVMe disks. Thanks to Barry M. Tannenbaum.
 * Add the PCISlot attribute to all PCI functions instead of only the first one.
+* Command-line tools may now import XML from the standard input with -i -.xml
 
 
 Version 1.11.0
