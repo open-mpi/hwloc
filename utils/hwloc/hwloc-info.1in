@@ -91,6 +91,14 @@ This option requires the use of the actual current machine topology
 (or any other topology with \fB\-\-thissystem\fR or with
 HWLOC_THISSYSTEM set to 1 in the environment).
 .TP
+\fB\-\-filter\fR <type>:<kind>, \fB\-\-filter\fR <type>
+Filter objects of type <type>, or of any type if <type> is "all".
+<kind> specifies the filtering behavior.
+If "none" or not specified, all objects of the given type are removed.
+If "all", all objects are kept as usual.
+If "structure", objects are kept when they bring structure to the topology.
+See hwloc_topology_set_type_filter() for more details.
+.TP
 \fB\-\-no\-icaches\fR
 Do not show Instruction caches, only Data and Unified caches are considered.
 .TP

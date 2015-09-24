@@ -327,6 +327,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -C --cpuset-only      Only show the cpuset of each object\n");
   fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
   fprintf (where, "Object filtering options:\n");
+  fprintf (where, "  --filter <type>:<knd> Filter objects of the given type, or all.\n");
+  fprintf (where, "     <knd> may be `all' (keep all), `none' (remove all), `structure' or `basic'\n");
   fprintf (where, "  --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "  --no-caches           Do not show caches\n");
   fprintf (where, "  --no-useless-caches   Do not show caches which do not have a hierarchical\n"
@@ -414,8 +416,6 @@ main (int argc, char *argv[])
   const char *filename = NULL;
   unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES;
   unsigned long restrict_flags = 0;
-  int merge = 0;
-  int ignorecache = 0, ignoreicache = 0;
   char * callname;
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
@@ -490,6 +490,39 @@ main (int argc, char *argv[])
 	  fprintf(stderr, "Unsupported type `%s' passed to --only, ignoring.\n", argv[1]);
 	opt = 1;
       }
+      else if (!strcmp (argv[0], "--filter")) {
+	hwloc_obj_type_t type;
+	char *colon;
+	enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_ALL;
+	int all = 0;
+	if (argc < 2)
+	  goto out_usagefailure;
+	colon = strchr(argv[1], ':');
+	if (colon) {
+	  *colon = '\0';
+	  if (!strcmp(colon+1, "none"))
+	    filter = HWLOC_TYPE_FILTER_KEEP_NONE;
+	  else if (!strcmp(colon+1, "all"))
+	    filter = HWLOC_TYPE_FILTER_KEEP_ALL;
+	  else if (!strcmp(colon+1, "structure"))
+	    filter = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
+	}
+	if (!strcmp(argv[1], "all"))
+	  all = 1;
+	else if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0) {
+	  fprintf(stderr, "Unsupported type `%s' passed to --ignore.\n", argv[1]);
+	  goto out_usagefailure;
+	}
+	if (type == HWLOC_OBJ_PU) {
+	  if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
+	    lstopo_ignore_pus = 1;
+	}
+	else if (all)
+	  hwloc_topology_set_all_types_filter(topology, filter);
+	else
+	  hwloc_topology_set_type_filter(topology, type, filter);
+	opt = 1;
+      }
       else if (!strcmp (argv[0], "--ignore")) {
 	hwloc_obj_type_t type;
 	if (argc < 2)
@@ -506,12 +539,18 @@ main (int argc, char *argv[])
 	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
 	opt = 1;
       }
-      else if (!strcmp (argv[0], "--no-caches"))
-	ignorecache = 2;
-      else if (!strcmp (argv[0], "--no-useless-caches"))
-	ignorecache = 1;
-      else if (!strcmp (argv[0], "--no-icaches"))
-	ignoreicache = 1;
+      else if (!strcmp (argv[0], "--no-caches")) {
+	for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+	  hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_NONE);
+      }
+      else if (!strcmp (argv[0], "--no-useless-caches")) {
+	for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+	  hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
+      }
+      else if (!strcmp (argv[0], "--no-icaches")) {
+	for(i=HWLOC_OBJ_L1ICACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+	  hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_NONE);
+      }
       else if (!strcmp (argv[0], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[0], "--no-io"))
@@ -520,8 +559,9 @@ main (int argc, char *argv[])
 	flags &= ~(HWLOC_TOPOLOGY_FLAG_IO_BRIDGES);
       else if (!strcmp (argv[0], "--whole-io"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
-      else if (!strcmp (argv[0], "--merge"))
-	merge = 1;
+      else if (!strcmp (argv[0], "--merge")) {
+	hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
+      }
       else if (!strcmp (argv[0], "--no-collapse"))
 	lstopo_collapse = 0;
       else if (!strcmp (argv[0], "--thissystem"))
@@ -627,24 +667,7 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
-  if (lstopo_show_only != HWLOC_OBJ_TYPE_NONE)
-    merge = 0;
-
   hwloc_topology_set_flags(topology, flags);
-
-  if (ignoreicache) {
-    for(i=HWLOC_OBJ_L1ICACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
-      hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_NONE);
-  }
-  if (ignorecache > 1) {
-    for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
-      hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_NONE);
-  } else if (ignorecache) {
-    for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
-      hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
-  }
-  if (merge)
-    hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
 
   if (input) {
     err = hwloc_utils_enable_input_format(topology, input, input_format, loutput.verbose_mode > 1, callname);

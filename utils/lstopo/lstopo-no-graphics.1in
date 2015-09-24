@@ -104,23 +104,32 @@ otherwise it will imply \fB\-\-cpuset\fR.
 \fB\-\-only\fR <type>
 Only show objects of the given type in the textual output.
 .TP
-\fB\-\-ignore\fR <type>
-Ignore all objects of type <type> in the topology.
-hwloc supports ignoring any type except PUs, NUMA nodes and I/O devices.
-lstopo also offers PU ignoring by hiding PU objects in the graphical and textual outputs,
+\fB\-\-filter\fR <type>:<kind>, \fB\-\-filter\fR <type>
+Filter objects of type <type>, or of any type if <type> is "all".
+<kind> specifies the filtering behavior.
+If "none" or not specified, all objects of the given type are removed.
+If "all", all objects are kept as usual.
+If "structure", objects are kept when they bring structure to the topology.
+See hwloc_topology_set_type_filter() for more details.
+
+hwloc supports filtering any type except PUs and NUMA nodes.
+lstopo also offers PU filtering by hiding PU objects in the graphical and textual outputs,
 but any object included a PU (for instance Misc) will be hidden as well.
 Note that PU may not be ignored in the XML output.
 Note also that the top-level object type cannot be ignored (usually Machine or System).
 .TP
+\fB\-\-ignore\fR <type>
+This is the old way to specify \fB-\-filter <type>:none\fR.
+.TP
 \fB\-\-no\-caches\fR
 Do not show caches.
+This is equivalent to \fB-\-filter <type>:none\fR for all cache types.
 .TP
 \fB\-\-no\-useless\-caches\fR
-Do not show caches which do not have a hierarchical impact.
-This sets HWLOC_TYPE_FILTER_KEEP_STRUCTURE for all cache types.
+This is equivalent to \fB-\-filter <type>:structure\fR for all cache types.
 .TP
 \fB\-\-no\-icaches\fR
-Do not show Instruction caches, only Data and Unified caches are displayed.
+This is equivalent to \fB-\-filter <type>:none\fR for all instruction cache types.
 .TP
 \fB\-\-whole\-system\fR
 Do not consider administration limitations.

@@ -41,6 +41,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
+  fprintf (where, "  --filter <type>:<knd> Filter objects of the given type, or all.\n");
+  fprintf (where, "     <knd> may be `all' (keep all), `none' (remove all), `structure' or `basic'\n");
   fprintf (where, "  --no-icaches          Do not show instruction caches\n");
   fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
   fprintf (where, "  --no-bridges          Do not any I/O bridge except hostbridges\n");
@@ -319,6 +321,38 @@ main (int argc, char *argv[])
 	  show_ancestor_attrdepth = attrs.group.depth;
 	}
 	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--filter")) {
+        hwloc_obj_type_t type;
+        char *colon;
+        enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_ALL;
+        int all = 0;
+        if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        colon = strchr(argv[1], ':');
+        if (colon) {
+          *colon = '\0';
+          if (!strcmp(colon+1, "none"))
+            filter = HWLOC_TYPE_FILTER_KEEP_NONE;
+          else if (!strcmp(colon+1, "all"))
+            filter = HWLOC_TYPE_FILTER_KEEP_ALL;
+          else if (!strcmp(colon+1, "structure"))
+            filter = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
+        }
+        if (!strcmp(argv[1], "all"))
+          all = 1;
+        else if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0) {
+          fprintf(stderr, "Unsupported type `%s' passed to --ignore.\n", argv[1]);
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+        }
+        else if (all)
+          hwloc_topology_set_all_types_filter(topology, filter);
+        else
+          hwloc_topology_set_type_filter(topology, type, filter);
+        opt = 1;
       }
       else if (!strcmp (argv[0], "--no-icaches")) {
 	for(i=HWLOC_OBJ_L1ICACHE; i<=HWLOC_OBJ_L3ICACHE; i++)

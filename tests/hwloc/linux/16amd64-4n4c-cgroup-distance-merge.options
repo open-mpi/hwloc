@@ -1,1 +1,1 @@
-- -v --merge --no-icaches
+- -v --filter all:structure --no-icaches

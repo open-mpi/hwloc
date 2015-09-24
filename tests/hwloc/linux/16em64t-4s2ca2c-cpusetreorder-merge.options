@@ -1,1 +1,1 @@
-- -v --merge
+- -v --filter all:structure
