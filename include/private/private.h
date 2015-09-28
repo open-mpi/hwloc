@@ -45,13 +45,12 @@ enum hwloc_ignore_type_e {
   HWLOC_IGNORE_TYPE_ALWAYS
 };
 
-#define HWLOC_DEPTH_MAX 128
-
 struct hwloc_topology {
   unsigned nb_levels;					/* Number of horizontal levels */
+  unsigned nb_levels_allocated;				/* Number of levels allocated and zeroed in level_nbobjects and levels below */
   unsigned next_group_depth;				/* Depth of the next Group object that we may create */
-  unsigned level_nbobjects[HWLOC_DEPTH_MAX]; 		/* Number of objects on each horizontal level */
-  struct hwloc_obj **levels[HWLOC_DEPTH_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbobjects[l]] */
+  unsigned *level_nbobjects; 				/* Number of objects on each horizontal level */
+  struct hwloc_obj ***levels;				/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbobjects[l]] */
   unsigned long flags;
   int type_depth[HWLOC_OBJ_TYPE_MAX];
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];

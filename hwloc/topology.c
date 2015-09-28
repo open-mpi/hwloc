@@ -2262,10 +2262,10 @@ hwloc_connect_levels(hwloc_topology_t topology)
   unsigned n_objs, n_taken_objs, n_new_objs;
 
   /* reset non-root levels (root was initialized during init and will not change here) */
-  for(l=1; l<HWLOC_DEPTH_MAX; l++)
+  for(l=1; l<topology->nb_levels; l++)
     free(topology->levels[l]);
-  memset(topology->levels+1, 0, (HWLOC_DEPTH_MAX-1)*sizeof(*topology->levels));
-  memset(topology->level_nbobjects+1, 0,  (HWLOC_DEPTH_MAX-1)*sizeof(*topology->level_nbobjects));
+  memset(topology->levels+1, 0, (topology->nb_levels-1)*sizeof(*topology->levels));
+  memset(topology->level_nbobjects+1, 0, (topology->nb_levels-1)*sizeof(*topology->level_nbobjects));
   topology->nb_levels = 1;
   /* don't touch next_group_depth, the Group objects are still here */
 
@@ -2374,6 +2374,23 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     taken_objs[n_taken_objs] = NULL;
 
+    if (topology->nb_levels == topology->nb_levels_allocated) {
+      /* extend the arrays of levels */
+      topology->levels = realloc(topology->levels,
+				 2 * topology->nb_levels_allocated * sizeof(*topology->levels));
+      topology->level_nbobjects = realloc(topology->level_nbobjects,
+					  2 * topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
+      if (!topology->levels || !topology->level_nbobjects) {
+	fprintf(stderr, "hwloc failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
+	return -1;
+      }
+      memset(topology->levels + topology->nb_levels_allocated,
+	     0, topology->nb_levels_allocated * sizeof(*topology->levels));
+      memset(topology->level_nbobjects + topology->nb_levels_allocated,
+	     0, topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
+      topology->nb_levels_allocated *= 2;
+    }
+    /* add the new level */
     topology->level_nbobjects[topology->nb_levels] = n_taken_objs;
     topology->levels[topology->nb_levels] = taken_objs;
 
@@ -2692,8 +2709,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->next_group_depth = 0;
   topology->levels[0] = malloc (sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
-  /* NULLify other levels so that we can detect and free old ones in hwloc_connect_levels() if needed */
-  memset(topology->levels+1, 0, (HWLOC_DEPTH_MAX-1)*sizeof(*topology->levels));
+  /* NULLify other levels */
   topology->bridge_level = NULL;
   topology->pcidev_level = NULL;
   topology->osdev_level = NULL;
@@ -2736,6 +2752,10 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->support.discovery = malloc(sizeof(*topology->support.discovery));
   topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
   topology->support.membind = malloc(sizeof(*topology->support.membind));
+
+  topology->nb_levels_allocated = 16; /* enough for default 9 levels = Mach+Pack+NUMA+L3+L2+L1d+L1i+Co+PU */
+  topology->levels = calloc(topology->nb_levels_allocated, sizeof(*topology->levels));
+  topology->level_nbobjects = calloc(topology->nb_levels_allocated, sizeof(*topology->level_nbobjects));
 
   /* Only ignore useless cruft by default */
   for(i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++)
@@ -2895,6 +2915,9 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 
   hwloc_topology_clear(topology);
   hwloc_distances_destroy(topology);
+
+  free(topology->levels);
+  free(topology->level_nbobjects);
 
   free(topology->support.discovery);
   free(topology->support.cpubind);
