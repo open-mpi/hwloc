@@ -17,12 +17,13 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
-Version 2.0
---------------
+Version 2.0.0
+-------------
 * The ABI of the library has changed. For instance some hwloc_obj fields
   were reordered.
   - HWLOC_API_VERSION and hwloc_get_api_version() now give 0x00020000.
-  - See "How do I handle ABI breaks and API upgrades ?" in the FAQ.
+  - See "How do I handle ABI breaks and API upgrades ?" in the FAQ
+    and https://github.com/open-mpi/hwloc/wiki/Upgrading-to-v2.0-API
 * Major changes
   + Topologies always have at least one NUMA object. On non-NUMA machines,
     a single NUMA object is added to describe the entire machine memory.
@@ -94,7 +95,7 @@ Version 2.0
     hwloc_topology_set_*() functions for selecting components.
 
 
-ersion 1.11.0
+Version 1.11.0
 --------------
 * API
   + Socket objects are renamed into Package to align with the terminology
