@@ -163,17 +163,19 @@
         </object>
         <object type="NUMANode" os_index="1" cpuset="0x00000030" complete_cpuset="0x000000f0" allowed_cpuset="0x00000030" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" local_memory="17179869184">
           <object type="L3Cache" cpuset="0x00000030" complete_cpuset="0x000000f0" allowed_cpuset="0x00000030" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="5240832" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-            <object type="L2Cache" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="524288" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-              <object type="L1Cache" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
-                <object type="Core" os_index="0" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
-                  <object type="PU" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002"/>
+            <object type="Group" cpuset="0x00000030" complete_cpuset="0x00000030" allowed_cpuset="0x00000030" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" depth="2">
+              <object type="L2Cache" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="524288" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
+                <object type="L1Cache" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
+                  <object type="Core" os_index="0" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
+                    <object type="PU" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002"/>
+                  </object>
                 </object>
               </object>
-            </object>
-            <object type="L2Cache" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="524288" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-              <object type="L1Cache" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
-                <object type="Core" os_index="1" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
-                  <object type="PU" os_index="5" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002"/>
+              <object type="L2Cache" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="524288" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
+                <object type="L1Cache" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
+                  <object type="Core" os_index="1" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
+                    <object type="PU" os_index="5" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002"/>
+                  </object>
                 </object>
               </object>
             </object>

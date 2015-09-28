@@ -32,6 +32,9 @@ Version 2.0
     when looking for caches with _by_type() functions.
     - New hwloc_obj_type_is_{,d,i}cache() functions may be used to check whether
       a given type is a cache.
+  + Change hwloc_topology_ignore_{type,all}_keep_structure() to only remove
+    entire levels instead of single objects, so that topology do not become
+    too asymmetric.
   + Add the experimental netloc subproject. It is enabled by default when
     supported and can be disabled with --disable-netloc.
     See the documentation for details.

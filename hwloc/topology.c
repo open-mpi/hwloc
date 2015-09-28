@@ -440,16 +440,33 @@ insert_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newp
   return &tmp->next_sibling;
 }
 
+/* firstnew must be non-NULL */
+static void
+prepend_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newparent)
+{
+  hwloc_obj_t *tmpp, tmp;
+  /* update parent pointers */
+  for(tmp = firstnew; tmp; tmp = tmp->next_sibling)
+    tmp->parent = newparent;
+  /* find the end of the new list */
+  for(tmpp = &firstnew ; *tmpp; tmpp = &((*tmpp)->next_sibling));
+  /* place the existing list there */
+  *tmpp = *firstp;
+  /* use the beginning of the new list now */
+  *firstp = firstnew;
+}
+
 static void
 append_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newparent)
 {
   hwloc_obj_t *tmpp, tmp;
-  /* find the end of the list */
-  for(tmpp = firstp ; *tmpp; tmpp = &((*tmpp)->next_sibling));
-  *tmpp = firstnew;
   /* update parent pointers */
   for(tmp = firstnew; tmp; tmp = tmp->next_sibling)
     tmp->parent = newparent;
+  /* find the end of the existing list */
+  for(tmpp = firstp ; *tmpp; tmpp = &((*tmpp)->next_sibling));
+  /* place new list there */
+  *tmpp = firstnew;
 }
 
 /* Remove an object from its parent and free it.
@@ -1698,6 +1715,8 @@ ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
   int dropped_children = 0;
   int dropped = 0;
 
+  /* FIXME: always remove useless Groups */
+
   /* account dropped normal children only, others don't required reordering */
   for_each_child_safe(child, parent, pchild)
     dropped_children += ignore_type_always(topology, pchild);
@@ -1748,80 +1767,167 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
   }
 }
 
-/* Remove objects that are ignored with keep structure flag.
- * Returns 1 if *pparent were replaced, which means the caller need to reorder its children.
- * Returns 0 otherwise.
- */
+/* compare i-th and i-1-th levels structure */
 static int
-ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_t *pparent)
+hwloc_compare_levels_structure(hwloc_topology_t topology, unsigned i)
 {
-  hwloc_obj_t parent = *pparent, child, *pchild;
-  int replacechild = 0, replaceparent = 0, droppedchildren = 0;
+  unsigned j;
+  if (topology->level_nbobjects[i-1] != topology->level_nbobjects[i])
+    return -1;
+  for(j=0; j<topology->level_nbobjects[i]; j++)
+    if (topology->levels[i-1][0]->arity != 1)
+      return -1;
+  /* same number of objects with arity 1 above, no problem */
+  return 0;
+}
 
-  if (!parent->first_child) /* can't use arity yet */
-    /* There are no children, nothing to merge. */
-    return 0;
+/* return > 0 if any level was removed, which means reconnect is needed */
+static void
+hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
+{
+  unsigned i, j;
+  int res = 0;
 
-  /* account dropped normal children only, others don't required reordering */
-  for_each_child_safe(child, parent, pchild)
-    droppedchildren += ignore_type_keep_structure(topology, pchild);
-  for_each_io_child_safe(child, parent, pchild)
-    ignore_type_keep_structure(topology, pchild);
-  for_each_misc_child_safe(child, parent, pchild)
-    ignore_type_keep_structure(topology, pchild);
+  /* start from the bottom since we'll remove intermediate levels */
+  for(i=topology->nb_levels-1; i>0; i--) {
+    int replacechild = 0, replaceparent = 0;
+    hwloc_obj_type_t type1 = topology->levels[i-1][0]->type;
+    hwloc_obj_type_t type2 = topology->levels[i][0]->type;
 
-  if (droppedchildren)
-    hwloc__reorder_children(parent);
-
-  child = parent->first_child;
-  /* we don't merge if there are multiple "important" children. */
-  if (child->next_sibling) /* can't use arity yet */
-    return 0;
-
-  /* Check whether parent and/or child can be replaced */
-  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
-    /* Parent can be ignored in favor of the child.  */
-    replaceparent = 1;
-  }
-  if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
-    /* Child can be ignored in favor of the parent.  */
-    replacechild = 1;
-  }
-
-  /* Decide which one to actually replace */
-  if (replaceparent && replacechild) {
-    /* If both may be replaced, look at obj_type_priority */
-    if (obj_type_priority[parent->type] > obj_type_priority[child->type])
-      replaceparent = 0;
-    else
-      replacechild = 0;
-  }
-
-  if (replaceparent) {
-    /* Replace parent with child */
-    hwloc_debug("%s", "\nIgnoring parent ");
-    hwloc_debug_print_object(0, parent);
-    /* move children to child, so that unlink_and_free_single_object() doesn't move them to the grandparent */
-    if (parent->io_first_child) {
-      append_siblings_list(&child->io_first_child, parent->io_first_child, child);
-      parent->io_first_child = NULL;
+    /* Check whether parents and/or children can be replaced */
+    if (topology->ignored_types[type1] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE)
+      /* Parents can be ignored in favor of children.  */
+      replaceparent = 1;
+    if (topology->ignored_types[type2] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE)
+      /* Children can be ignored in favor of parents.  */
+      replacechild = 1;
+    if (!replacechild && !replaceparent)
+      /* no ignoring */
+      continue;
+    /* Decide which one to actually replace */
+    if (replaceparent && replacechild) {
+      /* If both may be replaced, look at obj_type_priority */
+      if (obj_type_priority[type1] >= obj_type_priority[type2])
+	replaceparent = 0;
+      else
+	replacechild = 0;
     }
-    if (parent->misc_first_child) {
-      append_siblings_list(&child->misc_first_child, parent->misc_first_child, child);
-      parent->misc_first_child = NULL;
-    }
-    unlink_and_free_single_object(pparent);
-    topology->modified = 1;
+    /* Are these levels actually identical? */
+    if (hwloc_compare_levels_structure(topology, i) < 0)
+      continue;
+    hwloc_debug("may merge levels #%d=%s and #%d=%s\n",
+		i-1, hwloc_obj_type_string(type1), i, hwloc_obj_type_string(type2));
 
-  } else if (replacechild) {
-    /* Replace child with parent */
-    hwloc_debug("%s", "\nIgnoring child ");
-    hwloc_debug_print_object(0, child);
-    unlink_and_free_single_object(&parent->first_child);
-    topology->modified = 1;
+    /* OK, remove intermediate objects from the tree. */
+    for(j=0; j<topology->level_nbobjects[i]; j++) {
+      hwloc_obj_t parent = topology->levels[i-1][j];
+      hwloc_obj_t child = topology->levels[i][j];
+      unsigned k;
+      if (replacechild) {
+	/* move child's children to parent */
+	parent->first_child = child->first_child;
+	parent->last_child = child->last_child;
+	parent->arity = child->arity;
+	free(parent->children);
+	parent->children = child->children;
+	child->children = NULL;
+	/* update children parent */
+	for(k=0; k<parent->arity; k++)
+	  parent->children[k]->parent = parent;
+	/* append child io/misc children to parent */
+	if (child->io_first_child) {
+	  append_siblings_list(&parent->io_first_child, child->io_first_child, parent);
+	  parent->io_arity += child->io_arity;
+	}
+	if (child->misc_first_child) {
+	  append_siblings_list(&parent->misc_first_child, child->misc_first_child, parent);
+	  parent->misc_arity += child->misc_arity;
+	}
+	hwloc_free_unlinked_object(child);
+      } else {
+	/* replace parent with child in grand-parent */
+	if (parent->parent) {
+	  parent->parent->children[parent->sibling_rank] = child;
+	  child->sibling_rank = parent->sibling_rank;
+	  if (!parent->sibling_rank)
+	    parent->parent->first_child = child;
+	  if (parent->sibling_rank == parent->parent->arity-1)
+	    parent->parent->last_child = child;
+	  /* update child parent */
+	  child->parent = parent->parent;
+	} else {
+	  /* make child the new root */
+	  topology->levels[0][0] = child;
+	  child->parent = NULL;
+	}
+	/* prepend parent io/misc children to child */
+	if (parent->io_first_child) {
+	  prepend_siblings_list(&child->io_first_child, parent->io_first_child, child);
+	  child->io_arity += parent->io_arity;
+	}
+	if (parent->misc_first_child) {
+	  prepend_siblings_list(&child->misc_first_child, parent->misc_first_child, child);
+	  child->misc_arity += parent->misc_arity;
+	}
+	hwloc_free_unlinked_object(parent);
+	/* prev/next_sibling will be updated below in another loop */
+      }
+    }
+    if (replaceparent && i>1) {
+      /* Update sibling list within modified parent->parent arrays */
+      for(j=0; j<topology->level_nbobjects[i]; j++) {
+	hwloc_obj_t child = topology->levels[i][j];
+	unsigned rank = child->sibling_rank;
+	child->prev_sibling = rank > 0 ? child->parent->children[rank-1] : NULL;
+	child->next_sibling = rank < child->parent->arity-1 ? child->parent->children[rank+1] : NULL;
+      }
+    }
+
+    /* Update levels so that the next reconnect isn't confused */
+    if (replaceparent) {
+      /* Removing level i-1, so move levels [i..nb_levels-1] to [i-1..] */
+      free(topology->levels[i-1]);
+      memmove(&topology->levels[i-1],
+	      &topology->levels[i],
+	      (topology->nb_levels-i)*sizeof(topology->levels[i]));
+      memmove(&topology->level_nbobjects[i-1],
+	      &topology->level_nbobjects[i],
+	      (topology->nb_levels-i)*sizeof(topology->level_nbobjects[i]));
+      hwloc_debug("removed parent level %s at depth %d\n",
+		  hwloc_obj_type_string(type1), i-1);
+    } else {
+      /* Removing level i, so move levels [i+1..nb_levels-1] and later to [i..] */
+      free(topology->levels[i]);
+      memmove(&topology->levels[i],
+	      &topology->levels[i+1],
+	      (topology->nb_levels-1-i)*sizeof(topology->levels[i]));
+      memmove(&topology->level_nbobjects[i],
+	      &topology->level_nbobjects[i+1],
+	      (topology->nb_levels-1-i)*sizeof(topology->level_nbobjects[i]));
+      hwloc_debug("removed child level %s at depth %d\n",
+		  hwloc_obj_type_string(type2), i);
+    }
+    topology->level_nbobjects[topology->nb_levels-1] = 0;
+    topology->levels[topology->nb_levels-1] = NULL;
+    topology->nb_levels--;
+
+    res++;
   }
 
-  return replaceparent ? 1 : 0;
+  if (res > 0) {
+    /* Update object and type depths if some levels were removed */
+    for(i=0; i<topology->nb_levels; i++)
+      topology->type_depth[topology->levels[i][0]->type] = HWLOC_TYPE_DEPTH_UNKNOWN;
+    for(i=0; i<topology->nb_levels; i++) {
+      hwloc_obj_type_t type = topology->levels[i][0]->type;
+      for(j=0; j<topology->level_nbobjects[i]; j++)
+	topology->levels[i][j]->depth = i;
+      if (topology->type_depth[type] == HWLOC_TYPE_DEPTH_UNKNOWN)
+	topology->type_depth[type] = i;
+      else
+	topology->type_depth[type] = HWLOC_TYPE_DEPTH_MULTIPLE;
+    }
+  }
 }
 
 static void
@@ -2640,15 +2746,16 @@ next_noncpubackend:
   }
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
-  hwloc_debug("%s", "\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
-  ignore_type_keep_structure(topology, &topology->levels[0][0]);
-  hwloc_debug_print_objects(0, topology->levels[0][0]);
-
   /* Reconnect things after all these changes.
    * Often needed because of Groups inserted for I/Os.
+   * And required for KEEP_STRUCTURE below.
    */
   if (hwloc_topology_reconnect(topology, 0) < 0)
     return -1;
+
+  hwloc_debug("%s", "\nRemoving levels with HWLOC_IGNORE_TYPE_KEEP_STRUCTURE\n");
+  hwloc_filter_levels_keep_structure(topology);
+  hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");

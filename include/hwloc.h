@@ -1969,12 +1969,12 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_o
 
 /** \brief Ignore an object type if it does not bring any structure.
  *
- * Ignore all objects from the given type as long as they do not bring any structure:
- * Each ignored object should have a single children or be the only child of its parent.
+ * Ignore a level from the given type as long as it does not bring any structure:
+ * Each object of the level should have a single child or be the only child of its parent.
  * The bottom-level type ::HWLOC_OBJ_PU and the ::HWLOC_OBJ_NUMANODE level may not be ignored.
  * I/O objects may not be ignored, topology flags should be used to configure
  * their discovery instead.
- * Group objects are always ignored if they do not bring any structure
+ * Group levels are always ignored if they do not bring any structure
  * since they are designed to add structure to the topology.
  * Misc objects cannot be ignored based on the structure since they are only annotations
  * outside of the main topology structure.
@@ -1983,7 +1983,7 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t to
 
 /** \brief Ignore all objects that do not bring any structure.
  *
- * Ignore all objects that do not bring any structure:
+ * Ignore all levels that do not bring any structure:
  * This is equivalent to calling hwloc_topology_ignore_type_keep_structure()
  * for all object types.
  */
