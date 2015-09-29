@@ -2488,6 +2488,11 @@ hwloc_connect_levels(hwloc_topology_t topology)
 					  2 * topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
       if (!topology->levels || !topology->level_nbobjects) {
 	fprintf(stderr, "hwloc failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
+	free(objs);
+	free(taken_objs);
+	if (new_objs)
+	  free(new_objs);
+	errno = ENOMEM;
 	return -1;
       }
       memset(topology->levels + topology->nb_levels_allocated,
