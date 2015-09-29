@@ -635,7 +635,7 @@ Make sure to have had a look at those too!
 
 The following diagram can help to understand the vocabulary of the relationships
 by showing the example of a machine with two dual core packages (with no
-hardware threads); thus, a topology with 4 levels. Each box with rounded corner
+hardware threads); thus, a topology with 5 levels. Each box with rounded corner
 corresponds to one hwloc_obj_t, containing the values of the different integer
 fields (depth, logical_index, etc.), and arrows show to which other hwloc_obj_t
 pointers point to (first_child, parent, etc.). The L2 cache of the last core is intentionally missing to show how asymmetric topologies are handled.
@@ -2709,7 +2709,7 @@ Moreover, it is important to understand that a same parent object may
 have children of different types (and therefore, different
 depths). <strong>These children are therefore siblings (because they
 have the same parent), but they are <em>not</em> cousins (because they
-do not belong to the same horizontal levels).</strong>
+do not belong to the same horizontal level).</strong>
 
 
 \section faq_annotate How do I annotate the topology with private notes?
