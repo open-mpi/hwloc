@@ -615,7 +615,7 @@ Make sure to have had a look at those too!
   of parent/child links between the root object and the given object.
   If the topology is asymmetric, the difference between some parent
   and child depths may be larger than one when some intermediate levels
-  (for instance caches) are missing in only some parts of the machine.
+  (for instance groups) are missing in only some parts of the machine.
   </dd>
 
 <dt>OS or physical index</dt>
