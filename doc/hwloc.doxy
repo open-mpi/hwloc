@@ -665,14 +665,13 @@ hardware threads); thus, a topology with 5 levels. Each box with rounded corner
 corresponds to one hwloc_obj_t, containing the values of the different integer
 fields (depth, logical_index, etc.), and arrows show to which other hwloc_obj_t
 pointers point to (first_child, parent, etc.). The L2 cache of the last core is intentionally missing to show how asymmetric topologies are handled.
+See \ref faq_asymmetric for more information about such strange topologies.
 
 \image html diagram.png
 \image latex diagram.eps "" width=\textwidth
 
 It should be noted that for PU objects, the logical index -- as
 computed linearly by hwloc -- is not the same as the OS index.
-
-See also \ref faq_asymmetric for more details.
 
 
 \page tools Command-Line Tools 
@@ -2857,9 +2856,20 @@ hello from a single thread on core #3
 \section faq_asymmetric What happens if my topology is asymmetric?
 
 hwloc supports asymmetric topologies even if most platforms are usually
-symmetric. For example, there may be different types of processors
+symmetric. For example, there could be different types of processors
 in a single machine, each with different numbers of cores, symmetric
 multithreading, or levels of caches.
+
+In practice, asymmetric topologies mostly appear when intermediate groups
+are added for I/O affinity: on a 4-package machine, an I/O bus may be
+connected to 2 packages. These packages are below an additional Group
+object, while the other packages are not.
+
+Before hwloc v2.0, hwloc_topology_ignore_type_keep_structure() and
+hwloc_topology_ignore_all_keep_structure() may also make topologies
+assymetric by removing parts of levels, especially when part of the
+machine is disallowed by administrator restrictions
+(e.g. Linux cgroups).
 
 To understand how hwloc manages such cases, one should first remember
 the meaning of levels and cousin objects. All objects of the same type
@@ -2872,14 +2882,17 @@ attributes are also taken in account when gathering objects as
 horizontal levels.  To be clear: there will be one level for L1i
 caches, another level for L1d caches, another one for L2, etc.
 
-If the topology is asymmetric (e.g., if a cache is missing in one of
-the processors), a given horizontal level will still exist if there
+If the topology is asymmetric (e.g., if a group is missing above some
+processors), a given horizontal level will still exist if there
 exist any objects of that type.  However, some branches of the overall
 tree may not have an object located in that horizontal level.  Note
 that this specific hole within one horizontal level does not imply
 anything for other levels.  All objects of the same type are gathered
 in horizontal levels even if their parents or children have different
 depths and types.
+
+See the diagram in \ref termsanddefs for a graphical representation
+of such topologies.
 
 Moreover, it is important to understand that a same parent object may
 have children of different types (and therefore, different
