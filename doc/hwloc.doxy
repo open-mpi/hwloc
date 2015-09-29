@@ -1763,8 +1763,8 @@ NUMANode:1 Package:1 L3Cache:1 L2Cache:2 L1dCache:1 L1iCache:1 Core:1 PU:2
 
 The exported string may be passed back to hwloc for recreating
 another similar topology.
-The entire tree will be similar, but some special attributes such
-processort types may be missing.
+The entire tree will be similar, but some attributes such as
+the processor model will be missing.
 
 Such an export is only possible if the topology is totally symmetric,
 which means the <tt>symmetric_subtree</tt> field of the root object
