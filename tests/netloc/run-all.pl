@@ -48,7 +48,7 @@ foreach my $binary (@tests) {
   my $ret = system("./" . $binary);
   if( $ret != 0 ) {
     print "XXXX Failure! Returned $ret!\n";
-    exit -1;
+    exit 1;
   }
   else {
     print "---> Success!\n";

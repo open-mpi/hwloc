@@ -36,7 +36,7 @@ if (!$ok or !defined $rawdir or defined($help) ) {
   print " --verbose | -v\n";
   print "Help\n";
   print " --help | -h\n";
-  exit -1;
+  exit 1;
 }
 
 my @subnets;
