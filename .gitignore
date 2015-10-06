@@ -5,6 +5,12 @@ Makefile
 test-suite.log
 *~
 
+/auto.out
+/config.out
+/dist.out
+/doc/doc.out
+/doc/readme.out
+
 /config/ar-lib
 /config/argz.m4
 /config/compile
@@ -41,14 +47,15 @@ test-suite.log
 /doc/doxygen-doc/
 /doc/images/diagram.eps
 /doc/images/diagram.png
-/doc/hwloc-hello
-/doc/hwloc-hello-cpp
-/doc/hwloc-hello-cpp.cpp
-/doc/*.o
-/doc/*.log
-/doc/*.trs
-/doc/doc.out
-/doc/readme.out
+/doc/examples/hwloc-hello
+/doc/examples/hwloc-hello-cpp
+/doc/examples/hwloc-hello-cpp.cpp
+/doc/examples/cpuset+bitmap+cpubind
+/doc/examples/nodeset+membind+policy
+/doc/examples/sharedcaches
+/doc/examples/*.o
+/doc/examples/*.log
+/doc/examples/*.trs
 
 /src/static-components.h
 /src/*.lo
@@ -58,6 +65,7 @@ test-suite.log
 /tests/wrapper.sh
 /tests/hwloc_list_components
 /tests/hwloc_bitmap
+/tests/hwloc_bitmap_compare_inclusion
 /tests/hwloc_bitmap_string
 /tests/hwloc_get_closest_objs
 /tests/hwloc_get_obj_covering_cpuset
@@ -102,7 +110,6 @@ test-suite.log
 /tests/*.log
 /tests/*.trs
 
-/tests/linux/hwloc-gather-topology
 /tests/linux/test-topology.sh
 /tests/linux/*.log
 /tests/linux/*.trs
@@ -138,6 +145,7 @@ test-suite.log
 /utils/hwloc/hwloc-distances.1
 /utils/hwloc/hwloc-distrib
 /utils/hwloc/hwloc-distrib.1
+/utils/hwloc/hwloc-gather-topology
 /utils/hwloc/hwloc-gather-topology.1
 /utils/hwloc/hwloc-info
 /utils/hwloc/hwloc-info.1
@@ -161,7 +169,7 @@ test-suite.log
 /utils/lstopo/*.o
 /utils/lstopo/lstopo
 /utils/lstopo/lstopo-no-graphics
-/utils/lstopo/lstopo.1
+/utils/lstopo/lstopo-no-graphics.1
 /utils/lstopo/test-hwloc-ls.sh
 /utils/lstopo/test-*.sh.log
 /utils/lstopo/test-*.sh.trs
