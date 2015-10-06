@@ -19,35 +19,42 @@ in v0.9.1).
 
 Version 1.11.1
 --------------
-* Fix the topology of Fujitsu K-computer, FX10, FX100 servers.
-  Thanks to Takahiro Kawashima and Gilles Gouaillardet.
-* Fix a segfault when displaying logical indexes in the graphical lstopo,
-  thanks to Guillaume Mercier for reporting the issue.
-* hwloc-annotate, hwloc-diff and hwloc-patch do not drop unavailable resources
-  from the output anymore and those may be annotated as well.
-* Fix an overzealous assertion when inserting an intermediate Group object
-  while Groups are totally ignored.
-* Fix a memory leak on failure to load a xml diff file.
-* Fix some segfaults when inputting an invalid synthetic description.
-* Fix L3 cache information on AMD Opteron 61xx Magny-Cours processors
-  in the x86 backend. Thanks to Guillaume Beauchamp for the patch.
+* Detection fixes
+  + Hardwire the topology of Fujitsu K-computer, FX10, FX100 servers to
+    workaround buggy Linux kernels.
+    Thanks to Takahiro Kawashima and Gilles Gouaillardet.
+  + Fix L3 cache information on AMD Opteron 61xx Magny-Cours processors
+    in the x86 backend. Thanks to Guillaume Beauchamp for the patch.
+  + Detect block devices directly attached to PCI without a controller,
+    for instance NVMe disks. Thanks to Barry M. Tannenbaum.
+  + Add the PCISlot attribute to all PCI functions instead of only the
+    first one.
+* Miscellaneous internal fixes
+  + Ignore PCI bridges that could fail assertions by reporting buggy
+    secondary-subordinate bus numbers
+    Thanks to George Bosilca for reporting the issue.
+  + Fix an overzealous assertion when inserting an intermediate Group object
+    while Groups are totally ignored.
+  + Fix a memory leak on failure to load a xml diff file.
+  + Fix some segfaults when inputting an invalid synthetic description.
 * Many fixes and improvements in the Windows backend:
   + Fix the discovery of more than 32 processors and multiple processor
     groups. Thanks to Barry M. Tannenbaum for the help.
   + Add thread binding set support in case of multiple process groups.
   + Add thread binding get support.
   + Add get_last_cpu_location() support for the current thread.
-  + Disable the unsupported process binding in case of multiple processor groups.
+  + Disable the unsupported process binding in case of multiple processor
+    groups.
   + Fix/update the Visual Studio support under contrib/windows.
     Thanks to Eloi Gaudry for the help.
-* Fix lstopo linking with X11 libraries, for instance on Mac OS X.
-  Thanks to Scott Atchley and Pierre Ramet for reporting the issue.
-* Ignore PCI bridges reporting buggy secondary-subordinate bus numbers.
-  Thanks to George Bosilca for reporting the issue.
-* Detect block devices directly attached to PCI without a controller,
-  for instance NVMe disks. Thanks to Barry M. Tannenbaum.
-* Add the PCISlot attribute to all PCI functions instead of only the first one.
-* Command-line tools may now import XML from the standard input with -i -.xml
+* Tools fixes
+  + Fix a segfault when displaying logical indexes in the graphical lstopo.
+    Thanks to Guillaume Mercier for reporting the issue.
+  + Fix lstopo linking with X11 libraries, for instance on Mac OS X.
+    Thanks to Scott Atchley and Pierre Ramet for reporting the issue.
+  + hwloc-annotate, hwloc-diff and hwloc-patch do not drop unavailable
+    resources from the output anymore and those may be annotated as well.
+  + Command-line tools may now import XML from the standard input with -i -.xml
 
 
 Version 1.11.0
