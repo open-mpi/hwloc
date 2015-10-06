@@ -10,6 +10,12 @@ test-suite.log
 *.log
 *.trs
 
+/auto.out
+/config.out
+/dist.out
+/doc/doc.out
+/doc/readme.out
+
 /config/ar-lib
 /config/argz.m4
 /config/compile
@@ -47,17 +53,18 @@ test-suite.log
 /doc/doxygen-doc/
 /doc/images/diagram.eps
 /doc/images/diagram.png
-/doc/hwloc-hello
-/doc/hwloc-hello-cpp
-/doc/hwloc-hello-cpp.cpp
-/doc/doc.out
-/doc/readme.out
+/doc/examples/hwloc-hello
+/doc/examples/hwloc-hello-cpp
+/doc/examples/hwloc-hello-cpp.cpp
 /doc/examples/cpuset+bitmap+cpubind
 /doc/examples/hwloc-hello
 /doc/examples/hwloc-hello-cpp
 /doc/examples/hwloc-hello-cpp.cpp
 /doc/examples/nodeset+membind+policy
 /doc/examples/sharedcaches
+/doc/examples/*.o
+/doc/examples/*.log
+/doc/examples/*.trs
 
 /hwloc/static-components.h
 /hwloc/libhwloc.la
@@ -107,12 +114,14 @@ test-suite.log
 /tests/hwloc/cudart
 /tests/hwloc/nvml
 
-/tests/hwloc/linux/hwloc-gather-topology
 /tests/hwloc/linux/test-topology.sh
 
 /tests/hwloc/linux/gather/test-gather-topology.sh
 
 /tests/hwloc/ports/*.c
+/tests/hwloc/ports/liblstopo-port-windows.a
+
+/tests/hwloc/x86/test-topology.sh
 
 /tests/hwloc/xml/test-topology.sh
 
@@ -158,6 +167,9 @@ test-suite.log
 /utils/hwloc/hwloc-distances.1
 /utils/hwloc/hwloc-distrib
 /utils/hwloc/hwloc-distrib.1
+/utils/hwloc/hwloc-gather-cpuid
+/utils/hwloc/hwloc-gather-cpuid.1
+/utils/hwloc/hwloc-gather-topology
 /utils/hwloc/hwloc-gather-topology.1
 /utils/hwloc/hwloc-info
 /utils/hwloc/hwloc-info.1
@@ -182,7 +194,6 @@ test-suite.log
 /utils/lstopo/lstopo
 /utils/lstopo/lstopo-no-graphics
 /utils/lstopo/lstopo-no-graphics.1
-/utils/lstopo/lstopo.1
 /utils/lstopo/test-hwloc-ls.sh
 /utils/lstopo/test-*.sh.log
 /utils/lstopo/test-*.sh.trs
