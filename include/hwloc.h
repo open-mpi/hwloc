@@ -692,6 +692,10 @@ enum hwloc_topology_flags_e {
    * Gather all resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cpusets and gather all processors and memory nodes,
    * and ignore the fact that some resources may be offline.
+   *
+   * When this flag is not set, PUs that are disallowed are not added to the topology.
+   * Parent objects (package, core, cache, etc.) are added only if some of their children are allowed.
+   * NUMA nodes are always added but their available memory is set to 0 when disallowed.
    * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1UL<<0),
