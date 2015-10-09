@@ -1780,6 +1780,10 @@ enum hwloc_topology_flags_e {
    * Gather all resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cgroup/Cpusets and gather all processors and memory nodes.
    *
+   * When this flag is not set, PUs that are disallowed are not added to the topology.
+   * Parent objects (package, core, cache, etc.) are added only if some of their children are allowed.
+   * NUMA nodes are always added but their available memory is set to 0 when disallowed.
+   *
    * When this flag is set, each object has allowed_cpuset <= cpuset <= complete_cpuset.
    * Otherwise allowed_cpuset = cpuset <= complete_cpuset.
    * The same applies to nodesets.
