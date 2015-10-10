@@ -37,6 +37,8 @@ Version 1.11.1
     while Groups are totally ignored.
   + Fix a memory leak on failure to load a xml diff file.
   + Fix some segfaults when inputting an invalid synthetic description.
+  + Fix a segfault when plugins fail to find core symbols.
+    Thanks to Guy Streeter.
 * Many fixes and improvements in the Windows backend:
   + Fix the discovery of more than 32 processors and multiple processor
     groups. Thanks to Barry M. Tannenbaum for the help.
