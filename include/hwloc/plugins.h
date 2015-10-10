@@ -353,7 +353,7 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
     static int verboseenv_value = 0;
     if (!verboseenv_checked) {
       const char *verboseenv = getenv("HWLOC_PLUGINS_VERBOSE");
-      verboseenv_value = atoi(verboseenv);
+      verboseenv_value = verboseenv ? atoi(verboseenv) : 0;
       verboseenv_checked = 1;
     }
     if (verboseenv_value)
