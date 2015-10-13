@@ -917,6 +917,8 @@ static int process_nodes_dat(netloc_data_collection_handle_t *dc_handle, char *d
                 str_val = json_string_value( json_object_get( json_edge, PERL_JSON_EDGE_WIDTH ));
                 edge->width = (NULL == str_val ? NULL : strdup(str_val));
 
+                edge->gbits = json_real_value( json_object_get( json_edge, PERL_JSON_EDGE_WIDTH ));
+
 
                 str_val = json_string_value( json_object_get( json_edge, PERL_JSON_EDGE_DESCRIPTION ));
                 edge->description = (NULL == str_val ? NULL : strdup(str_val));

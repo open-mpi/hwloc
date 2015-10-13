@@ -29,6 +29,7 @@
 #define PERL_JSON_EDGE_PORT_TYPE_FROM "port_type_from"
 #define PERL_JSON_EDGE_WIDTH          "width"
 #define PERL_JSON_EDGE_SPEED          "speed"
+#define PERL_JSON_EDGE_GBITS          "gbits"
 #define PERL_JSON_EDGE_PORT_TO        "port_to"
 #define PERL_JSON_EDGE_PORT_ID_TO     "port_id_to"
 #define PERL_JSON_EDGE_PORT_TYPE_TO   "port_type_to"

@@ -345,6 +345,9 @@ struct netloc_edge_t {
     /** Metadata: Width */
     char *      width;
 
+    /** gbits of the link from speed and width */
+    float gbits;
+
     /** Description information from discovery (if any) */
     char * description;
 

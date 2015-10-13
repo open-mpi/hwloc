@@ -27,6 +27,7 @@
  * [network: [type, subnet, description],
  * [node_uid: [node_type, phy_id, log_id, description,
  *    [edge_uid: src_id, src_type, src_port, dest_id, dest_type, dest_port, speed, width
+ *    TODO update
  ***********************************************************************/
 #define JSON_NODE_FILE_META_TIMESTAMP "timestamp"
 #define JSON_NODE_FILE_META_VERSION   "version"
@@ -55,6 +56,7 @@
 #define JSON_NODE_FILE_DEST_PORT     "dest_port_id"
 #define JSON_NODE_FILE_EDGE_WIDTH    "width"
 #define JSON_NODE_FILE_EDGE_SPEED    "speed"
+#define JSON_NODE_FILE_EDGE_GBITS    "gbits"
 
 
 /***********************************************************************

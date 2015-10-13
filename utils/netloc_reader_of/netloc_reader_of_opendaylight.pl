@@ -29,6 +29,7 @@ use Perl_OF_support;
 #
 my $default_speed = "1";
 my $default_width = "1";
+my $default_gbits = 1;
 
 my $default_uri_addr = "127.0.0.1:8080";
 my $default_username = "admin";
@@ -209,6 +210,7 @@ sub _parse_network_topology {
                      port_type_from => $src_type,
                      width          => $default_width,
                      speed          => $bw,
+                     gbits          => $bw+0, # XXX
                      port_to        => $dest_dpid,
                      port_id_to     => sprintf("%d", $dest_port),
                      port_type_to   => $dest_type,
@@ -272,6 +274,7 @@ sub _parse_network_topology {
                      port_type_from => "SW",
                      width          => $default_width,
                      speed          => $default_speed,
+                     gbits          => $default_gbits,
                      port_to        => $host->phy_id,
                      port_id_to     => "-1",
                      port_type_to   => "CA",
@@ -287,6 +290,7 @@ sub _parse_network_topology {
                      port_type_from => "CA",
                      width          => $default_width,
                      speed          => $default_speed,
+                     gbits          => $default_gbits,
                      port_to        => $switch_ref->phy_id,
                      port_id_to     => sprintf("%d", $hosts_hash{"nodeConnectorId"} ),
                      port_type_to   => "SW",

@@ -106,6 +106,7 @@ struct(
 
     width          => '$',
     speed          => '$',
+    gbits          => '$',
 
     port_to        => '$', # Node->phy_id
     port_id_to     => '$',
@@ -125,6 +126,7 @@ sub TO_JSON {
             "port_type_from" => $_[0]->port_type_from,
             "width"          => $_[0]->width,
             "speed"          => $_[0]->speed,
+            "gbits"          => $_[0]->gbits,
             "port_to"        => $_[0]->port_to,
             "port_id_to"     => $_[0]->port_id_to,
             "port_type_to"   => $_[0]->port_type_to,

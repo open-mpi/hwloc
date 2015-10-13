@@ -85,6 +85,7 @@
        "dest_port":"-1",
        "width":"1",
        "speed":"1",
+       "gbits":1.0,
        "description":"None",
        "bidirectional":true
       },
@@ -104,6 +105,7 @@
 #define JSON_KEY_EDGE_INFO_DST_PORT     "dest_port"
 #define JSON_KEY_EDGE_INFO_WIDTH        "width"
 #define JSON_KEY_EDGE_INFO_SPEED        "speed"
+#define JSON_KEY_EDGE_INFO_GBITS        "gbits"
 #define JSON_KEY_EDGE_INFO_DIRECTIONAL  "bidirectional"
 #define JSON_KEY_EDGE_INFO_DESCRIPTION  "description"
 
@@ -112,6 +114,7 @@
 #define JSON_DEFAULT_EDGE_INFO_DST_PORT     "-1"
 #define JSON_DEFAULT_EDGE_INFO_WIDTH        "1"
 #define JSON_DEFAULT_EDGE_INFO_SPEED        "1"
+#define JSON_DEFAULT_EDGE_INFO_GBITS        1.0
 #define JSON_DEFAULT_EDGE_INFO_DIRECTIONAL  false
 #define JSON_DEFAULT_EDGE_INFO_DESCRIPTION  ""
 
@@ -708,6 +711,7 @@ static int convert_nodes_file(netloc_data_collection_handle_t *dc_handle) {
                     else {
                         printf("Warning: Unknown key \"%s\" in %s. Skipping.\n", key_lvl_3, JSON_KEY_EDGE_INFO);
                     }
+                    // XXX gbits TODO
                 }
 
                 // Update defaults
@@ -741,6 +745,7 @@ static int convert_nodes_file(netloc_data_collection_handle_t *dc_handle) {
                         edge_bi->description = strdup(edge->description);
                     }
                 }
+                // XXX gbits TODO
 
                 // Append to the edges list
                 ret = netloc_dc_append_edge_to_node(dc_handle, node, edge);

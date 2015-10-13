@@ -85,6 +85,7 @@ int netloc_topology_export_graphml(struct netloc_topology * topology, const char
     fprintf(fh, "\t<key id=\"target_port\" for=\"edge\" attr.name=\"target_port\" attr.type=\"string\"/>\n");
     fprintf(fh, "\t<key id=\"speed\"       for=\"edge\" attr.name=\"speed\"       attr.type=\"string\"/>\n");
     fprintf(fh, "\t<key id=\"width\"       for=\"edge\" attr.name=\"width\"       attr.type=\"string\"/>\n");
+    fprintf(fh, "\t<key id=\"gbits\"       for=\"edge\" attr.name=\"gbits\"       attr.type=\"double\"/>\n");
     fprintf(fh, "\t<key id=\"description\" for=\"edge\" attr.name=\"description\" attr.type=\"string\"/>\n");
 
 
@@ -229,6 +230,7 @@ int netloc_topology_export_gexf(struct netloc_topology * topology, const char * 
     fprintf(fh, "\t\t\t<attribute id=\"target_port\"  title=\"target_port\"  type=\"string\"/>\n");
     fprintf(fh, "\t\t\t<attribute id=\"speed\"        title=\"speed\"        type=\"string\"/>\n");
     fprintf(fh, "\t\t\t<attribute id=\"width\"        title=\"width\"        type=\"string\"/>\n");
+    fprintf(fh, "\t\t\t<attribute id=\"gbits\"        title=\"gbits\"        type=\"float\"/>\n");
     fprintf(fh, "\t\t\t<attribute id=\"description\"  title=\"description\"  type=\"string\"/>\n");
     fprintf(fh, "\t\t</attributes>\n");
 
@@ -337,6 +339,7 @@ static int netloc_topology_export_graphml_edge(const netloc_edge_t *edge, FILE *
 
     fprintf(fh, "\t\t\t<data key=\"speed\">%s</data>\n", edge->speed);
     fprintf(fh, "\t\t\t<data key=\"width\">%s</data>\n", edge->width);
+    fprintf(fh, "\t\t\t<data key=\"gbits\">%f</data>\n", edge->gbits);
 
     fprintf(fh, "\t\t\t<data key=\"description\">%s</data>\n", edge->description);
 
@@ -367,6 +370,7 @@ static int netloc_topology_export_gexf_edge(const netloc_edge_t *edge, FILE *fh)
 
     fprintf(fh, "\t\t\t\t\t<attvalue for=\"speed\"       value=\"%s\"/>\n", edge->speed );
     fprintf(fh, "\t\t\t\t\t<attvalue for=\"width\"       value=\"%s\"/>\n", edge->width );
+    fprintf(fh, "\t\t\t\t\t<attvalue for=\"gbits\"       value=\"%f\"/>\n", edge->gbits );
 
     fprintf(fh, "\t\t\t\t\t<attvalue for=\"description\" value=\"%s\"/>\n", edge->description );
     fprintf(fh, "\t\t\t\t</attvalues>\n");

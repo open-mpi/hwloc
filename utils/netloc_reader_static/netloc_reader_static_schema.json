@@ -140,6 +140,12 @@
                                     "description": "Width of the link",
                                     "default": "1",
                                     "required":false
+                                },
+                                "gbits": {
+                                    "type":"real",
+                                    "description": "Gbits of the link",
+                                    "default": 1.0,
+                                    "required":false
                                 }
                             }
                         }

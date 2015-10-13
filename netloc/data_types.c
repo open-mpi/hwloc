@@ -285,6 +285,7 @@ netloc_edge_t * netloc_dt_edge_t_construct()
 
     edge->speed = NULL;
     edge->width = NULL;
+    edge->gbits = 0;
 
     edge->description = NULL;
 
@@ -302,13 +303,14 @@ char * netloc_pretty_print_edge_t(netloc_edge_t* edge)
     tmp_src_str = netloc_decode_node_type(edge->src_node_type);
     tmp_dest_str = netloc_decode_node_type(edge->dest_node_type);
 
-    asprintf(&str, "%3d (%s) [%23s] %2s [<- %s / %s ->] (%s) [%23s] %2s",
+    asprintf(&str, "%3d (%s) [%23s] %2s [<- %s / %s (%f) ->] (%s) [%23s] %2s",
              edge->edge_uid,
              tmp_src_str,
              edge->src_node_id,
              edge->src_port_id,
              edge->speed,
              edge->width,
+             edge->gbits,
              tmp_dest_str,
              edge->dest_node_id,
              edge->dest_port_id);
@@ -382,6 +384,7 @@ int netloc_dt_edge_t_copy(netloc_edge_t *from, netloc_edge_t *to)
     }
     to->width = STRDUP_IF_NOT_NULL(from->width);
 
+    to->gbits = from->gbits;
 
     if( NULL != to->description ) {
         free(to->description);
@@ -411,6 +414,7 @@ json_t* netloc_dt_edge_t_json_encode(netloc_edge_t *edge)
 
     json_object_set_new(json_edge, JSON_NODE_FILE_EDGE_SPEED, json_string( STR_EMPTY_IF_NULL(edge->speed)));
     json_object_set_new(json_edge, JSON_NODE_FILE_EDGE_WIDTH, json_string( STR_EMPTY_IF_NULL(edge->width)));
+    json_object_set_new(json_edge, JSON_NODE_FILE_EDGE_GBITS, json_real(edge->gbits));
 
     json_object_set_new(json_edge, JSON_NODE_FILE_DESCRIPTION,  json_string( STR_EMPTY_IF_NULL(edge->description) ));
 
@@ -438,6 +442,7 @@ netloc_edge_t* netloc_dt_edge_t_json_decode(json_t *json_edge)
 
     ASSIGN_NULL_IF_EMPTY( edge->speed, json_edge, JSON_NODE_FILE_EDGE_SPEED);
     ASSIGN_NULL_IF_EMPTY( edge->width, json_edge, JSON_NODE_FILE_EDGE_WIDTH);
+    edge->gbits = json_real_value( json_object_get( json_edge, JSON_NODE_FILE_EDGE_GBITS));
 
     ASSIGN_NULL_IF_EMPTY( edge->description, json_edge, JSON_NODE_FILE_DESCRIPTION );
 

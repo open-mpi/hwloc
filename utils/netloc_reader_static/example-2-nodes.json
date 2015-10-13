@@ -29,6 +29,7 @@
        "dest_port":"-1",
        "width":"1",
        "speed":"1",
+       "gbits":1.0,
        "description":"None",
        "bidirectional":true
       },

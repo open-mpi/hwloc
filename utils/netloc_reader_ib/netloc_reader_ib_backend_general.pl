@@ -62,6 +62,51 @@ sub main {
 ####                   Private Functions                            ####
 ########################################################################
 
+# Compute gbits: cf https://en.wikipedia.org/wiki/InfiniBand
+sub _compute_gbits {
+    my $speed;
+    my $width;
+    my $rate;
+    my $encoding;
+    my $gb_per_x;
+    my $x;
+    ($speed, $width) = @_;
+
+    if ($speed eq "SDR") {
+        $rate = 2.5;
+        $encoding = 8.0/10;
+    }
+    elsif ($speed eq "DDR") {
+        $rate = 5;
+        $encoding = 8.0/10;
+    }
+    elsif ($speed eq "QDR") {
+        $rate = 10;
+        $encoding = 8.0/10;
+    }
+    elsif ($speed eq "FDR") {
+        $rate = 14.0625;
+        $encoding = 64.0/66;
+    }
+    elsif ($speed eq "EDR") {
+        $rate = 25;
+        $encoding = 64.0/66;
+    }
+    else {
+        return 1;
+    }
+    $gb_per_x = $rate*$encoding;
+
+    if ($width =~ m/([0-9]*)x/) {
+        $x = $1;
+    }
+    else {
+        return 1;
+    }
+
+    return $x*$gb_per_x;
+ }
+
 sub _parse_network_topology {
     my $file_name = shift(@_);
     my $subnet_id = shift(@_);
@@ -102,7 +147,7 @@ sub _parse_network_topology {
         my $line = $_;
 
         my ($have_peer, $src_type, $src_lid, $src_port_id, $src_guid,
-            $width, $speed, $dest_type, $dest_lid, $dest_port_id,
+            $width, $speed, $gbits, $dest_type, $dest_lid, $dest_port_id,
             $dest_guid, $edge_desc, $src_desc, $dest_desc);
 
         #
@@ -164,10 +209,16 @@ sub _parse_network_topology {
         }
 
         #
+        # Compute the gbits
+        #
+        $gbits = _compute_gbits($speed, $width);
+
+        #
         # Get the source node
         #
         my $src_node;
         $src_node = _enter_node(\%nodes, $src_type, $src_lid, $src_guid, $subnet_id, $src_desc);
+        print "gbits: $gbits\n";
 
         #
         # If we have a destination node, get it and link the source to
@@ -191,6 +242,7 @@ sub _parse_network_topology {
                     port_type_from => $src_type,
                     width          => $width,
                     speed          => $speed,
+                    gbits          => $gbits,
                     port_to        => $dest_node->phy_id,
                     port_id_to     => $dest_port_id,
                     port_type_to   => $dest_type,
