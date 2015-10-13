@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
   int loaded = 0;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   unsigned depth = 0;
@@ -220,6 +220,7 @@ int main(int argc, char *argv[])
 #define ENSURE_LOADED() do { \
   if (!loaded) { \
     hwloc_topology_init(&topology); \
+    hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL); \
     hwloc_topology_set_flags(topology, flags); \
     if (input) { \
       err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname); \

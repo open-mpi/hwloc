@@ -412,10 +412,10 @@ main (int argc, char *argv[])
   int err;
   hwloc_topology_t topology;
   const char *filename = NULL;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES | HWLOC_TOPOLOGY_FLAG_ICACHES;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES;
   unsigned long restrict_flags = 0;
   int merge = 0;
-  int ignorecache = 0;
+  int ignorecache = 0, ignoreicache = 0;
   char * callname;
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
@@ -457,6 +457,7 @@ main (int argc, char *argv[])
   err = hwloc_topology_init (&topology);
   if (err)
     goto out;
+  hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
 
   while (argc >= 1)
     {
@@ -510,7 +511,7 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--no-useless-caches"))
 	ignorecache = 1;
       else if (!strcmp (argv[0], "--no-icaches"))
-	flags &= ~HWLOC_TOPOLOGY_FLAG_ICACHES;
+	ignoreicache = 1;
       else if (!strcmp (argv[0], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[0], "--no-io"))
@@ -631,6 +632,10 @@ main (int argc, char *argv[])
 
   hwloc_topology_set_flags(topology, flags);
 
+  if (ignoreicache) {
+    for(i=HWLOC_OBJ_L1ICACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+      hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_NONE);
+  }
   if (ignorecache > 1) {
     for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
       hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_NONE);

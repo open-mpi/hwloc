@@ -38,6 +38,8 @@ Version 2.0.0
     - Contrary to hwloc_topology_ignore_{type,all}_keep_structure() which
       removed individual objects, HWLOC_TYPE_FILTER_KEEP_STRUCTURE only removes
       entire levels (so that topology do not become too asymmetric).
+  + Remove HWLOC_TOPOLOGY_FLAG_ICACHES in favor of hwloc_topology_set_type_filter()
+    with HWLOC_TYPE_FILTER_KEEP_ALL for instruction cache types.
   + Add the experimental netloc subproject. It is enabled by default when
     supported and can be disabled with --disable-netloc.
     See the documentation for details.

@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   int working_on_cpubind = 1; /* membind if 0 */
   int get_binding = 0;
   int get_last_cpu_location = 0;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
   int force = 0;
   int single = 0;
   int verbose = 0;
@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
 #define ENSURE_LOADED() do { \
   if (!loaded) { \
     hwloc_topology_init(&topology); \
+    hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL); \
     hwloc_topology_set_flags(topology, flags); \
     hwloc_topology_load(topology); \
     depth = hwloc_topology_get_depth(topology); \

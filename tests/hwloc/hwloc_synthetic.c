@@ -64,7 +64,7 @@ int main(void)
 
 
   hwloc_topology_init(&topology);
-  err = hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_ICACHES);
+  err = hwloc_topology_set_type_filter(topology, HWLOC_OBJ_L1ICACHE, HWLOC_TYPE_FILTER_KEEP_ALL);
   err = hwloc_topology_set_synthetic(topology, "pack:2(indexes=3,5) numa:2(memory=256GB indexes=pack) l3u:1(size=20mb) l2:2 l1i:1(size=16kB) l1dcache:2 core:1 pu:2(indexes=l2)");
   assert(!err);
   hwloc_topology_load(topology);

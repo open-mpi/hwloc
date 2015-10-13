@@ -199,12 +199,9 @@ typedef enum {
   HWLOC_OBJ_L4CACHE,	/**< \brief Level 4 Data (or Unified) Cache. */
   HWLOC_OBJ_L5CACHE,	/**< \brief Level 5 Data (or Unified) Cache. */
 
-  HWLOC_OBJ_L1ICACHE,	/**< \brief Level 1 instruction Cache,
-			 * only when the ::HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
-  HWLOC_OBJ_L2ICACHE,	/**< \brief Level 2 instruction Cache,
-			 * only when the ::HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
-  HWLOC_OBJ_L3ICACHE,	/**< \brief Level 3 instruction Cache,
-			 * only when the ::HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
+  HWLOC_OBJ_L1ICACHE,	/**< \brief Level 1 instruction Cache (filtered out by default). */
+  HWLOC_OBJ_L2ICACHE,	/**< \brief Level 2 instruction Cache (filtered out by default). */
+  HWLOC_OBJ_L3ICACHE,	/**< \brief Level 3 instruction Cache (filtered out by default). */
 
   HWLOC_OBJ_GROUP,	/**< \brief Group objects.
 			  * Objects which do not fit in the above but are
@@ -260,8 +257,7 @@ typedef enum {
 typedef enum hwloc_obj_cache_type_e {
   HWLOC_OBJ_CACHE_UNIFIED,      /**< \brief Unified cache. */
   HWLOC_OBJ_CACHE_DATA,         /**< \brief Data cache. */
-  HWLOC_OBJ_CACHE_INSTRUCTION   /**< \brief Instruction cache.
-				  * Only used when the ::HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
+  HWLOC_OBJ_CACHE_INSTRUCTION   /**< \brief Instruction cache (filtered out by default). */
 } hwloc_obj_cache_type_t;
 
 /** \brief Type of one side (upstream or downstream) of an I/O bridge. */
@@ -1842,14 +1838,6 @@ enum hwloc_topology_flags_e {
    * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1UL<<4),
-
-  /** \brief Detect instruction caches.
-   *
-   * This flag enables detection of Instruction caches,
-   * instead of only Data and Unified caches.
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_ICACHES = (1UL<<5)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

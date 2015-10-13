@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 {
 	hwloc_topology_t topo;
 	hwloc_topology_diff_t firstdiff = NULL;
-	unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM | HWLOC_TOPOLOGY_FLAG_WHOLE_IO | HWLOC_TOPOLOGY_FLAG_ICACHES;
+	unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM | HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
 	unsigned long patchflags = 0;
 	char *callname, *input, *inputdiff, *output = NULL, *refname = NULL;
 	int err;
@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
 	/* switch to the actual input topology */
 	hwloc_topology_destroy(topo);
 	hwloc_topology_init(&topo);
+	hwloc_topology_set_all_types_filter(topo, HWLOC_TYPE_FILTER_KEEP_ALL);
 	hwloc_topology_set_flags(topo, flags);
 	if (!strcmp(input, "refname")) {
 		/* use the diff refname as input */

@@ -257,13 +257,14 @@ main (int argc, char *argv[])
   int err;
   hwloc_topology_t topology;
   unsigned topodepth;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES | HWLOC_TOPOLOGY_FLAG_ICACHES;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES;
   char * callname;
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   char *restrictstring = NULL;
   size_t typelen;
   int opt;
+  unsigned i;
 
   /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
@@ -281,6 +282,8 @@ main (int argc, char *argv[])
   err = hwloc_topology_init (&topology);
   if (err)
     return EXIT_FAILURE;
+
+  hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
 
   while (argc >= 1) {
     opt = 0;
@@ -317,9 +320,10 @@ main (int argc, char *argv[])
 	}
 	opt = 1;
       }
-      else if (!strcmp (argv[0], "--no-icaches"))
-	flags &= ~HWLOC_TOPOLOGY_FLAG_ICACHES;
-      else if (!strcmp (argv[0], "--whole-system"))
+      else if (!strcmp (argv[0], "--no-icaches")) {
+	for(i=HWLOC_OBJ_L1ICACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+	  hwloc_topology_set_type_filter(topology, i, HWLOC_TYPE_FILTER_KEEP_NONE);
+      } else if (!strcmp (argv[0], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[0], "--no-io"))
 	flags &= ~(HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES);

@@ -1725,10 +1725,8 @@ ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
   for_each_misc_child_safe(child, parent, pchild)
     ignore_type_always(topology, pchild);
 
-  if ((parent != topology->levels[0][0] &&
-       topology->type_filter[parent->type] == HWLOC_TYPE_FILTER_KEEP_NONE)
-      || ((parent->type == HWLOC_OBJ_L1ICACHE || parent->type == HWLOC_OBJ_L2ICACHE || parent->type == HWLOC_OBJ_L3ICACHE)
-	  && !(topology->flags & HWLOC_TOPOLOGY_FLAG_ICACHES))) {
+  if (parent != topology->levels[0][0] &&
+      topology->type_filter[parent->type] == HWLOC_TYPE_FILTER_KEEP_NONE) {
     hwloc_debug("%s", "\nDropping ignored object ");
     hwloc_debug_print_object(0, parent);
     unlink_and_free_single_object(pparent);
@@ -2953,6 +2951,9 @@ hwloc__topology_filter_init(struct hwloc_topology *topology)
   /* Only ignore useless cruft by default */
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
     topology->type_filter[type] = HWLOC_TYPE_FILTER_KEEP_ALL;
+  topology->type_filter[HWLOC_OBJ_L1ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
+  topology->type_filter[HWLOC_OBJ_L2ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
+  topology->type_filter[HWLOC_OBJ_L3ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_GROUP] = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
 }
 

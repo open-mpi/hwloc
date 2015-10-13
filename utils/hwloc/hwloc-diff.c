@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 {
 	hwloc_topology_t topo1, topo2;
 	hwloc_topology_diff_t firstdiff = NULL, diff;
-	unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM | HWLOC_TOPOLOGY_FLAG_WHOLE_IO | HWLOC_TOPOLOGY_FLAG_ICACHES;
+	unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM | HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
 	char *callname, *input1, *input2, *output, *outputname, *refname = NULL;
 	char *xmlbuffer;
 	int xmlbuflen;
@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
 	}
 
 	hwloc_topology_init(&topo1);
+	hwloc_topology_set_all_types_filter(topo1, HWLOC_TYPE_FILTER_KEEP_ALL);
 	hwloc_topology_set_flags(topo1, flags);
 	err = hwloc_topology_set_xml(topo1, input1);
 	if (err < 0) {
@@ -78,6 +79,7 @@ int main(int argc, char *argv[])
 	hwloc_topology_load(topo1);
 
 	hwloc_topology_init(&topo2);
+	hwloc_topology_set_all_types_filter(topo2, HWLOC_TYPE_FILTER_KEEP_ALL);
 	hwloc_topology_set_flags(topo2, flags);
 	err = hwloc_topology_set_xml(topo2, input2);
 	if (err < 0) {
