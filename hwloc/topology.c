@@ -2955,6 +2955,7 @@ hwloc__topology_filter_init(struct hwloc_topology *topology)
   topology->type_filter[HWLOC_OBJ_L2ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_L3ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_GROUP] = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
+  topology->type_filter[HWLOC_OBJ_MISC] = HWLOC_TYPE_FILTER_KEEP_NONE;
 }
 
 static int
