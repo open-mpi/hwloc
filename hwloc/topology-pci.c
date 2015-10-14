@@ -79,12 +79,16 @@ static int
 hwloc_look_pci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
+  enum hwloc_type_filter_e pfilter, bfilter;
   struct hwloc_obj *tree = NULL, *tmp;
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
 
-  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+  hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
+  hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
+  if (bfilter == HWLOC_TYPE_FILTER_KEEP_NONE
+      && pfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
   if (!hwloc_topology_is_thissystem(topology)) {

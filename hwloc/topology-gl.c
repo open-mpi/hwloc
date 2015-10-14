@@ -25,10 +25,12 @@ static int
 hwloc_gl_discover(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
+  enum hwloc_type_filter_e filter;
   unsigned i;
   int err;
 
-  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+  hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &filter);
+  if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
   if (!hwloc_topology_is_thissystem(topology)) {

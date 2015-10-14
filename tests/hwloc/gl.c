@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2014 Inria.  All rights reserved.
+ * Copyright © 2012-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -16,7 +16,6 @@
 int main(void)
 {
   hwloc_topology_t topology;
-  unsigned long loading_flags;
   hwloc_obj_t pcidev, osdev, parent;
   hwloc_obj_t firstgpu = NULL, lastgpu = NULL;
   unsigned port, device;
@@ -30,13 +29,9 @@ int main(void)
   hwloc_topology_init(&topology); /* Topology initialization */
 
   /* Flags used for loading the I/O devices, bridges and their relevant info */
-  loading_flags = HWLOC_TOPOLOGY_FLAG_IO_BRIDGES | HWLOC_TOPOLOGY_FLAG_IO_DEVICES;
-
-  /* Set discovery flags */
-  err = hwloc_topology_set_flags(topology, loading_flags);
-  /* If flags not set */
-  if (err < 0)
-    printf("hwloc_topology_set_flags() failed, PCI devices will not be loaded in the topology \n");
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
 
   /* Perform topology detection */
   hwloc_topology_load(topology);

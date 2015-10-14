@@ -5151,13 +5151,21 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = NULL;
   struct hwloc_backend *tmpbackend;
+  enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
   int root_fd = -1;
 #ifdef HWLOC_HAVE_LINUXPCI
   struct hwloc_obj *tmp;
   int needpcidiscovery;
 #endif
 
-  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+  hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
+  hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
+  hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &ofilter);
+  hwloc_topology_get_type_filter(topology, HWLOC_OBJ_MISC, &mfilter);
+ if (bfilter == HWLOC_TYPE_FILTER_KEEP_NONE
+      && pfilter == HWLOC_TYPE_FILTER_KEEP_NONE
+      && ofilter == HWLOC_TYPE_FILTER_KEEP_NONE
+      && mfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
   /* hackily find the linux backend to steal its private_data (for fsroot) */
@@ -5177,6 +5185,8 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   root_fd = data->root_fd;
   hwloc_debug("linuxio backend stole linux backend root_fd %d\n", root_fd);
 
+  if (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
+      || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
 #ifdef HWLOC_HAVE_LINUXPCI
   /* don't rediscovery PCI devices if another backend did it
    * (they are attached to root until later in the core discovery)
@@ -5198,16 +5208,21 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
 
   hwloc_linuxfs_pci_look_pcislots(backend);
 #endif /* HWLOC_HAVE_LINUXPCI */
+  }
 
-  hwloc_linuxfs_lookup_block_class(backend);
-  hwloc_linuxfs_lookup_net_class(backend);
-  hwloc_linuxfs_lookup_infiniband_class(backend);
-  hwloc_linuxfs_lookup_mic_class(backend);
-  hwloc_linuxfs_lookup_drm_class(backend);
-  if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
-    hwloc_linuxfs_lookup_dma_class(backend);
-  if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
+  if (ofilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
+      hwloc_linuxfs_lookup_block_class(backend);
+      hwloc_linuxfs_lookup_net_class(backend);
+      hwloc_linuxfs_lookup_infiniband_class(backend);
+      hwloc_linuxfs_lookup_mic_class(backend);
+      if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
+	hwloc_linuxfs_lookup_drm_class(backend);
+	hwloc_linuxfs_lookup_dma_class(backend);
+      }
+  }
+  if (mfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
     hwloc__get_firmware_dmi_memory_info(topology, data);
+  }
 
   return 0;
 }

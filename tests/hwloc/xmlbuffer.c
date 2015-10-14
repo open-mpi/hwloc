@@ -34,7 +34,9 @@ static int one_test(void)
   t[9] = '\0';
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
   hwloc_topology_load(topology);
   assert(hwloc_topology_is_thissystem(topology));
   hwloc_obj_add_info(hwloc_get_root_obj(topology), "UglyString", s);
@@ -44,7 +46,9 @@ static int one_test(void)
   printf("exported to buffer %p length %d\n", buf1, size1);
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
   assert(!hwloc_topology_set_xmlbuffer(topology, buf1, size1));
   hwloc_topology_load(topology);
   assert(!hwloc_topology_is_thissystem(topology));

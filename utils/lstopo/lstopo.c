@@ -414,7 +414,7 @@ main (int argc, char *argv[])
   int err;
   hwloc_topology_t topology;
   const char *filename = NULL;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES;
+  unsigned long flags = 0;
   unsigned long restrict_flags = 0;
   char * callname;
   char * input = NULL;
@@ -458,6 +458,10 @@ main (int argc, char *argv[])
   if (err)
     goto out;
   hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MISC, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
 
   while (argc >= 1)
     {
@@ -506,6 +510,8 @@ main (int argc, char *argv[])
 	    filter = HWLOC_TYPE_FILTER_KEEP_ALL;
 	  else if (!strcmp(colon+1, "structure"))
 	    filter = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
+	  else if (!strcmp(colon+1, "important"))
+	    filter = HWLOC_TYPE_FILTER_KEEP_IMPORTANT;
 	}
 	if (!strcmp(argv[1], "all"))
 	  all = 1;
@@ -553,13 +559,19 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[0], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
-      else if (!strcmp (argv[0], "--no-io"))
-	flags &= ~(HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES);
-      else if (!strcmp (argv[0], "--no-bridges"))
-	flags &= ~(HWLOC_TOPOLOGY_FLAG_IO_BRIDGES);
-      else if (!strcmp (argv[0], "--whole-io"))
-	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
-      else if (!strcmp (argv[0], "--merge")) {
+      else if (!strcmp (argv[0], "--no-io")) {
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_NONE);
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_NONE);
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_NONE);
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MISC, HWLOC_TYPE_FILTER_KEEP_NONE);
+      } else if (!strcmp (argv[0], "--no-bridges")) {
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_NONE);
+      } else if (!strcmp (argv[0], "--whole-io")) {
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_ALL);
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MISC, HWLOC_TYPE_FILTER_KEEP_ALL);
+      } else if (!strcmp (argv[0], "--merge")) {
 	hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
       }
       else if (!strcmp (argv[0], "--no-collapse"))

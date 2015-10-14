@@ -1064,8 +1064,9 @@ components.
 
 I/O discovery is disabled by default (except in lstopo) for performance
 reasons.
-It can be enabled by passing flags such as <tt>::HWLOC_TOPOLOGY_FLAG_IO_DEVICES</tt>
-to hwloc_topology_set_flags() before loading the topology.
+It can be enabled by changing the filtering of I/O object types to
+<tt>::HWLOC_TYPE_FILTER_KEEP_IMPORTANT</tt> or <tt>::HWLOC_TYPE_FILTER_KEEP_ALL</tt>
+before loading the topology.
 
 Note that I/O discovery requires significant help from the operating system.
 The pciaccess library (the development package is usually <tt>libpciaccess-devel</tt>
@@ -1098,6 +1099,7 @@ memory modules (DIMMs).
 These are neither PCI nor OS handles, therefore they appear as Misc objects.
 See \ref miscobjs_auto.
 </li></ul>
+Any of these types may be filtered individually with <tt>hwloc_topology_set_type_filter()</tt>.
 
 hwloc tries to attach these new objects to normal objects
 (usually NUMA nodes) to match their actual physical location.
@@ -1189,7 +1191,7 @@ components when I/O discovery is enabled and supported.
 </li>
 <li>DMA engine channel (::HWLOC_OBJ_OSDEV_DMA)
  <ul>
- <li><em>dma0chan0</em> (Linux component) when full I/O discovery is enabled (::HWLOC_TOPOLOGY_FLAG_WHOLE_IO)</li>
+ <li><em>dma0chan0</em> (Linux component) when all OS devices are enabled (::HWLOC_TYPE_FILTER_KEEP_ALL)</li>
  </ul>
 </li>
 </ul>
@@ -1207,12 +1209,13 @@ A hostbridge object ( <tt>::HWLOC_OBJ_BRIDGE</tt> object with upstream
 type <em>Host</em> and downstream type <em>PCI</em>) is attached below
 a normal object (usually the entire machine or a NUMA node).
 There may be multiple hostbridges in the machine, attached to
-different places, but all PCI devices are below one of them.
+different places, but all PCI devices are below one of them
+(unless the Bridge object type is filtered-out).
 
 Each hostbridge contains one or several children, either other bridges
 (usually PCI to PCI) or PCI devices (<tt>::HWLOC_OBJ_PCI_DEVICE</tt>).
 The number of bridges between the hostbridge and a PCI device depends
-on the machine and on the topology flags.
+on the machine.
 
 \section iodevices_consult Consulting I/O devices and binding
 
@@ -1329,13 +1332,13 @@ output.
 
 \section miscobjs_auto Misc objects added by hwloc
 
-hwloc only uses Misc objects when other object types are not sufficient.
+hwloc only uses Misc objects when other object types are not sufficient,
+and when the Misc object type is not filtered-out anymore.
 This currently includes:
 <ul>
 <li>
 Memory modules (DIMMs), on Linux when privileged and when
-<tt>dmi-sysfs</tt> is supported by the kernel,
-and when full I/O discovery is enabled (::HWLOC_TOPOLOGY_FLAG_WHOLE_IO).
+<tt>dmi-sysfs</tt> is supported by the kernel.
 These objects have a <tt>Type</tt> info attribute of value <tt>MemoryModule</tt>.
 They are currently always attached to the root object.
 Their attributes describe the DIMM vendor, model, etc.

@@ -1683,6 +1683,77 @@ remove_unused_sets(hwloc_obj_t obj)
   /* No cpuset under I/O or Misc */
 }
 
+static void
+hwloc_remove_misc_children(hwloc_topology_t topology, hwloc_obj_t root)
+{
+  hwloc_obj_t child, *pchild;
+  for_each_misc_child_safe(child, root, pchild) {
+    hwloc_remove_misc_children(topology, child);
+    unlink_and_free_object_and_children(pchild);
+    topology->modified = 1;
+  }
+}
+
+static void
+hwloc_filter_misc_children(hwloc_topology_t topology, hwloc_obj_t root)
+{
+  if (topology->type_filter[HWLOC_OBJ_MISC] == HWLOC_TYPE_FILTER_KEEP_NONE)
+    hwloc_remove_misc_children(topology, root);
+}
+
+static void
+hwloc_filter_io_children(hwloc_topology_t topology, hwloc_obj_t root)
+{
+  hwloc_obj_t child, *pchild;
+
+  /* filter I/O children and recurse */
+  for_each_io_child_safe(child, root, pchild) {
+    /* recurse into grand-children */
+    hwloc_filter_io_children(topology, child);
+    hwloc_filter_misc_children(topology, child);
+
+    if (topology->type_filter[child->type] == HWLOC_TYPE_FILTER_KEEP_ALL)
+      continue;
+    else if (topology->type_filter[child->type] == HWLOC_TYPE_FILTER_KEEP_NONE) {
+      unlink_and_free_single_object(pchild);
+      topology->modified = 1;
+      continue;
+    }
+
+    /* HWLOC_TYPE_FILTER_KEEP_IMPORTANT */
+
+    if (child->type == HWLOC_OBJ_PCI_DEVICE) {
+      /* filter important PCI devices by class */
+      unsigned classid = child->attr->pcidev.class_id;
+      unsigned baseclass = classid >> 8;
+      if (baseclass != 0x03 /* PCI_BASE_CLASS_DISPLAY */
+	  && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
+	  && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
+	  && baseclass != 0x0b /* PCI_BASE_CLASS_PROCESSOR */
+	  && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */
+	  && baseclass != 0x12 /* Processing Accelerators */) {
+	unlink_and_free_single_object(pchild);
+	topology->modified = 1;
+	continue;
+      }
+    } else if (child->type == HWLOC_OBJ_OS_DEVICE) {
+      /* filter important OS devices by type */
+      if (child->attr->osdev.type == HWLOC_OBJ_OSDEV_DMA) {
+	unlink_and_free_single_object(pchild);
+	topology->modified = 1;
+	continue;
+      }
+    } else if (child->type == HWLOC_OBJ_BRIDGE) {
+      /* filter important bridges by number of children */
+      if (!child->io_first_child) {
+	unlink_and_free_single_object(pchild);
+	topology->modified = 1;
+	continue;
+      }
+    }
+  }
+}
+
 void
 hwloc__reorder_children(hwloc_obj_t parent)
 {
@@ -1705,11 +1776,12 @@ hwloc__reorder_children(hwloc_obj_t parent)
 }
 
 /* Remove objects that are ignored in any case.
+ * Does not handle KEEP_STRUCTURE flag
  * Returns 1 if *pparent were replaced, which means the caller need to reorder its children.
  * Returns 0 otherwise.
  */
 static int
-ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
+hwloc_filter_objects(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
   hwloc_obj_t parent = *pparent, child, *pchild;
   int dropped_children = 0;
@@ -1719,11 +1791,10 @@ ignore_type_always(hwloc_topology_t topology, hwloc_obj_t *pparent)
 
   /* account dropped normal children only, others don't required reordering */
   for_each_child_safe(child, parent, pchild)
-    dropped_children += ignore_type_always(topology, pchild);
-  for_each_io_child_safe(child, parent, pchild) /* There can be Misc under I/O */
-    ignore_type_always(topology, pchild);
-  for_each_misc_child_safe(child, parent, pchild)
-    ignore_type_always(topology, pchild);
+    dropped_children += hwloc_filter_objects(topology, pchild);
+
+  hwloc_filter_io_children(topology, parent);
+  hwloc_filter_misc_children(topology, parent);
 
   if (parent != topology->levels[0][0] &&
       topology->type_filter[parent->type] == HWLOC_TYPE_FILTER_KEEP_NONE) {
@@ -1926,80 +1997,6 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
 	topology->type_depth[type] = HWLOC_TYPE_DEPTH_MULTIPLE;
     }
   }
-}
-
-static void
-hwloc_drop_all_io(hwloc_topology_t topology, hwloc_obj_t root)
-{
-  hwloc_obj_t child, *pchild;
-  for_each_child_safe(child, root, pchild) {
-    hwloc_drop_all_io(topology, child);
-  }
-  for_each_io_child_safe(child, root, pchild) {
-    unlink_and_free_object_and_children(pchild);
-    topology->modified = 1;
-  }
-  /* No I/O under Misc */
-}
-
-/*
- * If IO_DEVICES and WHOLE_IO are not set, we drop everything.
- * If WHOLE_IO is not set, we drop non-interesting devices,
- * and bridges that have no children.
- * If IO_BRIDGES is also not set, we also drop all bridges
- * except the hostbridges.
- */
-static void
-hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
-{
-  hwloc_obj_t child, *pchild;
-
-  /* recurse into normal children */
-  for_each_child_safe(child, root, pchild) {
-    hwloc_drop_useless_io(topology, child);
-  }
-
-  /* filter I/O children and recurse */
-  for_each_io_child_safe(child, root, pchild) {
-    /* remove useless children if needed */
-    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
-	&& child->type == HWLOC_OBJ_PCI_DEVICE) {
-      unsigned classid = child->attr->pcidev.class_id;
-      unsigned baseclass = classid >> 8;
-      if (baseclass != 0x03 /* PCI_BASE_CLASS_DISPLAY */
-	  && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
-	  && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
-	  && baseclass != 0x0b /* PCI_BASE_CLASS_PROCESSOR */
-	  && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */
-	  && baseclass != 0x12 /* Processing Accelerators */) {
-	unlink_and_free_object_and_children(pchild);
-	topology->modified = 1;
-	continue;
-      }
-    }
-    /* recurse to ignore grand-children etc */
-    hwloc_drop_useless_io(topology, child);
-    /* now remove useless bridges if needed */
-    if (child->type == HWLOC_OBJ_BRIDGE) {
-      if (!child->io_first_child) {
-	/* bridges with no children are removed if WHOLE_IO isn't given */
-	if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
-	  unlink_and_free_single_object(pchild);
-	  topology->modified = 1;
-	  continue;
-	}
-      } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST) {
-	/* only hostbridges are kept if WHOLE_IO or IO_BRIDGE are not given */
-	if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_BRIDGES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
-	  unlink_and_free_single_object(pchild);
-	  topology->modified = 1;
-	  continue;
-	}
-      }
-    }
-  }
-
-  /* No I/O under Misc */
 }
 
 static void
@@ -2721,13 +2718,6 @@ next_noncpubackend:
 
   hwloc_pci_belowroot_apply_locality(topology);
 
-  /* FIXME: filter I/O in backends and merge that code with ignoring below to avoid useless traversals */
-  /* if we got anything, filter interesting objects and update the tree */
-  if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
-    /* drop all I/O children */
-    hwloc_drop_all_io(topology, topology->levels[0][0]);
-  else
-    hwloc_drop_useless_io(topology, topology->levels[0][0]);
   hwloc_debug("%s", "\nNow reconnecting\n");
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
@@ -2738,7 +2728,7 @@ next_noncpubackend:
 
   /* FIXME: merge these 2 steps? */
   hwloc_debug("%s", "\nRemoving ignored objects\n");
-  ignore_type_always(topology, &topology->levels[0][0]);
+  hwloc_filter_objects(topology, &topology->levels[0][0]);
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
@@ -2956,6 +2946,9 @@ hwloc__topology_filter_init(struct hwloc_topology *topology)
   topology->type_filter[HWLOC_OBJ_L3ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_GROUP] = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
   topology->type_filter[HWLOC_OBJ_MISC] = HWLOC_TYPE_FILTER_KEEP_NONE;
+  topology->type_filter[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_FILTER_KEEP_NONE;
+  topology->type_filter[HWLOC_OBJ_PCI_DEVICE] = HWLOC_TYPE_FILTER_KEEP_NONE;
+  topology->type_filter[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_FILTER_KEEP_NONE;
 }
 
 static int
@@ -2967,9 +2960,9 @@ hwloc__topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_
       errno = EINVAL;
       return -1;
     }
-  } else if (type == HWLOC_OBJ_MISC) {
+  } else if (hwloc_obj_type_is_special(type)) {
     if (filter == HWLOC_TYPE_FILTER_KEEP_STRUCTURE) {
-      /* Misc are outside of the main topology structure, makes no sense. */
+      /* I/O and Misc are outside of the main topology structure, makes no sense. */
       errno = EINVAL;
       return -1;
     }
@@ -2979,11 +2972,12 @@ hwloc__topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_
       errno = EINVAL;
       return -1;
     }
-  } else if (hwloc_obj_type_is_io(type)) {
-    /* I/O devices aren't in any level, use topology flags to ignore them */
-    errno = EINVAL;
-    return -1;
   }
+
+  /* "important" just means "all" for non-I/O non-Misc */
+  if (!hwloc_obj_type_is_special(type) && filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT)
+    filter = HWLOC_TYPE_FILTER_KEEP_ALL;
+
   topology->type_filter[type] = filter;
   return 0;
 }
@@ -2992,11 +2986,6 @@ int
 hwloc_topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e filter)
 {
   if ((unsigned) type >= HWLOC_OBJ_TYPE_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  if (hwloc_obj_type_is_io(type)) {
-    /* I/O devices aren't in any level, use topology flags to ignore them */
     errno = EINVAL;
     return -1;
   }
@@ -3024,11 +3013,6 @@ int
 hwloc_topology_get_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e *filterp)
 {
   if (type >= HWLOC_OBJ_TYPE_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  if (hwloc_obj_type_is_io(type)) {
-    /* I/O devices aren't in any level, use topology flags to ignore them */
     errno = EINVAL;
     return -1;
   }

@@ -226,7 +226,7 @@ typedef enum {
 			  * Misc objects have NULL CPU and node sets.
 			  */
 
-  HWLOC_OBJ_BRIDGE,	/**< \brief Bridge.
+  HWLOC_OBJ_BRIDGE,	/**< \brief Bridge (filtered out by default).
 			  * Any bridge that connects the host or an I/O bus,
 			  * to another I/O bus.
 			  * They are not added to the topology unless I/O discovery
@@ -235,14 +235,14 @@ typedef enum {
 			  * but rather in the dedicated io children list.
 			  * I/O objects have NULL CPU and node sets.
 			  */
-  HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
+  HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device (filtered out by default).
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  * I/O objects are not listed in the main children list,
 			  * but rather in the dedicated io children list.
 			  * I/O objects have NULL CPU and node sets.
 			  */
-  HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
+  HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device (filtered out by default).
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  * I/O objects are not listed in the main children list,
@@ -1805,39 +1805,7 @@ enum hwloc_topology_flags_e {
    * backend, but still having binding functions actually do bind.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1UL<<1),
-
-  /** \brief Detect PCI devices.
-   *
-   * By default, I/O devices are ignored. This flag enables I/O device
-   * detection using the pci backend. Only the common PCI devices (GPUs,
-   * NICs, block devices, ...) and host bridges (objects that connect the host
-   * objects to an I/O subsystem) will be added to the topology.
-   * Uncommon devices and other bridges (such as PCI-to-PCI bridges) will be
-   * ignored.
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_IO_DEVICES = (1UL<<2),
-
-  /** \brief Detect PCI bridges.
-   *
-   * This flag should be combined with ::HWLOC_TOPOLOGY_FLAG_IO_DEVICES to enable
-   * the detection of both common devices and of all useful bridges (bridges that
-   * have at least one device behind them).
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_IO_BRIDGES = (1UL<<3),
-
-  /** \brief Detect the whole PCI hierarchy.
-   *
-   * This flag enables detection of all I/O devices (even the uncommon ones
-   * such as DMA channels) and bridges (even those that have no device behind
-   * them) using the pci backend.
-   * Additionally it also enables MemoryModule misc objects.
-   * This implies ::HWLOC_TOPOLOGY_FLAG_IO_DEVICES.
-   * \hideinitializer
-   */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1UL<<4),
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1UL<<1)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
@@ -1951,11 +1919,8 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
 /** \brief Type filtering flags.
  *
  * By default, most objects are kept (::HWLOC_TYPE_FILTER_KEEP_ALL).
- * Instruction caches and Misc objects are ignored by default (::HWLOC_TYPE_FILTER_KEEP_NONE).
+ * Instruction caches, I/O and Misc objects are ignored by default (::HWLOC_TYPE_FILTER_KEEP_NONE).
  * Group levels are ignored unless they bring structure (::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
- *
- * Not applicable to I/O types, topology flags should be used to configure
- * their discovery instead.
  *
  * Note that group objects are also ignored individually (without the entire level)
  * when they do not bring structure.
@@ -1980,15 +1945,28 @@ enum hwloc_type_filter_e {
    *
    * Ignore the entire level from the given type as long as it does not bring any structure:
    * Each object in the level should have a single child or be the only child of its parent.
+   *
+   * Cannot be set for I/O and Misc objects since the topology structure does not matter there.
    * \hideinitializer
    */
-  HWLOC_TYPE_FILTER_KEEP_STRUCTURE = 2
+  HWLOC_TYPE_FILTER_KEEP_STRUCTURE = 2,
+
+  /** \brief Only keep likely-important objects of the given type.
+   *
+   * It is only useful for I/O object types.
+   * For ::HWLOC_OBJ_PCI_DEVICE and ::HWLOC_OBJ_OS_DEVICE, it means that only objects
+   * of major/common kinds are kept (storage, network, OpenFabrics, Intel MICs, CUDA,
+   * OpenCL, NVML, and displays).
+   * For ::HWLOC_OBJ_BRIDGE, it means that bridges are kept only if they have children.
+   *
+   * This flag equivalent to ::HWLOC_TYPE_FILTER_KEEP_ALL for normal and Misc types
+   * since they are likely important.
+   * \hideinitializer
+   */
+  HWLOC_TYPE_FILTER_KEEP_IMPORTANT = 3
 };
 
 /** \brief Set the filtering for the given object type.
- *
- * I/O objects may not be ignored, topology flags should be used to configure
- * their discovery instead.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_type_filter(hwloc_topology_t topology, hwloc_obj_type_t type, enum hwloc_type_filter_e filter);
 

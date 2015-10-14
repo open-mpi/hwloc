@@ -426,7 +426,9 @@ netloc_map__init_servers(struct netloc_map *map)
             continue;
 
         hwloc_topology_init(&topo);
-        hwloc_topology_set_flags(topo, HWLOC_TOPOLOGY_FLAG_IO_DEVICES);
+	hwloc_topology_set_type_filter(topo, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+	hwloc_topology_set_type_filter(topo, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+	/* no need for bridges */
         err = hwloc_topology_set_xml(topo, filepath);
         free(filepath);
         if (err < 0) {

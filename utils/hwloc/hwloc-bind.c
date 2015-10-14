@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   int working_on_cpubind = 1; /* membind if 0 */
   int get_binding = 0;
   int get_last_cpu_location = 0;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
+  unsigned long flags = 0;
   int force = 0;
   int single = 0;
   int verbose = 0;

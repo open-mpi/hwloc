@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2014 Inria.  All rights reserved.
+ * Copyright © 2013-2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -15,7 +15,8 @@ int main(void)
   int err;
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_IO_DEVICES);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
   hwloc_topology_load(topology);
 
   for(i=0; ; i++) {

@@ -420,10 +420,7 @@ man3_setsource_DATA = \
 man3_configurationdir = $(man3dir)
 man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IO_BRIDGES.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IO_DEVICES.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_IO.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_flags.3 \
@@ -437,6 +434,7 @@ man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_FILTER_KEEP_ALL.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_FILTER_KEEP_NONE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_FILTER_KEEP_STRUCTURE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TYPE_FILTER_KEEP_IMPORTANT.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_type_filter.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_all_types_filter.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_type_filter.3 \

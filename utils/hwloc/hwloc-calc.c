@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
   int loaded = 0;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
+  unsigned long flags = 0;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   unsigned depth = 0;
