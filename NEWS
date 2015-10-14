@@ -35,6 +35,8 @@ Version 1.11.1
     Thanks to George Bosilca for reporting the issue.
   + Fix an overzealous assertion when inserting an intermediate Group object
     while Groups are totally ignored.
+  + Fix a memory leak on Linux on AMD processors with dual-core compute units.
+    Thanks to Bob Benner.
   + Fix a memory leak on failure to load a xml diff file.
   + Fix some segfaults when inputting an invalid synthetic description.
   + Fix a segfault when plugins fail to find core symbols.
