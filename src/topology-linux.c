@@ -2993,11 +2993,11 @@ socket_done:
 	  hwloc_bitmap_set(core->cpuset, i);
 	} else {
 	  core->cpuset = coreset;
+	  coreset = NULL; /* don't free it */
 	}
         hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
                      mycoreid, coreset);
         hwloc_insert_object_by_cpuset(topology, core);
-        coreset = NULL; /* don't free it */
       }
 
       /* look at the books */
