@@ -636,8 +636,8 @@ Make sure to have had a look at those too!
 The following diagram can help to understand the vocabulary of the relationships
 by showing the example of a machine with two dual core packages (with no
 hardware threads); thus, a topology with 5 levels. Each box with rounded corner
-corresponds to one hwloc_obj_t, containing the values of the different integer
-fields (depth, logical_index, etc.), and arrows show to which other hwloc_obj_t
+corresponds to one ::hwloc_obj_t, containing the values of the different integer
+fields (depth, logical_index, etc.), and arrows show to which other ::hwloc_obj_t
 pointers point to (first_child, parent, etc.). The L2 cache of the last core is intentionally missing to show how asymmetric topologies are handled.
 See \ref faq_asymmetric for more information about such strange topologies.
 
@@ -828,7 +828,7 @@ following environment variables.
 
 <dt>HWLOC_THISSYSTEM=1</dt>
   <dd>enforces the return value of hwloc_topology_is_thissystem(), as if
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM was set with hwloc_topology_set_flags().
+  ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM was set with hwloc_topology_set_flags().
   It means that it makes hwloc assume that the selected backend provides the
   topology for the system on which we are running, even if it is not the
   OS-specific backend but the XML backend for instance.
@@ -1005,9 +1005,9 @@ when they provide better binding support.
 
 If the application does not want the CPU binding to change when
 changing the memory policy, it needs to use the
-HWLOC_MEMBIND_NOCPUBIND flag to prevent hwloc from using OS functions
+::HWLOC_MEMBIND_NOCPUBIND flag to prevent hwloc from using OS functions
 which would change the CPU binding.  Additionally,
-HWLOC_CPUBIND_NOMEMBIND can be passed to CPU binding function to
+::HWLOC_CPUBIND_NOMEMBIND can be passed to CPU binding function to
 prevent hwloc from using OS functions would change the memory binding
 policy.  Of course, using these flags will reduce hwloc's overall support for
 binding, so their use is discouraged.
@@ -1153,22 +1153,22 @@ Here is a list of OS device objects commonly created by hwloc
 components when I/O discovery is enabled and supported.
 
 <ul>
-<li>Hard disks (HWLOC_OBJ_OSDEV_BLOCK)
+<li>Hard disks (::HWLOC_OBJ_OSDEV_BLOCK)
  <ul>
  <li><em>sda</em> (Linux component)</li>
  </ul>
 </li>
-<li>Network interfaces (HWLOC_OBJ_OSDEV_NETWORK)
+<li>Network interfaces (::HWLOC_OBJ_OSDEV_NETWORK)
  <ul>
  <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
  </ul>
 </li>
-<li>OpenFabrics HCAs (HWLOC_OBJ_OSDEV_OPENFABRICS)
+<li>OpenFabrics HCAs (::HWLOC_OBJ_OSDEV_OPENFABRICS)
  <ul>
  <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
  </ul>
 </li>
-<li>GPUs (HWLOC_OBJ_OSDEV_GPU)
+<li>GPUs (::HWLOC_OBJ_OSDEV_GPU)
  <ul>
  <li><em>nvml0</em> for the first NVML device
   (NVML component, using the NVIDIA Management Library)</li>
@@ -1176,7 +1176,7 @@ components when I/O discovery is enabled and supported.
   (GL component, using the NV-CONTROL X extension library, NVCtrl)</li>
  </ul>
 </li>
-<li>Co-Processors (HWLOC_OBJ_OSDEV_COPROC)
+<li>Co-Processors (::HWLOC_OBJ_OSDEV_COPROC)
  <ul>
  <li><em>opencl0d0</em> for the first device of the first OpenCL platform,
   <em>opencl1d3</em> for the fourth device of the second OpenCL platform
@@ -1187,9 +1187,9 @@ components when I/O discovery is enabled and supported.
   (Linux component)</li>
  </ul>
 </li>
-<li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
+<li>DMA engine channel (::HWLOC_OBJ_OSDEV_DMA)
  <ul>
- <li><em>dma0chan0</em> (Linux component) when full I/O discovery is enabled (HWLOC_TOPOLOGY_FLAG_WHOLE_IO)</li>
+ <li><em>dma0chan0</em> (Linux component) when full I/O discovery is enabled (::HWLOC_TOPOLOGY_FLAG_WHOLE_IO)</li>
  </ul>
 </li>
 </ul>
@@ -1315,7 +1315,7 @@ Machine (24GB)
 \page miscobjs Miscellaneous objects
 
 hwloc topologies may be annotated with Misc objects
-(of type <tt>HWLOC_OBJ_MISC</tt>)
+(of type <tt>::HWLOC_OBJ_MISC</tt>)
 either automatically or by the user.
 This is an flexible way to annotate topologies with
 large sets of information since Misc objects may be inserted
@@ -1335,7 +1335,7 @@ This currently includes:
 <li>
 Memory modules (DIMMs), on Linux when privileged and when
 <tt>dmi-sysfs</tt> is supported by the kernel,
-and when full I/O discovery is enabled (HWLOC_TOPOLOGY_FLAG_WHOLE_IO).
+and when full I/O discovery is enabled (::HWLOC_TOPOLOGY_FLAG_WHOLE_IO).
 These objects have a <tt>Type</tt> info attribute of value <tt>MemoryModule</tt>.
 They are currently always attached to the root object.
 Their attributes describe the DIMM vendor, model, etc.
@@ -1392,7 +1392,7 @@ Each object contains a list of such pairs that may be consulted
 manually (looking at the object <tt>infos</tt> array field)
 or using the hwloc_obj_get_info_by_name().
 The user may additionally add new key-value pairs to any object using
-::hwloc_obj_add_info() or the \ref cli_hwloc_annotate program.
+hwloc_obj_add_info() or the \ref cli_hwloc_annotate program.
 
 Here is a non-exhaustive list of attributes that may be automatically
 added by hwloc (with the usual corresponding object in parentheses).
@@ -1580,7 +1580,7 @@ from the given XML file.
 topology may not correspond to the physical machine that loads it.
 This behavior may be reverted by asserting that loaded file really
 matches the underlying system with the HWLOC_THISSYSTEM environment
-variable or the HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM topology flag.
+variable or the ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM topology flag.
 
 \note hwloc also offers the ability to export/import \ref hwlocality_diff.
 
@@ -1736,7 +1736,7 @@ space-separated attributes. For instance:
 
 Aside from lstopo, the hwloc programming interface offers the same
 ability by passing the synthetic description string to
-::hwloc_topology_set_synthetic() before hwloc_topology_load().
+hwloc_topology_set_synthetic() before hwloc_topology_load().
 
 Synthetic topologies are created by the <tt>synthetic</tt> component.
 This component may be enabled by force by setting the HWLOC_SYNTHETIC
@@ -1746,12 +1746,12 @@ environment variable to something such as
 Loading a synthetic topology disables binding support since the
 topology usually does not match the underlying hardware.
 Binding may be reenabled as usual by setting HWLOC_THISSYSTEM=1 in the
-environment or by setting the HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM
+environment or by setting the ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM
 topology flag.
 
 \section synthetic_export Exporting a topology as a synthetic string
 
-The function ::hwloc_topology_export_synthetic() may export
+The function hwloc_topology_export_synthetic() may export
 a topology as a synthetic string.
 It offers a convenient way to quickly describe the contents of a machine.
 The lstopo tool may also perform such an export by forcing the output format.
@@ -1903,23 +1903,23 @@ enabled for the current topology.
 
 Like most libraries that mainly fill data structures, hwloc is not
 thread safe but rather reentrant: all state is held in a
-\ref hwloc_topology_t instance without mutex protection.  That means, for
+::hwloc_topology_t instance without mutex protection.  That means, for
 example, that two threads can safely operate on and modify two
-different \ref hwloc_topology_t instances, but they should not
+different ::hwloc_topology_t instances, but they should not
 simultaneously invoke functions that modify the <em>same</em>
 instance.  Similarly, one thread should not modify a
-\ref hwloc_topology_t instance while another thread is reading or
+::hwloc_topology_t instance while another thread is reading or
 traversing it.  However, two threads can safely read or traverse the
-same \ref hwloc_topology_t instance concurrently.
+same ::hwloc_topology_t instance concurrently.
 
 When running in multiprocessor environments, be aware that proper thread
 synchronization and/or memory coherency protection is needed to pass hwloc
-data (such as \ref hwloc_topology_t pointers) from one processor
+data (such as ::hwloc_topology_t pointers) from one processor
 to another (e.g., a mutex, semaphore, or a memory barrier).
 Note that this is not a hwloc-specific requirement, but it is worth
 mentioning.
 
-For reference, \ref hwloc_topology_t modification operations include
+For reference, ::hwloc_topology_t modification operations include
 (but may not be limited to):
 
 <dl>
@@ -1939,7 +1939,7 @@ For reference, \ref hwloc_topology_t modification operations include
   and <tt>hwloc_topology_insert_group_object()</tt>
   (see \ref hwlocality_tinker) may modify the topology significantly by adding
   objects inside the tree, changing the topology depth, etc.
-  <tt>hwloc_topology_restrict</tt> modifies the topology even more
+  <tt>hwloc_topology_restrict()</tt> modifies the topology even more
   dramatically by removing some objects.
 
   Although references to former objects <em>may</em> still be valid
@@ -2092,10 +2092,10 @@ anything under the <tt>include/hwloc</tt> subdirectory) and nothing from the
 
 \subsection plugins_disc_basic Basics of discovery components
 
-Each discovery component is defined by a <tt>hwloc_disc_component</tt>
+Each discovery component is defined by a <tt>::hwloc_disc_component</tt>
 structure which contains an <tt>instantiate()</tt> callback.
 This function is invoked when this component is actually used by a topology.
-It fills a new <tt>hwloc_backend</tt> structure that usually contains
+It fills a new <tt>::hwloc_backend</tt> structure that usually contains
 a <tt>discover()</tt> callback taking care of the actual topology discovery.
 
 \note If two discovery components have the same name, only the highest
@@ -2104,16 +2104,16 @@ This offers a way for third-party plugins to override existing components.
 
 \subsection plugins_disc_register Registering a new discovery component
 
-Registering components to the hwloc core relies on a <tt>hwloc_component</tt> structure.
-Its <tt>data</tt> field points to the previously defined <tt>hwloc_disc_component</tt>
-structure while its <tt>type</tt> should be HWLOC_COMPONENT_TYPE_DISC.
+Registering components to the hwloc core relies on a <tt>::hwloc_component</tt> structure.
+Its <tt>data</tt> field points to the previously defined <tt>::hwloc_disc_component</tt>
+structure while its <tt>type</tt> should be ::HWLOC_COMPONENT_TYPE_DISC.
 This structure should be named <tt>hwloc_&lt;name&gt;_component</tt>.
 
 The configure script should be modified to add <tt>&lt;name&gt;</tt>
 to its <tt>hwloc_components</tt> shell variable so that the component
 is actually available.
 
-\note The symbol name of the <tt>hwloc_component</tt> structure
+\note The symbol name of the <tt>::hwloc_component</tt> structure
 is independent of the name of the discovery component mentioned
 in the previous section.
 
@@ -2691,7 +2691,7 @@ object, while the other packages are not.
 To understand how hwloc manages such cases, one should first remember
 the meaning of levels and cousin objects. All objects of the same type
 are gathered as horizontal levels with a given depth. They are also
-connected through the cousin pointers of the hwloc_obj structure.
+connected through the cousin pointers of the ::hwloc_obj structure.
 Object attribute (cache depth and type, group depth) are also taken
 in account when gathering objects as horizontal levels.
 To be clear: there will be one level for L1i
@@ -2812,7 +2812,7 @@ To check that you are not mixing old/recent headers with a recent/old runtime li
 \endverbatim
 
 You should not try to remain compatible with very old releases such as
-1.1.x or earlier because <tt>HWLOC_API_VERSION</tt> was added in 1.0.0
+1.1.x or earlier because <tt>::HWLOC_API_VERSION</tt> was added in 1.0.0
 and <tt>hwloc_get_api_version()</tt> came only in 1.1.1.
 Also do not use the old cpuset API since it was deprecated and superseded
 by the bitmap API in 1.1, and later removed in 1.5.
