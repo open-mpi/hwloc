@@ -1751,7 +1751,7 @@ The lstopo program can also serve as a XML topology export tool.
 
 XML topologies may then be reloaded later with hwloc_topology_set_xml()
 and hwloc_topology_set_xmlbuffer().
-The XMLFILE environment variable also tells hwloc to load the topology
+The HWLOC_XMLFILE environment variable also tells hwloc to load the topology
 from the given XML file.
 
 \note Loading XML topologies disables binding because the loaded
