@@ -2947,7 +2947,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  coreset = NULL; /* don't free it */
 	}
         hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
-                     mycoreid, coreset);
+                     mycoreid, core->cpuset);
         hwloc_insert_object_by_cpuset(topology, core);
       }
 
