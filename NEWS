@@ -59,6 +59,7 @@ Version 1.11.1
   + hwloc-annotate, hwloc-diff and hwloc-patch do not drop unavailable
     resources from the output anymore and those may be annotated as well.
   + Command-line tools may now import XML from the standard input with -i -.xml
+  + Add missing documentation for the hwloc-info --no-icaches option.
 
 
 Version 1.11.0

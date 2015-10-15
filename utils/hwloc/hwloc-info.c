@@ -41,6 +41,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
+  fprintf (where, "  --no-icaches          Do not show instruction caches\n");
   fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
   fprintf (where, "  --no-bridges          Do not any I/O bridge except hostbridges\n");
   fprintf (where, "  --whole-io            Show all I/O devices and bridges\n");
