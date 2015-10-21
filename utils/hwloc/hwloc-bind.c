@@ -17,7 +17,7 @@
 
 #include "misc.h"
 
-#ifdef HWLOC_WIN_SYS
+#if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
 #include <process.h>
 #define execvp(a,b) (int)_execvp((a), (const char * const *)(b))
 #endif
