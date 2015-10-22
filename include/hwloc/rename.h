@@ -143,6 +143,9 @@ extern "C" {
 #define hwloc_topology_set_type_filter HWLOC_NAME(topology_set_type_filter)
 #define hwloc_topology_get_type_filter HWLOC_NAME(topology_get_type_filter)
 #define hwloc_topology_set_all_types_filter HWLOC_NAME(topology_set_all_types_filter)
+#define hwloc_topology_set_cache_types_filter HWLOC_NAME(topology_set_cache_types_filter)
+#define hwloc_topology_set_icache_types_filter HWLOC_NAME(topology_set_icache_types_filter)
+#define hwloc_topology_set_io_types_filter HWLOC_NAME(topology_set_io_types_filter)
 
 #define hwloc_topology_set_distance_matrix HWLOC_NAME(topology_set_distance_matrix)
 #define hwloc_topology_set_userdata HWLOC_NAME(topology_set_userdata)

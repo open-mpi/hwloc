@@ -32,9 +32,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "failed to initialize the topology\n");
     return EXIT_FAILURE;
   }
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_L1ICACHE, HWLOC_TYPE_FILTER_KEEP_ALL);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_L2ICACHE, HWLOC_TYPE_FILTER_KEEP_ALL);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_L3ICACHE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_icache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
   err = hwloc_topology_load(topology);
   if (err < 0) {
     fprintf(stderr, "failed to load the topology\n");

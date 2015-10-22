@@ -18,9 +18,7 @@ int main(void)
   hwloc_obj_t obj;
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_ALL);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
   hwloc_topology_load(topology);
 
   printf("Found %d bridges\n", hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_BRIDGE));

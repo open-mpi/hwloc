@@ -29,9 +29,7 @@ static int get_nb_pcidev(int iolevel, int thissystem,
   else
     putenv("HWLOC_THISSYSTEM=0");
   hwloc_topology_init(&topology);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, filter);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, filter);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, filter);
+  hwloc_topology_set_io_types_filter(topology, filter);
   if (xmlbuf)
     hwloc_topology_set_xmlbuffer(topology, xmlbuf, xmlbuflen);
   hwloc_topology_load(topology);
@@ -51,9 +49,7 @@ int main(void)
   int nb, nbnormal, nbwhole;
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_ALL);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
   hwloc_topology_load(topology);
   if (hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen) < 0)
     printf("XML buffer export failed (%s), ignoring\n", strerror(errno));

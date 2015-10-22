@@ -1066,7 +1066,7 @@ I/O discovery is disabled by default (except in lstopo) for performance
 reasons.
 It can be enabled by changing the filtering of I/O object types to
 <tt>::HWLOC_TYPE_FILTER_KEEP_IMPORTANT</tt> or <tt>::HWLOC_TYPE_FILTER_KEEP_ALL</tt>
-before loading the topology.
+before loading the topology, for instance with <tt>hwloc_topology_set_io_types_filter()</tt>.
 
 Note that I/O discovery requires significant help from the operating system.
 The pciaccess library (the development package is usually <tt>libpciaccess-devel</tt>
