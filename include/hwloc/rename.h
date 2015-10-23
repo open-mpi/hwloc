@@ -505,6 +505,9 @@ extern "C" {
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_obj_add_children_sets HWLOC_NAME(add_children_sets)
 
+#define hwloc_filter_check_pcidev_subtype_important HWLOC_NAME(filter_check_pcidev_subtype_important)
+#define hwloc_filter_check_osdev_subtype_important HWLOC_NAME(filter_check_osdev_subtype_important)
+
 #define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
 #define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
 #define hwloc_pci_check_bridge_type HWLOC_NAME(pci_check_bridge_type)

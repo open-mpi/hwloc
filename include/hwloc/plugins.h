@@ -370,6 +370,41 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
 
 
 
+/** \defgroup hwlocality_components_filtering Components and Plugins: Filtering objects
+ * @{
+ */
+
+/** \brief Check whether the given PCI device classid is important.
+ *
+ * \return 1 if important, 0 otherwise.
+ */
+static __hwloc_inline int
+hwloc_filter_check_pcidev_subtype_important(unsigned classid)
+{
+  unsigned baseclass = classid >> 8;
+  return (baseclass == 0x03 /* PCI_BASE_CLASS_DISPLAY */
+	  || baseclass == 0x02 /* PCI_BASE_CLASS_NETWORK */
+	  || baseclass == 0x01 /* PCI_BASE_CLASS_STORAGE */
+	  || baseclass == 0x0b /* PCI_BASE_CLASS_PROCESSOR */
+	  || classid == 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */
+	  || baseclass == 0x12 /* Processing Accelerators */);
+}
+
+/** \brief Check whether the given OS device subtype is important.
+ *
+ * \return 1 if important, 0 otherwise.
+ */
+static __hwloc_inline int
+hwloc_filter_check_osdev_subtype_important(hwloc_obj_osdev_type_t subtype)
+{
+  return (subtype != HWLOC_OBJ_OSDEV_DMA);
+}
+
+/** @} */
+
+
+
+
 /** \defgroup hwlocality_components_pci_funcs Components and Plugins: PCI functions to be used by components
  * @{
  */

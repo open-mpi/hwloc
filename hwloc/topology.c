@@ -1724,21 +1724,14 @@ hwloc_filter_io_children(hwloc_topology_t topology, hwloc_obj_t root)
 
     if (child->type == HWLOC_OBJ_PCI_DEVICE) {
       /* filter important PCI devices by class */
-      unsigned classid = child->attr->pcidev.class_id;
-      unsigned baseclass = classid >> 8;
-      if (baseclass != 0x03 /* PCI_BASE_CLASS_DISPLAY */
-	  && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
-	  && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
-	  && baseclass != 0x0b /* PCI_BASE_CLASS_PROCESSOR */
-	  && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */
-	  && baseclass != 0x12 /* Processing Accelerators */) {
+      if (!hwloc_filter_check_pcidev_subtype_important(child->attr->pcidev.class_id)) {
 	unlink_and_free_single_object(pchild);
 	topology->modified = 1;
 	continue;
       }
     } else if (child->type == HWLOC_OBJ_OS_DEVICE) {
       /* filter important OS devices by type */
-      if (child->attr->osdev.type == HWLOC_OBJ_OSDEV_DMA) {
+      if (!hwloc_filter_check_osdev_subtype_important(child->attr->osdev.type)) {
 	unlink_and_free_single_object(pchild);
 	topology->modified = 1;
 	continue;
