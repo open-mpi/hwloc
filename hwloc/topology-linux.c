@@ -4946,9 +4946,12 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     return 0;
 
   while ((dirent = readdir(dir)) != NULL) {
+#define CONFIG_SPACE_CACHESIZE 256
+    unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     unsigned domain, bus, dev, func;
     hwloc_obj_t obj;
     struct hwloc_pcidev_attr_s *attr;
+    unsigned offset;
     char path[64];
     char value[16];
     size_t read;
@@ -4956,6 +4959,16 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 
     if (sscanf(dirent->d_name, "%04x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
       continue;
+
+    /* initialize the config space in case we fail to read it (missing permissions, etc). */
+    memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
+    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
+    file = hwloc_fopen(path, "r", root_fd);
+    if (file) {
+      read = fread(config_space_cache, 1, CONFIG_SPACE_CACHESIZE, file);
+      (void) read; /* we initialized config_space_cache in case we don't read enough, ignore the read length */
+      fclose(file);
+    }
 
     obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, -1);
     if (!obj)
@@ -5017,31 +5030,17 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
         attr->subdevice_id = strtoul(value, NULL, 16);
     }
 
-    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
-    file = hwloc_fopen(path, "r", root_fd);
-    if (file) {
-#define CONFIG_SPACE_CACHESIZE 256
-      unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
-      unsigned offset;
+    /* is this a bridge? */
+    if (hwloc_pci_prepare_bridge(obj, config_space_cache) < 0)
+      continue;
 
-      /* initialize the config space in case we fail to read it (missing permissions, etc). */
-      memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
-      read = fread(config_space_cache, 1, CONFIG_SPACE_CACHESIZE, file);
-      (void) read; /* we initialized config_space_cache in case we don't read enough, ignore the read length */
-      fclose(file);
+    /* get the revision */
+    attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
 
-      /* is this a bridge? */
-      if (hwloc_pci_prepare_bridge(obj, config_space_cache) < 0)
-	continue;
-
-      /* get the revision */
-      attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
-
-      /* try to get the link speed */
-      offset = hwloc_pci_find_cap(config_space_cache, HWLOC_PCI_CAP_ID_EXP);
-      if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE)
-	hwloc_pci_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
-    }
+    /* try to get the link speed */
+    offset = hwloc_pci_find_cap(config_space_cache, HWLOC_PCI_CAP_ID_EXP);
+    if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE)
+      hwloc_pci_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
 
     hwloc_pci_tree_insert_by_busid(&tree, obj);
   }
