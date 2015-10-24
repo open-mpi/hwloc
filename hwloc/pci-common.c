@@ -521,27 +521,30 @@ hwloc_pci_find_linkspeed(const unsigned char *config,
 #define HWLOC_PCI_HEADER_TYPE 0x0e
 #define HWLOC_PCI_HEADER_TYPE_BRIDGE 1
 #define HWLOC_PCI_CLASS_BRIDGE_PCI 0x0604
+
+hwloc_obj_type_t
+hwloc_pci_check_bridge_type(unsigned device_class, const unsigned char *config)
+{
+  unsigned char headertype;
+
+  if (device_class != HWLOC_PCI_CLASS_BRIDGE_PCI)
+    return HWLOC_OBJ_PCI_DEVICE;
+
+  headertype = config[HWLOC_PCI_HEADER_TYPE] & 0x7f;
+  return (headertype == HWLOC_PCI_HEADER_TYPE_BRIDGE)
+    ? HWLOC_OBJ_BRIDGE : HWLOC_OBJ_PCI_DEVICE;
+}
+
 #define HWLOC_PCI_PRIMARY_BUS 0x18
 #define HWLOC_PCI_SECONDARY_BUS 0x19
 #define HWLOC_PCI_SUBORDINATE_BUS 0x1a
 
 int
-hwloc_pci_prepare_bridge(hwloc_obj_t obj,
-			 const unsigned char *config)
+hwloc_pci_setup_bridge_attr(hwloc_obj_t obj,
+			    const unsigned char *config)
 {
-  unsigned char headertype;
-  unsigned isbridge;
-  struct hwloc_pcidev_attr_s *pattr = &obj->attr->pcidev;
-  struct hwloc_bridge_attr_s *battr;
-
-  headertype = config[HWLOC_PCI_HEADER_TYPE] & 0x7f;
-  isbridge = (pattr->class_id == HWLOC_PCI_CLASS_BRIDGE_PCI
-	      && headertype == HWLOC_PCI_HEADER_TYPE_BRIDGE);
-
-  if (!isbridge)
-    return 0;
-
-  battr = &obj->attr->bridge;
+  struct hwloc_bridge_attr_s *battr = &obj->attr->bridge;
+  struct hwloc_pcidev_attr_s *pattr = &battr->upstream.pci;
 
   if (config[HWLOC_PCI_PRIMARY_BUS] != pattr->bus) {
     /* Sometimes the config space contains 00 instead of the actual primary bus number.

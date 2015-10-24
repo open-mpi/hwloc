@@ -501,7 +501,8 @@ extern "C" {
 
 #define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
 #define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
-#define hwloc_pci_prepare_bridge HWLOC_NAME(pci_prepare_bridge)
+#define hwloc_pci_check_bridge_type HWLOC_NAME(pci_check_bridge_type)
+#define hwloc_pci_setup_bridge_attr HWLOC_NAME(pci_setup_bridge_attr)
 #define hwloc_pci_tree_insert_by_busid HWLOC_NAME(pci_tree_insert_by_busid)
 #define hwloc_pci_tree_attach_belowroot HWLOC_NAME(pci_tree_attach_belowroot)
 #define hwloc_pci_belowroot_find_by_busid HWLOC_NAME(pci_belowroot_find_by_busid)

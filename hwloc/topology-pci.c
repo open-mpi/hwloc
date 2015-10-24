@@ -123,6 +123,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
   {
     const char *vendorname, *devicename;
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
+    hwloc_obj_type_t type;
     struct hwloc_obj *obj;
     unsigned domain;
     unsigned device_class;
@@ -139,6 +140,9 @@ hwloc_look_pci(struct hwloc_backend *backend)
 
     /* try to read the device_class */
     device_class = pcidev->device_class >> 8;
+
+    /* bridge or pci dev? */
+    type = hwloc_pci_check_bridge_type(device_class, config_space_cache);
 
     /* fixup SR-IOV buggy VF device/vendor IDs */
     if (0xffff == pcidev->vendor_id && 0xffff == pcidev->device_id) {
@@ -192,7 +196,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
     }
 
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, -1);
+    obj = hwloc_alloc_setup_object(type, -1);
     obj->attr->pcidev.domain = domain;
     obj->attr->pcidev.bus = pcidev->bus;
     obj->attr->pcidev.dev = pcidev->dev;
@@ -208,8 +212,10 @@ hwloc_look_pci(struct hwloc_backend *backend)
     if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE)
       hwloc_pci_find_linkspeed(config_space_cache, offset, &obj->attr->pcidev.linkspeed);
 
-    if (hwloc_pci_prepare_bridge(obj, config_space_cache) < 0)
-      continue;
+    if (type == HWLOC_OBJ_BRIDGE) {
+      if (hwloc_pci_setup_bridge_attr(obj, config_space_cache) < 0)
+	continue;
+    }
 
     if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
       memcpy(&tmp16, &config_space_cache[PCI_SUBSYSTEM_VENDOR_ID], sizeof(tmp16));

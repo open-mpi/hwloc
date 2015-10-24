@@ -4949,6 +4949,8 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 #define CONFIG_SPACE_CACHESIZE 256
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     unsigned domain, bus, dev, func;
+    unsigned short class_id;
+    hwloc_obj_type_t type;
     hwloc_obj_t obj;
     struct hwloc_pcidev_attr_s *attr;
     unsigned offset;
@@ -4970,7 +4972,19 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       fclose(file);
     }
 
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, -1);
+    class_id = HWLOC_PCI_CLASS_NOT_DEFINED;
+    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/class", dirent->d_name);
+    file = hwloc_fopen(path, "r", root_fd);
+    if (file) {
+      read = fread(value, 1, sizeof(value), file);
+      fclose(file);
+      if (read)
+        class_id = strtoul(value, NULL, 16) >> 8;
+    }
+
+    type = hwloc_pci_check_bridge_type(class_id, config_space_cache);
+
+    obj = hwloc_alloc_setup_object(type, -1);
     if (!obj)
       break;
     attr = &obj->attr->pcidev;
@@ -4983,7 +4997,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     /* default (unknown) values */
     attr->vendor_id = 0;
     attr->device_id = 0;
-    attr->class_id = HWLOC_PCI_CLASS_NOT_DEFINED;
+    attr->class_id = class_id;
     attr->revision = 0;
     attr->subvendor_id = 0;
     attr->subdevice_id = 0;
@@ -5005,14 +5019,6 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       if (read)
         attr->device_id = strtoul(value, NULL, 16);
     }
-    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/class", dirent->d_name);
-    file = hwloc_fopen(path, "r", root_fd);
-    if (file) {
-      read = fread(value, 1, sizeof(value), file);
-      fclose(file);
-      if (read)
-        attr->class_id = strtoul(value, NULL, 16) >> 8;
-    }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_vendor", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
@@ -5030,9 +5036,11 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
         attr->subdevice_id = strtoul(value, NULL, 16);
     }
 
-    /* is this a bridge? */
-    if (hwloc_pci_prepare_bridge(obj, config_space_cache) < 0)
-      continue;
+    /* bridge specific attributes */
+    if (type == HWLOC_OBJ_BRIDGE) {
+      if (hwloc_pci_setup_bridge_attr(obj, config_space_cache) < 0)
+	continue;
+    }
 
     /* get the revision */
     attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];

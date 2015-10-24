@@ -387,13 +387,19 @@ HWLOC_DECLSPEC unsigned hwloc_pci_find_cap(const unsigned char *config, unsigned
  */
 HWLOC_DECLSPEC int hwloc_pci_find_linkspeed(const unsigned char *config, unsigned offset, float *linkspeed);
 
-/** \brief Modify the PCI device object into a bridge and fill its attribute if a bridge is found in the PCI config space.
+/** \brief Return the hwloc object type (PCI device or Bridge) for the given class and configuration space.
  *
- * This function requires 64 bytes of common configuration header at the beginning of config.
+ * This function requires 16 bytes of common configuration header at the beginning of config.
+ */
+HWLOC_DECLSPEC hwloc_obj_type_t hwloc_pci_check_bridge_type(unsigned device_class, const unsigned char *config);
+
+/** \brief Fills the attributes of the given PCI bridge using the given PCI config space.
+ *
+ * This function requires 32 bytes of common configuration header at the beginning of config.
  *
  * Returns -1 and destroys /p obj if bridge fields are invalid.
  */
-HWLOC_DECLSPEC int hwloc_pci_prepare_bridge(hwloc_obj_t obj, const unsigned char *config);
+HWLOC_DECLSPEC int hwloc_pci_setup_bridge_attr(hwloc_obj_t obj, const unsigned char *config);
 
 /** \brief Insert a PCI object in the given PCI tree by looking at PCI bus IDs.
  *
