@@ -738,10 +738,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     data->nbnumanodes++;
   }
 
-  if (0) {
-    /* FIXME may apply some ignore rules here, but don't ignore the root object */
+  if (hwloc_obj_type_is_io(obj->type) && !hwloc_filter_check_keep_object(topology, obj))
     ignored = 1;
-  }
 
   if (parent && !ignored) {
     /* root->parent is NULL, and root is already inserted */

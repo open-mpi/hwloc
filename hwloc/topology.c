@@ -1708,41 +1708,17 @@ hwloc_filter_io_children(hwloc_topology_t topology, hwloc_obj_t root)
 
   /* filter I/O children and recurse */
   for_each_io_child_safe(child, root, pchild) {
+    enum hwloc_type_filter_e filter = topology->type_filter[child->type];
+
     /* recurse into grand-children */
     hwloc_filter_io_children(topology, child);
     hwloc_filter_misc_children(topology, child);
 
-    if (topology->type_filter[child->type] == HWLOC_TYPE_FILTER_KEEP_ALL)
-      continue;
-    else if (topology->type_filter[child->type] == HWLOC_TYPE_FILTER_KEEP_NONE) {
+    if (child->type == HWLOC_OBJ_BRIDGE
+	&& filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
+	&& !child->io_first_child) {
       unlink_and_free_single_object(pchild);
       topology->modified = 1;
-      continue;
-    }
-
-    /* HWLOC_TYPE_FILTER_KEEP_IMPORTANT */
-
-    if (child->type == HWLOC_OBJ_PCI_DEVICE) {
-      /* filter important PCI devices by class */
-      if (!hwloc_filter_check_pcidev_subtype_important(child->attr->pcidev.class_id)) {
-	unlink_and_free_single_object(pchild);
-	topology->modified = 1;
-	continue;
-      }
-    } else if (child->type == HWLOC_OBJ_OS_DEVICE) {
-      /* filter important OS devices by type */
-      if (!hwloc_filter_check_osdev_subtype_important(child->attr->osdev.type)) {
-	unlink_and_free_single_object(pchild);
-	topology->modified = 1;
-	continue;
-      }
-    } else if (child->type == HWLOC_OBJ_BRIDGE) {
-      /* filter important bridges by number of children */
-      if (!child->io_first_child) {
-	unlink_and_free_single_object(pchild);
-	topology->modified = 1;
-	continue;
-      }
     }
   }
 }

@@ -4936,6 +4936,7 @@ static int
 hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_topology *topology = backend->topology;
   hwloc_obj_t tree = NULL;
   int root_fd = data->root_fd;
   DIR *dir;
@@ -4989,6 +4990,23 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     }
 
     type = hwloc_pci_check_bridge_type(class_id, config_space_cache);
+
+    /* filtered? */
+    if (type == HWLOC_OBJ_PCI_DEVICE) {
+      enum hwloc_type_filter_e filter;
+      hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &filter);
+      if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
+	continue;
+      if (filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
+	  && !hwloc_filter_check_pcidev_subtype_important(class_id))
+	continue;
+    } else if (type == HWLOC_OBJ_BRIDGE) {
+      enum hwloc_type_filter_e filter;
+      hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &filter);
+      if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
+	continue;
+      /* HWLOC_TYPE_FILTER_KEEP_IMPORTANT filtered later in the core */
+    }
 
     obj = hwloc_alloc_setup_object(type, -1);
     if (!obj)

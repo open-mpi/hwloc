@@ -316,6 +316,7 @@ int
 hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_obj *old_tree)
 {
   struct hwloc_obj **next_hb_p;
+  enum hwloc_type_filter_e bfilter;
 
   if (!old_tree)
     /* found nothing, exit */
@@ -330,6 +331,13 @@ hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_ob
   next_hb_p = &hwloc_get_root_obj(topology)->io_first_child;
   while (*next_hb_p)
     next_hb_p = &((*next_hb_p)->next_sibling);
+
+  bfilter = topology->type_filter[HWLOC_OBJ_BRIDGE];
+  if (bfilter == HWLOC_TYPE_FILTER_KEEP_NONE) {
+    *next_hb_p = old_tree;
+    topology->modified = 1;
+    goto done;
+  }
 
   /*
    * tree points to all objects connected to any upstream bus in the machine.
@@ -388,6 +396,7 @@ hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_ob
 			     */
   }
 
+ done:
   topology->need_pci_belowroot_apply_locality = 1;
   return 0;
 }
@@ -546,16 +555,20 @@ hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology)
       continue;
     }
 
-    /* don't support PCI devices without hostbridges yet */
-    assert(obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI);
-
     if (obj->type == HWLOC_OBJ_PCI_DEVICE
 	|| (obj->type == HWLOC_OBJ_BRIDGE
 	    && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
       busid = &obj->attr->pcidev;
-    else
-      /* hostbridges don't have a PCI busid for looking up locality */
-      busid = &obj->io_first_child->attr->pcidev;
+    else {
+      /* hostbridges don't have a PCI busid for looking up locality, use their first child if PCI */
+      hwloc_obj_t child = obj->io_first_child;
+      if (child && (child->type == HWLOC_OBJ_PCI_DEVICE
+		    || (child->type == HWLOC_OBJ_BRIDGE
+			&& child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)))
+	busid = &obj->io_first_child->attr->pcidev;
+      else
+	continue;
+    }
 
     /* attach the object (and children) where it belongs */
     parent = hwloc__pci_find_busid_parent(topology, busid);

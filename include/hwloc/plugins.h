@@ -400,6 +400,27 @@ hwloc_filter_check_osdev_subtype_important(hwloc_obj_osdev_type_t subtype)
   return (subtype != HWLOC_OBJ_OSDEV_DMA);
 }
 
+/** \brief Check whether the given object should be filtered-out.
+ *
+ * \return 1 if the object type should be kept, 0 otherwise.
+ */
+static __hwloc_inline int
+hwloc_filter_check_keep_object(hwloc_topology_t topology, hwloc_obj_t obj)
+{
+  hwloc_obj_type_t type = obj->type;
+  enum hwloc_type_filter_e filter;
+  hwloc_topology_get_type_filter(topology, type, &filter);
+  if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
+    return 0;
+  if (filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
+    if (type == HWLOC_OBJ_PCI_DEVICE)
+      return hwloc_filter_check_pcidev_subtype_important(obj->attr->pcidev.class_id);
+    if (type == HWLOC_OBJ_OS_DEVICE)
+      return hwloc_filter_check_osdev_subtype_important(obj->attr->osdev.type);
+  }
+  return 1;
+}
+
 /** @} */
 
 
