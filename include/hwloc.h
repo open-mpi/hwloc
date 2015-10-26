@@ -2097,6 +2097,8 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  *
  * \return the newly-created object
  *
+ * \return \c NULL on error.
+ *
  * \note If \p name contains some non-printable characters, they will
  * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
