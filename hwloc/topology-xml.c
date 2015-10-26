@@ -738,7 +738,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     data->nbnumanodes++;
   }
 
-  if (hwloc_obj_type_is_io(obj->type) && !hwloc_filter_check_keep_object(topology, obj))
+  if (hwloc_obj_type_is_special(obj->type) && !hwloc_filter_check_keep_object(topology, obj))
     ignored = 1;
 
   if (parent && !ignored) {

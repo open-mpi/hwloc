@@ -1684,24 +1684,6 @@ remove_unused_sets(hwloc_obj_t obj)
 }
 
 static void
-hwloc_remove_misc_children(hwloc_topology_t topology, hwloc_obj_t root)
-{
-  hwloc_obj_t child, *pchild;
-  for_each_misc_child_safe(child, root, pchild) {
-    hwloc_remove_misc_children(topology, child);
-    unlink_and_free_object_and_children(pchild);
-    topology->modified = 1;
-  }
-}
-
-static void
-hwloc_filter_misc_children(hwloc_topology_t topology, hwloc_obj_t root)
-{
-  if (topology->type_filter[HWLOC_OBJ_MISC] == HWLOC_TYPE_FILTER_KEEP_NONE)
-    hwloc_remove_misc_children(topology, root);
-}
-
-static void
 hwloc_filter_io_children(hwloc_topology_t topology, hwloc_obj_t root)
 {
   hwloc_obj_t child, *pchild;
@@ -1712,7 +1694,6 @@ hwloc_filter_io_children(hwloc_topology_t topology, hwloc_obj_t root)
 
     /* recurse into grand-children */
     hwloc_filter_io_children(topology, child);
-    hwloc_filter_misc_children(topology, child);
 
     if (child->type == HWLOC_OBJ_BRIDGE
 	&& filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
@@ -1763,7 +1744,6 @@ hwloc_filter_objects(hwloc_topology_t topology, hwloc_obj_t *pparent)
     dropped_children += hwloc_filter_objects(topology, pchild);
 
   hwloc_filter_io_children(topology, parent);
-  hwloc_filter_misc_children(topology, parent);
 
   if (parent != topology->levels[0][0] &&
       topology->type_filter[parent->type] == HWLOC_TYPE_FILTER_KEEP_NONE) {
