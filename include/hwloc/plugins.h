@@ -256,6 +256,8 @@ struct hwloc_component {
  *
  * In case of error, hwloc_report_os_error() is called.
  *
+ * The caller should check whether the object type is filtered-out before calling this function.
+ *
  * Returns the object on success.
  * Returns NULL and frees obj on error.
  * Returns another object and frees obj if it was merged with an identical pre-existing object.
@@ -288,6 +290,8 @@ HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_top
  *
  * The given object may have normal, I/O or Misc children, as long as they are in order as well.
  * These children must have valid parent and next_sibling pointers.
+ *
+ * The caller should check whether the object type is filtered-out before calling this function.
  */
 HWLOC_DECLSPEC void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
@@ -398,6 +402,21 @@ static __hwloc_inline int
 hwloc_filter_check_osdev_subtype_important(hwloc_obj_osdev_type_t subtype)
 {
   return (subtype != HWLOC_OBJ_OSDEV_DMA);
+}
+
+/** \brief Check whether a non-I/O object type should be filtered-out.
+ *
+ * Cannot be used for I/O objects.
+ *
+ * \return 1 if the object type should be kept, 0 otherwise.
+ */
+static __hwloc_inline int
+hwloc_filter_check_keep_object_type(hwloc_topology_t topology, hwloc_obj_type_t type)
+{
+  enum hwloc_type_filter_e filter;
+  hwloc_topology_get_type_filter(topology, type, &filter);
+  assert(filter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT); /* IMPORTANT only used for I/O */
+  return filter == HWLOC_TYPE_FILTER_KEEP_NONE ? 0 : 1;
 }
 
 /** \brief Check whether the given object should be filtered-out.

@@ -57,51 +57,66 @@ hwloc_look_bgq(struct hwloc_backend *backend)
   obj->memory.local_memory = 16ULL*1024*1024*1024ULL;
   hwloc_insert_object_by_cpuset(topology, obj);
 
-  /* package */
-  obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, 0);
   set = hwloc_bitmap_alloc();
   hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);
-  obj->cpuset = set;
-  hwloc_obj_add_info(obj, "CPUModel", "IBM PowerPC A2");
-  hwloc_insert_object_by_cpuset(topology, obj);
 
   /* shared L2 */
-  obj = hwloc_alloc_setup_object(HWLOC_OBJ_L2CACHE, -1);
-  obj->cpuset = hwloc_bitmap_dup(set);
-  obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-  obj->attr->cache.depth = 2;
-  obj->attr->cache.size = 32*1024*1024;
-  obj->attr->cache.linesize = 128;
-  obj->attr->cache.associativity = 16;
-  hwloc_insert_object_by_cpuset(topology, obj);
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2CACHE)) {
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_L2CACHE, -1);
+    obj->cpuset = hwloc_bitmap_dup(set);
+    obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+    obj->attr->cache.depth = 2;
+    obj->attr->cache.size = 32*1024*1024;
+    obj->attr->cache.linesize = 128;
+    obj->attr->cache.associativity = 16;
+    hwloc_insert_object_by_cpuset(topology, obj);
+  }
+
+  /* package */
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, 0);
+    obj->cpuset = set;
+    hwloc_obj_add_info(obj, "CPUModel", "IBM PowerPC A2");
+    hwloc_insert_object_by_cpuset(topology, obj);
+  } else
+    hwloc_bitmap_free(set);
 
   /* Cores */
   for(i=0; i<HWLOC_BGQ_CORES; i++) {
-    /* Core */
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, i);
     set = hwloc_bitmap_alloc();
     hwloc_bitmap_set_range(set, i*4, i*4+3);
-    obj->cpuset = set;
-    hwloc_insert_object_by_cpuset(topology, obj);
+
     /* L1d */
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1CACHE, -1);
-    obj->cpuset = hwloc_bitmap_dup(set);
-    obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
-    obj->attr->cache.depth = 1;
-    obj->attr->cache.size = 16*1024;
-    obj->attr->cache.linesize = 64;
-    obj->attr->cache.associativity = 8;
-    hwloc_insert_object_by_cpuset(topology, obj);
+    if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE)) {
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1CACHE, -1);
+      obj->cpuset = hwloc_bitmap_dup(set);
+      obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
+      obj->attr->cache.depth = 1;
+      obj->attr->cache.size = 16*1024;
+      obj->attr->cache.linesize = 64;
+      obj->attr->cache.associativity = 8;
+      hwloc_insert_object_by_cpuset(topology, obj);
+    }
     /* L1i */
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
-    obj->cpuset = hwloc_bitmap_dup(set);
-    obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
-    obj->attr->cache.depth = 1;
-    obj->attr->cache.size = 16*1024;
-    obj->attr->cache.linesize = 64;
-    obj->attr->cache.associativity = 4;
-    hwloc_insert_object_by_cpuset(topology, obj);
+    if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
+      obj->cpuset = hwloc_bitmap_dup(set);
+      obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+      obj->attr->cache.depth = 1;
+      obj->attr->cache.size = 16*1024;
+      obj->attr->cache.linesize = 64;
+      obj->attr->cache.associativity = 4;
+      hwloc_insert_object_by_cpuset(topology, obj);
+    }
     /* there's also a L1p "prefetch cache" of 4kB with 128B lines */
+
+    /* Core */
+    if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, i);
+      obj->cpuset = set;
+      hwloc_insert_object_by_cpuset(topology, obj);
+    } else
+      hwloc_bitmap_free(set);
   }
 
   /* PUs */

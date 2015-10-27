@@ -619,67 +619,69 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
    * Only annotate existing objects for now.
    */
 
-  /* Look for packages */
-  if (fulldiscovery) {
-    hwloc_bitmap_t packages_cpuset = hwloc_bitmap_dup(complete_cpuset);
-    hwloc_bitmap_t package_cpuset;
-    hwloc_obj_t package;
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
+    /* Look for packages */
+    if (fulldiscovery) {
+      hwloc_bitmap_t packages_cpuset = hwloc_bitmap_dup(complete_cpuset);
+      hwloc_bitmap_t package_cpuset;
+      hwloc_obj_t package;
 
-    while ((i = hwloc_bitmap_first(packages_cpuset)) != (unsigned) -1) {
-      unsigned packageid = infos[i].packageid;
+      while ((i = hwloc_bitmap_first(packages_cpuset)) != (unsigned) -1) {
+	unsigned packageid = infos[i].packageid;
 
-      package_cpuset = hwloc_bitmap_alloc();
-      for (j = i; j < nbprocs; j++) {
-        if (infos[j].packageid == packageid) {
-          hwloc_bitmap_set(package_cpuset, j);
-          hwloc_bitmap_clr(packages_cpuset, j);
-        }
-      }
-      package = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, packageid);
-      package->cpuset = package_cpuset;
-
-      hwloc_x86_add_cpuinfos(package, &infos[i], 0);
-
-      hwloc_debug_1arg_bitmap("os package %u has cpuset %s\n",
-          packageid, package_cpuset);
-      hwloc_insert_object_by_cpuset(topology, package);
-      nbpackages++;
-    }
-    hwloc_bitmap_free(packages_cpuset);
-
-  } else {
-    /* Annotate packages previously-existing packages */
-    hwloc_obj_t package = NULL;
-    int same = 1;
-    nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
-    /* check whether all packages have the same info */
-    for(i=1; i<nbprocs; i++) {
-      if (strcmp(infos[i].cpumodel, infos[0].cpumodel)) {
-	same = 0;
-	break;
-      }
-    }
-    /* now iterate over packages and annotate them */
-    while ((package = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PACKAGE, package)) != NULL) {
-      if (package->os_index == (unsigned) -1) {
-	/* try to fix the package OS index if unknown.
-	 * FIXME: ideally, we should check all bits in case x86 and the native backend disagree.
-	 */
-	for(i=0; i<nbprocs; i++) {
-	  if (hwloc_bitmap_isset(package->cpuset, i)) {
-	    package->os_index = infos[i].packageid;
-	    break;
+	package_cpuset = hwloc_bitmap_alloc();
+	for (j = i; j < nbprocs; j++) {
+	  if (infos[j].packageid == packageid) {
+	    hwloc_bitmap_set(package_cpuset, j);
+	    hwloc_bitmap_clr(packages_cpuset, j);
 	  }
 	}
+	package = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, packageid);
+	package->cpuset = package_cpuset;
+
+	hwloc_x86_add_cpuinfos(package, &infos[i], 0);
+
+	hwloc_debug_1arg_bitmap("os package %u has cpuset %s\n",
+				packageid, package_cpuset);
+	hwloc_insert_object_by_cpuset(topology, package);
+	nbpackages++;
       }
-      for(i=0; i<nbprocs; i++) {
-	/* if there's a single package, it's the one we want.
-	 * if the index is ok, it's the one we want.
-	 * if the index is unknown but all packages have the same id, that's fine
-	 */
-	if (nbpackages == 1 || infos[i].packageid == package->os_index || (same && package->os_index == (unsigned) -1)) {
-	  hwloc_x86_add_cpuinfos(package, &infos[i], 1);
+      hwloc_bitmap_free(packages_cpuset);
+
+    } else {
+      /* Annotate packages previously-existing packages */
+      hwloc_obj_t package = NULL;
+      int same = 1;
+      nbpackages = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE);
+      /* check whether all packages have the same info */
+      for(i=1; i<nbprocs; i++) {
+	if (strcmp(infos[i].cpumodel, infos[0].cpumodel)) {
+	  same = 0;
 	  break;
+	}
+      }
+      /* now iterate over packages and annotate them */
+      while ((package = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PACKAGE, package)) != NULL) {
+	if (package->os_index == (unsigned) -1) {
+	  /* try to fix the package OS index if unknown.
+	   * FIXME: ideally, we should check all bits in case x86 and the native backend disagree.
+	   */
+	  for(i=0; i<nbprocs; i++) {
+	    if (hwloc_bitmap_isset(package->cpuset, i)) {
+	      package->os_index = infos[i].packageid;
+	      break;
+	    }
+	  }
+	}
+	for(i=0; i<nbprocs; i++) {
+	  /* if there's a single package, it's the one we want.
+	   * if the index is ok, it's the one we want.
+	   * if the index is unknown but all packages have the same id, that's fine
+	   */
+	  if (nbpackages == 1 || infos[i].packageid == package->os_index || (same && package->os_index == (unsigned) -1)) {
+	    hwloc_x86_add_cpuinfos(package, &infos[i], 1);
+	    break;
+	  }
 	}
       }
     }
@@ -689,7 +691,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     hwloc_x86_add_cpuinfos(hwloc_get_root_obj(topology), &infos[0], 1);
   }
 
-  /* Look for Numa nodes inside packages */
+  /* Look for Numa nodes inside packages (cannot be filtered-out) */
   if (fulldiscovery) {
     hwloc_bitmap_t nodes_cpuset = hwloc_bitmap_dup(complete_cpuset);
     hwloc_bitmap_t node_cpuset;
@@ -729,111 +731,115 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     hwloc_bitmap_free(nodes_cpuset);
   }
 
-  /* Look for Compute units inside packages */
-  if (fulldiscovery) {
-    hwloc_bitmap_t units_cpuset = hwloc_bitmap_dup(complete_cpuset);
-    hwloc_bitmap_t unit_cpuset;
-    hwloc_obj_t unit;
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+    /* Look for Compute units inside packages */
+    if (fulldiscovery) {
+      hwloc_bitmap_t units_cpuset = hwloc_bitmap_dup(complete_cpuset);
+      hwloc_bitmap_t unit_cpuset;
+      hwloc_obj_t unit;
 
-    while ((i = hwloc_bitmap_first(units_cpuset)) != (unsigned) -1) {
-      unsigned packageid = infos[i].packageid;
-      unsigned unitid = infos[i].unitid;
+      while ((i = hwloc_bitmap_first(units_cpuset)) != (unsigned) -1) {
+	unsigned packageid = infos[i].packageid;
+	unsigned unitid = infos[i].unitid;
 
-      if (unitid == (unsigned)-1) {
-        hwloc_bitmap_clr(units_cpuset, i);
-	continue;
-      }
-
-      unit_cpuset = hwloc_bitmap_alloc();
-      for (j = i; j < nbprocs; j++) {
-	if (infos[j].unitid == (unsigned) -1) {
-	  hwloc_bitmap_clr(units_cpuset, j);
+	if (unitid == (unsigned)-1) {
+	  hwloc_bitmap_clr(units_cpuset, i);
 	  continue;
 	}
 
-        if (infos[j].packageid == packageid && infos[j].unitid == unitid) {
-          hwloc_bitmap_set(unit_cpuset, j);
-          hwloc_bitmap_clr(units_cpuset, j);
-        }
-      }
-      unit = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, unitid);
-      unit->cpuset = unit_cpuset;
-      hwloc_debug_1arg_bitmap("os unit %u has cpuset %s\n",
-          unitid, unit_cpuset);
-      hwloc_insert_object_by_cpuset(topology, unit);
-    }
-    hwloc_bitmap_free(units_cpuset);
-  }
-
-  /* Look for unknown objects */
-  if (infos[one].otherids) {
-    for (level = infos[one].levels-1; level <= infos[one].levels-1; level--) {
-      if (infos[one].otherids[level] != UINT_MAX) {
-	hwloc_bitmap_t unknowns_cpuset = hwloc_bitmap_dup(complete_cpuset);
-	hwloc_bitmap_t unknown_cpuset;
-	hwloc_obj_t unknown_obj;
-
-	while ((i = hwloc_bitmap_first(unknowns_cpuset)) != (unsigned) -1) {
-	  unsigned unknownid = infos[i].otherids[level];
-
-	  unknown_cpuset = hwloc_bitmap_alloc();
-	  for (j = i; j < nbprocs; j++) {
-	    if (infos[j].otherids[level] == unknownid) {
-	      hwloc_bitmap_set(unknown_cpuset, j);
-	      hwloc_bitmap_clr(unknowns_cpuset, j);
-	    }
+	unit_cpuset = hwloc_bitmap_alloc();
+	for (j = i; j < nbprocs; j++) {
+	  if (infos[j].unitid == (unsigned) -1) {
+	    hwloc_bitmap_clr(units_cpuset, j);
+	    continue;
 	  }
-	  unknown_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, unknownid);
-	  unknown_obj->cpuset = unknown_cpuset;
-	  unknown_obj->attr->group.depth = topology->next_group_depth + level;
-	  if (next_group_depth <= topology->next_group_depth + level)
-	    next_group_depth = topology->next_group_depth + level + 1;
-	  hwloc_debug_2args_bitmap("os unknown%d %u has cpuset %s\n",
-	      level, unknownid, unknown_cpuset);
-	  hwloc_insert_object_by_cpuset(topology, unknown_obj);
+
+	  if (infos[j].packageid == packageid && infos[j].unitid == unitid) {
+	    hwloc_bitmap_set(unit_cpuset, j);
+	    hwloc_bitmap_clr(units_cpuset, j);
+	  }
 	}
-	hwloc_bitmap_free(unknowns_cpuset);
+	unit = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, unitid);
+	unit->cpuset = unit_cpuset;
+	hwloc_debug_1arg_bitmap("os unit %u has cpuset %s\n",
+				unitid, unit_cpuset);
+	hwloc_insert_object_by_cpuset(topology, unit);
+      }
+      hwloc_bitmap_free(units_cpuset);
+    }
+
+    /* Look for unknown objects */
+    if (infos[one].otherids) {
+      for (level = infos[one].levels-1; level <= infos[one].levels-1; level--) {
+	if (infos[one].otherids[level] != UINT_MAX) {
+	  hwloc_bitmap_t unknowns_cpuset = hwloc_bitmap_dup(complete_cpuset);
+	  hwloc_bitmap_t unknown_cpuset;
+	  hwloc_obj_t unknown_obj;
+
+	  while ((i = hwloc_bitmap_first(unknowns_cpuset)) != (unsigned) -1) {
+	    unsigned unknownid = infos[i].otherids[level];
+
+	    unknown_cpuset = hwloc_bitmap_alloc();
+	    for (j = i; j < nbprocs; j++) {
+	      if (infos[j].otherids[level] == unknownid) {
+		hwloc_bitmap_set(unknown_cpuset, j);
+		hwloc_bitmap_clr(unknowns_cpuset, j);
+	      }
+	    }
+	    unknown_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, unknownid);
+	    unknown_obj->cpuset = unknown_cpuset;
+	    unknown_obj->attr->group.depth = topology->next_group_depth + level;
+	    if (next_group_depth <= topology->next_group_depth + level)
+	      next_group_depth = topology->next_group_depth + level + 1;
+	    hwloc_debug_2args_bitmap("os unknown%d %u has cpuset %s\n",
+				     level, unknownid, unknown_cpuset);
+	    hwloc_insert_object_by_cpuset(topology, unknown_obj);
+	  }
+	  hwloc_bitmap_free(unknowns_cpuset);
+	}
       }
     }
   }
 
-  /* Look for cores */
-  if (fulldiscovery) {
-    hwloc_bitmap_t cores_cpuset = hwloc_bitmap_dup(complete_cpuset);
-    hwloc_bitmap_t core_cpuset;
-    hwloc_obj_t core;
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
+    /* Look for cores */
+    if (fulldiscovery) {
+      hwloc_bitmap_t cores_cpuset = hwloc_bitmap_dup(complete_cpuset);
+      hwloc_bitmap_t core_cpuset;
+      hwloc_obj_t core;
 
-    while ((i = hwloc_bitmap_first(cores_cpuset)) != (unsigned) -1) {
-      unsigned packageid = infos[i].packageid;
-      unsigned coreid = infos[i].coreid;
+      while ((i = hwloc_bitmap_first(cores_cpuset)) != (unsigned) -1) {
+	unsigned packageid = infos[i].packageid;
+	unsigned coreid = infos[i].coreid;
 
-      if (coreid == (unsigned) -1) {
-        hwloc_bitmap_clr(cores_cpuset, i);
-	continue;
-      }
-
-      core_cpuset = hwloc_bitmap_alloc();
-      for (j = i; j < nbprocs; j++) {
-	if (infos[j].coreid == (unsigned) -1) {
-	  hwloc_bitmap_clr(cores_cpuset, j);
+	if (coreid == (unsigned) -1) {
+	  hwloc_bitmap_clr(cores_cpuset, i);
 	  continue;
 	}
 
-        if (infos[j].packageid == packageid && infos[j].coreid == coreid) {
-          hwloc_bitmap_set(core_cpuset, j);
-          hwloc_bitmap_clr(cores_cpuset, j);
-        }
+	core_cpuset = hwloc_bitmap_alloc();
+	for (j = i; j < nbprocs; j++) {
+	  if (infos[j].coreid == (unsigned) -1) {
+	    hwloc_bitmap_clr(cores_cpuset, j);
+	    continue;
+	  }
+
+	  if (infos[j].packageid == packageid && infos[j].coreid == coreid) {
+	    hwloc_bitmap_set(core_cpuset, j);
+	    hwloc_bitmap_clr(cores_cpuset, j);
+	  }
+	}
+	core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, coreid);
+	core->cpuset = core_cpuset;
+	hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
+				coreid, core_cpuset);
+	hwloc_insert_object_by_cpuset(topology, core);
       }
-      core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, coreid);
-      core->cpuset = core_cpuset;
-      hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
-          coreid, core_cpuset);
-      hwloc_insert_object_by_cpuset(topology, core);
+      hwloc_bitmap_free(cores_cpuset);
     }
-    hwloc_bitmap_free(cores_cpuset);
   }
 
-  /* Look for PUs */
+  /* Look for PUs (cannot be filtered-out) */
   if (fulldiscovery) {
     unsigned i;
     hwloc_debug("%s", "\n\n * CPU cpusets *\n\n");
@@ -871,8 +877,10 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	otype = hwloc_cache_type_by_depth_type(level, type);
 	if (otype == HWLOC_OBJ_TYPE_NONE)
 	  continue;
-	caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
+	if (!hwloc_filter_check_keep_object_type(topology, otype))
+	  continue;
 
+	caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
 	while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
 	  unsigned packageid = infos[i].packageid;
 

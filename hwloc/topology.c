@@ -1727,38 +1727,19 @@ hwloc__reorder_children(hwloc_obj_t parent)
 
 /* Remove objects that are ignored in any case.
  * Does not handle KEEP_STRUCTURE flag
- * Returns 1 if *pparent were replaced, which means the caller need to reorder its children.
- * Returns 0 otherwise.
  */
-static int
+static void
 hwloc_filter_objects(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
   hwloc_obj_t parent = *pparent, child, *pchild;
-  int dropped_children = 0;
-  int dropped = 0;
 
   /* FIXME: always remove useless Groups */
 
-  /* account dropped normal children only, others don't required reordering */
   for_each_child_safe(child, parent, pchild)
-    dropped_children += hwloc_filter_objects(topology, pchild);
+    hwloc_filter_objects(topology, pchild);
 
+  /* FIXME: only bridges now! */
   hwloc_filter_io_children(topology, parent);
-
-  if (parent != topology->levels[0][0] &&
-      topology->type_filter[parent->type] == HWLOC_TYPE_FILTER_KEEP_NONE) {
-    hwloc_debug("%s", "\nDropping ignored object ");
-    hwloc_debug_print_object(0, parent);
-    unlink_and_free_single_object(pparent);
-    topology->modified = 1;
-    dropped = 1;
-
-  } else if (dropped_children) {
-    /* we keep this object but its children changed, reorder them by complete_cpuset */
-    hwloc__reorder_children(parent);
-  }
-
-  return dropped;
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes

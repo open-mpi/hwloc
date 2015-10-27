@@ -72,8 +72,8 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 
     hwloc_debug("%u threads per package\n", logical_per_package);
 
-
-    if (nprocs == npackages * logical_per_package)
+    if (nprocs == npackages * logical_per_package
+	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE))
       for (i = 0; i < npackages; i++) {
         obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, i);
         obj->cpuset = hwloc_bitmap_alloc();
@@ -91,7 +91,8 @@ hwloc_look_darwin(struct hwloc_backend *backend)
       if (cpumodel[0] != '\0')
         hwloc_obj_add_info(topology->levels[0][0], "CPUModel", cpumodel);
 
-    if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &_cores_per_package) && _cores_per_package > 0) {
+    if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &_cores_per_package) && _cores_per_package > 0
+	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
       unsigned cores_per_package = _cores_per_package;
       hwloc_debug("%u cores per package\n", cores_per_package);
 
@@ -203,7 +204,8 @@ hwloc_look_darwin(struct hwloc_backend *backend)
                cpu++)
             hwloc_bitmap_set(obj->cpuset, cpu);
 
-          if (i == 1 && l1icachesize) {
+          if (i == 1 && l1icachesize
+	      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
             /* FIXME assuming that L1i and L1d are shared the same way. Darwin
              * does not yet provide a way to know.  */
             hwloc_obj_t l1i = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
@@ -245,7 +247,10 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 #endif
           }
 
-          hwloc_insert_object_by_cpuset(topology, obj);
+	  if (hwloc_filter_check_keep_object_type(topology, obj->type))
+	    hwloc_insert_object_by_cpuset(topology, obj);
+	  else
+	    hwloc_free_unlinked_object(obj); /* FIXME: don't built at all, just build the cpuset in case l1i needs it */
         }
       }
     }

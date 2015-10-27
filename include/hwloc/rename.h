@@ -507,6 +507,7 @@ extern "C" {
 
 #define hwloc_filter_check_pcidev_subtype_important HWLOC_NAME(filter_check_pcidev_subtype_important)
 #define hwloc_filter_check_osdev_subtype_important HWLOC_NAME(filter_check_osdev_subtype_important)
+#define hwloc_filter_check_keep_object_type HWLOC_NAME(filter_check_keep_object_type)
 #define hwloc_filter_check_keep_object HWLOC_NAME(filter_check_keep_object)
 
 #define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)

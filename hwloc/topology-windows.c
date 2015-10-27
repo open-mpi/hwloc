@@ -795,6 +795,9 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    break;
 	}
 
+	if (!hwloc_filter_check_keep_object_type(topology, type))
+	  continue;
+
 	obj = hwloc_alloc_setup_object(type, id);
         obj->cpuset = hwloc_bitmap_alloc();
 	hwloc_debug("%s#%u mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
@@ -919,25 +922,31 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    /* So strange an interface... */
 	    for (id = 0; id < procInfo->Group.ActiveGroupCount; id++) {
               KAFFINITY mask;
-	      obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, id);
-	      obj->cpuset = hwloc_bitmap_alloc();
+	      hwloc_bitmap_t set;
+
+	      set = hwloc_bitmap_alloc();
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
 	      hwloc_debug("group %u %d cpus mask %lx\n", id,
-                  procInfo->Group.GroupInfo[id].ActiveProcessorCount, mask);
+			  procInfo->Group.GroupInfo[id].ActiveProcessorCount, mask);
 	      /* KAFFINITY is ULONG_PTR */
-	      hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, id, mask);
+	      hwloc_bitmap_set_ith_ULONG_PTR(set, id, mask);
 	      /* FIXME: what if running 32bits on a 64bits windows with 64-processor groups?
 	       * ULONG_PTR is 32bits, so half the group is invisible?
 	       * maybe scale id to id*8/sizeof(ULONG_PTR) so that groups are 64-PU aligned?
 	       */
-	      hwloc_debug_2args_bitmap("group %u %d bitmap %s\n", id, procInfo->Group.GroupInfo[id].ActiveProcessorCount, obj->cpuset);
+	      hwloc_debug_2args_bitmap("group %u %d bitmap %s\n", id, procInfo->Group.GroupInfo[id].ActiveProcessorCount, set);
 
 	      /* save the set of PUs so that we can create them at the end */
 	      if (!groups_pu_set)
 		groups_pu_set = hwloc_bitmap_alloc();
-	      hwloc_bitmap_or(groups_pu_set, groups_pu_set, obj->cpuset);
+	      hwloc_bitmap_or(groups_pu_set, groups_pu_set, set);
 
-	      hwloc_insert_object_by_cpuset(topology, obj);
+	      if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+		obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, id);
+		obj->cpuset = set;
+		hwloc_insert_object_by_cpuset(topology, obj);
+	      } else
+		hwloc_bitmap_free(set);
 	    }
 	    continue;
 	  default:
@@ -945,6 +954,9 @@ hwloc_look_windows(struct hwloc_backend *backend)
             hwloc_debug("unknown relation %d\n", procInfo->Relationship);
 	    continue;
 	}
+
+	if (!hwloc_filter_check_keep_object_type(topology, type))
+	  continue;
 
 	obj = hwloc_alloc_setup_object(type, id);
         obj->cpuset = hwloc_bitmap_alloc();

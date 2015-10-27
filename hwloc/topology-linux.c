@@ -2395,6 +2395,9 @@ try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   otype = hwloc_cache_type_by_depth_type(level, ctype);
   if (otype == HWLOC_OBJ_TYPE_NONE)
     return;
+  if (!hwloc_filter_check_keep_object_type(topology, otype))
+    return;
+
   c = hwloc_alloc_setup_object(otype, -1);
   c->attr->cache.depth = level;
   c->attr->cache.linesize = cache_line_size;
@@ -2536,10 +2539,12 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
         struct hwloc_obj *core = NULL;
         add_device_tree_cpus_node(&cpus, cpuset, l2_cache, phandle, dirent->d_name);
 
-        /* Add core */
-        core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
-        core->cpuset = hwloc_bitmap_dup(cpuset);
-        hwloc_insert_object_by_cpuset(topology, core);
+	if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
+	  /* Add core */
+	  core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
+	  core->cpuset = hwloc_bitmap_dup(cpuset);
+	  hwloc_insert_object_by_cpuset(topology, core);
+	}
 
         /* Add L1 cache */
         try_add_cache_from_device_tree_cpu(topology, data, cpu, 1, cpuset);
@@ -2612,6 +2617,8 @@ look_sysfsnode(struct hwloc_topology *topology,
   DIR *dir;
   struct dirent *dirent;
   hwloc_bitmap_t nodeset;
+
+  /* NUMA nodes cannot be filtered out */
 
   *found = 0;
 
@@ -2835,7 +2842,8 @@ look_sysfscpu(struct hwloc_topology *topology,
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       packageset = hwloc_parse_cpumap(str, data->root_fd);
-      if (packageset) {
+      if (packageset
+	  && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
        hwloc_bitmap_andnot(packageset, packageset, unknownset);
        if (hwloc_bitmap_first(packageset) == i) {
         /* first cpu in this package, add the package */
@@ -2911,7 +2919,9 @@ package_done:
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, data->root_fd);
       savedcoreset = coreset; /* store it for later work-arounds */
-      if (coreset) {
+      /* only filter now since savedcoreset is used for caches later */
+      if (coreset
+	  && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
        hwloc_bitmap_andnot(coreset, coreset, unknownset);
        if (hwloc_bitmap_weight(coreset) > 1) {
 	/* check if this is hyper-threading or different coreids */
@@ -2942,10 +2952,11 @@ package_done:
        }
       }
 
-      /* look at the books */
-      mybookid = 0; /* shut-up the compiler */
-      sprintf(str, "%s/cpu%d/topology/book_id", path, i);
-      if (hwloc_parse_sysfs_unsigned(str, &mybookid, data->root_fd) == 0) {
+      if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+       /* look at the books */
+       mybookid = 0; /* shut-up the compiler */
+       sprintf(str, "%s/cpu%d/topology/book_id", path, i);
+       if (hwloc_parse_sysfs_unsigned(str, &mybookid, data->root_fd) == 0) {
         sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
         bookset = hwloc_parse_cpumap(str, data->root_fd);
 	if (bookset) {
@@ -2960,8 +2971,10 @@ package_done:
           bookset = NULL; /* don't free it */
 	 }
         }
+       }
       }
 
+      /* PU cannot be filtered-out */
       {
       /* look at the thread */
       struct hwloc_obj *thread = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
@@ -3022,6 +3035,8 @@ package_done:
 
 	otype = hwloc_cache_type_by_depth_type(depth+1, ctype);
 	if (otype == HWLOC_OBJ_TYPE_NONE)
+	  continue;
+	if (!hwloc_filter_check_keep_object_type(topology, otype))
 	  continue;
 
 	/* get the cache size */

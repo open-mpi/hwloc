@@ -684,18 +684,23 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	  /* Separate Instruction and Data caches */
 	  obj2->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
 	  hwloc_debug("Adding an L1d cache for core %d\n", i);
-	  hwloc_insert_object_by_cpuset(topology, obj2);
 
-	  obj3 = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
-	  obj3->cpuset = hwloc_bitmap_dup(obj->cpuset);
-	  obj3->attr->cache.size = _system_configuration.icache_size;
-	  obj3->attr->cache.associativity = _system_configuration.icache_asc;
-	  obj3->attr->cache.linesize = _system_configuration.icache_line;
-	  obj3->attr->cache.depth = 1;
-	  obj3->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
-	  hwloc_debug("Adding an L1i cache for core %d\n", i);
-	  hwloc_insert_object_by_cpuset(topology, obj3);
+	  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
+	    obj3 = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
+	    obj3->cpuset = hwloc_bitmap_dup(obj->cpuset);
+	    obj3->attr->cache.size = _system_configuration.icache_size;
+	    obj3->attr->cache.associativity = _system_configuration.icache_asc;
+	    obj3->attr->cache.linesize = _system_configuration.icache_line;
+	    obj3->attr->cache.depth = 1;
+	    obj3->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+	    hwloc_debug("Adding an L1i cache for core %d\n", i);
+	    hwloc_insert_object_by_cpuset(topology, obj3);
+	  }
 	}
+	if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE))
+	  hwloc_insert_object_by_cpuset(topology, obj2);
+	else
+	  hwloc_free_unlinked_object(obj2); /* FIXME: don't built at all, just build the cpuset in case l1/l1i needs it */
 	break;
       }
       default:
@@ -704,7 +709,10 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     hwloc_debug_2args_bitmap("%s %d has cpuset %s\n",
 	       hwloc_obj_type_string(type),
 	       i, obj->cpuset);
-    hwloc_insert_object_by_cpuset(topology, obj);
+    if (hwloc_filter_check_keep_object_type(topology, obj->type))
+      hwloc_insert_object_by_cpuset(topology, obj);
+    else
+      hwloc_free_unlinked_object(obj);
   }
 
   rs_free(rset);

@@ -642,7 +642,8 @@ hwloc_look_kstat(struct hwloc_topology *topology)
        * however. */
     }
 
-  if (look_chips) {
+  if (look_chips
+      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
     struct hwloc_obj *obj;
     unsigned j,k;
     hwloc_debug("%d Packages\n", Lpkg_num);
@@ -662,7 +663,8 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     hwloc_debug("%s", "\n");
   }
 
-  if (look_cores) {
+  if (look_cores
+      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
     struct hwloc_obj *obj;
     unsigned j,k;
     hwloc_debug("%d Cores\n", Lcore_num);
@@ -677,6 +679,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     }
     hwloc_debug("%s", "\n");
   }
+
   if (Lproc_num) {
     struct hwloc_obj *obj;
     unsigned j,k;

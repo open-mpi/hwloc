@@ -770,6 +770,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   unsigned i;
   struct hwloc_synthetic_level_data_s *curlevel = &data->level[level];
   hwloc_obj_type_t type = curlevel->type;
+  hwloc_bitmap_t set;
   unsigned os_index;
 
   /* pre-hooks */
@@ -812,26 +813,31 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   else if (hwloc_obj_type_is_cache(type) || type == HWLOC_OBJ_GROUP)
     /* don't enforce useless os_indexes for Caches and Groups */
     os_index = -1;
-  obj = hwloc_alloc_setup_object(type, os_index);
-  obj->cpuset = hwloc_bitmap_alloc();
 
+  set = hwloc_bitmap_alloc();
   if (!curlevel->arity) {
-    hwloc_bitmap_set(obj->cpuset, os_index);
+    hwloc_bitmap_set(set, os_index);
   } else {
     for (i = 0; i < curlevel->arity; i++)
-      hwloc__look_synthetic(topology, data, level + 1, obj->cpuset);
+      hwloc__look_synthetic(topology, data, level + 1, set);
   }
 
-  if (type == HWLOC_OBJ_NUMANODE) {
-    obj->nodeset = hwloc_bitmap_alloc();
-    hwloc_bitmap_set(obj->nodeset, os_index);
-  }
+  hwloc_bitmap_or(parent_cpuset, parent_cpuset, set);
 
-  hwloc_bitmap_or(parent_cpuset, parent_cpuset, obj->cpuset);
+  if (hwloc_filter_check_keep_object_type(topology, type)) {
+    obj = hwloc_alloc_setup_object(type, os_index);
+    obj->cpuset = set;
 
-  hwloc_synthetic__post_look_hooks(curlevel, obj);
+    if (type == HWLOC_OBJ_NUMANODE) {
+      obj->nodeset = hwloc_bitmap_alloc();
+      hwloc_bitmap_set(obj->nodeset, os_index);
+    }
 
-  hwloc_insert_object_by_cpuset(topology, obj);
+    hwloc_synthetic__post_look_hooks(curlevel, obj);
+
+    hwloc_insert_object_by_cpuset(topology, obj);
+  } else
+    hwloc_bitmap_free(set);
 }
 
 static int
