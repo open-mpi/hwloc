@@ -3508,7 +3508,7 @@ look_cpuinfo(struct hwloc_topology *topology,
    * provide bogus information. We should rather drop it. */
   missingpkg=0;
   for(j=0; j<numprocs; j++)
-    if (Lprocs[i].Ppkg == -1) {
+    if (Lprocs[j].Ppkg == -1) {
       missingpkg=1;
       break;
     }
@@ -3552,7 +3552,7 @@ look_cpuinfo(struct hwloc_topology *topology,
    * provide bogus information. We should rather drop it. */
   missingcore=0;
   for(j=0; j<numprocs; j++)
-    if (Lprocs[i].Pcore == -1) {
+    if (Lprocs[j].Pcore == -1) {
       missingcore=1;
       break;
     }
