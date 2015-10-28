@@ -177,6 +177,9 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
     /* nothing to show */
     break;
   }
+
+  printf("%s symmetric subtree = %u\n", prefix, obj->symmetric_subtree);
+
   for(i=0; i<obj->infos_count; i++) {
     printf("%s info %s = %s\n", prefix, obj->infos[i].name, obj->infos[i].value);
   }
