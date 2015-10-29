@@ -602,6 +602,7 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
 }
 
 static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
+static void propagate_total_memory(hwloc_obj_t obj);
 static int hwloc_topology_reconnect(hwloc_topology_t topology, unsigned long flags __hwloc_attribute_unused);
 
 int
@@ -1245,6 +1246,7 @@ hwloc_obj_t
 hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
   hwloc_obj_t res;
+  int has_memory = (obj->memory.local_memory != 0);
 
   if (!topology->is_loaded) {
     /* this could actually work, we would just need to disable connect_children/levels below */
@@ -1281,6 +1283,10 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     return NULL;
 
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
+
+  if (has_memory)
+    propagate_total_memory(topology->levels[0][0]);
+
   return obj;
 }
 
