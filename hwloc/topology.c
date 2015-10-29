@@ -3200,6 +3200,8 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   if (hwloc_topology_reconnect(topology, 0) < 0)
     goto out;
 
+  hwloc_filter_levels_keep_structure(topology);
+  hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   propagate_total_memory(topology->levels[0][0]);
   hwloc_distances_restrict(topology, flags);
   hwloc_distances_finalize_os(topology);
