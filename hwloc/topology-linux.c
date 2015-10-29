@@ -4021,7 +4021,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
     goto nopci;
   tmp++;
 
-  /* iterate through busid to find the last on" (previous ones are bridges) */
+  /* iterate through busid to find the last one (previous ones are bridges) */
   foundpci = 0;
  nextpci:
   if (sscanf(tmp+1, "%x:%x:%x.%x", &_pcidomain, &_pcibus, &_pcidev, &_pcifunc) == 4) {

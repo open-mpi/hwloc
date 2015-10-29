@@ -2802,7 +2802,7 @@ next_noncpubackend:
   return 0;
 }
 
-/* To be before discovery is actually launched,
+/* To be called before discovery is actually launched,
  * Resets everything in case a previous load initialized some stuff.
  */
 void
