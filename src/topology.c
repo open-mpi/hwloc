@@ -847,9 +847,7 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
 		      &new->infos, &new->infos_count);
   }
 
-  if (new->name) {
-    if (old->name)
-      free(old->name);
+  if (new->name && !old->name) {
     old->name = new->name;
     new->name = NULL;
   }
@@ -858,21 +856,17 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
 
   switch(new->type) {
   case HWLOC_OBJ_NUMANODE:
-    /* Do not check these, it may change between calls */
-    merge_sizes(new, old, memory.local_memory);
-    merge_sizes(new, old, memory.total_memory);
-    /* if both newects have a page_types array, just keep the biggest one for now */
-    if (new->memory.page_types_len && old->memory.page_types_len)
-      hwloc_debug("%s", "merging page_types by keeping the biggest one only\n");
-    if (new->memory.page_types_len < old->memory.page_types_len) {
-      free(new->memory.page_types);
-    } else {
-      free(old->memory.page_types);
+    if (new->memory.local_memory && !old->memory.local_memory) {
+      /* no memory in old, use new memory */
+      old->memory.local_memory = new->memory.local_memory;
+      if (old->memory.page_types)
+	free(old->memory.page_types);
       old->memory.page_types_len = new->memory.page_types_len;
       old->memory.page_types = new->memory.page_types;
       new->memory.page_types = NULL;
       new->memory.page_types_len = 0;
     }
+    /* old->memory.total_memory will be updated by propagate_total_memory() */
     break;
   case HWLOC_OBJ_CACHE:
     merge_sizes(new, old, attr->cache.size);
