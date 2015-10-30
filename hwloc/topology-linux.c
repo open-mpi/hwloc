@@ -2393,6 +2393,8 @@ try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
     return;
 
   otype = hwloc_cache_type_by_depth_type(level, ctype);
+  if (otype == HWLOC_OBJ_TYPE_NONE)
+    return;
   c = hwloc_alloc_setup_object(otype, -1);
   c->attr->cache.depth = level;
   c->attr->cache.linesize = cache_line_size;
@@ -2982,6 +2984,7 @@ package_done:
 	unsigned sets = 0, lines_per_tag = 1;
 	int depth; /* 0 for L1, .... */
 	hwloc_obj_cache_type_t ctype = HWLOC_OBJ_CACHE_UNIFIED; /* default */
+	hwloc_obj_type_t otype;
 
 	/* get the cache level depth */
 	sprintf(mappath, "%s/cpu%d/cache/index%d/level", path, i, j);
@@ -3015,6 +3018,10 @@ package_done:
 	    continue;
 	  }
 	} else
+	  continue;
+
+	otype = hwloc_cache_type_by_depth_type(depth+1, ctype);
+	if (otype == HWLOC_OBJ_TYPE_NONE)
 	  continue;
 
 	/* get the cache size */
@@ -3070,7 +3077,6 @@ package_done:
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
-	    hwloc_obj_type_t otype = hwloc_cache_type_by_depth_type(depth+1, ctype);
             struct hwloc_obj *cache = hwloc_alloc_setup_object(otype, -1);
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;

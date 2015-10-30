@@ -863,10 +863,15 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_INSTRUCTION == HWLOC_OBJ_CACHE_DATA+1);
       for (type = HWLOC_OBJ_CACHE_UNIFIED; type <= HWLOC_OBJ_CACHE_INSTRUCTION; type++) {
 	/* Look for caches of that type at level level */
-	hwloc_obj_type_t otype = hwloc_cache_type_by_depth_type(level, type);
-	hwloc_bitmap_t caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
+	hwloc_obj_type_t otype;
+	hwloc_bitmap_t caches_cpuset;
 	hwloc_bitmap_t cache_cpuset;
 	hwloc_obj_t cache;
+
+	otype = hwloc_cache_type_by_depth_type(level, type);
+	if (otype == HWLOC_OBJ_TYPE_NONE)
+	  continue;
+	caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
 
 	while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
 	  unsigned packageid = infos[i].packageid;
