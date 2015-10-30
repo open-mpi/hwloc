@@ -9,6 +9,18 @@
 #include <private/private.h>
 #include <private/debug.h>
 
+void
+hwloc_pci_discovery_init(struct hwloc_topology *topology)
+{
+  topology->pci_nonzero_domains = 0;
+  topology->need_pci_belowroot_apply_locality = 0;
+}
+
+void
+hwloc_pci_discovery_exit(struct hwloc_topology *topology __hwloc_attribute_unused)
+{
+}
+
 #ifdef HWLOC_DEBUG
 static void
 hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,

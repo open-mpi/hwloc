@@ -2818,8 +2818,6 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->first_osdev = topology->last_osdev = NULL;
   topology->misc_level = NULL;
   topology->first_misc = topology->last_misc = NULL;
-  topology->pci_nonzero_domains = 0;
-  topology->need_pci_belowroot_apply_locality = 0;
 
   /* Create the actual machine object, but don't touch its attributes yet
    * since the OS backend may still change the object into something else
@@ -3104,10 +3102,14 @@ hwloc_topology_load (struct hwloc_topology *topology)
    */
   hwloc_distances_set_from_env(topology);
 
+  hwloc_pci_discovery_init(topology);
+
   /* actual topology discovery */
   err = hwloc_discover(topology);
   if (err < 0)
     goto out;
+
+  hwloc_pci_discovery_exit(topology);
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
@@ -3118,6 +3120,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   return 0;
 
  out:
+  hwloc_pci_discovery_exit(topology);
   hwloc_topology_clear(topology);
   hwloc_distances_destroy(topology);
   hwloc_topology_setup_defaults(topology);
