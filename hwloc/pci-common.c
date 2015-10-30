@@ -144,14 +144,18 @@ hwloc_pci_add_object(struct hwloc_obj *parent, struct hwloc_obj **parent_io_firs
 	childp = &new->io_first_child;
 	curp = &new->next_sibling;
 	while (*curp) {
-	  if (hwloc_pci_compare_busids(new, *curp) == HWLOC_PCI_BUSID_LOWER) {
-	    /* this sibling remains under root, after new */
-	    curp = &(*curp)->next_sibling;
-	    /* even if the list is sorted by busid, we can't break because the current bridge creates a bus that may be higher. some object may have to go there */
+	  hwloc_obj_t cur = *curp;
+	  if (hwloc_pci_compare_busids(new, cur) == HWLOC_PCI_BUSID_LOWER) {
+	    /* this sibling remains under root, after new. */
+	    if (cur->attr->pcidev.domain > new->attr->pcidev.domain
+		|| cur->attr->pcidev.bus > new->attr->bridge.downstream.pci.subordinate_bus)
+	      /* this sibling is even above new's subordinate bus, no other sibling could go below new */
+	      return;
+	    curp = &cur->next_sibling;
 	  } else {
 	    /* this sibling goes under new */
-	    *childp = *curp;
-	    *curp = (*curp)->next_sibling;
+	    *childp = cur;
+	    *curp = cur->next_sibling;
 	    (*childp)->parent = new;
 	    (*childp)->next_sibling = NULL;
 	    childp = &(*childp)->next_sibling;
