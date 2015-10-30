@@ -156,7 +156,7 @@ static void cpuid_or_from_dump(unsigned *eax, unsigned *ebx, unsigned *ecx, unsi
 #define has_x2apic(features) ((features)[4] & (1 << 21))
 
 struct cacheinfo {
-  unsigned type;
+  hwloc_obj_cache_type_t type;
   unsigned level;
   unsigned nbthreads_sharing;
 
@@ -196,7 +196,7 @@ enum cpuid_type {
   unknown
 };
 
-static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, unsigned cpuid)
+static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cache_type_t type, unsigned cpuid)
 {
   struct cacheinfo *cache;
   unsigned cachenum;
@@ -381,12 +381,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     hwloc_debug("x2APIC %08x, %d nodes, node %d, %d cores in unit %d\n", apic_id, nodes_per_proc, node_id, cores_per_unit, unit_id);
 
     for (cachenum = 0; ; cachenum++) {
-      unsigned type;
       eax = 0x8000001d;
       ecx = cachenum;
       cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-      type = eax & 0x1f;
-      if (type == 0)
+      if ((eax & 0x1f) == 0)
 	break;
       infos->numcaches++;
     }
@@ -395,17 +393,18 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
     for (cachenum = 0; ; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
-      unsigned type;
       eax = 0x8000001d;
       ecx = cachenum;
       cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
 
-      type = eax & 0x1f;
-
-      if (type == 0)
+      if ((eax & 0x1f) == 0)
 	break;
+      switch (eax & 0x1f) {
+      case 1: cache->type = HWLOC_OBJ_CACHE_DATA; break;
+      case 2: cache->type = HWLOC_OBJ_CACHE_INSTRUCTION; break;
+      default: cache->type = HWLOC_OBJ_CACHE_UNIFIED; break;
+      }
 
-      cache->type = type;
       cache->level = (eax >> 5) & 0x7;
       /* Note: actually number of cores */
       cache->nbthreads_sharing = ((eax >> 14) &  0xfff) + 1;
@@ -422,7 +421,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
 
-      hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
+      hwloc_debug("cache %u L%u%c t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
+		  cachenum, cache->level,
+		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
+		  cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
       cache++;
     }
@@ -434,8 +436,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000005) {
       eax = 0x80000005;
       cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-      fill_amd_cache(infos, 1, 1, ecx); /* L1d */
-      fill_amd_cache(infos, 1, 2, edx); /* L1i */
+      fill_amd_cache(infos, 1, HWLOC_OBJ_CACHE_DATA, ecx); /* L1d */
+      fill_amd_cache(infos, 1, HWLOC_OBJ_CACHE_INSTRUCTION, edx); /* L1i */
     }
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000006) {
       eax = 0x80000006;
@@ -445,9 +447,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	 * Could be useful if some Intels (at least before Core micro-architecture)
 	 * support this leaf without leaf 0x4.
 	 */
-	fill_amd_cache(infos, 2, 3, ecx); /* L2u */
+	fill_amd_cache(infos, 2, HWLOC_OBJ_CACHE_UNIFIED, ecx); /* L2u */
       if (edx & 0xf000)
-	fill_amd_cache(infos, 3, 3, edx); /* L3u */
+	fill_amd_cache(infos, 3, HWLOC_OBJ_CACHE_UNIFIED, edx); /* L3u */
     }
   }
 
@@ -456,16 +458,12 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    */
   if (cpuid_type != amd && highest_cpuid >= 0x04) {
     for (cachenum = 0; ; cachenum++) {
-      unsigned type;
       eax = 0x04;
       ecx = cachenum;
       cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
 
-      type = eax & 0x1f;
-
-      hwloc_debug("cache %u type %u\n", cachenum, type);
-
-      if (type == 0)
+      hwloc_debug("cache %u type %u\n", cachenum, eax & 0x1f);
+      if ((eax & 0x1f) == 0)
 	break;
       infos->numcaches++;
 
@@ -484,17 +482,18 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
     for (cachenum = 0; ; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
-      unsigned type;
       eax = 0x04;
       ecx = cachenum;
       cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
 
-      type = eax & 0x1f;
-
-      if (type == 0)
+      if ((eax & 0x1f) == 0)
 	break;
+      switch (eax & 0x1f) {
+      case 1: cache->type = HWLOC_OBJ_CACHE_DATA; break;
+      case 2: cache->type = HWLOC_OBJ_CACHE_INSTRUCTION; break;
+      default: cache->type = HWLOC_OBJ_CACHE_UNIFIED; break;
+      }
 
-      cache->type = type;
       cache->level = (eax >> 5) & 0x7;
       cache->nbthreads_sharing = ((eax >> 14) & 0xfff) + 1;
 
@@ -509,8 +508,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
 
-      hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
-
+      hwloc_debug("cache %u L%u%c t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
+		  cachenum, cache->level,
+		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
+		  cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
       cache++;
     }
   }
@@ -597,7 +598,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   unsigned nbprocs = data->nbprocs;
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
-  unsigned i, j, l, level, type;
+  unsigned i, j, l, level;
   unsigned nbpackages = 0;
   int one = -1;
   unsigned next_group_depth = topology->next_group_depth;
@@ -856,7 +857,10 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   /* Look for known types */
   if (fulldiscovery) while (level > 0) {
-    for (type = 1; type <= 3; type++) {
+    hwloc_obj_cache_type_t type;
+    HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_DATA == HWLOC_OBJ_CACHE_UNIFIED+1);
+    HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_INSTRUCTION == HWLOC_OBJ_CACHE_DATA+1);
+    for (type = HWLOC_OBJ_CACHE_UNIFIED; type <= HWLOC_OBJ_CACHE_INSTRUCTION; type++) {
       /* Look for caches of that type at level level */
       {
 	hwloc_bitmap_t caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
@@ -912,17 +916,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    cache->attr->cache.size = infos[i].cache[l].size;
 	    cache->attr->cache.linesize = infos[i].cache[l].linesize;
 	    cache->attr->cache.associativity = infos[i].cache[l].ways;
-	    switch (infos[i].cache[l].type) {
-	      case 1:
-		cache->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
-		break;
-	      case 2:
-		cache->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
-		break;
-	      case 3:
-		cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-		break;
-	    }
+	    cache->attr->cache.type = infos[i].cache[l].type;
 	    cache->cpuset = cache_cpuset;
 	    hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 		level, cacheid, cache_cpuset);
