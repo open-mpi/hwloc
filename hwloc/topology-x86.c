@@ -856,13 +856,14 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
         level = infos[i].cache[j].level;
 
   /* Look for known types */
-  if (fulldiscovery) while (level > 0) {
-    hwloc_obj_cache_type_t type;
-    HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_DATA == HWLOC_OBJ_CACHE_UNIFIED+1);
-    HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_INSTRUCTION == HWLOC_OBJ_CACHE_DATA+1);
-    for (type = HWLOC_OBJ_CACHE_UNIFIED; type <= HWLOC_OBJ_CACHE_INSTRUCTION; type++) {
-      /* Look for caches of that type at level level */
-      {
+  if (fulldiscovery)
+    while (level > 0) {
+      hwloc_obj_cache_type_t type;
+      HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_DATA == HWLOC_OBJ_CACHE_UNIFIED+1);
+      HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_INSTRUCTION == HWLOC_OBJ_CACHE_DATA+1);
+      for (type = HWLOC_OBJ_CACHE_UNIFIED; type <= HWLOC_OBJ_CACHE_INSTRUCTION; type++) {
+	/* Look for caches of that type at level level */
+	hwloc_obj_type_t otype = hwloc_cache_type_by_depth_type(level, type);
 	hwloc_bitmap_t caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
 	hwloc_bitmap_t cache_cpuset;
 	hwloc_obj_t cache;
@@ -891,7 +892,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	     * Works because we also compare packageid to identify siblings.
 	     */
 	    unsigned cacheid = (infos[i].apicid % infos[i].max_log_proc) / infos[i].cache[l].nbthreads_sharing;
-	    hwloc_obj_type_t otype;
 
 	    cache_cpuset = hwloc_bitmap_alloc();
 	    for (j = i; j < nbprocs; j++) {
@@ -910,7 +910,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		hwloc_bitmap_clr(caches_cpuset, j);
 	      }
 	    }
-	    otype = hwloc_cache_type_by_depth_type(level, infos[i].cache[l].type);
 	    cache = hwloc_alloc_setup_object(otype, -1);
 	    cache->attr->cache.depth = level;
 	    cache->attr->cache.size = infos[i].cache[l].size;
@@ -925,9 +924,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	}
 	hwloc_bitmap_free(caches_cpuset);
       }
+      level--;
     }
-    level--;
-  }
 
   for (i = 0; i < nbprocs; i++) {
     free(infos[i].cache);
