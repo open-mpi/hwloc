@@ -1684,7 +1684,7 @@ remove_unused_sets(hwloc_obj_t obj)
 }
 
 static void
-hwloc_filter_io_children(hwloc_topology_t topology, hwloc_obj_t root)
+hwloc__filter_bridges(hwloc_topology_t topology, hwloc_obj_t root, int depth)
 {
   hwloc_obj_t child, *pchild;
 
@@ -1693,7 +1693,7 @@ hwloc_filter_io_children(hwloc_topology_t topology, hwloc_obj_t root)
     enum hwloc_type_filter_e filter = topology->type_filter[child->type];
 
     /* recurse into grand-children */
-    hwloc_filter_io_children(topology, child);
+    hwloc__filter_bridges(topology, child, depth+1);
 
     if (child->type == HWLOC_OBJ_BRIDGE
 	&& filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
@@ -1701,7 +1701,20 @@ hwloc_filter_io_children(hwloc_topology_t topology, hwloc_obj_t root)
       unlink_and_free_single_object(pchild);
       topology->modified = 1;
     }
+    child->attr->bridge.depth = depth;
   }
+}
+
+static void
+hwloc_filter_bridges(hwloc_topology_t topology, hwloc_obj_t parent)
+{
+  hwloc_obj_t child = parent->first_child;
+  while (child) {
+    hwloc_filter_bridges(topology, child);
+    child = child->next_sibling;
+  }
+
+  hwloc__filter_bridges(topology, parent, 0);
 }
 
 void
@@ -1723,23 +1736,6 @@ hwloc__reorder_children(hwloc_obj_t parent)
     *prev = child;
   }
   /* No ordering to enforce for Misc children. */
-}
-
-/* Remove objects that are ignored in any case.
- * Does not handle KEEP_STRUCTURE flag
- */
-static void
-hwloc_filter_objects(hwloc_topology_t topology, hwloc_obj_t *pparent)
-{
-  hwloc_obj_t parent = *pparent, child, *pchild;
-
-  /* FIXME: always remove useless Groups */
-
-  for_each_child_safe(child, parent, pchild)
-    hwloc_filter_objects(topology, pchild);
-
-  /* FIXME: only bridges now! */
-  hwloc_filter_io_children(topology, parent);
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
@@ -1927,25 +1923,6 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
 	topology->type_depth[type] = HWLOC_TYPE_DEPTH_MULTIPLE;
     }
   }
-}
-
-static void
-hwloc_propagate_bridge_depth(hwloc_topology_t topology, hwloc_obj_t root, unsigned depth)
-{
-  hwloc_obj_t child;
-  for(child = root->first_child; child; child = child->next_sibling) {
-    assert(!depth); /* no normal children under I/O */
-    hwloc_propagate_bridge_depth(topology, child, 0);
-  }
-  for(child = root->io_first_child; child; child = child->next_sibling) {
-    if (child->type == HWLOC_OBJ_BRIDGE) {
-      child->attr->bridge.depth = depth;
-      hwloc_propagate_bridge_depth(topology, child, depth+1);
-    } else if (!hwloc_obj_type_is_io(child->type)) {
-      hwloc_propagate_bridge_depth(topology, child, 0);
-    }
-  }
-  /* No I/O under Misc children */
 }
 
 static void
@@ -2651,14 +2628,10 @@ next_noncpubackend:
   hwloc_debug("%s", "\nNow reconnecting\n");
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
-  /* FIXME merge with propagate memory and symmetric_subtree below */
-  hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
-
   /* Remove some stuff */
 
-  /* FIXME: merge these 2 steps? */
-  hwloc_debug("%s", "\nRemoving ignored objects\n");
-  hwloc_filter_objects(topology, &topology->levels[0][0]);
+  hwloc_debug("%s", "\nRemoving bridge objects if needed\n");
+  hwloc_filter_bridges(topology, topology->levels[0][0]);
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
