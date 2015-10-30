@@ -73,10 +73,12 @@ enum hwloc_pci_busid_comparison_e {
 static enum hwloc_pci_busid_comparison_e
 hwloc_pci_compare_busids(struct hwloc_obj *a, struct hwloc_obj *b)
 {
+#ifdef HWLOC_DEBUG
   if (a->type == HWLOC_OBJ_BRIDGE)
     assert(a->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI);
   if (b->type == HWLOC_OBJ_BRIDGE)
     assert(b->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI);
+#endif
 
   if (a->attr->pcidev.domain < b->attr->pcidev.domain)
     return HWLOC_PCI_BUSID_LOWER;
