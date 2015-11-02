@@ -581,6 +581,8 @@ extern "C" {
 
 /* private/private.h */
 
+#define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
+
 #define hwloc_os_distances_s HWLOC_NAME(os_distances_s)
 
 #define hwloc_xml_imported_distances_s HWLOC_NAME(xml_imported_distances_s)

@@ -96,6 +96,8 @@ Version 2.0.0
   + The old `libpci' component name from hwloc 1.6 is not supported anymore,
     only the `pci' name from hwloc 1.7 is now recognized.
   + The `linuxpci' component is now renamed into `linuxio'.
+  + The HWLOC_PCI_<domain>_<bus>_LOCALCPUS environment variables are superseded
+    with a single HWLOC_PCI_LOCALITY where bus ranges may be specified.
   + Add HWLOC_SYNTHETIC environment variable to enforce a synthetic topology
     as if hwloc_topology_set_synthetic() had been called.
   + HWLOC_COMPONENTS doesn't support xml or synthetic component attributes

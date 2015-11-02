@@ -71,6 +71,14 @@ struct hwloc_topology {
   int need_pci_belowroot_apply_locality;
   struct hwloc_backend *get_pci_busid_cpuset_backend;
 
+  int pci_has_forced_locality;
+  unsigned pci_forced_locality_nr;
+  struct hwloc_pci_forced_locality_s {
+    unsigned domain;
+    unsigned bus_first, bus_last;
+    hwloc_bitmap_t cpuset;
+  } * pci_forced_locality;
+
   struct hwloc_binding_hooks {
     int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
     int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);

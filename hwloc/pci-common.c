@@ -9,16 +9,137 @@
 #include <private/private.h>
 #include <private/debug.h>
 
+#include <fcntl.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <sys/stat.h>
+
+#ifdef HWLOC_WIN_SYS
+#include <io.h>
+#define open _open
+#define read _read
+#define close _close
+#endif
+
+static void
+hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
+				    const char *string /* must contain a ' ' */,
+				    unsigned *allocated)
+{
+  unsigned nr = topology->pci_forced_locality_nr;
+  unsigned domain, bus_first, bus_last, dummy;
+  hwloc_bitmap_t set;
+  char *tmp;
+
+  if (sscanf(string, "%x:%x-%x %x", &domain, &bus_first, &bus_last, &dummy) == 4) {
+    /* fine */
+  } else if (sscanf(string, "%x:%x %x", &domain, &bus_first, &dummy) == 3) {
+    bus_last = bus_last;
+  } else if (sscanf(string, "%x %x", &domain, &dummy) == 2) {
+    bus_first = 0;
+    bus_last = 255;
+  } else
+    return;
+
+  tmp = strchr(string, ' ');
+  if (!tmp)
+    return;
+  tmp++;
+
+  set = hwloc_bitmap_alloc();
+  hwloc_bitmap_sscanf(set, tmp);
+
+  if (!*allocated) {
+    *allocated = 1;
+    topology->pci_forced_locality = malloc(*allocated * sizeof(*topology->pci_forced_locality));
+  } else if (nr >= *allocated) {
+    topology->pci_forced_locality = realloc(topology->pci_forced_locality,
+					    2 * *allocated * sizeof(*topology->pci_forced_locality));
+    *allocated *= 2;
+  }
+
+  topology->pci_forced_locality[nr].domain = domain;
+  topology->pci_forced_locality[nr].bus_first = bus_first;
+  topology->pci_forced_locality[nr].bus_last = bus_last;
+  topology->pci_forced_locality[nr].cpuset = set;
+  topology->pci_forced_locality_nr++;
+}
+
+static void
+hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_env)
+{
+  char *env = strdup(_env);
+  unsigned allocated = 0;
+  char *tmp = env;
+
+  while (1) {
+    size_t len = strcspn(tmp, ";\r\n");
+    char *next = NULL;
+
+    if (tmp[len] != '\0') {
+      tmp[len] = '\0';
+      if (tmp[len+1] != '\0')
+	next = &tmp[len]+1;
+    }
+
+    hwloc_pci_forced_locality_parse_one(topology, tmp, &allocated);
+
+    if (next)
+      tmp = next;
+    else
+      break;
+  }
+
+  free(env);
+}
+
 void
 hwloc_pci_discovery_init(struct hwloc_topology *topology)
 {
+  char *env;
+
   topology->pci_nonzero_domains = 0;
   topology->need_pci_belowroot_apply_locality = 0;
+
+  topology->pci_has_forced_locality = 0;
+  topology->pci_forced_locality_nr = 0;
+  topology->pci_forced_locality = NULL;
+  env = getenv("HWLOC_PCI_LOCALITY");
+  if (env) {
+    int fd;
+
+    topology->pci_has_forced_locality = 1;
+
+    fd = open(env, O_RDONLY);
+    if (fd >= 0) {
+      struct stat st;
+      char *buffer;
+      fstat(fd, &st);
+      if (st.st_size <= 64*1024) { /* random limit large enough to store multiple cpusets for thousands of PUs */
+	buffer = malloc(st.st_size+1);
+	(void) read(fd, buffer, st.st_size);
+	buffer[st.st_size] = '\0';
+	hwloc_pci_forced_locality_parse(topology, buffer);
+	free(buffer);
+      } else {
+	fprintf(stderr, "Ignoring HWLOC_PCI_LOCALITY file `%s' too large (%lu bytes)\n",
+		env, (unsigned long) st.st_size);
+      }
+      close(fd);
+    } else
+      hwloc_pci_forced_locality_parse(topology, env);
+  }
 }
 
 void
 hwloc_pci_discovery_exit(struct hwloc_topology *topology __hwloc_attribute_unused)
 {
+  unsigned i;
+  for(i=0; i<topology->pci_forced_locality_nr; i++)
+    hwloc_bitmap_free(topology->pci_forced_locality[i].cpuset);
+  if (topology->pci_forced_locality)
+    free(topology->pci_forced_locality);
 }
 
 #ifdef HWLOC_DEBUG
@@ -314,23 +435,52 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t parent;
-  const char *env;
   int forced = 0;
-  char envname[256];
+  int noquirks = 0;
+  unsigned i;
   int err;
 
-  /* override the cpuset with the environment if given */
-  snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS",
-	   busid->domain, busid->bus);
-  env = getenv(envname);
-  if (env)
-    /* if env exists but is empty, don't let quirks change what the OS reports */
-    forced = 1;
-  if (env && *env) {
-    /* force the cpuset */
-    hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
-    hwloc_bitmap_sscanf(cpuset, env);
-  } else {
+  /* try to match a forced locality */
+  if (topology->pci_has_forced_locality) {
+    for(i=0; i<topology->pci_forced_locality_nr; i++) {
+      if (busid->domain == topology->pci_forced_locality[i].domain
+	  && busid->bus >= topology->pci_forced_locality[i].bus_first
+	  && busid->bus <= topology->pci_forced_locality[i].bus_last) {
+	hwloc_bitmap_copy(cpuset, topology->pci_forced_locality[i].cpuset);
+	forced = 1;
+	break;
+      }
+    }
+    /* if pci locality was forced, even empty, don't let quirks change what the OS reports */
+    noquirks = 1;
+  }
+
+  /* deprecated force locality variables */
+  if (!forced) {
+    const char *env;
+    char envname[256];
+    /* override the cpuset with the environment if given */
+    snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS",
+	     busid->domain, busid->bus);
+    env = getenv(envname);
+    if (env) {
+      static int warn = 0;
+      if (!topology->pci_forced_locality_nr && !warn) {
+	fprintf(stderr, "Environment variable %s is deprecated, please use HWLOC_PCI_LOCALITY instead.\n", env);
+	warn = 1;
+      }
+      if (*env) {
+	/* force the cpuset */
+	hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
+	hwloc_bitmap_sscanf(cpuset, env);
+	forced = 1;
+      }
+      /* if env exists, even empty, don't let quirks change what the OS reports */
+      noquirks = 1;
+    }
+  }
+
+  if (!forced) {
     /* get the cpuset by asking the OS backend. */
     struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
     if (backend)
@@ -346,7 +496,7 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
 
   parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
   if (parent) {
-    if (!forced)
+    if (!noquirks)
       /* We found a valid parent. Check that the OS didn't report invalid locality */
       parent = hwloc_pci_fixup_busid_parent(topology, busid, parent);
   } else {

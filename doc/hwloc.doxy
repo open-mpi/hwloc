@@ -904,14 +904,35 @@ following environment variables.
   </ul>
   </dd>
 
-<dt>HWLOC_PCI_&lt;domain&gt;_&lt;bus&gt;_LOCALCPUS=&lt;cpuset&gt;</dt>
-  <dd>changes the locality of I/O devices behind the specified PCI hostbridge.
+<dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
+<dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
+<dd>changes the locality of I/O devices behing the specified PCI buses.
   If no I/O locality information is available or if the BIOS reports
-  incorrect information, it is possible to move a I/O device tree (the
-  entire set of objects behind a host bridge) near a custom set of
-  processors.
-  <tt>domain</tt> and <tt>bus</tt> are the PCI domain and primary bus
-  of the corresponding host bridge.
+  incorrect information, it is possible to move a I/O device tree
+  (OS and/or PCI devices with optional bridges)
+  near a custom set of processors.
+  <br/>
+  Localities are given either inside the environment variable itself,
+  or in the pointed file.
+  They may be separated either by semi-colons or by line-breaks.
+  <br/>
+  Each locality contains a domain/bus specification (in hexadecimal numbers as usual)
+  followed by a whitespace and a cpuset:
+  <ul>
+  <li><tt>0001 &lt;cpuset&gt;</tt> specifies the locality of all buses in PCI domain 0000.</li>
+  <li><tt>0000:0f &lt;cpuset&gt;</tt> specifies only PCI bus 0f in domain 0000.</li>
+  <li><tt>0002:04-0a &lt;cpuset&gt;</tt> specifies a range of buses (from 04 to 0a) within domain 0002.</li>
+  </ul>
+  Domain/bus specifications should usually match entire hierarchies of buses
+  behind a bridge (including primary, secondary and subordinate buses).
+  For instance, if hostbridge 0000:00 contains other bridges creating buses 0000:01 to 0000:09,
+  the variable should be HWLOC_PCI_LOCALITY="0000:00-09 <cpuset>".
+  It supersedes the old HWLOC_PCI_0000_00_LOCALCPUS=&lt;cpuset&gt;
+  which only works when hostbridges exist in the topology.
+  <br/>
+  If the variable is defined to empty or invalid, no forced PCI locality is applied
+  but hwloc's internal automatic locality quirks are disabled, which means the exact
+  PCI locality reported by the platform is used.
   </dd>
 
 <dt>HWLOC_PLUGINS_PATH=/path/to/hwloc/plugins/:...</dt>
