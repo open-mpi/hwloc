@@ -238,9 +238,6 @@ test "x$hwloc_opencl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list 
 test "x$hwloc_have_cudart" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list CUDA"
 test "x$hwloc_nvml_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list NVML"
 test "x$hwloc_gl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list GL"
-# if anything but PCI, that anything will be useless
-test "x$hwloc_pciaccess_happy" != "xyes" && test "x$hwloc_linuxio_happy" != "xyes" \
- && test "x$hwloc_probeio_list" != "x" && hwloc_probeio_list="$hwloc_probeio_list (cannot work without PCI)"
 # if nothing, say "no"
 test "x$hwloc_probeio_list" = "x" && hwloc_probeio_list=" no"
 
