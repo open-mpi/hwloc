@@ -18,8 +18,12 @@
 #define mkdir(name, mode) _mkdir(name)
 #include <io.h>
 #define access _access
+#ifndef X_OK
 #define X_OK 00 /* meaningless */
+#endif
+#ifndef W_OK
 #define W_OK 02
+#endif
 #endif
 
 static void dump_one_cpuid(FILE *output, unsigned *regs, unsigned inregmask)
