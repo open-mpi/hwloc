@@ -713,29 +713,28 @@ EOF])
     # PCI support via libpciaccess.  NOTE: we do not support
     # libpci/pciutils because that library is GPL and is incompatible
     # with our BSD license.
-    hwloc_pci_happy=no
+    hwloc_pciaccess_happy=no
     if test "x$enable_io" != xno && test "x$enable_pci" != xno; then
-      hwloc_pci_happy=yes
-      HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [pciaccess.h], [:], [hwloc_pci_happy=no])
+      hwloc_pciaccess_happy=yes
+      HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [pciaccess.h], [:], [hwloc_pciaccess_happy=no])
 
       # Just for giggles, if we didn't find a pciaccess pkg-config,
       # just try looking for its header file and library.
-      AS_IF([test "$hwloc_pci_happy" != "yes"],
+      AS_IF([test "$hwloc_pciaccess_happy" != "yes"],
          [AC_CHECK_HEADER([pciaccess.h],
               [AC_CHECK_LIB([pciaccess], [pci_slot_match_iterator_create],
-                   [hwloc_pci_happy=yes
+                   [hwloc_pciaccess_happy=yes
                     HWLOC_PCIACCESS_LIBS="-lpciaccess"])
               ])
          ])
 
-      AS_IF([test "$hwloc_pci_happy" = "yes"],
+      AS_IF([test "$hwloc_pciaccess_happy" = "yes"],
          [HWLOC_PCIACCESS_REQUIRES=pciaccess
-          hwloc_pci_lib=pciaccess
           hwloc_components="$hwloc_components pci"
           hwloc_pci_component_maybeplugin=1])
     fi
     # If we asked for pci support but couldn't deliver, fail
-    AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no"],
+    AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pciaccess_happy" = "no"],
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
            AC_MSG_WARN([find appropriate support])
            AC_MSG_ERROR([Cannot continue])])
@@ -1178,7 +1177,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 		       [test "x$hwloc_have_cudart" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBXML2], [test "$hwloc_libxml2_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "$hwloc_cairo_happy" = "yes"])
-        AM_CONDITIONAL([HWLOC_HAVE_PCI], [test "$hwloc_pci_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_PCIACCESS], [test "$hwloc_pciaccess_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_OPENCL], [test "$hwloc_opencl_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_SET_MEMPOLICY], [test "x$enable_set_mempolicy" != "xno"])
