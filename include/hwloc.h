@@ -2120,7 +2120,7 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  *
  * \return \c NULL on error.
  *
- * \return \c NULL if Misc objects are filtered-out of the topology (::HWLOC_TYPE_FILTERED_KEEP_NONE).
+ * \return \c NULL if Misc objects are filtered-out of the topology (::HWLOC_TYPE_FILTER_KEEP_NONE).
  *
  * \note If \p name contains some non-printable characters, they will
  * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
@@ -2166,7 +2166,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  *
  * \return \c NULL if the insertion failed because of conflicting sets in topology tree.
  *
- * \return \c NULL if Group objects are filtered-out of the topology (::HWLOC_TYPE_FILTERED_KEEP_NONE).
+ * \return \c NULL if Group objects are filtered-out of the topology (::HWLOC_TYPE_FILTER_KEEP_NONE).
  *
  * \return \c NULL if the object was discarded because no set was initialized in the Group
  * before insert, or all of them were empty.
