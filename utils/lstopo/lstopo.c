@@ -492,7 +492,7 @@ main (int argc, char *argv[])
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--filter")) {
-	hwloc_obj_type_t type;
+	hwloc_obj_type_t type = HWLOC_OBJ_TYPE_NONE;
 	char *colon;
 	enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_ALL;
 	int all = 0;
