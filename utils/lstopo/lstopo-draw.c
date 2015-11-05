@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -645,6 +645,9 @@ lstopo_set_object_color(struct draw_methods *methods,
 static void
 pci_device_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned textwidth = gridsize;
   unsigned textheight = (fontsize ? fontsize + gridsize : 0);
   unsigned myheight = textheight;
@@ -708,6 +711,9 @@ pci_device_draw(hwloc_topology_t topology, struct draw_methods *methods, int log
 static void
 os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_methods *methods, int logical __hwloc_attribute_unused, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned textwidth = gridsize;
   unsigned totheight = gridsize;
   unsigned totwidth = gridsize;
@@ -825,6 +831,9 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
 static void
 bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;
   unsigned myheight = 0;
   /* Room for square, left link and speed */
@@ -890,6 +899,8 @@ static void
 pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned textwidth = gridsize;
   unsigned mywidth = 0, totwidth;
@@ -936,6 +947,9 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
 static void
 cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned myheight = gridsize + (fontsize ? (fontsize + gridsize) : 0) + gridsize, totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
@@ -970,6 +984,9 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 static void
 core_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
@@ -1001,6 +1018,9 @@ core_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 static void
 package_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
@@ -1032,6 +1052,9 @@ package_draw(hwloc_topology_t topology, struct draw_methods *methods, int logica
 static void
 node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   /* Reserve room for the heading memory box and separator */
   unsigned myheight = (fontsize ? (gridsize + fontsize) : 0) + gridsize + gridsize;
   /* Currently filled height */
@@ -1078,6 +1101,9 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 static void
 machine_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
@@ -1150,6 +1176,9 @@ machine_draw(hwloc_topology_t topology, struct draw_methods *methods, int logica
 static void
 system_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
@@ -1188,6 +1217,9 @@ system_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
 static void
 group_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
@@ -1226,6 +1258,9 @@ group_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 static void
 misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
@@ -1258,6 +1293,8 @@ static void
 fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int legend, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
   struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight, offset, i;
   time_t t;
   char text[128];
@@ -1380,6 +1417,8 @@ output_draw_start(struct lstopo_output *output)
 static void
 output_compute_pu_min_textwidth(struct lstopo_output *output)
 {
+  unsigned gridsize = output->gridsize;
+  unsigned fontsize = output->fontsize;
   char text[64];
   int n;
   hwloc_topology_t topology = output->topology;

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -44,8 +44,6 @@ int lstopo_ignore_pus = 0;
 int lstopo_collapse = 1;
 unsigned long lstopo_export_synthetic_flags = 0;
 
-unsigned int fontsize = 10;
-unsigned int gridsize = 10;
 enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX];
 
 static unsigned int top = 0;
@@ -442,6 +440,9 @@ main (int argc, char *argv[])
   loutput.legend_append = NULL;
   loutput.legend_append_nr = 0;
 
+  loutput.fontsize = 10;
+  loutput.gridsize = 10;
+
   for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
     force_orient[i] = LSTOPO_ORIENT_NONE;
   force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;
@@ -619,13 +620,13 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--fontsize")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	fontsize = atoi(argv[1]);
+	loutput.fontsize = atoi(argv[1]);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--gridsize")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	gridsize = atoi(argv[1]);
+	loutput.gridsize = atoi(argv[1]);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-legend")) {

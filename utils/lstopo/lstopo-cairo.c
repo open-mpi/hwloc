@@ -148,6 +148,7 @@ topo_cairo_write(void *closure, const unsigned char *data, unsigned int length)
 static void
 topo_cairo_paint(struct lstopo_cairo_output *coutput)
 {
+  unsigned fontsize = coutput->loutput.fontsize;
   cairo_surface_t *cs = coutput->surface;
   cairo_t *c = cairo_create(cs);
   coutput->context = c;
@@ -251,8 +252,8 @@ x11_init(void *_disp)
   disp->screen_height = screen_height;
   disp->width = coutput->max_x;
   disp->height = coutput->max_y;
-  disp->orig_fontsize = fontsize;
-  disp->orig_gridsize = gridsize;
+  disp->orig_fontsize = coutput->loutput.fontsize;
+  disp->orig_gridsize = coutput->loutput.gridsize;
   disp->x = 0;
   disp->y = 0;
   disp->scale = disp->last_scale = 1.0f;
@@ -299,8 +300,8 @@ move_x11(struct lstopo_x11_output *disp)
     disp->last_screen_width = disp->screen_width;
     disp->last_screen_height = disp->screen_height;
     disp->last_scale = disp->scale;
-    fontsize = disp->orig_fontsize * disp->scale;
-    gridsize = disp->orig_gridsize * disp->scale;
+    disp->coutput.loutput.fontsize = disp->orig_fontsize * disp->scale;
+    disp->coutput.loutput.gridsize = disp->orig_gridsize * disp->scale;
 
     x11_destroy(disp);
 

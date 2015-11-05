@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -334,6 +334,8 @@ static void
 ascii_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned width, unsigned y1, unsigned height)
 {
   struct lstopo_ascii_output *disp = output;
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
   unsigned i, j;
   unsigned x2, y2;
   x1 /= (gridsize/2);
@@ -384,6 +386,8 @@ static void
 ascii_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct lstopo_ascii_output *disp = output;
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
   unsigned i, j, z;
   x1 /= (gridsize/2);
   y1 /= gridsize;
@@ -442,6 +446,8 @@ static void
 ascii_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct lstopo_ascii_output *disp = output;
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
 
   if (!disp->drawing)
     return;
@@ -467,6 +473,8 @@ ascii_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused,
 void
 ascii_textsize(void *output __hwloc_attribute_unused, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned fontsize __hwloc_attribute_unused, unsigned *width)
 {
+  struct lstopo_output *loutput = output;
+  unsigned gridsize = loutput->gridsize;
   *width = textlength*(gridsize/2);
 }
 

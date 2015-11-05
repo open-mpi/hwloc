@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -104,7 +104,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     case WM_PAINT: {
       HFONT font;
       BeginPaint(hwnd, &the_output.ps);
-      font = CreateFont(fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
+      font = CreateFont(the_output.loutput.fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
       SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
       windows_box(&the_output, 0xff, 0xff, 0xff, 0, 0, win_width, 0, win_height);
       the_output.max_x = 0;
@@ -225,8 +225,8 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       x_delta = 0;
     if (y_delta < 0)
       y_delta = 0;
-    fontsize = (unsigned)(the_fontsize * the_scale);
-    gridsize = (unsigned)(the_gridsize * the_scale);
+    the_output.loutput.fontsize = (unsigned)(the_fontsize * the_scale);
+    the_output.loutput.gridsize = (unsigned)(the_gridsize * the_scale);
     RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
   }
   return DefWindowProc(hwnd, message, wparam, lparam);
@@ -262,7 +262,7 @@ windows_init(void *output)
 			      CW_USEDEFAULT, CW_USEDEFAULT,
 			      10, 10, NULL, NULL, NULL, NULL);
   BeginPaint(faketoplevel, &woutput->ps);
-  font = CreateFont(fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
+  font = CreateFont(woutput->loutput.fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
   SelectObject(woutput->ps.hdc, (HGDIOBJ) font);
   output_draw(&woutput->loutput);
   DeleteObject(font);
@@ -293,8 +293,8 @@ windows_init(void *output)
 
   the_scale = 1.0f;
 
-  the_fontsize = fontsize;
-  the_gridsize = gridsize;
+  the_fontsize = woutput->loutput.fontsize;
+  the_gridsize = woutput->loutput.gridsize;
 
   /* and display the window */
   ShowWindow(toplevel, SW_SHOWDEFAULT);

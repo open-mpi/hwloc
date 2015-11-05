@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2015 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -25,7 +25,6 @@ extern int lstopo_pid_number;
 extern hwloc_pid_t lstopo_pid;
 
 /* options for draw */
-extern unsigned int gridsize, fontsize;
 extern enum lstopo_orient_e force_orient[]; /* orientation of children within an object of the given type */
 
 /* options for text */
@@ -58,6 +57,7 @@ struct lstopo_output {
   unsigned legend_append_nr;
 
   /* draw config */
+  unsigned int gridsize, fontsize;
   struct draw_methods *methods;
   unsigned min_pu_textwidth;
 };
