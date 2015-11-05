@@ -1290,18 +1290,51 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 }
 
 static void
-fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int legend, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
+output_compute_pu_min_textwidth(struct lstopo_output *output)
 {
-  struct lstopo_output *loutput = output;
+  unsigned gridsize = output->gridsize;
+  unsigned fontsize = output->fontsize;
+  char text[64];
+  int n;
+  hwloc_topology_t topology = output->topology;
+  hwloc_obj_t lastpu;
+
+  if (!output->methods->textsize) {
+    output->min_pu_textwidth = 0;
+    return;
+  }
+
+  if (output->logical) {
+    unsigned depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
+    lastpu = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth)-1);
+  } else {
+    unsigned lastidx = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
+    lastpu = hwloc_get_pu_obj_by_os_index(topology, lastidx);
+  }
+
+  n = lstopo_obj_snprintf(text, sizeof(text), lastpu, output->logical);
+  output->min_pu_textwidth = get_textwidth(output, output->methods, text, n, fontsize, gridsize);
+}
+
+void
+output_draw(struct lstopo_output *loutput)
+{
+  hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
+  int logical = loutput->logical;
+  int legend = loutput->legend;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  unsigned depth = 100;
   unsigned totwidth, totheight, offset, i;
   time_t t;
   char text[128];
   char hostname[128] = "";
   unsigned long hostname_size = sizeof(hostname);
 
-  system_draw(topology, methods, logical, level, output, depth, x, &totwidth, y, &totheight);
+  output_compute_pu_min_textwidth(loutput);
+
+  system_draw(topology, methods, logical, hwloc_get_root_obj(topology), loutput, depth, 0, &totwidth, 0, &totheight);
 
   if (totwidth < 20*fontsize)
     totwidth = 20*fontsize;
@@ -1318,17 +1351,17 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
     }
     if (*hostname) {
       snprintf(text, sizeof(text), "Host: %s", hostname);
-      methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(3+loutput->legend_append_nr));
-      methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
+      methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(3+loutput->legend_append_nr));
+      methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
       offset = gridsize + fontsize;
     } else {
-      methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(2+loutput->legend_append_nr));
+      methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(2+loutput->legend_append_nr));
       offset = 0;
     }
 
     /* Display whether we're showing physical or logical IDs */
     snprintf(text, sizeof(text), "Indexes: %s", logical ? "logical" : "physical");
-    methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset, text);
+    methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset, text);
 
     /* Display timestamp */
     t = time(NULL);
@@ -1350,11 +1383,11 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
       snprintf(text, sizeof(text), "Date: %s", date);
     }
 #endif /* HAVE_STRFTIME */
-    methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset + fontsize + gridsize, text);
+    methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset + fontsize + gridsize, text);
 
     offset = totheight + gridsize + offset + (fontsize + gridsize) * 2;
     for(i=0; i<loutput->legend_append_nr; i++) {
-      methods->text(output, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
+      methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
       offset += fontsize + gridsize;
     }
   }
@@ -1412,40 +1445,6 @@ output_draw_start(struct lstopo_output *output)
   methods->declare_color(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR);
   methods->declare_color(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR);
   methods->declare_color(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR);
-}
-
-static void
-output_compute_pu_min_textwidth(struct lstopo_output *output)
-{
-  unsigned gridsize = output->gridsize;
-  unsigned fontsize = output->fontsize;
-  char text[64];
-  int n;
-  hwloc_topology_t topology = output->topology;
-  hwloc_obj_t lastpu;
-
-  if (!output->methods->textsize) {
-    output->min_pu_textwidth = 0;
-    return;
-  }
-
-  if (output->logical) {
-    unsigned depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
-    lastpu = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth)-1);
-  } else {
-    unsigned lastidx = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
-    lastpu = hwloc_get_pu_obj_by_os_index(topology, lastidx);
-  }
-
-  n = lstopo_obj_snprintf(text, sizeof(text), lastpu, output->logical);
-  output->min_pu_textwidth = get_textwidth(output, output->methods, text, n, fontsize, gridsize);
-}
-
-void
-output_draw(struct lstopo_output *output)
-{
-  output_compute_pu_min_textwidth(output);
-  fig(output->topology, output->methods, output->logical, output->legend, hwloc_get_root_obj(output->topology), output, 100, 0, 0);
 }
 
 static void
