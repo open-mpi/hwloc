@@ -25,8 +25,6 @@ extern int lstopo_pid_number;
 extern hwloc_pid_t lstopo_pid;
 
 /* options for draw */
-extern char ** lstopo_append_legends;
-extern unsigned lstopo_append_legends_nr;
 extern unsigned int gridsize, fontsize;
 extern enum lstopo_orient_e force_orient[]; /* orientation of children within an object of the given type */
 
@@ -44,12 +42,22 @@ struct draw_methods;
 
 /* if embedded in backend-specific output structure, must be at the beginning */
 struct lstopo_output {
-  FILE *file;
   hwloc_topology_t topology;
-  int logical;
-  int legend;
+
+  /* file config */
+  FILE *file;
   int overwrite;
+
+  /* misc config */
+  int logical;
   int verbose_mode;
+
+  /* legend */
+  int legend;
+  char ** legend_append;
+  unsigned legend_append_nr;
+
+  /* draw config */
   struct draw_methods *methods;
   unsigned min_pu_textwidth;
 };

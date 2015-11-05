@@ -1257,6 +1257,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 static void
 fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int legend, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
+  struct lstopo_output *loutput = output;
   unsigned totwidth, totheight, offset, i;
   time_t t;
   char text[128];
@@ -1280,11 +1281,11 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
     }
     if (*hostname) {
       snprintf(text, sizeof(text), "Host: %s", hostname);
-      methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(3+lstopo_append_legends_nr));
+      methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(3+loutput->legend_append_nr));
       methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
       offset = gridsize + fontsize;
     } else {
-      methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(2+lstopo_append_legends_nr));
+      methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(2+loutput->legend_append_nr));
       offset = 0;
     }
 
@@ -1315,8 +1316,8 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
     methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset + fontsize + gridsize, text);
 
     offset = totheight + gridsize + offset + (fontsize + gridsize) * 2;
-    for(i=0; i<lstopo_append_legends_nr; i++) {
-      methods->text(output, 0, 0, 0, fontsize, depth, gridsize, offset, lstopo_append_legends[i]);
+    for(i=0; i<loutput->legend_append_nr; i++) {
+      methods->text(output, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
       offset += fontsize + gridsize;
     }
   }

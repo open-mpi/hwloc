@@ -44,9 +44,6 @@ int lstopo_ignore_pus = 0;
 int lstopo_collapse = 1;
 unsigned long lstopo_export_synthetic_flags = 0;
 
-char **lstopo_append_legends = NULL;
-unsigned lstopo_append_legends_nr = 0;
-
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX];
@@ -437,9 +434,13 @@ main (int argc, char *argv[])
   hwloc_utils_check_api_version(callname);
 
   loutput.overwrite = 0;
+
   loutput.logical = -1;
-  loutput.legend = 1;
   loutput.verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
+
+  loutput.legend = 1;
+  loutput.legend_append = NULL;
+  loutput.legend_append_nr = 0;
 
   for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
     force_orient[i] = LSTOPO_ORIENT_NONE;
@@ -633,9 +634,9 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--append-legend")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	lstopo_append_legends = realloc(lstopo_append_legends, (lstopo_append_legends_nr+1) * sizeof(*lstopo_append_legends));
-	lstopo_append_legends[lstopo_append_legends_nr] = strdup(argv[1]);
-	lstopo_append_legends_nr++;
+	loutput.legend_append = realloc(loutput.legend_append, (loutput.legend_append_nr+1) * sizeof(*loutput.legend_append));
+	loutput.legend_append[loutput.legend_append_nr] = strdup(argv[1]);
+	loutput.legend_append_nr++;
 	opt = 1;
       }
 
@@ -824,9 +825,9 @@ main (int argc, char *argv[])
   output_draw_clear(&loutput);
   hwloc_topology_destroy (topology);
 
-  for(i=0; i<lstopo_append_legends_nr; i++)
-    free(lstopo_append_legends[i]);
-  free(lstopo_append_legends);
+  for(i=0; i<loutput.legend_append_nr; i++)
+    free(loutput.legend_append[i]);
+  free(loutput.legend_append);
 
   return EXIT_SUCCESS;
 
