@@ -35,7 +35,7 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
   if (sscanf(string, "%x:%x-%x %x", &domain, &bus_first, &bus_last, &dummy) == 4) {
     /* fine */
   } else if (sscanf(string, "%x:%x %x", &domain, &bus_first, &dummy) == 3) {
-    bus_last = bus_last;
+    bus_last = bus_first;
   } else if (sscanf(string, "%x %x", &domain, &dummy) == 2) {
     bus_first = 0;
     bus_last = 255;
