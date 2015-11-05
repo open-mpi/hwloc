@@ -11,15 +11,31 @@
 
 #include <hwloc.h>
 
+enum lstopo_orient_e {
+  LSTOPO_ORIENT_NONE = 0,
+  LSTOPO_ORIENT_HORIZ,
+  LSTOPO_ORIENT_VERT,
+  LSTOPO_ORIENT_RECT
+};
+
+/* options for draw+text */
 extern int lstopo_ignore_pus;
 extern int lstopo_collapse;
+extern int lstopo_pid_number;
+extern hwloc_pid_t lstopo_pid;
+
+/* options for draw */
+extern char ** lstopo_append_legends;
+extern unsigned lstopo_append_legends_nr;
+extern unsigned int gridsize, fontsize;
+extern enum lstopo_orient_e force_orient[]; /* orientation of children within an object of the given type */
+
+/* options for text */
 extern hwloc_obj_type_t lstopo_show_only;
 extern int lstopo_show_cpuset;
 extern int lstopo_show_taskset;
-extern int lstopo_pid_number;
-extern hwloc_pid_t lstopo_pid;
-extern char ** lstopo_append_legends;
-extern unsigned lstopo_append_legends_nr;
+
+/* options for synthetic */
 extern unsigned long lstopo_export_synthetic_flags;
 
 FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
@@ -39,7 +55,6 @@ struct lstopo_output {
 };
 
 typedef void output_method (struct lstopo_output *output, const char *filename);
-
 extern output_method output_console, output_synthetic, output_ascii, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
 
 struct draw_methods {
@@ -50,17 +65,6 @@ struct draw_methods {
   void (*text) (void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text);
   void (*textsize) (void *output, const char *text, unsigned textlength, unsigned fontsize, unsigned *width);
 };
-
-extern unsigned int gridsize, fontsize;
-
-enum lstopo_orient_e {
-  LSTOPO_ORIENT_NONE = 0,
-  LSTOPO_ORIENT_HORIZ,
-  LSTOPO_ORIENT_VERT,
-  LSTOPO_ORIENT_RECT
-};
-/* orientation of children within an object of the given type */
-extern enum lstopo_orient_e force_orient[];
 
 extern void output_draw_start(struct lstopo_output *output);
 extern void output_draw(struct lstopo_output *output);
