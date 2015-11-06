@@ -37,9 +37,6 @@
 
 int lstopo_pid_number = -1;
 hwloc_pid_t lstopo_pid;
-hwloc_obj_type_t lstopo_show_only = HWLOC_OBJ_TYPE_NONE;
-int lstopo_show_cpuset = 0;
-int lstopo_show_taskset = 0;
 int lstopo_ignore_pus = 0;
 int lstopo_collapse = 1;
 unsigned long lstopo_export_synthetic_flags = 0;
@@ -438,6 +435,10 @@ main (int argc, char *argv[])
   loutput.legend_append = NULL;
   loutput.legend_append_nr = 0;
 
+  loutput.show_only = HWLOC_OBJ_TYPE_NONE;
+  loutput.show_cpuset = 0;
+  loutput.show_taskset = 0;
+
   loutput.fontsize = 10;
   loutput.gridsize = 10;
   for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
@@ -478,17 +479,17 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "-p") || !strcmp (argv[0], "--physical"))
 	loutput.logical = 0;
       else if (!strcmp (argv[0], "-c") || !strcmp (argv[0], "--cpuset"))
-	lstopo_show_cpuset = 1;
+	loutput.show_cpuset = 1;
       else if (!strcmp (argv[0], "-C") || !strcmp (argv[0], "--cpuset-only"))
-	lstopo_show_cpuset = 2;
+	loutput.show_cpuset = 2;
       else if (!strcmp (argv[0], "--taskset")) {
-	lstopo_show_taskset = 1;
-	if (!lstopo_show_cpuset)
-	  lstopo_show_cpuset = 1;
+	loutput.show_taskset = 1;
+	if (!loutput.show_cpuset)
+	  loutput.show_cpuset = 1;
       } else if (!strcmp (argv[0], "--only")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-        if (hwloc_obj_type_sscanf(argv[1], &lstopo_show_only, NULL, 0) < 0)
+        if (hwloc_obj_type_sscanf(argv[1], &loutput.show_only, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --only, ignoring.\n", argv[1]);
 	opt = 1;
       }
@@ -732,8 +733,8 @@ main (int argc, char *argv[])
 
   /* if  the output format wasn't enforced, think a bit about what the user probably want */
   if (output_format == LSTOPO_OUTPUT_DEFAULT) {
-    if (lstopo_show_cpuset
-        || lstopo_show_only != HWLOC_OBJ_TYPE_NONE
+    if (loutput.show_cpuset
+        || loutput.show_only != HWLOC_OBJ_TYPE_NONE
         || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }

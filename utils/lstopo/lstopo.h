@@ -24,11 +24,6 @@ extern int lstopo_collapse;
 extern int lstopo_pid_number;
 extern hwloc_pid_t lstopo_pid;
 
-/* options for text */
-extern hwloc_obj_type_t lstopo_show_only;
-extern int lstopo_show_cpuset;
-extern int lstopo_show_taskset;
-
 /* options for synthetic */
 extern unsigned long lstopo_export_synthetic_flags;
 
@@ -52,6 +47,11 @@ struct lstopo_output {
   int legend;
   char ** legend_append;
   unsigned legend_append_nr;
+
+  /* text config */
+  hwloc_obj_type_t show_only;
+  int show_cpuset;
+  int show_taskset;
 
   /* draw config */
   unsigned int gridsize, fontsize;

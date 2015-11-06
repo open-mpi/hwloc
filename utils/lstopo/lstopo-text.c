@@ -27,8 +27,12 @@
  */
 
 static void
-output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode, int collapse)
+output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
 {
+  hwloc_topology_t topology = loutput->topology;
+  FILE *output = loutput->file;
+  int logical = loutput->logical;
+  int verbose_mode = loutput->verbose_mode;
   unsigned idx = logical ? l->logical_index : l->os_index;
   const char *value;
   char pidxstr[16];
@@ -45,7 +49,7 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
   if (l->type == HWLOC_OBJ_PCI_DEVICE)
     lstopo_busid_snprintf(busidstr, sizeof(busidstr), l, collapse, topology->pci_nonzero_domains);
 
-  if (lstopo_show_cpuset < 2) {
+  if (loutput->show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
     int len;
     value = hwloc_obj_get_info_by_name(l, "Type");
@@ -100,11 +104,11 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
   }
   if (!l->cpuset)
     return;
-  if (lstopo_show_cpuset == 1)
+  if (loutput->show_cpuset == 1)
     fprintf(output, " cpuset=");
-  if (lstopo_show_cpuset) {
+  if (loutput->show_cpuset) {
     char *cpusetstr;
-    if (lstopo_show_taskset)
+    if (loutput->show_taskset)
       hwloc_bitmap_taskset_asprintf(&cpusetstr, l->cpuset);
     else
       hwloc_bitmap_asprintf(&cpusetstr, l->cpuset);
@@ -123,10 +127,13 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
 
 /* Recursively output topology in a console fashion */
 static void
-output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode)
+output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t parent, int i)
 {
+  hwloc_topology_t topology = loutput->topology;
+  FILE *output = loutput->file;
+  int verbose_mode = loutput->verbose_mode;
   hwloc_obj_t child;
-  int group_identical = (verbose_mode <= 1) && !lstopo_show_cpuset;
+  int group_identical = (verbose_mode <= 1) && !loutput->show_cpuset;
   unsigned collapse = 1;
 
   if (l->type == HWLOC_OBJ_PCI_DEVICE) {
@@ -151,40 +158,41 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
 
   if (collapse > 1)
     fprintf(output, "%u x { ", collapse);
-  output_console_obj(topology, l, output, logical, verbose_mode, collapse);
+  output_console_obj(loutput, l, collapse);
   if (collapse > 1)
     fprintf(output, " }");
 
   for(child = l->first_child; child; child = child->next_sibling)
     if (child->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
-      output_topology (topology, child, l, output, i, logical, verbose_mode);
+      output_topology (loutput, child, l, i);
   for(child = l->io_first_child; child; child = child->next_sibling)
-    output_topology (topology, child, l, output, i, logical, verbose_mode);
+    output_topology (loutput, child, l, i);
   for(child = l->misc_first_child; child; child = child->next_sibling)
-    output_topology (topology, child, l, output, i, logical, verbose_mode);
+    output_topology (loutput, child, l, i);
 }
 
 /* Recursive so that multiple depth types are properly shown */
 static void
-output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
+output_only (struct lstopo_output *loutput, hwloc_obj_t l)
 {
+  FILE *output = loutput->file;
   hwloc_obj_t child;
-  if (lstopo_show_only == l->type) {
-    output_console_obj (topology, l, output, logical, verbose_mode, 0);
+  if (loutput->show_only == l->type) {
+    output_console_obj (loutput, l, 0);
     fprintf (output, "\n");
   }
   for(child = l->first_child; child; child = child->next_sibling)
-    output_only (topology, child, output, logical, verbose_mode);
-  if (lstopo_show_only == HWLOC_OBJ_BRIDGE || lstopo_show_only == HWLOC_OBJ_PCI_DEVICE
-      || lstopo_show_only == HWLOC_OBJ_OS_DEVICE || lstopo_show_only == HWLOC_OBJ_MISC) {
+    output_only (loutput, child);
+  if (loutput->show_only == HWLOC_OBJ_BRIDGE || loutput->show_only == HWLOC_OBJ_PCI_DEVICE
+      || loutput->show_only == HWLOC_OBJ_OS_DEVICE || loutput->show_only == HWLOC_OBJ_MISC) {
     /* I/O can only contain other I/O or Misc, no need to recurse otherwise */
     for(child = l->io_first_child; child; child = child->next_sibling)
-      output_only (topology, child, output, logical, verbose_mode);
+      output_only (loutput, child);
   }
-  if (lstopo_show_only == HWLOC_OBJ_MISC) {
+  if (loutput->show_only == HWLOC_OBJ_MISC) {
     /* Misc can only contain other Misc, no need to recurse otherwise */
     for(child = l->misc_first_child; child; child = child->next_sibling)
-      output_only (topology, child, output, logical, verbose_mode);
+      output_only (loutput, child);
   }
 }
 
@@ -201,6 +209,7 @@ void output_console(struct lstopo_output *loutput, const char *filename)
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
+  loutput->file = output;
 
   topodepth = hwloc_topology_get_depth(topology);
 
@@ -210,20 +219,20 @@ void output_console(struct lstopo_output *loutput, const char *filename)
    * if verbose_mode > 1, print both.
    */
 
-  if (lstopo_show_only != HWLOC_OBJ_TYPE_NONE) {
+  if (loutput->show_only != HWLOC_OBJ_TYPE_NONE) {
     if (verbose_mode > 1)
-      fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(lstopo_show_only));
-    output_only (topology, hwloc_get_root_obj(topology), output, logical, verbose_mode);
+      fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(loutput->show_only));
+    output_only (loutput, hwloc_get_root_obj(topology));
   } else if (verbose_mode >= 1) {
-    output_topology (topology, hwloc_get_root_obj(topology), NULL, output, 0, logical, verbose_mode);
+    output_topology (loutput, hwloc_get_root_obj(topology), NULL, 0);
     fprintf(output, "\n");
   }
 
-  if ((verbose_mode > 1 || !verbose_mode) && lstopo_show_only == HWLOC_OBJ_TYPE_NONE) {
+  if ((verbose_mode > 1 || !verbose_mode) && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {
     hwloc_lstopo_show_summary(output, topology);
  }
 
-  if (verbose_mode > 1 && lstopo_show_only == HWLOC_OBJ_TYPE_NONE) {
+  if (verbose_mode > 1 && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {
     const struct hwloc_distances_s * distances;
     unsigned depth;
 
@@ -239,7 +248,7 @@ void output_console(struct lstopo_output *loutput, const char *filename)
     }
   }
 
-  if (verbose_mode > 1 && lstopo_show_only == HWLOC_OBJ_TYPE_NONE) {
+  if (verbose_mode > 1 && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {
     hwloc_const_bitmap_t complete = hwloc_topology_get_complete_cpuset(topology);
     hwloc_const_bitmap_t topo = hwloc_topology_get_topology_cpuset(topology);
     hwloc_const_bitmap_t allowed = hwloc_topology_get_allowed_cpuset(topology);
