@@ -1695,13 +1695,14 @@ hwloc__filter_bridges(hwloc_topology_t topology, hwloc_obj_t root, int depth)
     /* recurse into grand-children */
     hwloc__filter_bridges(topology, child, depth+1);
 
+    child->attr->bridge.depth = depth;
+
     if (child->type == HWLOC_OBJ_BRIDGE
 	&& filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
 	&& !child->io_first_child) {
       unlink_and_free_single_object(pchild);
       topology->modified = 1;
     }
-    child->attr->bridge.depth = depth;
   }
 }
 
