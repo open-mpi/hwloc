@@ -44,8 +44,6 @@ int lstopo_ignore_pus = 0;
 int lstopo_collapse = 1;
 unsigned long lstopo_export_synthetic_flags = 0;
 
-enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX];
-
 static unsigned int top = 0;
 
 FILE *open_output(const char *filename, int overwrite)
@@ -442,13 +440,12 @@ main (int argc, char *argv[])
 
   loutput.fontsize = 10;
   loutput.gridsize = 10;
-
   for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
-    force_orient[i] = LSTOPO_ORIENT_NONE;
-  force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;
+    loutput.force_orient[i] = LSTOPO_ORIENT_NONE;
+  loutput.force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;
   for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
-    force_orient[i] = LSTOPO_ORIENT_HORIZ;
-  force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
+    loutput.force_orient[i] = LSTOPO_ORIENT_HORIZ;
+  loutput.force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
 
   /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
@@ -590,13 +587,13 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[0], "--horiz"))
 	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
-	  force_orient[i] = LSTOPO_ORIENT_HORIZ;
+	  loutput.force_orient[i] = LSTOPO_ORIENT_HORIZ;
       else if (!strcmp (argv[0], "--vert"))
 	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
-	  force_orient[i] = LSTOPO_ORIENT_VERT;
+	  loutput.force_orient[i] = LSTOPO_ORIENT_VERT;
       else if (!strcmp (argv[0], "--rect"))
 	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
-	  force_orient[i] = LSTOPO_ORIENT_RECT;
+	  loutput.force_orient[i] = LSTOPO_ORIENT_RECT;
       else if (!strncmp (argv[0], "--horiz=", 8)
 	       || !strncmp (argv[0], "--vert=", 7)
 	       || !strncmp (argv[0], "--rect=", 7)) {
@@ -610,7 +607,7 @@ main (int argc, char *argv[])
 	  if (hwloc_obj_type_sscanf(tmp, &type, NULL, 0) < 0)
 	    fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
 	  else
-	    force_orient[type] = orient;
+	    loutput.force_orient[type] = orient;
 	  if (!end)
 	    break;
 	  tmp = end+1;

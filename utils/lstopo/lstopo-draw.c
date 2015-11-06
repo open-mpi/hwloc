@@ -302,10 +302,10 @@ RECURSE_BEGIN(obj, border) \
       obj_totheight += height + (separator); \
       area += (width + (separator)) * (height + (separator)); \
     } \
-    if (force_orient[obj->type] == LSTOPO_ORIENT_HORIZ) { \
+    if (loutput->force_orient[obj->type] == LSTOPO_ORIENT_HORIZ) {	\
       rows =  1; \
       columns = numsubobjs; \
-    } else if (force_orient[obj->type] == LSTOPO_ORIENT_VERT) { \
+    } else if (loutput->force_orient[obj->type] == LSTOPO_ORIENT_VERT) { \
       columns =  1; \
       rows = numsubobjs; \
     } else { \
@@ -381,7 +381,7 @@ RECURSE_BEGIN(obj, border) \
 
 /* Pack objects in a grid */
 #define RECURSE_RECT(obj, methods, separator, border) do {\
-  if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NUMANODE && force_orient[obj->type] != LSTOPO_ORIENT_RECT) { \
+  if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NUMANODE && loutput->force_orient[obj->type] != LSTOPO_ORIENT_RECT) { \
     /* Nodes shouldn't be put with an arbitrary geometry, as NUMA distances may not be that way */ \
     int pvert = prefer_vert(loutput, level, depth, x, y, separator); \
     if (pvert) \
@@ -445,7 +445,7 @@ prefer_vert(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   horiz_ratio = (float)totwidth / totheight;
   RECURSE_VERT(level, &null_draw_methods, separator, 0);
   vert_ratio = (float)totwidth / totheight;
-  return force_orient[level->type] == LSTOPO_ORIENT_VERT || (force_orient[level->type] != LSTOPO_ORIENT_HORIZ && prefer_ratio(vert_ratio, horiz_ratio));
+  return loutput->force_orient[level->type] == LSTOPO_ORIENT_VERT || (loutput->force_orient[level->type] != LSTOPO_ORIENT_HORIZ && prefer_ratio(vert_ratio, horiz_ratio));
 }
 
 static int

@@ -24,9 +24,6 @@ extern int lstopo_collapse;
 extern int lstopo_pid_number;
 extern hwloc_pid_t lstopo_pid;
 
-/* options for draw */
-extern enum lstopo_orient_e force_orient[]; /* orientation of children within an object of the given type */
-
 /* options for text */
 extern hwloc_obj_type_t lstopo_show_only;
 extern int lstopo_show_cpuset;
@@ -58,6 +55,7 @@ struct lstopo_output {
 
   /* draw config */
   unsigned int gridsize, fontsize;
+  enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
   struct draw_methods *methods;
   unsigned min_pu_textwidth;
 };
