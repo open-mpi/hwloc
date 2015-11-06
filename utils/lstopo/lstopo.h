@@ -18,15 +18,6 @@ enum lstopo_orient_e {
   LSTOPO_ORIENT_RECT
 };
 
-/* options for draw+text */
-extern int lstopo_ignore_pus;
-extern int lstopo_collapse;
-extern int lstopo_pid_number;
-extern hwloc_pid_t lstopo_pid;
-
-/* options for synthetic */
-extern unsigned long lstopo_export_synthetic_flags;
-
 FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
 
 struct draw_methods;
@@ -42,6 +33,13 @@ struct lstopo_output {
   /* misc config */
   int logical;
   int verbose_mode;
+  int ignore_pus;
+  int collapse;
+  int pid_number;
+  hwloc_pid_t pid;
+
+  /* synthetic export config */
+  unsigned long export_synthetic_flags;
 
   /* legend */
   int legend;
@@ -85,13 +83,14 @@ static __hwloc_inline int lstopo_pu_forbidden(hwloc_obj_t l)
   return !hwloc_bitmap_isset(l->allowed_cpuset, l->os_index);
 }
 
-static __hwloc_inline int lstopo_pu_running(hwloc_topology_t topology, hwloc_obj_t l)
+static __hwloc_inline int lstopo_pu_running(struct lstopo_output *loutput, hwloc_obj_t l)
 {
+  hwloc_topology_t topology = loutput->topology;
   hwloc_bitmap_t bind = hwloc_bitmap_alloc();
   int res;
-  if (lstopo_pid_number != -1 && lstopo_pid_number != 0)
-    hwloc_get_proc_cpubind(topology, lstopo_pid, bind, 0);
-  else if (lstopo_pid_number == 0)
+  if (loutput->pid_number != -1 && loutput->pid_number != 0)
+    hwloc_get_proc_cpubind(topology, loutput->pid, bind, 0);
+  else if (loutput->pid_number == 0)
     hwloc_get_cpubind(topology, bind, 0);
   res = bind && hwloc_bitmap_isset(bind, l->os_index);
   hwloc_bitmap_free(bind);

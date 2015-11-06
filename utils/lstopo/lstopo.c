@@ -35,12 +35,6 @@
 #include "lstopo.h"
 #include "misc.h"
 
-int lstopo_pid_number = -1;
-hwloc_pid_t lstopo_pid;
-int lstopo_ignore_pus = 0;
-int lstopo_collapse = 1;
-unsigned long lstopo_export_synthetic_flags = 0;
-
 static unsigned int top = 0;
 
 FILE *open_output(const char *filename, int overwrite)
@@ -430,6 +424,12 @@ main (int argc, char *argv[])
 
   loutput.logical = -1;
   loutput.verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
+  loutput.ignore_pus = 0;
+  loutput.collapse = 1;
+  loutput.pid_number = -1;
+  loutput.pid = 0;
+
+  loutput.export_synthetic_flags = 0;
 
   loutput.legend = 1;
   loutput.legend_append = NULL;
@@ -520,7 +520,7 @@ main (int argc, char *argv[])
 	}
 	if (type == HWLOC_OBJ_PU) {
 	  if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
-	    lstopo_ignore_pus = 1;
+	    loutput.ignore_pus = 1;
 	}
 	else if (all)
 	  hwloc_topology_set_all_types_filter(topology, filter);
@@ -539,7 +539,7 @@ main (int argc, char *argv[])
 	if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	else if (type == HWLOC_OBJ_PU)
-	  lstopo_ignore_pus = 1;
+	  loutput.ignore_pus = 1;
 	else
 	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
 	opt = 1;
@@ -565,7 +565,7 @@ main (int argc, char *argv[])
 	hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
       }
       else if (!strcmp (argv[0], "--no-collapse"))
-	lstopo_collapse = 0;
+	loutput.collapse = 0;
       else if (!strcmp (argv[0], "--thissystem"))
 	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
       else if (!strcmp (argv[0], "--restrict")) {
@@ -583,7 +583,7 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--export-synthetic-flags")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	lstopo_export_synthetic_flags = (unsigned long) strtoull(argv[1], NULL, 0);
+	loutput.export_synthetic_flags = (unsigned long) strtoull(argv[1], NULL, 0);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--horiz"))
@@ -647,7 +647,7 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[0], "--pid")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	lstopo_pid_number = atoi(argv[1]); opt = 1;
+	loutput.pid_number = atoi(argv[1]); opt = 1;
       } else if (!strcmp (argv[0], "--ps") || !strcmp (argv[0], "--top"))
         top = 1;
       else if (!strcmp (argv[0], "--version")) {
@@ -677,9 +677,9 @@ main (int argc, char *argv[])
       return err;
   }
 
-  if (lstopo_pid_number > 0) {
-    lstopo_pid = hwloc_pid_from_number(lstopo_pid_number, 0);
-    if (hwloc_topology_set_pid(topology, lstopo_pid)) {
+  if (loutput.pid_number > 0) {
+    loutput.pid = hwloc_pid_from_number(loutput.pid_number, 0);
+    if (hwloc_topology_set_pid(topology, loutput.pid)) {
       perror("Setting target pid");
       goto out_with_topology;
     }
@@ -697,8 +697,8 @@ main (int argc, char *argv[])
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     if (!strcmp (restrictstring, "binding")) {
-      if (lstopo_pid_number > 0)
-	hwloc_get_proc_cpubind(topology, lstopo_pid, restrictset, HWLOC_CPUBIND_PROCESS);
+      if (loutput.pid_number > 0)
+	hwloc_get_proc_cpubind(topology, loutput.pid, restrictset, HWLOC_CPUBIND_PROCESS);
       else
 	hwloc_get_cpubind(topology, restrictset, HWLOC_CPUBIND_PROCESS);
     } else {
@@ -749,7 +749,7 @@ main (int argc, char *argv[])
   loutput.topology = topology;
   loutput.file = NULL;
 
-  if (output_format != LSTOPO_OUTPUT_XML && lstopo_collapse)
+  if (output_format != LSTOPO_OUTPUT_XML && loutput.collapse)
     lstopo_add_collapse_attributes(topology);
 
   switch (output_format) {

@@ -157,16 +157,16 @@ typedef void (*foo_draw)(struct lstopo_output *loutput, struct draw_methods *met
 static foo_draw get_type_fun(hwloc_obj_type_t type);
 
 /* count all children, ignoring PUs if needed */
-static int count_children(hwloc_obj_t obj)
+static int count_children(struct lstopo_output *loutput, hwloc_obj_t obj)
 {
   unsigned total = obj->arity + obj->io_arity + obj->misc_arity;
-  if (lstopo_ignore_pus) {
+  if (loutput->ignore_pus) {
     unsigned i;
     for (i = 0; i < obj->arity; i++)
       if (obj->children[i]->type == HWLOC_OBJ_PU)
 	total--;
   }
-  if (lstopo_collapse) {
+  if (loutput->collapse) {
     hwloc_obj_t child;
     for(child = obj->io_first_child; child; child = child->next_sibling) {
       if (child->type == HWLOC_OBJ_PCI_DEVICE) {
@@ -180,16 +180,17 @@ static int count_children(hwloc_obj_t obj)
 }
 
 /* next child, in all children list, ignoring PU if needed */
-static hwloc_obj_t next_child(hwloc_topology_t topology, hwloc_obj_t parent, hwloc_obj_t prev)
+static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent, hwloc_obj_t prev)
 {
+  hwloc_topology_t topology = loutput->topology;
   hwloc_obj_t obj = prev;
 again:
   obj = hwloc_get_next_child(topology, parent, obj);
   if (!obj)
     return NULL;
-  if (obj->type == HWLOC_OBJ_PU && lstopo_ignore_pus)
+  if (obj->type == HWLOC_OBJ_PU && loutput->ignore_pus)
     goto again;
-  if (lstopo_collapse && obj->type == HWLOC_OBJ_PCI_DEVICE) {
+  if (loutput->collapse && obj->type == HWLOC_OBJ_PCI_DEVICE) {
     const char *collapsestr = hwloc_obj_get_info_by_name(obj, "lstopoCollapse");
     if (collapsestr && !strcmp(collapsestr, "0"))
       goto again;
@@ -205,7 +206,7 @@ again:
 
 #define RECURSE_BEGIN(obj, border) do { \
   hwloc_obj_t child; \
-  unsigned numsubobjs = count_children(obj); \
+  unsigned numsubobjs = count_children(loutput, obj);	\
   unsigned width, height; \
   unsigned maxwidth __hwloc_attribute_unused, maxheight __hwloc_attribute_unused; \
   unsigned i; \
@@ -216,9 +217,9 @@ again:
 
 #define RECURSE_FOR(obj) \
     /* Iterate over subobjects */ \
-    for(i = 0, child = next_child(topology, obj, NULL); \
+    for(i = 0, child = next_child(loutput, obj, NULL); \
 	child; \
-	i++, child = next_child(topology, obj, child)) { \
+	i++, child = next_child(loutput, obj, child)) { \
 
       /* Recursive call */
 #define RECURSE_CALL_FUN(methods) \
@@ -933,7 +934,7 @@ pu_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t
 
   if (lstopo_pu_forbidden(level))
     colorarg = 2;
-  else if (lstopo_pu_running(topology, level))
+  else if (lstopo_pu_running(loutput, level))
     colorarg = 1;
   else
     colorarg = 0;

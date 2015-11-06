@@ -120,7 +120,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
   if (l->type == HWLOC_OBJ_PU && verbose_mode >= 2) {
     if (lstopo_pu_forbidden(l))
       fprintf(output, " (forbidden)");
-    else if (lstopo_pu_running(topology, l))
+    else if (lstopo_pu_running(loutput, l))
       fprintf(output, " (running)");
   }
 }
@@ -163,7 +163,7 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
     fprintf(output, " }");
 
   for(child = l->first_child; child; child = child->next_sibling)
-    if (child->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
+    if (child->type != HWLOC_OBJ_PU || !loutput->ignore_pus)
       output_topology (loutput, child, l, i);
   for(child = l->io_first_child; child; child = child->next_sibling)
     output_topology (loutput, child, l, i);
@@ -308,7 +308,7 @@ void output_synthetic(struct lstopo_output *loutput, const char *filename)
     fprintf(stderr, "Passing --no-io may remove them.\n");
   }
 
-  length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), lstopo_export_synthetic_flags);
+  length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), loutput->export_synthetic_flags);
   if (length < 0)
     return;
 
@@ -317,7 +317,7 @@ void output_synthetic(struct lstopo_output *loutput, const char *filename)
     if (!dbuffer)
       return;
 
-    length = hwloc_topology_export_synthetic(topology, dbuffer, length+1, lstopo_export_synthetic_flags);
+    length = hwloc_topology_export_synthetic(topology, dbuffer, length+1, loutput->export_synthetic_flags);
     if (length < 0)
       goto out;
   }
