@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.11.2
+--------------
+* Fix the overzealous L3 cache sharing fix added to the x86 backend in 1.11.1
+  for AMD Opteron 61xx (Magny-Cours) processors.
+
+
 Version 1.11.1
 --------------
 * Detection fixes

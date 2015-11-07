@@ -35,6 +35,7 @@ struct cacheinfo {
   unsigned type;
   unsigned level;
   unsigned nbthreads_sharing;
+  unsigned cacheid;
 
   unsigned linesize;
   unsigned linepart;
@@ -111,20 +112,6 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, uns
   }
   cache->size = size;
   cache->sets = 0;
-
-  if (infos->cpufamilynumber== 0x10 && infos->cpumodelnumber == 0x9
-      && level == 3
-      && (cache->ways == -1 || (cache->ways % 2 == 0)) && cache->nbthreads_sharing >= 8) {
-    /* Fix AMD family 0x10 model 0x9 (Magny-Cours) with 8 or 12 cores.
-     * The L3 (and its associativity) is actually split into two halves).
-     */
-    if (cache->nbthreads_sharing == 16)
-      cache->nbthreads_sharing = 12; /* nbthreads_sharing is a power of 2 but the processor actually has 8 or 12 cores */
-    cache->nbthreads_sharing /= 2;
-    cache->size /= 2;
-    if (cache->ways != -1)
-      cache->ways /= 2;
-  }
 
   hwloc_debug("cache L%u t%u linesize %u ways %u size %luKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
 }
@@ -441,6 +428,38 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
   }
 
+  /* Now that we have all info, compute cacheids and apply quirks */
+  for (cachenum = 0; cachenum < infos->numcaches; cachenum++) {
+    struct cacheinfo *cache = &infos->cache[cachenum];
+
+    /* default cacheid value */
+    cache->cacheid = infos->apicid / cache->nbthreads_sharing;
+
+    /* AMD quirk */
+    if (cpuid_type == amd
+	&& infos->cpufamilynumber== 0x10 && infos->cpumodelnumber == 0x9
+	&& cache->level == 3
+	&& (cache->ways == -1 || (cache->ways % 2 == 0)) && cache->nbthreads_sharing >= 8) {
+      /* Fix AMD family 0x10 model 0x9 (Magny-Cours) with 8 or 12 cores.
+       * The L3 (and its associativity) is actually split into two halves).
+       */
+      if (cache->nbthreads_sharing == 16)
+	cache->nbthreads_sharing = 12; /* nbthreads_sharing is a power of 2 but the processor actually has 8 or 12 cores */
+      cache->nbthreads_sharing /= 2;
+      cache->size /= 2;
+      if (cache->ways != -1)
+	cache->ways /= 2;
+      /* AMD Magny-Cours 12-cores processor reserve APIC ids as AAAAAABBBBBB....
+       * among first L3 (A), second L3 (B), and unexisting cores (.).
+       * On multi-socket servers, L3 in non-first sockets may have APIC id ranges
+       * such as [16-21] that are not aligned on multiple of nbthreads_sharing (6).
+       * That means, we can't just compare apicid/nbthreads_sharing to identify siblings.
+       */
+      cache->cacheid = (infos->apicid % infos->max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
+	+ 2 * (infos->apicid / infos->max_log_proc); /* add 2 caches per previous package */
+    }
+  }
+
   if (hwloc_bitmap_isset(data->apicid_set, infos->apicid))
     data->apicid_unique = 0;
   else
@@ -753,15 +772,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
 	  /* Found a matching cache, now look for others sharing it */
 	  {
-	    /* AMD Magny-Cours 12-cores processor reserve APIC ids as AAAAAABBBBBB....
-	     * among first L3 (A), second L3 (B), and unexisting cores (.).
-	     * On multi-socket servers, L3 in non-first sockets may have APIC id ranges
-	     * such as [16-21] that are not aligned on multiple of nbthreads_sharing (6).
-	     * That means, we can't just compare apicid/nbthreads_sharing to identify siblings.
-	     * Hence we use apicid%max_log_proc instead of apicid to restore the alignment.
-	     * Works because we also compare packageid to identify siblings.
-	     */
-	    unsigned cacheid = (infos[i].apicid % infos[i].max_log_proc) / infos[i].cache[l].nbthreads_sharing;
+	    unsigned cacheid = infos[i].cache[l].cacheid;
 
 	    cache_cpuset = hwloc_bitmap_alloc();
 	    for (j = i; j < nbprocs; j++) {
@@ -775,7 +786,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		hwloc_bitmap_clr(caches_cpuset, j);
 		continue;
 	      }
-	      if (infos[j].packageid == packageid && (infos[j].apicid % infos[j].max_log_proc) / infos[j].cache[l2].nbthreads_sharing == cacheid) {
+	      if (infos[j].packageid == packageid && infos[j].cache[l2].cacheid == cacheid) {
 		hwloc_bitmap_set(cache_cpuset, j);
 		hwloc_bitmap_clr(caches_cpuset, j);
 	      }
