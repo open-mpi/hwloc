@@ -171,7 +171,6 @@ struct cacheinfo {
 struct procinfo {
   unsigned present;
   unsigned apicid;
-  unsigned max_log_proc;
   unsigned max_nbcores;
   unsigned max_nbthreads;
   unsigned packageid;
@@ -197,7 +196,7 @@ enum cpuid_type {
   unknown
 };
 
-static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cache_type_t type, unsigned cpuid)
+static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cache_type_t type, unsigned nbthreads_sharing, unsigned cpuid)
 {
   struct cacheinfo *cache;
   unsigned cachenum;
@@ -218,10 +217,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cac
 
   cache->type = type;
   cache->level = level;
-  if (level <= 2)
-    cache->nbthreads_sharing = 1;
-  else
-    cache->nbthreads_sharing = infos->max_log_proc;
+  cache->nbthreads_sharing = nbthreads_sharing;
   cache->linesize = cpuid & 0xff;
   cache->linepart = 0;
   if (level == 1) {
@@ -249,6 +245,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   unsigned cachenum;
   struct cacheinfo *cache;
   unsigned regs[4];
+  unsigned legacy_max_log_proc; /* not valid on Intel processors with > 256 threads, or when cpuid 0x80000008 is supported */
   unsigned _model, _extendedmodel, _family, _extendedfamily;
 
   infos->present = 1;
@@ -259,21 +256,21 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    * levels and levels slots in otherids[]
    * numcaches and numcaches slots in caches[]
    *
-   * max_log_proc, max_nbthreads, max_nbcores, logprocid
+   * max_nbthreads, max_nbcores, logprocid
    * are only used temporarily inside this function and its callees.
    */
 
-  /* Get apicid, max_log_proc, packageid, logprocid from cpuid 0x01 */
+  /* Get apicid, legacy_max_log_proc, packageid, logprocid from cpuid 0x01 */
   eax = 0x01;
   cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
   infos->apicid = ebx >> 24;
   if (edx & (1 << 28))
-    infos->max_log_proc = 1 << hwloc_flsl(((ebx >> 16) & 0xff) - 1);
+    legacy_max_log_proc = 1 << hwloc_flsl(((ebx >> 16) & 0xff) - 1);
   else
-    infos->max_log_proc = 1;
-  hwloc_debug("APIC ID 0x%02x max_log_proc %u\n", infos->apicid, infos->max_log_proc);
-  infos->packageid = infos->apicid / infos->max_log_proc;
-  infos->logprocid = infos->apicid % infos->max_log_proc;
+    legacy_max_log_proc = 1;
+  hwloc_debug("APIC ID 0x%02x legacy_max_log_proc %u\n", infos->apicid, legacy_max_log_proc);
+  infos->packageid = infos->apicid / legacy_max_log_proc;
+  infos->logprocid = infos->apicid % legacy_max_log_proc;
   hwloc_debug("phys %u thread %u\n", infos->packageid, infos->logprocid);
 
   /* Get cpu model/family/stepping numbers from same cpuid */
@@ -333,7 +330,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     /* Still no multithreaded AMD */
     infos->max_nbthreads = 1 ;
     hwloc_debug("and max # of threads: %u\n", infos->max_nbthreads);
-    /* The legacy max_log_proc is deprecated, it can be smaller than max_nbcores,
+    /* legacy_max_log_proc is deprecated, it can be smaller than max_nbcores,
      * which is the maximum number of cores that the processor could theoretically support
      * (see "Multiple Core Calculation" in the AMD CPUID specification).
      * Recompute packageid/logprocid/threadid/coreid accordingly.
@@ -423,8 +420,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000005) {
       eax = 0x80000005;
       cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-      fill_amd_cache(infos, 1, HWLOC_OBJ_CACHE_DATA, ecx); /* L1d */
-      fill_amd_cache(infos, 1, HWLOC_OBJ_CACHE_INSTRUCTION, edx); /* L1i */
+      fill_amd_cache(infos, 1, HWLOC_OBJ_CACHE_DATA, 1, ecx); /* private L1d */
+      fill_amd_cache(infos, 1, HWLOC_OBJ_CACHE_INSTRUCTION, 1, edx); /* private L1i */
     }
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000006) {
       eax = 0x80000006;
@@ -434,9 +431,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	 * Could be useful if some Intels (at least before Core micro-architecture)
 	 * support this leaf without leaf 0x4.
 	 */
-	fill_amd_cache(infos, 2, HWLOC_OBJ_CACHE_UNIFIED, ecx); /* L2u */
+	fill_amd_cache(infos, 2, HWLOC_OBJ_CACHE_UNIFIED, 1, ecx); /* private L2u */
       if (edx & 0xf000)
-	fill_amd_cache(infos, 3, HWLOC_OBJ_CACHE_UNIFIED, edx); /* L3u */
+	fill_amd_cache(infos, 3, HWLOC_OBJ_CACHE_UNIFIED, legacy_max_log_proc, edx); /* package-wide L3u */
     }
   }
 
@@ -457,7 +454,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       if (!cachenum) {
 	/* by the way, get thread/core information from the first cache */
 	infos->max_nbcores = ((eax >> 26) & 0x3f) + 1;
-	infos->max_nbthreads = infos->max_log_proc / infos->max_nbcores;
+	infos->max_nbthreads = legacy_max_log_proc / infos->max_nbcores;
 	hwloc_debug("thus %u threads\n", infos->max_nbthreads);
 	infos->threadid = infos->logprocid % infos->max_nbthreads;
 	infos->coreid = infos->logprocid / infos->max_nbthreads;
@@ -580,8 +577,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
        * such as [16-21] that are not aligned on multiple of nbthreads_sharing (6).
        * That means, we can't just compare apicid/nbthreads_sharing to identify siblings.
        */
-      cache->cacheid = (infos->apicid % infos->max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
-	+ 2 * (infos->apicid / infos->max_log_proc); /* add 2 caches per previous package */
+      cache->cacheid = (infos->apicid % legacy_max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
+	+ 2 * (infos->apicid / legacy_max_log_proc); /* add 2 caches per previous package */
     }
   }
 
