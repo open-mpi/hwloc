@@ -176,7 +176,6 @@ struct procinfo {
   unsigned packageid;
   unsigned nodeid;
   unsigned unitid;
-  unsigned logprocid;
   unsigned threadid;
   unsigned coreid;
   unsigned *otherids;
@@ -246,6 +245,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   struct cacheinfo *cache;
   unsigned regs[4];
   unsigned legacy_max_log_proc; /* not valid on Intel processors with > 256 threads, or when cpuid 0x80000008 is supported */
+  unsigned legacy_log_proc_id;
   unsigned _model, _extendedmodel, _family, _extendedfamily;
 
   infos->present = 1;
@@ -256,11 +256,11 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    * levels and levels slots in otherids[]
    * numcaches and numcaches slots in caches[]
    *
-   * max_nbthreads, max_nbcores, logprocid
+   * max_nbthreads, max_nbcores
    * are only used temporarily inside this function and its callees.
    */
 
-  /* Get apicid, legacy_max_log_proc, packageid, logprocid from cpuid 0x01 */
+  /* Get apicid, legacy_max_log_proc, packageid, legacy_log_proc_id from cpuid 0x01 */
   eax = 0x01;
   cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
   infos->apicid = ebx >> 24;
@@ -270,8 +270,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     legacy_max_log_proc = 1;
   hwloc_debug("APIC ID 0x%02x legacy_max_log_proc %u\n", infos->apicid, legacy_max_log_proc);
   infos->packageid = infos->apicid / legacy_max_log_proc;
-  infos->logprocid = infos->apicid % legacy_max_log_proc;
-  hwloc_debug("phys %u thread %u\n", infos->packageid, infos->logprocid);
+  legacy_log_proc_id = infos->apicid % legacy_max_log_proc;
+  hwloc_debug("phys %u legacy thread %u\n", infos->packageid, legacy_log_proc_id);
 
   /* Get cpu model/family/stepping numbers from same cpuid */
   _model          = (eax>>4) & 0xf;
@@ -318,6 +318,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    */
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000008) {
     unsigned coreidsize;
+    unsigned logprocid;
     eax = 0x80000008;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     coreidsize = (ecx >> 12) & 0xf;
@@ -333,12 +334,12 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     /* legacy_max_log_proc is deprecated, it can be smaller than max_nbcores,
      * which is the maximum number of cores that the processor could theoretically support
      * (see "Multiple Core Calculation" in the AMD CPUID specification).
-     * Recompute packageid/logprocid/threadid/coreid accordingly.
+     * Recompute packageid/threadid/coreid accordingly.
      */
     infos->packageid = infos->apicid / infos->max_nbcores;
-    infos->logprocid = infos->apicid % infos->max_nbcores;
-    infos->threadid = infos->logprocid % infos->max_nbthreads;
-    infos->coreid = infos->logprocid / infos->max_nbthreads;
+    logprocid = infos->apicid % infos->max_nbcores;
+    infos->threadid = logprocid % infos->max_nbthreads;
+    infos->coreid = logprocid / infos->max_nbthreads;
     hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
   }
 
@@ -456,8 +457,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	infos->max_nbcores = ((eax >> 26) & 0x3f) + 1;
 	infos->max_nbthreads = legacy_max_log_proc / infos->max_nbcores;
 	hwloc_debug("thus %u threads\n", infos->max_nbthreads);
-	infos->threadid = infos->logprocid % infos->max_nbthreads;
-	infos->coreid = infos->logprocid / infos->max_nbthreads;
+	infos->threadid = legacy_log_proc_id % infos->max_nbthreads;
+	infos->coreid = legacy_log_proc_id / infos->max_nbthreads;
 	hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
       }
     }
