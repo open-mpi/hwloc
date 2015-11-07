@@ -1146,6 +1146,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
 
   if (highest_cpuid >= 0x7) {
     eax = 0x7;
+    ecx = 0;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     features[9] = ebx;
   }
