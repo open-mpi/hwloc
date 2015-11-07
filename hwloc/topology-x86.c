@@ -171,8 +171,6 @@ struct cacheinfo {
 struct procinfo {
   unsigned present;
   unsigned apicid;
-  unsigned max_nbcores;
-  unsigned max_nbthreads;
   unsigned packageid;
   unsigned nodeid;
   unsigned unitid;
@@ -250,16 +248,6 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
   infos->present = 1;
 
-  /* on return from this function, the following fields must be set in infos:
-   * packageid, nodeid, unitid, coreid, threadid, or -1
-   * apicid
-   * levels and levels slots in otherids[]
-   * numcaches and numcaches slots in caches[]
-   *
-   * max_nbthreads, max_nbcores
-   * are only used temporarily inside this function and its callees.
-   */
-
   /* Get apicid, legacy_max_log_proc, packageid, legacy_log_proc_id from cpuid 0x01 */
   eax = 0x01;
   cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
@@ -317,6 +305,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    * (not supported on Intel)
    */
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000008) {
+    unsigned max_nbcores;
+    unsigned max_nbthreads;
     unsigned coreidsize;
     unsigned logprocid;
     eax = 0x80000008;
@@ -324,22 +314,22 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     coreidsize = (ecx >> 12) & 0xf;
     hwloc_debug("core ID size: %u\n", coreidsize);
     if (!coreidsize) {
-      infos->max_nbcores = (ecx & 0xff) + 1;
+      max_nbcores = (ecx & 0xff) + 1;
     } else
-      infos->max_nbcores = 1 << coreidsize;
-    hwloc_debug("Thus max # of cores: %u\n", infos->max_nbcores);
+      max_nbcores = 1 << coreidsize;
+    hwloc_debug("Thus max # of cores: %u\n", max_nbcores);
     /* Still no multithreaded AMD */
-    infos->max_nbthreads = 1 ;
-    hwloc_debug("and max # of threads: %u\n", infos->max_nbthreads);
+    max_nbthreads = 1 ;
+    hwloc_debug("and max # of threads: %u\n", max_nbthreads);
     /* legacy_max_log_proc is deprecated, it can be smaller than max_nbcores,
      * which is the maximum number of cores that the processor could theoretically support
      * (see "Multiple Core Calculation" in the AMD CPUID specification).
      * Recompute packageid/threadid/coreid accordingly.
      */
-    infos->packageid = infos->apicid / infos->max_nbcores;
-    logprocid = infos->apicid % infos->max_nbcores;
-    infos->threadid = logprocid % infos->max_nbthreads;
-    infos->coreid = logprocid / infos->max_nbthreads;
+    infos->packageid = infos->apicid / max_nbcores;
+    logprocid = infos->apicid % max_nbcores;
+    infos->threadid = logprocid % max_nbthreads;
+    infos->coreid = logprocid / max_nbthreads;
     hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
   }
 
@@ -406,10 +396,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
 
-      hwloc_debug("cache %u L%u%c t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
+      hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
 		  cachenum, cache->level,
 		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
-		  cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
+		  cache->nbthreads_sharing, linesize, linepart, ways, sets, cache->size >> 10);
 
       cache++;
     }
@@ -442,6 +432,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    * (not supported on AMD)
    */
   if (cpuid_type != amd && highest_cpuid >= 0x04) {
+    unsigned max_nbcores;
+    unsigned max_nbthreads;
+
     for (cachenum = 0; ; cachenum++) {
       eax = 0x04;
       ecx = cachenum;
@@ -454,11 +447,11 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
       if (!cachenum) {
 	/* by the way, get thread/core information from the first cache */
-	infos->max_nbcores = ((eax >> 26) & 0x3f) + 1;
-	infos->max_nbthreads = legacy_max_log_proc / infos->max_nbcores;
-	hwloc_debug("thus %u threads\n", infos->max_nbthreads);
-	infos->threadid = legacy_log_proc_id % infos->max_nbthreads;
-	infos->coreid = legacy_log_proc_id / infos->max_nbthreads;
+	max_nbcores = ((eax >> 26) & 0x3f) + 1;
+	max_nbthreads = legacy_max_log_proc / max_nbcores;
+	hwloc_debug("thus %u threads\n", max_nbthreads);
+	infos->threadid = legacy_log_proc_id % max_nbthreads;
+	infos->coreid = legacy_log_proc_id / max_nbthreads;
 	hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
       }
     }
@@ -493,10 +486,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
 
-      hwloc_debug("cache %u L%u%c t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
+      hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
 		  cachenum, cache->level,
 		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
-		  cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
+		  cache->nbthreads_sharing, linesize, linepart, ways, sets, cache->size >> 10);
       cache++;
     }
   }
