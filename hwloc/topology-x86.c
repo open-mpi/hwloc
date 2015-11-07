@@ -354,6 +354,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     infos->unitid = unit_id = ebx & 0xff;
     cores_per_unit = ((ebx >> 8) & 3) + 1;
     hwloc_debug("x2APIC %08x, %d nodes, node %d, %d cores in unit %d\n", apic_id, nodes_per_proc, node_id, cores_per_unit, unit_id);
+    /* coreid and unitid are package-wide (core 0-15 and unit 0-7 on 16-core 2-NUMAnode processor).
+     * The Linux kernel reduces theses to NUMA-node-wide (by applying %core_per_node and %unit_per node respectively).
+     * It's not clear if we should do this as well.
+     */
 
     for (cachenum = 0; ; cachenum++) {
       eax = 0x8000001d;
@@ -526,9 +530,11 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	switch (apic_type) {
 	case 1:
 	  infos->threadid = id;
+	  /* apic_number is the actual number of threads per core */
 	  break;
 	case 2:
 	  infos->coreid = id;
+	  /* apic_number is the actual number of threads per package */
 	  break;
 	default:
 	  hwloc_debug("x2APIC %d: unknown type %d\n", level, apic_type);
