@@ -162,6 +162,7 @@ typedef enum {
   HWLOC_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
   			  * The whole system that is accessible to hwloc.
 			  * That may comprise several machines in SSI systems.
+			  * This object type is currently unused in native backends.
 			  */
   HWLOC_OBJ_MACHINE,	/**< \brief Machine.
 			  * The typical root object type.

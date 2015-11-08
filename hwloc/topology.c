@@ -765,11 +765,11 @@ static const hwloc_obj_type_t obj_order_type[] = {
 /* priority to be used when merging identical parent/children object
  * (in merge_useless_child), keep the highest priority one.
  *
- * Always keep Machine/PU/PCIDev/OSDev
- * then System/Node
+ * Always keep Machine/NUMANode/PU/PCIDev/OSDev
+ * then System
  * then Core
  * then Package
- * then Cache
+ * then Cache,
  * then Instruction Caches
  * then always drop Group/Misc/Bridge.
  *
