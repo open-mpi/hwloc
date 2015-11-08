@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.11.2
 --------------
+* Fix L3 cache sharing on AMD Opteron 63xx (Piledriver) and 62xx (Bulldozer)
+  in the x86 backend. Thanks to many users who helped.
 * Fix the overzealous L3 cache sharing fix added to the x86 backend in 1.11.1
   for AMD Opteron 61xx (Magny-Cours) processors.
 
