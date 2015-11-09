@@ -377,6 +377,12 @@ int main(int argc, const char * const argv[])
   hwloc_topology_init(&topo);
   hwloc_topology_load(topo);
 
+  if (!hwloc_topology_is_thissystem(topo)) {
+    fprintf(stderr, "%s must run on the current system topology, while this topology doesn't come from this system.\n", callname);
+    ret = EXIT_FAILURE;
+    goto out;
+  }
+
   if (!strcmp(basedir, "-")) {
     printf("Gathering on stdout ...\n");
     if (idx == (unsigned) -1) {
