@@ -102,6 +102,8 @@ int main(int argc, char *argv[])
   argc--;
   argv++;
 
+  hwloc_utils_check_api_version(callname);
+
   while (argc >= 1) {
     opt = 0;
     if (!strcmp(argv[0], "-a"))

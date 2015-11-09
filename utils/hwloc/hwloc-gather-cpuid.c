@@ -346,14 +346,16 @@ int main(int argc, const char * const argv[])
   int err;
   int ret = EXIT_SUCCESS;
 
+  callname = argv[0];
+  argc--; argv++;
+
+  hwloc_utils_check_api_version(callname);
+
   if (!hwloc_have_x86_cpuid()) {
     fprintf(stderr, "CPUID not supported.\n");
     ret = EXIT_FAILURE;
     goto out;
   }
-
-  callname = argv[0];
-  argc--; argv++;
 
   while (argc > 0 && argv[0][0] == '-' && argv[0][1] != '\0') {
     if (argc >= 2 && !strcmp(argv[0], "-c")) {

@@ -210,6 +210,13 @@ int main(int argc, char *argv[])
   int err;
   int ret = EXIT_SUCCESS;
 
+  callname = argv[0];
+  /* skip argv[0], handle options */
+  argv++;
+  argc--;
+
+  hwloc_utils_check_api_version(callname);
+
   /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
   putenv("HWLOC_SYNTHETIC_VERBOSE=1");
@@ -232,11 +239,6 @@ int main(int argc, char *argv[])
     loaded = 1; \
   } \
 } while (0)
-
-  callname = argv[0];
-  /* skip argv[0], handle options */
-  argv++;
-  argc--;
 
   while (argc >= 1) {
     if (*argv[0] == '-') {

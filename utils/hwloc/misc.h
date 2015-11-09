@@ -21,6 +21,20 @@
 extern void usage(const char *name, FILE *where);
 
 static __hwloc_inline void
+hwloc_utils_check_api_version(const char *callname)
+{
+  unsigned version = hwloc_get_api_version();
+  if ((version >> 16) != (HWLOC_API_VERSION >> 16)) {
+    fprintf(stderr,
+	    "%s compiled for hwloc API 0x%x but running on library API 0x%x.\n"
+	    "You may need to point LD_LIBRARY_PATH to the right hwloc library.\n"
+	    "Aborting since the new ABI is not backward compatible.\n",
+	    callname, HWLOC_API_VERSION, version);
+    exit(EXIT_FAILURE);
+  }
+}
+
+static __hwloc_inline void
 hwloc_utils_input_format_usage(FILE *where, int addspaces)
 {
   fprintf (where, "  --input <XML file>\n");

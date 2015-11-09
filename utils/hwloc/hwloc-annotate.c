@@ -102,12 +102,14 @@ int main(int argc, char *argv[])
 	unsigned topodepth;
 	int err;
 
-	putenv("HWLOC_XML_VERBOSE=1");
-
 	callname = argv[0];
 	/* skip argv[0], handle options */
 	argc--;
 	argv++;
+
+	hwloc_utils_check_api_version(callname);
+
+	putenv("HWLOC_XML_VERBOSE=1");
 
 	while (argc && *argv[0] == '-') {
 		if (!strcmp(argv[0], "--ci"))

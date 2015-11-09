@@ -425,6 +425,17 @@ main (int argc, char *argv[])
   int opt;
   unsigned i;
 
+  callname = strrchr(argv[0], '/');
+  if (!callname)
+    callname = argv[0];
+  else
+    callname++;
+  /* skip argv[0], handle options */
+  argc--;
+  argv++;
+
+  hwloc_utils_check_api_version(callname);
+
   loutput.overwrite = 0;
   loutput.logical = -1;
   loutput.legend = 1;
@@ -444,15 +455,6 @@ main (int argc, char *argv[])
 #ifdef HAVE_SETLOCALE
   setlocale(LC_ALL, "");
 #endif
-
-  callname = strrchr(argv[0], '/');
-  if (!callname)
-    callname = argv[0];
-  else
-    callname++;
-  /* skip argv[0], handle options */
-  argc--;
-  argv++;
 
   err = hwloc_topology_init (&topology);
   if (err)

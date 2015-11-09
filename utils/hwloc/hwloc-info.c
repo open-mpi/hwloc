@@ -267,10 +267,6 @@ main (int argc, char *argv[])
   size_t typelen;
   int opt;
 
-  /* enable verbose backends */
-  putenv("HWLOC_XML_VERBOSE=1");
-  putenv("HWLOC_SYNTHETIC_VERBOSE=1");
-
   callname = strrchr(argv[0], '/');
   if (!callname)
     callname = argv[0];
@@ -279,6 +275,12 @@ main (int argc, char *argv[])
   /* skip argv[0], handle options */
   argc--;
   argv++;
+
+  hwloc_utils_check_api_version(callname);
+
+  /* enable verbose backends */
+  putenv("HWLOC_XML_VERBOSE=1");
+  putenv("HWLOC_SYNTHETIC_VERBOSE=1");
 
   err = hwloc_topology_init (&topology);
   if (err)

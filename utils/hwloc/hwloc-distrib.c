@@ -53,16 +53,18 @@ int main(int argc, char *argv[])
   int opt;
   int err;
 
+  callname = argv[0];
+  /* skip argv[0], handle options */
+  argv++;
+  argc--;
+
+  hwloc_utils_check_api_version(callname);
+
   /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
   putenv("HWLOC_SYNTHETIC_VERBOSE=1");
 
   hwloc_topology_init(&topology);
-
-  callname = argv[0];
-  /* skip argv[0], handle options */
-  argv++;
-  argc--;
 
   while (argc >= 1) {
     if (!strcmp(argv[0], "--")) {

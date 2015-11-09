@@ -77,6 +77,13 @@ int main(int argc, char *argv[])
   hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
   char *callname;
 
+  callname = argv[0];
+  /* skip argv[0], handle options */
+  argv++;
+  argc--;
+
+  hwloc_utils_check_api_version(callname);
+
   cpubind_set = hwloc_bitmap_alloc();
   membind_set = hwloc_bitmap_alloc();
 
@@ -92,11 +99,6 @@ int main(int argc, char *argv[])
     loaded = 1; \
   } \
 } while (0)
-
-  callname = argv[0];
-  /* skip argv[0], handle options */
-  argv++;
-  argc--;
 
   while (argc >= 1) {
     if (!strcmp(argv[0], "--")) {
