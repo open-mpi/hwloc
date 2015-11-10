@@ -6,6 +6,8 @@
 #include <private/autogen/config.h>
 #include <hwloc.h>
 
+#include "misc.h"
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -323,13 +325,13 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   return 0;
 }
 
-static void usage(const char *callname)
+void usage(const char *callname, FILE *where)
 {
-  fprintf(stderr, "Usage : %s [ options ] ... [ outdir ]\n", callname);
-  fprintf(stderr, "  outdir is an optional output directory instead of cpuid/\n");
-  fprintf(stderr, "Options:\n");
-  fprintf(stderr, "  -c <n>     Only gather for logical processor with logical index <n>\n");
-  fprintf(stderr, "  -h --help  Show this usage\n");
+  fprintf(where, "Usage : %s [ options ] ... [ outdir ]\n", callname);
+  fprintf(where, "  outdir is an optional output directory instead of cpuid/\n");
+  fprintf(where, "Options:\n");
+  fprintf(where, "  -c <n>     Only gather for logical processor with logical index <n>\n");
+  fprintf(where, "  -h --help  Show this usage\n");
 }
 
 int main(int argc, const char * const argv[])
@@ -359,7 +361,7 @@ int main(int argc, const char * const argv[])
       argc -= 2;
       argv += 2;
     } else {
-      usage(callname);
+      usage(callname, stderr);
       if (strcmp(argv[0], "-h") && strcmp(argv[0], "--help"))
 	ret = EXIT_FAILURE;
       goto out;
