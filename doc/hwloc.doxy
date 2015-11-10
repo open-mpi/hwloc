@@ -2821,7 +2821,21 @@ to fix several issues of the 1.x interface
 The ABI was broken, which means
 <b>applications must be recompiled against the new 2.0 interface</b>.
 
-To check that you are not mixing old/recent headers with a recent/old runtime library:
+To check that you are not mixing old/recent headers with a recent/old runtime library,
+check the major revision number in the API version:
+\verbatim
+#include <hwloc.h>
+  unsigned version = hwloc_get_api_version();
+  if ((version >> 16) != (HWLOC_API_VERSION >> 16)) {
+    fprintf(stderr,
+           "%s compiled for hwloc API 0x%x but running on library API 0x%x.\n"
+           "You may need to point LD_LIBRARY_PATH to the right hwloc library.\n"
+           "Aborting since the new ABI is not backward compatible.\n",
+           callname, HWLOC_API_VERSION, version);
+    exit(EXIT_FAILURE);
+  }
+\endverbatim
+To specifically detect v2.0 issues:
 \verbatim
 #include <hwloc.h>
 #if HWLOC_API_VERSION >= 0x00020000
