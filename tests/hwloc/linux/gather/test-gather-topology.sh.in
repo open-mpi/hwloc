@@ -45,9 +45,12 @@ fi
 
 tmpdir=`mktemp -d`
 
-# make sure we compare things that are comparable
-# (the tarball cannot be "this system")
-export HWLOC_THISSYSTEM=0
+# make sure other components don't report things that won't exported in the tarball
+export HWLOC_COMPONENTS=linux,stop
+# use "//" so that we gather from root but thissystem gets disabled since it's not "/".
+# therefore we only gather things that can be gathered from the tarball.
+# (if we disabled thissystem explicitly without changing fsroot, Linux would automatically disable itself).
+export HWLOC_FSROOT=//
 
 echo "Saving current system topology to XML..."
 if ! "$lstopo" --no-io "$tmpdir/save.xml" ; then
