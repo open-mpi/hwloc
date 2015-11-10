@@ -3909,13 +3909,13 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
 
 static struct hwloc_backend *
 hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
-				  const void *_data1,
+				  const void *_data1 __hwloc_attribute_unused,
 				  const void *_data2 __hwloc_attribute_unused,
 				  const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
   struct hwloc_linux_backend_data_s *data;
-  const char * fsroot_path = _data1;
+  const char * fsroot_path;
   int flags, root = -1;
 
   backend = hwloc_backend_alloc(component);
@@ -3935,6 +3935,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
 
   /* default values */
   data->is_real_fsroot = 1;
+  fsroot_path = getenv("HWLOC_FSROOT");
   if (!fsroot_path)
     fsroot_path = "/";
 

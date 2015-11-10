@@ -1642,8 +1642,6 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * file as if hwloc_topology_set_xml() had been called.
  * Setting HWLOC_SYNTHETIC enforces a synthetic topology as if
  * hwloc_topology_set_synthetic() had been called.
- * Setting HWLOC_FSROOT switches to reading the topology from the specified Linux
- * filesystem root.
  *
  * Finally, HWLOC_THISSYSTEM enforces the return value of
  * hwloc_topology_is_thissystem().

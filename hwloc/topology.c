@@ -2977,7 +2977,15 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_disc_component_force_enable(topology,
 					1 /* env force */,
 					HWLOC_DISC_COMPONENT_TYPE_CPU, "linux",
-					fsroot_path_env, NULL, NULL);
+					NULL /* backend will getenv again */, NULL, NULL);
+  }
+  if (!topology->backends) {
+    const char *cpuid_path_env = getenv("HWLOC_CPUID_PATH");
+    if (cpuid_path_env)
+      hwloc_disc_component_force_enable(topology,
+					1 /* env force */,
+					HWLOC_DISC_COMPONENT_TYPE_CPU, "x86",
+					NULL /* backend will getenv again */, NULL, NULL);
   }
   if (!topology->backends) {
     const char *synthetic_env = getenv("HWLOC_SYNTHETIC");

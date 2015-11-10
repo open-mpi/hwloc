@@ -920,6 +920,9 @@ following environment variables.
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
   <dd>switches to reading the topology from the specified
   Linux filesystem root instead of the main file-system root.
+  This directory may have been saved previously from another machine
+  with <tt>hwloc-gather-topology</tt>.
+  <br/>
   Not using the main file-system root causes hwloc_topology_is_thissystem()
   to return 0.
   For convenience, this backend provides empty binding hooks which just
@@ -933,6 +936,12 @@ following environment variables.
   instead of executing actual x86 CPUID instructions.
   This directory may have been saved previously from another machine
   with <tt>hwloc-gather-cpuid</tt>.
+  <br/>
+  It causes hwloc_topology_is_thissystem() to return 0.
+  For convenience, this backend provides empty binding hooks which just
+  return success.  To have hwloc still actually call OS-specific hooks,
+  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
+  the loaded CPUID dump is really the underlying system.
   </dd>
 
 <dt>HWLOC_COMPONENTS=list,of,components</dt>
