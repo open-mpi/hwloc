@@ -796,24 +796,6 @@ following environment variables.
   See also \ref synthetic.
   </dd>
 
-<dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
-  <dd>switches to reading the topology from the specified
-  Linux filesystem root instead of the main file-system root.
-  Not using the main file-system root causes hwloc_topology_is_thissystem()
-  to return 0.
-  For convenience, this backend provides empty binding hooks which just
-  return success.  To have hwloc still actually call OS-specific hooks,
-  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
-  the loaded file is really the underlying system.
-  </dd>
-
-<dt>HWLOC_CPUID_PATH=/path/to/cpuid/</dt>
-  <dd>forces the x86 backend to read dumped CPUIDs from the given directory
-  instead of executing actual x86 CPUID instructions.
-  This directory may have been saved previously from another machine
-  with <tt>hwloc-gather-cpuid</tt>.
-  </dd>
-
 <dt>HWLOC_XML_VERBOSE=1</dt>
 <dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
   <dd>enables verbose messages in the XML or synthetic topology backends.
@@ -935,16 +917,22 @@ following environment variables.
   PCI locality reported by the platform is used.
   </dd>
 
-<dt>HWLOC_PLUGINS_PATH=/path/to/hwloc/plugins/:...</dt>
-  <dd>changes the default search directory for plugins.
-  By default, <tt>$libdir/hwloc</tt> is used.
-  The variable may contain several colon-separated directories.
+<dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
+  <dd>switches to reading the topology from the specified
+  Linux filesystem root instead of the main file-system root.
+  Not using the main file-system root causes hwloc_topology_is_thissystem()
+  to return 0.
+  For convenience, this backend provides empty binding hooks which just
+  return success.  To have hwloc still actually call OS-specific hooks,
+  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
+  the loaded file is really the underlying system.
   </dd>
 
-<dt>HWLOC_PLUGINS_VERBOSE=1</dt>
-  <dd>displays verbose information about plugins.
-  List which directories are scanned, which files are loaded,
-  and which components are successfully loaded.
+<dt>HWLOC_CPUID_PATH=/path/to/cpuid/</dt>
+  <dd>forces the x86 backend to read dumped CPUIDs from the given directory
+  instead of executing actual x86 CPUID instructions.
+  This directory may have been saved previously from another machine
+  with <tt>hwloc-gather-cpuid</tt>.
   </dd>
 
 <dt>HWLOC_COMPONENTS=list,of,components</dt>
@@ -982,6 +970,18 @@ following environment variables.
   This is the recommended way to list the available components
   with their priority
   (all of them are <em>registered</em> at startup).
+  </dd>
+
+<dt>HWLOC_PLUGINS_PATH=/path/to/hwloc/plugins/:...</dt>
+  <dd>changes the default search directory for plugins.
+  By default, <tt>$libdir/hwloc</tt> is used.
+  The variable may contain several colon-separated directories.
+  </dd>
+
+<dt>HWLOC_PLUGINS_VERBOSE=1</dt>
+  <dd>displays verbose information about plugins.
+  List which directories are scanned, which files are loaded,
+  and which components are successfully loaded.
   </dd>
 
 </dl>
