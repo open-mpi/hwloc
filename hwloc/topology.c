@@ -2965,19 +2965,12 @@ hwloc_topology_load (struct hwloc_topology *topology)
   }
 
   /* Only apply variables if we have not changed the backend yet.
-   * Only the last one will be kept.
+   * Only the first one will be kept.
+   * Check for FSROOT first since it's for debugging so likely needs to override everything else.
    * Check for XML last (that's the one that may be set system-wide by administrators)
    * so that it's only used if other variables are not set,
    * to allow users to override easily.
    */
-  if (!topology->backends) {
-    const char *synthetic_env = getenv("HWLOC_SYNTHETIC");
-    if (synthetic_env)
-      hwloc_disc_component_force_enable(topology,
-					1 /* env force */,
-					-1, "synthetic",
-					synthetic_env, NULL, NULL);
-  }
   if (!topology->backends) {
     const char *fsroot_path_env = getenv("HWLOC_FSROOT");
     if (fsroot_path_env)
@@ -2985,6 +2978,14 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					1 /* env force */,
 					HWLOC_DISC_COMPONENT_TYPE_CPU, "linux",
 					fsroot_path_env, NULL, NULL);
+  }
+  if (!topology->backends) {
+    const char *synthetic_env = getenv("HWLOC_SYNTHETIC");
+    if (synthetic_env)
+      hwloc_disc_component_force_enable(topology,
+					1 /* env force */,
+					-1, "synthetic",
+					synthetic_env, NULL, NULL);
   }
   if (!topology->backends) {
     const char *xmlpath_env = getenv("HWLOC_XMLFILE");
