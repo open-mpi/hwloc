@@ -19,6 +19,11 @@ in v0.9.1).
 
 Version 1.11.2
 --------------
+* The x86 and linux backends may now be combined for discovering CPUs
+  through x86 CPUID and memory from the Linux kernel.
+  This is useful for working around buggy CPU information reported by Linux
+  (for instance the AMD Bulldozer/Piledriver bug below).
+  Combination is enabled by passing HWLOC_COMPONENTS=x86 in the environment.
 * Fix L3 cache sharing on AMD Opteron 63xx (Piledriver) and 62xx (Bulldozer)
   in the x86 backend. Thanks to many users who helped.
 * Fix the overzealous L3 cache sharing fix added to the x86 backend in 1.11.1
