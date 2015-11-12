@@ -2688,6 +2688,7 @@ look_sysfsnode(struct hwloc_topology *topology,
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
           hwloc_obj_t node, res_obj;
+	  int annotate;
 
 	  osnode = indexes[index_];
 
@@ -2699,22 +2700,31 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    continue;
 	  }
 
-          node = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, osnode);
-          node->cpuset = cpuset;
-          node->nodeset = hwloc_bitmap_alloc();
-          hwloc_bitmap_set(node->nodeset, osnode);
-
+	  node = hwloc_get_numanode_obj_by_os_index(topology, osnode);
+	  annotate = (node != NULL);
+	  if (!annotate) {
+	    /* create a new node */
+	    node = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, osnode);
+	    node->cpuset = cpuset;
+	    node->nodeset = hwloc_bitmap_alloc();
+	    hwloc_bitmap_set(node->nodeset, osnode);
+	  }
           hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->memory);
 
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
-          res_obj = hwloc_insert_object_by_cpuset(topology, node);
-	  if (node == res_obj) {
+
+	  if (annotate) {
 	    nodes[index_] = node;
 	  } else {
-	    /* We got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
-	     * This object disappeared, we'll ignore distances */
-	    failednodes++;
+	    res_obj = hwloc_insert_object_by_cpuset(topology, node);
+	    if (node == res_obj) {
+	      nodes[index_] = node;
+	    } else {
+	      /* We got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
+	       * This object disappeared, we'll ignore distances */
+	      failednodes++;
+	    }
 	  }
       }
 
@@ -3767,17 +3777,35 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   unsigned nbnodes;
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
+  int already_pus;
+  int already_numanodes;
   int err;
 
-  if (topology->levels[0][0]->cpuset)
-    /* somebody discovered things */
-    return -1;
+  already_pus = (topology->levels[0][0]->complete_cpuset != NULL
+		 && !hwloc_bitmap_iszero(topology->levels[0][0]->complete_cpuset));
+  /* if there are PUs, still look at memory information
+   * since x86 misses NUMA node information (unless the processor supports topoext)
+   * memory size.
+   */
+  already_numanodes = (topology->levels[0][0]->complete_nodeset != NULL
+		       && !hwloc_bitmap_iszero(topology->levels[0][0]->complete_nodeset));
+  /* if there are already NUMA nodes, we'll just annotate them with memory information,
+   * which requires the NUMA level to be connected.
+   */
+  if (already_numanodes)
+    hwloc_topology_reconnect(topology, 0);
 
-  hwloc_gather_system_info(topology, data);
-
+  /* allocate root sets in case not done yet */
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
-  /* Gather the list of admin-disabled cpus and mems */
+  /*********************************
+   * Platform information for later
+   */
+  hwloc_gather_system_info(topology, data);
+
+  /**********************
+   * Gather the list of admin-disabled cpus and mems
+   */
   hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, data->root_fd);
   if (cgroup_mntpnt || cpuset_mntpnt) {
     cpuset_name = hwloc_read_linux_cpuset_name(data->root_fd, topology->pid);
@@ -3789,21 +3817,33 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     free(cpuset_mntpnt);
   }
 
-    /* Get the machine memory attributes */
-    hwloc_get_procfs_meminfo_info(topology, data, &topology->levels[0][0]->memory);
+  /*********************
+   * Memory information
+   */
 
-    /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
-    if (look_sysfsnode(topology, data, "/sys/bus/node/devices", &nbnodes) < 0)
-      look_sysfsnode(topology, data, "/sys/devices/system/node", &nbnodes);
+  /* Get the machine memory attributes */
+  hwloc_get_procfs_meminfo_info(topology, data, &topology->levels[0][0]->memory);
 
-    /* if we found some numa nodes, the machine object has no local memory */
-    if (nbnodes) {
-      unsigned i;
-      topology->levels[0][0]->memory.local_memory = 0;
-      if (topology->levels[0][0]->memory.page_types)
-        for(i=0; i<topology->levels[0][0]->memory.page_types_len; i++)
-          topology->levels[0][0]->memory.page_types[i].count = 0;
-    }
+  /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
+  if (look_sysfsnode(topology, data, "/sys/bus/node/devices", &nbnodes) < 0)
+    look_sysfsnode(topology, data, "/sys/devices/system/node", &nbnodes);
+
+  /* if we found some numa nodes, the machine object has no local memory */
+  if (nbnodes) {
+    unsigned i;
+    topology->levels[0][0]->memory.local_memory = 0;
+    if (topology->levels[0][0]->memory.page_types)
+      for(i=0; i<topology->levels[0][0]->memory.page_types_len; i++)
+	topology->levels[0][0]->memory.page_types[i].count = 0;
+  }
+
+  /**********************
+   * CPU information
+   */
+
+  /* Don't rediscover CPU resources if already done */
+  if (already_pus)
+    goto done;
 
   /* Gather the list of cpus now */
   err = hwloc_linux_try_hardwired_cpuinfo(backend);
@@ -3838,6 +3878,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     }
 
  done:
+
+  /**********************
+   * Misc
+   */
 
   /* Gather DMI info */
   hwloc__get_dmi_id_info(data, topology->levels[0][0]);
