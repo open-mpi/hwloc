@@ -28,11 +28,6 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
-  if (!hwloc_topology_is_thissystem(topology)) {
-    hwloc_debug("%s", "\nno OpenCL detection (not thissystem)\n");
-    return 0;
-  }
-
   clret = clGetPlatformIDs(0, NULL, &nr_platforms);
   if (CL_SUCCESS != clret || !nr_platforms)
     return -1;
@@ -168,8 +163,6 @@ hwloc_opencl_component_instantiate(struct hwloc_disc_component *component,
 				   const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
-
-  /* thissystem may not be fully initialized yet, we'll check flags in discover() */
 
   backend = hwloc_backend_alloc(component);
   if (!backend)

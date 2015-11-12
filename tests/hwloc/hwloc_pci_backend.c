@@ -78,16 +78,6 @@ int main(void)
   nb = get_nb_pcidev(2, 0, xmlbuf, xmlbuflen);
   assert(nb == nbwhole);
 
-  /* make sure we don't use linuxio backend, it works fine when HWLOC_THISSYSTEM=0 */
-  putenv("HWLOC_COMPONENTS=-linuxio");
-  /* with HWLOC_THISSYSTEM=0, won't get any object */
-  nb = get_nb_pcidev(0, 0, NULL, 0);
-  assert(!nb);
-  nb = get_nb_pcidev(1, 0, NULL, 0);
-  assert(!nb);
-  nb = get_nb_pcidev(2, 0, NULL, 0);
-  assert(!nb);
-
   hwloc_free_xmlbuffer(topology, xmlbuf);
   hwloc_topology_destroy(topology);
 

@@ -125,8 +125,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
   /* Add BGQ specific information */
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "BGQ");
-  if (topology->is_thissystem)
-    hwloc_add_uname_info(topology, NULL);
+  hwloc_add_uname_info(topology, NULL);
   return 0;
 }
 

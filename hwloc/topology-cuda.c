@@ -54,11 +54,6 @@ hwloc_cuda_discover(struct hwloc_backend *backend)
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
-  if (!hwloc_topology_is_thissystem(topology)) {
-    hwloc_debug("%s", "\nno CUDA detection (not thissystem)\n");
-    return 0;
-  }
-
   cures = cudaGetDeviceCount(&nb);
   if (cures)
     return -1;
@@ -125,8 +120,6 @@ hwloc_cuda_component_instantiate(struct hwloc_disc_component *component,
                                  const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
-
-  /* thissystem may not be fully initialized yet, we'll check flags in discover() */
 
   backend = hwloc_backend_alloc(component);
   if (!backend)

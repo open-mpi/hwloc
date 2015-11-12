@@ -254,8 +254,7 @@ hwloc_look_hpux(struct hwloc_backend *backend)
   topology->support.discovery->pu = 1;
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "HP-UX");
-  if (topology->is_thissystem)
-    hwloc_add_uname_info(topology, NULL);
+  hwloc_add_uname_info(topology, NULL);
   return 0;
 }
 

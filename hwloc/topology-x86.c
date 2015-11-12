@@ -1205,14 +1205,8 @@ hwloc_x86_discover(struct hwloc_backend *backend)
   int alreadypus = 0;
   int ret;
 
-  if (!data->src_cpuiddump_path) {
+  if (!data->src_cpuiddump_path)
     data->nbprocs = hwloc_fallback_nbprocessors(topology);
-
-    if (!topology->is_thissystem) {
-      hwloc_debug("%s", "\nno x86 detection (not thissystem)\n");
-      return 0;
-    }
-  }
 
   if (topology->levels[0][0]->cpuset) {
     /* somebody else discovered things */

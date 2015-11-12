@@ -923,6 +923,10 @@ following environment variables.
   This directory may have been saved previously from another machine
   with <tt>hwloc-gather-topology</tt>.
   <br/>
+  One should likely also set <tt>HWLOC_COMPONENTS=linux,linuxio,stop</tt>
+  so that non-Linux backends are disabled
+  (the <tt>-i</tt> option of command-line tools takes care of both).
+  <br/>
   Not using the main file-system root causes hwloc_topology_is_thissystem()
   to return 0.
   For convenience, this backend provides empty binding hooks which just
@@ -936,6 +940,10 @@ following environment variables.
   instead of executing actual x86 CPUID instructions.
   This directory may have been saved previously from another machine
   with <tt>hwloc-gather-cpuid</tt>.
+  <br/>
+  One should likely also set <tt>HWLOC_COMPONENTS=x86,stop</tt>
+  so that non-x86 backends are disabled
+  (the <tt>-i</tt> option of command-line tools takes care of both).
   <br/>
   It causes hwloc_topology_is_thissystem() to return 0.
   For convenience, this backend provides empty binding hooks which just
