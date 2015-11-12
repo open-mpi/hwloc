@@ -121,7 +121,7 @@ struct hwloc_backend {
   /** \private Reserved for the core. Used internally to list backends topology->backends. */
   struct hwloc_backend * next;
 
-  /** \brief Backend flags, as an OR'ed set of ::hwloc_backend_flag_e */
+  /** \brief Backend flags, currently always 0. */
   unsigned long flags;
 
   /** \brief Backend-specific 'is_thissystem' property.
@@ -145,13 +145,6 @@ struct hwloc_backend {
   /** \brief Callback used by the PCI backend to retrieve the locality of a PCI object from the OS/cpu backend.
    * May be NULL. */
   int (*get_pci_busid_cpuset)(struct hwloc_backend *backend, struct hwloc_pcidev_attr_s *busid, hwloc_bitmap_t cpuset);
-};
-
-/** \brief Backend flags */
-enum hwloc_backend_flag_e {
-  /** \brief Levels should be reconnected before this backend discover() is used.
-   * \hideinitializer */
-  HWLOC_BACKEND_FLAG_NEED_LEVELS = (1UL<<0)
 };
 
 /** \brief Allocate a backend structure, set good default values, initialize backend->component and topology, etc.

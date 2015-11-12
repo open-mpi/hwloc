@@ -482,8 +482,6 @@ extern "C" {
 #define hwloc_disc_component HWLOC_NAME(disc_component)
 
 #define hwloc_backend HWLOC_NAME(backend)
-#define hwloc_backend_flag_e HWLOC_NAME(backend_flag_e)
-#define HWLOC_BACKEND_FLAG_NEED_LEVELS HWLOC_NAME_CAPS(BACKEND_FLAG_NEED_LEVELS)
 
 #define hwloc_backend_alloc HWLOC_NAME(backend_alloc)
 #define hwloc_backend_enable HWLOC_NAME(backend_enable)

@@ -2515,13 +2515,6 @@ hwloc_discover(struct hwloc_topology *topology)
       goto next_cpubackend;
     if (!backend->discover)
       goto next_cpubackend;
-
-    if (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS) {
-      hwloc_debug("Backend %s forcing a reconnect of levels\n", backend->component->name);
-      if (hwloc_topology_reconnect(topology, 0) < 0)
-	return -1;
-    }
-
     backend->discover(backend);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
@@ -2613,13 +2606,6 @@ next_cpubackend:
       goto next_noncpubackend;
     if (!backend->discover)
       goto next_noncpubackend;
-
-    if (backend->flags & HWLOC_BACKEND_FLAG_NEED_LEVELS) {
-      hwloc_debug("Backend %s forcing a reconnect of levels\n", backend->component->name);
-      if (hwloc_topology_reconnect(topology, 0) < 0)
-	return -1;
-    }
-
     backend->discover(backend);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 

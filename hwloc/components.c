@@ -679,7 +679,7 @@ hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *back
   struct hwloc_backend **pprev;
 
   /* check backend flags */
-  if (backend->flags & (~(HWLOC_BACKEND_FLAG_NEED_LEVELS))) {
+  if (backend->flags) {
     fprintf(stderr, "Cannot enable %s discovery component `%s' with unknown flags %lx\n",
 	    hwloc_disc_component_type_string(backend->component->type), backend->component->name, backend->flags);
     return -1;
