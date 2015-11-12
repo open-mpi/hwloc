@@ -319,6 +319,15 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed os_index)
  */
 HWLOC_DECLSPEC int hwloc_obj_add_children_sets(hwloc_obj_t obj);
 
+/** \brief Request a reconnection of children and levels in the topology.
+ *
+ * May be used by backends during discovery if they need arrays or lists
+ * of object within levels or children to be fully connected.
+ *
+ * \p flags is currently unused, must 0.
+ */
+HWLOC_DECLSPEC int hwloc_topology_reconnect(hwloc_topology_t topology, unsigned long flags __hwloc_attribute_unused);
+
 /** \brief Make sure that plugins can lookup core symbols.
  *
  * This is a sanity check to avoid lazy-lookup failures when libhwloc

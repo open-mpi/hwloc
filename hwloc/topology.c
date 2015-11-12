@@ -603,7 +603,6 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
 
 static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
 static void propagate_total_memory(hwloc_obj_t obj);
-static int hwloc_topology_reconnect(hwloc_topology_t topology, unsigned long flags __hwloc_attribute_unused);
 
 int
 hwloc_topology_dup(hwloc_topology_t *newp,
@@ -2424,9 +2423,13 @@ hwloc_connect_levels(hwloc_topology_t topology)
   return 0;
 }
 
-static int
-hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags __hwloc_attribute_unused)
+int
+hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags)
 {
+  if (flags) {
+    errno = EINVAL;
+    return -1;
+  }
   if (!topology->modified)
     return 0;
 

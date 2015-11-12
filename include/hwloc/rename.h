@@ -504,6 +504,7 @@ extern "C" {
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_obj_add_children_sets HWLOC_NAME(add_children_sets)
+#define hwloc_topology_reconnect HWLOC_NAME(topology_reconnect)
 
 #define hwloc_filter_check_pcidev_subtype_important HWLOC_NAME(filter_check_pcidev_subtype_important)
 #define hwloc_filter_check_osdev_subtype_important HWLOC_NAME(filter_check_osdev_subtype_important)
