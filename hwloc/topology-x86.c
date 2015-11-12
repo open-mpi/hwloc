@@ -1217,6 +1217,7 @@ hwloc_x86_discover(struct hwloc_backend *backend)
     }
 
     /* several object types were added, we can't easily complete, just annotate a bit */
+    hwloc_topology_reconnect(topology, 0);
     ret = hwloc_look_x86(backend, 0);
     if (ret)
       hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
@@ -1353,7 +1354,6 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
   }
 
   backend->private_data = data;
-  backend->flags = HWLOC_BACKEND_FLAG_NEED_LEVELS;
   backend->discover = hwloc_x86_discover;
   backend->disable = hwloc_x86_backend_disable;
 
