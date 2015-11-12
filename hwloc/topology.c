@@ -2230,25 +2230,21 @@ hwloc_connect_io_misc_levels(hwloc_topology_t topology)
   topology->bridge_level = NULL;
   topology->bridge_nbobjects = 0;
   topology->first_bridge = topology->last_bridge = NULL;
-  topology->type_depth[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_DEPTH_BRIDGE;
 
   free(topology->pcidev_level);
   topology->pcidev_level = NULL;
   topology->pcidev_nbobjects = 0;
   topology->first_pcidev = topology->last_pcidev = NULL;
-  topology->type_depth[HWLOC_OBJ_PCI_DEVICE] = HWLOC_TYPE_DEPTH_PCI_DEVICE;
 
   free(topology->osdev_level);
   topology->osdev_level = NULL;
   topology->osdev_nbobjects = 0;
   topology->first_osdev = topology->last_osdev = NULL;
-  topology->type_depth[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_DEPTH_OS_DEVICE;
 
   free(topology->misc_level);
   topology->misc_level = NULL;
   topology->misc_nbobjects = 0;
   topology->first_misc = topology->last_misc = NULL;
-  topology->type_depth[HWLOC_OBJ_MISC] = HWLOC_TYPE_DEPTH_MISC;
 
   hwloc_list_io_misc_objects(topology, topology->levels[0][0]);
 
@@ -2277,8 +2273,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
   topology->nb_levels = 1;
   /* don't touch next_group_depth, the Group objects are still here */
 
-  /* initialize all depth to unknown */
-  for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_TYPE_MAX; l++)
+  /* initialize all non-IO/non-Misc depths to unknown */
+  for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_MISC; l++)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
 
   /* initialize root type depth */
@@ -2690,6 +2686,7 @@ void
 hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
   struct hwloc_obj *root_obj;
+  unsigned l;
 
   /* reset support */
   memset(&topology->binding_hooks, 0, sizeof(topology->binding_hooks));
@@ -2711,6 +2708,13 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->first_osdev = topology->last_osdev = NULL;
   topology->misc_level = NULL;
   topology->first_misc = topology->last_misc = NULL;
+  /* sane values to type_depth */
+  for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_MISC; l++)
+    topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  topology->type_depth[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_DEPTH_BRIDGE;
+  topology->type_depth[HWLOC_OBJ_PCI_DEVICE] = HWLOC_TYPE_DEPTH_PCI_DEVICE;
+  topology->type_depth[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_DEPTH_OS_DEVICE;
+  topology->type_depth[HWLOC_OBJ_MISC] = HWLOC_TYPE_DEPTH_MISC;
 
   /* Create the actual machine object, but don't touch its attributes yet
    * since the OS backend may still change the object into something else
