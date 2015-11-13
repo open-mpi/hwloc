@@ -1,5 +1,5 @@
-Machine (P#0 total=16468292KB DMIProductName="PowerEdge 2950" DMIProductVersion= DMIBoardVendor="Dell Inc." DMIBoardName=0NR282 DMIBoardVersion=A00 DMIBoardAssetTag= DMIChassisVendor="Dell Inc." DMIChassisType=23 DMIChassisVersion= DMIChassisAssetTag= DMIBIOSVendor="Dell Inc." DMIBIOSVersion=2.3.1 DMIBIOSDate=04/29/2008 DMISysVendor="Dell Inc." Backend=Linux)
-  NUMANode L#0 (P#0 local=16468292KB total=16468292KB)
+Machine (P#0 total=16772032KB DMIProductName="PowerEdge 2950" DMIProductVersion= DMIBoardVendor="Dell Inc." DMIBoardName=0NR282 DMIBoardVersion=A00 DMIBoardAssetTag= DMIChassisVendor="Dell Inc." DMIChassisType=23 DMIChassisVersion= DMIChassisAssetTag= DMIBIOSVendor="Dell Inc." DMIBIOSVersion=2.3.1 DMIBIOSDate=04/29/2008 DMISysVendor="Dell Inc." Backend=Linux)
+  NUMANode L#0 (P#0 local=16772032KB total=16772032KB)
     Package L#0 (P#0 CPUModel="Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz")
       L2Cache L#0 (size=4096KB linesize=64 ways=16)
         L1dCache L#0 (size=32KB linesize=64 ways=8)

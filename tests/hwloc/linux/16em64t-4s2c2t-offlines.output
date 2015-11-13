@@ -1,5 +1,5 @@
-Machine (P#0 Backend=Linux)
-  NUMANode L#0 (P#0)
+Machine (P#0 total=16772456KB Backend=Linux)
+  NUMANode L#0 (P#0 local=16772456KB total=16772456KB)
     Package L#0 (P#0 CPUModel="Intel(R) Xeon(TM) CPU 2.60GHz")
       L3Cache L#0 (size=4096KB linesize=64 ways=16)
         L2Cache L#0 (size=1024KB linesize=64 ways=8)

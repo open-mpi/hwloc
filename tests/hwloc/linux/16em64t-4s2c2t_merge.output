@@ -1,4 +1,4 @@
-NUMANode (P#0)
+NUMANode (P#0 local=16772456KB total=16772456KB)
   Package L#0 (P#0 CPUModel="Intel(R) Xeon(TM) CPU 2.60GHz")
     Core L#0 (P#0)
       PU L#0 (P#0)

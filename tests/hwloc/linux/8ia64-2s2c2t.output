@@ -1,5 +1,5 @@
-Machine (P#0 total=16591312KB Backend=Linux)
-  NUMANode L#0 (P#0 local=16591312KB total=16591312KB)
+Machine (P#0 total=16709376KB Backend=Linux)
+  NUMANode L#0 (P#0 local=16709376KB total=16709376KB)
     Package L#0 (P#0)
       L3Cache L#0 (size=9216KB linesize=128 ways=9)
         L2dCache L#0 (size=256KB linesize=128 ways=8)
