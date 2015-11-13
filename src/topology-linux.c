@@ -2838,18 +2838,17 @@ look_sysfsnode(struct hwloc_topology *topology,
   else
     return -1;
 
-  if (nbnodes <= 1)
-    {
-      hwloc_bitmap_free(nodeset);
-      return 0;
-    }
+  if (!nbnodes || (nbnodes == 1 && !data->is_knl)) { /* always keep NUMA for KNL, or configs might look too different */
+    hwloc_bitmap_free(nodeset);
+    return 0;
+  }
 
   /* For convenience, put these declarations inside a block. */
 
   {
       hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
       unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
-      float * distances;
+      float * distances = NULL;
       int failednodes = 0;
       unsigned index_;
 
@@ -2931,8 +2930,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	 * a distance matrix that would likely be wrong anyway.
 	 */
 	nbnodes -= failednodes;
-	distances = NULL;
-      } else {
+      } else if (nbnodes > 1) {
 	distances = calloc(nbnodes*nbnodes, sizeof(float));
       }
 
