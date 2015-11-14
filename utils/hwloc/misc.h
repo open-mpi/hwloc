@@ -233,8 +233,10 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
   case HWLOC_UTILS_INPUT_FSROOT: {
 #ifdef HWLOC_LINUX_SYS
     char *env;
-    asprintf(&env, "HWLOC_FSROOT=%s", input);
-    putenv(env);
+    if (asprintf(&env, "HWLOC_FSROOT=%s", input) < 0)
+      fprintf(stderr, "Failed to pass input filesystem root directory to HWLOC_FSROOT environment variable\n");
+    else
+      putenv(env);
     env = getenv("HWLOC_COMPONENTS");
     if (env)
       fprintf(stderr, "Cannot force linux and linuxio components first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
@@ -251,8 +253,12 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 #ifdef HWLOC_HAVE_X86_CPUID
     size_t len = strlen("HWLOC_CPUID_PATH=")+strlen(input)+1;
     char *env = malloc(len);
-    snprintf(env, len, "HWLOC_CPUID_PATH=%s", input);
-    putenv(env);
+    if (!env) {
+      fprintf(stderr, "Failed to pass input cpuid dump path to HWLOC_CPUID_PATH environment variable\n");
+    } else {
+      snprintf(env, len, "HWLOC_CPUID_PATH=%s", input);
+      putenv(env);
+    }
     env = getenv("HWLOC_COMPONENTS");
     if (env)
       fprintf(stderr, "Cannot force x86 component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
