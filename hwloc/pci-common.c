@@ -119,9 +119,10 @@ hwloc_pci_discovery_init(struct hwloc_topology *topology)
       if (!err) {
 	if (st.st_size <= 64*1024) { /* random limit large enough to store multiple cpusets for thousands of PUs */
 	  buffer = malloc(st.st_size+1);
-	  (void) read(fd, buffer, st.st_size);
-	  buffer[st.st_size] = '\0';
-	  hwloc_pci_forced_locality_parse(topology, buffer);
+	  if (read(fd, buffer, st.st_size) == st.st_size) {
+	    buffer[st.st_size] = '\0';
+	    hwloc_pci_forced_locality_parse(topology, buffer);
+	  }
 	  free(buffer);
 	} else {
 	  fprintf(stderr, "Ignoring HWLOC_PCI_LOCALITY file `%s' too large (%lu bytes)\n",
