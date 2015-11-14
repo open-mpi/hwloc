@@ -2,6 +2,7 @@
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2015 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -292,7 +293,7 @@ NETLOC_DECLSPEC int netloc_lookup_table_init(netloc_dt_lookup_table_t table, siz
  * Returns
  *   The allocated size of the lookup table
  */
-NETLOC_DECLSPEC int netloc_lookup_table_size_alloc(netloc_dt_lookup_table_t table);
+NETLOC_DECLSPEC size_t netloc_lookup_table_size_alloc(netloc_dt_lookup_table_t table);
 
 /**
  * Append an entry to the lookup table

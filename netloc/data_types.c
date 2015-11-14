@@ -2,6 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2015 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -707,7 +708,7 @@ json_t* netloc_dt_node_t_json_encode(netloc_node_t *node)
 netloc_node_t* netloc_dt_node_t_json_decode(struct netloc_dt_lookup_table *edge_table, json_t *json_node)
 {
     netloc_node_t *node = NULL;
-    size_t i;
+    int i;
     json_t *edge_list = NULL;
     char * key = NULL;
 

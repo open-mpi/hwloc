@@ -2,6 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013-2014 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2015 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -109,6 +110,7 @@ static int compute_shortest_path_dijkstra(netloc_data_collection_handle_t *handl
 {
     int exit_status = NETLOC_SUCCESS;
     int i;
+    size_t j;
     pq_queue_t *queue = NULL;
     int *distance = NULL;
     bool *not_seen = NULL;
@@ -174,11 +176,11 @@ static int compute_shortest_path_dijkstra(netloc_data_collection_handle_t *handl
      * Initialize the data structures
      */
     // Make sure to initialize the arrays
-    for( i = 0; i < netloc_lookup_table_size(handle->node_list); ++i){
-        distance[i] = INT_MAX;
-        not_seen[i] = true;
-        prev_node[i] = NULL;
-        prev_edge[i] = NULL;
+    for( j = 0; j < netloc_lookup_table_size(handle->node_list); ++j){
+        distance[j] = INT_MAX;
+        not_seen[j] = true;
+        prev_node[j] = NULL;
+        prev_edge[j] = NULL;
     }
 
     i = 0;

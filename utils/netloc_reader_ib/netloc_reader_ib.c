@@ -3,6 +3,7 @@
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  *
+ * Copyright © 2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * $HEADER$
@@ -1197,7 +1198,7 @@ static int process_nodes_dat(netloc_data_collection_handle_t *dc_handle, char *d
     netloc_node_t *node = NULL;
     netloc_edge_t *edge = NULL;
 
-    int i;
+    size_t i;
     json_t * json_edge = NULL;
 
     /*

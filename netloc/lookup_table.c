@@ -2,6 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2015 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -86,7 +87,7 @@ int netloc_dt_lookup_table_iterator_t_destruct(struct netloc_dt_lookup_table_ite
     return NETLOC_SUCCESS;
 }
 
-int netloc_lookup_table_size(struct netloc_dt_lookup_table *table) {
+size_t netloc_lookup_table_size(struct netloc_dt_lookup_table *table) {
     if( NULL == table ) {
         return 0;
     } else {
@@ -94,7 +95,7 @@ int netloc_lookup_table_size(struct netloc_dt_lookup_table *table) {
     }
 }
 
-int netloc_lookup_table_size_alloc(struct netloc_dt_lookup_table *table) {
+size_t netloc_lookup_table_size_alloc(struct netloc_dt_lookup_table *table) {
     if( NULL == table ) {
         return 0;
     } else {
