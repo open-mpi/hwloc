@@ -303,7 +303,7 @@ void output_synthetic(struct lstopo_output *loutput, const char *filename)
   if (length < 0)
     return;
 
-  if (length >= sizeof(sbuffer)) {
+  if (length >= (int) sizeof(sbuffer)) {
     dbuffer = malloc(length+1 /* \0 */);
     if (!dbuffer)
       return;
