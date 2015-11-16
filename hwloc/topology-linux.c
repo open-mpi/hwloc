@@ -2807,7 +2807,6 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  if (!atoi(online)) {
 	    fclose(fd);
 	    hwloc_debug("os proc %lu is offline\n", cpu);
-	    hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, cpu);
 	    hwloc_bitmap_set(unknownset, cpu);
 	    continue;
 	  }
@@ -2820,7 +2819,6 @@ look_sysfscpu(struct hwloc_topology *topology,
       if (hwloc_access(str, X_OK, data->root_fd) < 0 && errno == ENOENT) {
 	hwloc_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
 		   cpu, path, cpu);
-	hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, cpu);
 	hwloc_bitmap_set(unknownset, cpu);
 	continue;
       }
@@ -3132,6 +3130,8 @@ package_done:
     hwloc_insert_object_by_cpuset(topology, packages);
     packages = next;
   }
+
+  hwloc_bitmap_andnot(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, unknownset);
 
   if (0 == caches_added)
     look_powerpc_device_tree(topology, data);
