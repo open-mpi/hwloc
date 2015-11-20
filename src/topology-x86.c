@@ -660,6 +660,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       }
       unit = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, unitid);
       unit->cpuset = unit_cpuset;
+      hwloc_obj_add_info(unit, "Type", "ComputeUnit");
       hwloc_debug_1arg_bitmap("os unit %u has cpuset %s\n",
           unitid, unit_cpuset);
       hwloc_insert_object_by_cpuset(topology, unit);
