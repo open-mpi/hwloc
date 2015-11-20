@@ -3045,6 +3045,9 @@ package_done:
 	if (!hwloc_filter_check_keep_object_type(topology, otype))
 	  continue;
 
+	/* FIXME: if Bulldozer/Piledriver, add compute unit Groups when L2/L1i filtered-out */
+	/* FIXME: if KNL, add tile Groups when L2/L1i filtered-out */
+
 	/* get the cache size */
 	sprintf(mappath, "%s/cpu%d/cache/index%d/size", path, i, j);
 	fd = hwloc_fopen(mappath, "r", data->root_fd);
