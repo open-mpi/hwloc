@@ -28,6 +28,7 @@ Version 1.11.2
   in the x86 backend. Thanks to many users who helped.
 * Fix the overzealous L3 cache sharing fix added to the x86 backend in 1.11.1
   for AMD Opteron 61xx (Magny-Cours) processors.
+* Fix the management on alloc_membind() allocation failures on AIX.
 
 
 Version 1.11.1
