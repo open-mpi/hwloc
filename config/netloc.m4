@@ -81,7 +81,10 @@ EOF])
 ])dnl
 
 AC_DEFUN([NETLOC_CHECK_PLATFORM], [
+    AC_CHECK_FUNC([asprintf])
     AC_MSG_CHECKING([if netloc supports this platform])
+    AS_IF([test "$ac_cv_func_asprintf" != "yes"],
+          [$1=no netloc_missing_reason=" (asprintf missing)"])
     AS_IF([test "$hwloc_windows" = "yes"],
           [$1=no netloc_missing_reason=" (Windows platform)"])
     AC_MSG_RESULT([$$1$netloc_missing_reason])
