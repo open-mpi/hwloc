@@ -2168,6 +2168,12 @@ hwloc_level_filter_objects(hwloc_topology_t topology,
   /* count interesting objects and allocate the new array */
   for(i=0, nnew=0; i<nold; i++)
     nnew += hwloc_level_filter_object(topology, NULL, old[i]);
+  if (!nnew) {
+    *objs = NULL;
+    *n_objs = 0;
+    free(old);
+    return 0;
+  }
   new = malloc(nnew * sizeof(hwloc_obj_t));
   if (!new) {
     free(old);
