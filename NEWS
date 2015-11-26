@@ -30,6 +30,8 @@ Version 1.11.2
   for AMD Opteron 61xx (Magny-Cours) processors.
 * Fix the management on alloc_membind() allocation failures on AIX, HP-UX
   and OSF/Tru64.
+* Fix spurious failures to load with ENOMEM on AIX in case of Misc objects
+  below PUs.
 
 
 Version 1.11.1
