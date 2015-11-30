@@ -3637,18 +3637,13 @@ hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned nump
 
 static int
 look_cpuinfo(struct hwloc_topology *topology,
-	     struct hwloc_linux_backend_data_s *data,
-	     const char *path, hwloc_bitmap_t online_cpuset)
+	     struct hwloc_linux_cpuinfo_proc * Lprocs,
+	     unsigned numprocs, hwloc_bitmap_t online_cpuset)
 {
-  struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
-  struct hwloc_obj_info_s *global_infos = NULL;
-  unsigned global_infos_count = 0;
   /* P for physical/OS index, L for logical (e.g. in we order we get them, not in the final hwloc logical order) */
   unsigned *Lcore_to_Pcore;
   unsigned *Lcore_to_Ppkg; /* needed because Lcore is equivalent to Pcore+Ppkg, not to Pcore alone */
   unsigned *Lpkg_to_Ppkg;
-  int _numprocs;
-  unsigned numprocs;
   unsigned numpkgs=0;
   unsigned numcores=0;
   unsigned long Lproc;
@@ -3656,20 +3651,6 @@ look_cpuinfo(struct hwloc_topology *topology,
   unsigned missingcore;
   unsigned i,j;
   hwloc_bitmap_t cpuset;
-
-  /* parse the entire cpuinfo first, fill the Lprocs array and numprocs */
-  _numprocs = hwloc_linux_parse_cpuinfo(data, path, &Lprocs, &global_infos, &global_infos_count);
-
-
-  /* setup root info */
-  hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
-		    &global_infos, &global_infos_count);
-
-
-  if (_numprocs <= 0)
-    /* found no processor */
-    return -1;
-  numprocs = _numprocs;
 
   /* initialize misc arrays, there can be at most numprocs entries */
   Lcore_to_Pcore = malloc(numprocs * sizeof(*Lcore_to_Pcore));
@@ -3791,8 +3772,6 @@ look_cpuinfo(struct hwloc_topology *topology,
   free(Lcore_to_Pcore);
   free(Lcore_to_Ppkg);
   free(Lpkg_to_Ppkg);
-
-  hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
   return 0;
 }
 
@@ -4023,13 +4002,19 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     /* No cpuset support for now.  */
     /* No sys support for now.  */
     while ((dirent = readdir(nodes_dir)) != NULL) {
+      struct hwloc_linux_cpuinfo_proc * machine_Lprocs = NULL;
+      struct hwloc_obj_info_s *machine_global_infos = NULL;
+      unsigned machine_global_infos_count = 0;
+      int machine_numprocs = 0;
       unsigned long node;
       if (strncmp(dirent->d_name, "node", 4))
 	continue;
       machine_online_set = hwloc_bitmap_alloc();
       node = strtoul(dirent->d_name+4, NULL, 0);
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/cpuinfo", node);
-      err = look_cpuinfo(topology, data, path, machine_online_set);
+      machine_numprocs = hwloc_linux_parse_cpuinfo(data, path, &machine_Lprocs, &machine_global_infos, &machine_global_infos_count);
+      err = look_cpuinfo(topology, machine_Lprocs, machine_numprocs, machine_online_set);
+      hwloc_linux_free_cpuinfo(machine_Lprocs, machine_numprocs, machine_global_infos, machine_global_infos_count);
       if (err < 0) {
         hwloc_bitmap_free(machine_online_set);
         continue;
@@ -4084,6 +4069,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     if (!err)
       goto done;
 
+    /* setup root info */
+    hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
+		      &global_infos, &global_infos_count);
+
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
 	|| (hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, data->root_fd) < 0
 	    && hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, data->root_fd) < 0
@@ -4091,18 +4080,20 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 	    && hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, data->root_fd) < 0)) {
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16)
 	 * or not containing anything interesting */
-      err = look_cpuinfo(topology, data, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
+      if (numprocs > 0)
+	err = look_cpuinfo(topology, Lprocs, numprocs, topology->levels[0][0]->online_cpuset);
+      else
+	err = -1;
       if (err < 0)
 	hwloc_linux_fallback_pu_level(topology);
       look_powerpc_device_tree(topology, data);
 
     } else {
+      /* sysfs */
       if (look_sysfscpu(topology, data, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
         if (look_sysfscpu(topology, data, "/sys/devices/system/cpu", Lprocs, numprocs) < 0)
 	  /* sysfs but we failed to read cpu topology, fallback */
 	  hwloc_linux_fallback_pu_level(topology);
-      hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
-			&global_infos, &global_infos_count);
     }
 
  done:
