@@ -3295,6 +3295,7 @@ hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
   return 0;
 }
 
+/* Lprocs_p set to NULL unless returns > 0 */
 static int
 hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 			  const char *path,
@@ -3442,6 +3443,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   fclose(fd);
   free(str);
   free(Lprocs);
+  *Lprocs_p = NULL;
   return -1;
 }
 
@@ -3867,8 +3869,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       struct hwloc_obj_info_s *global_infos = NULL;
       unsigned global_infos_count = 0;
       int numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos, &global_infos_count);
-      if (numprocs <= 0)
-	Lprocs = NULL;
       if (look_sysfscpu(topology, data, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
         if (look_sysfscpu(topology, data, "/sys/devices/system/cpu", Lprocs, numprocs) < 0)
 	  /* sysfs but we failed to read cpu topology, fallback */
