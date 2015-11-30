@@ -3610,8 +3610,6 @@ look_cpuinfo(struct hwloc_topology *topology,
   free(Lpkg_to_Ppkg);
 
   hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
-
-  look_powerpc_device_tree(topology, data);
   return 0;
 }
 
@@ -3872,6 +3870,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       err = look_cpuinfo(topology, data, "/proc/cpuinfo");
       if (err < 0)
 	hwloc_linux_fallback_pu_level(topology);
+      look_powerpc_device_tree(topology, data);
 
     } else {
       if (look_sysfscpu(topology, data, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
