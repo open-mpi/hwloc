@@ -378,6 +378,11 @@ int main(int argc, char *argv[])
       fprintf(stderr, "binding on cpu set %s\n", s);
       free(s);
     }
+    if (got_membind && !hwloc_bitmap_isequal(membind_set, cpubind_set)) {
+      if (verbose)
+	fprintf(stderr, "Conflicting CPU and memory binding requested, adding HWLOC_CPUBIND_NOMEMBIND flag.\n");
+      cpubind_flags |= HWLOC_CPUBIND_NOMEMBIND;
+    }
     if (single)
       hwloc_bitmap_singlify(cpubind_set);
     if (pid_number > 0)
