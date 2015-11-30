@@ -48,6 +48,7 @@ struct hwloc_linux_backend_data_s {
   struct udev *udev; /* Global udev context */
 #endif
 
+  int is_knl;
   struct utsname utsname; /* fields contain \0 when unknown */
 };
 
@@ -3792,6 +3793,28 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
    */
   numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos, &global_infos_count);
 
+  /* detect models for quirks */
+  if (numprocs > 0) {
+    /* KNL */
+    if (!strncmp(data->utsname.machine, "x86", 3)) { /* supports 32bits? */
+      unsigned i;
+      const char *cpuvendor = NULL, *cpufamilynumber = NULL, *cpumodelnumber = NULL;
+      for(i=0; i<Lprocs[0].infos_count; i++) {
+	if (!strcmp(Lprocs[0].infos[i].name, "CPUVendor")) {
+	  cpuvendor = Lprocs[0].infos[i].value;
+	} else if (!strcmp(Lprocs[0].infos[i].name, "CPUFamilyNumber")) {
+	  cpufamilynumber = Lprocs[0].infos[i].value;
+	} else if (!strcmp(Lprocs[0].infos[i].name, "CPUModelNumber")) {
+	  cpumodelnumber = Lprocs[0].infos[i].value;
+	}
+      }
+      if (cpuvendor && !strcmp(cpuvendor, "GenuineIntel")
+	  && cpufamilynumber && !strcmp(cpufamilynumber, "6")
+	  && cpumodelnumber && !strcmp(cpumodelnumber, "87"))
+	data->is_knl = 1;
+    }
+  }
+
   /**********************
    * Gather the list of admin-disabled cpus and mems
    */
@@ -3968,6 +3991,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   backend->disable = hwloc_linux_backend_disable;
 
   /* default values */
+  data->is_knl = 0;
   data->is_real_fsroot = 1;
   fsroot_path = getenv("HWLOC_FSROOT");
   if (!fsroot_path)
