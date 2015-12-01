@@ -1012,6 +1012,8 @@ following environment variables.
  HWLOC_LINUX_USE_CPUINFO
   uses /proc/cpuinfo instead of sysfs.
   may be useful in the doc for debugging?
+ HWLOC_KNL_NUMA_QUIRK
+  disables the KNL NUMA Cluster quirk in the linux backend
  HWLOC_DEBUG_CHECK
   runs sanity checks during discovery, as if \--enable-debug was passed but
   without debug messages
@@ -2932,6 +2934,33 @@ unless user-level process binding is allowed by the NetBSD kernel.
 The <tt>security.models.extensions.user_set_cpu_affinity</tt>
 sysctl variable must be set to 1 to do so.
 Otherwise, only the number of logical processors will be detected.
+
+
+\section faq_knl_numa How do I find the local MCDRAM NUMA node on Intel Knights Landing Xeon Phi?
+
+Intel Knights Landing Xeon Phi processors introduce a new memory architecture by
+possibly having two distinct local memories:
+some normal memory (DDR) and some high-bandwidth on-package memory (MCDRAM).
+Processors can be configured in various clustering modes to have up to 4 <em>Clusters</em>.
+Moreover, each <em>Cluster</em> (quarter, half or whole processor) of the processor may have its own local
+parts of the DDR and of the MCDRAM.
+
+The upcoming hwloc 2.0 will address this new architecture by presented memory
+in an improved way.
+For now, starting with 1.11.2, hwloc releases use the following inexact representation:
+
+The local normal DDR memory is available as a local NUMA node above cores as usual.
+Allocating memory from one core to its local NUMA node will therefore actually
+allocate it on the normal memory by default.
+
+The local high-bandwidth MCDRAM is a different NUMA node (without any Core or PU below it).
+It is the next sibling of the local DDR NUMA node below the same parent object.
+To allocate on the faster MCDRAM, one should first find the local NUMA node (the DDR memory,
+by looking up parent objects), and then take the next sibling to reach the local MCDRAM
+NUMA node (if any).
+
+The MCDRAM NUMA nodes may also be identified thanks to the <tt>Type</tt> info attribute
+which is set to <tt>MCDRAM</tt>.
 
 
 \section faq_phi How do I build for Intel Xeon Phi coprocessor?
