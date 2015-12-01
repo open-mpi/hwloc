@@ -2954,6 +2954,46 @@ look_sysfsnode(struct hwloc_topology *topology,
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, data->root_fd);
       }
 
+      if (data->is_knl) {
+	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
+	if (!(env && !atoi(env)) && nbnodes>=2) { /* SNC2 or SNC4, with 0 or 2/4 MCDRAM, and 0-4 DDR nodes */
+	  unsigned i, j, closest;
+	  for(i=0; i<nbnodes; i++) {
+	    if (!hwloc_bitmap_iszero(nodes[i]->cpuset))
+	      /* nodes with CPU, that's DDR, skip it */
+	      continue;
+	    hwloc_obj_add_info(nodes[i], "Type", "MCDRAM");
+
+	    /* DDR is the closest node with CPUs */
+	    closest = (unsigned)-1;
+	    for(j=0; j<nbnodes; j++) {
+	      if (j==i)
+		continue;
+	      if (hwloc_bitmap_iszero(nodes[j]->cpuset))
+		/* nodes without CPU, that's another MCDRAM, skip it */
+		continue;
+	      if (closest == (unsigned)-1 || distances[i*nbnodes+j]<distances[i*nbnodes+closest])
+		closest = j;
+	    }
+	    if (closest != (unsigned) -1) {
+	      /* Add a Group for Cluster containing this MCDRAM + DDR */
+	      hwloc_obj_t cluster = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+	      cluster->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
+	      cluster->nodeset = hwloc_bitmap_dup(nodes[i]->nodeset);
+	      hwloc_bitmap_or(cluster->cpuset, cluster->cpuset, nodes[closest]->cpuset);
+	      hwloc_bitmap_or(cluster->nodeset, cluster->nodeset, nodes[closest]->nodeset);
+	      hwloc_obj_add_info(cluster, "Type", "Cluster");
+	      hwloc_insert_object_by_cpuset(topology, cluster);
+	    }
+          }
+	  /* drop the distance matrix, it contradicts the above NUMA layout groups */
+	  free(distances);
+          free(nodes);
+          free(indexes);
+          goto out;
+	}
+      }
+
       hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
   }
 
