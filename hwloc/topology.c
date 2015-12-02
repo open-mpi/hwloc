@@ -363,9 +363,8 @@ void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *val
        /* Get pointer to next child.  */ \
         child = *pchild)
 
-/* Free an object and all its content.  */
-void
-hwloc_free_unlinked_object(hwloc_obj_t obj)
+static void
+hwloc__free_object_contents(hwloc_obj_t obj)
 {
   switch (obj->type) {
   default:
@@ -383,7 +382,36 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
   hwloc_bitmap_free(obj->nodeset);
   hwloc_bitmap_free(obj->complete_nodeset);
   hwloc_bitmap_free(obj->allowed_nodeset);
+}
+
+/* Free an object and all its content.  */
+void
+hwloc_free_unlinked_object(hwloc_obj_t obj)
+{
+  hwloc__free_object_contents(obj);
   free(obj);
+}
+
+/* Replace old with contents of new object, and make new freeable by the caller.
+ * Only updates next_sibling/first_child pointers,
+ * so may only be used during early discovery.
+ */
+static void
+hwloc_replace_linked_object(hwloc_obj_t old, hwloc_obj_t new)
+{
+  /* drop old fields */
+  hwloc__free_object_contents(old);
+  /* copy old tree pointers to new */
+  new->parent = old->parent;
+  new->next_sibling = old->next_sibling;
+  new->first_child = old->first_child;
+  new->symmetric_subtree = old->symmetric_subtree;
+  new->io_first_child = old->io_first_child;
+  new->misc_first_child = old->misc_first_child;
+  /* copy new contents to old now that tree pointers are OK */
+  memcpy(old, new, sizeof(*old));
+  /* clear new to that we may free it */
+  memset(new, 0,sizeof(*new));
 }
 
 /* Remove an object and its children from its parent and free them.
@@ -1080,6 +1108,14 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	 */
 	return child;
 
+      } else if (child->type == HWLOC_OBJ_GROUP) {
+
+	/* Replace the Group with the new object contents
+	 * and let the caller free the new object
+	 */
+	hwloc_replace_linked_object(child, obj);
+	return child;
+
       } else {
 	/* otherwise compare actual types to decide of the inclusion */
 	res = hwloc_type_cmp(obj, child);
@@ -1088,7 +1124,9 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 
     switch (res) {
       case HWLOC_OBJ_EQUAL:
-	/* Can be two objects with same type. Or one Group and anything else. */
+	/* Two objects with same type.
+	 * Groups are handled above.
+	 */
 	if (obj->type == child->type
 	    && (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE)
 	    && obj->os_index != child->os_index) {
