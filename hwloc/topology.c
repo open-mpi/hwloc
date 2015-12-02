@@ -1076,9 +1076,10 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	assert(topology->type_filter[HWLOC_OBJ_GROUP] != HWLOC_TYPE_FILTER_KEEP_ALL);
         /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not,
 	 * while some callers need to know (at least hwloc_topology_insert_group()).
-	 *
-	 * Keep EQUAL so that the Group gets merged.
+	 * The Group doesn't contain anything to keep, just let the caller free it.
 	 */
+	return child;
+
       } else {
 	/* otherwise compare actual types to decide of the inclusion */
 	res = hwloc_type_cmp(obj, child);
