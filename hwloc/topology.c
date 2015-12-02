@@ -405,7 +405,6 @@ hwloc_replace_linked_object(hwloc_obj_t old, hwloc_obj_t new)
   new->parent = old->parent;
   new->next_sibling = old->next_sibling;
   new->first_child = old->first_child;
-  new->symmetric_subtree = old->symmetric_subtree;
   new->io_first_child = old->io_first_child;
   new->misc_first_child = old->misc_first_child;
   /* copy new contents to old now that tree pointers are OK */
