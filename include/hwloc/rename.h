@@ -528,6 +528,7 @@ extern "C" {
 
 /* private/debug.h */
 
+#define hwloc_debug_enabled HWLOC_NAME(debug_enabled)
 #define hwloc_debug HWLOC_NAME(debug)
 
 /* private/misc.h */

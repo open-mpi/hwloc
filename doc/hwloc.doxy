@@ -1001,6 +1001,11 @@ following environment variables.
   and which components are successfully loaded.
   </dd>
 
+<dt>HWLOC_DEBUG_VERBOSE=0</dt>
+  <dd>disables all verbose messages that are enabled by default
+  when <tt>--enable-debug</tt> is passed to configure.
+  </dd>
+
 </dl>
 
 <!-- not documented:
