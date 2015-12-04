@@ -1494,6 +1494,10 @@ Currently only available on Linux.
 Usually added to Package objects, but can be in Machine instead if
 hwloc failed to discover any package.
 </dd>
+<dt>Inclusive (Caches)</dt>
+<dd>The inclusiveness of a cache (1 if inclusive, 0 otherwise).
+Currently only available on x86 processors.
+</dd>
 <dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
 </dd>

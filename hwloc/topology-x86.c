@@ -163,6 +163,7 @@ struct cacheinfo {
 
   unsigned linesize;
   unsigned linepart;
+  int inclusive;
   int ways;
   unsigned sets;
   unsigned long size;
@@ -217,6 +218,8 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cac
   cache->nbthreads_sharing = nbthreads_sharing;
   cache->linesize = cpuid & 0xff;
   cache->linepart = 0;
+  cache->inclusive = 0; /* old AMD (K8-K10) supposed to have exclusive caches */
+
   if (level == 1) {
     cache->ways = (cpuid >> 16) & 0xff;
     if (cache->ways == 0xff)
@@ -399,6 +402,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
+      cache->inclusive = edx & 0x2;
 
       hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
 		  cachenum, cache->level,
@@ -489,6 +493,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
         cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
+      cache->inclusive = edx & 0x2;
 
       hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
 		  cachenum, cache->level,
@@ -887,77 +892,91 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     for (j = 0; j < infos[i].numcaches; j++)
       if (infos[i].cache[j].level > level)
         level = infos[i].cache[j].level;
+  while (level > 0) {
+    hwloc_obj_cache_type_t type;
+    HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_DATA == HWLOC_OBJ_CACHE_UNIFIED+1);
+    HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_INSTRUCTION == HWLOC_OBJ_CACHE_DATA+1);
+    for (type = HWLOC_OBJ_CACHE_UNIFIED; type <= HWLOC_OBJ_CACHE_INSTRUCTION; type++) {
+      /* Look for caches of that type at level level */
+      hwloc_obj_type_t otype;
+      hwloc_bitmap_t caches_cpuset;
+      hwloc_obj_t cache;
 
-  /* Look for known types */
-  if (fulldiscovery)
-    while (level > 0) {
-      hwloc_obj_cache_type_t type;
-      HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_DATA == HWLOC_OBJ_CACHE_UNIFIED+1);
-      HWLOC_BUILD_ASSERT(HWLOC_OBJ_CACHE_INSTRUCTION == HWLOC_OBJ_CACHE_DATA+1);
-      for (type = HWLOC_OBJ_CACHE_UNIFIED; type <= HWLOC_OBJ_CACHE_INSTRUCTION; type++) {
-	/* Look for caches of that type at level level */
-	hwloc_obj_type_t otype;
-	hwloc_bitmap_t caches_cpuset;
-	hwloc_bitmap_t cache_cpuset;
-	hwloc_obj_t cache;
+      otype = hwloc_cache_type_by_depth_type(level, type);
+      if (otype == HWLOC_OBJ_TYPE_NONE)
+	continue;
+      if (!hwloc_filter_check_keep_object_type(topology, otype))
+	continue;
 
-	otype = hwloc_cache_type_by_depth_type(level, type);
-	if (otype == HWLOC_OBJ_TYPE_NONE)
+      caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
+      while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
+	for (l = 0; l < infos[i].numcaches; l++) {
+	  if (infos[i].cache[l].level == level && infos[i].cache[l].type == type)
+	    break;
+	}
+	if (l == infos[i].numcaches) {
+	  /* no cache Llevel of that type in i */
+	  hwloc_bitmap_clr(caches_cpuset, i);
 	  continue;
-	if (!hwloc_filter_check_keep_object_type(topology, otype))
-	  continue;
+	}
 
-	caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
-	while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
+	if (fulldiscovery) {
+	  /* Add caches */
+	  hwloc_bitmap_t cache_cpuset;
 	  unsigned packageid = infos[i].packageid;
-
-	  for (l = 0; l < infos[i].numcaches; l++) {
-	    if (infos[i].cache[l].level == level && infos[i].cache[l].type == type)
-	      break;
-	  }
-	  if (l == infos[i].numcaches) {
-	    /* no cache Llevel of that type in i */
-	    hwloc_bitmap_clr(caches_cpuset, i);
-	    continue;
-	  }
-
+	  unsigned cacheid = infos[i].cache[l].cacheid;
 	  /* Found a matching cache, now look for others sharing it */
-	  {
-	    unsigned cacheid = infos[i].cache[l].cacheid;
 
-	    cache_cpuset = hwloc_bitmap_alloc();
-	    for (j = i; j < nbprocs; j++) {
-	      unsigned l2;
-	      for (l2 = 0; l2 < infos[j].numcaches; l2++) {
-		if (infos[j].cache[l2].level == level && infos[j].cache[l2].type == type)
-		  break;
-	      }
-	      if (l2 == infos[j].numcaches) {
-		/* no cache Llevel of that type in j */
-		hwloc_bitmap_clr(caches_cpuset, j);
-		continue;
-	      }
-	      if (infos[j].packageid == packageid && infos[j].cache[l2].cacheid == cacheid) {
-		hwloc_bitmap_set(cache_cpuset, j);
-		hwloc_bitmap_clr(caches_cpuset, j);
-	      }
+	  cache_cpuset = hwloc_bitmap_alloc();
+	  for (j = i; j < nbprocs; j++) {
+	    unsigned l2;
+	    for (l2 = 0; l2 < infos[j].numcaches; l2++) {
+	      if (infos[j].cache[l2].level == level && infos[j].cache[l2].type == type)
+		break;
 	    }
-	    cache = hwloc_alloc_setup_object(otype, -1);
-	    cache->attr->cache.depth = level;
-	    cache->attr->cache.size = infos[i].cache[l].size;
-	    cache->attr->cache.linesize = infos[i].cache[l].linesize;
-	    cache->attr->cache.associativity = infos[i].cache[l].ways;
-	    cache->attr->cache.type = infos[i].cache[l].type;
-	    cache->cpuset = cache_cpuset;
-	    hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
-		level, cacheid, cache_cpuset);
-	    hwloc_insert_object_by_cpuset(topology, cache);
+	    if (l2 == infos[j].numcaches) {
+	      /* no cache Llevel of that type in j */
+	      hwloc_bitmap_clr(caches_cpuset, j);
+	      continue;
+	    }
+	    if (infos[j].packageid == packageid && infos[j].cache[l2].cacheid == cacheid) {
+	      hwloc_bitmap_set(cache_cpuset, j);
+	      hwloc_bitmap_clr(caches_cpuset, j);
+	    }
+	  }
+	  cache = hwloc_alloc_setup_object(otype, -1);
+	  cache->attr->cache.depth = level;
+	  cache->attr->cache.size = infos[i].cache[l].size;
+	  cache->attr->cache.linesize = infos[i].cache[l].linesize;
+	  cache->attr->cache.associativity = infos[i].cache[l].ways;
+	  cache->attr->cache.type = infos[i].cache[l].type;
+	  cache->cpuset = cache_cpuset;
+	  hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
+	  hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
+				   level, cacheid, cache_cpuset);
+	  hwloc_insert_object_by_cpuset(topology, cache);
+
+	} else {
+	  /* Annotate existing caches */
+	  hwloc_bitmap_t set = hwloc_bitmap_alloc();
+	  hwloc_obj_t cache;
+	  hwloc_bitmap_set(set, i);
+	  cache = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, otype, NULL);
+	  if (cache) {
+	    /* Found cache above that PU, annotate if no such attribute yet */
+	    if (!hwloc_obj_get_info_by_name(cache, "Inclusive"))
+	      hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
+	    hwloc_bitmap_andnot(caches_cpuset, caches_cpuset, cache->cpuset);
+	  } else {
+	    /* No cache above that PU?! */
+	    hwloc_bitmap_clr(caches_cpuset, i);
 	  }
 	}
-	hwloc_bitmap_free(caches_cpuset);
       }
-      level--;
+      hwloc_bitmap_free(caches_cpuset);
     }
+    level--;
+  }
 
   /* FIXME: if KNL and L2 disabled, add tiles instead of L2 */
 
