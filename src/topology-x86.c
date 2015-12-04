@@ -39,6 +39,7 @@ struct cacheinfo {
 
   unsigned linesize;
   unsigned linepart;
+  int inclusive;
   int ways;
   unsigned sets;
   unsigned long size;
@@ -100,6 +101,8 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, int type, uns
     cache->nbthreads_sharing = infos->max_log_proc;
   cache->linesize = cpuid & 0xff;
   cache->linepart = 0;
+  cache->inclusive = 0; /* old AMD (K8-K10) supposed to have exclusive caches */
+
   if (level == 1) {
     cache->ways = (cpuid >> 16) & 0xff;
     if (cache->ways == 0xff)
@@ -284,6 +287,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
+      cache->inclusive = edx & 0x2;
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
@@ -371,6 +375,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
         cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
+      cache->inclusive = edx & 0x2;
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
@@ -758,18 +763,14 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     for (j = 0; j < infos[i].numcaches; j++)
       if (infos[i].cache[j].level > level)
         level = infos[i].cache[j].level;
-
-  /* Look for known types */
-  if (fulldiscovery) while (level > 0) {
+  while (level > 0) {
     for (type = 1; type <= 3; type++) {
       /* Look for caches of that type at level level */
       {
 	hwloc_bitmap_t caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
-	hwloc_bitmap_t cache_cpuset;
 	hwloc_obj_t cache;
 
 	while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
-	  unsigned packageid = infos[i].packageid;
 
 	  for (l = 0; l < infos[i].numcaches; l++) {
 	    if (infos[i].cache[l].level == level && infos[i].cache[l].type == type)
@@ -781,9 +782,12 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    continue;
 	  }
 
-	  /* Found a matching cache, now look for others sharing it */
-	  {
+	  if (fulldiscovery) {
+	    /* Add caches */
+	    hwloc_bitmap_t cache_cpuset;
+	    unsigned packageid = infos[i].packageid;
 	    unsigned cacheid = infos[i].cache[l].cacheid;
+	    /* Found a matching cache, now look for others sharing it */
 
 	    cache_cpuset = hwloc_bitmap_alloc();
 	    for (j = i; j < nbprocs; j++) {
@@ -819,9 +823,30 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		break;
 	    }
 	    cache->cpuset = cache_cpuset;
+	    hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
 	    hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 		level, cacheid, cache_cpuset);
 	    hwloc_insert_object_by_cpuset(topology, cache);
+
+	  } else {
+	    /* Annotate existing caches */
+	    hwloc_bitmap_t set = hwloc_bitmap_alloc();
+	    hwloc_obj_t cache = NULL;
+	    int depth;
+	    hwloc_bitmap_set(set, i);
+	    depth = hwloc_get_cache_type_depth(topology, level,
+					       type == 1 ? HWLOC_OBJ_CACHE_DATA : type == 2 ? HWLOC_OBJ_CACHE_INSTRUCTION : HWLOC_OBJ_CACHE_UNIFIED);
+	    if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
+	      cache = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, NULL);
+	    if (cache) {
+	      /* Found cache above that PU, annotate if no such attribute yet */
+	      if (!hwloc_obj_get_info_by_name(cache, "Inclusive"))
+		hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
+	      hwloc_bitmap_andnot(caches_cpuset, caches_cpuset, cache->cpuset);
+	    } else {
+	      /* No cache above that PU?! */
+	      hwloc_bitmap_clr(caches_cpuset, i);
+	    }
 	  }
 	}
 	hwloc_bitmap_free(caches_cpuset);
