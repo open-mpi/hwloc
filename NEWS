@@ -74,7 +74,8 @@ Version 2.0.0
     HWLOC_FSROOT may be used for the same remote testing/debugging purpose.
   + hwloc_obj_type_sscanf() now fills a object attribute union instead
     of some cache-specific fields.
-  + Remove the long deprecated hwloc_obj_snprintf().
+  + Remove the deprecated hwloc_obj_snprintf(), hwloc_obj_type_of_string(),
+    hwloc_distribute[v]().
   + hwloc_obj_cpuset_snprintf() is deprecated in favor of hwloc_bitmap_snprintf().
   + Functions diff_load_xml*(), diff_export_xml*() and diff_destroy() in
     hwloc/diff.h do not need a topology as first parameter anymore.

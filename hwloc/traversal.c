@@ -203,31 +203,6 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     }
 }
 
-hwloc_obj_type_t
-hwloc_obj_type_of_string (const char * string)
-{
-  if (!strcasecmp(string, "System")) return HWLOC_OBJ_SYSTEM;
-  if (!strcasecmp(string, "Machine")) return HWLOC_OBJ_MACHINE;
-  if (!strcasecmp(string, "Misc")) return HWLOC_OBJ_MISC;
-  if (!strcasecmp(string, "Group")) return HWLOC_OBJ_GROUP;
-  if (!strcasecmp(string, "NUMANode") || !strcasecmp(string, "Node")) return HWLOC_OBJ_NUMANODE;
-  if (!strcasecmp(string, "Package") || !strcasecmp(string, "Socket") /* backward compat with v1.10 */) return HWLOC_OBJ_PACKAGE;
-  if (!strcasecmp(string, "L1Cache")) return HWLOC_OBJ_L1CACHE;
-  if (!strcasecmp(string, "L2Cache")) return HWLOC_OBJ_L2CACHE;
-  if (!strcasecmp(string, "L3Cache")) return HWLOC_OBJ_L3CACHE;
-  if (!strcasecmp(string, "L4Cache")) return HWLOC_OBJ_L4CACHE;
-  if (!strcasecmp(string, "L5Cache")) return HWLOC_OBJ_L5CACHE;
-  if (!strcasecmp(string, "L1iCache")) return HWLOC_OBJ_L1ICACHE;
-  if (!strcasecmp(string, "L2iCache")) return HWLOC_OBJ_L2ICACHE;
-  if (!strcasecmp(string, "L3iCache")) return HWLOC_OBJ_L3ICACHE;
-  if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
-  if (!strcasecmp(string, "PU")) return HWLOC_OBJ_PU;
-  if (!strcasecmp(string, "Bridge") || !strcasecmp(string, "HostBridge") || !strcasecmp(string, "PCIBridge")) return HWLOC_OBJ_BRIDGE;
-  if (!strcasecmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
-  if (!strcasecmp(string, "OSDev")) return HWLOC_OBJ_OS_DEVICE;
-  return HWLOC_OBJ_TYPE_NONE;
-}
-
 int
 hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 		      union hwloc_obj_attr_u *attrp, size_t attrsize)
