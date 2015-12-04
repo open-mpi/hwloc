@@ -32,6 +32,8 @@ Version 1.11.2
   and OSF/Tru64.
 * Fix spurious failures to load with ENOMEM on AIX in case of Misc objects
   below PUs.
+* Debug messages may be disabled at runtime by passing HWLOC_DEBUG_VERBOSE=0
+  in the environment when --enable-debug was passed to configure.
 
 
 Version 1.11.1

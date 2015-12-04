@@ -982,6 +982,11 @@ following environment variables.
   (all of them are <em>registered</em> at startup).
   </dd>
 
+<dt>HWLOC_DEBUG_VERBOSE=0</dt>
+  <dd>disables all verbose messages that are enabled by default
+  when <tt>--enable-debug</tt> is passed to configure.
+  </dd>
+
 </dl>
 
 <!-- not documented:
