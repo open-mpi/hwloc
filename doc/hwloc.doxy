@@ -3079,7 +3079,10 @@ Otherwise, only the number of logical processors will be detected.
 
 \section faq_phi How do I build for Intel Xeon Phi coprocessor?
 
-Intel Xeon Phi coprocessors usually runs a Linux environment but cross-compiling from the host is required.
+\note This section does not apply to standalone Intel Knights Landing Xeon Phi.
+
+Intel Knights Corner Xeon Phi coprocessors usually runs a Linux environment
+but cross-compiling from the host is required.
 hwloc uses standard autotools options for cross-compiling.
 For instance, to build for a <em>Knights Corner (KNC)</em> coprocessor:
 
