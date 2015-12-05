@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 	err = hwloc_diff_read(inputdiff, &firstdiff, &refname);
 	if (err < 0) {
 		fprintf(stderr, "Failed to load XML topology diff %s\n", inputdiff);
-		goto out_with_topo;
+		goto out;
 	}
 
 	/* load the input topology */
@@ -122,19 +122,19 @@ int main(int argc, char *argv[])
 		/* use the diff refname as input */
 		if (!refname) {
 			fprintf(stderr, "Couldn't find the reference topology name from the input diff %s\n", inputdiff);
-			goto out_with_diff;
+			goto out_with_topo;
 		}
 		err = hwloc_topology_set_xml(topo, refname);
 		if (err < 0) {
 			fprintf(stderr, "Failed to load XML topology %s (from input diff %s refname)\n", refname, inputdiff);
-			goto out;
+			goto out_with_topo;
 		}
 	} else {
 		/* use the given input */
 		err = hwloc_topology_set_xml(topo, input);
 		if (err < 0) {
 			fprintf(stderr, "Failed to load XML topology %s\n", input);
-			goto out;
+			goto out_with_topo;
 		}
 	}
 
@@ -145,24 +145,23 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Failed to%s apply topology diff %s, failed for hunk #%d hunk\n",
 			(patchflags & HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE) ? " reverse" : "",
 			inputdiff, -err);
-		goto out_with_diff;
+		goto out_with_topo;
 	}
 
 	err = hwloc_topology_export_xml(topo, output ? output : input);
 	if (err < 0) {
 		fprintf(stderr, "Failed to export patched topology %s\n", output);
-		goto out_with_diff;
+		goto out_with_topo;
 	}
 
-	hwloc_topology_diff_destroy(firstdiff);
 	hwloc_topology_destroy(topo);
+	hwloc_topology_diff_destroy(firstdiff);
 
 	exit(EXIT_SUCCESS);
 
-out_with_diff:
-	hwloc_topology_diff_destroy(firstdiff);
 out_with_topo:
 	hwloc_topology_destroy(topo);
+	hwloc_topology_diff_destroy(firstdiff);
 out:
 	exit(EXIT_FAILURE);
 }
