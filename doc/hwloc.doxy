@@ -1574,7 +1574,8 @@ and GID #1 of port #3.
 <dt>Type</dt>
 <dd>A better type name than the usual one.
 This may be used to specify where Groups come from.
-For instance Linux s390 <em>books</em> appear as Groups of type <em>Book</em>.
+For instance Linux S/390 <em>books</em> appear as Groups of type <em>Book</em>
+(see also \ref faq_groups).
 Block OS devices may have a Type of "Disk", "NVDIMM", "Tape", "Removable Media Device"
 or "Other".
 The Type attribute value is displayed instead of the default object type name in lstopo.
@@ -2726,6 +2727,29 @@ hello from a single thread on core #3
 \endverbatim
 
 
+\section faq_groups What are these Group objects in my topology?
+
+hwloc comes with a set of predefined object types (Core, Package, NUMA node, Caches)
+that match the vast majority of hardware platforms.
+The ::HWLOC_OBJ_GROUP type was designed for cases where this set is not sufficient.
+Groups may be used anywhere to add more structure information to the topology,
+for instance to show that 2 out of 4 NUMA nodes are actually closer than the others.
+When applicable, the <tt>Type</tt> info attribute describes why a Group
+was actually added (see also \ref attributes_info).
+
+hwloc currently uses Groups for the following reasons:
+<ul>
+<li>AMD dual-core compute units (<tt>Type=ComputeUnit</tt>, in the x86 backend),
+ but these objects are usually merged with the L2 caches.</li>
+<li>Intel x2APIC non-core and non-package levels (in the x86 backend).</li>
+<li>Windows processor groups.</li>
+<li>IBM S/390 "Books" on Linux (<tt>Type=Book</tt>).</li>
+<li>AIX unknown hierarchy levels.</li>
+<li>Distance-based groups made of close objects.</li>
+<li>I/O parents when I/O locality does not match any existing object.</li>
+</ul>
+
+
 \section faq_asymmetric What happens if my topology is asymmetric?
 
 hwloc supports asymmetric topologies even if most platforms are usually
@@ -2736,7 +2760,7 @@ multithreading, or levels of caches.
 In practice, asymmetric topologies mostly appear when intermediate groups
 are added for I/O affinity: on a 4-package machine, an I/O bus may be
 connected to 2 packages. These packages are below an additional Group
-object, while the other packages are not.
+object, while the other packages are not (see also \ref faq_groups).
 
 To understand how hwloc manages such cases, one should first remember
 the meaning of levels and cousin objects. All objects of the same type
