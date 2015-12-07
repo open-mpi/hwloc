@@ -37,6 +37,7 @@ Version 1.11.2
   below PUs.
 * Debug messages may be disabled at runtime by passing HWLOC_DEBUG_VERBOSE=0
   in the environment when --enable-debug was passed to configure.
+* Add a FAQ entry "What are these Group objects in my topology?".
 
 
 Version 1.11.1
