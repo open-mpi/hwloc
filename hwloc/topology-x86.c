@@ -680,6 +680,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	hwloc_obj_t package;
 	hwloc_bitmap_set(set, i);
 	package = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PACKAGE, NULL);
+	hwloc_bitmap_free(set);
 	if (package) {
 	  /* Found package above that PU, annotate if no such attribute yet */
 	  hwloc_x86_add_cpuinfos(package, &infos[i], 1);
