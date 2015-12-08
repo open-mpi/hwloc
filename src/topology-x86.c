@@ -838,6 +838,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 					       type == 1 ? HWLOC_OBJ_CACHE_DATA : type == 2 ? HWLOC_OBJ_CACHE_INSTRUCTION : HWLOC_OBJ_CACHE_UNIFIED);
 	    if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
 	      cache = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, NULL);
+	    hwloc_bitmap_free(set);
 	    if (cache) {
 	      /* Found cache above that PU, annotate if no such attribute yet */
 	      if (!hwloc_obj_get_info_by_name(cache, "Inclusive"))
