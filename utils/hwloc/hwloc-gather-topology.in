@@ -77,9 +77,11 @@ destdir=`mktemp -d`
 savefile() {
   local dest="$1"
   local file="$2"
-  dir=`dirname "$file"`
-  mkdir -p "$dest/$dir" 2>/dev/null
-  cat "$file" > "$dest/$file" 2>/dev/null
+  if test -r "$file"; then
+    dir=`dirname "$file"`
+    mkdir -p "$dest/$dir" 2>/dev/null
+    cat "$file" > "$dest/$file" 2>/dev/null
+  fi
 }
 
 savelink() {
