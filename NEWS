@@ -19,6 +19,13 @@ in v0.9.1).
 
 Version 1.11.2
 --------------
+* Improve NUMA support on Intel Knights Landing Xeon Phi:
+  + Always have a NUMA node, even where there is a single one.
+  + Group local NUMA nodes of normal memory (DDR) and high-bandwidth memory
+    (MCDRAM) together through "Cluster" groups so that the local MCDRAM is
+    easy to find. See "How do I find the local MCDRAM NUMA node on Intel
+    Knights Landing Xeon Phi?" in the documentation.
+  Thanks to Grzegorz Andrejczuk for the help.
 * The x86 and linux backends may now be combined for discovering CPUs
   through x86 CPUID and memory from the Linux kernel.
   This is useful for working around buggy CPU information reported by Linux
