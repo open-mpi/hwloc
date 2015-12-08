@@ -3964,6 +3964,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   DIR *nodes_dir;
   unsigned nbnodes;
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
+  struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
+  struct hwloc_obj_info_s *global_infos = NULL;
+  unsigned global_infos_count = 0;
+  int numprocs = 0;
   int already_pus;
   int err;
 
@@ -3981,6 +3985,11 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
    * Platform information for later
    */
   hwloc_gather_system_info(topology, data);
+
+  /**********************
+   * /proc/cpuinfo
+   */
+  numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos, &global_infos_count);
 
   /**********************
    * Gather the list of admin-disabled cpus and mems
@@ -4089,17 +4098,12 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 	hwloc_linux_fallback_pu_level(topology);
 
     } else {
-      struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
-      struct hwloc_obj_info_s *global_infos = NULL;
-      unsigned global_infos_count = 0;
-      int numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos, &global_infos_count);
       if (look_sysfscpu(topology, data, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
         if (look_sysfscpu(topology, data, "/sys/devices/system/cpu", Lprocs, numprocs) < 0)
 	  /* sysfs but we failed to read cpu topology, fallback */
 	  hwloc_linux_fallback_pu_level(topology);
       hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
 			&global_infos, &global_infos_count);
-      hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
     }
 
  done:
@@ -4125,6 +4129,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   /* data->utsname was filled with real uname or \0, we can safely pass it */
   hwloc_add_uname_info(topology, &data->utsname);
 
+  hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
   return 1;
 }
 
