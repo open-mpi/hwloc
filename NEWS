@@ -26,6 +26,11 @@ Version 1.11.2
     easy to find. See "How do I find the local MCDRAM NUMA node on Intel
     Knights Landing Xeon Phi?" in the documentation.
   Thanks to Grzegorz Andrejczuk for the help.
+* Fix detection of the memory-side cache on Intel Knights Landing Xeon Phi
+  on Linux:
+  + Add the hwloc-dump-hwdata superuser binary to dump SMBIOS information
+    into /var/run/hwloc/ as root during boot.
+  + Load the above dumped memory-side cache from the main library at runtime.
 * The x86 and linux backends may now be combined for discovering CPUs
   through x86 CPUID and memory from the Linux kernel.
   This is useful for working around buggy CPU information reported by Linux
