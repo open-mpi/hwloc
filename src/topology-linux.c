@@ -4659,20 +4659,30 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
     if (!dev)
       return;
     prop = udev_device_get_property_value(dev, "ID_VENDOR");
-    if (prop)
-      strcpy(vendor, prop);
+    if (prop) {
+      strncpy(vendor, prop, sizeof(vendor));
+      vendor[sizeof(vendor)-1] = '\0';
+    }
     prop = udev_device_get_property_value(dev, "ID_MODEL");
-    if (prop)
-      strcpy(model, prop);
+    if (prop) {
+      strncpy(model, prop, sizeof(model));
+      model[sizeof(model)-1] = '\0';
+    }
     prop = udev_device_get_property_value(dev, "ID_REVISION");
-    if (prop)
-      strcpy(revision, prop);
+    if (prop) {
+      strncpy(revision, prop, sizeof(revision));
+      revision[sizeof(revision)-1] = '\0';
+    }
     prop = udev_device_get_property_value(dev, "ID_SERIAL_SHORT");
-    if (prop)
-      strcpy(serial, prop);
+    if (prop) {
+      strncpy(serial, prop, sizeof(serial));
+      serial[sizeof(serial)-1] = '\0';
+    }
     prop = udev_device_get_property_value(dev, "ID_TYPE");
-    if (prop)
-      strcpy(blocktype, prop);
+    if (prop) {
+      strncpy(blocktype, prop, sizeof(blocktype));
+      blocktype[sizeof(blocktype)-1] = '\0';
+    }
 
     udev_device_unref(dev);
   } else
