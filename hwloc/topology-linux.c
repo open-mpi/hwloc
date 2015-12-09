@@ -47,7 +47,7 @@ struct hwloc_linux_backend_data_s {
 #ifdef HAVE_LIBUDEV_H
   struct udev *udev; /* Global udev context */
 #endif
-
+  char *dumped_hwdata_dirname;
   int is_knl;
   struct utsname utsname; /* fields contain \0 when unknown */
 };
@@ -2602,6 +2602,96 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
   free(cpus.p);
 }
 
+/* Try to add memory-side caches for KNL.
+ * Returns 0 on success and -1 otherwise */
+static int hwloc_linux_try_add_knl_mcdram_caches(hwloc_topology_t topology, struct hwloc_linux_backend_data_s *data, hwloc_obj_t *nodes, unsigned nbnodes)
+{
+  char *knl_cache_file;
+  long long int cache_size = -1;
+  int associativity = -1;
+  int inclusiveness = -1;
+  int line_size = -1;
+  unsigned i;
+  FILE *f;
+  char buffer[512] = {0};
+  char *data_beg = NULL;
+  char *data_end = NULL;
+
+  if (asprintf(&knl_cache_file, "%s/knl_memoryside_cache", data->dumped_hwdata_dirname) < 0)
+    return -1;
+
+  hwloc_debug("Reading knl cache data from: %s\n", knl_cache_file);
+  f = hwloc_fopen(knl_cache_file, "r", data->root_fd);
+  if (!f) {
+    hwloc_debug("Unable to open KNL data file `%s' (%s)\n", knl_cache_file, strerror(errno));
+    free(knl_cache_file);
+    return -1;
+  }
+  free(knl_cache_file);
+
+  data_beg = &buffer[0];
+  data_end = data_beg + fread(buffer, 1, sizeof(buffer), f);
+
+  /* file must start with version information, only 1 accepted for now */
+  if (strncmp("version: 1\n", data_beg, strlen("version: 1\n"))) {
+    fprintf(stderr, "Invalid knl_memoryside_cache header, expected \"version: 1\".\n");
+    fclose(f);
+    return -1;
+  }
+  data_beg += strlen("version: 1\n");
+
+  while (data_beg < data_end) {
+    char *line_end = strstr(data_beg, "\n");
+    if (!line_end)
+        break;
+    if (!strncmp("cache_size:", data_beg, strlen("cache_size"))) {
+        sscanf(data_beg, "cache_size: %lld", &cache_size);
+        hwloc_debug("read cache_size=%lld\n", cache_size);
+    } else if (!strncmp("line_size:", data_beg, strlen("line_size:"))) {
+        sscanf(data_beg, "line_size: %d", &line_size);
+        hwloc_debug("read line_size=%d\n", line_size);
+    } else if (!strncmp("inclusiveness:", data_beg, strlen("inclusiveness:"))) {
+        sscanf(data_beg, "inclusiveness: %d", &inclusiveness);
+        hwloc_debug("read inclusiveness=%d\n", inclusiveness);
+    } else if (!strncmp("associativity:", data_beg, strlen("associativity:"))) {
+        sscanf(data_beg, "associativity: %d\n", &associativity);
+        hwloc_debug("read associativity=%d\n", associativity);
+    }
+    data_beg += line_end - data_beg +1;
+  }
+
+  fclose(f);
+
+  if (line_size == -1 || cache_size == -1 || associativity == -1 || inclusiveness == -1) {
+    hwloc_debug("Incorrect file format line_size=%d cache_size=%lld associativity=%d inclusiveness=%d\n",
+            line_size, cache_size, associativity, inclusiveness);
+    return -1;
+  }
+
+  for(i=0; i<nbnodes; i++) {
+    hwloc_obj_t cache;
+
+    if (hwloc_bitmap_iszero(nodes[i]->cpuset))
+      /* one L3 per DDR, none for MCDRAM nodes */
+      continue;
+
+    cache = hwloc_alloc_setup_object(HWLOC_OBJ_L3CACHE, -1);
+    if (!cache)
+      return -1;
+
+    cache->attr->cache.depth = 3;
+    cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+    cache->attr->cache.associativity = associativity;
+    hwloc_obj_add_info(cache, "Inclusive", inclusiveness ? "1" : "0");
+    cache->attr->cache.size = cache_size;
+    cache->attr->cache.linesize = line_size;
+    cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
+    hwloc_obj_add_info(cache, "Type", "MemorySideCache");
+    hwloc_insert_object_by_cpuset(topology, cache);
+  }
+  return 0;
+}
+
 
 
 /**************************************
@@ -2727,6 +2817,9 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    }
 	  }
       }
+
+      if (!failednodes && data->is_knl)
+        hwloc_linux_try_add_knl_mcdram_caches(topology, data, nodes, nbnodes);
 
       if (failednodes) {
 	/* failed to read/create some nodes, don't bother reading/fixing
@@ -4072,6 +4165,10 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
     data->udev = udev_new();
   }
 #endif
+
+  data->dumped_hwdata_dirname = getenv("HWLOC_DUMPED_HWDATA_DIR");
+  if (!data->dumped_hwdata_dirname)
+    data->dumped_hwdata_dirname = "/var/run/hwloc/";
 
   return backend;
 
