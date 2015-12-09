@@ -759,6 +759,16 @@ relevant topology files of the current machine into a tarball
 later (possibly offline) for simulating or debugging a machine
 without actually running on it.
 
+\section cli_hwloc_dump_hwdata hwloc-dump-hwdata
+
+hwloc-dump-hwdata is a Linux and x86-specific tool that dumps
+(during boot, privileged) some topology and locality information
+from raw hardware files (SMBIOS and ACPI tables) to human-readable
+and world-accessible files that the hwloc library will later reuse.
+
+Currently only used on Intel Knights Landing Xeon Phi platforms.
+See \ref faq_knl_dump.
+
 \section cli_hwloc_distances hwloc-distances
 
 hwloc-distances displays all distance matrices attached to
@@ -948,6 +958,11 @@ following environment variables.
   <dd>displays verbose information about plugins.
   List which directories are scanned, which files are loaded,
   and which components are successfully loaded.
+  </dd>
+
+<dt>HWLOC_DUMPED_HWDATA_DIR=/path/to/dumped/files/</dt>
+  <dd>loads files dumped by <tt>hwloc-dump-hwdata</tt> (on Linux)
+  from the given directory instead of <tt>/var/run/hwloc/</tt>.
   </dd>
 
 <dt>HWLOC_COMPONENTS=list,of,components</dt>
@@ -2758,6 +2773,11 @@ This XML-based model also has the advantage of speeding up the
 discovery because reading a XML topology is usually much faster
 than querying the operating system again.
 
+The utility <tt>hwloc-dump-hwdata</tt> is also involved in gathering
+privileged information at boot time and making it available to
+non-privileged users. However it only applies to Intel Knights Landing
+Xeon Phi for now (see \ref faq_knl_dump).
+
 
 \section faq_onedim hwloc only has a one-dimensional view of the architecture, it ignores distances
 
@@ -3104,6 +3124,23 @@ NUMA node (if any).
 
 The MCDRAM NUMA nodes may also be identified thanks to the <tt>Type</tt> info attribute
 which is set to <tt>MCDRAM</tt>.
+
+
+\section faq_knl_dump Why do I need hwloc-dump-hwdata for caches on Intel Knights Landing Xeon Phi?
+
+Intel Knights Landing Xeon Phi processors may use the on-package memory (MCDRAM)
+as either memory or a memory-side cache (currently reported as a L3 cache by hwloc).
+Details about this cache (especially its size) are currently only available to privileged users.
+
+The hwloc-dump-hwdata utility may be used to dump this privileged binary information
+into human-readable and world-accessible files that the hwloc library will later load.
+The utility should usually run as root once during boot, in order to update dumped
+information (stored under /var/run/hwloc by default) in case the MCDRAM configuration
+changed between reboots.
+
+hwloc-dump-hwdata requires <tt>dmi-sysfs</tt> kernel module loaded.
+
+The utility is currently unneeded on non-KNL platforms.
 
 
 \section faq_phi How do I build for Intel Xeon Phi coprocessor?
