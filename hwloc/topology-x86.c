@@ -32,6 +32,7 @@ struct hwloc_x86_backend_data_s {
   hwloc_bitmap_t apicid_set;
   int apicid_unique;
   char *src_cpuiddump_path;
+  int is_knl;
 };
 
 /************************************
@@ -282,6 +283,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   }
   infos->cpustepping = eax & 0xf;
 
+  if (cpuid_type == intel && infos->cpufamilynumber == 0x6 && infos->cpumodelnumber == 0x57)
+    data->is_knl = 1;
+
   /* Get cpu vendor string from cpuid 0x00 */
   memset(regs, 0, sizeof(regs));
   regs[0] = 0;
@@ -442,6 +446,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   if (cpuid_type != amd && highest_cpuid >= 0x04) {
     unsigned max_nbcores;
     unsigned max_nbthreads;
+    unsigned level;
 
     for (cachenum = 0; ; cachenum++) {
       eax = 0x04;
@@ -450,6 +455,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
       hwloc_debug("cache %u type %u\n", cachenum, eax & 0x1f);
       if ((eax & 0x1f) == 0)
+	break;
+      level = (eax >> 5) & 0x7;
+      if (data->is_knl && level == 3)
+	/* KNL reports wrong L3 information (size always 0, cpuset always the entire machine, ignore it */
 	break;
       infos->numcaches++;
 
@@ -474,13 +483,17 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
       if ((eax & 0x1f) == 0)
 	break;
+      level = (eax >> 5) & 0x7;
+      if (data->is_knl && level == 3)
+	/* KNL reports wrong L3 information (size always 0, cpuset always the entire machine, ignore it */
+	break;
       switch (eax & 0x1f) {
       case 1: cache->type = HWLOC_OBJ_CACHE_DATA; break;
       case 2: cache->type = HWLOC_OBJ_CACHE_INSTRUCTION; break;
       default: cache->type = HWLOC_OBJ_CACHE_UNIFIED; break;
       }
 
-      cache->level = (eax >> 5) & 0x7;
+      cache->level = level;
       cache->nbthreads_sharing = ((eax >> 14) & 0xfff) + 1;
 
       cache->linesize = linesize = (ebx & 0xfff) + 1;
@@ -1354,6 +1367,7 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
   backend->disable = hwloc_x86_backend_disable;
 
   /* default values */
+  data->is_knl = 0;
   data->apicid_set = hwloc_bitmap_alloc();
   data->apicid_unique = 1;
   data->src_cpuiddump_path = NULL;
