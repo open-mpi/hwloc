@@ -679,7 +679,6 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	  /* Unified cache */
 	  obj2->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
 	  hwloc_debug("Adding an L1u cache for core %d\n", i);
-	  hwloc_insert_object_by_cpuset(topology, obj2);
 	} else {
 	  /* Separate Instruction and Data caches */
 	  obj2->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
