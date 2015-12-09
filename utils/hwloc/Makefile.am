@@ -33,9 +33,20 @@ bin_PROGRAMS = \
         hwloc-info \
         hwloc-patch \
         hwloc-ps
+
 if HWLOC_HAVE_X86_CPUID
 bin_PROGRAMS += hwloc-gather-cpuid
 endif HWLOC_HAVE_X86_CPUID
+
+if HWLOC_HAVE_LINUX
+if HWLOC_HAVE_X86
+sbin_PROGRAMS = hwloc-dump-hwdata
+endif HWLOC_HAVE_X86
+endif HWLOC_HAVE_LINUX
+
+hwloc_dump_hwdata_SOURCES = \
+	hwloc-dump-hwdata.c \
+	hwloc-dump-hwdata-knl.c
 
 hwloc_calc_SOURCES = \
         hwloc-calc.h \
@@ -80,6 +91,12 @@ if HWLOC_HAVE_X86_CPUID
 man1_pages += hwloc-gather-cpuid.1
 endif HWLOC_HAVE_X86_CPUID
 
+if HWLOC_HAVE_LINUX
+if HWLOC_HAVE_X86
+man1_pages += hwloc-dump-hwdata.1in
+endif HWLOC_HAVE_X86
+endif HWLOC_HAVE_LINUX
+
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 
@@ -91,6 +108,16 @@ EXTRA_DIST += $(hgt_page:.1=.1in)
 if HWLOC_HAVE_LINUX
 nodist_man_MANS += $(hgt_page)
 endif HWLOC_HAVE_LINUX
+
+# Same for dump-hwdata page on Linux/x86
+hdh_page = hwloc-dump-hwdata.1
+EXTRA_DIST += $(hdh_page:.1=.1in)
+if HWLOC_HAVE_LINUX
+if HWLOC_HAVE_X86
+nodist_man_MANS += $(hdh_page)
+endif HWLOC_HAVE_X86
+endif HWLOC_HAVE_LINUX
+
 
 .1in.1:
 	@ echo Creating $@ man page...
