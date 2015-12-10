@@ -426,13 +426,16 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
     while ((dir = readdir(d))) {
         if (strncmp("14-", dir->d_name, 3) == 0) {
             err = process_smbios_group(input_fsroot, dir->d_name, &data);
-            if (err < 0)
+            if (err < 0) {
+                closedir(d);
                 return err;
+            }
         }
     }
 
     if (!data.type_count) {
       printf ("  Couldn't find any KNL information.\n");
+      closedir(d);
       return 0;
     }
 
@@ -445,8 +448,10 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
         while ((dir = readdir(d))) {
             if (strncmp(dir->d_name, tab, l) == 0) {
                 err = process_knl_entry(input_fsroot, dir->d_name, &data);
-                if (err < 0)
+                if (err < 0) {
+                    closedir(d);
                     return err;
+                }
             }
         }
     }
