@@ -388,7 +388,7 @@ static int print_result(struct parser_data *data, const char *out_file)
     fprintf(f, "cache_size: %llu\n",
                 (long long unsigned int)data->mcdram_cache);
     fprintf(f, "associativity: 1\n");// direct-mapped cache
-    fprintf(f, "inclusiveness: 1\n");// inclusive L2 cache
+    fprintf(f, "inclusiveness: 1\n");// inclusive cache
     fprintf(f, "line_size: 64\n");
     fflush(f);
     fclose(f);
