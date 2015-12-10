@@ -116,6 +116,27 @@ unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_o
   return stored;
 }
 
+hwloc_obj_t hwloc_get_next_closest_obj (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj *prev)
+{
+  if ((int)src->depth < 0) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  if (prev) {
+    hwloc_obj_t ancestor = hwloc_get_common_ancestor_obj(topology, src, prev);
+    hwloc_obj_t parent = prev, srcparent = src;
+
+    next = prev->next_sibling;
+    if (next == src)
+      next = next->next_sibling;
+    if (!next) {
+      
+    }
+    
+  
+}
+
 static int
 hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_bitmap_t set,
 				       struct hwloc_obj ***res, int *max)
