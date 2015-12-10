@@ -167,6 +167,8 @@ test-suite.log
 /utils/hwloc/hwloc-distances.1
 /utils/hwloc/hwloc-distrib
 /utils/hwloc/hwloc-distrib.1
+/utils/hwloc/hwloc-dump-hwdata
+/utils/hwloc/hwloc-dump-hwdata.1
 /utils/hwloc/hwloc-gather-cpuid
 /utils/hwloc/hwloc-gather-cpuid.1
 /utils/hwloc/hwloc-gather-topology
