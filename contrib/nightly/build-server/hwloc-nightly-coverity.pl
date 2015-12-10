@@ -122,6 +122,9 @@ safe_system(0, "./configure $configure_args", "configure");
 verbose "*** Building HWLOC tarball\n";
 safe_system(0, "cov-build --dir cov-int make $make_args", "cov-build");
 
+verbose "*** Checking HWLOC tarball\n";
+safe_system(0, "cov-build --dir cov-int make check $make_args", "cov-build-check");
+
 # Tar up the Coverity results
 verbose "*** Tarring up results\n";
 safe_system(0, "tar jcf $hwloc_ver-analyzed.tar.bz2 cov-int");
