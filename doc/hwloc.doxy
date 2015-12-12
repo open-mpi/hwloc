@@ -48,9 +48,10 @@ hwloc supports the following operating systems:
 
 <ul>
 <li>Linux (including old kernels not having sysfs topology
-information, with knowledge of cpusets, offline CPUs, ScaleMP vSMP,
-and NumaScale NumaConnect) on all supported hardware, including Intel Xeon Phi
-(either standalone or as a coprocessor).</li>
+information, with knowledge of cpusets, offline CPUs and ScaleMP vSMP)
+on all supported hardware, including Intel Xeon Phi
+(KNL and KNC, either standalone or as a coprocessor)
+and NumaScale NumaConnect.</li>
 <li>Solaris</li>
 <li>AIX</li>
 <li>Darwin / OS X</li>
