@@ -75,7 +75,11 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       font = CreateFont(fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
       SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
       windows_box(&the_output, 0xff, 0xff, 0xff, 0, 0, win_width, 0, win_height);
+      the_output.max_x = 0;
+      the_output.max_y = 0;
       output_draw(&the_output.loutput);
+      the_width = the_output.max_x;
+      the_height = the_output.max_y;
       DeleteObject(font);
       EndPaint(hwnd, &the_output.ps);
       break;
@@ -310,17 +314,17 @@ windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (!woutput->drawing) {
-    if (x > woutput->max_x)
-      woutput->max_x = x;
-    if (x+width > woutput->max_x)
-      woutput->max_x = x + width;
-    if (y > woutput->max_y)
-      woutput->max_y = y;
-    if (y + height > woutput->max_y)
-      woutput->max_y = y + height;
+  if (x > woutput->max_x)
+    woutput->max_x = x;
+  if (x+width > woutput->max_x)
+    woutput->max_x = x + width;
+  if (y > woutput->max_y)
+    woutput->max_y = y;
+  if (y + height > woutput->max_y)
+    woutput->max_y = y + height;
+
+  if (!woutput->drawing)
     return;
-  }
 
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
   SetBkColor(ps->hdc, RGB(r, g, b));
@@ -333,17 +337,17 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (!woutput->drawing) {
-    if (x1 > woutput->max_x)
-      woutput->max_x = x1;
-    if (x2 > woutput->max_x)
-      woutput->max_x = x2;
-    if (y1 > woutput->max_y)
-      woutput->max_y = y1;
-    if (y2 > woutput->max_y)
-      woutput->max_y = y2;
+  if (x1 > woutput->max_x)
+    woutput->max_x = x1;
+  if (x2 > woutput->max_x)
+    woutput->max_x = x2;
+  if (y1 > woutput->max_y)
+    woutput->max_y = y1;
+  if (y2 > woutput->max_y)
+    woutput->max_y = y2;
+
+  if (!woutput->drawing)
     return;
-  }
 
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
   MoveToEx(ps->hdc, x1 - x_delta, y1 - y_delta, NULL);
