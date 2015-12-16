@@ -70,6 +70,37 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
   int redraw = 0;
   switch (message) {
+    case WM_CHAR:  {
+      switch (wparam) {
+      case '+':
+	the_scale *= 1.2f;
+	redraw = 1;
+	break;
+      case '-':
+	the_scale /= 1.2f;
+	redraw = 1;
+	break;
+      case 'f':
+      case 'F': {
+	float wscale, hscale;
+	wscale = win_width / (float)the_width;
+	hscale = win_height / (float)the_height;
+	the_scale *= wscale > hscale ? hscale : wscale;
+	redraw = 1;
+	break;
+      }
+      case '1':
+	the_scale = 1.0;
+	redraw = 1;
+	break;
+      case 'q':
+      case 'Q':
+	finish = 1;
+	break;
+      }
+      break;
+    }
+
     case WM_PAINT: {
       HFONT font;
       BeginPaint(hwnd, &the_output.ps);
@@ -108,8 +139,6 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       break;
     case WM_KEYDOWN:
       switch (wparam) {
-      case 'q':
-      case 'Q':
       case VK_ESCAPE:
         finish = 1;
         break;
@@ -271,6 +300,9 @@ windows_init(void *output)
   ShowWindow(toplevel, SW_SHOWDEFAULT);
 
   printf("Keyboard shortcuts:\n");
+  printf("Zoom-in or out                         + -\n");
+  printf("Fit size to window                     f F\n");
+  printf("Reset scale to default                 1\n");
   printf("Scroll vertically                      Up Down PageUp PageDown\n");
   printf("Scroll horizontally                    Left Right Ctrl+PageUp Ctrl+PageDown\n");
   printf("Scroll to the top level corner         Home\n");

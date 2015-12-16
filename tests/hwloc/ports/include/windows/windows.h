@@ -156,6 +156,7 @@ VOID WINAPI PostQuitMessage(int nExitCode);
 #define WM_PAINT 15
 #define WM_KEYDOWN 256
 #define WM_KEYUP 257
+#define WM_CHAR 258
 #define WM_MOUSEMOVE 512
 #define WM_LBUTTONDOWN 513
 #define WM_LBUTTONUP 514
