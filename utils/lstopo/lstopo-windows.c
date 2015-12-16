@@ -60,6 +60,7 @@ static int finish;
 static int the_width, the_height;
 static int win_width, win_height;
 static unsigned int the_fontsize, the_gridsize;
+static float the_scale;
 
 static void
 windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height);
@@ -173,11 +174,18 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       if (hwnd == the_output.toplevel)
 	PostQuitMessage(0);
       return 0;
-    case WM_SIZE:
+    case WM_SIZE: {
+      float wscale, hscale;
       win_width = LOWORD(lparam);
       win_height = HIWORD(lparam);
+      wscale = win_width / (float)the_width;
+      hscale = win_height / (float)the_height;
+      the_scale *= wscale > hscale ? hscale : wscale;
+      if (the_scale < 1.0f)
+	the_scale = 1.0f;
       redraw = 1;
       break;
+    }
   }
   if (redraw) {
     if (x_delta > the_width - win_width)
@@ -188,22 +196,8 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       x_delta = 0;
     if (y_delta < 0)
       y_delta = 0;
-    if (win_width > the_width && win_height > the_height) {
-      fontsize = the_fontsize;
-      gridsize = the_gridsize;
-      if (win_width > the_width) {
-        fontsize = the_fontsize * win_width / the_width;
-        gridsize = the_gridsize * win_width / the_width;
-      }
-      if (win_height > the_height) {
-        unsigned int new_fontsize = the_fontsize * win_height / the_height;
-        unsigned int new_gridsize = the_gridsize * win_height / the_height;
-	if (new_fontsize < fontsize)
-	  fontsize = new_fontsize;
-	if (new_gridsize < gridsize)
-	  gridsize = new_gridsize;
-      }
-    }
+    fontsize = (unsigned)(the_fontsize * the_scale);
+    gridsize = (unsigned)(the_gridsize * the_scale);
     RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
   }
   return DefWindowProc(hwnd, message, wparam, lparam);
@@ -267,6 +261,8 @@ windows_init(void *output)
 
   the_width = width;
   the_height = height;
+
+  the_scale = 1.0f;
 
   the_fontsize = fontsize;
   the_gridsize = gridsize;
