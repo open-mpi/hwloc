@@ -269,6 +269,14 @@ windows_init(void *output)
 
   /* and display the window */
   ShowWindow(toplevel, SW_SHOWDEFAULT);
+
+  printf("Keyboard shortcuts:\n");
+  printf("Scroll vertically                      Up Down PageUp PageDown\n");
+  printf("Scroll horizontally                    Left Right Ctrl+PageUp Ctrl+PageDown\n");
+  printf("Scroll to the top level corner         Home\n");
+  printf("Scroll to the bottom right corner      End\n");
+  printf("Exit                                   q Q Esc\n");
+  printf("\n");
 }
 
 static void

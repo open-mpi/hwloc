@@ -50,6 +50,8 @@ Version 1.11.2
   and OSF/Tru64.
 * Fix spurious failures to load with ENOMEM on AIX in case of Misc objects
   below PUs.
+* lstopo displays keyboard shortcuts in the console when running in graphical
+  X11 or Windows mode.
 * Debug messages may be disabled at runtime by passing HWLOC_DEBUG_VERBOSE=0
   in the environment when --enable-debug was passed to configure.
 * Add a FAQ entry "What are these Group objects in my topology?".

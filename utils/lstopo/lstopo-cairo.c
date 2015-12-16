@@ -256,6 +256,14 @@ x11_init(void *_disp)
   x11_create(disp, coutput->max_x, coutput->max_y);
 
   XMapWindow(dpy, top);
+
+  printf("Keyboard shortcuts:\n");
+  printf("Scroll vertically                      Up Down PageUp PageDown\n");
+  printf("Scroll horizontally                    Left Right Ctrl+PageUp Ctrl+PageDown\n");
+  printf("Scroll to the top level corner         Home\n");
+  printf("Scroll to the bottom right corner      End\n");
+  printf("Exit                                   q Q Esc\n");
+  printf("\n");
 }
 
 static struct draw_methods x11_draw_methods = {
