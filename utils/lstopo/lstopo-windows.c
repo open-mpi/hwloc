@@ -299,16 +299,17 @@ windows_init(void *output)
   /* and display the window */
   ShowWindow(toplevel, SW_SHOWDEFAULT);
 
-  printf("Keyboard shortcuts:\n");
-  printf("Zoom-in or out                         + -\n");
-  printf("Fit size to window                     f F\n");
-  printf("Reset scale to default                 1\n");
-  printf("Scroll vertically                      Up Down PageUp PageDown\n");
-  printf("Scroll horizontally                    Left Right Ctrl+PageUp Ctrl+PageDown\n");
-  printf("Scroll to the top level corner         Home\n");
-  printf("Scroll to the bottom right corner      End\n");
-  printf("Exit                                   q Q Esc\n");
   printf("\n");
+  printf("Keyboard shortcuts:\n");
+  printf(" Zoom-in or out .................... + -\n");
+  printf(" Try to fit scale to window ........ f F\n");
+  printf(" Reset scale to default ............ 1\n");
+  printf(" Scroll vertically ................. Up Down PageUp PageDown\n");
+  printf(" Scroll horizontally ............... Left Right Ctrl+PageUp/Down\n");
+  printf(" Scroll to the top-left corner ..... Home\n");
+  printf(" Scroll to the bottom-right corner . End\n");
+  printf(" Exit .............................. q Q Esc\n");
+  printf("\n\n");
 }
 
 static void
