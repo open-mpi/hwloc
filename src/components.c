@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeau 1
  * See COPYING in top-level directory.
  */
@@ -458,14 +458,15 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
 				struct hwloc_disc_component *comp,
 				const char *comparg,
 				unsigned *excludes,
-				int envvar_forced,
-				int verbose_errors)
+				int envvar_forced)
 {
   struct hwloc_backend *backend;
   int err;
 
   if ((*excludes) & comp->type) {
-    if (hwloc_components_verbose || verbose_errors)
+    if (hwloc_components_verbose)
+      /* do not warn if envvar_forced since system-wide HWLOC_COMPONENTS must be silently ignored after set_xml() etc.
+       */
       fprintf(stderr, "Excluding %s discovery component `%s', conflicts with excludes 0x%x\n",
 	      hwloc_disc_component_type_string(comp->type), comp->name, *excludes);
     return -1;
@@ -473,7 +474,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
 
   backend = comp->instantiate(comp, comparg, NULL, NULL);
   if (!backend) {
-    if (hwloc_components_verbose || verbose_errors)
+    if (hwloc_components_verbose || envvar_forced)
       fprintf(stderr, "Failed to instantiate discovery component `%s'\n", comp->name);
     return -1;
   }
@@ -553,7 +554,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 
 	comp = hwloc_disc_component_find(-1, curenv);
 	if (comp) {
-	  hwloc_disc_component_try_enable(topology, comp, arg ? arg+1 : NULL, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings */);
+	  hwloc_disc_component_try_enable(topology, comp, arg ? arg+1 : NULL, &excludes, 1 /* envvar forced */);
 	} else {
 	  fprintf(stderr, "Cannot find discovery component `%s'\n", curenv);
 	}
@@ -595,7 +596,7 @@ nextname:
 	    curenv++;
 	}
       }
-      hwloc_disc_component_try_enable(topology, comp, NULL, &excludes, 0 /* defaults, not envvar forced */, 0 /* defaults don't need warnings on conflicts */);
+      hwloc_disc_component_try_enable(topology, comp, NULL, &excludes, 0 /* defaults, not envvar forced */);
 nextcomp:
       comp = comp->next;
     }
