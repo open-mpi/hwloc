@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeau 1
  * See COPYING in top-level directory.
  */
@@ -515,11 +515,6 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   if (env) {
     char *curenv = env;
     size_t s;
-
-    if (topology->backends) {
-      hwloc_backends_disable_all(topology);
-      excludes = 0;
-    }
 
     while (*curenv) {
       s = strcspn(curenv, HWLOC_COMPONENT_SEPS);

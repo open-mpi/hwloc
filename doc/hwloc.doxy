@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -986,9 +986,8 @@ following environment variables.
   respectively.
 
   Since this variable is the low-level and more generic way to
-  select components, it takes precedence over the application
-  selecting components with functions such as hwloc_topology_set_xml()
-  (or with environment variables).
+  select components, it takes precedence over environment variables
+  for selecting components.
 
   If the variable is set to an empty string (or set to a single comma),
   no specific component is loaded first, all components are loaded
