@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2014 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -245,6 +245,8 @@ x11_init(void *_disp)
     screen_width = screen->width;
   if (screen_height >= screen->height)
     screen_height = screen->height;
+  disp->last_screen_width = 0;
+  disp->last_screen_height = 0;
   disp->screen_width = screen_width;
   disp->screen_height = screen_height;
   disp->width = coutput->max_x;
