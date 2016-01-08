@@ -699,6 +699,9 @@ static int process_logical_paths(netloc_data_collection_handle_t *dc_handle)
                                                       &num_edges,
                                                       &edges);
             if( NETLOC_SUCCESS != ret ) {
+                netloc_dt_lookup_table_iterator_t_destruct(hti_src);
+                netloc_dt_lookup_table_iterator_t_destruct(hti_dst);
+                free(all_routes);
                 fprintf(stderr, "Error: Failed to compute a path between the following two nodes\n");
                 fprintf(stderr, "Error: Source:      %s\n", netloc_pretty_print_node_t( cur_src_node ));
                 fprintf(stderr, "Error: Destination: %s\n", netloc_pretty_print_node_t( cur_dst_node ));
@@ -716,6 +719,10 @@ static int process_logical_paths(netloc_data_collection_handle_t *dc_handle)
                                         edges,
                                         true);
             if( NETLOC_SUCCESS != ret ) {
+                netloc_dt_lookup_table_iterator_t_destruct(hti_src);
+                netloc_dt_lookup_table_iterator_t_destruct(hti_dst);
+                free(all_routes);
+                free(edges);
                 fprintf(stderr, "Error: Could not append the logical path between the following two nodes\n");
                 fprintf(stderr, "Error: Source:      %s\n", netloc_pretty_print_node_t( cur_src_node ));
                 fprintf(stderr, "Error: Destination: %s\n", netloc_pretty_print_node_t( cur_dst_node ));
