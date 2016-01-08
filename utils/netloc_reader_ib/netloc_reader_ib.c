@@ -2,8 +2,8 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  *
- * Copyright © 2015 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * $HEADER$
@@ -760,6 +760,9 @@ static int process_logical_paths(netloc_data_collection_handle_t *dc_handle)
     netloc_lookup_table_destroy(all_routes);
     free(all_routes);
 
+    netloc_dt_lookup_table_iterator_t_destruct(hti_src);
+    netloc_dt_lookup_table_iterator_t_destruct(hti_dst);
+
     /*
      * Remove the temporary prep file
      */
@@ -773,9 +776,6 @@ static int process_logical_paths(netloc_data_collection_handle_t *dc_handle)
         json_decref(json);
         json = NULL;
     }
-
-    netloc_dt_lookup_table_iterator_t_destruct(hti_src);
-    netloc_dt_lookup_table_iterator_t_destruct(hti_dst);
 
     return 0;
 }
