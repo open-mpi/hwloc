@@ -2,6 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -263,6 +264,7 @@ int netloc_topology_export_gexf(struct netloc_topology * topology, const char * 
         fprintf(fh, "\t\t\t\t</attvalues>\n");
         fprintf(fh, "\t\t\t</node>\n");
     }
+    netloc_dt_lookup_table_iterator_t_destruct(hti);
 
     fprintf(fh, "\t\t</nodes>\n");
 
