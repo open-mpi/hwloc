@@ -2,6 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * See COPYING in top-level directory.
  *
@@ -604,31 +605,6 @@ static int convert_nodes_file(netloc_data_collection_handle_t *dc_handle) {
             num_edges = json_array_size(value_edges);
 
             json_array_foreach(value_edges, index, value_lvl_2) {
-                edge = netloc_dt_edge_t_construct();
-
-                // Is this a bi-directional edge?
-                dir_value = json_object_get( value_lvl_2, JSON_KEY_EDGE_INFO_DIRECTIONAL );
-                if( NULL == dir_value ) {
-                    dir_bi = JSON_DEFAULT_EDGE_INFO_DIRECTIONAL;
-                }
-                else if( JSON_TRUE == json_typeof(dir_value) ) {
-                    dir_bi = true;
-                }
-                else {
-                    dir_bi = JSON_DEFAULT_EDGE_INFO_DIRECTIONAL;
-                }
-
-                // If so, keep a mirrored edge
-                if( dir_bi ) {
-                    edge_bi = netloc_dt_edge_t_construct();
-                } else {
-                    edge_bi = NULL;
-                }
-
-                if( progress ) {
-                    printf("\t\tProcessing Edge: %3d of %3d (%s)\n", (int)index, (int)num_edges, (edge_bi ? "Bidirectional" : "Unidirectional"));
-                }
-
                 // Access the source node
                 str_val = json_string_value( json_object_get( value_lvl_2, JSON_KEY_EDGE_INFO_SRC_NODE_ID ));
                 if( NULL == str_val ) {
@@ -654,6 +630,31 @@ static int convert_nodes_file(netloc_data_collection_handle_t *dc_handle) {
                 if( NULL == node ) {
                     printf("Error: Could not find the destination node %s\n", str_val);
                     continue;
+                }
+
+                edge = netloc_dt_edge_t_construct();
+
+                // Is this a bi-directional edge?
+                dir_value = json_object_get( value_lvl_2, JSON_KEY_EDGE_INFO_DIRECTIONAL );
+                if( NULL == dir_value ) {
+                    dir_bi = JSON_DEFAULT_EDGE_INFO_DIRECTIONAL;
+                }
+                else if( JSON_TRUE == json_typeof(dir_value) ) {
+                    dir_bi = true;
+                }
+                else {
+                    dir_bi = JSON_DEFAULT_EDGE_INFO_DIRECTIONAL;
+                }
+
+                // If so, keep a mirrored edge
+                if( dir_bi ) {
+                    edge_bi = netloc_dt_edge_t_construct();
+                } else {
+                    edge_bi = NULL;
+                }
+
+                if( progress ) {
+                    printf("\t\tProcessing Edge: %3d of %3d (%s)\n", (int)index, (int)num_edges, (edge_bi ? "Bidirectional" : "Unidirectional"));
                 }
 
                 // Save source/destination node information
@@ -759,6 +760,7 @@ static int convert_nodes_file(netloc_data_collection_handle_t *dc_handle) {
                 ret = netloc_dc_append_edge_to_node(dc_handle, node, edge);
                 if( NETLOC_SUCCESS != ret ) {
                     fprintf(stderr, "Error: Failed to append the edge to the node to the data collection\n");
+                    netloc_dt_edge_t_destruct(edge);
                     return ret;
                 }
 
@@ -768,6 +770,7 @@ static int convert_nodes_file(netloc_data_collection_handle_t *dc_handle) {
                     ret = netloc_dc_append_edge_to_node(dc_handle, dst_node, edge_bi);
                     if( NETLOC_SUCCESS != ret ) {
                         fprintf(stderr, "Error: Failed to append the edge to the node to the data collection\n");
+                        netloc_dt_edge_t_destruct(edge_bi);
                         return ret;
                     }
 
