@@ -1,7 +1,7 @@
 /*
  * Copyright © 2013      University of Wisconsin-La Crosse.
  *                         All rights reserved.
- * Copyright © 2014-2015 Inria.  All rights reserved.
+ * Copyright © 2014-2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -207,21 +207,6 @@ static int search_uri(const char * search_uri,
     if( URI_FILE != uri_type ) {
         fprintf(stderr, "Error: Unsupported protocol in URI <%s>.\n", search_uri);
         return NETLOC_ERROR;
-    }
-
-    /*
-     * Check to make sure we are looking at a directory
-     */
-    ret = stat(uri_str, &dstat);
-    if( 0 != ret ) {
-        fprintf(stderr, "Error: Cannot stat the directory <%s>.\n", uri_str);
-        free(uri_str);
-        return NETLOC_ERROR;
-    }
-    if( !(dstat.st_mode & S_IFDIR) ) {
-        fprintf(stderr, "Error: The URI does not point to a directory <%s>.\n", uri_str);
-        free(uri_str);
-        return NETLOC_ERROR_NOTDIR;
     }
 
     /*
