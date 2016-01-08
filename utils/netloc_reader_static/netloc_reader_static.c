@@ -877,6 +877,8 @@ static int compute_physical_paths(netloc_data_collection_handle_t *dc_handle)
                                                        &edges,
                                                        false);
             if( NETLOC_SUCCESS != ret ) {
+                netloc_dt_lookup_table_iterator_t_destruct(hti_src);
+                netloc_dt_lookup_table_iterator_t_destruct(hti_dst);
                 fprintf(stderr, "Error: Failed to compute a path between the following two nodes\n");
                 fprintf(stderr, "Error: Source:      %s\n", netloc_pretty_print_node_t(cur_src_node));
                 fprintf(stderr, "Error: Destination: %s\n", netloc_pretty_print_node_t(cur_dst_node));
@@ -894,6 +896,9 @@ static int compute_physical_paths(netloc_data_collection_handle_t *dc_handle)
                                         edges,
                                         false);
             if( NETLOC_SUCCESS != ret ) {
+                netloc_dt_lookup_table_iterator_t_destruct(hti_src);
+                netloc_dt_lookup_table_iterator_t_destruct(hti_dst);
+                free(edges);
                 fprintf(stderr, "Error: Could not append the physical path between the following two nodes\n");
                 fprintf(stderr, "Error: Source:      %s\n", netloc_pretty_print_node_t(cur_src_node));
                 fprintf(stderr, "Error: Destination: %s\n", netloc_pretty_print_node_t(cur_dst_node));
