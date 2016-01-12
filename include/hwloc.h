@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -345,11 +345,15 @@ struct hwloc_obj_memory_s {
 struct hwloc_obj {
   /* physical information */
   hwloc_obj_type_t type;		/**< \brief Type of object */
+
   unsigned os_index;			/**< \brief OS-provided physical index number.
 					 * It is not guaranteed unique across the entire machine,
 					 * except for PUs and NUMA nodes.
 					 */
-  char *name;				/**< \brief Object description if any */
+  char *name;				/**< \brief Object-specific name if any.
+					 * Mostly used for identifying OS devices and Misc objects where
+					 * a name string is more useful than numerical indexes.
+					 */
 
   struct hwloc_obj_memory_s memory;	/**< \brief Memory attributes */
 
@@ -2113,8 +2117,10 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  * without ever adding any intermediate hierarchy level. This is useful for
  * annotating the topology without actually changing the hierarchy.
  *
- * \p name will be copied to the setup the new object attributes.
- * However, the new leaf object will not have any \p cpuset.
+ * \p name is supposed to be unique across all Misc objects in the topology.
+ * It will be duplicated to setup the new object attributes.
+ *
+ * The new leaf object will not have any \p cpuset.
  *
  * \return the newly-created object
  *
