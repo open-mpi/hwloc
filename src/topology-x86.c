@@ -514,7 +514,7 @@ hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int nodup)
 }
 
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */
-static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery)
+static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_x86_backend_data_s *data = backend->private_data;
@@ -524,6 +524,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   unsigned nbpackages = 0;
   int one = -1;
   unsigned next_group_depth = topology->next_group_depth;
+  int caches_added = 0;
 
   for (i = 0; i < nbprocs; i++)
     if (infos[i].present) {
@@ -533,7 +534,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   if (one == -1) {
     hwloc_bitmap_free(complete_cpuset);
-    return;
+    return 0;
   }
 
   /* Ideally, when fulldiscovery=0, we could add any object that doesn't exist yet.
@@ -784,6 +785,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	hwloc_obj_t cache;
 
 	while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
+	  hwloc_bitmap_t puset;
+	  int depth;
 
 	  for (l = 0; l < infos[i].numcaches; l++) {
 	    if (infos[i].cache[l].level == level && infos[i].cache[l].type == type)
@@ -795,13 +798,27 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    continue;
 	  }
 
-	  if (fulldiscovery) {
-	    /* Add caches */
+	  puset = hwloc_bitmap_alloc();
+	  hwloc_bitmap_set(puset, i);
+	  depth = hwloc_get_cache_type_depth(topology, level,
+					     type == 1 ? HWLOC_OBJ_CACHE_DATA : type == 2 ? HWLOC_OBJ_CACHE_INSTRUCTION : HWLOC_OBJ_CACHE_UNIFIED);
+	  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
+	    cache = hwloc_get_next_obj_covering_cpuset_by_depth(topology, puset, depth, NULL);
+	  else
+	    cache = NULL;
+	  hwloc_bitmap_free(puset);
+
+	  if (cache) {
+	    /* Found cache above that PU, annotate if no such attribute yet */
+	    if (!hwloc_obj_get_info_by_name(cache, "Inclusive"))
+	      hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
+	    hwloc_bitmap_andnot(caches_cpuset, caches_cpuset, cache->cpuset);
+	  } else {
+	    /* Add the missing cache */
 	    hwloc_bitmap_t cache_cpuset;
 	    unsigned packageid = infos[i].packageid;
 	    unsigned cacheid = infos[i].cache[l].cacheid;
-	    /* Found a matching cache, now look for others sharing it */
-
+	    /* Now look for others sharing it */
 	    cache_cpuset = hwloc_bitmap_alloc();
 	    for (j = i; j < nbprocs; j++) {
 	      unsigned l2;
@@ -840,27 +857,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 		level, cacheid, cache_cpuset);
 	    hwloc_insert_object_by_cpuset(topology, cache);
-
-	  } else {
-	    /* Annotate existing caches */
-	    hwloc_bitmap_t set = hwloc_bitmap_alloc();
-	    hwloc_obj_t cache = NULL;
-	    int depth;
-	    hwloc_bitmap_set(set, i);
-	    depth = hwloc_get_cache_type_depth(topology, level,
-					       type == 1 ? HWLOC_OBJ_CACHE_DATA : type == 2 ? HWLOC_OBJ_CACHE_INSTRUCTION : HWLOC_OBJ_CACHE_UNIFIED);
-	    if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
-	      cache = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, NULL);
-	    hwloc_bitmap_free(set);
-	    if (cache) {
-	      /* Found cache above that PU, annotate if no such attribute yet */
-	      if (!hwloc_obj_get_info_by_name(cache, "Inclusive"))
-		hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
-	      hwloc_bitmap_andnot(caches_cpuset, caches_cpuset, cache->cpuset);
-	    } else {
-	      /* No cache above that PU?! */
-	      hwloc_bitmap_clr(caches_cpuset, i);
-	    }
+	    caches_added++;
 	  }
 	}
 	hwloc_bitmap_free(caches_cpuset);
@@ -871,6 +868,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   hwloc_bitmap_free(complete_cpuset);
   topology->next_group_depth = next_group_depth;
+
+  return fulldiscovery || caches_added;
 }
 
 static int
@@ -885,6 +884,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
   hwloc_bitmap_t orig_cpuset = hwloc_bitmap_alloc();
   hwloc_bitmap_t set;
   unsigned i;
+  int ret = 0;
 
   if (get_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
     hwloc_bitmap_free(orig_cpuset);
@@ -910,8 +910,8 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
   if (!data->apicid_unique)
     fulldiscovery = 0;
   else
-    summarize(backend, infos, fulldiscovery);
-  return fulldiscovery; /* success, but objects added only if fulldiscovery */
+    ret = summarize(backend, infos, fulldiscovery);
+  return ret;
 }
 
 #if defined HWLOC_FREEBSD_SYS && defined HAVE_CPUSET_SETID
@@ -1061,8 +1061,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
     look_proc(backend, &infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
-    summarize(backend, infos, fulldiscovery);
-    ret = fulldiscovery;
+    ret = summarize(backend, infos, fulldiscovery);
   }
 
 out_with_os_state:
@@ -1105,11 +1104,11 @@ hwloc_x86_discover(struct hwloc_backend *backend)
       goto fulldiscovery;
     }
 
-    /* several object types were added, we can't easily complete, just annotate a bit */
+    /* several object types were added, we can't easily complete, just do partial discovery */
     ret = hwloc_look_x86(backend, 0);
     if (ret)
       hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
-    return 0;
+    return ret;
   } else {
     /* topology is empty, initialize it */
     hwloc_alloc_obj_cpusets(topology->levels[0][0]);
