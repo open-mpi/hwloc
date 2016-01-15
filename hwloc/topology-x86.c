@@ -958,13 +958,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   /* FIXME: if KNL and L2 disabled, add tiles instead of L2 */
 
   hwloc_bitmap_free(remaining_cpuset);
-
-  for (i = 0; i < nbprocs; i++) {
-    free(infos[i].cache);
-    if (infos[i].otherids)
-      free(infos[i].otherids);
-  }
-
   hwloc_bitmap_free(complete_cpuset);
   topology->next_group_depth = next_group_depth;
 }
@@ -1190,7 +1183,12 @@ out_with_os_state:
 
 out_with_infos:
   if (NULL != infos) {
-      free(infos);
+    for (i = 0; i < nbprocs; i++) {
+      free(infos[i].cache);
+      if (infos[i].otherids)
+	free(infos[i].otherids);
+    }
+    free(infos);
   }
 
 out:
