@@ -909,7 +909,8 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
 
   if (!data->apicid_unique)
     fulldiscovery = 0;
-  summarize(backend, infos, fulldiscovery);
+  else
+    summarize(backend, infos, fulldiscovery);
   return fulldiscovery; /* success, but objects added only if fulldiscovery */
 }
 
