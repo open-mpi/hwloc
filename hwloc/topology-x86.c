@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2015 Inria.  All rights reserved.
+ * Copyright © 2010-2016 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -659,7 +659,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   /* Ideally, when fulldiscovery=0, we could add any object that doesn't exist yet.
    * But what if the x86 and the native backends disagree because one is buggy? Which one to trust?
-   * Only annotate existing objects for now.
+   * We only add missing caches, and annotate other existing objects for now.
    */
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
@@ -896,6 +896,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
       caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
       while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
+	hwloc_bitmap_t puset;
+
 	for (l = 0; l < infos[i].numcaches; l++) {
 	  if (infos[i].cache[l].level == level && infos[i].cache[l].type == type)
 	    break;
@@ -906,13 +908,22 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	  continue;
 	}
 
-	if (fulldiscovery) {
-	  /* Add caches */
+	puset = hwloc_bitmap_alloc();
+	hwloc_bitmap_set(puset, i);
+	cache = hwloc_get_next_obj_covering_cpuset_by_type(topology, puset, otype, NULL);
+	hwloc_bitmap_free(puset);
+
+	if (cache) {
+	  /* Found cache above that PU, annotate if no such attribute yet */
+	  if (!hwloc_obj_get_info_by_name(cache, "Inclusive"))
+	    hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
+	  hwloc_bitmap_andnot(caches_cpuset, caches_cpuset, cache->cpuset);
+	} else {
+	  /* Add the missing cache */
 	  hwloc_bitmap_t cache_cpuset;
 	  unsigned packageid = infos[i].packageid;
 	  unsigned cacheid = infos[i].cache[l].cacheid;
-	  /* Found a matching cache, now look for others sharing it */
-
+	  /* Now look for others sharing it */
 	  cache_cpuset = hwloc_bitmap_alloc();
 	  for (j = i; j < nbprocs; j++) {
 	    unsigned l2;
@@ -941,23 +952,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	  hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 				   level, cacheid, cache_cpuset);
 	  hwloc_insert_object_by_cpuset(topology, cache);
-
-	} else {
-	  /* Annotate existing caches */
-	  hwloc_bitmap_t set = hwloc_bitmap_alloc();
-	  hwloc_obj_t cache;
-	  hwloc_bitmap_set(set, i);
-	  cache = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, otype, NULL);
-	  hwloc_bitmap_free(set);
-	  if (cache) {
-	    /* Found cache above that PU, annotate if no such attribute yet */
-	    if (!hwloc_obj_get_info_by_name(cache, "Inclusive"))
-	      hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
-	    hwloc_bitmap_andnot(caches_cpuset, caches_cpuset, cache->cpuset);
-	  } else {
-	    /* No cache above that PU?! */
-	    hwloc_bitmap_clr(caches_cpuset, i);
-	  }
 	}
       }
       hwloc_bitmap_free(caches_cpuset);
@@ -1226,7 +1220,7 @@ hwloc_x86_discover(struct hwloc_backend *backend)
       goto fulldiscovery;
     }
 
-    /* several object types were added, we can't easily complete, just annotate a bit */
+    /* several object types were added, we can't easily complete, just do partial discovery */
     hwloc_topology_reconnect(topology, 0);
     ret = hwloc_look_x86(backend, 0);
     if (ret)
