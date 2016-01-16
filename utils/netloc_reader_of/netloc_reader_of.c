@@ -3,7 +3,7 @@
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  *
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * $HEADER$
@@ -207,36 +207,12 @@ int main(int argc, char ** argv) {
         }
     }
 
-    if( NULL != outdir ) {
-        free(outdir);
-        outdir = NULL;
-    }
-
-    if( NULL != out_file_nodes ) {
-        free(out_file_nodes);
-        out_file_nodes = NULL;
-    }
-
-    if( NULL != subnet ) {
-        free(subnet);
-        subnet = NULL;
-    }
-
-    if( NULL != uri_address ) {
-        free(uri_address);
-        uri_address = NULL;
-    }
-
-    if( NULL != auth_username ) {
-        free(auth_username);
-        auth_username = NULL;
-    }
-
-    if( NULL != auth_password ) {
-        free(auth_password);
-        auth_password = NULL;
-    }
-
+    free(outdir);
+    free(out_file_nodes);
+    free(subnet);
+    free(uri_address);
+    free(auth_username);
+    free(auth_password);
     return exit_status;
 }
 
@@ -339,9 +315,7 @@ static int parse_args(int argc, char ** argv) {
      * Check Output Directory Parameter
      */
     if( NULL == outdir || strlen(outdir) <= 0 ) {
-        if( NULL != outdir ) {
-            free(outdir);
-        }
+        free(outdir);
         // Default: current working directory
         outdir = strdup(".");
     }
@@ -356,10 +330,7 @@ static int parse_args(int argc, char ** argv) {
      * Check Subnet Parameter
      */
     if( NULL == subnet || strlen(subnet) <= 0 ) {
-        if( NULL != subnet ) {
-            free(subnet);
-            subnet = NULL;
-        }
+        free(subnet);
         //fprintf(stderr, "Warning: Subnet was not specified. Using default value.\n");
         // Default: 'unknown'
         subnet = strdup("unknown");
@@ -369,10 +340,7 @@ static int parse_args(int argc, char ** argv) {
      * Check URI Address:Port Parameter
      */
     if( NULL == uri_address || strlen(uri_address) <= 0 ) {
-        if( NULL != uri_address ) {
-            free(uri_address);
-            uri_address = NULL;
-        }
+        free(uri_address);
         uri_address = strdup("127.0.0.1:8080");
     }
 
@@ -579,9 +547,7 @@ static int compute_physical_paths(netloc_data_collection_handle_t *dc_handle)
                 return ret;
             }
 
-            num_edges = 0;
             free(edges);
-            edges = NULL;
 
             dst_idx++;
         }
@@ -670,7 +636,6 @@ static int check_dat_files() {
     netloc_dt_lookup_table_iterator_t_destruct(hti);
     netloc_lookup_table_destroy(nodes);
     free(nodes);
-    nodes = NULL;
 
     /*
      * Check 'switches'
@@ -705,7 +670,6 @@ static int check_dat_files() {
     netloc_dt_lookup_table_iterator_t_destruct(hti);
     netloc_lookup_table_destroy(nodes);
     free(nodes);
-    nodes = NULL;
 
     if( num_bad > 0 ) {
         fprintf(stderr, "Error: Found %2d malformed nodes in the .dat files\n", num_bad);
@@ -724,31 +688,11 @@ static int check_dat_files() {
     }
 
  cleanup:
-    if( NULL != search_uri ) {
-        free(search_uri);
-        search_uri = NULL;
-    }
-
-    if( NULL != network) {
-        netloc_dt_network_t_destruct(network);
-        network = NULL;
-    }
-
-    if( NULL != spec ) {
-        free(spec);
-        spec = NULL;
-    }
-
-    if( NULL != hosts_filename ) {
-        free(hosts_filename);
-        hosts_filename = NULL;
-    }
-
-    if( NULL != switches_filename ) {
-        free(switches_filename);
-        switches_filename = NULL;
-    }
-
+    netloc_dt_network_t_destruct(network);
+    free(search_uri);
+    free(spec);
+    free(hosts_filename);
+    free(switches_filename);
     return exit_status;
 }
 
@@ -863,15 +807,8 @@ static int extract_network_info_from_json_file(netloc_network_t *network, char *
     /*
      * Cleanup
      */
-    if( NULL != tmp_dat_file ) {
-        free(tmp_dat_file);
-        tmp_dat_file = NULL;
-    }
-    if(NULL != json) {
-        json_decref(json);
-        json = NULL;
-    }
-
+    free(tmp_dat_file);
+    json_decref(json);
     return NETLOC_SUCCESS;
 }
 
@@ -995,8 +932,6 @@ static int process_nodes_dat(netloc_data_collection_handle_t *dc_handle, char *d
 
                 // The append_edge duplicates the edge, so we should free it
                 netloc_dt_edge_t_destruct(edge);
-                edge = NULL;
-
             }
         }
         //printf("Debug: Node %s\n", netloc_pretty_print_node_t(node));

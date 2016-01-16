@@ -1,6 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -72,13 +73,7 @@ int main(void) {
     /*
      * Cleanup
      */
-    if( NULL != phy_id ) {
-        free(phy_id);
-        phy_id = NULL;
-    }
-
+    free(phy_id);
     netloc_dt_network_t_destruct(tmp_network);
-    tmp_network = NULL;
-
     return NETLOC_SUCCESS;
 }

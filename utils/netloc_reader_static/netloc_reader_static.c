@@ -252,21 +252,9 @@ int main(int argc, char ** argv) {
         }
     }
 
-    if( NULL != outdir ) {
-        free(outdir);
-        outdir = NULL;
-    }
-
-    if( NULL != inputfile ) {
-        free(inputfile);
-        inputfile = NULL;
-    }
-
-    if( NULL != subnet ) {
-        free(subnet);
-        subnet = NULL;
-    }
-
+    free(outdir);
+    free(inputfile);
+    free(subnet);
     return exit_status;
 }
 
@@ -327,9 +315,7 @@ static int parse_args(int argc, char ** argv) {
      * Check Output Directory Parameter
      */
     if( NULL == outdir || strlen(outdir) <= 0 ) {
-        if( NULL != outdir ) {
-            free(outdir);
-        }
+        free(outdir);
         // Default: current working directory
         outdir = strdup(".");
     }
@@ -798,7 +784,6 @@ static int convert_nodes_file(netloc_data_collection_handle_t *dc_handle) {
      */
     if(NULL != json) {
         json_decref(json);
-        json = NULL;
     }
 
     return NETLOC_SUCCESS;
@@ -905,9 +890,7 @@ static int compute_physical_paths(netloc_data_collection_handle_t *dc_handle)
                 return ret;
             }
 
-            num_edges = 0;
             free(edges);
-            edges = NULL;
 
             dst_idx++;
         }
@@ -997,7 +980,6 @@ static int check_dat_files() {
     if(NULL != nodes ) {
         netloc_lookup_table_destroy(nodes);
         free(nodes);
-        nodes = NULL;
     }
 
     /*
@@ -1034,7 +1016,6 @@ static int check_dat_files() {
     if( NULL != nodes ) {
         netloc_lookup_table_destroy(nodes);
         free(nodes);
-        nodes = NULL;
     }
 
     if( num_bad > 0 ) {
@@ -1054,31 +1035,14 @@ static int check_dat_files() {
     }
 
  cleanup:
-    if( NULL != search_uri ) {
-        free(search_uri);
-        search_uri = NULL;
-    }
-
     if( NULL != network) {
         netloc_dt_network_t_destruct(network);
-        network = NULL;
     }
 
-    if( NULL != spec ) {
-        free(spec);
-        spec = NULL;
-    }
-
-    if( NULL != hosts_filename ) {
-        free(hosts_filename);
-        hosts_filename = NULL;
-    }
-
-    if( NULL != switches_filename ) {
-        free(switches_filename);
-        switches_filename = NULL;
-    }
-
+    free(search_uri);
+    free(spec);
+    free(hosts_filename);
+    free(switches_filename);
     return exit_status;
 }
 

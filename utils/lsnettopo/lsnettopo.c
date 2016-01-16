@@ -3,6 +3,7 @@
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  *
+ * Copyright © 2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * $HEADER$
@@ -160,18 +161,13 @@ int main(int argc, char ** argv) {
         }
     }
 
-    if( NULL != filename ) {
-        free(filename);
-        filename = NULL;
-    }
+    free(filename);
 
     if( NULL != search_uris ) {
         for(i = 0; i < num_search_uris; ++i ) {
             free(search_uris[i]);
-            search_uris[i] = NULL;
         }
         free(search_uris);
-        search_uris = NULL;
     }
 
     return NETLOC_SUCCESS;

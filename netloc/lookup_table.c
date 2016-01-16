@@ -2,7 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -199,12 +199,10 @@ int netloc_lookup_table_entry_t_destruct(netloc_lookup_table_entry_t* hte, int d
 
     hte->__key__ = 0;
 
-    if( NULL != hte->key ) {
-        if (dup) {
-            free((char*) hte->key);
-        }
-        hte->key = NULL;
+    if (dup) {
+        free((char*) hte->key);
     }
+    hte->key = NULL;
     hte->value = NULL;
 
     free(hte);

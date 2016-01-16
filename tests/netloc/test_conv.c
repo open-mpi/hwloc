@@ -1,6 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -43,7 +44,6 @@ int main(void) {
     printf("Success\n");
 
     free(tmp_str);
-    tmp_str = NULL;
 
     /*
      * Test GUID: str -> int
@@ -67,20 +67,8 @@ int main(void) {
     /*
      * Cleanup
      */
-    if( NULL != mac_addr ) {
-        free(mac_addr);
-        mac_addr = NULL;
-    }
-
-    if( NULL != guid_addr ) {
-        free(guid_addr);
-        guid_addr = NULL;
-    }
-
-    if( NULL != tmp_str ) {
-        free(tmp_str);
-        tmp_str = NULL;
-    }
-
+    free(mac_addr);
+    free(guid_addr);
+    free(tmp_str);
     return exit_status;
 }

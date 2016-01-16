@@ -108,10 +108,7 @@ int netloc_find_network(const char * network_topo_uri, netloc_network_t* network
      */
  cleanup:
     for(i = 0; i < num_networks; ++i) {
-        if( NULL != all_networks[i] ) {
-            netloc_dt_network_t_destruct(all_networks[i]);
-            all_networks[i] = NULL;
-        }
+        netloc_dt_network_t_destruct(all_networks[i]);
     }
     free(all_networks);
 
@@ -306,10 +303,7 @@ static int search_uri(const char * search_uri,
             netloc_dt_network_t_destruct(tmp_network);
         }
 
-        if( NULL != filename ) {
-            free(filename);
-            filename = NULL;
-        }
+	free(filename);
     }
 
     /*
@@ -336,11 +330,8 @@ static int search_uri(const char * search_uri,
                     ++i;
                 }
 
-                free(all_networks);
-                all_networks = NULL;
-
                 closedir(dirp);
-                dirp = NULL;
+                free(all_networks);
                 free(uri_str);
 
                 return NETLOC_ERROR;
@@ -357,13 +348,8 @@ static int search_uri(const char * search_uri,
      * Cleanup
      */
     closedir(dirp);
-    dirp = NULL;
+    free(all_networks);
     free(uri_str);
-
-    if( NULL != all_networks ) {
-        free(all_networks);
-        all_networks = NULL;
-    }
 
     return NETLOC_SUCCESS;
 }

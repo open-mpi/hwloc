@@ -2,6 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013-2014 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -83,30 +84,11 @@ int netloc_dt_data_collection_handle_t_destruct(netloc_data_collection_handle_t 
     handle->is_open      = false;
     handle->is_read_only = false;
 
-    if( NULL != handle->unique_id_str ) {
-        free(handle->unique_id_str);
-        handle->unique_id_str = NULL;
-    }
-
-    if( NULL != handle->data_uri ) {
-        free(handle->data_uri);
-        handle->data_uri = NULL;
-    }
-
-    if( NULL != handle->filename_nodes ) {
-        free(handle->filename_nodes);
-        handle->filename_nodes = NULL;
-    }
-
-    if( NULL != handle->filename_physical_paths ) {
-        free(handle->filename_physical_paths);
-        handle->filename_physical_paths = NULL;
-    }
-
-    if( NULL != handle->filename_logical_paths ) {
-        free(handle->filename_logical_paths);
-        handle->filename_logical_paths = NULL;
-    }
+    free(handle->unique_id_str);
+    free(handle->data_uri);
+    free(handle->filename_nodes);
+    free(handle->filename_physical_paths);
+    free(handle->filename_logical_paths);
 
     if( NULL != handle->node_list ) {
         // Make sure to free all of the nodes pointed to in the lookup table
@@ -122,7 +104,6 @@ int netloc_dt_data_collection_handle_t_destruct(netloc_data_collection_handle_t 
 
         netloc_lookup_table_destroy(handle->node_list);
         free(handle->node_list);
-        handle->node_list = NULL;
     }
 
     if( NULL != handle->edges ) {
@@ -139,18 +120,15 @@ int netloc_dt_data_collection_handle_t_destruct(netloc_data_collection_handle_t 
 
         netloc_lookup_table_destroy(handle->edges);
         free(handle->edges);
-        handle->edges = NULL;
     }
 
     if( NULL != handle->node_data ) {
         json_decref(handle->node_data);
-        handle->node_data = NULL;
         // Implied decref of handle->node_data_acc
     }
 
     if( NULL != handle->path_data ) {
         json_decref(handle->path_data);
-        handle->path_data = NULL;
         // Implied decref of handle->path_data_acc
     }
 
@@ -408,7 +386,6 @@ int netloc_dc_append_node(netloc_data_collection_handle_t *handle, netloc_node_t
         }
     }
     free(key);
-    key = NULL;
 
     /*
      * Add the node to our list
@@ -484,7 +461,6 @@ int netloc_dc_append_edge_to_node(netloc_data_collection_handle_t *handle, netlo
     asprintf(&key, "%d", edge->edge_uid);
     found_edge = (netloc_edge_t*)netloc_lookup_table_access(handle->edges, key);
     free(key);
-    key = NULL;
     // JJH: Should we be checking the contents of the edge, not just the key?
 
     /*
@@ -496,7 +472,6 @@ int netloc_dc_append_edge_to_node(netloc_data_collection_handle_t *handle, netlo
         asprintf(&key, "%d", found_edge->edge_uid);
         netloc_lookup_table_append(handle->edges, key, found_edge);
         free(key);
-        key = NULL;
     }
 
     /*
@@ -523,7 +498,6 @@ int netloc_dc_append_edge_to_node(netloc_data_collection_handle_t *handle, netlo
     }
     found_edge->src_node = found_node;
     free(key);
-    key = NULL;
 
     if( NULL == edge->dest_node_id ) {
         return NETLOC_ERROR_NOT_FOUND;
@@ -543,7 +517,6 @@ int netloc_dc_append_edge_to_node(netloc_data_collection_handle_t *handle, netlo
     }
     found_edge->dest_node = found_node;
     free(key);
-    key = NULL;
 
     /*
      * Add the edge index to the node passed to us

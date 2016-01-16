@@ -1,6 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -117,10 +118,6 @@ int main(void) {
         return ret;
     }
 
-    if( NULL != search_uri ) {
-        free(search_uri);
-        search_uri = NULL;
-    }
-
+    free(search_uri);
     return exit_status;
 }

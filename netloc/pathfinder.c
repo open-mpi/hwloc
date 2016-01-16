@@ -2,7 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013-2014 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -349,30 +349,11 @@ static int compute_shortest_path_dijkstra(netloc_data_collection_handle_t *handl
         queue = NULL;
     }
 
-    if( NULL != rev_edges ) {
-        free(rev_edges);
-        rev_edges = NULL;
-    }
-
-    if( NULL != distance ) {
-        free(distance);
-        distance = NULL;
-    }
-
-    if( NULL != not_seen ) {
-        free(not_seen);
-        not_seen = NULL;
-    }
-
-    if( NULL != prev_node ) {
-        free(prev_node);
-        prev_node = NULL;
-    }
-
-    if( NULL != prev_edge ) {
-        free(prev_edge);
-        prev_edge = NULL;
-    }
+    free(rev_edges);
+    free(distance);
+    free(not_seen);
+    free(prev_node);
+    free(prev_edge);
 
     netloc_dt_lookup_table_iterator_t_destruct(hti);
 
@@ -405,14 +386,7 @@ static int pq_queue_t_destruct(pq_queue_t *pq)
         return NETLOC_SUCCESS;
     }
 
-    if( NULL != pq->data ) {
-        free(pq->data);
-        pq->data = NULL;
-    }
-
-    pq->size = 0;
-    pq->alloc = 0;
-
+    free(pq->data);
     free(pq);
 
     return NETLOC_SUCCESS;
