@@ -1188,8 +1188,7 @@ out_with_infos:
   if (NULL != infos) {
     for (i = 0; i < nbprocs; i++) {
       free(infos[i].cache);
-      if (infos[i].otherids)
-	free(infos[i].otherids);
+      free(infos[i].otherids);
     }
     free(infos);
   }
@@ -1340,8 +1339,7 @@ hwloc_x86_backend_disable(struct hwloc_backend *backend)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   hwloc_bitmap_free(data->apicid_set);
-  if (data->src_cpuiddump_path)
-    free(data->src_cpuiddump_path);
+  free(data->src_cpuiddump_path);
   free(data);
 }
 

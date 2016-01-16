@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -644,12 +644,8 @@ static void hwloc__xml_import_report_outoforder(hwloc_topology_t topology, hwloc
 
   free(c1);
   free(cc1);
-
-  if (c2)
-    free(c2);
-  if (cc2)
-    free(cc2);
-
+  free(c2);
+  free(cc2);
   free(progname);
 }
 

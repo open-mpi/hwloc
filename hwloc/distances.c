@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2015 Inria.  All rights reserved.
+ * Copyright © 2010-2016 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -882,21 +882,13 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
 
   inner_free:
       /* Safely free everything */
-      if (NULL != groupobjs) {
-          free(groupobjs);
-      }
-      if (NULL != groupsizes) {
-          free(groupsizes);
-      }
-      if (NULL != groupdistances) {
-          free(groupdistances);
-      }
+      free(groupobjs);
+      free(groupsizes);
+      free(groupdistances);
   }
 
  outter_free:
-  if (NULL != groupids) {
-      free(groupids);
-  }
+  free(groupids);
 }
 
 void

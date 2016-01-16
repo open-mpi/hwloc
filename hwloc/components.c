@@ -608,8 +608,7 @@ nextcomp:
     fprintf(stderr, "\n");
   }
 
-  if (env)
-    free(env);
+  free(env);
 }
 
 void

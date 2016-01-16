@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -141,8 +141,7 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology __hwloc_attribute_unuse
   unsigned i;
   for(i=0; i<topology->pci_forced_locality_nr; i++)
     hwloc_bitmap_free(topology->pci_forced_locality[i].cpuset);
-  if (topology->pci_forced_locality)
-    free(topology->pci_forced_locality);
+  free(topology->pci_forced_locality);
 }
 
 #ifdef HWLOC_DEBUG

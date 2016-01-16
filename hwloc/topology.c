@@ -1039,8 +1039,7 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
     if (new->memory.local_memory && !old->memory.local_memory) {
       /* no memory in old, use new memory */
       old->memory.local_memory = new->memory.local_memory;
-      if (old->memory.page_types)
-	free(old->memory.page_types);
+      free(old->memory.page_types);
       old->memory.page_types_len = new->memory.page_types_len;
       old->memory.page_types = new->memory.page_types;
       new->memory.page_types = NULL;
@@ -2426,8 +2425,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
 	fprintf(stderr, "hwloc failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
 	free(objs);
 	free(taken_objs);
-	if (new_objs)
-	  free(new_objs);
+	free(new_objs);
 	errno = ENOMEM;
 	return -1;
       }
@@ -2451,8 +2449,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
   }
 
   /* It's empty now.  */
-  if (objs)
-    free(objs);
+  free(objs);
 
   return 0;
 }

@@ -3322,8 +3322,7 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
 	     || !strcasecmp("Machine", prefix)) {
     /* machine and board are similar (and often more precise) than model above */
     char **valuep = hwloc__find_info_slot(infos, infos_count, "PlatformModel");
-    if (*valuep)
-      free(*valuep);
+    free(*valuep);
     *valuep = strdup(value);
   } else if (!strcasecmp("Revision", prefix)
 	     || !strcmp("Hardware rev", prefix)) {
@@ -3373,8 +3372,7 @@ hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
      * we should have the Architecture keypair for basic information anyway.
      */
     char **valuep = hwloc__find_info_slot(infos, infos_count, "CPUModel");
-    if (*valuep)
-      free(*valuep);
+    free(*valuep);
     *valuep = strdup(value);
   }
   return 0;
@@ -4039,8 +4037,7 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
 #ifdef HAVE_OPENAT
-  if (data->root_path)
-    free(data->root_path);
+  free(data->root_path);
   close(data->root_fd);
 #endif
 #ifdef HAVE_LIBUDEV_H
@@ -4128,8 +4125,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
 
  out_with_data:
 #ifdef HAVE_OPENAT
-  if (data->root_path)
-    free(data->root_path);
+  free(data->root_path);
 #endif
   free(data);
  out_with_backend:
