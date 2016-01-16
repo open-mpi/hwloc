@@ -22,6 +22,10 @@
 
 #include <private/cpuid-x86.h>
 
+#ifdef HAVE_VALGRIND_VALGRIND_H
+#include <valgrind/valgrind.h>
+#endif
+
 struct hwloc_x86_backend_data_s {
   unsigned nbprocs;
   hwloc_bitmap_t apicid_set;
@@ -1086,6 +1090,13 @@ hwloc_x86_discover(struct hwloc_backend *backend)
   struct hwloc_topology *topology = backend->topology;
   int alreadypus = 0;
   int ret;
+
+#if HAVE_DECL_RUNNING_ON_VALGRIND
+  if (RUNNING_ON_VALGRIND) {
+    fprintf(stderr, "hwloc x86 backend cannot work under Valgrind, disabling.\n");
+    return 0;
+  }
+#endif
 
   data->nbprocs = hwloc_fallback_nbprocessors(topology);
 
