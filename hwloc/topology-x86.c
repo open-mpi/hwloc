@@ -26,6 +26,9 @@
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
+#ifdef HAVE_VALGRIND_VALGRIND_H
+#include <valgrind/valgrind.h>
+#endif
 
 struct hwloc_x86_backend_data_s {
   unsigned nbprocs;
@@ -1204,6 +1207,15 @@ hwloc_x86_discover(struct hwloc_backend *backend)
   struct hwloc_topology *topology = backend->topology;
   int alreadypus = 0;
   int ret;
+
+#if HAVE_DECL_RUNNING_ON_VALGRIND
+  if (RUNNING_ON_VALGRIND && !data->src_cpuiddump_path) {
+    fprintf(stderr, "hwloc x86 backend cannot work under Valgrind, disabling.\n"
+	    "May be reenabled by dumping CPUIDs with hwloc-gather-cpuid\n"
+	    "and reloading them under Valgrind with HWLOC_CPUID_PATH.\n");
+    return 0;
+  }
+#endif
 
   if (!data->src_cpuiddump_path)
     data->nbprocs = hwloc_fallback_nbprocessors(topology);
