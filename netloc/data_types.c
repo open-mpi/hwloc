@@ -2,7 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -174,6 +174,9 @@ netloc_network_t * netloc_dt_network_t_json_decode(json_t *json_nw)
 
 int netloc_dt_network_t_destruct(netloc_network_t * network)
 {
+    if( NULL == network )
+        return NETLOC_SUCCESS;
+
     if( NULL != network->subnet_id ) {
         free(network->subnet_id);
         network->subnet_id = NULL;

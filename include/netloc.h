@@ -2,7 +2,7 @@
  * Copyright © 2013-2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -429,7 +429,7 @@ NETLOC_DECLSPEC netloc_network_t * netloc_dt_network_t_construct(void);
 /**
  * Destructor for \ref netloc_network_t
  *
- * \param network A valid network handle
+ * \param network A valid network handle, or \c NULL.
  *
  * \returns NETLOC_SUCCESS on success
  * \returns NETLOC_ERROR on error
