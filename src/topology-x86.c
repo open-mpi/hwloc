@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2015 Inria.  All rights reserved.
+ * Copyright © 2010-2016 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -869,12 +869,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     level--;
   }
 
-  for (i = 0; i < nbprocs; i++) {
-    free(infos[i].cache);
-    if (infos[i].otherids)
-      free(infos[i].otherids);
-  }
-
   hwloc_bitmap_free(complete_cpuset);
   topology->next_group_depth = next_group_depth;
 }
@@ -1075,7 +1069,12 @@ out_with_os_state:
 
 out_with_infos:
   if (NULL != infos) {
-      free(infos);
+    for (i = 0; i < nbprocs; i++) {
+      free(infos[i].cache);
+      if (infos[i].otherids)
+	free(infos[i].otherids);
+    }
+    free(infos);
   }
 
 out:
