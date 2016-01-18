@@ -1,6 +1,6 @@
 //
 // Copyright © 2013-2014 Cisco Systems, Inc.  All rights reserved.
-// Copyright © 2013-2015 Inria.  All rights reserved.
+// Copyright © 2013-2016 Inria.  All rights reserved.
 // Copyright © 2013-2014 University of Wisconsin-La Crosse.
 //
 // See COPYING in top-level directory.
@@ -430,12 +430,20 @@ netloc_map__init_servers(struct netloc_map *map)
 	hwloc_topology_set_type_filter(topo, HWLOC_OBJ_OS_DEVICE, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
 	/* no need for bridges */
         err = hwloc_topology_set_xml(topo, filepath);
-        free(filepath);
         if (err < 0) {
-            hwloc_topology_destroy(topo);
-            continue;
+	  fprintf(stderr, "hwloc_topology_set_xml() failed on XML `%s' (%s), ignoring this file.\n", filepath, strerror(errno));
+	  free(filepath);
+	  hwloc_topology_destroy(topo);
+	  continue;
         }
-        hwloc_topology_load(topo);
+        err = hwloc_topology_load(topo);
+	if (err < 0) {
+	  fprintf(stderr, "hwloc_topology_load() failed on XML `%s' (%s), ignoring this file.\n", filepath, strerror(errno));
+	  free(filepath);
+	  hwloc_topology_destroy(topo);
+	  continue;
+	}
+        free(filepath);
 
         server = netloc_map__init_server(map, topo, name);
         if (!server)
