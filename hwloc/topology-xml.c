@@ -677,12 +677,12 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	  obj->type = _HWLOC_OBJ_CACHE_OLD; /* will be fixed below */
 	  attribute_less_cache = 1;
 	} else
-	  goto error;
+	  goto error_with_object;
       }
     } else {
       /* type needed first */
       if (obj->type == HWLOC_OBJ_TYPE_NONE)
-	goto error;
+	goto error_with_object;
       hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue, state);
     }
   }
@@ -699,20 +699,20 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid cache type %s with attribute depth %u and type %d\n",
 	      hwloc_obj_type_string(obj->type), obj->attr->cache.depth, obj->attr->cache.type);
-    goto error;
+    goto error_with_object;
   }
 
   if (obj->cpuset && parent && !parent->cpuset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with cpuset while parent has none\n",
 	      hwloc_obj_type_string(obj->type), obj->os_index);
-    goto error;
+    goto error_with_object;
   }
   if (obj->nodeset && parent && !parent->nodeset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with nodeset while parent has none\n",
 	      hwloc_obj_type_string(obj->type), obj->os_index);
-    goto error;
+    goto error_with_object;
   }
 
   if (!obj->cpuset
@@ -721,7 +721,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid non-I/O object %s P#%u without cpuset\n",
 	      hwloc_obj_type_string(obj->type), obj->os_index);
-    goto error;
+    goto error_with_object;
   }
 
   if (obj->type == HWLOC_OBJ_NUMANODE) {
@@ -729,7 +729,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       if (hwloc__xml_verbose())
 	fprintf(stderr, "invalid NUMA node object P#%u without nodeset\n",
 		obj->os_index);
-      goto error;
+      goto error_with_object;
     }
     data->nbnumanodes++;
   }
@@ -760,7 +760,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		  hwloc_obj_type_string(obj->type), obj->os_index,
 		  hwloc_obj_type_string((*current)->type), (*current)->os_index);
 	}
-	goto error;
+	goto error_with_object;
       }
     }
 
@@ -807,8 +807,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   return state->global->close_tag(state);
 
- error:
+ error_with_object:
   hwloc_free_unlinked_object(obj);
+ error:
   return -1;
 }
 
