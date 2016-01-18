@@ -2561,7 +2561,6 @@ next_cpubackend:
    * and collect_proc_cpuset() should have set bits based on existing PUs.
    */
   if (!topology->levels[0][0]->cpuset || hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
-    printf("No PU added by any CPU and Global backend, aborting load\n");
     hwloc_debug("%s", "No PU added by any CPU and global backend\n");
     errno = EINVAL;
     return -1;
