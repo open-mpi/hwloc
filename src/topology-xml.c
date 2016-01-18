@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -612,11 +612,11 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       break;
     if (!strcmp(attrname, "type")) {
       if (hwloc_obj_type_sscanf(attrvalue, &obj->type, NULL, NULL, 0) < 0)
-	goto error;
+	goto error_with_object;
     } else {
       /* type needed first */
       if (obj->type == (hwloc_obj_type_t)-1)
-	goto error;
+	goto error_with_object;
       hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue, state);
     }
   }
@@ -714,8 +714,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   return state->global->close_tag(state);
 
- error:
+ error_with_object:
   hwloc_free_unlinked_object(obj);
+ error:
   return -1;
 }
 
