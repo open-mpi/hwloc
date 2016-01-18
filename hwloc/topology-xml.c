@@ -963,25 +963,38 @@ hwloc__xml_import_diff(hwloc__xml_import_state_t state,
  ********* main XML import *********
  ***********************************/
 
+static void
+hwloc_xml__free_distances(struct hwloc_xml_backend_data_s *data)
+{
+  struct hwloc_xml_imported_distances_s *xmldist;
+  while ((xmldist = data->first_distances) != NULL) {
+    data->first_distances = xmldist->next;
+    free(xmldist->distances.latency);
+    free(xmldist);
+  }
+}
+
 static int
 hwloc_xml__handle_distances(struct hwloc_topology *topology,
 			    struct hwloc_xml_backend_data_s *data,
 			    const char *msgprefix)
 {
-  struct hwloc_xml_imported_distances_s *xmldist, *next = data->first_distances;
-
-  if (!next)
-    return 0;
+  struct hwloc_xml_imported_distances_s *xmldist;
 
   /* connect things now because we need levels to check/build, they'll be reconnected properly later anyway */
   hwloc_connect_children(topology->levels[0][0]);
-  if (hwloc_connect_levels(topology) < 0)
+  if (hwloc_connect_levels(topology) < 0) {
+    hwloc_xml__free_distances(data);
     return -1;
+  }
 
-  while ((xmldist = next) != NULL) {
+  while ((xmldist = data->first_distances) != NULL) {
     hwloc_obj_t root = xmldist->root;
     unsigned depth = root->depth + xmldist->distances.relative_depth;
     unsigned nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, depth);
+
+    data->first_distances = xmldist->next;
+
     if (nbobjs != xmldist->distances.nbobjs) {
       /* distances invalid, drop */
       if (hwloc__xml_verbose())
@@ -1004,7 +1017,6 @@ hwloc_xml__handle_distances(struct hwloc_topology *topology,
       hwloc_distances_set(topology, objs[0]->type, nbobjs, indexes, objs, xmldist->distances.latency, 0 /* XML cannot force */);
     }
 
-    next = xmldist->next;
     free(xmldist);
   }
 
@@ -1107,6 +1119,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
     fprintf(stderr, "%s: XML component discovery failed.\n",
 	    data->msgprefix);
  err:
+  hwloc_xml__free_distances(data);
   hwloc_localeswitch_fini();
   return -1;
 }
