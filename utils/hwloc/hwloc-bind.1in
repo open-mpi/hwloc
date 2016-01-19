@@ -46,6 +46,8 @@ the default policy is bind.
 .TP
 \fB\-\-get\fR
 Report the current bindings.
+The output is an opaque bitmask that may be translated into objects with hwloc-calc
+(see EXAMPLES below).
 .TP
 \ 
 When a command is given, the binding is displayed before executing
@@ -62,6 +64,10 @@ No location may be given since no binding is performed.
 .TP
 \fB\-e\fR \fB\-\-get-last-cpu-location\fR
 Report the last processors where the process ran.
+The output is an opaque bitmask that may be translated into objects with hwloc-calc
+(see EXAMPLES below).
+.TP
+\ 
 Note that the result may already be outdated when reported since
 the operating system may move the process to other processors
 at any time according to the binding.
@@ -88,10 +94,12 @@ Require strict binding.
 Operate on pid <pid>
 .TP
 \fB\-p\fR \fB\-\-physical\fR
-take OS/physical indexes instead of logical indexes
+Interpret input locations with OS/physical indexes instead of logical indexes.
+This option does not apply to the output, see \fB\-\-get\fR above.
 .TP
 \fB\-l\fR \fB\-\-logical\fR
-take logical indexes instead of physical/OS indexes (default)
+Interpret input locations with logical indexes instead of physical/OS indexes (default).
+This option does not apply to the output, see \fB\-\-get\fR above.
 .TP
 \fB\-\-taskset\fR
 Display CPU set strings in the format recognized by the taskset command-line
@@ -219,6 +227,14 @@ nesting hwloc-bind invocations to set a binding and then report it:
 
     $ hwloc-bind node:1.package:2 -- hwloc-bind --get
     0x00004444,0x44000000
+
+hwloc-calc may convert this output into actual objects, either with logical or physical indexes:
+
+    $ hwloc-calc --physical -I pu `hwloc-bind --get`
+    26,30,34,38,42,46
+    $ hwloc-calc --logical -I pu `hwloc-bind --get` --sep " "
+    24 25 26 27 28 29
+
 .
 .PP
 Locations may also be specified as a hex bit mask (typically generated
