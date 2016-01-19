@@ -232,9 +232,6 @@ The current memory binding may also be reported:
     $ hwloc-bind --membind node:1 --mempolicy interleave -- hwloc-bind --get --membind
     0x000000f0 (interleave)
 
-Note that if the system is not NUMA, the reported string may indicate that the process is bound to
-the entire system memory (e.g., "0xf...f").
-
 .SH HINT
 If the graphics-enabled lstopo is available, use for instance
 
