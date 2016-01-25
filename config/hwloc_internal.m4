@@ -330,6 +330,7 @@ EOF
         hwloc_config_prefix[utils/netloc_reader_ib/Makefile]
         hwloc_config_prefix[utils/netloc_reader_of/Makefile]
         hwloc_config_prefix[utils/netloc_reader_static/Makefile]
+        hwloc_config_prefix[utils/netloc_draw/Makefile]
         hwloc_config_prefix[netloc.pc]
    )
 ])dnl

@@ -30,10 +30,12 @@ int netloc_attach(struct netloc_topology ** topology_ptr, netloc_network_t netwo
      */
     topology->network    = netloc_dt_network_t_dup(&network);
 
-    topology->nodes_loaded = false;
-    topology->num_nodes    = 0;
-    topology->nodes        = NULL;
-    topology->edges        = NULL;
+    topology->nodes_loaded   = false;
+    topology->num_nodes      = 0;
+    topology->nodes          = NULL;
+    topology->edges          = NULL;
+    topology->partitions     = NULL;
+    topology->num_partitions = 0;
 
     /*
      * Make the pointer live

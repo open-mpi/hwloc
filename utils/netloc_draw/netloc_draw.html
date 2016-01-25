@@ -1,0 +1,217 @@
+<!--
+    Copyright © 2016-2016 Inria.  All rights reserved.
+    $COPYRIGHT$
+
+    Additional copyrights may follow
+    See COPYING in top-level directory.
+
+    $HEADER$
+ --!>
+
+<!doctype html>
+<html>
+<head>
+    <script type="text/javascript" src="visdist/vis.js"></script>
+    <link href="visdist/vis.css" rel="stylesheet" type="text/css"/>
+
+    <style type="text/css">
+        #mynetwork {
+            width: auto;
+            height: 500px;
+            border: 1px solid lightgray;
+        }
+    </style>
+
+    <title>Network topology</title>
+    <input type="file" id="files" name="files[]" multiple />
+    <select id="selectPartition" onchange="draw()">
+        <option>Choose a partition</option>
+    </select>
+
+
+</head>
+<body>
+
+<div id="mynetwork"></div>
+<pre id="eventSpan"></pre>
+
+<script type="text/javascript">
+  var edgesById;
+  var nodesById;
+  var edges;
+  var nodes;
+  var partitions;
+  var mydata;
+
+  function handleFileSelect(evt) {
+    var files = evt.target.files;
+
+    // Loop through the file list
+    for (var i = 0, f; f = files[i]; i++) {
+
+        var fr = new FileReader();
+        fr.onload = function(e) {
+            data = e.target.result
+            loadFile(data);
+            draw();
+        };
+        fr.readAsText(f);
+
+    }
+  }
+
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+  var hostColor = "red";
+  var switchColor = "blue";
+  function renameKey(obj, newkey, oldkey)
+  {
+      return obj.map(function(d) { d[newkey] = d[oldkey]; delete d[oldkey]; return d; });
+  }
+
+  function loadFile(data)
+  {
+      mydata = JSON.parse(data);
+      var select = document.getElementById("selectPartition");
+      ho = select;
+      var partitions = mydata.partitions;
+      partitions.unshift("All");
+
+      while (select.firstChild) {
+          select.removeChild(select.firstChild);
+      }
+      for(var i = 0; i < partitions .length; i++) {
+          var partition = partitions [i];
+          var el = document.createElement("option");
+          el.textContent = partition;
+          el.value = partition;
+          select.appendChild(el);
+      }
+
+      var partitions = mydata.partitions;
+
+      var nodes = mydata.nodes;
+      nodes = renameKey(nodes, "level", "lv");
+      nodes = renameKey(nodes, "title", "desc");
+      nodes.map(
+              function(n) { n["color"] = n["type"] == "host" ? hostColor: switchColor; });
+  
+      var edges = mydata.edges;
+      edges.map(
+              function(e) {e["label"] = parseFloat(["gbits"]);});
+      var gbits_min = Math.min.apply(null, edges.map(function(e) { return e["gbits"];}));
+      edges.map(
+              function(e) {e["width"] = e["gbits"]/gbits_min;});
+      edges = renameKey(edges, "from", "src");
+      edges = renameKey(edges, "to", "dst");
+      edges = renameKey(edges, "label", "gbits");
+      edges.map(
+              function(n) { n["color"] = n["type"] == "SH" ? hostColor: switchColor; });
+
+      mydata.nodesById = {};
+      nodes.map(function(n) { mydata.nodesById[n.id] = n }); 
+
+      mydata.edgesById = {};
+      mydata.edges.map(function(e) { mydata.edgesById[e.id] = e }); 
+  }
+
+  function draw()
+  {
+    nodesById = mydata.nodesById;
+    edgesById = mydata.edgesById;
+
+    var e = document.getElementById("selectPartition");
+    var partition = e.options[e.selectedIndex].value;
+
+    var nodes;
+    var edges;
+
+    if (partition == "All")
+    {
+      nodes = mydata.nodes;
+      edges = mydata.edges;
+    }
+    else
+    {
+      edges = [];
+      mydata.edges.map(
+              function(e) { if (e.part.indexOf(partition) > -1) edges.push(e); });
+      nodes = [];
+      mydata.nodes.map(
+              function(e) { if (e.part.indexOf(partition) > -1) nodes.push(e); });
+    }
+
+    var shown_edges = []; // we keep only half of the edges (one way)
+    if (1)
+        shown_edges = edges;
+    else
+        /* FIXME does not work if we select a partition and logical path in not the
+           same in the other way */
+        /* we draw half of the edges (only one way) */
+        mydata.edges.map(
+                function(e) { if (e.from < e.to) shown_edges.push(e); });
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+    var data = {
+        nodes: nodes,
+        edges: shown_edges
+    };
+
+    var options = {interaction:{hover:true}};
+    var network = new vis.Network(container, data, options);
+
+    network.on("selectNode", function (params) {
+        params.event = "[original event]";
+        var node = nodesById[params.nodes[0]];
+        var edges = node.edges;
+        var partitions = node.part;
+
+        var neighbours = [];
+        var i = 0;
+        while (i < edges.length)
+        {
+            var edge = edgesById[edges[i]];
+            var dest = nodesById[edge.to];
+            var s = '\t' + dest.title + ' (edgeId ' + edges[i] + ' ports '
+                    + edge.src_port + '->' + edge.dst_port + '): ';
+            s += edge.label + 'Gb\n';
+            i++;
+            neighbours .push(s);
+        }
+
+        document.getElementById('eventSpan').innerHTML =
+            '<h2>' + node.title + '</h2>' +
+            'ID: ' + node.id + '\n' +
+            'Partitions: ' + partitions.join(',') + '\n' +
+            'Neighbours:\n' + neighbours .sort().join('');
+    });
+    network.on("deselectNode", function (params) {
+        document.getElementById('eventSpan').innerHTML = '';
+    });
+
+    network.on("selectEdge", function (params) {
+        params.event = "[original event]";
+        var edge = edgesById[params.edges[0]];
+        var partitions = edge.part;
+
+        document.getElementById('eventSpan').innerHTML =
+            '<h2>' + nodesById[edge.from].title + ' -> ' + nodesById[edge.to].title + '</h2>' +
+            'ID: ' + edge.id + '\n' +
+            'From: ' + edge.from + '\n' +
+            'To: ' + edge.to + '\n' +
+            'Partitions: ' + partitions.join(',') + '\n';
+    });
+    network.on("deselectEdge", function (params) {
+        document.getElementById('eventSpan').innerHTML = '';
+    });
+
+    network.on("stabilizationIterationsDone", function () {
+        network.setOptions({ physics: false })});
+  }
+
+
+</script>
+
+</body>
+</html>

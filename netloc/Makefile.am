@@ -37,7 +37,8 @@ sources = \
         pathfinder.c \
         lookup_table.c \
         export.c \
-        map.c
+        map.c \
+        analysis.c
 
 ldflags = $(JANSSON_LDFLAGS)
 

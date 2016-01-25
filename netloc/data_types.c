@@ -289,6 +289,14 @@ netloc_edge_t * netloc_dt_edge_t_construct()
 
     edge->description = NULL;
 
+    edge->num_real_edges = 0;
+    edge->real_edges = NULL;
+
+    edge->virtual_edge = NULL;
+
+    edge->partitions = NULL;
+    edge->num_partitions = 0;
+
     edge->userdata = NULL;
 
     return edge;
@@ -558,6 +566,14 @@ netloc_node_t * netloc_dt_node_t_construct()
 
     node->num_log_paths = 0;
     node->logical_paths = calloc(1, sizeof(*node->logical_paths));
+
+    node->num_real_nodes = 0;
+    node->real_nodes = NULL;
+
+    node->virtual_node = NULL;
+
+    node->partitions = NULL;
+    node->num_partitions = 0;
 
     return node;
 }

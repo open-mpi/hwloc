@@ -11,5 +11,6 @@ SUBDIRS += \
         netloc_gather_ib \
         netloc_reader_ib \
         netloc_reader_of \
-        netloc_reader_static
+        netloc_reader_static \
+        netloc_draw
 endif

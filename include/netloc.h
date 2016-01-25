@@ -72,6 +72,14 @@ typedef enum {
 } netloc_network_type_t;
 
 /**
+ * Enumerated type for the various types of supported topologies
+ */
+typedef enum {
+    NETLOC_TOPOLOGY_TYPE_TREE    = 1, /**< Tree */
+} netloc_topology_type_t;
+
+
+/**
  * Encode the network type
  *
  * \note Only used by netloc readers to encode the network type
@@ -351,6 +359,16 @@ struct netloc_edge_t {
     /** Description information from discovery (if any) */
     char * description;
 
+    /** If it is a merged edge, list of corresponding edges */
+    int num_real_edges;
+    struct netloc_edge_t **real_edges;
+
+    /** If it is a merged edge, corresponding virtual edge */
+    struct netloc_edge_t *virtual_edge;
+
+    char **partitions; /* copies of pointers to partition_name */
+    int num_partitions;
+
     /**
      * Application-given private data pointer.
      * Initialized to NULL, and not used by the netloc library.
@@ -414,6 +432,16 @@ struct netloc_node_t {
     int num_log_paths;
     /** Lookup table for logical paths from this node */
     netloc_dt_lookup_table_t logical_paths;
+
+    /** If it is a merged node, list of the corresponding nodes */
+    int num_real_nodes;
+    struct netloc_node_t **real_nodes;
+
+    /** If it is a merged node, corresponding virtual node*/
+    struct netloc_node_t *virtual_node;
+
+    char **partitions; /* copies of pointers to partition_name */
+    int num_partitions;
 };
 
 

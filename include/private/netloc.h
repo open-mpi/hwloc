@@ -86,8 +86,15 @@ struct netloc_topology {
     int num_nodes;
     netloc_node_t **nodes;
 
+    /** Partition List */
+    int num_partitions;
+    char **partitions;
+
     /** Lookup table for all edge information */
     struct netloc_dt_lookup_table *edges;
+
+    /** Type of the graph */
+    netloc_topology_type_t type;
 };
 
 
@@ -558,5 +565,31 @@ NETLOC_DECLSPEC netloc_dt_lookup_table_t netloc_dt_lookup_table_t_json_decode(js
                                                                                void * (*func)(const char *key, json_t* json_obj));
 
 /*************************************************/
+
+/**********************************************************************
+ *        Analysis functionality
+ **********************************************************************/
+
+typedef struct netloc_analysis_data_t {
+    int level;
+} netloc_analysis_data;
+
+typedef struct netloc_tree_data_t {
+    int num_levels;
+    int *num_nodes_by_level;
+    netloc_node_t ***nodes_by_level;
+    int *num_edges_by_level;
+    netloc_node_t ***edges_by_level;
+} netloc_tree_data;
+
+typedef struct netloc_topology_analysis_t {
+    netloc_topology_t topology;
+    netloc_topology_type_t type;
+    void *data;
+} netloc_topology_analysis;
+
+NETLOC_DECLSPEC int netloc_partition_analyse(netloc_topology_analysis *analysis,
+        netloc_topology_t topology, int simpify, char *partition, int levels);
+NETLOC_DECLSPEC netloc_tree_data *netloc_get_tree_data(netloc_topology_analysis *analysis);
 
 #endif // _NETLOC_PRIVATE_H_
