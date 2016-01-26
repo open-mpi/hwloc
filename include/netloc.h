@@ -440,8 +440,12 @@ struct netloc_node_t {
     /** If it is a merged node, corresponding virtual node*/
     struct netloc_node_t *virtual_node;
 
+    char *hostname;
+
     char **partitions; /* copies of pointers to partition_name */
     int num_partitions;
+
+    int topoIdx; /* index to topology->topos */
 };
 
 

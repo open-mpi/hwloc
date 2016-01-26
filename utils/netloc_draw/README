@@ -18,12 +18,14 @@ to a specific partition.
 Command Line Interface:
 -----------------------
 
-./netloc_draw_to_json <uri to netloc directory> <simplified> [partition name]
+./netloc_draw_to_json <path the root of netloc directory> [simplified] [hwloc topologies] [partition name]
 
-<simplified> is equal to "0" or "1"
+"simplified" is equal to "0" or "1"
+"hwloc topologies" is equal to "0" or "1"
 
 Examples:
 ---------
 
-shell$ ./netloc_draw_to_json <file:///home/pistou/examples/plafrim/netloc> 1 
-shell$ ./netloc_draw_to_json <file:///home/pistou/examples/plafrim/netloc> 0 fourmi 
+shell$ ./netloc_draw_to_json ~/examples/deathmachine 1 
+shell$ ./netloc_draw_to_json ~/examples/deathmachine 0 0 fourmi 
+shell$ ./netloc_draw_to_json ~/examples/deathmachine 1 1

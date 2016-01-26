@@ -36,6 +36,8 @@ int netloc_attach(struct netloc_topology ** topology_ptr, netloc_network_t netwo
     topology->edges          = NULL;
     topology->partitions     = NULL;
     topology->num_partitions = 0;
+    topology->topos          = NULL;
+    topology->num_topos      = 0;
 
     /*
      * Make the pointer live

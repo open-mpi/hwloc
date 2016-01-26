@@ -572,8 +572,12 @@ netloc_node_t * netloc_dt_node_t_construct()
 
     node->virtual_node = NULL;
 
+    node->hostname = NULL;
+
     node->partitions = NULL;
     node->num_partitions = 0;
+
+    node->topoIdx = -1;
 
     return node;
 }

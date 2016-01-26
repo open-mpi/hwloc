@@ -42,6 +42,9 @@
   var nodes;
   var partitions;
   var mydata;
+  var topos;
+  var switchColor = "black";
+  var hostColors;
 
   function handleFileSelect(evt) {
     var files = evt.target.files;
@@ -62,20 +65,42 @@
 
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
 
-  var hostColor = "red";
-  var switchColor = "blue";
   function renameKey(obj, newkey, oldkey)
   {
       return obj.map(function(d) { d[newkey] = d[oldkey]; delete d[oldkey]; return d; });
+  }
+
+  function palette(size) {
+      var palette = [];
+
+      if (!size)
+          return ["red"];
+
+      var v = Math.ceil(Math.pow(size, 1/3));
+      var value = 255/v;
+      for( var rStep = 0, r = 0; rStep < v; rStep++) {
+          for( var gStep = 0, g = 0; gStep < v; gStep++ ) {
+              for( var bStep = 0, b = 0; bStep < v; bStep++ ) {
+                  palette.push('rgba(' + r + ', ' + g + ', ' +  b + ', 1)');
+                  b += value;
+              }
+              g += value;
+          }
+          r += value;
+      }
+      return palette;
   }
 
   function loadFile(data)
   {
       mydata = JSON.parse(data);
       var select = document.getElementById("selectPartition");
-      ho = select;
       var partitions = mydata.partitions;
       partitions.unshift("All");
+
+      topos = mydata.hwloctopos;
+
+      hostColors = palette(topos.length);
 
       while (select.firstChild) {
           select.removeChild(select.firstChild);
@@ -94,7 +119,9 @@
       nodes = renameKey(nodes, "level", "lv");
       nodes = renameKey(nodes, "title", "desc");
       nodes.map(
-              function(n) { n["color"] = n["type"] == "host" ? hostColor: switchColor; });
+              function(n) { n["color"] = n["type"] == "host" ?
+                  (n["topo"] != -1 ? hostColors[n["topo"]] : hostColors[0]) :
+                      switchColor; });
   
       var edges = mydata.edges;
       edges.map(
@@ -106,7 +133,7 @@
       edges = renameKey(edges, "to", "dst");
       edges = renameKey(edges, "label", "gbits");
       edges.map(
-              function(n) { n["color"] = n["type"] == "SH" ? hostColor: switchColor; });
+              function(n) { n["color"] = n["type"] == "SH" ? switchColor: switchColor; });
 
       mydata.nodesById = {};
       nodes.map(function(n) { mydata.nodesById[n.id] = n }); 
@@ -184,7 +211,8 @@
             '<h2>' + node.title + '</h2>' +
             'ID: ' + node.id + '\n' +
             'Partitions: ' + partitions.join(',') + '\n' +
-            'Neighbours:\n' + neighbours .sort().join('');
+            'Neighbours:\n' + neighbours .sort().join('') +
+            ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
     });
     network.on("deselectNode", function (params) {
         document.getElementById('eventSpan').innerHTML = '';

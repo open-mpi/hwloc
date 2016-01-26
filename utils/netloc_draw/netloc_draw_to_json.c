@@ -18,12 +18,14 @@
 #define JSON_DRAW_FILE_NODE_EDGES "edges"
 #define JSON_DRAW_FILE_NODE_PARTITIONS "part"
 #define JSON_DRAW_FILE_NODE_DESC "desc"
+#define JSON_DRAW_FILE_NODE_HWLOCTOPO "topo"
 #define JSON_DRAW_FILE_NODE_LEVEL "lv"
 #define JSON_DRAW_FILE_NODE_TYPE "type"
 #define JSON_DRAW_FILE_GRAPH_TYPE "type"
 #define JSON_DRAW_FILE_NODES "nodes"
 #define JSON_DRAW_FILE_EDGES "edges"
 #define JSON_DRAW_FILE_PARTITIONS "partitions"
+#define JSON_DRAW_FILE_HWLOCTOPOS "hwloctopos"
 
 static char *remove_quote(char *string)
 {
@@ -74,10 +76,12 @@ static int write_node(json_t *json_nodes, netloc_node_t *node)
     char *id = node->physical_id;
     int level = node_data->level;
     char *desc = remove_quote(node->description);
+    int topoIdx = node->topoIdx;
 
     json_t *json_node = json_object();
     json_object_set_new(json_node, JSON_DRAW_FILE_NODE_ID, json_string(id));
     json_object_set_new(json_node, JSON_DRAW_FILE_NODE_DESC, json_string(desc));
+    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_HWLOCTOPO, json_integer(topoIdx));
     json_object_set_new(json_node, JSON_DRAW_FILE_NODE_LEVEL, json_integer(level));
 
     free(desc);
@@ -131,6 +135,15 @@ static int handle_partitions(netloc_topology_t topology, json_t *json_partitions
     return 0; // TODO
 }
 
+static int handle_topos(netloc_topology_t topology, json_t *json_topos)
+{
+    for (int p = 0; p < topology->num_topos; p++)
+    {
+        json_array_append_new(json_topos, json_string(topology->topos[p]));
+    }
+    return 0; // TODO
+}
+
 
 static int json_tree(netloc_topology_analysis *analysis, FILE *output)
 {
@@ -140,6 +153,7 @@ static int json_tree(netloc_topology_analysis *analysis, FILE *output)
     json_t *json_nodes = json_array();
     json_t *json_edges = json_array();
     json_t *json_partitions = json_array();
+    json_t *json_topos = json_array();
 
     netloc_node_t *node;
     netloc_dt_lookup_table_t nodes;
@@ -162,12 +176,14 @@ static int json_tree(netloc_topology_analysis *analysis, FILE *output)
     }
 
     handle_partitions(topology, json_partitions);
+    handle_topos(topology, json_topos);
 
     json_t *json_root = json_object();
     json_object_set_new(json_root, JSON_DRAW_FILE_GRAPH_TYPE, json_string("tree"));
     json_object_set_new(json_root, JSON_DRAW_FILE_NODES, json_nodes);
     json_object_set_new(json_root, JSON_DRAW_FILE_EDGES, json_edges);
     json_object_set_new(json_root, JSON_DRAW_FILE_PARTITIONS, json_partitions);
+    json_object_set_new(json_root, JSON_DRAW_FILE_HWLOCTOPOS, json_topos);
 
     char *json = json_dumps(json_root, 0);
     //FILE *output = fopen("/tmp/test.json", "w+");
@@ -180,31 +196,27 @@ static int json_tree(netloc_topology_analysis *analysis, FILE *output)
     return 0; // TODO
 }
 
-int netloc_to_json_draw(netloc_topology_t topology, int simplify, char *partition)
+int netloc_to_json_draw(netloc_topology_t topology, int simplify, char *partition, int hwloc)
 {
     static FILE *output;
     char *node_uri = topology->network->node_uri;
     int basename_len = strlen(node_uri)-10;
     char *basename = (char *)malloc((basename_len+1)*sizeof(char));
     char *draw;
-    char *ssimplify;
     char *spartition;
 
     netloc_topology_analysis analysis;
-    netloc_partition_analyse(&analysis, topology, simplify, partition, 0);
+    netloc_partition_analyse(&analysis, topology, simplify, partition, 0, hwloc);
 
     strncpy(basename, node_uri, basename_len);
     basename[basename_len] = '\0';
-    if (simplify)
-        asprintf(&ssimplify, "-simple");
-    else
-        asprintf(&ssimplify, "");
+
     if (partition)
         asprintf(&spartition, "-%s", partition);
     else
         asprintf(&spartition, "");
 
-    asprintf(&draw, "%s%s%s%s.json", basename, "draw", ssimplify, spartition);
+    asprintf(&draw, "%s%s%s%s%s.json", basename, "draw", simplify ? "-simple": "",  hwloc ? "-hwloc": "", spartition);
 
     output = fopen(draw, "w");
     // For trees
@@ -238,7 +250,7 @@ int main(int argc, char **argv)
 {
     int ret;
 
-    if (argc < 2 || argc > 4) {
+    if (argc < 2 || argc > 5) {
         goto wrong_params;
     }
 
@@ -248,12 +260,20 @@ int main(int argc, char **argv)
     char *netloc_dir;
     char *param;
     int simplify = 0;
+    int hwloc = 0;
 
     read_param(&cargc, &cargv);
-    netloc_dir = read_param(&cargc, &cargv);
+    char *path = read_param(&cargc, &cargv);
+    asprintf(&netloc_dir, "file://%s/%s", path, "netloc");
+
     if ((param = read_param(&cargc, &cargv))) {
         simplify = atoi(param);
     }
+
+    if ((param = read_param(&cargc, &cargv))) {
+        hwloc = atoi(param);
+    }
+
     partition_name = read_param(&cargc, &cargv);
 
     netloc_network_t *network = NULL;
@@ -279,12 +299,13 @@ int main(int argc, char **argv)
         return ret;
     }
 
-    netloc_to_json_draw(topology, simplify, partition_name);
+    netloc_to_json_draw(topology, simplify, partition_name, hwloc);
 
     return 0;
 
 wrong_params:
-    printf("Usage: %s <netloc_dir> [partition]\n", argv[0]);
+    printf("Usage: %s <netloc_dir> [simplify (1 or 0)] "
+            "[hwloc topos (1 or 0)] [partition]\n", argv[0]);
     return -1;
 }
 

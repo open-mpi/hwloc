@@ -11,7 +11,11 @@
 
 #define _GNU_SOURCE         /* See feature_test_macros(7) */
 #include <stdio.h>
+#include <sys/types.h>
+#include <dirent.h>
+
 #include <private/netloc.h>
+#include <hwloc.h>
 #include "support.h"
 
 // TODO transform into macro
@@ -578,29 +582,53 @@ int netloc_topology_merge_nodes(netloc_topology_t topology)
     return 0;
 }
 
+/* We suppose the description of nodes is like that: ([^ ]*).*
+ * while \1 is the hostname
+ */
+static int node_set_hostname(netloc_node_t *node)
+{
+    char *name = node->description;
+    int max_size = strlen(name);
+    char *hostname = (char *)malloc(max_size*sizeof(char));
+
+    /* Looking for the name of the hostname */
+    int i = 0;
+    if (name[0] == '\'')
+        name++;
+    while (i < max_size && name[i] != ' ') {
+        hostname[i] = name[i];
+        i++;
+    }
+    hostname[i++] = '\0';
+    hostname = realloc(hostname, i*sizeof(char));
+    node->hostname = hostname;
+
+    return 0;
+}
+
 /* We suppose the description of nodes is like that: ([a-z]*).*
  * while \1 is the name of the partition
  */
 static char *node_find_partition_name(netloc_node_t *node)
 {
-    char *name = node->description;
-    int max_size = strlen(name);
-    char *partition = (char *)malloc(max_size*sizeof(char));
+    char *name;
+    int max_size;
+    char *partition;
+
+    if (!node->hostname)
+        node_set_hostname(node);
+
+    max_size = strlen(node->hostname);
+    partition = (char *)malloc(max_size*sizeof(char));
+    name = node->hostname;
 
     /* Looking for the name of the partition */
     int i = 0;
-    if (name[0] == '\'')
-        name++;
     while (i < max_size && (name[i] >= 'a' && name[i] <= 'z')) {
         partition[i] = name[i];
         i++;
     }
     partition[i++] = '\0';
-    if (i == 1) {
-        printf("oupssssss: %s\n", node->description);
-        printf("%d (switch: %d, host: %d)\n", node->node_type,
-                NETLOC_NODE_TYPE_SWITCH, NETLOC_NODE_TYPE_HOST);
-    }
     partition = realloc(partition, i*sizeof(char));
     return partition;
 }
@@ -898,9 +926,91 @@ int netloc_topology_simplify(netloc_topology_t topology)
     return ret;
 }
 
+static int netloc_read_hwloc(netloc_topology_t topology)
+{
+    int ret = 0;
+    int err;
+    netloc_node_t *node;
+
+    char *hwloc_path;
+    asprintf(&hwloc_path, "%s/../hwloc", topology->network->data_uri+7);
+
+    netloc_explist_t *topos = netloc_explist_init(1);
+    int num_topos = 0;
+
+    DIR* dir = opendir(hwloc_path);
+    /* Directory does not exist */
+    if (!dir) {
+        printf("Directory (%s) to hwloc does not exist\n", hwloc_path);
+        return -1;
+    }
+    else {
+        closedir(dir);
+    }
+
+    netloc_dt_lookup_table_t hosts;
+    netloc_get_all_host_nodes(topology, &hosts);
+
+    netloc_dt_lookup_table_iterator_t hti =
+        netloc_dt_lookup_table_iterator_t_construct(hosts);
+    while ((node =
+            (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
+
+        char *hwloc_file;
+        char *refname;
+
+        /* We try to find a diff file */
+        asprintf(&hwloc_file, "%s/%s.diff.xml", hwloc_path, node->hostname);
+        hwloc_topology_diff_t diff;
+        if ((err = hwloc_topology_diff_load_xml(hwloc_file, &diff, &refname)) >= 0) {
+            refname[strlen(refname)-4] = '\0';
+            hwloc_topology_diff_destroy(diff);
+        }
+        else {
+            free(hwloc_file);
+            /* We try to find a regular file */
+            asprintf(&hwloc_file, "%s/%s.xml", hwloc_path, node->hostname);
+            FILE *fxml;
+            if (!(fxml = fopen(hwloc_file, "r"))) {
+                printf("Hwloc file absent: %s\n", hwloc_file);
+            }
+            else
+                fclose(fxml);
+            asprintf(&refname, "%s", node->hostname);
+        }
+        free(hwloc_file);
+
+        /* We add the hwloc topology */
+        int t = 0;
+        while (t < netloc_explist_get_size(topos) &&
+                strcmp(netloc_explist_get(topos, t), refname)) {
+            t++;
+        }
+        if (t == netloc_explist_get_size(topos)) {
+            netloc_explist_add(topos, refname);
+        }
+        else {
+            free(refname);
+        }
+        node->topoIdx = t;
+    }
+
+    topology->num_topos = netloc_explist_get_size(topos);
+    topology->topos = (char **)
+        netloc_explist_get_array_and_destroy(topos);
+
+    printf("%d hwloc topologies found:\n", topology->num_topos);
+    // XXX XXX XXX XXX XXX XXX XXX faire pareil pour recherche partitions
+    for (int p = 0; p < topology->num_topos; p++) {
+        printf("\t'%s'\n", topology->topos[p]);
+    }
+
+    return ret;
+}
+
 int netloc_partition_analyse(netloc_topology_analysis *analysis,
         netloc_topology_t topology, int simplify, char *partition,
-        int levels)
+        int levels, int hwloc)
 {
     int ret = 0;
     analysis->topology = topology;
@@ -911,6 +1021,8 @@ int netloc_partition_analyse(netloc_topology_analysis *analysis,
     else {
         netloc_topology_set_all_partitions(topology);
     }
+    if (hwloc)
+        netloc_read_hwloc(topology);
     if (simplify)
         netloc_topology_simplify(topology);
 

@@ -90,6 +90,10 @@ struct netloc_topology {
     int num_partitions;
     char **partitions;
 
+    /** Hwloc topology List */
+    char **topos;
+    int num_topos;
+
     /** Lookup table for all edge information */
     struct netloc_dt_lookup_table *edges;
 
@@ -589,7 +593,8 @@ typedef struct netloc_topology_analysis_t {
 } netloc_topology_analysis;
 
 NETLOC_DECLSPEC int netloc_partition_analyse(netloc_topology_analysis *analysis,
-        netloc_topology_t topology, int simpify, char *partition, int levels);
+        netloc_topology_t topology, int simpify, char *partition, int levels,
+        int hwloc);
 NETLOC_DECLSPEC netloc_tree_data *netloc_get_tree_data(netloc_topology_analysis *analysis);
 
 #endif // _NETLOC_PRIVATE_H_
