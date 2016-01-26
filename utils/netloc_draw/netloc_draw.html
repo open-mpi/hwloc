@@ -24,7 +24,7 @@
 
     <title>Network topology</title>
     <input type="file" id="files" name="files[]" multiple />
-    <select id="selectPartition" onchange="draw()">
+    <select id="selectPartition" onchange="draw()" selected="true">
         <option>Choose a partition</option>
     </select>
 
@@ -102,8 +102,8 @@
 
       hostColors = palette(topos.length);
 
-      while (select.firstChild) {
-          select.removeChild(select.firstChild);
+      while (select.length > 1) {
+          select.removeChild(select.lastChild);
       }
       for(var i = 0; i < partitions .length; i++) {
           var partition = partitions [i];
