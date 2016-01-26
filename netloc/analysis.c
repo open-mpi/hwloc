@@ -515,10 +515,13 @@ int netloc_topology_merge_nodes(netloc_topology_t topology)
 
         /* we copy all the edges */
         int edge_idx = 0;
+
+        printf("Merged nodes: ");
+
         /* Copy all the edges from the merged nodes into the virtual node */
         for (int m = 0; m < num_clones; m++) {
             netloc_node_t *clone = virtual_node->real_nodes[m];
-            printf("clone %d: %s\n", m, clone->physical_id);
+            printf("%s ", clone->physical_id);
 
             memcpy(&virtual_node->edge_ids[edge_idx], clone->edge_ids,
                     virtual_node->real_nodes[m]->num_edge_ids*sizeof(int)); 
@@ -531,6 +534,7 @@ int netloc_topology_merge_nodes(netloc_topology_t topology)
                 clone->edges[e] = new_edge;
             }
         }
+        printf("\n");
 
         /* fix the source of the edges to be the virtual one */
         for (int e = 0; e < num_edges; e++) {
