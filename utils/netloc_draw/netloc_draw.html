@@ -185,7 +185,7 @@
         edges: shown_edges
     };
 
-    var options = {interaction:{hover:true}};
+    var options = {interaction:{hover:true, tooltipDelay:0}};
     var network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
