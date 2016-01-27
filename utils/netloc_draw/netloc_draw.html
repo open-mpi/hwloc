@@ -37,8 +37,6 @@
 <pre id="eventSpan"></pre>
 
 <script type="text/javascript">
-  var edgesById;
-  var nodesById;
   var edges;
   var nodes;
   var partitions;
@@ -57,7 +55,6 @@
         fr.onload = function(e) {
             data = e.target.result
             loadFile(data);
-            draw();
         };
         fr.readAsText(f);
 
@@ -116,72 +113,58 @@
 
       var partitions = mydata.partitions;
 
-      var nodes = mydata.nodes;
-      nodes = renameKey(nodes, "level", "lv");
-      nodes = renameKey(nodes, "title", "desc");
-      nodes.map(
+      mydata.nodes = renameKey(mydata.nodes, "level", "lv");
+      mydata.nodes = renameKey(mydata.nodes, "title", "desc");
+      mydata.nodes.map(
               function(n) { n["color"] = n["type"] == "host" ?
                   (n["topo"] != -1 ? hostColors[n["topo"]] : hostColors[0]) :
                       switchColor; });
+      nodes = new vis.DataSet({});
+      nodes.add(mydata.nodes);
+
   
-      var edges = mydata.edges;
-      edges.map(
+      mydata.edges.map(
               function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
-      var gbits_min = Math.min.apply(null, edges.map(function(e) { return e["gbits"];}));
-      edges.map(
+      var gbits_min = Math.min.apply(null, mydata.edges.map(function(e) { return e["gbits"];}));
+      mydata.edges.map(
               function(e) {e["width"] = e["gbits"]/gbits_min;});
-      edges = renameKey(edges, "from", "src");
-      edges = renameKey(edges, "to", "dst");
-      edges.map(
+      mydata.edges = renameKey(mydata.edges, "from", "src");
+      mydata.edges = renameKey(mydata.edges, "to", "dst");
+      mydata.edges.map(
               function(n) { n["color"] = n["type"] == "SH" ? switchColor: switchColor; });
-
-      mydata.nodesById = {};
-      nodes.map(function(n) { mydata.nodesById[n.id] = n }); 
-
-      mydata.edgesById = {};
-      mydata.edges.map(function(e) { mydata.edgesById[e.id] = e }); 
+      edges = new vis.DataSet({});
+      edges.add(mydata.edges);
   }
 
   function draw()
   {
-    nodesById = mydata.nodesById;
-    edgesById = mydata.edgesById;
-
     var e = document.getElementById("selectPartition");
     var partition = e.options[e.selectedIndex].value;
 
-    var nodes;
-    var edges;
-
-    if (partition == "All")
+    if (partition != "All")
     {
-      nodes = mydata.nodes;
-      edges = mydata.edges;
-    }
-    else
-    {
-      edges = [];
-      mydata.edges.map(
-              function(e) { if (e.part.indexOf(partition) > -1) edges.push(e); });
-      nodes = [];
-      mydata.nodes.map(
-              function(e) { if (e.part.indexOf(partition) > -1) nodes.push(e); });
+        subedges = edges.get({filter: function (e) {
+            return (e.part.indexOf(partition) > -1);
+        }});
+        subnodes = nodes .get({filter: function (e) {
+            return (e.part.indexOf(partition) > -1);
+        }});
     }
 
-    var shown_edges = []; // we keep only half of the edges (one way)
-    if (1)
-        shown_edges = edges;
+    if (partition != "All")
+        shown_edges = subedges;
     else
         /* FIXME does not work if we select a partition and logical path in not the
            same in the other way */
         /* we draw half of the edges (only one way) */
-        mydata.edges.map(
-                function(e) { if (e.from < e.to) shown_edges.push(e); });
+        shown_edges = edges.get({filter: function (e) {
+            return (e.from < e.to);
+        }});
 
     // create a network
     var container = document.getElementById('mynetwork');
     var data = {
-        nodes: nodes,
+        nodes: subnodes,
         edges: shown_edges
     };
 
@@ -190,17 +173,17 @@
 
     network.on("selectNode", function (params) {
         params.event = "[original event]";
-        var node = nodesById[params.nodes[0]];
-        var edges = node.edges;
+        var node = nodes.get(params.nodes[0]);
+        var nodeEdges = node.edges;
         var partitions = node.part;
 
         var neighbours = [];
         var i = 0;
-        while (i < edges.length)
+        while (i < nodeEdges.length)
         {
-            var edge = edgesById[edges[i]];
-            var dest = nodesById[edge.to];
-            var s = '\t' + dest.title + ' (edgeId ' + edges[i] + ' ports '
+            var edge = edges.get(nodeEdges[i]);
+            var dest = nodes.get(edge.to);
+            var s = '\t' + dest.title + ' (edgeId ' + nodeEdges[i] + ' ports '
                     + edge.src_port + '->' + edge.dst_port + '): ';
             s += edge.label + 'Gb\n';
             i++;
@@ -220,11 +203,11 @@
 
     network.on("selectEdge", function (params) {
         params.event = "[original event]";
-        var edge = edgesById[params.edges[0]];
+        var edge = edges.get(params.edges[0]);
         var partitions = edge.part;
 
         document.getElementById('eventSpan').innerHTML =
-            '<h2>' + nodesById[edge.from].title + ' -> ' + nodesById[edge.to].title + '</h2>' +
+            '<h2>' + nodes.get(edge.from).title + ' -> ' + nodes.get(edge.to).title + '</h2>' +
             'ID: ' + edge.id + '\n' +
             'From: ' + edge.from + '\n' +
             'To: ' + edge.to + '\n' +
