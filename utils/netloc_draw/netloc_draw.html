@@ -39,11 +39,15 @@
 <script type="text/javascript">
   var edges;
   var nodes;
+  var shownEdges;
+  var shownEdes;
   var partitions;
   var mydata;
   var topos;
   var switchColor = "black";
   var hostColors;
+  var nodesWithPhysics;
+  var edgesWithPhysics;
 
   function handleFileSelect(evt) {
     var files = evt.target.files;
@@ -141,31 +145,34 @@
     var e = document.getElementById("selectPartition");
     var partition = e.options[e.selectedIndex].value;
 
-    if (partition != "All")
-    {
-        subedges = edges.get({filter: function (e) {
+    if (partition == "All") {
+        subEdges = new vis.DataSet(edges.get()); // TODO improve
+        shownNodes = new vis.DataSet(nodes.get()); // TODO improve
+    }
+    else {
+        subEdges = new vis.DataSet(edges.get({filter: function (e) {
             return (e.part.indexOf(partition) > -1);
-        }});
-        subnodes = nodes .get({filter: function (e) {
+        }}));
+        shownNodes = new vis.DataSet(nodes.get({filter: function (e) {
             return (e.part.indexOf(partition) > -1);
-        }});
+        }}));
     }
 
-    if (partition != "All")
-        shown_edges = subedges;
+    if (1 || partition != "All")
+        shownEdges = subEdges;
     else
         /* FIXME does not work if we select a partition and logical path in not the
-           same in the other way */
+           same in the other way and neither when we move nodes */
         /* we draw half of the edges (only one way) */
-        shown_edges = edges.get({filter: function (e) {
+        shownEdges = new vis.DataSet(subEdges.get({filter: function (e) {
             return (e.from < e.to);
-        }});
+        }}));
 
     // create a network
     var container = document.getElementById('mynetwork');
     var data = {
-        nodes: subnodes,
-        edges: shown_edges
+        nodes: shownNodes,
+        edges: shownEdges
     };
 
     var options = {interaction:{hover:true, tooltipDelay:0}};
@@ -217,8 +224,39 @@
         document.getElementById('eventSpan').innerHTML = '';
     });
 
+    network.on("dragStart", function (params) {
+        params.event = "[original event]";
+        var nodeIds = params.nodes;
+        var edgeIds = params.edges;
+
+        nodesWithPhysics = [];
+        edgesWithPhysics = edgeIds;
+        for (var e = 0; e < edgeIds.length; e++) {
+            var edgeId = edgeIds[e];
+            shownEdges.update({id: edgeId, physics: true});
+
+            var edge = shownEdges.get(edgeId);
+            var node = shownNodes.get(edge.to);
+            if (node.edges.length <= 1) {
+                nodesWithPhysics.push(edge.to);
+                shownNodes.update({id: edge.to, physics: true});
+            }
+        }
+    });
+    network.on("dragEnd", function (params) {
+        for (var e = 0; e < edgesWithPhysics.length; e++) {
+            shownEdges.update({id: edgesWithPhysics[e], physics: false});
+        }
+        for (var n = 0; n < nodesWithPhysics.length; n++) {
+            shownNodes.update({id: nodesWithPhysics[n], physics: false});
+        }
+    });
+
     network.on("stabilizationIterationsDone", function () {
-        network.setOptions({ physics: false })});
+        network.setOptions({nodes:{physics:false},
+                            edges:{physics:false},
+        });
+    });
   }
 
 
