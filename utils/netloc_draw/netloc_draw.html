@@ -126,13 +126,12 @@
   
       var edges = mydata.edges;
       edges.map(
-              function(e) {e["label"] = parseFloat(["gbits"]);});
+              function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
       var gbits_min = Math.min.apply(null, edges.map(function(e) { return e["gbits"];}));
       edges.map(
               function(e) {e["width"] = e["gbits"]/gbits_min;});
       edges = renameKey(edges, "from", "src");
       edges = renameKey(edges, "to", "dst");
-      edges = renameKey(edges, "label", "gbits");
       edges.map(
               function(n) { n["color"] = n["type"] == "SH" ? switchColor: switchColor; });
 

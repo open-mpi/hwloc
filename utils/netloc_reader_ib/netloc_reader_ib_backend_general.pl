@@ -108,7 +108,7 @@ sub _compute_gbits {
         return 1;
     }
 
-    return $x*$gb_per_x;
+    return sprintf("%f", $x*$gb_per_x);
  }
 
 sub _parse_network_topology {
