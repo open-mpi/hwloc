@@ -239,7 +239,7 @@ x11_init(void *_disp)
   disp->top = top = XCreateSimpleWindow(dpy, root, 0, 0, screen_width, screen_height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
   XStoreName(dpy, top, "lstopo");
   XSetIconName(dpy, top, "lstopo");
-  XSelectInput(dpy,top, StructureNotifyMask);
+  XSelectInput(dpy,top, StructureNotifyMask | KeyPressMask);
 
   if (screen_width >= screen->width)
     screen_width = screen->width;
