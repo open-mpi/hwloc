@@ -598,7 +598,8 @@ Make sure to have had a look at those too!
   object.  This may be completely arbitrary, non-unique, non-contiguous, not
   representative of logical proximity, and may depend on the BIOS
   configuration. That is why hwloc almost never uses them, only in the default
-  lstopo output (<tt>P\#x</tt>) and cpuset masks.</dd>
+  lstopo output (<tt>P\#x</tt>) and cpuset masks.
+  See also \ref faq_indexes.</dd>
 
 <dt>Logical index</dt>
   <dd>Index to uniquely identify objects of the same type and depth,
@@ -615,7 +616,7 @@ Make sure to have had a look at those too!
   processor" (which in hwloc we rather call "processing unit" to avoid the
   confusion) has both a physical index (as chosen arbitrarily by BIOS/OS) and a logical
   index (as computed according to logical proximity by hwloc).
-  </dd>
+  See also \ref faq_indexes.</dd>
 
 <dt>Processing unit</dt>
   <dd>The smallest processing element that can be represented by a hwloc
@@ -2512,7 +2513,7 @@ than any system-provided copy of hwloc.
 
 \page faq Frequently Asked Questions
 
-\section faq_indexs Should I use logical or physical/OS indexes? and how?
+\section faq_indexes Should I use logical or physical/OS indexes? and how?
 
 One of the original reasons why hwloc was created is that <b>physical/OS indexes</b>
 (<tt>obj->os_index</tt>) are often crazy and unpredictable:
