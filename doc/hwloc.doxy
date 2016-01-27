@@ -718,6 +718,7 @@ indexes or as hwloc's logical object indexes.
 It eases cooperation with external tools such as taskset or numactl
 by exporting hwloc specifications into list of processor or NUMA node
 physical indexes.
+See also \ref faq_indexes.
 
 
 \section cli_hwloc_info hwloc-info
@@ -2507,7 +2508,52 @@ than any system-provided copy of hwloc.
 
 
 
+
+
 \page faq Frequently Asked Questions
+
+\section faq_indexs Should I use logical or physical/OS indexes? and how?
+
+One of the original reasons why hwloc was created is that <b>physical/OS indexes</b>
+(<tt>obj->os_index</tt>) are often crazy and unpredictable:
+logical processors numbers are usually
+non-contiguous (processors 0 and 1 are not physically close), they vary from
+one machine to another, and may even change after a BIOS or system update.
+This numbers make task placement hardly portable.
+Moreover some objects have no physical/OS numbers (caches), and some objects
+have non-unique numbers (core numbers are only unique within a socket).
+Physical/OS indexes are only guaranteed to exist and be unique for PU
+and NUMA nodes.
+
+hwloc therefore introduces <b>logical indexes</b> (<tt>obj->logical_index</tt>)
+which are portable, contiguous and logically ordered
+(based on the resource organization in the locality tree).
+In general, one should only use logical indexes and just let hwloc do the
+internal conversion when really needed (when talking to the OS and hardware).
+
+hwloc developers recommends that users do not use physical/OS indexes
+unless they really know what they are doing.
+The main reason for still using physical/OS indexes is when interacting with
+non-hwloc tools such as numactl or taskset, or when reading hardware information
+from raw sources such as /proc/cpuinfo.
+
+lstopo options <tt>-l</tt> and <tt>-p</tt> may be used to switch between
+logical indexes (prefixed with <tt>L#</tt>) and physical/OS indexes (<tt>P#</tt>).
+Converting one into the other may also be achieved with hwloc-calc which may
+manipulate either logical or physical indexes as input or output.
+See also \ref cli_hwloc_calc.
+
+\verbatim
+# Convert PU with physical number 3 into logical number
+$ hwloc-calc -I pu --physical-input --logical-output pu:3
+5
+
+# Convert a set of NUMA nodes from logical to physical
+# (beware that the output order may not match the input order)
+$ hwloc-calc -I numa --logical-input --physical-output numa:2-3 numa:7
+0,2,5
+\endverbatim
+
 
 \section faq_xml I do not want hwloc to rediscover my enormous machine topology every time I rerun a process
 
