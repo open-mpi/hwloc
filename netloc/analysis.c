@@ -957,6 +957,7 @@ static int netloc_read_hwloc(netloc_topology_t topology)
 
     netloc_dt_lookup_table_iterator_t hti =
         netloc_dt_lookup_table_iterator_t_construct(hosts);
+    int num_diffs = 0;
     while ((node =
             (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
 
@@ -969,6 +970,7 @@ static int netloc_read_hwloc(netloc_topology_t topology)
         if ((err = hwloc_topology_diff_load_xml(hwloc_file, &diff, &refname)) >= 0) {
             refname[strlen(refname)-4] = '\0';
             hwloc_topology_diff_destroy(diff);
+            num_diffs++;
         }
         else {
             free(hwloc_file);
@@ -997,6 +999,10 @@ static int netloc_read_hwloc(netloc_topology_t topology)
             free(refname);
         }
         node->topoIdx = t;
+    }
+
+    if (!num_diffs) {
+        printf("Warning: no hwloc diff file found!\n");
     }
 
     topology->num_topos = netloc_explist_get_size(topos);
