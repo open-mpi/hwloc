@@ -134,8 +134,6 @@
               function(e) {e["width"] = e["gbits"]/gbits_min;});
       mydata.edges = renameKey(mydata.edges, "from", "src");
       mydata.edges = renameKey(mydata.edges, "to", "dst");
-      mydata.edges.map(
-              function(n) { n["color"] = n["type"] == "SH" ? switchColor: switchColor; });
       edges = new vis.DataSet({});
       edges.add(mydata.edges);
   }
@@ -254,7 +252,8 @@
 
     network.on("stabilizationIterationsDone", function () {
         network.setOptions({nodes:{physics:false},
-                            edges:{physics:false},
+                            edges:{physics:false, color: {inherit: true, opacity: 0.1}},
+                            // FIXME: opacity does not work!
         });
     });
   }
