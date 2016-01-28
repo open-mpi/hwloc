@@ -36,6 +36,7 @@ sources = \
         data_collect.c \
         pathfinder.c \
         lookup_table.c \
+        explist.c \
         export.c \
         map.c \
         analysis.c
