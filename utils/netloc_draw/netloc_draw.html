@@ -25,7 +25,10 @@
     <title>Network topology</title>
     <input type="file" id="files" name="files[]" multiple />
     <select id="selectPartition" onchange="draw()" selected="true">
-        <option>Choose a partition</option>
+        <option value="" disabled=true>Choose a partition</option>
+    </select>
+    <select id="selectColors" onchange="nodeColors()" selected="true">
+        <option value="" disabled=true>Choose a color mode</option>
     </select>
     <input id="reload" type="button" value="reload" onclick="draw();" />
 
@@ -45,6 +48,7 @@
   var mydata;
   var topos;
   var switchColor = "black";
+  var hostColor = "red";
   var hostColors;
   var nodesWithPhysics;
   var edgesWithPhysics;
@@ -78,12 +82,24 @@
       if (!size)
           return ["red"];
 
-      var v = Math.ceil(Math.pow(size, 1/3));
+      if (size <= 9)
+          return ["blue", "orange", "green", "pink", "brown", "purple",
+              "yellow", "red", "gray"].slice(0, size+1);
+
+      if (size <= 11)
+          return ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99",
+              "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a",
+              "#ffff99"].slice(0, size+1);
+
+      var v = Math.ceil(Math.pow(size+1, 1/3));
       var value = 255/v;
       for( var rStep = 0, r = 0; rStep < v; rStep++) {
           for( var gStep = 0, g = 0; gStep < v; gStep++ ) {
               for( var bStep = 0, b = 0; bStep < v; bStep++ ) {
-                  palette.push('rgba(' + r + ', ' + g + ', ' +  b + ', 1)');
+                  if (!r && !g && !b)
+                      continue;
+                  palette.push('rgb(' + Math.round(r) + ', ' + Math.round(g) + ', '
+                              +  Math.round(b) + ')');
                   b += value;
               }
               g += value;
@@ -96,33 +112,53 @@
   function loadFile(data)
   {
       mydata = JSON.parse(data);
-      var select = document.getElementById("selectPartition");
-      var partitions = mydata.partitions;
-      partitions.unshift("All");
-
+      partitions = mydata.partitions;
       topos = mydata.hwloctopos;
 
-      hostColors = palette(topos.length);
 
-      while (select.length > 1) {
-          select.removeChild(select.lastChild);
+      /* Add elements to selectColors */
+      var selectColors = document.getElementById("selectColors");
+      while (selectColors.length > 1) {
+          selectColors.removeChild(selectColors.lastChild);
       }
-      for(var i = 0; i < partitions .length; i++) {
-          var partition = partitions [i];
+      {
+        var el = document.createElement("option");
+        el.textContent = "normal";
+        el.value = "normal";
+        selectColors.appendChild(el);
+      }
+      if (partitions.length) {
+        var el = document.createElement("option");
+        el.textContent = "partition";
+        el.value = "partition";
+        selectColors.appendChild(el);
+      }
+      if (topos.length) {
+        var el = document.createElement("option");
+        el.textContent = "hwloc";
+        el.value = "hwloc";
+        selectColors.appendChild(el);
+      }
+
+      /* Add elements to selectPartition */
+      var selectPartition = document.getElementById("selectPartition");
+      while (selectPartition.length > 1) {
+          selectPartition.removeChild(selectPartition.lastChild);
+      }
+      var partitionOptions = partitions.slice();
+      partitionOptions.unshift("All");
+      for(var i = 0; i < partitionOptions.length; i++) {
+          var partition = partitionOptions [i];
           var el = document.createElement("option");
           el.textContent = partition;
           el.value = partition;
-          select.appendChild(el);
+          selectPartition.appendChild(el);
       }
-
-      var partitions = mydata.partitions;
 
       mydata.nodes = renameKey(mydata.nodes, "level", "lv");
       mydata.nodes = renameKey(mydata.nodes, "title", "desc");
-      mydata.nodes.map(
-              function(n) { n["color"] = n["type"] == "host" ?
-                  (n["topo"] != -1 ? hostColors[n["topo"]] : hostColors[0]) :
-                      switchColor; });
+      mydata.nodes.map(function(n)
+              { n["color"] = n["type"] == "host" ? hostColor: switchColor; });
       nodes = new vis.DataSet({});
       nodes.add(mydata.nodes);
 
@@ -138,10 +174,46 @@
       edges.add(mydata.edges);
   }
 
+  function nodeColors()
+  {
+    var e = document.getElementById("selectColors");
+    var colorMode = e.options[e.selectedIndex].value;
+
+    if (colorMode == "normal") {
+        color = hostColor;
+        shownNodes.forEach(function(n) {
+            if (n.type == "host") {
+                shownNodes.update({id: n.id, color: color});
+            }
+        });
+    }
+    else if (colorMode == "partition") {
+        var colors = palette(partitions.length);
+        shownNodes.forEach(function(n) {
+            if (n.type == "host") {
+                var colorIdx = partitions.indexOf(n.part[0]);
+                shownNodes.update({id: n.id, color: colors[colorIdx]});
+            }
+        });
+    }
+    else if (colorMode == "hwloc") {
+        var colors = palette(topos.length);
+        shownNodes.forEach(function(n) {
+            if (n.type == "host") {
+                var colorIdx = n.topo;
+                if (colorIdx != -1) {
+                    shownNodes.update({id: n.id, color: colors[colorIdx]});
+                }
+            }
+        });
+    }
+  }
+
   function draw()
   {
-    var e = document.getElementById("selectPartition");
-    var partition = e.options[e.selectedIndex].value;
+    var selectPartition = document.getElementById("selectPartition");
+    var partition =
+        selectPartition.options[selectPartition.selectedIndex].value;
 
     if (partition == "All") {
         subEdges = new vis.DataSet(edges.get()); // TODO improve
@@ -165,6 +237,16 @@
         shownEdges = new vis.DataSet(subEdges.get({filter: function (e) {
             return (e.from < e.to);
         }}));
+
+    var selectColor = document.getElementById("selectColors");
+    console.log(selectPartition.options[selectColor.selectedIndex].value);
+    var colorMode =
+        selectColor.options[selectColor.selectedIndex].value;
+    if (colorMode != "")
+        nodeColors();
+    else
+        selectColor.selectedIndex = 1;
+    console.log(selectPartition.options[selectColor.selectedIndex].value);
 
     // create a network
     var container = document.getElementById('mynetwork');
