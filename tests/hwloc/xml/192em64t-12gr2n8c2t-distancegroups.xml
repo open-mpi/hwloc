@@ -595,7 +595,7 @@
       <latency value="5.000000"/>
       <latency value="1.000000"/>
     </distances>
-    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff" complete_cpuset="0x0000ffff,,,,,,0x0000ffff" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" depth="0">
+    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff" complete_cpuset="0x0000ffff,,,,,,0x0000ffff" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="0" cpuset="0x000000ff,,,,,,0x000000ff" complete_cpuset="0x000000ff,,,,,,0x000000ff" allowed_cpuset="0x000000ff,,,,,,0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="33255329792">
         <page_type size="4096" count="8118977"/>
         <page_type size="2097152" count="0"/>
@@ -847,7 +847,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000" complete_cpuset="0xffff0000,,,,,,0xffff0000" allowed_cpuset="0xffff0000,,,,,,0xffff0000" nodeset="0x0000000c" complete_nodeset="0x0000000c" allowed_nodeset="0x0000000c" depth="0">
+    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000" complete_cpuset="0xffff0000,,,,,,0xffff0000" allowed_cpuset="0xffff0000,,,,,,0xffff0000" nodeset="0x0000000c" complete_nodeset="0x0000000c" allowed_nodeset="0x0000000c" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="2" cpuset="0x00ff0000,,,,,,0x00ff0000" complete_cpuset="0x00ff0000,,,,,,0x00ff0000" allowed_cpuset="0x00ff0000,,,,,,0x00ff0000" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -1027,7 +1027,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,0x0" nodeset="0x00000030" complete_nodeset="0x00000030" allowed_nodeset="0x00000030" depth="0">
+    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,0x0" nodeset="0x00000030" complete_nodeset="0x00000030" allowed_nodeset="0x00000030" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="4" cpuset="0x000000ff,,,,,,0x000000ff,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,0x0" allowed_cpuset="0x000000ff,,,,,,0x000000ff,0x0" nodeset="0x00000010" complete_nodeset="0x00000010" allowed_nodeset="0x00000010" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -1253,7 +1253,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,0x0" nodeset="0x000000c0" complete_nodeset="0x000000c0" allowed_nodeset="0x000000c0" depth="0">
+    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,0x0" nodeset="0x000000c0" complete_nodeset="0x000000c0" allowed_nodeset="0x000000c0" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="6" cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" allowed_cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" nodeset="0x00000040" complete_nodeset="0x00000040" allowed_nodeset="0x00000040" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -1454,7 +1454,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,,0x0" nodeset="0x00000300" complete_nodeset="0x00000300" allowed_nodeset="0x00000300" depth="0">
+    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,,0x0" nodeset="0x00000300" complete_nodeset="0x00000300" allowed_nodeset="0x00000300" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="8" cpuset="0x000000ff,,,,,,0x000000ff,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,0x0" allowed_cpuset="0x000000ff,,,,,,0x000000ff,,0x0" nodeset="0x00000100" complete_nodeset="0x00000100" allowed_nodeset="0x00000100" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -1644,7 +1644,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,,0x0" nodeset="0x00000c00" complete_nodeset="0x00000c00" allowed_nodeset="0x00000c00" depth="0">
+    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,,0x0" nodeset="0x00000c00" complete_nodeset="0x00000c00" allowed_nodeset="0x00000c00" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="10" cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" allowed_cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" nodeset="0x00000400" complete_nodeset="0x00000400" allowed_nodeset="0x00000400" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -1824,7 +1824,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,,,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,,,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,,,0x0" nodeset="0x00003000" complete_nodeset="0x00003000" allowed_nodeset="0x00003000" depth="0">
+    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,,,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,,,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,,,0x0" nodeset="0x00003000" complete_nodeset="0x00003000" allowed_nodeset="0x00003000" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="12" cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" allowed_cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" nodeset="0x00001000" complete_nodeset="0x00001000" allowed_nodeset="0x00001000" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -2004,7 +2004,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,,,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,,,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,,,0x0" nodeset="0x0000c000" complete_nodeset="0x0000c000" allowed_nodeset="0x0000c000" depth="0">
+    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,,,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,,,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,,,0x0" nodeset="0x0000c000" complete_nodeset="0x0000c000" allowed_nodeset="0x0000c000" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="14" cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" allowed_cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" nodeset="0x00004000" complete_nodeset="0x00004000" allowed_nodeset="0x00004000" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -2184,7 +2184,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,,,,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,,,,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,,,,0x0" nodeset="0x00030000" complete_nodeset="0x00030000" allowed_nodeset="0x00030000" depth="0">
+    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,,,,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,,,,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,,,,0x0" nodeset="0x00030000" complete_nodeset="0x00030000" allowed_nodeset="0x00030000" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="16" cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" allowed_cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" nodeset="0x00010000" complete_nodeset="0x00010000" allowed_nodeset="0x00010000" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -2364,7 +2364,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,,,,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,,,,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,,,,0x0" nodeset="0x000c0000" complete_nodeset="0x000c0000" allowed_nodeset="0x000c0000" depth="0">
+    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,,,,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,,,,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,,,,0x0" nodeset="0x000c0000" complete_nodeset="0x000c0000" allowed_nodeset="0x000c0000" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="18" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" allowed_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" nodeset="0x00040000" complete_nodeset="0x00040000" allowed_nodeset="0x00040000" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -2544,7 +2544,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,,,,,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,,,,,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,,,,,0x0" nodeset="0x00300000" complete_nodeset="0x00300000" allowed_nodeset="0x00300000" depth="0">
+    <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff,,,,,0x0" complete_cpuset="0x0000ffff,,,,,,0x0000ffff,,,,,0x0" allowed_cpuset="0x0000ffff,,,,,,0x0000ffff,,,,,0x0" nodeset="0x00300000" complete_nodeset="0x00300000" allowed_nodeset="0x00300000" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="20" cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" allowed_cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" nodeset="0x00100000" complete_nodeset="0x00100000" allowed_nodeset="0x00100000" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -2724,7 +2724,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,,,,,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,,,,,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,,,,,0x0" nodeset="0x00c00000" complete_nodeset="0x00c00000" allowed_nodeset="0x00c00000" depth="0">
+    <object type="Group" cpuset="0xffff0000,,,,,,0xffff0000,,,,,0x0" complete_cpuset="0xffff0000,,,,,,0xffff0000,,,,,0x0" allowed_cpuset="0xffff0000,,,,,,0xffff0000,,,,,0x0" nodeset="0x00c00000" complete_nodeset="0x00c00000" allowed_nodeset="0x00c00000" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="22" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" allowed_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" nodeset="0x00400000" complete_nodeset="0x00400000" allowed_nodeset="0x00400000" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>

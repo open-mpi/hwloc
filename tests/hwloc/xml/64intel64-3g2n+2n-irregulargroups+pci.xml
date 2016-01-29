@@ -93,7 +93,7 @@
       <latency value="7.900000"/>
       <latency value="1.000000"/>
     </distances>
-    <object type="Group" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" depth="0">
+    <object type="Group" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" allowed_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="33243172864">
         <page_type size="4096" count="8116009"/>
         <page_type size="2097152" count="0"/>
@@ -322,7 +322,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0xffff0000" complete_cpuset="0xffff0000" allowed_cpuset="0x0" nodeset="0x0000000c" complete_nodeset="0x0000000c" allowed_nodeset="0x0" depth="0">
+    <object type="Group" cpuset="0xffff0000" complete_cpuset="0xffff0000" allowed_cpuset="0x0" nodeset="0x0000000c" complete_nodeset="0x0000000c" allowed_nodeset="0x0" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="2" cpuset="0x00ff0000" complete_cpuset="0x00ff0000" allowed_cpuset="0x0" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x0" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>
@@ -588,7 +588,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0x00ffff00,0x0" complete_cpuset="0x00ffff00,0x0" allowed_cpuset="0x0" nodeset="0x00000060" complete_nodeset="0x00000060" allowed_nodeset="0x0" depth="0">
+    <object type="Group" cpuset="0x00ffff00,0x0" complete_cpuset="0x00ffff00,0x0" allowed_cpuset="0x0" nodeset="0x00000060" complete_nodeset="0x00000060" allowed_nodeset="0x0" depth="0" kind="1" subkind="0">
       <object type="NUMANode" os_index="5" cpuset="0x0000ff00,0x0" complete_cpuset="0x0000ff00,0x0" allowed_cpuset="0x0" nodeset="0x00000020" complete_nodeset="0x00000020" allowed_nodeset="0x0" local_memory="33269219328">
         <page_type size="4096" count="8122368"/>
         <page_type size="2097152" count="0"/>

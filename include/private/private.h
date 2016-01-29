@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -366,5 +366,20 @@ extern char * hwloc_progname(struct hwloc_topology *topology);
 /** \brief Compare bitmaps \p bitmap1 and \p bitmap2 from an inclusion point of view.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
+
+/* obj->attr->group.kind internal values.
+ * the core will keep the highest ones when merging two groups.
+ */
+#define HWLOC_GROUP_KIND_NONE				0 /* user can use subkind */
+#define HWLOC_GROUP_KIND_DISTANCE			1 /* subkind is round of adding these groups, either in recursive hwloc__groups_by_distances() or later in hwloc_group_by_distances() */
+#define HWLOC_GROUP_KIND_IO				2 /* no subkind */
+#define HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN	3 /* no subkind */
+#define HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP	4 /* no subkind */
+#define HWLOC_GROUP_KIND_AIX_SDL_UNKNOWN		5 /* subkind is SDL level */
+#define HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN		6 /* subkind is x2APIC unknown level */
+#define HWLOC_GROUP_KIND_S390_BOOK			7 /* no subkind */
+#define HWLOC_GROUP_KIND_INTEL_SUBNUMA_CLUSTER		8 /* no subkind */
+#define HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT		9 /* no subkind */
+#define HWLOC_GROUP_KIND_SYNTHETIC			10 /* subkind is group depth within synthetic description */
 
 #endif /* HWLOC_PRIVATE_H */

@@ -524,6 +524,8 @@ union hwloc_obj_attr_u {
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {
     unsigned depth;			  /**< \brief Depth of group object */
+    unsigned kind;			  /**< \brief Internally-used kind of group. */
+    unsigned subkind;			  /**< \brief Internally-used subkind to distinguish different levels of groups with same kind */
   } group;
   /** \brief PCI Device specific Object Attributes */
   struct hwloc_pcidev_attr_s {
@@ -2144,6 +2146,9 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object(hwloc_topology_t to
  * than "Group" as the type name for this object in lstopo.
  * Custom name/value info pairs may be added with hwloc_obj_add_info() after
  * insertion.
+ *
+ * The \p kind group attribute should be 0. The \p subkind group attribute may
+ * be set to identify multiple Groups of the same level.
  *
  * It is recommended not to set any other object attribute before insertion,
  * since the Group may get discarded during insertion.

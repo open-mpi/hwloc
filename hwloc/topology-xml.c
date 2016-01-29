@@ -198,6 +198,24 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
   }
 
+  else if (!strcmp(name, "kind")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_GROUP)
+      obj->attr->group.kind = lvalue;
+    else if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring kind attribute for non-group object type\n",
+	      state->global->msgprefix);
+  }
+
+  else if (!strcmp(name, "subkind")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_GROUP)
+      obj->attr->group.subkind = lvalue;
+    else if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring subkind attribute for non-group object type\n",
+	      state->global->msgprefix);
+  }
+
   else if (!strcmp(name, "pci_busid")) {
     switch (obj->type) {
     case HWLOC_OBJ_PCI_DEVICE:
@@ -1330,6 +1348,10 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   case HWLOC_OBJ_GROUP:
     sprintf(tmp, "%u", obj->attr->group.depth);
     state.new_prop(&state, "depth", tmp);
+    sprintf(tmp, "%u", obj->attr->group.kind);
+    state.new_prop(&state, "kind", tmp);
+    sprintf(tmp, "%u", obj->attr->group.subkind);
+    state.new_prop(&state, "subkind", tmp);
     break;
   case HWLOC_OBJ_BRIDGE:
     sprintf(tmp, "%u-%u", obj->attr->bridge.upstream_type, obj->attr->bridge.downstream_type);

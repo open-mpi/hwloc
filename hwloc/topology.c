@@ -1418,6 +1418,7 @@ hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, 
   hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
   group_obj->cpuset = hwloc_bitmap_dup(cpuset);
   group_obj->attr->group.depth = (unsigned) -1;
+  group_obj->attr->group.kind = HWLOC_GROUP_KIND_IO;
   parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
   if (!parent)
     /* Failed to insert the Group, maybe a conflicting cpuset */

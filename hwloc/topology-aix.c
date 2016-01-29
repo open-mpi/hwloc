@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -665,6 +665,8 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	break;
       case HWLOC_OBJ_GROUP:
 	obj->attr->group.depth = level;
+	obj->attr->group.kind = HWLOC_GROUP_KIND_AIX_SDL_UNKNOWN;
+	obj->attr->group.subkind = level;
 	break;
       case HWLOC_OBJ_CORE:
       {

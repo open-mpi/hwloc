@@ -20,13 +20,15 @@
 <!ATTLIST object cache_type CDATA "0" >
 <!ATTLIST object huge_page_size_kB CDATA "0" >
 <!ATTLIST object huge_page_free CDATA "0" >
-<!ATTLIST object depth CDATA "-1" >
 <!ATTLIST object cpuset CDATA "0" >
 <!ATTLIST object complete_cpuset CDATA "" >
 <!ATTLIST object allowed_cpuset CDATA "" >
 <!ATTLIST object nodeset CDATA "" >
 <!ATTLIST object complete_nodeset CDATA "" >
 <!ATTLIST object allowed_nodeset CDATA "" >
+<!ATTLIST object depth CDATA "-1" >
+<!ATTLIST object kind CDATA "0" >
+<!ATTLIST object subkind CDATA "0" >
 <!ATTLIST object bridge_type CDATA "" >
 <!ATTLIST object bridge_pci CDATA "" >
 <!ATTLIST object pci_busid CDATA "" >

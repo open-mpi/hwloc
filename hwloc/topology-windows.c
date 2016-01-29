@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -854,6 +854,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    break;
 	  case HWLOC_OBJ_GROUP:
 	    obj->attr->group.depth = procInfo[i].Relationship == RelationGroup;
+	    obj->attr->group.kind = procInfo[i].Relationship == RelationGroup ? HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP : HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN;
 	    break;
 	  default:
 	    break;
@@ -944,6 +945,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	      if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
 		obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, id);
 		obj->cpuset = set;
+		obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP;
 		hwloc_insert_object_by_cpuset(topology, obj);
 	      } else
 		hwloc_bitmap_free(set);

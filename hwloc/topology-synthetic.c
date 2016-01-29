@@ -707,6 +707,8 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
   switch (obj->type) {
   case HWLOC_OBJ_GROUP:
     obj->attr->group.depth = curlevel->depth;
+    obj->attr->group.kind = HWLOC_GROUP_KIND_SYNTHETIC;
+    obj->attr->group.subkind = curlevel->depth-1;
     break;
   case HWLOC_OBJ_SYSTEM:
     break;

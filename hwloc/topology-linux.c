@@ -2823,6 +2823,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	      hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
 	      hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
 	      cluster->subtype = strdup("Cluster");
+	      cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_SUBNUMA_CLUSTER;
 	      hwloc_insert_object_by_cpuset(topology, cluster);
 	    }
           }
@@ -3053,6 +3054,7 @@ package_done:
           hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
                        mybookid, bookset);
           book->subtype = strdup("Book");
+	  book->attr->group.kind = HWLOC_GROUP_KIND_S390_BOOK;
           hwloc_insert_object_by_cpuset(topology, book);
           bookset = NULL; /* don't free it */
 	 }
