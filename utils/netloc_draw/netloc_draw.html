@@ -52,6 +52,7 @@
   var hostColors;
   var nodesWithPhysics;
   var edgesWithPhysics;
+  var bandwidthList;
 
   function handleFileSelect(evt) {
     var files = evt.target.files;
@@ -139,6 +140,12 @@
         el.value = "hwloc";
         selectColors.appendChild(el);
       }
+      {
+        var el = document.createElement("option");
+        el.textContent = "bandwidth";
+        el.value = "bandwidth";
+        selectColors.appendChild(el);
+      }
 
       /* Add elements to selectPartition */
       var selectPartition = document.getElementById("selectPartition");
@@ -171,12 +178,23 @@
       mydata.nodes.map(function(n)
               { n["color"] = n["type"] == "host" ? hostColor: switchColor; });
       mydata.nodes.map(function(n) {
-          n["size"] =
-              10*Math.log(edges.get(n["edges"]).map(function(e) { return e.gbits; })
-              .reduce(function(a, b) { return a + b; }, 0));
+          n["bandwidth"] =
+              edges.get(n["edges"]).map(function(e) { return e.gbits; })
+              .reduce(function(a, b) { return a + b; }, 0);
+      });
+      mydata.nodes.map(function(n) {
+          n["size"] = 10*Math.log(n["bandwidth"]);
       });
       nodes = new vis.DataSet({});
       nodes.add(mydata.nodes);
+
+      bandwidthList = [];
+      /* Build list of sizes */
+      nodes.forEach(function(n) {
+          if (bandwidthList.indexOf(n.size) == -1) {
+              bandwidthList.push(n.size);
+          }
+      });
   }
 
   function nodeColors()
@@ -209,6 +227,15 @@
                 if (colorIdx != -1) {
                     shownNodes.update({id: n.id, color: colors[colorIdx]});
                 }
+            }
+        });
+    }
+    else if (colorMode == "bandwidth") {
+        var colors = palette(bandwidthList.length);
+        shownNodes.forEach(function(n) {
+            var colorIdx = bandwidthList.indexOf(n.size);
+            if (colorIdx != -1) {
+                shownNodes.update({id: n.id, color: colors[colorIdx]});
             }
         });
     }
@@ -290,7 +317,8 @@
             'ID: ' + node.id + '\n' +
             'Partitions: ' + node.part.map(function(p){return partitions[p]})
                                       .join(', ') + '\n' +
-            'Neighbours:\n' + neighbours .sort().join('') +
+            neighbours.length + ' neighbours:\n' + neighbours.sort().join('') +
+            'Total bandwidth: ' + node.bandwidth + '\n' +
             ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
     });
     network.on("deselectNode", function (params) {
