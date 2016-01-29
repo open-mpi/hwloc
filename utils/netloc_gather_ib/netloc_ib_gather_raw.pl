@@ -312,11 +312,14 @@ sub getroutes {
             $dest_guid, $dest_name);
 
         # First, assume that the line has both a port and a peer.
-        if ($line !~ m/^SW\s+(\d+)\s+(\d+)\s+(0x[0-9a-f]{16})\s+(\d+x)\s(.{3,5})\s+-\s+(CA|SW)\s+(\d+)\s+(\d+)\s+(0x[0-9a-f]{16})\s+\(\s+'(.+?)'\s+-\s+'(.+?)'\s\)/) {
+        if ($line !~ m/^SW\s+(\d+)\s+(\d+)\s+(0x[0-9a-f]{16})\s+(\d+x)\s([^\s]*)\s+-\s+(CA|SW)\s+(\d+)\s+(\d+)\s+(0x[0-9a-f]{16})\s+\(\s+'(.+?)'\s+-\s+'(.+?)'\s\)/) {
             # If we get here, there was no peer -- just a port.
             $have_peer = 0;
 
-            next unless ($line =~ m/^SW\s+(\d+)\s+(\d+)\s+(0x[0-9a-f]{16})\s+(\d+x)\s(.{3,5})\s+'(.+?)'/);
+            if ($line !~ m/^SW\s+(\d+)\s+(\d+)\s+(0x[0-9a-f]{16})\s+(\d+x)\s([^\s]*)\s+'(.+?)'/) {
+                print "Line cannot be parsed:\n$line\n";
+                next;
+            }
             $src_lid = $1; # This is a decimal number
             $src_port_id = $2; # This is a decimal number
             $src_guid = $3;

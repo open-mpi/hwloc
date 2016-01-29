@@ -88,6 +88,10 @@ sub _compute_gbits {
         $rate = 14.0625;
         $encoding = 64.0/66;
     }
+    elsif ($speed eq "FDR10") {
+        $rate = 10;
+        $encoding = 64.0/66;
+    }
     elsif ($speed eq "EDR") {
         $rate = 25;
         $encoding = 64.0/66;
@@ -160,7 +164,7 @@ sub _parse_network_topology {
                         (\d+)            \s+  # Source port id
                         (0x[0-9a-f]{16}) \s+  # Source guid
 
-                        (\d+x) \s (.{3}) \s+  # Connection width, speed
+                        (\d+x) \s ([^\s]*) \s+  # Connection width, speed
 
                         -                \s+  # Dash seperator
 
@@ -179,7 +183,7 @@ sub _parse_network_topology {
 
             $have_peer = 0;
 
-            $line =~ m/(CA|SW)\s+(\d+)\s+(\d+)\s+(0x[0-9a-f]{16})\s+(\d+x)\s(.{3})/;
+            $line =~ m/(CA|SW)\s+(\d+)\s+(\d+)\s+(0x[0-9a-f]{16})\s+(\d+x)\s([^\s]*)/;
 
             ($src_type, $src_lid, $src_port_id, $src_guid, $width, $speed) = ($1, $2, $3, $4, $5, $6);
         }
