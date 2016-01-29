@@ -17,7 +17,7 @@
     <style type="text/css">
         #mynetwork {
             width: auto;
-            height: 500px;
+            height: 800px;
             border: 1px solid lightgray;
         }
     </style>
@@ -47,7 +47,7 @@
   var partitions;
   var mydata;
   var topos;
-  var switchColor = "black";
+  var switchColor = {border: "black", background: "grey"};
   var hostColor = "red";
   var hostColors;
   var nodesWithPhysics;
@@ -155,14 +155,6 @@
           selectPartition.appendChild(el);
       }
 
-      mydata.nodes = renameKey(mydata.nodes, "level", "lv");
-      mydata.nodes = renameKey(mydata.nodes, "title", "desc");
-      mydata.nodes.map(function(n)
-              { n["color"] = n["type"] == "host" ? hostColor: switchColor; });
-      nodes = new vis.DataSet({});
-      nodes.add(mydata.nodes);
-
-  
       mydata.edges.map(
               function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
       var gbits_min = Math.min.apply(null, mydata.edges.map(function(e) { return e["gbits"];}));
@@ -172,6 +164,19 @@
       mydata.edges = renameKey(mydata.edges, "to", "dst");
       edges = new vis.DataSet({});
       edges.add(mydata.edges);
+
+
+      mydata.nodes = renameKey(mydata.nodes, "level", "lv");
+      mydata.nodes = renameKey(mydata.nodes, "title", "desc");
+      mydata.nodes.map(function(n)
+              { n["color"] = n["type"] == "host" ? hostColor: switchColor; });
+      mydata.nodes.map(function(n) {
+          n["size"] =
+              10*Math.log(edges.get(n["edges"]).map(function(e) { return e.gbits; })
+              .reduce(function(a, b) { return a + b; }, 0));
+      });
+      nodes = new vis.DataSet({});
+      nodes.add(mydata.nodes);
   }
 
   function nodeColors()
@@ -215,9 +220,10 @@
     var partition = parseInt(
         selectPartition.options[selectPartition.selectedIndex].value);
 
-    if (partition == -1) { // all
-        subEdges = new vis.DataSet(edges.get()); // TODO improve
-        shownNodes = new vis.DataSet(nodes.get()); // TODO improve
+    if (partition == -1) { // for "All"
+        // TODO improve
+        subEdges = new vis.DataSet(edges.get());
+        shownNodes = new vis.DataSet(nodes.get());
     }
     else {
         subEdges = new vis.DataSet(edges.get({filter: function (e) {
@@ -253,7 +259,12 @@
         edges: shownEdges
     };
 
-    var options = {interaction:{hover:true, tooltipDelay:0}};
+    var options = {interaction:{hover:true, tooltipDelay:0},
+                   physics: {barnesHut: {gravitationalConstant:-15000,
+                                         }},
+                   nodes: {shape: 'dot'},
+                   edges: {color: {inherit: true}}
+    };
     var network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
@@ -332,8 +343,7 @@
 
     network.on("stabilizationIterationsDone", function () {
         network.setOptions({nodes:{physics:false},
-                            edges:{physics:false, color: {inherit: true, opacity: 0.1}},
-                            // FIXME: opacity does not work!
+                            edges:{physics:false},
         });
     });
   }
