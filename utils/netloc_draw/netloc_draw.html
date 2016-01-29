@@ -151,7 +151,7 @@
           var partition = partitionOptions [i];
           var el = document.createElement("option");
           el.textContent = partition;
-          el.value = partition;
+          el.value = i-1; // because of "All"
           selectPartition.appendChild(el);
       }
 
@@ -191,7 +191,7 @@
         var colors = palette(partitions.length);
         shownNodes.forEach(function(n) {
             if (n.type == "host") {
-                var colorIdx = partitions.indexOf(n.part[0]);
+                var colorIdx = n.part[0];
                 shownNodes.update({id: n.id, color: colors[colorIdx]});
             }
         });
@@ -212,10 +212,10 @@
   function draw()
   {
     var selectPartition = document.getElementById("selectPartition");
-    var partition =
-        selectPartition.options[selectPartition.selectedIndex].value;
+    var partition = parseInt(
+        selectPartition.options[selectPartition.selectedIndex].value);
 
-    if (partition == "All") {
+    if (partition == -1) { // all
         subEdges = new vis.DataSet(edges.get()); // TODO improve
         shownNodes = new vis.DataSet(nodes.get()); // TODO improve
     }
@@ -239,14 +239,12 @@
         }}));
 
     var selectColor = document.getElementById("selectColors");
-    console.log(selectPartition.options[selectColor.selectedIndex].value);
     var colorMode =
         selectColor.options[selectColor.selectedIndex].value;
     if (colorMode != "")
         nodeColors();
     else
         selectColor.selectedIndex = 1;
-    console.log(selectPartition.options[selectColor.selectedIndex].value);
 
     // create a network
     var container = document.getElementById('mynetwork');
@@ -262,7 +260,6 @@
         params.event = "[original event]";
         var node = nodes.get(params.nodes[0]);
         var nodeEdges = node.edges;
-        var partitions = node.part;
 
         var neighbours = [];
         var i = 0;
@@ -280,7 +277,8 @@
         document.getElementById('eventSpan').innerHTML =
             '<h2>' + node.title + '</h2>' +
             'ID: ' + node.id + '\n' +
-            'Partitions: ' + partitions.join(',') + '\n' +
+            'Partitions: ' + node.part.map(function(p){return partitions[p]})
+                                      .join(', ') + '\n' +
             'Neighbours:\n' + neighbours .sort().join('') +
             ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
     });
@@ -291,14 +289,14 @@
     network.on("selectEdge", function (params) {
         params.event = "[original event]";
         var edge = edges.get(params.edges[0]);
-        var partitions = edge.part;
 
         document.getElementById('eventSpan').innerHTML =
             '<h2>' + nodes.get(edge.from).title + ' -> ' + nodes.get(edge.to).title + '</h2>' +
             'ID: ' + edge.id + '\n' +
             'From: ' + edge.from + '\n' +
             'To: ' + edge.to + '\n' +
-            'Partitions: ' + partitions.join(',') + '\n';
+            'Partitions: ' + edge.part.map(function(p){return partitions[p]})
+                                      .join(', ') + '\n';
     });
     network.on("deselectEdge", function (params) {
         document.getElementById('eventSpan').innerHTML = '';

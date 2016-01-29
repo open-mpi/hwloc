@@ -201,10 +201,10 @@ static int netloc_node_merge_edges(netloc_topology_t topology, netloc_node_t *no
                     virtual_edge->speed = NULL;
                     virtual_edge->width = NULL;
                     asprintf(&virtual_edge->description, "virtual%d", virtual_count++);
-                    virtual_edge->partitions = (char **)
-                        malloc(node->edges[firstIdx]->num_partitions*sizeof(char *));
+                    virtual_edge->partitions = (int *)
+                        malloc(node->edges[firstIdx]->num_partitions*sizeof(int));
                     memcpy(virtual_edge->partitions, node->edges[firstIdx]->partitions,
-                            node->edges[firstIdx]->num_partitions*sizeof(char *));
+                            node->edges[firstIdx]->num_partitions*sizeof(int));
                        /* work only if all the same */
 
 
@@ -416,10 +416,10 @@ int netloc_topology_merge_nodes(netloc_topology_t topology)
         virtual_node->real_nodes = (netloc_node_t **)
             netloc_explist_get_array_and_destroy(exp_real_nodes);
 
-        virtual_node->partitions = (char **)
-            malloc(virtual_node->real_nodes[0]->num_partitions*sizeof(char *));
+        virtual_node->partitions = (int *)
+            malloc(virtual_node->real_nodes[0]->num_partitions*sizeof(int));
         memcpy(virtual_node->partitions, virtual_node->real_nodes[0]->partitions,
-                virtual_node->real_nodes[0]->num_partitions*sizeof(char *));
+                virtual_node->real_nodes[0]->num_partitions*sizeof(int));
         virtual_node->num_partitions =
             virtual_node->real_nodes[0]->num_partitions;
             /* works only if the same between clones TODO merge all */
@@ -576,14 +576,14 @@ int netloc_topology_find_partitions(netloc_topology_t topology)
     }
 
     /* Associate the field partition in the nodes to the correct partition
-     * pointer */
+     * index */
     int num_partitions = 0;
     for (int n1 = 0; n1 < num_nodes; n1++) {
         if (!partition_names[n1])
             continue;
         partition_names[num_partitions] = partition_names[n1];
-        topology->nodes[n1]->partitions = (char **)malloc(sizeof(char *));
-        topology->nodes[n1]->partitions[0] = partition_names[num_partitions];
+        topology->nodes[n1]->partitions = (int *)malloc(sizeof(int));
+        topology->nodes[n1]->partitions[0] = num_partitions;
         topology->nodes[n1]->num_partitions = 1;
 
         for (int n2 = n1+1; n2 < num_nodes; n2++) {
@@ -593,8 +593,8 @@ int netloc_topology_find_partitions(netloc_topology_t topology)
             if (!strcmp(partition_names[n1], partition_names[n2])) {
                 free(partition_names[n2]);
                 partition_names[n2] = NULL;
-                topology->nodes[n2]->partitions = (char **)malloc(sizeof(char *));
-                topology->nodes[n2]->partitions[0] = partition_names[num_partitions];
+                topology->nodes[n2]->partitions = (int *)malloc(sizeof(int));
+                topology->nodes[n2]->partitions[0] = num_partitions;
                 topology->nodes[n2]->num_partitions = 1;
             }
         }
@@ -635,7 +635,7 @@ static netloc_node_t *find_node(netloc_topology_t topology, const char *id)
 
 /* Returns: -1 if partition_name is NULL, -2 if partition not found, else
  * partition index */
-static int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partition_name)
+int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partition_name)
 {
     if (!partition_name)
         return -1;
@@ -661,7 +661,7 @@ static int netloc_topology_find_partition_idx(netloc_topology_t topology, char *
 }
 
 /* Partition is the pointer present in topology->partitions */
-static int netloc_topology_set_partition(netloc_topology_t topology, char *partition)
+static int netloc_topology_set_partition(netloc_topology_t topology, int partition)
 {
     netloc_dt_lookup_table_t hosts;
     netloc_get_all_host_nodes(topology, &hosts);
@@ -693,7 +693,7 @@ static int netloc_topology_set_partition(netloc_topology_t topology, char *parti
             while ((edge = edges[idx++])) {
                 /* Set the partition for the edge */
                 if (!edge->partitions)
-                    edge->partitions = (char **)malloc(topology->num_partitions*sizeof(char *));
+                    edge->partitions = (int *)malloc(topology->num_partitions*sizeof(int));
                 int p = 0;
                 for ( ; p < edge->num_partitions; p++) {
                     if (edge->partitions[p] == partition)
@@ -710,7 +710,7 @@ static int netloc_topology_set_partition(netloc_topology_t topology, char *parti
                     continue;
 
                 if (!node->partitions)
-                    node->partitions = (char **)malloc(topology->num_partitions*sizeof(char *));
+                    node->partitions = (int*)malloc(topology->num_partitions*sizeof(int));
                 for (; p < node->num_partitions; p++) {
                     if (node->partitions[p] == partition)
                         break;
@@ -732,13 +732,12 @@ int netloc_topology_set_all_partitions(netloc_topology_t topology)
 
     for (int p = 0; p < topology->num_partitions; p++)
     {
-        char *partition = topology->partitions[p];
-        netloc_topology_set_partition(topology, partition);
+        netloc_topology_set_partition(topology, p);
     }
     return 0; // TODO
 }
 
-static int node_in_partition(netloc_node_t *node, char *partition)
+static int node_in_partition(netloc_node_t *node, int partition)
 {
     for (int p = 0; p < node->num_partitions; p++) {
         if (node->partitions[p] == partition)
@@ -747,26 +746,24 @@ static int node_in_partition(netloc_node_t *node, char *partition)
     return 0;
 }
 
-static int edge_in_partition(netloc_edge_t *edge, char *partition)
+static int edge_in_partition(netloc_edge_t *edge, int partition)
 {
-    for (int e = 0; e < edge->num_partitions; e++) {
-        if (edge->partitions[e] == partition)
+    for (int p = 0; p < edge->num_partitions; p++) {
+        if (edge->partitions[p] == partition)
             return 1;
     }
     return 0;
 }
 
+
 int netloc_topology_keep_partition(netloc_topology_t topology, char *partition_name)
 {
     int ret = 0;
-    char *partition;
 
     /* Find the selected partition in the topology */
-    int p = netloc_topology_find_partition_idx(topology, partition_name);
-    if (p < 0)
+    int partition = netloc_topology_find_partition_idx(topology, partition_name);
+    if (partition < 0)
         return -1;
-
-    partition = topology->partitions[p];
 
     /* Find all the partitions nodes and edges belong to */
     netloc_topology_set_partition(topology, partition);

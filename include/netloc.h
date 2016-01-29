@@ -366,7 +366,7 @@ struct netloc_edge_t {
     /** If it is a merged edge, corresponding virtual edge */
     struct netloc_edge_t *virtual_edge;
 
-    char **partitions; /* copies of pointers to partition_name */
+    int *partitions; /* index in the list from the topology */
     int num_partitions;
 
     /**
@@ -442,7 +442,7 @@ struct netloc_node_t {
 
     char *hostname;
 
-    char **partitions; /* copies of pointers to partition_name */
+    int *partitions; /* index in the list from the topology */
     int num_partitions;
 
     int topoIdx; /* index to topology->topos */

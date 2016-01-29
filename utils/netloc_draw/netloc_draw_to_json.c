@@ -58,8 +58,8 @@ static int write_edge(json_t *json_edges, netloc_edge_t *edge)
     json_t *json_partitions = json_array();
     for (int p = 0; p < edge->num_partitions; p++)
     {
-        char *partition = edge->partitions[p];
-        json_array_append_new(json_partitions, json_string(partition));
+        int partition = edge->partitions[p];
+        json_array_append_new(json_partitions, json_integer(partition));
     }
     json_object_set_new(json_edge, JSON_DRAW_FILE_NODE_PARTITIONS, json_partitions);
 
@@ -97,8 +97,8 @@ static int write_node(json_t *json_nodes, netloc_node_t *node)
     json_t *json_partitions = json_array();
     for (int p = 0; p < node->num_partitions; p++)
     {
-        char *partition = node->partitions[p];
-        json_array_append_new(json_partitions, json_string(partition));
+        int partition = node->partitions[p];
+        json_array_append_new(json_partitions, json_integer(partition));
     }
     json_object_set_new(json_node, JSON_DRAW_FILE_EDGE_PARTITIONS, json_partitions);
 
