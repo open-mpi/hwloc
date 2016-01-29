@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2015 Inria.  All rights reserved.
+ * Copyright © 2013-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -126,7 +126,11 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 
 	if (obj1->depth != obj2->depth)
 		goto out_too_complex;
+
 	if (obj1->type != obj2->type)
+		goto out_too_complex;
+	if ((!obj1->subtype) != (!obj2->subtype)
+	    || (obj1->subtype && strcmp(obj1->subtype, obj2->subtype)))
 		goto out_too_complex;
 
 	if (obj1->os_index != obj2->os_index)

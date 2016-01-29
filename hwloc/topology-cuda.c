@@ -1,6 +1,6 @@
 /*
  * Copyright © 2011 Université Bordeaux
- * Copyright © 2012-2015 Inria.  All rights reserved.
+ * Copyright © 2012-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -72,7 +72,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend)
     cuda_device->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
     cuda_device->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
-    hwloc_obj_add_info(cuda_device, "CoProcType", "CUDA");
+    cuda_device->subtype = strdup("CUDA");
     hwloc_obj_add_info(cuda_device, "Backend", "CUDA");
     hwloc_obj_add_info(cuda_device, "GPUVendor", "NVIDIA Corporation");
 

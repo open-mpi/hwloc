@@ -34,7 +34,6 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
   int logical = loutput->logical;
   int verbose_mode = loutput->verbose_mode;
   unsigned idx = logical ? l->logical_index : l->os_index;
-  const char *value;
   char pidxstr[16];
   char lidxstr[16];
   char busidstr[32];
@@ -52,10 +51,9 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
   if (loutput->show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
     int len;
-    value = hwloc_obj_get_info_by_name(l, "Type");
     hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
-    if (value)
-      fprintf(output, "%s(%s)", type, value);
+    if (l->subtype)
+      fprintf(output, "%s(%s)", type, l->subtype);
     else
       fprintf(output, "%s", type);
     if (l->depth != 0 && idx != (unsigned)-1

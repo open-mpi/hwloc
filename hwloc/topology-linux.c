@@ -2631,7 +2631,7 @@ static int hwloc_linux_try_add_knl_mcdram_caches(hwloc_topology_t topology, stru
     cache->attr->cache.size = cache_size;
     cache->attr->cache.linesize = line_size;
     cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
-    hwloc_obj_add_info(cache, "Type", "MemorySideCache");
+    cache->subtype = strdup("MemorySideCache");
     hwloc_insert_object_by_cpuset(topology, cache);
   }
   return 0;
@@ -2801,7 +2801,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    if (!hwloc_bitmap_iszero(nodes[i]->cpuset))
 	      /* nodes with CPU, that's DDR, skip it */
 	      continue;
-	    hwloc_obj_add_info(nodes[i], "Type", "MCDRAM");
+	    nodes[i]->subtype = strdup("MCDRAM");
 
 	    if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP))
 	      continue;
@@ -2822,7 +2822,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	      hwloc_obj_t cluster = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
 	      hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
 	      hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
-	      hwloc_obj_add_info(cluster, "Type", "Cluster");
+	      cluster->subtype = strdup("Cluster");
 	      hwloc_insert_object_by_cpuset(topology, cluster);
 	    }
           }
@@ -3052,7 +3052,7 @@ package_done:
           book->cpuset = bookset;
           hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
                        mybookid, bookset);
-          hwloc_obj_add_info(book, "Type", "Book");
+          book->subtype = strdup("Book");
           hwloc_insert_object_by_cpuset(topology, book);
           bookset = NULL; /* don't free it */
 	 }
@@ -4464,15 +4464,16 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
     hwloc_obj_add_info(obj, "SerialNumber", serial);
 
   if (!strcmp(blocktype, "disk"))
-    hwloc_obj_add_info(obj, "Type", "Disk");
+    obj->subtype = strdup("Disk");
   else if (!strcmp(blocktype, "NVDIMM")) /* FIXME: set by us above, to workaround udev returning "" so far */
-    hwloc_obj_add_info(obj, "Type", "NVDIMM");
+    obj->subtype = strdup("NVDIMM");
   else if (!strcmp(blocktype, "tape"))
-    hwloc_obj_add_info(obj, "Type", "Tape");
+    obj->subtype = strdup("Tape");
   else if (!strcmp(blocktype, "cd") || !strcmp(blocktype, "floppy") || !strcmp(blocktype, "optical"))
-    hwloc_obj_add_info(obj, "Type", "Removable Media Device");
-  else /* generic, usb mass storage/rbc, usb mass storage/scsi */
-    hwloc_obj_add_info(obj, "Type", "Other");
+    obj->subtype = strdup("Removable Media Device");
+  else {
+    /* generic, usb mass storage/rbc, usb mass storage/scsi */
+  }
 }
 
 static int
@@ -4747,7 +4748,7 @@ hwloc_linuxfs_mic_class_fillinfos(int root_fd,
   FILE *fd;
   char path[256];
 
-  hwloc_obj_add_info(obj, "CoProcType", "MIC");
+  obj->subtype = strdup("MIC");
 
   snprintf(path, sizeof(path), "%s/family", osdevpath);
   fd = hwloc_fopen(path, "r", root_fd);
@@ -4974,8 +4975,6 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
   hwloc_obj_t misc;
   int foundinfo = 0;
 
-  hwloc__add_info(&infos, &infos_count, "Type", "MemoryModule");
-
   /* start after the header */
   foff = header->length;
   i = 1;
@@ -5052,6 +5051,8 @@ done:
   misc = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, idx);
   if (!misc)
     goto out_with_infos;
+
+  misc->subtype = strdup("MemoryModule");
 
   hwloc__move_infos(&misc->infos, &misc->infos_count, &infos, &infos_count);
   /* FIXME: find a way to identify the corresponding NUMA node and attach these objects there.

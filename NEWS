@@ -56,6 +56,8 @@ Version 2.0.0
   + Remove Tru64 (OSF/1) support.
     - Remove HWLOC_MEMBIND_REPLICATE which wasn't available anywhere else.
 * API
+  + Objects now have a "subtype" field that supersedes former "Type" and
+    "CoProcType" info attributes.
   + The almost-unused "os_level" attribute has been removed from the
     hwloc_obj structure.
   + I/O and Misc objects are now stored in a dedicated children list, only

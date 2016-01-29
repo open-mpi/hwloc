@@ -1410,7 +1410,7 @@ anywhere in the topology (to annotate specific objects or
 parts of the topology), even below other Misc objects, and each
 of them may contain multiple attributes (ee also \ref faq_annotate).
 
-These Misc objects may have a <tt>Type</tt> info attribute
+These Misc objects may have a <tt>subtype</tt> field
 to replace <tt>Misc</tt> with something else in the lstopo
 output.
 
@@ -1423,17 +1423,17 @@ This currently includes:
 <li>
 Memory modules (DIMMs), on Linux when privileged and when
 <tt>dmi-sysfs</tt> is supported by the kernel.
-These objects have a <tt>Type</tt> info attribute of value <tt>MemoryModule</tt>.
+These objects have a <tt>subtype</tt> field of value <tt>MemoryModule</tt>.
 They are currently always attached to the root object.
 Their attributes describe the DIMM vendor, model, etc.
 <tt>lstopo -v</tt> displays them as:
 \code
-Misc(MemoryModule) (P#1 Type=MemoryModule DeviceLocation="Bottom-Slot 2(right)" BankLocation="BANK 2" Vendor=Elpida SerialNumber=21733667 AssetTag=9876543210 PartNumber="EBJ81UG8EFU0-GN-F ")
+Misc(MemoryModule) (P#1 DeviceLocation="Bottom-Slot 2(right)" BankLocation="BANK 2" Vendor=Elpida SerialNumber=21733667 AssetTag=9876543210 PartNumber="EBJ81UG8EFU0-GN-F ")
 \endcode
 </li>
 <li>
 Displaying process binding in <tt>lstopo \--top</tt>.
-These objects have a <tt>Type</tt> info attribute of value <tt>Process</tt>
+These objects have a <tt>subtype</tt> field of value <tt>Process</tt>
 and a name attribute made of their PID and program name.
 They are attached below the object they are bound to.
 The textual <tt>lstopo</tt> displays them as:
@@ -1457,10 +1457,22 @@ as well as hwloc-annotate command-line tool.
 
 \section attributes_normal Normal attributes
 
-hwloc objects have many attributes.
-The ::hwloc_obj structure contains a common set of attributes that
-are available for object types, for instance their <tt>type</tt> or
-<tt>logical_index</tt>.
+hwloc objects have many generic attributes in the ::hwloc_obj structure,
+for instance their <tt>logical_index</tt> or <tt>os_index</tt>
+(see \ref faq_indexes), <tt>depth</tt> or <tt>name</tt>.
+
+The kind of object is first described by the <tt>obj->type</tt>
+generic attribute (an integer).
+OS devices also have a specific <tt>obj->attr->osdev.type</tt> integer
+for distinguishing between NICs, GPUs, etc.
+Objects may also have an optional <tt>obj->subtype</tt> pointing
+to a better description string.
+For instance subtype is useful to say what Group objects are actually
+made of (e.g. <em>Book</em> for Linux S/390 books).
+It may also specify that a Block OS device is a <em>Disk</em>,
+or that a CoProcessor OS device is a <em>CUDA</em> device.
+This subtype is displayed by lstopo either in place or after the
+main <tt>obj->type</tt> attribute.
 
 Each object also contains an <tt>attr</tt> field that, if non NULL,
 points to a union ::hwloc_obj_attr_u of type-specific attribute
@@ -1470,9 +1482,10 @@ information in <tt>obj->attr->cache</tt>, such as its size and
 associativity, cache type.
 See ::hwloc_obj_attr_u for details.
 
+
 \section attributes_info Custom string infos
 
-Aside from the <tt>name</tt> field of each object, hwloc annotates
+Aside os these generic attribute fields, hwloc annotates
 many objects with string attributes that are made of a key and a
 value.
 Each object contains a list of such pairs that may be consulted
@@ -1552,10 +1565,6 @@ and SectorSize (in bytes) of a Block OS device.
 <dt>LinuxDeviceID</dt>
 <dd>The major/minor device number such as 8:0 on Linux for a Block OS device.
 </dd>
-<dt>CoProcType (Co-Processor OS devices)</dt>
-<dd>The type of co-processor, for instance <tt>"MIC"</tt>, <tt>"CUDA"</tt>
- or <tt>"OpenCL"</tt>.
-</dd>
 <dt>GPUVendor, GPUModel (GPU or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
 </dd>
@@ -1611,15 +1620,6 @@ interface, such as <tt>eth4</tt> on Linux.
 the state of a port #1 (value is 4 when active),
 the LID and LID mask count of port #2,
 and GID #1 of port #3.
-</dd>
-<dt>Type</dt>
-<dd>A better type name than the usual one.
-This may be used to specify where Groups come from.
-For instance Linux S/390 <em>books</em> appear as Groups of type <em>Book</em>
-(see also \ref faq_groups).
-Block OS devices may have a Type of "Disk", "NVDIMM", "Tape", "Removable Media Device"
-or "Other".
-The Type attribute value is displayed instead of the default object type name in lstopo.
 </dd>
 <dt>Vendor, AssetTag, PartNumber, DeviceLocation, BankLocation (MemoryModule Misc objects)</dt>
 <dd>
@@ -2824,16 +2824,16 @@ that match the vast majority of hardware platforms.
 The ::HWLOC_OBJ_GROUP type was designed for cases where this set is not sufficient.
 Groups may be used anywhere to add more structure information to the topology,
 for instance to show that 2 out of 4 NUMA nodes are actually closer than the others.
-When applicable, the <tt>Type</tt> info attribute describes why a Group
-was actually added (see also \ref attributes_info).
+When applicable, the <tt>subtype</tt> field describes why a Group
+was actually added (see also \ref attributes_normal).
 
 hwloc currently uses Groups for the following reasons:
 <ul>
-<li>AMD dual-core compute units (<tt>Type=ComputeUnit</tt>, in the x86 backend),
+<li>AMD dual-core compute units (<tt>subtype</tt> is <tt>ComputeUnit</tt>, in the x86 backend),
  but these objects are usually merged with the L2 caches.</li>
 <li>Intel x2APIC non-core and non-package levels (in the x86 backend).</li>
 <li>Windows processor groups.</li>
-<li>IBM S/390 "Books" on Linux (<tt>Type=Book</tt>).</li>
+<li>IBM S/390 "Books" on Linux (<tt>subtype</tt> is <tt>Book</tt>).</li>
 <li>AIX unknown hierarchy levels.</li>
 <li>Distance-based groups made of close objects.</li>
 <li>I/O parents when I/O locality does not match any existing object.</li>
@@ -3054,7 +3054,7 @@ To allocate on the faster MCDRAM, one should first find the local NUMA node (the
 by looking up parent objects), and then take the next sibling to reach the local MCDRAM
 NUMA node (if any).
 
-The MCDRAM NUMA nodes may also be identified thanks to the <tt>Type</tt> info attribute
+The MCDRAM NUMA nodes may also be identified thanks to the <tt>subtype</tt> field
 which is set to <tt>MCDRAM</tt>.
 
 

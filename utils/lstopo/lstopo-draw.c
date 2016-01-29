@@ -439,7 +439,6 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 {
   unsigned idx = logical ? obj->logical_index : obj->os_index;
   const char *indexprefix = logical ? " L#" : " P#";
-  const char *value;
   char typestr[32];
   char indexstr[32]= "";
   char attrstr[256];
@@ -451,9 +450,9 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     return snprintf(text, textlen, "%s", obj->name);
   }
 
-  /* Type replaces the basic type name */
-  if ((value = hwloc_obj_get_info_by_name(obj, "Type")) != NULL) {
-    snprintf(typestr, sizeof(typestr), "%s", value);
+  /* subtype replaces the basic type name */
+  if (obj->subtype) {
+    snprintf(typestr, sizeof(typestr), "%s", obj->subtype);
   } else {
     hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
   }
@@ -713,10 +712,9 @@ os_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwlo
   char morelines[3][64];
 
   if (fontsize) {
-    const char *coproctype;
+    const char *coproctype = level->subtype;
 
-    if (HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type
-        && (coproctype = hwloc_obj_get_info_by_name(level, "CoProcType")) != NULL) {
+    if (HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type && coproctype) {
 
       if (!strcmp(coproctype, "CUDA")) {
 	const char *value, *value2, *value3;

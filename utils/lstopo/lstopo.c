@@ -83,7 +83,7 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
   if (!obj)
     fprintf(stderr, "Failed to insert process `%s'\n", name);
   else
-    hwloc_obj_add_info(obj, "Type", "Process");
+    obj->subtype = strdup("Process");
 
   return obj;
 }

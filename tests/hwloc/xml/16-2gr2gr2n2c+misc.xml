@@ -5,10 +5,8 @@
     <info name="Backend" value="Synthetic"/>
     <info name="SyntheticDescription" value="group:2 group:2 node:2 core:2 1"/>
     <info name="hwlocVersion" value="1.10.1"/>
-    <object type="Group" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" allowed_cpuset="0x000000ff" nodeset="0x0000000f" complete_nodeset="0x0000000f" allowed_nodeset="0x0000000f" depth="2">
-      <info name="Type" value="MyBigGroup"/>
-      <object type="Group" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" allowed_cpuset="0x0000000f" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" depth="1">
-        <info name="Type" value="MySmallGroup"/>
+    <object type="Group" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" allowed_cpuset="0x000000ff" nodeset="0x0000000f" complete_nodeset="0x0000000f" allowed_nodeset="0x0000000f" subtype="MyBigGroup" depth="2">
+      <object type="Group" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" allowed_cpuset="0x0000000f" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" subtype="MySmallGroup" depth="1">
         <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="1073741824">
           <page_type size="4096" count="262144"/>
           <object type="Core" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
@@ -28,8 +26,7 @@
           </object>
         </object>
       </object>
-      <object type="Group" os_index="1" cpuset="0x000000f0" complete_cpuset="0x000000f0" allowed_cpuset="0x000000f0" nodeset="0x0000000c" complete_nodeset="0x0000000c" allowed_nodeset="0x0000000c" depth="1">
-        <info name="Type" value="MySmallGroup"/>
+      <object type="Group" os_index="1" cpuset="0x000000f0" complete_cpuset="0x000000f0" allowed_cpuset="0x000000f0" nodeset="0x0000000c" complete_nodeset="0x0000000c" allowed_nodeset="0x0000000c" subtype="MySmallGroup" depth="1">
         <object type="NUMANode" os_index="2" cpuset="0x00000030" complete_cpuset="0x00000030" allowed_cpuset="0x00000030" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" local_memory="1073741824">
           <page_type size="4096" count="262144"/>
           <object type="Core" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" allowed_cpuset="0x00000010" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004">
@@ -51,10 +48,8 @@
       </object>
       <object type="Misc" name="MyName"/>
     </object>
-    <object type="Group" os_index="1" cpuset="0x0000ff00" complete_cpuset="0x0000ff00" allowed_cpuset="0x0000ff00" nodeset="0x000000f0" complete_nodeset="0x000000f0" allowed_nodeset="0x000000f0" depth="2">
-      <info name="Type" value="MyBigGroup"/>
-      <object type="Group" os_index="2" cpuset="0x00000f00" complete_cpuset="0x00000f00" allowed_cpuset="0x00000f00" nodeset="0x00000030" complete_nodeset="0x00000030" allowed_nodeset="0x00000030" depth="1">
-        <info name="Type" value="MySmallGroup"/>
+    <object type="Group" os_index="1" cpuset="0x0000ff00" complete_cpuset="0x0000ff00" allowed_cpuset="0x0000ff00" nodeset="0x000000f0" complete_nodeset="0x000000f0" allowed_nodeset="0x000000f0" subtype="MyBigGroup" depth="2">
+      <object type="Group" os_index="2" cpuset="0x00000f00" complete_cpuset="0x00000f00" allowed_cpuset="0x00000f00" nodeset="0x00000030" complete_nodeset="0x00000030" allowed_nodeset="0x00000030" subtype="MySmallGroup" depth="1">
         <object type="NUMANode" os_index="4" cpuset="0x00000300" complete_cpuset="0x00000300" allowed_cpuset="0x00000300" nodeset="0x00000010" complete_nodeset="0x00000010" allowed_nodeset="0x00000010" local_memory="1073741824">
           <page_type size="4096" count="262144"/>
           <object type="Core" os_index="8" cpuset="0x00000100" complete_cpuset="0x00000100" allowed_cpuset="0x00000100" nodeset="0x00000010" complete_nodeset="0x00000010" allowed_nodeset="0x00000010">
@@ -74,8 +69,7 @@
           </object>
         </object>
       </object>
-      <object type="Group" os_index="3" cpuset="0x0000f000" complete_cpuset="0x0000f000" allowed_cpuset="0x0000f000" nodeset="0x000000c0" complete_nodeset="0x000000c0" allowed_nodeset="0x000000c0" depth="1">
-        <info name="Type" value="MySmallGroup"/>
+      <object type="Group" os_index="3" cpuset="0x0000f000" complete_cpuset="0x0000f000" allowed_cpuset="0x0000f000" nodeset="0x000000c0" complete_nodeset="0x000000c0" allowed_nodeset="0x000000c0" subtype="MySmallGroup" depth="1">
         <object type="NUMANode" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" allowed_cpuset="0x00003000" nodeset="0x00000040" complete_nodeset="0x00000040" allowed_nodeset="0x00000040" local_memory="1073741824">
           <page_type size="4096" count="262144"/>
           <object type="Core" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x00000040" complete_nodeset="0x00000040" allowed_nodeset="0x00000040">
@@ -94,9 +88,7 @@
             <object type="PU" os_index="15" cpuset="0x00008000" complete_cpuset="0x00008000" allowed_cpuset="0x00008000" nodeset="0x00000080" complete_nodeset="0x00000080" allowed_nodeset="0x00000080"/>
           </object>
         </object>
-        <object type="Misc" name="MyName2">
-          <info name="Type" value="ReallyMisc"/>
-        </object>
+        <object type="Misc" name="MyName2" subtype="ReallyMisc"/>
       </object>
     </object>
   </object>

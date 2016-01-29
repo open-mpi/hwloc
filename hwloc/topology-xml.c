@@ -123,6 +123,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     hwloc_bitmap_sscanf(obj->allowed_nodeset, value);
   } else if (!strcmp(name, "name"))
     obj->name = strdup(value);
+  else if (!strcmp(name, "subtype"))
+    obj->subtype = strdup(value);
 
   else if (!strcmp(name, "cache_size")) {
     unsigned long long lvalue = strtoull(value, NULL, 10);
@@ -434,9 +436,15 @@ hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
       return -1;
   }
 
-  if (infoname)
+  if (infoname) {
     /* empty strings are ignored by libxml */
-    hwloc_obj_add_info(obj, infoname, infovalue ? infovalue : "");
+    if (!strcmp(infoname, "Type") || !strcmp(infoname, "CoProcType")) {
+      if (infovalue)
+	obj->subtype = strdup(infovalue);
+    } else {
+      hwloc_obj_add_info(obj, infoname, infovalue ? infovalue : "");
+    }
+  }
 
   return state->global->close_tag(state);
 }
@@ -1292,6 +1300,11 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     char *name = hwloc__xml_export_safestrdup(obj->name);
     state.new_prop(&state, "name", name);
     free(name);
+  }
+  if (obj->subtype) {
+    char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
+    state.new_prop(&state, "subtype", subtype);
+    free(subtype);
   }
 
   switch (obj->type) {

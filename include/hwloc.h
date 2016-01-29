@@ -345,6 +345,7 @@ struct hwloc_obj_memory_s {
 struct hwloc_obj {
   /* physical information */
   hwloc_obj_type_t type;		/**< \brief Type of object */
+  char *subtype;			/**< \brief Subtype string to better describe the type field. */
 
   unsigned os_index;			/**< \brief OS-provided physical index number.
 					 * It is not guaranteed unique across the entire machine,
@@ -2139,9 +2140,10 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object(hwloc_topology_t to
  * The caller should (at least) initialize its sets before inserting the object.
  * See hwloc_topology_insert_group_object().
  *
- * Custom name/value info pairs may be added with hwloc_obj_add_info() after
- * insertion. For instance the Type info key allows to display something else
+ * The \p subtype object attribute may be set to display something else
  * than "Group" as the type name for this object in lstopo.
+ * Custom name/value info pairs may be added with hwloc_obj_add_info() after
+ * insertion.
  *
  * It is recommended not to set any other object attribute before insertion,
  * since the Group may get discarded during insertion.

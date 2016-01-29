@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2015 Inria.  All rights reserved.
+ * Copyright © 2012-2016 Inria.  All rights reserved.
  * Copyright © 2013 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -88,7 +88,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
       osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
-      hwloc_obj_add_info(osdev, "CoProcType", "OpenCL");
+      osdev->subtype = strdup("OpenCL");
       hwloc_obj_add_info(osdev, "Backend", "OpenCL");
 
       clGetDeviceInfo(device_ids[i], CL_DEVICE_TYPE, sizeof(type), &type, NULL);

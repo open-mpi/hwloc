@@ -212,9 +212,11 @@ hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
   else
     *idx = '\0';
   hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 1);
-  hwloc_debug("%s%s%s%s%s", type, idx, *attr ? "(" : "", attr, *attr ? ")" : "");
   if (obj->name)
     hwloc_debug(" name %s", obj->name);
+  hwloc_debug("%s%s%s%s%s", type, idx, *attr ? "(" : "", attr, *attr ? ")" : "");
+  if (obj->subtype)
+    hwloc_debug(" subtype %s", obj->subtype);
   if (obj->cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
     hwloc_debug(" cpuset %s", cpuset);
@@ -375,6 +377,7 @@ hwloc__free_object_contents(hwloc_obj_t obj)
   free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
+  free(obj->subtype);
   free(obj->name);
   hwloc_bitmap_free(obj->cpuset);
   hwloc_bitmap_free(obj->complete_cpuset);
@@ -580,6 +583,8 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
 
   if (src->name)
     newobj->name = strdup(src->name);
+  if (src->subtype)
+    newobj->subtype = strdup(src->subtype);
   newobj->userdata = src->userdata;
 
   memcpy(&newobj->memory, &src->memory, sizeof(struct hwloc_obj_memory_s));
@@ -1020,6 +1025,10 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
   if (new->name && !old->name) {
     old->name = new->name;
     new->name = NULL;
+  }
+  if (new->subtype && !old->subtype) {
+    old->subtype = new->subtype;
+    new->subtype = NULL;
   }
 
   /* Ignore userdata. It will be NULL before load().
