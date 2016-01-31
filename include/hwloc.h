@@ -523,7 +523,8 @@ union hwloc_obj_attr_u {
   } cache;
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {
-    unsigned depth;			  /**< \brief Depth of group object */
+    unsigned depth;			  /**< \brief Depth of group object.
+					   *   It may change if intermediate Group objects are added. */
     unsigned kind;			  /**< \brief Internally-used kind of group. */
     unsigned subkind;			  /**< \brief Internally-used subkind to distinguish different levels of groups with same kind */
   } group;

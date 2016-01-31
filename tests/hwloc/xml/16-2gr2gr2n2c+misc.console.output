@@ -1,5 +1,5 @@
 Machine (P#0 total=8388608KB Backend=Synthetic SyntheticDescription="group:2 group:2 node:2 core:2 1" hwlocVersion=1.10.1)
-  Group2(MyBigGroup) L#0 (P#0 total=4194304KB)
+  Group0(MyBigGroup) L#0 (P#0 total=4194304KB)
     Group1(MySmallGroup) L#0 (P#0 total=2097152KB)
       NUMANode L#0 (P#0 local=1048576KB total=1048576KB)
         Core L#0 (P#0)
@@ -23,7 +23,7 @@ Machine (P#0 total=8388608KB Backend=Synthetic SyntheticDescription="group:2 gro
         Core L#7 (P#7)
           PU L#7 (P#7)
     Misc L#0 MyName
-  Group2(MyBigGroup) L#1 (P#1 total=4194304KB)
+  Group0(MyBigGroup) L#1 (P#1 total=4194304KB)
     Group1(MySmallGroup) L#2 (P#2 total=2097152KB)
       NUMANode L#4 (P#4 local=1048576KB total=1048576KB)
         Core L#8 (P#8)
@@ -48,7 +48,7 @@ Machine (P#0 total=8388608KB Backend=Synthetic SyntheticDescription="group:2 gro
           PU L#15 (P#15)
       Misc(ReallyMisc) L#1 MyName2
 depth 0:	1 Machine (type #1)
- depth 1:	2 Group2 (type #14)
+ depth 1:	2 Group0 (type #14)
   depth 2:	4 Group1 (type #14)
    depth 3:	8 NUMANode (type #2)
     depth 4:	16 Core (type #4)

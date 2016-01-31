@@ -36,7 +36,7 @@
       <latency value="2.000000"/>
       <latency value="1.000000"/>
     </distances>
-    <object type="Group" cpuset="0x00000055,0x55555555" complete_cpuset="0x00000055,0x55555555" allowed_cpuset="0x00000055,0x55555555" nodeset="0x00000005" complete_nodeset="0x00000005" allowed_nodeset="0x00000005" depth="4294967295" kind="2" subkind="0">
+    <object type="Group" cpuset="0x00000055,0x55555555" complete_cpuset="0x00000055,0x55555555" allowed_cpuset="0x00000055,0x55555555" nodeset="0x00000005" complete_nodeset="0x00000005" allowed_nodeset="0x00000005" depth="0" kind="2" subkind="0">
       <object type="NUMANode" os_index="0" cpuset="0x00000011,0x11111111" complete_cpuset="0x00000011,0x11111111" allowed_cpuset="0x00000011,0x11111111" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="137425154048">
         <object type="Package" os_index="0" cpuset="0x00000011,0x11111111" complete_cpuset="0x00000011,0x11111111" allowed_cpuset="0x00000011,0x11111111" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
           <info name="CPUModel" value="Intel(R) Xeon(R) CPU E7- 4870  @ 2.40GHz"/>
@@ -294,7 +294,7 @@
         </object>
       </object>
     </object>
-    <object type="Group" cpuset="0x000000aa,0xaaaaaaaa" complete_cpuset="0x000000aa,0xaaaaaaaa" allowed_cpuset="0x000000aa,0xaaaaaaaa" nodeset="0x0000000a" complete_nodeset="0x0000000a" allowed_nodeset="0x0000000a" depth="4294967295" kind="2" subkind="0">
+    <object type="Group" cpuset="0x000000aa,0xaaaaaaaa" complete_cpuset="0x000000aa,0xaaaaaaaa" allowed_cpuset="0x000000aa,0xaaaaaaaa" nodeset="0x0000000a" complete_nodeset="0x0000000a" allowed_nodeset="0x0000000a" depth="0" kind="2" subkind="0">
       <object type="NUMANode" os_index="1" cpuset="0x00000022,0x22222222" complete_cpuset="0x00000022,0x22222222" allowed_cpuset="0x00000022,0x22222222" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" local_memory="137438953472">
         <object type="Package" os_index="1" cpuset="0x00000022,0x22222222" complete_cpuset="0x00000022,0x22222222" allowed_cpuset="0x00000022,0x22222222" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002">
           <info name="CPUModel" value="Intel(R) Xeon(R) CPU E7- 4870  @ 2.40GHz"/>

@@ -635,6 +635,7 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
 
 static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
 static void propagate_total_memory(hwloc_obj_t obj);
+static void hwloc_set_group_depth(hwloc_topology_t topology);
 
 int
 hwloc_topology_dup(hwloc_topology_t *newp,
@@ -868,16 +869,10 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
   if (compare < 0)
     return HWLOC_OBJ_CONTAINS;
 
-  /* Group objects have the same types but can have different depths.  */
-  if (type1 == HWLOC_OBJ_GROUP) {
-    if (obj1->attr->group.depth == (unsigned) -1
-	|| obj2->attr->group.depth == (unsigned) -1)
-      return HWLOC_OBJ_EQUAL;
-    if (obj1->attr->group.depth < obj2->attr->group.depth)
-      return HWLOC_OBJ_INCLUDED;
-    else if (obj1->attr->group.depth > obj2->attr->group.depth)
-      return HWLOC_OBJ_CONTAINS;
-  }
+  if (obj1->type == HWLOC_OBJ_GROUP
+      && (obj1->attr->group.kind != obj2->attr->group.kind
+	  || obj1->attr->group.subkind != obj2->attr->group.subkind))
+    return HWLOC_OBJ_DIFFERENT; /* we cannot do better */
 
   return HWLOC_OBJ_EQUAL;
 }
@@ -1103,8 +1098,16 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	assert(topology->type_filter[HWLOC_OBJ_GROUP] != HWLOC_TYPE_FILTER_KEEP_ALL);
         /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not,
 	 * while some callers need to know (at least hwloc_topology_insert_group()).
-	 * The Group doesn't contain anything to keep, just let the caller free it.
 	 */
+
+	/* If merging two groups, keep the highest kind.
+	 * Replace the existing Group with the new Group contents
+	 * and let the caller free the new Group.
+	 */
+	if (child->type == HWLOC_OBJ_GROUP
+	    && obj->attr->group.kind > child->attr->group.kind)
+	  hwloc_replace_linked_object(child, obj);
+
 	return child;
 
       } else if (child->type == HWLOC_OBJ_GROUP) {
@@ -1272,11 +1275,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 hwloc_obj_t
 hwloc_topology_alloc_group_object(struct hwloc_topology *topology __hwloc_attribute_unused)
 {
-  hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
-  if (!obj)
-    return NULL;
-  obj->attr->group.depth = -1;
-  return obj;
+  return hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
 }
 
 hwloc_obj_t
@@ -1320,6 +1319,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     return NULL;
 
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
+  hwloc_set_group_depth(topology);
 
   if (has_memory)
     propagate_total_memory(topology->levels[0][0]);
@@ -1417,7 +1417,6 @@ hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, 
   group_obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
   hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
   group_obj->cpuset = hwloc_bitmap_dup(cpuset);
-  group_obj->attr->group.depth = (unsigned) -1;
   group_obj->attr->group.kind = HWLOC_GROUP_KIND_IO;
   parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
   if (!parent)
@@ -2019,6 +2018,18 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
   root->symmetric_subtree = 1;
 }
 
+static void hwloc_set_group_depth(hwloc_topology_t topology)
+{
+  int groupdepth = 0;
+  unsigned i, j;
+  for(i=0; i<topology->nb_levels; i++)
+    if (topology->levels[i][0]->type == HWLOC_OBJ_GROUP) {
+      for (j = 0; j < topology->level_nbobjects[i]; j++)
+	topology->levels[i][j]->attr->group.depth = groupdepth;
+      groupdepth++;
+    }
+}
+
 /*
  * Initialize handy pointers in the whole topology.
  * The topology only had first_child and next_sibling pointers.
@@ -2310,7 +2321,6 @@ hwloc_connect_levels(hwloc_topology_t topology)
   memset(topology->levels+1, 0, (topology->nb_levels-1)*sizeof(*topology->levels));
   memset(topology->level_nbobjects+1, 0, (topology->nb_levels-1)*sizeof(*topology->level_nbobjects));
   topology->nb_levels = 1;
-  /* don't touch next_group_depth, the Group objects are still here */
 
   /* initialize all non-IO/non-Misc depths to unknown */
   for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_MISC; l++)
@@ -2682,6 +2692,9 @@ next_noncpubackend:
   /* setup the symmetric_subtree attribute */
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
 
+  /* apply group depths */
+  hwloc_set_group_depth(topology);
+
   /*
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology.
    *
@@ -2732,7 +2745,6 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 
   /* Only the System object on top by default */
   topology->nb_levels = 1; /* there's at least SYSTEM */
-  topology->next_group_depth = 0;
   topology->levels[0] = malloc (sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
   /* NULLify other levels */

@@ -647,7 +647,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
   unsigned i, j, l, level;
   int one = -1;
-  unsigned next_group_depth = topology->next_group_depth;
   hwloc_bitmap_t remaining_cpuset;
 
   for (i = 0; i < nbprocs; i++)
@@ -810,11 +809,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    }
 	    unknown_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, unknownid);
 	    unknown_obj->cpuset = unknown_cpuset;
-	    unknown_obj->attr->group.depth = topology->next_group_depth + level;
 	    unknown_obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN;
 	    unknown_obj->attr->group.subkind = level;
-	    if (next_group_depth <= topology->next_group_depth + level)
-	      next_group_depth = topology->next_group_depth + level + 1;
 	    hwloc_debug_2args_bitmap("os unknown%d %u has cpuset %s\n",
 				     level, unknownid, unknown_cpuset);
 	    hwloc_insert_object_by_cpuset(topology, unknown_obj);
@@ -965,7 +961,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   hwloc_bitmap_free(remaining_cpuset);
   hwloc_bitmap_free(complete_cpuset);
-  topology->next_group_depth = next_group_depth;
 }
 
 static int

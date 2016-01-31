@@ -664,7 +664,6 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* OK for power[4567], unknown for others */
 	break;
       case HWLOC_OBJ_GROUP:
-	obj->attr->group.depth = level;
 	obj->attr->group.kind = HWLOC_GROUP_KIND_AIX_SDL_UNKNOWN;
 	obj->attr->group.subkind = level;
 	break;

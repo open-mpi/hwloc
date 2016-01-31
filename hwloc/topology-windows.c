@@ -853,7 +853,6 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    }
 	    break;
 	  case HWLOC_OBJ_GROUP:
-	    obj->attr->group.depth = procInfo[i].Relationship == RelationGroup;
 	    obj->attr->group.kind = procInfo[i].Relationship == RelationGroup ? HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP : HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN;
 	    break;
 	  default:
