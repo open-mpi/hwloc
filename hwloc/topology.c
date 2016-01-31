@@ -874,14 +874,6 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
       return HWLOC_OBJ_CONTAINS;
   }
 
-  /* Bridges objects have the same types but can have different depths.  */
-  if (type1 == HWLOC_OBJ_BRIDGE) {
-    if (obj1->attr->bridge.depth < obj2->attr->bridge.depth)
-      return HWLOC_OBJ_INCLUDED;
-    else if (obj1->attr->bridge.depth > obj2->attr->bridge.depth)
-      return HWLOC_OBJ_CONTAINS;
-  }
-
   return HWLOC_OBJ_EQUAL;
 }
 
