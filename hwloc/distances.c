@@ -137,6 +137,15 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
   if (sscanf(string, "%u-%u:", &i, &j) == 2) {
     /* range i-j */
     nbobjs = j-i+1;
+
+    tmp = strchr(string, ':');
+    if (!tmp) {
+      fprintf(stderr, "Ignoring %s distances from environment variable, missing colon\n",
+	      hwloc_obj_type_string(type));
+      return;
+    }
+    tmp++;
+
     indexes = calloc(nbobjs, sizeof(unsigned));
     distances = calloc(nbobjs*nbobjs, sizeof(float));
     /* make sure the user didn't give a veeeeery large range */
@@ -147,7 +156,6 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
     }
     for(j=0; j<nbobjs; j++)
       indexes[j] = j+i;
-    tmp = strchr(string, ':') + 1;
 
   } else {
     /* explicit list of indexes, count them */
