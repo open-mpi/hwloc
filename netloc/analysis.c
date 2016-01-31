@@ -737,7 +737,7 @@ int netloc_topology_set_all_partitions(netloc_topology_t topology)
     return 0; // TODO
 }
 
-static int node_in_partition(netloc_node_t *node, int partition)
+int netloc_topology_node_in_partition(netloc_node_t *node, int partition)
 {
     for (int p = 0; p < node->num_partitions; p++) {
         if (node->partitions[p] == partition)
@@ -746,7 +746,7 @@ static int node_in_partition(netloc_node_t *node, int partition)
     return 0;
 }
 
-static int edge_in_partition(netloc_edge_t *edge, int partition)
+int netloc_topology_edge_in_partition(netloc_edge_t *edge, int partition)
 {
     for (int p = 0; p < edge->num_partitions; p++) {
         if (edge->partitions[p] == partition)
@@ -773,12 +773,12 @@ int netloc_topology_keep_partition(netloc_topology_t topology, char *partition_n
     int num_removed_nodes = 0;
     for (int n = 0; n < topology->num_nodes; n++) {
         netloc_node_t *node = topology->nodes[n];
-        if (node_in_partition(node, partition)) {
+        if (netloc_topology_node_in_partition(node, partition)) {
             /* Need to removed unused edges from the node */
             int num_removed_edges = 0;
             for (int e = 0; e < node->num_edges; e++) {
                 netloc_edge_t *edge = node->edges[e];
-                if (edge_in_partition(edge, partition)) {
+                if (netloc_topology_edge_in_partition(edge, partition)) {
                     node->edges[e-num_removed_edges] = node->edges[e];
                 }
                 else 
@@ -811,7 +811,7 @@ int netloc_topology_keep_partition(netloc_topology_t topology, char *partition_n
                 (netloc_edge_t *)netloc_lookup_table_iterator_next_entry(edges_iter))) {
         /* TODO improve with function thar returns key and value */
         // XXX TODO is it okay to remove one element while browsing XXX XXX XXX FIXME
-        if (!edge_in_partition(edge, partition)) {
+        if (!netloc_topology_edge_in_partition(edge, partition)) {
             /* mark them to be removed since we are browsing the table
              * TODO change with the table */
             netloc_explist_add(removed_edges, edge);
