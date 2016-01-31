@@ -510,7 +510,10 @@ static int node_set_hostname(netloc_node_t *node)
     int i = 0;
     if (name[0] == '\'')
         name++;
-    while (i < max_size && name[i] != ' ') {
+    while (i < max_size &&
+            ((name[i] >= 'a' && name[i] <= 'z') ||
+             (name[i] >= '0' && name[i] <= '9') ||
+             (name[i] == '-'))) {
         hostname[i] = name[i];
         i++;
     }
