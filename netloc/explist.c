@@ -36,7 +36,7 @@ void netloc_explist_add(netloc_explist_t *list, void *elem)
 {
     /* We extend the array if needed */
     if (list->size >= list->max_size) {
-        int new_max = 2*list->max_size;
+        int new_max = 2*list->max_size+1;
         list->array = (void **)
             realloc(list->array, new_max*sizeof(void *));
 
@@ -47,13 +47,28 @@ void netloc_explist_add(netloc_explist_t *list, void *elem)
     list->size++;
 }
 
+
+void netloc_explist_cat(netloc_explist_t *list1, netloc_explist_t *list2)
+{
+    int new_size = list1->size+list2->size;
+    if (new_size > list1->max_size) {
+        list1->array = (void **)
+            realloc(list1->array, new_size*sizeof(void *));
+        list1->max_size = new_size;
+    }
+    for (int e = 0; e < list2->size; e++) {
+        list1->array[list1->size+e] = list2->array[e];
+    }
+    list1->size = new_size;
+}
+
 void netloc_explist_set(netloc_explist_t *list, int idx, void *elem)
 {
     /* We extend the array if needed */
     if (idx >= list->size) {
         int new_size = idx+1;
 
-        if (new_size >= list->max_size) {
+        if (new_size > list->max_size) {
             list->array = (void **)
                 realloc(list->array, new_size*sizeof(void *));
 

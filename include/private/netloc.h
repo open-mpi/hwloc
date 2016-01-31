@@ -582,6 +582,7 @@ typedef struct {
 
 netloc_explist_t *netloc_explist_init(int size);
 void netloc_explist_add(netloc_explist_t *list, void *elem);
+void netloc_explist_cat(netloc_explist_t *list1, netloc_explist_t *list2);
 void netloc_explist_set(netloc_explist_t *list, int idx, void *elem);
 int netloc_explist_get_size(netloc_explist_t *list);
 void *netloc_explist_get(netloc_explist_t *list, int idx);
