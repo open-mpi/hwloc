@@ -186,7 +186,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	obj->attr->group.depth = lvalue;
 	break;
       case HWLOC_OBJ_BRIDGE:
-	obj->attr->bridge.depth = lvalue;
+	/* will be overwritten by the core */
 	break;
       default:
 	if (hwloc__xml_verbose())
