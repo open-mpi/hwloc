@@ -196,7 +196,7 @@ static inline const char * netloc_decode_node_type(netloc_node_type_t node_type)
  * \returns NULL if the type is invalid
  * \returns A string for that \ref netloc_node_type_t type
  */
-static inline char * netloc_decode_node_type_readable(netloc_node_type_t node_type) {
+static inline const char * netloc_decode_node_type_readable(netloc_node_type_t node_type) {
     if( NETLOC_NODE_TYPE_SWITCH == node_type ) {
         return "Switch";
     }
