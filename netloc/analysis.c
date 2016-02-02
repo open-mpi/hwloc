@@ -537,7 +537,7 @@ static char *node_find_partition_name(netloc_node_t *node)
         node_set_hostname(node);
 
     max_size = strlen(node->hostname);
-    partition = (char *)malloc(max_size*sizeof(char));
+    partition = (char *)malloc((max_size+1)*sizeof(char));
     name = node->hostname;
 
     /* Looking for the name of the partition */
