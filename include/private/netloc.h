@@ -595,6 +595,7 @@ void **netloc_explist_get_array_and_destroy(netloc_explist_t *list);
 
 typedef struct netloc_analysis_data_t {
     int level;
+    void *userdata;
 } netloc_analysis_data;
 
 typedef struct netloc_tree_data_t {
