@@ -228,6 +228,7 @@ int netloc_dt_lookup_table_t_copy(struct netloc_dt_lookup_table *from, struct ne
             to->ht_entries[i] = netloc_copy_lookup_table_entry_t(from->ht_entries[i], dup);
         }
     }
+    to->ht_used_size = from->ht_used_size;
 
     return NETLOC_SUCCESS;
 }
