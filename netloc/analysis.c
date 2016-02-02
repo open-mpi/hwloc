@@ -30,113 +30,6 @@ netloc_tree_data *netloc_get_tree_data(netloc_topology_analysis *analysis)
     return (netloc_tree_data *)analysis->data;
 }
 
-// level starts at 1, not 0
-static int node_set_level(netloc_node_t *node, int level)
-{
-    int num_edges = node->num_edges;
-
-    /** If this node has already been handled */
-    if (node->userdata && ((netloc_analysis_data *)node->userdata)->level <= level) {
-        return 0; // TODO
-    }
-
-    netloc_analysis_data *analysis_data;
-    if (!node->userdata)
-    {
-        node->userdata = (void *)malloc(sizeof(netloc_analysis_data));
-        analysis_data = (netloc_analysis_data *)node->userdata;
-    }
-    else
-    {
-        analysis_data = (netloc_analysis_data *)node->userdata;
-    }
-
-    analysis_data->level = level;
-
-    for (int e = 0; e < num_edges; e++) {
-        netloc_edge_t *edge = node->edges[e];
-        netloc_node_t *dest_node = edge->dest_node;
-        node_set_level(dest_node, level+1);
-    }
-    return 0; // TODO
-}
-
-static int node_max_level(netloc_node_t *node, int *max_level)
-{
-    int level = ((netloc_analysis_data *)node->userdata)->level;
-    if (level > *max_level)
-    {
-        *max_level = level;
-    }
-
-    return 0; // TODO
-}
-
-// Level starts from 0 now
-static int node_inverse_level(netloc_node_t *node, int max_level)
-{
-    int *plevel = &((netloc_analysis_data *)node->userdata)->level;
-    *plevel = max_level-*plevel;
-    return 0; // TODO
-}
-
-static int tree_set_levels(netloc_topology_analysis *analysis)
-{
-    int max_level = -1;
-    netloc_node_t *node;
-
-    netloc_topology_t topology = analysis->topology;
-
-    netloc_dt_lookup_table_t hosts;
-    netloc_get_all_host_nodes(topology, &hosts);
-
-    netloc_dt_lookup_table_iterator_t hti =
-        netloc_dt_lookup_table_iterator_t_construct(hosts);
-    while ((node =
-            (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
-        node_set_level(node, 1);
-    }
-
-    // we compute the depth of the tree
-    netloc_dt_lookup_table_t nodes;
-    netloc_get_all_nodes(topology, &nodes);
-    hti = netloc_dt_lookup_table_iterator_t_construct(nodes);
-    while ((node =
-            (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
-        node_max_level(node, &max_level);
-    }
-
-    hti = netloc_dt_lookup_table_iterator_t_construct(nodes);
-    int *num_nodes_by_level = (int *)calloc(max_level, sizeof(int));
-    netloc_node_t ***nodes_by_level = (netloc_node_t ***)
-        malloc(max_level*sizeof(netloc_node_t **));
-    int num_nodes = topology->num_nodes;
-    for (int l = 0; l < max_level; l++) {
-        nodes_by_level[l] = (netloc_node_t **)malloc(num_nodes*sizeof(netloc_node_t *));
-    }
-    while ((node =
-            (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
-        // we need to inverse the level because leaves are level 0 right now
-        node_inverse_level(node, max_level);
-
-        // Lists of nodes by level
-        int level = ((netloc_analysis_data *)node->userdata)->level;
-        nodes_by_level[level][num_nodes_by_level[level]] = node;
-
-        num_nodes_by_level[level]++;
-    }
-    for (int l = 0; l < max_level; l++) {
-        nodes_by_level[l] = realloc(nodes_by_level[l],
-                num_nodes_by_level[l]*sizeof(netloc_node_t));
-    }
-
-    netloc_tree_data *data = netloc_get_tree_data(analysis);
-    data->num_nodes_by_level = num_nodes_by_level;
-    data->nodes_by_level = nodes_by_level;
-
-    return max_level;
-}
-
 static netloc_tree_data *tree_data()
 {
     return (netloc_tree_data *)malloc(sizeof(netloc_tree_data));
@@ -833,7 +726,6 @@ int netloc_topology_keep_partition(netloc_topology_t topology, char *partition_n
 int netloc_topology_simplify(netloc_topology_t topology)
 {
     int ret = 0;
-
     netloc_topology_merge_edges(topology);
     netloc_topology_merge_nodes(topology);
     netloc_topology_merge_edges(topology);
@@ -841,7 +733,7 @@ int netloc_topology_simplify(netloc_topology_t topology)
     return ret;
 }
 
-static int netloc_read_hwloc(netloc_topology_t topology)
+int netloc_read_hwloc(netloc_topology_t topology)
 {
     int ret = 0;
     int err;
@@ -929,30 +821,3 @@ static int netloc_read_hwloc(netloc_topology_t topology)
     return ret;
 }
 
-int netloc_partition_analyse(netloc_topology_analysis *analysis,
-        netloc_topology_t topology, int simplify, char *partition,
-        int levels, int hwloc)
-{
-    int ret = 0;
-    analysis->topology = topology;
-
-    if (partition) {
-        netloc_topology_keep_partition(topology, partition);
-    }
-    else {
-        netloc_topology_set_all_partitions(topology);
-    }
-    if (hwloc)
-        netloc_read_hwloc(topology);
-    if (simplify)
-        netloc_topology_simplify(topology);
-
-    // if topology is a tree TODO check type
-    analysis->type = NETLOC_TOPOLOGY_TYPE_TREE;
-    netloc_tree_data *data = tree_data();
-    analysis->data = (void *)data;
-
-    data->num_levels = tree_set_levels(analysis);
-
-    return ret;
-}
