@@ -67,6 +67,7 @@ netloc_network_t * netloc_dt_network_t_construct( )
     network->path_uri     = NULL;
     network->description  = NULL;
     network->version      = NULL;
+    network->refcount     = 1;
     network->userdata     = NULL;
 
     return network;
@@ -175,6 +176,9 @@ netloc_network_t * netloc_dt_network_t_json_decode(json_t *json_nw)
 int netloc_dt_network_t_destruct(netloc_network_t * network)
 {
     if( NULL == network )
+        return NETLOC_SUCCESS;
+
+    if (--network->refcount <= 0)
         return NETLOC_SUCCESS;
 
     if( NULL != network->subnet_id ) {
@@ -297,7 +301,10 @@ netloc_edge_t * netloc_dt_edge_t_construct()
     edge->partitions = NULL;
     edge->num_partitions = 0;
 
+    edge->refcount = 1;
+
     edge->userdata = NULL;
+
 
     return edge;
 }
@@ -401,6 +408,8 @@ int netloc_dt_edge_t_copy(netloc_edge_t *from, netloc_edge_t *to)
 
     to->userdata = from->userdata;
 
+    to->refcount = 1;
+
     return NETLOC_SUCCESS;
 }
 
@@ -462,6 +471,9 @@ int netloc_dt_edge_t_destruct(netloc_edge_t * edge)
     if( NULL == edge ) {
         return NETLOC_SUCCESS;
     }
+
+    if (--edge->refcount <= 0)
+        return NETLOC_SUCCESS;
 
     // Do not free - just nullify the reference
     edge->src_node = NULL;
@@ -578,6 +590,8 @@ netloc_node_t * netloc_dt_node_t_construct()
     node->num_partitions = 0;
 
     node->topoIdx = -1;
+
+    node->refcount = 1;
 
     return node;
 }
@@ -955,6 +969,9 @@ int netloc_dt_node_t_destruct(netloc_node_t * node)
     int i;
     void **path = NULL;
     struct netloc_dt_lookup_table_iterator *hti = NULL;
+
+    if (--node->refcount <= 0)
+        return NETLOC_SUCCESS;
 
     node->physical_id_int = 0;
 

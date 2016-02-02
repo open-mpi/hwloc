@@ -302,6 +302,8 @@ struct netloc_network_t {
     /** Metadata about network information */
     char * version;
 
+    int refcount;
+
     /**
      * Application-given private data pointer.
      * Initialized to NULL, and not used by the netloc library.
@@ -368,6 +370,8 @@ struct netloc_edge_t {
 
     int *partitions; /* index in the list from the topology */
     int num_partitions;
+
+    int refcount;
 
     /**
      * Application-given private data pointer.
@@ -446,6 +450,8 @@ struct netloc_node_t {
     int num_partitions;
 
     int topoIdx; /* index to topology->topos */
+
+    int refcount;
 };
 
 
@@ -785,6 +791,16 @@ NETLOC_DECLSPEC int netloc_detach(netloc_topology_t topology);
  */
 NETLOC_DECLSPEC int netloc_refresh(netloc_topology_t topology);
 
+/**
+ * Copy a topology
+ *
+ * \param src A valid pointer to a \ref netloc_topology_t handle created
+ * from a prior call to \ref netloc_attach.
+ * \param dup A pointer where the new topology pointer will be saved
+ *
+ * \returns NETLOC_SUCCESS on success
+ */
+NETLOC_DECLSPEC int netloc_topology_copy(struct netloc_topology *src, struct netloc_topology **dup);
 
 /**********************************************************************
  * Query API Functions
