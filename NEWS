@@ -24,6 +24,9 @@ Version 1.11.3
   Thanks to Ryan Zezeski for reporting the issue.
 * Fix /proc/mounts parsing on Linux by using mntent.h.
   Thanks to Nathan Hjelm for reporting the issue.
+* Fix a x86 infinite loop on VMware due to the x2APIC feature being
+  advertised without actually being fully supported.
+  Thanks to Jianjun Wen for reporting the problem and testing the patch.
 
 
 Version 1.11.2
