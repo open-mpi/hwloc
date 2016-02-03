@@ -522,7 +522,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   /* Get package/core/thread information from cpuid 0x0b
    * (Intel x2APIC)
    */
-  if (cpuid_type == intel && has_x2apic(features)) {
+  if (cpuid_type == intel && highest_cpuid >= 0x0b && has_x2apic(features)) {
     unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
     for (level = 0; ; level++) {
       ecx = level;
