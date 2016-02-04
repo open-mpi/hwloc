@@ -29,6 +29,7 @@
 #define JSON_DRAW_FILE_NODE_EDGES "edges"
 #define JSON_DRAW_FILE_NODE_PARTITIONS "part"
 #define JSON_DRAW_FILE_NODE_DESC "desc"
+#define JSON_DRAW_FILE_NODE_HOSTNAME "hostname"
 #define JSON_DRAW_FILE_NODE_HWLOCTOPO "topo"
 #define JSON_DRAW_FILE_NODE_TYPE "type"
 #define JSON_DRAW_FILE_GRAPH_TYPE "type"
@@ -84,11 +85,13 @@ static int write_node(json_t *json_nodes, netloc_node_t *node)
     //char *node_label = node->physical_id;
     char *id = node->physical_id;
     char *desc = remove_quote(node->description);
+    char *hostname = node->hostname;
     int topoIdx = node->topoIdx;
 
     json_t *json_node = json_object();
     json_object_set_new(json_node, JSON_DRAW_FILE_NODE_ID, json_string(id));
     json_object_set_new(json_node, JSON_DRAW_FILE_NODE_DESC, json_string(desc));
+    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_HOSTNAME, json_string(hostname));
     json_object_set_new(json_node, JSON_DRAW_FILE_NODE_HWLOCTOPO, json_integer(topoIdx));
 
     free(desc);

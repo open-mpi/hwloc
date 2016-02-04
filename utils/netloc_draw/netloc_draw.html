@@ -30,7 +30,15 @@
     <select id="selectColors" onchange="nodeColors()" selected="true">
         <option value="" disabled=true>Choose a color mode</option>
     </select>
-    <input id="reload" type="button" value="reload" onclick="draw();" />
+    <input id="reload" type="button" value="Reload" onclick="draw();" />
+    <input id="searchValue" type="text" name="searchValue"/>
+    <select id="selectSearch" selected="true">
+        <option value="" disabled=true>Choose a search field</option>
+        <option value="hostname"      >Hostname</option>
+        <option value="id"            >Id</option>
+        <option value="type"          >Type</option>
+    </select>
+    <input id="search" type="button" value="Search" onclick="search();" />
 
 
 </head>
@@ -47,12 +55,13 @@
   var partitions;
   var mydata;
   var topos;
-  var switchColor = {border: "black", background: "grey"};
-  var hostColor = "red";
+  var switchColor = {border: "grey", background: "grey"};
+  var hostColor =  {border: "red", background: "red"};
   var hostColors;
   var nodesWithPhysics;
   var edgesWithPhysics;
   var bandwidthList;
+  var network;
 
   function handleFileSelect(evt) {
     var files = evt.target.files;
@@ -241,6 +250,72 @@
     }
   }
 
+  function selectNode(field, value)
+  {
+      var nodeIds;
+      if (field == "id") {
+          nodeIds = [value];
+      }
+      else {
+          var nodeSet = shownNodes.get({filter: function(n) { return n[field] == value; }});
+          nodeIds = nodeSet.map(function(n) { return n.id; });
+      }
+      if (nodeIds) {
+          network.selectNodes(nodeIds);
+          showNodeInfo(nodeIds);
+      }
+  }
+
+  function showNodeInfo(nodeIds)
+  {
+      var html = "";
+      var n = 0;
+      var inputNodes = nodes.get(nodeIds);
+      while (n < inputNodes.length) {
+          var node = inputNodes[n];
+          var nodeEdges = node.edges;
+
+          var neighbours = [];
+          var i = 0;
+
+          while (i < nodeEdges.length)
+          {
+              var edge = edges.get(nodeEdges[i]);
+              var dest = nodes.get(edge.to);
+              var s = '\t' + dest.title + ' (edgeId ' + nodeEdges[i] + ' ports '
+                      + edge.src_port + '->' + edge.dst_port + '): ';
+              s += edge.label + 'Gb\n';
+              i++;
+              neighbours .push(s);
+          }
+
+          html +=
+              '<h2>' + node.title + '</h2>' +
+              'ID: ' + node.id + '\n' +
+              'Partitions: ' + node.part.map(function(p){return partitions[p]})
+              .join(', ') + '\n' +
+              neighbours.length + ' neighbours:\n' + neighbours.sort().join('') +
+              'Total bandwidth: ' + node.bandwidth + '\n' +
+              ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
+          n++;
+      }
+      document.getElementById('eventSpan').innerHTML = html;
+  }
+
+  function search()
+  {
+    var selectSearch = document.getElementById("selectSearch");
+    var field = selectSearch.options[selectSearch.selectedIndex].value;
+
+    if (field == "") {
+    }
+    else {
+        var searchValue = document.getElementById("searchValue");
+        var value = searchValue.value;
+        selectNode(field, value);
+    }
+  }
+
   function draw()
   {
     var selectPartition = document.getElementById("selectPartition");
@@ -292,34 +367,11 @@
                    nodes: {shape: 'dot'},
                    edges: {color: {inherit: true}}
     };
-    var network = new vis.Network(container, data, options);
+    network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
         params.event = "[original event]";
-        var node = nodes.get(params.nodes[0]);
-        var nodeEdges = node.edges;
-
-        var neighbours = [];
-        var i = 0;
-        while (i < nodeEdges.length)
-        {
-            var edge = edges.get(nodeEdges[i]);
-            var dest = nodes.get(edge.to);
-            var s = '\t' + dest.title + ' (edgeId ' + nodeEdges[i] + ' ports '
-                    + edge.src_port + '->' + edge.dst_port + '): ';
-            s += edge.label + 'Gb\n';
-            i++;
-            neighbours .push(s);
-        }
-
-        document.getElementById('eventSpan').innerHTML =
-            '<h2>' + node.title + '</h2>' +
-            'ID: ' + node.id + '\n' +
-            'Partitions: ' + node.part.map(function(p){return partitions[p]})
-                                      .join(', ') + '\n' +
-            neighbours.length + ' neighbours:\n' + neighbours.sort().join('') +
-            'Total bandwidth: ' + node.bandwidth + '\n' +
-            ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
+        showNodeInfo(params.nodes);
     });
     network.on("deselectNode", function (params) {
         document.getElementById('eventSpan').innerHTML = '';
