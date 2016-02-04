@@ -31,7 +31,8 @@
         <option value="" disabled=true>Choose a color mode</option>
     </select>
     <input id="reload" type="button" value="Reload" onclick="draw();" />
-    <input id="searchValue" type="text" name="searchValue"/>
+    <input id="searchValue" type="text" name="searchValue"
+                                        onkeydown="if (event.keyCode == 13) search();"/>
     <select id="selectSearch" selected="true">
         <option value="" disabled=true>Choose a search field</option>
         <option value="hostname"      >Hostname</option>
