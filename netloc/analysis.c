@@ -118,11 +118,11 @@ static int netloc_node_merge_edges(netloc_topology_t topology, netloc_node_t *no
                         /* Creation of the list of the real edges */
                         if (edge->num_real_edges) {
                             for (int e = 0; e < edge->num_real_edges; e++) {
-                                netloc_explist_add(exp_real_edges, edge->real_edges[e]);
+                                netloc_explist_push(exp_real_edges, edge->real_edges[e]);
                             }
                         }
                         else {
-                            netloc_explist_add(exp_real_edges, edge);
+                            netloc_explist_push(exp_real_edges, edge);
                         }
                     }
                     virtual_edge->num_real_edges = netloc_explist_get_size(exp_real_edges);
@@ -217,7 +217,7 @@ int netloc_topology_merge_nodes(netloc_topology_t topology)
                 nodes = netloc_explist_init(512);
                 netloc_explist_set(nodes_by_degree, idx, nodes);
             }
-            netloc_explist_add(nodes, (void *) (intptr_t)n);
+            netloc_explist_push(nodes, (void *) (intptr_t)n);
         }
     }
 
@@ -247,13 +247,13 @@ int netloc_topology_merge_nodes(netloc_topology_t topology)
                     netloc_explist_set(nodes, n2, (void *)(intptr_t)-1);
                     if (!same_nodes) {
                         same_nodes = netloc_explist_init(2);
-                        netloc_explist_add(same_nodes, (void *)(intptr_t)node_idx1);
+                        netloc_explist_push(same_nodes, (void *)(intptr_t)node_idx1);
                     }
-                    netloc_explist_add(same_nodes, (void *)(intptr_t)node_idx2);
+                    netloc_explist_push(same_nodes, (void *)(intptr_t)node_idx2);
                 }
             }
             if (same_nodes)
-                netloc_explist_add(nodes_to_merge, same_nodes);
+                netloc_explist_push(nodes_to_merge, same_nodes);
         }
     }
 
@@ -275,11 +275,11 @@ int netloc_topology_merge_nodes(netloc_topology_t topology)
             node->virtual_node = virtual_node;
             if (node->num_real_nodes) {
                 for (int n = 0; n < node->num_real_nodes; n++) {
-                    netloc_explist_add(exp_real_nodes, node->real_nodes[n]);
+                    netloc_explist_push(exp_real_nodes, node->real_nodes[n]);
                 }
             }
             else {
-                netloc_explist_add(exp_real_nodes, node);
+                netloc_explist_push(exp_real_nodes, node);
             }
 
             num_edges += node->num_edges;
@@ -710,7 +710,7 @@ int netloc_topology_keep_partition(netloc_topology_t topology, char *partition_n
         if (!netloc_topology_edge_in_partition(edge, partition)) {
             /* mark them to be removed since we are browsing the table
              * TODO change with the table */
-            netloc_explist_add(removed_edges, edge);
+            netloc_explist_push(removed_edges, edge);
         }
     }
     /* Remove the marked edges */
@@ -796,7 +796,7 @@ int netloc_read_hwloc(netloc_topology_t topology)
             t++;
         }
         if (t == netloc_explist_get_size(topos)) {
-            netloc_explist_add(topos, refname);
+            netloc_explist_push(topos, refname);
         }
         else {
             free(refname);

@@ -32,7 +32,7 @@ netloc_explist_t *netloc_explist_init(int size)
     return list;
 }
 
-void netloc_explist_add(netloc_explist_t *list, void *elem)
+void netloc_explist_push(netloc_explist_t *list, void *elem)
 {
     /* We extend the array if needed */
     if (list->size >= list->max_size) {
@@ -47,6 +47,17 @@ void netloc_explist_add(netloc_explist_t *list, void *elem)
     list->size++;
 }
 
+void *netloc_explist_pop(netloc_explist_t *list)
+{
+    void *elem;
+
+    if (list->size == 0)
+        return NULL;
+
+    elem = list->array[list->size-1];
+    list->size--;
+    return elem;
+}
 
 void netloc_explist_cat(netloc_explist_t *list1, netloc_explist_t *list2)
 {
