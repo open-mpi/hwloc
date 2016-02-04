@@ -48,7 +48,7 @@
 <body>
 
 <div id="mynetwork"></div>
-<pre id="eventSpan"></pre>
+<pre id="description"></pre>
 
 <script type="text/javascript">
   var edges;
@@ -65,6 +65,7 @@
   var edgesWithPhysics;
   var bandwidthList;
   var network;
+  var description = "";
 
   function handleFileSelect(evt) {
     var files = evt.target.files;
@@ -309,7 +310,7 @@
 
   function showNodeInfo(nodeIds)
   {
-      var html = "";
+      var description = '<h1>' + nodeIds.length + ' nodes selected</h1>';
       var n = 0;
       var inputNodes = nodes.get(nodeIds);
       while (n < inputNodes.length) {
@@ -330,7 +331,7 @@
               neighbours .push(s);
           }
 
-          html +=
+          description +=
               '<h2>' + node.title + '</h2>' +
               'ID: ' + node.id + '\n' +
               'Partitions: ' + node.part.map(function(p){return partitions[p]})
@@ -340,7 +341,7 @@
               ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
           n++;
       }
-      document.getElementById('eventSpan').innerHTML = html;
+      document.getElementById('description').innerHTML = description;
   }
 
   function search()
@@ -395,6 +396,36 @@
     else
         selectColor.selectedIndex = 1;
 
+    /* update the desciption of the graph */
+    var num_hosts = shownNodes.get({filter: function(n) {
+            return n.type == "host";
+    }}).length;
+    var num_switches = shownNodes.length-num_hosts;
+    var enabledTopos = Array.apply(null, Array(topos.length))
+        .map(function(e) { return false; });
+    shownNodes.forEach(function(val) {
+        var idx = val.topo;
+        if (idx != -1)
+            enabledTopos[idx] = true;
+    });
+    var shownTopos = enabledTopos.reduce(function(a, e, i) {
+        if (e)
+            a.push(topos[i]);
+        return a;
+    }, []);
+
+    description =
+        '<h2>Stats</h2>' +
+        shownNodes.length + ' nodes\n' +
+        shownEdges.length + ' edges\n' +
+        num_hosts + ' hosts\n' +
+        num_switches + ' switches\n' +
+        '<h2>Partitions</h2>' +
+        '<ul><li>' + partitions.join('</li><li>') + '</li></ul>' +
+        '<h2>Hwloc topologies</h2>' +
+        '<ul><li>' + shownTopos.sort().join('</li><li>') + '</li></ul>';
+    document.getElementById('description').innerHTML = description;
+
     // create a network
     var container = document.getElementById('mynetwork');
     var data = {
@@ -415,14 +446,14 @@
         showNodeInfo(params.nodes);
     });
     network.on("deselectNode", function (params) {
-        document.getElementById('eventSpan').innerHTML = '';
+        document.getElementById('description').innerHTML = description;
     });
 
     network.on("selectEdge", function (params) {
         params.event = "[original event]";
         var edge = edges.get(params.edges[0]);
 
-        document.getElementById('eventSpan').innerHTML =
+        document.getElementById('description').innerHTML =
             '<h2>' + nodes.get(edge.from).title + ' -> ' + nodes.get(edge.to).title + '</h2>' +
             'ID: ' + edge.id + '\n' +
             'From: ' + edge.from + '\n' +
@@ -431,7 +462,7 @@
                                       .join(', ') + '\n';
     });
     network.on("deselectEdge", function (params) {
-        document.getElementById('eventSpan').innerHTML = '';
+        document.getElementById('description').innerHTML = description;
     });
 
     network.on("dragStart", function (params) {
