@@ -38,6 +38,8 @@
         <option value="hostname"      >Hostname</option>
         <option value="id"            >Id</option>
         <option value="type"          >Type</option>
+        <option value="part"          >Partition</option>
+        <option value="topo"          >Hwloc topologies</option>
     </select>
     <input id="search" type="button" value="Search" onclick="search();" />
 
@@ -255,10 +257,48 @@
   {
       var nodeIds;
       var regexp = new RegExp(value, "g");
+      var nodeSet;
 
-      var nodeSet = shownNodes.get({filter: function(n) {
-          return n[field] ? n[field].toString().match(regexp): false;
-      }});
+      switch (field) {
+          case "part":
+              var strings = partitions;
+              matchingStrings = strings.reduce(function(a, e, i) {
+                  if (e.match(regexp))
+                      a.push(i);
+                  return a;
+              }, []);
+              nodeSet = shownNodes.get({filter: function(n) {
+                  for (var e = 0; e < n[field].length; e++) {
+                      var elem = n[field][e];
+                      for (var f = 0; f < matchingStrings.length; f++) {
+                          if (elem == matchingStrings[f])
+                              return true;
+                      }
+                  }
+                  return false;
+              }});
+              break;
+          case "topo":
+              var strings = topos;
+              matchingStrings = strings.reduce(function(a, e, i) {
+                  if (e.match(regexp))
+                      a.push(i);
+                  return a;
+              }, []);
+              nodeSet = shownNodes.get({filter: function(n) {
+                  var elem = n[field];
+                  for (var f = 0; f < matchingStrings.length; f++) {
+                      if (elem == matchingStrings[f])
+                          return true;
+                  }
+                  return false;
+              }});
+              break;
+          default:
+              nodeSet = shownNodes.get({filter: function(n) {
+                  return n[field] ? n[field].toString().match(regexp): false;
+              }});
+      }
       nodeIds = nodeSet.map(function(n) { return n.id; });
 
       if (nodeIds) {
