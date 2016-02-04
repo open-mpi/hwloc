@@ -617,9 +617,10 @@ NETLOC_DECLSPEC netloc_tree_data *netloc_get_tree_data(netloc_topology_analysis 
 NETLOC_DECLSPEC int netloc_topology_node_in_partition(netloc_node_t *node, int partition);
 NETLOC_DECLSPEC int netloc_topology_edge_in_partition(netloc_edge_t *edge, int partition);
 NETLOC_DECLSPEC int netloc_topology_find_partitions(netloc_topology_t topology);
-NETLOC_DECLSPEC int netloc_topology_analyse_as_tree(netloc_topology_t topology, char *partition_name);
+NETLOC_DECLSPEC int netloc_topology_analyse_as_tree(netloc_topology_t topology);
 NETLOC_DECLSPEC int netloc_topology_set_all_partitions(netloc_topology_t topology);
 NETLOC_DECLSPEC int netloc_read_hwloc(netloc_topology_t topology);
 NETLOC_DECLSPEC int netloc_topology_simplify(netloc_topology_t topology);
+NETLOC_DECLSPEC int netloc_topology_keep_partition(netloc_topology_t topology, char *partition_name);
 
 #endif // _NETLOC_PRIVATE_H_

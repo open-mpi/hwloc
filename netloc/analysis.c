@@ -556,7 +556,6 @@ int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partiti
     return p;
 }
 
-/* Partition is the pointer present in topology->partitions */
 static int netloc_topology_set_partition(netloc_topology_t topology, int partition)
 {
     netloc_dt_lookup_table_t hosts;
@@ -825,105 +824,165 @@ int netloc_read_hwloc(netloc_topology_t topology)
     return ret;
 }
 
-//int netloc_topology_analyse_as_tree(netloc_topology_t topology, char *partition_name)
-//{
-//    int ret = 0;
-//    netloc_explist_t *nodes = netloc_explist_init(1);
-//
-//    netloc_topology_keep_partition(topology, partition_name);
-//
-//    /* we build nodes from host list in the given partition
-//     * and we init all the analysis data */
-//    netloc_node_t *node;
-//    netloc_dt_lookup_table_t allnodes;
-//    netloc_get_all_nodes(topology, &allnodes);
-//    netloc_dt_lookup_table_iterator_t hti =
-//        netloc_dt_lookup_table_iterator_t_construct(allnodes);
-//    while ((node =
-//            (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
-//
-//        void *userdata = node->userdata;
-//        node->userdata = (void *)malloc(sizeof(netloc_analysis_data));
-//        netloc_analysis_data *analysis_data = (netloc_analysis_data *)node->userdata;
-//        analysis_data->level = -1;
-//        analysis_data->userdata = userdata; 
-//
-//        for (int e = 0; e < node->num_edges; e++) {
-//            netloc_edge_t *edge = node->edges[e];
-//
-//            void *userdata = edge->userdata;
-//            edge->userdata = (void *)malloc(sizeof(netloc_analysis_data));
-//            netloc_analysis_data *analysis_data = (netloc_analysis_data *)edge->userdata;
-//            analysis_data->level = -1;
-//            analysis_data->userdata = userdata; 
-//        }
-//
-//        if (node->node_type == NETLOC_NODE_TYPE_HOST) {
-//            netloc_explist_add(nodes, node);
-//        }
-//    }
-//
-//    int level = 0;
-//    while (netloc_explist_get_size(nodes)) {
-//        netloc_explist_t *new_nodes = netloc_explist_init(1);
-//        for (int n = 0; n < netloc_explist_get_size(nodes); n++) {
-//            netloc_node_t *node = netloc_explist_get(nodes, n);
-//            netloc_analysis_data *node_data = (netloc_analysis_data *)node->userdata;
-//            if (node_data->level != -1 && node_data->level != level) {
-//                printf("Error: partition %s is not a tree\n", partition_name);
-//                netloc_explist_destroy(new_nodes);
-//                ret = -1;
-//                goto end;
-//            }
-//            else {
-//                node_data->level = level;
-//                for (int e = 0; e < node->num_edges; e++) {
-//                    netloc_edge_t *edge = node->edges[e];
-//                    netloc_analysis_data *edge_data = (netloc_analysis_data *)edge->userdata;
-//                    edge_data->level = level;
-//
-//                    netloc_node_t *dest = edge->dest_node;
-//                    netloc_analysis_data *dest_data = (netloc_analysis_data *)dest->userdata;
-//                    /* If we are going back */
-//                    if (dest_data->level != -1 && dest_data->level < level) {
-//                        continue;
-//                    }
-//                    else {
-//                        if (dest_data->level != level) {
-//                            netloc_explist_add(new_nodes, dest);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        level++;
-//        netloc_explist_destroy(nodes);
-//        nodes = new_nodes;
-//    }
-//    netloc_explist_destroy(nodes);
-//
-//
-//end:
-//    /* We copy back all userdata */
-//    hti = netloc_dt_lookup_table_iterator_t_construct(allnodes);
-//    while ((node =
-//            (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
-//        netloc_analysis_data *analysis_data = (netloc_analysis_data *)node->userdata;
-//        if (analysis_data->level == -1) {
-//            ret = -1;
-//            printf("The node %s was not browsed\n", node->description);
-//        }
-//
-//        node->userdata = analysis_data->userdata;
-//        free(analysis_data);
-//
-//        for (int e = 0; e < node->num_edges; e++) {
-//            netloc_edge_t *edge = node->edges[e];
-//            netloc_analysis_data *analysis_data = (netloc_analysis_data *)edge->userdata;
-//            node->userdata = analysis_data->userdata;
-//            free(analysis_data);
-//        }
-//    }
-//
-//    return ret;
-//}
+int netloc_topology_analyse_as_tree(netloc_topology_t topology)
+{
+    int ret = 0;
+    netloc_explist_t *nodes = netloc_explist_init(1);
+
+    /* we build nodes from host list in the given partition
+     * and we init all the analysis data */
+    netloc_node_t *node;
+    netloc_dt_lookup_table_t allnodes;
+    netloc_get_all_nodes(topology, &allnodes);
+    netloc_dt_lookup_table_iterator_t hti =
+        netloc_dt_lookup_table_iterator_t_construct(allnodes);
+    while ((node =
+            (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
+
+        void *userdata = node->userdata;
+        node->userdata = (void *)malloc(sizeof(netloc_analysis_data));
+        netloc_analysis_data *analysis_data = (netloc_analysis_data *)node->userdata;
+        analysis_data->level = -1;
+        analysis_data->userdata = userdata; 
+
+        for (int e = 0; e < node->num_edges; e++) {
+            netloc_edge_t *edge = node->edges[e];
+
+            void *userdata = edge->userdata;
+            edge->userdata = (void *)malloc(sizeof(netloc_analysis_data));
+            netloc_analysis_data *analysis_data = (netloc_analysis_data *)edge->userdata;
+            analysis_data->level = -1;
+            analysis_data->userdata = userdata; 
+        }
+
+        if (node->node_type == NETLOC_NODE_TYPE_HOST) {
+            netloc_explist_push(nodes, node);
+        }
+    }
+
+    int level = 0;
+    netloc_explist_t *edges_by_level = netloc_explist_init(1);
+    netloc_node_t *current_node = /* pointer to one host node */
+        netloc_explist_get(nodes, 0);
+    while (netloc_explist_get_size(nodes)) {
+        netloc_explist_t *new_nodes = netloc_explist_init(1);
+
+        netloc_explist_t *edges = netloc_explist_init(1);
+        netloc_explist_push(edges_by_level, edges);
+
+        for (int n = 0; n < netloc_explist_get_size(nodes); n++) {
+            netloc_node_t *node = netloc_explist_get(nodes, n);
+            netloc_analysis_data *node_data = (netloc_analysis_data *)node->userdata;
+            if (node_data->level != -1 && node_data->level != level) {
+                netloc_explist_destroy(new_nodes);
+                ret = -1;
+                goto end;
+            }
+            else {
+                node_data->level = level;
+                for (int e = 0; e < node->num_edges; e++) {
+                    netloc_edge_t *edge = node->edges[e];
+                    netloc_analysis_data *edge_data = (netloc_analysis_data *)edge->userdata;
+
+                    netloc_node_t *dest = edge->dest_node;
+                    netloc_analysis_data *dest_data = (netloc_analysis_data *)dest->userdata;
+                    /* If we are going back */
+                    if (dest_data->level != -1 && dest_data->level < level) {
+                        continue;
+                    }
+                    else {
+                        if (dest_data->level != level) {
+                            edge_data->level = level;
+                            netloc_explist_push(new_nodes, dest);
+                            netloc_explist_push(edges, edge);
+                        }
+                    }
+                }
+            }
+        }
+        level++;
+        netloc_explist_destroy(nodes);
+        nodes = new_nodes;
+    }
+    netloc_explist_destroy(nodes);
+
+    /* We go though the tree to number the leaves */
+    netloc_explist_t *down_edges = netloc_explist_init(1);
+    netloc_edge_t *up_edge = current_node->edges[0];
+    printf("hey %s\n", current_node->hostname);
+
+    while (1) {
+        netloc_edge_t *down_edge = netloc_explist_pop(down_edges);
+        if (down_edge) {
+            netloc_node_t *dest_node = down_edge->dest_node;
+            if (dest_node->node_type == NETLOC_NODE_TYPE_HOST) {
+                printf("hey %s\n", dest_node->hostname);
+            }
+            else {
+                for (int e = 0; e < dest_node->num_edges; e++) {
+                    netloc_edge_t *edge = dest_node->edges[e];
+                    netloc_analysis_data *edge_data = (netloc_analysis_data *)edge->userdata;
+                    int edge_level = edge_data->level;
+                    if (edge_level == -1) {
+                        netloc_explist_push(down_edges, edge);
+                    }
+                }
+            }
+        }
+        else {
+            netloc_edge_t *new_up_edge = NULL;
+            if (!up_edge)
+                break;
+
+            netloc_node_t *up_node = up_edge->dest_node;
+
+            for (int e = 0; e < up_node->num_edges; e++) {
+                netloc_edge_t *edge = up_node->edges[e];
+                netloc_analysis_data *edge_data = (netloc_analysis_data *)edge->userdata;
+                int edge_level = edge_data->level;
+                
+                netloc_node_t *dest_node = edge->dest_node;
+
+                /* If the is the node where we are from */
+                if (dest_node == up_edge->src_node)
+                    continue;
+
+                /* Downward edge */
+                if (edge_level == -1) {
+                    netloc_explist_push(down_edges, edge);
+                }
+                /* Upward edge */
+                else {
+                    new_up_edge = edge;
+                }
+
+            }
+            up_edge = new_up_edge;
+        }
+    }
+
+
+end:
+    /* We copy back all userdata */
+    hti = netloc_dt_lookup_table_iterator_t_construct(allnodes);
+    while ((node =
+            (netloc_node_t *)netloc_lookup_table_iterator_next_entry(hti))) {
+        netloc_analysis_data *analysis_data = (netloc_analysis_data *)node->userdata;
+        if (analysis_data->level == -1 && ret != -1) {
+            ret = -1;
+            printf("The node %s was not browsed\n", node->description);
+        }
+
+        node->userdata = analysis_data->userdata;
+        free(analysis_data);
+
+        for (int e = 0; e < node->num_edges; e++) {
+            netloc_edge_t *edge = node->edges[e];
+            netloc_analysis_data *analysis_data = (netloc_analysis_data *)edge->userdata;
+            node->userdata = analysis_data->userdata;
+            free(analysis_data);
+        }
+    }
+
+    return ret;
+}
