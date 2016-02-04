@@ -250,16 +250,16 @@
     }
   }
 
-  function selectNode(field, value)
+  function selectNodes(field, value)
   {
       var nodeIds;
-      if (field == "id") {
-          nodeIds = [value];
-      }
-      else {
-          var nodeSet = shownNodes.get({filter: function(n) { return n[field] == value; }});
-          nodeIds = nodeSet.map(function(n) { return n.id; });
-      }
+      var regexp = new RegExp(value, "g");
+
+      var nodeSet = shownNodes.get({filter: function(n) {
+          return n[field] ? n[field].toString().match(regexp): false;
+      }});
+      nodeIds = nodeSet.map(function(n) { return n.id; });
+
       if (nodeIds) {
           network.selectNodes(nodeIds);
           showNodeInfo(nodeIds);
@@ -312,7 +312,7 @@
     else {
         var searchValue = document.getElementById("searchValue");
         var value = searchValue.value;
-        selectNode(field, value);
+        selectNodes(field, value);
     }
   }
 
