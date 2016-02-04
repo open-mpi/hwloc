@@ -656,6 +656,10 @@ int netloc_topology_keep_partition(netloc_topology_t topology, char *partition_n
 {
     int ret = 0;
 
+    /* Find the partitions */
+    if (!topology->num_partitions)
+        netloc_topology_find_partitions(topology);
+
     /* Find the selected partition in the topology */
     int partition = netloc_topology_find_partition_idx(topology, partition_name);
     if (partition < 0)
