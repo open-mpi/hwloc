@@ -22,6 +22,7 @@ my $verbose = 0;
 my $force = 0;
 my $dryrun = 0;
 my $ignoreerrors = 0;
+my $help = 0;
 
 &Getopt::Long::Configure("bundling");
 my $ok = Getopt::Long::GetOptions(
@@ -32,12 +33,13 @@ my $ok = Getopt::Long::GetOptions(
 	"ibnetdiscover|f=s" => \$ibnetdiscover,
 	"ibroute|f=s" => \$ibroute,
         "ignore-errors" => \$ignoreerrors,
-	"verbose" => \$verbose,
+	"verbose|v" => \$verbose,
 	"force" => \$force,
-	"dry-run" => \$dryrun
+	"dry-run" => \$dryrun,
+	"help|h" => \$help
     );
 
-if (!$ok or !defined $outdir) {
+if ($help or !$ok or !defined $outdir) {
     print "Output directory for raw IB data must be specified with\n";
     print " --out-dir <dir>\n";
     print "Input must be one of these\n";
@@ -57,10 +59,12 @@ if (!$ok or !defined $outdir) {
     print "    Specify exact location of programs. Default is /usr/bin/<program>\n";
     print " --ignore-errors\n";
     print "    Ignore errors from ibnetdiscover and ibroute, assume their outputs are ok\n";
-    print " --verbose\n";
+    print " --verbose -v\n";
     print "    Add verbose messages\n";
     print " --dry-run\n";
     print "    Do not actually run programs\n";
+    print " --help -h\n";
+    print "    Show this help\n";
     exit(1);
 }
 mkdir $outdir;
