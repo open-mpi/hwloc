@@ -12,6 +12,13 @@ use strict;
 
 use Getopt::Long;
 
+my $HWLOC_top_builddir = "@HWLOC_top_builddir@";
+my $prefix = "@prefix@";
+my $exec_prefix = "@exec_prefix@";
+my $bindir = "@bindir@";
+# this will be changed into $bindir/... during make install
+my $locallstopo = "$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics";
+
 my $hwlocdir = undef;
 my $outdir = undef;
 my @forcesubnets;
@@ -132,6 +139,28 @@ if (@forcesubnets) {
   if (!defined $hwlocdir) {
     $hwlocdir = "${outdir}/hwloc";
     print "Using $hwlocdir as hwloc lstopo XML directory.\n\n";
+  }
+
+  mkdir $hwlocdir unless $dryrun;
+  die "$hwlocdir isn't a directory\n" unless -d $hwlocdir;
+
+  # at least get the local hwloc XML
+  my $hostname = `hostname`;
+  chomp $hostname;
+  my $lstopooutput = "$hwlocdir/${hostname}.xml";
+  if (!-f $lstopooutput) {
+    print "Exporting local node hwloc XML...\n";
+    print "  Running lstopo-no-graphics...\n";
+    my $cmd = "$locallstopo -f $lstopooutput";
+    if ($dryrun) {
+      print "   NOT running $cmd\n" if $verbose;
+    } else {
+      my $ret = system "$cmd" ;
+      if ($ret and !$ignoreerrors) {
+	print "   Failed (exit code $ret).\n";
+      }
+    }
+    print "\n";
   }
 
   # $servers{$hostname}->{gids}->{$boardname}->{$portnum}->{$gidnum}->{subnet} and ->{guid} = xxxx:xxxx:xxxx:xxxx
