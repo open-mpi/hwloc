@@ -58,15 +58,16 @@
   var partitions;
   var mydata;
   var topos;
-  var normalSwitchColor = {border: "grey", background: "grey"};
-  var normalHostColor =  {border: "red", background: "red"};
-  var normalEdgeColor =  {color: "grey"};
+  var normalSwitchColor = {background: "grey"};
+  var normalHostColor = {background: "red"};
+  var normalEdgeColor = {color: "grey"};
   var nodesWithPhysics;
   var edgesWithPhysics;
   var nodeBandwidthList;
   var edgeBandwidthList;
   var network;
   var description = "";
+  var lastColorMode = "bandwidth";
 
   function handleFileSelect(evt) {
       var files = evt.target.files;
@@ -217,30 +218,35 @@
     var colorMode = e.options[e.selectedIndex].value;
 
     if (colorMode == "normal") {
-        var nodeColor = normalHostColor;
         shownNodes.forEach(function(n) {
             if (n.type == "host")
-                shownNodes.update({id: n.id, color: nodeColor});
+                shownNodes.update({id: n.id, color: normalHostColor});
+            else
+                shownNodes.update({id: n.id, color: normalSwitchColor});
         });
 
-        var edgeColor = normalEdgeColor;
-        shownEdges.forEach(function(n) {
-            shownEdges.update({id: n.id, color: edgeColor});
-        });
+        if (lastColorMode == "bandwidth") {
+            shownEdges.forEach(function(n) {
+                shownEdges.update({id: n.id, color: normalEdgeColor});
+            });
+        }
     }
     else if (colorMode == "partition") {
         var nodeColors = palette(partitions.length);
         shownNodes.forEach(function(n) {
             if (n.type == "host") {
                 var colorIdx = n.part[0];
-                shownNodes.update({id: n.id, color: nodeColors[colorIdx]});
+                shownNodes.update({id: n.id, color: {background: nodeColors[colorIdx]}});
             }
+            else
+                shownNodes.update({id: n.id, color: normalSwitchColor});
         });
 
-        var edgeColor = normalEdgeColor;
-        shownEdges.forEach(function(n) {
-            shownEdges.update({id: n.id, color: edgeColor});
-        });
+        if (lastColorMode == "bandwidth") {
+            shownEdges.forEach(function(n) {
+                shownEdges.update({id: n.id, color: normalEdgeColor});
+            });
+        }
     }
     else if (colorMode == "hwloc") {
         var nodeColors = palette(topos.length);
@@ -248,22 +254,25 @@
             if (n.type == "host") {
                 var colorIdx = n.topo;
                 if (colorIdx != -1) {
-                    shownNodes.update({id: n.id, color: nodeColors[colorIdx]});
+                    shownNodes.update({id: n.id, color: {background: nodeColors[colorIdx]}});
                 }
             }
+            else
+                shownNodes.update({id: n.id, color: normalSwitchColor});
         });
 
-        var edgeColor = normalEdgeColor;
-        shownEdges.forEach(function(n) {
-            shownEdges.update({id: n.id, color: edgeColor});
-        });
+        if (lastColorMode == "bandwidth") {
+            shownEdges.forEach(function(n) {
+                shownEdges.update({id: n.id, color: normalEdgeColor});
+            });
+        }
     }
     else if (colorMode == "bandwidth") {
         var nodeColors = palette(nodeBandwidthList.length);
         shownNodes.forEach(function(n) {
             var colorIdx = nodeBandwidthList.indexOf(n.size);
             if (colorIdx != -1) {
-                shownNodes.update({id: n.id, color: nodeColors[colorIdx]});
+                shownNodes.update({id: n.id, color: {background: nodeColors[colorIdx]}});
             }
         });
 
@@ -272,10 +281,12 @@
         shownEdges.forEach(function(n) {
             var colorIdx = edgeBandwidthList.indexOf(n.gbits);
             if (colorIdx != -1) {
-                shownEdges.update({id: n.id, color: edgeeColors[colorIdx]});
+                shownEdges.update({id: n.id, color: {color: edgeeColors[colorIdx]}});
             }
         });
     }
+    lastcolorMode = colorMode;
+    console.log(lastcolorMode);
   }
 
   function selectNodes(field, value)
@@ -452,7 +463,7 @@
     var options = {interaction:{hover:true, tooltipDelay:0},
                    physics: {barnesHut: {gravitationalConstant:-15000,
                                          }},
-                   nodes: {shape: 'dot'},
+                   nodes: {shape: 'dot', borderWidth: 0.1, borderWidthSelected: 5},
                    edges: {color: {inherit: false}}
     };
     network = new vis.Network(container, data, options);
