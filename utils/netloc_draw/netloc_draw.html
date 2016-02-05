@@ -53,17 +53,18 @@
 <script type="text/javascript">
   var edges;
   var nodes;
+  var shownNodes;
   var shownEdges;
-  var shownEdes;
   var partitions;
   var mydata;
   var topos;
-  var switchColor = {border: "grey", background: "grey"};
-  var hostColor =  {border: "red", background: "red"};
-  var hostColors;
+  var normalSwitchColor = {border: "grey", background: "grey"};
+  var normalHostColor =  {border: "red", background: "red"};
+  var normalEdgeColor =  {color: "grey"};
   var nodesWithPhysics;
   var edgesWithPhysics;
-  var bandwidthList;
+  var nodeBandwidthList;
+  var edgeBandwidthList;
   var network;
   var description = "";
 
@@ -182,7 +183,7 @@
       mydata.nodes = renameKey(mydata.nodes, "level", "lv");
       mydata.nodes = renameKey(mydata.nodes, "title", "desc");
       mydata.nodes.map(function(n)
-              { n["color"] = n["type"] == "host" ? hostColor: switchColor; });
+              { n["color"] = n["type"] == "host" ? normalHostColor: normalSwitchColor; });
       mydata.nodes.map(function(n) {
           n["bandwidth"] =
               edges.get(n["edges"]).map(function(e) { return e.gbits; })
@@ -194,11 +195,18 @@
       nodes = new vis.DataSet({});
       nodes.add(mydata.nodes);
 
-      bandwidthList = [];
+      nodeBandwidthList = [];
       /* Build list of sizes */
       nodes.forEach(function(n) {
-          if (bandwidthList.indexOf(n.size) == -1) {
-              bandwidthList.push(n.size);
+          if (nodeBandwidthList.indexOf(n.size) == -1) {
+              nodeBandwidthList.push(n.size);
+          }
+      });
+      edgeBandwidthList = [];
+      /* Build list of sizes */
+      edges.forEach(function(e) {
+          if (edgeBandwidthList.indexOf(e.gbits) == -1) {
+              edgeBandwidthList.push(e.gbits);
           }
       });
   }
@@ -209,39 +217,62 @@
     var colorMode = e.options[e.selectedIndex].value;
 
     if (colorMode == "normal") {
-        color = hostColor;
+        var nodeColor = normalHostColor;
         shownNodes.forEach(function(n) {
-            if (n.type == "host") {
-                shownNodes.update({id: n.id, color: color});
-            }
+            if (n.type == "host")
+                shownNodes.update({id: n.id, color: nodeColor});
+        });
+
+        var edgeColor = normalEdgeColor;
+        shownEdges.forEach(function(n) {
+            shownEdges.update({id: n.id, color: edgeColor});
         });
     }
     else if (colorMode == "partition") {
-        var colors = palette(partitions.length);
+        var nodeColors = palette(partitions.length);
         shownNodes.forEach(function(n) {
             if (n.type == "host") {
                 var colorIdx = n.part[0];
-                shownNodes.update({id: n.id, color: colors[colorIdx]});
+                shownNodes.update({id: n.id, color: nodeColors[colorIdx]});
             }
+        });
+
+        var edgeColor = normalEdgeColor;
+        shownEdges.forEach(function(n) {
+            shownEdges.update({id: n.id, color: edgeColor});
         });
     }
     else if (colorMode == "hwloc") {
-        var colors = palette(topos.length);
+        var nodeColors = palette(topos.length);
         shownNodes.forEach(function(n) {
             if (n.type == "host") {
                 var colorIdx = n.topo;
                 if (colorIdx != -1) {
-                    shownNodes.update({id: n.id, color: colors[colorIdx]});
+                    shownNodes.update({id: n.id, color: nodeColors[colorIdx]});
                 }
             }
         });
+
+        var edgeColor = normalEdgeColor;
+        shownEdges.forEach(function(n) {
+            shownEdges.update({id: n.id, color: edgeColor});
+        });
     }
     else if (colorMode == "bandwidth") {
-        var colors = palette(bandwidthList.length);
+        var nodeColors = palette(nodeBandwidthList.length);
         shownNodes.forEach(function(n) {
-            var colorIdx = bandwidthList.indexOf(n.size);
+            var colorIdx = nodeBandwidthList.indexOf(n.size);
             if (colorIdx != -1) {
-                shownNodes.update({id: n.id, color: colors[colorIdx]});
+                shownNodes.update({id: n.id, color: nodeColors[colorIdx]});
+            }
+        });
+
+        console.log(edgeBandwidthList);
+        var edgeeColors = palette(edgeBandwidthList.length);
+        shownEdges.forEach(function(n) {
+            var colorIdx = edgeBandwidthList.indexOf(n.gbits);
+            if (colorIdx != -1) {
+                shownEdges.update({id: n.id, color: edgeeColors[colorIdx]});
             }
         });
     }
@@ -422,7 +453,7 @@
                    physics: {barnesHut: {gravitationalConstant:-15000,
                                          }},
                    nodes: {shape: 'dot'},
-                   edges: {color: {inherit: true}}
+                   edges: {color: {inherit: false}}
     };
     network = new vis.Network(container, data, options);
 
