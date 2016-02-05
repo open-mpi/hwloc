@@ -161,13 +161,12 @@
       }
       var partitionOptions = partitions.slice();
       partitionOptions.unshift("All");
-      for(var i = 0; i < partitionOptions.length; i++) {
-          var partition = partitionOptions [i];
+      partitionOptions.forEach(function(partition, i) {
           var el = document.createElement("option");
           el.textContent = partition;
           el.value = i-1; // because of "All"
           selectPartition.appendChild(el);
-      }
+      });
 
       mydata.edges.map(
               function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
@@ -263,13 +262,12 @@
                   return a;
               }, []);
               nodeSet = shownNodes.get({filter: function(n) {
-                  for (var e = 0; e < n[field].length; e++) {
-                      var elem = n[field][e];
+                  n[field].forEach(function(elem) {
                       for (var f = 0; f < matchingStrings.length; f++) {
                           if (elem == matchingStrings[f])
                               return true;
                       }
-                  }
+                  });
                   return false;
               }});
               break;
@@ -305,25 +303,19 @@
   function showNodeInfo(nodeIds)
   {
       var description = '<h1>' + nodeIds.length + ' nodes selected</h1>';
-      var n = 0;
       var inputNodes = shownNodes.get(nodeIds);
-      while (n < inputNodes.length) {
-          var node = inputNodes[n];
+      inputNodes.forEach(function(node) {
           var nodeEdges = node.edges;
-
           var neighbours = [];
-          var i = 0;
 
-          while (i < nodeEdges.length)
-          {
-              var edge = edges.get(nodeEdges[i]);
+          nodeEdges.forEach(function(edgeId) {
+              var edge = edges.get(edgeId);
               var dest = nodes.get(edge.to);
-              var s = '\t' + dest.title + ' (edgeId ' + nodeEdges[i] + ' ports '
+              var s = '\t' + dest.title + ' (edgeId ' + edgeId + ' ports '
                       + edge.src_port + '->' + edge.dst_port + '): ';
               s += edge.label + 'Gb\n';
-              i++;
               neighbours .push(s);
-          }
+          });
 
           description +=
               '<h2>' + node.title + '</h2>' +
@@ -333,8 +325,7 @@
               neighbours.length + ' neighbours:\n' + neighbours.sort().join('') +
               'Total bandwidth: ' + node.bandwidth + '\n' +
               ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
-          n++;
-      }
+      });
       document.getElementById('description').innerHTML = description;
   }
 
@@ -464,8 +455,7 @@
 
         nodesWithPhysics = [];
         edgesWithPhysics = edgeIds;
-        for (var e = 0; e < edgeIds.length; e++) {
-            var edgeId = edgeIds[e];
+        edgeIds.forEach(function(edgeId) {
             shownEdges.update({id: edgeId, physics: true});
 
             var edge = shownEdges.get(edgeId);
@@ -474,15 +464,15 @@
                 nodesWithPhysics.push(edge.to);
                 shownNodes.update({id: edge.to, physics: true});
             }
-        }
+        });
     });
     network.on("dragEnd", function (params) {
-        for (var e = 0; e < edgesWithPhysics.length; e++) {
-            shownEdges.update({id: edgesWithPhysics[e], physics: false});
-        }
-        for (var n = 0; n < nodesWithPhysics.length; n++) {
-            shownNodes.update({id: nodesWithPhysics[n], physics: false});
-        }
+        edgesWithPhysics.forEach(function(edgesWithPhysic) {
+            shownEdges.update({id: edgesWithPhysic, physics: false});
+        });
+        nodesWithPhysics.forEach(function(nodesWithPhysic) {
+            shownNodes.update({id: nodesWithPhysic, physics: false});
+        });
     });
 
     network.on("stabilizationIterationsDone", function () {
