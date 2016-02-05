@@ -23,7 +23,7 @@
     </style>
 
     <title>Network topology</title>
-    <input type="file" id="files" name="files[]" multiple />
+    <input type="file" id="files" name="files[]"/>
     <select id="selectPartition" onchange="draw()" selected="true">
         <option value="" disabled=true>Choose a partition</option>
     </select>
@@ -68,19 +68,13 @@
   var description = "";
 
   function handleFileSelect(evt) {
-    var files = evt.target.files;
-
-    // Loop through the file list
-    for (var i = 0, f; f = files[i]; i++) {
-
-        var fr = new FileReader();
-        fr.onload = function(e) {
-            data = e.target.result
-            loadFile(data);
-        };
-        fr.readAsText(f);
-
-    }
+      var files = evt.target.files;
+      var fr = new FileReader();
+      fr.onload = function(e) {
+          data = e.target.result
+              loadFile(data);
+      };
+      fr.readAsText(files[0]);
   }
 
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
