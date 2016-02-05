@@ -296,11 +296,13 @@
     console.log(lastcolorMode);
   }
 
-  function selectNodes(field, value)
+  function selectNodesAndEdges(field, value)
   {
-      var nodeIds;
       var regexp = new RegExp(value, "g");
+      var nodeIds;
       var nodeSet;
+      var edgeIds;
+      var edgeSet;
 
       switch (field) {
           case "part":
@@ -311,6 +313,16 @@
                   return a;
               }, []);
               nodeSet = shownNodes.get({filter: function(n) {
+                  for (var e = 0; e < n[field].length; e++) {
+                      var elem = n[field][e];
+                      for (var f = 0; f < matchingStrings.length; f++) {
+                          if (elem == matchingStrings[f])
+                              return true;
+                      }
+                  }
+                  return false;
+              }});
+              edgeSet = shownEdges.get({filter: function(n) {
                   for (var e = 0; e < n[field].length; e++) {
                       var elem = n[field][e];
                       for (var f = 0; f < matchingStrings.length; f++) {
@@ -336,46 +348,59 @@
                   }
                   return false;
               }});
+              edgeSet = [];
               break;
           default:
               nodeSet = shownNodes.get({filter: function(n) {
                   return n[field] ? n[field].toString().match(regexp): false;
               }});
+              edgeSet = shownEdges.get({filter: function(e) {
+                  return e[field] ? e[field].toString().match(regexp): false;
+              }});
       }
       nodeIds = nodeSet.map(function(n) { return n.id; });
+      edgeIds = edgeSet.map(function(e) { return e.id; });
 
-      if (nodeIds) {
-          network.selectNodes(nodeIds);
-          showNodeInfo(nodeIds);
-      }
+      network.setSelection({edges: edgeIds, nodes: nodeIds}, {highlightEdges: false});
+      showSelectionInfo();
   }
 
-  function showNodeInfo(nodeIds)
+  function showSelectionInfo()
   {
-      var description = '<h1>' + nodeIds.length + ' nodes selected</h1>';
-      var inputNodes = shownNodes.get(nodeIds);
-      inputNodes.forEach(function(node) {
-          var nodeEdges = node.edges;
-          var neighbours = [];
+      var description = "";
 
-          nodeEdges.forEach(function(edgeId) {
-              var edge = edges.get(edgeId);
-              var dest = nodes.get(edge.to);
-              var s = '\t' + dest.title + ' (edgeId ' + edgeId + ' ports '
-                      + edge.src_port + '->' + edge.dst_port + '): ';
-              s += edge.label + 'Gb\n';
-              neighbours .push(s);
+      var edgeIds = network.getSelectedEdges();
+      if (edgeIds.length)
+          description += '<h1>' + edgeIds.length + ' edges selected</h1>';
+
+      var nodeIds = network.getSelectedNodes();
+      if (nodeIds.length) {
+          description += '<h1>' + nodeIds.length + ' nodes selected</h1>';
+
+          var inputNodes = shownNodes.get(nodeIds);
+          inputNodes.forEach(function(node) {
+              var nodeEdges = node.edges;
+              var neighbours = [];
+
+              nodeEdges.forEach(function(edgeId) {
+                  var edge = edges.get(edgeId);
+                  var dest = nodes.get(edge.to);
+                  var s = '\t' + dest.title + ' (edgeId ' + edgeId + ' ports '
+                          + edge.src_port + '->' + edge.dst_port + '): ';
+                  s += edge.label + 'Gb\n';
+                  neighbours .push(s);
+              });
+
+              description +=
+                  '<h2>' + node.title + '</h2>' +
+                  'ID: ' + node.id + '\n' +
+                  'Partitions: ' + node.part.map(function(p){return partitions[p]})
+                  .join(', ') + '\n' +
+                  neighbours.length + ' neighbours:\n' + neighbours.sort().join('') +
+                  'Total bandwidth: ' + node.bandwidth + '\n' +
+                  ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
           });
-
-          description +=
-              '<h2>' + node.title + '</h2>' +
-              'ID: ' + node.id + '\n' +
-              'Partitions: ' + node.part.map(function(p){return partitions[p]})
-              .join(', ') + '\n' +
-              neighbours.length + ' neighbours:\n' + neighbours.sort().join('') +
-              'Total bandwidth: ' + node.bandwidth + '\n' +
-              ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
-      });
+      }
       document.getElementById('description').innerHTML = description;
   }
 
@@ -389,7 +414,7 @@
     else {
         var searchValue = document.getElementById("searchValue");
         var value = searchValue.value;
-        selectNodes(field, value);
+        selectNodesAndEdges(field, value);
     }
   }
 
@@ -462,16 +487,16 @@
         edges: shownEdges
     };
 
-    var options = {interaction:{hover:true, tooltipDelay:0},
+    var options = {interaction:{hover:true, tooltipDelay:0, multiselect: true},
                    physics: {barnesHut: {gravitationalConstant:-15000,
                                          }},
                    nodes: {shape: 'dot', borderWidth: 0.1, borderWidthSelected: 5},
-                   edges: {color: normalEdgeColor}
+                   edges: {color: normalEdgeColor, arrows: {to: true}}
     };
     network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
-        showNodeInfo(params.nodes);
+        showSelectionInfo();
     });
     network.on("deselectNode", function (params) {
         document.getElementById('description').innerHTML = description;
