@@ -3,7 +3,7 @@
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  *
- * Copyright © 2014-2015 Inria.  All rights reserved.
+ * Copyright © 2014-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * $HEADER$
@@ -541,7 +541,7 @@ InfiniBand network.
  to generate the necessary raw data files.
  <li> \c netloc_ib_extract_dats : This command simplifies the use of the
  \c netloc_reader_ib tool by processing all subnet data generated from the
- \c netloc_ib_gather_raw tool..
+ \c netloc_ib_gather_raw tool.
  <li> \c netloc_reader_ib : Processes raw data from the \c ibnetdiscover and
  \c ibroutes tools. The resulting \c .ndat files are used as abstract
  representations of the network graph
@@ -570,7 +570,7 @@ Normal way to use this:
 Example using \c netloc_ib_gather_raw and \c netloc_ib_extract_dats:
 
 \verbatim
-shell$ netloc_ib_gather_raw --hwloc-dir hwloc/ --raw-dir ib-raw/
+shell$ netloc_ib_gather_raw .
 shell$
 shell$ netloc_ib_extract_dats --raw-dir ib-raw --out-dir netloc
 ----------------------------------------------------------------------
@@ -602,7 +602,7 @@ Example using \c netloc_ib_gather_raw and \c netloc_reader_ib to only process
 one of the subnets.
 
 \verbatim
-shell$ netloc-ib-gather-raw.pl --hwloc-dir hwloc/ --raw-dir ib-raw/
+shell$ netloc-ib-gather-raw .
 shell$
 shell$ netloc_reader_ib --subnet 2222:2222:2222:2222 \
             --outdir dat_files/ \
