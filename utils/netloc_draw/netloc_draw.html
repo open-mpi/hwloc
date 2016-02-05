@@ -304,12 +304,13 @@
                   return a;
               }, []);
               nodeSet = shownNodes.get({filter: function(n) {
-                  n[field].forEach(function(elem) {
+                  for (var e = 0; e < n[field].length; e++) {
+                      var elem = n[field][e];
                       for (var f = 0; f < matchingStrings.length; f++) {
                           if (elem == matchingStrings[f])
                               return true;
                       }
-                  });
+                  }
                   return false;
               }});
               break;
