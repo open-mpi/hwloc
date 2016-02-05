@@ -418,7 +418,8 @@ foreach my $subnet (keys %subnets_todiscover) {
   print " Getting routes...\n";
   if (!$dryrun) {
     system("rm -rf $ibrouteoutdir");
-    mkdir $ibrouteoutdir;
+    mkdir $ibrouteoutdir unless $dryrun;
+    die "$ibrouteoutdir isn't a directory\n" unless -d $ibrouteoutdir;
   }
   getroutes $subnet, $boardname, $portnum, $ibnetdiscoveroutput, $ibrouteoutdir;
 }
