@@ -65,7 +65,7 @@
   var topos;
   var normalSwitchColor = {background: "grey"};
   var normalHostColor = {background: "red"};
-  var normalEdgeColor = {color: "grey"};
+  var normalEdgeColor = {color: "grey", highlight: "blue"};
   var nodesWithPhysics;
   var edgesWithPhysics;
   var nodeBandwidthList;
@@ -464,7 +464,7 @@
                    physics: {barnesHut: {gravitationalConstant:-15000,
                                          }},
                    nodes: {shape: 'dot', borderWidth: 0.1, borderWidthSelected: 5},
-                   edges: {color: {inherit: false}}
+                   edges: {color: normalEdgeColor}
     };
     network = new vis.Network(container, data, options);
 
