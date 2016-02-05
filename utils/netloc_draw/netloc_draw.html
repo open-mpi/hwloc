@@ -429,16 +429,10 @@
             return n.type == "host";
     }}).length;
     var num_switches = shownNodes.length-num_hosts;
-    var enabledTopos = Array.apply(null, Array(topos.length))
-        .map(function(e) { return false; });
-    shownNodes.forEach(function(val) {
-        var idx = val.topo;
-        if (idx != -1)
-            enabledTopos[idx] = true;
-    });
-    var shownTopos = enabledTopos.reduce(function(a, e, i) {
-        if (e)
-            a.push(topos[i]);
+    var enabledTopos = shownNodes.distinct("topo");
+    var shownTopos = enabledTopos.reduce(function(a, e) {
+        if (e != -1)
+            a.push(topos[e]);
         return a;
     }, []);
 
