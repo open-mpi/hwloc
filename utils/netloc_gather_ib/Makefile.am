@@ -20,5 +20,5 @@ CLEANFILES = $(bin_SCRIPTS)
 install-exec-hook:
 	$(SED) -e 's/HWLOC_top_builddir\/utils\/lstopo/bindir/' -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/netloc_ib_gather_raw > $(DESTDIR)$(bindir)/netloc_ib_gather_raw.tmp && mv -f $(DESTDIR)$(bindir)/netloc_ib_gather_raw.tmp $(DESTDIR)$(bindir)/netloc_ib_gather_raw
 	chmod +x $(DESTDIR)$(bindir)/netloc_ib_gather_raw
-	$(SED) -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/netloc_ib_extract_dats > $(DESTDIR)$(bindir)/netloc_ib_extract_dats.tmp && mv -f $(DESTDIR)$(bindir)/netloc_ib_extract_dats.tmp $(DESTDIR)$(bindir)/netloc_ib_extract_dats
+	$(SED) -e 's/HWLOC_top_builddir\/utils\/netloc_reader_ib/bindir/' -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/netloc_ib_extract_dats > $(DESTDIR)$(bindir)/netloc_ib_extract_dats.tmp && mv -f $(DESTDIR)$(bindir)/netloc_ib_extract_dats.tmp $(DESTDIR)$(bindir)/netloc_ib_extract_dats
 	chmod +x $(DESTDIR)$(bindir)/netloc_ib_extract_dats

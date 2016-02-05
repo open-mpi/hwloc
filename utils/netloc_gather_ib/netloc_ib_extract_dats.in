@@ -14,6 +14,13 @@ use strict;
 
 use Getopt::Long;
 
+my $HWLOC_top_builddir = "@HWLOC_top_builddir@";
+my $prefix = "@prefix@";
+my $exec_prefix = "@exec_prefix@";
+my $bindir = "@bindir@";
+# this will be changed into $bindir/... during make install
+my $localreader = "$HWLOC_top_builddir/utils/netloc_reader_ib/netloc_reader_ib";
+
 my $workdir;
 my $verbose;
 my $help;
@@ -72,7 +79,7 @@ foreach my $subnet (@subnets) {
   print "-"x70 . "\n";
 
   print "-"x15 . " General Network Information\n";
-  $cmd = ("netloc_reader_ib ".
+  $cmd = ("$localreader ".
           " --subnet ".$subnet.
           " --outdir ".$outdir.
           " --file ".$ibnetdiscover_files{$subnet}.
