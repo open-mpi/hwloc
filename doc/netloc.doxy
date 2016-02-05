@@ -421,40 +421,6 @@ Information by Switch
 ------------------------------------------------------------------------------
 \endverbatim
 
-\subsection tools_lsnettopo_cli Command Line Interface
-
-There are a few command line options available. See <tt>lsnettopo --help</tt>
-for a complete list.
-
-\verbatim
-<input directory>             (Optional)
-   Path to directory where the netloc .dat files are placed.
-   Detected as the first unknown option on the command line
-   Default: ./
-
---full | -f                   (Optional)
-   Full output, in addition to the brief overview
-   Default: disabled
-
---export | -e <export_type>   (Optional)
-   Export the data in the specified format type.
-   Supported Format Types
-     screen  (Default)
-        Display to the terminal
-     GraphML
-        File extension .graphml
-        http://graphml.graphdrawing.org/
-     GEXF
-        File extension .gexf
-        http://gexf.net/
-
---verbose | -v                (Optional)
-   Verbose output.
-
---help | -h                   (Optional)
-   Display a help message.
-\endverbatim
-
 <!-- ********************************************* -->
 
 \htmlonly
@@ -493,39 +459,6 @@ Network: ETH-unknown (version 1)
   Switches:   1
 ---------------------------------------------------
 \endverbatim
-
-\subsection tools_reader_static_cli Command Line Interfaces (netloc_reader_static)
-
-There are a few command line options available. See <tt>netloc_reader_static --help</tt>
-for a complete list.
-
-\verbatim
---input | -i <filename>
-   The JSON input file describing the network nodes and edges.
-
---outdir | -o <output directory>       (Optional)
-   Path to directory where output .dat filess are placed by the tool.
-   Default: "./"
-
---progress | -p
-   Show progress of processing node and edge information
-   Default: disabled
-
---help | -h                            (Optional)
-   Display a help message.
-\endverbatim
-
-\subsection tools_reader_static_json JSON Format
-
-Below is the <a href="http://json-schema.org/">JSON schema</a> for the input file.
-
-\verbinclude "../utils/netloc_reader_static/netloc_reader_static_schema.json"
-
-Below is an example of the expected format of the JSON input file with two nodes and one swich.
-
-\verbinclude "../utils/netloc_reader_static/example-2-nodes.json"
-
-
 
 <!-- ********************************************* -->
 
@@ -632,95 +565,6 @@ Network: IB-2222:2222:2222:2222
 \endverbatim
 
 
-\subsection tools_gather_ib_cli Command Line Interfaces (netloc_ib_gather_raw)
-
-There are a few command line options available. See <tt>netloc_ib_gather_raw</tt>
-for a complete list.
-
-\verbatim
-Output directory for raw IB data must be specified with
- --out-dir <dir>
-
-Input must be one of these
- --hwloc-dir <dir>
-    Specifies that <dir> contains the hwloc XML exports of the some nodes,
-    The list of IB subnets should be guessed from there.
-
- --force-subnet [<subnet>:]<board>:<port> to force the discovery
-    Force discovery on local board <board> port <port>, and optionally force the
-    subnet id <subnet> instead of reading it from the first GID.
-    Examples: --force-subnet mlx4_0:1
-              --force-subnet fe80:0000:0000:0000:mlx4_0:1
-
-Other options
- --sudo
-    Pass sudo to internal ibnetdiscover and ibroute invocations.
-    Useful when the entire script cannot run as root.
-
- --ibnetdiscover --ibroute
-    Specify exact location of programs. Default is /usr/bin/<program>
-
- --ignore-errors
-    Ignore errors from ibnetdiscover and ibroute, assume their outputs are ok
-
- --verbose
-    Add verbose messages
-
- --dry-run
-    Do not actually run programs
-\endverbatim
-
-
-\subsection tools_extract_ib_cli Command Line Interfaces (netloc_ib_extract_dats)
-
-There are a few command line options available. See <tt>netloc_ib_extract_dats --help</tt>
-for a complete list.
-
-\verbatim
- --raw-dir <dir>               (Optional)
-   Input directory with raw IB data must be specified with
-   Default is ./ib-raw
-
- --out-dir <dir>               (Optional)
-   Output directory for netloc data can be specified with
-   Default is ./netloc
-
- --verbose | -v                (Optional)
-   Verbose and progress information
-
- --help | -h                   (Optional)
-   Display a help message.
-\endverbatim
-
-
-\subsection tools_reader_ib_cli Command Line Interfaces (netloc_reader_ib)
-
-There are a few command line options available. See <tt>netloc_reader_ib --help</tt>
-for a complete list.
-
-\verbatim
---file <input file>
-   The file containing the ibnetdiscover data
-
---routedir <path to routing files>  (Optional)
-   Path to the file containing ibroutes data.
-   Information for each host should be stored in a separate file.
-   Default: Exclude logical routing information
-
---subnet <subnet id>
-   The subset id of the network
-
---outdir <output directory>         (Optional)
-   Path to directory where output .dat files are placed.
-   Default: ./
-
---progress | -p                     (Optional)
-   Display a progress percentage while processing the network files.
-
---help | -h                         (Optional)
-   Display a help message.
-\endverbatim
-
 
 <!-- ********************************************* -->
 
@@ -748,49 +592,6 @@ Network: ETH-unknown
   Hosts   :   8
   Switches:   7
 ---------------------------------------------------
-\endverbatim
-
-\subsection tools_reader_of_cli Command Line Interfaces (netloc_reader_of)
-
-There are a few command line options available. See <tt>netloc_reader_of --help</tt>
-for a complete list.
-
-\verbatim
---controller | -c <cname>
-   Name of the controller to use to access the OpenFlow network
-   information. See below for options.
-   Supported Controllers
-      opendaylight:
-         Attach to the OpenDaylight controller for network information.
-
-      floodlight:
-         Attach to the Floodlight controller for network information.
-
-      xnc:
-         Attach to the Cisco XNC controller for network information.
-
---subnet | -s <subnet id>              (Optional)
-   The subnet id of the network
-   Default: "unknown"
-
---outdir | -o <output directory>       (Optional)
-   Path to directory where output .dat filess are placed by the tool.
-   Default: "./"
-
---addr | -a <IP Address:Port>          (Optional)
-   IP address and port of the controller
-   Default: 127.0.0.1:8080
-
---username | -u <username>             (Optional)
-   Username for authorization to the controller
-   Default: <none>
-
---password | -p <password>             (Optional)
-   Password for authorization to the controller
-   Default: <none>
-
---help | -h                            (Optional)
-   Display a help message.
 \endverbatim
 
 
