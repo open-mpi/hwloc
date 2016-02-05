@@ -47,13 +47,15 @@
     <input id="fit" type="button" value="Fit" onclick="network.fit({animation: true})" />
     <input id="imageCreate" type="button" value="Generate image link" onclick="prepareImage();"/>
     <span id="imageLink"></span>
+    <input id="removeSel" type="button" value="Remove selected" onclick="network.deleteSelected();"/>
 
 
 </head>
 <body>
 
-<div id="mynetwork"></div>
-<pre id="description"></pre>
+    <div id="mynetwork"></div>
+    <span id="removeButton"></span>
+    <pre id="description"></pre>
 
 <script type="text/javascript">
   var edges;
