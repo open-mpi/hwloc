@@ -2,7 +2,7 @@ dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 dnl
-dnl Copyright © 2014-2015 Inria.  All rights reserved.
+dnl Copyright © 2014-2016 Inria.  All rights reserved.
 dnl See COPYING in top-level directory.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -73,7 +73,12 @@ EOF])
 
     AC_CONFIG_FILES(
         netloc_config_prefix[netloc/Makefile]
+        netloc_config_prefix[utils/netloc_gather_ib/netloc_ib_gather_raw]
     )
+
+    AC_CONFIG_COMMANDS([chmoding-netloc-scripts], [chmod +x \
+        ]netloc_config_prefix[utils/netloc_gather_ib/netloc_ib_gather_raw \
+    ])
 
     AS_IF([test "$netloc_happy" = "yes"],
           [$2],
