@@ -13,6 +13,7 @@
 <head>
     <script type="text/javascript" src="visdist/vis.js"></script>
     <link href="visdist/vis.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="html2canvas/html2canvas.js"></script>
 
     <style type="text/css">
         #mynetwork {
@@ -42,6 +43,9 @@
         <option value="topo"          >Hwloc topologies</option>
     </select>
     <input id="search" type="button" value="Search" onclick="search();" />
+    <input id="fit" type="button" value="Fit" onclick="network.fit({animation: true})" />
+    <input id="imageCreate" type="button" value="Generate image link" onclick="prepareImage();"/>
+    <span id="imageLink"></span>
 
 
 </head>
@@ -518,6 +522,91 @@
         });
     });
   }
+
+  function prepareImage()
+  {
+      html2canvas(document.getElementsByClassName("vis-network")[0], {
+        onrendered: function(canvas) {
+            var img = removeBlanks(canvas);
+            var dataURL = img.replace("image/png", "image/octet-stream");;
+            var imageLink = "<a href= " +
+                dataURL +
+                " download=\"netloc_draw.png\">image</a>";
+            document.getElementById('imageLink').innerHTML = imageLink;
+        },
+        background: undefined
+      });
+  }
+
+  function removeBlanks (canvas) {
+      var imgWidth = canvas.width;
+      var imgHeight = canvas.height;
+      var context = canvas.getContext("2d");
+      var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      var data = imageData.data;
+      var getRBG = function(x, y) {
+          return {
+              red:   data[(imgWidth*y + x) * 4],
+              green: data[(imgWidth*y + x) * 4 + 1],
+              blue:  data[(imgWidth*y + x) * 4 + 2]
+          };
+      };
+      var isWhite = function (rgb) {
+          return !rgb.red && !rgb.green && !rgb.blue;
+      };
+      var scanY = function (fromTop) {
+          var offset = fromTop ? 1 : -1;
+
+          // loop through each row
+          for(var y = fromTop ? 0 : imgHeight - 1;
+                  fromTop ? (y < imgHeight) : (y > -1);
+                  y += offset) {
+
+              // loop through each column
+              for(var x = 0; x < imgWidth; x++) {
+                  if (!isWhite(getRBG(x, y))) {
+                      return y;
+                  }
+              }
+          }
+          return null; // all image is white
+      };
+      var scanX = function (fromLeft) {
+          var offset = fromLeft? 1 : -1;
+
+          // loop through each column
+          for(var x = fromLeft ? 0 : imgWidth - 1;
+                  fromLeft ? (x < imgWidth) : (x > -1);
+                  x += offset) {
+
+              // loop through each row
+              for(var y = 0; y < imgHeight; y++) {
+                  if (!isWhite(getRBG(x, y))) {
+                      return x;
+                  }
+              }
+          }
+          return null; // all image is white
+      };
+
+      var cropTop = scanY(true);
+      var cropBottom = scanY(false);
+      var cropLeft = scanX(true);
+      var cropRight = scanX(false);
+      var cropWidth = cropRight-cropLeft+1;
+      var cropHeight = cropBottom-cropTop+1;
+
+      var newCanvas = document.createElement("canvas");
+      var newContext = newCanvas.getContext("2d");
+
+      newCanvas.width = cropWidth;
+      newCanvas.height = cropHeight;
+      newContext.drawImage(canvas,
+              cropLeft, cropTop, cropWidth, cropHeight,
+              0, 0, cropWidth, cropHeight);
+
+      return newCanvas.toDataURL("image/png");
+  };
 
 
 </script>
