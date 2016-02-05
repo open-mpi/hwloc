@@ -389,8 +389,8 @@ foreach my $subnet (keys %subnets_todiscover) {
   my $ibrouteoutdir = "$outdir/ibroutes-$subnet";
 
   if (-f $ibnetdiscoveroutput and !$force) {
-    print " $outdir/ib-subnet-$subnet.txt already exists, discover again? (y/n) ";
-    my $answer = <>;
+    print " $ibnetdiscoveroutput already exists, discover again? (y/n) ";
+    my $answer = <STDIN>;
     next if $answer !~ /^y/;
   }
 
