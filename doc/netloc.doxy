@@ -505,7 +505,7 @@ Example using \c netloc_ib_gather_raw and \c netloc_ib_extract_dats:
 \verbatim
 shell$ netloc_ib_gather_raw .
 shell$
-shell$ netloc_ib_extract_dats --raw-dir ib-raw --out-dir netloc
+shell$ netloc_ib_extract_dats .
 ----------------------------------------------------------------------
 Processing Subnet: 3333:3333:3333:3333
 ----------------------------------------------------------------------

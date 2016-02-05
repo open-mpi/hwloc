@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #
-# Copyright © 2013 Inria.  All rights reserved.
+# Copyright © 2013-2016 Inria.  All rights reserved.
 # Copyright © 2013-2014 University of Wisconsin-La Crosse.#
 #                         All rights reserved.
 #
@@ -14,30 +14,31 @@ use strict;
 
 use Getopt::Long;
 
-my $rawdir = "./ib-raw";
-my $outdir = "./netloc";
+my $workdir;
 my $verbose;
 my $help;
 
 &Getopt::Long::Configure("bundling");
 my $ok = Getopt::Long::GetOptions(
-        "out-dir|o=s" => \$outdir,
-        "raw-dir|r=s" => \$rawdir,
         "verbose|v" => \$verbose,
         "help|h" => \$help
     );
 
-if (!$ok or !defined $rawdir or defined($help) ) {
-  print "Input directory with raw IB data must be specified with\n";
-  print " --raw-dir <dir> (default is ./ib-raw)\n";
-  print "Output directory for netloc data can be specified with\n";
-  print " --out-dir <dir> (default is ./netloc)\n";
-  print "Verbose\n";
+if (!$ok or defined($help) or !defined $ARGV[0]) {
+  print "$0 [options] <dir>\n";
+  print "  Input raw files must be in <dir>/ib-raw/\n";
+  print "  Output files will be stored in <dir>/netloc/\n";
+  print "Options:\n";
   print " --verbose | -v\n";
-  print "Help\n";
+  print "    Verbose\n";
   print " --help | -h\n";
+  print "    Help\n";
   exit 1;
 }
+
+my $workdir = $ARGV[0];
+my $rawdir = "$workdir/ib-raw";
+my $outdir = "$workdir/netloc";
 
 my @subnets;
 my %ibnetdiscover_files;

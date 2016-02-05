@@ -63,7 +63,7 @@ The last step is to run netloc_ib_extract_dats to collect the IB information.
 It automatically looks inside the "ib-raw" directory by default and generates
 the output under "netloc". These can be changed with "--raw-dir" and "--out-dir".
 
-  $ netloc_ib_extract_dats
+  $ netloc_ib_extract_dats .
   ----------------------------------------------------------------------
   Processing Subnet: fe80:0000:0000:0000
   ----------------------------------------------------------------------
