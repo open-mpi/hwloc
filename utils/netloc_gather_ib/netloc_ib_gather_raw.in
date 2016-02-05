@@ -53,14 +53,15 @@ if ($help or !$ok or !defined $ARGV[0]) {
     print " --sudo\n";
     print "    Pass sudo to internal ibnetdiscover and ibroute invocations.\n";
     print "    Useful when the entire script cannot run as root.\n";
-    print " --ibnetdiscover --ibroute\n";
+    print " --ibnetdiscover /path/to/ibnetdiscover\n";
+    print " --ibroute /path/to/ibroute\n";
     print "    Specify exact location of programs. Default is /usr/bin/<program>\n";
     print " --ignore-errors\n";
     print "    Ignore errors from ibnetdiscover and ibroute, assume their outputs are ok\n";
     print " --verbose -v\n";
     print "    Add verbose messages\n";
     print " --dry-run\n";
-    print "    Do not actually run programs\n";
+    print "    Do not actually run programs or modify anything\n";
     print " --help -h\n";
     print "    Show this help\n";
     exit(1);
