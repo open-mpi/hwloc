@@ -312,7 +312,7 @@
   {
       var description = '<h1>' + nodeIds.length + ' nodes selected</h1>';
       var n = 0;
-      var inputNodes = nodes.get(nodeIds);
+      var inputNodes = shownNodes.get(nodeIds);
       while (n < inputNodes.length) {
           var node = inputNodes[n];
           var nodeEdges = node.edges;
@@ -442,28 +442,26 @@
     network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
-        params.event = "[original event]";
         showNodeInfo(params.nodes);
     });
     network.on("deselectNode", function (params) {
         document.getElementById('description').innerHTML = description;
     });
 
-    network.on("selectEdge", function (params) {
-        params.event = "[original event]";
-        var edge = edges.get(params.edges[0]);
+    //network.on("selectEdge", function (params) {
+    //    var edge = edges.get(params.edges[0]);
 
-        document.getElementById('description').innerHTML =
-            '<h2>' + nodes.get(edge.from).title + ' -> ' + nodes.get(edge.to).title + '</h2>' +
-            'ID: ' + edge.id + '\n' +
-            'From: ' + edge.from + '\n' +
-            'To: ' + edge.to + '\n' +
-            'Partitions: ' + edge.part.map(function(p){return partitions[p]})
-                                      .join(', ') + '\n';
-    });
-    network.on("deselectEdge", function (params) {
-        document.getElementById('description').innerHTML = description;
-    });
+    //    document.getElementById('description').innerHTML =
+    //        '<h2>' + nodes.get(edge.from).title + ' -> ' + nodes.get(edge.to).title + '</h2>' +
+    //        'ID: ' + edge.id + '\n' +
+    //        'From: ' + edge.from + '\n' +
+    //        'To: ' + edge.to + '\n' +
+    //        'Partitions: ' + edge.part.map(function(p){return partitions[p]})
+    //                                  .join(', ') + '\n';
+    //});
+    //network.on("deselectEdge", function (params) {
+    //    document.getElementById('description').innerHTML = description;
+    //});
 
     network.on("dragStart", function (params) {
         params.event = "[original event]";
