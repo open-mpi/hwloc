@@ -403,7 +403,7 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0c01: return "ACCES";
 	case 0x0c02: return "SSA";
 	case 0x0c03: return "USB";
-	case 0x0c04: return "Fiber";
+	case 0x0c04: return "Fibre";
 	case 0x0c05: return "SMBus";
 	case 0x0c06: return "IB";
 	case 0x0c07: return "IPMI";
