@@ -27,6 +27,8 @@ Version 1.11.3
 * Fix a x86 infinite loop on VMware due to the x2APIC feature being
   advertised without actually being fully supported.
   Thanks to Jianjun Wen for reporting the problem and testing the patch.
+* Do not filter-out FibreChannel PCI adapters by default anymore.
+  Thanks to Matt Muggeridge for the report.
 
 
 Version 1.11.2
