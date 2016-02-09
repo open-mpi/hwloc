@@ -390,7 +390,7 @@ sub getroutes {
 
         # Run ibroute on this switch LID
 	my $ibrouteoutput = "$ibrouteoutdir/ibroute-$subnet-$src_lid.txt";
-        print "  Running ibroute for switch LID $src_lid...\n";
+        print "  Running ibroute for switch '$src_name' LID $src_lid...\n";
 	my $cmd = "$sudo $ibroute -C $boardname -P $portnum $src_lid";
 	if ($dryrun) {
 	  print "   NOT running $cmd\n" if $verbose;
