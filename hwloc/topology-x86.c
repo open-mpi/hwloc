@@ -1096,12 +1096,12 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
     memset(&hooks, 0, sizeof(hooks));
     support.membind = &memsupport;
     hwloc_set_native_binding_hooks(&hooks, &support);
-    if (hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind) {
-      get_cpubind = hooks.get_thisproc_cpubind;
-      set_cpubind = hooks.set_thisproc_cpubind;
-    } else if (hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind) {
+    if (hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind) {
       get_cpubind = hooks.get_thisthread_cpubind;
       set_cpubind = hooks.set_thisthread_cpubind;
+    } else if (hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind) {
+      get_cpubind = hooks.get_thisproc_cpubind;
+      set_cpubind = hooks.set_thisproc_cpubind;
     } else {
       /* we need binding support if there are multiple PUs */
       if (nbprocs > 1)
