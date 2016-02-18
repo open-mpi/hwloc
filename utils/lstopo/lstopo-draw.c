@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1368,9 +1368,19 @@ output_compute_pu_min_textwidth(struct lstopo_output *output)
   if (output->logical) {
     unsigned depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
     lastpu = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth)-1);
-  } else {
+  } else if (hwloc_topology_get_topology_cpuset(topology)) {
     unsigned lastidx = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
     lastpu = hwloc_get_pu_obj_by_os_index(topology, lastidx);
+  } else {
+    /* no easy way to find the max os_index in custom topologies */
+    unsigned depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
+    hwloc_obj_t curpu = hwloc_get_obj_by_depth(topology, depth, 0);
+    lastpu = curpu;
+    while (curpu) {
+      if (curpu->os_index > lastpu->os_index)
+	lastpu = curpu;
+      curpu = curpu->next_cousin;
+    }
   }
 
   n = lstopo_obj_snprintf(text, sizeof(text), lastpu, output->logical);
