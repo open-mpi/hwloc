@@ -307,8 +307,10 @@ void output_synthetic(struct lstopo_output *loutput, const char *filename)
   }
 
   length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), loutput->export_synthetic_flags);
-  if (length < 0)
+  if (length < 0) {
+    fprintf(stderr, "Failed to export a synthetic description (%s)\n", strerror(errno));
     return;
+  }
 
   if (length >= (int) sizeof(sbuffer)) {
     dbuffer = malloc(length+1 /* \0 */);
