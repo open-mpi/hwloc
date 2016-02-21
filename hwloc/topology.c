@@ -470,33 +470,57 @@ insert_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newp
   return &tmp->next_sibling;
 }
 
-/* firstnew must be non-NULL */
+/* Take the new list starting at firstnew and prepend it to the old list starting at *firstp,
+ * and mark the new children as children of newparent.
+ * May be used during early or late discovery (updates prev_sibling and sibling_rank).
+ * List firstnew must be non-NULL.
+ */
 static void
 prepend_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newparent)
 {
-  hwloc_obj_t *tmpp, tmp;
-  /* update parent pointers */
-  for(tmp = firstnew; tmp; tmp = tmp->next_sibling)
-    tmp->parent = newparent;
-  /* find the end of the new list */
-  for(tmpp = &firstnew ; *tmpp; tmpp = &((*tmpp)->next_sibling));
-  /* place the existing list there */
+  hwloc_obj_t *tmpp, tmp, last;
+  unsigned length;
+
+  /* update parent pointers and find the length and end of the new list */
+  for(length = 0, tmpp = &firstnew, last = NULL ; *tmpp; length++, last = *tmpp, tmpp = &((*tmpp)->next_sibling))
+    (*tmpp)->parent = newparent;
+
+  /* update sibling_rank */
+  for(tmp = *firstp; tmp; tmp = tmp->next_sibling)
+    tmp->sibling_rank += length; /* if it wasn't initialized yet, it'll be overwritten later */
+
+  /* place the existing list at the end of the new one */
   *tmpp = *firstp;
+  if (*firstp)
+    (*firstp)->prev_sibling = last;
+
   /* use the beginning of the new list now */
   *firstp = firstnew;
 }
 
+/* Take the new list starting at firstnew and append it to the old list starting at *firstp,
+ * and mark the new children as children of newparent.
+ * May be used during early or late discovery (updates prev_sibling and sibling_rank).
+ */
 static void
 append_siblings_list(hwloc_obj_t *firstp, hwloc_obj_t firstnew, hwloc_obj_t newparent)
 {
-  hwloc_obj_t *tmpp, tmp;
-  /* update parent pointers */
-  for(tmp = firstnew; tmp; tmp = tmp->next_sibling)
+  hwloc_obj_t *tmpp, tmp, last;
+  unsigned length;
+
+  /* find the length and end of the existing list */
+  for(length = 0, tmpp = firstp, last = NULL ; *tmpp; length++, last = *tmpp, tmpp = &((*tmpp)->next_sibling));
+
+  /* update parent pointers and sibling_rank */
+  for(tmp = firstnew; tmp; tmp = tmp->next_sibling) {
     tmp->parent = newparent;
-  /* find the end of the existing list */
-  for(tmpp = firstp ; *tmpp; tmpp = &((*tmpp)->next_sibling));
-  /* place new list there */
+    tmp->sibling_rank += length; /* if it wasn't set yet, it'll be overwritten later */
+  }
+
+  /* place new list at the end of the old one */
   *tmpp = firstnew;
+  if (firstnew)
+    firstnew->prev_sibling = last;
 }
 
 /* Remove an object from its parent and free it.
