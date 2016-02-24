@@ -1797,7 +1797,7 @@ hwloc__reorder_children(hwloc_obj_t parent)
     child->next_sibling = *prev;
     *prev = child;
   }
-  /* No ordering to enforce for Misc children. */
+  /* No ordering to enforce for Misc or I/O children. */
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
