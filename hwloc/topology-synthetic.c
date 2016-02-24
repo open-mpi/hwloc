@@ -808,7 +808,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
   }
 
-  os_index = curlevel->next_os_index++;
+  os_index = curlevel->totalwidth - (++curlevel->next_os_index);
   if (curlevel->index_array)
     os_index = curlevel->index_array[os_index];
   else if (hwloc_obj_type_is_cache(type) || type == HWLOC_OBJ_GROUP)
