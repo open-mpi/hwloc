@@ -979,6 +979,38 @@ hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2)
     return hwloc_bitmap_compare_first(obj1->cpuset, obj2->cpuset);
 }
 
+/* Compare object that are already known as DIFFERENT.
+ * See how they are actually placed, more precisely than hwloc__object_cpusets_compare_first().
+ */
+static int
+hwloc__object_cpusets_compare_different(hwloc_obj_t obj1, hwloc_obj_t obj2)
+{
+  hwloc_bitmap_t set1, set2;
+  unsigned first1, last1, first2, last2;
+  if (obj1->complete_cpuset && obj2->complete_cpuset) {
+    set1 = obj1->complete_cpuset;
+    set2 = obj2->complete_cpuset;
+  } else {
+    set1 = obj1->cpuset;
+    set2 = obj2->cpuset;
+  }
+  first1 = hwloc_bitmap_first(set1);
+  last1 = hwloc_bitmap_last(set1);
+  first2 = hwloc_bitmap_first(set2);
+  last2 = hwloc_bitmap_last(set2);
+
+  if (last1 < first2)
+    /* 1 is entirely before 2 */
+    return -2;
+  if (first1 > last2)
+    /* 2 is entirely before 1 */
+    return 2;
+  /* there's some overlap (without intersection since DIFFERENT).
+   * just return the comparison of first1 and first2 for basic ordering.
+   */
+  return first1 < first2 ? -1 : first1 > first2 ? 1 : 0;
+}
+
 /* format the obj info to print in error messages */
 static void
 hwloc__report_error_format_obj(char *buf, size_t buflen, hwloc_obj_t obj)
@@ -1185,14 +1217,19 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	}
 	goto putback;
 
-      case HWLOC_OBJ_DIFFERENT:
-        /* OBJ should be a child of CUR before CHILD, mark its position if not found yet. */
-	if (!putp && hwloc__object_cpusets_compare_first(obj, child) < 0)
-	  /* Don't insert yet, there could be intersect errors later */
+      case HWLOC_OBJ_DIFFERENT: {
+        /* OBJ should be a child of CUR before CHILD */
+	int comp = hwloc__object_cpusets_compare_different(obj, child);
+	/* mark its position if not found yet. */
+	if (!putp && comp < 0)
 	  putp = cur_children;
+	if (comp == -2)
+	  /* Only insert if we're sure we won't intersect anything other child */
+	  goto insert;
 	/* Advance cur_children.  */
 	cur_children = &child->next_sibling;
 	break;
+      }
 
       case HWLOC_OBJ_CONTAINS:
 	/* OBJ contains CHILD, remove CHILD from CUR */
@@ -1212,6 +1249,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   /* Put OBJ where it belongs, or in last in CUR's children.  */
   if (!putp)
     putp = cur_children;
+ insert:
   obj->next_sibling = *putp;
   *putp = obj;
   obj->parent = cur;
