@@ -1246,7 +1246,15 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
 {
   struct hwloc_obj *result;
 
+#ifdef HWLOC_DEBUG
   assert(!hwloc_obj_type_is_special(obj->type));
+
+  /* we need at least one non-empty set (normal or complete, cpuset or nodeset) */
+  assert((obj->cpuset && !hwloc_bitmap_iszero(obj->cpuset))
+	 || (obj->complete_cpuset && !hwloc_bitmap_iszero(obj->complete_cpuset))
+	 || (obj->nodeset && !hwloc_bitmap_iszero(obj->nodeset))
+	 || (obj->complete_nodeset && !hwloc_bitmap_iszero(obj->complete_nodeset)));
+#endif
 
   /* Start at the top.  */
   result = hwloc___insert_object_by_cpuset(topology, topology->levels[0][0], obj, report_error);

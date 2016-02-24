@@ -251,6 +251,8 @@ struct hwloc_component {
  *
  * The caller should check whether the object type is filtered-out before calling this function.
  *
+ * The topology cpuset/nodesets will be enlarged to include the object sets.
+ *
  * Returns the object on success.
  * Returns NULL and frees obj on error.
  * Returns another object and frees obj if it was merged with an identical pre-existing object.
