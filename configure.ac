@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -252,11 +252,6 @@ Graphical output (Cairo):    $hwloc_cairo_happy
 XML input / output:          $hwloc_xml_status
 Netloc functionality:        $netloc_happy
 EOF
-
-# Linux specific support
-AS_IF([test "$hwloc_linux" = "yes"], [cat <<EOF
-libnuma memory support:      $hwloc_linux_libnuma_happy
-EOF])
 
 # Plugin support
 hwloc_plugin_summary=$hwloc_have_plugins

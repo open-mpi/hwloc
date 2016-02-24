@@ -572,13 +572,13 @@ EOF])
          AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])])
 
-    AC_MSG_CHECKING([for working syscall])
+    AC_MSG_CHECKING([for working syscall with 6 parameters])
     AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
           #include <unistd.h>
           #include <sys/syscall.h>
-          ]], [[syscall(1, 2, 3);]])],
-        [AC_DEFINE([HWLOC_HAVE_SYSCALL], [1], [Define to 1 if function `syscall' is available])
+          ]], [[syscall(0, 1, 2, 3, 4, 5, 6);]])],
+        [AC_DEFINE([HWLOC_HAVE_SYSCALL], [1], [Define to 1 if function `syscall' is available with 6 parameters])
          AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])])
 
@@ -670,41 +670,6 @@ EOF])
       AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, `Define to 1 if you have pthread_getthrds_np')
     )
     AC_CHECK_FUNCS([cpuset_setid])
-
-    # Linux libnuma support
-    hwloc_linux_libnuma_happy=no
-    if test "x$enable_libnuma" != "xno"; then
-        hwloc_linux_libnuma_happy=yes
-        AC_CHECK_HEADERS([numaif.h], [
-            AC_CHECK_LIB([numa], [numa_available], [HWLOC_LINUX_LIBNUMA_LIBS="-lnuma"], [hwloc_linux_libnuma_happy=no])
-        ], [hwloc_linux_libnuma_happy=no])
-    fi
-    AC_SUBST(HWLOC_LINUX_LIBNUMA_LIBS)
-    # If we asked for Linux libnuma support but couldn't deliver, fail
-    HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LINUX_LIBNUMA_LIBS"
-    AS_IF([test "$enable_libnuma" = "yes" -a "$hwloc_linux_libnuma_happy" = "no"],
-          [AC_MSG_WARN([Specified --enable-libnuma switch, but could not])
-           AC_MSG_WARN([find appropriate support])
-           AC_MSG_ERROR([Cannot continue])])
-    if test "x$hwloc_linux_libnuma_happy" = "xyes"; then
-      tmp_save_LIBS="$LIBS"
-      LIBS="$LIBS $HWLOC_LINUX_LIBNUMA_LIBS"
-
-      AC_CHECK_LIB([numa], [set_mempolicy], [
-	enable_set_mempolicy=yes
-	AC_DEFINE([HWLOC_HAVE_SET_MEMPOLICY], [1], [Define to 1 if set_mempolicy is available.])
-      ])
-      AC_CHECK_LIB([numa], [mbind], [
-	enable_mbind=yes
-	AC_DEFINE([HWLOC_HAVE_MBIND], [1], [Define to 1 if mbind is available.])
-      ])
-      AC_CHECK_LIB([numa], [migrate_pages], [
-	enable_migrate_pages=yes
-	AC_DEFINE([HWLOC_HAVE_MIGRATE_PAGES], [1], [Define to 1 if migrate_pages is available.])
-      ])
-
-      LIBS="$tmp_save_LIBS"
-    fi
 
     # Linux libudev support
     if test "x$enable_libudev" != xno; then
@@ -1162,12 +1127,12 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_GCC], [test "x$GCC" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_MS_LIB], [test "x$HWLOC_MS_LIB" != "x"])
         AM_CONDITIONAL([HWLOC_HAVE_OPENAT], [test "x$hwloc_have_openat" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_LINUX_LIBNUMA],
-                       [test "x$hwloc_have_linux_libnuma" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_SCHED_SETAFFINITY],
                        [test "x$hwloc_have_sched_setaffinity" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_PTHREAD],
                        [test "x$hwloc_have_pthread" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_LINUX_LIBNUMA],
+                       [test "x$hwloc_have_linux_libnuma" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS],
                        [test "x$hwloc_have_libibverbs" = "xyes"])
 	AM_CONDITIONAL([HWLOC_HAVE_CUDA],
@@ -1183,8 +1148,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_PCIACCESS], [test "$hwloc_pciaccess_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_OPENCL], [test "$hwloc_opencl_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
-        AM_CONDITIONAL([HWLOC_HAVE_SET_MEMPOLICY], [test "x$enable_set_mempolicy" != "xno"])
-        AM_CONDITIONAL([HWLOC_HAVE_MBIND], [test "x$enable_mbind" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
 
         AM_CONDITIONAL([HWLOC_BUILD_DOXYGEN],

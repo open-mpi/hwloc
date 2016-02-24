@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
@@ -476,12 +476,6 @@
 /* Define to 1 if building the Linux PCI component */
 /* #undef HWLOC_HAVE_LINUXPCI */
 
-/* Define to 1 if mbind is available. */
-/* #undef HWLOC_HAVE_MBIND */
-
-/* Define to 1 if migrate_pages is available. */
-/* #undef HWLOC_HAVE_MIGRATE_PAGES */
-
 /* Define to 1 if you have the `NVML' library. */
 /* #undef HWLOC_HAVE_NVML */
 
@@ -504,9 +498,6 @@
 
 /* Define to 1 if glibc provides a prototype of sched_setaffinity() */
 #define HWLOC_HAVE_SCHED_SETAFFINITY 1
-
-/* Define to 1 if set_mempolicy is available. */
-/* #undef HWLOC_HAVE_SET_MEMPOLICY */
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HWLOC_HAVE_STDINT_H 1

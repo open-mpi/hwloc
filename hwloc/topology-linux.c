@@ -37,10 +37,6 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <mntent.h>
-#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
-#define migratepages migrate_pages /* workaround broken migratepages prototype in numaif.h before libnuma 2.0.2 */
-#include <numaif.h>
-#endif
 
 struct hwloc_linux_backend_data_s {
   char *root_path; /* NULL if unused */
@@ -60,10 +56,11 @@ struct hwloc_linux_backend_data_s {
  * Misc Abstraction layers *
  ***************************/
 
+#include <linux/unistd.h>
+
 #if !(defined HWLOC_HAVE_SCHED_SETAFFINITY) && (defined HWLOC_HAVE_SYSCALL)
 /* libc doesn't have support for sched_setaffinity, make system call
  * ourselves: */
-#    include <linux/unistd.h>
 #    ifndef __NR_sched_setaffinity
 #       ifdef __i386__
 #         define __NR_sched_setaffinity 241
@@ -131,6 +128,131 @@ struct hwloc_linux_backend_data_s {
 #      define sched_getaffinity(pid, lg, mask) (syscall(__NR_sched_getaffinity, pid, lg, mask) < 0 ? -1 : 0)
 #    endif
 #endif
+
+/* numa syscalls are only in libnuma, but libnuma devel headers aren't widely installed.
+ * just redefine these syscalls to avoid requiring libnuma devel headers just because of these missing syscalls.
+ * __NR_foo should be defined in headers in all modern platforms.
+ * Just redefine the basic ones on important platform when not to hard to detect/define.
+ */
+
+#ifndef MPOL_DEFAULT
+# define MPOL_DEFAULT 0
+#endif
+#ifndef MPOL_PREFERRED
+# define MPOL_PREFERRED 1
+#endif
+#ifndef MPOL_BIND
+# define MPOL_BIND 2
+#endif
+#ifndef MPOL_INTERLEAVE
+# define MPOL_INTERLEAVE 3
+#endif
+#ifndef MPOL_F_ADDR
+# define  MPOL_F_ADDR (1<<1)
+#endif
+#ifndef MPOL_MF_STRICT
+# define MPOL_MF_STRICT (1<<0)
+#endif
+#ifndef MPOL_MF_MOVE
+# define MPOL_MF_MOVE (1<<1)
+#endif
+
+#ifndef __NR_mbind
+# ifdef __i386__
+#  define __NR_mbind 274
+# elif defined(__x86_64__)
+#  define __NR_mbind 237
+# elif defined(__ia64__)
+#  define __NR_mbind 1259
+# elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
+#  define __NR_mbind 259
+# elif defined(__sparc__)
+#  define __NR_mbind 353
+# endif
+#endif
+static __hwloc_inline long hwloc_mbind(void *addr, unsigned long len, int mode,
+				       const unsigned long *nodemask, unsigned long maxnode, unsigned flags)
+{
+#if (defined __NR_mbind) && (defined HWLOC_HAVE_SYSCALL)
+  return syscall(__NR_mbind, (long) addr, len, mode, (long)nodemask, maxnode, flags);
+#else
+  errno = ENOSYS;
+  return -1;
+#endif
+}
+
+#ifndef __NR_set_mempolicy
+# ifdef __i386__
+#  define __NR_set_mempolicy 276
+# elif defined(__x86_64__)
+#  define __NR_set_mempolicy 239
+# elif defined(__ia64__)
+#  define __NR_set_mempolicy 1261
+# elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
+#  define __NR_set_mempolicy 261
+# elif defined(__sparc__)
+#  define __NR_set_mempolicy 305
+# endif
+#endif
+static __hwloc_inline long hwloc_set_mempolicy(int mode, const unsigned long *nodemask,
+					       unsigned long maxnode)
+{
+#if (defined __NR_set_mempolicy) && (defined HWLOC_HAVE_SYSCALL)
+  return syscall(__NR_set_mempolicy, mode, nodemask, maxnode);
+#else
+  errno = ENOSYS;
+  return -1;
+#endif
+}
+
+#ifndef __NR_get_mempolicy
+# ifdef __i386__
+#  define __NR_get_mempolicy 275
+# elif defined(__x86_64__)
+#  define __NR_get_mempolicy 238
+# elif defined(__ia64__)
+#  define __NR_get_mempolicy 1260
+# elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
+#  define __NR_get_mempolicy 260
+# elif defined(__sparc__)
+#  define __NR_get_mempolicy 304
+# endif
+#endif
+static __hwloc_inline long hwloc_get_mempolicy(int *mode, const unsigned long *nodemask,
+					       unsigned long maxnode, void *addr, int flags)
+{
+#if (defined __NR_get_mempolicy) && (defined HWLOC_HAVE_SYSCALL)
+  return syscall(__NR_get_mempolicy, mode, nodemask, maxnode, addr, flags);
+#else
+  errno = ENOSYS;
+  return -1;
+#endif
+}
+
+#ifndef __NR_migrate_pages
+# ifdef __i386__
+#  define __NR_migrate_pages 204
+# elif defined(__x86_64__)
+#  define __NR_migrate_pages 256
+# elif defined(__ia64__)
+#  define __NR_migrate_pages 1280
+# elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
+#  define __NR_migrate_pages 258
+# elif defined(__sparc__)
+#  define __NR_migrate_pages 302
+# endif
+#endif
+static __hwloc_inline long hwloc_migrate_pages(int pid, unsigned long maxnode,
+					       const unsigned long *oldnodes, const unsigned long *newnodes)
+{
+#if (defined __NR_migrate_pages) && (defined HWLOC_HAVE_SYSCALL)
+  return syscall(__NR_migrate_pages, pid, maxnode, oldnodes, newnodes);
+#else
+  errno = ENOSYS;
+  return -1;
+#endif
+}
+
 
 /* Added for ntohl() */
 #include <arpa/inet.h>
@@ -1130,7 +1252,6 @@ hwloc_linux_get_thisthread_last_cpu_location(hwloc_topology_t topology, hwloc_bi
  ****** Membind hooks ******
  ***************************/
 
-#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
 static int
 hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t policy, int flags)
 {
@@ -1213,9 +1334,7 @@ hwloc_linux_membind_mask_to_nodeset(hwloc_topology_t topology __hwloc_attribute_
   for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
     hwloc_bitmap_set_ith_ulong(nodeset, i, linuxmask[i]);
 }
-#endif /* HWLOC_HAVE_SET_MEMPOLICY || HWLOC_HAVE_MBIND */
 
-#ifdef HWLOC_HAVE_MBIND
 static int
 hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
@@ -1236,26 +1355,19 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
 
   if (linuxpolicy == MPOL_DEFAULT)
     /* Some Linux kernels don't like being passed a set */
-    return mbind((void *) addr, len, linuxpolicy, NULL, 0, 0);
+    return hwloc_mbind((void *) addr, len, linuxpolicy, NULL, 0, 0);
 
   err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
   if (err < 0)
     goto out;
 
   if (flags & HWLOC_MEMBIND_MIGRATE) {
-#ifdef MPOL_MF_MOVE
     linuxflags = MPOL_MF_MOVE;
     if (flags & HWLOC_MEMBIND_STRICT)
       linuxflags |= MPOL_MF_STRICT;
-#else
-    if (flags & HWLOC_MEMBIND_STRICT) {
-      errno = ENOSYS;
-      goto out_with_mask;
-    }
-#endif
   }
 
-  err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
+  err = hwloc_mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
   if (err < 0)
     goto out_with_mask;
 
@@ -1286,9 +1398,7 @@ hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nod
 
   return buffer;
 }
-#endif /* HWLOC_HAVE_MBIND */
 
-#ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
 hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
@@ -1303,30 +1413,25 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
 
   if (linuxpolicy == MPOL_DEFAULT)
     /* Some Linux kernels don't like being passed a set */
-    return set_mempolicy(linuxpolicy, NULL, 0);
+    return hwloc_set_mempolicy(linuxpolicy, NULL, 0);
 
   err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
   if (err < 0)
     goto out;
 
   if (flags & HWLOC_MEMBIND_MIGRATE) {
-#ifdef HWLOC_HAVE_MIGRATE_PAGES
     unsigned long *fullmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
     if (fullmask) {
       memset(fullmask, 0xf, max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
-      err = migrate_pages(0, max_os_index+1, fullmask, linuxmask);
+      err = hwloc_migrate_pages(0, max_os_index+1, fullmask, linuxmask);
       free(fullmask);
     } else
       err = -1;
     if (err < 0 && (flags & HWLOC_MEMBIND_STRICT))
       goto out_with_mask;
-#else
-    errno = ENOSYS;
-    goto out_with_mask;
-#endif
   }
 
-  err = set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
+  err = hwloc_set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
   if (err < 0)
     goto out_with_mask;
 
@@ -1359,7 +1464,7 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
   max_numnodes = HWLOC_BITS_PER_LONG;
   while (1) {
     unsigned long *mask = malloc(max_numnodes / HWLOC_BITS_PER_LONG * sizeof(long));
-    int err = get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
+    int err = hwloc_get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
     free(mask);
     if (!err || errno != EINVAL)
       /* found it */
@@ -1404,7 +1509,7 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
     goto out;
   }
 
-  err = get_mempolicy(&linuxpolicy, linuxmask, max_os_index, 0, 0);
+  err = hwloc_get_mempolicy(&linuxpolicy, linuxmask, max_os_index, 0, 0);
   if (err < 0)
     goto out_with_mask;
 
@@ -1457,7 +1562,7 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
   for(tmpaddr = (char *)((unsigned long)addr & ~(pagesize-1));
       tmpaddr < (char *)addr + len;
       tmpaddr += pagesize) {
-    err = get_mempolicy(&linuxpolicy, linuxmask, max_os_index, tmpaddr, MPOL_F_ADDR);
+    err = hwloc_get_mempolicy(&linuxpolicy, linuxmask, max_os_index, tmpaddr, MPOL_F_ADDR);
     if (err < 0)
       goto out_with_masks;
 
@@ -1503,8 +1608,6 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
   return -1;
 }
 
-#endif /* HWLOC_HAVE_SET_MEMPOLICY */
-
 void
 hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 			struct hwloc_topology_support *support __hwloc_attribute_unused)
@@ -1524,12 +1627,9 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
   hooks->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
   hooks->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
   hooks->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
-#ifdef HWLOC_HAVE_SET_MEMPOLICY
   hooks->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
   hooks->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
   hooks->get_area_membind = hwloc_linux_get_area_membind;
-#endif /* HWLOC_HAVE_SET_MEMPOLICY */
-#ifdef HWLOC_HAVE_MBIND
   hooks->set_area_membind = hwloc_linux_set_area_membind;
   hooks->alloc_membind = hwloc_linux_alloc_membind;
   hooks->alloc = hwloc_alloc_mmap;
@@ -1537,10 +1637,7 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->firsttouch_membind = 1;
   support->membind->bind_membind = 1;
   support->membind->interleave_membind = 1;
-#endif /* HWLOC_HAVE_MBIND */
-#if (defined HWLOC_HAVE_MIGRATE_PAGES) || ((defined HWLOC_HAVE_MBIND) && (defined MPOL_MF_MOVE))
   support->membind->migrate_membind = 1;
-#endif
 }
 
 

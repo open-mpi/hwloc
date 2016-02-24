@@ -124,9 +124,6 @@ is configured and build.
 
 The hwloc core may also benefit from the following development packages:
 <ul>
-<li>libnuma for memory binding and migration support on Linux
-    (<tt>numactl-devel</tt> or <tt>libnuma-dev</tt> package).
-</li>
 <li>libpciaccess for full I/O device discovery
     (<tt>libpciaccess-devel</tt> or <tt>libpciaccess-dev</tt> package).
     On Linux, PCI discovery may still be performed (without vendor/device names)
