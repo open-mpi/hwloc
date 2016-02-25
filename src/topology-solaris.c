@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -426,11 +426,11 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
     }
   nlgrps = lgrp_nlgrps(cookie);
   root = lgrp_root(cookie);
-  {
+  if (nlgrps > 0) {
     hwloc_obj_t *glob_lgrps = calloc(nlgrps, sizeof(hwloc_obj_t));
     browse(topology, cookie, root, glob_lgrps, &curlgrp);
 #ifdef HAVE_LGRP_LATENCY_COOKIE
-    {
+    if (nlgrps > 1) {
       float *distances = calloc(curlgrp*curlgrp, sizeof(float));
       unsigned *indexes = calloc(curlgrp,sizeof(unsigned));
       unsigned i, j;

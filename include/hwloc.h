@@ -967,6 +967,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_custom(hwloc_topology_t topology);
 /** \brief Provide a distance matrix.
  *
  * Provide the matrix of distances between a set of objects of the given type.
+ * \p nbobjs must be at least 2.
  * The set may or may not contain all the existing objects of this type.
  * The objects are specified by their OS/physical index in the \p os_index
  * array. The \p distances matrix follows the same order.

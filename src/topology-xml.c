@@ -532,12 +532,23 @@ hwloc__xml_import_distances(struct hwloc_xml_backend_data_s *data,
 
     distances->distances.latency_max = latmax;
 
-    if (data->last_distances)
-      data->last_distances->next = distances;
-    else
-      data->first_distances = distances;
-    distances->prev = data->last_distances;
-    distances->next = NULL;
+    if (nbobjs < 2) {
+      /* distances with a single object are useless, even if the XML isn't invalid */
+      assert(nbobjs == 1);
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: ignoring invalid distance matrix with only 1 object\n",
+		state->global->msgprefix);
+      free(matrix);
+      free(distances);
+    } else {
+      /* queue the distance */
+      if (data->last_distances)
+	data->last_distances->next = distances;
+      else
+	data->first_distances = distances;
+      distances->prev = data->last_distances;
+      distances->next = NULL;
+    }
   }
 
   return state->global->close_tag(state);
