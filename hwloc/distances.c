@@ -84,6 +84,7 @@ void hwloc_distances_set(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_t
   if (!nbobjs)
     /* we're just clearing, return now */
     return;
+  assert(nbobjs >= 2);
 
   /* create the new element */
   osdist = malloc(sizeof(struct hwloc_os_distances_s));
@@ -136,6 +137,11 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
 
   if (sscanf(string, "%u-%u:", &i, &j) == 2) {
     /* range i-j */
+    if (j <= i) {
+      fprintf(stderr, "Ignoring %s distances from environment variable, range doesn't cover at least 2 indexes\n",
+	      hwloc_obj_type_string(type));
+      return;
+    }
     nbobjs = j-i+1;
 
     tmp = strchr(string, ':');
@@ -161,6 +167,9 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
     /* explicit list of indexes, count them */
     while (1) {
       size_t size = strspn(tmp, "0123456789");
+      if (!size)
+	/* missing index */
+	break;
       if (tmp[size] != ',') {
 	/* last element */
 	tmp += size;
@@ -172,6 +181,11 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
       nbobjs++;
     }
 
+    if (nbobjs < 2) {
+      fprintf(stderr, "Ignoring %s distances from environment variable, needs at least 2 indexes\n",
+	      hwloc_obj_type_string(type));
+      return;
+    }
     if (*tmp != ':') {
       fprintf(stderr, "Ignoring %s distances from environment variable, missing colon\n",
 	      hwloc_obj_type_string(type));
@@ -275,7 +289,7 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
     return 0;
   }
 
-  if (!nbobjs || !indexes || !distances)
+  if (nbobjs < 2 || !indexes || !distances)
     return -1;
 
   if (hwloc_distances__check_matrix(topology, type, nbobjs, indexes, NULL, distances) < 0)
