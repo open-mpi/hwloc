@@ -525,11 +525,21 @@ hwloc__xml_import_distances(struct hwloc_xml_backend_data_s *data,
     float *matrix, latmax = 0;
     struct hwloc_xml_imported_distances_s *distances;
 
+    matrix = malloc(nbobjs*nbobjs*sizeof(float));
     distances = malloc(sizeof(*distances));
+    if (!matrix || !distances) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: failed to allocate distance matrix for %lu objects\n",
+		state->global->msgprefix, nbobjs);
+      free(distances);
+      free(matrix);
+      return -1;
+    }
+
     distances->root = obj;
     distances->distances.relative_depth = reldepth;
     distances->distances.nbobjs = nbobjs;
-    distances->distances.latency = matrix = malloc(nbobjs*nbobjs*sizeof(float));
+    distances->distances.latency = matrix;
     distances->distances.latency_base = latbase;
 
     for(i=0; i<nbobjs*nbobjs; i++) {
