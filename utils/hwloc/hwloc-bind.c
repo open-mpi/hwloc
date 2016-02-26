@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -9,6 +9,10 @@
 #include <private/private.h>
 #include <hwloc-calc.h>
 #include <hwloc.h>
+
+#ifdef HWLOC_LINUX_SYS
+#include <hwloc/linux.h>
+#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -41,6 +45,9 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  -e --get-last-cpu-location\n"
 		 "                 Retrieve the last processors where the current process ran\n");
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
+#ifdef HWLOC_LINUX_SYS
+  fprintf(where, "  --tid <tid>    Operate on thread <tid>\n");
+#endif
   fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
@@ -74,6 +81,7 @@ int main(int argc, char *argv[])
   int opt;
   int ret;
   int pid_number = -1;
+  int tid_number = -1;
   hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
   char *callname;
 
@@ -144,6 +152,17 @@ int main(int argc, char *argv[])
         opt = 1;
         goto next;
       }
+#ifdef HWLOC_LINUX_SYS
+      if (!strcmp(argv[0], "--tid")) {
+        if (argc < 2) {
+          usage ("hwloc-bind", stderr);
+          exit(EXIT_FAILURE);
+        }
+        tid_number = atoi(argv[1]);
+        opt = 1;
+        goto next;
+      }
+#endif
       if (!strcmp (argv[0], "--version")) {
 	printf("%s %s\n", callname, HWLOC_VERSION);
 	exit(EXIT_SUCCESS);
@@ -250,6 +269,11 @@ int main(int argc, char *argv[])
 
   ENSURE_LOADED();
 
+  if (pid_number > 0 && tid_number > 0) {
+    fprintf(stderr, "cannot operate both on tid and pid\n");
+    return EXIT_FAILURE;
+  }
+
   if (pid_number > 0) {
     pid = hwloc_pid_from_number(pid_number, !(get_binding || get_last_cpu_location));
     /* no need to set_pid()
@@ -275,11 +299,19 @@ int main(int argc, char *argv[])
       if (get_last_cpu_location) {
 	if (pid_number > 0)
 	  err = hwloc_get_proc_last_cpu_location(topology, pid, cpubind_set, 0);
+#ifdef HWLOC_LINUX_SYS
+	else if (tid_number > 0)
+	  err = hwloc_linux_get_tid_last_cpu_location(topology, tid_number, cpubind_set);
+#endif
 	else
 	  err = hwloc_get_last_cpu_location(topology, cpubind_set, 0);
       } else {
 	if (pid_number > 0)
 	  err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
+#ifdef HWLOC_LINUX_SYS
+	else if (tid_number > 0)
+	  err = hwloc_linux_get_tid_cpubind(topology, tid_number, cpubind_set);
+#endif
 	else
 	  err = hwloc_get_cpubind(topology, cpubind_set, 0);
       }
@@ -287,6 +319,8 @@ int main(int argc, char *argv[])
 	const char *errmsg = strerror(errno);
 	if (pid_number > 0)
 	  fprintf(stderr, "hwloc_get_proc_%s %d failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", pid_number, errno, errmsg);
+	else if (tid_number > 0)
+	  fprintf(stderr, "hwloc_get_tid_%s %d failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", tid_number, errno, errmsg);
 	else
 	  fprintf(stderr, "hwloc_get_%s failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", errno, errmsg);
 	return EXIT_FAILURE;
@@ -299,7 +333,9 @@ int main(int argc, char *argv[])
       hwloc_membind_policy_t policy;
       if (pid_number > 0)
 	err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, 0);
-      else
+      else if (tid_number > 0) {
+	err = -1; errno = ENOSYS;
+      } else
 	err = hwloc_get_membind(topology, membind_set, &policy, 0);
       if (err) {
 	const char *errmsg = strerror(errno);
@@ -346,7 +382,9 @@ int main(int argc, char *argv[])
       hwloc_bitmap_singlify(membind_set);
     if (pid_number > 0)
       ret = hwloc_set_proc_membind(topology, pid, membind_set, membind_policy, membind_flags);
-    else
+    else if (tid_number > 0) {
+      ret = -1; errno = ENOSYS;
+    } else
       ret = hwloc_set_membind(topology, membind_set, membind_policy, membind_flags);
     if (ret && verbose >= 0) {
       int bind_errno = errno;
@@ -387,6 +425,10 @@ int main(int argc, char *argv[])
       hwloc_bitmap_singlify(cpubind_set);
     if (pid_number > 0)
       ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, cpubind_flags);
+#ifdef HWLOC_LINUX_SYS
+    else if (tid_number > 0)
+      ret = hwloc_linux_set_tid_cpubind(topology, tid_number, cpubind_set);
+#endif
     else
       ret = hwloc_set_cpubind(topology, cpubind_set, cpubind_flags);
     if (ret && verbose >= 0) {
@@ -397,6 +439,9 @@ int main(int argc, char *argv[])
       if (pid_number > 0)
         fprintf(stderr, "hwloc_set_proc_cpubind %s (flags %x) PID %d failed (errno %d %s)\n",
 		s, cpubind_flags, pid_number, bind_errno, errmsg);
+      else if (tid_number > 0)
+        fprintf(stderr, "hwloc_set_tid_cpubind %s (flags %x) PID %d failed (errno %d %s)\n",
+		s, cpubind_flags, tid_number, bind_errno, errmsg);
       else
         fprintf(stderr, "hwloc_set_cpubind %s (flags %x) failed (errno %d %s)\n",
 		s, cpubind_flags, bind_errno, errmsg);
@@ -411,7 +456,7 @@ int main(int argc, char *argv[])
 
   hwloc_topology_destroy(topology);
 
-  if (pid_number > 0)
+  if (pid_number > 0 || tid_number > 0)
     return EXIT_SUCCESS;
 
   if (0 == argc) {
