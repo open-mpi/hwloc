@@ -93,6 +93,11 @@ Require strict binding.
 \fB\-\-pid\fR <pid>
 Operate on pid <pid>
 .TP
+\fB\-\-tid\fR <tid>
+Operate on thread <tid> instead of on an entire process.
+The feature is only supported on Linux for thread CPU binding,
+or for reporting the last processor where the thread ran if \fB\-e\fR was also passed.
+.TP
 \fB\-p\fR \fB\-\-physical\fR
 Interpret input locations with OS/physical indexes instead of logical indexes.
 This option does not apply to the output, see \fB\-\-get\fR above.

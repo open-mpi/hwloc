@@ -29,6 +29,7 @@ Version 1.11.3
   Thanks to Jianjun Wen for reporting the problem and testing the patch.
 * Do not filter-out FibreChannel PCI adapters by default anymore.
   Thanks to Matt Muggeridge for the report.
+* Add --tid to let hwloc-bind operate on individual threads on Linux.
 
 
 Version 1.11.2
