@@ -55,6 +55,8 @@ hwloc_nolibxml_export(void)
   return nolibxml;
 }
 
+#define BASE64_ENCODED_LENGTH(length) (4*(((length)+2)/3))
+
 /*********************************
  ********* XML callbacks *********
  *********************************/
@@ -591,7 +593,7 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
 
     if (encoded) {
       char *encoded_buffer;
-      size_t encoded_length = 4*((length+2)/3);
+      size_t encoded_length = BASE64_ENCODED_LENGTH(length);
       ret = state->global->get_content(state, &encoded_buffer, encoded_length);
       if (ret < 0)
         return -1;
@@ -1584,7 +1586,7 @@ hwloc_export_obj_userdata_base64(void *reserved,
     return -1;
   }
 
-  encoded_length = 4*((length+2)/3);
+  encoded_length = BASE64_ENCODED_LENGTH(length);
   encoded_buffer = malloc(encoded_length+1);
   if (!encoded_buffer) {
     errno = ENOMEM;
