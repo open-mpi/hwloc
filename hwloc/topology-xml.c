@@ -637,8 +637,10 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
 	  return -1;
 	assert(encoded_buffer[encoded_length] == 0);
 	ret = hwloc_decode_from_base64(encoded_buffer, decoded_buffer, length+1);
-	if (ret != (int) length)
+	if (ret != (int) length) {
+	  free(decoded_buffer);
 	  return -1;
+	}
 	topology->userdata_import_cb(topology, obj, name, decoded_buffer, length);
 	free(decoded_buffer);
       }
