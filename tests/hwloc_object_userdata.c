@@ -43,6 +43,12 @@ static void export_cb(void *reserved, hwloc_topology_t topo, hwloc_obj_t obj)
   err = hwloc_export_obj_userdata(reserved, topo, obj, "MyName", tmp, 16);
   assert(err >= 0);
 
+  err = hwloc_export_obj_userdata(reserved, topo, obj, NULL, "", 0);
+  assert(err >= 0);
+
+  err = hwloc_export_obj_userdata_base64(reserved, topo, obj, NULL, "", 0);
+  assert(err >= 0);
+
   for(i=0; i<RANDOMSTRINGSHORTTESTS; i++) {
     sprintf(tmp, "EncodedShort%d", i);
     err = hwloc_export_obj_userdata_base64(reserved, topo, obj, tmp, randomstring+i, i);
@@ -61,7 +67,10 @@ static void import_cb(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_
   char tmp[17];
   uint64_t val;
 
-  if (!strcmp("MyName", name)) {
+  if (!name) {
+    assert(!*(char*)buffer);
+
+  } else if (!strcmp("MyName", name)) {
     assert(length == 16);
     memcpy(tmp, buffer, 16);
     tmp[16] = '\0';
