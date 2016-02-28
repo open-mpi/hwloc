@@ -691,6 +691,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
 
   new->userdata_export_cb = old->userdata_export_cb;
   new->userdata_import_cb = old->userdata_import_cb;
+  new->userdata_not_decoded = old->userdata_not_decoded;
 
   newroot = hwloc_get_root_obj(new);
   hwloc__duplicate_object(newroot, oldroot);
@@ -2831,6 +2832,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
 
   topology->userdata_export_cb = NULL;
   topology->userdata_import_cb = NULL;
+  topology->userdata_not_decoded = 0;
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);
@@ -3028,6 +3030,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
     errno = EBUSY;
     return -1;
   }
+
+  if (getenv("HWLOC_XML_USERDATA_NOT_DECODED"))
+    topology->userdata_not_decoded = 1;
 
   /* Ignore variables if HWLOC_COMPONENTS is set. It will be processed later */
   if (!getenv("HWLOC_COMPONENTS")) {

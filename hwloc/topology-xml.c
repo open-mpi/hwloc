@@ -630,6 +630,19 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
     if (ret < 0)
       return -1;
 
+  } else if (topology->userdata_not_decoded) {
+      char *buffer, *fakename;
+      size_t reallength = encoded ? BASE64_ENCODED_LENGTH(length) : length;
+      ret = state->global->get_content(state, &buffer, reallength);
+      if (ret < 0)
+        return -1;
+      fakename = malloc(6 + 1 + (name ? strlen(name) : 4) + 1);
+      if (!fakename)
+	return -1;
+      sprintf(fakename, encoded ? "base64%c%s" : "normal%c%s", name ? ':' : '-', name ? name : "anon");
+      topology->userdata_import_cb(topology, obj, fakename, buffer, length);
+      free(fakename);
+
   } else if (encoded && length) {
       char *encoded_buffer;
       size_t encoded_length = BASE64_ENCODED_LENGTH(length);
@@ -1716,7 +1729,7 @@ hwloc__export_obj_userdata(hwloc__xml_export_state_t parentstate, int encoded,
 
 int
 hwloc_export_obj_userdata(void *reserved,
-			  struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj __hwloc_attribute_unused,
+			  struct hwloc_topology *topology, struct hwloc_obj *obj __hwloc_attribute_unused,
 			  const char *name, const void *buffer, size_t length)
 {
   hwloc__xml_export_state_t state = reserved;
@@ -1732,7 +1745,29 @@ hwloc_export_obj_userdata(void *reserved,
     return -1;
   }
 
-  hwloc__export_obj_userdata(state, 0, name, length, buffer, length);
+  if (topology->userdata_not_decoded) {
+    int encoded;
+    size_t encoded_length;
+    const char *realname;
+    if (!strncmp(name, "normal", 6)) {
+      encoded = 0;
+      encoded_length = length;
+    } else if (!strncmp(name, "base64", 6)) {
+      encoded = 1;
+      encoded_length = BASE64_ENCODED_LENGTH(length);
+    } else
+      assert(0);
+    if (name[6] == ':')
+      realname = name+7;
+    else if (!strcmp(name+6, "-anon"))
+      realname = NULL;
+    else
+      assert(0);
+    hwloc__export_obj_userdata(state, encoded, realname, length, buffer, encoded_length);
+
+  } else
+    hwloc__export_obj_userdata(state, 0, name, length, buffer, length);
+
   return 0;
 }
 
@@ -1750,6 +1785,8 @@ hwloc_export_obj_userdata_base64(void *reserved,
     errno = EINVAL;
     return -1;
   }
+
+  assert(!topology->userdata_not_decoded);
 
   if (name && hwloc__xml_export_check_buffer(name, strlen(name)) < 0) {
     errno = EINVAL;

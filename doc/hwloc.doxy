@@ -1072,6 +1072,9 @@ following environment variables.
  HWLOC_LIBXML_CLEANUP
   cleanup libxml when ending import, to make valgrind happy
   not enabled by default because somebody else may be using libxml
+ HWLOC_XML_USERDATA_NOT_DECODED
+  do not decode base64 userdata on import,
+  and reexport it the same (used by tools for leaving userdata untouched)
 -->
 
 

@@ -372,4 +372,71 @@ hwloc_lstopo_show_summary(FILE *output, hwloc_topology_t topology)
 	     HWLOC_TYPE_DEPTH_MISC, nbobjs, "Misc", HWLOC_OBJ_MISC);
 }
 
+
+/*************************
+ * Importing/exporting userdata buffers without understanding/decoding/modifying them
+ * Caller must putenv("HWLOC_XML_USERDATA_NOT_DECODED=1") before loading the topology.
+ */
+
+struct hwloc_utils_userdata {
+  char *name;
+  size_t length;
+  char *buffer; /* NULL if userdata entry in the list is not meant to be exported to XML (added by somebody else) */
+  struct hwloc_utils_userdata *next;
+};
+
+static __hwloc_inline void
+hwloc_utils_userdata_import_cb(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj, const char *name, const void *buffer, size_t length)
+{
+  struct hwloc_utils_userdata *u, **up = (struct hwloc_utils_userdata **) &obj->userdata;
+  while (*up)
+    up = &((*up)->next);
+  *up = u = malloc(sizeof(struct hwloc_utils_userdata));
+  u->name = strdup(name);
+  u->length = length;
+  u->buffer = strdup(buffer);
+  u->next = NULL;
+}
+
+static __hwloc_inline void
+hwloc_utils_userdata_export_cb(void *reserved, hwloc_topology_t topology, hwloc_obj_t obj)
+{
+  struct hwloc_utils_userdata *u = obj->userdata;
+  while (u) {
+    if (u->buffer) /* not meant to be exported to XML (added by somebody else) */
+      hwloc_export_obj_userdata(reserved, topology, obj, u->name, u->buffer, u->length);
+    u = u->next;
+  }
+}
+
+/* must be called once the caller has removed its own userdata */
+static __hwloc_inline void
+hwloc_utils_userdata_free(hwloc_obj_t obj)
+{
+  struct hwloc_utils_userdata *u = obj->userdata, *next;
+  while (u) {
+    next = u->next;
+    assert(u->buffer);
+    free(u->name);
+    free(u->buffer);
+    free(u);
+    u = next;
+  }
+  obj->userdata = NULL;
+}
+
+/* must be called once the caller has removed its own userdata */
+static __hwloc_inline void
+hwloc_utils_userdata_free_recursive(hwloc_obj_t obj)
+{
+  hwloc_obj_t child;
+  hwloc_utils_userdata_free(obj);
+  for (child = obj->first_child; child; child = child->next_sibling)
+    hwloc_utils_userdata_free_recursive(child);
+  for (child = obj->io_first_child; child; child = child->next_sibling)
+    hwloc_utils_userdata_free_recursive(child);
+  for (child = obj->misc_first_child; child; child = child->next_sibling)
+    hwloc_utils_userdata_free_recursive(child);
+}
+
 #endif /* HWLOC_UTILS_MISC_H */
