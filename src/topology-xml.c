@@ -1561,6 +1561,11 @@ hwloc_export_obj_userdata(void *reserved,
 {
   hwloc__xml_export_state_t state = reserved;
 
+  if (!buffer) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if ((name && hwloc__xml_export_check_buffer(name, strlen(name)) < 0)
       || hwloc__xml_export_check_buffer(buffer, length) < 0) {
     errno = EINVAL;
@@ -1580,6 +1585,11 @@ hwloc_export_obj_userdata_base64(void *reserved,
   size_t encoded_length;
   char *encoded_buffer;
   int ret __hwloc_attribute_unused;
+
+  if (!buffer) {
+    errno = EINVAL;
+    return -1;
+  }
 
   if (name && hwloc__xml_export_check_buffer(name, strlen(name)) < 0) {
     errno = EINVAL;
