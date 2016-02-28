@@ -622,10 +622,10 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
       return -1;
   }
 
-  if (length && topology->userdata_import_cb) {
+  if (topology->userdata_import_cb) {
     int ret;
 
-    if (encoded) {
+    if (encoded && length) {
       char *encoded_buffer;
       size_t encoded_length = BASE64_ENCODED_LENGTH(length);
       ret = state->global->get_content(state, &encoded_buffer, encoded_length);
@@ -644,13 +644,17 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
 	topology->userdata_import_cb(topology, obj, name, decoded_buffer, length);
 	free(decoded_buffer);
       }
-    } else {
-      char *buffer;
-      ret = state->global->get_content(state, &buffer, length);
-      if (ret < 0)
-        return -1;
+
+    } else { /* always handle length==0 in the non-encoded case */
+      char *buffer = "";
+      if (length) {
+	ret = state->global->get_content(state, &buffer, length);
+	if (ret < 0)
+	  return -1;
+      }
       topology->userdata_import_cb(topology, obj, name, buffer, length);
     }
+
     state->global->close_content(state);
   }
   return state->global->close_tag(state);
