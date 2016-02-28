@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -106,6 +106,7 @@ struct hwloc_topology {
 
   void (*userdata_export_cb)(void *reserved, struct hwloc_topology *topology, struct hwloc_obj *obj);
   void (*userdata_import_cb)(struct hwloc_topology *topology, struct hwloc_obj *obj, const char *name, const void *buffer, size_t length);
+  int userdata_not_decoded;
 
   struct hwloc_os_distances_s {
     hwloc_obj_type_t type;

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2015 Inria.  All rights reserved.
+ * Copyright © 2012-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -171,6 +171,11 @@ int main(int argc, char *argv[])
 	err = hwloc_topology_set_xml(topology, input);
 	if (err < 0)
 		goto out;
+
+	putenv("HWLOC_XML_USERDATA_NOT_DECODED=1");
+	hwloc_topology_set_userdata_import_callback(topology, hwloc_utils_userdata_import_cb);
+	hwloc_topology_set_userdata_export_callback(topology, hwloc_utils_userdata_export_cb);
+
 	hwloc_topology_load(topology);
 
 	topodepth = hwloc_topology_get_depth(topology);
@@ -193,10 +198,12 @@ int main(int argc, char *argv[])
 	if (err < 0)
 		goto out;
 
+	hwloc_utils_userdata_free_recursive(hwloc_get_root_obj(topology));
 	hwloc_topology_destroy(topology);
 	exit(EXIT_SUCCESS);
 
 out:
+	hwloc_utils_userdata_free_recursive(hwloc_get_root_obj(topology));
 	hwloc_topology_destroy(topology);
 	exit(EXIT_FAILURE);
 }

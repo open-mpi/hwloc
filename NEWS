@@ -31,6 +31,7 @@ Version 1.11.3
   Thanks to Matt Muggeridge for the report.
 * Add --tid to let hwloc-bind operate on individual threads on Linux.
 * Fix some corner cases in the XML export/import of application userdata.
+* hwloc-annotate does not drop application userdata from XMLs anymore.
 
 
 Version 1.11.2

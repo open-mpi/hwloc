@@ -1055,6 +1055,9 @@ following environment variables.
  HWLOC_NO_LIBXML_EXPORT
  HWLOC_NO_LIBXML_IMPORT
   forces the use of the nolibxml XML backend instead of libxml2 if available
+ HWLOC_XML_USERDATA_NOT_DECODED
+  do not decode base64 userdata on import,
+  and reexport it the same (used by tools for leaving userdata untouched)
 -->
 
 
