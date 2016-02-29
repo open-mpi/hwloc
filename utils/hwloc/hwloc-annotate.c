@@ -25,6 +25,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
         fprintf(where, "Options:\n");
 	fprintf(where, "  --ci\tClear existing infos\n");
 	fprintf(where, "  --ri\tReplace or remove existing infos with same name (annotation must be info)\n");
+	fprintf(where, "  --cu\tClear existing userdata\n");
 }
 
 static char *infoname = NULL, *infovalue = NULL;
@@ -33,6 +34,7 @@ static char *miscname = NULL;
 
 static int clearinfos = 0;
 static int replaceinfos = 0;
+static int clearuserdata = 0;
 
 static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 {
@@ -46,6 +48,9 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 		free(obj->infos);
 		obj->infos = NULL;
 		obj->infos_count = 0;
+	}
+	if (clearuserdata) {
+		hwloc_utils_userdata_free(obj);
 	}
 	if (infoname) {
 		if (replaceinfos) {
@@ -116,6 +121,8 @@ int main(int argc, char *argv[])
 			clearinfos = 1;
 		else if (!strcmp(argv[0], "--ri"))
 			replaceinfos = 1;
+		else if (!strcmp(argv[0], "--cu"))
+			clearuserdata = 1;
 		else {
 			fprintf(stderr, "Unrecognized options: %s\n", argv[0]);
 			usage(callname, stderr);
