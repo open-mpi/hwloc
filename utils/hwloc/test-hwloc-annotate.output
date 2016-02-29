@@ -48,7 +48,6 @@
               <info name="Foo" value="Bar"/>
               <object type="Cache" cpuset="0x00000005" complete_cpuset="0x00000005" online_cpuset="0x00000005" allowed_cpuset="0x00000005" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="4" cache_type="2">
                 <info name="Foo" value="Bar"/>
-                <userdata name="EncodedLong2" length="126" encoding="base64">rmR/4H8AAHiuZH/gfwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEC2ZH/gfwAA/////wAAAAD///9/AAAA</userdata>
                 <object type="Core" os_index="0" cpuset="0x00000005" complete_cpuset="0x00000005" online_cpuset="0x00000005" allowed_cpuset="0x00000005" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0">
                   <info name="Foo2" value="Bar2"/>
                   <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0">
