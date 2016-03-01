@@ -643,6 +643,9 @@ HWLOC_DECLSPEC void hwloc_topology_destroy (hwloc_topology_t topology);
  * are duplicated into a new one.
  *
  * This is useful for keeping a backup while modifying a topology.
+ *
+ * \note Object userdata is not duplicated since hwloc does not know what it point to.
+ * The objects of both old and new topologies will point to the same userdata.
  */
 HWLOC_DECLSPEC int hwloc_topology_dup(hwloc_topology_t *newtopology, hwloc_topology_t oldtopology);
 
