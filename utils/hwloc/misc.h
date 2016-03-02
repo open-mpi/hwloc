@@ -331,7 +331,7 @@ hwloc_pid_from_number(int pid_number, int set_info __hwloc_attribute_unused)
     char *message;
     FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
                   NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (char *)&message, 0, NULL);
-    fprintf(stderr, "OpenProcess %d failed %ld: %s\n", pid_number, error, message);
+    fprintf(stderr, "OpenProcess %d failed %ld: %s\n", pid_number, (unsigned long) error, message);
     exit(EXIT_FAILURE);
   }
 #else

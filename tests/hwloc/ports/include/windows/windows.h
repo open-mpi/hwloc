@@ -27,6 +27,10 @@ typedef long LONG, LONG_PTR;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)(void);
 typedef void *PVOID,*LPVOID;
+typedef char CHAR;
+typedef CHAR *LPSTR;
+typedef LPSTR LPTSTR;
+typedef const void *LPCVOID;
 typedef ULONG_PTR SIZE_T;
 typedef LONG_PTR LRESULT;
 typedef UINT_PTR WPARAM;
@@ -125,6 +129,18 @@ typedef struct _SYSTEM_INFO {
 } SYSTEM_INFO, *LPSYSTEM_INFO;
 
 void WINAPI GetSystemInfo(LPSYSTEM_INFO lpSystemInfo);
+
+HANDLE WINAPI OpenProcess(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwProcessId);
+#define PROCESS_SET_INFORMATION 0x0200
+#define PROCESS_QUERY_INFORMATION 0x0400
+
+DWORD WINAPI FormatMessage(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DWORD dwLanguageId, LPTSTR lpBuffer, DWORD nSize, va_list *Arguments);
+#define FORMAT_MESSAGE_ALLOCATE_BUFFER 0x00000100
+#define FORMAT_MESSAGE_FROM_SYSTEM 0x00001000
+
+WORD MAKELANGID(USHORT usPrimaryLanguage, USHORT usSubLanguage);
+#define LANG_NEUTRAL 0x00
+#define SUBLANG_DEFAULT 0x01
 
 HGDIOBJ GetStockObject(int fnObject);
 BOOL DeleteObject(HGDIOBJ hObject);
