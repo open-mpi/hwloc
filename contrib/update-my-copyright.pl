@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
-# Copyright © 2011-2014 Inria.  All rights reserved.
+# Copyright © 2011-2016 Inria.  All rights reserved.
 # $COPYRIGHT$
 #
 
@@ -89,7 +89,9 @@ GetOptions(
 
 if ($HELP) {
     print <<EOT;
-$0 [options]
+$0 [options] [directory]
+
+[directory] is "." unless specified.
 
 --help | -h          This help message
 --quiet | -q         Only output critical messages to stdout
@@ -119,7 +121,7 @@ $year += 1900;
 quiet_print "==> This year: $year\n";
 
 # Find the top-level HWLOC source tree dir
-my $start = cwd();
+my $start = defined $ARGV[0] ? $ARGV[0] : cwd();
 my $top = $start;
 while (! -d "$top/hwloc" && ! -d "$top/netloc") {
     chdir("..");
