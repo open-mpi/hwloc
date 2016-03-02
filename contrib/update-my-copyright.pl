@@ -176,6 +176,13 @@ foreach my $f (@files) {
         next;
     }
 
+    # don't modify ourself while running
+    if ($f =~ m/update-my-copyright\.pl$/) {
+        quiet_print "==> WARNING: Cannot modify myself while running!\n";
+        quiet_print "    File left unchanged\n";
+        next;
+    }
+
     # Figure out the line prefix
     $lines[$token_line_index] =~ m/^(.+)$token/;
     my $prefix = $1;
