@@ -655,7 +655,7 @@ main (int argc, char *argv[])
     hwloc_topology_ignore_all_keep_structure(topology);
 
   if (input) {
-    err = hwloc_utils_enable_input_format(topology, input, input_format, loutput.verbose_mode > 1, callname);
+    err = hwloc_utils_enable_input_format(topology, input, &input_format, loutput.verbose_mode > 1, callname);
     if (err)
       return err;
   }

@@ -140,30 +140,30 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
 static __hwloc_inline int
 hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 				const char *input,
-				enum hwloc_utils_input_format input_format,
+				enum hwloc_utils_input_format *input_format,
 				int verbose, const char *callname)
 {
-  if (input_format == HWLOC_UTILS_INPUT_DEFAULT && !strcmp(input, "-.xml")) {
-    input_format = HWLOC_UTILS_INPUT_XML;
+  if (*input_format == HWLOC_UTILS_INPUT_DEFAULT && !strcmp(input, "-.xml")) {
+    *input_format = HWLOC_UTILS_INPUT_XML;
     input = "-";
   }
 
-  if (input_format == HWLOC_UTILS_INPUT_DEFAULT) {
+  if (*input_format == HWLOC_UTILS_INPUT_DEFAULT) {
     struct stat inputst;
     int err;
     err = stat(input, &inputst);
     if (err < 0) {
       if (verbose > 0)
 	printf("assuming `%s' is a synthetic topology description\n", input);
-      input_format = HWLOC_UTILS_INPUT_SYNTHETIC;
+      *input_format = HWLOC_UTILS_INPUT_SYNTHETIC;
     } else if (S_ISDIR(inputst.st_mode)) {
       if (verbose > 0)
 	printf("assuming `%s' is a file-system root\n", input);
-      input_format = HWLOC_UTILS_INPUT_FSROOT;
+      *input_format = HWLOC_UTILS_INPUT_FSROOT;
     } else if (S_ISREG(inputst.st_mode)) {
       if (verbose > 0)
 	printf("assuming `%s' is a XML file\n", input);
-      input_format = HWLOC_UTILS_INPUT_XML;
+      *input_format = HWLOC_UTILS_INPUT_XML;
     } else {
       fprintf (stderr, "Unrecognized input file: %s\n", input);
       usage (callname, stderr);
@@ -171,7 +171,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     }
   }
 
-  switch (input_format) {
+  switch (*input_format) {
   case HWLOC_UTILS_INPUT_XML:
     if (!strcmp(input, "-"))
       input = "/dev/stdin";
