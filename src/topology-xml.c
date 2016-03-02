@@ -1556,7 +1556,8 @@ hwloc__export_obj_userdata(hwloc__xml_export_state_t parentstate, int encoded,
   state.new_prop(&state, "length", tmp);
   if (encoded)
     state.new_prop(&state, "encoding", "base64");
-  state.add_content(&state, buffer, encoded ? encoded_length : length);
+  if (encoded_length)
+    state.add_content(&state, buffer, encoded ? encoded_length : length);
   state.end_object(&state, "userdata");
 }
 
