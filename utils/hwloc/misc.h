@@ -1,10 +1,13 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
+
+#ifndef HWLOC_UTILS_MISC_H
+#define HWLOC_UTILS_MISC_H
 
 #include <private/autogen/config.h>
 #include <hwloc.h>
@@ -283,3 +286,5 @@ hwloc_lstopo_show_summary(FILE *output, hwloc_topology_t topology)
     fprintf (output, "Special depth %d:\t%u %s (type #%u)\n",
 	     HWLOC_TYPE_DEPTH_OS_DEVICE, nbobjs, "OS Device", HWLOC_OBJ_OS_DEVICE);
 }
+
+#endif /* HWLOC_UTILS_MISC_H */
