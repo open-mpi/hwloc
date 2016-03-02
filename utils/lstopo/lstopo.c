@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -668,6 +668,30 @@ main (int argc, char *argv[])
     }
   }
 
+  /* if the output format wasn't enforced, look at the filename */
+  if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
+    if (!strcmp(filename, "-")
+	|| !strcmp(filename, "/dev/stdout")) {
+      output_format = LSTOPO_OUTPUT_CONSOLE;
+    } else {
+      char *dot = strrchr(filename, '.');
+      if (dot)
+        output_format = parse_output_format(dot+1, callname);
+      else {
+	fprintf(stderr, "Cannot infer output type for file `%s' without any extension, using default output.\n", filename);
+	filename = NULL;
+      }
+    }
+  }
+
+  /* if  the output format wasn't enforced, think a bit about what the user probably want */
+  if (output_format == LSTOPO_OUTPUT_DEFAULT) {
+    if (lstopo_show_cpuset
+        || lstopo_show_only != (hwloc_obj_type_t)-1
+        || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
+      output_format = LSTOPO_OUTPUT_CONSOLE;
+  }
+
   err = hwloc_topology_load (topology);
   if (err) {
     fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
@@ -694,30 +718,6 @@ main (int argc, char *argv[])
     }
     hwloc_bitmap_free(restrictset);
     free(restrictstring);
-  }
-
-  /* if the output format wasn't enforced, look at the filename */
-  if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
-    if (!strcmp(filename, "-")
-	|| !strcmp(filename, "/dev/stdout")) {
-      output_format = LSTOPO_OUTPUT_CONSOLE;
-    } else {
-      char *dot = strrchr(filename, '.');
-      if (dot)
-        output_format = parse_output_format(dot+1, callname);
-      else {
-	fprintf(stderr, "Cannot infer output type for file `%s' without any extension, using default output.\n", filename);
-	filename = NULL;
-      }
-    }
-  }
-
-  /* if  the output format wasn't enforced, think a bit about what the user probably want */
-  if (output_format == LSTOPO_OUTPUT_DEFAULT) {
-    if (lstopo_show_cpuset
-        || lstopo_show_only != (hwloc_obj_type_t)-1
-        || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
-      output_format = LSTOPO_OUTPUT_CONSOLE;
   }
 
   if (loutput.logical == -1) {
