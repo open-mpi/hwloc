@@ -719,6 +719,32 @@ main (int argc, char *argv[])
     }
   }
 
+  /* if the output format wasn't enforced, look at the filename */
+  if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
+    if (!strcmp(filename, "-")
+	|| !strcmp(filename, "/dev/stdout")) {
+      output_format = LSTOPO_OUTPUT_CONSOLE;
+    } else {
+      char *dot = strrchr(filename, '.');
+      if (dot)
+        output_format = parse_output_format(dot+1, callname);
+      else {
+	fprintf(stderr, "Cannot infer output type for file `%s' without any extension, using default output.\n", filename);
+	filename = NULL;
+      }
+    }
+  }
+  if (output_format == LSTOPO_OUTPUT_ERROR)
+    goto out_usagefailure;
+
+  /* if  the output format wasn't enforced, think a bit about what the user probably want */
+  if (output_format == LSTOPO_OUTPUT_DEFAULT) {
+    if (loutput.show_cpuset
+        || loutput.show_only != HWLOC_OBJ_TYPE_NONE
+        || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
+      output_format = LSTOPO_OUTPUT_CONSOLE;
+  }
+
   err = hwloc_topology_load (topology);
   if (err) {
     fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
@@ -745,32 +771,6 @@ main (int argc, char *argv[])
     }
     hwloc_bitmap_free(restrictset);
     free(restrictstring);
-  }
-
-  /* if the output format wasn't enforced, look at the filename */
-  if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
-    if (!strcmp(filename, "-")
-	|| !strcmp(filename, "/dev/stdout")) {
-      output_format = LSTOPO_OUTPUT_CONSOLE;
-    } else {
-      char *dot = strrchr(filename, '.');
-      if (dot)
-        output_format = parse_output_format(dot+1, callname);
-      else {
-	fprintf(stderr, "Cannot infer output type for file `%s' without any extension, using default output.\n", filename);
-	filename = NULL;
-      }
-    }
-  }
-  if (output_format == LSTOPO_OUTPUT_ERROR)
-    goto out_usagefailure;
-
-  /* if  the output format wasn't enforced, think a bit about what the user probably want */
-  if (output_format == LSTOPO_OUTPUT_DEFAULT) {
-    if (loutput.show_cpuset
-        || loutput.show_only != HWLOC_OBJ_TYPE_NONE
-        || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
-      output_format = LSTOPO_OUTPUT_CONSOLE;
   }
 
   if (loutput.logical == -1) {
