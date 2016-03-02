@@ -706,7 +706,7 @@ main (int argc, char *argv[])
   hwloc_topology_set_flags(topology, flags);
 
   if (input) {
-    err = hwloc_utils_enable_input_format(topology, input, input_format, loutput.verbose_mode > 1, callname);
+    err = hwloc_utils_enable_input_format(topology, input, &input_format, loutput.verbose_mode > 1, callname);
     if (err)
       goto out_with_topology;
   }

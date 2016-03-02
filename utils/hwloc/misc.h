@@ -207,23 +207,23 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
 static __hwloc_inline int
 hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 				const char *input,
-				enum hwloc_utils_input_format input_format,
+				enum hwloc_utils_input_format *input_format,
 				int verbose, const char *callname)
 {
-  if (input_format == HWLOC_UTILS_INPUT_DEFAULT && !strcmp(input, "-.xml")) {
-    input_format = HWLOC_UTILS_INPUT_XML;
+  if (*input_format == HWLOC_UTILS_INPUT_DEFAULT && !strcmp(input, "-.xml")) {
+    *input_format = HWLOC_UTILS_INPUT_XML;
     input = "-";
   }
 
-  if (input_format == HWLOC_UTILS_INPUT_DEFAULT) {
-    input_format = hwloc_utils_autodetect_input_format(input, verbose);
-    if (input_format == HWLOC_UTILS_INPUT_DEFAULT) {
+  if (*input_format == HWLOC_UTILS_INPUT_DEFAULT) {
+    *input_format = hwloc_utils_autodetect_input_format(input, verbose);
+    if (*input_format == HWLOC_UTILS_INPUT_DEFAULT) {
       usage (callname, stderr);
       return EXIT_FAILURE;
     }
   }
 
-  switch (input_format) {
+  switch (*input_format) {
   case HWLOC_UTILS_INPUT_XML:
     if (!strcmp(input, "-"))
       input = "/dev/stdin";
