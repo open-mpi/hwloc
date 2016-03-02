@@ -9,6 +9,7 @@
 #ifndef UTILS_LSTOPO_H
 #define UTILS_LSTOPO_H
 
+#include <private/autogen/config.h>
 #include <hwloc.h>
 
 enum lstopo_orient_e {
