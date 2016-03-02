@@ -264,6 +264,8 @@ lstopo_populate_userdata(hwloc_obj_t parent)
   hwloc_obj_t child;
   struct lstopo_obj_userdata *save = malloc(sizeof(*save));
 
+  save->common.buffer = NULL; /* so that it is ignored on XML export */
+  save->common.next = parent->userdata;
   save->fontsize = (unsigned) -1;
   save->gridsize = (unsigned) -1;
   parent->userdata = save;
@@ -280,9 +282,12 @@ static void
 lstopo_destroy_userdata(hwloc_obj_t parent)
 {
   hwloc_obj_t child;
+  struct lstopo_obj_userdata *save = parent->userdata;
 
-  free(parent->userdata);
-  parent->userdata = NULL;
+  if (save) {
+    parent->userdata = save->common.next;
+    free(save);
+  }
 
   for(child = parent->first_child; child; child = child->next_sibling)
     lstopo_destroy_userdata(child);
@@ -745,6 +750,14 @@ main (int argc, char *argv[])
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }
 
+  if (input_format == HWLOC_UTILS_INPUT_XML
+      && output_format == LSTOPO_OUTPUT_XML) {
+    /* must be after parsing output format and before loading the topology */
+    putenv("HWLOC_XML_USERDATA_NOT_DECODED=1");
+    hwloc_topology_set_userdata_import_callback(topology, hwloc_utils_userdata_import_cb);
+    hwloc_topology_set_userdata_export_callback(topology, hwloc_utils_userdata_export_cb);
+  }
+
   err = hwloc_topology_load (topology);
   if (err) {
     fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
@@ -858,6 +871,7 @@ main (int argc, char *argv[])
   }
 
   lstopo_destroy_userdata(hwloc_get_root_obj(topology));
+  hwloc_utils_userdata_free_recursive(hwloc_get_root_obj(topology));
   hwloc_topology_destroy (topology);
 
   for(i=0; i<loutput.legend_append_nr; i++)

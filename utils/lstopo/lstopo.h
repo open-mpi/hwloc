@@ -11,6 +11,7 @@
 
 #include <private/autogen/config.h>
 #include <hwloc.h>
+#include <misc.h>
 
 enum lstopo_orient_e {
   LSTOPO_ORIENT_NONE = 0,
@@ -60,6 +61,9 @@ struct lstopo_output {
 };
 
 struct lstopo_obj_userdata {
+  /* original common userdata (we replace the first one with this extended structure) */
+  struct hwloc_utils_userdata common;
+
   /* draw info */
   unsigned width;
   unsigned height;
