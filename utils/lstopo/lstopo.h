@@ -11,6 +11,7 @@
 
 #include <private/autogen/config.h>
 #include <hwloc.h>
+#include <misc.h>
 
 extern int lstopo_ignore_pus;
 extern int lstopo_collapse;
@@ -40,6 +41,9 @@ struct lstopo_output {
 };
 
 struct lstopo_obj_userdata {
+  /* original common userdata (we replace the first one with this extended structure) */
+  struct hwloc_utils_userdata common;
+
   /* draw info */
   unsigned width;
   unsigned height;
