@@ -869,6 +869,7 @@ main (int argc, char *argv[])
  out_usagefailure:
   usage (callname, stderr);
  out_with_topology:
+  lstopo_destroy_userdata(hwloc_get_root_obj(topology));
   hwloc_topology_destroy(topology);
  out:
   return EXIT_FAILURE;
