@@ -708,7 +708,7 @@ main (int argc, char *argv[])
   if (input) {
     err = hwloc_utils_enable_input_format(topology, input, input_format, loutput.verbose_mode > 1, callname);
     if (err)
-      return err;
+      goto out_with_topology;
   }
 
   if (loutput.pid_number > 0) {
