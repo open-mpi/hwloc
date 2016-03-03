@@ -573,6 +573,7 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
   size_t length = 0;
   int encoded = 0;
   char *name = NULL; /* optional */
+  int ret;
 
   while (1) {
     char *attrname, *attrvalue;
@@ -588,10 +589,14 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
       return -1;
   }
 
-  if (topology->userdata_import_cb) {
-    int ret;
+  if (!topology->userdata_import_cb) {
+    char *buffer;
+    size_t reallength = encoded ? BASE64_ENCODED_LENGTH(length) : length;
+    ret = state->global->get_content(state, &buffer, reallength);
+    if (ret < 0)
+      return -1;
 
-    if (encoded && length) {
+  } else if (encoded && length) {
       char *encoded_buffer;
       size_t encoded_length = BASE64_ENCODED_LENGTH(length);
       ret = state->global->get_content(state, &encoded_buffer, encoded_length);
@@ -611,7 +616,7 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
 	free(decoded_buffer);
       }
 
-    } else { /* always handle length==0 in the non-encoded case */
+  } else { /* always handle length==0 in the non-encoded case */
       char *buffer = "";
       if (length) {
 	ret = state->global->get_content(state, &buffer, length);
@@ -619,10 +624,9 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
 	  return -1;
       }
       topology->userdata_import_cb(topology, obj, name, buffer, length);
-    }
-
-    state->global->close_content(state);
   }
+
+  state->global->close_content(state);
   return state->global->close_tag(state);
 }
 
