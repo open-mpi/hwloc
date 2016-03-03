@@ -272,6 +272,32 @@ lstopo_add_collapse_attributes(hwloc_topology_t topology)
   }
 }
 
+static void
+lstopo_populate_userdata(hwloc_obj_t parent)
+{
+  hwloc_obj_t child;
+  struct lstopo_obj_userdata *save = malloc(sizeof(*save));
+
+  save->fontsize = (unsigned) -1;
+  save->gridsize = (unsigned) -1;
+  parent->userdata = save;
+
+  for(child = parent->first_child; child; child = child->next_sibling)
+    lstopo_populate_userdata(child);
+}
+
+static void
+lstopo_destroy_userdata(hwloc_obj_t parent)
+{
+  hwloc_obj_t child;
+
+  free(parent->userdata);
+  parent->userdata = NULL;
+
+  for(child = parent->first_child; child; child = child->next_sibling)
+    lstopo_destroy_userdata(child);
+}
+
 void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] ... [ filename.format ]\n\n", name);
@@ -730,6 +756,8 @@ main (int argc, char *argv[])
   loutput.topology = topology;
   loutput.file = NULL;
 
+  lstopo_populate_userdata(hwloc_get_root_obj(topology));
+
   if (output_format != LSTOPO_OUTPUT_XML && lstopo_collapse)
     lstopo_add_collapse_attributes(topology);
 
@@ -803,7 +831,7 @@ main (int argc, char *argv[])
       exit(EXIT_FAILURE);
   }
 
-  output_draw_clear(&loutput);
+  lstopo_destroy_userdata(hwloc_get_root_obj(topology));
   hwloc_topology_destroy (topology);
 
   for(i=0; i<lstopo_append_legends_nr; i++)

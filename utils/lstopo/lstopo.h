@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2015 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -39,6 +39,14 @@ struct lstopo_output {
   unsigned min_pu_textwidth;
 };
 
+struct lstopo_obj_userdata {
+  /* draw info */
+  unsigned width;
+  unsigned height;
+  unsigned fontsize;
+  unsigned gridsize;
+};
+
 typedef void output_method (struct lstopo_output *output, const char *filename);
 
 extern output_method output_console, output_synthetic, output_ascii, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
@@ -65,7 +73,6 @@ extern enum lstopo_orient_e force_orient[];
 
 extern void output_draw_start(struct lstopo_output *output);
 extern void output_draw(struct lstopo_output *output);
-extern void output_draw_clear(struct lstopo_output *output);
 
 int rgb_to_color(int r, int g, int b) __hwloc_attribute_const;
 int declare_color(int r, int g, int b);

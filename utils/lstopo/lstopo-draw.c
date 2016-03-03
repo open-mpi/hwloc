@@ -381,38 +381,23 @@ RECURSE_BEGIN(obj, border) \
 
 /* Dynamic programming */
 
-/* Per-object data: width and height of drawing for this object and sub-objects */
-struct dyna_save {
-  unsigned width;
-  unsigned height;
-  unsigned fontsize;
-  unsigned gridsize;
-};
-
 /* Save the computed size */
 #define DYNA_SAVE() do { \
-  if (!level->userdata) { \
-    struct dyna_save *save = malloc(sizeof(*save)); \
+    struct lstopo_obj_userdata *save = level->userdata; \
     save->width = *retwidth; \
     save->height = *retheight; \
     save->fontsize = fontsize; \
     save->gridsize = gridsize; \
-    level->userdata = save; \
-  } \
 } while (0)
 
 /* Check whether we already computed the size and we are not actually drawing, in that case return it */
 #define DYNA_CHECK() do { \
-  if (level->userdata && methods == &null_draw_methods) { \
-    struct dyna_save *save = level->userdata; \
+  if (methods == &null_draw_methods) { \
+    struct lstopo_obj_userdata *save = level->userdata; \
     if (save->fontsize == fontsize && save->gridsize == gridsize) { \
       *retwidth = save->width; \
       *retheight = save->height; \
       return; \
-    } else { \
-      /* Changed size, drop the existing computation */ \
-      free(level->userdata); \
-      level->userdata = NULL; \
     } \
   } \
 } while (0)
@@ -1392,23 +1377,4 @@ output_draw(struct lstopo_output *output)
 {
   output_compute_pu_min_textwidth(output);
   fig(output->topology, output->methods, output->logical, output->legend, hwloc_get_root_obj(output->topology), output, 100, 0, 0);
-}
-
-static void
-draw_clear(hwloc_topology_t topology, hwloc_obj_t level)
-{
-  unsigned i;
-
-  free(level->userdata);
-  level->userdata = NULL;
-
-  for (i = 0; i < level->arity; i++)
-    draw_clear(topology, level->children[i]);
-}
-
-void
-output_draw_clear(struct lstopo_output *loutput)
-{
-  hwloc_topology_t topology = loutput->topology;
-  draw_clear(topology, hwloc_get_root_obj(topology));
 }
