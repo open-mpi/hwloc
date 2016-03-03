@@ -60,3 +60,6 @@ Running the "lstopo" tool is a good way to check as a graphical output whether
 hwloc properly detected the architecture of your node. Netloc command-line
 tools can be used to display the network topology interconnecting your nodes.
 
+
+
+See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation.

@@ -1,4 +1,4 @@
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009-2013 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -799,6 +799,9 @@ $(HWLOC_top_srcdir)/README: $(DOX_TAG)
 	 | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' \
 	 | $(SED) -e '/^--*-$$/,$$ d' \
 	 > $@
+	echo >> $@
+	echo >> $@
+	echo "See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation." >> $@
 	rm -f $(DOX_HTML_README)
 
 else
