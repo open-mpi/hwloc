@@ -1102,12 +1102,6 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   /* Pointer where OBJ should be put */
   hwloc_obj_t *putp = NULL; /* OBJ position isn't found yet */
 
-  /* Make sure we haven't gone too deep.  */
-  if (!hwloc_bitmap_isincluded(obj->cpuset, cur->cpuset)) {
-    fprintf(stderr,"recursion has gone too deep?!\n");
-    return NULL;
-  }
-
   /* Iteration with prefetching to be completely safe against CHILD removal.
    * The list is already sorted by cpuset, and there's no intersection between siblings.
    */
