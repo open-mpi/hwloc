@@ -1314,7 +1314,7 @@ hwloc_topology_alloc_group_object(struct hwloc_topology *topology __hwloc_attrib
 hwloc_obj_t
 hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
-  hwloc_obj_t res;
+  hwloc_obj_t res, root;
   int has_memory = (obj->memory.local_memory != 0);
 
   if (!topology->is_loaded) {
@@ -1329,6 +1329,16 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     errno = EINVAL;
     return NULL;
   }
+
+  root = hwloc_get_root_obj(topology);
+  if (obj->cpuset)
+    hwloc_bitmap_and(obj->cpuset, obj->cpuset, root->cpuset);
+  if (obj->complete_cpuset)
+    hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, root->complete_cpuset);
+  if (obj->nodeset)
+    hwloc_bitmap_and(obj->nodeset, obj->nodeset, root->nodeset);
+  if (obj->complete_nodeset)
+    hwloc_bitmap_and(obj->complete_nodeset, obj->complete_nodeset, root->complete_nodeset);
 
   if ((!obj->cpuset || hwloc_bitmap_iszero(obj->cpuset))
       && (!obj->complete_cpuset || hwloc_bitmap_iszero(obj->complete_cpuset))

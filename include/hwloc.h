@@ -2164,15 +2164,22 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
 /** \brief Add more structure to the topology by adding an intermediate Group
  *
  * The caller should first allocate a new Group object with hwloc_topology_alloc_group_object().
- * Then it must initialize some of its sets to specify the final location of the Group
- * in the topology.
+ * Then it must setup at least one of its CPU or node sets to specify
+ * the final location of the Group in the topology.
  * Then the object can be passed to this function for actual insertion in the topology.
  *
- * Either the cpuset or nodeset field (or both, if compatible) may be used to do so.
- * If inserting with respect to the complete topology (including disallowed, offline
- * or unknown object), complete_cpuset and/or complete_nodeset may be used instead.
- * It grouping several objects, hwloc_obj_add_other_obj_sets() is an easy way to
- * build the Group sets iteratively.
+ * Either the cpuset or nodeset field (or both, if compatible) must be set
+ * to a non-empt bitmap. The complete_cpuset or complete_nodeset may be set
+ * instead if inserting with respect to the complete topology
+ * (including disallowed, offline or unknown objects).
+ *
+ * It grouping several objects, hwloc_obj_add_other_obj_sets() is an easy way
+ * to build the Group sets iteratively.
+ *
+ * These sets cannot be larger than the current topology, or they would get
+ * restricted silently.
+ *
+ * The core will setup the other sets after actual insertion.
  *
  * \return The inserted object if it was properly inserted.
  *
