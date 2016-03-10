@@ -325,7 +325,22 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
   }
 
-
+  /**************************
+   * forward compat with 2.0
+   */
+  else if (!strcmp(name, "kind") || !strcmp(name, "subkind")) {
+    if (obj->type == HWLOC_OBJ_GROUP) {
+      /* ignored, unused in <2.0 */
+    } else {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: ignoring %s attribute for non-group object\n",
+		state->global->msgprefix, name);
+    }
+  }
+  else if (!strcmp(name, "subtype")) {
+    /* FIXME: should be "CoProcType" for osdev/coproc but we don't have that type-specific attribute yet */
+    hwloc_obj_add_info(obj, "Type", value);
+  }
 
 
   /*************************
