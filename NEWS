@@ -74,8 +74,7 @@ Version 2.0.0
     hwloc_topology_insert_misc_object_by_parent().
   + hwloc_topology_set_fsroot() is removed, the environment variable
     HWLOC_FSROOT may be used for the same remote testing/debugging purpose.
-  + hwloc_obj_type_sscanf() now fills a object attribute union instead
-    of some cache-specific fields.
+  + hwloc_type_sscanf() deprecates the old hwloc_obj_type_sscanf().
   + Remove the deprecated hwloc_obj_snprintf(), hwloc_obj_type_of_string(),
     hwloc_distribute[v]().
   + hwloc_obj_cpuset_snprintf() is deprecated in favor of hwloc_bitmap_snprintf().

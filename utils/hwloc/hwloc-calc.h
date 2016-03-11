@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -168,7 +168,7 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
   typestring[typelen] = '\0';
 
   /* try to match a type name */
-  err = hwloc_obj_type_sscanf(typestring, &type, &attrs, sizeof(attrs));
+  err = hwloc_type_sscanf(typestring, &type, &attrs, sizeof(attrs));
   if (!err) {
     *typep = type;
     return hwloc_calc_depth_of_type(topology, type, &attrs, verbose);

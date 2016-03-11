@@ -821,6 +821,7 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
 /** \brief Return a constant stringified object type.
  *
  * This function is the basic way to convert a generic type into a string.
+ * The output string may be parsed back by hwloc_type_sscanf().
  *
  * hwloc_obj_type_snprintf() may return a more precise output for a specific
  * object, but it requires the caller to provide the output buffer.
@@ -837,7 +838,7 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  *
  * If \p verbose is 1, longer type names are used, e.g. L1Cache instead of L1.
  *
- * The output string may be parsed back by hwloc_obj_type_sscanf().
+ * The output string may be parsed back by hwloc_type_sscanf().
  *
  * If \p size is 0, \p string may safely be \c NULL.
  *
@@ -859,8 +860,9 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
  * \return the number of character that were actually written if not truncating,
  * or that would have been written (not including the ending \\0).
  */
-HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * __hwloc_restrict separator,
-				   int verbose);
+HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
+					   hwloc_obj_t obj, const char * __hwloc_restrict separator,
+					   int verbose);
 
 /** \brief Return an object type and attributes from a type string.
  *
@@ -868,8 +870,7 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
  * Matching is case-insensitive, and only the first letters are actually
  * required to match.
  *
- * This function is guaranteed to match any string returned by hwloc_obj_type_string()
- * or hwloc_obj_type_snprintf().
+ * The matched object type is set in \p typep (which cannot be \c NULL).
  *
  * Type-specific attributes, for instance Cache type, Cache depth, Group depth,
  * Bridge type or OS Device type may be returned in \p attrp.
@@ -881,12 +882,14 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
  *
  * \return 0 if a type was correctly identified, otherwise -1.
  *
- * \note This is an extended version of the now deprecated hwloc_obj_type_of_string()
+ * \note This function is guaranteed to match any string returned by
+ * hwloc_obj_type_string() or hwloc_obj_type_snprintf().
+ *
+ * \note This is an extended version of the now deprecated hwloc_obj_type_sscanf().
  */
-HWLOC_DECLSPEC int hwloc_obj_type_sscanf(const char *string,
-					 hwloc_obj_type_t *typep,
-					 union hwloc_obj_attr_u *attrp,
-					 size_t attrsize);
+HWLOC_DECLSPEC int hwloc_type_sscanf(const char *string,
+				     hwloc_obj_type_t *typep,
+				     union hwloc_obj_attr_u *attrp, size_t attrsize);
 
 /** @} */
 

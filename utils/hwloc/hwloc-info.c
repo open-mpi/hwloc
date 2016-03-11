@@ -310,7 +310,7 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	err = hwloc_obj_type_sscanf(argv[1], &show_ancestor_type, &attrs, sizeof(attrs));
+	err = hwloc_type_sscanf(argv[1], &show_ancestor_type, &attrs, sizeof(attrs));
         if (err < 0) {
           fprintf(stderr, "unrecognized --ancestor type %s\n", argv[1]);
           usage(callname, stderr);
@@ -347,7 +347,7 @@ main (int argc, char *argv[])
         }
         if (!strcmp(argv[1], "all"))
           all = 1;
-        else if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0) {
+        else if (hwloc_type_sscanf(argv[1], &type, NULL, 0) < 0) {
           fprintf(stderr, "Unsupported type `%s' passed to --ignore.\n", argv[1]);
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);

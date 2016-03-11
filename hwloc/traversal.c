@@ -204,8 +204,8 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
 }
 
 int
-hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
-		      union hwloc_obj_attr_u *attrp, size_t attrsize)
+hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
+		  union hwloc_obj_attr_u *attrp, size_t attrsize)
 {
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
   unsigned depthattr = (unsigned) -1;

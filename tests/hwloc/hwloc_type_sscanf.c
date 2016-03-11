@@ -18,7 +18,7 @@ static void check(hwloc_obj_t obj, int verbose)
 
   err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, verbose);
   assert(err > 0);
-  err = hwloc_obj_type_sscanf(buffer, &type, &attr, sizeof(attr));
+  err = hwloc_type_sscanf(buffer, &type, &attr, sizeof(attr));
   assert(!err);
   assert(obj->type == type);
   if (hwloc_obj_type_is_cache(type)) {

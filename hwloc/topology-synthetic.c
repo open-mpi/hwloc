@@ -175,7 +175,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
       tmp = attr;
       cur_loop = 0;
       while (tmp) {
-	err = hwloc_obj_type_sscanf(tmp, &type, &attrs, sizeof(attrs));
+	err = hwloc_type_sscanf(tmp, &type, &attrs, sizeof(attrs));
 	if (err < 0) {
 	  if (verbose)
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop type '%s'\n", tmp);
@@ -416,7 +416,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       break;
 
     if (*pos < '0' || *pos > '9') {
-      if (hwloc_obj_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
+      if (hwloc_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
 	/* FIXME: allow generic "Cache" string? would require to deal with possibly duplicate cache levels */
 	if (verbose)
 	  fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);

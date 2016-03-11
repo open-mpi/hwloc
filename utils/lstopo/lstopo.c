@@ -528,7 +528,7 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[0], "--only")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-        if (hwloc_obj_type_sscanf(argv[1], &loutput.show_only, NULL, 0) < 0)
+        if (hwloc_type_sscanf(argv[1], &loutput.show_only, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --only, ignoring.\n", argv[1]);
 	opt = 1;
       }
@@ -553,7 +553,7 @@ main (int argc, char *argv[])
 	}
 	if (!strcmp(argv[1], "all"))
 	  all = 1;
-	else if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0) {
+	else if (hwloc_type_sscanf(argv[1], &type, NULL, 0) < 0) {
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore.\n", argv[1]);
 	  goto out_usagefailure;
 	}
@@ -575,7 +575,7 @@ main (int argc, char *argv[])
 	  fprintf(stderr, "--ignore Cache not supported anymore, use --no-caches instead.\n");
 	  goto out_usagefailure;
 	}
-	if (hwloc_obj_type_sscanf(argv[1], &type, NULL, 0) < 0)
+	if (hwloc_type_sscanf(argv[1], &type, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	else if (type == HWLOC_OBJ_PU)
 	  loutput.ignore_pus = 1;
@@ -644,7 +644,7 @@ main (int argc, char *argv[])
 	  hwloc_obj_type_t type;
 	  if (end)
 	    *end = '\0';
-	  if (hwloc_obj_type_sscanf(tmp, &type, NULL, 0) < 0)
+	  if (hwloc_type_sscanf(tmp, &type, NULL, 0) < 0)
 	    fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
 	  else
 	    loutput.force_orient[type] = orient;
