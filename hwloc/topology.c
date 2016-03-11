@@ -3463,6 +3463,11 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj)
     assert((int) obj->depth >= 0);
   }
 
+  /* group depth cannot be -1 anymore in v2.0+ */
+  if (obj->type == HWLOC_OBJ_GROUP) {
+    assert(obj->attr->group.depth != (unsigned) -1);
+  }
+
   /* there's other cpusets and nodesets if and only if there's a main cpuset */
   assert(!!obj->cpuset == !!obj->complete_cpuset);
   assert(!!obj->cpuset == !!obj->allowed_cpuset);
