@@ -583,7 +583,10 @@ struct hwloc_distances_s {
 				 */
 };
 
-/** \brief Object info */
+/** \brief Object info
+ *
+ * \sa hwlocality_info_attr
+ */
 struct hwloc_obj_info_s {
   char *name;	/**< \brief Info name */
   char *value;	/**< \brief Info value */
@@ -1235,7 +1238,7 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
 
 
 
-/** \defgroup hwlocality_object_strings Manipulating Object Type, Sets and Attributes as Strings
+/** \defgroup hwlocality_object_strings Converting between Object Types, Sets and Attributes, and Strings
  * @{
  */
 
@@ -1311,6 +1314,15 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
  * or that would have been written (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, size_t nobj, const hwloc_obj_t * __hwloc_restrict objs);
+
+/** @} */
+
+
+
+/** \defgroup hwlocality_info_attr Consulting and Adding Key-Value Info Attributes
+ *
+ * @{
+ */
 
 /** \brief Search the given key name in object infos and return the corresponding value.
  *
