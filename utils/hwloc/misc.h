@@ -55,8 +55,8 @@ hwloc_utils_input_format_usage(FILE *where, int addspaces)
   fprintf (where, "  -i <directory>  %*sRead topology from directory containing a CPUID dump\n",
 	   addspaces, " ");
 #endif
-  fprintf (where, "  --input \"n:2 2\"\n");
-  fprintf (where, "  -i \"n:2 2\"      %*sSimulate a fake hierarchy, here with 2 NUMA nodes of 2\n",
+  fprintf (where, "  --input \"node:2 2\"\n");
+  fprintf (where, "  -i \"node:2 2\"   %*sSimulate a fake hierarchy, here with 2 NUMA nodes of 2\n",
 	   addspaces, " ");
   fprintf (where, "                  %*sprocessors\n",
 	   addspaces, " ");
