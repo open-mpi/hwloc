@@ -831,6 +831,9 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  * Matching is case-insensitive, and only the first letters are actually
  * required to match.
  *
+ * This function is guaranteed to match any string returned by hwloc_obj_type_string()
+ * or hwloc_obj_type_snprintf().
+ *
  * Type-specific attributes, for instance caches and groups, may be returned
  * in \p attrp. They are ignored if this pointer is \c NULL.
  *
