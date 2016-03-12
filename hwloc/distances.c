@@ -139,7 +139,7 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
     /* range i-j */
     if (j <= i) {
       fprintf(stderr, "Ignoring %s distances from environment variable, range doesn't cover at least 2 indexes\n",
-	      hwloc_obj_type_string(type));
+	      hwloc_type_name(type));
       return;
     }
     nbobjs = j-i+1;
@@ -147,7 +147,7 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
     tmp = strchr(string, ':');
     if (!tmp) {
       fprintf(stderr, "Ignoring %s distances from environment variable, missing colon\n",
-	      hwloc_obj_type_string(type));
+	      hwloc_type_name(type));
       return;
     }
     tmp++;
@@ -183,12 +183,12 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
 
     if (nbobjs < 2) {
       fprintf(stderr, "Ignoring %s distances from environment variable, needs at least 2 indexes\n",
-	      hwloc_obj_type_string(type));
+	      hwloc_type_name(type));
       return;
     }
     if (*tmp != ':') {
       fprintf(stderr, "Ignoring %s distances from environment variable, missing colon\n",
-	      hwloc_obj_type_string(type));
+	      hwloc_type_name(type));
       return;
     }
 
@@ -210,7 +210,7 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
     /* generate the matrix to create x groups of y elements */
     if (x*y*z != nbobjs) {
       fprintf(stderr, "Ignoring %s distances from environment variable, invalid grouping (%u*%u*%u=%u instead of %u)\n",
-	      hwloc_obj_type_string(type), x, y, z, x*y*z, nbobjs);
+	      hwloc_type_name(type), x, y, z, x*y*z, nbobjs);
       free(indexes);
       free(distances);
       return;
@@ -235,7 +235,7 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
         tmp = next+1;
       } else if (i!=nbobjs*nbobjs-1) {
 	fprintf(stderr, "Ignoring %s distances from environment variable, not enough values (%u out of %u)\n",
-		hwloc_obj_type_string(type), i+1, nbobjs*nbobjs);
+		hwloc_type_name(type), i+1, nbobjs*nbobjs);
 	free(indexes);
 	free(distances);
 	return;
@@ -244,7 +244,7 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
   }
 
   if (hwloc_distances__check_matrix(topology, type, nbobjs, indexes, NULL, distances) < 0) {
-    fprintf(stderr, "Ignoring invalid %s distances from environment variable\n", hwloc_obj_type_string(type));
+    fprintf(stderr, "Ignoring invalid %s distances from environment variable\n", hwloc_type_name(type));
     free(indexes);
     free(distances);
     return;
@@ -262,7 +262,7 @@ void hwloc_distances_set_from_env(struct hwloc_topology *topology)
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
     const char *env;
     char envname[64];
-    snprintf(envname, sizeof(envname), "HWLOC_%s_DISTANCES", hwloc_obj_type_string(type));
+    snprintf(envname, sizeof(envname), "HWLOC_%s_DISTANCES", hwloc_type_name(type));
     env = getenv(envname);
     if (env) {
       hwloc_localeswitch_declare;
@@ -816,7 +816,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
   for(i=0; i<nbaccuracies; i++) {
     if (verbose)
       fprintf(stderr, "Trying to group %u %s objects according to physical distances with accuracy %f\n",
-	      nbobjs, hwloc_obj_type_string(objs[0]->type), accuracies[i]);
+	      nbobjs, hwloc_type_name(objs[0]->type), accuracies[i]);
     if (needcheck && hwloc__check_grouping_matrix(nbobjs, _distances, accuracies[i], verbose) < 0)
       continue;
     nbgroups = hwloc__find_groups_by_min_distance(nbobjs, _distances, accuracies[i], groupids, verbose);

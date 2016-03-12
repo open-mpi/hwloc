@@ -825,12 +825,14 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
  *
  * hwloc_obj_type_snprintf() may return a more precise output for a specific
  * object, but it requires the caller to provide the output buffer.
+ *
+ * \note This function replaces the now deprecated hwloc_obj_type_string().
  */
-HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwloc_attribute_const;
+HWLOC_DECLSPEC const char * hwloc_type_name (hwloc_obj_type_t type) __hwloc_attribute_const;
 
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *
- * Contrary to hwloc_obj_type_string(), this function includes object-specific
+ * Contrary to hwloc_type_name(), this function includes object-specific
  * attributes (such as the Group depth, the Bridge type, or OS device type)
  * in the output, and it requires the caller to provide the output buffer.
  *
@@ -883,7 +885,7 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
  * \return 0 if a type was correctly identified, otherwise -1.
  *
  * \note This function is guaranteed to match any string returned by
- * hwloc_obj_type_string() or hwloc_obj_type_snprintf().
+ * hwloc_type_name() or hwloc_obj_type_snprintf().
  *
  * \note This is an extended version of the now deprecated hwloc_obj_type_sscanf().
  */

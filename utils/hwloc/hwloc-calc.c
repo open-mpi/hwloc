@@ -179,10 +179,10 @@ static int hwloc_calc_check_type_depth(hwloc_topology_t topology, hwloc_obj_type
   if (type != HWLOC_OBJ_TYPE_NONE) {
     int depth = hwloc_get_type_depth(topology, type);
     if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      fprintf(stderr, "unavailable %s type %s\n", caller, hwloc_obj_type_string(type));
+      fprintf(stderr, "unavailable %s type %s\n", caller, hwloc_type_name(type));
       return -1;
     } else  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      fprintf(stderr, "cannot use %s type %s with multiple depth, please use the relevant depth directly\n", caller, hwloc_obj_type_string(type));
+      fprintf(stderr, "cannot use %s type %s with multiple depth, please use the relevant depth directly\n", caller, hwloc_type_name(type));
       return -1;
     }
     *depthp = depth;

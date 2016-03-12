@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	  continue;
 	printf("Relative latency matrix between %u %ss (depth %u) by %s indexes (below %s%s%u):\n",
 	       distances->nbobjs,
-	       hwloc_obj_type_string(hwloc_get_depth_type(topology, i+distances->relative_depth)),
+	       hwloc_type_name(hwloc_get_depth_type(topology, i+distances->relative_depth)),
 	       i+distances->relative_depth,
 	       logical ? "logical" : "physical",
 	       roottypestring,

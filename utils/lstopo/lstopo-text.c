@@ -219,7 +219,7 @@ void output_console(struct lstopo_output *loutput, const char *filename)
 
   if (loutput->show_only != HWLOC_OBJ_TYPE_NONE) {
     if (verbose_mode > 1)
-      fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(loutput->show_only));
+      fprintf(output, "Only showing %s objects\n", hwloc_type_name(loutput->show_only));
     output_only (loutput, hwloc_get_root_obj(topology));
   } else if (verbose_mode >= 1) {
     output_topology (loutput, hwloc_get_root_obj(topology), NULL, 0);
@@ -239,7 +239,7 @@ void output_console(struct lstopo_output *loutput, const char *filename)
       if (!distances || !distances->latency)
         continue;
       fprintf(output, "relative latency matrix between %ss (depth %u) by %s indexes:\n",
-	      hwloc_obj_type_string(hwloc_get_depth_type(topology, depth)),
+	      hwloc_type_name(hwloc_get_depth_type(topology, depth)),
 	      depth,
 	      logical ? "logical" : "physical");
       hwloc_utils_print_distance_matrix(output, topology, hwloc_get_root_obj(topology), distances->nbobjs, depth, distances->latency, logical);

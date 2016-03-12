@@ -75,6 +75,7 @@ Version 2.0.0
   + hwloc_topology_set_fsroot() is removed, the environment variable
     HWLOC_FSROOT may be used for the same remote testing/debugging purpose.
   + hwloc_type_sscanf() deprecates the old hwloc_obj_type_sscanf().
+  + hwloc_type_name() deprecates the old hwloc_obj_type_string().
   + Remove the deprecated hwloc_obj_snprintf(), hwloc_obj_type_of_string(),
     hwloc_distribute[v]().
   + hwloc_obj_cpuset_snprintf() is deprecated in favor of hwloc_bitmap_snprintf().

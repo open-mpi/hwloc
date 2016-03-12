@@ -350,7 +350,7 @@ man3_levels_DATA = \
 man3_object_stringsdir = $(man3dir)
 man3_object_strings_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_object_strings.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_type_string.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_type_name.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_type_sscanf.3

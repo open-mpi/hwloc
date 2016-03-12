@@ -793,10 +793,10 @@ hwloc_look_windows(struct hwloc_backend *backend)
 
 	obj = hwloc_alloc_setup_object(type, id);
         obj->cpuset = hwloc_bitmap_alloc();
-	hwloc_debug("%s#%u mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
+	hwloc_debug("%s#%u mask %lx\n", hwloc_type_name(type), id, procInfo[i].ProcessorMask);
 	/* ProcessorMask is a ULONG_PTR */
 	hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, 0, procInfo[i].ProcessorMask);
-	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
+	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_type_name(type), id, obj->cpuset);
 
 	switch (type) {
 	  case HWLOC_OBJ_NUMANODE:
@@ -955,12 +955,12 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	obj = hwloc_alloc_setup_object(type, id);
         obj->cpuset = hwloc_bitmap_alloc();
         for (i = 0; i < num; i++) {
-          hwloc_debug("%s#%u %d: mask %d:%lx\n", hwloc_obj_type_string(type), id, i, GroupMask[i].Group, GroupMask[i].Mask);
+          hwloc_debug("%s#%u %d: mask %d:%lx\n", hwloc_type_name(type), id, i, GroupMask[i].Group, GroupMask[i].Mask);
 	  /* GROUP_AFFINITY.Mask is KAFFINITY, which is ULONG_PTR */
 	  hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, GroupMask[i].Group, GroupMask[i].Mask);
 	  /* FIXME: scale id to id*8/sizeof(ULONG_PTR) as above? */
         }
-	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
+	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_type_name(type), id, obj->cpuset);
 	switch (type) {
 	  case HWLOC_OBJ_NUMANODE:
 	    {

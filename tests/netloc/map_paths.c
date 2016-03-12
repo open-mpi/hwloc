@@ -1,5 +1,5 @@
 //
-// Copyright © 2013 Inria.  All rights reserved.
+// Copyright © 2013-2016 Inria.  All rights reserved.
 //
 // Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 // See COPYING in top-level directory.
@@ -133,26 +133,26 @@ int main(int argc, char *argv[])
 	break;
       case NETLOC_MAP_EDGE_TYPE_HWLOC_PARENT:
 	printf("hwloc UP from %s:%u (%s) to parent %s:%u (%s) weight %u\n",
-	       hwloc_obj_type_string(edge->hwloc.src_obj->type), edge->hwloc.src_obj->logical_index, edge->hwloc.src_obj->name ? : "<unnamed>",
-	       hwloc_obj_type_string(edge->hwloc.dest_obj->type), edge->hwloc.dest_obj->logical_index, edge->hwloc.dest_obj->name ? : "<unnamed>",
+	       hwloc_type_name(edge->hwloc.src_obj->type), edge->hwloc.src_obj->logical_index, edge->hwloc.src_obj->name ? : "<unnamed>",
+	       hwloc_type_name(edge->hwloc.dest_obj->type), edge->hwloc.dest_obj->logical_index, edge->hwloc.dest_obj->name ? : "<unnamed>",
 	       edge->hwloc.weight);
 	break;
       case NETLOC_MAP_EDGE_TYPE_HWLOC_HORIZONTAL:
 	printf("hwloc HORIZONTAL from %s:%u (%s) to cousin %s:%u (%s) weight %u\n",
-	       hwloc_obj_type_string(edge->hwloc.src_obj->type), edge->hwloc.src_obj->logical_index, edge->hwloc.src_obj->name ? : "<unnamed>",
-	       hwloc_obj_type_string(edge->hwloc.dest_obj->type), edge->hwloc.dest_obj->logical_index, edge->hwloc.dest_obj->name ? : "<unnamed>",
+	       hwloc_type_name(edge->hwloc.src_obj->type), edge->hwloc.src_obj->logical_index, edge->hwloc.src_obj->name ? : "<unnamed>",
+	       hwloc_type_name(edge->hwloc.dest_obj->type), edge->hwloc.dest_obj->logical_index, edge->hwloc.dest_obj->name ? : "<unnamed>",
 	       edge->hwloc.weight);
 	break;
       case NETLOC_MAP_EDGE_TYPE_HWLOC_CHILD:
 	printf("hwloc DOWN from %s:%u (%s) to child %s:%u (%s) weight %u\n",
-	       hwloc_obj_type_string(edge->hwloc.src_obj->type), edge->hwloc.src_obj->logical_index, edge->hwloc.src_obj->name ? : "<unnamed>",
-	       hwloc_obj_type_string(edge->hwloc.dest_obj->type), edge->hwloc.dest_obj->logical_index, edge->hwloc.dest_obj->name ? : "<unnamed>",
+	       hwloc_type_name(edge->hwloc.src_obj->type), edge->hwloc.src_obj->logical_index, edge->hwloc.src_obj->name ? : "<unnamed>",
+	       hwloc_type_name(edge->hwloc.dest_obj->type), edge->hwloc.dest_obj->logical_index, edge->hwloc.dest_obj->name ? : "<unnamed>",
 	       edge->hwloc.weight);
 	break;
       case NETLOC_MAP_EDGE_TYPE_HWLOC_PCI:
 	printf("hwloc PCI from %s:%u (%s) to child %s:%u (%s) weight %u\n",
-	       hwloc_obj_type_string(edge->hwloc.src_obj->type), edge->hwloc.src_obj->logical_index, edge->hwloc.src_obj->name ? : "<unnamed>",
-	       hwloc_obj_type_string(edge->hwloc.dest_obj->type), edge->hwloc.dest_obj->logical_index, edge->hwloc.dest_obj->name ? : "<unnamed>",
+	       hwloc_type_name(edge->hwloc.src_obj->type), edge->hwloc.src_obj->logical_index, edge->hwloc.src_obj->name ? : "<unnamed>",
+	       hwloc_type_name(edge->hwloc.dest_obj->type), edge->hwloc.dest_obj->logical_index, edge->hwloc.dest_obj->name ? : "<unnamed>",
 	       edge->hwloc.weight);
 	break;
       }

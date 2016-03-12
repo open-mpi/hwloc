@@ -199,7 +199,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	if (i == curleveldepth) {
 	  if (verbose)
 	    fprintf(stderr, "Failed to find level for synthetic index interleaving loop type '%s' above '%s'\n",
-		    tmp, hwloc_obj_type_string(curlevel->type));
+		    tmp, hwloc_type_name(curlevel->type));
 	  goto out_with_loops;
 	}
 	tmp = strchr(tmp, ':');
@@ -1174,7 +1174,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     /* for each level */
     obj = obj->first_child;
     if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
-      res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, hwloc_obj_type_string(obj->type), arity);
+      res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, hwloc_type_name(obj->type), arity);
     } else {
       char types[64];
       hwloc_obj_type_snprintf(types, sizeof(types), obj, 1);

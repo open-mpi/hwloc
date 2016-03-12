@@ -227,10 +227,10 @@ int main(int argc, char *argv[])
     } else {
       from_depth = hwloc_get_type_depth(topology, from_type);
       if (from_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_obj_type_string(from_type));
+	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_type_name(from_type));
 	from_depth = 0;
       } else if (from_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_obj_type_string(from_type));
+	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_type_name(from_type));
 	from_depth = 0;
       }
     }
@@ -240,10 +240,10 @@ int main(int argc, char *argv[])
     } else {
       to_depth = hwloc_get_type_depth(topology, to_type);
       if (to_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_obj_type_string(to_type));
+	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_type_name(to_type));
 	to_depth = INT_MAX;
       } else if (to_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_obj_type_string(to_type));
+	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_type_name(to_type));
 	to_depth = INT_MAX;
       }
     }

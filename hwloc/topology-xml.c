@@ -770,20 +770,20 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       && obj->type != hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type)) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid cache type %s with attribute depth %u and type %d\n",
-	      hwloc_obj_type_string(obj->type), obj->attr->cache.depth, obj->attr->cache.type);
+	      hwloc_type_name(obj->type), obj->attr->cache.depth, obj->attr->cache.type);
     goto error_with_object;
   }
 
   if (obj->cpuset && parent && !parent->cpuset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with cpuset while parent has none\n",
-	      hwloc_obj_type_string(obj->type), obj->os_index);
+	      hwloc_type_name(obj->type), obj->os_index);
     goto error_with_object;
   }
   if (obj->nodeset && parent && !parent->nodeset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with nodeset while parent has none\n",
-	      hwloc_obj_type_string(obj->type), obj->os_index);
+	      hwloc_type_name(obj->type), obj->os_index);
     goto error_with_object;
   }
 
@@ -792,7 +792,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       && obj->type != HWLOC_OBJ_OS_DEVICE && obj->type != HWLOC_OBJ_MISC) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid non-I/O object %s P#%u without cpuset\n",
-	      hwloc_obj_type_string(obj->type), obj->os_index);
+	      hwloc_type_name(obj->type), obj->os_index);
     goto error_with_object;
   }
 
@@ -829,8 +829,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       if (obj->cpuset && (!(*current)->cpuset || hwloc__object_cpusets_intersect(obj, *current))) {
 	if (hwloc__xml_verbose()) {
 	  fprintf(stderr, "intersecting children %s P#%u and %s P#%u\n",
-		  hwloc_obj_type_string(obj->type), obj->os_index,
-		  hwloc_obj_type_string((*current)->type), (*current)->os_index);
+		  hwloc_type_name(obj->type), obj->os_index,
+		  hwloc_type_name((*current)->type), (*current)->os_index);
 	}
 	goto error_with_object;
       }
@@ -1324,7 +1324,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 
   parentstate->new_child(parentstate, &state, "object");
 
-  state.new_prop(&state, "type", hwloc_obj_type_string(obj->type));
+  state.new_prop(&state, "type", hwloc_type_name(obj->type));
   if (obj->os_index != (unsigned) -1) {
     sprintf(tmp, "%u", obj->os_index);
     state.new_prop(&state, "os_index", tmp);

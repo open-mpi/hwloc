@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -39,7 +39,7 @@ int main(void)
 
   assert(obj);
   fprintf(stderr, "found covering object type %s covering cpuset %s\n",
-	  hwloc_obj_type_string(obj->type), GIVEN_CPUSET_STRING);
+	  hwloc_type_name(obj->type), GIVEN_CPUSET_STRING);
   assert(hwloc_bitmap_isincluded(set, obj->cpuset));
 
   hwloc_bitmap_asprintf(&string, obj->cpuset);
