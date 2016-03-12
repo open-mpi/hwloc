@@ -248,7 +248,14 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     type = HWLOC_OBJ_BRIDGE;
   } else if (!hwloc_strncasecmp(string, "pci", 3)) {
     type = HWLOC_OBJ_PCI_DEVICE;
-  } else if (!hwloc_strncasecmp(string, "os", 2)) {
+  } else if (!hwloc_strncasecmp(string, "os", 2)
+	     || !hwloc_strncasecmp(string, "bloc", 4)
+	     || !hwloc_strncasecmp(string, "net", 3)
+	     || !hwloc_strncasecmp(string, "openfab", 7)
+	     || !hwloc_strncasecmp(string, "dma", 3)
+	     || !hwloc_strncasecmp(string, "gpu", 3)
+	     || !hwloc_strncasecmp(string, "copro", 5)
+	     || !hwloc_strncasecmp(string, "co-pro", 6)) {
     type = HWLOC_OBJ_OS_DEVICE;
 
   /* types with depthattr */
