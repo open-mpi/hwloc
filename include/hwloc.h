@@ -834,20 +834,13 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  * This function is guaranteed to match any string returned by hwloc_obj_type_string()
  * or hwloc_obj_type_snprintf().
  *
- * Type-specific attributes, for instance caches and groups, may be returned
- * in \p attrp. They are ignored if this pointer is \c NULL.
- *
- * For instance "L2i" or "L2iCache" would return
- * type ::HWLOC_OBJ_L2ICACHE in \p typep, and 2 and ::HWLOC_OBJ_CACHE_INSTRUCTION
- * in the depth and type fields of attrp->cache (hwloc_obj_attr_u::hwloc_cache_attr_s).
- * "Group3" would return type ::HWLOC_OBJ_GROUP type and 3 in the depth field
- * of attrp->group (hwloc_obj_attr_u::hwloc_group_attr_s).
- *
+ * Type-specific attributes, for instance Cache type, Cache depth, Group depth,
+ * Bridge type or OS Device type may be returned in \p attrp.
  * Attributes that are not specified in the string (for instance "Group"
  * without a depth, or "L2Cache" without a cache type) are set to -1.
  *
- * \p attrp is only filled if its size specified in \p attrsize is large
- * enough. It should be at least as large as union hwloc_obj_attr_u.
+ * \p attrp is only filled if not \c NULL and if its size specified in \p attrsize
+ * is large enough. It should be at least as large as union hwloc_obj_attr_u.
  *
  * \return 0 if a type was correctly identified, otherwise -1.
  *

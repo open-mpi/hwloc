@@ -210,6 +210,8 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
   unsigned depthattr = (unsigned) -1;
   hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
+  hwloc_obj_bridge_type_t ubtype = (hwloc_obj_bridge_type_t) -1;
+  hwloc_obj_osdev_type_t ostype = (hwloc_obj_osdev_type_t) -1;
   char *end;
 
   /* never match the ending \0 since we want to match things like core:2 too.
@@ -233,21 +235,40 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
     type = HWLOC_OBJ_PU;
   } else if (!hwloc_strncasecmp(string, "misc", 4)) {
     type = HWLOC_OBJ_MISC;
-  } else if (!hwloc_strncasecmp(string, "bridge", 4)
-	     || !hwloc_strncasecmp(string, "hostbridge", 6)
-	     || !hwloc_strncasecmp(string, "pcibridge", 5)) {
+
+  } else if (!hwloc_strncasecmp(string, "bridge", 4)) {
     type = HWLOC_OBJ_BRIDGE;
+  } else if (!hwloc_strncasecmp(string, "hostbridge", 6)) {
+    type = HWLOC_OBJ_BRIDGE;
+    ubtype = HWLOC_OBJ_BRIDGE_HOST;
+  } else if (!hwloc_strncasecmp(string, "pcibridge", 5)) {
+    type = HWLOC_OBJ_BRIDGE;
+    ubtype = HWLOC_OBJ_BRIDGE_PCI;
+
   } else if (!hwloc_strncasecmp(string, "pci", 3)) {
     type = HWLOC_OBJ_PCI_DEVICE;
-  } else if (!hwloc_strncasecmp(string, "os", 2)
-	     || !hwloc_strncasecmp(string, "bloc", 4)
-	     || !hwloc_strncasecmp(string, "net", 3)
-	     || !hwloc_strncasecmp(string, "openfab", 7)
-	     || !hwloc_strncasecmp(string, "dma", 3)
-	     || !hwloc_strncasecmp(string, "gpu", 3)
-	     || !hwloc_strncasecmp(string, "copro", 5)
+
+  } else if (!hwloc_strncasecmp(string, "os", 2)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+  } else if (!hwloc_strncasecmp(string, "bloc", 4)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_BLOCK;
+  } else if (!hwloc_strncasecmp(string, "net", 3)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_NETWORK;
+  } else if (!hwloc_strncasecmp(string, "openfab", 7)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_OPENFABRICS;
+  } else if (!hwloc_strncasecmp(string, "dma", 3)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_DMA;
+  } else if (!hwloc_strncasecmp(string, "gpu", 3)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_GPU;
+  } else if (!hwloc_strncasecmp(string, "copro", 5)
 	     || !hwloc_strncasecmp(string, "co-pro", 6)) {
     type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_COPROC;
 
   /* types with depthattr */
   } else if ((string[0] == 'l' || string[0] == 'L') && string[1] >= '0' && string[1] <= '9') {
@@ -285,6 +306,11 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep,
       attrp->cache.type = cachetypeattr;
     } else if (type == HWLOC_OBJ_GROUP && attrsize >= sizeof(attrp->group)) {
       attrp->group.depth = depthattr;
+    } else if (type == HWLOC_OBJ_BRIDGE && attrsize >= sizeof(attrp->bridge)) {
+      attrp->bridge.upstream_type = ubtype;
+      attrp->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI; /* nothing else so far */
+    } else if (type == HWLOC_OBJ_OS_DEVICE && attrsize >= sizeof(attrp->osdev)) {
+      attrp->osdev.type = ostype;
     }
   }
   return 0;
