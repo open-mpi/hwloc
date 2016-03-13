@@ -266,12 +266,12 @@ int main(int argc, char *argv[])
       if (!strcmp(argv[0], "--number-of") || !strcmp(argv[0], "-N")) {
 	if (argc < 2) {
 	  usage(callname, stderr);
-	  return EXIT_SUCCESS;
+	  return EXIT_FAILURE;
 	}
 	if (hwloc_calc_type_depth(argv[1], &numberoftype, &numberofdepth) < 0) {
 	  fprintf(stderr, "unrecognized --number-of type or depth %s\n", argv[1]);
 	  usage(callname, stderr);
-	  return EXIT_SUCCESS;
+	  return EXIT_FAILURE;
 	}
 	argv++;
 	argc--;
@@ -280,12 +280,12 @@ int main(int argc, char *argv[])
       if (!strcmp(argv[0], "--intersect") || !strcmp(argv[0], "-I")) {
 	if (argc < 2) {
 	  usage(callname, stderr);
-	  return EXIT_SUCCESS;
+	  return EXIT_FAILURE;
 	}
 	if (hwloc_calc_type_depth(argv[1], &intersecttype, &intersectdepth) < 0) {
 	  fprintf(stderr, "unrecognized --intersect type or depth %s\n", argv[1]);
 	  usage(callname, stderr);
-	  return EXIT_SUCCESS;
+	  return EXIT_FAILURE;
 	}
 	argv++;
 	argc--;
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
 	char *tmp, *next;
 	if (argc < 2) {
 	  usage(callname, stderr);
-	  return EXIT_SUCCESS;
+	  return EXIT_FAILURE;
 	}
 	hiernblevels = 1;
 	tmp = argv[1];
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
 	  if (hwloc_calc_type_depth(tmp, &hiertype[i], &hierdepth[i]) < 0) {
 	    fprintf(stderr, "unrecognized --hierarchical type or depth %s\n", tmp);
 	    usage(callname, stderr);
-	    return EXIT_SUCCESS;
+	    return EXIT_FAILURE;
 	  }
 	  tmp = next+1;
 	}

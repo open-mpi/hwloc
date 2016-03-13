@@ -309,7 +309,7 @@ main (int argc, char *argv[])
         if (err < 0) {
           fprintf(stderr, "unrecognized --ancestor type %s\n", argv[1]);
           usage(callname, stderr);
-          return EXIT_SUCCESS;
+          return EXIT_FAILURE;
         }
 	opt = 1;
       }
