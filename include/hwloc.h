@@ -1251,40 +1251,6 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
  */
 HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwloc_attribute_const;
 
-/** \brief Return an object type and attributes from a type string.
- *
- * Convert strings such as "Package" or "Cache" into the corresponding types.
- * Matching is case-insensitive, and only the first letters are actually
- * required to match.
- *
- * This function is guaranteed to match any string returned by hwloc_obj_type_string()
- * or hwloc_obj_type_snprintf().
- *
- * Types that have specific attributes, for instance caches and groups,
- * may be returned in \p depthattrp and \p typeattrp. They are ignored
- * when these pointers are \c NULL.
- *
- * For instance "L2i" or "L2iCache" would return
- * type HWLOC_OBJ_CACHE in \p typep, 2 in \p depthattrp,
- * and HWLOC_OBJ_CACHE_TYPE_INSTRUCTION in \p typeattrp
- * (this last pointer should point to a hwloc_obj_cache_type_t).
- * "Group3" would return type HWLOC_OBJ_GROUP type and 3 in \p depthattrp.
- * Attributes that are not specified in the string (for instance "Group"
- * without a depth, or "L2Cache" without a cache type) are set to -1.
- *
- * \p typeattrp is only filled if the size specified in \p typeattrsize
- * is large enough. It is currently only used for caches, and the required
- * size is at least the size of hwloc_obj_cache_type_t.
- *
- * \return 0 if a type was correctly identified, otherwise -1.
- *
- * \note This is an extended version of the now deprecated hwloc_obj_type_of_string()
- */
-HWLOC_DECLSPEC int hwloc_obj_type_sscanf(const char *string,
-					 hwloc_obj_type_t *typep,
-					 int *depthattrp,
-					 void *typeattrp, size_t typeattrsize);
-
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *
  * Contrary to hwloc_obj_type_string(), this function includes object-specific
@@ -1323,6 +1289,40 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
  * or that would have been written (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, size_t nobj, const hwloc_obj_t * __hwloc_restrict objs);
+
+/** \brief Return an object type and attributes from a type string.
+ *
+ * Convert strings such as "Package" or "Cache" into the corresponding types.
+ * Matching is case-insensitive, and only the first letters are actually
+ * required to match.
+ *
+ * This function is guaranteed to match any string returned by hwloc_obj_type_string()
+ * or hwloc_obj_type_snprintf().
+ *
+ * Types that have specific attributes, for instance caches and groups,
+ * may be returned in \p depthattrp and \p typeattrp. They are ignored
+ * when these pointers are \c NULL.
+ *
+ * For instance "L2i" or "L2iCache" would return
+ * type HWLOC_OBJ_CACHE in \p typep, 2 in \p depthattrp,
+ * and HWLOC_OBJ_CACHE_TYPE_INSTRUCTION in \p typeattrp
+ * (this last pointer should point to a hwloc_obj_cache_type_t).
+ * "Group3" would return type HWLOC_OBJ_GROUP type and 3 in \p depthattrp.
+ * Attributes that are not specified in the string (for instance "Group"
+ * without a depth, or "L2Cache" without a cache type) are set to -1.
+ *
+ * \p typeattrp is only filled if the size specified in \p typeattrsize
+ * is large enough. It is currently only used for caches, and the required
+ * size is at least the size of hwloc_obj_cache_type_t.
+ *
+ * \return 0 if a type was correctly identified, otherwise -1.
+ *
+ * \note This is an extended version of the now deprecated hwloc_obj_type_of_string()
+ */
+HWLOC_DECLSPEC int hwloc_obj_type_sscanf(const char *string,
+					 hwloc_obj_type_t *typep,
+					 int *depthattrp,
+					 void *typeattrp, size_t typeattrsize);
 
 /** @} */
 
