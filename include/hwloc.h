@@ -818,10 +818,12 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
  * @{
  */
 
-/** \brief Return a stringified topology object type.
+/** \brief Return a constant stringified object type.
  *
- * The returned type is a constant that does not depend on any other object attribute
- * contrary to hwloc_obj_type_snprintf().
+ * This function is the basic way to convert a generic type into a string.
+ *
+ * hwloc_obj_type_snprintf() may return a more precise output for a specific
+ * object, but it requires the caller to provide the output buffer.
  */
 HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwloc_attribute_const;
 
@@ -853,8 +855,11 @@ HWLOC_DECLSPEC int hwloc_obj_type_sscanf(const char *string,
 
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *
- * It differs from hwloc_obj_type_string() because it includes attributes
- * such as the group depth or the bridge type.
+ * Contrary to hwloc_obj_type_string(), this function includes object-specific
+ * attributes (such as the Group depth, the Bridge type, or OS device type)
+ * in the output, and it requires the caller to provide the output buffer.
+ *
+ * The output is guaranteed to be the same for all objects of a same topology level.
  *
  * If \p verbose is 1, longer type names are used, e.g. L1Cache instead of L1.
  *
