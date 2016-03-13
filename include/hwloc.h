@@ -717,6 +717,9 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * hwloc_get_obj_by_depth() but it should not be considered as an actual
  * depth by the application. In particular, it should not be compared with
  * any other object depth or with the entire topology depth.
+ *
+ * \sa hwloc_type_sscanf_as_depth() for returning the depth of objects
+ * whose type is given as a string.
  */
 HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
 
@@ -892,6 +895,31 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
 HWLOC_DECLSPEC int hwloc_type_sscanf(const char *string,
 				     hwloc_obj_type_t *typep,
 				     union hwloc_obj_attr_u *attrp, size_t attrsize);
+
+/** \brief Return an object type and its level depth from a type string.
+ *
+ * Convert strings such as "Package" or "L1iCache" into the corresponding types
+ * and return in \p depthp the depth of the corresponding level in the
+ * topology \p topology.
+ *
+ * If no object of this type is present on the underlying architecture,
+ * ::HWLOC_TYPE_DEPTH_UNKNOWN is returned.
+ *
+ * If multiple such levels exist (for instance if giving Group without any depth),
+ * the function may return ::HWLOC_TYPE_DEPTH_MULTIPLE instead.
+ *
+ * The matched object type is set in \p typep if \p typep is non \c NULL.
+ *
+ * \note This function is similar to hwloc_type_sscanf() followed
+ * by hwloc_get_type_depth() but it also automatically disambiguates
+ * multiple group levels etc.
+ *
+ * \note This function is guaranteed to match any string returned by
+ * hwloc_type_name() or hwloc_obj_type_snprintf().
+ */
+HWLOC_DECLSPEC int hwloc_type_sscanf_as_depth(const char *string,
+					      hwloc_obj_type_t *typep,
+					      hwloc_topology_t topology, int *depthp);
 
 /** @} */
 

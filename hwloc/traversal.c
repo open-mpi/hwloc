@@ -316,6 +316,40 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   return 0;
 }
 
+int
+hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
+			   hwloc_topology_t topology, int *depthp)
+{
+  union hwloc_obj_attr_u attr;
+  hwloc_obj_type_t type;
+  int depth;
+  int err;
+
+  err = hwloc_type_sscanf(string, &type, &attr, sizeof(attr));
+  if (err < 0)
+    return err;
+
+  depth = hwloc_get_type_depth(topology, type);
+  if (type == HWLOC_OBJ_GROUP
+      && depth == HWLOC_TYPE_DEPTH_MULTIPLE
+      && attr.group.depth != (unsigned)-1) {
+    unsigned l;
+    depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+    for(l=0; l<topology->nb_levels; l++) {
+      if (topology->levels[l][0]->type == HWLOC_OBJ_GROUP
+	  && topology->levels[l][0]->attr->group.depth == attr.group.depth) {
+	depth = l;
+	break;
+      }
+    }
+  }
+
+  if (typep)
+    *typep = type;
+  *depthp = (unsigned) depth;
+  return 0;
+}
+
 static const char* hwloc_obj_cache_type_letter(hwloc_obj_cache_type_t type)
 {
   switch (type) {

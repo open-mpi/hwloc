@@ -8,12 +8,13 @@
 
 #include <hwloc.h>
 
-static void check(hwloc_obj_t obj, int verbose)
+static void check(hwloc_topology_t topology, hwloc_obj_t obj, int verbose)
 {
   hwloc_obj_t child;
   char buffer[64];
   hwloc_obj_type_t type;
   union hwloc_obj_attr_u attr;
+  int depth;
   int err;
 
   err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, verbose);
@@ -33,12 +34,16 @@ static void check(hwloc_obj_t obj, int verbose)
     assert(attr.osdev.type == obj->attr->osdev.type);
   }
 
+  err = hwloc_type_sscanf_as_depth(buffer, NULL, topology, &depth);
+  assert(!err);
+  assert(depth == (int) obj->depth);
+
   for(child = obj->first_child; child; child = child->next_sibling)
-    check(child, verbose);
+    check(topology, child, verbose);
   for(child = obj->io_first_child; child; child = child->next_sibling)
-    check(child, verbose);
+    check(topology, child, verbose);
   for(child = obj->misc_first_child; child; child = child->next_sibling)
-    check(child, verbose);
+    check(topology, child, verbose);
 }
 
 /* check whether type_sscanf() understand what type_snprintf() wrote */
@@ -53,8 +58,8 @@ int main(void)
   err = hwloc_topology_load(topology);
   assert(!err);
 
-  check(hwloc_get_root_obj(topology), 0);
-  check(hwloc_get_root_obj(topology), 1);
+  check(topology, hwloc_get_root_obj(topology), 0);
+  check(topology, hwloc_get_root_obj(topology), 1);
 
   hwloc_topology_destroy(topology);
 }
