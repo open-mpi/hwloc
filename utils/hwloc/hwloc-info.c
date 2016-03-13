@@ -314,7 +314,7 @@ main (int argc, char *argv[])
         if (err < 0) {
           fprintf(stderr, "unrecognized --ancestor type %s\n", argv[1]);
           usage(callname, stderr);
-          return EXIT_SUCCESS;
+          return EXIT_FAILURE;
         }
 	if (hwloc_obj_type_is_cache(show_ancestor_type)) {
 	  show_ancestor_attrdepth = attrs.cache.depth;
