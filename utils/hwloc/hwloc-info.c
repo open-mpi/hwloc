@@ -23,9 +23,7 @@ static hwloc_pid_t pid;
 static int verbose_mode = 0;
 static int logical = 1;
 static int show_ancestors = 0;
-static hwloc_obj_type_t show_ancestor_type = HWLOC_OBJ_TYPE_NONE;
-static int show_ancestor_attrdepth = -1;
-static hwloc_obj_cache_type_t show_ancestor_attrcachetype = (hwloc_obj_cache_type_t) -1;
+static int show_ancestor_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_index_prefix = 0;
 static int current_obj;
 
@@ -222,15 +220,11 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
       parent = parent->parent;
       level++;
     }
-  } else if (show_ancestor_type != HWLOC_OBJ_TYPE_NONE) {
+  } else if (show_ancestor_depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
     char parents[128];
     hwloc_obj_t parent = obj;
     while (parent) {
-      if (parent->type == show_ancestor_type) {
-	if (parent->type == HWLOC_OBJ_GROUP
-	    && show_ancestor_attrdepth != -1
-	    && show_ancestor_attrdepth != (int) parent->attr->group.depth)
-	  goto next;
+      if (parent->depth == (unsigned) show_ancestor_depth) {
 	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
 	if (verbose < 0)
 	  printf("%s%s:%u\n", prefix, parents, parent->logical_index);
@@ -238,8 +232,8 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
 	  printf("%s%s L#%u = parent of %s L#%u\n",
 		 prefix, parents, parent->logical_index, objs, obj->logical_index);
 	hwloc_info_show_obj(parent, parents, prefix, verbose);
+	break;
       }
-next:
       parent = parent->parent;
     }
   } else {
@@ -263,6 +257,7 @@ main (int argc, char *argv[])
   char * callname;
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
+  const char *show_ancestor_type = NULL;
   char *restrictstring = NULL;
   size_t typelen;
   int opt;
@@ -305,23 +300,11 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--ancestors"))
 	show_ancestors = 1;
       else if (!strcmp (argv[0], "--ancestor")) {
-	union hwloc_obj_attr_u attrs;
 	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	err = hwloc_type_sscanf(argv[1], &show_ancestor_type, &attrs, sizeof(attrs));
-        if (err < 0) {
-          fprintf(stderr, "unrecognized --ancestor type %s\n", argv[1]);
-          usage(callname, stderr);
-          return EXIT_FAILURE;
-        }
-	if (hwloc_obj_type_is_cache(show_ancestor_type)) {
-	  show_ancestor_attrdepth = attrs.cache.depth;
-	  show_ancestor_attrcachetype = attrs.cache.type;
-	} else if (show_ancestor_type == HWLOC_OBJ_GROUP) {
-	  show_ancestor_attrdepth = attrs.group.depth;
-	}
+	show_ancestor_type = argv[1];
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--filter")) {
@@ -433,6 +416,23 @@ main (int argc, char *argv[])
     return EXIT_FAILURE;
 
   topodepth = hwloc_topology_get_depth(topology);
+
+  if (show_ancestor_type) {
+    err = hwloc_type_sscanf_as_depth(show_ancestor_type, NULL, topology, &show_ancestor_depth);
+    if (err < 0) {
+      fprintf(stderr, "unrecognized --ancestor type %s\n", show_ancestor_type);
+      usage(callname, stderr);
+      return EXIT_FAILURE;
+    }
+    if (show_ancestor_depth == (int) HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "unavailable --ancestor type %s\n", show_ancestor_type);
+      return EXIT_FAILURE;
+    }
+    if (show_ancestor_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      fprintf(stderr, "multiple --ancestor type %s\n", show_ancestor_type);
+      return EXIT_FAILURE;
+    }
+  }
 
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();

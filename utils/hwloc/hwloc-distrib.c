@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   int singlify = 0;
   int verbose = 0;
   char *restrictstring = NULL;
-  hwloc_obj_type_t from_type = HWLOC_OBJ_TYPE_NONE, to_type = HWLOC_OBJ_TYPE_NONE;
+  const char *from_type = NULL, *to_type = NULL;
   hwloc_topology_t topology;
   unsigned long flags = 0;
   unsigned long dflags = 0;
@@ -120,8 +120,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	if (hwloc_type_sscanf(argv[1], &from_type, NULL, 0) < 0)
-	  fprintf(stderr, "Unsupported type `%s' passed to --from, ignoring.\n", argv[1]);
+	from_type = argv[1];
 	argc--;
 	argv++;
 	goto next;
@@ -131,8 +130,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	if (hwloc_type_sscanf(argv[1], &to_type, NULL, 0) < 0)
-	  fprintf(stderr, "Unsupported type `%s' passed to --to, ignoring.\n", argv[1]);
+	to_type = argv[1];
 	argc--;
 	argv++;
 	goto next;
@@ -142,9 +140,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	if (hwloc_type_sscanf(argv[1], &to_type, NULL, 0) < 0)
-	  fprintf(stderr, "Unsupported type `%s' passed to --at, ignoring.\n", argv[1]);
-	from_type = to_type;
+	from_type = to_type = argv[1];
 	argc--;
 	argv++;
 	goto next;
@@ -222,29 +218,19 @@ int main(int argc, char *argv[])
       free(restrictstring);
     }
 
-    if (from_type == HWLOC_OBJ_TYPE_NONE) {
-      from_depth = 0;
-    } else {
-      from_depth = hwloc_get_type_depth(topology, from_type);
-      if (from_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_type_name(from_type));
-	from_depth = 0;
-      } else if (from_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_type_name(from_type));
-	from_depth = 0;
+    from_depth = 0;
+    if (from_type) {
+      if (hwloc_type_sscanf_as_depth(argv[1], NULL, topology, &from_depth) < 0 || from_depth < 0) {
+	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --from, ignoring.\n", argv[1]);
+	return EXIT_FAILURE;
       }
     }
 
-    if (to_type == HWLOC_OBJ_TYPE_NONE) {
-      to_depth = INT_MAX;
-    } else {
-      to_depth = hwloc_get_type_depth(topology, to_type);
-      if (to_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_type_name(to_type));
-	to_depth = INT_MAX;
-      } else if (to_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_type_name(to_type));
-	to_depth = INT_MAX;
+    to_depth = INT_MAX;
+    if (to_type) {
+      if (hwloc_type_sscanf_as_depth(argv[1], NULL, topology, &to_depth) < 0 || to_depth < 0) {
+	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --to, ignoring.\n", argv[1]);
+	return EXIT_FAILURE;
       }
     }
 

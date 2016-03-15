@@ -86,67 +86,6 @@ hwloc_calc_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const
 }
 
 static __hwloc_inline int
-hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
-			 union hwloc_obj_attr_u *attrs,
-			 int verbose)
-{
-  int depth;
-  hwloc_obj_type_t realtype;
-
-  if (type == HWLOC_OBJ_GROUP) {
-    int depthattr = (int) attrs->group.depth;
-    if (depthattr == -1) {
-      hwloc_obj_type_t realtype;
-      /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
-      depth = hwloc_get_type_or_above_depth(topology, type);
-      if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-	if (verbose >= 0)
-	  fprintf(stderr, "type %s has multiple possible depths\n", hwloc_type_name(type));
-	return -1;
-      } else if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-	if (verbose >= 0)
-	  fprintf(stderr, "type %s isn't available\n", hwloc_type_name(type));
-	return -1;
-      }
-      realtype = hwloc_get_depth_type(topology, depth);
-      if (type != realtype && verbose > 0)
-	fprintf(stderr, "using type %s (depth %d) instead of %s\n",
-		hwloc_type_name(realtype), depth, hwloc_type_name(type));
-      return depth;
-    } else {
-      /* matched a type with a depth attribute, look at the first object of each level to find the depth */
-      int i;
-      for(i=0; ; i++) {
-	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
-	if (!obj) {
-	  if (verbose >= 0)
-	    fprintf(stderr, "Group with custom depth %d does not exist\n",
-		    depthattr);
-	  return -1;
-	}
-	if (obj->type == type
-	    && (unsigned) depthattr == obj->attr->group.depth)
-	  return i;
-      }
-    }
-  }
-
-  /* matched an exact type, try to get the depth from the type if it exists and is unique */
-  depth = hwloc_get_type_or_above_depth(topology, type);
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE); /* only happens for HWLOC_OBJ_GROUP */
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-    if (verbose >= 0)
-      fprintf(stderr, "type %s isn't available\n", hwloc_type_name(type));
-    return -1;
-  }
-  realtype = hwloc_get_depth_type(topology, depth);
-  if (type != realtype && verbose > 0)
-    fprintf(stderr, "using type %s (depth %d) instead of %s\n",
-	    hwloc_type_name(realtype), depth, hwloc_type_name(type));
-  return depth;
-}
-
-static __hwloc_inline int
 hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
 			      const char *string, size_t typelen,
 			      hwloc_obj_type_t *typep,
@@ -154,7 +93,6 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
 {
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   hwloc_obj_type_t type;
-  union hwloc_obj_attr_u attrs;
   int depth;
   char *end;
   int err;
@@ -168,10 +106,10 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
   typestring[typelen] = '\0';
 
   /* try to match a type name */
-  err = hwloc_type_sscanf(typestring, &type, &attrs, sizeof(attrs));
+  err = hwloc_type_sscanf_as_depth(typestring, &type, topology, &depth);
   if (!err) {
     *typep = type;
-    return hwloc_calc_depth_of_type(topology, type, &attrs, verbose);
+    return depth;
   }
 
   /* try to match a numeric depth */
