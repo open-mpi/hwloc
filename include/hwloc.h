@@ -1903,7 +1903,11 @@ struct hwloc_topology_discovery_support {
   unsigned char pu;
 };
 
-/** \brief Flags describing actual PU binding support for this topology. */
+/** \brief Flags describing actual PU binding support for this topology.
+ *
+ * A flag may be set even if the feature isn't supported in all cases
+ * (e.g. binding to random sets of non-contiguous objects).
+ */
 struct hwloc_topology_cpubind_support {
   /** Binding the whole current process is supported.  */
   unsigned char set_thisproc_cpubind;
@@ -1929,7 +1933,11 @@ struct hwloc_topology_cpubind_support {
   unsigned char get_thisthread_last_cpu_location;
 };
 
-/** \brief Flags describing actual memory binding support for this topology. */
+/** \brief Flags describing actual memory binding support for this topology.
+ *
+ * A flag may be set even if the feature isn't supported in all cases
+ * (e.g. binding to random sets of non-contiguous objects).
+ */
 struct hwloc_topology_membind_support {
   /** Binding the whole current process is supported.  */
   unsigned char set_thisproc_membind;
@@ -1974,7 +1982,13 @@ struct hwloc_topology_support {
   struct hwloc_topology_membind_support *membind;
 };
 
-/** \brief Retrieve the topology support. */
+/** \brief Retrieve the topology support.
+ *
+ * Each flag indicates whether a feature is supported.
+ * If set to 0, the feature is not supported.
+ * If set to 1, the feature is supported, but the corresponding
+ * call may still fail in some corner cases.
+ */
 HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
 
 /** \brief Type filtering flags.
