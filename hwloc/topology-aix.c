@@ -430,7 +430,7 @@ hwloc_aix_get_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
 
   hwloc_bitmap_free(hwloc_set);
 
-  *policy = HWLOC_MEMBIND_DEFAULT;
+  *policy = HWLOC_MEMBIND_BIND;
   res = 0;
 
 out:
