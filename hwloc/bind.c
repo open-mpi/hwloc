@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011-2015 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -29,6 +29,8 @@
  *
  * Darwin and OpenBSD don't seem to have binding facilities.
  */
+
+#define HWLOC_CPUBIND_ALLFLAGS (HWLOC_CPUBIND_PROCESS|HWLOC_CPUBIND_THREAD|HWLOC_CPUBIND_STRICT|HWLOC_CPUBIND_NOMEMBIND)
 
 static hwloc_const_bitmap_t
 hwloc_fix_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t set)
@@ -61,6 +63,11 @@ hwloc_fix_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t set)
 int
 hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t set, int flags)
 {
+  if (flags & ~HWLOC_CPUBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   set = hwloc_fix_cpubind(topology, set);
   if (!set)
     return -1;
@@ -89,6 +96,11 @@ hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t set, int flags
 int
 hwloc_get_cpubind(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
 {
+  if (flags & ~HWLOC_CPUBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (flags & HWLOC_CPUBIND_PROCESS) {
     if (topology->binding_hooks.get_thisproc_cpubind)
       return topology->binding_hooks.get_thisproc_cpubind(topology, set, flags);
@@ -113,6 +125,11 @@ hwloc_get_cpubind(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
 int
 hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t set, int flags)
 {
+  if (flags & ~HWLOC_CPUBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   set = hwloc_fix_cpubind(topology, set);
   if (!set)
     return -1;
@@ -127,6 +144,11 @@ hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_b
 int
 hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int flags)
 {
+  if (flags & ~HWLOC_CPUBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (topology->binding_hooks.get_proc_cpubind)
     return topology->binding_hooks.get_proc_cpubind(topology, pid, set, flags);
 
@@ -138,6 +160,11 @@ hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_
 int
 hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_bitmap_t set, int flags)
 {
+  if (flags & ~HWLOC_CPUBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   set = hwloc_fix_cpubind(topology, set);
   if (!set)
     return -1;
@@ -152,6 +179,11 @@ hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_co
 int
 hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bitmap_t set, int flags)
 {
+  if (flags & ~HWLOC_CPUBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (topology->binding_hooks.get_thread_cpubind)
     return topology->binding_hooks.get_thread_cpubind(topology, tid, set, flags);
 
@@ -163,6 +195,11 @@ hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bi
 int
 hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
 {
+  if (flags & ~HWLOC_CPUBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (flags & HWLOC_CPUBIND_PROCESS) {
     if (topology->binding_hooks.get_thisproc_last_cpu_location)
       return topology->binding_hooks.get_thisproc_last_cpu_location(topology, set, flags);
@@ -187,12 +224,19 @@ hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t set, int f
 int
 hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int flags)
 {
+  if (flags & ~HWLOC_CPUBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (topology->binding_hooks.get_proc_last_cpu_location)
     return topology->binding_hooks.get_proc_last_cpu_location(topology, pid, set, flags);
 
   errno = ENOSYS;
   return -1;
 }
+
+#define HWLOC_MEMBIND_ALLFLAGS (HWLOC_MEMBIND_PROCESS|HWLOC_MEMBIND_THREAD|HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_NOCPUBIND)
 
 static hwloc_const_nodeset_t
 hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
@@ -271,6 +315,11 @@ hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwl
 int
 hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
+  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
     return -1;
@@ -314,6 +363,11 @@ hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t set, hwloc_mem
 int
 hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
+  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (flags & HWLOC_MEMBIND_PROCESS) {
     if (topology->binding_hooks.get_thisproc_membind)
       return topology->binding_hooks.get_thisproc_membind(topology, nodeset, policy, flags);
@@ -354,6 +408,11 @@ hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t set, hwloc_membind_p
 int
 hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
+  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
     return -1;
@@ -384,6 +443,11 @@ hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_c
 int
 hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
+  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (topology->binding_hooks.get_proc_membind)
     return topology->binding_hooks.get_proc_membind(topology, pid, nodeset, policy, flags);
 
@@ -410,6 +474,11 @@ hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_
 int
 hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
+  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
     return -1;
@@ -439,6 +508,11 @@ hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
 int
 hwloc_get_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
+  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (topology->binding_hooks.get_area_membind)
     return topology->binding_hooks.get_area_membind(topology, addr, len, nodeset, policy, flags);
 
@@ -515,6 +589,12 @@ void *
 hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   void *p;
+
+  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return NULL;
+  }
+
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
     goto fallback;

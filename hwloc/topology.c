@@ -2905,6 +2905,12 @@ hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
     errno = EBUSY;
     return -1;
   }
+
+  if (flags & ~(HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM|HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)) {
+    errno = EINVAL;
+    return -1;
+  }
+
   topology->flags = flags;
   return 0;
 }
@@ -3194,6 +3200,11 @@ int
 hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, unsigned long flags)
 {
   hwloc_bitmap_t droppedcpuset, droppednodeset;
+
+  if (flags & ~(HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES|HWLOC_RESTRICT_FLAG_ADAPT_MISC|HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
+    errno = EINVAL;
+    return -1;
+  }
 
   /* make sure we'll keep something in the topology */
   if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->cpuset)) {
