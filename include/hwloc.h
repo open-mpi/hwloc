@@ -1654,6 +1654,10 @@ typedef enum {
    * Depending on the operating system, this may correspond to
    * ::HWLOC_MEMBIND_FIRSTTOUCH (Linux),
    * or ::HWLOC_MEMBIND_BIND (AIX, HP-UX, OSF, Solaris, Windows).
+   * This policy is never returned by get membind functions when running
+   * on normal machines.
+   * It is only returned when binding hooks are empty because the topology
+   * was loaded from XML, or HWLOC_THISSYSTEM=0, etc.
    * \hideinitializer */
   HWLOC_MEMBIND_DEFAULT =	0,
 

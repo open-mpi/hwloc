@@ -280,7 +280,7 @@ hwloc_solaris_get_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t i
   if (hwloc_bitmap_iszero(nodeset))
     hwloc_bitmap_copy(nodeset, hwloc_topology_get_complete_nodeset(topology));
 
-  *policy = HWLOC_MEMBIND_DEFAULT;
+  *policy = HWLOC_MEMBIND_BIND;
   return 0;
 }
 
