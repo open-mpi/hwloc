@@ -1037,6 +1037,13 @@ following environment variables.
   and which components are successfully loaded.
   </dd>
 
+<dt>HWLOC_PLUGINS_BLACKLIST=filename1,filename2,...</dt>
+  <dd>prevents plugins from being loaded if their filename
+  (without path) is listed.
+  Plugin filenames may be found in verbose messages outputted
+  when HWLOC_PLUGINS_VERBOSE=1.
+  </dd>
+
 <dt>HWLOC_DEBUG_VERBOSE=0</dt>
   <dd>disables all verbose messages that are enabled by default
   when <tt>--enable-debug</tt> is passed to configure.
@@ -2163,7 +2170,8 @@ names to specify the exact list of components to build as plugins.
 Plugins are built as independent dynamic libraries that are installed
 in <tt>$libdir/hwloc</tt>.
 All plugins found in this directory are loaded during
-<tt>topology_init()</tt>.
+<tt>topology_init()</tt>
+(unless blacklisted in <tt>HWLOC_PLUGINS_BLACKLIST</tt>, see \ref envvar).
 A specific list of directories (colon-separated) to scan may be
 specified in the <tt>HWLOC_PLUGINS_PATH</tt> environment variable.
 

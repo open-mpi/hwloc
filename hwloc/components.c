@@ -24,6 +24,7 @@ static unsigned hwloc_components_users = 0; /* first one initializes, last ones 
 static int hwloc_components_verbose = 0;
 #ifdef HWLOC_HAVE_PLUGINS
 static int hwloc_plugins_verbose = 0;
+static const char * hwloc_plugins_blacklist = NULL;
 #endif
 
 /* hwloc_components_mutex serializes:
@@ -88,6 +89,12 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
     basename = filename;
   else
     basename++;
+
+  if (hwloc_plugins_blacklist && strstr(hwloc_plugins_blacklist, basename)) {
+    if (hwloc_plugins_verbose)
+      fprintf(stderr, "Plugin `%s' is blacklisted in the environment\n", basename);
+    goto out;
+  }
 
   /* dlopen and get the component structure */
   handle = lt_dlopenext(filename);
@@ -196,6 +203,8 @@ hwloc_plugins_init(void)
 
   verboseenv = getenv("HWLOC_PLUGINS_VERBOSE");
   hwloc_plugins_verbose = verboseenv ? atoi(verboseenv) : 0;
+
+  hwloc_plugins_blacklist = getenv("HWLOC_PLUGINS_BLACKLIST");
 
   err = lt_dlinit();
   if (err)
