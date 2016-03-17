@@ -36,6 +36,8 @@ Version 1.11.3
 * Fix some corner cases in the XML export/import of application userdata.
 * hwloc-annotate and lstopo don't drop application userdata from XMLs anymore.
   + Add --cu to hwloc-annotate to drop these application userdata.
+* Add HWLOC_PLUGINS_BLACKLIST environment variable to prevent some plugins
+  from being loaded. Thanks to Alexandre Denis for the suggestion.
 
 
 Version 1.11.2
