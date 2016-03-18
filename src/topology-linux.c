@@ -3063,6 +3063,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   FILE *fd;
   unsigned caches_added, merge_buggy_core_siblings;
   hwloc_obj_t packages = NULL; /* temporary list of packages before actual insert in the tree */
+  int threadwithcoreid = -1; /* we don't know yet if threads have their own coreids within thread_siblings */
 
   /* fill the cpuset of interesting cpus */
   dir = hwloc_opendir(path, data->root_fd);
@@ -3123,7 +3124,6 @@ look_sysfscpu(struct hwloc_topology *topology,
     {
       hwloc_bitmap_t packageset, coreset, bookset, threadset, savedcoreset;
       unsigned mypackageid, mycoreid, mybookid;
-      int threadwithcoreid = 0;
 
       /* look at the package */
       mypackageid = 0; /* shut-up the compiler */
@@ -3206,7 +3206,7 @@ package_done:
       coreset = hwloc_parse_cpumap(str, data->root_fd);
       savedcoreset = coreset; /* store it for later work-arounds */
 
-      if (coreset && hwloc_bitmap_weight(coreset) > 1) {
+      if (coreset && hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
 	/* check if this is hyper-threading or different coreids */
 	unsigned siblingid, siblingcoreid;
 	hwloc_bitmap_t set = hwloc_bitmap_dup(coreset);
