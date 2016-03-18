@@ -1,6 +1,6 @@
 /*
  * Copyright © 2015 Intel, Inc.  All rights reserved.
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#define DEFAULT_DUMP_DIR "/var/run/hwloc"
+#define DEFAULT_DUMP_DIR RUNSTATEDIR "/hwloc"
 
 extern int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *filename);
 
