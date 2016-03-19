@@ -1352,7 +1352,7 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   unsigned linuxflags = 0;
   int err;
 
-  remainder = (uintptr_t) addr & (sysconf(_SC_PAGESIZE)-1);
+  remainder = (uintptr_t) addr & hwloc_getpagesize();
   addr = (char*) addr - remainder;
   len += remainder;
 
