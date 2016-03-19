@@ -50,6 +50,13 @@ struct hwloc_linux_backend_data_s {
   struct udev *udev; /* Global udev context */
 #endif
   char *dumped_hwdata_dirname;
+  enum {
+    HWLOC_LINUX_ARCH_X86, /* x86 32 or 64bits, including k1om (KNC) */
+    HWLOC_LINUX_ARCH_IA64,
+    HWLOC_LINUX_ARCH_ARM,
+    HWLOC_LINUX_ARCH_POWER,
+    HWLOC_LINUX_ARCH_UNKNOWN
+  } arch;
   int is_knl;
   struct utsname utsname; /* fields contain \0 when unknown */
 
@@ -2627,7 +2634,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
     return;
 
   /* only works for Power so far, and not useful on ARM */
-  if (strncmp(data->utsname.machine, "ppc", 3))
+  if (data->arch != HWLOC_LINUX_ARCH_POWER)
     return;
 
   cpus.n = 0;
@@ -3108,8 +3115,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   hwloc_debug_1arg_bitmap("found %d cpu topologies, cpuset %s\n",
 	     hwloc_bitmap_weight(cpuset), cpuset);
 
-  merge_buggy_core_siblings = (!strcmp(data->utsname.machine, "x86_64"))
-			   || (data->utsname.machine[0] == 'i' && !strcmp(data->utsname.machine+2, "86"));
+  merge_buggy_core_siblings = (data->arch == HWLOC_LINUX_ARCH_X86);
   caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
@@ -3653,25 +3659,23 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     getprocnb_end() else {
 
       /* architecture specific or default routine for parsing cpumodel */
-      if (!parse_cpuinfo_func) {
+      switch (data->arch) {
+      case HWLOC_LINUX_ARCH_X86:
+	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_x86;
+	break;
+      case HWLOC_LINUX_ARCH_ARM:
+	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
+	break;
+      case HWLOC_LINUX_ARCH_POWER:
+	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ppc;
+	break;
+      case HWLOC_LINUX_ARCH_IA64:
+	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ia64;
+	break;
+      default:
 	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_generic;
-	if (*data->utsname.machine) {
-	  /* x86_32 x86_64 k1om => x86 */
-	  if (!strcmp(data->utsname.machine, "x86_64")
-	      || (data->utsname.machine[0] == 'i' && !strcmp(data->utsname.machine+2, "86"))
-	      || !strcmp(data->utsname.machine, "k1om"))
-	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_x86;
-	  /* ia64 */
-	  else if (!strcmp(data->utsname.machine, "ia64"))
-	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ia64;
-	  /* arm */
-	  else if (!strncmp(data->utsname.machine, "arm", 3))
-	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
-	  else if (!strncmp(data->utsname.machine, "ppc", 3)
-		   || !strncmp(data->utsname.machine, "power", 5))
-	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ppc;
-	}
       }
+
       /* we can't assume that we already got a processor index line:
        * alpha/frv/h8300/m68k/microblaze/sparc have no processor lines at all, only a global entry.
        * tile has a global section with model name before the list of processor lines.
@@ -3967,6 +3971,25 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
       fclose(file);
     }
   }
+
+  /* detect arch for quirks, using configure #defines if possible, or uname */
+#if (defined HWLOC_X86_32_ARCH) || (defined HWLOC_X86_64_ARCH) /* does not cover KNC */
+  if (topology->is_thissystem)
+    data->arch = HWLOC_LINUX_ARCH_X86;
+#endif
+  if (data->arch == HWLOC_LINUX_ARCH_UNKNOWN && *data->utsname.machine) {
+    if (!strcmp(data->utsname.machine, "x86_64")
+	|| (data->utsname.machine[0] == 'i' && !strcmp(data->utsname.machine+2, "86"))
+	|| !strcmp(data->utsname.machine, "k1om"))
+      data->arch = HWLOC_LINUX_ARCH_X86;
+    else if (!strncmp(data->utsname.machine, "arm", 3))
+      data->arch = HWLOC_LINUX_ARCH_ARM;
+    else if (!strncmp(data->utsname.machine, "ppc", 3)
+	     || !strncmp(data->utsname.machine, "power", 5))
+      data->arch = HWLOC_LINUX_ARCH_POWER;
+    else if (!strcmp(data->utsname.machine, "ia64"))
+      data->arch = HWLOC_LINUX_ARCH_IA64;
+  }
 }
 
 /* returns 0 on success, -1 on non-match or error during hardwired load */
@@ -4050,10 +4073,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
    */
   numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos, &global_infos_count);
 
-  /* detect models for quirks */
-  if (numprocs > 0) {
-    /* KNL */
-    if (!strncmp(data->utsname.machine, "x86", 3)) { /* supports 32bits? */
+  /**************************
+   * detect model for quirks
+   */
+  if (data->arch == HWLOC_LINUX_ARCH_X86 && numprocs > 0) {
       unsigned i;
       const char *cpuvendor = NULL, *cpufamilynumber = NULL, *cpumodelnumber = NULL;
       for(i=0; i<Lprocs[0].infos_count; i++) {
@@ -4069,7 +4092,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 	  && cpufamilynumber && !strcmp(cpufamilynumber, "6")
 	  && cpumodelnumber && !strcmp(cpumodelnumber, "87"))
 	data->is_knl = 1;
-    }
   }
 
   /**********************
@@ -5142,6 +5164,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   backend->disable = hwloc_linux_backend_disable;
 
   /* default values */
+  data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->is_knl = 0;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
