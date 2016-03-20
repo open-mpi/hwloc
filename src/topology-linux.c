@@ -60,6 +60,7 @@ struct hwloc_linux_backend_data_s {
   int is_knl;
   struct utsname utsname; /* fields contain \0 when unknown */
   unsigned fallback_nbprocessors;
+  unsigned pagesize;
 
   int deprecated_classlinks_model; /* -2 if never tried, -1 if unknown, 0 if new (device contains class/name), 1 if old (device contains class:name) */
   int mic_need_directlookup; /* if not tried yet, 0 if not needed, 1 if needed */
@@ -2040,7 +2041,7 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
 #ifdef HAVE__SC_LARGE_PAGESIZE
     memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-    memory->page_types[0].size = hwloc_getpagesize(); /* might be overwritten later by /proc/meminfo or sysfs */
+    memory->page_types[0].size = data->pagesize; /* might be overwritten later by /proc/meminfo or sysfs */
   }
 
   hwloc_parse_meminfo_info(data, "/proc/meminfo", 0 /* no prefix */,
@@ -2133,7 +2134,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
       }
     }
     /* update what's remaining as normal pages */
-    memory->page_types[0].size = hwloc_getpagesize();
+    memory->page_types[0].size = data->pagesize;
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
 }
@@ -3899,14 +3900,16 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
   char line[128]; /* enough for utsname fields */
   const char *env;
 
-  /* initialize to something sane */
+  /* initialize to something sane, in case !is_thissystem and we can't find things in /proc/hwloc-nofile-info */
   memset(&data->utsname, 0, sizeof(data->utsname));
   data->fallback_nbprocessors = 1;
+  data->pagesize = 4096;
 
   /* read thissystem info */
   if (topology->is_thissystem) {
     uname(&data->utsname);
     data->fallback_nbprocessors = hwloc_fallback_nbprocessors(topology);
+    data->pagesize = hwloc_getpagesize();
   }
 
   /* overwrite with optional /proc/hwloc-nofile-info */
@@ -3943,6 +3946,10 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 	if (tmp)
 	  *tmp = '\0';
 	data->fallback_nbprocessors = atoi(line+22);
+      } else if (!strncmp("PageSize: ", line, 10)) {
+	if (tmp)
+	 *tmp = '\0';
+	data->pagesize = strtoull(line+10, NULL, 10);
       } else {
 	hwloc_debug("ignored /proc/hwloc-nofile-info line %s\n", line);
 	/* ignored */
@@ -3966,6 +3973,7 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
       if (*data->utsname.machine)
 	fprintf(file, "Architecture: %s\n", data->utsname.machine);
       fprintf(file, "FallbackNbProcessors: %u\n", data->fallback_nbprocessors);
+      fprintf(file, "PageSize: %llu\n", (unsigned long long) data->pagesize);
       fclose(file);
     }
   }
