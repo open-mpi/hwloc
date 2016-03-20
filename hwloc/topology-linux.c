@@ -263,6 +263,30 @@ static __hwloc_inline long hwloc_migrate_pages(int pid, unsigned long maxnode,
 #endif
 }
 
+#ifndef __NR_move_pages
+# ifdef __i386__
+#  define __NR_move_pages 317
+# elif defined(__x86_64__)
+#  define __NR_move_pages 279
+# elif defined(__ia64__)
+#  define __NR_move_pages 1276
+# elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
+#  define __NR_move_pages 301
+# elif defined(__sparc__)
+#  define __NR_move_pages 307
+# endif
+#endif
+static __hwloc_inline long hwloc_move_pages(int pid, unsigned long count, void **pages,
+					    const int *nodes, int *status, int flags)
+{
+#if (defined __NR_move_pages) && (defined HWLOC_HAVE_SYSCALL)
+  return syscall(__NR_move_pages, pid, count, pages, nodes, status, flags);
+#else
+  errno = ENOSYS;
+  return -1;
+#endif
+}
+
 
 /* Added for ntohl() */
 #include <arpa/inet.h>
@@ -1618,6 +1642,47 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
   return -1;
 }
 
+static int
+hwloc_linux_get_area_memlocation(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr, size_t len, hwloc_nodeset_t nodeset, int flags __hwloc_attribute_unused)
+{
+  unsigned offset;
+  unsigned long count;
+  void **pages;
+  int *status;
+  int pagesize = hwloc_getpagesize();
+  int ret;
+  unsigned i;
+
+  offset = ((unsigned long) addr) & (pagesize-1);
+  addr = ((char*) addr) - offset;
+  len += offset;
+  count = (len + pagesize-1)/pagesize;
+  pages = malloc(count*sizeof(*pages));
+  status = malloc(count*sizeof(*status));
+  if (!pages || !status) {
+    ret = -1;
+    goto out_with_pages;
+  }
+
+  for(i=0; i<count; i++)
+    pages[i] = ((char*)addr) + i*pagesize;
+
+  ret = hwloc_move_pages(0, count, pages, NULL, status, 0);
+  if (ret  < 0)
+    goto out_with_pages;
+
+  hwloc_bitmap_zero(nodeset);
+  for(i=0; i<count; i++)
+    if (status[i] >= 0)
+      hwloc_bitmap_set(nodeset, status[i]);
+  ret = 0;
+
+ out_with_pages:
+  free(pages);
+  free(status);
+  return ret;
+}
+
 void
 hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 			struct hwloc_topology_support *support __hwloc_attribute_unused)
@@ -1641,6 +1706,7 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
   hooks->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
   hooks->get_area_membind = hwloc_linux_get_area_membind;
   hooks->set_area_membind = hwloc_linux_set_area_membind;
+  hooks->get_area_memlocation = hwloc_linux_get_area_memlocation;
   hooks->alloc_membind = hwloc_linux_alloc_membind;
   hooks->alloc = hwloc_alloc_mmap;
   hooks->free_membind = hwloc_free_mmap;

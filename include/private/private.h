@@ -102,6 +102,7 @@ struct hwloc_topology {
     int (*get_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
     int (*set_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
     int (*get_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+    int (*get_area_memlocation)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, int flags);
     /* This has to return the same kind of pointer as alloc_membind, so that free_membind can be used on it */
     void *(*alloc)(hwloc_topology_t topology, size_t len);
     /* alloc_membind has to always succeed if !(flags & HWLOC_MEMBIND_STRICT).

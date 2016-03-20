@@ -230,6 +230,7 @@ extern "C" {
 #define hwloc_get_proc_membind HWLOC_NAME(get_proc_membind)
 #define hwloc_set_area_membind HWLOC_NAME(set_area_membind)
 #define hwloc_get_area_membind HWLOC_NAME(get_area_membind)
+#define hwloc_get_area_memlocation HWLOC_NAME(get_area_memlocation)
 #define hwloc_alloc_membind HWLOC_NAME(alloc_membind)
 #define hwloc_alloc HWLOC_NAME(alloc)
 #define hwloc_free HWLOC_NAME(free)
