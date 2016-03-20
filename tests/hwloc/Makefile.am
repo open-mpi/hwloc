@@ -40,6 +40,7 @@ check_PROGRAMS = hwloc_list_components \
         hwloc_type_sscanf \
         hwloc_bind \
         hwloc_get_last_cpu_location \
+        hwloc_get_area_memlocation \
         hwloc_object_userdata \
         hwloc_synthetic \
         hwloc_backends \
