@@ -59,6 +59,7 @@ struct hwloc_linux_backend_data_s {
   } arch;
   int is_knl;
   struct utsname utsname; /* fields contain \0 when unknown */
+  unsigned fallback_nbprocessors;
 
   int deprecated_classlinks_model; /* -2 if never tried, -1 if unknown, 0 if new (device contains class/name), 1 if old (device contains class:name) */
   int mic_need_directlookup; /* if not tried yet, 0 if not needed, 1 if needed */
@@ -1986,7 +1987,7 @@ hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology,
 #ifdef HAVE__SC_LARGE_PAGESIZE
     memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-    memory->page_types[0].size = hwloc_getpagesize();
+    memory->page_types[0].size = data->pagesize;
   }
 
   snprintf(path, sizeof(path), "/proc/nodes/node%lu/meminfo", node);
@@ -3891,17 +3892,6 @@ hwloc__linux_get_mic_sn(struct hwloc_topology *topology, struct hwloc_linux_back
 }
 
 static void
-hwloc_linux_fallback_pu_level(struct hwloc_topology *topology)
-{
-  if (topology->is_thissystem)
-    hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
-  else
-    /* fsys-root but not this system, no way, assume there's just 1
-     * processor :/ */
-    hwloc_setup_pu_level(topology, 1);
-}
-
-static void
 hwloc_gather_system_info(struct hwloc_topology *topology,
 			 struct hwloc_linux_backend_data_s *data)
 {
@@ -3911,10 +3901,13 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 
   /* initialize to something sane */
   memset(&data->utsname, 0, sizeof(data->utsname));
+  data->fallback_nbprocessors = 1;
 
   /* read thissystem info */
-  if (topology->is_thissystem)
+  if (topology->is_thissystem) {
     uname(&data->utsname);
+    data->fallback_nbprocessors = hwloc_fallback_nbprocessors(topology);
+  }
 
   /* overwrite with optional /proc/hwloc-nofile-info */
   file = hwloc_fopen("/proc/hwloc-nofile-info", "r", data->root_fd);
@@ -3946,6 +3939,10 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 	  *tmp = '\0';
 	strncpy(data->utsname.machine, line+14, sizeof(data->utsname.machine));
 	data->utsname.machine[sizeof(data->utsname.machine)-1] = '\0';
+      } else if (!strncmp("FallbackNbProcessors: ", line, 22)) {
+	if (tmp)
+	  *tmp = '\0';
+	data->fallback_nbprocessors = atoi(line+22);
       } else {
 	hwloc_debug("ignored /proc/hwloc-nofile-info line %s\n", line);
 	/* ignored */
@@ -3968,6 +3965,7 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 	fprintf(file, "HostName: %s\n", data->utsname.nodename);
       if (*data->utsname.machine)
 	fprintf(file, "Architecture: %s\n", data->utsname.machine);
+      fprintf(file, "FallbackNbProcessors: %u\n", data->fallback_nbprocessors);
       fclose(file);
     }
   }
@@ -4211,7 +4209,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       else
 	err = -1;
       if (err < 0)
-	hwloc_linux_fallback_pu_level(topology);
+	hwloc_setup_pu_level(topology, data->fallback_nbprocessors);
       look_powerpc_device_tree(topology, data);
 
     } else {
@@ -4219,7 +4217,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       if (look_sysfscpu(topology, data, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
         if (look_sysfscpu(topology, data, "/sys/devices/system/cpu", Lprocs, numprocs) < 0)
 	  /* sysfs but we failed to read cpu topology, fallback */
-	  hwloc_linux_fallback_pu_level(topology);
+	  hwloc_setup_pu_level(topology, data->fallback_nbprocessors);
     }
 
  done:
