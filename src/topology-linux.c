@@ -37,7 +37,7 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <mntent.h>
-#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
+#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND || defined HWLOC_HAVE_MOVE_PAGES
 #define migratepages migrate_pages /* workaround broken migratepages prototype in numaif.h before libnuma 2.0.2 */
 #include <numaif.h>
 #endif
@@ -1509,6 +1509,49 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
 
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 
+#ifdef HWLOC_HAVE_MOVE_PAGES
+static int
+hwloc_linux_get_area_memlocation(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr, size_t len, hwloc_nodeset_t nodeset, int flags __hwloc_attribute_unused)
+{
+  unsigned offset;
+  unsigned long count;
+  void **pages;
+  int *status;
+  int pagesize = hwloc_getpagesize();
+  int ret;
+  unsigned i;
+
+  offset = ((unsigned long) addr) & (pagesize-1);
+  addr = ((char*) addr) - offset;
+  len += offset;
+  count = (len + pagesize-1)/pagesize;
+  pages = malloc(count*sizeof(*pages));
+  status = malloc(count*sizeof(*status));
+  if (!pages || !status) {
+    ret = -1;
+    goto out_with_pages;
+  }
+
+  for(i=0; i<count; i++)
+    pages[i] = ((char*)addr) + i*pagesize;
+
+  ret = move_pages(0, count, pages, NULL, status, 0);
+  if (ret  < 0)
+    goto out_with_pages;
+
+  hwloc_bitmap_zero(nodeset);
+  for(i=0; i<count; i++)
+    if (status[i] >= 0)
+      hwloc_bitmap_set(nodeset, status[i]);
+  ret = 0;
+
+ out_with_pages:
+  free(pages);
+  free(status);
+  return ret;
+}
+#endif /* HWLOC_HAVE_MOVE_PAGES */
+
 void
 hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 			struct hwloc_topology_support *support __hwloc_attribute_unused)
@@ -1535,6 +1578,9 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 #ifdef HWLOC_HAVE_MBIND
   hooks->set_area_membind = hwloc_linux_set_area_membind;
+#ifdef HWLOC_HAVE_MOVE_PAGES
+  hooks->get_area_memlocation = hwloc_linux_get_area_memlocation;
+#endif /* HWLOC_HAVE_MOVE_PAGES */
   hooks->alloc_membind = hwloc_linux_alloc_membind;
   hooks->alloc = hwloc_alloc_mmap;
   hooks->free_membind = hwloc_free_mmap;

@@ -240,6 +240,7 @@ extern "C" {
 #define hwloc_set_area_membind HWLOC_NAME(set_area_membind)
 #define hwloc_get_area_membind_nodeset HWLOC_NAME(get_area_membind_nodeset)
 #define hwloc_get_area_membind HWLOC_NAME(get_area_membind)
+#define hwloc_get_area_memlocation HWLOC_NAME(get_area_memlocation)
 #define hwloc_alloc_membind_nodeset HWLOC_NAME(alloc_membind_nodeset)
 #define hwloc_alloc_membind HWLOC_NAME(alloc_membind)
 #define hwloc_alloc HWLOC_NAME(alloc)

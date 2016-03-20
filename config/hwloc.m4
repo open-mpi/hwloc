@@ -710,6 +710,9 @@ EOF])
 	enable_migrate_pages=yes
 	AC_DEFINE([HWLOC_HAVE_MIGRATE_PAGES], [1], [Define to 1 if migrate_pages is available.])
       ])
+      AC_CHECK_LIB([numa], [move_pages], [
+	AC_DEFINE([HWLOC_HAVE_MOVE_PAGES], [1], [Define to 1 if move_pages is available.])
+      ])
 
       LIBS="$tmp_save_LIBS"
     fi

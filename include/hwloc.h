@@ -1071,9 +1071,10 @@ struct hwloc_topology_membind_support {
   unsigned char replicate_membind;
   /** Next-touch migration policy is supported. */
   unsigned char nexttouch_membind;
-
   /** Migration flags is supported. */
   unsigned char migrate_membind;
+  /** Getting the last NUMA nodes where a memory area was allocated is supported */
+  unsigned char get_area_memlocation;
 };
 
 /** \brief Set of flags describing actual support for this topology.
@@ -2093,6 +2094,29 @@ HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, con
  * to EINVAL.
  */
 HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags);
+
+/** \brief Get the NUMA nodes where memory identified by (\p addr, \p len ) is physically allocated.
+ *
+ * Fills \p set according to the NUMA nodes where the memory area pages
+ * are physically allocated. If no page is actually allocated yet,
+ * \p set may be empty.
+ *
+ * If pages spread to multiple nodes, it is not specified whether they spread
+ * equitably, or whether most of them are on a single node, etc.
+ *
+ * The operating system may move memory pages from one processor
+ * to another at any time according to their binding,
+ * so this function may return something that is already
+ * outdated.
+ *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
+ *
+ * If \p len is 0, \p set is emptied.
+ *
+ * Flags are currently unused.
+ */
+HWLOC_DECLSPEC int hwloc_get_area_memlocation(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t set, int flags);
 
 /** \brief Allocate some memory
  *

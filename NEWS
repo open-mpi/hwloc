@@ -24,6 +24,10 @@ Version 1.11.3
   Thanks to Ryan Zezeski for reporting the issue.
 * Add HWLOC_MEMBIND_BYNODESET flag so that membind() functions accept
   either cpusets or nodesets.
+* Add hwloc_get_area_memlocation() to check where pages are actually
+  allocated.
+  - There's no _nodeset() variant, but the new flag HWLOC_MEMBIND_BYNODESET
+    is supported.
 * Fix a memory leak on Linux S/390 hosts with books.
 * Fix /proc/mounts parsing on Linux by using mntent.h.
   Thanks to Nathan Hjelm for reporting the issue.

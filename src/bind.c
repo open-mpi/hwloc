@@ -196,6 +196,8 @@ hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwl
   return -1;
 }
 
+#define HWLOC_MEMBIND_ALLFLAGS (HWLOC_MEMBIND_PROCESS|HWLOC_MEMBIND_THREAD|HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_NOCPUBIND|HWLOC_MEMBIND_BYNODESET)
+
 static hwloc_const_nodeset_t
 hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
 {
@@ -491,6 +493,43 @@ hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
   return ret;
 }
 
+static int
+hwloc_get_area_memlocation_by_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, int flags)
+{
+  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (!len)
+    /* nothing to do */
+    return 0;
+
+  if (topology->binding_hooks.get_area_memlocation)
+    return topology->binding_hooks.get_area_memlocation(topology, addr, len, nodeset, flags);
+
+  errno = ENOSYS;
+  return -1;
+}
+
+int
+hwloc_get_area_memlocation(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t set, int flags)
+{
+  int ret;
+
+  if (flags & HWLOC_MEMBIND_BYNODESET) {
+    ret = hwloc_get_area_memlocation_by_nodeset(topology, addr, len, set, flags);
+  } else {
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
+    ret = hwloc_get_area_memlocation_by_nodeset(topology, addr, len, nodeset, flags);
+    if (!ret)
+      hwloc_cpuset_from_nodeset(topology, set, nodeset);
+    hwloc_bitmap_free(nodeset);
+  }
+
+  return ret;
+}
+
 void *
 hwloc_alloc_heap(hwloc_topology_t topology __hwloc_attribute_unused, size_t len)
 {
@@ -703,6 +742,11 @@ static int dontget_area_membind(hwloc_topology_t topology __hwloc_attribute_unus
 {
   return dontset_return_complete_nodeset(topology, set, policy);
 }
+static int dontget_area_memlocation(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_bitmap_t set, int flags __hwloc_attribute_unused)
+{
+  hwloc_membind_policy_t policy;
+  return dontset_return_complete_nodeset(topology, set, &policy);
+}
 
 static void * dontalloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
 {
@@ -739,6 +783,7 @@ static void hwloc_set_dummy_hooks(struct hwloc_binding_hooks *hooks,
   hooks->get_proc_membind = dontget_proc_membind;
   hooks->set_area_membind = dontset_area_membind;
   hooks->get_area_membind = dontget_area_membind;
+  hooks->get_area_memlocation = dontget_area_memlocation;
   hooks->alloc_membind = dontalloc_membind;
   hooks->free_membind = dontfree_membind;
 }
@@ -828,6 +873,7 @@ hwloc_set_binding_hooks(struct hwloc_topology *topology)
     DO(mem,get_proc_membind);
     DO(mem,set_area_membind);
     DO(mem,get_area_membind);
+    DO(mem,get_area_memlocation);
     DO(mem,alloc_membind);
   }
 }

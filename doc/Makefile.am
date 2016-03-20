@@ -420,6 +420,7 @@ man3_membinding_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_set_area_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_area_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_area_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_get_area_memlocation.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
