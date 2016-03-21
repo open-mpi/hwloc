@@ -1279,7 +1279,7 @@ hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nod
   int err;
 
   buffer = hwloc_alloc_mmap(topology, len);
-  if (buffer == MAP_FAILED)
+  if (!buffer)
     return NULL;
 
   err = hwloc_linux_set_area_membind(topology, buffer, len, nodeset, policy, flags);
