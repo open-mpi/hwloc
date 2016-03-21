@@ -3118,14 +3118,13 @@ package_done:
        if (hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
 	/* check if this is hyper-threading or different coreids */
 	unsigned siblingid, siblingcoreid;
-	hwloc_bitmap_t set = hwloc_bitmap_dup(coreset);
-	hwloc_bitmap_clr(set, i);
-	siblingid = hwloc_bitmap_first(set);
+	siblingid = hwloc_bitmap_first(coreset);
+	if (siblingid == (unsigned) i)
+	  siblingid = hwloc_bitmap_next(coreset, i);
 	siblingcoreid = mycoreid;
 	sprintf(str, "%s/cpu%d/topology/core_id", path, siblingid);
 	hwloc_parse_sysfs_unsigned(str, &siblingcoreid, data->root_fd);
 	threadwithcoreid = (siblingcoreid != mycoreid);
-	hwloc_bitmap_free(set);
        }
        if (hwloc_bitmap_first(coreset) == i || threadwithcoreid) {
 	/* regular core */
