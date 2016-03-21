@@ -556,7 +556,8 @@ hwloc_alloc_heap(hwloc_topology_t topology __hwloc_attribute_unused, size_t len)
 void *
 hwloc_alloc_mmap(hwloc_topology_t topology __hwloc_attribute_unused, size_t len)
 {
-  return mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+  void * buffer = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+  return buffer == MAP_FAILED ? NULL : buffer;
 }
 #endif
 
