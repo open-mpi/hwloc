@@ -27,6 +27,8 @@ Version 1.11.3
 * Fix a x86 infinite loop on VMware due to the x2APIC feature being
   advertised without actually being fully supported.
   Thanks to Jianjun Wen for reporting the problem and testing the patch.
+* Fix the return value of hwloc_alloc() on mmap() failure.
+  Thanks to Hugo Brunie for reporting the issue.
 * Make hwloc_obj_type_sscanf() parse back everything that may be outputted
   by hwloc_obj_type_snprintf().
 * Do not filter-out FibreChannel PCI adapters by default anymore.
