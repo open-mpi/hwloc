@@ -479,6 +479,10 @@ hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size
     return -1;
   }
 
+  if (!len)
+    /* nothing to do */
+    return 0;
+
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
     return -1;
@@ -509,6 +513,12 @@ int
 hwloc_get_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
   if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (!len) {
+    /* nothing to query */
     errno = EINVAL;
     return -1;
   }

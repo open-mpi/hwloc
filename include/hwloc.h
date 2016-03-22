@@ -1570,6 +1570,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 /** \brief Bind the already-allocated memory identified by (addr, len)
  * to the NUMA node(s) in physical \p nodeset.
  *
+ * \return 0 if \p is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
@@ -1578,6 +1579,7 @@ HWLOC_DECLSPEC int hwloc_set_area_membind_nodeset(hwloc_topology_t topology, con
 /** \brief Bind the already-allocated memory identified by (addr, len)
  * to the NUMA node(s) near physical \p cpuset.
  *
+ * \return 0 if \p is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
@@ -1604,6 +1606,8 @@ HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void 
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.
+ *
+ * If \p len is 0, -1 is returned and errno is set to EINVAL.
  */
 HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
 
@@ -1630,6 +1634,8 @@ HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, con
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.
+ *
+ * If \p len is 0, -1 is returned and errno is set to EINVAL.
  */
 HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
