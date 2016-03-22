@@ -3252,6 +3252,7 @@ package_done:
           hwloc_insert_object_by_cpuset(topology, book);
           bookset = NULL; /* don't free it */
         }
+	hwloc_bitmap_free(bookset);
       }
 
       {

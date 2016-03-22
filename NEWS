@@ -22,6 +22,7 @@ Version 1.11.3
 * Allow the x86 backend to add missing cache levels, so that it completes
   what the Solaris backend lacks.
   Thanks to Ryan Zezeski for reporting the issue.
+* Fix a memory leak on Linux S/390 hosts with books.
 * Fix /proc/mounts parsing on Linux by using mntent.h.
   Thanks to Nathan Hjelm for reporting the issue.
 * Fix a x86 infinite loop on VMware due to the x2APIC feature being
