@@ -3025,7 +3025,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
-      hwloc_bitmap_t packageset, coreset, bookset, threadset, savedcoreset;
+      hwloc_bitmap_t packageset, coreset, bookset, threadset;
       unsigned mypackageid, mycoreid, mybookid;
 
       /* look at the package */
@@ -3104,6 +3104,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 package_done:
       hwloc_bitmap_free(packageset);
 
+     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
       /* look at the core */
       mycoreid = 0; /* shut-up the compiler */
       sprintf(str, "%s/cpu%d/topology/core_id", path, i);
@@ -3111,10 +3112,7 @@ package_done:
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, data->root_fd);
-      savedcoreset = coreset; /* store it for later work-arounds */
-      /* only filter now since savedcoreset is used for caches later */
-      if (coreset
-	  && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
+      if (coreset) {
        hwloc_bitmap_andnot(coreset, coreset, unknownset);
        if (hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
 	/* check if this is hyper-threading or different coreids */
@@ -3130,18 +3128,17 @@ package_done:
        if (hwloc_bitmap_first(coreset) == i || threadwithcoreid) {
 	/* regular core */
         struct hwloc_obj *core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
-	if (threadwithcoreid) {
+	if (threadwithcoreid)
 	  /* amd multicore compute-unit, create one core per thread */
-	  core->cpuset = hwloc_bitmap_alloc();
-	  hwloc_bitmap_set(core->cpuset, i);
-	} else {
-	  core->cpuset = coreset;
-	  coreset = NULL; /* don't free it */
-	}
+	  hwloc_bitmap_only(coreset, i);
+	core->cpuset = coreset;
         hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
                      mycoreid, core->cpuset);
         hwloc_insert_object_by_cpuset(topology, core);
+	coreset = NULL; /* don't free it */
        }
+       hwloc_bitmap_free(coreset);
+      }
       }
 
       if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
@@ -3281,16 +3278,13 @@ package_done:
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, data->root_fd);
         if (cacheset) {
+          if (hwloc_bitmap_iszero(cacheset)) {
+	    /* ia64 returning empty L3 and L2i? use the core set instead */
+	    hwloc_bitmap_free(cacheset);
+	    sprintf(mappath, "%s/cpu%d/topology/thread_siblings", path, i);
+	    cacheset = hwloc_parse_cpumap(mappath, data->root_fd);
+	  }
 	  hwloc_bitmap_andnot(cacheset, cacheset, unknownset);
-          if (hwloc_bitmap_weight(cacheset) < 1) {
-            /* mask is wrong (useful for many itaniums) */
-            if (savedcoreset)
-              /* assume it's a core-specific cache */
-              hwloc_bitmap_copy(cacheset, savedcoreset);
-            else
-              /* assumes it's not shared */
-              hwloc_bitmap_only(cacheset, i);
-          }
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
@@ -3315,7 +3309,6 @@ package_done:
         }
         hwloc_bitmap_free(cacheset);
       }
-      hwloc_bitmap_free(coreset);
     }
   hwloc_bitmap_foreach_end();
 
