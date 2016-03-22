@@ -1570,7 +1570,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 /** \brief Bind the already-allocated memory identified by (addr, len)
  * to the NUMA node(s) in physical \p nodeset.
  *
- * \return 0 if \p is 0.
+ * \return 0 if \p len is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
@@ -1579,7 +1579,7 @@ HWLOC_DECLSPEC int hwloc_set_area_membind_nodeset(hwloc_topology_t topology, con
 /** \brief Bind the already-allocated memory identified by (addr, len)
  * to the NUMA node(s) near physical \p cpuset.
  *
- * \return 0 if \p is 0.
+ * \return 0 if \p len is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
