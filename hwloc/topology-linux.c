@@ -3164,6 +3164,7 @@ package_done:
           bookset = NULL; /* don't free it */
 	 }
         }
+	hwloc_bitmap_free(bookset);
        }
       }
 
