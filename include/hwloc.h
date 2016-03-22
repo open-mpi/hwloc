@@ -2000,6 +2000,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 /** \brief Bind the already-allocated memory identified by (addr, len)
  * to the NUMA node(s) in physical \p nodeset.
  *
+ * \return 0 if \p len is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
@@ -2008,6 +2009,7 @@ HWLOC_DECLSPEC int hwloc_set_area_membind_nodeset(hwloc_topology_t topology, con
 /** \brief Bind the already-allocated memory identified by (addr, len)
  * to the NUMA node(s) near physical \p cpuset.
  *
+ * \return 0 if \p len is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
@@ -2031,6 +2033,8 @@ HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void 
  * union of all NUMA node(s) containing pages in the address range.
  * If all pages in the target have the same policy, it is returned in
  * \p policy.  Otherwise, \p policy is set to ::HWLOC_MEMBIND_MIXED.
+ *
+ * If \p len is 0, -1 is returned and errno is set to EINVAL.
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.
@@ -2057,6 +2061,8 @@ HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, con
  * cpuset is then set to the CPUs near the NUMA node(s) in this union.
  * If all pages in the target have the same policy, it is returned in
  * \p policy.  Otherwise, \p policy is set to ::HWLOC_MEMBIND_MIXED.
+ *
+ * If \p len is 0, -1 is returned and errno is set to EINVAL.
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.

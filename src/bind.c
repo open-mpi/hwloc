@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011-2015 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -412,6 +412,10 @@ hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_
 int
 hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
+  if (!len)
+    /* nothing to do */
+    return 0;
+
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
     return -1;
@@ -441,6 +445,12 @@ hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
 int
 hwloc_get_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
+  if (!len) {
+    /* nothing to query */
+    errno = EINVAL;
+    return -1;
+  }
+
   if (topology->binding_hooks.get_area_membind)
     return topology->binding_hooks.get_area_membind(topology, addr, len, nodeset, policy, flags);
 
