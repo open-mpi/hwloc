@@ -3153,7 +3153,7 @@ package_done:
         bookset = hwloc_parse_cpumap(str, data->root_fd);
 	if (bookset) {
 	 hwloc_bitmap_andnot(bookset, bookset, unknownset);
-         if (bookset && hwloc_bitmap_first(bookset) == i) {
+         if (hwloc_bitmap_first(bookset) == i) {
           struct hwloc_obj *book = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, mybookid);
           book->cpuset = bookset;
           hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
