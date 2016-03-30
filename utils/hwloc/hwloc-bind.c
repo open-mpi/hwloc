@@ -241,6 +241,7 @@ int main(int argc, char *argv[])
 
     ret = hwloc_calc_process_arg(topology, depth, argv[0], logical,
 				 working_on_cpubind ? cpubind_set : membind_set,
+				 working_on_cpubind ? 0 : 1,
 				 verbose);
     if (ret < 0) {
       if (verbose > 0)
@@ -370,11 +371,11 @@ int main(int argc, char *argv[])
     if (single)
       hwloc_bitmap_singlify(membind_set);
     if (pid_number > 0)
-      ret = hwloc_set_proc_membind(topology, pid, membind_set, membind_policy, membind_flags);
+      ret = hwloc_set_proc_membind_nodeset(topology, pid, membind_set, membind_policy, membind_flags);
     else if (tid_number > 0) {
       ret = -1; errno = ENOSYS;
     } else
-      ret = hwloc_set_membind(topology, membind_set, membind_policy, membind_flags);
+      ret = hwloc_set_membind_nodeset(topology, membind_set, membind_policy, membind_flags);
     if (ret && verbose >= 0) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
