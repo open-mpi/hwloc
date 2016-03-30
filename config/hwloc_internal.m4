@@ -404,7 +404,7 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh]
         hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh]
         hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh]
-
+        hwloc_config_prefix[contrib/misc/Makefile]
         hwloc_config_prefix[tests/netloc/Makefile]
     )
 
