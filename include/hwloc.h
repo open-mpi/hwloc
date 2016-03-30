@@ -1638,11 +1638,13 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  * \endcode
  *
  * Each hwloc memory binding function is available in two forms: one
- * that takes a CPU set argument and another that takes a NUMA memory
- * node set argument (see \ref hwlocality_object_sets and \ref
- * hwlocality_bitmap for a discussion of CPU sets and NUMA memory node
- * sets).  The names of the latter form end with _nodeset.  It is also
- * possible to convert between CPU set and node set using
+ * that takes a bitmap argument (a CPU set by default, or a NUMA memory
+ * node set if the flag ::HWLOC_MEMBIND_BYNODESET is specified),
+ * and another one (whose name ends with _nodeset) that always takes
+ * a NUMA memory node set.
+ * See \ref hwlocality_object_sets and \ref hwlocality_bitmap for a
+ * discussion of CPU sets and NUMA memory node sets.
+ * It is also possible to convert between CPU set and node set using
  * hwloc_cpuset_to_nodeset() or hwloc_cpuset_from_nodeset().
  *
  * Memory binding by CPU set cannot work for CPU-less NUMA memory nodes.
@@ -1778,7 +1780,18 @@ typedef enum {
    * may fail with errno set to ENOSYS when used with NOCPUBIND.
    * \hideinitializer
    */
-  HWLOC_MEMBIND_NOCPUBIND =     (1<<4)
+  HWLOC_MEMBIND_NOCPUBIND =     (1<<4),
+
+  /** \brief Consider the bitmap argument as a nodeset.
+   *
+   * Functions whose name ends with _nodeset() take a nodeset argument.
+   * Other functions take a bitmap argument that is considered a nodeset
+   * if this flag is given, or a cpuset otherwise.
+   *
+   * Memory binding by CPU set cannot work for CPU-less NUMA memory nodes.
+   * Binding by nodeset should therefore be preferred whenever possible.
+   */
+  HWLOC_MEMBIND_BYNODESET =     (1<<5)
 } hwloc_membind_flags_t;
 
 /** \brief Set the default memory binding policy of the current
@@ -1796,7 +1809,7 @@ typedef enum {
 HWLOC_DECLSPEC int hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Set the default memory binding policy of the current
- * process or thread to prefer the NUMA node(s) specified by \p cpuset
+ * process or thread to prefer the NUMA node(s) specified by \p set
  *
  * If neither ::HWLOC_MEMBIND_PROCESS nor ::HWLOC_MEMBIND_THREAD is
  * specified, the current process is assumed to be single-threaded.
@@ -1804,10 +1817,13 @@ HWLOC_DECLSPEC int hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_co
  * process-based OS functions or thread-based OS functions, depending
  * on which are available.
  *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
+ *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
+HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Query the default memory binding policy and physical locality of the
  * current process or thread.
@@ -1837,9 +1853,10 @@ HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpus
  *
  * Otherwise, if ::HWLOC_MEMBIND_PROCESS is specified (and
  * ::HWLOC_MEMBIND_STRICT is \em not specified), \p nodeset is set to
- * the logical OR of all threads' default nodeset.  If all threads'
- * default policies are the same, \p policy is set to that policy.  If
- * they are different, \p policy is set to ::HWLOC_MEMBIND_MIXED.
+ * the logical OR of all threads' default nodeset.
+ * If all threads' default policies are the same, \p policy is set to
+ * that policy.  If they are different, \p policy is set to
+ * ::HWLOC_MEMBIND_MIXED.
  *
  * In the ::HWLOC_MEMBIND_THREAD case (or when neither
  * ::HWLOC_MEMBIND_PROCESS or ::HWLOC_MEMBIND_THREAD is specified), there
@@ -1852,10 +1869,9 @@ HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpus
 HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Query the default memory binding policy and physical locality of the
- * current process or thread (the locality is returned in \p cpuset as
- * CPUs near the locality's actual NUMA node(s)).
+ * current process or thread.
  *
- * This function has two output parameters: \p cpuset and \p policy.
+ * This function has two output parameters: \p set and \p policy.
  * The values returned in these parameters depend on both the \p flags
  * passed in and the current memory binding policies and nodesets in
  * the queried target.
@@ -1875,28 +1891,28 @@ HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_no
  * is also specified.  In this case, hwloc will check the default
  * memory policies and nodesets for all threads in the process.  If
  * they are not identical, -1 is returned and errno is set to EXDEV.
- * If they are identical, the policy is returned in \p policy.  \p
- * cpuset is set to the union of CPUs near the NUMA node(s) in the
- * nodeset.
+ * If they are identical, the values are returned in \p set and \p
+ * policy.
  *
  * Otherwise, if ::HWLOC_MEMBIND_PROCESS is specified (and
- * ::HWLOC_MEMBIND_STRICT is \em not specified), the default nodeset
- * from each thread is logically OR'ed together.  \p cpuset is set to
- * the union of CPUs near the NUMA node(s) in the resulting nodeset.
+ * ::HWLOC_MEMBIND_STRICT is \em not specified), the default set
+ * from each thread is logically OR'ed together.
  * If all threads' default policies are the same, \p policy is set to
  * that policy.  If they are different, \p policy is set to
  * ::HWLOC_MEMBIND_MIXED.
  *
  * In the ::HWLOC_MEMBIND_THREAD case (or when neither
  * ::HWLOC_MEMBIND_PROCESS or ::HWLOC_MEMBIND_THREAD is specified), there
- * is only one nodeset and policy.  The policy is returned in \p
- * policy; \p cpuset is set to the union of CPUs near the NUMA node(s)
- * in the \p nodeset.
+ * is only one set and policy; they are returned in \p set and
+ * \p policy, respectively.
+ *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.
  */
-HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
+HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Set the default memory binding policy of the specified
  * process to prefer the NUMA node(s) specified by \p nodeset
@@ -1910,7 +1926,10 @@ HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t c
 HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Set the default memory binding policy of the specified
- * process to prefer the NUMA node(s) specified by \p cpuset
+ * process to prefer the NUMA node(s) specified by \p set
+ *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
@@ -1918,7 +1937,7 @@ HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwl
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
  */
-HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
+HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Query the default memory binding policy and physical locality of the
  * specified process.
@@ -1959,10 +1978,9 @@ HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Query the default memory binding policy and physical locality of the
- * specified process (the locality is returned in \p cpuset as CPUs
- * near the locality's actual NUMA node(s)).
+ * specified process.
  *
- * This function has two output parameters: \p cpuset and \p policy.
+ * This function has two output parameters: \p set and \p policy.
  * The values returned in these parameters depend on both the \p flags
  * passed in and the current memory binding policies and nodesets in
  * the queried target.
@@ -1981,15 +1999,16 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwl
  * If ::HWLOC_MEMBIND_STRICT is specified, hwloc will check the default
  * memory policies and nodesets for all threads in the specified
  * process.  If they are not identical, -1 is returned and errno is
- * set to EXDEV.  If they are identical, the policy is returned in \p
- * policy.  \p cpuset is set to the union of CPUs near the NUMA
- * node(s) in the nodeset.
+ * set to EXDEV.  If they are identical, the values are returned in \p
+ * set and \p policy.
  *
- * Otherwise, the default nodeset from each thread is logically OR'ed
- * together.  \p cpuset is set to the union of CPUs near the NUMA
- * node(s) in the resulting nodeset.  If all threads' default policies
+ * Otherwise, \p set is set to the logical OR of all threads'
+ * default set.  If all threads' default policies
  * are the same, \p policy is set to that policy.  If they are
  * different, \p policy is set to ::HWLOC_MEMBIND_MIXED.
+ *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.
@@ -1997,7 +2016,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwl
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
  */
-HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
+HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Bind the already-allocated memory identified by (addr, len)
  * to the NUMA node(s) specified by \p nodeset.
@@ -2009,13 +2028,16 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 HWLOC_DECLSPEC int hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Bind the already-allocated memory identified by (addr, len)
- * to the NUMA node(s) specified by \p cpuset.
+ * to the NUMA node(s) specified by \p set.
+ *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
  *
  * \return 0 if \p len is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
+HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Query the physical NUMA node(s) and binding policy of the memory
  * identified by (\p addr, \p len ).
@@ -2046,7 +2068,7 @@ HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, con
 /** \brief Query the CPUs near the physical NUMA node(s) and binding policy of
  * the memory identified by (\p addr, \p len ).
  *
- * This function has two output parameters: \p cpuset and \p policy.
+ * This function has two output parameters: \p set and \p policy.
  * The values returned in these parameters depend on both the \p flags
  * passed in and the memory binding policies and nodesets of the pages
  * in the address range.
@@ -2054,22 +2076,23 @@ HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, con
  * If ::HWLOC_MEMBIND_STRICT is specified, the target pages are first
  * checked to see if they all have the same memory binding policy and
  * nodeset.  If they do not, -1 is returned and errno is set to EXDEV.
- * If they are identical across all pages, the policy is returned in
- * \p policy.  \p cpuset is set to the union of CPUs near the NUMA
- * node(s) in the nodeset.
+ * If they are identical across all pages, the set and policy are
+ * returned in \p set and \p policy, respectively.
  *
  * If ::HWLOC_MEMBIND_STRICT is not specified, the union of all NUMA
- * node(s) containing pages in the address range is calculated.  \p
- * cpuset is then set to the CPUs near the NUMA node(s) in this union.
+ * node(s) containing pages in the address range is calculated.
  * If all pages in the target have the same policy, it is returned in
  * \p policy.  Otherwise, \p policy is set to ::HWLOC_MEMBIND_MIXED.
+ *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
  *
  * If \p len is 0, -1 is returned and errno is set to EINVAL.
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.
  */
-HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
+HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Allocate some memory
  *
@@ -2093,7 +2116,7 @@ HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
-/** \brief Allocate some memory on NUMA memory nodes specified by \p cpuset
+/** \brief Allocate some memory on NUMA memory nodes specified by \p set
  *
  * \return NULL with errno set to ENOSYS if the action is not supported
  * and ::HWLOC_MEMBIND_STRICT is given
@@ -2102,9 +2125,12 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size
  * \return NULL with errno set to ENOMEM if the memory allocation failed
  * even before trying to bind.
  *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
+ *
  * \note The allocated memory should be freed with hwloc_free().
  */
-HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
 /** \brief Allocate some memory on NUMA memory nodes specified by \p nodeset
  *
@@ -2115,14 +2141,17 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, 
 static __hwloc_inline void *
 hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
-/** \brief Allocate some memory on NUMA memory nodes specified by \p cpuset
+/** \brief Allocate some memory on NUMA memory nodes specified by \p set
  *
  * This is similar to hwloc_alloc_membind_nodeset() except that it is allowed to change
  * the current memory binding policy, thus providing more binding support, at
  * the expense of changing the current state.
+ *
+ * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
+ * Otherwise it's a cpuset.
  */
 static __hwloc_inline void *
-hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
+hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
 /** \brief Free memory that was previously allocated by hwloc_alloc()
  * or hwloc_alloc_membind().
