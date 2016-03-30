@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -115,20 +115,6 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
     if (!strcmp(obj->infos[i].name, name))
       return obj->infos[i].value;
   return NULL;
-}
-
-static __hwloc_inline void *
-hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
-{
-  void *p = hwloc_alloc_membind_nodeset(topology, len, nodeset, policy, flags);
-  if (p)
-    return p;
-  hwloc_set_membind_nodeset(topology, nodeset, policy, flags);
-  p = hwloc_alloc(topology, len);
-  if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
-    /* Enforce the binding by touching the data */
-    memset(p, 0, len);
-  return p;
 }
 
 static __hwloc_inline void *

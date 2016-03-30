@@ -3,7 +3,7 @@
  * - manipulating nodesets
  * - memory binding and binding policies
  *
- * Copyright © 2014-2015 Inria.  All rights reserved.
+ * Copyright © 2014-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -58,7 +58,7 @@ int main(void)
     hwloc_topology_destroy(topology);
     return EXIT_FAILURE;
   }
-  err = hwloc_get_membind_nodeset(topology, set, &policy, 0);
+  err = hwloc_get_membind(topology, set, &policy, HWLOC_MEMBIND_BYNODESET);
   if (err < 0) {
     fprintf(stderr, "failed to retrieve my memory binding and policy\n");
     hwloc_topology_destroy(topology);
@@ -95,7 +95,8 @@ int main(void)
   obj = NULL;
   buffer = NULL;
   while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, obj)) != NULL) {
-    buffer = hwloc_alloc_membind_nodeset(topology, 4096, obj->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_STRICT);
+    buffer = hwloc_alloc_membind(topology, 4096, obj->nodeset, HWLOC_MEMBIND_BIND,
+                                 HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_BYNODESET);
     if (!buffer) {
       fprintf(stderr, "failed to allocate memory on node %u\n", obj->os_index);
       hwloc_topology_destroy(topology);
@@ -111,7 +112,7 @@ int main(void)
     hwloc_topology_destroy(topology);
     return EXIT_FAILURE;
   }
-  err = hwloc_get_area_membind_nodeset(topology, buffer, 4096, set, &policy, 0);
+  err = hwloc_get_area_membind(topology, buffer, 4096, set, &policy, HWLOC_MEMBIND_BYNODESET);
   if (err < 0) {
     fprintf(stderr, "failed to retrieve the buffer binding and policy\n");
     hwloc_topology_destroy(topology);
@@ -139,7 +140,8 @@ int main(void)
 
   /* try to migrate the buffer to the first node */
   obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
-  err = hwloc_set_area_membind_nodeset(topology, buffer, 4096, obj->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_MIGRATE);
+  err = hwloc_set_area_membind(topology, buffer, 4096, obj->nodeset, HWLOC_MEMBIND_BIND,
+                               HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_BYNODESET);
   if (err < 0) {
     fprintf(stderr, "failed to migrate buffer\n");
     hwloc_topology_destroy(topology);

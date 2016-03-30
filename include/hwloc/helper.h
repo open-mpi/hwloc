@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -600,7 +600,7 @@ hwloc_get_pu_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
  *
  * This function is useful for converting a nodeset into the NUMA node
  * objects it contains.
- * When retrieving the current binding (e.g. with hwloc_get_membind_nodeset()),
+ * When retrieving the current binding (e.g. with hwloc_get_membind() with HWLOC_MEMBIND_BYNODESET),
  * one may iterate over the bits of the resulting nodeset with
  * hwloc_bitmap_foreach_begin(), and find the corresponding NUMA nodes
  * with this function.

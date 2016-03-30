@@ -351,17 +351,11 @@ int main(int argc, char *argv[])
       } else {
       hwloc_membind_policy_t policy;
       if (pid_number > 0) {
-	if (use_nodeset)
-	  err = hwloc_get_proc_membind_nodeset(topology, pid, membind_set, &policy, 0);
-	else
-	  err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, 0);
+	err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, use_nodeset ? HWLOC_MEMBIND_BYNODESET : 0);
       } else if (tid_number > 0) {
 	err = -1; errno = ENOSYS;
       } else {
-	if (use_nodeset)
-	  err = hwloc_get_membind_nodeset(topology, membind_set, &policy, 0);
-	else
-	  err = hwloc_get_membind(topology, membind_set, &policy, 0);
+	err = hwloc_get_membind(topology, membind_set, &policy, use_nodeset ? HWLOC_MEMBIND_BYNODESET : 0);
       }
       if (err) {
 	const char *errmsg = strerror(errno);
@@ -407,11 +401,11 @@ int main(int argc, char *argv[])
     if (single)
       hwloc_bitmap_singlify(membind_set);
     if (pid_number > 0)
-      ret = hwloc_set_proc_membind_nodeset(topology, pid, membind_set, membind_policy, membind_flags);
+      ret = hwloc_set_proc_membind(topology, pid, membind_set, membind_policy, membind_flags | HWLOC_MEMBIND_BYNODESET);
     else if (tid_number > 0) {
       ret = -1; errno = ENOSYS;
     } else
-      ret = hwloc_set_membind_nodeset(topology, membind_set, membind_policy, membind_flags);
+      ret = hwloc_set_membind(topology, membind_set, membind_policy, membind_flags | HWLOC_MEMBIND_BYNODESET);
     if (ret && verbose >= 0) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);

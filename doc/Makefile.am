@@ -396,22 +396,14 @@ man3_membinding_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_membind_flags_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_membind_policy_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_set_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_area_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_set_area_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_area_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_area_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_alloc.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_free.3
 
 man3_setsourcedir = $(man3dir)

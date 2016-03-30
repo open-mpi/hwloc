@@ -1123,13 +1123,11 @@ these facilities, hwloc provides:
 
 <ul>
 <li>functions that set/get the current memory binding policies (if supported):
-hwloc_set/get_membind_*() and hwloc_set/get_proc_membind()
-<li>functions that allocate memory bound to specific node set without changing
-the current memory binding policy (if supported): hwloc_alloc_membind() and
-hwloc_alloc_membind_nodeset().
-<li>helpers which, if needed, change the current memory binding policy of the
-process in order to obtain memory binding: hwloc_alloc_membind_policy() and
-hwloc_alloc_membind_policy_nodeset()
+hwloc_set/get_membind() and hwloc_set/get_proc_membind()
+<li>a function that allocates memory bound to specific node set without changing
+the current memory binding policy (if supported): hwloc_alloc_membind().
+<li>a helper which, if needed, changes the current memory binding policy of the
+process in order to obtain memory binding: hwloc_alloc_membind_policy().
 </ul>
 
 An application can thus use the two first sets of functions if it wants to

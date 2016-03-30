@@ -224,19 +224,12 @@ extern "C" {
 
 #define hwloc_membind_flags_t HWLOC_NAME(membind_flags_t)
 
-#define hwloc_set_membind_nodeset HWLOC_NAME(set_membind_nodeset)
 #define hwloc_set_membind HWLOC_NAME(set_membind)
-#define hwloc_get_membind_nodeset HWLOC_NAME(get_membind_nodeset)
 #define hwloc_get_membind HWLOC_NAME(get_membind)
-#define hwloc_set_proc_membind_nodeset HWLOC_NAME(set_proc_membind_nodeset)
 #define hwloc_set_proc_membind HWLOC_NAME(set_proc_membind)
-#define hwloc_get_proc_membind_nodeset HWLOC_NAME(get_proc_membind_nodeset)
 #define hwloc_get_proc_membind HWLOC_NAME(get_proc_membind)
-#define hwloc_set_area_membind_nodeset HWLOC_NAME(set_area_membind_nodeset)
 #define hwloc_set_area_membind HWLOC_NAME(set_area_membind)
-#define hwloc_get_area_membind_nodeset HWLOC_NAME(get_area_membind_nodeset)
 #define hwloc_get_area_membind HWLOC_NAME(get_area_membind)
-#define hwloc_alloc_membind_nodeset HWLOC_NAME(alloc_membind_nodeset)
 #define hwloc_alloc_membind HWLOC_NAME(alloc_membind)
 #define hwloc_alloc HWLOC_NAME(alloc)
 #define hwloc_free HWLOC_NAME(free)
@@ -527,6 +520,14 @@ extern "C" {
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
 #define hwloc_obj_type_string HWLOC_NAME(obj_type_string)
 #define hwloc_obj_type_sscanf HWLOC_NAME(obj_type_sscanf)
+
+#define hwloc_set_membind_nodeset HWLOC_NAME(set_membind_nodeset)
+#define hwloc_get_membind_nodeset HWLOC_NAME(get_membind_nodeset)
+#define hwloc_set_proc_membind_nodeset HWLOC_NAME(set_proc_membind_nodeset)
+#define hwloc_get_proc_membind_nodeset HWLOC_NAME(get_proc_membind_nodeset)
+#define hwloc_set_area_membind_nodeset HWLOC_NAME(set_area_membind_nodeset)
+#define hwloc_get_area_membind_nodeset HWLOC_NAME(get_area_membind_nodeset)
+#define hwloc_alloc_membind_nodeset HWLOC_NAME(alloc_membind_nodeset)
 
 /* private/debug.h */
 

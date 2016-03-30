@@ -3,7 +3,7 @@
  * See other examples under doc/examples/ in the source tree
  * for more details.
  *
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -159,13 +159,13 @@ int main(void)
     obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, n - 1);
 
     size = 1024*1024;
-    m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
-                                    HWLOC_MEMBIND_BIND, 0);
+    m = hwloc_alloc_membind(topology, size, obj->nodeset,
+                            HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_BYNODESET);
     hwloc_free(topology, m, size);
 
     m = malloc(size);
-    hwloc_set_area_membind_nodeset(topology, m, size, obj->nodeset,
-                                   HWLOC_MEMBIND_BIND, 0);
+    hwloc_set_area_membind(topology, m, size, obj->nodeset,
+                           HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_BYNODESET);
     free(m);
 
     /* Destroy topology object. */
