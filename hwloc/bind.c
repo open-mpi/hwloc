@@ -236,7 +236,7 @@ hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwl
   return -1;
 }
 
-#define HWLOC_MEMBIND_ALLFLAGS (HWLOC_MEMBIND_PROCESS|HWLOC_MEMBIND_THREAD|HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_NOCPUBIND)
+#define HWLOC_MEMBIND_ALLFLAGS (HWLOC_MEMBIND_PROCESS|HWLOC_MEMBIND_THREAD|HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_NOCPUBIND|HWLOC_MEMBIND_BYNODESET)
 
 static hwloc_const_nodeset_t
 hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
@@ -346,17 +346,20 @@ hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodes
 }
 
 int
-hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)
+hwloc_set_membind(hwloc_topology_t topology, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags)
 {
-  hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   int ret;
 
-  if (hwloc_fix_membind_cpuset(topology, nodeset, set))
-    ret = -1;
-  else
-    ret = hwloc_set_membind_nodeset(topology, nodeset, policy, flags);
-
-  hwloc_bitmap_free(nodeset);
+  if (flags & HWLOC_MEMBIND_BYNODESET) {
+    ret = hwloc_set_membind_nodeset(topology, set, policy, flags);
+  } else {
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
+    if (hwloc_fix_membind_cpuset(topology, nodeset, set))
+      ret = -1;
+    else
+      ret = hwloc_set_membind_nodeset(topology, nodeset, policy, flags);
+    hwloc_bitmap_free(nodeset);
+  }
   return ret;
 }
 
@@ -390,18 +393,20 @@ hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hw
 }
 
 int
-hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t set, hwloc_membind_policy_t * policy, int flags)
+hwloc_get_membind(hwloc_topology_t topology, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags)
 {
-  hwloc_nodeset_t nodeset;
   int ret;
 
-  nodeset = hwloc_bitmap_alloc();
-  ret = hwloc_get_membind_nodeset(topology, nodeset, policy, flags);
+  if (flags & HWLOC_MEMBIND_BYNODESET) {
+    ret = hwloc_get_membind_nodeset(topology, set, policy, flags);
+  } else {
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
+    ret = hwloc_get_membind_nodeset(topology, nodeset, policy, flags);
+    if (!ret)
+      hwloc_cpuset_from_nodeset(topology, set, nodeset);
+    hwloc_bitmap_free(nodeset);
+  }
 
-  if (!ret)
-    hwloc_cpuset_from_nodeset(topology, set, nodeset);
-
-  hwloc_bitmap_free(nodeset);
   return ret;
 }
 
@@ -426,17 +431,21 @@ hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc
 
 
 int
-hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)
+hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags)
 {
-  hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   int ret;
 
-  if (hwloc_fix_membind_cpuset(topology, nodeset, set))
-    ret = -1;
-  else
-    ret = hwloc_set_proc_membind_nodeset(topology, pid, nodeset, policy, flags);
+  if (flags & HWLOC_MEMBIND_BYNODESET) {
+    ret = hwloc_set_proc_membind_nodeset(topology, pid, set, policy, flags);
+  } else {
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
+    if (hwloc_fix_membind_cpuset(topology, nodeset, set))
+      ret = -1;
+    else
+      ret = hwloc_set_proc_membind_nodeset(topology, pid, nodeset, policy, flags);
+    hwloc_bitmap_free(nodeset);
+  }
 
-  hwloc_bitmap_free(nodeset);
   return ret;
 }
 
@@ -456,18 +465,20 @@ hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc
 }
 
 int
-hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, hwloc_membind_policy_t * policy, int flags)
+hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags)
 {
-  hwloc_nodeset_t nodeset;
   int ret;
 
-  nodeset = hwloc_bitmap_alloc();
-  ret = hwloc_get_proc_membind_nodeset(topology, pid, nodeset, policy, flags);
+  if (flags & HWLOC_MEMBIND_BYNODESET) {
+    ret = hwloc_get_proc_membind_nodeset(topology, pid, set, policy, flags);
+  } else {
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
+    ret = hwloc_get_proc_membind_nodeset(topology, pid, nodeset, policy, flags);
+    if (!ret)
+      hwloc_cpuset_from_nodeset(topology, set, nodeset);
+    hwloc_bitmap_free(nodeset);
+  }
 
-  if (!ret)
-    hwloc_cpuset_from_nodeset(topology, set, nodeset);
-
-  hwloc_bitmap_free(nodeset);
   return ret;
 }
 
@@ -495,17 +506,21 @@ hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size
 }
 
 int
-hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)
+hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags)
 {
-  hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   int ret;
 
-  if (hwloc_fix_membind_cpuset(topology, nodeset, set))
-    ret = -1;
-  else
-    ret = hwloc_set_area_membind_nodeset(topology, addr, len, nodeset, policy, flags);
+  if (flags & HWLOC_MEMBIND_BYNODESET) {
+    ret = hwloc_set_area_membind_nodeset(topology, addr, len, set, policy, flags);
+  } else {
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
+    if (hwloc_fix_membind_cpuset(topology, nodeset, set))
+      ret = -1;
+    else
+      ret = hwloc_set_area_membind_nodeset(topology, addr, len, nodeset, policy, flags);
+    hwloc_bitmap_free(nodeset);
+  }
 
-  hwloc_bitmap_free(nodeset);
   return ret;
 }
 
@@ -531,18 +546,20 @@ hwloc_get_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size
 }
 
 int
-hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t set, hwloc_membind_policy_t * policy, int flags)
+hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags)
 {
-  hwloc_nodeset_t nodeset;
   int ret;
 
-  nodeset = hwloc_bitmap_alloc();
-  ret = hwloc_get_area_membind_nodeset(topology, addr, len, nodeset, policy, flags);
+  if (flags & HWLOC_MEMBIND_BYNODESET) {
+    ret = hwloc_get_area_membind_nodeset(topology, addr, len, set, policy, flags);
+  } else {
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
+    ret = hwloc_get_area_membind_nodeset(topology, addr, len, nodeset, policy, flags);
+    if (!ret)
+      hwloc_cpuset_from_nodeset(topology, set, nodeset);
+    hwloc_bitmap_free(nodeset);
+  }
 
-  if (!ret)
-    hwloc_cpuset_from_nodeset(topology, set, nodeset);
-
-  hwloc_bitmap_free(nodeset);
   return ret;
 }
 
@@ -640,20 +657,24 @@ fallback:
 }
 
 void *
-hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)
+hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t set, hwloc_membind_policy_t policy, int flags)
 {
-  hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   void *ret;
 
-  if (hwloc_fix_membind_cpuset(topology, nodeset, set)) {
-    if (flags & HWLOC_MEMBIND_STRICT)
-      ret = NULL;
-    else
-      ret = hwloc_alloc(topology, len);
-  } else
-    ret = hwloc_alloc_membind_nodeset(topology, len, nodeset, policy, flags);
+  if (flags & HWLOC_MEMBIND_BYNODESET) {
+    ret = hwloc_alloc_membind_nodeset(topology, len, set, policy, flags);
+  } else {
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
+    if (hwloc_fix_membind_cpuset(topology, nodeset, set)) {
+      if (flags & HWLOC_MEMBIND_STRICT)
+	ret = NULL;
+      else
+	ret = hwloc_alloc(topology, len);
+    } else
+      ret = hwloc_alloc_membind_nodeset(topology, len, nodeset, policy, flags);
+    hwloc_bitmap_free(nodeset);
+  }
 
-  hwloc_bitmap_free(nodeset);
   return ret;
 }
 
