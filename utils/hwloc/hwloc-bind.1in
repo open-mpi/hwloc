@@ -62,6 +62,16 @@ instead of CPU binding.
 No location may be given since no binding is performed.
 
 .TP
+\fB\-\-nodeset\fR
+Report binding as a NUMA memory node set instead of a CPU set
+if \-\-get was given.
+This is useful for manipulating CPU-less NUMA nodes since their
+cpuset is empty while their nodeset is correct.
+.TP
+\ 
+Also parse input bitmasks as nodesets instead of cpusets.
+
+.TP
 \fB\-e\fR \fB\-\-get-last-cpu-location\fR
 Report the last processors where the process ran.
 The output is an opaque bitmask that may be translated into objects with hwloc-calc

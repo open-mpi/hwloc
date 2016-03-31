@@ -44,6 +44,7 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  --get          Retrieve current process binding\n");
   fprintf(where, "  -e --get-last-cpu-location\n"
 		 "                 Retrieve the last processors where the current process ran\n");
+  fprintf(where, "  --nodeset      Display (and parse) cpusets as nodesets\n");
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
 #ifdef HWLOC_LINUX_SYS
   fprintf(where, "  --tid <tid>    Operate on thread <tid>\n");
@@ -67,6 +68,7 @@ int main(int argc, char *argv[])
   int got_cpubind = 0, got_membind = 0;
   int working_on_cpubind = 1; /* membind if 0 */
   int get_binding = 0;
+  int use_nodeset = 0;
   int get_last_cpu_location = 0;
   unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES;
   int force = 0;
@@ -176,6 +178,10 @@ int main(int argc, char *argv[])
 	get_binding = 1;
 	goto next;
       }
+      else if (!strcmp (argv[0], "--nodeset")) {
+	use_nodeset = 1;
+	goto next;
+      }
       else if (!strcmp (argv[0], "--cpubind")) {
 	  working_on_cpubind = 1;
 	  goto next;
@@ -241,6 +247,7 @@ int main(int argc, char *argv[])
 
     ret = hwloc_calc_process_arg(topology, depth, argv[0], logical,
 				 working_on_cpubind ? cpubind_set : membind_set,
+				 use_nodeset,
 				 working_on_cpubind ? 0 : 1,
 				 verbose);
     if (ret < 0) {
@@ -314,18 +321,36 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "hwloc_get_%s failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", errno, errmsg);
 	return EXIT_FAILURE;
       }
-      if (taskset)
-	hwloc_bitmap_taskset_asprintf(&s, cpubind_set);
-      else
-	hwloc_bitmap_asprintf(&s, cpubind_set);
-    } else {
+      if (use_nodeset) {
+	hwloc_bitmap_t nset = hwloc_bitmap_alloc();
+	hwloc_cpuset_to_nodeset(topology, cpubind_set, nset);
+	if (taskset)
+	  hwloc_bitmap_taskset_asprintf(&s, nset);
+	else
+	  hwloc_bitmap_asprintf(&s, nset);
+	hwloc_bitmap_free(nset);
+      } else {
+	if (taskset)
+	  hwloc_bitmap_taskset_asprintf(&s, cpubind_set);
+	else
+	  hwloc_bitmap_asprintf(&s, cpubind_set);
+      }
+
+      } else {
       hwloc_membind_policy_t policy;
-      if (pid_number > 0)
-	err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, 0);
-      else if (tid_number > 0) {
+      if (pid_number > 0) {
+	if (use_nodeset)
+	  err = hwloc_get_proc_membind_nodeset(topology, pid, membind_set, &policy, 0);
+	else
+	  err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, 0);
+      } else if (tid_number > 0) {
 	err = -1; errno = ENOSYS;
-      } else
-	err = hwloc_get_membind(topology, membind_set, &policy, 0);
+      } else {
+	if (use_nodeset)
+	  err = hwloc_get_membind_nodeset(topology, membind_set, &policy, 0);
+	else
+	  err = hwloc_get_membind(topology, membind_set, &policy, 0);
+      }
       if (err) {
 	const char *errmsg = strerror(errno);
         if (pid_number > 0)

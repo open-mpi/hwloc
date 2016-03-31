@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -558,7 +558,7 @@ hwloc_calc_process_arg_cpuset_cb(void *_data, hwloc_obj_t obj, int verbose)
 static __hwloc_inline int
 hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		       const char *arg, int logical, hwloc_bitmap_t set,
-		       int nodeset_output, int verbose)
+		       int nodeset_input, int nodeset_output, int verbose)
 {
   hwloc_calc_append_mode_t mode = HWLOC_CALC_APPEND_ADD;
   size_t typelen;
@@ -653,11 +653,16 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
       hwloc_bitmap_taskset_sscanf(newset, arg);
     else
       hwloc_bitmap_sscanf(newset, arg);
-    if (nodeset_output) {
+    if (nodeset_output && !nodeset_input) {
       hwloc_bitmap_t newnset = hwloc_bitmap_alloc();
       hwloc_cpuset_to_nodeset(topology, newset, newnset);
       err = hwloc_calc_append_set(set, newnset, mode, verbose);
       hwloc_bitmap_free(newnset);
+    } else if (nodeset_input && !nodeset_output) {
+      hwloc_bitmap_t newcset = hwloc_bitmap_alloc();
+      hwloc_cpuset_from_nodeset(topology, newcset, newset);
+      err = hwloc_calc_append_set(set, newcset, mode, verbose);
+      hwloc_bitmap_free(newcset);
     } else {
       err = hwloc_calc_append_set(set, newset, mode, verbose);
     }
