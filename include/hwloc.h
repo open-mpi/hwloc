@@ -1197,7 +1197,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  * (e.g., some systems only allow binding memory on a per-thread
  * basis, whereas other systems only allow binding memory for all
  * threads in a process).
- * \p errno will be set to EXDEV when the requested cpuset can not be enforced
+ * \p errno will be set to EXDEV when the requested set can not be enforced
  * (e.g., some systems only allow binding memory to a single NUMA node).
  *
  * If ::HWLOC_MEMBIND_STRICT was not passed, the function may fail as well,
@@ -1227,6 +1227,9 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  * sets).  The names of the latter form end with _nodeset.  It is also
  * possible to convert between CPU set and node set using
  * hwloc_cpuset_to_nodeset() or hwloc_cpuset_from_nodeset().
+ *
+ * Memory binding by CPU set cannot work for CPU-less NUMA memory nodes.
+ * Binding by nodeset should therefore be preferred whenever possible.
  *
  * \sa Some example codes are available under doc/examples/ in the source tree.
  *
@@ -1263,7 +1266,7 @@ typedef enum {
    * each page in the allocation is bound only when it is first
    * touched. Pages are individually bound to the local NUMA node of
    * the first thread that touches it. If there is not enough memory
-   * on the node, allocation may be done in the specified cpuset
+   * on the node, allocation may be done in the specified nodes
    * before allocating on other nodes.
    * \hideinitializer */
   HWLOC_MEMBIND_FIRSTTOUCH =	1,
@@ -1349,7 +1352,7 @@ typedef enum {
 } hwloc_membind_flags_t;
 
 /** \brief Set the default memory binding policy of the current
- * process or thread to prefer the NUMA node(s) specified by physical \p nodeset
+ * process or thread to prefer the NUMA node(s) specified by \p nodeset
  *
  * If neither ::HWLOC_MEMBIND_PROCESS nor ::HWLOC_MEMBIND_THREAD is
  * specified, the current process is assumed to be single-threaded.
@@ -1363,8 +1366,7 @@ typedef enum {
 HWLOC_DECLSPEC int hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Set the default memory binding policy of the current
- * process or thread to prefer the NUMA node(s) near the specified physical \p
- * cpuset
+ * process or thread to prefer the NUMA node(s) specified by \p cpuset
  *
  * If neither ::HWLOC_MEMBIND_PROCESS nor ::HWLOC_MEMBIND_THREAD is
  * specified, the current process is assumed to be single-threaded.
@@ -1467,7 +1469,7 @@ HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_no
 HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Set the default memory binding policy of the specified
- * process to prefer the NUMA node(s) specified by physical \p nodeset
+ * process to prefer the NUMA node(s) specified by \p nodeset
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
@@ -1478,7 +1480,7 @@ HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t c
 HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Set the default memory binding policy of the specified
- * process to prefer the NUMA node(s) near the specified physical \p cpuset
+ * process to prefer the NUMA node(s) specified by \p cpuset
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
@@ -1568,7 +1570,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwl
 HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Bind the already-allocated memory identified by (addr, len)
- * to the NUMA node(s) in physical \p nodeset.
+ * to the NUMA node(s) specified by \p nodeset.
  *
  * \return 0 if \p len is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
@@ -1577,7 +1579,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 HWLOC_DECLSPEC int hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Bind the already-allocated memory identified by (addr, len)
- * to the NUMA node(s) near physical \p cpuset.
+ * to the NUMA node(s) specified by \p cpuset.
  *
  * \return 0 if \p len is 0.
  * \return -1 with errno set to ENOSYS if the action is not supported
@@ -1648,7 +1650,7 @@ HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void 
  */
 HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
 
-/** \brief Allocate some memory on the given physical nodeset \p nodeset
+/** \brief Allocate some memory on NUMA memory nodes specified by \p nodeset
  *
  * \return NULL with errno set to ENOSYS if the action is not supported
  * and ::HWLOC_MEMBIND_STRICT is given
@@ -1661,7 +1663,7 @@ HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
-/** \brief Allocate some memory on memory nodes near the given physical cpuset \p cpuset
+/** \brief Allocate some memory on NUMA memory nodes specified by \p cpuset
  *
  * \return NULL with errno set to ENOSYS if the action is not supported
  * and ::HWLOC_MEMBIND_STRICT is given
@@ -1674,7 +1676,7 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
-/** \brief Allocate some memory on the given nodeset \p nodeset
+/** \brief Allocate some memory on NUMA memory nodes specified by \p nodeset
  *
  * This is similar to hwloc_alloc_membind() except that it is allowed to change
  * the current memory binding policy, thus providing more binding support, at
@@ -1683,9 +1685,11 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, 
 static __hwloc_inline void *
 hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
-/** \brief Allocate some memory on the memory nodes near given cpuset \p cpuset
+/** \brief Allocate some memory on NUMA memory nodes specified by \p cpuset
  *
- * This is similar to hwloc_alloc_membind_policy_nodeset(), but for a given cpuset.
+ * This is similar to hwloc_alloc_membind_nodeset() except that it is allowed to change
+ * the current memory binding policy, thus providing more binding support, at
+ * the expense of changing the current state.
  */
 static __hwloc_inline void *
 hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
