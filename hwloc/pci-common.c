@@ -476,7 +476,7 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
     env = getenv(envname);
     if (env) {
       static int warn = 0;
-      if (!topology->pci_forced_locality_nr && !warn) {
+      if (!topology->pci_has_forced_locality && !warn) {
 	fprintf(stderr, "Environment variable %s is deprecated, please use HWLOC_PCI_LOCALITY instead.\n", env);
 	warn = 1;
       }
