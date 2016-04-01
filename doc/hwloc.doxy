@@ -1254,9 +1254,9 @@ components when I/O discovery is enabled and supported.
  <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
  </ul>
 </li>
-<li>OpenFabrics HCAs (::HWLOC_OBJ_OSDEV_OPENFABRICS)
+<li>OpenFabrics (InfiniBand, Omni-Path, usNIC, etc) HCAs (::HWLOC_OBJ_OSDEV_OPENFABRICS)
  <ul>
- <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
+ <li><em>mlx5_0</em>, <em>hfi1_0</em>, <em>qib0</em>, <em>usnic_0</em> (Linux component)</li>
  </ul>
 </li>
 <li>GPUs (::HWLOC_OBJ_OSDEV_GPU)
