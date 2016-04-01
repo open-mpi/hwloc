@@ -898,17 +898,6 @@ hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
 
 /** \defgroup hwlocality_helper_nodeset_convert Converting between CPU sets and node sets
  *
- * There are two semantics for converting cpusets to nodesets depending on how
- * non-NUMA machines are handled.
- *
- * When manipulating nodesets for memory binding, non-NUMA machines should be
- * considered as having a single NUMA node. The standard conversion routines
- * below should be used so that marking the first bit of the nodeset means
- * that memory should be bound to a non-NUMA whole machine.
- *
- * When manipulating nodesets as an actual list of NUMA nodes without any
- * need to handle memory binding on non-NUMA machines, the strict conversion
- * routines may be used instead.
  * @{
  */
 
@@ -924,24 +913,6 @@ hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
  */
 static __hwloc_inline void
 hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
-{
-	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-	hwloc_obj_t obj = NULL;
-	assert(depth != HWLOC_TYPE_DEPTH_UNKNOWN);
-	hwloc_bitmap_zero(nodeset);
-	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, _cpuset, depth, obj)) != NULL)
-		hwloc_bitmap_set(nodeset, obj->os_index);
-}
-
-/** \brief Convert a CPU set into a NUMA node set without handling non-NUMA cases
- *
- * This is the strict variant of hwloc_cpuset_to_nodeset(). It does not fix
- * non-NUMA cases. If the topology contains some NUMA nodes, behave exactly
- * the same. However, if the topology contains no NUMA nodes, return an empty
- * nodeset.
- */
-static __hwloc_inline void
-hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
 	hwloc_obj_t obj = NULL;
@@ -971,26 +942,6 @@ hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwl
 			/* no need to check obj->cpuset because objects in levels always have a cpuset */
 			hwloc_bitmap_or(_cpuset, _cpuset, obj->cpuset);
 	}
-}
-
-/** \brief Convert a NUMA node set into a CPU set without handling non-NUMA cases
- *
- * This is the strict variant of hwloc_cpuset_from_nodeset(). It does not fix
- * non-NUMA cases. If the topology contains some NUMA nodes, behave exactly
- * the same. However, if the topology contains no NUMA nodes, return an empty
- * cpuset.
- */
-static __hwloc_inline void
-hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
-{
-	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-	hwloc_obj_t obj = NULL;
-	assert(depth != HWLOC_TYPE_DEPTH_UNKNOWN);
-	hwloc_bitmap_zero(_cpuset);
-	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
-		if (hwloc_bitmap_isset(nodeset, obj->os_index))
-			/* no need to check obj->cpuset because objects in levels always have a cpuset */
-			hwloc_bitmap_or(_cpuset, _cpuset, obj->cpuset);
 }
 
 /** @} */

@@ -588,9 +588,7 @@ man3_helper_nodeset_convertdir = $(man3dir)
 man3_helper_nodeset_convert_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_nodeset_convert.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset_strict.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_nodeset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_nodeset_strict.3
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_nodeset.3
 
 man3_helper_distancesdir = $(man3dir)
 man3_helper_distances_DATA = \

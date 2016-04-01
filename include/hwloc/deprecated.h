@@ -187,6 +187,25 @@ hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_
   return hwloc_alloc_membind_policy(topology, len, nodeset, policy, flags | HWLOC_MEMBIND_BYNODESET);
 }
 
+/** \brief Convert a CPU set into a NUMA node set and handle non-NUMA cases
+ */
+static __hwloc_inline void
+hwloc_cpuset_to_nodeset_strict(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset) __hwloc_attribute_deprecated;
+static __hwloc_inline void
+hwloc_cpuset_to_nodeset_strict(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
+{
+  hwloc_cpuset_to_nodeset(topology, _cpuset, nodeset);
+}
+
+/** \brief Convert a NUMA node set into a CPU set and handle non-NUMA cases
+ */
+static __hwloc_inline void
+hwloc_cpuset_from_nodeset_strict(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset) __hwloc_attribute_deprecated;
+static __hwloc_inline void
+hwloc_cpuset_from_nodeset_strict(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
+{
+  hwloc_cpuset_from_nodeset(topology, _cpuset, nodeset);
+}
 
 
 #ifdef __cplusplus

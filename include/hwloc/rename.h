@@ -344,9 +344,7 @@ extern "C" {
 #define hwloc_topology_get_topology_nodeset HWLOC_NAME(topology_get_topology_nodeset)
 #define hwloc_topology_get_allowed_nodeset HWLOC_NAME(topology_get_allowed_nodeset)
 #define hwloc_cpuset_to_nodeset HWLOC_NAME(cpuset_to_nodeset)
-#define hwloc_cpuset_to_nodeset_strict HWLOC_NAME(cpuset_to_nodeset_strict)
 #define hwloc_cpuset_from_nodeset HWLOC_NAME(cpuset_from_nodeset)
-#define hwloc_cpuset_from_nodeset_strict HWLOC_NAME(cpuset_from_nodeset_strict)
 #define hwloc_get_whole_distance_matrix_by_depth HWLOC_NAME(get_whole_distance_matrix_by_depth)
 #define hwloc_get_whole_distance_matrix_by_type HWLOC_NAME(get_whole_distance_matrix_by_type)
 #define hwloc_get_distance_matrix_covering_obj_by_depth HWLOC_NAME(get_distance_matrix_covering_obj_by_depth)
@@ -529,6 +527,9 @@ extern "C" {
 #define hwloc_set_area_membind_nodeset HWLOC_NAME(set_area_membind_nodeset)
 #define hwloc_get_area_membind_nodeset HWLOC_NAME(get_area_membind_nodeset)
 #define hwloc_alloc_membind_nodeset HWLOC_NAME(alloc_membind_nodeset)
+
+#define hwloc_cpuset_to_nodeset_strict HWLOC_NAME(cpuset_to_nodeset_strict)
+#define hwloc_cpuset_from_nodeset_strict HWLOC_NAME(cpuset_from_nodeset_strict)
 
 /* private/debug.h */
 
