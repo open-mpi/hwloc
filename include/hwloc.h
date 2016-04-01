@@ -277,7 +277,8 @@ typedef enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device.
 				  * For instance the "eth0" interface on Linux. */
   HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device.
-				  * For instance the "mlx4_0" InfiniBand HCA device on Linux. */
+				  * For instance the "mlx4_0" InfiniBand HCA,
+				  * or "hfi1_0" Omni-Path interface on Linux. */
   HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma engine device.
 				  * For instance the "dma0chan0" DMA channel on Linux. */
   HWLOC_OBJ_OSDEV_COPROC	/**< \brief Operating system co-processor device.
