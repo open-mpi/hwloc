@@ -246,6 +246,14 @@ EOF
 
     AC_REQUIRE([AC_PROG_SED])
 
+    # runstatedir only supported in autoconf >= 2.70 and in some backports
+    if test "x${runstatedir}" != "x"; then
+      HWLOC_runstatedir=${runstatedir}
+    else
+      HWLOC_runstatedir='${localstatedir}/run'
+    fi
+    AC_SUBST([HWLOC_runstatedir])
+
     # Cairo support
     hwloc_cairo_happy=no
     if test "x$enable_cairo" != "xno"; then
