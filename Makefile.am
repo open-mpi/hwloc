@@ -23,7 +23,7 @@ SUBDIRS += netloc
 endif
 
 if HWLOC_BUILD_STANDALONE
-SUBDIRS += tests utils contrib/misc
+SUBDIRS += tests utils contrib/systemd contrib/misc
 # We need doc/ if HWLOC_BUILD_DOXYGEN, or during make install if HWLOC_INSTALL_DOXYGEN.
 # There's no INSTALL_SUBDIRS, so always enter doc/ and check HWLOC_BUILD/INSTALL_DOXYGEN there
 SUBDIRS += doc

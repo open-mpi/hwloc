@@ -314,6 +314,8 @@ EOF
     LIBS="$hwloc_old_LIBS"
     unset hwloc_old_LIBS
 
+    AC_PATH_TOOL(RMPATH, rm)
+
     _HWLOC_CHECK_DIFF_U
     _HWLOC_CHECK_DIFF_W
 
@@ -412,6 +414,7 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh]
         hwloc_config_prefix[utils/lstopo/test-lstopo.sh]
         hwloc_config_prefix[utils/lstopo/test-lstopo-distances.sh]
+        hwloc_config_prefix[contrib/systemd/Makefile]
         hwloc_config_prefix[contrib/misc/Makefile]
         hwloc_config_prefix[tests/netloc/Makefile]
     )
