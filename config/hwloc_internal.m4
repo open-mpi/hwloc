@@ -314,6 +314,8 @@ EOF
     LIBS="$hwloc_old_LIBS"
     unset hwloc_old_LIBS
 
+    AC_PATH_TOOL(RMPATH, rm)
+
     _HWLOC_CHECK_DIFF_U
     _HWLOC_CHECK_DIFF_W
 
@@ -401,7 +403,8 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh]
         hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh]
-        hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh])
+        hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh]
+        hwloc_config_prefix[contrib/systemd/Makefile])
 
     AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh ]hwloc_config_prefix[tests/wrapper.sh ]hwloc_config_prefix[utils/hwloc/hwloc-assembler-remote ]hwloc_config_prefix[utils/hwloc/hwloc-compress-dir ]hwloc_config_prefix[utils/hwloc/hwloc-gather-topology ]hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-assembler.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-distances.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh ]hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh ]hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh])
 
