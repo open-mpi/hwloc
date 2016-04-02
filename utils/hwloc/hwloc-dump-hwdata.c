@@ -23,7 +23,7 @@ static void usage(const char *name, FILE *where)
 {
     fprintf (where, "Usage: %s [ options ] ...\n", name);
     fprintf (where, "Options:\n");
-    fprintf (where, "  -o <dir>      Output files to directory <dir> instead of /var/run/hwloc/\n");
+    fprintf (where, "  -o <dir>      Output files to directory <dir> instead of " DEFAULT_DUMP_DIR "\n");
 }
 
 int main(int argc, char *argv[])

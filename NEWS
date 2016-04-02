@@ -58,6 +58,8 @@ Version 1.11.3
 * Add support for CUDA compute capability 6.x.
 * Small improvements for various Windows build systems,
   thanks to Jonathan L Peyton.
+* Make the hwloc-dump-hwdata dump directory configurable through configure
+  options such as --runstatedir or --localstatedir.
 
 
 Version 1.11.2

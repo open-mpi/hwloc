@@ -832,6 +832,9 @@ and world-accessible files that the hwloc library will later reuse.
 Currently only used on Intel Knights Landing Xeon Phi platforms.
 See \ref faq_knl_dump.
 
+See <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
+about the location of dumped files.
+
 
 \section cli_hwloc_gather hwloc-gather-topology
 
@@ -998,7 +1001,12 @@ following environment variables.
 
 <dt>HWLOC_DUMPED_HWDATA_DIR=/path/to/dumped/files/</dt>
   <dd>loads files dumped by <tt>hwloc-dump-hwdata</tt> (on Linux)
-  from the given directory instead of <tt>/var/run/hwloc/</tt>.
+  from the given directory.
+  The default dump/load directory is configured during build based
+  on \--runstatedir, \--localstatedir, and \--prefix options.
+  It usually points to <tt>/var/run/hwloc/</tt> in Linux distribution
+  packages, but it may also point to <tt>$prefix/var/run/hwloc/</tt>
+  when manually installing and only specifying \--prefix.
   </dd>
 
 <dt>HWLOC_COMPONENTS=list,of,components</dt>
@@ -2861,6 +2869,8 @@ The utility <tt>hwloc-dump-hwdata</tt> is also involved in gathering
 privileged information at boot time and making it available to
 non-privileged users. However it only applies to Intel Knights Landing
 Xeon Phi for now (see \ref faq_knl_dump).
+See also <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
+about the location of dumped files.
 
 
 \section faq_onedim hwloc only has a one-dimensional view of the architecture, it ignores distances
@@ -3232,6 +3242,9 @@ changed between reboots.
 hwloc-dump-hwdata requires <tt>dmi-sysfs</tt> kernel module loaded.
 
 The utility is currently unneeded on non-KNL platforms.
+
+See <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
+about the location of dumped files.
 
 
 \section faq_phi How do I build for Intel Xeon Phi coprocessor?

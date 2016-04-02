@@ -48,7 +48,7 @@ endif HWLOC_HAVE_LINUX
 hwloc_dump_hwdata_SOURCES = \
 	hwloc-dump-hwdata.c \
 	hwloc-dump-hwdata-knl.c
-hwloc_dump_hwdata_CPPFLAGS = $(AM_CPPFLAGS) -DRUNSTATEDIR=\"@runstatedir@\"
+hwloc_dump_hwdata_CPPFLAGS = $(AM_CPPFLAGS) -DRUNSTATEDIR=\"$(HWLOC_runstatedir)\"
 
 hwloc_calc_SOURCES = \
         hwloc-calc.h \
@@ -129,6 +129,7 @@ endif HWLOC_HAVE_LINUX
 	@ $(SED) -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
 	  -e 's/#PACKAGE_VERSION#/@PACKAGE_VERSION@/g' \
 	  -e 's/#HWLOC_DATE#/@HWLOC_RELEASE_DATE@/g' \
+	  -e 's@#RUNSTATEDIR#@'$(HWLOC_runstatedir)'@g' \
 	  > $@ < $<
 
 .3in.3:

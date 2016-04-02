@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2015 Inria.  All rights reserved.
+dnl Copyright © 2009-2016 Inria.  All rights reserved.
 dnl Copyright © 2009, 2011 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -245,6 +245,14 @@ AC_DEFUN([HWLOC_SETUP_UTILS],[
 EOF
 
     AC_REQUIRE([AC_PROG_SED])
+
+    # runstatedir only supported in autoconf >= 2.70 and in some backports
+    if test "x${runstatedir}" != "x"; then
+      HWLOC_runstatedir=${runstatedir}
+    else
+      HWLOC_runstatedir='${localstatedir}/run'
+    fi
+    AC_SUBST([HWLOC_runstatedir])
 
     # Cairo support
     hwloc_cairo_happy=no
