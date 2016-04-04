@@ -36,6 +36,8 @@ Version 1.11.3
   Thanks to Jianjun Wen for reporting the problem and testing the patch.
 * Fix the return value of hwloc_alloc() on mmap() failure.
   Thanks to Hugo Brunie for reporting the issue.
+* Do not break individual thread bindings during x86 backend discovery in a
+  multithreaded process. Thanks to Farouk Mansouri for the report.
 * Fix hwloc-bind --membind for CPU-less NUMA nodes.
 * Make hwloc_obj_type_sscanf() parse back everything that may be outputted
   by hwloc_obj_type_snprintf().
