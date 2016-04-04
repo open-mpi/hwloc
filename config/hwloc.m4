@@ -486,7 +486,9 @@ EOF])
     # program_invocation_name and __progname may be available but not exported in headers
     AC_MSG_CHECKING([for program_invocation_name])
     AC_TRY_LINK([
-		#define _GNU_SOURCE
+		#ifndef _GNU_SOURCE
+		# define _GNU_SOURCE
+		#endif
 		#include <errno.h>
 		#include <stdio.h>
 		extern char *program_invocation_name;
@@ -534,7 +536,9 @@ EOF])
       CFLAGS="$CFLAGS $HWLOC_STRICT_ARGS_CFLAGS"
       AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
-              #define _GNU_SOURCE
+              #ifndef _GNU_SOURCE
+              # define _GNU_SOURCE
+              #endif
               #include <sched.h>
               static unsigned long mask;
               ]], [[ sched_setaffinity(0, (void*) &mask); ]])],
@@ -543,7 +547,9 @@ EOF])
           [AC_MSG_RESULT([no])])
       CFLAGS=$hwloc_save_CFLAGS
     ], , [[
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 #include <sched.h>
 ]])
 
