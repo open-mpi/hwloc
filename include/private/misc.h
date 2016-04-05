@@ -383,6 +383,12 @@ static __hwloc_inline int hwloc_strncasecmp(const char *s1, const char *s2, size
 #  if !HAVE_DECL_STRTOULL && !defined(HAVE_STRTOULL)
 #    define strtoull _strtoui64
 #  endif
+#  ifndef S_ISREG
+#    define S_ISREG(m) ((m) & S_IFREG)
+#  endif
+#  ifndef S_ISDIR
+#    define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#  endif
 #endif
 
 #endif /* HWLOC_PRIVATE_MISC_H */
