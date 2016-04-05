@@ -403,6 +403,7 @@ EOF])
     AC_CHECK_LIB([gdi32], [main],
                  [HWLOC_LIBS="-lgdi32 $HWLOC_LIBS"
                   AC_DEFINE([HAVE_LIBGDI32], 1, [Define to 1 if we have -lgdi32])])
+    AC_CHECK_LIB([user32], [PostQuitMessage], [hwloc_have_user32="yes"])
 
     AC_CHECK_HEADER([windows.h], [
       AC_DEFINE([HWLOC_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
@@ -1155,6 +1156,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_OPENCL], [test "$hwloc_opencl_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
+        AM_CONDITIONAL([HWLOC_HAVE_USER32], [test "x$hwloc_have_user32" = "xyes"])
 
         AM_CONDITIONAL([HWLOC_BUILD_DOXYGEN],
                        [test "x$hwloc_generate_doxs" = "xyes"])
