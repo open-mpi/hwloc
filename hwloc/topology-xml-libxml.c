@@ -13,6 +13,7 @@
 /* private headers allowed because this plugin is built within hwloc */
 #include <private/xml.h>
 #include <private/debug.h>
+#include <private/misc.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>

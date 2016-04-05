@@ -8,6 +8,7 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/xml.h>
+#include <private/misc.h>
 
 #define HWLOC_COMPONENT_STOP_NAME "stop"
 #define HWLOC_COMPONENT_EXCLUDE_CHAR '-'

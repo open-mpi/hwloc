@@ -29,10 +29,6 @@
 #include <windows.h>
 #include <BaseTsd.h>
 typedef DWORDLONG hwloc_uint64_t;
-#define snprintf _snprintf
-#define strcasecmp _stricmp
-#define strdup _strdup
-#define putenv _putenv
 
 #if defined( _USRDLL ) /* dynamic linkage */
 #if defined( DECLSPEC_EXPORTS )
