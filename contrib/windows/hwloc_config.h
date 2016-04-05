@@ -32,9 +32,7 @@ typedef DWORDLONG hwloc_uint64_t;
 typedef SSIZE_T ssize_t;
 #define snprintf _snprintf
 #define strcasecmp _stricmp
-#define strncasecmp _strnicmp
 #define strdup _strdup
-#define strtoll _strtoi64
 #define S_ISREG(m) ((m)&_S_IFREG)
 #define S_ISDIR( m ) (((m) & S_IFMT) == S_IFDIR)
 #define putenv _putenv
