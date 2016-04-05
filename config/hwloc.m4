@@ -460,6 +460,7 @@ EOF])
     ])
 
     AC_CHECK_DECLS([strtoull], [], [AC_CHECK_FUNCS([strtoull])], [AC_INCLUDES_DEFAULT])
+    AC_CHECK_TYPES([ssize_t])
 
     # Do a full link test instead of just using AC_CHECK_FUNCS, which
     # just checks to see if the symbol exists or not.  For example,

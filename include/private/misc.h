@@ -380,6 +380,9 @@ static __hwloc_inline int hwloc_strncasecmp(const char *s1, const char *s2, size
 }
 
 #ifdef HWLOC_WIN_SYS
+#  ifndef HAVE_SSIZE_T
+typedef SSIZE_T ssize_t;
+#  endif
 #  if !HAVE_DECL_STRTOULL && !defined(HAVE_STRTOULL)
 #    define strtoull _strtoui64
 #  endif
