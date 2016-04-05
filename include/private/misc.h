@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2014 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -360,7 +360,7 @@ hwloc_weight_long(unsigned long w)
 #endif /* HWLOC_BITS_PER_LONG == 64 */
 }
 
-#if !HAVE_DECL_STRTOULL
+#if !HAVE_DECL_STRTOULL && defined(HAVE_STRTOULL)
 unsigned long long int strtoull(const char *nptr, char **endptr, int base);
 #endif
 
@@ -378,5 +378,11 @@ static __hwloc_inline int hwloc_strncasecmp(const char *s1, const char *s2, size
   return 0;
 #endif
 }
+
+#ifdef HWLOC_WIN_SYS
+#  if !HAVE_DECL_STRTOULL && !defined(HAVE_STRTOULL)
+#    define strtoull _strtoui64
+#  endif
+#endif
 
 #endif /* HWLOC_PRIVATE_MISC_H */

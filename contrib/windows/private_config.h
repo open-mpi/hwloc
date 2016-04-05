@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
@@ -77,7 +77,7 @@
 
 /* Define to 1 if you have the declaration of `strtoull', and to 0 if you
    don't. */
-#define HAVE_DECL_STRTOULL 1
+#define HAVE_DECL_STRTOULL 0
 
 /* Define to 1 if you have the declaration of `_SC_LARGE_PAGESIZE', and to 0
    if you don't. */
