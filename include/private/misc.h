@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -410,6 +410,12 @@ static __hwloc_inline int hwloc_obj_type_is_io (hwloc_obj_type_t type)
 #ifdef HWLOC_WIN_SYS
 #  if !HAVE_DECL_STRTOULL && !defined(HAVE_STRTOULL)
 #    define strtoull _strtoui64
+#  endif
+#  ifndef S_ISREG
+#    define S_ISREG(m) ((m) & S_IFREG)
+#  endif
+#  ifndef S_ISDIR
+#    define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #  endif
 #endif
 

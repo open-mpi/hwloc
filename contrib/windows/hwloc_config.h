@@ -33,8 +33,6 @@ typedef SSIZE_T ssize_t;
 #define snprintf _snprintf
 #define strcasecmp _stricmp
 #define strdup _strdup
-#define S_ISREG(m) ((m)&_S_IFREG)
-#define S_ISDIR( m ) (((m) & S_IFMT) == S_IFDIR)
 #define putenv _putenv
 
 #if defined( _USRDLL ) /* dynamic linkage */
