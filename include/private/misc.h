@@ -362,7 +362,7 @@ hwloc_weight_long(unsigned long w)
 #endif /* HWLOC_BITS_PER_LONG == 64 */
 }
 
-#if !HAVE_DECL_STRTOULL
+#if !HAVE_DECL_STRTOULL && defined(HAVE_STRTOULL)
 unsigned long long int strtoull(const char *nptr, char **endptr, int base);
 #endif
 
@@ -406,5 +406,11 @@ static __hwloc_inline int hwloc_obj_type_is_io (hwloc_obj_type_t type)
   /* type contiguity is asserted in topology_check() */
   return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
 }
+
+#ifdef HWLOC_WIN_SYS
+#  if !HAVE_DECL_STRTOULL && !defined(HAVE_STRTOULL)
+#    define strtoull _strtoui64
+#  endif
+#endif
 
 #endif /* HWLOC_PRIVATE_MISC_H */

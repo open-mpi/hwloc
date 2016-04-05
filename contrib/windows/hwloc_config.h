@@ -34,7 +34,6 @@ typedef SSIZE_T ssize_t;
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #define strdup _strdup
-#define strtoull _strtoui64
 #define strtoll _strtoi64
 #define S_ISREG(m) ((m)&_S_IFREG)
 #define S_ISDIR( m ) (((m) & S_IFMT) == S_IFDIR)

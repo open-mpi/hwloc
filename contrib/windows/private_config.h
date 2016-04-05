@@ -77,7 +77,7 @@
 
 /* Define to 1 if you have the declaration of `strtoull', and to 0 if you
    don't. */
-#define HAVE_DECL_STRTOULL 1
+#define HAVE_DECL_STRTOULL 0
 
 /* Define to 1 if you have the declaration of `_SC_LARGE_PAGESIZE', and to 0
    if you don't. */
