@@ -79,6 +79,22 @@
    don't. */
 #define HAVE_DECL_STRTOULL 0
 
+/* Define to 1 if you have the declaration of `strcasecmp', and to 0 if you
+   don't. */
+#define HAVE_DECL_STRCASECMP 0
+
+/* Define to 1 if you have the declaration of `snprintf', and to 0 if you
+   don't. */
+#define HAVE_DECL_SNPRINTF 0
+
+/* Define to 1 if you have the declaration of `_strdup', and to 0 if you
+   don't. */
+#define HAVE_DECL__STRDUP 1
+
+/* Define to 1 if you have the declaration of `_putenv', and to 0 if you
+   don't. */
+#define HAVE_DECL__PUTENV 1
+
 /* Define to 1 if you have the declaration of `_SC_LARGE_PAGESIZE', and to 0
    if you don't. */
 #define HAVE_DECL__SC_LARGE_PAGESIZE 0

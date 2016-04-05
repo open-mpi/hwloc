@@ -28,6 +28,7 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
+#include <private/misc.h>
 
 #ifdef HAVE_MACH_MACH_INIT_H
 #include <mach/mach_init.h>

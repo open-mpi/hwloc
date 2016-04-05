@@ -9,6 +9,7 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
+#include <private/misc.h>
 
 #include <float.h>
 #include <math.h>

@@ -392,6 +392,18 @@ typedef SSIZE_T ssize_t;
 #  ifndef S_ISDIR
 #    define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #  endif
+#  if !HAVE_DECL_STRCASECMP
+#    define strcasecmp _stricmp
+#  endif
+#  if !HAVE_DECL_SNPRINTF
+#    define snprintf _snprintf
+#  endif
+#  if HAVE_DECL__STRDUP
+#    define strdup _strdup
+#  endif
+#  if HAVE_DECL__PUTENV
+#    define putenv _putenv
+#  endif
 #endif
 
 #endif /* HWLOC_PRIVATE_MISC_H */
