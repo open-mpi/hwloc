@@ -29,9 +29,11 @@ bin_PROGRAMS = \
         hwloc-diff \
         hwloc-distrib \
         hwloc-info \
-        hwloc-patch \
-        hwloc-ps
+        hwloc-patch
 
+if !HWLOC_HAVE_WINDOWS
+bin_PROGRAMS += hwloc-ps
+endif
 if HWLOC_HAVE_X86_CPUID
 bin_PROGRAMS += hwloc-gather-cpuid
 endif HWLOC_HAVE_X86_CPUID
@@ -82,8 +84,11 @@ man1_pages = \
         hwloc-diff.1 \
         hwloc-distrib.1 \
         hwloc-info.1 \
-        hwloc-patch.1 \
-        hwloc-ps.1
+        hwloc-patch.1
+
+if !HWLOC_HAVE_WINDOWS
+man1_pages += hwloc-ps.1
+endif
 if HWLOC_HAVE_X86_CPUID
 man1_pages += hwloc-gather-cpuid.1
 endif HWLOC_HAVE_X86_CPUID
