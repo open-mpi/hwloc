@@ -29,7 +29,6 @@
 #include <windows.h>
 #include <BaseTsd.h>
 typedef DWORDLONG hwloc_uint64_t;
-typedef SSIZE_T ssize_t;
 #define snprintf _snprintf
 #define strcasecmp _stricmp
 #define strdup _strdup

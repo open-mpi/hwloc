@@ -408,6 +408,9 @@ static __hwloc_inline int hwloc_obj_type_is_io (hwloc_obj_type_t type)
 }
 
 #ifdef HWLOC_WIN_SYS
+#  ifndef HAVE_SSIZE_T
+typedef SSIZE_T ssize_t;
+#  endif
 #  if !HAVE_DECL_STRTOULL && !defined(HAVE_STRTOULL)
 #    define strtoull _strtoui64
 #  endif
