@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2009-2016 Inria.  All rights reserved.
-dnl Copyright © 2009-2012, 2015 Université Bordeaux
+dnl Copyright © 2009-2012, 2015-2016 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -1222,19 +1222,22 @@ AC_DEFUN([_HWLOC_CHECK_DIFF_W], [
 
 dnl HWLOC_CHECK_DECL
 dnl
-dnl Check declaration of given function by trying to call it with an insane
-dnl number of arguments (10). Success means the compiler couldn't really check.
+dnl Check that the declaration of the given function has a complete prototype
+dnl with argument list by trying to call it with an insane dnl number of
+dnl arguments (10). Success means the compiler couldn't really check.
 AC_DEFUN([_HWLOC_CHECK_DECL], [
-  AC_MSG_CHECKING([whether function $1 is declared])
-  AC_REQUIRE([AC_PROG_CC])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-       [AC_INCLUDES_DEFAULT([$4])
-	void * $1;],
-    )],
-    [AC_MSG_RESULT([no])
-     $3],
-    [AC_MSG_RESULT([yes])
-     $2]
+  AC_CHECK_DECL([$1], [
+    AC_MSG_CHECKING([whether function $1 has a complete prototype])
+    AC_REQUIRE([AC_PROG_CC])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+         [AC_INCLUDES_DEFAULT([$4])]
+         [$1(1,2,3,4,5,6,7,8,9,10);],
+      )],
+      [AC_MSG_RESULT([no])
+       $3],
+      [AC_MSG_RESULT([yes])
+       $2]
+    )], [$3], $4
   )
 ])
 
