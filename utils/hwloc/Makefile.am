@@ -33,8 +33,11 @@ bin_PROGRAMS = \
         hwloc-distances \
         hwloc-distrib \
         hwloc-info \
-        hwloc-patch \
-        hwloc-ps
+        hwloc-patch
+
+if !HWLOC_HAVE_WINDOWS
+bin_PROGRAMS += hwloc-ps
+endif
 
 if HWLOC_HAVE_LINUX
 if HWLOC_HAVE_X86
@@ -87,8 +90,11 @@ man1_pages = \
         hwloc-distances.1 \
         hwloc-distrib.1 \
         hwloc-info.1 \
-        hwloc-patch.1 \
-        hwloc-ps.1
+        hwloc-patch.1
+
+if !HWLOC_HAVE_WINDOWS
+man1_pages += hwloc-ps.1
+endif
 
 if HWLOC_HAVE_LINUX
 if HWLOC_HAVE_X86
