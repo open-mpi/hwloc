@@ -51,6 +51,7 @@ Version 1.11.3
   + Add --cu to hwloc-annotate to drop these application userdata.
 * Add HWLOC_PLUGINS_BLACKLIST environment variable to prevent some plugins
   from being loaded. Thanks to Alexandre Denis for the suggestion.
+* Add support for CUDA compute capability 6.x.
 
 
 Version 1.11.2
