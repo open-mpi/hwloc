@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2014 Inria.  All rights reserved.
+ * Copyright © 2011-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -16,20 +16,26 @@ int main(void)
 {
   hwloc_topology_t topology;
   hwloc_obj_t obj;
-  unsigned indexes[5];
-  float distances[5*5];
+  hwloc_obj_t objs[5];
+  float values[5*5];
   unsigned depth;
   unsigned width;
+  unsigned i;
+  int err;
 
   /* group 3 numa nodes as 1 group of 2 and 1 on the side */
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:3 pu:1");
-  indexes[0] = 0; indexes[1] = 1; indexes[2] = 2;
-  distances[0] = 1; distances[1] = 4; distances[2] = 4;
-  distances[3] = 4; distances[4] = 1; distances[5] = 2;
-  distances[6] = 4; distances[7] = 2; distances[8] = 1;
-  hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_PU, 3, indexes, distances);
   hwloc_topology_load(topology);
+  for(i=0; i<3; i++)
+    objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
+  values[0] = 1.f; values[1] = 4.f; values[2] = 4.f;
+  values[3] = 4.f; values[4] = 1.f; values[5] = 2.f;
+  values[6] = 4.f; values[7] = 2.f; values[8] = 1.f;
+  err = hwloc_distances_add(topology, 3, objs, values,
+			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+			    HWLOC_DISTANCES_FLAG_GROUP);
+  assert(!err);
   /* 2 groups at depth 1 */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP);
   assert(depth == 1);
@@ -55,14 +61,18 @@ int main(void)
   /* group 5 packages as 2 group of 2 and 1 on the side, all of them below a common node object */
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:1 pack:5 pu:1");
-  indexes[0] = 0; indexes[1] = 1; indexes[2] = 2; indexes[3] = 3; indexes[4] = 4;
-  distances[ 0] = 1; distances[ 1] = 2; distances[ 2] = 4; distances[ 3] = 4; distances[ 4] = 4;
-  distances[ 5] = 2; distances[ 6] = 1; distances[ 7] = 4; distances[ 8] = 4; distances[ 9] = 4;
-  distances[10] = 4; distances[11] = 4; distances[12] = 1; distances[13] = 4; distances[14] = 4;
-  distances[15] = 4; distances[16] = 4; distances[17] = 4; distances[18] = 1; distances[19] = 2;
-  distances[20] = 4; distances[21] = 4; distances[22] = 4; distances[23] = 2; distances[24] = 1;
-  hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_PACKAGE, 5, indexes, distances);
   hwloc_topology_load(topology);
+  for(i=0; i<5; i++)
+    objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, i);
+  values[ 0] = 1.f; values[ 1] = 2.f; values[ 2] = 4.f; values[ 3] = 4.f; values[ 4] = 4.f;
+  values[ 5] = 2.f; values[ 6] = 1.f; values[ 7] = 4.f; values[ 8] = 4.f; values[ 9] = 4.f;
+  values[10] = 4.f; values[11] = 4.f; values[12] = 1.f; values[13] = 4.f; values[14] = 4.f;
+  values[15] = 4.f; values[16] = 4.f; values[17] = 4.f; values[18] = 1.f; values[19] = 2.f;
+  values[20] = 4.f; values[21] = 4.f; values[22] = 4.f; values[23] = 2.f; values[24] = 1.f;
+  err = hwloc_distances_add(topology, 5, objs, values,
+			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+			    HWLOC_DISTANCES_FLAG_GROUP);
+  assert(!err);
   /* 1 node at depth 1 */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   assert(depth == 1);

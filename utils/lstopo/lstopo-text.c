@@ -193,33 +193,27 @@ static void output_distances(struct lstopo_output *loutput)
   hwloc_topology_t topology = loutput->topology;
   int logical = loutput->logical;
   FILE *output = loutput->file;
-  unsigned topodepth = hwloc_topology_get_depth(topology);
-  unsigned depth;
-
-  for (depth = 0; depth < topodepth; depth++) {
-    unsigned nr, i;
-    nr = hwloc_get_nbobjs_by_depth(topology, depth);
-    for (i = 0; i < nr; i++) {
-      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
-      unsigned j;
-      for (j = 0; j < obj->distances_count; j++) {
-	const struct hwloc_distances_s * distances = obj->distances[j];
-	char typestring[32];
-	if (!distances || !distances->latency)
-	  continue;
-	hwloc_obj_type_snprintf (typestring, sizeof(typestring), obj, 1);
-	fprintf(output, "Relative latency matrix between %u %ss (depth %u) by %s indexes (below %s%s%u):\n",
-		distances->nbobjs,
-		hwloc_type_name(hwloc_get_depth_type(topology, obj->depth + distances->relative_depth)),
-		obj->depth + distances->relative_depth,
-		logical ? "logical" : "physical",
-		typestring,
-		logical ? " L#" :  " P#",
-		logical ? obj->logical_index : obj->os_index);
-	hwloc_utils_print_distance_matrix(output, topology, obj, distances->nbobjs, distances->relative_depth, distances->latency, logical);
-      }
+  struct hwloc_distances_s **dist;
+  unsigned nr = 0, j;
+  int err = hwloc_distances_get(topology, &nr, NULL, 0, 0);
+  if (err < 0 || !nr)
+    return;
+  dist = malloc(nr * sizeof(*dist));
+  if (!dist)
+    return;
+  err = hwloc_distances_get(topology, &nr, dist, 0, 0);
+  if (!err) {
+    for(j=0; j<nr; j++) {
+      fprintf(output, "Relative latency matrix between %u %ss (depth %u) by %s indexes:\n",
+	      dist[j]->nbobjs,
+	      hwloc_type_name(dist[j]->objs[0]->type),
+	      dist[j]->objs[0]->depth,
+	      logical ? "logical" : "physical");
+      hwloc_utils_print_distance_matrix(output, dist[j]->nbobjs, dist[j]->objs, dist[j]->values, logical);
+      hwloc_distances_release(topology, dist[j]);
     }
   }
+  free(dist);
 }
 
 void output_console(struct lstopo_output *loutput, const char *filename)

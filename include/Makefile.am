@@ -20,6 +20,7 @@ include_hwloc_HEADERS = \
         hwloc/helper.h \
         hwloc/inlines.h \
         hwloc/diff.h \
+        hwloc/distances.h \
         hwloc/export.h \
         hwloc/myriexpress.h \
         hwloc/openfabrics-verbs.h \

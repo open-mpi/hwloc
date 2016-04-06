@@ -394,7 +394,6 @@ hwloc__free_object_contents(hwloc_obj_t obj)
     break;
   }
   hwloc__free_infos(obj->infos, obj->infos_count);
-  hwloc_clear_object_distances(obj);
   free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
@@ -649,8 +648,6 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
   newobj->complete_nodeset = hwloc_bitmap_dup(src->complete_nodeset);
   newobj->allowed_nodeset = hwloc_bitmap_dup(src->allowed_nodeset);
 
-  /* don't duplicate distances, they'll be recreated at the end of the topology build */
-
   for(i=0; i<src->infos_count; i++)
     hwloc__add_info(&newobj->infos, &newobj->infos_count, src->infos[i].name, src->infos[i].value);
 }
@@ -726,42 +723,13 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   for(child = oldroot->misc_first_child; child; child = child->next_sibling)
     hwloc__duplicate_objects(new, newroot, child);
 
-  if (old->first_osdist) {
-    struct hwloc_os_distances_s *olddist = old->first_osdist;
-    while (olddist) {
-      struct hwloc_os_distances_s *newdist = malloc(sizeof(*newdist));
-      newdist->type = olddist->type;
-      newdist->nbobjs = olddist->nbobjs;
-      newdist->indexes = malloc(newdist->nbobjs * sizeof(*newdist->indexes));
-      memcpy(newdist->indexes, olddist->indexes, newdist->nbobjs * sizeof(*newdist->indexes));
-      newdist->objs = NULL; /* will be recomputed when needed */
-      newdist->distances = malloc(newdist->nbobjs * newdist->nbobjs * sizeof(*newdist->distances));
-      memcpy(newdist->distances, olddist->distances, newdist->nbobjs * newdist->nbobjs * sizeof(*newdist->distances));
-
-      newdist->forced = olddist->forced;
-      if (new->first_osdist) {
-	new->last_osdist->next = newdist;
-	newdist->prev = new->last_osdist;
-      } else {
-	new->first_osdist = newdist;
-	newdist->prev = NULL;
-      }
-      new->last_osdist = newdist;
-      newdist->next = NULL;
-
-      olddist = olddist->next;
-    }
-  } else
-    new->first_osdist = old->last_osdist = NULL;
+  hwloc_internal_distances_dup(new, old);
 
   /* no need to duplicate backends, topology is already loaded */
   new->backends = NULL;
 
   if (hwloc_topology_reconnect(new, 0) < 0)
     goto out;
-
-  hwloc_distances_finalize_os(new);
-  hwloc_distances_finalize_logical(new);
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
@@ -1043,27 +1011,6 @@ static void
 merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
 {
   merge_index(new, old, os_index, unsigned);
-
-  if (new->distances_count) {
-    if (old->distances_count) {
-      struct hwloc_distances_s **tmpdists;
-      tmpdists = realloc(old->distances, (old->distances_count+new->distances_count) * sizeof(*old->distances));
-      if (!tmpdists) {
-	/* failed to realloc, ignore new distances */
-	hwloc_clear_object_distances(new);
-      } else {
-	old->distances = tmpdists;
-	old->distances_count += new->distances_count;
-	memcpy(old->distances + new->distances_count, new->distances, new->distances_count * sizeof(*old->distances));
-	free(new->distances);
-      }
-    } else {
-      old->distances_count = new->distances_count;
-      old->distances = new->distances;
-    }
-    new->distances_count = 0;
-    new->distances = NULL;
-  }
 
   if (new->infos_count) {
     hwloc__move_infos(&old->infos, &old->infos_count,
@@ -2734,12 +2681,6 @@ next_cpubackend:
    * All object cpusets and nodesets are properly set now.
    */
 
-  /*
-   * Group levels by distances
-   */
-  hwloc_distances_finalize_os(topology);
-  hwloc_group_by_distances(topology);
-
   /* Now connect handy pointers to make remaining discovery easier. */
   hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
   if (hwloc_topology_reconnect(topology, 0) < 0)
@@ -2804,16 +2745,6 @@ next_noncpubackend:
 
   /* apply group depths */
   hwloc_set_group_depth(topology);
-
-  /*
-   * Now that objects are numbered, take distance matrices from backends and put them in the main topology.
-   *
-   * Some objects may have disappeared (in removed_empty or removed_ignored) since we setup os distances
-   * (hwloc_distances_finalize_os()) above. Reset them so as to not point to disappeared objects anymore.
-   */
-  hwloc_distances_restrict_os(topology);
-  hwloc_distances_finalize_os(topology);
-  hwloc_distances_finalize_logical(topology);
 
   /* add some identification attributes if not loading from XML */
   if (topology->backends
@@ -2914,7 +2845,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
 
   hwloc__topology_filter_init(topology);
 
-  hwloc_distances_init(topology);
+  hwloc_internal_distances_init(topology);
 
   topology->userdata_export_cb = NULL;
   topology->userdata_import_cb = NULL;
@@ -3086,6 +3017,7 @@ hwloc_topology_clear (struct hwloc_topology *topology)
 {
   /* no need to set to NULL after free() since callers will call setup_defaults() or just destroy the rest of the topology */
   unsigned l;
+  hwloc_internal_distances_destroy(topology);
   hwloc_free_object_and_children(topology->levels[0][0]);
   for (l=0; l<topology->nb_levels; l++)
     free(topology->levels[l]);
@@ -3102,7 +3034,6 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   hwloc_components_fini();
 
   hwloc_topology_clear(topology);
-  hwloc_distances_destroy(topology);
 
   free(topology->levels);
   free(topology->level_nbobjects);
@@ -3122,6 +3053,8 @@ hwloc_topology_load (struct hwloc_topology *topology)
     errno = EBUSY;
     return -1;
   }
+
+  hwloc_internal_distances_prepare(topology);
 
   if (getenv("HWLOC_XML_USERDATA_NOT_DECODED"))
     topology->userdata_not_decoded = 1;
@@ -3175,11 +3108,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
   hwloc_backends_is_thissystem(topology);
   hwloc_backends_find_callbacks(topology);
 
-  /* get distance matrix from the environment are store them (as indexes) in the topology.
-   * indexes will be converted into objects later once the tree will be filled
-   */
-  hwloc_distances_set_from_env(topology);
-
   hwloc_pci_discovery_init(topology);
 
   /* actual topology discovery */
@@ -3194,13 +3122,19 @@ hwloc_topology_load (struct hwloc_topology *topology)
 #endif
     hwloc_topology_check(topology);
 
+  /* Mark distances objs arrays as invalid since we may have removed objects
+   * from the topology after adding the distances (remove_empty, etc).
+   * It would be hard to actually verify whether it's needed.
+   * We'll refresh them if users ever actually look at distances.
+   */
+  hwloc_internal_distances_invalidate_cached_objs(topology);
+
   topology->is_loaded = 1;
   return 0;
 
  out:
   hwloc_pci_discovery_exit(topology);
   hwloc_topology_clear(topology);
-  hwloc_distances_destroy(topology);
   hwloc_topology_setup_defaults(topology);
   hwloc_backends_disable_all(topology);
   return -1;
@@ -3216,8 +3150,6 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
   hwloc_obj_t obj = *pobj, child, *pchild;
   int dropping;
   int modified = hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset);
-
-  hwloc_clear_object_distances(obj);
 
   hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
   hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
@@ -3280,7 +3212,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
     return -1;
   }
 
-  if (flags & ~(HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES|HWLOC_RESTRICT_FLAG_ADAPT_MISC|HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
+  if (flags & ~(HWLOC_RESTRICT_FLAG_ADAPT_MISC|HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
     errno = EINVAL;
     return -1;
   }
@@ -3306,18 +3238,17 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   if (hwloc_topology_reconnect(topology, 0) < 0)
     goto out;
 
+  /* some objects may have disappeared, we need to update distances objs arrays */
+  hwloc_internal_distances_invalidate_cached_objs(topology);
+
   hwloc_filter_levels_keep_structure(topology);
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   propagate_total_memory(topology->levels[0][0]);
-  hwloc_distances_restrict(topology, flags);
-  hwloc_distances_finalize_os(topology);
-  hwloc_distances_finalize_logical(topology);
   return 0;
 
  out:
   /* unrecoverable failure, re-init the topology */
    hwloc_topology_clear(topology);
-   hwloc_distances_destroy(topology);
    hwloc_topology_setup_defaults(topology);
    return -1;
 }

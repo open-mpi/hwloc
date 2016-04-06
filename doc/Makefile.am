@@ -74,6 +74,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/helper.h \
        $(hwloc_include_dir)/hwloc/bitmap.h \
        $(hwloc_include_dir)/hwloc/export.h \
+       $(hwloc_include_dir)/hwloc/distances.h \
        $(hwloc_include_dir)/hwloc/diff.h \
        $(hwloc_include_dir)/hwloc/plugins.h \
        $(hwloc_include_dir)/hwloc/glibc-sched.h \
@@ -327,7 +328,6 @@ man3_objects_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_group_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_osdev_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_pcidev_attr_s.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_distances_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_info_s.3
 
 man3_creationdir = $(man3dir)
@@ -453,14 +453,12 @@ man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_icache_types_filter.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_io_types_filter.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_type_filter.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_distance_matrix.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_userdata.3
 
 man3_tinkerdir = $(man3dir)
 man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_tinker.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_IO.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_MISC.3 \
         $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \
@@ -607,11 +605,25 @@ man3_helper_nodeset_convert_DATA = \
 
 man3_helper_distancesdir = $(man3dir)
 man3_helper_distances_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_distances.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_whole_distance_matrix_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_whole_distance_matrix_by_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_distance_matrix_covering_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_latency.3
+        $(DOX_MAN_DIR)/man3/hwlocality_distances_get.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_kind_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_KIND_FROM_OS.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_KIND_FROM_USER.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_KIND_MEANS_LATENCY.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_get.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_get_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_get_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_release.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_distances_add.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_flag_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_FLAG_GROUP.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_FLAG_GROUP_INACCURATE.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_add.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_remove.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_type.3
 
 man3_helper_advanced_iodir = $(man3dir)
 man3_helper_advanced_io_DATA = \

@@ -100,7 +100,6 @@ extern "C" {
 #define hwloc_obj HWLOC_NAME(obj)
 #define hwloc_obj_t HWLOC_NAME(obj_t)
 
-#define hwloc_distances_s HWLOC_NAME(distances_s)
 #define hwloc_obj_info_s HWLOC_NAME(obj_info_s)
 
 #define hwloc_obj_attr_u HWLOC_NAME(obj_attr_u)
@@ -147,12 +146,10 @@ extern "C" {
 #define hwloc_topology_set_icache_types_filter HWLOC_NAME(topology_set_icache_types_filter)
 #define hwloc_topology_set_io_types_filter HWLOC_NAME(topology_set_io_types_filter)
 
-#define hwloc_topology_set_distance_matrix HWLOC_NAME(topology_set_distance_matrix)
 #define hwloc_topology_set_userdata HWLOC_NAME(topology_set_userdata)
 #define hwloc_topology_get_userdata HWLOC_NAME(topology_get_userdata)
 
 #define hwloc_restrict_flags_e HWLOC_NAME(restrict_flags_e)
-#define HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_DISTANCES)
 #define HWLOC_RESTRICT_FLAG_ADAPT_MISC HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_MISC)
 #define HWLOC_RESTRICT_FLAG_ADAPT_IO HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_IO)
 #define hwloc_topology_restrict HWLOC_NAME(topology_restrict)
@@ -345,10 +342,6 @@ extern "C" {
 #define hwloc_topology_get_allowed_nodeset HWLOC_NAME(topology_get_allowed_nodeset)
 #define hwloc_cpuset_to_nodeset HWLOC_NAME(cpuset_to_nodeset)
 #define hwloc_cpuset_from_nodeset HWLOC_NAME(cpuset_from_nodeset)
-#define hwloc_get_whole_distance_matrix_by_depth HWLOC_NAME(get_whole_distance_matrix_by_depth)
-#define hwloc_get_whole_distance_matrix_by_type HWLOC_NAME(get_whole_distance_matrix_by_type)
-#define hwloc_get_distance_matrix_covering_obj_by_depth HWLOC_NAME(get_distance_matrix_covering_obj_by_depth)
-#define hwloc_get_latency HWLOC_NAME(get_latency)
 
 /* export.h */
 
@@ -364,6 +357,30 @@ extern "C" {
 #define HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES HWLOC_NAME_CAPS(TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES)
 #define HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS HWLOC_NAME_CAPS(TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)
 #define hwloc_topology_export_synthetic HWLOC_NAME(topology_export_synthetic)
+
+/* distances.h */
+
+#define hwloc_distances_s HWLOC_NAME(distances_s)
+
+#define hwloc_distances_kind_e HWLOC_NAME(distances_kind_e)
+#define HWLOC_DISTANCES_KIND_FROM_OS HWLOC_NAME_CAPS(DISTANCES_KIND_FROM_OS)
+#define HWLOC_DISTANCES_KIND_FROM_USER HWLOC_NAME_CAPS(DISTANCES_KIND_FROM_USER)
+#define HWLOC_DISTANCES_KIND_MEANS_LATENCY HWLOC_NAME_CAPS(DISTANCES_KIND_MEANS_LATENCY)
+#define HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH HWLOC_NAME_CAPS(DISTANCES_KIND_MEANS_BANDWIDTH)
+
+#define hwloc_distances_get HWLOC_NAME(distances_get)
+#define hwloc_distances_get_by_depth HWLOC_NAME(distances_get_by_depth)
+#define hwloc_distances_get_by_type HWLOC_NAME(distances_get_by_type)
+#define hwloc_distances_release HWLOC_NAME(distances_release)
+
+#define hwloc_distances_flag_e HWLOC_NAME(distances_flag_e)
+#define HWLOC_DISTANCES_FLAG_GROUP HWLOC_NAME_CAPS(DISTANCES_FLAG_GROUP)
+#define HWLOC_DISTANCES_FLAG_GROUP_INACCURATE HWLOC_NAME_CAPS(DISTANCES_FLAG_GROUP_INACCURATE)
+
+#define hwloc_distances_add HWLOC_NAME(distances_add)
+#define hwloc_distances_remove HWLOC_NAME(distances_remove)
+#define hwloc_distances_remove_by_depth HWLOC_NAME(distances_remove_by_depth)
+#define hwloc_distances_remove_by_type HWLOC_NAME(distances_remove_by_type)
 
 /* diff.h */
 
@@ -567,13 +584,15 @@ extern "C" {
 #define hwloc_xml_backend_data_s HWLOC_NAME(xml_backend_data_s)
 #define hwloc__xml_export_state_s HWLOC_NAME(_xml_export_state_s)
 #define hwloc__xml_export_state_t HWLOC_NAME(_xml_export_state_t)
-#define hwloc__xml_export_object HWLOC_NAME(_xml_export_object)
+#define hwloc__xml_export_topology HWLOC_NAME(_xml_export_topology)
 #define hwloc__xml_export_diff HWLOC_NAME(_xml_export_diff)
 
 #define hwloc_xml_callbacks HWLOC_NAME(xml_callbacks)
 #define hwloc_xml_component HWLOC_NAME(xml_component)
 #define hwloc_xml_callbacks_register HWLOC_NAME(xml_callbacks_register)
 #define hwloc_xml_callbacks_reset HWLOC_NAME(xml_callbacks_reset)
+
+#define hwloc__xml_imported_v1distances_s HWLOC_NAME(_xml_imported_v1distances_s)
 
 /* private/components.h */
 
@@ -592,10 +611,6 @@ extern "C" {
 /* private/private.h */
 
 #define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
-
-#define hwloc_os_distances_s HWLOC_NAME(os_distances_s)
-
-#define hwloc_xml_imported_distances_s HWLOC_NAME(xml_imported_distances_s)
 
 #define hwloc_alloc_obj_cpusets HWLOC_NAME(alloc_obj_cpusets)
 #define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)
@@ -652,17 +667,15 @@ extern "C" {
 #define hwloc_free_mmap HWLOC_NAME(free_mmap)
 #define hwloc_alloc_or_fail HWLOC_NAME(alloc_or_fail)
 
-#define hwloc_distances_init HWLOC_NAME(distances_init)
-#define hwloc_distances_destroy HWLOC_NAME(distances_destroy)
-#define hwloc_distances_set HWLOC_NAME(distances_set)
-#define hwloc_distances_set_from_env HWLOC_NAME(distances_set_from_env)
-#define hwloc_distances_restrict_os HWLOC_NAME(distances_restrict_os)
-#define hwloc_distances_restrict HWLOC_NAME(distances_restrict)
-#define hwloc_distances_finalize_os HWLOC_NAME(distances_finalize_os)
-#define hwloc_distances_finalize_logical HWLOC_NAME(distances_finalize_logical)
-#define hwloc_clear_object_distances HWLOC_NAME(clear_object_distances)
-#define hwloc_clear_object_distances_one HWLOC_NAME(clear_object_distances_one)
-#define hwloc_group_by_distances HWLOC_NAME(group_by_distances)
+#define hwloc_internal_distances_s HWLOC_NAME(internal_distances_s)
+#define hwloc_internal_distances_init HWLOC_NAME(internal_distances_init)
+#define hwloc_internal_distances_prepare HWLOC_NAME(internal_distances_prepare)
+#define hwloc_internal_distances_dup HWLOC_NAME(internal_distances_dup)
+#define hwloc_internal_distances_destroy HWLOC_NAME(internal_distances_destroy)
+
+#define hwloc_internal_distances_add HWLOC_NAME(internal_distances_add)
+#define hwloc_internal_distances_add_by_index HWLOC_NAME(internal_distances_add_by_index)
+#define hwloc_internal_distances_invalidate_cached_objs HWLOC_NAME(hwloc_internal_distances_invalidate_cached_objs)
 
 #define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
 #define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)

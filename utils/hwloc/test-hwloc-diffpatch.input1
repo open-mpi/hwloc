@@ -25,12 +25,6 @@
     <info name="OSVersion" value="#1 SMP 2009-11-23 12:57:38 +0100"/>
     <info name="HostName" value="fourmi023"/>
     <info name="Architecture" value="x86_64"/>
-    <distances nbobjs="2" relative_depth="1" latency_base="10.000000">
-      <latency value="1.000000"/>
-      <latency value="2.000000"/>
-      <latency value="2.000000"/>
-      <latency value="1.000000"/>
-    </distances>
     <object type="NUMANode" os_index="0" cpuset="0x00000055" complete_cpuset="0x00000055" allowed_cpuset="0x00000055" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" gp_index="2" local_memory="12875255808">
       <page_type size="4096" count="3143373"/>
       <page_type size="2097152" count="0"/>
@@ -167,4 +161,8 @@
       </object>
     </object>
   </object>
+  <distances2 type="NUMANode" nbobjs="2" kind="5" indexing="os">
+    <indexes length="4">0 1 </indexes>
+    <floats length="40">10.000000 20.000000 20.000000 10.000000 </floats>
+  </distances2>
 </topology>

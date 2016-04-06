@@ -3022,6 +3022,8 @@ look_sysfsnode(struct hwloc_topology *topology,
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, data->root_fd);
       }
 
+      free(indexes);
+
       if (data->is_knl) {
 	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
 	if (!(env && !atoi(env)) && nbnodes>=2) { /* SNC2 or SNC4, with 0 or 2/4 MCDRAM, and 0-4 DDR nodes */
@@ -3059,12 +3061,13 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  /* drop the distance matrix, it contradicts the above NUMA layout groups */
 	  free(distances);
           free(nodes);
-          free(indexes);
           goto out;
 	}
       }
 
-      hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
+      hwloc_internal_distances_add(topology, nbnodes, nodes, distances,
+				   HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
+				   HWLOC_DISTANCES_FLAG_GROUP);
   }
 
  out:

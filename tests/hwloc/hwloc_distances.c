@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2014 Inria.  All rights reserved.
+ * Copyright © 2010-2016 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -21,16 +21,16 @@ static void print_distances(const struct hwloc_distances_s *distances)
   printf("     ");
   /* column header */
   for(j=0; j<nbobjs; j++)
-    printf(" % 5d", (int) j);
+    printf(" % 5d", (int) distances->objs[j]->os_index);
   printf("\n");
 
   /* each line */
   for(i=0; i<nbobjs; i++) {
     /* row header */
-    printf("% 5d", (int) i);
+    printf("% 5d", (int) distances->objs[i]->os_index);
     /* each value */
     for(j=0; j<nbobjs; j++)
-      printf(" %2.3f", distances->latency[i*nbobjs+j]);
+      printf(" %2.3f", distances->values[i*nbobjs+j]);
     printf("\n");
   }
 }
@@ -38,93 +38,246 @@ static void print_distances(const struct hwloc_distances_s *distances)
 int main(void)
 {
   hwloc_topology_t topology;
-  unsigned nbobjs;
-  const struct hwloc_distances_s *distances;
-  float d1, d2;
-  unsigned depth, topodepth, i, j;
+  struct hwloc_distances_s *distances[2];
+  hwloc_obj_t objs[16];
+  float values[16*16];
+  unsigned depth, topodepth;
+  unsigned i, j, k, nr;
   int err;
-  hwloc_obj_t obj1, obj2;
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:4 core:4 pu:1");
-  putenv("HWLOC_NUMANode_DISTANCES=0,1,2,3:2*2");
-  putenv("HWLOC_PU_DISTANCES=0-15:4*2*2");
   hwloc_topology_load(topology);
 
-  topodepth = hwloc_topology_get_depth(topology);
+  nr = 0;
+  err = hwloc_distances_get(topology, &nr, distances, 0, 0);
+  assert(!err);
+  assert(!nr);
+  if (!nr)
+    printf("No distance\n");
 
+  printf("\nInserting NUMA distances\n");
+  for(i=0; i<4; i++)
+    objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
+  /* matrix 2*2 */
+  for(i=0; i<16; i++)
+    values[i] = 8.f;
+  values[0+4*1] = 4.f;
+  values[1+4*0] = 4.f;
+  values[2+4*3] = 4.f;
+  values[3+4*2] = 4.f;
+  for(i=0; i<4; i++)
+    values[i+4*i] = 1.f;
+  err = hwloc_distances_add(topology, 4, objs, values,
+			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+			    HWLOC_DISTANCES_FLAG_GROUP);
+  assert(!err);
+
+  topodepth = hwloc_topology_get_depth(topology);
   for(depth=0; depth<topodepth; depth++) {
-    distances = hwloc_get_whole_distance_matrix_by_depth(topology, depth);
-    if (!distances || !distances->latency) {
+    nr = 0;
+    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
+    assert(!err);
+    if (depth == 2)
+      assert(nr == 1);
+    else
+      assert(!nr);
+    if (!nr) {
       printf("No distance at depth %u\n", depth);
       continue;
     }
-
-    printf("distance matrix for depth %u:\n", depth);
-    print_distances(distances);
-    nbobjs = distances->nbobjs;
-
-    obj1 = hwloc_get_obj_by_depth(topology, depth, 0);
-    obj2 = hwloc_get_obj_by_depth(topology, depth, nbobjs-1);
-    err = hwloc_get_latency(topology, obj1, obj2, &d1, &d2);
+    nr = 1;
+    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
     assert(!err);
-    assert(d1 == distances->latency[0*nbobjs+(nbobjs-1)]);
-    assert(d2 == distances->latency[(nbobjs-1)*nbobjs+0]);
+    printf("distance matrix for depth %u:\n", depth);
+    print_distances(distances[0]);
+    hwloc_distances_release(topology, distances[0]);
   }
 
-  /* check that hwloc_get_latency works fine on numa distances */
-  distances = hwloc_get_whole_distance_matrix_by_type(topology, HWLOC_OBJ_NUMANODE);
-  if (!distances || !distances->latency) {
-    fprintf(stderr, "No NUMA distance matrix!\n");
-    return -1;
-  }
-  printf("distance matrix for NUMA nodes\n");
-  print_distances(distances);
-  nbobjs = distances->nbobjs;
-  for(i=0; i<nbobjs; i++)
-    for(j=0; j<nbobjs; j++) {
-      obj1 = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
-      obj2 = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, j);
-      err = hwloc_get_latency(topology, obj1, obj2, &d1, &d2);
-      assert(!err);
-      assert(d1 == distances->latency[i*nbobjs+j]);
-      assert(d2 == distances->latency[j*nbobjs+i]);
-    }
+  /* check numa distances */
+  printf("Checking NUMA distances\n");
+  nr = 1;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_NUMANODE, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == 1);
+  assert(distances[0]);
+  assert(distances[0]->objs);
+  assert(distances[0]->values);
+  assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check that some random values are ok */
-  assert(distances->latency[0] == 1.0); /* diagonal */
-  assert(distances->latency[4] == 4.0); /* same group */
-  assert(distances->latency[6] == 8.0); /* different group */
-  assert(distances->latency[9] == 8.0); /* different group */
-  assert(distances->latency[10] == 1.0); /* diagonal */
-  assert(distances->latency[14] == 4.0); /* same group */
+  assert(distances[0]->values[0] == 1.f); /* diagonal */
+  assert(distances[0]->values[4] == 4.f); /* same group */
+  assert(distances[0]->values[6] == 8.f); /* different group */
+  assert(distances[0]->values[9] == 8.f); /* different group */
+  assert(distances[0]->values[10] == 1.f); /* diagonal */
+  assert(distances[0]->values[14] == 4.f); /* same group */
+  hwloc_distances_release(topology, distances[0]);
 
-  /* check that hwloc_get_latency works fine on PU distances */
-  distances = hwloc_get_whole_distance_matrix_by_type(topology, HWLOC_OBJ_PU);
-  if (!distances || !distances->latency) {
-    fprintf(stderr, "No PU distance matrix!\n");
-    return -1;
-  }
-  printf("distance matrix for PU nodes\n");
-  print_distances(distances);
-  nbobjs = distances->nbobjs;
+  printf("\nInserting PU distances\n");
+  /* matrix 4*2*2 */
   for(i=0; i<16; i++)
-    for(j=0; j<16; j++) {
-      obj1 = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
-      obj2 = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, j);
-      err = hwloc_get_latency(topology, obj1, obj2, &d1, &d2);
-      assert(!err);
-      assert(d1 == distances->latency[i*nbobjs+j]);
-      assert(d2 == distances->latency[j*nbobjs+i]);
+    objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
+  for(i=0; i<256; i++)
+    values[i] = 8.f;
+  for(i=0; i<4; i++) {
+    for(j=0; j<4; j++)
+      for(k=0; k<4; k++)
+      values[i*64+i*4+16*j+k] = 4.f;
+    values[i*64+i*4+1] = 2.f;
+    values[i*64+i*4+16] = 2.f;
+    values[i*64+i*4+2*16+3] = 2.f;
+    values[i*64+i*4+3*16+2] = 2.f;
+  }
+  for(i=0; i<16; i++)
+    values[i+16*i] = 1.f;
+  err = hwloc_distances_add(topology, 16, objs, values,
+			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+			    HWLOC_DISTANCES_FLAG_GROUP);
+  assert(!err);
+
+  topodepth = hwloc_topology_get_depth(topology);
+  for(depth=0; depth<topodepth; depth++) {
+    nr = 0;
+    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
+    assert(!err);
+    if (depth == 2 || depth == 5)
+      assert(nr == 1);
+    else
+      assert(!nr);
+    if (!nr) {
+      printf("No distance at depth %u\n", depth);
+      continue;
     }
+    nr = 1;
+    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
+    assert(!err);
+    printf("distance matrix for depth %u:\n", depth);
+    print_distances(distances[0]);
+    hwloc_distances_release(topology, distances[0]);
+  }
+
+  /* check PU distances */
+  printf("Checking PU distances\n");
+  nr = 1;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_PU, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == 1);
+  assert(distances[0]);
+  assert(distances[0]->values);
+  assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check that some random values are ok */
-  assert(distances->latency[0] == 1.0); /* diagonal */
-  assert(distances->latency[1] == 2.0); /* same group */
-  assert(distances->latency[3] == 4.0); /* same biggroup */
-  assert(distances->latency[15] == 8.0); /* different biggroup */
-  assert(distances->latency[250] == 8.0); /* different biggroup */
-  assert(distances->latency[253] == 4.0); /* same group */
-  assert(distances->latency[254] == 2.0); /* same biggroup */
-  assert(distances->latency[255] == 1.0); /* diagonal */
+  assert(distances[0]->values[0] == 1.f); /* diagonal */
+  assert(distances[0]->values[1] == 2.f); /* same group */
+  assert(distances[0]->values[3] == 4.f); /* same biggroup */
+  assert(distances[0]->values[15] == 8.f); /* different biggroup */
+  assert(distances[0]->values[250] == 8.f); /* different biggroup */
+  assert(distances[0]->values[253] == 4.f); /* same group */
+  assert(distances[0]->values[254] == 2.f); /* same biggroup */
+  assert(distances[0]->values[255] == 1.f); /* diagonal */
+  hwloc_distances_release(topology, distances[0]);
+
+  printf("\nInserting 2nd PU distances\n");
+  /* matrix 4*1 */
+  for(i=0; i<4; i++)
+    objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
+  for(i=0; i<16; i++)
+    values[i] = 3.f;
+  for(i=0; i<4; i++)
+    values[i+4*i] = 7.f;
+  err = hwloc_distances_add(topology, 4, objs, values,
+			    HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+			    HWLOC_DISTANCES_FLAG_GROUP);
+  assert(!err);
+
+  topodepth = hwloc_topology_get_depth(topology);
+  for(depth=0; depth<topodepth; depth++) {
+    nr = 0;
+    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
+    assert(!err);
+    if (depth == 2)
+      assert(nr == 1);
+    else if (depth == 5)
+      assert(nr == 2);
+    else
+      assert(!nr);
+    if (!nr) {
+      printf("No distance at depth %u\n", depth);
+      continue;
+    }
+    nr = 2;
+    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
+    assert(!err);
+    printf("distance matrix for depth %u:\n", depth);
+    print_distances(distances[0]);
+    hwloc_distances_release(topology, distances[0]);
+    if (nr > 1) {
+      print_distances(distances[1]);
+      hwloc_distances_release(topology, distances[1]);
+    }
+  }
+
+  /* check PU distances */
+  printf("Checking 2nd PU distances\n");
+  nr = 2;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_PU, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == 2);
+  assert(distances[1]);
+  assert(distances[1]->values);
+  assert(distances[1]->kind == (HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER));
+  /* check that some random values are ok */
+  assert(distances[1]->values[0] == 7.f); /* diagonal */
+  assert(distances[1]->values[1] == 3.f); /* other */
+  assert(distances[1]->values[3] == 3.f); /* other */
+  assert(distances[1]->values[15] == 7.f); /* diagonal */
+  hwloc_distances_release(topology, distances[0]);
+  hwloc_distances_release(topology, distances[1]);
+
+  /* check distances by kind */
+  nr = 2;
+  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH, 0);
+  assert(!err);
+  assert(nr == 1);
+  hwloc_distances_release(topology, distances[0]);
+  nr = 2;
+  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_OS, 0);
+  assert(!err);
+  assert(nr == 0);
+  nr = 2;
+  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER, 0);
+  assert(!err);
+  assert(nr == 2);
+  hwloc_distances_release(topology, distances[0]);
+  hwloc_distances_release(topology, distances[1]);
+
+  /* remove distances */
+  printf("Removing distances\n");
+  /* remove both PU distances */
+  err = hwloc_distances_remove_by_type(topology, HWLOC_OBJ_PU);
+  assert(!err);
+  nr = 0;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_PU, &nr, distances, 0, 0);
+  assert(!err);
+  assert(!nr);
+  nr = 0;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_NUMANODE, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == 1);
+  /* remove all distances */
+  err = hwloc_distances_remove(topology);
+  assert(!err);
+  nr = 0;
+  err = hwloc_distances_get(topology, &nr, distances, 0, 0);
+  assert(!err);
+  assert(!nr);
+  nr = 0;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_PU, &nr, distances, 0, 0);
+  assert(!err);
+  assert(!nr);
+  nr = 0;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_NUMANODE, &nr, distances, 0, 0);
+  assert(!err);
+  assert(!nr);
 
   hwloc_topology_destroy(topology);
 

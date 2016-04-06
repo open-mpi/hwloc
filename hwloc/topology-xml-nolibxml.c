@@ -670,7 +670,7 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 		 "<!DOCTYPE topology SYSTEM \"hwloc.dtd\">\n");
   hwloc__nolibxml_export_update_buffer(ndata, res);
   hwloc__nolibxml_export_new_child(&state, &childstate, "topology");
-  hwloc__xml_export_object (&childstate, topology, hwloc_get_root_obj(topology));
+  hwloc__xml_export_topology (&childstate, topology);
   hwloc__nolibxml_export_end_object(&childstate, "topology");
 
   return ndata->written+1;

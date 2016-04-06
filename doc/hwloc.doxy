@@ -867,7 +867,8 @@ following environment variables.
 <dt>HWLOC_GROUPING_ACCURACY=0.05</dt>
   <dd>relaxes distance comparison during grouping.
   By default, objects may be grouped if their distances form a minimal
-  distance graph. When setting this variable to 0.02, these distances
+  distance graph. When setting this variable to 0.02, and when
+  ::HWLOC_DISTANCES_FLAG_GROUP_INACCURATE is given, these distances
   do not have to be strictly equal anymore, they may just be equal
   with a 2% error.
   If set to <tt>try</tt> instead of a numerical value, hwloc will try
@@ -883,32 +884,6 @@ following environment variables.
   at configure time.
   This is useful when trying to find an interesting distance grouping
   accuracy.</dd>
-
-<dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:X*Y</dt>
-<dt>HWLOC_&lt;type&gt;_DISTANCES=begin-end:X*Y*Z</dt>
-<dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:distance,...</dt>
-  <dd>sets a distance matrix for objects of the given type and physical indexes.
-  The type should be given as its case-sensitive stringified value
-  (e.g. <tt>NUMANode</tt>, <tt>Package</tt>, <tt>L2Cache</tt>, <tt>Core</tt>, <tt>PU</tt>).
-  If another distance matrix already exists for the given type,
-  either because the user specified it or because the OS offers it,
-  it will be replaced by the given one.
-
-  If the variable value is <tt>none</tt>, the existing distance matrix for
-  the given type is removed.
-  Otherwise, the variable value first consists in a list of physical indexes
-  that may be specified as a comma-separated list (e.g. <tt>0,2,4,1,3,5</tt>)
-  or as a range of consecutive indexes (<tt>0-5</tt>).
-  It is followed by a colon and the corresponding distances:
-  <ul>
-  <li>If <tt>X*Y</tt> is given, X groups of Y close objects are specified.</li>
-  <li>If <tt>X*Y*Z</tt> is given, X groups of Y groups of Z close objects are specified.</li>
-  <li>Otherwise, the comma-separated list of distances should be given.
-  If N objects are considered, the i*N+j-th value gives the
-  distance from the i-th object to the j-th object.
-  These distance values must use a dot as a decimal separator.</li>
-  </ul>
-  </dd>
 
 <dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
 <dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
@@ -2624,9 +2599,8 @@ may miss some information about the actual physical distances between objects.
 The hwloc topology may therefore be annotated with distance information that
 may be used to build a more realistic representation (multi-dimensional)
 of each level.
-For instance, the root object may contain a distance matrix that represents
-the latencies between any pairs of NUMA nodes if the BIOS and/or operating
-system reports them.
+For instance, there can be a distance matrix that representing the latencies
+between any pair of NUMA nodes if the BIOS and/or operating system reports them.
 
 
 \subsection faq_groups What are these Group objects in my topology?

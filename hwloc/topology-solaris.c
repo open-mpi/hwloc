@@ -418,14 +418,14 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 #if HAVE_DECL_LGRP_LATENCY_COOKIE
     if (nlgrps > 1) {
       float *distances = calloc(curlgrp*curlgrp, sizeof(float));
-      unsigned *indexes = calloc(curlgrp,sizeof(unsigned));
       unsigned i, j;
       for (i = 0; i < curlgrp; i++) {
-	indexes[i] = glob_lgrps[i]->os_index;
 	for (j = 0; j < curlgrp; j++)
           distances[i*curlgrp+j] = (float) lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
-      hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, curlgrp, indexes, glob_lgrps, distances, 0 /* OS cannot force */);
+      hwloc_internal_distances_add(topology, curlgrp, glob_lgrps, distances,
+				   HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
+				   HWLOC_DISTANCES_FLAG_GROUP);
     } else
 #endif /* HAVE_DECL_LGRP_LATENCY_COOKIE */
       free(glob_lgrps);

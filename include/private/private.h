@@ -118,23 +118,27 @@ struct hwloc_topology {
   void (*userdata_import_cb)(struct hwloc_topology *topology, struct hwloc_obj *obj, const char *name, const void *buffer, size_t length);
   int userdata_not_decoded;
 
-  struct hwloc_os_distances_s {
+  struct hwloc_internal_distances_s {
     hwloc_obj_type_t type;
-    int nbobjs;
-    unsigned *indexes; /* array of OS indexes before we can convert them into objs. always available.
-			*/
-    struct hwloc_obj **objs; /* array of objects, in the same order as above.
-			      * either given (by a backend) together with the indexes array above.
-			      * or build from the above indexes array when not given (by the user).
-			      */
-    float *distances; /* distance matrices, ordered according to the above indexes/objs array.
-		       * distance from i to j is stored in slot i*nbnodes+j.
-		       * will be copied into the main logical-index-ordered distance at the end of the discovery.
-		       */
-    int forced; /* set if the user forced a matrix to ignore the OS one */
+    /* add union hwloc_obj_attr_u if we ever support groups */
+    unsigned nbobjs;
+    uint64_t *indexes; /* array of OS or GP indexes before we can convert them into objs. */
+    float *values; /* distance matrices, ordered according to the above indexes/objs array.
+		    * distance from i to j is stored in slot i*nbnodes+j.
+		    */
+    unsigned long kind;
 
-    struct hwloc_os_distances_s *prev, *next;
-  } *first_osdist, *last_osdist;
+    hwloc_obj_t *objs; /* array of objects */
+    int objs_are_valid; /* set to 1 if the array objs is still valid, 0 if needs refresh */
+
+    struct hwloc_internal_distances_s *prev, *next;
+  } *first_dist, *last_dist;
+
+  int grouping;
+  int grouping_verbose;
+  unsigned grouping_nbaccuracies;
+  float grouping_accuracies[5];
+  int grouping_next_subkind;
 
   /* list of enabled backends. */
   struct hwloc_backend * backends;
@@ -262,17 +266,13 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
   return hwloc_alloc(topology, len);
 }
 
-extern void hwloc_distances_init(struct hwloc_topology *topology);
-extern void hwloc_distances_destroy(struct hwloc_topology *topology);
-extern void hwloc_distances_set(struct hwloc_topology *topology, hwloc_obj_type_t type, unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances, int force);
-extern void hwloc_distances_set_from_env(struct hwloc_topology *topology);
-extern void hwloc_distances_restrict_os(struct hwloc_topology *topology);
-extern void hwloc_distances_restrict(struct hwloc_topology *topology, unsigned long flags);
-extern void hwloc_distances_finalize_os(struct hwloc_topology *topology);
-extern void hwloc_distances_finalize_logical(struct hwloc_topology *topology);
-extern void hwloc_clear_object_distances(struct hwloc_obj *obj);
-extern void hwloc_clear_object_distances_one(struct hwloc_distances_s *distances);
-extern void hwloc_group_by_distances(struct hwloc_topology *topology);
+extern void hwloc_internal_distances_init(hwloc_topology_t topology);
+extern void hwloc_internal_distances_prepare(hwloc_topology_t topology);
+extern void hwloc_internal_distances_destroy(hwloc_topology_t topology);
+extern void hwloc_internal_distances_dup(hwloc_topology_t new, hwloc_topology_t old);
+extern int hwloc_internal_distances_add(hwloc_topology_t topology, unsigned nbobjs, hwloc_obj_t *objs, float *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, float *values, unsigned long kind, unsigned long flags);
+extern void hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology);
 
 #ifdef HAVE_USELOCALE
 #include "locale.h"
@@ -373,7 +373,7 @@ HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, 
  * the core will keep the highest ones when merging two groups.
  */
 #define HWLOC_GROUP_KIND_NONE				0 /* user can use subkind */
-#define HWLOC_GROUP_KIND_DISTANCE			1 /* subkind is round of adding these groups, either in recursive hwloc__groups_by_distances() or later in hwloc_group_by_distances() */
+#define HWLOC_GROUP_KIND_DISTANCE			1 /* subkind is round of adding these groups during distance based grouping */
 #define HWLOC_GROUP_KIND_IO				2 /* no subkind */
 #define HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN	3 /* no subkind */
 #define HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP	4 /* no subkind */

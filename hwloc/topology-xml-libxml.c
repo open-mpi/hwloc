@@ -413,7 +413,7 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
 
   data->current_node = root_node;
 
-  hwloc__xml_export_object (&state, topology, hwloc_get_root_obj(topology));
+  hwloc__xml_export_topology (&state, topology);
 
   return doc;
 }

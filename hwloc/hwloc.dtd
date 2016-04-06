@@ -5,10 +5,10 @@
   See COPYING in top-level directory.
  -->
 
-<!ELEMENT topology (object)+>
+<!ELEMENT topology (object+,distances2*)>
 <!ELEMENT root (object)+>
 
-<!ELEMENT object (page_type*,info*,distances*,userdata*,object*)>
+<!ELEMENT object (page_type*,info*,userdata*,object*,distances*)>
 <!ATTLIST object type (System | Machine | Misc | Group | NUMANode | Package | L1Cache | L2Cache | L3Cache | L4Cache | L5Cache | L1iCache | L2iCache | L3iCache | Core | PU | Bridge | PCIDev | OSDev) #REQUIRED>
 <!ATTLIST object subtype CDATA "" >
 <!ATTLIST object os_index CDATA "-1" >
@@ -45,13 +45,17 @@
 <!ATTLIST info name CDATA #REQUIRED>
 <!ATTLIST info value CDATA #REQUIRED>
 
-<!ELEMENT distances (latency*)>
-<!ATTLIST distances nbobjs CDATA #REQUIRED>
-<!ATTLIST distances relative_depth CDATA #REQUIRED>
-<!ATTLIST distances latency_base CDATA #REQUIRED>
+<!ELEMENT distances2 (indexes+,floats+)>
+<!ATTLIST distances2 type CDATA #REQUIRED>
+<!ATTLIST distances2 nbobjs CDATA #REQUIRED>
+<!ATTLIST distances2 indexing CDATA #REQUIRED>
+<!ATTLIST distances2 kind CDATA #REQUIRED>
 
-<!ELEMENT latency EMPTY>
-<!ATTLIST latency value CDATA #REQUIRED>
+<!ELEMENT indexes (#PCDATA)>
+<!ATTLIST indexes length CDATA #REQUIRED>
+
+<!ELEMENT floats (#PCDATA)>
+<!ATTLIST floats length CDATA #REQUIRED>
 
 <!ELEMENT userdata (#PCDATA)>
 <!ATTLIST userdata name CDATA "" >
@@ -71,3 +75,13 @@
 <!ATTLIST diff obj_attr_name CDATA "" >
 <!ATTLIST diff obj_attr_newvalue CDATA "" >
 <!ATTLIST diff obj_attr_oldvalue CDATA "" >
+
+
+<!-- Deprecated in 2.0+ -->
+
+<!ELEMENT distances (latency*)>
+<!ATTLIST distances nbobjs CDATA #REQUIRED>
+<!ATTLIST distances relative_depth CDATA #REQUIRED>
+<!ATTLIST distances latency_base CDATA #REQUIRED>
+<!ELEMENT latency EMPTY>
+<!ATTLIST latency value CDATA #REQUIRED>

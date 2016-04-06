@@ -213,19 +213,6 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 		break;
 	}
 
-	/* distances */
-	if (obj1->distances_count != obj2->distances_count)
-		goto out_too_complex;
-	for(i=0; i<obj1->distances_count; i++) {
-		struct hwloc_distances_s *d1 = obj1->distances[i], *d2 = obj2->distances[i];
-		if (d1->relative_depth != d2->relative_depth
-		    || d1->nbobjs != d2->nbobjs
-		    || d1->latency_max != d2->latency_max
-		    || d1->latency_base != d2->latency_base
-		    || memcmp(d1->latency, d2->latency, d1->nbobjs * d1->nbobjs * sizeof(*d1->latency)))
-			goto out_too_complex;
-	}
-
 	/* infos */
 	if (obj1->infos_count != obj2->infos_count)
 		goto out_too_complex;
@@ -301,6 +288,7 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 			      hwloc_topology_diff_t *diffp)
 {
 	hwloc_topology_diff_t lastdiff, tmpdiff;
+	struct hwloc_internal_distances_s *dist1, *dist2;
 	int err;
 
 	if (flags != 0) {
@@ -313,7 +301,6 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 			       topo2, hwloc_get_root_obj(topo2),
 			       flags,
 			       diffp, &lastdiff);
-
 	if (!err) {
 		tmpdiff = *diffp;
 		while (tmpdiff) {
@@ -322,6 +309,30 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 				break;
 			}
 			tmpdiff = tmpdiff->generic.next;
+		}
+	}
+
+	if (!err) {
+		/* distances */
+		dist1 = topo1->first_dist;
+		dist2 = topo2->first_dist;
+		while (dist1 || dist2) {
+			if (!!dist1 != !!dist2) {
+				hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
+				err = 1;
+				break;
+			}
+			if (dist1->type != dist2->type
+			    || dist1->nbobjs != dist2->nbobjs
+			    || dist1->kind != dist2->kind
+			    || memcmp(dist1->indexes, dist2->indexes, dist1->nbobjs * sizeof(*dist1->indexes)) /* TODO this requires identical gp_indexes, which isn't enforced above, compare logical indexes instead */
+			    || memcmp(dist1->values, dist2->values, dist1->nbobjs * dist1->nbobjs * sizeof(*dist1->values))) {
+				hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
+				err = 1;
+				break;
+			}
+			dist1 = dist1->next;
+			dist2 = dist2->next;
 		}
 	}
 

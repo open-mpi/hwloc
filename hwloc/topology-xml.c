@@ -509,9 +509,9 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, h
 }
 
 static int
-hwloc__xml_import_distances(struct hwloc_xml_backend_data_s *data,
-			    hwloc_obj_t obj,
-			    hwloc__xml_import_state_t state)
+hwloc__xml_import_v1distances(struct hwloc_xml_backend_data_s *data,
+			      hwloc_obj_t obj,
+			      hwloc__xml_import_state_t state)
 {
   unsigned long reldepth = 0, nbobjs = 0;
   float latbase = 0;
@@ -534,25 +534,29 @@ hwloc__xml_import_distances(struct hwloc_xml_backend_data_s *data,
 
   if (nbobjs && reldepth && latbase) {
     unsigned i;
-    float *matrix, latmax = 0;
-    struct hwloc_xml_imported_distances_s *distances;
+    float *matrix;
+    struct hwloc__xml_imported_v1distances_s *v1dist;
 
     matrix = malloc(nbobjs*nbobjs*sizeof(float));
-    distances = malloc(sizeof(*distances));
-    if (!matrix || !distances) {
+    v1dist = malloc(sizeof(*v1dist));
+    if (!matrix || !v1dist) {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: failed to allocate distance matrix for %lu objects\n",
+	fprintf(stderr, "%s: failed to allocate v1distance matrix for %lu objects\n",
 		state->global->msgprefix, nbobjs);
-      free(distances);
+      free(v1dist);
       free(matrix);
       return -1;
     }
 
-    distances->root = obj;
-    distances->distances.relative_depth = reldepth;
-    distances->distances.nbobjs = nbobjs;
-    distances->distances.latency = matrix;
-    distances->distances.latency_base = latbase;
+    v1dist->kind = HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY;
+    /* TODO: we can't know for sure if it comes from the OS.
+     * On Linux/x86, it would be 10 on the diagonal.
+     * On Solaris/T5, 15 on the diagonal.
+     * Just check whether all values are integers, and that all values on the diagonal are minimal and identical?
+     */
+
+    v1dist->nbobjs = nbobjs;
+    v1dist->values = matrix;
 
     for(i=0; i<nbobjs*nbobjs; i++) {
       struct hwloc__xml_import_state_s childstate;
@@ -562,22 +566,20 @@ hwloc__xml_import_distances(struct hwloc_xml_backend_data_s *data,
       ret = state->global->find_child(state, &childstate, &tag);
       if (ret <= 0 || strcmp(tag, "latency")) {
 	/* a latency child is needed */
-	free(distances->distances.latency);
-	free(distances);
+	free(v1dist->values);
+	free(v1dist);
 	return -1;
       }
 
       ret = state->global->next_attr(&childstate, &attrname, &attrvalue);
       if (ret < 0 || strcmp(attrname, "value")) {
-	free(distances->distances.latency);
-	free(distances);
+	free(v1dist->values);
+	free(v1dist);
 	return -1;
       }
 
       val = (float) atof((char *) attrvalue);
-      matrix[i] = val;
-      if (val > latmax)
-	latmax = val;
+      matrix[i] = val * latbase;
 
       ret = state->global->close_tag(&childstate);
       if (ret < 0)
@@ -586,25 +588,33 @@ hwloc__xml_import_distances(struct hwloc_xml_backend_data_s *data,
       state->global->close_child(&childstate);
     }
 
-    distances->distances.latency_max = latmax;
-
     if (nbobjs < 2) {
       /* distances with a single object are useless, even if the XML isn't invalid */
       assert(nbobjs == 1);
       if (hwloc__xml_verbose())
 	fprintf(stderr, "%s: ignoring invalid distance matrix with only 1 object\n",
 		state->global->msgprefix);
-      free(matrix);
-      free(distances);
+      free(v1dist->values);
+      free(v1dist);
+
+    } else if (obj->parent) {
+      /* we currently only import distances attached to root.
+       * we can't save obj in v1dist because obj could be dropped during insert if ignored.
+       * we could save its complete_cpu/nodeset instead to find it back later.
+       * but it doesn't matter much since only NUMA distances attached to root matter.
+       */
+      free(v1dist->values);
+      free(v1dist);
+
     } else {
-      /* queue the distance */
-      distances->prev = data->last_distances;
-      distances->next = NULL;
-      if (data->last_distances)
-	data->last_distances->next = distances;
+      /* queue the distance for real */
+      v1dist->prev = data->last_v1dist;
+      v1dist->next = NULL;
+      if (data->last_v1dist)
+	data->last_v1dist->next = v1dist;
       else
-	data->first_distances = distances;
-      data->last_distances = distances;
+	data->first_v1dist = v1dist;
+      data->last_v1dist = v1dist;
     }
   }
 
@@ -846,6 +856,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       goto error_with_object;
     }
     data->nbnumanodes++;
+    obj->prev_cousin = data->last_numanode;
+    obj->next_cousin = NULL;
+    if (data->last_numanode)
+      data->last_numanode->next_cousin = obj;
+    else
+      data->first_numanode = obj;
+    data->last_numanode = obj;
   }
 
   if (!hwloc_filter_check_keep_object(topology, obj)) {
@@ -886,7 +903,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     } else if (!strcmp(tag, "info")) {
       ret = hwloc__xml_import_info(topology, obj, &childstate);
     } else if (!strcmp(tag, "distances")) {
-      ret = hwloc__xml_import_distances(data, obj, &childstate);
+      ret = hwloc__xml_import_v1distances(data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
       ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else
@@ -938,6 +955,222 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* root->parent is NULL, and root is already inserted. the caller will cleanup that root. */
     hwloc_free_unlinked_object(obj);
  error:
+  return -1;
+}
+
+static int
+hwloc__xml_import_v2distances(hwloc_topology_t topology,
+			      hwloc__xml_import_state_t state)
+{
+  hwloc_obj_type_t type = HWLOC_OBJ_TYPE_NONE;
+  unsigned nbobjs = 0;
+  int indexing = 0;
+  int os_indexing = 0;
+  int gp_indexing = 0;
+  unsigned long kind = 0;
+  unsigned nr_indexes, nr_floats;
+  uint64_t *indexes;
+  float *floats;
+  int ret;
+
+  /* process attributes */
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "nbobjs"))
+      nbobjs = strtoul(attrvalue, NULL, 10);
+    else if (!strcmp(attrname, "type")) {
+      if (hwloc_type_sscanf(attrvalue, &type, NULL, 0) < 0)
+	goto out;
+    }
+    else if (!strcmp(attrname, "indexing")) {
+      indexing = 1;
+      if (!strcmp(attrvalue, "os"))
+	os_indexing = 1;
+      else if (!strcmp(attrvalue, "gp"))
+	gp_indexing = 1;
+    }
+    else if (!strcmp(attrname, "kind")) {
+      kind = strtoul(attrvalue, NULL, 10);
+    }
+    else {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: ignoring unknown distance attribute %s\n",
+		state->global->msgprefix, attrname);
+    }
+  }
+
+  /* abort if missing attribute */
+  if (!nbobjs || type == HWLOC_OBJ_TYPE_NONE || !indexing || !kind) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: distance2 missing some attributes\n",
+	      state->global->msgprefix);
+    goto out;
+  }
+
+  indexes = malloc(nbobjs*sizeof(*indexes));
+  floats = malloc(nbobjs*nbobjs*sizeof(float));
+  if (!indexes || !floats) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: failed to allocate distances arrays for %u objects\n",
+	      state->global->msgprefix, nbobjs);
+    goto out_with_arrays;
+  }
+
+  /* process children */
+  nr_indexes = 0;
+  nr_floats = 0;
+  while (1) {
+    struct hwloc__xml_import_state_s childstate;
+    char *attrname, *attrvalue, *tag, *buffer;
+    int length;
+    int is_index = 0;
+    int is_float = 0;
+
+    ret = state->global->find_child(state, &childstate, &tag);
+    if (ret <= 0)
+      break;
+
+    if (!strcmp(tag, "indexes"))
+      is_index = 1;
+    else if (!strcmp(tag, "floats"))
+      is_float = 1;
+    if (!is_index && !is_float) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: distance2 with unrecognized child %s\n",
+		state->global->msgprefix, tag);
+      goto out_with_arrays;
+    }
+
+    if (state->global->next_attr(&childstate, &attrname, &attrvalue) < 0
+	|| strcmp(attrname, "length")) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: distance2 child must have length attribute\n",
+		state->global->msgprefix);
+      goto out_with_arrays;
+    }
+    length = atoi(attrvalue);
+
+    ret = state->global->get_content(&childstate, &buffer, length);
+    if (ret < 0) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: distance2 child needs content of length %d\n",
+		state->global->msgprefix, length);
+      goto out_with_arrays;
+    }
+
+    if (is_index) {
+      /* get indexes */
+      char *tmp;
+      if (nr_indexes >= nbobjs) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: distance2 with more than %d indexes\n",
+		  state->global->msgprefix, nbobjs);
+	goto out_with_arrays;
+      }
+      tmp = buffer;
+      while (1) {
+	char *next;
+	unsigned long long u = strtoull(tmp, &next, 0);
+	if (next == tmp)
+	  break;
+	indexes[nr_indexes++] = u;
+	if (*next != ' ')
+	  break;
+	if (nr_indexes == nbobjs)
+	  break;
+	tmp = next+1;
+      }
+
+    } else if (is_float) {
+      /* get floats */
+      char *tmp;
+      if (nr_floats >= nbobjs*nbobjs) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: distance2 with more than %d floats\n",
+		  state->global->msgprefix, nbobjs*nbobjs);
+	goto out_with_arrays;
+      }
+      tmp = buffer;
+      while (1) {
+	char *next;
+	if (tmp[0] < '0' || tmp[0] > '9')
+	  break;
+	floats[nr_floats++] = (float) atof(tmp); /* strtof() not always available in MSVC */
+	next = strchr(tmp, ' ');
+	if (!next)
+	  break;
+	if (nr_floats == nbobjs*nbobjs)
+	  break;
+	tmp = next+1;
+      }
+    }
+
+    state->global->close_content(&childstate);
+
+    ret = state->global->close_tag(&childstate);
+    if (ret < 0) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: distance2 with more than %d indexes\n",
+		state->global->msgprefix, nbobjs);
+      goto out_with_arrays;
+    }
+
+    state->global->close_child(&childstate);
+  }
+
+  if (nr_indexes != nbobjs) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: distance2 with less than %d indexes\n",
+	      state->global->msgprefix, nbobjs);
+    goto out_with_arrays;
+  }
+  if (nr_floats != nbobjs*nbobjs) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: distance2 with less than %d floats\n",
+	      state->global->msgprefix, nbobjs*nbobjs);
+    goto out_with_arrays;
+  }
+
+  if (nbobjs < 2) {
+    /* distances with a single object are useless, even if the XML isn't invalid */
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring distances2 with only %d object\n",
+	      state->global->msgprefix, nbobjs);
+    goto out_ignore;
+  }
+  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE) {
+    if (!os_indexing) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: ignoring PU or NUMA distances2 without os_indexing\n",
+		state->global->msgprefix);
+      goto out_ignore;
+    }
+  } else {
+    if (!gp_indexing) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: ignoring !PU or !NUMA distances2 without gp_indexing\n",
+		state->global->msgprefix);
+      goto out_ignore;
+    }
+  }
+
+  hwloc_internal_distances_add_by_index(topology, type, nbobjs, indexes, floats, kind, 0);
+
+  /* prevent freeing below */
+  indexes = NULL;
+  floats = NULL;
+
+ out_ignore:
+  free(indexes);
+  free(floats);
+  return state->global->close_tag(state);
+
+ out_with_arrays:
+  free(indexes);
+  free(floats);
+ out:
   return -1;
 }
 
@@ -1091,66 +1324,6 @@ hwloc__xml_import_diff(hwloc__xml_import_state_t state,
  ********* main XML import *********
  ***********************************/
 
-static void
-hwloc_xml__free_distances(struct hwloc_xml_backend_data_s *data)
-{
-  struct hwloc_xml_imported_distances_s *xmldist;
-  while ((xmldist = data->first_distances) != NULL) {
-    data->first_distances = xmldist->next;
-    free(xmldist->distances.latency);
-    free(xmldist);
-  }
-}
-
-static int
-hwloc_xml__handle_distances(struct hwloc_topology *topology,
-			    struct hwloc_xml_backend_data_s *data,
-			    const char *msgprefix)
-{
-  struct hwloc_xml_imported_distances_s *xmldist;
-
-  /* connect things now because we need levels to check/build, they'll be reconnected properly later anyway */
-  hwloc_connect_children(topology->levels[0][0]);
-  if (hwloc_connect_levels(topology) < 0) {
-    hwloc_xml__free_distances(data);
-    return -1;
-  }
-
-  while ((xmldist = data->first_distances) != NULL) {
-    hwloc_obj_t root = xmldist->root;
-    unsigned depth = root->depth + xmldist->distances.relative_depth;
-    unsigned nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, depth);
-
-    data->first_distances = xmldist->next;
-
-    if (nbobjs != xmldist->distances.nbobjs) {
-      /* distances invalid, drop */
-      if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: ignoring invalid distance matrix with %u objs instead of %u\n",
-		msgprefix, xmldist->distances.nbobjs, nbobjs);
-      free(xmldist->distances.latency);
-    } else {
-      /* distances valid, add it to the internal OS distances list for grouping */
-      unsigned *indexes = malloc(nbobjs * sizeof(unsigned));
-      hwloc_obj_t child, *objs = malloc(nbobjs * sizeof(hwloc_obj_t));
-      unsigned j;
-      for(j=0, child = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, depth, NULL);
-	  j<nbobjs;
-	  j++, child = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, depth, child)) {
-	indexes[j] = child->os_index;
-	objs[j] = child;
-      }
-      for(j=0; j<nbobjs*nbobjs; j++)
-	xmldist->distances.latency[j] *= xmldist->distances.latency_base;
-      hwloc_distances_set(topology, objs[0]->type, nbobjs, indexes, objs, xmldist->distances.latency, 0 /* XML cannot force */);
-    }
-
-    free(xmldist);
-  }
-
-  return 0;
-}
-
 /* this canNOT be the first XML call */
 static int
 hwloc_look_xml(struct hwloc_backend *backend)
@@ -1170,8 +1343,9 @@ hwloc_look_xml(struct hwloc_backend *backend)
 
   hwloc_localeswitch_init();
 
-  data->first_distances = data->last_distances = NULL;
   data->nbnumanodes = 0;
+  data->first_numanode = data->last_numanode = NULL;
+  data->first_v1dist = data->last_v1dist = NULL;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -1189,6 +1363,21 @@ hwloc_look_xml(struct hwloc_backend *backend)
   state.global->close_child(&childstate);
   assert(!gotignored);
 
+  /* find v2 distances */
+  while (1) {
+    ret = state.global->find_child(&state, &childstate, &tag);
+    if (ret < 0)
+      goto failed;
+    if (!ret)
+      break;
+    if (strcmp(tag, "distances2"))
+      goto failed;
+    ret = hwloc__xml_import_v2distances(topology, &childstate);
+    if (ret < 0)
+      goto failed;
+    state.global->close_child(&childstate);
+  }
+
   /* find end of topology tag */
   state.global->close_tag(&state);
 
@@ -1196,6 +1385,38 @@ hwloc_look_xml(struct hwloc_backend *backend)
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid root object without cpuset\n");
     goto err;
+  }
+
+  /* handle v1 distances */
+  if (data->first_v1dist) {
+    struct hwloc__xml_imported_v1distances_s *v1dist, *v1next = data->first_v1dist;
+    while ((v1dist = v1next) != NULL) {
+      unsigned nbobjs = v1dist->nbobjs;
+      v1next = v1dist->next;
+      /* Handle distances as NUMA node distances if nbobjs matches.
+       * Otherwise drop, only NUMA distances really matter.
+       *
+       * We could also attach to a random level with the right nbobjs,
+       * but it would require to have those objects in the original XML order (like the first_numanode cousin-list).
+       * because the topology order can be different if some parents are ignored during load.
+       */
+      if (nbobjs == data->nbnumanodes) {
+	hwloc_obj_t *objs = malloc(nbobjs*sizeof(hwloc_obj_t));
+	if (objs) {
+	  unsigned i;
+	  hwloc_obj_t node;
+	  for(i=0, node = data->first_numanode;
+	      i<nbobjs;
+	      i++, node = node->next_cousin)
+	    objs[i] = node;
+	  hwloc_internal_distances_add(topology, nbobjs, objs, v1dist->values, v1dist->kind, 0);
+	  v1dist->values = NULL; /* to avoid free() below */
+	}
+      }
+      free(v1dist->values);
+      free(v1dist);
+    }
+    data->first_v1dist = data->last_v1dist = NULL;
   }
 
   /* FIXME:
@@ -1246,10 +1467,6 @@ hwloc_look_xml(struct hwloc_backend *backend)
   /* keep the "Backend" information intact */
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
-  /* if we added some distances, we must check them, and make them groupable */
-  if (hwloc_xml__handle_distances(topology, data, data->msgprefix) < 0)
-    goto err;
-  data->first_distances = data->last_distances = NULL;
   topology->support.discovery->pu = 1;
 
   hwloc_localeswitch_fini();
@@ -1262,8 +1479,6 @@ hwloc_look_xml(struct hwloc_backend *backend)
     fprintf(stderr, "%s: XML component discovery failed.\n",
 	    data->msgprefix);
  err:
-  hwloc_xml__free_distances(data);
-
   hwloc_free_object_siblings_and_children(root->first_child);
   root->first_child = NULL;
   hwloc_free_object_siblings_and_children(root->io_first_child);
@@ -1392,7 +1607,7 @@ hwloc__xml_export_safestrdup(const char *old)
   return new;
 }
 
-void
+static void
 hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj)
 {
   struct hwloc__xml_export_state_s state;
@@ -1547,6 +1762,8 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     free(value);
   }
 
+#if 0
+  // FIXME, if v1 and root, export distances that cover all children
   for(i=0; i<obj->distances_count; i++) {
     unsigned nbobjs = obj->distances[i]->nbobjs;
     unsigned j;
@@ -1567,6 +1784,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     }
     childstate.end_object(&childstate, "distances");
   }
+#endif
 
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) &state, topology, obj);
@@ -1579,6 +1797,60 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     hwloc__xml_export_object (&state, topology, child);
 
   state.end_object(&state, "object");
+}
+
+#define EXPORT_ARRAY(state, type, nr, values, tagname, format, maxperline) do { \
+  unsigned i = 0; \
+  while (i<(nr)) { \
+    char tmp[255]; /* enough for (snprintf(format)+space) x maxperline */ \
+    char tmp2[16]; \
+    size_t len = 0; \
+    unsigned j; \
+    struct hwloc__xml_export_state_s childstate; \
+    (state)->new_child(state, &childstate, tagname); \
+    for(j=0; \
+	i+j<(nr) && j<maxperline; \
+	j++) \
+      len += sprintf(tmp+len, format " ", (type) (values)[i+j]); \
+    i += j; \
+    sprintf(tmp2, "%lu", (unsigned long) len); \
+    childstate.new_prop(&childstate, "length", tmp2); \
+    childstate.add_content(&childstate, tmp, len); \
+    childstate.end_object(&childstate, tagname); \
+  } \
+} while (0)
+
+static void
+hwloc__xml_export_v2distances(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology)
+{
+  struct hwloc_internal_distances_s *dist;
+  for(dist = topology->first_dist; dist; dist = dist->next) {
+    char tmp[255];
+    unsigned nbobjs = dist->nbobjs;
+    struct hwloc__xml_export_state_s state;
+
+    parentstate->new_child(parentstate, &state, "distances2");
+
+    state.new_prop(&state, "type", hwloc_type_name(dist->type));
+    sprintf(tmp, "%u", nbobjs);
+    state.new_prop(&state, "nbobjs", tmp);
+    sprintf(tmp, "%lu", dist->kind);
+    state.new_prop(&state, "kind", tmp);
+
+    state.new_prop(&state, "indexing",
+		   (dist->type == HWLOC_OBJ_NUMANODE || dist->type == HWLOC_OBJ_PU) ? "os" : "gp");
+    /* TODO don't hardwire 10 below. either snprintf the max to guess it, or just append until the end of the buffer */
+    EXPORT_ARRAY(&state, unsigned long long, nbobjs, dist->indexes, "indexes", "%llu", 10);
+    EXPORT_ARRAY(&state, float, nbobjs*nbobjs, dist->values, "floats", "%f", 16);
+    state.end_object(&state, "distances2");
+  }
+}
+
+void
+hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology)
+{
+  hwloc__xml_export_object (state, topology, hwloc_get_root_obj(topology));
+  hwloc__xml_export_v2distances (state, topology);
 }
 
 void

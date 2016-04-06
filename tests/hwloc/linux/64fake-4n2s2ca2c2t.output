@@ -204,4 +204,10 @@ depth 0:	1 Machine (type #1)
       depth 6:	32 L1iCache (type #11)
        depth 7:	32 Core (type #4)
         depth 8:	64 PU (type #5)
+Relative latency matrix between 4 NUMANodes (depth 1) by logical indexes:
+  index     0     1     2     3
+      0 0.000 0.000 0.000 0.000
+      1 0.000 0.000 0.000 0.000
+      2 0.000 0.000 0.000 0.000
+      3 0.000 0.000 0.000 0.000
 Topology not from this system

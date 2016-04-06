@@ -1,4 +1,4 @@
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -146,9 +146,6 @@ sysfs_options = \
 # modifying the environment of lstopo
 sysfs_envs = \
 		2i386-2t-hugepagesizecount.xml.env \
-		16amd64-8n2c-cpusets.xml.env \
-		32amd64-4s2n4c-cgroup.env \
-		32amd64-4s2n4c-cgroup.xml.env \
 		40intel64-2g2n4c+pci.env \
 		40intel64-4n10c+pci-conflicts.env \
 		96em64t-4n4d3ca2co-forcecpuinfo.env
