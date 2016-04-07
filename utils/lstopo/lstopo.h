@@ -49,6 +49,7 @@ struct lstopo_output {
   unsigned legend_append_nr;
 
   /* text config */
+  int show_distances_only;
   hwloc_obj_type_t show_only;
   int show_cpuset;
   int show_taskset;

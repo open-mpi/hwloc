@@ -242,6 +242,11 @@ void output_console(struct lstopo_output *loutput, const char *filename)
   }
   loutput->file = output;
 
+  if (loutput->show_distances_only) {
+    output_distances(loutput);
+    return;
+  }
+
   /*
    * if verbose_mode == 0, only print the summary.
    * if verbose_mode == 1, only print the topology tree.
