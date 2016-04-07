@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2015 Inria.  All rights reserved.
+# Copyright © 2012-2016 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -23,6 +23,15 @@ tar xfz $tarball
 rm $tarball
 cd $basename
 
+# make the script work on old branches so that we can use the same script
+# from upstream git master for testing v1.11-* and master-* branches
+WRAPPER=tests/hwloc/wrapper.sh
+RENAMEDIR=tests/hwloc/rename
+if test -f tests/hwloc/wrapper.sh; then
+  WRAPPER=tests/wrapper.sh
+  RENAMEDIR=tests/rename
+fi
+
 # ignore clock problems
 touch configure
 
@@ -41,11 +50,11 @@ cd build-plugins
 ../configure --enable-plugins
 make
 make check
-tests/hwloc/wrapper.sh utils/lstopo/lstopo-no-graphics -v
+$WRAPPER utils/lstopo/lstopo-no-graphics -v
 cd ..
 
 # check renaming
-(cd build/tests/hwloc/rename && make check)
+(cd build/$RENAMEDIR && make check)
 
 # cleanup
 rm -rf doc build/doc build-plugins/doc
