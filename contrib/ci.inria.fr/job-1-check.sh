@@ -27,7 +27,7 @@ cd $basename
 # from upstream git master for testing v1.11-* and master-* branches
 WRAPPER=tests/hwloc/wrapper.sh
 RENAMEDIR=tests/hwloc/rename
-if test -f tests/wrapper.sh; then
+if test -f tests/wrapper.sh.in; then
   WRAPPER=tests/wrapper.sh
   RENAMEDIR=tests/rename
 fi
