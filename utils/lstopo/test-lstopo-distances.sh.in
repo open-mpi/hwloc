@@ -9,7 +9,7 @@
 
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
-srcdir="$HWLOC_top_srcdir/utils/hwloc"
+srcdir="$HWLOC_top_srcdir/utils/lstopo"
 builddir="$HWLOC_top_builddir/utils/lstopo"
 distances="$builddir/lstopo-no-graphics --distances"
 
@@ -34,7 +34,7 @@ export LANG LC_ALL
   tmp=$TMPDIR/foo$$-$RANDOM
   (umask 077 && mkdir "$tmp")
 } || exit $?
-file="$tmp/test-hwloc-distances.output"
+file="$tmp/test-lstopo-distances.output"
 
 set -e
 (
@@ -68,5 +68,5 @@ set -e
   HWLOC_NUMANode_DISTANCES=none
   echo
 ) > "$file"
-diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-distances.output "$file"
+diff @HWLOC_DIFF_U@ $srcdir/test-lstopo-distances.output "$file"
 rm -rf "$tmp"

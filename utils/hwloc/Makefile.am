@@ -17,7 +17,6 @@ EXTRA_DIST = \
         test-hwloc-calc.output \
         test-hwloc-compress-dir.input.tar.gz test-hwloc-compress-dir.output.tar.gz \
         test-hwloc-diffpatch.input1 test-hwloc-diffpatch.input2 \
-        test-hwloc-distances.output \
         test-hwloc-distrib.output \
         test-hwloc-info.output
 
@@ -63,7 +62,6 @@ TESTS = \
         test-hwloc-calc.sh \
         test-hwloc-compress-dir.sh \
         test-hwloc-diffpatch.sh \
-        test-hwloc-distances.sh \
         test-hwloc-distrib.sh \
         test-hwloc-info.sh
 if HWLOC_HAVE_PLUGINS

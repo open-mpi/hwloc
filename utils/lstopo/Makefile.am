@@ -1,4 +1,4 @@
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009-2012, 2014 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -17,7 +17,8 @@ bin_PROGRAMS = \
         lstopo-no-graphics
 
 EXTRA_DIST = \
-        test-hwloc-ls.output
+        test-lstopo.output \
+        test-lstopo-distances.output
 
 lstopo_no_graphics_SOURCES = \
         lstopo.h \
@@ -57,7 +58,8 @@ nodist_man_MANS = $(man1_pages)
 
 if !HWLOC_HAVE_MINGW32
 TESTS = \
-        test-hwloc-ls.sh
+        test-lstopo.sh \
+        test-lstopo-distances.sh
 endif !HWLOC_HAVE_MINGW32
 
 if HWLOC_HAVE_CAIRO
