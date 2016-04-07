@@ -28,11 +28,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-diff", "hwloc-diff.vc
 		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-distances", "hwloc-distances.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB94}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-distrib", "hwloc-distrib.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB95}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}

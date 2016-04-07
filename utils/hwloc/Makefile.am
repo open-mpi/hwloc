@@ -28,7 +28,6 @@ bin_PROGRAMS = \
         hwloc-bind \
         hwloc-calc \
         hwloc-diff \
-        hwloc-distances \
         hwloc-distrib \
         hwloc-info \
         hwloc-patch \
@@ -83,7 +82,6 @@ man1_pages = \
         hwloc-calc.1 \
         hwloc-compress-dir.1 \
         hwloc-diff.1 \
-        hwloc-distances.1 \
         hwloc-distrib.1 \
         hwloc-info.1 \
         hwloc-patch.1 \

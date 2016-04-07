@@ -163,8 +163,6 @@ test-suite.log
 /utils/hwloc/hwloc-compress-dir.1
 /utils/hwloc/hwloc-diff
 /utils/hwloc/hwloc-diff.1
-/utils/hwloc/hwloc-distances
-/utils/hwloc/hwloc-distances.1
 /utils/hwloc/hwloc-distrib
 /utils/hwloc/hwloc-distrib.1
 /utils/hwloc/hwloc-dump-hwdata

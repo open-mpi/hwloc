@@ -744,16 +744,6 @@ lists processes that are bound; unbound process (and Linux kernel
 threads) are not displayed.
 
 
-\section cli_hwloc_distances hwloc-distances
-
-hwloc-distances displays all distance matrices attached to
-the topology. Note that lstopo may also display distance
-matrices in its verbose textual output. However lstopo only
-prints matrices that cover the entire topology while
-hwloc-distances also displays matrices that ignore part
-of the topology.
-
-
 \section cli_hwloc_annotate hwloc-annotate
 
 hwloc-annotate may add object attributes such as string information

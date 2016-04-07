@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2012-2014 Inria.  All rights reserved.
+# Copyright © 2012-2016 Inria.  All rights reserved.
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -10,8 +10,8 @@
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 srcdir="$HWLOC_top_srcdir/utils/hwloc"
-builddir="$HWLOC_top_builddir/utils/hwloc"
-distances="$builddir/hwloc-distances"
+builddir="$HWLOC_top_builddir/utils/lstopo"
+distances="$builddir/lstopo-no-graphics --distances"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
 export HWLOC_PLUGINS_PATH
