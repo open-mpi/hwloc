@@ -59,7 +59,7 @@ depth 0:	1 Machine (type #1)
         depth 8:	6 L1iCache (type #11)
          depth 9:	6 Core (type #4)
           depth 10:	6 PU (type #5)
-relative latency matrix between NUMANodes (depth 3) by logical indexes:
+Relative latency matrix between 8 NUMANodes (depth 3) by logical indexes (below Machine L#0):
   index     0     1     2     3     4     5     6     7
       0 1.000 2.000 4.000 4.000 8.000 8.000 8.000 8.000
       1 2.000 1.000 4.000 4.000 8.000 8.000 8.000 8.000
@@ -69,5 +69,13 @@ relative latency matrix between NUMANodes (depth 3) by logical indexes:
       5 8.000 8.000 8.000 8.000 2.000 1.000 4.000 4.000
       6 8.000 8.000 8.000 8.000 4.000 4.000 1.000 2.000
       7 8.000 8.000 8.000 8.000 4.000 4.000 2.000 1.000
+Relative latency matrix between 6 PUs (depth 10) by logical indexes (below Package L#0):
+  index     0     1     2     3     4     5
+      0 1.000 4.000 8.000 8.000 8.000 8.000
+      1 4.000 1.000 8.000 8.000 8.000 8.000
+      2 8.000 8.000 1.000 4.000 8.000 8.000
+      3 8.000 8.000 4.000 1.000 8.000 8.000
+      4 8.000 8.000 8.000 8.000 1.000 4.000
+      5 8.000 8.000 8.000 8.000 4.000 1.000
 26 processors not represented in topology: 0xffffffc0
 Topology not from this system

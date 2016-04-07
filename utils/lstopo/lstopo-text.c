@@ -194,10 +194,43 @@ output_only (struct lstopo_output *loutput, hwloc_obj_t l)
   }
 }
 
+static void output_distances(struct lstopo_output *loutput)
+{
+  hwloc_topology_t topology = loutput->topology;
+  int logical = loutput->logical;
+  FILE *output = loutput->file;
+  unsigned topodepth = hwloc_topology_get_depth(topology);
+  unsigned depth;
+
+  for (depth = 0; depth < topodepth; depth++) {
+    unsigned nr, i;
+    nr = hwloc_get_nbobjs_by_depth(topology, depth);
+    for (i = 0; i < nr; i++) {
+      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+      unsigned j;
+      for (j = 0; j < obj->distances_count; j++) {
+	const struct hwloc_distances_s * distances = obj->distances[j];
+	char typestring[32];
+	if (!distances || !distances->latency)
+	  continue;
+	hwloc_obj_type_snprintf (typestring, sizeof(typestring), obj, 1);
+	fprintf(output, "Relative latency matrix between %u %ss (depth %u) by %s indexes (below %s%s%u):\n",
+		distances->nbobjs,
+		hwloc_type_name(hwloc_get_depth_type(topology, obj->depth + distances->relative_depth)),
+		obj->depth + distances->relative_depth,
+		logical ? "logical" : "physical",
+		typestring,
+		logical ? " L#" :  " P#",
+		logical ? obj->logical_index : obj->os_index);
+	hwloc_utils_print_distance_matrix(output, topology, obj, distances->nbobjs, distances->relative_depth, distances->latency, logical);
+      }
+    }
+  }
+}
+
 void output_console(struct lstopo_output *loutput, const char *filename)
 {
   hwloc_topology_t topology = loutput->topology;
-  unsigned topodepth;
   int verbose_mode = loutput->verbose_mode;
   int logical = loutput->logical;
   FILE *output;
@@ -208,8 +241,6 @@ void output_console(struct lstopo_output *loutput, const char *filename)
     return;
   }
   loutput->file = output;
-
-  topodepth = hwloc_topology_get_depth(topology);
 
   /*
    * if verbose_mode == 0, only print the summary.
@@ -228,22 +259,10 @@ void output_console(struct lstopo_output *loutput, const char *filename)
 
   if ((verbose_mode > 1 || !verbose_mode) && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {
     hwloc_lstopo_show_summary(output, topology);
- }
+  }
 
   if (verbose_mode > 1 && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {
-    const struct hwloc_distances_s * distances;
-    unsigned depth;
-
-    for (depth = 0; depth < topodepth; depth++) {
-      distances = hwloc_get_whole_distance_matrix_by_depth(topology, depth);
-      if (!distances || !distances->latency)
-        continue;
-      fprintf(output, "relative latency matrix between %ss (depth %u) by %s indexes:\n",
-	      hwloc_type_name(hwloc_get_depth_type(topology, depth)),
-	      depth,
-	      logical ? "logical" : "physical");
-      hwloc_utils_print_distance_matrix(output, topology, hwloc_get_root_obj(topology), distances->nbobjs, depth, distances->latency, logical);
-    }
+    output_distances(loutput);
   }
 
   if (verbose_mode > 1 && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {

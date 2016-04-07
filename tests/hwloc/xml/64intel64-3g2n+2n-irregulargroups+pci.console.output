@@ -384,7 +384,7 @@ depth 0:	1 Machine (type #1)
 Special depth -3:	14 Bridge (type #16)
 Special depth -4:	8 PCI Device (type #17)
 Special depth -5:	3 OS Device (type #18)
-relative latency matrix between NUMANodes (depth 2) by logical indexes:
+Relative latency matrix between 8 NUMANodes (depth 2) by logical indexes (below Machine L#0):
   index     0     1     2     3     4     5     6     7
       0 1.000 5.000 6.500 6.500 6.500 6.500 6.500 6.500
       1 5.000 1.000 6.500 6.500 6.500 6.500 6.500 6.500
