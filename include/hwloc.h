@@ -1096,6 +1096,8 @@ struct hwloc_topology_support {
  * If set to 0, the feature is not supported.
  * If set to 1, the feature is supported, but the corresponding
  * call may still fail in some corner cases.
+ *
+ * These features are also listed by hwloc-info \--support
  */
 HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
 

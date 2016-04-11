@@ -33,6 +33,9 @@ void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] [ locations ]\n", name);
   fprintf (where, "\nOutput options:\n");
+  fprintf (where, "  --objects             Report information about specific objects\n");
+  fprintf (where, "  --topology            Report information the topology\n");
+  fprintf (where, "  --support             Report information about supported features\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  --ancestors           Display the chain of ancestor objects up to the root\n");
@@ -265,6 +268,7 @@ main (int argc, char *argv[])
   char *restrictstring = NULL;
   size_t typelen;
   int opt;
+  enum hwloc_info_mode { HWLOC_INFO_MODE_UNKNOWN, HWLOC_INFO_MODE_TOPOLOGY, HWLOC_INFO_MODE_OBJECTS, HWLOC_INFO_MODE_SUPPORT } mode = HWLOC_INFO_MODE_UNKNOWN;
 
   /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
@@ -288,7 +292,13 @@ main (int argc, char *argv[])
   while (argc >= 1) {
     opt = 0;
     if (*argv[0] == '-') {
-      if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose"))
+      if (!strcmp (argv[0], "--objects"))
+	mode = HWLOC_INFO_MODE_OBJECTS;
+      else if (!strcmp (argv[0], "--topology"))
+	mode = HWLOC_INFO_MODE_TOPOLOGY;
+      else if (!strcmp (argv[0], "--support"))
+	mode = HWLOC_INFO_MODE_SUPPORT;
+      else if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose"))
         verbose_mode++;
       else if (!strcmp (argv[0], "-s") || !strcmp (argv[0], "--silent"))
         verbose_mode--;
@@ -408,10 +418,50 @@ main (int argc, char *argv[])
     free(restrictstring);
   }
 
-  if (!argc)
+  if (mode == HWLOC_INFO_MODE_UNKNOWN) {
+    if (argc)
+      mode = HWLOC_INFO_MODE_OBJECTS;
+    else
+      mode = HWLOC_INFO_MODE_TOPOLOGY;
+  }
+
+  if (mode == HWLOC_INFO_MODE_TOPOLOGY) {
     hwloc_lstopo_show_summary(stdout, topology);
 
-  else {
+  } else if (mode == HWLOC_INFO_MODE_SUPPORT) {
+    const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
+#define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
+    DO(discovery, pu);
+
+    DO(cpubind, set_thisproc_cpubind);
+    DO(cpubind, get_thisproc_cpubind);
+    DO(cpubind, set_proc_cpubind);
+    DO(cpubind, get_proc_cpubind);
+    DO(cpubind, set_thisthread_cpubind);
+    DO(cpubind, get_thisthread_cpubind);
+    DO(cpubind, set_thread_cpubind);
+    DO(cpubind, get_thread_cpubind);
+    DO(cpubind, get_thisproc_last_cpu_location);
+    DO(cpubind, get_proc_last_cpu_location);
+    DO(cpubind, get_thisthread_cpubind);
+
+    DO(membind, set_thisproc_membind);
+    DO(membind, get_thisproc_membind);
+    DO(membind, set_proc_membind);
+    DO(membind, get_proc_membind);
+    DO(membind, set_thisthread_membind);
+    DO(membind, get_thisthread_membind);
+    DO(membind, set_area_membind);
+    DO(membind, get_area_membind);
+    DO(membind, firsttouch_membind);
+    DO(membind, bind_membind);
+    DO(membind, interleave_membind);
+    DO(membind, nexttouch_membind);
+    DO(membind, migrate_membind);
+    DO(membind, firsttouch_membind);
+    DO(membind, get_area_memlocation);
+
+  } else if (mode == HWLOC_INFO_MODE_OBJECTS) {
     current_obj = 0;
     while (argc >= 1) {
       if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
@@ -427,7 +477,8 @@ main (int argc, char *argv[])
       }
       argc--; argv++;
     }
-  }
+
+  } else assert(0);
 
   hwloc_topology_destroy (topology);
 

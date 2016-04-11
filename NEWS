@@ -43,6 +43,10 @@ Version 1.11.3
   by hwloc_obj_type_snprintf().
 * Do not filter-out FibreChannel PCI adapters by default anymore.
   Thanks to Matt Muggeridge for the report.
+* Add --support to hwloc-info to list supported features, just like with
+  hwloc_topology_get_support().
+  + Also add --objects and --topology to explicitly switch between the
+    default modes.
 * Add --tid to let hwloc-bind operate on individual threads on Linux.
 * Add --nodeset to let hwloc-bind report memory binding as NUMA node sets.
 * Fix the return value of command-line tools in some error cases.
