@@ -724,7 +724,10 @@ See also \ref faq_indexes.
 hwloc-info dumps information about the given objects, as well as all its specific attributes.
 It is intended to be used with tools such as grep for filtering
 certain attribute lines.
-When no object is specified, hwloc-info prints a summary of the topology.
+When no object is specified, or when <tt>\--topology</tt> is passed,
+hwloc-info prints a summary of the topology.
+When <tt>\--support</tt> is passed, hwloc-info lists the supported
+features for the topology.
 
 
 \section cli_hwloc_distrib hwloc-distrib
