@@ -91,17 +91,6 @@ man1_pages = \
         hwloc-distrib.1 \
         hwloc-info.1 \
         hwloc-patch.1
-
-if !HWLOC_HAVE_WINDOWS
-man1_pages += hwloc-ps.1
-endif
-
-if HWLOC_HAVE_LINUX
-if HWLOC_HAVE_X86
-man1_pages += hwloc-dump-hwdata.1in
-endif HWLOC_HAVE_X86
-endif HWLOC_HAVE_LINUX
-
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 
@@ -113,6 +102,13 @@ EXTRA_DIST += $(hgt_page:.1=.1in)
 if HWLOC_HAVE_LINUX
 nodist_man_MANS += $(hgt_page)
 endif HWLOC_HAVE_LINUX
+
+# Same for hwloc-ps on !Windows
+hps_page = hwloc-ps.1
+EXTRA_DIST += $(hps_page:.1=.1in)
+if !HWLOC_HAVE_WINDOWS
+nodist_man_MANS += $(hps_page)
+endif
 
 # Same for dump-hwdata page on Linux/x86
 hdh_page = hwloc-dump-hwdata.1
