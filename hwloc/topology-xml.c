@@ -775,6 +775,10 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     goto error_with_object;
   }
 
+  /* fixup Misc objects inserted by cpusets in pre-v2.0 XMLs */
+  if (obj->type == HWLOC_OBJ_MISC && obj->cpuset)
+    obj->type = HWLOC_OBJ_GROUP;
+
   if (obj->cpuset && parent && !parent->cpuset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with cpuset while parent has none\n",
