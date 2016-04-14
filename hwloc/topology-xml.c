@@ -779,6 +779,21 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (obj->type == HWLOC_OBJ_MISC && obj->cpuset)
     obj->type = HWLOC_OBJ_GROUP;
 
+  /* check special types vs cpuset */
+  if (!obj->cpuset && !hwloc_obj_type_is_special(obj->type)) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "invalid normal object %s P#%u without cpuset\n",
+	      hwloc_type_name(obj->type), obj->os_index);
+    goto error_with_object;
+  }
+  if (obj->cpuset && hwloc_obj_type_is_special(obj->type)) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "invalid special object %s with cpuset\n",
+	      hwloc_type_name(obj->type));
+    goto error_with_object;
+  }
+
+  /* check parent vs child sets */
   if (obj->cpuset && parent && !parent->cpuset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with cpuset while parent has none\n",
@@ -788,15 +803,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (obj->nodeset && parent && !parent->nodeset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "invalid object %s P#%u with nodeset while parent has none\n",
-	      hwloc_type_name(obj->type), obj->os_index);
-    goto error_with_object;
-  }
-
-  if (!obj->cpuset
-      && obj->type != HWLOC_OBJ_BRIDGE && obj->type != HWLOC_OBJ_PCI_DEVICE
-      && obj->type != HWLOC_OBJ_OS_DEVICE && obj->type != HWLOC_OBJ_MISC) {
-    if (hwloc__xml_verbose())
-      fprintf(stderr, "invalid non-I/O object %s P#%u without cpuset\n",
 	      hwloc_type_name(obj->type), obj->os_index);
     goto error_with_object;
   }
