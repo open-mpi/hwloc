@@ -732,7 +732,7 @@ static int hwloc__object_cpusets_intersect(hwloc_obj_t obj1, hwloc_obj_t obj2)
 static int
 hwloc__xml_import_object(hwloc_topology_t topology,
 			 struct hwloc_xml_backend_data_s *data,
-			 hwloc_obj_t parent, hwloc_obj_t obj,
+			 hwloc_obj_t parent, hwloc_obj_t obj, int outoforderallowed,
 			 hwloc__xml_import_state_t state)
 {
   int ignored = 0;
@@ -826,11 +826,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     hwloc_obj_t *current;
     for (current = &parent->first_child; *current; current = &(*current)->next_sibling) {
       if (obj->cpuset && (!(*current)->cpuset || hwloc__object_cpusets_compare_first(obj, *current) < 0)) {
-	static int reported = 0;
 	outoforder = 1;
-	if (!reported && !hwloc_hide_errors()) {
-	  hwloc__xml_import_report_outoforder(topology, obj, *current);
-	  reported = 1;
+	if (!outoforderallowed) {
+	  static int reported = 0;
+	  if (!reported && !hwloc_hide_errors()) {
+	    hwloc__xml_import_report_outoforder(topology, obj, *current);
+	    reported = 1;
+	  }
 	}
       }
       if (obj->cpuset && (!(*current)->cpuset || hwloc__object_cpusets_intersect(obj, *current))) {
@@ -863,7 +865,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     if (!strcmp(tag, "object")) {
       hwloc_obj_t childobj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
-      ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj, &childstate);
+      ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj,
+				     ignored /* children of ignored object may be out-of-order */,
+				     &childstate);
     } else if (!strcmp(tag, "page_type")) {
       ret = hwloc__xml_import_pagetype(topology, obj, &childstate);
     } else if (!strcmp(tag, "info")) {
@@ -1131,7 +1135,9 @@ hwloc_look_xml(struct hwloc_backend *backend)
   ret = state.global->find_child(&state, &childstate, &tag);
   if (ret < 0 || !ret || strcmp(tag, "object"))
     goto failed;
-  ret = hwloc__xml_import_object(topology, data, NULL /*  no parent */, root, &childstate);
+  ret = hwloc__xml_import_object(topology, data, NULL /*  no parent */, root,
+				 0 /* root cannot be ignored here, children won't be out-of-order */,
+				 &childstate);
   if (ret < 0)
     goto failed;
   state.global->close_child(&childstate);
