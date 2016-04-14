@@ -732,11 +732,12 @@ static int hwloc__object_cpusets_intersect(hwloc_obj_t obj1, hwloc_obj_t obj2)
 static int
 hwloc__xml_import_object(hwloc_topology_t topology,
 			 struct hwloc_xml_backend_data_s *data,
-			 hwloc_obj_t parent, hwloc_obj_t obj, int outoforderallowed,
+			 hwloc_obj_t parent, hwloc_obj_t obj, int outoforderallowed, int *parentneedreorderchildren,
 			 hwloc__xml_import_state_t state)
 {
   int ignored = 0;
   int attribute_less_cache = 0;
+  int needreorderchildren = 0;
 
   /* process attributes */
   while (1) {
@@ -822,11 +823,10 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* warn if inserting out-of-order or if children intersects,
      * so that the core doesn't have to deal with crappy children list.
      */
-    int outoforder = 0;
     hwloc_obj_t *current;
     for (current = &parent->first_child; *current; current = &(*current)->next_sibling) {
       if (obj->cpuset && (!(*current)->cpuset || hwloc__object_cpusets_compare_first(obj, *current) < 0)) {
-	outoforder = 1;
+	*parentneedreorderchildren = 1;
 	if (!outoforderallowed) {
 	  static int reported = 0;
 	  if (!reported && !hwloc_hide_errors()) {
@@ -847,8 +847,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     hwloc_insert_object_by_parent(topology, parent, obj);
     /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
-    if (outoforder)
-      hwloc__reorder_children(parent);
   }
 
   /* process subnodes */
@@ -867,6 +865,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       hwloc_obj_t childobj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
       ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj,
 				     ignored /* children of ignored object may be out-of-order */,
+				     ignored ? parentneedreorderchildren : &needreorderchildren,
 				     &childstate);
     } else if (!strcmp(tag, "page_type")) {
       ret = hwloc__xml_import_pagetype(topology, obj, &childstate);
@@ -887,6 +886,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   if (ignored)
     hwloc_free_unlinked_object(obj);
+  else if (needreorderchildren)
+    hwloc__reorder_children(obj);
 
   return state->global->close_tag(state);
 
@@ -1115,6 +1116,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
   struct hwloc__xml_import_state_s state, childstate;
   struct hwloc_obj *root = topology->levels[0][0];
   char *tag;
+  int needreorderchildren = 0;
   hwloc_localeswitch_declare;
   int ret;
 
@@ -1137,6 +1139,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
     goto failed;
   ret = hwloc__xml_import_object(topology, data, NULL /*  no parent */, root,
 				 0 /* root cannot be ignored here, children won't be out-of-order */,
+				 &needreorderchildren,
 				 &childstate);
   if (ret < 0)
     goto failed;
@@ -1150,6 +1153,9 @@ hwloc_look_xml(struct hwloc_backend *backend)
       fprintf(stderr, "invalid root object without cpuset\n");
     goto err;
   }
+
+  if (needreorderchildren)
+    hwloc__reorder_children(root);
 
   if (!data->nbnumanodes) {
     /* before 2.0, XML could have no NUMA node objects and no nodesets */
