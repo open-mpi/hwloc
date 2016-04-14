@@ -806,8 +806,15 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     data->nbnumanodes++;
   }
 
-  if (!hwloc_filter_check_keep_object(topology, obj))
-    ignored = 1;
+  if (!hwloc_filter_check_keep_object(topology, obj)) {
+    /* Ignore this object instead of inserting it.
+     *
+     * Well, let the core ignore the root object later
+     * because we don't know yet if root has more than one child.
+     */
+    if (parent)
+      ignored = 1;
+  }
 
   if (parent && !ignored) {
     /* root->parent is NULL, and root is already inserted */
