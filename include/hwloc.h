@@ -440,10 +440,10 @@ struct hwloc_obj {
 
   hwloc_nodeset_t nodeset;              /**< \brief NUMA nodes covered by this object or containing this object
                                           *
-                                          * This is the set of NUMA nodes for which there are NODE objects in the
+                                          * This is the set of NUMA nodes for which there are NUMA node objects in the
                                           * topology under or above this object, i.e. which are known to be physically
                                           * contained in this object or containing it and known how (the children path
-                                          * between this object and the NODE objects).
+                                          * between this object and the NUMA node objects).
                                           *
                                           * In the end, these nodes are those that are close to the current object.
                                           *
@@ -460,7 +460,7 @@ struct hwloc_obj {
                                           * This includes not only the same as the nodeset field, but also the NUMA
                                           * nodes for which topology information is unknown or incomplete, and the nodes
                                           * that are ignored when the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
-                                          * Thus no corresponding NODE object may be found in the topology, because the
+                                          * Thus no corresponding NUMA node object may be found in the topology, because the
                                           * precise position is undefined. It is however known that it would be
                                           * somewhere under this object.
                                           *
