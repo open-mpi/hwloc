@@ -67,7 +67,7 @@ Version 1.11.3
   + Add HWLOC_PLUGINS_BLACKLIST environment variable to prevent some plugins
     from being loaded. Thanks to Alexandre Denis for the suggestion.
   + Small improvements for various Windows build systems,
-    thanks to Jonathan L Peyton.
+    thanks to Jonathan L Peyton and Marco Atzeri.
 
 
 Version 1.11.2

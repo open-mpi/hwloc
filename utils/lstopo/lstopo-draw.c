@@ -1239,7 +1239,7 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
       /* Display the hostname, but only if we're showing *this*
          system */
     if (hwloc_topology_is_thissystem(topology)) {
-#ifdef HWLOC_WIN_SYS
+#if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
       GetComputerName(hostname, &hostname_size);
 #else
       gethostname(hostname, hostname_size);
