@@ -1588,7 +1588,7 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
       if (obj->allowed_cpuset)
         hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, obj->complete_cpuset);
       else
-        obj->allowed_cpuset = hwloc_bitmap_dup(obj->complete_cpuset);
+        obj->allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
     }
   }
 
@@ -1644,7 +1644,7 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
     if (!obj->complete_nodeset)
       obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
     if (!obj->allowed_nodeset)
-      obj->allowed_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
+      obj->allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
   }
 
   if (sys) {
@@ -1727,7 +1727,7 @@ propagate_nodesets(hwloc_obj_t obj)
     if (obj->allowed_nodeset)
       hwloc_bitmap_and(obj->allowed_nodeset, obj->allowed_nodeset, obj->complete_nodeset);
     else
-      obj->allowed_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
+      obj->allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
   }
 }
 
