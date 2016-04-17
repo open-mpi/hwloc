@@ -732,12 +732,12 @@ static int hwloc__object_cpusets_intersect(hwloc_obj_t obj1, hwloc_obj_t obj2)
 static int
 hwloc__xml_import_object(hwloc_topology_t topology,
 			 struct hwloc_xml_backend_data_s *data,
-			 hwloc_obj_t parent, hwloc_obj_t obj, int outoforderallowed, int *parentneedreorderchildren,
+			 hwloc_obj_t parent, hwloc_obj_t obj, int *gotignored,
 			 hwloc__xml_import_state_t state)
 {
   int ignored = 0;
+  int childrengotignored = 0;
   int attribute_less_cache = 0;
-  int needreorderchildren = 0;
 
   /* process attributes */
   while (1) {
@@ -848,21 +848,11 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (parent && !ignored) {
     /* root->parent is NULL, and root is already inserted */
 
-    /* warn if inserting out-of-order or if children intersects,
+    /* warn if children intersects,
      * so that the core doesn't have to deal with crappy children list.
      */
     hwloc_obj_t *current;
     for (current = &parent->first_child; *current; current = &(*current)->next_sibling) {
-      if (obj->cpuset && (!(*current)->cpuset || hwloc__object_cpusets_compare_first(obj, *current) < 0)) {
-	*parentneedreorderchildren = 1;
-	if (!outoforderallowed) {
-	  static int reported = 0;
-	  if (!reported && !hwloc_hide_errors()) {
-	    hwloc__xml_import_report_outoforder(topology, obj, *current);
-	    reported = 1;
-	  }
-	}
-      }
       if (obj->cpuset && (!(*current)->cpuset || hwloc__object_cpusets_intersect(obj, *current))) {
 	if (hwloc__xml_verbose()) {
 	  fprintf(stderr, "intersecting children %s P#%u and %s P#%u\n",
@@ -892,8 +882,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     if (!strcmp(tag, "object")) {
       hwloc_obj_t childobj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
       ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj,
-				     ignored /* children of ignored object may be out-of-order */,
-				     ignored ? parentneedreorderchildren : &needreorderchildren,
+				     &childrengotignored,
 				     &childstate);
     } else if (!strcmp(tag, "page_type")) {
       ret = hwloc__xml_import_pagetype(topology, obj, &childstate);
@@ -912,10 +901,38 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     state->global->close_child(&childstate);
   }
 
-  if (ignored)
+  if (ignored) {
+    /* drop that object, and tell the parent that one child got ignored */
     hwloc_free_unlinked_object(obj);
-  else if (needreorderchildren)
-    hwloc__reorder_children(obj);
+    *gotignored = 1;
+
+  } else if (obj->first_child) {
+    /* now that all children are inserted, make sure they are in-order,
+     * so that the core doesn't have to deal with crappy children list.
+     */
+    hwloc_obj_t cur, next;
+    for(cur = obj->first_child, next = cur->next_sibling;
+	next;
+	cur = next, next = next->next_sibling) {
+      /* If reordering is needed, at least one pair of consecutive children will be out-of-order.
+       * So just check pairs of consecutive children.
+       *
+       * We checked above that complete_cpuset is always set.
+       */
+      if (hwloc_bitmap_compare_first(next->complete_cpuset, cur->complete_cpuset) < 0) {
+	/* next should be before cur */
+	if (!childrengotignored || 1) {
+	  static int reported = 0;
+	  if (!reported && !hwloc_hide_errors()) {
+	    hwloc__xml_import_report_outoforder(topology, next, cur);
+	    reported = 1;
+	  }
+	}
+	hwloc__reorder_children(obj);
+	break;
+      }
+    }
+  }
 
   return state->global->close_tag(state);
 
@@ -1144,7 +1161,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
   struct hwloc__xml_import_state_s state, childstate;
   struct hwloc_obj *root = topology->levels[0][0];
   char *tag;
-  int needreorderchildren = 0;
+  int gotignored = 0;
   hwloc_localeswitch_declare;
   int ret;
 
@@ -1166,12 +1183,12 @@ hwloc_look_xml(struct hwloc_backend *backend)
   if (ret < 0 || !ret || strcmp(tag, "object"))
     goto failed;
   ret = hwloc__xml_import_object(topology, data, NULL /*  no parent */, root,
-				 0 /* root cannot be ignored here, children won't be out-of-order */,
-				 &needreorderchildren,
+				 &gotignored,
 				 &childstate);
   if (ret < 0)
     goto failed;
   state.global->close_child(&childstate);
+  assert(!gotignored);
 
   /* find end of topology tag */
   state.global->close_tag(&state);
@@ -1181,9 +1198,6 @@ hwloc_look_xml(struct hwloc_backend *backend)
       fprintf(stderr, "invalid root object without cpuset\n");
     goto err;
   }
-
-  if (needreorderchildren)
-    hwloc__reorder_children(root);
 
   if (!data->nbnumanodes) {
     /* before 2.0, XML could have no NUMA node objects and no nodesets */
