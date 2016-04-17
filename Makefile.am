@@ -35,7 +35,6 @@ DIST_SUBDIRS = $(SUBDIRS)
 
 # Only install the pkg file if we're building in standalone mode (and not on Windows)
 if HWLOC_BUILD_STANDALONE
-if !HWLOC_HAVE_WINDOWS
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hwloc.pc
 if BUILD_NETLOC
@@ -43,7 +42,6 @@ if BUILD_NETLOC
 # missing some things.
 pkgconfig_DATA += netloc.pc
 endif BUILD_NETLOC
-endif !HWLOC_HAVE_WINDOWS
 endif HWLOC_BUILD_STANDALONE
 
 # Only install the valgrind suppressions file if we're building in
