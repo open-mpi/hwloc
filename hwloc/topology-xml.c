@@ -1240,6 +1240,14 @@ hwloc_look_xml(struct hwloc_backend *backend)
 	    data->msgprefix);
  err:
   hwloc_xml__free_distances(data);
+
+  hwloc_free_object_siblings_and_children(root->first_child);
+  root->first_child = NULL;
+  hwloc_free_object_siblings_and_children(root->io_first_child);
+  root->io_first_child = NULL;
+  hwloc_free_object_siblings_and_children(root->misc_first_child);
+  root->misc_first_child = NULL;
+
   hwloc_localeswitch_fini();
   return -1;
 }
