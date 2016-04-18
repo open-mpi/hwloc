@@ -721,14 +721,6 @@ static void hwloc__xml_import_report_outoforder(hwloc_topology_t topology, hwloc
   free(progname);
 }
 
-static int hwloc__object_cpusets_intersect(hwloc_obj_t obj1, hwloc_obj_t obj2)
-{
-  if (obj1->complete_cpuset && obj2->complete_cpuset)
-    return hwloc_bitmap_intersects(obj1->complete_cpuset, obj2->complete_cpuset);
-  else
-    return hwloc_bitmap_intersects(obj1->cpuset, obj2->cpuset);
-}
-
 static int
 hwloc__xml_import_object(hwloc_topology_t topology,
 			 struct hwloc_xml_backend_data_s *data,
@@ -847,22 +839,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   if (parent && !ignored) {
     /* root->parent is NULL, and root is already inserted */
-
-    /* warn if children intersects,
-     * so that the core doesn't have to deal with crappy children list.
-     */
-    hwloc_obj_t *current;
-    for (current = &parent->first_child; *current; current = &(*current)->next_sibling) {
-      if (obj->cpuset && (!(*current)->cpuset || hwloc__object_cpusets_intersect(obj, *current))) {
-	if (hwloc__xml_verbose()) {
-	  fprintf(stderr, "intersecting children %s P#%u and %s P#%u\n",
-		  hwloc_type_name(obj->type), obj->os_index,
-		  hwloc_type_name((*current)->type), (*current)->os_index);
-	}
-	goto error_with_object;
-      }
-    }
-
     hwloc_insert_object_by_parent(topology, parent, obj);
     /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
   }
@@ -1198,6 +1174,17 @@ hwloc_look_xml(struct hwloc_backend *backend)
       fprintf(stderr, "invalid root object without cpuset\n");
     goto err;
   }
+
+  /* FIXME:
+   * We should check that the existing object sets are consistent:
+   * no intersection between objects of a same level,
+   * object sets included in parent sets.
+   * hwloc never generated such buggy XML, but users could create one.
+   *
+   * We want to add these checks to the existing core code that
+   * adds missing sets and propagates parent/children sets
+   * (in case another backend ever generates buggy object sets as well).
+   */
 
   if (!data->nbnumanodes) {
     /* before 2.0, XML could have no NUMA node objects and no nodesets */
