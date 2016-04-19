@@ -42,3 +42,5 @@ snapshot_version=${major}.${minor}.${release}${greek}-git
 # format.
 
 libhwloc_so_version=12:0:7
+
+# Please also update the <TargetName> lines in contrib/windows/libhwloc.vcxproj
