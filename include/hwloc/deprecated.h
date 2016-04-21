@@ -213,4 +213,4 @@ hwloc_cpuset_from_nodeset_strict(hwloc_topology_t topology, hwloc_cpuset_t _cpus
 #endif
 
 
-#endif /* HWLOC_INLINES_H */
+#endif /* HWLOC_DEPRECATED_H */

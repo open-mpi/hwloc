@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2015 Inria.  All rights reserved.
+ * Copyright © 2013-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -281,4 +281,4 @@ HWLOC_DECLSPEC int hwloc_topology_diff_export_xmlbuffer(hwloc_topology_diff_t di
 #endif
 
 
-#endif /* HWLOC_HELPER_H */
+#endif /* HWLOC_DIFF_H */
