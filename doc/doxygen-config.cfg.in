@@ -1,4 +1,4 @@
-# Copyright © 2010-2015 Inria.  All rights reserved.
+# Copyright © 2010-2016 Inria.  All rights reserved.
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -14,8 +14,6 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/helper.h \
 		@top_srcdir@/include/hwloc/bitmap.h \
 		@top_srcdir@/include/hwloc/export.h \
-		@top_srcdir@/include/hwloc/diff.h \
-		@top_srcdir@/include/hwloc/plugins.h \
 		@top_srcdir@/include/hwloc/linux.h \
 		@top_srcdir@/include/hwloc/linux-libnuma.h \
 		@top_srcdir@/include/hwloc/glibc-sched.h \
@@ -27,6 +25,8 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/intel-mic.h \
 		@top_srcdir@/include/hwloc/openfabrics-verbs.h \
 		@top_srcdir@/include/hwloc/myriexpress.h \
+		@top_srcdir@/include/hwloc/diff.h \
+		@top_srcdir@/include/hwloc/plugins.h \
 		@top_srcdir@/doc/netloc.doxy \
 		@top_srcdir@/include/netloc.h \
 		@top_srcdir@/include/netloc/dc.h \
