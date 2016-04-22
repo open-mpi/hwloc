@@ -749,9 +749,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   return 0;
 
  out:
-  hwloc_topology_clear(new);
-  hwloc_distances_destroy(new);
-  hwloc_topology_setup_defaults(new);
+  hwloc_topology_destroy(new);
   return -1;
 }
 
