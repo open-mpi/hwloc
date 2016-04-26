@@ -176,3 +176,4 @@ test-suite.log
 /utils/lstopo/test-*.sh.log
 /utils/lstopo/test-*.sh.trs
 
+/contrib/systemd/hwloc-dump-hwdata.service
