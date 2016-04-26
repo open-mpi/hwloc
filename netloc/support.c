@@ -1,6 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -62,286 +63,367 @@ int support_extract_filename_from_uri(const char * uri, uri_type_t *type, char *
     return NETLOC_SUCCESS;
 }
 
-int support_load_json(struct netloc_topology * topology)
+UT_icd edge_icd = {sizeof(netloc_edge_t), NULL, NULL, NULL };
+
+
+static char *line_get_next_token(char **string, char c)
 {
-    int ret, exit_status = NETLOC_SUCCESS;
-    int i;
-    json_t *json = NULL;
-    netloc_node_t *node = NULL;
+    char *field;
+    char *string_end;
 
-    int cur_idx;
-    json_t *json_path_list = NULL;
-    json_t *json_path = NULL;
-    json_t *json_node_list = NULL;
-    json_t *json_node = NULL;
-    json_t *json_edge_list = NULL;
+    if (!*string)
+        return NULL;
 
-    struct netloc_dt_lookup_table_iterator *hti = NULL;
-    netloc_edge_t *cur_edge = NULL;
+    string_end = strchr(*string, c);
 
-    const char * key = NULL;
+    if (string_end) {
+        string_end[0] = '\0';
+        field = *string;
+        *string = string_end+1;
+    } else {
+        field = *string;
+        *string = NULL;
+    }
+
+    return field;
+}
+static char *line_get_next_field(char **string)
+{
+    return line_get_next_token(string, ',');
+}
+
+static void read_partition_list(char *list, UT_array *array) {
+    char *partition;
+    if (!strlen(list))
+        return;
+    while ((partition = line_get_next_token(&list, ':'))) {
+        int partition_num = atoi(partition);
+        utarray_push_back(array, &partition_num);
+    }
+}
+
+static ssize_t get_line(char **lineptr, size_t *n, FILE *stream)
+{
+    ssize_t read = getline(lineptr, n, stream);
+    if (read == -1)
+        return -1;
+
+    /* Remove last \n character */
+    char *line = *lineptr;
+    int lastpos = strlen(line)-1;
+    if (line[lastpos] == '\n') {
+        line[lastpos] = '\0';
+        read--;
+    }
+    return read;
+}
+
+static int netloc_node_get_virtual_id(char *id)
+{
+    static int virtual_id = 0;
+    sprintf(id, "virtual%d", virtual_id++);
+    return 0;
+}
+
+static int edge_merge_into(netloc_edge_t *dest, netloc_edge_t *src, int keep)
+{
+    utarray_concat(dest->physical_links, src->physical_links);
+    dest->total_gbits += src->total_gbits;
+    utarray_concat(dest->partitions, src->partitions);
+    /* TODO XXX modify to avoid duplicates */
+    if (keep)
+        utarray_push_back(dest->subnode_edges, &src);
+
+    return 0;
+}
+
+static void find_similar_nodes(struct netloc_topology * topology)
+{
+    /* Build edge lists by node */
+    int num_nodes = HASH_COUNT(topology->nodes);
+    netloc_node_t **nodes = (netloc_node_t **)malloc(num_nodes*sizeof(netloc_node_t *));
+    netloc_node_t ***edgedest_by_node = (netloc_node_t ***)malloc(num_nodes*sizeof(netloc_node_t **));
+    int *num_edges_by_node = (int *)malloc(num_nodes*sizeof(int));
+    netloc_node_t *node, *node_tmp;
+    int idx = -1;
+    netloc_topology_iter_nodes(topology, node, node_tmp) {
+        idx++;
+        if (netloc_node_is_host(node)) {
+            nodes[idx] = NULL;
+            continue;
+        }
+        int num_edges = HASH_COUNT(node->edges);
+        nodes[idx] = node;
+        num_edges_by_node[idx] = num_edges;
+        edgedest_by_node[idx] = (netloc_node_t **)malloc(num_edges*sizeof(netloc_node_t *));
+
+        netloc_edge_t *edge, *edge_tmp;
+        int edge_idx = 0;
+        netloc_node_iter_edges(node, edge, edge_tmp) {
+            edgedest_by_node[idx][edge_idx] = edge->dest;
+            edge_idx++;
+        }
+    }
+
+    /* We compare the edge lits to find similar nodes */
+    UT_array *similar_nodes;
+    utarray_new(similar_nodes, &ut_ptr_icd);
+    for (int idx1 = 0; idx1 < num_nodes; idx1++) {
+        netloc_node_t *node1 = nodes[idx1];
+        netloc_node_t *virtual_node = NULL;
+        netloc_edge_t *first_virtual_edge = NULL;
+        if (!node1)
+            continue;
+        for (int idx2 = idx1+1; idx2 < num_nodes; idx2++) {
+            netloc_node_t *node2 = nodes[idx2];
+            if (!node2)
+                continue;
+            if (num_edges_by_node[idx2] != num_edges_by_node[idx1])
+                continue;
+            if (idx2 == idx1)
+                continue;
+
+            int equal = 1;
+            for (int i = 0; i < num_edges_by_node[idx1]; i++) {
+                if (edgedest_by_node[idx2][i] != edgedest_by_node[idx1][i]) {
+                    equal = 0;
+                    break;
+                }
+            }
+
+            /* If we have similar nodes */
+            if (equal) {
+                /* We create a new virtual node to contain all of them */
+                if (!virtual_node) {
+                    virtual_node = netloc_dt_node_t_construct();
+                    netloc_node_get_virtual_id(virtual_node->physical_id);
+
+                    virtual_node->type = node1->type;
+                    utarray_concat(virtual_node->physical_links, node1->physical_links);
+                    virtual_node->description = strdup(virtual_node->physical_id);
+
+                    utarray_push_back(virtual_node->subnodes, &node1);
+                    utarray_concat(virtual_node->partitions, node1->partitions);
+
+                    // TODO paths
+
+                    /* Set edges */
+                    netloc_edge_t *edge1, *edge_tmp1;
+                    netloc_node_iter_edges(node1, edge1, edge_tmp1) {
+                        netloc_edge_t *virtual_edge = netloc_dt_edge_t_construct();
+                        if (!first_virtual_edge)
+                            first_virtual_edge = virtual_edge;
+                        virtual_edge->node = virtual_node;
+                        virtual_edge->dest = edge1->dest;
+                        edge_merge_into(virtual_edge, edge1, 0);
+                        HASH_ADD_PTR(virtual_node->edges, dest, virtual_edge);
+
+                        /* Change the reverse edge of the neighbours (reverse nodes) */
+                        netloc_node_t *reverse_node = edge1->dest;
+                        netloc_edge_t *reverse_edge;
+                        HASH_FIND_PTR(reverse_node->edges, &node1, reverse_edge);
+
+                        netloc_edge_t *reverse_virtual_edge =
+                            netloc_dt_edge_t_construct();
+                        reverse_virtual_edge->dest = virtual_node;
+                        reverse_virtual_edge->node = reverse_node;
+                        HASH_ADD_PTR(reverse_node->edges, dest, reverse_virtual_edge);
+                        edge_merge_into(reverse_virtual_edge, reverse_edge, 1);
+                        HASH_DEL(reverse_node->edges, reverse_edge);
+                    }
+
+                    /* We remove the node from the list of nodes */
+                    HASH_DEL(topology->nodes, node1);
+                    HASH_ADD_STR(topology->nodes, physical_id, virtual_node);
+                    printf("First node found: %s (%s)\n", node1->description, node1->physical_id);
+                }
+
+                utarray_concat(virtual_node->physical_links, node2->physical_links);
+                utarray_push_back(virtual_node->subnodes, &node2);
+                utarray_concat(virtual_node->partitions, node2->partitions);
+
+                /* Set edges */
+                netloc_edge_t *edge2, *edge_tmp2;
+                netloc_edge_t *virtual_edge = first_virtual_edge;
+                netloc_node_iter_edges(node2, edge2, edge_tmp2) {
+                    /* Merge the edges from the physical node into the virtual node */
+                    edge_merge_into(virtual_edge, edge2, 0);
+
+                    /* Change the reverse edge of the neighbours (reverse nodes) */
+                    netloc_node_t *reverse_node = edge2->dest;
+
+                    netloc_edge_t *reverse_edge;
+                    HASH_FIND_PTR(reverse_node->edges, &node2, reverse_edge);
+
+                    netloc_edge_t *reverse_virtual_edge;
+                    HASH_FIND_PTR(reverse_node->edges, &virtual_node,
+                            reverse_virtual_edge);
+                    edge_merge_into(reverse_virtual_edge, reverse_edge, 1);
+                    HASH_DEL(reverse_node->edges, reverse_edge);
+
+                    /* Get the next edge */
+                    virtual_edge = virtual_edge->hh.next;
+                }
+
+                /* We remove the node from the list of nodes */
+                HASH_DEL(topology->nodes, node2);
+                printf("\t node found: %s (%s)\n", node2->description, node2->physical_id);
+
+                nodes[idx2] = NULL;
+            }
+        }
+        utarray_clear(similar_nodes);
+    }
+}
+
+static int edges_sort_by_dest(netloc_edge_t *a, netloc_edge_t *b) {
+    if (a->dest == b->dest)
+        return 0;
+    return (a->dest < b->dest) ? -1 : 1;
+}
+
+int support_load_datafile(struct netloc_topology * topology)
+{
+    int exit_status = NETLOC_SUCCESS;
 
     if( topology->nodes_loaded ) {
         return NETLOC_SUCCESS;
     }
 
-    /*
-     * Load the json object (nodes)
-     */
-    ret = support_load_json_from_file(topology->network->node_uri, &json);
-    if( NETLOC_SUCCESS != ret ) {
-        fprintf(stderr, "Error: Failed to load the node file %s\n", topology->network->node_uri);
-        exit_status = ret;
-        goto cleanup;
+    topology->nodes = NULL;
+    topology->physical_links = NULL;
+
+    char *path = topology->network->node_uri;
+
+    FILE *input = fopen(path, "r");
+
+    if (!input ) {
+        perror("fopen");
+        exit(-1);
     }
 
-    if( !json_is_object(json) ) {
-        fprintf(stderr, "Error: json handle is not a valid object\n");
-        exit_status = NETLOC_ERROR;
-        goto cleanup;
+    int num_nodes;
+    fscanf(input , "%d\n,", &num_nodes);
+
+    char *line = NULL;
+    size_t linesize = 0;
+
+    /* Read nodes from file */
+    for (int n = 0; n < num_nodes; n++) {
+        netloc_node_t *node = netloc_dt_node_t_construct();
+        get_line(&line, &linesize, input);
+        char *remain_line = line;
+
+        strcpy(node->physical_id, line_get_next_field(&remain_line));
+        node->logical_id = atoi(line_get_next_field(&remain_line));
+        node->type = atoi(line_get_next_field(&remain_line));
+        read_partition_list(line_get_next_field(&remain_line), node->partitions);
+        node->description = strdup(line_get_next_field(&remain_line));
+        node->hostname = strdup(line_get_next_field(&remain_line));
+
+        HASH_ADD_STR(topology->nodes, physical_id, node);
     }
 
-    /*
-     * Read in the edges
-     */
-    json_edge_list = json_object_get(json, JSON_NODE_FILE_EDGE_INFO);
-    topology->edges = netloc_dt_lookup_table_t_json_decode(json_edge_list, &dc_decode_edge);
-    //netloc_lookup_table_pretty_print(topology->edges);
-    //check_edge_data(topology->edges);
+    /* Read edges from file */
+    for (int n = 0; n < num_nodes; n++) {
+        char *field;
+        netloc_node_t *node;
 
-    /*
-     * Read in the nodes
-     */
-    json_node_list = json_object_get(json, JSON_NODE_FILE_NODE_INFO);
-    topology->num_nodes = (int) json_object_size(json_node_list);
-    topology->nodes = (netloc_node_t**)malloc(sizeof(netloc_node_t*) * (topology->num_nodes));
-    if( NULL == topology->nodes ) {
-        exit_status = NETLOC_ERROR;
-        goto cleanup;
-    }
+        get_line(&line, &linesize, input);
+        char *remain_line = line;
 
-    cur_idx = 0;
-    json_object_foreach(json_node_list, key, json_node) {
-        topology->nodes[cur_idx] = netloc_dt_node_t_json_decode(topology->edges, json_object_get(json_node_list, key) );
-        ++cur_idx;
-    }
+        field = line_get_next_field(&remain_line);
+        HASH_FIND_STR(topology->nodes, field, node);
 
-    if(NULL != json) {
-        json_decref(json);
-        json = NULL;
-    }
+        while ((field = line_get_next_field(&remain_line))) {
+            /* There is an edge */
+            netloc_edge_t *edge = netloc_dt_edge_t_construct();
 
-    /*
-     * For each edge, find the correct pointer for the dest_node.
-     * Note: the src_node is filled in during the creation of a node in the
-     *       netloc_dt_node_t_json_decode() operation, above.
-     */
-    hti = netloc_dt_lookup_table_iterator_t_construct(topology->edges);
-    while( !netloc_lookup_table_iterator_at_end(hti) ) {
-        cur_edge = (netloc_edge_t*)netloc_lookup_table_iterator_next_entry(hti);
-        if( NULL == cur_edge ) {
-            break;
-        }
+            HASH_FIND_STR(topology->nodes, field, edge->dest);
+            edge->total_gbits = strtof(line_get_next_field(&remain_line), NULL);
+            read_partition_list(line_get_next_field(&remain_line), edge->partitions);
 
-        for(i = 0; i < topology->num_nodes; ++i ) {
-            if( NULL != topology->nodes[i] ) {
-                if( 0 == strncmp(cur_edge->dest_node_id,
-                                 topology->nodes[i]->physical_id,
-                                 strlen(cur_edge->dest_node_id)) ) {
-                    cur_edge->dest_node = topology->nodes[i];
-                    break;
-                }
+            edge->node = node;
+            HASH_ADD_PTR(node->edges, dest, edge);
+
+            /* Read links */
+            int num_links = atoi(line_get_next_field(&remain_line));
+            utarray_reserve(edge->physical_links, num_links);
+            utarray_reserve(node->physical_links, num_links);
+            for (int i = 0; i < num_links; i++) {
+                netloc_physical_link_t *link;
+                link =  netloc_dt_physical_link_t_construct();
+
+                link->id = atoi(line_get_next_field(&remain_line));
+
+                link->src = node;
+                link->dest = edge->dest;
+
+                link->ports[0] = atoi(line_get_next_field(&remain_line));
+                link->ports[1] = atoi(line_get_next_field(&remain_line));
+
+                link->width = strdup(line_get_next_field(&remain_line));
+                link->speed = strdup(line_get_next_field(&remain_line));
+                link->gbits = strtof(line_get_next_field(&remain_line), NULL);
+                link->description = strdup(line_get_next_field(&remain_line));
+                link->other_way_id = atoi(line_get_next_field(&remain_line));
+
+                read_partition_list(line_get_next_field(&remain_line),
+                        link->partitions);
+
+                HASH_ADD_INT(topology->physical_links, id, link);
+
+                utarray_push_back(node->physical_links, &link);
+                utarray_push_back(edge->physical_links, &link);
             }
-        }
-        if( NULL == cur_edge->dest_node ) {
-            fprintf(stderr, "Error: Failed to find a node to match the following edge\n");
-            char * tmp_str = NULL;
-            tmp_str = netloc_pretty_print_edge_t(cur_edge);
-            fprintf(stderr, "       %s\n", tmp_str);
-            free(tmp_str);
-        }
-    }
-    netloc_dt_lookup_table_iterator_t_destruct(hti);
-    hti = NULL;
 
-    // for each edge
-    //   find the corresponding node, and point to it.
-
-    /*
-     * Load the json object (physical paths)
-     */
-    ret = support_load_json_from_file(topology->network->phy_path_uri, &json);
-    if( NETLOC_SUCCESS != ret ) {
-        fprintf(stderr, "Error: Failed to load the physical path file %s\n", topology->network->phy_path_uri);
-        exit_status = ret;
-        goto cleanup;
+        }
+        HASH_SRT(hh, node->edges, edges_sort_by_dest);
     }
 
-    if( !json_is_object(json) ) {
-        fprintf(stderr, "Error: json handle is not a valid object\n");
-        exit_status = NETLOC_SUCCESS;
-        goto cleanup;
+    /* Read partitions from file */
+    {
+        get_line(&line, &linesize, input);
+        char *remain_line = line;
+        char *field;
+
+        while ((field = line_get_next_field(&remain_line))) {
+            char *name = strdup(field);
+            utarray_push_back(topology->partitions, &name);
+        }
     }
 
-    /*
-     * Read in the paths
-     */
-    json_path_list = json_object_get(json, JSON_NODE_FILE_PATH_INFO);
+    /* Read paths */
+    while (get_line(&line, &linesize, input) != -1) {
+        netloc_node_t *node;
+        netloc_path_t *path;
+        char *field;
 
-    cur_idx = 0;
-    json_object_foreach(json_path_list, key, json_path) {
-        node = NULL;
-        for(i = 0; i < topology->num_nodes; ++i) {
-            if( 0 == strncmp(topology->nodes[i]->physical_id, key, strlen(key) ) ) {
-                node = topology->nodes[i];
-                break;
-            }
-        }
-        if( NULL == node ) {
-            fprintf(stderr, "Error: Failed to find the node with physical ID %s for physical path\n", key);
-            exit_status = NETLOC_ERROR;
-            goto cleanup;
+        char *remain_line = line;
+        char *src_id = line_get_next_field(&remain_line);
+        char *dest_id = line_get_next_field(&remain_line);
+
+        HASH_FIND_STR(topology->nodes, src_id, node);
+
+        path = (netloc_path_t *)malloc(sizeof(netloc_path_t));
+        strcpy(path->dest_id, dest_id);
+        utarray_new(path->links, &ut_ptr_icd);
+
+        while ((field = line_get_next_field(&remain_line))) {
+            int link_id = atoi(field);
+            netloc_physical_link_t *link;
+
+            HASH_FIND_INT(topology->physical_links, &link_id, link);
+            utarray_push_back(path->links, &link);
         }
 
-        if( NULL != node->physical_paths ) {
-            netloc_lookup_table_destroy(node->physical_paths);
-	    free(node->physical_paths);
-            node->physical_paths = NULL;
-        }
-        node->physical_paths = netloc_dt_node_t_json_decode_paths(topology->edges, json_path);
-        if( NULL == node->physical_paths ) {
-            fprintf(stderr, "Error: Failed to decode the physical path for node\n");
-            fprintf(stderr, "Error: Node: %s\n", netloc_pretty_print_node_t(node));
-            exit_status = NETLOC_ERROR;
-            goto cleanup;
-        }
-        node->num_phy_paths  = netloc_lookup_table_size(node->physical_paths);
+        HASH_ADD_STR(node->paths, dest_id, path);
     }
 
-    if(NULL != json) {
-        json_decref(json);
-        json = NULL;
-    }
+    fclose(input);
 
-
-    /*
-     * Load the json object (logical paths)
-     */
-    ret = support_load_json_from_file(topology->network->path_uri, &json);
-    if( NETLOC_SUCCESS != ret ) {
-        fprintf(stderr, "Error: Failed to load the path file %s\n", topology->network->path_uri);
-        exit_status = ret;
-        goto cleanup;
-    }
-
-    if( !json_is_object(json) ) {
-        fprintf(stderr, "Error: json handle is not a valid object\n");
-        exit_status = NETLOC_ERROR;
-        goto cleanup;
-    }
-
-    /*
-     * Read in the paths
-     */
-    json_path_list = json_object_get(json, JSON_NODE_FILE_PATH_INFO);
-
-    cur_idx = 0;
-    json_object_foreach(json_path_list, key, json_path) {
-        node = NULL;
-        for(i = 0; i < topology->num_nodes; ++i) {
-            if( 0 == strncmp(topology->nodes[i]->physical_id, key, strlen(key) ) ) {
-                node = topology->nodes[i];
-                break;
-            }
-        }
-        if( NULL == node ) {
-            fprintf(stderr, "Error: Failed to find the node with physical ID %s for logical path\n", key);
-            return NETLOC_ERROR;
-        }
-
-        if( NULL != node->logical_paths ) {
-            netloc_lookup_table_destroy(node->logical_paths);
-            free(node->logical_paths);
-            node->logical_paths = NULL;
-        }
-        node->logical_paths = netloc_dt_node_t_json_decode_paths(topology->edges, json_path);
-        if( NULL == node->logical_paths ) {
-            fprintf(stderr, "Error: Failed to decode the logical path for node\n");
-            fprintf(stderr, "Error: Node: %s\n", netloc_pretty_print_node_t(node));
-            exit_status = NETLOC_ERROR;
-            goto cleanup;
-        }
-        node->num_log_paths = netloc_lookup_table_size(node->logical_paths);
-    }
-
-
-    topology->nodes_loaded = true;
-
-    cleanup:
-    if(NULL != json) {
-        json_decref(json);
-        json = NULL;
-    }
+    find_similar_nodes(topology);
 
     return exit_status;
 }
 
-int support_load_json_from_file(const char * fname, json_t **json)
-{
-    const char *memblock = NULL;
-    int fd, filesize, pagesize, res;
-    struct stat sb;
-
-    // Open file and get the needed file info
-    res = fd = open(fname, O_RDONLY);
-    if( 0 > res ) {
-        fprintf(stderr, "Error: Cannot open the file %s\n", fname);
-        goto CLEANUP;
-    }
-    res = fstat(fd, &sb);
-    if( 0 != res ) {
-        fprintf(stderr, "Error: Cannot stat the file %s\n", fname);
-        goto CLEANUP;
-    }
-
-    // Set some useful values
-    filesize = sb.st_size;
-    pagesize = getpagesize();
-    filesize = (filesize/pagesize)*pagesize + pagesize;
-
-    // mmap the file
-    memblock = (const char *) mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, fd, 0);
-    if (MAP_FAILED == memblock) {
-        fprintf(stderr, "Error: mmap failed\n");
-        res = NETLOC_ERROR;
-        goto CLEANUP;
-    }
-
-    // load the JSON from the file
-    (*json) = json_loads(memblock, 0, NULL);
-    if(NULL == (*json)) {
-        fprintf(stderr, "Error: json_loads on mmaped file failed\n");
-        res = NETLOC_ERROR;
-        goto CLEANUP;
-    }
-
-    // munmap the file and close it
-    CLEANUP:
-    if(NULL != memblock) {
-        res = munmap((char *)memblock, filesize);
-        if(0 != res) {
-            fprintf(stderr, "Error: munmap failed!\n");
-        }
-        memblock = NULL;
-    }
-    if(0 <= fd) {
-        close(fd);
-    }
-
-    return res;
-}
-
-void * dc_decode_edge(const char * key, json_t* json_obj)
-{
-    return netloc_dt_edge_t_json_decode(json_obj);
-}

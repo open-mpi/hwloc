@@ -141,36 +141,19 @@ int netloc_foreach_network(const char * const * search_uris,
  *******************************************************************/
 static netloc_network_t *extract_network_info(char *filename)
 {
-    int ret;
-    json_t *json = NULL;
-    netloc_network_t *tmp_network = NULL;
+    netloc_network_t *network = NULL;
 
-    /*
-     * Load the JSON file
-     */
-    ret = support_load_json_from_file(filename, &json);
-    if( NETLOC_SUCCESS != ret ) {
-        fprintf(stderr, "Error: Failed to load the file %s\n", filename);
-        goto cleanup;
+    network = netloc_dt_network_t_construct();
+    if( NULL == network ) {
+        return NULL;
     }
 
-    if( !json_is_object(json) ) {
-        fprintf(stderr, "Error: json handle is not a valid object\n");
-        goto cleanup;
-    }
+    // TODO read from file
+    network->network_type = (netloc_network_type_t)NETLOC_NETWORK_TYPE_INFINIBAND;
+    network->subnet_id = strdup("fe80:0000:0000:0000");
+    network->version = strdup("12");
 
-    /*
-     * Extract the network information
-     */
-    tmp_network = netloc_dt_network_t_json_decode( json_object_get(json, JSON_NODE_FILE_NETWORK_INFO));
-
- cleanup:
-    if(NULL != json) {
-        json_decref(json);
-        json = NULL;
-    }
-
-    return tmp_network;
+    return network;
 }
 
 static int search_uri(const char * search_uri,
@@ -188,7 +171,6 @@ static int search_uri(const char * search_uri,
 
     char * filename = NULL;
     DIR *dirp = NULL;
-    struct stat dstat;
     struct dirent *dir_entry = NULL;
     bool found;
 
@@ -230,9 +212,9 @@ static int search_uri(const char * search_uri,
 #endif
 
         /*
-         * Skip if does not end in .ndat extension
+         * Skip if does not end in .txt extension
          */
-        if( NULL == strstr(dir_entry->d_name, ".ndat") ) {
+        if( NULL == strstr(dir_entry->d_name, ".txt") ) {
             continue;
         }
 
@@ -249,13 +231,13 @@ static int search_uri(const char * search_uri,
         /*
          * Determine file type: nodes or paths
          */
-        if( NULL != strstr(filename, "nodes.ndat") ) {
+        if( NULL != strstr(filename, "nodes.txt") ) {
             tmp_network->node_uri = strdup(filename);
         }
-        else if( NULL != strstr(filename, "phy-paths.ndat") ) {
+        else if( NULL != strstr(filename, "phy-paths.txt") ) {
             tmp_network->phy_path_uri = strdup(filename);
         }
-        else if( NULL != strstr(filename, "log-paths.ndat") ) {
+        else if( NULL != strstr(filename, "log-paths.txt") ) {
             tmp_network->path_uri = strdup(filename);
         }
 

@@ -29,9 +29,7 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/diff.h \
 		@top_srcdir@/include/hwloc/plugins.h \
 		@top_srcdir@/doc/netloc.doxy \
-		@top_srcdir@/include/netloc.h \
-		@top_srcdir@/include/netloc/dc.h \
-		@top_srcdir@/include/netloc/map.h
+		@top_srcdir@/include/netloc.h
 
 EXAMPLE_PATH   = @top_srcdir@/doc @top_srcdir@/tests/netloc
 

@@ -48,6 +48,7 @@
     <input id="imageCreate" type="button" value="Generate image link" onclick="prepareImage();"/>
     <span id="imageLink"></span>
     <input id="removeSel" type="button" value="Remove selected" onclick="network.deleteSelected();"/>
+    <input id="expandSel" type="button" value="Expand selected" onclick="expandSelected();"/>
 
 
 </head>
@@ -58,169 +59,217 @@
     <pre id="description"></pre>
 
 <script type="text/javascript">
-  var edges;
-  var nodes;
-  var shownNodes;
-  var shownEdges;
-  var partitions;
-  var mydata;
-  var topos;
-  var normalSwitchColor = {background: "grey"};
-  var normalHostColor = {background: "red"};
-  var normalEdgeColor = {color: "grey", highlight: "blue"};
-  var nodesWithPhysics;
-  var edgesWithPhysics;
-  var nodeBandwidthList;
-  var edgeBandwidthList;
-  var network;
-  var description = "";
-  var lastColorMode = "bandwidth";
+var edges;
+var nodes;
+var links;
+var shownNodes;
+var shownEdges;
+var partitions;
+var mydata;
+var topos;
+var normalSwitchColor = {background: "grey"};
+var normalHostColor = {background: "red"};
+var normalEdgeColor = {color: "grey", highlight: "blue"};
+var nodesWithPhysics;
+var edgesWithPhysics;
+var nodeBandwidthList;
+var edgeBandwidthList;
+var network;
+var description = "";
+var lastColorMode = "bandwidth";
 
-  function handleFileSelect(evt) {
-      var files = evt.target.files;
-      var fr = new FileReader();
-      fr.onload = function(e) {
-          data = e.target.result
-              loadFile(data);
-      };
-      fr.readAsText(files[0]);
-  }
+function printWithTime(msg) {
+    if (typeof printWithTime.lastTime == 'undefined' ) {
+        printWithTime.lastTime = Math.floor(new Date().getTime()/1000);
+    }
 
-  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    var time = Math.floor(new Date().getTime()/1000);
+    var duration = time-printWithTime.lastTime;
+    printWithTime.lastTime = time;
+    console.log(msg);
+    console.log(duration + "s elapsed");
+}
 
-  function renameKey(obj, newkey, oldkey)
-  {
-      return obj.map(function(d) { d[newkey] = d[oldkey]; delete d[oldkey]; return d; });
-  }
+function handleFileSelect(evt) {
+    var files = evt.target.files;
+    var fr = new FileReader();
+    fr.onload = function(e) {
+        printWithTime("Starting...");
+        data = e.target.result;
+        loadFile(data);
+    };
+    fr.readAsText(files[0]);
+}
 
-  function palette(size) {
-      var palette = [];
+document.getElementById('files').addEventListener('change', handleFileSelect, false);
 
-      if (!size)
-          return ["red"];
+function renameKey(obj, newkey, oldkey)
+{
+    return obj.map(function(d) { d[newkey] = d[oldkey]; delete d[oldkey]; return d; });
+}
 
-      if (size <= 9)
-          return ["blue", "orange", "green", "pink", "brown", "purple",
-              "yellow", "red", "gray"].slice(0, size+1);
+function getNeighbours(node)
+{
+    return node.edges.map(function(e) {
+        return edges.get(e).to;
+    });
+}
 
-      if (size <= 11)
-          return ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99",
-              "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a",
-              "#ffff99"].slice(0, size+1);
+function palette(size) {
+    var palette = [];
 
-      var v = Math.ceil(Math.pow(size+1, 1/3));
-      var value = 255/v;
-      for( var rStep = 0, r = 0; rStep < v; rStep++) {
-          for( var gStep = 0, g = 0; gStep < v; gStep++ ) {
-              for( var bStep = 0, b = 0; bStep < v; bStep++ ) {
-                  if (!r && !g && !b)
-                      continue;
-                  palette.push('rgb(' + Math.round(r) + ', ' + Math.round(g) + ', '
-                              +  Math.round(b) + ')');
-                  b += value;
-              }
-              g += value;
-          }
-          r += value;
-      }
-      return palette;
-  }
+    if (!size)
+        return ["red"];
 
-  function loadFile(data)
-  {
-      mydata = JSON.parse(data);
-      partitions = mydata.partitions;
-      topos = mydata.hwloctopos;
+    if (size <= 9)
+        return ["blue", "orange", "green", "pink", "brown", "purple",
+            "yellow", "red", "gray"].slice(0, size+1);
 
+    if (size <= 11)
+        return ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99",
+            "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a",
+            "#ffff99"].slice(0, size+1);
 
-      /* Add elements to selectColors */
-      var selectColors = document.getElementById("selectColors");
-      while (selectColors.length > 1) {
-          selectColors.removeChild(selectColors.lastChild);
-      }
-      {
+    var v = Math.ceil(Math.pow(size+1, 1/3));
+    var value = 255/v;
+    for( var rStep = 0, r = 0; rStep < v; rStep++) {
+        for( var gStep = 0, g = 0; gStep < v; gStep++ ) {
+            for( var bStep = 0, b = 0; bStep < v; bStep++ ) {
+                if (!r && !g && !b)
+                    continue;
+                palette.push('rgb(' + Math.round(r) + ', ' + Math.round(g) + ', '
+                        +  Math.round(b) + ')');
+                b += value;
+            }
+            g += value;
+        }
+        r += value;
+    }
+    return palette;
+}
+
+function loadFile(data)
+{
+    printWithTime("File loaded");
+    mydata = JSON.parse(data);
+    printWithTime("JSON parsed");
+    partitions = mydata.partitions;
+    topos = mydata.hwloctopos;
+
+    /* Prepare UI */
+    /***********************************************************************/
+    /* Add elements to selectColors */
+    var selectColors = document.getElementById("selectColors");
+    while (selectColors.length > 1) {
+        selectColors.removeChild(selectColors.lastChild);
+    }
+    {
         var el = document.createElement("option");
         el.textContent = "normal";
         el.value = "normal";
         selectColors.appendChild(el);
-      }
-      if (partitions.length) {
+    }
+    if (partitions.length) {
         var el = document.createElement("option");
         el.textContent = "partition";
         el.value = "partition";
         selectColors.appendChild(el);
-      }
-      if (topos.length) {
+    }
+    if (topos.length) {
         var el = document.createElement("option");
         el.textContent = "hwloc";
         el.value = "hwloc";
         selectColors.appendChild(el);
-      }
-      {
+    }
+    {
         var el = document.createElement("option");
         el.textContent = "bandwidth";
         el.value = "bandwidth";
         selectColors.appendChild(el);
-      }
+    }
 
-      /* Add elements to selectPartition */
-      var selectPartition = document.getElementById("selectPartition");
-      while (selectPartition.length > 1) {
-          selectPartition.removeChild(selectPartition.lastChild);
-      }
-      var partitionOptions = partitions.slice();
-      partitionOptions.unshift("All");
-      partitionOptions.forEach(function(partition, i) {
-          var el = document.createElement("option");
-          el.textContent = partition;
-          el.value = i-1; // because of "All"
-          selectPartition.appendChild(el);
-      });
+    /* Add elements to selectPartition */
+    var selectPartition = document.getElementById("selectPartition");
+    while (selectPartition.length > 1) {
+        selectPartition.removeChild(selectPartition.lastChild);
+    }
+    var partitionOptions = partitions.slice();
+    partitionOptions.unshift("All");
+    partitionOptions.forEach(function(partition, i) {
+        var el = document.createElement("option");
+        el.textContent = partition;
+        el.value = i-1; // because of "All"
+        selectPartition.appendChild(el);
+    });
+    /***********************************************************************/
 
-      mydata.edges.map(
-              function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
-      var gbits_min = Math.min.apply(null, mydata.edges.map(function(e) { return e["gbits"];}));
-      mydata.edges.map(
-              function(e) {e["width"] = e["gbits"]/gbits_min;});
-      mydata.edges = renameKey(mydata.edges, "from", "src");
-      mydata.edges = renameKey(mydata.edges, "to", "dst");
-      edges = new vis.DataSet({});
-      edges.add(mydata.edges);
+    /* Set  edges */
+    /***********************************************************************/
+    mydata.edges.map(
+            function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
+    var gbits_min = Math.min.apply(null, mydata.edges.map(function(e) { return e["gbits"];}));
+    mydata.edges.map(
+            function(e) {e["width"] = e["gbits"]/gbits_min;});
+    edges = new vis.DataSet({});
+    edges.add(mydata.edges);
+    printWithTime("Dataset edges created");
+    /* Find edge in other way */
+    edges.forEach(function(e) {
+        var id = e.id;
+        var other =
+            edges.get({filter: function(f) {
+                return f.from == e.to && f.to == e.from; }});
+        if (other.length) {
+            edges.update({id: id, other: other[0]});
+        }
+    });
+    printWithTime("Found other way for edges");
+    /***********************************************************************/
 
+    /* Set  nodes */
+    /***********************************************************************/
+    mydata.nodes = renameKey(mydata.nodes, "title", "desc");
+    mydata.nodes.map(function(n)
+            { n["color"] = n["type"] == "host" ?
+                normalHostColor: normalSwitchColor; });
+    mydata.nodes.map(function(n) {
+        n["bandwidth"] =
+            edges.get(n["edges"]).map(function(e) { if (!e) return 8; else return e.gbits; })
+            .reduce(function(a, b) { return a + b; }, 0);
+    });
+    mydata.nodes.map(function(n) {
+        n["size"] = 10*Math.log(n["bandwidth"]);
+    });
+    nodes = new vis.DataSet({});
+    nodes.add(mydata.nodes);
+    printWithTime("Dataset nodes created");
+    /***********************************************************************/
 
-      mydata.nodes = renameKey(mydata.nodes, "level", "lv");
-      mydata.nodes = renameKey(mydata.nodes, "title", "desc");
-      mydata.nodes.map(function(n)
-              { n["color"] = n["type"] == "host" ? normalHostColor: normalSwitchColor; });
-      mydata.nodes.map(function(n) {
-          n["bandwidth"] =
-              edges.get(n["edges"]).map(function(e) { return e.gbits; })
-              .reduce(function(a, b) { return a + b; }, 0);
-      });
-      mydata.nodes.map(function(n) {
-          n["size"] = 10*Math.log(n["bandwidth"]);
-      });
-      nodes = new vis.DataSet({});
-      nodes.add(mydata.nodes);
+    /* Set  links */
+    /***********************************************************************/
+    links = new vis.DataSet({});
+    links.add(mydata.links);
+    printWithTime("Dataset links created");
+    /***********************************************************************/
 
-      nodeBandwidthList = [];
-      /* Build list of sizes */
-      nodes.forEach(function(n) {
-          if (nodeBandwidthList.indexOf(n.size) == -1) {
-              nodeBandwidthList.push(n.size);
-          }
-      });
-      edgeBandwidthList = [];
-      /* Build list of sizes */
-      edges.forEach(function(e) {
-          if (edgeBandwidthList.indexOf(e.gbits) == -1) {
-              edgeBandwidthList.push(e.gbits);
-          }
-      });
-  }
+    /* Build list of width for nodes */
+    nodeBandwidthList = [];
+    nodes.forEach(function(n) {
+        if (nodeBandwidthList.indexOf(n.size) == -1) {
+            nodeBandwidthList.push(n.size);
+        }
+    });
+    /* Build list of width for edges */
+    edgeBandwidthList = [];
+    edges.forEach(function(e) {
+        if (edgeBandwidthList.indexOf(e.gbits) == -1) {
+            edgeBandwidthList.push(e.gbits);
+        }
+    });
+}
 
-  function nodeColors()
-  {
+function nodeColors()
+{
     var e = document.getElementById("selectColors");
     var colorMode = e.options[e.selectedIndex].value;
 
@@ -283,7 +332,6 @@
             }
         });
 
-        console.log(edgeBandwidthList);
         var edgeeColors = palette(edgeBandwidthList.length);
         shownEdges.forEach(function(n) {
             var colorIdx = edgeBandwidthList.indexOf(n.gbits);
@@ -293,119 +341,201 @@
         });
     }
     lastcolorMode = colorMode;
-    console.log(lastcolorMode);
-  }
+}
 
-  function selectNodesAndEdges(field, value)
-  {
-      var regexp = new RegExp(value, "g");
-      var nodeIds;
-      var nodeSet;
-      var edgeIds;
-      var edgeSet;
+function selectNodesAndEdges(field, value)
+{
+    var regexp = new RegExp(value, "g");
+    var nodeIds;
+    var nodeSet;
+    var edgeIds;
+    var edgeSet;
 
-      switch (field) {
-          case "part":
-              var strings = partitions;
-              matchingStrings = strings.reduce(function(a, e, i) {
-                  if (e.match(regexp))
-                      a.push(i);
-                  return a;
-              }, []);
-              nodeSet = shownNodes.get({filter: function(n) {
-                  for (var e = 0; e < n[field].length; e++) {
-                      var elem = n[field][e];
-                      for (var f = 0; f < matchingStrings.length; f++) {
-                          if (elem == matchingStrings[f])
-                              return true;
-                      }
-                  }
-                  return false;
-              }});
-              edgeSet = shownEdges.get({filter: function(n) {
-                  for (var e = 0; e < n[field].length; e++) {
-                      var elem = n[field][e];
-                      for (var f = 0; f < matchingStrings.length; f++) {
-                          if (elem == matchingStrings[f])
-                              return true;
-                      }
-                  }
-                  return false;
-              }});
-              break;
-          case "topo":
-              var strings = topos;
-              matchingStrings = strings.reduce(function(a, e, i) {
-                  if (e.match(regexp))
-                      a.push(i);
-                  return a;
-              }, []);
-              nodeSet = shownNodes.get({filter: function(n) {
-                  var elem = n[field];
-                  for (var f = 0; f < matchingStrings.length; f++) {
-                      if (elem == matchingStrings[f])
-                          return true;
-                  }
-                  return false;
-              }});
-              edgeSet = [];
-              break;
-          default:
-              nodeSet = shownNodes.get({filter: function(n) {
-                  return n[field] ? n[field].toString().match(regexp): false;
-              }});
-              edgeSet = shownEdges.get({filter: function(e) {
-                  return e[field] ? e[field].toString().match(regexp): false;
-              }});
-      }
-      nodeIds = nodeSet.map(function(n) { return n.id; });
-      edgeIds = edgeSet.map(function(e) { return e.id; });
+    switch (field) {
+        case "part":
+            var strings = partitions;
+            matchingStrings = strings.reduce(function(a, e, i) {
+                if (e.match(regexp))
+                    a.push(i);
+                return a;
+            }, []);
+            nodeSet = shownNodes.get({filter: function(n) {
+                for (var e = 0; e < n[field].length; e++) {
+                    var elem = n[field][e];
+                    for (var f = 0; f < matchingStrings.length; f++) {
+                        if (elem == matchingStrings[f])
+                            return true;
+                    }
+                }
+                return false;
+            }});
+            edgeSet = shownEdges.get({filter: function(n) {
+                for (var e = 0; e < n[field].length; e++) {
+                    var elem = n[field][e];
+                    for (var f = 0; f < matchingStrings.length; f++) {
+                        if (elem == matchingStrings[f])
+                            return true;
+                    }
+                }
+                return false;
+            }});
+            break;
+        case "topo":
+            var strings = topos;
+            matchingStrings = strings.reduce(function(a, e, i) {
+                if (e.match(regexp))
+                    a.push(i);
+                return a;
+            }, []);
+            nodeSet = shownNodes.get({filter: function(n) {
+                var elem = n[field];
+                for (var f = 0; f < matchingStrings.length; f++) {
+                    if (elem == matchingStrings[f])
+                        return true;
+                }
+                return false;
+            }});
+            edgeSet = [];
+            break;
+        default:
+            nodeSet = shownNodes.get({filter: function(n) {
+                return n[field] ? n[field].toString().match(regexp): false;
+            }});
+            edgeSet = shownEdges.get({filter: function(e) {
+                return e[field] ? e[field].toString().match(regexp): false;
+            }});
+    }
+    nodeIds = nodeSet.map(function(n) { return n.id; });
+    edgeIds = edgeSet.map(function(e) { return e.id; });
 
-      network.setSelection({edges: edgeIds, nodes: nodeIds}, {highlightEdges: false});
-      showSelectionInfo();
-  }
+    network.setSelection({edges: edgeIds, nodes: nodeIds}, {highlightEdges: false});
+    showSelectedNodes();
+}
 
-  function showSelectionInfo()
-  {
-      var description = "";
+function showSelectedEdges()
+{
+    var infos = "";
 
-      var edgeIds = network.getSelectedEdges();
-      if (edgeIds.length)
-          description += '<h1>' + edgeIds.length + ' edges selected</h1>';
+    var edgeIds = network.getSelectedEdges();
+    var nodeIds = network.getSelectedNodes();
 
-      var nodeIds = network.getSelectedNodes();
-      if (nodeIds.length) {
-          description += '<h1>' + nodeIds.length + ' nodes selected</h1>';
+    infos += '<h1>' + edgeIds.length + ' edges selected</h1>';
+    if (!nodeIds.length) {
+        var neighbours = [];
+        edgeIds.forEach(function(edgeId) {
+            var edge = edges.get(edgeId);
+            var dest = nodes.get(edge.to);
+            var src = nodes.get(edge.from);
 
-          var inputNodes = shownNodes.get(nodeIds);
-          inputNodes.forEach(function(node) {
-              var nodeEdges = node.edges;
-              var neighbours = [];
+            infos = '<h2>' + edge.title + '</h2>' +
+                'ID: ' + edge.id + '\n' +
+                'Partitions: ' + edge.part.map(function(p){return partitions[p]})
+                .join(', ') + '\n' +
+                '\t' + src.title + '(' + src.id + ') - ' +
+                dest.title + '(' + dest.id + '): ' +
+                    edge.label + 'Gb\n';
 
-              nodeEdges.forEach(function(edgeId) {
-                  var edge = edges.get(edgeId);
-                  var dest = nodes.get(edge.to);
-                  var s = '\t' + dest.title + ' (edgeId ' + edgeId + ' ports '
-                          + edge.src_port + '->' + edge.dst_port + '): ';
-                  s += edge.label + 'Gb\n';
-                  neighbours .push(s);
-              });
+            var edgeLinks = edge.links;
+            edgeLinks.forEach(function(linkId) {
+                var link = links.get(linkId);
+                infos += '\t\tlink ' + linkId + ' ('
+                        + link.src_port + '->' + link.dst_port + '):'
+                    + link.gbits + 'Gb\n';
+            });
+        });
+    }
+    document.getElementById('description').innerHTML += infos;
+}
 
-              description +=
-                  '<h2>' + node.title + '</h2>' +
-                  'ID: ' + node.id + '\n' +
-                  'Partitions: ' + node.part.map(function(p){return partitions[p]})
-                  .join(', ') + '\n' +
-                  neighbours.length + ' neighbours:\n' + neighbours.sort().join('') +
-                  'Total bandwidth: ' + node.bandwidth + '\n' +
-                  ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
-          });
-      }
-      document.getElementById('description').innerHTML = description;
-  }
+function showSelectedNodes()
+{
+    var infos = "";
 
-  function search()
-  {
+    var edgeIds = network.getSelectedEdges();
+    var nodeIds = network.getSelectedNodes();
+
+    var neighbourLists = [];
+    var similarNeighbours = null;
+    if (nodeIds.length) {
+        infos += '<h1>' + nodeIds.length + ' nodes selected</h1>';
+
+        var inputNodes = shownNodes.get(nodeIds);
+        inputNodes.forEach(function(node) {
+            var nodeEdges = node.edges;
+            var neighbourText = [];
+            var neighbours = [];
+
+            nodeEdges.forEach(function(edgeId) {
+                var edge = edges.get(edgeId);
+                var dest = nodes.get(edge.to);
+
+                var s = '\t' + dest.title + ' (' + dest.id + ') - edgeId ' + edgeId + ': ';
+            s += edge.label + 'Gb\n';
+
+            var edgeLinks = edge.links;
+            edgeLinks.forEach(function(linkId) {
+                var link = links.get(linkId);
+                s += '\t\tlink ' + linkId + ' ('
+                        + link.src_port + '->' + link.dst_port + '):'
+                    + link.gbits + 'Gb\n';
+            });
+            neighbourText.push(s);
+            neighbours.push(dest.id);
+            });
+
+            sub = node.sub.map(function(s) {
+                return nodes.get(s).title;
+            });
+
+            infos +=
+                '<h2>' + node.title + '</h2>' +
+                'ID: ' + node.id + ' Hostname: ' + node.hostname + '\n' +
+                'Partitions: ' + node.part.map(function(p){return partitions[p]})
+                .join(', ') + '\n' +
+                'Subnodes: ' + sub.join(', ') + '\n' +
+                neighbourText.length + ' neighbours:\n' + neighbourText.sort().join('') +
+                'Total bandwidth: ' + node.bandwidth + '\n' +
+                ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
+
+
+            if (!similarNeighbours) {
+                similarNeighbours = neighbours;
+            } else {
+                similarNeighbours = similarNeighbours.filter(function(n) {
+                    return neighbours.indexOf(n) != -1;
+                });
+            }
+            neighbourLists.push(neighbours);
+        });
+    }
+
+    if (nodeIds.length > 1) {
+        var s = [];
+        similarNeighbours.forEach(function(n) {
+            s.push('\t' + shownNodes.get(n).title + '\n');
+        });
+        infos +=
+            '<h2>Similar neighbours</h2>' +
+            similarNeighbours.length + ' similar neighbours:\n' + s.sort().join('');
+        infos +=
+            '<h2>Specific neighbours</h2>';
+        nodeIds.forEach(function(n, idx) {
+            infos += '\t' + shownNodes.get(n).title + ": " +
+                neighbourLists[idx]
+                  .filter(function(n)
+                          {return similarNeighbours.indexOf(n) < 0;})
+                  .map(function(n)
+                          {return shownNodes.get(n).title;})
+                  .sort().join(', ') +
+                '\n';
+        });
+    }
+
+    document.getElementById('description').innerHTML += infos;
+}
+
+function search()
+{
     var selectSearch = document.getElementById("selectSearch");
     var field = selectSearch.options[selectSearch.selectedIndex].value;
 
@@ -416,37 +546,53 @@
         var value = searchValue.value;
         selectNodesAndEdges(field, value);
     }
-  }
+}
 
-  function draw()
-  {
+function draw()
+{
+    printWithTime("Draw");
     var selectPartition = document.getElementById("selectPartition");
     var partition = parseInt(
-        selectPartition.options[selectPartition.selectedIndex].value);
+            selectPartition.options[selectPartition.selectedIndex].value);
 
+    var subNodes = new vis.DataSet(nodes.get({filter: function (n) {
+        return (n.merged == 0);
+    }}));
+    printWithTime("Nodes filtered");
+
+    var subEdges;
     if (partition == -1) { // for "All"
         // TODO improve
         subEdges = new vis.DataSet(edges.get());
-        shownNodes = new vis.DataSet(nodes.get());
+        shownNodes = new vis.DataSet(subNodes.get());
     }
     else {
         subEdges = new vis.DataSet(edges.get({filter: function (e) {
             return (e.part.indexOf(partition) > -1);
         }}));
-        shownNodes = new vis.DataSet(nodes.get({filter: function (e) {
+        shownNodes = new vis.DataSet(subNodes.get({filter: function (e) {
             return (e.part.indexOf(partition) > -1);
         }}));
     }
+    printWithTime("subdatasets created");
 
-    if (1 || partition != "All")
-        shownEdges = subEdges;
-    else
-        /* FIXME does not work if we select a partition and logical path in not the
-           same in the other way and neither when we move nodes */
-        /* we draw half of the edges (only one way) */
-        shownEdges = new vis.DataSet(subEdges.get({filter: function (e) {
-            return (e.from < e.to);
-        }}));
+    /* Keep edges in only one way */
+    shownEdges = new vis.DataSet(subEdges.get({filter: function (e) {
+        //return (subNodes.get(e.from) && subNodes.get(e.from).type != "host"); // DEBUG XXX
+        if (e.from < e.to) {
+            if (!subEdges.get(e.other.id)) {
+                e.arrows = {to: true};
+            }
+            return true;
+        }
+        else if (!subEdges.get(e.other.id)) {
+            e.arrows = {to: true};
+            return true;
+        }
+        else
+            return false;
+    }}));
+    printWithTime("Edges filtered (keep one way)");
 
     var selectColor = document.getElementById("selectColors");
     var colorMode =
@@ -458,7 +604,7 @@
 
     /* update the desciption of the graph */
     var num_hosts = shownNodes.get({filter: function(n) {
-            return n.type == "host";
+        return n.type == "host";
     }}).length;
     var num_switches = shownNodes.length-num_hosts;
     var enabledTopos = shownNodes.distinct("topo");
@@ -488,35 +634,29 @@
     };
 
     var options = {interaction:{hover:true, tooltipDelay:0, multiselect: true},
-                   physics: {barnesHut: {gravitationalConstant:-15000,
-                                         }},
-                   nodes: {shape: 'dot', borderWidth: 0.1, borderWidthSelected: 5},
-                   edges: {color: normalEdgeColor, arrows: {to: true}}
+        layout:{improvedLayout:false},
+        physics: {barnesHut: {gravitationalConstant:-15000,
+        }},
+        nodes: {shape: 'dot', borderWidth: 0.1, borderWidthSelected: 5},
+        edges: {color: normalEdgeColor}
     };
     network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
-        showSelectionInfo();
     });
     network.on("deselectNode", function (params) {
         document.getElementById('description').innerHTML = description;
     });
 
-    //network.on("selectEdge", function (params) {
-    //    var edge = edges.get(params.edges[0]);
+    network.on("selectEdge", function (params) {
+        showSelectedNodes();
+        showSelectedEdges();
+    });
+    network.on("deselectEdge", function (params) {
+        document.getElementById('description').innerHTML = description;
+    });
 
-    //    document.getElementById('description').innerHTML =
-    //        '<h2>' + nodes.get(edge.from).title + ' -> ' + nodes.get(edge.to).title + '</h2>' +
-    //        'ID: ' + edge.id + '\n' +
-    //        'From: ' + edge.from + '\n' +
-    //        'To: ' + edge.to + '\n' +
-    //        'Partitions: ' + edge.part.map(function(p){return partitions[p]})
-    //                                  .join(', ') + '\n';
-    //});
-    //network.on("deselectEdge", function (params) {
-    //    document.getElementById('description').innerHTML = description;
-    //});
-
+    if (1) { // DEBUG XXX
     network.on("dragStart", function (params) {
         params.event = "[original event]";
         var nodeIds = params.nodes;
@@ -543,17 +683,56 @@
             shownNodes.update({id: nodesWithPhysic, physics: false});
         });
     });
+    }
 
     network.on("stabilizationIterationsDone", function () {
-        network.setOptions({nodes:{physics:false},
-                            edges:{physics:false},
+        //network.setOptions({
+        //    nodes: {physics: false},
+        //    edges: {physics: false},
+        //    layout: {improvedLayout: false},
+        //});
+        shownEdges.getIds().forEach(function(e) {
+            shownEdges.update({id: e, physics: false});
+        });
+        shownNodes.getIds().forEach(function(n) {
+            shownNodes.update({id: n, physics: false});
         });
     });
-  }
+}
 
-  function prepareImage()
-  {
-      html2canvas(document.getElementsByClassName("vis-network")[0], {
+function expandSelected()
+{
+    nodeIds = network.getSelectedNodes();
+    nodeIds.forEach(function(n) {
+        // TODO
+        node = shownNodes.get(n);
+        neighbours = getNeighbours(node);
+
+        /* Physics enabled for neighbours */
+        neighbours.forEach(function(n) {
+            printWithTime(n + " -> physics");
+            shownNodes.update({id: n, physics: true, fixed: true});
+        });
+
+        /* The selected nodes are removed (then replaced) */
+        shownNodes.remove(node);
+        node.sub.forEach(function(s) {
+            subnode = nodes.get(s);
+            subnode.physics = false;
+            shownNodes.add(subnode);
+            network.selectNodes([subnode.id]);
+        });
+    });
+}
+
+function mergeNode(node)
+{
+    // TODO
+}
+
+function prepareImage()
+{
+    html2canvas(document.getElementsByClassName("vis-network")[0], {
         onrendered: function(canvas) {
             var img = removeBlanks(canvas);
             var dataURL = img.replace("image/png", "image/octet-stream");;
@@ -563,78 +742,78 @@
             document.getElementById('imageLink').innerHTML = imageLink;
         },
         background: undefined
-      });
-  }
+    });
+}
 
-  function removeBlanks (canvas) {
-      var imgWidth = canvas.width;
-      var imgHeight = canvas.height;
-      var context = canvas.getContext("2d");
-      var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-      var data = imageData.data;
-      var getRBG = function(x, y) {
-          return {
-              red:   data[(imgWidth*y + x) * 4],
-              green: data[(imgWidth*y + x) * 4 + 1],
-              blue:  data[(imgWidth*y + x) * 4 + 2]
-          };
-      };
-      var isWhite = function (rgb) {
-          return !rgb.red && !rgb.green && !rgb.blue;
-      };
-      var scanY = function (fromTop) {
-          var offset = fromTop ? 1 : -1;
+function removeBlanks (canvas) {
+    var imgWidth = canvas.width;
+    var imgHeight = canvas.height;
+    var context = canvas.getContext("2d");
+    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    var data = imageData.data;
+    var getRBG = function(x, y) {
+        return {
+            red:   data[(imgWidth*y + x) * 4],
+            green: data[(imgWidth*y + x) * 4 + 1],
+            blue:  data[(imgWidth*y + x) * 4 + 2]
+        };
+    };
+    var isWhite = function (rgb) {
+        return !rgb.red && !rgb.green && !rgb.blue;
+    };
+    var scanY = function (fromTop) {
+        var offset = fromTop ? 1 : -1;
 
-          // loop through each row
-          for(var y = fromTop ? 0 : imgHeight - 1;
-                  fromTop ? (y < imgHeight) : (y > -1);
-                  y += offset) {
+        // loop through each row
+        for(var y = fromTop ? 0 : imgHeight - 1;
+                fromTop ? (y < imgHeight) : (y > -1);
+                y += offset) {
 
-              // loop through each column
-              for(var x = 0; x < imgWidth; x++) {
-                  if (!isWhite(getRBG(x, y))) {
-                      return y;
-                  }
-              }
-          }
-          return null; // all image is white
-      };
-      var scanX = function (fromLeft) {
-          var offset = fromLeft? 1 : -1;
+            // loop through each column
+            for(var x = 0; x < imgWidth; x++) {
+                if (!isWhite(getRBG(x, y))) {
+                    return y;
+                }
+            }
+        }
+        return null; // all image is white
+    };
+    var scanX = function (fromLeft) {
+        var offset = fromLeft? 1 : -1;
 
-          // loop through each column
-          for(var x = fromLeft ? 0 : imgWidth - 1;
-                  fromLeft ? (x < imgWidth) : (x > -1);
-                  x += offset) {
+        // loop through each column
+        for(var x = fromLeft ? 0 : imgWidth - 1;
+                fromLeft ? (x < imgWidth) : (x > -1);
+                x += offset) {
 
-              // loop through each row
-              for(var y = 0; y < imgHeight; y++) {
-                  if (!isWhite(getRBG(x, y))) {
-                      return x;
-                  }
-              }
-          }
-          return null; // all image is white
-      };
+            // loop through each row
+            for(var y = 0; y < imgHeight; y++) {
+                if (!isWhite(getRBG(x, y))) {
+                    return x;
+                }
+            }
+        }
+        return null; // all image is white
+    };
 
-      var cropTop = scanY(true);
-      var cropBottom = scanY(false);
-      var cropLeft = scanX(true);
-      var cropRight = scanX(false);
-      var cropWidth = cropRight-cropLeft+1;
-      var cropHeight = cropBottom-cropTop+1;
+    var cropTop = scanY(true);
+    var cropBottom = scanY(false);
+    var cropLeft = scanX(true);
+    var cropRight = scanX(false);
+    var cropWidth = cropRight-cropLeft+1;
+    var cropHeight = cropBottom-cropTop+1;
 
-      var newCanvas = document.createElement("canvas");
-      var newContext = newCanvas.getContext("2d");
+    var newCanvas = document.createElement("canvas");
+    var newContext = newCanvas.getContext("2d");
 
-      newCanvas.width = cropWidth;
-      newCanvas.height = cropHeight;
-      newContext.drawImage(canvas,
-              cropLeft, cropTop, cropWidth, cropHeight,
-              0, 0, cropWidth, cropHeight);
+    newCanvas.width = cropWidth;
+    newCanvas.height = cropHeight;
+    newContext.drawImage(canvas,
+            cropLeft, cropTop, cropWidth, cropHeight,
+            0, 0, cropWidth, cropHeight);
 
-      return newCanvas.toDataURL("image/png");
-  };
+    return newCanvas.toDataURL("image/png");
+};
 
 
 </script>

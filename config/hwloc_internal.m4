@@ -324,14 +324,8 @@ EOF
         hwloc_config_prefix[utils/lstopo/Makefile]
         hwloc_config_prefix[hwloc.pc]
 
-        hwloc_config_prefix[utils/lsmap/Makefile]
-        hwloc_config_prefix[utils/lsnettopo/Makefile]
         hwloc_config_prefix[utils/netloc_gather_ib/Makefile]
-        hwloc_config_prefix[utils/netloc_reader_ib/Makefile]
-        hwloc_config_prefix[utils/netloc_reader_of/Makefile]
-        hwloc_config_prefix[utils/netloc_reader_static/Makefile]
         hwloc_config_prefix[utils/netloc_draw/Makefile]
-        hwloc_config_prefix[utils/netloc_test/Makefile]
         hwloc_config_prefix[netloc.pc]
    )
 ])dnl

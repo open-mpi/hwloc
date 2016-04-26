@@ -31,16 +31,8 @@ sources = \
         support.h \
         topology.c \
         metadata.c \
-        api.c \
         support.c \
-        data_types.c \
-        data_collect.c \
-        pathfinder.c \
-        lookup_table.c \
-        explist.c \
-        export.c \
-        map.c \
-        analysis.c
+        data_types.c
 
 ldflags = $(JANSSON_LDFLAGS)
 

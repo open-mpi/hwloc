@@ -7,12 +7,6 @@ SUBDIRS = hwloc lstopo
 
 if BUILD_NETLOC
 SUBDIRS += \
-        lsmap \
-        lsnettopo \
-        netloc_test \
         netloc_gather_ib \
-        netloc_reader_ib \
-        netloc_reader_of \
-        netloc_reader_static \
         netloc_draw
 endif

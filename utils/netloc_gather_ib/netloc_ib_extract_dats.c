@@ -14,8 +14,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <uthash.h>
-#include <utarray.h>
+#include <netloc/uthash.h>
+#include <netloc/utarray.h>
 
 #include <libgen.h> // for dirname
 
@@ -27,39 +27,83 @@
 #include <fcntl.h>
 #include <string.h>
 
-typedef struct {
-    UT_hash_handle hh;       /* makes this structure hashable */
-    char physical_id[17];    /* key */
-    char logical_id[17];
-    char type[3];
-    char subnet_id[20];
-    char network_type[3];
-    char description[];
-
-} *node_t;
-node_t nodes = NULL;
+int global_link_idx = 0;
 
 typedef struct {
     UT_hash_handle hh;         /* makes this structure hashable */
-    char edge_id[19];             /* key */
-    int ports[2];
-    char port_types[2][3];
-    char width[3];
-    char speed[6];
-    float gbits;
-    char description[];
-} *edge_t;
-edge_t edges = NULL;
+    char dest[20];             /* key */
+    float total_gbits;
+    UT_array *physical_link_idx;
+    int *partitions;
+} edge_t;
 
 typedef struct {
-    edge_t edge;
-    int way;
-} edge_ref_t;
+    UT_hash_handle hh;       /* makes this structure hashable */
+    char physical_id[20];    /* key */
+    long logical_id;
+    int type;
+    char *description;
+    edge_t *edges;
+    int main_partition;
+    char *hostname;
+    int *partitions;
+    UT_array *physical_links;
+} node_t;
+node_t *nodes = NULL;
 
-UT_icd edge_ref_icd = {sizeof(edge_ref_t), NULL, NULL, NULL};
+typedef struct {
+    int int_id; // TODO long long
+    int ports[2];
+    node_t *dest;
+    char *width;
+    char *speed;
+    float gbits;
+    char *description;
+    int *partitions;
+    int other_id;
+    edge_t *parent_edge;
+    node_t *parent_node;
+} physical_link_t;
+UT_icd physical_link_icd = {sizeof(physical_link_t), NULL, NULL, NULL };
 
-int read_routes(char *subnet, char *routes_path);
-int read_discover(char *subnet, char *discover_path);
+UT_icd partitions_icd = {sizeof(char *), NULL, NULL, NULL };
+UT_array *partitions = NULL;
+
+const int NODE_TYPE_HOST = 0;
+const int NODE_TYPE_SWITH = 1;
+const int NODE_TYPE_UNKNOWN = 2;
+
+/* Route tables */
+typedef struct {
+    UT_hash_handle hh;       /* makes this structure hashable */
+    char physical_id[20];    /* key */
+    int port;
+} route_dest_t;
+typedef struct {
+    UT_hash_handle hh;       /* makes this structure hashable */
+    char physical_id[20];    /* key */
+    route_dest_t *dest;
+} route_source_t;
+route_source_t *routes = NULL;
+
+/* Paths tables */
+typedef struct {
+    UT_hash_handle hh;       /* makes this structure hashable */
+    char physical_id[20];    /* key */
+    node_t *node;
+    UT_array *links;
+} path_dest_t;
+typedef struct {
+    UT_hash_handle hh;       /* makes this structure hashable */
+    char physical_id[20];    /* key */
+    node_t *node;
+    path_dest_t *dest;
+} path_source_t;
+path_source_t *paths = NULL;
+
+int read_routes(char *subnet, char *path, char *route_filename);
+int read_discover(char *subnet, char *discover_path, char *filename);
+int write_into_file(char *subnet, char *path);
 
 static void get_match(char *line, int nmatch, regmatch_t pmatch[], char *matches[])
 {
@@ -72,29 +116,76 @@ static void get_match(char *line, int nmatch, regmatch_t pmatch[], char *matches
     }
 }
 
-node_t get_node(node_t *nodes, char *type, char *lid,
+/* We suppose the description of nodes is like that: ([^ ]*).*
+ * while \1 is the hostname
+ */
+static char *node_find_hostname(node_t *node)
+{
+    char *name = node->description;
+    int max_size = strlen(name);
+    char *hostname = (char *)malloc(max_size*sizeof(char));
+
+    /* Looking for the name of the hostname */
+    int i = 0;
+    if (name[0] == '\'')
+        name++;
+    while (i < max_size &&
+            ((name[i] >= 'a' && name[i] <= 'z') ||
+             (name[i] >= '0' && name[i] <= '9') ||
+             (name[i] == '-'))) {
+        hostname[i] = name[i];
+        i++;
+    }
+    hostname[i++] = '\0';
+    hostname = realloc(hostname, i*sizeof(char));
+    return hostname;
+}
+
+node_t *get_node(node_t **nodes, char *type, char *lid,
         char *guid, char *subnet, char *desc)
 {
-    node_t node;
+    node_t *node;
+    char *id;
+
+    asprintf(&id, "%.4s:%.4s:%.4s:%.4s",
+            guid, guid+4, guid+8, guid+12);
 
     // TODO check guid format
-    HASH_FIND_STR(*nodes, guid+2, node);  /* id already in the hash? */
+    HASH_FIND_STR(*nodes, id, node);  /* id already in the hash? */
     if (!node) {
         size_t size = sizeof(*node)+sizeof(char)*(strlen(desc)+1);
-        node = (node_t) malloc(size);
-        sprintf(node->physical_id, "%.17s", guid+2);
-        sprintf(node->logical_id, "%.17s", lid);
-        sprintf(node->type, "%.2s", type);
-        sprintf(node->subnet_id, "%.19s", subnet);
-        sprintf(node->network_type, "IB");
-        sprintf(node->description, "%s", desc);
+        node = (node_t *) malloc(size);
+        sprintf(node->physical_id, "%s", id);
+
+        node->logical_id = atol(lid);
+        if (!strcmp(type, "CA"))
+            node->type = NODE_TYPE_HOST;
+        else if (!strcmp(type, "SW"))
+            node->type = NODE_TYPE_SWITH;
+        else
+            node->type = NODE_TYPE_UNKNOWN;
+        node->edges = NULL;
+        node->description = strdup(desc);
+        node->hostname = node_find_hostname(node);
+        node->main_partition = -1;
+        node->partitions = NULL;
+        
+        utarray_new(node->physical_links, &physical_link_icd);
 
         HASH_ADD_STR(*nodes, physical_id, node);  /* guid: name of key field */
     }
-    else
-        printf("node found!\n");
-    //printf("guid : %s\n", guid);
     return node;
+}
+
+static int find_other_physical_link(physical_link_t *link)
+{
+    node_t *dest = link->dest;
+    int dest_port = link->ports[1];
+
+    physical_link_t *other_link = (physical_link_t *)
+        utarray_eltptr(dest->physical_links, dest_port-1);
+
+    return other_link->int_id;
 }
 
 static float compute_gbits(char *speed, char *width)
@@ -137,7 +228,206 @@ static float compute_gbits(char *speed, char *width)
     }
 
     return x*gb_per_x;
- }
+}
+
+int build_paths(void)
+{
+    node_t *node_src, *node_dest, *node_tmp1, *node_tmp2;
+    HASH_ITER(hh, nodes, node_src, node_tmp1) {
+        if (node_src->type != NODE_TYPE_HOST)
+            continue;
+        char *id_src = node_src->physical_id;
+
+        path_source_t *path = (path_source_t *)
+            malloc(sizeof(path_source_t));
+        sprintf(path->physical_id, "%s", id_src);
+        path->node = node_src;
+        path->dest = NULL;
+        HASH_ADD_STR(paths, physical_id, path);
+
+        HASH_ITER(hh, nodes, node_dest, node_tmp2) {
+            if (node_dest->type != NODE_TYPE_HOST)
+                continue;
+
+            if (node_dest == node_src) {
+                continue;
+            }
+
+            UT_array *found_links = NULL;
+            utarray_new(found_links, &ut_ptr_icd);
+            int completed = 1;
+
+            char *id_dest = node_dest->physical_id;
+
+            physical_link_t *link = (physical_link_t *)
+                utarray_eltptr(node_src->physical_links, 0);
+            utarray_push_back(found_links, &link);
+
+            node_t *node_cur = link->dest;
+            while (node_cur != node_dest) {
+                route_source_t *route_source;
+                route_dest_t *route_dest;
+                char *id_cur = node_cur->physical_id;
+                HASH_FIND_STR(routes, id_cur, route_source);
+                if (!route_source) {
+                    completed = 0;
+                    break;
+                }
+                HASH_FIND_STR(route_source->dest, id_dest, route_dest);
+                if (!route_dest) {
+                    completed = 0;
+                    break;
+                }
+
+                int port = route_dest->port;
+                link = (physical_link_t *)
+                    utarray_eltptr(node_cur->physical_links, port-1);
+                utarray_push_back(found_links, &link);
+                node_cur = link->dest;
+            }
+
+            if (completed) {
+                path_dest_t *path_dest = (path_dest_t *)
+                    malloc(sizeof(path_dest_t));
+                sprintf(path_dest->physical_id, "%s", id_dest);
+                path_dest->node = node_dest;
+                path_dest->links = found_links;
+                HASH_ADD_STR(path->dest, physical_id, path_dest);
+            }
+        }
+    }
+    return 0;
+}
+
+/* We suppose the hostname of nodes is like that: ([a-z]*).*
+ * while \1 is the name of the partition
+ */
+static char *node_find_partition_name(node_t *node)
+{
+    char *name;
+    int max_size;
+    char *partition;
+
+    max_size = strlen(node->hostname);
+    partition = (char *)malloc((max_size+1)*sizeof(char));
+    name = node->hostname;
+
+    /* Looking for the name of the partition */
+    int i = 0;
+    while (i < max_size && (name[i] >= 'a' && name[i] <= 'z')) {
+        partition[i] = name[i];
+        i++;
+    }
+    partition[i++] = '\0';
+    partition = realloc(partition, i*sizeof(char));
+    return partition;
+}
+
+
+int netloc_topology_find_partitions()
+{
+    int ret = 0;
+    int num_nodes;
+    char **partition_names;
+    node_t **hosts;
+
+    num_nodes = HASH_COUNT(nodes);
+    partition_names = (char **)malloc(num_nodes*sizeof(char *));
+    hosts = (node_t **)malloc(num_nodes*sizeof(node_t *));
+
+    /* Save all the partition names */
+    int n = 0;
+    node_t *node, *node_tmp;
+    HASH_ITER(hh, nodes, node, node_tmp) {
+        if (node->type != NODE_TYPE_HOST)
+            continue;
+        partition_names[n] = node_find_partition_name(node);
+        hosts[n] = node;
+        n++;
+    }
+
+    /* Associate the field partition in the nodes to the correct partition
+     * index
+     */
+    int num_hosts = n;
+    int num_partitions = 0;
+    for (int n1 = 0; n1 < num_hosts; n1++) {
+        if (!partition_names[n1])
+            continue;
+        partition_names[num_partitions] = partition_names[n1];
+        hosts[n1]->main_partition = num_partitions;
+
+        for (int n2 = n1+1; n2 < num_hosts; n2++) {
+            if (!partition_names[n2])
+                continue;
+
+            if (!strcmp(partition_names[n1], partition_names[n2])) {
+                free(partition_names[n2]);
+                partition_names[n2] = NULL;
+                hosts[n2]->main_partition = num_partitions;
+            }
+        }
+        num_partitions++;
+    }
+
+    printf("%d partitions found\n", num_partitions);
+    utarray_new(partitions, &partitions_icd);
+    utarray_reserve(partitions, num_partitions);
+    for (int p = 0; p < num_partitions; p++) {
+        printf("\t'%s'\n", partition_names[p]);
+        utarray_push_back(partitions, partition_names+p);
+    }
+    free(partition_names);
+    free(hosts);
+
+    return ret;
+}
+
+int netloc_topology_set_partitions(void)
+{
+    /* Find the main partition for each node */
+    netloc_topology_find_partitions();
+
+    node_t *node, *node_tmp;
+    HASH_ITER(hh, nodes, node, node_tmp) {
+        node->partitions = (int *)
+            calloc(utarray_len(partitions), sizeof(int));
+        node->partitions[node->main_partition] = 1;
+
+        edge_t *edge, *edge_tmp;
+        HASH_ITER(hh, node->edges, edge, edge_tmp) {
+            edge->partitions = (int *)
+                calloc(utarray_len(partitions), sizeof(int));
+        }
+    }
+
+    /* Set the partitions for the physical links considering if there is in a
+     * path between two nodes of a partition */
+    path_source_t *path_src, *path_src_tmp;
+    HASH_ITER(hh, paths, path_src, path_src_tmp) {
+        node_t *node_src = path_src->node;
+        int partition = node_src->main_partition;
+        path_dest_t *path_dest, *path_dest_tmp;
+        HASH_ITER(hh, path_src->dest, path_dest, path_dest_tmp) {
+            node_t *node_dest = path_dest->node;
+            if (node_dest->main_partition != partition)
+                continue;
+
+            for (int l = 0; l < utarray_len(path_dest->links); l++) {
+                physical_link_t *link = *(physical_link_t **)
+                    utarray_eltptr(path_dest->links, l);
+                if (!link->partitions) {
+                    link->partitions = (int *)
+                        calloc(utarray_len(partitions), sizeof(int));
+                }
+                link->partitions[partition] = 1;
+                link->parent_node->partitions[partition] = 1;
+                link->parent_edge->partitions[partition] = 1;
+            }
+        }
+    }
+    return 0;
+}
 
 int main(int argc, char **argv)
 {
@@ -147,29 +437,49 @@ int main(int argc, char **argv)
     dir = opendir(path);
     if (dir != NULL) {
         regex_t subnet_regexp;
-        // TODO
-        //regcomp(&subnet_regexp, "^ib-subnet-([0-9a-fA-F:]{19}).txt$", REG_EXTENDED);
-        regcomp(&subnet_regexp, "ib-subnet-([0-9a-fA-F:]{19}).txt$", REG_EXTENDED);
+        regcomp(&subnet_regexp, "^ib-subnet-([0-9a-fA-F:]{19}).txt$", REG_EXTENDED);
         struct dirent *entry;
         while ((entry = readdir(dir))) {
             int subnet_found;
             char *filename = entry->d_name;
 
-            subnet_found = !(regexec(&subnet_regexp, filename, 0, NULL, REG_EXTENDED));
+            subnet_found = !(regexec(&subnet_regexp, filename, 0, NULL, 0));
             if (subnet_found) {
-                printf("current filename %s\n", filename);
-                char *subnet = NULL;
-                char *discover_path;
-                char *routes_path;
-                subnet = (char *)malloc(20*sizeof(char));
-                strncpy(subnet, filename+10, 19);
-                subnet[19] = '\0';
+                char *discover_filename;
+                char *route_filename;
+                char *subnet;
+                asprintf(&subnet, "%.19s", filename+10);
 
-                asprintf(&discover_path, "%s/%s", path, filename);
-                read_discover(subnet, discover_path);
+                discover_filename = filename;
+                read_discover(subnet, path, discover_filename);
 
-                asprintf(&routes_path, "%s/ibroutes-%s", path, subnet);
-                read_routes(subnet, routes_path);
+                asprintf(&route_filename, "%s/ibroutes-%s", path, subnet);
+                struct stat s;
+                int err = stat(route_filename, &s);
+                if (-1 == err) {
+                    if (errno == ENOENT) {
+                        printf("No route directory found for subnet %s\n", subnet);
+                    } else {
+                        perror("stat");
+                        exit(1);
+                    }
+                } else {
+                    if (S_ISDIR(s.st_mode)) {
+                        char *route_filename;
+                        asprintf(&route_filename, "ibroutes-%s", subnet);
+                        read_routes(subnet, path, route_filename);
+                        free(route_filename);
+                    } else {
+                        printf("No route directory found for subnet %s\n", subnet);
+                    }
+                }
+                free(route_filename);
+
+                build_paths();
+                netloc_topology_set_partitions();
+
+                write_into_file(subnet, path);
+
                 free(subnet);
             }
         }
@@ -180,14 +490,16 @@ int main(int argc, char **argv)
 
 }
 
-int read_discover(char *subnet, char *discover_path)
+int read_discover(char *subnet, char *path, char *filename)
 {
     char *line = NULL;
     size_t size = 0;
+    char *discover_path;
+    asprintf(&discover_path, "%s/%s", path, filename);
     FILE *discover_file = fopen(discover_path, "r");
 
     if (!discover_file) {
-        perror("fopen: ");
+        perror("fopen");
         exit(-1);
     }
 
@@ -199,14 +511,14 @@ int read_discover(char *subnet, char *discover_path)
             "(CA|SW)[[:space:]]+"                // Source type
             "([[:digit:]]+)[[:space:]]+"         // Source lid
             "([[:digit:]]+)[[:space:]]+"         // Source port id
-            "(0x[0-9a-f]{16})[[:space:]]+"       // Source guid
+            "0x([0-9a-f]{16})[[:space:]]+"       // Source guid
             "([[:digit:]]+x)[[:space:]]"         // Connection width
             "([^[:space:]]*)[[:space:]]+"        // Connection speed
             "-[[:space:]]+"                      // Dash seperator
             "(CA|SW)[[:space:]]+"                // Dest type
             "([[:digit:]]+)[[:space:]]+"         // Dest lid
             "([[:digit:]]+)[[:space:]]+"         // Dest port id
-            "(0x[0-9a-f]{16})[[:space:]]+"       // Dest guid
+            "0x([0-9a-f]{16})[[:space:]]+"       // Dest guid
             "\\([[:space:]]*(.*)[[:space:]]*\\)" // Description
             ,
             REG_EXTENDED);
@@ -216,9 +528,7 @@ int read_discover(char *subnet, char *discover_path)
             "(CA|SW)[[:space:]]+"          // Source type
             "([[:digit:]]+)[[:space:]]+"   // Source lid
             "([[:digit:]]+)[[:space:]]+"   // Source port id
-            "(0x[0-9a-f]{16})[[:space:]]+" // Source guid
-            "([[:digit:]]+x)[[:space:]]"   // Connection width
-            "([^[[:space:]]]*)"            // Connection speed
+            "0x([0-9a-f]{16})[[:space:]]+"       // Source guid
             ,
             REG_EXTENDED);
 
@@ -239,7 +549,7 @@ int read_discover(char *subnet, char *discover_path)
         char *dest_lid;
         char *dest_port_id;
         char *dest_guid;
-        char *edge_desc;
+        char *link_desc;
         char *src_desc;
         char *dest_desc;
         int have_peer;
@@ -262,13 +572,13 @@ int read_discover(char *subnet, char *discover_path)
             dest_lid     = matches[ 8];
             dest_port_id = matches[ 9];
             dest_guid    = matches[10];
-            edge_desc    = matches[11];
+            link_desc    = matches[11];
 
             /* Analyse description */
             regex_t desc_re;
             regcomp(&desc_re, "(.*)" " - " "(.*)", REG_EXTENDED);
-            if (!regexec(&desc_re, edge_desc, (size_t)3, pmatch, 0)) {
-                get_match(edge_desc, 3, pmatch, matches);
+            if (!regexec(&desc_re, link_desc, (size_t)3, pmatch, 0)) {
+                get_match(link_desc, 3, pmatch, matches);
                 src_desc  = matches[1];
                 dest_desc = matches[2];
             }
@@ -298,122 +608,280 @@ int read_discover(char *subnet, char *discover_path)
         float gbits = compute_gbits(speed, width);
 
         /* Get the source node */
-        node_t src_node =
+        node_t *src_node =
             get_node(&nodes, src_type, src_lid, src_guid, subnet, src_desc);
+
 
         /* Add the link to the edge list */
         if (have_peer) {
-            node_t dest_node =
+            node_t *dest_node =
                 get_node(&nodes, dest_type, dest_lid, dest_guid, subnet, dest_desc);
 
-            /* Compute the key */
-
-            char *ref_node;
-            char *ref_port;
-            if (strcmp(dest_node->physical_id, src_node->physical_id) < 0) {
-                ref_node = src_node->physical_id;
-                ref_port = src_port_id;
-            } else {
-                ref_node = dest_node->physical_id;
-                ref_port = dest_port_id;
-            }
-
-            char *edge_id;
-            edge_t edge; 
-            asprintf(&edge_id, "%s%s", ref_node, ref_port);
-
-            int way;
-            HASH_FIND_STR(edges, edge_id, edge);  /* id already in the hash? */
+            edge_t *edge;
+            HASH_FIND_STR(src_node->edges, dest_node->physical_id, edge);
+            /* Creation of the edge */
             if (!edge) {
-                way = 0;
-                size_t size = sizeof(*edge)+sizeof(char)*(strlen(edge_desc)+1);
-                edge = (edge_t) malloc(size);
-                strcpy(edge->edge_id, edge_id);
-
-                edge->ports[0]      =  atoi(src_port_id);
-                edge->ports[1]      =  atoi(dest_port_id);
-                sprintf(edge->port_types[0], "%s", src_type);
-                sprintf(edge->port_types[1], "%s", dest_type);
-                sprintf(edge->width, "%s", width);
-                sprintf(edge->speed, "%s", speed);
-                edge->gbits = gbits;
-                sprintf(edge->description, "%s", edge_desc);
-
-                HASH_ADD_STR(edges, edge_id, edge);
-
-                /* Add edge to the nodes */
-                //edge_ref_t edge_ref;
-                //edge_ref.edge = edge;
-                //edge_ref.way = way;
-                //utarray_push_back(src_node->edges, &edge_ref);
-                //edge_ref.way = !way;
-                //utarray_push_back(dest_node->edges, &edge_ref);
-            } else {
-                way = 1;
-                /* Check info */
-                // TODO change with warnings
-                assert(edge->ports[0] ==  atoi(dest_port_id));
-                assert(edge->ports[1] ==  atoi(src_port_id));
-                assert(!strcmp(edge->port_types[0], dest_type));
-                assert(!strcmp(edge->port_types[1], src_type));
-                assert(!strcmp(edge->width,  width));
-                assert(!strcmp(edge->speed,  speed));
-                assert(edge->gbits ==  gbits);
+                edge = (edge_t *) malloc(sizeof(edge_t));
+                strcpy(edge->dest, dest_node->physical_id);
+                edge->total_gbits = 0;
+                edge->partitions =  NULL;
+                utarray_new(edge->physical_link_idx, &ut_int_icd);
+                HASH_ADD_STR(src_node->edges, dest, edge);
             }
+
+            /* Creation of the physical link */
+            physical_link_t link[1];
+            link->int_id = global_link_idx++;
+            link->ports[0] =  atoi(src_port_id);
+            link->ports[1] =  atoi(dest_port_id);
+            link->width = strdup(width);
+            link->speed = strdup(speed);
+            link->dest = dest_node;
+            link->gbits = gbits;
+            edge->total_gbits += gbits;
+            link->description = strdup(link_desc);
+            link->partitions = NULL;
+            link->parent_edge = edge;
+            link->parent_node = src_node;
+
+            int port_idx = link->ports[0]-1;
+            /* NB: there is no function to set a specific index */
+            if (port_idx+1 > utarray_len(src_node->physical_links)) {
+                utarray_insert(src_node->physical_links, link, port_idx);
+            } else {
+                physical_link_t *dest_link = (physical_link_t *)
+                    utarray_eltptr(src_node->physical_links, port_idx);
+                memcpy(dest_link, link, sizeof(physical_link_t));
+            }
+
+            utarray_push_back(edge->physical_link_idx, &port_idx);
         }
     }
+
+    /* Find the link in the other way */
+    node_t *node, *node_tmp;
+    HASH_ITER(hh, nodes, node, node_tmp) {
+        int num_links = utarray_len(node->physical_links);
+        for (int i = 0; i <  num_links; i++) {
+            physical_link_t *link = (physical_link_t *)
+                utarray_eltptr(node->physical_links, i);
+            if (!link->dest)
+                continue;
+            link->other_id = find_other_physical_link(link);
+        }
+    }
+
     if (read == -1 && errno) {
         perror("getline:");
         exit(-1);
     }
     free(line);
 
-    FILE *output = fopen("/tmp/test.txt", "w");
+    return 0;
+}
 
-    /* Write nodes to file */
-    node_t node, node_tmp;
+char *partition_list_to_string(int *partition_list)
+{
+    if (!partition_list)
+        return strdup("");
+
+    int first = 1;
+    int offset = 0;
+    int num_partitions = utarray_len(partitions);
+    char tmp[20];
+    int max_length = num_partitions*(sprintf(tmp, "%d", num_partitions)+1)+1;
+
+    
+    char *string = (char *)malloc(max_length*sizeof(char));
+    for (int p = 0; p < num_partitions; p++) {
+        if (partition_list[p] != 0) {
+            if (!first)
+                offset += sprintf(string+offset, ":");
+            offset += sprintf(string+offset, "%d", p);
+            first = 0;
+        }
+    }
+    return string;
+}
+
+int write_into_file(char *subnet, char *path)
+{
+    char *output_path;
+    asprintf(&output_path, "%s/../netloc/IB-%s-nodes.txt", path, subnet);
+    FILE *output = fopen(output_path, "w");
+
+    if (!output) {
+        perror("fopen");
+        printf("Wrong output_path: %s\n", output_path);
+        exit(-1);
+    }
+    free(output_path);
+
+    /* Write nodes into file */
+    fprintf(output, "%d\n", HASH_COUNT(nodes));
+    node_t *node, *node_tmp;
     HASH_ITER(hh, nodes, node, node_tmp) {
         fprintf(output, "%s,", node->physical_id);
-        fprintf(output, "%s,", node->logical_id);
-        fprintf(output, "%s,", node->type);
-        fprintf(output, "%s,", node->subnet_id);
-        fprintf(output, "%s,", node->network_type);
-        fprintf(output, "%s", node->description);
+        fprintf(output, "%ld,", node->logical_id);
+        fprintf(output, "%d,", node->type);
+        fprintf(output, "%s,",
+                partition_list_to_string(node->partitions));
+        fprintf(output, "%s,", node->description);
+        fprintf(output, "%s", node->hostname);
         fprintf(output, "\n");
     }
 
-    /* Write edges to file */
-    edge_t edge, edge_tmp;
-    HASH_ITER(hh, edges, edge, edge_tmp) {
-        fprintf(output, "%s,", edge->edge_id);
-        fprintf(output, "%d,", edge->ports[0]);
-        fprintf(output, "%d,", edge->ports[1]);
-        fprintf(output, "%s,", edge->port_types[0]);
-        fprintf(output, "%s,", edge->port_types[1]);
-        fprintf(output, "%s,", edge->width);
-        fprintf(output, "%s,", edge->speed);
-        fprintf(output, "%f,", edge->gbits);
-        fprintf(output, "%s", edge->description);
+    /* Write edges into file */
+    HASH_ITER(hh, nodes, node, node_tmp) {
+        edge_t *edge, *edge_tmp;
+        fprintf(output, "%s", node->physical_id);
+        HASH_ITER(hh, node->edges, edge, edge_tmp) {
+            int num_links = utarray_len(edge->physical_link_idx);
+            fprintf(output, ",%s,", edge->dest);
+            fprintf(output, "%f,", edge->total_gbits);
+            fprintf(output, "%s,",
+                    partition_list_to_string(edge->partitions));
+            fprintf(output, "%d,", num_links);
+            for (int l = 0; l < num_links; l++) {
+                int link_idx = *(int *)utarray_eltptr(edge->physical_link_idx, l);
+                physical_link_t *link = (physical_link_t *)
+                    utarray_eltptr(node->physical_links, link_idx);
+                fprintf(output, "%d,", link->int_id);
+                fprintf(output, "%d,", link->ports[0]);
+                fprintf(output, "%d,", link->ports[1]);
+                fprintf(output, "%s,", link->width);
+                fprintf(output, "%s,", link->speed);
+                fprintf(output, "%f,", link->gbits);
+                fprintf(output, "%s,", link->description);
+                fprintf(output, "%d,", link->other_id);
+                fprintf(output, "%s",
+                        partition_list_to_string(link->partitions));
+                fprintf(output, "%s", l == num_links-1 ? "": ",");
+            }
+        }
         fprintf(output, "\n");
+    }
+
+    /* Write partitions into file */
+    for (char **ppartition = (char **)utarray_front(partitions);
+            ppartition != NULL;
+            ppartition = (char **)utarray_next(partitions, ppartition))
+        fprintf(output, "%s%s", *ppartition,
+                utarray_next(partitions, ppartition)? ",": "");
+    fprintf(output, "\n");
+
+    /* Write paths into file */
+    path_source_t *path_src, *path_src_tmp;
+    HASH_ITER(hh, paths, path_src, path_src_tmp) {
+        node_t *node_src = path_src->node;
+        path_dest_t *path_dest, *path_dest_tmp;
+        HASH_ITER(hh, path_src->dest, path_dest, path_dest_tmp) {
+            node_t *node_dest = path_dest->node;
+            fprintf(output, "%s,%s",
+                    node_src->physical_id, node_dest->physical_id);
+            for (int l = 0; l < utarray_len(path_dest->links); l++) {
+                physical_link_t *link = *(physical_link_t **)
+                    utarray_eltptr(path_dest->links, l);
+                fprintf(output, ",%d", link->int_id);
+            }
+            fprintf(output, "\n");
+        }
     }
 
     fclose(output);
 
-    printf("done\n");
     return 0;
 }
 
-int read_routes(char *subnet, char *routes_path)
+int read_routes(char *subnet, char *path, char *route_dirname)
 {
+    char *route_path;
+    asprintf(&route_path, "%s/%s", path, route_dirname);
     DIR *dir;
 
     printf("Read subnet: %s\n", subnet);
-    dir = opendir(routes_path);
+    dir = opendir(route_path);
 
-    // TODO
+    if (dir != NULL) {
+        char *line = NULL;
+        size_t size = 0;
+        regex_t route_filename_regexp;
+        regcomp(&route_filename_regexp, "^ibroute-[0-9a-fA-F:]{19}-([0-9]*).txt$", REG_EXTENDED);
+        struct dirent *entry;
+        while ((entry = readdir(dir))) {
+            char *filename = entry->d_name;
+
+            if (!(regexec(&route_filename_regexp, filename, 0, NULL, 0))) {
+                char *route_filename;
+                asprintf(&route_filename, "%s/%s", route_path, filename);
+                FILE *route_file = fopen(route_filename, "r");
+
+                if (!route_file) {
+                    perror("fopen");
+                    exit(-1);
+                }
+
+                if (!strcmp(filename, "ibroute-fe80:0000:0000:0000-12.txt")) {
+                    printf("DEBUG: read file %s\n", filename);
+                }
+
+                regex_t header_re;
+                regcomp(&header_re, "^Unicast lids.*"
+                        "guid[[:space:]]+0x([0-9a-f]{16}).*:", REG_EXTENDED);
+
+                regex_t route_re;
+                regcomp(&route_re, "^"
+                        "0x([0-9a-f]+)[[:space:]]+"            // Dest lid
+                        "([[:digit:]]+)[[:space:]]+"           // Port id
+                        ":[[:space:]]+[(]"                        // Separator
+                        "(Channel Adapter|Switch)[[:space:]]+" // Type
+                        "portguid 0x([0-9a-f]{16}):"           // Dest guid
+                        ,
+                        REG_EXTENDED);
+
+                int read;
+
+                route_source_t *route;
+                while ((read = getline(&line, &size, route_file)) > 0) {
+                    regmatch_t pmatch[5];
+                    char *matches[5];
+                    char guid[20];
+                    int port;
+                    char dest_guid[20];
+
+                    if (!regexec(&header_re, line, (size_t)2, pmatch, 0)) {
+                        get_match(line, 2, pmatch, matches);
+                        sprintf(guid, "%.4s:%.4s:%.4s:%.4s",
+                                matches[1], matches[1]+4, matches[1]+8, matches[1]+12);
+
+                        HASH_FIND_STR(routes, guid, route);
+                        if (!route) {
+                            route = (route_source_t *) malloc(sizeof(route_source_t));
+                            sprintf(route->physical_id, "%s", guid);
+                            route->dest = NULL;
+                            HASH_ADD_STR(routes, physical_id, route);
+                        }
+                    }
+                    else if (!regexec(&route_re, line, (size_t)5, pmatch, 0)) {
+                        route_dest_t *route_dest;
+                        get_match(line, 5, pmatch, matches);
+                        port = atoi(matches[2]);
+                        sprintf(dest_guid, "%.4s:%.4s:%.4s:%.4s",
+                                matches[4], matches[4]+4, matches[4]+8, matches[4]+12);
+
+                        route_dest = (route_dest_t *) malloc(sizeof(route_dest_t));
+                        sprintf(route_dest->physical_id, "%s", dest_guid);
+                        route_dest->port = port;
+                        HASH_ADD_STR(route->dest, physical_id, route_dest);
+                    }
+                }
+            }
+        }
+    }
 
 
     closedir(dir);
 
     return 0;
 }
+

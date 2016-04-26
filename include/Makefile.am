@@ -1,4 +1,4 @@
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -39,10 +39,8 @@ nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h
 if BUILD_NETLOC
 include_netlocdir = $(includedir)/netloc
 include_netloc_HEADERS = \
-        netloc/dc.h \
-        netloc/map.h \
-        netloc/rename.h \
-        netloc/rename_map.h
+        netloc/utarray.h \
+        netloc/uthash.h
 endif
 
 noinst_HEADERS = \

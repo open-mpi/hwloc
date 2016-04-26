@@ -2,6 +2,7 @@
 # Copyright © 2009-2013 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
+#
 
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 
@@ -89,9 +90,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
        $(hwloc_include_dir)/hwloc/myriexpress.h \
        $(srcdir)/netloc.doxy \
-       $(hwloc_include_dir)/netloc.h \
-       $(hwloc_include_dir)/netloc/dc.h \
-       $(hwloc_include_dir)/netloc/map.h
+       $(hwloc_include_dir)/netloc.h
 
 #
 # Create the images that we need for the PDF output and the HTML

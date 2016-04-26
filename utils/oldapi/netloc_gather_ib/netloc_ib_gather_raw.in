@@ -12,13 +12,6 @@ use strict;
 
 use Getopt::Long;
 
-my $HWLOC_top_builddir = "@HWLOC_top_builddir@";
-my $prefix = "@prefix@";
-my $exec_prefix = "@exec_prefix@";
-my $bindir = "@bindir@";
-# this will be changed into $bindir/... during make install
-my $locallstopo = "$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics";
-
 my $hwlocdir = undef;
 my $outdir = undef;
 my @forcesubnets;
@@ -57,26 +50,23 @@ my $ok = Getopt::Long::GetOptions(
 	"help|h" => \$help
     );
 
-if ($help or !$ok or !defined $ARGV[0]) {
-    print "$0 [options] <outdir>\n";
-    print "  Dumps topology information to <outdir>/ib-raw/\n";
-    print "  Subnets are guessed from the <outdir>/hwloc/ directory where\n";
-    print "  the hwloc XML exports of some nodes are stored.\n";
-    print "Options:\n";
+if (!$ok or !defined $outdir) {
+    print "Output directory for raw IB data must be specified with\n";
+    print " --out-dir <dir>\n";
+    print "Input must be one of these\n";
+    print " --hwloc-dir <dir>\n";
+    print "    Specifies that <dir> contains the hwloc XML exports of the some nodes,\n";
+    print "    The list of IB subnets should be guessed from there.\n";
+    print " --force-subnet [<subnet>:]<board>:<port> to force the discovery\n";
+    print "    Force discovery on local board <board> port <port>, and optionally force the\n";
+    print "    subnet id <subnet> instead of reading it from the first GID.\n";
+    print "    Examples: --force-subnet mlx4_0:1\n";
+    print "              --force-subnet fe80:0000:0000:0000:mlx4_0:1\n";
+    print "Other options\n";
     print " --sudo\n";
     print "    Pass sudo to internal ibnetdiscover and ibroute invocations.\n";
     print "    Useful when the entire script cannot run as root.\n";
-    print " --hwloc-dir <dir>\n";
-    print "    Use <dir> instead of <outdir>/hwloc/ for hwloc XML exports.\n";
-    print " --force-subnet [<subnet>:]<board>:<port> to force the discovery\n";
-    print "    Do not guess subnets from hwloc XML exports.\n";
-    print "    Force discovery on local board <board> port <port>\n";
-    print "    and optionally force the subnet id <subnet>\n";
-    print "    instead of reading it from the first GID.\n";
-    print "    Examples: --force-subnet mlx4_0:1\n";
-    print "              --force-subnet fe80:0000:0000:0000:mlx4_0:1\n";
-    print " --ibnetdiscover /path/to/ibnetdiscover\n";
-    print " --ibroute /path/to/ibroute\n";
+    print " --ibnetdiscover --ibroute\n";
     print "    Specify exact location of programs. Default is /usr/bin/<program>\n";
     print " --sleep <n>\n";
     print "    Sleep for <n> seconds between invocations of programs probing the network\n";
@@ -87,18 +77,18 @@ if ($help or !$ok or !defined $ARGV[0]) {
     print " --verbose -v\n";
     print "    Add verbose messages\n";
     print " --dry-run\n";
-    print "    Do not actually run programs or modify anything\n";
-    print " --help -h\n";
-    print "    Show this help\n";
+    print "    Do not actually run programs\n";
     exit(1);
 }
-
-my $outdir = $ARGV[0];
-
-mkdir $outdir unless $dryrun;
-die "$outdir isn't a directory\n" unless -d $outdir;
-mkdir "$outdir/ib-raw" unless $dryrun;
-die "$outdir/ib-raw isn't a directory\n" unless -d "$outdir/ib-raw";
+mkdir $outdir;
+if (!-d $outdir) {
+    print "$outdir isn't a directory\n";
+    exit (1);
+}
+if ($hwlocdir and @forcesubnets) {
+    print "Don't specify both --hwloc-dir and --force-subnet.\n";
+    exit (1);
+}
 
 my $sudo = $needsudo ? "sudo" : "";
 
@@ -148,36 +138,11 @@ if (@forcesubnets) {
     }
   }
   print "\n";
+}
 
-} else {
-  #########################################
-  # Guess subnets from hwloc
-  if (!defined $hwlocdir) {
-    $hwlocdir = "${outdir}/hwloc";
-    print "Using $hwlocdir as hwloc lstopo XML directory.\n\n";
-  }
-
-  mkdir $hwlocdir unless $dryrun;
-  die "$hwlocdir isn't a directory\n" unless -d $hwlocdir;
-
-  # at least get the local hwloc XML
-  my $hostname = `hostname`;
-  chomp $hostname;
-  my $lstopooutput = "$hwlocdir/${hostname}.xml";
-  if (!-f $lstopooutput) {
-    print "Exporting local node hwloc XML...\n";
-    print "  Running lstopo-no-graphics...\n";
-    my $cmd = "$locallstopo -f $lstopooutput";
-    if ($dryrun) {
-      print "   NOT running $cmd\n" if $verbose;
-    } else {
-      my $ret = system "$cmd" ;
-      if ($ret and !$ignoreerrors) {
-	print "   Failed (exit code $ret).\n";
-      }
-    }
-    print "\n";
-  }
+#########################################
+# Guess subnets from hwloc
+if ($hwlocdir) {
 
   # $servers{$hostname}->{gids}->{$boardname}->{$portnum}->{$gidnum}->{subnet} and ->{guid} = xxxx:xxxx:xxxx:xxxx
   # $servers{$hostname}->{gids}->{$boardname}->{$portnum}->{invalid} = 1
@@ -406,7 +371,7 @@ sub getroutes {
 
         # Run ibroute on this switch LID
 	my $ibrouteoutput = "$ibrouteoutdir/ibroute-$subnet-$src_lid.txt";
-        print "  Running ibroute for switch '$src_name' LID $src_lid...\n";
+        print "  Running ibroute for switch LID $src_lid...\n";
 	my $cmd = "$sudo $ibroute -C $boardname -P $portnum $src_lid";
 	if ($dryrun) {
 	  print "   NOT running $cmd\n" if $verbose;
@@ -438,12 +403,12 @@ foreach my $subnet (keys %subnets_todiscover) {
 
   print "Looking at $subnet (through local board $boardname port $portnum)...\n";
 
-  my $ibnetdiscoveroutput = "$outdir/ib-raw/ib-subnet-$subnet.txt";
-  my $ibrouteoutdir = "$outdir/ib-raw/ibroutes-$subnet";
+  my $ibnetdiscoveroutput = "$outdir/ib-subnet-$subnet.txt";
+  my $ibrouteoutdir = "$outdir/ibroutes-$subnet";
 
   if (-f $ibnetdiscoveroutput and !$force) {
-    print " $ibnetdiscoveroutput already exists, discover again? (y/n) ";
-    my $answer = <STDIN>;
+    print " $outdir/ib-subnet-$subnet.txt already exists, discover again? (y/n) ";
+    my $answer = <>;
     next if $answer !~ /^y/;
   }
 
@@ -467,8 +432,7 @@ foreach my $subnet (keys %subnets_todiscover) {
   print " Getting routes...\n";
   if (!$dryrun) {
     system("rm -rf $ibrouteoutdir");
-    mkdir $ibrouteoutdir unless $dryrun;
-    die "$ibrouteoutdir isn't a directory\n" unless -d $ibrouteoutdir;
+    mkdir $ibrouteoutdir;
   }
   getroutes $subnet, $boardname, $portnum, $ibnetdiscoveroutput, $ibrouteoutdir;
 }

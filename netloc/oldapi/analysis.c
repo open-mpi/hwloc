@@ -860,6 +860,7 @@ int netloc_topology_analyse_as_tree(netloc_topology_t topology)
         }
     }
 
+    /* We set the levels in the analysis data */
     int level = 0;
     netloc_explist_t *edges_by_level = netloc_explist_init(1);
     netloc_node_t *current_node = /* pointer to one host node */
@@ -873,6 +874,7 @@ int netloc_topology_analyse_as_tree(netloc_topology_t topology)
         for (int n = 0; n < netloc_explist_get_size(nodes); n++) {
             netloc_node_t *node = netloc_explist_get(nodes, n);
             netloc_analysis_data *node_data = (netloc_analysis_data *)node->userdata;
+            /* There is a problem, this is not a tree */
             if (node_data->level != -1 && node_data->level != level) {
                 netloc_explist_destroy(new_nodes);
                 ret = -1;

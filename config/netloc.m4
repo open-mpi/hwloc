@@ -73,14 +73,7 @@ EOF])
 
     AC_CONFIG_FILES(
         netloc_config_prefix[netloc/Makefile]
-        netloc_config_prefix[utils/netloc_gather_ib/netloc_ib_gather_raw]
-        netloc_config_prefix[utils/netloc_gather_ib/netloc_ib_extract_dats]
     )
-
-    AC_CONFIG_COMMANDS([chmoding-netloc-scripts], [chmod +x \
-        ]netloc_config_prefix[utils/netloc_gather_ib/netloc_ib_gather_raw \
-        ]netloc_config_prefix[utils/netloc_gather_ib/netloc_ib_extract_dats \
-    ])
 
     AS_IF([test "$netloc_happy" = "yes"],
           [$2],
