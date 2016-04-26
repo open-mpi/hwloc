@@ -259,3 +259,5 @@ test-suite.log
 /tests/netloc/embedded/main
 /tests/netloc/embedded/make.out
 /tests/netloc/embedded/netloc-tree
+
+/contrib/systemd/hwloc-dump-hwdata.service
