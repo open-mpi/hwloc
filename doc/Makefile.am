@@ -2,7 +2,6 @@
 # Copyright © 2009-2013 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
-#
 
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 

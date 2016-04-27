@@ -220,13 +220,14 @@ static void find_similar_nodes(struct netloc_topology * topology)
 
                         /* Change the reverse edge of the neighbours (reverse nodes) */
                         netloc_node_t *reverse_node = edge1->dest;
-                        netloc_edge_t *reverse_edge;
-                        HASH_FIND_PTR(reverse_node->edges, &node1, reverse_edge);
+                        netloc_edge_t *reverse_edge = edge1->other_way;
 
                         netloc_edge_t *reverse_virtual_edge =
                             netloc_dt_edge_t_construct();
                         reverse_virtual_edge->dest = virtual_node;
                         reverse_virtual_edge->node = reverse_node;
+                        reverse_virtual_edge->other_way = virtual_edge;
+                        virtual_edge->other_way = reverse_virtual_edge;
                         HASH_ADD_PTR(reverse_node->edges, dest, reverse_virtual_edge);
                         edge_merge_into(reverse_virtual_edge, reverse_edge, 1);
                         HASH_DEL(reverse_node->edges, reverse_edge);
@@ -251,9 +252,7 @@ static void find_similar_nodes(struct netloc_topology * topology)
 
                     /* Change the reverse edge of the neighbours (reverse nodes) */
                     netloc_node_t *reverse_node = edge2->dest;
-
-                    netloc_edge_t *reverse_edge;
-                    HASH_FIND_PTR(reverse_node->edges, &node2, reverse_edge);
+                    netloc_edge_t *reverse_edge = edge2->other_way;
 
                     netloc_edge_t *reverse_virtual_edge;
                     HASH_FIND_PTR(reverse_node->edges, &virtual_node,
@@ -282,7 +281,25 @@ static int edges_sort_by_dest(netloc_edge_t *a, netloc_edge_t *b) {
     return (a->dest < b->dest) ? -1 : 1;
 }
 
-int support_load_datafile(struct netloc_topology * topology)
+static int find_reverse_edges(struct netloc_topology *topology)
+{
+    netloc_node_t *node, *node_tmp;
+    HASH_ITER(hh, topology->nodes, node, node_tmp) {
+        netloc_edge_t *edge, *edge_tmp;
+        netloc_node_iter_edges(node, edge, edge_tmp) {
+            netloc_node_t *dest = edge->dest;
+            if (dest > node) {
+                netloc_edge_t *reverse_edge;
+                HASH_FIND_PTR(dest->edges, &node, reverse_edge);
+                edge->other_way = reverse_edge;
+                reverse_edge->other_way = edge;
+            }
+        }
+    }
+    return 0;
+}
+
+int support_load_datafile(struct netloc_topology *topology)
 {
     int exit_status = NETLOC_SUCCESS;
 
@@ -419,6 +436,8 @@ int support_load_datafile(struct netloc_topology * topology)
 
         HASH_ADD_STR(node->paths, dest_id, path);
     }
+
+    find_reverse_edges( topology);
 
     fclose(input);
 

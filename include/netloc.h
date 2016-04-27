@@ -338,6 +338,8 @@ struct netloc_edge_t {
 
     UT_array *subnode_edges; /* for edges going to virtual nodes */
 
+    struct netloc_edge_t *other_way;
+
     /**
      * Application-given private data pointer.
      * Initialized to NULL, and not used by the netloc library.
@@ -345,10 +347,6 @@ struct netloc_edge_t {
     void * userdata;
 };
 typedef struct netloc_edge_t netloc_edge_t;
-typedef struct {
-    netloc_edge_t *edge;
-    int way;
-} netloc_edge_ref_t;
 
 struct netloc_physical_link_t {
     UT_hash_handle hh;       /* makes this structure hashable */

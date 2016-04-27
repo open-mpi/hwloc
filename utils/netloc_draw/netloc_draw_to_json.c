@@ -34,6 +34,7 @@
 #define JSON_DRAW_FILE_EDGE_LINKS "links"
 #define JSON_DRAW_FILE_EDGE_PARTITIONS "part"
 #define JSON_DRAW_FILE_EDGE_SUBEDGES "subedges"
+#define JSON_DRAW_FILE_EDGE_OTHER_WAY "reverse"
 #define JSON_DRAW_FILE_NODE_ID "id"
 #define JSON_DRAW_FILE_NODE_EDGES "edges"
 #define JSON_DRAW_FILE_NODE_MERGED "merged"
@@ -122,6 +123,7 @@ static int handle_edge(netloc_edge_t *edge, json_t *json_edges)
     json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_SRC, json_string(src));
     json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_DST, json_string(dest));
     json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_GBITS, json_real(edge->total_gbits));
+    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_OTHER_WAY, json_integer(edge->other_way->id));
 
     /* Links */
     json_t *json_links = json_array();

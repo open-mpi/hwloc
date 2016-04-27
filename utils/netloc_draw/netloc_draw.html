@@ -213,17 +213,6 @@ function loadFile(data)
     edges = new vis.DataSet({});
     edges.add(mydata.edges);
     printWithTime("Dataset edges created");
-    /* Find edge in other way */
-    edges.forEach(function(e) {
-        var id = e.id;
-        var other =
-            edges.get({filter: function(f) {
-                return f.from == e.to && f.to == e.from; }});
-        if (other.length) {
-            edges.update({id: id, other: other[0]});
-        }
-    });
-    printWithTime("Found other way for edges");
     /***********************************************************************/
 
     /* Set  nodes */
@@ -580,12 +569,12 @@ function draw()
     shownEdges = new vis.DataSet(subEdges.get({filter: function (e) {
         //return (subNodes.get(e.from) && subNodes.get(e.from).type != "host"); // DEBUG XXX
         if (e.from < e.to) {
-            if (!subEdges.get(e.other.id)) {
+            if (!subEdges.get(e.reverse)) {
                 e.arrows = {to: true};
             }
             return true;
         }
-        else if (!subEdges.get(e.other.id)) {
+        else if (!subEdges.get(e.reverse)) {
             e.arrows = {to: true};
             return true;
         }
