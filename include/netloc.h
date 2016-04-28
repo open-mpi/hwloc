@@ -20,7 +20,6 @@
 #endif
 
 #include <hwloc/autogen/config.h>
-#include <netloc/rename.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -427,16 +426,29 @@ struct netloc_node_t {
     int topoIdx;  /* index in the list from the topology */
 };
 
+
+typedef enum {
+    NETLOC_ARCH_TREE    =  0,  /* Fat tree */
+} netloc_arch_type_t;
 typedef struct {
     UT_hash_handle hh;       /* makes this structure hashable */
     char id[20];
     int idx; /* Rank in the scotch_arch */
-} netloc_scotch_host_t;
+} netloc_arch_host_t;
 typedef struct {
-    SCOTCH_Arch arch;
-    netloc_scotch_host_t *hosts;
-} netloc_scotch_t;
-
+    int num_levels;
+    int *degrees;
+    int *throughput;
+    int num_cores;
+    netloc_arch_host_t *hosts;
+} netloc_arch_tree_t;
+typedef struct {
+    netloc_arch_type_t type;
+    union {
+        netloc_arch_tree_t *tree;
+    } arch;
+    SCOTCH_Arch *scotch;
+} netloc_arch_t;
 /**********************************************************************
  * Topology API Functions
  **********************************************************************/

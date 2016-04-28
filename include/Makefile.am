@@ -14,6 +14,10 @@ if BUILD_NETLOC
 include_HEADERS += netloc.h
 endif
 
+if BUILD_NETLOCSCOTCH
+include_HEADERS += netlocscotch.h
+endif
+
 include_hwlocdir = $(includedir)/hwloc
 include_hwloc_HEADERS = \
         hwloc/bitmap.h \

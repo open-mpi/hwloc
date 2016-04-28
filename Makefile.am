@@ -41,6 +41,9 @@ if BUILD_NETLOC
 # JMS Need to compare hwloc.pc and netloc.pc -- I think netloc.pc is
 # missing some things.
 pkgconfig_DATA += netloc.pc
+if BUILD_NETLOCSCOTCH
+pkgconfig_DATA += netlocscotch.pc
+endif BUILD_NETLOCSCOTCH
 endif BUILD_NETLOC
 endif HWLOC_BUILD_STANDALONE
 

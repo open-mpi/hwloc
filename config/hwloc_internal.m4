@@ -327,6 +327,7 @@ EOF
         hwloc_config_prefix[utils/netloc_gather_ib/Makefile]
         hwloc_config_prefix[utils/netloc_draw/Makefile]
         hwloc_config_prefix[netloc.pc]
+        hwloc_config_prefix[netlocscotch.pc]
    )
 ])dnl
 

@@ -117,4 +117,10 @@ AC_DEFUN([NETLOC_DO_AM_CONDITIONALS], [
     AM_CONDITIONAL([BUILD_NETLOC], [test "$netloc_happy" = "yes"])
 
     JANSSON_DO_AM_CONDITIONALS
+
+    AC_CHECK_HEADERS([scotch.h],
+            [scotch_found_headers=yes; break;])
+
+    AS_IF([test "x$scotch_found_headers" = "xyes"],
+            [AM_CONDITIONAL([BUILD_NETLOCSCOTCH], true)])
 ])dnl
