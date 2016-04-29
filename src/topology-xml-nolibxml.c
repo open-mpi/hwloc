@@ -219,8 +219,10 @@ hwloc__nolibxml_import_get_content(hwloc__xml_import_state_t state,
   char *end;
 
   /* auto-closed tags have no content */
-  if (nstate->closed)
+  if (nstate->closed) {
+    *beginp = "";
     return 0;
+  }
 
   /* find the next tag, where the content ends */
   end = strchr(buffer, '<');
