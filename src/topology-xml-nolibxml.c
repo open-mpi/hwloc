@@ -220,6 +220,8 @@ hwloc__nolibxml_import_get_content(hwloc__xml_import_state_t state,
 
   /* auto-closed tags have no content */
   if (nstate->closed) {
+    if (expected_length)
+      return -1;
     *beginp = "";
     return 0;
   }
