@@ -314,8 +314,6 @@ EOF
     LIBS="$hwloc_old_LIBS"
     unset hwloc_old_LIBS
 
-    AC_PATH_TOOL(RMPATH, rm)
-
     _HWLOC_CHECK_DIFF_U
     _HWLOC_CHECK_DIFF_W
 

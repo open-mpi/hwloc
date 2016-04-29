@@ -14,7 +14,6 @@ hwloc-dump-hwdata.service: hwloc-dump-hwdata.service.in Makefile
 	@ $(SED) \
 	  -e 's@#SBINDIR#@'$(sbindir)'@g' \
 	  -e 's@#RUNSTATEDIR#@'$(HWLOC_runstatedir)'@g' \
-	  -e 's@#RMPATH#@'$(RMPATH)'@g' \
 	  > $@ < $<
 
 distclean-local:
