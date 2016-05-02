@@ -16,11 +16,16 @@
 #include <dirent.h>
 #include <scotch.h>
 
+#include <private/autogen/config.h>
 #include <netloc.h>
 #include <netlocscotch.h>
 #include <private/netloc.h>
 #include <hwloc.h>
 #include "support.h"
+
+#ifdef HWLOC_HAVE_SLURM
+#include <slurm/slurm.h>
+#endif
 
 static void set_gbits(int *values, netloc_edge_t *edge, int num_levels)
 {
@@ -433,16 +438,38 @@ int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partiti
     return p;
 }
 
-static int get_core_number()
+static int slurm_get_proc_number(int *pnum_ppn)
 {
-    char *pbs_num_ppn = getenv("PBS_NUM_PPN");
-    if (strlen(pbs_num_ppn)) {
-        int num_ppn = atoi(pbs_num_ppn);
-        return num_ppn;
+    char *variable = getenv("SLURM_JOB_CPUS_PER_NODE");
+    if (variable) {
+        *pnum_ppn = atoi(variable);
+        return NETLOC_SUCCESS;
     } else {
-        printf("Error: you do not use PBS resource manager\n");
-        return -1;
+        printf("Error: problem in your SLURM environment\n");
+        return NETLOC_ERROR;
     }
+}
+
+static int pbs_get_proc_number(int *pnum_ppn)
+{
+    char *variable = getenv("PBS_NUM_PPN");
+    if (variable) {
+        *pnum_ppn = atoi(variable);
+        return NETLOC_SUCCESS;
+    } else {
+        printf("Error: problem in your PBS environment\n");
+        return NETLOC_ERROR;
+    }
+}
+
+static int hwloc_get_core_number(int *pnum_cores)
+{
+    // TODO
+    int num_cores;
+    num_cores = 32;
+
+    *pnum_cores = num_cores;
+    return NETLOC_SUCCESS;
 }
 
 static int tree_to_scotch_arch(netloc_arch_tree_t *tree, SCOTCH_Arch *scotch)
@@ -454,10 +481,11 @@ static int tree_to_scotch_arch(netloc_arch_tree_t *tree, SCOTCH_Arch *scotch)
     tree->degrees = (int *)realloc(tree->degrees, tree->num_levels*sizeof(int));
     tree->throughput = (int *)realloc(tree->throughput, tree->num_levels*sizeof(int));
 
-    int num_cores = get_core_number();
+    int num_cores;
+    ret = hwloc_get_core_number(&num_cores);
 
-    if (num_cores == -1) {
-        return NETLOC_ERROR;
+    if (ret != NETLOC_SUCCESS) {
+        return ret;
     }
 
     tree->degrees[tree->num_levels-1] = num_cores;
@@ -541,18 +569,21 @@ static int build_arch(netloc_arch_t *arch)
     return NETLOC_SUCCESS;
 }
 
-static int get_current_nodes(int *pnum_nodes, char ***pnodes)
+static int pbs_get_current_nodes(int *pnum_nodes, char ***pnodes)
 {
     char *pbs_file = getenv("PBS_NODEFILE");
     char *domainname = getenv("NETLOCSCOTCH_DOMAINNAME");
     char *line = NULL;
     size_t size = 0;
 
-    if (strlen(pbs_file)) {
-        int num_nodes = atoi(getenv("PBS_NUM_NODES"));
-        int by_node = atoi(getenv("PBS_NUM_PPN"));
-        int total_num_nodes = num_nodes*by_node;
+    if (pbs_file) {
         FILE *node_file = fopen(pbs_file, "r");
+
+        int num_nodes = atoi(getenv("PBS_NUM_NODES"));
+        int by_node;
+        pbs_get_proc_number(&by_node);
+
+        int total_num_nodes = num_nodes*by_node;
         int found_nodes = 0;
         char **nodes = (char **)malloc(total_num_nodes*sizeof(char *));
         int remove_length = strlen(domainname);
@@ -569,11 +600,44 @@ static int get_current_nodes(int *pnum_nodes, char ***pnodes)
         *pnodes = nodes;
         *pnum_nodes = total_num_nodes;
     } else { // TODO
-        printf("Error: you do not use PBS resource manager\n");
+        // you do not use PBS resource manager
         return NETLOC_ERROR;
     }
 
     return NETLOC_SUCCESS;
+}
+
+static int slurm_get_current_nodes(int *pnum_nodes, char ***pnodes)
+{
+#ifdef HWLOC_HAVE_SLURM
+    char *nodelist = getenv("SLURM_NODELIST");
+    char *domainname = getenv("NETLOCSCOTCH_DOMAINNAME");
+
+    if (nodelist) {
+        hostlist_t hostlist = slurm_hostlist_create(nodelist);
+        int num_nodes = slurm_hostlist_count(hostlist);
+        int by_node;
+        slurm_get_proc_number(&by_node);
+        int total_num_nodes = num_nodes*by_node;
+
+        char **nodes = (char **)malloc(total_num_nodes*sizeof(char *));
+
+        for (int n = 0; n < num_nodes; n++) {
+            char *hostname = slurm_hostlist_shift(hostlist);
+            for (int i = 0; i < by_node; i++) {
+                nodes[by_node*n+i] = strdup(hostname);
+            }
+            free(hostname);
+        }
+        slurm_hostlist_destroy(hostlist);
+
+        *pnum_nodes = total_num_nodes;
+        *pnodes = nodes;
+
+        return NETLOC_SUCCESS;
+    }
+#endif // HWLOC_HAVE_SLURM
+    return NETLOC_ERROR;
 }
 
 /* Need to define some variables in your environment:
@@ -592,11 +656,28 @@ int netlocscotch_build_current_arch(SCOTCH_Arch *subarch)
     }
 
     /* Then we retrieve the list of nodes given by the resource manager */
-    int num_nodes;
+    int num_nodes = -1;
     char **nodes;
-    ret = get_current_nodes(&num_nodes, &nodes);
-    if( NETLOC_SUCCESS != ret ) {
-        return ret;
+
+    /* We try different resource managers */
+    ret = pbs_get_current_nodes(&num_nodes, &nodes);
+
+    int (*get_node_functions[2])(int *, char ***) = {
+        slurm_get_current_nodes,
+        pbs_get_current_nodes
+    };
+
+    int num_functions = sizeof(get_node_functions)/sizeof(void *);
+
+    int f;
+    for (f = 0; f < num_functions; f++) {
+        ret = get_node_functions[f](&num_nodes, &nodes);
+        if (ret == NETLOC_SUCCESS)
+            break;
+    }
+    if (f == num_functions) {
+        fprintf(stderr, "Error: your resource manager is not compatible\n");
+        return NETLOC_ERROR;
     }
 
     /* Now we can build the sub architecture */

@@ -120,7 +120,9 @@ AC_DEFUN([NETLOC_DO_AM_CONDITIONALS], [
 
     AC_CHECK_HEADERS([scotch.h],
             [scotch_found_headers=yes; break;])
-
     AS_IF([test "x$scotch_found_headers" = "xyes"],
             [AM_CONDITIONAL([BUILD_NETLOCSCOTCH], true)])
+
+    AC_CHECK_HEADERS([slurm/slurm.h],
+            [AC_DEFINE(HWLOC_HAVE_SLURM, 1, [Define to 1 if slurm library is found])])
 ])dnl
