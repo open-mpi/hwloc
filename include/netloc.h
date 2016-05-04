@@ -447,7 +447,6 @@ typedef struct {
     union {
         netloc_arch_tree_t *tree;
     } arch;
-    SCOTCH_Arch *scotch;
 } netloc_arch_t;
 /**********************************************************************
  * Topology API Functions
@@ -547,6 +546,16 @@ NETLOC_DECLSPEC int netloc_dt_network_t_compare(netloc_network_t *a, netloc_netw
 NETLOC_DECLSPEC netloc_network_t * netloc_dt_network_t_dup(netloc_network_t *network);
 
 netloc_network_t* netloc_access_network_ref(struct netloc_topology * topology);
+
+int netloc_arch_build(netloc_arch_t *arch);
+int slurm_get_current_nodes(int *pnum_nodes, char ***pnodes);
+int slurm_get_proc_number(int *pnum_ppn);
+int pbs_get_current_nodes(int *pnum_nodes, char ***pnodes);
+int pbs_get_proc_number(int *pnum_ppn);
+int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition);
+int netloc_node_is_in_partition(netloc_node_t *node, int partition);
+int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partition_name);
+int hwloc_get_core_number(int *pnum_cores);
 
 #ifdef __cplusplus
 } /* extern "C" */

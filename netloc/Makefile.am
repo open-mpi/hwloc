@@ -32,7 +32,13 @@ sources = \
         topology.c \
         metadata.c \
         support.c \
-        data_types.c
+        data_types.c \
+        edge.c \
+        node.c \
+        architecture.c \
+        jobsched.c \
+        hwloc.c
+
 
 ldflags = $(JANSSON_LDFLAGS)
 
@@ -43,6 +49,9 @@ libnetloc_la_LDFLAGS = $(ldflags) -version-info $(libnetloc_so_version)
 libnetloc_la_LIBADD = \
         $(top_builddir)/hwloc/libhwloc.la \
         $(JANSSON_LIBS)
+if HWLOC_HAVE_SLURM
+libnetloc_la_LIBADD += -lslurm
+endif
 
 # Embedded library (note the lack of a .so version number -- that
 # intentionally only appears in the installable library).  Also note

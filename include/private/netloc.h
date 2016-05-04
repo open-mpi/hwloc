@@ -296,35 +296,6 @@ void **netloc_explist_get_array_and_destroy(netloc_explist_t *list);
  *        Analysis functionality
  **********************************************************************/
 
-typedef struct netloc_analysis_data_t {
-    int level;
-    void *userdata;
-} netloc_analysis_data;
-
-typedef struct netloc_tree_data_t {
-    int num_levels;
-    int *num_nodes_by_level;
-    netloc_node_t ***nodes_by_level;
-    int *num_edges_by_level;
-    netloc_node_t ***edges_by_level;
-} netloc_tree_data;
-
-typedef struct netloc_topology_analysis_t {
-    netloc_topology_t topology;
-    netloc_topology_type_t type;
-    void *data;
-} netloc_topology_analysis;
-
-NETLOC_DECLSPEC netloc_tree_data *netloc_get_tree_data(netloc_topology_analysis *analysis);
-NETLOC_DECLSPEC int netloc_topology_node_in_partition(netloc_node_t *node, int partition);
-NETLOC_DECLSPEC int netloc_topology_edge_in_partition(netloc_edge_t *edge, int partition);
-NETLOC_DECLSPEC int netloc_topology_find_partitions(netloc_topology_t topology);
-NETLOC_DECLSPEC int netloc_topology_analyse_as_tree(netloc_topology_t topology);
-NETLOC_DECLSPEC int netloc_topology_set_all_partitions(netloc_topology_t topology);
-NETLOC_DECLSPEC int netloc_read_hwloc(netloc_topology_t topology);
-NETLOC_DECLSPEC int netloc_topology_simplify(netloc_topology_t topology);
-NETLOC_DECLSPEC int netloc_topology_keep_partition(netloc_topology_t topology, char *partition_name);
-
 /* Access functions XXX */
 #define netloc_get_num_partitions(object) \
     utarray_len((object)->partitions)

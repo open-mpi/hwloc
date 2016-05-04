@@ -33,7 +33,11 @@ LDADD = $(top_builddir)/netloc/libnetloc.la
 
 if BUILD_NETLOCSCOTCH
 check_PROGRAMS += scotch
+if HWLOC_HAVE_SLURM
 scotch_LDADD = $(top_builddir)/netloc/libnetlocscotch.la -lscotch -lscotcherr -lslurm
+else
+scotch_LDADD = $(top_builddir)/netloc/libnetlocscotch.la -lscotch -lscotcherr
+endif
 endif BUILD_NETLOCSCOTCH
 
 test_map_LDADD = $(LDADD) $(top_builddir)/hwloc/libhwloc.la

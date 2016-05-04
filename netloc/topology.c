@@ -88,3 +88,27 @@ int netloc_topology_copy(struct netloc_topology *src, struct netloc_topology **d
    // TODO
     return 0;
 }
+
+int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partition_name)
+{
+    if (!partition_name)
+        return -1;
+
+    /* Find the selected partition in the topology */
+    int p = 0;
+    int found = 0;
+    while (p < utarray_len(topology->partitions)) {
+        char *current_name = *(char **)utarray_eltptr(topology->partitions, p);
+
+        if (!strcmp(current_name, partition_name)) {
+            found = 1;
+            break;
+        }
+        p++;
+    }
+
+    if (!found)
+        return -2;
+
+    return p;
+}

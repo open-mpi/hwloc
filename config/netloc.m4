@@ -124,5 +124,8 @@ AC_DEFUN([NETLOC_DO_AM_CONDITIONALS], [
             [AM_CONDITIONAL([BUILD_NETLOCSCOTCH], true)])
 
     AC_CHECK_HEADERS([slurm/slurm.h],
-            [AC_DEFINE(HWLOC_HAVE_SLURM, 1, [Define to 1 if slurm library is found])])
+            [AM_CONDITIONAL([HWLOC_HAVE_SLURM], true)
+            AC_DEFINE(HWLOC_HAVE_SLURM, 1, [Define to 1 if slurm library is found])],
+            [AM_CONDITIONAL([HWLOC_HAVE_SLURM], false)],
+            )
 ])dnl
