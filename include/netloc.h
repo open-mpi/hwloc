@@ -556,6 +556,7 @@ int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition);
 int netloc_node_is_in_partition(netloc_node_t *node, int partition);
 int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partition_name);
 int hwloc_get_core_number(int *pnum_cores);
+int netloc_get_current_nodes(int *pnum_nodes, char ***pnodes);
 
 #ifdef __cplusplus
 } /* extern "C" */

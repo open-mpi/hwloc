@@ -19,6 +19,36 @@
 #include <slurm/slurm.h>
 #endif
 
+int netloc_get_current_nodes(int *pnum_nodes, char ***pnodes)
+{
+    int num_nodes;
+    char **nodes;
+    int ret;
+
+    /* We try different resource managers */
+    int (*get_node_functions[2])(int *, char ***) = {
+        slurm_get_current_nodes,
+        pbs_get_current_nodes
+    };
+
+    int num_functions = sizeof(get_node_functions)/sizeof(void *);
+
+    int f;
+    for (f = 0; f < num_functions; f++) {
+        ret = get_node_functions[f](&num_nodes, &nodes);
+        if (ret == NETLOC_SUCCESS)
+            break;
+    }
+    if (f == num_functions) {
+        fprintf(stderr, "Error: your resource manager is not compatible\n");
+        return NETLOC_ERROR;
+    }
+
+    *pnum_nodes = num_nodes;
+    *pnodes = nodes;
+    return NETLOC_SUCCESS;
+}
+
 /******************************************************************************/
 /* Handles SLURM job manager */
 int slurm_get_current_nodes(int *pnum_nodes, char ***pnodes)

@@ -123,26 +123,11 @@ int netlocscotch_build_current_arch(SCOTCH_Arch *subarch)
     }
 
     /* Then we retrieve the list of nodes given by the resource manager */
-    int num_nodes = -1;
+    int num_nodes;
     char **nodes;
-
-    /* We try different resource managers */
-    int (*get_node_functions[2])(int *, char ***) = {
-        slurm_get_current_nodes,
-        pbs_get_current_nodes
-    };
-
-    int num_functions = sizeof(get_node_functions)/sizeof(void *);
-
-    int f;
-    for (f = 0; f < num_functions; f++) {
-        ret = get_node_functions[f](&num_nodes, &nodes);
-        if (ret == NETLOC_SUCCESS)
-            break;
-    }
-    if (f == num_functions) {
-        fprintf(stderr, "Error: your resource manager is not compatible\n");
-        return NETLOC_ERROR;
+    ret = netloc_get_current_nodes(&num_nodes, &nodes);
+    if( NETLOC_SUCCESS != ret ) {
+        return ret;
     }
 
     /* Now we can build the sub architecture */
