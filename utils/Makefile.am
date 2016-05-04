@@ -8,5 +8,6 @@ SUBDIRS = hwloc lstopo
 if BUILD_NETLOC
 SUBDIRS += \
         netloc_gather_ib \
-        netloc_draw
+        netloc_draw \
+        netloc_rank_order
 endif
