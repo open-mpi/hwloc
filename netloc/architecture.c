@@ -19,6 +19,7 @@ typedef struct netloc_analysis_data_t {
 } netloc_analysis_data;
 
 
+static int netloc_arch_add_hwloc(netloc_arch_t *arch);
 static int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
         netloc_arch_t *arch);
 static void set_gbits(int *values, netloc_edge_t *edge, int num_levels);
@@ -335,6 +336,61 @@ void set_gbits(int *values, netloc_edge_t *edge, int num_levels)
         values[idx] = gbits;
 }
 
+int netloc_arch_find_current_hosts(netloc_arch_t *arch, char **nodelist,
+        int num_nodes, netloc_arch_host_t ***phost_list)
+{
+    netloc_arch_tree_t *tree = arch->arch.tree;
+    int num_cores = tree->num_cores;
+    netloc_arch_host_t **host_list = (netloc_arch_host_t **)
+        malloc(num_nodes*sizeof(netloc_arch_host_t *));
+    netloc_arch_host_t *all_hosts = tree->hosts;
+
+    char *last_nodename = "";
+    netloc_arch_host_t *host;
+    for (int n = 0; n < num_nodes; n++) {
+        char *nodename = nodelist[n];
+
+        /* Another processor from the previous node */
+        if (strcmp(nodename, last_nodename)) {
+            HASH_FIND_STR(all_hosts, nodename, host);
+            last_nodename = nodename;
+            if (!host) {
+                fprintf(stderr, "Error: node %s not present in the all architecture\n", nodename);
+                return NETLOC_ERROR;
+            }
+        }
+        host_list[n] = host;
+    }
+
+    *phost_list = host_list;
+    return NETLOC_SUCCESS;
+}
+
+int netloc_arch_add_hwloc(netloc_arch_t *arch)
+{
+    int ret;
+    /* Add hwloc information to go beyond nodes */
+    /* TODO improve by using the tree from hwloc */
+    netloc_arch_tree_t *tree = arch->arch.tree;
+    tree->num_levels++;
+    tree->degrees = (int *)realloc(tree->degrees, tree->num_levels*sizeof(int));
+    tree->throughput = (int *)realloc(tree->throughput, tree->num_levels*sizeof(int));
+
+    int num_cores;
+    ret = hwloc_get_core_number(&num_cores);
+
+    if (ret != NETLOC_SUCCESS) {
+        return ret;
+    }
+
+    tree->degrees[tree->num_levels-1] = num_cores;
+    tree->throughput[tree->num_levels-1] = 1000; // TODO
+    tree->num_cores = num_cores;
+
+    return NETLOC_SUCCESS;
+}
+
+
 int netloc_arch_build(netloc_arch_t *arch)
 {
     char *arch_file = getenv("NETLOC_ARCHFILE");
@@ -360,7 +416,7 @@ int netloc_arch_build(netloc_arch_t *arch)
 
         // Search for the specific network
         int ret = netloc_find_network(netloc_dir, network);
-        if( NETLOC_SUCCESS != ret ) {
+        if (NETLOC_SUCCESS != ret) {
             fprintf(stderr, "Error: network not found!\n");
             netloc_dt_network_t_destruct(network);
             return NETLOC_ERROR;
@@ -391,6 +447,10 @@ int netloc_arch_build(netloc_arch_t *arch)
             netloc_topology_find_partition_idx(topology, partition_name);
 
         partition_topology_to_tleaf(topology, partition, arch);
+        ret = netloc_arch_add_hwloc(arch);
+        if (NETLOC_SUCCESS != ret) {
+            return NETLOC_ERROR;
+        }
     }
 
     return NETLOC_SUCCESS;
