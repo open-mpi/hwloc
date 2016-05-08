@@ -81,7 +81,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
       unsigned idx = strtoul(attr, (char **) &next, 10);
       if (next == attr) {
 	if (verbose)
-	  fprintf(stderr, "Failed to read synthetic index #%lu at '%s'\n", i, attr);
+	  fprintf(stderr, "Failed to read synthetic index #%lu at '%s'\n", (unsigned long) i, attr);
 	goto out_with_array;
       }
 
@@ -89,7 +89,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
       if (i != total-1) {
 	if (*next != ',') {
 	  if (verbose)
-	    fprintf(stderr, "Missing comma after synthetic index #%lu at '%s'\n", i, attr);
+	    fprintf(stderr, "Missing comma after synthetic index #%lu at '%s'\n", (unsigned long) i, attr);
 	  goto out_with_array;
 	}
 	attr = next+1;
