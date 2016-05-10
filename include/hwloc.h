@@ -1918,8 +1918,12 @@ enum hwloc_type_filter_e {
 
   /** \brief Only ignore objects if their entire level does not bring any structure.
    *
-   * Ignore the entire level from the given type as long as it does not bring any structure:
-   * Each object in the level should have a single child or be the only child of its parent.
+   * Keep the entire level of objects if at least one of these objects adds
+   * structure to the topology. An object brings structure when it has multiple
+   * children and it is not the only child of its parent.
+   *
+   * If all objects in the level are the only child of their parent, and if none
+   * of them has multiple children, the entire level is removed.
    *
    * Cannot be set for I/O and Misc objects since the topology structure does not matter there.
    * \hideinitializer
