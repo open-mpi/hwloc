@@ -21,6 +21,8 @@ Version 1.11.4
 --------------
 * Fix Linux build with -m32 with respect to libudev.
   Thanks to Paul Hargrove for reporting the issue.
+* Fix build with Visual Studio 2015, thanks to Eloi Gaudry for reporting
+  the issue and providing the patch.
 
 
 Version 1.11.3
