@@ -19,23 +19,43 @@
 #include <slurm/slurm.h>
 #endif
 
+static int netloc_get_current_hosts(int *pnum_nodes, char ***pnodes,
+        int by_node);
+
+static int slurm_get_current_hosts(int *pnum_nodes, char ***pnodes,
+        int by_node);
+static int slurm_get_proc_number(int *pnum_ppn);
+
+static int pbs_get_current_hosts(int *pnum_nodes, char ***pnodes, int by_node);
+static int pbs_get_proc_number(int *pnum_ppn);
+
 int netloc_get_current_nodes(int *pnum_nodes, char ***pnodes)
+{
+    return netloc_get_current_hosts(pnum_nodes, pnodes, 1);
+}
+
+int netloc_get_current_cores(int *pnum_nodes, char ***pnodes)
+{
+    return netloc_get_current_hosts(pnum_nodes, pnodes, 0);
+}
+
+int netloc_get_current_hosts(int *pnum_nodes, char ***pnodes, int by_node)
 {
     int num_nodes;
     char **nodes;
     int ret;
 
     /* We try different resource managers */
-    int (*get_node_functions[2])(int *, char ***) = {
-        slurm_get_current_nodes,
-        pbs_get_current_nodes
+    int (*get_node_functions[2])(int *, char ***, int) = {
+        slurm_get_current_hosts,
+        pbs_get_current_hosts
     };
 
     int num_functions = sizeof(get_node_functions)/sizeof(void *);
 
     int f;
     for (f = 0; f < num_functions; f++) {
-        ret = get_node_functions[f](&num_nodes, &nodes);
+        ret = get_node_functions[f](&num_nodes, &nodes, by_node);
         if (ret == NETLOC_SUCCESS)
             break;
     }
@@ -51,17 +71,19 @@ int netloc_get_current_nodes(int *pnum_nodes, char ***pnodes)
 
 /******************************************************************************/
 /* Handles SLURM job manager */
-int slurm_get_current_nodes(int *pnum_nodes, char ***pnodes)
+int slurm_get_current_hosts(int *pnum_nodes, char ***pnodes, int by_node)
 {
 #ifdef HWLOC_HAVE_SLURM
     char *nodelist = getenv("SLURM_NODELIST");
     char *domainname = getenv("NETLOC_DOMAINNAME");
 
+    if (!by_node) {
+        slurm_get_proc_number(&by_node);
+    }
+
     if (nodelist) {
         hostlist_t hostlist = slurm_hostlist_create(nodelist);
         int num_nodes = slurm_hostlist_count(hostlist);
-        int by_node;
-        slurm_get_proc_number(&by_node);
         int total_num_nodes = num_nodes*by_node;
 
         int remove_length;
@@ -105,19 +127,20 @@ int slurm_get_proc_number(int *pnum_ppn)
 
 /******************************************************************************/
 /* Handles PBS job manager */
-int pbs_get_current_nodes(int *pnum_nodes, char ***pnodes)
+int pbs_get_current_hosts(int *pnum_nodes, char ***pnodes, int by_node)
 {
     char *pbs_file = getenv("PBS_NODEFILE");
     char *domainname = getenv("NETLOC_DOMAINNAME");
     char *line = NULL;
     size_t size = 0;
 
+    if (!by_node)
+        pbs_get_proc_number(&by_node);
+
     if (pbs_file) {
         FILE *node_file = fopen(pbs_file, "r");
 
         int num_nodes = atoi(getenv("PBS_NUM_NODES"));
-        int by_node;
-        pbs_get_proc_number(&by_node);
 
         int total_num_nodes = num_nodes*by_node;
         int found_nodes = 0;

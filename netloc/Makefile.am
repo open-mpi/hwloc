@@ -37,7 +37,8 @@ sources = \
         node.c \
         architecture.c \
         jobsched.c \
-        hwloc.c
+        hwloc.c \
+        mpicomm.c
 
 
 ldflags = $(JANSSON_LDFLAGS)

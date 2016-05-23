@@ -15,6 +15,7 @@
 #ifndef _NETLOC_PRIVATE_H_
 #define _NETLOC_PRIVATE_H_
 
+#include <hwloc.h>
 #include <netloc.h>
 #include <jansson.h>
 #include <netloc/uthash.h>
@@ -42,6 +43,7 @@ struct netloc_topology {
 
     /** Node List */
     netloc_node_t *nodes;
+    netloc_node_t *nodesByHostname;
 
     netloc_physical_link_t *physical_links;
 
@@ -50,6 +52,7 @@ struct netloc_topology {
 
     /** Hwloc topology List */
     UT_array *topos;
+    hwloc_topology_t *hwloc_topos;
 
     /** Type of the graph */
     netloc_topology_type_t type;
@@ -363,5 +366,11 @@ void **netloc_explist_get_array_and_destroy(netloc_explist_t *list);
     HASH_ITER(hh, node->paths, path, _tmp)
 
 int support_load_datafile(struct netloc_topology * topology);
+void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
+        netloc_arch_host_t **phosts_by_idx);
+int hwloc_to_netloc_arch(hwloc_topology_t topology, netloc_arch_t *arch);
+char *netloc_line_get_next_token(char **string, char c);
+ssize_t netloc_get_line(char **lineptr, size_t *n, FILE *stream);
+int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum_row);
 
 #endif // _NETLOC_PRIVATE_H_

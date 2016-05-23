@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     int ret;
     /* First we need to get the topology of the whole machine */
     netloc_arch_t arch;
-    ret = netloc_arch_build(&arch);
+    ret = netloc_arch_build(&arch, 1);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     /* Then we retrieve the list of nodes given by the resource manager */
     int num_nodes;
     char **nodes;
-    ret = netloc_get_current_nodes(&num_nodes, &nodes);
+    ret = netloc_get_current_cores(&num_nodes, &nodes);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
     /* Show the list */
     for (int n = 0; n < num_nodes; n++) {
-        printf("%s%s", host_list[n]->id, n != num_nodes-1 ? " ": "\n");
+        printf("%s%s", ((char **)arch.hosts)[host_list[n]->host_idx], n != num_nodes-1 ? " ": "\n");
     }
 
     return NETLOC_SUCCESS;

@@ -66,7 +66,7 @@ int support_extract_filename_from_uri(const char * uri, uri_type_t *type, char *
 UT_icd edge_icd = {sizeof(netloc_edge_t), NULL, NULL, NULL };
 
 
-static char *line_get_next_token(char **string, char c)
+char *netloc_line_get_next_token(char **string, char c)
 {
     char *field;
     char *string_end;
@@ -89,20 +89,20 @@ static char *line_get_next_token(char **string, char c)
 }
 static char *line_get_next_field(char **string)
 {
-    return line_get_next_token(string, ',');
+    return netloc_line_get_next_token(string, ',');
 }
 
 static void read_partition_list(char *list, UT_array *array) {
     char *partition;
     if (!strlen(list))
         return;
-    while ((partition = line_get_next_token(&list, ':'))) {
+    while ((partition = netloc_line_get_next_token(&list, ':'))) {
         int partition_num = atoi(partition);
         utarray_push_back(array, &partition_num);
     }
 }
 
-static ssize_t get_line(char **lineptr, size_t *n, FILE *stream)
+ssize_t netloc_get_line(char **lineptr, size_t *n, FILE *stream)
 {
     ssize_t read = getline(lineptr, n, stream);
     if (read == -1)
@@ -308,6 +308,7 @@ int support_load_datafile(struct netloc_topology *topology)
     }
 
     topology->nodes = NULL;
+    topology->nodesByHostname = NULL;
     topology->physical_links = NULL;
 
     char *path = topology->network->node_uri;
@@ -328,7 +329,7 @@ int support_load_datafile(struct netloc_topology *topology)
     /* Read nodes from file */
     for (int n = 0; n < num_nodes; n++) {
         netloc_node_t *node = netloc_dt_node_t_construct();
-        get_line(&line, &linesize, input);
+        netloc_get_line(&line, &linesize, input);
         char *remain_line = line;
 
         strcpy(node->physical_id, line_get_next_field(&remain_line));
@@ -339,6 +340,10 @@ int support_load_datafile(struct netloc_topology *topology)
         node->hostname = strdup(line_get_next_field(&remain_line));
 
         HASH_ADD_STR(topology->nodes, physical_id, node);
+        if (strlen(node->hostname) > 0) {
+            HASH_ADD_KEYPTR(hh2, topology->nodesByHostname, node->hostname,
+                    strlen(node->hostname), node);
+        }
     }
 
     /* Read edges from file */
@@ -346,7 +351,7 @@ int support_load_datafile(struct netloc_topology *topology)
         char *field;
         netloc_node_t *node;
 
-        get_line(&line, &linesize, input);
+        netloc_get_line(&line, &linesize, input);
         char *remain_line = line;
 
         field = line_get_next_field(&remain_line);
@@ -400,7 +405,7 @@ int support_load_datafile(struct netloc_topology *topology)
 
     /* Read partitions from file */
     {
-        get_line(&line, &linesize, input);
+        netloc_get_line(&line, &linesize, input);
         char *remain_line = line;
         char *field;
 
@@ -411,7 +416,7 @@ int support_load_datafile(struct netloc_topology *topology)
     }
 
     /* Read paths */
-    while (get_line(&line, &linesize, input) != -1) {
+    while (netloc_get_line(&line, &linesize, input) != -1) {
         netloc_node_t *node;
         netloc_path_t *path;
         char *field;

@@ -389,7 +389,8 @@ typedef struct netloc_path_t netloc_path_t;
  * will distinguish the exact type of node this represents in the graph.
  */
 struct netloc_node_t {
-    UT_hash_handle hh;       /* makes this structure hashable */
+    UT_hash_handle hh;       /* makes this structure hashable with physical_id */
+    UT_hash_handle hh2;      /* makes this structure hashable with hostname */
 
     /** Physical ID of the node */
     char physical_id[20];
@@ -423,7 +424,7 @@ struct netloc_node_t {
 
     UT_array *partitions; /* index in the list from the topology */
 
-    int topoIdx;  /* index in the list from the topology */
+    int hwlocTopoIdx;  /* index in the list from the topology */
 };
 
 
@@ -432,21 +433,24 @@ typedef enum {
 } netloc_arch_type_t;
 typedef struct {
     UT_hash_handle hh;       /* makes this structure hashable */
-    char id[20];
-    int idx; /* Rank in the scotch_arch */
+    int idx; /* Hash key, and rank in the complete arch */
+    int host_idx;
 } netloc_arch_host_t;
 typedef struct {
     int num_levels;
     int *degrees;
     int *throughput;
     int num_cores;
-    netloc_arch_host_t *hosts;
 } netloc_arch_tree_t;
 typedef struct {
     netloc_arch_type_t type;
     union {
         netloc_arch_tree_t *tree;
     } arch;
+    int num_hosts;
+    netloc_arch_host_t *idx_hosts;
+    void *hosts;
+    netloc_topology_t topology;
 } netloc_arch_t;
 /**********************************************************************
  * Topology API Functions
@@ -547,16 +551,13 @@ NETLOC_DECLSPEC netloc_network_t * netloc_dt_network_t_dup(netloc_network_t *net
 
 netloc_network_t* netloc_access_network_ref(struct netloc_topology * topology);
 
-int netloc_arch_build(netloc_arch_t *arch);
-int slurm_get_current_nodes(int *pnum_nodes, char ***pnodes);
-int slurm_get_proc_number(int *pnum_ppn);
-int pbs_get_current_nodes(int *pnum_nodes, char ***pnodes);
-int pbs_get_proc_number(int *pnum_ppn);
+int netloc_arch_build(netloc_arch_t *arch, int add_hwloc);
+int netloc_get_current_nodes(int *pnum_nodes, char ***pnodes);
+int netloc_get_current_cores(int *pnum_nodes, char ***pnodes);
 int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition);
 int netloc_node_is_in_partition(netloc_node_t *node, int partition);
 int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partition_name);
 int hwloc_get_core_number(int *pnum_cores);
-int netloc_get_current_nodes(int *pnum_nodes, char ***pnodes);
 int netloc_arch_find_current_hosts(netloc_arch_t *arch, char **nodelist,
         int num_nodes, netloc_arch_host_t ***phost_list);
 

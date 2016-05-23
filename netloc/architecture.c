@@ -24,6 +24,83 @@ static int partition_topology_to_tleaf(netloc_topology_t topology, int partition
         netloc_arch_t *arch);
 static void set_gbits(int *values, netloc_edge_t *edge, int num_levels);
 
+/* Complete the topology to have a complete balanced tree  */
+/* Warning: the level for nodes and edges is not expressed as usual: the leaves
+ * have 0 and the root has number_of_levels-1
+ * */
+void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
+        netloc_arch_host_t **phosts_by_idx)
+{
+    int num_levels = tree->num_levels;
+    int *max_degrees = tree->degrees;
+
+    for (int l = num_levels; l > 1; l--) { // from the root to the leaves
+        UT_array *degrees = down_degrees_by_level[l];
+        int max_degree = max_degrees[l];
+
+        int down_level_idx = 0;
+        UT_array *down_level_degrees = down_degrees_by_level[l-1];
+        int down_level_max_degree = max_degrees[l-1];
+        printf("level: %d\n", l);
+        for (int d = 0; d < utarray_len(degrees); d++) {
+            int degree = *(int *)utarray_eltptr(degrees, d);
+            printf("\tdegree: %d\n", degree);
+
+            if (degree > 0) {
+                down_level_idx += degree;
+                if (degree < max_degree) {
+                    int missing_degree = (degree-max_degree)*down_level_max_degree;
+                    utarray_insert(down_level_degrees, &missing_degree, down_level_idx);
+                    down_level_idx++;
+                }
+            } else {
+                int missing_degree = degree*down_level_max_degree;
+                utarray_insert(down_level_degrees, &missing_degree, down_level_idx);
+                down_level_idx++;
+            }
+        }
+    }
+
+    /* Complete the ordered list of hosts */
+    UT_array *degrees = down_degrees_by_level[1];
+    int max_degree = max_degrees[1];
+    int idx = 0;
+    int host_idx = 0;
+    netloc_arch_host_t *hosts_by_idx = NULL;
+    for (int d = 0; d < utarray_len(degrees); d++) {
+        int degree = *(int *)utarray_eltptr(degrees, d);
+        int diff;
+
+        if (degree > 0) {
+            diff = max_degree-degree;
+        } else {
+            diff = -degree;
+        }
+
+        /* We go through the host_names */
+        for (int i = 0; i < degree; i++) {
+            netloc_arch_host_t *host = (netloc_arch_host_t *)
+                malloc(sizeof(netloc_arch_host_t));
+            host->host_idx = idx;
+            host->idx = host_idx++;
+            HASH_ADD_INT(hosts_by_idx, idx, host);
+
+            idx++;
+        }
+
+        /* we add the missing nodes for the tree to be complete */
+        for (int i = 0; i < diff; i++) {
+            void *new = NULL;
+            netloc_arch_host_t *host = (netloc_arch_host_t *)
+                malloc(sizeof(netloc_arch_host_t));
+            host->host_idx = -1;
+            host->idx = host_idx++;
+            HASH_ADD_INT(hosts_by_idx, idx, host);
+        }
+    }
+    *phosts_by_idx = hosts_by_idx;
+}
+
 
 int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
         netloc_arch_t *arch)
@@ -120,12 +197,12 @@ int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
 
     /* We go though the tree to order the leaves  and find the tree
      * structure */
-    UT_array *ordered_hosts;
+    UT_array *ordered_name_array;
     UT_array **down_degrees_by_level;
     int *max_down_degrees_by_level;
     int *gbits_by_level;
 
-    utarray_new(ordered_hosts, &ut_ptr_icd);
+    utarray_new(ordered_name_array, &ut_ptr_icd);
 
     down_degrees_by_level = (UT_array **)malloc(num_levels*sizeof(UT_array *));
     for (int l = 0; l < num_levels; l++) {
@@ -137,7 +214,7 @@ int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
     UT_array *down_edges;
     utarray_new(down_edges, &ut_ptr_icd);
     netloc_edge_t *up_edge = current_node->edges;
-    utarray_push_back(ordered_hosts, &current_node);
+    utarray_push_back(ordered_name_array, &current_node);
     while (1) {
         if (utarray_len(down_edges)) {
             netloc_edge_t *down_edge = *(void **)utarray_back(down_edges);
@@ -145,7 +222,7 @@ int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
             netloc_node_t *dest_node = down_edge->dest;
             if (netloc_node_is_host(dest_node)) {
                 set_gbits(gbits_by_level, down_edge, num_levels);
-                utarray_push_back(ordered_hosts, &dest_node);
+                utarray_push_back(ordered_name_array, &dest_node);
             }
             else {
                 netloc_edge_t *edge, *edge_tmp;
@@ -212,84 +289,19 @@ int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
         }
     }
 
-    /* Now we have the degree of each node, so we can complete the topology to
-     * have a complete balanced tree as requested by the tleaf structure */
-    /* Warning: the level for nodes and edges is not expressed as usual: the leaves have
-     * 0 and the root has number_of_levels-1 */
-    for (int l = num_levels-1; l > 1; l--) { // from the root to the leaves
-        UT_array *degrees = down_degrees_by_level[l];
-        int max_degree = max_down_degrees_by_level[l];
-
-        int down_level_idx = 0;
-        UT_array *down_level_degrees = down_degrees_by_level[l-1];
-        int down_level_max_degree = max_down_degrees_by_level[l-1];
-        printf("level: %d\n", l);
-        for (int d = 0; d < utarray_len(degrees); d++) {
-            int degree = *(int *)utarray_eltptr(degrees, d);
-            printf("\tdegree: %d\n", degree);
-
-            if (degree > 0) {
-                down_level_idx += degree;
-                if (degree < max_degree) {
-                    int missing_degree = (degree-max_degree)*down_level_max_degree;
-                    utarray_insert(down_level_degrees, &missing_degree, down_level_idx);
-                    down_level_idx++;
-                }
-            } else {
-                int missing_degree = degree*down_level_max_degree;
-                utarray_insert(down_level_degrees, &missing_degree, down_level_idx);
-                down_level_idx++;
-            }
-        }
-    }
-
-    /* Complete the ordered list of hosts */
-    UT_array *degrees = down_degrees_by_level[1];
-    int max_degree = max_down_degrees_by_level[1];
-    int idx = 0;
-    int host_idx = 0;
-    netloc_arch_host_t *numbered_hosts = NULL;
-    for (int d = 0; d < utarray_len(degrees); d++) {
-        int degree = *(int *)utarray_eltptr(degrees, d);
-        int diff;
-
-        if (degree > 0) {
-            diff = max_degree-degree;
-        } else {
-            diff = -degree;
-        }
-
-        /* We go through the ordered_hosts */
-        for (int i = 0; i < degree; i++) {
-            netloc_node_t *node = *(netloc_node_t **)
-                utarray_eltptr(ordered_hosts, idx);
-
-            netloc_arch_host_t *host = (netloc_arch_host_t *)
-                malloc(sizeof(netloc_arch_host_t));
-            strcpy(host->id, node->hostname);
-            host->idx = host_idx++;
-            HASH_ADD_STR(numbered_hosts, id, host);
-
-            idx++;
-        }
-
-        /* we add the missing nodes for the tree to be complete */
-        for (int i = 0; i < diff; i++) {
-            void *new = NULL;
-            netloc_arch_host_t *host = (netloc_arch_host_t *)
-                malloc(sizeof(netloc_arch_host_t));
-            strcpy(host->id, "");
-            host->idx = host_idx++;
-            HASH_ADD_STR(numbered_hosts, id, host);
-        }
-    }
-    // TODO
-
-    // scotch->arh
     tree->num_levels = num_levels-1;
     tree->degrees = max_down_degrees_by_level;
     tree->throughput = gbits_by_level;
-    tree->hosts = numbered_hosts;
+
+    /* Now we have the degree of each node, so we can complete the topology to
+     * have a complete balanced tree as requested by the tleaf structure */
+    netloc_arch_host_t *numbered_hosts;
+
+    netloc_complete_tree(tree, down_degrees_by_level, &numbered_hosts);
+
+    arch->num_hosts = utarray_len(ordered_name_array);
+    arch->idx_hosts = numbered_hosts;
+    arch->hosts = (netloc_node_t **)ordered_name_array->d;
 
 end:
     /* We copy back all userdata */
@@ -336,14 +348,35 @@ void set_gbits(int *values, netloc_edge_t *edge, int num_levels)
         values[idx] = gbits;
 }
 
+typedef struct {
+    UT_hash_handle hh;
+    char name[15];
+    netloc_arch_host_t *host;
+} node_by_name_t;
+
+/* Given a list of node names, we get a list of hosts picked from the complete
+ * architecture arch
+ */
 int netloc_arch_find_current_hosts(netloc_arch_t *arch, char **nodelist,
         int num_nodes, netloc_arch_host_t ***phost_list)
 {
-    netloc_arch_tree_t *tree = arch->arch.tree;
-    int num_cores = tree->num_cores;
+    netloc_arch_host_t *current_host = arch->idx_hosts;
+    node_by_name_t *nodes_by_name = NULL;
+    while (current_host) {
+        char *hostname =
+            ((netloc_node_t **)arch->hosts)[current_host->host_idx]->hostname;
+        node_by_name_t *node_by_name = (node_by_name_t *)
+            malloc(sizeof(node_by_name_t));
+        strcpy(node_by_name->name, hostname);
+        node_by_name->host = current_host;
+        HASH_ADD_STR(nodes_by_name, name, node_by_name);
+
+        current_host = current_host->hh.next;
+    }
+
+
     netloc_arch_host_t **host_list = (netloc_arch_host_t **)
         malloc(num_nodes*sizeof(netloc_arch_host_t *));
-    netloc_arch_host_t *all_hosts = tree->hosts;
 
     char *last_nodename = "";
     netloc_arch_host_t *host;
@@ -352,7 +385,7 @@ int netloc_arch_find_current_hosts(netloc_arch_t *arch, char **nodelist,
 
         /* Another processor from the previous node */
         if (strcmp(nodename, last_nodename)) {
-            HASH_FIND_STR(all_hosts, nodename, host);
+            HASH_FIND_STR(nodes_by_name, nodename, host);
             last_nodename = nodename;
             if (!host) {
                 fprintf(stderr, "Error: node %s not present in the all architecture\n", nodename);
@@ -391,7 +424,7 @@ int netloc_arch_add_hwloc(netloc_arch_t *arch)
 }
 
 
-int netloc_arch_build(netloc_arch_t *arch)
+int netloc_arch_build(netloc_arch_t *arch, int add_hwloc)
 {
     char *arch_file = getenv("NETLOC_ARCHFILE");
     char *partition_name = getenv("NETLOC_PARTITION");
@@ -431,6 +464,7 @@ int netloc_arch_build(netloc_arch_t *arch)
         }
 
         support_load_datafile(topology);
+        arch->topology = topology;
 
         if (!partition_name) {
             fprintf(stderr, "Error: you need to set NETLOC_PARTITION in your environment.\n");
@@ -447,9 +481,11 @@ int netloc_arch_build(netloc_arch_t *arch)
             netloc_topology_find_partition_idx(topology, partition_name);
 
         partition_topology_to_tleaf(topology, partition, arch);
-        ret = netloc_arch_add_hwloc(arch);
-        if (NETLOC_SUCCESS != ret) {
-            return NETLOC_ERROR;
+        if (add_hwloc) {
+            ret = netloc_arch_add_hwloc(arch);
+            if (NETLOC_SUCCESS != ret) {
+                return NETLOC_ERROR;
+            }
         }
     }
 
