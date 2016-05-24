@@ -13,8 +13,23 @@ AM_CPPFLAGS = \
 bin_PROGRAMS = \
         netloc_rank_order
 
+if BUILD_NETLOCSCOTCH
+bin_PROGRAMS += \
+        netloc_mpi_rank_file
+endif
+
 netloc_rank_order_SOURCES = \
         netloc_rank_order.c
 
 netloc_rank_order_LDADD = \
         $(top_builddir)/netloc/libnetloc.la
+
+if BUILD_NETLOCSCOTCH
+netloc_mpi_rank_file_SOURCES = \
+        netloc_rank_order.c
+
+netloc_mpi_rank_file_LDADD = \
+        $(top_builddir)/netloc/libnetloc.la \
+        $(top_builddir)/netloc/libnetlocscotch.la \
+        -lscotch -lscotcherr
+endif
