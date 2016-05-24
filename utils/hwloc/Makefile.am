@@ -118,15 +118,21 @@ endif
 hdh_page = hwloc-dump-hwdata.1
 EXTRA_DIST += $(hdh_page:.1=.1in)
 if HWLOC_HAVE_LINUX
+# WARNING: The SEDMAN line below isn't portable ($(subst ...) is GNU-make only).
+# Keep this rule Linux-only, or stop using $(subst ...). See issue #187.
 if HWLOC_HAVE_X86
 nodist_man_MANS += $(hdh_page)
+hwloc-dump-hwdata.1: hwloc-dump-hwdata.1in
+	@ echo Creating $@ man page...
+	@ $(SEDMAN) \
+	  -e 's/#RUNSTATEDIR#/$(subst /,\/,$(HWLOC_runstatedir))/g' \
+	  > $@ < $<
 endif HWLOC_HAVE_X86
 endif HWLOC_HAVE_LINUX
 
 .1in.1:
 	@ echo Creating $@ man page...
 	@ $(SEDMAN) \
-	  -e 's/#RUNSTATEDIR#/$(subst /,\/,$(HWLOC_runstatedir))/g' \
 	  > $@ < $<
 
 .3in.3:
