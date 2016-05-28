@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -438,6 +438,10 @@ int main(int argc, const char * const argv[])
       dump_one_proc(topo, pu, path);
     }
   }
+
+  printf("\n"
+	 "WARNING: Do not post these files on a public list or website unless you\n"
+	 "WARNING: are sure that no information about this platform is sensitive.\n");
 
  out_with_path:
   free(path);

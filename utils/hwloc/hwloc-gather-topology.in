@@ -209,4 +209,8 @@ export HWLOC_THISSYSTEM=0
 "$lstopo" - -v > "$dirname/$basename.output"
 echo "Expected topology output stored in $dirname/$basename.output"
 
+echo
+echo "WARNING: Do not post these files on a public list or website unless you"
+echo "WARNING: are sure that no information about this platform is sensitive."
+
 exit 0

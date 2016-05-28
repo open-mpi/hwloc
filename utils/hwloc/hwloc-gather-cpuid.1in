@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2015 Inria.  All rights reserved.
+.\" Copyright © 2015-2016 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-GATHER-CPUID "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
@@ -52,6 +52,12 @@ output, but a unique logical processor must have been given with \fB-c\fR.
 .PP
 \fBhwloc-gather-cpuid\fR is a x86 specific tool, it cannot be used
 on other platforms.
+.
+.PP
+.B NOTE:
+\fBhwloc-gather-cpuid\fR gathers many hardware details about the platform.
+Output files should not be posted on public lists or websites
+unless it is clear that they contain no sensitive information.
 .
 .PP
 .B NOTE:
