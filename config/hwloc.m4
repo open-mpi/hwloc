@@ -9,7 +9,7 @@ dnl Copyright © 2004-2012 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright © 2004-2008 High Performance Computing Center Stuttgart,
 dnl                         University of Stuttgart.  All rights reserved.
-dnl Copyright © 2006-2014 Cisco Systems, Inc.  All rights reserved.
+dnl Copyright © 2006-2016 Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2012  Blue Brain Project, BBP/EPFL. All rights reserved.
 dnl Copyright © 2012       Oracle and/or its affiliates.  All rights reserved.
 dnl See COPYING in top-level directory.
@@ -663,8 +663,16 @@ EOF])
     AC_CHECK_HEADERS([sys/utsname.h])
     AC_CHECK_FUNCS([uname])
 
-    AC_CHECK_HEADERS([valgrind/valgrind.h])
-    AC_CHECK_DECLS([RUNNING_ON_VALGRIND],,[:],[[#include <valgrind/valgrind.h>]])
+    dnl Don't check for valgrind in embedded mode:
+    dnl a) There's no compelling use case for Valgrind support in embedded
+    dnl mode,
+    dnl b) Except for the case where the outer project may have its
+    dnl own check for valgrind (and supplement CPPFLAGS in order to
+    dnl find Valgrind's header files).
+    AS_IF([test "$hwloc_mode" != "embedded"],
+        [AC_CHECK_HEADERS([valgrind/valgrind.h])
+         AC_CHECK_DECLS([RUNNING_ON_VALGRIND],,[:],[[#include <valgrind/valgrind.h>]])
+	])
 
     AC_CHECK_HEADERS([pthread_np.h])
     AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
