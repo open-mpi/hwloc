@@ -350,7 +350,7 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
         }
-        else if (all)
+        if (all)
           hwloc_topology_set_all_types_filter(topology, filter);
         else
           hwloc_topology_set_type_filter(topology, type, filter);
