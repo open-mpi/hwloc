@@ -554,6 +554,10 @@ main (int argc, char *argv[])
 	    filter = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
 	  else if (!strcmp(colon+1, "important"))
 	    filter = HWLOC_TYPE_FILTER_KEEP_IMPORTANT;
+	  else {
+	    fprintf(stderr, "Unsupported filtering kind `%s' passed to --ignore.\n", colon+1);
+	    goto out_usagefailure;
+	  }
 	}
 	if (!strcmp(argv[1], "all"))
 	  all = 1;
