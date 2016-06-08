@@ -33,11 +33,11 @@ my $help = 0;
 
 &Getopt::Long::Configure("bundling");
 my $ok = Getopt::Long::GetOptions(
-	"hwloc-dir|f=s" => \$hwlocdir,
-	"force-subnet|f=s" => \@forcesubnets,
+	"hwloc-dir=s" => \$hwlocdir,
+	"force-subnet=s" => \@forcesubnets,
 	"sudo" => \$needsudo,
-	"ibnetdiscover|f=s" => \$ibnetdiscover,
-	"ibroute|f=s" => \$ibroute,
+	"ibnetdiscover=s" => \$ibnetdiscover,
+	"ibroute=s" => \$ibroute,
         "ignore-errors" => \$ignoreerrors,
 	"verbose|v" => \$verbose,
 	"force" => \$force,
