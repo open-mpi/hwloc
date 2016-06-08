@@ -30,6 +30,17 @@ my $force = 0;
 my $dryrun = 0;
 my $ignoreerrors = 0;
 my $help = 0;
+my $sleep = 0;
+
+my $sleepcount = 0;
+sub sleep_between_probes {
+  my $indent = shift;
+  if ($sleep) {
+    print $indent."... Sleeping $sleep seconds between probes ...\n" unless $sleepcount;
+    sleep $sleep if $sleepcount;
+    $sleepcount++;
+  }
+}
 
 &Getopt::Long::Configure("bundling");
 my $ok = Getopt::Long::GetOptions(
@@ -38,6 +49,7 @@ my $ok = Getopt::Long::GetOptions(
 	"sudo" => \$needsudo,
 	"ibnetdiscover=s" => \$ibnetdiscover,
 	"ibroute=s" => \$ibroute,
+	"sleep=i" => \$sleep,
         "ignore-errors" => \$ignoreerrors,
 	"verbose|v" => \$verbose,
 	"force|f" => \$force,
@@ -66,6 +78,8 @@ if ($help or !$ok or !defined $ARGV[0]) {
     print " --ibnetdiscover /path/to/ibnetdiscover\n";
     print " --ibroute /path/to/ibroute\n";
     print "    Specify exact location of programs. Default is /usr/bin/<program>\n";
+    print " --sleep <n>\n";
+    print "    Sleep for <n> seconds between invocations of programs probing the network\n";
     print " --ignore-errors\n";
     print "    Ignore errors from ibnetdiscover and ibroute, assume their outputs are ok\n";
     print " --force -f\n";
@@ -397,6 +411,7 @@ sub getroutes {
 	if ($dryrun) {
 	  print "   NOT running $cmd\n" if $verbose;
 	} else {
+	  sleep_between_probes ("   ");
 	  my $ret = system "$cmd > ${ibrouteoutput}.new" ;
 	  if (!$ret or $ignoreerrors) {
 	    unlink ${ibrouteoutput};
@@ -437,6 +452,7 @@ foreach my $subnet (keys %subnets_todiscover) {
   if ($dryrun) {
     print "  NOT running $cmd\n" if $verbose;
   } else {
+    sleep_between_probes ("  ");
     my $ret = system "$cmd > ${ibnetdiscoveroutput}.new" ;
     if (!$ret or $ignoreerrors) {
       unlink ${ibnetdiscoveroutput};
