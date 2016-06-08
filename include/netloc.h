@@ -434,7 +434,7 @@ typedef enum {
 typedef struct {
     UT_hash_handle hh;       /* makes this structure hashable */
     int idx; /* Hash key, and rank in the complete arch */
-    int host_idx;
+    int host_idx; /* idx without ghost hosts */
 } netloc_arch_host_t;
 typedef struct {
     int num_levels;

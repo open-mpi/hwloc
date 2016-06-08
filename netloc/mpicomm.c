@@ -36,8 +36,10 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum
 
     /* Get the number of elements in a line to find the size of the matrix */
     netloc_get_line(&line, &linesize, input);
-    int n = 1;
-    while (netloc_line_get_next_token(&line, ' ')) {
+    int n = 0;
+    while ((ptr = netloc_line_get_next_token(&line, ' '))) {
+        if (!strlen(ptr))
+            break;
         n++;
     }
     rewind(input);
@@ -50,11 +52,13 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum
     }
     double *sum_row = (double *)malloc(n*sizeof(double));
 
-    while (netloc_get_line(&line, &linesize, input)) {
+    while (netloc_get_line(&line, &linesize, input) != -1) {
         char *remain_line = line;
         j = 0;
         sum_row[i] = 0;
         while ((ptr = netloc_line_get_next_token(&remain_line, ' '))){
+            if (!strlen(ptr))
+                break;
             mat[i][j] = atof(ptr);
             sum_row[i] += mat [i][j];
             if (mat[i][j] < 0) {
@@ -72,7 +76,7 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum
     }
 
 
-    if( i != n ){
+    if (i != n) {
         fprintf(stderr,"Error at %d %d. Too many rows for %s\n",i,j,filename);
         goto error;
     }

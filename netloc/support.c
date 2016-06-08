@@ -310,6 +310,7 @@ int support_load_datafile(struct netloc_topology *topology)
     topology->nodes = NULL;
     topology->nodesByHostname = NULL;
     topology->physical_links = NULL;
+    topology->hwloc_topos = NULL;
 
     char *path = topology->network->node_uri;
 

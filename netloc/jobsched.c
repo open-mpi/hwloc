@@ -152,13 +152,26 @@ int pbs_get_current_hosts(int *pnum_nodes, char ***pnodes, int by_node)
         else
             remove_length = strlen(domainname);
 
+        int in_current_node = 0;
+        char *last_nodename = NULL;
         while (getline(&line, &size, node_file) > 0) {
-            if (found_nodes > total_num_nodes) {
+            if (last_nodename && strncmp(last_nodename, line,
+                        strlen(line)-remove_length-1) == 0) {
+                in_current_node++;
+                if (in_current_node > by_node)
+                    continue;
+            } else {
+                in_current_node = 1;
+            }
+
+            if (found_nodes >= total_num_nodes) {
                 printf("Error: variable PBS_NUM_NODES does not correspond to "
                         "value from PBS_NODEFILE\n");
                 return NETLOC_ERROR;
             }
+
             nodes[found_nodes] = strndup(line, strlen(line)-remove_length-1);
+            last_nodename = nodes[found_nodes];
             found_nodes++;
         }
         *pnodes = nodes;

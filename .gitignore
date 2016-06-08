@@ -200,6 +200,7 @@ test-suite.log
 /utils/lstopo/test-*.sh.trs
 
 /netloc.pc
+/netlocscotch.pc
 
 /utils/lsmap/lsmap
 /utils/lsnettopo/lsnettopo
@@ -214,6 +215,7 @@ test-suite.log
 /utils/netloc_reader_of/netloc_reader_of_opendaylight
 /utils/netloc_reader_of/Perl_OF_support.pm
 /utils/netloc_reader_static/netloc_reader_static
+/utils/netloc_draw/netloc_draw_to_json
 
 /netloc/jansson/stamp-h?
 /netloc/jansson/config.h
@@ -260,5 +262,6 @@ test-suite.log
 /tests/netloc/embedded/main
 /tests/netloc/embedded/make.out
 /tests/netloc/embedded/netloc-tree
+/tests/netloc/scotch
 
 /contrib/systemd/hwloc-dump-hwdata.service

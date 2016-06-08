@@ -20,8 +20,8 @@ typedef struct netloc_analysis_data_t {
 
 
 static int netloc_arch_add_hwloc(netloc_arch_t *arch);
-static int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
-        netloc_arch_t *arch);
+static int partition_topology_to_tleaf(netloc_topology_t topology,
+        int partition, int num_cores, netloc_arch_t *arch);
 static void set_gbits(int *values, netloc_edge_t *edge, int num_levels);
 
 /* Complete the topology to have a complete balanced tree  */
@@ -34,9 +34,10 @@ void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_l
     int num_levels = tree->num_levels;
     int *max_degrees = tree->degrees;
 
+    /* Complete the tree by inserting nodes */
     for (int l = num_levels; l > 1; l--) { // from the root to the leaves
         UT_array *degrees = down_degrees_by_level[l];
-        int max_degree = max_degrees[l];
+        int max_degree = max_degrees[num_levels-l];
 
         int down_level_idx = 0;
         UT_array *down_level_degrees = down_degrees_by_level[l-1];
@@ -65,7 +66,7 @@ void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_l
     UT_array *degrees = down_degrees_by_level[1];
     int max_degree = max_degrees[1];
     int idx = 0;
-    int host_idx = 0;
+    int ghost_idx = 0;
     netloc_arch_host_t *hosts_by_idx = NULL;
     for (int d = 0; d < utarray_len(degrees); d++) {
         int degree = *(int *)utarray_eltptr(degrees, d);
@@ -82,7 +83,7 @@ void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_l
             netloc_arch_host_t *host = (netloc_arch_host_t *)
                 malloc(sizeof(netloc_arch_host_t));
             host->host_idx = idx;
-            host->idx = host_idx++;
+            host->idx = ghost_idx++;
             HASH_ADD_INT(hosts_by_idx, idx, host);
 
             idx++;
@@ -94,7 +95,7 @@ void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_l
             netloc_arch_host_t *host = (netloc_arch_host_t *)
                 malloc(sizeof(netloc_arch_host_t));
             host->host_idx = -1;
-            host->idx = host_idx++;
+            host->idx = ghost_idx++;
             HASH_ADD_INT(hosts_by_idx, idx, host);
         }
     }
@@ -102,8 +103,8 @@ void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_l
 }
 
 
-int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
-        netloc_arch_t *arch)
+int partition_topology_to_tleaf(netloc_topology_t topology,
+        int partition, int num_cores, netloc_arch_t *arch)
 {
     int ret = 0;
     UT_array *nodes;
@@ -292,6 +293,7 @@ int partition_topology_to_tleaf(netloc_topology_t topology, int partition,
     tree->num_levels = num_levels-1;
     tree->degrees = max_down_degrees_by_level;
     tree->throughput = gbits_by_level;
+    tree->num_cores = num_cores;
 
     /* Now we have the degree of each node, so we can complete the topology to
      * have a complete balanced tree as requested by the tleaf structure */
@@ -360,17 +362,19 @@ typedef struct {
 int netloc_arch_find_current_hosts(netloc_arch_t *arch, char **nodelist,
         int num_nodes, netloc_arch_host_t ***phost_list)
 {
+    /* Build nodes_by_name */
     netloc_arch_host_t *current_host = arch->idx_hosts;
     node_by_name_t *nodes_by_name = NULL;
     while (current_host) {
-        char *hostname =
-            ((netloc_node_t **)arch->hosts)[current_host->host_idx]->hostname;
-        node_by_name_t *node_by_name = (node_by_name_t *)
-            malloc(sizeof(node_by_name_t));
-        strcpy(node_by_name->name, hostname);
-        node_by_name->host = current_host;
-        HASH_ADD_STR(nodes_by_name, name, node_by_name);
-
+        if (current_host->host_idx != -1) {
+            char *hostname =
+                ((netloc_node_t **)arch->hosts)[current_host->host_idx]->hostname;
+            node_by_name_t *node_by_name = (node_by_name_t *)
+                malloc(sizeof(node_by_name_t));
+            strcpy(node_by_name->name, hostname);
+            node_by_name->host = current_host;
+            HASH_ADD_STR(nodes_by_name, name, node_by_name);
+        }
         current_host = current_host->hh.next;
     }
 
@@ -385,12 +389,14 @@ int netloc_arch_find_current_hosts(netloc_arch_t *arch, char **nodelist,
 
         /* Another processor from the previous node */
         if (strcmp(nodename, last_nodename)) {
-            HASH_FIND_STR(nodes_by_name, nodename, host);
+            node_by_name_t *node_by_name;
+            HASH_FIND_STR(nodes_by_name, nodename, node_by_name);
             last_nodename = nodename;
-            if (!host) {
+            if (!node_by_name) {
                 fprintf(stderr, "Error: node %s not present in the all architecture\n", nodename);
                 return NETLOC_ERROR;
             }
+            host = node_by_name->host;
         }
         host_list[n] = host;
     }
@@ -480,7 +486,14 @@ int netloc_arch_build(netloc_arch_t *arch, int add_hwloc)
         int partition =
             netloc_topology_find_partition_idx(topology, partition_name);
 
-        partition_topology_to_tleaf(topology, partition, arch);
+        if (add_hwloc) {
+            int *a = NULL; *a = 1;
+            // TODO
+            // partition_topology_to_tleaf(topology, partition, XXX, arch);
+        } else {
+            partition_topology_to_tleaf(topology, partition, 1, arch);
+        }
+
         if (add_hwloc) {
             ret = netloc_arch_add_hwloc(arch);
             if (NETLOC_SUCCESS != ret) {

@@ -26,7 +26,7 @@ netloc_rank_order_LDADD = \
 
 if BUILD_NETLOCSCOTCH
 netloc_mpi_rank_file_SOURCES = \
-        netloc_rank_order.c
+        netloc_mpi_rank_file.c
 
 netloc_mpi_rank_file_LDADD = \
         $(top_builddir)/netloc/libnetloc.la \
