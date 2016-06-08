@@ -40,7 +40,7 @@ my $ok = Getopt::Long::GetOptions(
 	"ibroute=s" => \$ibroute,
         "ignore-errors" => \$ignoreerrors,
 	"verbose|v" => \$verbose,
-	"force" => \$force,
+	"force|f" => \$force,
 	"dry-run" => \$dryrun,
 	"help|h" => \$help
     );
@@ -68,6 +68,8 @@ if ($help or !$ok or !defined $ARGV[0]) {
     print "    Specify exact location of programs. Default is /usr/bin/<program>\n";
     print " --ignore-errors\n";
     print "    Ignore errors from ibnetdiscover and ibroute, assume their outputs are ok\n";
+    print " --force -f\n";
+    print "    Always rediscover to overwrite existing files without asking\n";
     print " --verbose -v\n";
     print "    Add verbose messages\n";
     print " --dry-run\n";
