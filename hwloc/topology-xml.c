@@ -913,7 +913,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   return state->global->close_tag(state);
 
  error_with_object:
-  hwloc_free_unlinked_object(obj);
+  if (parent)
+    /* root->parent is NULL, and root is already inserted. the caller will cleanup that root. */
+    hwloc_free_unlinked_object(obj);
  error:
   return -1;
 }
