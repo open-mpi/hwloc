@@ -802,18 +802,28 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   /* check set consistency.
    * 1.7.2 and earlier reported I/O Groups with only a cpuset, we don't want to reject those XMLs yet.
    * Ignore those Groups since fixing the missing sets is hard (would need to look at children sets which are not available yet).
+   * Just abort the XML for non-Groups.
    */
   if (!obj->cpuset != !obj->allowed_cpuset
       || !obj->cpuset != !obj->complete_cpuset) {
     /* has some cpuset without others */
-    ignored = 1;
+    if (obj->type == HWLOC_OBJ_GROUP)
+      ignored = 1;
+    else
+      goto error_with_object;
   } else if (!obj->nodeset != !obj->allowed_nodeset
-      || !obj->nodeset != !obj->complete_nodeset) {
+	     || !obj->nodeset != !obj->complete_nodeset) {
     /* has some nodeset withot others */
-    ignored = 1;
+    if (obj->type == HWLOC_OBJ_GROUP)
+      ignored = 1;
+    else
+      goto error_with_object;
   } else if (obj->nodeset && !obj->cpuset) {
     /* has nodesets without cpusets (the contrary is allowed in pre-2.0) */
-    ignored = 1;
+    if (obj->type == HWLOC_OBJ_GROUP)
+      ignored = 1;
+    else
+      goto error_with_object;
   }
 
   /* check NUMA nodes */
