@@ -55,16 +55,16 @@ int host_get_idx(netloc_arch_t *arch, int num_hosts,
     return NETLOC_SUCCESS;
 }
 
-static int compareint(void const *a, void const *b)
+static int comparehost(void const *a, void const *b)
 {
-   int const *pa = a;
-   int const *pb = b;
-   return *pa - *pb;
+   netloc_arch_host_t * const *pa = a;
+   netloc_arch_host_t * const *pb = b;
+   return (*pa)->idx - (*pb)->idx;
 }
 
 static int build_subarch(netloc_arch_t *arch, char **nodelist,
         int num_nodes, SCOTCH_Arch *scotch, SCOTCH_Arch *subarch,
-        int **pnode_idx)
+        netloc_arch_host_t ***phost_list)
 {
     int ret;
     if (arch->type == NETLOC_ARCH_TREE) {
@@ -75,18 +75,19 @@ static int build_subarch(netloc_arch_t *arch, char **nodelist,
             return NETLOC_ERROR;
         }
 
+        /* Hack to avoid problem with unsorted node list in the subarch and scotch */
+        qsort(host_list, num_nodes, sizeof(*host_list), comparehost); // FIXME XXX
+
         int *idx_list;
         host_get_idx(arch, num_nodes, host_list, &idx_list);
-
-        /* Hack to avoid problem with unsorted node list in the subarch and scotch */
-        qsort(idx_list, num_nodes, sizeof(int), compareint); // FIXME XXX
-        *pnode_idx = idx_list;
 
         ret = SCOTCH_archSub(subarch, scotch, num_nodes, idx_list);
         if (ret != 0) {
             fprintf(stderr, "Error: SCOTCH_archSub failed\n");
             return NETLOC_ERROR;
         }
+
+        *phost_list = host_list;
 
     } else {
         // TODO
@@ -135,8 +136,8 @@ int netlocscotch_build_current_arch(SCOTCH_Arch *scotch_subarch)
     }
 
     /* Now we can build the sub architecture */
-    int *node_idx;
-    ret = build_subarch(&arch, nodes, num_nodes, scotch_arch, scotch_subarch, &node_idx);
+    netloc_arch_host_t **host_list;
+    ret = build_subarch(&arch, nodes, num_nodes, scotch_arch, scotch_subarch, &host_list);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -264,8 +265,8 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
 
     /* Now we can build the sub architecture */
     SCOTCH_Arch scotch_subarch;
-    int *node_idx;
-    ret = build_subarch(&arch, nodes, num_nodes, &scotch_arch, &scotch_subarch, &node_idx);
+    netloc_arch_host_t **host_list;
+    ret = build_subarch(&arch, nodes, num_nodes, &scotch_arch, &scotch_subarch, &host_list);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -314,7 +315,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     for (int n = 0; n < num_nodes; n++) {
         int *process_list = (int *)process_by_node[n]->d;
         int num_processes = utarray_len(process_by_node[n]);
-        char *nodename = ((netloc_node_t **)arch.hosts)[node_idx[n]]->hostname;
+        char *nodename = ((netloc_node_t **)arch.hosts)[host_list[n]->host_idx]->hostname;
         int node_ranks[num_processes];
 
         /* We need to extract the subgraph with only the vertices mapped to the
