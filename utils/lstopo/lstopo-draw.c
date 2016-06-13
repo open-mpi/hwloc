@@ -674,14 +674,16 @@ pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_
 static void
 os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_methods *methods, int logical __hwloc_attribute_unused, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  unsigned myheight = 0, totheight;
+  unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
-  unsigned totheight = gridsize;
-  unsigned totwidth = gridsize;
   struct style style;
   char text[64];
   int n;
   unsigned nmorelines = 0, i;
   char morelines[3][64];
+
+  DYNA_CHECK();
 
   if (fontsize) {
     const char *coproctype;
@@ -761,12 +763,11 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
       if (ntextwidth > textwidth)
 	textwidth = ntextwidth;
     }
-    totheight = gridsize + (fontsize + gridsize)*(nmorelines+1);
-    totwidth = gridsize + textwidth;
+    myheight = (fontsize + gridsize)*(nmorelines+1);
+    mywidth = 0;
   }
 
-  *retwidth = totwidth;
-  *retheight = totheight;
+  RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
   lstopo_set_object_color(methods, topology, level, 0, &style);
   methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
@@ -776,6 +777,10 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
     for(i=0; i<nmorelines; i++)
       methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + (i+2)*gridsize + (i+1)*fontsize, morelines[i]);
   }
+
+  RECURSE_RECT(level, methods, gridsize, gridsize);
+
+  DYNA_SAVE();
 }
 
 static void

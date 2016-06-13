@@ -23,6 +23,7 @@ Version 1.11.4
   Thanks to Paul Hargrove for reporting the issue.
 * Fix build with Visual Studio 2015, thanks to Eloi Gaudry for reporting
   the issue and providing the patch.
+* Don't forget to display OS device children in the graphical lstopo.
 
 
 Version 1.11.3
