@@ -702,14 +702,16 @@ os_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwlo
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  unsigned myheight = 0, totheight;
+  unsigned mywidth = 0, totwidth;
   unsigned textwidth = gridsize;
-  unsigned totheight = gridsize;
-  unsigned totwidth = gridsize;
   struct style style;
   char text[64];
   int n;
   unsigned nmorelines = 0, i;
   char morelines[3][64];
+
+  DYNA_CHECK();
 
   if (fontsize) {
     const char *coproctype = level->subtype;
@@ -798,12 +800,11 @@ os_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwlo
       if (ntextwidth > textwidth)
 	textwidth = ntextwidth;
     }
-    totheight = gridsize + (fontsize + gridsize)*(nmorelines+1);
-    totwidth = gridsize + textwidth;
+    myheight = (fontsize + gridsize)*(nmorelines+1);
+    mywidth = 0;
   }
 
-  *retwidth = totwidth;
-  *retheight = totheight;
+  RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
   lstopo_set_object_color(methods, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
@@ -813,6 +814,10 @@ os_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwlo
     for(i=0; i<nmorelines; i++)
       methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + (i+2)*gridsize + (i+1)*fontsize, morelines[i]);
   }
+
+  RECURSE_RECT(level, methods, gridsize, gridsize);
+
+  DYNA_SAVE();
 }
 
 static void
