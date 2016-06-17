@@ -2532,6 +2532,40 @@ than any system-provided copy of hwloc.
 \section faq1 Concepts
 
 
+\subsection faq_why I only need binding, why should I use hwloc ?
+
+hwloc is its portable API that works on a variety of operating
+systems.
+It supports binding of threads, processes and memory buffers
+(see \ref hwlocality_cpubinding and \ref hwlocality_membinding).
+Even if some features are not supported on some systems,
+using hwloc is much easier than reimplementing your own portability layer.
+
+Moreover, hwloc provides knowledge of cores and hardware threads.
+It offers easy ways to bind tasks to individual hardware threads,
+or to entire multithreaded cores, etc.
+See \ref faq_smt.
+Most alternative software for binding do not even know whether each
+core is single-threaded, multithreaded or hyper-threaded.
+They would bind to individual threads without any way to know whether
+multiple tasks are in the same physical core.
+
+However, using hwloc comes with an overhead since a topology must
+be loaded before gathering information and binding tasks or memory.
+Fortunately this overhead may be significantly reduced by filtering
+useless information out of the topology.
+For instance the following code builds a topology that only contains
+Cores, hardware threads (PUs, cannot be filtered-out),
+and NUMA nodes (cannot be filtered-out).
+
+\verbatim
+hwloc_topology_t topology;
+hwloc_topology_init(&topology);
+hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
+hwloc_topology_set_type_filter(topology, HWLOC_OBJ_CORE, HWLOC_TYPE_FILTER_KEEP_ALL);
+hwloc_topology_load(topology);
+\endverbatim
+
 
 \subsection faq_indexes Should I use logical or physical/OS indexes? and how?
 
