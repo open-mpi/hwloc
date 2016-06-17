@@ -2657,7 +2657,7 @@ have the same parent), but they are <em>not</em> cousins (because they
 do not belong to the same horizontal level).</strong>
 
 
-\subsection faq_nosmt What happens to my topology if I disable symmetric multithreading, hyper-threading, etc. ?
+\subsection faq_nosmt What happens to my topology if I disable symmetric multithreading, hyper-threading, etc. in the system?
 
 hwloc creates one PU (processing unit) object per hardware thread.
 If your machine supports symmetric multithreading, for instance Hyper-Threading,
@@ -2694,12 +2694,7 @@ $ lstopo -
 \endverbatim
 
 
-
-\section faq2 Advanced
-
-
-
-\subsection faq_smt How may I ignore symmetric multithreading, hyper-threading, etc. ?
+\subsection faq_smt How may I ignore symmetric multithreading, hyper-threading, etc. in hwloc?
 
 First, see \ref faq_nosmt for more information about multithreading.
 
@@ -2748,6 +2743,11 @@ hello from first thread on core #3
 $ hwloc-bind core:3 --single -- echo "hello from a single thread on core #3"
 hello from a single thread on core #3
 \endverbatim
+
+
+
+\section faq2 Advanced
+
 
 
 \subsection faq_xml I do not want hwloc to rediscover my enormous machine topology every time I rerun a process
