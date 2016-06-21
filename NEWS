@@ -19,6 +19,7 @@ in v0.9.1).
 
 Version 1.11.4
 --------------
+* Add MemoryMode and ClusterMode attributes in the Machine object on KNL.
 * Fix Linux build with -m32 with respect to libudev.
   Thanks to Paul Hargrove for reporting the issue.
 * Fix build with Visual Studio 2015, thanks to Eloi Gaudry for reporting
