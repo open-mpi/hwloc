@@ -2720,20 +2720,23 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
   free(cpus.p);
 }
 
-/* Try to add memory-side caches for KNL.
+/* Try to handle knl hwdata properties
  * Returns 0 on success and -1 otherwise */
-static int hwloc_linux_try_add_knl_mcdram_caches(hwloc_topology_t topology, struct hwloc_linux_backend_data_s *data, hwloc_obj_t *nodes, unsigned nbnodes)
+static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topology, struct hwloc_linux_backend_data_s *data, hwloc_obj_t *nodes, unsigned nbnodes)
 {
   char *knl_cache_file;
   long long int cache_size = -1;
   int associativity = -1;
   int inclusiveness = -1;
   int line_size = -1;
+  int version = 0;
   unsigned i;
   FILE *f;
   char buffer[512] = {0};
   char *data_beg = NULL;
   char *data_end = NULL;
+  char memory_mode_str[32] = {0};
+  char cluster_mode_str[32] = {0};
 
   if (asprintf(&knl_cache_file, "%s/knl_memoryside_cache", data->dumped_hwdata_dirname) < 0)
     return -1;
@@ -2750,31 +2753,44 @@ static int hwloc_linux_try_add_knl_mcdram_caches(hwloc_topology_t topology, stru
   data_beg = &buffer[0];
   data_end = data_beg + fread(buffer, 1, sizeof(buffer), f);
 
-  /* file must start with version information, only 1 accepted for now */
-  if (strncmp("version: 1\n", data_beg, strlen("version: 1\n"))) {
-    fprintf(stderr, "Invalid knl_memoryside_cache header, expected \"version: 1\".\n");
+  /* file must start with version information */
+  if (sscanf(data_beg, "version: %d", &version) != 1) {
+    fprintf(stderr, "Invalid knl_memoryside_cache header, expected \"version: <int>\".\n");
     fclose(f);
     return -1;
   }
-  data_beg += strlen("version: 1\n");
+
+  data_beg = strstr(data_beg, "\n") + 1;
 
   while (data_beg < data_end) {
     char *line_end = strstr(data_beg, "\n");
     if (!line_end)
         break;
-    if (!strncmp("cache_size:", data_beg, strlen("cache_size"))) {
-        sscanf(data_beg, "cache_size: %lld", &cache_size);
-        hwloc_debug("read cache_size=%lld\n", cache_size);
-    } else if (!strncmp("line_size:", data_beg, strlen("line_size:"))) {
-        sscanf(data_beg, "line_size: %d", &line_size);
-        hwloc_debug("read line_size=%d\n", line_size);
-    } else if (!strncmp("inclusiveness:", data_beg, strlen("inclusiveness:"))) {
-        sscanf(data_beg, "inclusiveness: %d", &inclusiveness);
-        hwloc_debug("read inclusiveness=%d\n", inclusiveness);
-    } else if (!strncmp("associativity:", data_beg, strlen("associativity:"))) {
-        sscanf(data_beg, "associativity: %d\n", &associativity);
-        hwloc_debug("read associativity=%d\n", associativity);
+    if (version >= 1) {
+      if (!strncmp("cache_size:", data_beg, strlen("cache_size"))) {
+          sscanf(data_beg, "cache_size: %lld", &cache_size);
+          hwloc_debug("read cache_size=%lld\n", cache_size);
+      } else if (!strncmp("line_size:", data_beg, strlen("line_size:"))) {
+          sscanf(data_beg, "line_size: %d", &line_size);
+          hwloc_debug("read line_size=%d\n", line_size);
+      } else if (!strncmp("inclusiveness:", data_beg, strlen("inclusiveness:"))) {
+          sscanf(data_beg, "inclusiveness: %d", &inclusiveness);
+          hwloc_debug("read inclusiveness=%d\n", inclusiveness);
+      } else if (!strncmp("associativity:", data_beg, strlen("associativity:"))) {
+          sscanf(data_beg, "associativity: %d\n", &associativity);
+          hwloc_debug("read associativity=%d\n", associativity);
+      }
     }
+    if (version >= 2) {
+      if (!strncmp("cluster_mode:", data_beg, strlen("cluster_mode:"))) {
+        sscanf(data_beg, "cluster_mode: %s\n", cluster_mode_str);
+        hwloc_debug("read cluster_mode=%s\n", cluster_mode_str);
+      } else if (!strncmp("memory_mode:", data_beg, strlen("memory_mode:"))) {
+        sscanf(data_beg, "memory_mode: %s\n", memory_mode_str);
+        hwloc_debug("read memory_mode=%s\n", memory_mode_str);
+      }
+    }
+
     data_beg += line_end - data_beg +1;
   }
 
@@ -2786,27 +2802,37 @@ static int hwloc_linux_try_add_knl_mcdram_caches(hwloc_topology_t topology, stru
     return -1;
   }
 
-  for(i=0; i<nbnodes; i++) {
-    hwloc_obj_t cache;
+  /* In file version 1 mcdram_cache is always non-zero.
+   * In file version 2 mcdram cache can be zero in flat mode. We need to check and do not expose cache in flat mode. */
+  if (cache_size > 0) {
+    for(i=0; i<nbnodes; i++) {
+      hwloc_obj_t cache;
 
-    if (hwloc_bitmap_iszero(nodes[i]->cpuset))
-      /* one L3 per DDR, none for MCDRAM nodes */
-      continue;
+      if (hwloc_bitmap_iszero(nodes[i]->cpuset))
+        /* one L3 per DDR, none for MCDRAM nodes */
+        continue;
 
-    cache = hwloc_alloc_setup_object(HWLOC_OBJ_L3CACHE, -1);
-    if (!cache)
-      return -1;
+      cache = hwloc_alloc_setup_object(HWLOC_OBJ_L3CACHE, -1);
+      if (!cache)
+        return -1;
 
-    cache->attr->cache.depth = 3;
-    cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-    cache->attr->cache.associativity = associativity;
-    hwloc_obj_add_info(cache, "Inclusive", inclusiveness ? "1" : "0");
-    cache->attr->cache.size = cache_size;
-    cache->attr->cache.linesize = line_size;
-    cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
-    cache->subtype = strdup("MemorySideCache");
-    hwloc_insert_object_by_cpuset(topology, cache);
+      cache->attr->cache.depth = 3;
+      cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+      cache->attr->cache.associativity = associativity;
+      hwloc_obj_add_info(cache, "Inclusive", inclusiveness ? "1" : "0");
+      cache->attr->cache.size = cache_size;
+      cache->attr->cache.linesize = line_size;
+      cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
+      cache->subtype = strdup("MemorySideCache");
+      hwloc_insert_object_by_cpuset(topology, cache);
+    }
   }
+  /* adding cluster and memory mode as properties of the machine */
+  if (version >= 2) {
+    hwloc_obj_add_info(topology->levels[0][0], "ClusterMode", cluster_mode_str);
+    hwloc_obj_add_info(topology->levels[0][0], "MemoryMode", memory_mode_str);
+  }
+
   return 0;
 }
 
@@ -2937,7 +2963,7 @@ look_sysfsnode(struct hwloc_topology *topology,
       }
 
       if (!failednodes && data->is_knl)
-        hwloc_linux_try_add_knl_mcdram_caches(topology, data, nodes, nbnodes);
+        hwloc_linux_try_handle_knl_hwdata_properties(topology, data, nodes, nbnodes);
 
       if (failednodes) {
 	/* failed to read/create some nodes, don't bother reading/fixing
