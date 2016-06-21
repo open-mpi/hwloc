@@ -2935,7 +2935,8 @@ than querying the operating system again.
 
 The utility <tt>hwloc-dump-hwdata</tt> is also involved in gathering
 privileged information at boot time and making it available to
-non-privileged users. However it only applies to Intel Knights Landing
+non-privileged users (note that this may require a specific SELinux
+MLS policy module). However it only applies to Intel Knights Landing
 Xeon Phi for now (see \ref faq_knl_dump).
 See also <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
 about the location of dumped files.
@@ -3112,6 +3113,12 @@ into human-readable and world-accessible files that the hwloc library will later
 The utility should usually run as root once during boot, in order to update dumped
 information (stored under /var/run/hwloc by default) in case the MCDRAM or clustering configuration
 changed between reboots.
+
+When SELinux MLS policy is enabled, a specific hwloc policy module may be required
+so that all users get access to the dumped files (in /var/run/hwloc by default).
+One may use hwloc policy files from the SELinux Reference Policy at
+https://github.com/TresysTechnology/refpolicy-contrib
+(see also the documentation at https://github.com/TresysTechnology/refpolicy/wiki/GettingStarted).
 
 hwloc-dump-hwdata requires <tt>dmi-sysfs</tt> kernel module loaded.
 
