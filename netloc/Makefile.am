@@ -36,7 +36,6 @@ sources = \
         edge.c \
         node.c \
         architecture.c \
-        jobsched.c \
         hwloc.c \
         mpicomm.c
 
