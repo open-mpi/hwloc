@@ -225,7 +225,7 @@ netloc_node_t * netloc_dt_node_t_construct()
     node->paths        = NULL;
     node->hostname     = NULL;
     utarray_new(node->partitions, &node_partitions_icd);
-    node->hwlocTopoIdx = -1;
+    node->hwlocTopo = NULL;
 
     return node;
 }

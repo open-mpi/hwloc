@@ -22,124 +22,44 @@
 #include <hwloc.h>
 #include "support.h"
 
-static int arch_to_scotch_arch(netloc_arch_t *arch, SCOTCH_Arch *scotch);
-static int host_get_idx(netloc_arch_t *arch, int num_hosts,
-        netloc_arch_host_t **host_list, int **pidx);
+static int arch_tree_to_scotch_arch(netloc_arch_tree_t *tree, SCOTCH_Arch *scotch);
 static int comm_matrix_to_scotch_graph(double **matrix, int n, SCOTCH_Graph *graph);
 int build_scotch_graph(int n, SCOTCH_Graph *graph);
 
-int host_get_idx(netloc_arch_t *arch, int num_hosts,
-        netloc_arch_host_t **host_list, int **pidx)
+static int compareint(void const *a, void const *b)
 {
-    int core_idx = 0;
-    netloc_arch_host_t *host;
-    netloc_arch_host_t *last_host = NULL;
-
-    int *idx = (int *)malloc(num_hosts*sizeof(int));
-
-    int num_cores = arch->arch.tree->num_cores;
-
-    for (int n = 0; n < num_hosts; n++) {
-        netloc_arch_host_t *host = host_list[n];
-        if (host == last_host) {
-            core_idx++;
-        } else {
-            core_idx = 0;
-            last_host = host;
-        }
-        idx[n] = host->idx*num_cores+core_idx;
-    }
-
-    *pidx = idx;
-
-    return NETLOC_SUCCESS;
+   const int *int_a = (const int *)a;
+   const int *int_b = (const int *)b;
+   return *int_a-*int_b;
 }
 
-static int comparehost(void const *a, void const *b)
-{
-   netloc_arch_host_t * const *pa = a;
-   netloc_arch_host_t * const *pb = b;
-   return (*pa)->idx - (*pb)->idx;
-}
-
-static int build_subarch(netloc_arch_t *arch, char **nodelist,
-        int num_nodes, SCOTCH_Arch *scotch, SCOTCH_Arch *subarch,
-        netloc_arch_host_t ***phost_list)
+static int build_subarch(SCOTCH_Arch *scotch, int num_nodes, int *node_list,
+        SCOTCH_Arch *subarch)
 {
     int ret;
-    if (arch->type == NETLOC_ARCH_TREE) {
-        netloc_arch_host_t **host_list;
-        ret = netloc_arch_find_current_hosts(arch, nodelist, num_nodes, &host_list);
-        if (ret != 0) {
-            fprintf(stderr, "Error: netloc_arch_find_current_hosts\n");
-            return NETLOC_ERROR;
-        }
 
-        /* Hack to avoid problem with unsorted node list in the subarch and scotch */
-        qsort(host_list, num_nodes, sizeof(*host_list), comparehost); // FIXME XXX
+    /* Hack to avoid problem with unsorted node list in the subarch and scotch
+     * FIXME TODO */
+    qsort(node_list, num_nodes, sizeof(*node_list), compareint);
 
-        int *idx_list;
-        host_get_idx(arch, num_nodes, host_list, &idx_list);
-
-        ret = SCOTCH_archSub(subarch, scotch, num_nodes, idx_list);
-        if (ret != 0) {
-            fprintf(stderr, "Error: SCOTCH_archSub failed\n");
-            return NETLOC_ERROR;
-        }
-
-        *phost_list = host_list;
-
-    } else {
-        // TODO
-    }
-
-    return NETLOC_SUCCESS;
-}
-
-int arch_to_scotch_arch(netloc_arch_t *arch, SCOTCH_Arch *scotch)
-{
-    netloc_arch_tree_t *tree = arch->arch.tree;
-    int ret;
-
-    ret = SCOTCH_archTleaf(scotch, tree->num_levels, tree->degrees, tree->throughput);
+    ret = SCOTCH_archSub(subarch, scotch, num_nodes, node_list);
     if (ret != 0) {
-        fprintf(stderr, "Error: SCOTCH_archTleaf failed\n");
+        fprintf(stderr, "Error: SCOTCH_archSub failed\n");
         return NETLOC_ERROR;
     }
 
     return NETLOC_SUCCESS;
 }
 
-int netlocscotch_build_current_arch(SCOTCH_Arch *scotch_subarch)
+/* Convert a netloc tree to a scotch tleaf architecture */
+int arch_tree_to_scotch_arch(netloc_arch_tree_t *tree, SCOTCH_Arch *scotch)
 {
     int ret;
-    /* First we need to get the topology of the whole machine */
-    netloc_arch_t arch;
-    ret = netloc_arch_build(&arch, 1);
-    if( NETLOC_SUCCESS != ret ) {
-        return ret;
-    }
 
-    SCOTCH_Arch *scotch_arch;
-    scotch_arch = (SCOTCH_Arch *)malloc(sizeof(SCOTCH_Arch));
-    ret = arch_to_scotch_arch(&arch, scotch_arch);
-    if( NETLOC_SUCCESS != ret ) {
-        return ret;
-    }
-
-    /* Then we retrieve the list of cores given by the resource manager */
-    int num_nodes;
-    char **nodes;
-    ret = netloc_get_current_cores(&num_nodes, &nodes);
-    if( NETLOC_SUCCESS != ret ) {
-        return ret;
-    }
-
-    /* Now we can build the sub architecture */
-    netloc_arch_host_t **host_list;
-    ret = build_subarch(&arch, nodes, num_nodes, scotch_arch, scotch_subarch, &host_list);
-    if( NETLOC_SUCCESS != ret ) {
-        return ret;
+    ret = SCOTCH_archTleaf(scotch, tree->num_levels, tree->degrees, tree->throughput);
+    if (ret != 0) {
+        fprintf(stderr, "Error: SCOTCH_archTleaf failed\n");
+        return NETLOC_ERROR;
     }
 
     return NETLOC_SUCCESS;
@@ -239,34 +159,35 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     int ret;
     /* First we need to get the topology of the whole machine */
     netloc_arch_t arch;
-    ret = netloc_arch_build(&arch, 0);
+    ret = netloc_arch_build(&arch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
 
     netloc_topology_t topology = arch.topology;
 
-    SCOTCH_Arch scotch_arch;
-    ret = arch_to_scotch_arch(&arch, &scotch_arch);
+    ret = netloc_read_hwloc(topology);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
 
-    /* Then we retrieve the list of nodes given by the resource manager */
-    int num_nodes;
-    char **nodes;
-    ret = netloc_get_current_nodes(&num_nodes, &nodes);
+    SCOTCH_Arch scotch_arch;
+    ret = arch_tree_to_scotch_arch(arch.arch.tree, &scotch_arch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
-    /* TODO another way for retrieving the list of nodes, cores and corresponding
-     * ranks: use MPI, hostname and hwloc (see mpi.c)
-     */
+
+    /* Set the current nodes and slots in the arch */
+    ret = netloc_set_current_resources(&arch);
+    if( NETLOC_SUCCESS != ret ) {
+        return ret;
+    }
+    int num_nodes = arch.num_current_nodes;
 
     /* Now we can build the sub architecture */
     SCOTCH_Arch scotch_subarch;
-    netloc_arch_host_t **host_list;
-    ret = build_subarch(&arch, nodes, num_nodes, &scotch_arch, &scotch_subarch, &host_list);
+    ret = build_subarch(&scotch_arch, arch.num_current_nodes,
+            arch.current_nodes, &scotch_subarch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -315,7 +236,8 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     for (int n = 0; n < num_nodes; n++) {
         int *process_list = (int *)process_by_node[n]->d;
         int num_processes = utarray_len(process_by_node[n]);
-        char *nodename = ((netloc_node_t **)arch.hosts)[host_list[n]->host_idx]->hostname;
+        netloc_arch_node_t *node = arch.nodes_by_idx[arch.current_nodes[n]];
+        char *nodename = node->name;
         int node_ranks[num_processes];
 
         /* We need to extract the subgraph with only the vertices mapped to the
@@ -324,24 +246,27 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         build_subgraph(graph, process_list, num_processes, &nodegraph);
 
         /* Get the architecture from hwloc */
-        netloc_node_t *node;
-        HASH_FIND_STR(topology->nodesByHostname, nodename, node);
-        HASH_FIND(hh2, topology->nodesByHostname, nodename, strlen(nodename),
-                node);
-        if (!node) {
+        netloc_arch_node_t *node_arch;
+        HASH_FIND_STR(arch.nodes_by_name, nodename, node_arch);
+        if (!node_arch) {
             return NETLOC_ERROR;
         }
 
-        hwloc_topology_t hwloc_topology =
-            topology->hwloc_topos[node->hwlocTopoIdx];
-        netloc_arch_t nodearch;
-        ret = hwloc_to_netloc_arch(hwloc_topology, &nodearch);
-
+        /* Build the scotch arch of the all node */
         SCOTCH_Arch scotch_nodearch;
-        ret = arch_to_scotch_arch(&nodearch, &scotch_nodearch);
+        ret = arch_tree_to_scotch_arch(node_arch->slot_tree, &scotch_nodearch);
+
+        /* Restrict the scotch arch to the available cores */
+        // TODO
+        SCOTCH_Arch scotch_nodesubarch;
+        ret = build_subarch(&scotch_nodearch, node_arch->num_current_slots,
+                node_arch->current_slots, &scotch_nodesubarch);
+        if( NETLOC_SUCCESS != ret ) {
+            return ret;
+        }
 
         /* Find the mapping to the cores */
-        ret = SCOTCH_graphMap(&nodegraph, &scotch_nodearch, &strategy, node_ranks);
+        ret = SCOTCH_graphMap(&nodegraph, &scotch_nodesubarch, &strategy, node_ranks);
         if (ret != 0) {
             fprintf(stderr, "Error: SCOTCH_graphMap failed\n");
             return NETLOC_ERROR;
@@ -350,8 +275,8 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         /* Report the node ranks in the global rank array */
         for (int p = 0; p < num_processes; p++) {
             int process = process_list[p];
-            cores[process].core = node_ranks[p];
-            cores[process].node = node;
+            cores[process].core = node->slot_os_idx[node_ranks[p]];
+            cores[process].node = node->node;
         }
     }
 
@@ -430,7 +355,6 @@ static int comm_matrix_to_scotch_graph(double **matrix, int n, SCOTCH_Graph *gra
                 min_load = load;
         }
     }
-
 
     edgetab = (SCOTCH_Num *)malloc(n*(n-1)*sizeof(SCOTCH_Num));
     edlotab = (SCOTCH_Num *)malloc(n*(n-1)*sizeof(SCOTCH_Num));

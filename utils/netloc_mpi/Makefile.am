@@ -11,7 +11,8 @@ AM_CPPFLAGS = \
         -I$(top_srcdir)/include
 
 bin_PROGRAMS = \
-        netloc_rank_order
+        netloc_rank_order \
+        netloc_mpi_find_hosts
 
 if BUILD_NETLOCSCOTCH
 bin_PROGRAMS += \
@@ -23,6 +24,12 @@ netloc_rank_order_SOURCES = \
 
 netloc_rank_order_LDADD = \
         $(top_builddir)/netloc/libnetloc.la
+
+netloc_mpi_find_hosts_SOURCES = \
+        netloc_mpi_find_hosts.c
+
+netloc_mpi_find_hosts_LDADD = \
+        $(top_builddir)/netloc/libnetloc.la -lmpi
 
 if BUILD_NETLOCSCOTCH
 netloc_mpi_rank_file_SOURCES = \

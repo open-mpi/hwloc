@@ -367,8 +367,8 @@ void **netloc_explist_get_array_and_destroy(netloc_explist_t *list);
 
 int support_load_datafile(struct netloc_topology * topology);
 void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
-        netloc_arch_host_t **phosts_by_idx);
-int hwloc_to_netloc_arch(hwloc_topology_t topology, netloc_arch_t *arch);
+        int num_hosts, int **parch_idx);
+int hwloc_to_netloc_arch(netloc_arch_node_t *arch);
 char *netloc_line_get_next_token(char **string, char c);
 ssize_t netloc_get_line(char **lineptr, size_t *n, FILE *stream);
 int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum_row);

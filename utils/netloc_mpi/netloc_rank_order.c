@@ -16,44 +16,45 @@
 #include <netloc.h>
 #include <private/netloc.h>
 
-int host_cmp(const void *a, const void *b) 
-{ 
-    const netloc_arch_host_t *host_a = *(const netloc_arch_host_t **)a;
-    const netloc_arch_host_t *host_b = *(const netloc_arch_host_t **)b;
-    return host_a->idx-host_b->idx; 
-} 
+static int compareint(void const *a, void const *b)
+{
+   const int *int_a = (const int *)a;
+   const int *int_b = (const int *)b;
+   return *int_a-*int_b;
+}
+
 
 int main(int argc, char **argv)
 {
     int ret;
     /* First we need to get the topology of the whole machine */
     netloc_arch_t arch;
-    ret = netloc_arch_build(&arch, 1);
+    ret = netloc_arch_build(&arch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
 
-    /* Then we retrieve the list of nodes given by the resource manager */
-    int num_nodes;
-    char **nodes;
-    ret = netloc_get_current_cores(&num_nodes, &nodes);
+    /* Set the current nodes and slots in the arch */
+    ret = netloc_set_current_resources(&arch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
-
-    /* Now we can get the host list */
-    netloc_arch_host_t **host_list;
-    ret = netloc_arch_find_current_hosts(&arch, nodes, num_nodes, &host_list);
-    if( NETLOC_SUCCESS != ret ) {
-        return ret;
-    }
+    int num_nodes = arch.num_current_nodes;
 
     /* Order the idx_list to have the nodes sorted */
-    qsort(host_list, num_nodes, sizeof(netloc_arch_host_t *), host_cmp);
+    qsort(arch.current_nodes, num_nodes, sizeof(*arch.current_nodes), compareint);
 
     /* Show the list */
     for (int n = 0; n < num_nodes; n++) {
-        printf("%s%s", ((char **)arch.hosts)[host_list[n]->host_idx], n != num_nodes-1 ? " ": "\n");
+        netloc_arch_node_t *arch_node = arch.nodes_by_idx[arch.current_nodes[n]];
+        qsort(arch_node->current_slots, arch_node->num_current_slots,
+                sizeof(*arch_node->current_slots), compareint);
+        
+        for (int s = 0; s < arch_node->num_current_slots; s++) {
+            int slot_idx = arch_node->current_slots[s];
+            int slot = arch_node->slot_os_idx[slot_idx];
+            printf("%s %d", arch_node->name, slot_idx);
+        }
     }
 
     return NETLOC_SUCCESS;

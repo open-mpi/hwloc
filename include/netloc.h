@@ -27,6 +27,7 @@
 #include <string.h>
 #include <scotch.h>
 
+#include <hwloc.h>
 #include <netloc/uthash.h>
 #include <netloc/utarray.h>
 
@@ -424,7 +425,7 @@ struct netloc_node_t {
 
     UT_array *partitions; /* index in the list from the topology */
 
-    int hwlocTopoIdx;  /* index in the list from the topology */
+    hwloc_topology_t hwlocTopo;
 };
 
 
@@ -432,25 +433,34 @@ typedef enum {
     NETLOC_ARCH_TREE    =  0,  /* Fat tree */
 } netloc_arch_type_t;
 typedef struct {
-    UT_hash_handle hh;       /* makes this structure hashable */
-    int idx; /* Hash key, and rank in the complete arch */
-    int host_idx; /* idx without ghost hosts */
-} netloc_arch_host_t;
-typedef struct {
     int num_levels;
     int *degrees;
     int *throughput;
-    int num_cores;
 } netloc_arch_tree_t;
 typedef struct {
+    UT_hash_handle hh;       /* makes this structure hashable */
+    char *name; /* Hash key */
+    netloc_node_t *node;
+    int idx_in_topo; /* idx with ghost hosts to have complete topo */
+    int num_slots; /* it is not the real number of slots but the maximum slot idx */
+    int *slot_idx; /* corresponding idx in slot_tree */
+    int *slot_os_idx; /* corresponding os index for each leaf in tree */
+      // ^ TODO
+    netloc_arch_tree_t *slot_tree;
+    int num_current_slots;
+    int *current_slots; /* indices in the complete tree */
+} netloc_arch_node_t;
+typedef struct {
+    netloc_topology_t topology;
     netloc_arch_type_t type;
     union {
         netloc_arch_tree_t *tree;
     } arch;
-    int num_hosts;
-    netloc_arch_host_t *idx_hosts;
-    void *hosts;
-    netloc_topology_t topology;
+    netloc_arch_node_t *nodes_by_name;
+    netloc_arch_node_t **nodes_by_idx; /* nodes by index in complete topo */
+      /* ^- remove TODO TODO */
+    int num_current_nodes;
+    int *current_nodes; /* indices in the complete topology */
 } netloc_arch_t;
 /**********************************************************************
  * Topology API Functions
@@ -551,15 +561,14 @@ NETLOC_DECLSPEC netloc_network_t * netloc_dt_network_t_dup(netloc_network_t *net
 
 netloc_network_t* netloc_access_network_ref(struct netloc_topology * topology);
 
-int netloc_arch_build(netloc_arch_t *arch, int add_hwloc);
+int netloc_arch_build(netloc_arch_t *arch);
 int netloc_get_current_nodes(int *pnum_nodes, char ***pnodes);
 int netloc_get_current_cores(int *pnum_nodes, char ***pnodes);
 int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition);
 int netloc_node_is_in_partition(netloc_node_t *node, int partition);
 int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partition_name);
-int hwloc_get_core_number(int *pnum_cores);
-int netloc_arch_find_current_hosts(netloc_arch_t *arch, char **nodelist,
-        int num_nodes, netloc_arch_host_t ***phost_list);
+int netloc_set_current_resources(netloc_arch_t *arch);
+int netloc_tree_num_leaves(netloc_arch_tree_t *tree, int *pnum_leaves);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -165,7 +165,8 @@ static int handle_node(netloc_node_t *node, json_t *json_nodes, json_t *json_edg
     char *id = node->physical_id;
     char *desc = remove_quote(node->description);
     char *hostname = node->hostname;
-    int topoIdx = node->hwlocTopoIdx;
+    //int topoIdx = node->hwlocTopoIdx; 
+    int topoIdx = 0; //  TODO XXX
 
     json_t *json_node = json_object();
     json_object_set_new(json_node, JSON_DRAW_FILE_NODE_ID, json_string(id));
