@@ -28,6 +28,7 @@ extern "C" {
 typedef struct {
     netloc_node_t *node;
     int core;
+    int rank;
 } netlocscotch_core_t;
 
 int netlocscotch_build_current_arch(SCOTCH_Arch *subarch);

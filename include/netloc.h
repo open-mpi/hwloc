@@ -445,10 +445,10 @@ typedef struct {
     int num_slots; /* it is not the real number of slots but the maximum slot idx */
     int *slot_idx; /* corresponding idx in slot_tree */
     int *slot_os_idx; /* corresponding os index for each leaf in tree */
-      // ^ TODO
     netloc_arch_tree_t *slot_tree;
     int num_current_slots;
     int *current_slots; /* indices in the complete tree */
+    int *slot_ranks; /* corresponding MPI rank for each leaf in tree */
 } netloc_arch_node_t;
 typedef struct {
     netloc_topology_t topology;
@@ -568,7 +568,7 @@ int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition);
 int netloc_node_is_in_partition(netloc_node_t *node, int partition);
 int netloc_topology_find_partition_idx(netloc_topology_t topology, char *partition_name);
 int netloc_set_current_resources(netloc_arch_t *arch);
-int netloc_tree_num_leaves(netloc_arch_tree_t *tree, int *pnum_leaves);
+int netloc_tree_num_leaves(netloc_arch_tree_t *tree);
 
 #ifdef __cplusplus
 } /* extern "C" */

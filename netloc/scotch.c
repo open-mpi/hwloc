@@ -277,6 +277,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
             int process = process_list[p];
             cores[process].core = node->slot_os_idx[node_ranks[p]];
             cores[process].node = node->node;
+            cores[process].rank = node->slot_ranks[node_ranks[p]];
         }
     }
 

@@ -220,8 +220,7 @@ int hwloc_to_netloc_arch(netloc_arch_node_t *arch)
         slot_idx[ordered_hosts[i]] = arch_idx[i];
     }
 
-    int num_leaves; 
-    netloc_tree_num_leaves(tree, &num_leaves);
+    int num_leaves = netloc_tree_num_leaves(tree);
     int *slot_os_idx = (int *)malloc(sizeof(int[num_leaves]));
     for (int i = 0; i < num_cores; i++) {
         slot_os_idx[arch_idx[i]] = ordered_hosts[i];

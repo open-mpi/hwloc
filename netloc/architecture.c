@@ -82,17 +82,17 @@ void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_l
     *parch_idx = arch_idx;
 }
 
-int netloc_tree_num_leaves(netloc_arch_tree_t *tree, int *pnum_leaves)
+int netloc_tree_num_leaves(netloc_arch_tree_t *tree)
 {
     int num_leaves = 1;
     for (int l = 0; l < tree->num_levels; l++) {
         num_leaves *= tree->degrees[l];
     }
-    *pnum_leaves = num_leaves;
-    return NETLOC_SUCCESS;
+    return num_leaves;
 }
 
-static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_idx, int **pslot_list)
+static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_idx,
+        int **pslot_list, int **prank_list)
 {
     char *filename = getenv("NETLOC_CURRENTSLOTS");
     char word[1024];
@@ -125,15 +125,19 @@ static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_id
     }
 
     int *slot_list = (int *)malloc(sizeof(int[slot_idx[num_nodes]]));
+    int *rank_list = (int *)malloc(sizeof(int[slot_idx[num_nodes]]));
     for (int s = 0; s < slot_idx[num_nodes]; s++) {
         fscanf(file, " %1023s", word);
         slot_list[s] = atoi(word);
+        fscanf(file, " %1023s", word);
+        rank_list[s] = atoi(word);
     }
 
     *pnum_nodes = num_nodes;
     *pnodes = nodes;
     *pslot_idx = slot_idx;
     *pslot_list = slot_list;
+    *prank_list = rank_list;
 
     return NETLOC_SUCCESS;
 }
@@ -145,8 +149,10 @@ int netloc_set_current_resources(netloc_arch_t *arch)
     char **nodes;
     int *slot_idx;
     int *slot_list;
+    int *rank_list;
 
-    ret = get_current_resources(&num_nodes, &nodes, &slot_idx, &slot_list);
+    ret = get_current_resources(&num_nodes, &nodes, &slot_idx, &slot_list,
+            &rank_list);
 
     if (ret != NETLOC_SUCCESS)
         assert(0); // XXX
@@ -173,10 +179,14 @@ int netloc_set_current_resources(netloc_arch_t *arch)
 
         node->current_slots = (int *)
             malloc(sizeof(int[num_slots]));
+        int num_leaves = netloc_tree_num_leaves(node->slot_tree);
+        node->slot_ranks = (int *)
+            malloc(sizeof(int[num_leaves]));
 
         for (int s = slot_idx[n]; s < slot_idx[n+1]; s++) {
             int slot = slot_list[s];
             node->current_slots[s-slot_idx[n]] = node->slot_idx[slot];
+            node->slot_ranks[node->slot_idx[slot]] = rank_list[s];
         }
     }
 
