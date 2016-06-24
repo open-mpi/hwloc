@@ -53,6 +53,7 @@ test-suite.log
 /doc/examples/cpuset+bitmap+cpubind
 /doc/examples/nodeset+membind+policy
 /doc/examples/sharedcaches
+/doc/examples/get-knl-modes
 /doc/examples/*.o
 /doc/examples/*.log
 /doc/examples/*.trs
