@@ -245,22 +245,15 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         SCOTCH_Graph nodegraph; /* graph with only elements for node n */
         build_subgraph(graph, process_list, num_processes, &nodegraph);
 
-        /* Get the architecture from hwloc */
-        netloc_arch_node_t *node_arch;
-        HASH_FIND_STR(arch.nodes_by_name, nodename, node_arch);
-        if (!node_arch) {
-            return NETLOC_ERROR;
-        }
-
         /* Build the scotch arch of the all node */
         SCOTCH_Arch scotch_nodearch;
-        ret = arch_tree_to_scotch_arch(node_arch->slot_tree, &scotch_nodearch);
+        ret = arch_tree_to_scotch_arch(node->slot_tree, &scotch_nodearch);
 
         /* Restrict the scotch arch to the available cores */
         // TODO
         SCOTCH_Arch scotch_nodesubarch;
-        ret = build_subarch(&scotch_nodearch, node_arch->num_current_slots,
-                node_arch->current_slots, &scotch_nodesubarch);
+        ret = build_subarch(&scotch_nodearch, node->num_current_slots,
+                node->current_slots, &scotch_nodesubarch);
         if( NETLOC_SUCCESS != ret ) {
             return ret;
         }
