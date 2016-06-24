@@ -1559,6 +1559,7 @@ The memory mode may be <em>Cache</em>, <em>Flat</em>,
 or <em>Hybrid25</em> (25% of MCDRAM as cache).
 The cluster mode may be <em>Quadrant</em>, <em>Hemisphere</em>, <em>All2All</em>,
 <em>SNC2</em> or <em>SNC4</em>.
+See doc/examples/get-knl-modes.c in the source directory for an example of retrieving these attributes.
 </dd>
 <dt>Inclusive (Caches)</dt>
 <dd>The inclusiveness of a cache (1 if inclusive, 0 otherwise).
@@ -3075,6 +3076,9 @@ some normal memory (DDR) and some high-bandwidth on-package memory (MCDRAM).
 Processors can be configured in various clustering modes to have up to 4 <em>Clusters</em>.
 Moreover, each <em>Cluster</em> (quarter, half or whole processor) of the processor may have its own local
 parts of the DDR and of the MCDRAM.
+This memory and clustering configuration may be probed by looking at MemoryMode
+and ClusterMode attributes, see \ref attributes_info and doc/examples/get-knl-modes.c
+in the source directory.
 
 The upcoming hwloc 2.0 will address this new architecture by presenting memory
 in an improved way.
@@ -3105,7 +3109,8 @@ which is set to <tt>MCDRAM</tt>.
 
 Intel Knights Landing Xeon Phi processors may use the on-package memory (MCDRAM)
 as either memory or a memory-side cache (currently reported as a L3 cache by hwloc).
-There are also several clustering modes that significantly affect the memory organization.
+There are also several clustering modes that significantly affect the memory organization
+(see \ref faq_knl_numa for more information about these modes).
 Details about these are currently only available to privileged users.
 
 The hwloc-dump-hwdata utility may be used to dump this privileged binary information
