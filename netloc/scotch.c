@@ -250,11 +250,10 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         ret = arch_tree_to_scotch_arch(node->slot_tree, &scotch_nodearch);
 
         /* Restrict the scotch arch to the available cores */
-        // TODO
         SCOTCH_Arch scotch_nodesubarch;
         ret = build_subarch(&scotch_nodearch, node->num_current_slots,
                 node->current_slots, &scotch_nodesubarch);
-        if( NETLOC_SUCCESS != ret ) {
+        if (NETLOC_SUCCESS != ret) {
             return ret;
         }
 
@@ -268,7 +267,8 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         /* Report the node ranks in the global rank array */
         for (int p = 0; p < num_processes; p++) {
             int process = process_list[p];
-            cores[process].core = node->slot_os_idx[node_ranks[p]];
+            int arch_idx = node->current_slots[node_ranks[p]];
+            cores[process].core = node->slot_os_idx[arch_idx];
             cores[process].node = node->node;
             cores[process].rank = node->slot_ranks[node_ranks[p]];
         }
