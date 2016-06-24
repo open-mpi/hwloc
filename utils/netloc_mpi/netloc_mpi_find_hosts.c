@@ -34,6 +34,7 @@ int main(int argc, char **argv)
     pu_rank = hwloc_bitmap_first(set);
 
     MPI_Get_processor_name(name, &resultlen);
+    resultlen++;
 
     if (rank == 0) {
         node_t *node;
