@@ -161,6 +161,7 @@ int netloc_set_current_resources(netloc_arch_t *arch)
     arch->current_nodes = (int *)
         malloc(sizeof(int[num_nodes]));
 
+    int constant_num_slots = 0;
     for (int n = 0; n < num_nodes; n++) {
         netloc_arch_node_t *node;
         HASH_FIND_STR(arch->nodes_by_name, nodes[n], node);
@@ -176,6 +177,19 @@ int netloc_set_current_resources(netloc_arch_t *arch)
 
         int num_slots = slot_idx[n+1]-slot_idx[n];
         node->num_current_slots = num_slots;
+
+        /* FIXME Nodes with different number of slots is not handled yet, because we
+         * build the scotch architecture without taking account of the
+         * available cores inside nodes, and Scotch is not able to wieght the
+         * nodes */
+        if (constant_num_slots) {
+            if (constant_num_slots != num_slots) {
+                fprintf(stderr, "Oups: the same number of cores by node is needed!\n");
+                assert(constant_num_slots == num_slots);
+            }
+        } else {
+            constant_num_slots = num_slots;
+        }
 
         node->current_slots = (int *)
             malloc(sizeof(int[num_slots]));
