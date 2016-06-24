@@ -24,6 +24,19 @@ int main(int argc, char **argv)
     node_t *nodes = NULL;
 
     MPI_Init(&argc,&argv);
+
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <output file>\n", argv[0]);
+        exit(1);
+    }
+
+    FILE *output = fopen(argv[1], "w");
+
+    if (!output) {
+        perror("fopen");
+        exit(2);
+    }
+
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_ranks);
 
@@ -86,18 +99,18 @@ int main(int argc, char **argv)
 
         /* Number of nodes */
         int num_nodes = HASH_COUNT(nodes);
-        fprintf(stdout, "%d", num_nodes);
+        fprintf(output, "%d", num_nodes);
 
         /* Names of nodes */
         node_t *node_tmp;
         HASH_ITER(hh, nodes, node, node_tmp) {
-            fprintf(stdout, " %s", node->name);
+            fprintf(output, " %s", node->name);
         }
 
         /* Number of slots by node */
         HASH_ITER(hh, nodes, node, node_tmp) {
             int num_slots = utarray_len(node->slots);
-            fprintf(stdout, " %d", num_slots);
+            fprintf(output, " %d", num_slots);
         }
 
         /* List of slots */
@@ -106,8 +119,8 @@ int main(int argc, char **argv)
             int *slots = (int *)node->slots->d;
             int *ranks = (int *)node->ranks->d;
             for (int s = 0; s < num_slots; s++) {
-                fprintf(stdout, " %d", slots[s]);
-                fprintf(stdout, " %d", ranks[s]);
+                fprintf(output, " %d", slots[s]);
+                fprintf(output, " %d", ranks[s]);
             }
         }
     } else {
