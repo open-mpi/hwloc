@@ -31,6 +31,9 @@ bin_PROGRAMS = \
         hwloc-info \
         hwloc-patch
 
+# start tests here before recursing into subdirs
+SUBDIRS = .
+
 if !HWLOC_HAVE_WINDOWS
 bin_PROGRAMS += hwloc-ps
 endif
@@ -41,6 +44,7 @@ endif HWLOC_HAVE_X86_CPUID
 if HWLOC_HAVE_LINUX
 if HWLOC_HAVE_X86
 sbin_PROGRAMS = hwloc-dump-hwdata
+SUBDIRS += test-hwloc-dump-hwdata
 endif HWLOC_HAVE_X86
 endif HWLOC_HAVE_LINUX
 

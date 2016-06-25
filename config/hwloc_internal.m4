@@ -410,6 +410,8 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh]
         hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh]
+        hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/Makefile]
+        hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh]
         hwloc_config_prefix[utils/lstopo/test-lstopo.sh]
         hwloc_config_prefix[utils/lstopo/test-lstopo-distances.sh]
         hwloc_config_prefix[contrib/systemd/Makefile]
@@ -432,6 +434,7 @@ chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh \
       ]hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh \
       ]hwloc_config_prefix[utils/lstopo/test-lstopo.sh \
       ]hwloc_config_prefix[utils/lstopo/test-lstopo-distances.sh])
 
