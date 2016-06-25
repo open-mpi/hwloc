@@ -1,4 +1,4 @@
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -164,3 +164,11 @@ EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_option
 LOG_COMPILER = $(builddir)/test-topology.sh
 
 SUBDIRS = . gather
+
+
+# Non-distributed tests in extra/*.output
+HWLOC_EXTRA_CHECK_DIR = tests/hwloc/linux/extra
+HWLOC_EXTRA_CHECK_TARGET = *.output
+include ../../../config/hwloc_extra.am
+check-local: hwloc-extra-check
+clean-local: hwloc-extra-check-clean
