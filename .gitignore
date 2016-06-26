@@ -127,6 +127,7 @@ test-suite.log
 /tests/hwloc/x86/extra/
 
 /tests/hwloc/xml/test-topology.sh
+/tests/hwloc/xml/extra/
 
 /tests/hwloc/embedded/aclocal.m4
 /tests/hwloc/embedded/autom4te.cache

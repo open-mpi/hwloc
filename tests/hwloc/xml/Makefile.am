@@ -1,4 +1,4 @@
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -70,3 +70,12 @@ TESTS = $(xml_outputs)
 EXTRA_DIST = $(xml_outputs) $(xml_source) $(xml_options) $(xml_envs)
 
 LOG_COMPILER = $(HWLOC_top_builddir)/tests/hwloc/xml/test-topology.sh
+
+
+# Non-distributed tests in extra/*.output
+HWLOC_EXTRA_CHECK_DIR = tests/hwloc/xml/extra
+HWLOC_EXTRA_CHECK_TARGET = *.{xml,output}
+include ../../../config/hwloc_extra.am
+check-local: hwloc-extra-check
+clean-local: hwloc-extra-check-clean
+
