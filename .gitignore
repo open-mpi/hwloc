@@ -124,6 +124,7 @@ test-suite.log
 /tests/hwloc/ports/liblstopo-port-windows.a
 
 /tests/hwloc/x86/test-topology.sh
+/tests/hwloc/x86/extra/
 
 /tests/hwloc/xml/test-topology.sh
 
