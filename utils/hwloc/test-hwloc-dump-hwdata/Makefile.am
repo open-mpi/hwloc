@@ -15,3 +15,12 @@ endif HWLOC_HAVE_BUNZIPP
 EXTRA_DIST = $(dumps)
 
 LOG_COMPILER = $(builddir)/test-hwloc-dump-hwdata.sh
+
+
+# Non-distributed tests in extra/*.output
+HWLOC_EXTRA_CHECK_DIR = utils/hwloc/test-hwloc-dump-hwdata/extra
+HWLOC_EXTRA_CHECK_TARGET = *.tar.bz2
+include ../../../config/hwloc_extra.am
+check-local: hwloc-extra-check
+clean-local: hwloc-extra-check-clean
+

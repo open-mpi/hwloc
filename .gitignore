@@ -193,6 +193,7 @@ test-suite.log
 /utils/hwloc/test-hwloc-info.sh
 /utils/hwloc/test-*.sh.log
 /utils/hwloc/test-*.sh.trs
+/utils/hwloc/test-hwloc-dump-hwdata/extra
 
 /utils/lstopo/*.o
 /utils/lstopo/lstopo
