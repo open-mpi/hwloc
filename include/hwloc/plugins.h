@@ -1,5 +1,6 @@
 /*
  * Copyright © 2013-2016 Inria.  All rights reserved.
+ * Copyright © 2016 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -418,7 +419,7 @@ hwloc_filter_check_osdev_subtype_important(hwloc_obj_osdev_type_t subtype)
 static __hwloc_inline int
 hwloc_filter_check_keep_object_type(hwloc_topology_t topology, hwloc_obj_type_t type)
 {
-  enum hwloc_type_filter_e filter;
+  enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_NONE;
   hwloc_topology_get_type_filter(topology, type, &filter);
   assert(filter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT); /* IMPORTANT only used for I/O */
   return filter == HWLOC_TYPE_FILTER_KEEP_NONE ? 0 : 1;
@@ -432,7 +433,7 @@ static __hwloc_inline int
 hwloc_filter_check_keep_object(hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_type_t type = obj->type;
-  enum hwloc_type_filter_e filter;
+  enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_NONE;
   hwloc_topology_get_type_filter(topology, type, &filter);
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
