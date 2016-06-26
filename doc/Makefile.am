@@ -207,17 +207,20 @@ else !HWLOC_BUILD_DOXYGEN
 # When we don't have doxygen, nothing to do for a normal build
 doc:
 
+if !HWLOC_INSTALL_DOXYGEN
 # But if the user tries to "make dist" and doesn't have all the right
-# tools, fail with a helpful error
+# tools, and prebuilt doc aren't available, fail with a helpful error
 $(BUILT_IMAGES) $(DOX_A4PDF) $(DOX_LETTERPDF):
 	@echo " "
 	@echo "*** ERROR: You do not have all the documentation generation tools"
-	@echo "*** that hwloc needs for 'make dist'.  Check the output from when you"
-	@echo "*** ran 'configure' to see what tools you are missing."
+	@echo "*** that hwloc needs.  Check the output from when you ran 'configure'"
+	@echo "*** (in section \"Configuring hwloc documentation\") to see what tools"
+	@echo "*** you are missing."
 	@echo "***"
-	@echo "*** 'make dist' will now abort with an error."
+	@echo "*** 'make' will now abort with an error."
 	@echo " "
 	@exit 1
+endif !HWLOC_INSTALL_DOXYGEN
 
 endif !HWLOC_BUILD_DOXYGEN
 # there are also a bunch of doxygen-build-dependencies later in this file
