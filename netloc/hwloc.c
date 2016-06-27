@@ -18,7 +18,7 @@
 #include <netloc.h>
 #include <hwloc.h>
 
-int netloc_read_hwloc(netloc_topology_t topology)
+int netloc_read_hwloc(netloc_topology_t topology, int num_nodes, netloc_node_t **node_list)
 {
     int ret = 0;
     int err;
@@ -42,8 +42,19 @@ int netloc_read_hwloc(netloc_topology_t topology)
     }
 
     int num_diffs = 0;
-    netloc_node_t *node, *node_tmp;
-    netloc_topology_iter_nodes(topology, node, node_tmp) {
+
+    if (!num_nodes) {
+        netloc_node_t *node, *node_tmp;
+        num_nodes = HASH_COUNT(topology->nodes);
+        node_list = (netloc_node_t **)malloc(sizeof(netloc_node_t *[num_nodes]));
+        int n = 0;
+        netloc_topology_iter_nodes(topology, node, node_tmp) {
+            node_list[n++] = node;
+        }
+    }
+
+    for (int n  = 0; n < num_nodes; n++) {
+        netloc_node_t *node = node_list[n];
         char *hwloc_file;
         char *refname;
 

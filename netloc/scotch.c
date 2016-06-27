@@ -159,20 +159,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     int ret;
     /* First we need to get the topology of the whole machine */
     netloc_arch_t arch;
-    ret = netloc_arch_build(&arch);
-    if( NETLOC_SUCCESS != ret ) {
-        return ret;
-    }
-
-    netloc_topology_t topology = arch.topology;
-
-    ret = netloc_read_hwloc(topology);
-    if( NETLOC_SUCCESS != ret ) {
-        return ret;
-    }
-
-    SCOTCH_Arch scotch_arch;
-    ret = arch_tree_to_scotch_arch(arch.arch.tree, &scotch_arch);
+    ret = netloc_arch_build(&arch, 1);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -182,12 +169,18 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
-    int num_nodes = arch.num_current_nodes;
+    int num_hosts = arch.num_current_hosts;
+
+    SCOTCH_Arch scotch_arch;
+    ret = arch_tree_to_scotch_arch(arch.arch.global_tree, &scotch_arch);
+    if( NETLOC_SUCCESS != ret ) {
+        return ret;
+    }
 
     /* Now we can build the sub architecture */
     SCOTCH_Arch scotch_subarch;
-    ret = build_subarch(&scotch_arch, arch.num_current_nodes,
-            arch.current_nodes, &scotch_subarch);
+    ret = build_subarch(&scotch_arch, arch.num_current_hosts,
+            arch.current_hosts, &scotch_subarch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -198,9 +191,6 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     SCOTCH_Strat strategy;
     SCOTCH_stratInit(&strategy);
 
-    netlocscotch_core_t *cores = (netlocscotch_core_t *)
-        malloc(graph_size*sizeof(netlocscotch_core_t));
-
     /* The ranks are the indices of the nodes in the complete graph */
     int *ranks = (int *)malloc(graph_size*sizeof(int));
     ret = SCOTCH_graphMap(graph, &scotch_subarch, &strategy, ranks);
@@ -210,67 +200,71 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         return NETLOC_ERROR;
     }
 
-    /* We have the mapping but only for the nodes, not inside the nodes */
+    netlocscotch_core_t *cores = (netlocscotch_core_t *)
+        malloc(graph_size*sizeof(netlocscotch_core_t));
+    if (!arch.has_slots) {
+        /* We have the mapping but only for the nodes, not inside the nodes */
 
-    UT_array *process_by_node[num_nodes];
-    for (int n = 0; n < num_nodes; n++) {
-        utarray_new(process_by_node[n], &ut_int_icd);
-    }
-
-    /* Find the processes mapped to the nodes */
-    for (int p = 0; p < graph_size; p++) {
-        int rank = ranks[p];
-        utarray_push_back(process_by_node[rank], &p);
-    }
-
-    /* Get intranode topology from hwloc */
-    if (!topology->hwloc_topos) {
-        ret = netloc_read_hwloc(topology);
-        if (ret != NETLOC_SUCCESS) {
-            fprintf(stderr, "Error: netloc_read_hwloc failed\n");
-            return NETLOC_ERROR;
-        }
-    }
-
-    /* Use the intranode topology */
-    for (int n = 0; n < num_nodes; n++) {
-        int *process_list = (int *)process_by_node[n]->d;
-        int num_processes = utarray_len(process_by_node[n]);
-        netloc_arch_node_t *node = arch.nodes_by_idx[arch.current_nodes[n]];
-        char *nodename = node->name;
-        int node_ranks[num_processes];
-
-        /* We need to extract the subgraph with only the vertices mapped to the
-         * current node */
-        SCOTCH_Graph nodegraph; /* graph with only elements for node n */
-        build_subgraph(graph, process_list, num_processes, &nodegraph);
-
-        /* Build the scotch arch of the all node */
-        SCOTCH_Arch scotch_nodearch;
-        ret = arch_tree_to_scotch_arch(node->slot_tree, &scotch_nodearch);
-
-        /* Restrict the scotch arch to the available cores */
-        SCOTCH_Arch scotch_nodesubarch;
-        ret = build_subarch(&scotch_nodearch, node->num_current_slots,
-                node->current_slots, &scotch_nodesubarch);
-        if (NETLOC_SUCCESS != ret) {
-            return ret;
+        UT_array *process_by_node[num_hosts];
+        for (int n = 0; n < num_hosts; n++) {
+            utarray_new(process_by_node[n], &ut_int_icd);
         }
 
-        /* Find the mapping to the cores */
-        ret = SCOTCH_graphMap(&nodegraph, &scotch_nodesubarch, &strategy, node_ranks);
-        if (ret != 0) {
-            fprintf(stderr, "Error: SCOTCH_graphMap failed\n");
-            return NETLOC_ERROR;
+        /* Find the processes mapped to the nodes */
+        for (int p = 0; p < graph_size; p++) {
+            int rank = ranks[p];
+            utarray_push_back(process_by_node[rank], &p);
         }
 
-        /* Report the node ranks in the global rank array */
-        for (int p = 0; p < num_processes; p++) {
-            int process = process_list[p];
-            int arch_idx = node->current_slots[node_ranks[p]];
-            cores[process].core = node->slot_os_idx[arch_idx];
-            cores[process].node = node->node;
-            cores[process].rank = node->slot_ranks[node_ranks[p]];
+        /* Use the intranode topology */
+        for (int n = 0; n < num_hosts; n++) {
+            int *process_list = (int *)process_by_node[n]->d;
+            int num_processes = utarray_len(process_by_node[n]);
+            netloc_arch_node_t *node = arch.node_slot_by_idx[arch.current_hosts[n]].node;
+            char *nodename = node->name;
+            int node_ranks[num_processes];
+
+            /* We need to extract the subgraph with only the vertices mapped to the
+             * current node */
+            SCOTCH_Graph nodegraph; /* graph with only elements for node n */
+            build_subgraph(graph, process_list, num_processes, &nodegraph);
+
+            /* Build the scotch arch of the all node */
+            SCOTCH_Arch scotch_nodearch;
+            ret = arch_tree_to_scotch_arch(node->slot_tree, &scotch_nodearch);
+
+            /* Restrict the scotch arch to the available cores */
+            SCOTCH_Arch scotch_nodesubarch;
+            ret = build_subarch(&scotch_nodearch, node->num_current_slots,
+                    node->current_slots, &scotch_nodesubarch);
+            if (NETLOC_SUCCESS != ret) {
+                return ret;
+            }
+
+            /* Find the mapping to the cores */
+            ret = SCOTCH_graphMap(&nodegraph, &scotch_nodesubarch, &strategy, node_ranks);
+            if (ret != 0) {
+                fprintf(stderr, "Error: SCOTCH_graphMap failed\n");
+                return NETLOC_ERROR;
+            }
+
+            /* Report the node ranks in the global rank array */
+            for (int p = 0; p < num_processes; p++) {
+                int process = process_list[p];
+                int arch_idx = node->current_slots[node_ranks[p]];
+                cores[process].core = node->slot_os_idx[arch_idx];
+                cores[process].node = node->node;
+                cores[process].rank = node->slot_ranks[node_ranks[p]];
+            }
+        }
+    } else {
+        for (int p = 0; p < graph_size; p++) {
+            int host_idx = arch.current_hosts[ranks[p]];
+            netloc_arch_node_t *node = arch.node_slot_by_idx[host_idx].node;
+            int slot_rank = arch.node_slot_by_idx[host_idx].slot;
+            cores[p].node = node->node;
+            cores[p].core = node->slot_os_idx[node->slot_idx[slot_rank]];
+            cores[p].rank = node->slot_ranks[node->slot_idx[slot_rank]];
         }
     }
 

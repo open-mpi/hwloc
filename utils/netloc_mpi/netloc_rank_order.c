@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     int ret;
     /* First we need to get the topology of the whole machine */
     netloc_arch_t arch;
-    ret = netloc_arch_build(&arch);
+    ret = netloc_arch_build(&arch, 0);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -39,14 +39,14 @@ int main(int argc, char **argv)
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
-    int num_nodes = arch.num_current_nodes;
+    int num_nodes = arch.num_current_hosts;
 
     /* Order the idx_list to have the nodes sorted */
-    qsort(arch.current_nodes, num_nodes, sizeof(*arch.current_nodes), compareint);
+    qsort(arch.current_hosts, num_nodes, sizeof(*arch.current_hosts), compareint);
 
     /* Show the list */
     for (int n = 0; n < num_nodes; n++) {
-        netloc_arch_node_t *arch_node = arch.nodes_by_idx[arch.current_nodes[n]];
+        netloc_arch_node_t *arch_node = arch.node_slot_by_idx[arch.current_hosts[n]].node;
         qsort(arch_node->current_slots, arch_node->num_current_slots,
                 sizeof(*arch_node->current_slots), compareint);
         

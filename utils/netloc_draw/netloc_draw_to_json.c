@@ -57,12 +57,6 @@
 #define JSON_DRAW_FILE_PARTITIONS "partitions"
 #define JSON_DRAW_FILE_HWLOCTOPOS "hwloctopos"
 
-int netloc_read_hwloc(netloc_topology_t topology)
-{
-    // TODO
-    return 0;
-}
-
 static char *remove_quote(char *string)
 {
     if (string[0] == '\'')
@@ -329,7 +323,7 @@ int netloc_to_json_draw(netloc_topology_t topology, int simplify)
     char *basename = (char *)malloc((basename_len+1)*sizeof(char));
     char *draw;
 
-    netloc_read_hwloc(topology);
+    netloc_read_hwloc(topology, 0, NULL);
 
     strncpy(basename, node_uri, basename_len);
     basename[basename_len] = '\0';

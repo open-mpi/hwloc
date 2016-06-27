@@ -22,6 +22,8 @@ typedef struct netloc_analysis_data_t {
 static int partition_topology_to_tleaf(netloc_topology_t topology,
         int partition, int num_cores, netloc_arch_t *arch);
 static void set_gbits(int *values, netloc_edge_t *edge, int num_levels);
+static netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main,
+        netloc_arch_tree_t *sub);
 
 /* Complete the topology to have a complete balanced tree  */
 void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
@@ -146,49 +148,65 @@ int netloc_set_current_resources(netloc_arch_t *arch)
 {
     int ret;
     int num_nodes;
-    char **nodes;
+    char **nodenames;
     int *slot_idx;
     int *slot_list;
     int *rank_list;
 
-    ret = get_current_resources(&num_nodes, &nodes, &slot_idx, &slot_list,
+    ret = get_current_resources(&num_nodes, &nodenames, &slot_idx, &slot_list,
             &rank_list);
 
     if (ret != NETLOC_SUCCESS)
         assert(0); // XXX
 
-    arch->num_current_nodes = num_nodes;
-    arch->current_nodes = (int *)
+    int *current_nodes = (int *)
         malloc(sizeof(int[num_nodes]));
+
+    netloc_arch_node_t **arch_node_list = (netloc_arch_node_t **)
+        malloc(sizeof(netloc_arch_node_t *[num_nodes]));
+    netloc_node_t **node_list = (netloc_node_t **)
+        malloc(sizeof(netloc_node_t *[num_nodes]));
+    for (int n = 0; n < num_nodes; n++) {
+        netloc_arch_node_t *arch_node;
+        HASH_FIND_STR(arch->nodes_by_name, nodenames[n], arch_node);
+        if (!arch_node) {
+            return NETLOC_ERROR;
+        }
+        arch_node_list[n] = arch_node;
+        node_list[n] = arch_node->node;
+    }
+
+    ret = netloc_read_hwloc(arch->topology, num_nodes, node_list);
+    if( NETLOC_SUCCESS != ret ) {
+        return ret;
+    }
 
     int constant_num_slots = 0;
     for (int n = 0; n < num_nodes; n++) {
-        netloc_arch_node_t *node;
-        HASH_FIND_STR(arch->nodes_by_name, nodes[n], node);
-        if (!node) {
-            return NETLOC_ERROR;
-        }
+        netloc_arch_node_t *node = arch_node_list[n];
 
         ret = hwloc_to_netloc_arch(node);
         if (ret != NETLOC_SUCCESS)
             return ret;
 
-        arch->current_nodes[n] = node->idx_in_topo;
+        current_nodes[n] = node->idx_in_topo;
 
         int num_slots = slot_idx[n+1]-slot_idx[n];
         node->num_current_slots = num_slots;
 
-        /* FIXME Nodes with different number of slots is not handled yet, because we
+        /* Nodes with different number of slots are not handled yet, because we
          * build the scotch architecture without taking account of the
          * available cores inside nodes, and Scotch is not able to wieght the
          * nodes */
-        if (constant_num_slots) {
-            if (constant_num_slots != num_slots) {
-                fprintf(stderr, "Oups: the same number of cores by node is needed!\n");
-                assert(constant_num_slots == num_slots);
+        if (!arch->has_slots) {
+            if (constant_num_slots) {
+                if (constant_num_slots != num_slots) {
+                    fprintf(stderr, "Oups: the same number of cores by node is needed!\n");
+                    assert(constant_num_slots == num_slots);
+                }
+            } else {
+                constant_num_slots = num_slots;
             }
-        } else {
-            constant_num_slots = num_slots;
         }
 
         node->current_slots = (int *)
@@ -204,7 +222,87 @@ int netloc_set_current_resources(netloc_arch_t *arch)
         }
     }
 
+    if (!arch->has_slots) {
+        arch->num_current_hosts = num_nodes;
+        arch->current_hosts = current_nodes;
+        arch->arch.global_tree = arch->arch.node_tree;
+
+        /* Build nodes_by_idx */
+        int tree_size = netloc_tree_num_leaves(arch->arch.node_tree);
+        netloc_arch_node_slot_t *nodes_by_idx = (netloc_arch_node_slot_t *)
+            malloc(sizeof(netloc_arch_node_slot_t[tree_size]));
+        for (int n = 0; n < num_nodes; n++) {
+            netloc_arch_node_t *node = arch_node_list[n];
+            nodes_by_idx[node->idx_in_topo].node = node;
+            nodes_by_idx[node->idx_in_topo].slot = -1;
+        }
+        arch->node_slot_by_idx = nodes_by_idx;
+
+
+    } else {
+        int num_hosts = slot_idx[num_nodes];
+        int *current_hosts = (int *)malloc(sizeof(int[num_hosts]));
+        /* Add the slot trees to the node tree */
+
+        /* Check that each slot tree has the same size */
+        int slot_tree_size = 0;
+        for (int n = 0; n < num_nodes; n++) {
+            netloc_arch_node_t *node = arch_node_list[n];
+            int current_size = netloc_tree_num_leaves(node->slot_tree);
+            if (!slot_tree_size) {
+                slot_tree_size = current_size;
+            } else {
+                if (slot_tree_size != current_size) {
+                    assert(0);
+                }
+            }
+        }
+
+        int current_host_idx = 0;
+        int node_tree_size = netloc_tree_num_leaves(arch->arch.node_tree);
+        int global_tree_size = node_tree_size*slot_tree_size;
+        netloc_arch_node_slot_t *nodes_by_idx = (netloc_arch_node_slot_t *)
+            malloc(sizeof(netloc_arch_node_slot_t[global_tree_size]));
+        for (int n = 0; n < num_nodes; n++) {
+            netloc_arch_node_t *node = arch_node_list[n];
+            for (int s = slot_idx[n]; s < slot_idx[n+1]; s++) {
+                int slot_rank = s-slot_idx[n];
+                int topo_idx = node->idx_in_topo*slot_tree_size +
+                    node->slot_idx[slot_rank];
+                nodes_by_idx[topo_idx].node = node;
+                nodes_by_idx[topo_idx].slot = slot_rank;
+                current_hosts[current_host_idx++] = topo_idx;
+            }
+        }
+        arch->num_current_hosts = current_host_idx;
+        arch->current_hosts = current_hosts;
+        arch->node_slot_by_idx = nodes_by_idx;
+
+        arch->arch.global_tree =
+            tree_merge(arch->arch.node_tree, arch_node_list[0]->slot_tree);
+    }
+
     return NETLOC_SUCCESS;
+}
+
+netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main, netloc_arch_tree_t *sub)
+{
+    netloc_arch_tree_t *new_tree = (netloc_arch_tree_t *)
+        malloc(sizeof(netloc_arch_tree_t));
+
+    int num_levels = main->num_levels+sub->num_levels;
+    new_tree->num_levels = num_levels;
+    new_tree->degrees = (int *)malloc(sizeof(int[num_levels]));
+    new_tree->throughput = (int *)malloc(sizeof(int[num_levels]));
+
+    memcpy(new_tree->degrees, main->degrees, main->num_levels*sizeof(int));
+    memcpy(new_tree->degrees+main->num_levels, sub->degrees,
+            sub->num_levels*sizeof(int));
+    memcpy(new_tree->throughput, main->throughput, main->num_levels*sizeof(int));
+    memcpy(new_tree->throughput+main->num_levels, sub->throughput,
+            sub->num_levels*sizeof(int));
+
+    return new_tree;
 }
 
 
@@ -217,7 +315,7 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
 
     netloc_arch_tree_t *tree = (netloc_arch_tree_t *)
         malloc(sizeof(netloc_arch_tree_t));
-    arch->arch.tree = tree;
+    arch->arch.node_tree = tree;
     arch->type = NETLOC_ARCH_TREE;
 
     /* we build nodes from host list in the given partition
@@ -407,30 +505,18 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
 
     netloc_node_t **ordered_nodes = (netloc_node_t **)ordered_name_array->d;
     netloc_arch_node_t *named_nodes = NULL;
-    int max_idx_in_topo = -1;
     for (int i = 0; i < num_nodes; i++) {
         netloc_arch_node_t *node = (netloc_arch_node_t *)
             malloc(sizeof(netloc_arch_node_t));
         node->node = ordered_nodes[i];
         node->name = ordered_nodes[i]->hostname;
         node->idx_in_topo = arch_idx[i];
-        max_idx_in_topo  = (max_idx_in_topo > arch_idx[i]) ? max_idx_in_topo : arch_idx[i];
         node->num_slots = -1;
         node->slot_idx = NULL;
         HASH_ADD_KEYPTR( hh, named_nodes, node->name, strlen(node->name), node);
     }
 
-    /* Build nodes_by_idx */
-    netloc_arch_node_t **nodes_by_idx = (netloc_arch_node_t **)
-        malloc(sizeof(netloc_arch_node_t *[max_idx_in_topo+1]));
-    netloc_arch_node_t *named_node = named_nodes;
-    for (int i = 0; i < num_nodes; i++) {
-        nodes_by_idx[named_node->idx_in_topo] = named_node;
-        named_node = named_node->hh.next;
-    }
-
     arch->nodes_by_name = named_nodes;
-    arch->nodes_by_idx = nodes_by_idx;
 
 end:
     /* We copy back all userdata */
@@ -506,7 +592,7 @@ int netloc_arch_find_current_nodes(netloc_arch_t *arch, char **nodelist,
     return NETLOC_SUCCESS;
 }
 
-int netloc_arch_build(netloc_arch_t *arch)
+int netloc_arch_build(netloc_arch_t *arch, int add_slots)
 {
     char *arch_file = getenv("NETLOC_ARCHFILE");
     char *partition_name = getenv("NETLOC_PARTITION");
@@ -547,6 +633,7 @@ int netloc_arch_build(netloc_arch_t *arch)
 
         support_load_datafile(topology);
         arch->topology = topology;
+        arch->has_slots = add_slots;
 
         if (!partition_name) {
             fprintf(stderr, "Error: you need to set NETLOC_PARTITION in your environment.\n");

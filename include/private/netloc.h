@@ -372,6 +372,6 @@ int hwloc_to_netloc_arch(netloc_arch_node_t *arch);
 char *netloc_line_get_next_token(char **string, char c);
 ssize_t netloc_get_line(char **lineptr, size_t *n, FILE *stream);
 int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum_row);
-int netloc_read_hwloc(netloc_topology_t topology);
+int netloc_read_hwloc(netloc_topology_t topology, int num_nodes, netloc_node_t **node_list);
 
 #endif // _NETLOC_PRIVATE_H_

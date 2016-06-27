@@ -451,16 +451,22 @@ typedef struct {
     int *slot_ranks; /* corresponding MPI rank for each leaf in tree */
 } netloc_arch_node_t;
 typedef struct {
+    netloc_arch_node_t *node;
+    int slot;
+} netloc_arch_node_slot_t;
+typedef struct {
     netloc_topology_t topology;
+    int has_slots; /* if slots are included in the architecture */
     netloc_arch_type_t type;
     union {
-        netloc_arch_tree_t *tree;
+        netloc_arch_tree_t *node_tree;
+        netloc_arch_tree_t *global_tree;
     } arch;
     netloc_arch_node_t *nodes_by_name;
-    netloc_arch_node_t **nodes_by_idx; /* nodes by index in complete topo */
+    netloc_arch_node_slot_t *node_slot_by_idx; /* node_slot by index in complete topo */
       /* ^- remove TODO TODO */
-    int num_current_nodes;
-    int *current_nodes; /* indices in the complete topology */
+    int num_current_hosts; /* if has_slots, host is a slot, else host is a node */
+    int *current_hosts; /* indices in the complete topology */
 } netloc_arch_t;
 /**********************************************************************
  * Topology API Functions
@@ -561,7 +567,7 @@ NETLOC_DECLSPEC netloc_network_t * netloc_dt_network_t_dup(netloc_network_t *net
 
 netloc_network_t* netloc_access_network_ref(struct netloc_topology * topology);
 
-int netloc_arch_build(netloc_arch_t *arch);
+int netloc_arch_build(netloc_arch_t *arch, int add_slots);
 int netloc_get_current_nodes(int *pnum_nodes, char ***pnodes);
 int netloc_get_current_cores(int *pnum_nodes, char ***pnodes);
 int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition);
