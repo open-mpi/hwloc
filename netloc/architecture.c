@@ -293,14 +293,17 @@ netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main, netloc_arch_tree_t *sub
     int num_levels = main->num_levels+sub->num_levels;
     new_tree->num_levels = num_levels;
     new_tree->degrees = (int *)malloc(sizeof(int[num_levels]));
-    new_tree->throughput = (int *)malloc(sizeof(int[num_levels]));
+    new_tree->cost = (int *)malloc(sizeof(int[num_levels]));
 
     memcpy(new_tree->degrees, main->degrees, main->num_levels*sizeof(int));
     memcpy(new_tree->degrees+main->num_levels, sub->degrees,
             sub->num_levels*sizeof(int));
-    memcpy(new_tree->throughput, main->throughput, main->num_levels*sizeof(int));
-    memcpy(new_tree->throughput+main->num_levels, sub->throughput,
-            sub->num_levels*sizeof(int));
+
+    int out_coeff = 10;
+    for (int l = 0; l < main->num_levels; l++) {
+        new_tree->cost[l] = main->cost[l]*sub->cost[0]*out_coeff;
+    }
+    memcpy(new_tree->cost+main->num_levels, sub->cost, sub->num_levels*sizeof(int));
 
     return new_tree;
 }
@@ -404,7 +407,6 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
     UT_array *ordered_name_array;
     UT_array **down_degrees_by_level;
     int *max_down_degrees_by_level;
-    int *gbits_by_level;
 
     utarray_new(ordered_name_array, &ut_ptr_icd);
 
@@ -413,7 +415,6 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
         utarray_new(down_degrees_by_level[l], &ut_int_icd);
     }
     max_down_degrees_by_level = (int *)calloc(num_levels-1, sizeof(int));
-    gbits_by_level = (int *)calloc(num_levels-1, sizeof(int));
 
     UT_array *down_edges;
     utarray_new(down_edges, &ut_ptr_icd);
@@ -425,7 +426,6 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
             utarray_pop_back(down_edges);
             netloc_node_t *dest_node = down_edge->dest;
             if (netloc_node_is_host(dest_node)) {
-                set_gbits(gbits_by_level, down_edge, num_levels);
                 utarray_push_back(ordered_name_array, &dest_node);
             }
             else {
@@ -437,7 +437,6 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
                     netloc_analysis_data *edge_data = (netloc_analysis_data *)edge->userdata;
                     int edge_level = edge_data->level;
                     if (edge_level == -1) {
-                        set_gbits(gbits_by_level, edge, num_levels);
                         utarray_push_back(down_edges, &edge);
                         num_edges++;
                     }
@@ -468,13 +467,11 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
                 /* If the is the node where we are from */
                 if (dest_node == up_edge->node) {
                     num_edges++;
-                    set_gbits(gbits_by_level, edge, num_levels);
                     continue;
                 }
 
                 /* Downward edge */
                 if (edge_level == -1) {
-                    set_gbits(gbits_by_level, edge, num_levels);
                     utarray_push_back(down_edges, &edge);
                     num_edges++;
                 }
@@ -495,7 +492,13 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
 
     tree->num_levels = num_levels-1;
     tree->degrees = max_down_degrees_by_level;
-    tree->throughput = gbits_by_level;
+
+    int network_coeff = 2;
+    tree->cost = (int *)malloc(sizeof(int[tree->num_levels]));
+    tree->cost[tree->num_levels-1] = 1;
+    for (int i = tree->num_levels-2; i >= 0 ; i--) {
+        tree->cost[i] = tree->cost[i+1]*network_coeff;
+    }
 
     /* Now we have the degree of each node, so we can complete the topology to
      * have a complete balanced tree as requested by the tleaf structure */

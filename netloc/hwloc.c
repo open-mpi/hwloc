@@ -211,16 +211,18 @@ int hwloc_to_netloc_arch(netloc_arch_node_t *arch)
     ordered_hosts = (int *)ordered_host_array->d;;
 
     /* Weight for the edges in the tree */
-    int *weight_by_level = (int *)malloc((depth-1)*sizeof(int));
-    for (int l = 0; l < depth-1; l++) {
-        weight_by_level[l] = l+1;
+    int *cost = (int *)malloc((depth-1)*sizeof(int));
+    int level_coeff = 3;
+    cost[depth-2] = 1;
+    for (int l = depth-3; l >= 0; l--) {
+        cost[l] = cost[l+1]*level_coeff;
     }
 
     netloc_arch_tree_t *tree = (netloc_arch_tree_t *)
         malloc(sizeof(netloc_arch_tree_t));
     tree->num_levels = depth-1;
     tree->degrees = max_down_degrees_by_level;
-    tree->throughput = weight_by_level;
+    tree->cost = cost;
 
     int *arch_idx;
     int num_cores = utarray_len(ordered_host_array);
