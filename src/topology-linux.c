@@ -1713,9 +1713,11 @@ static void
 hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const char *root_path)
 {
   char *mount_path;
-  struct mntent *mntent;
+  struct mntent mntent;
   FILE *fd;
   int err;
+  size_t bufsize;
+  char *buf;
 
   *cgroup_mntpnt = NULL;
   *cpuset_mntpnt = NULL;
@@ -1733,14 +1735,25 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
   if (!fd)
     return;
 
-  while ((mntent = getmntent(fd)) != NULL) {
-    if (!strcmp(mntent->mnt_type, "cpuset")) {
-      hwloc_debug("Found cpuset mount point on %s\n", mntent->mnt_dir);
-      *cpuset_mntpnt = strdup(mntent->mnt_dir);
+  /* getmntent_r() doesn't actually report an error when the buffer
+   * is too small. It just silently truncates things. So we can't
+   * dynamically resize things.
+   *
+   * Linux limits mount type, string, and options to one page each.
+   * getmntent() limits the line size to 4kB.
+   * so use 4*pagesize to be far above both.
+   */
+  bufsize = hwloc_getpagesize()*4;
+  buf = malloc(bufsize);
+
+  while (getmntent_r(fd, &mntent, buf, bufsize)) {
+    if (!strcmp(mntent.mnt_type, "cpuset")) {
+      hwloc_debug("Found cpuset mount point on %s\n", mntent.mnt_dir);
+      *cpuset_mntpnt = strdup(mntent.mnt_dir);
       break;
-    } else if (!strcmp(mntent->mnt_type, "cgroup")) {
+    } else if (!strcmp(mntent.mnt_type, "cgroup")) {
       /* found a cgroup mntpnt */
-      char *opt, *opts = mntent->mnt_opts;
+      char *opt, *opts = mntent.mnt_opts;
       int cpuset_opt = 0;
       int noprefix_opt = 0;
       /* look at options */
@@ -1753,16 +1766,17 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
       if (!cpuset_opt)
 	continue;
       if (noprefix_opt) {
-	hwloc_debug("Found cgroup emulating a cpuset mount point on %s\n", mntent->mnt_dir);
-	*cpuset_mntpnt = strdup(mntent->mnt_dir);
+	hwloc_debug("Found cgroup emulating a cpuset mount point on %s\n", mntent.mnt_dir);
+	*cpuset_mntpnt = strdup(mntent.mnt_dir);
       } else {
-	hwloc_debug("Found cgroup/cpuset mount point on %s\n", mntent->mnt_dir);
-	*cgroup_mntpnt = strdup(mntent->mnt_dir);
+	hwloc_debug("Found cgroup/cpuset mount point on %s\n", mntent.mnt_dir);
+	*cgroup_mntpnt = strdup(mntent.mnt_dir);
       }
       break;
     }
   }
 
+  free(buf);
   endmntent(fd);
 }
 
