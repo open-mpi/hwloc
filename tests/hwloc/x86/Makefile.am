@@ -8,6 +8,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # Add your expected output file here.
 # By default, it shows the output of `lstopo --of xml -'.
 cpuid_outputs = \
+	Intel-Broadwell-2xXeon-E5-2650Lv4.output \
 	Intel-Haswell-2xXeon-E5-2680v3.output \
 	Intel-IvyBridge-12xXeon-E5-4620v2.output \
 	Intel-SandyBridge-2xXeon-E5-2650.output \
@@ -28,6 +29,7 @@ cpuid_outputs = \
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # specifying which tarball to use
 cpuid_tarballs = \
+	Intel-Broadwell-2xXeon-E5-2650Lv4.tar.bz2 \
 	Intel-Haswell-2xXeon-E5-2680v3.tar.bz2 \
 	Intel-IvyBridge-12xXeon-E5-4620v2.tar.bz2 \
 	Intel-SandyBridge-2xXeon-E5-2650.tar.bz2 \
