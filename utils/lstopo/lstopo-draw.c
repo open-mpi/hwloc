@@ -463,10 +463,8 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     return snprintf(text, textlen, "%s%s%s", typestr, indexstr, totmemstr);
 }
 
-static struct draw_methods getmax_draw_methods;
-
 static void
-lstopo_set_object_color(struct draw_methods *methods,
+lstopo_set_object_color(struct lstopo_output *loutput,
 			hwloc_topology_t topology __hwloc_attribute_unused,
 			hwloc_obj_t obj, int arg, /* PU status (0=normal, 1=running, 2=forbidden)
 						   * Machine status (0=normal, 1=displayed as a root/System) */
@@ -475,8 +473,8 @@ lstopo_set_object_color(struct draw_methods *methods,
   unsigned forcer, forceg, forceb;
   const char *style;
 
-  /* no need to deal with colors when computing max sizes */
-  if (methods == &getmax_draw_methods)
+  /* no need to deal with colors when not drawing */
+  if (loutput->drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   memset(s, 0, sizeof(*s));
@@ -666,7 +664,7 @@ pci_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwl
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 0, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
 
   if (collapse > 1) {
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+2, x + overlaidoffset, *retwidth - overlaidoffset, y + overlaidoffset, *retheight - overlaidoffset);
@@ -796,7 +794,7 @@ os_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwlo
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 0, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
 
   if (fontsize) {
@@ -830,7 +828,7 @@ bridge_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_o
   RECURSE_VERT(level, &null_draw_methods, gridsize, 0);
 
   /* Square and left link */
-  lstopo_set_object_color(methods, topology, level, 0, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
   methods->line(loutput, 0, 0, 0, depth, x + gridsize, y + PCI_HEIGHT/2, x + 2*gridsize, y + PCI_HEIGHT/2);
 
@@ -915,7 +913,7 @@ pu_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t
     colorarg = 1;
   else
     colorarg = 0;
-  lstopo_set_object_color(methods, topology, level, colorarg, &style);
+  lstopo_set_object_color(loutput, topology, level, colorarg, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
 
   if (fontsize) {
@@ -953,7 +951,7 @@ cache_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
 
   RECURSE_RECT(level, &null_draw_methods, separator, 0);
 
-  lstopo_set_object_color(methods, topology, level, 0, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, myheight - gridsize);
 
   if (fontsize) {
@@ -988,7 +986,7 @@ core_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 0, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
@@ -1023,7 +1021,7 @@ package_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 0, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
@@ -1068,7 +1066,7 @@ node_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
   /* Compute the size needed by sublevels */
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 0 /* node */, &style);
+  lstopo_set_object_color(loutput, topology, level, 0 /* node */, &style);
   /* Draw the epoxy box */
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
   /* Draw the memory box */
@@ -1108,7 +1106,7 @@ machine_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 0 /* machine */, &style);
+  lstopo_set_object_color(loutput, topology, level, 0 /* machine */, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
@@ -1188,7 +1186,7 @@ system_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_o
   else
     RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 1 /* system */, &style);
+  lstopo_set_object_color(loutput, topology, level, 1 /* system */, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
@@ -1230,7 +1228,7 @@ group_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
   else
     RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 0, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
@@ -1268,7 +1266,7 @@ misc_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
 
   RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
 
-  lstopo_set_object_color(methods, topology, level, 0, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
