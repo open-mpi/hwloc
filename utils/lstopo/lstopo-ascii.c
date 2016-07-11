@@ -176,7 +176,7 @@ ascii_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribu
   char *toput;
 #endif
 
-  if (disp->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
@@ -337,6 +337,10 @@ ascii_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_un
   unsigned gridsize = loutput->gridsize;
   unsigned i, j;
   unsigned x2, y2;
+
+  if (disp->loutput.drawing == LSTOPO_DRAWING_PREPARE)
+    return;
+
   x1 /= (gridsize/2);
   width /= (gridsize/2);
   y1 /= gridsize;
@@ -388,6 +392,10 @@ ascii_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute
   struct lstopo_output *loutput = output;
   unsigned gridsize = loutput->gridsize;
   unsigned i, j, z;
+
+  if (disp->loutput.drawing == LSTOPO_DRAWING_PREPARE)
+    return;
+
   x1 /= (gridsize/2);
   y1 /= gridsize;
   x2 /= (gridsize/2);
@@ -448,7 +456,7 @@ ascii_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused,
   struct lstopo_output *loutput = output;
   unsigned gridsize = loutput->gridsize;
 
-  if (disp->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   x /= (gridsize/2);

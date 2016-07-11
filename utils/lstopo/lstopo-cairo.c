@@ -62,6 +62,9 @@ topo_cairo_box(void *_output, int r, int g, int b, unsigned depth __hwloc_attrib
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
+  if (coutput->loutput.drawing == LSTOPO_DRAWING_PREPARE)
+    return;
+
   if (x > coutput->max_x)
     coutput->max_x = x;
   if (x + width > coutput->max_x)
@@ -90,6 +93,9 @@ topo_cairo_line(void *_output, int r, int g, int b, unsigned depth __hwloc_attri
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
+  if (coutput->loutput.drawing == LSTOPO_DRAWING_PREPARE)
+    return;
+
   if (x1 > coutput->max_x)
     coutput->max_x = x1;
   if (x2 > coutput->max_x)
@@ -115,7 +121,7 @@ topo_cairo_text(void *_output, int r, int g, int b, int fontsize, unsigned depth
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (coutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   cairo_move_to(c, x, y + fontsize);
@@ -132,7 +138,6 @@ topo_cairo_textsize(void *_output, const char *text, unsigned textlength __hwloc
   cairo_text_extents(c, text, &extents);
   *width = extents.width;
 }
-
 
 #if (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE)
 static cairo_status_t
@@ -158,7 +163,9 @@ topo_cairo_paint(struct lstopo_cairo_output *coutput)
   coutput->context = NULL;
 }
 
-static void null_declare_color (void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused) {}
+
+
+static void topo_cairo_declare_color (void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused) {}
 #endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
@@ -277,7 +284,7 @@ x11_init(void *_disp)
 
 static struct draw_methods x11_draw_methods = {
   x11_init,
-  null_declare_color,
+  topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -526,7 +533,7 @@ png_init(void *_coutput)
 
 static struct draw_methods png_draw_methods = {
   png_init,
-  null_declare_color,
+  topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -589,7 +596,7 @@ pdf_init(void *_coutput)
 
 static struct draw_methods pdf_draw_methods = {
   pdf_init,
-  null_declare_color,
+  topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -652,7 +659,7 @@ ps_init(void *_coutput)
 
 static struct draw_methods ps_draw_methods = {
   ps_init,
-  null_declare_color,
+  topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -715,7 +722,7 @@ svg_init(void *_coutput)
 
 static struct draw_methods svg_draw_methods = {
   svg_init,
-  null_declare_color,
+  topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,

@@ -319,7 +319,7 @@ windows_declare_color(void *output, int r, int g, int b)
   HBRUSH brush;
   COLORREF color;
 
-  if (woutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   color = RGB(r, g, b);
@@ -342,6 +342,9 @@ windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_
 {
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
+
+  if (woutput->loutput.drawing == LSTOPO_DRAWING_PREPARE)
+    return;
 
   if (x > woutput->max_x)
     woutput->max_x = x;
@@ -366,6 +369,9 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
+  if (woutput->loutput.drawing == LSTOPO_DRAWING_PREPARE)
+    return;
+
   if (x1 > woutput->max_x)
     woutput->max_x = x1;
   if (x2 > woutput->max_x)
@@ -389,7 +395,7 @@ windows_text(void *output, int r, int g, int b, int size __hwloc_attribute_unuse
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (woutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   SetTextColor(ps->hdc, RGB(r, g, b));
