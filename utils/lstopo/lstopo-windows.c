@@ -30,7 +30,6 @@ static struct color {
 
 struct lstopo_windows_output {
   struct lstopo_output loutput; /* must be at the beginning */
-  int drawing;
   PAINTSTRUCT ps;
   HWND toplevel;
   unsigned max_x;
@@ -258,7 +257,7 @@ windows_init(void *output)
   /* compute the maximal needed size, this may require the toplevel window in the future */
   woutput->max_x = 0;
   woutput->max_y = 0;
-  woutput->drawing = 0;
+  woutput->loutput.drawing = LSTOPO_DRAWING_GETMAX;
   faketoplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
 			      CW_USEDEFAULT, CW_USEDEFAULT,
 			      10, 10, NULL, NULL, NULL, NULL);
@@ -269,7 +268,7 @@ windows_init(void *output)
   DeleteObject(font);
   EndPaint(faketoplevel, &woutput->ps);
   DestroyWindow(faketoplevel);
-  woutput->drawing = 1;
+  woutput->loutput.drawing = LSTOPO_DRAWING_DRAW;
 
   /* now create the actual toplevel with the sizes */
   width = woutput->max_x;
@@ -320,7 +319,7 @@ windows_declare_color(void *output, int r, int g, int b)
   HBRUSH brush;
   COLORREF color;
 
-  if (!woutput->drawing)
+  if (woutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
     return;
 
   color = RGB(r, g, b);
@@ -353,7 +352,7 @@ windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_
   if (y + height > woutput->max_y)
     woutput->max_y = y + height;
 
-  if (!woutput->drawing)
+  if (woutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
     return;
 
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
@@ -376,7 +375,7 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
   if (y2 > woutput->max_y)
     woutput->max_y = y2;
 
-  if (!woutput->drawing)
+  if (woutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
     return;
 
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
@@ -390,7 +389,7 @@ windows_text(void *output, int r, int g, int b, int size __hwloc_attribute_unuse
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (!woutput->drawing)
+  if (woutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
     return;
 
   SetTextColor(ps->hdc, RGB(r, g, b));

@@ -69,7 +69,6 @@ struct lstopo_ascii_output {
   int width;
   int height;
   int utf8;
-  int drawing;
 };
 
 static struct draw_methods ascii_draw_methods;
@@ -83,11 +82,11 @@ ascii_init(void *_output)
   unsigned j, i;
 
   /* compute the required size */
-  disp->drawing = 0;
+  disp->loutput.drawing = LSTOPO_DRAWING_GETMAX;
   output_draw(&disp->loutput);
   width = disp->width;
   height = disp->height;
-  disp->drawing = 1;
+  disp->loutput.drawing = LSTOPO_DRAWING_DRAW;
 
   /* terminals usually have narrow characters, so let's make them wider */
   disp->cells = malloc(height * sizeof(*disp->cells));
@@ -177,7 +176,7 @@ ascii_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribu
   char *toput;
 #endif
 
-  if (!disp->drawing)
+  if (disp->loutput.drawing == LSTOPO_DRAWING_GETMAX)
     return;
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
@@ -345,7 +344,7 @@ ascii_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_un
   x2 = x1 + width - 1;
   y2 = y1 + height - 1;
 
-  if (!disp->drawing) {
+  if (disp->loutput.drawing == LSTOPO_DRAWING_GETMAX) {
     if ((int)x1 >= disp->width)
       disp->width = x1+1;
     if ((int)x2 >= disp->width)
@@ -406,7 +405,7 @@ ascii_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute
     y2 = z;
   }
 
-  if (!disp->drawing) {
+  if (disp->loutput.drawing == LSTOPO_DRAWING_GETMAX) {
     if ((int)x2 >= disp->width)
       disp->width = x2+1;
     if ((int)y2 >= disp->height)
@@ -449,7 +448,7 @@ ascii_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused,
   struct lstopo_output *loutput = output;
   unsigned gridsize = loutput->gridsize;
 
-  if (!disp->drawing)
+  if (disp->loutput.drawing == LSTOPO_DRAWING_GETMAX)
     return;
 
   x /= (gridsize/2);

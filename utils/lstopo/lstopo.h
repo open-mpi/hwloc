@@ -13,6 +13,11 @@
 #include <hwloc.h>
 #include <misc.h>
 
+enum lstopo_drawing_e {
+  LSTOPO_DRAWING_GETMAX,
+  LSTOPO_DRAWING_DRAW
+};
+
 enum lstopo_orient_e {
   LSTOPO_ORIENT_NONE = 0,
   LSTOPO_ORIENT_HORIZ,
@@ -27,6 +32,8 @@ struct draw_methods;
 /* if embedded in backend-specific output structure, must be at the beginning */
 struct lstopo_output {
   hwloc_topology_t topology;
+
+  enum lstopo_drawing_e drawing;
 
   /* file config */
   FILE *file;

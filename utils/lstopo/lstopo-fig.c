@@ -25,6 +25,7 @@ fig_init(void *loutput_)
 {
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
+  loutput->drawing = LSTOPO_DRAWING_DRAW;
   fprintf(file, "#FIG 3.2  Produced by hwloc's lstopo\n");
   fprintf(file, "Landscape\n");
   fprintf(file, "Center\n");
@@ -55,6 +56,8 @@ fig_declare_color(void *loutput_, int r, int g, int b)
   FILE *file = loutput->file;
   int color;
 
+  assert(loutput->drawing == LSTOPO_DRAWING_DRAW);
+
   if (r == 0xff && g == 0xff && b == 0xff)
     return;
 
@@ -71,6 +74,9 @@ fig_box(void *loutput_, int r, int g, int b, unsigned depth, unsigned x, unsigne
 {
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
+
+  assert(loutput->drawing == LSTOPO_DRAWING_DRAW);
+
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   width *= FIG_FACTOR;
@@ -89,6 +95,9 @@ fig_line(void *loutput_, int r, int g, int b, unsigned depth, unsigned x1, unsig
 {
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
+
+  assert(loutput->drawing == LSTOPO_DRAWING_DRAW);
+
   x1 *= FIG_FACTOR;
   y1 *= FIG_FACTOR;
   x2 *= FIG_FACTOR;
@@ -106,6 +115,10 @@ fig_text(void *loutput_, int r, int g, int b, int size, unsigned depth, unsigned
   FILE *file = loutput->file;
   int len = (int)strlen(text);
   int color = rgb_to_fig(r, g, b);
+
+
+  assert(loutput->drawing == LSTOPO_DRAWING_DRAW);
+
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   size = (size * 16) / 10;
