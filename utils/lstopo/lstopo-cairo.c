@@ -62,9 +62,6 @@ topo_cairo_box(void *_output, int r, int g, int b, unsigned depth __hwloc_attrib
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (coutput->loutput.drawing == LSTOPO_DRAWING_PREPARE)
-    return;
-
   if (x > coutput->max_x)
     coutput->max_x = x;
   if (x + width > coutput->max_x)
@@ -74,7 +71,7 @@ topo_cairo_box(void *_output, int r, int g, int b, unsigned depth __hwloc_attrib
   if (y + height > coutput->max_y)
     coutput->max_y = y + height;
 
-  if (coutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   cairo_rectangle(c, x, y, width, height);
@@ -93,9 +90,6 @@ topo_cairo_line(void *_output, int r, int g, int b, unsigned depth __hwloc_attri
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (coutput->loutput.drawing == LSTOPO_DRAWING_PREPARE)
-    return;
-
   if (x1 > coutput->max_x)
     coutput->max_x = x1;
   if (x2 > coutput->max_x)
@@ -105,7 +99,7 @@ topo_cairo_line(void *_output, int r, int g, int b, unsigned depth __hwloc_attri
   if (y2 > coutput->max_y)
     coutput->max_y = y2;
 
-  if (coutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   cairo_move_to(c, x1, y1);
@@ -230,10 +224,10 @@ x11_init(void *_disp)
   disp->scr = scr = DefaultScreen(dpy);
   screen = ScreenOfDisplay(dpy, scr);
 
-  /* compute the maximal needed size using the root window */
+  /* recurse once for preparing sizes and positions using the root window surface */
   root = RootWindow(dpy, scr);
   disp->top = root;
-  coutput->loutput.drawing = LSTOPO_DRAWING_GETMAX;
+  coutput->loutput.drawing = LSTOPO_DRAWING_PREPARE;
   x11_create(disp, 1, 1);
   topo_cairo_paint(coutput);
   x11_destroy(disp);
@@ -314,13 +308,16 @@ move_x11(struct lstopo_x11_output *disp)
     x11_create(disp, disp->width, disp->height);
     disp->coutput.max_x = 0;
     disp->coutput.max_y = 0;
+    /* recompute new sizes and positions */
+    disp->coutput.loutput.drawing = LSTOPO_DRAWING_PREPARE;
     topo_cairo_paint(&disp->coutput);
     if (disp->coutput.max_x > disp->width || disp->coutput.max_y > disp->height) {
-      /* need to extend the window and redraw */
+      /* need to extend the window before actual redraw */
       x11_destroy(disp);
       x11_create(disp, disp->coutput.max_x, disp->coutput.max_y);
-      topo_cairo_paint(&disp->coutput);
     }
+    disp->coutput.loutput.drawing = LSTOPO_DRAWING_DRAW;
+    topo_cairo_paint(&disp->coutput);
     disp->width = disp->coutput.max_x;
     disp->height = disp->coutput.max_y;
   }
@@ -520,8 +517,8 @@ png_init(void *_coutput)
   fakecs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
   coutput->surface = fakecs;
 
-  /* compute the maximal size using the fake surface */
-  coutput->loutput.drawing = LSTOPO_DRAWING_GETMAX;
+  /* recurse once for preparing sizes and positions using the fake surface */
+  coutput->loutput.drawing = LSTOPO_DRAWING_PREPARE;
   topo_cairo_paint(coutput);
   coutput->loutput.drawing = LSTOPO_DRAWING_DRAW;
   cairo_surface_destroy(fakecs);
@@ -583,8 +580,8 @@ pdf_init(void *_coutput)
   fakecs = cairo_pdf_surface_create_for_stream(NULL, NULL, 1, 1);
   coutput->surface = fakecs;
 
-  /* compute the maximal size using the fake surface */
-  coutput->loutput.drawing = LSTOPO_DRAWING_GETMAX;
+  /* recurse once for preparing sizes and positions using the fake surface */
+  coutput->loutput.drawing = LSTOPO_DRAWING_PREPARE;
   topo_cairo_paint(coutput);
   coutput->loutput.drawing = LSTOPO_DRAWING_DRAW;
   cairo_surface_destroy(fakecs);
@@ -646,8 +643,8 @@ ps_init(void *_coutput)
   fakecs = cairo_ps_surface_create_for_stream(NULL, NULL, 1, 1);
   coutput->surface = fakecs;
 
-  /* compute the maximal size using the fake surface */
-  coutput->loutput.drawing = LSTOPO_DRAWING_GETMAX;
+  /* recurse once for preparing sizes and positions using the fake surface */
+  coutput->loutput.drawing = LSTOPO_DRAWING_PREPARE;
   topo_cairo_paint(coutput);
   coutput->loutput.drawing = LSTOPO_DRAWING_DRAW;
   cairo_surface_destroy(fakecs);
@@ -709,8 +706,8 @@ svg_init(void *_coutput)
   fakecs = cairo_svg_surface_create_for_stream(NULL, NULL, 1, 1);
   coutput->surface = fakecs;
 
-  /* compute the maximal size using the fake surface */
-  coutput->loutput.drawing = LSTOPO_DRAWING_GETMAX;
+  /* recurse once for preparing sizes and positions using the fake surface */
+  coutput->loutput.drawing = LSTOPO_DRAWING_PREPARE;
   topo_cairo_paint(coutput);
   coutput->loutput.drawing = LSTOPO_DRAWING_DRAW;
   cairo_surface_destroy(fakecs);

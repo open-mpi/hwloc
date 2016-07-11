@@ -109,9 +109,12 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       windows_box(&the_output, 0xff, 0xff, 0xff, 0, 0, win_width, 0, win_height);
       the_output.max_x = 0;
       the_output.max_y = 0;
+      the_output.loutput.drawing = LSTOPO_DRAWING_PREPARE;
       output_draw(&the_output.loutput);
       the_width = the_output.max_x;
       the_height = the_output.max_y;
+      the_output.loutput.drawing = LSTOPO_DRAWING_DRAW;
+      output_draw(&the_output.loutput);
       DeleteObject(font);
       EndPaint(hwnd, &the_output.ps);
       break;
@@ -254,10 +257,10 @@ windows_init(void *output)
 
   RegisterClass(&wndclass);
 
-  /* compute the maximal needed size, this may require the toplevel window in the future */
+  /* recurse once for preparing sizes and positions using a fake top level window */
   woutput->max_x = 0;
   woutput->max_y = 0;
-  woutput->loutput.drawing = LSTOPO_DRAWING_GETMAX;
+  woutput->loutput.drawing = LSTOPO_DRAWING_PREPARE;
   faketoplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
 			      CW_USEDEFAULT, CW_USEDEFAULT,
 			      10, 10, NULL, NULL, NULL, NULL);
@@ -343,9 +346,6 @@ windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (woutput->loutput.drawing == LSTOPO_DRAWING_PREPARE)
-    return;
-
   if (x > woutput->max_x)
     woutput->max_x = x;
   if (x+width > woutput->max_x)
@@ -355,7 +355,7 @@ windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_
   if (y + height > woutput->max_y)
     woutput->max_y = y + height;
 
-  if (woutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
@@ -369,9 +369,6 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (woutput->loutput.drawing == LSTOPO_DRAWING_PREPARE)
-    return;
-
   if (x1 > woutput->max_x)
     woutput->max_x = x1;
   if (x2 > woutput->max_x)
@@ -381,7 +378,7 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
   if (y2 > woutput->max_y)
     woutput->max_y = y2;
 
-  if (woutput->loutput.drawing == LSTOPO_DRAWING_GETMAX)
+  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
 
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));

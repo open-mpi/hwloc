@@ -25,7 +25,12 @@ fig_init(void *loutput_)
 {
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
+
+  /* recurse once for preparing sizes and positions */
+  loutput->drawing = LSTOPO_DRAWING_PREPARE;
+  output_draw(loutput);
   loutput->drawing = LSTOPO_DRAWING_DRAW;
+
   fprintf(file, "#FIG 3.2  Produced by hwloc's lstopo\n");
   fprintf(file, "Landscape\n");
   fprintf(file, "Center\n");

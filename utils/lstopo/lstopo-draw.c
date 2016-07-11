@@ -1347,17 +1347,7 @@ output_draw(struct lstopo_output *loutput)
 
   output_compute_pu_min_textwidth(loutput);
 
-  if (loutput->drawing == LSTOPO_DRAWING_GETMAX) {
-    /* only one traversal */
-    system_draw(loutput, methods, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
-  } else {
-    /* one traversal to prepare, another one for actual drawing */
-    assert(loutput->drawing == LSTOPO_DRAWING_DRAW);
-    loutput->drawing = LSTOPO_DRAWING_PREPARE;
-    system_draw(loutput, methods, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
-    loutput->drawing = LSTOPO_DRAWING_DRAW;
-    system_draw(loutput, methods, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
-  }
+  system_draw(loutput, methods, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
 
   if (totwidth < 20*fontsize)
     totwidth = 20*fontsize;

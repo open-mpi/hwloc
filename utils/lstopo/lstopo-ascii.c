@@ -81,8 +81,8 @@ ascii_init(void *_output)
   unsigned width, height;
   unsigned j, i;
 
-  /* compute the required size */
-  disp->loutput.drawing = LSTOPO_DRAWING_GETMAX;
+  /* recurse once for preparing sizes and positions */
+  disp->loutput.drawing = LSTOPO_DRAWING_PREPARE;
   output_draw(&disp->loutput);
   width = disp->width;
   height = disp->height;
@@ -338,9 +338,6 @@ ascii_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_un
   unsigned i, j;
   unsigned x2, y2;
 
-  if (disp->loutput.drawing == LSTOPO_DRAWING_PREPARE)
-    return;
-
   x1 /= (gridsize/2);
   width /= (gridsize/2);
   y1 /= gridsize;
@@ -348,7 +345,7 @@ ascii_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_un
   x2 = x1 + width - 1;
   y2 = y1 + height - 1;
 
-  if (disp->loutput.drawing == LSTOPO_DRAWING_GETMAX) {
+  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW) {
     if ((int)x1 >= disp->width)
       disp->width = x1+1;
     if ((int)x2 >= disp->width)
@@ -393,9 +390,6 @@ ascii_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute
   unsigned gridsize = loutput->gridsize;
   unsigned i, j, z;
 
-  if (disp->loutput.drawing == LSTOPO_DRAWING_PREPARE)
-    return;
-
   x1 /= (gridsize/2);
   y1 /= gridsize;
   x2 /= (gridsize/2);
@@ -413,7 +407,7 @@ ascii_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute
     y2 = z;
   }
 
-  if (disp->loutput.drawing == LSTOPO_DRAWING_GETMAX) {
+  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW) {
     if ((int)x2 >= disp->width)
       disp->width = x2+1;
     if ((int)y2 >= disp->height)

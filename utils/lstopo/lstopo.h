@@ -14,7 +14,6 @@
 #include <misc.h>
 
 enum lstopo_drawing_e {
-  LSTOPO_DRAWING_GETMAX,
   LSTOPO_DRAWING_PREPARE,
   LSTOPO_DRAWING_DRAW
 };
