@@ -1077,7 +1077,7 @@ node_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
   if (loutput->drawing != LSTOPO_DRAWING_DRAW)
     RECURSE_RECT(level, methods, gridsize, gridsize);
 
-  lstopo_set_object_color(loutput, topology, level, 0 /* node */, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   /* Draw the epoxy box */
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
   /* Draw the memory box */
@@ -1119,7 +1119,7 @@ machine_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_
   if (loutput->drawing != LSTOPO_DRAWING_DRAW)
     RECURSE_RECT(level, methods, gridsize, gridsize);
 
-  lstopo_set_object_color(loutput, topology, level, 0 /* machine */, &style);
+  lstopo_set_object_color(loutput, topology, level, !level->depth /* if !depth, behave as System/root */, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
@@ -1205,7 +1205,7 @@ system_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_o
       RECURSE_RECT(level, methods, gridsize, gridsize);
   }
 
-  lstopo_set_object_color(loutput, topology, level, 1 /* system */, &style);
+  lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
@@ -1347,7 +1347,7 @@ output_draw(struct lstopo_output *loutput)
 
   output_compute_pu_min_textwidth(loutput);
 
-  system_draw(loutput, methods, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
+  get_type_fun(hwloc_get_root_obj(topology)->type)(loutput, methods, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
 
   if (totwidth < 20*fontsize)
     totwidth = 20*fontsize;
