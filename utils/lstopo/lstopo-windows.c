@@ -346,17 +346,17 @@ windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (x > woutput->max_x)
-    woutput->max_x = x;
-  if (x+width > woutput->max_x)
-    woutput->max_x = x + width;
-  if (y > woutput->max_y)
-    woutput->max_y = y;
-  if (y + height > woutput->max_y)
-    woutput->max_y = y + height;
-
-  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
+  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW) {
+    if (x > woutput->max_x)
+      woutput->max_x = x;
+    if (x+width > woutput->max_x)
+      woutput->max_x = x + width;
+    if (y > woutput->max_y)
+      woutput->max_y = y;
+    if (y + height > woutput->max_y)
+      woutput->max_y = y + height;
     return;
+  }
 
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
   SetBkColor(ps->hdc, RGB(r, g, b));
@@ -369,17 +369,17 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (x1 > woutput->max_x)
-    woutput->max_x = x1;
-  if (x2 > woutput->max_x)
-    woutput->max_x = x2;
-  if (y1 > woutput->max_y)
-    woutput->max_y = y1;
-  if (y2 > woutput->max_y)
-    woutput->max_y = y2;
-
-  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
+  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW) {
+    if (x1 > woutput->max_x)
+      woutput->max_x = x1;
+    if (x2 > woutput->max_x)
+      woutput->max_x = x2;
+    if (y1 > woutput->max_y)
+      woutput->max_y = y1;
+    if (y2 > woutput->max_y)
+      woutput->max_y = y2;
     return;
+  }
 
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
   MoveToEx(ps->hdc, x1 - x_delta, y1 - y_delta, NULL);

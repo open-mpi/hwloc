@@ -62,17 +62,17 @@ topo_cairo_box(void *_output, int r, int g, int b, unsigned depth __hwloc_attrib
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (x > coutput->max_x)
-    coutput->max_x = x;
-  if (x + width > coutput->max_x)
-    coutput->max_x = x + width;
-  if (y > coutput->max_y)
-    coutput->max_y = y;
-  if (y + height > coutput->max_y)
-    coutput->max_y = y + height;
-
-  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
+  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW) {
+    if (x > coutput->max_x)
+      coutput->max_x = x;
+    if (x + width > coutput->max_x)
+      coutput->max_x = x + width;
+    if (y > coutput->max_y)
+      coutput->max_y = y;
+    if (y + height > coutput->max_y)
+      coutput->max_y = y + height;
     return;
+  }
 
   cairo_rectangle(c, x, y, width, height);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
@@ -90,17 +90,17 @@ topo_cairo_line(void *_output, int r, int g, int b, unsigned depth __hwloc_attri
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (x1 > coutput->max_x)
-    coutput->max_x = x1;
-  if (x2 > coutput->max_x)
-    coutput->max_x = x2;
-  if (y1 > coutput->max_y)
-    coutput->max_y = y1;
-  if (y2 > coutput->max_y)
-    coutput->max_y = y2;
-
-  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
+  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW) {
+    if (x1 > coutput->max_x)
+      coutput->max_x = x1;
+    if (x2 > coutput->max_x)
+      coutput->max_x = x2;
+    if (y1 > coutput->max_y)
+      coutput->max_y = y1;
+    if (y2 > coutput->max_y)
+      coutput->max_y = y2;
     return;
+  }
 
   cairo_move_to(c, x1, y1);
   cairo_set_source_rgb(c, (float) r / 255, (float) g / 255, (float) b / 255);
