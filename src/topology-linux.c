@@ -2856,11 +2856,9 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
     return -1;
   }
 
-  data_beg = strstr(data_beg, "\n") + 1;
-
   while (data_beg < data_end) {
     char *line_end = strstr(data_beg, "\n");
-    if (!line_end)
+    if (!line_end || line_end >= data_end)
         break;
     if (version >= 1) {
       if (!strncmp("cache_size:", data_beg, strlen("cache_size"))) {
@@ -2887,7 +2885,7 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
       }
     }
 
-    data_beg += line_end - data_beg +1;
+    data_beg += line_end - data_beg + 1;
   }
 
   fclose(f);
