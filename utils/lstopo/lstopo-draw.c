@@ -1196,7 +1196,10 @@ system_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_o
   }
 
   if (loutput->drawing != LSTOPO_DRAWING_DRAW) {
-    if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
+    /* FIXME: we only use the network code for drawing systems of machines.
+     * Systems of groups (of groups ...) of machines still use boxes.
+     */
+    if (level->arity > 1 && level->children[0]->type == HWLOC_OBJ_MACHINE)
       NETWORK_DRAW_BEGIN();
     else
       RECURSE_RECT(level, methods, gridsize, gridsize);
@@ -1210,7 +1213,7 @@ system_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_o
   }
 
   if (loutput->drawing == LSTOPO_DRAWING_DRAW) {
-    if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
+    if (level->arity > 1 && level->children[0]->type == HWLOC_OBJ_MACHINE)
       NETWORK_DRAW_END();
     else
       RECURSE_RECT(level, methods, gridsize, gridsize);
@@ -1234,6 +1237,11 @@ group_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
   int n;
   struct style style;
 
+  /* FIXME: If we want to draw groups of machines as network,
+   * we need system_draw() to draw systems of groups (of groups ...)
+   * of machines as network first.
+   */
+
   DYNA_CHECK();
 
   if (fontsize) {
@@ -1241,12 +1249,8 @@ group_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
     textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
   }
 
-  if (loutput->drawing != LSTOPO_DRAWING_DRAW) {
-    if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
-      NETWORK_DRAW_BEGIN();
-    else
-      RECURSE_RECT(level, methods, gridsize, gridsize);
-  }
+  if (loutput->drawing != LSTOPO_DRAWING_DRAW)
+    RECURSE_RECT(level, methods, gridsize, gridsize);
 
   lstopo_set_object_color(loutput, topology, level, 0, &style);
   methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
@@ -1255,12 +1259,8 @@ group_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
     methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW) {
-    if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
-      NETWORK_DRAW_END();
-    else
-      RECURSE_RECT(level, methods, gridsize, gridsize);
-  }
+  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    RECURSE_RECT(level, methods, gridsize, gridsize);
 
   DYNA_SAVE();
 }
