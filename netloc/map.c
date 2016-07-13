@@ -1,5 +1,5 @@
 //
-// Copyright © 2013-2014 Cisco Systems, Inc.  All rights reserved.
+// Copyright © 2013-2016 Cisco Systems, Inc.  All rights reserved.
 // Copyright © 2013-2016 Inria.  All rights reserved.
 // Copyright © 2013-2014 University of Wisconsin-La Crosse.
 //
@@ -459,8 +459,6 @@ netloc_map__init_servers(struct netloc_map *map)
             fprintf(stderr, "Found %u hwloc topology diffs, cannot load without any entire topology\n",
                     founddiffs);
         } else {
-            hwloc_topology_t validtopo = map->server_first->topology;
-
             /* now reread the directory entries */
             rewinddir(hwloc_xml_dir);
             while ((dirent = readdir(hwloc_xml_dir)) != NULL) {
