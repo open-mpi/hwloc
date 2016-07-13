@@ -1,4 +1,4 @@
-# Copyright © 2015 Inria.  All rights reserved.
+# Copyright © 2015-2016 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -16,6 +16,7 @@ cpuid_outputs = \
 	Intel-Nehalem-2xXeon-X5550.output \
 	Intel-Penryn-4xXeon-X7460.output \
 	Intel-Core-2xXeon-E5345.output \
+	Intel-KnightsLanding-XeonPhi-7210.output \
 	Intel-KnightsCorner-XeonPhi-SE10P.output \
 	AMD-15h-Bulldozer-4xOpteron-6272.output \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.output \
@@ -37,6 +38,7 @@ cpuid_tarballs = \
 	Intel-Nehalem-2xXeon-X5550.tar.bz2 \
 	Intel-Penryn-4xXeon-X7460.tar.bz2 \
 	Intel-Core-2xXeon-E5345.tar.bz2 \
+	Intel-KnightsLanding-XeonPhi-7210.tar.bz2 \
 	Intel-KnightsCorner-XeonPhi-SE10P.tar.bz2 \
 	AMD-15h-Bulldozer-4xOpteron-6272.tar.bz2 \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.tar.bz2 \
