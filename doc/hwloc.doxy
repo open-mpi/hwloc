@@ -1695,7 +1695,8 @@ hwloc failed to discover any package.
 </dd>
 <dt>MemoryMode, ClusterMode (topology root object)</dt>
 <dd>
-Intel Knights Landing configuration modes.
+Intel Knights Landing configuration modes, only available if
+hwloc-dump-hwdata was used (see \ref faq_knl_dump).
 The memory mode may be <em>Cache</em>, <em>Flat</em>,
 <em>Hybrid50</em> (half the MCDRAM is used as a cache)
 or <em>Hybrid25</em> (25% of MCDRAM as cache).
