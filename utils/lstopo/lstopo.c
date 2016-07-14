@@ -266,8 +266,6 @@ lstopo_populate_userdata(hwloc_obj_t parent)
 
   save->common.buffer = NULL; /* so that it is ignored on XML export */
   save->common.next = parent->userdata;
-  save->fontsize = (unsigned) -1;
-  save->gridsize = (unsigned) -1;
   parent->userdata = save;
 
   for(child = parent->first_child; child; child = child->next_sibling)

@@ -72,10 +72,6 @@ struct lstopo_obj_userdata {
   /* original common userdata (we replace the first one with this extended structure) */
   struct hwloc_utils_userdata common;
 
-  /* current fontsize and gridsize */
-  unsigned fontsize;
-  unsigned gridsize;
-
   /* object size (including children if they are outside of it, not including borders) */
   unsigned width;
   unsigned height;
