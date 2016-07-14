@@ -382,18 +382,9 @@ RECURSE_BEGIN(obj, border) \
 
 /* Pack objects in a grid */
 #define RECURSE_RECT(obj, methods, separator, border) do {\
-  if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NUMANODE && loutput->force_orient[obj->type] != LSTOPO_ORIENT_RECT) { \
-    /* Nodes shouldn't be put with an arbitrary geometry, as NUMA distances may not be that way */ \
-    int pvert = prefer_vert(loutput, level, depth, x, y, separator); \
-    if (pvert) \
-      RECURSE_VERT(level, methods, separator, border); \
-    else \
-      RECURSE_HORIZ(level, methods, separator, border); \
-  } else {\
-    RECURSE_RECT_BEGIN(obj, methods, separator, border) \
-    RECURSE_CALL_FUN(methods); \
-    RECURSE_RECT_END(obj, methods, separator, border); \
-  } \
+  RECURSE_RECT_BEGIN(obj, methods, separator, border) \
+  RECURSE_CALL_FUN(methods); \
+  RECURSE_RECT_END(obj, methods, separator, border); \
 } while (0)
 
 /* Dynamic programming */
