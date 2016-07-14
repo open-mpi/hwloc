@@ -224,6 +224,8 @@ fi
 # Show which optional support we'll be building
 hwloc_xml_status=basic
 AS_IF([test "$hwloc_libxml2_happy" = "yes"], [hwloc_xml_status=full])
+netloc_status=no
+AS_IF([test "$netloc_happy" = "yes"], [netloc_status=yes])
 
 # Prepare the I/O summary
 hwloc_probeio_list=
@@ -250,7 +252,7 @@ Hwloc optional build support status (more details can be found above):
 Probe / display I/O devices:$hwloc_probeio_list
 Graphical output (Cairo):    $hwloc_cairo_happy
 XML input / output:          $hwloc_xml_status
-Netloc functionality:        $netloc_happy
+Netloc functionality:        $netloc_status
 EOF
 
 # Plugin support
