@@ -72,11 +72,26 @@ struct lstopo_obj_userdata {
   /* original common userdata (we replace the first one with this extended structure) */
   struct hwloc_utils_userdata common;
 
-  /* draw info */
-  unsigned width;
-  unsigned height;
+  /* current fontsize and gridsize */
   unsigned fontsize;
   unsigned gridsize;
+
+  /* object size (including children if they are outside of it, not including borders) */
+  unsigned width;
+  unsigned height;
+
+  /* a child position is: its parent position + parent->children_*rel + child->*rel */
+  /* relative position of first child with respect to top-left corner of this object */
+  unsigned children_xrel;
+  unsigned children_yrel;
+  /* relative position of this object within its parent children zone */
+  unsigned xrel;
+  unsigned yrel;
+
+  /* children connected by network? */
+  int network;
+  /* children orientation */
+  enum lstopo_orient_e orient;
 };
 
 typedef void output_method (struct lstopo_output *output, const char *filename);
