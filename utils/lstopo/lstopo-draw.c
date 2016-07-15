@@ -138,7 +138,7 @@ static int prefer_ratio(float ratio1, float ratio2) {
  * separator is added between objects
  */
 
-typedef void (*foo_draw)(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t obj, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
+typedef void (*foo_draw)(struct lstopo_output *loutput, hwloc_obj_t obj, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
 
 static foo_draw get_type_fun(hwloc_obj_type_t type);
 
@@ -337,7 +337,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       child;
       i++, child = next_child(loutput, parent, child)) {
     unsigned dummyw, dummyh;
-    get_type_fun(child->type)(loutput, loutput->methods, child, 0, 0, &dummyw, 0, &dummyh);
+    get_type_fun(child->type)(loutput, child, 0, 0, &dummyw, 0, &dummyh);
   }
   if (!i)
     return;
@@ -481,7 +481,7 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
       child = next_child(loutput, parent, child)) {
     struct lstopo_obj_userdata *clud = child->userdata;
     unsigned dummyw, dummyh;
-    get_type_fun(child->type)(loutput, loutput->methods, child, depth, x + clud->xrel, &dummyw, y + clud->yrel, &dummyh);
+    get_type_fun(child->type)(loutput, child, depth, x + clud->xrel, &dummyw, y + clud->yrel, &dummyh);
   }
 
   if (plud->network)
@@ -685,9 +685,10 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 }
 
 static void
-pci_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -760,9 +761,10 @@ pci_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwl
 }
 
 static void
-os_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -896,9 +898,10 @@ os_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwlo
 }
 
 static void
-bridge_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
@@ -966,9 +969,10 @@ bridge_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_o
 }
 
 static void
-pu_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1029,9 +1033,10 @@ pu_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t
 }
 
 static void
-cache_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1077,9 +1082,10 @@ cache_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
 }
 
 static void
-core_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1125,9 +1131,10 @@ core_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
 }
 
 static void
-package_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1173,9 +1180,10 @@ package_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_
 }
 
 static void
-node_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1224,9 +1232,10 @@ node_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
 }
 
 static void
-machine_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1272,9 +1281,10 @@ machine_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_
 }
 
 static void
-system_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1320,9 +1330,10 @@ system_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_o
 }
 
 static void
-group_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1368,9 +1379,10 @@ group_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
 }
 
 static void
-misc_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
+  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
@@ -1459,7 +1471,7 @@ output_draw(struct lstopo_output *loutput)
 
   output_compute_pu_min_textwidth(loutput);
 
-  get_type_fun(hwloc_get_root_obj(topology)->type)(loutput, methods, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
+  get_type_fun(hwloc_get_root_obj(topology)->type)(loutput, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
 
   if (totwidth < 20*fontsize)
     totwidth = 20*fontsize;
