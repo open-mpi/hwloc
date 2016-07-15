@@ -138,7 +138,7 @@ static int prefer_ratio(float ratio1, float ratio2) {
  * separator is added between objects
  */
 
-typedef void (*foo_draw)(struct lstopo_output *loutput, hwloc_obj_t obj, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
+typedef void (*foo_draw)(struct lstopo_output *loutput, hwloc_obj_t obj, unsigned depth, unsigned x, unsigned y);
 
 static foo_draw get_type_fun(hwloc_obj_type_t type);
 
@@ -336,8 +336,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   for(i = 0, child = next_child(loutput, parent, NULL);
       child;
       i++, child = next_child(loutput, parent, child)) {
-    unsigned dummyw, dummyh;
-    get_type_fun(child->type)(loutput, child, 0, 0, &dummyw, 0, &dummyh);
+    get_type_fun(child->type)(loutput, child, 0, 0, 0);
   }
   if (!i)
     return;
@@ -480,8 +479,7 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
       child;
       child = next_child(loutput, parent, child)) {
     struct lstopo_obj_userdata *clud = child->userdata;
-    unsigned dummyw, dummyh;
-    get_type_fun(child->type)(loutput, child, depth, x + clud->xrel, &dummyw, y + clud->yrel, &dummyh);
+    get_type_fun(child->type)(loutput, child, depth, x + clud->xrel, y + clud->yrel);
   }
 
   if (plud->network)
@@ -685,7 +683,7 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 }
 
 static void
-pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -755,13 +753,10 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -892,13 +887,10 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -963,13 +955,10 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
       draw_children(loutput, level, depth-1, x, y);
     }
   }
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1027,13 +1016,10 @@ pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsign
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1076,13 +1062,10 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1125,13 +1108,10 @@ core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1174,13 +1154,10 @@ package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1226,13 +1203,10 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1275,13 +1249,10 @@ machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1324,13 +1295,10 @@ system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1373,13 +1341,10 @@ group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
-misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
@@ -1422,9 +1387,6 @@ misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
   /* Draw sublevels for real */
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     draw_children(loutput, level, depth-1, x, y);
-
-  *retwidth = totwidth;
-  *retheight = totheight;
 }
 
 static void
@@ -1462,6 +1424,8 @@ output_draw(struct lstopo_output *loutput)
   int legend = loutput->legend;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  hwloc_obj_t root = hwloc_get_root_obj(topology);
+  struct lstopo_obj_userdata *rlud = root->userdata;
   unsigned depth = 100;
   unsigned totwidth, totheight, offset, i;
   time_t t;
@@ -1471,8 +1435,10 @@ output_draw(struct lstopo_output *loutput)
 
   output_compute_pu_min_textwidth(loutput);
 
-  get_type_fun(hwloc_get_root_obj(topology)->type)(loutput, hwloc_get_root_obj(topology), depth, 0, &totwidth, 0, &totheight);
+  get_type_fun(root->type)(loutput, root, depth, 0, 0);
 
+  totwidth = rlud->width;
+  totheight = rlud->height;
   if (totwidth < 20*fontsize)
     totwidth = 20*fontsize;
 
