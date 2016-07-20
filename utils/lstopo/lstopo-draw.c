@@ -680,23 +680,20 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 static void
 pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight;
   unsigned textwidth = 0;
   unsigned overlaidoffset = 0;
-  struct style style;
   char text[64], _text[64];
   const char *collapsestr = hwloc_obj_get_info_by_name(level, "lstopoCollapse");
   unsigned collapse = collapsestr ? atoi(collapsestr) : 1;
-  int n;
 
   if (fontsize) {
+    int n;
     char busid[32];
-    lstopo_obj_snprintf(_text, sizeof(_text), level, logical);
+    lstopo_obj_snprintf(_text, sizeof(_text), level, loutput->logical);
     lstopo_busid_snprintf(busid, sizeof(busid), level, collapse, loutput->topology->pci_nonzero_domains);
     if (collapse > 1) {
       n = snprintf(text, sizeof(text), "%u x { %s %s }", collapse, _text, busid);
@@ -726,6 +723,9 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -752,20 +752,17 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
 static void
 os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight;
   unsigned textwidth = 0;
-  struct style style;
   char text[64];
-  int n;
   unsigned nmorelines = 0, i;
   char morelines[3][64];
 
   if (fontsize) {
+    int n;
     const char *coproctype = level->subtype;
 
     if (HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type && coproctype) {
@@ -844,7 +841,7 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
       }
     }
 
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
     for(i=0; i<nmorelines; i++) {
       unsigned nn = (unsigned)strlen(morelines[i]);
@@ -864,6 +861,9 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -885,14 +885,11 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
 static void
 bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight;
-  unsigned textwidth = 0;
   unsigned speedwidth = fontsize ? fontsize + gridsize : 0;
-  struct style style;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
@@ -904,6 +901,9 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -953,20 +953,15 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 static void
 pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0, textxoffset = 0;
   unsigned totwidth, totheight;
   char text[64];
-  int n;
-  struct style style;
-  int colorarg;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
     /* if smaller than other PU, artificially extend/shift it
      * to make PU boxes nicer when vertically stacked.
@@ -988,6 +983,10 @@ pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsign
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+    int colorarg;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1012,19 +1011,15 @@ pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsign
 static void
 cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;
   unsigned totwidth, totheight;
   char text[64];
-  int n;
-  struct style style;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
   }
 
@@ -1038,6 +1033,9 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1056,19 +1054,15 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
 static void
 core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;
   unsigned totwidth, totheight;
   char text[64];
-  int n;
-  struct style style;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
   }
 
@@ -1082,6 +1076,9 @@ core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1100,19 +1097,15 @@ core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
 static void
 package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;
   unsigned totwidth, totheight;
   char text[64];
-  int n;
-  struct style style;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
   }
 
@@ -1126,6 +1119,9 @@ package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1144,19 +1140,15 @@ package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
 static void
 node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;
   unsigned totwidth, totheight;
   char text[64];
-  int n;
-  struct style style;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
   }
 
@@ -1170,6 +1162,9 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1191,19 +1186,15 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
 static void
 machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;
   unsigned totwidth, totheight;
   char text[64];
-  int n;
-  struct style style;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
   }
 
@@ -1217,6 +1208,9 @@ machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1235,19 +1229,15 @@ machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
 static void
 system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;
   unsigned totwidth, totheight;
   char text[64];
-  int n;
-  struct style style;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
   }
 
@@ -1261,6 +1251,9 @@ system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1279,19 +1272,15 @@ system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 static void
 group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight;
   unsigned textwidth = 0;
   char text[64];
-  int n;
-  struct style style;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
   }
 
@@ -1305,6 +1294,9 @@ group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1323,19 +1315,15 @@ group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
 static void
 misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
-  struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = level->userdata;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight;
   unsigned textwidth = 0;
   char text[64];
-  int n;
-  struct style style;
 
   if (fontsize) {
-    n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
+    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
     textwidth = get_textwidth(loutput, text, n, fontsize);
   }
 
@@ -1349,6 +1337,9 @@ misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
     lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct style style;
+
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
@@ -1395,7 +1386,6 @@ output_draw(struct lstopo_output *loutput)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
-  int logical = loutput->logical;
   int legend = loutput->legend;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
@@ -1428,7 +1418,7 @@ output_draw(struct lstopo_output *loutput)
     }
 
     /* Display whether we're showing physical or logical IDs */
-    snprintf(text[ntext], sizeof(text[ntext]), "Indexes: %s", logical ? "logical" : "physical");
+    snprintf(text[ntext], sizeof(text[ntext]), "Indexes: %s", loutput->logical ? "logical" : "physical");
     textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
     if (textwidth > maxtextwidth)
       maxtextwidth = textwidth;
