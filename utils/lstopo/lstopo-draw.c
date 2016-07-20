@@ -422,7 +422,6 @@ RECURSE_BEGIN(obj, border) \
 static int
 prefer_vert(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y, unsigned separator)
 {
-  hwloc_topology_t topology = loutput->topology;
   float horiz_ratio, vert_ratio;
   unsigned textwidth = 0;
   unsigned mywidth = 0, myheight = 0;
@@ -824,7 +823,6 @@ static void
 bridge_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t level, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   hwloc_topology_t topology = loutput->topology;
-  int logical = loutput->logical;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;

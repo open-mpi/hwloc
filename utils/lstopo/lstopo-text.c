@@ -127,7 +127,6 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
 static void
 output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t parent, int i)
 {
-  hwloc_topology_t topology = loutput->topology;
   FILE *output = loutput->file;
   int verbose_mode = loutput->verbose_mode;
   hwloc_obj_t child;
@@ -232,7 +231,6 @@ void output_console(struct lstopo_output *loutput, const char *filename)
 {
   hwloc_topology_t topology = loutput->topology;
   int verbose_mode = loutput->verbose_mode;
-  int logical = loutput->logical;
   FILE *output;
 
   output = open_output(filename, loutput->overwrite);
