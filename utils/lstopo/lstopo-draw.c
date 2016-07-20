@@ -1429,22 +1429,14 @@ output_draw(struct lstopo_output *loutput)
   unsigned depth = 100;
   unsigned totwidth, totheight, offset, i;
   time_t t;
-  char text[128];
+  char text[3][128];
+  unsigned ntext = 0;
   char hostname[128] = "";
   unsigned long hostname_size = sizeof(hostname);
+  unsigned maxtextwidth = 0, textwidth;
 
-  output_compute_pu_min_textwidth(loutput);
-
-  get_type_fun(root->type)(loutput, root, depth, 0, 0);
-
-  totwidth = rlud->width;
-  totheight = rlud->height;
-  if (totwidth < 20*fontsize)
-    totwidth = 20*fontsize;
-
-  if (legend) {
-      /* Display the hostname, but only if we're showing *this*
-         system */
+  if (legend && fontsize) {
+    /* Display the hostname, but only if we're showing *this* system */
     if (hwloc_topology_is_thissystem(topology)) {
 #if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
       GetComputerName(hostname, &hostname_size);
@@ -1453,18 +1445,19 @@ output_draw(struct lstopo_output *loutput)
 #endif
     }
     if (*hostname) {
-      snprintf(text, sizeof(text), "Host: %s", hostname);
-      methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(3+loutput->legend_append_nr));
-      methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
-      offset = gridsize + fontsize;
-    } else {
-      methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(2+loutput->legend_append_nr));
-      offset = 0;
+      snprintf(text[ntext], sizeof(text[ntext]), "Host: %s", hostname);
+      textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
+      if (textwidth > maxtextwidth)
+	maxtextwidth = textwidth;
+      ntext++;
     }
 
     /* Display whether we're showing physical or logical IDs */
-    snprintf(text, sizeof(text), "Indexes: %s", logical ? "logical" : "physical");
-    methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset, text);
+    snprintf(text[ntext], sizeof(text[ntext]), "Indexes: %s", logical ? "logical" : "physical");
+    textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
+    if (textwidth > maxtextwidth)
+      maxtextwidth = textwidth;
+    ntext++;
 
     /* Display timestamp */
     t = time(NULL);
@@ -1472,7 +1465,7 @@ output_draw(struct lstopo_output *loutput)
     {
       struct tm *tmp;
       tmp = localtime(&t);
-      strftime(text, sizeof(text), "Date: %c", tmp);
+      strftime(text[ntext], sizeof(text[ntext]), "Date: %c", tmp);
     }
 #else /* HAVE_STRFTIME */
     {
@@ -1483,17 +1476,37 @@ output_draw(struct lstopo_output *loutput)
       if (n && date[n-1] == '\n') {
         date[n-1] = 0;
       }
-      snprintf(text, sizeof(text), "Date: %s", date);
+      snprintf(text[ntext], sizeof(text[ntext]), "Date: %s", date);
     }
 #endif /* HAVE_STRFTIME */
-    methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset + fontsize + gridsize, text);
-
-    offset = totheight + gridsize + offset + (fontsize + gridsize) * 2;
-    for(i=0; i<loutput->legend_append_nr; i++) {
-      methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
-      offset += fontsize + gridsize;
-    }
+    textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
+    if (textwidth > maxtextwidth)
+      maxtextwidth = textwidth;
+    ntext++;
   }
+
+  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
+    output_compute_pu_min_textwidth(loutput);
+
+    get_type_fun(root->type)(loutput, root, depth, 0, 0);
+  }
+
+  totwidth = rlud->width;
+  totheight = rlud->height;
+  if (maxtextwidth + 2*gridsize > totwidth)
+    totwidth = maxtextwidth + 2*gridsize;
+
+  if (legend && fontsize) {
+    offset = rlud->height + gridsize;
+    methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
+    for(i=0; i<ntext; i++, offset += gridsize + fontsize)
+      methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, text[i]);
+    for(i=0; i<loutput->legend_append_nr; i++, offset += gridsize + fontsize)
+      methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
+  }
+
+  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    get_type_fun(root->type)(loutput, root, depth, 0, 0);
 }
 
 /*
