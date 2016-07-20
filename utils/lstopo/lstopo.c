@@ -403,7 +403,7 @@ enum output_format {
 };
 
 static enum output_format
-parse_output_format(const char *name, char *callname)
+parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
 {
   if (!hwloc_strncasecmp(name, "default", 3))
     return LSTOPO_OUTPUT_DEFAULT;
@@ -817,14 +817,14 @@ main (int argc, char *argv[])
       if (getenv("DISPLAY")) {
         if (loutput.logical == -1)
           loutput.logical = 0;
-        output_x11(&loutput, NULL);
+        output_x11(&loutput);
       } else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #ifdef HWLOC_WIN_SYS
       {
         if (loutput.logical == -1)
           loutput.logical = 0;
-        output_windows(&loutput, NULL);
+        output_windows(&loutput);
       }
 #endif
 #endif /* !LSTOPO_HAVE_GRAPHICS */

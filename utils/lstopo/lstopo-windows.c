@@ -418,7 +418,7 @@ struct draw_methods windows_draw_methods = {
 };
 
 void
-output_windows (struct lstopo_output *loutput, const char *filename __hwloc_attribute_unused)
+output_windows (struct lstopo_output *loutput)
 {
   MSG msg;
 
