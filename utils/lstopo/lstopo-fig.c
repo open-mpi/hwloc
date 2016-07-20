@@ -61,9 +61,6 @@ fig_declare_color(void *loutput_, int r, int g, int b)
   FILE *file = loutput->file;
   int color;
 
-  if (loutput->drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   if (r == 0xff && g == 0xff && b == 0xff)
     return;
 
@@ -80,9 +77,6 @@ fig_box(void *loutput_, int r, int g, int b, unsigned depth, unsigned x, unsigne
 {
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
-
-  if (loutput->drawing != LSTOPO_DRAWING_DRAW)
-    return;
 
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
@@ -103,9 +97,6 @@ fig_line(void *loutput_, int r, int g, int b, unsigned depth, unsigned x1, unsig
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
 
-  if (loutput->drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   x1 *= FIG_FACTOR;
   y1 *= FIG_FACTOR;
   x2 *= FIG_FACTOR;
@@ -123,9 +114,6 @@ fig_text(void *loutput_, int r, int g, int b, int size, unsigned depth, unsigned
   FILE *file = loutput->file;
   int len = (int)strlen(text);
   int color;
-
-  if (loutput->drawing != LSTOPO_DRAWING_DRAW)
-    return;
 
   color = rgb_to_fig(r, g, b);
   x *= FIG_FACTOR;

@@ -60,9 +60,6 @@ topo_cairo_box(void *_output, int r, int g, int b, unsigned depth __hwloc_attrib
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   cairo_rectangle(c, x, y, width, height);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
   cairo_fill(c);
@@ -79,9 +76,6 @@ topo_cairo_line(void *_output, int r, int g, int b, unsigned depth __hwloc_attri
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   cairo_move_to(c, x1, y1);
   cairo_set_source_rgb(c, (float) r / 255, (float) g / 255, (float) b / 255);
   cairo_set_line_width(c, 1);
@@ -94,9 +88,6 @@ topo_cairo_text(void *_output, int r, int g, int b, int fontsize, unsigned depth
 {
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
-
-  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
 
   cairo_move_to(c, x, y + fontsize);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);

@@ -172,14 +172,10 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
 static void
 ascii_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused)
 {
-  struct lstopo_ascii_output *disp = output;
 #ifdef HWLOC_HAVE_LIBTERMCAP
   int color, rr, gg, bb;
   char *toput;
 #endif
-
-  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
   color = declare_color(r, g, b);
@@ -347,9 +343,6 @@ ascii_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_un
   x2 = x1 + width - 1;
   y2 = y1 + height - 1;
 
-  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   /* Corners */
   merge(disp, x1, y1, down|right, 0, r, g, b);
   merge(disp, x2, y1, down|left, 0, r, g, b);
@@ -400,9 +393,6 @@ ascii_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute
     y2 = z;
   }
 
-  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   /* vertical/horizontal should be enough, but should mix with existing
    * characters for better output ! */
 
@@ -437,9 +427,6 @@ ascii_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused,
   struct lstopo_ascii_output *disp = output;
   struct lstopo_output *loutput = output;
   unsigned gridsize = loutput->gridsize;
-
-  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
 
   x /= (gridsize/2);
   y /= gridsize;

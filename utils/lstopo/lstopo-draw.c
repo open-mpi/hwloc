@@ -539,10 +539,6 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   unsigned forcer, forceg, forceb;
   const char *style;
 
-  /* no need to deal with colors when not drawing */
-  if (loutput->drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   memset(s, 0, sizeof(*s));
 
   switch (obj->type) {
@@ -730,29 +726,29 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
 		   gridsize, fontsize+2*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
 
-  if (collapse > 1) {
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
-    if (collapse > 2)
-      methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset);
-  } else {
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-  }
+    if (collapse > 1) {
+      methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
+      if (collapse > 2)
+	methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset);
+      methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset);
+    } else {
+      methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    }
 
-  if (fontsize)
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -869,24 +865,24 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
 		   gridsize, gridsize + (fontsize + gridsize) * (nmorelines+1));
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-    for(i=0; i<nmorelines; i++)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + (i+2)*gridsize + (i+1)*fontsize, morelines[i]);
-  }
+    if (fontsize) {
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
+      for(i=0; i<nmorelines; i++)
+	methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + (i+2)*gridsize + (i+1)*fontsize, morelines[i]);
+    }
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -910,18 +906,17 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 		   3*gridsize + speedwidth, 0);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  /* Square and left link */
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
-  methods->line(loutput, 0, 0, 0, depth, x + gridsize, y + PCI_HEIGHT/2, x + 2*gridsize, y + PCI_HEIGHT/2);
+    /* Square and left link */
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
+    methods->line(loutput, 0, 0, 0, depth, x + gridsize, y + PCI_HEIGHT/2, x + 2*gridsize, y + PCI_HEIGHT/2);
 
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW) {
     if (level->io_arity > 0) {
       hwloc_obj_t child = NULL;
       unsigned ymax = -1;
@@ -952,6 +947,8 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	}
       }
       methods->line(loutput, 0, 0, 0, depth-1, x+2*gridsize, ymin, x+2*gridsize, ymax);
+
+      /* Draw sublevels for real */
       draw_children(loutput, level, depth-1, x, y);
     }
   }
@@ -994,28 +991,27 @@ pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsign
 		   gridsize, fontsize + 2*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  if (lstopo_pu_forbidden(level))
-    colorarg = 2;
-  else if (lstopo_pu_running(loutput, level))
-    colorarg = 1;
-  else
-    colorarg = 0;
-  lstopo_set_object_color(loutput, topology, level, colorarg, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    if (lstopo_pu_forbidden(level))
+      colorarg = 2;
+    else if (lstopo_pu_running(loutput, level))
+      colorarg = 1;
+    else
+      colorarg = 0;
+    lstopo_set_object_color(loutput, topology, level, colorarg, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize + textxoffset, y + gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize + textxoffset, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1046,22 +1042,21 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
 		   0, fontsize + 3*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, fontsize+2*gridsize /* totheight also contains children below this box */);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, fontsize+2*gridsize /* totheight also contains children below this box */);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1092,22 +1087,21 @@ core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
 		   gridsize, fontsize+2*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1138,22 +1132,21 @@ package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
 		   gridsize, fontsize+2*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1184,25 +1177,24 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
 		   gridsize, fontsize+4*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  /* Draw the epoxy box */
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-  /* Draw the memory box */
-  methods->box(loutput, style.bg2.r, style.bg2.g, style.bg2.b, depth-1, x + gridsize, totwidth - 2*gridsize, y + gridsize, fontsize+2*gridsize);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    /* Draw the epoxy box */
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    /* Draw the memory box */
+    methods->box(loutput, style.bg2.r, style.bg2.g, style.bg2.b, depth-1, x + gridsize, totwidth - 2*gridsize, y + gridsize, fontsize+2*gridsize);
 
-  if (fontsize) {
-    methods->text(loutput, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-2, x + 2*gridsize, y + 2*gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-2, x + 2*gridsize, y + 2*gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1233,22 +1225,21 @@ machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
 		   gridsize, fontsize+2*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, !level->depth /* if !depth, behave as System/root */, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    lstopo_set_object_color(loutput, topology, level, !level->depth /* if !depth, behave as System/root */, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1279,22 +1270,21 @@ system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 		   gridsize, fontsize+2*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1325,22 +1315,21 @@ group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
 		   gridsize, fontsize+2*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1371,22 +1360,21 @@ misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
 		   gridsize, fontsize+2*gridsize);
     lud->width = totwidth;
     lud->height = totheight;
-  } else {
+
+  } else { /* LSTOPO_DRAWING_DRAW */
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
-  }
 
-  lstopo_set_object_color(loutput, topology, level, 0, &style);
-  methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    lstopo_set_object_color(loutput, topology, level, 0, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
+    if (fontsize)
+      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
-  /* Draw sublevels for real */
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+    /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
+  }
 }
 
 static void
@@ -1486,30 +1474,42 @@ output_draw(struct lstopo_output *loutput)
   }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
+    /* compute root size, our size, and save it */
+
     output_compute_pu_min_textwidth(loutput);
 
     get_type_fun(root->type)(loutput, root, depth, 0, 0);
-  }
 
-  totwidth = rlud->width;
-  totheight = rlud->height;
-  if (maxtextwidth + 2*gridsize > totwidth)
-    totwidth = maxtextwidth + 2*gridsize;
+    /* loutput width is max(root, legend) */
+    totwidth = rlud->width;
+    if (maxtextwidth + 2*gridsize > totwidth)
+      totwidth = maxtextwidth + 2*gridsize;
+    loutput->width = totwidth;
 
-  if (legend && fontsize) {
-    offset = rlud->height + gridsize;
-    methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
-    for(i=0; i<ntext; i++, offset += gridsize + fontsize)
-      methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, text[i]);
-    for(i=0; i<loutput->legend_append_nr; i++, offset += gridsize + fontsize)
-      methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
-    totheight += gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize);
-  }
-  loutput->width = totwidth;
-  loutput->height = totheight;
+    /* loutput height is sum(root, legend) */
+    totheight = rlud->height;
+    if (legend && fontsize)
+      totheight += gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize);
+    loutput->height = totheight;
 
-  if (loutput->drawing == LSTOPO_DRAWING_DRAW)
+  } else { /* LSTOPO_DRAWING_DRAW */
+    /* restore our size that was computed during prepare */
+    totwidth = rlud->width;
+    totheight = rlud->height;
+
+    /* Draw root for real */
     get_type_fun(root->type)(loutput, root, depth, 0, 0);
+
+    /* Draw legend */
+    if (legend && fontsize) {
+      offset = rlud->height + gridsize;
+      methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
+      for(i=0; i<ntext; i++, offset += gridsize + fontsize)
+	methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, text[i]);
+      for(i=0; i<loutput->legend_append_nr; i++, offset += gridsize + fontsize)
+	methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
+    }
+  }
 }
 
 /*

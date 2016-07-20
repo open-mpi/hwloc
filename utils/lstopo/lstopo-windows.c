@@ -310,14 +310,10 @@ windows_init(void *output)
 }
 
 static void
-windows_declare_color(void *output, int r, int g, int b)
+windows_declare_color(void *output __hwloc_attribute_unused, int r, int g, int b)
 {
-  struct lstopo_windows_output *woutput = output;
   HBRUSH brush;
   COLORREF color;
-
-  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
 
   color = RGB(r, g, b);
   brush = CreateSolidBrush(color);
@@ -340,9 +336,6 @@ windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
   SetBkColor(ps->hdc, RGB(r, g, b));
   Rectangle(ps->hdc, x - x_delta, y - y_delta, x + width - x_delta, y + height - y_delta);
@@ -354,9 +347,6 @@ windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
-
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
   MoveToEx(ps->hdc, x1 - x_delta, y1 - y_delta, NULL);
   LineTo(ps->hdc, x2 - x_delta, y2 - y_delta);
@@ -367,9 +357,6 @@ windows_text(void *output, int r, int g, int b, int size __hwloc_attribute_unuse
 {
   struct lstopo_windows_output *woutput = output;
   PAINTSTRUCT *ps = &woutput->ps;
-
-  if (woutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
-    return;
 
   SetTextColor(ps->hdc, RGB(r, g, b));
   TextOut(ps->hdc, x - x_delta, y - y_delta, text, (int)strlen(text));
