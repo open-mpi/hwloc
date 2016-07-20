@@ -65,6 +65,7 @@ struct lstopo_output {
   unsigned int gridsize, fontsize;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
   struct draw_methods *methods;
+  unsigned width, height; /* total output size */
   unsigned min_pu_textwidth;
 };
 

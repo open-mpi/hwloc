@@ -1503,7 +1503,10 @@ output_draw(struct lstopo_output *loutput)
       methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, text[i]);
     for(i=0; i<loutput->legend_append_nr; i++, offset += gridsize + fontsize)
       methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
+    totheight += gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize);
   }
+  loutput->width = totwidth;
+  loutput->height = totheight;
 
   if (loutput->drawing == LSTOPO_DRAWING_DRAW)
     get_type_fun(root->type)(loutput, root, depth, 0, 0);

@@ -51,8 +51,6 @@ struct lstopo_cairo_output {
   struct lstopo_output loutput; /* must be at the beginning */
   cairo_surface_t *surface;
   cairo_t *context;
-  unsigned max_x;
-  unsigned max_y;
 };
 
 /* Cairo methods */
@@ -62,17 +60,8 @@ topo_cairo_box(void *_output, int r, int g, int b, unsigned depth __hwloc_attrib
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW) {
-    if (x > coutput->max_x)
-      coutput->max_x = x;
-    if (x + width > coutput->max_x)
-      coutput->max_x = x + width;
-    if (y > coutput->max_y)
-      coutput->max_y = y;
-    if (y + height > coutput->max_y)
-      coutput->max_y = y + height;
+  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
-  }
 
   cairo_rectangle(c, x, y, width, height);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
@@ -90,17 +79,8 @@ topo_cairo_line(void *_output, int r, int g, int b, unsigned depth __hwloc_attri
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
 
-  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW) {
-    if (x1 > coutput->max_x)
-      coutput->max_x = x1;
-    if (x2 > coutput->max_x)
-      coutput->max_x = x2;
-    if (y1 > coutput->max_y)
-      coutput->max_y = y1;
-    if (y2 > coutput->max_y)
-      coutput->max_y = y2;
+  if (coutput->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
-  }
 
   cairo_move_to(c, x1, y1);
   cairo_set_source_rgb(c, (float) r / 255, (float) g / 255, (float) b / 255);
@@ -234,8 +214,8 @@ x11_init(void *_disp)
   coutput->loutput.drawing = LSTOPO_DRAWING_DRAW;
 
   /* now create the actual window with the computed max size */
-  screen_width = coutput->max_x;
-  screen_height = coutput->max_y;
+  screen_width = coutput->loutput.width;
+  screen_height = coutput->loutput.height;
 
   disp->top = top = XCreateSimpleWindow(dpy, root, 0, 0, screen_width, screen_height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
   XStoreName(dpy, top, "lstopo");
@@ -250,8 +230,8 @@ x11_init(void *_disp)
   disp->last_screen_height = 0;
   disp->screen_width = screen_width;
   disp->screen_height = screen_height;
-  disp->width = coutput->max_x;
-  disp->height = coutput->max_y;
+  disp->width = coutput->loutput.width;
+  disp->height = coutput->loutput.height;
   disp->orig_fontsize = coutput->loutput.fontsize;
   disp->orig_gridsize = coutput->loutput.gridsize;
   disp->x = 0;
@@ -259,7 +239,7 @@ x11_init(void *_disp)
   disp->scale = disp->last_scale = 1.0f;
   /* TODO: if window got truncated, scale down? */
 
-  x11_create(disp, coutput->max_x, coutput->max_y);
+  x11_create(disp, coutput->loutput.width, coutput->loutput.height);
 
   XMapWindow(dpy, top);
 
@@ -306,20 +286,18 @@ move_x11(struct lstopo_x11_output *disp)
     x11_destroy(disp);
 
     x11_create(disp, disp->width, disp->height);
-    disp->coutput.max_x = 0;
-    disp->coutput.max_y = 0;
     /* recompute new sizes and positions */
     disp->coutput.loutput.drawing = LSTOPO_DRAWING_PREPARE;
     topo_cairo_paint(&disp->coutput);
-    if (disp->coutput.max_x > disp->width || disp->coutput.max_y > disp->height) {
+    if (disp->coutput.loutput.width > (unsigned) disp->width || disp->coutput.loutput.height > (unsigned) disp->height) {
       /* need to extend the window before actual redraw */
       x11_destroy(disp);
-      x11_create(disp, disp->coutput.max_x, disp->coutput.max_y);
+      x11_create(disp, disp->coutput.loutput.width, disp->coutput.loutput.height);
     }
     disp->coutput.loutput.drawing = LSTOPO_DRAWING_DRAW;
     topo_cairo_paint(&disp->coutput);
-    disp->width = disp->coutput.max_x;
-    disp->height = disp->coutput.max_y;
+    disp->width = disp->coutput.loutput.width;
+    disp->height = disp->coutput.loutput.height;
   }
 
   if (disp->width <= disp->screen_width) {
@@ -524,7 +502,7 @@ png_init(void *_coutput)
   cairo_surface_destroy(fakecs);
 
   /* create the actual surface with the right size */
-  cs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, coutput->max_x, coutput->max_y);
+  cs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, coutput->loutput.width, coutput->loutput.height);
   coutput->surface = cs;
 }
 
@@ -587,7 +565,7 @@ pdf_init(void *_coutput)
   cairo_surface_destroy(fakecs);
 
   /* create the actual surface with the right size */
-  cs = cairo_pdf_surface_create_for_stream(topo_cairo_write, coutput->loutput.file, coutput->max_x, coutput->max_y);
+  cs = cairo_pdf_surface_create_for_stream(topo_cairo_write, coutput->loutput.file, coutput->loutput.width, coutput->loutput.height);
   coutput->surface = cs;
 }
 
@@ -650,7 +628,7 @@ ps_init(void *_coutput)
   cairo_surface_destroy(fakecs);
 
   /* create the actual surface with the right size */
-  cs = cairo_ps_surface_create_for_stream(topo_cairo_write, coutput->loutput.file, coutput->max_x, coutput->max_y);
+  cs = cairo_ps_surface_create_for_stream(topo_cairo_write, coutput->loutput.file, coutput->loutput.width, coutput->loutput.height);
   coutput->surface = cs;
 }
 
@@ -713,7 +691,7 @@ svg_init(void *_coutput)
   cairo_surface_destroy(fakecs);
 
   /* create the actual surface with the right size */
-  cs = cairo_svg_surface_create_for_stream(topo_cairo_write, coutput->loutput.file, coutput->max_x, coutput->max_y);
+  cs = cairo_svg_surface_create_for_stream(topo_cairo_write, coutput->loutput.file, coutput->loutput.width, coutput->loutput.height);
   coutput->surface = cs;
 }
 

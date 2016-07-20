@@ -66,9 +66,10 @@ struct cell {
 struct lstopo_ascii_output {
   struct lstopo_output loutput; /* must be at the beginning */
   struct cell **cells;
+  int utf8;
+  /* loutput->width and ->height converted to array of chars to simplify internal management below*/
   int width;
   int height;
-  int utf8;
 };
 
 static struct draw_methods ascii_draw_methods;
@@ -78,14 +79,15 @@ static void
 ascii_init(void *_output)
 {
   struct lstopo_ascii_output *disp = _output;
+  unsigned gridsize = disp->loutput.gridsize;
   unsigned width, height;
   unsigned j, i;
 
   /* recurse once for preparing sizes and positions */
   disp->loutput.drawing = LSTOPO_DRAWING_PREPARE;
   output_draw(&disp->loutput);
-  width = disp->width;
-  height = disp->height;
+  width = disp->width = (disp->loutput.width + 1) / (gridsize/2);
+  height = disp->height = (disp->loutput.height + 1) / gridsize;
   disp->loutput.drawing = LSTOPO_DRAWING_DRAW;
 
   /* terminals usually have narrow characters, so let's make them wider */
@@ -345,17 +347,8 @@ ascii_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_un
   x2 = x1 + width - 1;
   y2 = y1 + height - 1;
 
-  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW) {
-    if ((int)x1 >= disp->width)
-      disp->width = x1+1;
-    if ((int)x2 >= disp->width)
-      disp->width = x2+1;
-    if ((int)y1 >= disp->height)
-      disp->height = y1+1;
-    if ((int)y2 >= disp->height)
-      disp->height = y2+1;
+  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
-  }
 
   /* Corners */
   merge(disp, x1, y1, down|right, 0, r, g, b);
@@ -407,13 +400,8 @@ ascii_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute
     y2 = z;
   }
 
-  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW) {
-    if ((int)x2 >= disp->width)
-      disp->width = x2+1;
-    if ((int)y2 >= disp->height)
-      disp->height = y2+1;
+  if (disp->loutput.drawing != LSTOPO_DRAWING_DRAW)
     return;
-  }
 
   /* vertical/horizontal should be enough, but should mix with existing
    * characters for better output ! */
@@ -545,8 +533,6 @@ void output_ascii(struct lstopo_output *loutput, const char *filename)
 
   memcpy(&disp->loutput, loutput, sizeof(*loutput));
   disp->loutput.methods = &ascii_draw_methods;
-  disp->width = 0;
-  disp->height = 0;
 
   output_draw_start(&disp->loutput);
   output_draw(&disp->loutput);
