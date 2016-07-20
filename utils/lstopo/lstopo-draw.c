@@ -94,7 +94,7 @@ struct style {
 	t2;	/* other text color */
 };
 
-unsigned get_textwidth(void *output, struct draw_methods *methods,
+unsigned get_textwidth(void *output,
 		       const char *text, unsigned length,
 		       unsigned fontsize, unsigned gridsize)
 {
@@ -657,7 +657,7 @@ pci_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwl
     } else {
       n = snprintf(text, sizeof(text), "%s %s", _text, busid);
     }
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
   }
 
   if (collapse > 1) {
@@ -792,10 +792,10 @@ os_device_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwlo
     }
 
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
     for(i=0; i<nmorelines; i++) {
       unsigned nn = (unsigned)strlen(morelines[i]);
-      unsigned ntextwidth = get_textwidth(loutput, methods, morelines[i], nn, fontsize, gridsize);
+      unsigned ntextwidth = get_textwidth(loutput, morelines[i], nn, fontsize, gridsize);
       if (ntextwidth > textwidth)
 	textwidth = ntextwidth;
     }
@@ -906,7 +906,7 @@ pu_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj_t
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
     /* if smaller than other PU, artificially extend/shift it
      * to make PU boxes nicer when vertically stacked.
      */
@@ -956,7 +956,7 @@ cache_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
     textwidth += gridsize; /* artificially extend the minimal inner size because RECURSE_RECT() uses 0 as border when computing totwidth */
   }
 
@@ -992,7 +992,7 @@ core_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
   }
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
@@ -1027,7 +1027,7 @@ package_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
   }
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
@@ -1070,7 +1070,7 @@ node_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
     textwidth += 2*gridsize; /* so artificially extend the minimal inner size to include space between space between epoxy and memory box */
   }
 
@@ -1112,7 +1112,7 @@ machine_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
   }
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
@@ -1189,7 +1189,7 @@ system_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_o
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
   }
 
   if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
@@ -1231,7 +1231,7 @@ group_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_ob
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
   }
 
   if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
@@ -1272,7 +1272,7 @@ misc_draw(struct lstopo_output *loutput, struct draw_methods *methods, hwloc_obj
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    textwidth = get_textwidth(loutput, methods, text, n, fontsize, gridsize);
+    textwidth = get_textwidth(loutput, text, n, fontsize, gridsize);
   }
 
   RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
@@ -1313,7 +1313,7 @@ output_compute_pu_min_textwidth(struct lstopo_output *output)
   }
 
   n = lstopo_obj_snprintf(text, sizeof(text), lastpu, output->logical);
-  output->min_pu_textwidth = get_textwidth(output, output->methods, text, n, fontsize, gridsize);
+  output->min_pu_textwidth = get_textwidth(output, text, n, fontsize, gridsize);
 }
 
 void
