@@ -447,8 +447,6 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     return snprintf(text, textlen, "%s%s%s", typestr, indexstr, totmemstr);
 }
 
-static struct draw_methods getmax_draw_methods;
-
 static void
 lstopo_set_object_color(struct draw_methods *methods,
 			hwloc_topology_t topology __hwloc_attribute_unused,
@@ -460,7 +458,7 @@ lstopo_set_object_color(struct draw_methods *methods,
   const char *style;
 
   /* no need to deal with colors when computing max sizes */
-  if (methods == &getmax_draw_methods)
+  if (methods == &null_draw_methods)
     return;
 
   memset(s, 0, sizeof(*s));
