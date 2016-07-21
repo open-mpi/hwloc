@@ -1037,92 +1037,6 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
 }
 
 static void
-core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
-{
-  struct lstopo_obj_userdata *lud = level->userdata;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-  unsigned textwidth = 0;
-  unsigned totwidth, totheight;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
-
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
-    /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = fontsize + 2*gridsize;
-    place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize+2*gridsize);
-    lud->width = totwidth;
-    lud->height = totheight;
-
-  } else { /* LSTOPO_DRAWING_DRAW */
-    struct draw_methods *methods = loutput->methods;
-    struct style style;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
-
-    lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-
-    /* Draw sublevels for real */
-    draw_children(loutput, level, depth-1, x, y);
-  }
-}
-
-static void
-package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
-{
-  struct lstopo_obj_userdata *lud = level->userdata;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-  unsigned textwidth = 0;
-  unsigned totwidth, totheight;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
-
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
-    /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = fontsize + 2*gridsize;
-    place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize+2*gridsize);
-    lud->width = totwidth;
-    lud->height = totheight;
-
-  } else { /* LSTOPO_DRAWING_DRAW */
-    struct draw_methods *methods = loutput->methods;
-    struct style style;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
-
-    lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-
-    /* Draw sublevels for real */
-    draw_children(loutput, level, depth-1, x, y);
-  }
-}
-
-static void
 node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   struct lstopo_obj_userdata *lud = level->userdata;
@@ -1169,142 +1083,13 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
 }
 
 static void
-machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
+normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned textwidth = 0;
   unsigned totwidth, totheight;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
-
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
-    /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = fontsize + 2*gridsize;
-    place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize+2*gridsize);
-    lud->width = totwidth;
-    lud->height = totheight;
-
-  } else { /* LSTOPO_DRAWING_DRAW */
-    struct draw_methods *methods = loutput->methods;
-    struct style style;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
-
-    lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-
-    /* Draw sublevels for real */
-    draw_children(loutput, level, depth-1, x, y);
-  }
-}
-
-static void
-system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
-{
-  struct lstopo_obj_userdata *lud = level->userdata;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-  unsigned textwidth = 0;
-  unsigned totwidth, totheight;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
-
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
-    /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = fontsize + 2*gridsize;
-    place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize+2*gridsize);
-    lud->width = totwidth;
-    lud->height = totheight;
-
-  } else { /* LSTOPO_DRAWING_DRAW */
-    struct draw_methods *methods = loutput->methods;
-    struct style style;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
-
-    lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-
-    /* Draw sublevels for real */
-    draw_children(loutput, level, depth-1, x, y);
-  }
-}
-
-static void
-group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
-{
-  struct lstopo_obj_userdata *lud = level->userdata;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
-  unsigned textwidth = 0;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
-
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
-    /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = fontsize + 2*gridsize;
-    place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize+2*gridsize);
-    lud->width = totwidth;
-    lud->height = totheight;
-
-  } else { /* LSTOPO_DRAWING_DRAW */
-    struct draw_methods *methods = loutput->methods;
-    struct style style;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
-
-    lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-
-    /* Draw sublevels for real */
-    draw_children(loutput, level, depth-1, x, y);
-  }
-}
-
-static void
-misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
-{
-  struct lstopo_obj_userdata *lud = level->userdata;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
-  unsigned textwidth = 0;
   char text[64];
 
   if (fontsize) {
@@ -1481,10 +1266,13 @@ static foo_draw
 get_type_fun(hwloc_obj_type_t type)
 {
   switch (type) {
-    case HWLOC_OBJ_SYSTEM: return system_draw;
-    case HWLOC_OBJ_MACHINE: return machine_draw;
+    case HWLOC_OBJ_SYSTEM:
+    case HWLOC_OBJ_MACHINE:
+    case HWLOC_OBJ_PACKAGE:
+    case HWLOC_OBJ_CORE:
+    case HWLOC_OBJ_GROUP:
+    case HWLOC_OBJ_MISC: return normal_draw;
     case HWLOC_OBJ_NUMANODE: return node_draw;
-    case HWLOC_OBJ_PACKAGE: return package_draw;
     case HWLOC_OBJ_L1CACHE: return cache_draw;
     case HWLOC_OBJ_L2CACHE: return cache_draw;
     case HWLOC_OBJ_L3CACHE: return cache_draw;
@@ -1493,18 +1281,15 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_L1ICACHE: return cache_draw;
     case HWLOC_OBJ_L2ICACHE: return cache_draw;
     case HWLOC_OBJ_L3ICACHE: return cache_draw;
-    case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PU: return pu_draw;
-    case HWLOC_OBJ_GROUP: return group_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
     case HWLOC_OBJ_OS_DEVICE: return os_device_draw;
     case HWLOC_OBJ_BRIDGE: return bridge_draw;
     default:
-    case HWLOC_OBJ_MISC: return misc_draw;
     case HWLOC_OBJ_TYPE_MAX: assert(0);
   }
   /* for dumb compilers */
-  return misc_draw;
+  return normal_draw;
 }
 
 void
