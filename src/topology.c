@@ -2233,15 +2233,17 @@ hwloc_build_level_from_list(struct hwloc_obj *first, struct hwloc_obj ***levelp)
   }
   nb = i;
 
-  /* allocate and fill level */
-  *levelp = malloc(nb * sizeof(struct hwloc_obj *));
-  obj = first;
-  i = 0;
-  while (obj) {
-    obj->logical_index = i;
-    (*levelp)[i] = obj;
-    i++;
-    obj = obj->next_cousin;
+  if (nb) {
+    /* allocate and fill level */
+    *levelp = malloc(nb * sizeof(struct hwloc_obj *));
+    obj = first;
+    i = 0;
+    while (obj) {
+      obj->logical_index = i;
+      (*levelp)[i] = obj;
+      i++;
+      obj = obj->next_cousin;
+    }
   }
 
   return nb;
