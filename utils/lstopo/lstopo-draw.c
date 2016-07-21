@@ -531,8 +531,7 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 
 static void
 lstopo_set_object_color(struct lstopo_output *loutput,
-			hwloc_obj_t obj, int arg, /* PU status (0=normal, 1=running, 2=forbidden)
-						   * Machine status (0=normal, 1=displayed as a root/System) */
+			hwloc_obj_t obj,
 			struct style *s)
 {
   unsigned forcer, forceg, forceb;
@@ -543,14 +542,13 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   switch (obj->type) {
 
   case HWLOC_OBJ_MACHINE:
-    if (arg == 0) {
+    if (obj->depth) {
       s->bg.r = MACHINE_R_COLOR;
       s->bg.g = MACHINE_G_COLOR;
       s->bg.b = MACHINE_B_COLOR;
       break;
     }
-    assert(arg == 1); /* Machine printed as a System (when root) */
-    /* fallthrough */
+    /* fallthrough, Machine root printed as a System */
   case HWLOC_OBJ_SYSTEM:
     s->bg.r = SYSTEM_R_COLOR;
     s->bg.g = SYSTEM_G_COLOR;
@@ -604,24 +602,18 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     break;
 
   case HWLOC_OBJ_PU:
-    switch (arg) {
-    case 0:
-      s->bg.r = THREAD_R_COLOR;
-      s->bg.g = THREAD_G_COLOR;
-      s->bg.b = THREAD_B_COLOR;
-      break;
-    case 1:
-      s->bg.r = RUNNING_R_COLOR;
-      s->bg.g = RUNNING_G_COLOR;
-      s->bg.b = RUNNING_B_COLOR;
-      break;
-    case 2:
+    if (lstopo_pu_forbidden(obj)) {
       s->bg.r = FORBIDDEN_R_COLOR;
       s->bg.g = FORBIDDEN_G_COLOR;
       s->bg.b = FORBIDDEN_B_COLOR;
-      break;
-    default:
-      assert(0);
+    } else if (lstopo_pu_running(loutput, obj)) {
+      s->bg.r = RUNNING_R_COLOR;
+      s->bg.g = RUNNING_G_COLOR;
+      s->bg.b = RUNNING_B_COLOR;
+    } else {
+      s->bg.r = THREAD_R_COLOR;
+      s->bg.g = THREAD_G_COLOR;
+      s->bg.b = THREAD_B_COLOR;
     }
     break;
 
@@ -730,7 +722,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
 
     if (collapse > 1) {
       methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
@@ -868,7 +860,7 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
     if (fontsize) {
@@ -909,7 +901,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     totheight = lud->height;
 
     /* Square and left link */
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
     methods->line(loutput, 0, 0, 0, depth, x + gridsize, y + PCI_HEIGHT/2, x + 2*gridsize, y + PCI_HEIGHT/2);
 
@@ -985,19 +977,12 @@ pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsign
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct style style;
-    int colorarg;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
 
-    if (lstopo_pu_forbidden(level))
-      colorarg = 2;
-    else if (lstopo_pu_running(loutput, level))
-      colorarg = 1;
-    else
-      colorarg = 0;
-    lstopo_set_object_color(loutput, level, colorarg, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
     if (fontsize)
@@ -1040,7 +1025,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, fontsize+2*gridsize /* totheight also contains children below this box */);
 
     if (fontsize)
@@ -1083,7 +1068,7 @@ core_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
     if (fontsize)
@@ -1126,7 +1111,7 @@ package_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
     if (fontsize)
@@ -1169,7 +1154,7 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     /* Draw the epoxy box */
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
     /* Draw the memory box */
@@ -1215,7 +1200,7 @@ machine_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, u
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, !level->depth /* if !depth, behave as System/root */, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
     if (fontsize)
@@ -1258,7 +1243,7 @@ system_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
     if (fontsize)
@@ -1301,7 +1286,7 @@ group_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
     if (fontsize)
@@ -1344,7 +1329,7 @@ misc_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, 0, &style);
+    lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
     if (fontsize)
