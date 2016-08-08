@@ -966,6 +966,7 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
   unsigned step = 1;
   unsigned nr_loops = 0;
   struct hwloc_synthetic_intlv_loop_s *loops = NULL;
+  struct hwloc_synthetic_intlv_loop_s *temp = NULL;
   hwloc_obj_t cur;
   unsigned i, j;
   ssize_t tmplen = buflen;
@@ -992,8 +993,8 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
 	break;
 
     nr_loops++;
-    loops = realloc(loops, nr_loops*sizeof(*loops));
-    if (!loops)
+    temp = realloc(loops, nr_loops*sizeof(*loops));
+    if (temp == NULL)
       goto exportall;
     loops[nr_loops-1].step = i;
     loops[nr_loops-1].nb = j;
