@@ -1769,6 +1769,7 @@ int
 hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
 {
   unsigned long *maps;
+  unsigned long *tmp;
   unsigned long map;
   int nr_maps = 0;
   static int nr_maps_allocated = 8; /* only compute the power-of-two above the kernel cpumask size once */
@@ -1783,17 +1784,24 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
   while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
     {
       if (nr_maps == nr_maps_allocated) {
-	nr_maps_allocated *= 2;
-	maps = realloc(maps, nr_maps_allocated * sizeof(*maps));
+        nr_maps_allocated *= 2;
+        tmp = realloc(maps, nr_maps_allocated * sizeof(*maps));
       }
 
       if (!map && !nr_maps)
-	/* ignore the first map if it's empty */
-	continue;
+        /* ignore the first map if it's empty */
+        continue;
 
-      memmove(&maps[1], &maps[0], nr_maps*sizeof(*maps));
-      maps[0] = map;
-      nr_maps++;
+      if (tmp != NULL) {
+        maps = tmp;
+        memmove(&maps[1], &maps[0], nr_maps*sizeof(*maps));
+        maps[0] = map;
+        nr_maps++;
+      }
+      else {
+        free(maps);
+        /* And handle error */
+      }
     }
 
   /* convert into a set */
