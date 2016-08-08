@@ -27,6 +27,7 @@ Version 1.11.4
 * Fix build with Visual Studio 2015, thanks to Eloi Gaudry for reporting
   the issue and providing the patch.
 * Don't forget to display OS device children in the graphical lstopo.
+* Fix a memory leak on Solaris, thanks to Bryon Gloden for the patch.
 
 
 Version 1.11.3
