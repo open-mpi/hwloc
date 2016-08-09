@@ -776,7 +776,7 @@ hwloc___nolibxml_prepare_export_diff(hwloc_topology_diff_t diff, const char *ref
 static int
 hwloc_nolibxml_export_diff_buffer(hwloc_topology_diff_t diff, const char *refname, char **bufferp, int *buflenp)
 {
-  char *buffer;
+  char *buffer, *tmpbuffer;
   size_t bufferlen, res;
 
   bufferlen = 16384; /* random guess for large enough default */
@@ -784,8 +784,15 @@ hwloc_nolibxml_export_diff_buffer(hwloc_topology_diff_t diff, const char *refnam
   res = hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, (int)bufferlen);
 
   if (res > bufferlen) {
-    buffer = realloc(buffer, res);
-    hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, (int)res);
+    tmpbuffer = realloc(buffer, res);
+    if (tmpbuffer != NULL) {
+      buffer = tmpbuffer;
+      hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, (int)res);
+    }
+    else {
+      free(buffer);
+      /* And handle error */
+    }
   }
 
   *bufferp = buffer;
