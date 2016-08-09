@@ -676,11 +676,17 @@ main (int argc, char *argv[])
 	loutput.legend = 0;
       }
       else if (!strcmp (argv[0], "--append-legend")) {
+	char **tmp;
 	if (argc < 2)
 	  goto out_usagefailure;
-	loutput.legend_append = realloc(loutput.legend_append, (loutput.legend_append_nr+1) * sizeof(*loutput.legend_append));
-	loutput.legend_append[loutput.legend_append_nr] = strdup(argv[1]);
-	loutput.legend_append_nr++;
+	tmp = realloc(loutput.legend_append, (loutput.legend_append_nr+1) * sizeof(*loutput.legend_append));
+	if (!tmp) {
+	  fprintf(stderr, "Failed to realloc legend append array, legend ignored.\n");
+	} else {
+	  loutput.legend_append = tmp;
+	  loutput.legend_append[loutput.legend_append_nr] = strdup(argv[1]);
+	  loutput.legend_append_nr++;
+	}
 	opt = 1;
       }
 

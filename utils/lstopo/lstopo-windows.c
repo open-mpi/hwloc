@@ -314,6 +314,7 @@ windows_declare_color(void *output __hwloc_attribute_unused, int r, int g, int b
 {
   HBRUSH brush;
   COLORREF color;
+  struct color *tmp;
 
   color = RGB(r, g, b);
   brush = CreateSolidBrush(color);
@@ -322,7 +323,12 @@ windows_declare_color(void *output __hwloc_attribute_unused, int r, int g, int b
     exit(EXIT_FAILURE);
   }
 
-  colors = realloc(colors, sizeof(*colors) * (numcolors + 1));
+  tmp = realloc(colors, sizeof(*colors) * (numcolors + 1));
+  if (!tmp) {
+    fprintf(stderr, "Failed to realloc the colors array\n");
+    return;
+  }
+  colors = tmp;
   colors[numcolors].r = r;
   colors[numcolors].g = g;
   colors[numcolors].b = b;
