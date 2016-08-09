@@ -319,7 +319,7 @@ hwloc_nolibxml_read_file(const char *xmlpath, char **bufferp, size_t *buflenp)
   FILE * file;
   size_t buflen, offset, readlen;
   struct stat statbuf;
-  char *buffer;
+  char *buffer, *tmpbuffer;
   size_t ret;
 
   if (!strcmp(xmlpath, "-"))
@@ -350,9 +350,10 @@ hwloc_nolibxml_read_file(const char *xmlpath, char **bufferp, size_t *buflenp)
       break;
 
     buflen *= 2;
-    buffer = realloc(buffer, buflen+1);
-    if (!buffer)
+    tmpbuffer = realloc(buffer, buflen+1);
+    if (!tmpbuffer)
       goto out_with_file;
+    buffer = tmpbuffer;
     readlen = buflen/2;
   }
 
