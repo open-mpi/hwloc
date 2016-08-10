@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -273,6 +273,7 @@ int main(int argc, char *argv[])
 	}
 	closedir(taskdir);
       }
+      free(path);
 #endif /* HWLOC_LINUX_SYS */
     }
 
