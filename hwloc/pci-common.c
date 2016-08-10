@@ -52,11 +52,17 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
   hwloc_bitmap_sscanf(set, tmp);
 
   if (!*allocated) {
+    topology->pci_forced_locality = malloc(sizeof(*topology->pci_forced_locality));
+    if (!topology->pci_forced_locality)
+      return; /* failed to allocate, ignore this forced locality */
     *allocated = 1;
-    topology->pci_forced_locality = malloc(*allocated * sizeof(*topology->pci_forced_locality));
   } else if (nr >= *allocated) {
-    topology->pci_forced_locality = realloc(topology->pci_forced_locality,
-					    2 * *allocated * sizeof(*topology->pci_forced_locality));
+    struct hwloc_pci_forced_locality_s *tmp;
+    tmp = realloc(topology->pci_forced_locality,
+		  2 * *allocated * sizeof(*topology->pci_forced_locality));
+    if (!tmp)
+      return; /* failed to allocate, ignore this forced locality */
+    topology->pci_forced_locality = tmp;
     *allocated *= 2;
   }
 

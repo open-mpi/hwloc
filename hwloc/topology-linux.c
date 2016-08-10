@@ -2438,7 +2438,12 @@ hwloc_read_str(const char *p, const char *p1, int root_fd)
   size_t cb = 0;
   char *ret = hwloc_read_raw(p, p1, &cb, root_fd);
   if ((NULL != ret) && (0 < cb) && (0 != ret[cb-1])) {
-    ret = realloc(ret, cb + 1);
+    char *tmp = realloc(ret, cb + 1);
+    if (!tmp) {
+      free(ret);
+      return NULL;
+    }
+    ret = tmp;
     ret[cb] = 0;
   }
   return ret;
@@ -2475,11 +2480,17 @@ add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
     uint32_t l2_cache, uint32_t phandle, const char *name)
 {
   if (cpus->n == cpus->allocated) {
+    void *tmp;
+    unsigned allocated;
     if (!cpus->allocated)
-      cpus->allocated = 64;
+      allocated = 64;
     else
-      cpus->allocated *= 2;
-    cpus->p = realloc(cpus->p, cpus->allocated * sizeof(cpus->p[0]));
+      allocated = 2 * cpus->allocated;
+    tmp = realloc(cpus->p, allocated * sizeof(cpus->p[0]));
+    if (!tmp)
+      return; /* failed to realloc, ignore this entry */
+    cpus->p = tmp;
+    cpus->allocated = allocated;
   }
   cpus->p[cpus->n].phandle = phandle;
   cpus->p[cpus->n].cpuset = (NULL == cpuset)?NULL:hwloc_bitmap_dup(cpuset);
