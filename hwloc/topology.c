@@ -2501,6 +2501,14 @@ hwloc_connect_levels(hwloc_topology_t topology)
 			  2 * topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
       if (!tmplevels || !tmpnbobjs) {
 	fprintf(stderr, "hwloc failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
+
+	/* if one realloc succeeded, make sure the caller will free the new buffer */
+	if (tmplevels)
+	  topology->levels = tmplevels;
+	if (tmpnbobjs)
+	  topology->level_nbobjects = tmpnbobjs;
+	/* the realloc that failed left topology->level_foo untouched, will be freed by the caller */
+
 	free(objs);
 	free(taken_objs);
 	free(new_objs);
