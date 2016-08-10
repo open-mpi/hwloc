@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     if (input) {
       err = hwloc_utils_enable_input_format(topology, input, &input_format, verbose, callname);
       if (err)
-	return err;
+	return EXIT_FAILURE;
     }
     hwloc_topology_set_flags(topology, flags);
     hwloc_topology_load(topology);
