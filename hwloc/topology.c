@@ -2494,11 +2494,12 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     if (topology->nb_levels == topology->nb_levels_allocated) {
       /* extend the arrays of levels */
-      topology->levels = realloc(topology->levels,
-				 2 * topology->nb_levels_allocated * sizeof(*topology->levels));
-      topology->level_nbobjects = realloc(topology->level_nbobjects,
-					  2 * topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
-      if (!topology->levels || !topology->level_nbobjects) {
+      void *tmplevels, *tmpnbobjs;
+      tmplevels = realloc(topology->levels,
+			  2 * topology->nb_levels_allocated * sizeof(*topology->levels));
+      tmpnbobjs = realloc(topology->level_nbobjects,
+			  2 * topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
+      if (!tmplevels || !tmpnbobjs) {
 	fprintf(stderr, "hwloc failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
 	free(objs);
 	free(taken_objs);
@@ -2506,6 +2507,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
 	errno = ENOMEM;
 	return -1;
       }
+      topology->levels = tmplevels;
+      topology->level_nbobjects = tmpnbobjs;
       memset(topology->levels + topology->nb_levels_allocated,
 	     0, topology->nb_levels_allocated * sizeof(*topology->levels));
       memset(topology->level_nbobjects + topology->nb_levels_allocated,
