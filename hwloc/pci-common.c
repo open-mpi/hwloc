@@ -54,14 +54,14 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
   if (!*allocated) {
     topology->pci_forced_locality = malloc(sizeof(*topology->pci_forced_locality));
     if (!topology->pci_forced_locality)
-      return; /* failed to allocate, ignore this forced locality */
+      goto out_with_set; /* failed to allocate, ignore this forced locality */
     *allocated = 1;
   } else if (nr >= *allocated) {
     struct hwloc_pci_forced_locality_s *tmp;
     tmp = realloc(topology->pci_forced_locality,
 		  2 * *allocated * sizeof(*topology->pci_forced_locality));
     if (!tmp)
-      return; /* failed to allocate, ignore this forced locality */
+      goto out_with_set; /* failed to allocate, ignore this forced locality */
     topology->pci_forced_locality = tmp;
     *allocated *= 2;
   }
@@ -71,6 +71,11 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
   topology->pci_forced_locality[nr].bus_last = bus_last;
   topology->pci_forced_locality[nr].cpuset = set;
   topology->pci_forced_locality_nr++;
+  return;
+
+ out_with_set:
+  hwloc_bitmap_free(set);
+  return;
 }
 
 static void
