@@ -28,6 +28,8 @@ Version 1.11.4
   the issue and providing the patch.
 * Don't forget to display OS device children in the graphical lstopo.
 * Fix a memory leak on Solaris, thanks to Bryon Gloden for the patch.
+* Properly handle realloc() failures, thanks to Bryon Gloden for reporting
+  the issue.
 
 
 Version 1.11.3
