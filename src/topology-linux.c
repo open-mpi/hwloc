@@ -3734,11 +3734,15 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     getprocnb_begin(PROCESSOR, Pproc);
     curproc = numprocs++;
     if (numprocs > allocated_Lprocs) {
+      struct hwloc_linux_cpuinfo_proc * tmp;
       if (!allocated_Lprocs)
 	allocated_Lprocs = 8;
       else
         allocated_Lprocs *= 2;
-      Lprocs = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
+      tmp = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
+      if (!tmp)
+	goto err;
+      Lprocs = tmp;
     }
     Lprocs[curproc].Pproc = Pproc;
     Lprocs[curproc].Pcore = -1;
