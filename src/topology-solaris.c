@@ -440,9 +440,9 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
           distances[i*curlgrp+j] = (float) lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
       hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, curlgrp, indexes, glob_lgrps, distances, 0 /* OS cannot force */);
-    }
+    } else
 #endif /* HAVE_LGRP_LATENCY_COOKIE */
-    free(glob_lgrps);
+      free(glob_lgrps);
   }
   lgrp_fini(cookie);
 }
