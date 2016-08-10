@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -129,8 +129,10 @@ hwloc_bitmap_enlarge_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_coun
 {
   unsigned tmp = 1 << hwloc_flsl((unsigned long) needed_count - 1);
   if (tmp > set->ulongs_allocated) {
-    set->ulongs = realloc(set->ulongs, tmp * sizeof(unsigned long));
-    assert(set->ulongs);
+    unsigned long *tmpulongs;
+    tmpulongs = realloc(set->ulongs, tmp * sizeof(unsigned long));
+    assert(tmpulongs); /* FIXME: return errors from all bitmap functions? */
+    set->ulongs = tmpulongs;
     set->ulongs_allocated = tmp;
   }
 }
