@@ -271,6 +271,7 @@ int main(int argc, char *argv[])
 	}
 	closedir(taskdir);
       }
+      free(path);
 #endif /* HWLOC_LINUX_SYS */
     }
 
