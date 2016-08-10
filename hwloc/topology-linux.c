@@ -1775,6 +1775,8 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
   int i;
 
   maps = malloc(nr_maps_allocated * sizeof(*maps));
+  if (!maps)
+    return -1;
 
   /* reset to zero first */
   hwloc_bitmap_zero(set);
@@ -1783,8 +1785,13 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
   while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
     {
       if (nr_maps == nr_maps_allocated) {
+	unsigned long *tmp = realloc(maps, 2*nr_maps_allocated * sizeof(*maps));
+	if (!tmp) {
+	  free(maps);
+	  return -1;
+	}
+	maps = tmp;
 	nr_maps_allocated *= 2;
-	maps = realloc(maps, nr_maps_allocated * sizeof(*maps));
       }
 
       if (!map && !nr_maps)
