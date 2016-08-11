@@ -1170,20 +1170,24 @@ output_draw(struct lstopo_output *loutput)
   char text[3][128];
   unsigned ntext = 0;
   char hostname[128] = "";
+  const char *forcedhostname = NULL;
   unsigned long hostname_size = sizeof(hostname);
   unsigned maxtextwidth = 0, textwidth;
 
   if (legend && fontsize) {
-    /* Display the hostname, but only if we're showing *this* system */
-    if (hwloc_topology_is_thissystem(topology)) {
+    forcedhostname = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "HostName");
+    if (!forcedhostname && hwloc_topology_is_thissystem(topology)) {
 #if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
       GetComputerName(hostname, &hostname_size);
 #else
       gethostname(hostname, hostname_size);
 #endif
     }
-    if (*hostname) {
-      snprintf(text[ntext], sizeof(text[ntext]), "Host: %s", hostname);
+    if (forcedhostname || *hostname) {
+      if (forcedhostname)
+	snprintf(text[ntext], sizeof(text[ntext]), "Host: %s", forcedhostname);
+      else
+	snprintf(text[ntext], sizeof(text[ntext]), "Host: %s", hostname);
       textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
       if (textwidth > maxtextwidth)
 	maxtextwidth = textwidth;
