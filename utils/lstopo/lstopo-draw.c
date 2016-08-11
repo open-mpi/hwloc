@@ -110,9 +110,6 @@ unsigned get_textwidth(void *output,
 /* preferred width/height compromise */
 #define RATIO (4.f/3.f)
 
-/* PCI object height: just a box */
-#define PCI_HEIGHT (fontsize ? gridsize + fontsize + gridsize : gridsize)
-
 /* do we prefer ratio1 over ratio2? */
 static int prefer_ratio(float ratio1, float ratio2) {
   float _ratio1 = (ratio1) / RATIO;
@@ -669,6 +666,9 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     }
 }
 
+/* additional gridsize when fontsize > 0 */
+#define FONTGRIDSIZE (fontsize ? gridsize : 0)
+
 static void
 pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
@@ -707,10 +707,10 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize + overlaidoffset;
-    totheight = fontsize + 2*gridsize + overlaidoffset;
+    totwidth = textwidth + gridsize + overlaidoffset + FONTGRIDSIZE;
+    totheight = fontsize + gridsize + overlaidoffset + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize+2*gridsize);
+		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
     lud->width = totwidth;
     lud->height = totheight;
 
@@ -845,10 +845,10 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = gridsize + (fontsize + gridsize) * (nmorelines+1);
+    totwidth = textwidth + gridsize + FONTGRIDSIZE;
+    totheight = gridsize + (fontsize + FONTGRIDSIZE) * (nmorelines+1);
     place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, gridsize + (fontsize + gridsize) * (nmorelines+1));
+		   gridsize, gridsize + (fontsize + FONTGRIDSIZE) * (nmorelines+1));
     lud->width = totwidth;
     lud->height = totheight;
 
@@ -874,6 +874,9 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
   }
 }
 
+/* bridge object height: just a box */
+#define PCI_HEIGHT (gridsize + fontsize + FONTGRIDSIZE)
+
 static void
 bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
@@ -886,7 +889,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     totwidth = 2*gridsize + gridsize + speedwidth;
-    totheight = 2*gridsize;
+    totheight = gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
 		   3*gridsize + speedwidth, 0);
     lud->width = totwidth;
@@ -967,10 +970,10 @@ pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsign
   /* Compute the size needed by sublevels */
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = fontsize + 2*gridsize;
+    totwidth = textwidth + gridsize + FONTGRIDSIZE;
+    totheight = fontsize + gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize + 2*gridsize);
+		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
     lud->width = totwidth;
     lud->height = totheight;
 
@@ -1010,10 +1013,10 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = fontsize + 2*gridsize;
+    totwidth = textwidth + gridsize + FONTGRIDSIZE;
+    totheight = fontsize + gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
-		   0, fontsize + 3*gridsize);
+		   0, fontsize + 2*gridsize + FONTGRIDSIZE);
     lud->width = totwidth;
     lud->height = totheight;
 
@@ -1026,7 +1029,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     totheight = lud->height;
 
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, fontsize+2*gridsize /* totheight also contains children below this box */);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, fontsize + gridsize + FONTGRIDSIZE /* totheight also contains children below this box */);
 
     if (fontsize)
       methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
@@ -1053,10 +1056,10 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 4*gridsize;
-    totheight = fontsize + 4*gridsize;
+    totwidth = textwidth + 3*gridsize + FONTGRIDSIZE;
+    totheight = fontsize + 3*gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize+4*gridsize);
+		   gridsize, fontsize + 3*gridsize + FONTGRIDSIZE);
     lud->width = totwidth;
     lud->height = totheight;
 
@@ -1072,7 +1075,7 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
     /* Draw the epoxy box */
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
     /* Draw the memory box */
-    methods->box(loutput, style.bg2.r, style.bg2.g, style.bg2.b, depth-1, x + gridsize, totwidth - 2*gridsize, y + gridsize, fontsize+2*gridsize);
+    methods->box(loutput, style.bg2.r, style.bg2.g, style.bg2.b, depth-1, x + gridsize, totwidth - 2*gridsize, y + gridsize, fontsize + gridsize + FONTGRIDSIZE);
 
     if (fontsize)
       methods->text(loutput, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-2, x + 2*gridsize, y + 2*gridsize, text);
@@ -1099,10 +1102,10 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 2*gridsize;
-    totheight = fontsize + 2*gridsize;
+    totwidth = textwidth + gridsize + FONTGRIDSIZE;
+    totheight = fontsize + gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize+2*gridsize);
+		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
     lud->width = totwidth;
     lud->height = totheight;
 
