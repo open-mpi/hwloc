@@ -1222,6 +1222,7 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
   time_t t;
   char text[128];
   char hostname[128] = "";
+  const char *forcedhostname = NULL;
   unsigned long hostname_size = sizeof(hostname);
 
   system_draw(topology, methods, logical, level, output, depth, x, &totwidth, y, &totheight);
@@ -1232,15 +1233,19 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
   if (legend) {
       /* Display the hostname, but only if we're showing *this*
          system */
-    if (hwloc_topology_is_thissystem(topology)) {
+    forcedhostname = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "HostName");
+    if (!forcedhostname && hwloc_topology_is_thissystem(topology)) {
 #if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
       GetComputerName(hostname, &hostname_size);
 #else
       gethostname(hostname, hostname_size);
 #endif
     }
-    if (*hostname) {
-      snprintf(text, sizeof(text), "Host: %s", hostname);
+    if (forcedhostname || *hostname) {
+      if (forcedhostname)
+	snprintf(text, sizeof(text), "Host: %s", forcedhostname);
+      else
+	snprintf(text, sizeof(text), "Host: %s", hostname);
       methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (gridsize + fontsize)*(3+lstopo_append_legends_nr));
       methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
       offset = gridsize + fontsize;
