@@ -874,8 +874,8 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
   }
 }
 
-/* bridge object height: just a box */
-#define PCI_HEIGHT (gridsize + fontsize + FONTGRIDSIZE)
+/* bridge object height: linkspeed + a small empty box */
+#define BRIDGE_HEIGHT (gridsize + fontsize + FONTGRIDSIZE)
 
 static void
 bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
@@ -905,8 +905,8 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
     /* Square and left link */
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
-    methods->line(loutput, 0, 0, 0, depth, x + gridsize, y + PCI_HEIGHT/2, x + 2*gridsize, y + PCI_HEIGHT/2);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + BRIDGE_HEIGHT/2 - gridsize/2, gridsize);
+    methods->line(loutput, 0, 0, 0, depth, x + gridsize, y + BRIDGE_HEIGHT/2, x + 2*gridsize, y + BRIDGE_HEIGHT/2);
 
     if (level->io_arity > 0) {
       hwloc_obj_t child = NULL;
@@ -914,7 +914,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
       unsigned ymin = (unsigned) -1;
       while ((child=next_child(loutput, level, child)) != NULL) {
 	struct lstopo_obj_userdata *clud = child->userdata;
-	unsigned ymid = y + clud->yrel + PCI_HEIGHT/2;
+	unsigned ymid = y + clud->yrel + BRIDGE_HEIGHT/2;
 	/* Line to PCI device */
 	methods->line(loutput, 0, 0, 0, depth-1, x+2*gridsize, ymid, x+3*gridsize+speedwidth, ymid);
 	if (ymin == (unsigned) -1)
@@ -933,7 +933,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);
 	    else
 	      snprintf(text, sizeof(text), "%0.1f", child->attr->pcidev.linkspeed);
-	    methods->text(loutput, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-1, x + 3*gridsize, ymid - PCI_HEIGHT/2, text);
+	    methods->text(loutput, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-1, x + 3*gridsize, ymid - BRIDGE_HEIGHT/2, text);
 	  }
 	}
       }
