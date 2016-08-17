@@ -541,7 +541,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   unsigned i;
 
   if (!old->is_loaded) {
-    errno = -EINVAL;
+    errno = EINVAL;
     return -1;
   }
 
