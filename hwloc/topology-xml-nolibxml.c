@@ -154,7 +154,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
     nchildstate->closed = 0;
 
   /* find attributes */
-  namelen = strspn(buffer, "abcdefghijklmnopqrstuvwxyz_");
+  namelen = strspn(buffer, "abcdefghijklmnopqrstuvwxyz1234567890_");
 
   if (buffer[namelen] == '\0') {
     /* no attributes */
