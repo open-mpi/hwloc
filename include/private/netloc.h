@@ -17,7 +17,6 @@
 
 #include <hwloc.h>
 #include <netloc.h>
-#include <jansson.h>
 #include <netloc/uthash.h>
 #include <netloc/utarray.h>
 
@@ -208,70 +207,6 @@ NETLOC_DECLSPEC unsigned long netloc_dt_convert_guid_str_to_int(const char * gui
  *  otherwise string representation.
  */
 NETLOC_DECLSPEC char * netloc_dt_convert_guid_int_to_str(const unsigned long value);
-
-
-/**********************************************************************
- *        JSON Encode/Decode functionality
- **********************************************************************/
-/**
- * JSON Encode the data
- *
- * \param network A pointer to the network to process
- *
- * Returns
- *   A valid json object representing the network information
- */
-NETLOC_DECLSPEC json_t* netloc_dt_network_t_json_encode(netloc_network_t *network);
-
-/**
- * JSON Decode the data
- *
- * User is responsible for calling _destruct on the returned pointer.
- *
- * \param json_nw A point to a valid json object representing the network information
- *
- * Returns
- *   A newly allocated network type filled in with the stored information
- */
-NETLOC_DECLSPEC netloc_network_t* netloc_dt_network_t_json_decode(json_t *json_nw);
-
-/*************************************************/
-
-/**
- * JSON Encode the data
- *
- * \param edge A pointer to the edge to process
- *
- * Returns
- *   A valid json object representing the edge information
- */
-NETLOC_DECLSPEC json_t* netloc_dt_edge_t_json_encode(netloc_edge_t *edge);
-
-/**
- * JSON Decode the data
- *
- * User is responsible for calling _destruct on the returned pointer.
- *
- * \param json_edge A point to a valid json object representing the edge information
- *
- * Returns
- *   A newly allocated edge type filled in with the stored information
- */
-NETLOC_DECLSPEC netloc_edge_t* netloc_dt_edge_t_json_decode(json_t *json_edge);
-
-/*************************************************/
-
-/**
- * JSON Encode the data
- *
- * This will -not- encode the path information
- *
- * \param node A pointer to the node to process
- *
- * Returns
- *   A valid json object representing the node information
- */
-NETLOC_DECLSPEC json_t* netloc_dt_node_t_json_encode(netloc_node_t *node);
 
 NETLOC_DECLSPEC netloc_physical_link_t * netloc_dt_physical_link_t_construct(void);
 

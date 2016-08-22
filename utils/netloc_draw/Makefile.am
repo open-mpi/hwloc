@@ -1,6 +1,7 @@
 # Copyright © 2013-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2013-2014 University of Wisconsin-La Crosse.
 #                         All rights reserved.
+# Copyright © 2016 Inria.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -8,7 +9,6 @@
 #
 
 AM_CPPFLAGS = \
-        $(JANSSON_CPPFLAGS) \
         -I$(top_builddir)/include \
         -I$(top_srcdir)/include
 

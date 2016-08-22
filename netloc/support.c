@@ -21,11 +21,6 @@
 #include <unistd.h>
 
 /**
- * Decode an edge
- */
-void * dc_decode_edge(const char * key, json_t* json_obj);
-
-/**
  * Debugging function
  */
 //void check_edge_data(struct netloc_dt_lookup_table *edges);

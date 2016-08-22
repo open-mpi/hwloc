@@ -9,7 +9,6 @@
 #
 
 AM_CPPFLAGS = \
-        $(JANSSON_CPPFLAGS) \
         -I$(top_builddir)/include \
         -I$(top_srcdir)/include \
         -DNETLOC_ABS_TOP_SRCDIR=\"$(abs_top_srcdir)/\"

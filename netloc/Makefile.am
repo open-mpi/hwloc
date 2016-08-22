@@ -8,13 +8,8 @@
 # $HEADER$
 #
 
-DIST_SUBDIRS = jansson
-
 if BUILD_NETLOC
-SUBDIRS = jansson
-
 AM_CPPFLAGS = \
-        $(JANSSON_CPPFLAGS) \
         $(NETLOC_CPPFLAGS) \
         $(HWLOC_CPPFLAGS)
 
@@ -40,15 +35,12 @@ sources = \
         mpicomm.c
 
 
-ldflags = $(JANSSON_LDFLAGS)
-
 # Installable library
 
 libnetloc_la_SOURCES = $(sources)
 libnetloc_la_LDFLAGS = $(ldflags) -version-info $(libnetloc_so_version)
 libnetloc_la_LIBADD = \
-        $(top_builddir)/hwloc/libhwloc.la \
-        $(JANSSON_LIBS)
+        $(top_builddir)/hwloc/libhwloc.la
 if HWLOC_HAVE_SLURM
 libnetloc_la_LIBADD += -lslurm
 endif
@@ -61,8 +53,7 @@ endif
 libnetloc_embedded_la_SOURCES = $(sources)
 libnetloc_embedded_la_LDFLAGS = $(ldflags)
 libnetloc_embedded_la_LIBADD = \
-        $(HWLOC_top_builddir)/hwloc/libhwloc_embedded.la \
-        $(JANSSON_LIBS)
+        $(HWLOC_top_builddir)/hwloc/libhwloc_embedded.la
 
 if BUILD_NETLOCSCOTCH
 # If we're in standalone mode, build the installable library.

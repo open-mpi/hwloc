@@ -6,7 +6,6 @@
 #
 
 AM_CPPFLAGS = \
-        $(JANSSON_CPPFLAGS) \
         -I$(top_builddir)/include \
         -I$(top_srcdir)/include
 

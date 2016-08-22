@@ -11,8 +11,9 @@
 
 #define _GNU_SOURCE         /* See feature_test_macros(7) */
 #include <stdio.h>
-
-#include <jansson.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #include "private/netloc.h"
 #include "netloc.h"
@@ -57,6 +58,196 @@
 #define JSON_DRAW_FILE_PARTITIONS "partitions"
 #define JSON_DRAW_FILE_HWLOCTOPOS "hwloctopos"
 
+/******************************************************************************/
+/* Functions to handle JSON */
+/******************************************************************************/
+typedef enum {
+    JSON_STRING,
+    JSON_INT,
+    JSON_FLOAT,
+    JSON_ARRAY,
+    JSON_DICT
+} json_type;
+
+typedef struct {
+    int num;
+    int allocated;
+    char **strings;
+} contents_t;
+
+typedef struct {
+    json_type type;
+    contents_t *contents;
+} json_t;
+
+static contents_t *contents_new(int allocated)
+{
+    contents_t *contents = (contents_t *)malloc(sizeof(contents_t));
+    contents->strings = (char **)malloc(sizeof(char *[allocated]));
+    contents->allocated = allocated;
+    contents->num = 0;
+    return contents;
+}
+
+static void contents_add(contents_t *contents, char *string)
+{
+    if (contents->num == contents->allocated) {
+        if (contents->allocated)
+        {
+            contents->strings = (char **)
+                realloc(contents->strings, sizeof(char *[2*contents->allocated]));
+            contents->allocated *= 2;
+        } else {
+            contents->strings = (char **)
+                realloc(contents->strings, sizeof(char *[1]));
+            contents->allocated = 1;
+        }
+    }
+    contents->strings[contents->num] = string;
+    contents->num++;
+}
+
+static void contents_cat(contents_t *dest, contents_t *src)
+{
+    int size = src->num;
+    if (dest->num+size > dest->allocated) {
+        if (dest->allocated)
+        {
+            dest->strings = (char **)
+                realloc(dest->strings, sizeof(char *[dest->allocated+size]));
+            dest->allocated += size;
+        } else {
+            dest->strings = (char **)
+                realloc(dest->strings, sizeof(char *[size]));
+            dest->allocated = size;
+        }
+    }
+    memcpy(&dest->strings[dest->num], src->strings, sizeof(char *[src->num]));
+    dest->num += src->num;
+}
+
+static void json_close_object(json_t *object)
+{
+    switch (object->type) {
+        case JSON_ARRAY:
+            contents_add(object->contents, strdup("]"));
+            break;
+        case JSON_DICT:
+            contents_add(object->contents, strdup("}"));
+            break;
+        default:
+            ;
+    }
+}
+static contents_t *get_content_and_destroy(json_t *object)
+{
+    contents_t *contents = object->contents;
+    json_close_object(object);
+    free(object);
+    return contents;
+}
+
+json_t *json_dict_new()
+{
+    json_t *dict = (json_t *)malloc(sizeof(json_t));
+    dict->type = JSON_DICT;
+    dict->contents = contents_new(3);
+    contents_add(dict->contents, strdup("{"));
+    return dict;
+}
+
+void json_dict_add(json_t *dict, char *field, json_t *child)
+{
+    assert(dict->type == JSON_DICT);
+
+    if (dict->contents->num > 1) {
+        contents_add(dict->contents, strdup(","));
+    }
+    char *field_string;
+    asprintf(&field_string, "\"%s\":", field);
+    contents_add(dict->contents, field_string);
+    contents_t *child_contents = get_content_and_destroy(child);
+    contents_cat(dict->contents, child_contents);
+    free(child_contents);
+}
+
+json_t *json_array_new()
+{
+    json_t *array = (json_t *)malloc(sizeof(json_t));
+    array->type = JSON_ARRAY;
+    array->contents = contents_new(3);
+    contents_add(array->contents, strdup("["));
+    return array;
+}
+
+void json_array_add(json_t *array, json_t *child)
+{
+    assert(array->type == JSON_ARRAY);
+
+    if (array->contents->num > 1) {
+        contents_add(array->contents, strdup(","));
+    }
+    contents_t *child_contents = get_content_and_destroy(child);
+    contents_cat(array->contents, child_contents);
+    free(child_contents);
+}
+
+json_t *json_string_new(char *value)
+{
+    json_t *string = (json_t *)malloc(sizeof(json_t));
+    string->type = JSON_STRING;
+    string->contents = contents_new(1);
+
+    char *new_value;
+    asprintf(&new_value, "\"%s\"", value);
+    contents_add(string->contents, new_value);
+    return string;
+}
+
+json_t *json_int_new(int value)
+{
+    json_t *integer = (json_t *)malloc(sizeof(json_t));
+    integer->type = JSON_INT;
+    integer->contents = contents_new(1);
+
+    char *new_value;
+    asprintf(&new_value, "%d", value);
+    contents_add(integer->contents, new_value);
+    return integer;
+}
+
+json_t *json_float_new(float value)
+{
+    json_t *real = (json_t *)malloc(sizeof(json_t));
+    real->type = JSON_FLOAT;
+    real->contents = contents_new(1);
+
+    char *new_value;
+    asprintf(&new_value, "%f", value);
+    contents_add(real->contents, new_value);
+    return real;
+}
+
+void json_write(FILE *file, json_t *object)
+{
+    json_close_object(object);;
+    for (int i = 0; i < object->contents->num; i++) {
+        fprintf(file, "%s", object->contents->strings[i]);
+    }
+}
+
+void json_free(json_t *object)
+{
+    for (int i = 0; i < object->contents->num; i++) {
+        free(object->contents->strings[i]);
+    }
+    free(object->contents->strings);
+    free(object);
+}
+
+/* End of JSON functions */
+/******************************************************************************/
+
 static char *remove_quote(char *string)
 {
     if (string[0] == '\'')
@@ -71,36 +262,36 @@ static int handle_link(netloc_physical_link_t *link, json_t *json_links)
     char *src = link->src->physical_id;
     char *dest = link->dest->physical_id;
 
-    json_t *json_link = json_object();
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_ID,        json_integer(link->id));
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_SRC,       json_string(src));
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_SRC_PORT,  json_integer(link->ports[0]));
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_DST,       json_string(dest));
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_DST_PORT,  json_integer(link->ports[1]));
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_WIDTH,     json_string(link->width));
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_SPEED,     json_string(link->speed));
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_GBITS,     json_real(link->gbits));
-    json_object_set_new(json_link,
-            JSON_DRAW_FILE_LINK_OTHER_WAY, json_integer(link->other_way_id));
+    json_t *json_link = json_dict_new();
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_ID,        json_int_new(link->id));
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_SRC,       json_string_new(src));
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_SRC_PORT,  json_int_new(link->ports[0]));
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_DST,       json_string_new(dest));
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_DST_PORT,  json_int_new(link->ports[1]));
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_WIDTH,     json_string_new(link->width));
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_SPEED,     json_string_new(link->speed));
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_GBITS,     json_float_new(link->gbits));
+    json_dict_add(json_link,
+            JSON_DRAW_FILE_LINK_OTHER_WAY, json_int_new(link->other_way_id));
 
-    json_t *json_partitions = json_array();
+    json_t *json_partitions = json_array_new();
 
     for (int p = 0; p < netloc_get_num_partitions(link); p++)
     {
         int partition = netloc_get_partition(link, p);
-        json_array_append_new(json_partitions, json_integer(partition));
+        json_array_add(json_partitions, json_int_new(partition));
     }
-    json_object_set_new(json_link, JSON_DRAW_FILE_LINK_PARTITIONS, json_partitions);
+    json_dict_add(json_link, JSON_DRAW_FILE_LINK_PARTITIONS, json_partitions);
 
-    json_array_append_new(json_links, json_link);
+    json_array_add(json_links, json_link);
 
     return 0;
 }
@@ -111,43 +302,43 @@ static int handle_edge(netloc_edge_t *edge, json_t *json_edges)
     char *src = edge->node->physical_id;
     char *dest = edge->dest->physical_id;
 
-    json_t *json_edge = json_object();
+    json_t *json_edge = json_dict_new();
 
-    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_ID, json_integer(edge->id));
-    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_SRC, json_string(src));
-    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_DST, json_string(dest));
-    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_GBITS, json_real(edge->total_gbits));
-    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_OTHER_WAY, json_integer(edge->other_way->id));
+    json_dict_add(json_edge, JSON_DRAW_FILE_EDGE_ID, json_int_new(edge->id));
+    json_dict_add(json_edge, JSON_DRAW_FILE_EDGE_SRC, json_string_new(src));
+    json_dict_add(json_edge, JSON_DRAW_FILE_EDGE_DST, json_string_new(dest));
+    json_dict_add(json_edge, JSON_DRAW_FILE_EDGE_GBITS, json_float_new(edge->total_gbits));
+    json_dict_add(json_edge, JSON_DRAW_FILE_EDGE_OTHER_WAY, json_int_new(edge->other_way->id));
 
     /* Links */
-    json_t *json_links = json_array();
+    json_t *json_links = json_array_new();
     for (int l = 0; l < netloc_edge_get_num_links(edge); l++)
     {
         netloc_physical_link_t *link = netloc_edge_get_link(edge, l);
-        json_array_append_new(json_links, json_integer(link->id));
+        json_array_add(json_links, json_int_new(link->id));
     }
-    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_LINKS, json_links);
+    json_dict_add(json_edge, JSON_DRAW_FILE_EDGE_LINKS, json_links);
 
     /* Partition list */
-    json_t *json_partitions = json_array();
+    json_t *json_partitions = json_array_new();
     for (int p = 0; p < netloc_get_num_partitions(edge); p++)
     {
         int partition = netloc_get_partition(edge, p);
-        json_array_append_new(json_partitions, json_integer(partition));
+        json_array_add(json_partitions, json_int_new(partition));
     }
-    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_PARTITIONS, json_partitions);
+    json_dict_add(json_edge, JSON_DRAW_FILE_EDGE_PARTITIONS, json_partitions);
 
     /* Subnode edges */
-    json_t *json_subedges = json_array();
+    json_t *json_subedges = json_array_new();
     for (int s = 0; s < netloc_edge_get_num_subedges(edge); s++)
     {
         netloc_edge_t *subedge = netloc_edge_get_subedge(edge, s);
-        json_array_append_new(json_subedges, json_integer(subedge->id));
+        json_array_add(json_subedges, json_int_new(subedge->id));
         handle_edge(subedge, json_edges);
     }
-    json_object_set_new(json_edge, JSON_DRAW_FILE_EDGE_SUBEDGES, json_subedges);
+    json_dict_add(json_edge, JSON_DRAW_FILE_EDGE_SUBEDGES, json_subedges);
 
-    json_array_append_new(json_edges, json_edge);
+    json_array_add(json_edges, json_edge);
 
     return 0;
 }
@@ -162,52 +353,52 @@ static int handle_node(netloc_node_t *node, json_t *json_nodes, json_t *json_edg
     //int topoIdx = node->hwlocTopoIdx; 
     int topoIdx = 0; //  TODO XXX
 
-    json_t *json_node = json_object();
-    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_ID, json_string(id));
-    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_DESC, json_string(desc));
-    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_HOSTNAME, json_string(hostname));
-    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_HWLOCTOPO, json_integer(topoIdx));
-    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_MERGED, json_integer(merged));
+    json_t *json_node = json_dict_new();
+    json_dict_add(json_node, JSON_DRAW_FILE_NODE_ID, json_string_new(id));
+    json_dict_add(json_node, JSON_DRAW_FILE_NODE_DESC, json_string_new(desc));
+    json_dict_add(json_node, JSON_DRAW_FILE_NODE_HOSTNAME, json_string_new(hostname));
+    json_dict_add(json_node, JSON_DRAW_FILE_NODE_HWLOCTOPO, json_int_new(topoIdx));
+    json_dict_add(json_node, JSON_DRAW_FILE_NODE_MERGED, json_int_new(merged));
 
     /* Subnodes */
-    json_t *json_subnodes = json_array();
+    json_t *json_subnodes = json_array_new();
     for (int s = 0; s < netloc_node_get_num_subnodes(node); s++)
     {
         netloc_node_t *subnode = netloc_node_get_subnode(node, s);
         handle_node(subnode, json_nodes, json_edges, 1);
-        json_array_append_new(json_subnodes, json_string(subnode->physical_id));
+        json_array_add(json_subnodes, json_string_new(subnode->physical_id));
     }
-    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_SUBNODES, json_subnodes);
+    json_dict_add(json_node, JSON_DRAW_FILE_NODE_SUBNODES, json_subnodes);
 
     /* Edges */
-    json_t *json_edge_ids = json_array();
+    json_t *json_edge_ids = json_array_new();
     netloc_edge_t *edge, *edge_tmp;
     netloc_node_iter_edges(node, edge, edge_tmp) {
-        json_array_append_new(json_edge_ids, json_integer(edge->id));
+        json_array_add(json_edge_ids, json_int_new(edge->id));
         handle_edge(edge, json_edges);
     }
-    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_EDGES, json_edge_ids);
+    json_dict_add(json_node, JSON_DRAW_FILE_NODE_EDGES, json_edge_ids);
 
     /* Partitions */
-    json_t *json_partitions = json_array();
+    json_t *json_partitions = json_array_new();
     for (int p = 0; p < netloc_get_num_partitions(node); p++)
     {
         int partition = netloc_get_partition(node, p);
-        json_array_append_new(json_partitions, json_integer(partition));
+        json_array_add(json_partitions, json_int_new(partition));
     }
-    json_object_set_new(json_node, JSON_DRAW_FILE_NODE_PARTITIONS, json_partitions);
+    json_dict_add(json_node, JSON_DRAW_FILE_NODE_PARTITIONS, json_partitions);
 
     if (netloc_node_is_host(node)) {
-        json_object_set_new(json_node, JSON_DRAW_FILE_NODE_TYPE, json_string("host"));
+        json_dict_add(json_node, JSON_DRAW_FILE_NODE_TYPE, json_string_new("host"));
     }
     else if (netloc_node_is_switch(node)) {
-        json_object_set_new(json_node, JSON_DRAW_FILE_NODE_TYPE, json_string("switch"));
+        json_dict_add(json_node, JSON_DRAW_FILE_NODE_TYPE, json_string_new("switch"));
     }
     else {
-        json_object_set_new(json_node, JSON_DRAW_FILE_NODE_TYPE, json_string("unknown"));
+        json_dict_add(json_node, JSON_DRAW_FILE_NODE_TYPE, json_string_new("unknown"));
     }
 
-    json_array_append_new(json_nodes, json_node);
+    json_array_add(json_nodes, json_node);
 
     free(desc);
     return 0;
@@ -219,29 +410,29 @@ static int handle_path(netloc_node_t *node, json_t *json_paths)
     //char *node_label = node->physical_id;
     char *id = node->physical_id;
 
-    json_t *json_node_paths = json_object();
-    json_object_set_new(json_node_paths, JSON_DRAW_FILE_PATH_ID, json_string(id));
+    json_t *json_node_paths = json_dict_new();
+    json_dict_add(json_node_paths, JSON_DRAW_FILE_PATH_ID, json_string_new(id));
 
     /* Paths */
-    json_t *json_path_list = json_array();
+    json_t *json_path_list = json_array_new();
     netloc_path_t *path, *path_tmp;
     netloc_node_iter_paths(node, path, path_tmp) {
-        json_t *json_node_path = json_object();
-        json_object_set_new(json_node_path, JSON_DRAW_FILE_PATH_ID,
-                json_string(path->dest_id));
+        json_t *json_node_path = json_dict_new();
+        json_dict_add(json_node_path, JSON_DRAW_FILE_PATH_ID,
+                json_string_new(path->dest_id));
 
-        json_t *json_links = json_array();
+        json_t *json_links = json_array_new();
         netloc_physical_link_t **plink;
         netloc_path_iter_links(path,plink) {
-            json_array_append_new(json_links, json_integer((*plink)->id));
+            json_array_add(json_links, json_int_new((*plink)->id));
         }
-        json_object_set_new(json_node_path, JSON_DRAW_FILE_PATH_LINKS,
+        json_dict_add(json_node_path, JSON_DRAW_FILE_PATH_LINKS,
                 json_links);
-        json_array_append_new(json_path_list, json_node_path);
+        json_array_add(json_path_list, json_node_path);
     }
-    json_object_set_new(json_node_paths, JSON_DRAW_FILE_PATHS, json_path_list);
+    json_dict_add(json_node_paths, JSON_DRAW_FILE_PATHS, json_path_list);
 
-    json_array_append_new(json_paths, json_node_paths);
+    json_array_add(json_paths, json_node_paths);
 
     return 0;
 }
@@ -250,7 +441,7 @@ static int handle_partitions(netloc_topology_t topology, json_t *json_partitions
 {
     char **ppartition;
     netloc_topology_iter_partitions(topology, ppartition) {
-        json_array_append_new(json_partitions, json_string(*ppartition));
+        json_array_add(json_partitions, json_string_new(*ppartition));
     }
     return 0; // TODO
 }
@@ -259,58 +450,55 @@ static int handle_topos(netloc_topology_t topology, json_t *json_topos)
 {
     char **ptopo;
     netloc_topology_iter_hwloctopos(topology, ptopo) {
-        json_array_append_new(json_topos, json_string(*ptopo));
+        json_array_add(json_topos, json_string_new(*ptopo));
     }
     return 0; // TODO
 }
 
-static int json_write(netloc_topology_t topology, FILE *output)
+static int write_json(netloc_topology_t topology, FILE *output)
 {
-    json_t *json_root = json_object();
+    json_t *json_root = json_dict_new();
 
     /* Graph type */
-    json_object_set_new(json_root, JSON_DRAW_FILE_GRAPH_TYPE, json_string("tree"));
+    json_dict_add(json_root, JSON_DRAW_FILE_GRAPH_TYPE, json_string_new("tree"));
 
     /* Nodes */
-    json_t *json_nodes = json_array();
-    json_t *json_edges = json_array();
+    json_t *json_nodes = json_array_new();
+    json_t *json_edges = json_array_new();
     netloc_node_t *node, *node_tmp;
     HASH_ITER(hh, topology->nodes, node, node_tmp) {
         handle_node(node, json_nodes, json_edges, 0);
     }
-    json_object_set_new(json_root, JSON_DRAW_FILE_NODES, json_nodes);
-    json_object_set_new(json_root, JSON_DRAW_FILE_EDGES, json_edges);
+    json_dict_add(json_root, JSON_DRAW_FILE_NODES, json_nodes);
+    json_dict_add(json_root, JSON_DRAW_FILE_EDGES, json_edges);
 
     /* Physical links */
-    json_t *json_links = json_array();
+    json_t *json_links = json_array_new();
     netloc_physical_link_t *link, *link_tmp;
     HASH_ITER(hh, topology->physical_links, link, link_tmp) {
         handle_link(link, json_links);
     }
-    json_object_set_new(json_root, JSON_DRAW_FILE_LINKS, json_links);
+    json_dict_add(json_root, JSON_DRAW_FILE_LINKS, json_links);
 
     /* Paths */
-    json_t *json_paths = json_array();
+    json_t *json_paths = json_array_new();
     HASH_ITER(hh, topology->nodes, node, node_tmp) {
         handle_path(node, json_paths);
     }
-    json_object_set_new(json_root, JSON_DRAW_FILE_PATHS, json_paths);
+    json_dict_add(json_root, JSON_DRAW_FILE_PATHS, json_paths);
 
     /* Partitions */
-    json_t *json_partitions = json_array();
+    json_t *json_partitions = json_array_new();
     handle_partitions(topology, json_partitions);
-    json_object_set_new(json_root, JSON_DRAW_FILE_PARTITIONS, json_partitions);
+    json_dict_add(json_root, JSON_DRAW_FILE_PARTITIONS, json_partitions);
 
     /* Hwloc topologies */
-    json_t *json_topos = json_array();
+    json_t *json_topos = json_array_new();
     handle_topos(topology, json_topos);
-    json_object_set_new(json_root, JSON_DRAW_FILE_HWLOCTOPOS, json_topos);
+    json_dict_add(json_root, JSON_DRAW_FILE_HWLOCTOPOS, json_topos);
 
-    char *json = json_dumps(json_root, 0);
-    fprintf(output, "%s", json);
-
-    /* Free json objects */
-    json_decref(json_root);
+    json_write(output, json_root);
+    json_free(json_root);
 
     return 0; // TODO
 }
@@ -331,7 +519,7 @@ int netloc_to_json_draw(netloc_topology_t topology, int simplify)
     asprintf(&draw, "%s-%s%s.json", basename, "draw", simplify ? "-simple": "");
     output = fopen(draw, "w");
 
-    json_write(topology, output);
+    write_json(topology, output);
 
     fclose(output);
     return 0; // TODO

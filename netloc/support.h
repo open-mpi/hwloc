@@ -2,6 +2,7 @@
  * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2013      University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -16,9 +17,6 @@
 
 #include <netloc.h>
 #include <private/netloc.h>
-
-#include <jansson.h>
-
 
 /***********************************************************************
  * JSON File Format Keywords
@@ -105,31 +103,5 @@ typedef enum {
  *   NETLOC_ERROR otherwise
  */
 int support_extract_filename_from_uri(const char * uri, uri_type_t *type, char **str);
-
-/**
- * Load data onto the topology handle from a JSON file
- *
- * \param topology A valid pointer to a topology structure
- *
- * Returns
- *   NETLOC_SUCCESS on success
- *   NETLOC_ERROR otherwise
- */
-int support_load_json(struct netloc_topology * topology);
-
-/**
- * Returns "*json" as a representation of the JSON in "fname"
- *
- * Note that the user is responsible for decrementing the reference to the json_t
- * pointer returned (via json_decref())
- *
- * \param fname The file name to be loaded into json
- * \param json  Is presumed to be an unallocated reference to a json_t pointer.
- *
- * Returns
- *   NETLOC_SUCCESS on success
- *   NETLOC_ERROR otherwise
- */
-int support_load_json_from_file(const char * fname, json_t **json);
 
 #endif /* NETLOC_SUPPORT_H */
