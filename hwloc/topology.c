@@ -3257,6 +3257,11 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 {
   hwloc_bitmap_t droppedcpuset, droppednodeset;
 
+  if (!topology->is_loaded) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (flags & ~(HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES|HWLOC_RESTRICT_FLAG_ADAPT_MISC|HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
     errno = EINVAL;
     return -1;
