@@ -3046,6 +3046,11 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 {
   hwloc_bitmap_t droppedcpuset, droppednodeset;
 
+  if (!topology->is_loaded) {
+    errno = EINVAL;
+    return -1;
+  }
+
   /* make sure we'll keep something in the topology */
   if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->cpuset)) {
     errno = EINVAL; /* easy failure, just don't touch the topology */
