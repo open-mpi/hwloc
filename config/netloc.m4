@@ -73,6 +73,7 @@ EOF])
 
     AC_CONFIG_FILES(
         netloc_config_prefix[netloc/Makefile]
+        netloc_config_prefix[utils/netloc_gather_ib/netloc_ib_gather_raw]
     )
 
     AS_IF([test "$netloc_happy" = "yes"],
