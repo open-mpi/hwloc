@@ -7,7 +7,7 @@ SUBDIRS = hwloc lstopo
 
 if BUILD_NETLOC
 SUBDIRS += \
-        netloc_gather_ib \
-        netloc_draw \
-        netloc_mpi
+        netloc/infiniband \
+        netloc/draw \
+        netloc/mpi
 endif

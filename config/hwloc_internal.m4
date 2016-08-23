@@ -324,9 +324,9 @@ EOF
         hwloc_config_prefix[utils/lstopo/Makefile]
         hwloc_config_prefix[hwloc.pc]
 
-        hwloc_config_prefix[utils/netloc_gather_ib/Makefile]
-        hwloc_config_prefix[utils/netloc_draw/Makefile]
-        hwloc_config_prefix[utils/netloc_mpi/Makefile]
+        hwloc_config_prefix[utils/netloc/infiniband/Makefile]
+        hwloc_config_prefix[utils/netloc/draw/Makefile]
+        hwloc_config_prefix[utils/netloc/mpi/Makefile]
         hwloc_config_prefix[netloc.pc]
         hwloc_config_prefix[netlocscotch.pc]
    )
