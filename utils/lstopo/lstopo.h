@@ -73,6 +73,9 @@ struct lstopo_obj_userdata {
   /* original common userdata (we replace the first one with this extended structure) */
   struct hwloc_utils_userdata common;
 
+  /* PCI collapsing */
+  int pci_collapsed; /* 0 if no collapsing, -1 if collapsed with a previous one, >1 if collapsed with several next */
+
   /* object size (including children if they are outside of it, not including borders) */
   unsigned width;
   unsigned height;
@@ -139,11 +142,13 @@ static __hwloc_inline int lstopo_pu_running(struct lstopo_output *loutput, hwloc
   return res;
 }
 
-static __hwloc_inline int lstopo_busid_snprintf(char *text, size_t textlen, hwloc_obj_t firstobj, unsigned collapse, unsigned needdomain)
+static __hwloc_inline int lstopo_busid_snprintf(char *text, size_t textlen, hwloc_obj_t firstobj, int collapse, unsigned needdomain)
 {
   hwloc_obj_t lastobj;
   char domain[6] = "";
   unsigned i;
+
+  assert(collapse >= 0); /* should be called on the first object of a collapsed range */
 
   if (needdomain)
     snprintf(domain, sizeof(domain), "%04x:", firstobj->attr->pcidev.domain);
@@ -157,7 +162,7 @@ static __hwloc_inline int lstopo_busid_snprintf(char *text, size_t textlen, hwlo
 		      firstobj->attr->pcidev.func);
   }
 
-  for(lastobj=firstobj, i=1; i<collapse; i++)
+  for(lastobj=firstobj, i=1; i<(unsigned)collapse; i++)
     lastobj = lastobj->next_cousin;
 
   /* multiple busid functions for same busid device */

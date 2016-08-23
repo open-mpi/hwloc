@@ -232,14 +232,12 @@ lstopo_add_collapse_attributes(hwloc_topology_t topology)
 	  && obj->attr->pcidev.subvendor_id == collapser->attr->pcidev.subvendor_id
 	  && obj->attr->pcidev.subdevice_id == collapser->attr->pcidev.subdevice_id) {
 	/* collapse another one */
-	hwloc_obj_add_info(obj, "lstopoCollapse", "0");
+	((struct lstopo_obj_userdata *)obj->userdata)->pci_collapsed = -1;
 	collapsed++;
 	continue;
       } else if (collapsed > 1) {
 	/* end this collapsing */
-	char text[10];
-	snprintf(text, sizeof(text), "%u", collapsed);
-	hwloc_obj_add_info(collapser, "lstopoCollapse", text);
+	((struct lstopo_obj_userdata *)collapser->userdata)->pci_collapsed = collapsed;
 	collapser = NULL;
 	collapsed = 0;
       }
@@ -252,9 +250,7 @@ lstopo_add_collapse_attributes(hwloc_topology_t topology)
   }
   if (collapsed > 1) {
     /* end this collapsing */
-    char text[10];
-    snprintf(text, sizeof(text), "%u", collapsed);
-    hwloc_obj_add_info(collapser, "lstopoCollapse", text);
+    ((struct lstopo_obj_userdata *)collapser->userdata)->pci_collapsed = collapsed;
   }
 }
 
@@ -266,6 +262,7 @@ lstopo_populate_userdata(hwloc_obj_t parent)
 
   save->common.buffer = NULL; /* so that it is ignored on XML export */
   save->common.next = parent->userdata;
+  save->pci_collapsed = 0;
   parent->userdata = save;
 
   for(child = parent->first_child; child; child = child->next_sibling)

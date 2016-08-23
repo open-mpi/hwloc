@@ -542,8 +542,6 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   if (verbose) {
     unsigned i;
     for(i=0; i<obj->infos_count; i++) {
-      if (!strcmp(obj->infos[i].name, "lstopoCollapse"))
-	continue;
       if (strchr(obj->infos[i].value, ' '))
 	res = hwloc_snprintf(tmp, tmplen, "%s%s=\"%s\"",
 			     prefix,

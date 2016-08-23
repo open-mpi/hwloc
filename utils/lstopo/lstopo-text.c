@@ -131,15 +131,10 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
   int verbose_mode = loutput->verbose_mode;
   hwloc_obj_t child;
   int group_identical = (verbose_mode <= 1) && !loutput->show_cpuset;
-  unsigned collapse = 1;
+  int collapse = ((struct lstopo_obj_userdata *) l->userdata)->pci_collapsed;
 
-  if (l->type == HWLOC_OBJ_PCI_DEVICE) {
-    const char *collapsestr = hwloc_obj_get_info_by_name(l, "lstopoCollapse");
-    if (collapsestr)
-      collapse = atoi(collapsestr);
-    if (!collapse)
-      return;
-  }
+  if (l->type == HWLOC_OBJ_PCI_DEVICE && collapse == -1)
+    return;
 
   if (group_identical
       && parent && parent->arity == 1

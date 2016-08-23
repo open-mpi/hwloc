@@ -151,8 +151,8 @@ again:
   if (obj->type == HWLOC_OBJ_PU && loutput->ignore_pus)
     goto again;
   if (loutput->collapse && obj->type == HWLOC_OBJ_PCI_DEVICE) {
-    const char *collapsestr = hwloc_obj_get_info_by_name(obj, "lstopoCollapse");
-    if (collapsestr && !strcmp(collapsestr, "0"))
+    struct lstopo_obj_userdata *lud = obj->userdata;
+    if (lud->pci_collapsed == -1)
       goto again;
   }
   return obj;
@@ -773,14 +773,12 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   /* main object identifier line */
   if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
     /* PCI text collapsing */
-    const char *collapsestr = hwloc_obj_get_info_by_name(obj, "lstopoCollapse");
-    unsigned collapse = collapsestr ? atoi(collapsestr) : 1;
     char busid[32];
     char _text[64];
     lstopo_obj_snprintf(_text, sizeof(_text), obj, loutput->logical);
-    lstopo_busid_snprintf(busid, sizeof(busid), obj, collapse, loutput->topology->pci_nonzero_domains);
-    if (collapse > 1) {
-      n = snprintf(lud->text[0], sizeof(lud->text[0]), "%u x { %s %s }", collapse, _text, busid);
+    lstopo_busid_snprintf(busid, sizeof(busid), obj, lud->pci_collapsed, loutput->topology->pci_nonzero_domains);
+    if (lud->pci_collapsed > 1) {
+      n = snprintf(lud->text[0], sizeof(lud->text[0]), "%u x { %s %s }", lud->pci_collapsed, _text, busid);
     } else {
       n = snprintf(lud->text[0], sizeof(lud->text[0]), "%s %s", _text, busid);
     }
@@ -833,14 +831,11 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight;
   unsigned overlaidoffset = 0;
-  /* FIXME: pass collapse to prepare_text() and save it for drawing */
-  const char *collapsestr = hwloc_obj_get_info_by_name(level, "lstopoCollapse");
-  unsigned collapse = collapsestr ? atoi(collapsestr) : 1;
 
-  if (collapse > 1) {
+  if (lud->pci_collapsed > 1) {
     /* additional depths and height for overlaid boxes */
     depth -= 2;
-    if (collapse > 2) {
+    if (lud->pci_collapsed > 2) {
       overlaidoffset = gridsize;
     } else {
       overlaidoffset = gridsize/2;
@@ -867,9 +862,9 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
 
     lstopo_set_object_color(loutput, level, &style);
 
-    if (collapse > 1) {
+    if (lud->pci_collapsed > 1) {
       methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
-      if (collapse > 2)
+      if (lud->pci_collapsed > 2)
 	methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset);
       methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset);
     } else {
