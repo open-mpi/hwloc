@@ -253,7 +253,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
                 int process = process_list[p];
                 int arch_idx = node->current_slots[node_ranks[p]];
                 cores[process].core = node->slot_os_idx[arch_idx];
-                cores[process].node = node->node;
+                cores[process].nodename = strdup(node->node->hostname);
                 cores[process].rank = node->slot_ranks[node_ranks[p]];
             }
         }
@@ -262,7 +262,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
             int host_idx = arch.current_hosts[ranks[p]];
             netloc_arch_node_t *node = arch.node_slot_by_idx[host_idx].node;
             int slot_rank = arch.node_slot_by_idx[host_idx].slot;
-            cores[p].node = node->node;
+            cores[p].nodename = strdup(node->node->hostname);
             cores[p].core = node->slot_os_idx[node->slot_idx[slot_rank]];
             cores[p].rank = node->slot_ranks[node->slot_idx[slot_rank]];
         }
@@ -292,10 +292,9 @@ int netlocscotch_get_mapping_from_comm_file(char *filename, int *pnum_processes,
 {
     int n;
     double **mat;
-    double *sum_row;
 
     int ret;
-    ret = netloc_build_comm_mat(filename, &n, &mat, &sum_row);
+    ret = netloc_build_comm_mat(filename, &n, &mat);
 
     if (ret != NETLOC_SUCCESS) {
         return ret;

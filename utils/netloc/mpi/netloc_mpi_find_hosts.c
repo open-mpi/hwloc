@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <mpi.h>
 #include <hwloc.h>
-#include <netloc.h>
+#include <private/netloc.h>
 
 typedef struct {
     UT_hash_handle hh; /* Makes this structure hashable */

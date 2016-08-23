@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     FILE *rank_file = fopen(rank_filename, "w");
     for (int p = 0; p < num_processes; p++) {
         fprintf(rank_file, "rank %d=%s slot=%d\n",
-                p, cores[p].node->hostname, cores[p].core);
+                p, cores[p].nodename, cores[p].core);
     }
     fclose(rank_file);
 

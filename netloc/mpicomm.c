@@ -17,7 +17,7 @@
 #include <netloc.h>
 #include <private/netloc.h>
 
-int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum_row)
+int netloc_build_comm_mat(char *filename, int *pn, double ***pmat)
 {
     FILE *input = fopen(filename, "r");
 
@@ -50,17 +50,14 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum
     for (int i = 0; i < n; i++) {
         mat[i] = &mat_values[i*n];
     }
-    double *sum_row = (double *)malloc(n*sizeof(double));
 
     while (netloc_get_line(&line, &linesize, input) != -1) {
         char *remain_line = line;
         j = 0;
-        sum_row[i] = 0;
         while ((ptr = netloc_line_get_next_token(&remain_line, ' '))){
             if (!strlen(ptr))
                 break;
             mat[i][j] = atof(ptr);
-            sum_row[i] += mat [i][j];
             if (mat[i][j] < 0) {
                 fprintf(stderr, "Warning: negative value in comm matrix "
                         "(mat[%d][%d] = %f)\n", i, j, mat[i][j]);
@@ -85,16 +82,13 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat, double **psum
 
     *pn = n;
     *pmat = mat;
-    *psum_row = sum_row;
 
     return NETLOC_SUCCESS;
 
 error:
     free(mat_values);
     free(mat);
-    free(sum_row);
     *pmat = NULL;
-    *psum_row = NULL;
     *pn = 0;
     fclose (input);
     return NETLOC_ERROR;
