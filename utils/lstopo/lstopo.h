@@ -116,9 +116,7 @@ struct lstopo_obj_userdata {
 };
 
 typedef void output_method (struct lstopo_output *output, const char *filename);
-extern output_method output_console, output_synthetic, output_ascii, output_fig, output_png, output_pdf, output_ps, output_svg, output_xml;
-typedef void output_method_nofile (struct lstopo_output *output);
-extern output_method_nofile output_x11, output_windows;
+extern output_method output_console, output_synthetic, output_ascii, output_fig, output_png, output_pdf, output_ps, output_svg, output_x11, output_windows, output_xml;
 
 struct draw_methods {
   void (*init) (void *output);

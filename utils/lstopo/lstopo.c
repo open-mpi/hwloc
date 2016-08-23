@@ -899,14 +899,14 @@ main (int argc, char *argv[])
       if (getenv("DISPLAY")) {
         if (loutput.logical == -1)
           loutput.logical = 0;
-        output_x11(&loutput);
+        output_x11(&loutput, NULL);
       } else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #ifdef HWLOC_WIN_SYS
       {
         if (loutput.logical == -1)
           loutput.logical = 0;
-        output_windows(&loutput);
+        output_windows(&loutput, NULL);
       }
 #endif
 #endif /* !LSTOPO_HAVE_GRAPHICS */
