@@ -883,41 +883,6 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   }
 }
 
-static void
-os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
-{
-  struct lstopo_obj_userdata *lud = level->userdata;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
-
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
-    /* compute children size and position, our size, and save it */
-    prepare_text(loutput, level);
-    totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
-    totheight = gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext;
-    place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext);
-    lud->width = totwidth;
-    lud->height = totheight;
-
-  } else { /* LSTOPO_DRAWING_DRAW */
-    struct draw_methods *methods = loutput->methods;
-    struct style style;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
-
-    lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
-
-    /* Draw sublevels for real */
-    draw_children(loutput, level, depth-1, x, y);
-  }
-}
-
 /* bridge object height: linkspeed + a small empty box */
 #define BRIDGE_HEIGHT (gridsize + fontsize + FONTGRIDSIZE)
 
@@ -986,42 +951,6 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
       /* Draw sublevels for real */
       draw_children(loutput, level, depth-1, x, y);
     }
-  }
-}
-
-static void
-pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
-{
-  struct lstopo_obj_userdata *lud = level->userdata;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
-
-  /* Compute the size needed by sublevels */
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
-    /* compute children size and position, our size, and save it */
-    prepare_text(loutput, level);
-    totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
-    totheight = fontsize + gridsize + FONTGRIDSIZE;
-    place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
-    lud->width = totwidth;
-    lud->height = totheight;
-
-  } else { /* LSTOPO_DRAWING_DRAW */
-    struct draw_methods *methods = loutput->methods;
-    struct style style;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
-
-    lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
-
-    /* Draw sublevels for real */
-    draw_children(loutput, level, depth-1, x, y);
   }
 }
 
@@ -1111,9 +1040,9 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
     totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
-    totheight = fontsize + gridsize + FONTGRIDSIZE;
+    totheight = gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext;
     place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
+		   gridsize, gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext);
     lud->width = totwidth;
     lud->height = totheight;
 
@@ -1283,7 +1212,9 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_MACHINE:
     case HWLOC_OBJ_PACKAGE:
     case HWLOC_OBJ_CORE:
+    case HWLOC_OBJ_PU:
     case HWLOC_OBJ_GROUP:
+    case HWLOC_OBJ_OS_DEVICE:
     case HWLOC_OBJ_MISC: return normal_draw;
     case HWLOC_OBJ_NUMANODE: return node_draw;
     case HWLOC_OBJ_L1CACHE: return cache_draw;
@@ -1294,9 +1225,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_L1ICACHE: return cache_draw;
     case HWLOC_OBJ_L2ICACHE: return cache_draw;
     case HWLOC_OBJ_L3ICACHE: return cache_draw;
-    case HWLOC_OBJ_PU: return pu_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
-    case HWLOC_OBJ_OS_DEVICE: return os_device_draw;
     case HWLOC_OBJ_BRIDGE: return bridge_draw;
     default:
     case HWLOC_OBJ_TYPE_MAX: assert(0);
