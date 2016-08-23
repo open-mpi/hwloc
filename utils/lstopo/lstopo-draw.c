@@ -666,8 +666,164 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     }
 }
 
+static void
+prepare_more_text(struct lstopo_output *loutput, hwloc_obj_t obj)
+{
+  struct lstopo_obj_userdata *lud = obj->userdata;
+  unsigned i;
+
+  if (HWLOC_OBJ_OS_DEVICE == obj->type) {
+    if (HWLOC_OBJ_OSDEV_COPROC == obj->attr->osdev.type && obj->subtype) {
+      /* Coprocessor */
+      if (!strcmp(obj->subtype, "CUDA")) {
+	/* CUDA */
+	const char *value, *value2, *value3;
+	value = hwloc_obj_get_info_by_name(obj, "CUDAGlobalMemorySize");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
+		   mb >= 10240 ? "%llu GB" : "%llu MB",
+		   mb >= 10240 ? mb/1024 : mb);
+	}
+	value = hwloc_obj_get_info_by_name(obj, "CUDAL2CacheSize");
+	if (value) {
+	  unsigned long long kb = strtoull(value, NULL, 10);
+	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
+		   kb >= 10240 ? "L2 (%llu MB)" : "L2 (%llu kB)",
+		   kb >= 10240 ? kb/1024 : kb);
+	}
+	value = hwloc_obj_get_info_by_name(obj, "CUDAMultiProcessors");
+	value2 = hwloc_obj_get_info_by_name(obj, "CUDACoresPerMP");
+	value3 = hwloc_obj_get_info_by_name(obj, "CUDASharedMemorySizePerMP");
+	if (value && value2 && value3) {
+	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
+		   "%s MP x (%s cores + %s kB)", value, value2, value3);
+	}
+
+      } else if (!strcmp(obj->subtype, "MIC")) {
+	/* MIC */
+	const char *value;
+	value = hwloc_obj_get_info_by_name(obj, "MICActiveCores");
+	if (value) {
+	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
+		   "%s cores", value);
+	}
+	value = hwloc_obj_get_info_by_name(obj, "MICMemorySize");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
+		   mb >= 10240 ? "%llu GB" : "%llu MB",
+		   mb >= 10240 ? mb/1024 : mb);
+	}
+
+      } else if (!strcmp(obj->subtype, "OpenCL")) {
+	/* OpenCL */
+	const char *value;
+	value = hwloc_obj_get_info_by_name(obj, "OpenCLComputeUnits");
+	if (value) {
+	  unsigned long long cu = strtoull(value, NULL, 10);
+	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
+		   "%llu compute units", cu);
+	}
+	value = hwloc_obj_get_info_by_name(obj, "OpenCLGlobalMemorySize");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
+		   mb >= 10240 ? "%llu GB" : "%llu MB",
+		   mb >= 10240 ? mb/1024 : mb);
+	}
+      }
+
+    } else if (HWLOC_OBJ_OSDEV_BLOCK == obj->attr->osdev.type) {
+      /* Block */
+      const char *value;
+      value = hwloc_obj_get_info_by_name(obj, "Size");
+      if (value) {
+	unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
+		 mb >= 10485760 ? "%llu TB" : mb >= 10240 ? "%llu GB" : "%llu MB",
+		 mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
+      }
+    }
+  }
+
+  for(i=1; i<lud->ntext; i++) {
+    unsigned nn = (unsigned)strlen(lud->text[i]);
+    unsigned ntextwidth = get_textwidth(loutput, lud->text[i], nn, loutput->fontsize);
+    if (ntextwidth > lud->textwidth)
+      lud->textwidth = ntextwidth;
+  }
+}
+
+static void
+prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
+{
+  struct lstopo_obj_userdata *lud = obj->userdata;
+  unsigned fontsize = loutput->fontsize;
+  int n;
+
+  /* sane defaults */
+  lud->ntext = 0;
+  lud->textwidth = 0;
+  lud->textxoffset = 0;
+
+  if (!fontsize)
+    return;
+
+  /* main object identifier line */
+  if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
+    /* PCI text collapsing */
+    const char *collapsestr = hwloc_obj_get_info_by_name(obj, "lstopoCollapse");
+    unsigned collapse = collapsestr ? atoi(collapsestr) : 1;
+    char busid[32];
+    char _text[64];
+    lstopo_obj_snprintf(_text, sizeof(_text), obj, loutput->logical);
+    lstopo_busid_snprintf(busid, sizeof(busid), obj, collapse, loutput->topology->pci_nonzero_domains);
+    if (collapse > 1) {
+      n = snprintf(lud->text[0], sizeof(lud->text[0]), "%u x { %s %s }", collapse, _text, busid);
+    } else {
+      n = snprintf(lud->text[0], sizeof(lud->text[0]), "%s %s", _text, busid);
+    }
+  } else {
+    /* normal object text */
+    n = lstopo_obj_snprintf(lud->text[0], sizeof(lud->text[0]), obj, loutput->logical);
+  }
+  lud->textwidth = get_textwidth(loutput, lud->text[0], n, fontsize);
+  lud->ntext = 1;
+
+  if (obj->type == HWLOC_OBJ_PU) {
+    /* if smaller than other PU, artificially extend/shift it
+     * to make PU boxes nicer when vertically stacked.
+     */
+    if (lud->textwidth < loutput->min_pu_textwidth) {
+      lud->textxoffset = (loutput->min_pu_textwidth - lud->textwidth) / 2;
+      lud->textwidth = loutput->min_pu_textwidth;
+    }
+  }
+
+  /* additional text */
+  prepare_more_text(loutput, obj);
+}
+
 /* additional gridsize when fontsize > 0 */
 #define FONTGRIDSIZE (fontsize ? gridsize : 0)
+
+static void
+draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct stylecolor *color, unsigned depth, unsigned x, unsigned y)
+{
+  struct draw_methods *methods = loutput->methods;
+  struct lstopo_obj_userdata *lud = obj->userdata;
+  unsigned fontsize = loutput->fontsize;
+  unsigned gridsize = loutput->gridsize;
+  unsigned i;
+
+  if (!fontsize)
+    return;
+
+  methods->text(loutput, color->r, color->g, color->b, fontsize, depth, x + lud->textxoffset, y, lud->text[0]);
+  for(i=1; i<lud->ntext; i++)
+    methods->text(loutput, color->r, color->g, color->b, fontsize, depth, x, y + i*gridsize + i*fontsize, lud->text[i]);
+}
 
 static void
 pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
@@ -676,24 +832,10 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight;
-  unsigned textwidth = 0;
   unsigned overlaidoffset = 0;
-  char text[64], _text[64];
+  /* FIXME: pass collapse to prepare_text() and save it for drawing */
   const char *collapsestr = hwloc_obj_get_info_by_name(level, "lstopoCollapse");
   unsigned collapse = collapsestr ? atoi(collapsestr) : 1;
-
-  if (fontsize) {
-    int n;
-    char busid[32];
-    lstopo_obj_snprintf(_text, sizeof(_text), level, loutput->logical);
-    lstopo_busid_snprintf(busid, sizeof(busid), level, collapse, loutput->topology->pci_nonzero_domains);
-    if (collapse > 1) {
-      n = snprintf(text, sizeof(text), "%u x { %s %s }", collapse, _text, busid);
-    } else {
-      n = snprintf(text, sizeof(text), "%s %s", _text, busid);
-    }
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
 
   if (collapse > 1) {
     /* additional depths and height for overlaid boxes */
@@ -707,7 +849,8 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + gridsize + overlaidoffset + FONTGRIDSIZE;
+    prepare_text(loutput, level);
+    totwidth = lud->textwidth + gridsize + overlaidoffset + FONTGRIDSIZE;
     totheight = fontsize + gridsize + overlaidoffset + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
 		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
@@ -733,8 +876,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
       methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
     }
 
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
@@ -748,107 +890,14 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned totwidth, totheight;
-  unsigned textwidth = 0;
-  char text[64];
-  unsigned nmorelines = 0, i;
-  char morelines[3][64];
-
-  if (fontsize) {
-    int n;
-    const char *coproctype = level->subtype;
-
-    if (HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type && coproctype) {
-
-      if (!strcmp(coproctype, "CUDA")) {
-	const char *value, *value2, *value3;
-
-	value = hwloc_obj_get_info_by_name(level, "CUDAGlobalMemorySize");
-	if (value) {
-	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
-		   mb >= 10240 ? "%llu GB" : "%llu MB",
-		   mb >= 10240 ? mb/1024 : mb);
-	  nmorelines++;
-	}
-
-	value = hwloc_obj_get_info_by_name(level, "CUDAL2CacheSize");
-	if (value) {
-	  unsigned long long kb = strtoull(value, NULL, 10);
-	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
-		   kb >= 10240 ? "L2 (%llu MB)" : "L2 (%llu kB)",
-		   kb >= 10240 ? kb/1024 : kb);
-	  nmorelines++;
-	}
-
-	value = hwloc_obj_get_info_by_name(level, "CUDAMultiProcessors");
-	value2 = hwloc_obj_get_info_by_name(level, "CUDACoresPerMP");
-	value3 = hwloc_obj_get_info_by_name(level, "CUDASharedMemorySizePerMP");
-	if (value && value2 && value3) {
-	  snprintf(morelines[nmorelines], sizeof(morelines[0]), "%s MP x (%s cores + %s kB)", value, value2, value3);
-	  nmorelines++;
-	}
-
-      } else if (!strcmp(coproctype, "MIC")) {
-	const char *value;
-	value = hwloc_obj_get_info_by_name(level, "MICActiveCores");
-	if (value) {
-	  snprintf(morelines[nmorelines], sizeof(morelines[0]), "%s cores", value);
-	  nmorelines++;
-	}
-	value = hwloc_obj_get_info_by_name(level, "MICMemorySize");
-	if (value) {
-	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
-		   mb >= 10240 ? "%llu GB" : "%llu MB",
-		   mb >= 10240 ? mb/1024 : mb);
-	  nmorelines++;
-	}
-
-      } else if (!strcmp(coproctype, "OpenCL")) {
-	const char *value;
-	value = hwloc_obj_get_info_by_name(level, "OpenCLComputeUnits");
-	if (value) {
-	  unsigned long long cu = strtoull(value, NULL, 10);
-	  snprintf(morelines[nmorelines], sizeof(morelines[0]), "%llu compute units", cu);
-	  nmorelines++;
-	}
-	value = hwloc_obj_get_info_by_name(level, "OpenCLGlobalMemorySize");
-	if (value) {
-	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
-		   mb >= 10240 ? "%llu GB" : "%llu MB",
-		   mb >= 10240 ? mb/1024 : mb);
-	  nmorelines++;
-	}
-      }
-    } else if (HWLOC_OBJ_OSDEV_BLOCK == level->attr->osdev.type) {
-      const char *value;
-      value = hwloc_obj_get_info_by_name(level, "Size");
-      if (value) {
-	unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	snprintf(morelines[nmorelines], sizeof(morelines[0]),
-		 mb >= 10485760 ? "%llu TB" : mb >= 10240 ? "%llu GB" : "%llu MB",
-		 mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
-	nmorelines++;
-      }
-    }
-
-    n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-    for(i=0; i<nmorelines; i++) {
-      unsigned nn = (unsigned)strlen(morelines[i]);
-      unsigned ntextwidth = get_textwidth(loutput, morelines[i], nn, fontsize);
-      if (ntextwidth > textwidth)
-	textwidth = ntextwidth;
-    }
-  }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + gridsize + FONTGRIDSIZE;
-    totheight = gridsize + (fontsize + FONTGRIDSIZE) * (nmorelines+1);
+    prepare_text(loutput, level);
+    totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
+    totheight = gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext;
     place_children(loutput, level, &totwidth, &totheight,
-		   gridsize, gridsize + (fontsize + FONTGRIDSIZE) * (nmorelines+1));
+		   gridsize, gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext);
     lud->width = totwidth;
     lud->height = totheight;
 
@@ -862,12 +911,7 @@ os_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth,
 
     lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-
-    if (fontsize) {
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
-      for(i=0; i<nmorelines; i++)
-	methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + (i+2)*gridsize + (i+1)*fontsize, morelines[i]);
-    }
+    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
@@ -951,26 +995,13 @@ pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsign
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned textwidth = 0, textxoffset = 0;
   unsigned totwidth, totheight;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-    /* if smaller than other PU, artificially extend/shift it
-     * to make PU boxes nicer when vertically stacked.
-     */
-    if (textwidth < loutput->min_pu_textwidth) {
-      textxoffset = (loutput->min_pu_textwidth - textwidth) / 2;
-      textwidth = loutput->min_pu_textwidth;
-    }
-  }
 
   /* Compute the size needed by sublevels */
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + gridsize + FONTGRIDSIZE;
+    prepare_text(loutput, level);
+    totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
     totheight = fontsize + gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
 		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
@@ -987,9 +1018,7 @@ pu_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsign
 
     lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize + textxoffset, y + gridsize, text);
+    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
@@ -1002,18 +1031,12 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned textwidth = 0;
   unsigned totwidth, totheight;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + gridsize + FONTGRIDSIZE;
+    prepare_text(loutput, level);
+    totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
     totheight = fontsize + gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
 		   0, fontsize + 2*gridsize + FONTGRIDSIZE);
@@ -1031,8 +1054,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, fontsize + gridsize + FONTGRIDSIZE /* totheight also contains children below this box */);
 
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
@@ -1045,18 +1067,12 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned textwidth = 0;
   unsigned totwidth, totheight;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + 3*gridsize + FONTGRIDSIZE;
+    prepare_text(loutput, level);
+    totwidth = lud->textwidth + 3*gridsize + FONTGRIDSIZE;
     totheight = fontsize + 3*gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
 		   gridsize, fontsize + 3*gridsize + FONTGRIDSIZE);
@@ -1076,9 +1092,7 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
     /* Draw the memory box */
     methods->box(loutput, style.bg2.r, style.bg2.g, style.bg2.b, depth-1, x + gridsize, totwidth - 2*gridsize, y + gridsize, fontsize + gridsize + FONTGRIDSIZE);
-
-    if (fontsize)
-      methods->text(loutput, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-2, x + 2*gridsize, y + 2*gridsize, text);
+    draw_text(loutput, level, &style.t2, depth-2, x + 2*gridsize, y + 2*gridsize);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
@@ -1091,18 +1105,12 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned textwidth = 0;
   unsigned totwidth, totheight;
-  char text[64];
-
-  if (fontsize) {
-    int n = lstopo_obj_snprintf(text, sizeof(text), level, loutput->logical);
-    textwidth = get_textwidth(loutput, text, n, fontsize);
-  }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = textwidth + gridsize + FONTGRIDSIZE;
+    prepare_text(loutput, level);
+    totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
     totheight = fontsize + gridsize + FONTGRIDSIZE;
     place_children(loutput, level, &totwidth, &totheight,
 		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
@@ -1119,9 +1127,7 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
     lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-
-    if (fontsize)
-      methods->text(loutput, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);

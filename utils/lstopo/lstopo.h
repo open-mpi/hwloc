@@ -89,6 +89,12 @@ struct lstopo_obj_userdata {
   int network;
   /* children orientation */
   enum lstopo_orient_e orient;
+
+  /* text lines within object */
+  char text[4][128]; /* current max number of lines is osdev name + 3 cuda attributes */
+  unsigned ntext;
+  unsigned textwidth;
+  unsigned textxoffset;
 };
 
 typedef void output_method (struct lstopo_output *output, const char *filename);
