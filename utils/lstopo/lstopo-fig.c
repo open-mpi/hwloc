@@ -21,9 +21,8 @@
 #define FIG_FACTOR 20
 
 static void
-fig_init(void *loutput_)
+fig_init(struct lstopo_output *loutput)
 {
-  struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
 
   /* recurse once for preparing sizes and positions */
@@ -55,9 +54,8 @@ rgb_to_fig(int r, int g, int b)
 }
 
 static void
-fig_declare_color(void *loutput_, int r, int g, int b)
+fig_declare_color(struct lstopo_output *loutput, int r, int g, int b)
 {
-  struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
   int color;
 
@@ -73,9 +71,8 @@ fig_declare_color(void *loutput_, int r, int g, int b)
 }
 
 static void
-fig_box(void *loutput_, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
+fig_box(struct lstopo_output *loutput, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
 {
-  struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
 
   x *= FIG_FACTOR;
@@ -92,9 +89,8 @@ fig_box(void *loutput_, int r, int g, int b, unsigned depth, unsigned x, unsigne
 }
 
 static void
-fig_line(void *loutput_, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+fig_line(struct lstopo_output *loutput, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
-  struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
 
   x1 *= FIG_FACTOR;
@@ -108,9 +104,8 @@ fig_line(void *loutput_, int r, int g, int b, unsigned depth, unsigned x1, unsig
 }
 
 static void
-fig_text(void *loutput_, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
+fig_text(struct lstopo_output *loutput, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
-  struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
   int len = (int)strlen(text);
   int color;

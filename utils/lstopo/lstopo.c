@@ -491,6 +491,9 @@ main (int argc, char *argv[])
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
 
+  loutput.backend_data = NULL;
+  loutput.methods = NULL;
+
   loutput.fontsize = 10;
   loutput.gridsize = 10;
   for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
