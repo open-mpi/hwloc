@@ -69,12 +69,24 @@ struct lstopo_output {
   unsigned min_pu_textwidth;
 };
 
+struct style {
+  struct stylecolor { int r, g, b; }
+	bg,	/* main box background color */
+	t,	/* main text color */
+	bg2,	/* other box background color */
+	t2;	/* other text color */
+};
+
 struct lstopo_obj_userdata {
   /* original common userdata (we replace the first one with this extended structure) */
   struct hwloc_utils_userdata common;
 
   /* PCI collapsing */
   int pci_collapsed; /* 0 if no collapsing, -1 if collapsed with a previous one, >1 if collapsed with several next */
+
+  /* custom style */
+  struct style style;
+  unsigned style_set; /* 0x1 if bg set, 0x2 for t, 0x4 for bg2, 0x8 for t2 */
 
   /* object size (including children if they are outside of it, not including borders) */
   unsigned width;
