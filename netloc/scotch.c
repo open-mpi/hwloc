@@ -153,40 +153,56 @@ static int build_subgraph(SCOTCH_Graph *graph, int *vertices, int num_vertices,
     return NETLOC_SUCCESS;
 }
 
-int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
-        netlocscotch_core_t **pcores)
+static int build_current_arch(SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
 {
     int ret;
     /* First we need to get the topology of the whole machine */
-    netloc_arch_t arch;
-    ret = netloc_arch_build(&arch, 1);
+    ret = netloc_arch_build(arch, 1);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
 
     /* Set the current nodes and slots in the arch */
-    ret = netloc_set_current_resources(&arch);
+    ret = netloc_set_current_resources(arch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
-    int num_hosts = arch.num_current_hosts;
+    int num_hosts = arch->num_current_hosts;
 
     SCOTCH_Arch scotch_arch;
-    ret = arch_tree_to_scotch_arch(arch.arch.global_tree, &scotch_arch);
-    if( NETLOC_SUCCESS != ret ) {
+    ret = arch_tree_to_scotch_arch(arch->arch.global_tree, &scotch_arch);
+    if (NETLOC_SUCCESS != ret) {
         return ret;
     }
 
     /* Now we can build the sub architecture */
+    ret = build_subarch(&scotch_arch, arch->num_current_hosts,
+            arch->current_hosts, scotch_subarch);
+    return ret;
+}
+
+int netlocscotch_build_current_arch(SCOTCH_Arch *scotch_subarch)
+{
+    netloc_arch_t arch;
+    return build_current_arch(scotch_subarch, &arch);
+}
+
+int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
+        netlocscotch_core_t **pcores)
+{
+    int ret;
+
     SCOTCH_Arch scotch_subarch;
-    ret = build_subarch(&scotch_arch, arch.num_current_hosts,
-            arch.current_hosts, &scotch_subarch);
-    if( NETLOC_SUCCESS != ret ) {
+    netloc_arch_t arch;
+    ret = build_current_arch(&scotch_subarch, &arch);
+    if (NETLOC_SUCCESS != ret) {
         return ret;
     }
 
     int graph_size;
     SCOTCH_graphSize(graph, &graph_size, NULL);
+
+    int num_hosts = arch.num_current_hosts;
 
     SCOTCH_Strat strategy;
     SCOTCH_stratInit(&strategy);
