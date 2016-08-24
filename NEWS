@@ -30,6 +30,8 @@ Version 1.11.4
 * Fix a memory leak on Solaris, thanks to Bryon Gloden for the patch.
 * Properly handle realloc() failures, thanks to Bryon Gloden for reporting
   the issue.
+* Fix lstopo crash in ascii/fig/windows outputs when some objects have a
+  lstopoStyle info attribute.
 
 
 Version 1.11.3

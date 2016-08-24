@@ -90,14 +90,6 @@
 #define BRIDGE_G_COLOR 0xff
 #define BRIDGE_B_COLOR 0xff
 
-struct style {
-  struct stylecolor { int r, g, b; }
-	bg,	/* main box background color */
-	t,	/* main text color */
-	bg2,	/* other box background color */
-	t2;	/* other text color */
-};
-
 unsigned get_textwidth(void *output,
 		       const char *text, unsigned length,
 		       unsigned fontsize, unsigned gridsize)
@@ -448,14 +440,66 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 }
 
 static void
+lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
+{
+  struct lstopo_obj_userdata *lud = obj->userdata;
+  struct style *s = &lud->style;
+  hwloc_obj_t child;
+  unsigned forcer, forceg, forceb;
+  const char *stylestr;
+
+  lud->style_set = 0;
+
+  stylestr = hwloc_obj_get_info_by_name(obj, "lstopoStyle");
+  if (stylestr) {
+    while (*stylestr != '\0') {
+      if (sscanf(stylestr, "%02x%02x%02x", &forcer, &forceg, &forceb) == 3
+	  || sscanf(stylestr, "Background=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
+	s->bg.r = forcer & 255;
+	s->bg.g = forceg & 255;
+	s->bg.b = forceb & 255;
+	lud->style_set |= 0x1;
+	loutput->methods->declare_color(loutput, s->bg.r, s->bg.g, s->bg.b);
+	s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
+    } else if (sscanf(stylestr, "Background2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
+	s->bg2.r = forcer & 255;
+	s->bg2.g = forceg & 255;
+	s->bg2.b = forceb & 255;
+	lud->style_set |= 0x2;
+	loutput->methods->declare_color(loutput, s->bg2.r, s->bg2.g, s->bg2.b);
+	s->t2.r = s->t2.g = s->t2.b = (s->bg2.r + s->bg2.g + s->bg2.b < 0xff) ? 0xff : 0;
+      } else if (sscanf(stylestr, "Text=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
+	s->t.r = forcer & 255;
+	s->t.g = forceg & 255;
+	s->t.b = forceb & 255;
+	lud->style_set |= 0x4;
+	loutput->methods->declare_color(loutput, s->t.r, s->t.g, s->t.b);
+      } else if (sscanf(stylestr, "Text2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
+	s->t2.r = forcer & 255;
+	s->t2.g = forceg & 255;
+	s->t2.b = forceb & 255;
+	lud->style_set |= 0x8;
+	loutput->methods->declare_color(loutput, s->t2.r, s->t2.g, s->t2.b);
+      }
+      stylestr = strchr(stylestr, ';');
+      if (!stylestr)
+	break;
+      stylestr++;
+    }
+  }
+
+  for(child = obj->first_child; child; child = child->next_sibling)
+    lstopo_prepare_custom_styles(loutput, child);
+}
+
+static void
 lstopo_set_object_color(struct draw_methods *methods,
 			hwloc_topology_t topology __hwloc_attribute_unused,
 			hwloc_obj_t obj, int arg, /* PU status (0=normal, 1=running, 2=forbidden, 3=offline)
 						   * Machine status (0=normal, 1=displayed as a root/System) */
 			struct style *s)
 {
-  unsigned forcer, forceg, forceb;
-  const char *style;
+  struct lstopo_obj_userdata *lud = obj->userdata;
 
   /* no need to deal with colors when computing max sizes */
   if (methods == &null_draw_methods)
@@ -569,34 +613,14 @@ lstopo_set_object_color(struct draw_methods *methods,
     assert(0);
   }
 
-  style = hwloc_obj_get_info_by_name(obj, "lstopoStyle");
-  if (style)
-    while (*style != '\0') {
-      if (sscanf(style, "%02x%02x%02x", &forcer, &forceg, &forceb) == 3
-	  || sscanf(style, "Background=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
-	s->bg.r = forcer & 255;
-	s->bg.g = forceg & 255;
-	s->bg.b = forceb & 255;
-	s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
-      } else if (sscanf(style, "Background2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
-	s->bg2.r = forcer & 255;
-	s->bg2.g = forceg & 255;
-	s->bg2.b = forceb & 255;
-	s->t2.r = s->t2.g = s->t2.b = (s->bg2.r + s->bg2.g + s->bg2.b < 0xff) ? 0xff : 0;
-      } else if (sscanf(style, "Text=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
-	s->t.r = forcer & 255;
-	s->t.g = forceg & 255;
-	s->t.b = forceb & 255;
-      } else if (sscanf(style, "Text2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
-	s->t2.r = forcer & 255;
-	s->t2.g = forceg & 255;
-	s->t2.b = forceb & 255;
-      }
-      style = strchr(style, ';');
-      if (!style)
-	break;
-      style++;
-    }
+  if (lud->style_set & 0x1)
+    memcpy(&s->bg, &lud->style.bg, sizeof(struct stylecolor));
+  if (lud->style_set & 0x2)
+    memcpy(&s->t, &lud->style.t, sizeof(struct stylecolor));
+  if (lud->style_set & 0x4)
+    memcpy(&s->bg2, &lud->style.bg2, sizeof(struct stylecolor));
+  if (lud->style_set & 0x8)
+    memcpy(&s->t2, &lud->style.t2, sizeof(struct stylecolor));
 }
 
 static void
@@ -1334,6 +1358,7 @@ output_draw_start(struct lstopo_output *output)
   methods->declare_color(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR);
   methods->declare_color(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR);
   methods->declare_color(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR);
+  lstopo_prepare_custom_styles(output, hwloc_get_root_obj(output->topology));
 }
 
 static void
