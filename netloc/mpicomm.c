@@ -35,7 +35,7 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat)
     i = 0;
 
     /* Get the number of elements in a line to find the size of the matrix */
-    netloc_get_line(&line, &linesize, input);
+    netloc_line_get(&line, &linesize, input);
     int n = 0;
     while ((ptr = netloc_line_get_next_token(&line, ' '))) {
         if (!strlen(ptr))
@@ -51,7 +51,7 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat)
         mat[i] = &mat_values[i*n];
     }
 
-    while (netloc_get_line(&line, &linesize, input) != -1) {
+    while (netloc_line_get(&line, &linesize, input) != -1) {
         char *remain_line = line;
         j = 0;
         while ((ptr = netloc_line_get_next_token(&remain_line, ' '))){

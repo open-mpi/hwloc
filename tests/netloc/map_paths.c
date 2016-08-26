@@ -128,8 +128,8 @@ int main(int argc, char *argv[])
         printf("netloc from %s to %s in subnet type %s id %s\n",
 	       edge->netloc.edge->src_node_id,
 	       edge->netloc.edge->dest_node_id,
-	       netloc_decode_network_type(netloc_access_network_ref(edge->netloc.topology)->network_type),
-	       netloc_access_network_ref(edge->netloc.topology)->subnet_id);
+	       netloc_network_type_decode(netloc_topology_get_network(edge->netloc.topology)->network_type),
+	       netloc_topology_get_network(edge->netloc.topology)->subnet_id);
 	break;
       case NETLOC_MAP_EDGE_TYPE_HWLOC_PARENT:
 	printf("hwloc UP from %s:%u (%s) to parent %s:%u (%s) weight %u\n",

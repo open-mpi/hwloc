@@ -18,7 +18,8 @@
 #include <netloc.h>
 #include <hwloc.h>
 
-int netloc_read_hwloc(netloc_topology_t topology, int num_nodes, netloc_node_t **node_list)
+int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
+        netloc_node_t **node_list)
 {
     int ret = 0;
     int err;
@@ -152,9 +153,9 @@ int netloc_read_hwloc(netloc_topology_t topology, int num_nodes, netloc_node_t *
 }
 
 /* Set the info from hwloc of the node in the correspondig arch */
-int hwloc_to_netloc_arch(netloc_arch_node_t *arch)
+int netloc_arch_node_get_hwloc_info(netloc_arch_node_t *arch_node)
 {
-    hwloc_topology_t topology = arch->node->hwlocTopo;
+    hwloc_topology_t topology = arch_node->node->hwlocTopo;
 
     hwloc_obj_t root = hwloc_get_root_obj(topology);
 
@@ -226,23 +227,23 @@ int hwloc_to_netloc_arch(netloc_arch_node_t *arch)
 
     int *arch_idx;
     int num_cores = utarray_len(ordered_host_array);
-    netloc_complete_tree(tree, down_degrees_by_level, num_cores, &arch_idx);
+    netloc_arch_tree_complete(tree, down_degrees_by_level, num_cores, &arch_idx);
 
     int *slot_idx = (int *)malloc(sizeof(int[max_os_index+1]));
     for (int i = 0; i < num_cores; i++) {
         slot_idx[ordered_hosts[i]] = arch_idx[i];
     }
 
-    int num_leaves = netloc_tree_num_leaves(tree);
+    int num_leaves = netloc_arch_tree_num_leaves(tree);
     int *slot_os_idx = (int *)malloc(sizeof(int[num_leaves]));
     for (int i = 0; i < num_cores; i++) {
         slot_os_idx[arch_idx[i]] = ordered_hosts[i];
     }
 
-    arch->slot_tree = tree;
-    arch->slot_idx = slot_idx;
-    arch->slot_os_idx = slot_os_idx;
-    arch->num_slots = max_os_index+1;
+    arch_node->slot_tree = tree;
+    arch_node->slot_idx = slot_idx;
+    arch_node->slot_os_idx = slot_os_idx;
+    arch_node->num_slots = max_os_index+1;
 
     return NETLOC_SUCCESS;
 }

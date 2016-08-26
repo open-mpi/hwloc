@@ -1,5 +1,8 @@
 /*
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2013-2014 University of Wisconsin-La Crosse.
+ *                         All rights reserved.
+ * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2015-2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -8,12 +11,54 @@
  *
  * $HEADER$
  */
+
 #define _GNU_SOURCE         /* See feature_test_macros(7) */
 #include <stdlib.h>
 
 #include <private/autogen/config.h>
 #include <private/netloc.h>
-#include <netloc.h>
+
+netloc_edge_t * netloc_edge_construct()
+{
+    static int cur_uid = 0;
+
+    netloc_edge_t *edge = NULL;
+
+    edge = (netloc_edge_t*)malloc(sizeof(netloc_edge_t));
+    if( NULL == edge ) {
+        return NULL;
+    }
+
+    edge->id = cur_uid;
+    cur_uid++;
+
+    edge->dest = NULL;
+    edge->node = NULL;
+
+    utarray_new(edge->physical_links, &ut_ptr_icd);
+
+    edge->total_gbits = 0;
+
+    utarray_new(edge->partitions, &ut_int_icd);
+
+    utarray_new(edge->subnode_edges, &ut_ptr_icd);
+
+    edge->userdata = NULL;
+
+    return edge;
+}
+
+char * netloc_edge_pretty_print(netloc_edge_t* edge)
+{
+    // TODO XXX
+    return "TODO";
+}
+
+int netloc_edge_destruct(netloc_edge_t * edge)
+{
+    // TODO
+    return NETLOC_SUCCESS;
+}
 
 
 int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition)

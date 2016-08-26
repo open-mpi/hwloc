@@ -23,13 +23,12 @@ noinst_LTLIBRARIES = libnetloc_embedded.la
 endif
 
 sources = \
-        support.h \
-        topology.c \
-        metadata.c \
         support.c \
-        data_types.c \
+        topology.c \
+        network.c \
         edge.c \
         node.c \
+        physical_link.c \
         architecture.c \
         hwloc.c \
         mpicomm.c

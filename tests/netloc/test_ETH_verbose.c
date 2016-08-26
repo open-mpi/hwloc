@@ -35,7 +35,7 @@ int main(void) {
     /*
      * Setup a Network connection
      */
-    network = netloc_dt_network_t_construct();
+    network = netloc_network_construct();
     network->network_type = NETLOC_NETWORK_TYPE_ETHERNET;
     network->subnet_id    = strdup("unknown");
     search_uri = strdup("file://data/netloc");
@@ -81,7 +81,7 @@ int main(void) {
 
         node = (netloc_node_t*)netloc_lookup_table_access(nodes, key);
         if( NETLOC_NODE_TYPE_INVALID == node->node_type ) {
-            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_pretty_print_node_t(node));
+            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_node_pretty_print(node));
             return NETLOC_ERROR;
         }
 
@@ -90,16 +90,16 @@ int main(void) {
          */
         ret = netloc_get_all_edges(topology, node, &num_edges, &edges);
         if( NETLOC_SUCCESS != ret ) {
-            fprintf(stderr, "Error: get_all_edges_by_id returned %d for node %s\n", ret, netloc_pretty_print_node_t(node));
+            fprintf(stderr, "Error: get_all_edges_by_id returned %d for node %s\n", ret, netloc_node_pretty_print(node));
             return ret;
         }
 
         /*
          * Verify the edges
          */
-        printf("Found: %d edges for host %s\n", num_edges, netloc_pretty_print_node_t(node));
+        printf("Found: %d edges for host %s\n", num_edges, netloc_node_pretty_print(node));
         for(i = 0; i < num_edges; ++i ) {
-            printf("\tEdge: %s\n", netloc_pretty_print_edge_t(edges[i]));
+            printf("\tEdge: %s\n", netloc_edge_pretty_print(edges[i]));
         }
     }
 

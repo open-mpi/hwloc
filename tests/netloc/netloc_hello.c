@@ -24,7 +24,7 @@ int main(void) {
     search_uris[0] = strdup("file://data/netloc");
 
     // Find a specific InfiniBand network
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     tmp_network->subnet_id    = strdup("fe80:0000:0000:0000");
 
@@ -32,11 +32,11 @@ int main(void) {
     ret = netloc_find_network(search_uris[0], tmp_network);
     if( NETLOC_SUCCESS != ret ) {
         fprintf(stderr, "Error: network not found!\n");
-        netloc_dt_network_t_destruct(tmp_network);
+        netloc_network_destruct(tmp_network);
         return NETLOC_ERROR;
     }
 
-    printf("\tFound Network: %s\n", netloc_pretty_print_network_t(tmp_network));
+    printf("\tFound Network: %s\n", netloc_network_pretty_print(tmp_network));
 
     netloc_topology_t topology;
 
@@ -60,7 +60,7 @@ int main(void) {
     if( NULL == node ) {
         printf("Did not find a node with the physical ID \"%s\"\n", phy_id);
     } else {
-        printf("Found: %s\n", netloc_pretty_print_node_t(node));
+        printf("Found: %s\n", netloc_node_pretty_print(node));
     }
 
     // Detach from the network
@@ -74,6 +74,6 @@ int main(void) {
      * Cleanup
      */
     free(phy_id);
-    netloc_dt_network_t_destruct(tmp_network);
+    netloc_network_destruct(tmp_network);
     return NETLOC_SUCCESS;
 }

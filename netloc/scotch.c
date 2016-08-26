@@ -20,7 +20,6 @@
 #include <netlocscotch.h>
 #include <private/netloc.h>
 #include <hwloc.h>
-#include "support.h"
 
 static int arch_tree_to_scotch_arch(netloc_arch_tree_t *tree, SCOTCH_Arch *scotch);
 static int comm_matrix_to_scotch_graph(double **matrix, int n, SCOTCH_Graph *graph);
@@ -163,7 +162,7 @@ static int build_current_arch(SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
     }
 
     /* Set the current nodes and slots in the arch */
-    ret = netloc_set_current_resources(arch);
+    ret = netloc_arch_set_current_resources(arch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }

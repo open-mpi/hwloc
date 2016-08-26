@@ -1,6 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -31,7 +32,7 @@ int main(void) {
     search_uris[0] = strdup("file://data/netloc");
 
     // Find a specific InfiniBand network
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     tmp_network->subnet_id    = strdup("fe80:0000:0000:0000");
 
@@ -39,11 +40,11 @@ int main(void) {
     ret = netloc_find_network(search_uris[0], tmp_network);
     if( NETLOC_SUCCESS != ret ) {
         fprintf(stderr, "Error: network not found!\n");
-        netloc_dt_network_t_destruct(tmp_network);
+        netloc_network_destruct(tmp_network);
         return NETLOC_ERROR;
     }
 
-    printf("\tFound Network: %s\n", netloc_pretty_print_network_t(tmp_network));
+    printf("\tFound Network: %s\n", netloc_network_pretty_print(tmp_network));
 
     // Attach to the network
     ret = netloc_attach(&topology, *tmp_network);
@@ -72,11 +73,11 @@ int main(void) {
 
         node = (netloc_node_t*)netloc_lookup_table_access(nodes, key);
         if( NETLOC_NODE_TYPE_INVALID == node->node_type ) {
-            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_pretty_print_node_t(node));
+            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_node_pretty_print(node));
             return NETLOC_ERROR;
         }
 
-        printf("Found: %s\n", netloc_pretty_print_node_t(node));
+        printf("Found: %s\n", netloc_node_pretty_print(node));
     }
 
     /* Cleanup the lookup table objects */
@@ -100,7 +101,7 @@ int main(void) {
     /*
      * Cleanup
      */
-    netloc_dt_network_t_destruct(tmp_network);
+    netloc_network_destruct(tmp_network);
     tmp_network = NULL;
 
     return NETLOC_SUCCESS;

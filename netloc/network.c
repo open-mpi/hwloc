@@ -12,6 +12,7 @@
  */
 
 #include <netloc.h>
+#include <private/netloc.h>
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -19,25 +20,22 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
-#include "support.h"
-
+/***********************************************************************
+ * URI Support
+ ***********************************************************************/
 /**
- * Extract network information from a file
- *
- * Caller is responsible for calling destructor on the returned value.
- *
- * \param filename The file to extract information from
- *
- * Returns
- *   NULL if no network information was found, or a problem with the file.
- *   A newly allocated network handle.
+ * URI types
  */
+typedef enum {
+    URI_FILE   = 1,
+    URI_OTHER  = 2,
+    URI_INVALID = 3,
+} uri_type_t;
+
+#define URI_PREFIX_FILE "file://"
+
 static netloc_network_t *extract_network_info(char *filename);
-
-/**
- * Search a single URI for all networks.
- * Works exactly like netloc_foreach_network() when it is provided only one search_uri.
- */
+static int extract_filename_from_uri(const char * uri, uri_type_t *type, char **str);
 static int search_uri(const char * search_uri,
                       int (*func)(const netloc_network_t *network, void *funcdata),
                       void *funcdata,
@@ -45,9 +43,197 @@ static int search_uri(const char * search_uri,
                       netloc_network_t ***networks);
 
 
-/*******************************************************************/
+int netloc_network_copy(netloc_network_t *from, netloc_network_t *to)
+{
 
-int netloc_find_network(const char * network_topo_uri, netloc_network_t* network)
+    if( NULL == to || NULL == from ) {
+        return NETLOC_ERROR;
+    }
+
+    to->network_type = from->network_type;
+
+    if( NULL != to->subnet_id ) {
+        free(to->subnet_id);
+    }
+    to->subnet_id    = STRDUP_IF_NOT_NULL(from->subnet_id);
+
+    if( NULL != to->data_uri ) {
+        free(to->data_uri);
+    }
+    to->data_uri     = STRDUP_IF_NOT_NULL(from->data_uri);
+
+    if( NULL != to->node_uri ) {
+        free(to->node_uri);
+    }
+    to->node_uri     = STRDUP_IF_NOT_NULL(from->node_uri);
+
+    if( NULL != to->path_uri ) {
+        free(to->path_uri);
+    }
+    to->path_uri     = STRDUP_IF_NOT_NULL(from->path_uri);
+
+    if( NULL != to->phy_path_uri ) {
+        free(to->phy_path_uri);
+    }
+    to->phy_path_uri     = STRDUP_IF_NOT_NULL(from->phy_path_uri);
+
+    if( NULL != to->description ) {
+        free(to->description);
+    }
+    to->description  = STRDUP_IF_NOT_NULL(from->description);
+
+    if( NULL != to->version ) {
+        free(to->version);
+    }
+    to->version  = STRDUP_IF_NOT_NULL(from->version);
+
+    to->userdata     = from->userdata;
+
+    return NETLOC_SUCCESS;
+}
+
+int netloc_network_compare(netloc_network_t *a, netloc_network_t *b)
+{
+    /* Check: Network Type */
+    if(a->network_type != b->network_type) {
+        return NETLOC_CMP_DIFF;
+    }
+
+    /* Check: Subnet ID */
+    if( (NULL == a->subnet_id && NULL != b->subnet_id) ||
+        (NULL != a->subnet_id && NULL == b->subnet_id) ) {
+        return NETLOC_CMP_DIFF;
+    }
+    if( NULL != a->subnet_id && NULL != b->subnet_id ) {
+        if( 0 != strncmp(a->subnet_id, b->subnet_id, strlen(a->subnet_id)) ) {
+            return NETLOC_CMP_DIFF;
+        }
+    }
+
+    /* Check: Metadata */
+    if( (NULL == a->version && NULL != b->version) ||
+        (NULL != a->version && NULL == b->version) ) {
+        return NETLOC_CMP_SIMILAR;
+    }
+    if( NULL != a->version && NULL != b->version ) {
+        if( 0 != strncmp(a->version, b->version, strlen(a->version)) ) {
+            return NETLOC_CMP_SIMILAR;
+        }
+    }
+
+    return NETLOC_CMP_SAME;
+}
+
+netloc_network_t * netloc_network_dup(netloc_network_t *orig)
+{
+    netloc_network_t *network = NULL;
+
+    if( NULL == orig ) {
+        return NULL;
+    }
+
+    network = netloc_network_construct();
+    if( NULL == network ) {
+        return NULL;
+    }
+
+    netloc_network_copy(orig, network);
+
+    return network;
+}
+
+char * netloc_network_pretty_print(netloc_network_t* network)
+{
+    char * str     = NULL;
+    const char * tmp_str = NULL;
+
+    tmp_str = netloc_network_type_decode(network->network_type);
+
+    if( NULL != network->version ) {
+        asprintf(&str, "%s-%s (version %s)", tmp_str, network->subnet_id, network->version);
+    } else {
+        asprintf(&str, "%s-%s", tmp_str, network->subnet_id);
+    }
+
+    return str;
+}
+
+netloc_network_t * netloc_network_construct( )
+{
+    netloc_network_t *network = NULL;
+
+    network = (netloc_network_t*)malloc(sizeof(netloc_network_t));
+    if( NULL == network ) {
+        return NULL;
+    }
+
+    network->network_type = NETLOC_NETWORK_TYPE_INVALID;
+    network->subnet_id    = NULL;
+    network->data_uri     = NULL;
+    network->node_uri     = NULL;
+    network->phy_path_uri = NULL;
+    network->path_uri     = NULL;
+    network->description  = NULL;
+    network->version      = NULL;
+    network->refcount     = 1;
+    network->userdata     = NULL;
+
+    return network;
+}
+
+int netloc_network_destruct(netloc_network_t * network)
+{
+    if( NULL == network )
+        return NETLOC_SUCCESS;
+
+    if (--network->refcount <= 0)
+        return NETLOC_SUCCESS;
+
+    if( NULL != network->subnet_id ) {
+        free(network->subnet_id);
+        network->subnet_id = NULL;
+    }
+
+    if( NULL != network->data_uri ) {
+        free(network->data_uri);
+        network->data_uri = NULL;
+    }
+
+    if( NULL != network->node_uri ) {
+        free(network->node_uri);
+        network->node_uri = NULL;
+    }
+
+    if( NULL != network->path_uri ) {
+        free(network->path_uri);
+        network->path_uri = NULL;
+    }
+
+    if( NULL != network->phy_path_uri ) {
+        free(network->phy_path_uri);
+        network->phy_path_uri = NULL;
+    }
+
+    if( NULL != network->description ) {
+        free(network->description);
+        network->description = NULL;
+    }
+
+    if( NULL != network->version ) {
+        free(network->version);
+        network->version = NULL;
+    }
+
+    if( NULL != network->userdata ) {
+        network->userdata = NULL;
+    }
+
+    free(network);
+
+    return NETLOC_SUCCESS;
+}
+
+int netloc_network_find(const char * network_topo_uri, netloc_network_t* network)
 {
     int ret, exit_status = NETLOC_SUCCESS;
     netloc_network_t **all_networks = NULL;
@@ -101,32 +287,32 @@ int netloc_find_network(const char * network_topo_uri, netloc_network_t* network
     /*
      * If we found exactly one then copy the information into the handle
      */
-    netloc_dt_network_t_copy(last_found, network);
+    netloc_network_copy(last_found, network);
 
     /*
      * Cleanup
      */
  cleanup:
     for(i = 0; i < num_networks; ++i) {
-        netloc_dt_network_t_destruct(all_networks[i]);
+        netloc_network_destruct(all_networks[i]);
     }
     free(all_networks);
 
     return exit_status;
 }
 
-int netloc_foreach_network(const char * const * search_uris,
+int netloc_network_foreach(const char * const * search_uris,
                              int num_uris,
                              int (*func)(const netloc_network_t *network, void *funcdata),
                              void *funcdata,
                              int *num_networks,
                              netloc_network_t ***networks)
 {
-    int i, ret;
+    int i;
 
     *num_networks = 0;
     for(i = 0; i < num_uris; ++i ) {
-        ret = search_uri(search_uris[i], func, funcdata, num_networks, networks);
+        int ret = search_uri(search_uris[i], func, funcdata, num_networks, networks);
         if( NETLOC_SUCCESS != ret ) {
             fprintf(stderr, "Error: Processing networks at URI %s\n", search_uris[i]);
             return ret;
@@ -136,14 +322,27 @@ int netloc_foreach_network(const char * const * search_uris,
     return NETLOC_SUCCESS;
 }
 
+
 /*******************************************************************
  * Support Functionality
  *******************************************************************/
+
+/**
+ * Extract network information from a file
+ *
+ * Caller is responsible for calling destructor on the returned value.
+ *
+ * \param filename The file to extract information from
+ *
+ * Returns
+ *   NULL if no network information was found, or a problem with the file.
+ *   A newly allocated network handle.
+ */
 static netloc_network_t *extract_network_info(char *filename)
 {
     netloc_network_t *network = NULL;
 
-    network = netloc_dt_network_t_construct();
+    network = netloc_network_construct();
     if( NULL == network ) {
         return NULL;
     }
@@ -156,6 +355,57 @@ static netloc_network_t *extract_network_info(char *filename)
     return network;
 }
 
+/***********************************************************************
+ *        Support Functions
+ ***********************************************************************/
+/**
+ * Extract the filename and URI information from a URI string
+ *
+ * \param uri URI to process
+ * \param type Type of the URI
+ * \param str String following the URI type prefix
+ *
+ * Returns
+ *   NETLOC_SUCCESS on success
+ *   NETLOC_ERROR otherwise
+ */
+static int extract_filename_from_uri(const char * uri, uri_type_t *type, char **str)
+{
+    size_t len;
+
+    *type = URI_INVALID;
+
+    // Sanity check
+    if( strlen(uri) < strlen(URI_PREFIX_FILE) ) {
+        fprintf(stderr, "Error: URI too short. Must start with %s (Provided: %s)\n", URI_PREFIX_FILE, uri);
+        return NETLOC_ERROR;
+    }
+
+    // The file uri is the only uri we support at the moment
+    if( 0 != strncmp(uri, URI_PREFIX_FILE, strlen(URI_PREFIX_FILE)) ) {
+        fprintf(stderr, "Error: Unsupported URI specifier. Must start with %s (Provided: %s)\n", URI_PREFIX_FILE, uri);
+        return NETLOC_ERROR;
+    }
+    *type = URI_FILE;
+
+    // Strip of the file prefix
+    (*str) = strdup(&uri[strlen(URI_PREFIX_FILE)]);
+
+    // Append a '/' if needed
+    len = strlen(*str);
+    if( (*str)[len-1] != '/' ) {
+        (*str) = (char *)realloc(*str, sizeof(char) * (len+2));
+        (*str)[len] = '/';
+        (*str)[len+1] = '\0';
+    }
+
+    return NETLOC_SUCCESS;
+}
+
+/**
+ * Search a single URI for all networks.
+ * Works exactly like netloc_foreach_network() when it is provided only one search_uri.
+ */
 static int search_uri(const char * search_uri,
                       int (*func)(const netloc_network_t *network, void *funcdata),
                       void *funcdata,
@@ -177,7 +427,7 @@ static int search_uri(const char * search_uri,
     /*
      * Process the URI
      */
-    ret = support_extract_filename_from_uri(search_uri, &uri_type, &uri_str);
+    ret = extract_filename_from_uri(search_uri, &uri_type, &uri_str);
     if( NETLOC_SUCCESS != ret ) {
         fprintf(stderr, "Error: Malformed URI <%s>.\n", search_uri);
         return ret;
@@ -248,7 +498,7 @@ static int search_uri(const char * search_uri,
          */
         found = false;
         for( i = 0; i < all_num_networks; ++i ) {
-            if( NETLOC_CMP_SAME == netloc_dt_network_t_compare(all_networks[i], tmp_network) ) {
+            if( NETLOC_CMP_SAME == netloc_network_compare(all_networks[i], tmp_network) ) {
                 found = true;
                 break;
             }
@@ -259,14 +509,19 @@ static int search_uri(const char * search_uri,
          */
         if( !found ) {
             all_num_networks += 1;
-            all_networks = (netloc_network_t**)realloc(all_networks, sizeof(netloc_network_t*)*all_num_networks);
+            netloc_network_t **old_all_networks = all_networks;
+            all_networks = (netloc_network_t **)
+                realloc(all_networks, sizeof(netloc_network_t *)
+                                       *all_num_networks);
             if( NULL == all_networks ) {
                 fprintf(stderr, "Error: Failed to allocate space for %d networks\n", all_num_networks);
 
                 closedir(dirp);
                 dirp = NULL;
-                netloc_dt_network_t_destruct(tmp_network);
+                netloc_network_destruct(tmp_network);
                 free(uri_str);
+                free(all_networks);
+                free(filename);
                 return NETLOC_ERROR;
             }
             all_networks[all_num_networks-1] = tmp_network;
@@ -282,10 +537,10 @@ static int search_uri(const char * search_uri,
             else if( NULL != strstr(filename, "log-paths.ndat") ) {
                 all_networks[i]->path_uri = strdup(filename);
             }
-            netloc_dt_network_t_destruct(tmp_network);
+            netloc_network_destruct(tmp_network);
         }
 
-	free(filename);
+        free(filename);
     }
 
     /*
@@ -307,7 +562,7 @@ static int search_uri(const char * search_uri,
             (*networks) = (netloc_network_t**)realloc((*networks), sizeof(netloc_network_t*)*(*num_networks));
             if( NULL == (*networks) ) {
                 while( i < all_num_networks ) {
-                    netloc_dt_network_t_destruct(all_networks[i]);
+                    netloc_network_destruct(all_networks[i]);
                     all_networks[i] = NULL;
                     ++i;
                 }
@@ -321,7 +576,7 @@ static int search_uri(const char * search_uri,
             (*networks)[(*num_networks)-1] = all_networks[i];
         }
         else {
-            netloc_dt_network_t_destruct(all_networks[i]);
+            netloc_network_destruct(all_networks[i]);
             all_networks[i] = NULL;
         }
     }
@@ -335,3 +590,5 @@ static int search_uri(const char * search_uri,
 
     return NETLOC_SUCCESS;
 }
+
+

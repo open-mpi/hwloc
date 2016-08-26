@@ -19,14 +19,14 @@ typedef struct netloc_analysis_data_t {
 } netloc_analysis_data;
 
 
-static int partition_topology_to_tleaf(netloc_topology_t topology,
+static int partition_topology_to_tleaf(netloc_topology_t *topology,
         int partition, int num_cores, netloc_arch_t *arch);
 static void set_gbits(int *values, netloc_edge_t *edge, int num_levels);
 static netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main,
         netloc_arch_tree_t *sub);
 
 /* Complete the topology to have a complete balanced tree  */
-void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
+void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
         int num_hosts, int **parch_idx)
 {
     int num_levels = tree->num_levels;
@@ -84,7 +84,7 @@ void netloc_complete_tree(netloc_arch_tree_t *tree, UT_array **down_degrees_by_l
     *parch_idx = arch_idx;
 }
 
-int netloc_tree_num_leaves(netloc_arch_tree_t *tree)
+int netloc_arch_tree_num_leaves(netloc_arch_tree_t *tree)
 {
     int num_leaves = 1;
     for (int l = 0; l < tree->num_levels; l++) {
@@ -144,7 +144,7 @@ static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_id
     return NETLOC_SUCCESS;
 }
 
-int netloc_set_current_resources(netloc_arch_t *arch)
+int netloc_arch_set_current_resources(netloc_arch_t *arch)
 {
     int ret;
     int num_nodes;
@@ -176,7 +176,7 @@ int netloc_set_current_resources(netloc_arch_t *arch)
         node_list[n] = arch_node->node;
     }
 
-    ret = netloc_read_hwloc(arch->topology, num_nodes, node_list);
+    ret = netloc_topology_read_hwloc(arch->topology, num_nodes, node_list);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
@@ -185,7 +185,7 @@ int netloc_set_current_resources(netloc_arch_t *arch)
     for (int n = 0; n < num_nodes; n++) {
         netloc_arch_node_t *node = arch_node_list[n];
 
-        ret = hwloc_to_netloc_arch(node);
+        ret = netloc_arch_node_get_hwloc_info(node);
         if (ret != NETLOC_SUCCESS)
             return ret;
 
@@ -211,7 +211,7 @@ int netloc_set_current_resources(netloc_arch_t *arch)
 
         node->current_slots = (int *)
             malloc(sizeof(int[num_slots]));
-        int num_leaves = netloc_tree_num_leaves(node->slot_tree);
+        int num_leaves = netloc_arch_tree_num_leaves(node->slot_tree);
         node->slot_ranks = (int *)
             malloc(sizeof(int[num_leaves]));
 
@@ -228,7 +228,7 @@ int netloc_set_current_resources(netloc_arch_t *arch)
         arch->arch.global_tree = arch->arch.node_tree;
 
         /* Build nodes_by_idx */
-        int tree_size = netloc_tree_num_leaves(arch->arch.node_tree);
+        int tree_size = netloc_arch_tree_num_leaves(arch->arch.node_tree);
         netloc_arch_node_slot_t *nodes_by_idx = (netloc_arch_node_slot_t *)
             malloc(sizeof(netloc_arch_node_slot_t[tree_size]));
         for (int n = 0; n < num_nodes; n++) {
@@ -248,7 +248,7 @@ int netloc_set_current_resources(netloc_arch_t *arch)
         int slot_tree_size = 0;
         for (int n = 0; n < num_nodes; n++) {
             netloc_arch_node_t *node = arch_node_list[n];
-            int current_size = netloc_tree_num_leaves(node->slot_tree);
+            int current_size = netloc_arch_tree_num_leaves(node->slot_tree);
             if (!slot_tree_size) {
                 slot_tree_size = current_size;
             } else {
@@ -259,7 +259,7 @@ int netloc_set_current_resources(netloc_arch_t *arch)
         }
 
         int current_host_idx = 0;
-        int node_tree_size = netloc_tree_num_leaves(arch->arch.node_tree);
+        int node_tree_size = netloc_arch_tree_num_leaves(arch->arch.node_tree);
         int global_tree_size = node_tree_size*slot_tree_size;
         netloc_arch_node_slot_t *nodes_by_idx = (netloc_arch_node_slot_t *)
             malloc(sizeof(netloc_arch_node_slot_t[global_tree_size]));
@@ -309,7 +309,7 @@ netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main, netloc_arch_tree_t *sub
 }
 
 
-int partition_topology_to_tleaf(netloc_topology_t topology,
+int partition_topology_to_tleaf(netloc_topology_t *topology,
         int partition, int num_cores, netloc_arch_t *arch)
 {
     int ret = 0;
@@ -504,7 +504,7 @@ int partition_topology_to_tleaf(netloc_topology_t topology,
      * have a complete balanced tree as requested by the tleaf structure */
     int *arch_idx;
     int num_nodes = utarray_len(ordered_name_array);
-    netloc_complete_tree(tree, down_degrees_by_level, num_nodes, &arch_idx);
+    netloc_arch_tree_complete(tree, down_degrees_by_level, num_nodes, &arch_idx);
 
     netloc_node_t **ordered_nodes = (netloc_node_t **)ordered_name_array->d;
     netloc_arch_node_t *named_nodes = NULL;
@@ -612,29 +612,29 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
         asprintf(&netloc_dir, "file://%s/%s", path, "netloc");
 
         netloc_network_t *network = NULL;
-        netloc_topology_t topology;
+        netloc_topology_t *topology = NULL;
 
         // Find a specific InfiniBand network
-        network = netloc_dt_network_t_construct();
+        network = netloc_network_construct();
         network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
 
         // Search for the specific network
-        int ret = netloc_find_network(netloc_dir, network);
+        int ret = netloc_network_find(netloc_dir, network);
         if (NETLOC_SUCCESS != ret) {
             fprintf(stderr, "Error: network not found!\n");
-            netloc_dt_network_t_destruct(network);
+            netloc_network_destruct(network);
             return NETLOC_ERROR;
         }
-        printf("Found Network: %s\n", netloc_pretty_print_network_t(network));
+        printf("Found Network: %s\n", netloc_network_pretty_print(network));
 
         // Attach to the network
-        ret = netloc_attach(&topology, *network);
-        if( NETLOC_SUCCESS != ret ) {
-            fprintf(stderr, "Error: netloc_attach returned an error (%d)\n", ret);
+        topology = netloc_topology_construct(network);
+        if( topology == NULL ) {
+            fprintf(stderr, "Error: netloc_topology_construct failed\n");
             return ret;
         }
 
-        support_load_datafile(topology);
+        netloc_topology_load(topology);
         arch->topology = topology;
         arch->has_slots = add_slots;
 

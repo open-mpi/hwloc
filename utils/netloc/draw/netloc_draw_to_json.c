@@ -437,7 +437,7 @@ static int handle_path(netloc_node_t *node, json_t *json_paths)
     return 0;
 }
 
-static int handle_partitions(netloc_topology_t topology, json_t *json_partitions)
+static int handle_partitions(netloc_topology_t *topology, json_t *json_partitions)
 {
     char **ppartition;
     netloc_topology_iter_partitions(topology, ppartition) {
@@ -446,7 +446,7 @@ static int handle_partitions(netloc_topology_t topology, json_t *json_partitions
     return 0; // TODO
 }
 
-static int handle_topos(netloc_topology_t topology, json_t *json_topos)
+static int handle_topos(netloc_topology_t *topology, json_t *json_topos)
 {
     char **ptopo;
     netloc_topology_iter_hwloctopos(topology, ptopo) {
@@ -455,7 +455,7 @@ static int handle_topos(netloc_topology_t topology, json_t *json_topos)
     return 0; // TODO
 }
 
-static int write_json(netloc_topology_t topology, FILE *output)
+static int write_json(netloc_topology_t *topology, FILE *output)
 {
     json_t *json_root = json_dict_new();
 
@@ -503,7 +503,7 @@ static int write_json(netloc_topology_t topology, FILE *output)
     return 0; // TODO
 }
 
-int netloc_to_json_draw(netloc_topology_t topology, int simplify)
+static int netloc_to_json_draw(netloc_topology_t *topology, int simplify)
 {
     static FILE *output;
     char *node_uri = topology->network->node_uri;
@@ -511,7 +511,7 @@ int netloc_to_json_draw(netloc_topology_t topology, int simplify)
     char *basename = (char *)malloc((basename_len+1)*sizeof(char));
     char *draw;
 
-    netloc_read_hwloc(topology, 0, NULL);
+    netloc_topology_read_hwloc(topology, 0, NULL);
 
     strncpy(basename, node_uri, basename_len);
     basename[basename_len] = '\0';
@@ -560,30 +560,30 @@ int main(int argc, char **argv)
     }
 
     netloc_network_t *network = NULL;
-    netloc_topology_t topology;
+    netloc_topology_t *topology = NULL;
 
     // Find a specific InfiniBand network
-    network = netloc_dt_network_t_construct();
+    network = netloc_network_construct();
     network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
 
     // Search for the specific network
-    ret = netloc_find_network(netloc_dir, network);
+    ret = netloc_network_find(netloc_dir, network);
     if( NETLOC_SUCCESS != ret ) {
         fprintf(stderr, "Error: network not found!\n");
-        netloc_dt_network_t_destruct(network);
+        netloc_network_destruct(network);
         return NETLOC_ERROR;
     }
-    printf("Found Network: %s\n", netloc_pretty_print_network_t(network));
+    printf("Found Network: %s\n", netloc_network_pretty_print(network));
 
     // Attach to the network
-    ret = netloc_attach(&topology, *network);
-    if( NETLOC_SUCCESS != ret ) {
-        fprintf(stderr, "Error: netloc_attach returned an error (%d)\n", ret);
+    topology = netloc_topology_construct(network);
+    if (topology == NULL) {
+        fprintf(stderr, "Error: netloc_topology_construct failed\n");
         return ret;
     }
 
     // TODO do this automatically as before
-    support_load_datafile(topology);
+    netloc_topology_load(topology);
 
     netloc_to_json_draw(topology, simplify);
 

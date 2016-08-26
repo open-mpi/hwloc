@@ -173,7 +173,7 @@ they
     search_uris[0] = strdup("file://data/");
 
     // Find a specific InfiniBand network
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     tmp_network->subnet_id    = strdup("fe80:0000:0000:0000");
 
@@ -181,14 +181,14 @@ they
     ret = netloc_find_network(search_uris[0], tmp_network);
     if( NETLOC_SUCCESS != ret ) {
         fprintf(stderr, "Error: network not found!\n");
-        netloc_dt_network_t_destruct(tmp_network);
+        netloc_network_destruct(tmp_network);
         return NETLOC_ERROR;
     }
 
-    printf("\tFound Network: %s\n", netloc_pretty_print_network_t(tmp_network));
+    printf("\tFound Network: %s\n", netloc_network_pretty_print(tmp_network));
 
     // Cleanup (Do this only once finished querying the network)
-    netloc_dt_network_t_destruct(tmp_network);
+    netloc_network_destruct(tmp_network);
     tmp_network = NULL;
 \endcode
 
@@ -204,7 +204,7 @@ netloc_apiusermetadata).  they
 <ul>
  <li> \ref netloc_attach : Attach to a specific network.
  <li> \ref netloc_detach : Detach from the network.
- <li> \ref netloc_access_network_ref : Access the network handle associated
+ <li> \ref netloc_topology_get_network : Access the network handle associated
  with this topology.
 </ul>
 
@@ -305,11 +305,11 @@ netloc_apiusertopo section.)
 
         node = (netloc_node_t*)netloc_lookup_table_access(nodes, key);
         if( NETLOC_NODE_TYPE_INVALID == node->node_type ) {
-            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_pretty_print_node_t(node));
+            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_node_pretty_print(node));
             return NETLOC_ERROR;
         }
 
-        printf("Found: %s\n", netloc_pretty_print_node_t(node));
+        printf("Found: %s\n", netloc_node_pretty_print(node));
     }
 
     /* Cleanup */
@@ -643,14 +643,14 @@ Note that the network information pertains to a single network type and subnet.
 they
 <ul>
  <li> \ref netloc_network_t : Network handle.
- <li> \ref netloc_dt_network_t_construct : Constructor for the network handle.
- <li> \ref netloc_dt_network_t_destruct : Destructor for the network handle.
+ <li> \ref netloc_network_construct : Constructor for the network handle.
+ <li> \ref netloc_network_destruct : Destructor for the network handle.
 </ul>
 
 \code
     netloc_network_t *network = NULL;
 
-    network = netloc_dt_network_t_construct();
+    network = netloc_network_construct();
 
     network->network_type = NETLOC_NETWORK_TYPE_ETHERNET;
     network->subnet_id    = strdup("unknown");
@@ -680,7 +680,7 @@ they
     dc_handle = netloc_dc_create(network, outdir);
 
     // After which the network can be destructed
-    netloc_dt_network_t_destruct(network);
+    netloc_network_destruct(network);
     network = NULL;
 \endcode
 
@@ -695,15 +695,15 @@ addressable network endpoing (e.g., MAC address, GUID).
 they
 <ul>
  <li> \ref netloc_node_t : Node type.
- <li> netloc_dt_node_t_construct() : Constructor for the node type.
- <li> netloc_dt_node_t_destruct() : Destructor for the node type.
+ <li> netloc_node_construct() : Constructor for the node type.
+ <li> netloc_node_destruct() : Destructor for the node type.
  <li> \ref netloc_encode_node_type : Encode the node type (e.g., Switch, Host)
 </ul>
 
 \code
     netloc_node_t *node = NULL;
 
-    node = netloc_dt_node_t_construct();
+    node = netloc_node_construct();
 
     // fill in the necessary fields. For example,
     node->network_type = dc_handle->network->network_type;
@@ -731,7 +731,7 @@ they
     netloc_dc_append_node(dc_handle, node);
 
     // You can destroy the node, since it is copied internally
-    netloc_dt_node_t_destruct(node);
+    netloc_node_destruct(node);
 \endcode
 
 <!-- ********************************************* -->
@@ -745,14 +745,14 @@ representing the links between nodes.
 they
 <ul>
  <li> \ref netloc_edge_t : Netloc edge type.
- <li> netloc_dt_edge_t_construct() : Edge constructor.
- <li> netloc_dt_edge_t_destruct() : Edge destructor.
+ <li> netloc_edge_construct() : Edge constructor.
+ <li> netloc_edge_destruct() : Edge destructor.
 </ul>
 
 \code
     netloc_edge_t *edge = NULL;
 
-    edge = netloc_dt_edge_t_construct();
+    edge = netloc_edge_construct();
 
     // fill in the necessary fields. For example,
     edge->src_node_id    = strdup(node->physical_id);
@@ -795,7 +795,7 @@ node.
     netloc_dc_append_edge_to_node(dc_handle, node, edge);
 
     // You can destroy the edge, since it is copied internally
-    netloc_dt_edge_t_destruct(edge);
+    netloc_edge_destruct(edge);
 \endcode
 
 

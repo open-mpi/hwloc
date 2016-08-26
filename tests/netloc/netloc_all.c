@@ -1,6 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -56,7 +57,7 @@ int main(void) {
      */
     for(i = 0; i < num_all_networks; ++i ) {
         // Pretty print the network for debugging purposes
-        printf("\tIncluded Network: %s\n", netloc_pretty_print_network_t(all_networks[i]) );
+        printf("\tIncluded Network: %s\n", netloc_network_pretty_print(all_networks[i]) );
 
         /*
          * Attach to the network
@@ -84,11 +85,11 @@ int main(void) {
                 break;
             }
             if( NETLOC_NODE_TYPE_INVALID == node->node_type ) {
-                fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_pretty_print_node_t(node));
+                fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_node_pretty_print(node));
                 return NETLOC_ERROR;
             }
 
-            printf("Found: %s\n", netloc_pretty_print_node_t(node));
+            printf("Found: %s\n", netloc_node_pretty_print(node));
         }
 
         /* Cleanup the lookup table objects */
@@ -128,7 +129,7 @@ int main(void) {
 
     if( NULL != all_networks ) {
         for(i = 0; i < num_all_networks; ++i ) {
-            netloc_dt_network_t_destruct(all_networks[i]);
+            netloc_network_destruct(all_networks[i]);
             all_networks[i] = NULL;
         }
         free(all_networks);

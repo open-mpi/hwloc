@@ -42,7 +42,7 @@ int main(void) {
     /*
      * Setup a Network connection
      */
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     tmp_network->subnet_id    = strdup("fe80:0000:0000:0000");
     search_uri = strdup("file://data/netloc");
@@ -156,7 +156,7 @@ int main(void) {
     }
 
     if( NULL != tmp_network) {
-        netloc_dt_network_t_destruct(tmp_network);
+        netloc_network_destruct(tmp_network);
         tmp_network = NULL;
     }
 
@@ -189,11 +189,11 @@ int test_all_nodes(netloc_topology_t topology)
 
         node = (netloc_node_t*)netloc_lookup_table_access(nodes, key);
         if( NETLOC_NODE_TYPE_INVALID == node->node_type ) {
-            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_pretty_print_node_t(node));
+            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_node_pretty_print(node));
             return NETLOC_ERROR;
         }
 #if DEBUG == 1
-        printf("Found: %s\n", netloc_pretty_print_node_t(node));
+        printf("Found: %s\n", netloc_node_pretty_print(node));
 #endif
     }
 
@@ -229,11 +229,11 @@ int test_all_switch_nodes(netloc_topology_t topology)
 
         node = (netloc_node_t*)netloc_lookup_table_access(switches, key);
         if( NETLOC_NODE_TYPE_SWITCH != node->node_type ) {
-            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_pretty_print_node_t(node));
+            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_node_pretty_print(node));
             return NETLOC_ERROR;
         }
 #if DEBUG == 1
-        printf("Found: %s\n", netloc_pretty_print_node_t(node));
+        printf("Found: %s\n", netloc_node_pretty_print(node));
 #endif
     }
 
@@ -269,11 +269,11 @@ int test_all_host_nodes(netloc_topology_t topology)
 
         node = (netloc_node_t*)netloc_lookup_table_access(hosts, key);
         if( NETLOC_NODE_TYPE_HOST != node->node_type ) {
-            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_pretty_print_node_t(node));
+            fprintf(stderr, "Error: Returned unexpected node: %s\n", netloc_node_pretty_print(node));
             return NETLOC_ERROR;
         }
 #if DEBUG == 1
-        printf("Found: %s\n", netloc_pretty_print_node_t(node));
+        printf("Found: %s\n", netloc_node_pretty_print(node));
 #endif
     }
 
@@ -318,7 +318,7 @@ int test_all_edges(netloc_topology_t topology)
          */
         ret = netloc_get_all_edges(topology, node, &num_edges, &edges);
         if( NETLOC_SUCCESS != ret ) {
-            fprintf(stderr, "Error: get_all_edges_by_id returned %d for node %s\n", ret, netloc_pretty_print_node_t(node));
+            fprintf(stderr, "Error: get_all_edges_by_id returned %d for node %s\n", ret, netloc_node_pretty_print(node));
             return ret;
         }
 
@@ -326,9 +326,9 @@ int test_all_edges(netloc_topology_t topology)
          * Verify the edges
          */
 #if DEBUG == 1
-        printf("Found: %d edges for host %s\n", num_edges, netloc_pretty_print_node_t(node));
+        printf("Found: %d edges for host %s\n", num_edges, netloc_node_pretty_print(node));
         for(i = 0; i < num_edges; ++i ) {
-            printf("\tEdge: %s\n", netloc_pretty_print_edge_t(edges[i]));
+            printf("\tEdge: %s\n", netloc_edge_pretty_print(edges[i]));
         }
 #endif
     }
@@ -396,15 +396,15 @@ int test_get_physical_path(netloc_topology_t topology)
             ret = netloc_get_path(topology, src_node, dest_node, &num_edges, &edges, false);
             if( NETLOC_ERROR_NOT_FOUND == ret ) {
                 fprintf(stderr, "Warning: No physical path information between these two nodes\n\tSrc  node %s\n\tDest node %s\n",
-                        netloc_pretty_print_node_t(src_node),
-                        netloc_pretty_print_node_t(dest_node));
+                        netloc_node_pretty_print(src_node),
+                        netloc_node_pretty_print(dest_node));
                 continue;
             }
             else if( NETLOC_SUCCESS != ret ) {
                 fprintf(stderr, "Error: get_physical_path returned %d\nError: Src  node %s\nError: Dest node %s\n",
                         ret,
-                        netloc_pretty_print_node_t(src_node),
-                        netloc_pretty_print_node_t(dest_node));
+                        netloc_node_pretty_print(src_node),
+                        netloc_node_pretty_print(dest_node));
                 return ret;
             }
 
@@ -413,10 +413,10 @@ int test_get_physical_path(netloc_topology_t topology)
              */
 #if DEBUG == 1
             printf("Path Between: %d edges\n", num_edges);
-            printf("\tSrc : %s\n", netloc_pretty_print_node_t(src_node));
-            printf("\tDest: %s\n", netloc_pretty_print_node_t(dest_node));
+            printf("\tSrc : %s\n", netloc_node_pretty_print(src_node));
+            printf("\tDest: %s\n", netloc_node_pretty_print(dest_node));
             for(i = 0; i < num_edges; ++i ) {
-                printf("\t\tEdge: %s\n", netloc_pretty_print_edge_t(edges[i]));
+                printf("\t\tEdge: %s\n", netloc_edge_pretty_print(edges[i]));
             }
 #endif
         }
@@ -486,15 +486,15 @@ int test_get_logical_path(netloc_topology_t topology)
             ret = netloc_get_path(topology, src_node, dest_node, &num_edges, &edges, true);
             if( NETLOC_ERROR_NOT_FOUND == ret ) {
                 fprintf(stderr, "Warning: No path information between these two nodes\n\tSrc  node %s\n\tDest node %s\n",
-                        netloc_pretty_print_node_t(src_node),
-                        netloc_pretty_print_node_t(dest_node));
+                        netloc_node_pretty_print(src_node),
+                        netloc_node_pretty_print(dest_node));
                 continue;
             }
             else if( NETLOC_SUCCESS != ret ) {
                 fprintf(stderr, "Error: get_logical_path returned %d\nError: Src  node %s\nError: Dest node %s\n",
                         ret,
-                        netloc_pretty_print_node_t(src_node),
-                        netloc_pretty_print_node_t(dest_node));
+                        netloc_node_pretty_print(src_node),
+                        netloc_node_pretty_print(dest_node));
                 return ret;
             }
 
@@ -503,10 +503,10 @@ int test_get_logical_path(netloc_topology_t topology)
              */
 #if DEBUG == 1
             printf("Path Between: %d edges\n", num_edges);
-            printf("\tSrc : %s\n", netloc_pretty_print_node_t(src_node));
-            printf("\tDest: %s\n", netloc_pretty_print_node_t(dest_node));
+            printf("\tSrc : %s\n", netloc_node_pretty_print(src_node));
+            printf("\tDest: %s\n", netloc_node_pretty_print(dest_node));
             for(i = 0; i < num_edges; ++i ) {
-                printf("\t\tEdge: %s\n", netloc_pretty_print_edge_t(edges[i]));
+                printf("\t\tEdge: %s\n", netloc_edge_pretty_print(edges[i]));
             }
 #endif
         }

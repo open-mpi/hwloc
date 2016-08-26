@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     }
 
     /* Set the current nodes and slots in the arch */
-    ret = netloc_set_current_resources(&arch);
+    ret = netloc_arch_set_current_resources(&arch);
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }

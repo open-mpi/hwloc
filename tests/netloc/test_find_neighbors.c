@@ -39,7 +39,7 @@ int main(void) {
     /*
      * Setup a Network connection
      */
-    network = netloc_dt_network_t_construct();
+    network = netloc_network_construct();
     network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     network->subnet_id    = strdup("fe80:0000:0000:0000");
     search_uri = strdup("file://data/netloc");
@@ -60,7 +60,7 @@ int main(void) {
         fprintf(stderr, "Error: netloc_attach returned an error (%d)\n", ret);
         return ret;
     }
-    netloc_dt_network_t_destruct(network);
+    netloc_network_destruct(network);
     network = NULL;
     printf("Success\n");
 
@@ -87,7 +87,7 @@ int main(void) {
 
     ret = netloc_get_all_edges(topology, src_node, &num_edges, &edges);
     if( NETLOC_SUCCESS != ret ) {
-        tmp_str = netloc_pretty_print_node_t(node);
+        tmp_str = netloc_node_pretty_print(node);
         fprintf(stderr, "Error: get_all_edges_by_id returned %d for node %s\n", ret, tmp_str);
         free(tmp_str);
         return ret;
@@ -96,7 +96,7 @@ int main(void) {
     /*
      * Display the data
      */
-    tmp_str = netloc_pretty_print_node_t(src_node);
+    tmp_str = netloc_node_pretty_print(src_node);
     printf("Neighbors of %s\n", tmp_str);
     free(tmp_str);
     for(i = 0; i < num_edges; ++i ) {

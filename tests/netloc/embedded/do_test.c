@@ -45,7 +45,7 @@ int do_test_netloc(void)
     search_uris[0] = strdup("file://data/netloc");
 
     // Find a specific InfiniBand network
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     tmp_network->subnet_id    = strdup("fe80:0000:0000:0000");
 

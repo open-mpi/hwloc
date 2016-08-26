@@ -1,6 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
+ * Copyright © 2016 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -197,14 +198,14 @@ int test_find_all_networks()
 
 #if DEBUG == 1
     for(i = 0; i < num_all_networks; ++i ) {
-        printf("\tIncluded Network: %s\n", netloc_pretty_print_network_t(all_networks[i]) );
+        printf("\tIncluded Network: %s\n", netloc_network_pretty_print(all_networks[i]) );
     }
 #endif
 
  cleanup:
     if( NULL != all_networks ) {
         for(i = 0; i < num_all_networks; ++i ) {
-            netloc_dt_network_t_destruct(all_networks[i]);
+            netloc_network_destruct(all_networks[i]);
             all_networks[i] = NULL;
         }
         free(all_networks);
@@ -242,14 +243,14 @@ int test_find_all_networks_no_cb()
 
 #if DEBUG == 1
     for(i = 0; i < num_all_networks; ++i ) {
-        printf("\tIncluded Network: %s\n", netloc_pretty_print_network_t(all_networks[i]) );
+        printf("\tIncluded Network: %s\n", netloc_network_pretty_print(all_networks[i]) );
     }
 #endif
 
  cleanup:
     if( NULL != all_networks ) {
         for(i = 0; i < num_all_networks; ++i ) {
-            netloc_dt_network_t_destruct(all_networks[i]);
+            netloc_network_destruct(all_networks[i]);
             all_networks[i] = NULL;
         }
         free(all_networks);
@@ -288,14 +289,14 @@ int test_find_all_networks_IB_cb()
 
 #if DEBUG == 1
     for(i = 0; i < num_all_networks; ++i ) {
-        printf("\tIncluded Network: %s\n", netloc_pretty_print_network_t(all_networks[i]) );
+        printf("\tIncluded Network: %s\n", netloc_network_pretty_print(all_networks[i]) );
     }
 #endif
 
  cleanup:
     if( NULL != all_networks ) {
         for(i = 0; i < num_all_networks; ++i ) {
-            netloc_dt_network_t_destruct(all_networks[i]);
+            netloc_network_destruct(all_networks[i]);
             all_networks[i] = NULL;
         }
         free(all_networks);
@@ -311,7 +312,7 @@ int test_find_specific_IB_network()
     int ret, exit_status = NETLOC_SUCCESS;
     netloc_network_t *tmp_network = NULL;
 
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     tmp_network->subnet_id    = strdup("fe80:0000:0000:0000");
 
@@ -323,17 +324,17 @@ int test_find_specific_IB_network()
     }
 
     if( strlen(tmp_network->subnet_id) <= 0 ) {
-        printf("Error: Subnet not filled in. <%s>\n", netloc_pretty_print_network_t(tmp_network) );
+        printf("Error: Subnet not filled in. <%s>\n", netloc_network_pretty_print(tmp_network) );
         exit_status = NETLOC_ERROR;
         goto cleanup;
     }
 
 #if DEBUG == 1
-    printf("\tFound Network: %s\n", netloc_pretty_print_network_t(tmp_network));
+    printf("\tFound Network: %s\n", netloc_network_pretty_print(tmp_network));
 #endif
 
  cleanup:
-    netloc_dt_network_t_destruct(tmp_network);
+    netloc_network_destruct(tmp_network);
     tmp_network = NULL;
 
     return exit_status;
@@ -344,7 +345,7 @@ int test_find_specific_ETH_network()
     int ret, exit_status = NETLOC_SUCCESS;
     netloc_network_t *tmp_network = NULL;
 
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_ETHERNET;
 
     ret = netloc_find_network(search_uris[0], tmp_network);
@@ -355,17 +356,17 @@ int test_find_specific_ETH_network()
     }
 
     if( strlen(tmp_network->subnet_id) <= 0 ) {
-        printf("Error: Subnet not filled in. <%s>\n", netloc_pretty_print_network_t(tmp_network) );
+        printf("Error: Subnet not filled in. <%s>\n", netloc_network_pretty_print(tmp_network) );
         exit_status = NETLOC_ERROR;
         goto cleanup;
     }
 
 #if DEBUG == 1
-    printf("\tFound Network: %s\n", netloc_pretty_print_network_t(tmp_network));
+    printf("\tFound Network: %s\n", netloc_network_pretty_print(tmp_network));
 #endif
 
  cleanup:
-    netloc_dt_network_t_destruct(tmp_network);
+    netloc_network_destruct(tmp_network);
     tmp_network = NULL;
 
     return exit_status;
@@ -376,7 +377,7 @@ int test_find_specific_error_network()
     int ret;
     netloc_network_t *tmp_network = NULL;
 
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     tmp_network->subnet_id    = strdup("12345");
 
@@ -391,7 +392,7 @@ int test_find_specific_error_network()
         fprintf(stderr, "Error: netloc_find_network returned success!\n");
     }
 
-    netloc_dt_network_t_destruct(tmp_network);
+    netloc_network_destruct(tmp_network);
     tmp_network = NULL;
 
     return ret;
@@ -402,7 +403,7 @@ int test_find_specific_error_multi_IB_network()
     int ret;
     netloc_network_t *tmp_network = NULL;
 
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     //tmp_network->subnet_id    = strdup("12345");
 
@@ -417,7 +418,7 @@ int test_find_specific_error_multi_IB_network()
         fprintf(stderr, "Error: netloc_find_network returned success!\n");
     }
 
-    netloc_dt_network_t_destruct(tmp_network);
+    netloc_network_destruct(tmp_network);
     tmp_network = NULL;
 
     return ret;
@@ -428,7 +429,7 @@ int test_find_specific_error_multi_network()
     int ret;
     netloc_network_t *tmp_network = NULL;
 
-    tmp_network = netloc_dt_network_t_construct();
+    tmp_network = netloc_network_construct();
     //tmp_network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
     //tmp_network->subnet_id    = strdup("12345");
 
@@ -443,7 +444,7 @@ int test_find_specific_error_multi_network()
         fprintf(stderr, "Error: netloc_find_network returned success!\n");
     }
 
-    netloc_dt_network_t_destruct(tmp_network);
+    netloc_network_destruct(tmp_network);
     tmp_network = NULL;
 
     return ret;
