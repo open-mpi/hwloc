@@ -141,6 +141,8 @@ static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_id
     *pslot_list = slot_list;
     *prank_list = rank_list;
 
+    fclose(file);
+
     return NETLOC_SUCCESS;
 }
 
@@ -170,7 +172,8 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
         netloc_arch_node_t *arch_node;
         HASH_FIND_STR(arch->nodes_by_name, nodenames[n], arch_node);
         if (!arch_node) {
-            return NETLOC_ERROR;
+            ret = NETLOC_ERROR;
+            goto ERROR;
         }
         arch_node_list[n] = arch_node;
         node_list[n] = arch_node->node;
@@ -178,7 +181,7 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
 
     ret = netloc_topology_read_hwloc(arch->topology, num_nodes, node_list);
     if( NETLOC_SUCCESS != ret ) {
-        return ret;
+        goto ERROR;
     }
 
     int constant_num_slots = 0;
@@ -187,7 +190,7 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
 
         ret = netloc_arch_node_get_hwloc_info(node);
         if (ret != NETLOC_SUCCESS)
-            return ret;
+            goto ERROR;
 
         current_nodes[n] = node->idx_in_topo;
 
@@ -283,6 +286,12 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
     }
 
     return NETLOC_SUCCESS;
+
+ERROR:
+    free(current_nodes);
+    free(arch_node_list);
+    free(node_list);
+    return ret;
 }
 
 netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main, netloc_arch_tree_t *sub)
@@ -400,7 +409,6 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
         utarray_free(nodes);
         nodes = new_nodes;
     }
-    utarray_free(nodes);
 
     /* We go though the tree to order the leaves  and find the tree
      * structure */
@@ -519,9 +527,18 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
         HASH_ADD_KEYPTR( hh, named_nodes, node->name, strlen(node->name), node);
     }
 
+
     arch->nodes_by_name = named_nodes;
 
 end:
+    utarray_free(nodes);
+    utarray_free(ordered_name_array);
+    for (int l = 0; l < num_levels; l++) {
+        utarray_free(down_degrees_by_level[l]);
+    }
+    free(down_degrees_by_level);
+    utarray_free(down_edges);
+
     /* We copy back all userdata */
     netloc_topology_iter_nodes(topology, node, node_tmp) {
         if (!netloc_node_is_in_partition(node, partition))
@@ -562,37 +579,6 @@ void set_gbits(int *values, netloc_edge_t *edge, int num_levels)
     }
     else
         values[idx] = gbits;
-}
-
-/* Given a list of node names, we get a list of hosts picked from the complete
- * architecture arch
- */
-int netloc_arch_find_current_nodes(netloc_arch_t *arch, char **nodelist,
-        int num_nodes, netloc_arch_node_t ***pnode_list)
-{
-    netloc_arch_node_t **node_list = (netloc_arch_node_t **)
-        malloc(num_nodes*sizeof(netloc_arch_node_t *));
-
-    char *last_nodename = "";
-    netloc_arch_node_t *all_nodes;
-    netloc_arch_node_t *node;
-    for (int n = 0; n < num_nodes; n++) {
-        char *nodename = nodelist[n];
-
-        /* Another processor from the previous node */
-        if (strcmp(nodename, last_nodename)) {
-            HASH_FIND_STR(all_nodes, nodename, node);
-            last_nodename = nodename;
-            if (!node) {
-                fprintf(stderr, "Error: node %s not present in the all architecture\n", nodename);
-                return NETLOC_ERROR;
-            }
-        }
-        node_list[n] = node;
-    }
-
-    *pnode_list = node_list;
-    return NETLOC_SUCCESS;
 }
 
 int netloc_arch_build(netloc_arch_t *arch, int add_slots)

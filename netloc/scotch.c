@@ -44,10 +44,9 @@ static int build_subarch(SCOTCH_Arch *scotch, int num_nodes, int *node_list,
     ret = SCOTCH_archSub(subarch, scotch, num_nodes, node_list);
     if (ret != 0) {
         fprintf(stderr, "Error: SCOTCH_archSub failed\n");
-        return NETLOC_ERROR;
     }
 
-    return NETLOC_SUCCESS;
+    return ret;
 }
 
 /* Convert a netloc tree to a scotch tleaf architecture */
@@ -140,16 +139,29 @@ static int build_subgraph(SCOTCH_Graph *graph, int *vertices, int num_vertices,
     }
 
     new_edge = edge_idx;
+
+
+    SCOTCH_Num *old_edgetab = new_edgetab;
     new_edgetab = (SCOTCH_Num *)
         realloc(new_edgetab, new_edge*sizeof(SCOTCH_Num));
+    if (!new_edgetab) {
+        new_edgetab = old_edgetab;
+    }
+
+    SCOTCH_Num *old_edlotab = new_edlotab;
     new_edlotab = (SCOTCH_Num *)
         realloc(new_edlotab, new_edge*sizeof(SCOTCH_Num));
+    if (!new_edlotab) {
+        new_edlotab = old_edlotab;
+    }
 
     ret = SCOTCH_graphBuild (nodegraph, base, num_vertices,
                 new_verttab, new_vendtab, new_velotab, new_vlbltab,
                 new_edge, new_edgetab, new_edlotab);
 
-    return NETLOC_SUCCESS;
+    free(vertex_is_present);
+
+    return ret;
 }
 
 static int build_current_arch(SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
@@ -166,7 +178,6 @@ static int build_current_arch(SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
-    int num_hosts = arch->num_current_hosts;
 
     SCOTCH_Arch scotch_arch;
     ret = arch_tree_to_scotch_arch(arch->arch.global_tree, &scotch_arch);
@@ -247,20 +258,23 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
             /* Build the scotch arch of the all node */
             SCOTCH_Arch scotch_nodearch;
             ret = arch_tree_to_scotch_arch(node->slot_tree, &scotch_nodearch);
+            if (NETLOC_SUCCESS != ret) {
+                goto ERROR;
+            }
 
             /* Restrict the scotch arch to the available cores */
             SCOTCH_Arch scotch_nodesubarch;
             ret = build_subarch(&scotch_nodearch, node->num_current_slots,
                     node->current_slots, &scotch_nodesubarch);
             if (NETLOC_SUCCESS != ret) {
-                return ret;
+                goto ERROR;
             }
 
             /* Find the mapping to the cores */
             ret = SCOTCH_graphMap(&nodegraph, &scotch_nodesubarch, &strategy, node_ranks);
             if (ret != 0) {
                 fprintf(stderr, "Error: SCOTCH_graphMap failed\n");
-                return NETLOC_ERROR;
+                goto ERROR;
             }
 
             /* Report the node ranks in the global rank array */
@@ -286,6 +300,10 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     *pcores = cores;
 
     return NETLOC_SUCCESS;
+
+ERROR:
+    free(cores);
+    return ret;
 }
 
 int netlocscotch_get_mapping_from_comm_matrix(double **comm, int num_vertices,
@@ -295,8 +313,13 @@ int netlocscotch_get_mapping_from_comm_matrix(double **comm, int num_vertices,
 
     SCOTCH_Graph graph;
     ret = comm_matrix_to_scotch_graph(comm, num_vertices, &graph);
+    if (NETLOC_SUCCESS != ret) {
+        return ret;
+    }
 
     ret = netlocscotch_get_mapping_from_graph(&graph, pcores);
+
+
 
     return ret;
 }
@@ -374,7 +397,7 @@ static int comm_matrix_to_scotch_graph(double **matrix, int n, SCOTCH_Graph *gra
                 verttab, vendtab, velotab, vlbltab,
                 edge, edgetab, edlotab);
 
-    return NETLOC_SUCCESS;
+    return ret;
 }
 
 int build_scotch_graph(int n, SCOTCH_Graph *graph)
@@ -420,6 +443,12 @@ int build_scotch_graph(int n, SCOTCH_Graph *graph)
     ret = SCOTCH_graphBuild (graph, base, vert,
                 verttab, vendtab, velotab, vlbltab,
                 edge, edgetab, edlotab);
+    /* Converts scotch error into netloc error */
+    if (ret != 0) {
+        ret = NETLOC_ERROR;
+    } else {
+        ret = NETLOC_SUCCESS;
+    }
 
-    return 0;
+    return ret;
 }

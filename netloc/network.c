@@ -422,7 +422,7 @@ static int search_uri(const char * search_uri,
     char * filename = NULL;
     DIR *dirp = NULL;
     struct dirent *dir_entry = NULL;
-    bool found;
+    int found;
 
     /*
      * Process the URI
@@ -496,10 +496,10 @@ static int search_uri(const char * search_uri,
         /*
          * Have we seen this network before?
          */
-        found = false;
+        found = 0;
         for( i = 0; i < all_num_networks; ++i ) {
             if( NETLOC_CMP_SAME == netloc_network_compare(all_networks[i], tmp_network) ) {
-                found = true;
+                found = 1;
                 break;
             }
         }

@@ -53,7 +53,7 @@ int main(int argc, char **argv)
         for (int s = 0; s < arch_node->num_current_slots; s++) {
             int slot_idx = arch_node->current_slots[s];
             int slot = arch_node->slot_os_idx[slot_idx];
-            printf("%s %d", arch_node->name, slot_idx);
+            printf("%s %d", arch_node->name, slot);
         }
     }
 

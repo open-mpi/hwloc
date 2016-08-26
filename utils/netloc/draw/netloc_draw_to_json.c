@@ -505,6 +505,7 @@ static int write_json(netloc_topology_t *topology, FILE *output)
 
 static int netloc_to_json_draw(netloc_topology_t *topology, int simplify)
 {
+    int ret;
     static FILE *output;
     char *node_uri = topology->network->node_uri;
     int basename_len = strlen(node_uri)-10;
@@ -518,11 +519,20 @@ static int netloc_to_json_draw(netloc_topology_t *topology, int simplify)
 
     asprintf(&draw, "%s-%s%s.json", basename, "draw", simplify ? "-simple": "");
     output = fopen(draw, "w");
+    if (output == NULL) {
+        perror("fopen: ");
+        ret = NETLOC_ERROR;
+        goto ERROR;
+    }
 
     write_json(topology, output);
 
+    ret = NETLOC_SUCCESS;
     fclose(output);
-    return 0; // TODO
+ERROR:
+    free(basename);
+
+    return ret;
 }
 
 static char *read_param(int *argc, char ***argv)

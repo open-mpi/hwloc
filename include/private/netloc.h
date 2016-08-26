@@ -15,7 +15,6 @@
 #ifndef _NETLOC_PRIVATE_H_
 #define _NETLOC_PRIVATE_H_
 
-#include <stdbool.h>
 #include <hwloc.h>
 #include <netloc.h>
 #include <netloc/uthash.h>
@@ -156,7 +155,7 @@ typedef struct netloc_topology_t {
     netloc_network_t *network;
 
     /** Lazy load the node list */
-    bool nodes_loaded;
+    int nodes_loaded;
 
     /** Node List */
     netloc_node_t *nodes; /* Hash table of nodes by physical_id */
@@ -571,6 +570,9 @@ netloc_physical_link_t * netloc_physical_link_construct();
  *   NETLOC_ERROR on error
  */
 int netloc_physical_link_destruct(netloc_physical_link_t *link);
+
+char * netloc_link_pretty_print(netloc_physical_link_t* link);
+
 
 /**********************************************************************
  *        Architecture functions

@@ -21,8 +21,6 @@ int main(int argc, char **argv)
     char name[1024];
     int resultlen;
 
-    node_t *nodes = NULL;
-
     MPI_Init(&argc,&argv);
 
     if (argc != 2) {
@@ -50,6 +48,7 @@ int main(int argc, char **argv)
     resultlen++;
 
     if (rank == 0) {
+        node_t *nodes = NULL;
         node_t *node;
 
         /* Rank 0 info */
