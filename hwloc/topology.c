@@ -625,6 +625,7 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
 
   newobj->type = src->type;
   newobj->os_index = src->os_index;
+  newobj->gp_index = src->gp_index;
 
   if (src->name)
     newobj->name = strdup(src->name);
@@ -703,6 +704,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   new->is_thissystem = old->is_thissystem;
   new->is_loaded = 1;
   new->pid = old->pid;
+  new->next_gp_index = old->next_gp_index;
 
   memcpy(&new->binding_hooks, &old->binding_hooks, sizeof(old->binding_hooks));
 
@@ -1326,13 +1328,14 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 }
 
 hwloc_obj_t
-hwloc_alloc_setup_object(hwloc_topology_t topology __hwloc_attribute_unused,
+hwloc_alloc_setup_object(hwloc_topology_t topology,
 			 hwloc_obj_type_t type, signed os_index)
 {
   struct hwloc_obj *obj = malloc(sizeof(*obj));
   memset(obj, 0, sizeof(*obj));
   obj->type = type;
   obj->os_index = os_index;
+  obj->gp_index = topology->next_gp_index++;
   obj->attr = malloc(sizeof(*obj->attr));
   memset(obj->attr, 0, sizeof(*obj->attr));
   /* do not allocate the cpuset here, let the caller do it */
@@ -2851,6 +2854,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   memset(topology->support.membind, 0, sizeof(*topology->support.membind));
 
   /* Only the System object on top by default */
+  topology->next_gp_index = 1; /* keep 0 as an invalid value */
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
@@ -3713,4 +3717,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
   /* recurse and check the tree of children, and type-specific checks */
   hwloc__check_object(topology, obj);
+
+  /* TODO: check that gp_index are unique across the topology (and >0).
+   * at least check it's unique across each level.
+   * Should only occur if XML is invalid.
+   */
 }

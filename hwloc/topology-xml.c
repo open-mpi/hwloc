@@ -90,7 +90,7 @@ hwloc_xml_callbacks_reset(void)
 #define _HWLOC_OBJ_CACHE_OLD HWLOC_OBJ_L5CACHE /* temporarily used when importing pre-v2.0 attribute-less cache types */
 
 static void
-hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
+hwloc__xml_import_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
 			      const char *name, const char *value,
 			      hwloc__xml_import_state_t state)
 {
@@ -103,7 +103,13 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     { /* ignored since v2.0 but still allowed for backward compat with v1.10 */ }
   else if (!strcmp(name, "os_index"))
     obj->os_index = strtoul(value, NULL, 10);
-  else if (!strcmp(name, "cpuset")) {
+  else if (!strcmp(name, "gp_index")) {
+    obj->gp_index = strtoull(value, NULL, 10);
+    if (!obj->gp_index && hwloc__xml_verbose())
+      fprintf(stderr, "%s: unexpected zero gp_index, topology may be invalid\n", state->global->msgprefix);
+    if (obj->gp_index >= topology->next_gp_index)
+      topology->next_gp_index = obj->gp_index + 1;
+  } else if (!strcmp(name, "cpuset")) {
     obj->cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->cpuset, value);
   } else if (!strcmp(name, "complete_cpuset")) {
@@ -1432,6 +1438,9 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "allowed_nodeset", cpuset);
     free(cpuset);
   }
+
+  sprintf(tmp, "%llu", (unsigned long long) obj->gp_index);
+  state.new_prop(&state, "gp_index", tmp);
 
   if (obj->name) {
     char *name = hwloc__xml_export_safestrdup(obj->name);

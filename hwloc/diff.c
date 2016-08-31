@@ -153,6 +153,8 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 	/* no need to check logical_index, sibling_rank, symmetric_subtree,
 	 * the parents did it */
 
+	/* gp_index don't have to be strictly identical */
+
 	if ((!obj1->name) != (!obj2->name)
 	    || (obj1->name && strcmp(obj1->name, obj2->name))) {
 		err = hwloc_append_diff_obj_attr_string(obj1,

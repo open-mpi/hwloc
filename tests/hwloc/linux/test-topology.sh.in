@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -53,11 +53,13 @@ test_topology ()
 	| sed	-e 's/ hwlocVersion='$HWLOC_VERSION'//' \
 		-e 's/ ProcessName=lstopo-no-graphics//' \
 		-e 's/ ProcessName=lt-lstopo-no-graphics//' \
+		-e 's/ gp_index="[0-9]\+"//' \
 	| grep -v "<info name=\"hwlocVersion\" value=\"$HWLOC_VERSION\"\/>" \
 	| grep -v "<info name=\"ProcessName\" value=\"lstopo-no-graphics\"\/>" \
 	| grep -v "<info name=\"ProcessName\" value=\"lt-lstopo-no-graphics\"\/>" \
 	> "$output"
 	# filtered hwlocVersion since it often changes
+	# filtered gp_index because it depends on the insertiong order, which may depend on pciaccess version, etc
     then
 	result=1
     else

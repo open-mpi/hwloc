@@ -52,6 +52,7 @@ struct hwloc_topology {
   int modified;                                         /* >0 if objects were added/removed recently, which means a reconnect is needed */
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
   void *userdata;
+  uint64_t next_gp_index;
 
   unsigned bridge_nbobjects;
   struct hwloc_obj **bridge_level;

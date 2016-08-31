@@ -12,6 +12,7 @@
 <!ATTLIST object type (System | Machine | Misc | Group | NUMANode | Package | L1Cache | L2Cache | L3Cache | L4Cache | L5Cache | L1iCache | L2iCache | L3iCache | Core | PU | Bridge | PCIDev | OSDev) #REQUIRED>
 <!ATTLIST object subtype CDATA "" >
 <!ATTLIST object os_index CDATA "-1" >
+<!ATTLIST object gp_index CDATA "-1" >
 <!ATTLIST object name CDATA "" >
 <!ATTLIST object local_memory CDATA "0" >
 <!ATTLIST object cache_size CDATA "0" >
