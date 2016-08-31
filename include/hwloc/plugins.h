@@ -292,18 +292,7 @@ HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_top
 HWLOC_DECLSPEC void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
 /** \brief Allocate and initialize an object of the given type and physical index */
-static __hwloc_inline struct hwloc_obj *
-hwloc_alloc_setup_object(hwloc_obj_type_t type, signed os_index)
-{
-  struct hwloc_obj *obj = malloc(sizeof(*obj));
-  memset(obj, 0, sizeof(*obj));
-  obj->type = type;
-  obj->os_index = os_index;
-  obj->attr = malloc(sizeof(*obj->attr));
-  memset(obj->attr, 0, sizeof(*obj->attr));
-  /* do not allocate the cpuset here, let the caller do it */
-  return obj;
-}
+HWLOC_DECLSPEC hwloc_obj_t hwloc_alloc_setup_object(hwloc_topology_t topology, hwloc_obj_type_t type, signed os_index);
 
 /** \brief Setup object cpusets/nodesets by OR'ing its children.
  *

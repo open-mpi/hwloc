@@ -360,7 +360,7 @@ hwloc_pci_tree_attach_belowroot(struct hwloc_topology *topology, struct hwloc_ob
    */
   while (old_tree) {
     /* start a new host bridge */
-    struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, -1);
+    struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(topology, HWLOC_OBJ_BRIDGE, -1);
     struct hwloc_obj **dstnextp = &hostbridge->io_first_child;
     struct hwloc_obj **srcnextp = &old_tree;
     struct hwloc_obj *child = *srcnextp;

@@ -852,7 +852,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
       for(i=0; i<nbgroups; i++) {
           /* create the Group object */
           hwloc_obj_t group_obj, res_obj;
-          group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+          group_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
           group_obj->cpuset = hwloc_bitmap_alloc();
           group_obj->attr->group.kind = HWLOC_GROUP_KIND_DISTANCE;
           group_obj->attr->group.subkind = *subkind;
@@ -1006,7 +1006,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
       /* add a final group object covering everybody so that the distance matrix can be stored somewhere.
        * this group will be merged into a regular object if the matrix isn't strangely incomplete
        */
-      group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+      group_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
       group_obj->attr->group.kind = HWLOC_GROUP_KIND_DISTANCE;
       group_obj->attr->group.subkind = subkind++;
       group_obj->cpuset = hwloc_bitmap_alloc();

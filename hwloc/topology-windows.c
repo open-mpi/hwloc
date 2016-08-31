@@ -796,7 +796,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	if (!hwloc_filter_check_keep_object_type(topology, type))
 	  continue;
 
-	obj = hwloc_alloc_setup_object(type, id);
+	obj = hwloc_alloc_setup_object(topology, type, id);
         obj->cpuset = hwloc_bitmap_alloc();
 	hwloc_debug("%s#%u mask %lx\n", hwloc_type_name(type), id, procInfo[i].ProcessorMask);
 	/* ProcessorMask is a ULONG_PTR */
@@ -944,7 +944,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	      hwloc_bitmap_or(groups_pu_set, groups_pu_set, set);
 
 	      if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
-		obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, id);
+		obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, id);
 		obj->cpuset = set;
 		obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP;
 		hwloc_insert_object_by_cpuset(topology, obj);
@@ -961,7 +961,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	if (!hwloc_filter_check_keep_object_type(topology, type))
 	  continue;
 
-	obj = hwloc_alloc_setup_object(type, id);
+	obj = hwloc_alloc_setup_object(topology, type, id);
         obj->cpuset = hwloc_bitmap_alloc();
         for (i = 0; i < num; i++) {
           hwloc_debug("%s#%u %d: mask %d:%lx\n", hwloc_type_name(type), id, i, GroupMask[i].Group, GroupMask[i].Mask);
@@ -1031,7 +1031,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
     hwloc_obj_t obj;
     unsigned idx;
     hwloc_bitmap_foreach_begin(idx, groups_pu_set) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, idx);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, idx);
       obj->cpuset = hwloc_bitmap_alloc();
       hwloc_bitmap_only(obj->cpuset, idx);
       hwloc_debug_1arg_bitmap("cpu %u has cpuset %s\n",
@@ -1047,7 +1047,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
     GetSystemInfo(&sysinfo);
     for(idx=0; idx<32; idx++)
       if (sysinfo.dwActiveProcessorMask & (((DWORD_PTR)1)<<idx)) {
-	obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, idx);
+	obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, idx);
 	obj->cpuset = hwloc_bitmap_alloc();
 	hwloc_bitmap_only(obj->cpuset, idx);
 	hwloc_debug_1arg_bitmap("cpu %u has cpuset %s\n",

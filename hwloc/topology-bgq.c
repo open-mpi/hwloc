@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2015 Inria.  All rights reserved.
+ * Copyright © 2013-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -47,7 +47,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
   }
 
   /* a single memory bank */
-  obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
+  obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);
   set = hwloc_bitmap_alloc();
   hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);
   obj->cpuset = set;
@@ -62,7 +62,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 
   /* shared L2 */
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2CACHE)) {
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_L2CACHE, -1);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, -1);
     obj->cpuset = hwloc_bitmap_dup(set);
     obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
     obj->attr->cache.depth = 2;
@@ -74,7 +74,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 
   /* package */
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, 0);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, 0);
     obj->cpuset = set;
     hwloc_obj_add_info(obj, "CPUModel", "IBM PowerPC A2");
     hwloc_insert_object_by_cpuset(topology, obj);
@@ -88,7 +88,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 
     /* L1d */
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE)) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1CACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, -1);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
       obj->attr->cache.depth = 1;
@@ -99,7 +99,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
     }
     /* L1i */
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
       obj->attr->cache.depth = 1;
@@ -112,7 +112,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 
     /* Core */
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, i);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, i);
       obj->cpuset = set;
       hwloc_insert_object_by_cpuset(topology, obj);
     } else

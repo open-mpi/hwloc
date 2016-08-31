@@ -75,7 +75,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
     if (nprocs == npackages * logical_per_package
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE))
       for (i = 0; i < npackages; i++) {
-        obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, i);
+        obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, i);
         obj->cpuset = hwloc_bitmap_alloc();
         for (cpu = i*logical_per_package; cpu < (i+1)*logical_per_package; cpu++)
           hwloc_bitmap_set(obj->cpuset, cpu);
@@ -98,7 +98,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 
       if (!(logical_per_package % cores_per_package))
         for (i = 0; i < npackages * cores_per_package; i++) {
-          obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, i);
+          obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, i);
           obj->cpuset = hwloc_bitmap_alloc();
           for (cpu = i*(logical_per_package/cores_per_package);
                cpu < (i+1)*(logical_per_package/cores_per_package);
@@ -192,11 +192,11 @@ hwloc_look_darwin(struct hwloc_backend *backend)
         /* cacheconfig tells us how many cpus share it, let's iterate on each cache */
         for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
 	  if (!i) {
-	    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, j);
+	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, j);
             obj->nodeset = hwloc_bitmap_alloc();
             hwloc_bitmap_set(obj->nodeset, j);
           } else {
-	    obj = hwloc_alloc_setup_object(HWLOC_OBJ_L1CACHE+i-1, -1);
+	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE+i-1, -1);
 	  }
           obj->cpuset = hwloc_bitmap_alloc();
           for (cpu = j*cacheconfig[i];
@@ -208,7 +208,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 	      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
             /* FIXME assuming that L1i and L1d are shared the same way. Darwin
              * does not yet provide a way to know.  */
-            hwloc_obj_t l1i = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
+            hwloc_obj_t l1i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
             l1i->cpuset = hwloc_bitmap_dup(obj->cpuset);
             hwloc_debug_1arg_bitmap("L1icache %u has cpuset %s\n",
                 j, l1i->cpuset);

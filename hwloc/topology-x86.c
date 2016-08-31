@@ -688,7 +688,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	  }
 	}
-	package = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, packageid);
+	package = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, packageid);
 	package->cpuset = package_cpuset;
 
 	hwloc_x86_add_cpuinfos(package, &infos[i], 0);
@@ -746,7 +746,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
           hwloc_bitmap_clr(remaining_cpuset, j);
         }
       }
-      node = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, nodeid);
+      node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, nodeid);
       node->cpuset = node_cpuset;
       node->nodeset = hwloc_bitmap_alloc();
       hwloc_bitmap_set(node->nodeset, nodeid);
@@ -784,7 +784,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	  }
 	}
-	unit = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, unitid);
+	unit = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, unitid);
 	unit->cpuset = unit_cpuset;
 	unit->subtype = strdup("ComputeUnit");
 	unit->attr->group.kind = HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT;
@@ -812,7 +812,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 		hwloc_bitmap_clr(remaining_cpuset, j);
 	      }
 	    }
-	    unknown_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, unknownid);
+	    unknown_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, unknownid);
 	    unknown_obj->cpuset = unknown_cpuset;
 	    unknown_obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN;
 	    unknown_obj->attr->group.subkind = level;
@@ -853,7 +853,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	  }
 	}
-	core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, coreid);
+	core = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, coreid);
 	core->cpuset = core_cpuset;
 	hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
 				coreid, core_cpuset);
@@ -868,7 +868,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     hwloc_debug("%s", "\n\n * CPU cpusets *\n\n");
     for (i=0; i<nbprocs; i++)
       if(infos[i].present) { /* Only add present PU. We don't know if others actually exist */
-       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
+       struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, i);
        obj->cpuset = hwloc_bitmap_alloc();
        hwloc_bitmap_only(obj->cpuset, i);
        hwloc_debug_1arg_bitmap("PU %u has cpuset %s\n", i, obj->cpuset);
@@ -945,7 +945,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	      hwloc_bitmap_clr(remaining_cpuset, j);
 	    }
 	  }
-	  cache = hwloc_alloc_setup_object(otype, -1);
+	  cache = hwloc_alloc_setup_object(topology, otype, -1);
 	  cache->attr->cache.depth = level;
 	  cache->attr->cache.size = infos[i].cache[l].size;
 	  cache->attr->cache.linesize = infos[i].cache[l].linesize;

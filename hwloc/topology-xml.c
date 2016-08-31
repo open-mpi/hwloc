@@ -871,7 +871,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       break;
 
     if (!strcmp(tag, "object")) {
-      hwloc_obj_t childobj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
+      hwloc_obj_t childobj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_TYPE_MAX, -1);
       ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj,
 				     &childrengotignored,
 				     &childstate);
@@ -1217,7 +1217,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
     hwloc_bitmap_only(root->allowed_nodeset, 0);
     hwloc_bitmap_only(root->complete_nodeset, 0);
     /* add a NUMA node and move the root memory there */
-    numa = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
+    numa = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);
     numa->cpuset = hwloc_bitmap_dup(root->cpuset);
     numa->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(numa->nodeset, 0);

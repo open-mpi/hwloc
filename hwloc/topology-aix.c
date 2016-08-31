@@ -634,7 +634,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
       hwloc_debug("Using os_index #%u for NUMA node inside node %d for sdl %d\n", os_index, i, sdl);
     }
 
-    obj = hwloc_alloc_setup_object(type, os_index);
+    obj = hwloc_alloc_setup_object(topology, type, os_index);
     obj->cpuset = cpuset;
 
     switch(type) {
@@ -670,7 +670,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
       case HWLOC_OBJ_CORE:
       {
 	hwloc_obj_t obj2, obj3;
-	obj2 = hwloc_alloc_setup_object(HWLOC_OBJ_L1CACHE, -1);
+	obj2 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, -1);
 	obj2->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	obj2->attr->cache.size = _system_configuration.dcache_size;
 	obj2->attr->cache.associativity = _system_configuration.dcache_asc;
@@ -686,7 +686,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	  hwloc_debug("Adding an L1d cache for core %d\n", i);
 
 	  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
-	    obj3 = hwloc_alloc_setup_object(HWLOC_OBJ_L1ICACHE, -1);
+	    obj3 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
 	    obj3->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	    obj3->attr->cache.size = _system_configuration.icache_size;
 	    obj3->attr->cache.associativity = _system_configuration.icache_asc;

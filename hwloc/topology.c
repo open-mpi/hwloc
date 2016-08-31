@@ -187,7 +187,7 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
   hwloc_debug("%s", "\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<nb_pus; oscpu++)
     {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, oscpu);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, oscpu);
       obj->cpuset = hwloc_bitmap_alloc();
       hwloc_bitmap_only(obj->cpuset, oscpu);
 
@@ -662,7 +662,7 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
   hwloc_obj_t newobj;
   hwloc_obj_t child;
 
-  newobj = hwloc_alloc_setup_object(src->type, src->os_index);
+  newobj = hwloc_alloc_setup_object(newtopology, src->type, src->os_index);
   hwloc__duplicate_object(newobj, src);
 
   for(child = src->first_child; child; child = child->next_sibling)
@@ -1326,9 +1326,23 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 }
 
 hwloc_obj_t
-hwloc_topology_alloc_group_object(struct hwloc_topology *topology __hwloc_attribute_unused)
+hwloc_alloc_setup_object(hwloc_topology_t topology __hwloc_attribute_unused,
+			 hwloc_obj_type_t type, signed os_index)
 {
-  return hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+  struct hwloc_obj *obj = malloc(sizeof(*obj));
+  memset(obj, 0, sizeof(*obj));
+  obj->type = type;
+  obj->os_index = os_index;
+  obj->attr = malloc(sizeof(*obj->attr));
+  memset(obj->attr, 0, sizeof(*obj->attr));
+  /* do not allocate the cpuset here, let the caller do it */
+  return obj;
+}
+
+hwloc_obj_t
+hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
+{
+  return hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
 }
 
 hwloc_obj_t
@@ -1405,7 +1419,7 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
     return NULL;
   }
 
-  obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+  obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MISC, -1);
   if (name)
     obj->name = strdup(name);
 
@@ -1472,7 +1486,7 @@ hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, 
     return largeparent;
 
   /* we need to insert an intermediate group */
-  group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+  group_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
   if (!group_obj)
     /* Failed to insert the exact Group, fallback to largeparent */
     return largeparent;
@@ -2673,7 +2687,7 @@ next_cpubackend:
   assert(topology->levels[0][0]->allowed_nodeset);
   /* If there's no NUMA node, add one with all the memory */
   if (hwloc_bitmap_iszero(topology->levels[0][0]->complete_nodeset)) {
-    hwloc_obj_t node = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, 0);
+    hwloc_obj_t node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);
     node->cpuset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset); /* requires root cpuset to be initialized above */
     node->complete_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->complete_cpuset); /* requires root cpuset to be initialized above */
     node->allowed_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->allowed_cpuset); /* requires root cpuset to be initialized above */
@@ -2861,7 +2875,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
    * since the OS backend may still change the object into something else
    * (for instance System)
    */
-  root_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, 0);
+  root_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MACHINE, 0);
   topology->levels[0][0] = root_obj;
 }
 

@@ -68,7 +68,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend)
     hwloc_obj_t cuda_device, parent;
     unsigned cores;
 
-    cuda_device = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
+    cuda_device = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, -1);
     snprintf(cuda_name, sizeof(cuda_name), "cuda%d", i);
     cuda_device->name = strdup(cuda_name);
     cuda_device->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;

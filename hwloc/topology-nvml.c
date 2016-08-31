@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2015 Inria.  All rights reserved.
+ * Copyright © 2012-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -43,7 +43,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend)
     ret = nvmlDeviceGetHandleByIndex(i, &device);
     assert(ret == NVML_SUCCESS);
 
-    osdev = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
+    osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, -1);
     snprintf(buffer, sizeof(buffer), "nvml%d", i);
     osdev->name = strdup(buffer);
     osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;

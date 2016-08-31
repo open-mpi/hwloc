@@ -826,7 +826,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   hwloc_bitmap_or(parent_cpuset, parent_cpuset, set);
 
   if (hwloc_filter_check_keep_object_type(topology, type)) {
-    obj = hwloc_alloc_setup_object(type, os_index);
+    obj = hwloc_alloc_setup_object(topology, type, os_index);
     obj->cpuset = set;
 
     if (type == HWLOC_OBJ_NUMANODE) {

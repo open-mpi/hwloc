@@ -347,7 +347,7 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
     cpuids = malloc(sizeof(processorid_t) * n);
     assert(cpuids != NULL);
 
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, lgrp);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, lgrp);
     obj->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(obj->nodeset, lgrp);
     obj->cpuset = hwloc_bitmap_alloc();
@@ -661,7 +661,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     unsigned j,k;
     hwloc_debug("%d Packages\n", Lpkg_num);
     for (j = 0; j < Lpkg_num; j++) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, Lpkg[j].Ppkg);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, Lpkg[j].Ppkg);
       if (CPUType)
 	hwloc_obj_add_info(obj, "CPUType", CPUType);
       if (CPUModel)
@@ -682,7 +682,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     unsigned j,k;
     hwloc_debug("%d Cores\n", Lcore_num);
     for (j = 0; j < Lcore_num; j++) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, Lcore[j].Pcore);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, Lcore[j].Pcore);
       obj->cpuset = hwloc_bitmap_alloc();
       for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lcore == j)
@@ -698,7 +698,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     unsigned j,k;
     hwloc_debug("%d PUs\n", Lproc_num);
     for (j = 0; j < Lproc_num; j++) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, Lproc[j].Pproc);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, Lproc[j].Pproc);
       obj->cpuset = hwloc_bitmap_alloc();
       for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lproc == j)

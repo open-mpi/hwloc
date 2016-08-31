@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2013 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -200,7 +200,7 @@ hwloc_look_hpux(struct hwloc_backend *backend)
       MPC_GETFIRSTLDOM_SYS : MPC_GETFIRSTLDOM, 0, 0);
     while (currentnode != -1 && i < nbnodes) {
       hwloc_debug("node %d is %d\n", i, currentnode);
-      nodes[i] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, currentnode);
+      nodes[i] = obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, currentnode);
       obj->cpuset = hwloc_bitmap_alloc();
       obj->nodeset = hwloc_bitmap_alloc();
       hwloc_bitmap_set(obj->nodeset, currentnode);
@@ -217,7 +217,7 @@ hwloc_look_hpux(struct hwloc_backend *backend)
   currentcpu = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETFIRSTSPU_SYS : MPC_GETFIRSTSPU, 0,0);
   while (currentcpu != -1) {
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, currentcpu);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, currentcpu);
     obj->cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(obj->cpuset, currentcpu);
 
