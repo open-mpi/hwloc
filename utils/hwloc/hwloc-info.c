@@ -72,6 +72,7 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
   printf("%s logical index = %u\n", prefix, obj->logical_index);
   if (obj->os_index != (unsigned) -1)
     printf("%s os index = %u\n", prefix, obj->os_index);
+  printf("%s gp index = %llu\n", prefix, (unsigned long long) obj->gp_index);
   if (obj->name)
     printf("%s name = %s\n", prefix, obj->name);
   if (obj->depth != (unsigned) -1)
