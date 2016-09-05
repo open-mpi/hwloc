@@ -158,7 +158,7 @@ char * netloc_network_pretty_print(netloc_network_t* network)
     return str;
 }
 
-netloc_network_t * netloc_network_construct( )
+netloc_network_t * netloc_network_construct(void)
 {
     netloc_network_t *network = NULL;
 
