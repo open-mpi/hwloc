@@ -1,0 +1,150 @@
+#!/bin/bash
+#
+# Copyright © 2016 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+
+NETLOC_TESTS_PATH="$HWLOC_top_builddir/tests/netloc"
+
+NETLOC_UTIL_PATH="$HWLOC_top_builddir/utils/netloc"
+
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+default=$(tput sgr0)
+
+function write_output
+{
+    color=$1
+    shift
+    echo $@ | sed "s/.*/$color&$default/"
+}
+
+function quit
+{
+    write_output $red "Test failed"
+    read
+    rm -fr $TEMPDIR
+}
+
+function getvalue
+{
+    echo "$params" | $GREP -P "^\s*$1:" | $SED 's/^.*:\s*//'
+}
+
+trap 'quit' 0
+set -e
+
+compress=xz
+hash $compress 2>/dev/null || \
+    { echo >&2 "It requires $compressbin but it's not installed."; exit 1; }
+COMPRESS=$(which $compress)
+GREP=$(which grep)
+SED=$(which sed)
+AWK=$(which awk)
+
+# Folder structure like that
+# TEMPDIR
+# ├── ref <- copy of the data directory
+# │   ├── machine1
+# │   │   └── file1
+# │   └── machine2
+# │       └── file1
+# └── test
+#     └── file1
+TEMPDIR=$(mktemp -d)
+TESTDIR=$TEMPDIR/tests
+REFDIR=$TEMPDIR/ref && mkdir $REFDIR
+TESTFILE=$REFDIR/tests.txt; cp $NETLOC_TESTS_PATH/data/tests.txt $REFDIR
+
+# Remove comments from the test file
+$SED -i 's/#.*$//g; /^\s*$/d' $TESTFILE
+
+# Get tests
+tests=$($GREP -P "^[^\s]*:\s*" $TESTFILE | sed 's/:\s*$//')
+
+S=0
+F=0
+for t in $tests; do
+    params=$($AWK '/^'$t':\s*$/{flag=1;next} /^\S*:\s*$/{flag=0}flag' $TESTFILE)
+
+    sets=$(getvalue testset)
+
+    # For each set to test
+    for s in $sets; do
+        mkdir $TESTDIR
+
+        # Extract files if needed
+        cd "$REFDIR"
+        if [ ! -d "$s" ]; then
+            cp "$NETLOC_TESTS_PATH/data/$s.txz" .
+            tar --use-compress-program=$COMPRESS -xf "$s.txz"
+            rm -r "$s.txz"
+        fi
+
+        # Copy needed files
+        needed=$(getvalue needed)
+        cd "$REFDIR/$s"
+        if [ -z "needed" ]; then
+            cp -r --parents . $TESTDIR
+        else
+            cp -r --parents $needed $TESTDIR
+        fi
+
+        # Remove excluded files
+        excluded=$(getvalue exluded)
+        if [ -n "$excluded" ]; then
+            rm -r $excluded
+        fi
+
+        while true; do
+            # Execute the command
+            cd $TESTDIR
+            cmd=$(getvalue command)
+            eval " $cmd" > /dev/null || \
+                {
+                    echo "Command $command failed"
+                    write_output $red "Test $t on $s failed!"
+                    failed=1
+                    break
+                }
+
+            # Check files
+            cd "$REFDIR/$s"
+            checkfiles=$(getvalue checkfiles)
+            for cf in $checkfiles; do
+                cmp --silent "$cf" "$TESTDIR/$cf" || \
+                    {
+                        echo "$cf: wrong file"
+                        write_output $red "Test $t on $s failed!"
+                        failed=1
+                        break
+                    }
+            done
+            break
+        done
+
+        rm -fr $TESTDIR
+        if [ -n "$failed" ]; then
+            ((F+=1))
+        else
+            ((N+=1))
+        fi
+        failed=
+    done
+done
+
+if [[ $F -ne O ]]; then
+    color=$red
+    returncode=1
+else
+    color=$green
+    returncode=0
+fi
+echo "### Summary ###"
+write_output $color "$F tests failed"
+write_output $green "$N tests succeeded"
+trap 0
+rm -fr $TEMPDIR
+exit $returncode

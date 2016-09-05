@@ -1,0 +1,24 @@
+# File to set tests
+# The syntax is the following:
+# test1:
+#   testset: machine1 machine2 # subfolders where tests be run
+#   command: ./test1 param1 # command to test
+#   needed: dir1/file*txt dir2 # files needed
+#   excluded: dir1/file0.txt dir2/file1 # file to exclude
+#   checkfiles: dir2/file1 # files used to check validity
+#   checkscript: ./check.sh # script to check validity
+# test2:
+#   ...
+
+extract:
+  testset: avakas plafrim plafrim2
+  command: mkdir netloc; $NETLOC_UTIL_PATH/infiniband/netloc_ib_extract_dats ib-raw
+  needed: ib-raw
+  checkfiles: netloc/*txt
+
+draw:
+  testset: avakas plafrim
+  command: $NETLOC_UTIL_PATH/draw/netloc_draw_to_json .
+  needed: netloc hwloc
+  excluded: netloc/*json
+  checkfiles: netloc/*json
