@@ -234,4 +234,10 @@ int WINAPI GetSystemMetrics(int nIndex);
 
 ATOM WINAPI RegisterClass(const WNDCLASS *lpWndClass);
 
+/* hide Linux' host disabling _SC_LARGE_PAGESIZE */
+#undef HAVE_DECL__SC_LARGE_PAGESIZE
+#define HAVE_DECL__SC_LARGE_PAGESIZE 1
+#undef _SC_LARGE_PAGESIZE
+#define _SC_LARGE_PAGESIZE 33
+
 #endif /* HWLOC_PORT_WINDOWS_WINDOWS_H */

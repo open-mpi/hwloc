@@ -817,7 +817,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	      memset(obj->memory.page_types, 0, 2 * sizeof(*obj->memory.page_types));
 	      obj->memory.page_types_len = 1;
 	      obj->memory.page_types[0].size = SystemInfo.dwPageSize;
-#ifdef HAVE__SC_LARGE_PAGESIZE
+#if HAVE_DECL__SC_LARGE_PAGESIZE
 	      obj->memory.page_types_len++;
 	      obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
@@ -983,7 +983,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	      memset(obj->memory.page_types, 0, 2 * sizeof(*obj->memory.page_types));
 	      obj->memory.page_types_len = 1;
 	      obj->memory.page_types[0].size = SystemInfo.dwPageSize;
-#ifdef HAVE__SC_LARGE_PAGESIZE
+#if HAVE_DECL__SC_LARGE_PAGESIZE
 	      obj->memory.page_types_len++;
 	      obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif

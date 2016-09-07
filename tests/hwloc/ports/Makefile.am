@@ -51,8 +51,7 @@ libhwloc_port_aix_la_SOURCES = \
 libhwloc_port_aix_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/aix \
         -DHWLOC_AIX_SYS \
-        -DHWLOC_HAVE_PTHREAD_GETTHRDS_NP \
-        -DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+        -DHWLOC_HAVE_PTHREAD_GETTHRDS_NP
 
 nodist_libhwloc_port_bgq_la_SOURCES = topology-bgq.c
 libhwloc_port_bgq_la_SOURCES = \
@@ -67,8 +66,7 @@ libhwloc_port_darwin_la_SOURCES = \
         include/darwin/sys/sysctl.h
 libhwloc_port_darwin_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/darwin \
-        -DHWLOC_DARWIN_SYS \
-        -DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+        -DHWLOC_DARWIN_SYS
 
 nodist_libhwloc_port_freebsd_la_SOURCES = topology-freebsd.c
 libhwloc_port_freebsd_la_SOURCES = \
@@ -119,7 +117,6 @@ libhwloc_port_solaris_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/solaris \
         -DHWLOC_SOLARIS_SYS \
         -DHAVE_LIBLGRP \
-        -DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33 \
         -DHAVE_DECL_LGRP_LATENCY_COOKIE=1 \
         -DHAVE_LIBKSTAT \
         -DHAVE_PICL_H
@@ -129,8 +126,7 @@ libhwloc_port_windows_la_SOURCES = \
         include/windows/windows.h
 libhwloc_port_windows_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/windows \
-        -DHWLOC_WIN_SYS \
-        -DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+        -DHWLOC_WIN_SYS
 
 nodist_liblstopo_port_windows_a_SOURCES = lstopo-windows.c
 liblstopo_port_windows_a_SOURCES = \
