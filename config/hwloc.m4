@@ -412,9 +412,11 @@ EOF])
     ])
 
     AC_CHECK_HEADERS([sys/lgrp_user.h], [
-      AC_CHECK_LIB([lgrp], [lgrp_latency_cookie],
+      AC_CHECK_LIB([lgrp], [lgrp_init],
                    [HWLOC_LIBS="-llgrp $HWLOC_LIBS"
-                    AC_DEFINE([HAVE_LIBLGRP], 1, [Define to 1 if we have -llgrp])])
+                    AC_DEFINE([HAVE_LIBLGRP], 1, [Define to 1 if we have -llgrp])
+                    AC_CHECK_DECLS([lgrp_latency_cookie],,,[[#include <sys/lgrp_user.h>]])
+      ])
     ])
     AC_CHECK_HEADERS([kstat.h], [
       AC_CHECK_LIB([kstat], [main],

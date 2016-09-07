@@ -1,4 +1,4 @@
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -129,7 +129,7 @@ libhwloc_port_solaris_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-DHWLOC_SOLARIS_SYS \
 	-DHAVE_LIBLGRP \
 	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33 \
-	-DHAVE_LGRP_LATENCY_COOKIE \
+	-DHAVE_DECL_LGRP_LATENCY_COOKIE=1 \
 	-DHAVE_LIBKSTAT \
 	-DHAVE_PICL_H
 
