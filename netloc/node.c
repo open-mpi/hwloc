@@ -41,11 +41,11 @@ netloc_node_t * netloc_node_construct()
     node->physical_id[0]  = '\0';
     node->logical_id   = -1;
     node->type    = NETLOC_NODE_TYPE_INVALID;
-    utarray_new(node->physical_links, &node_physical_nodes_icd);
+    utarray_new(node->physical_links, &node_physical_links_icd);
     node->description  = NULL;
     node->userdata     = NULL;
     node->edges        = NULL;
-    utarray_new(node->subnodes, &node_physical_links_icd);
+    utarray_new(node->subnodes, &node_physical_nodes_icd);
     node->paths        = NULL;
     node->hostname     = NULL;
     utarray_new(node->partitions, &node_partitions_icd);
