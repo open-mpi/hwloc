@@ -120,7 +120,7 @@ libhwloc_port_solaris_la_CPPFLAGS = $(common_CPPFLAGS) \
         -DHWLOC_SOLARIS_SYS \
         -DHAVE_LIBLGRP \
         -DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33 \
-        -DHAVE_LGRP_LATENCY_COOKIE \
+        -DHAVE_DECL_LGRP_LATENCY_COOKIE=1 \
         -DHAVE_LIBKSTAT \
         -DHAVE_PICL_H
 

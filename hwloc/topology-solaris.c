@@ -415,7 +415,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
   if (nlgrps > 0) {
     hwloc_obj_t *glob_lgrps = calloc(nlgrps, sizeof(hwloc_obj_t));
     browse(topology, cookie, root, glob_lgrps, &curlgrp);
-#ifdef HAVE_LGRP_LATENCY_COOKIE
+#if HAVE_DECL_LGRP_LATENCY_COOKIE
     if (nlgrps > 1) {
       float *distances = calloc(curlgrp*curlgrp, sizeof(float));
       unsigned *indexes = calloc(curlgrp,sizeof(unsigned));
@@ -427,7 +427,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
       }
       hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, curlgrp, indexes, glob_lgrps, distances, 0 /* OS cannot force */);
     } else
-#endif /* HAVE_LGRP_LATENCY_COOKIE */
+#endif /* HAVE_DECL_LGRP_LATENCY_COOKIE */
       free(glob_lgrps);
   }
   lgrp_fini(cookie);
