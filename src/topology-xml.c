@@ -573,12 +573,13 @@ hwloc__xml_import_distances(struct hwloc_xml_backend_data_s *data,
       free(distances);
     } else {
       /* queue the distance */
+      distances->prev = data->last_distances;
+      distances->next = NULL;
       if (data->last_distances)
 	data->last_distances->next = distances;
       else
 	data->first_distances = distances;
-      distances->prev = data->last_distances;
-      distances->next = NULL;
+      data->last_distances = distances;
     }
   }
 

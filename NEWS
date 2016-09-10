@@ -21,6 +21,7 @@ Version 1.11.5
 --------------
 * Reenable distance gathering on Solaris, disabled by mistake since v1.0.
   Thanks to TU Wien for the help.
+* Fix XML import of multiple distance matrices.
 
 
 Version 1.11.4
