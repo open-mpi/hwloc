@@ -17,8 +17,7 @@ bin_PROGRAMS = \
         lstopo-no-graphics
 
 EXTRA_DIST = \
-        test-lstopo.output \
-        test-lstopo-distances.output
+        test-lstopo.output
 
 lstopo_no_graphics_SOURCES = \
         lstopo.h \
@@ -61,8 +60,7 @@ nodist_man_MANS = $(man1_pages)
 
 if !HWLOC_HAVE_MINGW32
 TESTS = \
-        test-lstopo.sh \
-        test-lstopo-distances.sh
+        test-lstopo.sh
 endif !HWLOC_HAVE_MINGW32
 
 if HWLOC_HAVE_CAIRO
