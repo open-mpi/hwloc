@@ -21,20 +21,25 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "  <annotation> may be:\n");
 	fprintf(where, "    info <name> <value>\n");
 	fprintf(where, "    misc <name>\n");
+	fprintf(where, "    distances <filename> [<flags>]\n");
 	fprintf(where, "    none\n");
         fprintf(where, "Options:\n");
 	fprintf(where, "  --ci\tClear existing infos\n");
 	fprintf(where, "  --ri\tReplace or remove existing infos with same name (annotation must be info)\n");
 	fprintf(where, "  --cu\tClear existing userdata\n");
+	fprintf(where, "  --cd\tClear existing distances\n");
 }
 
 static char *infoname = NULL, *infovalue = NULL;
-
 static char *miscname = NULL;
+static char *distancesfilename = NULL;
+
+static unsigned long distancesflags = 0;
 
 static int clearinfos = 0;
 static int replaceinfos = 0;
 static int clearuserdata = 0;
+static int cleardistances = 0;
 
 static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 {
@@ -100,6 +105,129 @@ hwloc_calc_process_arg_info_cb(void *_data,
 	apply(topology, obj);
 }
 
+static void
+hwloc_calc_get_obj_cb(void *_data,
+		      hwloc_obj_t obj,
+		      int verbose __hwloc_attribute_unused)
+{
+	*(hwloc_obj_t*)_data = obj;
+}
+
+static void
+add_distances(hwloc_topology_t topology, unsigned topodepth)
+{
+	unsigned long kind = 0;
+	unsigned nbobjs = 0;
+	hwloc_obj_t *objs = NULL;
+	float *values = NULL;
+	FILE *file;
+	char line[64];
+	unsigned i, x, y, z;
+	int err;
+
+	file = fopen(distancesfilename, "r");
+	if (!file) {
+		fprintf(stderr, "Failed to open distances file %s\n", distancesfilename);
+		return;
+	}
+
+	if (!fgets(line, sizeof(line), file)) {
+		fprintf(stderr, "Failed to read kind line\n");
+		goto out;
+	}
+	kind = strtoul(line, NULL, 0);
+
+	if (!fgets(line, sizeof(line), file)) {
+		fprintf(stderr, "Failed to read nbobjs line\n");
+		goto out;
+	}
+	nbobjs = strtoul(line, NULL, 0);
+	if (nbobjs < 2) {
+		fprintf(stderr, "Invalid distances with nbobjs == %u\n", nbobjs);
+		goto out;
+	}
+
+	objs = malloc(nbobjs * sizeof(*objs));
+	values = malloc(nbobjs*nbobjs * sizeof(*values));
+	if (!objs || !values)
+		goto out;
+
+	for(i=0; i<nbobjs; i++) {
+		size_t typelen;
+		hwloc_obj_t obj = NULL;
+		if (!fgets(line, sizeof(line), file)) {
+			fprintf(stderr, "Failed to read object #%u line\n", i);
+			goto out;
+		}
+		typelen = strspn(line, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+		if (typelen && line[typelen] == ':') {
+			size_t length = strspn(line+typelen+1, "0123456789");
+			line[typelen+1+length] = '\0';
+			err = hwloc_calc_process_type_arg(topology, topodepth, line, typelen, 1,
+							  hwloc_calc_get_obj_cb, &obj,
+							  0);
+			if (err < 0)
+				goto out;
+		} else {
+			fprintf(stderr, "Cannot parse object #%u line\n", i);
+			goto out;
+		}
+		if (!obj)
+			goto out;
+
+		objs[i] = obj;
+	}
+
+	/* scan the first value line to see if we have all of them or just a combination */
+	if (!fgets(line, sizeof(line), file)) {
+		fprintf(stderr, "Failed to read object #%u line\n", i);
+		goto out;
+	}
+	z = 1; /* default if sscanf finds only 2 values below */
+	if (sscanf(line, "%u*%u*%u", &x, &y, &z) >= 2) {
+		/* combination: generate the matrix to create x groups of y elements */
+		unsigned j;
+		if (x*y*z != nbobjs) {
+			fprintf(stderr, "Invalid distances combination (%u*%u*%u=%u instead of %u)\n",
+				x, y, z, x*y*z, nbobjs);
+			goto out;
+		}
+		for(i=0; i<nbobjs; i++)
+			for(j=0; j<nbobjs; j++)
+				if (i==j)
+					values[i*nbobjs+j] = 10.f;
+				else if (i/z == j/z)
+					values[i*nbobjs+j] = 20.f;
+				else if (i/z/y == j/z/y)
+					values[i*nbobjs+j] = 40.f;
+				else
+					values[i*nbobjs+j] = 80.f;
+	} else {
+		/* read all other values */
+		values[0] = (float) atof(line);
+
+		for(i=1; i<nbobjs*nbobjs; i++) {
+			if (!fgets(line, sizeof(line), file)) {
+				fprintf(stderr, "Failed to read object #%u line\n", i);
+				goto out;
+			}
+			values[i] = (float) atof(line);
+		}
+	}
+
+	err = hwloc_distances_add(topology, nbobjs, objs, values, kind, distancesflags);
+	if (err < 0) {
+		fprintf(stderr, "Failed to add distances\n");
+		goto out;
+	}
+
+out:
+	free(objs);
+	free(values);
+	fclose(file);
+	return;
+}
+
 int main(int argc, char *argv[])
 {
 	hwloc_topology_t topology;
@@ -123,6 +251,8 @@ int main(int argc, char *argv[])
 			replaceinfos = 1;
 		else if (!strcmp(argv[0], "--cu"))
 			clearuserdata = 1;
+		else if (!strcmp(argv[0], "--cd"))
+			cleardistances = 1;
 		else {
 			fprintf(stderr, "Unrecognized options: %s\n", argv[0]);
 			usage(callname, stderr);
@@ -161,6 +291,15 @@ int main(int argc, char *argv[])
 		}
 		miscname = argv[1];
 
+	} else if (!strcmp(argv[0], "distances")) {
+		if (argc < 2) {
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
+		distancesfilename = argv[1];
+		if (argc >= 3)
+			distancesflags = strtoul(argv[2], NULL, 0);
+
 	} else if (!strcmp(argv[0], "none")) {
 		/* do nothing (maybe clear) */
 	} else {
@@ -190,7 +329,13 @@ int main(int argc, char *argv[])
 
 	topodepth = hwloc_topology_get_depth(topology);
 
-	if (!strcmp(location, "all")) {
+	if (cleardistances) {
+		hwloc_distances_remove(topology);
+	}
+
+	if (distancesfilename) {
+		add_distances(topology, topodepth);
+	} else if (!strcmp(location, "all")) {
 		apply_recursive(topology, hwloc_get_root_obj(topology));
 	} else if (!strcmp(location, "root")) {
 		apply(topology, hwloc_get_root_obj(topology));

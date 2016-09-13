@@ -37,6 +37,7 @@ fi
   (umask 077 && mkdir "$tmp")
 } || exit $?
 file="$tmp/test-hwloc-annotate.output"
+distances="$tmp/test-hwloc-annotate.distances"
 
 set -e
 
@@ -56,6 +57,16 @@ $annotate $file $file pci=0000:02:00.0 info mypcidev bybusid
 $annotate $file $file 'pci[8086:0046]:all' info mypcidev bymatch
 $annotate $file $file bridge:all info mybridges all
 $annotate --cu $file $file L1iCache:0 none
+$annotate --cd $file $file dummy none
+cat > $distances << EOF
+5
+3
+pu:2
+pu:0
+pu:1
+3*1
+EOF
+$annotate $file $file dummy distances $distances
 
 diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-annotate.output "$file"
 rm -rf "$tmp"
