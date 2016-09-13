@@ -10,6 +10,8 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # Add your output files here.
 xml_outputs = \
         16amd64-8n2c-cpusets.xml \
+        16amd64-4distances.xml \
+        16amd64-4distances.console.output \
         16em64t-4s2c2t.xml \
         16em64t-4s2c2t-offlines.xml \
         16em64t-4s2c2t.console.output \
@@ -33,6 +35,7 @@ xml_outputs = \
 # Each output `xyz.output' must have a corresponding `xyz.xml' source file,
 # or a `xyz.source' file specifying its source file.
 xml_source = \
+        16amd64-4distances.console.source \
         16em64t-4s2c2t.console.source \
         16-2gr2gr2n2c+misc.console.source \
         16intel64-manyVFs.console.source \
@@ -44,6 +47,7 @@ xml_source = \
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
 xml_options = \
+        16amd64-4distances.console.options \
         16em64t-4s2c2t.console.options \
         16intel64-manyVFs.console.options \
         16intel64-manyVFs.console.nocollapse.options \
@@ -56,6 +60,7 @@ xml_options = \
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 xml_envs = \
+        16amd64-4distances.console.env \
         64intel64-3g2n+2n-irregulargroups+pci.console.env
 
 # Only run the tests if we're building standalone, because the tests
