@@ -179,14 +179,17 @@ static int build_current_arch(SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
         return ret;
     }
 
-    SCOTCH_Arch scotch_arch;
-    ret = arch_tree_to_scotch_arch(arch->arch.global_tree, &scotch_arch);
+    SCOTCH_Arch *scotch_arch = (SCOTCH_Arch *)malloc(sizeof(SCOTCH_Arch));
+      /* FIXME: hack to prevent a bug in scotch (arch needs to remain allocated
+       * for using subarch)
+       */
+    ret = arch_tree_to_scotch_arch(arch->arch.global_tree, scotch_arch);
     if (NETLOC_SUCCESS != ret) {
         return ret;
     }
 
     /* Now we can build the sub architecture */
-    ret = build_subarch(&scotch_arch, arch->num_current_hosts,
+    ret = build_subarch(scotch_arch, arch->num_current_hosts,
             arch->current_hosts, scotch_subarch);
     return ret;
 }
