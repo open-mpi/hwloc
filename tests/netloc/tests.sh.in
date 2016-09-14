@@ -24,14 +24,32 @@ function write_output
 function quit
 {
     write_output $red "Test failed"
-    read
     rm -fr $TEMPDIR
 }
 
-function getvalue
+function getvalues
 {
-    echo "$params" | $GREP -P "^\s*$1:" | $SED 's/^.*:\s*//'
+    for i in $@; do
+        echo "$params" | $GREP -P "^\s*$1:" | $SED 's/^.*:\s*//'
+    done | tr '\n' ' '
 }
+
+function getCopies
+{
+    local t=$1
+    local copies=$(getvalues copy copy_${t})
+    for f in $copies; do
+        local name=$(echo $f | $SED 's/\([^=]*\)\(=.*\)\?/\1/')
+        local ext=$(echo $f | $SED 's/\([^=]*\)\(=.*\)\?/\2/')
+        if [ -z "$ext" ]; then
+            test -e $REFDIR/$name || cp -r "$NETLOC_TESTS_PATH/data/$name" "$REFDIR"
+        elif [ "$ext" = "=txz" ]; then
+            # TODO prevent from extracting it again
+            tar --use-compress-program=$COMPRESS -xf "$NETLOC_TESTS_PATH/data/$name.txz" -C "$REFDIR"
+        fi
+    done
+}
+
 
 trap 'quit' 0
 set -e
@@ -62,38 +80,39 @@ TESTFILE=$REFDIR/tests.txt; cp $NETLOC_TESTS_PATH/data/tests.txt $REFDIR
 $SED -i 's/#.*$//g; /^\s*$/d' $TESTFILE
 
 # Get tests
-tests=$($GREP -P "^[^\s]*:\s*" $TESTFILE | sed 's/:\s*$//')
+tests=$($GREP -P "^[^\s]*:\s*" $TESTFILE | $SED 's/:\s*$//')
 
 S=0
 F=0
-for t in $tests; do
-    params=$($AWK '/^'$t':\s*$/{flag=1;next} /^\S*:\s*$/{flag=0}flag' $TESTFILE)
 
-    sets=$(getvalue testset)
+for t in $tests; do
+    params_sv=$($AWK '/^'$t':\s*$/{flag=1;next} /^\S*:\s*$/{flag=0}flag' $TESTFILE)
+    params="$params_sv"
+    sets=$(getvalues testset)
 
     # For each set to test
     for s in $sets; do
+        NETLOC_TEST=$s
+        params="$(echo "$params_sv" | $SED 's/%/'$NETLOC_TEST'/g')"
         mkdir $TESTDIR
 
-        # Extract files if needed
-        cd "$REFDIR"
-        if [ ! -d "$s" ]; then
-            cp "$NETLOC_TESTS_PATH/data/$s.txz" .
-            tar --use-compress-program=$COMPRESS -xf "$s.txz"
-            rm -r "$s.txz"
-        fi
+        # Copy or extract files if needed
+        getCopies $s
 
         # Copy needed files
-        needed=$(getvalue needed)
-        cd "$REFDIR/$s"
+        cd "$REFDIR"
+        needed=$(getvalues needed)
         if [ -z "needed" ]; then
-            cp -r --parents . $TESTDIR
+            cp -r $s $TESTDIR
         else
-            cp -r --parents $needed $TESTDIR
+            files=$(eval "echo \"$needed\"")
+            for f in $files; do
+                cp -r --parents "$f" "$TESTDIR"
+            done
         fi
 
         # Remove excluded files
-        excluded=$(getvalue exluded)
+        excluded=$(getvalues exluded)
         if [ -n "$excluded" ]; then
             rm -r $excluded
         fi
@@ -101,27 +120,43 @@ for t in $tests; do
         while true; do
             # Execute the command
             cd $TESTDIR
-            cmd=$(getvalue command)
+            cmd=$(getvalues command)
             eval " $cmd" > /dev/null || \
                 {
                     echo "Command $command failed"
-                    write_output $red "Test $t on $s failed!"
+                    write_output $red "Test $t on $NETLOC_TEST failed!"
                     failed=1
                     break
                 }
 
             # Check files
-            cd "$REFDIR/$s"
-            checkfiles=$(getvalue checkfiles)
+            cd "$REFDIR"
+            checkfiles=$(getvalues checkfiles)
             for cf in $checkfiles; do
-                cmp --silent "$cf" "$TESTDIR/$cf" || \
-                    {
-                        echo "$cf: wrong file"
-                        write_output $red "Test $t on $s failed!"
-                        failed=1
-                        break
-                    }
+                files=$(eval "echo \"$cf\"")
+                for f in $files; do
+                    cmp "$f" "$TESTDIR/$f" || \
+                        {
+                            echo "$f: wrong file"
+                            write_output $red "Test $t on $NETLOC_TEST failed!"
+                            failed=1
+                            break
+                        }
+                done
             done
+            if [ "$failed" = 1 ]; then break; fi
+
+            # Check program
+            cd $TESTDIR
+            cmd=$(getvalues checkcommand)
+            eval " $cmd" > /dev/null || \
+                {
+                    echo "Check command $command failed"
+                    write_output $red "Test $t on $NETLOC_TEST failed!"
+                    failed=1
+                    break
+                }
+
             break
         done
 
@@ -129,7 +164,7 @@ for t in $tests; do
         if [ -n "$failed" ]; then
             ((F+=1))
         else
-            ((N+=1))
+            ((S+=1))
         fi
         failed=
     done
@@ -144,7 +179,7 @@ else
 fi
 echo "### Summary ###"
 write_output $color "$F tests failed"
-write_output $green "$N tests succeeded"
+write_output $green "$S tests succeeded"
 trap 0
 rm -fr $TEMPDIR
 exit $returncode
