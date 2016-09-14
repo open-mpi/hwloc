@@ -204,7 +204,9 @@ static void output_distances(struct lstopo_output *loutput)
   err = hwloc_distances_get(topology, &nr, dist, 0, 0);
   if (!err) {
     for(j=0; j<nr; j++) {
-      fprintf(output, "Relative latency matrix between %u %ss (depth %u) by %s indexes:\n",
+      const char *kindmeans = (dist[j]->kind & HWLOC_DISTANCES_KIND_MEANS_LATENCY) ? "latency" : (dist[j]->kind & HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH) ? "bandwidth" : "distance";
+      fprintf(output, "Relative %s matrix (kind %lu) between %u %ss (depth %u) by %s indexes:\n",
+	      kindmeans, dist[j]->kind,
 	      dist[j]->nbobjs,
 	      hwloc_type_name(dist[j]->objs[0]->type),
 	      dist[j]->objs[0]->depth,

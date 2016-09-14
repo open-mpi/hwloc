@@ -284,7 +284,7 @@ depth 0:	1 Machine (type #1)
       depth 6:	64 L1dCache (type #6)
        depth 7:	64 Core (type #4)
         depth 8:	64 PU (type #5)
-Relative latency matrix between 8 NUMANodes (depth 2) by logical indexes:
+Relative latency matrix (kind 5) between 8 NUMANodes (depth 2) by logical indexes:
   index     0     1     2     3     4     5     6     7
       0 10.000 16.000 16.000 22.000 16.000 22.000 16.000 22.000
       1 16.000 10.000 22.000 16.000 16.000 22.000 22.000 16.000
