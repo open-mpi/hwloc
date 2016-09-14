@@ -107,6 +107,12 @@ static void contents_add(contents_t *contents, char *string)
     contents->num++;
 }
 
+static void contents_destruct(contents_t *contents)
+{
+    free(contents->strings);
+    free(contents);
+}
+
 static void contents_cat(contents_t *dest, contents_t *src)
 {
     int size = src->num;
@@ -168,7 +174,7 @@ void json_dict_add(json_t *dict, char *field, json_t *child)
     contents_add(dict->contents, field_string);
     contents_t *child_contents = get_content_and_destroy(child);
     contents_cat(dict->contents, child_contents);
-    free(child_contents);
+    contents_destruct(child_contents);
 }
 
 json_t *json_array_new()
@@ -189,7 +195,7 @@ void json_array_add(json_t *array, json_t *child)
     }
     contents_t *child_contents = get_content_and_destroy(child);
     contents_cat(array->contents, child_contents);
-    free(child_contents);
+    contents_destruct(child_contents);
 }
 
 json_t *json_string_new(char *value)
@@ -242,6 +248,7 @@ void json_free(json_t *object)
         free(object->contents->strings[i]);
     }
     free(object->contents->strings);
+    free(object->contents);
     free(object);
 }
 
@@ -443,7 +450,7 @@ static int handle_partitions(netloc_topology_t *topology, json_t *json_partition
     netloc_topology_iter_partitions(topology, ppartition) {
         json_array_add(json_partitions, json_string_new(*ppartition));
     }
-    return 0; // TODO
+    return 0;
 }
 
 static int handle_topos(netloc_topology_t *topology, json_t *json_topos)
@@ -452,7 +459,7 @@ static int handle_topos(netloc_topology_t *topology, json_t *json_topos)
     netloc_topology_iter_hwloctopos(topology, ptopo) {
         json_array_add(json_topos, json_string_new(*ptopo));
     }
-    return 0; // TODO
+    return 0;
 }
 
 static int write_json(netloc_topology_t *topology, FILE *output)
@@ -500,7 +507,7 @@ static int write_json(netloc_topology_t *topology, FILE *output)
     json_write(output, json_root);
     json_free(json_root);
 
-    return 0; // TODO
+    return 0;
 }
 
 static int netloc_to_json_draw(netloc_topology_t *topology, int simplify)
@@ -519,6 +526,7 @@ static int netloc_to_json_draw(netloc_topology_t *topology, int simplify)
 
     asprintf(&draw, "%s-%s%s.json", basename, "draw", simplify ? "-simple": "");
     output = fopen(draw, "w");
+    free(draw);
     if (output == NULL) {
         perror("fopen: ");
         ret = NETLOC_ERROR;
@@ -578,12 +586,15 @@ int main(int argc, char **argv)
 
     // Search for the specific network
     ret = netloc_network_find(netloc_dir, network);
+    free(netloc_dir);
     if( NETLOC_SUCCESS != ret ) {
         fprintf(stderr, "Error: network not found!\n");
         netloc_network_destruct(network);
         return NETLOC_ERROR;
     }
-    printf("Found Network: %s\n", netloc_network_pretty_print(network));
+    char *network_str = netloc_network_pretty_print(network);
+    printf("Found Network: %s\n", network_str);
+    free(network_str);
 
     // Attach to the network
     topology = netloc_topology_construct(network);
@@ -591,11 +602,14 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error: netloc_topology_construct failed\n");
         return ret;
     }
+    netloc_network_destruct(network);
 
     // TODO do this automatically as before
     netloc_topology_load(topology);
 
     netloc_to_json_draw(topology, simplify);
+
+    netloc_topology_destruct(topology);
 
     return 0;
 

@@ -133,8 +133,6 @@ typedef struct netloc_network_t {
     /** Metadata about network information */
     char * version;
 
-    int refcount;
-
     /**
      * Application-given private data pointer.
      * Initialized to NULL, and not used by the netloc library.
@@ -572,6 +570,12 @@ netloc_physical_link_t * netloc_physical_link_construct();
 int netloc_physical_link_destruct(netloc_physical_link_t *link);
 
 char * netloc_link_pretty_print(netloc_physical_link_t* link);
+
+/*************************************************/
+
+
+netloc_path_t *netloc_path_construct(void);
+int netloc_path_destruct(netloc_path_t *path);
 
 
 /**********************************************************************

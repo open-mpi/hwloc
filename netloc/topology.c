@@ -24,8 +24,6 @@ static int edge_merge_into(netloc_edge_t *dest, netloc_edge_t *src, int keep);
 netloc_topology_t *netloc_topology_construct(netloc_network_t *network)
 {
     netloc_topology_t *topology = NULL;
-    static UT_icd partitions_icd = {sizeof(char *), NULL, NULL, NULL };
-    static UT_icd topos_icd = {sizeof(char *), NULL, NULL, NULL };
 
     /*
      * Allocate Memory
@@ -43,9 +41,9 @@ netloc_topology_t *netloc_topology_construct(netloc_network_t *network)
     topology->nodes_loaded   = 0;
     topology->nodes          = NULL;
     topology->physical_links = NULL;
-    utarray_new(topology->partitions, &partitions_icd );
-    utarray_new(topology->topos, &topos_icd );
     topology->type           = NETLOC_TOPOLOGY_TYPE_INVALID ;
+    utarray_new(topology->partitions, &ut_str_icd);
+    utarray_new(topology->topos, &ut_str_icd);
 
     return topology;
 }
@@ -60,12 +58,39 @@ int netloc_topology_destruct(netloc_topology_t *topology)
         return NETLOC_ERROR;
     }
 
-    /*
-     * Free Memory
-     */
+    /* Network */
     netloc_network_destruct(topology->network);
 
-    // TODO
+    /* Nodes */
+    netloc_node_t *node, *node_tmp;
+    HASH_ITER(hh2, topology->nodes, node, node_tmp) {
+        HASH_DELETE(hh2, topology->nodesByHostname, node);
+    }
+
+    netloc_topology_iter_nodes(topology, node, node_tmp) {
+        HASH_DELETE(hh, topology->nodes, node);
+        netloc_node_destruct(node);
+    }
+
+    /** Partition List */
+    utarray_free(topology->partitions);
+
+    /** Physical links */
+    netloc_physical_link_t *link, *link_tmp;
+    HASH_ITER(hh, topology->physical_links, link, link_tmp) {
+        HASH_DEL(topology->physical_links, link);
+        netloc_physical_link_destruct(link);
+    }
+
+    /** Hwloc topology List */
+    for (int t = 0; t < utarray_len(topology->topos); t++) {
+        if (topology->hwloc_topos[t])
+            hwloc_topology_destroy(topology->hwloc_topos[t]);
+    }
+    free(topology->hwloc_topos);
+
+    /** Hwloc topology name List */
+    utarray_free(topology->topos);
 
     free(topology);
 
@@ -184,8 +209,7 @@ int netloc_topology_load(netloc_topology_t *topology)
         char *field;
 
         while ((field = line_get_next_field(&remain_line))) {
-            char *name = strdup(field);
-            utarray_push_back(topology->partitions, &name);
+            utarray_push_back(topology->partitions, &field);
         }
     }
 
@@ -201,9 +225,8 @@ int netloc_topology_load(netloc_topology_t *topology)
 
         HASH_FIND_STR(topology->nodes, src_id, node);
 
-        path = (netloc_path_t *)malloc(sizeof(netloc_path_t));
+        path = netloc_path_construct();
         strcpy(path->dest_id, dest_id);
-        utarray_new(path->links, &ut_ptr_icd);
 
         while ((field = line_get_next_field(&remain_line))) {
             int link_id = atoi(field);
@@ -217,6 +240,7 @@ int netloc_topology_load(netloc_topology_t *topology)
     }
 
     fclose(input);
+    free(line);
 
     if (find_reverse_edges(topology) != NETLOC_SUCCESS) {
         return NETLOC_ERROR;
@@ -225,21 +249,6 @@ int netloc_topology_load(netloc_topology_t *topology)
     ret = find_similar_nodes(topology);
 
     return ret;
-}
-
-int netloc_topology_copy(netloc_topology_t *src, netloc_topology_t **dup)
-{
-   netloc_topology_t *new = (netloc_topology_t *)
-       malloc(sizeof(netloc_topology_t));
-
-   new->network = src->network;
-   new->network->refcount++;
-
-   new->nodes_loaded = src->nodes_loaded;
-
-   *dup = new;
-
-    return NETLOC_SUCCESS;
 }
 
 int netloc_topology_find_partition_idx(netloc_topology_t *topology, char *partition_name)
@@ -325,6 +334,7 @@ static int find_similar_nodes(netloc_topology_t * topology)
         idx++;
         if (netloc_node_is_host(node)) {
             nodes[idx] = NULL;
+            edgedest_by_node[idx] = NULL;
             continue;
         }
         int num_edges = HASH_COUNT(node->edges);
@@ -340,7 +350,7 @@ static int find_similar_nodes(netloc_topology_t * topology)
         }
     }
 
-    /* We compare the edge lits to find similar nodes */
+    /* We compare the edge lists to find similar nodes */
     UT_array *similar_nodes;
     utarray_new(similar_nodes, &ut_ptr_icd);
     for (int idx1 = 0; idx1 < num_nodes; idx1++) {
@@ -464,6 +474,11 @@ static int find_similar_nodes(netloc_topology_t * topology)
     ret = NETLOC_SUCCESS;
 ERROR:
     free(nodes);
+
+    for (int idx = 0; idx < num_nodes; idx++) {
+        if (edgedest_by_node[idx])
+            free(edgedest_by_node[idx]);
+    }
     free(edgedest_by_node);
     free(num_edges_by_node);
     free(similar_nodes);

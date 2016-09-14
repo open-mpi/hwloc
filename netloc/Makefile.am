@@ -29,6 +29,7 @@ sources = \
         edge.c \
         node.c \
         physical_link.c \
+        path.c \
         architecture.c \
         hwloc.c \
         mpicomm.c

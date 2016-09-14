@@ -18,6 +18,8 @@
 #include <netloc.h>
 #include <hwloc.h>
 
+static UT_icd topos_icd = {sizeof(hwloc_topology_t), NULL, NULL, NULL};
+
 int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
         netloc_node_t **node_list)
 {
@@ -36,10 +38,9 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
         closedir(dir);
     }
 
-    UT_array *hwloc_topo_names;
-    utarray_new(hwloc_topo_names, &ut_str_icd);
+    UT_array *hwloc_topo_names = topology->topos;
     UT_array *hwloc_topos;
-    utarray_new(hwloc_topos, &ut_ptr_icd);
+    utarray_new(hwloc_topos, &topos_icd);
 
     int num_diffs = 0;
 
@@ -103,35 +104,37 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
             ret = hwloc_topology_set_xml(topology, hwloc_ref_path);
             free(hwloc_ref_path);
             if (ret == -1) {
-                void *topology = NULL;
-                utarray_push_back(hwloc_topos, &topology);
+                void *null = NULL;
+                utarray_push_back(hwloc_topos, &null);
                 fprintf(stdout, "Warning: no topology for %s\n", refname);
+                hwloc_topology_destroy(topology);
+                free(refname); free(hwloc_file);
                 continue;
             }
 
             ret = hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
             if (ret == -1) {
                 fprintf(stderr, "hwloc_topology_set_all_types_filter failed\n");
+                free(refname); free(hwloc_file);
                 goto ERROR;
             }
 
             ret = hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
             if (ret == -1) {
                 fprintf(stderr, "hwloc_topology_set_all_types_filter failed\n");
+                free(refname); free(hwloc_file);
                 goto ERROR;
             }
 
             ret = hwloc_topology_load(topology);
             if (ret == -1) {
                 fprintf(stderr, "hwloc_topology_load failed\n");
+                free(refname); free(hwloc_file);
                 goto ERROR;
             }
             utarray_push_back(hwloc_topos, &topology);
         }
-        /* Topology already present */
-        else {
-            free(refname);
-        }
+        free(refname);
         free(hwloc_file);
         node->hwlocTopo = *(hwloc_topology_t *)utarray_eltptr(hwloc_topos, t);
     }
@@ -142,6 +145,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
 
     topology->topos = hwloc_topo_names;
     topology->hwloc_topos = (hwloc_topology_t *)hwloc_topos->d;
+    free(hwloc_topos);
 
     printf("%d hwloc topologies found:\n", utarray_len(topology->topos));
     // XXX XXX XXX XXX XXX XXX XXX faire pareil pour recherche partitions

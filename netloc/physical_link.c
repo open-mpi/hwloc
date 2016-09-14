@@ -53,6 +53,10 @@ netloc_physical_link_t * netloc_physical_link_construct()
 
 int netloc_physical_link_destruct(netloc_physical_link_t *link)
 {
+    free(link->width);
+    free(link->description);
+    free(link->speed);
+    utarray_free(link->partitions);
     free(link);
     return NETLOC_SUCCESS;
 }

@@ -56,7 +56,16 @@ char * netloc_edge_pretty_print(netloc_edge_t* edge)
 
 int netloc_edge_destruct(netloc_edge_t * edge)
 {
-    // TODO
+    utarray_free(edge->physical_links);
+    utarray_free(edge->partitions);
+
+    for (int e = 0; e < netloc_edge_get_num_subedges(edge); e++) {
+        netloc_edge_t *subedge;
+        subedge = netloc_edge_get_subedge(edge, e);
+        netloc_edge_destruct(subedge);
+    }
+    utarray_free(edge->subnode_edges);
+    free(edge);
     return NETLOC_SUCCESS;
 }
 

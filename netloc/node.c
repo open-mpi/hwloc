@@ -29,12 +29,14 @@ static UT_icd node_physical_nodes_icd = {
 
 static UT_icd node_partitions_icd = { sizeof(int), NULL, NULL, NULL };
 
+static int node_or_subnode_destruct(netloc_node_t * node, int is_node);
+
 netloc_node_t * netloc_node_construct()
 {
     netloc_node_t *node = NULL;
 
     node = (netloc_node_t*)malloc(sizeof(netloc_node_t));
-    if( NULL == node ) {
+    if (NULL == node) {
         return NULL;
     }
 
@@ -56,7 +58,48 @@ netloc_node_t * netloc_node_construct()
 
 int netloc_node_destruct(netloc_node_t * node)
 {
-    // TODO
+    return node_or_subnode_destruct(node, 1);
+}
+
+static int node_or_subnode_destruct(netloc_node_t * node, int is_node)
+{
+    utarray_free(node->physical_links);
+
+    /* Description */
+    free(node->description);
+
+    /* Edges */
+    netloc_edge_t *edge, *edge_tmp;
+    HASH_ITER(hh, node->edges, edge, edge_tmp) {
+        HASH_DEL(node->edges, edge);  /* delete; edge advances to next */
+        netloc_edge_destruct(edge);
+    }
+
+    /* Subnodes */
+    for (int n = 0; n < utarray_len(node->subnodes); n++) {
+        netloc_node_t *subnode = *(netloc_node_t **)
+            utarray_eltptr(node->subnodes, n);
+        node_or_subnode_destruct(subnode, 0);
+    }
+    utarray_free(node->subnodes);
+
+    /* Paths */
+    netloc_path_t *path, *path_tmp;
+    HASH_ITER(hh, node->paths, path, path_tmp) {
+        HASH_DEL(node->paths, path);  /* delete; path advances to next */
+        netloc_path_destruct(path);
+    }
+
+    /* Hostname */
+    free(node->hostname);
+
+    /* Partitions */
+    utarray_free(node->partitions);
+
+    /* hwlocTopo: nothing to do beacause the pointer is stored also in the topology */
+
+    free(node);
+
     return NETLOC_SUCCESS;
 }
 

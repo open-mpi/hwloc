@@ -175,7 +175,6 @@ netloc_network_t * netloc_network_construct(void)
     network->path_uri     = NULL;
     network->description  = NULL;
     network->version      = NULL;
-    network->refcount     = 1;
     network->userdata     = NULL;
 
     return network;
@@ -183,48 +182,46 @@ netloc_network_t * netloc_network_construct(void)
 
 int netloc_network_destruct(netloc_network_t * network)
 {
-    if( NULL == network )
+    if (NULL == network)
         return NETLOC_SUCCESS;
+    printf("hohey\n");
 
-    if (--network->refcount <= 0)
-        return NETLOC_SUCCESS;
-
-    if( NULL != network->subnet_id ) {
+    if (NULL != network->subnet_id) {
         free(network->subnet_id);
         network->subnet_id = NULL;
     }
 
-    if( NULL != network->data_uri ) {
+    if (NULL != network->data_uri) {
         free(network->data_uri);
         network->data_uri = NULL;
     }
 
-    if( NULL != network->node_uri ) {
+    if (NULL != network->node_uri) {
         free(network->node_uri);
         network->node_uri = NULL;
     }
 
-    if( NULL != network->path_uri ) {
+    if( NULL != network->path_uri) {
         free(network->path_uri);
         network->path_uri = NULL;
     }
 
-    if( NULL != network->phy_path_uri ) {
+    if( NULL != network->phy_path_uri) {
         free(network->phy_path_uri);
         network->phy_path_uri = NULL;
     }
 
-    if( NULL != network->description ) {
+    if( NULL != network->description) {
         free(network->description);
         network->description = NULL;
     }
 
-    if( NULL != network->version ) {
+    if( NULL != network->version) {
         free(network->version);
         network->version = NULL;
     }
 
-    if( NULL != network->userdata ) {
+    if( NULL != network->userdata) {
         network->userdata = NULL;
     }
 
