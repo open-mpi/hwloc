@@ -718,6 +718,10 @@ EOF])
       hwloc_pciaccess_happy=yes
       HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [pciaccess.h], [:], [hwloc_pciaccess_happy=no])
 
+      # Only add the REQUIRES if we got pciaccess through pkg-config.
+      # Otherwise we don't know if pciaccess.pc is installed
+      AS_IF([test "$hwloc_pciaccess_happy" = "yes"], [HWLOC_PCIACCESS_REQUIRES=pciaccess])
+
       # Just for giggles, if we didn't find a pciaccess pkg-config,
       # just try looking for its header file and library.
       AS_IF([test "$hwloc_pciaccess_happy" != "yes"],
@@ -729,8 +733,7 @@ EOF])
          ])
 
       AS_IF([test "$hwloc_pciaccess_happy" = "yes"],
-         [HWLOC_PCIACCESS_REQUIRES=pciaccess
-          hwloc_components="$hwloc_components pci"
+         [hwloc_components="$hwloc_components pci"
           hwloc_pci_component_maybeplugin=1])
     fi
     # If we asked for pci support but couldn't deliver, fail
@@ -903,6 +906,8 @@ EOF])
             AC_DEFINE([HWLOC_HAVE_GL], [1], [Define to 1 if you have the GL module components.])
 	    HWLOC_GL_LIBS="-lXNVCtrl -lXext -lX11"
 	    AC_SUBST(HWLOC_GL_LIBS)
+	    # FIXME we actually don't know if xext.pc and x11.pc are installed
+	    # since we didn't look for Xext and X11 using pkg-config
 	    HWLOC_GL_REQUIRES="xext x11"
             hwloc_have_gl=yes
 	    hwloc_components="$hwloc_components gl"
