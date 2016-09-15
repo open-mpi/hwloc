@@ -137,7 +137,12 @@ static char *node_find_hostname(node_t *node)
         i++;
     }
     hostname[i++] = '\0';
+    char *old_hostname = hostname;
     hostname = realloc(hostname, i*sizeof(char));
+    if (!hostname) {
+        fprintf(stderr, "Oups: cannot reallocate memory\n");
+        hostname = old_hostname;
+    }
     return hostname;
 }
 
@@ -174,6 +179,8 @@ node_t *get_node(node_t **nodes, char *type, char *lid,
 
         HASH_ADD_STR(*nodes, physical_id, node);  /* guid: name of key field */
     }
+    free(id);
+
     return node;
 }
 
@@ -222,10 +229,11 @@ static float compute_gbits(char *speed, char *width)
     regcomp(&width_re, "([[:digit:]]*)x", REG_EXTENDED);
     if (!regexec(&width_re, width, (size_t)0, NULL, 0)) {
         x = atoi(width);
+    } else {
+        x = 0.0;
     }
-    else {
-        return 0.0;
-    }
+
+    regfree(&width_re);
 
     return x*gb_per_x;
 }
@@ -319,12 +327,18 @@ static char *node_find_partition_name(node_t *node)
         i++;
     }
     partition[i++] = '\0';
+
+    char *old_partition = partition;
     partition = realloc(partition, i*sizeof(char));
+    if (!partition) {
+        fprintf(stderr, "Oups: cannot reallocate memory\n");
+        partition = old_partition;
+    }
     return partition;
 }
 
 
-int netloc_topology_find_partitions()
+int netloc_topology_find_partitions(void)
 {
     int ret = 0;
     int num_nodes;
@@ -392,7 +406,8 @@ int netloc_topology_set_partitions(void)
     HASH_ITER(hh, nodes, node, node_tmp) {
         node->partitions = (int *)
             calloc(utarray_len(partitions), sizeof(int));
-        node->partitions[node->main_partition] = 1;
+        if (node->main_partition != -1)
+            node->partitions[node->main_partition] = 1;
 
         edge_t *edge, *edge_tmp;
         HASH_ITER(hh, node->edges, edge, edge_tmp) {
@@ -480,9 +495,79 @@ int main(int argc, char **argv)
 
                 write_into_file(subnet, path);
 
+                /* Free node hash table */
+                node_t *node, *node_tmp;
+                HASH_ITER(hh, nodes, node, node_tmp) {
+                    HASH_DEL(nodes, node);
+
+                    /* Free nodes */
+                    free(node->description);
+
+                    /* Edges */
+                    edge_t *edge, *edge_tmp;
+                    HASH_ITER(hh, node->edges, edge, edge_tmp) {
+                        HASH_DEL(node->edges, edge);
+                        utarray_free(edge->physical_link_idx);
+                        free(edge->partitions);
+                        free(edge);
+                    }
+
+                    free(node->hostname);
+                    free(node->partitions);
+
+                    /* Physical links */
+                    for (int l = 0; l < utarray_len(node->physical_links); l++) {
+                        physical_link_t *link = (physical_link_t *)
+                            utarray_eltptr(node->physical_links, l);
+                        free(link->width);
+                        free(link->speed);
+                        free(link->description);
+                        free(link->partitions);
+                    }
+                    utarray_free(node->physical_links);
+
+                    free(node);
+                }
+
+                /* Free Partitions */
+                for (char **ppartition = (char **)utarray_front(partitions);
+                        ppartition != NULL;
+                        ppartition = (char **)utarray_next(partitions, ppartition)) {
+                    free(*ppartition);
+                }
+                utarray_free(partitions);
+
+                /* Free Routes */
+                route_source_t *route, *route_tmp;
+                HASH_ITER(hh, routes, route, route_tmp) {
+                    HASH_DEL(routes, route);
+
+                    route_dest_t *routed, *routed_tmp;
+                    HASH_ITER(hh, route->dest, routed, routed_tmp) {
+                        HASH_DEL(route->dest, routed);
+                        free(routed);
+                    }
+                    free(route);
+                }
+
+                /* Free Paths */
+                path_source_t *path, *path_tmp;
+                HASH_ITER(hh, paths, path, path_tmp) {
+                    HASH_DEL(paths, path);
+
+                    path_dest_t *pathd, *pathd_tmp;
+                    HASH_ITER(hh, path->dest, pathd, pathd_tmp) {
+                        HASH_DEL(path->dest, pathd);
+                        utarray_free(pathd->links);
+                        free(pathd);
+                    }
+                    free(path);
+                }
+
                 free(subnet);
             }
         }
+        regfree(&subnet_regexp);
         closedir(dir);
     }
     else
@@ -495,8 +580,11 @@ int read_discover(char *subnet, char *path, char *filename)
     char *line = NULL;
     size_t size = 0;
     char *discover_path;
+    FILE *discover_file;
+
     asprintf(&discover_path, "%s/%s", path, filename);
-    FILE *discover_file = fopen(discover_path, "r");
+    discover_file = fopen(discover_path, "r");
+    free(discover_path);
 
     if (!discover_file) {
         perror("fopen");
@@ -550,8 +638,8 @@ int read_discover(char *subnet, char *path, char *filename)
         char *dest_port_id;
         char *dest_guid;
         char *link_desc;
-        char *src_desc;
-        char *dest_desc;
+        char *src_desc = NULL;
+        char *dest_desc = NULL;
         int have_peer;
 
         if (!regexec(&dr_re, line, (size_t)0, NULL, 0)) {
@@ -573,6 +661,7 @@ int read_discover(char *subnet, char *path, char *filename)
             dest_port_id = matches[ 9];
             dest_guid    = matches[10];
             link_desc    = matches[11];
+            free(matches[0]);
 
             /* Analyse description */
             regex_t desc_re;
@@ -581,11 +670,13 @@ int read_discover(char *subnet, char *path, char *filename)
                 get_match(link_desc, 3, pmatch, matches);
                 src_desc  = matches[1];
                 dest_desc = matches[2];
+                free(matches[0]);
             }
             else {
                 src_desc = (char *)calloc(1, sizeof(char));
                 dest_desc = (char *)calloc(1, sizeof(char));
             }
+            regfree(&desc_re);
 
         }
         else if (!regexec(&nolink_re, line, (size_t)nolink_nfields, pmatch, 0)) {
@@ -598,6 +689,7 @@ int read_discover(char *subnet, char *path, char *filename)
             src_guid     = matches[ 4];
             width        = matches[ 5];
             speed        = matches[ 6];
+            free(matches[0]);
         }
         else {
             printf("Warning: line not recognized: \n\t%s\n", line);
@@ -610,7 +702,6 @@ int read_discover(char *subnet, char *path, char *filename)
         /* Get the source node */
         node_t *src_node =
             get_node(&nodes, src_type, src_lid, src_guid, subnet, src_desc);
-
 
         /* Add the link to the edge list */
         if (have_peer) {
@@ -656,7 +747,28 @@ int read_discover(char *subnet, char *path, char *filename)
 
             utarray_push_back(edge->physical_link_idx, &port_idx);
         }
+
+        free(src_type);
+        free(src_lid);
+        free(src_port_id);
+        free(src_guid);
+        free(width);
+        free(speed);
+
+        if (have_peer) {
+            free(src_desc);
+            free(dest_desc);
+            free(dest_type);
+            free(dest_lid);
+            free(dest_port_id);
+            free(dest_guid);
+            free(link_desc);
+        }
     }
+    regfree(&dr_re);
+    regfree(&link_re);
+    regfree(&nolink_re);
+    fclose(discover_file);
 
     /* Find the link in the other way */
     node_t *node, *node_tmp;
@@ -693,6 +805,7 @@ char *partition_list_to_string(int *partition_list)
 
     
     char *string = (char *)malloc(max_length*sizeof(char));
+    string[0] = '\0';
     for (int p = 0; p < num_partitions; p++) {
         if (partition_list[p] != 0) {
             if (!first)
@@ -724,8 +837,9 @@ int write_into_file(char *subnet, char *path)
         fprintf(output, "%s,", node->physical_id);
         fprintf(output, "%ld,", node->logical_id);
         fprintf(output, "%d,", node->type);
-        fprintf(output, "%s,",
-                partition_list_to_string(node->partitions));
+        char *partition_str = partition_list_to_string(node->partitions);
+        fprintf(output, "%s,", partition_str);
+        free(partition_str);
         fprintf(output, "%s,", node->description);
         fprintf(output, "%s", node->hostname);
         fprintf(output, "\n");
@@ -739,8 +853,9 @@ int write_into_file(char *subnet, char *path)
             int num_links = utarray_len(edge->physical_link_idx);
             fprintf(output, ",%s,", edge->dest);
             fprintf(output, "%f,", edge->total_gbits);
-            fprintf(output, "%s,",
-                    partition_list_to_string(edge->partitions));
+            char *partition_str = partition_list_to_string(edge->partitions);
+            fprintf(output, "%s,", partition_str);
+            free(partition_str);
             fprintf(output, "%d,", num_links);
             for (int l = 0; l < num_links; l++) {
                 int link_idx = *(int *)utarray_eltptr(edge->physical_link_idx, l);
@@ -754,8 +869,9 @@ int write_into_file(char *subnet, char *path)
                 fprintf(output, "%f,", link->gbits);
                 fprintf(output, "%s,", link->description);
                 fprintf(output, "%d,", link->other_id);
-                fprintf(output, "%s",
-                        partition_list_to_string(link->partitions));
+                char *partition_str = partition_list_to_string(link->partitions);
+                fprintf(output, "%s", partition_str);
+                free(partition_str);
                 fprintf(output, "%s", l == num_links-1 ? "": ",");
             }
         }
@@ -796,11 +912,12 @@ int write_into_file(char *subnet, char *path)
 int read_routes(char *subnet, char *path, char *route_dirname)
 {
     char *route_path;
-    asprintf(&route_path, "%s/%s", path, route_dirname);
     DIR *dir;
 
-    printf("Read subnet: %s\n", subnet);
+    asprintf(&route_path, "%s/%s", path, route_dirname);
     dir = opendir(route_path);
+
+    printf("Read subnet: %s\n", subnet);
 
     if (dir != NULL) {
         char *line = NULL;
@@ -815,6 +932,7 @@ int read_routes(char *subnet, char *path, char *route_dirname)
                 char *route_filename;
                 asprintf(&route_filename, "%s/%s", route_path, filename);
                 FILE *route_file = fopen(route_filename, "r");
+                free(route_filename);
 
                 if (!route_file) {
                     perror("fopen");
@@ -845,14 +963,17 @@ int read_routes(char *subnet, char *path, char *route_dirname)
                 while ((read = getline(&line, &size, route_file)) > 0) {
                     regmatch_t pmatch[5];
                     char *matches[5];
-                    char guid[20];
                     int port;
                     char dest_guid[20];
 
                     if (!regexec(&header_re, line, (size_t)2, pmatch, 0)) {
+                        char guid[20];
                         get_match(line, 2, pmatch, matches);
                         sprintf(guid, "%.4s:%.4s:%.4s:%.4s",
                                 matches[1], matches[1]+4, matches[1]+8, matches[1]+12);
+                        for (int m = 0; m < 2; m++) {
+                            free(matches[m]);
+                        }
 
                         HASH_FIND_STR(routes, guid, route);
                         if (!route) {
@@ -868,6 +989,9 @@ int read_routes(char *subnet, char *path, char *route_dirname)
                         port = atoi(matches[2]);
                         sprintf(dest_guid, "%.4s:%.4s:%.4s:%.4s",
                                 matches[4], matches[4]+4, matches[4]+8, matches[4]+12);
+                        for (int m = 0; m < 5; m++) {
+                            free(matches[m]);
+                        }
 
                         route_dest = (route_dest_t *) malloc(sizeof(route_dest_t));
                         sprintf(route_dest->physical_id, "%s", dest_guid);
@@ -875,11 +999,17 @@ int read_routes(char *subnet, char *path, char *route_dirname)
                         HASH_ADD_STR(route->dest, physical_id, route_dest);
                     }
                 }
+                fclose(route_file);
+                regfree(&header_re);
+                regfree(&route_re);
             }
         }
+        free(line);
+        regfree(&route_filename_regexp);
     }
 
 
+    free(route_path);
     closedir(dir);
 
     return 0;

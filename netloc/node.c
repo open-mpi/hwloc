@@ -31,7 +31,7 @@ static UT_icd node_partitions_icd = { sizeof(int), NULL, NULL, NULL };
 
 static int node_or_subnode_destruct(netloc_node_t * node, int is_node);
 
-netloc_node_t * netloc_node_construct()
+netloc_node_t * netloc_node_construct(void)
 {
     netloc_node_t *node = NULL;
 

@@ -15,7 +15,7 @@
 #include <private/autogen/config.h>
 #include <private/netloc.h>
 
-netloc_physical_link_t * netloc_physical_link_construct()
+netloc_physical_link_t * netloc_physical_link_construct(void)
 {
     static int cur_uid = 0;
 

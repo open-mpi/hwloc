@@ -558,7 +558,7 @@ int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition);
  * Returns
  *   A newly allocated pointer to the physical link information.
  */
-netloc_physical_link_t * netloc_physical_link_construct();
+netloc_physical_link_t * netloc_physical_link_construct(void);
 
 /**
  * Destructor for netloc_physical_link_t
@@ -581,6 +581,10 @@ int netloc_path_destruct(netloc_path_t *path);
 /**********************************************************************
  *        Architecture functions
  **********************************************************************/
+
+netloc_arch_t * netloc_arch_construct(void);
+
+int netloc_arch_destruct(netloc_arch_t *arch);
 
 int netloc_arch_build(netloc_arch_t *arch, int add_slots);
 

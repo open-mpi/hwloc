@@ -24,6 +24,9 @@ static int partition_topology_to_tleaf(netloc_topology_t *topology,
 static void set_gbits(int *values, netloc_edge_t *edge, int num_levels);
 static netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main,
         netloc_arch_tree_t *sub);
+static int netloc_arch_tree_destruct(netloc_arch_tree_t *tree);
+static int netloc_arch_node_destruct(netloc_arch_node_t *arch_node);
+static netloc_arch_node_t *netloc_arch_node_construct(void);
 
 /* Complete the topology to have a complete balanced tree  */
 void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
@@ -161,8 +164,11 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
     if (ret != NETLOC_SUCCESS)
         assert(0); // XXX
 
-    int *current_nodes = (int *)
-        malloc(sizeof(int[num_nodes]));
+    int *current_nodes = NULL;
+
+    if (!arch->has_slots) {
+        current_nodes = (int *) malloc(sizeof(int[num_nodes]));
+    }
 
     netloc_arch_node_t **arch_node_list = (netloc_arch_node_t **)
         malloc(sizeof(netloc_arch_node_t *[num_nodes]));
@@ -192,7 +198,10 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
         if (ret != NETLOC_SUCCESS)
             goto ERROR;
 
-        current_nodes[n] = node->idx_in_topo;
+
+        if (!arch->has_slots) {
+            current_nodes[n] = node->idx_in_topo;
+        }
 
         int num_slots = slot_idx[n+1]-slot_idx[n];
         node->num_current_slots = num_slots;
@@ -281,16 +290,27 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
         arch->current_hosts = current_hosts;
         arch->node_slot_by_idx = nodes_by_idx;
 
-        arch->arch.global_tree =
+        netloc_arch_tree_t *new_tree =
             tree_merge(arch->arch.node_tree, arch_node_list[0]->slot_tree);
+        netloc_arch_tree_destruct(arch->arch.node_tree);
+        arch->arch.global_tree = new_tree;
     }
 
-    return NETLOC_SUCCESS;
-
 ERROR:
-    free(current_nodes);
+    for (int n = 0; n < num_nodes; n++) {
+        free(nodenames[n]);
+    }
+    free(nodenames);
+    free(slot_idx);
+    free(slot_list);
+    free(rank_list);
     free(arch_node_list);
     free(node_list);
+
+    if (ret == NETLOC_SUCCESS)
+        return ret;
+
+    free(current_nodes);
     return ret;
 }
 
@@ -315,6 +335,15 @@ netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main, netloc_arch_tree_t *sub
     memcpy(new_tree->cost+main->num_levels, sub->cost, sub->num_levels*sizeof(int));
 
     return new_tree;
+}
+
+static int netloc_arch_tree_destruct(netloc_arch_tree_t *tree)
+{
+    free(tree->cost);
+    free(tree->degrees);
+    free(tree);
+
+    return NETLOC_SUCCESS;
 }
 
 
@@ -360,17 +389,11 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
     /* Upward edges will have the level of the source node and downward edges
      * will have -1 as level */
     int num_levels = 0;
-    UT_array *edges_by_level;
-    utarray_new( edges_by_level, &ut_ptr_icd);
     netloc_node_t *current_node = /* pointer to one host node */
         *(void **)utarray_eltptr(nodes, 0);
     while (utarray_len(nodes)) {
         UT_array *new_nodes;
         utarray_new(new_nodes, &ut_ptr_icd);
-
-        UT_array *edges;
-        utarray_new(edges, &ut_ptr_icd);
-        utarray_push_back(edges_by_level, &edges);
 
         for (int n = 0; n < utarray_len(nodes); n++) {
             netloc_node_t *node = *(void **)utarray_eltptr(nodes, n);
@@ -399,7 +422,6 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
                         if (dest_data->level != num_levels) {
                             edge_data->level = num_levels;
                             utarray_push_back(new_nodes, &dest);
-                            utarray_push_back(edges, &edge);
                         }
                     }
                 }
@@ -517,16 +539,13 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
     netloc_node_t **ordered_nodes = (netloc_node_t **)ordered_name_array->d;
     netloc_arch_node_t *named_nodes = NULL;
     for (int i = 0; i < num_nodes; i++) {
-        netloc_arch_node_t *node = (netloc_arch_node_t *)
-            malloc(sizeof(netloc_arch_node_t));
+        netloc_arch_node_t *node = netloc_arch_node_construct();
         node->node = ordered_nodes[i];
         node->name = ordered_nodes[i]->hostname;
         node->idx_in_topo = arch_idx[i];
-        node->num_slots = -1;
-        node->slot_idx = NULL;
-        HASH_ADD_KEYPTR( hh, named_nodes, node->name, strlen(node->name), node);
+        HASH_ADD_KEYPTR(hh, named_nodes, node->name, strlen(node->name), node);
     }
-
+    free(arch_idx);
 
     arch->nodes_by_name = named_nodes;
 
@@ -589,13 +608,11 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
 
     if (arch_file) { // TODO XXX
     } else {
-        char *netloc_dir;
-
+        int ret;
         if (!path) {
             fprintf(stderr, "Error: you need to set NETLOC_TOPODIR in your environment.\n");
             return NETLOC_ERROR;
         }
-        asprintf(&netloc_dir, "file://%s/%s", path, "netloc");
 
         netloc_network_t *network = NULL;
         netloc_topology_t *topology = NULL;
@@ -605,13 +622,19 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
         network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
 
         // Search for the specific network
-        int ret = netloc_network_find(netloc_dir, network);
+        char *netloc_dir;
+        asprintf(&netloc_dir, "file://%s/%s", path, "netloc");
+        ret = netloc_network_find(netloc_dir, network);
+        free(netloc_dir);
         if (NETLOC_SUCCESS != ret) {
             fprintf(stderr, "Error: network not found!\n");
             netloc_network_destruct(network);
             return NETLOC_ERROR;
         }
-        printf("Found Network: %s\n", netloc_network_pretty_print(network));
+
+        char *network_str = netloc_network_pretty_print(network);
+        printf("Found Network: %s\n", network_str);
+        free(network_str);
 
         // Attach to the network
         topology = netloc_topology_construct(network);
@@ -639,7 +662,58 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
             netloc_topology_find_partition_idx(topology, partition_name);
 
         partition_topology_to_tleaf(topology, partition, 1, arch);
+        netloc_network_destruct(network);
     }
+
+    return NETLOC_SUCCESS;
+}
+
+netloc_arch_t * netloc_arch_construct(void)
+{
+    netloc_arch_t *arch = (netloc_arch_t *)calloc(1, sizeof(netloc_arch_t));
+
+    return arch;
+}
+
+int netloc_arch_destruct(netloc_arch_t *arch)
+{
+    netloc_topology_destruct(arch->topology);
+
+    netloc_arch_node_t *node, *node_tmp;
+    HASH_ITER(hh, arch->nodes_by_name, node, node_tmp) {
+        HASH_DEL(arch->nodes_by_name, node);
+        netloc_arch_node_destruct(node);
+    }
+
+    free(arch->arch.node_tree->degrees);
+    free(arch->arch.node_tree->cost);
+    free(arch->arch.node_tree);
+    free(arch->current_hosts);
+    free(arch->node_slot_by_idx);
+
+    free(arch);
+
+    return NETLOC_SUCCESS;
+}
+
+static netloc_arch_node_t *netloc_arch_node_construct(void)
+{
+    netloc_arch_node_t *arch_node = (netloc_arch_node_t *)
+        calloc(1, sizeof(netloc_arch_node_t));
+    arch_node->num_slots = -1;
+
+    return arch_node;
+}
+
+static int netloc_arch_node_destruct(netloc_arch_node_t *arch_node)
+{
+    free(arch_node->slot_idx);
+    free(arch_node->slot_os_idx);
+    if (arch_node->slot_tree)
+        netloc_arch_tree_destruct(arch_node->slot_tree);
+    free(arch_node->current_slots);
+    free(arch_node->slot_ranks);
+    free(arch_node);
 
     return NETLOC_SUCCESS;
 }

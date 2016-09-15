@@ -24,6 +24,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
         netloc_node_t **node_list)
 {
     int ret = 0;
+    int all = 0;
 
     char *hwloc_path;
     asprintf(&hwloc_path, "%s/../hwloc", topology->network->data_uri+7);
@@ -52,6 +53,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
         netloc_topology_iter_nodes(topology, node, node_tmp) {
             node_list[n++] = node;
         }
+        all = 1;
     }
 
     for (int n  = 0; n < num_nodes; n++) {
@@ -156,7 +158,9 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
     ret = NETLOC_SUCCESS;
 
 ERROR:
-    free(node_list);
+    if (all) {
+        free(node_list);
+    }
     free(hwloc_path);
     return ret;
 }
@@ -248,11 +252,17 @@ int netloc_arch_node_get_hwloc_info(netloc_arch_node_t *arch_node)
     for (int i = 0; i < num_cores; i++) {
         slot_os_idx[arch_idx[i]] = ordered_hosts[i];
     }
+    free(arch_idx);
 
     arch_node->slot_tree = tree;
     arch_node->slot_idx = slot_idx;
     arch_node->slot_os_idx = slot_os_idx;
     arch_node->num_slots = max_os_index+1;
+
+    for (int l = 0; l < depth; l++) {
+        utarray_free(down_degrees_by_level[l]);
+    }
+    free(down_degrees_by_level);
 
     utarray_free(ordered_host_array);
 

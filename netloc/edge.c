@@ -18,7 +18,7 @@
 #include <private/autogen/config.h>
 #include <private/netloc.h>
 
-netloc_edge_t * netloc_edge_construct()
+netloc_edge_t * netloc_edge_construct(void)
 {
     static int cur_uid = 0;
 

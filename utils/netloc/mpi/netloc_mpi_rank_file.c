@@ -42,7 +42,13 @@ int main(int argc, char **argv)
         fprintf(rank_file, "rank %d=%s slot=%d\n",
                 p, cores[p].nodename, cores[p].core);
     }
+
+    for (int p = 0; p < num_processes; p++) {
+        free(cores[p].nodename);
+    }
+    free(cores);
     fclose(rank_file);
 
+    return 0;
 }
 

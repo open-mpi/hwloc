@@ -140,7 +140,6 @@ static int build_subgraph(SCOTCH_Graph *graph, int *vertices, int num_vertices,
 
     new_edge = edge_idx;
 
-
     SCOTCH_Num *old_edgetab = new_edgetab;
     new_edgetab = (SCOTCH_Num *)
         realloc(new_edgetab, new_edge*sizeof(SCOTCH_Num));
@@ -183,21 +182,32 @@ static int build_current_arch(SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
       /* FIXME: hack to prevent a bug in scotch (arch needs to remain allocated
        * for using subarch)
        */
+    SCOTCH_archInit(scotch_arch);
     ret = arch_tree_to_scotch_arch(arch->arch.global_tree, scotch_arch);
     if (NETLOC_SUCCESS != ret) {
         return ret;
     }
 
     /* Now we can build the sub architecture */
+    SCOTCH_archInit(scotch_subarch);
     ret = build_subarch(scotch_arch, arch->num_current_hosts,
             arch->current_hosts, scotch_subarch);
+
+    //SCOTCH_archExit(scotch_arch);
+    //free(scotch_arch); /* when Scotch bug will be fixed */
+
     return ret;
 }
 
 int netlocscotch_build_current_arch(SCOTCH_Arch *scotch_subarch)
 {
-    netloc_arch_t arch;
-    return build_current_arch(scotch_subarch, &arch);
+    int ret;
+
+    netloc_arch_t *arch = netloc_arch_construct();
+    ret = build_current_arch(scotch_subarch, arch);
+
+    netloc_arch_destruct(arch);
+    return ret;
 }
 
 int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
@@ -206,8 +216,9 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     int ret;
 
     SCOTCH_Arch scotch_subarch;
-    netloc_arch_t arch;
-    ret = build_current_arch(&scotch_subarch, &arch);
+    netlocscotch_core_t *cores = NULL;
+    netloc_arch_t *arch = netloc_arch_construct();
+    ret = build_current_arch(&scotch_subarch, arch);
     if (NETLOC_SUCCESS != ret) {
         return ret;
     }
@@ -215,7 +226,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     int graph_size;
     SCOTCH_graphSize(graph, &graph_size, NULL);
 
-    int num_hosts = arch.num_current_hosts;
+    int num_hosts = arch->num_current_hosts;
 
     SCOTCH_Strat strategy;
     SCOTCH_stratInit(&strategy);
@@ -224,14 +235,18 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     int *ranks = (int *)malloc(graph_size*sizeof(int));
     ret = SCOTCH_graphMap(graph, &scotch_subarch, &strategy, ranks);
 
+    SCOTCH_stratExit(&strategy);
+
+    SCOTCH_archExit(&scotch_subarch);
+
     if (ret != 0) {
         fprintf(stderr, "Error: SCOTCH_graphMap failed\n");
-        return NETLOC_ERROR;
+        goto ERROR;
     }
 
-    netlocscotch_core_t *cores = (netlocscotch_core_t *)
+    cores = (netlocscotch_core_t *)
         malloc(graph_size*sizeof(netlocscotch_core_t));
-    if (!arch.has_slots) {
+    if (!arch->has_slots) {
         /* We have the mapping but only for the nodes, not inside the nodes */
 
         UT_array *process_by_node[num_hosts];
@@ -249,7 +264,8 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         for (int n = 0; n < num_hosts; n++) {
             int *process_list = (int *)process_by_node[n]->d;
             int num_processes = utarray_len(process_by_node[n]);
-            netloc_arch_node_t *node = arch.node_slot_by_idx[arch.current_hosts[n]].node;
+            netloc_arch_node_t *node =
+                arch->node_slot_by_idx[arch->current_hosts[n]].node;
             char *nodename = node->name;
             int node_ranks[num_processes];
 
@@ -291,9 +307,9 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         }
     } else {
         for (int p = 0; p < graph_size; p++) {
-            int host_idx = arch.current_hosts[ranks[p]];
-            netloc_arch_node_t *node = arch.node_slot_by_idx[host_idx].node;
-            int slot_rank = arch.node_slot_by_idx[host_idx].slot;
+            int host_idx = arch->current_hosts[ranks[p]];
+            netloc_arch_node_t *node = arch->node_slot_by_idx[host_idx].node;
+            int slot_rank = arch->node_slot_by_idx[host_idx].slot;
             cores[p].nodename = strdup(node->node->hostname);
             cores[p].core = node->slot_os_idx[node->slot_idx[slot_rank]];
             cores[p].rank = node->slot_ranks[node->slot_idx[slot_rank]];
@@ -302,9 +318,11 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
 
     *pcores = cores;
 
-    return NETLOC_SUCCESS;
-
 ERROR:
+    free(ranks);
+    netloc_arch_destruct(arch);
+    if (ret == NETLOC_SUCCESS)
+        return ret;
     free(cores);
     return ret;
 }
@@ -322,6 +340,26 @@ int netlocscotch_get_mapping_from_comm_matrix(double **comm, int num_vertices,
 
     ret = netlocscotch_get_mapping_from_graph(&graph, pcores);
 
+    /* Free arrays */
+    {
+        SCOTCH_Num base;       /* Base value               */
+        SCOTCH_Num vert;       /* Number of vertices       */
+        SCOTCH_Num *verttab;   /* Vertex array [vertnbr+1] */
+        SCOTCH_Num *vendtab;   /* Vertex array [vertnbr]   */
+        SCOTCH_Num *velotab;   /* Vertex load array        */
+        SCOTCH_Num *vlbltab;   /* Vertex label array       */
+        SCOTCH_Num edge;       /* Number of edges (arcs)   */
+        SCOTCH_Num *edgetab;   /* Edge array [edgenbr]     */
+        SCOTCH_Num *edlotab;   /* Edge load array          */
+
+        SCOTCH_graphData(&graph, &base, &vert, &verttab, &vendtab, &velotab,
+                &vlbltab, &edge, &edgetab, &edlotab);
+        free(edlotab);
+        free(edgetab);
+        free(verttab);
+        SCOTCH_graphExit(&graph);
+    }
+
 
 
     return ret;
@@ -331,10 +369,10 @@ int netlocscotch_get_mapping_from_comm_matrix(double **comm, int num_vertices,
 int netlocscotch_get_mapping_from_comm_file(char *filename, int *pnum_processes,
         netlocscotch_core_t **pcores)
 {
+    int ret;
     int n;
     double **mat;
 
-    int ret;
     ret = netloc_build_comm_mat(filename, &n, &mat);
 
     if (ret != NETLOC_SUCCESS) {
@@ -343,7 +381,12 @@ int netlocscotch_get_mapping_from_comm_file(char *filename, int *pnum_processes,
 
     *pnum_processes = n;
 
-    return netlocscotch_get_mapping_from_comm_matrix(mat, n, pcores);
+    ret = netlocscotch_get_mapping_from_comm_matrix(mat, n, pcores);
+
+    free(mat[0]);
+    free(mat);
+
+    return ret;
 }
 
 static int comm_matrix_to_scotch_graph(double **matrix, int n, SCOTCH_Graph *graph)
@@ -396,9 +439,8 @@ static int comm_matrix_to_scotch_graph(double **matrix, int n, SCOTCH_Graph *gra
         }
     }
 
-    ret = SCOTCH_graphBuild (graph, base, vert,
-                verttab, vendtab, velotab, vlbltab,
-                edge, edgetab, edlotab);
+    ret = SCOTCH_graphBuild(graph, base, vert,
+            verttab, vendtab, velotab, vlbltab, edge, edgetab, edlotab);
 
     return ret;
 }

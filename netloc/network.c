@@ -184,7 +184,6 @@ int netloc_network_destruct(netloc_network_t * network)
 {
     if (NULL == network)
         return NETLOC_SUCCESS;
-    printf("hohey\n");
 
     if (NULL != network->subnet_id) {
         free(network->subnet_id);
