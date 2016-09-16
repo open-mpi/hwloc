@@ -205,7 +205,7 @@ PKG_CONFIG_PATH to the ./configure command line, like this:
 \htmlonly
 </div><div class="section" id="cli_examples">
 \endhtmlonly
-\section cli_examples CLI Examples
+\section cli_examples Command-line Examples
 
 On a 4-package 2-core machine with hyper-threading, the \c lstopo tool
 may show the following graphical output:
@@ -408,9 +408,8 @@ element may exist between a core and a PU.
 
 \subsection interface_example API Example
 
-The following small C example (named ``hwloc-hello.c'') prints the
-topology of the machine and bring the process to the first logical processor
-of the second core of the machine.
+The following small C example (available in the source tree as ``doc/examples/hwloc-hello.c'')
+prints the topology of the machine and performs some thread and memory binding.
 More examples are available in the doc/examples/ directory of the source
 tree.
 
