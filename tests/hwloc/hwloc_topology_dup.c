@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <assert.h>
 
 int main(void)
@@ -16,7 +17,7 @@ int main(void)
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   struct hwloc_distances_s *distances;
   hwloc_obj_t nodes[3], cores[6];
-  float node_distances[9], core_distances[36];
+  uint64_t node_distances[9], core_distances[36];
   unsigned i,j,nr;
   int err;
 
@@ -27,7 +28,7 @@ int main(void)
   for(i=0; i<3; i++) {
     nodes[i] = hwloc_get_obj_by_type(oldtopology, HWLOC_OBJ_NUMANODE, i);
     for(j=0; j<3; j++)
-      node_distances[i*3+j] = (i == j ? 10.f : 20.f);
+      node_distances[i*3+j] = (i == j ? 10 : 20);
   }
   err = hwloc_distances_add(oldtopology, 3, nodes, node_distances,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
@@ -37,7 +38,7 @@ int main(void)
   for(i=0; i<6; i++) {
     cores[i] = hwloc_get_obj_by_type(oldtopology, HWLOC_OBJ_CORE, i);
     for(j=0; j<6; j++)
-      core_distances[i*6+j] = (i == j ? 4.f : 8.f);
+      core_distances[i*6+j] = (i == j ? 4 : 8);
   }
   err = hwloc_distances_add(oldtopology, 6, cores, core_distances,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,

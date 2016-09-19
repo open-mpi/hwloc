@@ -134,6 +134,6 @@
   </object>
   <distances2 type="PU" nbobjs="3" kind="5" indexing="os">
     <indexes length="6">1 0 2 </indexes>
-    <floats length="90">10.000000 80.000000 80.000000 80.000000 10.000000 80.000000 80.000000 80.000000 10.000000 </floats>
+    <u64values length="27">10 80 80 80 10 80 80 80 10 </u64values>
   </distances2>
 </topology>

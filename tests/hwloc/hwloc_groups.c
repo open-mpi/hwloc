@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <assert.h>
 
 /* intensive testing of two grouping cases (2+1 and 2+2+1) */
@@ -17,7 +18,7 @@ int main(void)
   hwloc_topology_t topology;
   hwloc_obj_t obj;
   hwloc_obj_t objs[5];
-  float values[5*5];
+  uint64_t values[5*5];
   unsigned depth;
   unsigned width;
   unsigned i;
@@ -29,9 +30,9 @@ int main(void)
   hwloc_topology_load(topology);
   for(i=0; i<3; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
-  values[0] = 1.f; values[1] = 4.f; values[2] = 4.f;
-  values[3] = 4.f; values[4] = 1.f; values[5] = 2.f;
-  values[6] = 4.f; values[7] = 2.f; values[8] = 1.f;
+  values[0] = 1; values[1] = 4; values[2] = 4;
+  values[3] = 4; values[4] = 1; values[5] = 2;
+  values[6] = 4; values[7] = 2; values[8] = 1;
   err = hwloc_distances_add(topology, 3, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			    HWLOC_DISTANCES_FLAG_GROUP);
@@ -64,11 +65,11 @@ int main(void)
   hwloc_topology_load(topology);
   for(i=0; i<5; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, i);
-  values[ 0] = 1.f; values[ 1] = 2.f; values[ 2] = 4.f; values[ 3] = 4.f; values[ 4] = 4.f;
-  values[ 5] = 2.f; values[ 6] = 1.f; values[ 7] = 4.f; values[ 8] = 4.f; values[ 9] = 4.f;
-  values[10] = 4.f; values[11] = 4.f; values[12] = 1.f; values[13] = 4.f; values[14] = 4.f;
-  values[15] = 4.f; values[16] = 4.f; values[17] = 4.f; values[18] = 1.f; values[19] = 2.f;
-  values[20] = 4.f; values[21] = 4.f; values[22] = 4.f; values[23] = 2.f; values[24] = 1.f;
+  values[ 0] = 1; values[ 1] = 2; values[ 2] = 4; values[ 3] = 4; values[ 4] = 4;
+  values[ 5] = 2; values[ 6] = 1; values[ 7] = 4; values[ 8] = 4; values[ 9] = 4;
+  values[10] = 4; values[11] = 4; values[12] = 1; values[13] = 4; values[14] = 4;
+  values[15] = 4; values[16] = 4; values[17] = 4; values[18] = 1; values[19] = 2;
+  values[20] = 4; values[21] = 4; values[22] = 4; values[23] = 2; values[24] = 1;
   err = hwloc_distances_add(topology, 5, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			    HWLOC_DISTANCES_FLAG_GROUP);

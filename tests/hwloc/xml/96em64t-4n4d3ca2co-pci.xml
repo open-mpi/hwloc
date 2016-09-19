@@ -826,6 +826,7 @@
   </object>
   <distances2 type="NUMANode" nbobjs="4" kind="5" indexing="os">
     <indexes length="8">0 1 2 3 </indexes>
-    <floats length="160">10.000000 26.000000 26.000000 26.000000 26.000000 10.000000 26.000000 26.000000 26.000000 26.000000 10.000000 26.000000 26.000000 26.000000 26.000000 10.000000 </floats>
+    <u64values length="30">10 26 26 26 26 10 26 26 26 26 </u64values>
+    <u64values length="18">10 26 26 26 26 10 </u64values>
   </distances2>
 </topology>

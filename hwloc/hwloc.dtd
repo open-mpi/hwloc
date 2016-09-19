@@ -45,7 +45,7 @@
 <!ATTLIST info name CDATA #REQUIRED>
 <!ATTLIST info value CDATA #REQUIRED>
 
-<!ELEMENT distances2 (indexes+,floats+)>
+<!ELEMENT distances2 (indexes+,u64values+)>
 <!ATTLIST distances2 type CDATA #REQUIRED>
 <!ATTLIST distances2 nbobjs CDATA #REQUIRED>
 <!ATTLIST distances2 indexing CDATA #REQUIRED>
@@ -54,8 +54,8 @@
 <!ELEMENT indexes (#PCDATA)>
 <!ATTLIST indexes length CDATA #REQUIRED>
 
-<!ELEMENT floats (#PCDATA)>
-<!ATTLIST floats length CDATA #REQUIRED>
+<!ELEMENT u64values (#PCDATA)>
+<!ATTLIST u64values length CDATA #REQUIRED>
 
 <!ELEMENT userdata (#PCDATA)>
 <!ATTLIST userdata name CDATA "" >

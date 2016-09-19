@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <assert.h>
 
 /* testing of adding/replacing/removing distance matrices
@@ -21,7 +22,7 @@ int main(void)
 {
   hwloc_topology_t topology;
   hwloc_obj_t objs[32];
-  float values[32*32];
+  uint64_t values[32*32];
   unsigned i, j;
   unsigned depth;
   unsigned width;
@@ -30,13 +31,13 @@ int main(void)
   for(i=0; i<16; i++) {
     for(j=0; j<16; j++)
       if (i==j)
-        values[i+16*j] = values[j+16*i] = 3.f;
+        values[i+16*j] = values[j+16*i] = 30;
       else if (i/2==j/2)
-        values[i+16*j] = values[j+16*i] = 5.f;
+        values[i+16*j] = values[j+16*i] = 50;
       else if (i/4==j/4)
-        values[i+16*j] = values[j+16*i] = 7.f;
+        values[i+16*j] = values[j+16*i] = 70;
       else
-        values[i+16*j] = values[j+16*i] = 9.f;
+        values[i+16*j] = values[j+16*i] = 90;
   }
 
   /* default 2*8*1 */
@@ -74,8 +75,8 @@ int main(void)
   hwloc_topology_destroy(topology);
 
   /* play with accuracy */
-  values[0] = 2.9f; /* diagonal, instead of 3 (0.0333% error) */
-  values[1] = 5.1f; values[16] = 5.2f; /* smallest group, instead of 5 (0.02% error) */
+  values[0] = 29; /* diagonal, instead of 3 (0.0333% error) */
+  values[1] = 51; values[16] = 52; /* smallest group, instead of 5 (0.02% error) */
   putenv("HWLOC_GROUPING_ACCURACY=0.1"); /* ok */
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
@@ -159,11 +160,11 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
     for(j=0; j<8; j++)
       if (i==j)
-        values[i+8*j] = values[j+8*i] = 1.f;
+        values[i+8*j] = values[j+8*i] = 1;
       else if (i/4==j/4)
-        values[i+8*j] = values[j+8*i] = 4.f;
+        values[i+8*j] = values[j+8*i] = 4;
       else
-        values[i+8*j] = values[j+8*i] = 8.f;
+        values[i+8*j] = values[j+8*i] = 8;
   }
   assert(!hwloc_distances_add(topology, 8, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
@@ -175,11 +176,11 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
     for(j=0; j<8; j++)
       if (i==j)
-        values[i+8*j] = values[j+8*i] = 1.f;
+        values[i+8*j] = values[j+8*i] = 1;
       else if (i/2==j/2)
-        values[i+8*j] = values[j+8*i] = 4.f;
+        values[i+8*j] = values[j+8*i] = 4;
       else
-        values[i+8*j] = values[j+8*i] = 8.f;
+        values[i+8*j] = values[j+8*i] = 8;
   }
   assert(!hwloc_distances_add(topology, 8, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
@@ -201,11 +202,11 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
     for(j=0; j<32; j++)
       if (i==j)
-        values[i+32*j] = values[j+32*i] = 1.f;
+        values[i+32*j] = values[j+32*i] = 1;
       else if (i/2==j/2)
-        values[i+32*j] = values[j+32*i] = 4.f;
+        values[i+32*j] = values[j+32*i] = 4;
       else
-        values[i+32*j] = values[j+32*i] = 8.f;
+        values[i+32*j] = values[j+32*i] = 8;
   }
   assert(!hwloc_distances_add(topology, 32, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,

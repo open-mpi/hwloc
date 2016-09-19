@@ -12,6 +12,7 @@
 #include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/misc.h>
+#include <private/private.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -289,7 +290,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 }
 
 static __hwloc_inline void
-hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, float *matrix, int logical)
+hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *matrix, int logical)
 {
   unsigned i, j;
 
@@ -310,7 +311,7 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
     /* row values */
     for(j=0; j<nbobjs; j++) {
       for(j=0; j<nbobjs; j++)
-	fprintf(output, " %2.3f", matrix[i*nbobjs+j]);
+	fprintf(output, " % 5d", (int) matrix[i*nbobjs+j]);
       fprintf(output, "\n");
     }
   }

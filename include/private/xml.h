@@ -31,7 +31,7 @@ typedef struct hwloc__xml_import_state_s {
 struct hwloc__xml_imported_v1distances_s {
   unsigned long kind;
   unsigned nbobjs;
-  float *values;
+  float *floats;
   struct hwloc__xml_imported_v1distances_s *prev, *next;
 };
 

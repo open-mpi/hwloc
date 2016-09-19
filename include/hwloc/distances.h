@@ -39,14 +39,14 @@ extern "C" {
  * possibly provided by the user, as specified in the \p kind attribute.
  */
 struct hwloc_distances_s {
-  unsigned nbobjs;	/**< \brief Number of objects described by the distance matrix. */
-  hwloc_obj_t *objs;	/**< \biref Array of objects described by the distance matrix. */
-  unsigned long kind;	/**< \brief OR'ed set of ::hwloc_distances_kind_e. */
-  float *values;	/**< \brief Matrix of distances between objects, stored as a one-dimension array.
-			 *
-			 * Distance from i-th to j-th object is stored in slot i*nbobjs+j.
-			 * The meaning of the value depends on the \p kind attribute.
-			 */
+  unsigned nbobjs;		/**< \brief Number of objects described by the distance matrix. */
+  hwloc_obj_t *objs;		/**< \biref Array of objects described by the distance matrix. */
+  unsigned long kind;		/**< \brief OR'ed set of ::hwloc_distances_kind_e. */
+  hwloc_uint64_t *values;	/**< \brief Matrix of distances between objects, stored as a one-dimension array.
+				 *
+				 * Distance from i-th to j-th object is stored in slot i*nbobjs+j.
+				 * The meaning of the value depends on the \p kind attribute.
+				 */
 };
 
 /** \brief Kinds of distance matrices.
@@ -178,7 +178,7 @@ enum hwloc_distances_flag_e {
  * Objects must be of the same type. They cannot be of type Group.
  */
 HWLOC_DECLSPEC int hwloc_distances_add(hwloc_topology_t topology,
-				       unsigned nbobjs, hwloc_obj_t *objs, float *values,
+				       unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,
 				       unsigned long kind, unsigned long flags);
 
 /** \brief Remove all distance matrices from a topology.

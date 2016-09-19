@@ -2292,7 +2292,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, float *distances, int fsroot_fd)
+hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, uint64_t *distances, int fsroot_fd)
 {
   char string[4096]; /* enough for hundreds of nodes */
   char *tmp, *next;
@@ -2312,7 +2312,7 @@ hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, float *dis
     unsigned distance = strtoul(tmp, &next, 0);
     if (next == tmp)
       break;
-    *distances = (float) distance;
+    *distances = (uint64_t) distance;
     distances++;
     nbnodes--;
     if (!nbnodes)
@@ -2915,7 +2915,7 @@ look_sysfsnode(struct hwloc_topology *topology,
   {
       hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
       unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
-      float * distances = NULL;
+      uint64_t * distances = NULL;
       int failednodes = 0;
       unsigned index_;
 
@@ -3001,7 +3001,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	 */
 	nbnodes -= failednodes;
       } else if (nbnodes > 1) {
-	distances = calloc(nbnodes*nbnodes, sizeof(float));
+	distances = calloc(nbnodes*nbnodes, sizeof(uint64_t));
       }
 
       if (NULL == distances) {

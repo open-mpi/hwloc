@@ -119,7 +119,7 @@ add_distances(hwloc_topology_t topology, unsigned topodepth)
 	unsigned long kind = 0;
 	unsigned nbobjs = 0;
 	hwloc_obj_t *objs = NULL;
-	float *values = NULL;
+	uint64_t *values = NULL;
 	FILE *file;
 	char line[64];
 	unsigned i, x, y, z;
@@ -195,23 +195,23 @@ add_distances(hwloc_topology_t topology, unsigned topodepth)
 		for(i=0; i<nbobjs; i++)
 			for(j=0; j<nbobjs; j++)
 				if (i==j)
-					values[i*nbobjs+j] = 10.f;
+					values[i*nbobjs+j] = 10;
 				else if (i/z == j/z)
-					values[i*nbobjs+j] = 20.f;
+					values[i*nbobjs+j] = 20;
 				else if (i/z/y == j/z/y)
-					values[i*nbobjs+j] = 40.f;
+					values[i*nbobjs+j] = 40;
 				else
-					values[i*nbobjs+j] = 80.f;
+					values[i*nbobjs+j] = 80;
 	} else {
 		/* read all other values */
-		values[0] = (float) atof(line);
+	  values[0] = strtoull(line, NULL, 10);
 
 		for(i=1; i<nbobjs*nbobjs; i++) {
 			if (!fgets(line, sizeof(line), file)) {
 				fprintf(stderr, "Failed to read object #%u line\n", i);
 				goto out;
 			}
-			values[i] = (float) atof(line);
+			values[i] = strtoull(line, NULL, 10);
 		}
 	}
 

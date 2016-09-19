@@ -123,9 +123,9 @@ struct hwloc_topology {
     /* add union hwloc_obj_attr_u if we ever support groups */
     unsigned nbobjs;
     uint64_t *indexes; /* array of OS or GP indexes before we can convert them into objs. */
-    float *values; /* distance matrices, ordered according to the above indexes/objs array.
-		    * distance from i to j is stored in slot i*nbnodes+j.
-		    */
+    uint64_t *values; /* distance matrices, ordered according to the above indexes/objs array.
+		       * distance from i to j is stored in slot i*nbnodes+j.
+		       */
     unsigned long kind;
 
     hwloc_obj_t *objs; /* array of objects */
@@ -270,8 +270,8 @@ extern void hwloc_internal_distances_init(hwloc_topology_t topology);
 extern void hwloc_internal_distances_prepare(hwloc_topology_t topology);
 extern void hwloc_internal_distances_destroy(hwloc_topology_t topology);
 extern void hwloc_internal_distances_dup(hwloc_topology_t new, hwloc_topology_t old);
-extern int hwloc_internal_distances_add(hwloc_topology_t topology, unsigned nbobjs, hwloc_obj_t *objs, float *values, unsigned long kind, unsigned long flags);
-extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, float *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add(hwloc_topology_t topology, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
 extern void hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology);
 
 #ifdef HAVE_USELOCALE

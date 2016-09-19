@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <assert.h>
 
 static hwloc_topology_t topology;
@@ -30,7 +31,7 @@ static void print_distances(const struct hwloc_distances_s *distances)
     printf("% 5d", (int) distances->objs[i]->os_index);
     /* each value */
     for(j=0; j<nbobjs; j++)
-      printf(" %2.3f", distances->values[i*nbobjs+j]);
+      printf(" % 5d", (int) distances->values[i*nbobjs+j]);
     printf("\n");
   }
 }
@@ -101,7 +102,7 @@ int main(void)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t nodes[3], cores[6];
-  float node_distances[9], core_distances[36];
+  uint64_t node_distances[9], core_distances[36];
   hwloc_obj_t obj;
   unsigned i,j;
   int err;
@@ -113,7 +114,7 @@ int main(void)
   for(i=0; i<3; i++) {
     nodes[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
     for(j=0; j<3; j++)
-      node_distances[i*3+j] = (i == j ? 10.f : 20.f);
+      node_distances[i*3+j] = (i == j ? 10 : 20);
   }
   err = hwloc_distances_add(topology, 3, nodes, node_distances,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
@@ -123,7 +124,7 @@ int main(void)
   for(i=0; i<6; i++) {
     cores[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
     for(j=0; j<6; j++)
-      core_distances[i*6+j] = (i == j ? 4.f : 8.f);
+      core_distances[i*6+j] = (i == j ? 4 : 8);
   }
   err = hwloc_distances_add(topology, 6, cores, core_distances,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,

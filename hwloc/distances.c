@@ -183,14 +183,14 @@ int hwloc_distances_remove_by_depth(hwloc_topology_t topology, unsigned depth)
  */
 
 static void
-hwloc__groups_by_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, float *values, unsigned long kind, unsigned nbaccuracies, float *accuracies, int needcheck);
+hwloc__groups_by_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, uint64_t *values, unsigned long kind, unsigned nbaccuracies, float *accuracies, int needcheck);
 
 /* insert a distance matrix in the topology.
  * the caller gives us the distances and objs pointers, we'll free them later.
  */
 static int
 hwloc_internal_distances__add(hwloc_topology_t topology,
-			      hwloc_obj_type_t type, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *indexes, float *values,
+			      hwloc_obj_type_t type, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *indexes, uint64_t *values,
 			      unsigned long kind)
 {
   struct hwloc_internal_distances_s *dist = calloc(1, sizeof(*dist));
@@ -249,7 +249,7 @@ hwloc_internal_distances__add(hwloc_topology_t topology,
 }
 
 int hwloc_internal_distances_add_by_index(hwloc_topology_t topology,
-					  hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, float *values,
+					  hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, uint64_t *values,
 					  unsigned long kind, unsigned long flags)
 {
   if (nbobjs < 2) {
@@ -274,7 +274,7 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology,
 }
 
 int hwloc_internal_distances_add(hwloc_topology_t topology,
-				 unsigned nbobjs, hwloc_obj_t *objs, float *values,
+				 unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
 				 unsigned long kind, unsigned long flags)
 {
   if (nbobjs < 2) {
@@ -306,7 +306,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology,
       for(i=0; i<nbobjs; i++) {
 	fprintf(stderr, "  % 5d", (int)(gp ? objs[i]->gp_index : objs[i]->os_index));
 	for(j=0; j<nbobjs; j++)
-	  fprintf(stderr, " %2.3f", values[i*nbobjs + j]);
+	  fprintf(stderr, " % 5lld", (long long) values[i*nbobjs + j]);
 	fprintf(stderr, "\n");
       }
     }
@@ -331,12 +331,12 @@ int hwloc_internal_distances_add(hwloc_topology_t topology,
 /* The actual function exported to the user
  */
 int hwloc_distances_add(hwloc_topology_t topology,
-			unsigned nbobjs, hwloc_obj_t *objs, float *values,
+			unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
 			unsigned long kind, unsigned long flags)
 {
   hwloc_obj_type_t type;
   unsigned i;
-  float *_values;
+  uint64_t *_values;
   hwloc_obj_t *_objs;
   int err;
 
@@ -369,12 +369,12 @@ int hwloc_distances_add(hwloc_topology_t topology,
 
   /* copy the input arrays and give them to the topology */
   _objs = malloc(nbobjs*sizeof(hwloc_obj_t));
-  _values = malloc(nbobjs*nbobjs*sizeof(float));
+  _values = malloc(nbobjs*nbobjs*sizeof(*_values));
   if (!_objs || !_values)
     goto out_with_arrays;
 
   memcpy(_objs, objs, nbobjs*sizeof(hwloc_obj_t));
-  memcpy(_values, values, nbobjs*nbobjs*sizeof(float));
+  memcpy(_values, values, nbobjs*nbobjs*sizeof(*_values));
   err = hwloc_internal_distances_add(topology, nbobjs, _objs, _values, kind, flags);
   if (err < 0)
     goto out; /* _objs and _values freed in hwloc_internal_distances_add() */
@@ -515,10 +515,10 @@ hwloc_distances_get_one(hwloc_topology_t topology __hwloc_attribute_unused,
     goto out;
   memcpy(distances->objs, dist->objs, nbobjs * sizeof(hwloc_obj_t));
 
-  distances->values = malloc(nbobjs * nbobjs * sizeof(float));
+  distances->values = malloc(nbobjs * nbobjs * sizeof(*distances->values));
   if (!distances->values)
     goto out_with_objs;
-  memcpy(distances->values, dist->values, nbobjs*nbobjs*sizeof(float));
+  memcpy(distances->values, dist->values, nbobjs*nbobjs*sizeof(*distances->values));
 
   distances->kind = dist->kind;
   return distances;
@@ -653,9 +653,9 @@ static void hwloc_report_user_distance_error(const char *msg, int line)
     }
 }
 
-static int hwloc_compare_values(float a, float b, float accuracy)
+static int hwloc_compare_values(uint64_t a, uint64_t b, float accuracy)
 {
-  if (accuracy != 0.0 && fabsf(a-b) < a * accuracy)
+  if (accuracy != 0.0f && fabsf((float)a-(float)b) < (float)a * accuracy)
     return 0;
   return a < b ? -1 : a == b ? 0 : 1;
 }
@@ -666,12 +666,12 @@ static int hwloc_compare_values(float a, float b, float accuracy)
  */
 static unsigned
 hwloc__find_groups_by_min_distance(unsigned nbobjs,
-				   float *_values,
+				   uint64_t *_values,
 				   float accuracy,
 				   unsigned *groupids,
 				   int verbose)
 {
-  float min_distance = FLT_MAX;
+  uint64_t min_distance = UINT64_MAX;
   unsigned groupid = 1;
   unsigned i,j,k;
   unsigned skipped = 0;
@@ -687,7 +687,7 @@ hwloc__find_groups_by_min_distance(unsigned nbobjs,
         min_distance = VALUE(i, j);
   hwloc_debug("  found minimal distance %f between objects\n", min_distance);
 
-  if (min_distance == FLT_MAX)
+  if (min_distance == UINT64_MAX)
     return 0;
 
   /* build groups of objects connected with this distance */
@@ -736,8 +736,8 @@ hwloc__find_groups_by_min_distance(unsigned nbobjs,
     /* valid this group */
     groupid++;
     if (verbose)
-      fprintf(stderr, " Found transitive graph with %u objects with minimal distance %f accuracy %f\n",
-	      size, min_distance, accuracy);
+      fprintf(stderr, " Found transitive graph with %u objects with minimal distance %llu accuracy %f\n",
+	      size, (unsigned long long) min_distance, accuracy);
   }
 
   if (groupid == 2 && !skipped)
@@ -750,7 +750,7 @@ hwloc__find_groups_by_min_distance(unsigned nbobjs,
 
 /* check that the matrix is ok */
 static int
-hwloc__check_grouping_matrix(unsigned nbobjs, float *_values, float accuracy, int verbose)
+hwloc__check_grouping_matrix(unsigned nbobjs, uint64_t *_values, float accuracy, int verbose)
 {
   unsigned i,j;
   for(i=0; i<nbobjs; i++) {
@@ -758,15 +758,15 @@ hwloc__check_grouping_matrix(unsigned nbobjs, float *_values, float accuracy, in
       /* should be symmetric */
       if (hwloc_compare_values(VALUE(i, j), VALUE(j, i), accuracy)) {
 	if (verbose)
-	  fprintf(stderr, " Distance matrix asymmetric ([%u,%u]=%f != [%u,%u]=%f), aborting\n",
-		  i, j, VALUE(i, j), j, i, VALUE(j, i));
+	  fprintf(stderr, " Distance matrix asymmetric ([%u,%u]=%llu != [%u,%u]=%llu), aborting\n",
+		  i, j, (unsigned long long) VALUE(i, j), j, i, (unsigned long long) VALUE(j, i));
 	return -1;
       }
       /* diagonal is smaller than everything else */
       if (hwloc_compare_values(VALUE(i, j), VALUE(i, i), accuracy) <= 0) {
 	if (verbose)
-	  fprintf(stderr, " Distance to self not strictly minimal ([%u,%u]=%f <= [%u,%u]=%f), aborting\n",
-		  i, j, VALUE(i, j), i, i, VALUE(i, i));
+	  fprintf(stderr, " Distance to self not strictly minimal ([%u,%u]=%llu <= [%u,%u]=%llu), aborting\n",
+		  i, j, (unsigned long long) VALUE(i, j), i, i, (unsigned long long) VALUE(i, i));
 	return -1;
       }
     }
@@ -781,7 +781,7 @@ static void
 hwloc__groups_by_distances(struct hwloc_topology *topology,
 			   unsigned nbobjs,
 			   struct hwloc_obj **objs,
-			   float *_values,
+			   uint64_t *_values,
 			   unsigned long kind,
 			   unsigned nbaccuracies,
 			   float *accuracies,
@@ -824,12 +824,12 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
   {
       hwloc_obj_t *groupobjs = NULL;
       unsigned *groupsizes = NULL;
-      float *groupvalues = NULL;
+      uint64_t *groupvalues = NULL;
       unsigned failed = 0;
 
       groupobjs = malloc(sizeof(hwloc_obj_t) * nbgroups);
       groupsizes = malloc(sizeof(unsigned) * nbgroups);
-      groupvalues = malloc(sizeof(float) * nbgroups * nbgroups);
+      groupvalues = malloc(sizeof(uint64_t) * nbgroups * nbgroups);
       if (NULL == groupobjs || NULL == groupsizes || NULL == groupvalues) {
           goto inner_free;
       }
@@ -877,8 +877,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
       for(i=0; i<nbgroups; i++)
           for(j=0; j<nbgroups; j++) {
               unsigned groupsize = groupsizes[i]*groupsizes[j];
-              float groupsizef = (float) groupsize;
-              GROUP_VALUE(i, j) /= groupsizef;
+              GROUP_VALUE(i, j) /= groupsize;
           }
 #ifdef HWLOC_DEBUG
       hwloc_debug("%s", "generated new distance matrix between groups:\n");
@@ -894,7 +893,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
       }
 #endif
 
-      hwloc__groups_by_distances(topology, nbgroups, groupobjs, (float*) groupvalues, kind, nbaccuracies, accuracies, 0 /* no need to check generated matrix */);
+      hwloc__groups_by_distances(topology, nbgroups, groupobjs, groupvalues, kind, nbaccuracies, accuracies, 0 /* no need to check generated matrix */);
 
   inner_free:
       /* Safely free everything */

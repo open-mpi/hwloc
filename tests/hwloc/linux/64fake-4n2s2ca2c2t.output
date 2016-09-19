@@ -206,8 +206,8 @@ depth 0:	1 Machine (type #1)
         depth 8:	64 PU (type #5)
 Relative latency matrix (kind 5) between 4 NUMANodes (depth 1) by logical indexes:
   index     0     1     2     3
-      0 0.000 0.000 0.000 0.000
-      1 0.000 0.000 0.000 0.000
-      2 0.000 0.000 0.000 0.000
-      3 0.000 0.000 0.000 0.000
+      0     0     0     0     0
+      1     0     0     0     0
+      2     0     0     0     0
+      3     0     0     0     0
 Topology not from this system

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <assert.h>
 
 /* test setting/retrieving distances */
@@ -30,7 +31,7 @@ static void print_distances(const struct hwloc_distances_s *distances)
     printf("% 5d", (int) distances->objs[i]->os_index);
     /* each value */
     for(j=0; j<nbobjs; j++)
-      printf(" %2.3f", distances->values[i*nbobjs+j]);
+      printf(" % 5d", (int) distances->values[i*nbobjs+j]);
     printf("\n");
   }
 }
@@ -40,7 +41,7 @@ int main(void)
   hwloc_topology_t topology;
   struct hwloc_distances_s *distances[2];
   hwloc_obj_t objs[16];
-  float values[16*16];
+  uint64_t values[16*16];
   unsigned depth, topodepth;
   unsigned i, j, k, nr;
   int err;
@@ -61,13 +62,13 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
   /* matrix 2*2 */
   for(i=0; i<16; i++)
-    values[i] = 8.f;
-  values[0+4*1] = 4.f;
-  values[1+4*0] = 4.f;
-  values[2+4*3] = 4.f;
-  values[3+4*2] = 4.f;
+    values[i] = 8;
+  values[0+4*1] = 4;
+  values[1+4*0] = 4;
+  values[2+4*3] = 4;
+  values[3+4*2] = 4;
   for(i=0; i<4; i++)
-    values[i+4*i] = 1.f;
+    values[i+4*i] = 1;
   err = hwloc_distances_add(topology, 4, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			    HWLOC_DISTANCES_FLAG_GROUP);
@@ -105,12 +106,12 @@ int main(void)
   assert(distances[0]->values);
   assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check that some random values are ok */
-  assert(distances[0]->values[0] == 1.f); /* diagonal */
-  assert(distances[0]->values[4] == 4.f); /* same group */
-  assert(distances[0]->values[6] == 8.f); /* different group */
-  assert(distances[0]->values[9] == 8.f); /* different group */
-  assert(distances[0]->values[10] == 1.f); /* diagonal */
-  assert(distances[0]->values[14] == 4.f); /* same group */
+  assert(distances[0]->values[0] == 1); /* diagonal */
+  assert(distances[0]->values[4] == 4); /* same group */
+  assert(distances[0]->values[6] == 8); /* different group */
+  assert(distances[0]->values[9] == 8); /* different group */
+  assert(distances[0]->values[10] == 1); /* diagonal */
+  assert(distances[0]->values[14] == 4); /* same group */
   hwloc_distances_release(topology, distances[0]);
 
   printf("\nInserting PU distances\n");
@@ -118,18 +119,18 @@ int main(void)
   for(i=0; i<16; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
   for(i=0; i<256; i++)
-    values[i] = 8.f;
+    values[i] = 8;
   for(i=0; i<4; i++) {
     for(j=0; j<4; j++)
       for(k=0; k<4; k++)
-      values[i*64+i*4+16*j+k] = 4.f;
-    values[i*64+i*4+1] = 2.f;
-    values[i*64+i*4+16] = 2.f;
-    values[i*64+i*4+2*16+3] = 2.f;
-    values[i*64+i*4+3*16+2] = 2.f;
+      values[i*64+i*4+16*j+k] = 4;
+    values[i*64+i*4+1] = 2;
+    values[i*64+i*4+16] = 2;
+    values[i*64+i*4+2*16+3] = 2;
+    values[i*64+i*4+3*16+2] = 2;
   }
   for(i=0; i<16; i++)
-    values[i+16*i] = 1.f;
+    values[i+16*i] = 1;
   err = hwloc_distances_add(topology, 16, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			    HWLOC_DISTANCES_FLAG_GROUP);
@@ -166,14 +167,14 @@ int main(void)
   assert(distances[0]->values);
   assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check that some random values are ok */
-  assert(distances[0]->values[0] == 1.f); /* diagonal */
-  assert(distances[0]->values[1] == 2.f); /* same group */
-  assert(distances[0]->values[3] == 4.f); /* same biggroup */
-  assert(distances[0]->values[15] == 8.f); /* different biggroup */
-  assert(distances[0]->values[250] == 8.f); /* different biggroup */
-  assert(distances[0]->values[253] == 4.f); /* same group */
-  assert(distances[0]->values[254] == 2.f); /* same biggroup */
-  assert(distances[0]->values[255] == 1.f); /* diagonal */
+  assert(distances[0]->values[0] == 1); /* diagonal */
+  assert(distances[0]->values[1] == 2); /* same group */
+  assert(distances[0]->values[3] == 4); /* same biggroup */
+  assert(distances[0]->values[15] == 8); /* different biggroup */
+  assert(distances[0]->values[250] == 8); /* different biggroup */
+  assert(distances[0]->values[253] == 4); /* same group */
+  assert(distances[0]->values[254] == 2); /* same biggroup */
+  assert(distances[0]->values[255] == 1); /* diagonal */
   hwloc_distances_release(topology, distances[0]);
 
   printf("\nInserting 2nd PU distances\n");
@@ -181,9 +182,9 @@ int main(void)
   for(i=0; i<4; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
   for(i=0; i<16; i++)
-    values[i] = 3.f;
+    values[i] = 3;
   for(i=0; i<4; i++)
-    values[i+4*i] = 7.f;
+    values[i+4*i] = 7;
   err = hwloc_distances_add(topology, 4, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
 			    HWLOC_DISTANCES_FLAG_GROUP);
@@ -226,10 +227,10 @@ int main(void)
   assert(distances[1]->values);
   assert(distances[1]->kind == (HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check that some random values are ok */
-  assert(distances[1]->values[0] == 7.f); /* diagonal */
-  assert(distances[1]->values[1] == 3.f); /* other */
-  assert(distances[1]->values[3] == 3.f); /* other */
-  assert(distances[1]->values[15] == 7.f); /* diagonal */
+  assert(distances[1]->values[0] == 7); /* diagonal */
+  assert(distances[1]->values[1] == 3); /* other */
+  assert(distances[1]->values[3] == 3); /* other */
+  assert(distances[1]->values[15] == 7); /* diagonal */
   hwloc_distances_release(topology, distances[0]);
   hwloc_distances_release(topology, distances[1]);
 
