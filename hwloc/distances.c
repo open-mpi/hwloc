@@ -436,8 +436,8 @@ hwloc_internal_distances_restrict(struct hwloc_internal_distances_s *dist,
 }
 
 static int
-hwloc_internal_distances_refresh(hwloc_topology_t topology,
-				 struct hwloc_internal_distances_s *dist)
+hwloc_internal_distances_refresh_one(hwloc_topology_t topology,
+				     struct hwloc_internal_distances_s *dist)
 {
   hwloc_obj_type_t type = dist->type;
   unsigned nbobjs = dist->nbobjs;
@@ -474,6 +474,29 @@ hwloc_internal_distances_refresh(hwloc_topology_t topology,
 
   dist->objs_are_valid = 1;
   return 0;
+}
+
+void
+hwloc_internal_distances_refresh(hwloc_topology_t topology)
+{
+  struct hwloc_internal_distances_s *dist, *next;
+
+  for(dist = topology->first_dist; dist; dist = next) {
+    next = dist->next;
+
+    if (hwloc_internal_distances_refresh_one(topology, dist) < 0) {
+      if (dist->prev)
+	dist->prev->next = next;
+      else
+	topology->first_dist = next;
+      if (next)
+	next->prev = dist->prev;
+      else
+	topology->last_dist = dist->prev;
+      hwloc_internal_distances_free(dist);
+      continue;
+    }
+  }
 }
 
 void
@@ -536,7 +559,7 @@ hwloc__distances_get(hwloc_topology_t topology,
 		     unsigned *nrp, struct hwloc_distances_s **distancesp,
 		     unsigned long kind, unsigned long flags __hwloc_attribute_unused)
 {
-  struct hwloc_internal_distances_s *dist, *inext;
+  struct hwloc_internal_distances_s *dist;
   unsigned nr = 0, i;
 
   /* We could return the internal arrays (as const),
@@ -549,11 +572,14 @@ hwloc__distances_get(hwloc_topology_t topology,
     return -1;
   }
 
-  for(dist = topology->first_dist; dist; dist = inext) {
+  /* we could refresh only the distances that match, but we won't have many distances anyway,
+   * so performance is totally negligible.
+   */
+  hwloc_internal_distances_refresh(topology);
+
+  for(dist = topology->first_dist; dist; dist = dist->next) {
     unsigned long kind_from = kind & HWLOC_DISTANCES_KIND_FROM_ALL;
     unsigned long kind_means = kind & HWLOC_DISTANCES_KIND_MEANS_ALL;
-
-    inext = dist->next;
 
     if (type != HWLOC_OBJ_TYPE_NONE && type != dist->type)
       continue;
@@ -562,19 +588,6 @@ hwloc__distances_get(hwloc_topology_t topology,
       continue;
     if (kind_means && !(kind_means & dist->kind))
       continue;
-
-    if (hwloc_internal_distances_refresh(topology, dist) < 0) {
-      if (dist->prev)
-	dist->prev->next = inext;
-      else
-	topology->first_dist = inext;
-      if (inext)
-	inext->prev = dist->prev;
-      else
-	topology->last_dist = dist->prev;
-      hwloc_internal_distances_free(dist);
-      continue;
-    }
 
     if (nr < *nrp) {
       struct hwloc_distances_s *distances = hwloc_distances_get_one(topology, dist);

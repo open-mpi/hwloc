@@ -671,6 +671,7 @@ extern "C" {
 #define hwloc_internal_distances_init HWLOC_NAME(internal_distances_init)
 #define hwloc_internal_distances_prepare HWLOC_NAME(internal_distances_prepare)
 #define hwloc_internal_distances_dup HWLOC_NAME(internal_distances_dup)
+#define hwloc_internal_distances_refresh HWLOC_NAME(internal_distances_refresh)
 #define hwloc_internal_distances_destroy HWLOC_NAME(internal_distances_destroy)
 
 #define hwloc_internal_distances_add HWLOC_NAME(internal_distances_add)
