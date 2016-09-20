@@ -625,7 +625,7 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
         // Find a specific InfiniBand network
         network = netloc_network_construct();
         network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
-        network->subnet_id = subnet_id;
+        network->subnet_id = strdup(subnet_id);
 
         // Search for the specific network
         char *netloc_dir;

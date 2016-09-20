@@ -256,7 +256,6 @@ int netloc_network_find(const char * network_topo_uri,
     *networks = (netloc_network_t **)
         realloc(all_networks, sizeof(all_networks[num_found]));
     *num_networks = num_found;
-    *networks = all_networks;
 
     return NETLOC_SUCCESS;
 
