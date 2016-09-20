@@ -18,9 +18,10 @@
 #include <private/autogen/config.h>
 #include <private/netloc.h>
 
+static int cur_uid = 0;
+
 netloc_edge_t * netloc_edge_construct(void)
 {
-    static int cur_uid = 0;
 
     netloc_edge_t *edge = NULL;
 
@@ -69,6 +70,10 @@ int netloc_edge_destruct(netloc_edge_t * edge)
     return NETLOC_SUCCESS;
 }
 
+void netloc_edge_reset_uid(void)
+{
+    cur_uid = 0;
+}
 
 int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition)
 {

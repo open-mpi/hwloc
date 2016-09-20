@@ -455,11 +455,13 @@ int main(int argc, char **argv)
         regcomp(&subnet_regexp, "^ib-subnet-([0-9a-fA-F:]{19}).txt$", REG_EXTENDED);
         struct dirent *entry;
         while ((entry = readdir(dir))) {
+            nodes = NULL;
             int subnet_found;
             char *filename = entry->d_name;
 
             subnet_found = !(regexec(&subnet_regexp, filename, 0, NULL, 0));
             if (subnet_found) {
+                global_link_idx = 0;
                 char *discover_filename;
                 char *route_filename;
                 char *subnet;

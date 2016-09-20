@@ -578,38 +578,51 @@ int main(int argc, char **argv)
     }
 
     netloc_network_t *network = NULL;
-    netloc_topology_t *topology = NULL;
 
     // Find a specific InfiniBand network
     network = netloc_network_construct();
     network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
 
     // Search for the specific network
-    ret = netloc_network_find(netloc_dir, network);
+    netloc_network_t **networks;
+    int num_networks;
+
+    ret = netloc_network_find(netloc_dir, network, &num_networks, &networks);
+    netloc_network_destruct(network);
+
     free(netloc_dir);
     if( NETLOC_SUCCESS != ret ) {
         fprintf(stderr, "Error: network not found!\n");
-        netloc_network_destruct(network);
+        for (int n = 0; n < num_networks; n++) {
+            netloc_network_destruct(networks[n]);
+        }
+        free(networks);
         return NETLOC_ERROR;
     }
-    char *network_str = netloc_network_pretty_print(network);
-    printf("Found Network: %s\n", network_str);
-    free(network_str);
 
-    // Attach to the network
-    topology = netloc_topology_construct(network);
-    if (topology == NULL) {
-        fprintf(stderr, "Error: netloc_topology_construct failed\n");
-        return ret;
+    for (int n = 0; n < num_networks; n++) {
+        netloc_network_t *network = networks[n];
+        char *network_str = netloc_network_pretty_print(network);
+        printf("Found Network: %s\n", network_str);
+        free(network_str);
+
+        // Attach to the network
+        netloc_topology_t *topology;
+        topology = netloc_topology_construct(network);
+        if (topology == NULL) {
+            fprintf(stderr, "Error: netloc_topology_construct failed\n");
+            return ret;
+        }
+        netloc_network_destruct(network);
+
+        netloc_edge_reset_uid();
+        // TODO do this automatically as before
+        netloc_topology_load(topology);
+
+        netloc_to_json_draw(topology, simplify);
+
+        netloc_topology_destruct(topology);
     }
-    netloc_network_destruct(network);
-
-    // TODO do this automatically as before
-    netloc_topology_load(topology);
-
-    netloc_to_json_draw(topology, simplify);
-
-    netloc_topology_destruct(topology);
 
     return 0;
 

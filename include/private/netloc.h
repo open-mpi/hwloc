@@ -121,12 +121,6 @@ typedef struct netloc_network_t {
     /** Node URI */
     char * node_uri;
 
-    /** Physical Path URI */
-    char * phy_path_uri;
-
-    /** Path URI */
-    char * path_uri;
-
     /** Description information from discovery (if any) */
     char * description;
 
@@ -359,25 +353,19 @@ int netloc_network_destruct(netloc_network_t *network);
  * Find a specific network at the URI specified.
  *
  * \param network_topo_uri URI to search for the specified network.
- * \param network  Netloc network handle (IN/OUT)
+ * \param ref_network  Netloc network handle (IN/OUT)
  *                 A network handle with the data structure fields set to
  *                 specify the search. For example, the user can set 'IB'
  *                 and nothing else, if they do not know the subnet or any
- *                 of the other necessary information. If the method
- *                 returns success then the network handle will be filled
- *                 out with the rest of the information found. If the method
- *                 returns some error then the network handle is not modified.
+ *                 of the other necessary information.
+ * \param num_networks  Number of networks found.
+ * \param networks  Networks found.
  *
- * \returns NETLOC_SUCCESS if exactly one network matches the specification,
- *                  and updates the network handle.
- * \returns NETLOC_ERROR_MULTIPLE if more than one network matches the spec.
- * \returns NETLOC_ERROR_EMPTY if no networks match the specification.
- * \returns NETLOC_ERROR_NOENT if the directory does not exist.
- * \returns NETLOC_ERROR_NOTDIR if the data_dir is not a directory.
- * \returns NETLOC_ERROR if something else is wrong.
+ * \returns NETLOC_SUCCESS if networks matcs the specification
  */
 int netloc_network_find(const char * network_topo_uri,
-                                        netloc_network_t* network);
+        netloc_network_t *ref_network, int *num_networks,
+        netloc_network_t ***networks);
 
 /**
  * Pretty print the network (Debugging Support)
@@ -532,6 +520,8 @@ netloc_edge_t * netloc_edge_construct(void);
  *   NETLOC_ERROR on error
  */
 int netloc_edge_destruct(netloc_edge_t *edge);
+
+void netloc_edge_reset_uid(void);
 
 int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition);
 

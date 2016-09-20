@@ -67,16 +67,6 @@ int netloc_network_copy(netloc_network_t *from, netloc_network_t *to)
     }
     to->node_uri     = STRDUP_IF_NOT_NULL(from->node_uri);
 
-    if( NULL != to->path_uri ) {
-        free(to->path_uri);
-    }
-    to->path_uri     = STRDUP_IF_NOT_NULL(from->path_uri);
-
-    if( NULL != to->phy_path_uri ) {
-        free(to->phy_path_uri);
-    }
-    to->phy_path_uri     = STRDUP_IF_NOT_NULL(from->phy_path_uri);
-
     if( NULL != to->description ) {
         free(to->description);
     }
@@ -171,8 +161,6 @@ netloc_network_t * netloc_network_construct(void)
     network->subnet_id    = NULL;
     network->data_uri     = NULL;
     network->node_uri     = NULL;
-    network->phy_path_uri = NULL;
-    network->path_uri     = NULL;
     network->description  = NULL;
     network->version      = NULL;
     network->userdata     = NULL;
@@ -200,16 +188,6 @@ int netloc_network_destruct(netloc_network_t * network)
         network->node_uri = NULL;
     }
 
-    if( NULL != network->path_uri) {
-        free(network->path_uri);
-        network->path_uri = NULL;
-    }
-
-    if( NULL != network->phy_path_uri) {
-        free(network->phy_path_uri);
-        network->phy_path_uri = NULL;
-    }
-
     if( NULL != network->description) {
         free(network->description);
         network->description = NULL;
@@ -229,72 +207,66 @@ int netloc_network_destruct(netloc_network_t * network)
     return NETLOC_SUCCESS;
 }
 
-int netloc_network_find(const char * network_topo_uri, netloc_network_t* network)
+int netloc_network_find(const char * network_topo_uri,
+        netloc_network_t *ref_network, int *num_networks,
+        netloc_network_t ***networks)
 {
-    int ret, exit_status = NETLOC_SUCCESS;
+    int ret;
     netloc_network_t **all_networks = NULL;
-    int i, num_networks;
+    int i, num_all_networks;
     int num_found = 0;
-    netloc_network_t *last_found = NULL;
 
     /*
      * Find all of the network information at this URI
      */
-    num_networks = 0;
-    ret = search_uri(network_topo_uri, NULL, NULL, &num_networks, &all_networks);
+    num_all_networks = 0;
+    ret = search_uri(network_topo_uri, NULL, NULL, &num_all_networks, &all_networks);
     if( NETLOC_SUCCESS != ret ) {
         fprintf(stderr, "Error: Failed to search the uri: %s\n", network_topo_uri);
-        return ret;
+        goto cleanup;
     }
 
     /*
      * Compare the networks to see if they match
      */
     num_found = 0;
-    for(i = 0; i < num_networks; ++i) {
-        if( NETLOC_NETWORK_TYPE_INVALID != network->network_type ) {
-            if(all_networks[i]->network_type != network->network_type) {
-                continue;
+    for (i = 0; i < num_all_networks; ++i) {
+        int match = 1;
+        if (ref_network && NETLOC_NETWORK_TYPE_INVALID != ref_network->network_type ) {
+            if(all_networks[i]->network_type != ref_network->network_type) {
+                match = 0;
             }
         }
-        if( NULL != network->subnet_id ) {
-            if( 0 != strncmp(all_networks[i]->subnet_id, network->subnet_id, strlen(all_networks[i]->subnet_id)) ) {
-                continue;
+        if (ref_network && NULL != ref_network->subnet_id ) {
+            if( 0 != strncmp(all_networks[i]->subnet_id, ref_network->subnet_id,
+                        strlen(all_networks[i]->subnet_id)) ) {
+                match = 0;
             }
         }
 
-        ++num_found;
-        last_found = all_networks[i];
+        if (!match) {
+            netloc_network_destruct(all_networks[i]);
+
+        } else {
+            all_networks[num_found] = all_networks[i];
+            ++num_found;
+        }
     }
 
-    /*
-     * Determine if we found too much or too little
-     */
-    if( num_found == 0 ) {
-        exit_status = NETLOC_ERROR_EMPTY;
-        goto cleanup;
-    }
+    *networks = (netloc_network_t **)
+        realloc(all_networks, sizeof(all_networks[num_found]));
+    *num_networks = num_found;
+    *networks = all_networks;
 
-    if( num_found > 1 ) {
-        exit_status = NETLOC_ERROR_MULTIPLE;
-        goto cleanup;
-    }
+    return NETLOC_SUCCESS;
 
-    /*
-     * If we found exactly one then copy the information into the handle
-     */
-    netloc_network_copy(last_found, network);
-
-    /*
-     * Cleanup
-     */
  cleanup:
-    for(i = 0; i < num_networks; ++i) {
+    for(i = 0; i < num_all_networks; ++i) {
         netloc_network_destruct(all_networks[i]);
     }
     free(all_networks);
 
-    return exit_status;
+    return ret;
 }
 
 int netloc_network_foreach(const char * const * search_uris,
@@ -345,7 +317,9 @@ static netloc_network_t *extract_network_info(char *filename)
 
     // TODO read from file
     network->network_type = (netloc_network_type_t)NETLOC_NETWORK_TYPE_INFINIBAND;
-    network->subnet_id = strdup("fe80:0000:0000:0000");
+    char *subnet_id = strdup(filename+strlen(filename)-29);
+    subnet_id[19] = '\0';
+    network->subnet_id = subnet_id;
     network->version = strdup("12");
 
     return network;
@@ -418,7 +392,6 @@ static int search_uri(const char * search_uri,
     char * filename = NULL;
     DIR *dirp = NULL;
     struct dirent *dir_entry = NULL;
-    int found;
 
     /*
      * Process the URI
@@ -460,7 +433,7 @@ static int search_uri(const char * search_uri,
         /*
          * Skip if does not end in .txt extension
          */
-        if( NULL == strstr(dir_entry->d_name, ".txt") ) {
+        if( NULL == strstr(dir_entry->d_name, "-nodes.txt") ) {
             continue;
         }
 
@@ -474,67 +447,27 @@ static int search_uri(const char * search_uri,
             continue;
         }
 
-        /*
-         * Determine file type: nodes or paths
-         */
-        if( NULL != strstr(filename, "nodes.txt") ) {
-            tmp_network->node_uri = strdup(filename);
-        }
-        else if( NULL != strstr(filename, "phy-paths.txt") ) {
-            tmp_network->phy_path_uri = strdup(filename);
-        }
-        else if( NULL != strstr(filename, "log-paths.txt") ) {
-            tmp_network->path_uri = strdup(filename);
-        }
+        tmp_network->node_uri = strdup(filename);
 
         asprintf(&tmp_network->data_uri, "%s%s", URI_PREFIX_FILE, uri_str);
 
-        /*
-         * Have we seen this network before?
-         */
-        found = 0;
-        for( i = 0; i < all_num_networks; ++i ) {
-            if( NETLOC_CMP_SAME == netloc_network_compare(all_networks[i], tmp_network) ) {
-                found = 1;
-                break;
-            }
-        }
+        all_num_networks += 1;
+        netloc_network_t **old_all_networks = all_networks;
+        all_networks = (netloc_network_t **)
+            realloc(all_networks, sizeof(netloc_network_t *)
+                    *all_num_networks);
+        if( NULL == all_networks ) {
+            fprintf(stderr, "Error: Failed to allocate space for %d networks\n", all_num_networks);
 
-        /*
-         * Append only the unique networks
-         */
-        if( !found ) {
-            all_num_networks += 1;
-            netloc_network_t **old_all_networks = all_networks;
-            all_networks = (netloc_network_t **)
-                realloc(all_networks, sizeof(netloc_network_t *)
-                                       *all_num_networks);
-            if( NULL == all_networks ) {
-                fprintf(stderr, "Error: Failed to allocate space for %d networks\n", all_num_networks);
-
-                closedir(dirp);
-                dirp = NULL;
-                netloc_network_destruct(tmp_network);
-                free(uri_str);
-                free(all_networks);
-                free(filename);
-                return NETLOC_ERROR;
-            }
-            all_networks[all_num_networks-1] = tmp_network;
-        } else {
-            // If not unique, then we may still need to copy over the filenames
-            // Determine file type: nodes or paths
-            if( NULL != strstr(filename, "nodes.ndat") ) {
-                all_networks[i]->node_uri = strdup(filename);
-            }
-            else if( NULL != strstr(filename, "phy-paths.ndat") ) {
-                all_networks[i]->phy_path_uri = strdup(filename);
-            }
-            else if( NULL != strstr(filename, "log-paths.ndat") ) {
-                all_networks[i]->path_uri = strdup(filename);
-            }
+            closedir(dirp);
+            dirp = NULL;
             netloc_network_destruct(tmp_network);
+            free(uri_str);
+            free(all_networks);
+            free(filename);
+            return NETLOC_ERROR;
         }
+        all_networks[all_num_networks-1] = tmp_network;
 
         free(filename);
     }
