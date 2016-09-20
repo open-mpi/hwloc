@@ -13,6 +13,8 @@
 #include <private/misc.h>
 #include <private/debug.h>
 
+#include <math.h>
+
 int
 hwloc__xml_verbose(void)
 {
@@ -1324,6 +1326,53 @@ hwloc__xml_import_diff(hwloc__xml_import_state_t state,
  ********* main XML import *********
  ***********************************/
 
+static void
+hwloc_convert_from_v1dist_floats(hwloc_topology_t topology, unsigned nbobjs, float *floats, uint64_t *u64s)
+{
+  unsigned i;
+  int is_uint;
+  char *env;
+  float scale = 1000.f;
+  char scalestring[20];
+
+  env = getenv("HWLOC_XML_V1DIST_SCALE");
+  if (env) {
+    scale = atof(env);
+    goto scale;
+  }
+
+  is_uint = 1;
+  /* find out if all values are integers */
+  for(i=0; i<nbobjs*nbobjs; i++) {
+    float f, iptr, fptr;
+    f = floats[i];
+    if (f < 0.f) {
+      is_uint = 0;
+      break;
+    }
+    fptr = modff(f, &iptr);
+    if (fptr > .001f && fptr < .999f) {
+      is_uint = 0;
+      break;
+    }
+    u64s[i] = (int)(f+.5f);
+  }
+  if (is_uint)
+    return;
+
+ scale:
+  /* TODO heuristic to find a good scale */
+  for(i=0; i<nbobjs*nbobjs; i++)
+    u64s[i] = scale * floats[i];
+
+  /* save the scale in root info attrs.
+   * Not perfect since we may have multiple of them,
+   * and some distances might disappear in case f restrict, etc.
+   */
+  sprintf(scalestring, "%f", scale);
+  hwloc_obj_add_info(hwloc_get_root_obj(topology), "xmlv1DistancesScale", scalestring);
+}
+
 /* this canNOT be the first XML call */
 static int
 hwloc_look_xml(struct hwloc_backend *backend)
@@ -1404,14 +1453,13 @@ hwloc_look_xml(struct hwloc_backend *backend)
 	hwloc_obj_t *objs = malloc(nbobjs*sizeof(hwloc_obj_t));
 	uint64_t *values = malloc(nbobjs*nbobjs*sizeof(*values));
 	if (objs && values) {
-	  unsigned i;
 	  hwloc_obj_t node;
+	  unsigned i;
 	  for(i=0, node = data->first_numanode;
 	      i<nbobjs;
 	      i++, node = node->next_cousin)
 	    objs[i] = node;
-	  for(i=0; i<nbobjs*nbobjs; i++)
-	    values[i] = 1000. * v1dist->floats[i]; /* FIXME */
+hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
 	  hwloc_internal_distances_add(topology, nbobjs, objs, values, v1dist->kind, 0);
 	} else {
 	  free(objs);
