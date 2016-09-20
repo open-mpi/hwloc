@@ -289,6 +289,7 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 {
 	hwloc_topology_diff_t lastdiff, tmpdiff;
 	struct hwloc_internal_distances_s *dist1, *dist2;
+	unsigned i;
 	int err;
 
 	if (flags != 0) {
@@ -314,6 +315,8 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 
 	if (!err) {
 		/* distances */
+		hwloc_internal_distances_refresh(topo1);
+		hwloc_internal_distances_refresh(topo2);
 		dist1 = topo1->first_dist;
 		dist2 = topo2->first_dist;
 		while (dist1 || dist2) {
@@ -325,12 +328,18 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 			if (dist1->type != dist2->type
 			    || dist1->nbobjs != dist2->nbobjs
 			    || dist1->kind != dist2->kind
-			    || memcmp(dist1->indexes, dist2->indexes, dist1->nbobjs * sizeof(*dist1->indexes)) /* TODO this requires identical gp_indexes, which isn't enforced above, compare logical indexes instead */
 			    || memcmp(dist1->values, dist2->values, dist1->nbobjs * dist1->nbobjs * sizeof(*dist1->values))) {
 				hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
 				err = 1;
 				break;
 			}
+			for(i=0; i<dist1->nbobjs; i++)
+				/* gp_index isn't enforced above. so compare logical_index instead, which is enforced. requires distances refresh() above */
+				if (dist1->objs[i]->logical_index != dist2->objs[i]->logical_index) {
+					hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
+					err = 1;
+					break;
+				}
 			dist1 = dist1->next;
 			dist2 = dist2->next;
 		}
