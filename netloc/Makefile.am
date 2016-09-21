@@ -41,9 +41,6 @@ libnetloc_la_SOURCES = $(sources)
 libnetloc_la_LDFLAGS = $(ldflags) -version-info $(libnetloc_so_version)
 libnetloc_la_LIBADD = \
         $(top_builddir)/hwloc/libhwloc.la
-if HWLOC_HAVE_SLURM
-libnetloc_la_LIBADD += -lslurm
-endif
 
 # Embedded library (note the lack of a .so version number -- that
 # intentionally only appears in the installable library).  Also note

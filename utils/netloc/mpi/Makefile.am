@@ -9,6 +9,7 @@ AM_CPPFLAGS = \
         -I$(top_builddir)/include \
         -I$(top_srcdir)/include
 
+if BUILD_MPITOOLS
 bin_PROGRAMS = \
         netloc_rank_order \
         netloc_mpi_find_hosts
@@ -16,6 +17,7 @@ bin_PROGRAMS = \
 if BUILD_NETLOCSCOTCH
 bin_PROGRAMS += \
         netloc_mpi_rank_file
+endif
 endif
 
 netloc_rank_order_SOURCES = \
