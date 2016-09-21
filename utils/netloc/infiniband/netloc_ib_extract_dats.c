@@ -767,10 +767,22 @@ int read_discover(char *subnet, char *path, char *filename)
             free(link_desc);
         }
     }
+
+    int failed = 0;
+    if (read == -1 && errno) {
+        perror("getline:");
+        failed = 1;
+    }
+
+    free(line);
     regfree(&dr_re);
     regfree(&link_re);
     regfree(&nolink_re);
     fclose(discover_file);
+
+    if (failed)
+        exit(-1);
+
 
     /* Find the link in the other way */
     node_t *node, *node_tmp;
@@ -784,12 +796,6 @@ int read_discover(char *subnet, char *path, char *filename)
             link->other_id = find_other_physical_link(link);
         }
     }
-
-    if (read == -1 && errno) {
-        perror("getline:");
-        exit(-1);
-    }
-    free(line);
 
     return 0;
 }
