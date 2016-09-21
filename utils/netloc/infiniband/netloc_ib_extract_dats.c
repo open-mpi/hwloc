@@ -947,10 +947,6 @@ int read_routes(char *subnet, char *path, char *route_dirname)
                     exit(-1);
                 }
 
-                if (!strcmp(filename, "ibroute-fe80:0000:0000:0000-12.txt")) {
-                    printf("DEBUG: read file %s\n", filename);
-                }
-
                 regex_t header_re;
                 regcomp(&header_re, "^Unicast lids.*"
                         "guid[[:space:]]+0x([0-9a-f]{16}).*:", REG_EXTENDED);
