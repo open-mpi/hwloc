@@ -912,7 +912,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
        */
       if (hwloc_bitmap_compare_first(next->complete_cpuset, cur->complete_cpuset) < 0) {
 	/* next should be before cur */
-	if (!childrengotignored || 1) {
+	if (!childrengotignored) {
 	  static int reported = 0;
 	  if (!reported && !hwloc_hide_errors()) {
 	    hwloc__xml_import_report_outoforder(topology, next, cur);
