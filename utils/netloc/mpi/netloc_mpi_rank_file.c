@@ -38,17 +38,23 @@ int main(int argc, char **argv)
     }
 
     FILE *rank_file = fopen(rank_filename, "w");
-    for (int p = 0; p < num_processes; p++) {
-        fprintf(rank_file, "rank %d=%s slot=%d\n",
-                p, cores[p].nodename, cores[p].core);
+    if (!rank_file) {
+        perror("fopen");
+        ret = NETLOC_ERROR;
+
+    } else {
+        for (int p = 0; p < num_processes; p++) {
+            fprintf(rank_file, "rank %d=%s slot=%d\n",
+                    p, cores[p].nodename, cores[p].core);
+        }
+        fclose(rank_file);
     }
 
     for (int p = 0; p < num_processes; p++) {
         free(cores[p].nodename);
     }
     free(cores);
-    fclose(rank_file);
 
-    return 0;
+    return ret;
 }
 

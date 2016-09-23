@@ -45,9 +45,12 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat)
     }
     rewind(input);
 
+    if (!n) {
+        goto error;
+    }
 
-    double *mat_values = (double *)malloc(n*n*sizeof(double));
-    double **mat = (double **)malloc(n*sizeof(double));
+    double *mat_values = (double *)malloc(sizeof(double[n*n]));
+    double **mat = (double **)malloc(sizeof(double *[n]));
     for (int i = 0; i < n; i++) {
         mat[i] = &mat_values[i*n];
     }

@@ -120,7 +120,19 @@ int netloc_topology_load(netloc_topology_t *topology)
     }
 
     int num_nodes;
-    fscanf(input , "%d\n,", &num_nodes);
+    if (fscanf(input , "%d\n,", &num_nodes) != 1) {
+        fprintf(stderr, "Cannot read the number of nodes in %s\n", path);
+        perror("fscanf");
+        fclose(input);
+        return NETLOC_ERROR;
+    }
+
+    if (num_nodes <= 0) {
+        fprintf(stderr, "Oups: incorrect number of nodes (%d) in %s\n",
+                num_nodes, path);
+        fclose(input);
+        return NETLOC_ERROR;
+    }
 
     char *line = NULL;
     size_t linesize = 0;
@@ -131,7 +143,9 @@ int netloc_topology_load(netloc_topology_t *topology)
         netloc_line_get(&line, &linesize, input);
         char *remain_line = line;
 
-        strcpy(node->physical_id, line_get_next_field(&remain_line));
+        strncpy(node->physical_id, line_get_next_field(&remain_line), 20);
+            /* Should be shorter than 20 */
+        node->physical_id[19] = '\0'; /* If a problem occurs */
         node->logical_id = atoi(line_get_next_field(&remain_line));
         node->type = atoi(line_get_next_field(&remain_line));
         read_partition_list(line_get_next_field(&remain_line), node->partitions);
@@ -226,7 +240,8 @@ int netloc_topology_load(netloc_topology_t *topology)
         HASH_FIND_STR(topology->nodes, src_id, node);
 
         path = netloc_path_construct();
-        strcpy(path->dest_id, dest_id);
+        strncpy(path->dest_id, dest_id, 20); /* Should be shorter than 20 */
+        path->dest_id[19] = '\0'; /* If a problem occurs */
 
         while ((field = line_get_next_field(&remain_line))) {
             int link_id = atoi(field);
@@ -402,6 +417,7 @@ static int find_similar_nodes(netloc_topology_t * topology)
                         virtual_edge->dest = edge1->dest;
                         ret = edge_merge_into(virtual_edge, edge1, 0);
                         if (ret != NETLOC_SUCCESS) {
+                            netloc_edge_destruct(virtual_edge);
                             goto ERROR;
                         }
                         HASH_ADD_PTR(virtual_node->edges, dest, virtual_edge);

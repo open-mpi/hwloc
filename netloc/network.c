@@ -358,12 +358,18 @@ static int extract_filename_from_uri(const char * uri, uri_type_t *type, char **
     *type = URI_FILE;
 
     // Strip of the file prefix
-    (*str) = strdup(&uri[strlen(URI_PREFIX_FILE)]);
+    *str = strdup(&uri[strlen(URI_PREFIX_FILE)]);
 
     // Append a '/' if needed
     len = strlen(*str);
     if( (*str)[len-1] != '/' ) {
-        (*str) = (char *)realloc(*str, sizeof(char) * (len+2));
+        char *new_str;
+        new_str = (char *)realloc(*str, sizeof(char[len+2]));
+        if (!new_str) {
+            free(*str);
+            return NETLOC_ERROR;
+        }
+        *str = new_str;
         (*str)[len] = '/';
         (*str)[len+1] = '\0';
     }

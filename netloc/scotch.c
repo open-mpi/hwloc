@@ -220,6 +220,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     netloc_arch_t *arch = netloc_arch_construct();
     ret = build_current_arch(&scotch_subarch, arch);
     if (NETLOC_SUCCESS != ret) {
+        netloc_arch_destruct(arch);
         return ret;
     }
 
@@ -257,6 +258,10 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         /* Find the processes mapped to the nodes */
         for (int p = 0; p < graph_size; p++) {
             int rank = ranks[p];
+            if (rank >= num_hosts || rank < 0) {
+                ret = NETLOC_ERROR;
+                goto ERROR;
+            }
             utarray_push_back(process_by_node[rank], &p);
         }
 
@@ -304,6 +309,9 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
                 cores[process].nodename = strdup(node->node->hostname);
                 cores[process].rank = node->slot_ranks[node_ranks[p]];
             }
+        }
+        for (int n = 0; n < num_hosts; n++) {
+            utarray_free(process_by_node[n]);
         }
     } else {
         for (int p = 0; p < graph_size; p++) {

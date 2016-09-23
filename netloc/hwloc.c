@@ -147,7 +147,6 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
 
     topology->topos = hwloc_topo_names;
     topology->hwloc_topos = (hwloc_topology_t *)hwloc_topos->d;
-    free(hwloc_topos);
 
     printf("%d hwloc topologies found:\n", utarray_len(topology->topos));
     // XXX XXX XXX XXX XXX XXX XXX faire pareil pour recherche partitions
@@ -162,6 +161,10 @@ ERROR:
         free(node_list);
     }
     free(hwloc_path);
+    if (ret == NETLOC_SUCCESS)
+        free(hwloc_topos);
+    else
+        utarray_free(hwloc_topos);
     return ret;
 }
 

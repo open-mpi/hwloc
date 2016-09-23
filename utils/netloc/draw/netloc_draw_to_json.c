@@ -94,12 +94,16 @@ static void contents_add(contents_t *contents, char *string)
     if (contents->num == contents->allocated) {
         if (contents->allocated)
         {
-            contents->strings = (char **)
+            char **new_strings = (char **)
                 realloc(contents->strings, sizeof(char *[2*contents->allocated]));
+            if (!new_strings)
+                    return;
+            contents->strings = new_strings;
             contents->allocated *= 2;
         } else {
-            contents->strings = (char **)
-                realloc(contents->strings, sizeof(char *[1]));
+            contents->strings = (char **) malloc(sizeof(char *[1]));
+            if (!contents->strings)
+                return;
             contents->allocated = 1;
         }
     }

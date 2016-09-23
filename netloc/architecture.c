@@ -28,6 +28,14 @@ static int netloc_arch_tree_destruct(netloc_arch_tree_t *tree);
 static int netloc_arch_node_destruct(netloc_arch_node_t *arch_node);
 static netloc_arch_node_t *netloc_arch_node_construct(void);
 
+#define checked_fscanf(f, w, str, failed) \
+    if (fscanf(f, " %1023s", w) != 1) { \
+        fprintf(stderr, "Cannot read %s\n", str); \
+        perror("fscanf"); \
+        goto ERROR; \
+    }
+
+
 /* Complete the topology to have a complete balanced tree  */
 void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
         int num_hosts, int **parch_idx)
@@ -101,6 +109,11 @@ static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_id
 {
     char *filename = getenv("NETLOC_CURRENTSLOTS");
     char word[1024];
+    char *end_word;
+    int *slot_list = NULL;
+    int *rank_list = NULL;
+    int *slot_idx = NULL;
+    char **nodes = NULL;
 
     if (!filename) {
         return NETLOC_ERROR;
@@ -112,30 +125,54 @@ static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_id
         return NETLOC_ERROR;
     }
 
-    fscanf(file, " %1023s", word);
-    int num_nodes;
-    num_nodes = atoi(word);
+    checked_fscanf(file, word, "num_nodes", failed);
 
-    char **nodes = (char **)malloc(sizeof(char *[num_nodes]));
+    int num_nodes;
+    num_nodes = strtol(word, &end_word, 10);
+    if (*word == '\0' || *end_word != '\0' || num_nodes <= 0) {
+        fprintf(stderr, "Oups: incorrect number of nodes (%d) in \"%s\"\n",
+                num_nodes, word);
+        goto ERROR;
+    }
+
+    nodes = (char **)malloc(sizeof(char *[num_nodes]));
     for (int n = 0; n < num_nodes; n++) {
-        fscanf(file, " %1023s", word);
+        checked_fscanf(file, word, "node", failed);
         nodes[n] = strdup(word);
     }
 
-    int *slot_idx = (int *)malloc(sizeof(int[num_nodes+1]));
+    slot_idx = (int *)malloc(sizeof(int[num_nodes+1]));
     slot_idx[0] = 0;
     for (int n = 0; n < num_nodes; n++) {
-        fscanf(file, " %1023s", word);
-        slot_idx[n+1] = slot_idx[n]+atoi(word);
+        checked_fscanf(file, word, "slot index", failed);
+
+        int slot_index = strtol(word, &end_word, 10);
+        if (*word == '\0' || *end_word != '\0' || num_nodes <= 0) {
+            fprintf(stderr, "Oups: incorrect slot index (%d) in \"%s\"\n",
+                    slot_index, word);
+            goto ERROR;
+        }
+        slot_idx[n+1] = slot_idx[n]+slot_index;
     }
 
-    int *slot_list = (int *)malloc(sizeof(int[slot_idx[num_nodes]]));
-    int *rank_list = (int *)malloc(sizeof(int[slot_idx[num_nodes]]));
+    slot_list = (int *)malloc(sizeof(int[slot_idx[num_nodes]]));
+    rank_list = (int *)malloc(sizeof(int[slot_idx[num_nodes]]));
     for (int s = 0; s < slot_idx[num_nodes]; s++) {
-        fscanf(file, " %1023s", word);
-        slot_list[s] = atoi(word);
-        fscanf(file, " %1023s", word);
-        rank_list[s] = atoi(word);
+        checked_fscanf(file, word, "slot number", failed);
+        slot_list[s] = strtol(word, &end_word, 10);
+        if (*word == '\0' || *end_word != '\0' || num_nodes <= 0) {
+            fprintf(stderr, "Oups: incorrect slot number (%d) in \"%s\"\n",
+                    slot_list[s], word);
+            goto ERROR;
+        }
+
+        checked_fscanf(file, word, "rank number", failed);
+        rank_list[s] = strtol(word, &end_word, 10);
+        if (*word == '\0' || *end_word != '\0' || num_nodes <= 0) {
+            fprintf(stderr, "Oups: incorrect rank number (%d) in \"%s\"\n",
+                    rank_list[s], word);
+            goto ERROR;
+        }
     }
 
     *pnum_nodes = num_nodes;
@@ -147,6 +184,14 @@ static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_id
     fclose(file);
 
     return NETLOC_SUCCESS;
+
+ERROR:
+    fclose(file);
+    free(nodes);
+    free(slot_idx);
+    free(slot_list);
+    free(rank_list);
+    return NETLOC_ERROR;
 }
 
 int netloc_arch_set_current_resources(netloc_arch_t *arch)
@@ -161,7 +206,7 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
     ret = get_current_resources(&num_nodes, &nodenames, &slot_idx, &slot_list,
             &rank_list);
 
-    if (ret != NETLOC_SUCCESS)
+    if (ret != NETLOC_SUCCESS || num_nodes <= 0)
         assert(0); // XXX
 
     int *current_nodes = NULL;
@@ -434,8 +479,8 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
 
     /* We go though the tree to order the leaves  and find the tree
      * structure */
-    UT_array *ordered_name_array;
-    UT_array **down_degrees_by_level;
+    UT_array *ordered_name_array = NULL;
+    UT_array **down_degrees_by_level = NULL;
     int *max_down_degrees_by_level;
 
     utarray_new(ordered_name_array, &ut_ptr_icd);
@@ -446,7 +491,7 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
     }
     max_down_degrees_by_level = (int *)calloc(num_levels-1, sizeof(int));
 
-    UT_array *down_edges;
+    UT_array *down_edges = NULL;
     utarray_new(down_edges, &ut_ptr_icd);
     netloc_edge_t *up_edge = current_node->edges;
     utarray_push_back(ordered_name_array, &current_node);
@@ -550,13 +595,21 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
     arch->nodes_by_name = named_nodes;
 
 end:
-    utarray_free(nodes);
-    utarray_free(ordered_name_array);
-    for (int l = 0; l < num_levels; l++) {
-        utarray_free(down_degrees_by_level[l]);
+    if (nodes)
+        utarray_free(nodes);
+
+    if (ordered_name_array)
+        utarray_free(ordered_name_array);
+
+    if (down_degrees_by_level) {
+        for (int l = 0; l < num_levels; l++) {
+            utarray_free(down_degrees_by_level[l]);
+        }
+        free(down_degrees_by_level);
     }
-    free(down_degrees_by_level);
-    utarray_free(down_edges);
+
+    if (down_edges)
+        utarray_free(down_edges);
 
     /* We copy back all userdata */
     netloc_topology_iter_nodes(topology, node, node_tmp) {

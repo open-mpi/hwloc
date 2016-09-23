@@ -301,6 +301,8 @@ int build_paths(void)
                 path_dest->node = node_dest;
                 path_dest->links = found_links;
                 HASH_ADD_STR(path->dest, physical_id, path_dest);
+            } else {
+                utarray_free(found_links);
             }
         }
     }
@@ -701,12 +703,12 @@ int read_discover(char *subnet, char *path, char *filename)
         /* Compute gbits */
         float gbits = compute_gbits(speed, width);
 
-        /* Get the source node */
-        node_t *src_node =
-            get_node(&nodes, src_type, src_lid, src_guid, subnet, src_desc);
-
         /* Add the link to the edge list */
         if (have_peer) {
+            /* Get the source node */
+            node_t *src_node =
+                get_node(&nodes, src_type, src_lid, src_guid, subnet, src_desc);
+
             node_t *dest_node =
                 get_node(&nodes, dest_type, dest_lid, dest_guid, subnet, dest_desc);
 
@@ -736,6 +738,7 @@ int read_discover(char *subnet, char *path, char *filename)
             link->partitions = NULL;
             link->parent_edge = edge;
             link->parent_node = src_node;
+            link->other_id = -1;
 
             int port_idx = link->ports[0]-1;
             /* NB: there is no function to set a specific index */
@@ -748,16 +751,7 @@ int read_discover(char *subnet, char *path, char *filename)
             }
 
             utarray_push_back(edge->physical_link_idx, &port_idx);
-        }
 
-        free(src_type);
-        free(src_lid);
-        free(src_port_id);
-        free(src_guid);
-        free(width);
-        free(speed);
-
-        if (have_peer) {
             free(src_desc);
             free(dest_desc);
             free(dest_type);
@@ -766,6 +760,13 @@ int read_discover(char *subnet, char *path, char *filename)
             free(dest_guid);
             free(link_desc);
         }
+
+        free(src_type);
+        free(src_lid);
+        free(src_port_id);
+        free(src_guid);
+        free(width);
+        free(speed);
     }
 
     int failed = 0;
@@ -940,12 +941,13 @@ int read_routes(char *subnet, char *path, char *route_dirname)
                 char *route_filename;
                 asprintf(&route_filename, "%s/%s", route_path, filename);
                 FILE *route_file = fopen(route_filename, "r");
-                free(route_filename);
 
                 if (!route_file) {
                     perror("fopen");
                     exit(-1);
                 }
+
+                free(route_filename);
 
                 regex_t header_re;
                 regcomp(&header_re, "^Unicast lids.*"
@@ -963,7 +965,7 @@ int read_routes(char *subnet, char *path, char *route_dirname)
 
                 int read;
 
-                route_source_t *route;
+                route_source_t *route = NULL;
                 while ((read = getline(&line, &size, route_file)) > 0) {
                     regmatch_t pmatch[5];
                     char *matches[5];
@@ -988,6 +990,10 @@ int read_routes(char *subnet, char *path, char *route_dirname)
                         }
                     }
                     else if (!regexec(&route_re, line, (size_t)5, pmatch, 0)) {
+                        if (!route) {
+                            fprintf(stderr, "Malformed route file %s\n", filename);
+                            exit(-1);
+                        }
                         route_dest_t *route_dest;
                         get_match(line, 5, pmatch, matches);
                         port = atoi(matches[2]);
