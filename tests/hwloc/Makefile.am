@@ -48,7 +48,6 @@ check_PROGRAMS = hwloc_list_components \
         hwloc_is_thissystem \
         hwloc_distances \
         hwloc_groups \
-        hwloc_groups2 \
         hwloc_insert_misc \
         hwloc_topology_restrict \
         hwloc_topology_dup \
