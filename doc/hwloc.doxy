@@ -2019,6 +2019,11 @@ For reference, ::hwloc_topology_t modification operations include
   and <tt>hwloc_topology_insert_group_object()</tt>
   (see \ref hwlocality_tinker) may modify the topology significantly by adding
   objects inside the tree, changing the topology depth, etc.
+
+  <tt>hwloc_distances_add()</tt> and <tt>hwloc_distances_remove()</tt>
+  (see \ref hwlocality_distances_get) modify the list of distance structures
+  in the topology, and the former may even insert new Group objects.
+
   <tt>hwloc_topology_restrict()</tt> modifies the topology even more
   dramatically by removing some objects.
 
