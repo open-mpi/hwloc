@@ -171,13 +171,24 @@ int main(void)
   check_distances(3, 5);
 
   /* remove the entire third node */
-  printf("removing entire third node\n");
+  printf("removing all PUs under third node, but keep that CPU-less node\n");
   hwloc_bitmap_fill(cpuset);
   hwloc_bitmap_clr_range(cpuset, 16, 23);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
-  check(2, 3, 11);
-  check_distances(2, 3);
+  check(3, 3, 11);
+  check_distances(3, 3);
+
+  /* only keep three PUs (first and last of first core, and last of last core of second node) */
+  printf("restricting to 3 PUs in 2 cores in 2 nodes, and remove the CPU-less node\n");
+  hwloc_bitmap_zero(cpuset);
+  hwloc_bitmap_set(cpuset, 0);
+  hwloc_bitmap_set(cpuset, 3);
+  hwloc_bitmap_set(cpuset, 15);
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
+  assert(!err);
+  check(2, 2, 3);
+  check_distances(2, 2);
 
   /* restrict to the third node, impossible */
   printf("restricting to only some already removed node, must fail\n");
@@ -185,24 +196,13 @@ int main(void)
   hwloc_bitmap_set_range(cpuset, 16, 23);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(err == -1 && errno == EINVAL);
-  check(2, 3, 11);
-  check_distances(2, 3);
-
-  /* only keep three PUs (first and last of first core, and last of last core of second node) */
-  printf("restricting to 3 PUs in 2 cores in 2 nodes\n");
-  hwloc_bitmap_zero(cpuset);
-  hwloc_bitmap_set(cpuset, 0);
-  hwloc_bitmap_set(cpuset, 3);
-  hwloc_bitmap_set(cpuset, 15);
-  err = hwloc_topology_restrict(topology, cpuset, 0);
-  assert(!err);
   check(2, 2, 3);
   check_distances(2, 2);
 
   hwloc_topology_destroy(topology);
 
   /* check that restricting exactly on a Group object keeps things coherent */
-  printf("restricting to a Misc covering only the of the PU level\n");
+  printf("restricting to a Group covering only the of the PU level\n");
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "pu:4");
   hwloc_topology_load(topology);

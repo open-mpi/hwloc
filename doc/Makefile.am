@@ -459,6 +459,7 @@ man3_configuration_DATA = \
 man3_tinkerdir = $(man3dir)
 man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_tinker.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_REMOVE_CPULESS.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_IO.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_MISC.3 \
         $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \

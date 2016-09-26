@@ -55,7 +55,7 @@ int main(void)
   printf("removing one node\n");
   hwloc_bitmap_fill(cpuset);
   hwloc_bitmap_clr_range(cpuset, 16, 23);
-  err = hwloc_topology_restrict(topology, cpuset, 0);
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
   assert(!err);
   printf("checking the result\n");
   assert(hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE) == 2);

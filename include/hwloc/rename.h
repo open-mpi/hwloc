@@ -150,6 +150,7 @@ extern "C" {
 #define hwloc_topology_get_userdata HWLOC_NAME(topology_get_userdata)
 
 #define hwloc_restrict_flags_e HWLOC_NAME(restrict_flags_e)
+#define HWLOC_RESTRICT_FLAG_REMOVE_CPULESS HWLOC_NAME_CAPS(RESTRICT_FLAG_REMOVE_CPULESS)
 #define HWLOC_RESTRICT_FLAG_ADAPT_MISC HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_MISC)
 #define HWLOC_RESTRICT_FLAG_ADAPT_IO HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_IO)
 #define hwloc_topology_restrict HWLOC_NAME(topology_restrict)

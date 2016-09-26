@@ -43,6 +43,9 @@ Version 2.0.0
   + Remove HWLOC_TOPOLOGY_FLAG_IO_DEVICES, _IO_BRIDGES and _WHOLE_IO in favor of
     hwloc_topology_set_io_types_filter() with HWLOC_TYPE_FILTER_KEEP_ALL or
     HWLOC_TYPE_FILTER_KEEP_IMPORTANT.
+  + hwloc_topology_restrict() doesn't remove objects that contain memory
+    by default anymore.
+    - The list of existing restrict flags was modified.
   + The distance API has been completely reworked. It is now described
     in hwloc/distances.h.
   + Add the experimental netloc subproject. It is enabled by default when

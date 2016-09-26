@@ -1990,6 +1990,12 @@ HWLOC_DECLSPEC void * hwloc_topology_get_userdata(hwloc_topology_t topology);
 
 /** \brief Flags to be given to hwloc_topology_restrict(). */
 enum hwloc_restrict_flags_e {
+  /** \brief Remove all objects that became CPU-less.
+   * By default, only objects that contain no PU and no memory are removed.
+   * \hideinitializer
+   */
+  HWLOC_RESTRICT_FLAG_REMOVE_CPULESS = (1<<0),
+
   /** \brief Move Misc objects to ancestors if their parents are removed during restriction.
    * If this flag is not set, Misc objects are removed when their parents are removed.
    * \hideinitializer
