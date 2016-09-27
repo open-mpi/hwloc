@@ -354,15 +354,13 @@ static int handle_edge(netloc_edge_t *edge, json_t *json_edges)
     return 0;
 }
 
-static int handle_node(netloc_node_t *node, json_t *json_nodes, json_t *json_edges, int merged)
+static int handle_node(netloc_node_t *node, json_t *json_nodes,
+        json_t *json_edges, int merged)
 {
-    //unsigned long uid = node->physical_id_int;
-    //char *node_label = node->physical_id;
     char *id = node->physical_id;
     char *desc = remove_quote(node->description);
     char *hostname = node->hostname;
-    //int topoIdx = node->hwlocTopoIdx; 
-    int topoIdx = 0; //  TODO XXX
+    int topoIdx = node->hwlocTopoIdx;
 
     json_t *json_node = json_dict_new();
     json_dict_add(json_node, JSON_DRAW_FILE_NODE_ID, json_string_new(id));
@@ -417,8 +415,6 @@ static int handle_node(netloc_node_t *node, json_t *json_nodes, json_t *json_edg
 
 static int handle_path(netloc_node_t *node, json_t *json_paths)
 {
-    //unsigned long uid = node->physical_id_int;
-    //char *node_label = node->physical_id;
     char *id = node->physical_id;
 
     json_t *json_node_paths = json_dict_new();

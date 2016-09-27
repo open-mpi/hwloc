@@ -210,6 +210,7 @@ typedef struct netloc_node_t {
     UT_array *partitions; /* index in the list from the topology */
 
     hwloc_topology_t hwlocTopo;
+    int hwlocTopoIdx;
 } netloc_node_t;
 
 /**

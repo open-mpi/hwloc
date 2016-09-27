@@ -139,6 +139,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
         free(refname);
         free(hwloc_file);
         node->hwlocTopo = *(hwloc_topology_t *)utarray_eltptr(hwloc_topos, t);
+        node->hwlocTopoIdx = t;
     }
 
     if (!num_diffs) {
@@ -149,7 +150,6 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
     topology->hwloc_topos = (hwloc_topology_t *)hwloc_topos->d;
 
     printf("%d hwloc topologies found:\n", utarray_len(topology->topos));
-    // XXX XXX XXX XXX XXX XXX XXX faire pareil pour recherche partitions
     for (int p = 0; p < utarray_len(topology->topos); p++) {
         printf("\t'%s'\n", *(char **)utarray_eltptr(topology->topos, p));
     }

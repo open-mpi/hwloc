@@ -52,6 +52,7 @@ netloc_node_t * netloc_node_construct(void)
     node->hostname     = NULL;
     utarray_new(node->partitions, &node_partitions_icd);
     node->hwlocTopo = NULL;
+    node->hwlocTopoIdx = -1;
 
     return node;
 }

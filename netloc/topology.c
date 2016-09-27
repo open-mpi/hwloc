@@ -517,7 +517,7 @@ static int edge_merge_into(netloc_edge_t *dest, netloc_edge_t *src, int keep)
     utarray_concat(dest->physical_links, src->physical_links);
     dest->total_gbits += src->total_gbits;
     utarray_concat(dest->partitions, src->partitions);
-    /* TODO XXX modify to avoid duplicates */
+    /* it will keep the duplicated edges */
     if (keep)
         utarray_push_back(dest->subnode_edges, &src);
 
