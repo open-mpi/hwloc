@@ -516,8 +516,10 @@ hwloc_look_kstat(struct hwloc_topology *topology)
         {
           hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
           if (strcmp(stat->value.c, "on-line")) {
-            /* not online */
-	    hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, cpuid);
+            /* Not online.
+	     * It was marked as existing in complete_cpuset above, ignore everything else.
+	     * We wouldn't get the all topology information about parents anyway.
+	     */
 	    continue;
 	  }
         }
