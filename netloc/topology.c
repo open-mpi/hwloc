@@ -308,9 +308,7 @@ static void read_partition_list(char *list, UT_array *array)
 
 static int edges_sort_by_dest(netloc_edge_t *a, netloc_edge_t *b)
 {
-    if (a->dest == b->dest)
-        return 0;
-    return (a->dest < b->dest) ? -1 : 1;
+    return strcmp(a->dest->physical_id, b->dest->physical_id);
 }
 
 static int find_reverse_edges(netloc_topology_t *topology)

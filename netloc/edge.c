@@ -51,7 +51,7 @@ netloc_edge_t * netloc_edge_construct(void)
 
 char * netloc_edge_pretty_print(netloc_edge_t* edge)
 {
-    // TODO XXX
+    // TODO
     return "TODO";
 }
 

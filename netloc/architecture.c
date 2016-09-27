@@ -660,7 +660,8 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
     char *subnet_id = getenv("NETLOC_SUBNET");
     char *path = getenv("NETLOC_TOPODIR");
 
-    if (arch_file) { // TODO XXX
+    if (arch_file) {
+        // TODO: support export/import of architectures
     } else {
         int ret;
         if (!path) {
