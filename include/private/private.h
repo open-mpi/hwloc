@@ -142,6 +142,7 @@ struct hwloc_topology {
 
   /* list of enabled backends. */
   struct hwloc_backend * backends;
+  unsigned backend_excludes;
 };
 
 extern void hwloc_alloc_obj_cpusets(hwloc_obj_t obj);

@@ -419,6 +419,7 @@ void
 hwloc_backends_init(struct hwloc_topology *topology)
 {
   topology->backends = NULL;
+  topology->backend_excludes = 0;
 }
 
 static struct hwloc_disc_component *
@@ -444,6 +445,7 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
 {
   struct hwloc_disc_component *comp;
   struct hwloc_backend *backend;
+  int err;
 
   if (topology->is_loaded) {
     errno = EBUSY;
@@ -461,7 +463,10 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
     backend->envvar_forced = envvar_forced;
     if (topology->backends)
       hwloc_backends_disable_all(topology);
-    return hwloc_backend_enable(topology, backend);
+    err = hwloc_backend_enable(topology, backend);
+    if (err >= 0)
+      topology->backend_excludes = comp->excludes;
+    return err;
   } else
     return -1;
 }
@@ -470,18 +475,17 @@ static int
 hwloc_disc_component_try_enable(struct hwloc_topology *topology,
 				struct hwloc_disc_component *comp,
 				const char *comparg,
-				unsigned *excludes,
 				int envvar_forced)
 {
   struct hwloc_backend *backend;
   int err;
 
-  if ((*excludes) & comp->type) {
+  if (topology->backend_excludes & comp->type) {
     if (hwloc_components_verbose)
       /* do not warn if envvar_forced since system-wide HWLOC_COMPONENTS must be silently ignored after set_xml() etc.
        */
       fprintf(stderr, "Excluding %s discovery component `%s', conflicts with excludes 0x%x\n",
-	      hwloc_disc_component_type_string(comp->type), comp->name, *excludes);
+	      hwloc_disc_component_type_string(comp->type), comp->name, topology->backend_excludes);
     return -1;
   }
 
@@ -497,7 +501,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
   if (err < 0)
     return -1;
 
-  *excludes |= comp->excludes;
+  topology->backend_excludes |= comp->excludes;
 
   return 0;
 }
@@ -507,20 +511,12 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 {
   struct hwloc_disc_component *comp;
   struct hwloc_backend *backend;
-  unsigned excludes = 0;
   int tryall = 1;
   const char *_env;
   char *env; /* we'll to modify the env value, so duplicate it */
 
   _env = getenv("HWLOC_COMPONENTS");
   env = _env ? strdup(_env) : NULL;
-
-  /* compute current excludes */
-  backend = topology->backends;
-  while (backend) {
-    excludes |= backend->component->excludes;
-    backend = backend->next;
-  }
 
   /* enable explicitly listed components */
   if (env) {
@@ -559,7 +555,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 
 	comp = hwloc_disc_component_find(-1, curenv);
 	if (comp) {
-	  hwloc_disc_component_try_enable(topology, comp, NULL, &excludes, 1 /* envvar forced */);
+	  hwloc_disc_component_try_enable(topology, comp, NULL, 1 /* envvar forced */);
 	} else {
 	  fprintf(stderr, "Cannot find discovery component `%s'\n", curenv);
 	}
@@ -599,7 +595,7 @@ nextname:
 	    curenv++;
 	}
       }
-      hwloc_disc_component_try_enable(topology, comp, NULL, &excludes, 0 /* defaults, not envvar forced */);
+      hwloc_disc_component_try_enable(topology, comp, NULL, 0 /* defaults, not envvar forced */);
 nextcomp:
       comp = comp->next;
     }
@@ -795,4 +791,5 @@ hwloc_backends_disable_all(struct hwloc_topology *topology)
     topology->backends = next;
   }
   topology->backends = NULL;
+  topology->backend_excludes = 0;
 }
