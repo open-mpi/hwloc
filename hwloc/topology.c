@@ -2618,8 +2618,8 @@ next_cpubackend:
     return -1;
   }
 
-
   hwloc_debug("%s", "\nPropagate disallowed cpus down and up\n");
+  hwloc_bitmap_and(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->cpuset);
   propagate_unused_cpuset(topology->levels[0][0], NULL);
 
   /* Backends must allocate root->*nodeset.

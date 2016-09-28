@@ -3083,7 +3083,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	      struct hwloc_linux_cpuinfo_proc * cpuinfo_Lprocs, unsigned cpuinfo_numprocs)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
-  hwloc_bitmap_t unknownset; /* Set of cpus to clear */
+  hwloc_bitmap_t unknownset; /* Set of cpus to clear from kernel cpusets so that we know when first meeting an object */
 #define CPU_TOPOLOGY_STR_LEN 128
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
@@ -3444,8 +3444,6 @@ package_done:
     hwloc_insert_object_by_cpuset(topology, packages);
     packages = next;
   }
-
-  hwloc_bitmap_andnot(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, unknownset);
 
   if (0 == caches_added)
     look_powerpc_device_tree(topology, data);
