@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2016 Inria.  All rights reserved.
+ * Copyright © 2013-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -17,29 +17,21 @@
 
 #ifndef HWLOC_DISABLE_BGQ_PORT_TEST
 
-static int
-hwloc_look_bgq(struct hwloc_backend *backend)
-{
-  struct hwloc_topology *topology = backend->topology;
-  hwloc_bitmap_t set;
-  hwloc_obj_t obj;
-  unsigned i;
-  const char *env;
-
-  if (topology->levels[0][0]->cpuset)
-    /* somebody discovered things */
-    return -1;
-
 #define HWLOC_BGQ_CORES 17 /* spare core ignored for now */
 
-  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+static int
+hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
+{
+  const char *env;
+  unsigned i;
+
   /* mark the 17th core (OS-reserved) as disallowed */
   hwloc_bitmap_clr_range(topology->levels[0][0]->allowed_cpuset, (HWLOC_BGQ_CORES-1)*4, HWLOC_BGQ_CORES*4-1);
 
-  if (topology->is_thissystem) {
+  if (topology->is_thissystem) { /* don't call CNK unless thissystem */
     env = getenv("BG_THREADMODEL");
     if (!env || atoi(env) != 2) {
-      /* process cannot use cores/threads outside of its Kernel_ThreadMask() */
+      /* process cannot use cores/threads outside of its Kernel_ThreadMask() unless BG_THREADMODEL=2 */
       uint64_t bgmask = Kernel_ThreadMask(Kernel_MyTcoord());
       /* the mask is reversed, manually reverse it */
 	for(i=0; i<64; i++)
@@ -47,6 +39,24 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 	  hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, 63-i);
     }
   }
+  return 0;
+}
+
+static int
+hwloc_look_bgq(struct hwloc_backend *backend)
+{
+  struct hwloc_topology *topology = backend->topology;
+  hwloc_bitmap_t set;
+  hwloc_obj_t obj;
+  unsigned i;
+
+  if (topology->levels[0][0]->cpuset)
+    /* somebody discovered things */
+    return -1;
+
+  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+
+  hwloc_bgq__get_allowed_resources(topology);
 
   /* a single memory bank */
   obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);
@@ -204,6 +214,21 @@ hwloc_bgq_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t
   return hwloc_bgq_set_thread_cpubind(topology, pthread_self(), hwloc_set, flags);
 }
 
+static int
+hwloc_bgq_get_allowed_resources(struct hwloc_topology *topology)
+{
+  /* Loading BGQ from XML isn't much useful since everything is hardwired anyway.
+   * But still implement XML + this callback in case portable applications want to always use XMLs.
+   */
+
+  /* In theory, when applying local restrictions to a XML-loaded topology,
+   * we should check that the current topology contains 1 NUMA nodes and 17*4 PUs.
+   *
+   * Just trust the user when he sets THISSYSTEM=1.
+   */
+  return hwloc_bgq__get_allowed_resources(topology);
+}
+
 void
 hwloc_set_bgq_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
 		    struct hwloc_topology_support *support __hwloc_attribute_unused)
@@ -215,6 +240,8 @@ hwloc_set_bgq_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
   /* threads cannot be bound to more than one PU, so get_last_cpu_location == get_cpubind */
   hooks->get_thisthread_last_cpu_location = hwloc_bgq_get_thisthread_cpubind;
   /* hooks->get_thread_last_cpu_location = hwloc_bgq_get_thread_cpubind; */
+
+  hooks->get_allowed_resources = hwloc_bgq_get_allowed_resources;
 }
 
 static struct hwloc_backend *
@@ -249,7 +276,8 @@ hwloc_bgq_component_instantiate(struct hwloc_disc_component *component,
   if (!backend)
     return NULL;
   backend->discover = hwloc_look_bgq;
-  backend->is_thissystem = !forced_nonbgq;
+  if (forced_nonbgq)
+    backend->is_thissystem = 0;
   return backend;
 }
 
