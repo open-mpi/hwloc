@@ -279,15 +279,15 @@ hwloc_pci_component_instantiate(struct hwloc_disc_component *component,
 {
   struct hwloc_backend *backend;
 
+#ifdef HWLOC_SOLARIS_SYS
+  if ((uid_t)0 != geteuid())
+    return NULL;
+#endif
+
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
-#ifdef HWLOC_SOLARIS_SYS
-  if ((uid_t)0 != geteuid())
-    backend->discover = NULL;
-  else
-#endif
-    backend->discover = hwloc_look_pci;
+  backend->discover = hwloc_look_pci;
   return backend;
 }
 
