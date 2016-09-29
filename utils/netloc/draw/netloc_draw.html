@@ -632,6 +632,8 @@ function draw()
     network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
+        showSelectedNodes();
+        showSelectedEdges();
     });
     network.on("deselectNode", function (params) {
         document.getElementById('description').innerHTML = description;
