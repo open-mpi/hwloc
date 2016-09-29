@@ -445,7 +445,6 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
 {
   struct hwloc_disc_component *comp;
   struct hwloc_backend *backend;
-  int err;
 
   if (topology->is_loaded) {
     errno = EBUSY;
@@ -463,10 +462,7 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
     backend->envvar_forced = envvar_forced;
     if (topology->backends)
       hwloc_backends_disable_all(topology);
-    err = hwloc_backend_enable(topology, backend);
-    if (err >= 0)
-      topology->backend_excludes = comp->excludes;
-    return err;
+    return hwloc_backend_enable(topology, backend);
   } else
     return -1;
 }
@@ -478,7 +474,6 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
 				int envvar_forced)
 {
   struct hwloc_backend *backend;
-  int err;
 
   if (topology->backend_excludes & comp->type) {
     if (hwloc_components_verbose)
@@ -497,13 +492,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
   }
 
   backend->envvar_forced = envvar_forced;
-  err = hwloc_backend_enable(topology, backend);
-  if (err < 0)
-    return -1;
-
-  topology->backend_excludes |= comp->excludes;
-
-  return 0;
+  return hwloc_backend_enable(topology, backend);
 }
 
 void
@@ -712,7 +701,7 @@ hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *back
   *pprev = backend;
 
   backend->topology = topology;
-
+  topology->backend_excludes |= backend->component->excludes;
   return 0;
 }
 
