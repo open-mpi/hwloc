@@ -1956,6 +1956,49 @@ hwloc_linux_get_area_memlocation(hwloc_topology_t topology __hwloc_attribute_unu
   return ret;
 }
 
+static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const char *root_path, int root_fd, char **cpuset_namep);
+
+static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
+{
+  const char *fsroot_path;
+  char *cpuset_name;
+  int root_fd = -1;
+
+  fsroot_path = getenv("HWLOC_FSROOT");
+  if (!fsroot_path)
+    fsroot_path = "/";
+
+#ifdef HAVE_OPENAT
+  root_fd = open(fsroot_path, O_RDONLY | O_DIRECTORY);
+  if (root_fd < 0)
+    goto out;
+#else
+  if (strcmp(fsroot_path, "/")) {
+    errno = ENOSYS;
+    goto out;
+  }
+#endif
+
+  /* we could also error-out if the current topology doesn't actually match the system,
+   * at least for PUs and NUMA nodes. But it would increase the overhead of loading XMLs.
+   *
+   * Just trust the user when he sets THISSYSTEM=1. It enables hacky
+   * tests such as restricting random XML or synthetic to the current
+   * machine (uses the default cgroup).
+   */
+
+  hwloc_linux__get_allowed_resources(topology, fsroot_path, root_fd, &cpuset_name);
+  if (cpuset_name) {
+    hwloc_obj_add_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
+    free(cpuset_name);
+  }
+  if (root_fd != -1)
+    close(root_fd);
+
+ out:
+  return -1;
+}
+
 void
 hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 			struct hwloc_topology_support *support __hwloc_attribute_unused)
@@ -1987,6 +2030,7 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->bind_membind = 1;
   support->membind->interleave_membind = 1;
   support->membind->migrate_membind = 1;
+  hooks->get_allowed_resources = hwloc_linux_get_allowed_resources_hook;
 }
 
 
@@ -2152,7 +2196,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
  * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
  */
 static void
-hwloc_admin_disable_set_from_cpuset(struct hwloc_linux_backend_data_s *data,
+hwloc_admin_disable_set_from_cpuset(int root_fd,
 				    const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name,
 				    const char *attr_name,
 				    hwloc_bitmap_t admin_enabled_cpus_set)
@@ -2172,7 +2216,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_linux_backend_data_s *data,
     hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
   }
 
-  fd = hwloc_open(cpuset_filename, data->root_fd);
+  fd = hwloc_open(cpuset_filename, root_fd);
   if (fd < 0) {
     /* found no cpuset description, ignore it */
     hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
@@ -4152,13 +4196,29 @@ hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
   return -1;
 }
 
+static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const char *root_path, int root_fd, char **cpuset_namep)
+{
+  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
+  hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, root_path);
+  if (cgroup_mntpnt || cpuset_mntpnt) {
+    cpuset_name = hwloc_read_linux_cpuset_name(root_fd, topology->pid);
+    if (cpuset_name) {
+      hwloc_admin_disable_set_from_cpuset(root_fd, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
+      hwloc_admin_disable_set_from_cpuset(root_fd, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
+    }
+    free(cgroup_mntpnt);
+    free(cpuset_mntpnt);
+  }
+  *cpuset_namep = cpuset_name;
+}
+
 static int
 hwloc_look_linuxfs(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   unsigned nbnodes;
-  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
+  char *cpuset_name;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   struct hwloc_obj_info_s *global_infos = NULL;
   unsigned global_infos_count = 0;
@@ -4226,16 +4286,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   /**********************
    * Gather the list of admin-disabled cpus and mems
    */
-  hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, data->root_path);
-  if (cgroup_mntpnt || cpuset_mntpnt) {
-    cpuset_name = hwloc_read_linux_cpuset_name(data->root_fd, topology->pid);
-    if (cpuset_name) {
-      hwloc_admin_disable_set_from_cpuset(data, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
-      hwloc_admin_disable_set_from_cpuset(data, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
-    }
-    free(cgroup_mntpnt);
-    free(cpuset_mntpnt);
-  }
+  hwloc_linux__get_allowed_resources(topology, data->root_path, data->root_fd, &cpuset_name);
 
   /*********************
    * Memory information

@@ -844,6 +844,20 @@ following environment variables.
   This can be used for efficiency reasons to first detect the topology once,
   save it to an XML file, and quickly reload it later through the XML
   backend, but still having binding functions actually do bind.
+  This also enables support for the variable HWLOC_THISSYSTEM_ALLOWED_RESOURCES.
+  </dd>
+
+<dt>HWLOC_THISSYSTEM_ALLOWED_RESOURCES=1</dt>
+  <dd>Get the set of allowed resources from the native operating system
+  even if the topology was loaded from XML or synthetic description,
+  as if ::HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES was set
+  with hwloc_topology_set_flags().
+  This variable requires the topology to match the current system
+  (see the variable HWLOC_THISSYSTEM).
+  This is useful when the topology is not loaded directly from the
+  local machine (e.g. for performance reason) and it comes with all
+  resources, but the running process is restricted to only a part
+  of the machine (for instance because of Linux Cgroup/Cpuset).
   </dd>
 
 <dt>HWLOC_HIDE_ERRORS=0</dt>
@@ -1661,6 +1675,12 @@ topology may not correspond to the physical machine that loads it.
 This behavior may be reverted by asserting that loaded file really
 matches the underlying system with the HWLOC_THISSYSTEM environment
 variable or the ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM topology flag.
+
+\note The topology flag ::HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES
+may be used to load a XML topology that contains the entire machine
+and restrict it to the part that is actually available to the current
+process (e.g. when Linux Cgroup/Cpuset are used to restrict the set
+of resources).
 
 \note hwloc also offers the ability to export/import \ref hwlocality_diff.
 
@@ -2818,6 +2838,12 @@ It is also possible to manipulate such XML files with the C programming
 interface, and the import/export may also be directed to memory buffer
 (that may for instance be transmitted between applications through a package).
 See also \ref xml.
+
+\note The environment variable HWLOC_THISSYSTEM_ALLOWED_RESOURCES
+may be used to load a XML topology that contains the entire machine
+and restrict it to the part that is actually available to the current
+process (e.g. when Linux Cgroup/Cpuset are used to restrict the set
+of resources). See \ref envvar.
 
 
 \subsection faq_multitopo How many topologies may I use in my program?

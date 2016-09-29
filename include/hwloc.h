@@ -1738,7 +1738,28 @@ enum hwloc_topology_flags_e {
    * backend, but still having binding functions actually do bind.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1UL<<1)
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1UL<<1),
+
+ /** \brief Get the set of allowed resources from the local operating system even if the topology was loaded from XML or synthetic description.
+   *
+   * If the topology was loaded from XML or from a synthetic string,
+   * restrict it by applying the current process restrictions such as
+   * Linux Cgroup/Cpuset.
+   *
+   * This is useful when the topology is not loaded directly from
+   * the local machine (e.g. for performance reason) and it comes
+   * with all resources, while the running process is restricted
+   * to only parts of the machine.
+   *
+   * This flag is ignored unless ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM is
+   * also set since the loaded topology must match the underlying machine
+   * where restrictions will be gathered from.
+   *
+   * Setting the environment variable HWLOC_THISSYSTEM_ALLOWED_RESOURCES
+   * would result in the same behavior.
+   * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES = (1UL<<2)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
