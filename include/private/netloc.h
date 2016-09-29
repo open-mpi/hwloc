@@ -108,7 +108,7 @@ typedef struct netloc_arch_t netloc_arch_t;
  *
  * Represents a single network type and subnet.
  */
-typedef struct netloc_network_t {
+struct netloc_network_t {
     /** Type of network */
     netloc_network_type_t network_type;
 
@@ -132,7 +132,7 @@ typedef struct netloc_network_t {
      * Initialized to NULL, and not used by the netloc library.
      */
     void * userdata;
-} netloc_network_t;
+};
 
 /**
  * \struct netloc_topology_t
@@ -142,7 +142,7 @@ typedef struct netloc_network_t {
  *
  * \note Must be initialized with \ref netloc_topology_construct()
  */
-typedef struct netloc_topology_t {
+struct netloc_topology_t {
     /** Copy of the network structure */
     netloc_network_t *network;
 
@@ -164,7 +164,7 @@ typedef struct netloc_topology_t {
 
     /** Type of the graph */
     netloc_topology_type_t type;
-} netloc_topology_t;
+};
 
 /**
  * \brief Netloc Node Type
@@ -173,7 +173,7 @@ typedef struct netloc_topology_t {
  * graph. This could be a server or a network switch. The \ref node_type parameter
  * will distinguish the exact type of node this represents in the graph.
  */
-typedef struct netloc_node_t {
+struct netloc_node_t {
     UT_hash_handle hh;       /* makes this structure hashable with physical_id */
     UT_hash_handle hh2;      /* makes this structure hashable with hostname */
 
@@ -211,7 +211,7 @@ typedef struct netloc_node_t {
 
     hwloc_topology_t hwlocTopo;
     int hwlocTopoIdx;
-} netloc_node_t;
+};
 
 /**
  * \brief Netloc Edge Type
@@ -223,7 +223,7 @@ typedef struct netloc_node_t {
  * be entered into the data store without circular references.
  * \todo JJH Is the note above still true?
  */
-typedef struct netloc_edge_t {
+struct netloc_edge_t {
     UT_hash_handle hh;       /* makes this structure hashable */
 
     netloc_node_t *dest;
@@ -250,10 +250,10 @@ typedef struct netloc_edge_t {
      * Initialized to NULL, and not used by the netloc library.
      */
     void * userdata;
-} netloc_edge_t;
+};
 
 
-typedef struct netloc_physical_link_t {
+struct netloc_physical_link_t {
     UT_hash_handle hh;       /* makes this structure hashable */
 
     int id; // TODO long long
@@ -275,25 +275,25 @@ typedef struct netloc_physical_link_t {
 
     /** Description information from discovery (if any) */
     char *description;
-} netloc_physical_link_t;
+};
 
-typedef struct netloc_path_t {
+struct netloc_path_t {
     UT_hash_handle hh;       /* makes this structure hashable */
     char dest_id[20];
     UT_array *links;
-} netloc_path_t;
+};
 
 
 /**********************************************************************
  *        Architecture structures
  **********************************************************************/
-typedef struct netloc_arch_tree_t {
+struct netloc_arch_tree_t {
     int num_levels;
     int *degrees;
     int *cost;
-} netloc_arch_tree_t;
+};
 
-typedef struct netloc_arch_node_t {
+struct netloc_arch_node_t {
     UT_hash_handle hh;       /* makes this structure hashable */
     char *name; /* Hash key */
     netloc_node_t *node; /* Corresponding node */
@@ -305,14 +305,14 @@ typedef struct netloc_arch_node_t {
     int num_current_slots; /* Number of PUs */
     int *current_slots; /* indices in the complete tree */
     int *slot_ranks; /* corresponding MPI rank for each leaf in tree */
-} netloc_arch_node_t;
+};
 
-typedef struct netloc_arch_node_slot_t {
+struct netloc_arch_node_slot_t {
     netloc_arch_node_t *node;
     int slot;
-} netloc_arch_node_slot_t;
+};
 
-typedef struct netloc_arch_t {
+struct netloc_arch_t {
     netloc_topology_t *topology;
     int has_slots; /* if slots are included in the architecture */
     netloc_arch_type_t type;
@@ -324,7 +324,7 @@ typedef struct netloc_arch_t {
     netloc_arch_node_slot_t *node_slot_by_idx; /* node_slot by index in complete topo */
     int num_current_hosts; /* if has_slots, host is a slot, else host is a node */
     int *current_hosts; /* indices in the complete topology */
-} netloc_arch_t;
+};
 
 
 /**********************************************************************/
