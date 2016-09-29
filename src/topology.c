@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2556,6 +2556,13 @@ next_cpubackend:
 
   hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
   collect_proc_cpuset(topology->levels[0][0], NULL);
+
+  if (topology->binding_hooks.get_allowed_resources && topology->is_thissystem) {
+    const char *env = getenv("HWLOC_THISSYSTEM_ALLOWED_RESOURCES");
+    if ((env && atoi(env))
+	|| (topology->flags & HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES))
+      topology->binding_hooks.get_allowed_resources(topology);
+  }
 
   hwloc_debug("%s", "\nPropagate offline and disallowed cpus down and up\n");
   propagate_unused_cpuset(topology->levels[0][0], NULL);

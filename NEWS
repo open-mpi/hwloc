@@ -23,6 +23,10 @@ Version 1.11.6
   by trying to avoid sysfs file accesses as much as possible.
 * Add support for AMD Family 17h processors (Zen) SMT cores in the Linux
   and x86 backends.
+* Add the HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES flag (and the
+  HWLOC_THISSYSTEM_ALLOWED_RESOURCES environment variable) for reading the
+  set of allowed resources from the local operating system even if the
+  topology was loaded from XML or synthetic.
 * Fix hwloc_bitmap_set/clr_range() for infinite ranges that do not
   overlap currently defined ranges in the bitmap.
 * Don't reset the lstopo zoom scale when moving the X11 window.
