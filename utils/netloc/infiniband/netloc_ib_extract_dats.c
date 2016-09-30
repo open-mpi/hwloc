@@ -625,6 +625,7 @@ int read_discover(char *subnet, char *path, char *filename)
             REG_EXTENDED);
 
     int read;
+    errno = 0; /* getline can return -1 even if no error (EOF) */
     while ((read = getline(&line, &size, discover_file)) > 0) {
         const int link_nfields = 12;
         const int nolink_nfields = 7;
