@@ -2685,12 +2685,6 @@ next_noncpubackend:
     }
   }
 
-  /*
-   * Now set binding hooks according to topology->is_thissystem
-   * what the native OS backend offers.
-   */
-  hwloc_set_binding_hooks(topology);
-
   return 0;
 }
 
@@ -3014,6 +3008,11 @@ hwloc_topology_load (struct hwloc_topology *topology)
   hwloc_disc_components_enable_others(topology);
   /* now that backends are enabled, update the thissystem flag */
   hwloc_backends_is_thissystem(topology);
+  /*
+   * Now set binding hooks according to topology->is_thissystem
+   * and what the native OS backend offers.
+   */
+  hwloc_set_binding_hooks(topology);
 
   /* get distance matrix from the environment are store them (as indexes) in the topology.
    * indexes will be converted into objects later once the tree will be filled
