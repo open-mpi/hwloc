@@ -2760,12 +2760,6 @@ next_noncpubackend:
     }
   }
 
-  /*
-   * Now set binding hooks according to topology->is_thissystem
-   * what the native OS backend offers.
-   */
-  hwloc_set_binding_hooks(topology);
-
   return 0;
 }
 
@@ -3107,6 +3101,11 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* now that backends are enabled, update the thissystem flag and some callbacks */
   hwloc_backends_is_thissystem(topology);
   hwloc_backends_find_callbacks(topology);
+  /*
+   * Now set binding hooks according to topology->is_thissystem
+   * and what the native OS backend offers.
+   */
+  hwloc_set_binding_hooks(topology);
 
   hwloc_pci_discovery_init(topology);
 
