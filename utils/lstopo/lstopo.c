@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -562,6 +562,14 @@ main (int argc, char *argv[])
 	lstopo_collapse = 0;
       else if (!strcmp (argv[0], "--thissystem"))
 	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
+      else if (!strcmp (argv[0], "--flags")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	flags = strtoul(argv[1], NULL, 0);
+	opt = 1;
+      }
       else if (!strcmp (argv[0], "--restrict")) {
 	if (argc < 2) {
 	  usage (callname, stderr);
@@ -689,7 +697,11 @@ main (int argc, char *argv[])
   if (lstopo_show_only != (hwloc_obj_type_t)-1)
     merge = 0;
 
-  hwloc_topology_set_flags(topology, flags);
+  err = hwloc_topology_set_flags(topology, flags);
+  if (err < 0) {
+    fprintf(stderr, "Failed to set flags %lx (%s).\n", flags, strerror(errno));
+    return EXIT_FAILURE;
+  }
 
   if (ignorecache > 1) {
     hwloc_topology_ignore_type(topology, HWLOC_OBJ_CACHE);
