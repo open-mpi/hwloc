@@ -5626,7 +5626,7 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
     tmpbackend = tmpbackend->next;
   }
   if (!data) {
-    hwloc_debug("linuxio failed to find linux backend private_data, aborting instantiate()\n");
+    hwloc_debug("linuxio failed to find linux backend private_data, aborting its discovery()\n");
     return -1;
   }
   backend->private_data = data;
@@ -5683,12 +5683,15 @@ hwloc_linuxio_component_instantiate(struct hwloc_disc_component *component,
 {
   struct hwloc_backend *backend;
 
-  /* thissystem may not be fully initialized yet, we'll check flags in discover() */
-
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
   backend->discover = hwloc_look_linuxfs_io;
+
+  /* backend->is_thissystem should be what the linux backend has,
+   * but it's actually useless since both backends will change the main topology->is_thissystem in the same way.
+   */
+
   /* backend->private_data will point to the main linux private_data after load(),
    * once the main linux component is instantiated for sure.
    * it remains valid until the main linux component gets disabled during topology destroy.
