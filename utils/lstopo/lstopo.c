@@ -610,6 +610,12 @@ main (int argc, char *argv[])
 	loutput.collapse = 0;
       else if (!strcmp (argv[0], "--thissystem"))
 	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
+      else if (!strcmp (argv[0], "--flags")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	flags = strtoul(argv[1], NULL, 0);
+	opt = 1;
+      }
       else if (!strcmp (argv[0], "--restrict")) {
 	if (argc < 2)
 	  goto out_usagefailure;
@@ -717,7 +723,11 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
-  hwloc_topology_set_flags(topology, flags);
+  err = hwloc_topology_set_flags(topology, flags);
+  if (err < 0) {
+    fprintf(stderr, "Failed to set flags %lx (%s).\n", flags, strerror(errno));
+    goto out_with_topology;
+  }
 
   if (input) {
     err = hwloc_utils_enable_input_format(topology, input, &input_format, loutput.verbose_mode > 1, callname);

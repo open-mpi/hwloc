@@ -138,6 +138,11 @@ This is equivalent to \fB-\-filter <type>:none\fR for all instruction cache type
 \fB\-\-whole\-system\fR
 Do not consider administration limitations.
 .TP
+\fB\-\-flags\fR <flags>
+Enforce topology flags.
+The default is \fB0\fR.
+These flags are passed to \fIhwloc_topology_set_flags()\fR.
+.TP
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
 This sets HWLOC_TYPE_FILTER_KEEP_STRUCTURE for all object types.
