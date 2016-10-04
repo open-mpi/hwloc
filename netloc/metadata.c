@@ -2,6 +2,7 @@
  * Copyright © 2013      University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2014-2016 Inria.  All rights reserved.
+ * Copyright © 2016 Cisco Systems, Inc.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -188,7 +189,6 @@ static int search_uri(const char * search_uri,
 
     char * filename = NULL;
     DIR *dirp = NULL;
-    struct stat dstat;
     struct dirent *dir_entry = NULL;
     bool found;
 
