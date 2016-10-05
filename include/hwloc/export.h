@@ -28,9 +28,22 @@ extern "C" {
  * @{
  */
 
+/** \brief Flags for exporting XML topologies.
+ *
+ * Flags to be given as a OR'ed set to hwloc_topology_export_xml().
+ */
+enum hwloc_topology_export_xml_flags_e {
+ /** \brief Export XML that is loadable by hwloc v1.x.
+  * \hideinitializer
+  */
+ HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 = (1UL<<0),
+};
+
 /** \brief Export the topology into an XML file.
  *
  * This file may be loaded later through hwloc_topology_set_xml().
+ *
+ * \p flags is a OR'ed set of ::hwloc_topology_export_xml_flags_e.
  *
  * \return -1 if a failure occured.
  *
@@ -53,6 +66,8 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  * hwloc_free_xmlbuffer() later in the caller.
  *
  * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
+ *
+ * \p flags is a OR'ed set of ::hwloc_topology_export_xml_flags_e.
  *
  * \return -1 if a failure occured.
  *

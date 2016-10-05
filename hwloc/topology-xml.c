@@ -1661,17 +1661,24 @@ hwloc__xml_export_safestrdup(const char *old)
 }
 
 static void
-hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
   struct hwloc__xml_export_state_s state;
   hwloc_obj_t child;
   char *cpuset = NULL;
   char tmp[255];
+  int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
   unsigned i;
 
   parentstate->new_child(parentstate, &state, "object");
 
-  state.new_prop(&state, "type", hwloc_type_name(obj->type));
+  if (v1export && obj->type == HWLOC_OBJ_PACKAGE)
+    state.new_prop(&state, "type", "Socket");
+  else if (v1export && hwloc_obj_type_is_cache(obj->type))
+    state.new_prop(&state, "type", "Cache");
+  else
+    state.new_prop(&state, "type", hwloc_type_name(obj->type));
+
   if (obj->os_index != (unsigned) -1) {
     sprintf(tmp, "%u", obj->os_index);
     state.new_prop(&state, "os_index", tmp);
@@ -1684,6 +1691,11 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   if (obj->complete_cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->complete_cpuset);
     state.new_prop(&state, "complete_cpuset", cpuset);
+    free(cpuset);
+  }
+  if (v1export && obj->cpuset) {
+    hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
+    state.new_prop(&state, "online_cpuset", cpuset);
     free(cpuset);
   }
   if (obj->allowed_cpuset) {
@@ -1707,15 +1719,17 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     free(cpuset);
   }
 
-  sprintf(tmp, "%llu", (unsigned long long) obj->gp_index);
-  state.new_prop(&state, "gp_index", tmp);
+  if (!v1export) {
+    sprintf(tmp, "%llu", (unsigned long long) obj->gp_index);
+    state.new_prop(&state, "gp_index", tmp);
+  }
 
   if (obj->name) {
     char *name = hwloc__xml_export_safestrdup(obj->name);
     state.new_prop(&state, "name", name);
     free(name);
   }
-  if (obj->subtype) {
+  if (!v1export && obj->subtype) {
     char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
     state.new_prop(&state, "subtype", subtype);
     free(subtype);
@@ -1744,10 +1758,12 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   case HWLOC_OBJ_GROUP:
     sprintf(tmp, "%u", obj->attr->group.depth);
     state.new_prop(&state, "depth", tmp);
-    sprintf(tmp, "%u", obj->attr->group.kind);
-    state.new_prop(&state, "kind", tmp);
-    sprintf(tmp, "%u", obj->attr->group.subkind);
-    state.new_prop(&state, "subkind", tmp);
+    if (!v1export) {
+      sprintf(tmp, "%u", obj->attr->group.kind);
+      state.new_prop(&state, "kind", tmp);
+      sprintf(tmp, "%u", obj->attr->group.subkind);
+      state.new_prop(&state, "subkind", tmp);
+    }
     break;
   case HWLOC_OBJ_BRIDGE:
     sprintf(tmp, "%u-%u", obj->attr->bridge.upstream_type, obj->attr->bridge.downstream_type);
@@ -1814,40 +1830,67 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     free(name);
     free(value);
   }
-
-#if 0
-  // FIXME, if v1 and root, export distances that cover all children
-  for(i=0; i<obj->distances_count; i++) {
-    unsigned nbobjs = obj->distances[i]->nbobjs;
-    unsigned j;
+  if (v1export && obj->subtype) {
+    char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
     struct hwloc__xml_export_state_s childstate;
-    state.new_child(&state, &childstate, "distances");
-    sprintf(tmp, "%u", nbobjs);
-    childstate.new_prop(&childstate, "nbobjs", tmp);
-    sprintf(tmp, "%u", obj->distances[i]->relative_depth);
-    childstate.new_prop(&childstate, "relative_depth", tmp);
-    sprintf(tmp, "%f", obj->distances[i]->latency_base);
-    childstate.new_prop(&childstate, "latency_base", tmp);
-    for(j=0; j<nbobjs*nbobjs; j++) {
-      struct hwloc__xml_export_state_s greatchildstate;
-      childstate.new_child(&childstate, &greatchildstate, "latency");
-      sprintf(tmp, "%f", obj->distances[i]->latency[j]);
-      greatchildstate.new_prop(&greatchildstate, "value", tmp);
-      greatchildstate.end_object(&greatchildstate, "latency");
-    }
-    childstate.end_object(&childstate, "distances");
+    int is_coproctype = (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
+    state.new_child(&state, &childstate, "info");
+    childstate.new_prop(&childstate, "name", is_coproctype ? "CoProcType" : "Type");
+    childstate.new_prop(&childstate, "value", subtype);
+    childstate.end_object(&childstate, "info");
+    free(subtype);
   }
-#endif
+
+  if (v1export && !obj->parent) {
+    /* only latency matrices covering the entire machine can be exported to v1 */
+    struct hwloc_internal_distances_s *dist;
+    /* refresh distances since we need objects below */
+    hwloc_internal_distances_refresh(topology);
+    for(dist = topology->first_dist; dist; dist = dist->next) {
+      struct hwloc__xml_export_state_s childstate;
+      unsigned nbobjs = dist->nbobjs;
+      unsigned *logical_to_v2array;
+
+      if (nbobjs != (unsigned) hwloc_get_nbobjs_by_type(topology, dist->type))
+	continue;
+      if (!(dist->kind & HWLOC_DISTANCES_KIND_MEANS_LATENCY))
+	continue;
+
+      logical_to_v2array = malloc(nbobjs*sizeof(*logical_to_v2array));
+      if (!logical_to_v2array)
+	continue;
+      for(i=0; i<nbobjs; i++)
+	logical_to_v2array[dist->objs[i]->logical_index] = i;
+
+      state.new_child(&state, &childstate, "distances");
+      sprintf(tmp, "%u", nbobjs);
+      childstate.new_prop(&childstate, "nbobjs", tmp);
+      sprintf(tmp, "%u", hwloc_get_type_depth(topology, dist->type));
+      childstate.new_prop(&childstate, "relative_depth", tmp);
+      sprintf(tmp, "%f", 1.f);
+      childstate.new_prop(&childstate, "latency_base", tmp);
+      for(i=0; i<nbobjs*nbobjs; i++) {
+	struct hwloc__xml_export_state_s greatchildstate;
+	childstate.new_child(&childstate, &greatchildstate, "latency");
+	sprintf(tmp, "%f", (float) dist->values[i]);
+	greatchildstate.new_prop(&greatchildstate, "value", tmp);
+	greatchildstate.end_object(&greatchildstate, "latency");
+      }
+      childstate.end_object(&childstate, "distances");
+
+      free(logical_to_v2array);
+    }
+  }
 
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) &state, topology, obj);
 
   for(child = obj->first_child; child; child = child->next_sibling)
-    hwloc__xml_export_object (&state, topology, child);
+    hwloc__xml_export_object (&state, topology, child, flags);
   for(child = obj->io_first_child; child; child = child->next_sibling)
-    hwloc__xml_export_object (&state, topology, child);
+    hwloc__xml_export_object (&state, topology, child, flags);
   for(child = obj->misc_first_child; child; child = child->next_sibling)
-    hwloc__xml_export_object (&state, topology, child);
+    hwloc__xml_export_object (&state, topology, child, flags);
 
   state.end_object(&state, "object");
 }
@@ -1902,9 +1945,9 @@ hwloc__xml_export_v2distances(hwloc__xml_export_state_t parentstate, hwloc_topol
 void
 hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology, unsigned long flags)
 {
-  assert(!flags);
-  hwloc__xml_export_object (state, topology, hwloc_get_root_obj(topology));
-  hwloc__xml_export_v2distances (state, topology);
+  hwloc__xml_export_object (state, topology, hwloc_get_root_obj(topology), flags);
+  if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1))
+    hwloc__xml_export_v2distances (state, topology);
 }
 
 void
@@ -1970,7 +2013,7 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
-  if (flags) {
+  if (flags & ~HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
     errno = EINVAL;
     return -1;
   }
@@ -2002,7 +2045,7 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
-  if (flags) {
+  if (flags & ~HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
     errno = EINVAL;
     return -1;
   }
