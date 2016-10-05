@@ -45,6 +45,9 @@
  * See hwloc/bitmap.h for bitmap specific macros.
  * See hwloc/helper.h for high-level topology traversal helpers.
  * See hwloc/inlines.h for the actual inline code of some functions below.
+ * See hwloc/export.h for exporting topologies to XML or to synthetic descriptions.
+ * See hwloc/distances.h for querying and modifying distances between objects.
+ * See hwloc/diff.h for manipulating differences between similar topologies.
  */
 
 #ifndef HWLOC_H
