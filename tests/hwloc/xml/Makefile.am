@@ -13,6 +13,7 @@ xml_outputs = \
         16amd64-4distances.xml \
         16amd64-4distances.console.output \
         16amd64-4distances.v1tov2.xml \
+        16amd64-4distances.v2tov1.output \
         16em64t-4s2c2t.xml \
         16em64t-4s2c2t-offlines.xml \
         16em64t-4s2c2t.console.output \
@@ -38,6 +39,7 @@ xml_outputs = \
 xml_source = \
         16amd64-4distances.console.source \
         16amd64-4distances.v1tov2.source \
+        16amd64-4distances.v2tov1.source \
         16amd64-4distances.v1.xml \
         16em64t-4s2c2t.console.source \
         16-2gr2gr2n2c+misc.console.source \
@@ -51,6 +53,7 @@ xml_source = \
 # file modifying the behavior of lstopo
 xml_options = \
         16amd64-4distances.console.options \
+        16amd64-4distances.v2tov1.options \
         16em64t-4s2c2t.console.options \
         16intel64-manyVFs.console.options \
         16intel64-manyVFs.console.nocollapse.options \
