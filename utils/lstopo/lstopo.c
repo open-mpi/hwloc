@@ -377,6 +377,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "Miscellaneous options:\n");
+  fprintf (where, "  --export-xml-flags <n>\n"
+		  "                        Set flags during the XML topology export\n");
   fprintf (where, "  --export-synthetic-flags <n>\n"
 		  "                        Set flags during the synthetic topology export\n");
   fprintf (where, "  --ps --top            Display processes within the hierarchy\n");
@@ -465,6 +467,7 @@ main (int argc, char *argv[])
   loutput.pid = 0;
 
   loutput.export_synthetic_flags = 0;
+  loutput.export_xml_flags = 0;
 
   loutput.legend = 1;
   loutput.legend_append = NULL;
@@ -626,6 +629,12 @@ main (int argc, char *argv[])
 	if (argc < 2)
 	  goto out_usagefailure;
 	restrict_flags = (unsigned long) strtoull(argv[1], NULL, 0);
+	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--export-xml-flags")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	loutput.export_xml_flags = (unsigned long) strtoull(argv[1], NULL, 0);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--export-synthetic-flags")) {

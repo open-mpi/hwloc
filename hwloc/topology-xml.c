@@ -1900,8 +1900,9 @@ hwloc__xml_export_v2distances(hwloc__xml_export_state_t parentstate, hwloc_topol
 }
 
 void
-hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology)
+hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology, unsigned long flags)
 {
+  assert(!flags);
   hwloc__xml_export_object (state, topology, hwloc_get_root_obj(topology));
   hwloc__xml_export_v2distances (state, topology);
 }
@@ -1961,7 +1962,7 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
  **********************************/
 
 /* this can be the first XML call */
-int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, unsigned long flags)
 {
   hwloc_localeswitch_declare;
   int force_nolibxml;
@@ -1969,14 +1970,19 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
+  if (flags) {
+    errno = EINVAL;
+    return -1;
+  }
+
   hwloc_localeswitch_init();
 
   force_nolibxml = hwloc_nolibxml_export();
 retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
-    ret = hwloc_nolibxml_callbacks->export_file(topology, filename);
+    ret = hwloc_nolibxml_callbacks->export_file(topology, filename, flags);
   else {
-    ret = hwloc_libxml_callbacks->export_file(topology, filename);
+    ret = hwloc_libxml_callbacks->export_file(topology, filename, flags);
     if (ret < 0 && errno == ENOSYS) {
       hwloc_libxml_callbacks = NULL;
       goto retry;
@@ -1988,7 +1994,7 @@ retry:
 }
 
 /* this can be the first XML call */
-int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
+int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen, unsigned long flags)
 {
   hwloc_localeswitch_declare;
   int force_nolibxml;
@@ -1996,14 +2002,19 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
+  if (flags) {
+    errno = EINVAL;
+    return -1;
+  }
+
   hwloc_localeswitch_init();
 
   force_nolibxml = hwloc_nolibxml_export();
 retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
-    ret = hwloc_nolibxml_callbacks->export_buffer(topology, xmlbuffer, buflen);
+    ret = hwloc_nolibxml_callbacks->export_buffer(topology, xmlbuffer, buflen, flags);
   else {
-    ret = hwloc_libxml_callbacks->export_buffer(topology, xmlbuffer, buflen);
+    ret = hwloc_libxml_callbacks->export_buffer(topology, xmlbuffer, buflen, flags);
     if (ret < 0 && errno == ENOSYS) {
       hwloc_libxml_callbacks = NULL;
       goto retry;

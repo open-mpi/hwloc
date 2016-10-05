@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2015 Inria.  All rights reserved.
+ * Copyright © 2010-2016 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -39,7 +39,7 @@ static int one_test(void)
   assert(hwloc_topology_is_thissystem(topology));
   hwloc_obj_add_info(hwloc_get_root_obj(topology), "UglyString", s);
   hwloc_obj_add_info(hwloc_get_root_obj(topology), "UberUglyString", t);
-  hwloc_topology_export_xmlbuffer(topology, &buf1, &size1);
+  hwloc_topology_export_xmlbuffer(topology, &buf1, &size1, 0);
   hwloc_topology_destroy(topology);
   printf("exported to buffer %p length %d\n", buf1, size1);
 
@@ -52,7 +52,7 @@ static int one_test(void)
     assert(0);
   if (strcmp(hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "UberUglyString"), "xy"))
     assert(0);
-  hwloc_topology_export_xmlbuffer(topology, &buf2, &size2);
+  hwloc_topology_export_xmlbuffer(topology, &buf2, &size2, 0);
   printf("re-exported to buffer %p length %d\n", buf2, size2);
 
   if (strcmp(buf1, buf2)) {

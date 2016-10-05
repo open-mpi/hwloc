@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2015 Inria.  All rights reserved.
+ * Copyright © 2011-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -51,7 +51,7 @@ int main(void)
   hwloc_topology_init(&topology);
   hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
   hwloc_topology_load(topology);
-  if (hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen) < 0)
+  if (hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen, 0) < 0)
     printf("XML buffer export failed (%s), ignoring\n", strerror(errno));
 
   /* with HWLOC_THISSYSTEM=1 */

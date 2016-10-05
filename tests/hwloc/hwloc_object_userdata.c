@@ -148,7 +148,7 @@ int main(void)
   obj3->userdata = (void *)(uintptr_t) 0x3;
 
   /* export/import without callback, we get nothing */
-  hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen);
+  hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen, 0);
 
   hwloc_topology_init(&reimport);
   hwloc_topology_set_xmlbuffer(reimport, xmlbuf, xmlbuflen);
@@ -158,7 +158,7 @@ int main(void)
 
   /* export/import with callback, we should get three userdata */
   hwloc_topology_set_userdata_export_callback(topology, export_cb);
-  hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen);
+  hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen, 0);
 
   hwloc_topology_init(&reimport);
   hwloc_topology_set_userdata_import_callback(reimport, import_cb);

@@ -386,7 +386,7 @@ hwloc__libxml_export_add_content(hwloc__xml_export_state_t state, const char *bu
 }
 
 static xmlDocPtr
-hwloc__libxml2_prepare_export(hwloc_topology_t topology)
+hwloc__libxml2_prepare_export(hwloc_topology_t topology, unsigned long flags)
 {
   struct hwloc__xml_export_state_s state;
   hwloc__libxml_export_state_data_t data = (void *) state.data;
@@ -413,20 +413,20 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
 
   data->current_node = root_node;
 
-  hwloc__xml_export_topology (&state, topology);
+  hwloc__xml_export_topology (&state, topology, flags);
 
   return doc;
 }
 
 static int
-hwloc_libxml_export_file(hwloc_topology_t topology, const char *filename)
+hwloc_libxml_export_file(hwloc_topology_t topology, const char *filename, unsigned long flags)
 {
   xmlDocPtr doc;
   int ret;
 
   errno = 0; /* set to 0 so that we know if libxml2 changed it */
 
-  doc = hwloc__libxml2_prepare_export(topology);
+  doc = hwloc__libxml2_prepare_export(topology, flags);
   ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
   hwloc_libxml2_cleanup();
@@ -441,11 +441,11 @@ hwloc_libxml_export_file(hwloc_topology_t topology, const char *filename)
 }
 
 static int
-hwloc_libxml_export_buffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
+hwloc_libxml_export_buffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen, unsigned long flags)
 {
   xmlDocPtr doc;
 
-  doc = hwloc__libxml2_prepare_export(topology);
+  doc = hwloc__libxml2_prepare_export(topology, flags);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
   hwloc_libxml2_cleanup();

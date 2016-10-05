@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     switch_numa_index(hwloc_get_root_obj(topology), old_index, new_index);
   }
 
-  err = hwloc_topology_export_xml(topology, argv[2]);
+  err = hwloc_topology_export_xml(topology, argv[2], 0);
   if (err < 0) {
     fprintf(stderr, "hwloc_topology_export_xml() on file `%s' failed (%s)\n", argv[2], strerror(errno));
     usage(stderr, callname);

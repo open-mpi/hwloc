@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2015 Inria.  All rights reserved.
+ * Copyright © 2012-2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -75,12 +75,12 @@ int main(void)
   orig_backend_name = get_backend_name(topology1);
   hwloc_obj_add_info(hwloc_get_root_obj(topology1), "Foo", "Bar");
   assert(hwloc_topology_is_thissystem(topology1));
-  if (hwloc_topology_export_xmlbuffer(topology1, &xmlbuf, &xmlbuflen) < 0)
+  if (hwloc_topology_export_xmlbuffer(topology1, &xmlbuf, &xmlbuflen, 0) < 0)
     printf("XML buffer export failed (%s), ignoring\n", strerror(errno));
   else
     xmlbufok = 1;
   xmlfilefd = mkstemp(xmlfile);
-  if (xmlfilefd < 0 || hwloc_topology_export_xml(topology1, xmlfile) < 0)
+  if (xmlfilefd < 0 || hwloc_topology_export_xml(topology1, xmlfile, 0) < 0)
     printf("XML file export failed (%s), ignoring\n", strerror(errno));
   else
     xmlfileok = 1;

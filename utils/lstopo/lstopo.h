@@ -47,8 +47,9 @@ struct lstopo_output {
   int pid_number;
   hwloc_pid_t pid;
 
-  /* synthetic export config */
+  /* export config */
   unsigned long export_synthetic_flags;
+  unsigned long export_xml_flags;
 
   /* legend */
   int legend;

@@ -73,7 +73,7 @@ typedef struct hwloc__xml_export_state_s {
   char data[40];
 } * hwloc__xml_export_state_t;
 
-HWLOC_DECLSPEC void hwloc__xml_export_topology(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology);
+HWLOC_DECLSPEC void hwloc__xml_export_topology(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, unsigned long flags);
 
 HWLOC_DECLSPEC void hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_diff_t diff);
 
@@ -83,8 +83,8 @@ HWLOC_DECLSPEC void hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate
 
 struct hwloc_xml_callbacks {
   int (*backend_init)(struct hwloc_xml_backend_data_s *bdata, const char *xmlpath, const char *xmlbuffer, int xmlbuflen);
-  int (*export_file)(struct hwloc_topology *topology, const char *filename);
-  int (*export_buffer)(struct hwloc_topology *topology, char **xmlbuffer, int *buflen);
+  int (*export_file)(struct hwloc_topology *topology, const char *filename, unsigned long flags);
+  int (*export_buffer)(struct hwloc_topology *topology, char **xmlbuffer, int *buflen, unsigned long flags);
   void (*free_buffer)(void *xmlbuffer);
   int (*import_diff)(struct hwloc__xml_import_state_s *state, const char *xmlpath, const char *xmlbuffer, int xmlbuflen, hwloc_topology_diff_t *diff, char **refnamep);
   int (*export_diff_file)(union hwloc_topology_diff_u *diff, const char *refname, const char *filename);

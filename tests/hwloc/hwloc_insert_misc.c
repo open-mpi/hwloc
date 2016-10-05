@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -70,7 +70,7 @@ int main(void)
   hwloc_topology_check(topology);
 
   /* check that export/reimport/export gives same export buffer */
-  err = hwloc_topology_export_xmlbuffer(topology, &buf1, &buflen1);
+  err = hwloc_topology_export_xmlbuffer(topology, &buf1, &buflen1, 0);
   assert(!err);
   err = hwloc_topology_init(&reload);
   assert(!err);
@@ -81,7 +81,7 @@ int main(void)
   err = hwloc_topology_load(reload);
   assert(!err);
   hwloc_topology_check(reload);
-  err = hwloc_topology_export_xmlbuffer(reload, &buf2, &buflen2);
+  err = hwloc_topology_export_xmlbuffer(reload, &buf2, &buflen2, 0);
   assert(!err);
   assert(buflen1 == buflen2);
   err = strcmp(buf1, buf2);

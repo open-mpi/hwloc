@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 		goto out_with_topo;
 	}
 
-	err = hwloc_topology_export_xml(topo, output ? output : input);
+	err = hwloc_topology_export_xml(topo, output ? output : input, 0);
 	if (err < 0) {
 		fprintf(stderr, "Failed to export patched topology %s\n", output);
 		goto out_with_topo;

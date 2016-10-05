@@ -644,7 +644,7 @@ hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *
 }
 
 static size_t
-hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int buflen)
+hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int buflen, unsigned long flags)
 {
   struct hwloc__xml_export_state_s state, childstate;
   hwloc__nolibxml_export_state_data_t ndata = (void *) &state.data;
@@ -670,14 +670,14 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 		 "<!DOCTYPE topology SYSTEM \"hwloc.dtd\">\n");
   hwloc__nolibxml_export_update_buffer(ndata, res);
   hwloc__nolibxml_export_new_child(&state, &childstate, "topology");
-  hwloc__xml_export_topology (&childstate, topology);
+  hwloc__xml_export_topology (&childstate, topology, flags);
   hwloc__nolibxml_export_end_object(&childstate, "topology");
 
   return ndata->written+1;
 }
 
 static int
-hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buflenp)
+hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buflenp, unsigned long flags)
 {
   char *buffer;
   size_t bufferlen, res;
@@ -686,7 +686,7 @@ hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buf
   buffer = malloc(bufferlen);
   if (!buffer)
     return -1;
-  res = hwloc___nolibxml_prepare_export(topology, buffer, (int)bufferlen);
+  res = hwloc___nolibxml_prepare_export(topology, buffer, (int)bufferlen, flags);
 
   if (res > bufferlen) {
     char *tmp = realloc(buffer, res);
@@ -695,7 +695,7 @@ hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buf
       return -1;
     }
     buffer = tmp;
-    hwloc___nolibxml_prepare_export(topology, buffer, (int)res);
+    hwloc___nolibxml_prepare_export(topology, buffer, (int)res, flags);
   }
 
   *bufferp = buffer;
@@ -704,14 +704,14 @@ hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buf
 }
 
 static int
-hwloc_nolibxml_export_file(hwloc_topology_t topology, const char *filename)
+hwloc_nolibxml_export_file(hwloc_topology_t topology, const char *filename, unsigned long flags)
 {
   FILE *file;
   char *buffer;
   int bufferlen;
   int ret;
 
-  ret = hwloc_nolibxml_export_buffer(topology, &buffer, &bufferlen);
+  ret = hwloc_nolibxml_export_buffer(topology, &buffer, &bufferlen, flags);
   if (ret < 0)
     return -1;
 

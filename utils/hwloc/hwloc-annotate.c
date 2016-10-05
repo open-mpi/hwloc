@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	err = hwloc_topology_export_xml(topology, output);
+	err = hwloc_topology_export_xml(topology, output, 0);
 	if (err < 0)
 		goto out;
 

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -27,7 +27,7 @@ void output_xml(struct lstopo_output *loutput, const char *filename)
     return;
   }
 
-  if (hwloc_topology_export_xml(loutput->topology, filename) < 0) {
+  if (hwloc_topology_export_xml(loutput->topology, filename, loutput->export_xml_flags) < 0) {
     fprintf(stderr, "Failed to export XML to %s (%s)\n", filename, strerror(errno));
     return;
   }
