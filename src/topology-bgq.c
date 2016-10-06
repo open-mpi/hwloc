@@ -211,9 +211,13 @@ hwloc_bgq_component_instantiate(struct hwloc_disc_component *component,
   if (!env || !atoi(env)) {
     err = uname(&utsname);
     if (err || strcmp(utsname.sysname, "CNK") || strcmp(utsname.machine, "BGQ")) {
-      fprintf(stderr, "*** Found unexpected uname sysname `%s' machine `%s'\n", utsname.sysname, utsname.machine);
-      fprintf(stderr, "*** The BGQ backend is only enabled on compute nodes by default (sysname=CNK machine=BGQ)\n");
-      fprintf(stderr, "*** Set HWLOC_FORCE_BGQ=1 in the environment to enforce the BGQ backend anyway.\n");
+      fprintf(stderr, "*** Found unexpected uname sysname `%s' machine `%s'.\n", utsname.sysname, utsname.machine);
+      fprintf(stderr, "*** The BlueGene/Q backend (bgq) is only enabled by default on compute nodes\n"
+		      "*** (where uname returns sysname=CNK and machine=BGQ).\n"
+		      "*** If you know you *really* want to run the bgq backend on this non-compute node,\n"
+		      "*** set HWLOC_FORCE_BGQ=1 in the environment.\n"
+		      "*** If you just want to discover the native topology of this non-compute node,\n"
+		      "*** do not pass any BlueGene/Q-specific options on the configure command-line.\n");
       return NULL;
     }
   }
