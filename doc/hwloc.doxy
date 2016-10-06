@@ -3136,10 +3136,15 @@ export PATH=$PATH:/usr/linux-k1om-4.7/bin/
 
 \subsection faq_bgq How do I build hwloc for BlueGene/Q?
 
-IBM BlueGene/Q machines run a standard Linux on the I/O node and a
-custom CNK (<em>Compute Node Kernel</em>) on the compute nodes.
-To run on the compute node, hwloc must be cross-compiled from the I/O
-node with the following configuration line:
+IBM BlueGene/Q machines run a standard Linux on the login/frontend nodes
+and a custom CNK (<em>Compute Node Kernel</em>) on the compute nodes.
+
+To discover the topology of a login/frontend node, hwloc should be
+configured as usual, without any BlueGene/Q-specific option.
+
+However, one would likely rather discover the topology of the compute nodes
+where parallel jobs are actually running.
+If so, hwloc must be cross-compiled with the following configuration line:
 \verbatim
 ./configure --host=powerpc64-bgq-linux --disable-shared --enable-static \
   CPPFLAGS='-I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk/'
