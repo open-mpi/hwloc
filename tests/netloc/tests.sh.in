@@ -112,9 +112,13 @@ for t in $tests; do
         fi
 
         # Remove excluded files
-        excluded=$(getvalues exluded)
+        cd "$TESTDIR"
+        excluded=$(getvalues excluded)
         if [ -n "$excluded" ]; then
-            rm -r $excluded
+            files=$(eval "echo \"$excluded\"")
+            for f in $files; do
+                rm -f "$f"
+            done
         fi
 
         while true; do
