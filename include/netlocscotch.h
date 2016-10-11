@@ -26,11 +26,24 @@
 extern "C" {
 #endif
 
+/**
+ * A structure to represent process mapping
+ */
 typedef struct {
-    char *nodename;
-    int core;
-    int rank;
+    int rank; /**< Rank of the process */
+    char *nodename; /**< Name of the node */
+    int core; /**< Physical slot number of the core */
 } netlocscotch_core_t;
+
+/**
+ * \brief Build the Scotch architecture representing the all machine
+ *
+ * \param arch Pointer to the Scotch arch that will be built.
+ *
+ * \returns 0 on success
+ * \returns NETLOC_ERROR on error
+ */
+int netlocscotch_build_global_arch(SCOTCH_Arch *arch);
 
 /**
  * \brief Build the Scotch architecture representing the available resources
@@ -39,13 +52,41 @@ typedef struct {
  * environment variable NETLOC_CURRENTSLOTS. The file must be generated before
  * calling the program running this functions with: mpirun -np <nprocs>
  * netloc_mpi_find_hosts <outputfile>
+ * The complete architecture is needed since the sub architecture use data from it.
  *
- * \param arch Pointer to the Scotch arch that will be built
+ * \param arch Pointer to the Scotch arch that will be built.
+ * \param subarch Pointer to the Scotch sub arch that will be built.
  *
- * \returns 0 on succes
+ * \returns 0 on success
  * \returns NETLOC_ERROR on error
  */
-int netlocscotch_build_current_arch(SCOTCH_Arch *arch);
+int netlocscotch_build_current_arch(SCOTCH_Arch *arch, SCOTCH_Arch *subarch);
+
+/**
+ * \brief Give a good mapping with Scotch from a file containing a
+ * communication matrix
+ *
+ * This function reads the file about available resources, found by reading the
+ * environment variable NETLOC_CURRENTSLOTS. The file must be generated before
+ * calling the program running this functions with: mpirun -np <nprocs>
+ * netloc_mpi_find_hosts <outputfile>
+ *
+ * An application graph is built from the communication matrix and is mapped to
+ * the architecture graph built from the resource file.
+ *
+ * \param[in] filename Filename of the matrix file, where the matrix is stored line
+ * by line with spaces between values.
+ *
+ * \param[out] pnum_processes Pointer to the integer where th number of processes
+ * will be written.
+ *
+ * \param[out] pcores Array of pnum_processes elements.
+ *
+ * \returns 0 on succes 
+ * \returns NETLOC_ERROR on error
+ */
+int netlocscotch_get_mapping_from_comm_file(char *filename, int *pnum_processes,
+        netlocscotch_core_t **pcores);
 
 /**
  * \brief Give a good mapping with Scotch from a communication matrix
@@ -58,18 +99,17 @@ int netlocscotch_build_current_arch(SCOTCH_Arch *arch);
  * An application graph is built from the communication matrix and is mapped to
  * the architecture graph built from the resource file.
  *
- * \param filename Filename of the matrix file, where the matrix is stored line
- * by line with spaces between values.
+ * \param[in] comm pointer to the lines of the matrix of communications.
  *
- * \param pnum_processes Pointer to the integer where th number of processes
- * will be written.
+ * \param[in] num_vertices number of processes, that corresponds to the size of
+ * the matrix.
  *
- * \param pcores Array of pnum_processes elements .
+ * \param[out] pcores Array of num_vertices elements.
  *
- * \returns 0 on succes 
+ * \returns 0 on success
  * \returns NETLOC_ERROR on error
  */
-int netlocscotch_get_mapping_from_comm_file(char *filename, int *pnum_processes,
+int netlocscotch_get_mapping_from_comm_matrix(double **comm, int num_vertices,
         netlocscotch_core_t **pcores);
 
 #ifdef __cplusplus

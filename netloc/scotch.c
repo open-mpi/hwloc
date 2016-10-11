@@ -163,7 +163,8 @@ static int build_subgraph(SCOTCH_Graph *graph, int *vertices, int num_vertices,
     return ret;
 }
 
-static int build_current_arch(SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
+static int build_current_arch(SCOTCH_Arch *scotch_arch,
+        SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
 {
     int ret;
     /* First we need to get the topology of the whole machine */
@@ -172,41 +173,52 @@ static int build_current_arch(SCOTCH_Arch *scotch_subarch, netloc_arch_t *arch)
         return ret;
     }
 
-    /* Set the current nodes and slots in the arch */
-    ret = netloc_arch_set_current_resources(arch);
+    if (scotch_subarch) {
+        /* Set the current nodes and slots in the arch */
+        ret = netloc_arch_set_current_resources(arch);
+    } else {
+        ret = netloc_arch_set_global_resources(arch);
+    }
+
     if( NETLOC_SUCCESS != ret ) {
         return ret;
     }
 
-    SCOTCH_Arch *scotch_arch = (SCOTCH_Arch *)malloc(sizeof(SCOTCH_Arch));
-      /* FIXME: hack to prevent a bug in scotch (arch needs to remain allocated
-       * for using subarch)
-       */
     SCOTCH_archInit(scotch_arch);
     ret = arch_tree_to_scotch_arch(arch->arch.global_tree, scotch_arch);
     if (NETLOC_SUCCESS != ret) {
         return ret;
     }
 
-    /* Now we can build the sub architecture */
-    SCOTCH_archInit(scotch_subarch);
-    ret = build_subarch(scotch_arch, arch->num_current_hosts,
-            arch->current_hosts, scotch_subarch);
-
-    //SCOTCH_archExit(scotch_arch);
-    //free(scotch_arch); /* when Scotch bug will be fixed */
+    if (scotch_subarch) {
+        /* Now we can build the sub architecture */
+        SCOTCH_archInit(scotch_subarch);
+        ret = build_subarch(scotch_arch, arch->num_current_hosts,
+                arch->current_hosts, scotch_subarch);
+    }
 
     return ret;
 }
 
-int netlocscotch_build_current_arch(SCOTCH_Arch *scotch_subarch)
+int netlocscotch_build_global_arch(SCOTCH_Arch *arch)
 {
     int ret;
+    netloc_arch_t *netloc_arch = netloc_arch_construct();
+    ret = build_current_arch(arch, NULL, netloc_arch);
 
-    netloc_arch_t *arch = netloc_arch_construct();
-    ret = build_current_arch(scotch_subarch, arch);
+    netloc_arch_destruct(netloc_arch);
+    return ret;
+}
 
-    netloc_arch_destruct(arch);
+int netlocscotch_build_current_arch(SCOTCH_Arch *arch, SCOTCH_Arch *subarch)
+{
+    int ret;
+    netloc_arch_t *netloc_arch = netloc_arch_construct();
+    ret = build_current_arch(arch, subarch, netloc_arch);
+
+    if (ret == NETLOC_SUCCESS)
+        netloc_arch_destruct(netloc_arch);
+
     return ret;
 }
 
@@ -215,10 +227,11 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
 {
     int ret;
 
+    SCOTCH_Arch scotch_arch;
     SCOTCH_Arch scotch_subarch;
     netlocscotch_core_t *cores = NULL;
     netloc_arch_t *arch = netloc_arch_construct();
-    ret = build_current_arch(&scotch_subarch, arch);
+    ret = build_current_arch(&scotch_arch, &scotch_subarch, arch);
     if (NETLOC_SUCCESS != ret) {
         netloc_arch_destruct(arch);
         return ret;
@@ -239,6 +252,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     SCOTCH_stratExit(&strategy);
 
     SCOTCH_archExit(&scotch_subarch);
+    SCOTCH_archExit(&scotch_arch);
 
     if (ret != 0) {
         fprintf(stderr, "Error: SCOTCH_graphMap failed\n");
@@ -368,12 +382,9 @@ int netlocscotch_get_mapping_from_comm_matrix(double **comm, int num_vertices,
         SCOTCH_graphExit(&graph);
     }
 
-
-
     return ret;
 }
 
-/* NULL terminated array */
 int netlocscotch_get_mapping_from_comm_file(char *filename, int *pnum_processes,
         netlocscotch_core_t **pcores)
 {

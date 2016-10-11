@@ -210,6 +210,7 @@ test-suite.log
 /utils/netloc/mpi/netloc_rank_order
 
 /tests/netloc/data/tests.txt
+/tests/netloc/data/tests_scotch.txt
 /tests/netloc/tests.sh
 
 /contrib/systemd/hwloc-dump-hwdata.service

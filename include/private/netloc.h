@@ -581,6 +581,8 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots);
 
 int netloc_arch_set_current_resources(netloc_arch_t *arch);
 
+int netloc_arch_set_global_resources(netloc_arch_t *arch);
+
 int netloc_arch_node_get_hwloc_info(netloc_arch_node_t *arch);
 
 void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,

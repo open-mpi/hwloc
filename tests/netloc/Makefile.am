@@ -5,5 +5,20 @@
 # $HEADER$
 #
 
+AM_CFLAGS = $(NETLOC_CFLAGS)
+AM_CPPFLAGS = $(NETLOC_CPPFLAGS)
+AM_LDFLAGS = $(NETLOC_LDFLAGS)
+
+LDADD = $(top_builddir)/netloc/libnetloc.la \
+        $(top_builddir)/netloc/libnetlocscotch.la \
+        -lscotch -lscotcherr
+
+if BUILD_NETLOCSCOTCH
+check_PROGRAMS = data/scotch/scotch_get_arch
+endif
+
 TESTS = \
-        tests.sh
+        data/tests.txt \
+        data/tests_scotch.txt
+TEST_EXTENSIONS = .txt
+TXT_LOG_COMPILER = ./tests.sh

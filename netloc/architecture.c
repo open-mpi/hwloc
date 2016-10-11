@@ -116,6 +116,7 @@ static int get_current_resources(int *pnum_nodes, char ***pnodes, int **pslot_id
     char **nodes = NULL;
 
     if (!filename) {
+        fprintf(stderr, "You need to set NETLOC_CURRENTSLOTS\n");
         return NETLOC_ERROR;
     }
 
@@ -253,7 +254,7 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
 
         /* Nodes with different number of slots are not handled yet, because we
          * build the scotch architecture without taking account of the
-         * available cores inside nodes, and Scotch is not able to wieght the
+         * available cores inside nodes, and Scotch is not able to weight the
          * nodes */
         if (!arch->has_slots) {
             if (constant_num_slots) {
@@ -351,6 +352,131 @@ ERROR:
     free(rank_list);
     free(arch_node_list);
     free(node_list);
+
+    if (ret == NETLOC_SUCCESS)
+        return ret;
+
+    free(current_nodes);
+    return ret;
+}
+
+int netloc_arch_set_global_resources(netloc_arch_t *arch)
+{
+    int ret;
+    int *current_nodes = NULL;
+    int *slot_idx;
+
+    int num_nodes =  HASH_COUNT(arch->nodes_by_name);
+    if (!arch->has_slots) {
+        current_nodes = (int *) malloc(sizeof(int[num_nodes]));
+    }
+
+    ret = netloc_topology_read_hwloc(arch->topology, 0, NULL);
+    if( NETLOC_SUCCESS != ret ) {
+        goto ERROR;
+    }
+
+    int constant_num_slots = 0;
+    slot_idx = (int *)malloc(sizeof(int[num_nodes+1]));
+    slot_idx[0] = 0;
+    int current_idx = 0;
+    netloc_arch_node_t *node, *node_tmp;
+    HASH_ITER(hh, arch->nodes_by_name, node, node_tmp) {
+        ret = netloc_arch_node_get_hwloc_info(node);
+        if (ret != NETLOC_SUCCESS)
+            goto ERROR;
+
+        if (!arch->has_slots) {
+            current_nodes[current_idx] = node->idx_in_topo;
+        }
+        current_idx++;
+
+        int num_slots = node->num_slots;
+        node->num_current_slots = num_slots;
+
+        slot_idx[current_idx] = slot_idx[current_idx-1]+num_slots;
+
+        /* Nodes with different number of slots are not handled yet, because we
+         * build the scotch architecture without taking account of the
+         * available cores inside nodes, and Scotch is not able to weight the
+         * nodes */
+        if (!arch->has_slots) {
+            if (constant_num_slots) {
+                if (constant_num_slots != num_slots) {
+                    fprintf(stderr, "Oups: the same number of cores by node is needed!\n");
+                    assert(constant_num_slots == num_slots);
+                }
+            } else {
+                constant_num_slots = num_slots;
+            }
+        }
+    }
+
+    if (!arch->has_slots) {
+        arch->num_current_hosts = num_nodes;
+        arch->current_hosts = current_nodes;
+        arch->arch.global_tree = arch->arch.node_tree;
+
+        /* Build nodes_by_idx */
+        int tree_size = netloc_arch_tree_num_leaves(arch->arch.node_tree);
+        netloc_arch_node_slot_t *nodes_by_idx = (netloc_arch_node_slot_t *)
+            malloc(sizeof(netloc_arch_node_slot_t[tree_size]));
+        netloc_arch_node_t *node, *node_tmp;
+        HASH_ITER(hh, arch->nodes_by_name, node, node_tmp) {
+            nodes_by_idx[node->idx_in_topo].node = node;
+            nodes_by_idx[node->idx_in_topo].slot = -1;
+        }
+        arch->node_slot_by_idx = nodes_by_idx;
+
+
+    } else {
+        int num_hosts = slot_idx[num_nodes];
+        int *current_hosts = (int *)malloc(sizeof(int[num_hosts]));
+        netloc_arch_node_t *node, *node_tmp;
+        /* Add the slot trees to the node tree */
+
+        /* Check that each slot tree has the same size */
+        int slot_tree_size = 0;
+        HASH_ITER(hh, arch->nodes_by_name, node, node_tmp) {
+            int current_size = netloc_arch_tree_num_leaves(node->slot_tree);
+            if (!slot_tree_size) {
+                slot_tree_size = current_size;
+            } else {
+                if (slot_tree_size != current_size) {
+                    assert(0);
+                }
+            }
+        }
+
+        int current_host_idx = 0;
+        int node_tree_size = netloc_arch_tree_num_leaves(arch->arch.node_tree);
+        int global_tree_size = node_tree_size*slot_tree_size;
+        netloc_arch_node_slot_t *nodes_by_idx = (netloc_arch_node_slot_t *)
+            malloc(sizeof(netloc_arch_node_slot_t[global_tree_size]));
+        int n = 0;
+        HASH_ITER(hh, arch->nodes_by_name, node, node_tmp) {
+            for (int s = slot_idx[n]; s < slot_idx[n+1]; s++) {
+                int slot_rank = s-slot_idx[n];
+                int topo_idx = node->idx_in_topo*slot_tree_size +
+                    node->slot_idx[slot_rank];
+                nodes_by_idx[topo_idx].node = node;
+                nodes_by_idx[topo_idx].slot = slot_rank;
+                current_hosts[current_host_idx++] = topo_idx;
+            }
+            n++;
+        }
+        arch->num_current_hosts = current_host_idx;
+        arch->current_hosts = current_hosts;
+        arch->node_slot_by_idx = nodes_by_idx;
+
+        netloc_arch_tree_t *new_tree =
+            tree_merge(arch->arch.node_tree, arch->nodes_by_name->slot_tree);
+        netloc_arch_tree_destruct(arch->arch.node_tree);
+        arch->arch.global_tree = new_tree;
+    }
+
+ERROR:
+    free(slot_idx);
 
     if (ret == NETLOC_SUCCESS)
         return ret;

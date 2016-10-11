@@ -74,7 +74,7 @@ AWK=$(which awk)
 TEMPDIR=$(mktemp -d)
 TESTDIR=$TEMPDIR/tests
 REFDIR=$TEMPDIR/ref && mkdir $REFDIR
-TESTFILE=$REFDIR/tests.txt; cp $NETLOC_TESTS_PATH/data/tests.txt $REFDIR
+TESTFILE=$REFDIR/$(basename $1); cp $NETLOC_TESTS_PATH/$1 $REFDIR
 
 # Remove comments from the test file
 $SED -i 's/#.*$//g; /^\s*$/d' $TESTFILE
