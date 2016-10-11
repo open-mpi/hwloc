@@ -122,6 +122,15 @@ for t in $tests; do
         fi
 
         while true; do
+            # Remove output files
+            cd $TESTDIR
+            for cf in $checkfiles; do
+                files=$(eval "echo \"$cf\"")
+                for f in $files; do
+                    rm -f "$f"
+                done
+            done
+
             # Execute the command
             cd $TESTDIR
             cmd=$(getvalues command)
