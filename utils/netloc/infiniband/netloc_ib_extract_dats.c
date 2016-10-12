@@ -446,137 +446,185 @@ int netloc_topology_set_partitions(void)
     return 0;
 }
 
+void help(char *name, FILE *f)
+{
+    fprintf(f, "Usage: %s --in-dir <path to raw data files> "
+            "--out-dir <output path>\n", name);
+}
+
 int main(int argc, char **argv)
 {
-    DIR *dir;
+    DIR *indir, *outdir;
+    char *prog_name = basename(argv[0]);
 
-    char *path = argv[1];
-    dir = opendir(path);
-    if (dir != NULL) {
-        regex_t subnet_regexp;
-        regcomp(&subnet_regexp, "^ib-subnet-([0-9a-fA-F:]{19}).txt$", REG_EXTENDED);
-        struct dirent *entry;
-        while ((entry = readdir(dir))) {
-            nodes = NULL;
-            int subnet_found;
-            char *filename = entry->d_name;
-
-            subnet_found = !(regexec(&subnet_regexp, filename, 0, NULL, 0));
-            if (subnet_found) {
-                global_link_idx = 0;
-                char *discover_filename;
-                char *route_filename;
-                char *subnet;
-                asprintf(&subnet, "%.19s", filename+10);
-
-                discover_filename = filename;
-                read_discover(subnet, path, discover_filename);
-
-                asprintf(&route_filename, "%s/ibroutes-%s", path, subnet);
-                struct stat s;
-                int err = stat(route_filename, &s);
-                if (-1 == err) {
-                    if (errno == ENOENT) {
-                        printf("No route directory found for subnet %s\n", subnet);
-                    } else {
-                        perror("stat");
-                        exit(1);
-                    }
-                } else {
-                    if (S_ISDIR(s.st_mode)) {
-                        char *route_filename;
-                        asprintf(&route_filename, "ibroutes-%s", subnet);
-                        read_routes(subnet, path, route_filename);
-                        free(route_filename);
-                    } else {
-                        printf("No route directory found for subnet %s\n", subnet);
-                    }
-                }
-                free(route_filename);
-
-                build_paths();
-                netloc_topology_set_partitions();
-
-                write_into_file(subnet, path);
-
-                /* Free node hash table */
-                node_t *node, *node_tmp;
-                HASH_ITER(hh, nodes, node, node_tmp) {
-                    HASH_DEL(nodes, node);
-
-                    /* Free nodes */
-                    free(node->description);
-
-                    /* Edges */
-                    edge_t *edge, *edge_tmp;
-                    HASH_ITER(hh, node->edges, edge, edge_tmp) {
-                        HASH_DEL(node->edges, edge);
-                        utarray_free(edge->physical_link_idx);
-                        free(edge->partitions);
-                        free(edge);
-                    }
-
-                    free(node->hostname);
-                    free(node->partitions);
-
-                    /* Physical links */
-                    for (int l = 0; l < utarray_len(node->physical_links); l++) {
-                        physical_link_t *link = (physical_link_t *)
-                            utarray_eltptr(node->physical_links, l);
-                        free(link->width);
-                        free(link->speed);
-                        free(link->description);
-                        free(link->partitions);
-                    }
-                    utarray_free(node->physical_links);
-
-                    free(node);
-                }
-
-                /* Free Partitions */
-                for (char **ppartition = (char **)utarray_front(partitions);
-                        ppartition != NULL;
-                        ppartition = (char **)utarray_next(partitions, ppartition)) {
-                    free(*ppartition);
-                }
-                utarray_free(partitions);
-
-                /* Free Routes */
-                route_source_t *route, *route_tmp;
-                HASH_ITER(hh, routes, route, route_tmp) {
-                    HASH_DEL(routes, route);
-
-                    route_dest_t *routed, *routed_tmp;
-                    HASH_ITER(hh, route->dest, routed, routed_tmp) {
-                        HASH_DEL(route->dest, routed);
-                        free(routed);
-                    }
-                    free(route);
-                }
-
-                /* Free Paths */
-                path_source_t *path, *path_tmp;
-                HASH_ITER(hh, paths, path, path_tmp) {
-                    HASH_DEL(paths, path);
-
-                    path_dest_t *pathd, *pathd_tmp;
-                    HASH_ITER(hh, path->dest, pathd, pathd_tmp) {
-                        HASH_DEL(path->dest, pathd);
-                        utarray_free(pathd->links);
-                        free(pathd);
-                    }
-                    free(path);
-                }
-
-                free(subnet);
-            }
-        }
-        regfree(&subnet_regexp);
-        closedir(dir);
+    if (argc != 5) {
+        goto error_param;
     }
-    else
-        perror ("Couldn't open the directory");
+    argc--; argv++;
 
+    char *inpath = NULL, *outpath = NULL;
+    while (argc > 0) {
+        if (!strcmp(*argv, "--out-dir")) {
+            argc--; argv++;
+            if (!argc)
+                goto error_param;
+            outpath = *argv;
+        } else if (!strcmp(*argv, "--in-dir")) {
+            argc--; argv++;
+            if (!argc)
+                goto error_param;
+            inpath = *argv;
+        } else if (!strcmp(*argv, "--help")) {
+            help(prog_name, stdout);
+            return 0;
+        } else {
+            goto error_param;
+        }
+        argc--;
+        argv++;
+    }
+
+    indir = opendir(inpath);
+    if (!indir) {
+        fprintf(stderr, "Couldn't open input directory: \"%s\"", inpath);
+        perror("opendir");
+        return 2;
+    }
+
+    outdir = opendir(outpath);
+    if (!indir) {
+        fprintf(stderr, "Couldn't open input directory: \"%s\"", outpath);
+        perror("opendir");
+        return 2;
+    }
+
+    regex_t subnet_regexp;
+    regcomp(&subnet_regexp, "^ib-subnet-([0-9a-fA-F:]{19}).txt$", REG_EXTENDED);
+    struct dirent *entry;
+    while ((entry = readdir(indir))) {
+        nodes = NULL;
+        int subnet_found;
+        char *filename = entry->d_name;
+
+        subnet_found = !(regexec(&subnet_regexp, filename, 0, NULL, 0));
+        if (subnet_found) {
+            global_link_idx = 0;
+            char *discover_filename;
+            char *route_filename;
+            char *subnet;
+            asprintf(&subnet, "%.19s", filename+10);
+
+            discover_filename = filename;
+            read_discover(subnet, inpath, discover_filename);
+
+            asprintf(&route_filename, "%s/ibroutes-%s", inpath, subnet);
+            struct stat s;
+            int err = stat(route_filename, &s);
+            if (-1 == err) {
+                if (errno == ENOENT) {
+                    printf("No route directory found for subnet %s\n", subnet);
+                } else {
+                    perror("stat");
+                    exit(1);
+                }
+            } else {
+                if (S_ISDIR(s.st_mode)) {
+                    char *route_filename;
+                    asprintf(&route_filename, "ibroutes-%s", subnet);
+                    read_routes(subnet, inpath, route_filename);
+                    free(route_filename);
+                } else {
+                    printf("No route directory found for subnet %s\n", subnet);
+                }
+            }
+            free(route_filename);
+
+            build_paths();
+            netloc_topology_set_partitions();
+
+            write_into_file(subnet, outpath);
+
+            /* Free node hash table */
+            node_t *node, *node_tmp;
+            HASH_ITER(hh, nodes, node, node_tmp) {
+                HASH_DEL(nodes, node);
+
+                /* Free nodes */
+                free(node->description);
+
+                /* Edges */
+                edge_t *edge, *edge_tmp;
+                HASH_ITER(hh, node->edges, edge, edge_tmp) {
+                    HASH_DEL(node->edges, edge);
+                    utarray_free(edge->physical_link_idx);
+                    free(edge->partitions);
+                    free(edge);
+                }
+
+                free(node->hostname);
+                free(node->partitions);
+
+                /* Physical links */
+                for (int l = 0; l < utarray_len(node->physical_links); l++) {
+                    physical_link_t *link = (physical_link_t *)
+                        utarray_eltptr(node->physical_links, l);
+                    free(link->width);
+                    free(link->speed);
+                    free(link->description);
+                    free(link->partitions);
+                }
+                utarray_free(node->physical_links);
+
+                free(node);
+            }
+
+            /* Free Partitions */
+            for (char **ppartition = (char **)utarray_front(partitions);
+                    ppartition != NULL;
+                    ppartition = (char **)utarray_next(partitions, ppartition)) {
+                free(*ppartition);
+            }
+            utarray_free(partitions);
+
+            /* Free Routes */
+            route_source_t *route, *route_tmp;
+            HASH_ITER(hh, routes, route, route_tmp) {
+                HASH_DEL(routes, route);
+
+                route_dest_t *routed, *routed_tmp;
+                HASH_ITER(hh, route->dest, routed, routed_tmp) {
+                    HASH_DEL(route->dest, routed);
+                    free(routed);
+                }
+                free(route);
+            }
+
+            /* Free Paths */
+            path_source_t *path, *path_tmp;
+            HASH_ITER(hh, paths, path, path_tmp) {
+                HASH_DEL(paths, path);
+
+                path_dest_t *pathd, *pathd_tmp;
+                HASH_ITER(hh, path->dest, pathd, pathd_tmp) {
+                    HASH_DEL(path->dest, pathd);
+                    utarray_free(pathd->links);
+                    free(pathd);
+                }
+                free(path);
+            }
+
+            free(subnet);
+        }
+    }
+    regfree(&subnet_regexp);
+    closedir(indir);
+
+    return 0;
+
+error_param:
+    fprintf(stderr, "Wrong parameters\n");
+    help(prog_name, stderr);
+    return 1;
 }
 
 int read_discover(char *subnet, char *path, char *filename)
@@ -830,7 +878,7 @@ char *partition_list_to_string(int *partition_list)
 int write_into_file(char *subnet, char *path)
 {
     char *output_path;
-    asprintf(&output_path, "%s/../netloc/IB-%s-nodes.txt", path, subnet);
+    asprintf(&output_path, "%s/IB-%s-nodes.txt", path, subnet);
     FILE *output = fopen(output_path, "w");
 
     if (!output) {
