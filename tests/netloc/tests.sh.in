@@ -4,6 +4,18 @@
 # See COPYING in top-level directory.
 #
 
+# This script needs a test file as argument
+# The syntax of this file is the following
+# test1:
+#   testset: machine1 machine2 # subfolders where tests be run
+#   command: ./test1 param1 # command to test
+#   needed: dir1/file*txt dir2 # files needed
+#   excluded: dir1/file0.txt dir2/file1 # file to exclude
+#   checkfiles: dir2/file1 # files used to check validity
+#   checkscript: ./check.sh # script to check validity
+# test2:
+#   ...
+
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 
 NETLOC_TESTS_PATH="$HWLOC_top_builddir/tests/netloc"

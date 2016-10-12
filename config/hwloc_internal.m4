@@ -417,8 +417,6 @@ int foo(void) {
         hwloc_config_prefix[contrib/misc/Makefile]
         hwloc_config_prefix[tests/netloc/Makefile]
         hwloc_config_prefix[tests/netloc/tests.sh]
-        hwloc_config_prefix[tests/netloc/data/tests.txt]
-        hwloc_config_prefix[tests/netloc/data/tests_scotch.txt]
     )
 
     AC_CONFIG_COMMANDS([chmoding-scripts], [

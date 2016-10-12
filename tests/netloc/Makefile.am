@@ -18,7 +18,8 @@ check_PROGRAMS = data/scotch/scotch_get_arch
 endif
 
 TESTS = \
-        data/tests.txt \
+        data/tests_extract.txt \
+        data/tests_draw.txt \
         data/tests_scotch.txt
 TEST_EXTENSIONS = .txt
 TXT_LOG_COMPILER = ./tests.sh
