@@ -13,6 +13,7 @@
 
 #include <sys/types.h>
 #include <dirent.h>
+#include <libgen.h>
 
 #include <private/netloc.h>
 #include <netloc.h>
@@ -27,12 +28,25 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
     int all = 0;
 
     char *hwloc_path;
-    asprintf(&hwloc_path, "%s/../hwloc", topology->network->data_uri+7);
+
+    if (!strlen(topology->hwlocpath)) {
+        printf("No hwloc directory recorded in the topology\n");
+        return NETLOC_ERROR;
+    }
+
+    if (topology->hwlocpath[0] != '/') {
+        char *path_tmp = strdup(topology->topopath);
+        asprintf(&hwloc_path, "%s/%s", dirname(path_tmp), topology->hwlocpath);
+        free(path_tmp);
+    } else {
+        hwloc_path = strdup(topology->hwlocpath);
+    }
 
     DIR* dir = opendir(hwloc_path);
     /* Directory does not exist */
     if (!dir) {
         printf("Directory (%s) to hwloc does not exist\n", hwloc_path);
+        free(hwloc_path);
         return NETLOC_ERROR;
     }
     else {

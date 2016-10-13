@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <private/netloc.h>
 #include <netloc/uthash.h>
 #include <netloc/utarray.h>
 
@@ -103,7 +104,7 @@ path_source_t *paths = NULL;
 
 int read_routes(char *subnet, char *path, char *route_filename);
 int read_discover(char *subnet, char *discover_path, char *filename);
-int write_into_file(char *subnet, char *path);
+int write_into_file(char *subnet, char *path, char *hwlocpath);
 
 static void get_match(char *line, int nmatch, regmatch_t pmatch[], char *matches[])
 {
@@ -449,7 +450,9 @@ int netloc_topology_set_partitions(void)
 void help(char *name, FILE *f)
 {
     fprintf(f, "Usage: %s --in-dir <path to raw data files> "
-            "--out-dir <output path>\n", name);
+            "--out-dir <output path> [--hwloc-dir <hwloc xml path>\n"
+            "\thwloc-dir can be an absolute path"
+            "or a relative path from out-dir\n", name);
 }
 
 int main(int argc, char **argv)
@@ -457,12 +460,12 @@ int main(int argc, char **argv)
     DIR *indir, *outdir;
     char *prog_name = basename(argv[0]);
 
-    if (argc != 5) {
+    if (argc != 5 && argc != 7) {
         goto error_param;
     }
     argc--; argv++;
 
-    char *inpath = NULL, *outpath = NULL;
+    char *inpath = NULL, *outpath = NULL, *hwlocpath = NULL;
     while (argc > 0) {
         if (!strcmp(*argv, "--out-dir")) {
             argc--; argv++;
@@ -474,6 +477,11 @@ int main(int argc, char **argv)
             if (!argc)
                 goto error_param;
             inpath = *argv;
+        } else if (!strcmp(*argv, "--hwloc-dir")) {
+            argc--; argv++;
+            if (!argc)
+                goto error_param;
+            hwlocpath = *argv;
         } else if (!strcmp(*argv, "--help")) {
             help(prog_name, stdout);
             return 0;
@@ -486,16 +494,38 @@ int main(int argc, char **argv)
 
     indir = opendir(inpath);
     if (!indir) {
-        fprintf(stderr, "Couldn't open input directory: \"%s\"", inpath);
+        fprintf(stderr, "Couldn't open input directory: \"%s\"\n", inpath);
         perror("opendir");
         return 2;
     }
 
     outdir = opendir(outpath);
-    if (!indir) {
-        fprintf(stderr, "Couldn't open input directory: \"%s\"", outpath);
+    if (!outdir) {
+        fprintf(stderr, "Couldn't open output directory: \"%s\"\n", outpath);
         perror("opendir");
+        closedir(outdir);
         return 2;
+    }
+
+    if (hwlocpath) {
+        char *realpath;
+        if (hwlocpath[0] != '/') {
+            asprintf(&realpath, "%s/%s", outpath, hwlocpath);
+        } else {
+            realpath = strdup(hwlocpath);
+        }
+
+        DIR *hwlocdir = opendir(realpath);
+        if (!hwlocdir) {
+            fprintf(stderr, "Couldn't open hwloc directory: \"%s\"\n", realpath);
+            perror("opendir");
+            closedir(indir);
+            closedir(outdir);
+            free(realpath);
+            return 2;
+        }
+        free(realpath);
+        closedir(hwlocdir);
     }
 
     regex_t subnet_regexp;
@@ -542,7 +572,7 @@ int main(int argc, char **argv)
             build_paths();
             netloc_topology_set_partitions();
 
-            write_into_file(subnet, outpath);
+            write_into_file(subnet, outpath, hwlocpath);
 
             /* Free node hash table */
             node_t *node, *node_tmp;
@@ -618,6 +648,7 @@ int main(int argc, char **argv)
     }
     regfree(&subnet_regexp);
     closedir(indir);
+    closedir(outdir);
 
     return 0;
 
@@ -875,7 +906,7 @@ char *partition_list_to_string(int *partition_list)
     return string;
 }
 
-int write_into_file(char *subnet, char *path)
+int write_into_file(char *subnet, char *path, char *hwlocpath)
 {
     char *output_path;
     asprintf(&output_path, "%s/IB-%s-nodes.txt", path, subnet);
@@ -887,6 +918,10 @@ int write_into_file(char *subnet, char *path)
         exit(-1);
     }
     free(output_path);
+
+    fprintf(output, "%d\n", NETLOCFILE_VERSION);
+    fprintf(output, "%s\n", subnet);
+    fprintf(output, "%s\n", hwlocpath? hwlocpath: "");
 
     /* Write nodes into file */
     fprintf(output, "%d\n", HASH_COUNT(nodes));

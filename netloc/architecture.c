@@ -781,86 +781,41 @@ void set_gbits(int *values, netloc_edge_t *edge, int num_levels)
 
 int netloc_arch_build(netloc_arch_t *arch, int add_slots)
 {
-    char *arch_file = getenv("NETLOC_ARCHFILE");
     char *partition_name = getenv("NETLOC_PARTITION");
-    char *subnet_id = getenv("NETLOC_SUBNET");
-    char *path = getenv("NETLOC_TOPODIR");
+    char *topopath = getenv("NETLOC_TOPOFILE");
 
-    if (arch_file) {
-        // TODO: support export/import of architectures
-    } else {
-        int ret;
-        if (!path) {
-            fprintf(stderr, "Error: you need to set NETLOC_TOPODIR in your environment.\n");
-            return NETLOC_ERROR;
-        }
-        if (!subnet_id) {
-            fprintf(stderr, "Error: you need to set NETLOC_SUBNET in your environment.\n");
-            return NETLOC_ERROR;
-        }
-
-        netloc_network_t *network = NULL;
-        netloc_topology_t *topology = NULL;
-
-        // Find a specific InfiniBand network
-        network = netloc_network_construct();
-        network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
-        network->subnet_id = strdup(subnet_id);
-
-        // Search for the specific network
-        char *netloc_dir;
-        asprintf(&netloc_dir, "file://%s/%s", path, "netloc");
-        netloc_network_t **networks;
-        int num_networks;
-        ret = netloc_network_find(netloc_dir, network, &num_networks, &networks);
-        free(netloc_dir);
-        netloc_network_destruct(network);
-
-        if (NETLOC_SUCCESS != ret || num_networks != 1) {
-            fprintf(stderr, "Error: %d network%s found! with subnet %s\n", num_networks,
-                    num_networks > 1 ? "s": "", subnet_id);
-            for (int n = 0; n < num_networks; n++) {
-                netloc_network_destruct(networks[n]);
-            }
-            free(networks);
-            return NETLOC_ERROR;
-        }
-
-        network = networks[0];
-        free(networks);
-
-        char *network_str = netloc_network_pretty_print(network);
-        printf("Found Network: %s\n", network_str);
-        free(network_str);
-
-        // Attach to the network
-        topology = netloc_topology_construct(network);
-        if( topology == NULL ) {
-            fprintf(stderr, "Error: netloc_topology_construct failed\n");
-            return ret;
-        }
-
-        netloc_topology_load(topology);
-        arch->topology = topology;
-        arch->has_slots = add_slots;
-
-        if (!partition_name) {
-            fprintf(stderr, "Error: you need to set NETLOC_PARTITION in your environment.\n");
-            fprintf(stderr, "\tIt can be: ");
-            int num_partitions = utarray_len(topology->partitions);
-            for (int p = 0; p < num_partitions; p++) {
-                char *partition = *(char **)utarray_eltptr(topology->partitions, p);
-                fprintf(stderr, "%s%s", partition, p != num_partitions-1 ? ", ": "\n");
-            }
-            return NETLOC_ERROR;
-        }
-
-        int partition =
-            netloc_topology_find_partition_idx(topology, partition_name);
-
-        partition_topology_to_tleaf(topology, partition, 1, arch);
-        netloc_network_destruct(network);
+    if (!topopath) {
+        fprintf(stderr, "Error: you need to set NETLOC_TOPOFILE in your environment.\n");
+        return NETLOC_ERROR;
     }
+    topopath = strdup(topopath);
+
+    netloc_topology_t *topology = NULL;
+
+    topology = netloc_topology_construct(topopath);
+    if (topology == NULL) {
+        fprintf(stderr, "Error: netloc_topology_construct failed\n");
+        return NETLOC_ERROR;
+    }
+
+    arch->topology = topology;
+    arch->has_slots = add_slots;
+
+    if (!partition_name) {
+        fprintf(stderr, "Error: you need to set NETLOC_PARTITION in your environment.\n");
+        fprintf(stderr, "\tIt can be: ");
+        int num_partitions = utarray_len(topology->partitions);
+        for (int p = 0; p < num_partitions; p++) {
+            char *partition = *(char **)utarray_eltptr(topology->partitions, p);
+            fprintf(stderr, "%s%s", partition, p != num_partitions-1 ? ", ": "\n");
+        }
+        return NETLOC_ERROR;
+    }
+
+    int partition =
+        netloc_topology_find_partition_idx(topology, partition_name);
+
+    partition_topology_to_tleaf(topology, partition, 1, arch);
 
     return NETLOC_SUCCESS;
 }

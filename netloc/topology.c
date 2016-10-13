@@ -11,6 +11,12 @@
  * $HEADER$
  */
 
+#define _GNU_SOURCE	   /* See feature_test_macros(7) */
+#include <stdio.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <libgen.h>
+
 #include <private/netloc.h>
 
 static char *line_get_next_field(char **string);
@@ -21,121 +27,116 @@ static int find_similar_nodes(netloc_topology_t *topology);
 static int netloc_node_get_virtual_id(char *id);
 static int edge_merge_into(netloc_edge_t *dest, netloc_edge_t *src, int keep);
 
-netloc_topology_t *netloc_topology_construct(netloc_network_t *network)
+netloc_topology_t *netloc_topology_construct(char *path)
 {
+    int ret;
+    char *line = NULL;
+    size_t linesize = 0;
+
     netloc_topology_t *topology = NULL;
+
+    FILE *input = fopen(path, "r");
+
+    if (!input ) {
+        fprintf(stderr, "Cannot open topology file %s\n", path);
+        perror("fopen");
+        exit(-1);
+    }
+
+    int version;
+    if (fscanf(input , "%d\n,", &version) != 1) {
+        fprintf(stderr, "Cannot read the version number in %s\n", path);
+        perror("fscanf");
+        fclose(input);
+        return NULL;
+    } else if (version != NETLOCFILE_VERSION) {
+        fprintf(stderr, "Incorrect version number, "
+                "please generate your input file again\n");
+        fclose(input);
+        return NULL;
+    }
+
+    char *subnet = (char *)malloc(sizeof(char[30]));
+    if (fscanf(input , "%29s\n", subnet) != 1) {
+        fprintf(stderr, "Cannot read the subnet in %s\n", path);
+        perror("fscanf");
+        free(subnet);
+        fclose(input);
+        return NULL;
+    }
+
+    char *hwlocpath;
+    DIR *hwlocdir;
+    if (netloc_line_get(&line, &linesize, input) == -1) {
+        fprintf(stderr, "Cannot read hwloc path in %s\n", path);
+        perror("fscanf");
+        free(subnet);
+        fclose(input);
+        return NULL;
+    } else {
+        hwlocpath = strdup(line);
+    }
+
+    char *realhwlocpath;
+    if (hwlocpath[0] != '/') {
+        char *path_tmp = strdup(path);
+        asprintf(&realhwlocpath, "%s/%s", dirname(path_tmp), hwlocpath);
+        free(path_tmp);
+    } else {
+        realhwlocpath = strdup(hwlocpath);
+    }
+    if (!(hwlocdir = opendir(realhwlocpath))) {
+        fprintf(stderr, "Couldn't open hwloc directory: \"%s\"\n", realhwlocpath);
+        perror("opendir");
+        free(subnet);
+        free(realhwlocpath);
+        fclose(input);
+        return NULL;
+    } else {
+        closedir(hwlocdir);
+        free(realhwlocpath);
+    }
+
+    int num_nodes;
+    if (fscanf(input , "%d\n", &num_nodes) != 1) {
+        fprintf(stderr, "Cannot read the number of nodes in %s\n", path);
+        perror("fscanf");
+        free(subnet);
+        fclose(input);
+        return NULL;
+    }
+
+    if (num_nodes <= 0) {
+        fprintf(stderr, "Oups: incorrect number of nodes (%d) in %s\n",
+                num_nodes, path);
+        free(subnet);
+        fclose(input);
+        return NULL;
+    }
 
     /*
      * Allocate Memory
      */
     topology = (netloc_topology_t *)malloc(sizeof(netloc_topology_t) * 1);
     if( NULL == topology ) {
+        free(subnet);
+        fclose(input);
         return NULL;
     }
 
     /*
      * Initialize the structure
      */
-    topology->network    = netloc_network_dup(network);
-
-    topology->nodes_loaded   = 0;
+    topology->topopath = path;
+    topology->hwlocpath = hwlocpath;
+    topology->subnet_id = subnet;
     topology->nodes          = NULL;
     topology->physical_links = NULL;
     topology->type           = NETLOC_TOPOLOGY_TYPE_INVALID ;
+    topology->nodesByHostname = NULL;
+    topology->hwloc_topos = NULL;
     utarray_new(topology->partitions, &ut_str_icd);
     utarray_new(topology->topos, &ut_str_icd);
-
-    return topology;
-}
-
-int netloc_topology_destruct(netloc_topology_t *topology)
-{
-    /*
-     * Sanity Check
-     */
-    if( NULL == topology ) {
-        fprintf(stderr, "Error: Detaching from a NULL pointer\n");
-        return NETLOC_ERROR;
-    }
-
-    /* Network */
-    netloc_network_destruct(topology->network);
-
-    /* Nodes */
-    netloc_node_t *node, *node_tmp;
-    HASH_ITER(hh2, topology->nodes, node, node_tmp) {
-        HASH_DELETE(hh2, topology->nodesByHostname, node);
-    }
-
-    netloc_topology_iter_nodes(topology, node, node_tmp) {
-        HASH_DELETE(hh, topology->nodes, node);
-        netloc_node_destruct(node);
-    }
-
-    /** Partition List */
-    utarray_free(topology->partitions);
-
-    /** Physical links */
-    netloc_physical_link_t *link, *link_tmp;
-    HASH_ITER(hh, topology->physical_links, link, link_tmp) {
-        HASH_DEL(topology->physical_links, link);
-        netloc_physical_link_destruct(link);
-    }
-
-    /** Hwloc topology List */
-    for (int t = 0; t < utarray_len(topology->topos); t++) {
-        if (topology->hwloc_topos[t])
-            hwloc_topology_destroy(topology->hwloc_topos[t]);
-    }
-    free(topology->hwloc_topos);
-
-    /** Hwloc topology name List */
-    utarray_free(topology->topos);
-
-    free(topology);
-
-    return NETLOC_SUCCESS;
-}
-
-int netloc_topology_load(netloc_topology_t *topology)
-{
-    int ret;
-
-    if( topology->nodes_loaded ) {
-        return NETLOC_SUCCESS;
-    }
-
-    topology->nodes = NULL;
-    topology->nodesByHostname = NULL;
-    topology->physical_links = NULL;
-    topology->hwloc_topos = NULL;
-
-    char *path = topology->network->node_uri;
-
-    FILE *input = fopen(path, "r");
-
-    if (!input ) {
-        perror("fopen");
-        exit(-1);
-    }
-
-    int num_nodes;
-    if (fscanf(input , "%d\n,", &num_nodes) != 1) {
-        fprintf(stderr, "Cannot read the number of nodes in %s\n", path);
-        perror("fscanf");
-        fclose(input);
-        return NETLOC_ERROR;
-    }
-
-    if (num_nodes <= 0) {
-        fprintf(stderr, "Oups: incorrect number of nodes (%d) in %s\n",
-                num_nodes, path);
-        fclose(input);
-        return NETLOC_ERROR;
-    }
-
-    char *line = NULL;
-    size_t linesize = 0;
 
     /* Read nodes from file */
     for (int n = 0; n < num_nodes; n++) {
@@ -258,12 +259,67 @@ int netloc_topology_load(netloc_topology_t *topology)
     free(line);
 
     if (find_reverse_edges(topology) != NETLOC_SUCCESS) {
-        return NETLOC_ERROR;
+        netloc_topology_destruct(topology);
+        return NULL;
     }
 
     ret = find_similar_nodes(topology);
+    if (ret != NETLOC_SUCCESS) {
+        netloc_topology_destruct(topology);
+        return NULL;
+    }
 
-    return ret;
+    return topology;
+}
+
+int netloc_topology_destruct(netloc_topology_t *topology)
+{
+    /*
+     * Sanity Check
+     */
+    if( NULL == topology ) {
+        fprintf(stderr, "Error: Detaching from a NULL pointer\n");
+        return NETLOC_ERROR;
+    }
+
+    free(topology->topopath);
+    free(topology->hwlocpath);
+    free(topology->subnet_id);
+
+    /* Nodes */
+    netloc_node_t *node, *node_tmp;
+    HASH_ITER(hh2, topology->nodes, node, node_tmp) {
+        HASH_DELETE(hh2, topology->nodesByHostname, node);
+    }
+
+    netloc_topology_iter_nodes(topology, node, node_tmp) {
+        HASH_DELETE(hh, topology->nodes, node);
+        netloc_node_destruct(node);
+    }
+
+    /** Partition List */
+    utarray_free(topology->partitions);
+
+    /** Physical links */
+    netloc_physical_link_t *link, *link_tmp;
+    HASH_ITER(hh, topology->physical_links, link, link_tmp) {
+        HASH_DEL(topology->physical_links, link);
+        netloc_physical_link_destruct(link);
+    }
+
+    /** Hwloc topology List */
+    for (int t = 0; t < utarray_len(topology->topos); t++) {
+        if (topology->hwloc_topos[t])
+            hwloc_topology_destroy(topology->hwloc_topos[t]);
+    }
+    free(topology->hwloc_topos);
+
+    /** Hwloc topology name List */
+    utarray_free(topology->topos);
+
+    free(topology);
+
+    return NETLOC_SUCCESS;
 }
 
 int netloc_topology_find_partition_idx(netloc_topology_t *topology, char *partition_name)

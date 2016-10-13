@@ -25,7 +25,6 @@ endif
 sources = \
         support.c \
         topology.c \
-        network.c \
         edge.c \
         node.c \
         physical_link.c \

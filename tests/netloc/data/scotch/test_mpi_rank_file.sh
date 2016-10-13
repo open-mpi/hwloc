@@ -1,6 +1,5 @@
-export NETLOC_CURRENTSLOTS=$(realpath scotch/resources.txt)
-export NETLOC_TOPODIR=$(realpath ./plafrim2)
+export NETLOC_TOPOFILE=$(realpath ./plafrim2/netloc/IB-fe80:0000:0000:0000-nodes.txt)
 export NETLOC_PARTITION=miriel
-export NETLOC_SUBNET=fe80:0000:0000:0000
+export NETLOC_CURRENTSLOTS=$(realpath scotch/resources.txt)
 
 netloc_mpi_rank_file scotch/app.mat test.rank

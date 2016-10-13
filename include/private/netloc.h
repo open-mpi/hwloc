@@ -20,6 +20,8 @@
 #include <netloc/uthash.h>
 #include <netloc/utarray.h>
 
+#define NETLOCFILE_VERSION 1
+
 /*
  * "Import" a few things from hwloc
  */
@@ -80,8 +82,6 @@ typedef enum {
 
 /* Pre declarations to avoid inter dependency problems */
 /** \cond IGNORE */
-struct netloc_network_t;
-typedef struct netloc_network_t netloc_network_t;
 struct netloc_topology_t;
 typedef struct netloc_topology_t netloc_topology_t;
 struct netloc_node_t;
@@ -104,37 +104,6 @@ typedef struct netloc_arch_t netloc_arch_t;
 /** \endcond */
 
 /**
- * \brief Netloc Network Type
- *
- * Represents a single network type and subnet.
- */
-struct netloc_network_t {
-    /** Type of network */
-    netloc_network_type_t network_type;
-
-    /** Subnet ID */
-    char * subnet_id;
-
-    /** Data URI */
-    char * data_uri;
-
-    /** Node URI */
-    char * node_uri;
-
-    /** Description information from discovery (if any) */
-    char * description;
-
-    /** Metadata about network information */
-    char * version;
-
-    /**
-     * Application-given private data pointer.
-     * Initialized to NULL, and not used by the netloc library.
-     */
-    void * userdata;
-};
-
-/**
  * \struct netloc_topology_t
  * \brief Netloc Topology Context
  *
@@ -143,11 +112,10 @@ struct netloc_network_t {
  * \note Must be initialized with \ref netloc_topology_construct()
  */
 struct netloc_topology_t {
-    /** Copy of the network structure */
-    netloc_network_t *network;
-
-    /** Lazy load the node list */
-    int nodes_loaded;
+    /** Topology path */
+    char *topopath;
+    /** Subnet ID */
+    char *subnet_id;
 
     /** Node List */
     netloc_node_t *nodes; /* Hash table of nodes by physical_id */
@@ -159,6 +127,7 @@ struct netloc_topology_t {
     UT_array *partitions;
 
     /** Hwloc topology List */
+    char *hwlocpath;
     UT_array *topos;
     hwloc_topology_t *hwloc_topos;
 
@@ -326,85 +295,21 @@ struct netloc_arch_t {
     int *current_hosts; /* indices in the complete topology */
 };
 
-
-/**********************************************************************/
-/**********************************************************************
- * Network functions
- **********************************************************************/
-/**
- * Constructor for \ref netloc_network_t
- *
- * User is responsible for calling the destructor on the handle.
- *
- * \returns A newly allocated pointer to the network information.
- */
-netloc_network_t * netloc_network_construct(void);
-
-/**
- * Destructor for \ref netloc_network_t
- *
- * \param network A valid network handle, or \c NULL.
- *
- * \returns NETLOC_SUCCESS on success
- * \returns NETLOC_ERROR on error
- */
-int netloc_network_destruct(netloc_network_t *network);
-
-/**
- * Find a specific network at the URI specified.
- *
- * \param network_topo_uri URI to search for the specified network.
- * \param ref_network  Netloc network handle (IN/OUT)
- *                 A network handle with the data structure fields set to
- *                 specify the search. For example, the user can set 'IB'
- *                 and nothing else, if they do not know the subnet or any
- *                 of the other necessary information.
- * \param num_networks  Number of networks found.
- * \param networks  Networks found.
- *
- * \returns NETLOC_SUCCESS if networks matcs the specification
- */
-int netloc_network_find(const char * network_topo_uri,
-        netloc_network_t *ref_network, int *num_networks,
-        netloc_network_t ***networks);
-
-/**
- * Pretty print the network (Debugging Support)
- *
- * The user is responsible for calling free() on the string returned.
- *
- * \param network A valid pointer to a network
- *
- * \returns A newly allocated string representation of the network.
- */
-char * netloc_network_pretty_print(netloc_network_t* network);
-
-int netloc_network_copy(netloc_network_t *from, netloc_network_t *to);
-
-int netloc_network_compare(netloc_network_t *a, netloc_network_t *b);
-
-netloc_network_t * netloc_network_dup(netloc_network_t *network);
-
 /**********************************************************************
  * Topology Functions
  **********************************************************************/
 /**
- * Attach to the specified network, and allocate a topology handle.
+ * Allocate a topology handle.
  *
  * User is responsible for calling \ref netloc_detach on the topology handle.
  * The network parameter information is deep copied into the topology handle, so the
  * user may destruct the network handle after calling this function and/or reuse
  * the network handle.
  *
- * \param topology A pointer to a netloc_topology_t handle.
- * \param network The \ref netloc_network_t handle from a prior call to either:
- *                - \ref netloc_network_find()
- *                - \ref netloc_network_foreach()
- *
  * \returns NETLOC_SUCCESS on success
  * \returns NETLOC_ERROR upon an error.
  */
-netloc_topology_t *netloc_topology_construct(netloc_network_t *network);
+netloc_topology_t *netloc_topology_construct(char *path);
 
 /**
  * Destruct a topology handle
@@ -416,10 +321,6 @@ netloc_topology_t *netloc_topology_construct(netloc_network_t *network);
  * \returns NETLOC_ERROR upon an error.
  */
 int netloc_topology_destruct(netloc_topology_t *topology);
-
-int netloc_topology_load(netloc_topology_t *topology);
-
-netloc_network_t* netloc_topology_get_network(netloc_topology_t *topology);
 
 int netloc_topology_find_partition_idx(netloc_topology_t *topology, char *partition_name);
 

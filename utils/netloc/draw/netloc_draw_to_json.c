@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <dirent.h>
 
 #include "private/netloc.h"
 #include "netloc.h"
@@ -510,11 +511,11 @@ static int write_json(netloc_topology_t *topology, FILE *output)
     return 0;
 }
 
-static int netloc_to_json_draw(netloc_topology_t *topology, int simplify)
+static int netloc_to_json_draw(netloc_topology_t *topology)
 {
     int ret;
     static FILE *output;
-    char *node_uri = topology->network->node_uri;
+    char *node_uri = topology->topopath;
     int basename_len = strlen(node_uri)-10;
     char *basename = (char *)malloc((basename_len+1)*sizeof(char));
     char *draw;
@@ -524,7 +525,7 @@ static int netloc_to_json_draw(netloc_topology_t *topology, int simplify)
     strncpy(basename, node_uri, basename_len);
     basename[basename_len] = '\0';
 
-    asprintf(&draw, "%s-%s%s.json", basename, "draw", simplify ? "-simple": "");
+    asprintf(&draw, "%s-%s.json", basename, "draw");
     output = fopen(draw, "w");
     free(draw);
     if (output == NULL) {
@@ -555,79 +556,72 @@ static char *read_param(int *argc, char ***argv)
     return ret;
 }
 
+void help(char *name, FILE *f)
+{
+    fprintf(f, "Usage: %s <path to topology directory>\n", name);
+}
+
 int main(int argc, char **argv)
 {
-    int ret;
+    char *prog_name = basename(argv[0]);
 
-    if (argc < 2 || argc > 3) {
-        goto wrong_params;
+    if (argc != 2) {
+        help(prog_name, stderr);
+        return -1;
     }
+    read_param(&argc, &argv);
 
-    int cargc = argc;
-    char **cargv = argv;
-    char *netloc_dir;
     char *param;
-    int simplify = 0;
+    param = read_param(&argc, &argv);
 
-    read_param(&cargc, &cargv);
-    char *path = read_param(&cargc, &cargv);
-    asprintf(&netloc_dir, "file://%s/%s", path, "netloc");
-
-    if ((param = read_param(&cargc, &cargv))) {
-        simplify = atoi(param);
+    char *netlocpath;
+    if (!strcmp(param, "--help")) {
+        help(prog_name, stdout);
+        return 0;
+    } else {
+        netlocpath = param;
     }
 
-    netloc_network_t *network = NULL;
-
-    // Find a specific InfiniBand network
-    network = netloc_network_construct();
-    network->network_type = NETLOC_NETWORK_TYPE_INFINIBAND;
-
-    // Search for the specific network
-    netloc_network_t **networks;
-    int num_networks;
-
-    ret = netloc_network_find(netloc_dir, network, &num_networks, &networks);
-    netloc_network_destruct(network);
-
-    free(netloc_dir);
-    if( NETLOC_SUCCESS != ret ) {
-        fprintf(stderr, "Error: network not found!\n");
-        for (int n = 0; n < num_networks; n++) {
-            netloc_network_destruct(networks[n]);
-        }
-        free(networks);
+    DIR *netlocdir = opendir(netlocpath);
+    if (!netlocdir) {
+        fprintf(stderr, "Error: Cannot open the directory <%s>.\n", netlocpath);
         return NETLOC_ERROR;
     }
 
-    for (int n = 0; n < num_networks; n++) {
-        netloc_network_t *network = networks[n];
-        char *network_str = netloc_network_pretty_print(network);
-        printf("Found Network: %s\n", network_str);
-        free(network_str);
+    struct dirent *dir_entry = NULL;
+    while ((dir_entry = readdir(netlocdir)) != NULL) {
+        char *topopath;
+#ifdef _DIRENT_HAVE_D_TYPE
+        /* Skip directories if the filesystem returns a useful d_type.
+         * Otherwise, continue and let the actual opening will fail later.
+         */
+        if( DT_DIR == dir_entry->d_type ) {
+            continue;
+        }
+#endif
 
-        // Attach to the network
+        /* Skip if does not end in .txt extension */
+        if( NULL == strstr(dir_entry->d_name, "-nodes.txt") ) {
+            continue;
+        }
+
+        asprintf(&topopath, "%s/%s", netlocpath, dir_entry->d_name);
+
         netloc_topology_t *topology;
-        topology = netloc_topology_construct(network);
+        topology = netloc_topology_construct(topopath);
         if (topology == NULL) {
             fprintf(stderr, "Error: netloc_topology_construct failed\n");
-            return ret;
+            return NETLOC_ERROR;
         }
-        netloc_network_destruct(network);
 
         netloc_edge_reset_uid();
-        // TODO do this automatically as before
-        netloc_topology_load(topology);
 
-        netloc_to_json_draw(topology, simplify);
+        netloc_to_json_draw(topology);
 
         netloc_topology_destruct(topology);
     }
+    closedir(netlocdir);
 
     return 0;
-
-wrong_params:
-    printf("Usage: %s <netloc_dir> [simplify (1 or 0)]\n", argv[0]);
-    return -1;
 }
 
