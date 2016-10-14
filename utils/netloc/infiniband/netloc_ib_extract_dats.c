@@ -449,9 +449,9 @@ int netloc_topology_set_partitions(void)
 
 void help(char *name, FILE *f)
 {
-    fprintf(f, "Usage: %s --in-dir <path to raw data files> "
-            "--out-dir <output path> [--hwloc-dir <hwloc xml path>\n"
-            "\thwloc-dir can be an absolute path"
+    fprintf(f, "Usage: %s <path to input raw data files> <output path> "
+            "[--hwloc-dir <hwloc xml path>]\n"
+            "\thwloc-dir can be an absolute path "
             "or a relative path from out-dir\n", name);
 }
 
@@ -459,25 +459,31 @@ int main(int argc, char **argv)
 {
     DIR *indir, *outdir;
     char *prog_name = basename(argv[0]);
+    char *inpath = NULL, *outpath = NULL, *hwlocpath = NULL;
 
-    if (argc != 5 && argc != 7) {
+    if (argc != 2 && argc != 3 && argc != 5) {
         goto error_param;
     }
     argc--; argv++;
 
-    char *inpath = NULL, *outpath = NULL, *hwlocpath = NULL;
+    if (!argc)
+        goto error_param;
+
+    if (!strcmp(*argv, "--help")) {
+        help(prog_name, stdout);
+        return 0;
+    }
+
+    outpath = *argv;
+    argc--; argv++;
+
+    if (!argc)
+        goto error_param;
+    inpath = *argv;
+    argc--; argv++;
+
     while (argc > 0) {
-        if (!strcmp(*argv, "--out-dir")) {
-            argc--; argv++;
-            if (!argc)
-                goto error_param;
-            outpath = *argv;
-        } else if (!strcmp(*argv, "--in-dir")) {
-            argc--; argv++;
-            if (!argc)
-                goto error_param;
-            inpath = *argv;
-        } else if (!strcmp(*argv, "--hwloc-dir")) {
+        if (!strcmp(*argv, "--hwloc-dir")) {
             argc--; argv++;
             if (!argc)
                 goto error_param;
@@ -490,6 +496,10 @@ int main(int argc, char **argv)
         }
         argc--;
         argv++;
+    }
+
+    if (!outpath || !inpath) {
+        goto error_param;
     }
 
     indir = opendir(inpath);
