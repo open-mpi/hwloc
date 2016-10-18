@@ -294,8 +294,8 @@ int netloc_topology_destruct(netloc_topology_t *topology)
 
     /* Nodes */
     netloc_node_t *node, *node_tmp;
-    HASH_ITER(hh2, topology->nodes, node, node_tmp) {
-        HASH_DELETE(hh2, topology->nodesByHostname, node);
+    HASH_ITER(hh, topology->nodes, node, node_tmp) {
+        HASH_DELETE(hh, topology->nodes, node);
     }
 
     netloc_topology_iter_nodes(topology, node, node_tmp) {
