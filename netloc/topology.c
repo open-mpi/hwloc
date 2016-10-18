@@ -56,45 +56,51 @@ netloc_topology_t *netloc_topology_construct(char *path)
         return NULL;
     }
 
-    char *subnet = (char *)malloc(sizeof(char[30]));
-    if (fscanf(input , "%29s\n", subnet) != 1) {
+    char *subnet;
+    if (netloc_line_get(&line, &linesize, input) == -1) {
         fprintf(stderr, "Cannot read the subnet in %s\n", path);
         perror("fscanf");
-        free(subnet);
+        free(line);
         fclose(input);
         return NULL;
+    } else {
+        subnet = strdup(line);
     }
 
     char *hwlocpath;
-    DIR *hwlocdir;
     if (netloc_line_get(&line, &linesize, input) == -1) {
         fprintf(stderr, "Cannot read hwloc path in %s\n", path);
         perror("fscanf");
         free(subnet);
         fclose(input);
         return NULL;
+    } else if (!strlen(line)) {
+        hwlocpath = NULL;
     } else {
         hwlocpath = strdup(line);
     }
 
-    char *realhwlocpath;
-    if (hwlocpath[0] != '/') {
-        char *path_tmp = strdup(path);
-        asprintf(&realhwlocpath, "%s/%s", dirname(path_tmp), hwlocpath);
-        free(path_tmp);
-    } else {
-        realhwlocpath = strdup(hwlocpath);
-    }
-    if (!(hwlocdir = opendir(realhwlocpath))) {
-        fprintf(stderr, "Couldn't open hwloc directory: \"%s\"\n", realhwlocpath);
-        perror("opendir");
-        free(subnet);
-        free(realhwlocpath);
-        fclose(input);
-        return NULL;
-    } else {
-        closedir(hwlocdir);
-        free(realhwlocpath);
+    if (hwlocpath) {
+        DIR *hwlocdir;
+        char *realhwlocpath;
+        if (hwlocpath[0] != '/') {
+            char *path_tmp = strdup(path);
+            asprintf(&realhwlocpath, "%s/%s", dirname(path_tmp), hwlocpath);
+            free(path_tmp);
+        } else {
+            realhwlocpath = strdup(hwlocpath);
+        }
+        if (!(hwlocdir = opendir(realhwlocpath))) {
+            fprintf(stderr, "Couldn't open hwloc directory: \"%s\"\n", realhwlocpath);
+            perror("opendir");
+            free(subnet);
+            free(realhwlocpath);
+            fclose(input);
+            return NULL;
+        } else {
+            closedir(hwlocdir);
+            free(realhwlocpath);
+        }
     }
 
     int num_nodes;

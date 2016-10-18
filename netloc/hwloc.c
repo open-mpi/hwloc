@@ -29,7 +29,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
 
     char *hwloc_path;
 
-    if (!strlen(topology->hwlocpath)) {
+    if (!topology->hwlocpath) {
         printf("No hwloc directory recorded in the topology\n");
         return NETLOC_ERROR;
     }
