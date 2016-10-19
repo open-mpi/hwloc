@@ -474,12 +474,12 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    outpath = *argv;
+    inpath = *argv;
     argc--; argv++;
 
     if (!argc)
         goto error_param;
-    inpath = *argv;
+    outpath = *argv;
     argc--; argv++;
 
     while (argc > 0) {
