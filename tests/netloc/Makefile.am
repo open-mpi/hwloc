@@ -13,13 +13,14 @@ LDADD = $(top_builddir)/netloc/libnetloc.la \
         $(top_builddir)/netloc/libnetlocscotch.la \
         -lscotch -lscotcherr
 
-if BUILD_NETLOCSCOTCH
-check_PROGRAMS = data/scotch/scotch_get_arch
-endif
-
 TESTS = \
         data/tests_extract.txt \
-        data/tests_draw.txt \
-        data/tests_scotch.txt
+        data/tests_draw.txt
+
+if BUILD_NETLOCSCOTCH
+check_PROGRAMS = data/scotch/scotch_get_arch
+TESTS += data/tests_scotch.txt
+endif
+
 TEST_EXTENSIONS = .txt
 TXT_LOG_COMPILER = ./tests.sh
