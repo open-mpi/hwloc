@@ -16,11 +16,9 @@
 # test2:
 #   ...
 
-HWLOC_top_builddir="@HWLOC_top_builddir@"
-
-NETLOC_TESTS_PATH="$HWLOC_top_builddir/tests/netloc"
-
-NETLOC_UTIL_PATH="$HWLOC_top_builddir/utils/netloc"
+export NETLOC_TESTS_PATH="@HWLOC_top_srcdir@/tests/netloc"
+export NETLOC_BUILD_PATH="@HWLOC_top_builddir@/tests/netloc"
+export NETLOC_UTIL_PATH="@HWLOC_top_builddir@/utils/netloc"
 
 red=$(tput setaf 1)
 green=$(tput setaf 2)
@@ -54,7 +52,10 @@ function getCopies
         local name=$(echo $f | $SED 's/\([^=]*\)\(=.*\)\?/\1/')
         local ext=$(echo $f | $SED 's/\([^=]*\)\(=.*\)\?/\2/')
         if [ -z "$ext" ]; then
-            test -e $REFDIR/$name || cp -r "$NETLOC_TESTS_PATH/data/$name" "$REFDIR"
+            cp -r "$NETLOC_TESTS_PATH/data/$name" "$REFDIR"
+            chmod -R u+w $REFDIR
+            cp -r "$NETLOC_BUILD_PATH/data/$name" "$REFDIR"
+            chmod -R u+w $REFDIR
         elif [ "$ext" = "=txz" ]; then
             # TODO prevent from extracting it again
             tar --use-compress-program=$COMPRESS -xf "$NETLOC_TESTS_PATH/data/$name.txz" -C "$REFDIR"
@@ -68,7 +69,7 @@ set -e
 
 compress=xz
 hash $compress 2>/dev/null || \
-    { echo >&2 "It requires $compressbin but it's not installed."; exit 1; }
+    { echo >&2 "It requires $compress but it's not installed."; exit 1; }
 COMPRESS=$(which $compress)
 GREP=$(which grep)
 SED=$(which sed)
@@ -86,7 +87,7 @@ AWK=$(which awk)
 TEMPDIR=$(mktemp -d)
 TESTDIR=$TEMPDIR/tests
 REFDIR=$TEMPDIR/ref && mkdir $REFDIR
-TESTFILE=$REFDIR/$(basename $1); cp $NETLOC_TESTS_PATH/$1 $REFDIR
+TESTFILE=$REFDIR/$(basename $1); cp $NETLOC_TESTS_PATH/data/$(basename $1) $REFDIR
 
 # Remove comments from the test file
 $SED -i 's/#.*$//g; /^\s*$/d' $TESTFILE

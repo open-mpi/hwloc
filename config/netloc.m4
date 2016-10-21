@@ -33,9 +33,9 @@ EOF])
     # These flags are specific to netloc, and should not be redundant
     # with hwloc.  I.e., if the flag already exists in hwloc, there's
     # no need to put it here.
-    NETLOC_CFLAGS=
-    NETLOC_CPPFLAGS=
-    NETLOC_LDFLAGS=
+    NETLOC_CFLAGS=$HWLOC_CFLAGS
+    NETLOC_CPPFLAGS=$HWLOC_CPPFLAGS
+    NETLOC_LDFLAGS=$HWLOC_LDFLAGS
     NETLOC_LIBS=
     NETLOC_LIBS_PRIVATE=
 
@@ -98,4 +98,7 @@ AC_DEFUN([NETLOC_DO_AM_CONDITIONALS], [
     AC_CHECK_HEADERS([mpi.h],
             [mpi_found_headers=yes; break;])
     AM_CONDITIONAL([BUILD_MPITOOLS], [test "x$mpi_found_headers" = "xyes"])
+
+    AC_CHECK_PROG([xz],[xz],[yes],[no])
+    AM_CONDITIONAL([FOUND_XZ], [test "x$xz" = xyes])
 ])dnl
