@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Copyright © 2016 Inria.  All rights reserved.
 # See COPYING in top-level directory.
@@ -20,15 +20,15 @@ export NETLOC_TESTS_PATH="@HWLOC_top_srcdir@/tests/netloc"
 export NETLOC_BUILD_PATH="@HWLOC_top_builddir@/tests/netloc"
 export NETLOC_UTIL_PATH="@HWLOC_top_builddir@/utils/netloc"
 
-red=$(tput setaf 1)
-green=$(tput setaf 2)
-default=$(tput sgr0)
+red="\e[31m"
+green="\e[32m"
+default="\e[0m"
 
 function write_output
 {
     color=$1
     shift
-    echo $@ | sed "s/.*/$color&$default/"
+    echo -e $color$@$default
 }
 
 function quit
@@ -40,7 +40,7 @@ function quit
 function getvalues
 {
     for i in $@; do
-        echo "$params" | $GREP -P "^\s*$1:" | $SED 's/^.*:\s*//'
+        echo "$params" | $SED -n "s/^[[:space:]]*$i:[[:space:]]*\(.*\)\$/\1/p"
     done | tr '\n' ' '
 }
 
@@ -49,8 +49,8 @@ function getCopies
     local t=$1
     local copies=$(getvalues copy copy_${t})
     for f in $copies; do
-        local name=$(echo $f | $SED 's/\([^=]*\)\(=.*\)\?/\1/')
-        local ext=$(echo $f | $SED 's/\([^=]*\)\(=.*\)\?/\2/')
+        local name=$(echo $f | $SED 's/\([^=]*\)\(=.*\)\{0,1\}/\1/')
+        local ext=$(echo $f | $SED 's/\([^=]*\)\(=.*\)\{0,1\}/\2/')
         if [ -z "$ext" ]; then
             cp -r "$NETLOC_TESTS_PATH/data/$name" "$REFDIR"
             chmod -R u+w $REFDIR
@@ -58,7 +58,9 @@ function getCopies
             chmod -R u+w $REFDIR
         elif [ "$ext" = "=txz" ]; then
             # TODO prevent from extracting it again
-            tar --use-compress-program=$COMPRESS -xf "$NETLOC_TESTS_PATH/data/$name.txz" -C "$REFDIR"
+            $COMPRESS -d --stdout "$NETLOC_TESTS_PATH/data/$name.txz" > "$REFDIR/$name.tar"
+            tar -xf "$REFDIR/$name.tar" -C "$REFDIR"
+            rm "$REFDIR/$name.tar"
         fi
     done
 }
@@ -84,16 +86,17 @@ AWK=$(which awk)
 # │       └── file1
 # └── test
 #     └── file1
-TEMPDIR=$(mktemp -d)
+TEMPDIR=$(mktemp -d -t netloc_tests_XXXXX)
 TESTDIR=$TEMPDIR/tests
 REFDIR=$TEMPDIR/ref && mkdir $REFDIR
 TESTFILE=$REFDIR/$(basename $1); cp $NETLOC_TESTS_PATH/data/$(basename $1) $REFDIR
 
 # Remove comments from the test file
-$SED -i 's/#.*$//g; /^\s*$/d' $TESTFILE
+$SED 's/#.*$//g; /^[[:space:]]*$/d' $TESTFILE > $TESTFILE.new
+mv -f $TESTFILE.new $TESTFILE
 
 # Get tests
-tests=$($GREP -P "^[^\s]*:\s*" $TESTFILE | $SED 's/:\s*$//')
+tests=$($SED -n 's/^\([^[:space:]]*\):[[:space:]]*$/\1/p' $TESTFILE)
 
 S=0
 F=0
@@ -108,6 +111,7 @@ for t in $tests; do
         NETLOC_TEST=$s
         params="$(echo "$params_sv" | $SED 's/%/'$NETLOC_TEST'/g')"
         mkdir $TESTDIR
+        cd $TESTDIR
 
         # Copy or extract files if needed
         getCopies $s
@@ -120,7 +124,8 @@ for t in $tests; do
         else
             files=$(eval "echo \"$needed\"")
             for f in $files; do
-                cp -r --parents "$f" "$TESTDIR"
+                mkdir -p "$TESTDIR/$(dirname "$f")"
+                cp -r "$f" "$TESTDIR/$(dirname "$f")"
             done
         fi
 

@@ -7,7 +7,7 @@
 
 AM_CFLAGS = $(NETLOC_CFLAGS)
 AM_CPPFLAGS = $(NETLOC_CPPFLAGS)
-AM_LDFLAGS = $(NETLOC_LDFLAGS)
+AM_LDFLAGS = $(NETLOC_LDFLAGS) -lpthread
 
 LDADD = $(top_builddir)/netloc/libnetloc.la \
         $(top_builddir)/netloc/libnetlocscotch.la \
@@ -20,6 +20,7 @@ EXTRA_DIST = \
         data/plafrim.txz \
         data/plafrim2.txz \
         data/tests_scotch.txt \
+        data/tests_mpiscotch.txt \
         data/scotch/test_scotch_get_arch.sh \
         data/scotch/test_mpi_rank_file.sh \
         data/scotch/app.mat \
@@ -35,6 +36,9 @@ TESTS = \
 if BUILD_NETLOCSCOTCH
 check_PROGRAMS = data/scotch/scotch_get_arch
 TESTS += data/tests_scotch.txt
+if BUILD_MPITOOLS
+TESTS += data/tests_mpiscotch.txt
+endif
 endif
 endif
 
