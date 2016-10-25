@@ -10,12 +10,8 @@
 if HWLOC_BUILD_STANDALONE
 include_HEADERS = hwloc.h
 
-if BUILD_NETLOC
-include_HEADERS += netloc.h
-endif
-
 if BUILD_NETLOCSCOTCH
-include_HEADERS += netlocscotch.h
+include_HEADERS += netloc.h netlocscotch.h
 endif
 
 include_hwlocdir = $(includedir)/hwloc
@@ -40,13 +36,6 @@ include_hwloc_HEADERS = \
 include_hwloc_autogendir = $(includedir)/hwloc/autogen
 nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h
 
-if BUILD_NETLOC
-include_netlocdir = $(includedir)/netloc
-include_netloc_HEADERS = \
-        netloc/utarray.h \
-        netloc/uthash.h
-endif
-
 noinst_HEADERS = \
         private/private.h \
         private/debug.h \
@@ -55,7 +44,9 @@ noinst_HEADERS = \
         private/components.h \
         private/cpuid-x86.h \
         private/netloc.h \
-        private/map.h
+        private/map.h \
+        netloc/utarray.h \
+        netloc/uthash.h
 
 if HWLOC_HAVE_LINUX
 include_hwloc_HEADERS += \

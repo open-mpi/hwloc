@@ -40,7 +40,8 @@ pkgconfig_DATA = hwloc.pc
 if BUILD_NETLOC
 # JMS Need to compare hwloc.pc and netloc.pc -- I think netloc.pc is
 # missing some things.
-pkgconfig_DATA += netloc.pc
+# pkgconfig_DATA += netloc.pc Disabled until the netloc API is public
+EXTRA_DIST += netloc.pc
 if BUILD_NETLOCSCOTCH
 pkgconfig_DATA += netlocscotch.pc
 endif BUILD_NETLOCSCOTCH
