@@ -5,5 +5,5 @@
 
 SUBDIRS = hwloc
 if BUILD_NETLOC
-#SUBDIRS += netloc
+SUBDIRS += netloc
 endif
