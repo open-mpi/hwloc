@@ -657,7 +657,8 @@ EOF])
       AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
     ])
 
-    AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
+    AS_IF([test "$hwloc_c_vendor" != "android"], [AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])])
+
 
     AC_CHECK_HEADERS([malloc.h])
     AC_CHECK_FUNCS([getpagesize memalign posix_memalign])
