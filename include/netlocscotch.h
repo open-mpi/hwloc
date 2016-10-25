@@ -17,6 +17,7 @@
 #endif
 
 #include <hwloc/autogen/config.h>
+#include <netloc.h>
 
 /* Includes for Scotch */
 #include <stdio.h>
