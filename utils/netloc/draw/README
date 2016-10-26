@@ -1,0 +1,31 @@
+# Copyright © 2013-2014 University of Wisconsin-La Crosse.
+#                         All rights reserved.
+#
+# See COPYING in top-level directory.
+#
+# $HEADER$
+#
+
+Description:
+------------
+
+netloc_draw_to_json processes data to create a new json (in the same directory
+as the input files) ready to be displayed by netloc_draw.html.
+
+The topology can be simplified (same nodes and same edges merged), and reduced
+to a specific partition.
+
+Command Line Interface:
+-----------------------
+
+./netloc_draw_to_json <path the root of netloc directory> [simplified] [hwloc topologies] [partition name]
+
+"simplified" is equal to "0" or "1"
+"hwloc topologies" is equal to "0" or "1"
+
+Examples:
+---------
+
+shell$ ./netloc_draw_to_json ~/examples/deathmachine 1 
+shell$ ./netloc_draw_to_json ~/examples/deathmachine 0 0 fourmi 
+shell$ ./netloc_draw_to_json ~/examples/deathmachine 1 1

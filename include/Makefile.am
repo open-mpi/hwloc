@@ -1,4 +1,4 @@
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2016 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -10,8 +10,8 @@
 if HWLOC_BUILD_STANDALONE
 include_HEADERS = hwloc.h
 
-if BUILD_NETLOC
-include_HEADERS += netloc.h
+if BUILD_NETLOCSCOTCH
+include_HEADERS += netloc.h netlocscotch.h
 endif
 
 include_hwlocdir = $(includedir)/hwloc
@@ -36,15 +36,6 @@ include_hwloc_HEADERS = \
 include_hwloc_autogendir = $(includedir)/hwloc/autogen
 nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h
 
-if BUILD_NETLOC
-include_netlocdir = $(includedir)/netloc
-include_netloc_HEADERS = \
-        netloc/dc.h \
-        netloc/map.h \
-        netloc/rename.h \
-        netloc/rename_map.h
-endif
-
 noinst_HEADERS = \
         private/private.h \
         private/debug.h \
@@ -53,7 +44,8 @@ noinst_HEADERS = \
         private/components.h \
         private/cpuid-x86.h \
         private/netloc.h \
-        private/map.h
+        netloc/utarray.h \
+        netloc/uthash.h
 
 if HWLOC_HAVE_LINUX
 include_hwloc_HEADERS += \

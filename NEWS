@@ -52,6 +52,9 @@ Version 2.0.0
     in hwloc/distances.h.
   + Add the experimental netloc subproject. It is enabled by default when
     supported and can be disabled with --disable-netloc.
+    It currently brings command-line tools to gather and visualize the
+    topology of InfiniBand fabrics, and an API to convert such topologies
+    into Scotch architectures for process mapping.
     See the documentation for details.
   + Remove the online_cpuset from struct hwloc_obj. Offline PUs get unknown
     topologies on Linux nowadays, and wrong topology on Solaris. Other OS

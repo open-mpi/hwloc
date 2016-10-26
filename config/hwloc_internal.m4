@@ -324,13 +324,11 @@ EOF
         hwloc_config_prefix[utils/lstopo/Makefile]
         hwloc_config_prefix[hwloc.pc]
 
-        hwloc_config_prefix[utils/lsmap/Makefile]
-        hwloc_config_prefix[utils/lsnettopo/Makefile]
-        hwloc_config_prefix[utils/netloc_gather_ib/Makefile]
-        hwloc_config_prefix[utils/netloc_reader_ib/Makefile]
-        hwloc_config_prefix[utils/netloc_reader_of/Makefile]
-        hwloc_config_prefix[utils/netloc_reader_static/Makefile]
+        hwloc_config_prefix[utils/netloc/infiniband/Makefile]
+        hwloc_config_prefix[utils/netloc/draw/Makefile]
+        hwloc_config_prefix[utils/netloc/mpi/Makefile]
         hwloc_config_prefix[netloc.pc]
+        hwloc_config_prefix[netlocscotch.pc]
    )
 ])dnl
 
@@ -418,6 +416,7 @@ int foo(void) {
         hwloc_config_prefix[contrib/systemd/Makefile]
         hwloc_config_prefix[contrib/misc/Makefile]
         hwloc_config_prefix[tests/netloc/Makefile]
+        hwloc_config_prefix[tests/netloc/tests.sh]
     )
 
     AC_CONFIG_COMMANDS([chmoding-scripts], [
@@ -436,7 +435,9 @@ chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh \
       ]hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh \
-      ]hwloc_config_prefix[utils/lstopo/test-lstopo.sh])
+      ]hwloc_config_prefix[utils/lstopo/test-lstopo.sh \
+      ]hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw \
+      ]hwloc_config_prefix[tests/netloc/tests.sh])
 
     # These links are only needed in standalone mode.  It would
     # be nice to m4 foreach this somehow, but whenever I tried
