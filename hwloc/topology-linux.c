@@ -4141,7 +4141,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       }
       if (cpuvendor && !strcmp(cpuvendor, "GenuineIntel")
 	  && cpufamilynumber && !strcmp(cpufamilynumber, "6")
-	  && cpumodelnumber && !strcmp(cpumodelnumber, "87"))
+	  && cpumodelnumber && (!strcmp(cpumodelnumber, "87")
+	  || !strcmp(cpumodelnumber, "133")))
 	data->is_knl = 1;
       if (cpuvendor && !strcmp(cpuvendor, "AuthenticAMD")
 	  && cpufamilynumber && !strcmp(cpufamilynumber, "21"))
