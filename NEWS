@@ -19,6 +19,7 @@ in v0.9.1).
 
 Version 1.11.5
 --------------
+* Add support for Knights Mill Xeon Phi, thanks to Piotr Luc for the patch.
 * Reenable distance gathering on Solaris, disabled by mistake since v1.0.
   Thanks to TU Wien for the help.
 * Fix XML import of multiple distance matrices.
