@@ -1337,7 +1337,7 @@ hwloc_convert_from_v1dist_floats(hwloc_topology_t topology, unsigned nbobjs, flo
 
   env = getenv("HWLOC_XML_V1DIST_SCALE");
   if (env) {
-    scale = atof(env);
+    scale = (float) atof(env);
     goto scale;
   }
 
@@ -1363,7 +1363,7 @@ hwloc_convert_from_v1dist_floats(hwloc_topology_t topology, unsigned nbobjs, flo
  scale:
   /* TODO heuristic to find a good scale */
   for(i=0; i<nbobjs*nbobjs; i++)
-    u64s[i] = scale * floats[i];
+    u64s[i] = (uint64_t)(scale * floats[i]);
 
   /* save the scale in root info attrs.
    * Not perfect since we may have multiple of them,
