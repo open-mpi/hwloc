@@ -195,7 +195,7 @@ test-suite.log
 /utils/lstopo/lstopo
 /utils/lstopo/lstopo-no-graphics
 /utils/lstopo/lstopo-no-graphics.1
-/utils/lstopo/test-hwloc-ls.sh
+/utils/lstopo/test-lstopo.sh
 /utils/lstopo/test-*.sh.log
 /utils/lstopo/test-*.sh.trs
 
