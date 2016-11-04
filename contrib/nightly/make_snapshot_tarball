@@ -11,6 +11,7 @@
 # Copyright © 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
 # Copyright © 2006-2016 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2016 Inria.  All rights reserved.
 # $COPYRIGHT$
 #
 # Additional copyrights may follow
@@ -209,8 +210,8 @@ fi
 # Ensure that VERSION is set to indicate that it wants a snapshot, and
 # insert the actual value that we want (so that hwloc_get_version.sh
 # will report exactly that version).
-sed -e 's/^repo_rev=.*/repo_rev='$githash/ \
-    -e 's/^tarball_version=.*/tarball_version='$version/ \
+sed -e 's/^snapshot=.*/snapshot=1/' \
+    -e 's/^snapshot_version=.*/snapshot_version='$version/ \
     VERSION > VERSION.new
 cp -f VERSION.new VERSION
 rm -f VERSION.new
