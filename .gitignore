@@ -152,10 +152,6 @@ test-suite.log
 
 /utils/hwloc/hwloc-annotate
 /utils/hwloc/hwloc-annotate.1
-/utils/hwloc/hwloc-assembler
-/utils/hwloc/hwloc-assembler-remote
-/utils/hwloc/hwloc-assembler-remote.1
-/utils/hwloc/hwloc-assembler.1
 /utils/hwloc/hwloc-bind
 /utils/hwloc/hwloc-bind.1
 /utils/hwloc/hwloc-calc
@@ -181,12 +177,11 @@ test-suite.log
 /utils/hwloc/hwloc.7
 /utils/hwloc/test-fake-plugin.sh
 /utils/hwloc/test-hwloc-annotate.sh
-/utils/hwloc/test-hwloc-assembler.sh
 /utils/hwloc/test-hwloc-calc.sh
 /utils/hwloc/test-hwloc-compress-dir.sh
 /utils/hwloc/test-hwloc-diffpatch.sh
-/utils/hwloc/test-hwloc-distances.sh
 /utils/hwloc/test-hwloc-distrib.sh
+/utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh
 /utils/hwloc/test-hwloc-info.sh
 /utils/hwloc/test-*.sh.log
 /utils/hwloc/test-*.sh.trs
@@ -195,7 +190,7 @@ test-suite.log
 /utils/lstopo/lstopo
 /utils/lstopo/lstopo-no-graphics
 /utils/lstopo/lstopo-no-graphics.1
-/utils/lstopo/test-hwloc-ls.sh
+/utils/lstopo/test-lstopo.sh
 /utils/lstopo/test-*.sh.log
 /utils/lstopo/test-*.sh.trs
 
