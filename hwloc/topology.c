@@ -1405,7 +1405,7 @@ hwloc_get_highest_obj_covering_complete_cpuset (hwloc_topology_t topology, hwloc
     if (hwloc_bitmap_isequal(set, child->complete_cpuset))
       /* child puset is exactly what we want, no need to look at children, we want the highest */
       return child;
-    if (hwloc_bitmap_isincluded(set, child->complete_cpuset))
+    if (!hwloc_bitmap_iszero(child->complete_cpuset) && hwloc_bitmap_isincluded(set, child->complete_cpuset))
       break;
     child = child->next_sibling;
   }
