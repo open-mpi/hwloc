@@ -338,7 +338,10 @@ HWLOC_DECLSPEC void hwloc_bitmap_not (hwloc_bitmap_t res, hwloc_const_bitmap_t b
 /** \brief Test whether bitmaps \p bitmap1 and \p bitmap2 intersects */
 HWLOC_DECLSPEC int hwloc_bitmap_intersects (hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
 
-/** \brief Test whether bitmap \p sub_bitmap is part of bitmap \p super_bitmap */
+/** \brief Test whether bitmap \p sub_bitmap is part of bitmap \p super_bitmap.
+ *
+ * \note The empty bitmap is considered included in any other bitmap.
+ */
 HWLOC_DECLSPEC int hwloc_bitmap_isincluded (hwloc_const_bitmap_t sub_bitmap, hwloc_const_bitmap_t super_bitmap) __hwloc_attribute_pure;
 
 /** \brief Test whether bitmap \p bitmap1 is equal to bitmap \p bitmap2 */
