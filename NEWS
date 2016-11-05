@@ -22,6 +22,9 @@ Version 1.11.5
 * Add support for Knights Mill Xeon Phi, thanks to Piotr Luc for the patch.
 * Reenable distance gathering on Solaris, disabled by mistake since v1.0.
   Thanks to TU Wien for the help.
+* Fix hwloc_get_*obj*_inside_cpuset() functions to ignore objects with
+  empty CPU sets, for instance, CPU-less NUMA nodes such as KNL MCDRAM.
+  Thanks to Nicolas Denoyelle for the report.
 * Fix XML import of multiple distance matrices.
 
 
