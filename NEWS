@@ -26,6 +26,8 @@ Version 1.11.5
   empty CPU sets, for instance, CPU-less NUMA nodes such as KNL MCDRAM.
   Thanks to Nicolas Denoyelle for the report.
 * Fix XML import of multiple distance matrices.
+* Add a FAQ entry about "hwloc is only a structural model, it ignores
+  performance models, memory bandwidth, etc.?"
 
 
 Version 1.11.4
