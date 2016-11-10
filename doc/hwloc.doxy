@@ -2591,7 +2591,36 @@ $ hwloc-calc -I numa --logical-input --physical-output numa:2-3 numa:7
 \endverbatim
 
 
-\subsection faq_onedim hwloc only has a one-dimensional view of the architecture, it ignores distances
+\subsection faq_structural hwloc is only a structural model, it ignores performance models, memory bandwidth, etc.?
+
+hwloc is indeed designed to provide applications with a structural model
+of the platform. This is an orthogonal approach to describing the
+machine with performance models, for instance using memory bandwidth
+or latencies measured by benchmarks.
+We believe that both approaches are important for helping application
+make the most of the hardware.
+
+For instance, on a dual-processor host with four cores each, hwloc
+clearly shows which four cores are together.
+Latencies between all pairs of cores of the same processor are likely
+identical, and also likely lower than the latency between cores of
+different processors.
+However the structural model cannot guarantee such implementation
+details.
+On the other side, performance models would reveal such details
+without always clearly identifying which cores are in the same
+processor.
+
+The focus of hwloc is mainly of the structural modeling side.
+However, hwloc lets user adds performance information to the topology
+through distances
+(see \ref hwlocality_distances_get and \ref hwlocality_distances_add)
+or even custom annotations (see \ref faq_annotate).
+hwloc may also use such distance information for grouping objects
+together (see \ref faq_onedim and \ref faq_groups).
+
+
+\subsection faq_onedim hwloc only has a one-dimensional view of the architecture, it ignores distances?
 
 hwloc places all objects in a tree. Each level is a one-dimensional
 view of a set of similar objects. All children of the same object (siblings)
@@ -2606,6 +2635,9 @@ may be used to build a more realistic representation (multi-dimensional)
 of each level.
 For instance, there can be a distance matrix that representing the latencies
 between any pair of NUMA nodes if the BIOS and/or operating system reports them.
+
+For more information about the distance API, see \ref
+hwlocality_distances_get and \ref hwlocality_distances_add.
 
 
 \subsection faq_groups What are these Group objects in my topology?
