@@ -202,11 +202,11 @@ if (@forcesubnets) {
     my $boardname = undef;
     my $portnum = undef;
     while (my $line = <FILE>) {
-      if ($line =~ /<object type=\"OSDev\" name=\"(.+)\" osdev_type=\"3\">/) {
+      if ($line =~ /<object type=\"OSDev\".* name=\"(.+)\".* osdev_type=\"3\".*>/) {
         $boardname = $1;
       } elsif ($line =~ /<\/object>/) {
         $boardname = undef;
-      } elsif ($line =~ /<info name=\"Port([0-9]+)GID([0-9]+)\" value=\"([0-9a-fA-F:]{19}):([0-9a-fA-F:]{19})\"\/>/) {
+      } elsif ($line =~ /<info name=\"Port([0-9]+)GID([0-9]+)\".* value=\"([0-9a-fA-F:]{19}):([0-9a-fA-F:]{19})\"\/.*>/) {
         $servers{$hostname}->{gids}->{$boardname}->{$1}->{$2}->{subnet} = $3;
         $servers{$hostname}->{gids}->{$boardname}->{$1}->{$2}->{guid} = $4;
       } elsif ($line =~ /<info name=\"Port([0-9]+)LID\" value=\"(0x[0-9a-fA-F]+)\"\/>/) {
@@ -453,6 +453,7 @@ foreach my $subnet (keys %subnets_todiscover) {
     print "  NOT running $cmd\n" if $verbose;
   } else {
     sleep_between_probes ("  ");
+    print "  $cmd\n" if $verbose;
     my $ret = system "$cmd > ${ibnetdiscoveroutput}.new" ;
     if (!$ret or $ignoreerrors) {
       unlink ${ibnetdiscoveroutput};
