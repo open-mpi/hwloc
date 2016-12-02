@@ -1742,27 +1742,23 @@ struct hwloc_linux_cpuinfo_proc {
   unsigned infos_count;
 };
 
-static int
-hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
+static __hwloc_inline int
+hwloc_read_file_int(const char *path, int *value, int fsroot_fd)
 {
   char string[11];
-  FILE * fd;
+  int fd, ret;
 
-  fd = hwloc_fopen(mappath, "r", fsroot_fd);
-  if (!fd) {
-    *value = -1;
+  fd = hwloc_open(path, fsroot_fd);
+  if (fd < 0)
     return -1;
-  }
 
-  if (!fgets(string, 11, fd)) {
-    *value = -1;
-    fclose(fd);
+  ret = read(fd, string, sizeof(string));
+  close(fd);
+
+  if (ret <= 0)
     return -1;
-  }
-  *value = strtoul(string, NULL, 10);
 
-  fclose(fd);
-
+  *value = atoi(string);
   return 0;
 }
 
@@ -3167,11 +3163,13 @@ look_sysfscpu(struct hwloc_topology *topology,
     {
       hwloc_bitmap_t packageset, coreset, bookset, threadset;
       unsigned mypackageid, mycoreid, mybookid;
+      int tmpint;
 
       /* look at the package */
-      mypackageid = 0; /* shut-up the compiler */
-      sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i);
-      hwloc_parse_sysfs_unsigned(str, &mypackageid, data->root_fd);
+      mypackageid = (unsigned) -1;
+      sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i); /* contains %d at least up to 4.9 */
+      if (hwloc_read_file_int(str, &tmpint, data->root_fd) == 0)
+	mypackageid = (unsigned) tmpint;
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       packageset = hwloc_parse_cpumap(str, data->root_fd);
@@ -3246,9 +3244,10 @@ package_done:
 
      if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
       /* look at the core */
-      mycoreid = 0; /* shut-up the compiler */
-      sprintf(str, "%s/cpu%d/topology/core_id", path, i);
-      hwloc_parse_sysfs_unsigned(str, &mycoreid, data->root_fd);
+      mycoreid = (unsigned) -1;
+      sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.9 */
+      if (hwloc_read_file_int(str, &tmpint, data->root_fd) == 0)
+	mycoreid = (unsigned) tmpint;
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, data->root_fd);
@@ -3260,9 +3259,10 @@ package_done:
 	siblingid = hwloc_bitmap_first(coreset);
 	if (siblingid == (unsigned) i)
 	  siblingid = hwloc_bitmap_next(coreset, i);
-	siblingcoreid = mycoreid;
-	sprintf(str, "%s/cpu%d/topology/core_id", path, siblingid);
-	hwloc_parse_sysfs_unsigned(str, &siblingcoreid, data->root_fd);
+	siblingcoreid = (unsigned) -1;
+	sprintf(str, "%s/cpu%u/topology/core_id", path, siblingid); /* contains %d at least up to 4.9 */
+	if (hwloc_read_file_int(str, &tmpint, data->root_fd) == 0)
+	  siblingcoreid = (unsigned) tmpint;
 	threadwithcoreid = (siblingcoreid != mycoreid);
        }
        if (hwloc_bitmap_first(coreset) == i || threadwithcoreid) {
@@ -3283,9 +3283,10 @@ package_done:
 
       if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
        /* look at the books */
-       mybookid = 0; /* shut-up the compiler */
-       sprintf(str, "%s/cpu%d/topology/book_id", path, i);
-       if (hwloc_parse_sysfs_unsigned(str, &mybookid, data->root_fd) == 0) {
+	mybookid = (unsigned) -1;
+       sprintf(str, "%s/cpu%d/topology/book_id", path, i); /* contains %d at least up to 4.9 */
+       if (hwloc_read_file_int(str, &tmpint, data->root_fd) == 0) {
+	 mybookid = (unsigned) tmpint;
         sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
         bookset = hwloc_parse_cpumap(str, data->root_fd);
 	if (bookset) {
