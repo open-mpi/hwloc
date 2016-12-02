@@ -1639,6 +1639,26 @@ hwloc_read_file_int(const char *path, int *value, int fsroot_fd)
   return 0;
 }
 
+static __hwloc_inline int
+hwloc_read_file_uint(const char *path, unsigned *value, int fsroot_fd)
+{
+  char string[11];
+  int fd, ret;
+
+  fd = hwloc_open(path, fsroot_fd);
+  if (fd < 0)
+    return -1;
+
+  ret = read(fd, string, sizeof(string));
+  close(fd);
+
+  if (ret <= 0)
+    return -1;
+
+  *value = (unsigned) strtoul(string, NULL, 10);
+  return 0;
+}
+
 
 /* kernel cpumaps are composed of an array of 32bits cpumasks */
 #define KERNEL_CPU_MASK_BITS 32
@@ -3382,32 +3402,22 @@ package_done:
 
       /* look at the caches */
       for(j=0; j<10; j++) {
-#define SHARED_CPU_MAP_STRLEN 128
-	char mappath[SHARED_CPU_MAP_STRLEN];
 	char str2[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
 	hwloc_bitmap_t cacheset;
-	unsigned long kB = 0;
-	unsigned linesize = 0;
-	unsigned sets = 0, lines_per_tag = 1;
-	int depth; /* 0 for L1, .... */
+	unsigned kB;
+	unsigned linesize;
+	unsigned sets, lines_per_tag;
+	unsigned depth; /* 1 for L1, .... */
 	hwloc_obj_cache_type_t type = HWLOC_OBJ_CACHE_UNIFIED; /* default */
 
 	/* get the cache level depth */
-	sprintf(mappath, "%s/cpu%d/cache/index%d/level", path, i, j);
-	fd = hwloc_fopen(mappath, "r", data->root_fd);
-	if (fd) {
-	  char *res = fgets(str2,sizeof(str2), fd);
-	  fclose(fd);
-	  if (res)
-	    depth = strtoul(str2, NULL, 10)-1;
-	  else
-	    continue;
-	} else
+	sprintf(str, "%s/cpu%d/cache/index%d/level", path, i, j); /* contains %u at least up to 4.9 */
+	if (hwloc_read_file_uint(str, &depth, data->root_fd) < 0)
 	  continue;
 
 	/* cache type */
-	sprintf(mappath, "%s/cpu%d/cache/index%d/type", path, i, j);
-	fd = hwloc_fopen(mappath, "r", data->root_fd);
+	sprintf(str, "%s/cpu%d/cache/index%d/type", path, i, j);
+	fd = hwloc_fopen(str, "r", data->root_fd);
 	if (fd) {
 	  if (fgets(str2, sizeof(str2), fd)) {
 	    fclose(fd);
@@ -3427,13 +3437,9 @@ package_done:
 	  continue;
 
 	/* get the cache size */
-	sprintf(mappath, "%s/cpu%d/cache/index%d/size", path, i, j);
-	fd = hwloc_fopen(mappath, "r", data->root_fd);
-	if (fd) {
-	  if (fgets(str2,sizeof(str2), fd))
-	    kB = atol(str2); /* in kB */
-	  fclose(fd);
-	}
+	kB = 0;
+	sprintf(str, "%s/cpu%d/cache/index%d/size", path, i, j); /* contains %uK at least up to 4.9 */
+	hwloc_read_file_uint(str, &kB, data->root_fd);
 	/* KNL reports L3 with size=0 and full cpuset in cpuid.
 	 * Let hwloc_linux_try_add_knl_mcdram_cache() detect it better.
 	 */
@@ -3441,48 +3447,37 @@ package_done:
 	  continue;
 
 	/* get the line size */
-	sprintf(mappath, "%s/cpu%d/cache/index%d/coherency_line_size", path, i, j);
-	fd = hwloc_fopen(mappath, "r", data->root_fd);
-	if (fd) {
-	  if (fgets(str2,sizeof(str2), fd))
-	    linesize = atol(str2); /* in bytes */
-	  fclose(fd);
-	}
+	linesize = 0;
+	sprintf(str, "%s/cpu%d/cache/index%d/coherency_line_size", path, i, j); /* contains %u at least up to 4.9 */
+	hwloc_read_file_uint(str, &linesize, data->root_fd);
 
 	/* get the number of sets and lines per tag.
 	 * don't take the associativity directly in "ways_of_associativity" because
 	 * some archs (ia64, ppc) put 0 there when fully-associative, while others (x86) put something like -1 there.
 	 */
-	sprintf(mappath, "%s/cpu%d/cache/index%d/number_of_sets", path, i, j);
-	fd = hwloc_fopen(mappath, "r", data->root_fd);
-	if (fd) {
-	  if (fgets(str2,sizeof(str2), fd))
-	    sets = atol(str2);
-	  fclose(fd);
-	}
-	sprintf(mappath, "%s/cpu%d/cache/index%d/physical_line_partition", path, i, j);
-	fd = hwloc_fopen(mappath, "r", data->root_fd);
-	if (fd) {
-	  if (fgets(str2,sizeof(str2), fd))
-	    lines_per_tag = atol(str2);
-	  fclose(fd);
-	}
+	sets = 0;
+	sprintf(str, "%s/cpu%d/cache/index%d/number_of_sets", path, i, j); /* contains %u at least up to 4.9 */
+	hwloc_read_file_uint(str, &sets, data->root_fd);
 
-	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
-	cacheset = hwloc_parse_cpumap(mappath, data->root_fd);
+	lines_per_tag = 1;
+	sprintf(str, "%s/cpu%d/cache/index%d/physical_line_partition", path, i, j); /* contains %u at least up to 4.9 */
+	hwloc_read_file_uint(str, &lines_per_tag, data->root_fd);
+
+	sprintf(str, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
+	cacheset = hwloc_parse_cpumap(str, data->root_fd);
         if (cacheset) {
 	  if (hwloc_bitmap_iszero(cacheset)) {
 	    /* ia64 returning empty L3 and L2i? use the core set instead */
 	    hwloc_bitmap_free(cacheset);
-	    sprintf(mappath, "%s/cpu%d/topology/thread_siblings", path, i);
-	    cacheset = hwloc_parse_cpumap(mappath, data->root_fd);
+	    sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+	    cacheset = hwloc_parse_cpumap(str, data->root_fd);
 	  }
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
             struct hwloc_obj *cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
-            cache->attr->cache.size = kB << 10;
-            cache->attr->cache.depth = depth+1;
+            cache->attr->cache.size = ((uint64_t)kB) << 10;
+            cache->attr->cache.depth = depth;
             cache->attr->cache.linesize = linesize;
 	    cache->attr->cache.type = type;
 	    if (!linesize || !lines_per_tag || !sets)
@@ -3492,7 +3487,7 @@ package_done:
 	    else
 	      cache->attr->cache.associativity = (kB << 10) / linesize / lines_per_tag / sets;
             cache->cpuset = cacheset;
-            hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n",
+            hwloc_debug_1arg_bitmap("cache depth %u has cpuset %s\n",
                        depth, cacheset);
             hwloc_insert_object_by_cpuset(topology, cache);
             cacheset = NULL; /* don't free it */
