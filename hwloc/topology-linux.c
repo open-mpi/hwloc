@@ -1743,21 +1743,29 @@ struct hwloc_linux_cpuinfo_proc {
 };
 
 static __hwloc_inline int
-hwloc_read_file_int(const char *path, int *value, int fsroot_fd)
+hwloc_read_file_singleline(const char *path, char *string, size_t length, int fsroot_fd)
 {
-  char string[11];
   int fd, ret;
 
   fd = hwloc_open(path, fsroot_fd);
   if (fd < 0)
     return -1;
 
-  ret = read(fd, string, sizeof(string));
+  ret = read(fd, string, length);
   close(fd);
 
   if (ret <= 0)
     return -1;
 
+  return 0;
+}
+
+static __hwloc_inline int
+hwloc_read_file_int(const char *path, int *value, int fsroot_fd)
+{
+  char string[11];
+  if (hwloc_read_file_singleline(path, string, sizeof(string), fsroot_fd) < 0)
+    return -1;
   *value = atoi(string);
   return 0;
 }
@@ -1766,18 +1774,8 @@ static __hwloc_inline int
 hwloc_read_file_uint(const char *path, unsigned *value, int fsroot_fd)
 {
   char string[11];
-  int fd, ret;
-
-  fd = hwloc_open(path, fsroot_fd);
-  if (fd < 0)
+  if (hwloc_read_file_singleline(path, string, sizeof(string), fsroot_fd) < 0)
     return -1;
-
-  ret = read(fd, string, sizeof(string));
-  close(fd);
-
-  if (ret <= 0)
-    return -1;
-
   *value = (unsigned) strtoul(string, NULL, 10);
   return 0;
 }
@@ -3119,7 +3117,6 @@ look_sysfscpu(struct hwloc_topology *topology,
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
   int i,j;
-  FILE *fd;
   unsigned caches_added, merge_buggy_core_siblings;
   hwloc_obj_t packages = NULL; /* temporary list of packages before actual insert in the tree */
   int threadwithcoreid = data->is_amd15h ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
@@ -3146,17 +3143,12 @@ look_sysfscpu(struct hwloc_topology *topology,
 
       /* check whether this processor is online */
       sprintf(str, "%s/cpu%lu/online", path, cpu);
-      fd = hwloc_fopen(str, "r", data->root_fd);
-      if (fd) {
-	if (fgets(online, sizeof(online), fd)) {
-	  if (!atoi(online)) {
-	    fclose(fd);
-	    hwloc_debug("os proc %lu is offline\n", cpu);
-	    hwloc_bitmap_set(unknownset, cpu);
-	    continue;
-	  }
+      if (hwloc_read_file_singleline(str, online, sizeof(online), data->root_fd) == 0) {
+	if (!atoi(online)) {
+	  hwloc_debug("os proc %lu is offline\n", cpu);
+	  hwloc_bitmap_set(unknownset, cpu);
+	  continue;
 	}
-	fclose(fd);
       }
 
       /* check whether the kernel exports topology information for this cpu */
@@ -3356,24 +3348,14 @@ package_done:
 
 	/* cache type */
 	sprintf(str, "%s/cpu%d/cache/index%d/type", path, i, j);
-	fd = hwloc_fopen(str, "r", data->root_fd);
-	if (fd) {
-	  if (fgets(str2, sizeof(str2), fd)) {
-	    fclose(fd);
-	    if (!strncmp(str2, "Data", 4))
-	      ctype = HWLOC_OBJ_CACHE_DATA;
-	    else if (!strncmp(str2, "Unified", 7))
-	      ctype = HWLOC_OBJ_CACHE_UNIFIED;
-	    else if (!strncmp(str2, "Instruction", 11))
-	      ctype = HWLOC_OBJ_CACHE_INSTRUCTION;
-	    else
-	      continue;
-	  } else {
-	    fclose(fd);
-	    continue;
-	  }
-	} else
-	  continue;
+	if (hwloc_read_file_singleline(str, str2, sizeof(str2), data->root_fd) == 0) {
+	  if (!strncmp(str2, "Data", 4))
+	    ctype = HWLOC_OBJ_CACHE_DATA;
+	  else if (!strncmp(str2, "Unified", 7))
+	    ctype = HWLOC_OBJ_CACHE_UNIFIED;
+	  else if (!strncmp(str2, "Instruction", 11))
+	    ctype = HWLOC_OBJ_CACHE_INSTRUCTION;
+	}
 
 	otype = hwloc_cache_type_by_depth_type(depth, ctype);
 	if (otype == HWLOC_OBJ_TYPE_NONE)
