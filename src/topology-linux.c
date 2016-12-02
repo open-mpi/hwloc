@@ -1700,21 +1700,19 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
 	/* ignore the first map if it's empty */
 	continue;
 
-      memmove(&maps[1], &maps[0], nr_maps*sizeof(*maps));
-      maps[0] = map;
-      nr_maps++;
+      maps[nr_maps++] = map;
     }
 
   /* convert into a set */
 #if KERNEL_CPU_MASK_BITS == HWLOC_BITS_PER_LONG
   for(i=0; i<nr_maps; i++)
-    hwloc_bitmap_set_ith_ulong(set, i, maps[i]);
+    hwloc_bitmap_set_ith_ulong(set, i, maps[nr_maps-1-i]);
 #else
   for(i=0; i<(nr_maps+1)/2; i++) {
     unsigned long mask;
-    mask = maps[2*i];
+    mask = maps[nr_maps-2*i-1];
     if (2*i+1<nr_maps)
-      mask |= maps[2*i+1] << KERNEL_CPU_MASK_BITS;
+      mask |= maps[nr_maps-2*i-2] << KERNEL_CPU_MASK_BITS;
     hwloc_bitmap_set_ith_ulong(set, i, mask);
   }
 #endif
