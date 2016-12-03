@@ -30,14 +30,14 @@ static int hwloc_libxml2_needs_cleanup = 0;
 static void
 hwloc_libxml2_init_once(void)
 {
-  static int first = 1;
-  if (first) {
-    first = 0;
+  static int checked = 0;
+  if (!checked) {
     /* disable stderr warnings */
     xmlSetGenericErrorFunc(NULL, hwloc__xml_verbose() ? xmlGenericError : hwloc_libxml2_error_callback);
     /* enforce libxml2 cleanup ? */
     if (getenv("HWLOC_LIBXML_CLEANUP"))
       hwloc_libxml2_needs_cleanup = 1;
+    checked = 1;
   }
 }
 

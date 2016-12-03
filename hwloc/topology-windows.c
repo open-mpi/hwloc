@@ -457,7 +457,7 @@ hwloc_win_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_
  * get cpu/membind for threads
  */
 
-  static int
+static int
 hwloc_win_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_cpuset_t set, int flags __hwloc_attribute_unused)
 {
   GROUP_AFFINITY aff;

@@ -487,10 +487,10 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
 	     busid->domain, busid->bus);
     env = getenv(envname);
     if (env) {
-      static int warn = 0;
-      if (!topology->pci_has_forced_locality && !warn) {
+      static int reported = 0;
+      if (!topology->pci_has_forced_locality && !reported) {
 	fprintf(stderr, "Environment variable %s is deprecated, please use HWLOC_PCI_LOCALITY instead.\n", env);
-	warn = 1;
+	reported = 1;
       }
       if (*env) {
 	/* force the cpuset */

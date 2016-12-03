@@ -18,13 +18,13 @@
 int
 hwloc__xml_verbose(void)
 {
-  static int first = 1;
+  static int checked = 0;
   static int verbose = 0;
-  if (first) {
+  if (!checked) {
     const char *env = getenv("HWLOC_XML_VERBOSE");
     if (env)
       verbose = atoi(env);
-    first = 0;
+    checked = 1;
   }
   return verbose;
 }
@@ -32,13 +32,13 @@ hwloc__xml_verbose(void)
 static int
 hwloc_nolibxml_import(void)
 {
-  static int first = 1;
+  static int checked = 0;
   static int nolibxml = 0;
-  if (first) {
+  if (!checked) {
     const char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
     if (env)
       nolibxml = atoi(env);
-    first = 0;
+    checked = 1;
   }
   return nolibxml;
 }
@@ -46,13 +46,13 @@ hwloc_nolibxml_import(void)
 static int
 hwloc_nolibxml_export(void)
 {
-  static int first = 1;
+  static int checked = 0;
   static int nolibxml = 0;
-  if (first) {
+  if (!checked) {
     const char *env = getenv("HWLOC_NO_LIBXML_EXPORT");
     if (env)
       nolibxml = atoi(env);
-    first = 0;
+    checked = 1;
   }
   return nolibxml;
 }
