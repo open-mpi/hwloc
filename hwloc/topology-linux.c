@@ -1204,8 +1204,7 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
   char buf[1024] = "";
   char name[64];
   char *tmp;
-  FILE *file;
-  int i;
+  int fd, i, err;
 
   if (!tid) {
 #ifdef SYS_gettid
@@ -1217,17 +1216,18 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
   }
 
   snprintf(name, sizeof(name), "/proc/%lu/stat", (unsigned long) tid);
-  file = fopen(name, "r");
-  if (!file) {
+  fd = open(name, O_RDONLY); /* no fsroot for real /proc */
+  if (fd < 0) {
     errno = ENOSYS;
     return -1;
   }
-  tmp = fgets(buf, sizeof(buf), file);
-  fclose(file);
-  if (!tmp) {
+  err = read(fd, buf, sizeof(buf)-1); /* read -1 to put the ending \0 */
+  close(fd);
+  if (err <= 0) {
     errno = ENOSYS;
     return -1;
   }
+  buf[err-1] = '\0';
 
   tmp = strrchr(buf, ')');
   if (!tmp) {
@@ -1951,22 +1951,23 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
 {
 #define CPUSET_NAME_LEN 128
   char cpuset_name[CPUSET_NAME_LEN];
-  FILE *fd;
+  FILE *file;
+  int err;
   char *tmp;
 
   /* check whether a cgroup-cpuset is enabled */
   if (!pid)
-    fd = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
+    file = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
   else {
     char path[] = "/proc/XXXXXXXXXX/cgroup";
     snprintf(path, sizeof(path), "/proc/%d/cgroup", pid);
-    fd = hwloc_fopen(path, "r", fsroot_fd);
+    file = hwloc_fopen(path, "r", fsroot_fd);
   }
-  if (fd) {
+  if (file) {
     /* find a cpuset line */
 #define CGROUP_LINE_LEN 256
     char line[CGROUP_LINE_LEN];
-    while (fgets(line, sizeof(line), fd)) {
+    while (fgets(line, sizeof(line), file)) {
       char *end, *colon = strchr(line, ':');
       if (!colon)
 	continue;
@@ -1974,35 +1975,31 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
 	continue;
 
       /* found a cgroup-cpuset line, return the name */
-      fclose(fd);
+      fclose(file);
       end = strchr(colon, '\n');
       if (end)
 	*end = '\0';
       hwloc_debug("Found cgroup-cpuset %s\n", colon+8);
       return strdup(colon+8);
     }
-    fclose(fd);
+    fclose(file);
   }
 
   /* check whether a cpuset is enabled */
   if (!pid)
-    fd = hwloc_fopen("/proc/self/cpuset", "r", fsroot_fd);
+    err = hwloc_read_path_by_length("/proc/self/cpuset", cpuset_name, sizeof(cpuset_name), fsroot_fd);
   else {
     char path[] = "/proc/XXXXXXXXXX/cpuset";
     snprintf(path, sizeof(path), "/proc/%d/cpuset", pid);
-    fd = hwloc_fopen(path, "r", fsroot_fd);
+    err = hwloc_read_path_by_length(path, cpuset_name, sizeof(cpuset_name), fsroot_fd);
   }
-  if (!fd) {
+  if (err < 0) {
     /* found nothing */
     hwloc_debug("%s", "No cgroup or cpuset found\n");
     return NULL;
   }
 
   /* found a cpuset, return the name */
-  tmp = fgets(cpuset_name, sizeof(cpuset_name), fd);
-  fclose(fd);
-  if (!tmp)
-    return NULL;
   tmp = strchr(cpuset_name, '\n');
   if (tmp)
     *tmp = '\0';
@@ -2159,7 +2156,6 @@ hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
   DIR *dir;
   struct dirent *dirent;
   unsigned long index_ = 1;
-  FILE *hpfd;
   char line[64];
   char path[SYSFS_NUMA_NODE_PATH_LEN];
 
@@ -2170,15 +2166,11 @@ hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
         continue;
       memory->page_types[index_].size = strtoul(dirent->d_name+10, NULL, 0) * 1024ULL;
       sprintf(path, "%s/%s/nr_hugepages", dirpath, dirent->d_name);
-      hpfd = hwloc_fopen(path, "r", data->root_fd);
-      if (hpfd) {
-        if (fgets(line, sizeof(line), hpfd)) {
-          /* these are the actual total amount of huge pages */
-          memory->page_types[index_].count = strtoull(line, NULL, 0);
-          *remaining_local_memory -= memory->page_types[index_].count * memory->page_types[index_].size;
-          index_++;
-        }
-	fclose(hpfd);
+      if (!hwloc_read_path_by_length(path, line, sizeof(line), data->root_fd)) {
+	/* these are the actual total amount of huge pages */
+	memory->page_types[index_].count = strtoull(line, NULL, 0);
+	*remaining_local_memory -= memory->page_types[index_].count * memory->page_types[index_].size;
+	index_++;
       }
     }
     closedir(dir);
@@ -2371,20 +2363,13 @@ hwloc__get_dmi_id_one_info(struct hwloc_linux_backend_data_s *data,
 			   const char *dmi_name, const char *hwloc_name)
 {
   char dmi_line[64];
-  char *tmp;
-  FILE *fd;
 
   strcpy(path+pathlen, dmi_name);
-  fd = hwloc_fopen(path, "r", data->root_fd);
-  if (!fd)
+  if (hwloc_read_path_by_length(path, dmi_line, sizeof(dmi_line), data->root_fd) < 0)
     return;
 
-  dmi_line[0] = '\0';
-  tmp = fgets(dmi_line, sizeof(dmi_line), fd);
-  fclose (fd);
-
-  if (tmp && dmi_line[0] != '\0') {
-    tmp = strchr(dmi_line, '\n');
+  if (dmi_line[0] != '\0') {
+    char *tmp = strchr(dmi_line, '\n');
     if (tmp)
       *tmp = '\0';
     hwloc_debug("found %s '%s'\n", hwloc_name, dmi_line);
@@ -2804,10 +2789,8 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
   int line_size = -1;
   int version = 0;
   unsigned i;
-  FILE *f;
   char buffer[512] = {0};
   char *data_beg = NULL;
-  char *data_end = NULL;
   char memory_mode_str[32] = {0};
   char cluster_mode_str[32] = {0};
 
@@ -2815,8 +2798,7 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
     return -1;
 
   hwloc_debug("Reading knl cache data from: %s\n", knl_cache_file);
-  f = hwloc_fopen(knl_cache_file, "r", data->root_fd);
-  if (!f) {
+  if (hwloc_read_path_by_length(knl_cache_file, buffer, sizeof(buffer), data->root_fd) < 0) {
     hwloc_debug("Unable to open KNL data file `%s' (%s)\n", knl_cache_file, strerror(errno));
     free(knl_cache_file);
     return -1;
@@ -2824,18 +2806,16 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
   free(knl_cache_file);
 
   data_beg = &buffer[0];
-  data_end = data_beg + fread(buffer, 1, sizeof(buffer), f);
 
   /* file must start with version information */
   if (sscanf(data_beg, "version: %d", &version) != 1) {
     fprintf(stderr, "Invalid knl_memoryside_cache header, expected \"version: <int>\".\n");
-    fclose(f);
     return -1;
   }
 
-  while (data_beg < data_end) {
+  while (1) {
     char *line_end = strstr(data_beg, "\n");
-    if (!line_end || line_end >= data_end)
+    if (!line_end)
         break;
     if (version >= 1) {
       if (!strncmp("cache_size:", data_beg, strlen("cache_size"))) {
@@ -2862,10 +2842,8 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
       }
     }
 
-    data_beg += line_end - data_beg + 1;
+    data_beg = line_end + 1;
   }
-
-  fclose(f);
 
   if (line_size == -1 || cache_size == -1 || associativity == -1 || inclusiveness == -1) {
     hwloc_debug("Incorrect file format line_size=%d cache_size=%lld associativity=%d inclusiveness=%d\n",
@@ -3910,24 +3888,17 @@ look_cpuinfo(struct hwloc_topology *topology,
 static void
 hwloc__linux_get_mic_sn(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data)
 {
-  FILE *file;
   char line[64], *tmp, *end;
-  file = hwloc_fopen("/proc/elog", "r", data->root_fd);
-  if (!file)
+  if (hwloc_read_path_by_length("/proc/elog", line, sizeof(line), data->root_fd) < 0)
     return;
-  if (!fgets(line, sizeof(line), file))
-    goto out_with_file;
   if (strncmp(line, "Card ", 5))
-    goto out_with_file;
+    return;
   tmp = line + 5;
   end = strchr(tmp, ':');
   if (!end)
-    goto out_with_file;
+    return;
   *end = '\0';
   hwloc_obj_add_info(hwloc_get_root_obj(topology), "MICSerialNumber", tmp);
-
- out_with_file:
-  fclose(file);
 }
 
 static void
@@ -4042,13 +4013,12 @@ hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = backend->private_data;
-  FILE *fd;
-  char line[128];
 
   if (getenv("HWLOC_NO_HARDWIRED_TOPOLOGY"))
     return -1;
 
   if (!strcmp(data->utsname.machine, "s64fx")) {
+    char line[128];
     /* Fujistu K-computer, FX10, and FX100 use specific processors
      * whose Linux topology support is broken until 4.1 (acc455cffa75070d55e74fc7802b49edbc080e92and)
      * and existing machines will likely never be fixed by kernel upgrade.
@@ -4059,15 +4029,8 @@ hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
      * "cpu             : Fujitsu SPARC64 XIfx"
      * "cpu             : Fujitsu SPARC64 IXfx"
      */
-    fd = hwloc_fopen("/proc/cpuinfo", "r", data->root_fd);
-    if (!fd)
+    if (hwloc_read_path_by_length("/proc/cpuinfo", line, sizeof(line), data->root_fd) < 0)
       return -1;
-
-    if (!fgets(line, sizeof(line), fd)) {
-      fclose(fd);
-      return -1;
-    }
-    fclose(fd);
 
     if (strncmp(line, "cpu	", 4))
       return -1;
@@ -4421,6 +4384,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   struct hwloc_topology *topology = backend->topology;
   char path[256], buf[10];
   FILE *file;
+  int fd;
   int foundpci;
   unsigned pcidomain = 0, pcibus = 0, pcidev = 0, pcifunc = 0;
   unsigned _pcidomain, _pcibus, _pcidev, _pcifunc;
@@ -4483,10 +4447,10 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
  nopci:
   /* attach directly to the right NUMA node */
   snprintf(path, sizeof(path), "%s/device/numa_node", osdevpath);
-  file = hwloc_fopen(path, "r", root_fd);
-  if (file) {
-    err = fread(buf, 1, sizeof(buf), file);
-    fclose(file);
+  fd = hwloc_open(path, root_fd);
+  if (fd >= 0) {
+    err = read(fd, buf, sizeof(buf));
+    close(fd);
     if (err > 0) {
       int node = atoi(buf);
       if (node >= 0) {
