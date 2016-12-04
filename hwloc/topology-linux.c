@@ -514,6 +514,199 @@ hwloc_read_path_as_uint(const char *path, unsigned *value, int fsroot_fd)
   return 0;
 }
 
+/* Read everything from fd and save it into a newly allocated buffer
+ * returned in bufferp. Use sizep as a default buffer size, and returned
+ * the actually needed size in sizep.
+ */
+static __hwloc_inline int
+hwloc__read_fd(int fd, char **bufferp, size_t *sizep)
+{
+  char *buffer;
+  size_t toread, filesize, totalread;
+  ssize_t ret;
+
+  toread = filesize = *sizep;
+
+  /* Alloc and read +1 so that we get EOF on 2^n without reading once more */
+  buffer = malloc(filesize+1);
+  if (!buffer)
+    return -1;
+
+  ret = read(fd, buffer, toread+1);
+  if (ret < 0) {
+    free(buffer);
+    return -1;
+  }
+
+  totalread = (size_t) ret;
+
+  if (totalread < toread + 1)
+    /* Normal case, a single read got EOF */
+    goto done;
+
+  /* Unexpected case, must extend the buffer and read again.
+   * Only occurs on first invocation and if the kernel ever uses multiple page for a single mask.
+   */
+  do {
+    char *tmp;
+
+    toread = filesize;
+    filesize *= 2;
+
+    tmp = realloc(buffer, filesize+1);
+    if (!tmp) {
+      free(buffer);
+      return -1;
+    }
+    buffer = tmp;
+
+    ret = read(fd, buffer+toread+1, toread);
+    if (ret < 0) {
+      free(buffer);
+      return -1;
+    }
+
+    totalread += ret;
+  } while ((size_t) ret == toread);
+
+ done:
+  buffer[totalread] = '\0';
+  *bufferp = buffer;
+  *sizep = filesize;
+  return 0;
+}
+
+/* kernel cpumaps are composed of an array of 32bits cpumasks */
+#define KERNEL_CPU_MASK_BITS 32
+#define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
+
+static __hwloc_inline int
+hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
+{
+  static size_t _filesize = 0; /* will be dynamically initialized to hwloc_get_pagesize(), and increased later if needed */
+  size_t filesize;
+  unsigned long *maps;
+  unsigned long map;
+  int nr_maps = 0;
+  static int _nr_maps_allocated = 8; /* Only compute the power-of-two above the kernel cpumask size once.
+				      * Actually, it may increase multiple times if first read cpumaps start with zeroes.
+				      */
+  int nr_maps_allocated = _nr_maps_allocated;
+  char *buffer, *tmpbuf;
+  int i;
+
+  /* Kernel sysfs files are usually at most one page. 4kB may contain 455 32-bit
+   * masks (followed by comma), enough for 14k PUs. So allocate a page by default for now.
+   *
+   * If we ever need a larger buffer, we'll realloc() the buffer during the first
+   * invocation of this function so that others directly allocate the right size
+   * (all cpumask files have the exact same size).
+   */
+  filesize = _filesize;
+  if (!filesize)
+    filesize = hwloc_getpagesize();
+  if (hwloc__read_fd(fd, &buffer, &filesize) < 0)
+    return -1;
+  /* Only update the static value with the final one,
+   * to avoid sharing intermediate values that we modify,
+   * in case there's ever multiple concurrent calls.
+   */
+  _filesize = filesize;
+
+  maps = malloc(nr_maps_allocated * sizeof(*maps));
+  if (!maps) {
+    free(buffer);
+    return -1;
+  }
+
+  /* reset to zero first */
+  hwloc_bitmap_zero(set);
+
+  /* parse the whole mask */
+  tmpbuf = buffer;
+  while (sscanf(tmpbuf, "%lx", &map) == 1) {
+    /* read one kernel cpu mask and the ending comma */
+    if (nr_maps == nr_maps_allocated) {
+      unsigned long *tmp = realloc(maps, 2*nr_maps_allocated * sizeof(*maps));
+      if (!tmp) {
+	free(buffer);
+	free(maps);
+	return -1;
+      }
+      maps = tmp;
+      nr_maps_allocated *= 2;
+    }
+
+    tmpbuf = strchr(tmpbuf, ',');
+    if (!tmpbuf) {
+      maps[nr_maps++] = map;
+      break;
+    } else
+      tmpbuf++;
+
+    if (!map && !nr_maps)
+      /* ignore the first map if it's empty */
+      continue;
+
+    maps[nr_maps++] = map;
+  }
+
+  free(buffer);
+
+  /* convert into a set */
+#if KERNEL_CPU_MASK_BITS == HWLOC_BITS_PER_LONG
+  for(i=0; i<nr_maps; i++)
+    hwloc_bitmap_set_ith_ulong(set, i, maps[nr_maps-1-i]);
+#else
+  for(i=0; i<(nr_maps+1)/2; i++) {
+    unsigned long mask;
+    mask = maps[nr_maps-2*i-1];
+    if (2*i+1<nr_maps)
+      mask |= maps[nr_maps-2*i-2] << KERNEL_CPU_MASK_BITS;
+    hwloc_bitmap_set_ith_ulong(set, i, mask);
+  }
+#endif
+
+  free(maps);
+
+  /* Only update the static value with the final one,
+   * to avoid sharing intermediate values that we modify,
+   * in case there's ever multiple concurrent calls.
+   */
+  if (nr_maps_allocated > _nr_maps_allocated)
+    _nr_maps_allocated = nr_maps_allocated;
+  return 0;
+}
+
+/* FIXME: export to API? */
+static __hwloc_inline int
+hwloc__read_path_as_cpumask(const char *maskpath, hwloc_bitmap_t set, int fsroot_fd)
+{
+  int fd, err;
+  fd = hwloc_open(maskpath, fsroot_fd);
+  if (fd < 0)
+    return -1;
+  err = hwloc__read_fd_as_cpumask(fd, set);
+  close(fd);
+  return err;
+}
+
+static __hwloc_inline hwloc_bitmap_t
+hwloc__alloc_read_path_as_cpumask(const char *maskpath, int fsroot_fd)
+{
+  hwloc_bitmap_t set;
+  int err;
+  set = hwloc_bitmap_alloc();
+  if (!set)
+    return NULL;
+  err = hwloc__read_path_as_cpumask(maskpath, set, fsroot_fd);
+  if (err < 0) {
+    hwloc_bitmap_free(set);
+    return NULL;
+  } else
+    return set;
+}
+
 
 /*****************************
  ******* CpuBind Hooks *******
@@ -1784,10 +1977,7 @@ struct hwloc_linux_cpuinfo_proc {
   unsigned infos_count;
 };
 
-/* kernel cpumaps are composed of an array of 32bits cpumasks */
-#define KERNEL_CPU_MASK_BITS 32
-#define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
-
+/* FIXME drop from API */
 int
 hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
 {
@@ -1850,23 +2040,6 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
   if (nr_maps_allocated > _nr_maps_allocated)
     _nr_maps_allocated = nr_maps_allocated;
   return 0;
-}
-
-static hwloc_bitmap_t
-hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
-{
-  hwloc_bitmap_t set;
-  FILE * file;
-
-  file = hwloc_fopen(mappath, "r", fsroot_fd);
-  if (!file)
-    return NULL;
-
-  set = hwloc_bitmap_alloc();
-  hwloc_linux_parse_cpumap_file(file, set);
-
-  fclose(file);
-  return set;
 }
 
 static void
@@ -2976,7 +3149,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  osnode = indexes[index_];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
-          cpuset = hwloc_parse_cpumap(nodepath, data->root_fd);
+          cpuset = hwloc__alloc_read_path_as_cpumask(nodepath, data->root_fd);
           if (!cpuset) {
 	    /* This NUMA object won't be inserted, we'll ignore distances */
 	    failednodes++;
@@ -3169,7 +3342,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	mypackageid = (unsigned) tmpint;
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
-      packageset = hwloc_parse_cpumap(str, data->root_fd);
+      packageset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (packageset
 	  && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
        hwloc_bitmap_andnot(packageset, packageset, unknownset);
@@ -3247,7 +3420,7 @@ package_done:
 	mycoreid = (unsigned) tmpint;
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
-      coreset = hwloc_parse_cpumap(str, data->root_fd);
+      coreset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (coreset) {
        hwloc_bitmap_andnot(coreset, coreset, unknownset);
        if (hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
@@ -3285,7 +3458,7 @@ package_done:
        if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
 	 mybookid = (unsigned) tmpint;
         sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
-        bookset = hwloc_parse_cpumap(str, data->root_fd);
+        bookset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
 	if (bookset) {
 	 hwloc_bitmap_andnot(bookset, bookset, unknownset);
          if (hwloc_bitmap_first(bookset) == i) {
@@ -3379,13 +3552,13 @@ package_done:
 	hwloc_read_path_as_uint(str, &lines_per_tag, data->root_fd);
 
 	sprintf(str, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
-	cacheset = hwloc_parse_cpumap(str, data->root_fd);
+	cacheset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
         if (cacheset) {
           if (hwloc_bitmap_iszero(cacheset)) {
 	    hwloc_bitmap_t tmpset;
 	    /* ia64 returning empty L3 and L2i? use the core set instead */
 	    sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
-	    tmpset = hwloc_parse_cpumap(str, data->root_fd);
+	    tmpset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
 	    /* only use it if we actually got something */
 	    if (tmpset) {
 	      hwloc_bitmap_free(cacheset);
@@ -4230,19 +4403,14 @@ hwloc_linux_backend_get_pci_busid_cpuset(struct hwloc_backend *backend,
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   char path[256];
-  FILE *file;
   int err;
 
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
 	   busid->domain, busid->bus,
 	   busid->dev, busid->func);
-  file = hwloc_fopen(path, "r", data->root_fd);
-  if (file) {
-    err = hwloc_linux_parse_cpumap_file(file, cpuset);
-    fclose(file);
-    if (!err && !hwloc_bitmap_iszero(cpuset))
-      return 0;
-  }
+  err = hwloc__read_path_as_cpumask(path, cpuset, data->root_fd);
+  if (!err && !hwloc_bitmap_iszero(cpuset))
+    return 0;
   return -1;
 }
 
@@ -4388,7 +4556,6 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 {
   struct hwloc_topology *topology = backend->topology;
   char path[256], buf[10];
-  FILE *file;
   int fd;
   int foundpci;
   unsigned pcidomain = 0, pcibus = 0, pcidev = 0, pcifunc = 0;
@@ -4467,21 +4634,14 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   }
 
   /* attach directly to the right cpuset */
-  cpuset = hwloc_bitmap_alloc();
   snprintf(path, sizeof(path), "%s/device/local_cpus", osdevpath);
-  file = hwloc_fopen(path, "r", root_fd);
-  if (file) {
-    err = hwloc_linux_parse_cpumap_file(file, cpuset);
-    fclose(file);
-    if (!err) {
-      parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-      if (parent) {
-        hwloc_bitmap_free(cpuset);
-	return parent;
-      }
-    }
+  cpuset = hwloc__alloc_read_path_as_cpumask(path, root_fd);
+  if (cpuset) {
+    parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
+    hwloc_bitmap_free(cpuset);
+    if (parent)
+      return parent;
   }
-  hwloc_bitmap_free(cpuset);
 
   /* FIXME: {numa_node,local_cpus} may be missing when the device link points to a subdirectory.
    * For instance, device of scsi blocks may point to foo/ata1/host0/target0:0:0/0:0:0:0/ instead of foo/
