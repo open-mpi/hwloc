@@ -461,7 +461,10 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
     CPU_FREE(set);
     nr_cpus = setsize * 8; /* that's the value that was actually tested */
     if (!err)
-      /* found it */
+      /* Found it. Only update the static value with the final one,
+       * to avoid sharing intermediate values that we modify,
+       * in case there's ever multiple concurrent calls.
+       */
       return _nr_cpus = nr_cpus;
     nr_cpus *= 2;
   }
@@ -1352,12 +1355,12 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
 static int
 hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute_unused)
 {
-  static int max_numnodes = -1;
+  static int _max_numnodes = -1, max_numnodes;
   int linuxpolicy;
 
-  if (max_numnodes != -1)
+  if (_max_numnodes != -1)
     /* already computed */
-    return max_numnodes;
+    return _max_numnodes;
 
   /* start with a single ulong, it's the minimal and it's enough for most machines */
   max_numnodes = HWLOC_BITS_PER_LONG;
@@ -1366,8 +1369,11 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
     int err = get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
     free(mask);
     if (!err || errno != EINVAL)
-      /* found it */
-      return max_numnodes;
+      /* Found it. Only update the static value with the final one,
+       * to avoid sharing intermediate values that we modify,
+       * in case there's ever multiple concurrent calls.
+       */
+      return _max_numnodes = max_numnodes;
     max_numnodes *= 2;
   }
 }
@@ -1648,7 +1654,10 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
   unsigned long *maps;
   unsigned long map;
   int nr_maps = 0;
-  static int nr_maps_allocated = 8; /* only compute the power-of-two above the kernel cpumask size once */
+  static int _nr_maps_allocated = 8; /* Only compute the power-of-two above the kernel cpumask size once.
+				      * Actually, it may increase multiple times if first read cpumaps start with zeroes.
+				      */
+  int nr_maps_allocated = _nr_maps_allocated;
   int i;
 
   maps = malloc(nr_maps_allocated * sizeof(*maps));
@@ -1696,6 +1705,12 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
 
   free(maps);
 
+  /* Only update the static value with the final one,
+   * to avoid sharing intermediate values that we modify,
+   * in case there's ever multiple concurrent calls.
+   */
+  if (nr_maps_allocated > _nr_maps_allocated)
+    _nr_maps_allocated = nr_maps_allocated;
   return 0;
 }
 
