@@ -1588,7 +1588,7 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 }
 
 /* Setup object cpusets/nodesets by OR'ing its children. */
-HWLOC_DECLSPEC int
+int
 hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src)
 {
 #define ADD_OTHER_OBJ_SET(_dst, _src, _set)			\
@@ -1606,7 +1606,7 @@ hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src)
   return 0;
 }
 
-HWLOC_DECLSPEC int
+int
 hwloc_obj_add_children_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
