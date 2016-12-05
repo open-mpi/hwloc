@@ -101,7 +101,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
         }
 
         /* Add the hwloc topology */
-        int t = 0;
+        unsigned int t = 0;
         while (t < utarray_len(hwloc_topo_names) &&
                 strcmp(*(char **)utarray_eltptr(hwloc_topo_names, t), refname)) {
             t++;
@@ -164,7 +164,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
     topology->hwloc_topos = (hwloc_topology_t *)hwloc_topos->d;
 
     printf("%d hwloc topologies found:\n", utarray_len(topology->topos));
-    for (int p = 0; p < utarray_len(topology->topos); p++) {
+    for (unsigned int p = 0; p < utarray_len(topology->topos); p++) {
         printf("\t'%s'\n", *(char **)utarray_eltptr(topology->topos, p));
     }
 
@@ -228,7 +228,7 @@ int netloc_arch_node_get_hwloc_info(netloc_arch_node_t *arch_node)
     }
 
     /* List of PUs */
-    int max_os_index = 0;
+    unsigned int max_os_index = 0;
     UT_array *ordered_host_array;
     int *ordered_hosts;
     utarray_new(ordered_host_array, &ut_int_icd);

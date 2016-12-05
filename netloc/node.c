@@ -77,7 +77,7 @@ static int node_or_subnode_destruct(netloc_node_t * node, int is_node)
     }
 
     /* Subnodes */
-    for (int n = 0; n < utarray_len(node->subnodes); n++) {
+    for (unsigned int n = 0; n < utarray_len(node->subnodes); n++) {
         netloc_node_t *subnode = *(netloc_node_t **)
             utarray_eltptr(node->subnodes, n);
         node_or_subnode_destruct(subnode, 0);
@@ -119,7 +119,7 @@ char * netloc_node_pretty_print(netloc_node_t* node)
 
 int netloc_node_is_in_partition(netloc_node_t *node, int partition)
 {
-    for (int i = 0; i < netloc_get_num_partitions(node); i++) {
+    for (unsigned int i = 0; i < netloc_get_num_partitions(node); i++) {
         if (netloc_get_partition(node, i) == partition)
             return 1;
     }

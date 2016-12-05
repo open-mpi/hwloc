@@ -314,7 +314,7 @@ int netloc_topology_destruct(netloc_topology_t *topology)
     }
 
     /** Hwloc topology List */
-    for (int t = 0; t < utarray_len(topology->topos); t++) {
+    for (unsigned int t = 0; t < utarray_len(topology->topos); t++) {
         if (topology->hwloc_topos[t])
             hwloc_topology_destroy(topology->hwloc_topos[t]);
     }
@@ -334,7 +334,7 @@ int netloc_topology_find_partition_idx(netloc_topology_t *topology, char *partit
         return -1;
 
     /* Find the selected partition in the topology */
-    int p = 0;
+    unsigned int p = 0;
     int found = 0;
     while (p < utarray_len(topology->partitions)) {
         char *current_name = *(char **)utarray_eltptr(topology->partitions, p);

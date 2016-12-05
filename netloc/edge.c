@@ -60,7 +60,7 @@ int netloc_edge_destruct(netloc_edge_t * edge)
     utarray_free(edge->physical_links);
     utarray_free(edge->partitions);
 
-    for (int e = 0; e < netloc_edge_get_num_subedges(edge); e++) {
+    for (unsigned int e = 0; e < netloc_edge_get_num_subedges(edge); e++) {
         netloc_edge_t *subedge;
         subedge = netloc_edge_get_subedge(edge, e);
         netloc_edge_destruct(subedge);
@@ -77,7 +77,7 @@ void netloc_edge_reset_uid(void)
 
 int netloc_edge_is_in_partition(netloc_edge_t *edge, int partition)
 {
-    for (int i = 0; i < netloc_get_num_partitions(edge); i++) {
+    for (unsigned int i = 0; i < netloc_get_num_partitions(edge); i++) {
         if (netloc_get_partition(edge, i) == partition)
             return 1;
     }

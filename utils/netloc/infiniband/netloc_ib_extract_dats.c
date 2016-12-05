@@ -188,7 +188,7 @@ node_t *get_node(node_t **nodes, char *type, char *lid,
 static int find_other_physical_link(physical_link_t *link)
 {
     node_t *dest = link->dest;
-    int dest_port = link->ports[1];
+    unsigned int dest_port = link->ports[1];
 
     physical_link_t *other_link = (physical_link_t *)
         utarray_eltptr(dest->physical_links, dest_port-1);
@@ -288,7 +288,7 @@ int build_paths(void)
                     break;
                 }
 
-                int port = route_dest->port;
+                unsigned int port = route_dest->port;
                 link = (physical_link_t *)
                     utarray_eltptr(node_cur->physical_links, port-1);
                 utarray_push_back(found_links, &link);
@@ -431,7 +431,7 @@ int netloc_topology_set_partitions(void)
             if (node_dest->main_partition != partition)
                 continue;
 
-            for (int l = 0; l < utarray_len(path_dest->links); l++) {
+            for (unsigned int l = 0; l < utarray_len(path_dest->links); l++) {
                 physical_link_t *link = *(physical_link_t **)
                     utarray_eltptr(path_dest->links, l);
                 if (!link->partitions) {
@@ -605,7 +605,7 @@ int main(int argc, char **argv)
                 free(node->partitions);
 
                 /* Physical links */
-                for (int l = 0; l < utarray_len(node->physical_links); l++) {
+                for (unsigned int l = 0; l < utarray_len(node->physical_links); l++) {
                     physical_link_t *link = (physical_link_t *)
                         utarray_eltptr(node->physical_links, l);
                     free(link->width);
@@ -830,7 +830,7 @@ int read_discover(char *subnet, char *path, char *filename)
             link->parent_node = src_node;
             link->other_id = -1;
 
-            int port_idx = link->ports[0]-1;
+            unsigned int port_idx = link->ports[0]-1;
             /* NB: there is no function to set a specific index */
             if (port_idx+1 > utarray_len(src_node->physical_links)) {
                 utarray_insert(src_node->physical_links, link, port_idx);
@@ -878,8 +878,8 @@ int read_discover(char *subnet, char *path, char *filename)
     /* Find the link in the other way */
     node_t *node, *node_tmp;
     HASH_ITER(hh, nodes, node, node_tmp) {
-        int num_links = utarray_len(node->physical_links);
-        for (int i = 0; i <  num_links; i++) {
+        unsigned int num_links = utarray_len(node->physical_links);
+        for (unsigned int i = 0; i < num_links; i++) {
             physical_link_t *link = (physical_link_t *)
                 utarray_eltptr(node->physical_links, i);
             if (!link->dest)
@@ -902,7 +902,6 @@ char *partition_list_to_string(int *partition_list)
     char tmp[20];
     int max_length = num_partitions*(sprintf(tmp, "%d", num_partitions)+1)+1;
 
-    
     char *string = (char *)malloc(max_length*sizeof(char));
     string[0] = '\0';
     for (int p = 0; p < num_partitions; p++) {
@@ -953,15 +952,15 @@ int write_into_file(char *subnet, char *path, char *hwlocpath)
         edge_t *edge, *edge_tmp;
         fprintf(output, "%s", node->physical_id);
         HASH_ITER(hh, node->edges, edge, edge_tmp) {
-            int num_links = utarray_len(edge->physical_link_idx);
+            unsigned int num_links = utarray_len(edge->physical_link_idx);
             fprintf(output, ",%s,", edge->dest);
             fprintf(output, "%f,", edge->total_gbits);
             char *partition_str = partition_list_to_string(edge->partitions);
             fprintf(output, "%s,", partition_str);
             free(partition_str);
-            fprintf(output, "%d,", num_links);
-            for (int l = 0; l < num_links; l++) {
-                int link_idx = *(int *)utarray_eltptr(edge->physical_link_idx, l);
+            fprintf(output, "%u,", num_links);
+            for (unsigned int l = 0; l < num_links; l++) {
+                unsigned int link_idx = *(int *)utarray_eltptr(edge->physical_link_idx, l);
                 physical_link_t *link = (physical_link_t *)
                     utarray_eltptr(node->physical_links, link_idx);
                 fprintf(output, "%d,", link->int_id);
@@ -998,7 +997,7 @@ int write_into_file(char *subnet, char *path, char *hwlocpath)
             node_t *node_dest = path_dest->node;
             fprintf(output, "%s,%s",
                     node_src->physical_id, node_dest->physical_id);
-            for (int l = 0; l < utarray_len(path_dest->links); l++) {
+            for (unsigned int l = 0; l < utarray_len(path_dest->links); l++) {
                 physical_link_t *link = *(physical_link_t **)
                     utarray_eltptr(path_dest->links, l);
                 fprintf(output, ",%d", link->int_id);

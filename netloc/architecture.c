@@ -49,7 +49,7 @@ void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees
         int *degrees = (int *)down_degrees_by_level[l]->d;
         int max_degree = max_degrees[l];
 
-        int down_level_idx = 0;
+        unsigned int down_level_idx = 0;
         UT_array *down_level_degrees = down_degrees_by_level[l+1];
         int down_level_max_degree = max_degrees[l+1];
         for (int d = 0; d < num_degrees; d++) {
@@ -566,7 +566,7 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
         UT_array *new_nodes;
         utarray_new(new_nodes, &ut_ptr_icd);
 
-        for (int n = 0; n < utarray_len(nodes); n++) {
+        for (unsigned int n = 0; n < utarray_len(nodes); n++) {
             netloc_node_t *node = *(void **)utarray_eltptr(nodes, n);
             netloc_analysis_data *node_data = (netloc_analysis_data *)node->userdata;
             /* There is a problem, this is not a tree */
@@ -804,8 +804,8 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
     if (!partition_name) {
         fprintf(stderr, "Error: you need to set NETLOC_PARTITION in your environment.\n");
         fprintf(stderr, "\tIt can be: ");
-        int num_partitions = utarray_len(topology->partitions);
-        for (int p = 0; p < num_partitions; p++) {
+        unsigned int num_partitions = utarray_len(topology->partitions);
+        for (unsigned int p = 0; p < num_partitions; p++) {
             char *partition = *(char **)utarray_eltptr(topology->partitions, p);
             fprintf(stderr, "%s%s", partition, p != num_partitions-1 ? ", ": "\n");
         }

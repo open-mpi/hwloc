@@ -296,7 +296,7 @@ static int handle_link(netloc_physical_link_t *link, json_t *json_links)
 
     json_t *json_partitions = json_array_new();
 
-    for (int p = 0; p < netloc_get_num_partitions(link); p++)
+    for (unsigned int p = 0; p < netloc_get_num_partitions(link); p++)
     {
         int partition = netloc_get_partition(link, p);
         json_array_add(json_partitions, json_int_new(partition));
@@ -324,7 +324,7 @@ static int handle_edge(netloc_edge_t *edge, json_t *json_edges)
 
     /* Links */
     json_t *json_links = json_array_new();
-    for (int l = 0; l < netloc_edge_get_num_links(edge); l++)
+    for (unsigned int l = 0; l < netloc_edge_get_num_links(edge); l++)
     {
         netloc_physical_link_t *link = netloc_edge_get_link(edge, l);
         json_array_add(json_links, json_int_new(link->id));
@@ -333,7 +333,7 @@ static int handle_edge(netloc_edge_t *edge, json_t *json_edges)
 
     /* Partition list */
     json_t *json_partitions = json_array_new();
-    for (int p = 0; p < netloc_get_num_partitions(edge); p++)
+    for (unsigned int p = 0; p < netloc_get_num_partitions(edge); p++)
     {
         int partition = netloc_get_partition(edge, p);
         json_array_add(json_partitions, json_int_new(partition));
@@ -342,7 +342,7 @@ static int handle_edge(netloc_edge_t *edge, json_t *json_edges)
 
     /* Subnode edges */
     json_t *json_subedges = json_array_new();
-    for (int s = 0; s < netloc_edge_get_num_subedges(edge); s++)
+    for (unsigned int s = 0; s < netloc_edge_get_num_subedges(edge); s++)
     {
         netloc_edge_t *subedge = netloc_edge_get_subedge(edge, s);
         json_array_add(json_subedges, json_int_new(subedge->id));
@@ -372,7 +372,7 @@ static int handle_node(netloc_node_t *node, json_t *json_nodes,
 
     /* Subnodes */
     json_t *json_subnodes = json_array_new();
-    for (int s = 0; s < netloc_node_get_num_subnodes(node); s++)
+    for (unsigned int s = 0; s < netloc_node_get_num_subnodes(node); s++)
     {
         netloc_node_t *subnode = netloc_node_get_subnode(node, s);
         handle_node(subnode, json_nodes, json_edges, 1);
@@ -391,7 +391,7 @@ static int handle_node(netloc_node_t *node, json_t *json_nodes,
 
     /* Partitions */
     json_t *json_partitions = json_array_new();
-    for (int p = 0; p < netloc_get_num_partitions(node); p++)
+    for (unsigned int p = 0; p < netloc_get_num_partitions(node); p++)
     {
         int partition = netloc_get_partition(node, p);
         json_array_add(json_partitions, json_int_new(partition));
