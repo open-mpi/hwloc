@@ -1507,7 +1507,7 @@ add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
 }
 
 /* Setup object cpusets/nodesets by OR'ing its children. */
-HWLOC_DECLSPEC int
+int
 hwloc_fill_object_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
