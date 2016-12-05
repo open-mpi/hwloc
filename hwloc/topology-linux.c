@@ -678,7 +678,6 @@ hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
   return 0;
 }
 
-/* FIXME: export to API? */
 static __hwloc_inline int
 hwloc__read_path_as_cpumask(const char *maskpath, hwloc_bitmap_t set, int fsroot_fd)
 {
@@ -705,6 +704,18 @@ hwloc__alloc_read_path_as_cpumask(const char *maskpath, int fsroot_fd)
     return NULL;
   } else
     return set;
+}
+
+int
+hwloc_linux_read_path_as_cpumask(const char *maskpath, hwloc_bitmap_t set)
+{
+  int fd, err;
+  fd = open(maskpath, O_RDONLY);
+  if (fd < 0)
+    return -1;
+  err = hwloc__read_fd_as_cpumask(fd, set);
+  close(fd);
+  return err;
 }
 
 
@@ -1976,71 +1987,6 @@ struct hwloc_linux_cpuinfo_proc {
   struct hwloc_obj_info_s *infos;
   unsigned infos_count;
 };
-
-/* FIXME drop from API */
-int
-hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
-{
-  unsigned long *maps;
-  unsigned long map;
-  int nr_maps = 0;
-  static int _nr_maps_allocated = 8; /* Only compute the power-of-two above the kernel cpumask size once.
-				      * Actually, it may increase multiple times if first read cpumaps start with zeroes.
-				      */
-  int nr_maps_allocated = _nr_maps_allocated;
-  int i;
-
-  maps = malloc(nr_maps_allocated * sizeof(*maps));
-  if (!maps)
-    return -1;
-
-  /* reset to zero first */
-  hwloc_bitmap_zero(set);
-
-  /* parse the whole mask */
-  while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
-    {
-      if (nr_maps == nr_maps_allocated) {
-	unsigned long *tmp = realloc(maps, 2*nr_maps_allocated * sizeof(*maps));
-	if (!tmp) {
-	  free(maps);
-	  return -1;
-	}
-	maps = tmp;
-	nr_maps_allocated *= 2;
-      }
-
-      if (!map && !nr_maps)
-	/* ignore the first map if it's empty */
-	continue;
-
-      maps[nr_maps++] = map;
-    }
-
-  /* convert into a set */
-#if KERNEL_CPU_MASK_BITS == HWLOC_BITS_PER_LONG
-  for(i=0; i<nr_maps; i++)
-    hwloc_bitmap_set_ith_ulong(set, i, maps[nr_maps-1-i]);
-#else
-  for(i=0; i<(nr_maps+1)/2; i++) {
-    unsigned long mask;
-    mask = maps[nr_maps-2*i-1];
-    if (2*i+1<nr_maps)
-      mask |= maps[nr_maps-2*i-2] << KERNEL_CPU_MASK_BITS;
-    hwloc_bitmap_set_ith_ulong(set, i, mask);
-  }
-#endif
-
-  free(maps);
-
-  /* Only update the static value with the final one,
-   * to avoid sharing intermediate values that we modify,
-   * in case there's ever multiple concurrent calls.
-   */
-  if (nr_maps_allocated > _nr_maps_allocated)
-    _nr_maps_allocated = nr_maps_allocated;
-  return 0;
-}
 
 static void
 hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const char *root_path)

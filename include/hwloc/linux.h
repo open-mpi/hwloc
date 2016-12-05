@@ -32,13 +32,6 @@ extern "C" {
  * @{
  */
 
-/** \brief Convert a linux kernel cpumap file \p file into hwloc CPU set.
- *
- * Might be used when reading CPU set from sysfs attributes such as topology
- * and caches for processors, or local_cpus for devices.
- */
-HWLOC_DECLSPEC int hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set);
-
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
  * The behavior is exactly the same as the Linux sched_setaffinity system call,
@@ -65,6 +58,15 @@ HWLOC_DECLSPEC int hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t 
  * ::HWLOC_CPUBIND_THREAD as flags.
  */
 HWLOC_DECLSPEC int hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology, pid_t tid, hwloc_bitmap_t set);
+
+/** \brief Convert a linux kernel cpumask file \p path into a hwloc bitmap \p set.
+ *
+ * Might be used when reading CPU set from sysfs attributes such as topology
+ * and caches for processors, or local_cpus for devices.
+ *
+ * \note This function ignores the HWLOC_FSROOT environment variable.
+ */
+HWLOC_DECLSPEC int hwloc_linux_read_path_as_cpumask(const char *path, hwloc_bitmap_t set);
 
 /** @} */
 

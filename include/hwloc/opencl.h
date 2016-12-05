@@ -69,7 +69,6 @@ hwloc_opencl_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
 	/* If we're on Linux + AMD OpenCL, use the AMD extension + the sysfs mechanism to get the local cpus */
 #define HWLOC_OPENCL_DEVICE_SYSFS_PATH_MAX 128
 	char path[HWLOC_OPENCL_DEVICE_SYSFS_PATH_MAX];
-	FILE *sysfile = NULL;
 	cl_device_topology_amd amdtopo;
 	cl_int clret;
 
@@ -89,15 +88,9 @@ hwloc_opencl_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
 	}
 
 	sprintf(path, "/sys/bus/pci/devices/0000:%02x:%02x.%01x/local_cpus", amdtopo.pcie.bus, amdtopo.pcie.device, amdtopo.pcie.function);
-	sysfile = fopen(path, "r");
-	if (!sysfile)
-		return -1;
-
-	if (hwloc_linux_parse_cpumap_file(sysfile, set) < 0
+	if (hwloc_linux_read_path_as_cpumask(path, set) < 0
 	    || hwloc_bitmap_iszero(set))
 		hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-
-	fclose(sysfile);
 #else
 	/* Non-Linux + AMD OpenCL systems simply get a full cpuset */
 	hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));

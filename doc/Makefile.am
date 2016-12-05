@@ -695,10 +695,10 @@ man3_glibc_sched_DATA = \
 man3_linuxdir = $(man3dir)
 man3_linux_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_linux.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_linux_parse_cpumap_file.3 \
         $(DOX_MAN_DIR)/man3/hwloc_linux_set_tid_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_linux_get_tid_cpubind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_linux_get_tid_last_cpu_location.3
+        $(DOX_MAN_DIR)/man3/hwloc_linux_get_tid_last_cpu_location.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_linux_read_path_as_cpumask.3
 
 man3_linux_libnumadir = $(man3dir)
 man3_linux_libnuma_DATA = \

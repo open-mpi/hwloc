@@ -64,7 +64,6 @@ hwloc_intel_mic_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_un
 #define HWLOC_INTEL_MIC_DEVICE_SYSFS_PATH_MAX 128
 	char path[HWLOC_INTEL_MIC_DEVICE_SYSFS_PATH_MAX];
 	DIR *sysdir = NULL;
-	FILE *sysfile = NULL;
 	struct dirent *dirent;
 	unsigned pcibus, pcidev, pcifunc;
 
@@ -81,17 +80,9 @@ hwloc_intel_mic_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_un
 	while ((dirent = readdir(sysdir)) != NULL) {
 		if (sscanf(dirent->d_name, "pci_%02x:%02x.%02x", &pcibus, &pcidev, &pcifunc) == 3) {
 			sprintf(path, "/sys/class/mic/mic%d/pci_%02x:%02x.%02x/local_cpus", idx, pcibus, pcidev, pcifunc);
-			sysfile = fopen(path, "r");
-			if (!sysfile) {
-				closedir(sysdir);
-				return -1;
-			}
-
-			if (hwloc_linux_parse_cpumap_file(sysfile, set) < 0
+			if (hwloc_linux_read_path_as_cpumask(path, set) < 0
 			    || hwloc_bitmap_iszero(set))
 				hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-
-			fclose(sysfile);
 			break;
 		}
 	}
