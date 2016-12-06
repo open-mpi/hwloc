@@ -4510,7 +4510,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 #ifdef HWLOC_HAVE_LIBUDEV
   struct hwloc_linux_backend_data_s *data = backend->private_data;
 #endif
-  FILE *fd;
+  FILE *file;
   char path[256];
   char line[128];
   char vendor[64] = "";
@@ -4523,26 +4523,16 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   char *tmp;
 
   snprintf(path, sizeof(path), "%s/size", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char string[20];
-    if (fgets(string, sizeof(string), fd)) {
-      unsigned long long sectors = strtoull(string, NULL, 10);
-      /* linux always reports size in 512-byte units, we want kB */
-      snprintf(string, sizeof(string), "%llu", sectors / 2);
-      hwloc_obj_add_info(obj, "Size", string);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, line, sizeof(line), root_fd)) {
+    unsigned long long sectors = strtoull(line, NULL, 10);
+    /* linux always reports size in 512-byte units, we want kB */
+    snprintf(line, sizeof(line), "%llu", sectors / 2);
+    hwloc_obj_add_info(obj, "Size", line);
   }
 
   snprintf(path, sizeof(path), "%s/queue/hw_sector_size", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char string[20];
-    if (fgets(string, sizeof(string), fd)) {
-      sectorsize = strtoul(string, NULL, 10);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, line, sizeof(line), root_fd)) {
+    sectorsize = strtoul(line, NULL, 10);
   }
 
   /* pmem have device/devtype containing "nd_btt" (sectors)
@@ -4552,35 +4542,21 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
    * without metadata.
    */
   snprintf(path, sizeof(path), "%s/device/devtype", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char string[32];
-    if (fgets(string, sizeof(string), fd)) {
-      if (!strncmp(string, "nd_", 3)) {
-	strcpy(blocktype, "NVDIMM"); /* Save the blocktype now since udev reports "" so far */
-	if (!strcmp(string, "nd_namespace_io"))
-	  sectorsize = 1;
-      }
+  if (!hwloc_read_path_by_length(path, line, sizeof(line), root_fd)) {
+    if (!strncmp(line, "nd_", 3)) {
+      strcpy(blocktype, "NVDIMM"); /* Save the blocktype now since udev reports "" so far */
+      if (!strcmp(line, "nd_namespace_io"))
+	sectorsize = 1;
     }
-    fclose(fd);
   }
   if (sectorsize) {
-    char string[16];
-    snprintf(string, sizeof(string), "%u", sectorsize);
-    hwloc_obj_add_info(obj, "SectorSize", string);
+    snprintf(line, sizeof(line), "%u", sectorsize);
+    hwloc_obj_add_info(obj, "SectorSize", line);
   }
 
   snprintf(path, sizeof(path), "%s/dev", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (!fd)
+  if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) < 0)
     return;
-
-  if (NULL == fgets(line, sizeof(line), fd)) {
-    fclose(fd);
-    return;
-  }
-  fclose(fd);
-
   if (sscanf(line, "%u:%u", &major_id, &minor_id) != 2)
     return;
   tmp = strchr(line, '\n');
@@ -4627,11 +4603,11 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 #endif
  {
   snprintf(path, sizeof(path), "/run/udev/data/b%u:%u", major_id, minor_id);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (!fd)
+  file = hwloc_fopen(path, "r", root_fd);
+  if (!file)
     return;
 
-  while (NULL != fgets(line, sizeof(line), fd)) {
+  while (NULL != fgets(line, sizeof(line), file)) {
     tmp = strchr(line, '\n');
     if (tmp)
       *tmp = '\0';
@@ -4652,7 +4628,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
       blocktype[sizeof(blocktype)-1] = '\0';
     }
   }
-  fclose(fd);
+  fclose(file);
  }
 
   /* clear fake "ATA" vendor name */
@@ -4742,38 +4718,29 @@ static void
 hwloc_linuxfs_net_class_fillinfos(int root_fd,
 				  struct hwloc_obj *obj, const char *osdevpath)
 {
-  FILE *fd;
   struct stat st;
   char path[256];
+  char address[128];
   snprintf(path, sizeof(path), "%s/address", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char address[128];
-    if (fgets(address, sizeof(address), fd)) {
-      char *eol = strchr(address, '\n');
-      if (eol)
-        *eol = 0;
-      hwloc_obj_add_info(obj, "Address", address);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, address, sizeof(address), root_fd)) {
+    char *eol = strchr(address, '\n');
+    if (eol)
+      *eol = 0;
+    hwloc_obj_add_info(obj, "Address", address);
   }
   snprintf(path, sizeof(path), "%s/device/infiniband", osdevpath);
   if (!hwloc_stat(path, &st, root_fd)) {
+    char hexid[16];
     snprintf(path, sizeof(path), "%s/dev_id", osdevpath);
-    fd = hwloc_fopen(path, "r", root_fd);
-    if (fd) {
-      char hexid[16];
-      if (fgets(hexid, sizeof(hexid), fd)) {
-	char *eoid;
-	unsigned long port;
-	port = strtoul(hexid, &eoid, 0);
-	if (eoid != hexid) {
-	  char portstr[16];
-	  snprintf(portstr, sizeof(portstr), "%ld", port+1);
-	  hwloc_obj_add_info(obj, "Port", portstr);
-	}
+    if (!hwloc_read_path_by_length(path, hexid, sizeof(hexid), root_fd)) {
+      char *eoid;
+      unsigned long port;
+      port = strtoul(hexid, &eoid, 0);
+      if (eoid != hexid) {
+	char portstr[16];
+	snprintf(portstr, sizeof(portstr), "%ld", port+1);
+	hwloc_obj_add_info(obj, "Port", portstr);
       }
-      fclose(fd);
     }
   }
 }
@@ -4816,103 +4783,74 @@ static void
 hwloc_linuxfs_infiniband_class_fillinfos(int root_fd,
 					 struct hwloc_obj *obj, const char *osdevpath)
 {
-  FILE *fd;
   char path[256];
+  char guidvalue[20];
   unsigned i,j;
 
   snprintf(path, sizeof(path), "%s/node_guid", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char guidvalue[20];
-    if (fgets(guidvalue, sizeof(guidvalue), fd)) {
-      size_t len;
-      len = strspn(guidvalue, "0123456789abcdefx:");
-      assert(len == 19);
-      guidvalue[len] = '\0';
-      hwloc_obj_add_info(obj, "NodeGUID", guidvalue);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, guidvalue, sizeof(guidvalue), root_fd)) {
+    size_t len;
+    len = strspn(guidvalue, "0123456789abcdefx:");
+    guidvalue[len] = '\0';
+    hwloc_obj_add_info(obj, "NodeGUID", guidvalue);
   }
 
   snprintf(path, sizeof(path), "%s/sys_image_guid", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char guidvalue[20];
-    if (fgets(guidvalue, sizeof(guidvalue), fd)) {
-      size_t len;
-      len = strspn(guidvalue, "0123456789abcdefx:");
-      assert(len == 19);
-      guidvalue[len] = '\0';
-      hwloc_obj_add_info(obj, "SysImageGUID", guidvalue);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, guidvalue, sizeof(guidvalue), root_fd)) {
+    size_t len;
+    len = strspn(guidvalue, "0123456789abcdefx:");
+    guidvalue[len] = '\0';
+    hwloc_obj_add_info(obj, "SysImageGUID", guidvalue);
   }
 
   for(i=1; ; i++) {
+    char statevalue[2];
+    char lidvalue[11];
+    char gidvalue[40];
+
     snprintf(path, sizeof(path), "%s/ports/%u/state", osdevpath, i);
-    fd = hwloc_fopen(path, "r", root_fd);
-    if (fd) {
-      char statevalue[2];
-      if (fgets(statevalue, sizeof(statevalue), fd)) {
-	char statename[32];
-	statevalue[1] = '\0'; /* only keep the first byte/digit */
-	snprintf(statename, sizeof(statename), "Port%uState", i);
-	hwloc_obj_add_info(obj, statename, statevalue);
-      }
-      fclose(fd);
+    if (!hwloc_read_path_by_length(path, statevalue, sizeof(statevalue), root_fd)) {
+      char statename[32];
+      statevalue[1] = '\0'; /* only keep the first byte/digit */
+      snprintf(statename, sizeof(statename), "Port%uState", i);
+      hwloc_obj_add_info(obj, statename, statevalue);
     } else {
       /* no such port */
       break;
     }
 
     snprintf(path, sizeof(path), "%s/ports/%u/lid", osdevpath, i);
-    fd = hwloc_fopen(path, "r", root_fd);
-    if (fd) {
-      char lidvalue[11];
-      if (fgets(lidvalue, sizeof(lidvalue), fd)) {
-	char lidname[32];
-	size_t len;
-	len = strspn(lidvalue, "0123456789abcdefx");
-	lidvalue[len] = '\0';
-	snprintf(lidname, sizeof(lidname), "Port%uLID", i);
-	hwloc_obj_add_info(obj, lidname, lidvalue);
-      }
-      fclose(fd);
+    if (!hwloc_read_path_by_length(path, lidvalue, sizeof(lidvalue), root_fd)) {
+      char lidname[32];
+      size_t len;
+      len = strspn(lidvalue, "0123456789abcdefx");
+      lidvalue[len] = '\0';
+      snprintf(lidname, sizeof(lidname), "Port%uLID", i);
+      hwloc_obj_add_info(obj, lidname, lidvalue);
     }
 
     snprintf(path, sizeof(path), "%s/ports/%u/lid_mask_count", osdevpath, i);
-    fd = hwloc_fopen(path, "r", root_fd);
-    if (fd) {
-      char lidvalue[11];
-      if (fgets(lidvalue, sizeof(lidvalue), fd)) {
-	char lidname[32];
-	size_t len;
-	len = strspn(lidvalue, "0123456789");
-	lidvalue[len] = '\0';
-	snprintf(lidname, sizeof(lidname), "Port%uLMC", i);
-	hwloc_obj_add_info(obj, lidname, lidvalue);
-      }
-      fclose(fd);
+    if (!hwloc_read_path_by_length(path, lidvalue, sizeof(lidvalue), root_fd)) {
+      char lidname[32];
+      size_t len;
+      len = strspn(lidvalue, "0123456789");
+      lidvalue[len] = '\0';
+      snprintf(lidname, sizeof(lidname), "Port%uLMC", i);
+      hwloc_obj_add_info(obj, lidname, lidvalue);
     }
 
     for(j=0; ; j++) {
       snprintf(path, sizeof(path), "%s/ports/%u/gids/%u", osdevpath, i, j);
-      fd = hwloc_fopen(path, "r", root_fd);
-      if (fd) {
-	char gidvalue[40];
-	if (fgets(gidvalue, sizeof(gidvalue), fd)) {
-	  char gidname[32];
-	  size_t len;
-	  len = strspn(gidvalue, "0123456789abcdefx:");
-	  assert(len == 39);
-	  gidvalue[len] = '\0';
-	  if (strncmp(gidvalue+20, "0000:0000:0000:0000", 19)) {
-	    /* only keep initialized GIDs */
-	    snprintf(gidname, sizeof(gidname), "Port%uGID%u", i, j);
-	    hwloc_obj_add_info(obj, gidname, gidvalue);
-	  }
+      if (!hwloc_read_path_by_length(path, gidvalue, sizeof(gidvalue), root_fd)) {
+	char gidname[32];
+	size_t len;
+	len = strspn(gidvalue, "0123456789abcdefx:");
+	gidvalue[len] = '\0';
+	if (strncmp(gidvalue+20, "0000:0000:0000:0000", 19)) {
+	  /* only keep initialized GIDs */
+	  snprintf(gidname, sizeof(gidname), "Port%uGID%u", i, j);
+	  hwloc_obj_add_info(obj, gidname, gidvalue);
 	}
-	fclose(fd);
       } else {
 	/* no such port */
 	break;
@@ -4963,72 +4901,51 @@ static void
 hwloc_linuxfs_mic_class_fillinfos(int root_fd,
 				  struct hwloc_obj *obj, const char *osdevpath)
 {
-  FILE *fd;
   char path[256];
+  char family[64];
+  char sku[64];
+  char sn[64];
+  char string[20];
 
   obj->subtype = strdup("MIC");
 
   snprintf(path, sizeof(path), "%s/family", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char family[64];
-    if (fgets(family, sizeof(family), fd)) {
-      char *eol = strchr(family, '\n');
-      if (eol)
-        *eol = 0;
-      hwloc_obj_add_info(obj, "MICFamily", family);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, family, sizeof(family), root_fd)) {
+    char *eol = strchr(family, '\n');
+    if (eol)
+      *eol = 0;
+    hwloc_obj_add_info(obj, "MICFamily", family);
   }
 
   snprintf(path, sizeof(path), "%s/sku", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char sku[64];
-    if (fgets(sku, sizeof(sku), fd)) {
-      char *eol = strchr(sku, '\n');
-      if (eol)
-        *eol = 0;
-      hwloc_obj_add_info(obj, "MICSKU", sku);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, sku, sizeof(sku), root_fd)) {
+    char *eol = strchr(sku, '\n');
+    if (eol)
+      *eol = 0;
+    hwloc_obj_add_info(obj, "MICSKU", sku);
   }
 
   snprintf(path, sizeof(path), "%s/serialnumber", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char sn[64];
-    if (fgets(sn, sizeof(sn), fd)) {
-      char *eol = strchr(sn, '\n');
-      if (eol)
-        *eol = 0;
-      hwloc_obj_add_info(obj, "MICSerialNumber", sn);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, sn, sizeof(sn), root_fd)) {
+    char *eol;
+    eol = strchr(sn, '\n');
+    if (eol)
+      *eol = 0;
+    hwloc_obj_add_info(obj, "MICSerialNumber", sn);
   }
 
   snprintf(path, sizeof(path), "%s/active_cores", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char string[10];
-    if (fgets(string, sizeof(string), fd)) {
-      unsigned long count = strtoul(string, NULL, 16);
-      snprintf(string, sizeof(string), "%lu", count);
-      hwloc_obj_add_info(obj, "MICActiveCores", string);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, string, sizeof(string), root_fd)) {
+    unsigned long count = strtoul(string, NULL, 16);
+    snprintf(string, sizeof(string), "%lu", count);
+    hwloc_obj_add_info(obj, "MICActiveCores", string);
   }
 
   snprintf(path, sizeof(path), "%s/memsize", osdevpath);
-  fd = hwloc_fopen(path, "r", root_fd);
-  if (fd) {
-    char string[20];
-    if (fgets(string, sizeof(string), fd)) {
-      unsigned long count = strtoul(string, NULL, 16);
-      snprintf(string, sizeof(string), "%lu", count);
-      hwloc_obj_add_info(obj, "MICMemorySize", string);
-    }
-    fclose(fd);
+  if (!hwloc_read_path_by_length(path, string, sizeof(string), root_fd)) {
+    unsigned long count = strtoul(string, NULL, 16);
+    snprintf(string, sizeof(string), "%lu", count);
+    hwloc_obj_add_info(obj, "MICMemorySize", string);
   }
 }
 
