@@ -5275,8 +5275,8 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     unsigned offset;
     char path[64];
     char value[16];
-    size_t read;
-    FILE *file;
+    size_t ret;
+    int fd;
 
     if (sscanf(dirent->d_name, "%04x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
       continue;
@@ -5284,22 +5284,18 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
-    file = hwloc_fopen(path, "r", root_fd);
-    if (file) {
-      read = fread(config_space_cache, 1, CONFIG_SPACE_CACHESIZE, file);
-      (void) read; /* we initialized config_space_cache in case we don't read enough, ignore the read length */
-      fclose(file);
+    /* don't use hwloc_read_path_by_length() because we don't want the ending \0 */
+    fd = hwloc_open(path, root_fd);
+    if (fd >= 0) {
+      ret = read(fd, config_space_cache, CONFIG_SPACE_CACHESIZE);
+      (void) ret; /* we initialized config_space_cache in case we don't read enough, ignore the read length */
+      close(fd);
     }
 
     class_id = HWLOC_PCI_CLASS_NOT_DEFINED;
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/class", dirent->d_name);
-    file = hwloc_fopen(path, "r", root_fd);
-    if (file) {
-      read = fread(value, 1, sizeof(value), file);
-      fclose(file);
-      if (read)
-        class_id = strtoul(value, NULL, 16) >> 8;
-    }
+    if (!hwloc_read_path_by_length(path, value, sizeof(value), root_fd))
+      class_id = strtoul(value, NULL, 16) >> 8;
 
     type = hwloc_pci_check_bridge_type(class_id, config_space_cache);
 
@@ -5340,37 +5336,20 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     attr->linkspeed = 0;
 
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/vendor", dirent->d_name);
-    file = hwloc_fopen(path, "r", root_fd);
-    if (file) {
-      read = fread(value, 1, sizeof(value), file);
-      fclose(file);
-      if (read)
-        attr->vendor_id = strtoul(value, NULL, 16);
-    }
+    if (!hwloc_read_path_by_length(path, value, sizeof(value), root_fd))
+      attr->vendor_id = strtoul(value, NULL, 16);
+
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/device", dirent->d_name);
-    file = hwloc_fopen(path, "r", root_fd);
-    if (file) {
-      read = fread(value, 1, sizeof(value), file);
-      fclose(file);
-      if (read)
-        attr->device_id = strtoul(value, NULL, 16);
-    }
+    if (!hwloc_read_path_by_length(path, value, sizeof(value), root_fd))
+      attr->device_id = strtoul(value, NULL, 16);
+
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_vendor", dirent->d_name);
-    file = hwloc_fopen(path, "r", root_fd);
-    if (file) {
-      read = fread(value, 1, sizeof(value), file);
-      fclose(file);
-      if (read)
-        attr->subvendor_id = strtoul(value, NULL, 16);
-    }
+    if (!hwloc_read_path_by_length(path, value, sizeof(value), root_fd))
+      attr->subvendor_id = strtoul(value, NULL, 16);
+
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_device", dirent->d_name);
-    file = hwloc_fopen(path, "r", root_fd);
-    if (file) {
-      read = fread(value, 1, sizeof(value), file);
-      fclose(file);
-      if (read)
-        attr->subdevice_id = strtoul(value, NULL, 16);
-    }
+    if (!hwloc_read_path_by_length(path, value, sizeof(value), root_fd))
+      attr->subdevice_id = strtoul(value, NULL, 16);
 
     /* bridge specific attributes */
     if (type == HWLOC_OBJ_BRIDGE) {
@@ -5449,23 +5428,20 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
   if (dir) {
     while ((dirent = readdir(dir)) != NULL) {
       char path[64];
-      FILE *file;
+      char buf[64];
+      unsigned domain, bus, dev;
       if (dirent->d_name[0] == '.')
 	continue;
       snprintf(path, sizeof(path), "/sys/bus/pci/slots/%s/address", dirent->d_name);
-      file = hwloc_fopen(path, "r", root_fd);
-      if (file) {
-	unsigned domain, bus, dev;
-	if (fscanf(file, "%x:%x:%x", &domain, &bus, &dev) == 3) {
-	  hwloc_obj_t obj = hwloc_linuxfs_pci_find_pcislot_obj(hwloc_get_root_obj(topology)->io_first_child, domain, bus, dev);
-	  if (obj) {
-	    while (obj && obj->attr->pcidev.dev == dev /* sibling have same domain+bus */) {
-	      hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
-	      obj = obj->next_sibling;
-	    }
+      if (!hwloc_read_path_by_length(path, buf, sizeof(buf), root_fd)
+	  && sscanf(buf, "%x:%x:%x", &domain, &bus, &dev) == 3) {
+	hwloc_obj_t obj = hwloc_linuxfs_pci_find_pcislot_obj(hwloc_get_root_obj(topology)->io_first_child, domain, bus, dev);
+	if (obj) {
+	  while (obj && obj->attr->pcidev.dev == dev /* sibling have same domain+bus */) {
+	    hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
+	    obj = obj->next_sibling;
 	  }
 	}
-	fclose(file);
       }
     }
     closedir(dir);
