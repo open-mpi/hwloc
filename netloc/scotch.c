@@ -244,6 +244,9 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
 
     SCOTCH_Strat strategy;
     SCOTCH_stratInit(&strategy);
+    /* We force Scotch to use all the processes
+     * barat is 0.01 as in SCOTCH_STRATDEFAULT */
+    SCOTCH_stratGraphMapBuild(&strategy, SCOTCH_STRATQUALITY, graph_size, 0.01);
 
     /* The ranks are the indices of the nodes in the complete graph */
     int *ranks = (int *)malloc(graph_size*sizeof(int));
