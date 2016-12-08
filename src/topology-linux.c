@@ -2229,36 +2229,54 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
   }
 }
 
-static void
-hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, float *distances, int fsroot_fd)
+static int
+hwloc_parse_nodes_distances(const char *path, unsigned nbnodes, unsigned *indexes, float *distances, int fsroot_fd)
 {
-  char string[4096]; /* enough for hundreds of nodes */
-  char *tmp, *next;
-  FILE * fd;
+  size_t len = (10+1)*nbnodes;
+  float *curdist = distances;
+  char *string;
+  unsigned i;
 
-  fd = hwloc_fopen(distancepath, "r", fsroot_fd);
-  if (!fd)
-    return;
+  string = malloc(len); /* space-separated %d */
+  if (!string)
+    goto out;
 
-  if (!fgets(string, sizeof(string), fd)) {
-    fclose(fd);
-    return;
+  for(i=0; i<nbnodes; i++) {
+    unsigned osnode = indexes[i];
+    char distancepath[SYSFS_NUMA_NODE_PATH_LEN];
+    char *tmp, *next;
+    unsigned found;
+
+    /* Linux nodeX/distance file contains distance from X to other localities (from ACPI SLIT table or so),
+     * store them in slots X*N...X*N+N-1 */
+    sprintf(distancepath, "%s/node%u/distance", path, osnode);
+    if (hwloc_read_path_by_length(distancepath, string, len, fsroot_fd) < 0)
+      goto out_with_string;
+
+    tmp = string;
+    found = 0;
+    while (tmp) {
+      unsigned distance = strtoul(tmp, &next, 0); /* stored as a %d */
+      if (next == tmp)
+	break;
+      *curdist = (float) distance;
+      curdist++;
+      found++;
+      if (found == nbnodes)
+	break;
+      tmp = next+1;
+    }
+    if (found != nbnodes)
+      goto out_with_string;
   }
 
-  tmp = string;
-  while (tmp) {
-    unsigned distance = strtoul(tmp, &next, 0);
-    if (next == tmp)
-      break;
-    *distances = (float) distance;
-    distances++;
-    nbnodes--;
-    if (!nbnodes)
-      break;
-    tmp = next+1;
-  }
+  free(string);
+  return 0;
 
-  fclose(fd);
+ out_with_string:
+  free(string);
+ out:
+  return -1;
 }
 
 static void
@@ -3104,7 +3122,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	 */
 	nbnodes -= failednodes;
       } else if (nbnodes > 1) {
-	distances = calloc(nbnodes*nbnodes, sizeof(float));
+	distances = malloc(nbnodes*nbnodes*sizeof(*distances));
       }
 
       if (NULL == distances) {
@@ -3113,19 +3131,14 @@ look_sysfsnode(struct hwloc_topology *topology,
           goto out;
       }
 
-      /* Get actual distances now */
-      for (index_ = 0; index_ < nbnodes; index_++) {
-          char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
-
-	  osnode = indexes[index_];
-
-	  /* Linux nodeX/distance file contains distance from X to other localities (from ACPI SLIT table or so),
-	   * store them in slots X*N...X*N+N-1 */
-          sprintf(nodepath, "%s/node%u/distance", path, osnode);
-          hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, data->root_fd);
+      if (hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd) < 0) {
+	free(nodes);
+	free(distances);
+	free(indexes);
+	goto out;
       }
 
-      if (data->is_knl) {
+      if (data->is_knl && distances) {
 	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
 	if (!(env && !atoi(env)) && nbnodes>=2) { /* SNC2 or SNC4, with 0 or 2/4 MCDRAM, and 0-4 DDR nodes */
 	  unsigned i, j, closest;
