@@ -424,9 +424,6 @@ hwloc_linux_parse_cpuset_file(FILE *file, hwloc_bitmap_t set)
 {
   unsigned long start, stop;
 
-  /* reset to zero first */
-  hwloc_bitmap_zero(set);
-
   while (fscanf(file, "%lu", &start) == 1)
   {
     int c = fgetc(file);
