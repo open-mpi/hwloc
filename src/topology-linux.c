@@ -541,6 +541,52 @@ hwloc__alloc_read_path_as_cpumask(const char *maskpath, int fsroot_fd)
     return set;
 }
 
+/* set must be full on input */
+static __hwloc_inline int
+hwloc__read_fd_as_cpulist(int fd, hwloc_bitmap_t set)
+{
+  /* Kernel sysfs files are usually at most one page.
+   * But cpulists can be of very different sizes depending on the fragmentation,
+   * so don't bother remember the actual read size between invocations.
+   * We don't have many invocations anyway.
+   */
+  size_t filesize = hwloc_getpagesize();
+  char *buffer, *current, *comma, *tmp;
+  int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
+
+  if (hwloc__read_fd(fd, &buffer, &filesize) < 0)
+    return -1;
+
+  current = buffer;
+  prevlast = -1;
+
+  while (1) {
+    /* save a pointer to the next comma and erase it to simplify things */
+    comma = strchr(current, ',');
+    if (comma)
+      *comma = '\0';
+
+    /* find current enabled-segment bounds */
+    nextfirst = strtoul(current, &tmp, 0);
+    if (*tmp == '-')
+      nextlast = strtoul(tmp+1, NULL, 0);
+    else
+      nextlast = nextfirst;
+    if (prevlast+1 <= nextfirst-1)
+      hwloc_bitmap_clr_range(set, prevlast+1, nextfirst-1);
+
+    /* switch to next enabled-segment */
+    prevlast = nextlast;
+    if (!comma)
+      break;
+    current = comma+1;
+  }
+
+  hwloc_bitmap_clr_range(set, prevlast+1, -1);
+  free(buffer);
+  return 0;
+}
+
 
 /*****************************
  ******* CpuBind Hooks *******
@@ -611,44 +657,6 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 }
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
-static int
-hwloc_linux_parse_cpuset_file(FILE *file, hwloc_bitmap_t set)
-{
-  unsigned long start, stop;
-
-  while (fscanf(file, "%lu", &start) == 1)
-  {
-    int c = fgetc(file);
-
-    stop = start;
-
-    if (c == '-') {
-      /* Range */
-      if (fscanf(file, "%lu", &stop) != 1) {
-        /* Expected a number here */
-        errno = EINVAL;
-        return -1;
-      }
-      c = fgetc(file);
-    }
-
-    if (c == EOF || c == '\n') {
-      hwloc_bitmap_set_range(set, start, stop);
-      break;
-    }
-
-    if (c != ',') {
-      /* Expected EOF, EOL, or a comma */
-      errno = EINVAL;
-      return -1;
-    }
-
-    hwloc_bitmap_set_range(set, start, stop);
-  }
-
-  return 0;
-}
-
 /*
  * On some kernels, sched_getaffinity requires the output size to be larger
  * than the kernel cpu_set size (defined by CONFIG_NR_CPUS).
@@ -660,7 +668,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
 {
   static int _nr_cpus = -1;
   int nr_cpus = _nr_cpus;
-  FILE *possible;
+  int fd;
 
   if (nr_cpus != -1)
     /* already computed */
@@ -673,18 +681,17 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
     /* start from scratch, the topology isn't ready yet (complete_cpuset is missing (-1) or empty (0))*/
     nr_cpus = 1;
 
-  possible = fopen("/sys/devices/system/cpu/possible", "r"); /* binding only supported in real fsroot, no need for data->root_fd */
-  if (possible) {
-    hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc();
-    if (hwloc_linux_parse_cpuset_file(possible, possible_bitmap) == 0) {
+  fd = open("/sys/devices/system/cpu/possible", O_RDONLY); /* binding only supported in real fsroot, no need for data->root_fd */
+  if (fd >= 0) {
+    hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc_full();
+    if (hwloc__read_fd_as_cpulist(fd, possible_bitmap) == 0) {
       int max_possible = hwloc_bitmap_last(possible_bitmap);
-
       hwloc_debug_bitmap("possible CPUs are %s\n", possible_bitmap);
 
       if (nr_cpus < max_possible + 1)
         nr_cpus = max_possible + 1;
     }
-    fclose(possible);
+    close(fd);
     hwloc_bitmap_free(possible_bitmap);
   }
 
@@ -1834,7 +1841,6 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 }
 
 
-
 /*******************************************
  *** Misc Helpers for Topology Discovery ***
  *******************************************/
@@ -2061,100 +2067,41 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
  * the cpuset filesystem (usually mounted in / or /dev) where there
  * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
  */
-static char *
-hwloc_read_linux_cpuset_mask(const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name, const char *attr_name, int fsroot_fd)
-{
-#define CPUSET_FILENAME_LEN 256
-  char cpuset_filename[CPUSET_FILENAME_LEN];
-  FILE *fd;
-  char *info = NULL, *tmp;
-  ssize_t ssize;
-  size_t size;
-
-  if (cgroup_mntpnt) {
-    /* try to read the cpuset from cgroup */
-    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s", cgroup_mntpnt, cpuset_name, attr_name);
-    hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
-    fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-    if (fd)
-      goto gotfile;
-  } else if (cpuset_mntpnt) {
-    /* try to read the cpuset directly */
-    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/%s", cpuset_mntpnt, cpuset_name, attr_name);
-    hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-    fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-    if (fd)
-      goto gotfile;
-  }
-
-  /* found no cpuset description, ignore it */
-  hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
-  goto out;
-
-gotfile:
-  ssize = getline(&info, &size, fd);
-  fclose(fd);
-  if (ssize < 0)
-    goto out;
-  if (!info)
-    goto out;
-
-  tmp = strchr(info, '\n');
-  if (tmp)
-    *tmp = '\0';
-
-out:
-  return info;
-}
-
 static void
 hwloc_admin_disable_set_from_cpuset(struct hwloc_linux_backend_data_s *data,
 				    const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name,
 				    const char *attr_name,
 				    hwloc_bitmap_t admin_enabled_cpus_set)
 {
-  char *cpuset_mask;
-  char *current, *comma, *tmp;
-  int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
+#define CPUSET_FILENAME_LEN 256
+  char cpuset_filename[CPUSET_FILENAME_LEN];
+  int fd;
+  int err;
 
-  cpuset_mask = hwloc_read_linux_cpuset_mask(cgroup_mntpnt, cpuset_mntpnt, cpuset_name,
-					     attr_name, data->root_fd);
-  if (!cpuset_mask)
-    return;
-
-  hwloc_debug("found cpuset %s: %s\n", attr_name, cpuset_mask);
-
-  current = cpuset_mask;
-  prevlast = -1;
-
-  while (1) {
-    /* save a pointer to the next comma and erase it to simplify things */
-    comma = strchr(current, ',');
-    if (comma)
-      *comma = '\0';
-
-    /* find current enabled-segment bounds */
-    nextfirst = strtoul(current, &tmp, 0);
-    if (*tmp == '-')
-      nextlast = strtoul(tmp+1, NULL, 0);
-    else
-      nextlast = nextfirst;
-    if (prevlast+1 <= nextfirst-1) {
-      hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
-      hwloc_bitmap_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
-    }
-
-    /* switch to next enabled-segment */
-    prevlast = nextlast;
-    if (!comma)
-      break;
-    current = comma+1;
+  if (cgroup_mntpnt) {
+    /* try to read the cpuset from cgroup */
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s", cgroup_mntpnt, cpuset_name, attr_name);
+    hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
+  } else if (cpuset_mntpnt) {
+    /* try to read the cpuset directly */
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/%s", cpuset_mntpnt, cpuset_name, attr_name);
+    hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
   }
 
-  hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, -1);
-  hwloc_bitmap_clr_range(admin_enabled_cpus_set, prevlast+1, -1);
+  fd = hwloc_open(cpuset_filename, data->root_fd);
+  if (fd < 0) {
+    /* found no cpuset description, ignore it */
+    hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
+    return;
+  }
 
-  free(cpuset_mask);
+  err = hwloc__read_fd_as_cpulist(fd, admin_enabled_cpus_set);
+  close(fd);
+
+  if (err < 0)
+    hwloc_bitmap_fill(admin_enabled_cpus_set);
+  else
+    hwloc_debug_bitmap("cpuset includes %s\n", admin_enabled_cpus_set);
 }
 
 static void
