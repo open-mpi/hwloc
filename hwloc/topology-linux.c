@@ -2070,7 +2070,6 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_linux_backend_data_s *data,
   char *cpuset_mask;
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
-  hwloc_bitmap_t tmpset;
 
   cpuset_mask = hwloc_read_linux_cpuset_mask(cgroup_mntpnt, cpuset_mntpnt, cpuset_name,
 					     attr_name, data->root_fd);
@@ -2106,12 +2105,8 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_linux_backend_data_s *data,
     current = comma+1;
   }
 
-  hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
-  /* no easy way to clear until the infinity */
-  tmpset = hwloc_bitmap_alloc();
-  hwloc_bitmap_set_range(tmpset, 0, prevlast);
-  hwloc_bitmap_and(admin_enabled_cpus_set, admin_enabled_cpus_set, tmpset);
-  hwloc_bitmap_free(tmpset);
+  hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, -1);
+  hwloc_bitmap_clr_range(admin_enabled_cpus_set, prevlast+1, -1);
 
   free(cpuset_mask);
 }
