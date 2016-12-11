@@ -21,6 +21,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <assert.h>
+#ifdef HAVE_TIME_T
+#include <time.h>
+#endif
 
 #ifdef LSTOPO_HAVE_GRAPHICS
 #ifdef HWLOC_HAVE_CAIRO
@@ -452,6 +455,11 @@ main (int argc, char *argv[])
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   char *restrictstring = NULL;
   struct lstopo_output loutput;
+#ifdef HAVE_CLOCK_GETTIME
+  struct timespec ts1, ts2;
+  unsigned long ms;
+  int measure_load_time = !!getenv("HWLOC_DEBUG_LOAD_TIME");
+#endif
   int opt;
   unsigned i;
 
@@ -737,11 +745,24 @@ main (int argc, char *argv[])
     hwloc_topology_set_userdata_export_callback(topology, hwloc_utils_userdata_export_cb);
   }
 
+#ifdef HAVE_CLOCK_GETTIME
+  if (measure_load_time)
+    clock_gettime(CLOCK_MONOTONIC, &ts1);
+#endif
+
   err = hwloc_topology_load (topology);
   if (err) {
     fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
     return EXIT_FAILURE;
   }
+
+#ifdef HAVE_CLOCK_GETTIME
+  if (measure_load_time) {
+    clock_gettime(CLOCK_MONOTONIC, &ts2);
+    ms = (ts2.tv_nsec-ts1.tv_nsec)/1000000+(ts2.tv_sec-ts1.tv_sec)*1000UL;
+    printf("hwloc_topology_load() took %lu ms\n", ms);
+  }
+#endif
 
   if (top)
     add_process_objects(topology);
