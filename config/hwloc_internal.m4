@@ -317,6 +317,10 @@ EOF
     _HWLOC_CHECK_DIFF_U
     _HWLOC_CHECK_DIFF_W
 
+    AC_CHECK_HEADERS([time.h], [
+      AC_CHECK_FUNCS([clock_gettime])
+    ])
+
     # Only generate this if we're building the utilities
     AC_CONFIG_FILES(
         hwloc_config_prefix[utils/Makefile]
