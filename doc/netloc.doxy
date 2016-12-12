@@ -35,7 +35,7 @@ topology-aware mapping of the processes of an application.
 
 \subsection supportednetworks Supported Networks
 
-For now, only InfiniBand (See \ref tools_reader_ib) is supported, but it is
+For now, only InfiniBand (See \ref netloc_setup) is supported, but it is
 planned to be extended it very soon.
 
 <!-- ********************************************* -->
@@ -209,9 +209,6 @@ communication graph and an architecture. Netloc interfaces with Scotch, by
 getting the topology of the machine and building the Scotch architecture. It is
 also possible to directly build a mapping file that can be given to \c mpirun.
 
-\hmlonly
-</div><div class="section" id="scotch_intro">
-\endhtmlonly
 \section scotch_intro Introduction
 
 Scotch is able to deal architectures to represent the topology of a complete
