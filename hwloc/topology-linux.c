@@ -470,6 +470,51 @@ hwloc_readlink(const char *p, char *l, size_t ll, int d __hwloc_attribute_unused
 }
 
 
+/*****************************************
+ ******* Helpers for reading files *******
+ *****************************************/
+
+static __hwloc_inline int
+hwloc_read_path_by_length(const char *path, char *string, size_t length, int fsroot_fd)
+{
+  int fd, ret;
+
+  fd = hwloc_open(path, fsroot_fd);
+  if (fd < 0)
+    return -1;
+
+  ret = read(fd, string, length-1); /* read -1 to put the ending \0 */
+  close(fd);
+
+  if (ret <= 0)
+    return -1;
+
+  string[ret] = 0;
+
+  return 0;
+}
+
+static __hwloc_inline int
+hwloc_read_path_as_int(const char *path, int *value, int fsroot_fd)
+{
+  char string[11];
+  if (hwloc_read_path_by_length(path, string, sizeof(string), fsroot_fd) < 0)
+    return -1;
+  *value = atoi(string);
+  return 0;
+}
+
+static __hwloc_inline int
+hwloc_read_path_as_uint(const char *path, unsigned *value, int fsroot_fd)
+{
+  char string[11];
+  if (hwloc_read_path_by_length(path, string, sizeof(string), fsroot_fd) < 0)
+    return -1;
+  *value = (unsigned) strtoul(string, NULL, 10);
+  return 0;
+}
+
+
 /*****************************
  ******* CpuBind Hooks *******
  *****************************/
@@ -1741,45 +1786,6 @@ struct hwloc_linux_cpuinfo_proc {
   struct hwloc_obj_info_s *infos;
   unsigned infos_count;
 };
-
-static __hwloc_inline int
-hwloc_read_file_singleline(const char *path, char *string, size_t length, int fsroot_fd)
-{
-  int fd, ret;
-
-  fd = hwloc_open(path, fsroot_fd);
-  if (fd < 0)
-    return -1;
-
-  ret = read(fd, string, length);
-  close(fd);
-
-  if (ret <= 0)
-    return -1;
-
-  return 0;
-}
-
-static __hwloc_inline int
-hwloc_read_file_int(const char *path, int *value, int fsroot_fd)
-{
-  char string[11];
-  if (hwloc_read_file_singleline(path, string, sizeof(string), fsroot_fd) < 0)
-    return -1;
-  *value = atoi(string);
-  return 0;
-}
-
-static __hwloc_inline int
-hwloc_read_file_uint(const char *path, unsigned *value, int fsroot_fd)
-{
-  char string[11];
-  if (hwloc_read_file_singleline(path, string, sizeof(string), fsroot_fd) < 0)
-    return -1;
-  *value = (unsigned) strtoul(string, NULL, 10);
-  return 0;
-}
-
 
 /* kernel cpumaps are composed of an array of 32bits cpumasks */
 #define KERNEL_CPU_MASK_BITS 32
@@ -3141,7 +3147,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
       /* check whether this processor is online */
       sprintf(str, "%s/cpu%lu/online", path, cpu);
-      if (hwloc_read_file_singleline(str, online, sizeof(online), data->root_fd) == 0) {
+      if (hwloc_read_path_by_length(str, online, sizeof(online), data->root_fd) == 0) {
 	if (!atoi(online)) {
 	  hwloc_debug("os proc %lu is offline\n", cpu);
 	  hwloc_bitmap_set(unknownset, cpu);
@@ -3178,7 +3184,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       /* look at the package */
       mypackageid = (unsigned) -1;
       sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i); /* contains %d at least up to 4.9 */
-      if (hwloc_read_file_int(str, &tmpint, data->root_fd) == 0)
+      if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	mypackageid = (unsigned) tmpint;
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
@@ -3256,7 +3262,7 @@ package_done:
       /* look at the core */
       mycoreid = (unsigned) -1;
       sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.9 */
-      if (hwloc_read_file_int(str, &tmpint, data->root_fd) == 0)
+      if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	mycoreid = (unsigned) tmpint;
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
@@ -3271,7 +3277,7 @@ package_done:
 	  siblingid = hwloc_bitmap_next(coreset, i);
 	siblingcoreid = (unsigned) -1;
 	sprintf(str, "%s/cpu%u/topology/core_id", path, siblingid); /* contains %d at least up to 4.9 */
-	if (hwloc_read_file_int(str, &tmpint, data->root_fd) == 0)
+	if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	  siblingcoreid = (unsigned) tmpint;
 	threadwithcoreid = (siblingcoreid != mycoreid);
        }
@@ -3295,7 +3301,7 @@ package_done:
        /* look at the books */
 	mybookid = (unsigned) -1;
        sprintf(str, "%s/cpu%d/topology/book_id", path, i); /* contains %d at least up to 4.9 */
-       if (hwloc_read_file_int(str, &tmpint, data->root_fd) == 0) {
+       if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
 	 mybookid = (unsigned) tmpint;
         sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
         bookset = hwloc_parse_cpumap(str, data->root_fd);
@@ -3341,12 +3347,12 @@ package_done:
 
 	/* get the cache level depth */
 	sprintf(str, "%s/cpu%d/cache/index%d/level", path, i, j); /* contains %u at least up to 4.9 */
-	if (hwloc_read_file_uint(str, &depth, data->root_fd) < 0)
+	if (hwloc_read_path_as_uint(str, &depth, data->root_fd) < 0)
 	  continue;
 
 	/* cache type */
 	sprintf(str, "%s/cpu%d/cache/index%d/type", path, i, j);
-	if (hwloc_read_file_singleline(str, str2, sizeof(str2), data->root_fd) == 0) {
+	if (hwloc_read_path_by_length(str, str2, sizeof(str2), data->root_fd) == 0) {
 	  if (!strncmp(str2, "Data", 4))
 	    ctype = HWLOC_OBJ_CACHE_DATA;
 	  else if (!strncmp(str2, "Unified", 7))
@@ -3367,7 +3373,7 @@ package_done:
 	/* get the cache size */
 	kB = 0;
 	sprintf(str, "%s/cpu%d/cache/index%d/size", path, i, j); /* contains %uK at least up to 4.9 */
-	hwloc_read_file_uint(str, &kB, data->root_fd);
+	hwloc_read_path_as_uint(str, &kB, data->root_fd);
 	/* KNL reports L3 with size=0 and full cpuset in cpuid.
 	 * Let hwloc_linux_try_add_knl_mcdram_cache() detect it better.
 	 */
@@ -3377,7 +3383,7 @@ package_done:
 	/* get the line size */
 	linesize = 0;
 	sprintf(str, "%s/cpu%d/cache/index%d/coherency_line_size", path, i, j); /* contains %u at least up to 4.9 */
-	hwloc_read_file_uint(str, &linesize, data->root_fd);
+	hwloc_read_path_as_uint(str, &linesize, data->root_fd);
 
 	/* get the number of sets and lines per tag.
 	 * don't take the associativity directly in "ways_of_associativity" because
@@ -3385,11 +3391,11 @@ package_done:
 	 */
 	sets = 0;
 	sprintf(str, "%s/cpu%d/cache/index%d/number_of_sets", path, i, j); /* contains %u at least up to 4.9 */
-	hwloc_read_file_uint(str, &sets, data->root_fd);
+	hwloc_read_path_as_uint(str, &sets, data->root_fd);
 
 	lines_per_tag = 1;
 	sprintf(str, "%s/cpu%d/cache/index%d/physical_line_partition", path, i, j); /* contains %u at least up to 4.9 */
-	hwloc_read_file_uint(str, &lines_per_tag, data->root_fd);
+	hwloc_read_path_as_uint(str, &lines_per_tag, data->root_fd);
 
 	sprintf(str, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(str, data->root_fd);
