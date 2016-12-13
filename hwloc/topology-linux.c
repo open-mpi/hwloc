@@ -3382,10 +3382,15 @@ package_done:
 	cacheset = hwloc_parse_cpumap(str, data->root_fd);
         if (cacheset) {
           if (hwloc_bitmap_iszero(cacheset)) {
+	    hwloc_bitmap_t tmpset;
 	    /* ia64 returning empty L3 and L2i? use the core set instead */
-	    hwloc_bitmap_free(cacheset);
 	    sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
-	    cacheset = hwloc_parse_cpumap(str, data->root_fd);
+	    tmpset = hwloc_parse_cpumap(str, data->root_fd);
+	    /* only use it if we actually got something */
+	    if (tmpset) {
+	      hwloc_bitmap_free(cacheset);
+	      cacheset = tmpset;
+	    }
 	  }
 	  hwloc_bitmap_andnot(cacheset, cacheset, unknownset);
 
