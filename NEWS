@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.11.6
 --------------
+* Make the Linux discovery about twice faster, especially on the CPU side,
+  by trying to avoid sysfs file accesses as much as possible.
 * Fix hwloc_bitmap_set/clr_range() for infinite ranges that do not
   overlap currently defined ranges in the bitmap.
 
