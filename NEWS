@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.11.6
+--------------
+* Fix hwloc_bitmap_set/clr_range() for infinite ranges that do not
+  overlap currently defined ranges in the bitmap.
+
+
 Version 1.11.5
 --------------
 * Add support for Knights Mill Xeon Phi, thanks to Piotr Luc for the patch.
