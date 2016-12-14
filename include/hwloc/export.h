@@ -36,7 +36,7 @@ enum hwloc_topology_export_xml_flags_e {
  /** \brief Export XML that is loadable by hwloc v1.x.
   * \hideinitializer
   */
- HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 = (1UL<<0),
+ HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 = (1UL<<0)
 };
 
 /** \brief Export the topology into an XML file.
