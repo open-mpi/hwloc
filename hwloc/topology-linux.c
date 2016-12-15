@@ -180,8 +180,12 @@ struct hwloc_linux_backend_data_s {
 #  define __NR_mbind 353
 # endif
 #endif
-static __hwloc_inline long hwloc_mbind(void *addr, unsigned long len, int mode,
-				       const unsigned long *nodemask, unsigned long maxnode, unsigned flags)
+static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
+				       unsigned long len __hwloc_attribute_unused,
+				       int mode __hwloc_attribute_unused,
+				       const unsigned long *nodemask __hwloc_attribute_unused,
+				       unsigned long maxnode __hwloc_attribute_unused,
+				       unsigned flags __hwloc_attribute_unused)
 {
 #if (defined __NR_mbind) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_mbind, (long) addr, len, mode, (long)nodemask, maxnode, flags);
@@ -204,8 +208,9 @@ static __hwloc_inline long hwloc_mbind(void *addr, unsigned long len, int mode,
 #  define __NR_set_mempolicy 305
 # endif
 #endif
-static __hwloc_inline long hwloc_set_mempolicy(int mode, const unsigned long *nodemask,
-					       unsigned long maxnode)
+static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused,
+					       const unsigned long *nodemask __hwloc_attribute_unused,
+					       unsigned long maxnode __hwloc_attribute_unused)
 {
 #if (defined __NR_set_mempolicy) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_set_mempolicy, mode, nodemask, maxnode);
@@ -228,8 +233,11 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode, const unsigned long *no
 #  define __NR_get_mempolicy 304
 # endif
 #endif
-static __hwloc_inline long hwloc_get_mempolicy(int *mode, const unsigned long *nodemask,
-					       unsigned long maxnode, void *addr, int flags)
+static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unused,
+					       const unsigned long *nodemask __hwloc_attribute_unused,
+					       unsigned long maxnode __hwloc_attribute_unused,
+					       void *addr __hwloc_attribute_unused,
+					       int flags __hwloc_attribute_unused)
 {
 #if (defined __NR_get_mempolicy) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_get_mempolicy, mode, nodemask, maxnode, addr, flags);
@@ -252,8 +260,10 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode, const unsigned long *n
 #  define __NR_migrate_pages 302
 # endif
 #endif
-static __hwloc_inline long hwloc_migrate_pages(int pid, unsigned long maxnode,
-					       const unsigned long *oldnodes, const unsigned long *newnodes)
+static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
+					       unsigned long maxnode __hwloc_attribute_unused,
+					       const unsigned long *oldnodes __hwloc_attribute_unused,
+					       const unsigned long *newnodes __hwloc_attribute_unused)
 {
 #if (defined __NR_migrate_pages) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_migrate_pages, pid, maxnode, oldnodes, newnodes);
@@ -276,8 +286,12 @@ static __hwloc_inline long hwloc_migrate_pages(int pid, unsigned long maxnode,
 #  define __NR_move_pages 307
 # endif
 #endif
-static __hwloc_inline long hwloc_move_pages(int pid, unsigned long count, void **pages,
-					    const int *nodes, int *status, int flags)
+static __hwloc_inline long hwloc_move_pages(int pid __hwloc_attribute_unused,
+					    unsigned long count __hwloc_attribute_unused,
+					    void **pages __hwloc_attribute_unused,
+					    const int *nodes __hwloc_attribute_unused,
+					    int *status __hwloc_attribute_unused,
+					    int flags __hwloc_attribute_unused)
 {
 #if (defined __NR_move_pages) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_move_pages, pid, count, pages, nodes, status, flags);
@@ -1830,7 +1844,7 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
 {
   unsigned max_os_index;
   unsigned long *linuxmask, *globallinuxmask;
-  int linuxpolicy, globallinuxpolicy = 0;
+  int linuxpolicy = 0, globallinuxpolicy = 0; /* shut-up the compiler */
   int mixed = 0;
   int full = 0;
   int first = 1;
