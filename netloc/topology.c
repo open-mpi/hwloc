@@ -175,7 +175,16 @@ netloc_topology_t *netloc_topology_construct(char *path)
         char *remain_line = line;
 
         field = line_get_next_field(&remain_line);
+        if (strlen(field) > 19)
+            field[19] = '\0';
         HASH_FIND_STR(topology->nodes, field, node);
+
+        if (!node) {
+            fprintf(stderr, "Node node found: %s\n", field);
+            utarray_free(topology->partitions);
+            utarray_free(topology->topos);
+            return NULL;
+        }
 
         while ((field = line_get_next_field(&remain_line))) {
             /* There is an edge */
