@@ -809,6 +809,7 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0205: return "WorldFip";
 	case 0x0206: return "PICMG";
 	case 0x0207: return "InfiniBand";
+	case 0x0208: return "Fabric";
       }
       return "Network";
     case 0x03:
@@ -884,6 +885,7 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0b00: return "386";
 	case 0x0b01: return "486";
 	case 0x0b02: return "Pentium";
+/* 0x0b03 and 0x0b04 might be Pentium and P6 ? */
 	case 0x0b10: return "Alpha";
 	case 0x0b20: return "PowerPC";
 	case 0x0b30: return "MIPS";
