@@ -364,7 +364,7 @@ int netloc_arch_set_global_resources(netloc_arch_t *arch)
 {
     int ret;
     int *current_nodes = NULL;
-    int *slot_idx;
+    int *slot_idx = NULL;
 
     int num_nodes =  HASH_COUNT(arch->nodes_by_name);
     if (!arch->has_slots) {
