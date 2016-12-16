@@ -187,6 +187,12 @@ function loadFile(data)
         el.value = "bandwidth";
         selectColors.appendChild(el);
     }
+    {
+        var el = document.createElement("option");
+        el.textContent = "bandwidth_check";
+        el.value = "bandwidth_check";
+        selectColors.appendChild(el);
+    }
 
     /* Add elements to selectPartition */
     var selectPartition = document.getElementById("selectPartition");
@@ -270,30 +276,30 @@ function nodeColors()
                 shownNodes.update({id: n.id, color: normalSwitchColor});
         });
 
-        if (lastColorMode == "bandwidth") {
+        if (lastColorMode == "bandwidth" || lastColorMode == "bandwidth_check") {
             shownEdges.forEach(function(n) {
                 shownEdges.update({id: n.id, color: normalEdgeColor});
             });
         }
-    }
-    else if (colorMode == "partition") {
+
+    } else if (colorMode == "partition") {
         var nodeColors = palette(partitions.length);
         shownNodes.forEach(function(n) {
             if (n.type == "host") {
                 var colorIdx = n.part[0];
                 shownNodes.update({id: n.id, color: {background: nodeColors[colorIdx]}});
-            }
-            else
+
+            } else
                 shownNodes.update({id: n.id, color: normalSwitchColor});
         });
 
-        if (lastColorMode == "bandwidth") {
+        if (lastColorMode == "bandwidth" || lastColorMode == "bandwidth_check") {
             shownEdges.forEach(function(n) {
                 shownEdges.update({id: n.id, color: normalEdgeColor});
             });
         }
-    }
-    else if (colorMode == "hwloc") {
+
+    } else if (colorMode == "hwloc") {
         var nodeColors = palette(topos.length);
         shownNodes.forEach(function(n) {
             if (n.type == "host") {
@@ -301,18 +307,18 @@ function nodeColors()
                 if (colorIdx != -1) {
                     shownNodes.update({id: n.id, color: {background: nodeColors[colorIdx]}});
                 }
-            }
-            else
+
+            } else
                 shownNodes.update({id: n.id, color: normalSwitchColor});
         });
 
-        if (lastColorMode == "bandwidth") {
+        if (lastColorMode == "bandwidth" || lastColorMode == "bandwidth_check") {
             shownEdges.forEach(function(n) {
                 shownEdges.update({id: n.id, color: normalEdgeColor});
             });
         }
-    }
-    else if (colorMode == "bandwidth") {
+
+    } else if (colorMode == "bandwidth") {
         var nodeColors = palette(nodeBandwidthList.length);
         shownNodes.forEach(function(n) {
             var colorIdx = nodeBandwidthList.indexOf(n.size);
@@ -320,12 +326,36 @@ function nodeColors()
                 shownNodes.update({id: n.id, color: {background: nodeColors[colorIdx]}});
             }
         });
-
-        var edgeeColors = palette(edgeBandwidthList.length);
+        var edgeColors = palette(edgeBandwidthList.length);
         shownEdges.forEach(function(n) {
             var colorIdx = edgeBandwidthList.indexOf(n.gbits);
             if (colorIdx != -1) {
-                shownEdges.update({id: n.id, color: {color: edgeeColors[colorIdx]}});
+                shownEdges.update({id: n.id, color: {color: edgeColors[colorIdx]}});
+            }
+        });
+
+    } else if (colorMode == "bandwidth_check") {
+        var edgeColors = palette(edgeBandwidthList.length);
+        shownEdges.forEach(function(n) {
+            var colorIdx = edgeBandwidthList.indexOf(n.gbits);
+            if (colorIdx != -1) {
+                shownEdges.update({id: n.id, color: {color: edgeColors[colorIdx]}});
+            }
+        });
+
+        shownNodes.forEach(function(n) {
+            /* Quick check about in bw = out bd */
+            if (n.edges.length == 1) {
+                var colorIdx = edgeBandwidthList.indexOf(n.bandwidth);
+                shownNodes.update({id: n.id, color: {background: edgeColors[colorIdx]}});
+
+            } else {
+                var colorIdx = edgeBandwidthList.indexOf(n.bandwidth/2);
+                if (colorIdx != -1) {
+                    shownNodes.update({id: n.id, color: {background: edgeColors[colorIdx]}});
+                } else {
+                    shownNodes.update({id: n.id, color: {background: "black"}});
+                }
             }
         });
     }
@@ -489,6 +519,7 @@ function showSelectedNodes()
 
             if (!similarNeighbours) {
                 similarNeighbours = neighbours;
+
             } else {
                 similarNeighbours = similarNeighbours.filter(function(n) {
                     return neighbours.indexOf(n) != -1;
@@ -529,8 +560,8 @@ function search()
     var field = selectSearch.options[selectSearch.selectedIndex].value;
 
     if (field == "") {
-    }
-    else {
+
+    } else {
         var searchValue = document.getElementById("searchValue");
         var value = searchValue.value;
         selectNodesAndEdges(field, value);
@@ -554,8 +585,8 @@ function draw()
         // TODO improve
         subEdges = new vis.DataSet(edges.get());
         shownNodes = new vis.DataSet(subNodes.get());
-    }
-    else {
+
+    } else {
         subEdges = new vis.DataSet(edges.get({filter: function (e) {
             return (e.part.indexOf(partition) > -1);
         }}));
@@ -573,12 +604,12 @@ function draw()
                 e.arrows = {to: true};
             }
             return true;
-        }
-        else if (!subEdges.get(e.reverse)) {
+
+        } else if (!subEdges.get(e.reverse)) {
             e.arrows = {to: true};
             return true;
-        }
-        else
+
+        } else
             return false;
     }}));
     printWithTime("Edges filtered (keep one way)");
