@@ -466,9 +466,6 @@ int main(int argc, char **argv)
     }
     argc--; argv++;
 
-    if (!argc)
-        goto error_param;
-
     if (!strcmp(*argv, "--help")) {
         help(prog_name, stdout);
         return 0;
