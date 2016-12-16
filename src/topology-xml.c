@@ -341,6 +341,9 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     /* FIXME: should be "CoProcType" for osdev/coproc but we don't have that type-specific attribute yet */
     hwloc_obj_add_info(obj, "Type", value);
   }
+  else if (!strcmp(name, "gp_index")) {
+    /* doesn't exist in v1.x */
+  }
 
 
   /*************************
