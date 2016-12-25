@@ -2891,11 +2891,19 @@ and <tt>hwloc_topology_get_userdata()</tt>.
 
 
 
-\subsection faq_slow_lstopo Why is lstopo slow?
+\subsection faq_slow_lstopo Why is hwloc slow?
 
-lstopo enables most hwloc discovery flags by default so that the output
-topology is as precise as possible (while hwloc disables many of them
-by default).
+Building a hwloc topology on a large machine may be slow because
+the discovery of hundreds of hardware cores or threads takes time
+(especially when reading thousands of sysfs files on Linux).
+Ignoring some objects (for instance caches) that aren't useful
+to the current application may improve this overhead.
+One should also consider using XML (see \ref faq_xml) to work
+around such issues.
+
+Additionally, lstopo enables most hwloc objects and discovery flags
+by default so that the output topology is as precise as possible
+(while hwloc disables many of them by default).
 This includes I/O device discovery through PCI libraries as well as external
 libraries such as NVML.
 To speed up lstopo, you may disable such features with command-line
@@ -2916,9 +2924,6 @@ Also remember that these components may be disabled at build-time with
 configure flags such as <tt>\--disable-opencl</tt>, <tt>\--disable-cuda</tt> or <tt>\--disable-nvml</tt>,
 and at runtime with the environment variable
 <tt>HWLOC_COMPONENTS=-opencl,cuda,nvml</tt>.
-
-If loading topologies is slow because the machine contains tons of
-processors, one should also consider using XML (see \ref faq_xml).
 
 
 \subsection faq_privileged Does hwloc require privileged access?
