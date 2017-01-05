@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2009-2016 Inria.  All rights reserved.
-dnl Copyright © 2009-2012, 2015-2016 Université Bordeaux
+dnl Copyright © 2009-2012, 2015-2017 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -1269,8 +1269,8 @@ AC_DEFUN([_HWLOC_CHECK_DECL], [
     AC_MSG_CHECKING([whether function $1 has a complete prototype])
     AC_REQUIRE([AC_PROG_CC])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-         [AC_INCLUDES_DEFAULT([$4])]
-         [$1(1,2,3,4,5,6,7,8,9,10);],
+         [AC_INCLUDES_DEFAULT([$4])],
+         [$1(1,2,3,4,5,6,7,8,9,10);]
       )],
       [AC_MSG_RESULT([no])
        $3],
