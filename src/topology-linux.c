@@ -4336,8 +4336,12 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     hwloc_bitmap_t machine_online_set;
 
     if (already_pus)
+    {
+      free(cpuset_name);
+
       /* we don't support extending kerrighed topologies */
       return 0;
+    }
 
     /* replace top-level object type with SYSTEM and add some MACHINE underneath */
 
