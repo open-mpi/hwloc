@@ -4364,7 +4364,13 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       node = strtoul(dirent->d_name+4, NULL, 0);
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/cpuinfo", node);
       machine_numprocs = hwloc_linux_parse_cpuinfo(data, path, &machine_Lprocs, &machine_global_infos, &machine_global_infos_count);
-      err = look_cpuinfo(topology, machine_Lprocs, machine_numprocs, machine_online_set);
+      if (machine_numprocs < 0) {
+        err = -1;
+        machine_numprocs = 0;
+      }
+      else
+        err = look_cpuinfo(topology, machine_Lprocs, machine_numprocs, machine_online_set);
+
       hwloc_linux_free_cpuinfo(machine_Lprocs, machine_numprocs, machine_global_infos, machine_global_infos_count);
       if (err < 0) {
         hwloc_bitmap_free(machine_online_set);
