@@ -4339,6 +4339,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     {
       free(cpuset_name);
 
+      hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
+
       /* we don't support extending kerrighed topologies */
       return 0;
     }
