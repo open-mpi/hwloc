@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #
-# Copyright © 2013-2016 Inria.  All rights reserved.
+# Copyright © 2013-2017 Inria.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -202,22 +202,24 @@ if (@forcesubnets) {
     my $boardname = undef;
     my $portnum = undef;
     while (my $line = <FILE>) {
-      if ($line =~ /<object type=\"OSDev\".* name=\"(.+)\".* osdev_type=\"3\".*>/) {
+      if ($line =~ /<object type=\"OSDev\".* name=\"((?!hfi)(?!usnic).+)\".* osdev_type=\"3\".*>/) {
         $boardname = $1;
-      } elsif ($line =~ /<\/object>/) {
-        $boardname = undef;
-      } elsif ($line =~ /<info name=\"Port([0-9]+)GID([0-9]+)\".* value=\"([0-9a-fA-F:]{19}):([0-9a-fA-F:]{19})\"\/.*>/) {
-        $servers{$hostname}->{gids}->{$boardname}->{$1}->{$2}->{subnet} = $3;
-        $servers{$hostname}->{gids}->{$boardname}->{$1}->{$2}->{guid} = $4;
-      } elsif ($line =~ /<info name=\"Port([0-9]+)LID\" value=\"(0x[0-9a-fA-F]+)\"\/>/) {
-        # lid must be between 0x1 and 0xbfff
-        if ((hex $2) < 1 or (hex $2) > 49151) {
-          $servers{$hostname}->{gids}->{$boardname}->{$1}->{invalid} = 1;
-        }
-      } elsif ($line =~ /<info name=\"Port([0-9]+)State\" value=\"([0-9])\"\/>/) {
-        # state must be active = 4
-        if ($2 != 4) {
-          $servers{$hostname}->{gids}->{$boardname}->{$1}->{invalid} = 1;
+      } elsif (defined $boardname) {
+        if ($line =~ /<\/object>/) {
+          $boardname = undef;
+        } elsif ($line =~ /<info name=\"Port([0-9]+)GID([0-9]+)\".* value=\"([0-9a-fA-F:]{19}):([0-9a-fA-F:]{19})\"\/.*>/) {
+          $servers{$hostname}->{gids}->{$boardname}->{$1}->{$2}->{subnet} = $3;
+          $servers{$hostname}->{gids}->{$boardname}->{$1}->{$2}->{guid} = $4;
+        } elsif ($line =~ /<info name=\"Port([0-9]+)LID\" value=\"(0x[0-9a-fA-F]+)\"\/>/) {
+          # lid must be between 0x1 and 0xbfff
+          if ((hex $2) < 1 or (hex $2) > 49151) {
+            $servers{$hostname}->{gids}->{$boardname}->{$1}->{invalid} = 1;
+          }
+        } elsif ($line =~ /<info name=\"Port([0-9]+)State\" value=\"([0-9])\"\/>/) {
+          # state must be active = 4
+          if ($2 != 4) {
+            $servers{$hostname}->{gids}->{$boardname}->{$1}->{invalid} = 1;
+          }
         }
       }
     }

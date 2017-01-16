@@ -1,7 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -180,7 +180,7 @@ netloc_topology_t *netloc_topology_construct(char *path)
         HASH_FIND_STR(topology->nodes, field, node);
 
         if (!node) {
-            fprintf(stderr, "Node node found: %s\n", field);
+            fprintf(stderr, "Node not found: %s\n", field);
             utarray_free(topology->partitions);
             utarray_free(topology->topos);
             return NULL;
