@@ -2,7 +2,7 @@ dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 dnl
-dnl Copyright © 2014-2016 Inria.  All rights reserved.
+dnl Copyright © 2014-2017 Inria.  All rights reserved.
 dnl See COPYING in top-level directory.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -87,18 +87,21 @@ AC_DEFUN([NETLOC_CHECK_PLATFORM], [
     AS_IF([test "$hwloc_windows" = "yes"],
           [$1=no netloc_missing_reason=" (Windows platform)"])
     AC_MSG_RESULT([$$1$netloc_missing_reason])
+
+    AC_CHECK_LIB(scotch, SCOTCH_archSub,
+        [scotch_found_headers=yes;
+        AC_DEFINE([NETLOC_SCOTCH], [1],
+            [Define to 1 if scotch is netlocscotch is enabled])
+    ], [], -lscotcherr)
+    AC_CHECK_HEADERS([mpi.h],
+            [mpi_found_headers=yes; break;])
+
+    AC_CHECK_PROG([xz],[xz],[yes],[no])
 ])dnl
 
 AC_DEFUN([NETLOC_DO_AM_CONDITIONALS], [
     AM_CONDITIONAL([BUILD_NETLOC], [test "$netloc_happy" = "yes"])
-
-    AC_CHECK_HEADERS([scotch.h],
-            [scotch_found_headers=yes; break;])
     AM_CONDITIONAL([BUILD_NETLOCSCOTCH], [test "x$scotch_found_headers" = "xyes"])
-    AC_CHECK_HEADERS([mpi.h],
-            [mpi_found_headers=yes; break;])
     AM_CONDITIONAL([BUILD_MPITOOLS], [test "x$mpi_found_headers" = "xyes"])
-
-    AC_CHECK_PROG([xz],[xz],[yes],[no])
     AM_CONDITIONAL([FOUND_XZ], [test "x$xz" = xyes])
 ])dnl
