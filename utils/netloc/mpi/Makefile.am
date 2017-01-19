@@ -1,4 +1,4 @@
-# Copyright © 2016 Inria.  All rights reserved.
+# Copyright © 2016-2017 Inria.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -39,5 +39,5 @@ netloc_mpi_rank_file_SOURCES = \
 netloc_mpi_rank_file_LDADD = \
         $(top_builddir)/netloc/libnetloc.la \
         $(top_builddir)/netloc/libnetlocscotch.la \
-        -lscotch -lscotcherr
+        -lscotch -lscotcherr -lm -lpthread
 endif

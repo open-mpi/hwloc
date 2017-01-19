@@ -1,4 +1,4 @@
-# Copyright © 2016 Inria.  All rights reserved.
+# Copyright © 2016-2017 Inria.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -11,7 +11,7 @@ AM_LDFLAGS = $(NETLOC_LDFLAGS) -lpthread
 
 LDADD = $(top_builddir)/netloc/libnetloc.la \
         $(top_builddir)/netloc/libnetlocscotch.la \
-        -lscotch -lscotcherr
+        -lscotch -lscotcherr -lm -lpthread
 
 EXTRA_DIST = \
         data/tests_extract.txt \
