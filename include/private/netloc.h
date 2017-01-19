@@ -2,7 +2,7 @@
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
- * Copyright © 2015-2016 Inria.  All rights reserved.
+ * Copyright © 2015-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -19,8 +19,17 @@
 #include <netloc.h>
 #include <netloc/uthash.h>
 #include <netloc/utarray.h>
+#include <private/autogen/config.h>
 
 #define NETLOCFILE_VERSION 1
+
+#ifdef NETLOC_SCOTCH
+#include <stdint.h>
+#include <scotch.h>
+#define NETLOC_int SCOTCH_Num
+#else
+#define NETLOC_int int
+#endif
 
 /*
  * "Import" a few things from hwloc
@@ -257,9 +266,9 @@ struct netloc_path_t {
  *        Architecture structures
  **********************************************************************/
 struct netloc_arch_tree_t {
-    int num_levels;
-    int *degrees;
-    int *cost;
+    NETLOC_int num_levels;
+    NETLOC_int *degrees;
+    NETLOC_int *cost;
 };
 
 struct netloc_arch_node_t {
@@ -272,7 +281,7 @@ struct netloc_arch_node_t {
     int *slot_os_idx; /* corresponding os index for each leaf in tree */
     netloc_arch_tree_t *slot_tree; /* Tree built from hwloc */
     int num_current_slots; /* Number of PUs */
-    int *current_slots; /* indices in the complete tree */
+    NETLOC_int *current_slots; /* indices in the complete tree */
     int *slot_ranks; /* corresponding MPI rank for each leaf in tree */
 };
 
@@ -291,8 +300,8 @@ struct netloc_arch_t {
     } arch;
     netloc_arch_node_t *nodes_by_name;
     netloc_arch_node_slot_t *node_slot_by_idx; /* node_slot by index in complete topo */
-    int num_current_hosts; /* if has_slots, host is a slot, else host is a node */
-    int *current_hosts; /* indices in the complete topology */
+    NETLOC_int num_current_hosts; /* if has_slots, host is a slot, else host is a node */
+    NETLOC_int *current_hosts; /* indices in the complete topology */
 };
 
 /**********************************************************************
@@ -489,7 +498,7 @@ int netloc_arch_node_get_hwloc_info(netloc_arch_node_t *arch);
 void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees_by_level,
         int num_hosts, int **parch_idx);
 
-int netloc_arch_tree_num_leaves(netloc_arch_tree_t *tree);
+NETLOC_int netloc_arch_tree_num_leaves(netloc_arch_tree_t *tree);
 
 
 /**********************************************************************

@@ -1,4 +1,5 @@
 #include <stdio.h> // for scotch
+#include <stdint.h>
 #include <scotch.h>
 #include <netloc.h>
 #include <netlocscotch.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -193,13 +193,14 @@ int netloc_arch_node_get_hwloc_info(netloc_arch_node_t *arch_node)
     hwloc_obj_t first_object = root->first_child;
 
     UT_array **down_degrees_by_level;
-    int *max_down_degrees_by_level;
+    NETLOC_int *max_down_degrees_by_level;
 
     down_degrees_by_level = (UT_array **)malloc(depth*sizeof(UT_array *));
     for (int l = 0; l < depth; l++) {
         utarray_new(down_degrees_by_level[l], &ut_int_icd);
     }
-    max_down_degrees_by_level = (int *)calloc(depth-1, sizeof(int));
+    max_down_degrees_by_level = (NETLOC_int *)
+        calloc(depth-1, sizeof(NETLOC_int));
 
     int level = depth-1;
     hwloc_obj_t current_object = first_object;
@@ -242,7 +243,7 @@ int netloc_arch_node_get_hwloc_info(netloc_arch_node_t *arch_node)
     ordered_hosts = (int *)ordered_host_array->d;;
 
     /* Weight for the edges in the tree */
-    int *cost = (int *)malloc((depth-1)*sizeof(int));
+    NETLOC_int *cost = (NETLOC_int *)malloc((depth-1)*sizeof(NETLOC_int));
     int level_coeff = 3;
     cost[depth-2] = 1;
     for (int l = depth-3; l >= 0; l--) {

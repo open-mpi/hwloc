@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -32,7 +32,7 @@ static int compareint(void const *a, void const *b)
    return *int_a-*int_b;
 }
 
-static int build_subarch(SCOTCH_Arch *scotch, int num_nodes, int *node_list,
+static int build_subarch(SCOTCH_Arch *scotch, NETLOC_int num_nodes, NETLOC_int *node_list,
         SCOTCH_Arch *subarch)
 {
     int ret;
@@ -237,7 +237,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
         return ret;
     }
 
-    int graph_size;
+    NETLOC_int graph_size;
     SCOTCH_graphSize(graph, &graph_size, NULL);
 
     int num_hosts = arch->num_current_hosts;
@@ -249,7 +249,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
     SCOTCH_stratGraphMapBuild(&strategy, SCOTCH_STRATQUALITY, graph_size, 0.01);
 
     /* The ranks are the indices of the nodes in the complete graph */
-    int *ranks = (int *)malloc(graph_size*sizeof(int));
+    NETLOC_int *ranks = (NETLOC_int *)malloc(graph_size*sizeof(NETLOC_int));
     ret = SCOTCH_graphMap(graph, &scotch_subarch, &strategy, ranks);
 
     SCOTCH_stratExit(&strategy);
@@ -289,7 +289,7 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
             netloc_arch_node_t *node =
                 arch->node_slot_by_idx[arch->current_hosts[n]].node;
             char *nodename = node->name;
-            int node_ranks[num_processes];
+            NETLOC_int node_ranks[num_processes];
 
             /* We need to extract the subgraph with only the vertices mapped to the
              * current node */

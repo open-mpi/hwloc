@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -41,17 +41,17 @@ void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees
         int num_hosts, int **parch_idx)
 {
     int num_levels = tree->num_levels;
-    int *max_degrees = tree->degrees;
+    NETLOC_int *max_degrees = tree->degrees;
 
     /* Complete the tree by inserting nodes */
     for (int l = 0; l < num_levels-1; l++) { // from the root to the leaves
         int num_degrees = utarray_len(down_degrees_by_level[l]);
         int *degrees = (int *)down_degrees_by_level[l]->d;
-        int max_degree = max_degrees[l];
+        NETLOC_int max_degree = max_degrees[l];
 
         unsigned int down_level_idx = 0;
         UT_array *down_level_degrees = down_degrees_by_level[l+1];
-        int down_level_max_degree = max_degrees[l+1];
+        NETLOC_int down_level_max_degree = max_degrees[l+1];
         for (int d = 0; d < num_degrees; d++) {
             int degree = degrees[d];
             if (degree > 0) {
@@ -72,7 +72,7 @@ void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees
     /* Indices for the list of hosts, in the complete architecture */
     int num_degrees = utarray_len(down_degrees_by_level[num_levels-1]);
     int *degrees = (int *)down_degrees_by_level[num_levels-1]->d;
-    int max_degree = max_degrees[num_levels-1];
+    NETLOC_int max_degree = max_degrees[num_levels-1];
     int ghost_idx = 0;
     int idx = 0;
     netloc_arch_node_t *named_nodes = NULL;
@@ -95,9 +95,9 @@ void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees
     *parch_idx = arch_idx;
 }
 
-int netloc_arch_tree_num_leaves(netloc_arch_tree_t *tree)
+NETLOC_int netloc_arch_tree_num_leaves(netloc_arch_tree_t *tree)
 {
-    int num_leaves = 1;
+    NETLOC_int num_leaves = 1;
     for (int l = 0; l < tree->num_levels; l++) {
         num_leaves *= tree->degrees[l];
     }
@@ -210,10 +210,10 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
     if (ret != NETLOC_SUCCESS || num_nodes <= 0)
         assert(0); // XXX
 
-    int *current_nodes = NULL;
+    NETLOC_int *current_nodes = NULL;
 
     if (!arch->has_slots) {
-        current_nodes = (int *) malloc(sizeof(int[num_nodes]));
+        current_nodes = (NETLOC_int *) malloc(sizeof(NETLOC_int[num_nodes]));
     }
 
     netloc_arch_node_t **arch_node_list = (netloc_arch_node_t **)
@@ -267,9 +267,9 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
             }
         }
 
-        node->current_slots = (int *)
-            malloc(sizeof(int[num_slots]));
-        int num_leaves = netloc_arch_tree_num_leaves(node->slot_tree);
+        node->current_slots = (NETLOC_int *)
+            malloc(sizeof(NETLOC_int[num_slots]));
+        NETLOC_int num_leaves = netloc_arch_tree_num_leaves(node->slot_tree);
         node->slot_ranks = (int *)
             malloc(sizeof(int[num_leaves]));
 
@@ -286,7 +286,7 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
         arch->arch.global_tree = arch->arch.node_tree;
 
         /* Build nodes_by_idx */
-        int tree_size = netloc_arch_tree_num_leaves(arch->arch.node_tree);
+        NETLOC_int tree_size = netloc_arch_tree_num_leaves(arch->arch.node_tree);
         netloc_arch_node_slot_t *nodes_by_idx = (netloc_arch_node_slot_t *)
             malloc(sizeof(netloc_arch_node_slot_t[tree_size]));
         for (int n = 0; n < num_nodes; n++) {
@@ -299,7 +299,8 @@ int netloc_arch_set_current_resources(netloc_arch_t *arch)
 
     } else {
         int num_hosts = slot_idx[num_nodes];
-        int *current_hosts = (int *)malloc(sizeof(int[num_hosts]));
+        NETLOC_int *current_hosts = (NETLOC_int *)
+            malloc(sizeof(NETLOC_int[num_hosts]));
         /* Add the slot trees to the node tree */
 
         /* Check that each slot tree has the same size */
@@ -363,12 +364,12 @@ ERROR:
 int netloc_arch_set_global_resources(netloc_arch_t *arch)
 {
     int ret;
-    int *current_nodes = NULL;
+    NETLOC_int *current_nodes = NULL;
     int *slot_idx = NULL;
 
     int num_nodes =  HASH_COUNT(arch->nodes_by_name);
     if (!arch->has_slots) {
-        current_nodes = (int *) malloc(sizeof(int[num_nodes]));
+        current_nodes = (NETLOC_int *) malloc(sizeof(NETLOC_int[num_nodes]));
     }
 
     ret = netloc_topology_read_hwloc(arch->topology, 0, NULL);
@@ -431,7 +432,8 @@ int netloc_arch_set_global_resources(netloc_arch_t *arch)
 
     } else {
         int num_hosts = slot_idx[num_nodes];
-        int *current_hosts = (int *)malloc(sizeof(int[num_hosts]));
+        NETLOC_int *current_hosts = (NETLOC_int *)
+            malloc(sizeof(NETLOC_int[num_hosts]));
         netloc_arch_node_t *node, *node_tmp;
         /* Add the slot trees to the node tree */
 
@@ -492,18 +494,20 @@ netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main, netloc_arch_tree_t *sub
 
     int num_levels = main->num_levels+sub->num_levels;
     new_tree->num_levels = num_levels;
-    new_tree->degrees = (int *)malloc(sizeof(int[num_levels]));
-    new_tree->cost = (int *)malloc(sizeof(int[num_levels]));
+    new_tree->degrees = (NETLOC_int *)malloc(sizeof(NETLOC_int[num_levels]));
+    new_tree->cost = (NETLOC_int *)malloc(sizeof(NETLOC_int[num_levels]));
 
-    memcpy(new_tree->degrees, main->degrees, main->num_levels*sizeof(int));
+    memcpy(new_tree->degrees, main->degrees,
+            main->num_levels*sizeof(*new_tree->degrees));
     memcpy(new_tree->degrees+main->num_levels, sub->degrees,
-            sub->num_levels*sizeof(int));
+            sub->num_levels*sizeof(*new_tree->degrees));
 
     int out_coeff = 10;
     for (int l = 0; l < main->num_levels; l++) {
         new_tree->cost[l] = main->cost[l]*sub->cost[0]*out_coeff;
     }
-    memcpy(new_tree->cost+main->num_levels, sub->cost, sub->num_levels*sizeof(int));
+    memcpy(new_tree->cost+main->num_levels, sub->cost,
+            sub->num_levels*sizeof(*new_tree->cost));
 
     return new_tree;
 }
@@ -607,7 +611,7 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
      * structure */
     UT_array *ordered_name_array = NULL;
     UT_array **down_degrees_by_level = NULL;
-    int *max_down_degrees_by_level;
+    NETLOC_int *max_down_degrees_by_level;
 
     utarray_new(ordered_name_array, &ut_ptr_icd);
 
@@ -615,7 +619,8 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
     for (int l = 0; l < num_levels; l++) {
         utarray_new(down_degrees_by_level[l], &ut_int_icd);
     }
-    max_down_degrees_by_level = (int *)calloc(num_levels-1, sizeof(int));
+    max_down_degrees_by_level = (NETLOC_int *)
+        calloc(num_levels-1, sizeof(NETLOC_int));
 
     UT_array *down_edges = NULL;
     utarray_new(down_edges, &ut_ptr_icd);
@@ -662,7 +667,7 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
                     continue;
                 netloc_analysis_data *edge_data = (netloc_analysis_data *)edge->userdata;
                 int edge_level = edge_data->level;
-                
+
                 netloc_node_t *dest_node = edge->dest;
 
                 /* If the is the node where we are from */
@@ -695,7 +700,7 @@ int partition_topology_to_tleaf(netloc_topology_t *topology,
     tree->degrees = max_down_degrees_by_level;
 
     int network_coeff = 2;
-    tree->cost = (int *)malloc(sizeof(int[tree->num_levels]));
+    tree->cost = (NETLOC_int *)malloc(sizeof(NETLOC_int[tree->num_levels]));
     tree->cost[tree->num_levels-1] = 1;
     for (int i = tree->num_levels-2; i >= 0 ; i--) {
         tree->cost[i] = tree->cost[i+1]*network_coeff;
@@ -790,9 +795,7 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
     }
     topopath = strdup(topopath);
 
-    netloc_topology_t *topology = NULL;
-
-    topology = netloc_topology_construct(topopath);
+    netloc_topology_t *topology = netloc_topology_construct(topopath);
     if (topology == NULL) {
         fprintf(stderr, "Error: netloc_topology_construct failed\n");
         return NETLOC_ERROR;
