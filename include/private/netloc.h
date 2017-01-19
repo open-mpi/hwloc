@@ -366,7 +366,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
  * Returns
  *   A newly allocated pointer to the network information.
  */
-netloc_node_t * netloc_node_construct(void);
+netloc_node_t *netloc_node_construct(void);
 
 /**
  * Destructor for netloc_node_t
@@ -378,6 +378,8 @@ netloc_node_t * netloc_node_construct(void);
  *   NETLOC_ERROR on error
  */
 int netloc_node_destruct(netloc_node_t *node);
+
+char *netloc_node_pretty_print(netloc_node_t* node);
 
 #define netloc_node_get_num_subnodes(node) \
     utarray_len((node)->subnodes)
@@ -419,7 +421,7 @@ int netloc_node_is_in_partition(netloc_node_t *node, int partition);
  * Returns
  *   A newly allocated pointer to the edge information.
  */
-netloc_edge_t * netloc_edge_construct(void);
+netloc_edge_t *netloc_edge_construct(void);
 
 /**
  * Destructor for netloc_edge_t
@@ -431,6 +433,8 @@ netloc_edge_t * netloc_edge_construct(void);
  *   NETLOC_ERROR on error
  */
 int netloc_edge_destruct(netloc_edge_t *edge);
+
+char *netloc_edge_pretty_print(netloc_edge_t* edge);
 
 void netloc_edge_reset_uid(void);
 

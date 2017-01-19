@@ -21,7 +21,6 @@ typedef struct netloc_analysis_data_t {
 
 static int partition_topology_to_tleaf(netloc_topology_t *topology,
         int partition, int num_cores, netloc_arch_t *arch);
-static void set_gbits(int *values, netloc_edge_t *edge, int num_levels);
 static netloc_arch_tree_t *tree_merge(netloc_arch_tree_t *main,
         netloc_arch_tree_t *sub);
 static int netloc_arch_tree_destruct(netloc_arch_tree_t *tree);
@@ -75,7 +74,6 @@ void netloc_arch_tree_complete(netloc_arch_tree_t *tree, UT_array **down_degrees
     NETLOC_int max_degree = max_degrees[num_levels-1];
     int ghost_idx = 0;
     int idx = 0;
-    netloc_arch_node_t *named_nodes = NULL;
     int *arch_idx = (int *)malloc(sizeof(int[num_hosts]));
     for (int d = 0; d < num_degrees; d++) {
         int degree = degrees[d];
@@ -762,26 +760,6 @@ end:
     }
 
     return ret;
-}
-
-void set_gbits(int *values, netloc_edge_t *edge, int num_levels)
-{
-    int gbits = (int)edge->total_gbits;
-    int idx = num_levels-1-((netloc_analysis_data *)edge->node->userdata)->level;
-    if (values[idx] != 0) {
-        if (gbits < values[idx]) {
-            printf("Warning: edge from %s to %s is only %dGbits\n",
-                    edge->node->description, edge->dest->description,
-                    gbits);
-        }
-        else if (gbits > values[idx]) {
-            printf("Warning: at least on edge from %s has a limited speed\n",
-                    edge->node->description);
-            values[idx] = gbits;
-        }
-    }
-    else
-        values[idx] = gbits;
 }
 
 int netloc_arch_build(netloc_arch_t *arch, int add_slots)

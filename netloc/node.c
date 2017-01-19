@@ -2,7 +2,7 @@
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
  * Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2015-2016 Inria.  All rights reserved.
+ * Copyright © 2015-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -104,7 +104,7 @@ static int node_or_subnode_destruct(netloc_node_t * node, int is_node)
     return NETLOC_SUCCESS;
 }
 
-char * netloc_node_pretty_print(netloc_node_t* node)
+char *netloc_node_pretty_print(netloc_node_t* node)
 {
     char * str = NULL;
 

@@ -199,8 +199,9 @@ netloc_topology_t *netloc_topology_construct(char *path)
 
             /* Read links */
             int num_links = atoi(line_get_next_field(&remain_line));
-            utarray_reserve(edge->physical_links, num_links);
-            utarray_reserve(node->physical_links, num_links);
+            assert(num_links >= 0);
+            utarray_reserve(edge->physical_links, (unsigned int)num_links);
+            utarray_reserve(node->physical_links, (unsigned int)num_links);
             for (int i = 0; i < num_links; i++) {
                 netloc_physical_link_t *link;
                 link =  netloc_physical_link_construct();
@@ -358,7 +359,9 @@ int netloc_topology_find_partition_idx(netloc_topology_t *topology, char *partit
     if (!found)
         return -2;
 
-    return p;
+    assert(p <= INT_MAX);
+
+    return (int)p;
 }
 
 static char *line_get_next_field(char **string)

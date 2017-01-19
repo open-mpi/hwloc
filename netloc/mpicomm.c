@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -76,9 +76,9 @@ int netloc_build_comm_mat(char *filename, int *pn, double ***pmat)
         i++;
     }
 
-
     if (i != n) {
-        fprintf(stderr,"Error at %d %d. Too many rows for %s\n",i,j,filename);
+        fprintf(stderr,"Error at %d %d. Too many rows for %s\n",
+                i, j, filename);
         goto error;
     }
 

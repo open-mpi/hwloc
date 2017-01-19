@@ -23,7 +23,8 @@
 
 static int arch_tree_to_scotch_arch(netloc_arch_tree_t *tree, SCOTCH_Arch *scotch);
 static int comm_matrix_to_scotch_graph(double **matrix, int n, SCOTCH_Graph *graph);
-int build_scotch_graph(int n, SCOTCH_Graph *graph);
+static int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
+        netlocscotch_core_t **pcores);
 
 static int compareint(void const *a, void const *b)
 {
@@ -288,7 +289,6 @@ int netlocscotch_get_mapping_from_graph(SCOTCH_Graph *graph,
             int num_processes = utarray_len(process_by_node[n]);
             netloc_arch_node_t *node =
                 arch->node_slot_by_idx[arch->current_hosts[n]].node;
-            char *nodename = node->name;
             NETLOC_int node_ranks[num_processes];
 
             /* We need to extract the subgraph with only the vertices mapped to the
@@ -467,55 +467,3 @@ static int comm_matrix_to_scotch_graph(double **matrix, int n, SCOTCH_Graph *gra
     return ret;
 }
 
-int build_scotch_graph(int n, SCOTCH_Graph *graph)
-{
-    int ret;
-
-    SCOTCH_Num base;       /* Base value               */
-    SCOTCH_Num vert;       /* Number of vertices       */
-    SCOTCH_Num *verttab;   /* Vertex array [vertnbr+1] */
-    SCOTCH_Num *vendtab;   /* Vertex array [vertnbr]   */
-    SCOTCH_Num *velotab;   /* Vertex load array        */
-    SCOTCH_Num *vlbltab;   /* Vertex label array       */
-    SCOTCH_Num edge;       /* Number of edges (arcs)   */
-    SCOTCH_Num *edgetab;   /* Edge array [edgenbr]     */
-    SCOTCH_Num *edlotab;   /* Edge load array          */
-
-    base = 0;
-    vert = n;
-
-    verttab = (SCOTCH_Num *)malloc((vert+1)*sizeof(SCOTCH_Num));
-    for (int v = 0; v < vert+1; v++) {
-        verttab[v] = v*(n-1);
-    }
-
-    vendtab = NULL;
-    velotab = NULL;
-    vlbltab = NULL;
-
-    edge = n*(n-1);
-
-    edgetab = (SCOTCH_Num *)malloc(n*(n-1)*sizeof(SCOTCH_Num));
-    edlotab = (SCOTCH_Num *)malloc(n*(n-1)*sizeof(SCOTCH_Num));
-    for (int v1 = 0; v1 < vert; v1++) {
-        for (int v2 = 0; v2 < vert; v2++) {
-            if (v2 == v1)
-                continue;
-            int idx = v1*(n-1)+((v2 < v1) ? v2: v2-1);
-            edgetab[idx] = v2;
-            edlotab[idx] = 1;
-        }
-    }
-
-    ret = SCOTCH_graphBuild (graph, base, vert,
-                verttab, vendtab, velotab, vlbltab,
-                edge, edgetab, edlotab);
-    /* Converts scotch error into netloc error */
-    if (ret != 0) {
-        ret = NETLOC_ERROR;
-    } else {
-        ret = NETLOC_SUCCESS;
-    }
-
-    return ret;
-}

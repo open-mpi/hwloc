@@ -1,7 +1,7 @@
 /*
  * Copyright © 2013-2014 University of Wisconsin-La Crosse.
  *                         All rights reserved.
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -11,6 +11,7 @@
  * $HEADER$
  */
 
+#include <private/netloc.h>
 #include <netloc.h>
 
 #include <sys/types.h>
@@ -48,7 +49,7 @@ ssize_t netloc_line_get(char **lineptr, size_t *n, FILE *stream)
 
     /* Remove last \n character */
     char *line = *lineptr;
-    int lastpos = strlen(line)-1;
+    size_t lastpos = strlen(line)-1;
     if (line[lastpos] == '\n') {
         line[lastpos] = '\0';
         read--;
