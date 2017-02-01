@@ -267,8 +267,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
 
     infos->unitid = unit_id = ebx & 0xff;
-    cores_per_unit = ((ebx >> 8) & 3) + 1;
-    hwloc_debug("x2APIC %08x, %d nodes, node %d, %d cores in unit %d\n", apic_id, nodes_per_proc, node_id, cores_per_unit, unit_id);
+    cores_per_unit = ((ebx >> 8) & 0xff) + 1;
+    hwloc_debug("topoext %08x, %d nodes, node %d, %d cores in unit %d\n", apic_id, nodes_per_proc, node_id, cores_per_unit, unit_id);
 
     for (cachenum = 0; ; cachenum++) {
       unsigned type;
