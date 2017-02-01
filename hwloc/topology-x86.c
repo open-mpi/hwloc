@@ -845,6 +845,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
 	unsigned packageid = infos[i].packageid;
+	unsigned nodeid = infos[i].nodeid;
 	unsigned coreid = infos[i].coreid;
 
 	if (coreid == (unsigned) -1) {
@@ -859,7 +860,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    continue;
 	  }
 
-	  if (infos[j].packageid == packageid && infos[j].coreid == coreid) {
+	  if (infos[j].packageid == packageid && infos[j].nodeid == nodeid && infos[j].coreid == coreid) {
 	    hwloc_bitmap_set(core_cpuset, j);
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	  }
