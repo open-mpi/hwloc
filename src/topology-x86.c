@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2016 Inria.  All rights reserved.
+ * Copyright © 2010-2017 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -251,11 +251,21 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     eax = 0x8000001e;
     hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
     infos->apicid = apic_id = eax;
-    infos->nodeid = node_id = ecx & 0xff;
-    nodes_per_proc = ((ecx >> 8) & 7) + 1;
-    if (nodes_per_proc > 2) {
-      hwloc_debug("warning: undefined value %d, assuming it means %d\n", nodes_per_proc, nodes_per_proc);
+
+    if (infos->cpufamilynumber == 0x16) {
+      /* ecx is reserved */
+      node_id = 0;
+      nodes_per_proc = 1;
+    } else {
+      node_id = ecx & 0xff;
+      nodes_per_proc = ((ecx >> 8) & 7) + 1;
     }
+    infos->nodeid = node_id;
+    if ((infos->cpufamilynumber == 0x15 && nodes_per_proc > 2)
+	|| (infos->cpufamilynumber == 0x17 && nodes_per_proc > 4)) {
+      hwloc_debug("warning: undefined nodes_per_proc value %d, assuming it means %d\n", nodes_per_proc, nodes_per_proc);
+    }
+
     infos->unitid = unit_id = ebx & 0xff;
     cores_per_unit = ((ebx >> 8) & 3) + 1;
     hwloc_debug("x2APIC %08x, %d nodes, node %d, %d cores in unit %d\n", apic_id, nodes_per_proc, node_id, cores_per_unit, unit_id);
