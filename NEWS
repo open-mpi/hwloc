@@ -25,6 +25,7 @@ Version 1.11.6
   and x86 backends.
 * Fix hwloc_bitmap_set/clr_range() for infinite ranges that do not
   overlap currently defined ranges in the bitmap.
+* Don't reset the lstopo zoom scale when moving the X11 window.
 
 
 Version 1.11.5
