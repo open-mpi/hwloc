@@ -246,7 +246,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    * (AMD topology extension)
    */
   if (cpuid_type != intel && has_topoext(features)) {
-    unsigned apic_id, node_id, nodes_per_proc, unit_id, cores_per_unit;
+    unsigned apic_id, node_id, nodes_per_proc;
 
     eax = 0x8000001e;
     hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
@@ -266,9 +266,17 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       hwloc_debug("warning: undefined nodes_per_proc value %d, assuming it means %d\n", nodes_per_proc, nodes_per_proc);
     }
 
-    infos->unitid = unit_id = ebx & 0xff;
-    cores_per_unit = ((ebx >> 8) & 0xff) + 1;
-    hwloc_debug("topoext %08x, %d nodes, node %d, %d cores in unit %d\n", apic_id, nodes_per_proc, node_id, cores_per_unit, unit_id);
+    if (infos->cpufamilynumber <= 0x16) { /* topoext appeared in 0x15 and compute-units were only used in 0x15 and 0x16 */
+      unsigned unit_id, cores_per_unit;
+      infos->unitid = unit_id = ebx & 0xff;
+      cores_per_unit = ((ebx >> 8) & 0xff) + 1;
+      hwloc_debug("topoext %08x, %d nodes, node %d, %d cores in unit %d\n", apic_id, nodes_per_proc, node_id, cores_per_unit, unit_id);
+    } else {
+      unsigned core_id, threads_per_core;
+      infos->coreid = core_id = ebx & 0xff;
+      threads_per_core = ((ebx >> 8) & 0xff) + 1;
+      hwloc_debug("topoext %08x, %d nodes, node %d, %d threads in core %d\n", apic_id, nodes_per_proc, node_id, threads_per_core, core_id);
+    }
 
     for (cachenum = 0; ; cachenum++) {
       unsigned type;
