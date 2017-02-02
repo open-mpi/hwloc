@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -54,7 +54,7 @@ struct hwloc_linux_backend_data_s {
     HWLOC_LINUX_ARCH_UNKNOWN
   } arch;
   int is_knl;
-  int is_amd15h;
+  int is_amd_with_CU;
   struct utsname utsname; /* fields contain \0 when unknown */
   unsigned fallback_nbprocessors;
   unsigned pagesize;
@@ -3184,7 +3184,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   int i,j;
   unsigned caches_added, merge_buggy_core_siblings;
   hwloc_obj_t packages = NULL; /* temporary list of packages before actual insert in the tree */
-  int threadwithcoreid = data->is_amd15h ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
+  int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
 
   /* fill the cpuset of interesting cpus */
   dir = hwloc_opendir(path, data->root_fd);
@@ -4215,8 +4215,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 	  || !strcmp(cpumodelnumber, "133")))
 	data->is_knl = 1;
       if (cpuvendor && !strcmp(cpuvendor, "AuthenticAMD")
-	  && cpufamilynumber && !strcmp(cpufamilynumber, "21"))
-	data->is_amd15h = 1;
+	  && cpufamilynumber
+	  && (!strcmp(cpufamilynumber, "21")
+	      || !strcmp(cpufamilynumber, "22")))
+	data->is_amd_with_CU = 1;
   }
 
   /**********************
@@ -4393,7 +4395,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   /* default values */
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->is_knl = 0;
-  data->is_amd15h = 0;
+  data->is_amd_with_CU = 0;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");
