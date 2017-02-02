@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2016 Inria.  All rights reserved.
+Copyright © 2009-2017 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -21,6 +21,8 @@ Version 1.11.6
 --------------
 * Make the Linux discovery about twice faster, especially on the CPU side,
   by trying to avoid sysfs file accesses as much as possible.
+* Add support for AMD Family 17h processors (Zen) SMT cores in the Linux
+  backend.
 * Fix hwloc_bitmap_set/clr_range() for infinite ranges that do not
   overlap currently defined ranges in the bitmap.
 
