@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -15,6 +15,7 @@
 #include <string.h>
 #include <assert.h>
 #include <dirent.h>
+#include <libgen.h>
 
 #include "private/netloc.h"
 #include "netloc.h"
