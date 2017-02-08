@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -740,6 +740,10 @@ enum hwloc_topology_flags_e {
    * When this flag is not set, PUs that are disallowed are not added to the topology.
    * Parent objects (package, core, cache, etc.) are added only if some of their children are allowed.
    * NUMA nodes are always added but their available memory is set to 0 when disallowed.
+   *
+   * If the current topology is exported to XML and reimported later, this flag
+   * should be set again in the reimported topology so that disallowed resources
+   * are reimported as well.
    * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1UL<<0),
