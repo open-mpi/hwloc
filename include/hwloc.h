@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1712,6 +1712,10 @@ enum hwloc_topology_flags_e {
    * When this flag is set, each object has allowed_cpuset <= cpuset <= complete_cpuset.
    * Otherwise allowed_cpuset = cpuset <= complete_cpuset.
    * The same applies to nodesets.
+   *
+   * If the current topology is exported to XML and reimported later, this flag
+   * should be set again in the reimported topology so that disallowed resources
+   * are reimported as well.
    * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1UL<<0),
