@@ -3264,11 +3264,13 @@ hwloc_topology_check(struct hwloc_topology *topology)
       /* check that PUs and NUMA nodes have cpuset/nodeset */
       if (obj->type == HWLOC_OBJ_PU) {
 	assert(obj->cpuset);
+	assert(obj->complete_cpuset);
 	assert(hwloc_bitmap_weight(obj->complete_cpuset) == 1);
 	assert(hwloc_bitmap_first(obj->complete_cpuset) == (int) obj->os_index);
       }
       if (obj->type == HWLOC_OBJ_NUMANODE) {
 	assert(obj->nodeset);
+	assert(obj->complete_nodeset);
 	assert(hwloc_bitmap_weight(obj->complete_nodeset) == 1);
 	assert(hwloc_bitmap_first(obj->complete_nodeset) == (int) obj->os_index);
       }
