@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2010-2016 Inria.  All rights reserved.
+dnl Copyright © 2010-2017 Inria.  All rights reserved.
 dnl Copyright © 2009, 2011 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -395,11 +395,13 @@ int foo(void) {
         hwloc_config_prefix[tests/Makefile]
         hwloc_config_prefix[tests/hwloc/Makefile]
         hwloc_config_prefix[tests/hwloc/linux/Makefile]
+        hwloc_config_prefix[tests/hwloc/linux/allowed/Makefile]
         hwloc_config_prefix[tests/hwloc/linux/gather/Makefile]
         hwloc_config_prefix[tests/hwloc/x86/Makefile]
         hwloc_config_prefix[tests/hwloc/xml/Makefile]
         hwloc_config_prefix[tests/hwloc/ports/Makefile]
         hwloc_config_prefix[tests/hwloc/rename/Makefile]
+        hwloc_config_prefix[tests/hwloc/linux/allowed/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh]
         hwloc_config_prefix[tests/hwloc/linux/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/x86/test-topology.sh]
@@ -427,6 +429,7 @@ int foo(void) {
 chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
       ]hwloc_config_prefix[tests/hwloc/x86/test-topology.sh \
       ]hwloc_config_prefix[tests/hwloc/xml/test-topology.sh \
+      ]hwloc_config_prefix[tests/hwloc/linux/allowed/test-topology.sh \
       ]hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh \
       ]hwloc_config_prefix[tests/hwloc/wrapper.sh \
       ]hwloc_config_prefix[utils/hwloc/hwloc-compress-dir \
