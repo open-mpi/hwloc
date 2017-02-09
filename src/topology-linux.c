@@ -2617,8 +2617,10 @@ hwloc__get_firmware_dmi_memory_info(struct hwloc_topology *topology,
       break;
 
     err = fread(&header, sizeof(header), 1, fd);
-    if (err != 1)
+    if (err != 1) {
+      fclose(fd);
       break;
+    }
     if (header.length < sizeof(header)) {
       /* invalid, or too old entry/spec that doesn't contain what we need */
       fclose(fd);
