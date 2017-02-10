@@ -4268,7 +4268,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   struct hwloc_obj_info_s *global_infos = NULL;
   unsigned global_infos_count = 0;
-  int numprocs = 0;
+  int numprocs;
   int already_pus;
   int err;
 
@@ -4291,6 +4291,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
    * /proc/cpuinfo
    */
   numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos, &global_infos_count);
+  if (numprocs < 0)
+    numprocs = 0;
 
   /**************************
    * detect model for quirks
