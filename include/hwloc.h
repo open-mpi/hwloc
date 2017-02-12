@@ -410,7 +410,7 @@ struct hwloc_obj {
                                           */
   hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
                                           *
-                                          * This includes not only the same as the cpuset field, but also the CPUs for
+                                          * This includes not only the same as the cpuset field, but also some CPUs for
                                           * which topology information is unknown or incomplete, and the CPUs that are
                                           * ignored when the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
                                           * Thus no corresponding PU object may be found in the topology, because the
@@ -457,7 +457,7 @@ struct hwloc_obj {
                                           */
   hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,
                                           *
-                                          * This includes not only the same as the nodeset field, but also the NUMA
+                                          * This includes not only the same as the nodeset field, but also some NUMA
                                           * nodes for which topology information is unknown or incomplete, and the nodes
                                           * that are ignored when the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
                                           * Thus no corresponding NUMA node object may be found in the topology, because the
