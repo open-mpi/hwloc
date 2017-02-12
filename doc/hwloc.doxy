@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -37,7 +37,7 @@ hwloc supports the following operating systems:
 
 <ul>
 <li>Linux (including old kernels not having sysfs topology
-information, with knowledge of cpusets, offline CPUs and ScaleMP vSMP)
+information, with knowledge of cpusets, ScaleMP vSMP support, etc.)
 on all supported hardware, including Intel Xeon Phi
 (KNL and KNC, either standalone or as a coprocessor)
 and NumaScale NumaConnect.</li>
