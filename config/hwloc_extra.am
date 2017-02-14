@@ -1,0 +1,36 @@
+# Copyright © 2009-2016 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+
+# Must be called with:
+# HWLOC_EXTRA_CHECK_DIR= subdirectory containing targets (relative path from top_srcdir)
+# HWLOC_EXTRA_CHECK_TARGET= target filename pattern
+#
+# The caller must have some non-optional checks (so that LOG_DRIVER is defined by automake).
+
+.PHONY: hwloc-extra-check
+hwloc-extra-check:
+	@fail=0; \
+	echo "======================================================"; \
+	if test -d $(top_srcdir)/$(HWLOC_EXTRA_CHECK_DIR); then \
+	  echo "Running extra check from $(HWLOC_EXTRA_CHECK_DIR) ..."; \
+	  for file in `ls $(top_srcdir)/$(HWLOC_EXTRA_CHECK_DIR)/$(HWLOC_EXTRA_CHECK_TARGET)`; do \
+	    name=`echo "$$file" | sed 's/.*\///'`; \
+	    $(LOG_DRIVER) --test-name "$$name" --log-file "$$name.log" --trs-file "$$name.trs" -- $(LOG_COMPILER) $(top_srcdir)/$(HWLOC_EXTRA_CHECK_DIR)/"$$file"; \
+	    if grep "^[	 ]*:test-result:[	 ]*FAIL" "$$name.trs" >/dev/null 2>&1; then fail=`expr $$fail + 1`; fi; \
+	  done; \
+	else \
+	  echo "Extra check directory $(HWLOC_EXTRA_CHECK_DIR) missing."; \
+	fi; \
+	if test x$$fail != x0; then \
+	  echo "======================================================"; \
+          echo "# FAIL:  $$fail"; \
+	  exit 1; \
+	fi; \
+	echo "======================================================"
+
+.PHONY: hwloc-extra-check-clean
+hwloc-extra-check-clean:
+	@for file in `ls $(top_srcdir)/$(HWLOC_EXTRA_CHECK_DIR)/$(HWLOC_EXTRA_CHECK_TARGET)`; do \
+	  name=`echo "$$file" | sed 's/.*\///'`; \
+	  $(RM) "$$name.trs" "$$name.log"; \
+        done

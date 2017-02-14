@@ -61,3 +61,12 @@ endif HWLOC_HAVE_BUNZIPP
 EXTRA_DIST = $(cpuid_outputs) $(cpuid_tarballs) $(cpuid_options) $(cpuid_envs)
 
 LOG_COMPILER = $(builddir)/test-topology.sh
+
+
+# Non-distributed tests in extra/*.output
+HWLOC_EXTRA_CHECK_DIR = tests/hwloc/x86/extra
+HWLOC_EXTRA_CHECK_TARGET = *.output
+include ../../../config/hwloc_extra.am
+check-local: hwloc-extra-check
+clean-local: hwloc-extra-check-clean
+

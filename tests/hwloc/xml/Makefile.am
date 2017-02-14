@@ -76,3 +76,12 @@ TESTS = $(xml_outputs)
 EXTRA_DIST = $(xml_outputs) $(xml_source) $(xml_options) $(xml_envs)
 
 LOG_COMPILER = $(HWLOC_top_builddir)/tests/hwloc/xml/test-topology.sh
+
+
+# Non-distributed tests in extra/*.output
+HWLOC_EXTRA_CHECK_DIR = tests/hwloc/xml/extra
+HWLOC_EXTRA_CHECK_TARGET = *.{xml,output}
+include ../../../config/hwloc_extra.am
+check-local: hwloc-extra-check
+clean-local: hwloc-extra-check-clean
+
