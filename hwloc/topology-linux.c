@@ -4550,8 +4550,16 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   int err;
 
   err = hwloc_readlink(osdevpath, path, sizeof(path), root_fd);
-  if (err < 0)
-    return NULL;
+  if (err < 0) {
+    /* /sys/class/<class>/<name> is a directory instead of a symlink on old kernels (at least around 2.6.18 and 2.6.25).
+     * The link to parse can be found in /sys/class/<class>/<name>/device instead, at least for "/pci..."
+     */
+    char olddevpath[256];
+    snprintf(olddevpath, sizeof(olddevpath), "%s/device", osdevpath);
+    err = hwloc_readlink(olddevpath, path, sizeof(path), root_fd);
+    if (err < 0)
+      return NULL;
+  }
   path[err] = '\0';
 
   if (!allowvirtual) {
