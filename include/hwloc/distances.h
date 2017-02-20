@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2016 Inria.  All rights reserved.
+ * Copyright © 2010-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -40,7 +40,7 @@ extern "C" {
  */
 struct hwloc_distances_s {
   unsigned nbobjs;		/**< \brief Number of objects described by the distance matrix. */
-  hwloc_obj_t *objs;		/**< \biref Array of objects described by the distance matrix. */
+  hwloc_obj_t *objs;		/**< \brief Array of objects described by the distance matrix. */
   unsigned long kind;		/**< \brief OR'ed set of ::hwloc_distances_kind_e. */
   hwloc_uint64_t *values;	/**< \brief Matrix of distances between objects, stored as a one-dimension array.
 				 *
@@ -173,7 +173,7 @@ enum hwloc_distances_flag_e {
  * \p kind specifies the kind of distance as a OR'ed set of ::hwloc_distances_kind_e.
  *
  * \p flags configures the behavior of the function using an optional OR'ed set of
- * ::hwoc_distances_flag_e.
+ * ::hwloc_distances_flag_e.
  *
  * Objects must be of the same type. They cannot be of type Group.
  */
