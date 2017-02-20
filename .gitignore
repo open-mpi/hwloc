@@ -116,7 +116,7 @@ test-suite.log
 /tests/hwloc/nvml
 
 /tests/hwloc/linux/test-topology.sh
-
+/tests/hwloc/linux/allowed/test-topology.sh
 /tests/hwloc/linux/gather/test-gather-topology.sh
 
 /tests/hwloc/ports/*.c
