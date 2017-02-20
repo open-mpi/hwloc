@@ -115,6 +115,10 @@ test-suite.log
 /tests/linux/*.log
 /tests/linux/*.trs
 
+/tests/linux/allowed/test-topology.sh
+/tests/linux/allowed/*.log
+/tests/linux/allowed/*.trs
+
 /tests/linux/gather/test-gather-topology.sh
 /tests/linux/gather/*.log
 /tests/linux/gather/*.trs
