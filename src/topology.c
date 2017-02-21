@@ -2724,7 +2724,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->first_pcidev = topology->last_pcidev = NULL;
   topology->first_osdev = topology->last_osdev = NULL;
   /* sane values to type_depth */
-  for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_MISC; l++)
+  for (l = HWLOC_OBJ_SYSTEM; l <= HWLOC_OBJ_MISC; l++)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
   topology->type_depth[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_DEPTH_BRIDGE;
   topology->type_depth[HWLOC_OBJ_PCI_DEVICE] = HWLOC_TYPE_DEPTH_PCI_DEVICE;

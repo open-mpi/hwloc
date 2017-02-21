@@ -31,6 +31,7 @@ Version 1.11.6
   overlap currently defined ranges in the bitmap.
 * Don't reset the lstopo zoom scale when moving the X11 window.
 * lstopo now has --flags for manually setting topology flags.
+* hwloc_get_depth_type() returns HWLOC_TYPE_DEPTH_UNKNOWN for Misc objects.
 
 
 Version 1.11.5
