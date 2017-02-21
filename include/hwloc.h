@@ -1164,6 +1164,9 @@ HWLOC_DECLSPEC void * hwloc_topology_get_userdata(hwloc_topology_t topology);
 /** \brief Get the depth of the hierarchical tree of objects.
  *
  * This is the depth of ::HWLOC_OBJ_PU objects plus one.
+ *
+ * \note I/O and Misc objects are ignored when computing the depth
+ * of the tree (they are placed on special levels, or none).
  */
 HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topology) __hwloc_attribute_pure;
 
@@ -1188,6 +1191,8 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * hwloc_get_obj_by_depth() but it should not be considered as an actual
  * depth by the application. In particular, it should not be compared with
  * any other object depth or with the entire topology depth.
+ *
+ * If ::HWLOC_OBJ_MISC is given, the function returns ::HWLOC_TYPE_DEPTH_UNKNOWN.
  */
 HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
 
