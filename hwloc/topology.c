@@ -3315,8 +3315,7 @@ hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
       assert(!child->next_sibling);
     else
       assert(child->next_sibling == parent->children[j+1]);
-    if (!hwloc_obj_type_is_io(child->type))
-      assert(child->depth > parent->depth);
+    assert(child->depth > parent->depth);
     /* recurse */
     hwloc__check_object(topology, child);
   }
