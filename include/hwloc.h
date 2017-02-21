@@ -686,7 +686,7 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * If ::HWLOC_OBJ_GROUP is given, the function may return ::HWLOC_TYPE_DEPTH_MULTIPLE
  * if multiple levels of Groups exist.
  *
- * If an I/O or Misc object type or is given, the function returns a virtual value
+ * If an I/O or Misc object type is given, the function returns a virtual value
  * because these objects are stored in special levels that are not CPU-related.
  * This virtual depth may be passed to other hwloc functions such as
  * hwloc_get_obj_by_depth() but it should not be considered as an actual

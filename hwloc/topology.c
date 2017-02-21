@@ -804,7 +804,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_PCI_DEVICE,
   HWLOC_OBJ_OS_DEVICE,
   HWLOC_OBJ_PU,
-  HWLOC_OBJ_MISC,
+  HWLOC_OBJ_MISC, /* Misc is always a leaf */
 };
 /***** Make sure you update obj_type_priority[] below as well. *****/
 
