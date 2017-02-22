@@ -5413,7 +5413,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
   DIR *dir;
   struct dirent *dirent;
 
-  /* We could lookup /sys/devices/pci.../.../busid1/.../budid2 recursively
+  /* We could lookup /sys/devices/pci.../.../busid1/.../busid2 recursively
    * to build the hierarchy of bridges/devices directly.
    * But that would require readdirs in all bridge sysfs subdirectories.
    * Do a single readdir in the linear list in /sys/bus/pci/devices/...

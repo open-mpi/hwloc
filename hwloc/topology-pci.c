@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015      Research Organization for Information Science
@@ -166,7 +166,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
        * VF and PF have the same vendor ID.
        *
        * libpciaccess just returns ffff:ffff, needs to be fixed.
-       * linuxpci is OK because sysfs files are already fixed the kernel.
+       * linuxpci is OK because sysfs files are already fixed in the kernel.
        * (pciutils is OK when it uses those Linux sysfs files.)
        *
        * Reading these files is an easy way to work around the libpciaccess issue on Linux,
