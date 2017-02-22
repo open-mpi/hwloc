@@ -2307,22 +2307,18 @@ hwloc_connect_io_misc_levels(hwloc_topology_t topology)
 {
   free(topology->bridge_level);
   topology->bridge_level = NULL;
-  topology->bridge_nbobjects = 0;
   topology->first_bridge = topology->last_bridge = NULL;
 
   free(topology->pcidev_level);
   topology->pcidev_level = NULL;
-  topology->pcidev_nbobjects = 0;
   topology->first_pcidev = topology->last_pcidev = NULL;
 
   free(topology->osdev_level);
   topology->osdev_level = NULL;
-  topology->osdev_nbobjects = 0;
   topology->first_osdev = topology->last_osdev = NULL;
 
   free(topology->misc_level);
   topology->misc_level = NULL;
-  topology->misc_nbobjects = 0;
   topology->first_misc = topology->last_misc = NULL;
 
   hwloc_list_io_misc_objects(topology, topology->levels[0][0]);
@@ -2790,12 +2786,16 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->levels[0] = malloc (sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
   /* NULLify other levels */
+  topology->bridge_nbobjects = 0;
+  topology->pcidev_nbobjects = 0;
+  topology->osdev_nbobjects = 0;
   topology->bridge_level = NULL;
   topology->pcidev_level = NULL;
   topology->osdev_level = NULL;
   topology->first_bridge = topology->last_bridge = NULL;
   topology->first_pcidev = topology->last_pcidev = NULL;
   topology->first_osdev = topology->last_osdev = NULL;
+  topology->misc_nbobjects = 0;
   topology->misc_level = NULL;
   topology->first_misc = topology->last_misc = NULL;
   /* sane values to type_depth */
