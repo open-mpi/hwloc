@@ -44,12 +44,10 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
       return -1;
 #ifdef HAVE_LIBLGRP
     if (!(flags & HWLOC_CPUBIND_NOMEMBIND)) {
-      int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
       int n, i;
-      assert (depth >= 0);
-      n = hwloc_get_nbobjs_by_depth(topology, depth);
+      n = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
       for (i = 0; i < n; i++) {
-	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, i);
 	lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
       }
     }
@@ -59,13 +57,11 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 
 #ifdef HAVE_LIBLGRP
   if (!(flags & HWLOC_CPUBIND_NOMEMBIND)) {
-    int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
     int n, i, ok;
-    assert(depth >= 0);
-    n = hwloc_get_nbobjs_by_depth(topology, depth);
+    n = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
     hwloc_bitmap_t target = hwloc_bitmap_alloc();
     for (i = 0; i < n; i++) {
-      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, i);
       if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set))
 	hwloc_bitmap_or(target, target, obj->cpuset);
     }
@@ -77,7 +73,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
       /* Ok, managed to achieve hwloc_set by just combining NUMA nodes */
 
       for (i = 0; i < n; i++) {
-        hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+        hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, i);
 
         if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set)) {
           lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
@@ -131,11 +127,8 @@ static int
 hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   processorid_t binding;
-  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   int n;
   int i;
-
-  assert(depth >= 0);
 
   /* first check if processor_bind() was used to bind to a single processor rather than to an lgroup */
   if ( processor_bind(idtype, id, PBIND_QUERY, &binding) == 0 && binding != PBIND_NONE ) {
@@ -145,9 +138,9 @@ hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 
   /* if not, check lgroups */
   hwloc_bitmap_zero(hwloc_set);
-  n = hwloc_get_nbobjs_by_depth(topology, depth);
+  n = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
   for (i = 0; i < n; i++) {
-    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, i);
     lgrp_affinity_t aff = lgrp_affinity_get(idtype, id, obj->os_index);
 
     if (aff == LGRP_AFF_STRONG)
@@ -184,7 +177,6 @@ hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t h
 static int
 hwloc_solaris_set_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
-  int depth;
   int n, i;
 
   switch (policy) {
@@ -201,12 +193,10 @@ hwloc_solaris_set_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t i
     return -1;
   }
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert(depth >= 0);
-  n = hwloc_get_nbobjs_by_depth(topology, depth);
+  n = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
 
   for (i = 0; i < n; i++) {
-    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, i);
     if (hwloc_bitmap_isset(nodeset, obj->os_index)) {
       lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
     } else {
@@ -241,17 +231,14 @@ hwloc_solaris_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_node
 static int
 hwloc_solaris_get_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
-  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   int n;
   int i;
 
-  assert(depth >= 0);
-
   hwloc_bitmap_zero(nodeset);
-  n = hwloc_get_nbobjs_by_depth(topology, depth);
+  n = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
 
   for (i = 0; i < n; i++) {
-    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, i);
     lgrp_affinity_t aff = lgrp_affinity_get(idtype, id, obj->os_index);
 
     if (aff == LGRP_AFF_STRONG)

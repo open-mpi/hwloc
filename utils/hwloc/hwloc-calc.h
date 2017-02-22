@@ -172,7 +172,7 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
     if (lcontext->only_hbm == -1)
       lcontext->only_hbm = 1;
     *typep = HWLOC_OBJ_NUMANODE;
-    depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
+    depth = HWLOC_TYPE_DEPTH_NUMANODE;
     return depth;
   }
 
@@ -320,7 +320,8 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 					      &type);
     if (nextdepth == HWLOC_TYPE_DEPTH_UNKNOWN || nextdepth == HWLOC_TYPE_DEPTH_MULTIPLE)
       return -1;
-    if (nextdepth < 0) {
+    /* we need an object with a cpuset, that's depth>=0 or memory */
+    if (nextdepth < 0 && nextdepth != HWLOC_TYPE_DEPTH_NUMANODE) {
       if (verbose >= 0)
 	fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
       return -1;
@@ -504,7 +505,9 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
     return -1;
 
-  } else if (depth < 0) {
+  } else if (depth < 0 && depth != HWLOC_TYPE_DEPTH_NUMANODE) {
+    /* special object without cpusets */
+
     /* if we didn't find a depth but found a type, handle special cases */
     hwloc_obj_t obj = NULL;
 

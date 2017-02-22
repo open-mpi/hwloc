@@ -402,11 +402,9 @@ hwloc_aix_get_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   rsethandle_t rset;
   unsigned cpu, maxcpus;
   int res = -1;
-  int depth, n, i;
+  int n, i;
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert(depth >= 0);
-  n = hwloc_get_nbobjs_by_depth(topology, depth);
+  n = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
 
   rset = rs_alloc(RS_EMPTY);
 
@@ -423,7 +421,7 @@ hwloc_aix_get_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
 
   hwloc_bitmap_zero(nodeset);
   for (i = 0; i < n; i++) {
-    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, i);
     if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set))
       hwloc_bitmap_set(nodeset, obj->os_index);
   }

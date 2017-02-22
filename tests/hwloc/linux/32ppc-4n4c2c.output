@@ -164,14 +164,14 @@ Machine (P#0 total=129236992KB PlatformName=pSeries PlatformModel="CHRP IBM,9125
             Core L#31 (P#62)
               PU L#31 (P#62)
 depth 0:	1 Machine (type #1)
- depth 1:	4 NUMANode (type #2)
-  depth 2:	16 L3Cache (type #8)
-   depth 3:	16 L2Cache (type #7)
-    depth 4:	32 L1dCache (type #6)
-     depth 5:	32 L1iCache (type #11)
-      depth 6:	32 Core (type #4)
-       depth 7:	32 PU (type #5)
-Relative latency matrix (kind 5) between 4 NUMANodes (depth 1) by logical indexes:
+ depth 1:	16 L3Cache (type #8)
+  depth 2:	16 L2Cache (type #7)
+   depth 3:	32 L1dCache (type #6)
+    depth 4:	32 L1iCache (type #11)
+     depth 5:	32 Core (type #4)
+      depth 6:	32 PU (type #5)
+Special depth -7:	4 NUMANode (type #2)
+Relative latency matrix (kind 5) between 4 NUMANodes (depth -7) by logical indexes:
   index     0     1     2     3
       0    10    20    20    20
       1    20    10    20    20

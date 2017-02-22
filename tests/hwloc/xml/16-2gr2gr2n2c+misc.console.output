@@ -50,8 +50,8 @@ Machine (P#0 total=8388608KB Backend=Synthetic SyntheticDescription="group:2 gro
 depth 0:	1 Machine (type #1)
  depth 1:	2 Group0 (type #14)
   depth 2:	4 Group1 (type #14)
-   depth 3:	8 NUMANode (type #2)
-    depth 4:	16 Core (type #4)
-     depth 5:	16 PU (type #5)
+   depth 3:	16 Core (type #4)
+    depth 4:	16 PU (type #5)
+Special depth -7:	8 NUMANode (type #2)
 Special depth -6:	2 Misc (type #15)
 Topology not from this system

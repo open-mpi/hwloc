@@ -44,13 +44,13 @@ static void check(unsigned nbnodes, unsigned nbcores, unsigned nbpus)
 
   /* sanity checks */
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 4);
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert(depth == 1);
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_CORE);
-  assert(depth == 2);
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
   assert(depth == 3);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
+  assert((int) depth == HWLOC_TYPE_DEPTH_NUMANODE);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_CORE);
+  assert(depth == 1);
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
+  assert(depth == 2);
 
   /* actual checks */
   nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);

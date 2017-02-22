@@ -6,8 +6,8 @@ Machine (P#0 total=280840KB CPUModel="ARMv7 Processor rev 1 (v7l)" CPUImplemente
       Core L#1 (P#1)
         PU L#1 (P#1)
 depth 0:	1 Machine (type #1)
- depth 1:	1 NUMANode (type #2)
-  depth 2:	1 Package (type #3)
-   depth 3:	2 Core (type #4)
-    depth 4:	2 PU (type #5)
+ depth 1:	1 Package (type #3)
+  depth 2:	2 Core (type #4)
+   depth 3:	2 PU (type #5)
+Special depth -7:	1 NUMANode (type #2)
 Topology not from this system

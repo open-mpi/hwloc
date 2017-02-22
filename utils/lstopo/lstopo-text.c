@@ -208,11 +208,11 @@ static void output_distances(struct lstopo_output *loutput)
   if (!err) {
     for(j=0; j<nr; j++) {
       const char *kindmeans = (dist[j]->kind & HWLOC_DISTANCES_KIND_MEANS_LATENCY) ? "latency" : (dist[j]->kind & HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH) ? "bandwidth" : "distance";
-      fprintf(output, "Relative %s matrix (kind %lu) between %u %ss (depth %u) by %s indexes:\n",
+      fprintf(output, "Relative %s matrix (kind %lu) between %u %ss (depth %d) by %s indexes:\n",
 	      kindmeans, dist[j]->kind,
 	      dist[j]->nbobjs,
 	      hwloc_type_name(dist[j]->objs[0]->type),
-	      dist[j]->objs[0]->depth,
+	      (int) dist[j]->objs[0]->depth,
 	      logical ? "logical" : "physical");
       hwloc_utils_print_distance_matrix(output, dist[j]->nbobjs, dist[j]->objs, dist[j]->values, logical);
       hwloc_distances_release(topology, dist[j]);

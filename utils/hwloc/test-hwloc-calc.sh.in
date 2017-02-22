@@ -53,11 +53,11 @@ set -e
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" root --number-of node
   $calc --if synthetic --input "node:4 core:4 pu:4" node:2 -N core
-  $calc --if synthetic --input "node:4 core:4 pu:4" node:2 -N 3
+  $calc --if synthetic --input "node:4 core:4 pu:4" node:2 -N 2
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" root --intersect Machine
   $calc --if synthetic --input "node:4 core:4 pu:4" core:4-7 -I NUMANode
-  $calc --if synthetic --input "node:4 core:4 pu:4" core:10-15 -I 1
+  $calc --if synthetic --input "node:4 core:4 pu:4" core:10-15 -I NUMANode
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:2-3 --hierarchical node.pu
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:3-6 -H node.core --sep foo

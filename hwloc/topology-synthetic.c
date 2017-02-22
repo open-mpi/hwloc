@@ -957,7 +957,8 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
 						   char *buffer, size_t buflen)
 {
   unsigned depth = obj->depth;
-  unsigned total = topology->level_nbobjects[depth];
+  unsigned total;
+  hwloc_obj_t *level;
   unsigned step = 1;
   unsigned nr_loops = 0;
   struct hwloc_synthetic_intlv_loop_s *loops = NULL, *tmploops;
@@ -966,6 +967,15 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
   ssize_t tmplen = buflen;
   char *tmp = buffer;
   int res, ret = 0;
+
+  if ((int)depth < 0) {
+    assert((int)depth == HWLOC_TYPE_DEPTH_NUMANODE);
+    total = topology->slevels[HWLOC_SLEVEL_NUMANODE].nbobjs;
+    level = topology->slevels[HWLOC_SLEVEL_NUMANODE].objs;
+  } else {
+    total = topology->level_nbobjects[depth];
+    level = topology->levels[depth];
+  }
 
   /* must start with 0 */
   if (obj->os_index)
@@ -978,12 +988,12 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
 
     /* look for os_index == step */
     for(i=1; i<total; i++)
-      if (topology->levels[depth][i]->os_index == step)
+      if (level[i]->os_index == step)
 	break;
     if (i == total)
       goto exportall;
     for(j=2; j<total/i; j++)
-      if (topology->levels[depth][i*j]->os_index != step*j)
+      if (level[i*j]->os_index != step*j)
 	break;
 
     nr_loops++;
@@ -1004,7 +1014,7 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
       ind += (i / loops[j].step) % loops[j].nb * mul;
       mul *= loops[j].nb;
     }
-    if (topology->levels[depth][i]->os_index != ind)
+    if (level[i]->os_index != ind)
       goto exportall;
   }
 

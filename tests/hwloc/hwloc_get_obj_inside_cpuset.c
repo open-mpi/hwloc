@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -52,44 +52,44 @@ main (void)
 
   /* check last PU */
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PU, 2*3*4*5*6-1);
-  assert(obj == hwloc_get_obj_by_depth(topology, 5, 2*3*4*5*6-1));
+  assert(obj == hwloc_get_obj_by_depth(topology, 4, 2*3*4*5*6-1));
   /* there is no next PU after the last one */
   obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PU, obj);
   assert(!obj);
 
 
   /* check there are 20 cores inside first package */
-  root = hwloc_get_obj_by_depth(topology, 2, 0);
+  root = hwloc_get_obj_by_depth(topology, 1, 0);
   assert(hwloc_get_nbobjs_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_CORE) == 20);
 
   /* check there are 12 caches inside last node */
-  root = hwloc_get_obj_by_depth(topology, 1, 1);
+  root = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, 1);
   assert(hwloc_get_nbobjs_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_L2CACHE) == 12);
 
 
   /* check first PU of second package */
-  root = hwloc_get_obj_by_depth(topology, 2, 1);
+  root = hwloc_get_obj_by_depth(topology, 1, 1);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PU, 0);
-  assert(obj == hwloc_get_obj_by_depth(topology, 5, 4*5*6));
+  assert(obj == hwloc_get_obj_by_depth(topology, 4, 4*5*6));
   idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
   assert(idx == 0);
 
   /* check third core of third package */
-  root = hwloc_get_obj_by_depth(topology, 2, 2);
+  root = hwloc_get_obj_by_depth(topology, 1, 2);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_CORE, 2);
-  assert(obj == hwloc_get_obj_by_depth(topology, 4, 2*4*5+2));
+  assert(obj == hwloc_get_obj_by_depth(topology, 3, 2*4*5+2));
   idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
   assert(idx == 2);
 
   /* check first package of second node */
-  root = hwloc_get_obj_by_depth(topology, 1, 1);
+  root = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, 1);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PACKAGE, 0);
-  assert(obj == hwloc_get_obj_by_depth(topology, 2, 3));
+  assert(obj == hwloc_get_obj_by_depth(topology, 1, 3));
   idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
   assert(idx == 0);
 
   /* there is no node inside packages */
-  root = hwloc_get_obj_by_depth(topology, 2, 0);
+  root = hwloc_get_obj_by_depth(topology, 1, 0);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_NUMANODE, 0);
   assert(!obj);
 

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -785,7 +785,7 @@ hwloc_distrib(hwloc_topology_t topology,
      * If previous chunks got rounded-up, we may get a bit less. */
     chunk = (( (givenweight+weight) * n  + tot_weight-1) / tot_weight)
           - ((  givenweight         * n  + tot_weight-1) / tot_weight);
-    if (!root->arity || chunk <= 1 || root->depth >= until) {
+    if (!root->arity || chunk <= 1 || (root->depth >= until && (int) root->depth != HWLOC_TYPE_DEPTH_NUMANODE /* FIXME */)) {
       /* We can't split any more, put everything there.  */
       if (chunk) {
 	/* Fill cpusets with ours */

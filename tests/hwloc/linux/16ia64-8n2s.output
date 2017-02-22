@@ -123,15 +123,15 @@ Machine (P#0 total=48346688KB Backend=Linux Architecture=ia64)
                   PU L#15 (P#15)
 depth 0:	1 Machine (type #1)
  depth 1:	2 Group0 (type #14)
-  depth 2:	8 NUMANode (type #2)
-   depth 3:	16 Package (type #3)
-    depth 4:	16 L3Cache (type #8)
-     depth 5:	16 L2Cache (type #7)
-      depth 6:	16 L1dCache (type #6)
-       depth 7:	16 L1iCache (type #11)
-        depth 8:	16 Core (type #4)
-         depth 9:	16 PU (type #5)
-Relative latency matrix (kind 5) between 8 NUMANodes (depth 2) by logical indexes:
+  depth 2:	16 Package (type #3)
+   depth 3:	16 L3Cache (type #8)
+    depth 4:	16 L2Cache (type #7)
+     depth 5:	16 L1dCache (type #6)
+      depth 6:	16 L1iCache (type #11)
+       depth 7:	16 Core (type #4)
+        depth 8:	16 PU (type #5)
+Special depth -7:	8 NUMANode (type #2)
+Relative latency matrix (kind 5) between 8 NUMANodes (depth -7) by logical indexes:
   index     0     1     2     3     4     5     6     7
       0    10    25    25    25    29    29    29    29
       1    25    10    25    25    29    29    29    29

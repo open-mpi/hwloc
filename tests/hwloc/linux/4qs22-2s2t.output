@@ -6,9 +6,9 @@ Machine (P#0 total=16777216KB Backend=Linux)
     PU L#2 (P#2)
     PU L#3 (P#3)
 depth 0:	1 Machine (type #1)
- depth 1:	2 NUMANode (type #2)
-  depth 2:	4 PU (type #5)
-Relative latency matrix (kind 5) between 2 NUMANodes (depth 1) by logical indexes:
+ depth 1:	4 PU (type #5)
+Special depth -7:	2 NUMANode (type #2)
+Relative latency matrix (kind 5) between 2 NUMANodes (depth -7) by logical indexes:
   index     0     1
       0    10    20
       1    20    10

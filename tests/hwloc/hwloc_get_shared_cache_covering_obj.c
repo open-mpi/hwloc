@@ -29,7 +29,7 @@ int main(void)
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
-  obj = hwloc_get_obj_by_depth(topology, 6, CPUINDEX);
+  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(cache);
@@ -38,13 +38,13 @@ int main(void)
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
   /* check no shared cache above the L2 cache */
-  obj = hwloc_get_obj_by_depth(topology, 4, 0);
+  obj = hwloc_get_obj_by_depth(topology, 3, 0);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(!cache);
 
   /* check no shared cache above the node */
-  obj = hwloc_get_obj_by_depth(topology, 1, 0);
+  obj = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, 0);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(!cache);
@@ -58,7 +58,7 @@ int main(void)
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
-  obj = hwloc_get_obj_by_depth(topology, 6, CPUINDEX);
+  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(cache);
@@ -67,7 +67,7 @@ int main(void)
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
   /* check no shared-cache above the core */
-  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX/2);
+  obj = hwloc_get_obj_by_depth(topology, 4, CPUINDEX/2);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(!cache);

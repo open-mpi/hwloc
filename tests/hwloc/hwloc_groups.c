@@ -42,9 +42,9 @@ int main(void)
   assert(depth == 1);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 1);
-  /* 3 node at depth 2 */
+  /* 3 nodes */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert(depth == 2);
+  assert((int)depth == HWLOC_TYPE_DEPTH_NUMANODE);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 3);
   /* find the root obj */
@@ -52,7 +52,7 @@ int main(void)
   assert(obj->arity == 2);
   /* check its children */
   assert(obj->children[0]->type == HWLOC_OBJ_NUMANODE);
-  assert(obj->children[0]->depth == 2);
+  assert(obj->children[0]->depth == (unsigned) HWLOC_TYPE_DEPTH_NUMANODE);
   assert(obj->children[0]->arity == 1);
   assert(obj->children[1]->type == HWLOC_OBJ_GROUP);
   assert(obj->children[1]->depth == 1);
@@ -74,19 +74,19 @@ int main(void)
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
-  /* 1 node at depth 1 */
+  /* 1 node */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert(depth == 1);
+  assert((int)depth == HWLOC_TYPE_DEPTH_NUMANODE);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 1);
-  /* 2 groups at depth 2 */
+  /* 2 groups at depth 1 */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP);
-  assert(depth == 2);
+  assert(depth == 1);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 2);
-  /* 5 packages at depth 3 */
+  /* 5 packages at depth 2 */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE);
-  assert(depth == 3);
+  assert(depth == 2);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 5);
   /* find the node obj */
@@ -97,13 +97,13 @@ int main(void)
   assert(obj->arity == 3);
   /* check its children */
   assert(obj->children[0]->type == HWLOC_OBJ_GROUP);
-  assert(obj->children[0]->depth == 2);
+  assert(obj->children[0]->depth == 1);
   assert(obj->children[0]->arity == 2);
   assert(obj->children[1]->type == HWLOC_OBJ_PACKAGE);
-  assert(obj->children[1]->depth == 3);
+  assert(obj->children[1]->depth == 2);
   assert(obj->children[1]->arity == 1);
   assert(obj->children[2]->type == HWLOC_OBJ_GROUP);
-  assert(obj->children[2]->depth == 2);
+  assert(obj->children[2]->depth == 1);
   assert(obj->children[2]->arity == 2);
   hwloc_topology_destroy(topology);
 
@@ -129,14 +129,14 @@ int main(void)
   hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 4);
+  assert(depth == 3);
   width = hwloc_get_nbobjs_by_depth(topology, 0);
   assert(width == 1);
-  width = hwloc_get_nbobjs_by_depth(topology, 1);
+  width = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
   assert(width == 2);
-  width = hwloc_get_nbobjs_by_depth(topology, 2);
+  width = hwloc_get_nbobjs_by_depth(topology, 1);
   assert(width == 16);
-  width = hwloc_get_nbobjs_by_depth(topology, 3);
+  width = hwloc_get_nbobjs_by_depth(topology, 2);
   assert(width == 16);
   /* group 8cores as 2*2*2 */
   for(i=0; i<16; i++)
@@ -145,16 +145,16 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 6);
+  assert(depth == 5);
   width = hwloc_get_nbobjs_by_depth(topology, 0);
   assert(width == 1);
-  width = hwloc_get_nbobjs_by_depth(topology, 1);
+  width = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
   assert(width == 2);
-  width = hwloc_get_nbobjs_by_depth(topology, 2);
+  width = hwloc_get_nbobjs_by_depth(topology, 1);
   assert(width == 4);
-  width = hwloc_get_nbobjs_by_depth(topology, 3);
+  width = hwloc_get_nbobjs_by_depth(topology, 2);
   assert(width == 8);
-  width = hwloc_get_nbobjs_by_depth(topology, 4);
+  width = hwloc_get_nbobjs_by_depth(topology, 3);
   assert(width == 16);
   hwloc_topology_destroy(topology);
 
@@ -171,7 +171,7 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 6);
+  assert(depth == 5);
   hwloc_topology_destroy(topology);
 
   putenv("HWLOC_GROUPING_ACCURACY=try"); /* ok */
@@ -184,7 +184,7 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 6);
+  assert(depth == 5);
   hwloc_topology_destroy(topology);
 
   hwloc_topology_init(&topology);
@@ -196,7 +196,7 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP /* no inaccurate flag, cannot group */));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 4);
+  assert(depth == 3);
   hwloc_topology_destroy(topology);
 
   putenv("HWLOC_GROUPING_ACCURACY=0.01"); /* too small, cannot group */
@@ -209,7 +209,7 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 4);
+  assert(depth == 3);
   hwloc_topology_destroy(topology);
 
   putenv("HWLOC_GROUPING_ACCURACY=0"); /* full accuracy, cannot group */
@@ -222,7 +222,7 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 4);
+  assert(depth == 3);
   hwloc_topology_destroy(topology);
 
   /* default 2*4*4 */
@@ -230,14 +230,14 @@ int main(void)
   hwloc_topology_set_synthetic(topology, "node:2 core:4 pu:4");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 4);
+  assert(depth == 3);
   width = hwloc_get_nbobjs_by_depth(topology, 0);
   assert(width == 1);
-  width = hwloc_get_nbobjs_by_depth(topology, 1);
+  width = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
   assert(width == 2);
-  width = hwloc_get_nbobjs_by_depth(topology, 2);
+  width = hwloc_get_nbobjs_by_depth(topology, 1);
   assert(width == 8);
-  width = hwloc_get_nbobjs_by_depth(topology, 3);
+  width = hwloc_get_nbobjs_by_depth(topology, 2);
   assert(width == 32);
   /* apply useless core distances */
   for(i=0; i<8; i++) {
@@ -254,7 +254,7 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 4);
+  assert(depth == 3);
   /* group 4cores as 2*2 */
   for(i=0; i<8; i++) {
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
@@ -270,16 +270,16 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 5);
+  assert(depth == 4);
   width = hwloc_get_nbobjs_by_depth(topology, 0);
   assert(width == 1);
-  width = hwloc_get_nbobjs_by_depth(topology, 1);
+  width = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
   assert(width == 2);
-  width = hwloc_get_nbobjs_by_depth(topology, 2);
+  width = hwloc_get_nbobjs_by_depth(topology, 1);
   assert(width == 4);
-  width = hwloc_get_nbobjs_by_depth(topology, 3);
+  width = hwloc_get_nbobjs_by_depth(topology, 2);
   assert(width == 8);
-  width = hwloc_get_nbobjs_by_depth(topology, 4);
+  width = hwloc_get_nbobjs_by_depth(topology, 3);
   assert(width == 32);
   /* group 4PUs as 2*2 */
   for(i=0; i<32; i++) {
@@ -296,18 +296,18 @@ int main(void)
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			      HWLOC_DISTANCES_ADD_FLAG_GROUP));
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 6);
+  assert(depth == 5);
   width = hwloc_get_nbobjs_by_depth(topology, 0);
   assert(width == 1);
-  width = hwloc_get_nbobjs_by_depth(topology, 1);
+  width = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
   assert(width == 2);
-  width = hwloc_get_nbobjs_by_depth(topology, 2);
+  width = hwloc_get_nbobjs_by_depth(topology, 1);
   assert(width == 4);
-  width = hwloc_get_nbobjs_by_depth(topology, 3);
+  width = hwloc_get_nbobjs_by_depth(topology, 2);
   assert(width == 8);
-  width = hwloc_get_nbobjs_by_depth(topology, 4);
+  width = hwloc_get_nbobjs_by_depth(topology, 3);
   assert(width == 16);
-  width = hwloc_get_nbobjs_by_depth(topology, 5);
+  width = hwloc_get_nbobjs_by_depth(topology, 4);
   assert(width == 32);
   hwloc_topology_destroy(topology);
 

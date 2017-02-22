@@ -187,6 +187,10 @@ typedef enum {
 			  *
 			  * There is always at one such object in the topology
 			  * even if the machine is not NUMA.
+			  *
+			  * NUMA nodes have a special depth ::HWLOC_TYPE_DEPTH_NUMANODE
+			  * instead of a normal depth just like other objects in the
+			  * main tree.
 			  */
   HWLOC_OBJ_PACKAGE,	/**< \brief Physical package.
 			  * The physical package that usually gets inserted
@@ -697,8 +701,8 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
  *
  * This is the depth of ::HWLOC_OBJ_PU objects plus one.
  *
- * \note I/O and Misc objects are ignored when computing the depth
- * of the tree (they are placed on special levels).
+ * \note NUMA nodes, I/O and Misc objects are ignored when computing
+ * the depth of the tree (they are placed on special levels).
  */
 HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topology) __hwloc_attribute_pure;
 
@@ -714,8 +718,8 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * If ::HWLOC_OBJ_GROUP is given, the function may return ::HWLOC_TYPE_DEPTH_MULTIPLE
  * if multiple levels of Groups exist.
  *
- * If an I/O or Misc object type is given, the function returns a virtual value
- * because these objects are stored in special levels that are not CPU-related.
+ * If a NUMA node, I/O or Misc object type is given, the function returns a virtual
+ * value because these objects are stored in special levels that are not CPU-related.
  * This virtual depth may be passed to other hwloc functions such as
  * hwloc_get_obj_by_depth() but it should not be considered as an actual
  * depth by the application. In particular, it should not be compared with
@@ -732,7 +736,8 @@ enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_BRIDGE = -3,     /**< \brief Virtual depth for bridge object level. \hideinitializer */
     HWLOC_TYPE_DEPTH_PCI_DEVICE = -4, /**< \brief Virtual depth for PCI device object level. \hideinitializer */
     HWLOC_TYPE_DEPTH_OS_DEVICE = -5,  /**< \brief Virtual depth for software device object level. \hideinitializer */
-    HWLOC_TYPE_DEPTH_MISC = -6        /**< \brief Virtual depth for Misc object. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MISC = -6,       /**< \brief Virtual depth for Misc object. \hideinitializer */
+    HWLOC_TYPE_DEPTH_NUMANODE = -7    /**< \brief Virtual depth for NUMA nodes. \hideinitializer */
 };
 
 /** \brief Returns the depth of objects of type \p type or below

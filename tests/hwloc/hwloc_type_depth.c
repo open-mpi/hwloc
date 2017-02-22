@@ -25,34 +25,34 @@ int main(void)
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION);
   hwloc_topology_load(topology);
 
-  assert(hwloc_topology_get_depth(topology) == 9);
+  assert(hwloc_topology_get_depth(topology) == 8);
 
   assert(hwloc_get_depth_type(topology, 0) == HWLOC_OBJ_SYSTEM);
   assert(hwloc_get_depth_type(topology, 1) == HWLOC_OBJ_MACHINE);
-  assert(hwloc_get_depth_type(topology, 2) == HWLOC_OBJ_NUMANODE);
+  assert(hwloc_get_depth_type(topology, 2) == HWLOC_OBJ_GROUP);
   assert(hwloc_get_depth_type(topology, 3) == HWLOC_OBJ_GROUP);
-  assert(hwloc_get_depth_type(topology, 4) == HWLOC_OBJ_GROUP);
-  assert(hwloc_get_depth_type(topology, 5) == HWLOC_OBJ_CORE);
-  assert(hwloc_get_depth_type(topology, 6) == HWLOC_OBJ_L3CACHE);
-  assert(hwloc_get_depth_type(topology, 7) == HWLOC_OBJ_L1CACHE);
-  assert(hwloc_get_depth_type(topology, 8) == HWLOC_OBJ_PU);
+  assert(hwloc_get_depth_type(topology, 4) == HWLOC_OBJ_CORE);
+  assert(hwloc_get_depth_type(topology, 5) == HWLOC_OBJ_L3CACHE);
+  assert(hwloc_get_depth_type(topology, 6) == HWLOC_OBJ_L1CACHE);
+  assert(hwloc_get_depth_type(topology, 7) == HWLOC_OBJ_PU);
 
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_MACHINE) == 1);
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == 5);
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PU) == 8);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == 4);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PU) == 7);
 
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE) == HWLOC_TYPE_DEPTH_UNKNOWN);
-  assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PACKAGE) == 4);
-  assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_PACKAGE) == 5);
+  assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PACKAGE) == 3);
+  assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_PACKAGE) == 4);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP) == HWLOC_TYPE_DEPTH_MULTIPLE);
   assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_GROUP) == HWLOC_TYPE_DEPTH_MULTIPLE);
   assert(hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_GROUP) == HWLOC_TYPE_DEPTH_MULTIPLE);
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_L3CACHE) == 6);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_L3CACHE) == 5);
 
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_BRIDGE) == HWLOC_TYPE_DEPTH_BRIDGE);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PCI_DEVICE) == HWLOC_TYPE_DEPTH_PCI_DEVICE);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_OS_DEVICE) == HWLOC_TYPE_DEPTH_OS_DEVICE);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_MISC) == HWLOC_TYPE_DEPTH_MISC);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE) == HWLOC_TYPE_DEPTH_NUMANODE);
 
   hwloc_topology_destroy(topology);
 

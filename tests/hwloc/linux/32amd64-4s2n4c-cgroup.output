@@ -45,14 +45,14 @@ Machine (P#0 total=100661164KB DMIProductName=H8QG6 DMIProductVersion=1234567890
     NUMANode L#7 (P#7)
 depth 0:	1 Machine (type #1)
  depth 1:	4 Package (type #3)
-  depth 2:	8 NUMANode (type #2)
-   depth 3:	2 L3Cache (type #8)
-    depth 4:	6 L2Cache (type #7)
-     depth 5:	6 L1dCache (type #6)
-      depth 6:	6 L1iCache (type #11)
-       depth 7:	6 Core (type #4)
-        depth 8:	6 PU (type #5)
-Relative latency matrix (kind 5) between 8 NUMANodes (depth 2) by logical indexes:
+  depth 2:	2 L3Cache (type #8)
+   depth 3:	6 L2Cache (type #7)
+    depth 4:	6 L1dCache (type #6)
+     depth 5:	6 L1iCache (type #11)
+      depth 6:	6 Core (type #4)
+       depth 7:	6 PU (type #5)
+Special depth -7:	8 NUMANode (type #2)
+Relative latency matrix (kind 5) between 8 NUMANodes (depth -7) by logical indexes:
   index     0     1     2     3     4     5     6     7
       0    10    16    16    22    16    22    16    22
       1    16    10    22    16    22    16    22    16

@@ -1927,6 +1927,7 @@ hwloc_reset_normal_type_depths(hwloc_topology_t topology)
   unsigned i;
   for (i=HWLOC_OBJ_SYSTEM; i<HWLOC_OBJ_MISC; i++)
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  topology->type_depth[HWLOC_OBJ_NUMANODE] = HWLOC_TYPE_DEPTH_NUMANODE; /* cleared in the loop above */
 }
 
 /* compare i-th and i-1-th levels structure */
@@ -2352,20 +2353,34 @@ hwloc_append_special_object(struct hwloc_special_level_s *level, hwloc_obj_t obj
   }
 }
 
-/* Append I/O and Misc objects to their lists */
+/* Append special objects to their lists */
 static void
-hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc_list_special_objects(hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
-  if (obj->type == HWLOC_OBJ_MISC) {
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
+    obj->next_cousin = NULL;
+    obj->depth = HWLOC_TYPE_DEPTH_NUMANODE;
+    /* Insert the main NUMA node list */
+    hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_NUMANODE], obj);
+
+    /* Recurse */
+    for_each_child(child, obj) /* FIXME temporary */
+      hwloc_list_special_objects(topology, child);
+    for_each_io_child(child, obj) /* FIXME temporary */
+      hwloc_list_special_objects(topology, child);
+    for_each_misc_child(child, obj)
+      hwloc_list_special_objects(topology, child);
+
+  } else if (obj->type == HWLOC_OBJ_MISC) {
     obj->next_cousin = NULL;
     obj->depth = HWLOC_TYPE_DEPTH_MISC;
     /* Insert the main Misc list */
     hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_MISC], obj);
     /* Recurse, Misc only have Misc children */
     for_each_misc_child(child, obj)
-      hwloc_list_io_misc_objects(topology, child);
+      hwloc_list_special_objects(topology, child);
 
   } else if (hwloc_obj_type_is_io(obj->type)) {
     obj->next_cousin = NULL;
@@ -2387,18 +2402,18 @@ hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
     }
     /* Recurse, I/O only have I/O and Misc children */
     for_each_io_child(child, obj)
-      hwloc_list_io_misc_objects(topology, child);
+      hwloc_list_special_objects(topology, child);
     for_each_misc_child(child, obj)
-      hwloc_list_io_misc_objects(topology, child);
+      hwloc_list_special_objects(topology, child);
 
   } else {
     /* Recurse */
     for_each_child(child, obj)
-      hwloc_list_io_misc_objects(topology, child);
+      hwloc_list_special_objects(topology, child);
     for_each_io_child(child, obj)
-      hwloc_list_io_misc_objects(topology, child);
+      hwloc_list_special_objects(topology, child);
     for_each_misc_child(child, obj)
-      hwloc_list_io_misc_objects(topology, child);
+      hwloc_list_special_objects(topology, child);
   }
 }
 
@@ -2412,7 +2427,7 @@ hwloc_connect_io_misc_levels(hwloc_topology_t topology)
     free(topology->slevels[i].objs);
   memset(&topology->slevels, 0, sizeof(topology->slevels));
 
-  hwloc_list_io_misc_objects(topology, topology->levels[0][0]);
+  hwloc_list_special_objects(topology, topology->levels[0][0]);
 
   for(i=0; i<HWLOC_NR_SLEVELS; i++)
     hwloc_build_level_from_list(&topology->slevels[i]);
@@ -2470,11 +2485,27 @@ hwloc_connect_levels(hwloc_topology_t topology)
      * Don't use PU if there are other types since we want to keep PU at the bottom.
      */
 
+  find_top:
     /* Look for the first non-PU object, and use the first PU if we really find nothing else */
     for (i = 0; i < n_objs; i++)
-      if (objs[i]->type != HWLOC_OBJ_PU)
+      if (objs[i]->type != HWLOC_OBJ_PU && objs[i]->type != HWLOC_OBJ_NUMANODE /* FIXME temporary */)
         break;
     top_obj = i == n_objs ? objs[0] : objs[i];
+    if (top_obj->type == HWLOC_OBJ_NUMANODE) { /* FIXME temporary */
+      n_new_objs = 0;
+      for (i = 0; i < n_objs; i++)
+	n_new_objs += objs[i]->arity;
+      new_objs = malloc(n_new_objs * sizeof(new_objs[0]));
+      n_new_objs = 0;
+      for (i = 0; i < n_objs; i++) {
+	memcpy(&new_objs[n_new_objs], objs[i]->children, objs[i]->arity*sizeof(new_objs[0]));
+	n_new_objs += objs[i]->arity;
+      }
+      free(objs);
+      objs = new_objs;
+      n_objs = n_new_objs;
+      goto find_top;
+    }
 
     /* See if this is actually the topmost object */
     for (i = 0; i < n_objs; i++) {
@@ -2884,9 +2915,11 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_PCIDEV == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_PCI_DEVICE));
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_OSDEV == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_OS_DEVICE));
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_MISC == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_MISC));
+  HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_NUMANODE == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_NUMANODE));
 
   /* sane values to type_depth */
   hwloc_reset_normal_type_depths(topology);
+  topology->type_depth[HWLOC_OBJ_NUMANODE] = HWLOC_TYPE_DEPTH_NUMANODE;
   topology->type_depth[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_DEPTH_BRIDGE;
   topology->type_depth[HWLOC_OBJ_PCI_DEVICE] = HWLOC_TYPE_DEPTH_PCI_DEVICE;
   topology->type_depth[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_DEPTH_OS_DEVICE;
@@ -3497,7 +3530,8 @@ hwloc__check_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwlo
   for(prev = NULL, child = parent->first_child, j = 0;
       child;
       prev = child, child = child->next_sibling, j++) {
-    assert(child->depth > parent->depth);
+    if (child->type != HWLOC_OBJ_NUMANODE && parent->type != HWLOC_OBJ_NUMANODE) /* FIXME temporary */
+      assert(child->depth > parent->depth);
     /* check siblings */
     hwloc__check_child_siblings(parent, parent->children, parent->arity, j, child, prev);
     /* recurse */
@@ -3654,7 +3688,10 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
       assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_MISC);
   } else {
     assert(obj->cpuset);
-    assert((int) obj->depth >= 0);
+    if (obj->type == HWLOC_OBJ_NUMANODE)
+      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_NUMANODE);
+    else
+      assert((int) obj->depth >= 0);
   }
 
   /* group depth cannot be -1 anymore in v2.0+ */
@@ -3815,9 +3852,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
     assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_PU);
 
   /* check that we have a NUMA level */
-  j = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert(j < hwloc_topology_get_depth(topology));
-  assert(hwloc_get_depth_type(topology, j) == HWLOC_OBJ_NUMANODE);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE) == HWLOC_TYPE_DEPTH_NUMANODE);
+  assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_NUMANODE) == HWLOC_OBJ_NUMANODE);
   /* check that other levels are not NUMA */
   for(i=0; i<depth-1; i++)
     if (i != j)

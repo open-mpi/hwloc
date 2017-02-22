@@ -140,10 +140,10 @@ int main(void)
   obj1 = hwloc_get_root_obj(topology);
   assert(obj1);
   obj1->userdata = (void *)(uintptr_t) 0x1;
-  obj2 = hwloc_get_obj_by_depth(topology, 3, 13);
+  obj2 = hwloc_get_obj_by_depth(topology, 2, 13);
   assert(obj2);
   obj2->userdata = (void *)(uintptr_t) 0x2;
-  obj3 = hwloc_get_obj_by_depth(topology, 5, 2*3*4*5*6-1);
+  obj3 = hwloc_get_obj_by_depth(topology, 4, 2*3*4*5*6-1);
   assert(obj3);
   obj3->userdata = (void *)(uintptr_t) 0x3;
 
@@ -167,10 +167,10 @@ int main(void)
   obj1 = hwloc_get_root_obj(reimport);
   assert(obj1);
   assert(obj1->userdata == (void *)(uintptr_t) 0x4);
-  obj2 = hwloc_get_obj_by_depth(reimport, 3, 13);
+  obj2 = hwloc_get_obj_by_depth(reimport, 2, 13);
   assert(obj2);
   assert(obj2->userdata == (void *)(uintptr_t) 0x5);
-  obj3 = hwloc_get_obj_by_depth(reimport, 5, 2*3*4*5*6-1);
+  obj3 = hwloc_get_obj_by_depth(reimport, 4, 2*3*4*5*6-1);
   assert(obj3);
   assert(obj3->userdata == (void *)(uintptr_t) 0x6);
   hwloc_topology_destroy(reimport);

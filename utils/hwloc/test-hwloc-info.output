@@ -1,12 +1,12 @@
 depth 0:	1 Machine (type #1)
- depth 1:	2 NUMANode (type #2)
-  depth 2:	6 Core (type #4)
-   depth 3:	24 PU (type #5)
+ depth 1:	6 Core (type #4)
+  depth 2:	24 PU (type #5)
+Special depth -7:	2 NUMANode (type #2)
 
 depth 0:	1 Machine (type #1)
- depth 1:	2 NUMANode (type #2)
-  depth 2:	6 Core (type #4)
-   depth 3:	24 PU (type #5)
+ depth 1:	6 Core (type #4)
+  depth 2:	24 PU (type #5)
+Special depth -7:	2 NUMANode (type #2)
 
 discovery:pu = 1
 cpubind:set_thisproc_cpubind = 0
@@ -43,7 +43,7 @@ Core L#2
  logical index = 2
  os index = 2
  gp index = 16
- depth = 2
+ depth = 1
  sibling rank = 2
  children = 4
  i/o children = 0
@@ -61,7 +61,7 @@ Core L#3
  logical index = 3
  os index = 3
  gp index = 22
- depth = 2
+ depth = 1
  sibling rank = 0
  children = 4
  i/o children = 0
@@ -79,7 +79,7 @@ Core L#4
  logical index = 4
  os index = 4
  gp index = 27
- depth = 2
+ depth = 1
  sibling rank = 1
  children = 4
  i/o children = 0
@@ -98,7 +98,7 @@ Core L#4
 0.0:  logical index = 10
 0.0:  os index = 10
 0.0:  gp index = 14
-0.0:  depth = 3
+0.0:  depth = 2
 0.0:  sibling rank = 2
 0.0:  children = 0
 0.0:  i/o children = 0
@@ -116,7 +116,7 @@ Core L#4
 0.1:  logical index = 2
 0.1:  os index = 2
 0.1:  gp index = 16
-0.1:  depth = 2
+0.1:  depth = 1
 0.1:  sibling rank = 2
 0.1:  children = 4
 0.1:  i/o children = 0
@@ -134,7 +134,7 @@ Core L#4
 0.2:  logical index = 0
 0.2:  os index = 0
 0.2:  gp index = 17
-0.2:  depth = 1
+0.2:  depth = -7
 0.2:  sibling rank = 0
 0.2:  children = 3
 0.2:  i/o children = 0
@@ -175,7 +175,7 @@ Core L#4
 1.0:  logical index = 11
 1.0:  os index = 11
 1.0:  gp index = 15
-1.0:  depth = 3
+1.0:  depth = 2
 1.0:  sibling rank = 3
 1.0:  children = 0
 1.0:  i/o children = 0
@@ -193,7 +193,7 @@ Core L#4
 1.1:  logical index = 2
 1.1:  os index = 2
 1.1:  gp index = 16
-1.1:  depth = 2
+1.1:  depth = 1
 1.1:  sibling rank = 2
 1.1:  children = 4
 1.1:  i/o children = 0
@@ -211,7 +211,7 @@ Core L#4
 1.2:  logical index = 0
 1.2:  os index = 0
 1.2:  gp index = 17
-1.2:  depth = 1
+1.2:  depth = -7
 1.2:  sibling rank = 0
 1.2:  children = 3
 1.2:  i/o children = 0
@@ -253,7 +253,7 @@ NUMANode L#0 = parent of PU L#7
  logical index = 0
  os index = 0
  gp index = 17
- depth = 1
+ depth = -7
  sibling rank = 0
  children = 3
  i/o children = 0
@@ -273,7 +273,7 @@ NUMANode L#0 = parent of PU L#8
  logical index = 0
  os index = 0
  gp index = 17
- depth = 1
+ depth = -7
  sibling rank = 0
  children = 3
  i/o children = 0
@@ -293,7 +293,7 @@ NUMANode L#0 = parent of PU L#9
  logical index = 0
  os index = 0
  gp index = 17
- depth = 1
+ depth = -7
  sibling rank = 0
  children = 3
  i/o children = 0
@@ -313,7 +313,7 @@ L2Cache L#3 = parent of PU L#12
  full type = L2Cache
  logical index = 3
  gp index = 30
- depth = 3
+ depth = 2
  sibling rank = 1
  children = 2
  i/o children = 0

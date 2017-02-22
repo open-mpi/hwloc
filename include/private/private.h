@@ -57,11 +57,12 @@ struct hwloc_topology {
   void *adopted_shmem_addr;
   size_t adopted_shmem_length;
 
-#define HWLOC_NR_SLEVELS 4
+#define HWLOC_NR_SLEVELS 5
 #define HWLOC_SLEVEL_BRIDGE 0
 #define HWLOC_SLEVEL_PCIDEV 1
 #define HWLOC_SLEVEL_OSDEV 2
 #define HWLOC_SLEVEL_MISC 3
+#define HWLOC_SLEVEL_NUMANODE 4
   /* order must match negative depth, it's asserted in setup_defaults() */
 #define HWLOC_SLEVEL_FROM_DEPTH(x) (HWLOC_TYPE_DEPTH_BRIDGE-(x))
 #define HWLOC_SLEVEL_TO_DEPTH(x) (HWLOC_TYPE_DEPTH_BRIDGE-(x))

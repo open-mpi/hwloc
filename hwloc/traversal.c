@@ -26,6 +26,8 @@ hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
     switch (depth) {
+    case HWLOC_TYPE_DEPTH_NUMANODE:
+      return HWLOC_OBJ_NUMANODE;
     case HWLOC_TYPE_DEPTH_BRIDGE:
       return HWLOC_OBJ_BRIDGE;
     case HWLOC_TYPE_DEPTH_PCI_DEVICE:

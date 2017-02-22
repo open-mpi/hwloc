@@ -1419,7 +1419,7 @@ hwloc_convert_from_v1dist_floats(hwloc_topology_t topology, unsigned nbobjs, flo
 
   /* save the scale in root info attrs.
    * Not perfect since we may have multiple of them,
-   * and some distances might disappear in case f restrict, etc.
+   * and some distances might disappear in case of restrict, etc.
    */
   sprintf(scalestring, "%f", scale);
   hwloc_obj_add_info(hwloc_get_root_obj(topology), "xmlv1DistancesScale", scalestring);
@@ -1919,6 +1919,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     for(dist = topology->first_dist; dist; dist = dist->next) {
       struct hwloc__xml_export_state_s childstate;
       unsigned nbobjs = dist->nbobjs;
+      int depth;
 
       if (nbobjs != (unsigned) hwloc_get_nbobjs_by_type(topology, dist->type))
 	continue;
@@ -1929,10 +1930,36 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
       for(i=0; i<nbobjs; i++)
 	logical_to_v2array[dist->objs[i]->logical_index] = i;
 
+      /* compute the relative depth */
+      if (dist->type == HWLOC_OBJ_NUMANODE) {
+	/* for NUMA nodes, use the highest normal-parent depth + 1 */
+	depth = -1;
+	for(i=0; i<nbobjs; i++) {
+	  hwloc_obj_t parent = dist->objs[i]->parent;
+	  if ((int)parent->depth+1 > depth)
+	    depth = parent->depth+1;
+	}
+      } else {
+	/* for non-NUMA nodes, increase the object depth if any of them has memory above */
+	int parent_with_memory = 0;
+	for(i=0; i<nbobjs; i++) {
+	  hwloc_obj_t parent = dist->objs[i]->parent;
+	  while (parent) {
+	    if (parent->type == HWLOC_OBJ_NUMANODE) {
+	      parent_with_memory = 1;
+	      goto done;
+	    }
+	    parent = parent->parent;
+	  }
+	}
+      done:
+	depth = hwloc_get_type_depth(topology, dist->type) + parent_with_memory;
+      }
+
       state.new_child(&state, &childstate, "distances");
       sprintf(tmp, "%u", nbobjs);
       childstate.new_prop(&childstate, "nbobjs", tmp);
-      sprintf(tmp, "%d", hwloc_get_type_depth(topology, dist->type));
+      sprintf(tmp, "%d", depth);
       childstate.new_prop(&childstate, "relative_depth", tmp);
       sprintf(tmp, "%f", 1.f);
       childstate.new_prop(&childstate, "latency_base", tmp);

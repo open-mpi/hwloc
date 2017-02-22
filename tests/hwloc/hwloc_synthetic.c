@@ -45,14 +45,14 @@ int main(void)
 
   /* local checks */
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 6);
+  assert(depth == 5);
 
   check_level(topology, 0, 1, 2);
   check_level(topology, 1, 2, 3);
-  check_level(topology, 2, 6, 4);
-  check_level(topology, 3, 24, 5);
-  check_level(topology, 4, 120, 6);
-  check_level(topology, 5, 720, 0);
+  check_level(topology, HWLOC_TYPE_DEPTH_NUMANODE, 6, 4);
+  check_level(topology, 2, 24, 5);
+  check_level(topology, 3, 120, 6);
+  check_level(topology, 4, 720, 0);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
   assert(err == 75);

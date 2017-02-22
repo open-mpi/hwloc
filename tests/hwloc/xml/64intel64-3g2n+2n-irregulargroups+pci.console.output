@@ -373,18 +373,18 @@ Machine (P#0 total=259890340KB DMIProductName=UV2000 DMIProductVersion=SGI DMIBo
         PCI L#7 (busid=0004:01:00.0 id=10de:11ba class=0300(VGA) PCIVendor="nVidia Corporation")
 depth 0:	1 Machine (type #1)
  depth 1:	3 Group0 (type #14)
-  depth 2:	8 NUMANode (type #2)
-   depth 3:	8 Package (type #3)
-    depth 4:	8 L3Cache (type #8)
-     depth 5:	64 L2Cache (type #7)
-      depth 6:	64 L1dCache (type #6)
-       depth 7:	64 L1iCache (type #11)
-        depth 8:	64 Core (type #4)
-         depth 9:	64 PU (type #5)
+  depth 2:	8 Package (type #3)
+   depth 3:	8 L3Cache (type #8)
+    depth 4:	64 L2Cache (type #7)
+     depth 5:	64 L1dCache (type #6)
+      depth 6:	64 L1iCache (type #11)
+       depth 7:	64 Core (type #4)
+        depth 8:	64 PU (type #5)
+Special depth -7:	8 NUMANode (type #2)
 Special depth -3:	14 Bridge (type #16)
 Special depth -4:	8 PCI Device (type #17)
 Special depth -5:	3 OS Device (type #18)
-Relative latency matrix (kind 5) between 8 NUMANodes (depth 2) by logical indexes:
+Relative latency matrix (kind 5) between 8 NUMANodes (depth -7) by logical indexes:
   index     0     1     2     3     4     5     6     7
       0    10    50    65    65    65    65    65    65
       1    50    10    65    65    65    65    65    65
