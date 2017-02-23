@@ -132,8 +132,10 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 			    unsigned long kind, unsigned long flags)
 {
   int depth = hwloc_get_type_depth(topology, type);
-  if (depth < 0)
+  if (depth < 0) {
+    *nr = 0;
     return 0;
+  }
   return hwloc_distances_get_by_depth(topology, depth, nr, distances, kind, flags);
 }
 
