@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -15,17 +15,27 @@
 
 /* check that object userdata is properly initialized */
 
+static void check_level(hwloc_topology_t topology, unsigned depth, unsigned width, unsigned arity)
+{
+  unsigned j;
+  assert(hwloc_get_nbobjs_by_depth(topology, depth) == width);
+  for(j=0; j<width; j++) {
+    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, j);
+    assert(obj);
+    assert(obj->arity == arity);
+  }
+}
+
 int main(void)
 {
   hwloc_topology_t topology;
   unsigned depth;
-  unsigned i,j, width;
   char buffer[1024];
   int err;
 
   /* check a synthetic topology */
   hwloc_topology_init(&topology);
-  err = hwloc_topology_set_synthetic(topology, "2 3 4 5 6");
+  err = hwloc_topology_set_synthetic(topology, "pack:2 numa:3 l2:4 core:5 pu:6");
   assert(!err);
   hwloc_topology_load(topology);
 
@@ -37,17 +47,12 @@ int main(void)
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
 
-  width = 1;
-  for(i=0; i<6; i++) {
-    /* check arities */
-    assert(hwloc_get_nbobjs_by_depth(topology, i) == width);
-    for(j=0; j<width; j++) {
-      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, j);
-      assert(obj);
-      assert(obj->arity == (i<5 ? i+2 : 0));
-    }
-    width *= i+2;
-  }
+  check_level(topology, 0, 1, 2);
+  check_level(topology, 1, 2, 3);
+  check_level(topology, 2, 6, 4);
+  check_level(topology, 3, 24, 5);
+  check_level(topology, 4, 120, 6);
+  check_level(topology, 5, 720, 0);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
   assert(err == 75);

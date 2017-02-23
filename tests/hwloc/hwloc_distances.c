@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2016 Inria.  All rights reserved.
+ * Copyright © 2010-2017 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -36,13 +36,36 @@ static void print_distances(const struct hwloc_distances_s *distances)
   }
 }
 
+static void check_distances(hwloc_topology_t topology, unsigned depth, unsigned expected)
+{
+  struct hwloc_distances_s *distances[2];
+ unsigned nr = 0;
+  int err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == expected);
+  if (!nr) {
+    printf("No distance at depth %u\n", depth);
+    return;
+  }
+  nr = 2;
+  err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
+  assert(!err);
+  printf("distance matrix for depth %u:\n", depth);
+  print_distances(distances[0]);
+  hwloc_distances_release(topology, distances[0]);
+  if (nr > 1) {
+    print_distances(distances[1]);
+    hwloc_distances_release(topology, distances[1]);
+  }
+}
+
 int main(void)
 {
   hwloc_topology_t topology;
   struct hwloc_distances_s *distances[2];
   hwloc_obj_t objs[16];
   uint64_t values[16*16];
-  unsigned depth, topodepth;
+  unsigned topodepth;
   unsigned i, j, k, nr;
   int err;
 
@@ -75,25 +98,12 @@ int main(void)
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
-  for(depth=0; depth<topodepth; depth++) {
-    nr = 0;
-    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
-    assert(!err);
-    if (depth == 2)
-      assert(nr == 1);
-    else
-      assert(!nr);
-    if (!nr) {
-      printf("No distance at depth %u\n", depth);
-      continue;
-    }
-    nr = 1;
-    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
-    assert(!err);
-    printf("distance matrix for depth %u:\n", depth);
-    print_distances(distances[0]);
-    hwloc_distances_release(topology, distances[0]);
-  }
+  assert(topodepth == 5);
+  check_distances(topology, 0, 0);
+  check_distances(topology, 1, 0);
+  check_distances(topology, 2, 1);
+  check_distances(topology, 3, 0);
+  check_distances(topology, 4, 0);
 
   /* check numa distances */
   printf("Checking NUMA distances\n");
@@ -137,25 +147,13 @@ int main(void)
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
-  for(depth=0; depth<topodepth; depth++) {
-    nr = 0;
-    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
-    assert(!err);
-    if (depth == 2 || depth == 5)
-      assert(nr == 1);
-    else
-      assert(!nr);
-    if (!nr) {
-      printf("No distance at depth %u\n", depth);
-      continue;
-    }
-    nr = 1;
-    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
-    assert(!err);
-    printf("distance matrix for depth %u:\n", depth);
-    print_distances(distances[0]);
-    hwloc_distances_release(topology, distances[0]);
-  }
+  assert(topodepth == 6);
+  check_distances(topology, 0, 0);
+  check_distances(topology, 1, 0);
+  check_distances(topology, 2, 1);
+  check_distances(topology, 3, 0);
+  check_distances(topology, 4, 0);
+  check_distances(topology, 5, 1);
 
   /* check PU distances */
   printf("Checking PU distances\n");
@@ -191,31 +189,13 @@ int main(void)
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
-  for(depth=0; depth<topodepth; depth++) {
-    nr = 0;
-    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
-    assert(!err);
-    if (depth == 2)
-      assert(nr == 1);
-    else if (depth == 5)
-      assert(nr == 2);
-    else
-      assert(!nr);
-    if (!nr) {
-      printf("No distance at depth %u\n", depth);
-      continue;
-    }
-    nr = 2;
-    err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
-    assert(!err);
-    printf("distance matrix for depth %u:\n", depth);
-    print_distances(distances[0]);
-    hwloc_distances_release(topology, distances[0]);
-    if (nr > 1) {
-      print_distances(distances[1]);
-      hwloc_distances_release(topology, distances[1]);
-    }
-  }
+  assert(topodepth == 6);
+  check_distances(topology, 0, 0);
+  check_distances(topology, 1, 0);
+  check_distances(topology, 2, 1);
+  check_distances(topology, 3, 0);
+  check_distances(topology, 4, 0);
+  check_distances(topology, 5, 2);
 
   /* check PU distances */
   printf("Checking 2nd PU distances\n");

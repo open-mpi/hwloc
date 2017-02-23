@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -15,8 +15,8 @@
 
 /* check hwloc_get_shared_cache_covering_obj() */
 
-#define SYNTHETIC_TOPOLOGY_DESCRIPTION_SHARED "6 5 4 3 2" /* 736bits wide topology */
-#define SYNTHETIC_TOPOLOGY_DESCRIPTION_NONSHARED "6 5 4 1 2" /* 736bits wide topology */
+#define SYNTHETIC_TOPOLOGY_DESCRIPTION_SHARED "numa:1 group:6 pack:5 l2:4 core:3 pu:2" /* 736bits wide topology */
+#define SYNTHETIC_TOPOLOGY_DESCRIPTION_NONSHARED "numa:1 group:6 pack:5 l2:4 core:1 pu:2" /* 736bits wide topology */
 
 int main(void)
 {
@@ -29,7 +29,7 @@ int main(void)
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
-  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
+  obj = hwloc_get_obj_by_depth(topology, 6, CPUINDEX);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(cache);
@@ -38,7 +38,7 @@ int main(void)
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
   /* check no shared cache above the L2 cache */
-  obj = hwloc_get_obj_by_depth(topology, 3, 0);
+  obj = hwloc_get_obj_by_depth(topology, 4, 0);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(!cache);
@@ -58,7 +58,7 @@ int main(void)
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
-  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
+  obj = hwloc_get_obj_by_depth(topology, 6, CPUINDEX);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(cache);
@@ -67,7 +67,7 @@ int main(void)
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
   /* check no shared-cache above the core */
-  obj = hwloc_get_obj_by_depth(topology, 4, CPUINDEX/2);
+  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX/2);
   assert(obj);
   cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(!cache);

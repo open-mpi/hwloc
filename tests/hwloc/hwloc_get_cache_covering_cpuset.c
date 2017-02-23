@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -15,7 +15,7 @@
 
 /* check hwloc_get_cache_covering_cpuset() */
 
-#define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
+#define SYNTHETIC_TOPOLOGY_DESCRIPTION "numa:6 pack:5 l2:4 core:3 pu:2" /* 736bits wide topology */
 
 int main(void)
 {
@@ -30,7 +30,7 @@ int main(void)
   /* check the cache above a given cpu */
 #define CPUINDEX 180
   set = hwloc_bitmap_alloc();
-  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, CPUINDEX);
   assert(obj);
   hwloc_bitmap_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
@@ -44,10 +44,10 @@ int main(void)
 #define CPUINDEX1 180
 #define CPUINDEX2 183
   set = hwloc_bitmap_alloc();
-  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX1);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, CPUINDEX1);
   assert(obj);
   hwloc_bitmap_or(set, set, obj->cpuset);
-  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX2);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, CPUINDEX2);
   assert(obj);
   hwloc_bitmap_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
@@ -62,10 +62,10 @@ int main(void)
 #undef CPUINDEX1
 #define CPUINDEX1 300
   set = hwloc_bitmap_alloc();
-  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX1);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, CPUINDEX1);
   assert(obj);
   hwloc_bitmap_or(set, set, obj->cpuset);
-  obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX2);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, CPUINDEX2);
   assert(obj);
   hwloc_bitmap_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
@@ -74,7 +74,7 @@ int main(void)
 
   /* check no cache above higher level */
   set = hwloc_bitmap_alloc();
-  obj = hwloc_get_obj_by_depth(topology, 2, 0);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 0);
   assert(obj);
   hwloc_bitmap_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
