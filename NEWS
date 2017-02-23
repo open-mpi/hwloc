@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2016 Inria.  All rights reserved.
+Copyright © 2009-2017 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -125,6 +125,23 @@ Version 2.0.0
   + HWLOC_COMPONENTS takes precedence over other environment variables
     for selecting components.
   + Remove the dependency on libnuma on Linux.
+
+
+Version 1.11.6
+--------------
+* Make the Linux discovery about twice faster, especially on the CPU side,
+  by trying to avoid sysfs file accesses as much as possible.
+* Add support for AMD Family 17h processors (Zen) SMT cores in the Linux
+  and x86 backends.
+* Add the HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES flag (and the
+  HWLOC_THISSYSTEM_ALLOWED_RESOURCES environment variable) for reading the
+  set of allowed resources from the local operating system even if the
+  topology was loaded from XML or synthetic.
+* Fix hwloc_bitmap_set/clr_range() for infinite ranges that do not
+  overlap currently defined ranges in the bitmap.
+* Don't reset the lstopo zoom scale when moving the X11 window.
+* lstopo now has --flags for manually setting topology flags.
+* hwloc_get_depth_type() returns HWLOC_TYPE_DEPTH_UNKNOWN for Misc objects.
 
 
 Version 1.11.5
