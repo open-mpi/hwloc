@@ -174,14 +174,16 @@ output_only (struct lstopo_output *loutput, hwloc_obj_t l)
     output_console_obj (loutput, l, 0);
     fprintf (output, "\n");
   }
+  /* there can be anything below normal children */
   for(child = l->first_child; child; child = child->next_sibling)
     output_only (loutput, child);
+  /* there can be only I/O or Misc below I/O children */
   if (loutput->show_only == HWLOC_OBJ_BRIDGE || loutput->show_only == HWLOC_OBJ_PCI_DEVICE
       || loutput->show_only == HWLOC_OBJ_OS_DEVICE || loutput->show_only == HWLOC_OBJ_MISC) {
-    /* I/O can only contain other I/O or Misc, no need to recurse otherwise */
     for(child = l->io_first_child; child; child = child->next_sibling)
       output_only (loutput, child);
   }
+  /* there can be only Misc below Misc children */
   if (loutput->show_only == HWLOC_OBJ_MISC) {
     /* Misc can only contain other Misc, no need to recurse otherwise */
     for(child = l->misc_first_child; child; child = child->next_sibling)
