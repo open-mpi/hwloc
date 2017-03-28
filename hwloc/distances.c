@@ -88,10 +88,11 @@ void hwloc_internal_distances_destroy(struct hwloc_topology * topology)
 
 static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct hwloc_internal_distances_s *olddist)
 {
+  struct hwloc_tma *tma = new->tma;
   struct hwloc_internal_distances_s *newdist;
   unsigned nbobjs = olddist->nbobjs;
 
-  newdist = malloc(sizeof(*newdist));
+  newdist = hwloc_tma_malloc(tma, sizeof(*newdist));
   if (!newdist)
     return -1;
 
@@ -99,11 +100,12 @@ static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct h
   newdist->nbobjs = nbobjs;
   newdist->kind = olddist->kind;
 
-  newdist->indexes = malloc(nbobjs * sizeof(*newdist->indexes));
-  newdist->objs = calloc(nbobjs, sizeof(*newdist->objs));
+  newdist->indexes = hwloc_tma_malloc(tma, nbobjs * sizeof(*newdist->indexes));
+  newdist->objs = hwloc_tma_calloc(tma, nbobjs * sizeof(*newdist->objs));
   newdist->objs_are_valid = 0;
-  newdist->values = malloc(nbobjs*nbobjs * sizeof(*newdist->values));
+  newdist->values = hwloc_tma_malloc(tma, nbobjs*nbobjs * sizeof(*newdist->values));
   if (!newdist->indexes || !newdist->objs || !newdist->values) {
+    assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
     hwloc_internal_distances_free(newdist);
     return -1;
   }
@@ -122,7 +124,7 @@ static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct h
   return 0;
 }
 
-/* called by topology_dup() */
+/* This function may be called with topology->tma set, it cannot free() or realloc() */
 int hwloc_internal_distances_dup(struct hwloc_topology *new, struct hwloc_topology *old)
 {
   struct hwloc_internal_distances_s *olddist;
@@ -483,6 +485,7 @@ hwloc_internal_distances_refresh_one(hwloc_topology_t topology,
   return 0;
 }
 
+/* This function may be called with topology->tma set, it cannot free() or realloc() */
 void
 hwloc_internal_distances_refresh(hwloc_topology_t topology)
 {
@@ -492,6 +495,7 @@ hwloc_internal_distances_refresh(hwloc_topology_t topology)
     next = dist->next;
 
     if (hwloc_internal_distances_refresh_one(topology, dist) < 0) {
+      assert(!topology->tma || !topology->tma->dontfree); /* this tma cannot fail to allocate */
       if (dist->prev)
 	dist->prev->next = next;
       else

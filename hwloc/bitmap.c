@@ -177,7 +177,7 @@ hwloc_bitmap_reset_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_count)
  */
 #define hwloc_bitmap_reset_by_cpu_index(set, cpu) hwloc_bitmap_reset_by_ulongs(set, ((cpu)/HWLOC_BITS_PER_LONG)+1)
 
-struct hwloc_bitmap_s * hwloc_bitmap_dup(const struct hwloc_bitmap_s * old)
+struct hwloc_bitmap_s * hwloc_bitmap_tma_dup(struct hwloc_tma *tma, const struct hwloc_bitmap_s * old)
 {
   struct hwloc_bitmap_s * new;
 
@@ -186,11 +186,11 @@ struct hwloc_bitmap_s * hwloc_bitmap_dup(const struct hwloc_bitmap_s * old)
 
   HWLOC__BITMAP_CHECK(old);
 
-  new = malloc(sizeof(struct hwloc_bitmap_s));
+  new = hwloc_tma_malloc(tma, sizeof(struct hwloc_bitmap_s));
   if (!new)
     return NULL;
 
-  new->ulongs = malloc(old->ulongs_allocated * sizeof(unsigned long));
+  new->ulongs = hwloc_tma_malloc(tma, old->ulongs_allocated * sizeof(unsigned long));
   if (!new->ulongs) {
     free(new);
     return NULL;
@@ -203,6 +203,11 @@ struct hwloc_bitmap_s * hwloc_bitmap_dup(const struct hwloc_bitmap_s * old)
   new->magic = HWLOC_BITMAP_MAGIC;
 #endif
   return new;
+}
+
+struct hwloc_bitmap_s * hwloc_bitmap_dup(const struct hwloc_bitmap_s * old)
+{
+  return hwloc_bitmap_tma_dup(NULL, old);
 }
 
 void hwloc_bitmap_copy(struct hwloc_bitmap_s * dst, const struct hwloc_bitmap_s * src)

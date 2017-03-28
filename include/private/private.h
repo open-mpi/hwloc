@@ -147,6 +147,9 @@ struct hwloc_topology {
   /* list of enabled backends. */
   struct hwloc_backend * backends;
   unsigned backend_excludes;
+
+  /* memory allocator for topology objects */
+  struct hwloc_tma * tma;
 };
 
 extern void hwloc_alloc_obj_cpusets(hwloc_obj_t obj);
@@ -385,5 +388,49 @@ HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, 
 #define HWLOC_GROUP_KIND_INTEL_SUBNUMA_CLUSTER		8 /* no subkind */
 #define HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT		9 /* no subkind */
 #define HWLOC_GROUP_KIND_SYNTHETIC			10 /* subkind is group depth within synthetic description */
+
+/* memory allocator for topology objects */
+struct hwloc_tma {
+  void * (*malloc)(struct hwloc_tma *, size_t);
+  void *data;
+  int dontfree; /* when set, free() or realloc() cannot be used, and tma->malloc() cannot fail */
+};
+
+static __hwloc_inline void *
+hwloc_tma_malloc(struct hwloc_tma *tma,
+		 size_t size)
+{
+  if (tma) {
+    return tma->malloc(tma, size);
+  } else {
+    return malloc(size);
+  }
+}
+
+static __hwloc_inline void *
+hwloc_tma_calloc(struct hwloc_tma *tma,
+		 size_t size)
+{
+  char *ptr = hwloc_tma_malloc(tma, size);
+  if (ptr)
+    memset(ptr, 0, size);
+  return ptr;
+}
+
+static __hwloc_inline char *
+hwloc_tma_strdup(struct hwloc_tma *tma,
+		 const char *src)
+{
+  size_t len = strlen(src);
+  char *ptr = hwloc_tma_malloc(tma, len+1);
+  if (ptr)
+    memcpy(ptr, src, len+1);
+  return ptr;
+}
+
+/* bitmap allocator to be used inside hwloc */
+extern hwloc_bitmap_t hwloc_bitmap_tma_dup(struct hwloc_tma *tma, hwloc_const_bitmap_t old);
+
+extern int hwloc__topology_dup(hwloc_topology_t *newp, hwloc_topology_t old, struct hwloc_tma *tma);
 
 #endif /* HWLOC_PRIVATE_H */

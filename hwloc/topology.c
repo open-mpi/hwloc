@@ -391,6 +391,33 @@ void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *val
   hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
 
+/* This function may be called with topology->tma set, it cannot free() or realloc() */
+static int hwloc__tma_dup_infos(struct hwloc_tma *tma, hwloc_obj_t new, hwloc_obj_t src)
+{
+  unsigned i, j;
+  new->infos = hwloc_tma_calloc(tma, src->infos_count * sizeof(*src->infos));
+  if (!new->infos)
+    return -1;
+  for(i=0; i<src->infos_count; i++) {
+    new->infos[i].name = hwloc_tma_strdup(tma, src->infos[i].name);
+    new->infos[i].value = hwloc_tma_strdup(tma, src->infos[i].value);
+    if (!new->infos[i].name || !new->infos[i].value)
+      goto failed;
+  }
+  new->infos_count = src->infos_count;
+  return 0;
+
+ failed:
+  assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
+  for(j=0; j<=i; j++) {
+    free(new->infos[i].name);
+    free(new->infos[i].value);
+  }
+  free(new->infos);
+  new->infos = NULL;
+  return -1;
+}
+
 static void
 hwloc__free_object_contents(hwloc_obj_t obj)
 {
@@ -620,12 +647,14 @@ unlink_and_free_single_object(hwloc_obj_t *pparent)
   hwloc_free_unlinked_object(old);
 }
 
+/* This function may use a tma, it cannot free() or realloc() */
 static int
 hwloc__duplicate_object(struct hwloc_topology *newtopology,
 			struct hwloc_obj *newparent,
 			struct hwloc_obj *newobj,
 			struct hwloc_obj *src)
 {
+  struct hwloc_tma *tma = newtopology->tma;
   hwloc_obj_t *level;
   unsigned level_width;
   size_t len;
@@ -655,29 +684,28 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   newobj->symmetric_subtree = src->symmetric_subtree;
 
   if (src->name)
-    newobj->name = strdup(src->name);
+    newobj->name = hwloc_tma_strdup(tma, src->name);
   if (src->subtype)
-    newobj->subtype = strdup(src->subtype);
+    newobj->subtype = hwloc_tma_strdup(tma, src->subtype);
   newobj->userdata = src->userdata;
 
   memcpy(&newobj->memory, &src->memory, sizeof(struct hwloc_obj_memory_s));
   if (src->memory.page_types_len) {
     len = src->memory.page_types_len * sizeof(struct hwloc_obj_memory_page_type_s);
-    newobj->memory.page_types = malloc(len);
+    newobj->memory.page_types = hwloc_tma_malloc(tma, len);
     memcpy(newobj->memory.page_types, src->memory.page_types, len);
   }
 
   memcpy(newobj->attr, src->attr, sizeof(*newobj->attr));
 
-  newobj->cpuset = hwloc_bitmap_dup(src->cpuset);
-  newobj->complete_cpuset = hwloc_bitmap_dup(src->complete_cpuset);
-  newobj->allowed_cpuset = hwloc_bitmap_dup(src->allowed_cpuset);
-  newobj->nodeset = hwloc_bitmap_dup(src->nodeset);
-  newobj->complete_nodeset = hwloc_bitmap_dup(src->complete_nodeset);
-  newobj->allowed_nodeset = hwloc_bitmap_dup(src->allowed_nodeset);
+  newobj->cpuset = hwloc_bitmap_tma_dup(tma, src->cpuset);
+  newobj->complete_cpuset = hwloc_bitmap_tma_dup(tma, src->complete_cpuset);
+  newobj->allowed_cpuset = hwloc_bitmap_tma_dup(tma, src->allowed_cpuset);
+  newobj->nodeset = hwloc_bitmap_tma_dup(tma, src->nodeset);
+  newobj->complete_nodeset = hwloc_bitmap_tma_dup(tma, src->complete_nodeset);
+  newobj->allowed_nodeset = hwloc_bitmap_tma_dup(tma, src->allowed_nodeset);
 
-  for(i=0; i<src->infos_count; i++)
-    hwloc__add_info(&newobj->infos, &newobj->infos_count, src->infos[i].name, src->infos[i].value);
+  hwloc__tma_dup_infos(tma, newobj, src);
 
   /* find our level */
   if ((int) src->depth < 0) {
@@ -710,7 +738,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
 
   /* prepare for children */
   if (src->arity) {
-    newobj->children = malloc(src->arity * sizeof(*newobj->children));
+    newobj->children = hwloc_tma_malloc(tma, src->arity * sizeof(*newobj->children));
     if (!newobj->children)
       return -1;
   }
@@ -787,11 +815,13 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
 }
 
 static int
-hwloc__topology_init (struct hwloc_topology **topologyp, unsigned nblevels);
+hwloc__topology_init (struct hwloc_topology **topologyp, unsigned nblevels, struct hwloc_tma *tma);
 
+/* This function may use a tma, it cannot free() or realloc() */
 int
-hwloc_topology_dup(hwloc_topology_t *newp,
-		   hwloc_topology_t old)
+hwloc__topology_dup(hwloc_topology_t *newp,
+		    hwloc_topology_t old,
+		    struct hwloc_tma *tma)
 {
   hwloc_topology_t new;
   hwloc_obj_t newroot;
@@ -804,7 +834,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
     return -1;
   }
 
-  err = hwloc__topology_init(&new, old->nb_levels_allocated);
+  err = hwloc__topology_init(&new, old->nb_levels_allocated, tma);
   if (err < 0)
     goto out;
 
@@ -833,12 +863,12 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   assert(new->nb_levels_allocated >= new->nb_levels);
   for(i=1 /* root level already allocated */ ; i<new->nb_levels; i++) {
     new->level_nbobjects[i] = old->level_nbobjects[i];
-    new->levels[i] = calloc(new->level_nbobjects[i], sizeof(*new->levels[i]));
+    new->levels[i] = hwloc_tma_calloc(tma, new->level_nbobjects[i] * sizeof(*new->levels[i]));
   }
   for(i=0; i<HWLOC_NR_SLEVELS; i++) {
     new->slevels[i].nbobjs = old->slevels[i].nbobjs;
     if (new->slevels[i].nbobjs)
-      new->slevels[i].objs = calloc(new->slevels[i].nbobjs, sizeof(*new->slevels[i].objs));
+      new->slevels[i].objs = hwloc_tma_calloc(tma, new->slevels[i].nbobjs * sizeof(*new->slevels[i].objs));
   }
 
   /* recursively duplicate object children */
@@ -867,9 +897,17 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   return 0;
 
  out_with_topology:
+  assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
   hwloc_topology_destroy(new);
  out:
   return -1;
+}
+
+int
+hwloc_topology_dup(hwloc_topology_t *newp,
+		   hwloc_topology_t old)
+{
+  return hwloc__topology_dup(newp, old, NULL);
 }
 
 /* WARNING: The indexes of this array MUST match the ordering that of
@@ -1416,12 +1454,12 @@ hwloc_obj_t
 hwloc_alloc_setup_object(hwloc_topology_t topology,
 			 hwloc_obj_type_t type, signed os_index)
 {
-  struct hwloc_obj *obj = malloc(sizeof(*obj));
+  struct hwloc_obj *obj = hwloc_tma_malloc(topology->tma, sizeof(*obj));
   memset(obj, 0, sizeof(*obj));
   obj->type = type;
   obj->os_index = os_index;
   obj->gp_index = topology->next_gp_index++;
-  obj->attr = malloc(sizeof(*obj->attr));
+  obj->attr = hwloc_tma_malloc(topology->tma, sizeof(*obj->attr));
   memset(obj->attr, 0, sizeof(*obj->attr));
   /* do not allocate the cpuset here, let the caller do it */
   return obj;
@@ -2900,7 +2938,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   /* Only the System object on top by default */
   topology->next_gp_index = 1; /* keep 0 as an invalid value */
   topology->nb_levels = 1; /* there's at least SYSTEM */
-  topology->levels[0] = malloc (sizeof (hwloc_obj_t));
+  topology->levels[0] = hwloc_tma_malloc (topology->tma, sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
 
   /* NULLify other special levels */
@@ -2929,17 +2967,21 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 
 static void hwloc__topology_filter_init(struct hwloc_topology *topology);
 
+/* This function may use a tma, it cannot free() or realloc() */
 static int
 hwloc__topology_init (struct hwloc_topology **topologyp,
-		      unsigned nblevels)
+		      unsigned nblevels,
+		      struct hwloc_tma *tma)
 {
   struct hwloc_topology *topology;
 
-  topology = malloc (sizeof (struct hwloc_topology));
+  topology = hwloc_tma_malloc (tma, sizeof (struct hwloc_topology));
   if(!topology)
     return -1;
 
-  hwloc_components_init();
+  topology->tma = tma;
+
+  hwloc_components_init(); /* uses malloc without tma, but won't need it since dup() caller already took a reference */
   hwloc_backends_init(topology);
   hwloc_pci_discovery_init(topology); /* make sure both dup() and load() get sane variables */
 
@@ -2950,13 +2992,13 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->pid = 0;
   topology->userdata = NULL;
 
-  topology->support.discovery = malloc(sizeof(*topology->support.discovery));
-  topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
-  topology->support.membind = malloc(sizeof(*topology->support.membind));
+  topology->support.discovery = hwloc_tma_malloc(tma, sizeof(*topology->support.discovery));
+  topology->support.cpubind = hwloc_tma_malloc(tma, sizeof(*topology->support.cpubind));
+  topology->support.membind = hwloc_tma_malloc(tma, sizeof(*topology->support.membind));
 
   topology->nb_levels_allocated = nblevels; /* enough for default 9 levels = Mach+Pack+NUMA+L3+L2+L1d+L1i+Co+PU */
-  topology->levels = calloc(topology->nb_levels_allocated, sizeof(*topology->levels));
-  topology->level_nbobjects = calloc(topology->nb_levels_allocated, sizeof(*topology->level_nbobjects));
+  topology->levels = hwloc_tma_calloc(tma, topology->nb_levels_allocated * sizeof(*topology->levels));
+  topology->level_nbobjects = hwloc_tma_calloc(tma, topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
 
   hwloc__topology_filter_init(topology);
 
@@ -2976,7 +3018,9 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
 int
 hwloc_topology_init (struct hwloc_topology **topologyp)
 {
-  return hwloc__topology_init(topologyp, 16); /* 16 is enough for default 9 levels = Mach+Pack+NUMA+L3+L2+L1d+L1i+Co+PU */
+  return hwloc__topology_init(topologyp,
+			      16, /* 16 is enough for default 9 levels = Mach+Pack+NUMA+L3+L2+L1d+L1i+Co+PU */
+			      NULL); /* no TMA for normal topologies, too many allocations to fix */
 }
 
 int

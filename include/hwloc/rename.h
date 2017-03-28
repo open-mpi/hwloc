@@ -694,6 +694,14 @@ extern "C" {
 
 #define hwloc_bitmap_compare_inclusion HWLOC_NAME(bitmap_compare_inclusion)
 
+#define hwloc__topology_dup HWLOC_NAME(_topology_dup)
+
+#define hwloc_tma HWLOC_NAME(tma)
+#define hwloc_tma_malloc HWLOC_NAME(tma_malloc)
+#define hwloc_tma_calloc HWLOC_NAME(tma_calloc)
+#define hwloc_tma_strdup HWLOC_NAME(tma_strdup)
+#define hwloc_bitmap_tma_dup HWLOC_NAME(bitmap_tma_dup)
+
 /* private/solaris-chiptype.h */
 
 #define hwloc_solaris_get_chip_type HWLOC_NAME(solaris_get_chip_type)
