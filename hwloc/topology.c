@@ -2066,7 +2066,7 @@ static void hwloc_set_group_depth(hwloc_topology_t topology)
  *
  * Can be called several times, so may have to update the array.
  */
-void
+static void
 hwloc_connect_children(hwloc_obj_t parent)
 {
   unsigned n, oldn = parent->arity;
@@ -2333,7 +2333,7 @@ hwloc_connect_io_misc_levels(hwloc_topology_t topology)
  * Do the remaining work that hwloc_connect_children() did not do earlier.
  * Requires object arity and children list to be properly initialized (by hwloc_connect_children()).
  */
-int
+static int
 hwloc_connect_levels(hwloc_topology_t topology)
 {
   unsigned l, i=0;
