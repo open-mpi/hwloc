@@ -3525,21 +3525,23 @@ package_done:
     /* look at the books */
     sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
     bookset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
-    if (bookset && hwloc_bitmap_first(bookset) == i) {
-      struct hwloc_obj *book;
+    if (bookset) {
+      if (hwloc_bitmap_first(bookset) == i) {
+	struct hwloc_obj *book;
 
-      mybookid = (unsigned) -1;
-      sprintf(str, "%s/cpu%d/topology/book_id", path, i); /* contains %d at least up to 4.9 */
-      if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
-	mybookid = (unsigned) tmpint;
+	mybookid = (unsigned) -1;
+	sprintf(str, "%s/cpu%d/topology/book_id", path, i); /* contains %d at least up to 4.9 */
+	if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
+	  mybookid = (unsigned) tmpint;
 
-	book = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, mybookid);
-	book->cpuset = bookset;
-	hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
-				mybookid, bookset);
-	hwloc_obj_add_info(book, "Type", "Book");
-	hwloc_insert_object_by_cpuset(topology, book);
-	bookset = NULL; /* don't free it */
+	  book = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, mybookid);
+	  book->cpuset = bookset;
+	  hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
+				  mybookid, bookset);
+	  hwloc_obj_add_info(book, "Type", "Book");
+	  hwloc_insert_object_by_cpuset(topology, book);
+	  bookset = NULL; /* don't free it */
+	}
       }
       hwloc_bitmap_free(bookset);
     }
