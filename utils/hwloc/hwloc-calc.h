@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -69,20 +69,53 @@ hwloc_calc_append_set(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
   return 0;
 }
 
-static __hwloc_inline hwloc_obj_t __hwloc_attribute_pure
-hwloc_calc_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_bitmap_t rootset,
-					 unsigned depth, unsigned i, int logical)
+static __hwloc_inline unsigned
+hwloc_calc_get_nbobjs_inside_sets_by_depth(hwloc_topology_t topology,
+					   hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
+					   unsigned depth)
 {
-  if (logical) {
-    return hwloc_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i);
-  } else {
-    hwloc_obj_t obj = NULL;
-    while ((obj = hwloc_get_next_obj_inside_cpuset_by_depth(topology, rootset, depth, obj)) != NULL) {
-      if (obj->os_index == i)
-        return obj;
-    }
-    return NULL;
+  hwloc_obj_t obj = NULL;
+  unsigned n = 0;
+  while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
+    if (!hwloc_bitmap_isincluded(obj->cpuset, cpuset))
+      continue;
+    if (nodeset && !hwloc_bitmap_isincluded(obj->nodeset, nodeset))
+      continue;
+    if (hwloc_bitmap_iszero(obj->cpuset)
+	&& (!nodeset || hwloc_bitmap_iszero(obj->nodeset)))
+      /* ignore objects with empty sets (both can be empty when outside of cgroup) */
+      continue;
+    n++;
   }
+  return n;
+}
+
+static __hwloc_inline hwloc_obj_t
+hwloc_calc_get_obj_inside_sets_by_depth(hwloc_topology_t topology,
+					hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
+					unsigned depth, unsigned ind, int logical)
+{
+  hwloc_obj_t obj = NULL;
+  unsigned i = 0;
+  while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
+    if (!hwloc_bitmap_isincluded(obj->cpuset, cpuset))
+      continue;
+    if (nodeset && !hwloc_bitmap_isincluded(obj->nodeset, nodeset))
+      continue;
+    if (hwloc_bitmap_iszero(obj->cpuset)
+	&& (!nodeset || hwloc_bitmap_iszero(obj->nodeset)))
+      /* ignore objects with empty sets (both can be empty when outside of cgroup) */
+      continue;
+    if (logical) {
+      if (i == ind)
+	return obj;
+      i++;
+    } else {
+      if (obj->os_index == i)
+	return obj;
+    }
+  }
+  return NULL;
 }
 
 static __hwloc_inline int
@@ -282,7 +315,7 @@ hwloc_calc_parse_range(const char *_string,
 
 static __hwloc_inline int
 hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
-			       hwloc_const_bitmap_t rootset, int depth,
+			       hwloc_const_bitmap_t rootcpuset, hwloc_const_bitmap_t rootnodeset, int depth,
 			       const char *string, /* starts with indexes following the colon */
 			       int logical,
 			       void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
@@ -326,7 +359,7 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
     }
   }
 
-  width = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, rootset, depth);
+  width = hwloc_calc_get_nbobjs_inside_sets_by_depth(topology, rootcpuset, rootnodeset, depth);
   if (amount == -1)
     amount = (width-first+step-1)/step;
 
@@ -334,21 +367,25 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
     if (wrap && i>=width)
       i = 0;
 
-    obj = hwloc_calc_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
+    obj = hwloc_calc_get_obj_inside_sets_by_depth(topology, rootcpuset, rootnodeset, depth, i, logical);
     if (verbose > 0 || (!obj && verbose >= 0)) {
-      char *s;
-      hwloc_bitmap_asprintf(&s, rootset);
+      char *sc, *sn = NULL;
+      hwloc_bitmap_asprintf(&sc, rootcpuset);
+      if (rootnodeset)
+	hwloc_bitmap_asprintf(&sn, rootnodeset);
       if (obj)
-	printf("using object #%u depth %u below cpuset %s\n",
-	       i, depth, s);
+	printf("using object #%u depth %u below cpuset %s nodeset %s\n",
+	       i, depth, sc, sn);
       else
-	fprintf(stderr, "object #%u depth %u below cpuset %s does not exist\n",
-		i, depth, s);
-      free(s);
+	fprintf(stderr, "object #%u depth %u below cpuset %s nodeset %s does not exist\n",
+		i, depth, sc, sn);
+      free(sc);
+      if (rootnodeset)
+	free(sn);
     }
     if (obj) {
       if (dot) {
-	hwloc_calc_append_object_range(topology, topodepth, obj->cpuset, nextdepth, nextsep+1, logical, cbfunc, cbdata, verbose);
+	hwloc_calc_append_object_range(topology, topodepth, obj->cpuset, obj->nodeset, nextdepth, nextsep+1, logical, cbfunc, cbdata, verbose);
       } else {
 	/* add to the temporary cpuset
 	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
@@ -531,7 +568,10 @@ hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
   }
 
   /* look at indexes following this type/depth */
-  return hwloc_calc_append_object_range(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), depth, sep+1, logical, cbfunc, cbdata, verbose);
+  return hwloc_calc_append_object_range(topology, topodepth,
+					hwloc_topology_get_complete_cpuset(topology),
+					hwloc_topology_get_complete_nodeset(topology),
+					depth, sep+1, logical, cbfunc, cbdata, verbose);
 }
 
 struct hwloc_calc_process_arg_cpuset_cbdata_s {
