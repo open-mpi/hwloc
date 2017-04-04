@@ -616,11 +616,18 @@ unlink_and_free_single_object(hwloc_obj_t *pparent)
 }
 
 static void
-hwloc__duplicate_object(struct hwloc_obj *newobj,
-			struct hwloc_obj *src)
+hwloc__duplicate_object(struct hwloc_topology *newtopology,
+			struct hwloc_obj *newparent,
+			struct hwloc_obj *src);
+
+static void
+hwloc__duplicate_object_contents(struct hwloc_topology *newtopology,
+				 struct hwloc_obj *newobj,
+				 struct hwloc_obj *src)
 {
   size_t len;
   unsigned i;
+  hwloc_obj_t child;
 
   newobj->type = src->type;
   newobj->os_index = src->os_index;
@@ -651,35 +658,30 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
 
   for(i=0; i<src->infos_count; i++)
     hwloc__add_info(&newobj->infos, &newobj->infos_count, src->infos[i].name, src->infos[i].value);
-}
-
-void
-hwloc__duplicate_objects(struct hwloc_topology *newtopology,
-			 struct hwloc_obj *newparent,
-			 struct hwloc_obj *src)
-{
-  hwloc_obj_t newobj;
-  hwloc_obj_t child;
-
-  newobj = hwloc_alloc_setup_object(newtopology, src->type, src->os_index);
-  hwloc__duplicate_object(newobj, src);
 
   for(child = src->first_child; child; child = child->next_sibling)
-    hwloc__duplicate_objects(newtopology, newobj, child);
+    hwloc__duplicate_object(newtopology, newobj, child);
   for(child = src->io_first_child; child; child = child->next_sibling)
-    hwloc__duplicate_objects(newtopology, newobj, child);
+    hwloc__duplicate_object(newtopology, newobj, child);
   for(child = src->misc_first_child; child; child = child->next_sibling)
-    hwloc__duplicate_objects(newtopology, newobj, child);
+    hwloc__duplicate_object(newtopology, newobj, child);
+}
+
+static void
+hwloc__duplicate_object(struct hwloc_topology *newtopology,
+			struct hwloc_obj *newparent,
+			struct hwloc_obj *src)
+{
+  hwloc_obj_t newobj;
+
+  newobj = hwloc_alloc_setup_object(newtopology, src->type, src->os_index);
+  hwloc__duplicate_object_contents(newtopology, newobj, src);
 
   /* no need to check the children order here, the source topology
    * is supposed to be OK already, and we have debug asserts.
    */
   hwloc_insert_object_by_parent(newtopology, newparent, newobj);
 }
-
-static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
-static void propagate_total_memory(hwloc_obj_t obj);
-static void hwloc_set_group_depth(hwloc_topology_t topology);
 
 int
 hwloc_topology_dup(hwloc_topology_t *newp,
@@ -688,7 +690,6 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   hwloc_topology_t new;
   hwloc_obj_t newroot;
   hwloc_obj_t oldroot = hwloc_get_root_obj(old);
-  hwloc_obj_t child;
 
   if (!old->is_loaded) {
     errno = EINVAL;
@@ -715,14 +716,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   new->userdata_not_decoded = old->userdata_not_decoded;
 
   newroot = hwloc_get_root_obj(new);
-  hwloc__duplicate_object(newroot, oldroot);
-
-  for(child = oldroot->first_child; child; child = child->next_sibling)
-    hwloc__duplicate_objects(new, newroot, child);
-  for(child = oldroot->io_first_child; child; child = child->next_sibling)
-    hwloc__duplicate_objects(new, newroot, child);
-  for(child = oldroot->misc_first_child; child; child = child->next_sibling)
-    hwloc__duplicate_objects(new, newroot, child);
+  hwloc__duplicate_object_contents(new, newroot, oldroot);
 
   hwloc_internal_distances_dup(new, old);
 
@@ -1295,6 +1289,10 @@ hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
 {
   return hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
 }
+
+static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
+static void propagate_total_memory(hwloc_obj_t obj);
+static void hwloc_set_group_depth(hwloc_topology_t topology);
 
 hwloc_obj_t
 hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)

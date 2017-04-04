@@ -242,9 +242,6 @@ extern void hwloc_free_object_and_children(hwloc_obj_t obj);
 /* Free obj, its next siblings, and their children, assuming they're not linked to a parent */
 extern void hwloc_free_object_siblings_and_children(hwloc_obj_t obj);
 
-/* Duplicate src and its children under newparent in newtopology */
-extern void hwloc__duplicate_objects(struct hwloc_topology *newtopology, struct hwloc_obj *newparent, struct hwloc_obj *src);
-
 /* This can be used for the alloc field to get allocated data that can be freed by free() */
 void *hwloc_alloc_heap(hwloc_topology_t topology, size_t len);
 
