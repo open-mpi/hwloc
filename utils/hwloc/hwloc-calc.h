@@ -81,7 +81,9 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(hwloc_topology_t topology,
       continue;
     if (!hwloc_bitmap_isincluded(obj->nodeset, nodeset))
       continue;
-    assert(!hwloc_bitmap_iszero(obj->cpuset) || !hwloc_bitmap_iszero(obj->nodeset));
+    if (hwloc_bitmap_iszero(obj->cpuset) && hwloc_bitmap_iszero(obj->nodeset))
+      /* ignore objects with empty sets (both can be empty when outside of cgroup) */
+      continue;
     n++;
   }
   return n;
@@ -99,7 +101,9 @@ hwloc_calc_get_obj_inside_sets_by_depth(hwloc_topology_t topology,
       continue;
     if (!hwloc_bitmap_isincluded(obj->nodeset, nodeset))
       continue;
-    assert(!hwloc_bitmap_iszero(obj->cpuset) || !hwloc_bitmap_iszero(obj->nodeset));
+    if (hwloc_bitmap_iszero(obj->cpuset) && hwloc_bitmap_iszero(obj->nodeset))
+      /* ignore objects with empty sets (both can be empty when outside of cgroup) */
+      continue;
     if (logical) {
       if (i == ind)
 	return obj;
