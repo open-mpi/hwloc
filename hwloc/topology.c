@@ -625,6 +625,7 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
   newobj->type = src->type;
   newobj->os_index = src->os_index;
   newobj->gp_index = src->gp_index;
+  newobj->symmetric_subtree = src->symmetric_subtree;
 
   if (src->name)
     newobj->name = strdup(src->name);
