@@ -629,6 +629,7 @@ extern "C" {
 #define hwloc_topology_clear HWLOC_NAME(topology_clear)
 
 #define hwloc_pci_discovery_init HWLOC_NAME(pci_discovery_init)
+#define hwloc_pci_discovery_prepare HWLOC_NAME(pci_discovery_prepare)
 #define hwloc_pci_discovery_exit HWLOC_NAME(pci_discovery_exit)
 #define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
 #define hwloc_pci_belowroot_apply_locality HWLOC_NAME(pci_belowroot_apply_locality)

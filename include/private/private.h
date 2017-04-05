@@ -160,6 +160,7 @@ extern void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 extern void hwloc_topology_clear(struct hwloc_topology *topology);
 
 extern void hwloc_pci_discovery_init(struct hwloc_topology *topology);
+extern void hwloc_pci_discovery_prepare(struct hwloc_topology *topology);
 extern void hwloc_pci_discovery_exit(struct hwloc_topology *topology);
 
 /* Look for an object matching complete cpuset exactly, or insert one.

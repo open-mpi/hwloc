@@ -2826,6 +2826,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
 
   hwloc_components_init();
   hwloc_backends_init(topology);
+  hwloc_pci_discovery_init(topology); /* make sure both dup() and load() get sane variables */
 
   /* Setup topology context */
   topology->is_loaded = 0;
@@ -3112,7 +3113,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
    */
   hwloc_set_binding_hooks(topology);
 
-  hwloc_pci_discovery_init(topology);
+  hwloc_pci_discovery_prepare(topology);
 
   /* actual topology discovery */
   err = hwloc_discover(topology);

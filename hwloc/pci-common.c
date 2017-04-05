@@ -109,14 +109,19 @@ hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_en
 void
 hwloc_pci_discovery_init(struct hwloc_topology *topology)
 {
-  char *env;
-
   topology->pci_nonzero_domains = 0;
   topology->need_pci_belowroot_apply_locality = 0;
 
   topology->pci_has_forced_locality = 0;
   topology->pci_forced_locality_nr = 0;
   topology->pci_forced_locality = NULL;
+}
+
+void
+hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
+{
+  char *env;
+
   env = getenv("HWLOC_PCI_LOCALITY");
   if (env) {
     int fd;
@@ -154,6 +159,8 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology __hwloc_attribute_unuse
   for(i=0; i<topology->pci_forced_locality_nr; i++)
     hwloc_bitmap_free(topology->pci_forced_locality[i].cpuset);
   free(topology->pci_forced_locality);
+
+  hwloc_pci_discovery_init(topology);
 }
 
 #ifdef HWLOC_DEBUG
