@@ -786,6 +786,9 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   return err;
 }
 
+static int
+hwloc__topology_init (struct hwloc_topology **topologyp, unsigned nblevels);
+
 int
 hwloc_topology_dup(hwloc_topology_t *newp,
 		   hwloc_topology_t old)
@@ -801,7 +804,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
     return -1;
   }
 
-  err = hwloc_topology_init(&new);
+  err = hwloc__topology_init(&new, old->nb_levels_allocated);
   if (err < 0)
     goto out;
 
@@ -2926,8 +2929,9 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 
 static void hwloc__topology_filter_init(struct hwloc_topology *topology);
 
-int
-hwloc_topology_init (struct hwloc_topology **topologyp)
+static int
+hwloc__topology_init (struct hwloc_topology **topologyp,
+		      unsigned nblevels)
 {
   struct hwloc_topology *topology;
 
@@ -2950,7 +2954,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
   topology->support.membind = malloc(sizeof(*topology->support.membind));
 
-  topology->nb_levels_allocated = 16; /* enough for default 9 levels = Mach+Pack+NUMA+L3+L2+L1d+L1i+Co+PU */
+  topology->nb_levels_allocated = nblevels; /* enough for default 9 levels = Mach+Pack+NUMA+L3+L2+L1d+L1i+Co+PU */
   topology->levels = calloc(topology->nb_levels_allocated, sizeof(*topology->levels));
   topology->level_nbobjects = calloc(topology->nb_levels_allocated, sizeof(*topology->level_nbobjects));
 
@@ -2967,6 +2971,12 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
 
   *topologyp = topology;
   return 0;
+}
+
+int
+hwloc_topology_init (struct hwloc_topology **topologyp)
+{
+  return hwloc__topology_init(topologyp, 16); /* 16 is enough for default 9 levels = Mach+Pack+NUMA+L3+L2+L1d+L1i+Co+PU */
 }
 
 int
