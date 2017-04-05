@@ -722,6 +722,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
 
   /* no need to duplicate backends, topology is already loaded */
   new->backends = NULL;
+  new->get_pci_busid_cpuset_backend = NULL;
 
   if (hwloc_topology_reconnect(new, 0) < 0)
     goto out;
