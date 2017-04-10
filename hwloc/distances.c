@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2016 Inria.  All rights reserved.
+ * Copyright © 2010-2017 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -86,14 +86,14 @@ void hwloc_internal_distances_destroy(struct hwloc_topology * topology)
   topology->first_dist = topology->last_dist = NULL;
 }
 
-static void hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct hwloc_internal_distances_s *olddist)
+static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct hwloc_internal_distances_s *olddist)
 {
   struct hwloc_internal_distances_s *newdist;
   unsigned nbobjs = olddist->nbobjs;
 
   newdist = malloc(sizeof(*newdist));
   if (!newdist)
-    return;
+    return -1;
 
   newdist->type = olddist->type;
   newdist->nbobjs = nbobjs;
@@ -105,7 +105,7 @@ static void hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct 
   newdist->values = malloc(nbobjs*nbobjs * sizeof(*newdist->values));
   if (!newdist->indexes || !newdist->objs || !newdist->values) {
     hwloc_internal_distances_free(newdist);
-    return;
+    return -1;
   }
 
   memcpy(newdist->indexes, olddist->indexes, nbobjs * sizeof(*newdist->indexes));
@@ -118,14 +118,21 @@ static void hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct 
   else
     new->first_dist = newdist;
   new->last_dist = newdist;
+
+  return 0;
 }
 
 /* called by topology_dup() */
-void hwloc_internal_distances_dup(struct hwloc_topology *new, struct hwloc_topology *old)
+int hwloc_internal_distances_dup(struct hwloc_topology *new, struct hwloc_topology *old)
 {
   struct hwloc_internal_distances_s *olddist;
-  for(olddist = old->first_dist; olddist; olddist = olddist->next)
-    hwloc_internal_distances_dup_one(new, olddist);
+  int err;
+  for(olddist = old->first_dist; olddist; olddist = olddist->next) {
+    err = hwloc_internal_distances_dup_one(new, olddist);
+    if (err < 0)
+      return err;
+  }
+  return 0;
 }
 
 /******************************************************

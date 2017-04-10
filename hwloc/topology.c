@@ -615,12 +615,12 @@ unlink_and_free_single_object(hwloc_obj_t *pparent)
   hwloc_free_unlinked_object(old);
 }
 
-static void
+static int
 hwloc__duplicate_object(struct hwloc_topology *newtopology,
 			struct hwloc_obj *newparent,
 			struct hwloc_obj *src);
 
-static void
+static int
 hwloc__duplicate_object_contents(struct hwloc_topology *newtopology,
 				 struct hwloc_obj *newobj,
 				 struct hwloc_obj *src)
@@ -628,6 +628,7 @@ hwloc__duplicate_object_contents(struct hwloc_topology *newtopology,
   size_t len;
   unsigned i;
   hwloc_obj_t child;
+  int err;
 
   newobj->type = src->type;
   newobj->os_index = src->os_index;
@@ -659,28 +660,47 @@ hwloc__duplicate_object_contents(struct hwloc_topology *newtopology,
   for(i=0; i<src->infos_count; i++)
     hwloc__add_info(&newobj->infos, &newobj->infos_count, src->infos[i].name, src->infos[i].value);
 
-  for(child = src->first_child; child; child = child->next_sibling)
-    hwloc__duplicate_object(newtopology, newobj, child);
-  for(child = src->io_first_child; child; child = child->next_sibling)
-    hwloc__duplicate_object(newtopology, newobj, child);
-  for(child = src->misc_first_child; child; child = child->next_sibling)
-    hwloc__duplicate_object(newtopology, newobj, child);
+  for(child = src->first_child; child; child = child->next_sibling) {
+    err = hwloc__duplicate_object(newtopology, newobj, child);
+    if (err < 0)
+      return err;
+  }
+  for(child = src->io_first_child; child; child = child->next_sibling) {
+    err = hwloc__duplicate_object(newtopology, newobj, child);
+    if (err < 0)
+      return err;
+  }
+  for(child = src->misc_first_child; child; child = child->next_sibling) {
+    err = hwloc__duplicate_object(newtopology, newobj, child);
+    if (err < 0)
+      return err;
+  }
+
+  return 0;
 }
 
-static void
+static int
 hwloc__duplicate_object(struct hwloc_topology *newtopology,
 			struct hwloc_obj *newparent,
 			struct hwloc_obj *src)
 {
   hwloc_obj_t newobj;
+  int err;
 
   newobj = hwloc_alloc_setup_object(newtopology, src->type, src->os_index);
-  hwloc__duplicate_object_contents(newtopology, newobj, src);
+  if (!newobj)
+    return -1;
+
+  err = hwloc__duplicate_object_contents(newtopology, newobj, src);
+  /* may fail, but some children may have been inserted below us already.
+   * keep inserting ourself and let the caller clean the entire tree if we return an error.
+   */
 
   /* no need to check the children order here, the source topology
    * is supposed to be OK already, and we have debug asserts.
    */
   hwloc_insert_object_by_parent(newtopology, newparent, newobj);
+  return err;
 }
 
 int
@@ -690,13 +710,16 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   hwloc_topology_t new;
   hwloc_obj_t newroot;
   hwloc_obj_t oldroot = hwloc_get_root_obj(old);
+  int err;
 
   if (!old->is_loaded) {
     errno = EINVAL;
     return -1;
   }
 
-  hwloc_topology_init(&new);
+  err = hwloc_topology_init(&new);
+  if (err < 0)
+    goto out;
 
   new->flags = old->flags;
   memcpy(new->type_filter, old->type_filter, sizeof(old->type_filter));
@@ -716,16 +739,20 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   new->userdata_not_decoded = old->userdata_not_decoded;
 
   newroot = hwloc_get_root_obj(new);
-  hwloc__duplicate_object_contents(new, newroot, oldroot);
+  err = hwloc__duplicate_object_contents(new, newroot, oldroot);
+  if (err < 0)
+    goto out_with_topology;
 
-  hwloc_internal_distances_dup(new, old);
+  err = hwloc_internal_distances_dup(new, old);
+  if (err < 0)
+    goto out_with_topology;
 
   /* no need to duplicate backends, topology is already loaded */
   new->backends = NULL;
   new->get_pci_busid_cpuset_backend = NULL;
 
   if (hwloc_topology_reconnect(new, 0) < 0)
-    goto out;
+    goto out_with_topology;
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
@@ -735,8 +762,9 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   *newp = new;
   return 0;
 
- out:
+ out_with_topology:
   hwloc_topology_destroy(new);
+ out:
   return -1;
 }
 
