@@ -63,7 +63,8 @@ EOF])
            NETLOC_EMBEDDED_CPPFLAGS=$NETLOC_CPPFLAGS
            NETLOC_EMBEDDED_LDADD='$(HWLOC_top_builddir)/netloc/libnetloc_embedded.la'
            NETLOC_EMBEDDED_LIBS=$NETLOC_LIBS
-           NETLOC_LIBS=])
+           NETLOC_LIBS=],
+          [AC_CONFIG_FILES(netloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw])])
     AC_SUBST(NETLOC_EMBEDDED_CFLAGS)
     AC_SUBST(NETLOC_EMBEDDED_CPPFLAGS)
     AC_SUBST(NETLOC_EMBEDDED_LDADD)
@@ -71,7 +72,6 @@ EOF])
 
     AC_CONFIG_FILES(
         netloc_config_prefix[netloc/Makefile]
-        netloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw]
     )
 
     AS_IF([test "$netloc_happy" = "yes"],
