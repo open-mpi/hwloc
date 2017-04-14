@@ -57,12 +57,12 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
       goto out_with_set; /* failed to allocate, ignore this forced locality */
     *allocated = 1;
   } else if (nr >= *allocated) {
-    struct hwloc_pci_forced_locality_s *tmp;
-    tmp = realloc(topology->pci_forced_locality,
-		  2 * *allocated * sizeof(*topology->pci_forced_locality));
-    if (!tmp)
+    struct hwloc_pci_forced_locality_s *tmplocs;
+    tmplocs = realloc(topology->pci_forced_locality,
+		      2 * *allocated * sizeof(*topology->pci_forced_locality));
+    if (!tmplocs)
       goto out_with_set; /* failed to allocate, ignore this forced locality */
-    topology->pci_forced_locality = tmp;
+    topology->pci_forced_locality = tmplocs;
     *allocated *= 2;
   }
 
