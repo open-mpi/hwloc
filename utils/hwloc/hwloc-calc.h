@@ -332,7 +332,7 @@ static __hwloc_inline int
 hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 			       hwloc_const_bitmap_t rootcpuset, hwloc_const_bitmap_t rootnodeset, int depth,
 			       const char *string, /* starts with indexes following the colon */
-			       void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata)
+			       void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
   int verbose = lcontext->verbose;
   hwloc_obj_t obj;
@@ -403,7 +403,7 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 	/* add to the temporary cpuset
 	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
 	 */
-        cbfunc(cbdata, obj, verbose);
+        cbfunc(lcontext, cbdata, obj);
       }
     }
   }
@@ -412,18 +412,18 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 }
 
 static __hwloc_inline int
-hwloc_calc_append_iodev(void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
-			hwloc_obj_t obj,
-			int verbose)
+hwloc_calc_append_iodev(struct hwloc_calc_location_context_s *lcontext,
+			void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata,
+			hwloc_obj_t obj)
 {
-  cbfunc(cbdata, obj, verbose);
+  cbfunc(lcontext, cbdata, obj);
   return 0;
 }
 
 static __hwloc_inline int
 hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
 				 hwloc_obj_type_t type, int depth, const char *string,
-				 void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata)
+				 void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
   hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
@@ -519,7 +519,7 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
     if (verbose > 0)
       printf("using matching PCI object #%d bus id %04x:%02x:%02x.%01x\n", i,
 	     obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-    hwloc_calc_append_iodev(cbfunc, cbdata, obj, verbose);
+    hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
 
     if (!prev)
       prev = obj;
@@ -537,7 +537,7 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
 static __hwloc_inline int
 hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 			    const char *arg, size_t typelen,
-			    void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata)
+			    void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
   hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
@@ -562,7 +562,7 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
       /* try to match a busid */
       obj = hwloc_get_pcidev_by_busidstring(topology, sep+1);
       if (obj)
-	return hwloc_calc_append_iodev(cbfunc, cbdata, obj, verbose);
+	return hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
       if (verbose >= 0)
 	fprintf(stderr, "invalid PCI device %s\n", sep+1);
       return -1;
@@ -571,11 +571,12 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
       /* try to match a OS device name */
       while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
 	if (!strcmp(obj->name, sep+1))
-	  return hwloc_calc_append_iodev(cbfunc, cbdata, obj, verbose);
+	  return hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
       }
       if (verbose >= 0)
 	fprintf(stderr, "invalid OS device %s\n", sep+1);
       return -1;
+
     } else
       return -1;
   }
@@ -587,15 +588,16 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 					depth, sep+1, cbfunc, cbdata);
 }
 
-struct hwloc_calc_process_arg_cpuset_cbdata_s {
+struct hwloc_calc_process_location_set_cbdata_s {
   hwloc_bitmap_t set;
   int nodeset_output;
 };
 
 static __hwloc_inline void
-hwloc_calc_process_arg_cpuset_cb(void *_data, hwloc_obj_t obj, int verbose)
+hwloc_calc_process_location_set_cb(struct hwloc_calc_location_context_s *lcontext, void *_data, hwloc_obj_t obj)
 {
-  struct hwloc_calc_process_arg_cpuset_cbdata_s *cbdata = _data;
+  int verbose = lcontext->verbose;
+  struct hwloc_calc_process_location_set_cbdata_s *cbdata = _data;
   hwloc_bitmap_t set = cbdata->set;
   int nodeset_output = cbdata->nodeset_output;
   /* walk up out of I/O objects */
@@ -640,11 +642,11 @@ hwloc_calc_process_arg(struct hwloc_calc_location_context_s *lcontext,
   typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
   if (typelen && (arg[typelen] == ':' || arg[typelen] == '=' || arg[typelen] == '[')) {
     /* process type/depth */
-    struct hwloc_calc_process_arg_cpuset_cbdata_s cbdata;
+    struct hwloc_calc_process_location_set_cbdata_s cbdata;
     cbdata.set = hwloc_bitmap_alloc();
     cbdata.nodeset_output = nodeset_output;
     err = hwloc_calc_process_location(lcontext, arg, typelen,
-				      hwloc_calc_process_arg_cpuset_cb, &cbdata);
+				      hwloc_calc_process_location_set_cb, &cbdata);
     if (!err)
       err = hwloc_calc_append_set(set, cbdata.set, mode, verbose);
     hwloc_bitmap_free(cbdata.set);
