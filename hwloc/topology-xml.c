@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1896,23 +1896,23 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 }
 
 #define EXPORT_ARRAY(state, type, nr, values, tagname, format, maxperline) do { \
-  unsigned i = 0; \
-  while (i<(nr)) { \
-    char tmp[255]; /* enough for (snprintf(format)+space) x maxperline */ \
-    char tmp2[16]; \
-    size_t len = 0; \
-    unsigned j; \
-    struct hwloc__xml_export_state_s childstate; \
-    (state)->new_child(state, &childstate, tagname); \
-    for(j=0; \
-	i+j<(nr) && j<maxperline; \
-	j++) \
-      len += sprintf(tmp+len, format " ", (type) (values)[i+j]); \
-    i += j; \
-    sprintf(tmp2, "%lu", (unsigned long) len); \
-    childstate.new_prop(&childstate, "length", tmp2); \
-    childstate.add_content(&childstate, tmp, len); \
-    childstate.end_object(&childstate, tagname); \
+  unsigned _i = 0; \
+  while (_i<(nr)) { \
+    char _tmp[255]; /* enough for (snprintf(format)+space) x maxperline */ \
+    char _tmp2[16]; \
+    size_t _len = 0; \
+    unsigned _j; \
+    struct hwloc__xml_export_state_s _childstate; \
+    (state)->new_child(state, &_childstate, tagname); \
+    for(_j=0; \
+	_i+_j<(nr) && _j<maxperline; \
+	_j++) \
+      _len += sprintf(_tmp+_len, format " ", (type) (values)[_i+_j]); \
+    _i += _j; \
+    sprintf(_tmp2, "%lu", (unsigned long) _len); \
+    _childstate.new_prop(&_childstate, "length", _tmp2); \
+    _childstate.add_content(&_childstate, _tmp, _len); \
+    _childstate.end_object(&_childstate, tagname); \
   } \
 } while (0)
 
