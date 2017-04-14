@@ -192,10 +192,11 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
 }
 
 static void
-hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
-			       hwloc_obj_t obj,
-			       int verbose)
+hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lcontext,
+				    void *_data __hwloc_attribute_unused,
+				    hwloc_obj_t obj)
 {
+  int verbose = lcontext->verbose;
   char prefix[32];
   char objs[128];
 
@@ -513,21 +514,21 @@ main (int argc, char *argv[])
     DO(membind, get_area_memlocation);
 
   } else if (mode == HWLOC_INFO_MODE_OBJECTS) {
+    struct hwloc_calc_location_context_s lcontext;
+    lcontext.topology = topology;
+    lcontext.topodepth = topodepth;
+    lcontext.logical = logical;
+    lcontext.verbose = verbose_mode;
     current_obj = 0;
     while (argc >= 1) {
       if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
-	hwloc_calc_process_arg_info_cb(NULL, hwloc_get_root_obj(topology), verbose_mode);
+	hwloc_calc_process_location_info_cb(&lcontext, NULL, hwloc_get_root_obj(topology));
       } else {
 	/* try to match a type/depth followed by a special character */
 	typelen = strspn(argv[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=' || argv[0][typelen] == '[')) {
-	  struct hwloc_calc_location_context_s lcontext;
-	  lcontext.topology = topology;
-	  lcontext.topodepth = topodepth;
-	  lcontext.logical = logical;
-	  lcontext.verbose = verbose_mode;
 	  err = hwloc_calc_process_location(&lcontext, argv[0], typelen,
-					    hwloc_calc_process_arg_info_cb, NULL);
+					    hwloc_calc_process_location_info_cb, NULL);
 	}
       }
       argc--; argv++;
