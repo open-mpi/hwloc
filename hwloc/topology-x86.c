@@ -597,7 +597,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
   /* Now that we have all info, compute cacheids and apply quirks */
   for (cachenum = 0; cachenum < infos->numcaches; cachenum++) {
-    struct cacheinfo *cache = &infos->cache[cachenum];
+    cache = &infos->cache[cachenum];
 
     /* default cacheid value */
     cache->cacheid = infos->apicid / cache->nbthreads_sharing;
@@ -719,7 +719,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       } else {
 	/* Annotate packages previously-existing packages */
 	hwloc_bitmap_t set = hwloc_bitmap_alloc();
-	hwloc_obj_t package;
 	hwloc_bitmap_set(set, i);
 	package = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PACKAGE, NULL);
 	hwloc_bitmap_free(set);
@@ -884,7 +883,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   /* Look for PUs (cannot be filtered-out) */
   if (fulldiscovery) {
-    unsigned i;
     hwloc_debug("%s", "\n\n * CPU cpusets *\n\n");
     for (i=0; i<nbprocs; i++)
       if(infos[i].present) { /* Only add present PU. We don't know if others actually exist */
