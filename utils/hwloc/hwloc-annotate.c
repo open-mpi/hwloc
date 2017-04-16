@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2016 Inria.  All rights reserved.
+ * Copyright © 2012-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -161,11 +161,17 @@ add_distances(hwloc_topology_t topology, unsigned topodepth)
 		}
 		typelen = strspn(line, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 		if (typelen && line[typelen] == ':') {
-			size_t length = strspn(line+typelen+1, "0123456789");
+			struct hwloc_calc_location_context_s lcontext;
+			size_t length;
+
+			lcontext.topology = topology;
+			lcontext.topodepth = topodepth;
+			lcontext.logical = 1;
+			lcontext.verbose = 0;
+			length = strspn(line+typelen+1, "0123456789");
 			line[typelen+1+length] = '\0';
-			err = hwloc_calc_process_type_arg(topology, topodepth, line, typelen, 1,
-							  hwloc_calc_get_obj_cb, &obj,
-							  0);
+			err = hwloc_calc_process_location(&lcontext, line, typelen,
+							  hwloc_calc_get_obj_cb, &obj);
 			if (err < 0)
 				goto out;
 		} else {
@@ -343,9 +349,13 @@ int main(int argc, char *argv[])
 		size_t typelen;
 		typelen = strspn(location, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 		if (typelen && (location[typelen] == ':' || location[typelen] == '=' || location[typelen] == '[')) {
-			err = hwloc_calc_process_type_arg(topology, topodepth, location, typelen, 1,
-							  hwloc_calc_process_arg_info_cb, topology,
-							  0);
+			struct hwloc_calc_location_context_s lcontext;
+			lcontext.topology = topology;
+			lcontext.topodepth = topodepth;
+			lcontext.logical = 1;
+			lcontext.verbose = 0;
+			err = hwloc_calc_process_location(&lcontext, location, typelen,
+							  hwloc_calc_process_arg_info_cb, topology);
 		}
 	}
 
