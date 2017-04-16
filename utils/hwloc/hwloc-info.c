@@ -473,9 +473,13 @@ main (int argc, char *argv[])
 	/* try to match a type/depth followed by a special character */
 	typelen = strspn(argv[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=' || argv[0][typelen] == '[')) {
-	  err = hwloc_calc_process_type_arg(topology, topodepth, argv[0], typelen, logical,
-					    hwloc_calc_process_arg_info_cb, NULL,
-					    verbose_mode);
+	  struct hwloc_calc_location_context_s lcontext;
+	  lcontext.topology = topology;
+	  lcontext.topodepth = topodepth;
+	  lcontext.logical = logical;
+	  lcontext.verbose = verbose_mode;
+	  err = hwloc_calc_process_location(&lcontext, argv[0], typelen,
+					    hwloc_calc_process_arg_info_cb, NULL);
 	}
       }
       argc--; argv++;

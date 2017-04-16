@@ -22,6 +22,13 @@
 #include <ctype.h>
 #include <assert.h>
 
+struct hwloc_calc_location_context_s {
+  hwloc_topology_t topology;
+  unsigned topodepth;
+  int logical;
+  int verbose;
+};
+
 typedef enum hwloc_calc_append_mode_e {
   HWLOC_CALC_APPEND_ADD,
   HWLOC_CALC_APPEND_CLR,
@@ -70,10 +77,11 @@ hwloc_calc_append_set(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
 }
 
 static __hwloc_inline unsigned
-hwloc_calc_get_nbobjs_inside_sets_by_depth(hwloc_topology_t topology,
+hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
 					   hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
 					   unsigned depth)
 {
+  hwloc_topology_t topology = lcontext->topology;
   hwloc_obj_t obj = NULL;
   unsigned n = 0;
   while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
@@ -91,10 +99,12 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(hwloc_topology_t topology,
 }
 
 static __hwloc_inline hwloc_obj_t
-hwloc_calc_get_obj_inside_sets_by_depth(hwloc_topology_t topology,
+hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
 					hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
-					unsigned depth, unsigned ind, int logical)
+					unsigned depth, unsigned ind)
 {
+  hwloc_topology_t topology = lcontext->topology;
+  int logical = lcontext->logical;
   hwloc_obj_t obj = NULL;
   unsigned i = 0;
   while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
@@ -119,10 +129,12 @@ hwloc_calc_get_obj_inside_sets_by_depth(hwloc_topology_t topology,
 }
 
 static __hwloc_inline int
-hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
-			 int depthattr, hwloc_obj_cache_type_t cachetype /* -1 if not specified */,
-			 int verbose)
+hwloc_calc_depth_of_type(struct hwloc_calc_location_context_s *lcontext,
+			 hwloc_obj_type_t type,
+			 int depthattr, hwloc_obj_cache_type_t cachetype /* -1 if not specified */)
 {
+  hwloc_topology_t topology = lcontext->topology;
+  int verbose = lcontext->verbose;
   int depth;
   int i;
 
@@ -178,11 +190,12 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 }
 
 static __hwloc_inline int
-hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
+hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
 			      const char *string, size_t typelen,
-			      hwloc_obj_type_t *typep,
-			      int verbose)
+			      hwloc_obj_type_t *typep)
 {
+  unsigned topodepth = lcontext->topodepth;
+  int verbose = lcontext->verbose;
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   hwloc_obj_type_t type;
   hwloc_obj_cache_type_t cachetypeattr;
@@ -205,7 +218,7 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
     if (type == HWLOC_OBJ_MISC)
       return -1;
     *typep = type;
-    return hwloc_calc_depth_of_type(topology, type, depthattr, cachetypeattr, verbose);
+    return hwloc_calc_depth_of_type(lcontext, type, depthattr, cachetypeattr);
   }
 
   /* try to match a numeric depth */
@@ -316,13 +329,12 @@ hwloc_calc_parse_range(const char *_string,
 }
 
 static __hwloc_inline int
-hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
+hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 			       hwloc_const_bitmap_t rootcpuset, hwloc_const_bitmap_t rootnodeset, int depth,
 			       const char *string, /* starts with indexes following the colon */
-			       int logical,
-			       void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
-			       int verbose)
+			       void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata)
 {
+  int verbose = lcontext->verbose;
   hwloc_obj_t obj;
   unsigned width;
   const char *dot, *nextsep = NULL;
@@ -348,10 +360,9 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
       return -1;
     nextsep = &nextstring[typelen];
 
-    nextdepth = hwloc_calc_parse_depth_prefix(topology, topodepth,
+    nextdepth = hwloc_calc_parse_depth_prefix(lcontext,
 					      nextstring, typelen,
-					      &type,
-					      verbose);
+					      &type);
     if (nextdepth == HWLOC_TYPE_DEPTH_UNKNOWN || nextdepth == HWLOC_TYPE_DEPTH_MULTIPLE)
       return -1;
     if (nextdepth < 0) {
@@ -361,7 +372,7 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
     }
   }
 
-  width = hwloc_calc_get_nbobjs_inside_sets_by_depth(topology, rootcpuset, rootnodeset, depth);
+  width = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, rootcpuset, rootnodeset, depth);
   if (amount == -1)
     amount = (width-first+step-1)/step;
 
@@ -369,7 +380,7 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
     if (wrap && i>=width)
       i = 0;
 
-    obj = hwloc_calc_get_obj_inside_sets_by_depth(topology, rootcpuset, rootnodeset, depth, i, logical);
+    obj = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, rootcpuset, rootnodeset, depth, i);
     if (verbose > 0 || (!obj && verbose >= 0)) {
       char *sc, *sn = NULL;
       hwloc_bitmap_asprintf(&sc, rootcpuset);
@@ -387,7 +398,7 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
     }
     if (obj) {
       if (dot) {
-	hwloc_calc_append_object_range(topology, topodepth, obj->cpuset, obj->nodeset, nextdepth, nextsep+1, logical, cbfunc, cbdata, verbose);
+	hwloc_calc_append_object_range(lcontext, obj->cpuset, obj->nodeset, nextdepth, nextsep+1, cbfunc, cbdata);
       } else {
 	/* add to the temporary cpuset
 	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
@@ -410,10 +421,12 @@ hwloc_calc_append_iodev(void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
 }
 
 static __hwloc_inline int
-hwloc_calc_append_iodev_by_index(hwloc_topology_t topology, hwloc_obj_type_t type, int depth, const char *string,
-				 void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
-				 int verbose)
+hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
+				 hwloc_obj_type_t type, int depth, const char *string,
+				 void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata)
 {
+  hwloc_topology_t topology = lcontext->topology;
+  int verbose = lcontext->verbose;
   hwloc_obj_t obj, prev = NULL;
   int pcivendor = -1, pcidevice = -1;
   const char *current, *dot;
@@ -522,21 +535,19 @@ hwloc_calc_append_iodev_by_index(hwloc_topology_t topology, hwloc_obj_type_t typ
 }
 
 static __hwloc_inline int
-hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
+hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 			    const char *arg, size_t typelen,
-			    int logical,
-			    void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata,
-			    int verbose)
+			    void (*cbfunc)(void *, hwloc_obj_t, int), void *cbdata)
 {
+  hwloc_topology_t topology = lcontext->topology;
+  int verbose = lcontext->verbose;
   const char *sep = &arg[typelen];
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
   int depth;
 
-  depth = hwloc_calc_parse_depth_prefix(topology, topodepth,
+  depth = hwloc_calc_parse_depth_prefix(lcontext,
 					arg, typelen,
-					&type,
-					verbose);
-
+					&type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
     return -1;
 
@@ -545,7 +556,7 @@ hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
     hwloc_obj_t obj = NULL;
 
     if (*sep == ':' || *sep == '[') {
-      return hwloc_calc_append_iodev_by_index(topology, type, depth, sep, cbfunc, cbdata, verbose);
+      return hwloc_calc_append_iodev_by_index(lcontext, type, depth, sep, cbfunc, cbdata);
 
     } else if (*sep == '=' && type == HWLOC_OBJ_PCI_DEVICE) {
       /* try to match a busid */
@@ -570,10 +581,10 @@ hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
   }
 
   /* look at indexes following this type/depth */
-  return hwloc_calc_append_object_range(topology, topodepth,
+  return hwloc_calc_append_object_range(lcontext,
 					hwloc_topology_get_complete_cpuset(topology),
 					hwloc_topology_get_complete_nodeset(topology),
-					depth, sep+1, logical, cbfunc, cbdata, verbose);
+					depth, sep+1, cbfunc, cbdata);
 }
 
 struct hwloc_calc_process_arg_cpuset_cbdata_s {
@@ -586,6 +597,7 @@ hwloc_calc_process_arg_cpuset_cb(void *_data, hwloc_obj_t obj, int verbose)
 {
   struct hwloc_calc_process_arg_cpuset_cbdata_s *cbdata = _data;
   hwloc_bitmap_t set = cbdata->set;
+  int nodeset_output = cbdata->nodeset_output;
   /* walk up out of I/O objects */
   while (obj && !obj->cpuset)
     obj = obj->parent;
@@ -593,15 +605,17 @@ hwloc_calc_process_arg_cpuset_cb(void *_data, hwloc_obj_t obj, int verbose)
     /* do nothing */
     return;
   hwloc_calc_append_set(set,
-			cbdata->nodeset_output ? obj->nodeset : obj->cpuset,
+			nodeset_output ? obj->nodeset : obj->cpuset,
 			HWLOC_CALC_APPEND_ADD, verbose);
 }
 
 static __hwloc_inline int
-hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
-		       const char *arg, int logical, hwloc_bitmap_t set,
-		       int nodeset_input, int nodeset_output, int verbose)
+hwloc_calc_process_arg(struct hwloc_calc_location_context_s *lcontext,
+		       const char *arg,
+		       hwloc_bitmap_t set, int nodeset_input, int nodeset_output)
 {
+  hwloc_topology_t topology = lcontext->topology;
+  int verbose = lcontext->verbose;
   hwloc_calc_append_mode_t mode = HWLOC_CALC_APPEND_ADD;
   size_t typelen;
   int err;
@@ -629,9 +643,8 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
     struct hwloc_calc_process_arg_cpuset_cbdata_s cbdata;
     cbdata.set = hwloc_bitmap_alloc();
     cbdata.nodeset_output = nodeset_output;
-    err = hwloc_calc_process_type_arg(topology, topodepth, arg, typelen, logical,
-				      hwloc_calc_process_arg_cpuset_cb, &cbdata,
-				      verbose);
+    err = hwloc_calc_process_location(lcontext, arg, typelen,
+				      hwloc_calc_process_arg_cpuset_cb, &cbdata);
     if (!err)
       err = hwloc_calc_append_set(set, cbdata.set, mode, verbose);
     hwloc_bitmap_free(cbdata.set);

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
   int tid_number = -1;
   hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
   char *callname;
+  struct hwloc_calc_location_context_s lcontext;
 
   cpubind_set = hwloc_bitmap_alloc();
   membind_set = hwloc_bitmap_alloc();
@@ -245,11 +246,14 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    ret = hwloc_calc_process_arg(topology, depth, argv[0], logical,
+    lcontext.topology = topology;
+    lcontext.topodepth = depth;
+    lcontext.logical = logical;
+    lcontext.verbose = verbose;
+    ret = hwloc_calc_process_arg(&lcontext, argv[0],
 				 working_on_cpubind ? cpubind_set : membind_set,
 				 use_nodeset,
-				 working_on_cpubind ? 0 : 1,
-				 verbose);
+				 working_on_cpubind ? 0 : 1);
     if (ret < 0) {
       if (verbose > 0)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);

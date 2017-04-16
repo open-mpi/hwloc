@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -209,6 +209,7 @@ int main(int argc, char *argv[])
   int i;
   int err;
   int ret = EXIT_SUCCESS;
+  struct hwloc_calc_location_context_s lcontext;
 
   /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
@@ -417,7 +418,11 @@ int main(int argc, char *argv[])
     }
 
     cmdline_args++;
-    if (hwloc_calc_process_arg(topology, depth, argv[0], logicali, set, 0, 0, verbose) < 0)
+    lcontext.topology = topology;
+    lcontext.topodepth = depth;
+    lcontext.logical = logicali;
+    lcontext.verbose = verbose;
+    if (hwloc_calc_process_arg(&lcontext, argv[0], set, 0, 0) < 0)
       fprintf(stderr, "ignored unrecognized argument %s\n", argv[0]);
 
  next:
@@ -494,7 +499,11 @@ int main(int argc, char *argv[])
 	if (!token)
 	  break;
 	current = NULL;
-	if (hwloc_calc_process_arg(topology, depth, token, logicali, set, 0, 0, verbose) < 0)
+	lcontext.topology = topology;
+	lcontext.topodepth = depth;
+	lcontext.logical = logicali;
+	lcontext.verbose = verbose;
+	if (hwloc_calc_process_arg(&lcontext, token, set, 0, 0) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", token);
       }
       hwloc_calc_output(topology, outsep, set);
