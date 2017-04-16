@@ -205,8 +205,9 @@ The additional
 type can be used when several machines form an overall single system image
 (SSI), such as Kerrighed.
 .PP
-I/O devices are not listed here since they are not identified using
-tuples as explained in \fBLocation Specification\fR.
+\fBosdev\fR, \fBpcidev\fR, \fBbridge\fR, and \fBmisc\fR may also be used
+to specify special devices although some of them have dedicated identification
+ways as explained in \fBLocation Specification\fR.
 .
 .PP
 Finally, note that an object can be denoted by its numeric "depth" in
