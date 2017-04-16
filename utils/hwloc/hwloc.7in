@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2014 Inria.  All rights reserved.
+.\" Copyright © 2010-2017 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -38,11 +38,9 @@ See http://www.mjmwired.net/kernel/Documentation/cpusets.txt for a
 discussion of Linux CPU sets.  A
 super-short-ignoring-many-details description (taken from that page)
 is:
-.
-.\" Force a paragraph break, but keep the indentation
-.TP
-\
-.
+.br
+
+.br
  "Cpusets provide a mechanism for assigning a set of CPUs and Memory
 Nodes to a set of tasks."
 .
@@ -52,10 +50,9 @@ See http://www.mjmwired.net/kernel/Documentation/cgroups.txt for a
 discussion of Linux control groups.  A
 super-short-ignoring-many-details description (taken from that page)
 is:
-.
-.\" Force a paragraph break, but keep the indentation
-.TP
-\
+.br
+
+.br
  "Control Groups provide a mechanism for aggregating/partitioning sets
 of tasks, and all their future children, into hierarchical groups
 with specialized behaviour."
@@ -84,9 +81,9 @@ Hwloc objects represent types of mapped items (e.g., packages, cores,
 etc.) in a topology tree; indexes are non-negative integers that
 specify a unique physical object in a topology tree.  Both concepts
 are described in detail, below.
-.\" Force a paragraph break, but keep the indentation.
-.TP
-\
+.br
+
+.br
 Chaining multiple tuples together in the more general form
 .I object1:index[.object2:index2[...]]
 is permissable.  While the first tuple's object may appear anywhere in
@@ -97,6 +94,9 @@ When using logical indexes (which is the default),
 indexes specified in chained tuples are relative to the scope of the
 parent object.  For example, "package:0.core:1" refers to the second
 core in the first package.
+.br
+
+.br
 When using OS/physical indexes, the first object matching the given
 index is used.
 .
