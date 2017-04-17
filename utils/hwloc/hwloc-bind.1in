@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2016 Inria.  All rights reserved.
+.\" Copyright © 2009-2017 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -152,6 +152,14 @@ hwloc-bind execs an executable (with optional command line arguments)
 that is bound to the specified location (or list of locations).  Upon
 successful execution, hwloc-bind simply sets bindings and then execs
 the executable over itself.
+.
+.PP
+If multiple locations are given, they are combined in the sense that
+the binding will be wider. The process will be allowed to run on every
+location inside the combination.
+.
+.PP
+The list of input locations may be explicitly ended with "--".
 .
 .PP
 If binding fails, or if the binding set is empty, and \fB\-\-force\fR
