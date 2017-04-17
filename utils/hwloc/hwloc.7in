@@ -124,7 +124,8 @@ For example, "\fBpci=02:03.1\fR" is the PCI device with bus ID "02:03.1".
 .
 .TP
 .B Hex:
-Locations can also be specified as hexidecimal bitmasks prefixed
+For tools that manipulate object as sets (e.g. hwloc-calc and hwloc-bind),
+locations can also be specified as hexidecimal bitmasks prefixed
 .
 with "0x".  Commas must be used to separate the hex digits into blocks
 of 8, such as "0xffc0140,0x00020110".
@@ -143,17 +144,30 @@ with the 33rd.  The string "0xf...f" -- with no other specified values
 -- sets all bits.
 .
 .PP
-Multiple locations can be specified on the command lines
-(delimited by whitespace); the first token of the execution command is
-assumed to either follow "--" (if specified) or the first token that
-is unrecognized as a location.
+"all" and "root" are special locations consisting in the root
+object in tree. It contains the entire current topology.
 .
 .PP
-By default, if multiple locations are specified, they are added,
-meaning that the binding will be wider in the sense that the process
-may run on more objects.
+Some tools directly operate on these objects (e.g. hwloc-info and hwloc-annotate).
+They do not support hexadecimal locations because each location may
+correspond to multiple objects.
+For instance, there can be exactly one L3 cache per package and NUMA node,
+which means it's the same location.
+.
+If multiple locations are given on the command-line,
+these tools will operation on each location individually and consecutively.
 .
 .PP
+Some other tools internally manipulate objects as sets (e.g. hwloc-calc and hwloc-bind).
+They translate each input location into a hexidecimal location.
+When I/O or Misc objects are used, they are translated into the set
+of processors (or NUMA nodes) that are close to the given object
+(because I/O or Misc objects do not contain processors or NUMA nodes).
+.
+.PP
+If multiple locations are specified on the command-line (delimited by whitespace),
+they are combined (the overall location is wider).
+.
 If prefixed with "~", the given location
 will be cleared instead of added to the current list of locations.  If
 prefixed with "x", the given location will be and'ed instead of added
@@ -161,14 +175,6 @@ to the current list.  If prefixed with "^", the given location will be
 xor'ed.
 .
 .PP
-When I/O or Misc objects are used, they are translated into the set
-of processors (or NUMA nodes) that are close to the given object
-(because I/O or Misc objects do not contain processors or NUMA nodes).
-.
-.PP
-"all" and "root" are special locations consisting in the root
-object in tree. It contains the entire current topology.
-.
 More complex operations may be performed by using
 .IR hwloc-calc
 to compute intermediate values.
