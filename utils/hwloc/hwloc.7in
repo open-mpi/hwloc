@@ -33,6 +33,11 @@ of "CPU set" does not carry any the same connotations as Linux's "CPU
 set" (e.g., process affinity, etc.).
 .
 .TP
+.B hwloc node set:
+A set of NUMA memory nodes near an hwloc object, expressed as a bitmask
+indexed by the physical numbers of the NUMA nodes (as announced by the OS).
+.
+.TP
 .B Linux CPU set:
 See http://www.mjmwired.net/kernel/Documentation/cpusets.txt for a
 discussion of Linux CPU sets.  A
@@ -59,7 +64,7 @@ with specialized behaviour."
 .
 .PP
 To be clear, hwloc supports all of the above concepts.  It is simply
-worth noting that they are 3 different things.
+worth noting that they are different things.
 .
 .SS Location Specification
 .
