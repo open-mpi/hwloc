@@ -21,11 +21,11 @@ different operating systems and platforms.
 .
 .
 .SS Definitions
-Hwloc has some specific definitions for terms that are used in this
+hwloc has some specific definitions for terms that are used in this
 man page and other hwloc documentation.
 .
 .TP 5
-.B Hwloc CPU set:
+.B hwloc CPU set:
 A set of processors included in an hwloc object, expressed as a bitmask
 indexed by the physical numbers of the CPUs (as announced by the OS).
 The hwloc definition
@@ -77,7 +77,7 @@ Locations can be specified in multiple ways:
 Tuples of hwloc "objects" and associated indexes can be specified in
 the form
 .IR object:index .
-Hwloc objects represent types of mapped items (e.g., packages, cores,
+hwloc objects represent types of mapped items (e.g., packages, cores,
 etc.) in a topology tree; indexes are non-negative integers that
 specify a unique physical object in a topology tree.  Both concepts
 are described in detail, below.
@@ -158,7 +158,7 @@ More complex operations may be performed by using
 .IR hwloc-calc
 to compute intermediate values.
 .
-.SS Hwloc Objects
+.SS hwloc Objects
 .
 .PP
 Objects in tuples can be any of the following strings
@@ -215,7 +215,7 @@ ways as explained in \fBLocation Specification\fR.
 Finally, note that an object can be denoted by its numeric "depth" in
 the topology graph.
 .
-.SS Hwloc Indexes
+.SS hwloc Indexes
 Indexes are integer values that uniquely specify a given object of a
 specific type.  Indexes can be expressed either as
 .I logical
@@ -318,11 +318,11 @@ to switch from one mode to another.
 .\" **************************
 .SH SEE ALSO
 .
-Hwloc's command line tool documentation: lstopo(1), hwloc-bind(1),
+hwloc's command line tool documentation: lstopo(1), hwloc-bind(1),
 hwloc-calc(1), hwloc-distrib(1), hwloc-ps(1).
 .
 .PP
-Hwloc has many C API functions, each of which have their own man page.
+hwloc has many C API functions, each of which have their own man page.
 Some top-level man pages are also provided, grouping similar functions
 together.  A few good places to start might include:
 hwlocality_objects(3), hwlocality_types(3), hwlocality_creation(3),
