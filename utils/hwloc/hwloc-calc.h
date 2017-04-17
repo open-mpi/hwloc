@@ -588,9 +588,15 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 					depth, sep+1, cbfunc, cbdata);
 }
 
-struct hwloc_calc_process_location_set_cbdata_s {
-  hwloc_bitmap_t set;
+struct hwloc_calc_set_context_s {
+  int nodeset_input;
   int nodeset_output;
+  hwloc_bitmap_t output_set;
+};
+
+struct hwloc_calc_process_location_set_cbdata_s {
+  struct hwloc_calc_set_context_s *scontext;
+  hwloc_bitmap_t set;
 };
 
 static __hwloc_inline void
@@ -599,7 +605,7 @@ hwloc_calc_process_location_set_cb(struct hwloc_calc_location_context_s *lcontex
   int verbose = lcontext->verbose;
   struct hwloc_calc_process_location_set_cbdata_s *cbdata = _data;
   hwloc_bitmap_t set = cbdata->set;
-  int nodeset_output = cbdata->nodeset_output;
+  int nodeset_output = cbdata->scontext->nodeset_output;
   /* walk up out of I/O objects */
   while (obj && !obj->cpuset)
     obj = obj->parent;
@@ -612,12 +618,15 @@ hwloc_calc_process_location_set_cb(struct hwloc_calc_location_context_s *lcontex
 }
 
 static __hwloc_inline int
-hwloc_calc_process_arg(struct hwloc_calc_location_context_s *lcontext,
-		       const char *arg,
-		       hwloc_bitmap_t set, int nodeset_input, int nodeset_output)
+hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontext,
+				   struct hwloc_calc_set_context_s *scontext,
+				   const char *arg)
 {
   hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
+  int nodeset_output = scontext->nodeset_output;
+  int nodeset_input = scontext->nodeset_input;
+  hwloc_bitmap_t output_set = scontext->output_set;
   hwloc_calc_append_mode_t mode = HWLOC_CALC_APPEND_ADD;
   size_t typelen;
   int err;
@@ -634,7 +643,7 @@ hwloc_calc_process_arg(struct hwloc_calc_location_context_s *lcontext,
   }
 
   if (!strcmp(arg, "all") || !strcmp(arg, "root"))
-    return hwloc_calc_append_set(set,
+    return hwloc_calc_append_set(output_set,
 				 nodeset_output ? hwloc_topology_get_topology_nodeset(topology) : hwloc_topology_get_topology_cpuset(topology),
 				 mode, verbose);
 
@@ -644,11 +653,11 @@ hwloc_calc_process_arg(struct hwloc_calc_location_context_s *lcontext,
     /* process type/depth */
     struct hwloc_calc_process_location_set_cbdata_s cbdata;
     cbdata.set = hwloc_bitmap_alloc();
-    cbdata.nodeset_output = nodeset_output;
+    cbdata.scontext = scontext;
     err = hwloc_calc_process_location(lcontext, arg, typelen,
 				      hwloc_calc_process_location_set_cb, &cbdata);
     if (!err)
-      err = hwloc_calc_append_set(set, cbdata.set, mode, verbose);
+      err = hwloc_calc_append_set(output_set, cbdata.set, mode, verbose);
     hwloc_bitmap_free(cbdata.set);
 
   } else {
@@ -713,15 +722,15 @@ hwloc_calc_process_arg(struct hwloc_calc_location_context_s *lcontext,
     if (nodeset_output && !nodeset_input) {
       hwloc_bitmap_t newnset = hwloc_bitmap_alloc();
       hwloc_cpuset_to_nodeset(topology, newset, newnset);
-      err = hwloc_calc_append_set(set, newnset, mode, verbose);
+      err = hwloc_calc_append_set(output_set, newnset, mode, verbose);
       hwloc_bitmap_free(newnset);
     } else if (nodeset_input && !nodeset_output) {
       hwloc_bitmap_t newcset = hwloc_bitmap_alloc();
       hwloc_cpuset_from_nodeset(topology, newcset, newset);
-      err = hwloc_calc_append_set(set, newcset, mode, verbose);
+      err = hwloc_calc_append_set(output_set, newcset, mode, verbose);
       hwloc_bitmap_free(newcset);
     } else {
-      err = hwloc_calc_append_set(set, newset, mode, verbose);
+      err = hwloc_calc_append_set(output_set, newset, mode, verbose);
     }
     hwloc_bitmap_free(newset);
   }

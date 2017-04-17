@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
   hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
   char *callname;
   struct hwloc_calc_location_context_s lcontext;
+  struct hwloc_calc_set_context_s scontext;
 
   cpubind_set = hwloc_bitmap_alloc();
   membind_set = hwloc_bitmap_alloc();
@@ -250,10 +251,10 @@ int main(int argc, char *argv[])
     lcontext.topodepth = depth;
     lcontext.logical = logical;
     lcontext.verbose = verbose;
-    ret = hwloc_calc_process_arg(&lcontext, argv[0],
-				 working_on_cpubind ? cpubind_set : membind_set,
-				 use_nodeset,
-				 working_on_cpubind ? 0 : 1);
+    scontext.nodeset_input = use_nodeset;
+    scontext.nodeset_output = working_on_cpubind ? 0 : 1;
+    scontext.output_set = working_on_cpubind ? cpubind_set : membind_set;
+    ret = hwloc_calc_process_location_as_set(&lcontext, &scontext, argv[0]);
     if (ret < 0) {
       if (verbose > 0)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
