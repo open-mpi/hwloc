@@ -191,7 +191,7 @@ Objects in tuples can be any of the following strings
 A set of processors and memory.
 .
 .TP
-.B node
+.B numanode
 A NUMA node; a set of processors around memory which the processors
 can directly access.
 .
