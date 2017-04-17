@@ -22,6 +22,8 @@ Version 1.11.7
 * Fix hwloc-bind --membind for CPU-less NUMA nodes (again).
   Thanks to Gilles Gouaillardet for reporting the issue.
 * Fix a memory leak on IBM S/390 platforms running Linux.
+* Updates to the documentation of locations in hwloc(7) and
+  command-line tools manpages.
 
 
 Version 1.11.6
