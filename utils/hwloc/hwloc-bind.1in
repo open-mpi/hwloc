@@ -196,7 +196,7 @@ no ambiguity between hwloc-bind option names and the executed command name:
 To bind the "echo" command to the first core of the second package and
 the second core of the first package:
 
-    hwloc-bind package:1.core:0 package:0.core:1 -- echo hello
+    $ hwloc-bind package:1.core:0 package:0.core:1 -- echo hello
 
 Note that binding the "echo" command to multiple processors is
 probably meaningless (because "echo" is likely implemented as a
