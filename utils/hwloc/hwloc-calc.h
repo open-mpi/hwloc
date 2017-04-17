@@ -202,6 +202,8 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
   /* try to match a type name */
   err = hwloc_obj_type_sscanf(typestring, &type, &depthattr, &cachetypeattr, sizeof(cachetypeattr));
   if (!err) {
+    if (type == HWLOC_OBJ_MISC)
+      return -1;
     *typep = type;
     return hwloc_calc_depth_of_type(topology, type, depthattr, cachetypeattr, verbose);
   }
