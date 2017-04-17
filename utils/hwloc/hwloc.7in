@@ -195,6 +195,9 @@ A set of processors and memory.
 A NUMA node; a set of processors around memory which the processors
 can directly access.
 .
+If \fBhbm\fR is used instead of \fBnumanode\fR in locations,
+command-line tools only consider high-bandwidth memory nodes such as KNL's MCDRAM.
+.
 .TP
 .B package
 Typically a physical package or chip, that goes into a package,

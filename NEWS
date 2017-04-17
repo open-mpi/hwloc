@@ -22,6 +22,11 @@ Version 1.11.7
 * Fix hwloc-bind --membind for CPU-less NUMA nodes (again).
   Thanks to Gilles Gouaillardet for reporting the issue.
 * Fix a memory leak on IBM S/390 platforms running Linux.
+* Command-line tools now support "hbm" instead "numanode" for filtering
+  only high-bandwidth memory nodes when selecting locations.
+  + hwloc-bind also support --hbm and --no-hbm for filtering only or
+    no HBM nodes.
+  Thanks to Nicolas Denoyelle for the suggestion.
 * Updates to the documentation of locations in hwloc(7) and
   command-line tools manpages.
 

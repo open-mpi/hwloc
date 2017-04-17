@@ -25,6 +25,7 @@
 struct hwloc_calc_location_context_s {
   hwloc_topology_t topology;
   unsigned topodepth;
+  int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes */
   int logical;
   int verbose;
 };
@@ -82,6 +83,7 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
 					   unsigned depth)
 {
   hwloc_topology_t topology = lcontext->topology;
+  int only_hbm = lcontext->only_hbm;
   hwloc_obj_t obj = NULL;
   unsigned n = 0;
   while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
@@ -93,6 +95,13 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
 	&& (!nodeset || hwloc_bitmap_iszero(obj->nodeset)))
       /* ignore objects with empty sets (both can be empty when outside of cgroup) */
       continue;
+    if (only_hbm >= 0 && obj->type == HWLOC_OBJ_NUMANODE) {
+      /* filter on hbm */
+      const char *info = hwloc_obj_get_info_by_name(obj, "Type");
+      int obj_is_hbm = info && !strcmp(info, "MCDRAM");
+      if (only_hbm != obj_is_hbm)
+	continue;
+    }
     n++;
   }
   return n;
@@ -104,6 +113,7 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
 					unsigned depth, unsigned ind)
 {
   hwloc_topology_t topology = lcontext->topology;
+  int only_hbm = lcontext->only_hbm;
   int logical = lcontext->logical;
   hwloc_obj_t obj = NULL;
   unsigned i = 0;
@@ -116,6 +126,13 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
 	&& (!nodeset || hwloc_bitmap_iszero(obj->nodeset)))
       /* ignore objects with empty sets (both can be empty when outside of cgroup) */
       continue;
+    if (only_hbm >= 0 && obj->type == HWLOC_OBJ_NUMANODE) {
+      /* filter on hbm */
+      const char *info = hwloc_obj_get_info_by_name(obj, "Type");
+      int obj_is_hbm = info && !strcmp(info, "MCDRAM");
+      if (only_hbm != obj_is_hbm)
+	continue;
+    }
     if (logical) {
       if (i == ind)
 	return obj;
@@ -194,6 +211,7 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
 			      const char *string, size_t typelen,
 			      hwloc_obj_type_t *typep)
 {
+  hwloc_topology_t topology = lcontext->topology;
   unsigned topodepth = lcontext->topodepth;
   int verbose = lcontext->verbose;
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
@@ -219,6 +237,13 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
       return -1;
     *typep = type;
     return hwloc_calc_depth_of_type(lcontext, type, depthattr, cachetypeattr);
+  }
+  if (!strcasecmp(typestring, "HBM") || !strcasecmp(typestring, "MCDRAM")) {
+    if (lcontext->only_hbm == -1)
+      lcontext->only_hbm = 1;
+    *typep = HWLOC_OBJ_NUMANODE;
+    depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
+    return depth;
   }
 
   /* try to match a numeric depth */

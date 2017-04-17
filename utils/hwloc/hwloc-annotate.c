@@ -197,6 +197,7 @@ int main(int argc, char *argv[])
 			struct hwloc_calc_location_context_s lcontext;
 			lcontext.topology = topology;
 			lcontext.topodepth = topodepth;
+			lcontext.only_hbm = -1;
 			lcontext.logical = 1;
 			lcontext.verbose = 0;
 			err = hwloc_calc_process_location(&lcontext, location, typelen,
