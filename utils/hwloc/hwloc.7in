@@ -89,6 +89,16 @@ are described in detail, below.
 .br
 
 .br
+Indexes may also be specified as ranges.
+\fIx-y\fR enumerates from index \fIx\fR to \fIy\fR.
+\fIx:y\fR enumerates \fIy\fR objects starting from index \fIx\fR
+(wrapping around the end of the index range if needed).
+\fIx-\fR enumerates all objects starting from index \fIx\fR.
+\fIall\fR, \fIodd\fR, and \fIeven\fR are also supported for listing
+all objects, or only those with odd or even indexes.
+.br
+
+.br
 Chaining multiple tuples together in the more general form
 .I object1:index[.object2:index2[...]]
 is permissable.  While the first tuple's object may appear anywhere in
