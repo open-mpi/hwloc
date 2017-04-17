@@ -394,6 +394,7 @@ int main(int argc, char *argv[])
     cmdline_args++;
     lcontext.topology = topology;
     lcontext.topodepth = depth;
+    lcontext.only_hbm = -1;
     lcontext.logical = logicali;
     lcontext.verbose = verbose;
     scontext.output_set = set;
@@ -483,6 +484,7 @@ int main(int argc, char *argv[])
 	current = NULL;
 	lcontext.topology = topology;
 	lcontext.topodepth = depth;
+	lcontext.only_hbm = -1;
 	lcontext.logical = logicali;
 	lcontext.verbose = verbose;
 	scontext.output_set = set;

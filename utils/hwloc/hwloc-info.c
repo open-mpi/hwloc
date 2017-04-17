@@ -517,6 +517,7 @@ main (int argc, char *argv[])
     struct hwloc_calc_location_context_s lcontext;
     lcontext.topology = topology;
     lcontext.topodepth = topodepth;
+    lcontext.only_hbm = -1;
     lcontext.logical = logical;
     lcontext.verbose = verbose_mode;
     current_obj = 0;

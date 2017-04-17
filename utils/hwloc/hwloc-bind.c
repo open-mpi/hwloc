@@ -53,6 +53,8 @@ void usage(const char *name, FILE *where)
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
   fprintf(where, "  --whole-system   Do not consider administration limitations\n");
+  fprintf(where, "  --hbm          Only consider high bandwidth memory nodes\n");
+  fprintf(where, "  --no-hbm       Ignore high-bandwidth memory nodes\n");
   fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -f --force     Launch the command even if binding failed\n");
   fprintf(where, "  -q --quiet     Hide non-fatal error messages\n");
@@ -75,6 +77,7 @@ int main(int argc, char *argv[])
   int force = 0;
   int single = 0;
   int verbose = 0;
+  int only_hbm = -1;
   int logical = 1;
   int taskset = 0;
   int cpubind_flags = 0;
@@ -222,6 +225,14 @@ int main(int argc, char *argv[])
 	opt = 1;
 	goto next;
       }
+      if (!strcmp(argv[0], "--hbm")) {
+	only_hbm = 1;
+	goto next;
+      }
+      if (!strcmp(argv[0], "--no-hbm")) {
+	only_hbm = 0;
+	goto next;
+      }
       if (!strcmp (argv[0], "--whole-system")) {
 	if (loaded) {
 	  fprintf(stderr, "Input option %s disallowed after options using the topology\n", argv[0]);
@@ -260,6 +271,7 @@ int main(int argc, char *argv[])
 
     lcontext.topology = topology;
     lcontext.topodepth = depth;
+    lcontext.only_hbm = only_hbm;
     lcontext.logical = logical;
     lcontext.verbose = verbose;
     scontext.nodeset_input = use_nodeset;
