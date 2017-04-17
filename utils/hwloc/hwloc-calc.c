@@ -207,6 +207,7 @@ int main(int argc, char *argv[])
   int err;
   int ret = EXIT_SUCCESS;
   struct hwloc_calc_location_context_s lcontext;
+  struct hwloc_calc_set_context_s scontext;
 
   callname = argv[0];
   /* skip argv[0], handle options */
@@ -395,7 +396,10 @@ int main(int argc, char *argv[])
     lcontext.topodepth = depth;
     lcontext.logical = logicali;
     lcontext.verbose = verbose;
-    if (hwloc_calc_process_arg(&lcontext, argv[0], set, 0, 0) < 0)
+    scontext.output_set = set;
+    scontext.nodeset_input = 0;
+    scontext.nodeset_output = 0;
+    if (hwloc_calc_process_location_as_set(&lcontext, &scontext, argv[0]) < 0)
       fprintf(stderr, "ignored unrecognized argument %s\n", argv[0]);
 
  next:
@@ -481,7 +485,10 @@ int main(int argc, char *argv[])
 	lcontext.topodepth = depth;
 	lcontext.logical = logicali;
 	lcontext.verbose = verbose;
-	if (hwloc_calc_process_arg(&lcontext, token, set, 0, 0) < 0)
+	scontext.output_set = set;
+	scontext.nodeset_input = 0;
+	scontext.nodeset_output = 0;
+	if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", token);
       }
       hwloc_calc_output(topology, outsep, set);
