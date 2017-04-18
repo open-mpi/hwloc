@@ -25,6 +25,7 @@ static int logical = 1;
 static int show_ancestors = 0;
 static int show_ancestor_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_children = 0;
+static int show_descendants_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_index_prefix = 0;
 static int current_obj;
 
@@ -40,6 +41,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --ancestors           Display the chain of ancestor objects up to the root\n");
   fprintf (where, "  --ancestor <type>     Only display the ancestor of the given type\n");
   fprintf (where, "  --children            Display all children\n");
+  fprintf (where, "  --descendants <type>  Only display descendants of the given type\n");
   fprintf (where, "  -n                    Prefix each line with the index of the considered object\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
@@ -260,6 +262,57 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       hwloc_info_show_obj(child, childs, prefix, verbose);
       i++;
     }
+  } else if (show_descendants_depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
+    if (show_descendants_depth >= 0) {
+      /* normal level */
+      unsigned i = 0;
+      unsigned n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth);
+      for(i=0; i<n; i++) {
+	hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth, i);
+	char childs[128];
+	if (show_index_prefix)
+	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
+	hwloc_obj_type_snprintf(childs, sizeof(childs), child, 1);
+	if (verbose < 0)
+	  printf("%s%s:%u\n", prefix, childs, child->logical_index);
+	else
+	  printf("%s%s L#%u = descendant #%u of %s L#%u\n",
+		 prefix, childs, child->logical_index, i, objs, obj->logical_index);
+	hwloc_info_show_obj(child, childs, prefix, verbose);
+      }
+    } else {
+      /* custom level */
+      unsigned i = 0;
+      hwloc_obj_t child = NULL;
+      while ((child = hwloc_get_next_obj_by_depth(topology, show_descendants_depth, child)) != NULL) {
+	char childs[128];
+	hwloc_obj_t parent = child->parent;
+	if (obj->cpuset) {
+	  while (parent && !parent->cpuset)
+	    parent = parent->parent;
+	  if (!parent)
+	    continue;
+	  if (!hwloc_bitmap_isincluded(parent->cpuset, obj->cpuset)
+	      || !hwloc_bitmap_isincluded(parent->nodeset, obj->nodeset))
+	    continue;
+	} else {
+	  while (parent && parent != obj)
+	    parent = parent->parent;
+	  if (!parent)
+	    continue;
+	}
+	if (show_index_prefix)
+	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
+	hwloc_obj_type_snprintf(childs, sizeof(childs), child, 1);
+	if (verbose < 0)
+	  printf("%s%s:%u\n", prefix, childs, child->logical_index);
+	else
+	  printf("%s%s L#%u = descendant #%u of %s L#%u\n",
+		 prefix, childs, child->logical_index, i, objs, obj->logical_index);
+	hwloc_info_show_obj(child, childs, prefix, verbose);
+	i++;
+      }
+    }
   } else {
     if (verbose < 0)
       printf("%s%s:%u\n", prefix, objs, obj->logical_index);
@@ -282,6 +335,7 @@ main (int argc, char *argv[])
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   const char *show_ancestor_type = NULL;
+  const char *show_descendants_type = NULL;
   char *restrictstring = NULL;
   size_t typelen;
   int opt;
@@ -340,6 +394,14 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[0], "--children"))
 	show_children = 1;
+      else if (!strcmp (argv[0], "--descendants")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	show_descendants_type = argv[1];
+	opt = 1;
+      }
       else if (!strcmp (argv[0], "--filter")) {
         hwloc_obj_type_t type;
         char *colon;
@@ -468,6 +530,22 @@ main (int argc, char *argv[])
     }
     if (show_ancestor_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
       fprintf(stderr, "multiple --ancestor type %s\n", show_ancestor_type);
+      return EXIT_FAILURE;
+    }
+  }
+  if (show_descendants_type) {
+    err = hwloc_type_sscanf_as_depth(show_descendants_type, NULL, topology, &show_descendants_depth);
+    if (err < 0) {
+      fprintf(stderr, "unrecognized --descendants type %s\n", show_descendants_type);
+      usage(callname, stderr);
+      return EXIT_FAILURE;
+    }
+    if (show_descendants_depth == (int) HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "unavailable --descendants type %s\n", show_descendants_type);
+      return EXIT_FAILURE;
+    }
+    if (show_descendants_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      fprintf(stderr, "multiple --descendants type %s\n", show_descendants_type);
       return EXIT_FAILURE;
     }
   }

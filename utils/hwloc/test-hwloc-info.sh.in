@@ -55,6 +55,8 @@ set -e
   $info --if synthetic --input "node:2 core:2 l2:2 l1d:2 pu:2" --ancestor l1 -s pu:7-10
   echo
   $info --if synthetic --input "node:2 core:2 l2:2 l1d:2 pu:2" --children -s l2:1 node:1.core:1
+  echo
+  $info --if synthetic --input "node:2 core:2 l2:2 l1d:2 pu:2" --descendants l1d -s core:1-2
 ) \
  | grep -v " info hwlocVersion = $HWLOC_VERSION" \
  | grep -v " info ProcessName = hwloc-info" \
