@@ -26,6 +26,7 @@ static int show_ancestors = 0;
 static hwloc_obj_type_t show_ancestor_type = (hwloc_obj_type_t) -1;
 static int show_ancestor_attrdepth = -1;
 static hwloc_obj_cache_type_t show_ancestor_attrcachetype = (hwloc_obj_cache_type_t) -1;
+static int show_children = 0;
 static int show_index_prefix = 0;
 static int current_obj;
 
@@ -40,6 +41,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  --ancestors           Display the chain of ancestor objects up to the root\n");
   fprintf (where, "  --ancestor <type>     Only display the ancestor of the given type\n");
+  fprintf (where, "  --children            Display all children\n");
   fprintf (where, "  -n                    Prefix each line with the index of the considered object\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
@@ -190,6 +192,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
 				    void *_data __hwloc_attribute_unused,
 				    hwloc_obj_t obj)
 {
+  hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
   char prefix[32];
   char objs[128];
@@ -247,6 +250,22 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       }
 next:
       parent = parent->parent;
+    }
+  } else if (show_children) {
+    unsigned i = 0;
+    hwloc_obj_t child = NULL;
+    while ((child = hwloc_get_next_child(topology, obj, child)) != NULL) {
+      char childs[128];
+      if (show_index_prefix)
+	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
+      hwloc_obj_type_snprintf(childs, sizeof(childs), child, 1);
+      if (verbose < 0)
+	printf("%s%s:%u\n", prefix, childs, child->logical_index);
+      else
+	printf("%s%s L#%u = child #%u of %s L#%u\n",
+	       prefix, childs, child->logical_index, i, objs, obj->logical_index);
+      hwloc_info_show_obj(child, childs, prefix, verbose);
+      i++;
     }
   } else {
     if (verbose < 0)
@@ -327,6 +346,8 @@ main (int argc, char *argv[])
         }
 	opt = 1;
       }
+      else if (!strcmp (argv[0], "--children"))
+	show_children = 1;
       else if (!strcmp (argv[0], "--no-icaches"))
 	flags &= ~HWLOC_TOPOLOGY_FLAG_ICACHES;
       else if (!strcmp (argv[0], "--whole-system"))
