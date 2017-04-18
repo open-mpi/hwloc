@@ -27,7 +27,8 @@ Version 1.11.7
   + hwloc-bind also support --hbm and --no-hbm for filtering only or
     no HBM nodes.
   Thanks to Nicolas Denoyelle for the suggestion.
-* Add --children to list object children in hwloc-info.
+* Add --children and --descendants to hwloc-info for listing object
+  children or object descendants of a specific type.
 * Updates to the documentation of locations in hwloc(7) and
   command-line tools manpages.
 
