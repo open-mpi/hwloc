@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
   int taskset = 0;
   int cpubind_flags = 0;
   hwloc_membind_policy_t membind_policy = HWLOC_MEMBIND_BIND;
+  int got_mempolicy = 0;
   int membind_flags = 0;
   int opt;
   int ret;
@@ -213,6 +214,7 @@ int main(int argc, char *argv[])
           usage ("hwloc-bind", stderr);
           exit(EXIT_FAILURE);
 	}
+	got_mempolicy = 1;
 	opt = 1;
 	goto next;
       }
@@ -433,6 +435,9 @@ int main(int argc, char *argv[])
     }
     if (ret && !force)
       goto failed_binding;
+  } else {
+    if (got_mempolicy)
+      fprintf(stderr, "--mempolicy ignored unless memory binding is also requested with --membind.\n");
   }
 
   if (got_cpubind) {
