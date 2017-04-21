@@ -3617,7 +3617,7 @@ package_done:
 	  /* KNL reports L3 with size=0 and full cpuset in cpuid.
 	   * Let hwloc_linux_try_add_knl_mcdram_cache() detect it better.
 	   */
-	  if (!kB && depth == 2 && data->is_knl) {
+	  if (!kB && depth == 3 && data->is_knl) {
 	    hwloc_bitmap_free(cacheset);
 	    continue;
 	  }
