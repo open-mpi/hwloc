@@ -3214,25 +3214,25 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       /* Create NUMA objects */
       for (index_ = 0; index_ < nbnodes; index_++) {
-          char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
-          hwloc_bitmap_t cpuset;
           hwloc_obj_t node, res_obj;
 	  int annotate;
 
 	  osnode = indexes[index_];
 
-          sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
-          cpuset = hwloc__alloc_read_path_as_cpumask(nodepath, data->root_fd);
-          if (!cpuset) {
-	    /* This NUMA object won't be inserted, we'll ignore distances */
-	    failednodes++;
-	    continue;
-	  }
-
 	  node = hwloc_get_numanode_obj_by_os_index(topology, osnode);
 	  annotate = (node != NULL);
 	  if (!annotate) {
 	    /* create a new node */
+	    char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
+	    hwloc_bitmap_t cpuset;
+	    sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
+	    cpuset = hwloc__alloc_read_path_as_cpumask(nodepath, data->root_fd);
+	    if (!cpuset) {
+	      /* This NUMA object won't be inserted, we'll ignore distances */
+	      failednodes++;
+	      continue;
+	    }
+
 	    node = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, osnode);
 	    node->cpuset = cpuset;
 	    node->nodeset = hwloc_bitmap_alloc();
