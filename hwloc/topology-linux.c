@@ -2977,7 +2977,7 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
 
   /* In file version 1 mcdram_cache is always non-zero.
    * In file version 2 mcdram cache can be zero in flat mode. We need to check and do not expose cache in flat mode. */
-  if (cache_size > 0) {
+  if (cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE)) {
     for(i=0; i<nbnodes; i++) {
       hwloc_obj_t cache;
 
