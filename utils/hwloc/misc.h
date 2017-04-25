@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -241,6 +241,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
       fprintf(stderr, "Failed to pass input filesystem root directory to HWLOC_FSROOT environment variable\n");
     else
       putenv(env);
+    putenv("HWLOC_DUMPED_HWDATA_DIR=/var/run/hwloc");
     env = getenv("HWLOC_COMPONENTS");
     if (env)
       fprintf(stderr, "Cannot force linux and linuxio components first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
