@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -480,8 +480,9 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
  */
 
 static int
-lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
+lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, hwloc_obj_t obj)
 {
+  int logical = loutput->logical;
   unsigned idx = logical ? obj->logical_index : obj->os_index;
   const char *indexprefix = logical ? " L#" : " P#";
   char typestr[32];
@@ -502,7 +503,8 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
   }
 
-  if (idx != (unsigned)-1 && obj->depth != 0
+  if (loutput->show_indexes[obj->type]
+      && idx != (unsigned)-1 && obj->depth != 0
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
@@ -803,7 +805,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
     /* PCI text collapsing */
     char busid[32];
     char _text[64];
-    lstopo_obj_snprintf(_text, sizeof(_text), obj, loutput->logical);
+    lstopo_obj_snprintf(loutput, _text, sizeof(_text), obj);
     lstopo_busid_snprintf(busid, sizeof(busid), obj, lud->pci_collapsed, loutput->topology->pci_nonzero_domains);
     if (lud->pci_collapsed > 1) {
       n = snprintf(lud->text[0], sizeof(lud->text[0]), "%u x { %s %s }", lud->pci_collapsed, _text, busid);
@@ -812,7 +814,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
     }
   } else {
     /* normal object text */
-    n = lstopo_obj_snprintf(lud->text[0], sizeof(lud->text[0]), obj, loutput->logical);
+    n = lstopo_obj_snprintf(loutput, lud->text[0], sizeof(lud->text[0]), obj);
   }
   lud->textwidth = get_textwidth(loutput, lud->text[0], n, fontsize);
   lud->ntext = 1;
@@ -1108,7 +1110,7 @@ output_compute_pu_min_textwidth(struct lstopo_output *output)
     lastpu = hwloc_get_pu_obj_by_os_index(topology, lastidx);
   }
 
-  n = lstopo_obj_snprintf(text, sizeof(text), lastpu, output->logical);
+  n = lstopo_obj_snprintf(output, text, sizeof(text), lastpu);
   output->min_pu_textwidth = get_textwidth(output, text, n, fontsize);
 }
 
