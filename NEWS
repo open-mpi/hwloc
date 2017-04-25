@@ -33,6 +33,8 @@ Version 1.11.7
   children or object descendants of a specific type.
 * Add --index --no-index to enable/disable displaying index numbers
   in the graphical lstopo output.
+* Try to gather hwloc-dump-hwdata output from all possible locations
+  in hwloc-gather-topology.
 * Updates to the documentation of locations in hwloc(7) and
   command-line tools manpages.
 
