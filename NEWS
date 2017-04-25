@@ -31,6 +31,8 @@ Version 1.11.7
   Thanks to Nicolas Denoyelle for the suggestion.
 * Add --children and --descendants to hwloc-info for listing object
   children or object descendants of a specific type.
+* Add --index --no-index to enable/disable displaying index numbers
+  in the graphical lstopo output.
 * Updates to the documentation of locations in hwloc(7) and
   command-line tools manpages.
 
