@@ -5426,8 +5426,12 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
 #endif
 
   data->dumped_hwdata_dirname = getenv("HWLOC_DUMPED_HWDATA_DIR");
-  if (!data->dumped_hwdata_dirname)
-    data->dumped_hwdata_dirname = RUNSTATEDIR "/hwloc/";
+  if (!data->dumped_hwdata_dirname) {
+    if (_data1)
+      data->dumped_hwdata_dirname = "/var/run/hwloc";
+    else
+      data->dumped_hwdata_dirname = RUNSTATEDIR "/hwloc";
+  }
 
   data->deprecated_classlinks_model = -2; /* never tried */
   data->mic_need_directlookup = -1; /* not initialized */
