@@ -2902,21 +2902,31 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
   free(cpus.p);
 }
 
+struct knl_hwdata {
+  char memory_mode[32];
+  char cluster_mode[32];
+  long long int mcdram_cache_size; /* mcdram_cache_* is valid only if size > 0 */
+  int mcdram_cache_associativity;
+  int mcdram_cache_inclusiveness;
+  int mcdram_cache_line_size;
+};
+
 /* Try to handle knl hwdata properties
  * Returns 0 on success and -1 otherwise */
-static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topology, struct hwloc_linux_backend_data_s *data, hwloc_obj_t *nodes, unsigned nbnodes)
+static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backend_data_s *data,
+							struct knl_hwdata *hwdata)
 {
   char *knl_cache_file;
-  long long int cache_size = -1;
-  int associativity = -1;
-  int inclusiveness = -1;
-  int line_size = -1;
   int version = 0;
-  unsigned i;
   char buffer[512] = {0};
   char *data_beg = NULL;
-  char memory_mode_str[32] = {0};
-  char cluster_mode_str[32] = {0};
+
+  hwdata->memory_mode[0] = '\0';
+  hwdata->cluster_mode[0] = '\0';
+  hwdata->mcdram_cache_size = -1;
+  hwdata->mcdram_cache_associativity = -1;
+  hwdata->mcdram_cache_inclusiveness = -1;
+  hwdata->mcdram_cache_line_size = -1;
 
   if (asprintf(&knl_cache_file, "%s/knl_memoryside_cache", data->dumped_hwdata_dirname) < 0)
     return -1;
@@ -2943,67 +2953,42 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
         break;
     if (version >= 1) {
       if (!strncmp("cache_size:", data_beg, strlen("cache_size"))) {
-          sscanf(data_beg, "cache_size: %lld", &cache_size);
-          hwloc_debug("read cache_size=%lld\n", cache_size);
+          sscanf(data_beg, "cache_size: %lld", &hwdata->mcdram_cache_size);
+          hwloc_debug("read cache_size=%lld\n", hwdata->mcdram_cache_size);
       } else if (!strncmp("line_size:", data_beg, strlen("line_size:"))) {
-          sscanf(data_beg, "line_size: %d", &line_size);
-          hwloc_debug("read line_size=%d\n", line_size);
+          sscanf(data_beg, "line_size: %d", &hwdata->mcdram_cache_line_size);
+          hwloc_debug("read line_size=%d\n", hwdata->mcdram_cache_line_size);
       } else if (!strncmp("inclusiveness:", data_beg, strlen("inclusiveness:"))) {
-          sscanf(data_beg, "inclusiveness: %d", &inclusiveness);
-          hwloc_debug("read inclusiveness=%d\n", inclusiveness);
+          sscanf(data_beg, "inclusiveness: %d", &hwdata->mcdram_cache_inclusiveness);
+          hwloc_debug("read inclusiveness=%d\n", hwdata->mcdram_cache_inclusiveness);
       } else if (!strncmp("associativity:", data_beg, strlen("associativity:"))) {
-          sscanf(data_beg, "associativity: %d\n", &associativity);
-          hwloc_debug("read associativity=%d\n", associativity);
+          sscanf(data_beg, "associativity: %d\n", &hwdata->mcdram_cache_associativity);
+          hwloc_debug("read associativity=%d\n", hwdata->mcdram_cache_associativity);
       }
     }
     if (version >= 2) {
       if (!strncmp("cluster_mode:", data_beg, strlen("cluster_mode:"))) {
-        sscanf(data_beg, "cluster_mode: %s\n", cluster_mode_str);
-        hwloc_debug("read cluster_mode=%s\n", cluster_mode_str);
+        sscanf(data_beg, "cluster_mode: %s\n", hwdata->cluster_mode);
+        hwloc_debug("read cluster_mode=%s\n", hwdata->cluster_mode);
       } else if (!strncmp("memory_mode:", data_beg, strlen("memory_mode:"))) {
-        sscanf(data_beg, "memory_mode: %s\n", memory_mode_str);
-        hwloc_debug("read memory_mode=%s\n", memory_mode_str);
+        sscanf(data_beg, "memory_mode: %s\n", hwdata->memory_mode);
+        hwloc_debug("read memory_mode=%s\n", hwdata->memory_mode);
       }
     }
 
     data_beg = line_end + 1;
   }
 
-  if (line_size == -1 || cache_size == -1 || associativity == -1 || inclusiveness == -1) {
-    hwloc_debug("Incorrect file format line_size=%d cache_size=%lld associativity=%d inclusiveness=%d\n",
-            line_size, cache_size, associativity, inclusiveness);
-    return -1;
-  }
-
-  /* In file version 1 mcdram_cache is always non-zero.
-   * In file version 2 mcdram cache can be zero in flat mode. We need to check and do not expose cache in flat mode. */
-  if (cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE)) {
-    for(i=0; i<nbnodes; i++) {
-      hwloc_obj_t cache;
-
-      if (nodes[i] && hwloc_bitmap_iszero(nodes[i]->cpuset))
-        /* one L3 per DDR, none for MCDRAM nodes */
-        continue;
-
-      cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, -1);
-      if (!cache)
-        return -1;
-
-      cache->attr->cache.depth = 3;
-      cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-      cache->attr->cache.associativity = associativity;
-      hwloc_obj_add_info(cache, "Inclusive", inclusiveness ? "1" : "0");
-      cache->attr->cache.size = cache_size;
-      cache->attr->cache.linesize = line_size;
-      cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
-      cache->subtype = strdup("MemorySideCache");
-      hwloc_insert_object_by_cpuset(topology, cache);
-    }
-  }
-  /* adding cluster and memory mode as properties of the machine */
-  if (version >= 2) {
-    hwloc_obj_add_info(topology->levels[0][0], "ClusterMode", cluster_mode_str);
-    hwloc_obj_add_info(topology->levels[0][0], "MemoryMode", memory_mode_str);
+  if (hwdata->mcdram_cache_size == -1
+      || hwdata->mcdram_cache_line_size == -1
+      || hwdata->mcdram_cache_associativity == -1
+      || hwdata->mcdram_cache_inclusiveness == -1) {
+    hwloc_debug("Incorrect file format cache_size=%lld line_size=%d associativity=%d inclusiveness=%d\n",
+		hwdata->mcdram_cache_size,
+		hwdata->mcdram_cache_line_size,
+		hwdata->mcdram_cache_associativity,
+		hwdata->mcdram_cache_inclusiveness);
+    hwdata->mcdram_cache_size = -1; /* mark cache as invalid */
   }
 
   return 0;
@@ -3059,6 +3044,7 @@ look_sysfsnode(struct hwloc_topology *topology,
       hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
       unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
       uint64_t * distances = NULL;
+      struct knl_hwdata knl_hwdata;
       int failednodes = 0;
       unsigned index_;
 
@@ -3155,42 +3141,66 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       if (data->is_knl) {
 	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
-	int noquirk = (env && !atoi(env)) || !distances;
+	int noquirk = (env && !atoi(env)) || !distances || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP);
+	int mscache;
+	unsigned i, j, closest;
 
-	hwloc_linux_try_handle_knl_hwdata_properties(topology, data, nodes, nbnodes);
+	hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata);
+	mscache = knl_hwdata.mcdram_cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE);
 
+	if (knl_hwdata.cluster_mode[0])
+	  hwloc_obj_add_info(topology->levels[0][0], "ClusterMode", knl_hwdata.cluster_mode);
+	if (knl_hwdata.memory_mode[0])
+	  hwloc_obj_add_info(topology->levels[0][0], "MemoryMode", knl_hwdata.memory_mode);
+
+	for(i=0; i<nbnodes; i++) {
+	  if (!hwloc_bitmap_iszero(nodes[i]->cpuset)) {
+	    /* DDR, see if there's a MCDRAM cache to add */
+	    if (mscache) {
+	      hwloc_obj_t cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, -1);
+	      if (cache) {
+		cache->attr->cache.depth = 3;
+		cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+		cache->attr->cache.size = knl_hwdata.mcdram_cache_size;
+		cache->attr->cache.linesize = knl_hwdata.mcdram_cache_line_size;
+		cache->attr->cache.associativity = knl_hwdata.mcdram_cache_associativity;
+		hwloc_obj_add_info(cache, "Inclusive", knl_hwdata.mcdram_cache_inclusiveness ? "1" : "0");
+		cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
+		cache->subtype = strdup("MemorySideCache");
+		hwloc_insert_object_by_cpuset(topology, cache);
+	      }
+	    }
+	    /* nothing else to do for DDR */
+	    continue;
+	  }
+	  /* MCDRAM */
+	  nodes[i]->subtype = strdup("MCDRAM");
+
+	  if (noquirk)
+	    continue;
+
+	  /* DDR is the closest node with CPUs */
+	  closest = (unsigned)-1;
+	  for(j=0; j<nbnodes; j++) {
+	    if (j==i)
+	      continue;
+	    if (hwloc_bitmap_iszero(nodes[j]->cpuset))
+	      /* nodes without CPU, that's another MCDRAM, skip it */
+	      continue;
+	    if (closest == (unsigned)-1 || distances[i*nbnodes+j]<distances[i*nbnodes+closest])
+	      closest = j;
+	  }
+	  if (closest != (unsigned) -1) {
+	    /* Add a Group for Cluster containing this MCDRAM + DDR */
+	    hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+	    hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
+	    hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
+	    cluster->subtype = strdup("Cluster");
+	    cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_SUBNUMA_CLUSTER;
+	    hwloc_insert_object_by_cpuset(topology, cluster);
+	  }
+	}
 	if (!noquirk) {
-	  unsigned i, j, closest;
-	  for(i=0; i<nbnodes; i++) {
-	    if (!hwloc_bitmap_iszero(nodes[i]->cpuset))
-	      /* nodes with CPU, that's DDR, skip it */
-	      continue;
-	    nodes[i]->subtype = strdup("MCDRAM");
-
-	    if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP))
-	      continue;
-
-	    /* DDR is the closest node with CPUs */
-	    closest = (unsigned)-1;
-	    for(j=0; j<nbnodes; j++) {
-	      if (j==i)
-		continue;
-	      if (hwloc_bitmap_iszero(nodes[j]->cpuset))
-		/* nodes without CPU, that's another MCDRAM, skip it */
-		continue;
-	      if (closest == (unsigned)-1 || distances[i*nbnodes+j]<distances[i*nbnodes+closest])
-		closest = j;
-	    }
-	    if (closest != (unsigned) -1) {
-	      /* Add a Group for Cluster containing this MCDRAM + DDR */
-	      hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
-	      hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
-	      hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
-	      cluster->subtype = strdup("Cluster");
-	      cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_SUBNUMA_CLUSTER;
-	      hwloc_insert_object_by_cpuset(topology, cluster);
-	    }
-          }
 	  /* drop the distance matrix, it contradicts the above NUMA layout groups */
 	  free(distances);
           free(nodes);
