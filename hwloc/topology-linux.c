@@ -2981,7 +2981,7 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
     for(i=0; i<nbnodes; i++) {
       hwloc_obj_t cache;
 
-      if (hwloc_bitmap_iszero(nodes[i]->cpuset))
+      if (nodes[i] && hwloc_bitmap_iszero(nodes[i]->cpuset))
         /* one L3 per DDR, none for MCDRAM nodes */
         continue;
 
@@ -3135,9 +3135,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  }
       }
 
-      if (!failednodes && data->is_knl)
-        hwloc_linux_try_handle_knl_hwdata_properties(topology, data, nodes, nbnodes);
-
       if (failednodes) {
 	/* failed to read/create some nodes, don't bother reading/fixing
 	 * a distance matrix that would likely be wrong anyway.
@@ -3147,13 +3144,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	distances = malloc(nbnodes*nbnodes*sizeof(*distances));
       }
 
-      if (NULL == distances) {
-          free(nodes);
-          free(indexes);
-          goto out;
-      }
-
-      if (hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd) < 0) {
+      if (distances && hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd) < 0) {
 	free(nodes);
 	free(distances);
 	free(indexes);
@@ -3162,9 +3153,13 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       free(indexes);
 
-      if (data->is_knl && distances) {
+      if (data->is_knl) {
 	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
-	if (!(env && !atoi(env)) && nbnodes>=2) { /* SNC2 or SNC4, with 0 or 2/4 MCDRAM, and 0-4 DDR nodes */
+	int noquirk = (env && !atoi(env)) || !distances;
+
+	hwloc_linux_try_handle_knl_hwdata_properties(topology, data, nodes, nbnodes);
+
+	if (!noquirk) {
 	  unsigned i, j, closest;
 	  for(i=0; i<nbnodes; i++) {
 	    if (!hwloc_bitmap_iszero(nodes[i]->cpuset))
@@ -3203,9 +3198,12 @@ look_sysfsnode(struct hwloc_topology *topology,
 	}
       }
 
-      hwloc_internal_distances_add(topology, nbnodes, nodes, distances,
-				   HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
-				   HWLOC_DISTANCES_FLAG_GROUP);
+      if (distances)
+	hwloc_internal_distances_add(topology, nbnodes, nodes, distances,
+				     HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
+				     HWLOC_DISTANCES_FLAG_GROUP);
+      else
+	free(nodes);
   }
 
  out:
