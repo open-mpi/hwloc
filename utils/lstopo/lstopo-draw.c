@@ -428,12 +428,17 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
-  attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
-  /* display the root total_memory if different from the local_memory (already shown) */
-  if (!obj->parent && obj->memory.total_memory > obj->memory.local_memory)
-    snprintf(totmemstr, sizeof(totmemstr), " (%lu%s total)",
-             (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, 0),
-             hwloc_memory_size_printf_unit(obj->memory.total_memory, 0));
+
+  if (show_attrs[obj->type]) {
+    attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
+    /* display the root total_memory if different from the local_memory (already shown) */
+    if (!obj->parent && obj->memory.total_memory > obj->memory.local_memory)
+      snprintf(totmemstr, sizeof(totmemstr), " (%lu%s total)",
+	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, 0),
+	       hwloc_memory_size_printf_unit(obj->memory.total_memory, 0));
+  } else
+    attrlen = 0;
+
   if (attrlen > 0)
     return snprintf(text, textlen, "%s%s (%s)%s", typestr, indexstr, attrstr, totmemstr);
   else
@@ -702,7 +707,8 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
   if (fontsize) {
     const char *coproctype;
 
-    if (HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type
+    if (show_attrs[HWLOC_OBJ_OS_DEVICE]
+	&& HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type
         && (coproctype = hwloc_obj_get_info_by_name(level, "CoProcType")) != NULL) {
 
       if (!strcmp(coproctype, "CUDA")) {
@@ -838,7 +844,7 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
           speed = subobjs[i]->attr->pcidev.linkspeed;
         if (subobjs[i]->type == HWLOC_OBJ_BRIDGE && subobjs[i]->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
           speed = subobjs[i]->attr->bridge.upstream.pci.linkspeed;
-        if (speed != 0.) {
+        if (show_attrs[HWLOC_OBJ_BRIDGE] && speed != 0.) {
           char text[4];
           if (speed >= 10.)
 	    snprintf(text, sizeof(text), "%.0f", subobjs[i]->attr->pcidev.linkspeed);

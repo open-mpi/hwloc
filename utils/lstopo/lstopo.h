@@ -88,6 +88,7 @@ enum lstopo_orient_e {
 extern enum lstopo_orient_e force_orient[];
 
 extern int show_indexes[];
+extern int show_attrs[];
 
 extern void output_draw_start(struct lstopo_output *output);
 extern void output_draw(struct lstopo_output *output);

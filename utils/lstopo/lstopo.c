@@ -54,6 +54,7 @@ unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX];
 int show_indexes[HWLOC_OBJ_TYPE_MAX];
+int show_attrs[HWLOC_OBJ_TYPE_MAX];
 
 static unsigned int top = 0;
 
@@ -388,6 +389,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --rect[=<type,...>]   Rectangular graphical layout with nearly 4/3 ratio\n");
   fprintf (where, "  --index=[<type,...>]  Display indexes for the given object types\n");
   fprintf (where, "  --no-index=[<type,.>] Do not display indexes for the given object types\n");
+  fprintf (where, "  --attrs=[<type,...>]  Display attributes for the given object types\n");
+  fprintf (where, "  --no-attrs=[<type,.>] Do not display attributes for the given object types\n");
   fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "Miscellaneous options:\n");
@@ -476,8 +479,10 @@ main (int argc, char *argv[])
   force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;
   force_orient[HWLOC_OBJ_CACHE] = LSTOPO_ORIENT_HORIZ;
   force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
-  for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+  for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++) {
     show_indexes[i] = 1;
+    show_attrs[i] = 1;
+  }
 
   /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
@@ -629,15 +634,21 @@ main (int argc, char *argv[])
       }
 
       else if (!strcmp (argv[0], "--no-index")
-	       || !strcmp (argv[0], "--index")) {
-	int flag = argv[0][2] == 'i';
+	       || !strcmp (argv[0], "--index")
+	       || !strcmp (argv[0], "--no-attrs")
+	       || !strcmp (argv[0], "--attrs")) {
+	int flag = argv[0][2] != 'n';
+	int *array = argv[0][5-flag*3] == 'a' ? show_attrs : show_indexes;
 	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
-	  show_indexes[i] = flag;
+	  array[i] = flag;
       }
 
       else if (!strncmp (argv[0], "--no-index=", 11)
-	       || !strncmp (argv[0], "--index=", 8)) {
-	int flag = argv[0][2] == 'i';
+	       || !strncmp (argv[0], "--index=", 8)
+	       || !strncmp (argv[0], "--no-attrs=", 11)
+	       || !strncmp (argv[0], "--attrs=", 8)) {
+	int flag = argv[0][2] != 'n';
+	int *array = argv[0][5-flag*3] == 'a' ? show_attrs : show_indexes;
 	char *tmp = argv[0] + (flag ? 8 : 11);
 	while (tmp) {
 	  char *end = strchr(tmp, ',');
@@ -647,7 +658,7 @@ main (int argc, char *argv[])
 	  if (hwloc_obj_type_sscanf(tmp, &type, NULL, NULL, 0) < 0)
 	    fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
 	  else
-	    show_indexes[type] = flag;
+	    array[type] = flag;
 	  if (!end)
 	    break;
 	  tmp = end+1;
