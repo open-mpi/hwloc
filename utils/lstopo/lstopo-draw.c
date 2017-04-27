@@ -508,12 +508,17 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
-  attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
-  /* display the root total_memory if different from the local_memory (already shown) */
-  if (!obj->parent && obj->memory.total_memory > obj->memory.local_memory)
-    snprintf(totmemstr, sizeof(totmemstr), " (%lu%s total)",
-             (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, 0),
-             hwloc_memory_size_printf_unit(obj->memory.total_memory, 0));
+
+  if (loutput->show_attrs[obj->type]) {
+    attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
+    /* display the root total_memory if different from the local_memory (already shown) */
+    if (!obj->parent && obj->memory.total_memory > obj->memory.local_memory)
+      snprintf(totmemstr, sizeof(totmemstr), " (%lu%s total)",
+	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, 0),
+	       hwloc_memory_size_printf_unit(obj->memory.total_memory, 0));
+  } else
+    attrlen = 0;
+
   if (attrlen > 0)
     return snprintf(text, textlen, "%s%s (%s)%s", typestr, indexstr, attrstr, totmemstr);
   else
@@ -702,6 +707,9 @@ prepare_more_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   struct lstopo_obj_userdata *lud = obj->userdata;
   unsigned i;
 
+  if (!loutput->show_attrs[obj->type])
+    return;
+
   if (HWLOC_OBJ_OS_DEVICE == obj->type) {
     if (HWLOC_OBJ_OSDEV_COPROC == obj->attr->osdev.type && obj->subtype) {
       /* Coprocessor */
@@ -801,7 +809,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
     return;
 
   /* main object identifier line */
-  if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
+  if (obj->type == HWLOC_OBJ_PCI_DEVICE && loutput->show_attrs[HWLOC_OBJ_PCI_DEVICE]) {
     /* PCI text collapsing */
     char busid[32];
     char _text[64];
@@ -961,7 +969,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	    speed = child->attr->pcidev.linkspeed;
 	  if (child->type == HWLOC_OBJ_BRIDGE && child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
 	    speed = child->attr->bridge.upstream.pci.linkspeed;
-	  if (speed != 0.) {
+	  if (loutput->show_attrs[HWLOC_OBJ_BRIDGE] && speed != 0.) {
 	    char text[4];
 	    if (speed >= 10.)
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);

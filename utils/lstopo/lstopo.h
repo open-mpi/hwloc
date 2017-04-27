@@ -69,6 +69,7 @@ struct lstopo_output {
   unsigned width, height; /* total output size */
   unsigned min_pu_textwidth;
   int show_indexes[HWLOC_OBJ_TYPE_MAX];
+  int show_attrs[HWLOC_OBJ_TYPE_MAX];
 };
 
 struct style {
