@@ -1,4 +1,4 @@
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2017 Inria.  All rights reserved.
 #
 # See COPYING in top-level directory.
 
@@ -11,3 +11,5 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 LDADD = $(HWLOC_top_builddir)/hwloc/libhwloc.la
 
 check_PROGRAMS = hwloc-tweak-osindex
+
+EXTRA_DIST = hwloc-export-sysfs
