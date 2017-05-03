@@ -1911,7 +1911,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
     /* Are these levels actually identical? */
     if (hwloc_compare_levels_structure(topology, i) < 0)
       continue;
-    hwloc_debug("may merge levels #%d=%s and #%d=%s\n",
+    hwloc_debug("may merge levels #%u=%s and #%u=%s\n",
 		i-1, hwloc_type_name(type1), i, hwloc_type_name(type2));
 
     /* OK, remove intermediate objects from the tree. */
@@ -1989,7 +1989,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
       memmove(&topology->level_nbobjects[i-1],
 	      &topology->level_nbobjects[i],
 	      (topology->nb_levels-i)*sizeof(topology->level_nbobjects[i]));
-      hwloc_debug("removed parent level %s at depth %d\n",
+      hwloc_debug("removed parent level %s at depth %u\n",
 		  hwloc_type_name(type1), i-1);
     } else {
       /* Removing level i, so move levels [i+1..nb_levels-1] and later to [i..] */
@@ -2000,7 +2000,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
       memmove(&topology->level_nbobjects[i],
 	      &topology->level_nbobjects[i+1],
 	      (topology->nb_levels-1-i)*sizeof(topology->level_nbobjects[i]));
-      hwloc_debug("removed child level %s at depth %d\n",
+      hwloc_debug("removed child level %s at depth %u\n",
 		  hwloc_type_name(type2), i);
     }
     topology->level_nbobjects[topology->nb_levels-1] = 0;

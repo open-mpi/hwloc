@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2016 Inria.  All rights reserved.
+ * Copyright © 2012-2017 Inria.  All rights reserved.
  * Copyright © 2013 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -67,7 +67,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
       hwloc_obj_t osdev, parent;
       char buffer[64];
 
-      hwloc_debug("This is opencl%dd%d\n", j, i);
+      hwloc_debug("This is opencl%ud%u\n", j, i);
 
 #ifdef CL_DEVICE_TOPOLOGY_AMD
       clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
@@ -83,7 +83,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 #endif
 
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, -1);
-      snprintf(buffer, sizeof(buffer), "opencl%dd%d", j, i);
+      snprintf(buffer, sizeof(buffer), "opencl%ud%u", j, i);
       osdev->name = strdup(buffer);
       osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;

@@ -186,7 +186,7 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
   }
   if ((unsigned) depth >= topodepth) {
     if (verbose >= 0)
-      fprintf(stderr, "ignoring invalid depth %u\n", depth);
+      fprintf(stderr, "ignoring invalid depth %d\n", depth);
     return -1;
   }
   *typep = HWLOC_OBJ_TYPE_NONE;
@@ -342,10 +342,10 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
       hwloc_bitmap_asprintf(&sc, rootcpuset);
       hwloc_bitmap_asprintf(&sn, rootnodeset);
       if (obj)
-	printf("using object #%u depth %u below cpuset %s nodeset %s\n",
+	printf("using object #%u depth %d below cpuset %s nodeset %s\n",
 	       i, depth, sc, sn);
       else
-	fprintf(stderr, "object #%u depth %u below cpuset %s nodeset %s does not exist\n",
+	fprintf(stderr, "object #%u depth %d below cpuset %s nodeset %s does not exist\n",
 		i, depth, sc, sn);
       free(sc);
       free(sn);

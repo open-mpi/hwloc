@@ -432,10 +432,10 @@ int main(int argc, char *argv[])
       char *s;
       hwloc_bitmap_asprintf(&s, membind_set);
       if (pid_number > 0)
-        fprintf(stderr, "hwloc_set_proc_membind %s (policy %u flags %x) PID %d failed (errno %d %s)\n",
+        fprintf(stderr, "hwloc_set_proc_membind %s (policy %d flags %x) PID %d failed (errno %d %s)\n",
 		s, membind_policy, membind_flags, pid_number, bind_errno, errmsg);
       else
-        fprintf(stderr, "hwloc_set_membind %s (policy %u flags %x) failed (errno %d %s)\n",
+        fprintf(stderr, "hwloc_set_membind %s (policy %d flags %x) failed (errno %d %s)\n",
 		s, membind_policy, membind_flags, bind_errno, errmsg);
       free(s);
     }
