@@ -29,7 +29,7 @@ static hwloc_obj_cache_type_t show_ancestor_attrcachetype = (hwloc_obj_cache_typ
 static int show_children = 0;
 static int show_descendants_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_index_prefix = 0;
-static int current_obj;
+static unsigned current_obj;
 
 void usage(const char *name, FILE *where)
 {
