@@ -705,7 +705,7 @@ hwloc__find_groups_by_min_distance(unsigned nbobjs,
     for(j=0; j<nbobjs; j++) /* check the entire matrix, it may not be perfectly symmetric depending on the accuracy */
       if (i != j && VALUE(i, j) < min_distance) /* no accuracy here, we want the real minimal */
         min_distance = VALUE(i, j);
-  hwloc_debug("  found minimal distance %f between objects\n", min_distance);
+  hwloc_debug("  found minimal distance %llu between objects\n", (unsigned long long) min_distance);
 
   if (min_distance == UINT64_MAX)
     return 0;
@@ -908,7 +908,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
       for(i=0; i<nbgroups; i++) {
 	hwloc_debug("  % 5d", (int) i);
 	for(j=0; j<nbgroups; j++)
-	  hwloc_debug(" %2.3f", GROUP_VALUE(i, j));
+	  hwloc_debug(" %llu", (unsigned long long) GROUP_VALUE(i, j));
 	hwloc_debug("%s", "\n");
       }
 #endif
