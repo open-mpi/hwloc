@@ -150,7 +150,7 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
   }
 
   if (collapse > 1)
-    fprintf(output, "%u x { ", collapse);
+    fprintf(output, "%d x { ", collapse);
   output_console_obj(loutput, l, collapse);
   if (collapse > 1)
     fprintf(output, " }");
