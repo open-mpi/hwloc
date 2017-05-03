@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1129,7 +1129,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   ssize_t tmplen = buflen;
   char *tmp = buffer;
   int res, ret = 0;
-   int arity;
+  unsigned arity;
   const char * separator = " ";
   const char * prefix = "";
 

@@ -27,7 +27,7 @@ static int show_ancestor_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_children = 0;
 static int show_descendants_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_index_prefix = 0;
-static int current_obj;
+static unsigned current_obj;
 
 void usage(const char *name, FILE *where)
 {
