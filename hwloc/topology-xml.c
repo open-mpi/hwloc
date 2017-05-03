@@ -155,7 +155,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology, struct hwloc_obj 
   }
 
   else if (!strcmp(name, "cache_associativity")) {
-    unsigned long lvalue = strtoul(value, NULL, 10);
+    unsigned long lvalue = atoi(value);
     if (hwloc_obj_type_is_cache(obj->type))
       obj->attr->cache.associativity = lvalue;
     else if (hwloc__xml_verbose())
@@ -1750,7 +1750,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "depth", tmp);
     sprintf(tmp, "%u", (unsigned) obj->attr->cache.linesize);
     state.new_prop(&state, "cache_linesize", tmp);
-    sprintf(tmp, "%u", (unsigned) obj->attr->cache.associativity);
+    sprintf(tmp, "%d", obj->attr->cache.associativity);
     state.new_prop(&state, "cache_associativity", tmp);
     sprintf(tmp, "%d", (int) obj->attr->cache.type);
     state.new_prop(&state, "cache_type", tmp);
