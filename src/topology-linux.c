@@ -2838,7 +2838,7 @@ try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   else
     c->attr->cache.associativity = 0;
   c->cpuset = hwloc_bitmap_dup(cpuset);
-  hwloc_debug_2args_bitmap("cache (%s) depth %d has cpuset %s\n",
+  hwloc_debug_2args_bitmap("cache (%s) depth %u has cpuset %s\n",
 			   type == HWLOC_OBJ_CACHE_UNIFIED ? "unified" : (type == HWLOC_OBJ_CACHE_DATA ? "data" : "instruction"),
 			   level, c->cpuset);
   hwloc_insert_object_by_cpuset(topology, c);
@@ -2989,7 +2989,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
 
 #ifdef HWLOC_DEBUG
   for (i = 0; i < cpus.n; ++i) {
-    hwloc_debug("%i: %s  ibm,phandle=%08X l2_cache=%08X ",
+    hwloc_debug("%u: %s  ibm,phandle=%08X l2_cache=%08X ",
       i, cpus.p[i].name, cpus.p[i].phandle, cpus.p[i].l2_cache);
     if (NULL == cpus.p[i].cpuset) {
       hwloc_debug("%s\n", "no cpuset");
@@ -4057,7 +4057,7 @@ look_cpuinfo(struct hwloc_topology *topology,
 	if ((unsigned) Ppkg == Lpkg_to_Ppkg[i])
 	  break;
       Lprocs[Lproc].Lpkg = i;
-      hwloc_debug("%lu on package %u (%lx)\n", Pproc, i, Ppkg);
+      hwloc_debug("%lu on package %u (%lx)\n", Pproc, i, (unsigned long) Ppkg);
       if (i==numpkgs) {
 	Lpkg_to_Ppkg[numpkgs] = Ppkg;
 	numpkgs++;
@@ -4087,7 +4087,7 @@ look_cpuinfo(struct hwloc_topology *topology,
 	    doneinfos = 1;
 	  }
 	}
-      hwloc_debug_1arg_bitmap("package %d has cpuset %s\n", i, obj->cpuset);
+      hwloc_debug_1arg_bitmap("Package %u has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");
@@ -4125,7 +4125,7 @@ look_cpuinfo(struct hwloc_topology *topology,
       for(j=0; j<numprocs; j++)
 	if ((unsigned) Lprocs[j].Lcore == i)
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
-      hwloc_debug_1arg_bitmap("Core %d has cpuset %s\n", i, obj->cpuset);
+      hwloc_debug_1arg_bitmap("Core %u has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");
@@ -4701,7 +4701,7 @@ hwloc_linux_net_class_fillinfos(struct hwloc_backend *backend,
       port = strtoul(hexid, &eoid, 0);
       if (eoid != hexid) {
 	char portstr[16];
-	snprintf(portstr, sizeof(portstr), "%ld", port+1);
+	snprintf(portstr, sizeof(portstr), "%lu", port+1);
 	hwloc_obj_add_info(obj, "Port", portstr);
       }
     }

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -669,7 +669,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   if (look_chips) {
     struct hwloc_obj *obj;
     unsigned j,k;
-    hwloc_debug("%d Packages\n", Lpkg_num);
+    hwloc_debug("%u Packages\n", Lpkg_num);
     for (j = 0; j < Lpkg_num; j++) {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PACKAGE, Lpkg[j].Ppkg);
       if (CPUType)
@@ -680,7 +680,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
       for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lpkg == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
-      hwloc_debug_1arg_bitmap("Package %d has cpuset %s\n", j, obj->cpuset);
+      hwloc_debug_1arg_bitmap("Package %u has cpuset %s\n", j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");
@@ -689,14 +689,14 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   if (look_cores) {
     struct hwloc_obj *obj;
     unsigned j,k;
-    hwloc_debug("%d Cores\n", Lcore_num);
+    hwloc_debug("%u Cores\n", Lcore_num);
     for (j = 0; j < Lcore_num; j++) {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, Lcore[j].Pcore);
       obj->cpuset = hwloc_bitmap_alloc();
       for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lcore == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
-      hwloc_debug_1arg_bitmap("Core %d has cpuset %s\n", j, obj->cpuset);
+      hwloc_debug_1arg_bitmap("Core %u has cpuset %s\n", j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");
@@ -704,14 +704,14 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   if (Lproc_num) {
     struct hwloc_obj *obj;
     unsigned j,k;
-    hwloc_debug("%d PUs\n", Lproc_num);
+    hwloc_debug("%u PUs\n", Lproc_num);
     for (j = 0; j < Lproc_num; j++) {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, Lproc[j].Pproc);
       obj->cpuset = hwloc_bitmap_alloc();
       for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lproc == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
-      hwloc_debug_1arg_bitmap("PU %d has cpuset %s\n", j, obj->cpuset);
+      hwloc_debug_1arg_bitmap("PU %u has cpuset %s\n", j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");

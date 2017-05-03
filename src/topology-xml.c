@@ -144,7 +144,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
   }
 
   else if (!strcmp(name, "cache_associativity")) {
-    unsigned long lvalue = strtoul(value, NULL, 10);
+    int lvalue = atoi(value);
     if (obj->type == HWLOC_OBJ_CACHE)
       obj->attr->cache.associativity = lvalue;
     else if (hwloc__xml_verbose())
@@ -160,7 +160,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	  || lvalue == HWLOC_OBJ_CACHE_INSTRUCTION)
 	obj->attr->cache.type = (hwloc_obj_cache_type_t) lvalue;
       else
-	fprintf(stderr, "%s: ignoring invalid cache_type attribute %ld\n",
+	fprintf(stderr, "%s: ignoring invalid cache_type attribute %lu\n",
 		state->global->msgprefix, lvalue);
     } else if (hwloc__xml_verbose())
       fprintf(stderr, "%s: ignoring cache_type attribute for non-cache object type\n",
@@ -1282,9 +1282,9 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "depth", tmp);
     sprintf(tmp, "%u", (unsigned) obj->attr->cache.linesize);
     state.new_prop(&state, "cache_linesize", tmp);
-    sprintf(tmp, "%d", (unsigned) obj->attr->cache.associativity);
+    sprintf(tmp, "%d", obj->attr->cache.associativity);
     state.new_prop(&state, "cache_associativity", tmp);
-    sprintf(tmp, "%d", (unsigned) obj->attr->cache.type);
+    sprintf(tmp, "%d", (int) obj->attr->cache.type);
     state.new_prop(&state, "cache_type", tmp);
     break;
   case HWLOC_OBJ_GROUP:
@@ -1404,7 +1404,7 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
 
     switch (diff->generic.type) {
     case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR:
-      sprintf(tmp, "%d", diff->obj_attr.obj_depth);
+      sprintf(tmp, "%d", (int) diff->obj_attr.obj_depth);
       state.new_prop(&state, "obj_depth", tmp);
       sprintf(tmp, "%u", diff->obj_attr.obj_index);
       state.new_prop(&state, "obj_index", tmp);

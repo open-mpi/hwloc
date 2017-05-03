@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
       char *cmd;
       FILE *file;
       cmd = malloc(strlen(pidcmd)+1+5+2+1);
-      sprintf(cmd, "%s %u", pidcmd, pid);
+      sprintf(cmd, "%s %u", pidcmd, (unsigned) pid);
       file = popen(cmd, "r");
       if (file) {
 	if (fgets(pidoutput, sizeof(pidoutput), file)) {

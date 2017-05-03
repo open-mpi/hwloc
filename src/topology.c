@@ -1043,7 +1043,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	if (obj->os_level != child->os_level) {
 	  static int reported = 0;
 	  if (!reported && !hwloc_hide_errors()) {
-	    fprintf(stderr, "Cannot merge similar %s objects with different OS levels %u and %u\n",
+	    fprintf(stderr, "Cannot merge similar %s objects with different OS levels %d and %d\n",
 		    hwloc_obj_type_string(obj->type), child->os_level, obj->os_level);
 	    reported = 1;
 	  }

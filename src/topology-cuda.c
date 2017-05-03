@@ -1,6 +1,6 @@
 /*
  * Copyright © 2011 Université Bordeaux
- * Copyright © 2012-2014 Inria.  All rights reserved.
+ * Copyright © 2012-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -89,7 +89,7 @@ static unsigned hwloc_cuda_cores_per_MP(int major, int minor)
     case 6:
       return 64;
   }
-  hwloc_debug("unknown compute capability %u.%u, disabling core display.\n", major, minor);
+  hwloc_debug("unknown compute capability %d.%d, disabling core display.\n", major, minor);
   return 0;
 }
 
