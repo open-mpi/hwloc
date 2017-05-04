@@ -3116,7 +3116,8 @@ look_sysfsnode(struct hwloc_topology *topology,
   if (!indexes)
     return 0;
 
-  nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+  nodes = calloc(nbnodes * 2, /* for KNL-specific objects */
+		 sizeof(hwloc_obj_t));
   distances = malloc(nbnodes*nbnodes*sizeof(*distances));
   nodes_cpuset  = hwloc_bitmap_alloc();
   if (NULL == nodes_cpuset || NULL == nodes || NULL == distances) {
@@ -3130,7 +3131,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       /* Create NUMA objects */
       for (index_ = 0; index_ < nbnodes; index_++) {
-          hwloc_obj_t node, res_obj;
+          hwloc_obj_t node;
 	  int annotate;
 
 	  osnode = indexes[index_];
@@ -3165,21 +3166,9 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  }
           hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->memory);
 
+	  nodes[index_] = node;
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
-
-	  if (annotate) {
-	    nodes[index_] = node;
-	  } else {
-	    res_obj = hwloc_insert_object_by_cpuset(topology, node);
-	    if (node == res_obj) {
-	      nodes[index_] = node;
-	    } else {
-	      /* We got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
-	       * This object disappeared, we'll ignore distances */
-	      failednodes++;
-	    }
-	  }
       }
 
       hwloc_bitmap_free(nodes_cpuset);
@@ -3199,7 +3188,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       free(indexes);
 
-      if (data->is_knl) {
+      if (data->is_knl && !failednodes) {
 	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
 	int noquirk = (env && !atoi(env)) || !distances || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP);
 	int mscache;
@@ -3257,7 +3246,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
 	    cluster->subtype = strdup("Cluster");
 	    cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER;
-	    hwloc_insert_object_by_cpuset(topology, cluster);
+	    nodes[nbnodes+i] = cluster;
 	  }
 	}
 	if (!noquirk) {
@@ -3267,6 +3256,24 @@ look_sysfsnode(struct hwloc_topology *topology,
 	}
       }
 
+      /* everything is ready now, insert all objects and distances for real */
+      for (index_ = 0; index_ < 2 * nbnodes; index_++) {
+	hwloc_obj_t node = nodes[index_];
+	if (node && !node->parent) {
+	  /* not inserted yet */
+	  hwloc_obj_t res_obj = hwloc_insert_object_by_cpuset(topology, node);
+	  if (res_obj != node && index_ < nbnodes)
+	    /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
+	     * This object disappeared, we'll ignore distances */
+	    failednodes++;
+	}
+      }
+      if (failednodes) {
+	free(distances);
+	distances = NULL;
+      }
+
+      /* Inserted distances now that nodes are properly inserted */
       if (distances)
 	hwloc_internal_distances_add(topology, nbnodes, nodes, distances,
 				     HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
