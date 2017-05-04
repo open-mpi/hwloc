@@ -3105,7 +3105,7 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned nbnodes;
   hwloc_obj_t * nodes;
   unsigned *indexes;
-  uint64_t * distances = NULL;
+  uint64_t * distances;
   hwloc_bitmap_t nodes_cpuset;
   struct knl_hwdata knl_hwdata;
   int failednodes = 0;
@@ -3117,10 +3117,12 @@ look_sysfsnode(struct hwloc_topology *topology,
     return 0;
 
   nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+  distances = malloc(nbnodes*nbnodes*sizeof(*distances));
   nodes_cpuset  = hwloc_bitmap_alloc();
-  if (NULL == nodes_cpuset || NULL == nodes) {
+  if (NULL == nodes_cpuset || NULL == nodes || NULL == distances) {
     free(nodes);
     free(indexes);
+    free(distances);
     hwloc_bitmap_free(nodes_cpuset);
     nbnodes = 0;
     goto out;
@@ -3182,20 +3184,17 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       hwloc_bitmap_free(nodes_cpuset);
 
-      if (failednodes) {
+      if (failednodes || nbnodes <= 1) {
 	/* failed to read/create some nodes, don't bother reading/fixing
 	 * a distance matrix that would likely be wrong anyway.
 	 */
-	nbnodes -= failednodes;
-      } else if (nbnodes > 1) {
-	distances = malloc(nbnodes*nbnodes*sizeof(*distances));
+	free(distances);
+	distances = NULL;
       }
 
       if (distances && hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd) < 0) {
-	free(nodes);
 	free(distances);
-	free(indexes);
-	goto out;
+	distances = NULL;
       }
 
       free(indexes);
@@ -3264,8 +3263,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	if (!noquirk) {
 	  /* drop the distance matrix, it contradicts the above NUMA layout groups */
 	  free(distances);
-          free(nodes);
-          goto out;
+	  distances = NULL;
 	}
       }
 
@@ -3277,7 +3275,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	free(nodes);
 
  out:
-  *found = nbnodes;
+  *found = nbnodes - failednodes;
   return 0;
 }
 
