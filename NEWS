@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.11.8
+--------------
+* Add support for CUDA compute capability 7.0 and fix support for 6.[12].
+
+
 Version 1.11.7
 --------------
 * Fix hwloc-bind --membind for CPU-less NUMA nodes (again).
