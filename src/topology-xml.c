@@ -899,7 +899,7 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 	break;
       case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO:
 	diff->obj_attr.diff.string.name = strdup(obj_attr_name_s);
-	/* fallthrough */
+	/* FALLTHRU */
       case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
 	diff->obj_attr.diff.string.oldvalue = strdup(obj_attr_oldvalue_s);
 	diff->obj_attr.diff.string.newvalue = strdup(obj_attr_newvalue_s);
@@ -1305,7 +1305,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     }
     if (obj->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI)
       break;
-    /* fallthrough */
+    /* FALLTHRU */
   case HWLOC_OBJ_PCI_DEVICE:
     sprintf(tmp, "%04x:%02x:%02x.%01x",
 	    (unsigned) obj->attr->pcidev.domain,

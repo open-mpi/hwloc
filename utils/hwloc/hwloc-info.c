@@ -532,7 +532,7 @@ main (int argc, char *argv[])
     err = hwloc_topology_restrict (topology, restrictset, 0);
     if (err) {
       perror("Restricting the topology");
-      /* fallthrough */
+      /* FALLTHRU */
     }
     hwloc_bitmap_free(restrictset);
     free(restrictstring);
