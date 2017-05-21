@@ -3088,11 +3088,23 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
       }
     }
     if (version >= 2) {
-      if (!strncmp("cluster_mode:", data_beg, strlen("cluster_mode:"))) {
-        sscanf(data_beg, "cluster_mode: %s\n", cluster_mode_str);
+      if (!strncmp("cluster_mode: ", data_beg, strlen("cluster_mode: "))) {
+	size_t length;
+	data_beg += strlen("cluster_mode: ");
+	length = line_end-data_beg;
+	if (length > sizeof(cluster_mode_str)-1)
+	  length = sizeof(cluster_mode_str)-1;
+	memcpy(cluster_mode_str, data_beg, length);
+	cluster_mode_str[length] = '\0';
         hwloc_debug("read cluster_mode=%s\n", cluster_mode_str);
-      } else if (!strncmp("memory_mode:", data_beg, strlen("memory_mode:"))) {
-        sscanf(data_beg, "memory_mode: %s\n", memory_mode_str);
+      } else if (!strncmp("memory_mode: ", data_beg, strlen("memory_mode: "))) {
+	size_t length;
+	data_beg += strlen("memory_mode: ");
+	length = line_end-data_beg;
+	if (length > sizeof(memory_mode_str)-1)
+	  length = sizeof(memory_mode_str)-1;
+	memcpy(memory_mode_str, data_beg, length);
+	memory_mode_str[length] = '\0';
         hwloc_debug("read memory_mode=%s\n", memory_mode_str);
       }
     }
