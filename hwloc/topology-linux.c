@@ -2972,11 +2972,23 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
       }
     }
     if (version >= 2) {
-      if (!strncmp("cluster_mode:", data_beg, strlen("cluster_mode:"))) {
-        sscanf(data_beg, "cluster_mode: %s\n", hwdata->cluster_mode);
+      if (!strncmp("cluster_mode: ", data_beg, strlen("cluster_mode: "))) {
+	size_t length;
+	data_beg += strlen("cluster_mode: ");
+	length = line_end-data_beg;
+	if (length > sizeof(hwdata->cluster_mode)-1)
+	  length = sizeof(hwdata->cluster_mode)-1;
+	memcpy(hwdata->cluster_mode, data_beg, length);
+	hwdata->cluster_mode[length] = '\0';
         hwloc_debug("read cluster_mode=%s\n", hwdata->cluster_mode);
-      } else if (!strncmp("memory_mode:", data_beg, strlen("memory_mode:"))) {
-        sscanf(data_beg, "memory_mode: %s\n", hwdata->memory_mode);
+      } else if (!strncmp("memory_mode: ", data_beg, strlen("memory_mode: "))) {
+	size_t length;
+	data_beg += strlen("memory_mode: ");
+	length = line_end-data_beg;
+	if (length > sizeof(hwdata->memory_mode)-1)
+	  length = sizeof(hwdata->memory_mode)-1;
+	memcpy(hwdata->memory_mode, data_beg, length);
+	hwdata->memory_mode[length] = '\0';
         hwloc_debug("read memory_mode=%s\n", hwdata->memory_mode);
       }
     }
