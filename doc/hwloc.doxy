@@ -420,9 +420,11 @@ and linker flags.  For example, it can be used thusly to compile
 applications that utilize the hwloc library (assuming GNU Make):
 
 \verbatim
-CFLAGS += $(pkg-config --cflags hwloc)
-LDLIBS += $(pkg-config --libs hwloc)
-cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
+CFLAGS += $(shell pkg-config --cflags hwloc)
+LDLIBS += $(shell pkg-config --libs hwloc)
+
+hwloc-hello: hwloc-hello.c
+        $(CC) hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 \endverbatim
 
 On a machine with 4GB of RAM and 2 processor packages -- each package of
