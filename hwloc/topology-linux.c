@@ -4320,8 +4320,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   if (already_numanodes)
     hwloc_topology_reconnect(topology, 0);
 
-  /* allocate root sets in case not done yet */
-  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+  hwloc_alloc_root_sets(topology->levels[0][0]);
 
   /*********************************
    * Platform information for later

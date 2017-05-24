@@ -2710,20 +2710,29 @@ hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags)
   return 0;
 }
 
-void hwloc_alloc_obj_cpusets(hwloc_obj_t obj)
+void hwloc_alloc_root_sets(hwloc_obj_t root)
 {
-  if (!obj->cpuset)
-    obj->cpuset = hwloc_bitmap_alloc_full();
-  if (!obj->complete_cpuset)
-    obj->complete_cpuset = hwloc_bitmap_alloc();
-  if (!obj->allowed_cpuset)
-    obj->allowed_cpuset = hwloc_bitmap_alloc_full();
-  if (!obj->nodeset)
-    obj->nodeset = hwloc_bitmap_alloc();
-  if (!obj->complete_nodeset)
-    obj->complete_nodeset = hwloc_bitmap_alloc();
-  if (!obj->allowed_nodeset)
-    obj->allowed_nodeset = hwloc_bitmap_alloc_full();
+  /*
+   * All sets are initially NULL.
+   *
+   * At least one backend should call this function to initialize all sets at once.
+   * XML uses it lazily in case only some sets were given in the XML import.
+   *
+   * Other backends can check root->cpuset != NULL to see if somebody
+   * discovered things before them.
+   */
+  if (!root->cpuset)
+     root->cpuset = hwloc_bitmap_alloc_full();
+  if (!root->complete_cpuset)
+     root->complete_cpuset = hwloc_bitmap_alloc();
+  if (!root->allowed_cpuset)
+    root->allowed_cpuset = hwloc_bitmap_alloc_full();
+  if (!root->nodeset)
+    root->nodeset = hwloc_bitmap_alloc();
+  if (!root->complete_nodeset)
+    root->complete_nodeset = hwloc_bitmap_alloc();
+  if (!root->allowed_nodeset)
+    root->allowed_nodeset = hwloc_bitmap_alloc_full();
 }
 
 /* Main discovery loop */
@@ -2791,7 +2800,7 @@ next_cpubackend:
   hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
   collect_proc_cpuset(topology->levels[0][0], NULL);
 
-  /* One backend should have allocated root cpusets with hwloc_alloc_obj_cpusets()
+  /* One backend should have called hwloc_alloc_root_sets()
    * and collect_proc_cpuset() should have set bits based on existing PUs.
    */
   if (!topology->levels[0][0]->cpuset || hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
@@ -2810,9 +2819,8 @@ next_cpubackend:
   hwloc_bitmap_and(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->cpuset);
   propagate_unused_cpuset(topology->levels[0][0], NULL);
 
-  /* Backends must allocate root->*nodeset.
+  /* One backend must have allocated root->*nodeset with hwloc_alloc_root_sets().
    *
-   * Most of them call hwloc_alloc_obj_cpusets() on the root to do so.
    * root->complete_nodeset is empty by default, and filled by the core
    * when NUMA nodes are added with insert_by_cpuset().
    * root->allowed_nodeset is everything by default, unless reduced by backends.

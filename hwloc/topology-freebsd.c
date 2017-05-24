@@ -186,7 +186,7 @@ hwloc_look_freebsd(struct hwloc_backend *backend)
 
   if (!topology->levels[0][0]->cpuset) {
     /* Nobody (even the x86 backend) created objects yet, setup basic objects */
-    hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+    hwloc_alloc_root_sets(topology->levels[0][0]);
     hwloc_setup_pu_level(topology, nbprocs);
   }
 

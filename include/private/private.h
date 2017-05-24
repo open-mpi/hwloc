@@ -155,7 +155,7 @@ struct hwloc_topology {
   struct hwloc_tma * tma;
 };
 
-extern void hwloc_alloc_obj_cpusets(hwloc_obj_t obj);
+extern void hwloc_alloc_root_sets(hwloc_obj_t root);
 extern void hwloc_setup_pu_level(struct hwloc_topology *topology, unsigned nb_pus);
 extern int hwloc_get_sysctlbyname(const char *name, int64_t *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);

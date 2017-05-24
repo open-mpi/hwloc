@@ -627,7 +627,7 @@ extern "C" {
 
 #define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
 
-#define hwloc_alloc_obj_cpusets HWLOC_NAME(alloc_obj_cpusets)
+#define hwloc_alloc_root_sets HWLOC_NAME(alloc_root_sets)
 #define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)
 #define hwloc_get_sysctlbyname HWLOC_NAME(get_sysctlbyname)
 #define hwloc_get_sysctl HWLOC_NAME(get_sysctl)

@@ -1574,7 +1574,7 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
   }
 
   /* allocate default cpusets and nodesets if missing, the core will restrict them */
-  hwloc_alloc_obj_cpusets(root);
+  hwloc_alloc_root_sets(root);
 
   /* keep the "Backend" information intact */
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */

@@ -1259,7 +1259,7 @@ hwloc_x86_discover(struct hwloc_backend *backend)
     return 0;
   } else {
     /* topology is empty, initialize it */
-    hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+    hwloc_alloc_root_sets(topology->levels[0][0]);
   }
 
 fulldiscovery:

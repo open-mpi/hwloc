@@ -845,7 +845,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
 
   assert(!topology->levels[0][0]->cpuset);
 
-  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+  hwloc_alloc_root_sets(topology->levels[0][0]);
 
   topology->support.discovery->pu = 1;
 

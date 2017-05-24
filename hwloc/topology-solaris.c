@@ -972,7 +972,7 @@ hwloc_look_solaris(struct hwloc_backend *backend)
     /* somebody discovered things */
     return -1;
 
-  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+  hwloc_alloc_root_sets(topology->levels[0][0]);
 
 #ifdef HAVE_LIBLGRP
   hwloc_look_lgrp(topology);
