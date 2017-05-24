@@ -1402,14 +1402,22 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root
     root = topology->levels[0][0];
 
   result = hwloc___insert_object_by_cpuset(topology, root, obj, report_error);
+  if (result) {
+    if (result->type == HWLOC_OBJ_PU) {
+      /* Add the bit to the top sets */
+      if (hwloc_bitmap_isset(result->cpuset, result->os_index))
+	hwloc_bitmap_set(topology->levels[0][0]->cpuset, result->os_index);
+      hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, result->os_index);
+    } else if (result->type == HWLOC_OBJ_NUMANODE) {
+      /* Add the bit to the top sets */
+      if (hwloc_bitmap_isset(result->nodeset, result->os_index))
+	hwloc_bitmap_set(topology->levels[0][0]->nodeset, result->os_index);
+      hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, result->os_index);
+    }
+  }
   if (result != obj) {
     /* either failed to insert, or got merged, free the original object */
     hwloc_free_unlinked_object(obj);
-  } else {
-    /* Add the cpuset to the top */
-    hwloc_bitmap_or(topology->levels[0][0]->complete_cpuset, topology->levels[0][0]->complete_cpuset, obj->cpuset);
-    if (obj->nodeset)
-      hwloc_bitmap_or(topology->levels[0][0]->complete_nodeset, topology->levels[0][0]->complete_nodeset, obj->nodeset);
   }
   return result;
 }
@@ -1441,6 +1449,16 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
      * Other callers just insert random objects such as I/O or Misc, no cpuset issue there.
      */
     for (current = &parent->first_child; *current; current = &(*current)->next_sibling);
+    /* Add the bit to the top sets */
+    if (obj->type == HWLOC_OBJ_PU) {
+      if (hwloc_bitmap_isset(obj->cpuset, obj->os_index))
+	hwloc_bitmap_set(topology->levels[0][0]->cpuset, obj->os_index);
+      hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, obj->os_index);
+    } else if (obj->type == HWLOC_OBJ_NUMANODE) {
+      if (hwloc_bitmap_isset(obj->nodeset, obj->os_index))
+	hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
+      hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
+    }
   }
 
   *current = obj;
@@ -1693,30 +1711,6 @@ propagate_total_memory(hwloc_obj_t obj)
     if (obj->memory.page_types[i-1].size)
       break;
   obj->memory.page_types_len = i;
-}
-
-/* Collect the cpuset of all the PU objects. */
-static void
-collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
-{
-  hwloc_obj_t child;
-
-  if (sys) {
-    /* We are already given a pointer to a system object */
-    if (obj->type == HWLOC_OBJ_PU)
-      hwloc_bitmap_or(sys->cpuset, sys->cpuset, obj->cpuset);
-  } else {
-    if (obj->cpuset) {
-      /* This object is the root of a machine */
-      sys = obj;
-      /* Assume no PU for now */
-      hwloc_bitmap_zero(obj->cpuset);
-    }
-  }
-
-  for_each_child(child, obj)
-    collect_proc_cpuset(child, sys);
-  /* No PU under I/O or Misc */
 }
 
 /* While traversing down and up, propagate the disallowed cpus by
@@ -2796,12 +2790,8 @@ next_cpubackend:
     backend = backend->next;
   }
 
-  /* Update objects cpusets and nodesets now that the CPU/GLOBAL backend populated PUs and nodes */
-  hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
-  collect_proc_cpuset(topology->levels[0][0], NULL);
-
   /* One backend should have called hwloc_alloc_root_sets()
-   * and collect_proc_cpuset() should have set bits based on existing PUs.
+   * and set bits during PU and NUMA insert.
    */
   if (!topology->levels[0][0]->cpuset || hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
     hwloc_debug("%s", "No PU added by any CPU and global backend\n");

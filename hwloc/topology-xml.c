@@ -1598,6 +1598,12 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
   hwloc_free_object_siblings_and_children(root->misc_first_child);
   root->misc_first_child = NULL;
 
+  /* make sure the core will abort */
+  if (root->cpuset)
+    hwloc_bitmap_zero(root->cpuset);
+  if (root->nodeset)
+    hwloc_bitmap_zero(root->nodeset);
+
   hwloc_localeswitch_fini();
   return -1;
 }
