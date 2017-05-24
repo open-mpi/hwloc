@@ -2722,7 +2722,7 @@ void hwloc_alloc_root_sets(hwloc_obj_t root)
    * discovered things before them.
    */
   if (!root->cpuset)
-     root->cpuset = hwloc_bitmap_alloc_full();
+     root->cpuset = hwloc_bitmap_alloc();
   if (!root->complete_cpuset)
      root->complete_cpuset = hwloc_bitmap_alloc();
   if (!root->allowed_cpuset)
