@@ -131,6 +131,7 @@ hwloc_nvml_get_device_osdev(hwloc_topology_t topology, nvmlDevice_t device)
 	hwloc_obj_t osdev;
 	nvmlReturn_t nvres;
 	nvmlPciInfo_t pci;
+	char uuid[64];
 
 	if (!hwloc_topology_is_thissystem(topology)) {
 		errno = EINVAL;
@@ -141,17 +142,28 @@ hwloc_nvml_get_device_osdev(hwloc_topology_t topology, nvmlDevice_t device)
 	if (NVML_SUCCESS != nvres)
 		return NULL;
 
+	nvres = nvmlDeviceGetUUID(device, uuid, sizeof(uuid));
+	if (NVML_SUCCESS != nvres)
+		uuid[0] = '\0';
+
 	osdev = NULL;
 	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
 		hwloc_obj_t pcidev = osdev->parent;
+		const char *info;
+
 		if (strncmp(osdev->name, "nvml", 4))
 			continue;
+
 		if (pcidev
 		    && pcidev->type == HWLOC_OBJ_PCI_DEVICE
 		    && pcidev->attr->pcidev.domain == pci.domain
 		    && pcidev->attr->pcidev.bus == pci.bus
 		    && pcidev->attr->pcidev.dev == pci.device
 		    && pcidev->attr->pcidev.func == 0)
+			return osdev;
+
+		info = hwloc_obj_get_info_by_name(osdev, "NVIDIAUUID");
+		if (info && !strcmp(info, uuid))
 			return osdev;
 	}
 
