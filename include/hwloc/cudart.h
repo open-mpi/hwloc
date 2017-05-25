@@ -148,7 +148,7 @@ hwloc_cudart_get_device_pcidev(hwloc_topology_t topology, int idx)
  * hwloc_cudart_get_device_cpuset().
  *
  * \note The corresponding PCI device object can be obtained by looking
- * at the OS device parent object.
+ * at the OS device parent object (unless PCI devices are filtered out).
  *
  * \note This function is identical to hwloc_cuda_get_device_osdev_by_index().
  */

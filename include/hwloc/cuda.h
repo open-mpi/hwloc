@@ -148,8 +148,10 @@ hwloc_cuda_get_device_pcidev(hwloc_topology_t topology, CUdevice cudevice)
  * If not, the locality of the object may still be found using
  * hwloc_cuda_get_device_cpuset().
  *
+ * \note This function cannot work if PCI devices are filtered out.
+ *
  * \note The corresponding hwloc PCI device may be found by looking
- * at the result parent pointer.
+ * at the result parent pointer (unless PCI devices are filtered out).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_cuda_get_device_osdev(hwloc_topology_t topology, CUdevice cudevice)
@@ -172,6 +174,7 @@ hwloc_cuda_get_device_osdev(hwloc_topology_t topology, CUdevice cudevice)
 		    && (int) pcidev->attr->pcidev.dev == dev
 		    && pcidev->attr->pcidev.func == 0)
 			return osdev;
+		/* if PCI are filtered out, we need a info attr to match on */
 	}
 
 	return NULL;
@@ -188,7 +191,7 @@ hwloc_cuda_get_device_osdev(hwloc_topology_t topology, CUdevice cudevice)
  * I/O devices detection and the CUDA component must be enabled in the topology.
  *
  * \note The corresponding PCI device object can be obtained by looking
- * at the OS device parent object.
+ * at the OS device parent object (unless PCI devices are filtered out).
  *
  * \note This function is identical to hwloc_cudart_get_device_osdev_by_index().
  */

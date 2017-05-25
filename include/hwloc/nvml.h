@@ -96,7 +96,7 @@ hwloc_nvml_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
  * I/O devices detection and the NVML component must be enabled in the topology.
  *
  * \note The corresponding PCI device object can be obtained by looking
- * at the OS device parent object.
+ * at the OS device parent object (unless PCI devices are filtered out).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_nvml_get_device_osdev_by_index(hwloc_topology_t topology, unsigned idx)
@@ -123,7 +123,7 @@ hwloc_nvml_get_device_osdev_by_index(hwloc_topology_t topology, unsigned idx)
  * hwloc_nvml_get_device_cpuset().
  *
  * \note The corresponding hwloc PCI device may be found by looking
- * at the result parent pointer.
+ * at the result parent pointer (unless PCI devices are filtered out).
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_nvml_get_device_osdev(hwloc_topology_t topology, nvmlDevice_t device)
