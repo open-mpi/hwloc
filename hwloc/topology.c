@@ -1808,28 +1808,18 @@ hwloc_obj_add_children_sets(hwloc_obj_t obj)
 
 /* Propagate nodesets up and down */
 static void
-propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
+propagate_nodeset(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
   hwloc_bitmap_t parent_nodeset = NULL;
   int parent_weight = 0;
 
-  if (!sys && obj->nodeset) {
-    sys = obj;
-    if (!obj->complete_nodeset)
-      obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
-    if (!obj->allowed_nodeset)
-      obj->allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
-  }
-
-  if (sys) {
-    if (obj->nodeset) {
+  if (obj->nodeset) {
       /* Some existing nodeset coming from above, to possibly propagate down */
       parent_nodeset = obj->nodeset;
       parent_weight = hwloc_bitmap_weight(parent_nodeset);
-    } else
+  } else
       obj->nodeset = hwloc_bitmap_alloc();
-  }
 
   for_each_child(child, obj) {
     /* Propagate singleton nodesets down */
@@ -1844,10 +1834,10 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
     }
 
     /* Recurse */
-    propagate_nodeset(child, sys);
+    propagate_nodeset(child);
 
     /* Propagate children nodesets up */
-    if (sys && child->nodeset)
+    if (child->nodeset)
       hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
   }
   /* No nodeset under I/O or Misc */
@@ -2835,7 +2825,7 @@ next_cpubackend:
     hwloc_insert_object_by_cpuset(topology, node);
   }
   hwloc_debug("%s", "\nPropagate nodesets\n");
-  propagate_nodeset(topology->levels[0][0], NULL);
+  propagate_nodeset(topology->levels[0][0]);
   propagate_nodesets(topology->levels[0][0]);
 
   hwloc_debug_print_objects(0, topology->levels[0][0]);
