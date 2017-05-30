@@ -2761,29 +2761,17 @@ next_cpubackend:
 	|| (topology->flags & HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES))
       topology->binding_hooks.get_allowed_resources(topology);
   }
-  hwloc_debug("%s", "\nPropagate disallowed cpus down and up\n");
-  hwloc_bitmap_and(topology->levels[0][0]->cpuset, topology->levels[0][0]->cpuset, topology->levels[0][0]->complete_cpuset);
-  hwloc_bitmap_and(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->cpuset);
-  fixup_cpusets(topology->levels[0][0]);
 
-  /* One backend must have allocated root->*nodeset with hwloc_alloc_root_sets().
-   *
-   * root->complete_nodeset is empty by default, and filled by the core
-   * when NUMA nodes are added with insert_by_cpuset().
-   * root->allowed_nodeset is everything by default, unless reduced by backends.
-   *
-   * The XML backend takes care of everything to properly support old XML input
-   * with missing nodesets and/or NUMA nodes. It checks nodesets and fix them if needed.
+  /* If there's no NUMA node, add one with all the memory.
+   * root->complete_nodeset wouldn't be empty if any NUMA was ever added:
+   * - insert_by_cpuset() adds bits whe PU/NUMA are added.
+   * - XML takes care of sanitizing nodesets.
    */
-  assert(topology->levels[0][0]->nodeset);
-  assert(topology->levels[0][0]->complete_nodeset);
-  assert(topology->levels[0][0]->allowed_nodeset);
-  /* If there's no NUMA node, add one with all the memory */
   if (hwloc_bitmap_iszero(topology->levels[0][0]->complete_nodeset)) {
-    hwloc_obj_t node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);
-    node->cpuset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset); /* requires root cpuset to be initialized above */
-    node->complete_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->complete_cpuset); /* requires root cpuset to be initialized above */
-    node->allowed_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->allowed_cpuset); /* requires root cpuset to be initialized above */
+    hwloc_obj_t node;
+    hwloc_debug("%s", "\nAdd missing single NUMA node\n");
+    node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);
+    node->cpuset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset);
     node->nodeset = hwloc_bitmap_alloc();
     /* other nodesets will be filled below */
     hwloc_bitmap_set(node->nodeset, 0);
@@ -2791,7 +2779,13 @@ next_cpubackend:
     memset(&topology->levels[0][0]->memory, 0, sizeof(node->memory));
     hwloc_insert_object_by_cpuset(topology, node);
   }
-  hwloc_debug("%s", "\nPropagate nodesets\n");
+
+  hwloc_debug("%s", "\nFixup root sets\n");
+  hwloc_bitmap_and(topology->levels[0][0]->cpuset, topology->levels[0][0]->cpuset, topology->levels[0][0]->complete_cpuset);
+  hwloc_bitmap_and(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->cpuset);
+
+  hwloc_debug("%s", "\nPropagate sets\n");
+  fixup_cpusets(topology->levels[0][0]);
   propagate_nodeset(topology->levels[0][0]);
   propagate_nodesets(topology->levels[0][0]);
 
