@@ -1756,16 +1756,6 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     } else {
       /* This object is the root of a machine */
       sys = obj;
-      /* Apply complete_cpuset to cpuset and allowed_cpuset, it
-       * will automatically be applied below */
-      if (obj->complete_cpuset)
-        hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->complete_cpuset);
-      else
-        obj->complete_cpuset = hwloc_bitmap_dup(obj->cpuset);
-      if (obj->allowed_cpuset)
-        hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, obj->complete_cpuset);
-      else
-        obj->allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
     }
   }
 
@@ -2796,6 +2786,7 @@ next_cpubackend:
       topology->binding_hooks.get_allowed_resources(topology);
   }
   hwloc_debug("%s", "\nPropagate disallowed cpus down and up\n");
+  hwloc_bitmap_and(topology->levels[0][0]->cpuset, topology->levels[0][0]->cpuset, topology->levels[0][0]->complete_cpuset);
   hwloc_bitmap_and(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->cpuset);
   propagate_unused_cpuset(topology->levels[0][0], NULL);
 
