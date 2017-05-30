@@ -1713,54 +1713,30 @@ propagate_total_memory(hwloc_obj_t obj)
   obj->memory.page_types_len = i;
 }
 
-/* While traversing down and up, propagate the disallowed cpus by
- * and'ing them to and from the first object that has a cpuset */
+/* Now that root cpusets are ready, propagate them to children
+ * by allocating missing cpusets and restricting existing ones.
+ */
 static void
-propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
+fixup_cpusets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
-  if (obj->cpuset) {
-    if (sys) {
-      /* We are already given a pointer to an system object, update it and update ourselves */
-      hwloc_bitmap_t mask = hwloc_bitmap_alloc();
-
-      /* Apply the topology cpuset */
-      hwloc_bitmap_and(obj->cpuset, obj->cpuset, sys->cpuset);
-
-      /* Update complete cpuset down */
-      if (obj->complete_cpuset) {
-	hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, sys->complete_cpuset);
-      } else {
-	obj->complete_cpuset = hwloc_bitmap_dup(sys->complete_cpuset);
-	hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, obj->cpuset);
-      }
-
-      /* Update allowed cpusets */
-      if (obj->allowed_cpuset) {
-	/* Update ours */
-	hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, sys->allowed_cpuset);
-
-	/* Update the given cpuset, but only what we know */
-	hwloc_bitmap_copy(mask, obj->cpuset);
-	hwloc_bitmap_not(mask, mask);
-	hwloc_bitmap_or(mask, mask, obj->allowed_cpuset);
-	hwloc_bitmap_and(sys->allowed_cpuset, sys->allowed_cpuset, mask);
-      } else {
-	/* Just take it as such */
-	obj->allowed_cpuset = hwloc_bitmap_dup(sys->allowed_cpuset);
-	hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, obj->cpuset);
-      }
-
-      hwloc_bitmap_free(mask);
+  for_each_child(child, obj) {
+    /* our cpuset must be included in our parent's one */
+    hwloc_bitmap_and(child->cpuset, child->cpuset, obj->cpuset);
+    /* our complete_cpuset must be included in our parent's one, but can be larger than our cpuset */
+    if (child->complete_cpuset) {
+      hwloc_bitmap_and(child->complete_cpuset, child->complete_cpuset, obj->complete_cpuset);
     } else {
-      /* This object is the root of a machine */
-      sys = obj;
+      child->complete_cpuset = hwloc_bitmap_dup(child->cpuset);
     }
-  }
+    /* our allowed_cpuset must be included in our parent's one and included in our cpuset */
+    if (!child->allowed_cpuset)
+      child->allowed_cpuset = hwloc_bitmap_dup(child->cpuset);
+    hwloc_bitmap_and(child->allowed_cpuset, child->allowed_cpuset, obj->allowed_cpuset);
 
-  for_each_child(child, obj)
-    propagate_unused_cpuset(child, sys);
+    fixup_cpusets(child);
+  }
   /* No PU under I/O or Misc */
 }
 
@@ -2788,7 +2764,7 @@ next_cpubackend:
   hwloc_debug("%s", "\nPropagate disallowed cpus down and up\n");
   hwloc_bitmap_and(topology->levels[0][0]->cpuset, topology->levels[0][0]->cpuset, topology->levels[0][0]->complete_cpuset);
   hwloc_bitmap_and(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->cpuset);
-  propagate_unused_cpuset(topology->levels[0][0], NULL);
+  fixup_cpusets(topology->levels[0][0]);
 
   /* One backend must have allocated root->*nodeset with hwloc_alloc_root_sets().
    *
