@@ -1713,29 +1713,38 @@ propagate_total_memory(hwloc_obj_t obj)
   obj->memory.page_types_len = i;
 }
 
-/* Now that root cpusets are ready, propagate them to children
- * by allocating missing cpusets and restricting existing ones.
+/* Now that root sets are ready, propagate them to children
+ * by allocating missing sets and restricting existing ones.
  */
 static void
-fixup_cpusets(hwloc_obj_t obj)
+fixup_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
   for_each_child(child, obj) {
     /* our cpuset must be included in our parent's one */
     hwloc_bitmap_and(child->cpuset, child->cpuset, obj->cpuset);
+    hwloc_bitmap_and(child->nodeset, child->nodeset, obj->nodeset);
     /* our complete_cpuset must be included in our parent's one, but can be larger than our cpuset */
     if (child->complete_cpuset) {
       hwloc_bitmap_and(child->complete_cpuset, child->complete_cpuset, obj->complete_cpuset);
     } else {
       child->complete_cpuset = hwloc_bitmap_dup(child->cpuset);
     }
+    if (child->complete_nodeset) {
+      hwloc_bitmap_and(child->complete_nodeset, child->complete_nodeset, obj->complete_nodeset);
+    } else {
+      child->complete_nodeset = hwloc_bitmap_dup(child->nodeset);
+    }
     /* our allowed_cpuset must be included in our parent's one and included in our cpuset */
     if (!child->allowed_cpuset)
       child->allowed_cpuset = hwloc_bitmap_dup(child->cpuset);
     hwloc_bitmap_and(child->allowed_cpuset, child->allowed_cpuset, obj->allowed_cpuset);
+    if (!child->allowed_nodeset)
+      child->allowed_nodeset = hwloc_bitmap_dup(child->nodeset);
+    hwloc_bitmap_and(child->allowed_nodeset, child->allowed_nodeset, obj->allowed_nodeset);
 
-    fixup_cpusets(child);
+    fixup_sets(child);
   }
   /* No PU under I/O or Misc */
 }
@@ -1807,59 +1816,6 @@ propagate_nodeset(hwloc_obj_t obj)
       hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
   }
   /* No nodeset under I/O or Misc */
-}
-
-/* Propagate allowed and complete nodesets */
-static void
-propagate_nodesets(hwloc_obj_t obj)
-{
-  hwloc_bitmap_t mask = hwloc_bitmap_alloc();
-  hwloc_obj_t child;
-
-  for_each_child(child, obj) {
-    if (obj->nodeset) {
-      /* Update complete nodesets down */
-      if (child->complete_nodeset) {
-        hwloc_bitmap_and(child->complete_nodeset, child->complete_nodeset, obj->complete_nodeset);
-      } else if (child->nodeset) {
-        child->complete_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
-        hwloc_bitmap_and(child->complete_nodeset, child->complete_nodeset, child->nodeset);
-      } /* else the child doesn't have nodeset information, we can not provide a complete nodeset */
-
-      /* Update allowed nodesets down */
-      if (child->allowed_nodeset) {
-        hwloc_bitmap_and(child->allowed_nodeset, child->allowed_nodeset, obj->allowed_nodeset);
-      } else if (child->nodeset) {
-        child->allowed_nodeset = hwloc_bitmap_dup(obj->allowed_nodeset);
-        hwloc_bitmap_and(child->allowed_nodeset, child->allowed_nodeset, child->nodeset);
-      }
-    }
-
-    propagate_nodesets(child);
-
-    if (obj->nodeset) {
-      /* Update allowed nodesets up */
-      if (child->nodeset && child->allowed_nodeset) {
-        hwloc_bitmap_copy(mask, child->nodeset);
-        hwloc_bitmap_andnot(mask, mask, child->allowed_nodeset);
-        hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, mask);
-      }
-    }
-  }
-  hwloc_bitmap_free(mask);
-  /* No nodeset under I/O or Misc */
-
-  if (obj->nodeset) {
-    /* Apply complete nodeset to nodeset and allowed_nodeset */
-    if (obj->complete_nodeset)
-      hwloc_bitmap_and(obj->nodeset, obj->nodeset, obj->complete_nodeset);
-    else
-      obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
-    if (obj->allowed_nodeset)
-      hwloc_bitmap_and(obj->allowed_nodeset, obj->allowed_nodeset, obj->complete_nodeset);
-    else
-      obj->allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
-  }
 }
 
 static void
@@ -2779,11 +2735,16 @@ next_cpubackend:
   hwloc_debug("%s", "\nFixup root sets\n");
   hwloc_bitmap_and(topology->levels[0][0]->cpuset, topology->levels[0][0]->cpuset, topology->levels[0][0]->complete_cpuset);
   hwloc_bitmap_and(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->cpuset);
+  hwloc_bitmap_and(topology->levels[0][0]->nodeset, topology->levels[0][0]->nodeset, topology->levels[0][0]->complete_nodeset);
+  hwloc_bitmap_and(topology->levels[0][0]->allowed_nodeset, topology->levels[0][0]->allowed_nodeset, topology->levels[0][0]->nodeset);
 
   hwloc_debug("%s", "\nPropagate sets\n");
-  fixup_cpusets(topology->levels[0][0]);
+  /* cpuset are already there thanks to the _by_cpuset insertion,
+   * but nodeset have to be propagated below and above NUMA nodes
+   */
   propagate_nodeset(topology->levels[0][0]);
-  propagate_nodesets(topology->levels[0][0]);
+  /* now fixup parent/children sets */
+  fixup_sets(topology->levels[0][0]);
 
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
