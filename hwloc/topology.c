@@ -1867,12 +1867,8 @@ remove_unused_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
-  if (obj->cpuset) {
-    hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->allowed_cpuset);
-  }
-  if (obj->nodeset) {
-    hwloc_bitmap_and(obj->nodeset, obj->nodeset, obj->allowed_nodeset);
-  }
+  hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->allowed_cpuset);
+  hwloc_bitmap_and(obj->nodeset, obj->nodeset, obj->allowed_nodeset);
   if (obj->type == HWLOC_OBJ_NUMANODE && obj->os_index != (unsigned) -1 &&
       !hwloc_bitmap_isset(obj->allowed_nodeset, obj->os_index)) {
     unsigned i;
