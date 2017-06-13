@@ -340,4 +340,5 @@ extern char * hwloc_progname(struct hwloc_topology *topology);
 /** \brief Compare bitmaps \p bitmap1 and \p bitmap2 from an inclusion point of view.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
+
 #endif /* HWLOC_PRIVATE_H */

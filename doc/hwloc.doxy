@@ -1723,6 +1723,10 @@ See doc/examples/get-knl-modes.c in the source directory for an example of retri
 <dd>The inclusiveness of a cache (1 if inclusive, 0 otherwise).
 Currently only available on x86 processors.
 </dd>
+<dt>SolarisProcessorGroup (Group)</dt>
+<dd>
+The Solaris kstat processor group name that was used to build this Group object.
+</dd>
 <dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
 </dd>
