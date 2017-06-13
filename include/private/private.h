@@ -391,6 +391,7 @@ HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, 
 #define HWLOC_GROUP_KIND_INTEL_SUBNUMA_CLUSTER		8 /* no subkind */
 #define HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT		9 /* no subkind */
 #define HWLOC_GROUP_KIND_SYNTHETIC			10 /* subkind is group depth within synthetic description */
+#define HWLOC_GROUP_KIND_SOLARIS_PG_HW_PERF		11 /* subkind is group width */
 
 /* memory allocator for topology objects */
 struct hwloc_tma {

@@ -33,9 +33,6 @@
 #endif
 
 /* TODO: use psets? (only for root)
- * TODO: get cache info from prtdiag? (it is setgid sys to be able to read from
- * crw-r-----   1 root     sys       88,  0 nov   3 14:35 /devices/pseudo/devinfo@0:devinfo
- * and run (apparently undocumented) ioctls on it.
  */
 
 static int
@@ -509,11 +506,27 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
   hwloc_solaris_get_chip_info(&chip_info);
 
-  for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next)
-    {
-      if (strncmp("cpu_info", ksp->ks_module, 8))
-	continue;
+  /* mark unneeded caches as size -1 */
+  if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE))
+    chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L1I] = -1;
+  if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE))
+    chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L1D] = -1;
+  if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2ICACHE))
+    chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2I] = -1;
+  if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2CACHE))
+    chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2D] = -1;
+  if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE))
+    chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L3] = -1;
 
+  /* mark empty caches as unneeded on !sparc since we have the x86 backend to better get them. */
+  if (!is_sparc) {
+    for(i=0; i<sizeof(chip_info.cache_size)/sizeof(*chip_info.cache_size); i++)
+      if (!chip_info.cache_size[i])
+	chip_info.cache_size[i] = -1;
+  }
+
+  for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next) {
+    if (!strncmp("cpu_info", ksp->ks_module, 8)) {
       cpuid = ksp->ks_instance;
 
       if (kstat_read(kc, ksp, NULL) == -1)
@@ -673,7 +686,69 @@ hwloc_look_kstat(struct hwloc_topology *topology)
       /* Note: there is also clog_id for the Thread ID (not unique) and
        * pkg_core_id for the core ID (not unique).  They are not useful to us
        * however. */
+
+    } else if (!strcmp("pg_hw_perf", ksp->ks_module)) {
+      if (kstat_read(kc, ksp, NULL) == -1) {
+	fprintf(stderr, "kstat_read failed for module %s name %s instance %d: %s\n", ksp->ks_module, ksp->ks_name, ksp->ks_instance, strerror(errno));
+	continue;
+      }
+      stat = (kstat_named_t *) kstat_data_lookup(ksp, "cpus");
+      if (stat) {
+	hwloc_debug("found kstat module %s name %s instance %d cpus type %d\n", ksp->ks_module, ksp->ks_name, ksp->ks_instance, stat->data_type);
+	if (stat->data_type == KSTAT_DATA_STRING) {
+	  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+	  hwloc_bitmap_list_sscanf(cpuset, stat->value.str.addr.ptr);
+
+	  if (!strcmp(ksp->ks_name, "L3_Cache")) {
+	    if (chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L3] >= 0) {
+	      hwloc_obj_t l3 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, -1);
+	      l3->cpuset = cpuset;
+	      l3->attr->cache.depth = 3;
+	      l3->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L3];
+	      l3->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L3];
+	      l3->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L3];
+	      l3->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+	      hwloc_insert_object_by_cpuset(topology, l3);
+	      cpuset = NULL; /* don't free below */
+	    }
+	  }
+	  else if (!strcmp(ksp->ks_name, "L2_Cache")) {
+	    if (!chip_info.l2_unified && chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2I] >= 0) {
+	      hwloc_obj_t l2i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2ICACHE, -1);
+	      l2i->cpuset = hwloc_bitmap_dup(cpuset);
+	      l2i->attr->cache.depth = 2;
+	      l2i->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2I];
+	      l2i->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L2I];
+	      l2i->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L2I];
+	      l2i->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+	      hwloc_insert_object_by_cpuset(topology, l2i);
+	    }
+	    if (chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2D] >= 0) {
+	      hwloc_obj_t l2 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, -1);
+	      l2->cpuset = cpuset;
+	      l2->attr->cache.depth = 2;
+	      l2->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2D];
+	      l2->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L2D];
+	      l2->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L2D];
+	      l2->attr->cache.type = chip_info.l2_unified ? HWLOC_OBJ_CACHE_UNIFIED : HWLOC_OBJ_CACHE_DATA;
+	      hwloc_insert_object_by_cpuset(topology, l2);
+	      cpuset = NULL; /* don't free below */
+	    }
+	  }
+	  else if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+	    hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+	    group->cpuset = cpuset;
+	    group->attr->group.kind = HWLOC_GROUP_KIND_SOLARIS_PG_HW_PERF;
+	    group->attr->group.subkind = hwloc_bitmap_weight(cpuset);
+	    hwloc_obj_add_info(group, "SolarisProcessorGroup", ksp->ks_name);
+	    hwloc_insert_object_by_cpuset(topology, group);
+	    cpuset = NULL; /* don't free below */
+	  }
+	  hwloc_bitmap_free(cpuset);
+	}
+      }
     }
+  }
 
   if (look_chips
       && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
