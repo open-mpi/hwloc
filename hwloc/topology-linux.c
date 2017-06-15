@@ -2782,8 +2782,10 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
     return;
 
   /* only works for Power so far, and not useful on ARM */
-  if (data->arch != HWLOC_LINUX_ARCH_POWER)
+  if (data->arch != HWLOC_LINUX_ARCH_POWER) {
+    closedir(dt);
     return;
+  }
 
   cpus.n = 0;
   cpus.p = NULL;
