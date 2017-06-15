@@ -212,7 +212,7 @@ hwloc_calc_parse_range(const char *_string,
     len = strlen(_string);
   }
   if (len >= sizeof(string)) {
-    fprintf(stderr, "invalid range `%s', too long\n", string);
+    fprintf(stderr, "invalid range `%s', too long\n", _string);
     return -1;
   }
   memcpy(string, _string, len);
