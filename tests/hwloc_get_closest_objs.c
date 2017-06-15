@@ -71,7 +71,7 @@ main (void)
   assert(hwloc_obj_is_in_subtree(topology, last, ancestor));
   assert(hwloc_obj_is_in_subtree(topology, closest[found-1], ancestor));
   assert(ancestor == hwloc_get_root_obj(topology));
-  printf("ancestor type %u (%s) depth %u number %u is system level\n",
+  printf("ancestor type %d (%s) depth %u number %u is system level\n",
 	 (int) ancestor->type, hwloc_obj_type_string(ancestor->type), ancestor->depth, ancestor->logical_index);
 
   free(closest);
