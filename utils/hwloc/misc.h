@@ -284,8 +284,8 @@ hwloc_lstopo_show_summary(FILE *output, hwloc_topology_t topology)
     nbobjs = hwloc_get_nbobjs_by_depth (topology, depth);
     fprintf(output, "%*s", (int) depth, "");
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
-    fprintf (output,"depth %u:\t%u %s (type #%u)\n",
-	     depth, nbobjs, type, obj->type);
+    fprintf (output,"depth %u:\t%u %s (type #%d)\n",
+	     depth, nbobjs, type, (int) obj->type);
   }
   nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_BRIDGE);
   if (nbobjs)
