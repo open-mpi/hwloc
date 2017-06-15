@@ -31,7 +31,7 @@ int main(void)
 
   buffer = hwloc_alloc(topology, LEN);
   assert(buffer);
-  printf("buffer %p length %u\n", buffer, LEN);
+  printf("buffer %p length %d\n", buffer, LEN);
 
   err = hwloc_get_area_memlocation(topology, buffer, LEN, set, HWLOC_MEMBIND_BYNODESET);
   if (err < 0 && errno == ENOSYS) {

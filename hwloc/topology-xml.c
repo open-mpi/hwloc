@@ -1766,7 +1766,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     }
     break;
   case HWLOC_OBJ_BRIDGE:
-    sprintf(tmp, "%u-%u", obj->attr->bridge.upstream_type, obj->attr->bridge.downstream_type);
+    sprintf(tmp, "%d-%d", (int) obj->attr->bridge.upstream_type, (int) obj->attr->bridge.downstream_type);
     state.new_prop(&state, "bridge_type", tmp);
     sprintf(tmp, "%u", obj->attr->bridge.depth);
     state.new_prop(&state, "depth", tmp);
@@ -1797,7 +1797,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "pci_link_speed", tmp);
     break;
   case HWLOC_OBJ_OS_DEVICE:
-    sprintf(tmp, "%u", obj->attr->osdev.type);
+    sprintf(tmp, "%d", (int) obj->attr->osdev.type);
     state.new_prop(&state, "osdev_type", tmp);
     break;
   default:
@@ -1959,7 +1959,7 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
 
     parentstate->new_child(parentstate, &state, "diff");
 
-    sprintf(tmp, "%u", diff->generic.type);
+    sprintf(tmp, "%d", (int) diff->generic.type);
     state.new_prop(&state, "type", tmp);
 
     switch (diff->generic.type) {
@@ -1969,7 +1969,7 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
       sprintf(tmp, "%u", diff->obj_attr.obj_index);
       state.new_prop(&state, "obj_index", tmp);
 
-      sprintf(tmp, "%u", diff->obj_attr.diff.generic.type);
+      sprintf(tmp, "%d", (int) diff->obj_attr.diff.generic.type);
       state.new_prop(&state, "obj_attr_type", tmp);
 
       switch (diff->obj_attr.diff.generic.type) {
