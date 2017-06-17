@@ -138,7 +138,7 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
 	return obj;
       i++;
     } else {
-      if (obj->os_index == i)
+      if (obj->os_index == ind)
 	return obj;
     }
   }
