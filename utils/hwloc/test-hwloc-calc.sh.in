@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2017 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -74,6 +74,9 @@ set -e
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:33-37 --pulist --po
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:30-37 --nodelist --po --sep foo
+  echo
+  $calc --if synthetic --input "node:4(indexes=3,2,1,0) pu:2" node:1-2 --po -I node
+  $calc --if synthetic --input "node:4 core:4 pu:4(indexes=node:core)" --pi pu:2-5 -I pu
   echo
   $calc --if synthetic --input "numa:2 l3:2 pu:1" numa:0 l3u:3
   $calc --if synthetic --input "group:2 numa:2 l2:2 l1d:2 pu:1" Group0:1 NUMA:0
