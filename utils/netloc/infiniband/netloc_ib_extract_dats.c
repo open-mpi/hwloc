@@ -957,7 +957,8 @@ int write_into_file(char *subnet, char *path, char *hwlocpath)
             free(partition_str);
             fprintf(output, "%u,", num_links);
             for (unsigned int l = 0; l < num_links; l++) {
-                unsigned int link_idx = *(int *)utarray_eltptr(edge->physical_link_idx, l);
+                unsigned int link_idx = *(unsigned int *)
+                    utarray_eltptr(edge->physical_link_idx, l);
                 physical_link_t *link = (physical_link_t *)
                     utarray_eltptr(node->physical_links, link_idx);
                 fprintf(output, "%d,", link->int_id);
