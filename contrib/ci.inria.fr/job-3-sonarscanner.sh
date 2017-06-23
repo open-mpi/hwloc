@@ -81,7 +81,7 @@ ${CPPCHECK} ${DEFINITIONS} hwloc/topology-gl.c -Itests/hwloc/ports/include/gl 2>
 DEFINITIONS=
 ${CPPCHECK} ${DEFINITIONS} hwloc/topology-nvml.c -Itests/hwloc/ports/include/nvml 2> hwloc-cppcheck-nvml.xml
 DEFINITIONS="-DCL_DEVICE_BOARD_NAME_AMD=0x4038 -DCL_DEVICE_TOPOLOGY_AMD=0x4037"
-${CPPCHECK} ${DEFINITIONS} hwloc/topology-opencl.c -Itests/hwloc/ports/include/opencl 2> hwloc-cppcheck-opencl.xm
+${CPPCHECK} ${DEFINITIONS} hwloc/topology-opencl.c -Itests/hwloc/ports/include/opencl 2> hwloc-cppcheck-opencl.xml
 # cppcheck on non-Linux lstopo
 DEFINITIONS=
 ${CPPCHECK} ${DEFINITIONS} utils/lstopo/lstopo-windows.c -Itests/hwloc/ports/include/windows 2> hwloc-cppcheck-lstopo-windows.xml
@@ -118,8 +118,8 @@ sonar.projectVersion=git
 sonar.branch=$hwloc_branch
 sonar.scm.disabled=false
 sonar.sourceEncoding=UTF-8
-sonar.sources=hwloc, netloc, tests, utils
 sonar.language=c++
+sonar.sources=hwloc, netloc, tests, utils
 sonar.exclusions=tests/hwloc/ports
 sonar.cxx.errorRecoveryEnabled=true
 sonar.cxx.compiler.parser=GCC
