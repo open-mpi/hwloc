@@ -78,4 +78,6 @@ done
 
 # FIXME: /sys/devices/system/cpu/{online,offline,possible,present,kernel_max}
 
+# command-line tools look for /proc to autoguess that -i means fake fsroot
+mkdir -p "$outdir/proc"
 # FIXME: /proc/cpuinfo
