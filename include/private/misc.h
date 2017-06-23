@@ -191,9 +191,9 @@ hwloc_ffsl_from_ffs32(unsigned long x)
 #ifdef __GNUC_____
 
 #  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 4))
-#    define hwloc_flsl(x) (x ? 8*sizeof(long) - __builtin_clzl(x) : 0)
+#    define hwloc_flsl(x) (x ? (8*sizeof(long) - __builtin_clzl(x)) : 0)
 #  else
-#    define hwloc_fls(x) (x ? 8*sizeof(int) - __builtin_clz(x) : 0)
+#    define hwloc_fls(x) (x ? (8*sizeof(int) - __builtin_clz(x)) : 0)
 #    define HWLOC_NEED_FLSL
 #  endif
 
@@ -211,7 +211,7 @@ extern int flsl(long) __hwloc_attribute_const;
 extern int clzl(long) __hwloc_attribute_const;
 #  endif
 
-#  define hwloc_flsl(x) (x ? 8*sizeof(long) - clzl(x) : 0)
+#  define hwloc_flsl(x) (x ? (8*sizeof(long) - clzl(x)) : 0)
 
 #elif defined(HWLOC_HAVE_FLS)
 
@@ -228,7 +228,7 @@ extern int fls(int) __hwloc_attribute_const;
 extern int clz(int) __hwloc_attribute_const;
 #  endif
 
-#  define hwloc_fls(x) (x ? 8*sizeof(int) - clz(x) : 0)
+#  define hwloc_fls(x) (x ? (8*sizeof(int) - clz(x)) : 0)
 #  define HWLOC_NEED_FLSL
 
 #else /* no fls implementation */
