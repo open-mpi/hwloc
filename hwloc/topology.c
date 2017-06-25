@@ -2904,6 +2904,11 @@ int
 hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
                        hwloc_pid_t pid __hwloc_attribute_unused)
 {
+  if (topology->is_loaded) {
+    errno = EBUSY;
+    return -1;
+  }
+
   /* this does *not* change the backend */
 #ifdef HWLOC_LINUX_SYS
   topology->pid = pid;
@@ -2917,6 +2922,11 @@ hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
 int
 hwloc_topology_set_synthetic(struct hwloc_topology *topology, const char *description)
 {
+  if (topology->is_loaded) {
+    errno = EBUSY;
+    return -1;
+  }
+
   return hwloc_disc_component_force_enable(topology,
 					   0 /* api */,
 					   -1, "synthetic",
@@ -2927,6 +2937,11 @@ int
 hwloc_topology_set_xml(struct hwloc_topology *topology,
 		       const char *xmlpath)
 {
+  if (topology->is_loaded) {
+    errno = EBUSY;
+    return -1;
+  }
+
   return hwloc_disc_component_force_enable(topology,
 					   0 /* api */,
 					   -1, "xml",
@@ -2938,6 +2953,11 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology,
                              const char *xmlbuffer,
                              int size)
 {
+  if (topology->is_loaded) {
+    errno = EBUSY;
+    return -1;
+  }
+
   return hwloc_disc_component_force_enable(topology,
 					   0 /* api */,
 					   -1, "xml", NULL,
