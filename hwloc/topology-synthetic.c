@@ -1133,6 +1133,11 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   const char * separator = " ";
   const char * prefix = "";
 
+  if (!topology->is_loaded) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (flags & ~(HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
     errno = EINVAL;
     return -1;

@@ -2011,6 +2011,11 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
   int force_nolibxml;
   int ret;
 
+  if (!topology->is_loaded) {
+    errno = EINVAL;
+    return -1;
+  }
+
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
   if (flags & ~HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
@@ -2042,6 +2047,11 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
   hwloc_localeswitch_declare;
   int force_nolibxml;
   int ret;
+
+  if (!topology->is_loaded) {
+    errno = EINVAL;
+    return -1;
+  }
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
