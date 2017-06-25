@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2016 Inria.  All rights reserved.
+ * Copyright © 2013-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -292,6 +292,11 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 	unsigned i;
 	int err;
 
+	if (!topo1->is_loaded || !topo2->is_loaded) {
+	  errno = EINVAL;
+	  return -1;
+	}
+
 	if (flags != 0) {
 		errno = EINVAL;
 		return -1;
@@ -429,6 +434,11 @@ int hwloc_topology_diff_apply(hwloc_topology_t topology,
 {
 	hwloc_topology_diff_t tmpdiff, tmpdiff2;
 	int err, nr;
+
+	if (!topology->is_loaded) {
+	  errno = EINVAL;
+	  return -1;
+	}
 
 	if (flags & ~HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE) {
 		errno = EINVAL;
