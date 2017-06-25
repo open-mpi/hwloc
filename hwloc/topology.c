@@ -1324,6 +1324,11 @@ hwloc_alloc_setup_object(hwloc_topology_t topology,
 hwloc_obj_t
 hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
 {
+  if (!topology->is_loaded) {
+    /* this could actually work, see insert() below */
+    errno = EINVAL;
+    return NULL;
+  }
   return hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
 }
 
