@@ -1,6 +1,0 @@
-export NETLOC_TOPOFILE=$(realpath ./plafrim2/netloc/IB-fe80:0000:0000:0000-nodes.txt)
-export NETLOC_PARTITION=miriel
-export NETLOC_CURRENTSLOTS=$(realpath scotch/resources.txt)
-
-cd $(dirname $0)
-$NETLOC_UTIL_PATH/scotch/netlocscotch_get_arch arch.scotch subarch.scotch

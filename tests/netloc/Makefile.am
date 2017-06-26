@@ -19,14 +19,9 @@ EXTRA_DIST = \
         data/avakas.txz \
         data/plafrim.txz \
         data/plafrim2.txz \
+        data/scotch.txz \
         data/tests_scotch.txt \
-        data/tests_mpiscotch.txt \
-        data/scotch/test_scotch_get_arch.sh \
-        data/scotch/test_mpi_rank_file.sh \
-        data/scotch/app.mat \
-        data/scotch/resources.txt \
-        data/scotch/arch.scotch \
-        data/scotch/subarch.scotch
+        data/tests_mpiscotch.txt
 
 if FOUND_XZ
 TESTS = \
