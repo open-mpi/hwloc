@@ -434,7 +434,7 @@ netloc_edge_t *netloc_edge_construct(void);
  */
 int netloc_edge_destruct(netloc_edge_t *edge);
 
-char *netloc_edge_pretty_print(netloc_edge_t* edge);
+char * netloc_edge_pretty_print(netloc_edge_t* edge);
 
 void netloc_edge_reset_uid(void);
 

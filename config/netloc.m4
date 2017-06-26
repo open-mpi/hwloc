@@ -98,7 +98,12 @@ AC_DEFUN([NETLOC_CHECK_PLATFORM], [
             [Define to 1 if scotch is netlocscotch is enabled])
     ], [], -lscotcherr)
     AC_CHECK_HEADERS([mpi.h],
-            [mpi_found_headers=yes; break;])
+            [mpi_found_headers=yes;
+            MPI_CPPFLAGS=`mpicc -showme:compile 2>/dev/null`
+            MPI_LDADD=`mpicc -showme:link 2>/dev/null`
+            AC_SUBST(MPI_CPPFLAGS)
+            AC_SUBST(MPI_LDADD)
+            break;])
 
     AC_CHECK_PROG([xz],[xz],[yes],[no])
 ])dnl

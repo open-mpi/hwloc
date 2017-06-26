@@ -5,9 +5,12 @@
 # $HEADER$
 #
 
-AM_CPPFLAGS = \
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS) \
         -I$(top_builddir)/include \
         -I$(top_srcdir)/include
+AM_LDFLAGS = $(HWLOC_LDFLAGS)
+
+LDADD = $(top_builddir)/netloc/libnetloc.la
 
 if BUILD_MPITOOLS
 bin_PROGRAMS = \
@@ -20,24 +23,15 @@ bin_PROGRAMS += \
 endif
 endif
 
-netloc_rank_order_SOURCES = \
-        netloc_rank_order.c
+netloc_rank_order_SOURCES = netloc_rank_order.c
 
-netloc_rank_order_LDADD = \
-        $(top_builddir)/netloc/libnetloc.la
-
-netloc_mpi_find_hosts_SOURCES = \
-        netloc_mpi_find_hosts.c
-
-netloc_mpi_find_hosts_LDADD = \
-        $(top_builddir)/netloc/libnetloc.la -lmpi
+netloc_mpi_find_hosts_SOURCES = netloc_mpi_find_hosts.c
+netloc_mpi_find_hosts_CPPFLAGS = $(AM_CPPFLAGS) $(MPI_CPPFLAGS)
+netloc_mpi_find_hosts_LDADD = $(LDADD) $(MPI_LDADD)
 
 if BUILD_NETLOCSCOTCH
-netloc_mpi_rank_file_SOURCES = \
-        netloc_mpi_rank_file.c
-
-netloc_mpi_rank_file_LDADD = \
-        $(top_builddir)/netloc/libnetloc.la \
+netloc_mpi_rank_file_SOURCES = netloc_mpi_rank_file.c
+netloc_mpi_rank_file_LDADD = $(LDADD) \
         $(top_builddir)/netloc/libnetlocscotch.la \
         -lscotch -lscotcherr -lm -lpthread
 endif
