@@ -3,4 +3,4 @@ export NETLOC_PARTITION=miriel
 export NETLOC_CURRENTSLOTS=$(realpath scotch/resources.txt)
 
 cd $(dirname $0)
-./scotch_get_arch
+$NETLOC_UTIL_PATH/scotch/netlocscotch_get_arch arch.scotch subarch.scotch

@@ -34,7 +34,6 @@ TESTS = \
         data/tests_draw.txt
 
 if BUILD_NETLOCSCOTCH
-check_PROGRAMS = data/scotch/scotch_get_arch
 TESTS += data/tests_scotch.txt
 if BUILD_MPITOOLS
 TESTS += data/tests_mpiscotch.txt

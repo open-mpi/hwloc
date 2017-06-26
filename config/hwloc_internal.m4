@@ -330,6 +330,7 @@ EOF
 
         hwloc_config_prefix[utils/netloc/infiniband/Makefile]
         hwloc_config_prefix[utils/netloc/draw/Makefile]
+        hwloc_config_prefix[utils/netloc/scotch/Makefile]
         hwloc_config_prefix[utils/netloc/mpi/Makefile]
         hwloc_config_prefix[netloc.pc]
         hwloc_config_prefix[netlocscotch.pc]
