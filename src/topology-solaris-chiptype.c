@@ -58,28 +58,14 @@
 *****************************************************************************/
 
 static const char* items[] = {
-#define INDEX_CLOCK_FREQUENCY 0
-  "clock-frequency",
-#define INDEX_CPU_MHZ 1
-  "cpu-mhz",
-#define INDEX_ECACHE_SIZE 2
-  "ecache-size",
-#define INDEX_L2CACHE_SIZE 3
-  "l2-cache-size",
-#define INDEX_SL2_CACHE_SIZE 4
-  "sectored-l2-cache-size",
-#define INDEX_IMPLEMENTATION 5
-  "implementation#",
-#define INDEX_MANUFACTURER 6
-  "manufacturer#",
-#define INDEX_COMPATIBLE 7
-  "compatible",
-#define INDEX_PROCESSOR_TYPE 8
+#define INDEX_PROCESSOR_TYPE 0
   "ProcessorType",
-#define INDEX_VENDOR_ID 9
-  "vendor-id",
-#define INDEX_BRAND_STRING 10
-  "brand-string"
+#define INDEX_BRAND_STRING 1
+  "brand-string",
+#define INDEX_COMPATIBLE 2
+  "compatible",
+#define INDEX_IMPLEMENTATION 3
+  "implementation#",
 };
 
 #define NUM_ITEMS (sizeof(items) / sizeof(items[0]))
@@ -105,31 +91,18 @@ static const char* sparc_modes[] = {
 Default values are for Unknown so we can build up from there.
 *****************************************************************************/
 
-static long dss_chip_mode         = MODE_UNKNOWN;
-static long dss_chip_impl         = IMPL_SPITFIRE;
-static long dss_chip_cache        = TWO_MEG_CACHE;
-static long dss_chip_manufacturer = TI_MANUFACTURER;
-static long long dss_chip_speed   = SPITFIRE_SPEED;
+static int  called_cpu_probe      = 0;
 static char dss_chip_type[PICL_PROPNAMELEN_MAX];
 static char dss_chip_model[PICL_PROPNAMELEN_MAX];
-static int  called_cpu_probe      = 0;
+static long dss_chip_mode         = MODE_UNKNOWN;
+static long dss_chip_impl         = IMPL_SPITFIRE;
 
 /*****************************************************************************
 Assigns values based on the value of index.  For this reason, the order of
 the items array is important.
 *****************************************************************************/
 static void assign_value(int index, long long val) {
-  if (index == INDEX_CLOCK_FREQUENCY) {  /* clock-frequency */
-    dss_chip_speed = val;
-  }
-  else if (index == INDEX_CPU_MHZ) {  /* cpu-mhz */
-    dss_chip_speed = val * 1000000; /* Scale since value was in MHz */
-  }
-  else if ((index >= INDEX_ECACHE_SIZE) && (index <= INDEX_SL2_CACHE_SIZE)) {
-    /* ecache-size, l2-cache-size, sectored-l2-cache-size */
-    dss_chip_cache = val;
-  }
-  else if (index == INDEX_IMPLEMENTATION) {
+  if (index == INDEX_IMPLEMENTATION) {
     /* implementation#  T1, T2, and Rock do not have this, see RFE 6615268 */
     dss_chip_impl = val;
     if (dss_chip_impl == IMPL_SPITFIRE) {
@@ -158,9 +131,6 @@ static void assign_value(int index, long long val) {
     else if (dss_chip_impl == IMPL_ROCK) {
       dss_chip_mode = 8;
     }
-  }
-  else if (index == INDEX_MANUFACTURER) { /* manufacturer# */
-    dss_chip_manufacturer = val;
   }
 }
 
@@ -199,7 +169,6 @@ static void assign_string_value(int index, char* string_val) {
   } else if (index == INDEX_BRAND_STRING) { /* brand-string */
       strncpy(&dss_chip_model[0], string_val, PICL_PROPNAMELEN_MAX);
   }
-
 }
 
 /*****************************************************************************
