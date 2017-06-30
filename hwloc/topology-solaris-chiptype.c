@@ -111,7 +111,7 @@ static void assign_value(int index, long long val) {
   if (index == 0) {  /* clock-frequency */
     dss_chip_speed = val;
   }
-  if (index == 1) {  /* cpu-mhz */
+  else if (index == 1) {  /* cpu-mhz */
     dss_chip_speed = val * 1000000; /* Scale since value was in MHz */
   }
   else if ((index >= 2) && (index <= 4)) {
