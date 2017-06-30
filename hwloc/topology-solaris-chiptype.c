@@ -95,7 +95,6 @@ static int  called_cpu_probe      = 0;
 static char dss_chip_type[PICL_PROPNAMELEN_MAX];
 static char dss_chip_model[PICL_PROPNAMELEN_MAX];
 static long dss_chip_mode         = MODE_UNKNOWN;
-static long dss_chip_impl         = IMPL_SPITFIRE;
 
 /*****************************************************************************
 Assigns values based on the value of index.  For this reason, the order of
@@ -104,7 +103,7 @@ the items array is important.
 static void assign_value(int index, long long val) {
   if (index == INDEX_IMPLEMENTATION) {
     /* implementation#  T1, T2, and Rock do not have this, see RFE 6615268 */
-    dss_chip_impl = val;
+    long dss_chip_impl = val;
     if (dss_chip_impl == IMPL_SPITFIRE) {
       dss_chip_mode = 1;
     }
