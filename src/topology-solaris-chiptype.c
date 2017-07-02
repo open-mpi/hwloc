@@ -13,6 +13,9 @@
 #include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/solaris-chiptype.h>
+#include <private/misc.h>
+#include <private/debug.h>
+
 #include <stdlib.h>
 #include <strings.h>
 
@@ -66,6 +69,54 @@ static const char* items[] = {
   "compatible",
 #define INDEX_IMPLEMENTATION 3
   "implementation#",
+
+/* the following groups must be contigous from L1I to L3 each */
+#define INDEX_L1I_CACHE_SIZE 4
+  "l1-icache-size",
+#define INDEX_L1D_CACHE_SIZE 5
+  "l1-dcache-size",
+#define INDEX_L2I_CACHE_SIZE 6
+  "l2-icache-size",
+#define INDEX_L2D_CACHE_SIZE 7
+  "l2-dcache-size",
+#define INDEX_L3_CACHE_SIZE 8
+  "l3-cache-size",
+
+#define INDEX_L1I_CACHE_LINESIZE 9
+  "l1-icache-line-size",
+#define INDEX_L1D_CACHE_LINESIZE 10
+  "l1-dcache-line-size",
+#define INDEX_L2I_CACHE_LINESIZE 11
+  "l2-icache-line-size",
+#define INDEX_L2D_CACHE_LINESIZE 12
+  "l2-dcache-line-size",
+#define INDEX_L3_CACHE_LINESIZE 13
+  "l3-cache-line-size",
+
+#define INDEX_L1I_CACHE_ASSOCIATIVITY 14
+  "l1-icache-associativity",
+#define INDEX_L1D_CACHE_ASSOCIATIVITY 15
+  "l1-dcache-associativity",
+#define INDEX_L2I_CACHE_ASSOCIATIVITY 16
+  "l2-icache-associativity",
+#define INDEX_L2D_CACHE_ASSOCIATIVITY 17
+  "l2-dcache-associativity",
+#define INDEX_L3_CACHE_ASSOCIATIVITY 18
+  "l3-cache-associativity",
+
+#define INDEX_L2U_CACHE_SIZE 19
+  "l2-cache-size",
+#define INDEX_L2U_CACHE_LINESIZE 20
+  "l2-cache-line-size",
+#define INDEX_L2U_CACHE_ASSOCIATIVITY 21
+  "l2-cache-associativity",
+
+#define INDEX_SL2_CACHE_SIZE 22
+  "sectored-l2-cache-size",
+#define INDEX_SL2_CACHE_LINESIZE 23
+  "sectored-l2-cache-line-size",
+#define INDEX_SL2_CACHE_ASSOCIATIVITY 24
+  "sectored-l2-cache-associativity",
 };
 
 #define NUM_ITEMS (sizeof(items) / sizeof(items[0]))
@@ -132,6 +183,65 @@ static void assign_value(int index, long long val) {
     else if (dss_chip_impl == IMPL_ROCK) {
       dss_chip_mode = 8;
     }
+  }
+
+  else if ((index >= INDEX_L1I_CACHE_SIZE) && (index <= INDEX_L3_CACHE_SIZE)) {
+    /* make sure our indexes and the target structure are ordered the same */
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_SIZE+HWLOC_SOLARIS_CHIP_INFO_L1I == INDEX_L1I_CACHE_SIZE);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_SIZE+HWLOC_SOLARIS_CHIP_INFO_L1D == INDEX_L1D_CACHE_SIZE);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_SIZE+HWLOC_SOLARIS_CHIP_INFO_L2I == INDEX_L2I_CACHE_SIZE);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_SIZE+HWLOC_SOLARIS_CHIP_INFO_L2D == INDEX_L2D_CACHE_SIZE);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_SIZE+HWLOC_SOLARIS_CHIP_INFO_L3  == INDEX_L3_CACHE_SIZE);
+
+    chip_info.cache_size[index-INDEX_L1I_CACHE_SIZE] = val;
+  }
+  else if ((index >= INDEX_L1I_CACHE_LINESIZE) && (index <= INDEX_L3_CACHE_LINESIZE)) {
+    /* make sure our indexes and the target structure are ordered the same */
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_LINESIZE+HWLOC_SOLARIS_CHIP_INFO_L1I == INDEX_L1I_CACHE_LINESIZE);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_LINESIZE+HWLOC_SOLARIS_CHIP_INFO_L1D == INDEX_L1D_CACHE_LINESIZE);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_LINESIZE+HWLOC_SOLARIS_CHIP_INFO_L2I == INDEX_L2I_CACHE_LINESIZE);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_LINESIZE+HWLOC_SOLARIS_CHIP_INFO_L2D == INDEX_L2D_CACHE_LINESIZE);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_LINESIZE+HWLOC_SOLARIS_CHIP_INFO_L3  == INDEX_L3_CACHE_LINESIZE);
+
+    chip_info.cache_linesize[index-INDEX_L1I_CACHE_LINESIZE] = val;
+  }
+  else if ((index >= INDEX_L1I_CACHE_ASSOCIATIVITY) && (index <= INDEX_L3_CACHE_ASSOCIATIVITY)) {
+    /* make sure our indexes and the target structure are ordered the same */
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_ASSOCIATIVITY+HWLOC_SOLARIS_CHIP_INFO_L1I == INDEX_L1I_CACHE_ASSOCIATIVITY);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_ASSOCIATIVITY+HWLOC_SOLARIS_CHIP_INFO_L1D == INDEX_L1D_CACHE_ASSOCIATIVITY);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_ASSOCIATIVITY+HWLOC_SOLARIS_CHIP_INFO_L2I == INDEX_L2I_CACHE_ASSOCIATIVITY);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_ASSOCIATIVITY+HWLOC_SOLARIS_CHIP_INFO_L2D == INDEX_L2D_CACHE_ASSOCIATIVITY);
+    HWLOC_BUILD_ASSERT(INDEX_L1I_CACHE_ASSOCIATIVITY+HWLOC_SOLARIS_CHIP_INFO_L3  == INDEX_L3_CACHE_ASSOCIATIVITY);
+
+    chip_info.cache_associativity[index-INDEX_L1I_CACHE_ASSOCIATIVITY] = val;
+  }
+
+  /* store L2U info in L2D with l2_unified flag */
+  else if (index == INDEX_L2U_CACHE_SIZE) {
+    chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2D] = val;
+    chip_info.l2_unified = 1;
+  }
+  else if (index == INDEX_L2U_CACHE_LINESIZE) {
+    chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L2D] = val;
+    chip_info.l2_unified = 1;
+  }
+  else if (index == INDEX_L2U_CACHE_ASSOCIATIVITY) {
+    chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L2D] = val;
+    chip_info.l2_unified = 1;
+  }
+
+  /* assume sectored L2 is identical to L2u for size/linesize/associativity */
+  else if (index == INDEX_SL2_CACHE_SIZE) {
+    chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2D] = val;
+    chip_info.l2_unified = 1;
+  }
+  else if (index == INDEX_SL2_CACHE_LINESIZE) {
+    chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L2D] = val;
+    chip_info.l2_unified = 1;
+  }
+  else if (index == INDEX_SL2_CACHE_ASSOCIATIVITY) {
+    chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L2D] = val;
+    chip_info.l2_unified = 1;
   }
 }
 
@@ -297,6 +407,8 @@ static void probe_picl(void)
 {
   int ret;
 
+  memset(&chip_info, 0, sizeof(chip_info));
+
   ret = picl_initialize();
   if (ret == PICL_SUCCESS) {
     picl_nodehdl_t root;
@@ -325,12 +437,20 @@ static void probe_picl(void)
     sysinfo(SI_PLATFORM, dss_chip_model, PICL_PROPNAMELEN_MAX);
   }
 
+#ifdef HWLOC_DEBUG
+  {
+    unsigned i;
+    for(i=0; i<sizeof(chip_info.cache_size)/sizeof(*chip_info.cache_size); i++)
+      hwloc_debug("PICL gave cache #%u size %lu line %u associativity %u\n",
+		  i, chip_info.cache_size[i], chip_info.cache_linesize[i], chip_info.cache_associativity[i]);
+  }
+#endif
+
   /* make sure strings are null-terminated */
   dss_chip_type[sizeof(dss_chip_type)-1] = '\0';
   dss_chip_model[sizeof(dss_chip_model)-1] = '\0';
 
   /* setup the info struct */
-  memset(&chip_info, 0, sizeof(chip_info));
   if (dss_chip_type[0])
     chip_info.type = dss_chip_type;
   if (dss_chip_model[0])
