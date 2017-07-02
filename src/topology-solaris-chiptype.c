@@ -275,12 +275,6 @@ static int probe_cpu(picl_nodehdl_t node_hdl, void* dummy_arg __hwloc_attribute_
             }
           }
           break;
-        } else if (index == NUM_ITEMS-1) {
-	  if (p_info.type == PICL_PTYPE_CHARSTRING) {
-            val = picl_get_propval(p_hdl, &string_val, sizeof(string_val));
-            if (val == PICL_SUCCESS) {
-            }
-	  }
 	}
       }
     }
