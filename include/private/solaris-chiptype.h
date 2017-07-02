@@ -25,6 +25,16 @@
 struct hwloc_solaris_chip_info_s {
   char *model;
   char *type;
+  /* L1i, L1d, L2, L3 */
+#define HWLOC_SOLARIS_CHIP_INFO_L1I 0
+#define HWLOC_SOLARIS_CHIP_INFO_L1D 1
+#define HWLOC_SOLARIS_CHIP_INFO_L2I 2
+#define HWLOC_SOLARIS_CHIP_INFO_L2D 3
+#define HWLOC_SOLARIS_CHIP_INFO_L3  4
+  long cache_size[5]; /* cleared to -1 if we don't want of that cache */
+  unsigned cache_linesize[5];
+  unsigned cache_associativity[5];
+  int l2_unified;
 };
 
 /* fills the structure with 0 on error */
