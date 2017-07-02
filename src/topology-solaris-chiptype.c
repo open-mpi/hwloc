@@ -290,7 +290,7 @@ Initializes, gets the root, then walks the picl tree looking for information
 
 Currently, the "core" class is only needed for OPL systems
 *****************************************************************************/
-char* hwloc_solaris_get_chip_type(void) {
+static char* hwloc_solaris_get_chip_type(void) {
   picl_nodehdl_t root;
   int            val;
   static char chip_type[PICL_PROPNAMELEN_MAX];
@@ -327,7 +327,7 @@ Initializes, gets the root, then walks the picl tree looking for information
 
 Currently, the "core" class is only needed for OPL systems
 *****************************************************************************/
-char *hwloc_solaris_get_chip_model(void) {
+static char *hwloc_solaris_get_chip_model(void) {
 
     if (called_cpu_probe) {
 	if (dss_chip_mode != MODE_UNKNOWN) { /* SPARC chip */
@@ -341,11 +341,16 @@ char *hwloc_solaris_get_chip_model(void) {
     return(dss_chip_model);
 }
 
-#else
-char* hwloc_solaris_get_chip_type(void) {
-  return NULL;
+void hwloc_solaris_get_chip_info(struct hwloc_solaris_chip_info_s *info)
+{
+  memset(info, 0, sizeof(*info));
+  info->type = hwloc_solaris_get_chip_type();
+  info->model = hwloc_solaris_get_chip_model();
 }
-char *hwloc_solaris_get_chip_model(void) {
-  return NULL;
+
+#else /* !HAVE_PICL_H */
+void hwloc_solaris_get_chip_info(struct hwloc_solaris_chip_info_s *info)
+{
+  memset(info, 0, sizeof(*info));
 }
-#endif
+#endif /* !HAVE_PICL_H */
