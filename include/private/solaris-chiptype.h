@@ -22,7 +22,12 @@
 #ifndef HWLOC_PRIVATE_SOLARIS_CHIPTYPE_H
 #define HWLOC_PRIVATE_SOLARIS_CHIPTYPE_H
 
-char* hwloc_solaris_get_chip_type(void);
-char* hwloc_solaris_get_chip_model(void);
+struct hwloc_solaris_chip_info_s {
+  char *model;
+  char *type;
+};
+
+/* fills the structure with 0 on error */
+extern void hwloc_solaris_get_chip_info(struct hwloc_solaris_chip_info_s *info);
 
 #endif /* HWLOC_PRIVATE_SOLARIS_CHIPTYPE_H */

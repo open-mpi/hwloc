@@ -449,9 +449,7 @@ done:
 static int
 hwloc_look_kstat(struct hwloc_topology *topology)
 {
-  /* FIXME this assumes that all packages are identical */
-  char *CPUType = hwloc_solaris_get_chip_type();
-  char *CPUModel = hwloc_solaris_get_chip_model();
+  struct hwloc_solaris_chip_info_s chip_info;
 
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
@@ -500,6 +498,8 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     free(Lpkg);
     return 0;
   }
+
+  hwloc_solaris_get_chip_info(&chip_info);
 
   for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next)
     {
@@ -674,10 +674,10 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     hwloc_debug("%u Packages\n", Lpkg_num);
     for (j = 0; j < Lpkg_num; j++) {
       obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, Lpkg[j].Ppkg);
-      if (CPUType)
-	hwloc_obj_add_info(obj, "CPUType", CPUType);
-      if (CPUModel)
-	hwloc_obj_add_info(obj, "CPUModel", CPUModel);
+      if (chip_info.type)
+	hwloc_obj_add_info(obj, "CPUType", chip_info.type);
+      if (chip_info.model)
+	hwloc_obj_add_info(obj, "CPUModel", chip_info.model);
       obj->cpuset = hwloc_bitmap_alloc();
       for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lpkg == j)
