@@ -96,6 +96,8 @@ static char dss_chip_type[PICL_PROPNAMELEN_MAX];
 static char dss_chip_model[PICL_PROPNAMELEN_MAX];
 static long dss_chip_mode         = MODE_UNKNOWN;
 
+struct hwloc_solaris_chip_info_s chip_info;
+
 /*****************************************************************************
 Assigns values based on the value of index.  For this reason, the order of
 the items array is important.
@@ -290,62 +292,60 @@ Initializes, gets the root, then walks the picl tree looking for information
 
 Currently, the "core" class is only needed for OPL systems
 *****************************************************************************/
-static char* hwloc_solaris_get_chip_type(void) {
-  picl_nodehdl_t root;
-  int            val;
-  static char chip_type[PICL_PROPNAMELEN_MAX];
 
-  val = picl_initialize();
-  if (val != PICL_SUCCESS) { /* Can't initialize session with PICL daemon */
-      return(NULL);
+static void probe_picl(void)
+{
+  int ret;
+
+  ret = picl_initialize();
+  if (ret == PICL_SUCCESS) {
+    picl_nodehdl_t root;
+    ret = picl_get_root(&root);
+    if (ret == PICL_SUCCESS) {
+      ret = picl_walk_tree_by_class(root, "cpu", (void *)NULL, probe_cpu);
+      ret = picl_walk_tree_by_class(root, "core", (void *)NULL, probe_cpu);
+    }
+    picl_shutdown();
   }
-  val = picl_get_root(&root);
-  if (val != PICL_SUCCESS) {  /* Failed to get root node of the PICL tree */
-      return(NULL);
-  }
-  val = picl_walk_tree_by_class(root, "cpu", (void *)NULL, probe_cpu);
-  val = picl_walk_tree_by_class(root, "core", (void *)NULL, probe_cpu);
-  picl_shutdown();
 
   if (called_cpu_probe) {
 #if (defined HWLOC_X86_64_ARCH) || (defined HWLOC_X86_32_ARCH)
-      /* PICL returns some corrupted chip_type strings on x86,
-       * and CPUType only used on Sparc anyway, at least for now.
-       * So we just ignore this attribute on x86. */
-#else
-      strncpy(chip_type, dss_chip_type, PICL_PROPNAMELEN_MAX);
+    /* PICL returns some corrupted chip_type strings on x86,
+     * and CPUType only used on Sparc anyway, at least for now.
+     * So we just ignore this attribute on x86. */
+    dss_chip_type[0] = '\0';
 #endif
-  } else {
-      /* no picl information on machine available */
-      sysinfo(SI_HW_PROVIDER, chip_type, PICL_PROPNAMELEN_MAX);
-  }
-  return(chip_type);
-}
-
-/*****************************************************************************
-Initializes, gets the root, then walks the picl tree looking for information
-
-Currently, the "core" class is only needed for OPL systems
-*****************************************************************************/
-static char *hwloc_solaris_get_chip_model(void) {
-
-    if (called_cpu_probe) {
-	if (dss_chip_mode != MODE_UNKNOWN) { /* SPARC chip */
-	    strncpy(dss_chip_model, sparc_modes[dss_chip_mode],
-		    PICL_PROPNAMELEN_MAX);
-	}
-    } else {
-	/* no picl information on machine available */
-	sysinfo(SI_PLATFORM, dss_chip_model, PICL_PROPNAMELEN_MAX);
+    if (dss_chip_mode != MODE_UNKNOWN) { /* SPARC chip */
+      strncpy(dss_chip_model, sparc_modes[dss_chip_mode],
+	      PICL_PROPNAMELEN_MAX);
     }
-    return(dss_chip_model);
+  } else {
+    /* no picl information on machine available */
+    sysinfo(SI_HW_PROVIDER, dss_chip_type, PICL_PROPNAMELEN_MAX);
+    sysinfo(SI_PLATFORM, dss_chip_model, PICL_PROPNAMELEN_MAX);
+  }
+
+  /* make sure strings are null-terminated */
+  dss_chip_type[sizeof(dss_chip_type)-1] = '\0';
+  dss_chip_model[sizeof(dss_chip_model)-1] = '\0';
+
+  /* setup the info struct */
+  memset(&chip_info, 0, sizeof(chip_info));
+  if (dss_chip_type[0])
+    chip_info.type = dss_chip_type;
+  if (dss_chip_model[0])
+    chip_info.model = dss_chip_model;
 }
 
 void hwloc_solaris_get_chip_info(struct hwloc_solaris_chip_info_s *info)
 {
-  memset(info, 0, sizeof(*info));
-  info->type = hwloc_solaris_get_chip_type();
-  info->model = hwloc_solaris_get_chip_model();
+  static int probe_done = 0;
+  if (!probe_done) {
+    probe_picl();
+    probe_done = 1;
+  }
+
+  memcpy(info, &chip_info, sizeof(*info));
 }
 
 #else /* !HAVE_PICL_H */
