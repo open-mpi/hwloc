@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <sys/processor.h>
 #include <sys/procset.h>
+#include <sys/systeminfo.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 
@@ -450,6 +451,9 @@ static int
 hwloc_look_kstat(struct hwloc_topology *topology)
 {
   struct hwloc_solaris_chip_info_s chip_info;
+  static char architecture[6] = "";
+  int is_sparc = 0;
+  int ret;
 
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
@@ -498,6 +502,10 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     free(Lpkg);
     return 0;
   }
+
+  ret = sysinfo(SI_ARCHITECTURE, architecture, sizeof architecture);
+  if (ret == 6 && !strcmp(architecture, "sparc"))
+    is_sparc = 1;
 
   hwloc_solaris_get_chip_info(&chip_info);
 
