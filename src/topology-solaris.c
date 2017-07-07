@@ -466,6 +466,8 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   struct hwloc_solaris_chip_info_s chip_info;
   static char architecture[6] = "";
   int is_sparc = 0;
+  int l1i_from_core = 0;
+  int l1d_from_core = 0;
   int ret;
 
   kstat_ctl_t *kc = kstat_open();
@@ -527,6 +529,19 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     for(i=0; i<sizeof(chip_info.cache_size)/sizeof(*chip_info.cache_size); i++)
       if (!chip_info.cache_size[i])
 	chip_info.cache_size[i] = -1;
+  }
+
+  /* on sparc, assume l1d and l1i have same sharing as the core.
+   * on !sparc, we don't know the sharing of these caches, hence we ignore them.
+   * on x86, the x86-backend will take care of these caches again.
+   */
+  if (is_sparc && chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L1D] >= 0) {
+    hwloc_debug("Will generate L1d caches from cores and PICL cache index #%u\n", HWLOC_SOLARIS_CHIP_INFO_L1D);
+    l1d_from_core = 1;
+  }
+  if (is_sparc && chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L1I] >= 0) {
+    hwloc_debug("Will generate L1i caches from cores and PICL cache index #%u\n", HWLOC_SOLARIS_CHIP_INFO_L1I);
+    l1i_from_core = 1;
   }
 
   for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next) {
@@ -770,17 +785,46 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     hwloc_debug("%s", "\n");
   }
 
-  if (look_cores) {
-    struct hwloc_obj *obj;
-    unsigned j,k;
+  if (look_cores || l1i_from_core || l1d_from_core) {
+    unsigned j;
     hwloc_debug("%u Cores\n", Lcore_num);
     for (j = 0; j < Lcore_num; j++) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, Lcore[j].Pcore);
-      obj->cpuset = hwloc_bitmap_alloc();
+      /* Build the core cpuset */
+      struct hwloc_obj *obj;
+      unsigned k;
+      hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
       for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lcore == j)
-	  hwloc_bitmap_set(obj->cpuset, k);
-      hwloc_debug_1arg_bitmap("Core %u has cpuset %s\n", j, obj->cpuset);
+	  hwloc_bitmap_set(cpuset, k);
+      hwloc_debug_1arg_bitmap("Core %u has cpuset %s\n", j, cpuset);
+
+      /* Sparcs have per-core L1's. If we got their sizes from PICL, create those objects.
+       *
+       * On x86, let the x86 backend handle things.
+       * At least AMD Fam15h L1i isn't per core (shared by dual-core compute unit).
+       */
+      if (l1d_from_core) {
+	struct hwloc_obj *l1 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+	l1->cpuset = hwloc_bitmap_dup(cpuset);
+	l1->attr->cache.depth = 1;
+	l1->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
+	l1->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L1D];
+	l1->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L1D];
+	l1->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L1D];
+	hwloc_insert_object_by_cpuset(topology, l1);
+      }
+      if (l1i_from_core) {
+	struct hwloc_obj *l1i = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+	l1i->cpuset = hwloc_bitmap_dup(cpuset);
+	l1i->attr->cache.depth = 1;
+	l1i->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+	l1i->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L1I];
+	l1i->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L1I];
+	l1i->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L1I];
+	hwloc_insert_object_by_cpuset(topology, l1i);
+      }
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, Lcore[j].Pcore);
+      obj->cpuset = cpuset;
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");
