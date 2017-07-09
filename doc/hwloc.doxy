@@ -1054,6 +1054,8 @@ following environment variables.
   listed in those warnings so no need to document it
  HWLOC_FORCE_BGQ
   makes the bgq component run even if it doesn't recognize the running platform as a BGQ/CNK
+ HWLOC_PICL_HETEROGENEOUS
+  don't apply PICL info from a single CPU to all CPUs since the machine isn't homogeneous
  HWLOC_DEBUG_FAKE_COMPONENT
   enables debugging message to check that the fake component gets loaded
  HWLOC_DEBUG_PAGESIZE

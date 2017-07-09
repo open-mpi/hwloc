@@ -405,9 +405,20 @@ Currently, the "core" class is only needed for OPL systems
 
 static void probe_picl(void)
 {
+  char *env;
   int ret;
 
   memset(&chip_info, 0, sizeof(chip_info));
+
+  /* if we ever see a heterogeneous platform, we'll need to parse PICL attributes for each CPU
+   * (which means returning PICL_WALK_CONTINUE instead of PICL_WALK_TERMINATE above)
+   * instead of using the first CPU PICL attributes for the entire machine.
+   *
+   * Use this env var to disable the PICL homogeneous-only parsing in the meantime.
+   */
+  env = getenv("HWLOC_PICL_HETEROGENEOUS");
+  if (env && atoi(env))
+    return;
 
   ret = picl_initialize();
   if (ret == PICL_SUCCESS) {
