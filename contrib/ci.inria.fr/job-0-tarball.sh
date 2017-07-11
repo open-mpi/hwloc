@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2016 Inria.  All rights reserved.
+# Copyright © 2012-2017 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -18,9 +18,8 @@ else
   echo using generic $HOME/local/hwloc-master
 fi
 
-# remove everything but the last 10 builds
-ls -td hwloc-* | tail -n +11 | xargs chmod u+w -R || true
-ls -td hwloc-* | tail -n +11 | xargs rm -rf || true
+# remove previous artifacts so that they don't exported again by this build
+rm -f hwloc-*.tar.gz hwloc-*.tar.bz2 || true
 
 # display autotools versions
 automake --version | head -1
