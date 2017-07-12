@@ -93,7 +93,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
             asprintf(&hwloc_file, "%s/%s.xml", hwloc_path, node->hostname);
             FILE *fxml;
             if (!(fxml = fopen(hwloc_file, "r"))) {
-                printf("Hwloc file absent: %s\n", hwloc_file);
+                printf("Missing hwloc file: %s\n", hwloc_file);
             }
             else
                 fclose(fxml);

@@ -776,6 +776,7 @@ int netloc_arch_build(netloc_arch_t *arch, int add_slots)
     netloc_topology_t *topology = netloc_topology_construct(topopath);
     if (topology == NULL) {
         fprintf(stderr, "Error: netloc_topology_construct failed\n");
+        free(topopath);
         return NETLOC_ERROR;
     }
 
