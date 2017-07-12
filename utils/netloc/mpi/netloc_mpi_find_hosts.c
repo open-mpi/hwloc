@@ -39,13 +39,14 @@ int main(int argc, char **argv)
 
     MPI_Init(&argc,&argv);
 
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <output file>\n", argv[0]);
-        exit(1);
-    }
-
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_ranks);
+
+    if (argc != 2) {
+        if (rank == 0)
+            fprintf(stderr, "Usage: %s <output file>\n", argv[0]);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
 
     hwloc_topology_init(&topology);
     hwloc_topology_load(topology);
