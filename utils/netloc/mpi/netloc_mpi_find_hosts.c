@@ -1,4 +1,17 @@
+/*
+ * Copyright © 2017 Inria.  All rights reserved.
+ *
+ * $COPYRIGHT$
+ *
+ * Additional copyrights may follow
+ * See COPYING in top-level directory.
+ *
+ * $HEADER$
+ */
+
+#define _GNU_SOURCE	   /* See feature_test_macros(7) */
 #include <stdio.h>
+#include <libgen.h>
 #include <mpi.h>
 #include <hwloc.h>
 #include <private/netloc.h>
@@ -20,19 +33,15 @@ int main(int argc, char **argv)
     int pu_rank = -1;
     char name[1024];
     int resultlen;
+    int master; /* To be responsible for a node */
+    int one = 1;
+    int zero = 0;
 
     MPI_Init(&argc,&argv);
 
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <output file>\n", argv[0]);
         exit(1);
-    }
-
-    FILE *output = fopen(argv[1], "w");
-
-    if (!output) {
-        perror("fopen");
-        exit(2);
     }
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -48,8 +57,17 @@ int main(int argc, char **argv)
     resultlen++;
 
     if (rank == 0) {
+        FILE *output;
+        output = fopen(argv[1], "w");
+        if (!output) {
+            perror("fopen");
+            MPI_Abort(MPI_COMM_WORLD, 2);
+        }
+
         node_t *nodes = NULL;
         node_t *node;
+
+        master = 1;
 
         /* Rank 0 info */
         /* Find node */
@@ -88,6 +106,13 @@ int main(int argc, char **argv)
                 utarray_new(node->slots, &ut_int_icd);
                 utarray_new(node->ranks, &ut_int_icd);
                 HASH_ADD_KEYPTR(hh, nodes, node->name, strlen(node->name), node);
+
+                /* p will be the master for node */
+                MPI_Send(&one, 1, MPI_INT, p, 0, MPI_COMM_WORLD);
+
+            } else {
+                /* p won't be a master */
+                MPI_Send(&zero, 1, MPI_INT, p, 0, MPI_COMM_WORLD);
             }
             /* Add the slot to the list of slots */
             utarray_push_back(node->slots, &slot);
@@ -122,6 +147,7 @@ int main(int argc, char **argv)
                 fprintf(output, " %d", ranks[s]);
             }
         }
+        fclose(output);
     } else {
         int buffer[2];
         buffer[0] = resultlen;
@@ -130,6 +156,67 @@ int main(int argc, char **argv)
         MPI_Send(buffer, 2, MPI_INT, 0, 0, MPI_COMM_WORLD);
         /* Send node name */
         MPI_Send(name, resultlen, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+
+        /* Receive if is a master or not */
+        MPI_Recv (&master, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+    }
+
+    /* In charge of writing hwloc file */
+    if (master) {
+        /* Get the Netloc topology to find hwloc path */
+        char *topopath = getenv("NETLOC_TOPOFILE");
+        if (!topopath) {
+            fprintf(stderr, "Error: you need to set NETLOC_TOPOFILE in your environment.\n");
+        } else {
+            topopath = strdup(topopath);
+            netloc_topology_t *netloc_topology = netloc_topology_construct(topopath);
+            if (netloc_topology == NULL) {
+                fprintf(stderr, "Error: netloc_topology_construct failed\n");
+                free(topopath);
+                return NETLOC_ERROR;
+            }
+
+            /* Find hwloc dir path */
+            char *hwloc_path;
+            if (netloc_topology->hwlocpath[0] != '/') {
+                char *path_tmp = strdup(netloc_topology->topopath);
+                asprintf(&hwloc_path, "%s/%s", dirname(path_tmp), netloc_topology->hwlocpath);
+                free(path_tmp);
+            } else {
+                hwloc_path = strdup(netloc_topology->hwlocpath);
+            }
+
+            /* Check if already have an hwloc file */
+            /* We try to find a diff file */
+            char *hwloc_file;
+            asprintf(&hwloc_file, "%s/%s.diff.xml", hwloc_path, name);
+            FILE *fxml;
+            if ((fxml = fopen(hwloc_file, "r"))) {
+                fclose(fxml);
+                free(hwloc_file);
+                hwloc_file = NULL;
+            } else {
+                free(hwloc_file);
+                /* We try to find a regular file */
+                asprintf(&hwloc_file, "%s/%s.xml", hwloc_path, name);
+                if ((fxml = fopen(hwloc_file, "r"))) {
+                    fclose(fxml);
+                    free(hwloc_file);
+                    hwloc_file = NULL;
+                }
+            }
+
+            /* if there is no hwloc file, let's write one */
+            if (hwloc_file) {
+                if (hwloc_topology_export_xml(topology, hwloc_file, 0) == -1) {
+                    fprintf(stderr, "Error: netloc_topology_construct failed\n");
+                    free(topopath);
+                    return NETLOC_ERROR;
+                }
+                free(hwloc_path);
+                free(hwloc_file);
+            }
+        }
     }
 
     MPI_Finalize();
