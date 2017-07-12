@@ -3575,7 +3575,8 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj)
 }
 
 static void
-hwloc__check_level(struct hwloc_topology *topology, unsigned depth)
+hwloc__check_level(struct hwloc_topology *topology, unsigned depth,
+		   hwloc_obj_t first, hwloc_obj_t last)
 {
   unsigned width = hwloc_get_nbobjs_by_depth(topology, depth);
   struct hwloc_obj *prev = NULL;
@@ -3623,6 +3624,14 @@ hwloc__check_level(struct hwloc_topology *topology, unsigned depth)
     obj = hwloc_get_obj_by_depth(topology, depth, width-1);
     assert(obj);
     assert(!obj->next_cousin);
+  }
+
+  if ((int) depth < 0) {
+    assert(first == hwloc_get_obj_by_depth(topology, depth, 0));
+    assert(last == hwloc_get_obj_by_depth(topology, depth, width-1));
+  } else {
+    assert(!first);
+    assert(!last);
   }
 
   /* check last+1 object of the level */
@@ -3697,11 +3706,11 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
   /* check each level */
   for(i=0; i<depth; i++)
-    hwloc__check_level(topology, i);
-  hwloc__check_level(topology, HWLOC_OBJ_BRIDGE);
-  hwloc__check_level(topology, HWLOC_OBJ_PCI_DEVICE);
-  hwloc__check_level(topology, HWLOC_OBJ_OS_DEVICE);
-  hwloc__check_level(topology, HWLOC_OBJ_MISC);
+    hwloc__check_level(topology, i, NULL, NULL);
+  hwloc__check_level(topology, HWLOC_TYPE_DEPTH_BRIDGE, topology->first_bridge, topology->last_bridge);
+  hwloc__check_level(topology, HWLOC_TYPE_DEPTH_PCI_DEVICE, topology->first_pcidev, topology->last_pcidev);
+  hwloc__check_level(topology, HWLOC_TYPE_DEPTH_OS_DEVICE, topology->first_osdev, topology->last_osdev);
+  hwloc__check_level(topology, HWLOC_TYPE_DEPTH_MISC, topology->first_misc, topology->last_misc);
 
   /* recurse and check the tree of children, and type-specific checks */
   hwloc__check_object(topology, obj);
