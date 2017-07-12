@@ -626,9 +626,11 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
 			struct hwloc_obj *newobj,
 			struct hwloc_obj *src)
 {
+  hwloc_obj_t *level;
+  unsigned level_width;
   size_t len;
   unsigned i;
-  hwloc_obj_t child;
+  hwloc_obj_t child, prev;
   int err = 0;
 
   /* either we're duplicating to an already allocated new root, which has no newparent,
@@ -641,6 +643,11 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
     if (!newobj)
       return -1;
   }
+
+  /* duplicate all non-object-pointer fields */
+  newobj->logical_index = src->logical_index;
+  newobj->depth = src->depth;
+  newobj->sibling_rank = src->sibling_rank;
 
   newobj->type = src->type;
   newobj->os_index = src->os_index;
@@ -672,6 +679,46 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   for(i=0; i<src->infos_count; i++)
     hwloc__add_info(&newobj->infos, &newobj->infos_count, src->infos[i].name, src->infos[i].value);
 
+  /* find our level */
+  if ((int) src->depth < 0) {
+    i = HWLOC_SLEVEL_FROM_DEPTH(src->depth);
+    level = newtopology->slevels[i].objs;
+    level_width = newtopology->slevels[i].nbobjs;
+    /* deal with first/last pointers of special levels, even if not really needed */
+    if (!newobj->logical_index)
+      newtopology->slevels[i].first = newobj;
+    if (newobj->logical_index == newtopology->slevels[i].nbobjs - 1)
+      newtopology->slevels[i].last = newobj;
+  } else {
+    level = newtopology->levels[src->depth];
+    level_width = newtopology->level_nbobjects[src->depth];
+  }
+  /* place us for real */
+  assert(newobj->logical_index < level_width);
+  level[newobj->logical_index] = newobj;
+  /* link to already-inserted cousins
+   * (hwloc_pci_belowroot_apply_locality() can cause out-of-order logical indexes)
+   */
+  if (newobj->logical_index > 0 && level[newobj->logical_index-1]) {
+    newobj->prev_cousin = level[newobj->logical_index-1];
+    level[newobj->logical_index-1]->next_cousin = newobj;
+  }
+  if (newobj->logical_index < level_width-1 && level[newobj->logical_index+1]) {
+    newobj->next_cousin = level[newobj->logical_index+1];
+    level[newobj->logical_index+1]->prev_cousin = newobj;
+  }
+
+  /* prepare for children */
+  if (src->arity) {
+    newobj->children = malloc(src->arity * sizeof(*newobj->children));
+    if (!newobj->children)
+      return -1;
+  }
+  newobj->arity = src->arity;
+  newobj->io_arity = src->io_arity;
+  newobj->misc_arity = src->misc_arity;
+
+  /* actually insert children now */
   for_each_child(child, src) {
     err = hwloc__duplicate_object(newtopology, newobj, NULL, child);
     if (err < 0)
@@ -690,6 +737,37 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
 
  out_with_children:
 
+  /* link children if all of them where inserted */
+  if (!err) {
+    /* only next_sibling is set by insert_by_parent().
+     * sibling_rank was set above.
+     */
+    if (newobj->arity) {
+      newobj->children[0]->prev_sibling = NULL;
+      for(i=1; i<newobj->arity; i++)
+	newobj->children[i]->prev_sibling = newobj->children[i-1];
+      newobj->last_child = newobj->children[newobj->arity-1];
+    }
+    if (newobj->io_arity) {
+      child = newobj->io_first_child;
+      prev = NULL;
+      while (child) {
+	child->prev_sibling = prev;
+	prev = child;
+	child = child->next_sibling;
+      }
+    }
+    if (newobj->misc_arity) {
+      child = newobj->misc_first_child;
+      prev = NULL;
+      while (child) {
+	child->prev_sibling = prev;
+	prev = child;
+	child = child->next_sibling;
+      }
+    }
+  }
+
   /* some children insertion may have failed, but some children may have been inserted below us already.
    * keep inserting ourself and let the caller clean the entire tree if we return an error.
    */
@@ -699,6 +777,10 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
      * is supposed to be OK already, and we have debug asserts.
      */
     hwloc_insert_object_by_parent(newtopology, newparent, newobj);
+
+    /* place us inside our parent children array */
+    if (!hwloc_obj_type_is_special(newobj->type))
+      newparent->children[newobj->sibling_rank] = newobj;
   }
 
   return err;
@@ -711,6 +793,7 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   hwloc_topology_t new;
   hwloc_obj_t newroot;
   hwloc_obj_t oldroot = hwloc_get_root_obj(old);
+  unsigned i;
   int err;
 
   if (!old->is_loaded) {
@@ -739,6 +822,23 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   new->userdata_import_cb = old->userdata_import_cb;
   new->userdata_not_decoded = old->userdata_not_decoded;
 
+  for(i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++)
+    new->type_depth[i] = old->type_depth[i];
+
+  /* duplicate levels and we'll place objects there when duplicating objects */
+  new->nb_levels = old->nb_levels;
+  assert(new->nb_levels_allocated >= new->nb_levels);
+  for(i=1 /* root level already allocated */ ; i<new->nb_levels; i++) {
+    new->level_nbobjects[i] = old->level_nbobjects[i];
+    new->levels[i] = calloc(new->level_nbobjects[i], sizeof(*new->levels[i]));
+  }
+  for(i=0; i<HWLOC_NR_SLEVELS; i++) {
+    new->slevels[i].nbobjs = old->slevels[i].nbobjs;
+    if (new->slevels[i].nbobjs)
+      new->slevels[i].objs = calloc(new->slevels[i].nbobjs, sizeof(*new->slevels[i].objs));
+  }
+
+  /* recursively duplicate object children */
   newroot = hwloc_get_root_obj(new);
   err = hwloc__duplicate_object(new, NULL, newroot, oldroot);
   if (err < 0)
@@ -748,12 +848,12 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   if (err < 0)
     goto out_with_topology;
 
+  /* we connected everything during duplication */
+  new->modified = 0;
+
   /* no need to duplicate backends, topology is already loaded */
   new->backends = NULL;
   new->get_pci_busid_cpuset_backend = NULL;
-
-  if (hwloc_topology_reconnect(new, 0) < 0)
-    goto out_with_topology;
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
