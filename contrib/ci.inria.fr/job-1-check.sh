@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2016 Inria.  All rights reserved.
+# Copyright © 2012-2017 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -35,7 +35,7 @@ fi
 # ignore clock problems
 touch configure
 
-# build without plugins
+# build without plugins, with relative VPATH
 mkdir build
 cd build
 ../configure
@@ -44,10 +44,10 @@ make check
 utils/lstopo/lstopo-no-graphics -v
 cd ..
 
-# build with plugins
+# build with plugins, with absolute VPATH
 mkdir build-plugins
 cd build-plugins
-../configure --enable-plugins
+$PWD/../configure --enable-plugins
 make
 make check
 $WRAPPER utils/lstopo/lstopo-no-graphics -v
