@@ -25,7 +25,7 @@ hdhd="$builddir/hwloc-dump-hwdata"
 
 set -e
 
-tarball="${HWLOC_top_builddir}/utils/hwloc/test-hwloc-dump-hwdata/$1"
+tarball="$srcdir/test-hwloc-dump-hwdata/"`basename $1`
 (cd "$tmp" && tar xfj $tarball)
 
 HWLOC_FSROOT="`echo "$tmp"/*`"
