@@ -1,4 +1,4 @@
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2017 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -57,6 +57,10 @@ check_PROGRAMS = hwloc_list_components \
         xmlbuffer \
         gl \
         intel-mic
+
+if !HWLOC_HAVE_WINDOWS
+check_PROGRAMS += shmem
+endif !HWLOC_HAVE_WINDOWS
 
 if HWLOC_HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma
