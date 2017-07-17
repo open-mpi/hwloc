@@ -418,6 +418,12 @@ extern "C" {
 #define hwloc_topology_diff_load_xmlbuffer HWLOC_NAME(topology_diff_load_xmlbuffer)
 #define hwloc_topology_diff_export_xmlbuffer HWLOC_NAME(topology_diff_export_xmlbuffer)
 
+/* shmem.h */
+
+#define hwloc_shmem_topology_get_length HWLOC_NAME(shmem_topology_get_length)
+#define hwloc_shmem_topology_write HWLOC_NAME(shmem_topology_write)
+#define hwloc_shmem_topology_adopt HWLOC_NAME(shmem_topology_adopt)
+
 /* glibc-sched.h */
 
 #define hwloc_cpuset_to_glibc_sched_affinity HWLOC_NAME(cpuset_to_glibc_sched_affinity)
@@ -694,6 +700,7 @@ extern "C" {
 
 #define hwloc_bitmap_compare_inclusion HWLOC_NAME(bitmap_compare_inclusion)
 
+#define hwloc__topology_disadopt HWLOC_NAME(_topology_disadopt)
 #define hwloc__topology_dup HWLOC_NAME(_topology_dup)
 
 #define hwloc_tma HWLOC_NAME(tma)

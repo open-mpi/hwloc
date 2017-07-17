@@ -2828,7 +2828,9 @@ The machine topology usually does not vary much, except if some cores
 are stopped/restarted or if the administrator restrictions are modified.
 Thus rediscovering the whole topology again and again may look useless.
 
-For this purpose, hwloc offers XML import/export features. It lets you
+For this purpose, hwloc offers XML import/export and shared memory features.
+
+XML lets you
 save the discovered topology to a file (for instance with the lstopo program)
 and reload it later by setting the HWLOC_XMLFILE environment variable.
 The HWLOC_THISSYSTEM environment variable should also be set to 1 to
@@ -2846,6 +2848,15 @@ may be used to load a XML topology that contains the entire machine
 and restrict it to the part that is actually available to the current
 process (e.g. when Linux Cgroup/Cpuset are used to restrict the set
 of resources). See \ref envvar.
+
+Shared-memory topologies consist in one process exposing its topology
+in a shared-memory buffer so that other processes (running on the same machine)
+may use it directly.
+This has the advantage of reducing the memory footprint since a single
+topology is stored in physical memory for multiple processes.
+However it requires all processes to map this shared-memory buffer
+at the same virtual address, which may be difficult in some cases.
+This API is described in \ref hwlocality_shmem.
 
 
 \subsection faq_multitopo How many topologies may I use in my program?

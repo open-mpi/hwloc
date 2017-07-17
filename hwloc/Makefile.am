@@ -1,4 +1,4 @@
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2017 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2012 Oracle and/or its affiliates.  All rights reserved.
@@ -36,6 +36,7 @@ sources = \
         bitmap.c \
         pci-common.c \
         diff.c \
+        shmem.c \
         misc.c \
         base64.c \
         topology-noos.c \

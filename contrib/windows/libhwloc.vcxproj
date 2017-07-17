@@ -201,6 +201,7 @@
     <ClCompile Include="..\..\hwloc\components.c" />
     <ClCompile Include="..\..\hwloc\distances.c" />
     <ClCompile Include="..\..\hwloc\diff.c" />
+    <ClCompile Include="..\..\hwloc\shmem.c" />
     <ClCompile Include="..\..\hwloc\misc.c" />
     <ClCompile Include="..\..\hwloc\pci-common.c" />
     <ClCompile Include="..\..\hwloc\topology-noos.c" />
@@ -223,6 +224,7 @@
     <ClInclude Include="..\..\include\hwloc\openfabrics-verbs.h" />
     <ClInclude Include="..\..\include\hwloc\plugins.h" />
     <ClInclude Include="..\..\include\hwloc\diff.h" />
+    <ClInclude Include="..\..\include\hwloc\shmem.h" />
     <ClInclude Include="..\..\include\hwloc\rename.h" />
     <ClInclude Include="..\..\include\private\components.h" />
     <ClInclude Include="..\..\include\private\cpuid-x86.h" />

@@ -2992,6 +2992,9 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->pid = 0;
   topology->userdata = NULL;
 
+  topology->adopted_shmem_addr = NULL;
+  topology->adopted_shmem_length = 0;
+
   topology->support.discovery = hwloc_tma_malloc(tma, sizeof(*topology->support.discovery));
   topology->support.cpubind = hwloc_tma_malloc(tma, sizeof(*topology->support.cpubind));
   topology->support.membind = hwloc_tma_malloc(tma, sizeof(*topology->support.membind));
@@ -3213,6 +3216,11 @@ hwloc_topology_clear (struct hwloc_topology *topology)
 void
 hwloc_topology_destroy (struct hwloc_topology *topology)
 {
+  if (topology->adopted_shmem_addr) {
+    hwloc__topology_disadopt(topology);
+    return;
+  }
+
   hwloc_backends_disable_all(topology);
   hwloc_components_fini();
 

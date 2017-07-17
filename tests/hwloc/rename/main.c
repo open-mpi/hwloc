@@ -8,6 +8,7 @@
 /* all headers should be included */
 #include "hwloc.h"
 #include "hwloc/bitmap.h"
+#include "hwloc/shmem.h"
 #include "hwloc/helper.h"
 #include "hwloc/plugins.h"
 

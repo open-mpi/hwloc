@@ -54,6 +54,9 @@ struct hwloc_topology {
   void *userdata;
   uint64_t next_gp_index;
 
+  void *adopted_shmem_addr;
+  size_t adopted_shmem_length;
+
 #define HWLOC_NR_SLEVELS 4
 #define HWLOC_SLEVEL_BRIDGE 0
 #define HWLOC_SLEVEL_PCIDEV 1
@@ -432,5 +435,6 @@ hwloc_tma_strdup(struct hwloc_tma *tma,
 extern hwloc_bitmap_t hwloc_bitmap_tma_dup(struct hwloc_tma *tma, hwloc_const_bitmap_t old);
 
 extern int hwloc__topology_dup(hwloc_topology_t *newp, hwloc_topology_t old, struct hwloc_tma *tma);
+extern void hwloc__topology_disadopt(hwloc_topology_t  topology);
 
 #endif /* HWLOC_PRIVATE_H */

@@ -76,6 +76,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/export.h \
        $(hwloc_include_dir)/hwloc/distances.h \
        $(hwloc_include_dir)/hwloc/diff.h \
+       $(hwloc_include_dir)/hwloc/shmem.h \
        $(hwloc_include_dir)/hwloc/plugins.h \
        $(hwloc_include_dir)/hwloc/glibc-sched.h \
        $(hwloc_include_dir)/hwloc/linux.h \
@@ -486,6 +487,13 @@ man3_syntheticexport_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_syntheticexport.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_export_synthetic.3
 
+man3_shmemdir = $(man3dir)
+man3_shmem_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_shmem.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_shmem_topology_get_length.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_shmem_topology_write.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_shmem_topology_adopt.3
+
 man3_bitmapdir = $(man3dir)
 man3_bitmap_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_bitmap.3 \
@@ -764,6 +772,7 @@ $(man3_tinker_DATA): $(DOX_TAG)
 $(man3_setsource_DATA): $(DOX_TAG)
 $(man3_xmlexport_DATA): $(DOX_TAG)
 $(man3_syntheticexport_DATA): $(DOX_TAG)
+$(man3_shmem_DATA): $(DOX_TAG)
 $(man3_bitmap_DATA): $(DOX_TAG)
 $(man3_helper_find_inside_DATA): $(DOX_TAG)
 $(man3_helper_find_covering_DATA): $(DOX_TAG)
