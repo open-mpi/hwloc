@@ -2233,14 +2233,14 @@ hwloc_level_take_objects(hwloc_obj_t top_obj,
   return new_i;
 }
 
-static unsigned
-hwloc_build_level_from_list(struct hwloc_obj *first, struct hwloc_obj ***levelp)
+static int
+hwloc_build_level_from_list(struct hwloc_special_level_s *slevel)
 {
   unsigned i, nb;
   struct hwloc_obj * obj;
 
   /* count */
-  obj = first;
+  obj = slevel->first;
   i = 0;
   while (obj) {
     i++;
@@ -2250,18 +2250,32 @@ hwloc_build_level_from_list(struct hwloc_obj *first, struct hwloc_obj ***levelp)
 
   if (nb) {
     /* allocate and fill level */
-    *levelp = malloc(nb * sizeof(struct hwloc_obj *));
-    obj = first;
+    slevel->objs = malloc(nb * sizeof(struct hwloc_obj *));
+    obj = slevel->first;
     i = 0;
     while (obj) {
       obj->logical_index = i;
-      (*levelp)[i] = obj;
+      slevel->objs[i] = obj;
       i++;
       obj = obj->next_cousin;
     }
   }
 
-  return nb;
+  slevel->nbobjs = nb;
+  return 0;
+}
+
+static void
+hwloc_append_special_object(struct hwloc_special_level_s *level, hwloc_obj_t obj)
+{
+  if (level->first) {
+    obj->prev_cousin = level->last;
+    obj->prev_cousin->next_cousin = obj;
+    level->last = obj;
+  } else {
+    obj->prev_cousin = NULL;
+    level->first = level->last = obj;
+  }
 }
 
 /* Append I/O and Misc objects to their lists */
@@ -2274,14 +2288,7 @@ hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
     obj->next_cousin = NULL;
     obj->depth = HWLOC_TYPE_DEPTH_MISC;
     /* Insert the main Misc list */
-    if (topology->slevels[HWLOC_SLEVEL_MISC].first) {
-      obj->prev_cousin = topology->slevels[HWLOC_SLEVEL_MISC].last;
-      obj->prev_cousin->next_cousin = obj;
-      topology->slevels[HWLOC_SLEVEL_MISC].last = obj;
-    } else {
-      obj->prev_cousin = NULL;
-      topology->slevels[HWLOC_SLEVEL_MISC].first = topology->slevels[HWLOC_SLEVEL_MISC].last = obj;
-    }
+    hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_MISC], obj);
     /* Recurse, Misc only have Misc children */
     for_each_misc_child_safe(child, obj, temp)
       hwloc_list_io_misc_objects(topology, child);
@@ -2292,38 +2299,17 @@ hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
     if (obj->type == HWLOC_OBJ_BRIDGE) {
       obj->depth = HWLOC_TYPE_DEPTH_BRIDGE;
       /* Insert in the main bridge list */
-      if (topology->slevels[HWLOC_SLEVEL_BRIDGE].first) {
-	obj->prev_cousin = topology->slevels[HWLOC_SLEVEL_BRIDGE].last;
-	obj->prev_cousin->next_cousin = obj;
-	topology->slevels[HWLOC_SLEVEL_BRIDGE].last = obj;
-      } else {
-	obj->prev_cousin = NULL;
-	topology->slevels[HWLOC_SLEVEL_BRIDGE].first = topology->slevels[HWLOC_SLEVEL_BRIDGE].last = obj;
-      }
+      hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_BRIDGE], obj);
 
     } else if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
       obj->depth = HWLOC_TYPE_DEPTH_PCI_DEVICE;
       /* Insert in the main pcidev list */
-      if (topology->slevels[HWLOC_SLEVEL_PCIDEV].first) {
-	obj->prev_cousin = topology->slevels[HWLOC_SLEVEL_PCIDEV].last;
-	obj->prev_cousin->next_cousin = obj;
-	topology->slevels[HWLOC_SLEVEL_PCIDEV].last = obj;
-      } else {
-	obj->prev_cousin = NULL;
-	topology->slevels[HWLOC_SLEVEL_PCIDEV].first = topology->slevels[HWLOC_SLEVEL_PCIDEV].last = obj;
-      }
+      hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_PCIDEV], obj);
 
     } else if (obj->type == HWLOC_OBJ_OS_DEVICE) {
       obj->depth = HWLOC_TYPE_DEPTH_OS_DEVICE;
       /* Insert in the main osdev list */
-      if (topology->slevels[HWLOC_SLEVEL_OSDEV].first) {
-	obj->prev_cousin = topology->slevels[HWLOC_SLEVEL_OSDEV].last;
-	obj->prev_cousin->next_cousin = obj;
-	topology->slevels[HWLOC_SLEVEL_OSDEV].last = obj;
-      } else {
-	obj->prev_cousin = NULL;
-	topology->slevels[HWLOC_SLEVEL_OSDEV].first = topology->slevels[HWLOC_SLEVEL_OSDEV].last = obj;
-      }
+      hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_OSDEV], obj);
     }
     /* Recurse, I/O only have I/O and Misc children */
     for_each_io_child_safe(child, obj, temp)
@@ -2346,28 +2332,16 @@ hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
 static void
 hwloc_connect_io_misc_levels(hwloc_topology_t topology)
 {
-  free(topology->slevels[HWLOC_SLEVEL_BRIDGE].objs);
-  topology->slevels[HWLOC_SLEVEL_BRIDGE].objs = NULL;
-  topology->slevels[HWLOC_SLEVEL_BRIDGE].first = topology->slevels[HWLOC_SLEVEL_BRIDGE].last = NULL;
+  unsigned i;
 
-  free(topology->slevels[HWLOC_SLEVEL_PCIDEV].objs);
-  topology->slevels[HWLOC_SLEVEL_PCIDEV].objs = NULL;
-  topology->slevels[HWLOC_SLEVEL_PCIDEV].first = topology->slevels[HWLOC_SLEVEL_PCIDEV].last = NULL;
-
-  free(topology->slevels[HWLOC_SLEVEL_OSDEV].objs);
-  topology->slevels[HWLOC_SLEVEL_OSDEV].objs = NULL;
-  topology->slevels[HWLOC_SLEVEL_OSDEV].first = topology->slevels[HWLOC_SLEVEL_OSDEV].last = NULL;
-
-  free(topology->slevels[HWLOC_SLEVEL_MISC].objs);
-  topology->slevels[HWLOC_SLEVEL_MISC].objs = NULL;
-  topology->slevels[HWLOC_SLEVEL_MISC].first = topology->slevels[HWLOC_SLEVEL_MISC].last = NULL;
+  for(i=0; i<HWLOC_NR_SLEVELS; i++)
+    free(topology->slevels[i].objs);
+  memset(&topology->slevels, 0, sizeof(topology->slevels));
 
   hwloc_list_io_misc_objects(topology, topology->levels[0][0]);
 
-  topology->slevels[HWLOC_SLEVEL_BRIDGE].nbobjs = hwloc_build_level_from_list(topology->slevels[HWLOC_SLEVEL_BRIDGE].first, &topology->slevels[HWLOC_SLEVEL_BRIDGE].objs);
-  topology->slevels[HWLOC_SLEVEL_PCIDEV].nbobjs = hwloc_build_level_from_list(topology->slevels[HWLOC_SLEVEL_PCIDEV].first, &topology->slevels[HWLOC_SLEVEL_PCIDEV].objs);
-  topology->slevels[HWLOC_SLEVEL_OSDEV].nbobjs = hwloc_build_level_from_list(topology->slevels[HWLOC_SLEVEL_OSDEV].first, &topology->slevels[HWLOC_SLEVEL_OSDEV].objs);
-  topology->slevels[HWLOC_SLEVEL_MISC].nbobjs = hwloc_build_level_from_list(topology->slevels[HWLOC_SLEVEL_MISC].first, &topology->slevels[HWLOC_SLEVEL_MISC].objs);
+  for(i=0; i<HWLOC_NR_SLEVELS; i++)
+    hwloc_build_level_from_list(&topology->slevels[i]);
 }
 
 /*
@@ -2826,19 +2800,9 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
-  /* NULLify other levels */
-  topology->slevels[HWLOC_SLEVEL_BRIDGE].nbobjs = 0;
-  topology->slevels[HWLOC_SLEVEL_PCIDEV].nbobjs = 0;
-  topology->slevels[HWLOC_SLEVEL_OSDEV].nbobjs = 0;
-  topology->slevels[HWLOC_SLEVEL_BRIDGE].objs = NULL;
-  topology->slevels[HWLOC_SLEVEL_PCIDEV].objs = NULL;
-  topology->slevels[HWLOC_SLEVEL_OSDEV].objs = NULL;
-  topology->slevels[HWLOC_SLEVEL_BRIDGE].first = topology->slevels[HWLOC_SLEVEL_BRIDGE].last = NULL;
-  topology->slevels[HWLOC_SLEVEL_PCIDEV].first = topology->slevels[HWLOC_SLEVEL_PCIDEV].last = NULL;
-  topology->slevels[HWLOC_SLEVEL_OSDEV].first = topology->slevels[HWLOC_SLEVEL_OSDEV].last = NULL;
-  topology->slevels[HWLOC_SLEVEL_MISC].nbobjs = 0;
-  topology->slevels[HWLOC_SLEVEL_MISC].objs = NULL;
-  topology->slevels[HWLOC_SLEVEL_MISC].first = topology->slevels[HWLOC_SLEVEL_MISC].last = NULL;
+
+  /* NULLify other special levels */
+  memset(&topology->slevels, 0, sizeof(topology->slevels));
   /* assert the indexes of special levels */
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_BRIDGE == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_BRIDGE));
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_PCIDEV == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_PCI_DEVICE));
@@ -3089,10 +3053,8 @@ hwloc_topology_clear (struct hwloc_topology *topology)
   hwloc_free_object_and_children(topology->levels[0][0]);
   for (l=0; l<topology->nb_levels; l++)
     free(topology->levels[l]);
-  free(topology->slevels[HWLOC_SLEVEL_BRIDGE].objs);
-  free(topology->slevels[HWLOC_SLEVEL_PCIDEV].objs);
-  free(topology->slevels[HWLOC_SLEVEL_OSDEV].objs);
-  free(topology->slevels[HWLOC_SLEVEL_MISC].objs);
+  for(l=0; l<HWLOC_NR_SLEVELS; l++)
+    free(topology->slevels[l].objs);
 }
 
 void
@@ -3713,10 +3675,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
   /* check each level */
   for(i=0; i<depth; i++)
     hwloc__check_level(topology, i, NULL, NULL);
-  hwloc__check_level(topology, HWLOC_TYPE_DEPTH_BRIDGE, topology->slevels[HWLOC_SLEVEL_BRIDGE].first, topology->slevels[HWLOC_SLEVEL_BRIDGE].last);
-  hwloc__check_level(topology, HWLOC_TYPE_DEPTH_PCI_DEVICE, topology->slevels[HWLOC_SLEVEL_PCIDEV].first, topology->slevels[HWLOC_SLEVEL_PCIDEV].last);
-  hwloc__check_level(topology, HWLOC_TYPE_DEPTH_OS_DEVICE, topology->slevels[HWLOC_SLEVEL_OSDEV].first, topology->slevels[HWLOC_SLEVEL_OSDEV].last);
-  hwloc__check_level(topology, HWLOC_TYPE_DEPTH_MISC, topology->slevels[HWLOC_SLEVEL_MISC].first, topology->slevels[HWLOC_SLEVEL_MISC].last);
+  for(i=0; i<HWLOC_NR_SLEVELS; i++)
+    hwloc__check_level(topology, HWLOC_SLEVEL_TO_DEPTH(i), topology->slevels[i].first, topology->slevels[i].last);
 
   /* recurse and check the tree of children, and type-specific checks */
   hwloc__check_object(topology, obj);

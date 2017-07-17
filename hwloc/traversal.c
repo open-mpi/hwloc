@@ -43,38 +43,26 @@ hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
 unsigned
 hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, unsigned depth)
 {
-  if (depth >= topology->nb_levels)
-    switch (depth) {
-    case HWLOC_TYPE_DEPTH_BRIDGE:
-      return topology->slevels[HWLOC_SLEVEL_BRIDGE].nbobjs;
-    case HWLOC_TYPE_DEPTH_PCI_DEVICE:
-      return topology->slevels[HWLOC_SLEVEL_PCIDEV].nbobjs;
-    case HWLOC_TYPE_DEPTH_OS_DEVICE:
-      return topology->slevels[HWLOC_SLEVEL_OSDEV].nbobjs;
-    case HWLOC_TYPE_DEPTH_MISC:
-      return topology->slevels[HWLOC_SLEVEL_MISC].nbobjs;
-    default:
+  if (depth >= topology->nb_levels) {
+    unsigned l = HWLOC_SLEVEL_FROM_DEPTH(depth);
+    if (l < HWLOC_NR_SLEVELS)
+      return topology->slevels[l].nbobjs;
+    else
       return 0;
-    }
+  }
   return topology->level_nbobjects[depth];
 }
 
 struct hwloc_obj *
 hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigned idx)
 {
-  if (depth >= topology->nb_levels)
-    switch (depth) {
-    case HWLOC_TYPE_DEPTH_BRIDGE:
-      return idx < topology->slevels[HWLOC_SLEVEL_BRIDGE].nbobjs ? topology->slevels[HWLOC_SLEVEL_BRIDGE].objs[idx] : NULL;
-    case HWLOC_TYPE_DEPTH_PCI_DEVICE:
-      return idx < topology->slevels[HWLOC_SLEVEL_PCIDEV].nbobjs ? topology->slevels[HWLOC_SLEVEL_PCIDEV].objs[idx] : NULL;
-    case HWLOC_TYPE_DEPTH_OS_DEVICE:
-      return idx < topology->slevels[HWLOC_SLEVEL_OSDEV].nbobjs ? topology->slevels[HWLOC_SLEVEL_OSDEV].objs[idx] : NULL;
-    case HWLOC_TYPE_DEPTH_MISC:
-      return idx < topology->slevels[HWLOC_SLEVEL_MISC].nbobjs ? topology->slevels[HWLOC_SLEVEL_MISC].objs[idx] : NULL;
-    default:
+  if (depth >= topology->nb_levels) {
+    unsigned l = HWLOC_SLEVEL_FROM_DEPTH(depth);
+    if (l < HWLOC_NR_SLEVELS)
+      return idx < topology->slevels[l].nbobjs ? topology->slevels[l].objs[idx] : NULL;
+    else
       return NULL;
-    }
+  }
   if (idx >= topology->level_nbobjects[depth])
     return NULL;
   return topology->levels[depth][idx];
