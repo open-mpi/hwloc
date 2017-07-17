@@ -614,6 +614,8 @@ extern "C" {
 
 /* private/private.h */
 
+#define hwloc_special_level_s HWLOC_NAME(special_level_s)
+
 #define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
 
 #define hwloc_alloc_obj_cpusets HWLOC_NAME(alloc_obj_cpusets)

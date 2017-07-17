@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -46,13 +46,13 @@ hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, unsigned depth)
   if (depth >= topology->nb_levels)
     switch (depth) {
     case HWLOC_TYPE_DEPTH_BRIDGE:
-      return topology->bridge_nbobjects;
+      return topology->slevels[HWLOC_SLEVEL_BRIDGE].nbobjs;
     case HWLOC_TYPE_DEPTH_PCI_DEVICE:
-      return topology->pcidev_nbobjects;
+      return topology->slevels[HWLOC_SLEVEL_PCIDEV].nbobjs;
     case HWLOC_TYPE_DEPTH_OS_DEVICE:
-      return topology->osdev_nbobjects;
+      return topology->slevels[HWLOC_SLEVEL_OSDEV].nbobjs;
     case HWLOC_TYPE_DEPTH_MISC:
-      return topology->misc_nbobjects;
+      return topology->slevels[HWLOC_SLEVEL_MISC].nbobjs;
     default:
       return 0;
     }
@@ -65,13 +65,13 @@ hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigne
   if (depth >= topology->nb_levels)
     switch (depth) {
     case HWLOC_TYPE_DEPTH_BRIDGE:
-      return idx < topology->bridge_nbobjects ? topology->bridge_level[idx] : NULL;
+      return idx < topology->slevels[HWLOC_SLEVEL_BRIDGE].nbobjs ? topology->slevels[HWLOC_SLEVEL_BRIDGE].objs[idx] : NULL;
     case HWLOC_TYPE_DEPTH_PCI_DEVICE:
-      return idx < topology->pcidev_nbobjects ? topology->pcidev_level[idx] : NULL;
+      return idx < topology->slevels[HWLOC_SLEVEL_PCIDEV].nbobjs ? topology->slevels[HWLOC_SLEVEL_PCIDEV].objs[idx] : NULL;
     case HWLOC_TYPE_DEPTH_OS_DEVICE:
-      return idx < topology->osdev_nbobjects ? topology->osdev_level[idx] : NULL;
+      return idx < topology->slevels[HWLOC_SLEVEL_OSDEV].nbobjs ? topology->slevels[HWLOC_SLEVEL_OSDEV].objs[idx] : NULL;
     case HWLOC_TYPE_DEPTH_MISC:
-      return idx < topology->misc_nbobjects ? topology->misc_level[idx] : NULL;
+      return idx < topology->slevels[HWLOC_SLEVEL_MISC].nbobjs ? topology->slevels[HWLOC_SLEVEL_MISC].objs[idx] : NULL;
     default:
       return NULL;
     }

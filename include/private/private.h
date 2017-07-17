@@ -54,18 +54,19 @@ struct hwloc_topology {
   void *userdata;
   uint64_t next_gp_index;
 
-  unsigned bridge_nbobjects;
-  struct hwloc_obj **bridge_level;
-  struct hwloc_obj *first_bridge, *last_bridge;
-  unsigned pcidev_nbobjects;
-  struct hwloc_obj **pcidev_level;
-  struct hwloc_obj *first_pcidev, *last_pcidev;
-  unsigned osdev_nbobjects;
-  struct hwloc_obj **osdev_level;
-  struct hwloc_obj *first_osdev, *last_osdev;
-  unsigned misc_nbobjects;
-  struct hwloc_obj **misc_level;
-  struct hwloc_obj *first_misc, *last_misc;
+#define HWLOC_NR_SLEVELS 4
+#define HWLOC_SLEVEL_BRIDGE 0
+#define HWLOC_SLEVEL_PCIDEV 1
+#define HWLOC_SLEVEL_OSDEV 2
+#define HWLOC_SLEVEL_MISC 3
+  /* order must match negative depth, it's asserted in setup_defaults() */
+#define HWLOC_SLEVEL_FROM_DEPTH(x) (HWLOC_TYPE_DEPTH_BRIDGE-(x))
+#define HWLOC_SLEVEL_TO_DEPTH(x) (HWLOC_TYPE_DEPTH_BRIDGE-(x))
+  struct hwloc_special_level_s {
+    unsigned nbobjs;
+    struct hwloc_obj **objs;
+    struct hwloc_obj *first, *last; /* Temporarily used while listing object before building the objs array */
+  } slevels[HWLOC_NR_SLEVELS];
 
   int pci_nonzero_domains;
   int need_pci_belowroot_apply_locality;
