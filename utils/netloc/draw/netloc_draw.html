@@ -8,9 +8,10 @@
     $HEADER$
  -->
 
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <script type="text/javascript" src="visdist/vis.js"></script>
     <link href="visdist/vis.css" rel="stylesheet" type="text/css"/>
     <script type="text/javascript" src="html2canvas/html2canvas.js"></script>
@@ -24,35 +25,32 @@
     </style>
 
     <title>Network topology</title>
+  </head>
+  <body>
     <input type="file" id="files" name="files[]"/>
-    <select id="selectPartition" onchange="draw()" selected="true">
-        <option value="" disabled=true>Choose a partition</option>
+    <select id="selectPartition">
+      <option value="" disabled="disabled">Choose a partition</option>
     </select>
-    <select id="selectColors" onchange="nodeColors()" selected="true">
-        <option value="" disabled=true>Choose a color mode</option>
+    <select id="selectColors">
+      <option value="" disabled="disabled">Choose a color mode</option>
     </select>
-    <input id="reload" type="button" value="Reload" onclick="draw();" />
-    <input id="searchValue" type="text" name="searchValue"
-                                        onkeydown="if (event.keyCode == 13) search();"/>
-    <select id="selectSearch" selected="true">
-        <option value="" disabled=true>Choose a search field</option>
-        <option value="hostname"      >Hostname</option>
-        <option value="id"            >Id</option>
-        <option value="type"          >Type</option>
-        <option value="part"          >Partition</option>
-        <option value="topo"          >Hwloc topologies</option>
-        <option value="title"         >Description</option>
+    <input id="reload" type="button" value="Reload"/>
+    <input id="searchValue" type="text" name="searchValue"/>
+    <select id="selectSearch">
+      <option value="" disabled="disabled">Choose a search field</option>
+      <option value="hostname"      >Hostname</option>
+      <option value="id"            >Id</option>
+      <option value="type"          >Type</option>
+      <option value="part"          >Partition</option>
+      <option value="topo"          >Hwloc topologies</option>
+      <option value="title"         >Description</option>
     </select>
-    <input id="search" type="button" value="Search" onclick="search();" />
-    <input id="fit" type="button" value="Fit" onclick="network.fit({animation: true})" />
-    <input id="imageCreate" type="button" value="Generate image link" onclick="prepareImage();"/>
+    <input id="search" type="button" value="Search"/>
+    <input id="fit" type="button" value="Fit"/>
+    <input id="imageCreate" type="button" value="Generate image link"/>
     <span id="imageLink"></span>
-    <input id="removeSel" type="button" value="Remove selected" onclick="network.deleteSelected();"/>
-    <input id="expandSel" type="button" value="Expand selected" onclick="expandSelected();"/>
-
-
-</head>
-<body>
+    <input id="removeSel" type="button" value="Remove selected"/>
+    <input id="expandSel" type="button" value="Expand selected"/>
 
     <div id="mynetwork"></div>
     <span id="removeButton"></span>
@@ -101,8 +99,6 @@ function handleFileSelect(evt) {
     fr.readAsText(files[0]);
 }
 
-document.getElementById('files').addEventListener('change', handleFileSelect, false);
-
 function renameKey(obj, newkey, oldkey)
 {
     return obj.map(function(d) { d[newkey] = d[oldkey]; delete d[oldkey]; return d; });
@@ -110,9 +106,7 @@ function renameKey(obj, newkey, oldkey)
 
 function getNeighbours(node)
 {
-    return node.edges.map(function(e) {
-        return edges.get(e).to;
-    });
+    return node.edges.map(function(e) { return edges.get(e).to; }).filter(function(n) { return shownNodes.get(n); });
 }
 
 function palette(size) {
@@ -463,11 +457,12 @@ function showSelectedEdges()
             });
         });
     }
-    document.getElementById('description').innerHTML += infos;
+    document.getElementById('desc_selected').innerHTML += infos;
 }
 
 function showSelectedNodes()
 {
+    document.getElementById('desc_selected').innerHTML = '';
     var infos = "";
 
     var edgeIds = network.getSelectedEdges();
@@ -532,7 +527,7 @@ function showSelectedNodes()
     if (nodeIds.length > 1) {
         var s = [];
         similarNeighbours.forEach(function(n) {
-            s.push('\t' + shownNodes.get(n).title + '\n');
+            s.push('\t' + nodes.get(n).title + '\n');
         });
         infos +=
             '<h2>Similar neighbours</h2>' +
@@ -551,7 +546,7 @@ function showSelectedNodes()
         });
     }
 
-    document.getElementById('description').innerHTML += infos;
+    document.getElementById('desc_selected').innerHTML += infos;
 }
 
 function search()
@@ -643,7 +638,8 @@ function draw()
         '<h2>Partitions</h2>' +
         '<ul><li>' + partitions.join('</li><li>') + '</li></ul>' +
         '<h2>Hwloc topologies</h2>' +
-        '<ul><li>' + shownTopos.sort().join('</li><li>') + '</li></ul>';
+        '<ul><li>' + shownTopos.sort().join('</li><li>') + '</li></ul>' +
+        '<div id="desc_selected"></div>';
     document.getElementById('description').innerHTML = description;
 
     // create a network
@@ -731,19 +727,22 @@ function expandSelected()
         neighbours = getNeighbours(node);
 
         /* Physics enabled for neighbours */
-        neighbours.forEach(function(n) {
-            printWithTime(n + " -> physics");
-            shownNodes.update({id: n, physics: true, fixed: true});
+        neighbours.forEach(function(nbg) {
+            printWithTime(nbg + " -> physics");
+            shownNodes.update({id: nbg, physics: true, fixed: true});
         });
 
         /* The selected nodes are removed (then replaced) */
-        shownNodes.remove(node);
+        printWithTime(shownNodes.remove(node) + " -> removed");
+        var selectedNodes = [];
         node.sub.forEach(function(s) {
             subnode = nodes.get(s);
             subnode.physics = false;
             shownNodes.add(subnode);
-            network.selectNodes([subnode.id]);
+            selectedNodes.push(subnode.id);
         });
+        network.selectNodes(selectedNodes);
+        showSelectedNodes();
     });
 }
 
@@ -837,7 +836,17 @@ function removeBlanks (canvas) {
     return newCanvas.toDataURL("image/png");
 };
 
-
+/* Add Event Listeners */
+document.getElementById("files").addEventListener("change", handleFileSelect);
+document.getElementById("selectPartition").addEventListener("change", draw);
+document.getElementById("selectColors").addEventListener("change", nodeColors);
+document.getElementById("reload").addEventListener("click", draw);
+document.getElementById("searchValue").addEventListener("keydown", function(event){if(event.keyCode==13)search();});
+document.getElementById("search").addEventListener("click", search);
+document.getElementById("fit").addEventListener("click", function(){network.fit({animation:true});});
+document.getElementById("imageCreate").addEventListener("click", prepareImage);
+document.getElementById("removeSel").addEventListener("click", function(){network.deleteSelected();});
+document.getElementById("expandSel").addEventListener("click", expandSelected);
 </script>
 
 </body>
