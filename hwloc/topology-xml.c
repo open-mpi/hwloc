@@ -764,13 +764,19 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	if (!strcasecmp(attrvalue, "Cache")) {
 	  obj->type = _HWLOC_OBJ_CACHE_OLD; /* will be fixed below */
 	  attribute_less_cache = 1;
-	} else
+	} else {
+	  if (hwloc__xml_verbose())
+	    fprintf(stderr, "unrecognized object type string %s\n", attrvalue);
 	  goto error_with_object;
+	}
       }
     } else {
       /* type needed first */
-      if (obj->type == HWLOC_OBJ_TYPE_NONE)
+      if (obj->type == HWLOC_OBJ_TYPE_NONE) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "object attribute %s found before type\n", attrname);
 	goto error_with_object;
+      }
       hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue, state);
     }
   }
@@ -830,23 +836,35 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (!obj->cpuset != !obj->allowed_cpuset
       || !obj->cpuset != !obj->complete_cpuset) {
     /* has some cpuset without others */
-    if (obj->type == HWLOC_OBJ_GROUP)
+    if (obj->type == HWLOC_OBJ_GROUP) {
       ignored = 1;
-    else
+    } else {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "invalid object %s P#%u with some missing cpusets\n",
+		hwloc_type_name(obj->type), obj->os_index);
       goto error_with_object;
+    }
   } else if (!obj->nodeset != !obj->allowed_nodeset
 	     || !obj->nodeset != !obj->complete_nodeset) {
     /* has some nodeset withot others */
-    if (obj->type == HWLOC_OBJ_GROUP)
+    if (obj->type == HWLOC_OBJ_GROUP) {
       ignored = 1;
-    else
+    } else {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "invalid object %s P#%u with some missing nodesets\n",
+		hwloc_type_name(obj->type), obj->os_index);
       goto error_with_object;
+    }
   } else if (obj->nodeset && !obj->cpuset) {
     /* has nodesets without cpusets (the contrary is allowed in pre-2.0) */
-    if (obj->type == HWLOC_OBJ_GROUP)
+    if (obj->type == HWLOC_OBJ_GROUP) {
       ignored = 1;
-    else
+    } else {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "invalid object %s P#%u with either cpuset or nodeset missing\n",
+		hwloc_type_name(obj->type), obj->os_index);
       goto error_with_object;
+    }
   }
 
   /* check NUMA nodes */
