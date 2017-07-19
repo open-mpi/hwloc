@@ -76,6 +76,37 @@ var network;
 var description = "";
 var lastColorMode = "bandwidth";
 
+function filterEdge(e) {
+    return (shownNodes.get(e.to) && shownNodes.get(e.from));
+}
+
+function updateDescription() {
+    /* update the desciption of the graph */
+    var num_hosts = shownNodes.get({filter: function(n) {
+        return n.type == "host";
+    }}).length;
+    var num_switches = shownNodes.length-num_hosts;
+    var enabledTopos = shownNodes.distinct("topo");
+    var shownTopos = enabledTopos.reduce(function(a, e) {
+        if (e != -1)
+            a.push(topos[e]);
+        return a;
+    }, []);
+
+    description =
+        '<h2>Stats</h2>' +
+        shownNodes.length + ' nodes\n' +
+        shownEdges.length + ' edges\n' +
+        num_hosts + ' hosts\n' +
+        num_switches + ' switches\n' +
+        '<h2>Partitions</h2>' +
+        '<ul><li>' + partitions.join('</li><li>') + '</li></ul>' +
+        '<h2>Hwloc topologies</h2>' +
+        '<ul><li>' + shownTopos.sort().join('</li><li>') + '</li></ul>' +
+        '<div id="desc_selected"></div>';
+    document.getElementById('description').innerHTML = description;
+}
+
 function printWithTime(msg) {
     if (typeof printWithTime.lastTime == 'undefined' ) {
         printWithTime.lastTime = Math.floor(new Date().getTime()/1000);
@@ -106,7 +137,11 @@ function renameKey(obj, newkey, oldkey)
 
 function getNeighbours(node)
 {
-    return node.edges.map(function(e) { return edges.get(e).to; }).filter(function(n) { return shownNodes.get(n); });
+    return node.edges.map(function(e) {
+        return edges.get(e).to;
+    }).filter(function(n) {
+        return shownNodes.get(n);
+    });
 }
 
 function palette(size) {
@@ -435,12 +470,12 @@ function showSelectedEdges()
     infos += '<h1>' + edgeIds.length + ' edges selected</h1>';
     if (!nodeIds.length) {
         var neighbours = [];
-        edgeIds.forEach(function(edgeId) {
+        edgeIds.forEach(function(edgeId, id) {
             var edge = edges.get(edgeId);
             var dest = nodes.get(edge.to);
             var src = nodes.get(edge.from);
 
-            infos = '<h2>' + edge.title + '</h2>' +
+            infos += '<h2>edge #' + (id+1) + '</h2>' +
                 'ID: ' + edge.id + '\n' +
                 'Partitions: ' + edge.part.map(function(p){return partitions[p]})
                 .join(', ') + '\n' +
@@ -577,16 +612,15 @@ function draw()
 
     var subEdges;
     if (partition == -1) { // for "All"
-        // TODO improve
-        subEdges = new vis.DataSet(edges.get());
-        shownNodes = new vis.DataSet(subNodes.get());
-
+        shownNodes = subNodes;
+        subEdges = new vis.DataSet(edges.get({filter: filterEdge}));
     } else {
-        subEdges = new vis.DataSet(edges.get({filter: function (e) {
-            return (e.part.indexOf(partition) > -1);
+        shownNodes = new vis.DataSet(subNodes.get({filter: function (n) {
+            return (n.part.indexOf(partition) > -1);
         }}));
-        shownNodes = new vis.DataSet(subNodes.get({filter: function (e) {
-            return (e.part.indexOf(partition) > -1);
+        subEdges = new vis.DataSet(edges.get({filter: function (e) {
+            return (shownNodes.get(e.to) && shownNodes.get(e.from)
+                    && e.part.indexOf(partition) > -1);
         }}));
     }
     printWithTime("subdatasets created");
@@ -594,7 +628,10 @@ function draw()
     /* Keep edges in only one way */
     shownEdges = new vis.DataSet(subEdges.get({filter: function (e) {
         //return (subNodes.get(e.from) && subNodes.get(e.from).type != "host"); // DEBUG XXX
-        if (e.from < e.to) {
+        /* We'd rather keep the edge where e.from > e.to, so we would keep the
+           ones from virtual nodes which would ease the expansion.
+         */
+        if (e.from > e.to) {
             if (!subEdges.get(e.reverse)) {
                 e.arrows = {to: true};
             }
@@ -617,30 +654,7 @@ function draw()
     else
         selectColor.selectedIndex = 1;
 
-    /* update the desciption of the graph */
-    var num_hosts = shownNodes.get({filter: function(n) {
-        return n.type == "host";
-    }}).length;
-    var num_switches = shownNodes.length-num_hosts;
-    var enabledTopos = shownNodes.distinct("topo");
-    var shownTopos = enabledTopos.reduce(function(a, e) {
-        if (e != -1)
-            a.push(topos[e]);
-        return a;
-    }, []);
-
-    description =
-        '<h2>Stats</h2>' +
-        shownNodes.length + ' nodes\n' +
-        shownEdges.length + ' edges\n' +
-        num_hosts + ' hosts\n' +
-        num_switches + ' switches\n' +
-        '<h2>Partitions</h2>' +
-        '<ul><li>' + partitions.join('</li><li>') + '</li></ul>' +
-        '<h2>Hwloc topologies</h2>' +
-        '<ul><li>' + shownTopos.sort().join('</li><li>') + '</li></ul>' +
-        '<div id="desc_selected"></div>';
-    document.getElementById('description').innerHTML = description;
+    updateDescription();
 
     // create a network
     var container = document.getElementById('mynetwork');
@@ -733,17 +747,20 @@ function expandSelected()
         });
 
         /* The selected nodes are removed (then replaced) */
+        shownEdges.remove(node.edges);
         printWithTime(shownNodes.remove(node) + " -> removed");
         var selectedNodes = [];
         node.sub.forEach(function(s) {
             subnode = nodes.get(s);
             subnode.physics = false;
             shownNodes.add(subnode);
+            shownEdges.add(edges.get(subnode.edges), {filter: filterEdge});
             selectedNodes.push(subnode.id);
         });
         network.selectNodes(selectedNodes);
         showSelectedNodes();
     });
+    updateDescription();
 }
 
 function mergeNode(node)
