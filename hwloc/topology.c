@@ -626,6 +626,11 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   hwloc_obj_t child;
   int err = 0;
 
+  /* either we're duplicating to an already allocated new root, which has no newparent,
+   * or we're duplicating to a non-yet allocated new non-root, which will have a newparent.
+   */
+  assert(!newparent == !!newobj);
+
   if (!newobj) {
     newobj = hwloc_alloc_setup_object(newtopology, src->type, src->os_index);
     if (!newobj)
