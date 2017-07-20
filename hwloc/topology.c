@@ -3308,12 +3308,39 @@ void * hwloc_topology_get_userdata(struct hwloc_topology * topology)
  ****************/
 
 static void
+hwloc__check_child_siblings(hwloc_obj_t parent, hwloc_obj_t *array,
+			    unsigned arity, unsigned i,
+			    hwloc_obj_t child, hwloc_obj_t prev)
+{
+  assert(child->parent == parent);
+
+  assert(child->sibling_rank == i);
+  if (array)
+    assert(child == array[i]);
+
+  if (prev)
+    assert(prev->next_sibling == child);
+  assert(child->prev_sibling == prev);
+
+  if (!i)
+    assert(child->prev_sibling == NULL);
+  else
+    assert(child->prev_sibling != NULL);
+
+  if (i == arity-1)
+    assert(child->next_sibling == NULL);
+  else
+    assert(child->next_sibling != NULL);
+}
+
+static void
 hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj);
 
 /* check children between a parent object */
 static void
 hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
 {
+  hwloc_obj_t child, prev;
   unsigned j;
 
   if (!parent->arity) {
@@ -3329,22 +3356,18 @@ hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
   assert(parent->last_child);
 
   /* sibling checks */
-  for(j=0; j<parent->arity; j++) {
-    hwloc_obj_t child = parent->children[j];
-    assert(child->parent == parent);
-    assert(child->sibling_rank == j);
-    if (j)
-      assert(child->prev_sibling == parent->children[j-1]);
-    else
-      assert(!child->prev_sibling);
-    if (j == parent->arity-1)
-      assert(!child->next_sibling);
-    else
-      assert(child->next_sibling == parent->children[j+1]);
+  for(prev = NULL, child = parent->first_child, j = 0;
+      child;
+      prev = child, child = child->next_sibling, j++) {
     assert(child->depth > parent->depth);
+    /* check siblings */
+    hwloc__check_child_siblings(parent, parent->children, parent->arity, j, child, prev);
     /* recurse */
     hwloc__check_object(topology, child);
   }
+  /* check arity */
+  assert(j == parent->arity);
+
   assert(parent->first_child == parent->children[0]);
   assert(parent->last_child == parent->children[parent->arity-1]);
 
@@ -3430,16 +3453,8 @@ hwloc__check_io_children(hwloc_topology_t topology, hwloc_obj_t parent)
       prev = child, child = child->next_sibling, j++) {
     /* all children must be I/O */
     assert(hwloc_obj_type_is_io(child->type));
-
     /* check siblings */
-    assert(child->parent == parent);
-    assert(child->sibling_rank == j);
-    if (prev)
-      assert(prev->next_sibling == child);
-    assert(child->prev_sibling == prev);
-    if (j == parent->io_arity-1)
-      assert(child->next_sibling == NULL);
-
+    hwloc__check_child_siblings(parent, NULL, parent->io_arity, j, child, prev);
     /* only I/O and Misc children, recurse */
     assert(!child->first_child);
     hwloc__check_object(topology, child);
@@ -3467,16 +3482,8 @@ hwloc__check_misc_children(hwloc_topology_t topology, hwloc_obj_t parent)
       prev = child, child = child->next_sibling, j++) {
     /* all children must be Misc */
     assert(child->type == HWLOC_OBJ_MISC);
-
     /* check siblings */
-    assert(child->parent == parent);
-    assert(child->sibling_rank == j);
-    if (prev)
-      assert(prev->next_sibling == child);
-    assert(child->prev_sibling == prev);
-    if (j == parent->misc_arity-1)
-      assert(child->next_sibling == NULL);
-
+    hwloc__check_child_siblings(parent, NULL, parent->misc_arity, j, child, prev);
     /* only Misc children, recurse */
     assert(!child->first_child);
     assert(!child->io_first_child);
