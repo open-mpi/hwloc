@@ -673,6 +673,9 @@ function draw()
     network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
+        params.nodes.forEach(function(nodeId) {
+            shownNodes.update({id: nodeId, fixed: false});
+        });
         showSelectedNodes();
         showSelectedEdges();
     });
@@ -701,18 +704,23 @@ function draw()
 
             var edge = shownEdges.get(edgeId);
             var node = shownNodes.get(edge.to);
-            if (node.edges.length <= 1) {
+            if (1 >= node.edges.length) {
                 nodesWithPhysics.push(edge.to);
                 shownNodes.update({id: edge.to, physics: true});
+            }
+            var node = shownNodes.get(edge.from);
+            if (1 >= node.edges.length) {
+                nodesWithPhysics.push(edge.from);
+                shownNodes.update({id: edge.from, physics: true});
             }
         });
     });
     network.on("dragEnd", function (params) {
-        edgesWithPhysics.forEach(function(edgesWithPhysic) {
-            shownEdges.update({id: edgesWithPhysic, physics: false});
+        edgesWithPhysics.forEach(function(edgeWithPhysic) {
+            shownEdges.update({id: edgeWithPhysic, physics: false});
         });
-        nodesWithPhysics.forEach(function(nodesWithPhysic) {
-            shownNodes.update({id: nodesWithPhysic, physics: false});
+        nodesWithPhysics.forEach(function(nodeWithPhysic) {
+            shownNodes.update({id: nodeWithPhysic, physics: false});
         });
     });
     }
