@@ -3531,6 +3531,16 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj)
   }
 
   /* check cache type/depth vs type */
+  if (hwloc_obj_type_is_cache(obj->type)) {
+    if (hwloc_obj_type_is_icache(obj->type))
+      assert(obj->attr->cache.type == HWLOC_OBJ_CACHE_INSTRUCTION);
+    else if (hwloc_obj_type_is_dcache(obj->type))
+      assert(obj->attr->cache.type == HWLOC_OBJ_CACHE_DATA
+	     || obj->attr->cache.type == HWLOC_OBJ_CACHE_UNIFIED);
+    else
+      assert(0);
+    assert(hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type) == obj->type);
+  }
 
   /* check children */
   hwloc__check_children(topology, obj);
