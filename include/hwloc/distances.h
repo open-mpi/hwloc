@@ -40,7 +40,9 @@ extern "C" {
  */
 struct hwloc_distances_s {
   unsigned nbobjs;		/**< \brief Number of objects described by the distance matrix. */
-  hwloc_obj_t *objs;		/**< \brief Array of objects described by the distance matrix. */
+  hwloc_obj_t *objs;		/**< \brief Array of objects described by the distance matrix.
+				 * These objects are not in any particular order.
+				 */
   unsigned long kind;		/**< \brief OR'ed set of ::hwloc_distances_kind_e. */
   hwloc_uint64_t *values;	/**< \brief Matrix of distances between objects, stored as a one-dimension array.
 				 *
