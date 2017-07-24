@@ -3815,10 +3815,10 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     /* mark the end of the prefix */
     prefix = str;
     end = dot;
-    while (end[-1] == ' ' || end[-1] == '	') end--; /* need a strrspn() */
+    while (end[-1] == ' ' || end[-1] == '\t') end--; /* need a strrspn() */
     *end = 0;
     /* find beginning of value, its end is already marked */
-    value = dot+1 + strspn(dot+1, " 	");
+    value = dot+1 + strspn(dot+1, " \t");
 
     /* defines for parsing numbers */
 #   define getprocnb_begin(field, var)					\
@@ -4210,7 +4210,7 @@ hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
     if (hwloc_read_path_by_length("/proc/cpuinfo", line, sizeof(line), data->root_fd) < 0)
       return -1;
 
-    if (strncmp(line, "cpu	", 4))
+    if (strncmp(line, "cpu\t", 4))
       return -1;
 
     if (strstr(line, "Fujitsu SPARC64 VIIIfx"))
