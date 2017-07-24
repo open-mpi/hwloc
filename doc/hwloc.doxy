@@ -3249,6 +3249,17 @@ For instance, to check whether the hwloc version is at least 1.10, you should us
 #endif
 \endverbatim
 
+For supporting older releases that do not have <tt>HWLOC_OBJ_NUMANODE</tt>
+and <tt>HWLOC_OBJ_PACKAGE</tt> yet, you may use:
+
+\verbatim
+#include <hwloc.h>
+#if HWLOC_API_VERSION < 0x00010b00
+#define HWLOC_OBJ_NUMANODE HWLOC_OBJ_NODE
+#define HWLOC_OBJ_PACKAGE HWLOC_OBJ_SOCKET
+#endif
+\endverbatim
+
 The hwloc interface will be deeply modified in release 2.0
 to fix several issues of the 1.x interface.
 The ABI will be broken, which means
