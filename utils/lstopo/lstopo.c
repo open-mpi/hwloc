@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <assert.h>
-#ifdef HAVE_TIME_T
+#ifdef HAVE_TIME_H
 #include <time.h>
 #endif
 
