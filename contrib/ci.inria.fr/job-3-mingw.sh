@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2015 Inria.  All rights reserved.
+# Copyright © 2012-2017 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -48,6 +48,7 @@ while test $# -gt 0; do
   shift
 done
 
+oldPWD=$PWD
 oldPATH=$PATH
 
 if test x$dotar = x1; then
@@ -72,14 +73,22 @@ fi
 
 if test x$dobuild32 = x1; then
 
+  echo "*** Switching to MinGW32 ***"
+  set +xe # cannot keep set -e while sourcing /etc/profile
+  MSYSTEM=MINGW32 . /etc/profile || true
+  set -xe
+  cd $oldPWD
+
+  # for MS 'lib' program in dolib.c
+  export PATH=$PATH:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE"
+
   mkdir ${basename}/build32 || true
   cd ${basename}/build32
 
-  export PATH=/c/Builds:/c/Builds/mingw32/bin/:/c/Builds/mingw64/bin/:/c/Builds/mingw32/i686-w64-mingw32/lib:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE":$oldPATH
   if test x$doconf = x1; then
     winball=hwloc-win32-build-${version}
     prefix=${PWD}/../${winball}
-    ../configure --prefix=$prefix --enable-static --host=i686-w64-mingw32 CC_FOR_BUILD=x86_64-w64-mingw32-gcc $confopts
+    ../configure --prefix=$prefix --enable-static $confopts
   fi
 
   make
@@ -111,14 +120,22 @@ fi
 
 if test x$dobuild64 = x1; then
 
+  echo "*** Switching to MinGW64 ***"
+  set +xe # cannot keep set -e while sourcing /etc/profile
+  MSYSTEM=MINGW64 . /etc/profile || true
+  set -xe
+  cd $oldPWD
+
+  # for MS 'lib' program in dolib.c
+  export PATH=$PATH:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE"
+
   mkdir ${basename}/build64 || true
   cd ${basename}/build64
 
-  export PATH=/c/Builds:/c/Builds/mingw64/bin/:/c/Builds/mingw32/i686-w64-mingw32/lib/:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE":$oldPATH
   if test x$doconf = x1; then
     winball=hwloc-win64-build-${version}
     prefix=${PWD}/../${winball}
-    ../configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32 $confopts
+    ../configure --prefix=$prefix --enable-static $confopts
   fi
 
   make
