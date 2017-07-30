@@ -488,6 +488,7 @@ main (int argc, char *argv[])
   putenv("HWLOC_XML_VERBOSE=1");
   putenv("HWLOC_SYNTHETIC_VERBOSE=1");
 
+  /* Use localized time prints, and utf-8 characters in the ascii output */
 #ifdef HAVE_SETLOCALE
   setlocale(LC_ALL, "");
 #endif
