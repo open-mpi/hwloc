@@ -41,7 +41,9 @@ extern "C" {
 struct hwloc_distances_s {
   unsigned nbobjs;		/**< \brief Number of objects described by the distance matrix. */
   hwloc_obj_t *objs;		/**< \brief Array of objects described by the distance matrix.
-				 * These objects are not in any particular order.
+				 * These objects are not in any particular order,
+				 * see hwloc_distances_obj_index() and hwloc_distances_obj_pair_values()
+				 * for easy ways to find objects in this array and their corresponding values.
 				 */
   unsigned long kind;		/**< \brief OR'ed set of ::hwloc_distances_kind_e. */
   hwloc_uint64_t *values;	/**< \brief Matrix of distances between objects, stored as a one-dimension array.
@@ -144,6 +146,49 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 /** \brief Release a distance structure previously returned by hwloc_distances_get(). */
 HWLOC_DECLSPEC void
 hwloc_distances_release(hwloc_topology_t topology, struct hwloc_distances_s *distances);
+
+/** @} */
+
+
+
+/** \defgroup hwlocality_distances_consult Helpers for consulting distances structures
+ * @{
+ */
+
+/** \brief Find the index of an object in a distances structure.
+ *
+ * \return -1 if object \p obj is not involved in structure \p distances.
+ */
+static __hwloc_inline int
+hwloc_distances_obj_index(struct hwloc_distances_s *distances, hwloc_obj_t obj)
+{
+  unsigned i;
+  for(i=0; i<distances->nbobjs; i++)
+    if (distances->objs[i] == obj)
+      return (int)i;
+  return -1;
+}
+
+/** \brief Find the values between two objects in a distances structure.
+ *
+ * The distance from \p obj1 to \p obj2 is stored in the value pointed by
+ * \p value1to2 and reciprocally.
+ *
+ * \return -1 if object \p obj1 or \p obj2 is not involved in structure \p distances.
+ */
+static __hwloc_inline int
+hwloc_distances_obj_pair_values(struct hwloc_distances_s *distances,
+				hwloc_obj_t obj1, hwloc_obj_t obj2,
+				hwloc_uint64_t *value1to2, hwloc_uint64_t *value2to1)
+{
+  int i1 = hwloc_distances_obj_index(distances, obj1);
+  int i2 = hwloc_distances_obj_index(distances, obj2);
+  if (i1 < 0 || i2 < 0)
+    return -1;
+  *value1to2 = distances->values[i1 * distances->nbobjs + i2];
+  *value2to1 = distances->values[i2 * distances->nbobjs + i1];
+  return 0;
+}
 
 /** @} */
 

@@ -376,6 +376,8 @@ extern "C" {
 #define hwloc_distances_get_by_depth HWLOC_NAME(distances_get_by_depth)
 #define hwloc_distances_get_by_type HWLOC_NAME(distances_get_by_type)
 #define hwloc_distances_release HWLOC_NAME(distances_release)
+#define hwloc_distances_obj_index HWLOC_NAME(distances_obj_index)
+#define hwloc_distances_obj_pair_values HWLOC_NAME(distances_pair_values)
 
 #define hwloc_distances_add_flag_e HWLOC_NAME(distances_add_flag_e)
 #define HWLOC_DISTANCES_ADD_FLAG_GROUP HWLOC_NAME_CAPS(DISTANCES_ADD_FLAG_GROUP)
