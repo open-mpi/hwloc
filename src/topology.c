@@ -1287,7 +1287,7 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
 static void
 append_iodevs(hwloc_topology_t topology, hwloc_obj_t obj)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   /* make sure we don't have remaining stale pointers from a previous load */
   obj->next_cousin = NULL;
@@ -1325,7 +1325,7 @@ append_iodevs(hwloc_topology_t topology, hwloc_obj_t obj)
     }
   }
 
-  for_each_child_safe(child, obj, temp)
+  for_each_child(child, obj)
     append_iodevs(topology, child);
 }
 
@@ -1346,14 +1346,14 @@ static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
 static void
 propagate_total_memory(hwloc_obj_t obj)
 {
-  hwloc_obj_t *temp, child;
+  hwloc_obj_t child;
   unsigned i;
 
   /* reset total before counting local and children memory */
   obj->memory.total_memory = 0;
 
-  /* Propagate memory up */
-  for_each_child_safe(child, obj, temp) {
+  /* Propagate memory up. */
+  for_each_child(child, obj) {
     propagate_total_memory(child);
     obj->memory.total_memory += child->memory.total_memory;
   }
@@ -1374,7 +1374,7 @@ propagate_total_memory(hwloc_obj_t obj)
 static void
 collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   if (sys) {
     /* We are already given a pointer to a system object */
@@ -1389,7 +1389,7 @@ collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     }
   }
 
-  for_each_child_safe(child, obj, temp)
+  for_each_child(child, obj)
     collect_proc_cpuset(child, sys);
 }
 
@@ -1398,7 +1398,7 @@ collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 static void
 propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   if (obj->cpuset) {
     if (sys) {
@@ -1469,7 +1469,7 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     }
   }
 
-  for_each_child_safe(child, obj, temp)
+  for_each_child(child, obj)
     propagate_unused_cpuset(child, sys);
 }
 
@@ -1477,7 +1477,7 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 static void
 add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   /* I/O devices (and their children) have no sets */
   if (hwloc_obj_type_is_io(obj->type))
@@ -1513,7 +1513,7 @@ add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
     assert(!obj->allowed_nodeset);
   }
 
-  for_each_child_safe(child, obj, temp)
+  for_each_child(child, obj)
     add_default_object_sets(child, obj->cpuset != NULL);
 }
 
@@ -1563,7 +1563,7 @@ hwloc_fill_object_sets(hwloc_obj_t obj)
 static void
 propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
   hwloc_bitmap_t parent_nodeset = NULL;
   int parent_weight = 0;
 
@@ -1584,7 +1584,7 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
       obj->nodeset = hwloc_bitmap_alloc();
   }
 
-  for_each_child_safe(child, obj, temp) {
+  for_each_child(child, obj) {
     /* don't propagate nodesets in I/O objects, keep them NULL */
     if (hwloc_obj_type_is_io(child->type))
       return;
@@ -1617,9 +1617,9 @@ static void
 propagate_nodesets(hwloc_obj_t obj)
 {
   hwloc_bitmap_t mask = hwloc_bitmap_alloc();
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
-  for_each_child_safe(child, obj, temp) {
+  for_each_child(child, obj) {
     /* don't propagate nodesets in I/O objects, keep them NULL */
     if (hwloc_obj_type_is_io(child->type))
       continue;
@@ -1671,7 +1671,7 @@ propagate_nodesets(hwloc_obj_t obj)
 static void
 remove_unused_sets(hwloc_obj_t obj)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   if (obj->cpuset) {
     hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->online_cpuset);
@@ -1690,7 +1690,7 @@ remove_unused_sets(hwloc_obj_t obj)
       obj->memory.page_types[i].count = 0;
   }
 
-  for_each_child_safe(child, obj, temp)
+  for_each_child(child, obj)
     remove_unused_sets(child);
 }
 
@@ -1815,9 +1815,9 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
 /* adjust object nodesets accordingly the given droppednodeset
  */
 static void
-restrict_object_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_nodeset_t droppednodeset)
+restrict_object_nodeset(hwloc_topology_t topology, hwloc_obj_t obj, hwloc_nodeset_t droppednodeset)
 {
-  hwloc_obj_t obj = *pobj, child, *pchild;
+  hwloc_obj_t child;
 
   /* if this object isn't modified, don't bother looking at children */
   if (obj->complete_nodeset && !hwloc_bitmap_intersects(obj->complete_nodeset, droppednodeset))
@@ -1830,8 +1830,8 @@ restrict_object_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_node
   if (obj->allowed_nodeset)
     hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, droppednodeset);
 
-  for_each_child_safe(child, obj, pchild)
-    restrict_object_nodeset(topology, pchild, droppednodeset);
+  for_each_child(child, obj)
+    restrict_object_nodeset(topology, obj, droppednodeset);
 }
 
 /* we don't want to merge groups that were inserted explicitly with the custom interface */
@@ -3078,7 +3078,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_bitmap_not(droppedcpuset, cpuset);
   restrict_object(topology, flags, &topology->levels[0][0], droppedcpuset, droppednodeset, 0 /* root cannot be removed */);
   /* update nodesets according to dropped nodeset */
-  restrict_object_nodeset(topology, &topology->levels[0][0], droppednodeset);
+  restrict_object_nodeset(topology, topology->levels[0][0], droppednodeset);
 
   hwloc_bitmap_free(droppedcpuset);
   hwloc_bitmap_free(droppednodeset);
