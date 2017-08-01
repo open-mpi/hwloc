@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2016 Inria.  All rights reserved.
+ * Copyright © 2011-2017 Inria.  All rights reserved.
  * Copyright © 2011 Université Bordeaux.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -118,7 +118,7 @@ int main(void)
   }
   err = hwloc_distances_add(topology, 3, nodes, node_distances,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_FLAG_GROUP);
+			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   for(i=0; i<6; i++) {
@@ -128,7 +128,7 @@ int main(void)
   }
   err = hwloc_distances_add(topology, 6, cores, core_distances,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_FLAG_GROUP);
+			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   /* entire topology */

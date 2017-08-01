@@ -94,7 +94,7 @@ int main(void)
     values[i+4*i] = 1;
   err = hwloc_distances_add(topology, 4, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_FLAG_GROUP);
+			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
@@ -143,7 +143,7 @@ int main(void)
     values[i+16*i] = 1;
   err = hwloc_distances_add(topology, 16, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_FLAG_GROUP);
+			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
@@ -185,7 +185,7 @@ int main(void)
     values[i+4*i] = 7;
   err = hwloc_distances_add(topology, 4, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_FLAG_GROUP);
+			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);

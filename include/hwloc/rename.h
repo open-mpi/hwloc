@@ -377,9 +377,9 @@ extern "C" {
 #define hwloc_distances_get_by_type HWLOC_NAME(distances_get_by_type)
 #define hwloc_distances_release HWLOC_NAME(distances_release)
 
-#define hwloc_distances_flag_e HWLOC_NAME(distances_flag_e)
-#define HWLOC_DISTANCES_FLAG_GROUP HWLOC_NAME_CAPS(DISTANCES_FLAG_GROUP)
-#define HWLOC_DISTANCES_FLAG_GROUP_INACCURATE HWLOC_NAME_CAPS(DISTANCES_FLAG_GROUP_INACCURATE)
+#define hwloc_distances_add_flag_e HWLOC_NAME(distances_add_flag_e)
+#define HWLOC_DISTANCES_ADD_FLAG_GROUP HWLOC_NAME_CAPS(DISTANCES_ADD_FLAG_GROUP)
+#define HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE HWLOC_NAME_CAPS(DISTANCES_ADD_FLAG_GROUP_INACCURATE)
 
 #define hwloc_distances_add HWLOC_NAME(distances_add)
 #define hwloc_distances_remove HWLOC_NAME(distances_remove)

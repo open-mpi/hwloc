@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2016 Inria.  All rights reserved.
+ * Copyright © 2011-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -35,7 +35,7 @@ int main(void)
   values[6] = 4; values[7] = 2; values[8] = 1;
   err = hwloc_distances_add(topology, 3, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_FLAG_GROUP);
+			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
   /* 2 groups at depth 1 */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP);
@@ -72,7 +72,7 @@ int main(void)
   values[20] = 4; values[21] = 4; values[22] = 4; values[23] = 2; values[24] = 1;
   err = hwloc_distances_add(topology, 5, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_FLAG_GROUP);
+			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
   /* 1 node at depth 1 */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
@@ -143,7 +143,7 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   assert(!hwloc_distances_add(topology, 16, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
   width = hwloc_get_nbobjs_by_depth(topology, 0);
@@ -169,7 +169,7 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   assert(!hwloc_distances_add(topology, 16, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP|HWLOC_DISTANCES_FLAG_GROUP_INACCURATE));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
   hwloc_topology_destroy(topology);
@@ -182,7 +182,7 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   assert(!hwloc_distances_add(topology, 16, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP|HWLOC_DISTANCES_FLAG_GROUP_INACCURATE));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
   hwloc_topology_destroy(topology);
@@ -194,7 +194,7 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   assert(!hwloc_distances_add(topology, 16, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP /* no inaccurate flag, cannot group */));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP /* no inaccurate flag, cannot group */));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
   hwloc_topology_destroy(topology);
@@ -207,7 +207,7 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   assert(!hwloc_distances_add(topology, 16, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP|HWLOC_DISTANCES_FLAG_GROUP_INACCURATE));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
   hwloc_topology_destroy(topology);
@@ -220,7 +220,7 @@ int main(void)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   assert(!hwloc_distances_add(topology, 16, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP|HWLOC_DISTANCES_FLAG_GROUP_INACCURATE));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
   hwloc_topology_destroy(topology);
@@ -252,7 +252,7 @@ int main(void)
   }
   assert(!hwloc_distances_add(topology, 8, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
   /* group 4cores as 2*2 */
@@ -268,7 +268,7 @@ int main(void)
   }
   assert(!hwloc_distances_add(topology, 8, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 5);
   width = hwloc_get_nbobjs_by_depth(topology, 0);
@@ -294,7 +294,7 @@ int main(void)
   }
   assert(!hwloc_distances_add(topology, 32, objs, values,
 			      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			      HWLOC_DISTANCES_FLAG_GROUP));
+			      HWLOC_DISTANCES_ADD_FLAG_GROUP));
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
   width = hwloc_get_nbobjs_by_depth(topology, 0);

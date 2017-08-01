@@ -154,17 +154,17 @@ hwloc_distances_release(hwloc_topology_t topology, struct hwloc_distances_s *dis
  */
 
 /** \brief Flags for adding a new distances to a topology. */
-enum hwloc_distances_flag_e {
+enum hwloc_distances_add_flag_e {
   /** \brief Try to group objects based on the newly provided distance information.
    * \hideinitializer
    */
-  HWLOC_DISTANCES_FLAG_GROUP = (1UL<<0),
+  HWLOC_DISTANCES_ADD_FLAG_GROUP = (1UL<<0),
   /** \brief If grouping, consider the distance values as inaccurate and relax the
    * comparisons during the grouping algorithms. The actual accuracy may be modified
    * through the HWLOC_GROUPING_ACCURACY environment variable (see \ref envvar).
    * \hideinitializer
    */
-  HWLOC_DISTANCES_FLAG_GROUP_INACCURATE = (1UL<<1)
+  HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE = (1UL<<1)
 };
 
 /** \brief Provide a distance matrix.
@@ -177,7 +177,7 @@ enum hwloc_distances_flag_e {
  * \p kind specifies the kind of distance as a OR'ed set of ::hwloc_distances_kind_e.
  *
  * \p flags configures the behavior of the function using an optional OR'ed set of
- * ::hwloc_distances_flag_e.
+ * ::hwloc_distances_add_flag_e.
  *
  * Objects must be of the same type. They cannot be of type Group.
  */

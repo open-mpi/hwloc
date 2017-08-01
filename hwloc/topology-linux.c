@@ -3230,7 +3230,7 @@ look_sysfsnode(struct hwloc_topology *topology,
       if (distances)
 	hwloc_internal_distances_add(topology, nbnodes, nodes, distances,
 				     HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
-				     HWLOC_DISTANCES_FLAG_GROUP);
+				     HWLOC_DISTANCES_ADD_FLAG_GROUP);
       else
 	free(nodes);
   }

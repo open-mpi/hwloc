@@ -619,9 +619,9 @@ man3_helper_distances_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_distances_get_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_release.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_distances_add.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_distances_flag_e.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_FLAG_GROUP.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_FLAG_GROUP_INACCURATE.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_add_flag_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_ADD_FLAG_GROUP.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_add.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_depth.3 \
