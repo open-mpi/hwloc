@@ -1516,14 +1516,14 @@ static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
 static void
 propagate_total_memory(hwloc_obj_t obj)
 {
-  hwloc_obj_t *temp, child;
+  hwloc_obj_t child;
   unsigned i;
 
   /* reset total before counting local and children memory */
   obj->memory.total_memory = 0;
 
   /* Propagate memory up. */
-  for_each_child_safe(child, obj, temp) {
+  for_each_child(child, obj) {
     propagate_total_memory(child);
     obj->memory.total_memory += child->memory.total_memory;
   }
@@ -1546,7 +1546,7 @@ propagate_total_memory(hwloc_obj_t obj)
 static void
 collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   if (sys) {
     /* We are already given a pointer to a system object */
@@ -1561,7 +1561,7 @@ collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     }
   }
 
-  for_each_child_safe(child, obj, temp)
+  for_each_child(child, obj)
     collect_proc_cpuset(child, sys);
   /* No PU under I/O or Misc */
 }
@@ -1571,7 +1571,7 @@ collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 static void
 propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   if (obj->cpuset) {
     if (sys) {
@@ -1622,7 +1622,7 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     }
   }
 
-  for_each_child_safe(child, obj, temp)
+  for_each_child(child, obj)
     propagate_unused_cpuset(child, sys);
   /* No PU under I/O or Misc */
 }
@@ -1663,7 +1663,7 @@ hwloc_obj_add_children_sets(hwloc_obj_t obj)
 static void
 propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
   hwloc_bitmap_t parent_nodeset = NULL;
   int parent_weight = 0;
 
@@ -1684,7 +1684,7 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
       obj->nodeset = hwloc_bitmap_alloc();
   }
 
-  for_each_child_safe(child, obj, temp) {
+  for_each_child(child, obj) {
     /* Propagate singleton nodesets down */
     if (parent_weight == 1) {
       if (!child->nodeset)
@@ -1711,9 +1711,9 @@ static void
 propagate_nodesets(hwloc_obj_t obj)
 {
   hwloc_bitmap_t mask = hwloc_bitmap_alloc();
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
-  for_each_child_safe(child, obj, temp) {
+  for_each_child(child, obj) {
     if (obj->nodeset) {
       /* Update complete nodesets down */
       if (child->complete_nodeset) {
@@ -1762,7 +1762,7 @@ propagate_nodesets(hwloc_obj_t obj)
 static void
 remove_unused_sets(hwloc_obj_t obj)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   if (obj->cpuset) {
     hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->allowed_cpuset);
@@ -1780,7 +1780,7 @@ remove_unused_sets(hwloc_obj_t obj)
       obj->memory.page_types[i].count = 0;
   }
 
-  for_each_child_safe(child, obj, temp)
+  for_each_child(child, obj)
     remove_unused_sets(child);
   /* No cpuset under I/O or Misc */
 }
@@ -2279,7 +2279,7 @@ hwloc_append_special_object(struct hwloc_special_level_s *level, hwloc_obj_t obj
 static void
 hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
 {
-  hwloc_obj_t child, *temp;
+  hwloc_obj_t child;
 
   if (obj->type == HWLOC_OBJ_MISC) {
     obj->next_cousin = NULL;
@@ -2287,7 +2287,7 @@ hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
     /* Insert the main Misc list */
     hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_MISC], obj);
     /* Recurse, Misc only have Misc children */
-    for_each_misc_child_safe(child, obj, temp)
+    for_each_misc_child(child, obj)
       hwloc_list_io_misc_objects(topology, child);
 
   } else if (hwloc_obj_type_is_io(obj->type)) {
@@ -2309,18 +2309,18 @@ hwloc_list_io_misc_objects(hwloc_topology_t topology, hwloc_obj_t obj)
       hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_OSDEV], obj);
     }
     /* Recurse, I/O only have I/O and Misc children */
-    for_each_io_child_safe(child, obj, temp)
+    for_each_io_child(child, obj)
       hwloc_list_io_misc_objects(topology, child);
-    for_each_misc_child_safe(child, obj, temp)
+    for_each_misc_child(child, obj)
       hwloc_list_io_misc_objects(topology, child);
 
   } else {
     /* Recurse */
-    for_each_child_safe(child, obj, temp)
+    for_each_child(child, obj)
       hwloc_list_io_misc_objects(topology, child);
-    for_each_io_child_safe(child, obj, temp)
+    for_each_io_child(child, obj)
       hwloc_list_io_misc_objects(topology, child);
-    for_each_misc_child_safe(child, obj, temp)
+    for_each_misc_child(child, obj)
       hwloc_list_io_misc_objects(topology, child);
   }
 }
