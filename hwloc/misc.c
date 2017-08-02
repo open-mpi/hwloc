@@ -99,6 +99,9 @@ void hwloc_add_uname_info(struct hwloc_topology *topology __hwloc_attribute_unus
 #ifdef HAVE_UNAME
   struct utsname _utsname, *utsname;
 
+  if (!topology->levels[0][0])
+    return;
+
   if (hwloc_obj_get_info_by_name(topology->levels[0][0], "OSName"))
     /* don't annotate twice */
     return;

@@ -488,14 +488,14 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
   if (!backend) {
     if (hwloc_components_verbose || envvar_forced)
       fprintf(stderr, "Failed to instantiate discovery component `%s'\n", comp->name);
-    return -1;
+    return -2;
   }
 
   backend->envvar_forced = envvar_forced;
   return hwloc_backend_enable(topology, backend);
 }
 
-void
+int
 hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 {
   struct hwloc_disc_component *comp;
@@ -584,7 +584,10 @@ nextname:
 	    curenv++;
 	}
       }
-      hwloc_disc_component_try_enable(topology, comp, NULL, 0 /* defaults, not envvar forced */);
+      int err = hwloc_disc_component_try_enable(topology, comp, NULL, 0 /* defaults, not envvar forced */);
+      if (err < -1) {
+        return err;
+      }
 nextcomp:
       comp = comp->next;
     }
@@ -604,6 +607,7 @@ nextcomp:
   }
 
   free(env);
+  return 0;
 }
 
 void
