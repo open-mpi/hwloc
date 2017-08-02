@@ -200,6 +200,9 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
     }
 }
 
+/* Traverse children of a parent */
+#define for_each_child(child, parent) for(child = parent->first_child; child; child = child->next_sibling)
+
 #ifdef HWLOC_DEBUG
 /* Just for debugging.  */
 static void
@@ -259,9 +262,10 @@ hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 static void
 hwloc_debug_print_objects(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
+  hwloc_obj_t child;
   hwloc_debug_print_object(indent, obj);
-  for (obj = obj->first_child; obj; obj = obj->next_sibling)
-    hwloc_debug_print_objects(indent + 1, obj);
+  for_each_child (child, obj)
+    hwloc_debug_print_objects(indent + 1, child);
 }
 #else /* !HWLOC_DEBUG */
 #define hwloc_debug_print_object(indent, obj) do { /* nothing */ } while (0)
@@ -522,7 +526,7 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
   hwloc__duplicate_object(newobj, src);
 
   child = NULL;
-  while ((child = hwloc_get_next_child(newtopology, src, child)) != NULL)
+  for_each_child(child, src)
     hwloc__duplicate_objects(newtopology, newobj, child);
 
   /* no need to check the children order here, the source topology
@@ -1234,7 +1238,7 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
     obj->nodeset = hwloc_bitmap_alloc();
     obj->complete_nodeset = hwloc_bitmap_alloc();
     obj->allowed_nodeset = hwloc_bitmap_alloc();
-    while (child) {
+    for_each_child(child, obj) {
       if (child->complete_cpuset)
 	hwloc_bitmap_or(obj->complete_cpuset, obj->complete_cpuset, child->complete_cpuset);
       if (child->allowed_cpuset)
@@ -1247,7 +1251,6 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
 	hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
       if (child->allowed_nodeset)
 	hwloc_bitmap_or(obj->allowed_nodeset, obj->allowed_nodeset, child->allowed_nodeset);
-      child = child->next_sibling;
     }
   } else {
     /* copy the parent nodesets */
@@ -1520,8 +1523,7 @@ hwloc_fill_object_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
   assert(obj->cpuset != NULL);
-  child = obj->first_child;
-  while (child) {
+  for_each_child(child, obj) {
     assert(child->cpuset != NULL);
     if (child->complete_cpuset) {
       if (!obj->complete_cpuset)
@@ -1553,7 +1555,6 @@ hwloc_fill_object_sets(hwloc_obj_t obj)
 	obj->allowed_nodeset = hwloc_bitmap_alloc();
       hwloc_bitmap_or(obj->allowed_nodeset, obj->allowed_nodeset, child->allowed_nodeset);
     }
-    child = child->next_sibling;
   }
   return 0;
 }
@@ -2009,15 +2010,14 @@ hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
 static void
 hwloc_propagate_bridge_depth(hwloc_topology_t topology, hwloc_obj_t root, unsigned depth)
 {
-  hwloc_obj_t child = root->first_child;
-  while (child) {
+  hwloc_obj_t child;
+  for_each_child(child, root) {
     if (child->type == HWLOC_OBJ_BRIDGE) {
       child->attr->bridge.depth = depth;
       hwloc_propagate_bridge_depth(topology, child, depth+1);
     } else if (!hwloc_obj_type_is_io(child->type)) {
       hwloc_propagate_bridge_depth(topology, child, 0);
     }
-    child = child->next_sibling;
   }
 }
 
@@ -2037,9 +2037,9 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
 
   /* look at children, and return if they are not symmetric */
   child = NULL;
-  while ((child = hwloc_get_next_child(topology, root, child)) != NULL)
+  for_each_child(child, root)
     hwloc_propagate_symmetric_subtree(topology, child);
-  while ((child = hwloc_get_next_child(topology, root, child)) != NULL)
+  for_each_child(child, root)
     if (!child->symmetric_subtree)
       return;
 
@@ -2137,7 +2137,7 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
   if (hwloc_type_cmp(root, obj) == HWLOC_OBJ_EQUAL)
     return 1;
 
-  for (child = root->first_child; child; child = child->next_sibling)
+  for_each_child(child, root)
     if (!hwloc_obj_type_is_io(child->type)
 	&& child->type != HWLOC_OBJ_MISC
 	&& find_same_type(child, obj))
@@ -3197,7 +3197,7 @@ static void
 hwloc__check_children_depth(struct hwloc_topology *topology, struct hwloc_obj *parent)
 {
   hwloc_obj_t child = NULL;
-  while ((child = hwloc_get_next_child(topology, parent, child)) != NULL) {
+  for_each_child(child, parent) {
     if (child->type == HWLOC_OBJ_BRIDGE)
       assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_BRIDGE);
     else if (child->type == HWLOC_OBJ_PCI_DEVICE)
