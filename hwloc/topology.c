@@ -199,6 +199,11 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
     }
 }
 
+/* Traverse children of a parent */
+#define for_each_child(child, parent) for(child = parent->first_child; child; child = child->next_sibling)
+#define for_each_io_child(child, parent) for(child = parent->io_first_child; child; child = child->next_sibling)
+#define for_each_misc_child(child, parent) for(child = parent->misc_first_child; child; child = child->next_sibling)
+
 #ifdef HWLOC_DEBUG
 /* Just for debugging.  */
 static void
@@ -257,11 +262,11 @@ hwloc_debug_print_objects(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
   hwloc_obj_t child;
   hwloc_debug_print_object(indent, obj);
-  for (child = obj->first_child; child; child = child->next_sibling)
+  for_each_child (child, obj)
     hwloc_debug_print_objects(indent + 1, child);
-  for (child = obj->io_first_child; child; child = child->next_sibling)
+  for_each_io_child (child, obj)
     hwloc_debug_print_objects(indent + 1, child);
-  for (child = obj->misc_first_child; child; child = child->next_sibling)
+  for_each_misc_child (child, obj)
     hwloc_debug_print_objects(indent + 1, child);
 }
 #else /* !HWLOC_DEBUG */
@@ -667,17 +672,17 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   for(i=0; i<src->infos_count; i++)
     hwloc__add_info(&newobj->infos, &newobj->infos_count, src->infos[i].name, src->infos[i].value);
 
-  for(child = src->first_child; child; child = child->next_sibling) {
+  for_each_child(child, src) {
     err = hwloc__duplicate_object(newtopology, newobj, NULL, child);
     if (err < 0)
       goto out_with_children;
   }
-  for(child = src->io_first_child; child; child = child->next_sibling) {
+  for_each_io_child(child, src) {
     err = hwloc__duplicate_object(newtopology, newobj, NULL, child);
     if (err < 0)
       goto out_with_children;
   }
-  for(child = src->misc_first_child; child; child = child->next_sibling) {
+  for_each_misc_child(child, src) {
     err = hwloc__duplicate_object(newtopology, newobj, NULL, child);
     if (err < 0)
       goto out_with_children;
@@ -1437,14 +1442,12 @@ hwloc_get_highest_obj_covering_complete_cpuset (hwloc_topology_t topology, hwloc
 
  recurse:
   /* find the right child */
-  child = current->first_child;
-  while (child) {
+  for_each_child(child, current) {
     if (hwloc_bitmap_isequal(set, child->complete_cpuset))
       /* child puset is exactly what we want, no need to look at children, we want the highest */
       return child;
     if (!hwloc_bitmap_iszero(child->complete_cpuset) && hwloc_bitmap_isincluded(set, child->complete_cpuset))
       break;
-    child = child->next_sibling;
   }
 
   if (child) {
@@ -1648,11 +1651,9 @@ hwloc_obj_add_children_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
   assert(obj->cpuset != NULL);
-  child = obj->first_child;
-  while (child) {
+  for_each_child(child, obj) {
     assert(child->cpuset != NULL);
     hwloc_obj_add_other_obj_sets(obj, child);
-    child = child->next_sibling;
   }
   /* No need to look at Misc children, they contain no PU. */
   return 0;
@@ -2046,7 +2047,7 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
    * return if any child is not symmetric.
    */
   ok = 1;
-  for(child = root->first_child; child; child = child->next_sibling) {
+  for_each_child(child, root) {
     hwloc_propagate_symmetric_subtree(topology, child);
     if (!child->symmetric_subtree)
       ok = 0;
@@ -2188,7 +2189,7 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
   if (hwloc_type_cmp(root, obj) == HWLOC_OBJ_EQUAL)
     return 1;
 
-  for (child = root->first_child; child; child = child->next_sibling)
+  for_each_child (child, root)
     if (find_same_type(child, obj))
       return 1;
 
