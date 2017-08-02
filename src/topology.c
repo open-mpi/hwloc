@@ -203,6 +203,16 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
 /* Traverse children of a parent */
 #define for_each_child(child, parent) for(child = parent->first_child; child; child = child->next_sibling)
 
+/* Traverse children of a parent in a safe way: reread the next pointer as
+ * appropriate to prevent crash on child deletion:  */
+#define for_each_child_safe(child, parent, pchild) \
+  for (pchild = &(parent)->first_child, child = *pchild; \
+       child; \
+       /* Check whether the current child was not dropped.  */ \
+       (*pchild == child ? pchild = &(child->next_sibling) : NULL), \
+       /* Get pointer to next child.  */ \
+        child = *pchild)
+
 #ifdef HWLOC_DEBUG
 /* Just for debugging.  */
 static void
@@ -364,16 +374,6 @@ void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *val
     return;
   hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
-
-/* Traverse children of a parent in a safe way: reread the next pointer as
- * appropriate to prevent crash on child deletion:  */
-#define for_each_child_safe(child, parent, pchild) \
-  for (pchild = &(parent)->first_child, child = *pchild; \
-       child; \
-       /* Check whether the current child was not dropped.  */ \
-       (*pchild == child ? pchild = &(child->next_sibling) : NULL), \
-       /* Get pointer to next childect.  */ \
-        child = *pchild)
 
 static void
 hwloc__free_object_contents(hwloc_obj_t obj)
