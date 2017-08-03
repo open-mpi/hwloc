@@ -21,6 +21,7 @@ Version 1.11.8
 --------------
 * Fix search for objects by physical index in command-line tools.
 * Add support for CUDA compute capability 7.0 and fix support for 6.[12].
+* Add a FAQ entry about building on Windows.
 
 
 Version 1.11.7
