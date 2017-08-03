@@ -3245,6 +3245,20 @@ CPPFLAGS may have to be updated if your platform headers are installed
 in a different directory.
 
 
+\subsection faq_windows How do I build hwloc for Windows?
+
+hwloc releases are available as pre-built ZIPs for Windows on both 32bits and
+64bits x86 platforms.
+They are built using MSYS2 and MinGW on a Windows host.
+Such an environment allows using the Unix-like <tt>configure</tt>, <tt>make</tt>
+and <tt>make install</tt> steps without having to tweak too many variables or options.
+One may look at <tt>contrib/ci.inria.fr/job-3-mingw.sh</tt> in the hwloc
+repository for an example used for nightly testing.
+
+hwloc releases also contain a basic Microsoft Visual Studio solution
+under <tt>contrib/windows/</tt>.
+
+
 \subsection faq_netbsd_bind How to get useful topology information on NetBSD?
 
 The NetBSD (and FreeBSD) backend uses x86-specific topology discovery
