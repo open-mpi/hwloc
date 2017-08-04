@@ -450,6 +450,7 @@ main (int argc, char *argv[])
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   char *restrictstring = NULL;
   struct lstopo_output loutput;
+  output_method *output_func;
 #ifdef HAVE_CLOCK_GETTIME
   struct timespec ts1, ts2;
   unsigned long ms;
@@ -877,10 +878,73 @@ main (int argc, char *argv[])
     free(restrictstring);
   }
 
+  switch (output_format) {
+  case LSTOPO_OUTPUT_DEFAULT:
+#ifdef LSTOPO_HAVE_GRAPHICS
+#if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11_KEYSYM
+    if (getenv("DISPLAY")) {
+      output_func = output_x11;
+    } else
+#endif /* CAIRO_HAS_XLIB_SURFACE */
+#ifdef HWLOC_WIN_SYS
+    {
+      output_func = output_windows;
+    }
+#endif
+#endif /* !LSTOPO_HAVE_GRAPHICS */
+#if !defined HWLOC_WIN_SYS || !defined LSTOPO_HAVE_GRAPHICS
+    {
+      output_func = output_console;
+    }
+#endif
+    break;
+
+  case LSTOPO_OUTPUT_CONSOLE:
+    output_func = output_console;
+    break;
+  case LSTOPO_OUTPUT_SYNTHETIC:
+    output_func = output_synthetic;
+    break;
+  case LSTOPO_OUTPUT_ASCII:
+    output_func = output_ascii;
+    break;
+  case LSTOPO_OUTPUT_FIG:
+    output_func = output_fig;
+    break;
+#ifdef LSTOPO_HAVE_GRAPHICS
+# if CAIRO_HAS_PNG_FUNCTIONS
+  case LSTOPO_OUTPUT_PNG:
+    output_func = output_png;
+    break;
+# endif /* CAIRO_HAS_PNG_FUNCTIONS */
+# if CAIRO_HAS_PDF_SURFACE
+  case LSTOPO_OUTPUT_PDF:
+    output_func = output_pdf;
+    break;
+# endif /* CAIRO_HAS_PDF_SURFACE */
+# if CAIRO_HAS_PS_SURFACE
+  case LSTOPO_OUTPUT_PS:
+    output_func = output_ps;
+    break;
+#endif /* CAIRO_HAS_PS_SURFACE */
+#if CAIRO_HAS_SVG_SURFACE
+  case LSTOPO_OUTPUT_SVG:
+    output_func = output_svg;
+    break;
+#endif /* CAIRO_HAS_SVG_SURFACE */
+#endif /* LSTOPO_HAVE_GRAPHICS */
+  case LSTOPO_OUTPUT_XML:
+    output_func = output_xml;
+    break;
+  default:
+    fprintf(stderr, "file format not supported\n");
+    goto out_usagefailure;
+  }
+
   if (loutput.logical == -1) {
-    if (output_format == LSTOPO_OUTPUT_CONSOLE)
+    if (output_func == output_console)
       loutput.logical = 1;
-    else if (output_format != LSTOPO_OUTPUT_DEFAULT)
+    else
       loutput.logical = 0;
   }
 
@@ -892,74 +956,7 @@ main (int argc, char *argv[])
   if (output_format != LSTOPO_OUTPUT_XML && loutput.collapse)
     lstopo_add_collapse_attributes(topology);
 
-  switch (output_format) {
-    case LSTOPO_OUTPUT_DEFAULT:
-#ifdef LSTOPO_HAVE_GRAPHICS
-#if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11_KEYSYM
-      if (getenv("DISPLAY")) {
-        if (loutput.logical == -1)
-          loutput.logical = 0;
-        output_x11(&loutput, NULL);
-      } else
-#endif /* CAIRO_HAS_XLIB_SURFACE */
-#ifdef HWLOC_WIN_SYS
-      {
-        if (loutput.logical == -1)
-          loutput.logical = 0;
-        output_windows(&loutput, NULL);
-      }
-#endif
-#endif /* !LSTOPO_HAVE_GRAPHICS */
-#if !defined HWLOC_WIN_SYS || !defined LSTOPO_HAVE_GRAPHICS
-      {
-        if (loutput.logical == -1)
-          loutput.logical = 1;
-        output_console(&loutput, NULL);
-      }
-#endif
-      break;
-
-    case LSTOPO_OUTPUT_CONSOLE:
-      output_console(&loutput, filename);
-      break;
-    case LSTOPO_OUTPUT_SYNTHETIC:
-      output_synthetic(&loutput, filename);
-      break;
-    case LSTOPO_OUTPUT_ASCII:
-      output_ascii(&loutput, filename);
-      break;
-    case LSTOPO_OUTPUT_FIG:
-      output_fig(&loutput, filename);
-      break;
-#ifdef LSTOPO_HAVE_GRAPHICS
-# if CAIRO_HAS_PNG_FUNCTIONS
-    case LSTOPO_OUTPUT_PNG:
-      output_png(&loutput, filename);
-      break;
-# endif /* CAIRO_HAS_PNG_FUNCTIONS */
-# if CAIRO_HAS_PDF_SURFACE
-    case LSTOPO_OUTPUT_PDF:
-      output_pdf(&loutput, filename);
-      break;
-# endif /* CAIRO_HAS_PDF_SURFACE */
-# if CAIRO_HAS_PS_SURFACE
-    case LSTOPO_OUTPUT_PS:
-      output_ps(&loutput, filename);
-      break;
-#endif /* CAIRO_HAS_PS_SURFACE */
-#if CAIRO_HAS_SVG_SURFACE
-    case LSTOPO_OUTPUT_SVG:
-      output_svg(&loutput, filename);
-      break;
-#endif /* CAIRO_HAS_SVG_SURFACE */
-#endif /* LSTOPO_HAVE_GRAPHICS */
-    case LSTOPO_OUTPUT_XML:
-      output_xml(&loutput, filename);
-      break;
-    default:
-      fprintf(stderr, "file format not supported\n");
-      goto out_usagefailure;
-  }
+  output_func(&loutput, filename);
 
   lstopo_destroy_userdata(hwloc_get_root_obj(topology));
   hwloc_utils_userdata_free_recursive(hwloc_get_root_obj(topology));
