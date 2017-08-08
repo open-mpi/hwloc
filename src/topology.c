@@ -3113,6 +3113,8 @@ hwloc_topology_get_depth(struct hwloc_topology *topology)
   return topology->nb_levels;
 }
 
+#ifndef NDEBUG /* assert only enabled if !NDEBUG */
+
 /* check children between a parent object */
 static void
 hwloc__check_children(struct hwloc_obj *parent)
@@ -3343,3 +3345,12 @@ void * hwloc_topology_get_userdata(struct hwloc_topology * topology)
 {
   return topology->userdata;
 }
+
+#else /* NDEBUG */
+
+void
+hwloc_topology_check(struct hwloc_topology *topology __hwloc_attribute_unused)
+{
+}
+
+#endif /* NDEBUG */
