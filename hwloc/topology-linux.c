@@ -803,6 +803,8 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   setsize = CPU_ALLOC_SIZE(last+1);
   plinux_set = CPU_ALLOC(last+1);
+  if (!plinux_set)
+    return -1;
 
   CPU_ZERO_S(setsize, plinux_set);
   hwloc_bitmap_foreach_begin(cpu, hwloc_set)
@@ -869,6 +871,10 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
   fd = open("/sys/devices/system/cpu/possible", O_RDONLY); /* binding only supported in real fsroot, no need for data->root_fd */
   if (fd >= 0) {
     hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc_full();
+    if (!possible_bitmap) {
+      close(fd);
+      return -1;
+    }
     if (hwloc__read_fd_as_cpulist(fd, possible_bitmap) == 0) {
       int max_possible = hwloc_bitmap_last(possible_bitmap);
       hwloc_debug_bitmap("possible CPUs are %s\n", possible_bitmap);
@@ -882,6 +888,8 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
 
   while (1) {
     cpu_set_t *set = CPU_ALLOC(nr_cpus);
+    if (!set)
+      return -1;
     size_t setsize = CPU_ALLOC_SIZE(nr_cpus);
     int err = sched_getaffinity(0, setsize, set); /* always works, unless setsize is too small */
     CPU_FREE(set);
@@ -911,8 +919,12 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   /* find the kernel nr_cpus so as to use a large enough cpu_set size */
   kernel_nr_cpus = hwloc_linux_find_kernel_nr_cpus(topology);
+  if (kernel_nr_cpus == -1)
+    return -1;
   setsize = CPU_ALLOC_SIZE(kernel_nr_cpus);
   plinux_set = CPU_ALLOC(kernel_nr_cpus);
+  if (!plinux_set)
+    return -1;
 
   err = sched_getaffinity(tid, setsize, plinux_set);
 
@@ -1156,6 +1168,8 @@ hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t
 {
   struct hwloc_linux_foreach_proc_tid_get_cpubind_cb_data_s data;
   hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
+  if (!tidset)
+    return -1;
   int ret;
 
   data.cpuset = hwloc_set;
@@ -1266,6 +1280,8 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 
      setsize = CPU_ALLOC_SIZE(last+1);
      plinux_set = CPU_ALLOC(last+1);
+     if (!plinux_set)
+       return -1;
 
      CPU_ZERO_S(setsize, plinux_set);
      hwloc_bitmap_foreach_begin(cpu, hwloc_set)
@@ -1357,6 +1373,8 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
 
      setsize = CPU_ALLOC_SIZE(last+1);
      plinux_set = CPU_ALLOC(last+1);
+     if (!plinux_set)
+       return -1;
 
      err = pthread_getaffinity_np(tid, setsize, plinux_set);
      if (err) {
@@ -1512,6 +1530,8 @@ hwloc_linux_get_pid_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwlo
 {
   struct hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb_data_s data;
   hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
+  if (!tidset)
+    return -1;
   int ret;
 
   data.cpuset = hwloc_set;
@@ -1593,6 +1613,8 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
 
   if (hwloc_bitmap_isfull(nodeset)) {
     linux_nodeset = hwloc_bitmap_alloc();
+    if (!linux_nodeset)
+      return -1;
     hwloc_bitmap_only(linux_nodeset, 0);
     nodeset = linux_nodeset;
   }
@@ -1768,6 +1790,8 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
   max_numnodes = HWLOC_BITS_PER_LONG;
   while (1) {
     unsigned long *mask = malloc(max_numnodes / HWLOC_BITS_PER_LONG * sizeof(long));
+    if (!mask)
+      return -1;
     int err = hwloc_get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
     free(mask);
     if (!err || errno != EINVAL)
@@ -1809,6 +1833,8 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
   int err;
 
   max_os_index = hwloc_linux_find_kernel_max_numnodes(topology);
+  if (max_os_index == (unsigned)-1)
+    goto out;
 
   linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
   if (!linuxmask) {
@@ -1854,6 +1880,8 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
   unsigned i;
 
   max_os_index = hwloc_linux_find_kernel_max_numnodes(topology);
+  if (max_os_index == (unsigned)-1)
+    goto out;
 
   linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
   if (!linuxmask) {
