@@ -3308,6 +3308,8 @@ void * hwloc_topology_get_userdata(struct hwloc_topology * topology)
  * Debug Checks *
  ****************/
 
+#ifndef NDEBUG /* assert only enabled if !NDEBUG */
+
 static void
 hwloc__check_child_siblings(hwloc_obj_t parent, hwloc_obj_t *array,
 			    unsigned arity, unsigned i,
@@ -3700,3 +3702,12 @@ hwloc_topology_check(struct hwloc_topology *topology)
    * Should only occur if XML is invalid.
    */
 }
+
+#else /* NDEBUG */
+
+void
+hwloc_topology_check(struct hwloc_topology *topology __hwloc_attribute_unused)
+{
+}
+
+#endif /* NDEBUG */
