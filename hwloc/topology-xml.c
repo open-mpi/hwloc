@@ -2238,20 +2238,20 @@ hwloc_export_obj_userdata(void *reserved,
     int encoded;
     size_t encoded_length;
     const char *realname;
-    if (!strncmp(name, "normal", 6)) {
-      encoded = 0;
-      encoded_length = length;
-    } else if (!strncmp(name, "base64", 6)) {
+    if (!strncmp(name, "base64", 6)) {
       encoded = 1;
       encoded_length = BASE64_ENCODED_LENGTH(length);
-    } else
-      assert(0);
+    } else {
+      assert(!strncmp(name, "normal", 6));
+      encoded = 0;
+      encoded_length = length;
+    }
     if (name[6] == ':')
       realname = name+7;
-    else if (!strcmp(name+6, "-anon"))
+    else {
+      assert(!strcmp(name+6, "-anon"));
       realname = NULL;
-    else
-      assert(0);
+    }
     hwloc__export_obj_userdata(state, encoded, realname, length, buffer, encoded_length);
 
   } else
