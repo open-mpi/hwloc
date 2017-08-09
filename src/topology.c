@@ -3330,6 +3330,15 @@ hwloc_topology_check(struct hwloc_topology *topology)
   hwloc__check_children_depth(topology, obj);
 }
 
+#else /* NDEBUG */
+
+void
+hwloc_topology_check(struct hwloc_topology *topology __hwloc_attribute_unused)
+{
+}
+
+#endif /* NDEBUG */
+
 const struct hwloc_topology_support *
 hwloc_topology_get_support(struct hwloc_topology * topology)
 {
@@ -3345,12 +3354,3 @@ void * hwloc_topology_get_userdata(struct hwloc_topology * topology)
 {
   return topology->userdata;
 }
-
-#else /* NDEBUG */
-
-void
-hwloc_topology_check(struct hwloc_topology *topology __hwloc_attribute_unused)
-{
-}
-
-#endif /* NDEBUG */
