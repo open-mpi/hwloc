@@ -79,16 +79,13 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
   struct hwloc_bitmap_s * set;
 
   set = malloc(sizeof(struct hwloc_bitmap_s));
-  if (!set) {
-    errno = ENOMEM;
+  if (!set)
     return NULL;
-  }
 
   set->ulongs_count = 1;
   set->ulongs_allocated = 64/sizeof(unsigned long);
   set->ulongs = malloc(64);
   if (!set->ulongs) {
-    errno = ENOMEM;
     free(set);
     return NULL;
   }
@@ -190,15 +187,12 @@ struct hwloc_bitmap_s * hwloc_bitmap_dup(const struct hwloc_bitmap_s * old)
   HWLOC__BITMAP_CHECK(old);
 
   new = malloc(sizeof(struct hwloc_bitmap_s));
-  if (!new) {
-    errno = ENOMEM;
+  if (!new)
     return NULL;
-  }
 
   new->ulongs = malloc(old->ulongs_allocated * sizeof(unsigned long));
   if (!new->ulongs) {
     free(new);
-    errno = ENOMEM;
     return NULL;
   }
   new->ulongs_allocated = old->ulongs_allocated;

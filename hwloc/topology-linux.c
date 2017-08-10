@@ -543,10 +543,8 @@ hwloc__read_fd(int fd, char **bufferp, size_t *sizep)
 
   /* Alloc and read +1 so that we get EOF on 2^n without reading once more */
   buffer = malloc(filesize+1);
-  if (!buffer) {
-    errno = ENOMEM;
+  if (!buffer)
     return -1;
-  }
 
   ret = read(fd, buffer, toread+1);
   if (ret < 0) {
@@ -632,7 +630,6 @@ hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
   maps = malloc(nr_maps_allocated * sizeof(*maps));
   if (!maps) {
     free(buffer);
-    errno = ENOMEM;
     return -1;
   }
 
@@ -646,7 +643,6 @@ hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
     if (nr_maps == nr_maps_allocated) {
       unsigned long *tmp = realloc(maps, 2*nr_maps_allocated * sizeof(*maps));
       if (!tmp) {
-        errno = ENOMEM;
 	free(buffer);
 	free(maps);
 	return -1;
@@ -2120,10 +2116,8 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
    */
   bufsize = hwloc_getpagesize()*4;
   buf = malloc(bufsize);
-  if (!buf) {
-    errno = ENOMEM;
+  if (!buf)
     return;
-  }
 
   while (getmntent_r(fd, &mntent, buf, bufsize)) {
     if (!strcmp(mntent.mnt_type, "cpuset")) {
@@ -2364,10 +2358,8 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
      */
     memory->page_types_len = types;
     memory->page_types = calloc(types, sizeof(*memory->page_types));
-    if (!memory->page_types) {
-      errno = ENOMEM;
+    if (!memory->page_types)
       return -2;
-    }
   }
 
   if (topology->is_thissystem) {
@@ -2440,10 +2432,8 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
   if (topology->is_thissystem) {
     memory->page_types_len = types;
     memory->page_types = malloc(types*sizeof(*memory->page_types));
-    if (!memory->page_types) {
-      errno = ENOMEM;
+    if (!memory->page_types)
       return -2;
-    }
     memset(memory->page_types, 0, types*sizeof(*memory->page_types));
   }
 
@@ -3108,10 +3098,8 @@ look_sysfsnode(struct hwloc_topology *topology,
   if (dir)
     {
       nodeset = hwloc_bitmap_alloc();
-      if (!nodeset) {
-        errno = ENOMEM;
+      if (!nodeset)
         return -2;
-      }
       while ((dirent = readdir(dir)) != NULL)
 	{
 	  if (strncmp(dirent->d_name, "node", 4))
@@ -3191,19 +3179,16 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    }
 
 	    node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, osnode);
-	    if (!node) {
+	    if (!node)
 	      return -2;
-	    }
 	    node->cpuset = cpuset;
 	    node->nodeset = hwloc_bitmap_alloc();
-	    if (!node->nodeset) {
+	    if (!node->nodeset)
 	      return -2;
-	    }
 	    hwloc_bitmap_set(node->nodeset, osnode);
 	  }
-	  if (hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->memory) < 0) {
+	  if (hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->memory) < 0)
 	    return -2;
-	  }
 
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
@@ -3229,10 +3214,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 	nbnodes -= failednodes;
       } else if (nbnodes > 1) {
 	distances = malloc(nbnodes*nbnodes*sizeof(*distances));
-        if (!distances) {
-          errno = ENOMEM;
+        if (!distances)
           return -2;
-        }
       }
 
       if (distances && hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd) < 0) {
@@ -3298,9 +3281,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  if (closest != (unsigned) -1) {
 	    /* Add a Group for Cluster containing this MCDRAM + DDR */
 	    hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
-	    if (!cluster) {
+	    if (!cluster)
 	      return -2;
-	    }
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
 	    cluster->subtype = strdup("Cluster");
@@ -3460,9 +3442,8 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  /* no package with same physical_package_id, create a new one */
 	  package = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, mypackageid);
-	  if (!package) {
+	  if (!package)
 	    return -2;
-	  }
 	  package->cpuset = packageset;
 	  hwloc_debug_1arg_bitmap("os package %u has cpuset %s\n",
 				  mypackageid, packageset);
@@ -3525,9 +3506,8 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  }
 
 	  core = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, mycoreid);
-	  if (!core) {
+	  if (!core)
 	    return -2;
-	  }
 	  if (threadwithcoreid)
 	    /* amd multicore compute-unit, create one core per thread */
 	    hwloc_bitmap_only(coreset, i);
@@ -3576,9 +3556,8 @@ look_sysfscpu(struct hwloc_topology *topology,
     {
       /* look at the thread */
       struct hwloc_obj *thread = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, i);
-      if (!thread) {
+      if (!thread)
         return -2;
-      }
       threadset = hwloc_bitmap_alloc();
       if (!threadset) {
         hwloc_free_unlinked_object(thread);
@@ -3909,10 +3888,8 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 #      define COREID "core id"
   len = 128; /* vendor/model can be very long */
   str = malloc(len);
-  if (!str) {
-    errno = ENOMEM;
+  if (!str)
     goto err;
-  }
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
   while (fgets(str,len,fd)!=NULL) {
     unsigned long Ppkg, Pcore, Pproc;

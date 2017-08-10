@@ -585,9 +585,8 @@ nextname:
 	}
       }
       int err = hwloc_disc_component_try_enable(topology, comp, NULL, 0 /* defaults, not envvar forced */);
-      if (err < -1) {
+      if (err < -1)
         return err;
-      }
 nextcomp:
       comp = comp->next;
     }

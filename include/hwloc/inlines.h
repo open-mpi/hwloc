@@ -111,13 +111,9 @@ static __hwloc_inline const char *
 hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
 {
   unsigned i;
-  for(i=0; i<obj->infos_count; i++) {
-    if (!obj->infos[i].name)
-      return NULL;
-
+  for(i=0; i<obj->infos_count; i++)
     if (!strcmp(obj->infos[i].name, name))
       return obj->infos[i].value;
-  }
   return NULL;
 }
 
