@@ -810,6 +810,7 @@ static const unsigned obj_type_order[] = {
     /* next entry is HWLOC_OBJ_OS_DEVICE */   16
 };
 
+#ifndef NDEBUG /* only used in debug check assert if !NDEBUG */
 static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_SYSTEM,
   HWLOC_OBJ_MACHINE,
@@ -831,6 +832,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_PU,
   HWLOC_OBJ_MISC, /* Misc is always a leaf */
 };
+#endif
 /***** Make sure you update obj_type_priority[] below as well. *****/
 
 /* priority to be used when merging identical parent/children object
