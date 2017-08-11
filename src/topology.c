@@ -659,6 +659,7 @@ static const unsigned obj_type_order[] = {
     /* next entry is HWLOC_OBJ_OS_DEVICE */   9
 };
 
+#ifndef NDEBUG /* only used in debug check assert if !NDEBUG */
 static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_SYSTEM,
   HWLOC_OBJ_MACHINE,
@@ -673,6 +674,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_PU,
   HWLOC_OBJ_MISC,
 };
+#endif
 
 /* priority to be used when merging identical parent/children object
  * (in merge_useless_child), keep the highest priority one.
@@ -707,7 +709,7 @@ hwloc_get_type_order(hwloc_obj_type_t type)
   return obj_type_order[type];
 }
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG /* only used in debug check assert if !NDEBUG */
 static hwloc_obj_type_t hwloc_get_order_type(int order)
 {
   return obj_order_type[order];
