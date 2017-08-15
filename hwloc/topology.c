@@ -177,7 +177,7 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
 /*
  * Use the given number of processors to set a PU level.
  */
-void
+int
 hwloc_setup_pu_level(struct hwloc_topology *topology,
 		     unsigned nb_pus)
 {
@@ -187,8 +187,13 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
   hwloc_debug("%s", "\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<nb_pus; oscpu++)
     {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, oscpu);
-      obj->cpuset = hwloc_bitmap_alloc();
+      if (!(obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, oscpu))) {
+        return -2;
+      }
+      if (!(obj->cpuset = hwloc_bitmap_alloc())) {
+        hwloc_free_unlinked_object(obj);
+        return -2;
+      }
       hwloc_bitmap_only(obj->cpuset, oscpu);
 
       hwloc_debug_2args_bitmap("cpu %u (os %u) has cpuset %s\n",
@@ -197,6 +202,8 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
 
       cpu++;
     }
+
+  return 0;
 }
 
 /* Traverse children of a parent */
@@ -308,7 +315,7 @@ void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count)
   free(infos);
 }
 
-void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value)
+int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value)
 {
   unsigned count = *countp;
   struct hwloc_obj_info_s *infos = *infosp;
@@ -319,13 +326,22 @@ void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const c
     struct hwloc_obj_info_s *tmpinfos = realloc(infos, alloccount*sizeof(*infos));
     if (!tmpinfos)
       /* failed to allocate, ignore this info */
-      return;
+      return 0;
     infos = tmpinfos;
   }
   infos[count].name = strdup(name);
   infos[count].value = value ? strdup(value) : NULL;
+  if (!infos[count].name || (value && !infos[count].value)) {
+    free(infos[count].name);
+    free(infos[count].value);
+    infos[count].name = NULL;
+    infos[count].value = NULL;
+    errno = ENOMEM;
+    return -2;
+  }
   *infosp = infos;
   *countp = count+1;
+  return 0;
 }
 
 char ** hwloc__find_info_slot(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name)
@@ -379,9 +395,9 @@ void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_count
   /* dst_infos not modified */
 }
 
-void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
+int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 {
-  hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
+  return hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
 
 void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *value, int nodup)
@@ -1314,11 +1330,18 @@ hwloc_alloc_setup_object(hwloc_topology_t topology,
 			 hwloc_obj_type_t type, signed os_index)
 {
   struct hwloc_obj *obj = malloc(sizeof(*obj));
+  if (!obj)
+    return 0;
+
   memset(obj, 0, sizeof(*obj));
   obj->type = type;
   obj->os_index = os_index;
   obj->gp_index = topology->next_gp_index++;
   obj->attr = malloc(sizeof(*obj->attr));
+  if (!obj->attr) {
+    free(obj);
+    return NULL;
+  }
   memset(obj->attr, 0, sizeof(*obj->attr));
   /* do not allocate the cpuset here, let the caller do it */
   return obj;
@@ -1570,7 +1593,7 @@ collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 
 /* While traversing down and up, propagate the disallowed cpus by
  * and'ing them to and from the first object that has a cpuset */
-static void
+static int
 propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 {
   hwloc_obj_t child;
@@ -1579,6 +1602,8 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     if (sys) {
       /* We are already given a pointer to an system object, update it and update ourselves */
       hwloc_bitmap_t mask = hwloc_bitmap_alloc();
+      if (!mask)
+        return -1;
 
       /* Apply the topology cpuset */
       hwloc_bitmap_and(obj->cpuset, obj->cpuset, sys->cpuset);
@@ -1588,7 +1613,12 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
 	hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, sys->complete_cpuset);
       } else {
 	obj->complete_cpuset = hwloc_bitmap_dup(sys->complete_cpuset);
-	hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, obj->cpuset);
+        if (obj->complete_cpuset)
+	  hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, obj->cpuset);
+        else {
+          hwloc_bitmap_free(mask);
+          return -1;
+        }
       }
 
       /* Update allowed cpusets */
@@ -1604,7 +1634,12 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
       } else {
 	/* Just take it as such */
 	obj->allowed_cpuset = hwloc_bitmap_dup(sys->allowed_cpuset);
-	hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, obj->cpuset);
+        if (obj->allowed_cpuset)
+	  hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, obj->cpuset);
+        else {
+          hwloc_bitmap_free(mask);
+          return -1;
+        }
       }
 
       hwloc_bitmap_free(mask);
@@ -1624,9 +1659,14 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     }
   }
 
-  for_each_child(child, obj)
-    propagate_unused_cpuset(child, sys);
+  for_each_child(child, obj) {
+    int ret = propagate_unused_cpuset(child, sys);
+    if (ret < 0)
+      return ret;
+  }
   /* No PU under I/O or Misc */
+  
+  return 0;
 }
 
 /* Setup object cpusets/nodesets by OR'ing its children. */
@@ -1662,7 +1702,7 @@ hwloc_obj_add_children_sets(hwloc_obj_t obj)
 }
 
 /* Propagate nodesets up and down */
-static void
+static int
 propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
 {
   hwloc_obj_t child;
@@ -1671,10 +1711,17 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
 
   if (!sys && obj->nodeset) {
     sys = obj;
-    if (!obj->complete_nodeset)
+    if (!obj->complete_nodeset) {
       obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
-    if (!obj->allowed_nodeset)
+      if (!obj->complete_nodeset)
+        return -2;
+    }
+    
+    if (!obj->allowed_nodeset) {
       obj->allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
+      if (!obj->allowed_nodeset)
+        return -2;
+    }
   }
 
   if (sys) {
@@ -1682,15 +1729,22 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
       /* Some existing nodeset coming from above, to possibly propagate down */
       parent_nodeset = obj->nodeset;
       parent_weight = hwloc_bitmap_weight(parent_nodeset);
-    } else
+    } else {
       obj->nodeset = hwloc_bitmap_alloc();
+      if (!obj->nodeset)
+        return -2;
+    }
   }
 
   for_each_child(child, obj) {
     /* Propagate singleton nodesets down */
     if (parent_weight == 1) {
-      if (!child->nodeset)
+      if (!child->nodeset) {
         child->nodeset = hwloc_bitmap_dup(obj->nodeset);
+        if (!child->nodeset) {
+          return -2;
+        }
+      }
       else if (!hwloc_bitmap_isequal(child->nodeset, parent_nodeset)) {
         hwloc_debug_bitmap("Oops, parent nodeset %s", parent_nodeset);
         hwloc_debug_bitmap(" is different from child nodeset %s, ignoring the child one\n", child->nodeset);
@@ -1699,21 +1753,27 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
     }
 
     /* Recurse */
-    propagate_nodeset(child, sys);
+    int ret = propagate_nodeset(child, sys);
+    if (ret < 0)
+      return ret;
 
     /* Propagate children nodesets up */
     if (sys && child->nodeset)
       hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
   }
   /* No nodeset under I/O or Misc */
+  return 0;
 }
 
 /* Propagate allowed and complete nodesets */
-static void
+static int
 propagate_nodesets(hwloc_obj_t obj)
 {
   hwloc_bitmap_t mask = hwloc_bitmap_alloc();
   hwloc_obj_t child;
+
+  if (!mask)
+    return -2;
 
   for_each_child(child, obj) {
     if (obj->nodeset) {
@@ -1722,6 +1782,8 @@ propagate_nodesets(hwloc_obj_t obj)
         hwloc_bitmap_and(child->complete_nodeset, child->complete_nodeset, obj->complete_nodeset);
       } else if (child->nodeset) {
         child->complete_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
+        if (!child->complete_nodeset)
+          return -2;
         hwloc_bitmap_and(child->complete_nodeset, child->complete_nodeset, child->nodeset);
       } /* else the child doesn't have nodeset information, we can not provide a complete nodeset */
 
@@ -1730,11 +1792,16 @@ propagate_nodesets(hwloc_obj_t obj)
         hwloc_bitmap_and(child->allowed_nodeset, child->allowed_nodeset, obj->allowed_nodeset);
       } else if (child->nodeset) {
         child->allowed_nodeset = hwloc_bitmap_dup(obj->allowed_nodeset);
+        if (!child->allowed_nodeset)
+          return -2;
+
         hwloc_bitmap_and(child->allowed_nodeset, child->allowed_nodeset, child->nodeset);
       }
     }
 
-    propagate_nodesets(child);
+    int ret = propagate_nodesets(child);
+    if (ret < 0)
+      return ret;
 
     if (obj->nodeset) {
       /* Update allowed nodesets up */
@@ -1752,13 +1819,20 @@ propagate_nodesets(hwloc_obj_t obj)
     /* Apply complete nodeset to nodeset and allowed_nodeset */
     if (obj->complete_nodeset)
       hwloc_bitmap_and(obj->nodeset, obj->nodeset, obj->complete_nodeset);
-    else
+    else {
       obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
+      if (!obj->complete_nodeset)
+        return -2;
+    }
     if (obj->allowed_nodeset)
       hwloc_bitmap_and(obj->allowed_nodeset, obj->allowed_nodeset, obj->complete_nodeset);
-    else
+    else {
       obj->allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
+      if (!obj->allowed_nodeset)
+        return -2;
+    }
   }
+  return 0;
 }
 
 static void
@@ -2062,6 +2136,8 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
    * just walk down the first child in each tree and compare their depth and arities
    */
   array = malloc(root->arity * sizeof(*array));
+  if (!array)
+    return;
   memcpy(array, root->children, root->arity * sizeof(*array));
   while (1) {
     unsigned i;
@@ -2106,7 +2182,7 @@ static void hwloc_set_group_depth(hwloc_topology_t topology)
  *
  * Can be called several times, so may have to update the array.
  */
-static void
+static int
 hwloc_connect_children(hwloc_obj_t parent)
 {
   unsigned n, oldn = parent->arity;
@@ -2126,7 +2202,10 @@ hwloc_connect_children(hwloc_obj_t parent)
     if (n >= oldn || parent->children[n] != child)
       ok = 0;
     /* recurse */
-    hwloc_connect_children(child);
+
+    int ret = hwloc_connect_children(child);
+    if (ret < 0)
+      return ret;
   }
   parent->last_child = prev_child;
   parent->arity = n;
@@ -2144,6 +2223,8 @@ hwloc_connect_children(hwloc_obj_t parent)
   if (oldn < n) {
     free(parent->children);
     parent->children = malloc(n * sizeof(*parent->children));
+    if (!parent->children)
+      return -2;
   }
   /* refill */
   for (n = 0, child = parent->first_child;
@@ -2162,7 +2243,9 @@ hwloc_connect_children(hwloc_obj_t parent)
     child->parent = parent;
     child->sibling_rank = n;
     child->prev_sibling = prev_child;
-    hwloc_connect_children(child);
+    int ret = hwloc_connect_children(child);
+    if (ret < 0)
+      return ret;
   }
   parent->io_arity = n;
 
@@ -2175,9 +2258,14 @@ hwloc_connect_children(hwloc_obj_t parent)
     child->parent = parent;
     child->sibling_rank = n;
     child->prev_sibling = prev_child;
-    hwloc_connect_children(child);
+
+    int ret = hwloc_connect_children(child);
+    if (ret < 0)
+      return ret;
   }
   parent->misc_arity = n;
+
+  return 0;
 }
 
 /*
@@ -2427,9 +2515,19 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     /* New level.  */
     taken_objs = malloc((n_taken_objs + 1) * sizeof(taken_objs[0]));
+    if (!taken_objs) {
+      free(objs);
+      return -2;
+    }
+
     /* New list of pending objects.  */
     if (n_objs - n_taken_objs + n_new_objs) {
       new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
+      if (!new_objs) {
+        free(objs);
+        free(taken_objs);
+        return -2;
+      }
     } else {
 #ifdef HWLOC_DEBUG
       assert(!n_new_objs);
@@ -2487,7 +2585,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
 	free(taken_objs);
 	free(new_objs);
 	errno = ENOMEM;
-	return -1;
+	return -2;
       }
       topology->levels = tmplevels;
       topology->level_nbobjects = tmpnbobjs;
@@ -2526,10 +2624,13 @@ hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags)
   if (!topology->modified)
     return 0;
 
-  hwloc_connect_children(topology->levels[0][0]);
+  int ret = hwloc_connect_children(topology->levels[0][0]);
+  if (ret < -1)
+      return ret;
 
-  if (hwloc_connect_levels(topology) < 0)
-    return -1;
+  ret = hwloc_connect_levels(topology);
+  if (ret < 0)
+    return ret;
 
   hwloc_connect_io_misc_levels(topology);
 
@@ -2538,7 +2639,8 @@ hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags)
   return 0;
 }
 
-void hwloc_alloc_obj_cpusets(hwloc_obj_t obj)
+int
+hwloc_alloc_obj_cpusets(hwloc_obj_t obj)
 {
   if (!obj->cpuset)
     obj->cpuset = hwloc_bitmap_alloc_full();
@@ -2552,6 +2654,13 @@ void hwloc_alloc_obj_cpusets(hwloc_obj_t obj)
     obj->complete_nodeset = hwloc_bitmap_alloc();
   if (!obj->allowed_nodeset)
     obj->allowed_nodeset = hwloc_bitmap_alloc_full();
+  
+  if (!obj->cpuset || !obj->complete_cpuset || !obj->allowed_cpuset || !obj->nodeset || !obj->complete_nodeset || !obj->allowed_nodeset) {
+    errno = ENOMEM;
+    return -2;
+  }
+
+  return 0;
 }
 
 /* Main discovery loop */
@@ -2608,7 +2717,9 @@ hwloc_discover(struct hwloc_topology *topology)
       goto next_cpubackend;
     if (!backend->discover)
       goto next_cpubackend;
-    backend->discover(backend);
+    if (backend->discover(backend) < -1)
+      return -1;
+
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_cpubackend:
@@ -2636,7 +2747,8 @@ next_cpubackend:
   }
   hwloc_debug("%s", "\nPropagate disallowed cpus down and up\n");
   hwloc_bitmap_and(topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->allowed_cpuset, topology->levels[0][0]->cpuset);
-  propagate_unused_cpuset(topology->levels[0][0], NULL);
+  if (propagate_unused_cpuset(topology->levels[0][0], NULL) < 0)
+    return -1;
 
   /* Backends must allocate root->*nodeset.
    *
@@ -2654,10 +2766,19 @@ next_cpubackend:
   /* If there's no NUMA node, add one with all the memory */
   if (hwloc_bitmap_iszero(topology->levels[0][0]->complete_nodeset)) {
     hwloc_obj_t node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);
+    if (!node)
+      return -2;
     node->cpuset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset); /* requires root cpuset to be initialized above */
     node->complete_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->complete_cpuset); /* requires root cpuset to be initialized above */
     node->allowed_cpuset = hwloc_bitmap_dup(topology->levels[0][0]->allowed_cpuset); /* requires root cpuset to be initialized above */
     node->nodeset = hwloc_bitmap_alloc();
+    if (!node->cpuset || !node->complete_cpuset || !node->allowed_cpuset || !node->nodeset) {
+      hwloc_bitmap_free(node->cpuset);
+      hwloc_bitmap_free(node->complete_cpuset);
+      hwloc_bitmap_free(node->allowed_cpuset);
+      free(node);
+      return -2;
+    }
     /* other nodesets will be filled below */
     hwloc_bitmap_set(node->nodeset, 0);
     memcpy(&node->memory, &topology->levels[0][0]->memory, sizeof(node->memory));
@@ -2665,8 +2786,12 @@ next_cpubackend:
     hwloc_insert_object_by_cpuset(topology, node);
   }
   hwloc_debug("%s", "\nPropagate nodesets\n");
-  propagate_nodeset(topology->levels[0][0], NULL);
-  propagate_nodesets(topology->levels[0][0]);
+  int ret = propagate_nodeset(topology->levels[0][0], NULL);
+  if (ret < 0)
+    return ret;
+  ret = propagate_nodesets(topology->levels[0][0]);
+  if (ret < 0)
+    return ret;
 
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
@@ -2782,7 +2907,7 @@ next_noncpubackend:
 /* To be called before discovery is actually launched,
  * Resets everything in case a previous load initialized some stuff.
  */
-void
+int
 hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
   struct hwloc_obj *root_obj;
@@ -2820,8 +2945,16 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
    * since the OS backend may still change the object into something else
    * (for instance System)
    */
+  if (!topology->levels[0])
+    return -1;
   root_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MACHINE, 0);
+  if (!root_obj) {
+    free(topology->levels[0]);
+    topology->levels[0] = NULL;
+    return -1;
+  }
   topology->levels[0][0] = root_obj;
+  return 0;
 }
 
 static void hwloc__topology_filter_init(struct hwloc_topology *topology);
@@ -2832,7 +2965,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   struct hwloc_topology *topology;
 
   topology = malloc (sizeof (struct hwloc_topology));
-  if(!topology)
+  if (!topology)
     return -1;
 
   hwloc_components_init();
@@ -2853,6 +2986,13 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->nb_levels_allocated = 16; /* enough for default 9 levels = Mach+Pack+NUMA+L3+L2+L1d+L1i+Co+PU */
   topology->levels = calloc(topology->nb_levels_allocated, sizeof(*topology->levels));
   topology->level_nbobjects = calloc(topology->nb_levels_allocated, sizeof(*topology->level_nbobjects));
+  if (!topology->support.discovery || !topology->support.cpubind || !topology->support.membind || !topology->levels || !topology->level_nbobjects) {
+    topology->first_dist = 0;
+    topology->nb_levels = 0;
+    memset(topology->slevels, 0, sizeof(topology->slevels));
+    hwloc_topology_destroy(topology);
+    return -1;
+  }
 
   hwloc__topology_filter_init(topology);
 
@@ -2863,7 +3003,11 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->userdata_not_decoded = 0;
 
   /* Make the topology look like something coherent but empty */
-  hwloc_topology_setup_defaults(topology);
+  int ret = hwloc_topology_setup_defaults(topology);
+  if (ret < 0) {
+    hwloc_topology_destroy(topology);
+    return -1;
+  }
 
   *topologyp = topology;
   return 0;
@@ -3049,9 +3193,12 @@ hwloc_topology_clear (struct hwloc_topology *topology)
   /* no need to set to NULL after free() since callers will call setup_defaults() or just destroy the rest of the topology */
   unsigned l;
   hwloc_internal_distances_destroy(topology);
-  hwloc_free_object_and_children(topology->levels[0][0]);
-  for (l=0; l<topology->nb_levels; l++)
-    free(topology->levels[l]);
+  if (topology->levels && topology->levels[0] && topology->levels[0][0])
+    hwloc_free_object_and_children(topology->levels[0][0]);
+  if (topology->nb_levels) {
+    for (l=0; l<topology->nb_levels; l++)
+      free(topology->levels[l]);
+  }
   for(l=0; l<HWLOC_NR_SLEVELS; l++)
     free(topology->slevels[l].objs);
 }
@@ -3132,7 +3279,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
   }
 
   /* instantiate all possible other backends now */
-  hwloc_disc_components_enable_others(topology);
+  err = hwloc_disc_components_enable_others(topology);
+  if (err < -1)
+    return -1;
   /* now that backends are enabled, update the thissystem flag and some callbacks */
   hwloc_backends_is_thissystem(topology);
   hwloc_backends_find_callbacks(topology);

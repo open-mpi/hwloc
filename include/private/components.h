@@ -24,7 +24,7 @@ extern int hwloc_disc_component_force_enable(struct hwloc_topology *topology,
 					     int envvar_forced, /* 1 if forced through envvar, 0 if forced through API */
 					     int type, const char *name,
 					     const void *data1, const void *data2, const void *data3);
-extern void hwloc_disc_components_enable_others(struct hwloc_topology *topology);
+extern int hwloc_disc_components_enable_others(struct hwloc_topology *topology);
 
 /* Compute the topology is_thissystem flag and find some callbacks based on enabled backends */
 extern void hwloc_backends_is_thissystem(struct hwloc_topology *topology);

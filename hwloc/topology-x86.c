@@ -247,7 +247,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cac
 
 /* Fetch information from the processor itself thanks to cpuid and store it in
  * infos for summarize to analyze them globally */
-static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
+static int look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   unsigned eax, ebx, ecx = 0, edx;
@@ -501,6 +501,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
 
     cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
+    if (!cache)
+      return -2;
 
     for (cachenum = 0; ; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
@@ -558,6 +560,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     if (level) {
       infos->levels = level;
       infos->otherids = malloc(level * sizeof(*infos->otherids));
+      if (!infos->otherids)
+        return -2;
       for (level = 0; ; level++) {
 	ecx = level;
 	eax = 0x0b;
@@ -641,6 +645,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     data->apicid_unique = 0;
   else
     hwloc_bitmap_set(data->apicid_set, infos->apicid);
+
+  return 0;
 }
 
 static void
@@ -663,12 +669,14 @@ hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int nodup)
 }
 
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */
-static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery)
+static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   unsigned nbprocs = data->nbprocs;
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
+  if (!complete_cpuset)
+    return -2;
   unsigned i, j, l, level;
   int one = -1;
   hwloc_bitmap_t remaining_cpuset;
@@ -681,10 +689,14 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   if (one == -1) {
     hwloc_bitmap_free(complete_cpuset);
-    return;
+    return 0;
   }
 
   remaining_cpuset = hwloc_bitmap_alloc();
+  if (!remaining_cpuset) {
+    hwloc_bitmap_free(complete_cpuset);
+    return -2;
+  }
 
   /* Ideally, when fulldiscovery=0, we could add any object that doesn't exist yet.
    * But what if the x86 and the native backends disagree because one is buggy? Which one to trust?
@@ -719,6 +731,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       } else {
 	/* Annotate packages previously-existing packages */
 	hwloc_bitmap_t set = hwloc_bitmap_alloc();
+	if (!set)
+	  return -2;
 	hwloc_bitmap_set(set, i);
 	package = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PACKAGE, NULL);
 	hwloc_bitmap_free(set);
@@ -753,6 +767,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       }
 
       node_cpuset = hwloc_bitmap_alloc();
+      if (!node_cpuset)
+        return -2;
       for (j = i; j < nbprocs; j++) {
 	if (infos[j].nodeid == (unsigned) -1) {
 	  hwloc_bitmap_clr(remaining_cpuset, j);
@@ -765,8 +781,14 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
         }
       }
       node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, nodeid);
+      if (!node)
+        return -2;
       node->cpuset = node_cpuset;
       node->nodeset = hwloc_bitmap_alloc();
+      if (!node->nodeset) {
+        hwloc_free_unlinked_object(node);
+        return -1;
+      }
       hwloc_bitmap_set(node->nodeset, nodeid);
       hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
           nodeid, node_cpuset);
@@ -931,6 +953,9 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	}
 
 	puset = hwloc_bitmap_alloc();
+	if (!puset)
+	  return -2;
+
 	hwloc_bitmap_set(puset, i);
 	cache = hwloc_get_next_obj_covering_cpuset_by_type(topology, puset, otype, NULL);
 	hwloc_bitmap_free(puset);
@@ -947,6 +972,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	  unsigned cacheid = infos[i].cache[l].cacheid;
 	  /* Now look for others sharing it */
 	  cache_cpuset = hwloc_bitmap_alloc();
+	  if (!cache_cpuset)
+	    return -2;
 	  for (j = i; j < nbprocs; j++) {
 	    unsigned l2;
 	    for (l2 = 0; l2 < infos[j].numcaches; l2++) {
@@ -964,6 +991,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	    }
 	  }
 	  cache = hwloc_alloc_setup_object(topology, otype, -1);
+	  if (!cache)
+	    return -2;
 	  cache->attr->cache.depth = level;
 	  cache->attr->cache.size = infos[i].cache[l].size;
 	  cache->attr->cache.linesize = infos[i].cache[l].linesize;
@@ -984,6 +1013,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   hwloc_bitmap_free(remaining_cpuset);
   hwloc_bitmap_free(complete_cpuset);
+  return 0;
 }
 
 static int
@@ -1001,11 +1031,19 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
 
   if (!data->src_cpuiddump_path) {
     orig_cpuset = hwloc_bitmap_alloc();
-    if (get_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
-      hwloc_bitmap_free(orig_cpuset);
+    if (!orig_cpuset) {
       return -1;
     }
+    int ret = get_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT);
+    if (ret < 0) {
+      hwloc_bitmap_free(orig_cpuset);
+      return ret;
+    }
     set = hwloc_bitmap_alloc();
+    if (!set) {
+      errno = ENOMEM;
+      return -2;
+    }
   }
 
   for (i = 0; i < nbprocs; i++) {
@@ -1021,7 +1059,10 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
       }
     }
 
-    look_proc(backend, &infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
+    int ret = look_proc(backend, &infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
+    if (ret < 0) {
+      return ret;
+    }
 
     if (data->src_cpuiddump_path) {
       cpuiddump_free(src_cpuiddump);
@@ -1036,8 +1077,13 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
 
   if (!data->apicid_unique)
     fulldiscovery = 0;
-  else
-    summarize(backend, infos, fulldiscovery);
+  else {
+    int ret = summarize(backend, infos, fulldiscovery);
+    if (ret < 0) {
+      return ret;
+    }
+  }
+
   return 0;
 }
 
@@ -1202,8 +1248,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
     look_proc(backend, &infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
-    summarize(backend, infos, fulldiscovery);
-    ret = 0;
+    ret = summarize(backend, infos, fulldiscovery);
   }
 
 out_with_os_state:
@@ -1253,8 +1298,10 @@ hwloc_x86_discover(struct hwloc_backend *backend)
     }
 
     /* several object types were added, we can't easily complete, just do partial discovery */
-    hwloc_topology_reconnect(topology, 0);
-    ret = hwloc_look_x86(backend, 0);
+    if ((ret = hwloc_topology_reconnect(topology, 0)) < -1)
+      return ret;
+    if ((ret = hwloc_look_x86(backend, 0)) < 0)
+      return ret;
     if (ret)
       hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
     return 0;
@@ -1395,12 +1442,20 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
   /* default values */
   data->is_knl = 0;
   data->apicid_set = hwloc_bitmap_alloc();
+  if (!data->apicid_set) {
+    errno = ENOMEM;
+    goto out_with_backend;
+  }
   data->apicid_unique = 1;
   data->src_cpuiddump_path = NULL;
 
   src_cpuiddump_path = getenv("HWLOC_CPUID_PATH");
   if (src_cpuiddump_path) {
     hwloc_bitmap_t set = hwloc_bitmap_alloc();
+    if (!set) {
+      errno = ENOMEM;
+      goto out_with_backend;
+    }
     if (!hwloc_x86_check_cpuiddump_input(src_cpuiddump_path, set)) {
       backend->is_thissystem = 0;
       data->src_cpuiddump_path = strdup(src_cpuiddump_path);
