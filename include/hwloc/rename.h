@@ -527,14 +527,15 @@ extern "C" {
 #define hwloc_filter_check_keep_object_type HWLOC_NAME(filter_check_keep_object_type)
 #define hwloc_filter_check_keep_object HWLOC_NAME(filter_check_keep_object)
 
-#define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
-#define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
-#define hwloc_pci_check_bridge_type HWLOC_NAME(pci_check_bridge_type)
-#define hwloc_pci_setup_bridge_attr HWLOC_NAME(pci_setup_bridge_attr)
-#define hwloc_pci_tree_insert_by_busid HWLOC_NAME(pci_tree_insert_by_busid)
-#define hwloc_pci_tree_attach_belowroot HWLOC_NAME(pci_tree_attach_belowroot)
-#define hwloc_pci_belowroot_find_by_busid HWLOC_NAME(pci_belowroot_find_by_busid)
-#define hwloc_pci_find_busid_parent HWLOC_NAME(pci_find_busid_parent)
+#define hwloc_pcidisc_find_cap HWLOC_NAME(pcidisc_find_cap)
+#define hwloc_pcidisc_find_linkspeed HWLOC_NAME(pcidisc_find_linkspeed)
+#define hwloc_pcidisc_check_bridge_type HWLOC_NAME(pcidisc_check_bridge_type)
+#define hwloc_pcidisc_setup_bridge_attr HWLOC_NAME(pcidisc_setup_bridge_attr)
+#define hwloc_pcidisc_tree_insert_by_busid HWLOC_NAME(pcidisc_tree_insert_by_busid)
+#define hwloc_pcidisc_tree_attach HWLOC_NAME(pcidisc_tree_attach)
+
+#define hwloc_pcidisc_find_by_busid HWLOC_NAME(pcidisc_find_by_busid)
+#define hwloc_pcidisc_find_busid_parent HWLOC_NAME(pcidisc_find_busid_parent)
 
 /* hwloc/deprecated.h */
 

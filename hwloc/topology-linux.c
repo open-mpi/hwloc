@@ -4626,11 +4626,11 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 
   if (foundpci) {
     /* attach to a PCI parent */
-    parent = hwloc_pci_belowroot_find_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
+    parent = hwloc_pcidisc_find_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
     if (parent)
       return parent;
     /* attach to a normal (non-I/O) parent found by PCI affinity */
-    parent = hwloc_pci_find_busid_parent(topology, pcidomain, pcibus, pcidev, pcifunc);
+    parent = hwloc_pcidisc_find_busid_parent(topology, pcidomain, pcibus, pcidev, pcifunc);
     if (parent)
       return parent;
   }
@@ -5503,7 +5503,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 	&& !hwloc_read_path_by_length(path, value, sizeof(value), root_fd))
       class_id = strtoul(value, NULL, 16) >> 8;
 
-    type = hwloc_pci_check_bridge_type(class_id, config_space_cache);
+    type = hwloc_pcidisc_check_bridge_type(class_id, config_space_cache);
 
     /* filtered? */
     if (type == HWLOC_OBJ_PCI_DEVICE) {
@@ -5563,7 +5563,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 
     /* bridge specific attributes */
     if (type == HWLOC_OBJ_BRIDGE) {
-      if (hwloc_pci_setup_bridge_attr(obj, config_space_cache) < 0)
+      if (hwloc_pcidisc_setup_bridge_attr(obj, config_space_cache) < 0)
 	continue;
     }
 
@@ -5571,16 +5571,16 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
 
     /* try to get the link speed */
-    offset = hwloc_pci_find_cap(config_space_cache, HWLOC_PCI_CAP_ID_EXP);
+    offset = hwloc_pcidisc_find_cap(config_space_cache, HWLOC_PCI_CAP_ID_EXP);
     if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE)
-      hwloc_pci_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
+      hwloc_pcidisc_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
 
-    hwloc_pci_tree_insert_by_busid(&tree, obj);
+    hwloc_pcidisc_tree_insert_by_busid(&tree, obj);
   }
 
   closedir(dir);
 
-  hwloc_pci_tree_attach_belowroot(backend->topology, tree);
+  hwloc_pcidisc_tree_attach(backend->topology, tree);
   return 0;
 }
 
