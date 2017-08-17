@@ -4252,7 +4252,29 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   int numprocs;
   int already_pus;
   int already_numanodes;
+  const char *sysfs_cpu_path;
+  const char *sysfs_node_path;
   int err;
+
+  /* look for sysfs cpu path containing at least one of core_siblings and thread_siblings */
+  if (!hwloc_access("/sys/bus/cpu/devices/cpu0/topology/thread_siblings", R_OK, data->root_fd)
+      || !hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, data->root_fd))
+    sysfs_cpu_path = "/sys/bus/cpu/devices";
+  else if (!hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, data->root_fd)
+      || !hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, data->root_fd))
+    sysfs_cpu_path = "/sys/devices/system/cpu";
+  else
+    sysfs_cpu_path = NULL;
+  hwloc_debug("Found sysfs cpu files under %s\n", sysfs_cpu_path);
+
+  /* look for sysfs node path */
+  if (!hwloc_access("/sys/bus/node/devices/node0/cpumap", R_OK, data->root_fd))
+    sysfs_node_path = "/sys/bus/node/devices";
+  else if (!hwloc_access("/sys/devices/system/node/node0/cpumap", R_OK, data->root_fd))
+    sysfs_node_path = "/sys/devices/system/node";
+  else
+    sysfs_node_path = NULL;
+  hwloc_debug("Found sysfs node files under %s\n", sysfs_node_path);
 
   already_pus = (topology->levels[0][0]->complete_cpuset != NULL
 		 && !hwloc_bitmap_iszero(topology->levels[0][0]->complete_cpuset));
@@ -4323,8 +4345,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   hwloc_get_procfs_meminfo_info(topology, data, &topology->levels[0][0]->memory);
 
   /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
-  if (look_sysfsnode(topology, data, "/sys/bus/node/devices", &nbnodes) < 0)
-    look_sysfsnode(topology, data, "/sys/devices/system/node", &nbnodes);
+  if (sysfs_node_path)
+    look_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
+  else
+    nbnodes = 0;
 
   /* if we found some numa nodes, the machine object has no local memory */
   if (nbnodes) {
@@ -4352,11 +4376,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
 		    &global_infos, &global_infos_count);
 
-  if (getenv("HWLOC_LINUX_USE_CPUINFO")
-      || (hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, data->root_fd) < 0
-	  && hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, data->root_fd) < 0
-	  && hwloc_access("/sys/bus/cpu/devices/cpu0/topology/thread_siblings", R_OK, data->root_fd) < 0
-	  && hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, data->root_fd) < 0)) {
+  if (getenv("HWLOC_LINUX_USE_CPUINFO") || !sysfs_cpu_path) {
     /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16)
      * or not containing anything interesting */
     if (numprocs > 0)
@@ -4369,10 +4389,9 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
   } else {
     /* sysfs */
-    if (look_sysfscpu(topology, data, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
-      if (look_sysfscpu(topology, data, "/sys/devices/system/cpu", Lprocs, numprocs) < 0)
-	/* sysfs but we failed to read cpu topology, fallback */
-	hwloc_setup_pu_level(topology, data->fallback_nbprocessors);
+    if (look_sysfscpu(topology, data, sysfs_cpu_path, Lprocs, numprocs) < 0)
+      /* sysfs but we failed to read cpu topology, fallback */
+      hwloc_setup_pu_level(topology, data->fallback_nbprocessors);
   }
 
  done:
