@@ -3248,7 +3248,6 @@ look_sysfscpu(struct hwloc_topology *topology,
 	      struct hwloc_linux_cpuinfo_proc * cpuinfo_Lprocs, unsigned cpuinfo_numprocs)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
-  hwloc_bitmap_t unknownset; /* Set of cpus to clear from kernel cpusets so that we know when first meeting an object */
 #define CPU_TOPOLOGY_STR_LEN 128
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
@@ -3264,7 +3263,6 @@ look_sysfscpu(struct hwloc_topology *topology,
   else {
     struct dirent *dirent;
     cpuset = hwloc_bitmap_alloc();
-    unknownset = hwloc_bitmap_alloc();
 
     while ((dirent = readdir(dir)) != NULL) {
       unsigned long cpu;
@@ -3282,7 +3280,6 @@ look_sysfscpu(struct hwloc_topology *topology,
       if (hwloc_read_path_by_length(str, online, sizeof(online), data->root_fd) == 0) {
 	if (!atoi(online)) {
 	  hwloc_debug("os proc %lu is offline\n", cpu);
-	  hwloc_bitmap_set(unknownset, cpu);
 	  continue;
 	}
       }
@@ -3292,7 +3289,6 @@ look_sysfscpu(struct hwloc_topology *topology,
       if (hwloc_access(str, X_OK, data->root_fd) < 0 && errno == ENOENT) {
 	hwloc_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
 		   cpu, path, cpu);
-	hwloc_bitmap_set(unknownset, cpu);
 	continue;
       }
 
@@ -3317,7 +3313,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       packageset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (packageset) {
-	hwloc_bitmap_andnot(packageset, packageset, unknownset);
+	hwloc_bitmap_and(packageset, packageset, cpuset);
 	if (hwloc_bitmap_first(packageset) == i) {
 	  /* first cpu in this package, add the package */
 	  struct hwloc_obj *package;
@@ -3396,7 +3392,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       coreset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (coreset) {
 	int gotcoreid = 0; /* to avoid reading the coreid twice */
-	hwloc_bitmap_andnot(coreset, coreset, unknownset);
+	hwloc_bitmap_and(coreset, coreset, cpuset);
 	if (hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
 	  /* check if this is hyper-threading or different coreids */
 	  unsigned siblingid, siblingcoreid;
@@ -3446,7 +3442,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
       bookset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (bookset) {
-	hwloc_bitmap_andnot(bookset, bookset, unknownset);
+	hwloc_bitmap_and(bookset, bookset, cpuset);
 	if (hwloc_bitmap_first(bookset) == i) {
 	  struct hwloc_obj *book;
 
@@ -3500,7 +3496,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	    cacheset = tmpset;
 	  }
 	}
-	hwloc_bitmap_andnot(cacheset, cacheset, unknownset);
+	hwloc_bitmap_and(cacheset, cacheset, cpuset);
 
 	if (hwloc_bitmap_first(cacheset) == i) {
 	  unsigned kB;
@@ -3605,7 +3601,6 @@ look_sysfscpu(struct hwloc_topology *topology,
     look_powerpc_device_tree(topology, data);
 
   hwloc_bitmap_free(cpuset);
-  hwloc_bitmap_free(unknownset);
 
   return 0;
 }
