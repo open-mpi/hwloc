@@ -159,7 +159,7 @@ static void add_process_objects(hwloc_topology_t topology)
       unsigned pathlen = 6 + strlen(dirent->d_name) + 1 + 7 + 1;
       char cmd[64], *c;
       int file;
-      ssize_t n;
+      ssize_t n, m;
 
       path = malloc(pathlen);
       snprintf(path, pathlen, "/proc/%s/cmdline", dirent->d_name);
@@ -168,6 +168,21 @@ static void add_process_objects(hwloc_topology_t topology)
 
       if (file >= 0) {
         n = read(file, cmd, sizeof(cmd) - 1);
+
+        if (n == sizeof(cmd) - 1) {
+          /* Bigger than our buffer, read more */
+          char cmd2[sizeof(cmd) - 1];
+          memcpy(cmd2, cmd, sizeof(cmd2));
+
+          do {
+            m = read(file, cmd2, sizeof(cmd2));
+          } while (m == sizeof(cmd2));
+
+          /* And swap the two pieces into cmd */
+          memcpy(cmd, cmd2 + m, sizeof(cmd2) - m);
+          memcpy(cmd + sizeof(cmd2) - m, cmd2, m);
+        }
+
         close(file);
 
         if (n <= 0)
