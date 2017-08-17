@@ -183,7 +183,7 @@ static void add_process_objects(hwloc_topology_t topology)
     {
       /* Get threads */
       char *path;
-      unsigned pathlen = 6+strlen(dirent->d_name) + 1 + 4 + 1;
+      unsigned pathlen = 6 + strlen(dirent->d_name) + 1 + 4 + 1;
       DIR *task_dir;
       struct dirent *task_dirent;
 
@@ -193,16 +193,56 @@ static void add_process_objects(hwloc_topology_t topology)
       free(path);
 
       if (task_dir) {
+        char comm[16] = "";
+        int comm_file;
+        ssize_t n;
+
+        pathlen = 6 + strlen(dirent->d_name) + 1 + 4 + 1;
+        path = malloc(pathlen);
+        snprintf(path, pathlen, "/proc/%s/comm", dirent->d_name);
+        comm_file = open(path, O_RDONLY);
+        free(path);
+
+        if (comm_file >= 0) {
+          n = read(comm_file, comm, sizeof(comm) - 1);
+          if (n < 0)
+            n = 0;
+          close(comm_file);
+          comm[n] = 0;
+        }
+
         while ((task_dirent = readdir(task_dir))) {
           long local_tid;
           char *task_end;
           const size_t tid_len = sizeof(local_tid)*3+1;
-          char task_name[sizeof(name) + 1 + tid_len + 1];
+          char task_comm[16] = "";
+          char task_name[sizeof(name) + 1 + tid_len + 1 + sizeof(task_comm) + 1];
 
           local_tid = strtol(task_dirent->d_name, &task_end, 10);
           if (*task_end)
             /* Not a number, or the main task */
             continue;
+
+          pathlen = 6 + strlen(dirent->d_name) + 1 + 4 + 1
+                      + strlen(task_dirent->d_name) + 1 + 4 + 1;
+          path = malloc(pathlen);
+          snprintf(path, pathlen, "/proc/%s/task/%s/comm",
+                   dirent->d_name, task_dirent->d_name);
+          comm_file = open(path, O_RDONLY);
+          free(path);
+
+          if (comm_file >= 0) {
+            n = read(comm_file, task_comm, sizeof(task_comm) - 1);
+            if (n < 0)
+              n = 0;
+            close(comm_file);
+            task_comm[n] = 0;
+            if (!strcmp(comm, task_comm))
+              /* Same as task command, do not show it */
+              n = 0;
+          } else {
+            n = 0;
+          }
 
           if (hwloc_linux_get_tid_cpubind(topology, local_tid, task_cpuset))
             continue;
@@ -210,7 +250,11 @@ static void add_process_objects(hwloc_topology_t topology)
           if (proc_cpubind && hwloc_bitmap_isequal(task_cpuset, cpuset))
             continue;
 
-          snprintf(task_name, sizeof(task_name), "%s %li", name, local_tid);
+          if (n) {
+            snprintf(task_name, sizeof(task_name), "%s %li %s", name, local_tid, task_comm);
+          } else {
+            snprintf(task_name, sizeof(task_name), "%s %li", name, local_tid);
+          }
 
           insert_task(topology, task_cpuset, task_name);
         }
