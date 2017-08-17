@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2017 Inria.  All rights reserved.
- * Copyright © 2009-2012, 2015 Université Bordeaux
+ * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -180,8 +180,12 @@ static void add_process_objects(hwloc_topology_t topology)
       if (task_dir) {
         while ((task_dirent = readdir(task_dir))) {
           long local_tid;
+          char *task_begin;
           char *task_end;
-          char task_name[64];
+          size_t name_len = strlen(name);
+          const size_t task_len = 64;
+          const size_t tid_len = sizeof(local_tid)*3+1;
+          char task_name[task_len + 1 + tid_len + 1];
 
           local_tid = strtol(task_dirent->d_name, &task_end, 10);
           if (*task_end)
@@ -194,7 +198,11 @@ static void add_process_objects(hwloc_topology_t topology)
           if (proc_cpubind && hwloc_bitmap_isequal(task_cpuset, cpuset))
             continue;
 
-          snprintf(task_name, sizeof(task_name), "%s %li", name, local_tid);
+          if (name_len > task_len)
+            task_begin = name + name_len - task_len;
+          else
+            task_begin = name;
+          snprintf(task_name, sizeof(task_name), "%s %li", task_begin, local_tid);
 
           insert_task(topology, task_cpuset, task_name);
         }
