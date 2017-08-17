@@ -122,7 +122,7 @@ static void add_process_objects(hwloc_topology_t topology)
     long local_pid_number;
     hwloc_pid_t local_pid;
     char *end;
-    char name[64];
+    char name[80];
     int proc_cpubind;
 
     local_pid_number = strtol(dirent->d_name, &end, 10);
@@ -180,12 +180,9 @@ static void add_process_objects(hwloc_topology_t topology)
       if (task_dir) {
         while ((task_dirent = readdir(task_dir))) {
           long local_tid;
-          char *task_begin;
           char *task_end;
-          size_t name_len = strlen(name);
-          const size_t task_len = 64;
           const size_t tid_len = sizeof(local_tid)*3+1;
-          char task_name[task_len + 1 + tid_len + 1];
+          char task_name[sizeof(name) + 1 + tid_len + 1];
 
           local_tid = strtol(task_dirent->d_name, &task_end, 10);
           if (*task_end)
@@ -198,11 +195,7 @@ static void add_process_objects(hwloc_topology_t topology)
           if (proc_cpubind && hwloc_bitmap_isequal(task_cpuset, cpuset))
             continue;
 
-          if (name_len > task_len)
-            task_begin = name + name_len - task_len;
-          else
-            task_begin = name;
-          snprintf(task_name, sizeof(task_name), "%s %li", task_begin, local_tid);
+          snprintf(task_name, sizeof(task_name), "%s %li", name, local_tid);
 
           insert_task(topology, task_cpuset, task_name);
         }
