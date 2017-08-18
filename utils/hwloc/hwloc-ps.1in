@@ -21,7 +21,7 @@ hwloc-ps \- List currently-running processes or threads that are bound
 .
 .TP 10
 \fB\-a\fR
-list all processes, even those that are not bound to any
+List all processes, even those that are not bound to any
 specific part of the machine.
 .TP
 \fB\-\-pid <pid>\fR
@@ -34,16 +34,16 @@ even if they are not bound to any specific part of the machine.
 This is currently only supported on Linux.
 .TP
 \fB\-p\fR \fB\-\-physical\fR
-report OS/physical indexes instead of logical indexes
+Report OS/physical indexes instead of logical indexes
 .TP
 \fB\-l\fR \fB\-\-logical\fR
-report logical indexes instead of physical/OS indexes (default)
+Report logical indexes instead of physical/OS indexes (default)
 .TP
 \fB\-c\fR \fB\-\-cpuset\fR
-show process bindings as cpusets instead of objects.
+Show process bindings as cpusets instead of objects.
 .TP
 \fB\-t\fR \fB\-\-threads\fR
-show threads inside processes.
+Show threads inside processes.
 If \fB\-a\fR is given as well, list all threads within each process.
 Otherwise, show all threads inside each process where at least one
 thread is bound.
