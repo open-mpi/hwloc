@@ -96,8 +96,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
     char name[64] = "";
     /* management of threads */
     unsigned boundthreads = 0, i;
-    long *tids = NULL; /* NULL if process is not threaded */
-    hwloc_bitmap_t *tidcpusets = NULL;
+    struct hwlocpstid { long tid; hwloc_bitmap_t cpuset; } *tids = NULL;
     hwloc_bitmap_t cpuset;
     char *end;
 
@@ -157,9 +156,8 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 	}
 	if (n > 1) {
 	  /* if there's more than one thread, see if some are bound */
-	  tids = malloc(n * sizeof(*tids));
-	  tidcpusets = calloc(n+1, sizeof(*tidcpusets));
-	  if (tids && tidcpusets) {
+	  tids = calloc(n+1, sizeof(*tids));
+	  if (tids) {
 	    /* reread the directory but gather info now */
 	    rewinddir(taskdir);
 	    i = 0;
@@ -176,8 +174,8 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 		  continue;
 	      }
 	      hwloc_bitmap_and(cpuset, cpuset, topocpuset);
-	      tids[i] = tid;
-	      tidcpusets[i] = hwloc_bitmap_dup(cpuset);
+	      tids[i].tid = tid;
+	      tids[i].cpuset = hwloc_bitmap_dup(cpuset);
 	      i++;
 	      if (hwloc_bitmap_iszero(cpuset))
 		continue;
@@ -187,8 +185,6 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 	    }
 	  } else {
 	    /* failed to alloc, behave as if there were no threads */
-	    free(tids); tids = NULL;
-	    free(tidcpusets); tidcpusets = NULL;
 	  }
 	}
 	closedir(taskdir);
@@ -234,15 +230,14 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
     /* print the process */
     print_task(topology, pid, name, cpuset, pidoutput[0] == '\0' ? NULL : pidoutput, 0);
     if (tids)
-      /* print each tid we found (it's tidcpuset isn't NULL anymore) */
-      for(i=0; tidcpusets[i] != NULL; i++) {
-	print_task(topology, tids[i], "", tidcpusets[i], NULL, 1);
-	hwloc_bitmap_free(tidcpusets[i]);
+      /* print each tid we found with a cpuset, the n+1-th is NULL */
+      for(i=0; tids[i].cpuset != NULL; i++) {
+	print_task(topology, tids[i].tid, "", tids[i].cpuset, NULL, 1);
+	hwloc_bitmap_free(tids[i].cpuset);
       }
 
  out:
     /* free threads stuff */
-    free(tidcpusets);
     free(tids);
     hwloc_bitmap_free(cpuset);
 }
