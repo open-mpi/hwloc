@@ -40,11 +40,11 @@ void usage(const char *name, FILE *where)
 }
 
 static void print_task(hwloc_topology_t topology,
-		       long pid_number, const char *name, hwloc_bitmap_t cpuset,
+		       long pid, const char *name, hwloc_bitmap_t cpuset,
 		       char *pidoutput,
 		       int thread)
 {
-  printf("%s%ld\t", thread ? " " : "", pid_number);
+  printf("%s%ld\t", thread ? " " : "", pid);
 
   if (show_cpuset) {
     char *cpuset_str = NULL;
@@ -169,8 +169,7 @@ int main(int argc, char *argv[])
     goto out_with_dir;
 
   while ((dirent = readdir(dir))) {
-    long pid_number;
-    hwloc_pid_t pid;
+    long pid;
     char pidoutput[1024];
     char *end;
     char name[64] = "";
@@ -179,12 +178,10 @@ int main(int argc, char *argv[])
     long *tids = NULL; /* NULL if process is not threaded */
     hwloc_bitmap_t *tidcpusets = NULL;
 
-    pid_number = strtol(dirent->d_name, &end, 10);
+    pid = strtol(dirent->d_name, &end, 10);
     if (*end)
       /* Not a number */
       continue;
-
-    pid = hwloc_pid_from_number(pid_number, 0);
 
 #ifdef HWLOC_LINUX_SYS
     {
@@ -310,7 +307,7 @@ int main(int argc, char *argv[])
     }
 
     /* print the process */
-    print_task(topology, pid_number, name, cpuset, pidoutput[0] == '\0' ? NULL : pidoutput, 0);
+    print_task(topology, pid, name, cpuset, pidoutput[0] == '\0' ? NULL : pidoutput, 0);
     if (tids)
       /* print each tid we found (it's tidcpuset isn't NULL anymore) */
       for(i=0; tidcpusets[i] != NULL; i++) {
