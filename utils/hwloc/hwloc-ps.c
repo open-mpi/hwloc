@@ -27,6 +27,7 @@ static int show_threads = 0;
 static int get_last_cpu_location = 0;
 #define NO_ONLY_PID -1
 static long only_pid = NO_ONLY_PID;
+static char *only_name = NULL;
 static char *pidcmd = NULL;
 static int logical = 1;
 
@@ -36,6 +37,9 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Options:\n");
   fprintf (where, "  -a               Show all processes, including those that are not bound\n");
   fprintf (where, "  --pid <pid>      Only show process of pid number <pid>\n");
+#ifdef HWLOC_LINUX_SYS
+  fprintf (where, "  --name <name>    Only show processes whose name contains <name>\n");
+#endif
   fprintf (where, "  -l --logical     Use logical object indexes (default)\n");
   fprintf (where, "  -p --physical    Use physical object indexes\n");
   fprintf (where, "  -c --cpuset      Show cpuset instead of objects\n");
@@ -120,6 +124,9 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
           goto out;
 
         name[n] = 0;
+
+	if (only_name && !strstr(name, only_name))
+	  goto out;
       }
     }
 #endif /* HWLOC_LINUX_SYS */
@@ -172,7 +179,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 	      i++;
 	      if (hwloc_bitmap_iszero(cpuset))
 		continue;
-	      if (hwloc_bitmap_isequal(cpuset, topocpuset) && !show_all && only_pid == NO_ONLY_PID)
+	      if (hwloc_bitmap_isequal(cpuset, topocpuset) && !show_all && only_pid == NO_ONLY_PID && !only_name)
 		continue;
 	      boundthreads++;
 	    }
@@ -201,7 +208,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
       goto out;
 
     /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
-    if (hwloc_bitmap_isequal(cpuset, topocpuset) && (!tids || !boundthreads) && !show_all && only_pid == NO_ONLY_PID)
+    if (hwloc_bitmap_isequal(cpuset, topocpuset) && (!tids || !boundthreads) && !show_all && only_pid == NO_ONLY_PID && !only_name)
       goto out;
 
     pidoutput[0] = '\0';
@@ -283,6 +290,17 @@ int main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
       }
       only_pid = strtol(argv[1], NULL, 10);
+      opt = 1;
+    } else if (!strcmp(argv[0], "--name")) {
+      if (argc < 2) {
+	usage(callname, stdout);
+	exit(EXIT_FAILURE);
+      }
+#ifdef HWLOC_LINUX_SYS
+      only_name = argv[1];
+#else
+      fprintf (stderr, "Filtering by name is currently only supported on Linux\n");
+#endif
       opt = 1;
     } else if (!strcmp (argv[0], "--whole-system")) {
       flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
