@@ -25,6 +25,8 @@ static int show_cpuset = 0;
 static int show_all = 0;
 static int show_threads = 0;
 static int get_last_cpu_location = 0;
+#define NO_ONLY_PID -1
+static long only_pid = NO_ONLY_PID;
 static char *pidcmd = NULL;
 static int logical = 1;
 
@@ -33,6 +35,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Usage: %s [ options ] ...\n", name);
   fprintf (where, "Options:\n");
   fprintf (where, "  -a               Show all processes, including those that are not bound\n");
+  fprintf (where, "  --pid <pid>      Only show process of pid number <pid>\n");
   fprintf (where, "  -l --logical     Use logical object indexes (default)\n");
   fprintf (where, "  -p --physical    Use physical object indexes\n");
   fprintf (where, "  -c --cpuset      Show cpuset instead of objects\n");
@@ -169,7 +172,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 	      i++;
 	      if (hwloc_bitmap_iszero(cpuset))
 		continue;
-	      if (hwloc_bitmap_isequal(cpuset, topocpuset) && !show_all)
+	      if (hwloc_bitmap_isequal(cpuset, topocpuset) && !show_all && only_pid == NO_ONLY_PID)
 		continue;
 	      boundthreads++;
 	    }
@@ -198,7 +201,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
       goto out;
 
     /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
-    if (hwloc_bitmap_isequal(cpuset, topocpuset) && (!tids || !boundthreads) && !show_all)
+    if (hwloc_bitmap_isequal(cpuset, topocpuset) && (!tids || !boundthreads) && !show_all && only_pid == NO_ONLY_PID)
       goto out;
 
     pidoutput[0] = '\0';
@@ -276,6 +279,13 @@ int main(int argc, char *argv[])
 #else
       fprintf (stderr, "Listing threads is currently only supported on Linux\n");
 #endif
+    } else if (!strcmp(argv[0], "--pid")) {
+      if (argc < 2) {
+	usage(callname, stdout);
+	exit(EXIT_FAILURE);
+      }
+      only_pid = strtol(argv[1], NULL, 10);
+      opt = 1;
     } else if (!strcmp (argv[0], "--whole-system")) {
       flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
     } else if (!strcmp (argv[0], "--pid-cmd")) {
@@ -320,16 +330,22 @@ int main(int argc, char *argv[])
   if (!dir)
     goto out_with_topology;
 
-  while ((dirent = readdir(dir))) {
-    long pid;
-    char *end;
+  if (only_pid == NO_ONLY_PID) {
+    /* show all */
+    while ((dirent = readdir(dir))) {
+      long pid;
+      char *end;
 
-    pid = strtol(dirent->d_name, &end, 10);
-    if (*end)
-      /* Not a number */
-      continue;
+      pid = strtol(dirent->d_name, &end, 10);
+      if (*end)
+	/* Not a number */
+	continue;
 
-    one_process(topology, topocpuset, pid);
+      one_process(topology, topocpuset, pid);
+    }
+  } else {
+    /* show only one */
+    one_process(topology, topocpuset, only_pid);
   }
 
   err = 0;

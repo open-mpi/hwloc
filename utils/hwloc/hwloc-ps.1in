@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010 inria.  All rights reserved.
+.\" Copyright © 2010-2017 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-PS "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
@@ -23,6 +23,10 @@ hwloc-ps \- List currently-running processes or threads that are bound
 \fB\-a\fR
 list all processes, even those that are not bound to any
 specific part of the machine.
+.TP
+\fB\-\-pid <pid>\fR
+Only show process of PID \fI<pid>\fR,
+even if it is not bound to any specific part of the machine.
 .TP
 \fB\-p\fR \fB\-\-physical\fR
 report OS/physical indexes instead of logical indexes
@@ -97,7 +101,7 @@ If a process is bound, it appears in the default output:
     4759	Core:0		myprogram
 
 If a process is not bound but 3 of his 4 threads are bound,
-it only appears in the thread-aware output:
+it only appears in the thread-aware output (or if explicitly selected):
 
     $ utils/hwloc-ps
 
@@ -107,6 +111,9 @@ it only appears in the thread-aware output:
      4761	PU:0
      4762	PU:2
      4765	PU:1
+
+    $ utils/hwloc-ps --pid 4759
+    4759	Machine:0		myprogram
 
 To display the binding of already running MPI processes (launched by
 Open MPI) and append their MPI rank (in MPI_COMM_WORLD) to each line:
