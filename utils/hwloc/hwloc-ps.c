@@ -31,6 +31,8 @@ static char *only_name = NULL;
 static char *pidcmd = NULL;
 static int logical = 1;
 
+#define TIDNAME_MAX 16 /* specified in pthread_setname_np.3 */
+
 void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] ...\n", name);
@@ -96,7 +98,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
     char name[64] = "";
     /* management of threads */
     unsigned boundthreads = 0, i;
-    struct hwlocpstid { long tid; hwloc_bitmap_t cpuset; } *tids = NULL;
+    struct hwlocpstid { long tid; hwloc_bitmap_t cpuset; char name[TIDNAME_MAX]; } *tids = NULL;
     hwloc_bitmap_t cpuset;
     char *end;
 
@@ -183,6 +185,25 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 		continue;
 	      boundthreads++;
 
+	      {
+		unsigned path2len = pathlen + 1 + 21 + 1 + 4 + 1;
+		char *path2 = malloc(path2len);
+		if (path2) {
+		  int commfile;
+		  snprintf(path2, path2len, "%s/%ld/comm", path, tid);
+		  commfile = open(path2, O_RDWR);
+		  if (commfile >= 0) {
+		    read(commfile, tids[i].name, TIDNAME_MAX);
+		    close(commfile);
+		    tids[i].name[TIDNAME_MAX-1] = '\0';
+		    end = strchr(tids[i].name, '\n');
+		    if (end)
+		      *end = '\0';
+		  }
+		  free(path2);
+		}
+	      }
+
 	      if (i == n)
 		/* ignore the lastly created threads, we need cpuset==NULL if the last slot */
 		break;
@@ -236,7 +257,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
     if (tids)
       /* print each tid we found with a cpuset, the n+1-th is NULL */
       for(i=0; tids[i].cpuset != NULL; i++) {
-	print_task(topology, tids[i].tid, "", tids[i].cpuset, NULL, 1);
+	print_task(topology, tids[i].tid, tids[i].name, tids[i].cpuset, NULL, 1);
 	hwloc_bitmap_free(tids[i].cpuset);
       }
 
