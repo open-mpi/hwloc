@@ -182,6 +182,10 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 	      if (hwloc_bitmap_isequal(cpuset, topocpuset) && !show_all && only_pid == NO_ONLY_PID && !only_name)
 		continue;
 	      boundthreads++;
+
+	      if (i == n)
+		/* ignore the lastly created threads, we need cpuset==NULL if the last slot */
+		break;
 	    }
 	  } else {
 	    /* failed to alloc, behave as if there were no threads */
