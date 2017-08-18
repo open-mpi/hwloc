@@ -43,7 +43,9 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -l --logical     Use logical object indexes (default)\n");
   fprintf (where, "  -p --physical    Use physical object indexes\n");
   fprintf (where, "  -c --cpuset      Show cpuset instead of objects\n");
+#ifdef HWLOC_LINUX_SYS
   fprintf (where, "  -t --threads     Show threads\n");
+#endif
   fprintf (where, "  -e --get-last-cpu-location\n");
   fprintf (where, "                   Retrieve the last processors where the tasks ran\n");
   fprintf (where, "  --pid-cmd <cmd>  Append the output of <cmd> <pid> to each PID line\n");
