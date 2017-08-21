@@ -419,16 +419,26 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
     if (nlgrps > 1) {
       uint64_t *distances = calloc(curlgrp*curlgrp, sizeof(uint64_t));
       unsigned i, j;
-      for (i = 0; i < curlgrp; i++) {
-	for (j = 0; j < curlgrp; j++)
-          distances[i*curlgrp+j] = (uint64_t) lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
+      if (distances) {
+	for (i = 0; i < curlgrp; i++)
+	  for (j = 0; j < curlgrp; j++) {
+	    int latency = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
+	    if (latency < 0) {
+	      /* FIXME: if errno = ESRCH because some NUMA nodes are unavailable, we could reduce the matrix instead of ignoring */
+	      free(distances);
+	      goto done;
+            }
+            distances[i*curlgrp+j] = (uint64_t) latency;
+        }
+	hwloc_internal_distances_add(topology, curlgrp, glob_lgrps, distances,
+				     HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
+				     HWLOC_DISTANCES_ADD_FLAG_GROUP);
+	glob_lgrps = NULL; /* dont free it below */
       }
-      hwloc_internal_distances_add(topology, curlgrp, glob_lgrps, distances,
-				   HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
-				   HWLOC_DISTANCES_ADD_FLAG_GROUP);
-    } else
+    }
 #endif /* HAVE_DECL_LGRP_LATENCY_COOKIE */
-      free(glob_lgrps);
+done:
+    free(glob_lgrps);
   }
   lgrp_fini(cookie);
 }
