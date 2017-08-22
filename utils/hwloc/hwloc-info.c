@@ -407,6 +407,8 @@ main (int argc, char *argv[])
         char *colon;
         enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_ALL;
         int all = 0;
+	int allcaches = 0;
+	int allicaches = 0;
         if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
@@ -423,20 +425,28 @@ main (int argc, char *argv[])
 	  else if (!strcmp(colon+1, "important"))
 	    filter = HWLOC_TYPE_FILTER_KEEP_IMPORTANT;
 	  else {
-	    fprintf(stderr, "Unsupported filtering kind `%s' passed to --ignore.\n", colon+1);
+	    fprintf(stderr, "Unsupported filtering kind `%s' passed to --filter.\n", colon+1);
 	    usage (callname, stderr);
 	    exit(EXIT_FAILURE);
 	  }
         }
         if (!strcmp(argv[1], "all"))
           all = 1;
+	else if (!strcmp(argv[1], "cache"))
+	  allcaches = 1;
+	else if (!strcmp(argv[1], "icache"))
+	  allicaches = 1;
         else if (hwloc_type_sscanf(argv[1], &type, NULL, 0) < 0) {
-          fprintf(stderr, "Unsupported type `%s' passed to --ignore.\n", argv[1]);
+          fprintf(stderr, "Unsupported type `%s' passed to --filter.\n", argv[1]);
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
         }
         if (all)
           hwloc_topology_set_all_types_filter(topology, filter);
+	else if (allcaches)
+	  hwloc_topology_set_cache_types_filter(topology, filter);
+	else if (allicaches)
+	  hwloc_topology_set_icache_types_filter(topology, filter);
         else
           hwloc_topology_set_type_filter(topology, type, filter);
         opt = 1;
