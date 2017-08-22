@@ -1226,7 +1226,7 @@ output_draw(struct lstopo_output *loutput)
     /* Draw legend */
     if (legend && fontsize) {
       offset = rlud->height + gridsize;
-      methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
+      methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
       for(i=0; i<ntext; i++, offset += gridsize + fontsize)
 	methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, text[i]);
       for(i=0; i<loutput->legend_append_nr; i++, offset += gridsize + fontsize)
