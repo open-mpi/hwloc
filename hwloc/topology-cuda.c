@@ -81,7 +81,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend)
     cuda_device->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
     cuda_device->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
-    cuda_device->subtype = strdup("CUDA");
+    cuda_device->subtype = "CUDA";
     hwloc_obj_add_info(cuda_device, "Backend", "CUDA");
     hwloc_obj_add_info(cuda_device, "GPUVendor", "NVIDIA Corporation");
 

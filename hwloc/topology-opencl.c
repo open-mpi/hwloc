@@ -88,7 +88,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
       osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
-      osdev->subtype = strdup("OpenCL");
+      osdev->subtype = "OpenCL";
       hwloc_obj_add_info(osdev, "Backend", "OpenCL");
 
       clGetDeviceInfo(device_ids[i], CL_DEVICE_TYPE, sizeof(type), &type, NULL);

@@ -502,7 +502,6 @@ static int look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsi
 
     cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
     if (!cache) {
-      errno = ENOMEM;
       return -2;
     }
 
@@ -562,10 +561,8 @@ static int look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsi
     if (level) {
       infos->levels = level;
       infos->otherids = malloc(level * sizeof(*infos->otherids));
-      if (!infos->otherids) {
-        errno = ENOMEM;
+      if (!infos->otherids)
         return -2;
-      }
       for (level = 0; ; level++) {
 	ecx = level;
 	eax = 0x0b;
@@ -678,10 +675,10 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   unsigned nbprocs = data->nbprocs;
+  int ret = 0;
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
-  if (!complete_cpuset) {
+  if (!complete_cpuset)
     return -2;
-  }
   unsigned i, j, l, level;
   int one = -1;
   hwloc_bitmap_t remaining_cpuset;
@@ -737,7 +734,8 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
 	/* Annotate packages previously-existing packages */
 	hwloc_bitmap_t set = hwloc_bitmap_alloc();
 	if (!set) {
-	  return -2;
+          ret = -2;
+          goto l_done;
 	}
 	hwloc_bitmap_set(set, i);
 	package = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PACKAGE, NULL);
@@ -773,9 +771,8 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
       }
 
       node_cpuset = hwloc_bitmap_alloc();
-      if (!node_cpuset) {
+      if (!node_cpuset)
         return -2;
-      }
       for (j = i; j < nbprocs; j++) {
 	if (infos[j].nodeid == (unsigned) -1) {
 	  hwloc_bitmap_clr(remaining_cpuset, j);
@@ -789,13 +786,15 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
       }
       node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, nodeid);
       if (!node) {
-        return -2;
+        ret = -2;
+        goto l_done;
       }
       node->cpuset = node_cpuset;
       node->nodeset = hwloc_bitmap_alloc();
       if (!node->nodeset) {
         hwloc_free_unlinked_object(node);
-        return -1;
+        ret = -2;
+        goto l_done;
       }
       hwloc_bitmap_set(node->nodeset, nodeid);
       hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
@@ -834,7 +833,7 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
 	}
 	unit = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, unitid);
 	unit->cpuset = unit_cpuset;
-	unit->subtype = strdup("ComputeUnit");
+	unit->subtype = "ComputeUnit";
 	unit->attr->group.kind = HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT;
 	hwloc_debug_1arg_bitmap("os unit %u has cpuset %s\n",
 				unitid, unit_cpuset);
@@ -961,8 +960,10 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
 	}
 
 	puset = hwloc_bitmap_alloc();
-	if (!puset)
-	  return -2;
+	if (!puset) {
+          ret = -2;
+          goto l_done;
+        }
 
 	hwloc_bitmap_set(puset, i);
 	cache = hwloc_get_next_obj_covering_cpuset_by_type(topology, puset, otype, NULL);
@@ -981,7 +982,8 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
 	  /* Now look for others sharing it */
 	  cache_cpuset = hwloc_bitmap_alloc();
 	  if (!cache_cpuset) {
-	    return -2;
+            ret = -2;
+            goto l_done;
 	  }
 	  for (j = i; j < nbprocs; j++) {
 	    unsigned l2;
@@ -1001,7 +1003,9 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
 	  }
 	  cache = hwloc_alloc_setup_object(topology, otype, -1);
 	  if (!cache) {
-	    return -2;
+            hwloc_bitmap_free(cache_cpuset);
+            ret = -2;
+            goto l_done;
 	  }
 	  cache->attr->cache.depth = level;
 	  cache->attr->cache.size = infos[i].cache[l].size;
@@ -1020,10 +1024,10 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
   }
 
   /* FIXME: if KNL and L2 disabled, add tiles instead of L2 */
-
+l_done:
   hwloc_bitmap_free(remaining_cpuset);
   hwloc_bitmap_free(complete_cpuset);
-  return 0;
+  return ret;
 }
 
 static int
@@ -1051,6 +1055,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
     }
     set = hwloc_bitmap_alloc();
     if (!set) {
+      hwloc_bitmap_free(orig_cpuset);
       errno = ENOMEM;
       return -2;
     }
@@ -1071,6 +1076,8 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
 
     int ret = look_proc(backend, &infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
     if (ret < 0) {
+      hwloc_bitmap_free(set);
+      hwloc_bitmap_free(orig_cpuset);
       return ret;
     }
 
@@ -1431,7 +1438,7 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
 				const void *_data2 __hwloc_attribute_unused,
 				const void *_data3 __hwloc_attribute_unused)
 {
-  struct hwloc_backend *backend;
+  struct hwloc_backend *backend = NULL;
   struct hwloc_x86_backend_data_s *data;
   const char *src_cpuiddump_path;
 
@@ -1442,6 +1449,7 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
   data = malloc(sizeof(*data));
   if (!data) {
     errno = ENOMEM;
+    backend->private_data = NULL;
     goto out_with_backend;
   }
 
@@ -1453,7 +1461,6 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
   data->is_knl = 0;
   data->apicid_set = hwloc_bitmap_alloc();
   if (!data->apicid_set) {
-    errno = ENOMEM;
     goto out_with_backend;
   }
   data->apicid_unique = 1;
@@ -1479,7 +1486,10 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
   return backend;
 
  out_with_backend:
-  free(backend);
+  if (backend) {
+    free(backend->private_data);
+    free(backend);
+  }
  out:
   return NULL;
 }

@@ -38,12 +38,15 @@ hwloc_look_darwin(struct hwloc_backend *backend)
   int64_t cachelinesize;
   int64_t memsize;
   char cpumodel[64];
+  int ret = 0;
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
     return -1;
 
-  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+  ret = hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+  if (ret < 0)
+    return ret;
 
   if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
     return -1;
@@ -76,7 +79,13 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE))
       for (i = 0; i < npackages; i++) {
         obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, i);
+        if (!obj)
+          return -2;
         obj->cpuset = hwloc_bitmap_alloc();
+        if (!obj->cpuset) {
+          hwloc_free_unlinked_object(obj);
+          return -2;
+        }
         for (cpu = i*logical_per_package; cpu < (i+1)*logical_per_package; cpu++)
           hwloc_bitmap_set(obj->cpuset, cpu);
 
@@ -99,7 +108,13 @@ hwloc_look_darwin(struct hwloc_backend *backend)
       if (!(logical_per_package % cores_per_package))
         for (i = 0; i < npackages * cores_per_package; i++) {
           obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, i);
+          if (!obj)
+            return -2;
           obj->cpuset = hwloc_bitmap_alloc();
+          if (!obj->cpuset) {
+            hwloc_free_unlinked_object(obj);
+            return -2;
+          }
           for (cpu = i*(logical_per_package/cores_per_package);
                cpu < (i+1)*(logical_per_package/cores_per_package);
                cpu++)
@@ -145,16 +160,21 @@ hwloc_look_darwin(struct hwloc_backend *backend)
     uint64_t *cachesize = NULL;
     uint32_t *cacheconfig32 = NULL;
 
+    obj = NULL;
+    
     cacheconfig = malloc(sizeof(uint64_t) * n);
     if (NULL == cacheconfig) {
+        ret = -2;
         goto out;
     }
     cachesize = malloc(sizeof(uint64_t) * n);
     if (NULL == cachesize) {
+        ret = -2;
         goto out;
     }
     cacheconfig32 = malloc(sizeof(uint32_t) * n);
     if (NULL == cacheconfig32) {
+        ret = -2;
         goto out;
     }
 
@@ -193,12 +213,28 @@ hwloc_look_darwin(struct hwloc_backend *backend)
         for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
 	  if (!i) {
 	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, j);
+            if (!obj) {
+              ret = -2;
+              goto out;
+            }
             obj->nodeset = hwloc_bitmap_alloc();
+            if (!obj->nodeset) {
+              ret = -2;
+              goto out;
+            }
             hwloc_bitmap_set(obj->nodeset, j);
           } else {
 	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE+i-1, -1);
 	  }
+          if (!obj) {
+            ret = -2;
+            goto out;
+          }
           obj->cpuset = hwloc_bitmap_alloc();
+          if (!obj->cpuset) {
+            ret = -2;
+            goto out;
+          }
           for (cpu = j*cacheconfig[i];
                cpu < ((j+1)*cacheconfig[i]);
                cpu++)
@@ -209,7 +245,15 @@ hwloc_look_darwin(struct hwloc_backend *backend)
             /* FIXME assuming that L1i and L1d are shared the same way. Darwin
              * does not yet provide a way to know.  */
             hwloc_obj_t l1i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
+            if (!l1i) {
+              ret = -2;
+              goto out;
+            }
             l1i->cpuset = hwloc_bitmap_dup(obj->cpuset);
+            if (!l1i->cpuset) {
+              ret = -2;
+              goto out;
+            }
             hwloc_debug_1arg_bitmap("L1icache %u has cpuset %s\n",
                 j, l1i->cpuset);
             l1i->attr->cache.depth = i;
@@ -240,6 +284,10 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 	    obj->memory.local_memory = cachesize[i];
 	    obj->memory.page_types_len = 2;
 	    obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
+            if (!obj->memory.page_types) {
+              ret = -2;
+              goto out;
+            }
 	    memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
 	    obj->memory.page_types[0].size = hwloc_getpagesize();
 #if HAVE_DECL__SC_LARGE_PAGESIZE
@@ -258,6 +306,10 @@ hwloc_look_darwin(struct hwloc_backend *backend)
     free(cacheconfig);
     free(cachesize);
     free(cacheconfig32);
+    if (ret < 0) {
+      hwloc_free_unlinked_object(obj);
+      return ret;
+    }
   }
 
 
@@ -266,7 +318,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Darwin");
   hwloc_add_uname_info(topology, NULL);
-  return 0;
+  return ret;
 }
 
 void

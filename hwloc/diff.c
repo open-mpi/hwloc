@@ -405,8 +405,7 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 			for(i=0; i<obj->infos_count; i++) {
 				if (!strcmp(obj->infos[i].name, name)
 				    && !strcmp(obj->infos[i].value, oldvalue)) {
-					free(obj->infos[i].value);
-					obj->infos[i].value = strdup(newvalue);
+					obj->infos[i].value = newvalue;
 					found = 1;
 					break;
 				}

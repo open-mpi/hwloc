@@ -356,7 +356,7 @@ struct hwloc_obj_memory_s {
 struct hwloc_obj {
   /* physical information */
   hwloc_obj_type_t type;		/**< \brief Type of object */
-  char *subtype;			/**< \brief Subtype string to better describe the type field. */
+  const char *subtype;			/**< \brief Subtype string to better describe the type field. */
 
   unsigned os_index;			/**< \brief OS-provided physical index number.
 					 * It is not guaranteed unique across the entire machine,
@@ -579,8 +579,8 @@ union hwloc_obj_attr_u {
  * \sa hwlocality_info_attr
  */
 struct hwloc_obj_info_s {
-  char *name;	/**< \brief Info name */
-  char *value;	/**< \brief Info value */
+  const char *name;	/**< \brief Info name */
+  const char *value;	/**< \brief Info value */
 };
 
 /** @} */

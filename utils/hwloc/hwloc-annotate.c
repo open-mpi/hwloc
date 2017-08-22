@@ -46,10 +46,6 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 	unsigned i,j;
 	if (clearinfos) {
 		/* this may be considered dangerous, applications should not modify objects directly */
-		for(i=0; i<obj->infos_count; i++) {
-			free(obj->infos[i].name);
-			free(obj->infos[i].value);
-		}
 		free(obj->infos);
 		obj->infos = NULL;
 		obj->infos_count = 0;
@@ -63,8 +59,6 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 			for(i=0, j=0; i<obj->infos_count; i++) {
 				if (!strcmp(infoname, obj->infos[i].name)) {
 					/* remove info */
-					free(obj->infos[i].name);
-					free(obj->infos[i].value);
 					obj->infos[i].name = NULL;
 				} else {
 					if (i != j) {
