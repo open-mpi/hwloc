@@ -2008,6 +2008,15 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
   }
 }
 
+/* reset type depth before modifying levels (either reconnecting or filtering/keep_structure) */
+static void
+hwloc_reset_normal_type_depths(hwloc_topology_t topology)
+{
+  unsigned i;
+  for (i=HWLOC_OBJ_SYSTEM; i<HWLOC_OBJ_MISC; i++)
+    topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
+}
+
 /* compare i-th and i-1-th levels structure */
 static int
 hwloc_compare_levels_structure(hwloc_topology_t topology, unsigned i)
@@ -2157,8 +2166,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
 
   if (res > 0) {
     /* Update object and type depths if some levels were removed */
-    for(i=0; i<topology->nb_levels; i++)
-      topology->type_depth[topology->levels[i][0]->type] = HWLOC_TYPE_DEPTH_UNKNOWN;
+    hwloc_reset_normal_type_depths(topology);
     for(i=0; i<topology->nb_levels; i++) {
       hwloc_obj_type_t type = topology->levels[i][0]->type;
       for(j=0; j<topology->level_nbobjects[i]; j++)
@@ -2503,8 +2511,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
   topology->nb_levels = 1;
 
   /* initialize all non-IO/non-Misc depths to unknown */
-  for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_MISC; l++)
-    topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  hwloc_reset_normal_type_depths(topology);
 
   /* initialize root type depth */
   root = topology->levels[0][0];
@@ -2927,7 +2934,6 @@ void
 hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
   struct hwloc_obj *root_obj;
-  unsigned l;
 
   /* reset support */
   memset(&topology->binding_hooks, 0, sizeof(topology->binding_hooks));
@@ -2950,8 +2956,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_MISC == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_MISC));
 
   /* sane values to type_depth */
-  for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_MISC; l++)
-    topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  hwloc_reset_normal_type_depths(topology);
   topology->type_depth[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_DEPTH_BRIDGE;
   topology->type_depth[HWLOC_OBJ_PCI_DEVICE] = HWLOC_TYPE_DEPTH_PCI_DEVICE;
   topology->type_depth[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_DEPTH_OS_DEVICE;
