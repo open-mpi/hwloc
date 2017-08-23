@@ -2025,7 +2025,7 @@ hwloc_compare_levels_structure(hwloc_topology_t topology, unsigned i)
   if (topology->level_nbobjects[i-1] != topology->level_nbobjects[i])
     return -1;
   for(j=0; j<topology->level_nbobjects[i]; j++)
-    if (topology->levels[i-1][0]->arity != 1)
+    if (topology->levels[i-1][j]->arity != 1)
       return -1;
   /* same number of objects with arity 1 above, no problem */
   return 0;
