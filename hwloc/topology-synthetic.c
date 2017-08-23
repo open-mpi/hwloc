@@ -1179,7 +1179,8 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   while (arity) {
     /* for each level */
     obj = obj->first_child;
-    if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
+    if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
+	|| flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
       res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, hwloc_type_name(obj->type), arity);
     } else {
       char types[64];
