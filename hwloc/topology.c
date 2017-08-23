@@ -3350,7 +3350,8 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
 			  hwloc_bitmap_t droppedcpuset, hwloc_bitmap_t droppednodeset)
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
-  int modified = hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset);
+  int modified = hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset)
+    || hwloc_bitmap_iszero(obj->complete_cpuset);
 
   hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
   hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
