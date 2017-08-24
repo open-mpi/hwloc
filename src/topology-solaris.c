@@ -410,41 +410,61 @@ lgrp_list_allowed(struct hwloc_topology *topology)
   return;
 }
 
+/* build all NUMAs (even if disallowed) and get global cpuset+nodeset using LGRP_VIEW_OS */
 static void
-browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hwloc_obj_t *glob_lgrps, unsigned *curlgrp)
+lgrp_build_numanodes(struct hwloc_topology *topology,
+		     lgrp_cookie_t cookie, lgrp_id_t root,
+		     hwloc_obj_t *nodes, unsigned *nr_nodes)
 {
-  int n;
-  hwloc_obj_t obj;
-  lgrp_mem_size_t mem_size;
+  int npids, nnids;
+  int i, j, n;
+  processorid_t *pids;
+  lgrp_id_t *nids;
 
-  n = lgrp_cpus(cookie, lgrp, NULL, 0, LGRP_CONTENT_HIERARCHY);
-  if (n == -1)
-    return;
+  /* get the max number of PUs */
+  npids = lgrp_cpus(cookie, root, NULL, 0, LGRP_CONTENT_HIERARCHY);
+  if (npids < 0) {
+    hwloc_debug("lgrp_cpus failed: %s\n", strerror(errno));
+    goto out;
+  }
+  hwloc_debug("root lgrp contains %d PUs\n", npids);
+  assert(npids > 0);
 
-  /* Is this lgrp a NUMA node? */
-  if ((mem_size = lgrp_mem_size(cookie, lgrp, LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT)) > 0)
-  {
-    int i;
-    processorid_t *cpuids;
-    cpuids = malloc(sizeof(processorid_t) * n);
-    assert(cpuids != NULL);
+  /* allocate a single array that will be large enough for lgroup cpus below */
+  pids = malloc(npids * sizeof(*pids));
+  if (!pids)
+    goto out;
 
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, lgrp);
-    obj->nodeset = hwloc_bitmap_alloc();
-    hwloc_bitmap_set(obj->nodeset, lgrp);
-    obj->cpuset = hwloc_bitmap_alloc();
-    glob_lgrps[(*curlgrp)++] = obj;
+  /* list NUMA nodes */
+  nnids = lgrp_resources(cookie, root, NULL, 0, LGRP_RSRC_MEM);
+  if (nnids < 0) {
+    hwloc_debug("lgrp_resources failed: %s\n", strerror(errno));
+    goto out_with_pids;
+  }
+  hwloc_debug("root lgrp contains %d NUMA nodes\n", nnids);
+  assert(nnids > 0);
 
-    lgrp_cpus(cookie, lgrp, cpuids, n, LGRP_CONTENT_HIERARCHY);
-    for (i = 0; i < n ; i++) {
-      hwloc_debug("node %ld's cpu %d is %d\n", lgrp, i, cpuids[i]);
-      hwloc_bitmap_set(obj->cpuset, cpuids[i]);
-    }
-    hwloc_debug_1arg_bitmap("node %ld has cpuset %s\n",
-	lgrp, obj->cpuset);
+  nids = malloc(nnids * sizeof(*nids));
+  if (!nids)
+    goto out_with_pids;
 
+  n = lgrp_resources(cookie, root, nids, nnids, LGRP_RSRC_MEM);
+  assert(n == nnids);
+
+  for(i=0; i<nnids; i++) {
+    hwloc_obj_t obj;
+    lgrp_mem_size_t mem_size;
+    hwloc_debug("root lgrp contains NUMA node #%d = P#%ld\n", i, nids[i]);
+    mem_size = lgrp_mem_size(cookie, nids[i], LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT);
     /* or LGRP_MEM_SZ_FREE */
-    hwloc_debug("node %ld has %lldkB\n", lgrp, mem_size/1024);
+
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_NUMANODE, nids[i]);
+    obj->nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_set(obj->nodeset, nids[i]);
+    obj->cpuset = hwloc_bitmap_alloc();
+    nodes[(*nr_nodes)++] = obj;
+
+    hwloc_debug("NUMA node %ld has %lldkB\n", nids[i], mem_size/1024);
     obj->memory.local_memory = mem_size;
     obj->memory.page_types_len = 2;
     obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
@@ -453,26 +473,27 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
 #if HAVE_DECL__SC_LARGE_PAGESIZE
     obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-    hwloc_insert_object_by_cpuset(topology, obj);
-    free(cpuids);
-  }
 
-  n = lgrp_children(cookie, lgrp, NULL, 0);
-  {
-    lgrp_id_t *lgrps;
-    int i;
-
-    lgrps = malloc(sizeof(lgrp_id_t) * n);
-    assert(lgrps != NULL);
-    lgrp_children(cookie, lgrp, lgrps, n);
-    hwloc_debug("lgrp %ld has %d children\n", lgrp, n);
-    for (i = 0; i < n ; i++)
-      {
-	browse(topology, cookie, lgrps[i], glob_lgrps, curlgrp);
+    n = lgrp_cpus(cookie, nids[i], pids, npids, LGRP_CONTENT_HIERARCHY);
+    if (n < 0) {
+      hwloc_debug("lgrp_cpus on NUMA node failed: %s\n", strerror(errno));
+    } else {
+      hwloc_debug("NUMA node %ld contains %d PUs\n", nids[i], n);
+      for (j = 0; j < n ; j++) {
+	hwloc_debug("node %ld's cpu %d is %d\n", nids[i], j, pids[j]);
+	hwloc_bitmap_set(obj->cpuset, pids[j]);
       }
-    hwloc_debug("lgrp %ld's children done\n", lgrp);
-    free(lgrps);
+      hwloc_debug_1arg_bitmap("node %ld has cpuset %s\n",
+			      nids[i], obj->cpuset);
+    }
+
+    hwloc_insert_object_by_cpuset(topology, obj);
   }
+
+ out_with_pids:
+  free(pids);
+ out:
+  return;
 }
 
 static void
@@ -495,7 +516,9 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
   root = lgrp_root(cookie);
   if (nlgrps > 0) {
     hwloc_obj_t *glob_lgrps = calloc(nlgrps, sizeof(hwloc_obj_t));
-    browse(topology, cookie, root, glob_lgrps, &curlgrp);
+
+    lgrp_build_numanodes(topology, cookie, root, glob_lgrps, &curlgrp);
+
 #if HAVE_DECL_LGRP_LATENCY_COOKIE
     if (nlgrps > 1) {
       float *distances = calloc(curlgrp*curlgrp, sizeof(float));
@@ -953,6 +976,7 @@ hwloc_look_solaris(struct hwloc_backend *backend)
   if (hwloc_look_kstat(topology) > 0)
     alreadypus = 1;
 #endif /* HAVE_LIBKSTAT */
+
   if (!alreadypus)
     hwloc_setup_pu_level(topology, nbprocs);
 
