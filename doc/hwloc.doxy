@@ -41,7 +41,7 @@ information, with knowledge of cpusets, ScaleMP vSMP support, etc.)
 on all supported hardware, including Intel Xeon Phi
 (KNL and KNC, either standalone or as a coprocessor)
 and NumaScale NumaConnect.</li>
-<li>Solaris</li>
+<li>Solaris (with support for processor sets and logical domains)</li>
 <li>AIX</li>
 <li>Darwin / OS X</li>
 <li>FreeBSD and its variants (such as kFreeBSD/GNU)</li>

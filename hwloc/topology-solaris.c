@@ -32,9 +32,6 @@
 #  include <sys/lgrp_user.h>
 #endif
 
-/* TODO: use psets? (only for root)
- */
-
 static int
 hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_bitmap_t hwloc_set, int flags)
 {
@@ -326,6 +323,79 @@ hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size
 #endif
 
 #ifdef HAVE_LIBLGRP
+
+/* list the allowed PUs and NUMA Nodes using LGRP_VIEW_CALLER */
+static void
+lgrp_list_allowed(struct hwloc_topology *topology)
+{
+  lgrp_cookie_t cookie;
+  lgrp_id_t root;
+  int npids, nnids;
+  int i, n;
+  processorid_t *pids;
+  lgrp_id_t *nids;
+
+  cookie = lgrp_init(LGRP_VIEW_CALLER);
+  if (cookie == LGRP_COOKIE_NONE) {
+    hwloc_debug("lgrp_init LGRP_VIEW_CALLER failed: %s\n", strerror(errno));
+    goto out;
+  }
+  root = lgrp_root(cookie);
+
+  /* list allowed PUs */
+  npids = lgrp_cpus(cookie, root, NULL, 0, LGRP_CONTENT_HIERARCHY);
+  if (npids < 0) {
+    hwloc_debug("lgrp_cpus failed: %s\n", strerror(errno));
+    goto out_with_cookie;
+  }
+  hwloc_debug("root lgrp contains %d allowed PUs\n", npids);
+  assert(npids > 0);
+
+  pids = malloc(npids * sizeof(*pids));
+  if (!pids)
+    goto out_with_cookie;
+
+  n = lgrp_cpus(cookie, root, pids, npids, LGRP_CONTENT_HIERARCHY);
+  assert(n == npids);
+
+  hwloc_bitmap_zero(topology->levels[0][0]->allowed_cpuset);
+
+  for(i=0; i<npids; i++) {
+    hwloc_debug("root lgrp contains allowed PU #%d = P#%d\n", i, pids[i]);
+    hwloc_bitmap_set(topology->levels[0][0]->allowed_cpuset, pids[i]);
+  }
+  free(pids);
+
+  /* list allowed NUMA nodes */
+  nnids = lgrp_resources(cookie, root, NULL, 0, LGRP_RSRC_MEM);
+  if (nnids < 0) {
+    hwloc_debug("lgrp_resources failed: %s\n", strerror(errno));
+    goto out_with_cookie;
+  }
+  hwloc_debug("root lgrp contains %d allowed NUMA nodes\n", nnids);
+  assert(nnids > 0);
+
+  nids = malloc(nnids * sizeof(*nids));
+  if (!nids)
+    goto out_with_cookie;
+
+  n = lgrp_resources(cookie, root, nids, nnids, LGRP_RSRC_MEM);
+  assert(n == nnids);
+
+  hwloc_bitmap_zero(topology->levels[0][0]->allowed_nodeset);
+
+  for(i=0; i<nnids; i++) {
+    hwloc_debug("root lgrp contains allowed NUMA node #%d = P#%ld\n", i, nids[i]);
+    hwloc_bitmap_set(topology->levels[0][0]->allowed_nodeset, nids[i]);
+  }
+  free(nids);
+
+ out_with_cookie:
+  lgrp_fini(cookie);
+ out:
+  return;
+}
+
 static void
 browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hwloc_obj_t *glob_lgrps, unsigned *curlgrp)
 {
@@ -399,10 +469,9 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
   int nlgrps;
   lgrp_id_t root;
 
-  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
-    cookie = lgrp_init(LGRP_VIEW_OS);
-  else
-    cookie = lgrp_init(LGRP_VIEW_CALLER);
+  lgrp_list_allowed(topology);
+
+  cookie = lgrp_init(LGRP_VIEW_OS);
   if (cookie == LGRP_COOKIE_NONE)
     {
       hwloc_debug("lgrp_init failed: %s\n", strerror(errno));
