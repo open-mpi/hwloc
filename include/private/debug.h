@@ -35,7 +35,8 @@ static __hwloc_inline int hwloc_debug_enabled(void)
 }
 #endif
 
-#ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
+#if HWLOC_HAVE_ATTRIBUTE_FORMAT
+/* FIXME: use __hwloc_attribute_format from private/private.h but that header cannot be used in plugins */
 static __hwloc_inline void hwloc_debug(const char *s __hwloc_attribute_unused, ...) __attribute__ ((__format__ (__printf__, 1, 2)));
 #endif
 
