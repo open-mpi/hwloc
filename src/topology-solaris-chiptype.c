@@ -140,7 +140,9 @@ static const char* sparc_modes[] = {
 #define MODE_M7                 11
     "M7",
 #define MODE_S7                 12
-    "S7"
+    "S7",
+#define MODE_M8                 13
+    "M8"
 };
 
 /*****************************************************************************
@@ -291,6 +293,10 @@ static void assign_string_value(int index, char* string_val) {
     else if (strncasecmp(string_val, "SPARC-S7",
 			 PICL_PROPNAMELEN_MAX) == 0) {
       dss_chip_mode = MODE_S7;
+    }
+    else if (strncasecmp(string_val, "SPARC-M8",
+			 PICL_PROPNAMELEN_MAX) == 0) {
+      dss_chip_mode = MODE_M8;
     }
   } else if (index == INDEX_PROCESSOR_TYPE) {  /* ProcessorType */
       strncpy(&dss_chip_type[0], string_val, PICL_PROPNAMELEN_MAX);
