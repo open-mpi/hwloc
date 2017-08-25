@@ -132,10 +132,13 @@ static const char* sparc_modes[] = {
     "SPARC64_VI",
     "T1",
     "T2",
+/* needs T4, T3 and T2+ ? */
     "SPARC64_VII",
     "ROCK",
-    "T5"
-/* needs T4, T3 and T2+ ? */
+    "T5",
+    "T6",
+    "M7",
+    "S7"
 };
 
 /*****************************************************************************
@@ -274,6 +277,18 @@ static void assign_string_value(int index, char* string_val) {
     else if (strncasecmp(string_val, "SPARC-T5",
 			 PICL_PROPNAMELEN_MAX) == 0) {
       dss_chip_mode = 9;
+    }
+    else if (strncasecmp(string_val, "SPARC-T6", /* not actually tested */
+			 PICL_PROPNAMELEN_MAX) == 0) {
+      dss_chip_mode = 10;
+    }
+    else if (strncasecmp(string_val, "SPARC-M7",
+			 PICL_PROPNAMELEN_MAX) == 0) {
+      dss_chip_mode = 11;
+    }
+    else if (strncasecmp(string_val, "SPARC-S7",
+			 PICL_PROPNAMELEN_MAX) == 0) {
+      dss_chip_mode = 12;
     }
   } else if (index == INDEX_PROCESSOR_TYPE) {  /* ProcessorType */
       strncpy(&dss_chip_type[0], string_val, PICL_PROPNAMELEN_MAX);
