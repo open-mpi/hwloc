@@ -23,17 +23,6 @@
 #include <sys/systeminfo.h>
 #include <picl.h>
 
-/* SPARC Chip Modes. */
-#define MODE_UNKNOWN            0
-#define MODE_SPITFIRE           1
-#define MODE_BLACKBIRD          2
-#define MODE_CHEETAH            3
-#define MODE_SPARC64_VI         4
-#define MODE_T1                 5
-#define MODE_T2                 6
-#define MODE_SPARC64_VII        7
-#define MODE_ROCK               8
-
 /* SPARC Chip Implementations. */
 #define IMPL_SPARC64_VI         0x6
 #define IMPL_SPARC64_VII        0x7
@@ -125,19 +114,32 @@ static const char* items[] = {
 SPARC strings for chip modes and implementation
 *****************************************************************************/
 static const char* sparc_modes[] = {
+#define MODE_UNKNOWN            0
     "UNKNOWN",
+#define MODE_SPITFIRE           1
     "SPITFIRE",
+#define MODE_BLACKBIRD          2
     "BLACKBIRD",
+#define MODE_CHEETAH            3
     "CHEETAH",
+#define MODE_SPARC64_VI         4
     "SPARC64_VI",
+#define MODE_T1                 5
     "T1",
+#define MODE_T2                 6
     "T2",
 /* needs T4, T3 and T2+ ? */
+#define MODE_SPARC64_VII        7
     "SPARC64_VII",
+#define MODE_ROCK               8
     "ROCK",
+#define MODE_T5                 9
     "T5",
+#define MODE_T6                 10
     "T6",
+#define MODE_M7                 11
     "M7",
+#define MODE_S7                 12
     "S7"
 };
 
@@ -161,30 +163,30 @@ static void assign_value(int index, long long val) {
     /* implementation#  T1, T2, and Rock do not have this, see RFE 6615268 */
     long dss_chip_impl = val;
     if (dss_chip_impl == IMPL_SPITFIRE) {
-      dss_chip_mode = 1;
+      dss_chip_mode = MODE_SPITFIRE;
     }
     else if ((dss_chip_impl >= IMPL_BLACKBIRD) &&
              (dss_chip_impl <= IMPL_HUMMINGBIRD)) {
-      dss_chip_mode = 2;
+      dss_chip_mode = MODE_BLACKBIRD;
     }
     else if ((dss_chip_impl >= IMPL_CHEETAH) &&
              (dss_chip_impl <= IMPL_PANTHER)) {
-      dss_chip_mode = 3;
+      dss_chip_mode = MODE_CHEETAH;
     }
     else if (dss_chip_impl == IMPL_SPARC64_VI) {
-      dss_chip_mode = 4;
+      dss_chip_mode = MODE_SPARC64_VI;
     }
     else if (dss_chip_impl == IMPL_NIAGARA) {
-      dss_chip_mode = 5;
+      dss_chip_mode = MODE_T1;
     }
     else if (dss_chip_impl == IMPL_NIAGARA_2) {
-      dss_chip_mode = 6;
+      dss_chip_mode = MODE_T2;
     }
     else if (dss_chip_impl == IMPL_SPARC64_VII) {
-      dss_chip_mode = 7;
+      dss_chip_mode = MODE_SPARC64_VII;
     }
     else if (dss_chip_impl == IMPL_ROCK) {
-      dss_chip_mode = 8;
+      dss_chip_mode = MODE_ROCK;
     }
   }
 
@@ -256,39 +258,39 @@ static void assign_string_value(int index, char* string_val) {
   if (index == INDEX_COMPATIBLE) { /* compatible */
     if (strncasecmp(string_val, "FJSV,SPARC64-VI",
                     PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 4;
+      dss_chip_mode = MODE_SPARC64_VI;
     }
     else if (strncasecmp(string_val, "SUNW,UltraSPARC-T1",
                          PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 5;
+      dss_chip_mode = MODE_T1;
     }
     else if (strncasecmp(string_val, "SUNW,UltraSPARC-T2",
                          PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 6;
+      dss_chip_mode = MODE_T2;
     }
     else if (strncasecmp(string_val, "FJSV,SPARC64-VII",
                          PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 7;
+      dss_chip_mode = MODE_SPARC64_VII;
     }
     else if (strncasecmp(string_val, "SUNW,Rock",
                          PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 8;
+      dss_chip_mode = MODE_ROCK;
     }
     else if (strncasecmp(string_val, "SPARC-T5",
 			 PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 9;
+      dss_chip_mode = MODE_T5;
     }
     else if (strncasecmp(string_val, "SPARC-T6", /* not actually tested */
 			 PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 10;
+      dss_chip_mode = MODE_T6;
     }
     else if (strncasecmp(string_val, "SPARC-M7",
 			 PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 11;
+      dss_chip_mode = MODE_M7;
     }
     else if (strncasecmp(string_val, "SPARC-S7",
 			 PICL_PROPNAMELEN_MAX) == 0) {
-      dss_chip_mode = 12;
+      dss_chip_mode = MODE_S7;
     }
   } else if (index == INDEX_PROCESSOR_TYPE) {  /* ProcessorType */
       strncpy(&dss_chip_type[0], string_val, PICL_PROPNAMELEN_MAX);
