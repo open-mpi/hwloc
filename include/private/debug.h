@@ -19,6 +19,9 @@
 #include <stdio.h>
 #endif
 
+/* Compile-time assertion */
+#define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
+
 #ifdef HWLOC_DEBUG
 static __hwloc_inline int hwloc_debug_enabled(void)
 {

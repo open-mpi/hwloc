@@ -24,9 +24,6 @@
 #endif
 #endif
 
-/* Compile-time assertion */
-#define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
-
 #define HWLOC_BITS_PER_LONG (HWLOC_SIZEOF_UNSIGNED_LONG * 8)
 #define HWLOC_BITS_PER_INT (HWLOC_SIZEOF_UNSIGNED_INT * 8)
 
@@ -409,11 +406,58 @@ static __hwloc_inline int hwloc_obj_type_is_io (hwloc_obj_type_t type)
   return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
 }
 
+#ifdef HAVE_USELOCALE
+#include "locale.h"
+#ifdef HAVE_XLOCALE_H
+#include "xlocale.h"
+#endif
+#define hwloc_localeswitch_declare locale_t __old_locale = (locale_t)0, __new_locale
+#define hwloc_localeswitch_init() do {                     \
+  __new_locale = newlocale(LC_ALL_MASK, "C", (locale_t)0); \
+  if (__new_locale != (locale_t)0)                         \
+    __old_locale = uselocale(__new_locale);                \
+} while (0)
+#define hwloc_localeswitch_fini() do { \
+  if (__new_locale != (locale_t)0) {   \
+    uselocale(__old_locale);           \
+    freelocale(__new_locale);          \
+  }                                    \
+} while(0)
+#else /* HAVE_USELOCALE */
+#if __HWLOC_HAVE_ATTRIBUTE_UNUSED
+#define hwloc_localeswitch_declare int __dummy_nolocale __hwloc_attribute_unused
+#define hwloc_localeswitch_init()
+#else
+#define hwloc_localeswitch_declare int __dummy_nolocale
+#define hwloc_localeswitch_init() (void)__dummy_nolocale
+#endif
+#define hwloc_localeswitch_fini()
+#endif /* HAVE_USELOCALE */
+
+#if !HAVE_DECL_FABSF
+#define fabsf(f) fabs((double)(f))
+#endif
+
+#if HAVE_DECL__SC_PAGE_SIZE
+#define hwloc_getpagesize() sysconf(_SC_PAGE_SIZE)
+#elif HAVE_DECL__SC_PAGESIZE
+#define hwloc_getpagesize() sysconf(_SC_PAGESIZE)
+#elif defined HAVE_GETPAGESIZE
+#define hwloc_getpagesize() getpagesize()
+#else
+#undef hwloc_getpagesize
+#endif
+
 #if HWLOC_HAVE_ATTRIBUTE_FORMAT
 #  define __hwloc_attribute_format(type, str, arg)  __attribute__((__format__(type, str, arg)))
 #else
 #  define __hwloc_attribute_format(type, str, arg)
 #endif
+
+#define hwloc_memory_size_printf_value(_size, _verbose) \
+  ((_size) < (10ULL<<20) || _verbose ? (((_size)>>9)+1)>>1 : (_size) < (10ULL<<30) ? (((_size)>>19)+1)>>1 : (_size) < (10ULL<<40) ? (((_size)>>29)+1)>>1 : (((_size)>>39)+1)>>1)
+#define hwloc_memory_size_printf_unit(_size, _verbose) \
+  ((_size) < (10ULL<<20) || _verbose ? "KB" : (_size) < (10ULL<<30) ? "MB" : (_size) < (10ULL<<40) ? "GB" : "TB")
 
 #ifdef HWLOC_WIN_SYS
 #  ifndef HAVE_SSIZE_T
