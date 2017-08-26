@@ -22,7 +22,7 @@ static int check_compare(hwloc_const_bitmap_t set1, hwloc_const_bitmap_t set2)
     }
   } else if (hwloc_bitmap_iszero(set2)) {
     assert(res == HWLOC_BITMAP_CONTAINS);
-    
+
   } else if (hwloc_bitmap_isequal(set1, set2)) {
     assert(res == HWLOC_BITMAP_EQUAL);
   } else if (hwloc_bitmap_isincluded(set1, set2)) {
