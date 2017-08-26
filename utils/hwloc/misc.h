@@ -12,7 +12,6 @@
 #include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/misc.h>
-#include <private/private.h>
 
 #include <stdio.h>
 #include <string.h>

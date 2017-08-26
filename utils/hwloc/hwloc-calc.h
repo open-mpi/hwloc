@@ -9,9 +9,8 @@
 #ifndef HWLOC_CALC_H
 #define HWLOC_CALC_H
 
-#include <private/private.h>
-#include <private/misc.h>
 #include <hwloc.h>
+#include <private/misc.h>
 
 #include <stdlib.h>
 #include <stdio.h>

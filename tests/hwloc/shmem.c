@@ -4,8 +4,8 @@
  */
 
 #include <hwloc.h>
+#include <private/misc.h>
 #include <hwloc/shmem.h>
-#include <private/private.h>
 
 #include <stdlib.h>
 #include <fcntl.h>

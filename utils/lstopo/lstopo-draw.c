@@ -7,7 +7,8 @@
  */
 
 #include <private/autogen/config.h>
-#include <private/private.h>
+#include <private/misc.h>
+#include <private/private.h> /* for topology->pci_nonzero_domains */
 #include <hwloc.h>
 
 #include <stdlib.h>

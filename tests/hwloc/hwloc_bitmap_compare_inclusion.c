@@ -1,11 +1,10 @@
 /*
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 #include <hwloc.h>
-
-#include <private/private.h>
+#include <private/private.h> /* for hwloc_bitmap_compare_inclusion() */
 
 #include <assert.h>
 

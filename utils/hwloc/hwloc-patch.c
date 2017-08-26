@@ -1,9 +1,9 @@
 /*
- * Copyright © 2013-2016 Inria.  All rights reserved.
+ * Copyright © 2013-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/private.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/diff.h>
 

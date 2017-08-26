@@ -11,7 +11,6 @@
  */
 
 #include <private/autogen/config.h>
-#include <private/private.h>
 #include <hwloc.h>
 
 #ifdef HAVE_NL_LANGINFO
