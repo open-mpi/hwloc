@@ -26,7 +26,7 @@
 #include <hwloc.h>
 #include <hwloc/bitmap.h>
 #include <private/components.h>
-#include <private/debug.h>
+#include <private/misc.h>
 #include <sys/types.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -340,12 +340,6 @@ extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsi
 /* Check whether needle matches the beginning of haystack, at least n, and up
  * to a colon or \0 */
 extern int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
-
-#if HWLOC_HAVE_ATTRIBUTE_FORMAT
-#  define __hwloc_attribute_format(type, str, arg)  __attribute__((__format__(type, str, arg)))
-#else
-#  define __hwloc_attribute_format(type, str, arg)
-#endif
 
 #define hwloc_memory_size_printf_value(_size, _verbose) \
   ((_size) < (10ULL<<20) || _verbose ? (((_size)>>9)+1)>>1 : (_size) < (10ULL<<30) ? (((_size)>>19)+1)>>1 : (_size) < (10ULL<<40) ? (((_size)>>29)+1)>>1 : (((_size)>>39)+1)>>1)

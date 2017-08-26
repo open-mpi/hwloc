@@ -409,6 +409,12 @@ static __hwloc_inline int hwloc_obj_type_is_io (hwloc_obj_type_t type)
   return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
 }
 
+#if HWLOC_HAVE_ATTRIBUTE_FORMAT
+#  define __hwloc_attribute_format(type, str, arg)  __attribute__((__format__(type, str, arg)))
+#else
+#  define __hwloc_attribute_format(type, str, arg)
+#endif
+
 #ifdef HWLOC_WIN_SYS
 #  ifndef HAVE_SSIZE_T
 typedef SSIZE_T ssize_t;

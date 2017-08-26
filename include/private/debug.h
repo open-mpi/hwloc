@@ -12,6 +12,7 @@
 #define HWLOC_DEBUG_H
 
 #include <private/autogen/config.h>
+#include <private/misc.h>
 
 #ifdef HWLOC_DEBUG
 #include <stdarg.h>
@@ -35,11 +36,7 @@ static __hwloc_inline int hwloc_debug_enabled(void)
 }
 #endif
 
-#if HWLOC_HAVE_ATTRIBUTE_FORMAT
-/* FIXME: use __hwloc_attribute_format from private/private.h but that header cannot be used in plugins */
-static __hwloc_inline void hwloc_debug(const char *s __hwloc_attribute_unused, ...) __attribute__ ((__format__ (__printf__, 1, 2)));
-#endif
-
+static __hwloc_inline void hwloc_debug(const char *s __hwloc_attribute_unused, ...) __hwloc_attribute_format(printf, 1, 2);
 static __hwloc_inline void hwloc_debug(const char *s __hwloc_attribute_unused, ...)
 {
 #ifdef HWLOC_DEBUG
