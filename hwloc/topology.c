@@ -1270,12 +1270,12 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	 * while some callers need to know (at least hwloc_topology_insert_group()).
 	 */
 
-	/* If merging two groups, keep the highest kind.
+	/* If merging two groups, keep the smallest kind.
 	 * Replace the existing Group with the new Group contents
 	 * and let the caller free the new Group.
 	 */
 	if (child->type == HWLOC_OBJ_GROUP
-	    && obj->attr->group.kind > child->attr->group.kind)
+	    && obj->attr->group.kind < child->attr->group.kind)
 	  hwloc_replace_linked_object(child, obj);
 
 	return child;

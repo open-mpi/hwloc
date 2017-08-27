@@ -321,20 +321,26 @@ extern char * hwloc_progname(struct hwloc_topology *topology);
 HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
 
 /* obj->attr->group.kind internal values.
- * the core will keep the highest ones when merging two groups.
+ * the core will keep the smallest ones when merging two groups,
+ * that's why user-given kinds are first.
  */
-#define HWLOC_GROUP_KIND_NONE				0 /* user can use subkind */
-#define HWLOC_GROUP_KIND_DISTANCE			1 /* subkind is round of adding these groups during distance based grouping */
-#define HWLOC_GROUP_KIND_IO				2 /* no subkind */
-#define HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN	3 /* no subkind */
-#define HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP	4 /* no subkind */
-#define HWLOC_GROUP_KIND_AIX_SDL_UNKNOWN		5 /* subkind is SDL level */
-#define HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN		6 /* subkind is x2APIC unknown level */
-#define HWLOC_GROUP_KIND_S390_BOOK			7 /* no subkind */
-#define HWLOC_GROUP_KIND_INTEL_SUBNUMA_CLUSTER		8 /* no subkind */
-#define HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT		9 /* no subkind */
-#define HWLOC_GROUP_KIND_SYNTHETIC			10 /* subkind is group depth within synthetic description */
-#define HWLOC_GROUP_KIND_SOLARIS_PG_HW_PERF		11 /* subkind is group width */
+/* first, user-given groups, should remain as long as possible */
+#define HWLOC_GROUP_KIND_USER				0	/* user-given, user may use subkind too */
+#define HWLOC_GROUP_KIND_SYNTHETIC			10	/* subkind is group depth within synthetic description */
+/* then, hardware-specific groups */
+#define HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER	100	/* no subkind */
+#define HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN		101	/* subkind is x2APIC unknown level */
+#define HWLOC_GROUP_KIND_S390_BOOK			110	/* no subkind */
+#define HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT		120	/* no subkind */
+/* then, OS-specific groups */
+#define HWLOC_GROUP_KIND_SOLARIS_PG_HW_PERF		200	/* subkind is group width */
+#define HWLOC_GROUP_KIND_AIX_SDL_UNKNOWN		210	/* subkind is SDL level */
+#define HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP	220	/* no subkind */
+#define HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN	221	/* no subkind */
+/* distance groups */
+#define HWLOC_GROUP_KIND_DISTANCE			900	/* subkind is round of adding these groups during distance based grouping */
+/* finally, hwloc-specific groups required to insert something else, should disappear as soon as possible */
+#define HWLOC_GROUP_KIND_IO				1000	/* no subkind */
 
 /* memory allocator for topology objects */
 struct hwloc_tma {

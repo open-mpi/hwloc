@@ -3215,7 +3215,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
 	    cluster->subtype = strdup("Cluster");
-	    cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_SUBNUMA_CLUSTER;
+	    cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER;
 	    hwloc_insert_object_by_cpuset(topology, cluster);
 	  }
 	}
