@@ -48,12 +48,14 @@ test_topology ()
 	| sed	-e 's/ hwlocVersion='$HWLOC_VERSION'//' \
 		-e 's/ ProcessName=lstopo-no-graphics//' \
 		-e 's/ ProcessName=lt-lstopo-no-graphics//' \
-		-e 's/ gp_index="[0-9]\+"//' \
+		-e 's/ gp_index="[0-9]*"//' \
 	| grep -v "<info name=\"hwlocVersion\" value=\"$HWLOC_VERSION\"/>" \
 	| grep -v "<info name=\"ProcessName\" value=\"lstopo-no-graphics" \
 	| grep -v "<info name=\"ProcessName\" value=\"lt-lstopo-no-graphics" \
 	> "$output"
-	# filtered hwlocVersion since it often changes, or can be a .exe
+	# filtered gp_index because it can if we reorder discovery
+	# (not used in NUMA/PU distances, and regenerated (differently) during XML import).
+	# filtered hwlocVersion since it often changes, or can be a .exe .
     then
 	result=1
     else
