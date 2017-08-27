@@ -986,6 +986,14 @@ hwloc_look_solaris(struct hwloc_backend *backend)
   return 1;
 }
 
+#ifdef HAVE_LIBLGRP
+static int hwloc_solaris_get_allowed_hook(hwloc_topology_t topology)
+{
+  lgrp_list_allowed(topology);
+  return 0;
+}
+#endif
+
 void
 hwloc_set_solaris_hooks(struct hwloc_binding_hooks *hooks,
 			struct hwloc_topology_support *support __hwloc_attribute_unused)
@@ -1010,6 +1018,9 @@ hwloc_set_solaris_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->bind_membind = 1;
   support->membind->interleave_membind = 1;
   support->membind->nexttouch_membind = 1;
+#endif
+#ifdef HAVE_LIBLGRP
+  hooks->get_allowed_resources = hwloc_solaris_get_allowed_hook;
 #endif
 }
 
