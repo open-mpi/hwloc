@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2014 Inria.  All rights reserved.
+# Copyright © 2009-2017 Inria.  All rights reserved.
 # Copyright © 2009 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -60,6 +60,14 @@ set -e
   $distrib --if synthetic --input "4 4" 2 --reverse --single
   echo
   $distrib --if synthetic --input "4 4 4 4" 19
+  echo
+
+  $distrib --if synthetic --input "2 2 2 2" 9
+  echo
+  $distrib --if synthetic --input "2 2 2 2" --from pu 9
+  echo
+  $distrib --if synthetic --input "2 2 2 2" --to core 9
+  echo
 ) > "$file"
 diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-distrib.output "$file"
 rm -rf "$tmp"
