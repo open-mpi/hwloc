@@ -222,16 +222,16 @@ int main(int argc, char *argv[])
 
     from_depth = 0;
     if (from_type) {
-      if (hwloc_type_sscanf_as_depth(argv[1], NULL, topology, &from_depth) < 0 || from_depth < 0) {
-	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --from, ignoring.\n", argv[1]);
+      if (hwloc_type_sscanf_as_depth(from_type, NULL, topology, &from_depth) < 0 || from_depth < 0) {
+	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --from, ignoring.\n", from_type);
 	return EXIT_FAILURE;
       }
     }
 
     to_depth = INT_MAX;
     if (to_type) {
-      if (hwloc_type_sscanf_as_depth(argv[1], NULL, topology, &to_depth) < 0 || to_depth < 0) {
-	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --to, ignoring.\n", argv[1]);
+      if (hwloc_type_sscanf_as_depth(to_type, NULL, topology, &to_depth) < 0 || to_depth < 0) {
+	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --to, ignoring.\n", to_type);
 	return EXIT_FAILURE;
       }
     }
