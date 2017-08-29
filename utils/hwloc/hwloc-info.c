@@ -604,7 +604,7 @@ main (int argc, char *argv[])
     DO(cpubind, get_thread_cpubind);
     DO(cpubind, get_thisproc_last_cpu_location);
     DO(cpubind, get_proc_last_cpu_location);
-    DO(cpubind, get_thisthread_cpubind);
+    DO(cpubind, get_thisthread_last_cpu_location);
 
     DO(membind, set_thisproc_membind);
     DO(membind, get_thisproc_membind);
