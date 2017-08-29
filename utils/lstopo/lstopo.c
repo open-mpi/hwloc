@@ -233,12 +233,12 @@ static void add_process_objects(hwloc_topology_t topology)
       {
         /* Get threads */
         DIR *task_dir;
-        struct dirent *task_dirent;
 
         snprintf(path, pathlen, "/proc/%s/task", dirent->d_name);
         task_dir = opendir(path);
 
         if (task_dir) {
+          struct dirent *task_dirent;
           while ((task_dirent = readdir(task_dir))) {
             long local_tid;
             char *task_end;
