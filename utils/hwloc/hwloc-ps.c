@@ -193,10 +193,10 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 		  snprintf(path2, path2len, "%s/%ld/comm", path, tid);
 		  commfile = open(path2, O_RDWR);
 		  if (commfile >= 0) {
-		    read(commfile, tids[i].name, TIDNAME_MAX);
+		    read(commfile, tids[i-1].name, TIDNAME_MAX);
 		    close(commfile);
-		    tids[i].name[TIDNAME_MAX-1] = '\0';
-		    end = strchr(tids[i].name, '\n');
+		    tids[i-1].name[TIDNAME_MAX-1] = '\0';
+		    end = strchr(tids[i-1].name, '\n');
 		    if (end)
 		      *end = '\0';
 		  }
