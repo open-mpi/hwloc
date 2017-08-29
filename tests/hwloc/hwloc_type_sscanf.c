@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -7,6 +7,7 @@
 #include <errno.h>
 
 #include <hwloc.h>
+#include <private/misc.h>
 
 static void check(hwloc_topology_t topology, hwloc_obj_t obj, int verbose)
 {
@@ -38,11 +39,11 @@ static void check(hwloc_topology_t topology, hwloc_obj_t obj, int verbose)
   assert(!err);
   assert(depth == (int) obj->depth);
 
-  for(child = obj->first_child; child; child = child->next_sibling)
+  for_each_child(child, obj)
     check(topology, child, verbose);
-  for(child = obj->io_first_child; child; child = child->next_sibling)
+  for_each_io_child(child, obj)
     check(topology, child, verbose);
-  for(child = obj->misc_first_child; child; child = child->next_sibling)
+  for_each_misc_child(child, obj)
     check(topology, child, verbose);
 }
 

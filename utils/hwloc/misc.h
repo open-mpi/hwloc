@@ -431,11 +431,11 @@ hwloc_utils_userdata_free_recursive(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
   hwloc_utils_userdata_free(obj);
-  for (child = obj->first_child; child; child = child->next_sibling)
+  for_each_child(child, obj)
     hwloc_utils_userdata_free_recursive(child);
-  for (child = obj->io_first_child; child; child = child->next_sibling)
+  for_each_io_child(child, obj)
     hwloc_utils_userdata_free_recursive(child);
-  for (child = obj->misc_first_child; child; child = child->next_sibling)
+  for_each_misc_child(child, obj)
     hwloc_utils_userdata_free_recursive(child);
 }
 
