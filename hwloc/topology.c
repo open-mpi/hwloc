@@ -230,14 +230,14 @@ hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
   char type[64], idx[10], attr[1024], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
+  if (obj->name)
+    hwloc_debug("name %s ", obj->name);
   hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
   if (obj->os_index != (unsigned) -1)
     snprintf(idx, sizeof(idx), "#%u", obj->os_index);
   else
     *idx = '\0';
   hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 1);
-  if (obj->name)
-    hwloc_debug(" name %s", obj->name);
   hwloc_debug("%s%s%s%s%s", type, idx, *attr ? "(" : "", attr, *attr ? ")" : "");
   if (obj->subtype)
     hwloc_debug(" subtype %s", obj->subtype);
