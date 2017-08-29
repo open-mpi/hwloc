@@ -39,9 +39,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Options:\n");
   fprintf (where, "  -a               Show all processes, including those that are not bound\n");
   fprintf (where, "  --pid <pid>      Only show process of pid number <pid>\n");
-#ifdef HWLOC_LINUX_SYS
   fprintf (where, "  --name <name>    Only show processes whose name contains <name>\n");
-#endif
   fprintf (where, "  -l --logical     Use logical object indexes (default)\n");
   fprintf (where, "  -p --physical    Use physical object indexes\n");
   fprintf (where, "  -c --cpuset      Show cpuset instead of objects\n");
@@ -106,7 +104,6 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
     if (!cpuset)
       return;
 
-#ifdef HWLOC_LINUX_SYS
     {
       unsigned pathlen = 6 + 21 + 1 + 7 + 1;
       char *path;
@@ -132,7 +129,6 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 	  goto out;
       }
     }
-#endif /* HWLOC_LINUX_SYS */
 
     if (show_threads) {
 #ifdef HWLOC_LINUX_SYS
@@ -320,11 +316,7 @@ int main(int argc, char *argv[])
 	usage(callname, stdout);
 	exit(EXIT_FAILURE);
       }
-#ifdef HWLOC_LINUX_SYS
       only_name = argv[1];
-#else
-      fprintf (stderr, "Filtering by name is currently only supported on Linux\n");
-#endif
       opt = 1;
     } else if (!strcmp (argv[0], "--whole-system")) {
       flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
