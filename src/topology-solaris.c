@@ -994,6 +994,14 @@ static int hwloc_solaris_get_allowed_hook(hwloc_topology_t topology)
 }
 #endif
 
+static int
+hwloc_solaris_get_thisthread_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+{
+  int pu = getcpuid();
+  hwloc_bitmap_only(hwloc_set, pu);
+  return 0;
+}
+
 void
 hwloc_set_solaris_hooks(struct hwloc_binding_hooks *hooks,
 			struct hwloc_topology_support *support __hwloc_attribute_unused)
@@ -1001,6 +1009,7 @@ hwloc_set_solaris_hooks(struct hwloc_binding_hooks *hooks,
   hooks->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
   hooks->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
   hooks->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
+  hooks->get_thisthread_last_cpu_location = hwloc_solaris_get_thisthread_last_cpu_location;
 #ifdef HAVE_LIBLGRP
   hooks->get_proc_cpubind = hwloc_solaris_get_proc_cpubind;
   hooks->get_thisproc_cpubind = hwloc_solaris_get_thisproc_cpubind;
