@@ -356,6 +356,8 @@ lstopo_populate_userdata(hwloc_obj_t parent)
 
   for_each_child(child, parent)
     lstopo_populate_userdata(child);
+  for_each_memory_child(child, parent)
+    lstopo_populate_userdata(child);
   for_each_io_child(child, parent)
     lstopo_populate_userdata(child);
   for_each_misc_child(child, parent)
@@ -374,6 +376,8 @@ lstopo_destroy_userdata(hwloc_obj_t parent)
   }
 
   for_each_child(child, parent)
+    lstopo_destroy_userdata(child);
+  for_each_memory_child(child, parent)
     lstopo_destroy_userdata(child);
   for_each_io_child(child, parent)
     lstopo_destroy_userdata(child);

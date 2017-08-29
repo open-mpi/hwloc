@@ -577,6 +577,8 @@ lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
 
   for_each_child(child, obj)
     lstopo_prepare_custom_styles(loutput, child);
+  for_each_memory_child(child, obj)
+    lstopo_prepare_custom_styles(loutput, child);
   for_each_io_child(child, obj)
     lstopo_prepare_custom_styles(loutput, child);
   for_each_misc_child(child, obj)

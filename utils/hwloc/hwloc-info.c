@@ -83,6 +83,7 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
     printf("%s depth = %d\n", prefix, (int) obj->depth); /* special levels have negative values */
   printf("%s sibling rank = %u\n", prefix, obj->sibling_rank);
   printf("%s children = %u\n", prefix, obj->arity);
+  printf("%s memory children = %u\n", prefix, obj->memory_arity);
   printf("%s i/o children = %u\n", prefix, obj->io_arity);
   printf("%s misc children = %u\n", prefix, obj->misc_arity);
   if (obj->memory.local_memory)

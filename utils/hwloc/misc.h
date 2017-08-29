@@ -438,6 +438,8 @@ hwloc_utils_userdata_free_recursive(hwloc_obj_t obj)
   hwloc_utils_userdata_free(obj);
   for_each_child(child, obj)
     hwloc_utils_userdata_free_recursive(child);
+  for_each_memory_child(child, obj)
+    hwloc_utils_userdata_free_recursive(child);
   for_each_io_child(child, obj)
     hwloc_utils_userdata_free_recursive(child);
   for_each_misc_child(child, obj)

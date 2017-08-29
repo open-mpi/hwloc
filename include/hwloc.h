@@ -188,6 +188,9 @@ typedef enum {
 			  * There is always at one such object in the topology
 			  * even if the machine is not NUMA.
 			  *
+			  * Memory objects are not listed in the main children list,
+			  * but rather in the dedicated Memory children list.
+			  *
 			  * NUMA nodes have a special depth ::HWLOC_TYPE_DEPTH_NUMANODE
 			  * instead of a normal depth just like other objects in the
 			  * main tree.
@@ -402,7 +405,7 @@ struct hwloc_obj {
   struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent */
   struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent */
 
-  /** @name List and array of normal children below this object (except I/O and Misc children). */
+  /** @name List and array of normal children below this object (except Memory, I/O and Misc children). */
   /**@{*/
   unsigned arity;			/**< \brief Number of normal children.
 					 * Misc and I/O children are not listed here but rather in their dedicated children list.
@@ -414,11 +417,22 @@ struct hwloc_obj {
 
   int symmetric_subtree;		/**< \brief Set if the subtree of normal objects below this object is symmetric,
 					  * which means all children and their children have identical subtrees.
-					  * I/O and Misc children are ignored.
+					  * I/O and Misc children are ignored. Memory children are taken into account.
 					  *
 					  * If set in the topology root object, lstopo may export the topology
 					  * as a synthetic string.
 					  */
+
+  /** @name List of Memory children below this object. */
+  /**@{*/
+  unsigned memory_arity;		/**< \brief Number of Memory children.
+					 * These children are listed in \p memory_first_child.
+					 */
+  struct hwloc_obj *memory_first_child;	/**< \brief First Memory child.
+					 * NUMA nodes are listed here (\p memory_arity and \p memory_first_child)
+					 * instead of in the normal children list.
+					 */
+  /**@}*/
 
   /** @name List of I/O children below this object. */
   /**@{*/

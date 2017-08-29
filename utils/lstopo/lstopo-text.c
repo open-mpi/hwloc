@@ -138,7 +138,7 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
 
   if (group_identical
       && parent && parent->arity == 1
-      && !parent->io_arity && !parent->misc_arity
+      && !parent->memory_arity && !parent->io_arity && !parent->misc_arity
       && l->cpuset && parent->cpuset && hwloc_bitmap_isequal(l->cpuset, parent->cpuset)) {
     /* in non-verbose mode, merge objects with their parent is they are exactly identical */
     fprintf(output, " + ");
@@ -155,6 +155,8 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
   if (collapse > 1)
     fprintf(output, " }");
 
+  for_each_memory_child(child, l)
+    output_topology (loutput, child, l, i);
   for_each_child(child, l)
     if (child->type != HWLOC_OBJ_PU || !loutput->ignore_pus)
       output_topology (loutput, child, l, i);
@@ -177,6 +179,11 @@ output_only (struct lstopo_output *loutput, hwloc_obj_t l)
   /* there can be anything below normal children */
   for_each_child(child, l)
     output_only (loutput, child);
+  /* there can be only memory or Misc below memory children */
+  if (hwloc_obj_type_is_memory(loutput->show_only) || loutput->show_only == HWLOC_OBJ_MISC) {
+    for(child = l->memory_first_child; child; child = child->next_sibling)
+      output_only (loutput, child);
+  }
   /* there can be only I/O or Misc below I/O children */
   if (hwloc_obj_type_is_special(loutput->show_only)) {
     for_each_io_child(child, l)

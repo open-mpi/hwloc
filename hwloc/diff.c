@@ -247,6 +247,20 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 	if (child1 || child2)
 		goto out_too_complex;
 
+	/* memory children */
+	for(child1 = obj1->memory_first_child, child2 = obj2->memory_first_child;
+	    child1 != NULL && child2 != NULL;
+	    child1 = child1->next_sibling, child2 = child2->next_sibling) {
+		err = hwloc_diff_trees(topo1, child1,
+				       topo2, child2,
+				       flags,
+				       firstdiffp, lastdiffp);
+		if (err < 0)
+			return err;
+	}
+	if (child1 || child2)
+		goto out_too_complex;
+
 	/* I/O children */
 	for(child1 = obj1->io_first_child, child2 = obj2->io_first_child;
 	    child1 != NULL && child2 != NULL;

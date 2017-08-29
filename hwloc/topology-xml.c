@@ -1000,6 +1000,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	break;
       }
     }
+    /* no need to reorder memory children as long as there are no intermediate memory objects
+     * that could cause reordering when filtered-out.
+     */
   }
 
   return state->global->close_tag(state);
@@ -1597,6 +1600,8 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
  err:
   hwloc_free_object_siblings_and_children(root->first_child);
   root->first_child = NULL;
+  hwloc_free_object_siblings_and_children(root->memory_first_child);
+  root->memory_first_child = NULL;
   hwloc_free_object_siblings_and_children(root->io_first_child);
   root->io_first_child = NULL;
   hwloc_free_object_siblings_and_children(root->misc_first_child);
@@ -1982,6 +1987,8 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) &state, topology, obj);
 
+  for_each_memory_child(child, obj)
+    hwloc__xml_export_object (&state, topology, child, flags);
   for_each_child(child, obj)
     hwloc__xml_export_object (&state, topology, child, flags);
   for_each_io_child(child, obj)

@@ -41,6 +41,8 @@ static void check(hwloc_topology_t topology, hwloc_obj_t obj, int verbose)
 
   for_each_child(child, obj)
     check(topology, child, verbose);
+  for_each_memory_child(child, obj)
+    check(topology, child, verbose);
   for_each_io_child(child, obj)
     check(topology, child, verbose);
   for_each_misc_child(child, obj)
