@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2017 Inria.  All rights reserved.
- * Copyright © 2009-2012, 2017 Université Bordeaux
+ * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -116,69 +116,20 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
       path = malloc(pathlen);
       snprintf(path, pathlen, "/proc/%ld/cmdline", pid);
       file = open(path, O_RDONLY);
-      if (file < 0) {
-	/* Ignore errors */
-	free(path);
-	goto out;
-      }
-      n = read(file, name, sizeof(name) - 1);
-      close(file);
-
-      if (n <= 0) {
-	/* Ignore kernel threads and errors */
-	free(path);
-	goto out;
-      }
-
-      snprintf(path, pathlen, "/proc/%ld/comm", pid);
-      file = open(path, O_RDONLY);
-
-      if (file >= 0) {
-	n = read(file, name, sizeof(name) - 1);
-	close(file);
-	if (n > 0) {
-	  name[n] = 0;
-	  if (n > 1 && name[n-1] == '\n')
-	    name[n-1] = 0;
-	} else {
-	  snprintf(name, sizeof(name), "(unknown)");
-	}
-      } else {
-	/* Old kernel, have to look at old file */
-	char stats[32];
-	char *parenl = NULL, *parenr;
-
-	snprintf(path, pathlen, "/proc/%ld/stat", pid);
-	file = open(path, O_RDONLY);
-
-	if (file < 0) {
-	  /* Ignore errors */
-	  free(path);
-	  goto out;
-	}
-
-	/* "pid (comm) ..." */
-	n = read(file, stats, sizeof(stats) - 1);
-	close(file);
-	if (n > 0) {
-	  stats[n] = 0;
-	  parenl = strchr(stats, '(');
-	  parenr = strchr(stats, ')');
-	  if (!parenr)
-	    parenr = &stats[sizeof(stats)-1];
-	  *parenr = 0;
-	}
-	if (!parenl) {
-	  snprintf(name, sizeof(name), "(unknown)");
-	} else {
-	  snprintf(name, sizeof(name), parenl+1);
-	}
-      }
-
       free(path);
 
-      if (only_name && !strstr(name, only_name)) {
-	goto out;
+      if (file >= 0) {
+        n = read(file, name, sizeof(name) - 1);
+        close(file);
+
+        if (n <= 0)
+          /* Ignore kernel threads and errors */
+          goto out;
+
+        name[n] = 0;
+
+	if (only_name && !strstr(name, only_name))
+	  goto out;
       }
     }
 #endif /* HWLOC_LINUX_SYS */
