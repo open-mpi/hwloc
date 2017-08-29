@@ -1431,6 +1431,11 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
   char *tmp;
   int fd, i, err;
 
+  /* TODO: find a way to use sched_getcpu().
+   * either compare tid with gettid() in all callbacks.
+   * or pass gettid() in the callback data.
+   */
+
   if (!tid) {
 #ifdef SYS_gettid
     tid = syscall(SYS_gettid);
@@ -1547,6 +1552,17 @@ hwloc_linux_get_thisthread_last_cpu_location(hwloc_topology_t topology, hwloc_bi
     errno = ENOSYS;
     return -1;
   }
+
+#if HAVE_DECL_SCHED_GETCPU
+  {
+    int pu = sched_getcpu();
+    if (pu >= 0) {
+      hwloc_bitmap_only(hwloc_set, pu);
+      return 0;
+    }
+  }
+#endif
+
   return hwloc_linux_get_tid_last_cpu_location(topology, 0, hwloc_set);
 }
 
