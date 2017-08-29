@@ -228,7 +228,7 @@ hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
   hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 1);
   hwloc_debug("%s%s%s%s%s", type, idx, *attr ? "(" : "", attr, *attr ? ")" : "");
   if (obj->name)
-    hwloc_debug(" name %s", obj->name);
+    hwloc_debug(" name \"%s\"", obj->name);
   if (obj->cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
     hwloc_debug(" cpuset %s", cpuset);
