@@ -580,6 +580,7 @@ extern "C" {
 #define hwloc_weight_long HWLOC_NAME(weight_long)
 #define hwloc_strncasecmp HWLOC_NAME(strncasecmp)
 #define hwloc_cache_type_by_depth_type HWLOC_NAME(cache_type_by_depth_type)
+#define hwloc_obj_type_is_normal HWLOC_NAME(obj_type_is_normal)
 #define hwloc_obj_type_is_io HWLOC_NAME(obj_type_is_io)
 #define hwloc_obj_type_is_special HWLOC_NAME(obj_type_is_special)
 

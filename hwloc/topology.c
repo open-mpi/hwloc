@@ -802,7 +802,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
     hwloc_insert_object_by_parent(newtopology, newparent, newobj);
 
     /* place us inside our parent children array */
-    if (!hwloc_obj_type_is_special(newobj->type))
+    if (hwloc_obj_type_is_normal(newobj->type))
       newparent->children[newobj->sibling_rank] = newobj;
   }
 

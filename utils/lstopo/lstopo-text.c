@@ -178,8 +178,7 @@ output_only (struct lstopo_output *loutput, hwloc_obj_t l)
   for_each_child(child, l)
     output_only (loutput, child);
   /* there can be only I/O or Misc below I/O children */
-  if (loutput->show_only == HWLOC_OBJ_BRIDGE || loutput->show_only == HWLOC_OBJ_PCI_DEVICE
-      || loutput->show_only == HWLOC_OBJ_OS_DEVICE || loutput->show_only == HWLOC_OBJ_MISC) {
+  if (hwloc_obj_type_is_special(loutput->show_only)) {
     for_each_io_child(child, l)
       output_only (loutput, child);
   }
