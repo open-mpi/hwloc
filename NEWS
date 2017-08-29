@@ -20,6 +20,8 @@ in v0.9.1).
 Version 1.11.8
 --------------
 * Fix search for objects by physical index in command-line tools.
+* Add missing "cpubind:get_thisthread_last_cpu_location" in the output
+  of hwloc-info --support.
 * Add support for CUDA compute capability 7.0 and fix support for 6.[12].
 * Detect caches on Solaris/Sparc. Thanks to Maureen Chew for the help.
 * Properly detect allowed/disallowed PUs and NUMA nodes on Solaris with
