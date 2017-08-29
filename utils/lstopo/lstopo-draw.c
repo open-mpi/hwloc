@@ -575,11 +575,11 @@ lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
     }
   }
 
-  for(child = obj->first_child; child; child = child->next_sibling)
+  for_each_child(child, obj)
     lstopo_prepare_custom_styles(loutput, child);
-  for(child = obj->io_first_child; child; child = child->next_sibling)
+  for_each_io_child(child, obj)
     lstopo_prepare_custom_styles(loutput, child);
-  for(child = obj->misc_first_child; child; child = child->next_sibling)
+  for_each_misc_child(child, obj)
     lstopo_prepare_custom_styles(loutput, child);
 }
 

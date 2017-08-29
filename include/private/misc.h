@@ -394,6 +394,11 @@ static __hwloc_inline hwloc_obj_type_t hwloc_cache_type_by_depth_type(unsigned d
   }
 }
 
+/* Traverse children of a parent */
+#define for_each_child(child, parent) for(child = parent->first_child; child; child = child->next_sibling)
+#define for_each_io_child(child, parent) for(child = parent->io_first_child; child; child = child->next_sibling)
+#define for_each_misc_child(child, parent) for(child = parent->misc_first_child; child; child = child->next_sibling)
+
 /* I/O or Misc object, without cpusets or nodesets. */
 static __hwloc_inline int hwloc_obj_type_is_special (hwloc_obj_type_t type)
 {

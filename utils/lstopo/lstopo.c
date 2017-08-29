@@ -328,11 +328,11 @@ lstopo_populate_userdata(hwloc_obj_t parent)
   save->pci_collapsed = 0;
   parent->userdata = save;
 
-  for(child = parent->first_child; child; child = child->next_sibling)
+  for_each_child(child, parent)
     lstopo_populate_userdata(child);
-  for(child = parent->io_first_child; child; child = child->next_sibling)
+  for_each_io_child(child, parent)
     lstopo_populate_userdata(child);
-  for(child = parent->misc_first_child; child; child = child->next_sibling)
+  for_each_misc_child(child, parent)
     lstopo_populate_userdata(child);
 }
 
@@ -347,11 +347,11 @@ lstopo_destroy_userdata(hwloc_obj_t parent)
     free(save);
   }
 
-  for(child = parent->first_child; child; child = child->next_sibling)
+  for_each_child(child, parent)
     lstopo_destroy_userdata(child);
-  for(child = parent->io_first_child; child; child = child->next_sibling)
+  for_each_io_child(child, parent)
     lstopo_destroy_userdata(child);
-  for(child = parent->misc_first_child; child; child = child->next_sibling)
+  for_each_misc_child(child, parent)
     lstopo_destroy_userdata(child);
 }
 

@@ -199,11 +199,6 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
     }
 }
 
-/* Traverse children of a parent */
-#define for_each_child(child, parent) for(child = parent->first_child; child; child = child->next_sibling)
-#define for_each_io_child(child, parent) for(child = parent->io_first_child; child; child = child->next_sibling)
-#define for_each_misc_child(child, parent) for(child = parent->misc_first_child; child; child = child->next_sibling)
-
 /* Traverse children of a parent in a safe way: reread the next pointer as
  * appropriate to prevent crash on child deletion:  */
 #define for_each_child_safe(child, parent, pchild) \

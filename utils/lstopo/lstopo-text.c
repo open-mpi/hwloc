@@ -155,12 +155,12 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
   if (collapse > 1)
     fprintf(output, " }");
 
-  for(child = l->first_child; child; child = child->next_sibling)
+  for_each_child(child, l)
     if (child->type != HWLOC_OBJ_PU || !loutput->ignore_pus)
       output_topology (loutput, child, l, i);
-  for(child = l->io_first_child; child; child = child->next_sibling)
+  for_each_io_child(child, l)
     output_topology (loutput, child, l, i);
-  for(child = l->misc_first_child; child; child = child->next_sibling)
+  for_each_misc_child(child, l)
     output_topology (loutput, child, l, i);
 }
 
@@ -175,18 +175,18 @@ output_only (struct lstopo_output *loutput, hwloc_obj_t l)
     fprintf (output, "\n");
   }
   /* there can be anything below normal children */
-  for(child = l->first_child; child; child = child->next_sibling)
+  for_each_child(child, l)
     output_only (loutput, child);
   /* there can be only I/O or Misc below I/O children */
   if (loutput->show_only == HWLOC_OBJ_BRIDGE || loutput->show_only == HWLOC_OBJ_PCI_DEVICE
       || loutput->show_only == HWLOC_OBJ_OS_DEVICE || loutput->show_only == HWLOC_OBJ_MISC) {
-    for(child = l->io_first_child; child; child = child->next_sibling)
+    for_each_io_child(child, l)
       output_only (loutput, child);
   }
   /* there can be only Misc below Misc children */
   if (loutput->show_only == HWLOC_OBJ_MISC) {
     /* Misc can only contain other Misc, no need to recurse otherwise */
-    for(child = l->misc_first_child; child; child = child->next_sibling)
+    for_each_misc_child(child, l)
       output_only (loutput, child);
   }
 }

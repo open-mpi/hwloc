@@ -5725,15 +5725,13 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
    * (they are attached to root until later in the core discovery)
    */
   needpcidiscovery = 1;
-  tmp = hwloc_get_root_obj(topology)->io_first_child;
-  while (tmp) {
+  for_each_io_child(tmp, hwloc_get_root_obj(topology)) {
     if (tmp->type == HWLOC_OBJ_PCI_DEVICE
 	|| (tmp->type == HWLOC_OBJ_BRIDGE && tmp->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
       hwloc_debug("%s", "PCI objects already added, ignoring linuxio PCI discovery.\n");
       needpcidiscovery = 0;
       break;
     }
-    tmp = tmp->next_sibling;
   }
 
   if (needpcidiscovery)

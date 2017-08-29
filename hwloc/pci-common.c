@@ -197,23 +197,15 @@ hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
 }
 
 static void
-hwloc_pci__traverse(void * cbdata, struct hwloc_obj *tree,
-		    void (*cb)(void * cbdata, struct hwloc_obj *))
-{
-  struct hwloc_obj *child = tree;
-  while (child) {
-    cb(cbdata, child);
-    if (child->type == HWLOC_OBJ_BRIDGE && child->io_first_child)
-      hwloc_pci__traverse(cbdata, child->io_first_child, cb);
-    child = child->next_sibling;
-  }
-}
-
-static void
 hwloc_pci_traverse(void * cbdata, struct hwloc_obj *tree,
 		   void (*cb)(void * cbdata, struct hwloc_obj *))
 {
-  hwloc_pci__traverse(cbdata, tree, cb);
+  hwloc_obj_t child;
+  cb(cbdata, tree);
+  for_each_io_child(child, tree) {
+    if (child->type == HWLOC_OBJ_BRIDGE)
+      hwloc_pci_traverse(cbdata, child, cb);
+  }
 }
 #endif /* HWLOC_DEBUG */
 
@@ -611,9 +603,9 @@ static struct hwloc_obj *
 hwloc__pci_belowroot_find_by_busid(hwloc_obj_t parent,
 				   unsigned domain, unsigned bus, unsigned dev, unsigned func)
 {
-  hwloc_obj_t child = parent->io_first_child;
+  hwloc_obj_t child;
 
-  for ( ; child; child = child->next_sibling) {
+  for_each_io_child(child, parent) {
     if (child->type == HWLOC_OBJ_PCI_DEVICE
 	|| (child->type == HWLOC_OBJ_BRIDGE
 	    && child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)) {

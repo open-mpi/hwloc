@@ -1903,11 +1903,11 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) &state, topology, obj);
 
-  for(child = obj->first_child; child; child = child->next_sibling)
+  for_each_child(child, obj)
     hwloc__xml_export_object (&state, topology, child, flags);
-  for(child = obj->io_first_child; child; child = child->next_sibling)
+  for_each_io_child(child, obj)
     hwloc__xml_export_object (&state, topology, child, flags);
-  for(child = obj->misc_first_child; child; child = child->next_sibling)
+  for_each_misc_child(child, obj)
     hwloc__xml_export_object (&state, topology, child, flags);
 
   state.end_object(&state, "object");
