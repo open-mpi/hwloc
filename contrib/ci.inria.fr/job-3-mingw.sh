@@ -88,7 +88,7 @@ if test x$dobuild32 = x1; then
   if test x$doconf = x1; then
     winball=hwloc-win32-build-${version}
     prefix=${PWD}/../${winball}
-    ../configure --prefix=$prefix --enable-static $confopts
+    ../configure --prefix=$prefix --enable-static CC="gcc -static-libgcc" $confopts
   fi
 
   make
@@ -135,7 +135,7 @@ if test x$dobuild64 = x1; then
   if test x$doconf = x1; then
     winball=hwloc-win64-build-${version}
     prefix=${PWD}/../${winball}
-    ../configure --prefix=$prefix --enable-static $confopts
+    ../configure --prefix=$prefix --enable-static CC="gcc -static-libgcc" $confopts
   fi
 
   make
