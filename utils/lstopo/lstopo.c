@@ -278,6 +278,8 @@ static void add_process_objects(hwloc_topology_t topology)
           closedir(task_dir);
         }
       }
+
+      free(path);
     }
 #endif /* HWLOC_LINUX_SYS */
 
