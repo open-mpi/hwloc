@@ -19,19 +19,21 @@ in v0.9.1).
 
 Version 1.11.8
 --------------
-* Fix search for objects by physical index in command-line tools.
-* Add missing "cpubind:get_thisthread_last_cpu_location" in the output
-  of hwloc-info --support.
-* Add support for CUDA compute capability 7.0 and fix support for 6.[12].
 * Multiple Solaris improvements, thanks to Maureen Chew for the help:
   + Detect caches on Sparc.
   + Properly detect allowed/disallowed PUs and NUMA nodes with processor sets.
   + Add hwloc_get_last_cpu_location() support for the current thread.
-* Add --pid and --name to specify target processes in hwloc-ps.
-* Display thread names in lstopo and hwloc-ps on Linux.
-* Add a FAQ entry about building on Windows.
-* Install missing sub-manpage for hwloc_obj_add_info() and
-  hwloc_obj_get_info_by_name().
+* Add support for CUDA compute capability 7.0 and fix support for 6.[12].
+* Tools improvements
+  + Fix search for objects by physical index in command-line tools.
+  + Add missing "cpubind:get_thisthread_last_cpu_location" in the output
+    of hwloc-info --support.
+  + Add --pid and --name to specify target processes in hwloc-ps.
+  + Display thread names in lstopo and hwloc-ps on Linux.
+* Doc improvements
+  + Add a FAQ entry about building on Windows.
+  + Install missing sub-manpage for hwloc_obj_add_info() and
+    hwloc_obj_get_info_by_name().
 
 
 Version 1.11.7
