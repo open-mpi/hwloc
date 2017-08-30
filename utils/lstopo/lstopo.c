@@ -38,6 +38,12 @@
 #include "lstopo.h"
 #include "misc.h"
 
+#ifdef __MINGW32__
+# ifdef HAVE_CLOCK_GETTIME
+#  undef HAVE_CLOCK_GETTIME
+# endif
+#endif
+
 static unsigned int top = 0;
 
 FILE *open_output(const char *filename, int overwrite)
