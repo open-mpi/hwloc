@@ -38,6 +38,12 @@
 #include "lstopo.h"
 #include "misc.h"
 
+#ifdef __MINGW32__
+# ifdef HAVE_CLOCK_GETTIME
+#  undef HAVE_CLOCK_GETTIME
+# endif
+#endif
+
 int lstopo_pid_number = -1;
 hwloc_pid_t lstopo_pid;
 hwloc_obj_type_t lstopo_show_only = (hwloc_obj_type_t) -1;
