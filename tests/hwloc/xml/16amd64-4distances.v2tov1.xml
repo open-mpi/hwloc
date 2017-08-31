@@ -10,7 +10,7 @@
     <info name="Architecture" value="x86_64"/>
     <info name="hwlocVersion" value="1.11.4"/>
     <info name="ProcessName" value="lstopo"/>
-    <distances nbobjs="8" relative_depth="2" latency_base="1.000000">
+    <distances nbobjs="8" relative_depth="3" latency_base="1.000000">
       <latency value="10.000000"/>
       <latency value="20.000000"/>
       <latency value="20.000000"/>
@@ -76,7 +76,7 @@
       <latency value="20.000000"/>
       <latency value="10.000000"/>
     </distances>
-    <distances nbobjs="8" relative_depth="3" latency_base="1.000000">
+    <distances nbobjs="8" relative_depth="2" latency_base="1.000000">
       <latency value="10.000000"/>
       <latency value="20.000000"/>
       <latency value="80.000000"/>

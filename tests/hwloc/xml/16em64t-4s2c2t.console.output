@@ -1,4 +1,5 @@
-Machine + NUMANode L#0 (P#0)
+Machine
+  NUMANode L#0 (P#0)
   Package L#0 + L3 L#0 (4096KB)
     L2 L#0 (1024KB) + L1d L#0 (16KB) + Core L#0
       PU L#0 (P#0)

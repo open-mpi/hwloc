@@ -785,6 +785,7 @@ hwloc_distrib(hwloc_topology_t topology,
     unsigned chunk, weight;
     hwloc_obj_t root = roots[flags & HWLOC_DISTRIB_FLAG_REVERSE ? n_roots-1-i : i];
     hwloc_cpuset_t cpuset = root->cpuset;
+    /* FIXME: if root is NUMANODE, use normal parent? */
     weight = hwloc_bitmap_weight(cpuset);
     if (!weight)
       continue;
@@ -792,7 +793,7 @@ hwloc_distrib(hwloc_topology_t topology,
      * If previous chunks got rounded-up, we may get a bit less. */
     chunk = (( (givenweight+weight) * n  + tot_weight-1) / tot_weight)
           - ((  givenweight         * n  + tot_weight-1) / tot_weight);
-    if (!root->arity || chunk <= 1 || (root->depth >= until && (int) root->depth != HWLOC_TYPE_DEPTH_NUMANODE /* FIXME */)) {
+    if (!root->arity || chunk <= 1 || root->depth >= until) {
       /* We can't split any more, put everything there.  */
       if (chunk) {
 	/* Fill cpusets with ours */

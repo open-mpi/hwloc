@@ -143,6 +143,7 @@ again:
     return NULL;
   if (obj->type == HWLOC_OBJ_PU && loutput->ignore_pus)
     goto again;
+  /* FIXME ignore numas */
   if (loutput->collapse && obj->type == HWLOC_OBJ_PCI_DEVICE) {
     struct lstopo_obj_userdata *lud = obj->userdata;
     if (lud->pci_collapsed == -1)
@@ -337,6 +338,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       || (hwloc_obj_type_is_cache(parent->type) && parent->attr->cache.depth == 1))
     separator = 0;
 
+  /* FIXME show numa at the top of the box */
 
   /* actually place children */
   if (orient == LSTOPO_ORIENT_HORIZ) {

@@ -404,13 +404,13 @@ static __hwloc_inline hwloc_obj_type_t hwloc_cache_type_by_depth_type(unsigned d
 static __hwloc_inline int hwloc_obj_type_is_normal (hwloc_obj_type_t type)
 {
   /* type contiguity is asserted in topology_check() */
-  return type < HWLOC_OBJ_MISC || type > HWLOC_OBJ_OS_DEVICE;
+  return (type < HWLOC_OBJ_MISC || type > HWLOC_OBJ_OS_DEVICE) && type != HWLOC_OBJ_NUMANODE;
 }
 
-/* Currently unused */
-static __hwloc_inline int hwloc_obj_type_is_memory (hwloc_obj_type_t type __hwloc_attribute_unused)
+/* Any object attached to memory children, currently only NUMA nodes */
+static __hwloc_inline int hwloc_obj_type_is_memory (hwloc_obj_type_t type)
 {
-  return 0;
+  return type == HWLOC_OBJ_NUMANODE;
 }
 
 /* I/O or Misc object, without cpusets or nodesets. */

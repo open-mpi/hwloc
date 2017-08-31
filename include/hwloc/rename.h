@@ -642,6 +642,8 @@ extern "C" {
 #define hwloc_topology_setup_defaults HWLOC_NAME(topology_setup_defaults)
 #define hwloc_topology_clear HWLOC_NAME(topology_clear)
 
+#define hwloc__attach_memory_object HWLOC_NAME(insert_memory_object)
+
 #define hwloc_pci_discovery_init HWLOC_NAME(pci_discovery_init)
 #define hwloc_pci_discovery_prepare HWLOC_NAME(pci_discovery_prepare)
 #define hwloc_pci_discovery_exit HWLOC_NAME(pci_discovery_exit)

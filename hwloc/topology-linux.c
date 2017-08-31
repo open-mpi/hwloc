@@ -3217,6 +3217,11 @@ look_sysfsnode(struct hwloc_topology *topology,
 	      closest = j;
 	  }
 	  if (closest != (unsigned) -1) {
+	    /* Change MCDRAM cpuset to DDR cpuset for clarity.
+	     * Not actually useful if we insert with hwloc__attach_memory_object() below.
+	     * The cpuset will be updated by the core later anyway.
+	     */
+	    hwloc_bitmap_copy(nodes[i]->cpuset, nodes[closest]->cpuset);
 	    /* Add a Group for Cluster containing this MCDRAM + DDR */
 	    hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
@@ -3250,10 +3255,15 @@ look_sysfsnode(struct hwloc_topology *topology,
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
 	if (node) {
-	  hwloc_obj_t parent = NULL;
-	  if (data->is_knl && node_knl_cluster[i] != -1)
-	    parent = knl_clusters[node_knl_cluster[i]];
-	  hwloc_obj_t res_obj = hwloc__insert_object_by_cpuset(topology, parent, node, hwloc_report_os_error);
+	  hwloc_obj_t res_obj;
+	  if (data->is_knl && node_knl_cluster[i] != -1) {
+	    /* directly attach to the existing cluster */
+	    hwloc_obj_t parent = knl_clusters[node_knl_cluster[i]];
+	    res_obj = hwloc__attach_memory_object(topology, parent, node, hwloc_report_os_error);
+	  } else {
+	    /* we don't know where to attach, let the core find or insert if needed */
+	    res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, hwloc_report_os_error);
+	  }
 	  if (res_obj != node)
 	    /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
 	     * This object disappeared, we'll ignore distances */

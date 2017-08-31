@@ -1,6 +1,6 @@
 Machine (P#0 total=8299024KB CPUModel=EV68CB Backend=Linux)
-  NUMANode L#0 (P#0 local=8299024KB total=8299024KB)
-    PU L#0 (P#0)
+  PU L#0 (P#0 total=8299024KB)
+    NUMANode L#0 (P#0 local=8299024KB total=8299024KB)
 depth 0:	1 Machine (type #1)
  depth 1:	1 PU (type #5)
 Special depth -7:	1 NUMANode (type #2)

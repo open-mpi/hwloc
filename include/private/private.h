@@ -168,6 +168,11 @@ extern void hwloc__reorder_children(hwloc_obj_t parent);
 extern void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 extern void hwloc_topology_clear(struct hwloc_topology *topology);
 
+/* insert memory object as memory child of normal parent */
+extern struct hwloc_obj * hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
+						      hwloc_obj_t obj,
+						      hwloc_report_error_t report_error);
+
 extern void hwloc_pci_discovery_init(struct hwloc_topology *topology);
 extern void hwloc_pci_discovery_prepare(struct hwloc_topology *topology);
 extern void hwloc_pci_discovery_exit(struct hwloc_topology *topology);
@@ -342,6 +347,7 @@ HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, 
 #define HWLOC_GROUP_KIND_DISTANCE			900	/* subkind is round of adding these groups during distance based grouping */
 /* finally, hwloc-specific groups required to insert something else, should disappear as soon as possible */
 #define HWLOC_GROUP_KIND_IO				1000	/* no subkind */
+#define HWLOC_GROUP_KIND_MEMORY				1001	/* no subkind */
 
 /* memory allocator for topology objects */
 struct hwloc_tma {

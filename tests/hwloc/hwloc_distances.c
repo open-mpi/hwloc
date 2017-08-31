@@ -98,11 +98,12 @@ int main(void)
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
-  assert(topodepth == 4);
+  assert(topodepth == 5);
   check_distances(topology, 0, 0);
   check_distances(topology, 1, 0);
   check_distances(topology, 2, 0);
   check_distances(topology, 3, 0);
+  check_distances(topology, 4, 0);
   check_distances(topology, HWLOC_TYPE_DEPTH_NUMANODE, 1);
 
   /* check numa distances */
@@ -161,12 +162,13 @@ int main(void)
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
-  assert(topodepth == 5);
+  assert(topodepth == 6);
   check_distances(topology, 0, 0);
   check_distances(topology, 1, 0);
   check_distances(topology, 2, 0);
   check_distances(topology, 3, 0);
-  check_distances(topology, 4, 1);
+  check_distances(topology, 4, 0);
+  check_distances(topology, 5, 1);
   check_distances(topology, HWLOC_TYPE_DEPTH_NUMANODE, 1);
 
   /* check PU distances */
@@ -203,12 +205,13 @@ int main(void)
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
-  assert(topodepth == 5);
+  assert(topodepth == 6);
   check_distances(topology, 0, 0);
   check_distances(topology, 1, 0);
   check_distances(topology, 2, 0);
   check_distances(topology, 3, 0);
-  check_distances(topology, 4, 2);
+  check_distances(topology, 4, 0);
+  check_distances(topology, 5, 2);
   check_distances(topology, HWLOC_TYPE_DEPTH_NUMANODE, 1);
 
   /* check PU distances */

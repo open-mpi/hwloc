@@ -68,7 +68,7 @@ main (void)
   hwloc_bitmap_sscanf(set, "0ff08000");
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PACKAGE);
-  assert(depth == 1);
+  assert(depth == 2);
   obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, NULL);
   assert(obj == hwloc_get_obj_by_depth(topology, depth, 1));
   obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, obj);

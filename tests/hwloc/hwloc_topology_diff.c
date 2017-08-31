@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2015 Inria.  All rights reserved.
+ * Copyright © 2013-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -168,9 +168,9 @@ int main(void)
   tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
   tmpdiff = tmpdiff->generic.next;
-  assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-  tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX);
+  tmpdiff = tmpdiff->generic.next;
+  assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
   assert(tmpdiff->generic.next == NULL);
   hwloc_topology_diff_destroy(diff);
 
@@ -183,7 +183,7 @@ int main(void)
   assert(err == 0);
   assert(diff);
   err = hwloc_topology_diff_apply(topo2, diff, HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE);
-  assert(err == -4);
+  assert(err == -3);
   hwloc_topology_diff_destroy(diff);
 
   hwloc_topology_destroy(topo3);

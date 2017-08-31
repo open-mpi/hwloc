@@ -811,6 +811,46 @@ hwloc__xml_import_object(hwloc_topology_t topology,
      * 1.x specific checks
      */
 
+    /* attach pre-v2.0 children of NUMA nodes to normal parent */
+    if (parent && parent->type == HWLOC_OBJ_NUMANODE) {
+      parent = parent->parent;
+      assert(parent);
+    }
+
+    /* insert a group above pre-v2.0 NUMA nodes if needed */
+    if (obj->type == HWLOC_OBJ_NUMANODE) {
+      if (!parent) {
+	/* crazy case of NUMA node root (only possible when filtering Machine keep_structure in v1.x),
+	 * reinsert a Machine object
+	 */
+	hwloc_obj_t machine = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MACHINE, -1);
+	machine->cpuset = hwloc_bitmap_dup(obj->cpuset);
+	machine->allowed_cpuset = hwloc_bitmap_dup(obj->allowed_cpuset);
+	machine->complete_cpuset = hwloc_bitmap_dup(obj->cpuset);
+	machine->nodeset = hwloc_bitmap_dup(obj->nodeset);
+	machine->allowed_nodeset = hwloc_bitmap_dup(obj->allowed_nodeset);
+	machine->complete_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
+	topology->levels[0][0] = machine;
+	parent = machine;
+
+      } else if (!hwloc_bitmap_isequal(obj->complete_cpuset, parent->complete_cpuset)) {
+	/* this NUMA node added some hierarchy, we need to attach it under an intermediate group */
+	if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+	  hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+	  group->gp_index = 0; /* will be initialized at the end of the discovery once we know the max */
+	  group->cpuset = hwloc_bitmap_dup(obj->cpuset);
+	  group->allowed_cpuset = hwloc_bitmap_dup(obj->allowed_cpuset);
+	  group->complete_cpuset = hwloc_bitmap_dup(obj->cpuset);
+	  group->nodeset = hwloc_bitmap_dup(obj->nodeset);
+	  group->allowed_nodeset = hwloc_bitmap_dup(obj->allowed_nodeset);
+	  group->complete_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
+	  group->attr->group.kind = HWLOC_GROUP_KIND_MEMORY;
+	  hwloc_insert_object_by_parent(topology, parent, group);
+	  parent = group;
+	}
+      }
+    }
+
     /* fixup attribute-less caches imported from pre-v2.0 XMLs */
     if (attribute_less_cache) {
       assert(obj->type == _HWLOC_OBJ_CACHE_OLD);
@@ -1474,6 +1514,9 @@ hwloc_look_xml(struct hwloc_backend *backend)
   state.global->close_child(&childstate);
   assert(!gotignored);
 
+  /* the root may have changed if we had to reinsert a Machine */
+  root = topology->levels[0][0];
+
   if (data->version_major >= 2) {
     /* find v2 distances */
     while (1) {
@@ -1499,6 +1542,17 @@ hwloc_look_xml(struct hwloc_backend *backend)
       fprintf(stderr, "%s: invalid root object without cpuset\n",
 	      data->msgprefix);
     goto err;
+  }
+
+  /* update pre-v2.0 memory group gp_index */
+  if (data->version_major < 2 && data->first_numanode) {
+    hwloc_obj_t node = data->first_numanode;
+    do {
+      if (node->parent->type == HWLOC_OBJ_GROUP
+	  && !node->parent->gp_index)
+	node->parent->gp_index = topology->next_gp_index++;
+      node = node->next_cousin;
+    } while (node);
   }
 
   if (data->version_major < 2 && data->first_v1dist) {
@@ -1757,6 +1811,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     sprintf(tmp, "%u", obj->os_index);
     state.new_prop(&state, "os_index", tmp);
   }
+  /* TODO if exporting v1 non-first NUMA, we should clear its cpuset */
   if (obj->cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
     state.new_prop(&state, "cpuset", cpuset);
@@ -1777,6 +1832,9 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "allowed_cpuset", cpuset);
     free(cpuset);
   }
+  /* TODO if exporting v1, we should clear second local NUMA bits from nodeset,
+   * but the importer should clear them anyway.
+   */
   if (obj->nodeset && !hwloc_bitmap_isfull(obj->nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
     state.new_prop(&state, "nodeset", cpuset);
@@ -1941,6 +1999,8 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 	depth = -1;
 	for(i=0; i<nbobjs; i++) {
 	  hwloc_obj_t parent = dist->objs[i]->parent;
+	  while (hwloc_obj_type_is_memory(parent->type))
+	    parent = parent->parent;
 	  if ((int)parent->depth+1 > depth)
 	    depth = parent->depth+1;
 	}
@@ -1950,7 +2010,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 	for(i=0; i<nbobjs; i++) {
 	  hwloc_obj_t parent = dist->objs[i]->parent;
 	  while (parent) {
-	    if (parent->type == HWLOC_OBJ_NUMANODE) {
+	    if (parent->memory_first_child) {
 	      parent_with_memory = 1;
 	      goto done;
 	    }
@@ -1987,10 +2047,37 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) &state, topology, obj);
 
-  for_each_memory_child(child, obj)
-    hwloc__xml_export_object (&state, topology, child, flags);
-  for_each_child(child, obj)
-    hwloc__xml_export_object (&state, topology, child, flags);
+  if (v1export) {
+    /* v1.x requires NUMA nodes to move back to normal children */
+    if (obj->type == HWLOC_OBJ_NUMANODE && obj->sibling_rank == 0) {
+      /* export parent below first NUMA node */
+      hwloc__xml_export_object (&state, topology, obj->parent, flags);
+    } else {
+      for_each_child(child, obj) {
+	if (child->memory_arity) {
+	  /* child has memory, export memory first, and then normal children below the first memory */
+	  hwloc_obj_t node;
+	  if (child->memory_arity > 1 && hwloc__xml_verbose())
+	    /* TODO export non-first NUMA nodes with empty cpuset (like KNL on v1.x) */
+	    fprintf(stderr, "cannot export more than one local NUMA nodes to v1.x\n");
+	  node = child->memory_first_child;
+	  assert(node->type == HWLOC_OBJ_NUMANODE);
+	  hwloc__xml_export_object (&state, topology, node, flags);
+	} else {
+	  /* no memory, export as usual */
+	  hwloc__xml_export_object (&state, topology, child, flags);
+	}
+      }
+    }
+
+  } else {
+    /* v2.x export, memory and normal children as usual */
+    for_each_memory_child(child, obj)
+      hwloc__xml_export_object (&state, topology, child, flags);
+    for_each_child(child, obj)
+      hwloc__xml_export_object (&state, topology, child, flags);
+  }
+
   for_each_io_child(child, obj)
     hwloc__xml_export_object (&state, topology, child, flags);
   for_each_misc_child(child, obj)

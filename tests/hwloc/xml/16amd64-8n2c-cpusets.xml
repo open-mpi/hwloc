@@ -4,7 +4,8 @@
   <object type="Machine" os_index="0" cpuset="0x0000f06f" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000f06f" nodeset="0x0000003e" complete_nodeset="0x000000ff" allowed_nodeset="0x0000003e" gp_index="1">
     <info name="DMIBoardVendor" value="TYAN Computer Corp"/>
     <info name="DMIBoardName" value="S4881 "/>
-    <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" gp_index="2">
+    <object type="Group" cpuset="0x00000003" complete_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" gp_index="64" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" gp_index="2"/>
       <object type="Package" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" gp_index="3">
         <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" gp_index="4" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="L1Cache" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" gp_index="5" cache_size="65536" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
@@ -22,7 +23,8 @@
         </object>
       </object>
     </object>
-    <object type="NUMANode" os_index="1" cpuset="0x0000000c" complete_cpuset="0x0000000c" allowed_cpuset="0x0000000c" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" gp_index="12" local_memory="8589934592">
+    <object type="Group" cpuset="0x0000000c" complete_cpuset="0x0000000c" allowed_cpuset="0x0000000c" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" gp_index="65" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="1" cpuset="0x0000000c" complete_cpuset="0x0000000c" allowed_cpuset="0x0000000c" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" gp_index="12" local_memory="8589934592"/>
       <object type="Package" os_index="1" cpuset="0x0000000c" complete_cpuset="0x0000000c" allowed_cpuset="0x0000000c" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" gp_index="13">
         <object type="L2Cache" cpuset="0x00000004" complete_cpuset="0x00000004" allowed_cpuset="0x00000004" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" gp_index="14" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="L1Cache" cpuset="0x00000004" complete_cpuset="0x00000004" allowed_cpuset="0x00000004" nodeset="0x00000002" complete_nodeset="0x00000002" allowed_nodeset="0x00000002" gp_index="15" cache_size="65536" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
@@ -40,8 +42,9 @@
         </object>
       </object>
     </object>
-    <object type="NUMANode" os_index="2" cpuset="0x00000020" complete_cpuset="0x00000030" allowed_cpuset="0x00000020" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" gp_index="22" local_memory="8589934592">
-      <object type="Package" os_index="2" cpuset="0x00000020" complete_cpuset="0x00000030" allowed_cpuset="0x00000020" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" gp_index="23">
+    <object type="Group" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" gp_index="66" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="2" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" gp_index="22" local_memory="8589934592"/>
+      <object type="Package" os_index="2" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" gp_index="23">
         <object type="L2Cache" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" gp_index="24" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="L1Cache" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" gp_index="25" cache_size="65536" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
             <object type="Core" os_index="1" cpuset="0x00000020" complete_cpuset="0x00000020" allowed_cpuset="0x00000020" nodeset="0x00000004" complete_nodeset="0x00000004" allowed_nodeset="0x00000004" gp_index="26">
@@ -51,8 +54,9 @@
         </object>
       </object>
     </object>
-    <object type="NUMANode" os_index="3" cpuset="0x00000040" complete_cpuset="0x000000c0" allowed_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" allowed_nodeset="0x00000008" gp_index="28" local_memory="8589934592">
-      <object type="Package" os_index="3" cpuset="0x00000040" complete_cpuset="0x000000c0" allowed_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" allowed_nodeset="0x00000008" gp_index="29">
+    <object type="Group" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" allowed_nodeset="0x00000008" gp_index="67" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="3" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" allowed_nodeset="0x00000008" gp_index="28" local_memory="8589934592"/>
+      <object type="Package" os_index="3" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" allowed_nodeset="0x00000008" gp_index="29">
         <object type="L2Cache" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" allowed_nodeset="0x00000008" gp_index="30" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="L1Cache" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" allowed_nodeset="0x00000008" gp_index="31" cache_size="65536" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
             <object type="Core" os_index="0" cpuset="0x00000040" complete_cpuset="0x00000040" allowed_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" allowed_nodeset="0x00000008" gp_index="32">
@@ -62,9 +66,8 @@
         </object>
       </object>
     </object>
-    <object type="NUMANode" os_index="4" cpuset="0x0" complete_cpuset="0x00000300" allowed_cpuset="0x0" nodeset="0x00000010" complete_nodeset="0x00000010" allowed_nodeset="0x00000010" gp_index="34" local_memory="8589934592"/>
-    <object type="NUMANode" os_index="5" cpuset="0x0" complete_cpuset="0x00000c00" allowed_cpuset="0x0" nodeset="0x00000020" complete_nodeset="0x00000020" allowed_nodeset="0x00000020" gp_index="35" local_memory="8589934592"/>
-    <object type="NUMANode" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" allowed_cpuset="0x00003000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0" gp_index="36">
+    <object type="Group" cpuset="0x00003000" complete_cpuset="0x00003000" allowed_cpuset="0x00003000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0" gp_index="70" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" allowed_cpuset="0x00003000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0" gp_index="36"/>
       <object type="Package" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" allowed_cpuset="0x00003000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0" gp_index="37">
         <object type="L2Cache" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0" gp_index="38" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="L1Cache" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0" gp_index="39" cache_size="65536" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
@@ -82,7 +85,8 @@
         </object>
       </object>
     </object>
-    <object type="NUMANode" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" allowed_cpuset="0x0000c000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0" gp_index="46">
+    <object type="Group" cpuset="0x0000c000" complete_cpuset="0x0000c000" allowed_cpuset="0x0000c000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0" gp_index="71" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" allowed_cpuset="0x0000c000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0" gp_index="46"/>
       <object type="Package" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" allowed_cpuset="0x0000c000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0" gp_index="47">
         <object type="L2Cache" cpuset="0x00004000" complete_cpuset="0x00004000" allowed_cpuset="0x00004000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0" gp_index="48" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
           <object type="L1Cache" cpuset="0x00004000" complete_cpuset="0x00004000" allowed_cpuset="0x00004000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0" gp_index="49" cache_size="65536" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
@@ -99,6 +103,12 @@
           </object>
         </object>
       </object>
+    </object>
+    <object type="Group" cpuset="0x0" complete_cpuset="0x0" allowed_cpuset="0x0" nodeset="0x00000020" complete_nodeset="0x00000020" allowed_nodeset="0x00000020" gp_index="69" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="5" cpuset="0x0" complete_cpuset="0x0" allowed_cpuset="0x0" nodeset="0x00000020" complete_nodeset="0x00000020" allowed_nodeset="0x00000020" gp_index="35" local_memory="8589934592"/>
+    </object>
+    <object type="Group" cpuset="0x0" complete_cpuset="0x0" allowed_cpuset="0x0" nodeset="0x00000010" complete_nodeset="0x00000010" allowed_nodeset="0x00000010" gp_index="68" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="4" cpuset="0x0" complete_cpuset="0x0" allowed_cpuset="0x0" nodeset="0x00000010" complete_nodeset="0x00000010" allowed_nodeset="0x00000010" gp_index="34" local_memory="8589934592"/>
     </object>
   </object>
   <distances2 type="NUMANode" nbobjs="8" kind="5" indexing="os">

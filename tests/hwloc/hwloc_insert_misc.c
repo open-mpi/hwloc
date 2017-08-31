@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -130,8 +130,10 @@ int main(void)
   obj = hwloc_get_obj_by_type(topology2, HWLOC_OBJ_NUMANODE, 1);
   assert(obj);
   hwloc_topology_insert_misc_object(topology2, obj, "below last NUMA");
-  hwloc_topology_insert_misc_object(topology2, obj, "below last Package");
-  hwloc_topology_insert_misc_object(topology2, obj, "below last Core");
+  /* Misc below parent Group of this NUMA node (where Package and Core Misc will end up) */
+  assert(obj->parent->type == HWLOC_OBJ_GROUP);
+  hwloc_topology_insert_misc_object(topology2, obj->parent, "below last Package");
+  hwloc_topology_insert_misc_object(topology2, obj->parent, "below last Core");
   assert(obj);
   /* Misc below first PU */
   obj = hwloc_get_obj_by_type(topology2, HWLOC_OBJ_PU, 0);

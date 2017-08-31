@@ -1309,6 +1309,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
        child = next_child, child ? next_child = child->next_sibling : NULL) {
 
     int res = hwloc_obj_cmp_sets(obj, child);
+    int setres = res;
 
     if (res == HWLOC_OBJ_EQUAL) {
       if (obj->type == HWLOC_OBJ_GROUP) {
@@ -1395,6 +1396,10 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	*obj_children = child;
 	obj_children = &child->next_sibling;
 	child->parent = obj;
+	if (setres == HWLOC_OBJ_EQUAL) {
+	  obj->memory_first_child = child->memory_first_child;
+	  child->memory_first_child = NULL;
+	}
 	break;
     }
   }
@@ -1432,6 +1437,126 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   return NULL;
 }
 
+/* this differs from hwloc_get_obj_covering_cpuset() by:
+ * - not looking at the parent cpuset first, which means we can insert
+ *   below root even if root PU bits are not set yet (PU are inserted later).
+ * - returning the first child that exactly matches instead of walking down in case
+ *   of identical children.
+ */
+static struct hwloc_obj *
+hwloc__find_obj_covering_memory_cpuset(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_bitmap_t cpuset)
+{
+  hwloc_obj_t child = hwloc_get_child_covering_cpuset(topology, cpuset, parent);
+  if (!child)
+    return parent;
+  if (child && hwloc_bitmap_isequal(child->cpuset, cpuset))
+    return child;
+  return hwloc__find_obj_covering_memory_cpuset(topology, child, cpuset);
+}
+
+static struct hwloc_obj *
+hwloc__find_insert_memory_parent(struct hwloc_topology *topology, hwloc_obj_t obj,
+				 hwloc_report_error_t report_error)
+{
+  hwloc_obj_t parent, group, result;
+
+  if (hwloc_bitmap_iszero(obj->cpuset)) {
+    /* CPU-less go in dedicated group below root */
+    parent = topology->levels[0][0];
+
+  } else {
+    /* find the lowest obj covering the cpuset */
+    parent = hwloc__find_obj_covering_memory_cpuset(topology, topology->levels[0][0], obj->cpuset);
+    if (!parent) {
+      /* fallback to root */
+      parent = hwloc_get_root_obj(topology);
+    }
+
+    /* TODO: if root->cpuset was updated earlier, we would be sure whether the group will remain identical to root */
+    if (parent != topology->levels[0][0] && hwloc_bitmap_isequal(parent->cpuset, obj->cpuset))
+      /* that parent is fine */
+      return parent;
+  }
+
+  if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP))
+    /* even if parent isn't perfect, we don't want an intermediate group */
+    return parent;
+
+  /* need to insert an intermediate group for attaching the NUMA node */
+  group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+  if (!group)
+    /* failed to create the group, fallback to larger parent */
+    return parent;
+
+  group->attr->group.kind = HWLOC_GROUP_KIND_MEMORY;
+  group->cpuset = hwloc_bitmap_dup(obj->cpuset);
+  group->complete_cpuset = hwloc_bitmap_dup(obj->complete_cpuset);
+  if (!group->cpuset != !obj->cpuset
+      || !group->complete_cpuset != !obj->complete_cpuset) {
+    /* failed to create the group, fallback to larger parent */
+    hwloc_free_unlinked_object(group);
+    return parent;
+  }
+
+  result = hwloc__insert_object_by_cpuset(topology, parent, group, report_error);
+  if (!result) {
+    /* failed to insert, fallback to larger parent */
+    hwloc_free_unlinked_object(group);
+    return parent;
+  }
+
+  assert(result == group);
+  return group;
+}
+
+/*attach the given memory object below the given normal parent. */
+struct hwloc_obj *
+hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
+			    hwloc_obj_t obj,
+			    hwloc_report_error_t report_error __hwloc_attribute_unused)
+{
+  hwloc_obj_t *cur_children;
+
+  assert(parent);
+  assert(hwloc_obj_type_is_normal(parent->type));
+
+#if 0
+  /* TODO: enable this instead of hack in fixup_sets once NUMA nodes are inserted late */
+  /* copy the parent cpuset in case it's larger than expected.
+   * we could also keep the cpuset smaller than the parent and say that a normal-parent
+   * can have multiple memory children with smaller cpusets.
+   * However, the user decided the ignore Groups, so hierarchy/locality loss is expected.
+   */
+  hwloc_bitmap_copy(obj->cpuset, parent->cpuset);
+#endif
+
+  /* only NUMA nodes are memory for now, just append to the end of the list */
+  assert(obj->type == HWLOC_OBJ_NUMANODE);
+  assert(obj->nodeset);
+  cur_children = &parent->memory_first_child;
+  while (*cur_children) {
+    /* TODO check that things are inserted in order.
+     * it's OK for KNL, the only user so far
+     */
+    cur_children = &(*cur_children)->next_sibling;
+  }
+  *cur_children = obj;
+  obj->next_sibling = NULL;
+
+  /* Initialize the complete nodeset if needed */
+  if (!obj->complete_nodeset) {
+    obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
+  }
+
+  /* Add the bit to the top sets, and to the parent CPU-side object */
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
+    if (hwloc_bitmap_isset(obj->nodeset, obj->os_index))
+      hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
+    hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
+  }
+  return obj;
+}
+
 /* insertion routine that lets you change the error reporting callback */
 struct hwloc_obj *
 hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root,
@@ -1450,23 +1575,27 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root
 	 || (obj->complete_nodeset && !hwloc_bitmap_iszero(obj->complete_nodeset)));
 #endif
 
+  if (hwloc_obj_type_is_memory(obj->type)) {
+    if (!root) {
+      root = hwloc__find_insert_memory_parent(topology, obj, report_error);
+      if (!root) {
+	hwloc_free_unlinked_object(obj);
+	return NULL;
+      }
+    }
+    return hwloc__attach_memory_object(topology, root, obj, report_error);
+  }
+
   if (!root)
     /* Start at the top. */
     root = topology->levels[0][0];
 
   result = hwloc___insert_object_by_cpuset(topology, root, obj, report_error);
-  if (result) {
-    if (result->type == HWLOC_OBJ_PU) {
+  if (result && result->type == HWLOC_OBJ_PU) {
       /* Add the bit to the top sets */
       if (hwloc_bitmap_isset(result->cpuset, result->os_index))
 	hwloc_bitmap_set(topology->levels[0][0]->cpuset, result->os_index);
       hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, result->os_index);
-    } else if (result->type == HWLOC_OBJ_NUMANODE) {
-      /* Add the bit to the top sets */
-      if (hwloc_bitmap_isset(result->nodeset, result->os_index))
-	hwloc_bitmap_set(topology->levels[0][0]->nodeset, result->os_index);
-      hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, result->os_index);
-    }
   }
   if (result != obj) {
     /* either failed to insert, or got merged, free the original object */
@@ -1494,6 +1623,15 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   } else if (hwloc_obj_type_is_io(obj->type)) {
     /* Append to the end of the I/O list */
     for (current = &parent->io_first_child; *current; current = &(*current)->next_sibling);
+  } else if (hwloc_obj_type_is_memory(obj->type)) {
+    /* Append to the end of the memory list */
+    for (current = &parent->memory_first_child; *current; current = &(*current)->next_sibling);
+    /* Add the bit to the top sets */
+    if (obj->type == HWLOC_OBJ_NUMANODE) {
+      if (hwloc_bitmap_isset(obj->nodeset, obj->os_index))
+	hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
+      hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
+    }
   } else {
     /* Append to the end of the list.
      * The caller takes care of inserting children in the right cpuset order, without intersection between them.
@@ -1507,10 +1645,6 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
       if (hwloc_bitmap_isset(obj->cpuset, obj->os_index))
 	hwloc_bitmap_set(topology->levels[0][0]->cpuset, obj->os_index);
       hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, obj->os_index);
-    } else if (obj->type == HWLOC_OBJ_NUMANODE) {
-      if (hwloc_bitmap_isset(obj->nodeset, obj->os_index))
-	hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
-      hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
     }
   }
 
@@ -1853,40 +1987,71 @@ hwloc_obj_add_children_sets(hwloc_obj_t obj)
   return 0;
 }
 
-/* Propagate nodesets up and down */
+/* CPU objects are inserted by cpusets, we know their cpusets are properly included.
+ * We just need fixup_sets() to make sure they aren't too wide.
+ *
+ * Memory objects are inserted by cpusets to find their CPU parent,
+ * but nodesets are only used inside the memory hierarchy below that parent.
+ * Thus we need to propagate nodesets to CPU-side parents and children.
+ *
+ * A memory object nodeset consists of NUMA nodes below it.
+ * A normal object nodeset consists in NUMA nodes attached to any
+ * of its children or parents.
+ */
 static void
 propagate_nodeset(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
-  hwloc_bitmap_t parent_nodeset = NULL;
-  int parent_weight = 0;
 
-  if (obj->nodeset) {
-      /* Some existing nodeset coming from above, to possibly propagate down */
-      parent_nodeset = obj->nodeset;
-      parent_weight = hwloc_bitmap_weight(parent_nodeset);
-  } else
-      obj->nodeset = hwloc_bitmap_alloc();
-
-  for_each_child(child, obj) {
-    /* Propagate singleton nodesets down */
-    if (parent_weight == 1) {
-      if (!child->nodeset)
-        child->nodeset = hwloc_bitmap_dup(obj->nodeset);
-      else if (!hwloc_bitmap_isequal(child->nodeset, parent_nodeset)) {
-        hwloc_debug_bitmap("Oops, parent nodeset %s", parent_nodeset);
-        hwloc_debug_bitmap(" is different from child nodeset %s, ignoring the child one\n", child->nodeset);
-        hwloc_bitmap_copy(child->nodeset, parent_nodeset);
-      }
-    }
-
-    /* Recurse */
-    propagate_nodeset(child);
-
-    /* Propagate children nodesets up */
-    if (child->nodeset)
-      hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
+  if (!obj->nodeset)
+    obj->nodeset = hwloc_bitmap_alloc();
+  else
+    hwloc_bitmap_zero(obj->nodeset);
+  if (!obj->complete_nodeset)
+    obj->complete_nodeset = hwloc_bitmap_alloc();
+  else
+    hwloc_bitmap_zero(obj->complete_nodeset);
+  /* start our nodeset from the parent one */
+  if (obj->parent) {
+    hwloc_bitmap_copy(obj->nodeset, obj->parent->nodeset);
+    hwloc_bitmap_copy(obj->complete_nodeset, obj->parent->complete_nodeset);
   }
+
+  /* now add our local nodeset */
+  for_each_memory_child(child, obj) {
+    /* FIXME rather recurse in the memory hierarchy */
+    /* build our local nodeset from our memory children */
+    hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
+    if (child->complete_nodeset)
+      hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
+    /* by the way, copy our cpusets to memory children */
+    if (child->cpuset)
+      hwloc_bitmap_copy(child->cpuset, obj->cpuset);
+    else
+      child->cpuset = hwloc_bitmap_dup(obj->cpuset);
+    if (child->complete_cpuset)
+      hwloc_bitmap_copy(child->complete_cpuset, obj->complete_cpuset);
+    else
+      child->complete_cpuset = hwloc_bitmap_dup(obj->complete_cpuset);
+  }
+
+  /* Propagate our local nodeset to CPU children. */
+  for_each_child(child, obj) {
+    propagate_nodeset(child);
+  }
+
+  /* Propagate CPU children specific nodesets back to us.
+   *
+   * We cannot merge these two loops because we don't want to first child
+   * nodeset to be propagated back to us and then down to the second child.
+   * Each child may have its own local nodeset,
+   * each of them is propagated to us, but not to other children.
+   */
+  for_each_child(child, obj) {
+    hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
+    hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
+  }
+
   /* No nodeset under I/O or Misc */
 }
 
@@ -1899,6 +2064,7 @@ remove_unused_sets(hwloc_obj_t obj)
   hwloc_bitmap_and(obj->nodeset, obj->nodeset, obj->allowed_nodeset);
   if (obj->type == HWLOC_OBJ_NUMANODE && obj->os_index != (unsigned) -1 &&
       !hwloc_bitmap_isset(obj->allowed_nodeset, obj->os_index)) {
+    /* FIXME drop NUMA entirely */
     unsigned i;
     hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
     obj->memory.local_memory = 0;
@@ -1987,6 +2153,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
       && !obj->memory_first_child /* only remove if no memory attached there */
       && !obj->io_first_child /* only remove if no I/O is attached there */
       && hwloc_bitmap_iszero(obj->cpuset)) {
+    /* FIXME drop NUMA entirely */
     /* Remove empty children (even if it has Misc children) */
     hwloc_debug("%s", "\nRemoving empty object ");
     hwloc_debug_print_object(0, obj);
@@ -2466,11 +2633,7 @@ hwloc_list_special_objects(hwloc_topology_t topology, hwloc_obj_t obj)
     hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_NUMANODE], obj);
 
     /* Recurse */
-    for_each_child(child, obj) /* FIXME temporary */
-      hwloc_list_special_objects(topology, child);
     for_each_memory_child(child, obj)
-      hwloc_list_special_objects(topology, child);
-    for_each_io_child(child, obj) /* FIXME temporary */
       hwloc_list_special_objects(topology, child);
     for_each_misc_child(child, obj)
       hwloc_list_special_objects(topology, child);
@@ -2589,27 +2752,11 @@ hwloc_connect_levels(hwloc_topology_t topology)
      * Don't use PU if there are other types since we want to keep PU at the bottom.
      */
 
-  find_top:
     /* Look for the first non-PU object, and use the first PU if we really find nothing else */
     for (i = 0; i < n_objs; i++)
-      if (objs[i]->type != HWLOC_OBJ_PU && objs[i]->type != HWLOC_OBJ_NUMANODE /* FIXME temporary */)
+      if (objs[i]->type != HWLOC_OBJ_PU)
         break;
     top_obj = i == n_objs ? objs[0] : objs[i];
-    if (top_obj->type == HWLOC_OBJ_NUMANODE) { /* FIXME temporary */
-      n_new_objs = 0;
-      for (i = 0; i < n_objs; i++)
-	n_new_objs += objs[i]->arity;
-      new_objs = malloc(n_new_objs * sizeof(new_objs[0]));
-      n_new_objs = 0;
-      for (i = 0; i < n_objs; i++) {
-	memcpy(&new_objs[n_new_objs], objs[i]->children, objs[i]->arity*sizeof(new_objs[0]));
-	n_new_objs += objs[i]->arity;
-      }
-      free(objs);
-      objs = new_objs;
-      n_objs = n_new_objs;
-      goto find_top;
-    }
 
     /* See if this is actually the topmost object */
     for (i = 0; i < n_objs; i++) {
@@ -3469,7 +3616,6 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
     assert(!obj->first_child);
     assert(!obj->memory_first_child);
     unlink_and_free_single_object(pobj);
-    /* do not remove children. if they were to be removed, they would have been already */
     topology->modified = 1;
   }
 }
@@ -3643,8 +3789,7 @@ hwloc__check_normal_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexe
     /* normal child */
     assert(hwloc_obj_type_is_normal(child->type));
     /* check depth */
-    if (child->type != HWLOC_OBJ_NUMANODE && parent->type != HWLOC_OBJ_NUMANODE) /* FIXME temporary */
-      assert(child->depth > parent->depth);
+    assert(child->depth > parent->depth);
     /* check siblings */
     hwloc__check_child_siblings(parent, parent->children, parent->arity, j, child, prev);
     /* recurse */
@@ -3656,71 +3801,60 @@ hwloc__check_normal_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexe
   assert(parent->first_child == parent->children[0]);
   assert(parent->last_child == parent->children[parent->arity-1]);
 
-  /* we already checked in the caller that objects have either all sets or none */
-
-  {
-    /* check that parent->cpuset == exclusive OR of children
-     * (can be wrong for complete_cpuset since disallowed/offline/unknown PUs can be removed)
-     */
-    hwloc_bitmap_t remaining_parent_cpuset = hwloc_bitmap_dup(parent->cpuset);
-    hwloc_bitmap_t remaining_parent_nodeset = hwloc_bitmap_dup(parent->nodeset);
-    for(j=0; j<parent->arity; j++) {
-      if (!parent->children[j]->cpuset)
-	continue;
-      /* check that child cpuset is included in the reminder of the parent */
-      assert(hwloc_bitmap_isincluded(parent->children[j]->cpuset, remaining_parent_cpuset));
-      hwloc_bitmap_andnot(remaining_parent_cpuset, remaining_parent_cpuset, parent->children[j]->cpuset);
-      /* check that child cpuset is included in the parent (multiple children may have the same nodeset when we're below a NUMA node) */
-      assert(hwloc_bitmap_isincluded(parent->children[j]->nodeset, parent->nodeset));
-      hwloc_bitmap_andnot(remaining_parent_nodeset, remaining_parent_nodeset, parent->children[j]->nodeset);
-    }
-
-    if (parent->type == HWLOC_OBJ_PU) {
-      /* if parent is a PU (with Misc children for instance),
-       * its os_index bit may remain in cpuset. */
-      assert(hwloc_bitmap_weight(remaining_parent_cpuset) == 1);
-      assert(hwloc_bitmap_first(remaining_parent_cpuset) == (int)parent->os_index);
-    } else {
-      /* nothing remains */
-      assert(hwloc_bitmap_iszero(remaining_parent_cpuset));
-    }
-    hwloc_bitmap_free(remaining_parent_cpuset);
-
-    if (parent->type == HWLOC_OBJ_NUMANODE)
-      /* if parent is a NUMA node, its os_index bit may remain.
-       * or it could already have been removed by a child. */
-      hwloc_bitmap_clr(remaining_parent_nodeset, parent->os_index);
-    if (parent->type == HWLOC_OBJ_PU) {
-      /* if parent is a PU (with Misc children for instance),
-       * one bit may remain in nodeset. */
-      assert(hwloc_bitmap_weight(remaining_parent_nodeset) == 1);
-    } else {
-      /* nothing remains */
-      assert(hwloc_bitmap_iszero(remaining_parent_nodeset));
-    }
-    hwloc_bitmap_free(remaining_parent_nodeset);
-  }
-
-  /* check that children complete_cpuset are properly ordered, empty ones may be anywhere
-   * (can be wrong for main cpuset since removed PUs can break the ordering).
-   */
-  {
-    int firstchild;
-    int prev_firstchild = -1; /* -1 works fine with first comparisons below */
-    for(j=0; j<parent->arity; j++) {
-      if (!parent->children[j]->complete_cpuset
-	  || hwloc_bitmap_iszero(parent->children[j]->complete_cpuset))
-	continue;
-
-      firstchild = hwloc_bitmap_first(parent->children[j]->complete_cpuset);
-      assert(prev_firstchild < firstchild);
-      prev_firstchild = firstchild;
-    }
-  }
-
   /* no normal children below a PU */
   if (parent->type == HWLOC_OBJ_PU)
     assert(!parent->arity);
+}
+
+static void
+hwloc__check_children_cpusets(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj)
+{
+  /* we already checked in the caller that objects have either all sets or none */
+  hwloc_obj_t child;
+  int prev_first, prev_empty;
+
+  if (obj->type == HWLOC_OBJ_PU) {
+    /* PU cpuset is just itself, with no normal children */
+    assert(hwloc_bitmap_weight(obj->cpuset) == 1);
+    assert(hwloc_bitmap_first(obj->cpuset) == (int) obj->os_index);
+    assert(hwloc_bitmap_weight(obj->complete_cpuset) == 1);
+    assert(hwloc_bitmap_first(obj->complete_cpuset) == (int) obj->os_index);
+    assert(!obj->arity);
+  } else if (hwloc_obj_type_is_memory(obj->type)) {
+    /* memory object cpuset is equal to its parent */
+    assert(hwloc_bitmap_isequal(obj->parent->cpuset, obj->cpuset));
+    assert(!obj->arity);
+  } else if (!hwloc_obj_type_is_special(obj->type)) {
+    hwloc_bitmap_t set;
+    /* other obj cpuset is an exclusive OR of normal children, except for PUs */
+    set = hwloc_bitmap_alloc();
+    for_each_child(child, obj) {
+      assert(!hwloc_bitmap_intersects(set, child->cpuset));
+      hwloc_bitmap_or(set, set, child->cpuset);
+    }
+    assert(hwloc_bitmap_isequal(set, obj->cpuset));
+    hwloc_bitmap_free(set);
+  }
+
+  /* check that memory children have same cpuset */
+  for_each_memory_child(child, obj)
+    assert(hwloc_bitmap_isequal(obj->cpuset, child->cpuset));
+
+  /* check that children complete_cpusets are properly ordered, empty ones may be anywhere
+   * (can be wrong for main cpuset since removed PUs can break the ordering).
+   */
+  prev_first = -1; /* -1 works fine with first comparisons below */
+  prev_empty = 0; /* no empty cpuset in previous children */
+  for_each_child(child, obj) {
+    int first = hwloc_bitmap_first(child->complete_cpuset);
+    if (first >= 0) {
+      assert(!prev_empty); /* no objects with CPU after objects without CPU */
+      assert(prev_first < first);
+    } else {
+      prev_empty = 1;
+    }
+    prev_first = first;
+  }
 }
 
 static void
@@ -3884,6 +4018,70 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
   hwloc__check_memory_children(topology, gp_indexes, obj);
   hwloc__check_io_children(topology, gp_indexes, obj);
   hwloc__check_misc_children(topology, gp_indexes, obj);
+  hwloc__check_children_cpusets(topology, obj);
+  /* nodesets are checked during another recursion with state below */
+}
+
+static void
+hwloc__check_nodesets(hwloc_obj_t obj, hwloc_bitmap_t parentset)
+{
+  hwloc_obj_t child;
+  int prev_first;
+
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
+    /* NUMANODE nodeset is just itself, with no memory/normal children */
+    assert(hwloc_bitmap_weight(obj->nodeset) == 1);
+    assert(hwloc_bitmap_first(obj->nodeset) == (int) obj->os_index);
+    assert(hwloc_bitmap_weight(obj->complete_nodeset) == 1);
+    assert(hwloc_bitmap_first(obj->complete_nodeset) == (int) obj->os_index);
+    assert(!obj->arity);
+    assert(!obj->memory_arity);
+    assert(hwloc_bitmap_isincluded(obj->nodeset, parentset));
+  } else {
+    hwloc_bitmap_t myset;
+    hwloc_bitmap_t childset;
+
+    /* the local nodeset is an exclusive OR of memory children */
+    myset = hwloc_bitmap_alloc();
+    for_each_memory_child(child, obj) {
+      assert(!hwloc_bitmap_intersects(myset, child->nodeset));
+      hwloc_bitmap_or(myset, myset, child->nodeset);
+    }
+    /* the local nodeset cannot intersect with parents' local nodeset */
+    assert(!hwloc_bitmap_intersects(myset, parentset));
+    hwloc_bitmap_or(parentset, parentset, myset);
+    hwloc_bitmap_free(myset);
+    /* parentset now contains parent+local contribution */
+
+    /* for each children, recurse to check/get its contribution */
+    childset = hwloc_bitmap_alloc();
+    for_each_child(child, obj) {
+      hwloc_bitmap_t set = hwloc_bitmap_dup(parentset); /* don't touch parentset, we don't want to propagate the first child contribution to other children */
+      hwloc__check_nodesets(child, set);
+      /* extract this child contribution */
+      hwloc_bitmap_andnot(set, set, parentset);
+      /* save it */
+      assert(!hwloc_bitmap_intersects(childset, set));
+      hwloc_bitmap_or(childset, childset, set);
+      hwloc_bitmap_free(set);
+    }
+    /* combine child contribution into parentset */
+    assert(!hwloc_bitmap_intersects(parentset, childset));
+    hwloc_bitmap_or(parentset, parentset, childset);
+    hwloc_bitmap_free(childset);
+    /* now check that our nodeset is combination of parent, local and children */
+    assert(hwloc_bitmap_isequal(obj->nodeset, parentset));
+  }
+
+  /* check that children complete_nodesets are properly ordered, empty ones may be anywhere
+   * (can be wrong for main nodeset since removed PUs can break the ordering).
+   */
+  prev_first = -1; /* -1 works fine with first comparisons below */
+  for_each_memory_child(child, obj) {
+    int first = hwloc_bitmap_first(child->complete_nodeset);
+    assert(prev_first < first);
+    prev_first = first;
+  }
 }
 
 static void
@@ -3910,10 +4108,6 @@ hwloc__check_level(struct hwloc_topology *topology, unsigned depth,
     assert(obj->prev_cousin == prev);
 
     /* check that PUs and NUMA nodes have correct cpuset/nodeset */
-    if (obj->type == HWLOC_OBJ_PU) {
-      assert(hwloc_bitmap_weight(obj->complete_cpuset) == 1);
-      assert(hwloc_bitmap_first(obj->complete_cpuset) == (int) obj->os_index);
-    }
     if (obj->type == HWLOC_OBJ_NUMANODE) {
       assert(hwloc_bitmap_weight(obj->complete_nodeset) == 1);
       assert(hwloc_bitmap_first(obj->complete_nodeset) == (int) obj->os_index);
@@ -3956,8 +4150,8 @@ void
 hwloc_topology_check(struct hwloc_topology *topology)
 {
   struct hwloc_obj *obj;
-  hwloc_bitmap_t gp_indexes;
   hwloc_obj_type_t type;
+  hwloc_bitmap_t gp_indexes, set;
   unsigned i, j, depth;
 
   /* make sure we can use ranges to check types */
@@ -4026,6 +4220,11 @@ hwloc_topology_check(struct hwloc_topology *topology)
   gp_indexes = hwloc_bitmap_alloc(); /* TODO prealloc to topology->next_gp_index */
   hwloc__check_object(topology, gp_indexes, obj);
   hwloc_bitmap_free(gp_indexes);
+
+  /* recurse and check the nodesets of children */
+  set = hwloc_bitmap_alloc();
+  hwloc__check_nodesets(obj, set);
+  hwloc_bitmap_free(set);
 }
 
 #else /* NDEBUG */

@@ -53,7 +53,7 @@ set -e
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" root --number-of node
   $calc --if synthetic --input "node:4 core:4 pu:4" node:2 -N core
-  $calc --if synthetic --input "node:4 core:4 pu:4" node:2 -N 2
+  $calc --if synthetic --input "node:4 core:4 pu:4" node:2 -N 3
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" root --intersect Machine
   $calc --if synthetic --input "node:4 core:4 pu:4" core:4-7 -I NUMANode
