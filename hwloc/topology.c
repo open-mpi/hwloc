@@ -3600,6 +3600,10 @@ hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
       prev_firstchild = firstchild;
     }
   }
+
+  /* no normal children below a PU */
+  if (parent->type == HWLOC_OBJ_PU)
+    assert(!parent->arity);
 }
 
 static void
