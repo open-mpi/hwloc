@@ -351,7 +351,7 @@ struct hwloc_obj_memory_s {
 
 /** \brief Structure of a topology object
  *
- * Applications must not modify any field except hwloc_obj.userdata.
+ * Applications must not modify any field except \p hwloc_obj.userdata.
  */
 struct hwloc_obj {
   /* physical information */
