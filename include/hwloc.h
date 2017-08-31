@@ -395,11 +395,15 @@ struct hwloc_obj {
   struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent */
   struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent */
 
-  /* children array below this object (except I/O and Misc children) */
-  unsigned arity;			/**< \brief Number of children */
-  struct hwloc_obj **children;		/**< \brief Children, \c children[0 .. arity -1] */
-  struct hwloc_obj *first_child;	/**< \brief First child */
-  struct hwloc_obj *last_child;		/**< \brief Last child */
+  /** @name List and array of normal children below this object (except I/O and Misc children). */
+  /**@{*/
+  unsigned arity;			/**< \brief Number of normal children.
+					 * Misc and I/O children are not listed here but rather in their dedicated children list.
+					 */
+  struct hwloc_obj **children;		/**< \brief Normal children, \c children[0 .. arity -1] */
+  struct hwloc_obj *first_child;	/**< \brief First normal child */
+  struct hwloc_obj *last_child;		/**< \brief Last normal child */
+  /**@}*/
 
   int symmetric_subtree;		/**< \brief Set if the subtree of normal objects below this object is symmetric,
 					  * which means all children and their children have identical subtrees.
@@ -409,13 +413,27 @@ struct hwloc_obj {
 					  * as a synthetic string.
 					  */
 
-  /* specific list of I/O children */
-  unsigned io_arity;			/**< \brief Number of I/O children */
-  struct hwloc_obj *io_first_child;	/**< \brief First I/O child */
+  /** @name List of I/O children below this object. */
+  /**@{*/
+  unsigned io_arity;			/**< \brief Number of I/O children.
+					 * These children are listed in \p io_first_child.
+					 */
+  struct hwloc_obj *io_first_child;	/**< \brief First I/O child.
+					 * Bridges, PCI and OS devices are listed here (\p io_arity and \p io_first_child)
+					 * instead of in the normal children list.
+					 */
+  /**@}*/
 
-  /* specific list of Misc children */
-  unsigned misc_arity;			/**< \brief Number of Misc children */
-  struct hwloc_obj *misc_first_child;	/**< \brief First Misc child */
+  /** @name List of Misc children below this object. */
+  /**@{*/
+  unsigned misc_arity;			/**< \brief Number of Misc children.
+					 * These children are listed in \p misc_first_child.
+					 */
+  struct hwloc_obj *misc_first_child;	/**< \brief First Misc child.
+					 * Misc objects are listed here (\p misc_arity and \p misc_first_child)
+					 * instead of in the normal children list.
+					 */
+  /**@}*/
 
   /* cpusets and nodesets */
   hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
