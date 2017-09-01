@@ -140,7 +140,7 @@ static int test(hwloc_topology_t orig, const char *callname) {
   assert(ret == EXIT_SUCCESS || ret == EXIT_SKIP);
 
   printf("adopting in other child process\n");
-  snprintf(cmd, sizeof(cmd), "%s %s %lu %lu %lu %d", callname, tmpname, fileoffset, forced_addr, shmem_length, synthetic_with_distances);
+  snprintf(cmd, sizeof(cmd), "%s %s %lu %lu %lu %d", callname, tmpname, fileoffset, forced_addr, (unsigned long) shmem_length, synthetic_with_distances);
   printf("running command %s\n", cmd);
   err = system(cmd);
   assert(WIFEXITED(err));
