@@ -131,6 +131,50 @@ sonar.cxx.cppcheck.reportPath=${CPPCHECK_XMLS}
 sonar.cxx.includeDirectories=$(echo | gcc -E -Wp,-v - 2>&1 | grep "^ " | tr '\n' ',')include,hwloc,utils/lstopo,utils/hwloc
 sonar.cxx.rats.reportPath=${RATS_XMLS}
 sonar.cxx.valgrind.reportPath=${VALGRIND_XMLS}
+sonar.issue.ignore.multicriteria=e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14
+# Complete the task associated to this TODO comment.
+sonar.issue.ignore.multicriteria.e1.ruleKey=cxx:TodoTagPresence
+sonar.issue.ignore.multicriteria.e1.resourceKey=**
+# Missing curly brace.
+sonar.issue.ignore.multicriteria.e2.ruleKey=cxx:MissingCurlyBraces
+sonar.issue.ignore.multicriteria.e2.resourceKey=**
+# Extract this magic number '3' into a constant, variable declaration or an enum.
+sonar.issue.ignore.multicriteria.e3.ruleKey=cxx:MagicNumber
+sonar.issue.ignore.multicriteria.e3.resourceKey=**
+# Undocumented API: hwloc_noos_component
+sonar.issue.ignore.multicriteria.e4.ruleKey=cxx:UndocumentedApi
+sonar.issue.ignore.multicriteria.e4.resourceKey=**
+# At most one statement is allowed per line, but 2 statements were found on this line.
+sonar.issue.ignore.multicriteria.e5.ruleKey=cxx:TooManyStatementsPerLine
+sonar.issue.ignore.multicriteria.e5.resourceKey=**
+# Split this 166 characters long line (which is greater than 160 authorized).
+sonar.issue.ignore.multicriteria.e6.ruleKey=cxx:TooLongLine
+sonar.issue.ignore.multicriteria.e6.resourceKey=**
+# 196 more comment lines need to be written to reach the minimum threshold of 25.0% comment density.
+# BUG: doesn't seem to match properly, even with * or so on instead of ++
+sonar.issue.ignore.multicriteria.e7.ruleKey=common-c++:InsufficientCommentDensity
+sonar.issue.ignore.multicriteria.e7.resourceKey=**
+# Double check that your buffer is as big as you specify. When using functions that accept a number n of bytes to copy, such as strncpy, be aware that if the dest buffer size = n it may not NULL-terminate the string.
+sonar.issue.ignore.multicriteria.e8.ruleKey=rats:snprintf
+sonar.issue.ignore.multicriteria.e8.resourceKey=**
+# Double check that your buffer is as big as you specify. When using functions that accept a number n of bytes to copy, such as strncpy, be aware that if the dest buffer size = n it may not NULL-terminate the string.sonar.issue.ignore.multicriteria.e8.ruleKey=rats:snprintf
+sonar.issue.ignore.multicriteria.e9.ruleKey=rats:memcpy
+sonar.issue.ignore.multicriteria.e9.resourceKey=**
+# Don't use on memory intended to be secure, because the old structure will not be zeroed out
+sonar.issue.ignore.multicriteria.e10.ruleKey=rats:realloc
+sonar.issue.ignore.multicriteria.e10.resourceKey=**
+# This function does not properly handle non-NULL terminated strings. This does not result in exploitable code, but can lead to access violations.
+sonar.issue.ignore.multicriteria.e11.ruleKey=rats:strlen
+sonar.issue.ignore.multicriteria.e11.resourceKey=**
+# Check to be sure that the format string passed as argument 2 to this function call does not come from an untrusted source that could have added formatting characters that the code is not prepared to handle. Additionally, the format string could contain `%s' without precision that could result in a buffer overflow.
+sonar.issue.ignore.multicriteria.e12.ruleKey=rats:sprintf
+sonar.issue.ignore.multicriteria.e12.resourceKey=**
+# Extra care should be taken to ensure that character arrays that are allocated on the stack are used safely. They are prime targets for buffer overflow attacks.
+sonar.issue.ignore.multicriteria.e13.ruleKey=rats:fixed size global buffer
+sonar.issue.ignore.multicriteria.e13.resourceKey=**
+# A potential race condition vulnerability exists here. Normally a call to this function is vulnerable only when a match check precedes it. No check was detected, however one could still exist that could not be detected.
+sonar.issue.ignore.multicriteria.e14.ruleKey=rats:fixed size local buffer
+sonar.issue.ignore.multicriteria.e14.resourceKey=**
 EOF
 
 # Run the sonar-scanner analysis and submit to SonarQube server
