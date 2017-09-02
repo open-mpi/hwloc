@@ -166,7 +166,7 @@ sonar.issue.ignore.multicriteria.e10.resourceKey=**
 # This function does not properly handle non-NULL terminated strings. This does not result in exploitable code, but can lead to access violations.
 sonar.issue.ignore.multicriteria.e11.ruleKey=rats:strlen
 sonar.issue.ignore.multicriteria.e11.resourceKey=**
-# Check to be sure that the format string passed as argument 2 to this function call does not come from an untrusted source that could have added formatting characters that the code is not prepared to handle. Additionally, the format string could contain `%s' without precision that could result in a buffer overflow.
+# Check to be sure that the format string passed as argument 2 to this function call does not come from an untrusted source that could have added formatting characters that the code is not prepared to handle. Additionally, the format string could contain '%s' without precision that could result in a buffer overflow.
 sonar.issue.ignore.multicriteria.e12.ruleKey=rats:sprintf
 sonar.issue.ignore.multicriteria.e12.resourceKey=**
 # Extra care should be taken to ensure that character arrays that are allocated on the stack are used safely. They are prime targets for buffer overflow attacks.
