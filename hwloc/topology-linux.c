@@ -3035,83 +3035,96 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
  ****** Sysfs Topology Discovery ******
  **************************************/
 
+static unsigned *
+list_sysfsnode(struct hwloc_linux_backend_data_s *data,
+	       const char *path,
+	       unsigned *nbnodesp)
+{
+  DIR *dir;
+  unsigned osnode, nbnodes = 0;
+  unsigned *indexes, index_;
+  hwloc_bitmap_t nodeset;
+  struct dirent *dirent;
+
+  /* Get the list of nodes first */
+  dir = hwloc_opendir(path, data->root_fd);
+  if (!dir)
+    return NULL;
+
+  nodeset = hwloc_bitmap_alloc();
+  if (!nodeset)
+    return NULL;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    if (strncmp(dirent->d_name, "node", 4))
+      continue;
+    osnode = strtoul(dirent->d_name+4, NULL, 0);
+    hwloc_bitmap_set(nodeset, osnode);
+    nbnodes++;
+  }
+  closedir(dir);
+
+  indexes = calloc(nbnodes, sizeof(*indexes));
+  if (!indexes) {
+    hwloc_bitmap_free(nodeset);
+    return NULL;
+  }
+
+  /* we don't know if sysfs returns nodes in order, we can't merge these loops */
+
+  /* Unsparsify node indexes.
+   * We'll need them later because Linux groups sparse distances
+   * and keeps them in order in the sysfs distance files.
+   * It'll simplify things in the meantime.
+   */
+  index_ = 0;
+  hwloc_bitmap_foreach_begin (osnode, nodeset) {
+    indexes[index_] = osnode;
+    index_++;
+  } hwloc_bitmap_foreach_end();
+
+  hwloc_bitmap_free(nodeset);
+
+#ifdef HWLOC_DEBUG
+  hwloc_debug("%s", "NUMA indexes: ");
+  for (index_ = 0; index_ < nbnodes; index_++)
+    hwloc_debug(" %u", indexes[index_]);
+  hwloc_debug("%s", "\n");
+#endif
+
+  *nbnodesp = nbnodes;
+  return indexes;
+}
+
 static int
 look_sysfsnode(struct hwloc_topology *topology,
 	       struct hwloc_linux_backend_data_s *data,
 	       const char *path, unsigned *found)
 {
   unsigned osnode;
-  unsigned nbnodes = 0;
-  DIR *dir;
-  struct dirent *dirent;
-  hwloc_bitmap_t nodeset;
+  unsigned nbnodes;
+  hwloc_obj_t * nodes;
+  unsigned *indexes;
+  uint64_t * distances = NULL;
+  hwloc_bitmap_t nodes_cpuset;
+  struct knl_hwdata knl_hwdata;
+  int failednodes = 0;
+  unsigned index_;
 
   /* NUMA nodes cannot be filtered out */
-
-  *found = 0;
-
-  /* Get the list of nodes first */
-  dir = hwloc_opendir(path, data->root_fd);
-  if (dir)
-    {
-      nodeset = hwloc_bitmap_alloc();
-      while ((dirent = readdir(dir)) != NULL)
-	{
-	  if (strncmp(dirent->d_name, "node", 4))
-	    continue;
-	  osnode = strtoul(dirent->d_name+4, NULL, 0);
-	  hwloc_bitmap_set(nodeset, osnode);
-	  nbnodes++;
-	}
-      closedir(dir);
-    }
-  else
-    return -1;
-
-  if (!nbnodes) {
-    hwloc_bitmap_free(nodeset);
+  indexes = list_sysfsnode(data, path, &nbnodes);
+  if (!indexes)
     return 0;
+
+  nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+  nodes_cpuset  = hwloc_bitmap_alloc();
+  if (NULL == nodes_cpuset || NULL == nodes) {
+    free(nodes);
+    free(indexes);
+    hwloc_bitmap_free(nodes_cpuset);
+    nbnodes = 0;
+    goto out;
   }
-
-  /* For convenience, put these declarations inside a block. */
-
-  {
-      hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
-      unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
-      uint64_t * distances = NULL;
-      hwloc_bitmap_t nodes_cpuset = hwloc_bitmap_alloc();
-      struct knl_hwdata knl_hwdata;
-      int failednodes = 0;
-      unsigned index_;
-
-      if (NULL == nodes_cpuset || NULL == nodes || NULL == indexes) {
-          free(nodes);
-          free(indexes);
-          hwloc_bitmap_free(nodeset);
-	  hwloc_bitmap_free(nodes_cpuset);
-          nbnodes = 0;
-          goto out;
-      }
-
-      /* Unsparsify node indexes.
-       * We'll need them later because Linux groups sparse distances
-       * and keeps them in order in the sysfs distance files.
-       * It'll simplify things in the meantime.
-       */
-      index_ = 0;
-      hwloc_bitmap_foreach_begin (osnode, nodeset) {
-	indexes[index_] = osnode;
-	index_++;
-      } hwloc_bitmap_foreach_end();
-      hwloc_bitmap_free(nodeset);
-
-#ifdef HWLOC_DEBUG
-      hwloc_debug("%s", "NUMA indexes: ");
-      for (index_ = 0; index_ < nbnodes; index_++) {
-	hwloc_debug(" %u", indexes[index_]);
-      }
-      hwloc_debug("%s", "\n");
-#endif
 
       /* Create NUMA objects */
       for (index_ = 0; index_ < nbnodes; index_++) {
@@ -3167,6 +3180,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  }
       }
 
+      hwloc_bitmap_free(nodes_cpuset);
+
       if (failednodes) {
 	/* failed to read/create some nodes, don't bother reading/fixing
 	 * a distance matrix that would likely be wrong anyway.
@@ -3180,7 +3195,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 	free(nodes);
 	free(distances);
 	free(indexes);
-	hwloc_bitmap_free(nodes_cpuset);
 	goto out;
       }
 
@@ -3251,7 +3265,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  /* drop the distance matrix, it contradicts the above NUMA layout groups */
 	  free(distances);
           free(nodes);
-	  hwloc_bitmap_free(nodes_cpuset);
           goto out;
 	}
       }
@@ -3262,9 +3275,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 				     HWLOC_DISTANCES_ADD_FLAG_GROUP);
       else
 	free(nodes);
-
-      hwloc_bitmap_free(nodes_cpuset);
-  }
 
  out:
   *found = nbnodes;
