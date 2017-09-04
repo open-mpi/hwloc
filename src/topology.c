@@ -1263,6 +1263,11 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
     obj->allowed_nodeset = hwloc_bitmap_dup(obj->parent->allowed_nodeset);
   }
 
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
+#endif
+    hwloc_topology_check(topology);
+
   return obj;
 }
 
@@ -1283,6 +1288,11 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
 
   hwloc_connect_children(topology->levels[0][0]);
   /* no need to hwloc_connect_levels() since misc object are not in levels */
+
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
+#endif
+    hwloc_topology_check(topology);
 
   return obj;
 }
@@ -3100,6 +3110,12 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_distances_restrict(topology, flags);
   hwloc_distances_finalize_os(topology);
   hwloc_distances_finalize_logical(topology);
+
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
+#endif
+    hwloc_topology_check(topology);
+
   return 0;
 
  out:
