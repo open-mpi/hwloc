@@ -1531,6 +1531,11 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
   if (has_memory)
     propagate_total_memory(topology->levels[0][0]);
 
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
+#endif
+    hwloc_topology_check(topology);
+
   return obj;
 }
 
@@ -1559,6 +1564,11 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
    * but this API is likely not performance critical anyway
    */
   hwloc_topology_reconnect(topology, 0);
+
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
+#endif
+    hwloc_topology_check(topology);
 
   return obj;
 }
@@ -3432,6 +3442,12 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_filter_levels_keep_structure(topology);
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   propagate_total_memory(topology->levels[0][0]);
+
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
+#endif
+    hwloc_topology_check(topology);
+
   return 0;
 
  out:
