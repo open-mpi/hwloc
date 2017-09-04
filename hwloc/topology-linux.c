@@ -3079,14 +3079,16 @@ look_sysfsnode(struct hwloc_topology *topology,
       hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
       unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
       uint64_t * distances = NULL;
+      hwloc_bitmap_t nodes_cpuset = hwloc_bitmap_alloc();
       struct knl_hwdata knl_hwdata;
       int failednodes = 0;
       unsigned index_;
 
-      if (NULL == nodes || NULL == indexes) {
+      if (NULL == nodes_cpuset || NULL == nodes || NULL == indexes) {
           free(nodes);
           free(indexes);
           hwloc_bitmap_free(nodeset);
+	  hwloc_bitmap_free(nodes_cpuset);
           nbnodes = 0;
           goto out;
       }
@@ -3131,6 +3133,15 @@ look_sysfsnode(struct hwloc_topology *topology,
 	      failednodes++;
 	      continue;
 	    }
+	    if (hwloc_bitmap_intersects(nodes_cpuset, cpuset)) {
+	      /* crazy BIOS with overlapping NUMA node cpusets, impossible on Linux so far */
+	      hwloc_debug_1arg_bitmap("node P#%u cpuset %s intersects with previous nodes, ignoring that node.\n", osnode, cpuset);
+	      hwloc_bitmap_free(cpuset);
+	      failednodes++;
+	      continue;
+	    } else {
+	      hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
+	    }
 
 	    node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, osnode);
 	    node->cpuset = cpuset;
@@ -3169,6 +3180,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	free(nodes);
 	free(distances);
 	free(indexes);
+	hwloc_bitmap_free(nodes_cpuset);
 	goto out;
       }
 
@@ -3239,6 +3251,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  /* drop the distance matrix, it contradicts the above NUMA layout groups */
 	  free(distances);
           free(nodes);
+	  hwloc_bitmap_free(nodes_cpuset);
           goto out;
 	}
       }
@@ -3249,6 +3262,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 				     HWLOC_DISTANCES_ADD_FLAG_GROUP);
       else
 	free(nodes);
+
+      hwloc_bitmap_free(nodes_cpuset);
   }
 
  out:
