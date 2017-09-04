@@ -3355,12 +3355,29 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
 			  hwloc_bitmap_t droppedcpuset, hwloc_bitmap_t droppednodeset)
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
-  int modified = hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset)
-    || hwloc_bitmap_iszero(obj->complete_cpuset);
+  int modified = 0;
 
-  hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
-  hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
-  hwloc_bitmap_andnot(obj->allowed_cpuset, obj->allowed_cpuset, droppedcpuset);
+  if (hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset)) {
+    hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
+    hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
+    hwloc_bitmap_andnot(obj->allowed_cpuset, obj->allowed_cpuset, droppedcpuset);
+    modified = 1;
+  } else {
+    if ((flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS)
+	&& hwloc_bitmap_iszero(obj->complete_cpuset)) {
+      /* we're empty, there's a NUMAnode below us, it'll be removed this time */
+      modified = 1;
+    }
+    /* nodeset cannot intersect unless cpuset intersects or is empty */
+    if (droppednodeset)
+      assert(!hwloc_bitmap_intersects(obj->complete_nodeset, droppednodeset)
+	     || hwloc_bitmap_iszero(obj->complete_cpuset));
+  }
+  if (droppednodeset) {
+    hwloc_bitmap_andnot(obj->nodeset, obj->nodeset, droppednodeset);
+    hwloc_bitmap_andnot(obj->complete_nodeset, obj->complete_nodeset, droppednodeset);
+    hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, droppednodeset);
+  }
 
   if (modified) {
     for_each_child_safe(child, obj, pchild)
@@ -3375,8 +3392,6 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
     hwloc_debug("%s", "\nRemoving object during restrict");
     hwloc_debug_print_object(0, obj);
 
-    if (obj->type == HWLOC_OBJ_NUMANODE)
-      hwloc_bitmap_set(droppednodeset, obj->os_index);
     if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
       hwloc_free_object_siblings_and_children(obj->io_first_child);
       obj->io_first_child = NULL;
@@ -3388,14 +3403,6 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
     unlink_and_free_single_object(pobj);
     /* do not remove children. if they were to be removed, they would have been already */
     topology->modified = 1;
-
-  } else {
-    /* keep object, update its nodeset if removing CPU-less NUMA-node is enabled */
-    if (flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS) {
-      hwloc_bitmap_andnot(obj->nodeset, obj->nodeset, droppednodeset);
-      hwloc_bitmap_andnot(obj->complete_nodeset, obj->complete_nodeset, droppednodeset);
-      hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, droppednodeset);
-    }
   }
 }
 
@@ -3423,11 +3430,33 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 
   droppedcpuset = hwloc_bitmap_alloc();
   droppednodeset = hwloc_bitmap_alloc();
+  if (!droppedcpuset && !droppednodeset) {
+    hwloc_bitmap_free(droppedcpuset);
+    hwloc_bitmap_free(droppednodeset);
+    return -1;
+  }
 
-  /* drop PUs and parents based on the reverse of set,
-   * and fill the droppednodeset when removing NUMA nodes to update parent nodesets
-   */
+  /* cpuset to clear */
   hwloc_bitmap_not(droppedcpuset, cpuset);
+  /* nodeset to clear */
+  if (flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS) {
+    hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
+    do {
+      /* node will be removed if nodeset gets or was empty */
+      if (hwloc_bitmap_iszero(node->cpuset)
+	  || hwloc_bitmap_isincluded(node->cpuset, droppedcpuset))
+	hwloc_bitmap_set(droppednodeset, node->os_index);
+      node = node->next_cousin;
+    } while (node);
+  }
+  /* remove nodeset if empty */
+  if (!(flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS)
+      || hwloc_bitmap_iszero(droppednodeset)) {
+    hwloc_bitmap_free(droppednodeset);
+    droppednodeset = NULL;
+  }
+
+  /* now recurse to filter sets and drop things */
   restrict_object_by_cpuset(topology, flags, &topology->levels[0][0], droppedcpuset, droppednodeset);
 
   hwloc_bitmap_free(droppedcpuset);
