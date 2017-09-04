@@ -2041,6 +2041,8 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
     return -1;
   }
 
+  hwloc_internal_distances_refresh(topology);
+
   hwloc_localeswitch_init();
 
   force_nolibxml = hwloc_nolibxml_export();
@@ -2077,6 +2079,8 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
     errno = EINVAL;
     return -1;
   }
+
+  hwloc_internal_distances_refresh(topology);
 
   hwloc_localeswitch_init();
 
