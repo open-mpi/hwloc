@@ -90,9 +90,9 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 
 static void apply_recursive(hwloc_topology_t topology, hwloc_obj_t obj)
 {
-	unsigned i;
-	for(i=0; i<obj->arity; i++)
-		apply_recursive(topology, obj->children[i]);
+	hwloc_obj_t child = NULL;
+	while ((child = hwloc_get_next_child(topology, obj, child)) != NULL)
+		apply_recursive(topology, child);
 	apply(topology, obj);
 }
 

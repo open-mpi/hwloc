@@ -53,7 +53,10 @@
                   <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" gp_index="9">
                     <info name="Foo" value="Bar"/>
                     <object type="Misc" gp_index="29" name="pumisc">
-                      <object type="Misc" gp_index="50" name="miscmisc1"/>
+                      <info name="Foo" value="Bar"/>
+                      <object type="Misc" gp_index="50" name="miscmisc1">
+                        <info name="Foo" value="Bar"/>
+                      </object>
                     </object>
                   </object>
                   <object type="PU" os_index="2" cpuset="0x00000004" complete_cpuset="0x00000004" allowed_cpuset="0x00000004" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" gp_index="10">
@@ -90,35 +93,46 @@
       </object>
     </object>
     <object type="Bridge" os_index="0" gp_index="17" bridge_type="0-1" depth="0" bridge_pci="0000:[00-05]">
+      <info name="Foo" value="Bar"/>
       <info name="mybridges" value="all"/>
       <userdata name="EncodedLong8" length="120" encoding="base64">4H8AAHiuZH/gfwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEC2ZH/gfwAA/////wAAAAD///9/</userdata>
       <object type="PCIDev" os_index="32" gp_index="18" name="Intel Corporation Core Processor Integrated Graphics Controller" pci_busid="0000:00:02.0" pci_type="0300 [8086:0046] [0028:000a] 02" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="Core Processor Integrated Graphics Controller"/>
+        <info name="Foo" value="Bar"/>
         <info name="mypcidev" value="byindex"/>
         <info name="mypcidev" value="bymatch"/>
-        <object type="OSDev" gp_index="19" name="controlD64" osdev_type="1"/>
-        <object type="OSDev" gp_index="20" name="card0" osdev_type="1"/>
+        <object type="OSDev" gp_index="19" name="controlD64" osdev_type="1">
+          <info name="Foo" value="Bar"/>
+        </object>
+        <object type="OSDev" gp_index="20" name="card0" osdev_type="1">
+          <info name="Foo" value="Bar"/>
+        </object>
       </object>
       <object type="PCIDev" os_index="400" gp_index="21" name="Intel Corporation 82577LM Gigabit Network Connection" pci_busid="0000:00:19.0" pci_type="0200 [8086:10ea] [0028:000a] 05" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="82577LM Gigabit Network Connection"/>
+        <info name="Foo" value="Bar"/>
         <info name="mypcidev" value="byindex"/>
         <object type="OSDev" gp_index="22" name="eth0" osdev_type="2">
           <info name="Address" value="5c:26:0a:53:da:8c"/>
+          <info name="Foo" value="Bar"/>
           <info name="myosdev" value="byindex"/>
         </object>
       </object>
       <object type="Bridge" os_index="449" gp_index="23" name="Intel Corporation 5 Series/3400 Series Chipset PCI Express Root Port 2" bridge_type="1-1" depth="1" bridge_pci="0000:[02-02]" pci_busid="0000:00:1c.1" pci_type="0604 [8086:3b44] [0000:0000] 05" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="5 Series/3400 Series Chipset PCI Express Root Port 2"/>
+        <info name="Foo" value="Bar"/>
         <info name="mybridges" value="all"/>
         <object type="PCIDev" os_index="8192" gp_index="24" name="Intel Corporation Centrino Ultimate-N 6300" pci_busid="0000:02:00.0" pci_type="0280 [8086:422b] [0086:0021] 35" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="Centrino Ultimate-N 6300"/>
+          <info name="Foo" value="Bar"/>
           <info name="mypcidev" value="bybusid"/>
           <object type="OSDev" gp_index="25" name="wlan0" osdev_type="2">
             <info name="Address" value="00:24:d7:0f:bd:34"/>
+            <info name="Foo" value="Bar"/>
             <info name="myosdev" value="byindex"/>
           </object>
         </object>
@@ -126,11 +140,18 @@
       <object type="PCIDev" os_index="498" gp_index="26" name="Intel Corporation 5 Series/3400 Series Chipset 6 port SATA AHCI Controller" pci_busid="0000:00:1f.2" pci_type="0106 [8086:3b2f] [0028:000a] 05" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="5 Series/3400 Series Chipset 6 port SATA AHCI Controller"/>
-        <object type="OSDev" gp_index="27" name="sda" osdev_type="0"/>
-        <object type="OSDev" gp_index="28" name="sr0" osdev_type="0"/>
+        <info name="Foo" value="Bar"/>
+        <object type="OSDev" gp_index="27" name="sda" osdev_type="0">
+          <info name="Foo" value="Bar"/>
+        </object>
+        <object type="OSDev" gp_index="28" name="sr0" osdev_type="0">
+          <info name="Foo" value="Bar"/>
+        </object>
       </object>
     </object>
-    <object type="Misc" gp_index="49" name="rootmisc"/>
+    <object type="Misc" gp_index="49" name="rootmisc">
+      <info name="Foo" value="Bar"/>
+    </object>
   </object>
   <distances2 type="PU" nbobjs="3" kind="5" indexing="os">
     <indexes length="6">1 0 2 </indexes>
