@@ -228,6 +228,8 @@ echo "Topology files gathered in $dirname/$basename.tar.bz2 and kept in $destdir
 export HWLOC_THISSYSTEM=0
 "$lstopo" - -v > "$dirname/$basename.output"
 echo "Expected topology output stored in $dirname/$basename.output"
+"$lstopo" -.xml --whole-system > "$dirname/$basename.xml"
+echo "XML topology stored in in $dirname/$basename.xml"
 
 echo
 echo "WARNING: Do not post these files on a public list or website unless you"
