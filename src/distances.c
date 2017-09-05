@@ -511,8 +511,11 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
 	  || !hwloc_bitmap_isincluded(complete_cpuset, root->complete_cpuset)))
     root = root->parent;
   if (!root) {
-    /* should not happen, ignore the distance matrix and report an error. */
-    if (!hwloc_hide_errors()) {
+    /* should not happen unless cpuset is empty.
+     * cpuset may be empty if some objects got removed by KEEP_STRUCTURE, etc
+     * or if all objects are CPU-less.
+     */
+    if (!hwloc_hide_errors() && !hwloc_bitmap_iszero(cpuset)) {
       char *a, *b;
       hwloc_bitmap_asprintf(&a, cpuset);
       hwloc_bitmap_asprintf(&b, nodeset);
