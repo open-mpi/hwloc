@@ -2104,10 +2104,20 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
 	if (parent->parent) {
 	  parent->parent->children[parent->sibling_rank] = child;
 	  child->sibling_rank = parent->sibling_rank;
-	  if (!parent->sibling_rank)
+	  if (!parent->sibling_rank) {
 	    parent->parent->first_child = child;
-	  if (parent->sibling_rank == parent->parent->arity-1)
+	    /* child->prev_sibling was already NULL, child was single */
+	  } else {
+	    child->prev_sibling = parent->parent->children[parent->sibling_rank-1];
+	    child->prev_sibling->next_sibling = child;
+	  }
+	  if (parent->sibling_rank == parent->parent->arity-1) {
 	    parent->parent->last_child = child;
+	    /* child->next_sibling was already NULL, child was single */
+	  } else {
+	    child->next_sibling = parent->parent->children[parent->sibling_rank+1];
+	    child->next_sibling->prev_sibling = child;
+	  }
 	  /* update child parent */
 	  child->parent = parent->parent;
 	} else {
