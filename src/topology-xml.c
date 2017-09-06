@@ -33,9 +33,19 @@ hwloc_nolibxml_import(void)
   static int first = 1;
   static int nolibxml = 0;
   if (first) {
-    const char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
-    if (env)
-      nolibxml = atoi(env);
+    const char *env = getenv("HWLOC_LIBXML");
+    if (env) {
+      nolibxml = !atoi(env);
+    } else {
+      env = getenv("HWLOC_LIBXML_IMPORT");
+      if (env) {
+	nolibxml = !atoi(env);
+      } else {
+	env = getenv("HWLOC_NO_LIBXML_IMPORT");
+	if (env)
+	  nolibxml = atoi(env);
+      }
+    }
     first = 0;
   }
   return nolibxml;
@@ -47,9 +57,19 @@ hwloc_nolibxml_export(void)
   static int first = 1;
   static int nolibxml = 0;
   if (first) {
-    const char *env = getenv("HWLOC_NO_LIBXML_EXPORT");
-    if (env)
-      nolibxml = atoi(env);
+    const char *env = getenv("HWLOC_LIBXML");
+    if (env) {
+      nolibxml = !atoi(env);
+    } else {
+      env = getenv("HWLOC_LIBXML_EXPORT");
+      if (env) {
+	nolibxml = !atoi(env);
+      } else {
+	env = getenv("HWLOC_NO_LIBXML_EXPORT");
+	if (env)
+	  nolibxml = atoi(env);
+      }
+    }
     first = 0;
   }
   return nolibxml;

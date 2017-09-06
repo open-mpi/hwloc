@@ -1084,9 +1084,11 @@ following environment variables.
   enables debugging message to check that the fake component gets loaded
  HWLOC_DEBUG_PAGESIZE
   forces the page size in the Linux code for debugging in topology chroots 
- HWLOC_NO_LIBXML_EXPORT
- HWLOC_NO_LIBXML_IMPORT
-  forces the use of the nolibxml XML backend instead of libxml2 if available
+ HWLOC_LIBXML=0
+ HWLOC_LIBXML_EXPORT=0
+ HWLOC_LIBXML_IMPORT=0
+  forces the use of the nolibxml XML backend instead of libxml2 if available,
+  for both import and export, or only one
  HWLOC_XML_USERDATA_NOT_DECODED
   do not decode base64 userdata on import,
   and reexport it the same (used by tools for leaving userdata untouched)
