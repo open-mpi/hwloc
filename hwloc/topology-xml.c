@@ -40,13 +40,8 @@ hwloc_nolibxml_import(void)
       nolibxml = !atoi(env);
     } else {
       env = getenv("HWLOC_LIBXML_IMPORT");
-      if (env) {
+      if (env)
 	nolibxml = !atoi(env);
-      } else {
-	env = getenv("HWLOC_NO_LIBXML_IMPORT");
-	if (env)
-	  nolibxml = atoi(env);
-      }
     }
     checked = 1;
   }
@@ -64,13 +59,8 @@ hwloc_nolibxml_export(void)
       nolibxml = !atoi(env);
     } else {
       env = getenv("HWLOC_LIBXML_EXPORT");
-      if (env) {
+      if (env)
 	nolibxml = !atoi(env);
-      } else {
-	env = getenv("HWLOC_NO_LIBXML_EXPORT");
-	if (env)
-	  nolibxml = atoi(env);
-      }
     }
     checked = 1;
   }
