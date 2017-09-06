@@ -3430,7 +3430,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 
   droppedcpuset = hwloc_bitmap_alloc();
   droppednodeset = hwloc_bitmap_alloc();
-  if (!droppedcpuset && !droppednodeset) {
+  if (!droppedcpuset || !droppednodeset) {
     hwloc_bitmap_free(droppedcpuset);
     hwloc_bitmap_free(droppednodeset);
     return -1;
