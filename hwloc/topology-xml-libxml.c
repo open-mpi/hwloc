@@ -414,6 +414,8 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology, unsigned long flags)
   /* Creates a new document, a node and set it as a root node. */
   doc = xmlNewDoc(BAD_CAST "1.0");
   root_node = xmlNewNode(NULL, BAD_CAST "topology");
+  if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1))
+    xmlNewProp(root_node, BAD_CAST "version", BAD_CAST "2.0");
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */

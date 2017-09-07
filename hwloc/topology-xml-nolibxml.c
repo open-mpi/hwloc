@@ -684,6 +684,8 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 		 "<!DOCTYPE topology SYSTEM \"hwloc.dtd\">\n");
   hwloc__nolibxml_export_update_buffer(ndata, res);
   hwloc__nolibxml_export_new_child(&state, &childstate, "topology");
+  if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1))
+    hwloc__nolibxml_export_new_prop(&childstate, "version", "2.0");
   hwloc__xml_export_topology (&childstate, topology, flags);
   hwloc__nolibxml_export_end_object(&childstate, "topology");
 
