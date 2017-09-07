@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -50,6 +50,7 @@ struct hwloc_xml_backend_data_s {
   void (*close_content)(struct hwloc__xml_import_state_s * state);
   char * msgprefix;
   void *data; /* libxml2 doc, or nolibxml buffer */
+  unsigned version_major, version_minor;
   unsigned nbnumanodes;
   hwloc_obj_t first_numanode, last_numanode; /* temporary cousin-list for handling v1distances */
   struct hwloc__xml_imported_v1distances_s *first_v1dist, *last_v1dist;

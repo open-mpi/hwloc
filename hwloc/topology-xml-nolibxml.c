@@ -255,6 +255,8 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
 {
   hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
   struct hwloc__nolibxml_backend_data_s *nbdata = bdata->data;
+  unsigned major, minor;
+  char *end;
   char *buffer;
 
   assert(sizeof(*nstate) <= sizeof(state->data));
@@ -272,7 +274,19 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   }
 
   /* find topology tag */
-  if (strncmp(buffer, "<topology>", 10))
+  if (sscanf(buffer, "<topology version=\"%u.%u\">", &major, &minor) == 2) {
+    bdata->version_major = major;
+    bdata->version_minor = minor;
+    end = strchr(buffer, '>') + 1;
+  } else if (!strncmp(buffer, "<topology>", 10)) {
+    bdata->version_major = 1;
+    bdata->version_minor = 0;
+    end = buffer + 10;
+  } else if (!strncmp(buffer, "<root>", 6)) {
+    bdata->version_major = 0;
+    bdata->version_minor = 9;
+    end = buffer + 6;
+  } else
     goto failed;
 
   state->global->next_attr = hwloc__nolibxml_import_next_attr;
@@ -283,7 +297,7 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   state->global->close_content = hwloc__nolibxml_import_close_content;
   state->parent = NULL;
   nstate->closed = 0;
-  nstate->tagbuffer = buffer+10;
+  nstate->tagbuffer = end;
   nstate->tagname = (char *) "topology";
   nstate->attrbuffer = NULL;
   return 0; /* success */

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -188,7 +188,20 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
 
   root_node = xmlDocGetRootElement((xmlDoc*) bdata->data);
 
-  if (strcmp((const char *) root_node->name, "topology") && strcmp((const char *) root_node->name, "root")) {
+  if (!strcmp((const char *) root_node->name, "root")) {
+    bdata->version_major = 0;
+    bdata->version_minor = 9;
+  } else if (!strcmp((const char *) root_node->name, "topology")) {
+    unsigned major, minor;
+    xmlChar *version = xmlGetProp(root_node, (xmlChar*) "version");
+    if (version && sscanf((const char *)version, "%u.%u", &major, &minor) == 2) {
+      bdata->version_major = major;
+      bdata->version_minor = minor;
+    } else {
+      bdata->version_major = 1;
+      bdata->version_minor = 0;
+    }
+  } else {
     /* root node should be in "topology" class (or "root" if importing from < 1.0) */
     if (hwloc__xml_verbose())
       fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
