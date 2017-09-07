@@ -1445,6 +1445,13 @@ hwloc_look_xml(struct hwloc_backend *backend)
   if (ret < 0)
     goto failed;
 
+  if (data->version_major > 2) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "cannot import XML version %u.%u > 2\n",
+	      data->version_major, data->version_minor);
+    goto err;
+  }
+
   /* find root object tag and import it */
   ret = state.global->find_child(&state, &childstate, &tag);
   if (ret < 0 || !ret || strcmp(tag, "object"))
