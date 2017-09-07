@@ -102,7 +102,9 @@ hwloc_xml_callbacks_reset(void)
 #define _HWLOC_OBJ_CACHE_OLD HWLOC_OBJ_L5CACHE /* temporarily used when importing pre-v2.0 attribute-less cache types */
 
 static void
-hwloc__xml_import_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
+hwloc__xml_import_object_attr(struct hwloc_topology *topology,
+			      struct hwloc_xml_backend_data_s *data,
+			      struct hwloc_obj *obj,
 			      const char *name, const char *value,
 			      hwloc__xml_import_state_t state)
 {
@@ -111,8 +113,6 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology, struct hwloc_obj 
     return;
   }
 
-  else if (!strcmp(name, "os_level"))
-    { /* ignored since v2.0 but still allowed for backward compat with v1.10 */ }
   else if (!strcmp(name, "os_index"))
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "gp_index")) {
@@ -127,8 +127,6 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology, struct hwloc_obj 
   } else if (!strcmp(name, "complete_cpuset")) {
     obj->complete_cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->complete_cpuset,value);
-  } else if (!strcmp(name, "online_cpuset")) {
-    { /* ignored since v2.0 but still allowed for backward compat with v1.10 */ }
   } else if (!strcmp(name, "allowed_cpuset")) {
     obj->allowed_cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->allowed_cpuset, value);
@@ -371,87 +369,96 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology, struct hwloc_obj 
     }
   }
 
+  else if (data->version_major < 2) {
+    /************************
+     * deprecated from 1.x
+     */
+    if (!strcmp(name, "os_level")
+	|| !strcmp(name, "online_cpuset"))
+      { /* ignored */ }
 
-
-
-  /*************************
-   * deprecated (from 1.0)
-   */
-  else if (!strcmp(name, "dmi_board_vendor")) {
-    hwloc_obj_add_info(obj, "DMIBoardVendor", value);
-  }
-  else if (!strcmp(name, "dmi_board_name")) {
-    hwloc_obj_add_info(obj, "DMIBoardName", value);
-  }
-
-  /*************************
-   * deprecated (from 0.9)
-   */
-  else if (!strcmp(name, "memory_kB")) {
-    unsigned long long lvalue = strtoull(value, NULL, 10);
-    switch (obj->type) {
-      case _HWLOC_OBJ_CACHE_OLD:
-	obj->attr->cache.size = lvalue << 10;
-	break;
-      case HWLOC_OBJ_NUMANODE:
-      case HWLOC_OBJ_MACHINE:
-      case HWLOC_OBJ_SYSTEM:
-	obj->memory.local_memory = lvalue << 10;
-	break;
-      default:
-	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: ignoring memory_kB attribute for object type without memory\n",
-		  state->global->msgprefix);
-	break;
+    /*************************
+     * deprecated from 1.0
+     */
+    else if (!strcmp(name, "dmi_board_vendor")) {
+      hwloc_obj_add_info(obj, "DMIBoardVendor", value);
     }
-  }
-  else if (!strcmp(name, "huge_page_size_kB")) {
-    unsigned long lvalue = strtoul(value, NULL, 10);
-    switch (obj->type) {
-      case HWLOC_OBJ_NUMANODE:
-      case HWLOC_OBJ_MACHINE:
-      case HWLOC_OBJ_SYSTEM:
-	if (!obj->memory.page_types) {
-	  obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-	  obj->memory.page_types_len = 1;
+    else if (!strcmp(name, "dmi_board_name")) {
+      hwloc_obj_add_info(obj, "DMIBoardName", value);
+    }
+
+    else if (data->version_major < 1) {
+      /*************************
+       * deprecated from 0.9
+       */
+      if (!strcmp(name, "memory_kB")) {
+	unsigned long long lvalue = strtoull(value, NULL, 10);
+	switch (obj->type) {
+	case _HWLOC_OBJ_CACHE_OLD:
+	  obj->attr->cache.size = lvalue << 10;
+	  break;
+	case HWLOC_OBJ_NUMANODE:
+	case HWLOC_OBJ_MACHINE:
+	case HWLOC_OBJ_SYSTEM:
+	  obj->memory.local_memory = lvalue << 10;
+	  break;
+	default:
+	  if (hwloc__xml_verbose())
+	    fprintf(stderr, "%s: ignoring memory_kB attribute for object type without memory\n",
+		    state->global->msgprefix);
+	  break;
 	}
-	obj->memory.page_types[0].size = lvalue << 10;
-	break;
-      default:
-	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: ignoring huge_page_size_kB attribute for object type without huge pages\n",
-		  state->global->msgprefix);
-	break;
-    }
-  }
-  else if (!strcmp(name, "huge_page_free")) {
-    unsigned long lvalue = strtoul(value, NULL, 10);
-    switch (obj->type) {
-      case HWLOC_OBJ_NUMANODE:
-      case HWLOC_OBJ_MACHINE:
-      case HWLOC_OBJ_SYSTEM:
-	if (!obj->memory.page_types) {
-	  obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-	  obj->memory.page_types_len = 1;
+      }
+      else if (!strcmp(name, "huge_page_size_kB")) {
+	unsigned long lvalue = strtoul(value, NULL, 10);
+	switch (obj->type) {
+	case HWLOC_OBJ_NUMANODE:
+	case HWLOC_OBJ_MACHINE:
+	case HWLOC_OBJ_SYSTEM:
+	  if (!obj->memory.page_types) {
+	    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+	    obj->memory.page_types_len = 1;
+	  }
+	  obj->memory.page_types[0].size = lvalue << 10;
+	  break;
+	default:
+	  if (hwloc__xml_verbose())
+	    fprintf(stderr, "%s: ignoring huge_page_size_kB attribute for object type without huge pages\n",
+		    state->global->msgprefix);
+	  break;
 	}
-	obj->memory.page_types[0].count = lvalue;
-	break;
-      default:
-	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: ignoring huge_page_free attribute for object type without huge pages\n",
-		  state->global->msgprefix);
-	break;
+      }
+      else if (!strcmp(name, "huge_page_free")) {
+	unsigned long lvalue = strtoul(value, NULL, 10);
+	switch (obj->type) {
+	case HWLOC_OBJ_NUMANODE:
+	case HWLOC_OBJ_MACHINE:
+	case HWLOC_OBJ_SYSTEM:
+	  if (!obj->memory.page_types) {
+	    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+	    obj->memory.page_types_len = 1;
+	  }
+	  obj->memory.page_types[0].count = lvalue;
+	  break;
+	default:
+	  if (hwloc__xml_verbose())
+	    fprintf(stderr, "%s: ignoring huge_page_free attribute for object type without huge pages\n",
+		    state->global->msgprefix);
+	  break;
+	}
+      }
+      /* end of deprecated from 0.9 */
+      else goto unknown;
     }
+    /* end of deprecated from 1.0 */
+    else goto unknown;
   }
-  /*
-   * end of deprecated (from 0.9)
-   *******************************/
-
-
-
-  else if (hwloc__xml_verbose())
-    fprintf(stderr, "%s: ignoring unknown object attribute %s\n",
-	    state->global->msgprefix, name);
+  else {
+  unknown:
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring unknown object attribute %s\n",
+	      state->global->msgprefix, name);
+  }
 }
 
 
@@ -787,14 +794,64 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	  fprintf(stderr, "object attribute %s found before type\n", attrname);
 	goto error_with_object;
       }
-      hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue, state);
+      hwloc__xml_import_object_attr(topology, data, obj, attrname, attrvalue, state);
     }
   }
 
-  /* fixup attribute-less caches imported from pre-v2.0 XMLs */
-  if (attribute_less_cache) {
-    assert(obj->type == _HWLOC_OBJ_CACHE_OLD);
-    obj->type = hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type);
+  if (data->version_major < 2) {
+    /***************************
+     * 1.x specific checks
+     */
+
+    /* fixup attribute-less caches imported from pre-v2.0 XMLs */
+    if (attribute_less_cache) {
+      assert(obj->type == _HWLOC_OBJ_CACHE_OLD);
+      obj->type = hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type);
+    }
+
+    /* fixup Misc objects inserted by cpusets in pre-v2.0 XMLs */
+    if (obj->type == HWLOC_OBJ_MISC && obj->cpuset)
+      obj->type = HWLOC_OBJ_GROUP;
+
+    /* check set consistency.
+     * 1.7.2 and earlier reported I/O Groups with only a cpuset, we don't want to reject those XMLs yet.
+     * Ignore those Groups since fixing the missing sets is hard (would need to look at children sets which are not available yet).
+     * Just abort the XML for non-Groups.
+     */
+    if (!obj->cpuset != !obj->allowed_cpuset
+	|| !obj->cpuset != !obj->complete_cpuset) {
+      /* has some cpuset without others */
+      if (obj->type == HWLOC_OBJ_GROUP) {
+	ignored = 1;
+      } else {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "invalid object %s P#%u with some missing cpusets\n",
+		  hwloc_type_name(obj->type), obj->os_index);
+	goto error_with_object;
+      }
+    } else if (!obj->nodeset != !obj->allowed_nodeset
+	       || !obj->nodeset != !obj->complete_nodeset) {
+      /* has some nodeset withot others */
+      if (obj->type == HWLOC_OBJ_GROUP) {
+	ignored = 1;
+      } else {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "invalid object %s P#%u with some missing nodesets\n",
+		  hwloc_type_name(obj->type), obj->os_index);
+	goto error_with_object;
+      }
+    } else if (obj->nodeset && !obj->cpuset) {
+      /* has nodesets without cpusets (the contrary is allowed in pre-2.0) */
+      if (obj->type == HWLOC_OBJ_GROUP) {
+	ignored = 1;
+      } else {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "invalid object %s P#%u with either cpuset or nodeset missing\n",
+		  hwloc_type_name(obj->type), obj->os_index);
+	goto error_with_object;
+      }
+    }
+    /* end of 1.x specific checks */
   }
 
   /* check that cache attributes are coherent with the actual type */
@@ -805,10 +862,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	      hwloc_type_name(obj->type), obj->attr->cache.depth, (int) obj->attr->cache.type);
     goto error_with_object;
   }
-
-  /* fixup Misc objects inserted by cpusets in pre-v2.0 XMLs */
-  if (obj->type == HWLOC_OBJ_MISC && obj->cpuset)
-    obj->type = HWLOC_OBJ_GROUP;
 
   /* check special types vs cpuset */
   if (!obj->cpuset && !hwloc_obj_type_is_special(obj->type)) {
@@ -836,45 +889,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       fprintf(stderr, "invalid object %s P#%u with nodeset while parent has none\n",
 	      hwloc_type_name(obj->type), obj->os_index);
     goto error_with_object;
-  }
-
-  /* check set consistency.
-   * 1.7.2 and earlier reported I/O Groups with only a cpuset, we don't want to reject those XMLs yet.
-   * Ignore those Groups since fixing the missing sets is hard (would need to look at children sets which are not available yet).
-   * Just abort the XML for non-Groups.
-   */
-  if (!obj->cpuset != !obj->allowed_cpuset
-      || !obj->cpuset != !obj->complete_cpuset) {
-    /* has some cpuset without others */
-    if (obj->type == HWLOC_OBJ_GROUP) {
-      ignored = 1;
-    } else {
-      if (hwloc__xml_verbose())
-	fprintf(stderr, "invalid object %s P#%u with some missing cpusets\n",
-		hwloc_type_name(obj->type), obj->os_index);
-      goto error_with_object;
-    }
-  } else if (!obj->nodeset != !obj->allowed_nodeset
-	     || !obj->nodeset != !obj->complete_nodeset) {
-    /* has some nodeset withot others */
-    if (obj->type == HWLOC_OBJ_GROUP) {
-      ignored = 1;
-    } else {
-      if (hwloc__xml_verbose())
-	fprintf(stderr, "invalid object %s P#%u with some missing nodesets\n",
-		hwloc_type_name(obj->type), obj->os_index);
-      goto error_with_object;
-    }
-  } else if (obj->nodeset && !obj->cpuset) {
-    /* has nodesets without cpusets (the contrary is allowed in pre-2.0) */
-    if (obj->type == HWLOC_OBJ_GROUP) {
-      ignored = 1;
-    } else {
-      if (hwloc__xml_verbose())
-	fprintf(stderr, "invalid object %s P#%u with either cpuset or nodeset missing\n",
-		hwloc_type_name(obj->type), obj->os_index);
-      goto error_with_object;
-    }
   }
 
   /* check NUMA nodes */
@@ -932,7 +946,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       ret = hwloc__xml_import_pagetype(topology, obj, &childstate);
     } else if (!strcmp(tag, "info")) {
       ret = hwloc__xml_import_info(topology, obj, &childstate);
-    } else if (!strcmp(tag, "distances")) {
+    } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
       ret = hwloc__xml_import_v1distances(data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
       ret = hwloc__xml_import_userdata(topology, obj, &childstate);
@@ -1440,19 +1454,21 @@ hwloc_look_xml(struct hwloc_backend *backend)
   state.global->close_child(&childstate);
   assert(!gotignored);
 
-  /* find v2 distances */
-  while (1) {
-    ret = state.global->find_child(&state, &childstate, &tag);
-    if (ret < 0)
-      goto failed;
-    if (!ret)
-      break;
-    if (strcmp(tag, "distances2"))
-      goto failed;
-    ret = hwloc__xml_import_v2distances(topology, &childstate);
-    if (ret < 0)
-      goto failed;
-    state.global->close_child(&childstate);
+  if (data->version_major >= 2) {
+    /* find v2 distances */
+    while (1) {
+      ret = state.global->find_child(&state, &childstate, &tag);
+      if (ret < 0)
+	goto failed;
+      if (!ret)
+	break;
+      if (strcmp(tag, "distances2"))
+	goto failed;
+      ret = hwloc__xml_import_v2distances(topology, &childstate);
+      if (ret < 0)
+	goto failed;
+      state.global->close_child(&childstate);
+    }
   }
 
   /* find end of topology tag */
@@ -1464,8 +1480,8 @@ hwloc_look_xml(struct hwloc_backend *backend)
     goto err;
   }
 
-  /* handle v1 distances */
-  if (data->first_v1dist) {
+  if (data->version_major < 2 && data->first_v1dist) {
+    /* handle v1 distances */
     struct hwloc__xml_imported_v1distances_s *v1dist, *v1next = data->first_v1dist;
     while ((v1dist = v1next) != NULL) {
       unsigned nbobjs = v1dist->nbobjs;
@@ -1511,7 +1527,7 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
    * (in case another backend ever generates buggy object sets as well).
    */
 
-  if (!data->nbnumanodes) {
+  if (data->version_major < 2 && !data->nbnumanodes) {
     /* before 2.0, XML could have no NUMA node objects and no nodesets */
     hwloc_obj_t numa;
     /* create missing root nodesets and make sure they are consistent with the upcoming NUMA node */
