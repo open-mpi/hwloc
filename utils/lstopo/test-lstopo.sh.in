@@ -54,6 +54,7 @@ $ls
   $ls $tmp/test.fig
   $ls -f $tmp/test.xml
   HWLOC_LIBXML_EXPORT=0 $ls -f $tmp/test.xml
+  $ls --export-xml-flags 1 -f $tmp/test.v1.xml
   $ls --input "ma:1 no:2 so:1 l2:2 2" $tmp/test.synthetic
 ) > "$file"
 diff @HWLOC_DIFF_U@ $srcdir/test-lstopo.output "$file"

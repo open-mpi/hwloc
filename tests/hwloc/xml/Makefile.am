@@ -12,8 +12,6 @@ xml_outputs = \
         16amd64-8n2c-cpusets.xml \
         16amd64-4distances.xml \
         16amd64-4distances.console.output \
-        16amd64-4distances.v1tov2.xml \
-        16amd64-4distances.v2tov1.xml \
         16em64t-4s2c2t.xml \
         16em64t-4s2c2t-offlines.xml \
         16em64t-4s2c2t.console.output \
@@ -30,7 +28,9 @@ xml_outputs = \
         64intel64-3g2n+2n-irregulargroups+pci.console.output \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t.xml \
-        192em64t-24n8c2t.xml
+        192em64t-24n8c2t.xml \
+        16amd64-4distances.v1tov2.xml \
+        16amd64-4distances.v2tov1.xml
 
 # Each output `xyz.xml' may have a corresponding `xyz.source' file specifying
 # its source file.
@@ -38,22 +38,21 @@ xml_outputs = \
 # or a `xyz.source' file specifying its source file.
 xml_source = \
         16amd64-4distances.console.source \
-        16amd64-4distances.v1tov2.source \
-        16amd64-4distances.v2tov1.source \
-        16amd64-4distances.v1.xml \
         16em64t-4s2c2t.console.source \
         16-2gr2gr2n2c+misc.console.source \
         16intel64-manyVFs.console.source \
         16intel64-manyVFs.console.nocollapse.source \
         32em64t-2n8c2t-pci-noio.source \
         32em64t-2n8c2t-pci-normalio.source \
-        64intel64-3g2n+2n-irregulargroups+pci.console.source
+        64intel64-3g2n+2n-irregulargroups+pci.console.source \
+        16amd64-4distances.v1tov2.source \
+        16amd64-4distances.v2tov1.source \
+        16amd64-4distances.v1.xml
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
 xml_options = \
         16amd64-4distances.console.options \
-        16amd64-4distances.v2tov1.options \
         16em64t-4s2c2t.console.options \
         16intel64-manyVFs.console.options \
         16intel64-manyVFs.console.nocollapse.options \
@@ -61,7 +60,8 @@ xml_options = \
         32em64t-2n8c2t-pci-noio.options \
         32em64t-2n8c2t-pci-wholeio.options \
         64intel64-3g2n+2n-irregulargroups+pci.options \
-        64intel64-3g2n+2n-irregulargroups+pci.console.options
+        64intel64-3g2n+2n-irregulargroups+pci.console.options \
+        16amd64-4distances.v2tov1.options
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
