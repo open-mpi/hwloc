@@ -201,6 +201,7 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
       bdata->version_major = 1;
       bdata->version_minor = 0;
     }
+    xmlFree(version);
   } else {
     /* root node should be in "topology" class (or "root" if importing from < 1.0) */
     if (hwloc__xml_verbose())
