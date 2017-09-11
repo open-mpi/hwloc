@@ -3561,11 +3561,11 @@ hwloc__check_child_siblings(hwloc_obj_t parent, hwloc_obj_t *array,
 }
 
 static void
-hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj);
+hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_obj_t obj);
 
 /* check children between a parent object */
 static void
-hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
+hwloc__check_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_obj_t parent)
 {
   hwloc_obj_t child, prev;
   unsigned j;
@@ -3590,7 +3590,7 @@ hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
     /* check siblings */
     hwloc__check_child_siblings(parent, parent->children, parent->arity, j, child, prev);
     /* recurse */
-    hwloc__check_object(topology, child);
+    hwloc__check_object(topology, gp_indexes, child);
   }
   /* check arity */
   assert(j == parent->arity);
@@ -3666,7 +3666,7 @@ hwloc__check_children(hwloc_topology_t topology, hwloc_obj_t parent)
 }
 
 static void
-hwloc__check_io_children(hwloc_topology_t topology, hwloc_obj_t parent)
+hwloc__check_io_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_obj_t parent)
 {
   unsigned j;
   hwloc_obj_t child, prev;
@@ -3688,14 +3688,14 @@ hwloc__check_io_children(hwloc_topology_t topology, hwloc_obj_t parent)
     hwloc__check_child_siblings(parent, NULL, parent->io_arity, j, child, prev);
     /* only I/O and Misc children, recurse */
     assert(!child->first_child);
-    hwloc__check_object(topology, child);
+    hwloc__check_object(topology, gp_indexes, child);
   }
   /* check arity */
   assert(j == parent->io_arity);
 }
 
 static void
-hwloc__check_misc_children(hwloc_topology_t topology, hwloc_obj_t parent)
+hwloc__check_misc_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_obj_t parent)
 {
   unsigned j;
   hwloc_obj_t child, prev;
@@ -3718,15 +3718,18 @@ hwloc__check_misc_children(hwloc_topology_t topology, hwloc_obj_t parent)
     /* only Misc children, recurse */
     assert(!child->first_child);
     assert(!child->io_first_child);
-    hwloc__check_object(topology, child);
+    hwloc__check_object(topology, gp_indexes, child);
   }
   /* check arity */
   assert(j == parent->misc_arity);
 }
 
 static void
-hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_obj_t obj)
 {
+  assert(!hwloc_bitmap_isset(gp_indexes, obj->gp_index));
+  hwloc_bitmap_set(gp_indexes, obj->gp_index);
+
   /* check that sets and depth */
   if (hwloc_obj_type_is_special(obj->type)) {
     assert(!obj->cpuset);
@@ -3781,9 +3784,9 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_obj_t obj)
   }
 
   /* check children */
-  hwloc__check_children(topology, obj);
-  hwloc__check_io_children(topology, obj);
-  hwloc__check_misc_children(topology, obj);
+  hwloc__check_children(topology, gp_indexes, obj);
+  hwloc__check_io_children(topology, gp_indexes, obj);
+  hwloc__check_misc_children(topology, gp_indexes, obj);
 }
 
 static void
@@ -3856,6 +3859,7 @@ void
 hwloc_topology_check(struct hwloc_topology *topology)
 {
   struct hwloc_obj *obj;
+  hwloc_bitmap_t gp_indexes;
   hwloc_obj_type_t type;
   unsigned i, j, depth;
 
@@ -3923,12 +3927,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
     hwloc__check_level(topology, HWLOC_SLEVEL_TO_DEPTH(i), topology->slevels[i].first, topology->slevels[i].last);
 
   /* recurse and check the tree of children, and type-specific checks */
-  hwloc__check_object(topology, obj);
-
-  /* TODO: check that gp_index are unique across the topology (and >0).
-   * at least check it's unique across each level.
-   * Should only occur if XML is invalid.
-   */
+  gp_indexes = hwloc_bitmap_alloc(); /* TODO prealloc to topology->next_gp_index */
+  hwloc__check_object(topology, gp_indexes, obj);
+  hwloc_bitmap_free(gp_indexes);
 }
 
 #else /* NDEBUG */
