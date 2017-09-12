@@ -233,13 +233,13 @@
   </object>
   <distances2 type="NUMANode" nbobjs="8" kind="5" indexing="os">
     <indexes length="16">1 0 2 5 4 3 6 7 </indexes>
-    <u64values length="20">1 4 4 4 8 8 8 8 4 1 </u64values>
-    <u64values length="20">4 4 8 8 8 8 4 4 1 4 </u64values>
-    <u64values length="20">8 8 8 8 4 4 4 1 8 8 </u64values>
-    <u64values length="20">8 8 8 8 8 8 1 4 4 4 </u64values>
-    <u64values length="20">8 8 8 8 4 1 4 4 8 8 </u64values>
-    <u64values length="20">8 8 4 4 1 4 8 8 8 8 </u64values>
-    <u64values length="8">4 4 4 1 </u64values>
+    <u64values length="20">1 2 4 4 8 8 8 8 2 1 </u64values>
+    <u64values length="20">4 4 8 8 8 8 4 4 1 2 </u64values>
+    <u64values length="20">8 8 8 8 4 4 2 1 8 8 </u64values>
+    <u64values length="20">8 8 8 8 8 8 1 2 4 4 </u64values>
+    <u64values length="20">8 8 8 8 2 1 4 4 8 8 </u64values>
+    <u64values length="20">8 8 4 4 1 2 8 8 8 8 </u64values>
+    <u64values length="8">4 4 2 1 </u64values>
   </distances2>
   <distances2 type="NUMANode" nbobjs="8" kind="5" indexing="os">
     <indexes length="16">1 0 2 5 4 3 6 7 </indexes>

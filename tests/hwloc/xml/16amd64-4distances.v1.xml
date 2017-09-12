@@ -12,14 +12,14 @@
     <info name="ProcessName" value="lstopo"/>
     <distances nbobjs="8" relative_depth="3" latency_base="1.000000">
       <latency value="1.000000"/>
-      <latency value="4.000000"/>
+      <latency value="2.000000"/>
       <latency value="4.000000"/>
       <latency value="4.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
-      <latency value="4.000000"/>
+      <latency value="2.000000"/>
       <latency value="1.000000"/>
       <latency value="4.000000"/>
       <latency value="4.000000"/>
@@ -30,14 +30,14 @@
       <latency value="4.000000"/>
       <latency value="4.000000"/>
       <latency value="1.000000"/>
-      <latency value="4.000000"/>
+      <latency value="2.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="4.000000"/>
       <latency value="4.000000"/>
-      <latency value="4.000000"/>
+      <latency value="2.000000"/>
       <latency value="1.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
@@ -48,14 +48,14 @@
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="1.000000"/>
-      <latency value="4.000000"/>
+      <latency value="2.000000"/>
       <latency value="4.000000"/>
       <latency value="4.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
-      <latency value="4.000000"/>
+      <latency value="2.000000"/>
       <latency value="1.000000"/>
       <latency value="4.000000"/>
       <latency value="4.000000"/>
@@ -66,14 +66,14 @@
       <latency value="4.000000"/>
       <latency value="4.000000"/>
       <latency value="1.000000"/>
-      <latency value="4.000000"/>
+      <latency value="2.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="8.000000"/>
       <latency value="4.000000"/>
       <latency value="4.000000"/>
-      <latency value="4.000000"/>
+      <latency value="2.000000"/>
       <latency value="1.000000"/>
     </distances>
     <distances nbobjs="16" relative_depth="8" latency_base="1.000000">
