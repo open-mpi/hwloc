@@ -874,7 +874,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
             }
           hwloc_debug_1arg_bitmap("adding Group object with %u objects and cpuset %s\n",
                                   groupsizes[i], group_obj->cpuset);
-          res_obj = hwloc__insert_object_by_cpuset(topology, group_obj,
+          res_obj = hwloc__insert_object_by_cpuset(topology, NULL, group_obj,
 						   (kind & HWLOC_DISTANCES_KIND_FROM_USER) ? hwloc_report_user_distance_error : hwloc_report_os_error);
 	  /* res_obj may be NULL on failure to insert. */
 	  if (!res_obj)

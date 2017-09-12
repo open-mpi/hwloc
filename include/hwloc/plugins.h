@@ -269,9 +269,11 @@ HWLOC_DECLSPEC int hwloc_hide_errors(void);
 
 /** \brief Add an object to the topology and specify which error callback to use.
  *
- * Aside from the error callback selection, this function is identical to hwloc_insert_object_by_cpuset()
+ * This function is similar to hwloc_insert_object_by_cpuset() but it allows specifying
+ * where to start insertion from (if \p root is NULL, the topology root object is used),
+ * and specifying the error callback.
  */
-HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
+HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root, hwloc_obj_t obj, hwloc_report_error_t report_error);
 
 /** \brief Insert an object somewhere in the topology.
  *

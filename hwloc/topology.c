@@ -1381,7 +1381,8 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 
 /* insertion routine that lets you change the error reporting callback */
 struct hwloc_obj *
-hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
+hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root,
+			       hwloc_obj_t obj,
 			       hwloc_report_error_t report_error)
 {
   struct hwloc_obj *result;
@@ -1396,8 +1397,11 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
 	 || (obj->complete_nodeset && !hwloc_bitmap_iszero(obj->complete_nodeset)));
 #endif
 
-  /* Start at the top.  */
-  result = hwloc___insert_object_by_cpuset(topology, topology->levels[0][0], obj, report_error);
+  if (!root)
+    /* Start at the top. */
+    root = topology->levels[0][0];
+
+  result = hwloc___insert_object_by_cpuset(topology, root, obj, report_error);
   if (result != obj) {
     /* either failed to insert, or got merged, free the original object */
     hwloc_free_unlinked_object(obj);
@@ -1415,7 +1419,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
 struct hwloc_obj *
 hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
-  return hwloc__insert_object_by_cpuset(topology, obj, hwloc_report_os_error);
+  return hwloc__insert_object_by_cpuset(topology, NULL, obj, hwloc_report_os_error);
 }
 
 void
@@ -1513,7 +1517,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     return NULL;
   }
 
-  res = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
+  res = hwloc__insert_object_by_cpuset(topology, NULL, obj, NULL /* do not show errors on stdout */);
   if (!res)
     return NULL;
   if (res != obj)
@@ -1633,7 +1637,7 @@ hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, 
   hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
   group_obj->cpuset = hwloc_bitmap_dup(cpuset);
   group_obj->attr->group.kind = HWLOC_GROUP_KIND_IO;
-  parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
+  parent = hwloc__insert_object_by_cpuset(topology, largeparent, group_obj, hwloc_report_os_error);
   if (!parent)
     /* Failed to insert the Group, maybe a conflicting cpuset */
     return largeparent;
