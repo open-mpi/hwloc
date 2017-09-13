@@ -1810,9 +1810,10 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "cache_type", tmp);
     break;
   case HWLOC_OBJ_GROUP:
-    sprintf(tmp, "%u", obj->attr->group.depth);
-    state.new_prop(&state, "depth", tmp);
-    if (!v1export) {
+    if (v1export) {
+      sprintf(tmp, "%u", obj->attr->group.depth);
+      state.new_prop(&state, "depth", tmp);
+    } else {
       sprintf(tmp, "%u", obj->attr->group.kind);
       state.new_prop(&state, "kind", tmp);
       sprintf(tmp, "%u", obj->attr->group.subkind);
