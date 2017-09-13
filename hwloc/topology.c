@@ -1623,7 +1623,8 @@ hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, 
     return NULL;
 
   largeparent = hwloc_get_highest_obj_covering_complete_cpuset(topology, cpuset);
-  if (hwloc_bitmap_isequal(largeparent->complete_cpuset, cpuset))
+  if (hwloc_bitmap_isequal(largeparent->complete_cpuset, cpuset)
+      || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP))
     /* Found a valid object (normal case) */
     return largeparent;
 
