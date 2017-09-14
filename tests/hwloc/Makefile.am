@@ -59,7 +59,9 @@ check_PROGRAMS = hwloc_list_components \
         intel-mic
 
 if !HWLOC_HAVE_WINDOWS
+if !HWLOC_HAVE_DARWIN
 check_PROGRAMS += shmem
+endif !HWLOC_HAVE_DARWIN
 endif !HWLOC_HAVE_WINDOWS
 
 if HWLOC_HAVE_LINUX_LIBNUMA
