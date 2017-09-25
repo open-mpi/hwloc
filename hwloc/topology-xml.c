@@ -783,7 +783,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	  attribute_less_cache = 1;
 	} else {
 	  if (hwloc__xml_verbose())
-	    fprintf(stderr, "unrecognized object type string %s\n", attrvalue);
+	    fprintf(stderr, "%s: unrecognized object type string %s\n",
+		    state->global->msgprefix, attrvalue);
 	  goto error_with_object;
 	}
       }
@@ -791,7 +792,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       /* type needed first */
       if (obj->type == HWLOC_OBJ_TYPE_NONE) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "object attribute %s found before type\n", attrname);
+	  fprintf(stderr, "%s: object attribute %s found before type\n",
+		  state->global->msgprefix,  attrname);
 	goto error_with_object;
       }
       hwloc__xml_import_object_attr(topology, data, obj, attrname, attrvalue, state);
@@ -825,8 +827,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	ignored = 1;
       } else {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "invalid object %s P#%u with some missing cpusets\n",
-		  hwloc_type_name(obj->type), obj->os_index);
+	  fprintf(stderr, "%s: invalid object %s P#%u with some missing cpusets\n",
+		  state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
 	goto error_with_object;
       }
     } else if (!obj->nodeset != !obj->allowed_nodeset
@@ -836,8 +838,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	ignored = 1;
       } else {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "invalid object %s P#%u with some missing nodesets\n",
-		  hwloc_type_name(obj->type), obj->os_index);
+	  fprintf(stderr, "%s: invalid object %s P#%u with some missing nodesets\n",
+		  state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
 	goto error_with_object;
       }
     } else if (obj->nodeset && !obj->cpuset) {
@@ -846,8 +848,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	ignored = 1;
       } else {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "invalid object %s P#%u with either cpuset or nodeset missing\n",
-		  hwloc_type_name(obj->type), obj->os_index);
+	  fprintf(stderr, "%s: invalid object %s P#%u with either cpuset or nodeset missing\n",
+		  state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
 	goto error_with_object;
       }
     }
@@ -858,36 +860,36 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (hwloc_obj_type_is_cache(obj->type)
       && obj->type != hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type)) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "invalid cache type %s with attribute depth %u and type %d\n",
-	      hwloc_type_name(obj->type), obj->attr->cache.depth, (int) obj->attr->cache.type);
+      fprintf(stderr, "%s: invalid cache type %s with attribute depth %u and type %d\n",
+	      state->global->msgprefix, hwloc_type_name(obj->type), obj->attr->cache.depth, (int) obj->attr->cache.type);
     goto error_with_object;
   }
 
   /* check special types vs cpuset */
   if (!obj->cpuset && !hwloc_obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "invalid normal object %s P#%u without cpuset\n",
-	      hwloc_type_name(obj->type), obj->os_index);
+      fprintf(stderr, "%s: invalid normal object %s P#%u without cpuset\n",
+	      state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
     goto error_with_object;
   }
   if (obj->cpuset && hwloc_obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "invalid special object %s with cpuset\n",
-	      hwloc_type_name(obj->type));
+      fprintf(stderr, "%s: invalid special object %s with cpuset\n",
+	      state->global->msgprefix, hwloc_type_name(obj->type));
     goto error_with_object;
   }
 
   /* check parent vs child sets */
   if (obj->cpuset && parent && !parent->cpuset) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "invalid object %s P#%u with cpuset while parent has none\n",
-	      hwloc_type_name(obj->type), obj->os_index);
+      fprintf(stderr, "%s: invalid object %s P#%u with cpuset while parent has none\n",
+	      state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
     goto error_with_object;
   }
   if (obj->nodeset && parent && !parent->nodeset) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "invalid object %s P#%u with nodeset while parent has none\n",
-	      hwloc_type_name(obj->type), obj->os_index);
+      fprintf(stderr, "%s: invalid object %s P#%u with nodeset while parent has none\n",
+	      state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
     goto error_with_object;
   }
 
@@ -895,8 +897,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (obj->type == HWLOC_OBJ_NUMANODE) {
     if (!obj->nodeset) {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "invalid NUMA node object P#%u without nodeset\n",
-		obj->os_index);
+	fprintf(stderr, "%s: invalid NUMA node object P#%u without nodeset\n",
+		state->global->msgprefix, obj->os_index);
       goto error_with_object;
     }
     data->nbnumanodes++;
@@ -952,7 +954,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "invalid special object child %s\n", tag);
+	fprintf(stderr, "%s: invalid special object child %s\n",
+		state->global->msgprefix, tag);
       ret = -1;
     }
 
@@ -1447,8 +1450,8 @@ hwloc_look_xml(struct hwloc_backend *backend)
 
   if (data->version_major > 2) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "cannot import XML version %u.%u > 2\n",
-	      data->version_major, data->version_minor);
+      fprintf(stderr, "%s: cannot import XML version %u.%u > 2\n",
+	      data->msgprefix, data->version_major, data->version_minor);
     goto err;
   }
 
@@ -1486,7 +1489,8 @@ hwloc_look_xml(struct hwloc_backend *backend)
 
   if (!root->cpuset) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "invalid root object without cpuset\n");
+      fprintf(stderr, "%s: invalid root object without cpuset\n",
+	      data->msgprefix);
     goto err;
   }
 
@@ -1564,7 +1568,8 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
   /* make sure we have a nodeset now. if we got NUMA nodes without nodeset, something bad happened */
   if (!root->nodeset) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "invalid root object without nodeset\n");
+      fprintf(stderr, "%s: invalid root object without nodeset\n",
+	      data->msgprefix);
     goto err;
   }
 

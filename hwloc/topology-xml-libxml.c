@@ -83,12 +83,14 @@ hwloc__libxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, ch
 	  }
 	} else {
 	  if (hwloc__xml_verbose())
-	    fprintf(stderr, "ignoring unexpected xml attr node type %u\n", subnode->type);
+	    fprintf(stderr, "%s: ignoring unexpected xml attr node type %u\n",
+		    state->global->msgprefix, subnode->type);
 	}
       }
     } else {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
+	fprintf(stderr, "%s: ignoring unexpected xml attr type %u\n",
+		state->global->msgprefix, attr->type);
     }
   return -1;
 }
@@ -116,10 +118,12 @@ hwloc__libxml_import_find_child(hwloc__xml_import_state_t state,
     } else if (child->type == XML_TEXT_NODE) {
       if (child->content && child->content[0] != '\0' && child->content[0] != '\n')
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring object text content %s\n", (const char*) child->content);
+	  fprintf(stderr, "%s: ignoring object text content %s\n",
+		  state->global->msgprefix, (const char*) child->content);
     } else if (child->type != XML_COMMENT_NODE) {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring unexpected xml node type %u\n", child->type);
+	fprintf(stderr, "%s: ignoring unexpected xml node type %u\n",
+		state->global->msgprefix, child->type);
     }
 
   return 0;
@@ -179,11 +183,12 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   dtd = xmlGetIntSubset((xmlDoc*) bdata->data);
   if (!dtd) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "Loading XML topology without DTD\n");
+      fprintf(stderr, "%s: Loading XML topology without DTD\n",
+	      state->global->msgprefix);
   } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
-	      (char *) dtd->SystemID, "hwloc.dtd");
+      fprintf(stderr, "%s: Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
+	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd");
   }
 
   root_node = xmlDocGetRootElement((xmlDoc*) bdata->data);
@@ -205,7 +210,8 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   } else {
     /* root node should be in "topology" class (or "root" if importing from < 1.0) */
     if (hwloc__xml_verbose())
-      fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
+      fprintf(stderr, "%s: ignoring object of class `%s' not at the top the xml hierarchy\n",
+	      state->global->msgprefix, (const char *) root_node->name);
     goto failed;
   }
 
@@ -257,11 +263,12 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
   dtd = xmlGetIntSubset(doc);
   if (!dtd) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "Loading XML topologydiff without DTD\n");
+      fprintf(stderr, "%s: Loading XML topologydiff without DTD\n",
+	      state->global->msgprefix);
   } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "Loading XML topologydiff with wrong DTD SystemID (%s instead of %s)\n",
-	      (char *) dtd->SystemID, "hwloc.dtd");
+      fprintf(stderr, "%s: Loading XML topologydiff with wrong DTD SystemID (%s instead of %s)\n",
+	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd");
   }
 
   root_node = xmlDocGetRootElement(doc);
@@ -269,7 +276,8 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
   if (strcmp((const char *) root_node->name, "topologydiff")) {
     /* root node should be in "topologydiff" class */
     if (hwloc__xml_verbose())
-      fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
+      fprintf(stderr, "%s: ignoring object of class `%s' not at the top the xml hierarchy\n",
+	      state->global->msgprefix, (const char *) root_node->name);
     goto out_with_doc;
   }
 
