@@ -809,7 +809,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "invalid special object child %s\n", tag);
+	fprintf(stderr, "%s: invalid special object child %s\n",
+		state->global->msgprefix, tag);
       ret = -1;
     }
 
