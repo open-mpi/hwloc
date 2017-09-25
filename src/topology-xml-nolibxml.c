@@ -272,8 +272,17 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   }
 
   /* find topology tag */
-  if (strncmp(buffer, "<topology>", 10))
+  if (strncmp(buffer, "<topology>", 10)) {
+    if (hwloc__xml_verbose()) {
+      if (!strncmp(buffer, "<topology version=", 18))
+	fprintf(stderr, "%s: hwloc v1.x cannot import topology version >= 2.\n",
+		state->global->msgprefix);
+      else
+	fprintf(stderr, "%s: failed to find starting tag <topology>\n",
+		state->global->msgprefix);
+    }
     goto failed;
+  }
 
   state->global->next_attr = hwloc__nolibxml_import_next_attr;
   state->global->find_child = hwloc__nolibxml_import_find_child;

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -162,6 +162,7 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   hwloc__libxml_import_state_data_t lstate = (void*) state->data;
   xmlNode* root_node;
   xmlDtd *dtd;
+  xmlChar *version;
 
   assert(sizeof(*lstate) <= sizeof(state->data));
 
@@ -183,6 +184,15 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: ignoring object of class `%s' not at the top the xml hierarchy\n",
 	      state->global->msgprefix, (const char *) root_node->name);
+    goto failed;
+  }
+
+  version = xmlGetProp(root_node, (xmlChar*) "version");
+  if (version) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: hwloc v1.x cannot import topology version >= 2.\n",
+	      state->global->msgprefix);
+    xmlFree(version);
     goto failed;
   }
 
