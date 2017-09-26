@@ -152,12 +152,12 @@ function palette(size) {
 
     if (size <= 9)
         return ["blue", "orange", "green", "pink", "brown", "purple",
-            "yellow", "red", "gray"].slice(0, size+1);
+                "yellow", "red", "gray"].slice(0, size+1);
 
     if (size <= 11)
         return ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99",
-            "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a",
-            "#ffff99"].slice(0, size+1);
+                "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a",
+                "#ffff99"].slice(0, size+1);
 
     var v = Math.ceil(Math.pow(size+1, 1/3));
     var value = 255/v;
@@ -167,7 +167,7 @@ function palette(size) {
                 if (!r && !g && !b)
                     continue;
                 palette.push('rgb(' + Math.round(r) + ', ' + Math.round(g) + ', '
-                        +  Math.round(b) + ')');
+                             +  Math.round(b) + ')');
                 b += value;
             }
             g += value;
@@ -241,10 +241,10 @@ function loadFile(data)
     /* Set  edges */
     /***********************************************************************/
     mydata.edges.map(
-            function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
+        function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
     var gbits_min = Math.min.apply(null, mydata.edges.map(function(e) { return e["gbits"];}));
     mydata.edges.map(
-            function(e) {e["width"] = e["gbits"]/gbits_min;});
+        function(e) {e["width"] = e["gbits"]/gbits_min;});
     edges = new vis.DataSet({});
     edges.add(mydata.edges);
     printWithTime("Dataset edges created");
@@ -254,8 +254,8 @@ function loadFile(data)
     /***********************************************************************/
     mydata.nodes = renameKey(mydata.nodes, "title", "desc");
     mydata.nodes.map(function(n)
-            { n["color"] = n["type"] == "host" ?
-                normalHostColor: normalSwitchColor; });
+                     { n["color"] = n["type"] == "host" ?
+                       normalHostColor: normalSwitchColor; });
     mydata.nodes.map(function(n) {
         n["bandwidth"] =
             edges.get(n["edges"]).map(function(e) { if (!e) return 8; else return e.gbits; })
@@ -400,58 +400,58 @@ function selectNodesAndEdges(field, value)
     var edgeSet;
 
     switch (field) {
-        case "part":
-            var strings = partitions;
-            matchingStrings = strings.reduce(function(a, e, i) {
-                if (e.match(regexp))
-                    a.push(i);
-                return a;
-            }, []);
-            nodeSet = shownNodes.get({filter: function(n) {
-                for (var e = 0; e < n[field].length; e++) {
-                    var elem = n[field][e];
-                    for (var f = 0; f < matchingStrings.length; f++) {
-                        if (elem == matchingStrings[f])
-                            return true;
-                    }
-                }
-                return false;
-            }});
-            edgeSet = shownEdges.get({filter: function(n) {
-                for (var e = 0; e < n[field].length; e++) {
-                    var elem = n[field][e];
-                    for (var f = 0; f < matchingStrings.length; f++) {
-                        if (elem == matchingStrings[f])
-                            return true;
-                    }
-                }
-                return false;
-            }});
-            break;
-        case "topo":
-            var strings = topos;
-            matchingStrings = strings.reduce(function(a, e, i) {
-                if (e.match(regexp))
-                    a.push(i);
-                return a;
-            }, []);
-            nodeSet = shownNodes.get({filter: function(n) {
-                var elem = n[field];
+    case "part":
+        var strings = partitions;
+        matchingStrings = strings.reduce(function(a, e, i) {
+            if (e.match(regexp))
+                a.push(i);
+            return a;
+        }, []);
+        nodeSet = shownNodes.get({filter: function(n) {
+            for (var e = 0; e < n[field].length; e++) {
+                var elem = n[field][e];
                 for (var f = 0; f < matchingStrings.length; f++) {
                     if (elem == matchingStrings[f])
                         return true;
                 }
-                return false;
-            }});
-            edgeSet = [];
-            break;
-        default:
-            nodeSet = shownNodes.get({filter: function(n) {
-                return n[field] ? n[field].toString().match(regexp): false;
-            }});
-            edgeSet = shownEdges.get({filter: function(e) {
-                return e[field] ? e[field].toString().match(regexp): false;
-            }});
+            }
+            return false;
+        }});
+        edgeSet = shownEdges.get({filter: function(n) {
+            for (var e = 0; e < n[field].length; e++) {
+                var elem = n[field][e];
+                for (var f = 0; f < matchingStrings.length; f++) {
+                    if (elem == matchingStrings[f])
+                        return true;
+                }
+            }
+            return false;
+        }});
+        break;
+    case "topo":
+        var strings = topos;
+        matchingStrings = strings.reduce(function(a, e, i) {
+            if (e.match(regexp))
+                a.push(i);
+            return a;
+        }, []);
+        nodeSet = shownNodes.get({filter: function(n) {
+            var elem = n[field];
+            for (var f = 0; f < matchingStrings.length; f++) {
+                if (elem == matchingStrings[f])
+                    return true;
+            }
+            return false;
+        }});
+        edgeSet = [];
+        break;
+    default:
+        nodeSet = shownNodes.get({filter: function(n) {
+            return n[field] ? n[field].toString().match(regexp): false;
+        }});
+        edgeSet = shownEdges.get({filter: function(e) {
+            return e[field] ? e[field].toString().match(regexp): false;
+        }});
     }
     nodeIds = nodeSet.map(function(n) { return n.id; });
     edgeIds = edgeSet.map(function(e) { return e.id; });
@@ -481,13 +481,13 @@ function showSelectedEdges()
                 .join(', ') + '\n' +
                 '\t' + src.title + '(' + src.id + ') - ' +
                 dest.title + '(' + dest.id + '): ' +
-                    edge.label + 'Gb\n';
+                edge.label + 'Gb\n';
 
             var edgeLinks = edge.links;
             edgeLinks.forEach(function(linkId) {
                 var link = links.get(linkId);
                 infos += '\t\tlink ' + linkId + ' ('
-                        + link.src_port + '->' + link.dst_port + '):'
+                    + link.src_port + '->' + link.dst_port + '):'
                     + link.gbits + 'Gb\n';
             });
         });
@@ -518,18 +518,18 @@ function showSelectedNodes()
                 var edge = edges.get(edgeId);
                 var dest = nodes.get(edge.to);
 
-                var s = '\t' + dest.title + ' (' + dest.id + ') - edgeId ' + edgeId + ': ';
-            s += edge.label + 'Gb\n';
+                var s = '\t' + dest.title + ' (' + dest.id + ') - edgeId '
+                    + edgeId + ': ' +  edge.label + 'Gb\n';
 
-            var edgeLinks = edge.links;
-            edgeLinks.forEach(function(linkId) {
-                var link = links.get(linkId);
-                s += '\t\tlink ' + linkId + ' ('
+                var edgeLinks = edge.links;
+                edgeLinks.forEach(function(linkId) {
+                    var link = links.get(linkId);
+                    s += '\t\tlink ' + linkId + ' ('
                         + link.src_port + '->' + link.dst_port + '):'
-                    + link.gbits + 'Gb\n';
-            });
-            neighbourText.push(s);
-            neighbours.push(dest.id);
+                        + link.gbits + 'Gb\n';
+                });
+                neighbourText.push(s);
+                neighbours.push(dest.id);
             });
 
             sub = node.sub.map(function(s) {
@@ -546,10 +546,8 @@ function showSelectedNodes()
                 'Total bandwidth: ' + node.bandwidth + '\n' +
                 ((node.topo != -1) ? ('Hwloc topology: ' + topos[node.topo]): '');
 
-
             if (!similarNeighbours) {
                 similarNeighbours = neighbours;
-
             } else {
                 similarNeighbours = similarNeighbours.filter(function(n) {
                     return neighbours.indexOf(n) != -1;
@@ -572,11 +570,11 @@ function showSelectedNodes()
         nodeIds.forEach(function(n, idx) {
             infos += '\t' + shownNodes.get(n).title + ": " +
                 neighbourLists[idx]
-                  .filter(function(n)
-                          {return similarNeighbours.indexOf(n) < 0;})
-                  .map(function(n)
-                          {return shownNodes.get(n).title;})
-                  .sort().join(', ') +
+                .filter(function(n)
+                        {return similarNeighbours.indexOf(n) < 0;})
+                .map(function(n)
+                     {return shownNodes.get(n).title;})
+                .sort().join(', ') +
                 '\n';
         });
     }
@@ -603,7 +601,7 @@ function draw()
     printWithTime("Draw");
     var selectPartition = document.getElementById("selectPartition");
     var partition = parseInt(
-            selectPartition.options[selectPartition.selectedIndex].value);
+        selectPartition.options[selectPartition.selectedIndex].value);
 
     var subNodes = new vis.DataSet(nodes.get({filter: function (n) {
         return (n.merged == 0);
@@ -630,7 +628,7 @@ function draw()
         //return (subNodes.get(e.from) && subNodes.get(e.from).type != "host"); // DEBUG XXX
         /* We'd rather keep the edge where e.from > e.to, so we would keep the
            ones from virtual nodes which would ease the expansion.
-         */
+        */
         if (e.from > e.to) {
             if (!subEdges.get(e.reverse)) {
                 e.arrows = {to: true};
@@ -664,12 +662,12 @@ function draw()
     };
 
     var options = {interaction:{hover:true, tooltipDelay:0, multiselect: true},
-        layout:{improvedLayout:false},
-        physics: {barnesHut: {gravitationalConstant:-15000,
-        }},
-        nodes: {shape: 'dot', borderWidth: 0.1, borderWidthSelected: 5},
-        edges: {color: normalEdgeColor}
-    };
+                   layout:{improvedLayout:false},
+                   physics: {barnesHut: {gravitationalConstant:-15000,
+                                        }},
+                   nodes: {shape: 'dot', borderWidth: 0.1, borderWidthSelected: 5},
+                   edges: {color: normalEdgeColor}
+                  };
     network = new vis.Network(container, data, options);
 
     network.on("selectNode", function (params) {
@@ -692,37 +690,37 @@ function draw()
     });
 
     if (1) { // DEBUG XXX
-    network.on("dragStart", function (params) {
-        params.event = "[original event]";
-        var nodeIds = params.nodes;
-        var edgeIds = params.edges;
+        network.on("dragStart", function (params) {
+            params.event = "[original event]";
+            var nodeIds = params.nodes;
+            var edgeIds = params.edges;
 
-        nodesWithPhysics = [];
-        edgesWithPhysics = edgeIds;
-        edgeIds.forEach(function(edgeId) {
-            shownEdges.update({id: edgeId, physics: true});
+            nodesWithPhysics = [];
+            edgesWithPhysics = edgeIds;
+            edgeIds.forEach(function(edgeId) {
+                shownEdges.update({id: edgeId, physics: true});
 
-            var edge = shownEdges.get(edgeId);
-            var node = shownNodes.get(edge.to);
-            if (1 >= node.edges.length) {
-                nodesWithPhysics.push(edge.to);
-                shownNodes.update({id: edge.to, physics: true});
-            }
-            var node = shownNodes.get(edge.from);
-            if (1 >= node.edges.length) {
-                nodesWithPhysics.push(edge.from);
-                shownNodes.update({id: edge.from, physics: true});
-            }
+                var edge = shownEdges.get(edgeId);
+                var node = shownNodes.get(edge.to);
+                if (1 >= node.edges.length) {
+                    nodesWithPhysics.push(edge.to);
+                    shownNodes.update({id: edge.to, physics: true});
+                }
+                var node = shownNodes.get(edge.from);
+                if (1 >= node.edges.length) {
+                    nodesWithPhysics.push(edge.from);
+                    shownNodes.update({id: edge.from, physics: true});
+                }
+            });
         });
-    });
-    network.on("dragEnd", function (params) {
-        edgesWithPhysics.forEach(function(edgeWithPhysic) {
-            shownEdges.update({id: edgeWithPhysic, physics: false});
+        network.on("dragEnd", function (params) {
+            edgesWithPhysics.forEach(function(edgeWithPhysic) {
+                shownEdges.update({id: edgeWithPhysic, physics: false});
+            });
+            nodesWithPhysics.forEach(function(nodeWithPhysic) {
+                shownNodes.update({id: nodeWithPhysic, physics: false});
+            });
         });
-        nodesWithPhysics.forEach(function(nodeWithPhysic) {
-            shownNodes.update({id: nodeWithPhysic, physics: false});
-        });
-    });
     }
 
     network.on("stabilizationIterationsDone", function () {
@@ -812,8 +810,8 @@ function removeBlanks (canvas) {
 
         // loop through each row
         for(var y = fromTop ? 0 : imgHeight - 1;
-                fromTop ? (y < imgHeight) : (y > -1);
-                y += offset) {
+            fromTop ? (y < imgHeight) : (y > -1);
+            y += offset) {
 
             // loop through each column
             for(var x = 0; x < imgWidth; x++) {
@@ -829,8 +827,8 @@ function removeBlanks (canvas) {
 
         // loop through each column
         for(var x = fromLeft ? 0 : imgWidth - 1;
-                fromLeft ? (x < imgWidth) : (x > -1);
-                x += offset) {
+            fromLeft ? (x < imgWidth) : (x > -1);
+            x += offset) {
 
             // loop through each row
             for(var y = 0; y < imgHeight; y++) {
@@ -855,8 +853,8 @@ function removeBlanks (canvas) {
     newCanvas.width = cropWidth;
     newCanvas.height = cropHeight;
     newContext.drawImage(canvas,
-            cropLeft, cropTop, cropWidth, cropHeight,
-            0, 0, cropWidth, cropHeight);
+                         cropLeft, cropTop, cropWidth, cropHeight,
+                         0, 0, cropWidth, cropHeight);
 
     return newCanvas.toDataURL("image/png");
 };
