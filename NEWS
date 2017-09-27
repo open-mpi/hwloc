@@ -127,6 +127,7 @@ Version 2.0.0
   + HWLOC_COMPONENTS takes precedence over other environment variables
     for selecting components.
   + Remove the dependency on libnuma on Linux.
+  + hwloc now requires a C99 compliant compiler.
 
 
 Version 1.11.8

@@ -12,6 +12,7 @@ dnl                         University of Stuttgart.  All rights reserved.
 dnl Copyright © 2006-2017 Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2012  Blue Brain Project, BBP/EPFL. All rights reserved.
 dnl Copyright © 2012       Oracle and/or its affiliates.  All rights reserved.
+dnl Copyright © 2012  Los Alamos National Security, LLC. All rights reserved.
 dnl See COPYING in top-level directory.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -149,6 +150,14 @@ EOF])
     AS_IF([test "$hwloc_symbol_prefix_value" = "hwloc_"],
           [AC_DEFINE([HWLOC_SYM_TRANSFORM], [0])],
           [AC_DEFINE([HWLOC_SYM_TRANSFORM], [1])])
+
+    # hwloc 2.0+ requires a C99 compliant compiler
+    AC_PROG_CC_C99
+    # The result of AC_PROG_CC_C99 is stored in ac_cv_prog_cc_c99
+    if test "x$ac_cv_prog_cc_c99" = xno ; then
+        AC_MSG_WARN([hwloc requires a C99 compiler])
+        AC_MSG_ERROR([Aborting.])
+    fi
 
     # GCC specifics.
     if test "x$GCC" = "xyes"; then
