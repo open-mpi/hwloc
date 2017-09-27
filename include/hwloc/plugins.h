@@ -140,7 +140,8 @@ struct hwloc_backend {
   /** \brief Main discovery callback.
    * returns -1 on error, either because it couldn't add its objects ot the existing topology,
    * or because of an actual discovery/gathering failure.
-   * May be NULL if type is ::HWLOC_DISC_COMPONENT_TYPE_MISC. */
+   * May be NULL.
+   */
   int (*discover)(struct hwloc_backend *backend);
 
   /** \brief Callback used by the PCI backend to retrieve the locality of a PCI object from the OS/cpu backend.
