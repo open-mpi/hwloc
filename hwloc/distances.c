@@ -811,7 +811,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
 			   float *accuracies,
 			   int needcheck)
 {
-  unsigned *groupids = NULL;
+  HWLOC_VLA(unsigned, groupids, nbobjs);
   unsigned nbgroups = 0;
   unsigned i,j;
   int verbose = topology->grouping_verbose;
@@ -824,11 +824,6 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
     /* TODO hwloc__find_groups_by_max_distance() for bandwidth */
     return;
 
-  groupids = malloc(sizeof(unsigned) * nbobjs);
-  if (NULL == groupids) {
-      return;
-  }
-
   for(i=0; i<nbaccuracies; i++) {
     if (verbose)
       fprintf(stderr, "Trying to group %u %s objects according to physical distances with accuracy %f\n",
@@ -840,23 +835,14 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
       break;
   }
   if (!nbgroups)
-    goto outter_free;
+    return;
 
-  /* For convenience, put these declarations inside a block.  It's a
-     crying shame we can't use C99 syntax here, and have to do a bunch
-     of mallocs. :-( */
   {
-      hwloc_obj_t *groupobjs = NULL;
-      unsigned *groupsizes = NULL;
-      uint64_t *groupvalues = NULL;
+      HWLOC_VLA(hwloc_obj_t, groupobjs, nbgroups);
+      HWLOC_VLA(unsigned, groupsizes, nbgroups);
+      HWLOC_VLA(uint64_t, groupvalues, nbgroups*nbgroups);
       unsigned failed = 0;
 
-      groupobjs = malloc(sizeof(hwloc_obj_t) * nbgroups);
-      groupsizes = malloc(sizeof(unsigned) * nbgroups);
-      groupvalues = malloc(sizeof(uint64_t) * nbgroups * nbgroups);
-      if (NULL == groupobjs || NULL == groupsizes || NULL == groupvalues) {
-          goto inner_free;
-      }
       /* create new Group objects and record their size */
       memset(&(groupsizes[0]), 0, sizeof(groupsizes[0]) * nbgroups);
       for(i=0; i<nbgroups; i++) {
@@ -886,7 +872,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
 
       if (failed)
 	/* don't try to group above if we got a NULL group here, just keep this incomplete level */
-	goto inner_free;
+	return;
 
       /* factorize values */
       memset(&(groupvalues[0]), 0, sizeof(groupvalues[0]) * nbgroups * nbgroups);
@@ -918,14 +904,5 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
 #endif
 
       hwloc__groups_by_distances(topology, nbgroups, groupobjs, groupvalues, kind, nbaccuracies, accuracies, 0 /* no need to check generated matrix */);
-
-  inner_free:
-      /* Safely free everything */
-      free(groupobjs);
-      free(groupsizes);
-      free(groupvalues);
   }
-
- outter_free:
-  free(groupids);
 }

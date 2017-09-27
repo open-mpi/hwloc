@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -141,22 +141,9 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 
   if (!sysctlbyname("hw.cacheconfig", NULL, &size, NULL, 0)) {
     unsigned n = size / sizeof(uint32_t);
-    uint64_t *cacheconfig = NULL;
-    uint64_t *cachesize = NULL;
-    uint32_t *cacheconfig32 = NULL;
-
-    cacheconfig = malloc(sizeof(uint64_t) * n);
-    if (NULL == cacheconfig) {
-        goto out;
-    }
-    cachesize = malloc(sizeof(uint64_t) * n);
-    if (NULL == cachesize) {
-        goto out;
-    }
-    cacheconfig32 = malloc(sizeof(uint32_t) * n);
-    if (NULL == cacheconfig32) {
-        goto out;
-    }
+    uint64_t cacheconfig[n];
+    uint64_t cachesize[n];
+    uint32_t cacheconfig32[n];
 
     if ((!sysctlbyname("hw.cacheconfig", cacheconfig, &size, NULL, 0))) {
       /* Yeech. Darwin seemingly has changed from 32bit to 64bit integers for
@@ -254,10 +241,6 @@ hwloc_look_darwin(struct hwloc_backend *backend)
         }
       }
     }
-  out:
-    free(cacheconfig);
-    free(cachesize);
-    free(cacheconfig32);
   }
 
 

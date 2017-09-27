@@ -59,7 +59,6 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
   const char *attr = curlevel->index_string;
   unsigned long length = curlevel->index_string_length;
   unsigned *array = NULL;
-  struct hwloc_synthetic_intlv_loop_s * loops = NULL;
   size_t i;
 
   if (!attr)
@@ -115,13 +114,10 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
       nr_loops++;
       tmp++;
     }
+
+   {
     /* nr_loops colon-separated fields, but we may need one more at the end */
-    loops = malloc((nr_loops+1)*sizeof(*loops));
-    if (!loops) {
-      if (verbose)
-	fprintf(stderr, "Failed to allocate synthetic index interleave loop array of size %u\n", nr_loops);
-      goto out_with_array;
-    }
+    HWLOC_VLA(struct hwloc_synthetic_intlv_loop_s, loops, nr_loops+1);
 
     if (*attr >= '0' && *attr <= '9') {
       /* interleaving as x*y:z*t:... */
@@ -135,24 +131,24 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	if (tmp2 == tmp || *tmp2 != '*') {
 	  if (verbose)
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number before '*'\n", tmp);
-	  goto out_with_loops;
+	  goto out_with_array;
 	}
 	if (!step) {
 	  if (verbose)
 	    fprintf(stderr, "Invalid interleaving loop with step 0 at '%s'\n", tmp);
-	  goto out_with_loops;
+	  goto out_with_array;
 	}
 	tmp2++;
 	nb = (unsigned) strtol(tmp2, &tmp3, 0);
 	if (tmp3 == tmp2 || (*tmp3 && *tmp3 != ':' && *tmp3 != ')' && *tmp3 != ' ')) {
 	  if (verbose)
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number between '*' and ':'\n", tmp);
-	  goto out_with_loops;
+	  goto out_with_array;
 	}
 	if (!nb) {
 	  if (verbose)
 	    fprintf(stderr, "Invalid interleaving loop with number 0 at '%s'\n", tmp2);
-	  goto out_with_loops;
+	  goto out_with_array;
 	}
 	loops[cur_loop].step = step;
 	loops[cur_loop].nb = nb;
@@ -179,12 +175,12 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	if (err < 0) {
 	  if (verbose)
 	    fprintf(stderr, "Failed to read synthetic index interleaving loop type '%s'\n", tmp);
-	  goto out_with_loops;
+	  goto out_with_array;
 	}
 	if (type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	  if (verbose)
 	    fprintf(stderr, "Misc object type disallowed in synthetic index interleaving loop type '%s'\n", tmp);
-	  goto out_with_loops;
+	  goto out_with_array;
 	}
 	for(i=0; i<curleveldepth; i++) {
 	  if (type != data->level[i].type)
@@ -200,7 +196,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	  if (verbose)
 	    fprintf(stderr, "Failed to find level for synthetic index interleaving loop type '%s' above '%s'\n",
 		    tmp, hwloc_type_name(curlevel->type));
-	  goto out_with_loops;
+	  goto out_with_array;
 	}
 	tmp = strchr(tmp, ':');
 	if (!tmp || tmp > attr+length)
@@ -218,7 +214,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	  if (loops[i].level_depth == mydepth && i != cur_loop) {
 	    if (verbose)
 	      fprintf(stderr, "Invalid duplicate interleaving loop type in synthetic index '%s'\n", attr);
-	    goto out_with_loops;
+	    goto out_with_array;
 	  }
 	  if (loops[i].level_depth < mydepth
 	      && loops[i].level_depth > prevdepth)
@@ -247,7 +243,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
       } else {
 	if (verbose)
 	  fprintf(stderr, "Invalid index interleaving total width %lu instead of %lu\n", nbs, total);
-	goto out_with_loops;
+	goto out_with_array;
       }
     }
 
@@ -266,23 +262,21 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
       if (array[j] >= total) {
 	if (verbose)
 	  fprintf(stderr, "Invalid index interleaving generates out-of-range index %u\n", array[j]);
-	goto out_with_loops;
+	goto out_with_array;
       }
       if (!array[j] && j) {
 	if (verbose)
 	  fprintf(stderr, "Invalid index interleaving generates duplicate index values\n");
-	goto out_with_loops;
+	goto out_with_array;
       }
     }
 
-    free(loops);
     curlevel->index_array = array;
+   }
   }
 
   return;
 
- out_with_loops:
-  free(loops);
  out_with_array:
   free(array);
  out:

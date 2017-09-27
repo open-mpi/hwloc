@@ -2202,7 +2202,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
 static void
 hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
 {
-  hwloc_obj_t child, *array;
+  hwloc_obj_t child;
   unsigned arity = root->arity;
   int ok;
 
@@ -2233,7 +2233,8 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
   /* now check that children subtrees are identical.
    * just walk down the first child in each tree and compare their depth and arities
    */
-  array = malloc(arity * sizeof(*array));
+{
+  HWLOC_VLA(hwloc_obj_t, array, arity);
   memcpy(array, root->children, arity * sizeof(*array));
   while (1) {
     unsigned i;
@@ -2241,7 +2242,6 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
     for(i=1; i<arity; i++)
       if (array[i]->depth != array[0]->depth
 	  || array[i]->arity != array[0]->arity) {
-      free(array);
       return;
     }
     if (!array[0]->arity)
@@ -2251,7 +2251,7 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
     for(i=0; i<arity; i++)
       array[i] = array[i]->first_child;
   }
-  free(array);
+}
 
   /* everything went fine, we're symmetric */
  good:

@@ -492,4 +492,12 @@ typedef SSIZE_T ssize_t;
 #  endif
 #endif
 
+#if defined HWLOC_WIN_SYS && !defined __MINGW32__
+/* MSVC doesn't support C99 variable-length array */
+#include <malloc.h>
+#define HWLOC_VLA(_type, _name, _nb) _type *_name = (_type*) _alloca((_nb)*sizeof(_type))
+#else
+#define HWLOC_VLA(_type, _name, _nb) _type _name[_nb]
+#endif
+
 #endif /* HWLOC_PRIVATE_MISC_H */

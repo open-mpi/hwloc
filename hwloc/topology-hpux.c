@@ -176,7 +176,6 @@ hwloc_look_hpux(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   int has_numa = sysconf(_SC_CCNUMA_SUPPORT) == 1;
-  hwloc_obj_t *nodes = NULL, obj;
   spu_t currentcpu;
   ldom_t currentnode;
   int i, nbnodes = 0;
@@ -190,11 +189,12 @@ hwloc_look_hpux(struct hwloc_backend *backend)
   if (has_numa) {
     nbnodes = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) ?
       MPC_GETNUMLDOMS_SYS : MPC_GETNUMLDOMS, 0, 0);
+  }
+  hwloc_debug("%d nodes\n", nbnodes);
 
-    hwloc_debug("%d nodes\n", nbnodes);
+  hwloc_obj_t nodes[nbnodes], obj;
 
-    nodes = malloc(nbnodes * sizeof(*nodes));
-
+  if (has_numa) {
     i = 0;
     currentnode = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) ?
       MPC_GETFIRSTLDOM_SYS : MPC_GETFIRSTLDOM, 0, 0);
@@ -223,7 +223,7 @@ hwloc_look_hpux(struct hwloc_backend *backend)
 
     hwloc_debug("cpu %d\n", currentcpu);
 
-    if (nodes) {
+    if (has_numa) {
       /* Add this cpu to its node */
       currentnode = mpctl(MPC_SPUTOLDOM, currentcpu, 0);
       /* Hopefully it's just the same as previous cpu */
@@ -246,11 +246,10 @@ hwloc_look_hpux(struct hwloc_backend *backend)
       MPC_GETNEXTSPU_SYS : MPC_GETNEXTSPU, currentcpu, 0);
   }
 
-  if (nodes) {
+  if (has_numa) {
     /* Add nodes */
     for (i = 0 ; i < nbnodes ; i++)
       hwloc_insert_object_by_cpuset(topology, nodes[i]);
-    free(nodes);
   }
 
   topology->support.discovery->pu = 1;

@@ -70,8 +70,6 @@ cpuiddump_read(const char *dirpath, unsigned idx)
 {
   struct cpuiddump *cpuiddump;
   struct cpuiddump_entry *cur;
-  char *filename;
-  size_t filenamelen = strlen(dirpath) + 15;
   FILE *file;
   char line[128];
   unsigned nr;
@@ -79,15 +77,16 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   cpuiddump = malloc(sizeof(*cpuiddump));
   cpuiddump->nr = 0; /* return a cpuiddump that will raise errors because it matches nothing */
 
-  filename = malloc(filenamelen);
+ {
+  size_t filenamelen = strlen(dirpath) + 15;
+  HWLOC_VLA(char, filename, filenamelen);
   snprintf(filename, filenamelen, "%s/pu%u", dirpath, idx);
   file = fopen(filename, "r");
   if (!file) {
     fprintf(stderr, "Could not read dumped cpuid file %s\n", filename);
-    free(filename);
     return cpuiddump;
   }
-  free(filename);
+ }
 
   nr = 0;
   while (fgets(line, sizeof(line), file))
@@ -1294,7 +1293,6 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
 #if !(defined HWLOC_WIN_SYS && !defined __MINGW32__) /* needs a lot of work */
   struct dirent *dirent;
   DIR *dir;
-  char *path;
   FILE *file;
   char line [32];
 
@@ -1302,30 +1300,23 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
   if (!dir)
     return -1;
 
-  path = malloc(strlen(src_cpuiddump_path) + strlen("/hwloc-cpuid-info") + 1);
-  if (!path)
-    goto out_with_dir;
-
+  char path[strlen(src_cpuiddump_path) + strlen("/hwloc-cpuid-info") + 1];
   sprintf(path, "%s/hwloc-cpuid-info", src_cpuiddump_path);
   file = fopen(path, "r");
   if (!file) {
     fprintf(stderr, "Couldn't open dumped cpuid summary %s\n", path);
-    free(path);
     goto out_with_dir;
   }
   if (!fgets(line, sizeof(line), file)) {
     fprintf(stderr, "Found read dumped cpuid summary in %s\n", path);
     fclose(file);
-    free(path);
     goto out_with_dir;
   }
   fclose(file);
   if (strcmp(line, "Architecture: x86\n")) {
     fprintf(stderr, "Found non-x86 dumped cpuid summary in %s: %s\n", path, line);
-    free(path);
     goto out_with_dir;
   }
-  free(path);
 
   while ((dirent = readdir(dir)) != NULL) {
     if (!strncmp(dirent->d_name, "pu", 2)) {
