@@ -21,6 +21,8 @@ int main(void)
     hwloc_topology_t topology;
     hwloc_obj_t obj;
     unsigned n, i;
+    int devid, platformid;
+    const char *dev;
 
     /* Allocate, initialize and load topology object. */
     hwloc_topology_init(&topology);
@@ -40,7 +42,7 @@ int main(void)
       if (s && !strcmp(s, "CUDA")) {
         /* This is a CUDA device */
         assert(!strncmp(obj->name, "cuda", 4));
-        int devid = atoi(obj->name + 4);
+        devid = atoi(obj->name + 4);
         printf("CUDA device %d\n", devid);
 
         s = hwloc_obj_get_info_by_name(obj, "GPUModel");
@@ -66,10 +68,10 @@ int main(void)
       if (s && !strcmp(s, "OpenCL")) {
         /* This is an OpenCL device */
         assert(!strncmp(obj->name, "opencl", 6));
-        int platformid = atoi(obj->name + 6);
+        platformid = atoi(obj->name + 6);
         printf("OpenCL platform %d\n", platformid);
-        const char *dev = strchr(obj->name + 6, 'd');
-        int devid = atoi(dev + 1);
+        dev = strchr(obj->name + 6, 'd');
+        devid = atoi(dev + 1);
         printf("OpenCL device %d\n", devid);
 
         s = hwloc_obj_get_info_by_name(obj, "GPUModel");
