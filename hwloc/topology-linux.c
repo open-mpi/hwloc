@@ -4367,40 +4367,18 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
    */
   hwloc_linux__get_allowed_resources(topology, data->root_path, data->root_fd, &cpuset_name);
 
-  /*********************
-   * Memory information
-   */
-
-  /* Get the machine memory attributes */
-  hwloc_get_procfs_meminfo_info(topology, data, &topology->levels[0][0]->memory);
-
-  /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
-  if (sysfs_node_path)
-    look_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
-  else
-    nbnodes = 0;
-
-  /* if we found some numa nodes, the machine object has no local memory */
-  if (nbnodes) {
-    unsigned i;
-    topology->levels[0][0]->memory.local_memory = 0;
-    if (topology->levels[0][0]->memory.page_types)
-      for(i=0; i<topology->levels[0][0]->memory.page_types_len; i++)
-	topology->levels[0][0]->memory.page_types[i].count = 0;
-  }
-
   /**********************
    * CPU information
    */
 
   /* Don't rediscover CPU resources if already done */
   if (already_pus)
-    goto done;
+    goto cpudone;
 
   /* Gather the list of cpus now */
   err = hwloc_linux_try_hardwired_cpuinfo(backend);
   if (!err)
-    goto done;
+    goto cpudone;
 
   /* setup root info */
   hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
@@ -4424,7 +4402,29 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       hwloc_setup_pu_level(topology, data->fallback_nbprocessors);
   }
 
- done:
+ cpudone:
+
+  /*********************
+   * Memory information
+   */
+
+  /* Get the machine memory attributes */
+  hwloc_get_procfs_meminfo_info(topology, data, &topology->levels[0][0]->memory);
+
+  /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
+  if (sysfs_node_path)
+    look_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
+  else
+    nbnodes = 0;
+
+  /* if we found some numa nodes, the machine object has no local memory */
+  if (nbnodes) {
+    unsigned i;
+    topology->levels[0][0]->memory.local_memory = 0;
+    if (topology->levels[0][0]->memory.page_types)
+      for(i=0; i<topology->levels[0][0]->memory.page_types_len; i++)
+	topology->levels[0][0]->memory.page_types[i].count = 0;
+  }
 
   /**********************
    * Misc
