@@ -3081,14 +3081,14 @@ look_sysfsnode(struct hwloc_topology *topology,
   hwloc_bitmap_t nodes_cpuset;
   struct knl_hwdata knl_hwdata;
   int failednodes = 0;
-  unsigned index_;
+  unsigned i;
 
   /* NUMA nodes cannot be filtered out */
   indexes = list_sysfsnode(data, path, &nbnodes);
   if (!indexes)
     return 0;
 
-  nodes = calloc(nbnodes * 2, /* for KNL-specific objects */
+  nodes = calloc(nbnodes,
 		 sizeof(hwloc_obj_t));
   distances = malloc(nbnodes*nbnodes*sizeof(*distances));
   nodes_cpuset  = hwloc_bitmap_alloc();
@@ -3102,11 +3102,11 @@ look_sysfsnode(struct hwloc_topology *topology,
   }
 
       /* Create NUMA objects */
-      for (index_ = 0; index_ < nbnodes; index_++) {
+      for (i = 0; i < nbnodes; i++) {
           hwloc_obj_t node;
 	  int annotate;
 
-	  osnode = indexes[index_];
+	  osnode = indexes[i];
 
 	  node = hwloc_get_numanode_obj_by_os_index(topology, osnode);
 	  annotate = (node != NULL);
@@ -3138,7 +3138,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  }
           hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->memory);
 
-	  nodes[index_] = node;
+	  nodes[i] = node;
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
       }
@@ -3160,11 +3160,15 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       free(indexes);
 
+      unsigned nr_knl_clusters = 0;
+      hwloc_obj_t knl_clusters[4]= { NULL, NULL, NULL, NULL };
+      int node_knl_cluster[8] = { -1, -1, -1, -1, -1, -1, -1, -1};
+
       if (data->is_knl && !failednodes) {
 	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
 	int noquirk = (env && !atoi(env)) || !distances || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP);
 	int mscache;
-	unsigned i, j, closest;
+	unsigned j, closest;
 
 	hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata);
 	mscache = knl_hwdata.mcdram_cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE);
@@ -3187,6 +3191,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 		cache->attr->cache.associativity = knl_hwdata.mcdram_cache_associativity;
 		hwloc_obj_add_info(cache, "Inclusive", knl_hwdata.mcdram_cache_inclusiveness ? "1" : "0");
 		cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
+		cache->nodeset = hwloc_bitmap_dup(nodes[i]->nodeset); /* only applies to DDR */
 		cache->subtype = strdup("MemorySideCache");
 		hwloc_insert_object_by_cpuset(topology, cache);
 	      }
@@ -3218,7 +3223,10 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
 	    cluster->subtype = strdup("Cluster");
 	    cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER;
-	    nodes[nbnodes+i] = cluster;
+	    knl_clusters[nr_knl_clusters] = cluster;
+	    node_knl_cluster[i] = nr_knl_clusters;
+	    node_knl_cluster[closest] = nr_knl_clusters;
+	    nr_knl_clusters++;
 	  }
 	}
 	if (!noquirk) {
@@ -3228,18 +3236,31 @@ look_sysfsnode(struct hwloc_topology *topology,
 	}
       }
 
-      /* everything is ready now, insert all objects and distances for real */
-      for (index_ = 0; index_ < 2 * nbnodes; index_++) {
-	hwloc_obj_t node = nodes[index_];
-	if (node && !node->parent) {
-	  /* not inserted yet */
-	  hwloc_obj_t res_obj = hwloc_insert_object_by_cpuset(topology, node);
-	  if (res_obj != node && index_ < nbnodes)
+      /* everything is ready for insertion now */
+
+      /* insert knl clusters */
+      if (data->is_knl) {
+	for(i=0; i<nr_knl_clusters; i++) {
+	  knl_clusters[i] = hwloc_insert_object_by_cpuset(topology, knl_clusters[i]);
+	  /* failure or replace can be ignored */
+	}
+      }
+
+      /* insert actual numa nodes */
+      for (i = 0; i < nbnodes; i++) {
+	hwloc_obj_t node = nodes[i];
+	if (node) {
+	  hwloc_obj_t parent = NULL;
+	  if (data->is_knl && node_knl_cluster[i] != -1)
+	    parent = knl_clusters[node_knl_cluster[i]];
+	  hwloc_obj_t res_obj = hwloc__insert_object_by_cpuset(topology, parent, node, hwloc_report_os_error);
+	  if (res_obj != node)
 	    /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
 	     * This object disappeared, we'll ignore distances */
 	    failednodes++;
 	}
       }
+
       if (failednodes) {
 	free(distances);
 	distances = NULL;
