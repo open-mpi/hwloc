@@ -1727,7 +1727,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   char *cpuset = NULL;
   char tmp[255];
   int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
-  unsigned i;
+  unsigned i,j;
 
   parentstate->new_child(parentstate, &state, "object");
 
@@ -1926,12 +1926,16 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
       childstate.new_prop(&childstate, "relative_depth", tmp);
       sprintf(tmp, "%f", 1.f);
       childstate.new_prop(&childstate, "latency_base", tmp);
-      for(i=0; i<nbobjs*nbobjs; i++) {
-	struct hwloc__xml_export_state_s greatchildstate;
-	childstate.new_child(&childstate, &greatchildstate, "latency");
-	sprintf(tmp, "%f", (float) dist->values[i]);
-	greatchildstate.new_prop(&greatchildstate, "value", tmp);
-	greatchildstate.end_object(&greatchildstate, "latency");
+      for(i=0; i<nbobjs; i++) {
+        for(j=0; j<nbobjs; j++) {
+	  /* we should export i*nbobjs+j, we translate using logical_to_v2array[] */
+	  unsigned k = logical_to_v2array[i]*nbobjs+logical_to_v2array[j];
+	  struct hwloc__xml_export_state_s greatchildstate;
+	  childstate.new_child(&childstate, &greatchildstate, "latency");
+	  sprintf(tmp, "%f", (float) dist->values[k]);
+	  greatchildstate.new_prop(&greatchildstate, "value", tmp);
+	  greatchildstate.end_object(&greatchildstate, "latency");
+	}
       }
       childstate.end_object(&childstate, "distances");
      }
