@@ -508,15 +508,78 @@ Make sure to have had a look at those too!
 
 \page termsanddefs Terms and Definitions 
 
+\section termsanddefs_objects Objects
+
 <dl>
 
 <dt>Object</dt>
   <dd>Interesting kind of part of the system, such as a Core, a L2Cache,
-  a Memory node, etc. The different types detected by hwloc are
+  a NUMA memory node, etc. The different types detected by hwloc are
   detailed in the ::hwloc_obj_type_t enumeration.
   
-  They are topologically sorted by CPU set into a tree.
+  They are topologically sorted by CPU set into a tree (see \ref termsanddefs_tree).
   </dd>
+
+<dt>Processing Unit (or Logical Processor)</dt>
+  <dd>The smallest processing element that can be represented by a hwloc
+  object. It may be a single-core processor, a core of a multicore
+  processor, or a single thread in a SMT processor.
+  hwloc's PU acronym stands for Processing Unit.
+
+  "Logical processor" should not be confused with "Logical index of a
+  processor".
+  </dd>
+
+<dt>Package</dt>
+  <dd>A processor Package is the physical package that usually gets
+  inserted into a socket on the motherboard.
+  It is also often called a physical processor or a CPU even if these
+  names bring confusion with respect to cores and processing units.
+  A processor package usually contains multiple cores
+  (and may also be composed of multiple dies).
+  hwloc Package objects were called Sockets up to hwloc 1.10.
+  </dd>
+
+<dt>NUMA Node</dt>
+  <dd>
+  An object that contains memory that is directly and byte-accessible
+  to the host processors.
+  It is usually close to some cores (the corresponding objects are
+  descendants of the NUMA node object in the hwloc tree,
+  see \ref termsanddefs_tree)
+  as specified by its CPU set.
+  </dd>
+
+</dl>
+
+\section termsanddefs_indexes Indexes and Sets
+
+<dl>
+
+<dt>OS or physical index</dt>
+  <dd>The index that the operating system (OS) uses to identify the
+  object.  This may be completely arbitrary, non-unique, non-contiguous, not
+  representative of logical proximity, and may depend on the BIOS
+  configuration. That is why hwloc almost never uses them, only in the default
+  lstopo output (<tt>P\#x</tt>) and cpuset masks.
+  See also \ref faq_indexes.</dd>
+
+<dt>Logical index</dt>
+  <dd>Index to uniquely identify objects of the same type and depth,
+  automatically computed by hwloc according to the topology.  It expresses
+  logical proximity in a generic way, i.e. objects which have adjacent logical
+  indexes are adjacent in the topology. That is why hwloc almost always uses
+  it in its API, since it expresses logical proximity. They can be shown (as
+  <tt>L\#x</tt>) by <tt>lstopo</tt> thanks to the <tt>-l</tt> option.  This index
+  is always linear and in
+  the range [0, num_objs_same_type_same_level-1].  Think of it as ``cousin
+  rank.'' The ordering is based on topology first, and then on OS CPU numbers,
+  so it is stable across everything except firmware CPU renumbering.
+  "Logical index" should not be confused with "Logical processor". A "Logical
+  processor" (which in hwloc we rather call "processing unit" to avoid the
+  confusion) has both a physical index (as chosen arbitrarily by BIOS/OS) and a logical
+  index (as computed according to logical proximity by hwloc).
+  See also \ref faq_indexes.</dd>
 
 <dt>CPU set</dt>
   <dd>The set of logical processors (or processing units) logically included in an object
@@ -540,6 +603,12 @@ Make sure to have had a look at those too!
   such as CPUs (CPU sets) or memory nodes (Node sets). They are implemented
   with the ::hwloc_bitmap_t opaque structure.
 </dd>
+
+</dl>
+
+\section termsanddefs_tree Hierarchy, Tree and Levels
+
+<dl>
 
 <dt>Parent object</dt>
   <dd>The object logically containing the current object, for example
@@ -586,46 +655,6 @@ Make sure to have had a look at those too!
   If the topology is asymmetric, the difference between some parent
   and child depths may be larger than one when some intermediate levels
   (for instance groups) are missing in only some parts of the machine.
-  </dd>
-
-<dt>OS or physical index</dt>
-  <dd>The index that the operating system (OS) uses to identify the
-  object.  This may be completely arbitrary, non-unique, non-contiguous, not
-  representative of logical proximity, and may depend on the BIOS
-  configuration. That is why hwloc almost never uses them, only in the default
-  lstopo output (<tt>P\#x</tt>) and cpuset masks.
-  See also \ref faq_indexes.</dd>
-
-<dt>Logical index</dt>
-  <dd>Index to uniquely identify objects of the same type and depth,
-  automatically computed by hwloc according to the topology.  It expresses
-  logical proximity in a generic way, i.e. objects which have adjacent logical
-  indexes are adjacent in the topology. That is why hwloc almost always uses
-  it in its API, since it expresses logical proximity. They can be shown (as
-  <tt>L\#x</tt>) by <tt>lstopo</tt> thanks to the <tt>-l</tt> option.  This index
-  is always linear and in
-  the range [0, num_objs_same_type_same_level-1].  Think of it as ``cousin
-  rank.'' The ordering is based on topology first, and then on OS CPU numbers,
-  so it is stable across everything except firmware CPU renumbering.
-  "Logical index" should not be confused with "Logical processor". A "Logical
-  processor" (which in hwloc we rather call "processing unit" to avoid the
-  confusion) has both a physical index (as chosen arbitrarily by BIOS/OS) and a logical
-  index (as computed according to logical proximity by hwloc).
-  See also \ref faq_indexes.</dd>
-
-<dt>Processing unit</dt>
-  <dd>The smallest processing element that can be represented by a hwloc
-  object. It may be a single-core processor, a core of a multicore
-  processor, or a single thread in a SMT processor.
-  hwloc's PU acronym stands for Processing Unit.
-  </dd>
-
-<!-- don't use a single <dd> for both PU and logicalproc <dt> because
- it may be rendered poorly (big vfill between the <dt> lines -->
-<dt>Logical processor</dt>
-  <dd>Synonym of "Processing unit".
-  "Logical processor" should not be confused with "Logical index of a
-  processor".
   </dd>
 
 </dl>

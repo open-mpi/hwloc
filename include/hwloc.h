@@ -180,15 +180,18 @@ typedef enum {
 			  * coherency.
 			  */
   HWLOC_OBJ_NUMANODE,	/**< \brief NUMA node.
-			  * A set of processors around memory which the
-			  * processors can directly access.
+			  * An object that contains memory that is directly
+			  * and byte-accessible to the host processors.
+			  * It is usually close to some cores (the corresponding objects
+			  * are descendants of the NUMA node object in the hwloc tree).
 			  *
 			  * There is always at one such object in the topology
 			  * even if the machine is not NUMA.
 			  */
-  HWLOC_OBJ_PACKAGE,	/**< \brief Physical package, what goes into a socket.
-			  * In the physical meaning, i.e. that you can add
-			  * or remove physically.
+  HWLOC_OBJ_PACKAGE,	/**< \brief Physical package.
+			  * The physical package that usually gets inserted
+			  * into a socket on the motherboard.
+			  * A processor package usually contains multiple cores.
 			  */
 
   HWLOC_OBJ_CORE,	/**< \brief Core.
