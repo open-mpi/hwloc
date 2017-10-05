@@ -63,19 +63,6 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 
       hwloc_debug("This is opencl%ud%u\n", j, i);
 
-#ifdef CL_DEVICE_TOPOLOGY_AMD
-      clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
-      if (CL_SUCCESS != clret) {
-	hwloc_debug("no AMD-specific device information: %d\n", clret);
-	continue;
-      } else if (CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD != amdtopo.raw.type) {
-	hwloc_debug("AMD-specific device topology reports non-PCIe device type: %u\n", amdtopo.raw.type);
-	continue;
-      }
-#else
-      continue;
-#endif
-
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       snprintf(buffer, sizeof(buffer), "opencl%ud%u", j, i);
       osdev->name = strdup(buffer);
@@ -135,9 +122,18 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 
       parent = NULL;
 #ifdef CL_DEVICE_TOPOLOGY_AMD
-      parent = hwloc_pcidisc_find_by_busid(topology, 0, (unsigned)amdtopo.pcie.bus, (unsigned)amdtopo.pcie.device, (unsigned)amdtopo.pcie.function);
-      if (!parent)
-	parent = hwloc_pcidisc_find_busid_parent(topology, 0, (unsigned)amdtopo.pcie.bus, (unsigned)amdtopo.pcie.device, (unsigned)amdtopo.pcie.function);
+      clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
+      if (CL_SUCCESS != clret) {
+	hwloc_debug("no AMD-specific device information: %d\n", clret);
+      } else if (CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD != amdtopo.raw.type) {
+	hwloc_debug("AMD-specific device topology reports non-PCIe device type: %u\n", amdtopo.raw.type);
+      } else {
+	parent = hwloc_pcidisc_find_by_busid(topology, 0, (unsigned)amdtopo.pcie.bus, (unsigned)amdtopo.pcie.device, (unsigned)amdtopo.pcie.function);
+	if (!parent)
+	  parent = hwloc_pcidisc_find_busid_parent(topology, 0, (unsigned)amdtopo.pcie.bus, (unsigned)amdtopo.pcie.device, (unsigned)amdtopo.pcie.function);
+      }
+#else
+      hwloc_debug("No locality information found.\n");
 #endif
       if (!parent)
 	parent = hwloc_get_root_obj(topology);

@@ -54,12 +54,13 @@ int main(void)
       const char *value;
       unsigned p, d;
 
-      osdev = hwloc_opencl_get_device_osdev(topology, device_ids[j]);
-      osdev2 = hwloc_opencl_get_device_osdev_by_index(topology, i, j);
-      assert(osdev == osdev2);
-      if (!osdev) {
-	printf("no osdev for platform %u device %u\n", i, j);
-	continue;
+      osdev = hwloc_opencl_get_device_osdev_by_index(topology, i, j);
+      assert(osdev); /* we currently insert all OpenCL devices, even CPU devices */
+
+      /* try to get it from PCI locality (only works with AMD extensions) */
+      osdev2 = hwloc_opencl_get_device_osdev(topology, device_ids[j]);
+      if (osdev2) {
+        assert(osdev == osdev2);
       }
 
       ancestor = hwloc_get_non_io_ancestor_obj(topology, osdev);
