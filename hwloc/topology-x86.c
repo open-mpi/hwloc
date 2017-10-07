@@ -1416,6 +1416,7 @@ static struct hwloc_disc_component hwloc_x86_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_x86_component_instantiate,
   45, /* between native and no_os */
+  1,
   NULL
 };
 

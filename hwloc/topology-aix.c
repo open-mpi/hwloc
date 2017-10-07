@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -863,6 +863,7 @@ static struct hwloc_disc_component hwloc_aix_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_aix_component_instantiate,
   50,
+  1,
   NULL
 };
 

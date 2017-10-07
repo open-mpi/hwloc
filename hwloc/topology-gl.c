@@ -159,6 +159,7 @@ static struct hwloc_disc_component hwloc_gl_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_gl_component_instantiate,
   10, /* after pci */
+  1,
   NULL
 };
 

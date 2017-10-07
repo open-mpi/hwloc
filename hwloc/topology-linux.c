@@ -4590,6 +4590,7 @@ static struct hwloc_disc_component hwloc_linux_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_linux_component_instantiate,
   50,
+  1,
   NULL
 };
 
@@ -5823,6 +5824,7 @@ static struct hwloc_disc_component hwloc_linuxio_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_linuxio_component_instantiate,
   19, /* after pci */
+  1,
   NULL
 };
 

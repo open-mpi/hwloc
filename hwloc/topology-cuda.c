@@ -144,6 +144,7 @@ static struct hwloc_disc_component hwloc_cuda_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_cuda_component_instantiate,
   10, /* after pci */
+  1,
   NULL
 };
 

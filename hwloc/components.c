@@ -566,6 +566,8 @@ nextname:
   if (tryall) {
     comp = hwloc_disc_components;
     while (NULL != comp) {
+      if (!comp->enabled_by_default)
+	goto nextcomp;
       /* check if this component was explicitly excluded in env */
       if (env) {
 	char *curenv = env;

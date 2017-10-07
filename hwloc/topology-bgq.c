@@ -287,6 +287,7 @@ static struct hwloc_disc_component hwloc_bgq_disc_component = {
   ~0,
   hwloc_bgq_component_instantiate,
   50,
+  1,
   NULL
 };
 

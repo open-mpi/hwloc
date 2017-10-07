@@ -1057,6 +1057,7 @@ static struct hwloc_disc_component hwloc_solaris_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_solaris_component_instantiate,
   50,
+  1,
   NULL
 };
 

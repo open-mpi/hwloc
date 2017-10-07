@@ -86,6 +86,11 @@ struct hwloc_disc_component {
    */
   unsigned priority;
 
+  /** \brief Enabled by default.
+   * If unset, if will be disabled unless explicitly requested.
+   */
+  unsigned enabled_by_default;
+
   /** \private Used internally to list components by priority on topology->components
    * (the component structure is usually read-only,
    *  the core copies it before using this field for queueing)

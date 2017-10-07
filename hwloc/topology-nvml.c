@@ -120,6 +120,7 @@ static struct hwloc_disc_component hwloc_nvml_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_nvml_component_instantiate,
   5, /* after pci, and after cuda since likely less useful */
+  1,
   NULL
 };
 

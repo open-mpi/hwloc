@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2014 Inria.  All rights reserved.
+ * Copyright © 2012-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -26,6 +26,7 @@ static struct hwloc_disc_component hwloc_fake_disc_component = {
   0, /* nothing to exclude */
   hwloc_fake_component_instantiate,
   100, /* make sure it's loaded before anything conflicting excludes it */
+  1,
   NULL
 };
 
