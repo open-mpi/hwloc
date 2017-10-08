@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -34,6 +34,7 @@ extern "C" {
  */
 enum hwloc_topology_export_xml_flags_e {
  /** \brief Export XML that is loadable by hwloc v1.x.
+  * However, the export may miss some details about the topology.
   * \hideinitializer
   */
  HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 = (1UL<<0)
@@ -42,6 +43,15 @@ enum hwloc_topology_export_xml_flags_e {
 /** \brief Export the topology into an XML file.
  *
  * This file may be loaded later through hwloc_topology_set_xml().
+ *
+ * By default, the latest export format is used, which means older hwloc
+ * releases (e.g. v1.x) will not be able to import it.
+ * Exporting to v1.x specific XML format is possible using flag
+ * ::HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 but it may miss some details
+ * about the topology.
+ * If there is any chance that the exported file may ever be imported
+ * back by a process using hwloc 1.x, one should consider detecting
+ * it at runtime and using the corresponding export format.
  *
  * \p flags is a OR'ed set of ::hwloc_topology_export_xml_flags_e.
  *
@@ -66,6 +76,15 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  * hwloc_free_xmlbuffer() later in the caller.
  *
  * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
+ *
+ * By default, the latest export format is used, which means older hwloc
+ * releases (e.g. v1.x) will not be able to import it.
+ * Exporting to v1.x specific XML format is possible using flag
+ * ::HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 but it may miss some details
+ * about the topology.
+ * If there is any chance that the exported buffer may ever be imported
+ * back by a process using hwloc 1.x, one should consider detecting
+ * it at runtime and using the corresponding export format.
  *
  * \p flags is a OR'ed set of ::hwloc_topology_export_xml_flags_e.
  *
