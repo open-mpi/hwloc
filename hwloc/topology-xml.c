@@ -128,8 +128,11 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     obj->complete_cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->complete_cpuset,value);
   } else if (!strcmp(name, "allowed_cpuset")) {
-    obj->allowed_cpuset = hwloc_bitmap_alloc();
-    hwloc_bitmap_sscanf(obj->allowed_cpuset, value);
+    /* ignored except for root */
+    if (!obj->parent) {
+      obj->allowed_cpuset = hwloc_bitmap_alloc();
+      hwloc_bitmap_sscanf(obj->allowed_cpuset, value);
+    }
   } else if (!strcmp(name, "nodeset")) {
     obj->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->nodeset, value);
@@ -137,8 +140,11 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     obj->complete_nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->complete_nodeset, value);
   } else if (!strcmp(name, "allowed_nodeset")) {
-    obj->allowed_nodeset = hwloc_bitmap_alloc();
-    hwloc_bitmap_sscanf(obj->allowed_nodeset, value);
+    /* ignored except for root */
+    if (!obj->parent) {
+      obj->allowed_nodeset = hwloc_bitmap_alloc();
+      hwloc_bitmap_sscanf(obj->allowed_nodeset, value);
+    }
   } else if (!strcmp(name, "name"))
     obj->name = strdup(value);
   else if (!strcmp(name, "subtype"))
@@ -820,8 +826,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
      * Ignore those Groups since fixing the missing sets is hard (would need to look at children sets which are not available yet).
      * Just abort the XML for non-Groups.
      */
-    if (!obj->cpuset != !obj->allowed_cpuset
-	|| !obj->cpuset != !obj->complete_cpuset) {
+    if (!obj->cpuset != !obj->complete_cpuset) {
       /* has some cpuset without others */
       if (obj->type == HWLOC_OBJ_GROUP) {
 	ignored = 1;
@@ -831,8 +836,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		  state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
 	goto error_with_object;
       }
-    } else if (!obj->nodeset != !obj->allowed_nodeset
-	       || !obj->nodeset != !obj->complete_nodeset) {
+    } else if (!obj->nodeset != !obj->complete_nodeset) {
       /* has some nodeset withot others */
       if (obj->type == HWLOC_OBJ_GROUP) {
 	ignored = 1;
