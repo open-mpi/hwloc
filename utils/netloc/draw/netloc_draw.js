@@ -186,7 +186,7 @@ function loadFile(data)
         function(e) {e["label"] = Math.round(parseFloat(e["gbits"]));});
     var gbits_min = Math.min.apply(null, mydata.edges.map(function(e) { return e["gbits"];}));
     mydata.edges.map(
-        function(e) {e["width"] = e["gbits"]/gbits_min;});
+        function(e) {e["width"] = e["gbits"]/gbits_min; e["physics"] = false;});
     edges = new vis.DataSet({});
     edges.add(mydata.edges);
     printWithTime("Dataset edges created");
@@ -202,8 +202,10 @@ function loadFile(data)
             .reduce(function(a, b) { return a + b; }, 0);
         n["size"] = 10*Math.log(n["bandwidth"]);
         n["x"] = n["y"] = 0;
-        if (mydata.type == "tree")
-            n["physics"] = false;
+        if (mydata.type === "tree") {
+            n["fixed"] = true;
+            n["physics"] = true;
+        }
     });
     nodes = new vis.DataSet({});
     nodes.add(mydata.nodes);
@@ -595,7 +597,7 @@ function draw()
     printWithTime("Description updated");
 
     /* Set nodes positions */
-    if (mydata.type == "tree"){
+    if (mydata.type === "tree"){
         physicsEnabled = false;
         var stack = [];
         var current_ring;
@@ -848,6 +850,12 @@ function draw()
         document.getElementById('description').innerHTML = description;
     });
 
+    if (mydata.type === "tree") {
+        network.once("afterDrawing", function () {
+            this.setOptions({physics: {enabled: true}});
+        });
+    }
+
     if (1) { // DEBUG XXX
         network.on("dragStart", function (params) {
             params.event = "[original event]";
@@ -855,29 +863,32 @@ function draw()
             var edgeIds = params.edges;
 
             nodesWithPhysics = [];
+            nodeIds.forEach(function (id) {
+                shownNodes.update({id: id, physics: true, fixed: false});
+                nodesWithPhysics.push(id);
+            });
             edgesWithPhysics = edgeIds;
             edgeIds.forEach(function(edgeId) {
                 shownEdges.update({id: edgeId, physics: true});
-
                 var edge = shownEdges.get(edgeId);
                 var node = shownNodes.get(edge.to);
                 if (1 >= node.edges.length) {
                     nodesWithPhysics.push(edge.to);
-                    shownNodes.update({id: edge.to, physics: true});
+                    shownNodes.update({id: edge.to, physics: true, fixed: false});
                 }
                 var node = shownNodes.get(edge.from);
                 if (1 >= node.edges.length) {
                     nodesWithPhysics.push(edge.from);
-                    shownNodes.update({id: edge.from, physics: true});
+                    shownNodes.update({id: edge.from, physics: true, fixed: false});
                 }
             });
         });
         network.on("dragEnd", function (params) {
             edgesWithPhysics.forEach(function(edgeWithPhysic) {
-                shownEdges.update({id: edgeWithPhysic, physics: false});
+                shownEdges.update({id: edgeWithPhysic, physics: false, fixed: true});
             });
             nodesWithPhysics.forEach(function(nodeWithPhysic) {
-                shownNodes.update({id: nodeWithPhysic, physics: false});
+                shownNodes.update({id: nodeWithPhysic, physics: false, fixed: true});
             });
         });
     }
@@ -935,85 +946,104 @@ function mergeNode(node)
 
 function prepareImage()
 {
-    html2canvas(document.getElementsByClassName("vis-network")[0], {
-        onrendered: function(canvas) {
-            var img = removeBlanks(canvas);
-            var dataURL = img.replace("image/png", "image/octet-stream");;
-            var imageLink = "<a href= " +
-                dataURL +
-                " download=\"netloc_draw.png\">image</a>";
-            document.getElementById('imageLink').innerHTML = imageLink;
-        },
-        background: undefined
-    });
+    function export_SVG() {
+
+        function Node (x, y, r, c) {
+            var cx, cy, radius, fill;
+            this.node = document.createElementNS('http://www.w3.org/2000/svg','circle');
+            this.attribute = function (key,val) {
+                if (val === undefined) return this.node.getAttribute(key);
+                this.node.setAttribute(key,val);
+                return val;
+            }
+            this.getCoord = function () {return {cx: cx, cy: cy}}
+            this.setCoord = function (obj) {
+                if (undefined === obj) return;
+                cx = this.attribute('cx', obj.cx);
+                cy = this.attribute('cy', obj.cy);
+            }
+            this.getSize = function () {return r}
+            this.setSize = function (r) {radius = this.attribute('r', r)}
+            this.getColor = function () {return fill}
+            this.setColor = function (c) {fill = this.attribute('fill', c)}
+            // Init
+            cx     = this.attribute.apply(this, ['cx', x]);
+            cy     = this.attribute.apply(this, ['cy', y]);
+            radius = this.attribute.apply(this, ['r', r]);
+            fill   = this.attribute.apply(this, ['fill', c]);
+        }
+
+        function Edge (x1, y1, x2, y2, w, c, l) {
+            var from, to, width, label, color;
+            this.edge = document.createElementNS('http://www.w3.org/2000/svg','line');
+            this.attribute = function (key,val) {
+                if (val === undefined) return this.edge.getAttribute(key);
+                this.edge.setAttribute(key,val);
+                return val;
+            }
+            this.style = function (key,val) {
+                if (undefined === val) return this.edge.style[key];
+                this.edge.style[key] = val;
+                return val;
+            }
+            this.getCoords = function () {return {from: from, to: to}}
+            this.setCoords = function (obj) {
+                if (undefined === obj) return;
+                from.x = this.attribute('x1', obj.from === undefined ? undefined : obj.from.x);
+                from.y = this.attribute('y1', obj.from === undefined ? undefined : obj.from.y);
+                to.x   = this.attribute('x2', obj.to   === undefined ? undefined : obj.to.x);
+                to.y   = this.attribute('y2', obj.to   === undefined ? undefined : obj.to.y);
+            }
+            this.getWidth = function () {return width}
+            this.setWidth = function (w) {width = this.style('stroke-width', w)}
+            this.getColor = function () {return color}
+            this.setColor = function (color) {fill = this.style('stroke', color)}
+            // TO BE ADDED: label
+            // Init
+            from   = {x: this.attribute.apply(this, ['x1', x1]),
+                      y: this.attribute.apply(this, ['y1', y1])};
+            to     = {x: this.attribute.apply(this, ['x2', x2]),
+                      y: this.attribute.apply(this, ['y2', y2])};
+            width  = this.style.apply(this, ['stroke-width', w]);
+            color  = this.style.apply(this, ['stroke', c]);
+            label  = l
+        }
+
+        var nodeArr = shownNodes.get();
+        var bounds = nodeArr.reduce( function (bounds, node) {
+            return {minx: Math.min(bounds.minx, node.x), maxx: Math.max(bounds.maxx, node.x),
+                    miny: Math.min(bounds.miny, node.y), maxy: Math.max(bounds.maxy, node.y),
+                    maxr: Math.max(bounds.maxr, node.size)};
+        }, {minx: Infinity, miny: Infinity, maxx: -Infinity, maxy: -Infinity, maxr: -Infinity});
+        var SVGCanvas = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        SVGCanvas.setAttribute('version', '1.1');
+        SVGCanvas.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        SVGCanvas.setAttribute('width',  bounds.maxx - bounds.minx + 2 * bounds.maxr);
+        SVGCanvas.setAttribute('height', bounds.maxy - bounds.miny + 2 * bounds.maxr);
+        shownEdges.get().map( function (edge) {
+            return {from: shownNodes.get(edge.from), to: shownNodes.get(edge.to),
+                    width: edge.width, color: edge.color.color, label: edge.label};
+        }).forEach( function (obj) {
+            SVGCanvas.appendChild(new Edge(obj.from.x - bounds.minx + bounds.maxr,
+                                           obj.from.y - bounds.miny + bounds.maxr,
+                                           obj.to.x   - bounds.minx + bounds.maxr,
+                                           obj.to.y   - bounds.miny + bounds.maxr,
+                                           obj.width,    obj.color,   obj.label  ).edge);
+        });
+        nodeArr.forEach( function (node) {
+            SVGCanvas.appendChild(new Node(node.x - bounds.minx + bounds.maxr,
+                                           node.y - bounds.miny + bounds.maxr,
+                                           node.size, node.color.background).node);
+        });
+        // Return text version of complete SVG image
+        return document.createElement('div').appendChild(SVGCanvas).parentNode.innerHTML;
+    }
+
+    var img = btoa(export_SVG());
+    var link = document.createElement('a');
+    link.setAttribute('href-lang', 'image/svg+xml');
+    link.setAttribute('href', 'data:image/svg+xml;base64,\n'+img);
+    link.setAttribute('title', 'netloc_draw.svg');
+    link.appendChild(document.createTextNode("image"));
+    document.getElementById('imageLink').appendChild(link);
 }
-
-function removeBlanks (canvas) {
-    var imgWidth = canvas.width;
-    var imgHeight = canvas.height;
-    var context = canvas.getContext("2d");
-    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    var data = imageData.data;
-    var getRBG = function(x, y) {
-        return {
-            red:   data[(imgWidth*y + x) * 4],
-            green: data[(imgWidth*y + x) * 4 + 1],
-            blue:  data[(imgWidth*y + x) * 4 + 2]
-        };
-    };
-    var isWhite = function (rgb) {
-        return !rgb.red && !rgb.green && !rgb.blue;
-    };
-    var scanY = function (fromTop) {
-        var offset = fromTop ? 1 : -1;
-
-        // loop through each row
-        for(var y = fromTop ? 0 : imgHeight - 1;
-            fromTop ? (y < imgHeight) : (y > -1);
-            y += offset) {
-
-            // loop through each column
-            for(var x = 0; x < imgWidth; x++) {
-                if (!isWhite(getRBG(x, y))) {
-                    return y;
-                }
-            }
-        }
-        return null; // all image is white
-    };
-    var scanX = function (fromLeft) {
-        var offset = fromLeft? 1 : -1;
-
-        // loop through each column
-        for(var x = fromLeft ? 0 : imgWidth - 1;
-            fromLeft ? (x < imgWidth) : (x > -1);
-            x += offset) {
-
-            // loop through each row
-            for(var y = 0; y < imgHeight; y++) {
-                if (!isWhite(getRBG(x, y))) {
-                    return x;
-                }
-            }
-        }
-        return null; // all image is white
-    };
-
-    var cropTop = scanY(true);
-    var cropBottom = scanY(false);
-    var cropLeft = scanX(true);
-    var cropRight = scanX(false);
-    var cropWidth = cropRight-cropLeft+1;
-    var cropHeight = cropBottom-cropTop+1;
-
-    var newCanvas = document.createElement("canvas");
-    var newContext = newCanvas.getContext("2d");
-
-    newCanvas.width = cropWidth;
-    newCanvas.height = cropHeight;
-    newContext.drawImage(canvas,
-                         cropLeft, cropTop, cropWidth, cropHeight,
-                         0, 0, cropWidth, cropHeight);
-
-    return newCanvas.toDataURL("image/png");
-};
