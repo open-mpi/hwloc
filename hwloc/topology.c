@@ -1736,13 +1736,13 @@ fixup_sets(hwloc_obj_t obj)
     } else {
       child->complete_nodeset = hwloc_bitmap_dup(child->nodeset);
     }
-    /* our allowed_cpuset must be included in our parent's one and included in our cpuset */
+    /* rebuild the allowed_cpuset from scratch */
     if (!child->allowed_cpuset)
-      child->allowed_cpuset = hwloc_bitmap_dup(child->cpuset);
-    hwloc_bitmap_and(child->allowed_cpuset, child->allowed_cpuset, obj->allowed_cpuset);
+      child->allowed_cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_and(child->allowed_cpuset, child->cpuset, obj->allowed_cpuset);
     if (!child->allowed_nodeset)
-      child->allowed_nodeset = hwloc_bitmap_dup(child->nodeset);
-    hwloc_bitmap_and(child->allowed_nodeset, child->allowed_nodeset, obj->allowed_nodeset);
+      child->allowed_nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_and(child->allowed_nodeset, child->nodeset, obj->allowed_nodeset);
 
     fixup_sets(child);
   }
