@@ -13,7 +13,7 @@ xml_outputs = \
         16amd64-4distances.xml \
         16amd64-4distances.console.output \
         16amd64-4distances.v1tov2.xml \
-        16amd64-4distances.v2tov1.output \
+        16amd64-4distances.v2tov1.xml \
         16em64t-4s2c2t.xml \
         16em64t-4s2c2t-offlines.xml \
         16em64t-4s2c2t.console.output \
