@@ -781,7 +781,7 @@ hwloc___nolibxml_prepare_export_diff(hwloc_topology_diff_t diff, const char *ref
 
   res = hwloc_snprintf(ndata->buffer, ndata->remaining,
 		 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		 "<!DOCTYPE topologydiff SYSTEM \"hwloc.dtd\">\n");
+		 "<!DOCTYPE topologydiff SYSTEM \"hwloc2-diff.dtd\">\n");
   hwloc__nolibxml_export_update_buffer(ndata, res);
   hwloc__nolibxml_export_new_child(&state, &childstate, "topologydiff");
   if (refname)

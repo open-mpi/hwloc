@@ -266,10 +266,10 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: Loading XML topologydiff without DTD\n",
 	      state->global->msgprefix);
-  } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")) {
+  } else if (strcmp((char *) dtd->SystemID, "hwloc2-diff.dtd")) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: Loading XML topologydiff with wrong DTD SystemID (%s instead of %s)\n",
-	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd");
+	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc2-diff.dtd");
   }
 
   root_node = xmlDocGetRootElement(doc);
@@ -499,7 +499,7 @@ hwloc__libxml2_prepare_export_diff(hwloc_topology_diff_t diff, const char *refna
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */
-  (void) xmlCreateIntSubset(doc, BAD_CAST "topologydiff", NULL, BAD_CAST "hwloc.dtd");
+  (void) xmlCreateIntSubset(doc, BAD_CAST "topologydiff", NULL, BAD_CAST "hwloc2-diff.dtd");
 
   state.new_child = hwloc__libxml_export_new_child;
   state.new_prop = hwloc__libxml_export_new_prop;
