@@ -217,9 +217,9 @@ libhwloc_embedded_la_SOURCES = $(sources)
 # XML data (only install if we're building in standalone mode)
 
 if HWLOC_BUILD_STANDALONE
-xml_DATA = $(srcdir)/hwloc.dtd
+xml_DATA = $(srcdir)/hwloc.dtd $(srcdir)/hwloc2.dtd
 xmldir = $(pkgdatadir)
-EXTRA_DIST += hwloc.dtd
+EXTRA_DIST += hwloc.dtd hwloc2.dtd
 endif
 
 DISTCLEANFILES = static-components.h

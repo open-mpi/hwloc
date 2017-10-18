@@ -1,4 +1,4 @@
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2017 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.

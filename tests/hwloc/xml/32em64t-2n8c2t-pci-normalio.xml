@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE topology SYSTEM "hwloc.dtd">
+<!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="2.0">
   <object type="Machine" os_index="0" cpuset="0xffffffff" complete_cpuset="0xffffffff" allowed_cpuset="0xffffffff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" gp_index="1">
     <page_type size="4096" count="0"/>

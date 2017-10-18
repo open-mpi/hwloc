@@ -4,32 +4,32 @@
   Copyright © 2009-2011 Université Bordeaux.
   See COPYING in top-level directory.
 
-  This is the old DTD for hwloc v1.x XMLs and diff XMLs.
+  This is the DTD for hwloc v2.x XMLs.
  -->
 
-<!ELEMENT topology (object)+>
-<!ELEMENT root (object)+>
+<!ELEMENT topology (object+,distances2*)>
+<!ATTLIST topology version CDATA "">
 
-<!ELEMENT object (page_type*,info*,distances*,userdata*,object*)>
-<!ATTLIST object type (System | Machine | Misc | Group | NUMANode | Socket | Package | Cache | Core | PU | Bridge | PCIDev | OSDev) #REQUIRED>
-<!ATTLIST object os_level CDATA "-1" >
+<!ELEMENT object (page_type*,info*,userdata*,object*)>
+<!ATTLIST object type (System | Machine | Misc | Group | NUMANode | Package | L1Cache | L2Cache | L3Cache | L4Cache | L5Cache | L1iCache | L2iCache | L3iCache | Core | PU | Bridge | PCIDev | OSDev) #REQUIRED>
+<!ATTLIST object subtype CDATA "" >
 <!ATTLIST object os_index CDATA "-1" >
+<!ATTLIST object gp_index CDATA "-1" >
 <!ATTLIST object name CDATA "" >
 <!ATTLIST object local_memory CDATA "0" >
 <!ATTLIST object cache_size CDATA "0" >
 <!ATTLIST object cache_linesize CDATA "0" >
 <!ATTLIST object cache_associativity CDATA "0" >
 <!ATTLIST object cache_type CDATA "0" >
-<!ATTLIST object huge_page_size_kB CDATA "0" >
-<!ATTLIST object huge_page_free CDATA "0" >
-<!ATTLIST object depth CDATA "-1" >
 <!ATTLIST object cpuset CDATA "0" >
 <!ATTLIST object complete_cpuset CDATA "" >
-<!ATTLIST object online_cpuset CDATA "" >
 <!ATTLIST object allowed_cpuset CDATA "" >
 <!ATTLIST object nodeset CDATA "" >
 <!ATTLIST object complete_nodeset CDATA "" >
 <!ATTLIST object allowed_nodeset CDATA "" >
+<!ATTLIST object depth CDATA "-1" >
+<!ATTLIST object kind CDATA "0" >
+<!ATTLIST object subkind CDATA "0" >
 <!ATTLIST object bridge_type CDATA "" >
 <!ATTLIST object bridge_pci CDATA "" >
 <!ATTLIST object pci_busid CDATA "" >
@@ -45,29 +45,19 @@
 <!ATTLIST info name CDATA #REQUIRED>
 <!ATTLIST info value CDATA #REQUIRED>
 
-<!ELEMENT distances (latency*)>
-<!ATTLIST distances nbobjs CDATA #REQUIRED>
-<!ATTLIST distances relative_depth CDATA #REQUIRED>
-<!ATTLIST distances latency_base CDATA #REQUIRED>
+<!ELEMENT distances2 (indexes+,u64values+)>
+<!ATTLIST distances2 type CDATA #REQUIRED>
+<!ATTLIST distances2 nbobjs CDATA #REQUIRED>
+<!ATTLIST distances2 indexing CDATA #REQUIRED>
+<!ATTLIST distances2 kind CDATA #REQUIRED>
 
-<!ELEMENT latency EMPTY>
-<!ATTLIST latency value CDATA #REQUIRED>
+<!ELEMENT indexes (#PCDATA)>
+<!ATTLIST indexes length CDATA #REQUIRED>
+
+<!ELEMENT u64values (#PCDATA)>
+<!ATTLIST u64values length CDATA #REQUIRED>
 
 <!ELEMENT userdata (#PCDATA)>
 <!ATTLIST userdata name CDATA "" >
 <!ATTLIST userdata length CDATA "0" >
 <!ATTLIST userdata encoding CDATA "" >
-
-
-<!ELEMENT topologydiff (diff)*>
-<!ATTLIST topologydiff refname CDATA "">
-
-<!ELEMENT diff EMPTY>
-<!ATTLIST diff type CDATA #REQUIRED>
-<!ATTLIST diff obj_depth CDATA "-1" >
-<!ATTLIST diff obj_index CDATA "-1" >
-<!ATTLIST diff obj_attr_type CDATA "-1" >
-<!ATTLIST diff obj_attr_index CDATA "-1" >
-<!ATTLIST diff obj_attr_name CDATA "" >
-<!ATTLIST diff obj_attr_newvalue CDATA "" >
-<!ATTLIST diff obj_attr_oldvalue CDATA "" >

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE topology SYSTEM "hwloc.dtd">
+<!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology>
   <object type="Machine" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" online_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" nodeset="0x000000ff" complete_nodeset="0x000000ff" allowed_nodeset="0x000000ff">
     <info name="DMIBoardVendor" value="TYAN Computer Corp"/>

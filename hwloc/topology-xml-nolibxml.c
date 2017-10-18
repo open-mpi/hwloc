@@ -662,6 +662,7 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 {
   struct hwloc__xml_export_state_s state, childstate;
   hwloc__nolibxml_export_state_data_t ndata = (void *) &state.data;
+  int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
   int res;
 
   assert(sizeof(*ndata) <= sizeof(state.data));
@@ -681,7 +682,7 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 
   res = hwloc_snprintf(ndata->buffer, ndata->remaining,
 		 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		 "<!DOCTYPE topology SYSTEM \"hwloc.dtd\">\n");
+		 "<!DOCTYPE topology SYSTEM \"%s\">\n", v1export ? "hwloc.dtd" : "hwloc2.dtd");
   hwloc__nolibxml_export_update_buffer(ndata, res);
   hwloc__nolibxml_export_new_child(&state, &childstate, "topology");
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1))

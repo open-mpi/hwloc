@@ -185,10 +185,11 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: Loading XML topology without DTD\n",
 	      state->global->msgprefix);
-  } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")) {
+  } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")
+	     && strcmp((char *) dtd->SystemID, "hwloc2.dtd")) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
-	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd");
+	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd or hwloc2.dtd");
   }
 
   root_node = xmlDocGetRootElement((xmlDoc*) bdata->data);
@@ -412,6 +413,7 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology, unsigned long flags)
 {
   struct hwloc__xml_export_state_s state;
   hwloc__libxml_export_state_data_t data = (void *) state.data;
+  int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
 
@@ -428,7 +430,7 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology, unsigned long flags)
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */
-  (void) xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
+  (void) xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, v1export ? BAD_CAST "hwloc.dtd" : BAD_CAST "hwloc2.dtd");
 
   state.new_child = hwloc__libxml_export_new_child;
   state.new_prop = hwloc__libxml_export_new_prop;
