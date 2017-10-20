@@ -176,7 +176,8 @@ may show the following graphical output:
 Here's the equivalent output in textual form:
 
 \verbatim
-Machine + NUMANode L#0 (P#0)
+Machine
+  NUMANode L#0 (P#0)
   Package L#0 + L3 L#0 (4096KB)
     L2 L#0 (1024KB) + L1 L#0 (16KB) + Core L#0
       PU L#0 (P#0)
@@ -221,16 +222,20 @@ Here's the equivalent output in textual form:
 
 \verbatim
 Machine (32GB)
-  NUMANode L#0 (P#0 8190MB) + Package L#0
+  Package L#0
+    NUMANode L#0 (P#0 8190MB)
     L2 L#0 (1024KB) + L1 L#0 (64KB) + Core L#0 + PU L#0 (P#0)
     L2 L#1 (1024KB) + L1 L#1 (64KB) + Core L#1 + PU L#1 (P#1)
-  NUMANode L#1 (P#1 8192MB) + Package L#1
+  Package L#1
+    NUMANode L#1 (P#1 8192MB)
     L2 L#2 (1024KB) + L1 L#2 (64KB) + Core L#2 + PU L#2 (P#2)
     L2 L#3 (1024KB) + L1 L#3 (64KB) + Core L#3 + PU L#3 (P#3)
-  NUMANode L#2 (P#2 8192MB) + Package L#2
+  Package L#2
+    NUMANode L#2 (P#2 8192MB)
     L2 L#4 (1024KB) + L1 L#4 (64KB) + Core L#4 + PU L#4 (P#4)
     L2 L#5 (1024KB) + L1 L#5 (64KB) + Core L#5 + PU L#5 (P#5)
-  NUMANode L#3 (P#3 8192MB) + Package L#3
+  Package L#3
+    NUMANode L#3 (P#3 8192MB)
     L2 L#6 (1024KB) + L1 L#6 (64KB) + Core L#6 + PU L#6 (P#6)
     L2 L#7 (1024KB) + L1 L#7 (64KB) + Core L#7 + PU L#7 (P#7)
 \endverbatim
@@ -244,7 +249,8 @@ each package):
 Here's the same output in textual form:
 
 \verbatim
-Machine (16GB) + NUMANode L#0 (P#0)
+Machine (16GB)
+  NUMANode L#0 (P#0)
   Package L#0
     L2 L#0 (4096KB)
       L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
@@ -387,7 +393,7 @@ hwloc-hello: hwloc-hello.c
         $(CC) hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 \endverbatim
 
-On a machine with 4GB of RAM and 2 processor packages -- each package of
+On a machine 2 processor packages -- each package of
 which has two processing cores -- the output from running \c
 hwloc-hello could be something like the following:
 
@@ -396,33 +402,30 @@ shell$ ./hwloc-hello
 *** Objects at level 0
 Index 0: Machine
 *** Objects at level 1
-Index 0: NUMANode#0(3938MB)
-*** Objects at level 2
 Index 0: Package#0
 Index 1: Package#1
-*** Objects at level 3
+*** Objects at level 2
 Index 0: Core#0
 Index 1: Core#1
 Index 2: Core#3
 Index 3: Core#2
-*** Objects at level 4
+*** Objects at level 3
 Index 0: PU#0
 Index 1: PU#1
 Index 2: PU#2
 Index 3: PU#3
 *** Printing overall tree
 Machine
-  NUMANode#0(3938MB)
-    Package#0
-      Core#0
-        PU#0
-      Core#1
-        PU#1
-    Package#1
-      Core#3
-        PU#2
-      Core#2
-        PU#3
+  Package#0
+    Core#0
+      PU#0
+    Core#1
+      PU#1
+  Package#1
+    Core#3
+      PU#2
+    Core#2
+      PU#3
 *** 2 package(s)
 *** Logical processor 0 has 0 caches totaling 0KB
 shell$ 
@@ -544,10 +547,10 @@ Make sure to have had a look at those too!
   <dd>
   An object that contains memory that is directly and byte-accessible
   to the host processors.
-  It is usually close to some cores (the corresponding objects are
-  descendants of the NUMA node object in the hwloc tree,
-  see \ref termsanddefs_tree)
-  as specified by its CPU set.
+  It is usually close to some cores as specified by its CPU set.
+  Hence it is attached as a memory child of the object that groups
+  those cores together, for instance a Package objects with 4 Core children
+  (see \ref termsanddefs_tree).
   </dd>
 
 </dl>
@@ -588,7 +591,7 @@ Make sure to have had a look at those too!
   ::hwloc_bitmap_t opaque structure.  hwloc CPU sets are just masks, they
   do \em not have any relation with an operating system actual binding notion like
   Linux' cpusets.
-  I/O and Misc objects do not have CPU sets while all normal objects have a non-NULL one.</dd>
+  I/O and Misc objects do not have CPU sets while all normal and memory objects have a non-NULL one.</dd>
 
 <dt>Node set</dt>
   <dd>The set of NUMA memory nodes logically included in an object
@@ -596,7 +599,7 @@ Make sure to have had a look at those too!
   numbers (as announced by the OS).  They are implemented with the
   ::hwloc_bitmap_t opaque structure.
   as bitmaps.
-  I/O and Misc objects do not have Node sets while all normal objects have a non-NULL one.</dd>
+  I/O and Misc objects do not have Node sets while all normal and memory objects have a non-NULL one.</dd>
 
 <dt>Bitmap</dt>
   <dd>A possibly-infinite set of bits used for describing sets of objects
@@ -620,22 +623,27 @@ Make sure to have had a look at those too!
 <dt>Children object(s)</dt>
   <dd>The object (or objects) contained in the current object because
   their CPU set is included in the CPU set of the current object.
-  Each object may also contain separated lists for I/O and Misc object children.
+  Each object may also contain separated lists for Memory, I/O and Misc object children.
   </dd>
 
 <dt>Arity</dt>
-  <dd>The number of children of an object.
-  There are also specific arities for I/O and Misc children.
+  <dd>The number of normal children of an object.
+  There are also specific arities for Memory, I/O and Misc children.
   </dd>
 
 <dt>Sibling objects</dt>
-  <dd>Objects which have the same parent. They usually have the same type
-  (and hence are cousins, as well), but they may not if the topology
-  is asymmetric.</dd>
+  <dd>Objects in the same children list, which all of them are normal
+  children of the same parent, or all of them are Memory children of
+  the same parent, or I/O children, or Misc.
+  They usually have the same type (and hence are cousins, as well).
+  But they may not if the topology is asymmetric.
+  </dd>
 
 <dt>Sibling rank</dt>
   <dd>Index to uniquely identify objects which have
-  the same parent, and is always in the range [0, parent_arity).</dd>
+  the same parent, and is always in the range [0, arity-1]
+  (respectively memory_arity, io_arity or misc_arity for Memory, I/O
+  and Misc children of a parent).</dd>
 
 <dt>Cousin objects</dt>
   <dd>Objects of the same type (and depth) as the current object,
@@ -644,7 +652,8 @@ Make sure to have had a look at those too!
 <dt>Level</dt>
   <dd>Set of objects of the same type and depth. All these objects
   are cousins.
-  I/O and Misc objects also have their own specific levels and depth.
+
+  Memory, I/O and Misc objects also have their own specific levels and depth.
   </dd>
 
 <dt>Depth</dt>
@@ -655,6 +664,8 @@ Make sure to have had a look at those too!
   If the topology is asymmetric, the difference between some parent
   and child depths may be larger than one when some intermediate levels
   (for instance groups) are missing in only some parts of the machine.
+
+  Memory, I/O and Misc objects also have their own specific levels and depth.
   </dd>
 
 </dl>
@@ -1250,7 +1261,8 @@ OS devices may be attached below PCI devices, but they may also be
 attached directly to normal objects.
 Indeed some OS devices are not related to PCI.
 For instance, NVDIMM block devices (such as <em>pmem0s</em> on Linux)
-are directly attached to their NUMA node.
+are directly attached near their NUMA node
+(I/O child of the parent whose memory child is the NUMA node).
 Also, if hwloc could not discover PCI for some reason, PCI-related
 OS devices may also be attached directly to normal objects.
 
@@ -1350,7 +1362,7 @@ which describe the processing units and memory that are immediately
 close to the I/O device.
 For instance the path from a OS device to its locality may go
 across a PCI device parent, one or several bridges, up to
-a NUMA node with the same locality.
+a Package node with the same locality.
 
 Command-line tools are also aware of I/O devices.
 lstopo displays the interesting ones by default
@@ -1403,10 +1415,10 @@ Here is the corresponding textual output:
 
 \verbatim
 Machine (24GB)
-  NUMANode L#0 (P#0 12GB)
-    Package L#0 + L3 L#0 (8192KB)
-      L2 L#0 (256KB) + L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
-      L2 L#1 (256KB) + L1 L#1 (32KB) + Core L#1 + PU L#1 (P#2)
+  Package L#0 + L3 L#0 (8192KB)
+    NUMANode L#0 (P#0 12GB)
+    L2 L#0 (256KB) + L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
+    L2 L#1 (256KB) + L1 L#1 (32KB) + Core L#1 + PU L#1 (P#2)
     HostBridge
       PCIBridge
         PCI 14e4:163b
@@ -1423,7 +1435,8 @@ Machine (24GB)
         Net "ib0"
         Net "ib1"
         Net "mlx4_0"
-  NUMANode L#1 (P#1 12GB) + Package L#1 + L3 L#1 (8192KB)
+  Package L#1 + L3 L#1 (8192KB)
+    NUMANode L#1 (P#1 12GB)
     L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
     L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
 \endverbatim
@@ -1796,19 +1809,23 @@ Aside from loading XML topologies, hwloc also enables the building of
 <em>synthetic</em> topologies that are described by a single string
 listing the arity of each levels.
 
-For instance, lstopo may create a topology made of 2 NUMA nodes,
-containing a single package each, with one L2 cache above two
+For instance, lstopo may create a topology made of 2 packages,
+containing a single NUMA node and a L2 cache above two
 single-threaded cores:
 
 \verbatim
-$ lstopo -i "node:2 pack:1 l2:1 core:2 pu:1" -
+$ lstopo -i "pack:2 node:1 l2:1 core:2 pu:1" -
 Machine (2048MB)
-  NUMANode L#0 (P#0 1024MB) + Package L#0 + L2 L#0 (4096KB)
-    Core L#0 + PU L#0 (P#0)
-    Core L#1 + PU L#1 (P#1)
-  NUMANode L#1 (P#1 1024MB) + Package L#1 + L2 L#1 (4096KB)
-    Core L#2 + PU L#2 (P#2)
-    Core L#3 + PU L#3 (P#3)
+  Package L#0
+    NUMANode L#0 (P#0 1024MB)
+    L2 L#0 (4096KB)
+      Core L#0 + PU L#0 (P#0)
+      Core L#1 + PU L#1 (P#1)
+  Package L#1
+    NUMANode L#1 (P#1 1024MB)
+    L2 L#1 (4096KB)
+      Core L#2 + PU L#2 (P#2)
+      Core L#3 + PU L#3 (P#3)
 \endverbatim
 
 Replacing <tt>-</tt> with <tt>file.xml</tt> in this command line
@@ -1842,6 +1859,13 @@ equivalent:
 $ lstopo -i "2 3 4 5 6"
 $ lstopo -i "Package:2 NUMANode:3 L2Cache:4 Core:5 PU:6"
 \endverbatim
+
+NUMA nodes are handled in a special way since there are not part of the
+main CPU hierarchy but rather attached below it as memory children.
+Thus, <tt>NUMANode:3</tt> actually means <tt>Group:3</tt> where one
+NUMA node is attached below each group.
+These groups are merged back into the parent when possible
+(typically when a single NUMA node is requested below each parent).
 
 The root object does not appear in the synthetic description string.
 A Machine object is used by default, and a System object replaces it
@@ -1903,7 +1927,7 @@ The lstopo tool may also perform such an export by forcing the output format.
 
 \verbatim
 $ lstopo --of synthetic --no-io
-NUMANode:1 Package:1 L3Cache:1 L2Cache:2 L1dCache:1 L1iCache:1 Core:1 PU:2
+Package:1 L3Cache:1 L2Cache:2 L1dCache:1 L1iCache:1 Core:1 PU:2
 \endverbatim
 
 The exported string may be passed back to hwloc for recreating
@@ -2599,7 +2623,7 @@ multiple tasks are in the same physical core.
 However, using hwloc comes with an overhead since a topology must
 be loaded before gathering information and binding tasks or memory.
 Fortunately this overhead may be significantly reduced by filtering
-useless information out of the topology.
+non-interesting information out of the topology.
 For instance the following code builds a topology that only contains
 Cores, hardware threads (PUs, cannot be filtered-out),
 and NUMA nodes (cannot be filtered-out).
@@ -2611,6 +2635,21 @@ hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
 hwloc_topology_set_type_filter(topology, HWLOC_OBJ_CORE, HWLOC_TYPE_FILTER_KEEP_ALL);
 hwloc_topology_load(topology);
 \endverbatim
+
+However, one should remember that filtering such objects out removes
+locality information from the hwloc tree.
+For instance, we do not know anymore which PU is close to which NUMA
+node.
+This would be useful to applications that explicitly want to
+place specific memory buffers close to specific tasks.
+Those applications just need to tell hwloc to keep Group objects that
+bring structure information:
+\verbatim
+hwloc_topology_set_type_filter(topology, HWLOC_OBJ_GROUP, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
+\endverbatim
+
+Note that the default configuration is to keep all objects enabled,
+except I/Os and instruction caches.
 
 
 \subsection faq_indexes Should I use logical or physical/OS indexes? and how?
@@ -2717,6 +2756,8 @@ was actually added (see also \ref attributes_normal).
 
 hwloc currently uses Groups for the following reasons:
 <ul>
+<li>NUMA parents when memory locality does not match any existing object.</li>
+<li>I/O parents when I/O locality does not match any existing object.</li>
 <li>AMD dual-core compute units (<tt>subtype</tt> is <tt>ComputeUnit</tt>, in the x86 backend),
  but these objects are usually merged with the L2 caches.</li>
 <li>Intel x2APIC non-core and non-package levels (in the x86 backend).</li>
@@ -2724,7 +2765,6 @@ hwloc currently uses Groups for the following reasons:
 <li>IBM S/390 "Books" on Linux (<tt>subtype</tt> is <tt>Book</tt>).</li>
 <li>AIX unknown hierarchy levels.</li>
 <li>Distance-based groups made of close objects.</li>
-<li>I/O parents when I/O locality does not match any existing object.</li>
 </ul>
 
 
@@ -3196,28 +3236,28 @@ This memory and clustering configuration may be probed by looking at MemoryMode
 and ClusterMode attributes, see \ref attributes_info and doc/examples/get-knl-modes.c
 in the source directory.
 
-The upcoming hwloc 2.0 will address this new architecture by presenting memory
-in an improved way.
-For now, starting with 1.11.2, hwloc releases use the following approximate representation:
+Starting with version 2.0, hwloc properly exposes this memory
+configuration.
+DDR and MCDRAM are attached as two memory children of the same parent,
+DDR first, and MCDRAM second if any.
+Depending on the KNL configuration, that parent may be a Package,
+a Cache, or a Group object of type <tt>Cluster</tt>.
 
-If a cluster only contains DDR or MCDRAM but not both, that memory is available
-as a local NUMA node above cores as usual.
+Hence cores may have one or two local NUMA nodes, listed by the core nodeset.
+An application may allocate local memory from a core by using that nodeset.
+The operating system will actually allocate from the DDR when
+possible, or fallback to the MCDRAM.
 
-If a cluster contains both, two distinct NUMA nodes appear.
-They are sibling children of a Group object of type <tt>Cluster</tt>
-(or sibling children of the Package object for non-clustered processors).
+To allocate specifically on one of these memories,
+one should walk up the parent pointers until finding an object with
+some memory children.
+Looking at these memory children will give the DDR first,
+then the MCDRAM if any.
+Their nodeset may then be used for allocating or binding memory buffers.
 
-The DDR memory is the local NUMA node above cores as usual.
-Allocating memory from one core to its local NUMA node will therefore actually
-allocate it on the normal memory by default.
-
-The local high-bandwidth MCDRAM is the second NUMA node (without any Core or PU below it).
-It is the next sibling of the local DDR NUMA node below the same parent object.
-To allocate on the faster MCDRAM, one should first find the local NUMA node (the DDR memory,
-by looking up parent objects), and then take the next sibling to reach the local MCDRAM
-NUMA node (if any).
-
-The MCDRAM NUMA nodes may also be identified thanks to the <tt>subtype</tt> field
+One may also traverse the list of NUMA nodes until finding some whose
+cpuset matches the target core or PUs.
+The MCDRAM NUMA nodes may be identified thanks to the <tt>subtype</tt> field
 which is set to <tt>MCDRAM</tt>.
 
 Command-line tools such as <tt>hwloc-bind</tt> may bind memory on the MCDRAM by

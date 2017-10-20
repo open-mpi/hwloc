@@ -401,14 +401,14 @@ struct hwloc_obj {
 
   /* children of the same parent are siblings, even if they may have different type and depth */
   struct hwloc_obj *parent;		/**< \brief Parent, \c NULL if root (system object) */
-  unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array. Or the index in parent's I/O or Misc children list. */
-  struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent */
-  struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent */
-
+  unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array. Or the index in parent's Memory, I/O or Misc children list. */
+  struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent (inside the same list of children). */
+  struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent (inside the same list of children). */
   /** @name List and array of normal children below this object (except Memory, I/O and Misc children). */
   /**@{*/
   unsigned arity;			/**< \brief Number of normal children.
-					 * Misc and I/O children are not listed here but rather in their dedicated children list.
+					 * Memory, Misc and I/O children are not listed here
+					 * but rather in their dedicated children list.
 					 */
   struct hwloc_obj **children;		/**< \brief Normal children, \c children[0 .. arity -1] */
   struct hwloc_obj *first_child;	/**< \brief First normal child */
