@@ -1349,7 +1349,7 @@ This normal object should have non-NULL CPU sets and node sets
 which describe the processing units and memory that are immediately
 close to the I/O device.
 For instance the path from a OS device to its locality may go
-across a PCI device parent, one or several bridges, up to a
+across a PCI device parent, one or several bridges, up to
 a NUMA node with the same locality.
 
 Command-line tools are also aware of I/O devices.
