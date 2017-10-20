@@ -259,7 +259,7 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   char *end;
   char *buffer;
 
-  assert(sizeof(*nstate) <= sizeof(state->data));
+  HWLOC_BUILD_ASSERT(sizeof(*nstate) <= sizeof(state->data));
 
   /* use a copy in the temporary buffer, we may modify during parsing */
   buffer = nbdata->copy;
@@ -437,7 +437,7 @@ hwloc_nolibxml_import_diff(struct hwloc__xml_import_state_s *state,
   size_t buflen;
   int ret;
 
-  assert(sizeof(*nstate) <= sizeof(state->data));
+  HWLOC_BUILD_ASSERT(sizeof(*nstate) <= sizeof(state->data));
 
   if (xmlbuffer) {
     buffer = malloc(xmlbuflen);
@@ -665,7 +665,7 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
   int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
   int res;
 
-  assert(sizeof(*ndata) <= sizeof(state.data));
+  HWLOC_BUILD_ASSERT(sizeof(*ndata) <= sizeof(state.data));
 
   state.new_child = hwloc__nolibxml_export_new_child;
   state.new_prop = hwloc__nolibxml_export_new_prop;
@@ -764,7 +764,7 @@ hwloc___nolibxml_prepare_export_diff(hwloc_topology_diff_t diff, const char *ref
   hwloc__nolibxml_export_state_data_t ndata = (void *) &state.data;
   int res;
 
-  assert(sizeof(*ndata) <= sizeof(state.data));
+  HWLOC_BUILD_ASSERT(sizeof(*ndata) <= sizeof(state.data));
 
   state.new_child = hwloc__nolibxml_export_new_child;
   state.new_prop = hwloc__nolibxml_export_new_prop;

@@ -178,7 +178,7 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   xmlNode* root_node;
   xmlDtd *dtd;
 
-  assert(sizeof(*lstate) <= sizeof(state->data));
+  HWLOC_BUILD_ASSERT(sizeof(*lstate) <= sizeof(state->data));
 
   dtd = xmlGetIntSubset((xmlDoc*) bdata->data);
   if (!dtd) {
@@ -242,7 +242,7 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
   xmlDtd *dtd;
   int ret;
 
-  assert(sizeof(*lstate) <= sizeof(state->data));
+  HWLOC_BUILD_ASSERT(sizeof(*lstate) <= sizeof(state->data));
 
   LIBXML_TEST_VERSION;
   hwloc_libxml2_init_once();
@@ -417,7 +417,7 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology, unsigned long flags)
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
 
-  assert(sizeof(*data) <= sizeof(state.data));
+  HWLOC_BUILD_ASSERT(sizeof(*data) <= sizeof(state.data));
 
   LIBXML_TEST_VERSION;
   hwloc_libxml2_init_once();
@@ -486,7 +486,7 @@ hwloc__libxml2_prepare_export_diff(hwloc_topology_diff_t diff, const char *refna
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
 
-  assert(sizeof(*data) <= sizeof(state.data));
+  HWLOC_BUILD_ASSERT(sizeof(*data) <= sizeof(state.data));
 
   LIBXML_TEST_VERSION;
   hwloc_libxml2_init_once();
