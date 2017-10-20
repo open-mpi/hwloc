@@ -664,7 +664,13 @@ by showing the example of a machine with two dual core packages (with no
 hardware threads); thus, a topology with 5 levels. Each box with rounded corner
 corresponds to one ::hwloc_obj_t, containing the values of the different integer
 fields (depth, logical_index, etc.), and arrows show to which other ::hwloc_obj_t
-pointers point to (first_child, parent, etc.). The L2 cache of the last core is intentionally missing to show how asymmetric topologies are handled.
+pointers point to (first_child, parent, etc.).
+
+Objects of the same level (cousins) are listed in red boxes and linked
+with red arrows.
+Children of the same parent (siblings) are linked with blue arrows.
+
+The L2 cache of the last core is intentionally missing to show how asymmetric topologies are handled.
 See \ref faq_asymmetric for more information about such strange topologies.
 
 \image html diagram.png
