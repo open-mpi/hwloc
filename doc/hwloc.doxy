@@ -2979,7 +2979,7 @@ Building a hwloc topology on a large machine may be slow because
 the discovery of hundreds of hardware cores or threads takes time
 (especially when reading thousands of sysfs files on Linux).
 Ignoring some objects (for instance caches) that aren't useful
-to the current application may improve this overhead.
+to the current application may improve this overhead (see \ref faq_why).
 One should also consider using XML (see \ref faq_xml) to work
 around such issues.
 
