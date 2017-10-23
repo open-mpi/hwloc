@@ -55,7 +55,7 @@ hwloc_libxml2_cleanup(void)
 
 typedef struct hwloc__libxml_import_state_data_s {
   xmlNode *node; /* current libxml node, always valid */
-  xmlNode *child; /* last processed child, or NULL if none yet */
+  xmlNode *child; /* next processed child, or NULL if none yet */
   xmlAttr *attr; /* last processed attribute, or NULL if none yet */
 } __hwloc_attribute_may_alias * hwloc__libxml_import_state_data_t;
 
@@ -74,23 +74,23 @@ hwloc__libxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, ch
       /* use the first valid attribute content */
       xmlNode *subnode;
       for (subnode = attr->children; subnode; subnode = subnode->next) {
-	if (subnode->type == XML_TEXT_NODE) {
-	  if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
-	    *namep = (char *) attr->name;
-	    *valuep = (char *) subnode->content;
-	    lstate->attr = attr;
-	    return 0;
-	  }
-	} else {
-	  if (hwloc__xml_verbose())
-	    fprintf(stderr, "%s: ignoring unexpected xml attr node type %u\n",
-		    state->global->msgprefix, subnode->type);
-	}
+        if (subnode->type == XML_TEXT_NODE) {
+          if (subnode->content) {
+            *namep = (char *) attr->name;
+            *valuep = (char *) subnode->content;
+            lstate->attr = attr;
+            return 0;
+          }
+        } else {
+          if (hwloc__xml_verbose())
+            fprintf(stderr, "%s: ignoring unexpected xml attr node type %u\n",
+                    state->global->msgprefix, subnode->type);
+        }
       }
     } else {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: ignoring unexpected xml attr type %u\n",
-		state->global->msgprefix, attr->type);
+        fprintf(stderr, "%s: ignoring unexpected xml attr type %u\n",
+                state->global->msgprefix, attr->type);
     }
   return -1;
 }
@@ -106,25 +106,27 @@ hwloc__libxml_import_find_child(hwloc__xml_import_state_t state,
   childstate->parent = state;
   childstate->global = state->global;
   if (!lstate->child)
+    /* All children proceeded */
     return 0;
-  child = lstate->child->next;
-  for (; child; child = child->next)
-    if (child->type == XML_ELEMENT_NODE) {
-      lstate->child = lchildstate->node = child;
-      lchildstate->child = child->children;
-      lchildstate->attr = NULL;
-      *tagp = (char*) child->name;
-      return 1;
-    } else if (child->type == XML_TEXT_NODE) {
-      if (child->content && child->content[0] != '\0' && child->content[0] != '\n')
-	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: ignoring object text content %s\n",
-		  state->global->msgprefix, (const char*) child->content);
-    } else if (child->type != XML_COMMENT_NODE) {
+
+  child = lstate->child;
+  if (child->type == XML_ELEMENT_NODE) {
+    lstate->child = child->next;
+    lchildstate->node = child;
+    lchildstate->child = child->children;
+    lchildstate->attr = NULL;
+    *tagp = (char*) child->name;
+    return 1;
+  } else if (child->type == XML_TEXT_NODE) {
+    if (child->content && child->content[0] != '\0' && child->content[0] != '\n')
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: ignoring unexpected xml node type %u\n",
-		state->global->msgprefix, child->type);
-    }
+        fprintf(stderr, "%s: ignoring object text content %s\n",
+                state->global->msgprefix, (const char*) child->content);
+  } else if (child->type != XML_COMMENT_NODE) {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: ignoring unexpected xml node type %u\n",
+                state->global->msgprefix, child->type);
+  }
 
   return 0;
 }
@@ -175,12 +177,12 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
 		       struct hwloc__xml_import_state_s *state)
 {
   hwloc__libxml_import_state_data_t lstate = (void*) state->data;
-  xmlNode* root_node;
-  xmlDtd *dtd;
+  xmlNodePtr root_node;
+  xmlDtdPtr dtd;
 
   HWLOC_BUILD_ASSERT(sizeof(*lstate) <= sizeof(state->data));
 
-  dtd = xmlGetIntSubset((xmlDoc*) bdata->data);
+  dtd = xmlGetIntSubset((xmlDocPtr) bdata->data);
   if (!dtd) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: Loading XML topology without DTD\n",
@@ -192,7 +194,7 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
 	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd or hwloc2.dtd");
   }
 
-  root_node = xmlDocGetRootElement((xmlDoc*) bdata->data);
+  root_node = xmlDocGetRootElement((xmlDocPtr) bdata->data);
 
   if (!strcmp((const char *) root_node->name, "root")) {
     bdata->version_major = 0;
@@ -250,9 +252,9 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
   errno = 0; /* set to 0 so that we know if libxml2 changed it */
 
   if (xmlpath)
-    doc = xmlReadFile(xmlpath, NULL, 0);
+    doc = xmlReadFile(xmlpath, NULL, XML_PARSE_NOBLANKS);
   else if (xmlbuffer)
-    doc = xmlReadMemory(xmlbuffer, xmlbuflen, "", NULL, 0);
+    doc = xmlReadMemory(xmlbuffer, xmlbuflen, "", NULL, XML_PARSE_NOBLANKS);
 
   if (!doc) {
     if (!errno)
@@ -345,9 +347,9 @@ hwloc_libxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
   errno = 0; /* set to 0 so that we know if libxml2 changed it */
 
   if (xmlpath)
-    doc = xmlReadFile(xmlpath, NULL, 0);
+    doc = xmlReadFile(xmlpath, NULL, XML_PARSE_NOBLANKS);
   else if (xmlbuffer)
-    doc = xmlReadMemory(xmlbuffer, xmlbuflen, "", NULL, 0);
+    doc = xmlReadMemory(xmlbuffer, xmlbuflen, "", NULL, XML_PARSE_NOBLANKS);
 
   if (!doc) {
     if (!errno)
