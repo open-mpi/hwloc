@@ -1537,12 +1537,10 @@ HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void 
  * so this function may return something that is already
  * outdated.
  *
- * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
- * Otherwise it's a cpuset.
+ * If ::HWLOC_MEMBIND_BYNODESET is specified in \p flags, set is
+ * considered a nodeset. Otherwise it's a cpuset.
  *
  * If \p len is 0, \p set is emptied.
- *
- * Flags are currently unused.
  */
 HWLOC_DECLSPEC int hwloc_get_area_memlocation(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t set, int flags);
 
