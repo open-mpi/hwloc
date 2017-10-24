@@ -132,22 +132,51 @@ typedef void (*foo_draw)(struct lstopo_output *loutput, hwloc_obj_t obj, unsigne
 
 static foo_draw get_type_fun(hwloc_obj_type_t type);
 
-/* next child, in all children list, ignoring PU if needed */
+/* next child, in all children list, with memory before CPU, ignoring PU if needed.
+ * similar to hwloc_get_next_child() but returns memory children first.
+ */
 static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent, hwloc_obj_t prev)
 {
   hwloc_topology_t topology = loutput->topology;
+  int state = 0;
   hwloc_obj_t obj = prev;
-again:
-  obj = hwloc_get_next_child(topology, parent, obj);
+ again:
+  if (prev) {
+    if (prev->type == HWLOC_OBJ_MISC)
+      state = 3;
+    else if (hwloc_obj_type_is_io(prev->type))
+      state = 2;
+    else if (hwloc_obj_type_is_normal(prev->type))
+      state = 1;
+    obj = prev->next_sibling;
+  } else {
+    obj = parent->memory_first_child;
+  }
+  if (!obj && state == 0) {
+    obj = parent->first_child;
+    state = 1;
+  }
+  if (!obj && state == 1) {
+    obj = parent->io_first_child;
+    state = 2;
+  }
+  if (!obj && state == 2) {
+    obj = parent->misc_first_child;
+    state = 3;
+  }
   if (!obj)
     return NULL;
-  if (obj->type == HWLOC_OBJ_PU && loutput->ignore_pus)
+  if (obj->type == HWLOC_OBJ_PU && loutput->ignore_pus) {
+    prev = obj;
     goto again;
+  }
   /* FIXME ignore numas */
   if (loutput->collapse && obj->type == HWLOC_OBJ_PCI_DEVICE) {
     struct lstopo_obj_userdata *lud = obj->userdata;
-    if (lud->pci_collapsed == -1)
+    if (lud->pci_collapsed == -1) {
+      prev = obj;
       goto again;
+    }
   }
   return obj;
 }
