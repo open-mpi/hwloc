@@ -156,7 +156,8 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
     fprintf(output, " }");
 
   for_each_memory_child(child, l)
-    output_topology (loutput, child, l, i); /* FIXME ignore_numas */
+    if (child->type != HWLOC_OBJ_PU || !loutput->ignore_numanodes)
+      output_topology (loutput, child, l, i);
   for_each_child(child, l)
     if (child->type != HWLOC_OBJ_PU || !loutput->ignore_pus)
       output_topology (loutput, child, l, i);

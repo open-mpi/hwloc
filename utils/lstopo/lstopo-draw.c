@@ -170,7 +170,10 @@ static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent,
     prev = obj;
     goto again;
   }
-  /* FIXME ignore numas */
+  if (obj->type == HWLOC_OBJ_NUMANODE && loutput->ignore_numanodes) {
+    prev = obj;
+    goto again;
+  }
   if (loutput->collapse && obj->type == HWLOC_OBJ_PCI_DEVICE) {
     struct lstopo_obj_userdata *lud = obj->userdata;
     if (lud->pci_collapsed == -1) {

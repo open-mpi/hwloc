@@ -124,9 +124,9 @@ If "important" (only applicable to I/O and Misc), only important objects are kep
 See hwloc_topology_set_type_filter() for more details.
 
 hwloc supports filtering any type except PUs and NUMA nodes.
-lstopo also offers PU filtering by hiding PU objects in the graphical and textual outputs,
-but any object included a PU (for instance Misc) will be hidden as well.
-Note that PU may not be ignored in the XML output.
+lstopo also offers PU and NUMA node filtering by hiding them in the graphical and textual outputs,
+but any object included in them (for instance Misc) will be hidden as well.
+Note that PUs and NUMA nodes may not be ignored in the XML output.
 Note also that the top-level object type cannot be ignored (usually Machine or System).
 .TP
 \fB\-\-ignore\fR <type>

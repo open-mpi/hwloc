@@ -41,6 +41,7 @@ struct lstopo_output {
   int logical;
   int verbose_mode;
   int ignore_pus;
+  int ignore_numanodes;
   int collapse;
   int pid_number;
   hwloc_pid_t pid;

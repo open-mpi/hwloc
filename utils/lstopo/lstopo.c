@@ -565,6 +565,7 @@ main (int argc, char *argv[])
   loutput.logical = -1;
   loutput.verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   loutput.ignore_pus = 0;
+  loutput.ignore_numanodes = 0;
   loutput.collapse = 1;
   loutput.pid_number = -1;
   loutput.pid = 0;
@@ -684,6 +685,10 @@ main (int argc, char *argv[])
 	  if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
 	    loutput.ignore_pus = 1;
 	}
+	else if (type == HWLOC_OBJ_NUMANODE) {
+	  if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
+	    loutput.ignore_numanodes = 1;
+	}
 	else if (all)
 	  hwloc_topology_set_all_types_filter(topology, filter);
 	else if (allcaches)
@@ -706,6 +711,8 @@ main (int argc, char *argv[])
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	else if (type == HWLOC_OBJ_PU)
 	  loutput.ignore_pus = 1;
+	else if (type == HWLOC_OBJ_NUMANODE)
+	  loutput.ignore_numanodes = 1;
 	else
 	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
 	opt = 1;
