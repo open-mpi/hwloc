@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
 
 int main(void)
 {
@@ -42,13 +43,8 @@ int main(void)
   /* retrieve the entire set of NUMA nodes and count them */
   cset = hwloc_topology_get_topology_nodeset(topology);
   nbnodes = hwloc_bitmap_weight(cset);
-  if (nbnodes <= 0) {
-    /* nbnodes may be -1 when there's no NUMA information,
-     * or 0 when the machine is known to be non-NUMA */
-    printf("this machine is not NUMA, nothing to do\n");
-    hwloc_topology_destroy(topology);
-    return EXIT_SUCCESS;
-  }
+  /* there's always at least one NUMA node */
+  assert(nbnodes > 0);
   printf("there are %d nodes in the machine\n", nbnodes);
 
   /* get the process memory binding as a nodeset */
