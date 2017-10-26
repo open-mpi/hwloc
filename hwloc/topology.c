@@ -1491,6 +1491,10 @@ hwloc__find_insert_memory_parent(struct hwloc_topology *topology, hwloc_obj_t ob
   group->attr->group.kind = HWLOC_GROUP_KIND_MEMORY;
   group->cpuset = hwloc_bitmap_dup(obj->cpuset);
   group->complete_cpuset = hwloc_bitmap_dup(obj->complete_cpuset);
+  /* we could duplicate nodesets too but hwloc__insert_object_by_cpuset()
+   * doesn't actually need it. and it could prevent future calls from reusing
+   * that groups for other NUMA nodes.
+   */
   if (!group->cpuset != !obj->cpuset
       || !group->complete_cpuset != !obj->complete_cpuset) {
     /* failed to create the group, fallback to larger parent */
@@ -1568,11 +1572,12 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root
 #ifdef HWLOC_DEBUG
   assert(!hwloc_obj_type_is_special(obj->type));
 
-  /* we need at least one non-empty set (normal or complete, cpuset or nodeset) */
-  assert((obj->cpuset && !hwloc_bitmap_iszero(obj->cpuset))
-	 || (obj->complete_cpuset && !hwloc_bitmap_iszero(obj->complete_cpuset))
-	 || (obj->nodeset && !hwloc_bitmap_iszero(obj->nodeset))
-	 || (obj->complete_nodeset && !hwloc_bitmap_iszero(obj->complete_nodeset)));
+  /* we need at least one non-NULL set (normal or complete, cpuset or nodeset) */
+  assert(obj->cpuset || obj->complete_cpuset || obj->nodeset || obj->complete_nodeset);
+  /* we support the case where all of them are empty.
+   * it may happen when hwloc__find_insert_memory_parent()
+   * inserts a Group for a CPU-less NUMA-node.
+   */
 #endif
 
   if (hwloc_obj_type_is_memory(obj->type)) {
