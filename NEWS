@@ -25,6 +25,10 @@ Version 2.0.0
   - See "How do I handle ABI breaks and API upgrades ?" in the FAQ
     and https://github.com/open-mpi/hwloc/wiki/Upgrading-to-v2.0-API
 * Major changes
+  + Memory, I/O and Misc objects are now stored in dedicated children lists,
+    not in the usual children list that is now only used for CPU-side objects.
+    - hwloc_get_next_child() may still be used to iterate over these 4 lists
+      of children at once.
   + Topologies always have at least one NUMA object. On non-NUMA machines,
     a single NUMA object is added to describe the entire machine memory.
     The NUMA level cannot be ignored anymore.
@@ -72,11 +76,6 @@ Version 2.0.0
     "CoProcType" info attributes.
   + The almost-unused "os_level" attribute has been removed from the
     hwloc_obj structure.
-  + I/O and Misc objects are now stored in a dedicated children list, only
-    normal children with non-NULL cpusets and nodesets are in the main
-    children list.
-    - hwloc_get_next_child() may still be used to iterate over these 3 lists
-      of children at once.
   + Replace hwloc_topology_insert_misc_object_by_cpuset() with
     hwloc_topology_insert_group_object() to precisely specify the location
     of an additional hierarchy level in the topology.
@@ -106,8 +105,8 @@ Version 2.0.0
   + Linux OS devices do not have to be attached through PCI anymore,
     for instance enabling the discovery of NVDIMM block devices.
   + Add a SectorSize attribute to block OS devices on Linux.
-  + Misc MemoryModule objects are only added when full I/O discovery is enabled
-    (WHOLE_IO topology flag).
+  + MemoryModule objects are not added by default because Misc objects are
+    filtered-out by default.
   + Do not set PCI devices and bridges name automatically. Vendor and device
     names are already in info attributes.
   + Exporting to synthetic now ignores I/O and Misc objects.
