@@ -63,10 +63,6 @@
 #define MACHINE_G_COLOR EPOXY_G_COLOR
 #define MACHINE_B_COLOR EPOXY_B_COLOR
 
-#define NODE_R_COLOR DARK_EPOXY_R_COLOR
-#define NODE_G_COLOR DARK_EPOXY_G_COLOR
-#define NODE_B_COLOR DARK_EPOXY_B_COLOR
-
 #define SYSTEM_R_COLOR 0xff
 #define SYSTEM_G_COLOR 0xff
 #define SYSTEM_B_COLOR 0xff
@@ -660,12 +656,9 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     break;
 
   case HWLOC_OBJ_NUMANODE:
-    s->bg.r = NODE_R_COLOR;
-    s->bg.g = NODE_G_COLOR;
-    s->bg.b = NODE_B_COLOR;
-    s->bg2.r = MEMORY_R_COLOR;
-    s->bg2.g = MEMORY_G_COLOR;
-    s->bg2.b = MEMORY_B_COLOR;
+    s->bg.r = MEMORY_R_COLOR;
+    s->bg.g = MEMORY_G_COLOR;
+    s->bg.b = MEMORY_B_COLOR;
     break;
 
   case HWLOC_OBJ_PACKAGE:
@@ -1058,42 +1051,6 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
 }
 
 static void
-node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
-{
-  struct lstopo_obj_userdata *lud = level->userdata;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
-    /* compute children size and position, our size, and save it */
-    prepare_text(loutput, level);
-    lud->width = lud->textwidth + 3*gridsize + FONTGRIDSIZE;
-    lud->height = fontsize + 3*gridsize + FONTGRIDSIZE;
-    place_children(loutput, level,
-		   gridsize, fontsize + 3*gridsize + FONTGRIDSIZE);
-
-  } else { /* LSTOPO_DRAWING_DRAW */
-    struct draw_methods *methods = loutput->methods;
-    struct style style;
-    unsigned totwidth, totheight;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
-
-    lstopo_set_object_color(loutput, level, &style);
-    /* Draw the epoxy box */
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
-    /* Draw the memory box */
-    methods->box(loutput, style.bg2.r, style.bg2.g, style.bg2.b, depth-1, x + gridsize, totwidth - 2*gridsize, y + gridsize, fontsize + gridsize + FONTGRIDSIZE);
-    draw_text(loutput, level, &style.t2, depth-2, x + 2*gridsize, y + 2*gridsize);
-
-    /* Draw sublevels for real */
-    draw_children(loutput, level, depth-1, x, y);
-  }
-}
-
-static void
 normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   struct lstopo_obj_userdata *lud = level->userdata;
@@ -1273,13 +1230,13 @@ get_type_fun(hwloc_obj_type_t type)
   switch (type) {
     case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_MACHINE:
+    case HWLOC_OBJ_NUMANODE:
     case HWLOC_OBJ_PACKAGE:
     case HWLOC_OBJ_CORE:
     case HWLOC_OBJ_PU:
     case HWLOC_OBJ_GROUP:
     case HWLOC_OBJ_OS_DEVICE:
     case HWLOC_OBJ_MISC: return normal_draw;
-    case HWLOC_OBJ_NUMANODE: return node_draw;
     case HWLOC_OBJ_L1CACHE: return cache_draw;
     case HWLOC_OBJ_L2CACHE: return cache_draw;
     case HWLOC_OBJ_L3CACHE: return cache_draw;
@@ -1303,7 +1260,6 @@ output_draw_start(struct lstopo_output *output)
   struct draw_methods *methods = output->methods;
   methods->init(output);
   methods->declare_color(output, 0, 0, 0);
-  methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
   methods->declare_color(output, PACKAGE_R_COLOR, PACKAGE_G_COLOR, PACKAGE_B_COLOR);
   methods->declare_color(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR);
   methods->declare_color(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR);
