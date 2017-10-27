@@ -1879,17 +1879,17 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   /* TODO if exporting v1, we should clear second local NUMA bits from nodeset,
    * but the importer should clear them anyway.
    */
-  if (obj->nodeset && !hwloc_bitmap_isfull(obj->nodeset)) {
+  if (obj->nodeset) {
     hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
     state.new_prop(&state, "nodeset", cpuset);
     free(cpuset);
   }
-  if (obj->complete_nodeset && !hwloc_bitmap_isfull(obj->complete_nodeset)) {
+  if (obj->complete_nodeset) {
     hwloc_bitmap_asprintf(&cpuset, obj->complete_nodeset);
     state.new_prop(&state, "complete_nodeset", cpuset);
     free(cpuset);
   }
-  if (obj->allowed_nodeset && !hwloc_bitmap_isfull(obj->allowed_nodeset)) {
+  if (obj->allowed_nodeset) {
     hwloc_bitmap_asprintf(&cpuset, obj->allowed_nodeset);
     state.new_prop(&state, "allowed_nodeset", cpuset);
     free(cpuset);
