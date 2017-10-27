@@ -1855,41 +1855,38 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     sprintf(tmp, "%u", obj->os_index);
     state.new_prop(&state, "os_index", tmp);
   }
-  /* TODO if exporting v1 non-first NUMA, we should clear its cpuset */
+
   if (obj->cpuset) {
+    /* TODO if exporting v1 non-first NUMA, we should clear its cpuset */
     hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
     state.new_prop(&state, "cpuset", cpuset);
     free(cpuset);
-  }
-  if (obj->complete_cpuset) {
+
     hwloc_bitmap_asprintf(&cpuset, obj->complete_cpuset);
     state.new_prop(&state, "complete_cpuset", cpuset);
     free(cpuset);
-  }
-  if (v1export && obj->cpuset) {
-    hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
-    state.new_prop(&state, "online_cpuset", cpuset);
-    free(cpuset);
-  }
-  if (obj->allowed_cpuset) {
+
+    if (v1export) {
+      hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
+      state.new_prop(&state, "online_cpuset", cpuset);
+      free(cpuset);
+    }
+
     hwloc_bitmap_asprintf(&cpuset, obj->allowed_cpuset);
     state.new_prop(&state, "allowed_cpuset", cpuset);
     free(cpuset);
-  }
-  /* TODO if exporting v1, we should clear second local NUMA bits from nodeset,
-   * but the importer should clear them anyway.
-   */
-  if (obj->nodeset) {
+
+    /* TODO if exporting v1, we should clear second local NUMA bits from nodeset,
+     * but the importer should clear them anyway.
+     */
     hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
     state.new_prop(&state, "nodeset", cpuset);
     free(cpuset);
-  }
-  if (obj->complete_nodeset) {
+
     hwloc_bitmap_asprintf(&cpuset, obj->complete_nodeset);
     state.new_prop(&state, "complete_nodeset", cpuset);
     free(cpuset);
-  }
-  if (obj->allowed_nodeset) {
+
     hwloc_bitmap_asprintf(&cpuset, obj->allowed_nodeset);
     state.new_prop(&state, "allowed_nodeset", cpuset);
     free(cpuset);
