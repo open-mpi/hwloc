@@ -464,27 +464,27 @@ lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
 	s->bg.r = forcer & 255;
 	s->bg.g = forceg & 255;
 	s->bg.b = forceb & 255;
-	lud->style_set |= 0x1;
+	lud->style_set |= LSTOPO_STYLE_BG;
 	loutput->methods->declare_color(loutput, s->bg.r, s->bg.g, s->bg.b);
 	s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
     } else if (sscanf(stylestr, "Background2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
 	s->bg2.r = forcer & 255;
 	s->bg2.g = forceg & 255;
 	s->bg2.b = forceb & 255;
-	lud->style_set |= 0x2;
+	lud->style_set |= LSTOPO_STYLE_BG2;
 	loutput->methods->declare_color(loutput, s->bg2.r, s->bg2.g, s->bg2.b);
 	s->t2.r = s->t2.g = s->t2.b = (s->bg2.r + s->bg2.g + s->bg2.b < 0xff) ? 0xff : 0;
       } else if (sscanf(stylestr, "Text=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
 	s->t.r = forcer & 255;
 	s->t.g = forceg & 255;
 	s->t.b = forceb & 255;
-	lud->style_set |= 0x4;
+	lud->style_set |= LSTOPO_STYLE_T;
 	loutput->methods->declare_color(loutput, s->t.r, s->t.g, s->t.b);
       } else if (sscanf(stylestr, "Text2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
 	s->t2.r = forcer & 255;
 	s->t2.g = forceg & 255;
 	s->t2.b = forceb & 255;
-	lud->style_set |= 0x8;
+	lud->style_set |= LSTOPO_STYLE_T2;
 	loutput->methods->declare_color(loutput, s->t2.r, s->t2.g, s->t2.b);
       }
       stylestr = strchr(stylestr, ';');
@@ -619,13 +619,13 @@ lstopo_set_object_color(struct draw_methods *methods,
     assert(0);
   }
 
-  if (lud->style_set & 0x1)
+  if (lud->style_set & LSTOPO_STYLE_BG)
     memcpy(&s->bg, &lud->style.bg, sizeof(struct stylecolor));
-  if (lud->style_set & 0x2)
+  if (lud->style_set & LSTOPO_STYLE_T)
     memcpy(&s->t, &lud->style.t, sizeof(struct stylecolor));
-  if (lud->style_set & 0x4)
+  if (lud->style_set & LSTOPO_STYLE_BG2)
     memcpy(&s->bg2, &lud->style.bg2, sizeof(struct stylecolor));
-  if (lud->style_set & 0x8)
+  if (lud->style_set & LSTOPO_STYLE_T2)
     memcpy(&s->t2, &lud->style.t2, sizeof(struct stylecolor));
 }
 

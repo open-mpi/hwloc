@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.11.9
+--------------
+* Fix the management of the lstopoStyle info attribute for custom colors.
+
+
 Version 1.11.8
 --------------
 * Multiple Solaris improvements, thanks to Maureen Chew for the help:
