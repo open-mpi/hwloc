@@ -357,7 +357,7 @@ hwloc_lstopo_show_summary(FILE *output, hwloc_topology_t topology)
   /* FIXME: which order? */
   nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_NUMANODE);
   if (nbobjs)
-    fprintf (output, "Special depth %d:\t%u %s (type #%u)\n",
+    fprintf (output, "Special depth %d:\t%u %s (type #%d)\n",
 	     HWLOC_TYPE_DEPTH_NUMANODE, nbobjs, "NUMANode", HWLOC_OBJ_NUMANODE);
   nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_BRIDGE);
   if (nbobjs)
