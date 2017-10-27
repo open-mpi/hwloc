@@ -77,7 +77,6 @@ struct style {
   struct stylecolor { int r, g, b; }
 	bg,	/* main box background color */
 	t,	/* main text color */
-	bg2,	/* other box background color */
 	t2;	/* other text color */
 };
 
@@ -92,8 +91,7 @@ struct lstopo_obj_userdata {
   struct style style;
 #define LSTOPO_STYLE_BG  0x1
 #define LSTOPO_STYLE_T   0x2
-#define LSTOPO_STYLE_BG2 0x4
-#define LSTOPO_STYLE_T2  0x8
+#define LSTOPO_STYLE_T2  0x4
   unsigned style_set; /* OR'ed LSTOPO_STYLE_* */
 
   /* object size (including children if they are outside of it, not including borders) */

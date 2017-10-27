@@ -585,13 +585,6 @@ lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
 	lud->style_set |= LSTOPO_STYLE_BG;
 	loutput->methods->declare_color(loutput, s->bg.r, s->bg.g, s->bg.b);
 	s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
-    } else if (sscanf(stylestr, "Background2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
-	s->bg2.r = forcer & 255;
-	s->bg2.g = forceg & 255;
-	s->bg2.b = forceb & 255;
-	lud->style_set |= LSTOPO_STYLE_BG2;
-	loutput->methods->declare_color(loutput, s->bg2.r, s->bg2.g, s->bg2.b);
-	s->t2.r = s->t2.g = s->t2.b = (s->bg2.r + s->bg2.g + s->bg2.b < 0xff) ? 0xff : 0;
       } else if (sscanf(stylestr, "Text=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
 	s->t.r = forcer & 255;
 	s->t.g = forceg & 255;
@@ -739,8 +732,6 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     memcpy(&s->bg, &lud->style.bg, sizeof(struct stylecolor));
   if (lud->style_set & LSTOPO_STYLE_T)
     memcpy(&s->t, &lud->style.t, sizeof(struct stylecolor));
-  if (lud->style_set & LSTOPO_STYLE_BG2)
-    memcpy(&s->bg2, &lud->style.bg2, sizeof(struct stylecolor));
   if (lud->style_set & LSTOPO_STYLE_T2)
     memcpy(&s->t2, &lud->style.t2, sizeof(struct stylecolor));
 }
