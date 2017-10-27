@@ -326,6 +326,46 @@ place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned 
   *height = totheight;
 }
 
+static void
+place__children(struct lstopo_output *loutput, hwloc_obj_t parent,
+		enum lstopo_orient_e *orientp, unsigned separator, int network,
+		unsigned *widthp, unsigned *heightp)
+{
+  if (*orientp == LSTOPO_ORIENT_HORIZ) {
+    /* force horizontal */
+    place_children_horiz(loutput, parent, separator, widthp, heightp);
+
+  } else if (*orientp == LSTOPO_ORIENT_VERT) {
+    /* force vertical */
+    place_children_vert(loutput, parent, separator, widthp, heightp);
+
+  } else if (network) {
+    /* NONE or forced RECT, but network only supports horiz or vert, use the best one */
+    unsigned vwidth, vheight, hwidth, hheight;
+    float horiz_ratio, vert_ratio;
+    place_children_horiz(loutput, parent, separator, &hwidth, &hheight);
+    horiz_ratio = (float)hwidth / hheight;
+    place_children_vert(loutput, parent, separator, &vwidth, &vheight);
+    vert_ratio = (float)vwidth / vheight;
+    if (prefer_ratio(vert_ratio, horiz_ratio)) {
+      /* children still contain vertical placement */
+      *orientp = LSTOPO_ORIENT_VERT;
+      *widthp = vwidth;
+      *heightp = vheight;
+    } else {
+      /* must place horizontally again */
+      *orientp = LSTOPO_ORIENT_HORIZ;
+      place_children_horiz(loutput, parent, separator, &hwidth, &hheight);
+      *widthp = hwidth;
+      *heightp = hheight;
+    }
+
+  } else {
+    /* NONE or forced RECT, do a rectangular placement */
+    place_children_rect(loutput, parent, separator, widthp, heightp);
+  }
+}
+
 /* Recurse into children to get their size.
  * Place them.
  * Save their position and the parent total size for later.
@@ -374,40 +414,18 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* FIXME show numa at the top of the box */
 
   /* actually place children */
-  if (orient == LSTOPO_ORIENT_HORIZ) {
-    /* force horizontal */
-    place_children_horiz(loutput, parent, separator, &childwidth, &childheight);
-
-  } else if (orient == LSTOPO_ORIENT_VERT) {
-    /* force vertical */
-    place_children_vert(loutput, parent, separator, &childwidth, &childheight);
-
-  } else if (network) {
-    /* NONE or forced RECT, but network only supports horiz or vert, use the best one */
-    unsigned vwidth, vheight, hwidth, hheight;
-    float horiz_ratio, vert_ratio;
-    place_children_horiz(loutput, parent, separator, &hwidth, &hheight);
-    horiz_ratio = (float)hwidth / hheight;
-    place_children_vert(loutput, parent, separator, &vwidth, &vheight);
-    vert_ratio = (float)vwidth / vheight;
-    if (prefer_ratio(vert_ratio, horiz_ratio)) {
-      /* children still contain vertical placement */
-      orient = LSTOPO_ORIENT_VERT;
-      childwidth = vwidth + separator;
-      childheight = vheight;
+  place__children(loutput, parent, &orient, separator, network, &childwidth, &childheight);
+  if (network) {
+    /* add room for network links */
+    if (orient == LSTOPO_ORIENT_VERT) {
+      childwidth += separator;
       nxoff = separator;
-    } else {
-      /* must place horizontally again */
-      orient = LSTOPO_ORIENT_HORIZ;
-      place_children_horiz(loutput, parent, separator, &hwidth, &hheight);
-      childwidth = hwidth;
-      childheight = hheight + separator;
+    } else if (orient == LSTOPO_ORIENT_HORIZ) {
+      childheight += separator;
       nyoff = separator;
+    } else {
+      abort();
     }
-
-  } else {
-    /* NONE or forced RECT, do a rectangular placement */
-    place_children_rect(loutput, parent, separator, &childwidth, &childheight);
   }
 
   /* adjust parent size */
