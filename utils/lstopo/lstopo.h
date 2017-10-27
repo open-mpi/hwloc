@@ -90,7 +90,11 @@ struct lstopo_obj_userdata {
 
   /* custom style */
   struct style style;
-  unsigned style_set; /* 0x1 if bg set, 0x2 for t, 0x4 for bg2, 0x8 for t2 */
+#define LSTOPO_STYLE_BG  0x1
+#define LSTOPO_STYLE_T   0x2
+#define LSTOPO_STYLE_BG2 0x4
+#define LSTOPO_STYLE_T2  0x8
+  unsigned style_set; /* OR'ed LSTOPO_STYLE_* */
 
   /* object size (including children if they are outside of it, not including borders) */
   unsigned width;
