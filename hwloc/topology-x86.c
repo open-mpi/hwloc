@@ -601,38 +601,38 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     /* default cacheid value */
     cache->cacheid = infos->apicid / cache->nbthreads_sharing;
 
-    /* AMD quirk */
-    if (cpuid_type == amd
-	&& infos->cpufamilynumber== 0x10 && infos->cpumodelnumber == 0x9
-	&& cache->level == 3
-	&& (cache->ways == -1 || (cache->ways % 2 == 0)) && cache->nbthreads_sharing >= 8) {
-      /* Fix AMD family 0x10 model 0x9 (Magny-Cours) with 8 or 12 cores.
-       * The L3 (and its associativity) is actually split into two halves).
-       */
-      if (cache->nbthreads_sharing == 16)
-	cache->nbthreads_sharing = 12; /* nbthreads_sharing is a power of 2 but the processor actually has 8 or 12 cores */
-      cache->nbthreads_sharing /= 2;
-      cache->size /= 2;
-      if (cache->ways != -1)
-	cache->ways /= 2;
-      /* AMD Magny-Cours 12-cores processor reserve APIC ids as AAAAAABBBBBB....
-       * among first L3 (A), second L3 (B), and unexisting cores (.).
-       * On multi-socket servers, L3 in non-first sockets may have APIC id ranges
-       * such as [16-21] that are not aligned on multiple of nbthreads_sharing (6).
-       * That means, we can't just compare apicid/nbthreads_sharing to identify siblings.
-       */
-      cache->cacheid = (infos->apicid % legacy_max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
-	+ 2 * (infos->apicid / legacy_max_log_proc); /* add 2 caches per previous package */
+    if (cpuid_type == amd) {
+      /* AMD quirks */
+      if (infos->cpufamilynumber== 0x10 && infos->cpumodelnumber == 0x9
+	  && cache->level == 3
+	  && (cache->ways == -1 || (cache->ways % 2 == 0)) && cache->nbthreads_sharing >= 8) {
+	/* Fix AMD family 0x10 model 0x9 (Magny-Cours) with 8 or 12 cores.
+	 * The L3 (and its associativity) is actually split into two halves).
+	 */
+	if (cache->nbthreads_sharing == 16)
+	  cache->nbthreads_sharing = 12; /* nbthreads_sharing is a power of 2 but the processor actually has 8 or 12 cores */
+	cache->nbthreads_sharing /= 2;
+	cache->size /= 2;
+	if (cache->ways != -1)
+	  cache->ways /= 2;
+	/* AMD Magny-Cours 12-cores processor reserve APIC ids as AAAAAABBBBBB....
+	 * among first L3 (A), second L3 (B), and unexisting cores (.).
+	 * On multi-socket servers, L3 in non-first sockets may have APIC id ranges
+	 * such as [16-21] that are not aligned on multiple of nbthreads_sharing (6).
+	 * That means, we can't just compare apicid/nbthreads_sharing to identify siblings.
+	 */
+	cache->cacheid = (infos->apicid % legacy_max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
+	  + 2 * (infos->apicid / legacy_max_log_proc); /* add 2 caches per previous package */
 
-    } else if (cpuid_type == amd
-	       && infos->cpufamilynumber == 0x15
-	       && (infos->cpumodelnumber == 0x1 /* Bulldozer */ || infos->cpumodelnumber == 0x2 /* Piledriver */)
-	       && cache->level == 3 && cache->nbthreads_sharing == 6) {
-      /* AMD Bulldozer and Piledriver 12-core processors have same APIC ids as Magny-Cours above,
-       * but we can't merge the checks because the original nbthreads_sharing must be exactly 6 here.
-       */
-      cache->cacheid = (infos->apicid % legacy_max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
-	+ 2 * (infos->apicid / legacy_max_log_proc); /* add 2 cache per previous package */
+      } else if (infos->cpufamilynumber == 0x15
+		 && (infos->cpumodelnumber == 0x1 /* Bulldozer */ || infos->cpumodelnumber == 0x2 /* Piledriver */)
+		 && cache->level == 3 && cache->nbthreads_sharing == 6) {
+	/* AMD Bulldozer and Piledriver 12-core processors have same APIC ids as Magny-Cours below,
+	 * but we can't merge the checks because the original nbthreads_sharing must be exactly 6 here.
+	 */
+	cache->cacheid = (infos->apicid % legacy_max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
+	  + 2 * (infos->apicid / legacy_max_log_proc); /* add 2 cache per previous package */
+      }
     }
   }
 
