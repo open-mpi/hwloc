@@ -1,4 +1,4 @@
-# Copyright © 2015-2016 Inria.  All rights reserved.
+# Copyright © 2015-2017 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -18,6 +18,7 @@ cpuid_outputs = \
 	Intel-Core-2xXeon-E5345.output \
 	Intel-KnightsLanding-XeonPhi-7210.output \
 	Intel-KnightsCorner-XeonPhi-SE10P.output \
+	AMD-17h-Zen-2xEpyc-7451.output \
 	AMD-15h-Bulldozer-4xOpteron-6272.output \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.output \
 	AMD-K10-Istanbul-8xOpteron-8439SE.output \
@@ -40,6 +41,7 @@ cpuid_tarballs = \
 	Intel-Core-2xXeon-E5345.tar.bz2 \
 	Intel-KnightsLanding-XeonPhi-7210.tar.bz2 \
 	Intel-KnightsCorner-XeonPhi-SE10P.tar.bz2 \
+	AMD-17h-Zen-2xEpyc-7451.output.tar.bz2 \
 	AMD-15h-Bulldozer-4xOpteron-6272.tar.bz2 \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.tar.bz2 \
 	AMD-K10-Istanbul-8xOpteron-8439SE.tar.bz2 \
