@@ -374,6 +374,9 @@ int main(int argc, const char * const argv[])
   if (argc >= 1)
     basedir = argv[0];
 
+  if (!getenv("HWLOC_COMPONENTS"))
+    putenv("HWLOC_COMPONENTS=no_os,stop");
+
   hwloc_topology_init(&topo);
   hwloc_topology_set_all_types_filter(topo, HWLOC_TYPE_FILTER_KEEP_NONE);
   hwloc_topology_load(topo);
