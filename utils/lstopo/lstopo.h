@@ -106,6 +106,9 @@ struct lstopo_obj_userdata {
     unsigned xrel;
     unsigned yrel;
   } children;
+  /* relative position of first memory child */
+  struct lstopo_children_position above_children;
+
   /* relative position of this object within its parent children zone */
   unsigned xrel;
   unsigned yrel;

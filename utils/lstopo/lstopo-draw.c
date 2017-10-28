@@ -397,6 +397,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned separator = loutput->gridsize;
   unsigned totwidth = plud->width, totheight = plud->height;
   unsigned children_width, children_height;
+  unsigned above_children_width, above_children_height;
   int network;
   unsigned nxoff = 0, nyoff = 0;
   hwloc_obj_t child;
@@ -429,10 +430,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       || (hwloc_obj_type_is_cache(parent->type) && parent->attr->cache.depth == 1))
     separator = 0;
 
-  /* FIXME show numa at the top of the box */
-
-  /* actually place children */
-  place__children(loutput, parent, NEXT_CHILD_KIND_ALL, &orient, network, 0, separator, &children_width, &children_height);
+  /* place non-memory children */
+  place__children(loutput, parent, NEXT_CHILD_KIND_ALL & ~NEXT_CHILD_KIND_MEMORY, &orient, network, 0, separator, &children_width, &children_height);
   if (network) {
     /* add room for network links */
     if (orient == LSTOPO_ORIENT_VERT) {
@@ -446,6 +445,12 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     }
   }
 
+  /* place memory children */
+  if (parent->memory_first_child) {
+    enum lstopo_orient_e morient = LSTOPO_ORIENT_HORIZ;
+    place__children(loutput, parent, NEXT_CHILD_KIND_MEMORY, &morient, 0, 0, separator, &above_children_width, &above_children_height);
+  }
+
   /* adjust parent size */
   if (hwloc_obj_type_is_cache(parent->type)) {
     /* cache children are below */
@@ -453,6 +458,11 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       totwidth = children_width;
     if (children_height)
       totheight += children_height + border;
+    if (parent->memory_first_child) {
+      totheight += above_children_height + separator;
+      if (above_children_width > totwidth)
+	totwidth = above_children_width + 2*border;
+    }
   } else if (parent->type == HWLOC_OBJ_BRIDGE) {
     /* bridge children are on the right, within any space between bridge and children */
     if (children_width)
@@ -465,6 +475,11 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       totwidth = children_width + 2*border;
     if (children_height)
       totheight += children_height + border;
+    if (parent->memory_first_child) {
+      totheight += above_children_height + separator;
+      if (above_children_width + 2*border > totwidth)
+	totwidth = above_children_width + 2*border;
+    }
   }
 
   /* save config for draw_children() later */
@@ -476,6 +491,13 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   plud->children.height = children_height;
   plud->children.xrel = xrel + nxoff;
   plud->children.yrel = yrel + nyoff;
+  if (parent->memory_first_child) {
+    plud->above_children.width = above_children_width;
+    plud->above_children.height = above_children_height;
+    plud->above_children.xrel = xrel + nxoff;
+    plud->above_children.yrel = yrel + nyoff;
+    plud->children.yrel += above_children_height + separator;
+  }
 }
 
 /***********************
@@ -538,15 +560,18 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
   hwloc_obj_t child;
   int ncstate;
 
-  /* add children zone offset to the parent top-left corner */
-  x += plud->children.xrel;
-  y += plud->children.yrel;
-
-  for(child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, NULL, &ncstate);
+  for(child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL & ~NEXT_CHILD_KIND_MEMORY, NULL, &ncstate);
       child;
-      child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, child, &ncstate)) {
+      child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL & ~NEXT_CHILD_KIND_MEMORY, child, &ncstate)) {
     struct lstopo_obj_userdata *clud = child->userdata;
-    get_type_fun(child->type)(loutput, child, depth, x + clud->xrel, y + clud->yrel);
+    get_type_fun(child->type)(loutput, child, depth, x + plud->children.xrel + clud->xrel, y + plud->children.yrel + clud->yrel);
+  }
+
+  for(child = next_child(loutput, parent, NEXT_CHILD_KIND_MEMORY, NULL, &ncstate);
+      child;
+      child = next_child(loutput, parent, NEXT_CHILD_KIND_MEMORY, child, &ncstate)) {
+    struct lstopo_obj_userdata *clud = child->userdata;
+    get_type_fun(child->type)(loutput, child, depth, x + plud->above_children.xrel + clud->xrel, y + plud->above_children.yrel + clud->yrel);
   }
 
   if (plud->network)
