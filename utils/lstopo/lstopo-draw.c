@@ -395,7 +395,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned border = loutput->gridsize;
   unsigned separator = loutput->gridsize;
   unsigned totwidth = plud->width, totheight = plud->height;
-  unsigned childwidth, childheight;
+  unsigned children_width, children_height;
   int network;
   unsigned nxoff = 0, nyoff = 0;
   hwloc_obj_t child;
@@ -431,14 +431,14 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* FIXME show numa at the top of the box */
 
   /* actually place children */
-  place__children(loutput, parent, NEXT_CHILD_KIND_ALL, &orient, separator, network, &childwidth, &childheight);
+  place__children(loutput, parent, NEXT_CHILD_KIND_ALL, &orient, separator, network, &children_width, &children_height);
   if (network) {
     /* add room for network links */
     if (orient == LSTOPO_ORIENT_VERT) {
-      childwidth += separator;
+      children_width += separator;
       nxoff = separator;
     } else if (orient == LSTOPO_ORIENT_HORIZ) {
-      childheight += separator;
+      children_height += separator;
       nyoff = separator;
     } else {
       abort();
@@ -448,22 +448,22 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* adjust parent size */
   if (hwloc_obj_type_is_cache(parent->type)) {
     /* cache children are below */
-    if (childwidth > totwidth)
-      totwidth = childwidth;
-    if (childheight)
-      totheight += childheight + border;
+    if (children_width > totwidth)
+      totwidth = children_width;
+    if (children_height)
+      totheight += children_height + border;
   } else if (parent->type == HWLOC_OBJ_BRIDGE) {
     /* bridge children are on the right, within any space between bridge and children */
-    if (childwidth)
-      totwidth += childwidth;
-    if (childheight > totheight)
-      totheight = childheight;
+    if (children_width)
+      totwidth += children_width;
+    if (children_height > totheight)
+      totheight = children_height;
   } else {
     /* normal objects have children inside their box, with space around them */
-    if (childwidth + 2*border > totwidth)
-      totwidth = childwidth + 2*border;
-    if (childheight)
-      totheight += childheight + border;
+    if (children_width + 2*border > totwidth)
+      totwidth = children_width + 2*border;
+    if (children_height)
+      totheight += children_height + border;
   }
 
   /* save config for draw_children() later */
