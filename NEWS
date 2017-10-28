@@ -19,6 +19,7 @@ in v0.9.1).
 
 Version 1.11.9
 --------------
+* Fix AMD Epyc 24-core L3 cache locality in the x86 backend.
 * Fix the management of the lstopoStyle info attribute for custom colors.
 
 
