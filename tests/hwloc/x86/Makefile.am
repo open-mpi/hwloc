@@ -41,7 +41,7 @@ cpuid_tarballs = \
 	Intel-Core-2xXeon-E5345.tar.bz2 \
 	Intel-KnightsLanding-XeonPhi-7210.tar.bz2 \
 	Intel-KnightsCorner-XeonPhi-SE10P.tar.bz2 \
-	AMD-17h-Zen-2xEpyc-7451.output.tar.bz2 \
+	AMD-17h-Zen-2xEpyc-7451.tar.bz2 \
 	AMD-15h-Piledriver-4xOpteron-6348.tar.bz2 \
 	AMD-15h-Bulldozer-4xOpteron-6272.tar.bz2 \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.tar.bz2 \
