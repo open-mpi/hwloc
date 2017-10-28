@@ -1505,7 +1505,6 @@ hwloc__find_insert_memory_parent(struct hwloc_topology *topology, hwloc_obj_t ob
   result = hwloc__insert_object_by_cpuset(topology, parent, group, report_error);
   if (!result) {
     /* failed to insert, fallback to larger parent */
-    hwloc_free_unlinked_object(group);
     return parent;
   }
 
