@@ -603,7 +603,15 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
     if (cpuid_type == amd) {
       /* AMD quirks */
-      if (infos->cpufamilynumber== 0x10 && infos->cpumodelnumber == 0x9
+      if (infos->cpufamilynumber == 0x17
+	  && cache->level == 3 && cache->nbthreads_sharing == 6) {
+	/* AMD family 0x17 always shares L3 between 8 APIC ids,
+	 * even when only 6 APIC ids are enabled and reported in nbthreads_sharing
+	 * (on 24-core CPUs).
+	 */
+	cache->cacheid = infos->apicid / 8;
+
+      } else if (infos->cpufamilynumber== 0x10 && infos->cpumodelnumber == 0x9
 	  && cache->level == 3
 	  && (cache->ways == -1 || (cache->ways % 2 == 0)) && cache->nbthreads_sharing >= 8) {
 	/* Fix AMD family 0x10 model 0x9 (Magny-Cours) with 8 or 12 cores.
