@@ -2007,27 +2007,40 @@ propagate_nodeset(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
+  /* Start our nodeset from the parent one.
+   * It was emptied at root, and it's being filled with local nodes
+   * in that branch of the tree as we recurse down.
+   */
   if (!obj->nodeset)
     obj->nodeset = hwloc_bitmap_alloc();
+  if (obj->parent)
+    hwloc_bitmap_copy(obj->nodeset, obj->parent->nodeset);
   else
     hwloc_bitmap_zero(obj->nodeset);
+
+  /* Don't clear complete_nodeset, just make sure it contains nodeset.
+   * We cannot clear the complete_nodeset at root and rebuild it down because
+   * some bits may correspond to offline/disallowed NUMA nodes missing in the topology.
+   */
   if (!obj->complete_nodeset)
-    obj->complete_nodeset = hwloc_bitmap_alloc();
+    obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
   else
-    hwloc_bitmap_zero(obj->complete_nodeset);
-  /* start our nodeset from the parent one */
-  if (obj->parent) {
-    hwloc_bitmap_copy(obj->nodeset, obj->parent->nodeset);
-    hwloc_bitmap_copy(obj->complete_nodeset, obj->parent->complete_nodeset);
-  }
+    hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, obj->nodeset);
 
   /* now add our local nodeset */
   for_each_memory_child(child, obj) {
     /* FIXME rather recurse in the memory hierarchy */
-    /* build our local nodeset from our memory children */
+
+    /* first, update children complete_nodeset if needed */
+    if (!child->complete_nodeset)
+      obj->complete_nodeset = hwloc_bitmap_dup(child->nodeset);
+    else
+      hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, obj->nodeset);
+
+    /* add memory children nodesets to ours */
     hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
-    if (child->complete_nodeset)
-      hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
+    hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
+
     /* by the way, copy our cpusets to memory children */
     if (child->cpuset)
       hwloc_bitmap_copy(child->cpuset, obj->cpuset);
@@ -2039,7 +2052,7 @@ propagate_nodeset(hwloc_obj_t obj)
       child->complete_cpuset = hwloc_bitmap_dup(obj->complete_cpuset);
   }
 
-  /* Propagate our local nodeset to CPU children. */
+  /* Propagate our nodeset to CPU children. */
   for_each_child(child, obj) {
     propagate_nodeset(child);
   }
@@ -2057,6 +2070,7 @@ propagate_nodeset(hwloc_obj_t obj)
   }
 
   /* No nodeset under I/O or Misc */
+
 }
 
 static void
