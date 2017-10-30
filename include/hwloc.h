@@ -85,7 +85,7 @@ extern "C" {
  * Users may check for available features at build time using this number
  * (see \ref faq_upgrade).
  */
-#define HWLOC_API_VERSION 0x00010b00
+#define HWLOC_API_VERSION 0x00010b06
 
 /** \brief Indicate at runtime which hwloc API version was used at build time.
  *
