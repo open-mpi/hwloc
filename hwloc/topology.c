@@ -2080,16 +2080,6 @@ remove_unused_sets(hwloc_obj_t obj)
 
   hwloc_bitmap_and(obj->cpuset, obj->cpuset, obj->allowed_cpuset);
   hwloc_bitmap_and(obj->nodeset, obj->nodeset, obj->allowed_nodeset);
-  if (obj->type == HWLOC_OBJ_NUMANODE && obj->os_index != (unsigned) -1 &&
-      !hwloc_bitmap_isset(obj->allowed_nodeset, obj->os_index)) {
-    /* FIXME drop NUMA entirely */
-    unsigned i;
-    hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
-    obj->memory.local_memory = 0;
-    obj->memory.total_memory = 0;
-    for(i=0; i<obj->memory.page_types_len; i++)
-      obj->memory.page_types[i].count = 0;
-  }
 
   for_each_child(child, obj)
     remove_unused_sets(child);
@@ -2154,8 +2144,9 @@ hwloc__reorder_children(hwloc_obj_t parent)
   /* No ordering to enforce for Misc or I/O children. */
 }
 
-/* Remove all children whose cpuset is empty, except NUMA nodes
- * since we want to keep memory information, and except PCI bridges and devices.
+/* Remove all normal children whose cpuset is empty,
+ * and memory children whose nodeset is empty.
+ * Also don't remove objects that have I/O children, but ignore Misc.
  */
 static void
 remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
@@ -2164,20 +2155,29 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
 
   for_each_child_safe(child, obj, pchild)
     remove_empty(topology, pchild);
+  for_each_memory_child_safe(child, obj, pchild)
+    remove_empty(topology, pchild);
   /* No cpuset under I/O or Misc */
 
-  if (obj->type != HWLOC_OBJ_NUMANODE
-      && !obj->first_child /* only remove if all children were removed above, so that we don't remove parents of NUMAnode */
-      && !obj->memory_first_child /* only remove if no memory attached there */
-      && !obj->io_first_child /* only remove if no I/O is attached there */
-      && hwloc_bitmap_iszero(obj->cpuset)) {
-    /* FIXME drop NUMA entirely */
-    /* Remove empty children (even if it has Misc children) */
-    hwloc_debug("%s", "\nRemoving empty object ");
-    hwloc_debug_print_object(0, obj);
-    unlink_and_free_single_object(pobj);
-    topology->modified = 1;
+  if (obj->first_child /* only remove if all children were removed above, so that we don't remove parents of NUMAnode */
+      || obj->memory_first_child /* only remove if no memory attached there */
+      || obj->io_first_child /* only remove if no I/O is attached there */)
+    /* ignore Misc */
+    return;
+
+  if (hwloc_obj_type_is_normal(obj->type)) {
+    if (!hwloc_bitmap_iszero(obj->cpuset))
+      return;
+  } else {
+    assert(hwloc_obj_type_is_memory(obj->type));
+    if (!hwloc_bitmap_iszero(obj->nodeset))
+      return;
   }
+
+  hwloc_debug("%s", "\nRemoving empty object ");
+  hwloc_debug_print_object(0, obj);
+  unlink_and_free_single_object(pobj);
+  topology->modified = 1;
 }
 
 /* reset type depth before modifying levels (either reconnecting or filtering/keep_structure) */

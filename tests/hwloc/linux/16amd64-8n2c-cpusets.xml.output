@@ -10,7 +10,6 @@
     <info name="LinuxCgroup" value="/dummy"/>
     <object type="Package" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0">
       <info name="CPUModel" value="Dual Core AMD Opteron(tm) Processor 865"/>
-      <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0"/>
       <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
         <object type="L1Cache" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
           <object type="Core" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" allowed_nodeset="0x0">
@@ -70,13 +69,8 @@
       <info name="CPUModel" value="Dual Core AMD Opteron(tm) Processor 865"/>
       <object type="NUMANode" os_index="4" cpuset="0x0" complete_cpuset="0x00000300" allowed_cpuset="0x0" nodeset="0x00000010" complete_nodeset="0x00000010" allowed_nodeset="0x00000010" local_memory="8589934592"/>
     </object>
-    <object type="Package" os_index="5" cpuset="0x0" complete_cpuset="0x00000c00" allowed_cpuset="0x0" nodeset="0x0" complete_nodeset="0x00000020" allowed_nodeset="0x0">
-      <info name="CPUModel" value="Dual Core AMD Opteron(tm) Processor 865"/>
-      <object type="NUMANode" os_index="5" cpuset="0x0" complete_cpuset="0x00000c00" allowed_cpuset="0x0" nodeset="0x0" complete_nodeset="0x00000020" allowed_nodeset="0x0"/>
-    </object>
     <object type="Package" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" allowed_cpuset="0x00003000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0">
       <info name="CPUModel" value="Dual Core AMD Opteron(tm) Processor 865"/>
-      <object type="NUMANode" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" allowed_cpuset="0x00003000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0"/>
       <object type="L2Cache" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
         <object type="L1Cache" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
           <object type="Core" os_index="0" cpuset="0x00001000" complete_cpuset="0x00001000" allowed_cpuset="0x00001000" nodeset="0x0" complete_nodeset="0x00000040" allowed_nodeset="0x0">
@@ -94,7 +88,6 @@
     </object>
     <object type="Package" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" allowed_cpuset="0x0000c000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0">
       <info name="CPUModel" value="Dual Core AMD Opteron(tm) Processor 865"/>
-      <object type="NUMANode" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" allowed_cpuset="0x0000c000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0"/>
       <object type="L2Cache" cpuset="0x00004000" complete_cpuset="0x00004000" allowed_cpuset="0x00004000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
         <object type="L1Cache" cpuset="0x00004000" complete_cpuset="0x00004000" allowed_cpuset="0x00004000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="1">
           <object type="Core" os_index="0" cpuset="0x00004000" complete_cpuset="0x00004000" allowed_cpuset="0x00004000" nodeset="0x0" complete_nodeset="0x00000080" allowed_nodeset="0x0">
@@ -111,14 +104,9 @@
       </object>
     </object>
   </object>
-  <distances2 type="NUMANode" nbobjs="8" kind="5" indexing="os">
-    <indexes length="16">0 1 2 3 4 5 6 7 </indexes>
-    <u64values length="30">10 20 20 20 20 20 20 20 20 10 </u64values>
-    <u64values length="30">20 20 20 20 20 20 20 20 10 20 </u64values>
-    <u64values length="30">20 20 20 20 20 20 20 10 20 20 </u64values>
-    <u64values length="30">20 20 20 20 20 20 10 20 20 20 </u64values>
-    <u64values length="30">20 20 20 20 20 10 20 20 20 20 </u64values>
-    <u64values length="30">20 20 20 20 10 20 20 20 20 20 </u64values>
-    <u64values length="12">20 20 20 10 </u64values>
+  <distances2 type="NUMANode" nbobjs="4" kind="5" indexing="os">
+    <indexes length="8">1 2 3 4 </indexes>
+    <u64values length="30">10 20 20 20 20 10 20 20 20 20 </u64values>
+    <u64values length="18">10 20 20 20 20 10 </u64values>
   </distances2>
 </topology>

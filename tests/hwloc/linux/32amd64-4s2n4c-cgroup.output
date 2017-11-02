@@ -44,29 +44,22 @@ Machine (P#0 total=100661164KB DMIProductName=H8QG6 DMIProductVersion=1234567890
       NUMANode L#4 (P#4 local=16777216KB total=16777216KB)
     L3Cache L#5 (total=16777216KB size=5118KB linesize=64 ways=48)
       NUMANode L#5 (P#5 local=16777216KB total=16777216KB)
-  Package L#3 (P#3 CPUModel="AMD Opteron(tm) Processor 6134")
-    L3Cache L#6 (size=5118KB linesize=64 ways=48)
-      NUMANode L#6 (P#6)
-    L3Cache L#7 (size=5118KB linesize=64 ways=48)
-      NUMANode L#7 (P#7)
 depth 0:	1 Machine (type #1)
- depth 1:	4 Package (type #3)
-  depth 2:	8 L3Cache (type #8)
+ depth 1:	3 Package (type #3)
+  depth 2:	6 L3Cache (type #8)
    depth 3:	6 L2Cache (type #7)
     depth 4:	6 L1dCache (type #6)
      depth 5:	6 L1iCache (type #11)
       depth 6:	6 Core (type #4)
        depth 7:	6 PU (type #5)
-Special depth -7:	8 NUMANode (type #2)
-Relative latency matrix (kind 5) between 8 NUMANodes (depth -7) by logical indexes:
-  index     0     1     2     3     4     5     6     7
-      0    10    16    16    22    16    22    16    22
-      1    16    10    22    16    22    16    22    16
-      2    16    22    10    16    16    22    16    22
-      3    22    16    16    10    22    16    22    16
-      4    16    22    16    22    10    16    16    22
-      5    22    16    22    16    16    10    22    16
-      6    16    22    16    22    16    22    10    16
-      7    22    16    22    16    22    16    16    10
+Special depth -7:	6 NUMANode (type #2)
+Relative latency matrix (kind 5) between 6 NUMANodes (depth -7) by logical indexes:
+  index     0     1     2     3     4     5
+      0    10    16    16    22    16    22
+      1    16    10    22    16    22    16
+      2    16    22    10    16    16    22
+      3    22    16    16    10    22    16
+      4    16    22    16    22    10    16
+      5    22    16    22    16    16    10
 26 processors not represented in topology: 0xffffffc0
 Topology not from this system
