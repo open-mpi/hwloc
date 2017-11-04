@@ -200,7 +200,7 @@ static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent,
 
 static void
 place_children_horiz(struct lstopo_output *loutput, hwloc_obj_t parent,
-		     unsigned kind, unsigned separator,
+		     unsigned kind, unsigned border, unsigned separator,
 		     unsigned *width, unsigned *height)
 {
   unsigned curx = 0;
@@ -211,19 +211,19 @@ place_children_horiz(struct lstopo_output *loutput, hwloc_obj_t parent,
       child;
       child = next_child(loutput, parent, kind, child, &ncstate)) {
     struct lstopo_obj_userdata *clud = child->userdata;
-    clud->xrel = curx;
-    clud->yrel = 0;
+    clud->xrel = curx + border;
+    clud->yrel = border;
     if (clud->height > maxh)
       maxh = clud->height;
     curx += separator + clud->width;
   }
-  *width = curx - separator;
-  *height = maxh;
+  *width = curx - separator + 2*border;
+  *height = maxh + 2*border;
 }
 
 static void
 place_children_vert(struct lstopo_output *loutput, hwloc_obj_t parent,
-		    unsigned kind, unsigned separator,
+		    unsigned kind, unsigned border, unsigned separator,
 		    unsigned *width, unsigned *height)
 {
   unsigned cury = 0;
@@ -234,19 +234,19 @@ place_children_vert(struct lstopo_output *loutput, hwloc_obj_t parent,
       child;
       child = next_child(loutput, parent, kind, child, &ncstate)) {
     struct lstopo_obj_userdata *clud = child->userdata;
-    clud->xrel = 0;
-    clud->yrel = cury;
+    clud->xrel = border;
+    clud->yrel = cury + border;
     if (clud->width > maxw)
       maxw = clud->width;
     cury += separator + clud->height;
   }
-  *width = maxw;
-  *height = cury - separator;
+  *width = maxw + 2*border;
+  *height = cury - separator + 2*border;
 }
 
 static void
 place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent,
-		    unsigned kind, unsigned separator,
+		    unsigned kind, unsigned border, unsigned separator,
 		    unsigned *width, unsigned *height)
 {
   unsigned numsubobjs = 0, obj_totwidth = 0, obj_totheight = 0;
@@ -323,8 +323,8 @@ place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent,
       maxheight = 0;
     }
     /* Add new child */
-    clud->xrel = rowwidth;
-    clud->yrel = totheight;
+    clud->xrel = rowwidth + border;
+    clud->yrel = totheight + border;
     rowwidth += clud->width + separator;
     if (clud->height > maxheight)
       maxheight = clud->height;
@@ -337,31 +337,32 @@ place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* Update total height using last row */
   totheight += maxheight; /* no separator */
 
-  *width = totwidth;
-  *height = totheight;
+  *width = totwidth + 2*border;
+  *height = totheight + 2*border;
 }
 
 static void
 place__children(struct lstopo_output *loutput, hwloc_obj_t parent,
 		unsigned kind,
-		enum lstopo_orient_e *orientp, unsigned separator, int network,
+		enum lstopo_orient_e *orientp, int network,
+		unsigned border, unsigned separator,
 		unsigned *widthp, unsigned *heightp)
 {
   if (*orientp == LSTOPO_ORIENT_HORIZ) {
     /* force horizontal */
-    place_children_horiz(loutput, parent, kind, separator, widthp, heightp);
+    place_children_horiz(loutput, parent, kind, border, separator, widthp, heightp);
 
   } else if (*orientp == LSTOPO_ORIENT_VERT) {
     /* force vertical */
-    place_children_vert(loutput, parent, kind, separator, widthp, heightp);
+    place_children_vert(loutput, parent, kind, border, separator, widthp, heightp);
 
   } else if (network) {
     /* NONE or forced RECT, but network only supports horiz or vert, use the best one */
     unsigned vwidth, vheight, hwidth, hheight;
     float horiz_ratio, vert_ratio;
-    place_children_horiz(loutput, parent, kind, separator, &hwidth, &hheight);
+    place_children_horiz(loutput, parent, kind, border, separator, &hwidth, &hheight);
     horiz_ratio = (float)hwidth / hheight;
-    place_children_vert(loutput, parent, kind, separator, &vwidth, &vheight);
+    place_children_vert(loutput, parent, kind, border, separator, &vwidth, &vheight);
     vert_ratio = (float)vwidth / vheight;
     if (prefer_ratio(vert_ratio, horiz_ratio)) {
       /* children still contain vertical placement */
@@ -371,14 +372,14 @@ place__children(struct lstopo_output *loutput, hwloc_obj_t parent,
     } else {
       /* must place horizontally again */
       *orientp = LSTOPO_ORIENT_HORIZ;
-      place_children_horiz(loutput, parent, kind, separator, &hwidth, &hheight);
+      place_children_horiz(loutput, parent, kind, border, separator, &hwidth, &hheight);
       *widthp = hwidth;
       *heightp = hheight;
     }
 
   } else {
     /* NONE or forced RECT, do a rectangular placement */
-    place_children_rect(loutput, parent, kind, separator, widthp, heightp);
+    place_children_rect(loutput, parent, kind, border, separator, widthp, heightp);
   }
 }
 
@@ -431,7 +432,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* FIXME show numa at the top of the box */
 
   /* actually place children */
-  place__children(loutput, parent, NEXT_CHILD_KIND_ALL, &orient, separator, network, &children_width, &children_height);
+  place__children(loutput, parent, NEXT_CHILD_KIND_ALL, &orient, network, 0, separator, &children_width, &children_height);
   if (network) {
     /* add room for network links */
     if (orient == LSTOPO_ORIENT_VERT) {
