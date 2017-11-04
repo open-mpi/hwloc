@@ -459,6 +459,14 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       if (above_children_width < children_width) {
 	above_children_width = children_width;
       }
+    } else {
+      /* if there's a single memory child without wide memory box, enlarge that child */
+      hwloc_obj_t child = parent->memory_first_child;
+      struct lstopo_obj_userdata *clud = child->userdata;
+      if (clud->width < children_width) {
+	clud->width = children_width;
+	above_children_width = children_width;
+      }
     }
   }
 
