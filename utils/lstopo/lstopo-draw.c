@@ -31,6 +31,7 @@
 #define DARKER_EPOXY_G_COLOR ((DARK_EPOXY_G_COLOR * 100) / 110)
 #define DARKER_EPOXY_B_COLOR ((DARK_EPOXY_B_COLOR * 100) / 110)
 
+/* each of these colors must be declared in output_draw_start() */
 #define PACKAGE_R_COLOR DARK_EPOXY_R_COLOR
 #define PACKAGE_G_COLOR DARK_EPOXY_G_COLOR
 #define PACKAGE_B_COLOR DARK_EPOXY_B_COLOR
@@ -66,6 +67,10 @@
 #define SYSTEM_R_COLOR 0xff
 #define SYSTEM_G_COLOR 0xff
 #define SYSTEM_B_COLOR 0xff
+
+#define GROUP_IN_PACKAGE_R_COLOR EPOXY_R_COLOR
+#define GROUP_IN_PACKAGE_G_COLOR EPOXY_G_COLOR
+#define GROUP_IN_PACKAGE_B_COLOR EPOXY_B_COLOR
 
 #define MISC_R_COLOR 0xff
 #define MISC_G_COLOR 0xff
@@ -644,9 +649,15 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     break;
 
   case HWLOC_OBJ_GROUP:
-    s->bg.r = MISC_R_COLOR;
-    s->bg.g = MISC_G_COLOR;
-    s->bg.b = MISC_B_COLOR;
+    if (obj->parent && obj->parent->type == HWLOC_OBJ_PACKAGE) {
+      s->bg.r = GROUP_IN_PACKAGE_R_COLOR;
+      s->bg.g = GROUP_IN_PACKAGE_G_COLOR;
+      s->bg.b = GROUP_IN_PACKAGE_B_COLOR;
+    } else {
+      s->bg.r = MISC_R_COLOR;
+      s->bg.g = MISC_G_COLOR;
+      s->bg.b = MISC_B_COLOR;
+    }
     break;
 
   case HWLOC_OBJ_MISC:
@@ -1269,6 +1280,7 @@ output_draw_start(struct lstopo_output *output)
   methods->declare_color(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR);
   methods->declare_color(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR);
   methods->declare_color(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR);
+  methods->declare_color(output, GROUP_IN_PACKAGE_R_COLOR, GROUP_IN_PACKAGE_G_COLOR, GROUP_IN_PACKAGE_B_COLOR);
   methods->declare_color(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR);
   methods->declare_color(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR);
   methods->declare_color(output, OS_DEVICE_R_COLOR, OS_DEVICE_G_COLOR, OS_DEVICE_B_COLOR);
