@@ -40,6 +40,10 @@
 #define MEMORY_G_COLOR 0xdf
 #define MEMORY_B_COLOR 0xde
 
+#define MEMORIES_R_COLOR 0xf2
+#define MEMORIES_G_COLOR 0xe8
+#define MEMORIES_B_COLOR 0xe8
+
 #define CORE_R_COLOR 0xbe
 #define CORE_G_COLOR 0xbe
 #define CORE_B_COLOR 0xbe
@@ -448,7 +452,14 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* place memory children */
   if (parent->memory_first_child) {
     enum lstopo_orient_e morient = LSTOPO_ORIENT_HORIZ;
-    place__children(loutput, parent, NEXT_CHILD_KIND_MEMORY, &morient, 0, 0, separator, &above_children_width, &above_children_height);
+    unsigned memory_border = parent->memory_arity > 1 ? border : 0;
+    place__children(loutput, parent, NEXT_CHILD_KIND_MEMORY, &morient, 0, memory_border, separator, &above_children_width, &above_children_height);
+    if (parent->memory_arity > 1) {
+      /* if there are multiple memory children, make the box as large as possible */
+      if (above_children_width < children_width) {
+	above_children_width = children_width;
+      }
+    }
   }
 
   /* adjust parent size */
@@ -504,6 +515,9 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
  * Drawing children
  */
 
+/* additional gridsize when fontsize > 0 */
+#define FONTGRIDSIZE (fontsize ? gridsize : 0)
+
 static void
 draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
 		      unsigned x, unsigned y)
@@ -558,6 +572,8 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
 {
   struct lstopo_obj_userdata *plud = parent->userdata;
   hwloc_obj_t child;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
   int ncstate;
 
   for(child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL & ~NEXT_CHILD_KIND_MEMORY, NULL, &ncstate);
@@ -567,11 +583,15 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
     get_type_fun(child->type)(loutput, child, depth, x + plud->children.xrel + clud->xrel, y + plud->children.yrel + clud->yrel);
   }
 
+  if (parent->memory_arity > 1) {
+    loutput->methods->box(loutput, MEMORIES_R_COLOR, MEMORIES_G_COLOR, MEMORIES_B_COLOR, depth, x + plud->above_children.xrel, plud->above_children.width, y + plud->above_children.yrel, plud->above_children.height);
+  }
+
   for(child = next_child(loutput, parent, NEXT_CHILD_KIND_MEMORY, NULL, &ncstate);
       child;
       child = next_child(loutput, parent, NEXT_CHILD_KIND_MEMORY, child, &ncstate)) {
     struct lstopo_obj_userdata *clud = child->userdata;
-    get_type_fun(child->type)(loutput, child, depth, x + plud->above_children.xrel + clud->xrel, y + plud->above_children.yrel + clud->yrel);
+    get_type_fun(child->type)(loutput, child, depth - 1, x + plud->above_children.xrel + clud->xrel, y + plud->above_children.yrel + clud->yrel);
   }
 
   if (plud->network)
@@ -940,9 +960,6 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   /* additional text */
   prepare_more_text(loutput, obj);
 }
-
-/* additional gridsize when fontsize > 0 */
-#define FONTGRIDSIZE (fontsize ? gridsize : 0)
 
 static void
 draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct stylecolor *color, unsigned depth, unsigned x, unsigned y)
@@ -1331,6 +1348,7 @@ output_draw_start(struct lstopo_output *output)
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, PACKAGE_R_COLOR, PACKAGE_G_COLOR, PACKAGE_B_COLOR);
   methods->declare_color(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR);
+  methods->declare_color(output, MEMORIES_R_COLOR, MEMORIES_G_COLOR, MEMORIES_B_COLOR);
   methods->declare_color(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR);
   methods->declare_color(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR);
   methods->declare_color(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR);
