@@ -1,14 +1,14 @@
-depth 0:	1 Machine (type #1)
- depth 1:	2 Group0 (type #14)
-  depth 2:	6 Core (type #4)
-   depth 3:	24 PU (type #5)
-Special depth -7:	2 NUMANode (type #2)
+depth 0:           1 Machine (type #1)
+ depth 1:          2 Group0 (type #14)
+  depth 2:         6 Core (type #4)
+   depth 3:        24 PU (type #5)
+Special depth -7:  2 NUMANode (type #2)
 
-depth 0:	1 Machine (type #1)
- depth 1:	2 Group0 (type #14)
-  depth 2:	6 Core (type #4)
-   depth 3:	24 PU (type #5)
-Special depth -7:	2 NUMANode (type #2)
+depth 0:           1 Machine (type #1)
+ depth 1:          2 Group0 (type #14)
+  depth 2:         6 Core (type #4)
+   depth 3:        24 PU (type #5)
+Special depth -7:  2 NUMANode (type #2)
 
 discovery:pu = 1
 cpubind:set_thisproc_cpubind = 0

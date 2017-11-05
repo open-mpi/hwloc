@@ -341,40 +341,55 @@ hwloc_pid_from_number(int pid_number, int set_info __hwloc_attribute_unused)
 }
 
 static __hwloc_inline void
+hwloc_lstopo_show_summary_depth(FILE *output, int prefixmaxlen, hwloc_topology_t topology, int depth)
+{
+  hwloc_obj_type_t type = hwloc_get_depth_type(topology, depth);
+  unsigned nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
+  if (nbobjs) {
+    int prefixlen;
+    char _types[64];
+    const char *types;
+
+    if (depth < 0)
+      prefixlen = fprintf(output, "Special depth %d:", depth);
+    else
+      prefixlen = fprintf(output,"%*sdepth %u:", (int) depth, "", depth);
+
+    if (depth < 0) {
+      /* use plain type, we don't want OSdev subtype since it may differ for other objects in the level */
+      types = hwloc_type_name(type);
+    } else {
+      /* use verbose type name, those are identical for all objects on normal levels */
+      hwloc_obj_type_snprintf(_types, sizeof(_types), hwloc_get_obj_by_depth(topology, depth, 0), 1);
+      types = _types;
+    }
+
+    fprintf(output, "%*s%u %s (type #%d)\n",
+	    prefixmaxlen-prefixlen, "",
+	    nbobjs, types, (int) type);
+  }
+}
+
+static __hwloc_inline void
 hwloc_lstopo_show_summary(FILE *output, hwloc_topology_t topology)
 {
   unsigned topodepth = hwloc_topology_get_depth(topology);
-  unsigned depth, nbobjs;
-  for (depth = 0; depth < topodepth; depth++) {
-    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, 0);
-    char type[64];
-    nbobjs = hwloc_get_nbobjs_by_depth (topology, depth);
-    fprintf(output, "%*s", (int) depth, "");
-    hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
-    fprintf (output,"depth %u:\t%u %s (type #%d)\n",
-	     depth, nbobjs, type, (int) obj->type);
-  }
+  unsigned depth;
+  int prefixmaxlen, sdepthmaxlen;
+
+  prefixmaxlen = topodepth-1 + strlen("depth xyz:  ");
+  sdepthmaxlen = strlen("Special depth -x:  ");
+  if (prefixmaxlen < sdepthmaxlen)
+    prefixmaxlen = sdepthmaxlen;
+
+  for (depth = 0; depth < topodepth; depth++)
+    hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, depth);
   /* FIXME: which order? */
-  nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_NUMANODE);
-  if (nbobjs)
-    fprintf (output, "Special depth %d:\t%u %s (type #%d)\n",
-	     HWLOC_TYPE_DEPTH_NUMANODE, nbobjs, "NUMANode", HWLOC_OBJ_NUMANODE);
-  nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_BRIDGE);
-  if (nbobjs)
-    fprintf (output, "Special depth %d:\t%u %s (type #%d)\n",
-	     HWLOC_TYPE_DEPTH_BRIDGE, nbobjs, "Bridge", HWLOC_OBJ_BRIDGE);
-  nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_PCI_DEVICE);
-  if (nbobjs)
-    fprintf (output, "Special depth %d:\t%u %s (type #%d)\n",
-	     HWLOC_TYPE_DEPTH_PCI_DEVICE, nbobjs, "PCI Device", HWLOC_OBJ_PCI_DEVICE);
-  nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_OS_DEVICE);
-  if (nbobjs)
-    fprintf (output, "Special depth %d:\t%u %s (type #%d)\n",
-	     HWLOC_TYPE_DEPTH_OS_DEVICE, nbobjs, "OS Device", HWLOC_OBJ_OS_DEVICE);
-  nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_MISC);
-  if (nbobjs)
-    fprintf (output, "Special depth %d:\t%u %s (type #%d)\n",
-	     HWLOC_TYPE_DEPTH_MISC, nbobjs, "Misc", HWLOC_OBJ_MISC);
+  hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_NUMANODE);
+  hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_BRIDGE);
+  hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_PCI_DEVICE);
+  hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_OS_DEVICE);
+  hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_MISC);
 }
 
 
