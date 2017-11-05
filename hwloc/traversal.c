@@ -173,7 +173,6 @@ hwloc_type_name (hwloc_obj_type_t obj)
 {
   switch (obj)
     {
-    case HWLOC_OBJ_SYSTEM: return "System";
     case HWLOC_OBJ_MACHINE: return "Machine";
     case HWLOC_OBJ_MISC: return "Misc";
     case HWLOC_OBJ_GROUP: return "Group";
@@ -212,9 +211,7 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
    */
 
   /* types without a custom depth */
-  if (!hwloc_strncasecmp(string, "system", 2)) {
-    type = HWLOC_OBJ_SYSTEM;
-  } else if (!hwloc_strncasecmp(string, "machine", 2)) {
+  if (!hwloc_strncasecmp(string, "machine", 2)) {
     type = HWLOC_OBJ_MACHINE;
   } else if (!hwloc_strncasecmp(string, "node", 2)
 	     || !hwloc_strncasecmp(string, "numa", 2)) { /* matches node and numanode */
@@ -359,7 +356,6 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   hwloc_obj_type_t type = obj->type;
   switch (type) {
   case HWLOC_OBJ_MISC:
-  case HWLOC_OBJ_SYSTEM:
   case HWLOC_OBJ_MACHINE:
   case HWLOC_OBJ_NUMANODE:
   case HWLOC_OBJ_PACKAGE:

@@ -47,7 +47,6 @@ extern "C" {
 #define hwloc_nodeset_t HWLOC_NAME(nodeset_t)
 #define hwloc_const_nodeset_t HWLOC_NAME(const_nodeset_t)
 
-#define HWLOC_OBJ_SYSTEM HWLOC_NAME_CAPS(OBJ_SYSTEM)
 #define HWLOC_OBJ_MACHINE HWLOC_NAME_CAPS(OBJ_MACHINE)
 #define HWLOC_OBJ_NUMANODE HWLOC_NAME_CAPS(OBJ_NUMANODE)
 #define HWLOC_OBJ_PACKAGE HWLOC_NAME_CAPS(OBJ_PACKAGE)

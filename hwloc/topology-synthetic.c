@@ -418,7 +418,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	errno = EINVAL;
 	goto error;
       }
-      if (type == HWLOC_OBJ_SYSTEM || type == HWLOC_OBJ_MACHINE || type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
+      if (type == HWLOC_OBJ_MACHINE || type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	if (verbose)
 	  fprintf(stderr, "Synthetic string with disallowed object type at '%s'\n", pos);
 	errno = EINVAL;
@@ -712,11 +712,11 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
     break;
   case HWLOC_OBJ_PU:
     break;
-  case HWLOC_OBJ_SYSTEM:
   case HWLOC_OBJ_BRIDGE:
   case HWLOC_OBJ_PCI_DEVICE:
   case HWLOC_OBJ_OS_DEVICE:
   case HWLOC_OBJ_MISC:
+  case _HWLOC_OBJ_SYSTEM_OBSOLETE:
   case HWLOC_OBJ_TYPE_MAX:
     /* Should never happen */
     assert(0);
@@ -767,11 +767,11 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_PU:
       break;
     case HWLOC_OBJ_MACHINE:
-    case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_BRIDGE:
     case HWLOC_OBJ_PCI_DEVICE:
     case HWLOC_OBJ_OS_DEVICE:
     case HWLOC_OBJ_MISC:
+    case _HWLOC_OBJ_SYSTEM_OBSOLETE:
     case HWLOC_OBJ_TYPE_MAX:
       /* Should never happen */
       assert(0);

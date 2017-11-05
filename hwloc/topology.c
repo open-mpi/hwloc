@@ -973,30 +973,29 @@ hwloc_topology_dup(hwloc_topology_t *newp,
    */
 /***** Make sure you update obj_type_priority[] below as well. *****/
 static const unsigned obj_type_order[] = {
-    /* first entry is HWLOC_OBJ_SYSTEM */  0,
-    /* next entry is HWLOC_OBJ_MACHINE */  1,
-    /* next entry is HWLOC_OBJ_NUMANODE */ 3,
-    /* next entry is HWLOC_OBJ_PACKAGE */  4,
-    /* next entry is HWLOC_OBJ_CORE */     13,
-    /* next entry is HWLOC_OBJ_PU */       17,
-    /* next entry is HWLOC_OBJ_L1CACHE */  11,
-    /* next entry is HWLOC_OBJ_L2CACHE */  9,
-    /* next entry is HWLOC_OBJ_L3CACHE */  7,
-    /* next entry is HWLOC_OBJ_L4CACHE */  6,
-    /* next entry is HWLOC_OBJ_L5CACHE */  5,
-    /* next entry is HWLOC_OBJ_L1ICACHE */ 12,
-    /* next entry is HWLOC_OBJ_L2ICACHE */ 10,
-    /* next entry is HWLOC_OBJ_L3ICACHE */ 8,
-    /* next entry is HWLOC_OBJ_GROUP */    2,
-    /* next entry is HWLOC_OBJ_MISC */     18,
-    /* next entry is HWLOC_OBJ_BRIDGE */   14,
-    /* next entry is HWLOC_OBJ_PCI_DEVICE */  15,
-    /* next entry is HWLOC_OBJ_OS_DEVICE */   16
+    /* FIXME remove _HWLOC_OBJ_SYSTEM_OBSOLETE */ 18,
+    /* first entry is HWLOC_OBJ_MACHINE */  0,
+    /* next entry is HWLOC_OBJ_NUMANODE */ 2,
+    /* next entry is HWLOC_OBJ_PACKAGE */  3,
+    /* next entry is HWLOC_OBJ_CORE */     12,
+    /* next entry is HWLOC_OBJ_PU */       16,
+    /* next entry is HWLOC_OBJ_L1CACHE */  10,
+    /* next entry is HWLOC_OBJ_L2CACHE */  8,
+    /* next entry is HWLOC_OBJ_L3CACHE */  6,
+    /* next entry is HWLOC_OBJ_L4CACHE */  5,
+    /* next entry is HWLOC_OBJ_L5CACHE */  4,
+    /* next entry is HWLOC_OBJ_L1ICACHE */ 11,
+    /* next entry is HWLOC_OBJ_L2ICACHE */ 9,
+    /* next entry is HWLOC_OBJ_L3ICACHE */ 7,
+    /* next entry is HWLOC_OBJ_GROUP */    1,
+    /* next entry is HWLOC_OBJ_MISC */     17,
+    /* next entry is HWLOC_OBJ_BRIDGE */   13,
+    /* next entry is HWLOC_OBJ_PCI_DEVICE */  14,
+    /* next entry is HWLOC_OBJ_OS_DEVICE */   15
 };
 
 #ifndef NDEBUG /* only used in debug check assert if !NDEBUG */
 static const hwloc_obj_type_t obj_order_type[] = {
-  HWLOC_OBJ_SYSTEM,
   HWLOC_OBJ_MACHINE,
   HWLOC_OBJ_GROUP,
   HWLOC_OBJ_NUMANODE,
@@ -1015,6 +1014,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_OS_DEVICE,
   HWLOC_OBJ_PU,
   HWLOC_OBJ_MISC, /* Misc is always a leaf */
+  _HWLOC_OBJ_SYSTEM_OBSOLETE, /* FIXME remove */
 };
 #endif
 /***** Make sure you update obj_type_priority[] below as well. *****/
@@ -1023,7 +1023,6 @@ static const hwloc_obj_type_t obj_order_type[] = {
  * (in merge_useless_child), keep the highest priority one.
  *
  * Always keep Machine/NUMANode/PU/PCIDev/OSDev
- * then System
  * then Core
  * then Package
  * then Cache,
@@ -1034,8 +1033,8 @@ static const hwloc_obj_type_t obj_order_type[] = {
  */
 /***** Make sure you update this array when changing the list of types. *****/
 static const int obj_type_priority[] = {
-  /* first entry is HWLOC_OBJ_SYSTEM */     80,
-  /* next entry is HWLOC_OBJ_MACHINE */     90,
+  /* FIXME remove _HWLOC_OBJ_SYSTEM_OBSOLETE */ 0,
+  /* first entry is HWLOC_OBJ_MACHINE */     90,
   /* next entry is HWLOC_OBJ_NUMANODE */    100,
   /* next entry is HWLOC_OBJ_PACKAGE */     40,
   /* next entry is HWLOC_OBJ_CORE */        60,
@@ -1060,12 +1059,12 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
   unsigned order1 = obj_type_order[type1];
   unsigned order2 = obj_type_order[type2];
 
-  /* only normal objects are comparable. others are only comparable with machine/system */
+  /* only normal objects are comparable. others are only comparable with machine */
   if (!hwloc_obj_type_is_normal(type1)
-      && hwloc_obj_type_is_normal(type2) && type2 != HWLOC_OBJ_SYSTEM && type2 != HWLOC_OBJ_MACHINE)
+      && hwloc_obj_type_is_normal(type2) && type2 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
   if (!hwloc_obj_type_is_normal(type2)
-      && hwloc_obj_type_is_normal(type1) && type1 != HWLOC_OBJ_SYSTEM && type1 != HWLOC_OBJ_MACHINE)
+      && hwloc_obj_type_is_normal(type1) && type1 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
 
   return order1 - order2;
@@ -4063,6 +4062,7 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
   hwloc_bitmap_set(gp_indexes, obj->gp_index);
 
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MIN == 0);
+  assert(obj->type != _HWLOC_OBJ_SYSTEM_OBSOLETE);
   assert((unsigned) obj->type < HWLOC_OBJ_TYPE_MAX);
 
   /* check that sets and depth */

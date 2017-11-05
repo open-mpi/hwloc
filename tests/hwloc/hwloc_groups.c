@@ -31,6 +31,7 @@ int main(void)
   hwloc_topology_load(topology);
   /* 3 group at depth 1 */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP);
+printf("depth %d\n", depth);
   assert(depth == 1);
   width = hwloc_get_nbobjs_by_depth(topology, 1);
   assert(width == 3);

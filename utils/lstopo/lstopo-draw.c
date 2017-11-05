@@ -375,11 +375,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   else
     plud->above_children.kinds = 0;
 
-  /* system containing machines is drawn as network */
-  /* FIXME: we only use the network code for drawing systems of machines.
-   * Systems of groups (of groups ...) of machines still use boxes.
-   */
-  plud->network = network = (parent->type == HWLOC_OBJ_SYSTEM && parent->arity > 1 && parent->children[0]->type == HWLOC_OBJ_MACHINE);
+  // FIXME
+  plud->network = network = 0;
   /* must be initialized before returning below so that draw_children() works */
 
   /* bridge children always vertical */
@@ -706,13 +703,13 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   switch (obj->type) {
 
   case HWLOC_OBJ_MACHINE:
+    // FIXME
     if (obj->depth) {
       s->bg = MACHINE_COLOR;
       break;
     }
     /* Machine root printed as a System */
     /* FALLTHRU */
-  case HWLOC_OBJ_SYSTEM:
     s->bg = SYSTEM_COLOR;
     break;
 
@@ -1285,7 +1282,6 @@ static foo_draw
 get_type_fun(hwloc_obj_type_t type)
 {
   switch (type) {
-    case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_MACHINE:
     case HWLOC_OBJ_NUMANODE:
     case HWLOC_OBJ_PACKAGE:

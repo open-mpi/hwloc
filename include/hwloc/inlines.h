@@ -38,7 +38,7 @@ hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
     if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) < 0)
       return depth+1;
 
-  /* Shouldn't ever happen, as there is always a SYSTEM level with lower order and known depth.  */
+  /* Shouldn't ever happen, as there is always a Machine level with lower order and known depth.  */
   /* abort(); */
 }
 

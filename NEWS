@@ -72,6 +72,7 @@ Version 2.0.0
   + Remove the custom interface for assembling the topologies of different
     nodes as well as the hwloc-assembler tools.
   + Remove Kerrighed support from the Linux backend.
+  + Remove the now-unused "System" object type HWLOC_OBJ_SYSTEM.
   + Remove Tru64 (OSF/1) support.
     - Remove HWLOC_MEMBIND_REPLICATE which wasn't available anywhere else.
 * API

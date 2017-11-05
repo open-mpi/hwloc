@@ -226,11 +226,6 @@ The smallest physical execution unit that hwloc recognizes.  For
 example, there may be multiple PUs on a core (e.g.,
 hardware threads).
 .PP
-The additional
-.B system
-type can be used when several machines form an overall single system image
-(SSI).
-.PP
 \fBosdev\fR, \fBpcidev\fR, \fBbridge\fR, and \fBmisc\fR may also be used
 to specify special devices although some of them have dedicated identification
 ways as explained in \fBLocation Specification\fR.

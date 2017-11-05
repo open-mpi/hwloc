@@ -169,15 +169,11 @@ typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
  * hwloc_compare_types() instead.
  */
 typedef enum {
-  HWLOC_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
-  			  * The whole system that is accessible to hwloc.
-			  * That may comprise several machines in SSI systems.
-			  * This object type is currently unused in native backends.
-			  */
-  HWLOC_OBJ_TYPE_MIN =  HWLOC_OBJ_SYSTEM,   /**< \private Sentinel value */
+  _HWLOC_OBJ_SYSTEM_OBSOLETE,  /* FIXME drop and reorder */
+  HWLOC_OBJ_TYPE_MIN = _HWLOC_OBJ_SYSTEM_OBSOLETE,   /**< \private Sentinel value */
 
   HWLOC_OBJ_MACHINE,	/**< \brief Machine.
-			  * The typical root object type.
+			  * The root object type.
 			  * A set of processors and memory with cache
 			  * coherency.
 			  */
