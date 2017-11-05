@@ -778,6 +778,15 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	if (!strcasecmp(attrvalue, "Cache")) {
 	  obj->type = _HWLOC_OBJ_CACHE_OLD; /* will be fixed below */
 	  attribute_less_cache = 1;
+	} else if (!strcasecmp(attrvalue, "System")) {
+	  if (!parent)
+	    obj->type = HWLOC_OBJ_MACHINE;
+	  else {
+	    if (hwloc__xml_verbose())
+	      fprintf(stderr, "%s: obsolete System object only allowed at root\n",
+		      state->global->msgprefix);
+	    goto error_with_object;
+	  }
 	} else {
 	  if (hwloc__xml_verbose())
 	    fprintf(stderr, "%s: unrecognized object type string %s\n",
@@ -795,6 +804,11 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
       hwloc__xml_import_object_attr(topology, data, obj, attrname, attrvalue, state);
     }
+  }
+
+  if (parent && obj->type == HWLOC_OBJ_MACHINE) {
+    /* replace non-root Machine with Groups */
+    obj->type = HWLOC_OBJ_GROUP;
   }
 
   if (parent && data->version_major >= 2) {
