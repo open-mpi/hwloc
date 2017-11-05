@@ -642,7 +642,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     if (verbose)
       fprintf(stderr, "Inserting a NUMA level with a single object at depth %u\n", i);
     /* move existing levels by one */
-    memmove(&data->level[i+1], &data->level[i], (count*i)*sizeof(struct hwloc_synthetic_level_data_s));
+    memmove(&data->level[i+1], &data->level[i], (count-i)*sizeof(struct hwloc_synthetic_level_data_s));
     data->level[i].type = HWLOC_OBJ_NUMANODE;
     data->level[i].index_string = NULL;
     data->level[i].index_array = NULL;
