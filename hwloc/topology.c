@@ -4285,6 +4285,12 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
   assert(!topology->modified);
 
+  /* check that first level is Machine.
+   * Root object cannot be ignored. And Machine can only be merged into PU,
+   * but there must be a NUMA node below Machine, and it cannot be below PU.
+   */
+  assert(hwloc_get_depth_type(topology, 0) == HWLOC_OBJ_MACHINE);
+
   /* check that last level is PU and that it doesn't have memory */
   assert(hwloc_get_depth_type(topology, depth-1) == HWLOC_OBJ_PU);
   assert(hwloc_get_nbobjs_by_depth(topology, depth-1) > 0);
@@ -4294,9 +4300,11 @@ hwloc_topology_check(struct hwloc_topology *topology)
     assert(obj->type == HWLOC_OBJ_PU);
     assert(!obj->memory_first_child);
   }
-  /* check that other levels are not PU */
-  for(j=1; j<depth-1; j++)
+  /* check that other levels are not PU or Machine */
+  for(j=1; j<depth-1; j++) {
     assert(hwloc_get_depth_type(topology, j) != HWLOC_OBJ_PU);
+    assert(hwloc_get_depth_type(topology, j) != HWLOC_OBJ_MACHINE);
+  }
 
   /* check that we have a NUMA level */
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE) == HWLOC_TYPE_DEPTH_NUMANODE);

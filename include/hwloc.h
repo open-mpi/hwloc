@@ -318,7 +318,9 @@ typedef enum hwloc_obj_osdev_type_e {
  * contain packages which contain caches, which contain cores, which contain
  * processors).
  *
- * \note ::HWLOC_OBJ_PU will always be the deepest.
+ * \note ::HWLOC_OBJ_PU will always be the deepest,
+ * while ::HWLOC_OBJ_MACHINE is always the highest.
+ *
  * \note This does not mean that the actual topology will respect that order:
  * e.g. as of today cores may also contain caches, and packages may also contain
  * nodes. This is thus just to be seen as a fallback comparison method.
