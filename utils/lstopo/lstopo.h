@@ -126,8 +126,6 @@ struct lstopo_obj_userdata {
   unsigned xrel;
   unsigned yrel;
 
-  /* children connected by network? */
-  int network;
   /* children orientation */
   enum lstopo_orient_e orient;
 

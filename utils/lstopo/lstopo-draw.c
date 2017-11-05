@@ -300,7 +300,7 @@ place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent,
 static void
 place__children(struct lstopo_output *loutput, hwloc_obj_t parent,
 		unsigned kind,
-		enum lstopo_orient_e *orientp, int network,
+		enum lstopo_orient_e *orientp,
 		unsigned border, unsigned separator,
 		unsigned *widthp, unsigned *heightp)
 {
@@ -311,27 +311,6 @@ place__children(struct lstopo_output *loutput, hwloc_obj_t parent,
   } else if (*orientp == LSTOPO_ORIENT_VERT) {
     /* force vertical */
     place_children_vert(loutput, parent, kind, border, separator, widthp, heightp);
-
-  } else if (network) {
-    /* NONE or forced RECT, but network only supports horiz or vert, use the best one */
-    unsigned vwidth, vheight, hwidth, hheight;
-    float horiz_ratio, vert_ratio;
-    place_children_horiz(loutput, parent, kind, border, separator, &hwidth, &hheight);
-    horiz_ratio = (float)hwidth / hheight;
-    place_children_vert(loutput, parent, kind, border, separator, &vwidth, &vheight);
-    vert_ratio = (float)vwidth / vheight;
-    if (prefer_ratio(vert_ratio, horiz_ratio)) {
-      /* children still contain vertical placement */
-      *orientp = LSTOPO_ORIENT_VERT;
-      *widthp = vwidth;
-      *heightp = vheight;
-    } else {
-      /* must place horizontally again */
-      *orientp = LSTOPO_ORIENT_HORIZ;
-      place_children_horiz(loutput, parent, kind, border, separator, &hwidth, &hheight);
-      *widthp = hwidth;
-      *heightp = hheight;
-    }
 
   } else {
     /* NONE or forced RECT, do a rectangular placement */
@@ -354,8 +333,6 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned totwidth = plud->width, totheight = plud->height;
   unsigned children_width = 0, children_height = 0;
   unsigned above_children_width, above_children_height;
-  int network;
-  unsigned nxoff = 0, nyoff = 0;
   hwloc_obj_t child;
   int ncstate;
   unsigned i;
@@ -373,10 +350,6 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     plud->above_children.kinds = LSTOPO_CHILD_KIND_MEMORY;
   else
     plud->above_children.kinds = 0;
-
-  // FIXME
-  plud->network = network = 0;
-  /* must be initialized before returning below so that draw_children() works */
 
   /* bridge children always vertical */
   if (parent->type == HWLOC_OBJ_BRIDGE)
@@ -399,20 +372,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
   /* place non-memory children */
   if (parent->arity + parent->io_arity + parent->misc_arity)
-    place__children(loutput, parent, plud->children.kinds, &orient, network, 0, separator, &children_width, &children_height);
-
-  if (network) {
-    /* add room for network links */
-    if (orient == LSTOPO_ORIENT_VERT) {
-      children_width += separator;
-      nxoff = separator;
-    } else if (orient == LSTOPO_ORIENT_HORIZ) {
-      children_height += separator;
-      nyoff = separator;
-    } else {
-      abort();
-    }
-  }
+    place__children(loutput, parent, plud->children.kinds, &orient, 0, separator, &children_width, &children_height);
 
   /* place memory children */
   if (plud->above_children.kinds) {
@@ -422,7 +382,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     assert(plud->above_children.kinds == LSTOPO_CHILD_KIND_MEMORY);
     memory_border = parent->memory_arity > 1 ? border : 0;
 
-    place__children(loutput, parent, plud->above_children.kinds, &morient, 0, memory_border, separator, &above_children_width, &above_children_height);
+    place__children(loutput, parent, plud->above_children.kinds, &morient, memory_border, separator, &above_children_width, &above_children_height);
 
     if (parent->memory_arity > 1) {
       /* if there are multiple memory children, add a box, as large as the parent */
@@ -475,18 +435,17 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
   /* save config for draw_children() later */
   plud->orient = orient;
-  plud->network = network;
   plud->width = totwidth;
   plud->height = totheight;
   plud->children.width = children_width;
   plud->children.height = children_height;
-  plud->children.xrel = xrel + nxoff;
-  plud->children.yrel = yrel + nyoff;
+  plud->children.xrel = xrel;
+  plud->children.yrel = yrel;
   if (plud->above_children.kinds) {
     plud->above_children.width = above_children_width;
     plud->above_children.height = above_children_height;
-    plud->above_children.xrel = xrel + nxoff;
-    plud->above_children.yrel = yrel + nyoff;
+    plud->above_children.xrel = xrel;
+    plud->above_children.yrel = yrel;
     plud->children.yrel += above_children_height + separator;
   }
 }
@@ -497,54 +456,6 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
 /* additional gridsize when fontsize > 0 */
 #define FONTGRIDSIZE (fontsize ? gridsize : 0)
-
-static void
-draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
-		      unsigned x, unsigned y)
-{
-  unsigned separator = loutput->gridsize;
-  struct lstopo_obj_userdata *plud = parent->userdata;
-  enum lstopo_orient_e orient = plud->orient;
-  int ncstate;
-
-  if (orient == LSTOPO_ORIENT_HORIZ) {
-    hwloc_obj_t child;
-    unsigned xmax = (unsigned) -1;
-    unsigned xmin = (unsigned) -1;
-    for(child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
-	child;
-	child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
-      struct lstopo_obj_userdata *clud = child->userdata;
-      unsigned xmid = clud->xrel + clud->width / 2;
-      loutput->methods->line(loutput, &BLACK_COLOR, depth, x+xmid, y-separator, x+xmid, y);
-      if (xmin == (unsigned) -1)
-	xmin = xmid;
-      xmax = xmid;
-    }
-    assert(xmax != xmin);
-    loutput->methods->line(loutput, &BLACK_COLOR, depth, x+xmin, y-separator, x+xmax, y-separator);
-
-  } else if (orient == LSTOPO_ORIENT_VERT) {
-    hwloc_obj_t child;
-    unsigned ymax = (unsigned) -1;
-    unsigned ymin = (unsigned) -1;
-    for(child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
-	child;
-	child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
-      struct lstopo_obj_userdata *clud = child->userdata;
-      unsigned ymid = clud->yrel + clud->height / 2;
-      loutput->methods->line(loutput, &BLACK_COLOR, depth, x-separator, y+ymid, x, y+ymid);
-      if (ymin == (unsigned) -1)
-	ymin = ymid;
-      ymax = ymid;
-    }
-    assert(ymax != ymin);
-    loutput->methods->line(loutput, &BLACK_COLOR, depth, x-separator, y+ymin, x-separator, y+ymax);
-
-  } else {
-    assert(0);
-  }
-}
 
 static void
 draw__children(struct lstopo_output *loutput, hwloc_obj_t parent,
@@ -577,9 +488,6 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
 
   if (plud->above_children.kinds)
     draw__children(loutput, parent, &plud->above_children, depth, x + plud->above_children.xrel, y + plud->above_children.yrel);
-
-  if (plud->network)
-    draw_children_network(loutput, parent, depth, x, y);
 }
 
 /*******
