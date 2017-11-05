@@ -1844,7 +1844,7 @@ the number of such children under each object of the previous level.
 That is why the above topology contains 4 cores (2 cores times 2 nodes).
 
 These type names must be written as
-<tt>machine</tt>, <tt>node</tt>, <tt>package</tt>, <tt>core</tt>,
+<tt>machine</tt>, <tt>numanode</tt>, <tt>package</tt>, <tt>core</tt>,
 <tt>l2u</tt>, <tt>l1i</tt>, <tt>pu</tt>, <tt>group</tt>
 (hwloc_obj_type_sscanf() is used for parsing the type names).
 They do not need to be written case-sensitively, nor entirely
