@@ -98,7 +98,7 @@ int main(void)
     assert(!hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen));
   }
   printf("switching to synthetic...\n");
-  hwloc_topology_set_synthetic(topology2, "machine:2 node:3 l1:2 pu:4");
+  hwloc_topology_set_synthetic(topology2, "pack:2 node:3 l1:2 pu:4");
   hwloc_topology_destroy(topology2);
 
   /* init+xml+load+destroy */
@@ -130,7 +130,7 @@ int main(void)
   /* init+synthetic+load+destroy */
   printf("switching to synthetic and loading...\n");
   hwloc_topology_init(&topology2);
-  hwloc_topology_set_synthetic(topology2, "machine:2 node:3 l3i:2 pu:4");
+  hwloc_topology_set_synthetic(topology2, "pack:2 node:3 l3i:2 pu:4");
   hwloc_topology_load(topology2);
   assert_backend_name(topology2, "Synthetic");
   assert_foo_bar(topology2, 0);

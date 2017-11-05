@@ -390,6 +390,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   data->level[0].index_string = NULL;
   data->level[0].index_array = NULL;
   data->level[0].memorysize = 0;
+  type_count[HWLOC_OBJ_MACHINE] = 1;
   if (*description == '(') {
     err = hwloc_synthetic_parse_level_attrs(description+1, &description, &data->level[0], verbose);
     if (err < 0)
@@ -417,7 +418,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	errno = EINVAL;
 	goto error;
       }
-      if (type == HWLOC_OBJ_SYSTEM || type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
+      if (type == HWLOC_OBJ_SYSTEM || type == HWLOC_OBJ_MACHINE || type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	if (verbose)
 	  fprintf(stderr, "Synthetic string with disallowed object type at '%s'\n", pos);
 	errno = EINVAL;
@@ -542,21 +543,6 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     errno = EINVAL;
     return -1;
   }
-  if (type_count[HWLOC_OBJ_MACHINE] > 1) {
-    if (verbose)
-      fprintf(stderr, "Synthetic string cannot have several machine levels\n");
-    errno = EINVAL;
-    return -1;
-  }
-
-  /* initialize the top level (not specified in the string) */
-  if (type_count[HWLOC_OBJ_MACHINE] == 1) {
-    data->level[0].type = HWLOC_OBJ_SYSTEM;
-    type_count[HWLOC_OBJ_SYSTEM] = 1;
-  } else {
-    data->level[0].type = HWLOC_OBJ_MACHINE;
-    type_count[HWLOC_OBJ_MACHINE] = 1;
-  }
 
   /* deal with missing intermediate levels */
   unset = 0;
@@ -632,25 +618,19 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
   /* enforce a NUMA level */
   if (!type_count[HWLOC_OBJ_NUMANODE]) {
-    /* insert a NUMA level and the machine level */
-    if (data->level[1].type == HWLOC_OBJ_MACHINE)
-      /* there's an explicit machine level after the automatic system root, insert below both */
-      i = 2;
-    else
-      /* insert below the automatic machine root */
-      i = 1;
+    /* insert a NUMA level below the automatic machine root */
     if (verbose)
-      fprintf(stderr, "Inserting a NUMA level with a single object at depth %u\n", i);
+      fprintf(stderr, "Inserting a NUMA level with a single object at depth %u\n", 1);
     /* move existing levels by one */
-    memmove(&data->level[i+1], &data->level[i], (count-i)*sizeof(struct hwloc_synthetic_level_data_s));
-    data->level[i].type = HWLOC_OBJ_NUMANODE;
-    data->level[i].index_string = NULL;
-    data->level[i].index_array = NULL;
-    data->level[i].memorysize = 0;
-    data->level[i].totalwidth = data->level[i-1].totalwidth;
+    memmove(&data->level[2], &data->level[1], count*sizeof(struct hwloc_synthetic_level_data_s));
+    data->level[1].type = HWLOC_OBJ_NUMANODE;
+    data->level[1].index_string = NULL;
+    data->level[1].index_array = NULL;
+    data->level[1].memorysize = 0;
+    data->level[1].totalwidth = data->level[0].totalwidth;
     /* update arity to insert a single NUMA node per parent */
-    data->level[i].arity = data->level[i-1].arity;
-    data->level[i-1].arity = 1;
+    data->level[1].arity = data->level[0].arity;
+    data->level[0].arity = 1;
     count++;
   }
 
@@ -703,8 +683,6 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
     obj->attr->group.kind = HWLOC_GROUP_KIND_SYNTHETIC;
     obj->attr->group.subkind = curlevel->depth-1;
     break;
-  case HWLOC_OBJ_SYSTEM:
-    break;
   case HWLOC_OBJ_MACHINE:
     break;
   case HWLOC_OBJ_NUMANODE:
@@ -734,6 +712,7 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
     break;
   case HWLOC_OBJ_PU:
     break;
+  case HWLOC_OBJ_SYSTEM:
   case HWLOC_OBJ_BRIDGE:
   case HWLOC_OBJ_PCI_DEVICE:
   case HWLOC_OBJ_OS_DEVICE:
@@ -770,8 +749,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   switch (type) {
     case HWLOC_OBJ_GROUP:
       break;
-    case HWLOC_OBJ_MACHINE:
-      break;
     case HWLOC_OBJ_NUMANODE:
       break;
     case HWLOC_OBJ_PACKAGE:
@@ -789,6 +766,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_PU:
       break;
+    case HWLOC_OBJ_MACHINE:
     case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_BRIDGE:
     case HWLOC_OBJ_PCI_DEVICE:
