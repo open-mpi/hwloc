@@ -43,7 +43,6 @@ const struct lstopo_color RUNNING_COLOR = { 0, 0xff, 0 };
 const struct lstopo_color FORBIDDEN_COLOR = { 0xff, 0, 0 };
 const struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff };
 const struct lstopo_color MACHINE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
-const struct lstopo_color SYSTEM_COLOR = { 0xff, 0xff, 0xff };
 const struct lstopo_color GROUP_IN_PACKAGE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
 const struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff };
 const struct lstopo_color PCI_DEVICE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR };
@@ -703,14 +702,7 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   switch (obj->type) {
 
   case HWLOC_OBJ_MACHINE:
-    // FIXME
-    if (obj->depth) {
-      s->bg = MACHINE_COLOR;
-      break;
-    }
-    /* Machine root printed as a System */
-    /* FALLTHRU */
-    s->bg = SYSTEM_COLOR;
+    s->bg = MACHINE_COLOR;
     break;
 
   case HWLOC_OBJ_GROUP: {
@@ -1322,7 +1314,6 @@ declare_colors(struct lstopo_output *output)
   methods->declare_color(output, &FORBIDDEN_COLOR);
   methods->declare_color(output, &CACHE_COLOR);
   methods->declare_color(output, &MACHINE_COLOR);
-  methods->declare_color(output, &SYSTEM_COLOR);
   methods->declare_color(output, &GROUP_IN_PACKAGE_COLOR);
   methods->declare_color(output, &MISC_COLOR);
   methods->declare_color(output, &PCI_DEVICE_COLOR);
