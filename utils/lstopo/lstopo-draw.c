@@ -331,13 +331,13 @@ place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned 
  */
 static void
 place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
-	       unsigned *totwidth, unsigned *totheight, /* total object size */
 	       unsigned xrel, unsigned yrel /* position of children within parent */)
 {
   struct lstopo_obj_userdata *plud = parent->userdata;
   enum lstopo_orient_e orient = loutput->force_orient[parent->type];
   unsigned border = loutput->gridsize;
   unsigned separator = loutput->gridsize;
+  unsigned totwidth = plud->width, totheight = plud->height;
   unsigned childwidth, childheight;
   int network;
   unsigned nxoff = 0, nyoff = 0;
@@ -412,27 +412,29 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* adjust parent size */
   if (hwloc_obj_type_is_cache(parent->type)) {
     /* cache children are below */
-    if (childwidth > *totwidth)
-      *totwidth = childwidth;
+    if (childwidth > totwidth)
+      totwidth = childwidth;
     if (childheight)
-      *totheight += childheight + border;
+      totheight += childheight + border;
   } else if (parent->type == HWLOC_OBJ_BRIDGE) {
     /* bridge children are on the right, within any space between bridge and children */
     if (childwidth)
-      *totwidth += childwidth;
-    if (childheight > *totheight)
-      *totheight = childheight;
+      totwidth += childwidth;
+    if (childheight > totheight)
+      totheight = childheight;
   } else {
     /* normal objects have children inside their box, with space around them */
-    if (childwidth + 2*border > *totwidth)
-      *totwidth = childwidth + 2*border;
+    if (childwidth + 2*border > totwidth)
+      totwidth = childwidth + 2*border;
     if (childheight)
-      *totheight += childheight + border;
+      totheight += childheight + border;
   }
 
   /* save config for draw_children() later */
   plud->orient = orient;
   plud->network = network;
+  plud->width = totwidth;
+  plud->height = totheight;
   plud->children_xrel = xrel + nxoff;
   plud->children_yrel = yrel + nyoff;
 }
@@ -905,7 +907,6 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
   unsigned overlaidoffset = 0;
 
   if (lud->pci_collapsed > 1) {
@@ -921,16 +922,15 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
-    totwidth = lud->textwidth + gridsize + overlaidoffset + FONTGRIDSIZE;
-    totheight = fontsize + gridsize + overlaidoffset + FONTGRIDSIZE;
-    place_children(loutput, level, &totwidth, &totheight,
+    lud->width = lud->textwidth + gridsize + overlaidoffset + FONTGRIDSIZE;
+    lud->height = fontsize + gridsize + overlaidoffset + FONTGRIDSIZE;
+    place_children(loutput, level,
 		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
-    lud->width = totwidth;
-    lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct style style;
+    unsigned totwidth, totheight;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
@@ -963,21 +963,19 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
   unsigned speedwidth = fontsize ? fontsize + gridsize : 0;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    totwidth = 2*gridsize + gridsize + speedwidth;
-    totheight = gridsize + FONTGRIDSIZE;
-    place_children(loutput, level, &totwidth, &totheight,
+    lud->width = 2*gridsize + gridsize + speedwidth;
+    lud->height = gridsize + FONTGRIDSIZE;
+    place_children(loutput, level,
 		   3*gridsize + speedwidth, 0);
-    lud->width = totwidth;
-    lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct style style;
+    unsigned totwidth, totheight;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
@@ -1031,21 +1029,19 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
-    totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
-    totheight = fontsize + gridsize + FONTGRIDSIZE;
-    place_children(loutput, level, &totwidth, &totheight,
+    lud->width = lud->textwidth + gridsize + FONTGRIDSIZE;
+    lud->height = fontsize + gridsize + FONTGRIDSIZE;
+    place_children(loutput, level,
 		   0, fontsize + 2*gridsize + FONTGRIDSIZE);
-    lud->width = totwidth;
-    lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct style style;
+    unsigned totwidth, totheight;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
@@ -1067,21 +1063,19 @@ node_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsi
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
-    totwidth = lud->textwidth + 3*gridsize + FONTGRIDSIZE;
-    totheight = fontsize + 3*gridsize + FONTGRIDSIZE;
-    place_children(loutput, level, &totwidth, &totheight,
+    lud->width = lud->textwidth + 3*gridsize + FONTGRIDSIZE;
+    lud->height = fontsize + 3*gridsize + FONTGRIDSIZE;
+    place_children(loutput, level,
 		   gridsize, fontsize + 3*gridsize + FONTGRIDSIZE);
-    lud->width = totwidth;
-    lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct style style;
+    unsigned totwidth, totheight;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
@@ -1105,21 +1099,19 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned totwidth, totheight;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
-    totwidth = lud->textwidth + gridsize + FONTGRIDSIZE;
-    totheight = gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext;
-    place_children(loutput, level, &totwidth, &totheight,
+    lud->width = lud->textwidth + gridsize + FONTGRIDSIZE;
+    lud->height = gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext;
+    place_children(loutput, level,
 		   gridsize, gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext);
-    lud->width = totwidth;
-    lud->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct style style;
+    unsigned totwidth, totheight;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
