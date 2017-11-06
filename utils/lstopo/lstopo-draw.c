@@ -1129,15 +1129,22 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     struct draw_methods *methods = loutput->methods;
     struct style style;
     unsigned totwidth, totheight;
+    unsigned myoff = 0;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
     totheight = lud->height;
 
-    lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, myheight);
+    if (level->memory_arity) {
+      /* display above_children even above the cache itself */
+      myoff = lud->above_children.height + gridsize;
+      lud->above_children.yrel = 0;
+    }
 
-    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
+    lstopo_set_object_color(loutput, level, &style);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y + myoff, myheight);
+
+    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize + myoff);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
