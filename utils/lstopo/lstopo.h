@@ -100,8 +100,12 @@ struct lstopo_obj_userdata {
 
   /* a child position is: its parent position + parent->children_*rel + child->*rel */
   /* relative position of first child with respect to top-left corner of this object */
-  unsigned children_xrel;
-  unsigned children_yrel;
+  struct lstopo_children_position {
+    unsigned width;
+    unsigned height;
+    unsigned xrel;
+    unsigned yrel;
+  } children;
   /* relative position of this object within its parent children zone */
   unsigned xrel;
   unsigned yrel;

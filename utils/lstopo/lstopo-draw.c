@@ -472,8 +472,10 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   plud->network = network;
   plud->width = totwidth;
   plud->height = totheight;
-  plud->children_xrel = xrel + nxoff;
-  plud->children_yrel = yrel + nyoff;
+  plud->children.width = children_width;
+  plud->children.height = children_height;
+  plud->children.xrel = xrel + nxoff;
+  plud->children.yrel = yrel + nyoff;
 }
 
 /***********************
@@ -537,8 +539,8 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
   int ncstate;
 
   /* add children zone offset to the parent top-left corner */
-  x += plud->children_xrel;
-  y += plud->children_yrel;
+  x += plud->children.xrel;
+  y += plud->children.yrel;
 
   for(child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, NULL, &ncstate);
       child;
