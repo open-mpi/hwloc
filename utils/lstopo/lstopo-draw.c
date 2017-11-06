@@ -1065,14 +1065,15 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  unsigned myheight = fontsize + gridsize + FONTGRIDSIZE; /* totheight also contains children outside of this actual cache box */
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
     lud->width = lud->textwidth + gridsize + FONTGRIDSIZE;
-    lud->height = fontsize + gridsize + FONTGRIDSIZE;
+    lud->height = myheight;
     place_children(loutput, level,
-		   0, fontsize + 2*gridsize + FONTGRIDSIZE);
+		   0, myheight + gridsize);
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
@@ -1084,7 +1085,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     totheight = lud->height;
 
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, fontsize + gridsize + FONTGRIDSIZE /* totheight also contains children below this box */);
+    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, myheight);
 
     draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
 
