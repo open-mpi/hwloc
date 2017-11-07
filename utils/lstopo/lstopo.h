@@ -80,6 +80,12 @@ struct style {
 	t2;	/* other text color */
 };
 
+#define LSTOPO_CHILD_KIND_NORMAL 0x1
+#define LSTOPO_CHILD_KIND_MEMORY 0x2
+#define LSTOPO_CHILD_KIND_IO     0x4
+#define LSTOPO_CHILD_KIND_MISC   0x8
+#define LSTOPO_CHILD_KIND_ALL    0xf
+
 struct lstopo_obj_userdata {
   /* original common userdata (we replace the first one with this extended structure) */
   struct hwloc_utils_userdata common;
@@ -101,6 +107,7 @@ struct lstopo_obj_userdata {
   /* a child position is: its parent position + parent->children_*rel + child->*rel */
   /* relative position of first child with respect to top-left corner of this object */
   struct lstopo_children_position {
+    unsigned kinds;
     unsigned width;
     unsigned height;
     unsigned xrel;

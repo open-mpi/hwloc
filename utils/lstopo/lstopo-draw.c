@@ -140,11 +140,6 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 /* next child, in all children list, with memory before CPU, ignoring PU if needed.
  * similar to hwloc_get_next_child() but returns memory children first.
  */
-#define NEXT_CHILD_KIND_NORMAL 0x1
-#define NEXT_CHILD_KIND_MEMORY 0x2
-#define NEXT_CHILD_KIND_IO     0x4
-#define NEXT_CHILD_KIND_MISC   0x8
-#define NEXT_CHILD_KIND_ALL    0xf
 #define NEXT_CHILD_INIT_STATE -1
 static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned kind, hwloc_obj_t prev, int *statep)
 {
@@ -160,19 +155,19 @@ static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent,
   }
 
  again:
-  if (!obj && state <= -1 && (kind & NEXT_CHILD_KIND_MEMORY)) {
+  if (!obj && state <= -1 && (kind & LSTOPO_CHILD_KIND_MEMORY)) {
     obj = parent->memory_first_child;
     state = 0;
   }
-  if (!obj && state <= 0 && (kind & NEXT_CHILD_KIND_NORMAL)) {
+  if (!obj && state <= 0 && (kind & LSTOPO_CHILD_KIND_NORMAL)) {
     obj = parent->first_child;
     state = 1;
   }
-  if (!obj && state <= 1 && (kind & NEXT_CHILD_KIND_IO)) {
+  if (!obj && state <= 1 && (kind & LSTOPO_CHILD_KIND_IO)) {
     obj = parent->io_first_child;
     state = 2;
   }
-  if (!obj && state <= 2 && (kind & NEXT_CHILD_KIND_MISC)) {
+  if (!obj && state <= 2 && (kind & LSTOPO_CHILD_KIND_MISC)) {
     obj = parent->misc_first_child;
     state = 3;
   }
@@ -408,6 +403,13 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   int ncstate;
   unsigned i;
 
+  /* select which children kinds go where */
+  plud->children.kinds = LSTOPO_CHILD_KIND_ALL & ~LSTOPO_CHILD_KIND_MEMORY;
+  if (parent->memory_arity && !(plud->children.kinds & LSTOPO_CHILD_KIND_MEMORY))
+    plud->above_children.kinds = LSTOPO_CHILD_KIND_MEMORY;
+  else
+    plud->above_children.kinds = 0;
+
   /* system containing machines is drawn as network */
   /* FIXME: we only use the network code for drawing systems of machines.
    * Systems of groups (of groups ...) of machines still use boxes.
@@ -420,9 +422,9 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     orient = LSTOPO_ORIENT_VERT;
 
   /* recurse into children to prepare their sizes */
-  for(i = 0, child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, NULL, &ncstate);
+  for(i = 0, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
       child;
-      i++, child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, child, &ncstate)) {
+      i++, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
     get_type_fun(child->type)(loutput, child, 0, 0, 0);
   }
   if (!i)
@@ -435,7 +437,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     separator = 0;
 
   /* place non-memory children */
-  place__children(loutput, parent, NEXT_CHILD_KIND_ALL & ~NEXT_CHILD_KIND_MEMORY, &orient, network, 0, separator, &children_width, &children_height);
+  place__children(loutput, parent, plud->children.kinds, &orient, network, 0, separator, &children_width, &children_height);
+
   if (network) {
     /* add room for network links */
     if (orient == LSTOPO_ORIENT_VERT) {
@@ -450,10 +453,15 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   }
 
   /* place memory children */
-  if (parent->memory_first_child) {
+  if (plud->above_children.kinds) {
     enum lstopo_orient_e morient = LSTOPO_ORIENT_HORIZ;
-    unsigned memory_border = parent->memory_arity > 1 ? border : 0;
-    place__children(loutput, parent, NEXT_CHILD_KIND_MEMORY, &morient, 0, memory_border, separator, &above_children_width, &above_children_height);
+    unsigned memory_border;
+
+    assert(plud->above_children.kinds == LSTOPO_CHILD_KIND_MEMORY);
+    memory_border = parent->memory_arity > 1 ? border : 0;
+
+    place__children(loutput, parent, plud->above_children.kinds, &morient, 0, memory_border, separator, &above_children_width, &above_children_height);
+
     if (parent->memory_arity > 1) {
       /* if there are multiple memory children, make the box as large as possible */
       if (above_children_width < children_width) {
@@ -477,7 +485,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       totwidth = children_width;
     if (children_height)
       totheight += children_height + border;
-    if (parent->memory_first_child) {
+    if (plud->above_children.kinds) {
       totheight += above_children_height + separator;
       if (above_children_width > totwidth)
 	totwidth = above_children_width + 2*border;
@@ -494,7 +502,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       totwidth = children_width + 2*border;
     if (children_height)
       totheight += children_height + border;
-    if (parent->memory_first_child) {
+    if (plud->above_children.kinds) {
       totheight += above_children_height + separator;
       if (above_children_width + 2*border > totwidth)
 	totwidth = above_children_width + 2*border;
@@ -510,7 +518,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   plud->children.height = children_height;
   plud->children.xrel = xrel + nxoff;
   plud->children.yrel = yrel + nyoff;
-  if (parent->memory_first_child) {
+  if (plud->above_children.kinds) {
     plud->above_children.width = above_children_width;
     plud->above_children.height = above_children_height;
     plud->above_children.xrel = xrel + nxoff;
@@ -539,9 +547,9 @@ draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigne
     hwloc_obj_t child;
     unsigned xmax;
     unsigned xmin = (unsigned) -1;
-    for(child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, NULL, &ncstate);
+    for(child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
 	child;
-	child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, child, &ncstate)) {
+	child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
       struct lstopo_obj_userdata *clud = child->userdata;
       unsigned xmid = clud->xrel + clud->width / 2;
       loutput->methods->line(loutput, 0, 0, 0, depth, x+xmid, y-separator, x+xmid, y);
@@ -556,9 +564,9 @@ draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigne
     hwloc_obj_t child;
     unsigned ymax;
     unsigned ymin = (unsigned) -1;
-    for(child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, NULL, &ncstate);
+    for(child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
 	child;
-	child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL, child, &ncstate)) {
+	child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
       struct lstopo_obj_userdata *clud = child->userdata;
       unsigned ymid = clud->yrel + clud->height / 2;
       loutput->methods->line(loutput, 0, 0, 0, depth, x-separator, y+ymid, x, y+ymid);
@@ -584,22 +592,28 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
   unsigned fontsize = loutput->fontsize;
   int ncstate;
 
-  for(child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL & ~NEXT_CHILD_KIND_MEMORY, NULL, &ncstate);
-      child;
-      child = next_child(loutput, parent, NEXT_CHILD_KIND_ALL & ~NEXT_CHILD_KIND_MEMORY, child, &ncstate)) {
-    struct lstopo_obj_userdata *clud = child->userdata;
-    get_type_fun(child->type)(loutput, child, depth, x + plud->children.xrel + clud->xrel, y + plud->children.yrel + clud->yrel);
+  if (plud->children.kinds) {
+    for(child = next_child(loutput, parent, plud->children.kinds, NULL, &ncstate);
+	child;
+	child = next_child(loutput, parent, plud->children.kinds, child, &ncstate)) {
+      struct lstopo_obj_userdata *clud = child->userdata;
+      get_type_fun(child->type)(loutput, child, depth, x + plud->children.xrel + clud->xrel, y + plud->children.yrel + clud->yrel);
+    }
   }
 
-  if (parent->memory_arity > 1) {
-    loutput->methods->box(loutput, MEMORIES_R_COLOR, MEMORIES_G_COLOR, MEMORIES_B_COLOR, depth, x + plud->above_children.xrel, plud->above_children.width, y + plud->above_children.yrel, plud->above_children.height);
-  }
+  if (plud->above_children.kinds) {
+    assert(plud->above_children.kinds == LSTOPO_CHILD_KIND_MEMORY);
 
-  for(child = next_child(loutput, parent, NEXT_CHILD_KIND_MEMORY, NULL, &ncstate);
-      child;
-      child = next_child(loutput, parent, NEXT_CHILD_KIND_MEMORY, child, &ncstate)) {
-    struct lstopo_obj_userdata *clud = child->userdata;
-    get_type_fun(child->type)(loutput, child, depth - 1, x + plud->above_children.xrel + clud->xrel, y + plud->above_children.yrel + clud->yrel);
+    if (parent->memory_arity > 1) {
+      loutput->methods->box(loutput, MEMORIES_R_COLOR, MEMORIES_G_COLOR, MEMORIES_B_COLOR, depth, x + plud->above_children.xrel, plud->above_children.width, y + plud->above_children.yrel, plud->above_children.height);
+    }
+
+    for(child = next_child(loutput, parent, plud->above_children.kinds, NULL, &ncstate);
+	child;
+	child = next_child(loutput, parent, plud->above_children.kinds, child, &ncstate)) {
+      struct lstopo_obj_userdata *clud = child->userdata;
+      get_type_fun(child->type)(loutput, child, depth - 1, x + plud->above_children.xrel + clud->xrel, y + plud->above_children.yrel + clud->yrel);
+    }
   }
 
   if (plud->network)
@@ -1076,7 +1090,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
       unsigned ymax = -1;
       unsigned ymin = (unsigned) -1;
       int ncstate;
-      while ((child=next_child(loutput, level, NEXT_CHILD_KIND_ALL, child, &ncstate)) != NULL) {
+      while ((child=next_child(loutput, level, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) != NULL) {
 	struct lstopo_obj_userdata *clud = child->userdata;
 	unsigned ymid = y + clud->yrel + BRIDGE_HEIGHT/2;
 	/* Line to PCI device */
@@ -1135,7 +1149,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     totwidth = lud->width;
     totheight = lud->height;
 
-    if (level->memory_arity) {
+    if (lud->above_children.kinds) {
       /* display above_children even above the cache itself */
       myoff = lud->above_children.height + gridsize;
       lud->above_children.yrel = 0;
