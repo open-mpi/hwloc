@@ -112,6 +112,8 @@ struct lstopo_obj_userdata {
     unsigned height;
     unsigned xrel;
     unsigned yrel;
+    unsigned box;
+    struct stylecolor boxcolor;
   } children;
   /* relative position of first memory child */
   struct lstopo_children_position above_children;

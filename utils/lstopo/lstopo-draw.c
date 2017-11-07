@@ -463,10 +463,15 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     place__children(loutput, parent, plud->above_children.kinds, &morient, 0, memory_border, separator, &above_children_width, &above_children_height);
 
     if (parent->memory_arity > 1) {
-      /* if there are multiple memory children, make the box as large as possible */
+      /* if there are multiple memory children, add a box, as large as the parent */
       if (above_children_width < children_width) {
 	above_children_width = children_width;
       }
+      plud->above_children.boxcolor.r = MEMORIES_R_COLOR;
+      plud->above_children.boxcolor.g = MEMORIES_G_COLOR;
+      plud->above_children.boxcolor.b = MEMORIES_B_COLOR;
+      plud->above_children.box = 1;
+
     } else {
       /* if there's a single memory child without wide memory box, enlarge that child */
       hwloc_obj_t child = parent->memory_first_child;
@@ -475,6 +480,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 	clud->width = children_width;
 	above_children_width = children_width;
       }
+      plud->above_children.box = 0;
     }
   }
 
@@ -602,10 +608,8 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
   }
 
   if (plud->above_children.kinds) {
-    assert(plud->above_children.kinds == LSTOPO_CHILD_KIND_MEMORY);
-
-    if (parent->memory_arity > 1) {
-      loutput->methods->box(loutput, MEMORIES_R_COLOR, MEMORIES_G_COLOR, MEMORIES_B_COLOR, depth, x + plud->above_children.xrel, plud->above_children.width, y + plud->above_children.yrel, plud->above_children.height);
+    if (plud->above_children.box) {
+      loutput->methods->box(loutput, plud->above_children.boxcolor.r, plud->above_children.boxcolor.g, plud->above_children.boxcolor.b, depth, x + plud->above_children.xrel, plud->above_children.width, y + plud->above_children.yrel, plud->above_children.height);
     }
 
     for(child = next_child(loutput, parent, plud->above_children.kinds, NULL, &ncstate);
