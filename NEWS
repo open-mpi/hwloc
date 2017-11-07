@@ -98,6 +98,8 @@ Version 2.0.0
     in hwloc/linux.h.
 * Tools
   - lstopo and hwloc-info have a new --filter option matching the new filtering API.
+  - lstopo can be given --children-layout=plain to force a basic displaying
+    of memory and normal children together below their parent.
   - hwloc-distances was removed and replaced with lstopo --distances.
 * Plugin API
   + hwloc_fill_object_sets() is renamed into hwloc_obj_add_children_sets().

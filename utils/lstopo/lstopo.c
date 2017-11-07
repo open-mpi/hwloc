@@ -462,6 +462,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "  --whole-system        Do not consider administration limitations\n");
   fprintf (where, "Graphical output options:\n");
+  fprintf (where, "  --children-order=plain\n"
+		  "                        Display memory children below the parent like any other child\n");
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 10         Set size of margin between elements\n");
   fprintf (where, "  --horiz[=<type,...>]  Horizontal graphical layout instead of nearly 4/3 ratio\n");
@@ -585,6 +587,7 @@ main (int argc, char *argv[])
   loutput.backend_data = NULL;
   loutput.methods = NULL;
 
+  loutput.plain_children_order = 0;
   loutput.fontsize = 10;
   loutput.gridsize = 10;
   for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
@@ -832,6 +835,14 @@ main (int argc, char *argv[])
         }
       }
 
+      else if (!strncmp (argv[0], "--children-order=", 18)) {
+	char *tmp = argv[0]+18;
+	argv[0][17] = '\0';
+	if (!strcmp(tmp, "plain"))
+	  loutput.plain_children_order = 1;
+	else if (strcmp(tmp, "memoryabove"))
+	  fprintf(stderr, "Unsupported order `%s' passed to %s, ignoring.\n", tmp, argv[0]);
+      }
       else if (!strcmp (argv[0], "--fontsize")) {
 	if (argc < 2)
 	  goto out_usagefailure;

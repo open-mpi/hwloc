@@ -62,6 +62,7 @@ struct lstopo_output {
   int show_taskset;
 
   /* draw config */
+  unsigned plain_children_order;
   unsigned int gridsize, fontsize;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
   void *backend_data;
