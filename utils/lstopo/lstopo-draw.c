@@ -403,6 +403,10 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   int ncstate;
   unsigned i;
 
+  /* defaults */
+  plud->children.box = 0;
+  plud->above_children.box = 0;
+
   /* select which children kinds go where */
   plud->children.kinds = LSTOPO_CHILD_KIND_ALL & ~LSTOPO_CHILD_KIND_MEMORY;
   if (parent->memory_arity && !(plud->children.kinds & LSTOPO_CHILD_KIND_MEMORY))
@@ -480,7 +484,6 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 	clud->width = children_width;
 	above_children_width = children_width;
       }
-      plud->above_children.box = 0;
     }
   }
 
@@ -589,36 +592,36 @@ draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigne
 }
 
 static void
+draw__children(struct lstopo_output *loutput, hwloc_obj_t parent,
+	       struct lstopo_children_position *children,
+	       unsigned depth,
+	       unsigned x, unsigned y)
+{
+  hwloc_obj_t child;
+  int ncstate;
+
+  if (children->box)
+    loutput->methods->box(loutput, children->boxcolor.r, children->boxcolor.g, children->boxcolor.b, depth, x, children->width, y, children->height);
+
+  for(child = next_child(loutput, parent, children->kinds, NULL, &ncstate);
+      child;
+      child = next_child(loutput, parent, children->kinds, child, &ncstate)) {
+      struct lstopo_obj_userdata *clud = child->userdata;
+      get_type_fun(child->type)(loutput, child, depth-1, x + clud->xrel, y + clud->yrel);
+    }
+}
+
+static void
 draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
 	      unsigned x, unsigned y)
 {
   struct lstopo_obj_userdata *plud = parent->userdata;
-  hwloc_obj_t child;
-  unsigned gridsize = loutput->gridsize;
-  unsigned fontsize = loutput->fontsize;
-  int ncstate;
 
-  if (plud->children.kinds) {
-    for(child = next_child(loutput, parent, plud->children.kinds, NULL, &ncstate);
-	child;
-	child = next_child(loutput, parent, plud->children.kinds, child, &ncstate)) {
-      struct lstopo_obj_userdata *clud = child->userdata;
-      get_type_fun(child->type)(loutput, child, depth, x + plud->children.xrel + clud->xrel, y + plud->children.yrel + clud->yrel);
-    }
-  }
+  if (plud->children.kinds)
+    draw__children(loutput, parent, &plud->children, depth, x + plud->children.xrel, y + plud->children.yrel);
 
-  if (plud->above_children.kinds) {
-    if (plud->above_children.box) {
-      loutput->methods->box(loutput, plud->above_children.boxcolor.r, plud->above_children.boxcolor.g, plud->above_children.boxcolor.b, depth, x + plud->above_children.xrel, plud->above_children.width, y + plud->above_children.yrel, plud->above_children.height);
-    }
-
-    for(child = next_child(loutput, parent, plud->above_children.kinds, NULL, &ncstate);
-	child;
-	child = next_child(loutput, parent, plud->above_children.kinds, child, &ncstate)) {
-      struct lstopo_obj_userdata *clud = child->userdata;
-      get_type_fun(child->type)(loutput, child, depth - 1, x + plud->above_children.xrel + clud->xrel, y + plud->above_children.yrel + clud->yrel);
-    }
-  }
+  if (plud->above_children.kinds)
+    draw__children(loutput, parent, &plud->above_children, depth, x + plud->above_children.xrel, y + plud->above_children.yrel);
 
   if (plud->network)
     draw_children_network(loutput, parent, depth, x, y);
