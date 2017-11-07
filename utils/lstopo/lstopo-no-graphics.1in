@@ -210,6 +210,21 @@ machine are shown.  On Linux, kernel threads are not shown.
 If many processes appear, the output may become hard to read anyway,
 making the hwloc-ps program more practical.
 .TP
+\fB\-\-children\-order=<order>\fR
+Change the order of the different kinds of children with respect to
+their parent in the graphical output.
+
+The default order is \fImemoryabove\fR:
+it displays memory children above other children
+(and above the parent if it is a cache).
+PUs are therefore below their local NUMA nodes, like hwloc 1.x did.
+
+If the order is changed to \fIplain\fR, lstopo displays the topology
+in a basic manner that strictly matches the actual tree:
+memory children are listed below their parent just like any other child.
+PUs are therefore on the side of their local NUMA nodes,
+below a common ancestor.
+.TP
 \fB\-\-fontsize\fR <size>
 Set size of text font.
 .TP

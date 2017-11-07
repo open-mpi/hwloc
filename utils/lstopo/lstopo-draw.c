@@ -408,7 +408,10 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   plud->above_children.box = 0;
 
   /* select which children kinds go where */
-  plud->children.kinds = LSTOPO_CHILD_KIND_ALL & ~LSTOPO_CHILD_KIND_MEMORY;
+  if (loutput->plain_children_order)
+    plud->children.kinds = LSTOPO_CHILD_KIND_ALL;
+  else
+    plud->children.kinds = LSTOPO_CHILD_KIND_ALL & ~LSTOPO_CHILD_KIND_MEMORY;
   if (parent->memory_arity && !(plud->children.kinds & LSTOPO_CHILD_KIND_MEMORY))
     plud->above_children.kinds = LSTOPO_CHILD_KIND_MEMORY;
   else
