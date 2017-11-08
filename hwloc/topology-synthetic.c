@@ -708,6 +708,12 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
   case HWLOC_OBJ_MACHINE:
     break;
   case HWLOC_OBJ_NUMANODE:
+    obj->memory.local_memory = curlevel->memorysize;
+    obj->memory.page_types_len = 1;
+    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+    memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
+    obj->memory.page_types[0].size = 4096;
+    obj->memory.page_types[0].count = curlevel->memorysize / 4096;
     break;
   case HWLOC_OBJ_PACKAGE:
     break;
@@ -736,14 +742,6 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
     /* Should never happen */
     assert(0);
     break;
-  }
-  if (curlevel->memorysize && !hwloc_obj_type_is_cache(obj->type)) {
-    obj->memory.local_memory = curlevel->memorysize;
-    obj->memory.page_types_len = 1;
-    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-    memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
-    obj->memory.page_types[0].size = 4096;
-    obj->memory.page_types[0].count = curlevel->memorysize / 4096;
   }
 }
 
