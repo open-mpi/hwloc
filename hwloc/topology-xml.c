@@ -188,8 +188,16 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	      state->global->msgprefix);
   }
 
-  else if (!strcmp(name, "local_memory"))
-    obj->memory.local_memory = strtoull(value, NULL, 10);
+  else if (!strcmp(name, "local_memory")) {
+    unsigned long long lvalue = strtoull(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_NUMANODE)
+      obj->memory.local_memory = lvalue;
+    else if (!obj->parent)
+      topology->machine_memory.local_memory = lvalue;
+    else if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring local_memory attribute for non-NUMAnode non-root object\n",
+	      state->global->msgprefix);
+  }
 
   else if (!strcmp(name, "depth")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
@@ -395,58 +403,42 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
        */
       if (!strcmp(name, "memory_kB")) {
 	unsigned long long lvalue = strtoull(value, NULL, 10);
-	switch (obj->type) {
-	case _HWLOC_OBJ_CACHE_OLD:
+	if (obj->type == _HWLOC_OBJ_CACHE_OLD)
 	  obj->attr->cache.size = lvalue << 10;
-	  break;
-	case HWLOC_OBJ_NUMANODE:
-	case HWLOC_OBJ_MACHINE:
-	case HWLOC_OBJ_SYSTEM:
+	else if (obj->type == HWLOC_OBJ_NUMANODE)
 	  obj->memory.local_memory = lvalue << 10;
-	  break;
-	default:
-	  if (hwloc__xml_verbose())
-	    fprintf(stderr, "%s: ignoring memory_kB attribute for object type without memory\n",
-		    state->global->msgprefix);
-	  break;
-	}
+	else if (!obj->parent)
+	  topology->machine_memory.local_memory = lvalue << 10;
+	else if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: ignoring memory_kB attribute for non-NUMAnode non-root object\n",
+		  state->global->msgprefix);
       }
       else if (!strcmp(name, "huge_page_size_kB")) {
 	unsigned long lvalue = strtoul(value, NULL, 10);
-	switch (obj->type) {
-	case HWLOC_OBJ_NUMANODE:
-	case HWLOC_OBJ_MACHINE:
-	case HWLOC_OBJ_SYSTEM:
-	  if (!obj->memory.page_types) {
-	    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-	    obj->memory.page_types_len = 1;
+	if (obj->type == HWLOC_OBJ_NUMANODE || !obj->parent) {
+	  struct hwloc_obj_memory_s *memory = obj->type == HWLOC_OBJ_NUMANODE ? &obj->memory : &topology->machine_memory;
+	  if (!memory->page_types) {
+	    memory->page_types = malloc(sizeof(*memory->page_types));
+	    memory->page_types_len = 1;
 	  }
-	  obj->memory.page_types[0].size = lvalue << 10;
-	  break;
-	default:
-	  if (hwloc__xml_verbose())
-	    fprintf(stderr, "%s: ignoring huge_page_size_kB attribute for object type without huge pages\n",
-		    state->global->msgprefix);
-	  break;
+	  memory->page_types[0].size = lvalue << 10;
+	} else if (hwloc__xml_verbose()) {
+	  fprintf(stderr, "%s: ignoring huge_page_size_kB attribute for non-NUMAnode non-root object\n",
+		  state->global->msgprefix);
 	}
       }
       else if (!strcmp(name, "huge_page_free")) {
 	unsigned long lvalue = strtoul(value, NULL, 10);
-	switch (obj->type) {
-	case HWLOC_OBJ_NUMANODE:
-	case HWLOC_OBJ_MACHINE:
-	case HWLOC_OBJ_SYSTEM:
-	  if (!obj->memory.page_types) {
-	    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-	    obj->memory.page_types_len = 1;
+	if (obj->type == HWLOC_OBJ_NUMANODE || !obj->parent) {
+	  struct hwloc_obj_memory_s *memory = obj->type == HWLOC_OBJ_NUMANODE ? &obj->memory : &topology->machine_memory;
+	  if (!memory->page_types) {
+	    memory->page_types = malloc(sizeof(*memory->page_types));
+	    memory->page_types_len = 1;
 	  }
-	  obj->memory.page_types[0].count = lvalue;
-	  break;
-	default:
-	  if (hwloc__xml_verbose())
-	    fprintf(stderr, "%s: ignoring huge_page_free attribute for object type without huge pages\n",
-		    state->global->msgprefix);
-	  break;
+	  memory->page_types[0].count = lvalue;
+	} else if (hwloc__xml_verbose()) {
+	  fprintf(stderr, "%s: ignoring huge_page_free attribute for non-NUMAnode non-root object\n",
+		  state->global->msgprefix);
 	}
       }
       /* end of deprecated from 0.9 */
@@ -497,7 +489,7 @@ hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
 }
 
 static int
-hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj,
+hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, struct hwloc_obj_memory_s *memory,
 			   hwloc__xml_import_state_t state)
 {
   uint64_t size = 0, count = 0;
@@ -515,14 +507,14 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, h
   }
 
   if (size) {
-    unsigned idx = obj->memory.page_types_len;
+    unsigned idx = memory->page_types_len;
     struct hwloc_obj_memory_page_type_s *tmp;
-    tmp = realloc(obj->memory.page_types, (idx+1)*sizeof(*obj->memory.page_types));
+    tmp = realloc(memory->page_types, (idx+1)*sizeof(*memory->page_types));
     if (tmp) { /* if failed to allocate, ignore this page_type entry */
-      obj->memory.page_types = tmp;
-      obj->memory.page_types_len = idx+1;
-      obj->memory.page_types[idx].size = size;
-      obj->memory.page_types[idx].count = count;
+      memory->page_types = tmp;
+      memory->page_types_len = idx+1;
+      memory->page_types[idx].size = size;
+      memory->page_types[idx].count = count;
     }
   }
 
@@ -1028,8 +1020,19 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj,
 				     &childrengotignored,
 				     &childstate);
+
     } else if (!strcmp(tag, "page_type")) {
-      ret = hwloc__xml_import_pagetype(topology, obj, &childstate);
+      if (obj->type == HWLOC_OBJ_NUMANODE) {
+	ret = hwloc__xml_import_pagetype(topology, &obj->memory, &childstate);
+      } else if (!parent) {
+	ret = hwloc__xml_import_pagetype(topology, &topology->machine_memory, &childstate);
+      } else {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
+		  state->global->msgprefix, tag);
+	ret = -1;
+      }
+
     } else if (!strcmp(tag, "info")) {
       ret = hwloc__xml_import_info(topology, obj, &childstate);
     } else if (data->version_major < 2 && !strcmp(tag, "distances")) {

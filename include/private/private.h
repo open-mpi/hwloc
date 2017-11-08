@@ -150,6 +150,12 @@ struct hwloc_topology {
   float grouping_accuracies[5];
   unsigned grouping_next_subkind;
 
+  /* machine-wide memory.
+   * temporarily stored there by OSes that only provide this without NUMA information,
+   * and actually used later by the core.
+   */
+  struct hwloc_obj_memory_s machine_memory;
+
   /* list of enabled backends. */
   struct hwloc_backend * backends;
   unsigned backend_excludes;

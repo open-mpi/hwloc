@@ -891,6 +891,10 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   new->userdata_import_cb = old->userdata_import_cb;
   new->userdata_not_decoded = old->userdata_not_decoded;
 
+  assert(!old->machine_memory.local_memory);
+  assert(!old->machine_memory.page_types_len);
+  assert(!old->machine_memory.page_types);
+
   for(i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++)
     new->type_depth[i] = old->type_depth[i];
 
@@ -3006,9 +3010,15 @@ next_cpubackend:
     node->nodeset = hwloc_bitmap_alloc();
     /* other nodesets will be filled below */
     hwloc_bitmap_set(node->nodeset, 0);
-    memcpy(&node->memory, &topology->levels[0][0]->memory, sizeof(node->memory));
-    memset(&topology->levels[0][0]->memory, 0, sizeof(node->memory));
+    memcpy(&node->memory, &topology->machine_memory, sizeof(node->memory));
+    memset(&topology->machine_memory, 0, sizeof(topology->machine_memory));
     hwloc_insert_object_by_cpuset(topology, node);
+  } else {
+    /* if we're sure we found all NUMA nodes without their sizes (x86 backend?),
+     * we could split topology->total_memory in all of them.
+     */
+    free(topology->machine_memory.page_types);
+    memset(&topology->machine_memory, 0, sizeof(topology->machine_memory));
   }
 
   hwloc_debug("%s", "\nFixup root sets\n");
@@ -3158,6 +3168,11 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = hwloc_tma_malloc (topology->tma, sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
+
+  /* Machine-wide memory */
+  topology->machine_memory.local_memory = 0;
+  topology->machine_memory.page_types_len = 0;
+  topology->machine_memory.page_types = NULL;
 
   /* NULLify other special levels */
   memset(&topology->slevels, 0, sizeof(topology->slevels));
@@ -3435,6 +3450,7 @@ hwloc_topology_clear (struct hwloc_topology *topology)
     free(topology->levels[l]);
   for(l=0; l<HWLOC_NR_SLEVELS; l++)
     free(topology->slevels[l].objs);
+  free(topology->machine_memory.page_types);
 }
 
 void

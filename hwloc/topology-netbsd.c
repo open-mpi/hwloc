@@ -141,7 +141,7 @@ hwloc_netbsd_node_meminfo_info(struct hwloc_topology *topology)
   unsigned long physmem;
   size_t len = sizeof(physmem);
   sysctl(mib, 2, &physmem, &len, NULL, 0);
-  topology->levels[0][0]->memory.local_memory = physmem;
+  topology->machine_memory.local_memory = physmem;
 }
 #endif
 

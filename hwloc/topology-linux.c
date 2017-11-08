@@ -2404,7 +2404,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
     } else {
       /* get hugepage size from machine-specific meminfo since there is no size in node-specific meminfo,
        * hwloc_get_procfs_meminfo_info must have been called earlier */
-      meminfo_hugepages_size = topology->levels[0][0]->memory.page_types[1].size;
+      meminfo_hugepages_size = topology->machine_memory.page_types[1].size;
       /* use what we found in meminfo */
       if (meminfo_hugepages_size) {
         memory->page_types[1].count = meminfo_hugepages_count;
@@ -4418,22 +4418,13 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
    */
 
   /* Get the machine memory attributes */
-  hwloc_get_procfs_meminfo_info(topology, data, &topology->levels[0][0]->memory);
+  hwloc_get_procfs_meminfo_info(topology, data, &topology->machine_memory);
 
   /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
   if (sysfs_node_path)
     look_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
   else
     nbnodes = 0;
-
-  /* if we found some numa nodes, the machine object has no local memory */
-  if (nbnodes) {
-    unsigned i;
-    topology->levels[0][0]->memory.local_memory = 0;
-    if (topology->levels[0][0]->memory.page_types)
-      for(i=0; i<topology->levels[0][0]->memory.page_types_len; i++)
-	topology->levels[0][0]->memory.page_types[i].count = 0;
-  }
 
   /**********************
    * Misc
