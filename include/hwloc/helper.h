@@ -827,20 +827,18 @@ hwloc_distrib(hwloc_topology_t topology,
 /** \defgroup hwlocality_helper_topology_sets CPU and node sets of entire topologies
  * @{
  */
+
 /** \brief Get complete CPU set
  *
  * \return the complete CPU set of logical processors of the system.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
+ *
+ * \note This is equivalent to retrieving the root object complete CPU-set.
  */
-static __hwloc_inline hwloc_const_cpuset_t
+HWLOC_DECLSPEC hwloc_const_cpuset_t
 hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
-static __hwloc_inline hwloc_const_cpuset_t
-hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
-{
-  return hwloc_get_root_obj(topology)->complete_cpuset;
-}
 
 /** \brief Get topology CPU set
  *
@@ -850,14 +848,11 @@ hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
+ *
+ * \note This is equivalent to retrieving the root object complete CPU-set.
  */
-static __hwloc_inline hwloc_const_cpuset_t
+HWLOC_DECLSPEC hwloc_const_cpuset_t
 hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
-static __hwloc_inline hwloc_const_cpuset_t
-hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
-{
-  return hwloc_get_root_obj(topology)->cpuset;
-}
 
 /** \brief Get allowed CPU set
  *
@@ -866,13 +861,8 @@ hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
  */
-static __hwloc_inline hwloc_const_cpuset_t
+HWLOC_DECLSPEC hwloc_const_cpuset_t
 hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
-static __hwloc_inline hwloc_const_cpuset_t
-hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
-{
-  return hwloc_get_root_obj(topology)->allowed_cpuset;
-}
 
 /** \brief Get complete node set
  *
@@ -880,14 +870,11 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
+ *
+ * \note This is equivalent to retrieving the root object complete CPU-set.
  */
-static __hwloc_inline hwloc_const_nodeset_t
+HWLOC_DECLSPEC hwloc_const_nodeset_t
 hwloc_topology_get_complete_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
-static __hwloc_inline hwloc_const_nodeset_t
-hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
-{
-  return hwloc_get_root_obj(topology)->complete_nodeset;
-}
 
 /** \brief Get topology node set
  *
@@ -897,14 +884,11 @@ hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
+ *
+ * \note This is equivalent to retrieving the root object complete CPU-set.
  */
-static __hwloc_inline hwloc_const_nodeset_t
+HWLOC_DECLSPEC hwloc_const_nodeset_t
 hwloc_topology_get_topology_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
-static __hwloc_inline hwloc_const_nodeset_t
-hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
-{
-  return hwloc_get_root_obj(topology)->nodeset;
-}
 
 /** \brief Get allowed node set
  *
@@ -913,13 +897,8 @@ hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
  */
-static __hwloc_inline hwloc_const_nodeset_t
+HWLOC_DECLSPEC hwloc_const_nodeset_t
 hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
-static __hwloc_inline hwloc_const_nodeset_t
-hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
-{
-  return hwloc_get_root_obj(topology)->allowed_nodeset;
-}
 
 /** @} */
 

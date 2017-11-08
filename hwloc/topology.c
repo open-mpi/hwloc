@@ -3752,6 +3752,43 @@ void * hwloc_topology_get_userdata(struct hwloc_topology * topology)
   return topology->userdata;
 }
 
+hwloc_const_cpuset_t
+hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->complete_cpuset;
+}
+
+hwloc_const_cpuset_t
+hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->cpuset;
+}
+
+hwloc_const_cpuset_t
+hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->allowed_cpuset;
+}
+
+hwloc_const_nodeset_t
+hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->complete_nodeset;
+}
+
+hwloc_const_nodeset_t
+hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->nodeset;
+}
+
+hwloc_const_nodeset_t
+hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->allowed_nodeset;
+}
+
+
 /****************
  * Debug Checks *
  ****************/
