@@ -2,8 +2,6 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="2.0">
   <object type="Machine" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" gp_index="1">
-    <page_type size="4096" count="0"/>
-    <page_type size="2097152" count="0"/>
     <info name="Architecture" value="x86_64"/>
     <info name="hwlocVersion" value="2.0.0a1-git"/>
     <info name="ProcessName" value="lt-lstopo-no-graphics"/>
