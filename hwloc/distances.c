@@ -569,25 +569,39 @@ hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology)
  * User API for getting distances
  */
 
+/* what we actually allocate for user queries, even if we only
+ * return the distances part of it.
+ */
+struct hwloc_distances_container_s {
+  unsigned id;
+  struct hwloc_distances_s distances;
+};
+
+#define HWLOC_DISTANCES_CONTAINER_OFFSET ((char*)&((struct hwloc_distances_container_s*)NULL)->distances - (char*)NULL)
+#define HWLOC_DISTANCES_CONTAINER(_d) (struct hwloc_distances_container_s *) ( ((char*)_d) - HWLOC_DISTANCES_CONTAINER_OFFSET )
+
 void
 hwloc_distances_release(hwloc_topology_t topology __hwloc_attribute_unused,
 			struct hwloc_distances_s *distances)
 {
+  struct hwloc_distances_container_s *cont = HWLOC_DISTANCES_CONTAINER(distances);
   free(distances->values);
   free(distances->objs);
-  free(distances);
+  free(cont);
 }
 
 static struct hwloc_distances_s *
 hwloc_distances_get_one(hwloc_topology_t topology __hwloc_attribute_unused,
 			struct hwloc_internal_distances_s *dist)
 {
+  struct hwloc_distances_container_s *cont;
   struct hwloc_distances_s *distances;
   unsigned nbobjs;
 
-  distances = malloc(sizeof(*distances));
-  if (!distances)
+  cont = malloc(sizeof(*cont));
+  if (!cont)
     return NULL;
+  distances = &cont->distances;
 
   nbobjs = distances->nbobjs = dist->nbobjs;
 
@@ -602,12 +616,13 @@ hwloc_distances_get_one(hwloc_topology_t topology __hwloc_attribute_unused,
   memcpy(distances->values, dist->values, nbobjs*nbobjs*sizeof(*distances->values));
 
   distances->kind = dist->kind;
+  cont->id = dist->id;
   return distances;
 
  out_with_objs:
   free(distances->objs);
  out:
-  free(distances);
+  free(cont);
   return NULL;
 }
 
