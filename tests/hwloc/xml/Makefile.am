@@ -29,6 +29,7 @@ xml_outputs = \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t.xml \
         192em64t-24n8c2t.xml \
+        8em64t-2p2ca2co-nonodesets.v1tov2.xml \
         16amd64-4distances.v1tov2.xml \
         16amd64-4distances.v2tov1.xml \
         2intel64-1n2c-numaroot.v1tov2.xml \
@@ -49,6 +50,8 @@ xml_source = \
         32em64t-2n8c2t-pci-noio.source \
         32em64t-2n8c2t-pci-normalio.source \
         64intel64-3g2n+2n-irregulargroups+pci.console.source \
+        8em64t-2p2ca2co-nonodesets.v1tov2.source \
+        8em64t-2p2ca2co-nonodesets.v1.xml \
         16amd64-4distances.v1tov2.source \
         16amd64-4distances.v2tov1.source \
         16amd64-4distances.v1.xml \
