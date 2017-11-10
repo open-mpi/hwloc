@@ -708,12 +708,12 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
   case HWLOC_OBJ_MACHINE:
     break;
   case HWLOC_OBJ_NUMANODE:
-    obj->memory.local_memory = curlevel->memorysize;
-    obj->memory.page_types_len = 1;
-    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-    memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
-    obj->memory.page_types[0].size = 4096;
-    obj->memory.page_types[0].count = curlevel->memorysize / 4096;
+    obj->attr->numanode.local_memory = curlevel->memorysize;
+    obj->attr->numanode.page_types_len = 1;
+    obj->attr->numanode.page_types = malloc(sizeof(*obj->attr->numanode.page_types));
+    memset(obj->attr->numanode.page_types, 0, sizeof(*obj->attr->numanode.page_types));
+    obj->attr->numanode.page_types[0].size = 4096;
+    obj->attr->numanode.page_types[0].count = curlevel->memorysize / 4096;
     break;
   case HWLOC_OBJ_PACKAGE:
     break;
@@ -1069,9 +1069,9 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
 	     prefix, (unsigned long long) obj->attr->cache.size);
     prefix = separator;
   }
-  if (obj->memory.local_memory) {
+  if (obj->type == HWLOC_OBJ_NUMANODE && obj->attr->numanode.local_memory) {
     snprintf(memsize, sizeof(memsize), "%smemory=%llu",
-	     prefix, (unsigned long long) obj->memory.local_memory);
+	     prefix, (unsigned long long) obj->attr->numanode.local_memory);
     prefix = separator;
   }
   if (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE) {

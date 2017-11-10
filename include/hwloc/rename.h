@@ -94,15 +94,14 @@ extern "C" {
 #define hwloc_compare_types_e HWLOC_NAME(compare_types_e)
 #define HWLOC_TYPE_UNORDERED HWLOC_NAME_CAPS(TYPE_UNORDERED)
 
-#define hwloc_obj_memory_s HWLOC_NAME(obj_memory_s)
-#define hwloc_obj_memory_page_type_s HWLOC_NAME(obj_memory_page_type_s)
-
 #define hwloc_obj HWLOC_NAME(obj)
 #define hwloc_obj_t HWLOC_NAME(obj_t)
 
 #define hwloc_obj_info_s HWLOC_NAME(obj_info_s)
 
 #define hwloc_obj_attr_u HWLOC_NAME(obj_attr_u)
+#define hwloc_numanode_attr_s HWLOC_NAME(numanode_attr_s)
+#define hwloc_memory_page_type_s HWLOC_NAME(memory_page_type_s)
 #define hwloc_cache_attr_s HWLOC_NAME(cache_attr_s)
 #define hwloc_group_attr_s HWLOC_NAME(group_attr_s)
 #define hwloc_pcidev_attr_s HWLOC_NAME(pcidev_attr_s)

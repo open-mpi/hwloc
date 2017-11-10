@@ -66,7 +66,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
   set = hwloc_bitmap_alloc();
   hwloc_bitmap_set(set, 0);
   obj->nodeset = set;
-  obj->memory.local_memory = 16ULL*1024*1024*1024ULL;
+  obj->attr->numanode.local_memory = 16ULL*1024*1024*1024ULL;
   hwloc_insert_object_by_cpuset(topology, obj);
 
   set = hwloc_bitmap_alloc();

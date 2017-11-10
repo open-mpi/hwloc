@@ -32,6 +32,9 @@ Version 2.0.0
   + Topologies always have at least one NUMA object. On non-NUMA machines,
     a single NUMA object is added to describe the entire machine memory.
     The NUMA level cannot be ignored anymore.
+  + obj->memory is removed.
+    - local_memory and page_types are now in obj->attr->numanode
+    - total_memory moves obj->total_memory.
   + The HWLOC_OBJ_CACHE type is replaced with 8 types HWLOC_OBJ_L[1-5]CACHE
     and HWLOC_OBJ_L[1-3]ICACHE that remove the need to disambiguate levels
     when looking for caches with _by_type() functions.

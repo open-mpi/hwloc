@@ -63,7 +63,7 @@ static void check(int has_groups, unsigned nbnodes, unsigned nbcores, unsigned n
   assert(nb == nbcores);
   nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU);
   assert(nb == nbpus);
-  total_memory = hwloc_get_root_obj(topology)->memory.total_memory;
+  total_memory = hwloc_get_root_obj(topology)->total_memory;
   assert(total_memory == nbnodes * 1024*1024*1024); /* synthetic topology puts 1GB per node */
 }
 

@@ -416,11 +416,13 @@ static void
 hwloc__free_object_contents(hwloc_obj_t obj)
 {
   switch (obj->type) {
+  case HWLOC_OBJ_NUMANODE:
+    free(obj->attr->numanode.page_types);
+    break;
   default:
     break;
   }
   hwloc__free_infos(obj->infos, obj->infos_count);
-  free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
   free(obj->subtype);
@@ -709,14 +711,15 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
     newobj->subtype = hwloc_tma_strdup(tma, src->subtype);
   newobj->userdata = src->userdata;
 
-  memcpy(&newobj->memory, &src->memory, sizeof(struct hwloc_obj_memory_s));
-  if (src->memory.page_types_len) {
-    len = src->memory.page_types_len * sizeof(struct hwloc_obj_memory_page_type_s);
-    newobj->memory.page_types = hwloc_tma_malloc(tma, len);
-    memcpy(newobj->memory.page_types, src->memory.page_types, len);
-  }
+  newobj->total_memory = src->total_memory;
 
   memcpy(newobj->attr, src->attr, sizeof(*newobj->attr));
+
+  if (src->type == HWLOC_OBJ_NUMANODE && src->attr->numanode.page_types_len) {
+    len = src->attr->numanode.page_types_len * sizeof(struct hwloc_memory_page_type_s);
+    newobj->attr->numanode.page_types = hwloc_tma_malloc(tma, len);
+    memcpy(newobj->attr->numanode.page_types, src->attr->numanode.page_types, len);
+  }
 
   newobj->cpuset = hwloc_bitmap_tma_dup(tma, src->cpuset);
   newobj->complete_cpuset = hwloc_bitmap_tma_dup(tma, src->complete_cpuset);
@@ -1247,16 +1250,16 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
 
   switch(new->type) {
   case HWLOC_OBJ_NUMANODE:
-    if (new->memory.local_memory && !old->memory.local_memory) {
+    if (new->attr->numanode.local_memory && !old->attr->numanode.local_memory) {
       /* no memory in old, use new memory */
-      old->memory.local_memory = new->memory.local_memory;
-      free(old->memory.page_types);
-      old->memory.page_types_len = new->memory.page_types_len;
-      old->memory.page_types = new->memory.page_types;
-      new->memory.page_types = NULL;
-      new->memory.page_types_len = 0;
+      old->attr->numanode.local_memory = new->attr->numanode.local_memory;
+      free(old->attr->numanode.page_types);
+      old->attr->numanode.page_types_len = new->attr->numanode.page_types_len;
+      old->attr->numanode.page_types = new->attr->numanode.page_types;
+      new->attr->numanode.page_types = NULL;
+      new->attr->numanode.page_types_len = 0;
     }
-    /* old->memory.total_memory will be updated by propagate_total_memory() */
+    /* old->attr->numanode.total_memory will be updated by propagate_total_memory() */
     break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
@@ -1685,7 +1688,6 @@ hwloc_obj_t
 hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
   hwloc_obj_t res, root;
-  int has_memory = (obj->memory.local_memory != 0);
 
   if (!topology->is_loaded) {
     /* this could actually work, we would just need to disable connect_children/levels below */
@@ -1733,9 +1735,6 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
 
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   hwloc_set_group_depth(topology);
-
-  if (has_memory)
-    propagate_total_memory(topology->levels[0][0]);
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
@@ -1856,8 +1855,8 @@ hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, 
 
 static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
 {
-  const struct hwloc_obj_memory_page_type_s *a = _a;
-  const struct hwloc_obj_memory_page_type_s *b = _b;
+  const struct hwloc_memory_page_type_s *a = _a;
+  const struct hwloc_memory_page_type_s *b = _b;
   /* consider 0 as larger so that 0-size page_type go to the end */
   if (!b->size)
     return -1;
@@ -1875,30 +1874,32 @@ propagate_total_memory(hwloc_obj_t obj)
   unsigned i;
 
   /* reset total before counting local and children memory */
-  obj->memory.total_memory = 0;
+  obj->total_memory = 0;
 
   /* Propagate memory up. */
   for_each_child(child, obj) {
     propagate_total_memory(child);
-    obj->memory.total_memory += child->memory.total_memory;
+    obj->total_memory += child->total_memory;
   }
   for_each_memory_child(child, obj) {
     propagate_total_memory(child);
-    obj->memory.total_memory += child->memory.total_memory;
+    obj->total_memory += child->total_memory;
   }
   /* No memory under I/O or Misc */
 
-  obj->memory.total_memory += obj->memory.local_memory;
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
+    obj->total_memory += obj->attr->numanode.local_memory;
 
-  /* By the way, sort the page_type array.
-   * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
-   */
-  qsort(obj->memory.page_types, obj->memory.page_types_len, sizeof(*obj->memory.page_types), hwloc_memory_page_type_compare);
-  /* Ignore 0-size page_types, they are at the end */
-  for(i=obj->memory.page_types_len; i>=1; i--)
-    if (obj->memory.page_types[i-1].size)
-      break;
-  obj->memory.page_types_len = i;
+    /* By the way, sort the page_type array.
+     * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
+     */
+    qsort(obj->attr->numanode.page_types, obj->attr->numanode.page_types_len, sizeof(*obj->attr->numanode.page_types), hwloc_memory_page_type_compare);
+    /* Ignore 0-size page_types, they are at the end */
+    for(i=obj->attr->numanode.page_types_len; i>=1; i--)
+      if (obj->attr->numanode.page_types[i-1].size)
+	break;
+    obj->attr->numanode.page_types_len = i;
+  }
 }
 
 /* Now that root sets are ready, propagate them to children
@@ -3010,7 +3011,7 @@ next_cpubackend:
     node->nodeset = hwloc_bitmap_alloc();
     /* other nodesets will be filled below */
     hwloc_bitmap_set(node->nodeset, 0);
-    memcpy(&node->memory, &topology->machine_memory, sizeof(node->memory));
+    memcpy(&node->attr->numanode, &topology->machine_memory, sizeof(topology->machine_memory));
     memset(&topology->machine_memory, 0, sizeof(topology->machine_memory));
     hwloc_insert_object_by_cpuset(topology, node);
   } else {

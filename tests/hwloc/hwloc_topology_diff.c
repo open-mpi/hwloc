@@ -47,21 +47,14 @@ int main(void)
   printf("add a similar info to topo1, and change memory sizes\n");
   obj = hwloc_get_root_obj(topo2);
   hwloc_obj_add_info(obj, "Foo", "Bar2");
-  obj->memory.local_memory += 128*4096;
 
   obj = hwloc_get_obj_by_type(topo2, HWLOC_OBJ_NUMANODE, 0);
-  obj->memory.local_memory += 32*4096;
+  obj->attr->numanode.local_memory += 32*4096;
 
   printf("check that topo2 is now properly diff'ed\n");
   err = hwloc_topology_diff_build(topo1, topo2, 0, &diff);
   assert(err == 0);
   tmpdiff = diff;
-  assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-  assert(tmpdiff->obj_attr.obj_depth == 0);
-  assert(tmpdiff->obj_attr.obj_index == 0);
-  assert(tmpdiff->obj_attr.diff.generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE);
-  assert(tmpdiff->obj_attr.diff.uint64.newvalue - tmpdiff->obj_attr.diff.uint64.oldvalue == 128*4096);
-  tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
   assert(tmpdiff->obj_attr.obj_depth == 0);
   assert(tmpdiff->obj_attr.obj_index == 0);
@@ -124,12 +117,6 @@ int main(void)
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
   assert(tmpdiff->obj_attr.obj_depth == 0);
   assert(tmpdiff->obj_attr.obj_index == 0);
-  assert(tmpdiff->obj_attr.diff.generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE);
-  assert(tmpdiff->obj_attr.diff.uint64.newvalue - tmpdiff->obj_attr.diff.uint64.oldvalue == 128*4096);
-  tmpdiff = tmpdiff->generic.next;
-  assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-  assert(tmpdiff->obj_attr.obj_depth == 0);
-  assert(tmpdiff->obj_attr.obj_index == 0);
   assert(tmpdiff->obj_attr.diff.generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO);
   err = strcmp(tmpdiff->obj_attr.diff.string.name, "Foo");
   assert(!err);
@@ -166,8 +153,6 @@ int main(void)
   tmpdiff = diff;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
   tmpdiff = tmpdiff->generic.next;
-  assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-  tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX);
   tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
@@ -183,7 +168,7 @@ int main(void)
   assert(err == 0);
   assert(diff);
   err = hwloc_topology_diff_apply(topo2, diff, HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE);
-  assert(err == -3);
+  assert(err == -2);
   hwloc_topology_diff_destroy(diff);
 
   hwloc_topology_destroy(topo3);

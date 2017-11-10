@@ -165,22 +165,22 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 			return err;
 	}
 
-	/* memory */
-	if (obj1->memory.local_memory != obj2->memory.local_memory) {
-		err = hwloc_append_diff_obj_attr_uint64(obj1,
-						       HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE,
-						       0,
-						       obj1->memory.local_memory,
-						       obj2->memory.local_memory,
-						       firstdiffp, lastdiffp);
-		if (err < 0)
-			return err;
-	}
-	/* ignore memory page_types */
-
 	/* type-specific attrs */
 	switch (obj1->type) {
 	default:
+		break;
+	case HWLOC_OBJ_NUMANODE:
+		if (obj1->attr->numanode.local_memory != obj2->attr->numanode.local_memory) {
+			err = hwloc_append_diff_obj_attr_uint64(obj1,
+								HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE,
+								0,
+								obj1->attr->numanode.local_memory,
+								obj2->attr->numanode.local_memory,
+								firstdiffp, lastdiffp);
+			if (err < 0)
+				return err;
+		}
+		/* ignore memory page_types */
 		break;
 	case HWLOC_OBJ_L1CACHE:
 	case HWLOC_OBJ_L2CACHE:
@@ -397,12 +397,14 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 			hwloc_uint64_t oldvalue = reverse ? obj_attr->diff.uint64.newvalue : obj_attr->diff.uint64.oldvalue;
 			hwloc_uint64_t newvalue = reverse ? obj_attr->diff.uint64.oldvalue : obj_attr->diff.uint64.newvalue;
 			hwloc_uint64_t valuediff = newvalue - oldvalue;
-			if (obj->memory.local_memory != oldvalue)
+			if (obj->type != HWLOC_OBJ_NUMANODE)
 				return -1;
-			obj->memory.local_memory = newvalue;
+			if (obj->attr->numanode.local_memory != oldvalue)
+				return -1;
+			obj->attr->numanode.local_memory = newvalue;
 			tmpobj = obj;
 			while (tmpobj) {
-				tmpobj->memory.total_memory += valuediff;
+				tmpobj->total_memory += valuediff;
 				tmpobj = tmpobj->parent;
 			}
 			break;

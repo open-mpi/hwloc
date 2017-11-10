@@ -2262,7 +2262,7 @@ hwloc_parse_meminfo_info(struct hwloc_linux_backend_data_s *data,
 static void
 hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
 			   const char *dirpath,
-			   struct hwloc_obj_memory_s *memory,
+			   struct hwloc_numanode_attr_s *memory,
 			   uint64_t *remaining_local_memory)
 {
   DIR *dir;
@@ -2295,7 +2295,7 @@ hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
 static void
 hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
 			      struct hwloc_linux_backend_data_s *data,
-			      struct hwloc_obj_memory_s *memory)
+			      struct hwloc_numanode_attr_s *memory)
 {
   uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
   struct stat st;
@@ -2366,7 +2366,7 @@ static void
 hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 			      struct hwloc_linux_backend_data_s *data,
 			      const char *syspath, int node,
-			      struct hwloc_obj_memory_s *memory)
+			      struct hwloc_numanode_attr_s *memory)
 {
   char path[SYSFS_NUMA_NODE_PATH_LEN];
   char meminfopath[SYSFS_NUMA_NODE_PATH_LEN];
@@ -3136,7 +3136,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    node->nodeset = hwloc_bitmap_alloc();
 	    hwloc_bitmap_set(node->nodeset, osnode);
 	  }
-          hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->memory);
+          hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->attr->numanode);
 
 	  nodes[i] = node;
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",

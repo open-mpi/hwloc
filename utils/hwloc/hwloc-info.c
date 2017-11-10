@@ -85,10 +85,12 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
   printf("%s memory children = %u\n", prefix, obj->memory_arity);
   printf("%s i/o children = %u\n", prefix, obj->io_arity);
   printf("%s misc children = %u\n", prefix, obj->misc_arity);
-  if (obj->memory.local_memory)
-    printf("%s local memory = %llu\n", prefix, (unsigned long long) obj->memory.local_memory);
-  if (obj->memory.total_memory)
-    printf("%s total memory = %llu\n", prefix, (unsigned long long) obj->memory.total_memory);
+
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
+    printf("%s local memory = %llu\n", prefix, (unsigned long long) obj->attr->numanode.local_memory);
+  }
+  if (obj->total_memory)
+    printf("%s total memory = %llu\n", prefix, (unsigned long long) obj->total_memory);
 
   if (obj->cpuset) {
     hwloc_bitmap_snprintf(s, sizeof(s), obj->cpuset);

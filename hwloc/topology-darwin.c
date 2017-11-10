@@ -224,13 +224,13 @@ hwloc_look_darwin(struct hwloc_backend *backend)
           } else {
             hwloc_debug_1arg_bitmap("node %u has cpuset %s\n",
                 j, obj->cpuset);
-	    obj->memory.local_memory = cachesize[i];
-	    obj->memory.page_types_len = 2;
-	    obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
-	    memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
-	    obj->memory.page_types[0].size = hwloc_getpagesize();
+	    obj->attr->numanode.local_memory = cachesize[i];
+	    obj->attr->numanode.page_types_len = 2;
+	    obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
+	    memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
+	    obj->attr->numanode.page_types[0].size = hwloc_getpagesize();
 #if HAVE_DECL__SC_LARGE_PAGESIZE
-	    obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
+	    obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
           }
 

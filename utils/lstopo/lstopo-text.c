@@ -89,11 +89,11 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     }
     free(attr);
     /* display the root total_memory if not verbose (already shown)
-     * and different from the local_memory (already shown) */
-    if (verbose_mode == 1 && !l->parent && l->memory.total_memory > l->memory.local_memory)
+     * (cannot be local_memory since root cannot be a NUMA node) */
+    if (verbose_mode == 1 && !l->parent && l->total_memory)
       fprintf(output, " (%lu%s total)",
-	      (unsigned long) hwloc_memory_size_printf_value(l->memory.total_memory, 0),
-	      hwloc_memory_size_printf_unit(l->memory.total_memory, 0));
+	      (unsigned long) hwloc_memory_size_printf_value(l->total_memory, 0),
+	      hwloc_memory_size_printf_unit(l->total_memory, 0));
     /* append the name */
     if (l->name && (l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2)
 	&& l->type != HWLOC_OBJ_MISC && l->type != HWLOC_OBJ_GROUP)

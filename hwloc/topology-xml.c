@@ -191,7 +191,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
   else if (!strcmp(name, "local_memory")) {
     unsigned long long lvalue = strtoull(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_NUMANODE)
-      obj->memory.local_memory = lvalue;
+      obj->attr->numanode.local_memory = lvalue;
     else if (!obj->parent)
       topology->machine_memory.local_memory = lvalue;
     else if (hwloc__xml_verbose())
@@ -406,7 +406,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	if (obj->type == _HWLOC_OBJ_CACHE_OLD)
 	  obj->attr->cache.size = lvalue << 10;
 	else if (obj->type == HWLOC_OBJ_NUMANODE)
-	  obj->memory.local_memory = lvalue << 10;
+	  obj->attr->numanode.local_memory = lvalue << 10;
 	else if (!obj->parent)
 	  topology->machine_memory.local_memory = lvalue << 10;
 	else if (hwloc__xml_verbose())
@@ -416,7 +416,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       else if (!strcmp(name, "huge_page_size_kB")) {
 	unsigned long lvalue = strtoul(value, NULL, 10);
 	if (obj->type == HWLOC_OBJ_NUMANODE || !obj->parent) {
-	  struct hwloc_obj_memory_s *memory = obj->type == HWLOC_OBJ_NUMANODE ? &obj->memory : &topology->machine_memory;
+	  struct hwloc_numanode_attr_s *memory = obj->type == HWLOC_OBJ_NUMANODE ? &obj->attr->numanode : &topology->machine_memory;
 	  if (!memory->page_types) {
 	    memory->page_types = malloc(sizeof(*memory->page_types));
 	    memory->page_types_len = 1;
@@ -430,7 +430,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       else if (!strcmp(name, "huge_page_free")) {
 	unsigned long lvalue = strtoul(value, NULL, 10);
 	if (obj->type == HWLOC_OBJ_NUMANODE || !obj->parent) {
-	  struct hwloc_obj_memory_s *memory = obj->type == HWLOC_OBJ_NUMANODE ? &obj->memory : &topology->machine_memory;
+	  struct hwloc_numanode_attr_s *memory = obj->type == HWLOC_OBJ_NUMANODE ? &obj->attr->numanode : &topology->machine_memory;
 	  if (!memory->page_types) {
 	    memory->page_types = malloc(sizeof(*memory->page_types));
 	    memory->page_types_len = 1;
@@ -489,7 +489,7 @@ hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
 }
 
 static int
-hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, struct hwloc_obj_memory_s *memory,
+hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, struct hwloc_numanode_attr_s *memory,
 			   hwloc__xml_import_state_t state)
 {
   uint64_t size = 0, count = 0;
@@ -508,7 +508,7 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, s
 
   if (size) {
     unsigned idx = memory->page_types_len;
-    struct hwloc_obj_memory_page_type_s *tmp;
+    struct hwloc_memory_page_type_s *tmp;
     tmp = realloc(memory->page_types, (idx+1)*sizeof(*memory->page_types));
     if (tmp) { /* if failed to allocate, ignore this page_type entry */
       memory->page_types = tmp;
@@ -1023,7 +1023,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     } else if (!strcmp(tag, "page_type")) {
       if (obj->type == HWLOC_OBJ_NUMANODE) {
-	ret = hwloc__xml_import_pagetype(topology, &obj->memory, &childstate);
+	ret = hwloc__xml_import_pagetype(topology, &obj->attr->numanode, &childstate);
       } else if (!parent) {
 	ret = hwloc__xml_import_pagetype(topology, &topology->machine_memory, &childstate);
       } else {
@@ -1034,7 +1034,14 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
 
     } else if (!strcmp(tag, "info")) {
-      ret = hwloc__xml_import_info(topology, obj, &childstate);
+      if (obj->type) {
+	ret = hwloc__xml_import_info(topology, obj, &childstate);
+      } else {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
+		  state->global->msgprefix, tag);
+	ret = -1;
+      }
     } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
       ret = hwloc__xml_import_v1distances(data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
@@ -1907,6 +1914,21 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   }
 
   switch (obj->type) {
+  case HWLOC_OBJ_NUMANODE:
+    if (obj->attr->numanode.local_memory) {
+      sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.local_memory);
+      state.new_prop(&state, "local_memory", tmp);
+    }
+    for(i=0; i<obj->attr->numanode.page_types_len; i++) {
+      struct hwloc__xml_export_state_s childstate;
+      state.new_child(&state, &childstate, "page_type");
+      sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.page_types[i].size);
+      childstate.new_prop(&childstate, "size", tmp);
+      sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.page_types[i].count);
+      childstate.new_prop(&childstate, "count", tmp);
+      childstate.end_object(&childstate, "page_type");
+    }
+    break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
   case HWLOC_OBJ_L3CACHE:
@@ -1974,21 +1996,6 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     break;
   default:
     break;
-  }
-
-  if (obj->memory.local_memory) {
-    sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
-    state.new_prop(&state, "local_memory", tmp);
-  }
-
-  for(i=0; i<obj->memory.page_types_len; i++) {
-    struct hwloc__xml_export_state_s childstate;
-    state.new_child(&state, &childstate, "page_type");
-    sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].size);
-    childstate.new_prop(&childstate, "size", tmp);
-    sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].count);
-    childstate.new_prop(&childstate, "count", tmp);
-    childstate.end_object(&childstate, "page_type");
   }
 
   for(i=0; i<obj->infos_count; i++) {

@@ -341,24 +341,6 @@ enum hwloc_compare_types_e {
 
 union hwloc_obj_attr_u;
 
-/** \brief Object memory */
-struct hwloc_obj_memory_s {
-  hwloc_uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
-  hwloc_uint64_t local_memory; /**< \brief Local memory (in bytes) */
-
-  /** \brief Size of array \p page_types */
-  unsigned page_types_len;
-  /** \brief Array of local memory page types, \c NULL if no local memory and \p page_types is 0.
-   *
-   * The array is sorted by increasing \p size fields.
-   * It contains \p page_types_len slots.
-   */
-  struct hwloc_obj_memory_page_type_s {
-    hwloc_uint64_t size;	/**< \brief Size of pages */
-    hwloc_uint64_t count;	/**< \brief Number of pages of this size */
-  } * page_types;
-};
-
 /** \brief Structure of a topology object
  *
  * Applications must not modify any field except \p hwloc_obj.userdata.
@@ -380,7 +362,7 @@ struct hwloc_obj {
 					 * a name string is more useful than numerical indexes.
 					 */
 
-  struct hwloc_obj_memory_s memory;	/**< \brief Memory attributes */
+  hwloc_uint64_t total_memory; /**< \brief Total memory (in bytes) in NUMA nodes below this object. */
 
   union hwloc_obj_attr_u *attr;		/**< \brief Object type-specific Attributes,
 					 * may be \c NULL if no attribute value was found */
@@ -556,6 +538,21 @@ typedef struct hwloc_obj * hwloc_obj_t;
 
 /** \brief Object type-specific Attributes */
 union hwloc_obj_attr_u {
+  /** \brief NUMA node-specific Object Attributes */
+  struct hwloc_numanode_attr_s {
+    hwloc_uint64_t local_memory; /**< \brief Local memory (in bytes) */
+    unsigned page_types_len; /**< \brief Size of array \p page_types */
+    /** \brief Array of local memory page types, \c NULL if no local memory and \p page_types is 0.
+     *
+     * The array is sorted by increasing \p size fields.
+     * It contains \p page_types_len slots.
+     */
+    struct hwloc_memory_page_type_s {
+      hwloc_uint64_t size;	/**< \brief Size of pages */
+      hwloc_uint64_t count;	/**< \brief Number of pages of this size */
+    } * page_types;
+  } numanode;
+
   /** \brief Cache-specific Object Attributes */
   struct hwloc_cache_attr_s {
     hwloc_uint64_t size;		  /**< \brief Size of cache in bytes */

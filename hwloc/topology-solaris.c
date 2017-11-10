@@ -438,13 +438,13 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
     nodes[(*nr_nodes)++] = obj;
 
     hwloc_debug("NUMA node %ld has %lldkB\n", nids[i], mem_size/1024);
-    obj->memory.local_memory = mem_size;
-    obj->memory.page_types_len = 2;
-    obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
-    memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
-    obj->memory.page_types[0].size = hwloc_getpagesize();
+    obj->attr->numanode.local_memory = mem_size;
+    obj->attr->numanode.page_types_len = 2;
+    obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
+    memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
+    obj->attr->numanode.page_types[0].size = hwloc_getpagesize();
 #if HAVE_DECL__SC_LARGE_PAGESIZE
-    obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
+    obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
 
     n = lgrp_cpus(cookie, nids[i], pids, npids, LGRP_CONTENT_HIERARCHY);

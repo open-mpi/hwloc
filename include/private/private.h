@@ -154,7 +154,7 @@ struct hwloc_topology {
    * temporarily stored there by OSes that only provide this without NUMA information,
    * and actually used later by the core.
    */
-  struct hwloc_obj_memory_s machine_memory;
+  struct hwloc_numanode_attr_s machine_memory;
 
   /* list of enabled backends. */
   struct hwloc_backend * backends;

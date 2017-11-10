@@ -422,25 +422,25 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   /* print memory attributes */
   res = 0;
   if (verbose) {
-    if (obj->memory.local_memory)
+    if (obj->type == HWLOC_OBJ_NUMANODE && obj->attr->numanode.local_memory)
       res = hwloc_snprintf(tmp, tmplen, "%slocal=%lu%s%stotal=%lu%s",
 			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
-			   hwloc_memory_size_printf_unit(obj->memory.local_memory, verbose),
+			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->numanode.local_memory, verbose),
+			   hwloc_memory_size_printf_unit(obj->attr->numanode.local_memory, verbose),
 			   separator,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
-			   hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
-    else if (obj->memory.total_memory)
+			   (unsigned long) hwloc_memory_size_printf_value(obj->total_memory, verbose),
+			   hwloc_memory_size_printf_unit(obj->total_memory, verbose));
+    else if (obj->total_memory)
       res = hwloc_snprintf(tmp, tmplen, "%stotal=%lu%s",
 			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
-			   hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
+			   (unsigned long) hwloc_memory_size_printf_value(obj->total_memory, verbose),
+			   hwloc_memory_size_printf_unit(obj->total_memory, verbose));
   } else {
-    if (obj->memory.local_memory)
+    if (obj->type == HWLOC_OBJ_NUMANODE && obj->attr->numanode.local_memory)
       res = hwloc_snprintf(tmp, tmplen, "%s%lu%s",
 			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
-			   hwloc_memory_size_printf_unit(obj->memory.local_memory, verbose));
+			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->numanode.local_memory, verbose),
+			   hwloc_memory_size_printf_unit(obj->attr->numanode.local_memory, verbose));
   }
   if (res < 0)
     return -1;

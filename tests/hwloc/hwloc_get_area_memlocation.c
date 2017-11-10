@@ -49,7 +49,7 @@ int main(void)
   node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node);
   if (!node)
     goto out_with_buffer;
-  if (!node->memory.local_memory)
+  if (!node->attr->numanode.local_memory)
     goto next1;
   printf("binding to 1st node and touching 1st quarter\n");
   err = hwloc_set_area_membind(topology, buffer, LEN, node->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_BYNODESET);
@@ -71,7 +71,7 @@ int main(void)
   node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node);
   if (!node)
     goto out_with_nomorenodes;
-  if (!node->memory.local_memory)
+  if (!node->attr->numanode.local_memory)
     goto next2;
   printf("binding to 2nd node and touching 2nd quarter\n");
   err = hwloc_set_area_membind(topology, buffer, LEN, node->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_BYNODESET);
@@ -89,7 +89,7 @@ int main(void)
   node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node);
   if (!node)
     goto out_with_nomorenodes;
-  if (!node->memory.local_memory)
+  if (!node->attr->numanode.local_memory)
     goto next3;
   printf("binding to 3rd node and touching 3rd quarter\n");
   err = hwloc_set_area_membind(topology, buffer, LEN, node->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_BYNODESET);
@@ -107,7 +107,7 @@ int main(void)
   node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node);
   if (!node)
     goto out_with_nomorenodes;
-  if (!node->memory.local_memory)
+  if (!node->attr->numanode.local_memory)
     goto next4;
   printf("binding to 4th node and touching 4th quarter\n");
   err = hwloc_set_area_membind(topology, buffer, LEN, node->nodeset, HWLOC_MEMBIND_BIND, HWLOC_MEMBIND_BYNODESET);

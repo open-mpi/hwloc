@@ -622,11 +622,11 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
 
   if (loutput->show_attrs[obj->type]) {
     attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
-    /* display the root total_memory if different from the local_memory (already shown) */
-    if (!obj->parent && obj->memory.total_memory > obj->memory.local_memory)
+    /* display the root total_memory (cannot be local_memory since root cannot be a NUMA node) */
+    if (!obj->parent && obj->total_memory)
       snprintf(totmemstr, sizeof(totmemstr), " (%lu%s total)",
-	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, 0),
-	       hwloc_memory_size_printf_unit(obj->memory.total_memory, 0));
+	       (unsigned long) hwloc_memory_size_printf_value(obj->total_memory, 0),
+	       hwloc_memory_size_printf_unit(obj->total_memory, 0));
   } else
     attrlen = 0;
 

@@ -69,7 +69,7 @@ int main(void)
   hwloc_bitmap_foreach_begin(i, set) {
     obj = hwloc_get_numanode_obj_by_os_index(topology, i);
     printf("  node #%u (OS index %u) with %llu bytes of memory\n",
-	   obj->logical_index, i, (unsigned long long) obj->memory.local_memory);
+	   obj->logical_index, i, (unsigned long long) obj->attr->numanode.local_memory);
   } hwloc_bitmap_foreach_end();
   hwloc_bitmap_free(set);
 
@@ -130,7 +130,7 @@ int main(void)
   hwloc_bitmap_foreach_begin(i, set) {
     obj = hwloc_get_numanode_obj_by_os_index(topology, i);
     printf("  node #%u (OS index %u) with %llu bytes of memory\n",
-	   obj->logical_index, i, (unsigned long long) obj->memory.local_memory);
+	   obj->logical_index, i, (unsigned long long) obj->attr->numanode.local_memory);
   } hwloc_bitmap_foreach_end();
   hwloc_bitmap_free(set);
 

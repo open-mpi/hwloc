@@ -43,11 +43,11 @@ int main(void)
   while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) != NULL) {
     hwloc_bitmap_or(set, set, node->cpuset);
     if (hwloc_bitmap_iszero(node->cpuset)) {
-      if (node->memory.local_memory)
+      if (node->attr->numanode.local_memory)
         hwloc_bitmap_set(nocpubutmemnodeset, node->os_index);
       else
 	hwloc_bitmap_set(nocpunomemnodeset, node->os_index);
-    } else if (!node->memory.local_memory) {
+    } else if (!node->attr->numanode.local_memory) {
       hwloc_bitmap_set(nomembutcpunodeset, node->os_index);
       hwloc_bitmap_or(nomembutcpucpuset, nomembutcpucpuset, node->cpuset);
     }
@@ -146,7 +146,7 @@ int main(void)
 
   /* convert first node (with CPU and memory) between cpuset/nodeset and libnuma */
   node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, NULL);
-  while (node && (!node->memory.local_memory || hwloc_bitmap_iszero(node->cpuset)))
+  while (node && (!node->attr->numanode.local_memory || hwloc_bitmap_iszero(node->cpuset)))
     /* skip nodes with no cpus or no memory to avoid strange libnuma behaviors */
     node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node);
   if (node) {
