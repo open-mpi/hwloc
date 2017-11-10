@@ -1646,36 +1646,22 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
    * (in case another backend ever generates buggy object sets as well).
    */
 
-  if (data->version_major < 2 && !data->nbnumanodes) {
-    /* before 2.0, XML could have no NUMA node objects and no nodesets */
-    hwloc_obj_t numa;
-    /* create missing root nodesets and make sure they are consistent with the upcoming NUMA node */
-    if (!root->nodeset)
-      root->nodeset = hwloc_bitmap_alloc();
-    if (!root->allowed_nodeset)
-      root->allowed_nodeset = hwloc_bitmap_alloc();
-    if (!root->complete_nodeset)
-      root->complete_nodeset = hwloc_bitmap_alloc();
-    hwloc_bitmap_only(root->nodeset, 0);
-    hwloc_bitmap_only(root->allowed_nodeset, 0);
-    hwloc_bitmap_only(root->complete_nodeset, 0);
-    /* add a NUMA node and move the root memory there */
-    numa = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);
-    numa->cpuset = hwloc_bitmap_dup(root->cpuset);
-    numa->nodeset = hwloc_bitmap_alloc();
-    hwloc_bitmap_set(numa->nodeset, 0);
-    memcpy(&numa->memory, &topology->levels[0][0]->memory, sizeof(numa->memory));
-    memset(&topology->levels[0][0]->memory, 0, sizeof(numa->memory));
-    /* insert by cpuset so that it goes between root and its existing children */
-    hwloc_insert_object_by_cpuset(topology, numa);
-  }
-
-  /* make sure we have a nodeset now. if we got NUMA nodes without nodeset, something bad happened */
-  if (!root->nodeset) {
-    if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: invalid root object without nodeset\n",
-	      data->msgprefix);
-    goto err;
+  if (data->version_major >= 2) {
+    /* v2 must have non-empty nodesets since at least one NUMA node is required */
+    if (!root->nodeset) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: invalid root object without nodeset\n",
+		data->msgprefix);
+      goto err;
+    }
+    if (hwloc_bitmap_iszero(root->nodeset)) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: invalid root object with empty nodeset\n",
+		data->msgprefix);
+      goto err;
+    }
+  } else {
+    /* if v1 without nodeset, the core will add a default NUMA node and nodesets */
   }
 
   /* allocate default cpusets and nodesets if missing, the core will restrict them */
