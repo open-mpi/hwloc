@@ -375,9 +375,19 @@ struct hwloc_obj {
 
   /* global position */
   unsigned depth;			/**< \brief Vertical index in the hierarchy.
-					 * If the topology is symmetric, this is equal to the
-					 * parent depth plus one, and also equal to the number
-					 * of parent/child links from the root object to here.
+					 *
+					 * For normal objects, this is the depth of the horizontal level
+					 * that contains this object and its cousins of the same type.
+					 * If the topology is symmetric, this is equal to the parent depth
+					 * plus one, and also equal to the number of parent/child links
+					 * from the root object to here.
+					 *
+					 * For special objects (I/O and Misc) that are not
+					 * in the main tree, this is a special negative value that
+					 * corresponds to their dedicated level,
+					 * see hwloc_get_type_depth() and ::hwloc_get_type_depth_e.
+					 * Those special values can be passed to hwloc functions such
+					 * hwloc_get_nbobjs_by_depth() as usual.
 					 */
   unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects,
 					 * hence guaranteed unique across the entire machine.
