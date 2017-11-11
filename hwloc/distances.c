@@ -151,7 +151,7 @@ int hwloc_distances_remove(hwloc_topology_t topology)
   return 0;
 }
 
-int hwloc_distances_remove_by_depth(hwloc_topology_t topology, unsigned depth)
+int hwloc_distances_remove_by_depth(hwloc_topology_t topology, int depth)
 {
   struct hwloc_internal_distances_s *dist, *next;
   hwloc_obj_type_t type;
@@ -634,7 +634,7 @@ hwloc_distances_get(hwloc_topology_t topology,
 }
 
 int
-hwloc_distances_get_by_depth(hwloc_topology_t topology, unsigned depth,
+hwloc_distances_get_by_depth(hwloc_topology_t topology, int depth,
 			     unsigned *nrp, struct hwloc_distances_s **distancesp,
 			     unsigned long kind, unsigned long flags)
 {

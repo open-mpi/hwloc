@@ -1,7 +1,7 @@
 
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -57,7 +57,7 @@ static void check_cpuset(hwloc_bitmap_t set, const char *expected1, const char *
 int main(void)
 {
   hwloc_topology_t topology;
-  unsigned depth;
+  int depth;
   char *string = NULL;
   int stringlen, len;
   hwloc_obj_t obj;

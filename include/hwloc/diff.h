@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2016 Inria.  All rights reserved.
+ * Copyright © 2013-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -136,7 +136,7 @@ typedef union hwloc_topology_diff_u {
     hwloc_topology_diff_type_t type; /* must be ::HWLOC_TOPOLOGY_DIFF_OBJ_ATTR */
     union hwloc_topology_diff_u * next;
     /* List of attribute differences for a single object */
-    unsigned obj_depth;
+    int obj_depth;
     unsigned obj_index;
     union hwloc_topology_diff_obj_attr_u diff;
   } obj_attr;
@@ -146,7 +146,7 @@ typedef union hwloc_topology_diff_u {
     hwloc_topology_diff_type_t type; /* must be ::HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX */
     union hwloc_topology_diff_u * next;
     /* Where we had to stop computing the diff in the first topology */
-    unsigned obj_depth;
+    int obj_depth;
     unsigned obj_index;
   } too_complex;
 } * hwloc_topology_diff_t;

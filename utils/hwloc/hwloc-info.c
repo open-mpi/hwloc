@@ -79,7 +79,7 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
   printf("%s gp index = %llu\n", prefix, (unsigned long long) obj->gp_index);
   if (obj->name)
     printf("%s name = %s\n", prefix, obj->name);
-  printf("%s depth = %d\n", prefix, (int) obj->depth); /* special levels have negative values */
+  printf("%s depth = %d\n", prefix, obj->depth);
   printf("%s sibling rank = %u\n", prefix, obj->sibling_rank);
   printf("%s children = %u\n", prefix, obj->arity);
   printf("%s memory children = %u\n", prefix, obj->memory_arity);
@@ -238,7 +238,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     char parents[128];
     hwloc_obj_t parent = obj;
     while (parent) {
-      if (parent->depth == (unsigned) show_ancestor_depth) {
+      if (parent->depth == show_ancestor_depth) {
 	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
 	if (verbose < 0)
 	  printf("%s%s:%u\n", prefix, parents, parent->logical_index);
@@ -333,7 +333,7 @@ main (int argc, char *argv[])
 {
   int err;
   hwloc_topology_t topology;
-  unsigned topodepth;
+  int topodepth;
   unsigned long flags = 0;
   char * callname;
   char * input = NULL;
@@ -538,7 +538,7 @@ main (int argc, char *argv[])
       usage(callname, stderr);
       return EXIT_FAILURE;
     }
-    if (show_ancestor_depth == (int) HWLOC_TYPE_DEPTH_UNKNOWN) {
+    if (show_ancestor_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "unavailable --ancestor type %s\n", show_ancestor_type);
       return EXIT_FAILURE;
     }
@@ -554,7 +554,7 @@ main (int argc, char *argv[])
       usage(callname, stderr);
       return EXIT_FAILURE;
     }
-    if (show_descendants_depth == (int) HWLOC_TYPE_DEPTH_UNKNOWN) {
+    if (show_descendants_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "unavailable --descendants type %s\n", show_descendants_type);
       return EXIT_FAILURE;
     }

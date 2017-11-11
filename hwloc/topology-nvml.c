@@ -46,7 +46,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend)
     osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
     snprintf(buffer, sizeof(buffer), "nvml%u", i);
     osdev->name = strdup(buffer);
-    osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
+    osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
 
     hwloc_obj_add_info(osdev, "Backend", "NVML");

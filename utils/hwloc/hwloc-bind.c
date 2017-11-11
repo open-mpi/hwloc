@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
   int loaded = 0;
-  unsigned depth;
+  int depth;
   hwloc_bitmap_t cpubind_set, membind_set;
   int got_cpubind = 0, got_membind = 0;
   int working_on_cpubind = 1; /* membind if 0 */

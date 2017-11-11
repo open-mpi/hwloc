@@ -218,7 +218,7 @@ static void output_distances(struct lstopo_output *loutput)
 	      kindmeans, dist[j]->kind,
 	      dist[j]->nbobjs,
 	      hwloc_type_name(dist[j]->objs[0]->type),
-	      (int) dist[j]->objs[0]->depth,
+	      dist[j]->objs[0]->depth,
 	      logical ? "logical" : "physical");
       hwloc_utils_print_distance_matrix(output, dist[j]->nbobjs, dist[j]->objs, dist[j]->values, logical);
       hwloc_distances_release(topology, dist[j]);

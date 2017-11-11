@@ -36,9 +36,9 @@ static void print_distances(const struct hwloc_distances_s *distances)
   }
 }
 
-static void check(unsigned has_groups, unsigned nbnodes, unsigned nbcores, unsigned nbpus)
+static void check(int has_groups, unsigned nbnodes, unsigned nbcores, unsigned nbpus)
 {
-  unsigned depth;
+  int depth;
   unsigned nb;
   unsigned long long total_memory;
 
@@ -46,9 +46,9 @@ static void check(unsigned has_groups, unsigned nbnodes, unsigned nbcores, unsig
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 3 + has_groups);
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert((int) depth == HWLOC_TYPE_DEPTH_NUMANODE);
+  assert(depth == HWLOC_TYPE_DEPTH_NUMANODE);
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP);
-  assert((int) depth == (has_groups ? 1 : HWLOC_TYPE_DEPTH_UNKNOWN));
+  assert(depth == (has_groups ? 1 : HWLOC_TYPE_DEPTH_UNKNOWN));
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_CORE);
   assert(depth == 1 + has_groups);
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);

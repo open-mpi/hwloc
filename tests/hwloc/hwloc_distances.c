@@ -36,7 +36,7 @@ static void print_distances(const struct hwloc_distances_s *distances)
   }
 }
 
-static void check_distances(hwloc_topology_t topology, unsigned depth, unsigned expected)
+static void check_distances(hwloc_topology_t topology, int depth, unsigned expected)
 {
   struct hwloc_distances_s *distances[2];
  unsigned nr = 0;
@@ -44,13 +44,13 @@ static void check_distances(hwloc_topology_t topology, unsigned depth, unsigned 
   assert(!err);
   assert(nr == expected);
   if (!nr) {
-    printf("No distance at depth %u\n", depth);
+    printf("No distance at depth %d\n", depth);
     return;
   }
   nr = 2;
   err = hwloc_distances_get_by_depth(topology, depth, &nr, distances, 0, 0);
   assert(!err);
-  printf("distance matrix for depth %u:\n", depth);
+  printf("distance matrix for depth %d:\n", depth);
   print_distances(distances[0]);
   hwloc_distances_release(topology, distances[0]);
   if (nr > 1) {
@@ -65,7 +65,7 @@ int main(void)
   struct hwloc_distances_s *distances[2];
   hwloc_obj_t objs[16];
   uint64_t values[16*16], value1, value2;
-  unsigned topodepth;
+  int topodepth;
   unsigned i, j, k, nr;
   int err;
 

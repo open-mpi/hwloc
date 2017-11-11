@@ -17,7 +17,7 @@ int main(void)
   hwloc_obj_t obj;
   hwloc_obj_t objs[32];
   uint64_t values[32*32];
-  unsigned depth;
+  int depth;
   unsigned width;
   unsigned i, j;
   int err;
@@ -44,7 +44,7 @@ int main(void)
   assert(width == 1);
   /* 3 nodes */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert((int)depth == HWLOC_TYPE_DEPTH_NUMANODE);
+  assert(depth == HWLOC_TYPE_DEPTH_NUMANODE);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 3);
   /* find the root obj */
@@ -78,7 +78,7 @@ int main(void)
   assert(!err);
   /* 1 node */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-  assert((int)depth == HWLOC_TYPE_DEPTH_NUMANODE);
+  assert(depth == HWLOC_TYPE_DEPTH_NUMANODE);
   width = hwloc_get_nbobjs_by_depth(topology, depth);
   assert(width == 1);
   /* 2 groups at depth 1 */

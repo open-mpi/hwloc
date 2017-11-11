@@ -122,7 +122,7 @@ hwloc_distances_get(hwloc_topology_t topology,
  * Identical to hwloc_distances_get() with the additional \p depth filter.
  */
 HWLOC_DECLSPEC int
-hwloc_distances_get_by_depth(hwloc_topology_t topology, unsigned depth,
+hwloc_distances_get_by_depth(hwloc_topology_t topology, int depth,
 			     unsigned *nr, struct hwloc_distances_s **distances,
 			     unsigned long kind, unsigned long flags);
 
@@ -244,7 +244,7 @@ HWLOC_DECLSPEC int hwloc_distances_remove(hwloc_topology_t topology);
  *
  * Identical to hwloc_distances_remove() but only applies to one level of the topology.
  */
-HWLOC_DECLSPEC int hwloc_distances_remove_by_depth(hwloc_topology_t topology, unsigned depth);
+HWLOC_DECLSPEC int hwloc_distances_remove_by_depth(hwloc_topology_t topology, int depth);
 
 /** \brief Remove distance matrices for objects of a specific type in the topology.
  *

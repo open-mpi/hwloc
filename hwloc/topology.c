@@ -726,7 +726,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   hwloc__tma_dup_infos(tma, newobj, src);
 
   /* find our level */
-  if ((int) src->depth < 0) {
+  if (src->depth < 0) {
     i = HWLOC_SLEVEL_FROM_DEPTH(src->depth);
     level = newtopology->slevels[i].objs;
     level_width = newtopology->slevels[i].nbobjs;
@@ -2341,9 +2341,9 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
     for(i=0; i<topology->nb_levels; i++) {
       hwloc_obj_type_t type = topology->levels[i][0]->type;
       for(j=0; j<topology->level_nbobjects[i]; j++)
-	topology->levels[i][j]->depth = i;
+	topology->levels[i][j]->depth = (int)i;
       if (topology->type_depth[type] == HWLOC_TYPE_DEPTH_UNKNOWN)
-	topology->type_depth[type] = i;
+	topology->type_depth[type] = (int)i;
       else
 	topology->type_depth[type] = HWLOC_TYPE_DEPTH_MULTIPLE;
     }
@@ -2799,7 +2799,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     /* Ok, put numbers in the level and link cousins.  */
     for (i = 0; i < n_taken_objs; i++) {
-      taken_objs[i]->depth = topology->nb_levels;
+      taken_objs[i]->depth = (int) topology->nb_levels;
       taken_objs[i]->logical_index = i;
       if (i) {
 	taken_objs[i]->prev_cousin = taken_objs[i-1];
@@ -2814,7 +2814,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
     hwloc_debug(" has number %u\n\n", topology->nb_levels);
 
     if (topology->type_depth[top_obj->type] == HWLOC_TYPE_DEPTH_UNKNOWN)
-      topology->type_depth[top_obj->type] = topology->nb_levels;
+      topology->type_depth[top_obj->type] = (int) topology->nb_levels;
     else
       topology->type_depth[top_obj->type] = HWLOC_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
 
@@ -3716,10 +3716,10 @@ hwloc_topology_is_thissystem(struct hwloc_topology *topology)
   return topology->is_thissystem;
 }
 
-unsigned
+int
 hwloc_topology_get_depth(struct hwloc_topology *topology)
 {
-  return topology->nb_levels;
+  return (int) topology->nb_levels;
 }
 
 const struct hwloc_topology_support *
@@ -4008,19 +4008,19 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
   if (hwloc_obj_type_is_special(obj->type)) {
     assert(!obj->cpuset);
     if (obj->type == HWLOC_OBJ_BRIDGE)
-      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_BRIDGE);
+      assert(obj->depth == HWLOC_TYPE_DEPTH_BRIDGE);
     else if (obj->type == HWLOC_OBJ_PCI_DEVICE)
-      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_PCI_DEVICE);
+      assert(obj->depth == HWLOC_TYPE_DEPTH_PCI_DEVICE);
     else if (obj->type == HWLOC_OBJ_OS_DEVICE)
-      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_OS_DEVICE);
+      assert(obj->depth == HWLOC_TYPE_DEPTH_OS_DEVICE);
     else if (obj->type == HWLOC_OBJ_MISC)
-      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_MISC);
+      assert(obj->depth == HWLOC_TYPE_DEPTH_MISC);
   } else {
     assert(obj->cpuset);
     if (obj->type == HWLOC_OBJ_NUMANODE)
-      assert(obj->depth == (unsigned) HWLOC_TYPE_DEPTH_NUMANODE);
+      assert(obj->depth == HWLOC_TYPE_DEPTH_NUMANODE);
     else
-      assert((int) obj->depth >= 0);
+      assert(obj->depth >= 0);
   }
 
   /* group depth cannot be -1 anymore in v2.0+ */
@@ -4123,7 +4123,7 @@ hwloc__check_nodesets(hwloc_obj_t obj, hwloc_bitmap_t parentset)
 }
 
 static void
-hwloc__check_level(struct hwloc_topology *topology, unsigned depth,
+hwloc__check_level(struct hwloc_topology *topology, int depth,
 		   hwloc_obj_t first, hwloc_obj_t last)
 {
   unsigned width = hwloc_get_nbobjs_by_depth(topology, depth);
@@ -4162,7 +4162,7 @@ hwloc__check_level(struct hwloc_topology *topology, unsigned depth,
     assert(!obj->prev_cousin);
     /* check type */
     assert(hwloc_get_depth_type(topology, depth) == obj->type);
-    assert(depth == (unsigned) hwloc_get_type_depth(topology, obj->type)
+    assert(depth == hwloc_get_type_depth(topology, obj->type)
 	   || HWLOC_TYPE_DEPTH_MULTIPLE == hwloc_get_type_depth(topology, obj->type));
     /* check last object of the level */
     obj = hwloc_get_obj_by_depth(topology, depth, width-1);
@@ -4170,7 +4170,7 @@ hwloc__check_level(struct hwloc_topology *topology, unsigned depth,
     assert(!obj->next_cousin);
   }
 
-  if ((int) depth < 0) {
+  if (depth < 0) {
     assert(first == hwloc_get_obj_by_depth(topology, depth, 0));
     assert(last == hwloc_get_obj_by_depth(topology, depth, width-1));
   } else {
@@ -4188,9 +4188,10 @@ void
 hwloc_topology_check(struct hwloc_topology *topology)
 {
   struct hwloc_obj *obj;
-  hwloc_obj_type_t type;
   hwloc_bitmap_t gp_indexes, set;
-  unsigned i, j, depth;
+  hwloc_obj_type_t type;
+  unsigned i;
+  int j, depth;
 
   /* make sure we can use ranges to check types */
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_L2CACHE == HWLOC_OBJ_L1CACHE + 1);
@@ -4223,21 +4224,21 @@ hwloc_topology_check(struct hwloc_topology *topology)
   /* check that last level is PU */
   assert(hwloc_get_depth_type(topology, depth-1) == HWLOC_OBJ_PU);
   assert(hwloc_get_nbobjs_by_depth(topology, depth-1) > 0);
-  for(j=0; j<hwloc_get_nbobjs_by_depth(topology, depth-1); j++) {
-    obj = hwloc_get_obj_by_depth(topology, depth-1, j);
+  for(i=0; i<hwloc_get_nbobjs_by_depth(topology, depth-1); i++) {
+    obj = hwloc_get_obj_by_depth(topology, depth-1, i);
     assert(obj);
     assert(obj->type == HWLOC_OBJ_PU);
   }
   /* check that other levels are not PU */
-  for(i=1; i<depth-1; i++)
-    assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_PU);
+  for(j=1; j<depth-1; j++)
+    assert(hwloc_get_depth_type(topology, j) != HWLOC_OBJ_PU);
 
   /* check that we have a NUMA level */
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE) == HWLOC_TYPE_DEPTH_NUMANODE);
   assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_NUMANODE) == HWLOC_OBJ_NUMANODE);
   /* check that normal levels are not NUMA */
-  for(i=0; i<depth; i++)
-    assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_NUMANODE);
+  for(j=0; j<depth; j++)
+    assert(hwloc_get_depth_type(topology, j) != HWLOC_OBJ_NUMANODE);
 
   /* top-level specific checks */
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
@@ -4256,11 +4257,11 @@ hwloc_topology_check(struct hwloc_topology *topology)
     assert(hwloc_bitmap_isequal(topology->allowed_nodeset, obj->nodeset));
   }
 
-    /* check each level */
-  for(i=0; i<depth; i++)
-    hwloc__check_level(topology, i, NULL, NULL);
-  for(i=0; i<HWLOC_NR_SLEVELS; i++)
-    hwloc__check_level(topology, HWLOC_SLEVEL_TO_DEPTH(i), topology->slevels[i].first, topology->slevels[i].last);
+  /* check each level */
+  for(j=0; j<depth; j++)
+    hwloc__check_level(topology, j, NULL, NULL);
+  for(j=0; j<HWLOC_NR_SLEVELS; j++)
+    hwloc__check_level(topology, HWLOC_SLEVEL_TO_DEPTH(j), topology->slevels[j].first, topology->slevels[j].last);
 
   /* recurse and check the tree of children, and type-specific checks */
   gp_indexes = hwloc_bitmap_alloc(); /* TODO prealloc to topology->next_gp_index */

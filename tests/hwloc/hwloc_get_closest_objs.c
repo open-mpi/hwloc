@@ -26,7 +26,7 @@ int
 main (void)
 {
   hwloc_topology_t topology;
-  unsigned depth;
+  int depth;
   hwloc_obj_t last;
   hwloc_obj_t *closest;
   unsigned found;
@@ -71,7 +71,7 @@ main (void)
   assert(hwloc_obj_is_in_subtree(topology, last, ancestor));
   assert(hwloc_obj_is_in_subtree(topology, closest[found-1], ancestor));
   assert(ancestor == hwloc_get_root_obj(topology));
-  printf("ancestor type %d (%s) depth %u number %u is the root object\n",
+  printf("ancestor type %d (%s) depth %d number %u is the root object\n",
 	 (int) ancestor->type, hwloc_type_name(ancestor->type), ancestor->depth, ancestor->logical_index);
 
   free(closest);

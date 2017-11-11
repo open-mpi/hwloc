@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
   unsigned long flags = 0;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
-  unsigned depth = 0;
+  int depth = 0;
   hwloc_bitmap_t set;
   int cmdline_args = 0;
   const char * numberoftype = NULL;

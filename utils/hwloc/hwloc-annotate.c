@@ -113,7 +113,7 @@ hwloc_calc_get_obj_cb(struct hwloc_calc_location_context_s *lcontext __hwloc_att
 }
 
 static void
-add_distances(hwloc_topology_t topology, unsigned topodepth)
+add_distances(hwloc_topology_t topology, int topodepth)
 {
 	unsigned long kind = 0;
 	unsigned nbobjs = 0;
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 {
 	hwloc_topology_t topology;
 	char *callname, *input, *output, *location;
-	unsigned topodepth;
+	int topodepth;
 	int err;
 
 	callname = argv[0];

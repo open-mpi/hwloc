@@ -2037,7 +2037,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 	  hwloc_obj_t parent = dist->objs[i]->parent;
 	  while (hwloc_obj_type_is_memory(parent->type))
 	    parent = parent->parent;
-	  if ((int)parent->depth+1 > depth)
+	  if (parent->depth+1 > depth)
 	    depth = parent->depth+1;
 	}
       } else {
@@ -2191,7 +2191,7 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
 
     switch (diff->generic.type) {
     case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR:
-      sprintf(tmp, "%d", (int) diff->obj_attr.obj_depth);
+      sprintf(tmp, "%d", diff->obj_attr.obj_depth);
       state.new_prop(&state, "obj_depth", tmp);
       sprintf(tmp, "%u", diff->obj_attr.obj_index);
       state.new_prop(&state, "obj_index", tmp);

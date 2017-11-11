@@ -22,8 +22,8 @@ static char *randomstring;
 
 static void check(hwloc_topology_t topology)
 {
-  unsigned depth;
-  unsigned i,j;
+  int depth, i;
+  unsigned j;
 
   depth = hwloc_topology_get_depth(topology);
   for(i=0; i<depth; i++) {

@@ -82,7 +82,7 @@ hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigne
 }
 
 static __hwloc_inline hwloc_obj_t
-hwloc_get_next_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_obj_t prev)
+hwloc_get_next_obj_by_depth (hwloc_topology_t topology, int depth, hwloc_obj_t prev)
 {
   if (!prev)
     return hwloc_get_obj_by_depth (topology, depth, 0);

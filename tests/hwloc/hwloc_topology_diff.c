@@ -74,7 +74,7 @@ int main(void)
   assert(!err);
   tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-  assert(tmpdiff->obj_attr.obj_depth == (unsigned) hwloc_get_type_depth(topo1, HWLOC_OBJ_NUMANODE));
+  assert(tmpdiff->obj_attr.obj_depth == hwloc_get_type_depth(topo1, HWLOC_OBJ_NUMANODE));
   assert(tmpdiff->obj_attr.obj_index == 0);
   assert(tmpdiff->obj_attr.diff.generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE);
   assert(tmpdiff->obj_attr.diff.uint64.newvalue - tmpdiff->obj_attr.diff.uint64.oldvalue == 32*4096);
@@ -139,7 +139,7 @@ int main(void)
   assert(!err);
   tmpdiff = tmpdiff->generic.next;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-  assert(tmpdiff->obj_attr.obj_depth == (unsigned) hwloc_get_type_depth(topo1, HWLOC_OBJ_NUMANODE));
+  assert(tmpdiff->obj_attr.obj_depth == hwloc_get_type_depth(topo1, HWLOC_OBJ_NUMANODE));
   assert(tmpdiff->obj_attr.obj_index == 0);
   assert(tmpdiff->obj_attr.diff.generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE);
   assert(tmpdiff->obj_attr.diff.uint64.newvalue - tmpdiff->obj_attr.diff.uint64.oldvalue == 32*4096);

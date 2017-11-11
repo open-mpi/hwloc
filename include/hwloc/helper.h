@@ -83,7 +83,7 @@ HWLOC_DECLSPEC int hwloc_get_largest_objs_inside_cpuset (hwloc_topology_t topolo
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_next_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
-					   unsigned depth, hwloc_obj_t prev)
+					   int depth, hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
   if (!next)
@@ -125,10 +125,10 @@ hwloc_get_next_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
-				      unsigned depth, unsigned idx) __hwloc_attribute_pure;
+				      int depth, unsigned idx) __hwloc_attribute_pure;
 static __hwloc_inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
-				      unsigned depth, unsigned idx)
+				      int depth, unsigned idx)
 {
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   unsigned count = 0;
@@ -180,10 +180,10 @@ hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpus
  */
 static __hwloc_inline unsigned
 hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
-					 unsigned depth) __hwloc_attribute_pure;
+					 int depth) __hwloc_attribute_pure;
 static __hwloc_inline unsigned
 hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
-					 unsigned depth)
+					 int depth)
 {
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   unsigned count = 0;
@@ -319,7 +319,7 @@ hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t s
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_next_obj_covering_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t set,
-					    unsigned depth, hwloc_obj_t prev)
+					    int depth, hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
   if (!next)
@@ -369,9 +369,9 @@ hwloc_get_next_obj_covering_cpuset_by_type(hwloc_topology_t topology, hwloc_cons
 
 /** \brief Returns the ancestor object of \p obj at depth \p depth. */
 static __hwloc_inline hwloc_obj_t
-hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj) __hwloc_attribute_pure;
+hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, int depth, hwloc_obj_t obj) __hwloc_attribute_pure;
 static __hwloc_inline hwloc_obj_t
-hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj)
+hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, int depth, hwloc_obj_t obj)
 {
   hwloc_obj_t ancestor = obj;
   if (obj->depth < depth)
@@ -765,7 +765,7 @@ hwloc_distrib(hwloc_topology_t topology,
 	      hwloc_obj_t *roots, unsigned n_roots,
 	      hwloc_cpuset_t *set,
 	      unsigned n,
-	      unsigned until, unsigned long flags)
+	      int until, unsigned long flags)
 {
   unsigned i;
   unsigned tot_weight;

@@ -23,7 +23,7 @@
 
 struct hwloc_calc_location_context_s {
   hwloc_topology_t topology;
-  unsigned topodepth;
+  int topodepth;
   int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes */
   int logical;
   int verbose;
@@ -79,7 +79,7 @@ hwloc_calc_append_set(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
 static __hwloc_inline unsigned
 hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
 					   hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
-					   unsigned depth)
+					   int depth)
 {
   hwloc_topology_t topology = lcontext->topology;
   int only_hbm = lcontext->only_hbm;
@@ -107,7 +107,7 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
 static __hwloc_inline hwloc_obj_t
 hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
 					hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
-					unsigned depth, unsigned ind)
+					int depth, unsigned ind)
 {
   hwloc_topology_t topology = lcontext->topology;
   int only_hbm = lcontext->only_hbm;
@@ -146,7 +146,7 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
 			      hwloc_obj_type_t *typep)
 {
   hwloc_topology_t topology = lcontext->topology;
-  unsigned topodepth = lcontext->topodepth;
+  int topodepth = lcontext->topodepth;
   int verbose = lcontext->verbose;
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   hwloc_obj_type_t type;
@@ -183,7 +183,7 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
       fprintf(stderr, "invalid type name %s\n", string);
     return -1;
   }
-  if ((unsigned) depth >= topodepth) {
+  if (depth >= topodepth) {
     if (verbose >= 0)
       fprintf(stderr, "ignoring invalid depth %d\n", depth);
     return -1;

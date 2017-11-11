@@ -74,6 +74,7 @@ Version 2.0.0
 * API
   + Objects now have a "subtype" field that supersedes former "Type" and
     "CoProcType" info attributes.
+  + Object depths are now signed ints.
   + Objects do not have allowed_cpuset and allowed_nodeset anymore.
     They are only available for the entire topology using
     hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset().

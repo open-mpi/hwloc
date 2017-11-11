@@ -956,7 +956,7 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
 						   hwloc_obj_t obj,
 						   char *buffer, size_t buflen)
 {
-  unsigned depth = obj->depth;
+  int depth = obj->depth;
   unsigned total;
   hwloc_obj_t *level;
   unsigned step = 1;
@@ -968,8 +968,8 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
   char *tmp = buffer;
   int res, ret = 0;
 
-  if ((int)depth < 0) {
-    assert((int)depth == HWLOC_TYPE_DEPTH_NUMANODE);
+  if (depth < 0) {
+    assert(depth == HWLOC_TYPE_DEPTH_NUMANODE);
     total = topology->slevels[HWLOC_SLEVEL_NUMANODE].nbobjs;
     level = topology->slevels[HWLOC_SLEVEL_NUMANODE].objs;
   } else {

@@ -386,7 +386,7 @@ struct hwloc_obj {
 					 * may be \c NULL if no attribute value was found */
 
   /* global position */
-  unsigned depth;			/**< \brief Vertical index in the hierarchy.
+  int depth;				/**< \brief Vertical index in the hierarchy.
 					 *
 					 * For normal objects, this is the depth of the horizontal level
 					 * that contains this object and its cousins of the same type.
@@ -707,7 +707,7 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
  * \note NUMA nodes, I/O and Misc objects are ignored when computing
  * the depth of the tree (they are placed on special levels).
  */
-HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topology) __hwloc_attribute_pure;
+HWLOC_DECLSPEC int hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topology) __hwloc_attribute_pure;
 
 /** \brief Returns the depth of objects of type \p type.
  *
@@ -773,11 +773,11 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  *
  * \return (hwloc_obj_type_t)-1 if depth \p depth does not exist.
  */
-HWLOC_DECLSPEC hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, int depth) __hwloc_attribute_pure;
 
 /** \brief Returns the width of level at depth \p depth.
  */
-HWLOC_DECLSPEC unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
+HWLOC_DECLSPEC unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, int depth) __hwloc_attribute_pure;
 
 /** \brief Returns the width of level type \p type
  *
@@ -796,7 +796,7 @@ static __hwloc_inline hwloc_obj_t
 hwloc_get_root_obj (hwloc_topology_t topology) __hwloc_attribute_pure;
 
 /** \brief Returns the topology object at logical index \p idx from depth \p depth */
-HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned depth, unsigned idx) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, int depth, unsigned idx) __hwloc_attribute_pure;
 
 /** \brief Returns the topology object at logical index \p idx with type \p type
  *
@@ -812,7 +812,7 @@ hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigne
  * If \p prev is \c NULL, return the first object at depth \p depth.
  */
 static __hwloc_inline hwloc_obj_t
-hwloc_get_next_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_obj_t prev);
+hwloc_get_next_obj_by_depth (hwloc_topology_t topology, int depth, hwloc_obj_t prev);
 
 /** \brief Returns the next object of type \p type.
  *

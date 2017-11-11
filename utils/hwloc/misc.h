@@ -373,8 +373,8 @@ hwloc_lstopo_show_summary_depth(FILE *output, size_t prefixmaxlen, hwloc_topolog
 static __hwloc_inline void
 hwloc_lstopo_show_summary(FILE *output, hwloc_topology_t topology)
 {
-  unsigned topodepth = hwloc_topology_get_depth(topology);
-  unsigned depth;
+  int topodepth = hwloc_topology_get_depth(topology);
+  int depth;
   size_t prefixmaxlen, sdepthmaxlen;
 
   prefixmaxlen = topodepth-1 + strlen("depth xyz:  ");

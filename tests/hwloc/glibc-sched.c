@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -19,7 +19,7 @@ int main(void)
 {
   hwloc_topology_t topology;
 #ifdef HWLOC_HAVE_CPU_SET
-  unsigned depth;
+  int depth;
   hwloc_bitmap_t hwlocset;
   cpu_set_t schedset;
   hwloc_obj_t obj;

@@ -25,9 +25,9 @@ hwloc_get_type_depth (struct hwloc_topology *topology, hwloc_obj_type_t type)
 }
 
 hwloc_obj_type_t
-hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
+hwloc_get_depth_type (hwloc_topology_t topology, int depth)
 {
-  if (depth >= topology->nb_levels)
+  if ((unsigned)depth >= topology->nb_levels)
     switch (depth) {
     case HWLOC_TYPE_DEPTH_NUMANODE:
       return HWLOC_OBJ_NUMANODE;
@@ -46,9 +46,9 @@ hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
 }
 
 unsigned
-hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, unsigned depth)
+hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, int depth)
 {
-  if (depth >= topology->nb_levels) {
+  if ((unsigned)depth >= topology->nb_levels) {
     unsigned l = HWLOC_SLEVEL_FROM_DEPTH(depth);
     if (l < HWLOC_NR_SLEVELS)
       return topology->slevels[l].nbobjs;
@@ -59,9 +59,9 @@ hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, unsigned depth)
 }
 
 struct hwloc_obj *
-hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigned idx)
+hwloc_get_obj_by_depth (struct hwloc_topology *topology, int depth, unsigned idx)
 {
-  if (depth >= topology->nb_levels) {
+  if ((unsigned)depth >= topology->nb_levels) {
     unsigned l = HWLOC_SLEVEL_FROM_DEPTH(depth);
     if (l < HWLOC_NR_SLEVELS)
       return idx < topology->slevels[l].nbobjs ? topology->slevels[l].objs[idx] : NULL;
@@ -330,7 +330,7 @@ hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
     for(l=0; l<topology->nb_levels; l++) {
       if (topology->levels[l][0]->type == HWLOC_OBJ_GROUP
 	  && topology->levels[l][0]->attr->group.depth == attr.group.depth) {
-	depth = l;
+	depth = (int)l;
 	break;
       }
     }
@@ -338,7 +338,7 @@ hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
 
   if (typep)
     *typep = type;
-  *depthp = (unsigned) depth;
+  *depthp = depth;
   return 0;
 }
 
