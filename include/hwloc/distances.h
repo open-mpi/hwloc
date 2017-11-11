@@ -136,7 +136,7 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 			    unsigned long kind, unsigned long flags)
 {
   int depth = hwloc_get_type_depth(topology, type);
-  if (depth < 0 && depth != HWLOC_TYPE_DEPTH_NUMANODE) {
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
     *nr = 0;
     return 0;
   }
@@ -254,7 +254,7 @@ static __hwloc_inline int
 hwloc_distances_remove_by_type(hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
-  if (depth < 0)
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return 0;
   return hwloc_distances_remove_by_depth(topology, depth);
 }
