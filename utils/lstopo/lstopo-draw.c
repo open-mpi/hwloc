@@ -684,7 +684,7 @@ static void
 lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
 {
   struct lstopo_obj_userdata *lud = obj->userdata;
-  struct style *s = &lud->style;
+  struct lstopo_style *s = &lud->style;
   hwloc_obj_t child;
   unsigned forcer, forceg, forceb;
   const char *stylestr;
@@ -735,7 +735,7 @@ lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
 static void
 lstopo_set_object_color(struct lstopo_output *loutput,
 			hwloc_obj_t obj,
-			struct style *s)
+			struct lstopo_style *s)
 {
   struct lstopo_obj_userdata *lud = obj->userdata;
 
@@ -1038,7 +1038,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
-    struct style style;
+    struct lstopo_style style;
     unsigned totwidth, totheight;
 
     /* restore our size that was computed during prepare */
@@ -1083,7 +1083,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
-    struct style style;
+    struct lstopo_style style;
     unsigned totwidth, totheight;
 
     /* restore our size that was computed during prepare */
@@ -1151,7 +1151,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
-    struct style style;
+    struct lstopo_style style;
     unsigned totwidth, totheight;
     unsigned myoff = 0;
 
@@ -1192,7 +1192,7 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
-    struct style style;
+    struct lstopo_style style;
     unsigned totwidth, totheight;
 
     /* restore our size that was computed during prepare */

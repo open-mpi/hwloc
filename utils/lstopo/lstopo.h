@@ -76,7 +76,7 @@ struct lstopo_output {
 
 struct lstopo_color { int r, g, b; };
 
-struct style {
+struct lstopo_style {
   struct lstopo_color
 	bg,	/* main box background color */
 	t,	/* main text color */
@@ -97,7 +97,7 @@ struct lstopo_obj_userdata {
   int pci_collapsed; /* 0 if no collapsing, -1 if collapsed with a previous one, >1 if collapsed with several next */
 
   /* custom style */
-  struct style style;
+  struct lstopo_style style;
 #define LSTOPO_STYLE_BG  0x1
 #define LSTOPO_STYLE_T   0x2
 #define LSTOPO_STYLE_T2  0x4
