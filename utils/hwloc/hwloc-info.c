@@ -79,8 +79,7 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
   printf("%s gp index = %llu\n", prefix, (unsigned long long) obj->gp_index);
   if (obj->name)
     printf("%s name = %s\n", prefix, obj->name);
-  if (obj->depth != (unsigned) -1)
-    printf("%s depth = %d\n", prefix, (int) obj->depth); /* special levels have negative values */
+  printf("%s depth = %d\n", prefix, (int) obj->depth); /* special levels have negative values */
   printf("%s sibling rank = %u\n", prefix, obj->sibling_rank);
   printf("%s children = %u\n", prefix, obj->arity);
   printf("%s memory children = %u\n", prefix, obj->memory_arity);
