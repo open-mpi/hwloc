@@ -74,8 +74,10 @@ struct lstopo_output {
   enum lstopo_drawing_e drawing;
 };
 
+struct lstopo_color { int r, g, b; };
+
 struct style {
-  struct stylecolor { int r, g, b; }
+  struct lstopo_color
 	bg,	/* main box background color */
 	t,	/* main text color */
 	t2;	/* other text color */
@@ -114,7 +116,7 @@ struct lstopo_obj_userdata {
     unsigned xrel;
     unsigned yrel;
     unsigned box;
-    struct stylecolor boxcolor;
+    struct lstopo_color boxcolor;
   } children;
   /* relative position of first memory child */
   struct lstopo_children_position above_children;

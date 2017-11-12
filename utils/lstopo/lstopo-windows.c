@@ -24,7 +24,7 @@
 /* windows back-end.  */
 
 static struct color {
-  int r, g, b;
+  struct lstopo_color color;
   HGDIOBJ brush;
 } *colors;
 
@@ -42,7 +42,7 @@ rgb_to_brush(int r, int g, int b)
   int i;
 
   for (i = 0; i < numcolors; i++)
-    if (colors[i].r == r && colors[i].g == g && colors[i].b == b)
+    if (colors[i].color.r == r && colors[i].color.g == g && colors[i].color.b == b)
       return colors[i].brush;
 
   fprintf(stderr, "color #%02x%02x%02x not declared\n", r, g, b);
@@ -330,9 +330,9 @@ windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, in
     return;
   }
   colors = tmp;
-  colors[numcolors].r = r;
-  colors[numcolors].g = g;
-  colors[numcolors].b = b;
+  colors[numcolors].color.r = r;
+  colors[numcolors].color.g = g;
+  colors[numcolors].color.b = b;
   colors[numcolors].brush = (HGDIOBJ) brush;
   numcolors++;
 }

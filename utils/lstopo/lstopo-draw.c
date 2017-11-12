@@ -846,11 +846,11 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   }
 
   if (lud->style_set & LSTOPO_STYLE_BG)
-    memcpy(&s->bg, &lud->style.bg, sizeof(struct stylecolor));
+    memcpy(&s->bg, &lud->style.bg, sizeof(struct lstopo_color));
   if (lud->style_set & LSTOPO_STYLE_T)
-    memcpy(&s->t, &lud->style.t, sizeof(struct stylecolor));
+    memcpy(&s->t, &lud->style.t, sizeof(struct lstopo_color));
   if (lud->style_set & LSTOPO_STYLE_T2)
-    memcpy(&s->t2, &lud->style.t2, sizeof(struct stylecolor));
+    memcpy(&s->t2, &lud->style.t2, sizeof(struct lstopo_color));
 }
 
 static void
@@ -994,7 +994,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 }
 
 static void
-draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct stylecolor *color, unsigned depth, unsigned x, unsigned y)
+draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *color, unsigned depth, unsigned x, unsigned y)
 {
   struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = obj->userdata;

@@ -12,10 +12,7 @@
 
 #include "lstopo.h"
 
-static struct color {
-  int r, g, b;
-} *colors;
-
+static struct lstopo_color *colors;
 static int numcolors;
 
 static int
@@ -46,7 +43,7 @@ int
 declare_color(int r, int g, int b)
 {
   int color = find_color(r, g, b);
-  struct color *tmp;
+  struct lstopo_color *tmp;
 
   if (color != -1)
     return color;
