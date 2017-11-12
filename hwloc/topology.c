@@ -2089,7 +2089,7 @@ remove_unused_sets(hwloc_obj_t obj)
 }
 
 static void
-hwloc__filter_bridges(hwloc_topology_t topology, hwloc_obj_t root, int depth)
+hwloc__filter_bridges(hwloc_topology_t topology, hwloc_obj_t root, unsigned depth)
 {
   hwloc_obj_t child, *pchild;
 
@@ -2433,7 +2433,7 @@ hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
 
 static void hwloc_set_group_depth(hwloc_topology_t topology)
 {
-  int groupdepth = 0;
+  unsigned groupdepth = 0;
   unsigned i, j;
   for(i=0; i<topology->nb_levels; i++)
     if (topology->levels[i][0]->type == HWLOC_OBJ_GROUP) {
