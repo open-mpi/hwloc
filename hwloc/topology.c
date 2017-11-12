@@ -2563,7 +2563,7 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
  * if equal, take the object and put its children into the remaining objs.
  * if not equal, put the object into the remaining objs.
  */
-static int
+static unsigned
 hwloc_level_take_objects(hwloc_obj_t top_obj,
 			 hwloc_obj_t *current_objs, unsigned n_current_objs,
 			 hwloc_obj_t *taken_objs, unsigned n_taken_objs __hwloc_attribute_unused,
