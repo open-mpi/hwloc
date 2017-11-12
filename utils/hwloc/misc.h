@@ -353,7 +353,7 @@ hwloc_lstopo_show_summary_depth(FILE *output, int prefixmaxlen, hwloc_topology_t
     if (depth < 0)
       prefixlen = fprintf(output, "Special depth %d:", depth);
     else
-      prefixlen = fprintf(output,"%*sdepth %u:", (int) depth, "", depth);
+      prefixlen = fprintf(output,"%*sdepth %d:", depth, "", depth);
 
     if (depth < 0) {
       /* use plain type, we don't want OSdev subtype since it may differ for other objects in the level */
