@@ -18,7 +18,10 @@
 int
 hwloc_get_type_depth (struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
-  return topology->type_depth[type];
+  if ((int)type < HWLOC_OBJ_SYSTEM || (int)type >= HWLOC_OBJ_TYPE_MAX)
+    return HWLOC_TYPE_DEPTH_UNKNOWN;
+  else
+    return topology->type_depth[type];
 }
 
 hwloc_obj_type_t
