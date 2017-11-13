@@ -32,65 +32,23 @@
 #define DARKER_EPOXY_B_COLOR ((DARK_EPOXY_B_COLOR * 100) / 110)
 
 /* each of these colors must be declared in output_draw_start() */
-#define PACKAGE_R_COLOR DARK_EPOXY_R_COLOR
-#define PACKAGE_G_COLOR DARK_EPOXY_G_COLOR
-#define PACKAGE_B_COLOR DARK_EPOXY_B_COLOR
-
-#define MEMORY_R_COLOR 0xef
-#define MEMORY_G_COLOR 0xdf
-#define MEMORY_B_COLOR 0xde
-
-#define MEMORIES_R_COLOR 0xf2
-#define MEMORIES_G_COLOR 0xe8
-#define MEMORIES_B_COLOR 0xe8
-
-#define CORE_R_COLOR 0xbe
-#define CORE_G_COLOR 0xbe
-#define CORE_B_COLOR 0xbe
-
-#define THREAD_R_COLOR 0xff
-#define THREAD_G_COLOR 0xff
-#define THREAD_B_COLOR 0xff
-
-#define RUNNING_R_COLOR 0
-#define RUNNING_G_COLOR 0xff
-#define RUNNING_B_COLOR 0
-
-#define FORBIDDEN_R_COLOR 0xff
-#define FORBIDDEN_G_COLOR 0
-#define FORBIDDEN_B_COLOR 0
-
-#define CACHE_R_COLOR 0xff
-#define CACHE_G_COLOR 0xff
-#define CACHE_B_COLOR 0xff
-
-#define MACHINE_R_COLOR EPOXY_R_COLOR
-#define MACHINE_G_COLOR EPOXY_G_COLOR
-#define MACHINE_B_COLOR EPOXY_B_COLOR
-
-#define SYSTEM_R_COLOR 0xff
-#define SYSTEM_G_COLOR 0xff
-#define SYSTEM_B_COLOR 0xff
-
-#define GROUP_IN_PACKAGE_R_COLOR EPOXY_R_COLOR
-#define GROUP_IN_PACKAGE_G_COLOR EPOXY_G_COLOR
-#define GROUP_IN_PACKAGE_B_COLOR EPOXY_B_COLOR
-
-#define MISC_R_COLOR 0xff
-#define MISC_G_COLOR 0xff
-#define MISC_B_COLOR 0xff
-
-#define PCI_DEVICE_R_COLOR DARKER_EPOXY_R_COLOR
-#define PCI_DEVICE_G_COLOR DARKER_EPOXY_G_COLOR
-#define PCI_DEVICE_B_COLOR DARKER_EPOXY_B_COLOR
-
-#define OS_DEVICE_R_COLOR 0xde
-#define OS_DEVICE_G_COLOR 0xde
-#define OS_DEVICE_B_COLOR 0xde
-
-#define BRIDGE_R_COLOR 0xff
-#define BRIDGE_G_COLOR 0xff
-#define BRIDGE_B_COLOR 0xff
+const struct lstopo_color BLACK_COLOR = { 0, 0, 0 };
+const struct lstopo_color WHITE_COLOR = { 0xff, 0xff, 0xff };
+const struct lstopo_color PACKAGE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR };
+const struct lstopo_color MEMORY_COLOR = { 0xef, 0xdf, 0xde };
+const struct lstopo_color MEMORIES_COLOR = { 0xf2, 0xe8, 0xe8}; /* slightly lighter than MEMORY_COLOR */
+const struct lstopo_color CORE_COLOR = { 0xbe, 0xbe, 0xbe };
+const struct lstopo_color THREAD_COLOR = { 0xff, 0xff, 0xff };
+const struct lstopo_color RUNNING_COLOR = { 0, 0xff, 0 };
+const struct lstopo_color FORBIDDEN_COLOR = { 0xff, 0, 0 };
+const struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff };
+const struct lstopo_color MACHINE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
+const struct lstopo_color SYSTEM_COLOR = { 0xff, 0xff, 0xff };
+const struct lstopo_color GROUP_IN_PACKAGE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
+const struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff };
+const struct lstopo_color PCI_DEVICE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR };
+const struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde };
+const struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff };
 
 unsigned get_textwidth(void *output,
 		       const char *text, unsigned length,
@@ -474,9 +432,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       if (above_children_width < children_width) {
 	above_children_width = children_width;
       }
-      plud->above_children.boxcolor.r = MEMORIES_R_COLOR;
-      plud->above_children.boxcolor.g = MEMORIES_G_COLOR;
-      plud->above_children.boxcolor.b = MEMORIES_B_COLOR;
+      plud->above_children.boxcolor = MEMORIES_COLOR;
       plud->above_children.box = 1;
 
     } else {
@@ -745,53 +701,37 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 
   case HWLOC_OBJ_MACHINE:
     if (obj->depth) {
-      s->bg.r = MACHINE_R_COLOR;
-      s->bg.g = MACHINE_G_COLOR;
-      s->bg.b = MACHINE_B_COLOR;
+      s->bg = MACHINE_COLOR;
       break;
     }
     /* Machine root printed as a System */
     /* FALLTHRU */
   case HWLOC_OBJ_SYSTEM:
-    s->bg.r = SYSTEM_R_COLOR;
-    s->bg.g = SYSTEM_G_COLOR;
-    s->bg.b = SYSTEM_B_COLOR;
+    s->bg = SYSTEM_COLOR;
     break;
 
   case HWLOC_OBJ_GROUP:
     if (obj->parent && obj->parent->type == HWLOC_OBJ_PACKAGE) {
-      s->bg.r = GROUP_IN_PACKAGE_R_COLOR;
-      s->bg.g = GROUP_IN_PACKAGE_G_COLOR;
-      s->bg.b = GROUP_IN_PACKAGE_B_COLOR;
+      s->bg = GROUP_IN_PACKAGE_COLOR;
     } else {
-      s->bg.r = MISC_R_COLOR;
-      s->bg.g = MISC_G_COLOR;
-      s->bg.b = MISC_B_COLOR;
+      s->bg = MISC_COLOR;
     }
     break;
 
   case HWLOC_OBJ_MISC:
-    s->bg.r = MISC_R_COLOR;
-    s->bg.g = MISC_G_COLOR;
-    s->bg.b = MISC_B_COLOR;
+    s->bg = MISC_COLOR;
     break;
 
   case HWLOC_OBJ_NUMANODE:
-    s->bg.r = MEMORY_R_COLOR;
-    s->bg.g = MEMORY_G_COLOR;
-    s->bg.b = MEMORY_B_COLOR;
+    s->bg = MEMORY_COLOR;
     break;
 
   case HWLOC_OBJ_PACKAGE:
-    s->bg.r = PACKAGE_R_COLOR;
-    s->bg.g = PACKAGE_G_COLOR;
-    s->bg.b = PACKAGE_B_COLOR;
+    s->bg = PACKAGE_COLOR;
     break;
 
   case HWLOC_OBJ_CORE:
-    s->bg.r = CORE_R_COLOR;
-    s->bg.g = CORE_G_COLOR;
-    s->bg.b = CORE_B_COLOR;
+    s->bg = CORE_COLOR;
     break;
 
   case HWLOC_OBJ_L1CACHE:
@@ -802,43 +742,29 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   case HWLOC_OBJ_L1ICACHE:
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
-    s->bg.r = CACHE_R_COLOR;
-    s->bg.g = CACHE_G_COLOR;
-    s->bg.b = CACHE_B_COLOR;
+    s->bg = CACHE_COLOR;
     break;
 
   case HWLOC_OBJ_PU:
     if (lstopo_pu_forbidden(obj)) {
-      s->bg.r = FORBIDDEN_R_COLOR;
-      s->bg.g = FORBIDDEN_G_COLOR;
-      s->bg.b = FORBIDDEN_B_COLOR;
+      s->bg = FORBIDDEN_COLOR;
     } else if (lstopo_pu_running(loutput, obj)) {
-      s->bg.r = RUNNING_R_COLOR;
-      s->bg.g = RUNNING_G_COLOR;
-      s->bg.b = RUNNING_B_COLOR;
+      s->bg = RUNNING_COLOR;
     } else {
-      s->bg.r = THREAD_R_COLOR;
-      s->bg.g = THREAD_G_COLOR;
-      s->bg.b = THREAD_B_COLOR;
+      s->bg = THREAD_COLOR;
     }
     break;
 
   case HWLOC_OBJ_BRIDGE:
-    s->bg.r = BRIDGE_R_COLOR;
-    s->bg.g = BRIDGE_G_COLOR;
-    s->bg.b = BRIDGE_B_COLOR;
+    s->bg = BRIDGE_COLOR;
     break;
 
   case HWLOC_OBJ_PCI_DEVICE:
-    s->bg.r = PCI_DEVICE_R_COLOR;
-    s->bg.g = PCI_DEVICE_G_COLOR;
-    s->bg.b = PCI_DEVICE_B_COLOR;
+    s->bg = PCI_DEVICE_COLOR;
     break;
 
   case HWLOC_OBJ_OS_DEVICE:
-    s->bg.r = OS_DEVICE_R_COLOR;
-    s->bg.g = OS_DEVICE_G_COLOR;
-    s->bg.b = OS_DEVICE_B_COLOR;
+    s->bg = OS_DEVICE_COLOR;
     break;
 
   default:
@@ -1384,21 +1310,22 @@ output_draw_start(struct lstopo_output *output)
 {
   struct draw_methods *methods = output->methods;
   methods->init(output);
-  methods->declare_color(output, 0, 0, 0);
-  methods->declare_color(output, PACKAGE_R_COLOR, PACKAGE_G_COLOR, PACKAGE_B_COLOR);
-  methods->declare_color(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR);
-  methods->declare_color(output, MEMORIES_R_COLOR, MEMORIES_G_COLOR, MEMORIES_B_COLOR);
-  methods->declare_color(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR);
-  methods->declare_color(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR);
-  methods->declare_color(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR);
-  methods->declare_color(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR);
-  methods->declare_color(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR);
-  methods->declare_color(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR);
-  methods->declare_color(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR);
-  methods->declare_color(output, GROUP_IN_PACKAGE_R_COLOR, GROUP_IN_PACKAGE_G_COLOR, GROUP_IN_PACKAGE_B_COLOR);
-  methods->declare_color(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR);
-  methods->declare_color(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR);
-  methods->declare_color(output, OS_DEVICE_R_COLOR, OS_DEVICE_G_COLOR, OS_DEVICE_B_COLOR);
-  methods->declare_color(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR);
+  methods->declare_color(output, BLACK_COLOR.r, BLACK_COLOR.g, BLACK_COLOR.b);
+  methods->declare_color(output, WHITE_COLOR.r, WHITE_COLOR.g, WHITE_COLOR.b);
+  methods->declare_color(output, PACKAGE_COLOR.r, PACKAGE_COLOR.g, PACKAGE_COLOR.b);
+  methods->declare_color(output, MEMORY_COLOR.r, MEMORY_COLOR.g, MEMORY_COLOR.b);
+  methods->declare_color(output, MEMORIES_COLOR.r, MEMORIES_COLOR.g, MEMORIES_COLOR.b);
+  methods->declare_color(output, CORE_COLOR.r, CORE_COLOR.g, CORE_COLOR.b);
+  methods->declare_color(output, THREAD_COLOR.r, THREAD_COLOR.g, THREAD_COLOR.b);
+  methods->declare_color(output, RUNNING_COLOR.r, RUNNING_COLOR.g, RUNNING_COLOR.b);
+  methods->declare_color(output, FORBIDDEN_COLOR.r, FORBIDDEN_COLOR.g, FORBIDDEN_COLOR.b);
+  methods->declare_color(output, CACHE_COLOR.r, CACHE_COLOR.g, CACHE_COLOR.b);
+  methods->declare_color(output, MACHINE_COLOR.r, MACHINE_COLOR.g, MACHINE_COLOR.b);
+  methods->declare_color(output, SYSTEM_COLOR.r, SYSTEM_COLOR.g, SYSTEM_COLOR.b);
+  methods->declare_color(output, GROUP_IN_PACKAGE_COLOR.r, GROUP_IN_PACKAGE_COLOR.g, GROUP_IN_PACKAGE_COLOR.b);
+  methods->declare_color(output, MISC_COLOR.r, MISC_COLOR.g, MISC_COLOR.b);
+  methods->declare_color(output, PCI_DEVICE_COLOR.r, PCI_DEVICE_COLOR.g, PCI_DEVICE_COLOR.b);
+  methods->declare_color(output, OS_DEVICE_COLOR.r, OS_DEVICE_COLOR.g, OS_DEVICE_COLOR.b);
+  methods->declare_color(output, BRIDGE_COLOR.r, BRIDGE_COLOR.g, BRIDGE_COLOR.b);
   lstopo_prepare_custom_styles(output, hwloc_get_root_obj(output->topology));
 }
