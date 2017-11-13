@@ -970,7 +970,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	      hwloc_bitmap_clr(remaining_cpuset, j);
 	    }
 	  }
-	  cache = hwloc_alloc_setup_object(topology, otype, -1);
+	  cache = hwloc_alloc_setup_object(topology, otype, HWLOC_UNKNOWN_INDEX);
 	  cache->attr->cache.depth = level;
 	  cache->attr->cache.size = infos[i].cache[l].size;
 	  cache->attr->cache.linesize = infos[i].cache[l].linesize;

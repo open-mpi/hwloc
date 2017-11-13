@@ -2689,7 +2689,7 @@ try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   if (!hwloc_filter_check_keep_object_type(topology, otype))
     return;
 
-  c = hwloc_alloc_setup_object(topology, otype, -1);
+  c = hwloc_alloc_setup_object(topology, otype, HWLOC_UNKNOWN_INDEX);
   c->attr->cache.depth = level;
   c->attr->cache.linesize = cache_line_size;
   c->attr->cache.size = cache_size;
@@ -2837,7 +2837,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
 
 	if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
 	  /* Add core */
-	  core = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, reg);
+	  core = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, (unsigned) reg);
 	  core->cpuset = hwloc_bitmap_dup(cpuset);
 	  hwloc_insert_object_by_cpuset(topology, core);
 	}
@@ -3182,7 +3182,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  if (!hwloc_bitmap_iszero(nodes[i]->cpuset)) {
 	    /* DDR, see if there's a MCDRAM cache to add */
 	    if (mscache) {
-	      hwloc_obj_t cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, -1);
+	      hwloc_obj_t cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, HWLOC_UNKNOWN_INDEX);
 	      if (cache) {
 		cache->attr->cache.depth = 3;
 		cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
@@ -3223,7 +3223,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	     */
 	    hwloc_bitmap_copy(nodes[i]->cpuset, nodes[closest]->cpuset);
 	    /* Add a Group for Cluster containing this MCDRAM + DDR */
-	    hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+	    hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
 	    hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
 	    cluster->subtype = strdup("Cluster");
@@ -3517,7 +3517,7 @@ look_sysfscpu(struct hwloc_topology *topology,
     /* PU cannot be filtered-out */
     {
       /* look at the thread */
-      struct hwloc_obj *thread = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, i);
+      struct hwloc_obj *thread = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, (unsigned) i);
       threadset = hwloc_bitmap_alloc();
       hwloc_bitmap_only(threadset, i);
       thread->cpuset = threadset;
@@ -3614,7 +3614,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  hwloc_read_path_as_uint(str, &lines_per_tag, data->root_fd);
 
 	  /* first cpu in this cache, add the cache */
-	  cache = hwloc_alloc_setup_object(topology, otype, -1);
+	  cache = hwloc_alloc_setup_object(topology, otype, HWLOC_UNKNOWN_INDEX);
 	  cache->attr->cache.size = ((uint64_t)kB) << 10;
 	  cache->attr->cache.depth = depth;
 	  cache->attr->cache.linesize = linesize;
@@ -3995,7 +3995,7 @@ look_cpuinfo(struct hwloc_topology *topology,
   /* create PU objects */
   for(Lproc=0; Lproc<numprocs; Lproc++) {
     unsigned long Pproc = Lprocs[Lproc].Pproc;
-    hwloc_obj_t obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, Pproc);
+    hwloc_obj_t obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, (unsigned)Pproc);
     obj->cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_only(obj->cpuset, Pproc);
     hwloc_debug_2args_bitmap("cpu %lu (os %lu) has cpuset %s\n",
@@ -4704,7 +4704,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
     if (err > 0) {
       int node = atoi(buf);
       if (node >= 0) {
-	parent = hwloc_get_numanode_obj_by_os_index(topology, node);
+	parent = hwloc_get_numanode_obj_by_os_index(topology, (unsigned) node);
 	if (parent) {
 	  /* don't attach I/O under numa node, attach to the same normal parent */
 	  while (hwloc_obj_type_is_memory(parent->type))
@@ -4739,7 +4739,7 @@ static hwloc_obj_t
 hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcidev, hwloc_obj_osdev_type_t type, const char *name)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, -1);
+  struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
   obj->name = strdup(name);
   obj->attr->osdev.type = type;
 
@@ -5584,7 +5584,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       /* HWLOC_TYPE_FILTER_KEEP_IMPORTANT filtered later in the core */
     }
 
-    obj = hwloc_alloc_setup_object(topology, type, -1);
+    obj = hwloc_alloc_setup_object(topology, type, HWLOC_UNKNOWN_INDEX);
     if (!obj)
       break;
     attr = &obj->attr->pcidev;

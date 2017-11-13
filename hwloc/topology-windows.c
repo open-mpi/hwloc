@@ -775,7 +775,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 		&& procInfo->Cache.Type != CacheInstruction)
 	  continue;
 
-	id = -1;
+	id = HWLOC_UNKNOWN_INDEX;
 	switch (procInfo[i].Relationship) {
 	  case RelationNumaNode:
 	    type = HWLOC_OBJ_NUMANODE;
@@ -900,7 +900,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 		&& procInfo->Cache.Type != CacheInstruction)
 	  continue;
 
-	id = -1;
+	id = HWLOC_UNKNOWN_INDEX;
 	switch (procInfo->Relationship) {
 	  case RelationNumaNode:
 	    type = HWLOC_OBJ_NUMANODE;

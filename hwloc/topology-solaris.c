@@ -431,7 +431,7 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
     mem_size = lgrp_mem_size(cookie, nids[i], LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT);
     /* or LGRP_MEM_SZ_FREE */
 
-    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, nids[i]);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, (unsigned) nids[i]);
     obj->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(obj->nodeset, nids[i]);
     obj->cpuset = hwloc_bitmap_alloc();
@@ -795,7 +795,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
 	  if (!strcmp(ksp->ks_name, "L3_Cache")) {
 	    if (chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L3] >= 0) {
-	      hwloc_obj_t l3 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, -1);
+	      hwloc_obj_t l3 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, HWLOC_UNKNOWN_INDEX);
 	      l3->cpuset = cpuset;
 	      l3->attr->cache.depth = 3;
 	      l3->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L3];
@@ -808,7 +808,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	  }
 	  else if (!strcmp(ksp->ks_name, "L2_Cache")) {
 	    if (!chip_info.l2_unified && chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2I] >= 0) {
-	      hwloc_obj_t l2i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2ICACHE, -1);
+	      hwloc_obj_t l2i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2ICACHE, HWLOC_UNKNOWN_INDEX);
 	      l2i->cpuset = hwloc_bitmap_dup(cpuset);
 	      l2i->attr->cache.depth = 2;
 	      l2i->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2I];
@@ -818,7 +818,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	      hwloc_insert_object_by_cpuset(topology, l2i);
 	    }
 	    if (chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2D] >= 0) {
-	      hwloc_obj_t l2 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, -1);
+	      hwloc_obj_t l2 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, HWLOC_UNKNOWN_INDEX);
 	      l2->cpuset = cpuset;
 	      l2->attr->cache.depth = 2;
 	      l2->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2D];
@@ -830,7 +830,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    }
 	  }
 	  else if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
-	    hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+	    hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 	    group->cpuset = cpuset;
 	    group->attr->group.kind = HWLOC_GROUP_KIND_SOLARIS_PG_HW_PERF;
 	    group->attr->group.subkind = hwloc_bitmap_weight(cpuset);
@@ -883,7 +883,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
        * At least AMD Fam15h L1i isn't per core (shared by dual-core compute unit).
        */
       if (l1d_from_core) {
-	struct hwloc_obj *l1 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, -1);
+	struct hwloc_obj *l1 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, HWLOC_UNKNOWN_INDEX);
 	l1->cpuset = hwloc_bitmap_dup(cpuset);
 	l1->attr->cache.depth = 1;
 	l1->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
@@ -893,7 +893,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	hwloc_insert_object_by_cpuset(topology, l1);
       }
       if (l1i_from_core) {
-	struct hwloc_obj *l1i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
+	struct hwloc_obj *l1i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
 	l1i->cpuset = hwloc_bitmap_dup(cpuset);
 	l1i->attr->cache.depth = 1;
 	l1i->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;

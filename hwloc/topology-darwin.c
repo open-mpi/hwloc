@@ -183,7 +183,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
             obj->nodeset = hwloc_bitmap_alloc();
             hwloc_bitmap_set(obj->nodeset, j);
           } else {
-	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE+i-1, -1);
+	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE+i-1, HWLOC_UNKNOWN_INDEX);
 	  }
           obj->cpuset = hwloc_bitmap_alloc();
           for (cpu = j*cacheconfig[i];
@@ -195,7 +195,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 	      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
             /* FIXME assuming that L1i and L1d are shared the same way. Darwin
              * does not yet provide a way to know.  */
-            hwloc_obj_t l1i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
+            hwloc_obj_t l1i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
             l1i->cpuset = hwloc_bitmap_dup(obj->cpuset);
             hwloc_debug_1arg_bitmap("L1icache %u has cpuset %s\n",
                 j, l1i->cpuset);

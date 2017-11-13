@@ -605,7 +605,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 
   for (i = 0; i < nbnodes; i++) {
     hwloc_bitmap_t cpuset;
-    unsigned os_index = (unsigned) -1; /* no os_index except for PU and NUMANODE below */
+    unsigned os_index = HWLOC_UNKNOWN_INDEX; /* no os_index except for PU and NUMANODE below */
 
     if (rs_getrad(rset, rad, sdl, i, 0)) {
       fprintf(stderr,"rs_getrad(%d) failed: %s\n", i, strerror(errno));
@@ -668,7 +668,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
       case HWLOC_OBJ_CORE:
       {
 	hwloc_obj_t obj2, obj3;
-	obj2 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, -1);
+	obj2 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, HWLOC_UNKNOWN_INDEX);
 	obj2->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	obj2->attr->cache.size = _system_configuration.dcache_size;
 	obj2->attr->cache.associativity = _system_configuration.dcache_asc;
@@ -684,7 +684,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	  hwloc_debug("Adding an L1d cache for core %d\n", i);
 
 	  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
-	    obj3 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
+	    obj3 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
 	    obj3->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	    obj3->attr->cache.size = _system_configuration.icache_size;
 	    obj3->attr->cache.associativity = _system_configuration.icache_asc;

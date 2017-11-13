@@ -867,7 +867,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	/* crazy case of NUMA node root (only possible when filtering Machine keep_structure in v1.x),
 	 * reinsert a Machine object
 	 */
-	hwloc_obj_t machine = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MACHINE, -1);
+	hwloc_obj_t machine = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MACHINE, HWLOC_UNKNOWN_INDEX);
 	machine->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	machine->allowed_cpuset = hwloc_bitmap_dup(obj->allowed_cpuset);
 	machine->complete_cpuset = hwloc_bitmap_dup(obj->cpuset);
@@ -880,7 +880,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       } else if (!hwloc_bitmap_isequal(obj->complete_cpuset, parent->complete_cpuset)) {
 	/* this NUMA node added some hierarchy, we need to attach it under an intermediate group */
 	if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
-	  hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+	  hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 	  group->gp_index = 0; /* will be initialized at the end of the discovery once we know the max */
 	  group->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	  group->allowed_cpuset = hwloc_bitmap_dup(obj->allowed_cpuset);
@@ -1028,7 +1028,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       break;
 
     if (!strcmp(tag, "object")) {
-      hwloc_obj_t childobj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_TYPE_MAX, -1);
+      hwloc_obj_t childobj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_TYPE_MAX, HWLOC_UNKNOWN_INDEX);
       ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj,
 				     &childrengotignored,
 				     &childstate);
@@ -1837,7 +1837,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   else
     state.new_prop(&state, "type", hwloc_type_name(obj->type));
 
-  if (obj->os_index != (unsigned) -1) {
+  if (obj->os_index != HWLOC_UNKNOWN_INDEX) {
     sprintf(tmp, "%u", obj->os_index);
     state.new_prop(&state, "os_index", tmp);
   }

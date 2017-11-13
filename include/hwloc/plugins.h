@@ -299,8 +299,11 @@ HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_top
  */
 HWLOC_DECLSPEC void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
-/** \brief Allocate and initialize an object of the given type and physical index */
-HWLOC_DECLSPEC hwloc_obj_t hwloc_alloc_setup_object(hwloc_topology_t topology, hwloc_obj_type_t type, signed os_index);
+/** \brief Allocate and initialize an object of the given type and physical index.
+ *
+ * If \p os_index is unknown or irrelevant, use \c HWLOC_UNKNOWN_INDEX.
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_alloc_setup_object(hwloc_topology_t topology, hwloc_obj_type_t type, unsigned os_index);
 
 /** \brief Setup object cpusets/nodesets by OR'ing its children.
  *

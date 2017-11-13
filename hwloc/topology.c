@@ -238,7 +238,7 @@ hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
   char type[64], idx[10], attr[1024], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
   hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
-  if (obj->os_index != (unsigned) -1)
+  if (obj->os_index != HWLOC_UNKNOWN_INDEX)
     snprintf(idx, sizeof(idx), "#%u", obj->os_index);
   else
     *idx = '\0';
@@ -1193,7 +1193,7 @@ hwloc__report_error_format_obj(char *buf, size_t buflen, hwloc_obj_t obj)
 	hwloc_bitmap_asprintf(&cpusetstr, obj->cpuset);
 	if (obj->nodeset) /* may be missing during insert */
 	  hwloc_bitmap_asprintf(&nodesetstr, obj->nodeset);
-	if (obj->os_index != (unsigned) -1)
+	if (obj->os_index != HWLOC_UNKNOWN_INDEX)
 	  snprintf(buf, buflen, "%s (P#%u cpuset %s%s%s)",
 		   typestr, obj->os_index, cpusetstr,
 		   nodesetstr ? " nodeset " : "",
@@ -1483,7 +1483,7 @@ hwloc__find_insert_memory_parent(struct hwloc_topology *topology, hwloc_obj_t ob
     return parent;
 
   /* need to insert an intermediate group for attaching the NUMA node */
-  group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+  group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
   if (!group)
     /* failed to create the group, fallback to larger parent */
     return parent;
@@ -1660,7 +1660,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 
 hwloc_obj_t
 hwloc_alloc_setup_object(hwloc_topology_t topology,
-			 hwloc_obj_type_t type, signed os_index)
+			 hwloc_obj_type_t type, unsigned os_index)
 {
   struct hwloc_obj *obj = hwloc_tma_malloc(topology->tma, sizeof(*obj));
   memset(obj, 0, sizeof(*obj));
@@ -1681,7 +1681,7 @@ hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
     errno = EINVAL;
     return NULL;
   }
-  return hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+  return hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 }
 
 static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
@@ -1767,7 +1767,7 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
     return NULL;
   }
 
-  obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MISC, -1);
+  obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MISC, HWLOC_UNKNOWN_INDEX);
   if (name)
     obj->name = strdup(name);
 
@@ -1838,7 +1838,7 @@ hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, 
     return largeparent;
 
   /* we need to insert an intermediate group */
-  group_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, -1);
+  group_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
   if (!group_obj)
     /* Failed to insert the exact Group, fallback to largeparent */
     return largeparent;

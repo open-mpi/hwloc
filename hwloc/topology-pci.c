@@ -211,7 +211,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
     }
 
-    obj = hwloc_alloc_setup_object(topology, type, -1);
+    obj = hwloc_alloc_setup_object(topology, type, HWLOC_UNKNOWN_INDEX);
     obj->attr->pcidev.domain = domain;
     obj->attr->pcidev.bus = pcidev->bus;
     obj->attr->pcidev.dev = pcidev->dev;

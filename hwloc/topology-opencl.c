@@ -76,7 +76,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
       continue;
 #endif
 
-      osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, -1);
+      osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       snprintf(buffer, sizeof(buffer), "opencl%ud%u", j, i);
       osdev->name = strdup(buffer);
       osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;

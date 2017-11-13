@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2016 Inria.  All rights reserved.
+ * Copyright © 2015-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -22,7 +22,7 @@ int hwloc_look_hardwired_fujitsu_k(struct hwloc_topology *topology)
     hwloc_bitmap_set(set, i);
 
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
       obj->attr->cache.depth = 1;
@@ -32,7 +32,7 @@ int hwloc_look_hardwired_fujitsu_k(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE)) {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, HWLOC_UNKNOWN_INDEX);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
       obj->attr->cache.depth = 1;
@@ -53,7 +53,7 @@ int hwloc_look_hardwired_fujitsu_k(struct hwloc_topology *topology)
   hwloc_bitmap_set_range(set, 0, 7);
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2CACHE)) {
-    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, -1);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, HWLOC_UNKNOWN_INDEX);
     obj->cpuset = hwloc_bitmap_dup(set);
     obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
     obj->attr->cache.depth = 2;
@@ -90,7 +90,7 @@ int hwloc_look_hardwired_fujitsu_fx10(struct hwloc_topology *topology)
     hwloc_bitmap_set(set, i);
 
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
       obj->attr->cache.depth = 1;
@@ -100,7 +100,7 @@ int hwloc_look_hardwired_fujitsu_fx10(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE)) {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, HWLOC_UNKNOWN_INDEX);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
       obj->attr->cache.depth = 1;
@@ -121,7 +121,7 @@ int hwloc_look_hardwired_fujitsu_fx10(struct hwloc_topology *topology)
   hwloc_bitmap_set_range(set, 0, 15);
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2CACHE)) {
-    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, -1);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, HWLOC_UNKNOWN_INDEX);
     obj->cpuset = hwloc_bitmap_dup(set);
     obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
     obj->attr->cache.depth = 2;
@@ -158,7 +158,7 @@ int hwloc_look_hardwired_fujitsu_fx100(struct hwloc_topology *topology)
     hwloc_bitmap_set(set, i);
 
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
       obj->attr->cache.depth = 1;
@@ -168,7 +168,7 @@ int hwloc_look_hardwired_fujitsu_fx100(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE)) {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, HWLOC_UNKNOWN_INDEX);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
       obj->attr->cache.depth = 1;
@@ -186,7 +186,7 @@ int hwloc_look_hardwired_fujitsu_fx100(struct hwloc_topology *topology)
   }
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2CACHE)) {
-    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, -1);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, HWLOC_UNKNOWN_INDEX);
     obj->cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_set_range(obj->cpuset, 0, 15);
     hwloc_bitmap_set(obj->cpuset, 32);
@@ -197,7 +197,7 @@ int hwloc_look_hardwired_fujitsu_fx100(struct hwloc_topology *topology)
     obj->attr->cache.associativity = 24;
     hwloc_insert_object_by_cpuset(topology, obj);
 
-    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, -1);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, HWLOC_UNKNOWN_INDEX);
     obj->cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_set_range(obj->cpuset, 16, 31);
     hwloc_bitmap_set(obj->cpuset, 33);

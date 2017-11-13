@@ -74,7 +74,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 
   /* shared L2 */
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2CACHE)) {
-    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, -1);
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, HWLOC_UNKNOWN_INDEX);
     obj->cpuset = hwloc_bitmap_dup(set);
     obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
     obj->attr->cache.depth = 2;
@@ -100,7 +100,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 
     /* L1d */
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE)) {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE, HWLOC_UNKNOWN_INDEX);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
       obj->attr->cache.depth = 1;
@@ -111,7 +111,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
     }
     /* L1i */
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
-      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, -1);
+      obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
       obj->cpuset = hwloc_bitmap_dup(set);
       obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
       obj->attr->cache.depth = 1;

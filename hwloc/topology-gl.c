@@ -111,7 +111,7 @@ hwloc_gl_discover(struct hwloc_backend *backend)
 
       snprintf(name, sizeof(name), ":%u.%u", i, j);
 
-      osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, -1);
+      osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       osdev->name = strdup(name);
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
       hwloc_obj_add_info(osdev, "Backend", "GL");

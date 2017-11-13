@@ -371,7 +371,10 @@ struct hwloc_obj {
   unsigned os_index;			/**< \brief OS-provided physical index number.
 					 * It is not guaranteed unique across the entire machine,
 					 * except for PUs and NUMA nodes.
+					 * Set to HWLOC_UNKNOWN_INDEX if unknown or irrelevant for this object.
 					 */
+#define HWLOC_UNKNOWN_INDEX (unsigned)-1
+
   char *name;				/**< \brief Object-specific name if any.
 					 * Mostly used for identifying OS devices and Misc objects where
 					 * a name string is more useful than numerical indexes.

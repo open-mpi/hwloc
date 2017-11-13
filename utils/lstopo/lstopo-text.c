@@ -56,13 +56,13 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
       fprintf(output, "%s(%s)", type, l->subtype);
     else
       fprintf(output, "%s", type);
-    if (l->depth != 0 && idx != (unsigned)-1
+    if (l->depth != 0 && idx != HWLOC_UNKNOWN_INDEX
 	&& (verbose_mode >= 2 || !hwloc_obj_type_is_special(l->type)))
       fprintf(output, " %s", logical ? lidxstr : pidxstr);
     if (l->name && (l->type == HWLOC_OBJ_MISC || l->type == HWLOC_OBJ_GROUP))
       fprintf(output, " %s", l->name);
-    if (logical && l->os_index != (unsigned) -1 &&
-	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NUMANODE))
+    if (logical && l->os_index != HWLOC_UNKNOWN_INDEX /* if logical, still print os_index in some cases */
+	&& (verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NUMANODE))
       snprintf(phys, sizeof(phys), "%s", pidxstr);
     if (l->type == HWLOC_OBJ_PCI_DEVICE && verbose_mode <= 1)
       fprintf(output, " %s (%s)",
