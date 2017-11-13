@@ -165,9 +165,10 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
 
 /* We we can, allocate rgb colors */
 static void
-ascii_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused)
+ascii_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor __hwloc_attribute_unused)
 {
 #ifdef HWLOC_HAVE_LIBTERMCAP
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   int color, rr, gg, bb;
   char *toput;
 #endif
@@ -323,9 +324,10 @@ merge(struct lstopo_ascii_output *disp, int x, int y, int or, int andnot, int r,
 
 /* Now we can implement the standard drawing helpers */
 static void
-ascii_box(struct lstopo_output *loutput, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned width, unsigned y1, unsigned height)
+ascii_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned width, unsigned y1, unsigned height)
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   unsigned gridsize = loutput->gridsize;
   unsigned i, j;
   unsigned x2, y2;
@@ -363,7 +365,7 @@ ascii_box(struct lstopo_output *loutput, int r, int g, int b, unsigned depth __h
 }
 
 static void
-ascii_line(struct lstopo_output *loutput, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+ascii_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
   unsigned gridsize = loutput->gridsize;
@@ -415,9 +417,10 @@ ascii_line(struct lstopo_output *loutput, int r __hwloc_attribute_unused, int g 
 }
 
 static void
-ascii_text(struct lstopo_output *loutput, int r, int g, int b, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
+ascii_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   unsigned gridsize = loutput->gridsize;
 
   x /= (gridsize/2);

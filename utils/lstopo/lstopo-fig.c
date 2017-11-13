@@ -42,8 +42,10 @@ fig_init(struct lstopo_output *loutput)
 }
 
 static int __hwloc_attribute_const
-rgb_to_fig(int r, int g, int b)
+lcolor_to_fig(const struct lstopo_color *lcolor)
 {
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
+
   if (r == 0xff && g == 0xff && b == 0xff)
     return 7;
 
@@ -54,9 +56,10 @@ rgb_to_fig(int r, int g, int b)
 }
 
 static void
-fig_declare_color(struct lstopo_output *loutput, int r, int g, int b)
+fig_declare_color(struct lstopo_output *loutput, const struct lstopo_color *lcolor)
 {
   FILE *file = loutput->file;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   int color;
 
   if (r == 0xff && g == 0xff && b == 0xff)
@@ -71,15 +74,16 @@ fig_declare_color(struct lstopo_output *loutput, int r, int g, int b)
 }
 
 static void
-fig_box(struct lstopo_output *loutput, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
+fig_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   FILE *file = loutput->file;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   width *= FIG_FACTOR;
   height *= FIG_FACTOR;
-  fprintf(file, "2 2 0 1 0 %d %u -1 20 0.0 0 0 -1 0 0 5\n\t", rgb_to_fig(r, g, b), depth);
+  fprintf(file, "2 2 0 1 0 %d %u -1 20 0.0 0 0 -1 0 0 5\n\t", lcolor_to_fig(lcolor), depth);
   fprintf(file, " %u %u", x, y);
   fprintf(file, " %u %u", x + width, y);
   fprintf(file, " %u %u", x + width, y + height);
@@ -89,28 +93,30 @@ fig_box(struct lstopo_output *loutput, int r, int g, int b, unsigned depth, unsi
 }
 
 static void
-fig_line(struct lstopo_output *loutput, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+fig_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   FILE *file = loutput->file;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   x1 *= FIG_FACTOR;
   y1 *= FIG_FACTOR;
   x2 *= FIG_FACTOR;
   y2 *= FIG_FACTOR;
-  fprintf(file, "2 1 0 1 0 %d %u -1 -1 0.0 0 0 -1 0 0 2\n\t", rgb_to_fig(r, g, b), depth);
+  fprintf(file, "2 1 0 1 0 %d %u -1 -1 0.0 0 0 -1 0 0 2\n\t", lcolor_to_fig(lcolor), depth);
   fprintf(file, " %u %u", x1, y1);
   fprintf(file, " %u %u", x2, y2);
   fprintf(file, "\n");
 }
 
 static void
-fig_text(struct lstopo_output *loutput, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
+fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
   FILE *file = loutput->file;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   int len = (int)strlen(text);
   int color;
 
-  color = rgb_to_fig(r, g, b);
+  color = lcolor_to_fig(lcolor);
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   size = (size * 16) / 10;

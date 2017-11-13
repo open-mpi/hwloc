@@ -520,13 +520,13 @@ draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigne
 	child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
       struct lstopo_obj_userdata *clud = child->userdata;
       unsigned xmid = clud->xrel + clud->width / 2;
-      loutput->methods->line(loutput, 0, 0, 0, depth, x+xmid, y-separator, x+xmid, y);
+      loutput->methods->line(loutput, &BLACK_COLOR, depth, x+xmid, y-separator, x+xmid, y);
       if (xmin == (unsigned) -1)
 	xmin = xmid;
       xmax = xmid;
     }
     assert(xmax != xmin);
-    loutput->methods->line(loutput, 0, 0, 0, depth, x+xmin, y-separator, x+xmax, y-separator);
+    loutput->methods->line(loutput, &BLACK_COLOR, depth, x+xmin, y-separator, x+xmax, y-separator);
 
   } else if (orient == LSTOPO_ORIENT_VERT) {
     hwloc_obj_t child;
@@ -537,13 +537,13 @@ draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigne
 	child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
       struct lstopo_obj_userdata *clud = child->userdata;
       unsigned ymid = clud->yrel + clud->height / 2;
-      loutput->methods->line(loutput, 0, 0, 0, depth, x-separator, y+ymid, x, y+ymid);
+      loutput->methods->line(loutput, &BLACK_COLOR, depth, x-separator, y+ymid, x, y+ymid);
       if (ymin == (unsigned) -1)
 	ymin = ymid;
       ymax = ymid;
     }
     assert(ymax != ymin);
-    loutput->methods->line(loutput, 0, 0, 0, depth, x-separator, y+ymin, x-separator, y+ymax);
+    loutput->methods->line(loutput, &BLACK_COLOR, depth, x-separator, y+ymin, x-separator, y+ymax);
 
   } else {
     assert(0);
@@ -560,7 +560,7 @@ draw__children(struct lstopo_output *loutput, hwloc_obj_t parent,
   int ncstate;
 
   if (children->box)
-    loutput->methods->box(loutput, children->boxcolor.r, children->boxcolor.g, children->boxcolor.b, depth, x, children->width, y, children->height);
+    loutput->methods->box(loutput, &children->boxcolor, depth, x, children->width, y, children->height);
 
   for(child = next_child(loutput, parent, children->kinds, NULL, &ncstate);
       child;
@@ -656,20 +656,20 @@ lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
 	s->bg.g = forceg & 255;
 	s->bg.b = forceb & 255;
 	lud->style_set |= LSTOPO_STYLE_BG;
-	loutput->methods->declare_color(loutput, s->bg.r, s->bg.g, s->bg.b);
+	loutput->methods->declare_color(loutput, &s->bg);
 	s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
       } else if (sscanf(stylestr, "Text=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
 	s->t.r = forcer & 255;
 	s->t.g = forceg & 255;
 	s->t.b = forceb & 255;
 	lud->style_set |= LSTOPO_STYLE_T;
-	loutput->methods->declare_color(loutput, s->t.r, s->t.g, s->t.b);
+	loutput->methods->declare_color(loutput, &s->t);
       } else if (sscanf(stylestr, "Text2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
 	s->t2.r = forcer & 255;
 	s->t2.g = forceg & 255;
 	s->t2.b = forceb & 255;
 	lud->style_set |= LSTOPO_STYLE_T2;
-	loutput->methods->declare_color(loutput, s->t2.r, s->t2.g, s->t2.b);
+	loutput->methods->declare_color(loutput, &s->t2);
       }
       stylestr = strchr(stylestr, ';');
       if (!stylestr)
@@ -920,7 +920,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 }
 
 static void
-draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *color, unsigned depth, unsigned x, unsigned y)
+draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *lcolor, unsigned depth, unsigned x, unsigned y)
 {
   struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = obj->userdata;
@@ -931,9 +931,9 @@ draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *c
   if (!fontsize)
     return;
 
-  methods->text(loutput, color->r, color->g, color->b, fontsize, depth, x + lud->textxoffset, y, lud->text[0]);
+  methods->text(loutput, lcolor, fontsize, depth, x + lud->textxoffset, y, lud->text[0]);
   for(i=1; i<lud->ntext; i++)
-    methods->text(loutput, color->r, color->g, color->b, fontsize, depth, x, y + i*gridsize + i*fontsize, lud->text[i]);
+    methods->text(loutput, lcolor, fontsize, depth, x, y + i*gridsize + i*fontsize, lud->text[i]);
 }
 
 static void
@@ -974,12 +974,12 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lstopo_set_object_color(loutput, level, &style);
 
     if (lud->pci_collapsed > 1) {
-      methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
+      methods->box(loutput, &style.bg, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
       if (lud->pci_collapsed > 2)
-	methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset);
-      methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset);
+	methods->box(loutput, &style.bg, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset);
+      methods->box(loutput, &style.bg, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset);
     } else {
-      methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+      methods->box(loutput, &style.bg, depth, x, totwidth, y, totheight);
     }
 
     draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
@@ -1018,8 +1018,8 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
     /* Square and left link */
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + BRIDGE_HEIGHT/2 - gridsize/2, gridsize);
-    methods->line(loutput, 0, 0, 0, depth, x + gridsize, y + BRIDGE_HEIGHT/2, x + 2*gridsize, y + BRIDGE_HEIGHT/2);
+    methods->box(loutput, &style.bg, depth, x, gridsize, y + BRIDGE_HEIGHT/2 - gridsize/2, gridsize);
+    methods->line(loutput, &BLACK_COLOR, depth, x + gridsize, y + BRIDGE_HEIGHT/2, x + 2*gridsize, y + BRIDGE_HEIGHT/2);
 
     if (level->io_arity > 0) {
       hwloc_obj_t child = NULL;
@@ -1030,7 +1030,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	struct lstopo_obj_userdata *clud = child->userdata;
 	unsigned ymid = y + clud->yrel + BRIDGE_HEIGHT/2;
 	/* Line to PCI device */
-	methods->line(loutput, 0, 0, 0, depth-1, x+2*gridsize, ymid, x+3*gridsize+speedwidth, ymid);
+	methods->line(loutput, &BLACK_COLOR, depth-1, x+2*gridsize, ymid, x+3*gridsize+speedwidth, ymid);
 	if (ymin == (unsigned) -1)
 	  ymin = ymid;
 	ymax = ymid;
@@ -1047,11 +1047,11 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);
 	    else
 	      snprintf(text, sizeof(text), "%0.1f", child->attr->pcidev.linkspeed);
-	    methods->text(loutput, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-1, x + 3*gridsize, ymid - BRIDGE_HEIGHT/2, text);
+	    methods->text(loutput, &style.t2, fontsize, depth-1, x + 3*gridsize, ymid - BRIDGE_HEIGHT/2, text);
 	  }
 	}
       }
-      methods->line(loutput, 0, 0, 0, depth-1, x+2*gridsize, ymin, x+2*gridsize, ymax);
+      methods->line(loutput, &BLACK_COLOR, depth-1, x+2*gridsize, ymin, x+2*gridsize, ymax);
 
       /* Draw sublevels for real */
       draw_children(loutput, level, depth-1, x, y);
@@ -1092,7 +1092,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     }
 
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y + myoff, myheight);
+    methods->box(loutput, &style.bg, depth, x, totwidth, y + myoff, myheight);
 
     draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize + myoff);
 
@@ -1126,7 +1126,7 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     totheight = lud->height;
 
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
+    methods->box(loutput, &style.bg, depth, x, totwidth, y, totheight);
     draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
@@ -1263,11 +1263,11 @@ output_draw(struct lstopo_output *loutput)
     /* Draw legend */
     if (legend && fontsize) {
       offset = rlud->height + gridsize;
-      methods->box(loutput, 0xff, 0xff, 0xff, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
+      methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
       for(i=0; i<ntext; i++, offset += gridsize + fontsize)
-	methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, text[i]);
+	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, text[i]);
       for(i=0; i<loutput->legend_append_nr; i++, offset += gridsize + fontsize)
-	methods->text(loutput, 0, 0, 0, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
+	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
     }
   }
 }
@@ -1310,22 +1310,22 @@ output_draw_start(struct lstopo_output *output)
 {
   struct draw_methods *methods = output->methods;
   methods->init(output);
-  methods->declare_color(output, BLACK_COLOR.r, BLACK_COLOR.g, BLACK_COLOR.b);
-  methods->declare_color(output, WHITE_COLOR.r, WHITE_COLOR.g, WHITE_COLOR.b);
-  methods->declare_color(output, PACKAGE_COLOR.r, PACKAGE_COLOR.g, PACKAGE_COLOR.b);
-  methods->declare_color(output, MEMORY_COLOR.r, MEMORY_COLOR.g, MEMORY_COLOR.b);
-  methods->declare_color(output, MEMORIES_COLOR.r, MEMORIES_COLOR.g, MEMORIES_COLOR.b);
-  methods->declare_color(output, CORE_COLOR.r, CORE_COLOR.g, CORE_COLOR.b);
-  methods->declare_color(output, THREAD_COLOR.r, THREAD_COLOR.g, THREAD_COLOR.b);
-  methods->declare_color(output, RUNNING_COLOR.r, RUNNING_COLOR.g, RUNNING_COLOR.b);
-  methods->declare_color(output, FORBIDDEN_COLOR.r, FORBIDDEN_COLOR.g, FORBIDDEN_COLOR.b);
-  methods->declare_color(output, CACHE_COLOR.r, CACHE_COLOR.g, CACHE_COLOR.b);
-  methods->declare_color(output, MACHINE_COLOR.r, MACHINE_COLOR.g, MACHINE_COLOR.b);
-  methods->declare_color(output, SYSTEM_COLOR.r, SYSTEM_COLOR.g, SYSTEM_COLOR.b);
-  methods->declare_color(output, GROUP_IN_PACKAGE_COLOR.r, GROUP_IN_PACKAGE_COLOR.g, GROUP_IN_PACKAGE_COLOR.b);
-  methods->declare_color(output, MISC_COLOR.r, MISC_COLOR.g, MISC_COLOR.b);
-  methods->declare_color(output, PCI_DEVICE_COLOR.r, PCI_DEVICE_COLOR.g, PCI_DEVICE_COLOR.b);
-  methods->declare_color(output, OS_DEVICE_COLOR.r, OS_DEVICE_COLOR.g, OS_DEVICE_COLOR.b);
-  methods->declare_color(output, BRIDGE_COLOR.r, BRIDGE_COLOR.g, BRIDGE_COLOR.b);
+  methods->declare_color(output, &BLACK_COLOR);
+  methods->declare_color(output, &WHITE_COLOR);
+  methods->declare_color(output, &PACKAGE_COLOR);
+  methods->declare_color(output, &MEMORY_COLOR);
+  methods->declare_color(output, &MEMORIES_COLOR);
+  methods->declare_color(output, &CORE_COLOR);
+  methods->declare_color(output, &THREAD_COLOR);
+  methods->declare_color(output, &RUNNING_COLOR);
+  methods->declare_color(output, &FORBIDDEN_COLOR);
+  methods->declare_color(output, &CACHE_COLOR);
+  methods->declare_color(output, &MACHINE_COLOR);
+  methods->declare_color(output, &SYSTEM_COLOR);
+  methods->declare_color(output, &GROUP_IN_PACKAGE_COLOR);
+  methods->declare_color(output, &MISC_COLOR);
+  methods->declare_color(output, &PCI_DEVICE_COLOR);
+  methods->declare_color(output, &OS_DEVICE_COLOR);
+  methods->declare_color(output, &BRIDGE_COLOR);
   lstopo_prepare_custom_styles(output, hwloc_get_root_obj(output->topology));
 }

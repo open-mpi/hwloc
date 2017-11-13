@@ -37,8 +37,9 @@ struct lstopo_windows_output {
 static int numcolors;
 
 static HGDIOBJ
-rgb_to_brush(int r, int g, int b)
+lcolor_to_brush(const struct lstopo_color *lcolor)
 {
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   int i;
 
   for (i = 0; i < numcolors; i++)
@@ -61,7 +62,7 @@ static unsigned int the_fontsize, the_gridsize;
 static float the_scale;
 
 static void
-windows_box(struct lstopo_output *loutput, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height);
+windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height);
 
 static LRESULT CALLBACK
 WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
@@ -102,10 +103,11 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
     case WM_PAINT: {
       HFONT font;
+      struct lstopo_color white = {0xff, 0xff, 0xff};
       BeginPaint(hwnd, &the_output.ps);
       font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
       SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
-      windows_box(loutput, 0xff, 0xff, 0xff, 0, 0, win_width, 0, win_height);
+      windows_box(loutput, &white, 0, 0, win_width, 0, win_height);
       loutput->drawing = LSTOPO_DRAWING_PREPARE;
       output_draw(loutput);
       the_width = loutput->width;
@@ -311,8 +313,9 @@ windows_init(struct lstopo_output *loutput)
 }
 
 static void
-windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, int r, int g, int b)
+windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor)
 {
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   HBRUSH brush;
   COLORREF color;
   struct color *tmp;
@@ -330,40 +333,40 @@ windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, in
     return;
   }
   colors = tmp;
-  colors[numcolors].color.r = r;
-  colors[numcolors].color.g = g;
-  colors[numcolors].color.b = b;
+  colors[numcolors].color = *lcolor;
   colors[numcolors].brush = (HGDIOBJ) brush;
   numcolors++;
 }
 
 static void
-windows_box(struct lstopo_output *loutput, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
+windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
-  SelectObject(ps->hdc, rgb_to_brush(r, g, b));
+  SelectObject(ps->hdc, lcolor_to_brush(lcolor));
   SetBkColor(ps->hdc, RGB(r, g, b));
   Rectangle(ps->hdc, x - x_delta, y - y_delta, x + width - x_delta, y + height - y_delta);
 }
 
 static void
-windows_line(struct lstopo_output *loutput, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+windows_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  SelectObject(ps->hdc, rgb_to_brush(r, g, b));
+  SelectObject(ps->hdc, lcolor_to_brush(lcolor));
   MoveToEx(ps->hdc, x1 - x_delta, y1 - y_delta, NULL);
   LineTo(ps->hdc, x2 - x_delta, y2 - y_delta);
 }
 
 static void
-windows_text(struct lstopo_output *loutput, int r, int g, int b, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
+windows_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   SetTextColor(ps->hdc, RGB(r, g, b));
   TextOut(ps->hdc, x - x_delta, y - y_delta, text, (int)strlen(text));

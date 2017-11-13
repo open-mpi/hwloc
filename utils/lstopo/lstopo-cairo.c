@@ -55,10 +55,11 @@ struct lstopo_cairo_output {
 
 /* Cairo methods */
 static void
-topo_cairo_box(struct lstopo_output *loutput, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
+topo_cairo_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   struct lstopo_cairo_output *coutput = loutput->backend_data;
   cairo_t *c = coutput->context;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   cairo_rectangle(c, x, y, width, height);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
@@ -71,10 +72,11 @@ topo_cairo_box(struct lstopo_output *loutput, int r, int g, int b, unsigned dept
 }
 
 static void
-topo_cairo_line(struct lstopo_output *loutput, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+topo_cairo_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct lstopo_cairo_output *coutput = loutput->backend_data;
   cairo_t *c = coutput->context;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   cairo_move_to(c, x1, y1);
   cairo_set_source_rgb(c, (float) r / 255, (float) g / 255, (float) b / 255);
@@ -84,10 +86,11 @@ topo_cairo_line(struct lstopo_output *loutput, int r, int g, int b, unsigned dep
 }
 
 static void
-topo_cairo_text(struct lstopo_output *loutput, int r, int g, int b, int fontsize, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
+topo_cairo_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int fontsize, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct lstopo_cairo_output *coutput = loutput->backend_data;
   cairo_t *c = coutput->context;
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   cairo_move_to(c, x, y + fontsize);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
@@ -130,7 +133,7 @@ topo_cairo_paint(struct lstopo_cairo_output *coutput)
 
 
 
-static void topo_cairo_declare_color (struct lstopo_output *loutput __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused) {}
+static void topo_cairo_declare_color (struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor __hwloc_attribute_unused) {}
 #endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
