@@ -341,19 +341,19 @@ hwloc_pid_from_number(int pid_number, int set_info __hwloc_attribute_unused)
 }
 
 static __hwloc_inline void
-hwloc_lstopo_show_summary_depth(FILE *output, int prefixmaxlen, hwloc_topology_t topology, int depth)
+hwloc_lstopo_show_summary_depth(FILE *output, size_t prefixmaxlen, hwloc_topology_t topology, int depth)
 {
   hwloc_obj_type_t type = hwloc_get_depth_type(topology, depth);
   unsigned nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
   if (nbobjs) {
-    int prefixlen;
+    size_t prefixlen;
     char _types[64];
     const char *types;
 
     if (depth < 0)
       prefixlen = fprintf(output, "Special depth %d:", depth);
     else
-      prefixlen = fprintf(output,"%*sdepth %d:", depth, "", depth);
+      prefixlen = fprintf(output, "%*sdepth %d:", depth, "", depth);
 
     if (depth < 0) {
       /* use plain type, we don't want OSdev subtype since it may differ for other objects in the level */
@@ -365,7 +365,7 @@ hwloc_lstopo_show_summary_depth(FILE *output, int prefixmaxlen, hwloc_topology_t
     }
 
     fprintf(output, "%*s%u %s (type #%d)\n",
-	    prefixmaxlen-prefixlen, "",
+	    (int)(prefixmaxlen-prefixlen), "",
 	    nbobjs, types, (int) type);
   }
 }
@@ -375,7 +375,7 @@ hwloc_lstopo_show_summary(FILE *output, hwloc_topology_t topology)
 {
   unsigned topodepth = hwloc_topology_get_depth(topology);
   unsigned depth;
-  int prefixmaxlen, sdepthmaxlen;
+  size_t prefixmaxlen, sdepthmaxlen;
 
   prefixmaxlen = topodepth-1 + strlen("depth xyz:  ");
   sdepthmaxlen = strlen("Special depth -x:  ");
