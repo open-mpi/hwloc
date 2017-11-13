@@ -170,7 +170,7 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
     topology->support.discovery->pu = 1;
   else
     n = 1;
-  return n;
+  return (unsigned)n;
 }
 #endif /* !HWLOC_WIN_SYS */
 

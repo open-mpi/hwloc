@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -91,12 +91,12 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     return err;
   if (hwloc_obj_type_is_cache(*typep)) {
     if (depthattrp)
-      *depthattrp = attr.cache.depth;
+      *depthattrp = (int) attr.cache.depth;
     if (typeattrp && typeattrsize >= sizeof(hwloc_obj_cache_type_t))
       memcpy(typeattrp, &attr.cache.type, sizeof(hwloc_obj_cache_type_t));
   } else if (*typep == HWLOC_OBJ_GROUP) {
     if (depthattrp)
-      *depthattrp = attr.group.depth;
+      *depthattrp = (int) attr.group.depth;
   }
   return 0;
 }

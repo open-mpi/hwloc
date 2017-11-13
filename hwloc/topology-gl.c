@@ -53,7 +53,7 @@ hwloc_gl_discover(struct hwloc_backend *backend)
 
     for (j = 0; j < (unsigned) ScreenCount(display) && j < HWLOC_GL_SCREEN_MAX; j++) {
       hwloc_obj_t osdev, parent;
-      const int screen = j;
+      const int screen = (int)j;
       unsigned int *ptr_binary_data;
       int data_length;
       int gpu_number;
@@ -76,7 +76,7 @@ hwloc_gl_discover(struct hwloc_backend *backend)
       if (!err)
         continue;
 
-      gpu_number = ptr_binary_data[1];
+      gpu_number = (int)ptr_binary_data[1];
       free(ptr_binary_data);
 
 #ifdef NV_CTRL_PCI_DOMAIN
@@ -120,9 +120,9 @@ hwloc_gl_discover(struct hwloc_backend *backend)
       if (productname)
 	hwloc_obj_add_info(osdev, "GPUModel", productname);
 
-      parent = hwloc_pcidisc_find_by_busid(topology, nv_ctrl_pci_domain, nv_ctrl_pci_bus, nv_ctrl_pci_device, nv_ctrl_pci_func);
+      parent = hwloc_pcidisc_find_by_busid(topology, (unsigned)nv_ctrl_pci_domain, (unsigned)nv_ctrl_pci_bus, (unsigned)nv_ctrl_pci_device, (unsigned)nv_ctrl_pci_func);
       if (!parent)
-	parent = hwloc_pcidisc_find_busid_parent(topology, nv_ctrl_pci_domain, nv_ctrl_pci_bus, nv_ctrl_pci_device, nv_ctrl_pci_func);
+	parent = hwloc_pcidisc_find_busid_parent(topology, (unsigned)nv_ctrl_pci_domain, (unsigned)nv_ctrl_pci_bus, (unsigned)nv_ctrl_pci_device, (unsigned)nv_ctrl_pci_func);
       if (!parent)
 	parent = hwloc_get_root_obj(topology);
 

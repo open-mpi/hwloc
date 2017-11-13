@@ -221,7 +221,7 @@ hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_c
     return 0;
   if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return -1; /* FIXME: agregate nbobjs from different levels? */
-  return hwloc_get_nbobjs_inside_cpuset_by_depth(topology, set, depth);
+  return (int) hwloc_get_nbobjs_inside_cpuset_by_depth(topology, set, depth);
 }
 
 /** \brief Return the logical index among the objects included in CPU set \p set.
@@ -779,14 +779,14 @@ hwloc_distrib(hwloc_topology_t topology,
 
   tot_weight = 0;
   for (i = 0; i < n_roots; i++)
-    tot_weight += hwloc_bitmap_weight(roots[i]->cpuset);
+    tot_weight += (unsigned) hwloc_bitmap_weight(roots[i]->cpuset);
 
   for (i = 0, given = 0, givenweight = 0; i < n_roots; i++) {
     unsigned chunk, weight;
     hwloc_obj_t root = roots[flags & HWLOC_DISTRIB_FLAG_REVERSE ? n_roots-1-i : i];
     hwloc_cpuset_t cpuset = root->cpuset;
     /* FIXME: if root is NUMANODE, use normal parent? */
-    weight = hwloc_bitmap_weight(cpuset);
+    weight = (unsigned) hwloc_bitmap_weight(cpuset);
     if (!weight)
       continue;
     /* Give to root a chunk proportional to its weight.

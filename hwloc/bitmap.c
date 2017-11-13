@@ -127,7 +127,7 @@ void hwloc_bitmap_free(struct hwloc_bitmap_s * set)
 static void
 hwloc_bitmap_enlarge_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_count)
 {
-  unsigned tmp = 1 << hwloc_flsl((unsigned long) needed_count - 1);
+  unsigned tmp = 1U << hwloc_flsl((unsigned long) needed_count - 1);
   if (tmp > set->ulongs_allocated) {
     unsigned long *tmpulongs;
     tmpulongs = realloc(set->ulongs, tmp * sizeof(unsigned long));
@@ -260,7 +260,7 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
     size -= res;
   }
 
-  i=set->ulongs_count-1;
+  i=(int) set->ulongs_count-1;
 
   if (set->infinite) {
     /* ignore starting FULL since we have 0xf...f already */
@@ -1227,7 +1227,7 @@ int hwloc_bitmap_last(const struct hwloc_bitmap_s * set)
 	if (set->infinite)
 		return -1;
 
-	for(i=set->ulongs_count-1; i>=0; i--) {
+	for(i=(int)set->ulongs_count-1; i>=0; i--) {
 		/* subsets are unsigned longs, use flsl */
 		unsigned long w = set->ulongs[i];
 		if (w)
@@ -1368,7 +1368,7 @@ int hwloc_bitmap_compare(const struct hwloc_bitmap_s * set1, const struct hwloc_
 	if (count1 != count2) {
 		if (min_count < count2) {
 			unsigned long val1 = set1->infinite ? HWLOC_SUBBITMAP_FULL :  HWLOC_SUBBITMAP_ZERO;
-			for(i=max_count-1; i>=(signed) min_count; i--) {
+			for(i=(int)max_count-1; i>=(int) min_count; i--) {
 				unsigned long val2 = set2->ulongs[i];
 				if (val1 == val2)
 					continue;
@@ -1376,7 +1376,7 @@ int hwloc_bitmap_compare(const struct hwloc_bitmap_s * set1, const struct hwloc_
 			}
 		} else {
 			unsigned long val2 = set2->infinite ? HWLOC_SUBBITMAP_FULL :  HWLOC_SUBBITMAP_ZERO;
-			for(i=max_count-1; i>=(signed) min_count; i--) {
+			for(i=(int)max_count-1; i>=(int) min_count; i--) {
 				unsigned long val1 = set1->ulongs[i];
 				if (val1 == val2)
 					continue;
@@ -1385,7 +1385,7 @@ int hwloc_bitmap_compare(const struct hwloc_bitmap_s * set1, const struct hwloc_
 		}
 	}
 
-	for(i=min_count-1; i>=0; i--) {
+	for(i=(int)min_count-1; i>=0; i--) {
 		unsigned long val1 = set1->ulongs[i];
 		unsigned long val2 = set2->ulongs[i];
 		if (val1 == val2)

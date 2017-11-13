@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -67,7 +67,7 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
     return 0;
   if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return -1; /* FIXME: agregate nbobjs from different levels? */
-  return hwloc_get_nbobjs_by_depth(topology, depth);
+  return (int) hwloc_get_nbobjs_by_depth(topology, depth);
 }
 
 static __hwloc_inline hwloc_obj_t

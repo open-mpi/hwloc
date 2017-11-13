@@ -76,7 +76,7 @@ hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigne
 unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, unsigned max)
 {
   struct hwloc_obj *parent, *nextparent, **src_objs;
-  int i,src_nbobjects;
+  unsigned i,src_nbobjects;
   unsigned stored = 0;
 
   if (!src->cpuset)

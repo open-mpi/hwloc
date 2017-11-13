@@ -519,7 +519,7 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, h
   }
 
   if (size) {
-    int idx = obj->memory.page_types_len;
+    unsigned idx = obj->memory.page_types_len;
     struct hwloc_obj_memory_page_type_s *tmp;
     tmp = realloc(obj->memory.page_types, (idx+1)*sizeof(*obj->memory.page_types));
     if (tmp) { /* if failed to allocate, ignore this page_type entry */

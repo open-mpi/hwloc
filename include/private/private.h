@@ -146,7 +146,7 @@ struct hwloc_topology {
   int grouping_verbose;
   unsigned grouping_nbaccuracies;
   float grouping_accuracies[5];
-  int grouping_next_subkind;
+  unsigned grouping_next_subkind;
 
   /* list of enabled backends. */
   struct hwloc_backend * backends;

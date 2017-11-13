@@ -717,7 +717,7 @@ hwloc__find_groups_by_min_distance(unsigned nbobjs,
   /* build groups of objects connected with this distance */
   for(i=0; i<nbobjs; i++) {
     unsigned size;
-    int firstfound;
+    unsigned firstfound;
 
     /* if already grouped, skip */
     if (groupids[i])
@@ -728,19 +728,19 @@ hwloc__find_groups_by_min_distance(unsigned nbobjs,
     size = 1;
     firstfound = i;
 
-    while (firstfound != -1) {
+    while (firstfound != (unsigned)-1) {
       /* we added new objects to the group, the first one was firstfound.
        * rescan all connections from these new objects (starting at first found) to any other objects,
        * so as to find new objects minimally-connected by transivity.
        */
-      int newfirstfound = -1;
+      unsigned newfirstfound = (unsigned)-1;
       for(j=firstfound; j<nbobjs; j++)
 	if (groupids[j] == groupid)
 	  for(k=0; k<nbobjs; k++)
               if (!groupids[k] && !hwloc_compare_values(VALUE(j, k), min_distance, accuracy)) {
 	      groupids[k] = groupid;
 	      size++;
-	      if (newfirstfound == -1)
+	      if (newfirstfound == (unsigned)-1)
 		newfirstfound = k;
 	      if (i == j)
 		hwloc_debug("  object %u is minimally connected to %u\n", k, i);
