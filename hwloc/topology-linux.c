@@ -4741,7 +4741,6 @@ hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcide
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, -1);
   obj->name = strdup(name);
-  obj->logical_index = -1;
   obj->attr->osdev.type = type;
 
   hwloc_insert_object_by_parent(topology, pcidev, obj);

@@ -113,7 +113,6 @@ hwloc_gl_discover(struct hwloc_backend *backend)
 
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, -1);
       osdev->name = strdup(name);
-      osdev->logical_index = -1;
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
       hwloc_obj_add_info(osdev, "Backend", "GL");
       hwloc_obj_add_info(osdev, "GPUVendor", "NVIDIA Corporation");
