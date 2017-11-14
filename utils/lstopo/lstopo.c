@@ -343,6 +343,35 @@ lstopo_add_collapse_attributes(hwloc_topology_t topology)
   }
 }
 
+static int
+lstopo_check_pci_domains(hwloc_topology_t topology)
+{
+  unsigned n;
+  hwloc_obj_t obj;
+
+  /* check PCI devices for domains.
+   * they are listed by depth-first search, the order doesn't guarantee a domain at the end.
+   */
+  obj = NULL;
+  while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
+    if (obj->attr->pcidev.domain)
+      return 1;
+  }
+
+  /* check PCI Bridges for domains.
+   * they are listed by depth-first search, the order doesn't guarantee a domain at the end.
+   */
+  obj = NULL;
+  while ((obj = hwloc_get_next_bridge(topology, obj)) != NULL) {
+    if (obj->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI)
+      break;
+    if (obj->attr->pcidev.domain)
+      return 1;
+  }
+
+  return 0;
+}
+
 static void
 lstopo_populate_userdata(hwloc_obj_t parent)
 {
@@ -571,6 +600,7 @@ main (int argc, char *argv[])
   loutput.collapse = 1;
   loutput.pid_number = -1;
   loutput.pid = 0;
+  loutput.need_pci_domain = 0;
 
   loutput.export_synthetic_flags = 0;
   loutput.export_xml_flags = 0;
@@ -976,6 +1006,8 @@ main (int argc, char *argv[])
     printf("hwloc_topology_load() took %lu ms\n", ms);
   }
 #endif
+
+  loutput.need_pci_domain = lstopo_check_pci_domains(topology);
 
   if (top)
     add_process_objects(topology);

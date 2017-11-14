@@ -45,6 +45,7 @@ struct lstopo_output {
   int collapse;
   int pid_number;
   hwloc_pid_t pid;
+  int need_pci_domain;
 
   /* export config */
   unsigned long export_synthetic_flags;

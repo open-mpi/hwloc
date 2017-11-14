@@ -892,7 +892,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
     char busid[32];
     char _text[64];
     lstopo_obj_snprintf(loutput, _text, sizeof(_text), obj);
-    lstopo_busid_snprintf(busid, sizeof(busid), obj, lud->pci_collapsed, loutput->topology->pci_nonzero_domains);
+    lstopo_busid_snprintf(busid, sizeof(busid), obj, lud->pci_collapsed, loutput->need_pci_domain);
     if (lud->pci_collapsed > 1) {
       n = snprintf(lud->text[0], sizeof(lud->text[0]), "%d x { %s %s }", lud->pci_collapsed, _text, busid);
     } else {

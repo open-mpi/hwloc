@@ -109,7 +109,6 @@ hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_en
 void
 hwloc_pci_discovery_init(struct hwloc_topology *topology)
 {
-  topology->pci_nonzero_domains = 0;
   topology->need_pci_belowroot_apply_locality = 0;
 
   topology->pci_has_forced_locality = 0;
@@ -398,9 +397,6 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *old
     hostbridge->attr->bridge.downstream.pci.subordinate_bus = current_subordinate;
     hwloc_debug("New PCI hostbridge %04x:[%02x-%02x]\n",
 		current_domain, current_bus, current_subordinate);
-
-    if (current_domain)
-      topology->pci_nonzero_domains = 1;
 
     *next_hb_p = hostbridge;
     next_hb_p = &hostbridge->next_sibling;

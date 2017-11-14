@@ -46,7 +46,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     snprintf(lidxstr, sizeof(lidxstr), "L#%u", l->logical_index);
   }
   if (l->type == HWLOC_OBJ_PCI_DEVICE)
-    lstopo_busid_snprintf(busidstr, sizeof(busidstr), l, collapse, topology->pci_nonzero_domains);
+    lstopo_busid_snprintf(busidstr, sizeof(busidstr), l, collapse, loutput->need_pci_domain);
 
   if (loutput->show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
