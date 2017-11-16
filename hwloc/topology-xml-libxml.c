@@ -234,6 +234,24 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   return -1; /* failed */
 }
 
+/* can be called at the end of the import (to cleanup things early),
+ * or by backend_exit() if load failed for other reasons.
+ */
+static void
+hwloc_libxml_free_buffers(struct hwloc_xml_backend_data_s *bdata)
+{
+  if (bdata->data) {
+    xmlFreeDoc((xmlDoc*)bdata->data);
+    bdata->data = NULL;
+  }
+}
+
+static void
+hwloc_libxml_look_done(struct hwloc_xml_backend_data_s *bdata, int result __hwloc_attribute_unused)
+{
+  hwloc_libxml_free_buffers(bdata);
+}
+
 static int
 hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xmlpath, const char *xmlbuffer, int xmlbuflen, hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
@@ -331,7 +349,7 @@ out:
 static void
 hwloc_libxml_backend_exit(struct hwloc_xml_backend_data_s *bdata)
 {
-  xmlFreeDoc((xmlDoc*)bdata->data);
+  hwloc_libxml_free_buffers(bdata);
   hwloc_libxml2_cleanup();
 }
 
@@ -359,7 +377,7 @@ hwloc_libxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
   }
 
   bdata->look_init = hwloc_libxml_look_init;
-  bdata->look_failed = NULL;
+  bdata->look_done = hwloc_libxml_look_done;
   bdata->backend_exit = hwloc_libxml_backend_exit;
   bdata->data = doc;
   return 0;

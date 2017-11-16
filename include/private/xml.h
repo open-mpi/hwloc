@@ -40,7 +40,7 @@ HWLOC_DECLSPEC int hwloc__xml_import_diff(hwloc__xml_import_state_t state, hwloc
 struct hwloc_xml_backend_data_s {
   /* xml backend parameters */
   int (*look_init)(struct hwloc_xml_backend_data_s *bdata, struct hwloc__xml_import_state_s *state);
-  void (*look_failed)(struct hwloc_xml_backend_data_s *bdata);
+  void (*look_done)(struct hwloc_xml_backend_data_s *bdata, int result);
   void (*backend_exit)(struct hwloc_xml_backend_data_s *bdata);
   int (*next_attr)(struct hwloc__xml_import_state_s * state, char **namep, char **valuep);
   int (*find_child)(struct hwloc__xml_import_state_s * state, struct hwloc__xml_import_state_s * childstate, char **tagp);

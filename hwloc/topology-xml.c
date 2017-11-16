@@ -1672,12 +1672,15 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
 
   topology->support.discovery->pu = 1;
 
+  if (data->look_done)
+    data->look_done(data, 0);
+
   hwloc_localeswitch_fini();
   return 0;
 
  failed:
-  if (data->look_failed)
-    data->look_failed(data);
+  if (data->look_done)
+    data->look_done(data, -1);
   if (hwloc__xml_verbose())
     fprintf(stderr, "%s: XML component discovery failed.\n",
 	    data->msgprefix);
