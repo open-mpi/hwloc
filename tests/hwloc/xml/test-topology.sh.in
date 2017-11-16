@@ -22,6 +22,9 @@ export HWLOC_PLUGINS_PATH
 HWLOC_DEBUG_CHECK=1
 export HWLOC_DEBUG_CHECK
 
+HWLOC_LIBXML_CLEANUP=1
+export HWLOC_LIBXML_CLEANUP
+
 if test x@HWLOC_XML_LOCALIZED@ = x1; then
   # make sure we use default numeric formats in XML outputs (non-XML outputs have to set those variables too)
   LANG=C
