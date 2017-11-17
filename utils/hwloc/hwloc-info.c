@@ -93,25 +93,19 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
   if (obj->cpuset) {
     hwloc_bitmap_snprintf(s, sizeof(s), obj->cpuset);
     printf("%s cpuset = %s\n", prefix, s);
-  }
-  if (obj->complete_cpuset) {
+
     hwloc_bitmap_snprintf(s, sizeof(s), obj->complete_cpuset);
     printf("%s complete cpuset = %s\n", prefix, s);
-  }
-  if (obj->allowed_cpuset) {
+
     hwloc_bitmap_snprintf(s, sizeof(s), obj->allowed_cpuset);
     printf("%s allowed cpuset = %s\n", prefix, s);
-  }
 
-  if (obj->nodeset) {
     hwloc_bitmap_snprintf(s, sizeof(s), obj->nodeset);
     printf("%s nodeset = %s\n", prefix, s);
-  }
-  if (obj->complete_nodeset) {
+
     hwloc_bitmap_snprintf(s, sizeof(s), obj->complete_nodeset);
     printf("%s complete nodeset = %s\n", prefix, s);
-  }
-  if (obj->allowed_nodeset) {
+
     hwloc_bitmap_snprintf(s, sizeof(s), obj->allowed_nodeset);
     printf("%s allowed nodeset = %s\n", prefix, s);
   }
