@@ -72,6 +72,9 @@ struct hwloc_topology {
     struct hwloc_obj *first, *last; /* Temporarily used while listing object before building the objs array */
   } slevels[HWLOC_NR_SLEVELS];
 
+  hwloc_bitmap_t allowed_cpuset;
+  hwloc_bitmap_t allowed_nodeset;
+
   int need_pci_belowroot_apply_locality;
   struct hwloc_backend *get_pci_busid_cpuset_backend;
 

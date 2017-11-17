@@ -478,7 +478,8 @@ struct hwloc_obj {
                                           * objects).
                                           *
                                           * If the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
-                                          * some of these CPUs may not be allowed for binding, see allowed_cpuset.
+                                          * some of these CPUs may not be allowed for binding,
+                                          * see hwloc_topology_get_allowed_cpuset().
                                           *
 					  * \note All objects have non-NULL CPU and node sets except Misc and I/O objects.
 					  *
@@ -496,17 +497,6 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
                                           */
-  hwloc_cpuset_t allowed_cpuset;        /**< \brief The CPU set of allowed logical processors
-                                          *
-                                          * This includes the CPUs contained in this object which are allowed for
-                                          * binding, i.e. passing them to the hwloc binding functions should not return
-                                          * permission errors.  This is usually restricted by administration rules.
-                                          *
-                                          * If the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
-                                          * allowed_cpuset may be smaller than cpuset. Otherwise they are identical.
-                                          *
-                                          * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
-                                          */
 
   hwloc_nodeset_t nodeset;              /**< \brief NUMA nodes covered by this object or containing this object
                                           *
@@ -518,7 +508,8 @@ struct hwloc_obj {
                                           * In the end, these nodes are those that are close to the current object.
                                           *
                                           * If the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
-                                          * some of these nodes may not be allowed for allocation, see allowed_nodeset.
+                                          * some of these nodes may not be allowed for allocation,
+                                          * see hwloc_topology_get_allowed_nodeset().
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
                                           * object, so only the first bit may be set in \p nodeset.
@@ -539,21 +530,6 @@ struct hwloc_obj {
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
                                           * object, so only the first bit is set in \p complete_nodeset.
-                                          *
-                                          * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
-                                          */
-  hwloc_nodeset_t allowed_nodeset;      /**< \brief The set of allowed NUMA memory nodes
-                                          *
-                                          * This includes the NUMA memory nodes contained in this object which are
-                                          * allowed for memory allocation, i.e. passing them to NUMA node-directed
-                                          * memory allocation should not return permission errors. This is usually
-                                          * restricted by administration rules.
-                                          *
-                                          * If the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
-                                          * allowed_nodeset may be smaller than nodeset. Otherwise they are identical.
-                                          *
-                                          * If there are no NUMA nodes in the machine, all the memory is close to this
-                                          * object, so only the first bit may be set in \p allowed_nodeset.
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
                                           */
@@ -1769,9 +1745,13 @@ enum hwloc_topology_flags_e {
    * When this flag is not set, PUs and NUMA nodes that are disallowed are not added to the topology.
    * Parent objects (package, core, cache, etc.) are added only if some of their children are allowed.
    *
-   * When this flag is set, each object has allowed_cpuset <= cpuset <= complete_cpuset.
-   * Otherwise allowed_cpuset = cpuset <= complete_cpuset.
-   * The same applies to nodesets.
+   * When this flag is set, the actual sets of allowed PUs and NUMA nodes are given
+   * by hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset().
+   * They may be smaller than the root object cpuset and nodeset.
+   *
+   * When this flag is not set, all existing PUs and NUMA nodes in the topology
+   * are allowed. hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset()
+   * are equal to the root object cpuset and nodeset.
    *
    * If the current topology is exported to XML and reimported later, this flag
    * should be set again in the reimported topology so that disallowed resources

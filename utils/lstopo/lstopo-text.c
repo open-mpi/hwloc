@@ -115,7 +115,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
 
   /* annotate if the PU is forbidden/running */
   if (l->type == HWLOC_OBJ_PU && verbose_mode >= 2) {
-    if (lstopo_pu_forbidden(l))
+    if (lstopo_pu_forbidden(loutput, l))
       fprintf(output, " (forbidden)");
     else if (lstopo_pu_running(loutput, l))
       fprintf(output, " (running)");

@@ -74,6 +74,9 @@ Version 2.0.0
 * API
   + Objects now have a "subtype" field that supersedes former "Type" and
     "CoProcType" info attributes.
+  + Objects do not have allowed_cpuset and allowed_nodeset anymore.
+    They are only available for the entire topology using
+    hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset().
   + The almost-unused "os_level" attribute has been removed from the
     hwloc_obj structure.
   + Replace hwloc_topology_insert_misc_object_by_cpuset() with

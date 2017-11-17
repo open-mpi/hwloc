@@ -26,7 +26,7 @@ hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
   unsigned i;
 
   /* mark the 17th core (OS-reserved) as disallowed */
-  hwloc_bitmap_clr_range(topology->levels[0][0]->allowed_cpuset, (HWLOC_BGQ_CORES-1)*4, HWLOC_BGQ_CORES*4-1);
+  hwloc_bitmap_clr_range(topology->allowed_cpuset, (HWLOC_BGQ_CORES-1)*4, HWLOC_BGQ_CORES*4-1);
 
   if (topology->is_thissystem) { /* don't call CNK unless thissystem */
     env = getenv("BG_THREADMODEL");
@@ -36,7 +36,7 @@ hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
       /* the mask is reversed, manually reverse it */
 	for(i=0; i<64; i++)
 	if (((bgmask >> i) & 1) == 0)
-	  hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, 63-i);
+	  hwloc_bitmap_clr(topology->allowed_cpuset, 63-i);
     }
   }
   return 0;

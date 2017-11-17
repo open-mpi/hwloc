@@ -42,7 +42,6 @@ static void switch_pu_index(hwloc_obj_t obj, unsigned old_index, unsigned new_in
   }
 
   switch_set_index(obj->cpuset, old_index, new_index);
-  switch_set_index(obj->allowed_cpuset, old_index, new_index);
 #ifndef HWLOC2
   switch_set_index(obj->online_cpuset, old_index, new_index);
 #endif
@@ -66,7 +65,6 @@ static void switch_numa_index(hwloc_obj_t obj, unsigned old_index, unsigned new_
   }
 
   switch_set_index(obj->nodeset, old_index, new_index);
-  switch_set_index(obj->allowed_nodeset, old_index, new_index);
   switch_set_index(obj->complete_nodeset, old_index, new_index);
 
   for(child = obj->first_child; child; child = child->next_sibling)
@@ -158,6 +156,7 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
+    switch_set_index((hwloc_bitmap_t)hwloc_topology_get_allowed_cpuset(topology), old_index, new_index);
     switch_pu_index(hwloc_get_root_obj(topology), old_index, new_index);
 
   } else if (HWLOC_OBJ_NUMANODE == type) {
@@ -178,6 +177,7 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
+    switch_set_index((hwloc_bitmap_t)hwloc_topology_get_allowed_nodeset(topology), old_index, new_index);
     switch_numa_index(hwloc_get_root_obj(topology), old_index, new_index);
   }
 

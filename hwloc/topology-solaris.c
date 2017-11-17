@@ -345,11 +345,11 @@ lgrp_list_allowed(struct hwloc_topology *topology)
   n = lgrp_cpus(cookie, root, pids, npids, LGRP_CONTENT_HIERARCHY);
   assert(n == npids);
 
-  hwloc_bitmap_zero(topology->levels[0][0]->allowed_cpuset);
+  hwloc_bitmap_zero(topology->allowed_cpuset);
 
   for(i=0; i<npids; i++) {
     hwloc_debug("root lgrp contains allowed PU #%d = P#%d\n", i, pids[i]);
-    hwloc_bitmap_set(topology->levels[0][0]->allowed_cpuset, pids[i]);
+    hwloc_bitmap_set(topology->allowed_cpuset, pids[i]);
   }
   free(pids);
 
@@ -369,11 +369,11 @@ lgrp_list_allowed(struct hwloc_topology *topology)
   n = lgrp_resources(cookie, root, nids, nnids, LGRP_RSRC_MEM);
   assert(n == nnids);
 
-  hwloc_bitmap_zero(topology->levels[0][0]->allowed_nodeset);
+  hwloc_bitmap_zero(topology->allowed_nodeset);
 
   for(i=0; i<nnids; i++) {
     hwloc_debug("root lgrp contains allowed NUMA node #%d = P#%ld\n", i, nids[i]);
-    hwloc_bitmap_set(topology->levels[0][0]->allowed_nodeset, nids[i]);
+    hwloc_bitmap_set(topology->allowed_nodeset, nids[i]);
   }
   free(nids);
 

@@ -144,10 +144,8 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 #define SETS_DIFFERENT(_set, _obj1, _obj2) _SETS_DIFFERENT((_obj1)->_set, (_obj2)->_set)
 	if (SETS_DIFFERENT(cpuset, obj1, obj2)
 	    || SETS_DIFFERENT(complete_cpuset, obj1, obj2)
-	    || SETS_DIFFERENT(allowed_cpuset, obj1, obj2)
 	    || SETS_DIFFERENT(nodeset, obj1, obj2)
-	    || SETS_DIFFERENT(complete_nodeset, obj1, obj2)
-	    || SETS_DIFFERENT(allowed_nodeset, obj1, obj2))
+	    || SETS_DIFFERENT(complete_nodeset, obj1, obj2))
 		goto out_too_complex;
 
 	/* no need to check logical_index, sibling_rank, symmetric_subtree,
@@ -329,6 +327,14 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 				break;
 			}
 			tmpdiff = tmpdiff->generic.next;
+		}
+	}
+
+	if (!err) {
+		if (SETS_DIFFERENT(allowed_cpuset, topo1, topo2)
+		    || SETS_DIFFERENT(allowed_nodeset, topo1, topo2)) {
+			hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
+			err = 1;
 		}
 	}
 

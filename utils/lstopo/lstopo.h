@@ -160,9 +160,10 @@ int rgb_to_color(int r, int g, int b) __hwloc_attribute_const;
 int declare_color(int r, int g, int b);
 
 
-static __hwloc_inline int lstopo_pu_forbidden(hwloc_obj_t l)
+static __hwloc_inline int lstopo_pu_forbidden(struct lstopo_output *loutput, hwloc_obj_t l)
 {
-  return !hwloc_bitmap_isset(l->allowed_cpuset, l->os_index);
+  hwloc_topology_t topology = loutput->topology;
+  return !hwloc_bitmap_isset(hwloc_topology_get_allowed_cpuset(topology), l->os_index);
 }
 
 static __hwloc_inline int lstopo_pu_running(struct lstopo_output *loutput, hwloc_obj_t l)

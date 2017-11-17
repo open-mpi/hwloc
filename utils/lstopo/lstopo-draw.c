@@ -751,7 +751,7 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     break;
 
   case HWLOC_OBJ_PU:
-    if (lstopo_pu_forbidden(obj)) {
+    if (lstopo_pu_forbidden(loutput, obj)) {
       s->bg = FORBIDDEN_COLOR;
     } else if (lstopo_pu_running(loutput, obj)) {
       s->bg = RUNNING_COLOR;

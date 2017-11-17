@@ -858,6 +858,15 @@ hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_
  *
  * \return the CPU set of allowed logical processors of the system.
  *
+ * \note If the topology flag ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM was not set,
+ * this is identical to hwloc_topology_get_topology_cpuset(), which means
+ * all PUs are allowed.
+ *
+ * \note If ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM was set, applying
+ * hwloc_bitmap_intersects() on the result of this function and on an object
+ * cpuset checks whether there are allowed PUs inside that object.
+ * Applying hwloc_bitmap_and() returns the list of these allowed PUs.
+ *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
  */
@@ -893,6 +902,15 @@ hwloc_topology_get_topology_nodeset(hwloc_topology_t topology) __hwloc_attribute
 /** \brief Get allowed node set
  *
  * \return the node set of allowed memory of the system.
+ *
+ * \note If the topology flag ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM was not set,
+ * this is identical to hwloc_topology_get_topology_nodeset(), which means
+ * all NUMA nodes are allowed.
+ *
+ * \note If ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM was set, applying
+ * hwloc_bitmap_intersects() on the result of this function and on an object
+ * nodeset checks whether there are allowed NUMA nodes inside that object.
+ * Applying hwloc_bitmap_and() returns the list of these allowed NUMA nodes.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.

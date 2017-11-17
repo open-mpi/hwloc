@@ -4270,8 +4270,8 @@ static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const 
   if (cgroup_mntpnt || cpuset_mntpnt) {
     cpuset_name = hwloc_read_linux_cpuset_name(root_fd, topology->pid);
     if (cpuset_name) {
-      hwloc_admin_disable_set_from_cpuset(root_fd, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
-      hwloc_admin_disable_set_from_cpuset(root_fd, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
+      hwloc_admin_disable_set_from_cpuset(root_fd, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->allowed_cpuset);
+      hwloc_admin_disable_set_from_cpuset(root_fd, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->allowed_nodeset);
     }
     free(cgroup_mntpnt);
     free(cpuset_mntpnt);

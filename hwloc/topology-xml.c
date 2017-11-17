@@ -129,10 +129,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     hwloc_bitmap_sscanf(obj->complete_cpuset,value);
   } else if (!strcmp(name, "allowed_cpuset")) {
     /* ignored except for root */
-    if (!obj->parent) {
-      obj->allowed_cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_sscanf(obj->allowed_cpuset, value);
-    }
+    if (!obj->parent)
+      hwloc_bitmap_sscanf(topology->allowed_cpuset, value);
   } else if (!strcmp(name, "nodeset")) {
     obj->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->nodeset, value);
@@ -141,10 +139,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     hwloc_bitmap_sscanf(obj->complete_nodeset, value);
   } else if (!strcmp(name, "allowed_nodeset")) {
     /* ignored except for root */
-    if (!obj->parent) {
-      obj->allowed_nodeset = hwloc_bitmap_alloc();
-      hwloc_bitmap_sscanf(obj->allowed_nodeset, value);
-    }
+    if (!obj->parent)
+      hwloc_bitmap_sscanf(topology->allowed_nodeset, value);
   } else if (!strcmp(name, "name"))
     obj->name = strdup(value);
   else if (!strcmp(name, "subtype"))
@@ -872,10 +868,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	 */
 	hwloc_obj_t machine = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MACHINE, HWLOC_UNKNOWN_INDEX);
 	machine->cpuset = hwloc_bitmap_dup(obj->cpuset);
-	machine->allowed_cpuset = hwloc_bitmap_dup(obj->allowed_cpuset);
 	machine->complete_cpuset = hwloc_bitmap_dup(obj->cpuset);
 	machine->nodeset = hwloc_bitmap_dup(obj->nodeset);
-	machine->allowed_nodeset = hwloc_bitmap_dup(obj->allowed_nodeset);
 	machine->complete_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
 	topology->levels[0][0] = machine;
 	parent = machine;
@@ -886,10 +880,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	  hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 	  group->gp_index = 0; /* will be initialized at the end of the discovery once we know the max */
 	  group->cpuset = hwloc_bitmap_dup(obj->cpuset);
-	  group->allowed_cpuset = hwloc_bitmap_dup(obj->allowed_cpuset);
 	  group->complete_cpuset = hwloc_bitmap_dup(obj->cpuset);
 	  group->nodeset = hwloc_bitmap_dup(obj->nodeset);
-	  group->allowed_nodeset = hwloc_bitmap_dup(obj->allowed_nodeset);
 	  group->complete_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
 	  group->attr->group.kind = HWLOC_GROUP_KIND_MEMORY;
 	  hwloc_insert_object_by_parent(topology, parent, group);
@@ -1032,6 +1024,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     if (!strcmp(tag, "object")) {
       hwloc_obj_t childobj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_TYPE_MAX, HWLOC_UNKNOWN_INDEX);
+      childobj->parent = ignored ? parent : obj;
       ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj,
 				     &childrengotignored,
 				     &childstate);
@@ -1864,9 +1857,14 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
       free(cpuset);
     }
 
-    hwloc_bitmap_asprintf(&cpuset, obj->allowed_cpuset);
-    state.new_prop(&state, "allowed_cpuset", cpuset);
-    free(cpuset);
+    {
+      hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
+      hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, topology->allowed_cpuset);
+      hwloc_bitmap_asprintf(&cpuset, allowed_cpuset);
+      state.new_prop(&state, "allowed_cpuset", cpuset);
+      free(cpuset);
+      hwloc_bitmap_free(allowed_cpuset);
+    }
 
     /* TODO if exporting v1, we should clear second local NUMA bits from nodeset,
      * but the importer should clear them anyway.
@@ -1879,9 +1877,14 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "complete_nodeset", cpuset);
     free(cpuset);
 
-    hwloc_bitmap_asprintf(&cpuset, obj->allowed_nodeset);
-    state.new_prop(&state, "allowed_nodeset", cpuset);
-    free(cpuset);
+    {
+      hwloc_bitmap_t allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
+      hwloc_bitmap_and(allowed_nodeset, allowed_nodeset, topology->allowed_nodeset);
+      hwloc_bitmap_asprintf(&cpuset, allowed_nodeset);
+      state.new_prop(&state, "allowed_nodeset", cpuset);
+      free(cpuset);
+      hwloc_bitmap_free(allowed_nodeset);
+    }
   }
 
   if (!v1export) {
