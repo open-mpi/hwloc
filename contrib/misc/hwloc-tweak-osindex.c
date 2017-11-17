@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Inria.  All rights reserved.
+ * Copyright © 2016-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * This program modifies PU and NUMA node os_index for debugging.
@@ -51,6 +51,9 @@ static void switch_pu_index(hwloc_obj_t obj, unsigned old_index, unsigned new_in
   for(child = obj->first_child; child; child = child->next_sibling)
     if (child->complete_cpuset && hwloc_bitmap_isset(child->complete_cpuset, old_index))
       switch_pu_index(child, old_index, new_index);
+  for(child = obj->memory_first_child; child; child = child->next_sibling)
+    if (child->complete_cpuset && hwloc_bitmap_isset(child->complete_cpuset, old_index))
+      switch_pu_index(child, old_index, new_index);
 }
 
 static void switch_numa_index(hwloc_obj_t obj, unsigned old_index, unsigned new_index)
@@ -67,6 +70,9 @@ static void switch_numa_index(hwloc_obj_t obj, unsigned old_index, unsigned new_
   switch_set_index(obj->complete_nodeset, old_index, new_index);
 
   for(child = obj->first_child; child; child = child->next_sibling)
+    if (child->complete_nodeset && hwloc_bitmap_isset(child->complete_nodeset, old_index))
+      switch_numa_index(child, old_index, new_index);
+  for(child = obj->memory_first_child; child; child = child->next_sibling)
     if (child->complete_nodeset && hwloc_bitmap_isset(child->complete_nodeset, old_index))
       switch_numa_index(child, old_index, new_index);
 }
