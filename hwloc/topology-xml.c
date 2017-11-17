@@ -777,6 +777,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   int childrengotignored = 0;
   int attribute_less_cache = 0;
 
+  /* set parent now since it's used during import below or in subfunctions */
+  obj->parent = parent;
+
   /* process attributes */
   while (1) {
     char *attrname, *attrvalue;
