@@ -1857,7 +1857,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
       free(cpuset);
     }
 
-    {
+    if (v1export || !obj->parent) {
       hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
       hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, topology->allowed_cpuset);
       hwloc_bitmap_asprintf(&cpuset, allowed_cpuset);
@@ -1877,7 +1877,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "complete_nodeset", cpuset);
     free(cpuset);
 
-    {
+    if (v1export || !obj->parent) {
       hwloc_bitmap_t allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
       hwloc_bitmap_and(allowed_nodeset, allowed_nodeset, topology->allowed_nodeset);
       hwloc_bitmap_asprintf(&cpuset, allowed_nodeset);
