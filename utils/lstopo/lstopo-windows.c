@@ -313,7 +313,7 @@ struct draw_methods windows_draw_methods = {
   windows_textsize,
 };
 
-void
+int
 output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribute_unused)
 {
   WNDCLASS wndclass;
@@ -404,4 +404,6 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }
+
+  return 0;
 }

@@ -1109,7 +1109,7 @@ main (int argc, char *argv[])
   if (output_format != LSTOPO_OUTPUT_XML && loutput.collapse)
     lstopo_add_collapse_attributes(topology);
 
-  output_func(&loutput, filename);
+  err = output_func(&loutput, filename);
 
   lstopo_destroy_userdata(hwloc_get_root_obj(topology));
   hwloc_utils_userdata_free_recursive(hwloc_get_root_obj(topology));
@@ -1119,7 +1119,7 @@ main (int argc, char *argv[])
     free(loutput.legend_append[i]);
   free(loutput.legend_append);
 
-  return EXIT_SUCCESS;
+  return err ? EXIT_FAILURE : EXIT_SUCCESS;
 
  out_usagefailure:
   usage (callname, stderr);

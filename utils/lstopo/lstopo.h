@@ -138,7 +138,7 @@ struct lstopo_obj_userdata {
   unsigned textxoffset;
 };
 
-typedef void output_method (struct lstopo_output *output, const char *filename);
+typedef int output_method (struct lstopo_output *output, const char *filename);
 extern output_method output_console, output_synthetic, output_ascii, output_fig, output_png, output_pdf, output_ps, output_svg, output_x11, output_windows, output_xml;
 
 struct draw_methods {

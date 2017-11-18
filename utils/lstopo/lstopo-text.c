@@ -228,7 +228,8 @@ static void output_distances(struct lstopo_output *loutput)
   free(dist);
 }
 
-void output_console(struct lstopo_output *loutput, const char *filename)
+int
+output_console(struct lstopo_output *loutput, const char *filename)
 {
   hwloc_topology_t topology = loutput->topology;
   int verbose_mode = loutput->verbose_mode;
@@ -237,13 +238,13 @@ void output_console(struct lstopo_output *loutput, const char *filename)
   output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    return;
+    return -1;
   }
   loutput->file = output;
 
   if (loutput->show_distances_only) {
     output_distances(loutput);
-    return;
+    return 0;
   }
 
   /*
@@ -300,9 +301,12 @@ void output_console(struct lstopo_output *loutput, const char *filename)
 
   if (output != stdout)
     fclose(output);
+
+  return 0;
 }
 
-void output_synthetic(struct lstopo_output *loutput, const char *filename)
+int
+output_synthetic(struct lstopo_output *loutput, const char *filename)
 {
   hwloc_topology_t topology = loutput->topology;
   FILE *output;
@@ -313,7 +317,7 @@ void output_synthetic(struct lstopo_output *loutput, const char *filename)
 
   if (!hwloc_get_root_obj(topology)->symmetric_subtree) {
     fprintf(stderr, "Cannot output assymetric topology in synthetic format.\n");
-    return;
+    goto out;
   }
 
   nb1 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_MISC);
@@ -332,23 +336,23 @@ void output_synthetic(struct lstopo_output *loutput, const char *filename)
   length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), loutput->export_synthetic_flags);
   if (length < 0) {
     fprintf(stderr, "Failed to export a synthetic description (%s)\n", strerror(errno));
-    return;
+    goto out;
   }
 
   if (length >= (int) sizeof(sbuffer)) {
     dbuffer = malloc(length+1 /* \0 */);
     if (!dbuffer)
-      return;
+      goto out;
 
     length = hwloc_topology_export_synthetic(topology, dbuffer, length+1, loutput->export_synthetic_flags);
     if (length < 0)
-      goto out;
+      goto out_with_dbuffer;
   }
 
   output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    goto out;
+    goto out_with_dbuffer;
   }
 
   fprintf(output, "%s\n", dbuffer ? dbuffer : sbuffer);
@@ -356,6 +360,11 @@ void output_synthetic(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
- out:
   free(dbuffer);
+  return 0;
+
+ out_with_dbuffer:
+  free(dbuffer);
+ out:
+  return -1;
 }

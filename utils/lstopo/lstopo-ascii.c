@@ -428,7 +428,8 @@ static struct draw_methods ascii_draw_methods = {
   ascii_textsize,
 };
 
-void output_ascii(struct lstopo_output *loutput, const char *filename)
+int
+output_ascii(struct lstopo_output *loutput, const char *filename)
 {
   FILE *output;
   struct lstopo_ascii_output disp;
@@ -445,7 +446,7 @@ void output_ascii(struct lstopo_output *loutput, const char *filename)
   output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    return;
+    return -1;
   }
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
@@ -554,4 +555,6 @@ void output_ascii(struct lstopo_output *loutput, const char *filename)
 
   if (output != stdout)
     fclose(output);
+
+  return 0;
 }

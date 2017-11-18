@@ -242,7 +242,7 @@ static struct draw_methods x11_draw_methods = {
   topo_cairo_textsize,
 };
 
-void
+int
 output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_unused)
 {
   struct lstopo_x11_output _disp, *disp = &_disp;
@@ -267,7 +267,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   /* create the toplevel window */
   if (!(dpy = XOpenDisplay(NULL))) {
     fprintf(stderr, "couldn't connect to X\n");
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
   disp->dpy = dpy;
@@ -483,6 +483,8 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   XDestroyWindow(disp->dpy, disp->top);
   XFreeCursor(disp->dpy, disp->hand);
   XCloseDisplay(disp->dpy);
+
+  return 0;
 }
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 
@@ -499,7 +501,7 @@ static struct draw_methods png_draw_methods = {
   topo_cairo_textsize,
 };
 
-void
+int
 output_png(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
@@ -509,7 +511,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
   output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    return;
+    return -1;
   }
 
   memset(&coutput, 0, sizeof(coutput));
@@ -542,6 +544,8 @@ output_png(struct lstopo_output *loutput, const char *filename)
 
   if (output != stdout)
     fclose(output);
+
+  return 0;
 }
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 
@@ -558,7 +562,7 @@ static struct draw_methods pdf_draw_methods = {
   topo_cairo_textsize,
 };
 
-void
+int
 output_pdf(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
@@ -568,7 +572,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
   output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    return;
+    return -1;
   }
 
   memset(&coutput, 0, sizeof(coutput));
@@ -601,6 +605,8 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
 
   if (output != stdout)
     fclose(output);
+
+  return 0;
 }
 #endif /* CAIRO_HAS_PDF_SURFACE */
 
@@ -617,7 +623,7 @@ static struct draw_methods ps_draw_methods = {
   topo_cairo_textsize,
 };
 
-void
+int
 output_ps(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
@@ -627,7 +633,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
   output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    return;
+    return -1;
   }
 
   memset(&coutput, 0, sizeof(coutput));
@@ -660,6 +666,8 @@ output_ps(struct lstopo_output *loutput, const char *filename)
 
   if (output != stdout)
     fclose(output);
+
+  return 0;
 }
 #endif /* CAIRO_HAS_PS_SURFACE */
 
@@ -676,7 +684,7 @@ static struct draw_methods svg_draw_methods = {
   topo_cairo_textsize,
 };
 
-void
+int
 output_svg(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
@@ -686,7 +694,7 @@ output_svg(struct lstopo_output *loutput, const char *filename)
   output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    return;
+    return -1;
   }
 
   memset(&coutput, 0, sizeof(coutput));
@@ -719,5 +727,7 @@ output_svg(struct lstopo_output *loutput, const char *filename)
 
   if (output != stdout)
     fclose(output);
+
+  return 0;
 }
 #endif /* CAIRO_HAS_SVG_SURFACE */

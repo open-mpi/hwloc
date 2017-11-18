@@ -110,13 +110,13 @@ static struct draw_methods fig_draw_methods = {
   NULL, /* textsize not supported, fallback to default estimation in get_textsize() */
 };
 
-void
+int
 output_fig (struct lstopo_output *loutput, const char *filename)
 {
   FILE *output = open_output(filename, loutput->overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    return;
+    return -1;
   }
 
   loutput->file = output;
@@ -145,4 +145,6 @@ output_fig (struct lstopo_output *loutput, const char *filename)
 
   if (output != stdout)
     fclose(output);
+
+  return 0;
 }
