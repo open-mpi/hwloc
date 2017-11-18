@@ -20,27 +20,6 @@
 
 #define FIG_FACTOR 20
 
-static void
-fig_init(struct lstopo_output *loutput)
-{
-  FILE *file = loutput->file;
-
-  /* recurse once for preparing sizes and positions */
-  loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  output_draw(loutput);
-  loutput->drawing = LSTOPO_DRAWING_DRAW;
-
-  fprintf(file, "#FIG 3.2  Produced by hwloc's lstopo\n");
-  fprintf(file, "Landscape\n");
-  fprintf(file, "Center\n");
-  fprintf(file, "Inches\n");
-  fprintf(file, "letter\n");
-  fprintf(file, "100.00\n");	/* magnification */
-  fprintf(file, "Single\n");	/* single page */
-  fprintf(file, "-2\n");	/* no transparent color */
-  fprintf(file, "1200 2\n");	/* 1200 ppi resolution, upper left origin */
-}
-
 static int __hwloc_attribute_const
 lcolor_to_fig(const struct lstopo_color *lcolor)
 {
@@ -124,7 +103,6 @@ fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int s
 }
 
 static struct draw_methods fig_draw_methods = {
-  fig_init,
   fig_declare_color,
   fig_box,
   fig_line,
@@ -144,7 +122,22 @@ output_fig (struct lstopo_output *loutput, const char *filename)
   loutput->file = output;
   loutput->methods = &fig_draw_methods;
 
-  loutput->methods->init(loutput);
+  /* recurse once for preparing sizes and positions */
+  loutput->drawing = LSTOPO_DRAWING_PREPARE;
+  output_draw(loutput);
+  loutput->drawing = LSTOPO_DRAWING_DRAW;
+
+  fprintf(output, "#FIG 3.2  Produced by hwloc's lstopo\n");
+  fprintf(output, "Landscape\n");
+  fprintf(output, "Center\n");
+  fprintf(output, "Inches\n");
+  fprintf(output, "letter\n");
+  fprintf(output, "100.00\n");	/* magnification */
+  fprintf(output, "Single\n");	/* single page */
+  fprintf(output, "-2\n");	/* no transparent color */
+  fprintf(output, "1200 2\n");	/* 1200 ppi resolution, upper left origin */
+
+  /* ready */
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 

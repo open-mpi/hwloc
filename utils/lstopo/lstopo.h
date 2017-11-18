@@ -142,7 +142,6 @@ typedef void output_method (struct lstopo_output *output, const char *filename);
 extern output_method output_console, output_synthetic, output_ascii, output_fig, output_png, output_pdf, output_ps, output_svg, output_x11, output_windows, output_xml;
 
 struct draw_methods {
-  void (*init) (struct lstopo_output *loutput);
   /* only called when loutput->draw_methods == LSTOPO_DRAWING_DRAW */
   void (*declare_color) (struct lstopo_output *loutput, const struct lstopo_color *lcolor);
   void (*box) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height);

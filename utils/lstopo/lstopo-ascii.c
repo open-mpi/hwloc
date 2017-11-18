@@ -69,34 +69,6 @@ struct lstopo_ascii_output {
 
 static struct draw_methods ascii_draw_methods;
 
-/* Allocate the off-screen buffer */
-static void
-ascii_init(struct lstopo_output *loutput)
-{
-  struct lstopo_ascii_output *disp = loutput->backend_data;
-  unsigned gridsize = loutput->gridsize;
-  unsigned width, height;
-  unsigned j, i;
-
-  /* recurse once for preparing sizes and positions */
-  loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  output_draw(loutput);
-  width = disp->width = (loutput->width + 1) / (gridsize/2);
-  height = disp->height = (loutput->height + 1) / gridsize;
-  loutput->drawing = LSTOPO_DRAWING_DRAW;
-
-  /* terminals usually have narrow characters, so let's make them wider */
-  disp->cells = malloc(height * sizeof(*disp->cells));
-  for (j = 0; j < height; j++) {
-    disp->cells[j] = calloc(width, sizeof(**disp->cells));
-    for (i = 0; i < width; i++)
-      disp->cells[j][i].c = ' ';
-  }
-#ifdef HAVE_NL_LANGINFO
-  disp->utf8 = !strcmp(nl_langinfo(CODESET), "UTF-8");
-#endif /* HAVE_NL_LANGINFO */
-}
-
 #ifdef HWLOC_HAVE_LIBTERMCAP
 /* Standard terminfo strings */
 static char *initc = NULL, *initp = NULL;
@@ -449,7 +421,6 @@ ascii_textsize(struct lstopo_output *loutput, const char *text __hwloc_attribute
 }
 
 static struct draw_methods ascii_draw_methods = {
-  ascii_init,
   ascii_declare_color,
   ascii_box,
   ascii_line,
@@ -468,6 +439,8 @@ void output_ascii(struct lstopo_output *loutput, const char *filename)
   int term = 0;
   char *tmp;
 #endif
+  unsigned gridsize = loutput->gridsize;
+  unsigned width, height;
 
   output = open_output(filename, loutput->overwrite);
   if (!output) {
@@ -511,7 +484,25 @@ void output_ascii(struct lstopo_output *loutput, const char *filename)
   loutput->backend_data = &disp;
   loutput->methods = &ascii_draw_methods;
 
-  loutput->methods->init(loutput);
+  /* recurse once for preparing sizes and positions */
+  loutput->drawing = LSTOPO_DRAWING_PREPARE;
+  output_draw(loutput);
+  width = disp.width = (loutput->width + 1) / (gridsize/2);
+  height = disp.height = (loutput->height + 1) / gridsize;
+  loutput->drawing = LSTOPO_DRAWING_DRAW;
+
+  /* terminals usually have narrow characters, so let's make them wider */
+  disp.cells = malloc(height * sizeof(*disp.cells));
+  for (j = 0; j < height; j++) {
+    disp.cells[j] = calloc(width, sizeof(**disp.cells));
+    for (i = 0; i < width; i++)
+      disp.cells[j][i].c = ' ';
+  }
+#ifdef HAVE_NL_LANGINFO
+  disp.utf8 = !strcmp(nl_langinfo(CODESET), "UTF-8");
+#endif /* HAVE_NL_LANGINFO */
+
+  /* ready */
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 

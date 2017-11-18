@@ -235,84 +235,6 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 }
 
 static void
-windows_init(struct lstopo_output *loutput)
-{
-  struct lstopo_windows_output *woutput = loutput->backend_data;
-  WNDCLASS wndclass;
-  HWND toplevel, faketoplevel;
-  unsigned width, height;
-  HFONT font;
-
-  /* make sure WM_DESTROY on the faketoplevel won't kill the program */
-  woutput->toplevel = NULL;
-
-  /* create the toplevel window, with random size for now */
-  memset(&wndclass, 0, sizeof(wndclass));
-  wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
-  wndclass.hCursor = LoadCursor(NULL, IDC_SIZEALL);
-  wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-  wndclass.lpfnWndProc = WndProc;
-  wndclass.lpszClassName = "lstopo";
-
-  RegisterClass(&wndclass);
-
-  /* recurse once for preparing sizes and positions using a fake top level window */
-  loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  faketoplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
-			      CW_USEDEFAULT, CW_USEDEFAULT,
-			      10, 10, NULL, NULL, NULL, NULL);
-  BeginPaint(faketoplevel, &woutput->ps);
-  font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
-  SelectObject(woutput->ps.hdc, (HGDIOBJ) font);
-  output_draw(loutput);
-  DeleteObject(font);
-  EndPaint(faketoplevel, &woutput->ps);
-  DestroyWindow(faketoplevel);
-  loutput->drawing = LSTOPO_DRAWING_DRAW;
-
-  /* now create the actual toplevel with the sizes */
-  width = loutput->width;
-  height = loutput->height;
-
-  win_width = width + 2*GetSystemMetrics(SM_CXSIZEFRAME);
-  win_height = height + 2*GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION);
-
-  if (win_width > GetSystemMetrics(SM_CXFULLSCREEN))
-    win_width = GetSystemMetrics(SM_CXFULLSCREEN);
-
-  if (win_height > GetSystemMetrics(SM_CYFULLSCREEN))
-    win_height = GetSystemMetrics(SM_CYFULLSCREEN);
-
-  toplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
-		  CW_USEDEFAULT, CW_USEDEFAULT,
-		  win_width, win_height, NULL, NULL, NULL, NULL);
-  woutput->toplevel = toplevel;
-
-  the_width = width;
-  the_height = height;
-
-  the_scale = 1.0f;
-
-  the_fontsize = loutput->fontsize;
-  the_gridsize = loutput->gridsize;
-
-  /* and display the window */
-  ShowWindow(toplevel, SW_SHOWDEFAULT);
-
-  printf("\n");
-  printf("Keyboard shortcuts:\n");
-  printf(" Zoom-in or out .................... + -\n");
-  printf(" Try to fit scale to window ........ f F\n");
-  printf(" Reset scale to default ............ 1\n");
-  printf(" Scroll vertically ................. Up Down PageUp PageDown\n");
-  printf(" Scroll horizontally ............... Left Right Ctrl+PageUp/Down\n");
-  printf(" Scroll to the top-left corner ..... Home\n");
-  printf(" Scroll to the bottom-right corner . End\n");
-  printf(" Exit .............................. q Q Esc\n");
-  printf("\n\n");
-}
-
-static void
 windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor)
 {
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
@@ -384,7 +306,6 @@ windows_textsize(struct lstopo_output *loutput, const char *text, unsigned textl
 }
 
 struct draw_methods windows_draw_methods = {
-  windows_init,
   windows_declare_color,
   windows_box,
   windows_line,
@@ -395,6 +316,10 @@ struct draw_methods windows_draw_methods = {
 void
 output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribute_unused)
 {
+  WNDCLASS wndclass;
+  HWND toplevel, faketoplevel;
+  unsigned width, height;
+  HFONT font;
   MSG msg;
 
   memset(&the_output, 0, sizeof(the_output));
@@ -402,7 +327,75 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   loutput->methods = &windows_draw_methods;
   loutput->backend_data = &the_output;
 
-  loutput->methods->init(loutput);
+  /* make sure WM_DESTROY on the faketoplevel won't kill the program */
+  the_output.toplevel = NULL;
+
+  /* create the toplevel window, with random size for now */
+  memset(&wndclass, 0, sizeof(wndclass));
+  wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
+  wndclass.hCursor = LoadCursor(NULL, IDC_SIZEALL);
+  wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+  wndclass.lpfnWndProc = WndProc;
+  wndclass.lpszClassName = "lstopo";
+
+  RegisterClass(&wndclass);
+
+  /* recurse once for preparing sizes and positions using a fake top level window */
+  loutput->drawing = LSTOPO_DRAWING_PREPARE;
+  faketoplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
+			      CW_USEDEFAULT, CW_USEDEFAULT,
+			      10, 10, NULL, NULL, NULL, NULL);
+  BeginPaint(faketoplevel, &the_output.ps);
+  font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
+  SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
+  output_draw(loutput);
+  DeleteObject(font);
+  EndPaint(faketoplevel, &the_output.ps);
+  DestroyWindow(faketoplevel);
+  loutput->drawing = LSTOPO_DRAWING_DRAW;
+
+  /* now create the actual toplevel with the sizes */
+  width = loutput->width;
+  height = loutput->height;
+
+  win_width = width + 2*GetSystemMetrics(SM_CXSIZEFRAME);
+  win_height = height + 2*GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION);
+
+  if (win_width > GetSystemMetrics(SM_CXFULLSCREEN))
+    win_width = GetSystemMetrics(SM_CXFULLSCREEN);
+
+  if (win_height > GetSystemMetrics(SM_CYFULLSCREEN))
+    win_height = GetSystemMetrics(SM_CYFULLSCREEN);
+
+  toplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
+		  CW_USEDEFAULT, CW_USEDEFAULT,
+		  win_width, win_height, NULL, NULL, NULL, NULL);
+  the_output.toplevel = toplevel;
+
+  the_width = width;
+  the_height = height;
+
+  the_scale = 1.0f;
+
+  the_fontsize = loutput->fontsize;
+  the_gridsize = loutput->gridsize;
+
+  /* and display the window */
+  ShowWindow(toplevel, SW_SHOWDEFAULT);
+
+  printf("\n");
+  printf("Keyboard shortcuts:\n");
+  printf(" Zoom-in or out .................... + -\n");
+  printf(" Try to fit scale to window ........ f F\n");
+  printf(" Reset scale to default ............ 1\n");
+  printf(" Scroll vertically ................. Up Down PageUp PageDown\n");
+  printf(" Scroll horizontally ............... Left Right Ctrl+PageUp/Down\n");
+  printf(" Scroll to the top-left corner ..... Home\n");
+  printf(" Scroll to the bottom-right corner . End\n");
+  printf(" Exit .............................. q Q Esc\n");
+  printf("\n\n");
+
+  /* ready */
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 

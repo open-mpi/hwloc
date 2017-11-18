@@ -177,17 +177,92 @@ x11_destroy(struct lstopo_x11_output *disp)
   XDestroyWindow(disp->dpy, disp->win);
 }
 
+/** Clip coordinates of the visible part. */
 static void
-x11_init(struct lstopo_output *loutput)
+move_x11(struct lstopo_x11_output *disp)
 {
-  struct lstopo_x11_output *disp = loutput->backend_data;
   struct lstopo_cairo_output *coutput = &disp->coutput;
+  struct lstopo_output *loutput = coutput->loutput;
+
+  if (disp->scale != disp->last_scale) {
+    disp->x = disp->scale / disp->last_scale * (float)disp->x;
+    disp->y = disp->scale / disp->last_scale * (float)disp->y;
+  }
+
+  if (disp->screen_width != disp->last_screen_width
+      || disp->screen_height != disp->last_screen_height
+      || disp->scale != disp->last_scale) {
+    disp->last_screen_width = disp->screen_width;
+    disp->last_screen_height = disp->screen_height;
+    disp->last_scale = disp->scale;
+    loutput->fontsize = disp->orig_fontsize * disp->scale;
+    loutput->gridsize = disp->orig_gridsize * disp->scale;
+
+    x11_destroy(disp);
+
+    x11_create(disp, disp->width, disp->height);
+    /* recompute new sizes and positions */
+    loutput->drawing = LSTOPO_DRAWING_PREPARE;
+    topo_cairo_paint(coutput);
+    if (loutput->width > (unsigned) disp->width || loutput->height > (unsigned) disp->height) {
+      /* need to extend the window before actual redraw */
+      x11_destroy(disp);
+      x11_create(disp, loutput->width, loutput->height);
+    }
+    loutput->drawing = LSTOPO_DRAWING_DRAW;
+    topo_cairo_paint(coutput);
+    disp->width = loutput->width;
+    disp->height = loutput->height;
+  }
+
+  if (disp->width <= disp->screen_width) {
+    disp->x = 0;
+  } else {
+    if (disp->x < 0)
+      disp->x = 0;
+    if (disp->x >= disp->width - disp->screen_width)
+      disp->x = disp->width - disp->screen_width;
+  }
+
+  if (disp->height <= disp->screen_height) {
+    disp->y = 0;
+  } else {
+    if (disp->y < 0)
+      disp->y = 0;
+    if (disp->y >= disp->height - disp->screen_height)
+      disp->y = disp->height - disp->screen_height;
+  }
+}
+
+static struct draw_methods x11_draw_methods = {
+  topo_cairo_declare_color,
+  topo_cairo_box,
+  topo_cairo_line,
+  topo_cairo_text,
+  topo_cairo_textsize,
+};
+
+void
+output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_unused)
+{
+  struct lstopo_x11_output _disp, *disp = &_disp;
+  struct lstopo_cairo_output *coutput;
   Display *dpy;
   Window root, top;
   int scr;
   Screen *screen;
   int screen_width, screen_height;
   unsigned int dpi_x, dpi_y, dpi;
+  int finish = 0;
+  int state = 0;
+  int x = 0, y = 0; /* shut warning down */
+  int lastx, lasty;
+
+  coutput = &disp->coutput;
+  memset(coutput, 0, sizeof(*coutput));
+  coutput->loutput = loutput;
+  loutput->backend_data = coutput;
+  loutput->methods = &x11_draw_methods;
 
   /* create the toplevel window */
   if (!(dpy = XOpenDisplay(NULL))) {
@@ -258,91 +333,8 @@ x11_init(struct lstopo_output *loutput)
   printf(" Scroll to the bottom-right corner . End\n");
   printf(" Exit .............................. q Q Esc\n");
   printf("\n\n");
-}
 
-static struct draw_methods x11_draw_methods = {
-  x11_init,
-  topo_cairo_declare_color,
-  topo_cairo_box,
-  topo_cairo_line,
-  topo_cairo_text,
-  topo_cairo_textsize,
-};
-
-/** Clip coordinates of the visible part. */
-static void
-move_x11(struct lstopo_x11_output *disp)
-{
-  struct lstopo_cairo_output *coutput = &disp->coutput;
-  struct lstopo_output *loutput = coutput->loutput;
-
-  if (disp->scale != disp->last_scale) {
-    disp->x = disp->scale / disp->last_scale * (float)disp->x;
-    disp->y = disp->scale / disp->last_scale * (float)disp->y;
-  }
-
-  if (disp->screen_width != disp->last_screen_width
-      || disp->screen_height != disp->last_screen_height
-      || disp->scale != disp->last_scale) {
-    disp->last_screen_width = disp->screen_width;
-    disp->last_screen_height = disp->screen_height;
-    disp->last_scale = disp->scale;
-    loutput->fontsize = disp->orig_fontsize * disp->scale;
-    loutput->gridsize = disp->orig_gridsize * disp->scale;
-
-    x11_destroy(disp);
-
-    x11_create(disp, disp->width, disp->height);
-    /* recompute new sizes and positions */
-    loutput->drawing = LSTOPO_DRAWING_PREPARE;
-    topo_cairo_paint(coutput);
-    if (loutput->width > (unsigned) disp->width || loutput->height > (unsigned) disp->height) {
-      /* need to extend the window before actual redraw */
-      x11_destroy(disp);
-      x11_create(disp, loutput->width, loutput->height);
-    }
-    loutput->drawing = LSTOPO_DRAWING_DRAW;
-    topo_cairo_paint(coutput);
-    disp->width = loutput->width;
-    disp->height = loutput->height;
-  }
-
-  if (disp->width <= disp->screen_width) {
-    disp->x = 0;
-  } else {
-    if (disp->x < 0)
-      disp->x = 0;
-    if (disp->x >= disp->width - disp->screen_width)
-      disp->x = disp->width - disp->screen_width;
-  }
-
-  if (disp->height <= disp->screen_height) {
-    disp->y = 0;
-  } else {
-    if (disp->y < 0)
-      disp->y = 0;
-    if (disp->y >= disp->height - disp->screen_height)
-      disp->y = disp->height - disp->screen_height;
-  }
-}
-
-void
-output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_unused)
-{
-  struct lstopo_x11_output _disp, *disp = &_disp;
-  struct lstopo_cairo_output *coutput;
-  int finish = 0;
-  int state = 0;
-  int x = 0, y = 0; /* shut warning down */
-  int lastx, lasty;
-
-  coutput = &disp->coutput;
-  memset(coutput, 0, sizeof(*coutput));
-  coutput->loutput = loutput;
-  loutput->backend_data = coutput;
-  loutput->methods = &x11_draw_methods;
-
-  loutput->methods->init(loutput);
+  /* ready */
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 
@@ -499,29 +491,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 /* PNG back-end */
 static struct draw_methods png_draw_methods;
 
-static void
-png_init(struct lstopo_output *loutput)
-{
-  struct lstopo_cairo_output *coutput = loutput->backend_data;
-  cairo_surface_t *fakecs, *cs;
-
-  /* create a fake surface */
-  fakecs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
-  coutput->surface = fakecs;
-
-  /* recurse once for preparing sizes and positions using the fake surface */
-  loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  topo_cairo_paint(coutput);
-  loutput->drawing = LSTOPO_DRAWING_DRAW;
-  cairo_surface_destroy(fakecs);
-
-  /* create the actual surface with the right size */
-  cs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, loutput->width, loutput->height);
-  coutput->surface = cs;
-}
-
 static struct draw_methods png_draw_methods = {
-  png_init,
   topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
@@ -534,6 +504,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
   FILE *output;
+  cairo_surface_t *fakecs, *cs;
 
   output = open_output(filename, loutput->overwrite);
   if (!output) {
@@ -547,7 +518,21 @@ output_png(struct lstopo_output *loutput, const char *filename)
   loutput->methods = &png_draw_methods;
   loutput->file = output;
 
-  loutput->methods->init(loutput);
+  /* create a fake surface */
+  fakecs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+  coutput.surface = fakecs;
+
+  /* recurse once for preparing sizes and positions using the fake surface */
+  loutput->drawing = LSTOPO_DRAWING_PREPARE;
+  topo_cairo_paint(&coutput);
+  loutput->drawing = LSTOPO_DRAWING_DRAW;
+  cairo_surface_destroy(fakecs);
+
+  /* create the actual surface with the right size */
+  cs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, loutput->width, loutput->height);
+  coutput.surface = cs;
+
+  /* ready */
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 
@@ -565,29 +550,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
 /* PDF back-end */
 static struct draw_methods pdf_draw_methods;
 
-static void
-pdf_init(struct lstopo_output *loutput)
-{
-  struct lstopo_cairo_output *coutput = loutput->backend_data;
-  cairo_surface_t *fakecs, *cs;
-
-  /* create a fake surface */
-  fakecs = cairo_pdf_surface_create_for_stream(NULL, NULL, 1, 1);
-  coutput->surface = fakecs;
-
-  /* recurse once for preparing sizes and positions using the fake surface */
-  loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  topo_cairo_paint(coutput);
-  loutput->drawing = LSTOPO_DRAWING_DRAW;
-  cairo_surface_destroy(fakecs);
-
-  /* create the actual surface with the right size */
-  cs = cairo_pdf_surface_create_for_stream(topo_cairo_write, loutput->file, loutput->width, loutput->height);
-  coutput->surface = cs;
-}
-
 static struct draw_methods pdf_draw_methods = {
-  pdf_init,
   topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
@@ -600,6 +563,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
   FILE *output;
+  cairo_surface_t *fakecs, *cs;
 
   output = open_output(filename, loutput->overwrite);
   if (!output) {
@@ -613,7 +577,21 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
   loutput->methods = &pdf_draw_methods;
   loutput->file = output;
 
-  loutput->methods->init(loutput);
+  /* create a fake surface */
+  fakecs = cairo_pdf_surface_create_for_stream(NULL, NULL, 1, 1);
+  coutput.surface = fakecs;
+
+  /* recurse once for preparing sizes and positions using the fake surface */
+  loutput->drawing = LSTOPO_DRAWING_PREPARE;
+  topo_cairo_paint(&coutput);
+  loutput->drawing = LSTOPO_DRAWING_DRAW;
+  cairo_surface_destroy(fakecs);
+
+  /* create the actual surface with the right size */
+  cs = cairo_pdf_surface_create_for_stream(topo_cairo_write, loutput->file, loutput->width, loutput->height);
+  coutput.surface = cs;
+
+  /* ready */
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 
@@ -631,29 +609,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
 /* PS back-end */
 static struct draw_methods ps_draw_methods;
 
-static void
-ps_init(struct lstopo_output *loutput)
-{
-  struct lstopo_cairo_output *coutput = loutput->backend_data;
-  cairo_surface_t *fakecs, *cs;
-
-  /* create a fake surface */
-  fakecs = cairo_ps_surface_create_for_stream(NULL, NULL, 1, 1);
-  coutput->surface = fakecs;
-
-  /* recurse once for preparing sizes and positions using the fake surface */
-  loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  topo_cairo_paint(coutput);
-  loutput->drawing = LSTOPO_DRAWING_DRAW;
-  cairo_surface_destroy(fakecs);
-
-  /* create the actual surface with the right size */
-  cs = cairo_ps_surface_create_for_stream(topo_cairo_write, loutput->file, loutput->width, loutput->height);
-  coutput->surface = cs;
-}
-
 static struct draw_methods ps_draw_methods = {
-  ps_init,
   topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
@@ -666,6 +622,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
   FILE *output;
+  cairo_surface_t *fakecs, *cs;
 
   output = open_output(filename, loutput->overwrite);
   if (!output) {
@@ -679,7 +636,21 @@ output_ps(struct lstopo_output *loutput, const char *filename)
   loutput->methods = &ps_draw_methods;
   loutput->file = output;
 
-  loutput->methods->init(loutput);
+  /* create a fake surface */
+  fakecs = cairo_ps_surface_create_for_stream(NULL, NULL, 1, 1);
+  coutput.surface = fakecs;
+
+  /* recurse once for preparing sizes and positions using the fake surface */
+  loutput->drawing = LSTOPO_DRAWING_PREPARE;
+  topo_cairo_paint(&coutput);
+  loutput->drawing = LSTOPO_DRAWING_DRAW;
+  cairo_surface_destroy(fakecs);
+
+  /* create the actual surface with the right size */
+  cs = cairo_ps_surface_create_for_stream(topo_cairo_write, loutput->file, loutput->width, loutput->height);
+  coutput.surface = cs;
+
+  /* ready */
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 
@@ -697,29 +668,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
 /* SVG back-end */
 static struct draw_methods svg_draw_methods;
 
-static void
-svg_init(struct lstopo_output *loutput)
-{
-  struct lstopo_cairo_output *coutput = loutput->backend_data;
-  cairo_surface_t *fakecs, *cs;
-
-  /* create a fake surface */
-  fakecs = cairo_svg_surface_create_for_stream(NULL, NULL, 1, 1);
-  coutput->surface = fakecs;
-
-  /* recurse once for preparing sizes and positions using the fake surface */
-  loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  topo_cairo_paint(coutput);
-  loutput->drawing = LSTOPO_DRAWING_DRAW;
-  cairo_surface_destroy(fakecs);
-
-  /* create the actual surface with the right size */
-  cs = cairo_svg_surface_create_for_stream(topo_cairo_write, loutput->file, loutput->width, loutput->height);
-  coutput->surface = cs;
-}
-
 static struct draw_methods svg_draw_methods = {
-  svg_init,
   topo_cairo_declare_color,
   topo_cairo_box,
   topo_cairo_line,
@@ -732,6 +681,7 @@ output_svg(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
   FILE *output;
+  cairo_surface_t *fakecs, *cs;
 
   output = open_output(filename, loutput->overwrite);
   if (!output) {
@@ -745,7 +695,21 @@ output_svg(struct lstopo_output *loutput, const char *filename)
   loutput->methods = &svg_draw_methods;
   loutput->file = output;
 
-  loutput->methods->init(loutput);
+  /* create a fake surface */
+  fakecs = cairo_svg_surface_create_for_stream(NULL, NULL, 1, 1);
+  coutput.surface = fakecs;
+
+  /* recurse once for preparing sizes and positions using the fake surface */
+  loutput->drawing = LSTOPO_DRAWING_PREPARE;
+  topo_cairo_paint(&coutput);
+  loutput->drawing = LSTOPO_DRAWING_DRAW;
+  cairo_surface_destroy(fakecs);
+
+  /* create the actual surface with the right size */
+  cs = cairo_svg_surface_create_for_stream(topo_cairo_write, loutput->file, loutput->width, loutput->height);
+  coutput.surface = cs;
+
+  /* ready */
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 
