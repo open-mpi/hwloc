@@ -511,7 +511,10 @@ void output_ascii(struct lstopo_output *loutput, const char *filename)
   loutput->backend_data = &disp;
   loutput->methods = &ascii_draw_methods;
 
-  output_draw_start(loutput);
+  loutput->methods->init(loutput);
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
+
   output_draw(loutput);
 
   lfr = lfg = lfb = -1;

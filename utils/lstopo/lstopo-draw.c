@@ -31,7 +31,7 @@
 #define DARKER_EPOXY_G_COLOR ((DARK_EPOXY_G_COLOR * 100) / 110)
 #define DARKER_EPOXY_B_COLOR ((DARK_EPOXY_B_COLOR * 100) / 110)
 
-/* each of these colors must be declared in output_draw_start() */
+/* each of these colors must be declared in declare_colors() */
 const struct lstopo_color BLACK_COLOR = { 0, 0, 0 };
 const struct lstopo_color WHITE_COLOR = { 0xff, 0xff, 0xff };
 const struct lstopo_color PACKAGE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR };
@@ -637,7 +637,7 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
 }
 
 static void
-lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
+lstopo__prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
 {
   struct lstopo_obj_userdata *lud = obj->userdata;
   struct lstopo_style *s = &lud->style;
@@ -679,13 +679,19 @@ lstopo_prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
   }
 
   for_each_child(child, obj)
-    lstopo_prepare_custom_styles(loutput, child);
+    lstopo__prepare_custom_styles(loutput, child);
   for_each_memory_child(child, obj)
-    lstopo_prepare_custom_styles(loutput, child);
+    lstopo__prepare_custom_styles(loutput, child);
   for_each_io_child(child, obj)
-    lstopo_prepare_custom_styles(loutput, child);
+    lstopo__prepare_custom_styles(loutput, child);
   for_each_misc_child(child, obj)
-    lstopo_prepare_custom_styles(loutput, child);
+    lstopo__prepare_custom_styles(loutput, child);
+}
+
+void
+lstopo_prepare_custom_styles(struct lstopo_output *loutput)
+{
+  lstopo__prepare_custom_styles(loutput, hwloc_get_root_obj(loutput->topology));
 }
 
 static void
@@ -1306,10 +1312,9 @@ get_type_fun(hwloc_obj_type_t type)
 }
 
 void
-output_draw_start(struct lstopo_output *output)
+declare_colors(struct lstopo_output *output)
 {
   struct draw_methods *methods = output->methods;
-  methods->init(output);
   methods->declare_color(output, &BLACK_COLOR);
   methods->declare_color(output, &WHITE_COLOR);
   methods->declare_color(output, &PACKAGE_COLOR);
@@ -1327,5 +1332,4 @@ output_draw_start(struct lstopo_output *output)
   methods->declare_color(output, &PCI_DEVICE_COLOR);
   methods->declare_color(output, &OS_DEVICE_COLOR);
   methods->declare_color(output, &BRIDGE_COLOR);
-  lstopo_prepare_custom_styles(output, hwloc_get_root_obj(output->topology));
 }

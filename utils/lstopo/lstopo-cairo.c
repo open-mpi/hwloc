@@ -342,7 +342,10 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   loutput->backend_data = coutput;
   loutput->methods = &x11_draw_methods;
 
-  output_draw_start(loutput);
+  loutput->methods->init(loutput);
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
+
   lastx = disp->x;
   lasty = disp->y;
 
@@ -544,7 +547,9 @@ output_png(struct lstopo_output *loutput, const char *filename)
   loutput->methods = &png_draw_methods;
   loutput->file = output;
 
-  output_draw_start(loutput);
+  loutput->methods->init(loutput);
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
 
   topo_cairo_paint(&coutput);
   cairo_surface_write_to_png_stream(coutput.surface, topo_cairo_write, output);
@@ -608,7 +613,9 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
   loutput->methods = &pdf_draw_methods;
   loutput->file = output;
 
-  output_draw_start(loutput);
+  loutput->methods->init(loutput);
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
 
   topo_cairo_paint(&coutput);
   cairo_surface_flush(coutput.surface);
@@ -672,7 +679,9 @@ output_ps(struct lstopo_output *loutput, const char *filename)
   loutput->methods = &ps_draw_methods;
   loutput->file = output;
 
-  output_draw_start(loutput);
+  loutput->methods->init(loutput);
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
 
   topo_cairo_paint(&coutput);
   cairo_surface_flush(coutput.surface);
@@ -736,7 +745,9 @@ output_svg(struct lstopo_output *loutput, const char *filename)
   loutput->methods = &svg_draw_methods;
   loutput->file = output;
 
-  output_draw_start(loutput);
+  loutput->methods->init(loutput);
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
 
   topo_cairo_paint(&coutput);
   cairo_surface_flush(coutput.surface);

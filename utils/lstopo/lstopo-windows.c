@@ -402,7 +402,10 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   loutput->methods = &windows_draw_methods;
   loutput->backend_data = &the_output;
 
-  output_draw_start(loutput);
+  loutput->methods->init(loutput);
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
+
   UpdateWindow(the_output.toplevel);
   while (!finish && GetMessage(&msg, NULL, 0, 0)) {
     TranslateMessage(&msg);

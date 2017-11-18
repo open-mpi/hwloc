@@ -144,7 +144,10 @@ output_fig (struct lstopo_output *loutput, const char *filename)
   loutput->file = output;
   loutput->methods = &fig_draw_methods;
 
-  output_draw_start(loutput);
+  loutput->methods->init(loutput);
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
+
   output_draw(loutput);
 
   if (output != stdout)

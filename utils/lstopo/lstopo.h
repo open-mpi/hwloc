@@ -152,8 +152,10 @@ struct draw_methods {
   void (*textsize) (struct lstopo_output *loutput, const char *text, unsigned textlength, unsigned fontsize, unsigned *width);
 };
 
-extern void output_draw_start(struct lstopo_output *output);
 extern void output_draw(struct lstopo_output *output);
+
+extern void lstopo_prepare_custom_styles(struct lstopo_output *loutput);
+extern void declare_colors(struct lstopo_output *output);
 
 int rgb_to_color(int r, int g, int b) __hwloc_attribute_const;
 int declare_color(int r, int g, int b);
