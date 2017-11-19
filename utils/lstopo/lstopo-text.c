@@ -29,7 +29,6 @@
 static void
 output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
 {
-  hwloc_topology_t topology = loutput->topology;
   FILE *output = loutput->file;
   int logical = loutput->logical;
   int verbose_mode = loutput->verbose_mode;

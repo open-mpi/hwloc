@@ -50,9 +50,10 @@ const struct lstopo_color PCI_DEVICE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_
 const struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde };
 const struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff };
 
-unsigned get_textwidth(void *output,
-		       const char *text, unsigned length,
-		       unsigned fontsize)
+static unsigned
+get_textwidth(void *output,
+	      const char *text, unsigned length,
+	      unsigned fontsize)
 {
   struct lstopo_output *loutput = output;
   if (loutput->methods->textsize) {
@@ -101,7 +102,6 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 #define NEXT_CHILD_INIT_STATE -1
 static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned kind, hwloc_obj_t prev, int *statep)
 {
-  hwloc_topology_t topology = loutput->topology;
   int state;
   hwloc_obj_t obj;
   if (prev) {
@@ -437,8 +437,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
     } else {
       /* if there's a single memory child without wide memory box, enlarge that child */
-      hwloc_obj_t child = parent->memory_first_child;
-      struct lstopo_obj_userdata *clud = child->userdata;
+      struct lstopo_obj_userdata *clud = parent->memory_first_child->userdata;
       if (clud->width < children_width) {
 	clud->width = children_width;
 	above_children_width = children_width;
@@ -513,7 +512,7 @@ draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigne
 
   if (orient == LSTOPO_ORIENT_HORIZ) {
     hwloc_obj_t child;
-    unsigned xmax;
+    unsigned xmax = (unsigned) -1;
     unsigned xmin = (unsigned) -1;
     for(child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
 	child;
@@ -530,7 +529,7 @@ draw_children_network(struct lstopo_output *loutput, hwloc_obj_t parent, unsigne
 
   } else if (orient == LSTOPO_ORIENT_VERT) {
     hwloc_obj_t child;
-    unsigned ymax;
+    unsigned ymax = (unsigned) -1;
     unsigned ymin = (unsigned) -1;
     for(child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
 	child;
@@ -1016,11 +1015,6 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct lstopo_style style;
-    unsigned totwidth, totheight;
-
-    /* restore our size that was computed during prepare */
-    totwidth = lud->width;
-    totheight = lud->height;
 
     /* Square and left link */
     lstopo_set_object_color(loutput, level, &style);
@@ -1084,12 +1078,11 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct lstopo_style style;
-    unsigned totwidth, totheight;
+    unsigned totwidth;
     unsigned myoff = 0;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
-    totheight = lud->height;
 
     if (lud->above_children.kinds) {
       /* display above_children even above the cache itself */

@@ -346,7 +346,6 @@ lstopo_add_collapse_attributes(hwloc_topology_t topology)
 static int
 lstopo_check_pci_domains(hwloc_topology_t topology)
 {
-  unsigned n;
   hwloc_obj_t obj;
 
   /* check PCI devices for domains.

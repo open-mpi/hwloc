@@ -413,7 +413,7 @@ ascii_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int
 #endif
 }
 
-void
+static void
 ascii_textsize(struct lstopo_output *loutput, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned fontsize __hwloc_attribute_unused, unsigned *width)
 {
   unsigned gridsize = loutput->gridsize;
@@ -441,7 +441,7 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   char *tmp;
 #endif
   unsigned gridsize = loutput->gridsize;
-  unsigned width, height;
+  int width, height;
 
   output = open_output(filename, loutput->overwrite);
   if (!output) {

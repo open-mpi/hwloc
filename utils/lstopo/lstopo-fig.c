@@ -56,7 +56,6 @@ static void
 fig_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   FILE *file = loutput->file;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
@@ -75,7 +74,6 @@ static void
 fig_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   FILE *file = loutput->file;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   x1 *= FIG_FACTOR;
   y1 *= FIG_FACTOR;
@@ -91,7 +89,6 @@ static void
 fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
   FILE *file = loutput->file;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   int len = (int)strlen(text);
   int color;
 
