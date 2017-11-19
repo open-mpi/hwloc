@@ -90,8 +90,9 @@
 #define BRIDGE_G_COLOR 0xff
 #define BRIDGE_B_COLOR 0xff
 
-unsigned get_textwidth(void *output,
-		       const char *text, unsigned length)
+static unsigned
+get_textwidth(void *output,
+	      const char *text, unsigned length)
 {
   struct lstopo_output *loutput = output;
   if (loutput->methods->textsize) {
@@ -176,8 +177,8 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
   if (obj->type == HWLOC_OBJ_BRIDGE && lstopo_collapse) { \
     for (i = 0; i < numsubobjs; i++) \
       if (subobjs[i]->type == HWLOC_OBJ_PCI_DEVICE) { \
-	const char *collapsestr = hwloc_obj_get_info_by_name(subobjs[i], "lstopoCollapse"); \
-	if (collapsestr && !strcmp(collapsestr, "0")) \
+	const char *_collapsestr = hwloc_obj_get_info_by_name(subobjs[i], "lstopoCollapse"); \
+	if (_collapsestr && !strcmp(_collapsestr, "0")) \
 	  numignoredsubobjs++; \
       } \
   } \
@@ -190,8 +191,8 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
       if (lstopo_ignore_pus && subobjs[i]->type == HWLOC_OBJ_PU) \
 	continue; \
       if (lstopo_collapse && subobjs[i]->type == HWLOC_OBJ_PCI_DEVICE) { \
-	const char *collapsestr = hwloc_obj_get_info_by_name(subobjs[i], "lstopoCollapse"); \
-	if (collapsestr && !strcmp(collapsestr, "0")) \
+	const char *_collapsestr = hwloc_obj_get_info_by_name(subobjs[i], "lstopoCollapse"); \
+	if (_collapsestr && !strcmp(_collapsestr, "0")) \
 	  continue; \
       }
 
@@ -698,7 +699,7 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
   struct style style;
   char text[64];
   int n;
-  unsigned nmorelines = 0, i;
+  unsigned nmorelines = 0, j;
   char morelines[3][64];
 
   DYNA_CHECK();
@@ -776,9 +777,9 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
 
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = get_textwidth(output, text, n);
-    for(i=0; i<nmorelines; i++) {
-      unsigned nn = (unsigned)strlen(morelines[i]);
-      unsigned ntextwidth = get_textwidth(output, morelines[i], nn);
+    for(j=0; j<nmorelines; j++) {
+      unsigned nn = (unsigned)strlen(morelines[j]);
+      unsigned ntextwidth = get_textwidth(output, morelines[j], nn);
       if (ntextwidth > textwidth)
 	textwidth = ntextwidth;
     }
@@ -793,8 +794,8 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
 
   if (fontsize) {
     methods->text(output, style.t.r, style.t.g, style.t.b, depth-1, x + gridsize, y + gridsize, text);
-    for(i=0; i<nmorelines; i++)
-      methods->text(output, style.t.r, style.t.g, style.t.b, depth-1, x + gridsize, y + (i+2)*gridsize + (i+1)*fontsize, morelines[i]);
+    for(j=0; j<nmorelines; j++)
+      methods->text(output, style.t.r, style.t.g, style.t.b, depth-1, x + gridsize, y + (j+2)*gridsize + (j+1)*fontsize, morelines[j]);
   }
 
   RECURSE_RECT(level, methods, gridsize, gridsize);

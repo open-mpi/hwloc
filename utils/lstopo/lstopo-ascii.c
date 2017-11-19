@@ -460,7 +460,7 @@ ascii_text(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_u
 #endif
 }
 
-void
+static void
 ascii_textsize(void *output __hwloc_attribute_unused, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned *width)
 {
   *width = textlength*(gridsize/2);
