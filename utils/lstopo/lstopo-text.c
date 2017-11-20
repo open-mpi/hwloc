@@ -326,6 +326,10 @@ output_synthetic(struct lstopo_output *loutput, const char *filename)
     goto out;
   }
 
+  nb1 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
+  if (nb1) { /* FIXME: export memory children? */
+    fprintf(stderr, "# Ignoring %u NUMA nodes.\n", nb1);
+  }
   nb1 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_MISC);
   if (nb1) {
     fprintf(stderr, "# Ignoring %u Misc objects.\n", nb1);
