@@ -145,6 +145,10 @@ int main(void)
   hwloc_bitmap_zero(cpuset);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(err < 0 && errno == EINVAL);
+  printf("restricting to unexisting PU:24, must fail\n");
+  hwloc_bitmap_only(cpuset, 24);
+  err = hwloc_topology_restrict(topology, cpuset, 0);
+  assert(err < 0 && errno == EINVAL);
   check(1, 3, 6, 24);
   check_distances(3, 6);
 

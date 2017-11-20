@@ -3655,7 +3655,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   }
 
   /* make sure we'll keep something in the topology */
-  if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->cpuset)) {
+  if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->allowed_cpuset)) {
     errno = EINVAL; /* easy failure, just don't touch the topology */
     return -1;
   }
@@ -3680,6 +3680,12 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 	hwloc_bitmap_set(droppednodeset, node->os_index);
       node = node->next_cousin;
     } while (node);
+
+    /* check we're not removing all NUMA nodes */
+    if (hwloc_bitmap_isincluded(topology->levels[0][0]->allowed_nodeset, droppednodeset)) {
+      errno = EINVAL; /* easy failure, just don't touch the topology */
+      return -1;
+    }
   }
   /* remove nodeset if empty */
   if (!(flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS)
