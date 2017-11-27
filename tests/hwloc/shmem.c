@@ -157,6 +157,7 @@ static int test(hwloc_topology_t orig, const char *callname) {
 
  out_with_fd:
   close(fd);
+  unlink(tmpname);
  out:
   return ret;
 }
