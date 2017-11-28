@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright © 2016 Inria.  All rights reserved.
+# Copyright © 2016-2017 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -19,6 +19,8 @@
 export NETLOC_TESTS_PATH="@HWLOC_top_srcdir@/tests/netloc"
 export NETLOC_BUILD_PATH="@HWLOC_top_builddir@/tests/netloc"
 export NETLOC_UTIL_PATH="@HWLOC_top_builddir@/utils/netloc"
+
+origpwd="$(pwd)"
 
 red="\e[31m"
 green="\e[32m"
@@ -193,6 +195,7 @@ for t in $tests; do
             break
         done
 
+	cd "$origpwd"
         rm -fr $TESTDIR
         if [ -n "$failed" ]; then
             ((F+=1))
