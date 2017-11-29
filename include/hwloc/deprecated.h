@@ -21,6 +21,8 @@
 extern "C" {
 #endif
 
+/* backward compat with v1.11 before System removal */
+#define HWLOC_OBJ_SYSTEM HWLOC_OBJ_MACHINE
 /* backward compat with v1.10 before Socket->Package renaming */
 #define HWLOC_OBJ_SOCKET HWLOC_OBJ_PACKAGE
 /* backward compat with v1.10 before Node->NUMANode clarification */
