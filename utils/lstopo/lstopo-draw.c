@@ -353,7 +353,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned border = loutput->gridsize;
   unsigned separator = loutput->gridsize;
   unsigned totwidth = plud->width, totheight = plud->height;
-  unsigned children_width, children_height;
+  unsigned children_width = 0, children_height = 0;
   unsigned above_children_width, above_children_height;
   int network;
   unsigned nxoff = 0, nyoff = 0;
@@ -402,7 +402,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     separator = 0;
 
   /* place non-memory children */
-  place__children(loutput, parent, plud->children.kinds, &orient, network, 0, separator, &children_width, &children_height);
+  if (parent->arity + parent->io_arity + parent->misc_arity)
+    place__children(loutput, parent, plud->children.kinds, &orient, network, 0, separator, &children_width, &children_height);
 
   if (network) {
     /* add room for network links */
