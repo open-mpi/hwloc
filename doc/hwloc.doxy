@@ -2889,12 +2889,21 @@ hwloc currently uses Groups for the following reasons:
 <li>AMD dual-core compute units (<tt>Type=ComputeUnit</tt>, in the x86 backend),
  but these objects are usually merged with the L2 caches.</li>
 <li>Intel x2APIC non-core and non-package levels (in the x86 backend).</li>
-<li>Windows processor groups.</li>
+<li>Windows processor groups (unless they contain a single NUMA node, or a single Package, etc.).</li>
 <li>IBM S/390 "Books" on Linux (<tt>Type=Book</tt>).</li>
 <li>AIX unknown hierarchy levels.</li>
 <li>Distance-based groups made of close objects.</li>
 <li>I/O parents when I/O locality does not match any existing object.</li>
 </ul>
+
+hwloc Groups are only kept if no other object has the same
+locality information.
+It means that a Group containing a single child is merged
+into that child.
+And a Group is merged into its parent if it is its only child.
+For instance a Windows processor group containing a single NUMA node
+would be  merged with that NUMA node since it already contains the
+relevant hierarchy information.
 
 
 \subsection faq_asymmetric What happens if my topology is asymmetric?
