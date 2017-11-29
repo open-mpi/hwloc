@@ -715,13 +715,19 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     s->bg = SYSTEM_COLOR;
     break;
 
-  case HWLOC_OBJ_GROUP:
-    if (obj->parent && obj->parent->type == HWLOC_OBJ_PACKAGE) {
-      s->bg = GROUP_IN_PACKAGE_COLOR;
-    } else {
-      s->bg = MISC_COLOR;
+  case HWLOC_OBJ_GROUP: {
+    hwloc_obj_t parent;
+    s->bg = MISC_COLOR;
+    parent = obj->parent;
+    while (parent) {
+      if (parent->type == HWLOC_OBJ_PACKAGE) {
+	s->bg = GROUP_IN_PACKAGE_COLOR;
+	break;
+      }
+      parent = parent->parent;
     }
     break;
+  }
 
   case HWLOC_OBJ_MISC:
     s->bg = MISC_COLOR;
