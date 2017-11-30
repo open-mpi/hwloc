@@ -104,7 +104,7 @@ S=0
 F=0
 
 for t in $tests; do
-    params_sv=$($AWK '/^'$t':\s*$/{flag=1;next} /^\S*:\s*$/{flag=0}flag' $TESTFILE)
+    params_sv=$($AWK '/^'$t':\s*$/{flag=1;next}; /^\S*:\s*$/{flag=0}; {if (flag) print}' $TESTFILE)
     params="$params_sv"
     sets=$(getvalues testset)
 
