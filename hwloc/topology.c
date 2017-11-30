@@ -2013,9 +2013,9 @@ propagate_nodeset(hwloc_obj_t obj)
 
     /* first, update children complete_nodeset if needed */
     if (!child->complete_nodeset)
-      obj->complete_nodeset = hwloc_bitmap_dup(child->nodeset);
+      child->complete_nodeset = hwloc_bitmap_dup(child->nodeset);
     else
-      hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, obj->nodeset);
+      hwloc_bitmap_or(child->complete_nodeset, child->complete_nodeset, child->nodeset);
 
     /* add memory children nodesets to ours */
     hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
