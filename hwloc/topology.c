@@ -3667,6 +3667,8 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
     /* check we're not removing all NUMA nodes */
     if (hwloc_bitmap_isincluded(topology->allowed_nodeset, droppednodeset)) {
       errno = EINVAL; /* easy failure, just don't touch the topology */
+      hwloc_bitmap_free(droppedcpuset);
+      hwloc_bitmap_free(droppednodeset);
       return -1;
     }
   }
