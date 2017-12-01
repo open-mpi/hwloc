@@ -1034,14 +1034,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
 
     } else if (!strcmp(tag, "info")) {
-      if (obj->type) {
-	ret = hwloc__xml_import_info(topology, obj, &childstate);
-      } else {
-	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
-		  state->global->msgprefix, tag);
-	ret = -1;
-      }
+      ret = hwloc__xml_import_info(topology, obj, &childstate);
     } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
       ret = hwloc__xml_import_v1distances(data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
