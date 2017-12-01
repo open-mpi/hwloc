@@ -3175,6 +3175,10 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->machine_memory.page_types_len = 0;
   topology->machine_memory.page_types = NULL;
 
+  /* Allowed stuff */
+  topology->allowed_cpuset = NULL;
+  topology->allowed_nodeset = NULL;
+
   /* NULLify other special levels */
   memset(&topology->slevels, 0, sizeof(topology->slevels));
   /* assert the indexes of special levels */
@@ -3226,9 +3230,6 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->is_thissystem = 1;
   topology->pid = 0;
   topology->userdata = NULL;
-
-  topology->allowed_cpuset = NULL;
-  topology->allowed_nodeset = NULL;
 
   topology->adopted_shmem_addr = NULL;
   topology->adopted_shmem_length = 0;
