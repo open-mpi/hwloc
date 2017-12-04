@@ -17,6 +17,7 @@ sysfs_outputs = \
 		4em64t-2c2t-ignore-reorder.output \
 		4ia64-4s.output \
 		4ppc-4c.output \
+		4fake-4gr1nu1pu.output \
 		256ppc-8n8s4t.output \
 		256ppc-8n8s4t-nocache.output \
 		256ppc-8n8s4t-nosys.output \
@@ -76,6 +77,7 @@ sysfs_tarballs = \
 		4em64t-2c2t-ignore-reorder.tar.bz2 \
 		4ia64-4s.tar.bz2 \
 		4ppc-4c.tar.bz2 \
+		4fake-4gr1nu1pu.tar.bz2 \
 		256ppc-8n8s4t.tar.bz2 \
 		256ppc-8n8s4t-nocache.source \
 		256ppc-8n8s4t-nosys.source \
