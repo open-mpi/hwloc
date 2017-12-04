@@ -1279,6 +1279,38 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
   }
 }
 
+/* returns the result of merge, or NULL if not merged */
+static __hwloc_inline hwloc_obj_t
+hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
+{
+  if (new->type == HWLOC_OBJ_GROUP) {
+    /* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible (asserted in topology_check()). */
+
+    /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not,
+     * while some callers need to know (at least hwloc_topology_insert_group()).
+     */
+
+    /* If merging two groups, keep the smallest kind.
+     * Replace the existing Group with the new Group contents
+     * and let the caller free the new Group.
+     */
+    if (old->type == HWLOC_OBJ_GROUP
+	&& new->attr->group.kind < old->attr->group.kind)
+      hwloc_replace_linked_object(old, new);
+
+    return old;
+
+  } else if (old->type == HWLOC_OBJ_GROUP) {
+    /* Replace the Group with the new object contents
+     * and let the caller free the new object
+     */
+    hwloc_replace_linked_object(old, new);
+    return old;
+  }
+
+  return NULL;
+}
+
 /* Try to insert OBJ in CUR, recurse if needed.
  * Returns the object if it was inserted,
  * the remaining object it was merged,
@@ -1308,35 +1340,11 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     int setres = res;
 
     if (res == HWLOC_OBJ_EQUAL) {
-      if (obj->type == HWLOC_OBJ_GROUP) {
-	/* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible (asserted in topology_check()). */
-
-        /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not,
-	 * while some callers need to know (at least hwloc_topology_insert_group()).
-	 */
-
-	/* If merging two groups, keep the smallest kind.
-	 * Replace the existing Group with the new Group contents
-	 * and let the caller free the new Group.
-	 */
-	if (child->type == HWLOC_OBJ_GROUP
-	    && obj->attr->group.kind < child->attr->group.kind)
-	  hwloc_replace_linked_object(child, obj);
-
-	return child;
-
-      } else if (child->type == HWLOC_OBJ_GROUP) {
-
-	/* Replace the Group with the new object contents
-	 * and let the caller free the new object
-	 */
-	hwloc_replace_linked_object(child, obj);
-	return child;
-
-      } else {
-	/* otherwise compare actual types to decide of the inclusion */
-	res = hwloc_type_cmp(obj, child);
-      }
+      hwloc_obj_t merged = hwloc__insert_try_merge_group(child, obj);
+      if (merged)
+	return merged;
+      /* otherwise compare actual types to decide of the inclusion */
+      res = hwloc_type_cmp(obj, child);
     }
 
     switch (res) {
