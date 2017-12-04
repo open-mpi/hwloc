@@ -1309,8 +1309,8 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 
     if (res == HWLOC_OBJ_EQUAL) {
       if (obj->type == HWLOC_OBJ_GROUP) {
-	/* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible. */
-	assert(topology->type_filter[HWLOC_OBJ_GROUP] != HWLOC_TYPE_FILTER_KEEP_ALL);
+	/* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible (asserted in topology_check()). */
+
         /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not,
 	 * while some callers need to know (at least hwloc_topology_insert_group()).
 	 */
@@ -4230,6 +4230,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
   HWLOC_BUILD_ASSERT(sizeof(obj_type_order)/sizeof(*obj_type_order) == HWLOC_OBJ_TYPE_MAX);
   HWLOC_BUILD_ASSERT(sizeof(obj_order_type)/sizeof(*obj_order_type) == HWLOC_OBJ_TYPE_MAX);
   HWLOC_BUILD_ASSERT(sizeof(obj_type_priority)/sizeof(*obj_type_priority) == HWLOC_OBJ_TYPE_MAX);
+
+  /* make sure group are not entirely ignored */
+  assert(topology->type_filter[HWLOC_OBJ_GROUP] != HWLOC_TYPE_FILTER_KEEP_ALL);
 
   /* make sure order arrays are coherent */
   for(type=0; type<HWLOC_OBJ_TYPE_MAX; type++)
