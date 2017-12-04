@@ -29,17 +29,25 @@ for Ppu in $Ppus; do
 
   Lcore=$(hwloc-calc -I core pu:$Lpu)
   Pcore=$(hwloc-calc --po -I core pu:$Lpu)
-  echo " Adding core L#${Lcore} = P#${Pcore}..."
-  echo $Pcore > "$outdir/sys/devices/system/cpu/cpu${Ppu}/topology/core_id"
-  hwloc-calc core:$Lcore | sed -e 's/0x//g' -e 's/,,/,00000000,/g' > "$outdir/sys/devices/system/cpu/cpu${Ppu}/topology/thread_siblings"
-# FIXME: thread_siblings_list isn't used so far
+  if test "x$Lcore" != x; then
+    echo " Adding core L#${Lcore} = P#${Pcore}..."
+    echo $Pcore > "$outdir/sys/devices/system/cpu/cpu${Ppu}/topology/core_id"
+    hwloc-calc core:$Lcore | sed -e 's/0x//g' -e 's/,,/,00000000,/g' > "$outdir/sys/devices/system/cpu/cpu${Ppu}/topology/thread_siblings"
+    # FIXME: thread_siblings_list isn't used so far
+  else
+    echo " No core."
+  fi
 
   Lpack=$(hwloc-calc -I pack pu:$Lpu)
   Ppack=$(hwloc-calc --po -I pack pu:$Lpu)
-  echo " Adding package L#${Lpack} = P#${Ppack}..."
-  echo $Ppack > "$outdir/sys/devices/system/cpu/cpu${Ppu}/topology/physical_package_id"
-  hwloc-calc pack:$Lpack | sed -e 's/0x//g' -e 's/,,/,00000000,/g' > "$outdir/sys/devices/system/cpu/cpu${Ppu}/topology/core_siblings"
-# FIXME: core_siblings_list isn't used so far
+  if test "x$Lpack" != x; then
+    echo " Adding package L#${Lpack} = P#${Ppack}..."
+    echo $Ppack > "$outdir/sys/devices/system/cpu/cpu${Ppu}/topology/physical_package_id"
+    hwloc-calc pack:$Lpack | sed -e 's/0x//g' -e 's/,,/,00000000,/g' > "$outdir/sys/devices/system/cpu/cpu${Ppu}/topology/core_siblings"
+    # FIXME: core_siblings_list isn't used so far
+  else
+    echo "No package."
+  fi
 
   if test x$(hwloc-info --ancestor NUMAnode -s pu:$Lpu) != x; then
     Lnuma=$(hwloc-calc -I numanode pu:$Lpu)
