@@ -49,15 +49,19 @@ for Ppu in $Ppus; do
     echo "No package."
   fi
 
-  if test x$(hwloc-info --ancestor NUMAnode -s pu:$Lpu) != x; then
-    Lnuma=$(hwloc-calc -I numanode pu:$Lpu)
-    Pnuma=$(hwloc-calc --po -I numanode pu:$Lpu)
-    echo " Adding NUMAnode L#${Lnuma} = P#${Pnuma}..."
-    mkdir -p "$outdir/sys/devices/system/node/node${Pnuma}"
-    hwloc-calc numanode:$Lnuma | sed -e 's/0x//g' -e 's/,,/,00000000,/g' > "$outdir/sys/devices/system/node/node${Pnuma}/cpumap"
-    bytes=$(hwloc-info numanode:$Lnuma | sed -rn -e 's/^ local memory = //p')
-    echo "Node $Pnuma MemTotal:       "$((bytes/1024))" kB" > "$outdir/sys/devices/system/node/node${Pnuma}/meminfo"
+  Lnumas=$(hwloc-calc -I numanode pu:$Lpu --sep " ")
+  if test "x$Lnumas" != x; then
+    # 2.0 with always NUMA node but possibly multiple of them
+    for Lnuma in $Lnumas; do
+      Pnuma=$(hwloc-calc --po -I numanode numa:$Lnuma)
+      echo " Adding NUMAnode L#${Lnuma} = P#${Pnuma}..."
+      mkdir -p "$outdir/sys/devices/system/node/node${Pnuma}"
+      hwloc-calc numanode:$Lnuma | sed -e 's/0x//g' -e 's/,,/,00000000,/g' > "$outdir/sys/devices/system/node/node${Pnuma}/cpumap"
+      bytes=$(hwloc-info numanode:$Lnuma | sed -rn -e 's/^ local memory = //p')
+      echo "Node $Pnuma MemTotal:       "$((bytes/1024))" kB" > "$outdir/sys/devices/system/node/node${Pnuma}/meminfo"
+    done
   else
+    # 1.x with single local NUMA node but possibly none
     echo " Adding single NUMAnode L#0 = P#0..."
     mkdir -p "$outdir/sys/devices/system/node/node0"
     hwloc-calc all | sed -e 's/0x//g' -e 's/,,/,00000000,/g' > "$outdir/sys/devices/system/node/node0/cpumap"
