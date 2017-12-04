@@ -1286,6 +1286,10 @@ hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
   if (new->type == HWLOC_OBJ_GROUP) {
     /* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible (asserted in topology_check()). */
 
+    if (old->type == HWLOC_OBJ_PU && new->attr->group.kind == HWLOC_GROUP_KIND_MEMORY)
+      /* Never merge Memory groups with PU, we don't want to attach Memory under PU */
+      return NULL;
+
     /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not,
      * while some callers need to know (at least hwloc_topology_insert_group()).
      */
@@ -1295,12 +1299,17 @@ hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
      * and let the caller free the new Group.
      */
     if (old->type == HWLOC_OBJ_GROUP
-	&& new->attr->group.kind < old->attr->group.kind)
+	&& (new->attr->group.kind < old->attr->group.kind))
       hwloc_replace_linked_object(old, new);
 
     return old;
 
   } else if (old->type == HWLOC_OBJ_GROUP) {
+
+    if (new->type == HWLOC_OBJ_PU && old->attr->group.kind == HWLOC_GROUP_KIND_MEMORY)
+      /* Never merge Memory groups with PU, we don't want to attach Memory under PU */
+      return NULL;
+
     /* Replace the Group with the new object contents
      * and let the caller free the new object
      */
@@ -1469,11 +1478,17 @@ hwloc__find_insert_memory_parent(struct hwloc_topology *topology, hwloc_obj_t ob
     parent = topology->levels[0][0];
 
   } else {
-    /* find the lowest obj covering the cpuset */
+    /* find the highest obj covering the cpuset */
     parent = hwloc__find_obj_covering_memory_cpuset(topology, topology->levels[0][0], obj->cpuset);
     if (!parent) {
       /* fallback to root */
       parent = hwloc_get_root_obj(topology);
+    }
+
+    if (parent->type == HWLOC_OBJ_PU) {
+      /* Never attach to PU, try parent */
+      parent = parent->parent;
+      assert(parent);
     }
 
     /* TODO: if root->cpuset was updated earlier, we would be sure whether the group will remain identical to root */
@@ -2187,12 +2202,19 @@ hwloc_reset_normal_type_depths(hwloc_topology_t topology)
 static int
 hwloc_compare_levels_structure(hwloc_topology_t topology, unsigned i)
 {
+  int checkmemory = (topology->levels[i][0]->type == HWLOC_OBJ_PU);
   unsigned j;
+
   if (topology->level_nbobjects[i-1] != topology->level_nbobjects[i])
     return -1;
-  for(j=0; j<topology->level_nbobjects[i]; j++)
+
+  for(j=0; j<topology->level_nbobjects[i]; j++) {
     if (topology->levels[i-1][j]->arity != 1)
       return -1;
+    if (checkmemory && topology->levels[i-1][j]->memory_arity)
+      /* don't merge PUs if there's memory above */
+      return -1;
+  }
   /* same number of objects with arity 1 above, no problem */
   return 0;
 }
@@ -2207,8 +2229,10 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
   /* start from the bottom since we'll remove intermediate levels */
   for(i=topology->nb_levels-1; i>0; i--) {
     int replacechild = 0, replaceparent = 0;
-    hwloc_obj_type_t type1 = topology->levels[i-1][0]->type;
-    hwloc_obj_type_t type2 = topology->levels[i][0]->type;
+    hwloc_obj_t obj1 = topology->levels[i-1][0];
+    hwloc_obj_t obj2 = topology->levels[i][0];
+    hwloc_obj_type_t type1 = obj1->type;
+    hwloc_obj_type_t type2 = obj2->type;
 
     /* Check whether parents and/or children can be replaced */
     if (topology->type_filter[type1] == HWLOC_TYPE_FILTER_KEEP_STRUCTURE)
@@ -4252,13 +4276,14 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
   assert(!topology->modified);
 
-  /* check that last level is PU */
+  /* check that last level is PU and that it doesn't have memory */
   assert(hwloc_get_depth_type(topology, depth-1) == HWLOC_OBJ_PU);
   assert(hwloc_get_nbobjs_by_depth(topology, depth-1) > 0);
   for(i=0; i<hwloc_get_nbobjs_by_depth(topology, depth-1); i++) {
     obj = hwloc_get_obj_by_depth(topology, depth-1, i);
     assert(obj);
     assert(obj->type == HWLOC_OBJ_PU);
+    assert(!obj->memory_first_child);
   }
   /* check that other levels are not PU */
   for(j=1; j<depth-1; j++)

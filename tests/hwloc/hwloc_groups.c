@@ -18,6 +18,7 @@ int main(void)
   hwloc_obj_t objs[32];
   uint64_t values[32*32];
   int depth;
+  hwloc_obj_type_t type;
   unsigned width;
   unsigned i, j;
   int err;
@@ -28,6 +29,12 @@ int main(void)
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:3 pu:1");
   hwloc_topology_load(topology);
+  /* 3 group at depth 1 */
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP);
+  assert(depth == 1);
+  width = hwloc_get_nbobjs_by_depth(topology, 1);
+  assert(width == 3);
+  /* insert distances and groups */
   for(i=0; i<3; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, i);
   values[0] = 1; values[1] = 4; values[2] = 4;
@@ -37,11 +44,17 @@ int main(void)
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
-  /* 1 group at depth 1 */
+  /* 1 groups at depth 1 and 2 */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP);
-  assert(depth == 1);
-  width = hwloc_get_nbobjs_by_depth(topology, depth);
+  assert(depth == -2);
+  type = hwloc_get_depth_type(topology, 1);
+  assert(type == HWLOC_OBJ_GROUP);
+  width = hwloc_get_nbobjs_by_depth(topology, 1);
   assert(width == 1);
+  type = hwloc_get_depth_type(topology, 2);
+  assert(type == HWLOC_OBJ_GROUP);
+  width = hwloc_get_nbobjs_by_depth(topology, 2);
+  assert(width == 3);
   /* 3 nodes */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   assert(depth == HWLOC_TYPE_DEPTH_NUMANODE);
@@ -51,13 +64,19 @@ int main(void)
   obj = hwloc_get_root_obj(topology);
   assert(obj->arity == 2);
   /* check its children */
-  assert(obj->children[0]->type == HWLOC_OBJ_PU);
+  /* first child is a group with PU+NUMA children */
+  assert(obj->children[0]->type == HWLOC_OBJ_GROUP);
   assert(obj->children[0]->depth == 2);
-  assert(obj->children[0]->arity == 0);
+  assert(obj->children[0]->arity == 1);
+  assert(obj->children[0]->first_child->type == HWLOC_OBJ_PU);
   assert(obj->children[0]->memory_arity == 1);
+  assert(obj->children[0]->memory_first_child->type == HWLOC_OBJ_NUMANODE);
+  /* second child is a group with two group children */
   assert(obj->children[1]->type == HWLOC_OBJ_GROUP);
   assert(obj->children[1]->depth == 1);
   assert(obj->children[1]->arity == 2);
+  assert(obj->children[1]->children[0]->type == HWLOC_OBJ_GROUP);
+  assert(obj->children[1]->children[1]->type == HWLOC_OBJ_GROUP);
   assert(obj->children[1]->memory_arity == 0);
   hwloc_topology_destroy(topology);
 
