@@ -619,13 +619,13 @@ main (int argc, char *argv[])
   loutput.plain_children_order = 0;
   loutput.fontsize = 10;
   loutput.gridsize = 10;
-  for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
     loutput.force_orient[i] = LSTOPO_ORIENT_NONE;
   loutput.force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;
   for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
     loutput.force_orient[i] = LSTOPO_ORIENT_HORIZ;
   loutput.force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
-  for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++) {
+  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
     loutput.show_indexes[i] = 1;
     loutput.show_attrs[i] = 1;
   }
@@ -804,13 +804,13 @@ main (int argc, char *argv[])
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--horiz"))
-	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  loutput.force_orient[i] = LSTOPO_ORIENT_HORIZ;
       else if (!strcmp (argv[0], "--vert"))
-	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  loutput.force_orient[i] = LSTOPO_ORIENT_VERT;
       else if (!strcmp (argv[0], "--rect"))
-	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  loutput.force_orient[i] = LSTOPO_ORIENT_RECT;
       else if (!strncmp (argv[0], "--horiz=", 8)
 	       || !strncmp (argv[0], "--vert=", 7)
@@ -838,7 +838,7 @@ main (int argc, char *argv[])
 	       || !strcmp (argv[0], "--attrs")) {
 	int flag = argv[0][2] != 'n';
 	int *array = argv[0][5-flag*3] == 'a' ? loutput.show_attrs : loutput.show_indexes;
-	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  array[i] = flag;
       }
 

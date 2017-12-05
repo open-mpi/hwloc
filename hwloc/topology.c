@@ -898,7 +898,7 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   assert(!old->machine_memory.page_types_len);
   assert(!old->machine_memory.page_types);
 
-  for(i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++)
+  for(i = HWLOC_OBJ_TYPE_MIN; i < HWLOC_OBJ_TYPE_MAX; i++)
     new->type_depth[i] = old->type_depth[i];
 
   /* duplicate levels and we'll place objects there when duplicating objects */
@@ -3390,7 +3390,7 @@ hwloc__topology_filter_init(struct hwloc_topology *topology)
 {
   hwloc_obj_type_t type;
   /* Only ignore useless cruft by default */
-  for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
+  for(type = HWLOC_OBJ_TYPE_MIN; type < HWLOC_OBJ_TYPE_MAX; type++)
     topology->type_filter[type] = HWLOC_TYPE_FILTER_KEEP_ALL;
   topology->type_filter[HWLOC_OBJ_L1ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_L2ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
@@ -3436,6 +3436,7 @@ hwloc__topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_
 int
 hwloc_topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e filter)
 {
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MIN == 0);
   if ((unsigned) type >= HWLOC_OBJ_TYPE_MAX) {
     errno = EINVAL;
     return -1;
@@ -3455,7 +3456,7 @@ hwloc_topology_set_all_types_filter(struct hwloc_topology *topology, enum hwloc_
     errno = EBUSY;
     return -1;
   }
-  for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
+  for(type = HWLOC_OBJ_TYPE_MIN; type < HWLOC_OBJ_TYPE_MAX; type++)
     hwloc__topology_set_type_filter(topology, type, filter);
   return 0;
 }
@@ -3463,7 +3464,8 @@ hwloc_topology_set_all_types_filter(struct hwloc_topology *topology, enum hwloc_
 int
 hwloc_topology_get_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e *filterp)
 {
-  if (type >= HWLOC_OBJ_TYPE_MAX) {
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MIN == 0);
+  if ((unsigned) type >= HWLOC_OBJ_TYPE_MAX) {
     errno = EINVAL;
     return -1;
   }
@@ -4056,6 +4058,9 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
   assert(!hwloc_bitmap_isset(gp_indexes, obj->gp_index));
   hwloc_bitmap_set(gp_indexes, obj->gp_index);
 
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MIN == 0);
+  assert((unsigned) obj->type < HWLOC_OBJ_TYPE_MAX);
+
   /* check that sets and depth */
   if (hwloc_obj_type_is_special(obj->type)) {
     assert(!obj->cpuset);
@@ -4267,9 +4272,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
   assert(topology->type_filter[HWLOC_OBJ_GROUP] != HWLOC_TYPE_FILTER_KEEP_ALL);
 
   /* make sure order arrays are coherent */
-  for(type=0; type<HWLOC_OBJ_TYPE_MAX; type++)
+  for(type=HWLOC_OBJ_TYPE_MIN; type<HWLOC_OBJ_TYPE_MAX; type++)
     assert(obj_order_type[obj_type_order[type]] == type);
-  for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
+  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
     assert(obj_type_order[obj_order_type[i]] == i);
 
   depth = hwloc_topology_get_depth(topology);

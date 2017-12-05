@@ -502,7 +502,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   }
   data->level[count-1].type = HWLOC_OBJ_PU;
 
-  for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++) {
+  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
     type_count[i] = 0;
   }
   for(i=count-1; i>0; i--) {

@@ -174,6 +174,8 @@ typedef enum {
 			  * That may comprise several machines in SSI systems.
 			  * This object type is currently unused in native backends.
 			  */
+  HWLOC_OBJ_TYPE_MIN =  HWLOC_OBJ_SYSTEM,   /**< \private Sentinel value */
+
   HWLOC_OBJ_MACHINE,	/**< \brief Machine.
 			  * The typical root object type.
 			  * A set of processors and memory with cache
