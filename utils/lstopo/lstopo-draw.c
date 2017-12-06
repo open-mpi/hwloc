@@ -39,7 +39,7 @@ const struct lstopo_color MEMORY_COLOR = { 0xef, 0xdf, 0xde };
 const struct lstopo_color MEMORIES_COLOR = { 0xf2, 0xe8, 0xe8}; /* slightly lighter than MEMORY_COLOR */
 const struct lstopo_color CORE_COLOR = { 0xbe, 0xbe, 0xbe };
 const struct lstopo_color THREAD_COLOR = { 0xff, 0xff, 0xff };
-const struct lstopo_color RUNNING_COLOR = { 0, 0xff, 0 };
+const struct lstopo_color BINDING_COLOR = { 0, 0xff, 0 };
 const struct lstopo_color FORBIDDEN_COLOR = { 0xff, 0, 0 };
 const struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff };
 const struct lstopo_color MACHINE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
@@ -657,8 +657,8 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   case HWLOC_OBJ_PU:
     if (lstopo_pu_forbidden(loutput, obj)) {
       s->bg = FORBIDDEN_COLOR;
-    } else if (lstopo_pu_running(loutput, obj)) {
-      s->bg = RUNNING_COLOR;
+    } else if (lstopo_pu_binding(loutput, obj)) {
+      s->bg = BINDING_COLOR;
     } else {
       s->bg = THREAD_COLOR;
     }
@@ -1218,7 +1218,7 @@ declare_colors(struct lstopo_output *output)
   methods->declare_color(output, &MEMORIES_COLOR);
   methods->declare_color(output, &CORE_COLOR);
   methods->declare_color(output, &THREAD_COLOR);
-  methods->declare_color(output, &RUNNING_COLOR);
+  methods->declare_color(output, &BINDING_COLOR);
   methods->declare_color(output, &FORBIDDEN_COLOR);
   methods->declare_color(output, &CACHE_COLOR);
   methods->declare_color(output, &MACHINE_COLOR);

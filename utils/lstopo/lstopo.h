@@ -164,7 +164,7 @@ static __hwloc_inline int lstopo_pu_forbidden(struct lstopo_output *loutput, hwl
   return !hwloc_bitmap_isset(hwloc_topology_get_allowed_cpuset(topology), l->os_index);
 }
 
-static __hwloc_inline int lstopo_pu_running(struct lstopo_output *loutput, hwloc_obj_t l)
+static __hwloc_inline int lstopo_pu_binding(struct lstopo_output *loutput, hwloc_obj_t l)
 {
   hwloc_topology_t topology = loutput->topology;
   hwloc_bitmap_t bind = hwloc_bitmap_alloc();

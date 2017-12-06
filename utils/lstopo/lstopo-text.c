@@ -113,12 +113,12 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     free(cpusetstr);
   }
 
-  /* annotate if the PU is forbidden/running */
+  /* annotate if the PU is forbidden/binding */
   if (l->type == HWLOC_OBJ_PU && verbose_mode >= 2) {
     if (lstopo_pu_forbidden(loutput, l))
       fprintf(output, " (forbidden)");
-    else if (lstopo_pu_running(loutput, l))
-      fprintf(output, " (running)");
+    else if (lstopo_pu_binding(loutput, l))
+      fprintf(output, " (binding)");
   }
 }
 
