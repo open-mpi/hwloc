@@ -1551,7 +1551,7 @@ Many of them will therefore be missing on some OS.
 <dd>The operating system name, release, version, the hostname and the
 architecture name, as reported by the Unix <tt>uname</tt> command.
 </dd>
-<dt>Backend (Machine object or topology root object)</dt>
+<dt>Backend (topology root, Machine object)</dt>
 <dd>The name of the hwloc backend/component that filled the topology.
 If several components were combined, multiple Backend keys may exist,
 with different values, for instance <tt>x86</tt>, <tt>Linux</tt>
@@ -1561,7 +1561,7 @@ and <tt>pci</tt>.
 <dd>The name the Linux control group where the calling process is
 placed.
 </dd>
-<dt>SyntheticDescription (topology root object)</dt>
+<dt>SyntheticDescription (topology root, Machine object)</dt>
 <dd>The description string that was given to hwloc to build this
 synthetic topology.
 </dd>
@@ -1594,7 +1594,7 @@ Currently only available on Linux.
 Usually added to Package objects, but can be in Machine instead if
 hwloc failed to discover any package.
 </dd>
-<dt>MemoryMode, ClusterMode (topology root object)</dt>
+<dt>MemoryMode, ClusterMode (topology root, Machine object)</dt>
 <dd>
 Intel Knights Landing configuration modes, only available if
 hwloc-dump-hwdata was used (see \ref faq_knl_dump).
@@ -1658,8 +1658,8 @@ and SectorSize (in bytes) of a Block OS device.
  multiple MICs.
  When running hwloc on the host, each hwloc OS device object that
  corresponds to a Xeon Phi gets such an attribute.
- When running hwloc inside a Xeon Phi coprocessor, the root object of the topology
- gets this attribute.
+ When running hwloc inside a Xeon Phi coprocessor, the root of the topology
+ (Machine object) gets this attribute.
 </dd>
 <dt>MICFamily, MICSKU, MICActiveCores, MICMemorySize</dt>
 <dd>The family, SKU (model),
@@ -1868,8 +1868,8 @@ NUMA node is attached below each group.
 These groups are merged back into the parent when possible
 (typically when a single NUMA node is requested below each parent).
 
-The root object does not appear in the synthetic description string.
-A Machine object is used by default.
+The root object does not appear in the synthetic description string
+since it is always a Machine object.
 Therefore the Machine type is disallowed in the description as well.
 
 A NUMA level (with a single NUMA node) is automatically added if needed.

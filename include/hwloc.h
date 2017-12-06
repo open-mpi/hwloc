@@ -395,7 +395,7 @@ struct hwloc_obj {
   struct hwloc_obj *prev_cousin;	/**< \brief Previous object of same type and depth */
 
   /* children of the same parent are siblings, even if they may have different type and depth */
-  struct hwloc_obj *parent;		/**< \brief Parent, \c NULL if root (system object) */
+  struct hwloc_obj *parent;		/**< \brief Parent, \c NULL if root (Machine object) */
   unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array. Or the index in parent's Memory, I/O or Misc children list. */
   struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent (inside the same list of children). */
   struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent (inside the same list of children). */
@@ -786,8 +786,7 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type) __hw
 
 /** \brief Returns the top-object of the topology-tree.
  *
- * Its type is typically ::HWLOC_OBJ_MACHINE but it could be different
- * for complex topologies.
+ * Its type is ::HWLOC_OBJ_MACHINE.
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_root_obj (hwloc_topology_t topology) __hwloc_attribute_pure;
