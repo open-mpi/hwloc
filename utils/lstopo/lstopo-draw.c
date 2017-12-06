@@ -632,7 +632,13 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     break;
 
   case HWLOC_OBJ_NUMANODE:
-    s->bg = MEMORY_COLOR;
+    if (lstopo_numa_forbidden(loutput, obj)) {
+      s->bg = FORBIDDEN_COLOR;
+    } else if (lstopo_numa_binding(loutput, obj)) {
+      s->bg = BINDING_COLOR;
+    } else {
+      s->bg = MEMORY_COLOR;
+    }
     break;
 
   case HWLOC_OBJ_PACKAGE:

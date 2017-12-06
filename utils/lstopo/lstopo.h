@@ -178,6 +178,27 @@ static __hwloc_inline int lstopo_pu_binding(struct lstopo_output *loutput, hwloc
   return res;
 }
 
+static __hwloc_inline int lstopo_numa_forbidden(struct lstopo_output *loutput, hwloc_obj_t l)
+{
+  hwloc_topology_t topology = loutput->topology;
+  return !hwloc_bitmap_isset(hwloc_topology_get_allowed_nodeset(topology), l->os_index);
+}
+
+static __hwloc_inline int lstopo_numa_binding(struct lstopo_output *loutput, hwloc_obj_t l)
+{
+  hwloc_topology_t topology = loutput->topology;
+  hwloc_bitmap_t bind = hwloc_bitmap_alloc();
+  hwloc_membind_policy_t policy;
+  int res;
+  if (loutput->pid_number != -1 && loutput->pid_number != 0)
+    hwloc_get_proc_membind(topology, loutput->pid, bind, &policy, HWLOC_MEMBIND_BYNODESET);
+  else if (loutput->pid_number == 0)
+    hwloc_get_membind(topology, bind, &policy, HWLOC_MEMBIND_BYNODESET);
+  res = bind && hwloc_bitmap_isset(bind, l->os_index);
+  hwloc_bitmap_free(bind);
+  return res;
+}
+
 static __hwloc_inline int lstopo_busid_snprintf(char *text, size_t textlen, hwloc_obj_t firstobj, int collapse, unsigned needdomain)
 {
   hwloc_obj_t lastobj;
