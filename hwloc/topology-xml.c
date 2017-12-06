@@ -764,6 +764,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   int ignored = 0;
   int childrengotignored = 0;
   int attribute_less_cache = 0;
+  int numa_was_root = 0;
 
   /* set parent now since it's used during import below or in subfunctions */
   obj->parent = parent;
@@ -879,6 +880,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	machine->complete_nodeset = hwloc_bitmap_dup(obj->complete_nodeset);
 	topology->levels[0][0] = machine;
 	parent = machine;
+	numa_was_root = 1;
 
       } else if (!hwloc_bitmap_isequal(obj->complete_cpuset, parent->complete_cpuset)) {
 	/* this NUMA node added some hierarchy, we need to attach it under an intermediate group */
@@ -1064,6 +1066,14 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       goto error;
 
     state->global->close_child(&childstate);
+  }
+
+  if (numa_was_root) {
+    /* duplicate NUMA infos to root, most of them are likely root-specific */
+    unsigned i;
+    for(i=0; i<obj->infos_count; i++)
+      hwloc_obj_add_info(parent, obj->infos[i].name, obj->infos[i].value);
+    /* TODO some infos are root-only (hwlocVersion, ProcessName, etc), remove them from obj? */
   }
 
   if (ignored) {

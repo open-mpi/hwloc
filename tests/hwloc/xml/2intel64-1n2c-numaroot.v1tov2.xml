@@ -2,6 +2,8 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="2.0">
   <object type="Machine" cpuset="0x00000003" complete_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" gp_index="2">
+    <info name="hwlocVersion" value="v1.11-20170902.0906.git16cb39b"/>
+    <info name="ProcessName" value="lstopo-no-graphics"/>
     <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="1" local_memory="2147074048">
       <page_type size="4096" count="0"/>
       <info name="hwlocVersion" value="v1.11-20170902.0906.git16cb39b"/>
