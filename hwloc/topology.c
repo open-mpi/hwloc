@@ -2193,8 +2193,12 @@ static void
 hwloc_reset_normal_type_depths(hwloc_topology_t topology)
 {
   unsigned i;
-  for (i=HWLOC_OBJ_SYSTEM; i<HWLOC_OBJ_MISC; i++)
+  for (i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_MISC; i++)
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_NUMANODE < HWLOC_OBJ_MISC);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE > HWLOC_OBJ_MISC);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE > HWLOC_OBJ_MISC);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_OS_DEVICE > HWLOC_OBJ_MISC);
   topology->type_depth[HWLOC_OBJ_NUMANODE] = HWLOC_TYPE_DEPTH_NUMANODE; /* cleared in the loop above */
 }
 
