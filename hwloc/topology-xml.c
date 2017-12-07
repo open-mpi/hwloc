@@ -2144,23 +2144,20 @@ hwloc__xml_v1export_object_with_memory(hwloc__xml_export_state_t parentstate, hw
   struct hwloc__xml_export_state_s gstate, mstate, ostate, *state = parentstate;
   hwloc_obj_t child;
 
-  if (obj->parent->arity > 1 && obj->memory_arity > 1) {
-    hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
+  if (obj->parent->arity > 1 && obj->memory_arity > 1 && parentstate->global->v1_memory_group) {
     /* child has sibling, we must add a Group around those memory children */
-    if (group) {
-      parentstate->new_child(parentstate, &gstate, "object");
-      group->cpuset = obj->cpuset;
-      group->complete_cpuset = obj->complete_cpuset;
-      group->nodeset = obj->nodeset;
-      group->complete_nodeset = obj->complete_nodeset;
-      hwloc__xml_export_object_contents (&gstate, topology, group, flags);
-      group->cpuset = NULL;
-      group->complete_cpuset = NULL;
-      group->nodeset = NULL;
-      group->complete_nodeset = NULL;
-      hwloc_free_unlinked_object(group);
-      state = &gstate;
-    }
+    hwloc_obj_t group = parentstate->global->v1_memory_group;
+    parentstate->new_child(parentstate, &gstate, "object");
+    group->cpuset = obj->cpuset;
+    group->complete_cpuset = obj->complete_cpuset;
+    group->nodeset = obj->nodeset;
+    group->complete_nodeset = obj->complete_nodeset;
+    hwloc__xml_export_object_contents (&gstate, topology, group, flags);
+    group->cpuset = NULL;
+    group->complete_cpuset = NULL;
+    group->nodeset = NULL;
+    group->complete_nodeset = NULL;
+    state = &gstate;
   }
 
   /* export first memory child */
@@ -2359,6 +2356,11 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
 
   hwloc_localeswitch_init();
 
+  edata.v1_memory_group = NULL;
+  if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1)
+    /* temporary group to be used during v1 export of memory children */
+    edata.v1_memory_group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
+
   force_nolibxml = hwloc_nolibxml_export();
 retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
@@ -2370,6 +2372,9 @@ retry:
       goto retry;
     }
   }
+
+  if (edata.v1_memory_group)
+    hwloc_free_unlinked_object(edata.v1_memory_group);
 
   hwloc_localeswitch_fini();
   return ret;
@@ -2399,6 +2404,11 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 
   hwloc_localeswitch_init();
 
+  edata.v1_memory_group = NULL;
+  if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1)
+    /* temporary group to be used during v1 export of memory children */
+    edata.v1_memory_group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
+
   force_nolibxml = hwloc_nolibxml_export();
 retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
@@ -2410,6 +2420,9 @@ retry:
       goto retry;
     }
   }
+
+  if (edata.v1_memory_group)
+    hwloc_free_unlinked_object(edata.v1_memory_group);
 
   hwloc_localeswitch_fini();
   return ret;
