@@ -2105,7 +2105,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 }
 
 static void
-hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
+hwloc__xml_v2export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
   struct hwloc__xml_export_state_s state;
   hwloc_obj_t child;
@@ -2114,41 +2114,54 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 
   hwloc__xml_export_object_contents(&state, topology, obj, flags);
 
-  if (v1export) {
-    /* v1.x requires NUMA nodes to move back to normal children */
-    if (obj->type == HWLOC_OBJ_NUMANODE && obj->sibling_rank == 0) {
-      /* export parent below first NUMA node */
-      hwloc__xml_export_object (&state, topology, obj->parent, flags);
-    } else {
-      for_each_child(child, obj) {
-	if (child->memory_arity) {
-	  /* child has memory, export memory first, and then normal children below the first memory */
-	  hwloc_obj_t node;
-	  if (child->memory_arity > 1 && hwloc__xml_verbose())
-	    /* TODO export non-first NUMA nodes with empty cpuset (like KNL on v1.x) */
-	    fprintf(stderr, "cannot export more than one local NUMA nodes to v1.x\n");
-	  node = child->memory_first_child;
-	  assert(node->type == HWLOC_OBJ_NUMANODE);
-	  hwloc__xml_export_object (&state, topology, node, flags);
-	} else {
-	  /* no memory, export as usual */
-	  hwloc__xml_export_object (&state, topology, child, flags);
-	}
+  for_each_memory_child(child, obj)
+    hwloc__xml_v2export_object (&state, topology, child, flags);
+  for_each_child(child, obj)
+    hwloc__xml_v2export_object (&state, topology, child, flags);
+  for_each_io_child(child, obj)
+    hwloc__xml_v2export_object (&state, topology, child, flags);
+  for_each_misc_child(child, obj)
+    hwloc__xml_v2export_object (&state, topology, child, flags);
+
+  state.end_object(&state, "object");
+}
+
+static void
+hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
+{
+  struct hwloc__xml_export_state_s state;
+  hwloc_obj_t child;
+
+  parentstate->new_child(parentstate, &state, "object");
+
+  hwloc__xml_export_object_contents(&state, topology, obj, flags);
+
+  /* v1.x requires NUMA nodes to move back to normal children */
+  if (obj->type == HWLOC_OBJ_NUMANODE && obj->sibling_rank == 0) {
+    /* export parent below first NUMA node */
+    hwloc__xml_v1export_object (&state, topology, obj->parent, flags);
+  } else {
+    for_each_child(child, obj) {
+      if (child->memory_arity) {
+	/* child has memory, export memory first, and then normal children below the first memory */
+	hwloc_obj_t node;
+	if (child->memory_arity > 1 && hwloc__xml_verbose())
+	  /* TODO export non-first NUMA nodes with empty cpuset (like KNL on v1.x) */
+	  fprintf(stderr, "cannot export more than one local NUMA nodes to v1.x\n");
+	node = child->memory_first_child;
+	assert(node->type == HWLOC_OBJ_NUMANODE);
+	hwloc__xml_v1export_object (&state, topology, node, flags);
+      } else {
+	/* no memory, export as usual */
+	hwloc__xml_v1export_object (&state, topology, child, flags);
       }
     }
-
-  } else {
-    /* v2.x export, memory and normal children as usual */
-    for_each_memory_child(child, obj)
-      hwloc__xml_export_object (&state, topology, child, flags);
-    for_each_child(child, obj)
-      hwloc__xml_export_object (&state, topology, child, flags);
   }
 
   for_each_io_child(child, obj)
-    hwloc__xml_export_object (&state, topology, child, flags);
+    hwloc__xml_v1export_object (&state, topology, child, flags);
   for_each_misc_child(child, obj)
-    hwloc__xml_export_object (&state, topology, child, flags);
+    hwloc__xml_v1export_object (&state, topology, child, flags);
 
   state.end_object(&state, "object");
 }
@@ -2203,9 +2216,12 @@ hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topol
 void
 hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology, unsigned long flags)
 {
-  hwloc__xml_export_object (state, topology, hwloc_get_root_obj(topology), flags);
-  if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1))
+  if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
+    hwloc__xml_v1export_object (state, topology, hwloc_get_root_obj(topology), flags);
+  } else {
+    hwloc__xml_v2export_object (state, topology, hwloc_get_root_obj(topology), flags);
     hwloc__xml_v2export_distances (state, topology);
+  }
 }
 
 void
