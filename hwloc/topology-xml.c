@@ -1847,7 +1847,7 @@ hwloc__xml_export_safestrdup(const char *old)
 static void
 hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
-  char *cpuset = NULL;
+  char *setstring = NULL, *setstring2 = NULL;
   char tmp[255];
   int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
   unsigned i,j;
@@ -1866,46 +1866,43 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 
   if (obj->cpuset) {
     /* TODO if exporting v1 non-first NUMA, we should clear its cpuset */
-    hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
-    state->new_prop(state, "cpuset", cpuset);
-    free(cpuset);
+    hwloc_bitmap_asprintf(&setstring, obj->cpuset);
+    state->new_prop(state, "cpuset", setstring);
 
-    hwloc_bitmap_asprintf(&cpuset, obj->complete_cpuset);
-    state->new_prop(state, "complete_cpuset", cpuset);
-    free(cpuset);
+    hwloc_bitmap_asprintf(&setstring2, obj->complete_cpuset);
+    state->new_prop(state, "complete_cpuset", setstring2);
+    free(setstring2);
 
-    if (v1export) {
-      hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
-      state->new_prop(state, "online_cpuset", cpuset);
-      free(cpuset);
-    }
+    if (v1export)
+      state->new_prop(state, "online_cpuset", setstring);
+    free(setstring);
 
     if (v1export || !obj->parent) {
       hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
       hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, topology->allowed_cpuset);
-      hwloc_bitmap_asprintf(&cpuset, allowed_cpuset);
-      state->new_prop(state, "allowed_cpuset", cpuset);
-      free(cpuset);
+      hwloc_bitmap_asprintf(&setstring, allowed_cpuset);
+      state->new_prop(state, "allowed_cpuset", setstring);
+      free(setstring);
       hwloc_bitmap_free(allowed_cpuset);
     }
 
     /* TODO if exporting v1, we should clear second local NUMA bits from nodeset,
      * but the importer should clear them anyway.
      */
-    hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
-    state->new_prop(state, "nodeset", cpuset);
-    free(cpuset);
+    hwloc_bitmap_asprintf(&setstring, obj->nodeset);
+    state->new_prop(state, "nodeset", setstring);
+    free(setstring);
 
-    hwloc_bitmap_asprintf(&cpuset, obj->complete_nodeset);
-    state->new_prop(state, "complete_nodeset", cpuset);
-    free(cpuset);
+    hwloc_bitmap_asprintf(&setstring, obj->complete_nodeset);
+    state->new_prop(state, "complete_nodeset", setstring);
+    free(setstring);
 
     if (v1export || !obj->parent) {
       hwloc_bitmap_t allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
       hwloc_bitmap_and(allowed_nodeset, allowed_nodeset, topology->allowed_nodeset);
-      hwloc_bitmap_asprintf(&cpuset, allowed_nodeset);
-      state->new_prop(state, "allowed_nodeset", cpuset);
-      free(cpuset);
+      hwloc_bitmap_asprintf(&setstring, allowed_nodeset);
+      state->new_prop(state, "allowed_nodeset", setstring);
+      free(setstring);
       hwloc_bitmap_free(allowed_nodeset);
     }
   }
