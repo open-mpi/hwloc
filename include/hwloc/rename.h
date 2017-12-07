@@ -599,6 +599,7 @@ extern "C" {
 #define hwloc_xml_backend_data_s HWLOC_NAME(xml_backend_data_s)
 #define hwloc__xml_export_state_s HWLOC_NAME(_xml_export_state_s)
 #define hwloc__xml_export_state_t HWLOC_NAME(_xml_export_state_t)
+#define hwloc__xml_export_data_s HWLOC_NAME(_xml_export_data_s)
 #define hwloc__xml_export_topology HWLOC_NAME(_xml_export_topology)
 #define hwloc__xml_export_diff HWLOC_NAME(_xml_export_diff)
 
