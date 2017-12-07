@@ -2127,6 +2127,42 @@ hwloc__xml_v2export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
 }
 
 static void
+hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags);
+
+static void
+hwloc__xml_v1export_object_with_memory(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
+{
+  struct hwloc__xml_export_state_s mstate, ostate;
+  hwloc_obj_t child;
+
+  if (obj->memory_arity > 1 && hwloc__xml_verbose())
+    /* TODO export non-first NUMA nodes with empty cpuset (like KNL on v1.x) */
+    fprintf(stderr, "cannot export more than one local NUMA nodes to v1.x\n");
+
+  /* export first memory child */
+  child = obj->memory_first_child;
+  assert(child->type == HWLOC_OBJ_NUMANODE);
+  parentstate->new_child(parentstate, &mstate, "object");
+  hwloc__xml_export_object_contents (&mstate, topology, child, flags);
+
+  /* then the actual object */
+  mstate.new_child(&mstate, &ostate, "object");
+  hwloc__xml_export_object_contents (&ostate, topology, obj, flags);
+
+  /* then its normal/io/misc children */
+  for_each_child(child, obj)
+    hwloc__xml_v1export_object (&ostate, topology, child, flags);
+  for_each_io_child(child, obj)
+    hwloc__xml_v1export_object (&ostate, topology, child, flags);
+  for_each_misc_child(child, obj)
+    hwloc__xml_v1export_object (&ostate, topology, child, flags);
+
+  /* close object and first memory child */
+  ostate.end_object(&ostate, "object");
+  mstate.end_object(&mstate, "object");
+}
+
+static void
 hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
   struct hwloc__xml_export_state_s state;
@@ -2136,25 +2172,12 @@ hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
 
   hwloc__xml_export_object_contents(&state, topology, obj, flags);
 
-  /* v1.x requires NUMA nodes to move back to normal children */
-  if (obj->type == HWLOC_OBJ_NUMANODE && obj->sibling_rank == 0) {
-    /* export parent below first NUMA node */
-    hwloc__xml_v1export_object (&state, topology, obj->parent, flags);
-  } else {
-    for_each_child(child, obj) {
-      if (child->memory_arity) {
-	/* child has memory, export memory first, and then normal children below the first memory */
-	hwloc_obj_t node;
-	if (child->memory_arity > 1 && hwloc__xml_verbose())
-	  /* TODO export non-first NUMA nodes with empty cpuset (like KNL on v1.x) */
-	  fprintf(stderr, "cannot export more than one local NUMA nodes to v1.x\n");
-	node = child->memory_first_child;
-	assert(node->type == HWLOC_OBJ_NUMANODE);
-	hwloc__xml_v1export_object (&state, topology, node, flags);
-      } else {
-	/* no memory, export as usual */
-	hwloc__xml_v1export_object (&state, topology, child, flags);
-      }
+  for_each_child(child, obj) {
+    if (!child->memory_arity) {
+      /* no memory child, just export normally */
+      hwloc__xml_v1export_object (&state, topology, child, flags);
+    } else {
+      hwloc__xml_v1export_object_with_memory(&state, topology, child, flags);
     }
   }
 
