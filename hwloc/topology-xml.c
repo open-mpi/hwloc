@@ -522,7 +522,7 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, s
 }
 
 static int
-hwloc__xml_import_v1distances(struct hwloc_xml_backend_data_s *data,
+hwloc__xml_v1import_distances(struct hwloc_xml_backend_data_s *data,
 			      hwloc_obj_t obj,
 			      hwloc__xml_import_state_t state)
 {
@@ -1052,7 +1052,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     } else if (!strcmp(tag, "info")) {
       ret = hwloc__xml_import_info(topology, obj, &childstate);
     } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
-      ret = hwloc__xml_import_v1distances(data, obj, &childstate);
+      ret = hwloc__xml_v1import_distances(data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
       ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else {
@@ -1123,7 +1123,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 }
 
 static int
-hwloc__xml_import_v2distances(hwloc_topology_t topology,
+hwloc__xml_v2import_distances(hwloc_topology_t topology,
 			      hwloc__xml_import_state_t state)
 {
   hwloc_obj_type_t type = HWLOC_OBJ_TYPE_NONE;
@@ -1594,7 +1594,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
 	break;
       if (strcmp(tag, "distances2"))
 	goto failed;
-      ret = hwloc__xml_import_v2distances(topology, &childstate);
+      ret = hwloc__xml_v2import_distances(topology, &childstate);
       if (ret < 0)
 	goto failed;
       state.global->close_child(&childstate);
@@ -2171,7 +2171,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 } while (0)
 
 static void
-hwloc__xml_export_v2distances(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology)
+hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology)
 {
   struct hwloc_internal_distances_s *dist;
   for(dist = topology->first_dist; dist; dist = dist->next) {
@@ -2201,7 +2201,7 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
 {
   hwloc__xml_export_object (state, topology, hwloc_get_root_obj(topology), flags);
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1))
-    hwloc__xml_export_v2distances (state, topology);
+    hwloc__xml_v2export_distances (state, topology);
 }
 
 void
