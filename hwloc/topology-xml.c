@@ -1865,29 +1865,38 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   }
 
   if (obj->cpuset) {
-    /* TODO if exporting v1 non-first NUMA, we should clear its cpuset */
-    hwloc_bitmap_asprintf(&setstring, obj->cpuset);
-    state->new_prop(state, "cpuset", setstring);
+    if (v1export && obj->type == HWLOC_OBJ_NUMANODE && obj->sibling_rank > 0) {
+      /* v1 non-first NUMA nodes have empty cpusets */
+      state->new_prop(state, "cpuset", "0x0");
+      state->new_prop(state, "online_cpuset", "0x0");
+      state->new_prop(state, "complete_cpuset", "0x0");
+      state->new_prop(state, "allowed_cpuset", "0x0");
 
-    hwloc_bitmap_asprintf(&setstring2, obj->complete_cpuset);
-    state->new_prop(state, "complete_cpuset", setstring2);
-    free(setstring2);
+    } else {
+      /* normal case */
+      hwloc_bitmap_asprintf(&setstring, obj->cpuset);
+      state->new_prop(state, "cpuset", setstring);
 
-    if (v1export)
-      state->new_prop(state, "online_cpuset", setstring);
-    free(setstring);
+      hwloc_bitmap_asprintf(&setstring2, obj->complete_cpuset);
+      state->new_prop(state, "complete_cpuset", setstring2);
+      free(setstring2);
 
-    if (v1export || !obj->parent) {
-      hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
-      hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, topology->allowed_cpuset);
-      hwloc_bitmap_asprintf(&setstring, allowed_cpuset);
-      state->new_prop(state, "allowed_cpuset", setstring);
+      if (v1export)
+	state->new_prop(state, "online_cpuset", setstring);
       free(setstring);
-      hwloc_bitmap_free(allowed_cpuset);
+
+      if (v1export || !obj->parent) {
+	hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
+	hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, topology->allowed_cpuset);
+	hwloc_bitmap_asprintf(&setstring, allowed_cpuset);
+	state->new_prop(state, "allowed_cpuset", setstring);
+	free(setstring);
+	hwloc_bitmap_free(allowed_cpuset);
+      }
     }
 
-    /* TODO if exporting v1, we should clear second local NUMA bits from nodeset,
-     * but the importer should clear them anyway.
+    /* If exporting v1, we should clear second local NUMA bits from nodeset,
+     * but the importer will clear them anyway.
      */
     hwloc_bitmap_asprintf(&setstring, obj->nodeset);
     state->new_prop(state, "nodeset", setstring);
@@ -2132,17 +2141,32 @@ hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
 static void
 hwloc__xml_v1export_object_with_memory(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
-  struct hwloc__xml_export_state_s mstate, ostate;
+  struct hwloc__xml_export_state_s gstate, mstate, ostate, *state = parentstate;
   hwloc_obj_t child;
 
-  if (obj->memory_arity > 1 && hwloc__xml_verbose())
-    /* TODO export non-first NUMA nodes with empty cpuset (like KNL on v1.x) */
-    fprintf(stderr, "cannot export more than one local NUMA nodes to v1.x\n");
+  if (obj->parent->arity > 1 && obj->memory_arity > 1) {
+    hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
+    /* child has sibling, we must add a Group around those memory children */
+    if (group) {
+      parentstate->new_child(parentstate, &gstate, "object");
+      group->cpuset = obj->cpuset;
+      group->complete_cpuset = obj->complete_cpuset;
+      group->nodeset = obj->nodeset;
+      group->complete_nodeset = obj->complete_nodeset;
+      hwloc__xml_export_object_contents (&gstate, topology, group, flags);
+      group->cpuset = NULL;
+      group->complete_cpuset = NULL;
+      group->nodeset = NULL;
+      group->complete_nodeset = NULL;
+      hwloc_free_unlinked_object(group);
+      state = &gstate;
+    }
+  }
 
   /* export first memory child */
   child = obj->memory_first_child;
   assert(child->type == HWLOC_OBJ_NUMANODE);
-  parentstate->new_child(parentstate, &mstate, "object");
+  state->new_child(state, &mstate, "object");
   hwloc__xml_export_object_contents (&mstate, topology, child, flags);
 
   /* then the actual object */
@@ -2160,6 +2184,16 @@ hwloc__xml_v1export_object_with_memory(hwloc__xml_export_state_t parentstate, hw
   /* close object and first memory child */
   ostate.end_object(&ostate, "object");
   mstate.end_object(&mstate, "object");
+
+  /* now other memory children */
+  for_each_memory_child(child, obj)
+    if (child->sibling_rank > 0)
+      hwloc__xml_v1export_object (state, topology, child, flags);
+
+  if (state == &gstate) {
+    /* close group if any */
+    gstate.end_object(&gstate, "object");
+  }
 }
 
 static void
