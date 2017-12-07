@@ -1845,42 +1845,38 @@ hwloc__xml_export_safestrdup(const char *old)
 }
 
 static void
-hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
+hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
-  struct hwloc__xml_export_state_s state;
-  hwloc_obj_t child;
   char *cpuset = NULL;
   char tmp[255];
   int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
   unsigned i,j;
 
-  parentstate->new_child(parentstate, &state, "object");
-
   if (v1export && obj->type == HWLOC_OBJ_PACKAGE)
-    state.new_prop(&state, "type", "Socket");
+    state->new_prop(state, "type", "Socket");
   else if (v1export && hwloc_obj_type_is_cache(obj->type))
-    state.new_prop(&state, "type", "Cache");
+    state->new_prop(state, "type", "Cache");
   else
-    state.new_prop(&state, "type", hwloc_type_name(obj->type));
+    state->new_prop(state, "type", hwloc_type_name(obj->type));
 
   if (obj->os_index != HWLOC_UNKNOWN_INDEX) {
     sprintf(tmp, "%u", obj->os_index);
-    state.new_prop(&state, "os_index", tmp);
+    state->new_prop(state, "os_index", tmp);
   }
 
   if (obj->cpuset) {
     /* TODO if exporting v1 non-first NUMA, we should clear its cpuset */
     hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
-    state.new_prop(&state, "cpuset", cpuset);
+    state->new_prop(state, "cpuset", cpuset);
     free(cpuset);
 
     hwloc_bitmap_asprintf(&cpuset, obj->complete_cpuset);
-    state.new_prop(&state, "complete_cpuset", cpuset);
+    state->new_prop(state, "complete_cpuset", cpuset);
     free(cpuset);
 
     if (v1export) {
       hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
-      state.new_prop(&state, "online_cpuset", cpuset);
+      state->new_prop(state, "online_cpuset", cpuset);
       free(cpuset);
     }
 
@@ -1888,7 +1884,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
       hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
       hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, topology->allowed_cpuset);
       hwloc_bitmap_asprintf(&cpuset, allowed_cpuset);
-      state.new_prop(&state, "allowed_cpuset", cpuset);
+      state->new_prop(state, "allowed_cpuset", cpuset);
       free(cpuset);
       hwloc_bitmap_free(allowed_cpuset);
     }
@@ -1897,18 +1893,18 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
      * but the importer should clear them anyway.
      */
     hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
-    state.new_prop(&state, "nodeset", cpuset);
+    state->new_prop(state, "nodeset", cpuset);
     free(cpuset);
 
     hwloc_bitmap_asprintf(&cpuset, obj->complete_nodeset);
-    state.new_prop(&state, "complete_nodeset", cpuset);
+    state->new_prop(state, "complete_nodeset", cpuset);
     free(cpuset);
 
     if (v1export || !obj->parent) {
       hwloc_bitmap_t allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
       hwloc_bitmap_and(allowed_nodeset, allowed_nodeset, topology->allowed_nodeset);
       hwloc_bitmap_asprintf(&cpuset, allowed_nodeset);
-      state.new_prop(&state, "allowed_nodeset", cpuset);
+      state->new_prop(state, "allowed_nodeset", cpuset);
       free(cpuset);
       hwloc_bitmap_free(allowed_nodeset);
     }
@@ -1916,17 +1912,17 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 
   if (!v1export) {
     sprintf(tmp, "%llu", (unsigned long long) obj->gp_index);
-    state.new_prop(&state, "gp_index", tmp);
+    state->new_prop(state, "gp_index", tmp);
   }
 
   if (obj->name) {
     char *name = hwloc__xml_export_safestrdup(obj->name);
-    state.new_prop(&state, "name", name);
+    state->new_prop(state, "name", name);
     free(name);
   }
   if (!v1export && obj->subtype) {
     char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
-    state.new_prop(&state, "subtype", subtype);
+    state->new_prop(state, "subtype", subtype);
     free(subtype);
   }
 
@@ -1934,11 +1930,11 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   case HWLOC_OBJ_NUMANODE:
     if (obj->attr->numanode.local_memory) {
       sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.local_memory);
-      state.new_prop(&state, "local_memory", tmp);
+      state->new_prop(state, "local_memory", tmp);
     }
     for(i=0; i<obj->attr->numanode.page_types_len; i++) {
       struct hwloc__xml_export_state_s childstate;
-      state.new_child(&state, &childstate, "page_type");
+      state->new_child(state, &childstate, "page_type");
       sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.page_types[i].size);
       childstate.new_prop(&childstate, "size", tmp);
       sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.page_types[i].count);
@@ -1955,38 +1951,38 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
     sprintf(tmp, "%llu", (unsigned long long) obj->attr->cache.size);
-    state.new_prop(&state, "cache_size", tmp);
+    state->new_prop(state, "cache_size", tmp);
     sprintf(tmp, "%u", obj->attr->cache.depth);
-    state.new_prop(&state, "depth", tmp);
+    state->new_prop(state, "depth", tmp);
     sprintf(tmp, "%u", (unsigned) obj->attr->cache.linesize);
-    state.new_prop(&state, "cache_linesize", tmp);
+    state->new_prop(state, "cache_linesize", tmp);
     sprintf(tmp, "%d", obj->attr->cache.associativity);
-    state.new_prop(&state, "cache_associativity", tmp);
+    state->new_prop(state, "cache_associativity", tmp);
     sprintf(tmp, "%d", (int) obj->attr->cache.type);
-    state.new_prop(&state, "cache_type", tmp);
+    state->new_prop(state, "cache_type", tmp);
     break;
   case HWLOC_OBJ_GROUP:
     if (v1export) {
       sprintf(tmp, "%u", obj->attr->group.depth);
-      state.new_prop(&state, "depth", tmp);
+      state->new_prop(state, "depth", tmp);
     } else {
       sprintf(tmp, "%u", obj->attr->group.kind);
-      state.new_prop(&state, "kind", tmp);
+      state->new_prop(state, "kind", tmp);
       sprintf(tmp, "%u", obj->attr->group.subkind);
-      state.new_prop(&state, "subkind", tmp);
+      state->new_prop(state, "subkind", tmp);
     }
     break;
   case HWLOC_OBJ_BRIDGE:
     sprintf(tmp, "%d-%d", (int) obj->attr->bridge.upstream_type, (int) obj->attr->bridge.downstream_type);
-    state.new_prop(&state, "bridge_type", tmp);
+    state->new_prop(state, "bridge_type", tmp);
     sprintf(tmp, "%u", obj->attr->bridge.depth);
-    state.new_prop(&state, "depth", tmp);
+    state->new_prop(state, "depth", tmp);
     if (obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI) {
       sprintf(tmp, "%04x:[%02x-%02x]",
 	      (unsigned) obj->attr->bridge.downstream.pci.domain,
 	      (unsigned) obj->attr->bridge.downstream.pci.secondary_bus,
 	      (unsigned) obj->attr->bridge.downstream.pci.subordinate_bus);
-      state.new_prop(&state, "bridge_pci", tmp);
+      state->new_prop(state, "bridge_pci", tmp);
     }
     if (obj->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI)
       break;
@@ -1997,19 +1993,19 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 	    (unsigned) obj->attr->pcidev.bus,
 	    (unsigned) obj->attr->pcidev.dev,
 	    (unsigned) obj->attr->pcidev.func);
-    state.new_prop(&state, "pci_busid", tmp);
+    state->new_prop(state, "pci_busid", tmp);
     sprintf(tmp, "%04x [%04x:%04x] [%04x:%04x] %02x",
 	    (unsigned) obj->attr->pcidev.class_id,
 	    (unsigned) obj->attr->pcidev.vendor_id, (unsigned) obj->attr->pcidev.device_id,
 	    (unsigned) obj->attr->pcidev.subvendor_id, (unsigned) obj->attr->pcidev.subdevice_id,
 	    (unsigned) obj->attr->pcidev.revision);
-    state.new_prop(&state, "pci_type", tmp);
+    state->new_prop(state, "pci_type", tmp);
     sprintf(tmp, "%f", obj->attr->pcidev.linkspeed);
-    state.new_prop(&state, "pci_link_speed", tmp);
+    state->new_prop(state, "pci_link_speed", tmp);
     break;
   case HWLOC_OBJ_OS_DEVICE:
     sprintf(tmp, "%d", (int) obj->attr->osdev.type);
-    state.new_prop(&state, "osdev_type", tmp);
+    state->new_prop(state, "osdev_type", tmp);
     break;
   default:
     break;
@@ -2019,7 +2015,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     char *name = hwloc__xml_export_safestrdup(obj->infos[i].name);
     char *value = hwloc__xml_export_safestrdup(obj->infos[i].value);
     struct hwloc__xml_export_state_s childstate;
-    state.new_child(&state, &childstate, "info");
+    state->new_child(state, &childstate, "info");
     childstate.new_prop(&childstate, "name", name);
     childstate.new_prop(&childstate, "value", value);
     childstate.end_object(&childstate, "info");
@@ -2030,7 +2026,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
     struct hwloc__xml_export_state_s childstate;
     int is_coproctype = (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
-    state.new_child(&state, &childstate, "info");
+    state->new_child(state, &childstate, "info");
     childstate.new_prop(&childstate, "name", is_coproctype ? "CoProcType" : "Type");
     childstate.new_prop(&childstate, "value", subtype);
     childstate.end_object(&childstate, "info");
@@ -2084,7 +2080,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 	depth = hwloc_get_type_depth(topology, dist->type) + parent_with_memory;
       }
 
-      state.new_child(&state, &childstate, "distances");
+      state->new_child(state, &childstate, "distances");
       sprintf(tmp, "%u", nbobjs);
       childstate.new_prop(&childstate, "nbobjs", tmp);
       sprintf(tmp, "%d", depth);
@@ -2108,7 +2104,18 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   }
 
   if (obj->userdata && topology->userdata_export_cb)
-    topology->userdata_export_cb((void*) &state, topology, obj);
+    topology->userdata_export_cb((void*) state, topology, obj);
+}
+
+static void
+hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
+{
+  struct hwloc__xml_export_state_s state;
+  hwloc_obj_t child;
+
+  parentstate->new_child(parentstate, &state, "object");
+
+  hwloc__xml_export_object_contents(&state, topology, obj, flags);
 
   if (v1export) {
     /* v1.x requires NUMA nodes to move back to normal children */
