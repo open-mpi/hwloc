@@ -406,6 +406,7 @@ hwloc__libxml_export_new_child(hwloc__xml_export_state_t parentstate,
   state->new_prop = parentstate->new_prop;
   state->add_content = parentstate->add_content;
   state->end_object = parentstate->end_object;
+  state->global = parentstate->global;
 
   ldata->current_node = xmlNewChild(lpdata->current_node, NULL, BAD_CAST name, NULL);
 }
@@ -431,7 +432,8 @@ hwloc__libxml_export_add_content(hwloc__xml_export_state_t state, const char *bu
 }
 
 static xmlDocPtr
-hwloc__libxml2_prepare_export(hwloc_topology_t topology, unsigned long flags)
+hwloc__libxml2_prepare_export(hwloc_topology_t topology, struct hwloc__xml_export_data_s *edata,
+			      unsigned long flags)
 {
   struct hwloc__xml_export_state_s state;
   hwloc__libxml_export_state_data_t data = (void *) state.data;
@@ -458,6 +460,7 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology, unsigned long flags)
   state.new_prop = hwloc__libxml_export_new_prop;
   state.add_content = hwloc__libxml_export_add_content;
   state.end_object = hwloc__libxml_export_end_object;
+  state.global = edata;
 
   data->current_node = root_node;
 
@@ -467,14 +470,15 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology, unsigned long flags)
 }
 
 static int
-hwloc_libxml_export_file(hwloc_topology_t topology, const char *filename, unsigned long flags)
+hwloc_libxml_export_file(hwloc_topology_t topology, struct hwloc__xml_export_data_s *edata,
+			 const char *filename, unsigned long flags)
 {
   xmlDocPtr doc;
   int ret;
 
   errno = 0; /* set to 0 so that we know if libxml2 changed it */
 
-  doc = hwloc__libxml2_prepare_export(topology, flags);
+  doc = hwloc__libxml2_prepare_export(topology, edata, flags);
   ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
   hwloc_libxml2_cleanup();
@@ -489,11 +493,12 @@ hwloc_libxml_export_file(hwloc_topology_t topology, const char *filename, unsign
 }
 
 static int
-hwloc_libxml_export_buffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen, unsigned long flags)
+hwloc_libxml_export_buffer(hwloc_topology_t topology, struct hwloc__xml_export_data_s *edata,
+			   char **xmlbuffer, int *buflen, unsigned long flags)
 {
   xmlDocPtr doc;
 
-  doc = hwloc__libxml2_prepare_export(topology, flags);
+  doc = hwloc__libxml2_prepare_export(topology, edata, flags);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
   hwloc_libxml2_cleanup();

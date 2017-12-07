@@ -2339,6 +2339,7 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
 int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, unsigned long flags)
 {
   hwloc_localeswitch_declare;
+  struct hwloc__xml_export_data_s edata;
   int force_nolibxml;
   int ret;
 
@@ -2361,9 +2362,9 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
   force_nolibxml = hwloc_nolibxml_export();
 retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
-    ret = hwloc_nolibxml_callbacks->export_file(topology, filename, flags);
+    ret = hwloc_nolibxml_callbacks->export_file(topology, &edata, filename, flags);
   else {
-    ret = hwloc_libxml_callbacks->export_file(topology, filename, flags);
+    ret = hwloc_libxml_callbacks->export_file(topology, &edata, filename, flags);
     if (ret < 0 && errno == ENOSYS) {
       hwloc_libxml_callbacks = NULL;
       goto retry;
@@ -2378,6 +2379,7 @@ retry:
 int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen, unsigned long flags)
 {
   hwloc_localeswitch_declare;
+  struct hwloc__xml_export_data_s edata;
   int force_nolibxml;
   int ret;
 
@@ -2400,9 +2402,9 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
   force_nolibxml = hwloc_nolibxml_export();
 retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
-    ret = hwloc_nolibxml_callbacks->export_buffer(topology, xmlbuffer, buflen, flags);
+    ret = hwloc_nolibxml_callbacks->export_buffer(topology, &edata, xmlbuffer, buflen, flags);
   else {
-    ret = hwloc_libxml_callbacks->export_buffer(topology, xmlbuffer, buflen, flags);
+    ret = hwloc_libxml_callbacks->export_buffer(topology, &edata, xmlbuffer, buflen, flags);
     if (ret < 0 && errno == ENOSYS) {
       hwloc_libxml_callbacks = NULL;
       goto retry;

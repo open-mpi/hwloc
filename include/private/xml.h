@@ -68,6 +68,10 @@ typedef struct hwloc__xml_export_state_s {
   void (*add_content)(struct hwloc__xml_export_state_s *state, const char *buffer, size_t length);
   void (*end_object)(struct hwloc__xml_export_state_s *state, const char *name);
 
+  struct hwloc__xml_export_data_s {
+    int dummy;
+  } *global;
+
   /* opaque data used to store backend-specific data.
    * statically allocated to allow stack-allocation by the common code without knowing actual backend needs.
    */
@@ -84,8 +88,8 @@ HWLOC_DECLSPEC void hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate
 
 struct hwloc_xml_callbacks {
   int (*backend_init)(struct hwloc_xml_backend_data_s *bdata, const char *xmlpath, const char *xmlbuffer, int xmlbuflen);
-  int (*export_file)(struct hwloc_topology *topology, const char *filename, unsigned long flags);
-  int (*export_buffer)(struct hwloc_topology *topology, char **xmlbuffer, int *buflen, unsigned long flags);
+  int (*export_file)(struct hwloc_topology *topology, struct hwloc__xml_export_data_s *edata, const char *filename, unsigned long flags);
+  int (*export_buffer)(struct hwloc_topology *topology, struct hwloc__xml_export_data_s *edata, char **xmlbuffer, int *buflen, unsigned long flags);
   void (*free_buffer)(void *xmlbuffer);
   int (*import_diff)(struct hwloc__xml_import_state_s *state, const char *xmlpath, const char *xmlbuffer, int xmlbuflen, hwloc_topology_diff_t *diff, char **refnamep);
   int (*export_diff_file)(union hwloc_topology_diff_u *diff, const char *refname, const char *filename);

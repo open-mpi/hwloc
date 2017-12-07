@@ -613,6 +613,7 @@ hwloc__nolibxml_export_new_child(hwloc__xml_export_state_t parentstate,
   state->new_prop = parentstate->new_prop;
   state->add_content = parentstate->add_content;
   state->end_object = parentstate->end_object;
+  state->global = parentstate->global;
 
   ndata->buffer = npdata->buffer;
   ndata->written = npdata->written;
@@ -676,7 +677,8 @@ hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *
 }
 
 static size_t
-hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int buflen, unsigned long flags)
+hwloc___nolibxml_prepare_export(hwloc_topology_t topology, struct hwloc__xml_export_data_s *edata,
+				char *xmlbuffer, int buflen, unsigned long flags)
 {
   struct hwloc__xml_export_state_s state, childstate;
   hwloc__nolibxml_export_state_data_t ndata = (void *) &state.data;
@@ -689,6 +691,7 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
   state.new_prop = hwloc__nolibxml_export_new_prop;
   state.add_content = hwloc__nolibxml_export_add_content;
   state.end_object = hwloc__nolibxml_export_end_object;
+  state.global = edata;
 
   ndata->indent = 0;
   ndata->written = 0;
@@ -712,7 +715,8 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 }
 
 static int
-hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buflenp, unsigned long flags)
+hwloc_nolibxml_export_buffer(hwloc_topology_t topology, struct hwloc__xml_export_data_s *edata,
+			     char **bufferp, int *buflenp, unsigned long flags)
 {
   char *buffer;
   size_t bufferlen, res;
@@ -721,7 +725,7 @@ hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buf
   buffer = malloc(bufferlen);
   if (!buffer)
     return -1;
-  res = hwloc___nolibxml_prepare_export(topology, buffer, (int)bufferlen, flags);
+  res = hwloc___nolibxml_prepare_export(topology, edata, buffer, (int)bufferlen, flags);
 
   if (res > bufferlen) {
     char *tmp = realloc(buffer, res);
@@ -730,7 +734,7 @@ hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buf
       return -1;
     }
     buffer = tmp;
-    hwloc___nolibxml_prepare_export(topology, buffer, (int)res, flags);
+    hwloc___nolibxml_prepare_export(topology, edata, buffer, (int)res, flags);
   }
 
   *bufferp = buffer;
@@ -739,14 +743,15 @@ hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buf
 }
 
 static int
-hwloc_nolibxml_export_file(hwloc_topology_t topology, const char *filename, unsigned long flags)
+hwloc_nolibxml_export_file(hwloc_topology_t topology, struct hwloc__xml_export_data_s *edata,
+			   const char *filename, unsigned long flags)
 {
   FILE *file;
   char *buffer;
   int bufferlen;
   int ret;
 
-  ret = hwloc_nolibxml_export_buffer(topology, &buffer, &bufferlen, flags);
+  ret = hwloc_nolibxml_export_buffer(topology, edata, &buffer, &bufferlen, flags);
   if (ret < 0)
     return -1;
 
