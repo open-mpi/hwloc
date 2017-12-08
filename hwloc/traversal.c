@@ -211,7 +211,31 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
    */
 
   /* types without a custom depth */
-  if (!hwloc_strncasecmp(string, "machine", 2)) {
+
+  /* osdev subtype first to avoid conflicts coproc/core etc */
+  if (!hwloc_strncasecmp(string, "os", 2)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+  } else if (!hwloc_strncasecmp(string, "bloc", 4)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_BLOCK;
+  } else if (!hwloc_strncasecmp(string, "net", 3)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_NETWORK;
+  } else if (!hwloc_strncasecmp(string, "openfab", 7)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_OPENFABRICS;
+  } else if (!hwloc_strncasecmp(string, "dma", 3)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_DMA;
+  } else if (!hwloc_strncasecmp(string, "gpu", 3)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_GPU;
+  } else if (!hwloc_strncasecmp(string, "copro", 5)
+	     || !hwloc_strncasecmp(string, "co-pro", 6)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_COPROC;
+
+  } else if (!hwloc_strncasecmp(string, "machine", 2)) {
     type = HWLOC_OBJ_MACHINE;
   } else if (!hwloc_strncasecmp(string, "node", 2)
 	     || !hwloc_strncasecmp(string, "numa", 2)) { /* matches node and numanode */
@@ -237,28 +261,6 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 
   } else if (!hwloc_strncasecmp(string, "pci", 3)) {
     type = HWLOC_OBJ_PCI_DEVICE;
-
-  } else if (!hwloc_strncasecmp(string, "os", 2)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-  } else if (!hwloc_strncasecmp(string, "bloc", 4)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_BLOCK;
-  } else if (!hwloc_strncasecmp(string, "net", 3)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_NETWORK;
-  } else if (!hwloc_strncasecmp(string, "openfab", 7)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_OPENFABRICS;
-  } else if (!hwloc_strncasecmp(string, "dma", 3)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_DMA;
-  } else if (!hwloc_strncasecmp(string, "gpu", 3)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_GPU;
-  } else if (!hwloc_strncasecmp(string, "copro", 5)
-	     || !hwloc_strncasecmp(string, "co-pro", 6)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_COPROC;
 
   /* types with depthattr */
   } else if ((string[0] == 'l' || string[0] == 'L') && string[1] >= '0' && string[1] <= '9') {
