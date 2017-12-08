@@ -3923,6 +3923,9 @@ hwloc__check_children_cpusets(hwloc_topology_t topology __hwloc_attribute_unused
     assert(hwloc_bitmap_first(obj->cpuset) == (int) obj->os_index);
     assert(hwloc_bitmap_weight(obj->complete_cpuset) == 1);
     assert(hwloc_bitmap_first(obj->complete_cpuset) == (int) obj->os_index);
+    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
+      assert(hwloc_bitmap_isset(topology->allowed_cpuset, (int) obj->os_index));
+    }
     assert(!obj->arity);
   } else if (hwloc_obj_type_is_memory(obj->type)) {
     /* memory object cpuset is equal to its parent */
@@ -4122,7 +4125,7 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
 }
 
 static void
-hwloc__check_nodesets(hwloc_obj_t obj, hwloc_bitmap_t parentset)
+hwloc__check_nodesets(hwloc_topology_t topology, hwloc_obj_t obj, hwloc_bitmap_t parentset)
 {
   hwloc_obj_t child;
   int prev_first;
@@ -4133,6 +4136,9 @@ hwloc__check_nodesets(hwloc_obj_t obj, hwloc_bitmap_t parentset)
     assert(hwloc_bitmap_first(obj->nodeset) == (int) obj->os_index);
     assert(hwloc_bitmap_weight(obj->complete_nodeset) == 1);
     assert(hwloc_bitmap_first(obj->complete_nodeset) == (int) obj->os_index);
+    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
+      assert(hwloc_bitmap_isset(topology->allowed_nodeset, (int) obj->os_index));
+    }
     assert(!obj->arity);
     assert(!obj->memory_arity);
     assert(hwloc_bitmap_isincluded(obj->nodeset, parentset));
@@ -4156,7 +4162,7 @@ hwloc__check_nodesets(hwloc_obj_t obj, hwloc_bitmap_t parentset)
     childset = hwloc_bitmap_alloc();
     for_each_child(child, obj) {
       hwloc_bitmap_t set = hwloc_bitmap_dup(parentset); /* don't touch parentset, we don't want to propagate the first child contribution to other children */
-      hwloc__check_nodesets(child, set);
+      hwloc__check_nodesets(topology, child, set);
       /* extract this child contribution */
       hwloc_bitmap_andnot(set, set, parentset);
       /* save it */
@@ -4343,7 +4349,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
   /* recurse and check the nodesets of children */
   set = hwloc_bitmap_alloc();
-  hwloc__check_nodesets(obj, set);
+  hwloc__check_nodesets(topology, obj, set);
   hwloc_bitmap_free(set);
 }
 
