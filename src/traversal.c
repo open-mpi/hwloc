@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -229,7 +229,18 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
    */
 
   /* types without depthattr */
-  if (!hwloc_strncasecmp(string, "system", 2)) {
+
+  /* osdev first to avoid conflicts coproc/core etc */
+  if (!hwloc_strncasecmp(string, "os", 2)
+	     || !hwloc_strncasecmp(string, "bloc", 4)
+	     || !hwloc_strncasecmp(string, "net", 3)
+	     || !hwloc_strncasecmp(string, "openfab", 7)
+	     || !hwloc_strncasecmp(string, "dma", 3)
+	     || !hwloc_strncasecmp(string, "gpu", 3)
+	     || !hwloc_strncasecmp(string, "copro", 5)
+	     || !hwloc_strncasecmp(string, "co-pro", 6)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+  } else if (!hwloc_strncasecmp(string, "system", 2)) {
     type = HWLOC_OBJ_SYSTEM;
   } else if (!hwloc_strncasecmp(string, "machine", 2)) {
     type = HWLOC_OBJ_MACHINE;
@@ -251,15 +262,6 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     type = HWLOC_OBJ_BRIDGE;
   } else if (!hwloc_strncasecmp(string, "pci", 3)) {
     type = HWLOC_OBJ_PCI_DEVICE;
-  } else if (!hwloc_strncasecmp(string, "os", 2)
-	     || !hwloc_strncasecmp(string, "bloc", 4)
-	     || !hwloc_strncasecmp(string, "net", 3)
-	     || !hwloc_strncasecmp(string, "openfab", 7)
-	     || !hwloc_strncasecmp(string, "dma", 3)
-	     || !hwloc_strncasecmp(string, "gpu", 3)
-	     || !hwloc_strncasecmp(string, "copro", 5)
-	     || !hwloc_strncasecmp(string, "co-pro", 6)) {
-    type = HWLOC_OBJ_OS_DEVICE;
 
   /* types with depthattr */
   } else if (!hwloc_strncasecmp(string, "cache", 2)) {
