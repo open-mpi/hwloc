@@ -37,6 +37,7 @@ xml_outputs = \
         2intel64-1n2c-numaroot.v1tov2.xml \
         28intel64-2p2g7c-CoDgroups.v1tov2.xml \
         28intel64-2p2g7c-CoD.nogroups.v1tov2.xml \
+        64intel64-fakeKNL-SNC4-hybrid.v1tov2.xml \
         64intel64-fakeKNL-SNC4-hybrid.v2tov1.xml
 
 # Each output `xyz.xml' may have a corresponding `xyz.source' file specifying
@@ -64,6 +65,7 @@ xml_source = \
         28intel64-2p2g7c-CoDgroups.v1tov2.source \
         28intel64-2p2g7c-CoD.nogroups.v1tov2.source \
         28intel64-2p2g7c-CoDgroups.v1.xml \
+        64intel64-fakeKNL-SNC4-hybrid.v1tov2.source \
         64intel64-fakeKNL-SNC4-hybrid.v2tov1.source
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
