@@ -26,6 +26,7 @@ xml_outputs = \
         32em64t-2n8c2t-pci-wholeio.xml \
         64intel64-3g2n+2n-irregulargroups+pci.xml \
         64intel64-3g2n+2n-irregulargroups+pci.console.output \
+        64intel64-fakeKNL-SNC4-hybrid.xml \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t.xml \
         192em64t-24n8c2t.xml \
@@ -60,8 +61,7 @@ xml_source = \
         28intel64-2p2g7c-CoDgroups.v1tov2.source \
         28intel64-2p2g7c-CoD.nogroups.v1tov2.source \
         28intel64-2p2g7c-CoDgroups.v1.xml \
-        64intel64-fakeKNL-SNC4-hybrid.v2tov1.source \
-        64intel64-fakeKNL-SNC4-hybrid.xml
+        64intel64-fakeKNL-SNC4-hybrid.v2tov1.source
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
