@@ -765,6 +765,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   int childrengotignored = 0;
   int attribute_less_cache = 0;
   int numa_was_root = 0;
+  char *tag;
+  struct hwloc__xml_import_state_s childstate;
 
   /* set parent now since it's used during import below or in subfunctions */
   obj->parent = parent;
@@ -805,6 +807,52 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
       hwloc__xml_import_object_attr(topology, data, obj, attrname, attrvalue, state);
     }
+  }
+
+  /* process non-object subnodes to get info attrs (as well as page_types, etc) */
+  while (1) {
+    int ret;
+
+    tag = NULL;
+    ret = state->global->find_child(state, &childstate, &tag);
+    if (ret < 0)
+      goto error;
+    if (!ret)
+      break;
+
+    if (!strcmp(tag, "object")) {
+      /* we'll handle children later */
+      break;
+
+    } else if (!strcmp(tag, "page_type")) {
+      if (obj->type == HWLOC_OBJ_NUMANODE) {
+	ret = hwloc__xml_import_pagetype(topology, &obj->attr->numanode, &childstate);
+      } else if (!parent) {
+	ret = hwloc__xml_import_pagetype(topology, &topology->machine_memory, &childstate);
+      } else {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
+		  state->global->msgprefix, tag);
+	ret = -1;
+      }
+
+    } else if (!strcmp(tag, "info")) {
+      ret = hwloc__xml_import_info(topology, obj, &childstate);
+    } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
+      ret = hwloc__xml_v1import_distances(data, obj, &childstate);
+    } else if (!strcmp(tag, "userdata")) {
+      ret = hwloc__xml_import_userdata(topology, obj, &childstate);
+    } else {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: invalid special object child %s\n",
+		state->global->msgprefix, tag);
+      ret = -1;
+    }
+
+    if (ret < 0)
+      goto error;
+
+    state->global->close_child(&childstate);
   }
 
   if (parent && obj->type == HWLOC_OBJ_MACHINE) {
@@ -1018,17 +1066,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
   }
 
-  /* process subnodes */
-  while (1) {
-    struct hwloc__xml_import_state_s childstate;
-    char *tag;
+  /* process object subnodes, if we found one win the above loop */
+  while (tag) {
     int ret;
-
-    ret = state->global->find_child(state, &childstate, &tag);
-    if (ret < 0)
-      goto error;
-    if (!ret)
-      break;
 
     if (!strcmp(tag, "object")) {
       hwloc_obj_t childobj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_TYPE_MAX, HWLOC_UNKNOWN_INDEX);
@@ -1036,28 +1076,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       ret = hwloc__xml_import_object(topology, data, ignored ? parent : obj, childobj,
 				     &childrengotignored,
 				     &childstate);
-
-    } else if (!strcmp(tag, "page_type")) {
-      if (obj->type == HWLOC_OBJ_NUMANODE) {
-	ret = hwloc__xml_import_pagetype(topology, &obj->attr->numanode, &childstate);
-      } else if (!parent) {
-	ret = hwloc__xml_import_pagetype(topology, &topology->machine_memory, &childstate);
-      } else {
-	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
-		  state->global->msgprefix, tag);
-	ret = -1;
-      }
-
-    } else if (!strcmp(tag, "info")) {
-      ret = hwloc__xml_import_info(topology, obj, &childstate);
-    } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
-      ret = hwloc__xml_v1import_distances(data, obj, &childstate);
-    } else if (!strcmp(tag, "userdata")) {
-      ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: invalid special object child %s\n",
+	fprintf(stderr, "%s: invalid special object child %s while looking for objects\n",
 		state->global->msgprefix, tag);
       ret = -1;
     }
@@ -1066,6 +1087,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       goto error;
 
     state->global->close_child(&childstate);
+
+    tag = NULL;
+    ret = state->global->find_child(state, &childstate, &tag);
+    if (ret < 0)
+      goto error;
+    if (!ret)
+      break;
   }
 
   if (numa_was_root) {
