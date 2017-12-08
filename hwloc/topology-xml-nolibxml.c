@@ -117,6 +117,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
   hwloc__nolibxml_import_state_data_t nchildstate = (void*) childstate->data;
   char *buffer = nstate->tagbuffer;
   char *end;
+  char *tag;
   size_t namelen;
 
   childstate->parent = state;
@@ -137,7 +138,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
     return 0;
 
   /* normal tag */
-  *tagp = nchildstate->tagname = buffer;
+  tag = nchildstate->tagname = buffer;
 
   /* find the end, mark it and return it */
   end = strchr(buffer, '>');
@@ -159,6 +160,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
   if (buffer[namelen] == '\0') {
     /* no attributes */
     nchildstate->attrbuffer = NULL;
+    *tagp = tag;
     return 1;
   }
 
@@ -168,6 +170,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
   /* found a space, likely starting attributes */
   buffer[namelen] = '\0';
   nchildstate->attrbuffer = buffer+namelen+1;
+  *tagp = tag;
   return 1;
 }
 
