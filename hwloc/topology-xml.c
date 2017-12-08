@@ -931,8 +931,28 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	numa_was_root = 1;
 
       } else if (!hwloc_bitmap_isequal(obj->complete_cpuset, parent->complete_cpuset)) {
-	/* this NUMA node added some hierarchy, we need to attach it under an intermediate group */
-	if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+	/* This NUMA node has a different locality from its parent.
+	 * Don't attach it to this parent, or it well get its parent cpusets.
+	 * Add an intermediate Group with the desired locality.
+	 */
+	int needgroup = 1;
+	hwloc_obj_t sibling;
+
+	sibling = parent->memory_first_child;
+	if (sibling && !sibling->subtype
+	    && !sibling->next_sibling
+	    && obj->subtype && !strcmp(obj->subtype, "MCDRAM")
+	    && hwloc_bitmap_iszero(obj->complete_cpuset)) {
+	  /* this is KNL MCDRAM, we want to attach it near its DDR sibling */
+	  needgroup = 0;
+	}
+	/* Ideally we would also detect similar cases on future non-KNL platforms with multiple local NUMA nodes.
+	 * That's unlikely to occur with v1.x.
+	 * And we have no way to be sure if this CPU-less node is desired or not.
+	 */
+
+	if (needgroup
+	    && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
 	  hwloc_obj_t group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 	  group->gp_index = 0; /* will be initialized at the end of the discovery once we know the max */
 	  group->cpuset = hwloc_bitmap_dup(obj->cpuset);
