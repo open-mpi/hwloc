@@ -124,23 +124,29 @@ void hwloc_bitmap_free(struct hwloc_bitmap_s * set)
 
 /* enlarge until it contains at least needed_count ulongs.
  */
-static void
+static int
+hwloc_bitmap_enlarge_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_count) __hwloc_attribute_warn_unused_result;
+static int
 hwloc_bitmap_enlarge_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_count)
 {
   unsigned tmp = 1U << hwloc_flsl((unsigned long) needed_count - 1);
   if (tmp > set->ulongs_allocated) {
     unsigned long *tmpulongs;
     tmpulongs = realloc(set->ulongs, tmp * sizeof(unsigned long));
-    assert(tmpulongs); /* FIXME: return errors from all bitmap functions? */
+    if (!tmpulongs)
+      return -1;
     set->ulongs = tmpulongs;
     set->ulongs_allocated = tmp;
   }
+  return 0;
 }
 
 /* enlarge until it contains at least needed_count ulongs,
  * and update new ulongs according to the infinite field.
  */
-static void
+static int
+hwloc_bitmap_realloc_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_count) __hwloc_attribute_warn_unused_result;
+static int
 hwloc_bitmap_realloc_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_count)
 {
   unsigned i;
@@ -148,15 +154,17 @@ hwloc_bitmap_realloc_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_coun
   HWLOC__BITMAP_CHECK(set);
 
   if (needed_count <= set->ulongs_count)
-    return;
+    return 0;
 
   /* realloc larger if needed */
-  hwloc_bitmap_enlarge_by_ulongs(set, needed_count);
+  if (hwloc_bitmap_enlarge_by_ulongs(set, needed_count) < 0)
+    return -1;
 
   /* fill the newly allocated subset depending on the infinite flag */
   for(i=set->ulongs_count; i<needed_count; i++)
     set->ulongs[i] = set->infinite ? HWLOC_SUBBITMAP_FULL : HWLOC_SUBBITMAP_ZERO;
   set->ulongs_count = needed_count;
+  return 0;
 }
 
 /* realloc until it contains at least cpu+1 bits */
@@ -165,11 +173,15 @@ hwloc_bitmap_realloc_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_coun
 /* reset a bitmap to exactely the needed size.
  * the caller must reinitialize all ulongs and the infinite flag later.
  */
-static void
+static int
+hwloc_bitmap_reset_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_count) __hwloc_attribute_warn_unused_result;
+static int
 hwloc_bitmap_reset_by_ulongs(struct hwloc_bitmap_s * set, unsigned needed_count)
 {
-  hwloc_bitmap_enlarge_by_ulongs(set, needed_count);
+  if (hwloc_bitmap_enlarge_by_ulongs(set, needed_count))
+    return -1;
   set->ulongs_count = needed_count;
+  return 0;
 }
 
 /* reset until it contains exactly cpu+1 bits (roundup to a ulong).
