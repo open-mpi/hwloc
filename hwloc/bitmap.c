@@ -74,6 +74,8 @@ struct hwloc_bitmap_s {
 #define HWLOC_SUBBITMAP_ULBIT_FROM(bit)		(HWLOC_SUBBITMAP_FULL<<(bit))
 #define HWLOC_SUBBITMAP_ULBIT_FROMTO(begin,end)	(HWLOC_SUBBITMAP_ULBIT_TO(end) & HWLOC_SUBBITMAP_ULBIT_FROM(begin))
 
+#define HWLOC_BITMAP_PREALLOC_ULONGS (64/sizeof(unsigned long))
+
 struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
 {
   struct hwloc_bitmap_s * set;
@@ -83,8 +85,8 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
     return NULL;
 
   set->ulongs_count = 1;
-  set->ulongs_allocated = 64/sizeof(unsigned long);
-  set->ulongs = malloc(64);
+  set->ulongs_allocated = HWLOC_BITMAP_PREALLOC_ULONGS;
+  set->ulongs = malloc(HWLOC_BITMAP_PREALLOC_ULONGS * sizeof(unsigned long));
   if (!set->ulongs) {
     free(set);
     return NULL;
