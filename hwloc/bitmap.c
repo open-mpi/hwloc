@@ -401,16 +401,12 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
 int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_bitmap_s * __hwloc_restrict set)
 {
   int prev = -1;
-  hwloc_bitmap_t reverse;
   ssize_t size = buflen;
   char *tmp = buf;
   int res, ret = 0;
   int needcomma = 0;
 
   HWLOC__BITMAP_CHECK(set);
-
-  reverse = hwloc_bitmap_alloc(); /* FIXME: add hwloc_bitmap_alloc_size() + hwloc_bitmap_init_allocated() to avoid malloc? */
-  hwloc_bitmap_not(reverse, set);
 
   /* mark the end in case we do nothing later */
   if (buflen > 0)
@@ -422,7 +418,7 @@ int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const
     begin = hwloc_bitmap_next(set, prev);
     if (begin == -1)
       break;
-    end = hwloc_bitmap_next(reverse, begin);
+    end = hwloc_bitmap_next_unset(set, begin);
 
     if (end == begin+1) {
       res = hwloc_snprintf(tmp, size, needcomma ? ",%d" : "%d", begin);
@@ -431,10 +427,8 @@ int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const
     } else {
       res = hwloc_snprintf(tmp, size, needcomma ? ",%d-%d" : "%d-%d", begin, end-1);
     }
-    if (res < 0) {
-      hwloc_bitmap_free(reverse);
+    if (res < 0)
       return -1;
-    }
     ret += res;
 
     if (res >= size)
@@ -449,8 +443,6 @@ int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const
     else
       prev = end - 1;
   }
-
-  hwloc_bitmap_free(reverse);
 
   return ret;
 }
