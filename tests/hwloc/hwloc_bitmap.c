@@ -95,6 +95,9 @@ int main(void)
   assert(hwloc_bitmap_weight(set) == 0);
   assert(hwloc_bitmap_first(set) == -1);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, -1) == 0);
   /* 20-39 */
   hwloc_bitmap_set_range(set, 20, 39);
   assert(!hwloc_bitmap_iszero(set));
@@ -102,6 +105,9 @@ int main(void)
   assert(hwloc_bitmap_weight(set) == 20);
   assert(hwloc_bitmap_first(set) == 20);
   assert(hwloc_bitmap_last(set) == 39);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 19) == 40);
   /* 20-39,80- */
   hwloc_bitmap_set_range(set, 80, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -110,6 +116,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 20);
   assert(hwloc_bitmap_next(set, 39) == 80);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == 79);
+  assert(hwloc_bitmap_next_unset(set, 79) == -1);
   /* 20-39,80-359 */
   hwloc_bitmap_clr_range(set, 360, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -118,6 +127,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 20);
   assert(hwloc_bitmap_next(set, 39) == 80);
   assert(hwloc_bitmap_last(set) == 359);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 100) == 360);
   /* 20-39,80-179,280-359 */
   hwloc_bitmap_clr_range(set, 180, 279);
   assert(!hwloc_bitmap_iszero(set));
@@ -127,6 +139,9 @@ int main(void)
   assert(hwloc_bitmap_next(set, 39) == 80);
   assert(hwloc_bitmap_next(set, 179) == 280);
   assert(hwloc_bitmap_last(set) == 359);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 100) == 180);
   /* 20- */
   hwloc_bitmap_set_range(set, 35, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -134,6 +149,9 @@ int main(void)
   assert(hwloc_bitmap_weight(set) == -1);
   assert(hwloc_bitmap_first(set) == 20);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == 19);
+  assert(hwloc_bitmap_next_unset(set, 100) == -1);
   /* 20-419 */
   hwloc_bitmap_clr_range(set, 420, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -141,6 +159,9 @@ int main(void)
   assert(hwloc_bitmap_weight(set) == 400);
   assert(hwloc_bitmap_first(set) == 20);
   assert(hwloc_bitmap_last(set) == 419);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 100) == 420);
   /* 20-419,1000- */
   hwloc_bitmap_set_range(set, 1000, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -149,6 +170,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 20);
   assert(hwloc_bitmap_next(set, 419) == 1000);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == 999);
+  assert(hwloc_bitmap_next_unset(set, 1000) == -1);
   /* 20- */
   hwloc_bitmap_set_range(set, 420, 999);
   assert(!hwloc_bitmap_iszero(set));
@@ -156,6 +180,9 @@ int main(void)
   assert(hwloc_bitmap_weight(set) == -1);
   assert(hwloc_bitmap_first(set) == 20);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == 19);
+  assert(hwloc_bitmap_next_unset(set, 1000) == -1);
   /* 0- */
   hwloc_bitmap_set_range(set, 0, 25);
   assert(!hwloc_bitmap_iszero(set));
@@ -163,6 +190,9 @@ int main(void)
   assert(hwloc_bitmap_weight(set) == -1);
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == -1);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 1000) == -1);
   /* 0-99,1500- */
   hwloc_bitmap_clr_range(set, 100, 1499);
   assert(!hwloc_bitmap_iszero(set));
@@ -171,6 +201,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 1500);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == 1499);
+  assert(hwloc_bitmap_next_unset(set, 99) == 100);
   /* 0-99,1500-1999 */
   hwloc_bitmap_clr_range(set, 2000, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -179,6 +212,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 1500);
   assert(hwloc_bitmap_last(set) == 1999);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 1800) == 2000);
   /* 0-99,1500- */
   hwloc_bitmap_set_range(set, 1500, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -187,6 +223,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 1500);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == 1499);
+  assert(hwloc_bitmap_next_unset(set, 1000) == 1001);
   /* 0-99,1500-2199 */
   hwloc_bitmap_clr_range(set, 2200, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -195,6 +234,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 1500);
   assert(hwloc_bitmap_last(set) == 2199);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 1800) == 2200);
   /* 0-99,1500-1999 */
   hwloc_bitmap_clr_range(set, 2000, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -203,6 +245,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 1500);
   assert(hwloc_bitmap_last(set) == 1999);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 1800) == 2000);
   /* 0-99,1500- */
   hwloc_bitmap_set_range(set, 2000, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -211,6 +256,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 1500);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == 1499);
+  assert(hwloc_bitmap_next_unset(set, 1800) == -1);
   /* 0-99,1500-1999 */
   hwloc_bitmap_clr_range(set, 2000, -1);
   assert(!hwloc_bitmap_iszero(set));
@@ -219,6 +267,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 1500);
   assert(hwloc_bitmap_last(set) == 1999);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 1800) == 2000);
   /* 0-99,200-1999 */
   hwloc_bitmap_set_range(set, 200, 1499);
   assert(!hwloc_bitmap_iszero(set));
@@ -227,6 +278,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 200);
   assert(hwloc_bitmap_last(set) == 1999);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 200) == 2000);
   /* 0-99,1999 */
   hwloc_bitmap_clr_range(set, 200, 1998);
   assert(!hwloc_bitmap_iszero(set));
@@ -235,6 +289,9 @@ int main(void)
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_next(set, 99) == 1999);
   assert(hwloc_bitmap_last(set) == 1999);
+  assert(hwloc_bitmap_first_unset(set) == 100);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, 1999) == 2000);
   /* 1999 */
   hwloc_bitmap_clr_range(set, 0, 100);
   assert(!hwloc_bitmap_iszero(set));
@@ -242,6 +299,10 @@ int main(void)
   assert(hwloc_bitmap_weight(set) == 1);
   assert(hwloc_bitmap_first(set) == 1999);
   assert(hwloc_bitmap_last(set) == 1999);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, -1) == 0);
+  assert(hwloc_bitmap_next_unset(set, 1999) == 2000);
   /* empty */
   hwloc_bitmap_clr(set, 1999);
   assert(hwloc_bitmap_iszero(set));
@@ -249,6 +310,10 @@ int main(void)
   assert(hwloc_bitmap_weight(set) == 0);
   assert(hwloc_bitmap_first(set) == -1);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, -1) == 0);
+  assert(hwloc_bitmap_next_unset(set, 1999) == 2000);
   hwloc_bitmap_free(set);
 
   /* check miscellaneous other functions */

@@ -268,6 +268,26 @@ HWLOC_DECLSPEC int hwloc_bitmap_last(hwloc_const_bitmap_t bitmap) __hwloc_attrib
  */
 HWLOC_DECLSPEC int hwloc_bitmap_weight(hwloc_const_bitmap_t bitmap) __hwloc_attribute_pure;
 
+/** \brief Compute the first unset index (least significant bit) in bitmap \p bitmap
+ *
+ * \return -1 if no index is unset in \p bitmap.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_first_unset(hwloc_const_bitmap_t bitmap) __hwloc_attribute_pure;
+
+/** \brief Compute the next unset index in bitmap \p bitmap which is after index \p prev
+ *
+ * If \p prev is -1, the first unset index is returned.
+ *
+ * \return -1 if no index with higher index is unset in \p bitmap.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_next_unset(hwloc_const_bitmap_t bitmap, int prev) __hwloc_attribute_pure;
+
+/** \brief Compute the last unset index (most significant bit) in bitmap \p bitmap
+ *
+ * \return -1 if no index is unset in \p bitmap, or if \p bitmap is infinitely set.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_last_unset(hwloc_const_bitmap_t bitmap) __hwloc_attribute_pure;
+
 /** \brief Loop macro iterating on bitmap \p bitmap
  *
  * The loop must start with hwloc_bitmap_foreach_begin() and end

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2017 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -24,6 +24,11 @@ int main(void)
   assert(hwloc_bitmap_next(set, 0) == -1);
   assert(hwloc_bitmap_next(set, -1) == -1);
   assert(hwloc_bitmap_weight(set) == 0);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, -1) == 0);
+  assert(hwloc_bitmap_next_unset(set, 0) == 1);
+  assert(hwloc_bitmap_next_unset(set, 12345) == 12346);
 
   /* full set */
   hwloc_bitmap_fill(set);
@@ -41,6 +46,11 @@ int main(void)
   assert(hwloc_bitmap_next(set, 64) == 65);
   assert(hwloc_bitmap_next(set, 12345) == 12346);
   assert(hwloc_bitmap_weight(set) == -1);
+  assert(hwloc_bitmap_first_unset(set) == -1);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, -1) == -1);
+  assert(hwloc_bitmap_next_unset(set, 0) == -1);
+  assert(hwloc_bitmap_next_unset(set, 12345) == -1);
 
   /* custom sets */
   hwloc_bitmap_zero(set);
@@ -52,18 +62,41 @@ int main(void)
   assert(hwloc_bitmap_next(set, 36) == 37);
   assert(hwloc_bitmap_next(set, 59) == -1);
   assert(hwloc_bitmap_weight(set) == 24);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, -1) == 0);
+  assert(hwloc_bitmap_next_unset(set, 0) == 1);
+  assert(hwloc_bitmap_next_unset(set, 35) == 60);
+  assert(hwloc_bitmap_next_unset(set, 12345) == 12346);
   hwloc_bitmap_set_range(set, 136, 259);
   assert(hwloc_bitmap_first(set) == 36);
   assert(hwloc_bitmap_last(set) == 259);
   assert(hwloc_bitmap_next(set, 59) == 136);
   assert(hwloc_bitmap_next(set, 259) == -1);
   assert(hwloc_bitmap_weight(set) == 148);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, -1) == 0);
+  assert(hwloc_bitmap_next_unset(set, 0) == 1);
+  assert(hwloc_bitmap_next_unset(set, 35) == 60);
+  assert(hwloc_bitmap_next_unset(set, 60) == 61);
+  assert(hwloc_bitmap_next_unset(set, 135) == 260);
+  assert(hwloc_bitmap_next_unset(set, 12345) == 12346);
   hwloc_bitmap_clr(set, 199);
   assert(hwloc_bitmap_first(set) == 36);
   assert(hwloc_bitmap_last(set) == 259);
   assert(hwloc_bitmap_next(set, 198) == 200);
   assert(hwloc_bitmap_next(set, 199) == 200);
   assert(hwloc_bitmap_weight(set) == 147);
+  assert(hwloc_bitmap_first_unset(set) == 0);
+  assert(hwloc_bitmap_last_unset(set) == -1);
+  assert(hwloc_bitmap_next_unset(set, -1) == 0);
+  assert(hwloc_bitmap_next_unset(set, 0) == 1);
+  assert(hwloc_bitmap_next_unset(set, 35) == 60);
+  assert(hwloc_bitmap_next_unset(set, 60) == 61);
+  assert(hwloc_bitmap_next_unset(set, 135) == 199);
+  assert(hwloc_bitmap_next_unset(set, 199) == 260);
+  assert(hwloc_bitmap_next_unset(set, 12345) == 12346);
 
   i = 0;
   hwloc_bitmap_foreach_begin(cpu, set) {
