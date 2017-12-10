@@ -37,6 +37,10 @@ extern "C" {
  * A bitmap may be of infinite size (all bits are set after some point).
  * A bitmap may even be full if all bits are set.
  *
+ * \note Most functions below return an int that may be negative in case of
+ * error. The usual error case would be an internal failure to realloc/extend
+ * the storage of the bitmap (\p errno would be set to \c ENOMEM).
+ *
  * \note Several examples of using the bitmap API are available under the
  * doc/examples/ directory in the source tree.
  * Regression tests such as tests/hwloc/hwloc_bitmap*.c also make intensive use
@@ -82,7 +86,7 @@ HWLOC_DECLSPEC void hwloc_bitmap_free(hwloc_bitmap_t bitmap);
 HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_dup(hwloc_const_bitmap_t bitmap) __hwloc_attribute_malloc;
 
 /** \brief Copy the contents of bitmap \p src into the already allocated bitmap \p dst */
-HWLOC_DECLSPEC void hwloc_bitmap_copy(hwloc_bitmap_t dst, hwloc_const_bitmap_t src);
+HWLOC_DECLSPEC int hwloc_bitmap_copy(hwloc_bitmap_t dst, hwloc_const_bitmap_t src);
 
 
 /*
@@ -171,16 +175,16 @@ HWLOC_DECLSPEC void hwloc_bitmap_zero(hwloc_bitmap_t bitmap);
 HWLOC_DECLSPEC void hwloc_bitmap_fill(hwloc_bitmap_t bitmap);
 
 /** \brief Empty the bitmap \p bitmap and add bit \p id */
-HWLOC_DECLSPEC void hwloc_bitmap_only(hwloc_bitmap_t bitmap, unsigned id);
+HWLOC_DECLSPEC int hwloc_bitmap_only(hwloc_bitmap_t bitmap, unsigned id);
 
 /** \brief Fill the bitmap \p and clear the index \p id */
-HWLOC_DECLSPEC void hwloc_bitmap_allbut(hwloc_bitmap_t bitmap, unsigned id);
+HWLOC_DECLSPEC int hwloc_bitmap_allbut(hwloc_bitmap_t bitmap, unsigned id);
 
 /** \brief Setup bitmap \p bitmap from unsigned long \p mask */
-HWLOC_DECLSPEC void hwloc_bitmap_from_ulong(hwloc_bitmap_t bitmap, unsigned long mask);
+HWLOC_DECLSPEC int hwloc_bitmap_from_ulong(hwloc_bitmap_t bitmap, unsigned long mask);
 
 /** \brief Setup bitmap \p bitmap from unsigned long \p mask used as \p i -th subset */
-HWLOC_DECLSPEC void hwloc_bitmap_from_ith_ulong(hwloc_bitmap_t bitmap, unsigned i, unsigned long mask);
+HWLOC_DECLSPEC int hwloc_bitmap_from_ith_ulong(hwloc_bitmap_t bitmap, unsigned i, unsigned long mask);
 
 
 /*
@@ -188,25 +192,25 @@ HWLOC_DECLSPEC void hwloc_bitmap_from_ith_ulong(hwloc_bitmap_t bitmap, unsigned 
  */
 
 /** \brief Add index \p id in bitmap \p bitmap */
-HWLOC_DECLSPEC void hwloc_bitmap_set(hwloc_bitmap_t bitmap, unsigned id);
+HWLOC_DECLSPEC int hwloc_bitmap_set(hwloc_bitmap_t bitmap, unsigned id);
 
 /** \brief Add indexes from \p begin to \p end in bitmap \p bitmap.
  *
  * If \p end is \c -1, the range is infinite.
  */
-HWLOC_DECLSPEC void hwloc_bitmap_set_range(hwloc_bitmap_t bitmap, unsigned begin, int end);
+HWLOC_DECLSPEC int hwloc_bitmap_set_range(hwloc_bitmap_t bitmap, unsigned begin, int end);
 
 /** \brief Replace \p i -th subset of bitmap \p bitmap with unsigned long \p mask */
-HWLOC_DECLSPEC void hwloc_bitmap_set_ith_ulong(hwloc_bitmap_t bitmap, unsigned i, unsigned long mask);
+HWLOC_DECLSPEC int hwloc_bitmap_set_ith_ulong(hwloc_bitmap_t bitmap, unsigned i, unsigned long mask);
 
 /** \brief Remove index \p id from bitmap \p bitmap */
-HWLOC_DECLSPEC void hwloc_bitmap_clr(hwloc_bitmap_t bitmap, unsigned id);
+HWLOC_DECLSPEC int hwloc_bitmap_clr(hwloc_bitmap_t bitmap, unsigned id);
 
 /** \brief Remove indexes from \p begin to \p end in bitmap \p bitmap.
  *
  * If \p end is \c -1, the range is infinite.
  */
-HWLOC_DECLSPEC void hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin, int end);
+HWLOC_DECLSPEC int hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin, int end);
 
 /** \brief Keep a single index among those set in bitmap \p bitmap
  *
@@ -214,7 +218,7 @@ HWLOC_DECLSPEC void hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin
  * have a chance of migrating between multiple logical CPUs
  * in the original mask.
  */
-HWLOC_DECLSPEC void hwloc_bitmap_singlify(hwloc_bitmap_t bitmap);
+HWLOC_DECLSPEC int hwloc_bitmap_singlify(hwloc_bitmap_t bitmap);
 
 
 /*
@@ -330,31 +334,31 @@ do { \
  *
  * \p res can be the same as \p bitmap1 or \p bitmap2
  */
-HWLOC_DECLSPEC void hwloc_bitmap_or (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
+HWLOC_DECLSPEC int hwloc_bitmap_or (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
 
 /** \brief And bitmaps \p bitmap1 and \p bitmap2 and store the result in bitmap \p res
  *
  * \p res can be the same as \p bitmap1 or \p bitmap2
  */
-HWLOC_DECLSPEC void hwloc_bitmap_and (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
+HWLOC_DECLSPEC int hwloc_bitmap_and (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
 
 /** \brief And bitmap \p bitmap1 and the negation of \p bitmap2 and store the result in bitmap \p res
  *
  * \p res can be the same as \p bitmap1 or \p bitmap2
  */
-HWLOC_DECLSPEC void hwloc_bitmap_andnot (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
+HWLOC_DECLSPEC int hwloc_bitmap_andnot (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
 
 /** \brief Xor bitmaps \p bitmap1 and \p bitmap2 and store the result in bitmap \p res
  *
  * \p res can be the same as \p bitmap1 or \p bitmap2
  */
-HWLOC_DECLSPEC void hwloc_bitmap_xor (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
+HWLOC_DECLSPEC int hwloc_bitmap_xor (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
 
 /** \brief Negate bitmap \p bitmap and store the result in bitmap \p res
  *
  * \p res can be the same as \p bitmap
  */
-HWLOC_DECLSPEC void hwloc_bitmap_not (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap);
+HWLOC_DECLSPEC int hwloc_bitmap_not (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap);
 
 
 /*
