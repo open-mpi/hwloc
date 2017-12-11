@@ -178,9 +178,8 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
   if (mmap_res == MAP_FAILED)
     return -1;
   if (mmap_res != mmap_address) {
-    munmap(mmap_res, length);
     errno = EBUSY;
-    return -1;
+    goto out_with_mmap;
   }
 
   old = (hwloc_topology_t)((char*)mmap_address + sizeof(header));
@@ -225,6 +224,7 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
 
  out_with_components:
   hwloc_components_fini();
+ out_with_mmap:
   munmap(mmap_address, length);
   return -1;
 }

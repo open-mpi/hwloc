@@ -112,8 +112,10 @@ HWLOC_DECLSPEC int hwloc_shmem_topology_write(hwloc_topology_t topology,
  *
  * \return -1 with errno set to EBUSY if the virtual memory mapping defined
  * by \p mmap_address and \p length isn't available in the process.
+ *
  * \return -1 with errno set to EINVAL if \p fileoffset, \p mmap_address
- * or \p length aren't page-aligned.
+ * or \p length aren't page-aligned, or do not match what was given to
+ * hwloc_shmem_topology_write() earlier.
  */
 HWLOC_DECLSPEC int hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
 					      int fd, hwloc_uint64_t fileoffset,
