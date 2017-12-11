@@ -25,6 +25,8 @@
  * - have a way to change the initial allocation size:
  *   add hwloc_bitmap_set_foo() to changes a global here,
  *   and make the hwloc core call based on the early number of PUs
+ * - make HWLOC_BITMAP_PREALLOC_BITS configurable, and detectable
+ *   by parsing /proc/cpuinfo during configure on Linux.
  * - preallocate inside the bitmap structure (so that the whole structure is a cacheline for instance)
  *   and allocate a dedicated array only later when reallocating larger
  * - add a bitmap->ulongs_empty_first which guarantees that some first ulongs are empty,
@@ -35,6 +37,10 @@
 
 /* magic number */
 #define HWLOC_BITMAP_MAGIC 0x20091007
+
+/* preallocated bits in every bitmap */
+#define HWLOC_BITMAP_PREALLOC_BITS 512
+#define HWLOC_BITMAP_PREALLOC_ULONGS (HWLOC_BITMAP_PREALLOC_BITS/HWLOC_BITS_PER_LONG)
 
 /* actual opaque type internals */
 struct hwloc_bitmap_s {
@@ -74,8 +80,6 @@ struct hwloc_bitmap_s {
 #define HWLOC_SUBBITMAP_ULBIT_TO(bit)		(HWLOC_SUBBITMAP_FULL>>(HWLOC_BITS_PER_LONG-1-(bit)))
 #define HWLOC_SUBBITMAP_ULBIT_FROM(bit)		(HWLOC_SUBBITMAP_FULL<<(bit))
 #define HWLOC_SUBBITMAP_ULBIT_FROMTO(begin,end)	(HWLOC_SUBBITMAP_ULBIT_TO(end) & HWLOC_SUBBITMAP_ULBIT_FROM(begin))
-
-#define HWLOC_BITMAP_PREALLOC_ULONGS (64/sizeof(unsigned long))
 
 struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
 {
