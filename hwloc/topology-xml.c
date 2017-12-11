@@ -122,29 +122,38 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     if (obj->gp_index >= topology->next_gp_index)
       topology->next_gp_index = obj->gp_index + 1;
   } else if (!strcmp(name, "cpuset")) {
-    obj->cpuset = hwloc_bitmap_alloc();
+    if (!obj->cpuset)
+      obj->cpuset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->cpuset, value);
   } else if (!strcmp(name, "complete_cpuset")) {
-    obj->complete_cpuset = hwloc_bitmap_alloc();
-    hwloc_bitmap_sscanf(obj->complete_cpuset,value);
+    if (!obj->complete_cpuset)
+      obj->complete_cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(obj->complete_cpuset, value);
   } else if (!strcmp(name, "allowed_cpuset")) {
     /* ignored except for root */
     if (!obj->parent)
       hwloc_bitmap_sscanf(topology->allowed_cpuset, value);
   } else if (!strcmp(name, "nodeset")) {
-    obj->nodeset = hwloc_bitmap_alloc();
+    if (!obj->nodeset)
+      obj->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->nodeset, value);
   } else if (!strcmp(name, "complete_nodeset")) {
-    obj->complete_nodeset = hwloc_bitmap_alloc();
+    if (!obj->complete_nodeset)
+      obj->complete_nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(obj->complete_nodeset, value);
   } else if (!strcmp(name, "allowed_nodeset")) {
     /* ignored except for root */
     if (!obj->parent)
       hwloc_bitmap_sscanf(topology->allowed_nodeset, value);
-  } else if (!strcmp(name, "name"))
+  } else if (!strcmp(name, "name")) {
+    if (obj->name)
+      free(obj->name);
     obj->name = strdup(value);
-  else if (!strcmp(name, "subtype"))
+  } else if (!strcmp(name, "subtype")) {
+    if (obj->subtype)
+      free(obj->subtype);
     obj->subtype = strdup(value);
+  }
 
   else if (!strcmp(name, "cache_size")) {
     unsigned long long lvalue = strtoull(value, NULL, 10);
@@ -480,8 +489,11 @@ hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
   if (infoname) {
     /* empty strings are ignored by libxml */
     if (!strcmp(infoname, "Type") || !strcmp(infoname, "CoProcType")) {
-      if (infovalue)
+      if (infovalue) {
+	if (obj->subtype)
+	  free(obj->subtype);
 	obj->subtype = strdup(infovalue);
+      }
     } else {
       if (infovalue)
 	hwloc_obj_add_info(obj, infoname, infovalue);
