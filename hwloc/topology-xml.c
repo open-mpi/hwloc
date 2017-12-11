@@ -391,10 +391,12 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
      * deprecated from 1.0
      */
     else if (!strcmp(name, "dmi_board_vendor")) {
-      hwloc_obj_add_info(obj, "DMIBoardVendor", value);
+      if (value[0])
+	hwloc_obj_add_info(obj, "DMIBoardVendor", value);
     }
     else if (!strcmp(name, "dmi_board_name")) {
-      hwloc_obj_add_info(obj, "DMIBoardName", value);
+      if (value[0])
+	hwloc_obj_add_info(obj, "DMIBoardName", value);
     }
 
     else if (data->version_major < 1) {
@@ -481,7 +483,8 @@ hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
       if (infovalue)
 	obj->subtype = strdup(infovalue);
     } else {
-      hwloc_obj_add_info(obj, infoname, infovalue ? infovalue : "");
+      if (infovalue)
+	hwloc_obj_add_info(obj, infoname, infovalue);
     }
   }
 

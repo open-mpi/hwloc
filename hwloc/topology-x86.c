@@ -654,7 +654,8 @@ static void
 hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int replace)
 {
   char number[8];
-  hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUVendor", info->cpuvendor, replace);
+  if (info->cpuvendor[0])
+    hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUVendor", info->cpuvendor, replace);
   snprintf(number, sizeof(number), "%u", info->cpufamilynumber);
   hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUFamilyNumber", number, replace);
   snprintf(number, sizeof(number), "%u", info->cpumodelnumber);

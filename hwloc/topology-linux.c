@@ -3666,15 +3666,20 @@ hwloc_linux_parse_cpuinfo_x86(const char *prefix, const char *value,
 			      int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("vendor_id", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUVendor", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUVendor", value);
   } else if (!strcmp("model name", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUModel", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUModel", value);
   } else if (!strcmp("model", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
   } else if (!strcmp("cpu family", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
   } else if (!strcmp("stepping", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUStepping", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUStepping", value);
   }
   return 0;
 }
@@ -3685,13 +3690,17 @@ hwloc_linux_parse_cpuinfo_ia64(const char *prefix, const char *value,
 			       int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("vendor", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUVendor", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUVendor", value);
   } else if (!strcmp("model name", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUModel", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUModel", value);
   } else if (!strcmp("model", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
   } else if (!strcmp("family", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
   }
   return 0;
 }
@@ -3703,23 +3712,32 @@ hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
 {
   if (!strcmp("Processor", prefix) /* old kernels with one Processor header */
       || !strcmp("model name", prefix) /* new kernels with one model name per core */) {
-    hwloc__add_info(infos, infos_count, "CPUModel", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUModel", value);
   } else if (!strcmp("CPU implementer", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUImplementer", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUImplementer", value);
   } else if (!strcmp("CPU architecture", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUArchitecture", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUArchitecture", value);
   } else if (!strcmp("CPU variant", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUVariant", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUVariant", value);
   } else if (!strcmp("CPU part", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUPart", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUPart", value);
   } else if (!strcmp("CPU revision", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPURevision", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPURevision", value);
   } else if (!strcmp("Hardware", prefix)) {
-    hwloc__add_info(infos, infos_count, "HardwareName", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "HardwareName", value);
   } else if (!strcmp("Revision", prefix)) {
-    hwloc__add_info(infos, infos_count, "HardwareRevision", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "HardwareRevision", value);
   } else if (!strcmp("Serial", prefix)) {
-    hwloc__add_info(infos, infos_count, "HardwareSerial", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "HardwareSerial", value);
   }
   return 0;
 }
@@ -3731,28 +3749,37 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
 {
   /* common fields */
   if (!strcmp("cpu", prefix)) {
-    hwloc__add_info(infos, infos_count, "CPUModel", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "CPUModel", value);
   } else if (!strcmp("platform", prefix)) {
-    hwloc__add_info(infos, infos_count, "PlatformName", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "PlatformName", value);
   } else if (!strcmp("model", prefix)) {
-    hwloc__add_info(infos, infos_count, "PlatformModel", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "PlatformModel", value);
   }
   /* platform-specific fields */
   else if (!strcasecmp("vendor", prefix)) {
-    hwloc__add_info(infos, infos_count, "PlatformVendor", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "PlatformVendor", value);
   } else if (!strcmp("Board ID", prefix)) {
-    hwloc__add_info(infos, infos_count, "PlatformBoardID", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "PlatformBoardID", value);
   } else if (!strcmp("Board", prefix)
 	     || !strcasecmp("Machine", prefix)) {
     /* machine and board are similar (and often more precise) than model above */
-    hwloc__add_info_nodup(infos, infos_count, "PlatformModel", value, 1);
+    if (value[0])
+      hwloc__add_info_nodup(infos, infos_count, "PlatformModel", value, 1);
   } else if (!strcasecmp("Revision", prefix)
 	     || !strcmp("Hardware rev", prefix)) {
-    hwloc__add_info(infos, infos_count, is_global ? "PlatformRevision" : "CPURevision", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, is_global ? "PlatformRevision" : "CPURevision", value);
   } else if (!strcmp("SVR", prefix)) {
-    hwloc__add_info(infos, infos_count, "SystemVersionRegister", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "SystemVersionRegister", value);
   } else if (!strcmp("PVR", prefix)) {
-    hwloc__add_info(infos, infos_count, "ProcessorVersionRegister", value);
+    if (value[0])
+      hwloc__add_info(infos, infos_count, "ProcessorVersionRegister", value);
   }
   /* don't match 'board*' because there's also "board l2" on some platforms */
   return 0;
@@ -3793,7 +3820,8 @@ hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
     /* keep the last one, assume it's more precise than the first one.
      * we should have the Architecture keypair for basic information anyway.
      */
-    hwloc__add_info_nodup(infos, infos_count, "CPUModel", value, 1);
+    if (value[0])
+      hwloc__add_info_nodup(infos, infos_count, "CPUModel", value, 1);
   }
   return 0;
 }
@@ -4112,7 +4140,9 @@ hwloc__linux_get_mic_sn(struct hwloc_topology *topology, struct hwloc_linux_back
   if (!end)
     return;
   *end = '\0';
-  hwloc_obj_add_info(hwloc_get_root_obj(topology), "MICSerialNumber", tmp);
+
+  if (tmp[0])
+    hwloc_obj_add_info(hwloc_get_root_obj(topology), "MICSerialNumber", tmp);
 }
 
 static void

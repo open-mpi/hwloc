@@ -834,7 +834,8 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    group->cpuset = cpuset;
 	    group->attr->group.kind = HWLOC_GROUP_KIND_SOLARIS_PG_HW_PERF;
 	    group->attr->group.subkind = hwloc_bitmap_weight(cpuset);
-	    hwloc_obj_add_info(group, "SolarisProcessorGroup", ksp->ks_name);
+	    if (ksp->ks_name[0])
+	      hwloc_obj_add_info(group, "SolarisProcessorGroup", ksp->ks_name);
 	    hwloc_insert_object_by_cpuset(topology, group);
 	    cpuset = NULL; /* don't free below */
 	  }
@@ -851,9 +852,9 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     hwloc_debug("%u Packages\n", Lpkg_num);
     for (j = 0; j < Lpkg_num; j++) {
       obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, Lpkg[j].Ppkg);
-      if (chip_info.type)
+      if (chip_info.type && chip_info.type[0])
 	hwloc_obj_add_info(obj, "CPUType", chip_info.type);
-      if (chip_info.model)
+      if (chip_info.model && chip_info.model[0])
 	hwloc_obj_add_info(obj, "CPUModel", chip_info.model);
       obj->cpuset = hwloc_bitmap_alloc();
       for(k=0; k<Pproc_max; k++)

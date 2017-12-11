@@ -86,7 +86,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend)
     hwloc_obj_add_info(cuda_device, "GPUVendor", "NVIDIA Corporation");
 
     cures = cudaGetDeviceProperties(&prop, i);
-    if (!cures)
+    if (!cures && prop.name[0] != '\0')
       hwloc_obj_add_info(cuda_device, "GPUModel", prop.name);
 
     snprintf(number, sizeof(number), "%llu", ((unsigned long long) prop.totalGlobalMem) >> 10);
