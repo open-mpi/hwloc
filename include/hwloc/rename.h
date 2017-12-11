@@ -655,7 +655,7 @@ extern "C" {
 #define hwloc_pci_class_string HWLOC_NAME(pci_class_string)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)
-#define hwloc__find_info_slot HWLOC_NAME(_find_info_slot)
+#define hwloc__add_info_nodup HWLOC_NAME(_add_info_nodup)
 #define hwloc__move_infos HWLOC_NAME(_move_infos)
 #define hwloc__free_infos HWLOC_NAME(_free_infos)
 
@@ -701,8 +701,6 @@ extern "C" {
 
 #define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
 #define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)
-
-#define hwloc_obj_add_info_nodup HWLOC_NAME(obj_add_info_nodup)
 
 #define hwloc_progname HWLOC_NAME(progname)
 

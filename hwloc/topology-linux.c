@@ -3745,9 +3745,7 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
   } else if (!strcmp("Board", prefix)
 	     || !strcasecmp("Machine", prefix)) {
     /* machine and board are similar (and often more precise) than model above */
-    char **valuep = hwloc__find_info_slot(infos, infos_count, "PlatformModel");
-    free(*valuep);
-    *valuep = strdup(value);
+    hwloc__add_info_nodup(infos, infos_count, "PlatformModel", value, 1);
   } else if (!strcasecmp("Revision", prefix)
 	     || !strcmp("Hardware rev", prefix)) {
     hwloc__add_info(infos, infos_count, is_global ? "PlatformRevision" : "CPURevision", value);
@@ -3795,9 +3793,7 @@ hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
     /* keep the last one, assume it's more precise than the first one.
      * we should have the Architecture keypair for basic information anyway.
      */
-    char **valuep = hwloc__find_info_slot(infos, infos_count, "CPUModel");
-    free(*valuep);
-    *valuep = strdup(value);
+    hwloc__add_info_nodup(infos, infos_count, "CPUModel", value, 1);
   }
   return 0;
 }

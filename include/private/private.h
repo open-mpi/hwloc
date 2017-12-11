@@ -201,7 +201,7 @@ extern int hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology);
 HWLOC_DECLSPEC extern const char * hwloc_pci_class_string(unsigned short class_id);
 
 extern void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
-extern char ** hwloc__find_info_slot(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name);
+extern void hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);
 extern void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);
 extern void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count);
 
@@ -316,8 +316,6 @@ extern int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n
 /* On some systems, snprintf returns the size of written data, not the actually
  * required size.  hwloc_snprintf always report the actually required size. */
 extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
-
-extern void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *value, int nodup);
 
 /* Return the name of the currently running program, if supported.
  * If not NULL, must be freed by the caller.

@@ -651,22 +651,22 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 }
 
 static void
-hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int nodup)
+hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int replace)
 {
   char number[8];
-  hwloc_obj_add_info_nodup(obj, "CPUVendor", info->cpuvendor, nodup);
+  hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUVendor", info->cpuvendor, replace);
   snprintf(number, sizeof(number), "%u", info->cpufamilynumber);
-  hwloc_obj_add_info_nodup(obj, "CPUFamilyNumber", number, nodup);
+  hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUFamilyNumber", number, replace);
   snprintf(number, sizeof(number), "%u", info->cpumodelnumber);
-  hwloc_obj_add_info_nodup(obj, "CPUModelNumber", number, nodup);
+  hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUModelNumber", number, replace);
   if (info->cpumodel[0]) {
     const char *c = info->cpumodel;
     while (*c == ' ')
       c++;
-    hwloc_obj_add_info_nodup(obj, "CPUModel", c, nodup);
+    hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUModel", c, replace);
   }
   snprintf(number, sizeof(number), "%u", info->cpustepping);
-  hwloc_obj_add_info_nodup(obj, "CPUStepping", number, nodup);
+  hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUStepping", number, replace);
 }
 
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */

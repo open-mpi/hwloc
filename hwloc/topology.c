@@ -322,15 +322,23 @@ void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const c
   *countp = count+1;
 }
 
-char ** hwloc__find_info_slot(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name)
+void hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp,
+			   const char *name, const char *value,
+			   int replace)
 {
+  struct hwloc_obj_info_s *infos = *infosp;
+  unsigned count = *countp;
   unsigned i;
-  for(i=0; i<*countp; i++) {
-    if (!strcmp((*infosp)[i].name, name))
-      return &(*infosp)[i].value;
+  for(i=0; i<count; i++) {
+    if (!strcmp(infos[i].name, name)) {
+      if (replace) {
+	free(infos[i].value);
+	infos[i].value = strdup(value);
+      }
+      return;
+    }
   }
-  hwloc__add_info(infosp, countp, name, NULL);
-  return &(*infosp)[*countp-1].value;
+  hwloc__add_info(infosp, countp, name, value);
 }
 
 void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp,
@@ -375,13 +383,6 @@ void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_count
 
 void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 {
-  hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
-}
-
-void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *value, int nodup)
-{
-  if (nodup && hwloc_obj_get_info_by_name(obj, name))
-    return;
   hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
 
