@@ -54,6 +54,11 @@ unsigned hwloc_get_api_version(void)
   return HWLOC_API_VERSION;
 }
 
+int hwloc_topology_abi_check(hwloc_topology_t topology)
+{
+  return topology->topology_abi != HWLOC_TOPOLOGY_ABI ? -1 : 0;
+}
+
 int hwloc_hide_errors(void)
 {
   static int hide = 0;

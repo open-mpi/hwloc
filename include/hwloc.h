@@ -671,6 +671,25 @@ HWLOC_DECLSPEC void hwloc_topology_destroy (hwloc_topology_t topology);
  */
 HWLOC_DECLSPEC int hwloc_topology_dup(hwloc_topology_t *newtopology, hwloc_topology_t oldtopology);
 
+/** \brief Verify that the topology is compatible with the current hwloc library.
+ *
+ * This is useful when using the same topology structure (in memory)
+ * in different libraries that may use different hwloc installations
+ * (for instance if one library embeds a specific version of hwloc,
+ * while another library uses a default system-wide hwloc installation).
+ *
+ * If all libraries/programs use the same hwloc installation, this function
+ * always returns success.
+ *
+ * \return \c 0 on success.
+ *
+ * \return \c -1 with \p errno set to \c EINVAL if incompatible.
+ *
+ * \note If sharing between processes with hwloc_shmem_topology_write(),
+ * the relevant check is already performed inside hwloc_shmem_topology_adopt().
+ */
+HWLOC_DECLSPEC int hwloc_topology_abi_check(hwloc_topology_t topology);
+
 /** \brief Run internal checks on a topology structure
  *
  * The program aborts if an inconsistency is detected in the given topology.

@@ -336,6 +336,7 @@ man3_creation_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_dup.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_abi_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3
 
 man3_levelsdir = $(man3dir)

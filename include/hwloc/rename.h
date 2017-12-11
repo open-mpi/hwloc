@@ -112,6 +112,7 @@ extern "C" {
 #define hwloc_topology_load HWLOC_NAME(topology_load)
 #define hwloc_topology_destroy HWLOC_NAME(topology_destroy)
 #define hwloc_topology_dup HWLOC_NAME(topology_dup)
+#define hwloc_topology_abi_check HWLOC_NAME(topology_abi_check)
 #define hwloc_topology_check HWLOC_NAME(topology_check)
 
 #define hwloc_topology_flags_e HWLOC_NAME(topology_flags_e)

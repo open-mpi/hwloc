@@ -110,6 +110,8 @@ HWLOC_DECLSPEC int hwloc_shmem_topology_write(hwloc_topology_t topology,
  * that created the shared topology also placed userdata-pointed buffers
  * in shared memory.
  *
+ * \note This function takes care of calling hwloc_topology_abi_check().
+ *
  * \return -1 with errno set to EBUSY if the virtual memory mapping defined
  * by \p mmap_address and \p length isn't available in the process.
  *

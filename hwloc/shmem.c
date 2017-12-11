@@ -186,7 +186,7 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
   }
 
   old = (hwloc_topology_t)((char*)mmap_address + sizeof(header));
-  if (old->topology_abi != HWLOC_TOPOLOGY_ABI) {
+  if (hwloc_topology_abi_check(old) < 0) {
     errno = EINVAL;
     goto out_with_mmap;
   }
