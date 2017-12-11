@@ -184,6 +184,7 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
   }
 
   old = (hwloc_topology_t)((char*)mmap_address + sizeof(header));
+  /* enforced by dup() inside shmem_topology_write() */
   assert(old->is_loaded);
   assert(old->backends == NULL);
   assert(old->get_pci_busid_cpuset_backend == NULL);
@@ -210,6 +211,9 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
   memcpy(new->support.cpubind, old->support.cpubind, sizeof(*new->support.cpubind));
   memcpy(new->support.membind, old->support.membind, sizeof(*new->support.membind));
   hwloc_set_binding_hooks(new);
+  /* clear userdata callbacks pointing to the writer process' functions */
+  new->userdata_export_cb = NULL;
+  new->userdata_import_cb = NULL;
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
