@@ -939,7 +939,7 @@ hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology) __hwloc_attribute_
  * If \p cpuset is empty, \p nodeset will be emptied as well.
  * Otherwise \p nodeset will be entirely filled.
  */
-static __hwloc_inline void
+static __hwloc_inline int
 hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
@@ -947,7 +947,9 @@ hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset,
 	assert(depth != HWLOC_TYPE_DEPTH_UNKNOWN);
 	hwloc_bitmap_zero(nodeset);
 	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, _cpuset, depth, obj)) != NULL)
-		hwloc_bitmap_set(nodeset, obj->os_index);
+		if (hwloc_bitmap_set(nodeset, obj->os_index) < 0)
+			return -1;
+	return 0;
 }
 
 /** \brief Convert a NUMA node set into a CPU set and handle non-NUMA cases
@@ -958,7 +960,7 @@ hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset,
  * Otherwise \p cpuset will be entirely filled.
  * This is useful for manipulating memory binding sets.
  */
-static __hwloc_inline void
+static __hwloc_inline int
 hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
@@ -968,8 +970,10 @@ hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwl
 	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
 		if (hwloc_bitmap_isset(nodeset, obj->os_index))
 			/* no need to check obj->cpuset because objects in levels always have a cpuset */
-			hwloc_bitmap_or(_cpuset, _cpuset, obj->cpuset);
+			if (hwloc_bitmap_or(_cpuset, _cpuset, obj->cpuset) < 0)
+				return -1;
 	}
+	return 0;
 }
 
 /** @} */
