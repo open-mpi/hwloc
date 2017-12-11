@@ -75,17 +75,6 @@ struct hwloc_topology {
   hwloc_bitmap_t allowed_cpuset;
   hwloc_bitmap_t allowed_nodeset;
 
-  int need_pci_belowroot_apply_locality;
-  struct hwloc_backend *get_pci_busid_cpuset_backend;
-
-  int pci_has_forced_locality;
-  unsigned pci_forced_locality_nr;
-  struct hwloc_pci_forced_locality_s {
-    unsigned domain;
-    unsigned bus_first, bus_last;
-    hwloc_bitmap_t cpuset;
-  } * pci_forced_locality;
-
   struct hwloc_binding_hooks {
     int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
     int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
@@ -150,18 +139,34 @@ struct hwloc_topology {
   float grouping_accuracies[5];
   unsigned grouping_next_subkind;
 
+  /* list of enabled backends. */
+  struct hwloc_backend * backends;
+  struct hwloc_backend * get_pci_busid_cpuset_backend;
+  unsigned backend_excludes;
+
+  /* memory allocator for topology objects */
+  struct hwloc_tma * tma;
+
+  /*
+   * temporary variables during discovery
+   */
+
   /* machine-wide memory.
    * temporarily stored there by OSes that only provide this without NUMA information,
    * and actually used later by the core.
    */
   struct hwloc_numanode_attr_s machine_memory;
 
-  /* list of enabled backends. */
-  struct hwloc_backend * backends;
-  unsigned backend_excludes;
+  /* pci stuff */
+  int need_pci_belowroot_apply_locality;
+  int pci_has_forced_locality;
+  unsigned pci_forced_locality_nr;
+  struct hwloc_pci_forced_locality_s {
+    unsigned domain;
+    unsigned bus_first, bus_last;
+    hwloc_bitmap_t cpuset;
+  } * pci_forced_locality;
 
-  /* memory allocator for topology objects */
-  struct hwloc_tma * tma;
 };
 
 extern void hwloc_alloc_root_sets(hwloc_obj_t root);
