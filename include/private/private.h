@@ -200,9 +200,9 @@ extern int hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology);
 
 HWLOC_DECLSPEC extern const char * hwloc_pci_class_string(unsigned short class_id);
 
-extern void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
-extern void hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);
-extern void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);
+extern int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
+extern int hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);
+extern int hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);
 extern void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count);
 
 /* set native OS binding hooks */

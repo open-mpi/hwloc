@@ -302,7 +302,7 @@ void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count)
   free(infos);
 }
 
-void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value)
+int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value)
 {
   unsigned count = *countp;
   struct hwloc_obj_info_s *infos = *infosp;
@@ -313,18 +313,29 @@ void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const c
     struct hwloc_obj_info_s *tmpinfos = realloc(infos, alloccount*sizeof(*infos));
     if (!tmpinfos)
       /* failed to allocate, ignore this info */
-      return;
+      goto out_with_array;
     infos = tmpinfos;
   }
   infos[count].name = strdup(name);
+  if (!infos[count].name)
+    goto out_with_array;
   infos[count].value = strdup(value);
+  if (!infos[count].value)
+    goto out_with_name;
   *infosp = infos;
   *countp = count+1;
+  return 0;
+
+ out_with_name:
+  free(infos[count].name);
+ out_with_array:
+  /* don't bother reducing the array */
+  return -1;
 }
 
-void hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp,
-			   const char *name, const char *value,
-			   int replace)
+int hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp,
+			  const char *name, const char *value,
+			  int replace)
 {
   struct hwloc_obj_info_s *infos = *infosp;
   unsigned count = *countp;
@@ -332,17 +343,20 @@ void hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp,
   for(i=0; i<count; i++) {
     if (!strcmp(infos[i].name, name)) {
       if (replace) {
+	char *new = strdup(value);
+	if (!new)
+	  return -1;
 	free(infos[i].value);
-	infos[i].value = strdup(value);
+	infos[i].value = new;
       }
-      return;
+      return 0;
     }
   }
-  hwloc__add_info(infosp, countp, name, value);
+  return hwloc__add_info(infosp, countp, name, value);
 }
 
-void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp,
-		       struct hwloc_obj_info_s **src_infosp, unsigned *src_countp)
+int hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp,
+		      struct hwloc_obj_info_s **src_infosp, unsigned *src_countp)
 {
   unsigned dst_count = *dst_countp;
   struct hwloc_obj_info_s *dst_infos = *dst_infosp;
@@ -368,22 +382,23 @@ void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_count
   free(src_infos);
   *src_infosp = NULL;
   *src_countp = 0;
-  return;
+  return 0;
 
  drop:
-  for(i=0; i<src_count; i++, dst_count++) {
+  /* drop src infos, don't modify dst_infos at all */
+  for(i=0; i<src_count; i++) {
     free(src_infos[i].name);
     free(src_infos[i].value);
   }
   free(src_infos);
   *src_infosp = NULL;
   *src_countp = 0;
-  /* dst_infos not modified */
+  return -1;
 }
 
-void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
+int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 {
-  hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
+  return hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
 
 /* This function may be called with topology->tma set, it cannot free() or realloc() */

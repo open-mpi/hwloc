@@ -105,6 +105,7 @@ Version 2.0.0
     hwloc/diff.h do not need a topology as first parameter anymore.
   + Most functions in hwloc/bitmap.h now return an int that may be negative
     in case of failure to realloc/extend the internal storage of a bitmap.
+  + hwloc_obj_add_info() also returns an int in case allocations fail.
   + hwloc_parse_cpumap_file () superseded by hwloc_linux_read_path_as_cpumask()
     in hwloc/linux.h.
 * Tools

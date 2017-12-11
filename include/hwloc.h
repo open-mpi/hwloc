@@ -953,6 +953,8 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_
  *
  * The input strings are copied before being added in the object infos.
  *
+ * \return \c 0 on success, \c -1 on error.
+ *
  * \note This function may be used to enforce object colors in the lstopo
  * graphical output by using "lstopoStyle" as a name and "Background=#rrggbb"
  * as a value. See CUSTOM COLORS in the lstopo(1) manpage for details.
@@ -960,7 +962,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_
  * \note If \p value contains some non-printable characters, they will
  * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
-HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
+HWLOC_DECLSPEC int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
 
 /** @} */
 
