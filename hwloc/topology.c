@@ -3281,7 +3281,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->is_thissystem = 1;
   topology->pid = 0;
   topology->userdata = NULL;
-
+  topology->topology_abi = HWLOC_TOPOLOGY_ABI;
   topology->adopted_shmem_addr = NULL;
   topology->adopted_shmem_length = 0;
 

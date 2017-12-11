@@ -116,6 +116,9 @@ HWLOC_DECLSPEC int hwloc_shmem_topology_write(hwloc_topology_t topology,
  * \return -1 with errno set to EINVAL if \p fileoffset, \p mmap_address
  * or \p length aren't page-aligned, or do not match what was given to
  * hwloc_shmem_topology_write() earlier.
+ *
+ * \return -1 with errno set to EINVAL if the layout of the topology structure
+ * is different between the writer process and the adopter process.
  */
 HWLOC_DECLSPEC int hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
 					      int fd, hwloc_uint64_t fileoffset,

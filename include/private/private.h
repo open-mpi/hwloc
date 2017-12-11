@@ -39,7 +39,17 @@
 #endif
 #include <string.h>
 
+#define HWLOC_TOPOLOGY_ABI 0x20000 /* version of the layout of struct topology */
+
+/*****************************************************
+ * WARNING:
+ * changes below in this structure (and its children)
+ * should cause a bump of HWLOC_TOPOLOGY_ABI.
+ *****************************************************/
+
 struct hwloc_topology {
+  unsigned topology_abi;
+
   unsigned nb_levels;					/* Number of horizontal levels */
   unsigned nb_levels_allocated;				/* Number of levels allocated and zeroed in level_nbobjects and levels below */
   unsigned *level_nbobjects; 				/* Number of objects on each horizontal level */
@@ -146,6 +156,12 @@ struct hwloc_topology {
 
   /* memory allocator for topology objects */
   struct hwloc_tma * tma;
+
+/*****************************************************
+ * WARNING:
+ * changes above in this structure (and its children)
+ * should cause a bump of HWLOC_TOPOLOGY_ABI.
+ *****************************************************/
 
   /*
    * temporary variables during discovery

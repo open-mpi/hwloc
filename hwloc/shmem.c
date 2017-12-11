@@ -21,6 +21,9 @@ struct hwloc_shmem_header {
   uint32_t header_length; /* where the actual topology starts in the file/mapping */
   uint64_t mmap_address; /* virtual address to pass to mmap */
   uint64_t mmap_length; /* length to pass to mmap (includes the header) */
+
+  /* sanity checks for hwloc_topology changes */
+  uint32_t topology_abi;
 };
 
 #define HWLOC_SHMEM_MALLOC_ALIGN 8UL
@@ -183,6 +186,11 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
   }
 
   old = (hwloc_topology_t)((char*)mmap_address + sizeof(header));
+  if (old->topology_abi != HWLOC_TOPOLOGY_ABI) {
+    errno = EINVAL;
+    goto out_with_mmap;
+  }
+
   /* enforced by dup() inside shmem_topology_write() */
   assert(old->is_loaded);
   assert(old->backends == NULL);
@@ -200,6 +208,7 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
   new->tma = NULL;
   new->adopted_shmem_addr = mmap_address;
   new->adopted_shmem_length = length;
+  new->topology_abi = HWLOC_TOPOLOGY_ABI;
   /* setting binding hooks will touch support arrays, so duplicate them too.
    * could avoid that by requesting a R/W mmap
    */
