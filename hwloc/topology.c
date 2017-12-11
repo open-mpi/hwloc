@@ -317,7 +317,7 @@ void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const c
     infos = tmpinfos;
   }
   infos[count].name = strdup(name);
-  infos[count].value = value ? strdup(value) : NULL;
+  infos[count].value = strdup(value);
   *infosp = infos;
   *countp = count+1;
 }
