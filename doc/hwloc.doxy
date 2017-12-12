@@ -931,7 +931,7 @@ following environment variables.
   <dd>relaxes distance comparison during grouping.
   By default, objects may be grouped if their distances form a minimal
   distance graph. When setting this variable to 0.02, and when
-  ::HWLOC_DISTANCES_FLAG_GROUP_INACCURATE is given, these distances
+  ::HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE is given, these distances
   do not have to be strictly equal anymore, they may just be equal
   with a 2% error.
   If set to <tt>try</tt> instead of a numerical value, hwloc will try
