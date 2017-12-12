@@ -328,15 +328,15 @@ output_synthetic(struct lstopo_output *loutput, const char *filename)
 
   nb1 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_MISC);
   if (nb1) {
-    fprintf(stderr, "Ignoring %u Misc objects.\n", nb1);
-    fprintf(stderr, "Passing --ignore Misc may remove them.\n");
+    fprintf(stderr, "# Ignoring %u Misc objects.\n", nb1);
+    fprintf(stderr, "# (pass --filter Misc:none to hide this message).\n");
   }
   nb1 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_BRIDGE);
   nb2 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PCI_DEVICE);
   nb3 = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_OS_DEVICE);
   if (nb1 || nb2 || nb3) {
-    fprintf(stderr, "Ignoring %u Bridge, %u PCI device and %u OS device objects\n", nb1, nb2, nb3);
-    fprintf(stderr, "Passing --no-io may remove them.\n");
+    fprintf(stderr, "# Ignoring %u Bridge, %u PCI device and %u OS device objects\n", nb1, nb2, nb3);
+    fprintf(stderr, "# (pass --no-io to hide this message).\n");
   }
 
   length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), loutput->export_synthetic_flags);
