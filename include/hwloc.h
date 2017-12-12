@@ -168,9 +168,9 @@ typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
  * may be defined in the future!  If you need to compare types, use
  * hwloc_compare_types() instead.
  */
+#define HWLOC_OBJ_TYPE_MIN _HWLOC_OBJ_SYSTEM_OBSOLETE /**< \private Sentinel value */
 typedef enum {
   _HWLOC_OBJ_SYSTEM_OBSOLETE,  /* FIXME drop and reorder */
-#define HWLOC_OBJ_TYPE_MIN _HWLOC_OBJ_SYSTEM_OBSOLETE /**< \private Sentinel value */
 
   HWLOC_OBJ_MACHINE,	/**< \brief Machine.
 			  * The root object type.
