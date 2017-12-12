@@ -1088,13 +1088,9 @@ hwloc__export_synthetic_add_char(int *ret, char **tmp, ssize_t *tmplen, char c)
 }
 
 static int
-hwloc__export_synthetic_indexes(struct hwloc_topology * topology,
-				hwloc_obj_t obj,
+hwloc__export_synthetic_indexes(hwloc_obj_t *level, unsigned total,
 				char *buffer, size_t buflen)
 {
-  int depth = obj->depth;
-  unsigned total;
-  hwloc_obj_t *level;
   unsigned step = 1;
   unsigned nr_loops = 0;
   struct hwloc_synthetic_intlv_loop_s *loops = NULL, *tmploops;
@@ -1104,17 +1100,8 @@ hwloc__export_synthetic_indexes(struct hwloc_topology * topology,
   char *tmp = buffer;
   int res, ret = 0;
 
-  if (depth < 0) {
-    assert(depth == HWLOC_TYPE_DEPTH_NUMANODE);
-    total = topology->slevels[HWLOC_SLEVEL_NUMANODE].nbobjs;
-    level = topology->slevels[HWLOC_SLEVEL_NUMANODE].objs;
-  } else {
-    total = topology->level_nbobjects[depth];
-    level = topology->levels[depth];
-  }
-
   /* must start with 0 */
-  if (obj->os_index)
+  if (level[0]->os_index)
     goto exportall;
 
   while (step != total) {
@@ -1171,7 +1158,7 @@ hwloc__export_synthetic_indexes(struct hwloc_topology * topology,
   free(loops);
 
   /* dump all indexes */
-  cur = obj;
+  cur = level[0];
   while (cur) {
     res = snprintf(tmp, tmplen, "%u%s", cur->os_index,
 		   cur->next_cousin ? "," : ")");
@@ -1224,11 +1211,23 @@ hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
       return -1;
 
     if (needindexes) {
+      unsigned total;
+      hwloc_obj_t *level;
+
+      if (obj->depth < 0) {
+	assert(obj->depth == HWLOC_TYPE_DEPTH_NUMANODE);
+	total = topology->slevels[HWLOC_SLEVEL_NUMANODE].nbobjs;
+	level = topology->slevels[HWLOC_SLEVEL_NUMANODE].objs;
+      } else {
+	total = topology->level_nbobjects[obj->depth];
+	level = topology->levels[obj->depth];
+      }
+
       res = snprintf(tmp, tmplen, "%sindexes=", prefix);
       if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
 	return -1;
 
-      res = hwloc__export_synthetic_indexes(topology, obj, tmp, tmplen);
+      res = hwloc__export_synthetic_indexes(level, total, tmp, tmplen);
       if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
 	return -1;
     }
