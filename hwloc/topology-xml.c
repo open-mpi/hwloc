@@ -100,6 +100,7 @@ hwloc_xml_callbacks_reset(void)
  ************************************************/
 
 #define _HWLOC_OBJ_CACHE_OLD (HWLOC_OBJ_TYPE_MAX+1) /* temporarily used when importing pre-v2.0 attribute-less cache types */
+#define _HWLOC_OBJ_FUTURE    (HWLOC_OBJ_TYPE_MAX+2) /* temporarily used when ignoring future types */
 
 static void
 hwloc__xml_import_object_attr(struct hwloc_topology *topology,
@@ -789,6 +790,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		      state->global->msgprefix);
 	    goto error_with_object;
 	  }
+	} else if (!strcasecmp(attrvalue, "MemCache")) {
+	  /* ignore likely-future types */
+	  obj->type = _HWLOC_OBJ_FUTURE;
+	  ignored = 1;
+	  if (hwloc__xml_verbose())
+	    fprintf(stderr, "%s: %s object not-supported, will be ignored\n",
+		    state->global->msgprefix, attrvalue);
 	} else {
 	  if (hwloc__xml_verbose())
 	    fprintf(stderr, "%s: unrecognized object type string %s\n",
