@@ -832,7 +832,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
   for(i=0; i<nbaccuracies; i++) {
     if (verbose)
       fprintf(stderr, "Trying to group %u %s objects according to physical distances with accuracy %f\n",
-	      nbobjs, hwloc_type_name(objs[0]->type), accuracies[i]);
+	      nbobjs, hwloc_obj_type_string(objs[0]->type), accuracies[i]);
     if (needcheck && hwloc__check_grouping_matrix(nbobjs, _values, accuracies[i], verbose) < 0)
       continue;
     nbgroups = hwloc__find_groups_by_min_distance(nbobjs, _values, accuracies[i], groupids, verbose);

@@ -1384,7 +1384,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	  static int reported = 0;
 	  if (!reported && !hwloc_hide_errors()) {
 	    fprintf(stderr, "Cannot merge similar %s objects with different OS indexes %u and %u\n",
-		    hwloc_type_name(obj->type), child->os_index, obj->os_index);
+		    hwloc_obj_type_string(obj->type), child->os_index, obj->os_index);
 	    reported = 1;
 	  }
           return NULL;
@@ -2273,7 +2273,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
     if (hwloc_compare_levels_structure(topology, i) < 0)
       continue;
     hwloc_debug("may merge levels #%u=%s and #%u=%s\n",
-		i-1, hwloc_type_name(type1), i, hwloc_type_name(type2));
+		i-1, hwloc_obj_type_string(type1), i, hwloc_obj_type_string(type2));
 
     /* OK, remove intermediate objects from the tree. */
     for(j=0; j<topology->level_nbobjects[i]; j++) {
@@ -2369,7 +2369,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
 	      &topology->level_nbobjects[i],
 	      (topology->nb_levels-i)*sizeof(topology->level_nbobjects[i]));
       hwloc_debug("removed parent level %s at depth %u\n",
-		  hwloc_type_name(type1), i-1);
+		  hwloc_obj_type_string(type1), i-1);
     } else {
       /* Removing level i, so move levels [i+1..nb_levels-1] and later to [i..] */
       free(topology->levels[i]);
@@ -2380,7 +2380,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
 	      &topology->level_nbobjects[i+1],
 	      (topology->nb_levels-1-i)*sizeof(topology->level_nbobjects[i]));
       hwloc_debug("removed child level %s at depth %u\n",
-		  hwloc_type_name(type2), i);
+		  hwloc_obj_type_string(type2), i);
     }
     topology->level_nbobjects[topology->nb_levels-1] = 0;
     topology->levels[topology->nb_levels-1] = NULL;
@@ -2864,7 +2864,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
     taken_objs[n_taken_objs-1]->next_cousin = NULL;
 
     /* One more level!  */
-    hwloc_debug("--- %s level", hwloc_type_name(top_obj->type));
+    hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
     hwloc_debug(" has number %u\n\n", topology->nb_levels);
 
     if (topology->type_depth[top_obj->type] == HWLOC_TYPE_DEPTH_UNKNOWN)

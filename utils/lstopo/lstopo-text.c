@@ -224,7 +224,7 @@ static void output_distances(struct lstopo_output *loutput)
       fprintf(output, "Relative %s matrix (kind %lu) between %u %ss (depth %d) by %s indexes:\n",
 	      kindmeans, dist[j]->kind,
 	      dist[j]->nbobjs,
-	      hwloc_type_name(dist[j]->objs[0]->type),
+	      hwloc_obj_type_string(dist[j]->objs[0]->type),
 	      dist[j]->objs[0]->depth,
 	      logical ? "logical" : "physical");
       hwloc_utils_print_distance_matrix(output, dist[j]->nbobjs, dist[j]->objs, dist[j]->values, logical);
@@ -261,7 +261,7 @@ output_console(struct lstopo_output *loutput, const char *filename)
 
   if (loutput->show_only != HWLOC_OBJ_TYPE_NONE) {
     if (verbose_mode > 1)
-      fprintf(output, "Only showing %s objects\n", hwloc_type_name(loutput->show_only));
+      fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(loutput->show_only));
     output_only (loutput, hwloc_get_root_obj(topology));
   } else if (verbose_mode >= 1) {
     output_topology (loutput, hwloc_get_root_obj(topology), NULL, 0);

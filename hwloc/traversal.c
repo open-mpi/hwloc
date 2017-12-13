@@ -169,7 +169,7 @@ hwloc_get_largest_objs_inside_cpuset (struct hwloc_topology *topology, hwloc_con
 }
 
 const char *
-hwloc_type_name (hwloc_obj_type_t obj)
+hwloc_obj_type_string (hwloc_obj_type_t obj)
 {
   switch (obj)
     {
@@ -363,7 +363,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_PACKAGE:
   case HWLOC_OBJ_CORE:
   case HWLOC_OBJ_PU:
-    return hwloc_snprintf(string, size, "%s", hwloc_type_name(type));
+    return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
   case HWLOC_OBJ_L3CACHE:
@@ -377,9 +377,9 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 			  verbose ? "Cache" : "");
   case HWLOC_OBJ_GROUP:
     if (obj->attr->group.depth != (unsigned) -1)
-      return hwloc_snprintf(string, size, "%s%u", hwloc_type_name(type), obj->attr->group.depth);
+      return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->group.depth);
     else
-      return hwloc_snprintf(string, size, "%s", hwloc_type_name(type));
+      return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_BRIDGE:
     return snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
   case HWLOC_OBJ_PCI_DEVICE:

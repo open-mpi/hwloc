@@ -180,7 +180,7 @@ extern "C" {
 #define hwloc_get_obj_by_depth HWLOC_NAME(get_obj_by_depth )
 #define hwloc_get_obj_by_type HWLOC_NAME(get_obj_by_type )
 
-#define hwloc_type_name HWLOC_NAME(type_name)
+#define hwloc_obj_type_string HWLOC_NAME(obj_type_string )
 #define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
 #define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
 #define hwloc_type_sscanf HWLOC_NAME(type_sscanf)
@@ -551,7 +551,6 @@ extern "C" {
 
 #define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
-#define hwloc_obj_type_string HWLOC_NAME(obj_type_string)
 #define hwloc_obj_type_sscanf HWLOC_NAME(obj_type_sscanf)
 
 #define hwloc_set_membind_nodeset HWLOC_NAME(set_membind_nodeset)

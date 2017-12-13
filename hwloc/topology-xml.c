@@ -873,21 +873,21 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       if (!hwloc_obj_type_is_normal(parent->type)) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "normal object %s cannot be child of non-normal parent %s\n",
-		  hwloc_type_name(obj->type), hwloc_type_name(parent->type));
+		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     } else if (hwloc_obj_type_is_memory(obj->type)) {
       if (hwloc_obj_type_is_io(parent->type) || HWLOC_OBJ_MISC == parent->type) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "Memory object %s cannot be child of non-normal-or-memory parent %s\n",
-		  hwloc_type_name(obj->type), hwloc_type_name(parent->type));
+		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     } else if (hwloc_obj_type_is_io(obj->type)) {
       if (hwloc_obj_type_is_memory(parent->type) || HWLOC_OBJ_MISC == parent->type) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "I/O object %s cannot be child of non-normal-or-I/O parent %s\n",
-		  hwloc_type_name(obj->type), hwloc_type_name(parent->type));
+		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     }
@@ -898,14 +898,14 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       if (hwloc_obj_type_is_special(parent->type)) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "v1.x normal v1.x object %s cannot be child of special parent %s\n",
-		  hwloc_type_name(obj->type), hwloc_type_name(parent->type));
+		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     } else if (hwloc_obj_type_is_io(obj->type)) {
       if (HWLOC_OBJ_MISC == parent->type) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "I/O object %s cannot be child of Misc parent\n",
-		  hwloc_type_name(obj->type));
+		  hwloc_obj_type_string(obj->type));
 	goto error_with_object;
       }
     }
@@ -995,7 +995,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: invalid object %s P#%u with some missing cpusets\n",
-		  state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
+		  state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
 	goto error_with_object;
       }
     } else if (!obj->nodeset != !obj->complete_nodeset) {
@@ -1005,7 +1005,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: invalid object %s P#%u with some missing nodesets\n",
-		  state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
+		  state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
 	goto error_with_object;
       }
     } else if (obj->nodeset && !obj->cpuset) {
@@ -1015,7 +1015,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: invalid object %s P#%u with either cpuset or nodeset missing\n",
-		  state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
+		  state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
 	goto error_with_object;
       }
     }
@@ -1027,7 +1027,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       && obj->type != hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type)) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: invalid cache type %s with attribute depth %u and type %d\n",
-	      state->global->msgprefix, hwloc_type_name(obj->type), obj->attr->cache.depth, (int) obj->attr->cache.type);
+	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->attr->cache.depth, (int) obj->attr->cache.type);
     goto error_with_object;
   }
 
@@ -1035,13 +1035,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (!obj->cpuset && !hwloc_obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: invalid normal object %s P#%u without cpuset\n",
-	      state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
+	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
   if (obj->cpuset && hwloc_obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: invalid special object %s with cpuset\n",
-	      state->global->msgprefix, hwloc_type_name(obj->type));
+	      state->global->msgprefix, hwloc_obj_type_string(obj->type));
     goto error_with_object;
   }
 
@@ -1049,13 +1049,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (obj->cpuset && parent && !parent->cpuset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: invalid object %s P#%u with cpuset while parent has none\n",
-	      state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
+	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
   if (obj->nodeset && parent && !parent->nodeset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: invalid object %s P#%u with nodeset while parent has none\n",
-	      state->global->msgprefix, hwloc_type_name(obj->type), obj->os_index);
+	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
 
@@ -1912,7 +1912,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   else if (v1export && hwloc_obj_type_is_cache(obj->type))
     state->new_prop(state, "type", "Cache");
   else
-    state->new_prop(state, "type", hwloc_type_name(obj->type));
+    state->new_prop(state, "type", hwloc_obj_type_string(obj->type));
 
   if (obj->os_index != HWLOC_UNKNOWN_INDEX) {
     sprintf(tmp, "%u", obj->os_index);
@@ -2307,7 +2307,7 @@ hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topol
 
     parentstate->new_child(parentstate, &state, "distances2");
 
-    state.new_prop(&state, "type", hwloc_type_name(dist->type));
+    state.new_prop(&state, "type", hwloc_obj_type_string(dist->type));
     sprintf(tmp, "%u", nbobjs);
     state.new_prop(&state, "nbobjs", tmp);
     sprintf(tmp, "%lu", dist->kind);

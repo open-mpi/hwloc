@@ -66,18 +66,6 @@ hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_obj 
   return res;
 }
 
-/** \brief Return a stringified topology object type.
- *
- * Deprecated by the identical hwloc_type_name()
- */
-static __hwloc_inline const char *
-hwloc_obj_type_string (hwloc_obj_type_t type) __hwloc_attribute_const; /* not deprecated in early 2.x releases because widely used and prototype unchanged */
-static __hwloc_inline const char *
-hwloc_obj_type_string (hwloc_obj_type_t type)
-{
-  return hwloc_type_name(type);
-}
-
 /** \brief Convert a type string into a type and some attributes.
  *
  * Deprecated by hwloc_type_sscanf()

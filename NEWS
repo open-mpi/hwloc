@@ -97,7 +97,6 @@ Version 2.0.0
   + hwloc_type_sscanf() deprecates the old hwloc_obj_type_sscanf().
   + hwloc_type_sscanf_as_depth() is added to convert a type name into
     a level depth.
-  + hwloc_type_name() deprecates the old hwloc_obj_type_string().
   + Remove the deprecated hwloc_obj_snprintf(), hwloc_obj_type_of_string(),
     hwloc_distribute[v]().
   + hwloc_obj_cpuset_snprintf() is deprecated in favor of hwloc_bitmap_snprintf().

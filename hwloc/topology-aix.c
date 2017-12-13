@@ -705,7 +705,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	break;
     }
     hwloc_debug_2args_bitmap("%s %d has cpuset %s\n",
-	       hwloc_type_name(type),
+	       hwloc_obj_type_string(type),
 	       i, obj->cpuset);
     if (hwloc_filter_check_keep_object_type(topology, obj->type))
       hwloc_insert_object_by_cpuset(topology, obj);

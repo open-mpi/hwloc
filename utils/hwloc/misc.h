@@ -357,7 +357,7 @@ hwloc_lstopo_show_summary_depth(FILE *output, size_t prefixmaxlen, hwloc_topolog
 
     if (depth < 0) {
       /* use plain type, we don't want OSdev subtype since it may differ for other objects in the level */
-      types = hwloc_type_name(type);
+      types = hwloc_obj_type_string(type);
     } else {
       /* use verbose type name, those are identical for all objects on normal levels */
       hwloc_obj_type_snprintf(_types, sizeof(_types), hwloc_get_obj_by_depth(topology, depth, 0), 1);
