@@ -68,14 +68,14 @@ struct hwloc_topology {
   size_t adopted_shmem_length;
 
 #define HWLOC_NR_SLEVELS 5
-#define HWLOC_SLEVEL_BRIDGE 0
-#define HWLOC_SLEVEL_PCIDEV 1
-#define HWLOC_SLEVEL_OSDEV 2
-#define HWLOC_SLEVEL_MISC 3
-#define HWLOC_SLEVEL_NUMANODE 4
+#define HWLOC_SLEVEL_NUMANODE 0
+#define HWLOC_SLEVEL_BRIDGE 1
+#define HWLOC_SLEVEL_PCIDEV 2
+#define HWLOC_SLEVEL_OSDEV 3
+#define HWLOC_SLEVEL_MISC 4
   /* order must match negative depth, it's asserted in setup_defaults() */
-#define HWLOC_SLEVEL_FROM_DEPTH(x) (HWLOC_TYPE_DEPTH_BRIDGE-(x))
-#define HWLOC_SLEVEL_TO_DEPTH(x) (HWLOC_TYPE_DEPTH_BRIDGE-(x))
+#define HWLOC_SLEVEL_FROM_DEPTH(x) (HWLOC_TYPE_DEPTH_NUMANODE-(x))
+#define HWLOC_SLEVEL_TO_DEPTH(x) (HWLOC_TYPE_DEPTH_NUMANODE-(x))
   struct hwloc_special_level_s {
     unsigned nbobjs;
     struct hwloc_obj **objs;

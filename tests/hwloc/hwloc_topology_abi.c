@@ -44,32 +44,32 @@ int main(void)
      * HWLOC_TOPOLOGY_ABI must be bumped when updating these checks.
      *******************************************************************/
 
-    HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MAX == 19);
+    HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MAX == 18);
     HWLOC_BUILD_ASSERT(HWLOC_NR_SLEVELS == 5);
 
     offset = offsetof(struct hwloc_topology, topology_abi);
     assert(offset == 0);
 
     offset = offsetof(struct hwloc_topology, adopted_shmem_addr);
-    assert(offset == 224);
+    assert(offset == 216);
 
     offset = offsetof(struct hwloc_topology, binding_hooks);
-    assert(offset == 416);
+    assert(offset == 408);
     size = sizeof(struct hwloc_binding_hooks);
     assert(size == 192);
 
     offset = offsetof(struct hwloc_topology, support);
-    assert(offset == 608);
+    assert(offset == 600);
     size = sizeof(struct hwloc_topology_support);
     assert(size == 24);
 
     offset = offsetof(struct hwloc_topology, first_dist);
-    assert(offset == 656);
+    assert(offset == 648);
     size = sizeof(struct hwloc_internal_distances_s);
     assert(size == 64);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 704);
+    assert(offset == 696);
 
     /* fields after this one aren't needed after discovery */
 

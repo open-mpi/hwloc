@@ -168,37 +168,19 @@ typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
  * may be defined in the future!  If you need to compare types, use
  * hwloc_compare_types() instead.
  */
-#define HWLOC_OBJ_TYPE_MIN _HWLOC_OBJ_SYSTEM_OBSOLETE /**< \private Sentinel value */
+#define HWLOC_OBJ_TYPE_MIN HWLOC_OBJ_MACHINE /**< \private Sentinel value */
 typedef enum {
-  _HWLOC_OBJ_SYSTEM_OBSOLETE,  /* FIXME drop and reorder */
-
   HWLOC_OBJ_MACHINE,	/**< \brief Machine.
 			  * The root object type.
 			  * A set of processors and memory with cache
 			  * coherency.
 			  */
-  HWLOC_OBJ_NUMANODE,	/**< \brief NUMA node.
-			  * An object that contains memory that is directly
-			  * and byte-accessible to the host processors.
-			  * It is usually close to some cores (the corresponding objects
-			  * are descendants of the NUMA node object in the hwloc tree).
-			  *
-			  * There is always at one such object in the topology
-			  * even if the machine is not NUMA.
-			  *
-			  * Memory objects are not listed in the main children list,
-			  * but rather in the dedicated Memory children list.
-			  *
-			  * NUMA nodes have a special depth ::HWLOC_TYPE_DEPTH_NUMANODE
-			  * instead of a normal depth just like other objects in the
-			  * main tree.
-			  */
+
   HWLOC_OBJ_PACKAGE,	/**< \brief Physical package.
 			  * The physical package that usually gets inserted
 			  * into a socket on the motherboard.
 			  * A processor package usually contains multiple cores.
 			  */
-
   HWLOC_OBJ_CORE,	/**< \brief Core.
 			  * A computation unit (may be shared by several
 			  * logical processors).
@@ -235,15 +217,21 @@ typedef enum {
 			  * any structure.
 			  */
 
-  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects (filtered out by default).
-			  * Objects without particular meaning, that can e.g. be
-			  * added by the application for its own use, or by hwloc
-			  * for miscellaneous objects such as MemoryModule (DIMMs).
-			  * These objects are not listed in the main children list,
-			  * but rather in the dedicated misc children list.
-			  * Misc objects may only have Misc objects as children,
-			  * and those are in the dedicated misc children list as well.
-			  * Misc objects have NULL CPU and node sets.
+  HWLOC_OBJ_NUMANODE,	/**< \brief NUMA node.
+			  * An object that contains memory that is directly
+			  * and byte-accessible to the host processors.
+			  * It is usually close to some cores (the corresponding objects
+			  * are descendants of the NUMA node object in the hwloc tree).
+			  *
+			  * There is always at one such object in the topology
+			  * even if the machine is not NUMA.
+			  *
+			  * Memory objects are not listed in the main children list,
+			  * but rather in the dedicated Memory children list.
+			  *
+			  * NUMA nodes have a special depth ::HWLOC_TYPE_DEPTH_NUMANODE
+			  * instead of a normal depth just like other objects in the
+			  * main tree.
 			  */
 
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge (filtered out by default).
@@ -268,6 +256,17 @@ typedef enum {
 			  * I/O objects are not listed in the main children list,
 			  * but rather in the dedicated io children list.
 			  * I/O objects have NULL CPU and node sets.
+			  */
+
+  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects (filtered out by default).
+			  * Objects without particular meaning, that can e.g. be
+			  * added by the application for its own use, or by hwloc
+			  * for miscellaneous objects such as MemoryModule (DIMMs).
+			  * These objects are not listed in the main children list,
+			  * but rather in the dedicated misc children list.
+			  * Misc objects may only have Misc objects as children,
+			  * and those are in the dedicated misc children list as well.
+			  * Misc objects have NULL CPU and node sets.
 			  */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
@@ -752,11 +751,11 @@ HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_ty
 enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_UNKNOWN = -1,    /**< \brief No object of given type exists in the topology. \hideinitializer */
     HWLOC_TYPE_DEPTH_MULTIPLE = -2,   /**< \brief Objects of given type exist at different depth in the topology (only for Groups). \hideinitializer */
-    HWLOC_TYPE_DEPTH_BRIDGE = -3,     /**< \brief Virtual depth for bridge object level. \hideinitializer */
-    HWLOC_TYPE_DEPTH_PCI_DEVICE = -4, /**< \brief Virtual depth for PCI device object level. \hideinitializer */
-    HWLOC_TYPE_DEPTH_OS_DEVICE = -5,  /**< \brief Virtual depth for software device object level. \hideinitializer */
-    HWLOC_TYPE_DEPTH_MISC = -6,       /**< \brief Virtual depth for Misc object. \hideinitializer */
-    HWLOC_TYPE_DEPTH_NUMANODE = -7    /**< \brief Virtual depth for NUMA nodes. \hideinitializer */
+    HWLOC_TYPE_DEPTH_NUMANODE = -3,   /**< \brief Virtual depth for NUMA nodes. \hideinitializer */
+    HWLOC_TYPE_DEPTH_BRIDGE = -4,     /**< \brief Virtual depth for bridge object level. \hideinitializer */
+    HWLOC_TYPE_DEPTH_PCI_DEVICE = -5, /**< \brief Virtual depth for PCI device object level. \hideinitializer */
+    HWLOC_TYPE_DEPTH_OS_DEVICE = -6,  /**< \brief Virtual depth for software device object level. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MISC = -7        /**< \brief Virtual depth for Misc object. \hideinitializer */
 };
 
 /** \brief Returns the depth of objects of type \p type or below
