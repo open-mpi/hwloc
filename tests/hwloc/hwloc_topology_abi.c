@@ -69,7 +69,7 @@ int main(void)
     assert(size == 64);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 696);
+    assert(offset == 700);
 
     /* fields after this one aren't needed after discovery */
 

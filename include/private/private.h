@@ -140,8 +140,10 @@ struct hwloc_topology {
     hwloc_obj_t *objs; /* array of objects */
     int objs_are_valid; /* set to 1 if the array objs is still valid, 0 if needs refresh */
 
+    unsigned id; /* to match the container id field of public distances structure */
     struct hwloc_internal_distances_s *prev, *next;
   } *first_dist, *last_dist;
+  unsigned next_dist_id;
 
   int grouping;
   int grouping_verbose;

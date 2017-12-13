@@ -22,6 +22,7 @@
 void hwloc_internal_distances_init(struct hwloc_topology *topology)
 {
   topology->first_dist = topology->last_dist = NULL;
+  topology->next_dist_id = 0;
 }
 
 /* called at the beginning of load() */
@@ -99,6 +100,7 @@ static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct h
   newdist->type = olddist->type;
   newdist->nbobjs = nbobjs;
   newdist->kind = olddist->kind;
+  newdist->id = olddist->id;
 
   newdist->indexes = hwloc_tma_malloc(tma, nbobjs * sizeof(*newdist->indexes));
   newdist->objs = hwloc_tma_calloc(tma, nbobjs * sizeof(*newdist->objs));
@@ -129,6 +131,7 @@ int hwloc_internal_distances_dup(struct hwloc_topology *new, struct hwloc_topolo
 {
   struct hwloc_internal_distances_s *olddist;
   int err;
+  new->next_dist_id = old->next_dist_id;
   for(olddist = old->first_dist; olddist; olddist = olddist->next) {
     err = hwloc_internal_distances_dup_one(new, olddist);
     if (err < 0)
@@ -238,6 +241,8 @@ hwloc_internal_distances__add(hwloc_topology_t topology,
   }
 
   dist->values = values;
+
+  dist->id = topology->next_dist_id++;
 
   if (topology->last_dist)
     topology->last_dist->next = dist;
