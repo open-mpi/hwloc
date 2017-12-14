@@ -234,7 +234,7 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
  out_with_components:
   hwloc_components_fini();
  out_with_mmap:
-  munmap(mmap_address, length);
+  munmap(mmap_res, length);
   return -1;
 }
 
