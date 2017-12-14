@@ -21,9 +21,6 @@ struct hwloc_shmem_header {
   uint32_t header_length; /* where the actual topology starts in the file/mapping */
   uint64_t mmap_address; /* virtual address to pass to mmap */
   uint64_t mmap_length; /* length to pass to mmap (includes the header) */
-
-  /* sanity checks for hwloc_topology changes */
-  uint32_t topology_abi;
 };
 
 #define HWLOC_SHMEM_MALLOC_ALIGN 8UL
