@@ -368,6 +368,19 @@ hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
   return 0;
 }
 
+/* frees level until arity = 0 */
+static void
+hwloc_synthetic_free_levels(struct hwloc_synthetic_backend_data_s *data)
+{
+  unsigned i;
+  for(i=0; i<HWLOC_SYNTHETIC_MAX_DEPTH; i++) {
+    struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
+    free(curlevel->index_array);
+    if (!curlevel->arity)
+      return;
+  }
+}
+
 /* Read from description a series of integers describing a symmetrical
    topology and update the hwloc_synthetic_backend_data_s accordingly.  On
    success, return zero.  */
@@ -687,12 +700,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   return 0;
 
  error:
-  for(i=0; i<HWLOC_SYNTHETIC_MAX_DEPTH; i++) {
-    struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
-    free(curlevel->index_array);
-    if (!curlevel->arity)
-      break;
-  }
+  hwloc_synthetic_free_levels(data);
   return -1;
 }
 
@@ -836,13 +844,7 @@ static void
 hwloc_synthetic_backend_disable(struct hwloc_backend *backend)
 {
   struct hwloc_synthetic_backend_data_s *data = backend->private_data;
-  unsigned i;
-  for(i=0; i<HWLOC_SYNTHETIC_MAX_DEPTH; i++) {
-    struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
-    free(curlevel->index_array);
-    if (!curlevel->arity)
-      break;
-  }
+  hwloc_synthetic_free_levels(data);
   free(data->string);
   free(data);
 }
