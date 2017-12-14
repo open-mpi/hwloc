@@ -18,22 +18,30 @@
 #include <strings.h>
 #endif
 
-struct hwloc_synthetic_level_data_s {
-  unsigned arity;
-  unsigned long totalwidth;
+struct hwloc_synthetic_attr_s {
   hwloc_obj_type_t type;
   unsigned depth; /* For caches/groups */
   hwloc_obj_cache_type_t cachetype; /* For caches */
   hwloc_uint64_t memorysize; /* For caches/memory */
+};
 
+struct hwloc_synthetic_indexes_s {
   /* the indexes= attribute before parsing */
-  const char *index_string;
-  unsigned long index_string_length;
+  const char *string;
+  unsigned long string_length;
   /* the array of explicit indexes after parsing */
-  unsigned *index_array;
+  unsigned *array;
 
   /* used while filling the topology */
-  unsigned next_os_index; /* id of the next object for that level */
+  unsigned next; /* id of the next object for that level */
+};
+
+struct hwloc_synthetic_level_data_s {
+  unsigned arity;
+  unsigned long totalwidth;
+
+  struct hwloc_synthetic_attr_s attr;
+  struct hwloc_synthetic_indexes_s indexes;
 };
 
 struct hwloc_synthetic_backend_data_s {
@@ -50,14 +58,13 @@ struct hwloc_synthetic_intlv_loop_s {
 };
 
 static void
-hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *data,
-				      unsigned curleveldepth,
-				      int verbose)
+hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
+				struct hwloc_synthetic_indexes_s *indexes,
+				unsigned long total,
+				int verbose)
 {
-  struct hwloc_synthetic_level_data_s *curlevel = &data->level[curleveldepth];
-  unsigned long total = curlevel->totalwidth;
-  const char *attr = curlevel->index_string;
-  unsigned long length = curlevel->index_string_length;
+  const char *attr = indexes->string;
+  unsigned long length = indexes->string_length;
   unsigned *array = NULL;
   size_t i;
 
@@ -96,7 +103,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	attr = next;
       }
     }
-    curlevel->index_array = array;
+    indexes->array = array;
 
   } else {
     /* interleaving */
@@ -187,11 +194,11 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	    loops[cur_loop].level_depth = (unsigned)-1;
 	    break;
 	  }
-	  if (type != data->level[i].type)
+	  if (type != data->level[i].attr.type)
 	    continue;
 	  if (type == HWLOC_OBJ_GROUP
 	      && attrs.group.depth != (unsigned) -1
-	      && attrs.group.depth != data->level[i].depth)
+	      && attrs.group.depth != data->level[i].attr.depth)
 	    continue;
 	  loops[cur_loop].level_depth = (unsigned)i;
 	  break;
@@ -275,7 +282,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
       }
     }
 
-    curlevel->index_array = array;
+    indexes->array = array;
    }
   }
 
@@ -311,11 +318,12 @@ hwloc_synthetic_parse_memory_attr(const char *attr, const char **endp)
 }
 
 static int
-hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
-				  struct hwloc_synthetic_level_data_s *curlevel,
-				  int verbose)
+hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
+			    struct hwloc_synthetic_attr_s *sattr,
+			    struct hwloc_synthetic_indexes_s *sind,
+			    int verbose)
 {
-  hwloc_obj_type_t type = curlevel->type;
+  hwloc_obj_type_t type = sattr->type;
   const char *next_pos;
   hwloc_uint64_t memorysize = 0;
   const char *index_string = NULL;
@@ -361,9 +369,9 @@ hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
     }
   }
 
-  curlevel->memorysize = memorysize;
-  curlevel->index_string = index_string;
-  curlevel->index_string_length = (unsigned long)index_string_length;
+  sattr->memorysize = memorysize;
+  sind->string = index_string;
+  sind->string_length = (unsigned long)index_string_length;
   *next_posp = next_pos+1;
   return 0;
 }
@@ -375,7 +383,7 @@ hwloc_synthetic_free_levels(struct hwloc_synthetic_backend_data_s *data)
   unsigned i;
   for(i=0; i<HWLOC_SYNTHETIC_MAX_DEPTH; i++) {
     struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
-    free(curlevel->index_array);
+    free(curlevel->indexes.array);
     if (!curlevel->arity)
       return;
   }
@@ -403,13 +411,13 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
   /* default values before we add root attributes */
   data->level[0].totalwidth = 1;
-  data->level[0].type = HWLOC_OBJ_MACHINE;
-  data->level[0].index_string = NULL;
-  data->level[0].index_array = NULL;
-  data->level[0].memorysize = 0;
+  data->level[0].attr.type = HWLOC_OBJ_MACHINE;
+  data->level[0].indexes.string = NULL;
+  data->level[0].indexes.array = NULL;
+  data->level[0].attr.memorysize = 0;
   type_count[HWLOC_OBJ_MACHINE] = 1;
   if (*description == '(') {
-    err = hwloc_synthetic_parse_level_attrs(description+1, &description, &data->level[0], verbose);
+    err = hwloc_synthetic_parse_attrs(description+1, &description, &data->level[0].attr, &data->level[0].indexes, verbose);
     if (err < 0)
       return err;
   }
@@ -451,16 +459,16 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       }
       pos = next_pos + 1;
     }
-    data->level[count].type = type;
-    data->level[count].depth = (unsigned) -1;
-    data->level[count].cachetype = (hwloc_obj_cache_type_t) -1;
+    data->level[count].attr.type = type;
+    data->level[count].attr.depth = (unsigned) -1;
+    data->level[count].attr.cachetype = (hwloc_obj_cache_type_t) -1;
     if (hwloc_obj_type_is_cache(type)) {
       /* these are always initialized */
-      data->level[count].depth = attrs.cache.depth;
-      data->level[count].cachetype = attrs.cache.type;
+      data->level[count].attr.depth = attrs.cache.depth;
+      data->level[count].attr.cachetype = attrs.cache.type;
     } else if (type == HWLOC_OBJ_GROUP) {
       /* could be -1 but will be set below */
-      data->level[count].depth = attrs.group.depth;
+      data->level[count].attr.depth = attrs.group.depth;
     }
 
     item = strtoul(pos, (char **)&next_pos, 0);
@@ -480,11 +488,11 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     totalarity *= item;
     data->level[count].totalwidth = totalarity;
-    data->level[count].index_string = NULL;
-    data->level[count].index_array = NULL;
-    data->level[count].memorysize = 0;
+    data->level[count].indexes.string = NULL;
+    data->level[count].indexes.array = NULL;
+    data->level[count].attr.memorysize = 0;
     if (*next_pos == '(') {
-      err = hwloc_synthetic_parse_level_attrs(next_pos+1, &next_pos, &data->level[count], verbose);
+      err = hwloc_synthetic_parse_attrs(next_pos+1, &next_pos, &data->level[count].attr, &data->level[count].indexes, verbose);
       if (err < 0)
 	goto error;
     }
@@ -512,19 +520,19 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     goto error;
   }
 
-  if (data->level[count-1].type != HWLOC_OBJ_TYPE_NONE && data->level[count-1].type != HWLOC_OBJ_PU) {
+  if (data->level[count-1].attr.type != HWLOC_OBJ_TYPE_NONE && data->level[count-1].attr.type != HWLOC_OBJ_PU) {
     if (verbose)
       fprintf(stderr, "Synthetic string cannot use non-PU type for last level\n");
     errno = EINVAL;
     return -1;
   }
-  data->level[count-1].type = HWLOC_OBJ_PU;
+  data->level[count-1].attr.type = HWLOC_OBJ_PU;
 
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
     type_count[i] = 0;
   }
   for(i=count-1; i>0; i--) {
-    hwloc_obj_type_t type = data->level[i].type;
+    hwloc_obj_type_t type = data->level[i].attr.type;
     if (type != HWLOC_OBJ_TYPE_NONE) {
       type_count[type]++;
     }
@@ -564,7 +572,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   /* deal with missing intermediate levels */
   unset = 0;
   for(i=1; i<count-1; i++) {
-    if (data->level[i].type == HWLOC_OBJ_TYPE_NONE)
+    if (data->level[i].attr.type == HWLOC_OBJ_TYPE_NONE)
       unset++;
   }
   if (unset && unset != count-2) {
@@ -601,17 +609,17 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     /* we place them in order: groups, package, numa, caches, core */
     for(i = 0; i < needgroups; i++) {
       unsigned depth = 1 + i;
-      data->level[depth].type = HWLOC_OBJ_GROUP;
+      data->level[depth].attr.type = HWLOC_OBJ_GROUP;
       type_count[HWLOC_OBJ_GROUP]++;
     }
     if (needpack) {
       unsigned depth = 1 + needgroups;
-      data->level[depth].type = HWLOC_OBJ_PACKAGE;
+      data->level[depth].attr.type = HWLOC_OBJ_PACKAGE;
       type_count[HWLOC_OBJ_PACKAGE] = 1;
     }
     if (neednuma) {
       unsigned depth = 1 + needgroups + needpack;
-      data->level[depth].type = HWLOC_OBJ_NUMANODE;
+      data->level[depth].attr.type = HWLOC_OBJ_NUMANODE;
       type_count[HWLOC_OBJ_NUMANODE] = 1;
     }
     if (needcaches) {
@@ -622,31 +630,31 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       unsigned l1depth = l2depth + 1;
       unsigned l1idepth = l1depth + 1;
       if (needcaches >= 3) {
-	data->level[l3depth].type = HWLOC_OBJ_L3CACHE;
-	data->level[l3depth].depth = 3;
-	data->level[l3depth].cachetype = HWLOC_OBJ_CACHE_UNIFIED;
+	data->level[l3depth].attr.type = HWLOC_OBJ_L3CACHE;
+	data->level[l3depth].attr.depth = 3;
+	data->level[l3depth].attr.cachetype = HWLOC_OBJ_CACHE_UNIFIED;
 	type_count[HWLOC_OBJ_L3CACHE] = 1;
       }
-      data->level[l2depth].type = HWLOC_OBJ_L2CACHE;
-      data->level[l2depth].depth = 2;
-      data->level[l2depth].cachetype = HWLOC_OBJ_CACHE_UNIFIED;
+      data->level[l2depth].attr.type = HWLOC_OBJ_L2CACHE;
+      data->level[l2depth].attr.depth = 2;
+      data->level[l2depth].attr.cachetype = HWLOC_OBJ_CACHE_UNIFIED;
       type_count[HWLOC_OBJ_L2CACHE] = 1;
       if (needcaches >= 2) {
-	data->level[l1depth].type = HWLOC_OBJ_L1CACHE;
-	data->level[l1depth].depth = 1;
-	data->level[l1depth].cachetype = HWLOC_OBJ_CACHE_DATA;
+	data->level[l1depth].attr.type = HWLOC_OBJ_L1CACHE;
+	data->level[l1depth].attr.depth = 1;
+	data->level[l1depth].attr.cachetype = HWLOC_OBJ_CACHE_DATA;
 	type_count[HWLOC_OBJ_L1CACHE] = 1;
       }
       if (needcaches >= 4) {
-	data->level[l1idepth].type = HWLOC_OBJ_L1ICACHE;
-	data->level[l1idepth].depth = 1;
-	data->level[l1idepth].cachetype = HWLOC_OBJ_CACHE_INSTRUCTION;
+	data->level[l1idepth].attr.type = HWLOC_OBJ_L1ICACHE;
+	data->level[l1idepth].attr.depth = 1;
+	data->level[l1idepth].attr.cachetype = HWLOC_OBJ_CACHE_INSTRUCTION;
 	type_count[HWLOC_OBJ_L1ICACHE] = 1;
       }
     }
     if (needcore) {
       unsigned depth = 1 + needgroups + needpack + neednuma + needcaches;
-      data->level[depth].type = HWLOC_OBJ_CORE;
+      data->level[depth].attr.type = HWLOC_OBJ_CORE;
       type_count[HWLOC_OBJ_CORE] = 1;
     }
   }
@@ -658,10 +666,10 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       fprintf(stderr, "Inserting a NUMA level with a single object at depth 1\n");
     /* move existing levels by one */
     memmove(&data->level[2], &data->level[1], count*sizeof(struct hwloc_synthetic_level_data_s));
-    data->level[1].type = HWLOC_OBJ_NUMANODE;
-    data->level[1].index_string = NULL;
-    data->level[1].index_array = NULL;
-    data->level[1].memorysize = 0;
+    data->level[1].attr.type = HWLOC_OBJ_NUMANODE;
+    data->level[1].indexes.string = NULL;
+    data->level[1].indexes.array = NULL;
+    data->level[1].attr.memorysize = 0;
     data->level[1].totalwidth = data->level[0].totalwidth;
     /* update arity to insert a single NUMA node per parent */
     data->level[1].arity = data->level[0].arity;
@@ -671,28 +679,28 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
   for (i=0; i<count; i++) {
     struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
-    hwloc_obj_type_t type = curlevel->type;
+    hwloc_obj_type_t type = curlevel->attr.type;
 
     if (type == HWLOC_OBJ_GROUP) {
-      if (curlevel->depth == (unsigned)-1)
-	curlevel->depth = type_count[HWLOC_OBJ_GROUP]--;
+      if (curlevel->attr.depth == (unsigned)-1)
+	curlevel->attr.depth = type_count[HWLOC_OBJ_GROUP]--;
 
     } else if (hwloc_obj_type_is_cache(type)) {
-      if (!curlevel->memorysize) {
-	if (1 == curlevel->depth)
+      if (!curlevel->attr.memorysize) {
+	if (1 == curlevel->attr.depth)
 	  /* 32Kb in L1 */
-	  curlevel->memorysize = 32*1024;
+	  curlevel->attr.memorysize = 32*1024;
 	else
 	  /* *4 at each level, starting from 1MB for L2, unified */
-	  curlevel->memorysize = 256*1024 << (2*curlevel->depth);
+	  curlevel->attr.memorysize = 256*1024 << (2*curlevel->attr.depth);
       }
 
-    } else if (type == HWLOC_OBJ_NUMANODE && !curlevel->memorysize) {
+    } else if (type == HWLOC_OBJ_NUMANODE && !curlevel->attr.memorysize) {
       /* 1GB in memory nodes. */
-      curlevel->memorysize = 1024*1024*1024;
+      curlevel->attr.memorysize = 1024*1024*1024;
     }
 
-    hwloc_synthetic_process_level_indexes(data, i, verbose);
+    hwloc_synthetic_process_indexes(data, &data->level[i].indexes, data->level[i].totalwidth, verbose);
   }
 
   data->string = strdup(description);
@@ -705,23 +713,23 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 }
 
 static void
-hwloc_synthetic_set_attr(struct hwloc_synthetic_level_data_s *curlevel,
+hwloc_synthetic_set_attr(struct hwloc_synthetic_attr_s *sattr,
 			 hwloc_obj_t obj)
 {
   switch (obj->type) {
   case HWLOC_OBJ_GROUP:
     obj->attr->group.kind = HWLOC_GROUP_KIND_SYNTHETIC;
-    obj->attr->group.subkind = curlevel->depth-1;
+    obj->attr->group.subkind = sattr->depth-1;
     break;
   case HWLOC_OBJ_MACHINE:
     break;
   case HWLOC_OBJ_NUMANODE:
-    obj->attr->numanode.local_memory = curlevel->memorysize;
+    obj->attr->numanode.local_memory = sattr->memorysize;
     obj->attr->numanode.page_types_len = 1;
     obj->attr->numanode.page_types = malloc(sizeof(*obj->attr->numanode.page_types));
     memset(obj->attr->numanode.page_types, 0, sizeof(*obj->attr->numanode.page_types));
     obj->attr->numanode.page_types[0].size = 4096;
-    obj->attr->numanode.page_types[0].count = curlevel->memorysize / 4096;
+    obj->attr->numanode.page_types[0].count = sattr->memorysize / 4096;
     break;
   case HWLOC_OBJ_PACKAGE:
     break;
@@ -733,10 +741,10 @@ hwloc_synthetic_set_attr(struct hwloc_synthetic_level_data_s *curlevel,
   case HWLOC_OBJ_L1ICACHE:
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
-    obj->attr->cache.depth = curlevel->depth;
+    obj->attr->cache.depth = sattr->depth;
     obj->attr->cache.linesize = 64;
-    obj->attr->cache.type = curlevel->cachetype;
-    obj->attr->cache.size = curlevel->memorysize;
+    obj->attr->cache.type = sattr->cachetype;
+    obj->attr->cache.size = sattr->memorysize;
     break;
   case HWLOC_OBJ_CORE:
     break;
@@ -766,16 +774,16 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   hwloc_obj_t obj;
   unsigned i;
   struct hwloc_synthetic_level_data_s *curlevel = &data->level[level];
-  hwloc_obj_type_t type = curlevel->type;
+  hwloc_obj_type_t type = curlevel->attr.type;
   hwloc_bitmap_t set;
   unsigned os_index;
 
   assert(hwloc_obj_type_is_normal(type) || type == HWLOC_OBJ_NUMANODE);
   assert(type != HWLOC_OBJ_MACHINE);
 
-  os_index = curlevel->next_os_index++;
-  if (curlevel->index_array)
-    os_index = curlevel->index_array[os_index];
+  os_index = curlevel->indexes.next++;
+  if (curlevel->indexes.array)
+    os_index = curlevel->indexes.array[os_index];
   else if (hwloc_obj_type_is_cache(type) || type == HWLOC_OBJ_GROUP)
     /* don't enforce useless os_indexes for Caches and Groups */
     os_index = HWLOC_UNKNOWN_INDEX;
@@ -799,7 +807,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       hwloc_bitmap_set(obj->nodeset, os_index);
     }
 
-    hwloc_synthetic_set_attr(curlevel, obj);
+    hwloc_synthetic_set_attr(&curlevel->attr, obj);
 
     hwloc_insert_object_by_cpuset(topology, obj);
   } else
@@ -822,13 +830,13 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
 
   /* start with os_index 0 for each level */
   for (i = 0; data->level[i].arity > 0; i++)
-    data->level[i].next_os_index = 0;
+    data->level[i].indexes.next = 0;
   /* ... including the last one */
-  data->level[i].next_os_index = 0;
+  data->level[i].indexes.next = 0;
 
   /* update first level type according to the synthetic type array */
-  topology->levels[0][0]->type = data->level[0].type;
-  hwloc_synthetic_set_attr(&data->level[0], topology->levels[0][0]);
+  topology->levels[0][0]->type = data->level[0].attr.type;
+  hwloc_synthetic_set_attr(&data->level[0].attr, topology->levels[0][0]);
 
   for (i = 0; i < data->level[0].arity; i++)
     hwloc__look_synthetic(topology, data, 1, cpuset);
