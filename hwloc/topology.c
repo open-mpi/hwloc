@@ -319,7 +319,7 @@ int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const ch
     if (!tmpinfos)
       /* failed to allocate, ignore this info */
       goto out_with_array;
-    infos = tmpinfos;
+    *infosp = infos = tmpinfos;
   }
   infos[count].name = strdup(name);
   if (!infos[count].name)
@@ -327,7 +327,6 @@ int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const ch
   infos[count].value = strdup(value);
   if (!infos[count].value)
     goto out_with_name;
-  *infosp = infos;
   *countp = count+1;
   return 0;
 
