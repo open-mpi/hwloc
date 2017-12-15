@@ -558,11 +558,29 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   }
   if (unset) {
     /* we want in priority: numa, package, core, up to 3 caches, groups */
-    unsigned neednuma = count >= 3;
-    unsigned needpack = count >= 4;
-    unsigned needcore = count >= 5;
-    unsigned needcaches = count <= 5 ? 0 : count >= 9 ? 4 : count-5;
-    unsigned needgroups = count-2-neednuma-needpack-needcore-needcaches;
+    unsigned _count = count;
+    unsigned neednuma = 0;
+    unsigned needpack = 0;
+    unsigned needcore = 0;
+    unsigned needcaches = 0;
+    unsigned needgroups = 0;
+    /* 2 levels for machine and PU */
+    _count -= 2;
+
+    neednuma = (_count >= 1);
+    _count -= neednuma;
+
+    needpack = (_count >= 1);
+    _count -= needpack;
+
+    needcore = (_count >= 1);
+    _count -= needcore;
+
+    needcaches = (_count > 4 ? 4 : _count);
+    _count -= needcaches;
+
+    needgroups = _count;
+
     /* we place them in order: groups, package, numa, caches, core */
     for(i = 0; i < needgroups; i++) {
       unsigned depth = 1 + i;
