@@ -4080,6 +4080,8 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MIN == 0);
   assert((unsigned) obj->type < HWLOC_OBJ_TYPE_MAX);
 
+  assert(hwloc_filter_check_keep_object(topology, obj));
+
   /* check that sets and depth */
   if (hwloc_obj_type_is_special(obj->type)) {
     assert(!obj->cpuset);
