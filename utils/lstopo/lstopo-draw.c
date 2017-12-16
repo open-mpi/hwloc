@@ -412,7 +412,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     if (plud->above_children.kinds) {
       totheight += above_children_height + separator;
       if (above_children_width > totwidth)
-	totwidth = above_children_width + 2*border;
+	totwidth = above_children_width;
     }
   } else if (parent->type == HWLOC_OBJ_BRIDGE) {
     /* bridge children are on the right, within any space between bridge and children */
