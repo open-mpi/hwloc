@@ -693,8 +693,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 }
 
 static void
-hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
-				 hwloc_obj_t obj)
+hwloc_synthetic_set_attr(struct hwloc_synthetic_level_data_s *curlevel,
+			 hwloc_obj_t obj)
 {
   switch (obj->type) {
   case HWLOC_OBJ_GROUP:
@@ -758,32 +758,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   hwloc_bitmap_t set;
   unsigned os_index;
 
-  /* pre-hooks */
-  switch (type) {
-    case HWLOC_OBJ_GROUP:
-      break;
-    case HWLOC_OBJ_NUMANODE:
-      break;
-    case HWLOC_OBJ_PACKAGE:
-      break;
-    case HWLOC_OBJ_L1CACHE:
-    case HWLOC_OBJ_L2CACHE:
-    case HWLOC_OBJ_L3CACHE:
-    case HWLOC_OBJ_L4CACHE:
-    case HWLOC_OBJ_L5CACHE:
-    case HWLOC_OBJ_L1ICACHE:
-    case HWLOC_OBJ_L2ICACHE:
-    case HWLOC_OBJ_L3ICACHE:
-      break;
-    case HWLOC_OBJ_CORE:
-      break;
-    case HWLOC_OBJ_PU:
-      break;
-    default:
-      /* Should never happen */
-      assert(0);
-      break;
-  }
+  assert(hwloc_obj_type_is_normal(type) || type == HWLOC_OBJ_NUMANODE);
+  assert(type != HWLOC_OBJ_MACHINE);
 
   os_index = curlevel->next_os_index++;
   if (curlevel->index_array)
@@ -811,7 +787,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       hwloc_bitmap_set(obj->nodeset, os_index);
     }
 
-    hwloc_synthetic__post_look_hooks(curlevel, obj);
+    hwloc_synthetic_set_attr(curlevel, obj);
 
     hwloc_insert_object_by_cpuset(topology, obj);
   } else
@@ -840,7 +816,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
 
   /* update first level type according to the synthetic type array */
   topology->levels[0][0]->type = data->level[0].type;
-  hwloc_synthetic__post_look_hooks(&data->level[0], topology->levels[0][0]);
+  hwloc_synthetic_set_attr(&data->level[0], topology->levels[0][0]);
 
   for (i = 0; i < data->level[0].arity; i++)
     hwloc__look_synthetic(topology, data, 1, cpuset);
