@@ -182,7 +182,11 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	    fprintf(stderr, "Misc object type disallowed in synthetic index interleaving loop type '%s'\n", tmp);
 	  goto out_with_array;
 	}
-	for(i=0; i<curleveldepth; i++) {
+	for(i=0; ; i++) {
+	  if (!data->level[i].arity) {
+	    loops[cur_loop].level_depth = (unsigned)-1;
+	    break;
+	  }
 	  if (type != data->level[i].type)
 	    continue;
 	  if (type == HWLOC_OBJ_GROUP
@@ -192,10 +196,10 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	  loops[cur_loop].level_depth = (unsigned)i;
 	  break;
 	}
-	if (i == curleveldepth) {
+	if (loops[cur_loop].level_depth == (unsigned)-1) {
 	  if (verbose)
-	    fprintf(stderr, "Failed to find level for synthetic index interleaving loop type '%s' above '%s'\n",
-		    tmp, hwloc_obj_type_string(curlevel->type));
+	    fprintf(stderr, "Failed to find level for synthetic index interleaving loop type '%s'\n",
+		    tmp);
 	  goto out_with_array;
 	}
 	tmp = strchr(tmp, ':');
@@ -220,7 +224,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	      && loops[i].level_depth > prevdepth)
 	    prevdepth = loops[i].level_depth;
 	}
-	step = curlevel->totalwidth / data->level[mydepth].totalwidth; /* number of objects below us */
+	step = total / data->level[mydepth].totalwidth; /* number of objects below us */
 	nb = data->level[mydepth].totalwidth / data->level[prevdepth].totalwidth; /* number of us within parent */
 
 	loops[cur_loop].step = step;
