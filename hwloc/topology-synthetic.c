@@ -42,11 +42,21 @@ struct hwloc_synthetic_level_data_s {
 
   struct hwloc_synthetic_attr_s attr;
   struct hwloc_synthetic_indexes_s indexes;
+
+  struct hwloc_synthetic_attached_s {
+    struct hwloc_synthetic_attr_s attr;
+
+    struct hwloc_synthetic_attached_s *next;
+  } *attached;
 };
 
 struct hwloc_synthetic_backend_data_s {
   /* synthetic backend parameters */
   char *string;
+
+  unsigned long numa_attached_nr;
+  struct hwloc_synthetic_indexes_s numa_attached_indexes;
+
 #define HWLOC_SYNTHETIC_MAX_DEPTH 128
   struct hwloc_synthetic_level_data_s level[HWLOC_SYNTHETIC_MAX_DEPTH];
 };
@@ -370,8 +380,14 @@ hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
   }
 
   sattr->memorysize = memorysize;
-  sind->string = index_string;
-  sind->string_length = (unsigned long)index_string_length;
+
+  if (index_string) {
+    if (sind->string && verbose)
+      fprintf(stderr, "Overwriting duplicate indexes attribute with last occurence\n");
+    sind->string = index_string;
+    sind->string_length = (unsigned long)index_string_length;
+  }
+
   *next_posp = next_pos+1;
   return 0;
 }
@@ -383,10 +399,17 @@ hwloc_synthetic_free_levels(struct hwloc_synthetic_backend_data_s *data)
   unsigned i;
   for(i=0; i<HWLOC_SYNTHETIC_MAX_DEPTH; i++) {
     struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
+    struct hwloc_synthetic_attached_s **pprev = &curlevel->attached;
+    while (*pprev) {
+      struct hwloc_synthetic_attached_s *cur = *pprev;
+      *pprev = cur->next;
+      free(cur);
+    }
     free(curlevel->indexes.array);
     if (!curlevel->arity)
-      return;
+      break;
   }
+  free(data->numa_attached_indexes.array);
 }
 
 /* Read from description a series of integers describing a symmetrical
@@ -409,18 +432,25 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   if (env)
     verbose = atoi(env);
 
+  data->numa_attached_nr = 0;
+  data->numa_attached_indexes.array = NULL;
+
   /* default values before we add root attributes */
   data->level[0].totalwidth = 1;
   data->level[0].attr.type = HWLOC_OBJ_MACHINE;
   data->level[0].indexes.string = NULL;
   data->level[0].indexes.array = NULL;
   data->level[0].attr.memorysize = 0;
+  data->level[0].attached = NULL;
   type_count[HWLOC_OBJ_MACHINE] = 1;
   if (*description == '(') {
     err = hwloc_synthetic_parse_attrs(description+1, &description, &data->level[0].attr, &data->level[0].indexes, verbose);
     if (err < 0)
       return err;
   }
+
+  data->numa_attached_indexes.string = NULL;
+  data->numa_attached_indexes.array = NULL;
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
     hwloc_obj_type_t type = HWLOC_OBJ_TYPE_NONE;
@@ -434,6 +464,66 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     if (!*pos)
       break;
+
+    if (*pos == '[') {
+      /* attached */
+      struct hwloc_synthetic_attached_s *attached, **pprev;
+      char *attr;
+
+      pos++;
+
+      if (hwloc_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
+	if (verbose)
+	  fprintf(stderr, "Synthetic string with unknown attached object type at '%s'\n", pos);
+	errno = EINVAL;
+	goto error;
+      }
+      if (type != HWLOC_OBJ_NUMANODE) {
+	if (verbose)
+	  fprintf(stderr, "Synthetic string with disallowed attached object type at '%s'\n", pos);
+	errno = EINVAL;
+	goto error;
+      }
+      data->numa_attached_nr += data->level[count-1].totalwidth;
+
+      attached = malloc(sizeof(*attached));
+      if (attached) {
+	attached->attr.type = type;
+	attached->attr.memorysize = 0;
+	/* attached->attr.depth and .cachetype unused */
+	attached->next = NULL;
+	pprev = &data->level[count-1].attached;
+	while (*pprev)
+	  pprev = &((*pprev)->next);
+	*pprev = attached;
+      }
+
+      next_pos = strchr(pos, ']');
+      if (!next_pos) {
+	if (verbose)
+	  fprintf(stderr,"Synthetic string doesn't have a closing `]' after attached object type at '%s'\n", pos);
+	errno = EINVAL;
+	goto error;
+      }
+
+      attr = strchr(pos, '(');
+      if (attr && attr < next_pos && attached) {
+	const char *dummy;
+	err = hwloc_synthetic_parse_attrs(attr+1, &dummy, &attached->attr, &data->numa_attached_indexes, verbose);
+	if (err < 0)
+	  goto error;
+      }
+
+      next_pos++;
+      continue;
+    }
+
+    /* normal level */
+
+    /* reset defaults */
+    data->level[count].indexes.string = NULL;
+    data->level[count].indexes.array = NULL;
+    data->level[count].attached = NULL;
 
     if (*pos < '0' || *pos > '9') {
       if (hwloc_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
@@ -459,6 +549,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       }
       pos = next_pos + 1;
     }
+
     data->level[count].attr.type = type;
     data->level[count].attr.depth = (unsigned) -1;
     data->level[count].attr.cachetype = (hwloc_obj_cache_type_t) -1;
@@ -471,6 +562,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       data->level[count].attr.depth = attrs.group.depth;
     }
 
+    /* number of normal children */
     item = strtoul(pos, (char **)&next_pos, 0);
     if (next_pos == pos) {
       if (verbose)
@@ -562,6 +654,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     errno = EINVAL;
     return -1;
   }
+  if (type_count[HWLOC_OBJ_NUMANODE] && data->numa_attached_nr) {
+    if (verbose)
+      fprintf(stderr,"Synthetic string cannot have NUMA nodes both as a level and attached\n");
+    errno = EINVAL;
+    return -1;
+  }
   if (type_count[HWLOC_OBJ_CORE] > 1) {
     if (verbose)
       fprintf(stderr, "Synthetic string cannot have several core levels\n");
@@ -592,7 +690,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     /* 2 levels for machine and PU */
     _count -= 2;
 
-    neednuma = (_count >= 1);
+    neednuma = (_count >= 1 && !data->numa_attached_nr);
     _count -= neednuma;
 
     needpack = (_count >= 1);
@@ -660,7 +758,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   }
 
   /* enforce a NUMA level */
-  if (!type_count[HWLOC_OBJ_NUMANODE]) {
+  if (!type_count[HWLOC_OBJ_NUMANODE] && !data->numa_attached_nr) {
     /* insert a NUMA level below the automatic machine root */
     if (verbose)
       fprintf(stderr, "Inserting a NUMA level with a single object at depth 1\n");
@@ -702,6 +800,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     hwloc_synthetic_process_indexes(data, &data->level[i].indexes, data->level[i].totalwidth, verbose);
   }
+
+  hwloc_synthetic_process_indexes(data, &data->numa_attached_indexes, data->numa_attached_nr, verbose);
 
   data->string = strdup(description);
   data->level[count-1].arity = 0;
@@ -771,6 +871,35 @@ hwloc_synthetic_next_index(struct hwloc_synthetic_indexes_s *indexes, hwloc_obj_
   return os_index;
 }
 
+static void
+hwloc_synthetic_insert_attached(struct hwloc_topology *topology,
+				struct hwloc_synthetic_backend_data_s *data,
+				struct hwloc_synthetic_attached_s *attached,
+				hwloc_bitmap_t set)
+{
+  hwloc_obj_t child;
+  unsigned attached_os_index;
+
+  if (!attached)
+    return;
+
+  assert(attached->attr.type == HWLOC_OBJ_NUMANODE);
+
+  attached_os_index = hwloc_synthetic_next_index(&data->numa_attached_indexes, HWLOC_OBJ_NUMANODE);
+
+  child = hwloc_alloc_setup_object(topology, attached->attr.type, attached_os_index);
+  child->cpuset = hwloc_bitmap_dup(set);
+
+  child->nodeset = hwloc_bitmap_alloc();
+  hwloc_bitmap_set(child->nodeset, attached_os_index);
+
+  hwloc_synthetic_set_attr(&attached->attr, child);
+
+  hwloc_insert_object_by_cpuset(topology, child);
+
+  hwloc_synthetic_insert_attached(topology, data, attached->next, set);
+}
+
 /*
  * Recursively build objects whose cpu start at first_cpu
  * - level gives where to look in the type, arity and id arrays
@@ -809,7 +938,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 
   if (hwloc_filter_check_keep_object_type(topology, type)) {
     obj = hwloc_alloc_setup_object(topology, type, os_index);
-    obj->cpuset = set;
+    obj->cpuset = hwloc_bitmap_dup(set);
 
     if (type == HWLOC_OBJ_NUMANODE) {
       obj->nodeset = hwloc_bitmap_alloc();
@@ -819,8 +948,11 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     hwloc_synthetic_set_attr(&curlevel->attr, obj);
 
     hwloc_insert_object_by_cpuset(topology, obj);
-  } else
-    hwloc_bitmap_free(set);
+  }
+
+  hwloc_synthetic_insert_attached(topology, data, curlevel->attached, set);
+
+  hwloc_bitmap_free(set);
 }
 
 static int
@@ -840,6 +972,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
   /* start with os_index 0 for each level */
   for (i = 0; data->level[i].arity > 0; i++)
     data->level[i].indexes.next = 0;
+  data->numa_attached_indexes.next = 0;
   /* ... including the last one */
   data->level[i].indexes.next = 0;
 
@@ -849,6 +982,8 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
 
   for (i = 0; i < data->level[0].arity; i++)
     hwloc__look_synthetic(topology, data, 1, cpuset);
+
+  hwloc_synthetic_insert_attached(topology, data, data->level[0].attached, cpuset);
 
   hwloc_bitmap_free(cpuset);
 
