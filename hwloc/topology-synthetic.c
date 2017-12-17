@@ -757,6 +757,20 @@ hwloc_synthetic_set_attr(struct hwloc_synthetic_attr_s *sattr,
   }
 }
 
+static unsigned
+hwloc_synthetic_next_index(struct hwloc_synthetic_indexes_s *indexes, hwloc_obj_type_t type)
+{
+  unsigned os_index = indexes->next++;
+
+  if (indexes->array)
+    os_index = indexes->array[os_index];
+  else if (hwloc_obj_type_is_cache(type) || type == HWLOC_OBJ_GROUP)
+    /* don't enforce useless os_indexes for Caches and Groups */
+    os_index = HWLOC_UNKNOWN_INDEX;
+
+  return os_index;
+}
+
 /*
  * Recursively build objects whose cpu start at first_cpu
  * - level gives where to look in the type, arity and id arrays
@@ -781,12 +795,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   assert(hwloc_obj_type_is_normal(type) || type == HWLOC_OBJ_NUMANODE);
   assert(type != HWLOC_OBJ_MACHINE);
 
-  os_index = curlevel->indexes.next++;
-  if (curlevel->indexes.array)
-    os_index = curlevel->indexes.array[os_index];
-  else if (hwloc_obj_type_is_cache(type) || type == HWLOC_OBJ_GROUP)
-    /* don't enforce useless os_indexes for Caches and Groups */
-    os_index = HWLOC_UNKNOWN_INDEX;
+  os_index = hwloc_synthetic_next_index(&curlevel->indexes, type);
 
   set = hwloc_bitmap_alloc();
   if (!curlevel->arity) {
