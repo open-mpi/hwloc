@@ -78,7 +78,7 @@ scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make |
 test x$NO_CHECK = xtrue || scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make check | tee -a scan-build.log
 
 # Run cppcheck analysis
-SOURCES_TO_ANALYZE="hwloc netloc tests utils"
+SOURCES_TO_ANALYZE="hwloc tests utils"
 SOURCES_TO_EXCLUDE="-itests/hwloc/ports -ihwloc/topology-aix.c -ihwloc/topology-bgq.c -ihwloc/topology-darwin.c -ihwloc/topology-freebsd.c -ihwloc/topology-hpux.c -ihwloc/topology-netbsd.c -ihwloc/topology-solaris.c -ihwloc/topology-solaris-chiptype.c -ihwloc/topology-windows.c -ihwloc/topology-cuda.c -ihwloc/topology-gl.c -ihwloc/topology-nvml.c -ihwloc/topology-rsmi.c -ihwloc/topology-levelzero.c -ihwloc/topology-opencl.c -iutils/lstopo/lstopo-windows.c -iutils/lstopo/lstopo-android.c"
 CPPCHECK_INCLUDES="-Iinclude -Ihwloc -Iutils/lstopo -Iutils/hwloc"
 CPPCHECK="cppcheck -v -f --language=c --platform=unix64 --enable=all --xml --xml-version=2 --suppress=purgedConfiguration --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES}"
@@ -156,7 +156,7 @@ sonar.projectVersion=$hwloc_branch
 sonar.scm.disabled=false
 # sonar.scm.provider=git requires sonar-scanner to run inside a git clone
 sonar.sourceEncoding=UTF-8
-sonar.sources=hwloc, netloc, tests, utils
+sonar.sources=hwloc, tests, utils
 sonar.exclusions=tests/hwloc/ports/**,utils/netloc/draw/**,tests/hwloc/xml/*.xml
 sonar.c.clangsa.reportPath=analyzer_reports/*/*.plist
 sonar.c.errorRecoveryEnabled=true
