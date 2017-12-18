@@ -225,9 +225,11 @@ fi
 hwloc_xml_status=basic
 AS_IF([test "$hwloc_libxml2_happy" = "yes"], [hwloc_xml_status=full])
 netloc_status=no
-AS_IF([test "$netloc_happy" = "yes"], [netloc_status=yes])
-netlocscotch_status=no
-AS_IF([test "$scotch_found_headers" = "yes"], [netlocscotch_status=yes])
+AS_IF([test "$netloc_happy" = "yes"], [
+  netlocscotch_status=without
+  AS_IF([test "$scotch_found_headers" = "yes"], [netlocscotch_status=with])
+  netloc_status="yes ($netlocscotch_status scotch)"
+])
 
 # Prepare the I/O summary
 hwloc_probeio_list=
@@ -254,7 +256,7 @@ Hwloc optional build support status (more details can be found above):
 Probe / display I/O devices:$hwloc_probeio_list
 Graphical output (Cairo):    $hwloc_cairo_happy
 XML input / output:          $hwloc_xml_status
-Netloc functionality:        $netloc_status (with scotch: $netlocscotch_status)
+Netloc functionality:        $netloc_status
 EOF
 
 # Plugin support
