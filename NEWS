@@ -90,8 +90,8 @@ Version 2.0.0
 * New APIs and Features
   + Add hwloc/shmem.h for sharing topologies between processes running on
     the same machine (for reducing the memory footprint).
-  + Add the experimental netloc subproject. It is enabled by default when
-    supported and can be disabled with --disable-netloc.
+  + Add the experimental netloc subproject. It is disabled by default
+    and can be enabled with --enable-netloc.
     It currently brings command-line tools to gather and visualize the
     topology of InfiniBand fabrics, and an API to convert such topologies
     into Scotch architectures for process mapping.
