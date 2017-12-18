@@ -118,18 +118,20 @@ int main(void)
   assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check helpers */
   assert(hwloc_distances_obj_index(distances[0], hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2)) == 2);
-  assert(hwloc_distances_obj_pair_values(distances[0],
-					 hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1),
-					 hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2),
-					 &value1, &value2) == 0);
+  err = hwloc_distances_obj_pair_values(distances[0],
+					hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1),
+					hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2),
+					&value1, &value2);
+  assert(!err);
   assert(value1 == values[1*4+2]);
   assert(value2 == values[2*4+1]);
   /* check helpers on errors */
   assert(hwloc_distances_obj_index(distances[0], hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0)) == -1);
-  assert(hwloc_distances_obj_pair_values(distances[0],
-					 hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 1),
-					 hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 2),
-					 &value1, &value2) == -1);
+  err = hwloc_distances_obj_pair_values(distances[0],
+					hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 1),
+					hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 2),
+					&value1, &value2);
+  assert(err == -1);
   /* check that some random values are ok */
   assert(distances[0]->values[0] == 1); /* diagonal */
   assert(distances[0]->values[4] == 4); /* same group */
