@@ -60,7 +60,7 @@ if test x$dotar = x1; then
   # find the tarball and extract it
   tarball=$(ls -tr hwloc-*.tar.gz | tail -1)
   basename=$(basename $tarball .tar.gz)
-  version=$(echo $basename | cut -d- -f2)
+  version=$(echo $basename | cut -d- -f2-)
   test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
   tar xfz $tarball
   if test x$dokeeptar = x0; then
