@@ -9,7 +9,10 @@ set -x
 
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
-branch=$( echo $GIT_BRANCH | sed -r -e 's@^.*/([^/]+)$@\1@' )
+
+# keep branch-name before the first - (e.g. v2.0-beta becomes v2.0)
+# and look for the corresponding autotools
+branch=$( echo $GIT_BRANCH | sed -r -e 's@^.*/([^/]+)$@\1@' -e 's/-.*//' )
 if test -d $HOME/local/hwloc-$branch ; then
   export PATH=$HOME/local/hwloc-${branch}/bin:$PATH
   echo using specific $HOME/local/hwloc-$branch
