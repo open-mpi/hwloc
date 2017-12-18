@@ -217,7 +217,16 @@ enum hwloc_topology_export_synthetic_flags_e {
   * This is required if loading the synthetic description with hwloc < 1.10.
   * \hideinitializer
   */
- HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS = (1UL<<1)
+ HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS = (1UL<<1),
+
+ /** \brief Export the memory hierarchy as expected in hwloc 1.x.
+  *
+  * Instead of attaching memory children to levels, export single NUMA node child
+  * as normal intermediate levels, when possible.
+  * This is required if loading the synthetic description with hwloc 1.x.
+  * \hideinitializer
+  */
+ HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1 = (1UL<<2)
 };
 
 /** \brief Export the topology as a synthetic string.

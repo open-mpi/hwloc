@@ -1292,8 +1292,41 @@ hwloc_topology_export_synthetic_memory_children(struct hwloc_topology * topology
   int res, ret = 0;
 
   mchild = parent->memory_first_child;
-  while (mchild) {
+  if (!mchild)
+    return 0;
 
+  if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1) {
+    /* v1: export a single NUMA child */
+    if (parent->memory_arity > 1 || mchild->type != HWLOC_OBJ_NUMANODE) {
+      /* not supported */
+      errno = EINVAL;
+      return -1;
+    }
+
+    if (needprefix) {
+      if (tmplen > 1) {
+	tmp[0] = ' ';
+	tmp[1] = '\0';
+	tmp++;
+	tmplen--;
+      }
+      ret++;
+    }
+
+    res = hwloc_topology_export_synthetic_obj(topology, flags, mchild, 1, tmp, tmplen);
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= tmplen)
+      res = tmplen>0 ? (int)tmplen - 1 : 0;
+    tmp += res;
+    tmplen -= res;
+
+    return ret;
+  }
+
+  while (mchild) {
+    /* v2: export all NUMA children */
     if (needprefix) {
       if (tmplen > 1) {
 	tmp[0] = ' ';
@@ -1353,7 +1386,9 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     return -1;
   }
 
-  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
+  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES
+		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS
+		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1)) {
     errno = EINVAL;
     return -1;
   }
