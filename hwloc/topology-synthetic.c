@@ -1235,6 +1235,48 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
   }
 }
 
+static int
+hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned long flags,
+				    hwloc_obj_t obj, unsigned arity,
+				    char *buffer, size_t buflen,
+				    const char *prefix)
+{
+  ssize_t tmplen = buflen;
+  char *tmp = buffer;
+  int res, ret = 0;
+
+  /* <type>:<arity>, except for root */
+  if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
+      || flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
+    res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, hwloc_obj_type_string(obj->type), arity);
+  } else {
+    char types[64];
+    hwloc_obj_type_snprintf(types, sizeof(types), obj, 1);
+    res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, types, arity);
+  }
+  if (res < 0)
+    return -1;
+  ret += res;
+  if (res >= tmplen)
+    res = tmplen>0 ? (int)tmplen - 1 : 0;
+  tmp += res;
+  tmplen -= res;
+
+  if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
+    /* obj attributes */
+    res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= tmplen)
+      res = tmplen>0 ? (int)tmplen - 1 : 0;
+    tmp += res;
+    tmplen -= res;
+  }
+
+  return ret;
+}
+
 int
 hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 				char *buffer, size_t buflen,
@@ -1277,13 +1319,13 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   }
 
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
-    /* root attributes */
+    /* obj attributes */
     res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
     if (res < 0)
       return -1;
-    ret += res;
-    if (ret > 0)
+    if (res > 0)
       prefix = separator;
+    ret += res;
     if (res >= tmplen)
       res = tmplen>0 ? (int)tmplen - 1 : 0;
     tmp += res;
@@ -1294,14 +1336,8 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   while (arity) {
     /* for each level */
     obj = obj->first_child;
-    if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
-	|| flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
-      res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, hwloc_obj_type_string(obj->type), arity);
-    } else {
-      char types[64];
-      hwloc_obj_type_snprintf(types, sizeof(types), obj, 1);
-      res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, types, arity);
-    }
+
+    res = hwloc_topology_export_synthetic_obj(topology, flags, obj, arity, tmp, tmplen, prefix);
     if (res < 0)
       return -1;
     ret += res;
@@ -1309,18 +1345,6 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
       res = tmplen>0 ? (int)tmplen - 1 : 0;
     tmp += res;
     tmplen -= res;
-
-    if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
-      /* obj attributes */
-      res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
-      if (res < 0)
-	return -1;
-      ret += res;
-      if (res >= tmplen)
-	res = tmplen>0 ? (int)tmplen - 1 : 0;
-      tmp += res;
-      tmplen -= res;
-    }
 
     /* next level */
     prefix = separator;
