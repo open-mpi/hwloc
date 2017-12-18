@@ -605,13 +605,6 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     count++;
   }
 
-  if (count <= 0) {
-    if (verbose)
-      fprintf(stderr, "Synthetic string doesn't contain any object\n");
-    errno = EINVAL;
-    goto error;
-  }
-
   if (data->level[count-1].attr.type != HWLOC_OBJ_TYPE_NONE && data->level[count-1].attr.type != HWLOC_OBJ_PU) {
     if (verbose)
       fprintf(stderr, "Synthetic string cannot use non-PU type for last level\n");
