@@ -1238,8 +1238,7 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
 static int
 hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned long flags,
 				    hwloc_obj_t obj, unsigned arity,
-				    char *buffer, size_t buflen,
-				    const char *prefix)
+				    char *buffer, size_t buflen)
 {
   ssize_t tmplen = buflen;
   char *tmp = buffer;
@@ -1248,11 +1247,11 @@ hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned l
   /* <type>:<arity>, except for root */
   if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
       || flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
-    res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, hwloc_obj_type_string(obj->type), arity);
+    res = hwloc_snprintf(tmp, tmplen, "%s:%u", hwloc_obj_type_string(obj->type), arity);
   } else {
     char types[64];
     hwloc_obj_type_snprintf(types, sizeof(types), obj, 1);
-    res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, types, arity);
+    res = hwloc_snprintf(tmp, tmplen, "%s:%u", types, arity);
   }
   if (res < 0)
     return -1;
@@ -1287,8 +1286,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   char *tmp = buffer;
   int res, ret = 0;
   unsigned arity;
-  const char * separator = " ";
-  const char * prefix = "";
+  int needprefix = 0;
 
   if (!topology->is_loaded) {
     errno = EINVAL;
@@ -1324,7 +1322,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     if (res < 0)
       return -1;
     if (res > 0)
-      prefix = separator;
+      needprefix = 1;
     ret += res;
     if (res >= tmplen)
       res = tmplen>0 ? (int)tmplen - 1 : 0;
@@ -1337,7 +1335,17 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     /* for each level */
     obj = obj->first_child;
 
-    res = hwloc_topology_export_synthetic_obj(topology, flags, obj, arity, tmp, tmplen, prefix);
+    if (needprefix) {
+      if (tmplen > 1) {
+	tmp[0] = ' ';
+	tmp[1] = '\0';
+	tmp++;
+	tmplen--;
+      }
+      ret++;
+    }
+
+    res = hwloc_topology_export_synthetic_obj(topology, flags, obj, arity, tmp, tmplen);
     if (res < 0)
       return -1;
     ret += res;
@@ -1347,7 +1355,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     tmplen -= res;
 
     /* next level */
-    prefix = separator;
+    needprefix = 1;
     arity = obj->arity;
   }
 
