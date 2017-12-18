@@ -144,10 +144,10 @@ AC_SUBST([libnetloc_so_version])
 
 AC_ARG_ENABLE([netloc],
               [AS_HELP_STRING([--enable-netloc],
-                              [The Netloc functionality is enabled by default, but will be silently skipped it if cannot be built (e.g., not supported on your platform).  Using --enable-netloc will cause configure to abort if Netloc cannot be build.  Using --disable-netloc will cause configure to skip attempting to build netloc at all.])
+                              [The Netloc functionality is disabled by default. Using --enable-netloc will cause configure to abort if Netloc cannot be build (e.g., not supported on your platform).])
               ])
 
-AS_IF([test "$enable_netloc" != "no" -a "$hwloc_mode" = "standalone"],
+AS_IF([test "$enable_netloc" = "yes" -a "$hwloc_mode" = "standalone"],
       [NETLOC_SETUP_CORE([], [],
            [AS_IF([test "$enable_netloc" = "yes"],
                   [AC_MSG_ERROR([Cannot build netloc core])])
