@@ -2111,7 +2111,8 @@ For reference, ::hwloc_topology_t modification operations include
   after these functions return.  </dd>
 
 <dt>Runtime topology modifications</dt>
-  <dd><tt>hwloc_topology_insert_misc_object()</tt>
+  <dd><tt>hwloc_topology_insert_misc_object()</tt>,
+  <tt>hwloc_topology_alloc_group_object()</tt>,
   and <tt>hwloc_topology_insert_group_object()</tt>
   (see \ref hwlocality_tinker) may modify the topology significantly by adding
   objects inside the tree, changing the topology depth, etc.
@@ -2119,6 +2120,9 @@ For reference, ::hwloc_topology_t modification operations include
   <tt>hwloc_distances_add()</tt> and <tt>hwloc_distances_remove()</tt>
   (see \ref hwlocality_distances_get) modify the list of distance structures
   in the topology, and the former may even insert new Group objects.
+  <tt>hwloc_distances_get()</tt> and its variant may also modify
+  internal distance structures to refresh according to previous
+  topology changes (if some objects were previously removed).
 
   <tt>hwloc_topology_restrict()</tt> modifies the topology even more
   dramatically by removing some objects.
