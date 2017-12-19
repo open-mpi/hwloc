@@ -1249,7 +1249,11 @@ hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned l
   /* <type>:<arity>, except for root */
   if (arity != (unsigned)-1)
     snprintf(aritys, sizeof(aritys), ":%u", arity);
-  if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
+  if (hwloc_obj_type_is_cache(obj->type)
+      && (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES)) {
+    /* v1 uses generic "Cache" for non-extended type name */
+    res = hwloc_snprintf(tmp, tmplen, "Cache%s", aritys);
+  } else if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
       || flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
     res = hwloc_snprintf(tmp, tmplen, "%s%s", hwloc_obj_type_string(obj->type), aritys);
   } else {
