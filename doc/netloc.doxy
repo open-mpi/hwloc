@@ -3,7 +3,7 @@
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  *
- * Copyright © 2014-2016 Inria.  All rights reserved.
+ * Copyright © 2014-2017 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * $HEADER$
@@ -229,7 +229,7 @@ generic format independent to the fabric by extract_dats. Figure 1 shows how
 the different modules of Netloc are linked, and what are the tools provided by
 Netloc.
 
-\section scotch_intro Tools and API
+\section scotch_tools_api Tools and API
 
 When the machine is discovered and all the needed files are generated as seen
 previously, a user can call the netlocscotch functions from the API and
@@ -263,7 +263,7 @@ record in a file, the lists of available nodes and available cores by using MPI
 and hwloc. From this file, the function netlocscotch_build_subarch will build
 the Scotch sub-architecture.
 
-\subsection netlocscotch_mapping The mapping of the processes
+\subsection netlocscotch_mapping Mapping of processes
 
 A main goal in having all these data about the network topology, especially in
 Scotch structures, is to help the process placement. For that, we use the
