@@ -1253,6 +1253,13 @@ hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned l
       && (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES)) {
     /* v1 uses generic "Cache" for non-extended type name */
     res = hwloc_snprintf(tmp, tmplen, "Cache%s", aritys);
+
+  } else if (obj->type == HWLOC_OBJ_PACKAGE
+	     && (flags & (HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES
+			  |HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1))) {
+    /* if exporting to v1 or without extended-types, use all-v1-compatible Socket name */
+    res = hwloc_snprintf(tmp, tmplen, "Socket%s", aritys);
+
   } else if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
       || flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
     res = hwloc_snprintf(tmp, tmplen, "%s%s", hwloc_obj_type_string(obj->type), aritys);
