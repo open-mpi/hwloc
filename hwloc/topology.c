@@ -1227,26 +1227,17 @@ hwloc__report_error_format_obj(char *buf, size_t buflen, hwloc_obj_t obj)
  * complete.
  */
 
-#define merge_index(new, old, field, type) \
-  if ((old)->field == (type) -1) \
-    (old)->field = (new)->field;
-#define merge_sizes(new, old, field) \
-  if (!(old)->field) \
-    (old)->field = (new)->field;
-#ifdef HWLOC_DEBUG
-#define check_sizes(new, old, field) \
-  if ((new)->field) \
-    assert((old)->field == (new)->field)
-#else
-#define check_sizes(new, old, field)
-#endif
-
+/* merge new object attributes in old.
+ * use old if defined, otherwise use new.
+ */
 static void
 merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
 {
-  merge_index(new, old, os_index, unsigned);
+  if (old->os_index == HWLOC_UNKNOWN_INDEX)
+    old->os_index = new->os_index;
 
   if (new->infos_count) {
+    /* FIXME: dedup */
     hwloc__move_infos(&old->infos, &old->infos_count,
 		      &new->infos, &new->infos_count);
   }
@@ -1285,10 +1276,12 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
   case HWLOC_OBJ_L1ICACHE:
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
-    merge_sizes(new, old, attr->cache.size);
-    check_sizes(new, old, attr->cache.size);
-    merge_sizes(new, old, attr->cache.linesize);
-    check_sizes(new, old, attr->cache.linesize);
+    if (!old->attr->cache.size)
+      old->attr->cache.size = new->attr->cache.size;
+    if (!old->attr->cache.linesize)
+      old->attr->cache.size = new->attr->cache.linesize;
+    if (!old->attr->cache.associativity)
+      old->attr->cache.size = new->attr->cache.linesize;
     break;
   default:
     break;
@@ -1377,17 +1370,6 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	/* Two objects with same type.
 	 * Groups are handled above.
 	 */
-	if (obj->type == child->type
-	    && (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE)
-	    && obj->os_index != child->os_index) {
-	  static int reported = 0;
-	  if (!reported && !hwloc_hide_errors()) {
-	    fprintf(stderr, "Cannot merge similar %s objects with different OS indexes %u and %u\n",
-		    hwloc_obj_type_string(obj->type), child->os_index, obj->os_index);
-	    reported = 1;
-	  }
-          return NULL;
-	}
 	merge_insert_equal(obj, child);
 	/* Already present, no need to insert.  */
 	return child;
