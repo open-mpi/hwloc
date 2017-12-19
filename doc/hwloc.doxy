@@ -1861,12 +1861,19 @@ $ lstopo -i "2 3 4 5 6"
 $ lstopo -i "Package:2 NUMANode:3 L2Cache:4 Core:5 PU:6"
 \endverbatim
 
-NUMA nodes are handled in a special way since there are not part of the
+NUMA nodes are handled in a special way since they are not part of the
 main CPU hierarchy but rather attached below it as memory children.
 Thus, <tt>NUMANode:3</tt> actually means <tt>Group:3</tt> where one
 NUMA node is attached below each group.
 These groups are merged back into the parent when possible
 (typically when a single NUMA node is requested below each parent).
+
+It is also possible the explicitly attach NUMA nodes to specific levels.
+For instance, a KNL-like topology with 2 NUMA nodes per 16-core group
+may be created with:
+\verbatim
+$ lstopo -i "package:1 group:4 [numa] [numa] core:16 pu:4"
+\endverbatim
 
 The root object does not appear in the synthetic description string
 since it is always a Machine object.
