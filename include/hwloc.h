@@ -1850,6 +1850,7 @@ typedef enum {
    *
    * Memory binding by CPU set cannot work for CPU-less NUMA memory nodes.
    * Binding by nodeset should therefore be preferred whenever possible.
+   * \hideinitializer
    */
   HWLOC_MEMBIND_BYNODESET =     (1<<5)
 } hwloc_membind_flags_t;
