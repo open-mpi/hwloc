@@ -1,4 +1,4 @@
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2017 Inria.  All rights reserved.
 # Copyright © 2009      Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -32,6 +32,9 @@ endif
 # Do not let automake automatically add the non-standalone dirs to the
 # distribution tarball if we're building in embedded mode.
 DIST_SUBDIRS = $(SUBDIRS)
+if !BUILD_NETLOC
+DIST_SUBDIRS += netloc
+endif
 
 # Only install the pkg file if we're building in standalone mode (and not on Windows)
 if HWLOC_BUILD_STANDALONE
