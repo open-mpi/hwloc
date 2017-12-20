@@ -1574,6 +1574,8 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
       hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
     hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
   }
+
+  topology->modified = 1;
   return obj;
 }
 
