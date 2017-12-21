@@ -1286,7 +1286,7 @@ static int
 hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsigned long flags,
 					hwloc_obj_t parent,
 					char *buffer, size_t buflen,
-					int needprefix)
+					int needprefix, int verbose)
 {
   hwloc_obj_t mchild;
   ssize_t tmplen = buflen;
@@ -1301,6 +1301,8 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
     /* v1: export a single NUMA child */
     if (parent->memory_arity > 1 || mchild->type != HWLOC_OBJ_NUMANODE) {
       /* not supported */
+      if (verbose)
+	fprintf(stderr, "Cannot export to synthetic v1 if multiple memory children are attached to the same location.\n");
       errno = EINVAL;
       return -1;
     }
@@ -1400,6 +1402,11 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   int res, ret = 0;
   unsigned arity;
   int needprefix = 0;
+  int verbose = 0;
+  const char *env = getenv("HWLOC_SYNTHETIC_VERBOSE");
+
+  if (env)
+    verbose = atoi(env);
 
   if (!topology->is_loaded) {
     errno = EINVAL;
@@ -1428,12 +1435,16 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   /* TODO: flag to force all indexes, not only for PU and NUMA? */
 
   if (!obj->symmetric_subtree) {
+    if (verbose)
+      fprintf(stderr, "Cannot export to synthetic unless topology is symmetric (root->symmetric_subtree must be set).\n");
     errno = EINVAL;
     return -1;
   }
 
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)
       && hwloc_check_memory_symmetric(topology) < 0) {
+    if (verbose)
+      fprintf(stderr, "Cannot export to synthetic unless memory is attached symmetrically.\n");
     errno = EINVAL;
     return -1;
   }
@@ -1450,6 +1461,8 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     while ((node = node->next_cousin) != NULL) {
       assert(hwloc_obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
       if (node->parent->depth != pdepth) {
+	if (verbose)
+	  fprintf(stderr, "Cannot export to synthetic v1 if memory is attached to parents at different depths.\n");
 	errno = EINVAL;
 	return -1;
       }
@@ -1468,7 +1481,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   }
 
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)) {
-    res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, needprefix);
+    res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, needprefix, verbose);
     if (res > 0)
       needprefix = 1;
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
@@ -1488,7 +1501,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
       return -1;
 
     if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)) {
-      res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, 1);
+      res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, 1, verbose);
       if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
 	return -1;
     }
