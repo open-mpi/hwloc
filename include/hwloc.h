@@ -410,8 +410,9 @@ struct hwloc_obj {
   /**@}*/
 
   int symmetric_subtree;		/**< \brief Set if the subtree of normal objects below this object is symmetric,
-					  * which means all children and their children have identical subtrees.
-					  * I/O and Misc children are ignored. Memory children are taken into account.
+					  * which means all normal children and their children have identical subtrees.
+					  *
+					  * Memory, I/O and Misc children are ignored.
 					  *
 					  * If set in the topology root object, lstopo may export the topology
 					  * as a synthetic string.
