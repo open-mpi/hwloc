@@ -1942,11 +1942,13 @@ another similar topology.
 The entire tree will be similar, but some attributes such as
 the processor model will be missing.
 
-Such an export is only possible if the topology is totally symmetric,
-which means the <tt>symmetric_subtree</tt> field of the root object
+Such an export is only possible if the topology is totally symmetric.
+It means that the <tt>symmetric_subtree</tt> field of the root object
 is set.
-Note that I/O devices and Misc objects are ignored when computing
-this field and when exporting the string.
+Also memory children should be attached in a symmetric way
+(e.g. the same number of memory children below each Package object, etc.).
+However I/O devices and Misc objects are ignored when looking at
+symmetry and exporting the string.
 
 
 

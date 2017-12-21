@@ -1337,6 +1337,58 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
   return ret;
 }
 
+static int
+hwloc_check_memory_symmetric(struct hwloc_topology * topology)
+{
+  hwloc_bitmap_t remaining_nodes;
+
+  remaining_nodes = hwloc_bitmap_dup(hwloc_get_root_obj(topology)->nodeset);
+  if (!remaining_nodes)
+    /* assume asymmetric */
+    return -1;
+
+  while (!hwloc_bitmap_iszero(remaining_nodes)) {
+    unsigned idx;
+    hwloc_obj_t node;
+    hwloc_obj_t first_parent;
+    unsigned i;
+
+    idx = hwloc_bitmap_first(remaining_nodes);
+    node = hwloc_get_numanode_obj_by_os_index(topology, idx);
+    assert(node);
+
+    first_parent = node->parent;
+    assert(hwloc_obj_type_is_normal(first_parent->type)); /* only depth-1 memory children for now */
+
+    /* check whether all object on parent's level have same number of NUMA children */
+    for(i=0; i<hwloc_get_nbobjs_by_depth(topology, first_parent->depth); i++) {
+      hwloc_obj_t parent, mchild;
+
+      parent = hwloc_get_obj_by_depth(topology, first_parent->depth, i);
+      assert(parent);
+
+      /* must have same memory arity */
+      if (parent->memory_arity != first_parent->memory_arity)
+	goto out_with_bitmap;
+
+      /* clear these NUMA children from remaining_nodes */
+      mchild = parent->memory_first_child;
+      while (mchild) {
+	assert(mchild->type == HWLOC_OBJ_NUMANODE); /* only NUMA node memory children for now */
+	hwloc_bitmap_clr(remaining_nodes, mchild->os_index); /* cannot use parent->nodeset, some normal children may have other NUMA nodes */
+	mchild = mchild->next_sibling;
+      }
+    }
+  }
+
+  hwloc_bitmap_free(remaining_nodes);
+  return 0;
+
+ out_with_bitmap:
+  hwloc_bitmap_free(remaining_nodes);
+  return -1;
+}
+
 int
 hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 				char *buffer, size_t buflen,
@@ -1375,6 +1427,11 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   /* TODO: flag to force all indexes, not only for PU and NUMA? */
 
   if (!obj->symmetric_subtree) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (hwloc_check_memory_symmetric(topology) < 0) {
     errno = EINVAL;
     return -1;
   }
