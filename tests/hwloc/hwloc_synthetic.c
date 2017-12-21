@@ -141,5 +141,29 @@ int main(void)
 
   hwloc_topology_destroy(topology);
 
+
+
+
+  hwloc_topology_init(&topology);
+  err = hwloc_topology_set_synthetic(topology, "pack:2 [numa(memory=1GB)] [numa(memory=1MB)] core:2 [numa(indexes=8,7,5,6,4,3,1,2)] pu:4");
+  assert(!err);
+  hwloc_topology_load(topology);
+
+  err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
+  assert(err == 114);
+  err = strcmp("Package:2 [NUMANode(memory=1073741824)] [NUMANode(memory=1048576)] Core:2 [NUMANode(indexes=8,7,5,6,4,3,1,2)] PU:4", buffer);
+  assert(!err);
+
+  err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1);
+  assert(err == -1);
+  assert(errno == EINVAL);
+
+  err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY);
+  assert(err == 21);
+  err = strcmp("Package:2 Core:2 PU:4", buffer);
+  assert(!err);
+
+  hwloc_topology_destroy(topology);
+
   return 0;
 }
