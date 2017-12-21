@@ -1316,6 +1316,9 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
 
   while (mchild) {
     /* v2: export all NUMA children */
+
+    assert(mchild->type == HWLOC_OBJ_NUMANODE); /* only NUMA node memory children for now */
+
     if (needprefix)
       hwloc__export_synthetic_add_char(&ret, &tmp, &tmplen, ' ');
 
