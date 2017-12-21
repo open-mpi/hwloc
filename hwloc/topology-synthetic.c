@@ -1190,7 +1190,7 @@ hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
 	     prefix, (unsigned long long) obj->attr->numanode.local_memory);
     prefix = separator;
   }
-  if (!obj->sibling_rank /* only display indexes once per level (not for non-first NUMA children) */
+  if (!obj->logical_index /* only display indexes once per level (not for non-first NUMA children, etc.) */
       && (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE)) {
     hwloc_obj_t cur = obj;
     while (cur) {
