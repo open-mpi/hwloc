@@ -1438,6 +1438,26 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     return -1;
   }
 
+  if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1) {
+    /* v1 requires all NUMA at the same level */
+    hwloc_obj_t node;
+    signed pdepth;
+
+    node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
+    assert(hwloc_obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
+    pdepth = node->parent->depth;
+
+    while ((node = node->next_cousin) != NULL) {
+      assert(hwloc_obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
+      if (node->parent->depth != pdepth) {
+	errno = EINVAL;
+	return -1;
+      }
+    }
+  }
+
+  /* we're good, start exporting */
+
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
     /* obj attributes */
     res = hwloc__export_synthetic_obj_attr(topology, obj, tmp, tmplen);
