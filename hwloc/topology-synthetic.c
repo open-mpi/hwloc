@@ -1408,7 +1408,8 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 
   if (flags & ~(HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES
 		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS
-		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1)) {
+		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1
+		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)) {
     errno = EINVAL;
     return -1;
   }
@@ -1431,7 +1432,8 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     return -1;
   }
 
-  if (hwloc_check_memory_symmetric(topology) < 0) {
+  if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)
+      && hwloc_check_memory_symmetric(topology) < 0) {
     errno = EINVAL;
     return -1;
   }
@@ -1445,11 +1447,13 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
       return -1;
   }
 
-  res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, needprefix);
-  if (res > 0)
-    needprefix = 1;
-  if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
-    return -1;
+  if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)) {
+    res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, needprefix);
+    if (res > 0)
+      needprefix = 1;
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
+      return -1;
+  }
 
   arity = obj->arity;
   while (arity) {
@@ -1463,9 +1467,11 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
 
-    res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, 1);
-    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
-      return -1;
+    if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)) {
+      res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, 1);
+      if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
+	return -1;
+    }
 
     /* next level */
     needprefix = 1;

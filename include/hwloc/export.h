@@ -224,9 +224,20 @@ enum hwloc_topology_export_synthetic_flags_e {
   * Instead of attaching memory children to levels, export single NUMA node child
   * as normal intermediate levels, when possible.
   * This is required if loading the synthetic description with hwloc 1.x.
+  * However this may fail if some objects have multiple local NUMA nodes.
   * \hideinitializer
   */
- HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1 = (1UL<<2)
+ HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1 = (1UL<<2),
+
+ /** \brief Do not export memory information.
+  *
+  * Only export the actual hierarchy of normal CPU-side objects and ignore
+  * where memory is attached.
+  * This is useful for when the hierarchy of CPUs is what really matters,
+  * but it behaves as if there was a single machine-wide NUMA node.
+  * \hideinitializer
+  */
+ HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY = (1UL<<3)
 };
 
 /** \brief Export the topology as a synthetic string.
