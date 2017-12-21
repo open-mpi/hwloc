@@ -1087,9 +1087,10 @@ hwloc__export_synthetic_add_char(int *ret, char **tmp, ssize_t *tmplen, char c)
   (*ret)++;
 }
 
-static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topology,
-						   hwloc_obj_t obj,
-						   char *buffer, size_t buflen)
+static int
+hwloc__export_synthetic_indexes(struct hwloc_topology * topology,
+				hwloc_obj_t obj,
+				char *buffer, size_t buflen)
 {
   int depth = obj->depth;
   unsigned total;
@@ -1181,9 +1182,10 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
   return ret;
 }
 
-static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topology,
-						    hwloc_obj_t obj,
-						    char *buffer, size_t buflen)
+static int
+hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
+				 hwloc_obj_t obj,
+				 char *buffer, size_t buflen)
 {
   const char * separator = " ";
   const char * prefix = "(";
@@ -1226,7 +1228,7 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
       if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
 	return -1;
 
-      res = hwloc_topology_export_synthetic_indexes(topology, obj, tmp, tmplen);
+      res = hwloc__export_synthetic_indexes(topology, obj, tmp, tmplen);
       if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
 	return -1;
     }
@@ -1237,9 +1239,9 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
 }
 
 static int
-hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned long flags,
-				    hwloc_obj_t obj, unsigned arity,
-				    char *buffer, size_t buflen)
+hwloc__export_synthetic_obj(struct hwloc_topology * topology, unsigned long flags,
+			    hwloc_obj_t obj, unsigned arity,
+			    char *buffer, size_t buflen)
 {
   char aritys[12] = "";
   ssize_t tmplen = buflen;
@@ -1273,7 +1275,7 @@ hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned l
 
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
     /* obj attributes */
-    res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
+    res = hwloc__export_synthetic_obj_attr(topology, obj, tmp, tmplen);
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
   }
@@ -1282,10 +1284,10 @@ hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned l
 }
 
 static int
-hwloc_topology_export_synthetic_memory_children(struct hwloc_topology * topology, unsigned long flags,
-						hwloc_obj_t parent,
-						char *buffer, size_t buflen,
-						int needprefix)
+hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsigned long flags,
+					hwloc_obj_t parent,
+					char *buffer, size_t buflen,
+					int needprefix)
 {
   hwloc_obj_t mchild;
   ssize_t tmplen = buflen;
@@ -1307,7 +1309,7 @@ hwloc_topology_export_synthetic_memory_children(struct hwloc_topology * topology
     if (needprefix)
       hwloc__export_synthetic_add_char(&ret, &tmp, &tmplen, ' ');
 
-    res = hwloc_topology_export_synthetic_obj(topology, flags, mchild, 1, tmp, tmplen);
+    res = hwloc__export_synthetic_obj(topology, flags, mchild, 1, tmp, tmplen);
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
     return ret;
@@ -1320,7 +1322,7 @@ hwloc_topology_export_synthetic_memory_children(struct hwloc_topology * topology
 
     hwloc__export_synthetic_add_char(&ret, &tmp, &tmplen, '[');
 
-    res = hwloc_topology_export_synthetic_obj(topology, flags, mchild, (unsigned)-1, tmp, tmplen);
+    res = hwloc__export_synthetic_obj(topology, flags, mchild, (unsigned)-1, tmp, tmplen);
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
 
@@ -1377,14 +1379,14 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
     /* obj attributes */
-    res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
+    res = hwloc__export_synthetic_obj_attr(topology, obj, tmp, tmplen);
     if (res > 0)
       needprefix = 1;
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
   }
 
-  res = hwloc_topology_export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, needprefix);
+  res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, needprefix);
   if (res > 0)
     needprefix = 1;
   if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
@@ -1398,11 +1400,11 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     if (needprefix)
       hwloc__export_synthetic_add_char(&ret, &tmp, &tmplen, ' ');
 
-    res = hwloc_topology_export_synthetic_obj(topology, flags, obj, arity, tmp, tmplen);
+    res = hwloc__export_synthetic_obj(topology, flags, obj, arity, tmp, tmplen);
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
 
-    res = hwloc_topology_export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, 1);
+    res = hwloc__export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, 1);
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
 
