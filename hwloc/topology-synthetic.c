@@ -1062,6 +1062,19 @@ const struct hwloc_component hwloc_synthetic_component = {
   &hwloc_synthetic_disc_component
 };
 
+static __hwloc_inline int
+hwloc__export_synthetic_update_status(int *ret, char **tmp, ssize_t *tmplen, int res)
+{
+  if (res < 0)
+    return -1;
+  *ret += res;
+  if (res >= *tmplen)
+    res = *tmplen>0 ? (int)(*tmplen) - 1 : 0;
+  *tmp += res;
+  *tmplen -= res;
+  return 0;
+}
+
 static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topology,
 						   hwloc_obj_t obj,
 						   char *buffer, size_t buflen)
@@ -1132,15 +1145,10 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
   for(j=0; j<nr_loops; j++) {
     res = hwloc_snprintf(tmp, tmplen, "%u*%u%s", loops[j].step, loops[j].nb,
 			 j == nr_loops-1 ? ")" : ":");
-    if (res < 0) {
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0) {
       free(loops);
       return -1;
     }
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
   }
 
   free(loops);
@@ -1154,13 +1162,8 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
   while (cur) {
     res = snprintf(tmp, tmplen, "%u%s", cur->os_index,
 		   cur->next_cousin ? "," : ")");
-    if (res < 0)
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
     cur = cur->next_cousin;
   }
   return ret;
@@ -1203,32 +1206,17 @@ static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topo
     int res, ret = 0;
 
     res = hwloc_snprintf(tmp, tmplen, "%s%s%s", cachesize, memsize, needindexes ? "" : ")");
-    if (res < 0)
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
 
     if (needindexes) {
       res = snprintf(tmp, tmplen, "%sindexes=", prefix);
-      if (res < 0)
+      if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
 	return -1;
-      ret += res;
-      if (res >= tmplen)
-	res = tmplen>0 ? (int)tmplen - 1 : 0;
-      tmp += res;
-      tmplen -= res;
 
       res = hwloc_topology_export_synthetic_indexes(topology, obj, tmp, tmplen);
-      if (res < 0)
+      if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
 	return -1;
-      ret += res;
-      if (res >= tmplen)
-	res = tmplen>0 ? (int)tmplen - 1 : 0;
-      tmp += res;
-      tmplen -= res;
     }
     return ret;
   } else {
@@ -1268,24 +1256,14 @@ hwloc_topology_export_synthetic_obj(struct hwloc_topology * topology, unsigned l
     hwloc_obj_type_snprintf(types, sizeof(types), obj, 1);
     res = hwloc_snprintf(tmp, tmplen, "%s%s", types, aritys);
   }
-  if (res < 0)
+  if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
     return -1;
-  ret += res;
-  if (res >= tmplen)
-    res = tmplen>0 ? (int)tmplen - 1 : 0;
-  tmp += res;
-  tmplen -= res;
 
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
     /* obj attributes */
     res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
-    if (res < 0)
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
   }
 
   return ret;
@@ -1325,14 +1303,8 @@ hwloc_topology_export_synthetic_memory_children(struct hwloc_topology * topology
     }
 
     res = hwloc_topology_export_synthetic_obj(topology, flags, mchild, 1, tmp, tmplen);
-    if (res < 0)
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
-
     return ret;
   }
 
@@ -1357,13 +1329,8 @@ hwloc_topology_export_synthetic_memory_children(struct hwloc_topology * topology
     ret++;
 
     res = hwloc_topology_export_synthetic_obj(topology, flags, mchild, (unsigned)-1, tmp, tmplen);
-    if (res < 0)
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
 
     if (tmplen > 1) {
       tmp[0] = ']';
@@ -1425,27 +1392,17 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
     /* obj attributes */
     res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
-    if (res < 0)
-      return -1;
     if (res > 0)
       needprefix = 1;
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
+      return -1;
   }
 
   res = hwloc_topology_export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, needprefix);
-  if (res < 0)
-    return -1;
   if (res > 0)
     needprefix = 1;
-  ret += res;
-  if (res >= tmplen)
-    res = tmplen>0 ? (int)tmplen - 1 : 0;
-  tmp += res;
-  tmplen -= res;
+  if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
+    return -1;
 
   arity = obj->arity;
   while (arity) {
@@ -1463,22 +1420,12 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     }
 
     res = hwloc_topology_export_synthetic_obj(topology, flags, obj, arity, tmp, tmplen);
-    if (res < 0)
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
 
     res = hwloc_topology_export_synthetic_memory_children(topology, flags, obj, tmp, tmplen, 1);
-    if (res < 0)
+    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
-    ret += res;
-    if (res >= tmplen)
-      res = tmplen>0 ? (int)tmplen - 1 : 0;
-    tmp += res;
-    tmplen -= res;
 
     /* next level */
     needprefix = 1;
