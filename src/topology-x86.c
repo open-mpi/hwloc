@@ -76,6 +76,7 @@ struct procinfo {
 enum cpuid_type {
   intel,
   amd,
+  zhaoxin,
   unknown
 };
 
@@ -176,7 +177,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     infos->cpufamilynumber = _family;
   }
   if ((cpuid_type == intel && (_family == 0x6 || _family == 0xf))
-      || (cpuid_type == amd && _family == 0xf)) {
+      || (cpuid_type == amd && _family == 0xf)
+      || (cpuid_type == zhaoxin && (_family == 0x6 || _family == 0x7))) {
     infos->cpumodelnumber = _model + (_extendedmodel << 4);
   } else {
     infos->cpumodelnumber = _model;
@@ -212,7 +214,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   /* Get core/thread information from cpuid 0x80000008
    * (not supported on Intel)
    */
-  if (cpuid_type != intel && highest_ext_cpuid >= 0x80000008) {
+  if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000008) {
     unsigned coreidsize;
     eax = 0x80000008;
     hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
@@ -245,7 +247,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    * and cache information from cpuid 0x8000001d
    * (AMD topology extension)
    */
-  if (cpuid_type != intel && has_topoext(features)) {
+  if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
     unsigned apic_id, node_id, nodes_per_proc;
 
     eax = 0x8000001e;
@@ -330,13 +332,13 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
      * get cache information from cpuid 0x80000005 and 0x80000006
      * (not supported on Intel)
      */
-    if (cpuid_type != intel && highest_ext_cpuid >= 0x80000005) {
+    if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000005) {
       eax = 0x80000005;
       hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
       fill_amd_cache(infos, 1, 1, ecx); /* L1d */
       fill_amd_cache(infos, 1, 2, edx); /* L1i */
     }
-    if (cpuid_type != intel && highest_ext_cpuid >= 0x80000006) {
+    if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000006) {
       eax = 0x80000006;
       hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
       if (ecx & 0xf000)
@@ -427,7 +429,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   /* Get package/core/thread information from cpuid 0x0b
    * (Intel x2APIC)
    */
-  if (cpuid_type == intel && highest_cpuid >= 0x0b && has_x2apic(features)) {
+  if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
     unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
     for (level = 0; ; level++) {
       ecx = level;
@@ -978,6 +980,14 @@ static void hwloc_x86_os_state_restore(hwloc_x86_os_state_t *state __hwloc_attri
 #define AMD_EDX ('e' | ('n'<<8) | ('t'<<16) | ('i'<<24))
 #define AMD_ECX ('c' | ('A'<<8) | ('M'<<16) | ('D'<<24))
 
+#define ZX_EBX ('C' | ('e'<<8) | ('n'<<16) | ('t'<<24))
+#define ZX_EDX ('a' | ('u'<<8) | ('r'<<16) | ('H'<<24))
+#define ZX_ECX ('a' | ('u'<<8) | ('l'<<16) | ('s'<<24))
+
+#define SH_EBX (' ' | (' '<<8) | ('S'<<16) | ('h'<<24))
+#define SH_EDX ('a' | ('n'<<8) | ('g'<<16) | ('h'<<24))
+#define SH_ECX ('a' | ('i'<<8) | (' '<<16) | (' '<<24))
+
 /* fake cpubind for when nbprocs=1 and no binding support */
 static int fake_get_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 			    hwloc_cpuset_t set __hwloc_attribute_unused,
@@ -1052,6 +1062,11 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
     cpuid_type = intel;
   if (ebx == AMD_EBX && ecx == AMD_ECX && edx == AMD_EDX)
     cpuid_type = amd;
+  /* support for zhaoxin x86 cpu vendor id */
+  if (ebx == ZX_EBX && ecx == ZX_ECX && edx == ZX_EDX)
+    cpuid_type = zhaoxin;
+  if (ebx == SH_EBX && ecx == SH_ECX && edx == SH_EDX)
+    cpuid_type = zhaoxin;
 
   hwloc_debug("highest cpuid %x, cpuid type %u\n", highest_cpuid, cpuid_type);
   if (highest_cpuid < 0x01) {
