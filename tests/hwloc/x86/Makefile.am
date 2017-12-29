@@ -25,7 +25,9 @@ cpuid_outputs = \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.output \
 	AMD-K10-Istanbul-8xOpteron-8439SE.output \
 	AMD-K8-SantaRosa-2xOpteron-2218.output \
-	AMD-K8-SledgeHammer-2xOpteron-250.output
+	AMD-K8-SledgeHammer-2xOpteron-250.output \
+	Zhaoxin-CentaurHauls-ZXD-4600.output \
+	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.output
 
 # FIXME add AMD-K10-Shanghai/Barcelona-[248]3xx
 
@@ -49,7 +51,9 @@ cpuid_tarballs = \
 	AMD-K10-MagnyCours-2xOpteron-6164HE.tar.bz2 \
 	AMD-K10-Istanbul-8xOpteron-8439SE.tar.bz2 \
 	AMD-K8-SantaRosa-2xOpteron-2218.tar.bz2 \
-	AMD-K8-SledgeHammer-2xOpteron-250.tar.bz2
+	AMD-K8-SledgeHammer-2xOpteron-250.tar.bz2 \
+	Zhaoxin-CentaurHauls-ZXD-4600.tar.bz2 \
+	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.tar.bz2
 
 # Each output `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
