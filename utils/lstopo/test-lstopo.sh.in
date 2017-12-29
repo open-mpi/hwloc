@@ -41,7 +41,10 @@ $ls
   $ls -v > $tmp/test.console_verbose
   $ls -c -v > $tmp/test.cpuset_verbose
   $ls --taskset -v > $tmp/test.taskset
+
   $ls --merge > $tmp/test.merge
+  $ls --filter all:none > $tmp/test.none
+  $ls --filter all:all > $tmp/test.all
 
   $ls --no-io > $tmp/test.no-io
   $ls --no-bridges > $tmp/test.no-bridges
