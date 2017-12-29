@@ -1962,8 +1962,8 @@ enum hwloc_type_filter_e {
 
   /** \brief Ignore all objects of this type.
    *
-   * The bottom-level type ::HWLOC_OBJ_PU and the ::HWLOC_OBJ_NUMANODE type may not be ignored.
-   * The top-level object of the hierarchy will never actually be removed even if its type is ignored.
+   * The bottom-level type ::HWLOC_OBJ_PU, the ::HWLOC_OBJ_NUMANODE type, and
+   * the top-level type ::HWLOC_OBJ_MACHINE may not be ignored.
    * \hideinitializer
    */
   HWLOC_TYPE_FILTER_KEEP_NONE = 1,

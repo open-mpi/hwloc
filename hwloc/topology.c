@@ -3405,9 +3405,9 @@ hwloc__topology_filter_init(struct hwloc_topology *topology)
 static int
 hwloc__topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e filter)
 {
-  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE) {
+  if (type == HWLOC_OBJ_PU || type == HWLOC_OBJ_NUMANODE || type == HWLOC_OBJ_MACHINE) {
     if (filter != HWLOC_TYPE_FILTER_KEEP_ALL) {
-      /* we need the PU and NUMA levels */
+      /* we need the Machine, PU and NUMA levels */
       errno = EINVAL;
       return -1;
     }
