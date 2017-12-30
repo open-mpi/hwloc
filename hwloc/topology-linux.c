@@ -56,7 +56,7 @@ struct hwloc_linux_backend_data_s {
   int is_knl;
   int is_amd_with_CU;
   struct utsname utsname; /* fields contain \0 when unknown */
-  unsigned fallback_nbprocessors;
+  int fallback_nbprocessors;
   unsigned pagesize;
 };
 
@@ -4162,6 +4162,10 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
   if (topology->is_thissystem) {
     uname(&data->utsname);
     data->fallback_nbprocessors = hwloc_fallback_nbprocessors(topology);
+    if (data->fallback_nbprocessors >= 1)
+      topology->support.discovery->pu = 1;
+    else
+      data->fallback_nbprocessors = 1;
     data->pagesize = hwloc_getpagesize();
   }
 
@@ -4225,7 +4229,7 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 	fprintf(file, "HostName: %s\n", data->utsname.nodename);
       if (*data->utsname.machine)
 	fprintf(file, "Architecture: %s\n", data->utsname.machine);
-      fprintf(file, "FallbackNbProcessors: %u\n", data->fallback_nbprocessors);
+      fprintf(file, "FallbackNbProcessors: %d\n", data->fallback_nbprocessors);
       fprintf(file, "PageSize: %llu\n", (unsigned long long) data->pagesize);
       fclose(file);
     }

@@ -139,8 +139,8 @@ int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
    used as a fall-back method, allowing virtual backends (FSROOT, etc) to
    have the desired effect.  */
 #ifndef HWLOC_WIN_SYS /* The windows implementation is in topology-windows.c */
-unsigned
-hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
+int
+hwloc_fallback_nbprocessors(struct hwloc_topology *topology __hwloc_attribute_unused) {
   int n;
 #if HAVE_DECL__SC_NPROCESSORS_ONLN
   n = sysconf(_SC_NPROCESSORS_ONLN);
@@ -167,15 +167,10 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
 #else
 #ifdef __GNUC__
 #warning No known way to discover number of available processors on this system
-#warning hwloc_fallback_nbprocessors will default to 1
 #endif
   n = -1;
 #endif
-  if (n >= 1)
-    topology->support.discovery->pu = 1;
-  else
-    n = 1;
-  return (unsigned)n;
+  return n;
 }
 #endif /* !HWLOC_WIN_SYS */
 

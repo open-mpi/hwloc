@@ -1268,7 +1268,12 @@ hwloc_x86_discover(struct hwloc_backend *backend)
     assert(data->nbprocs > 0); /* enforced by hwloc_x86_component_instantiate() */
     topology->support.discovery->pu = 1;
   } else {
-    data->nbprocs = hwloc_fallback_nbprocessors(topology);
+    int nbprocs = hwloc_fallback_nbprocessors(topology);
+    if (nbprocs >= 1)
+      topology->support.discovery->pu = 1;
+    else
+      nbprocs = 1;
+    data->nbprocs = (unsigned) nbprocs;
   }
 
   if (topology->levels[0][0]->cpuset) {

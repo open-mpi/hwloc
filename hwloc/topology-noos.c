@@ -14,13 +14,20 @@ static int
 hwloc_look_noos(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
+  int nbprocs;
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
     return -1;
 
+  nbprocs = hwloc_fallback_nbprocessors(topology);
+  if (nbprocs >= 1)
+    topology->support.discovery->pu = 1;
+  else
+    nbprocs = 1;
+
   hwloc_alloc_root_sets(topology->levels[0][0]);
-  hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
+  hwloc_setup_pu_level(topology, nbprocs);
   hwloc_add_uname_info(topology, NULL);
   return 0;
 }

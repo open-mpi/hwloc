@@ -1148,8 +1148,8 @@ const struct hwloc_component hwloc_windows_component = {
   &hwloc_windows_disc_component
 };
 
-unsigned
-hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
+int
+hwloc_fallback_nbprocessors(struct hwloc_topology *topology __hwloc_attribute_unused) {
   int n;
   SYSTEM_INFO sysinfo;
 
@@ -1166,9 +1166,5 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
       n = MAXIMUM_PROC_PER_GROUP*nr_processor_groups;
   }
 
-  if (n >= 1)
-    topology->support.discovery->pu = 1;
-  else
-    n = 1;
   return n;
 }
