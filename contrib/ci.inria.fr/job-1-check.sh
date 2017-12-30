@@ -51,6 +51,7 @@ $PWD/../configure --enable-plugins
 make
 make check
 $WRAPPER utils/lstopo/lstopo-no-graphics -v
+$WRAPPER utils/hwloc/hwloc-info --support
 cd ..
 
 # check renaming

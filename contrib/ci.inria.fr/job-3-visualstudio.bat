@@ -25,6 +25,9 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 x64\Release\lstopo-no-graphics.exe
 if %errorlevel% neq 0 exit /b %errorlevel%
 
+x64\Release\hwloc-info.exe --support
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 cd ..\..\..
 
 sh -c "tar cfz %TARBALL%-build.tar.gz %TARBALL%"
