@@ -110,6 +110,7 @@ if test x$dobuild32 = x1; then
   fi
 
   build32/utils/lstopo/lstopo-no-graphics -v
+  build32/utils/hwloc/hwloc-info --support
 
   if test x$dotar = x1; then
     cd ..
@@ -157,6 +158,7 @@ if test x$dobuild64 = x1; then
   fi
 
   build64/utils/lstopo/lstopo-no-graphics -v
+  build64/utils/hwloc/hwloc-info --support
 
   if test x$dotar = x1; then
     cd ..

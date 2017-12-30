@@ -42,6 +42,7 @@ $PWD/../configure --enable-plugins
 make
 make check
 tests/wrapper.sh utils/lstopo/lstopo-no-graphics -v
+tests/wrapper.sh utils/hwloc/hwloc-info --support
 cd ..
 
 # check renaming
