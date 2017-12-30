@@ -24,6 +24,7 @@ Version 1.11.9
   thanks to Jeff Zhao for the patch.
 * Fix the management of the lstopoStyle info attribute for custom colors.
 * Add verbose warnings when failing to load hwloc v2.0+ XMLs.
+* Fix the missing pu discovery support bit on some OS.
 
 
 Version 1.11.8

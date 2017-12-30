@@ -935,6 +935,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");
+    topology->support.discovery->pu = 1;
   }
 
   kstat_close(kc);
