@@ -954,7 +954,6 @@ static int
 hwloc_look_solaris(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  unsigned nbprocs = hwloc_fallback_nbprocessors (topology);
   int alreadypus = 0;
 
   if (topology->levels[0][0]->cpuset)
@@ -971,8 +970,10 @@ hwloc_look_solaris(struct hwloc_backend *backend)
     alreadypus = 1;
 #endif /* HAVE_LIBKSTAT */
 
-  if (!alreadypus)
+  if (!alreadypus) {
+    unsigned nbprocs = hwloc_fallback_nbprocessors (topology);
     hwloc_setup_pu_level(topology, nbprocs);
+  }
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Solaris");
   hwloc_add_uname_info(topology, NULL);

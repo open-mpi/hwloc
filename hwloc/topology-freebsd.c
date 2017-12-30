@@ -182,10 +182,10 @@ static int
 hwloc_look_freebsd(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
 
   if (!topology->levels[0][0]->cpuset) {
     /* Nobody (even the x86 backend) created objects yet, setup basic objects */
+    unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
     hwloc_alloc_root_sets(topology->levels[0][0]);
     hwloc_setup_pu_level(topology, nbprocs);
   }
