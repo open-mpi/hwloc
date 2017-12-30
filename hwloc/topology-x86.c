@@ -1264,8 +1264,12 @@ hwloc_x86_discover(struct hwloc_backend *backend)
   }
 #endif
 
-  if (!data->src_cpuiddump_path)
+  if (data->src_cpuiddump_path) {
+    assert(data->nbprocs > 0); /* enforced by hwloc_x86_component_instantiate() */
+    topology->support.discovery->pu = 1;
+  } else {
     data->nbprocs = hwloc_fallback_nbprocessors(topology);
+  }
 
   if (topology->levels[0][0]->cpuset) {
     /* somebody else discovered things */
@@ -1419,6 +1423,7 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
     if (!hwloc_x86_check_cpuiddump_input(src_cpuiddump_path, set)) {
       backend->is_thissystem = 0;
       data->src_cpuiddump_path = strdup(src_cpuiddump_path);
+      assert(!hwloc_bitmap_iszero(set)); /* enforced by hwloc_x86_check_cpuiddump_input() */
       data->nbprocs = hwloc_bitmap_weight(set);
     } else {
       fprintf(stderr, "Ignoring dumped cpuid directory.\n");
