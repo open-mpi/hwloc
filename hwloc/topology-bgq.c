@@ -68,6 +68,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
   obj->nodeset = set;
   obj->attr->numanode.local_memory = 16ULL*1024*1024*1024ULL;
   hwloc_insert_object_by_cpuset(topology, obj);
+  topology->support.discovery->numa = 1;
 
   set = hwloc_bitmap_alloc();
   hwloc_bitmap_set_range(set, 0, HWLOC_BGQ_CORES*4-1);

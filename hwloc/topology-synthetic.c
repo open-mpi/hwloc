@@ -961,6 +961,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
   topology->support.discovery->pu = 1;
+  topology->support.discovery->numa = 1; /* we add a single NUMA node if none is given */
 
   /* start with os_index 0 for each level */
   for (i = 0; data->level[i].arity > 0; i++)

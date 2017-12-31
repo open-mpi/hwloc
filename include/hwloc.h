@@ -1850,6 +1850,8 @@ HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restri
 struct hwloc_topology_discovery_support {
   /** \brief Detecting the number of PU objects is supported. */
   unsigned char pu;
+  /** \brief Detecting the number of NUMA nodes is supported. */
+  unsigned char numa;
 };
 
 /** \brief Flags describing actual PU binding support for this topology.

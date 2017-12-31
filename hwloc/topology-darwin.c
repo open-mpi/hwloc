@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -38,6 +38,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
   int64_t cachelinesize;
   int64_t memsize;
   char cpumodel[64];
+  int gotnuma = 0;
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
@@ -186,6 +187,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, j);
             obj->nodeset = hwloc_bitmap_alloc();
             hwloc_bitmap_set(obj->nodeset, j);
+	    gotnuma++;
           } else {
 	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE+i-1, HWLOC_UNKNOWN_INDEX);
 	  }
@@ -247,6 +249,8 @@ hwloc_look_darwin(struct hwloc_backend *backend)
     }
   }
 
+  if (gotnuma)
+    topology->support.discovery->numa = 1;
 
   /* add PU objects */
   hwloc_setup_pu_level(topology, nprocs);

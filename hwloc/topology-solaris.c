@@ -462,6 +462,7 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
 
     hwloc_insert_object_by_cpuset(topology, obj);
   }
+  topology->support.discovery->numa = 1;
 
  out_with_pids:
   free(pids);

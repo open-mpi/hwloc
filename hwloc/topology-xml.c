@@ -1749,6 +1749,8 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
   topology->support.discovery->pu = 1;
+  if (data->nbnumanodes)
+    topology->support.discovery->numa = 1;
 
   if (data->look_done)
     data->look_done(data, 0);

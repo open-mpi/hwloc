@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2017 Inria.  All rights reserved.
+ * Copyright © 2010-2018 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -682,6 +682,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   unsigned i, j, l, level;
   int one = -1;
   hwloc_bitmap_t remaining_cpuset;
+  int gotnuma = 0;
 
   for (i = 0; i < nbprocs; i++)
     if (infos[i].present) {
@@ -781,6 +782,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
           nodeid, node_cpuset);
       hwloc_insert_object_by_cpuset(topology, node);
+      gotnuma++;
     }
   }
 
@@ -994,6 +996,9 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   hwloc_bitmap_free(remaining_cpuset);
   hwloc_bitmap_free(complete_cpuset);
+
+  if (gotnuma)
+    topology->support.discovery->numa = 1;
 }
 
 static int

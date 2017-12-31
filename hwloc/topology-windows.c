@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -732,6 +732,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
   hwloc_bitmap_t groups_pu_set = NULL;
   SYSTEM_INFO SystemInfo;
   DWORD length;
+  int gotnuma = 0;
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
@@ -780,6 +781,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	  case RelationNumaNode:
 	    type = HWLOC_OBJ_NUMANODE;
 	    id = procInfo[i].NumaNode.NodeNumber;
+	    gotnuma++;
 	    break;
 	  case RelationProcessorPackage:
 	    type = HWLOC_OBJ_PACKAGE;
@@ -907,6 +909,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
             num = 1;
             GroupMask = &procInfo->NumaNode.GroupMask;
 	    id = procInfo->NumaNode.NodeNumber;
+	    gotnuma++;
 	    break;
 	  case RelationProcessorPackage:
 	    type = HWLOC_OBJ_PACKAGE;
@@ -1028,6 +1031,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
   }
 
   topology->support.discovery->pu = 1;
+  topology->support.discovery->numa = gotnuma;
 
   if (groups_pu_set) {
     /* the system supports multiple Groups.

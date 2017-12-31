@@ -3142,6 +3142,7 @@ look_sysfsnode(struct hwloc_topology *topology,
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
       }
+      topology->support.discovery->numa = 1;
 
       hwloc_bitmap_free(nodes_cpuset);
 

@@ -599,6 +599,7 @@ main (int argc, char *argv[])
     const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
 #define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
     DO(discovery, pu);
+    DO(discovery, numa);
 
     DO(cpubind, set_thisproc_cpubind);
     DO(cpubind, get_thisproc_cpubind);

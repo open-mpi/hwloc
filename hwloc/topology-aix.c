@@ -756,6 +756,7 @@ hwloc_look_aix(struct hwloc_backend *backend)
 	  hwloc_debug("looking AIX node sdl %d\n", i);
 	  look_rset(i, HWLOC_OBJ_NUMANODE, topology, i);
 	  known = 1;
+          topology->support.discovery->numa = 1;
 	}
 #      ifdef R_L2CSDL
       if (i == rs_getinfo(NULL, R_L2CSDL, 0))
