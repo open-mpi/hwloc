@@ -56,7 +56,7 @@ struct hwloc_linux_backend_data_s {
   int is_knl;
   int is_amd_with_CU;
   struct utsname utsname; /* fields contain \0 when unknown */
-  int fallback_nbprocessors;
+  int fallback_nbprocessors; /* only used in hwloc_linux_fallback_pu_level(), maybe be <= 0 (error) earlier */
   unsigned pagesize;
 };
 
@@ -4155,17 +4155,13 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 
   /* initialize to something sane, in case !is_thissystem and we can't find things in /proc/hwloc-nofile-info */
   memset(&data->utsname, 0, sizeof(data->utsname));
-  data->fallback_nbprocessors = 1;
+  data->fallback_nbprocessors = -1; /* unknown yet */
   data->pagesize = 4096;
 
   /* read thissystem info */
   if (topology->is_thissystem) {
     uname(&data->utsname);
-    data->fallback_nbprocessors = hwloc_fallback_nbprocessors(topology);
-    if (data->fallback_nbprocessors >= 1)
-      topology->support.discovery->pu = 1;
-    else
-      data->fallback_nbprocessors = 1;
+    data->fallback_nbprocessors = hwloc_fallback_nbprocessors(topology); /* errors managed in hwloc_linux_fallback_pu_level() */
     data->pagesize = hwloc_getpagesize();
   }
 
@@ -4309,6 +4305,19 @@ static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const 
   *cpuset_namep = cpuset_name;
 }
 
+static void
+hwloc_linux_fallback_pu_level(struct hwloc_backend *backend)
+{
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+
+  if (data->fallback_nbprocessors >= 1)
+    topology->support.discovery->pu = 1;
+  else
+    data->fallback_nbprocessors = 1;
+  hwloc_setup_pu_level(topology, data->fallback_nbprocessors);
+}
+
 static int
 hwloc_look_linuxfs(struct hwloc_backend *backend)
 {
@@ -4431,14 +4440,14 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     else
       err = -1;
     if (err < 0)
-      hwloc_setup_pu_level(topology, data->fallback_nbprocessors);
+      hwloc_linux_fallback_pu_level(backend);
     look_powerpc_device_tree(topology, data);
 
   } else {
     /* sysfs */
     if (look_sysfscpu(topology, data, sysfs_cpu_path, Lprocs, numprocs) < 0)
       /* sysfs but we failed to read cpu topology, fallback */
-      hwloc_setup_pu_level(topology, data->fallback_nbprocessors);
+      hwloc_linux_fallback_pu_level(backend);
   }
 
  cpudone:
