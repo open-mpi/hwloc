@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -600,6 +600,7 @@ main (int argc, char *argv[])
 #define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
     DO(discovery, pu);
     DO(discovery, numa);
+    DO(discovery, numa_memory);
 
     DO(cpubind, set_thisproc_cpubind);
     DO(cpubind, get_thisproc_cpubind);

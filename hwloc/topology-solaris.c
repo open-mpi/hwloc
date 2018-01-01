@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -463,6 +463,7 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
     hwloc_insert_object_by_cpuset(topology, obj);
   }
   topology->support.discovery->numa = 1;
+  topology->support.discovery->numa_memory = 1;
 
  out_with_pids:
   free(pids);

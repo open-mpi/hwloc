@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2017 Inria.  All rights reserved.
+Copyright © 2009-2018 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -81,6 +81,7 @@ Version 2.0.0
   + hwloc_topology_restrict() doesn't remove objects that contain memory
     by default anymore.
     - The list of existing restrict flags was modified.
+  + The discovery support array now contains some NUMA specific bits.
   + XML export functions take an additional flags argument,
     for instance for exporting XMLs that are compatible with hwloc 1.x.
   + Functions diff_load_xml*(), diff_export_xml*() and diff_destroy() in

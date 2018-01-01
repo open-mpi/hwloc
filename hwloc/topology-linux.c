@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -3143,6 +3143,7 @@ look_sysfsnode(struct hwloc_topology *topology,
                                   osnode, node->cpuset);
       }
       topology->support.discovery->numa = 1;
+      topology->support.discovery->numa_memory = 1;
 
       hwloc_bitmap_free(nodes_cpuset);
 

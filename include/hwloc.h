@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1852,6 +1852,8 @@ struct hwloc_topology_discovery_support {
   unsigned char pu;
   /** \brief Detecting the number of NUMA nodes is supported. */
   unsigned char numa;
+  /** \brief Detecting the amount of memory in NUMA nodes is supported. */
+  unsigned char numa_memory;
 };
 
 /** \brief Flags describing actual PU binding support for this topology.

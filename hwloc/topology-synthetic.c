@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -962,6 +962,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
 
   topology->support.discovery->pu = 1;
   topology->support.discovery->numa = 1; /* we add a single NUMA node if none is given */
+  topology->support.discovery->numa_memory = 1; /* specified or default size */
 
   /* start with os_index 0 for each level */
   for (i = 0; data->level[i].arity > 0; i++)

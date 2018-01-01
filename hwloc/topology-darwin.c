@@ -39,6 +39,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
   int64_t memsize;
   char cpumodel[64];
   int gotnuma = 0;
+  int gotnumamemory = 0;
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
@@ -230,7 +231,10 @@ hwloc_look_darwin(struct hwloc_backend *backend)
           } else {
             hwloc_debug_1arg_bitmap("node %u has cpuset %s\n",
                 j, obj->cpuset);
-	    obj->attr->numanode.local_memory = cachesize[i];
+	    if (cachesize[i]) {
+	      obj->attr->numanode.local_memory = cachesize[i];
+	      gotnumamemory++;
+	    }
 	    obj->attr->numanode.page_types_len = 2;
 	    obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
 	    memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
@@ -250,6 +254,8 @@ hwloc_look_darwin(struct hwloc_backend *backend)
   }
 
   if (gotnuma)
+    topology->support.discovery->numa = 1;
+  if (gotnumamemory)
     topology->support.discovery->numa = 1;
 
   /* add PU objects */

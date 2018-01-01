@@ -733,6 +733,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
   SYSTEM_INFO SystemInfo;
   DWORD length;
   int gotnuma = 0;
+  int gotnumamemory = 0;
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
@@ -815,8 +816,10 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	      obj->nodeset = hwloc_bitmap_alloc();
 	      hwloc_bitmap_set(obj->nodeset, id);
 	      if ((GetNumaAvailableMemoryNodeExProc && GetNumaAvailableMemoryNodeExProc(id, &avail))
-	       || (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail)))
+		  || (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail))) {
 		obj->attr->numanode.local_memory = avail;
+		gotnumamemory++;
+	      }
 	      obj->attr->numanode.page_types_len = 2;
 	      obj->attr->numanode.page_types = malloc(2 * sizeof(*obj->attr->numanode.page_types));
 	      memset(obj->attr->numanode.page_types, 0, 2 * sizeof(*obj->attr->numanode.page_types));
@@ -983,8 +986,10 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	      obj->nodeset = hwloc_bitmap_alloc();
 	      hwloc_bitmap_set(obj->nodeset, id);
 	      if ((GetNumaAvailableMemoryNodeExProc && GetNumaAvailableMemoryNodeExProc(id, &avail))
-	       || (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail)))
+		  || (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail))) {
 	        obj->attr->numanode.local_memory = avail;
+		gotnumamemory++;
+	      }
 	      obj->attr->numanode.page_types = malloc(2 * sizeof(*obj->attr->numanode.page_types));
 	      memset(obj->attr->numanode.page_types, 0, 2 * sizeof(*obj->attr->numanode.page_types));
 	      obj->attr->numanode.page_types_len = 1;
@@ -1032,6 +1037,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 
   topology->support.discovery->pu = 1;
   topology->support.discovery->numa = gotnuma;
+  topology->support.discovery->numa_memory = gotnumamemory;
 
   if (groups_pu_set) {
     /* the system supports multiple Groups.
