@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
@@ -12,6 +13,8 @@
 
 hwloc_topology_t topology;
 const struct hwloc_topology_support *support;
+
+static int checkprocincluded;
 
 /* check that a bound process execs on a non-empty cpuset included in the binding */
 static int check(hwloc_const_cpuset_t set, int flags)
@@ -29,8 +32,11 @@ static int check(hwloc_const_cpuset_t set, int flags)
   ret = hwloc_get_last_cpu_location(topology, last, flags);
   assert(!ret);
   assert(!hwloc_bitmap_iszero(last));
-  printf("  checking inclusion\n");
-  assert(hwloc_bitmap_isincluded(last, set));
+
+  if (flags == HWLOC_CPUBIND_THREAD || checkprocincluded) {
+    printf("  checking inclusion\n");
+    assert(hwloc_bitmap_isincluded(last, set));
+  }
 
   hwloc_bitmap_free(last);
   return 0;
@@ -57,6 +63,8 @@ int main(void)
 {
   unsigned depth;
   hwloc_obj_t obj;
+
+  checkprocincluded = (NULL == getenv("HWLOC_TEST_DONTCHECK_PROC_CPULOCATION"));
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
