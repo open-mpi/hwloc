@@ -1647,8 +1647,12 @@ hwloc_look_xml(struct hwloc_backend *backend)
 	goto failed;
       if (!ret)
 	break;
-      if (strcmp(tag, "distances2"))
-	goto failed;
+      if (strcmp(tag, "distances2")) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object, expected `distances2'\n",
+		  data->msgprefix, tag);
+	goto done;
+      }
       ret = hwloc__xml_v2import_distances(topology, &childstate);
       if (ret < 0)
 	goto failed;
@@ -1659,6 +1663,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
   /* find end of topology tag */
   state.global->close_tag(&state);
 
+done:
   if (!root->cpuset) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: invalid root object without cpuset\n",
