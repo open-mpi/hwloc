@@ -1,11 +1,11 @@
 /*
- * Copyright © 2011-2017 Inria.  All rights reserved.
+ * Copyright © 2011-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 #include <hwloc.h>
-#include <private/misc.h>
 #include <hwloc/shmem.h>
+#include <private/misc.h> /* for hwloc_getpagesize() */
 
 #include <stdlib.h>
 #include <fcntl.h>

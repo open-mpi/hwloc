@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -10,7 +10,7 @@
 #define HWLOC_CALC_H
 
 #include <hwloc.h>
-#include <private/misc.h>
+#include <private/misc.h> /* for HWLOC_OBJ_TYPE_NONE */
 
 #include <stdlib.h>
 #include <stdio.h>

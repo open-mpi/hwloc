@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2017 Inria.  All rights reserved.
+ * Copyright © 2016-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -7,7 +7,7 @@
 #include <errno.h>
 
 #include <hwloc.h>
-#include <private/misc.h>
+#include <private/misc.h> /* for for_each_*child() */
 
 static void check(hwloc_topology_t topology, hwloc_obj_t obj, int verbose)
 {
