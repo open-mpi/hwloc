@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -39,6 +39,8 @@ int main(void)
   assert(!err);
   hwloc_topology_load(topology);
 
+  assert(hwloc_get_memory_parents_depth(topology) == 2);
+
   /* internal checks */
 
   hwloc_topology_check(topology);
@@ -60,6 +62,8 @@ int main(void)
   err = strcmp("Package:2 Group:3 [NUMANode(memory=1073741824)] L2Cache:4(size=4194304) Core:5 PU:6", buffer);
   assert(!err);
 
+  assert(hwloc_get_memory_parents_depth(topology) == 2);
+
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1);
   assert(err == 47);
   err = strcmp("Socket:2 Group:3 NUMANode:1 Cache:4 Core:5 PU:6", buffer);
@@ -74,6 +78,8 @@ int main(void)
   err = hwloc_topology_set_synthetic(topology, "pack:2(indexes=3,5) numa:2(memory=256GB indexes=pack) l3u:1(size=20mb) l2:2 l1i:1(size=16kB) l1dcache:2 core:1 pu:2(indexes=l2)");
   assert(!err);
   hwloc_topology_load(topology);
+
+  assert(hwloc_get_memory_parents_depth(topology) == 2);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
   assert(err == 181);
@@ -101,6 +107,8 @@ int main(void)
   assert(!err);
   hwloc_topology_load(topology);
 
+  assert(hwloc_get_memory_parents_depth(topology) == 0);
+
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
   assert(err == 72);
   err = strcmp("[NUMANode(memory=1073741824)] Package:2 Core:2 PU:2(indexes=4*2:2*2:1*2)", buffer);
@@ -125,6 +133,8 @@ int main(void)
   assert(!err);
   hwloc_topology_load(topology);
 
+  assert(hwloc_get_memory_parents_depth(topology) == 2);
+
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
   assert(err == 76);
   err = strcmp("Package:2 Core:2 [NUMANode(memory=1073741824)] PU:2(indexes=0,4,2,6,1,3,5,7)", buffer);
@@ -148,6 +158,8 @@ int main(void)
   err = hwloc_topology_set_synthetic(topology, "pack:2 [numa(memory=1GB)] [numa(memory=1MB)] core:2 [numa(indexes=8,7,5,6,4,3,1,2)] pu:4");
   assert(!err);
   hwloc_topology_load(topology);
+
+  assert(hwloc_get_memory_parents_depth(topology) == HWLOC_TYPE_DEPTH_MULTIPLE);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
   assert(err == 114);

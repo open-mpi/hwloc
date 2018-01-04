@@ -761,6 +761,27 @@ enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_MISC = -7        /**< \brief Virtual depth for Misc object. \hideinitializer */
 };
 
+/** \brief Return the depth of parents where memory objects are attached.
+ *
+ * Memory objects have virtual negative depths because they are not part of
+ * the main CPU-side hierarchy of objects. This depth should not be compared
+ * with other level depths.
+ *
+ * If all Memory objects are attached to Normal parents at the same depth,
+ * this parent depth may be compared to other as usual, for instance
+ * for knowing whether NUMA nodes is attached above or below Packages.
+ *
+ * \return The depth of Normal parents of all memory children
+ * if all these parents have the same depth. For instance the depth of
+ * the Package level if all NUMA nodes are attached to Package objects.
+ *
+ * \return ::HWLOC_TYPE_DEPTH_MULTIPLE if Normal parents of all
+ * memory children do not have the same depth. For instance if some
+ * NUMA nodes are attached to Packages while others are attached to
+ * Groups.
+ */
+HWLOC_DECLSPEC int hwloc_get_memory_parents_depth (hwloc_topology_t topology);
+
 /** \brief Returns the depth of objects of type \p type or below
  *
  * If no object of this type is present on the underlying architecture, the

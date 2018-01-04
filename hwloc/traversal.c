@@ -46,6 +46,31 @@ hwloc_get_depth_type (hwloc_topology_t topology, int depth)
   return topology->levels[depth][0]->type;
 }
 
+int
+hwloc_get_memory_parents_depth (hwloc_topology_t topology)
+{
+  int depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+  /* memory leaves are always NUMA nodes for now, no need to check parents of other memory types */
+  hwloc_obj_t numa = hwloc_get_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, 0);
+  assert(numa);
+  while (numa) {
+    hwloc_obj_t parent = numa->parent;
+    /* walk-up the memory hierarchy */
+    while (hwloc__obj_type_is_memory(parent->type))
+      parent = parent->parent;
+
+    if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+      depth = parent->depth;
+    else if (depth != parent->depth)
+      return HWLOC_TYPE_DEPTH_MULTIPLE;
+
+    numa = numa->next_cousin;
+  }
+
+  assert(depth >= 0);
+  return depth;
+}
+
 unsigned
 hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, int depth)
 {

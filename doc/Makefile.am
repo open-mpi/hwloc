@@ -350,6 +350,7 @@ man3_levels_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_BRIDGE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_PCI_DEVICE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_OS_DEVICE.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_memory_parents_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \

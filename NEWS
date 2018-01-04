@@ -34,6 +34,11 @@ Version 2.0.0
   + Topologies always have at least one NUMA object. On non-NUMA machines,
     a single NUMA object is added to describe the entire machine memory.
     The NUMA level cannot be ignored anymore.
+  + The NUMA level is special since NUMA nodes are not in the main hierarchy
+    of objects anymore. Its depth is a fake negative depth that should not be
+    compared with normal levels.
+    - If all memory objects are attached to parents at the same depth,
+      it may be retrieved with hwloc_get_memory_parents_depth().
   + The HWLOC_OBJ_CACHE type is replaced with 8 types HWLOC_OBJ_L[1-5]CACHE
     and HWLOC_OBJ_L[1-3]ICACHE that remove the need to disambiguate levels
     when looking for caches with _by_type() functions.

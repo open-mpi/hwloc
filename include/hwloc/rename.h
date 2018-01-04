@@ -162,6 +162,7 @@ extern "C" {
 
 #define hwloc_topology_get_depth HWLOC_NAME(topology_get_depth)
 #define hwloc_get_type_depth HWLOC_NAME(get_type_depth)
+#define hwloc_get_memory_parents_depth HWLOC_NAME(get_memory_parents_depth)
 
 #define hwloc_get_type_depth_e HWLOC_NAME(get_type_depth_e)
 #define HWLOC_TYPE_DEPTH_UNKNOWN HWLOC_NAME_CAPS(TYPE_DEPTH_UNKNOWN)

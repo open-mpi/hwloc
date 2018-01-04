@@ -71,6 +71,8 @@ int main(void)
   assert(hwloc_get_depth_type(topology, -8) == HWLOC_OBJ_TYPE_NONE);
   assert(hwloc_get_depth_type(topology, -134) == HWLOC_OBJ_TYPE_NONE);
 
+  assert(hwloc_get_memory_parents_depth(topology) == 0);
+
   hwloc_topology_destroy(topology);
 
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
