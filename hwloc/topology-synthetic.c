@@ -348,7 +348,7 @@ hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
   }
 
   while (')' != *attrs) {
-    int iscache = hwloc_obj_type_is_cache(type);
+    int iscache = hwloc__obj_type_is_cache(type);
 
     if (iscache && !strncmp("size=", attrs, 5)) {
       memorysize = hwloc_synthetic_parse_memory_attr(attrs+5, &attrs);
@@ -553,7 +553,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     data->level[count].attr.type = type;
     data->level[count].attr.depth = (unsigned) -1;
     data->level[count].attr.cachetype = (hwloc_obj_cache_type_t) -1;
-    if (hwloc_obj_type_is_cache(type)) {
+    if (hwloc__obj_type_is_cache(type)) {
       /* these are always initialized */
       data->level[count].attr.depth = attrs.cache.depth;
       data->level[count].attr.cachetype = attrs.cache.type;
@@ -776,7 +776,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       if (curlevel->attr.depth == (unsigned)-1)
 	curlevel->attr.depth = type_count[HWLOC_OBJ_GROUP]--;
 
-    } else if (hwloc_obj_type_is_cache(type)) {
+    } else if (hwloc__obj_type_is_cache(type)) {
       if (!curlevel->attr.memorysize) {
 	if (1 == curlevel->attr.depth)
 	  /* 32Kb in L1 */
@@ -857,7 +857,7 @@ hwloc_synthetic_next_index(struct hwloc_synthetic_indexes_s *indexes, hwloc_obj_
 
   if (indexes->array)
     os_index = indexes->array[os_index];
-  else if (hwloc_obj_type_is_cache(type) || type == HWLOC_OBJ_GROUP)
+  else if (hwloc__obj_type_is_cache(type) || type == HWLOC_OBJ_GROUP)
     /* don't enforce useless os_indexes for Caches and Groups */
     os_index = HWLOC_UNKNOWN_INDEX;
 
@@ -1182,7 +1182,7 @@ hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
   char memsize[64] = "";
   int needindexes = 0;
 
-  if (hwloc_obj_type_is_cache(obj->type) && obj->attr->cache.size) {
+  if (hwloc__obj_type_is_cache(obj->type) && obj->attr->cache.size) {
     snprintf(cachesize, sizeof(cachesize), "%ssize=%llu",
 	     prefix, (unsigned long long) obj->attr->cache.size);
     prefix = separator;
@@ -1252,7 +1252,7 @@ hwloc__export_synthetic_obj(struct hwloc_topology * topology, unsigned long flag
   /* <type>:<arity>, except for root */
   if (arity != (unsigned)-1)
     snprintf(aritys, sizeof(aritys), ":%u", arity);
-  if (hwloc_obj_type_is_cache(obj->type)
+  if (hwloc__obj_type_is_cache(obj->type)
       && (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES)) {
     /* v1 uses generic "Cache" for non-extended type name */
     res = hwloc_snprintf(tmp, tmplen, "Cache%s", aritys);

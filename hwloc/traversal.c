@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -72,6 +72,24 @@ hwloc_get_obj_by_depth (struct hwloc_topology *topology, int depth, unsigned idx
   if (idx >= topology->level_nbobjects[depth])
     return NULL;
   return topology->levels[depth][idx];
+}
+
+int
+hwloc_obj_type_is_cache(hwloc_obj_type_t type)
+{
+  return hwloc__obj_type_is_cache(type);
+}
+
+int
+hwloc_obj_type_is_dcache(hwloc_obj_type_t type)
+{
+  return hwloc__obj_type_is_dcache(type);
+}
+
+int
+hwloc_obj_type_is_icache(hwloc_obj_type_t type)
+{
+  return hwloc__obj_type_is_icache(type);
 }
 
 unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, unsigned max)
@@ -293,7 +311,7 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 
   *typep = type;
   if (attrp) {
-    if (hwloc_obj_type_is_cache(type) && attrsize >= sizeof(attrp->cache)) {
+    if (hwloc__obj_type_is_cache(type) && attrsize >= sizeof(attrp->cache)) {
       attrp->cache.depth = depthattr;
       attrp->cache.type = cachetypeattr;
     } else if (type == HWLOC_OBJ_GROUP && attrsize >= sizeof(attrp->group)) {

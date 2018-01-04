@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2017 Inria.  All rights reserved.
+ * Copyright © 2010-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -592,6 +592,10 @@ extern "C" {
 #define hwloc_obj_type_is_memory HWLOC_NAME(obj_type_is_memory)
 #define hwloc_obj_type_is_io HWLOC_NAME(obj_type_is_io)
 #define hwloc_obj_type_is_special HWLOC_NAME(obj_type_is_special)
+
+#define hwloc__obj_type_is_cache HWLOC_NAME(_obj_type_is_cache)
+#define hwloc__obj_type_is_dcache HWLOC_NAME(_obj_type_is_dcache)
+#define hwloc__obj_type_is_icache HWLOC_NAME(_obj_type_is_icache)
 
 /* private/cpuid-x86.h */
 

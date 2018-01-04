@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -438,6 +438,28 @@ static __hwloc_inline int hwloc_obj_type_is_io (hwloc_obj_type_t type)
 {
   /* type contiguity is asserted in topology_check() */
   return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
+}
+
+static __hwloc_inline int
+hwloc__obj_type_is_cache(hwloc_obj_type_t type)
+{
+  /* type contiguity is asserted in topology_check() */
+  return (type >= HWLOC_OBJ_L1CACHE && type <= HWLOC_OBJ_L3ICACHE);
+}
+
+static __hwloc_inline int
+hwloc__obj_type_is_dcache(hwloc_obj_type_t type)
+{
+  /* type contiguity is asserted in topology_check() */
+  return (type >= HWLOC_OBJ_L1CACHE && type <= HWLOC_OBJ_L5CACHE);
+}
+
+/** \brief Check whether an object is a Instruction Cache. */
+static __hwloc_inline int
+hwloc__obj_type_is_icache(hwloc_obj_type_t type)
+{
+  /* type contiguity is asserted in topology_check() */
+  return (type >= HWLOC_OBJ_L1ICACHE && type <= HWLOC_OBJ_L3ICACHE);
 }
 
 #ifdef HAVE_USELOCALE

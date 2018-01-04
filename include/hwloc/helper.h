@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -480,25 +480,16 @@ hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_
  */
 
 /** \brief Check whether an object is a Cache (Data, Unified or Instruction). */
-static __hwloc_inline int
-hwloc_obj_type_is_cache(hwloc_obj_type_t type)
-{
-  return (type >= HWLOC_OBJ_L1CACHE && type <= HWLOC_OBJ_L3ICACHE);
-}
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_cache(hwloc_obj_type_t type);
 
 /** \brief Check whether an object is a Data or Unified Cache. */
-static __hwloc_inline int
-hwloc_obj_type_is_dcache(hwloc_obj_type_t type)
-{
-  return (type >= HWLOC_OBJ_L1CACHE && type <= HWLOC_OBJ_L5CACHE);
-}
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_dcache(hwloc_obj_type_t type);
 
 /** \brief Check whether an object is a Instruction Cache. */
-static __hwloc_inline int
-hwloc_obj_type_is_icache(hwloc_obj_type_t type)
-{
-  return (type >= HWLOC_OBJ_L1ICACHE && type <= HWLOC_OBJ_L3ICACHE);
-}
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_icache(hwloc_obj_type_t type);
 
 /** \brief Find the depth of cache objects matching cache level and type.
  *

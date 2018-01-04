@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -4097,10 +4097,10 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
   }
 
   /* check cache type/depth vs type */
-  if (hwloc_obj_type_is_cache(obj->type)) {
-    if (hwloc_obj_type_is_icache(obj->type))
+  if (hwloc__obj_type_is_cache(obj->type)) {
+    if (hwloc__obj_type_is_icache(obj->type))
       assert(obj->attr->cache.type == HWLOC_OBJ_CACHE_INSTRUCTION);
-    else if (hwloc_obj_type_is_dcache(obj->type))
+    else if (hwloc__obj_type_is_dcache(obj->type))
       assert(obj->attr->cache.type == HWLOC_OBJ_CACHE_DATA
 	     || obj->attr->cache.type == HWLOC_OBJ_CACHE_UNIFIED);
     else
@@ -4254,6 +4254,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
   int j, depth;
 
   /* make sure we can use ranges to check types */
+
+  /* hwloc__obj_type_is_{,d,i}cache() want cache types to be ordered like this */
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_L2CACHE == HWLOC_OBJ_L1CACHE + 1);
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_L3CACHE == HWLOC_OBJ_L2CACHE + 1);
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_L4CACHE == HWLOC_OBJ_L3CACHE + 1);
