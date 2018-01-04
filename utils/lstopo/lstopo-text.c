@@ -1,13 +1,12 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 #include <private/autogen/config.h>
-#include <private/private.h> /* for topology->pci_nonzero_domains */
 #include <private/misc.h>
 #include <hwloc.h>
 
