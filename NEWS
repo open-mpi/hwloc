@@ -29,6 +29,8 @@ Version 2.0.0
     not in the usual children list that is now only used for CPU-side objects.
     - hwloc_get_next_child() may still be used to iterate over these 4 lists
       of children at once.
+    - hwloc_obj_type_is_normal(), _memory() and _io() may be used to check
+      the kind of a given object type.
   + Topologies always have at least one NUMA object. On non-NUMA machines,
     a single NUMA object is added to describe the entire machine memory.
     The NUMA level cannot be ignored anymore.

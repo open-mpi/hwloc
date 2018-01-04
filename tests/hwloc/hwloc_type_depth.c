@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -21,6 +21,7 @@
 int main(void)
 {
   hwloc_topology_t topology;
+  int i;
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION);
@@ -71,6 +72,9 @@ int main(void)
   assert(hwloc_get_depth_type(topology, -134) == HWLOC_OBJ_TYPE_NONE);
 
   hwloc_topology_destroy(topology);
+
+  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+    assert(1 == hwloc_obj_type_is_normal(i) + hwloc_obj_type_is_memory(i) + hwloc_obj_type_is_io(i) + (i == HWLOC_OBJ_MISC));
 
   return EXIT_SUCCESS;
 }

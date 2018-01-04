@@ -75,6 +75,24 @@ hwloc_get_obj_by_depth (struct hwloc_topology *topology, int depth, unsigned idx
 }
 
 int
+hwloc_obj_type_is_normal(hwloc_obj_type_t type)
+{
+  return hwloc__obj_type_is_normal(type);
+}
+
+int
+hwloc_obj_type_is_memory(hwloc_obj_type_t type)
+{
+  return hwloc__obj_type_is_memory(type);
+}
+
+int
+hwloc_obj_type_is_io(hwloc_obj_type_t type)
+{
+  return hwloc__obj_type_is_io(type);
+}
+
+int
 hwloc_obj_type_is_cache(hwloc_obj_type_t type)
 {
   return hwloc__obj_type_is_cache(type);

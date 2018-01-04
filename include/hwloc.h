@@ -426,6 +426,7 @@ struct hwloc_obj {
   struct hwloc_obj *memory_first_child;	/**< \brief First Memory child.
 					 * NUMA nodes are listed here (\p memory_arity and \p memory_first_child)
 					 * instead of in the normal children list.
+					 * See also hwloc_obj_type_is_memory().
 					 */
   /**@}*/
 
@@ -437,6 +438,7 @@ struct hwloc_obj {
   struct hwloc_obj *io_first_child;	/**< \brief First I/O child.
 					 * Bridges, PCI and OS devices are listed here (\p io_arity and \p io_first_child)
 					 * instead of in the normal children list.
+					 * See also hwloc_obj_type_is_io().
 					 */
   /**@}*/
 

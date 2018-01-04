@@ -574,12 +574,19 @@ man3_helper_ancestors_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3
 
+man3_helper_find_typesdir = $(mandir)
+man3_helper_find_types_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_types.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_normal.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_memory.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_io.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_cache.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_dcache.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_icache.3
+
 man3_helper_find_cachedir = $(man3dir)
 man3_helper_find_cache_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_cache.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_dcache.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_icache.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_type_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_covering_obj.3
@@ -780,6 +787,7 @@ $(man3_bitmap_DATA): $(DOX_TAG)
 $(man3_helper_find_inside_DATA): $(DOX_TAG)
 $(man3_helper_find_covering_DATA): $(DOX_TAG)
 $(man3_helper_ancestors_DATA): $(DOX_TAG)
+$(man3_helper_find_types_DATA): $(DOX_TAG)
 $(man3_helper_find_cache_DATA): $(DOX_TAG)
 $(man3_helper_find_misc_DATA): $(DOX_TAG)
 $(man3_helper_distribute_DATA): $(DOX_TAG)
