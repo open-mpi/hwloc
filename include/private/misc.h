@@ -394,6 +394,18 @@ static __hwloc_inline hwloc_obj_type_t hwloc_cache_type_by_depth_type(unsigned d
   }
 }
 
+#define HWLOC_BITMAP_EQUAL 0       /* Bitmaps are equal */
+#define HWLOC_BITMAP_INCLUDED 1    /* First bitmap included in second */
+#define HWLOC_BITMAP_CONTAINS 2    /* First bitmap contains second */
+#define HWLOC_BITMAP_INTERSECTS 3  /* Bitmaps intersect without any inclusion */
+#define HWLOC_BITMAP_DIFFERENT  4  /* Bitmaps do not intersect */
+
+/* Compare bitmaps \p bitmap1 and \p bitmap2 from an inclusion point of view. */
+HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
+
+/* Return a stringified PCI class. */
+HWLOC_DECLSPEC extern const char * hwloc_pci_class_string(unsigned short class_id);
+
 /* Traverse children of a parent */
 #define for_each_child(child, parent) for(child = parent->first_child; child; child = child->next_sibling)
 #define for_each_memory_child(child, parent) for(child = parent->memory_first_child; child; child = child->next_sibling)

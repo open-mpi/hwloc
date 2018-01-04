@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -221,8 +221,6 @@ extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_t
  */
 extern int hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology);
 
-HWLOC_DECLSPEC extern const char * hwloc_pci_class_string(unsigned short class_id);
-
 extern int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
 extern int hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);
 extern int hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);
@@ -344,16 +342,6 @@ extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwl
  * If not NULL, must be freed by the caller.
  */
 extern char * hwloc_progname(struct hwloc_topology *topology);
-
-#define HWLOC_BITMAP_EQUAL 0       /* Bitmaps are equal */
-#define HWLOC_BITMAP_INCLUDED 1    /* First bitmap included in second */
-#define HWLOC_BITMAP_CONTAINS 2    /* First bitmap contains second */
-#define HWLOC_BITMAP_INTERSECTS 3  /* Bitmaps intersect without any inclusion */
-#define HWLOC_BITMAP_DIFFERENT  4  /* Bitmaps do not intersect */
-
-/** \brief Compare bitmaps \p bitmap1 and \p bitmap2 from an inclusion point of view.
- */
-HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
 
 /* obj->attr->group.kind internal values.
  * the core will keep the smallest ones when merging two groups,

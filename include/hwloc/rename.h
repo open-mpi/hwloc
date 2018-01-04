@@ -582,6 +582,11 @@ extern "C" {
 #define hwloc_flsl_from_fls32 HWLOC_NAME(flsl_from_fls32)
 #define hwloc_weight_long HWLOC_NAME(weight_long)
 #define hwloc_strncasecmp HWLOC_NAME(strncasecmp)
+
+#define hwloc_bitmap_compare_inclusion HWLOC_NAME(bitmap_compare_inclusion)
+
+#define hwloc_pci_class_string HWLOC_NAME(pci_class_string)
+
 #define hwloc_cache_type_by_depth_type HWLOC_NAME(cache_type_by_depth_type)
 #define hwloc_obj_type_is_normal HWLOC_NAME(obj_type_is_normal)
 #define hwloc_obj_type_is_memory HWLOC_NAME(obj_type_is_memory)
@@ -653,7 +658,6 @@ extern "C" {
 #define hwloc_pci_discovery_exit HWLOC_NAME(pci_discovery_exit)
 #define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
 #define hwloc_pci_belowroot_apply_locality HWLOC_NAME(pci_belowroot_apply_locality)
-#define hwloc_pci_class_string HWLOC_NAME(pci_class_string)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)
 #define hwloc__add_info_nodup HWLOC_NAME(_add_info_nodup)
@@ -704,8 +708,6 @@ extern "C" {
 #define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)
 
 #define hwloc_progname HWLOC_NAME(progname)
-
-#define hwloc_bitmap_compare_inclusion HWLOC_NAME(bitmap_compare_inclusion)
 
 #define hwloc__topology_disadopt HWLOC_NAME(_topology_disadopt)
 #define hwloc__topology_dup HWLOC_NAME(_topology_dup)
