@@ -1,4 +1,4 @@
-# Copyright © 2009-2017 Inria.  All rights reserved.
+# Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2009-2013 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -577,6 +577,9 @@ man3_helper_ancestors_DATA = \
 man3_helper_find_cachedir = $(man3dir)
 man3_helper_find_cache_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_cache.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_dcache.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_icache.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_type_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_covering_obj.3

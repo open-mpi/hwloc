@@ -479,15 +479,24 @@ hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_
  * @{
  */
 
-/** \brief Check whether an object is a Cache (Data, Unified or Instruction). */
+/** \brief Check whether an object type is a Cache (Data, Unified or Instruction).
+ *
+ * \return 1 if an object of type \p type is a Cache, 0 otherwise.
+ */
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_cache(hwloc_obj_type_t type);
 
-/** \brief Check whether an object is a Data or Unified Cache. */
+/** \brief Check whether an object type is a Data or Unified Cache.
+ *
+ * \return 1 if an object of type \p type is a Data or Unified Cache, 0 otherwise.
+ */
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_dcache(hwloc_obj_type_t type);
 
-/** \brief Check whether an object is a Instruction Cache. */
+/** \brief Check whether an object type is a Instruction Cache,
+ *
+ * \return 1 if an object of type \p type is a Instruction Cache, 0 otherwise.
+ */
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_icache(hwloc_obj_type_t type);
 
