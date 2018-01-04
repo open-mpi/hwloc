@@ -869,22 +869,22 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   if (parent && data->version_major >= 2) {
     /* check parent/child types for 2.x */
-    if (hwloc_obj_type_is_normal(obj->type)) {
-      if (!hwloc_obj_type_is_normal(parent->type)) {
+    if (hwloc__obj_type_is_normal(obj->type)) {
+      if (!hwloc__obj_type_is_normal(parent->type)) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "normal object %s cannot be child of non-normal parent %s\n",
 		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
-    } else if (hwloc_obj_type_is_memory(obj->type)) {
-      if (hwloc_obj_type_is_io(parent->type) || HWLOC_OBJ_MISC == parent->type) {
+    } else if (hwloc__obj_type_is_memory(obj->type)) {
+      if (hwloc__obj_type_is_io(parent->type) || HWLOC_OBJ_MISC == parent->type) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "Memory object %s cannot be child of non-normal-or-memory parent %s\n",
 		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
-    } else if (hwloc_obj_type_is_io(obj->type)) {
-      if (hwloc_obj_type_is_memory(parent->type) || HWLOC_OBJ_MISC == parent->type) {
+    } else if (hwloc__obj_type_is_io(obj->type)) {
+      if (hwloc__obj_type_is_memory(parent->type) || HWLOC_OBJ_MISC == parent->type) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "I/O object %s cannot be child of non-normal-or-I/O parent %s\n",
 		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
@@ -894,14 +894,14 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   } else if (parent && data->version_major < 2) {
     /* check parent/child types for pre-v2.0 */
-    if (hwloc_obj_type_is_normal(obj->type) || HWLOC_OBJ_NUMANODE == obj->type) {
-      if (hwloc_obj_type_is_special(parent->type)) {
+    if (hwloc__obj_type_is_normal(obj->type) || HWLOC_OBJ_NUMANODE == obj->type) {
+      if (hwloc__obj_type_is_special(parent->type)) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "v1.x normal v1.x object %s cannot be child of special parent %s\n",
 		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
-    } else if (hwloc_obj_type_is_io(obj->type)) {
+    } else if (hwloc__obj_type_is_io(obj->type)) {
       if (HWLOC_OBJ_MISC == parent->type) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "I/O object %s cannot be child of Misc parent\n",
@@ -1032,13 +1032,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   }
 
   /* check special types vs cpuset */
-  if (!obj->cpuset && !hwloc_obj_type_is_special(obj->type)) {
+  if (!obj->cpuset && !hwloc__obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: invalid normal object %s P#%u without cpuset\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
-  if (obj->cpuset && hwloc_obj_type_is_special(obj->type)) {
+  if (obj->cpuset && hwloc__obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: invalid special object %s with cpuset\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type));
@@ -2128,7 +2128,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 	depth = -1;
 	for(i=0; i<nbobjs; i++) {
 	  hwloc_obj_t parent = dist->objs[i]->parent;
-	  while (hwloc_obj_type_is_memory(parent->type))
+	  while (hwloc__obj_type_is_memory(parent->type))
 	    parent = parent->parent;
 	  if (parent->depth+1 > depth)
 	    depth = parent->depth+1;

@@ -914,7 +914,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   hwloc_bitmap_t set;
   unsigned os_index;
 
-  assert(hwloc_obj_type_is_normal(type) || type == HWLOC_OBJ_NUMANODE);
+  assert(hwloc__obj_type_is_normal(type) || type == HWLOC_OBJ_NUMANODE);
   assert(type != HWLOC_OBJ_MACHINE);
 
   os_index = hwloc_synthetic_next_index(&curlevel->indexes, type);
@@ -1362,7 +1362,7 @@ hwloc_check_memory_symmetric(struct hwloc_topology * topology)
     assert(node);
 
     first_parent = node->parent;
-    assert(hwloc_obj_type_is_normal(first_parent->type)); /* only depth-1 memory children for now */
+    assert(hwloc__obj_type_is_normal(first_parent->type)); /* only depth-1 memory children for now */
 
     /* check whether all object on parent's level have same number of NUMA children */
     for(i=0; i<hwloc_get_nbobjs_by_depth(topology, first_parent->depth); i++) {
@@ -1457,11 +1457,11 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
     signed pdepth;
 
     node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
-    assert(hwloc_obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
+    assert(hwloc__obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
     pdepth = node->parent->depth;
 
     while ((node = node->next_cousin) != NULL) {
-      assert(hwloc_obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
+      assert(hwloc__obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
       if (node->parent->depth != pdepth) {
 	if (verbose)
 	  fprintf(stderr, "Cannot export to synthetic v1 if memory is attached to parents at different depths.\n");

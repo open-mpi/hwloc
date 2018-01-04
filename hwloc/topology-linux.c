@@ -4739,7 +4739,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 	parent = hwloc_get_numanode_obj_by_os_index(topology, (unsigned) node);
 	if (parent) {
 	  /* don't attach I/O under numa node, attach to the same normal parent */
-	  while (hwloc_obj_type_is_memory(parent->type))
+	  while (hwloc__obj_type_is_memory(parent->type))
 	    parent = parent->parent;
 	  return parent;
 	}

@@ -55,7 +55,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     else
       fprintf(output, "%s", type);
     if (l->depth != 0 && idx != HWLOC_UNKNOWN_INDEX
-	&& (verbose_mode >= 2 || !hwloc_obj_type_is_special(l->type)))
+	&& (verbose_mode >= 2 || !hwloc__obj_type_is_special(l->type)))
       fprintf(output, " %s", logical ? lidxstr : pidxstr);
     if (l->name && (l->type == HWLOC_OBJ_MISC || l->type == HWLOC_OBJ_GROUP))
       fprintf(output, " %s", l->name);
@@ -186,12 +186,12 @@ output_only (struct lstopo_output *loutput, hwloc_obj_t l)
   for_each_child(child, l)
     output_only (loutput, child);
   /* there can be only memory or Misc below memory children */
-  if (hwloc_obj_type_is_memory(loutput->show_only) || loutput->show_only == HWLOC_OBJ_MISC) {
+  if (hwloc__obj_type_is_memory(loutput->show_only) || loutput->show_only == HWLOC_OBJ_MISC) {
     for(child = l->memory_first_child; child; child = child->next_sibling)
       output_only (loutput, child);
   }
   /* there can be only I/O or Misc below I/O children */
-  if (hwloc_obj_type_is_special(loutput->show_only)) {
+  if (hwloc__obj_type_is_special(loutput->show_only)) {
     for_each_io_child(child, l)
       output_only (loutput, child);
   }

@@ -413,28 +413,28 @@ HWLOC_DECLSPEC extern const char * hwloc_pci_class_string(unsigned short class_i
 #define for_each_misc_child(child, parent) for(child = parent->misc_first_child; child; child = child->next_sibling)
 
 /* Any object attached to normal children */
-static __hwloc_inline int hwloc_obj_type_is_normal (hwloc_obj_type_t type)
+static __hwloc_inline int hwloc__obj_type_is_normal (hwloc_obj_type_t type)
 {
   /* type contiguity is asserted in topology_check() */
   return type <= HWLOC_OBJ_GROUP;
 }
 
 /* Any object attached to memory children, currently only NUMA nodes */
-static __hwloc_inline int hwloc_obj_type_is_memory (hwloc_obj_type_t type)
+static __hwloc_inline int hwloc__obj_type_is_memory (hwloc_obj_type_t type)
 {
   /* type contiguity is asserted in topology_check() */
   return type == HWLOC_OBJ_NUMANODE;
 }
 
 /* I/O or Misc object, without cpusets or nodesets. */
-static __hwloc_inline int hwloc_obj_type_is_special (hwloc_obj_type_t type)
+static __hwloc_inline int hwloc__obj_type_is_special (hwloc_obj_type_t type)
 {
   /* type contiguity is asserted in topology_check() */
   return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_MISC;
 }
 
 /* Any object attached to io children */
-static __hwloc_inline int hwloc_obj_type_is_io (hwloc_obj_type_t type)
+static __hwloc_inline int hwloc__obj_type_is_io (hwloc_obj_type_t type)
 {
   /* type contiguity is asserted in topology_check() */
   return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;

@@ -619,7 +619,7 @@ unlink_and_free_single_object(hwloc_obj_t *pparent)
     /* append old siblings back */
     *lastp = old->next_sibling;
 
-  } else if (hwloc_obj_type_is_io(old->type)) {
+  } else if (hwloc__obj_type_is_io(old->type)) {
     /* I/O object */
 
     /* no normal children */
@@ -639,7 +639,7 @@ unlink_and_free_single_object(hwloc_obj_t *pparent)
     if (old->misc_first_child)
       append_siblings_list(&old->parent->misc_first_child, old->misc_first_child, old->parent);
 
-  } else if (hwloc_obj_type_is_memory(old->type)) {
+  } else if (hwloc__obj_type_is_memory(old->type)) {
     /* memory object */
 
     /* no normal children */
@@ -858,7 +858,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
     hwloc_insert_object_by_parent(newtopology, newparent, newobj);
 
     /* place us inside our parent children array */
-    if (hwloc_obj_type_is_normal(newobj->type))
+    if (hwloc__obj_type_is_normal(newobj->type))
       newparent->children[newobj->sibling_rank] = newobj;
   }
 
@@ -1072,11 +1072,11 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
   unsigned order2 = obj_type_order[type2];
 
   /* only normal objects are comparable. others are only comparable with machine */
-  if (!hwloc_obj_type_is_normal(type1)
-      && hwloc_obj_type_is_normal(type2) && type2 != HWLOC_OBJ_MACHINE)
+  if (!hwloc__obj_type_is_normal(type1)
+      && hwloc__obj_type_is_normal(type2) && type2 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
-  if (!hwloc_obj_type_is_normal(type2)
-      && hwloc_obj_type_is_normal(type1) && type1 != HWLOC_OBJ_MACHINE)
+  if (!hwloc__obj_type_is_normal(type2)
+      && hwloc__obj_type_is_normal(type1) && type1 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
 
   return order1 - order2;
@@ -1123,8 +1123,8 @@ hwloc_obj_cmp_sets(hwloc_obj_t obj1, hwloc_obj_t obj2)
   hwloc_bitmap_t set1, set2;
   int res = HWLOC_OBJ_DIFFERENT;
 
-  assert(!hwloc_obj_type_is_special(obj1->type));
-  assert(!hwloc_obj_type_is_special(obj2->type));
+  assert(!hwloc__obj_type_is_special(obj1->type));
+  assert(!hwloc__obj_type_is_special(obj2->type));
 
   /* compare cpusets first */
   if (obj1->complete_cpuset && obj2->complete_cpuset) {
@@ -1340,7 +1340,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   /* Pointer where OBJ should be put */
   hwloc_obj_t *putp = NULL; /* OBJ position isn't found yet */
 
-  assert(!hwloc_obj_type_is_memory(obj->type));
+  assert(!hwloc__obj_type_is_memory(obj->type));
 
   /* Iteration with prefetching to be completely safe against CHILD removal.
    * The list is already sorted by cpuset, and there's no intersection between siblings.
@@ -1533,7 +1533,7 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
   hwloc_obj_t *cur_children;
 
   assert(parent);
-  assert(hwloc_obj_type_is_normal(parent->type));
+  assert(hwloc__obj_type_is_normal(parent->type));
 
 #if 0
   /* TODO: enable this instead of hack in fixup_sets once NUMA nodes are inserted late */
@@ -1583,7 +1583,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root
   struct hwloc_obj *result;
 
 #ifdef HWLOC_DEBUG
-  assert(!hwloc_obj_type_is_special(obj->type));
+  assert(!hwloc__obj_type_is_special(obj->type));
 
   /* we need at least one non-NULL set (normal or complete, cpuset or nodeset) */
   assert(obj->cpuset || obj->complete_cpuset || obj->nodeset || obj->complete_nodeset);
@@ -1593,7 +1593,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root
    */
 #endif
 
-  if (hwloc_obj_type_is_memory(obj->type)) {
+  if (hwloc__obj_type_is_memory(obj->type)) {
     if (!root) {
       root = hwloc__find_insert_memory_parent(topology, obj, report_error);
       if (!root) {
@@ -1638,10 +1638,10 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   if (obj->type == HWLOC_OBJ_MISC) {
     /* Append to the end of the Misc list */
     for (current = &parent->misc_first_child; *current; current = &(*current)->next_sibling);
-  } else if (hwloc_obj_type_is_io(obj->type)) {
+  } else if (hwloc__obj_type_is_io(obj->type)) {
     /* Append to the end of the I/O list */
     for (current = &parent->io_first_child; *current; current = &(*current)->next_sibling);
-  } else if (hwloc_obj_type_is_memory(obj->type)) {
+  } else if (hwloc__obj_type_is_memory(obj->type)) {
     /* Append to the end of the memory list */
     for (current = &parent->memory_first_child; *current; current = &(*current)->next_sibling);
     /* Add the bit to the top sets */
@@ -2168,11 +2168,11 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
     /* ignore Misc */
     return;
 
-  if (hwloc_obj_type_is_normal(obj->type)) {
+  if (hwloc__obj_type_is_normal(obj->type)) {
     if (!hwloc_bitmap_iszero(obj->cpuset))
       return;
   } else {
-    assert(hwloc_obj_type_is_memory(obj->type));
+    assert(hwloc__obj_type_is_memory(obj->type));
     if (!hwloc_bitmap_iszero(obj->nodeset))
       return;
   }
@@ -2677,7 +2677,7 @@ hwloc_list_special_objects(hwloc_topology_t topology, hwloc_obj_t obj)
     for_each_misc_child(child, obj)
       hwloc_list_special_objects(topology, child);
 
-  } else if (hwloc_obj_type_is_io(obj->type)) {
+  } else if (hwloc__obj_type_is_io(obj->type)) {
     obj->next_cousin = NULL;
 
     if (obj->type == HWLOC_OBJ_BRIDGE) {
@@ -3406,7 +3406,7 @@ hwloc__topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_
       errno = EINVAL;
       return -1;
     }
-  } else if (hwloc_obj_type_is_special(type)) {
+  } else if (hwloc__obj_type_is_special(type)) {
     if (filter == HWLOC_TYPE_FILTER_KEEP_STRUCTURE) {
       /* I/O and Misc are outside of the main topology structure, makes no sense. */
       errno = EINVAL;
@@ -3421,7 +3421,7 @@ hwloc__topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_
   }
 
   /* "important" just means "all" for non-I/O non-Misc */
-  if (!hwloc_obj_type_is_special(type) && filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT)
+  if (!hwloc__obj_type_is_special(type) && filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT)
     filter = HWLOC_TYPE_FILTER_KEEP_ALL;
 
   topology->type_filter[type] = filter;
@@ -3883,7 +3883,7 @@ hwloc__check_normal_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexe
       child;
       prev = child, child = child->next_sibling, j++) {
     /* normal child */
-    assert(hwloc_obj_type_is_normal(child->type));
+    assert(hwloc__obj_type_is_normal(child->type));
     /* check depth */
     assert(child->depth > parent->depth);
     /* check siblings */
@@ -3919,11 +3919,11 @@ hwloc__check_children_cpusets(hwloc_topology_t topology __hwloc_attribute_unused
       assert(hwloc_bitmap_isset(topology->allowed_cpuset, (int) obj->os_index));
     }
     assert(!obj->arity);
-  } else if (hwloc_obj_type_is_memory(obj->type)) {
+  } else if (hwloc__obj_type_is_memory(obj->type)) {
     /* memory object cpuset is equal to its parent */
     assert(hwloc_bitmap_isequal(obj->parent->cpuset, obj->cpuset));
     assert(!obj->arity);
-  } else if (!hwloc_obj_type_is_special(obj->type)) {
+  } else if (!hwloc__obj_type_is_special(obj->type)) {
     hwloc_bitmap_t set;
     /* other obj cpuset is an exclusive OR of normal children, except for PUs */
     set = hwloc_bitmap_alloc();
@@ -3973,7 +3973,7 @@ hwloc__check_memory_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexe
   for(prev = NULL, child = parent->memory_first_child, j = 0;
       child;
       prev = child, child = child->next_sibling, j++) {
-    assert(hwloc_obj_type_is_memory(child->type));
+    assert(hwloc__obj_type_is_memory(child->type));
     /* check siblings */
     hwloc__check_child_siblings(parent, NULL, parent->memory_arity, j, child, prev);
     /* only Memory and Misc children, recurse */
@@ -4007,7 +4007,7 @@ hwloc__check_io_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, h
       child;
       prev = child, child = child->next_sibling, j++) {
     /* all children must be I/O */
-    assert(hwloc_obj_type_is_io(child->type));
+    assert(hwloc__obj_type_is_io(child->type));
     /* check siblings */
     hwloc__check_child_siblings(parent, NULL, parent->io_arity, j, child, prev);
     /* only I/O and Misc children, recurse */
@@ -4062,7 +4062,7 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
   assert(hwloc_filter_check_keep_object(topology, obj));
 
   /* check that sets and depth */
-  if (hwloc_obj_type_is_special(obj->type)) {
+  if (hwloc__obj_type_is_special(obj->type)) {
     assert(!obj->cpuset);
     if (obj->type == HWLOC_OBJ_BRIDGE)
       assert(obj->depth == HWLOC_TYPE_DEPTH_BRIDGE);
@@ -4264,7 +4264,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_L2ICACHE == HWLOC_OBJ_L1ICACHE + 1);
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_L3ICACHE == HWLOC_OBJ_L2ICACHE + 1);
 
-  /* hwloc_obj_type_is_normal(), hwloc_obj_type_is_memory(), hwloc_obj_type_is_io(), hwloc_obj_type_is_special()
+  /* hwloc__obj_type_is_normal(), hwloc__obj_type_is_memory(), hwloc__obj_type_is_io(), hwloc__obj_type_is_special()
    * and hwloc_reset_normal_type_depths()
    * want special types to be ordered like this, after all normal types.
    */

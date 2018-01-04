@@ -588,10 +588,10 @@ extern "C" {
 #define hwloc_pci_class_string HWLOC_NAME(pci_class_string)
 
 #define hwloc_cache_type_by_depth_type HWLOC_NAME(cache_type_by_depth_type)
-#define hwloc_obj_type_is_normal HWLOC_NAME(obj_type_is_normal)
-#define hwloc_obj_type_is_memory HWLOC_NAME(obj_type_is_memory)
-#define hwloc_obj_type_is_io HWLOC_NAME(obj_type_is_io)
-#define hwloc_obj_type_is_special HWLOC_NAME(obj_type_is_special)
+#define hwloc__obj_type_is_normal HWLOC_NAME(_obj_type_is_normal)
+#define hwloc__obj_type_is_memory HWLOC_NAME(_obj_type_is_memory)
+#define hwloc__obj_type_is_io HWLOC_NAME(_obj_type_is_io)
+#define hwloc__obj_type_is_special HWLOC_NAME(_obj_type_is_special)
 
 #define hwloc__obj_type_is_cache HWLOC_NAME(_obj_type_is_cache)
 #define hwloc__obj_type_is_dcache HWLOC_NAME(_obj_type_is_dcache)
