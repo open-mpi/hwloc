@@ -134,13 +134,13 @@ This is the old way to specify \fB-\-filter <type>:none\fR.
 .TP
 \fB\-\-no\-caches\fR
 Do not show caches.
-This is equivalent to \fB-\-filter <type>:none\fR for all cache types.
+This is identical to \fB-\-filter cache:none\fR.
 .TP
 \fB\-\-no\-useless\-caches\fR
-This is equivalent to \fB-\-filter <type>:structure\fR for all cache types.
+This is identical to \fB-\-filter cache:structure\fR.
 .TP
 \fB\-\-no\-icaches\fR
-This is equivalent to \fB-\-filter <type>:none\fR for all instruction cache types.
+This is identical to \fB-\-filter icache:none\fR.
 .TP
 \fB\-\-whole\-system\fR
 Do not consider administration limitations.
@@ -153,6 +153,7 @@ These flags are passed to \fIhwloc_topology_set_flags()\fR.
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
 This sets HWLOC_TYPE_FILTER_KEEP_STRUCTURE for all object types.
+This is identical to \fB\-\-filter all:structure\fR.
 .TP
 \fB\-\-no\-collapse\fR
 Do not collapse identical PCI devices.
@@ -175,16 +176,19 @@ These flags are passed to \fIhwloc_topology_restrict()\fR.
 .TP
 \fB\-\-no\-io\fB
 Do not show any I/O device or bridge.
+This is identical to \fB\-\-filter io:none\fR.
 By default, common devices (GPUs, NICs, block devices, ...) and
 interesting bridges are shown.
 .TP
 \fB\-\-no\-bridges\fB
 Do not show any I/O bridge except hostbridges.
+This is identical to \fB\-\-filter bridge:none\fR.
 By default, common devices (GPUs, NICs, block devices, ...) and
 interesting bridges are shown.
 .TP
 \fB\-\-whole\-io\fB
 Show all I/O devices and bridges.
+This is identical to \fB\-\-filter io:all\fR.
 By default, only common devices (GPUs, NICs, block devices, ...) and
 interesting bridges are shown.
 .TP
