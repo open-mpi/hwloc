@@ -4656,7 +4656,7 @@ const struct hwloc_component hwloc_linux_component = {
 
 static hwloc_obj_t
 hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
-				const char *osdevpath, unsigned flags)
+				const char *osdevpath, unsigned osdev_flags)
 {
   struct hwloc_topology *topology = backend->topology;
   char path[256], buf[10];
@@ -4682,7 +4682,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   }
   path[err] = '\0';
 
-  if (!(flags & HWLOC_LINUXFS_FIND_OSDEV_FLAG_VIRTUAL)) {
+  if (!(osdev_flags & HWLOC_LINUXFS_FIND_OSDEV_FLAG_VIRTUAL)) {
     if (strstr(path, "/virtual/"))
       return NULL;
   }
@@ -4951,7 +4951,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 }
 
 static int
-hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend)
+hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
@@ -4980,7 +4980,7 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend)
     err = snprintf(path, sizeof(path), "/sys/class/block/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
@@ -5030,7 +5030,7 @@ hwloc_linuxfs_net_class_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend)
+hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
@@ -5052,7 +5052,7 @@ hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend)
     err = snprintf(path, sizeof(path), "/sys/class/net/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
@@ -5147,7 +5147,7 @@ hwloc_linuxfs_infiniband_class_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend)
+hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
@@ -5173,7 +5173,7 @@ hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend)
     err = snprintf(path, sizeof(path), "/sys/class/infiniband/%s", dirent->d_name);
     if ((size_t) err > sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
@@ -5240,7 +5240,7 @@ hwloc_linuxfs_mic_class_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend)
+hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
@@ -5262,7 +5262,7 @@ hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend)
       continue;
 
     snprintf(path, sizeof(path), "/sys/class/mic/mic%u", idx);
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
@@ -5277,7 +5277,7 @@ hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend)
 }
 
 static int
-hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend)
+hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
@@ -5309,7 +5309,7 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend)
     err = snprintf(path, sizeof(path), "/sys/class/drm/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
@@ -5322,7 +5322,7 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend)
 }
 
 static int
-hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend)
+hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
@@ -5344,7 +5344,7 @@ hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend)
     err = snprintf(path, sizeof(path), "/sys/class/dma/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, 0 /* no virtual */);
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
@@ -5824,13 +5824,14 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   }
 
   if (ofilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
-      hwloc_linuxfs_lookup_block_class(backend);
-      hwloc_linuxfs_lookup_net_class(backend);
-      hwloc_linuxfs_lookup_infiniband_class(backend);
-      hwloc_linuxfs_lookup_mic_class(backend);
+    unsigned osdev_flags = 0; /* no filtering for now */
+    hwloc_linuxfs_lookup_block_class(backend, osdev_flags);
+    hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
+    hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
+    hwloc_linuxfs_lookup_mic_class(backend, osdev_flags);
       if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
-	hwloc_linuxfs_lookup_drm_class(backend);
-	hwloc_linuxfs_lookup_dma_class(backend);
+	hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
+	hwloc_linuxfs_lookup_dma_class(backend, osdev_flags);
       }
   }
   if (mfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
