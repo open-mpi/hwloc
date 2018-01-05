@@ -3457,6 +3457,34 @@ hwloc_topology_set_all_types_filter(struct hwloc_topology *topology, enum hwloc_
 }
 
 int
+hwloc_topology_set_cache_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter)
+{
+  unsigned i;
+  for(i=HWLOC_OBJ_L1CACHE; i<HWLOC_OBJ_L3ICACHE; i++)
+    hwloc_topology_set_type_filter(topology, (hwloc_obj_type_t) i, filter);
+  return 0;
+}
+
+int
+hwloc_topology_set_icache_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter)
+{
+  unsigned i;
+  for(i=HWLOC_OBJ_L1ICACHE; i<HWLOC_OBJ_L3ICACHE; i++)
+    hwloc_topology_set_type_filter(topology, (hwloc_obj_type_t) i, filter);
+  return 0;
+}
+
+int
+hwloc_topology_set_io_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter)
+{
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MISC, filter);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, filter);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, filter);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, filter);
+  return 0;
+}
+
+int
 hwloc_topology_get_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t type, enum hwloc_type_filter_e *filterp)
 {
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MIN == 0);
