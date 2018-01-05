@@ -413,6 +413,7 @@ main (int argc, char *argv[])
         char *colon;
         enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_ALL;
         int all = 0;
+	int allio = 0;
 	int allcaches = 0;
 	int allicaches = 0;
         if (argc < 2) {
@@ -438,6 +439,8 @@ main (int argc, char *argv[])
         }
         if (!strcmp(argv[1], "all"))
           all = 1;
+	else if (!strcmp(argv[1], "io"))
+	  allio = 1;
 	else if (!strcmp(argv[1], "cache"))
 	  allcaches = 1;
 	else if (!strcmp(argv[1], "icache"))
@@ -449,6 +452,8 @@ main (int argc, char *argv[])
         }
         if (all)
           hwloc_topology_set_all_types_filter(topology, filter);
+	else if (allio)
+          hwloc_topology_set_io_types_filter(topology, filter);
 	else if (allcaches)
 	  hwloc_topology_set_cache_types_filter(topology, filter);
 	else if (allicaches)
