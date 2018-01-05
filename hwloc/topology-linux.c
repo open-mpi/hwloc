@@ -5824,7 +5824,9 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
   }
 
   if (ofilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
-    unsigned osdev_flags = 0; /* no filtering for now */
+    unsigned osdev_flags = 0;
+    if (getenv("HWLOC_VIRTUAL_LINUX_OSDEV"))
+      osdev_flags |= HWLOC_LINUXFS_FIND_OSDEV_FLAG_VIRTUAL;
     hwloc_linuxfs_lookup_block_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
