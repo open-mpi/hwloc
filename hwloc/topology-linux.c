@@ -4653,6 +4653,7 @@ const struct hwloc_component hwloc_linux_component = {
  ***********************************/
 
 #define HWLOC_LINUXFS_FIND_OSDEV_FLAG_VIRTUAL (1<<0)
+#define HWLOC_LINUXFS_FIND_OSDEV_FLAG_USB (1<<1)
 
 static hwloc_obj_t
 hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
@@ -4684,6 +4685,11 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 
   if (!(osdev_flags & HWLOC_LINUXFS_FIND_OSDEV_FLAG_VIRTUAL)) {
     if (strstr(path, "/virtual/"))
+      return NULL;
+  }
+
+  if (!(osdev_flags & HWLOC_LINUXFS_FIND_OSDEV_FLAG_USB)) {
+    if (strstr(path, "/usb"))
       return NULL;
   }
 
@@ -5827,6 +5833,9 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
     unsigned osdev_flags = 0;
     if (getenv("HWLOC_VIRTUAL_LINUX_OSDEV"))
       osdev_flags |= HWLOC_LINUXFS_FIND_OSDEV_FLAG_VIRTUAL;
+    if (ofilter == HWLOC_TYPE_FILTER_KEEP_ALL)
+      osdev_flags |= HWLOC_LINUXFS_FIND_OSDEV_FLAG_USB;
+
     hwloc_linuxfs_lookup_block_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
