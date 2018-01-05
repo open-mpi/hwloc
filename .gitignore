@@ -110,7 +110,6 @@ test-suite.log
 /tests/hwloc/linux-libnuma
 /tests/hwloc/glibc-sched
 /tests/hwloc/openfabrics-verbs
-/tests/hwloc/myriexpress
 /tests/hwloc/opencl
 /tests/hwloc/cuda
 /tests/hwloc/cudart

@@ -88,7 +88,6 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/gl.h \
        $(hwloc_include_dir)/hwloc/intel-mic.h \
        $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
-       $(hwloc_include_dir)/hwloc/myriexpress.h \
        $(srcdir)/netloc.doxy \
        $(hwloc_include_dir)/netloc.h
 
@@ -738,12 +737,6 @@ man3_linux_libnuma_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nodeset_to_linux_libnuma_ulongs.3
 
-man3_myriexpressdir = $(man3dir)
-man3_myriexpress_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_myriexpress.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_mx_board_get_device_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_mx_endpoint_get_device_cpuset.3
-
 man3_openfabricsdir = $(man3dir)
 man3_openfabrics_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_openfabrics.3 \
@@ -801,7 +794,6 @@ $(man3_cuda_DATA): $(DOX_TAG)
 $(man3_glibc_sched_DATA): $(DOX_TAG)
 $(man3_linux_DATA): $(DOX_TAG)
 $(man3_linux_libnuma_DATA): $(DOX_TAG)
-$(man3_myriexpress_DATA): $(DOX_TAG)
 $(man3_openfabrics_DATA): $(DOX_TAG)
 
 $(DOX_LETTERPDF): $(DOX_TAG)

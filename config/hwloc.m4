@@ -1194,8 +1194,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 		       [test "x$hwloc_have_cuda" = "xyes"])
 	AM_CONDITIONAL([HWLOC_HAVE_GL],
 		       [test "x$hwloc_have_gl" = "xyes"])
-	AM_CONDITIONAL([HWLOC_HAVE_MYRIEXPRESS],
-		       [test "x$hwloc_have_myriexpress" = "xyes"])
 	AM_CONDITIONAL([HWLOC_HAVE_CUDART],
 		       [test "x$hwloc_have_cudart" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBXML2], [test "$hwloc_libxml2_happy" = "yes"])

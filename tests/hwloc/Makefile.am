@@ -77,10 +77,6 @@ if HWLOC_HAVE_LIBIBVERBS
 check_PROGRAMS += openfabrics-verbs
 endif HWLOC_HAVE_LIBIBVERBS
 
-if HWLOC_HAVE_MYRIEXPRESS
-check_PROGRAMS += myriexpress
-endif HWLOC_HAVE_MYRIEXPRESS
-
 if HWLOC_HAVE_OPENCL
 check_PROGRAMS += opencl
 endif HWLOC_HAVE_OPENCL
@@ -111,7 +107,6 @@ LDADD += $(HWLOC_top_builddir)/hwloc/$(hwloc_lib)
 
 linux_libnuma_LDADD = $(LDADD) -lnuma
 openfabrics_verbs_LDADD = $(LDADD) -libverbs
-myriexpress_LDADD = $(LDADD) -lmyriexpress
 opencl_LDADD = $(LDADD) -lOpenCL
 cuda_LDADD = $(LDADD) -lcuda
 cudart_LDADD = $(LDADD) -lcuda -lcudart

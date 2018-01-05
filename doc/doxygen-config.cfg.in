@@ -25,7 +25,6 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/gl.h \
 		@top_srcdir@/include/hwloc/intel-mic.h \
 		@top_srcdir@/include/hwloc/openfabrics-verbs.h \
-		@top_srcdir@/include/hwloc/myriexpress.h \
 		@top_srcdir@/include/hwloc/diff.h \
 		@top_srcdir@/include/hwloc/shmem.h \
 		@top_srcdir@/include/hwloc/plugins.h \

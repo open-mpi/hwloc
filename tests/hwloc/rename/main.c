@@ -21,9 +21,6 @@
 #if HWLOC_TEST_RENAME_GLIBC_SCHED
 #include "hwloc/glibc-sched.h"
 #endif
-#if HWLOC_TEST_RENAME_MYRIEXPRESS
-#include "hwloc/myriexpress.h"
-#endif
 #if HWLOC_TEST_RENAME_OPENFABRICS_VERBS
 #include "hwloc/openfabrics-verbs.h"
 #endif

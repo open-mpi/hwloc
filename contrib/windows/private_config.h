@@ -202,12 +202,6 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
 
-/* Define to 1 if we have -lmyriexpress */
-/* #undef HAVE_MYRIEXPRESS */
-
-/* Define to 1 if you have the <myriexpress.h> header file. */
-/* #undef HAVE_MYRIEXPRESS_H */
-
 /* Define to 1 if you have the `nl_langinfo' function. */
 /* #undef HAVE_NL_LANGINFO */
 

@@ -2006,15 +2006,6 @@ enabled for the current topology.
   information (if I/O device discovery is enabled).
  </dd>
 
-<dt>Myrinet Express</dt>
- <dd>
-  hwloc/myriexpress.h offers interoperability with the Myrinet
-  Express interface.  It can return the list of processors near
-  a Myrinet board managed by the MX driver.
-  Note that if I/O device discovery is enabled, such boards may also
-  appear as PCI objects in the topology.
- </dd>
-
 <dt>Intel Xeon Phi (MIC)</dt>
  <dd>
   hwloc/intel-mic.h helps interoperability with Intel Xeon Phi (MIC)
