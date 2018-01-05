@@ -3620,9 +3620,12 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* Mark distances objs arrays as invalid since we may have removed objects
    * from the topology after adding the distances (remove_empty, etc).
    * It would be hard to actually verify whether it's needed.
-   * We'll refresh them if users ever actually look at distances.
    */
   hwloc_internal_distances_invalidate_cached_objs(topology);
+  /* And refresh distances so that multithreaded concurrent distances_get()
+   * don't refresh() concurrently (disallowed).
+   */
+  hwloc_internal_distances_refresh(topology);
 
   topology->is_loaded = 1;
   return 0;

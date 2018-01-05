@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2017 Inria.  All rights reserved.
+ * Copyright © 2010-2018 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -590,6 +590,11 @@ hwloc__distances_get(hwloc_topology_t topology,
 
   /* we could refresh only the distances that match, but we won't have many distances anyway,
    * so performance is totally negligible.
+   *
+   * This is also useful in multithreaded apps that modify the topology.
+   * They can call any valid hwloc_distances_get() to force a refresh after
+   * changing the topology, so that future concurrent get() won't cause
+   * concurrent refresh().
    */
   hwloc_internal_distances_refresh(topology);
 
