@@ -2015,9 +2015,10 @@ enum hwloc_type_filter_e {
    * For ::HWLOC_OBJ_PCI_DEVICE and ::HWLOC_OBJ_OS_DEVICE, it means that only objects
    * of major/common kinds are kept (storage, network, OpenFabrics, Intel MICs, CUDA,
    * OpenCL, NVML, and displays).
+   * Also, only OS devices directly attached on PCI (e.g. no USB) are reported.
    * For ::HWLOC_OBJ_BRIDGE, it means that bridges are kept only if they have children.
    *
-   * This flag equivalent to ::HWLOC_TYPE_FILTER_KEEP_ALL for normal and Misc types
+   * This flag equivalent to ::HWLOC_TYPE_FILTER_KEEP_ALL for Normal, Memory and Misc types
    * since they are likely important.
    * \hideinitializer
    */
