@@ -4652,9 +4652,11 @@ const struct hwloc_component hwloc_linux_component = {
  ******* Linux I/O component *******
  ***********************************/
 
+#define HWLOC_LINUXFS_FIND_OSDEV_FLAG_VIRTUAL (1<<0)
+
 static hwloc_obj_t
 hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
-				const char *osdevpath, int allowvirtual)
+				const char *osdevpath, unsigned flags)
 {
   struct hwloc_topology *topology = backend->topology;
   char path[256], buf[10];
@@ -4680,7 +4682,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   }
   path[err] = '\0';
 
-  if (!allowvirtual) {
+  if (!(flags & HWLOC_LINUXFS_FIND_OSDEV_FLAG_VIRTUAL)) {
     if (strstr(path, "/virtual/"))
       return NULL;
   }
