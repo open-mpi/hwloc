@@ -63,6 +63,11 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 
       hwloc_debug("This is opencl%ud%u\n", j, i);
 
+      clGetDeviceInfo(device_ids[i], CL_DEVICE_TYPE, sizeof(type), &type, NULL);
+      if (type == CL_DEVICE_TYPE_CPU)
+	/* we don't want CPU opencl devices */
+	continue;
+
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       snprintf(buffer, sizeof(buffer), "opencl%ud%u", j, i);
       osdev->name = strdup(buffer);
@@ -72,13 +77,10 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
       osdev->subtype = strdup("OpenCL");
       hwloc_obj_add_info(osdev, "Backend", "OpenCL");
 
-      clGetDeviceInfo(device_ids[i], CL_DEVICE_TYPE, sizeof(type), &type, NULL);
       if (type == CL_DEVICE_TYPE_GPU)
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "GPU");
       else if (type == CL_DEVICE_TYPE_ACCELERATOR)
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Accelerator");
-      else if (type == CL_DEVICE_TYPE_CPU)
-	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "CPU");
       else if (type == CL_DEVICE_TYPE_CUSTOM)
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Custom");
       else

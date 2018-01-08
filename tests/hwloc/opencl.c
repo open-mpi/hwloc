@@ -55,7 +55,13 @@ int main(void)
       unsigned p, d;
 
       osdev = hwloc_opencl_get_device_osdev_by_index(topology, i, j);
-      assert(osdev); /* we currently insert all OpenCL devices, even CPU devices */
+      /* we currently insert all OpenCL devices, except CPU devices */
+      if (!osdev) {
+	cl_device_type type;
+	clGetDeviceInfo(device_ids[i], CL_DEVICE_TYPE, sizeof(type), &type, NULL);
+	assert(type == CL_DEVICE_TYPE_CPU);
+	continue;
+      }
 
       /* try to get it from PCI locality (only works with AMD extensions) */
       osdev2 = hwloc_opencl_get_device_osdev(topology, device_ids[j]);
