@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2017 Inria.  All rights reserved.
+ * Copyright © 2012-2018 Inria.  All rights reserved.
  * Copyright © 2013 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -130,10 +130,15 @@ hwloc_opencl_get_device_osdev_by_index(hwloc_topology_t topology,
         return NULL;
 }
 
-/** \brief Get the hwloc OS device object corresponding to OpenCL device \p device.
+/** \brief Get the hwloc OS device object corresponding to OpenCL device \p deviceX.
  *
- * Return the hwloc OS device object that describes the given
- * OpenCL device \p device. Return NULL if there is none.
+ * Use OpenCL device attributes to find the corresponding hwloc OS device object.
+ * Return NULL if there is none or if useful attributes are not available.
+ *
+ * This function currently only works on AMD OpenCL devices that support
+ * the CL_DEVICE_TOPOLOGY_AMD extension. hwloc_opencl_get_device_osdev_by_index()
+ * should be preferred whenever possible, i.e. when platform and device index
+ * are known.
  *
  * Topology \p topology and device \p device must match the local machine.
  * I/O devices detection and the OpenCL component must be enabled in the topology.
