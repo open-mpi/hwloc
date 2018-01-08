@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2015 Inria.  All rights reserved.
+ * Copyright © 2010-2018 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -66,7 +66,8 @@ int main(void)
 
     assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
 
-    value = hwloc_obj_get_info_by_name(osdev, "CoProcType");
+    value = osdev->subtype;
+    assert(value);
     err = strcmp(value, "CUDA");
     assert(!err);
 
