@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2017 Inria.  All rights reserved.
+ * Copyright © 2012-2018 Inria.  All rights reserved.
  * Copyright © 2013 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -104,10 +104,10 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 
       buffer[0] = '\0';
 #ifdef CL_DEVICE_BOARD_NAME_AMD
-      clGetDeviceInfo(device_ids[i], CL_DEVICE_BOARD_NAME_AMD, sizeof(buffer), buffer, NULL);
-#else
-      clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+      clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_BOARD_NAME_AMD, sizeof(buffer), buffer, NULL);
+      if (CL_SUCCESS != clret || buffer[0] == '\0')
 #endif
+        clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
       if (buffer[0] != '\0')
 	hwloc_obj_add_info(osdev, "GPUModel", buffer);
 
