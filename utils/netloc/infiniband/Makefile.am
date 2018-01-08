@@ -1,9 +1,8 @@
 # Copyright © 2013 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2013      University of Wisconsin-La Crosse.
 #                         All rights reserved.
-# Copyright © 2015-2016 Inria.  All rights reserved.
+# Copyright © 2015-2018 Inria.  All rights reserved.
 #
-# Copyright © 2016 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 # $HEADER$
@@ -27,4 +26,5 @@ netloc_ib_extract_dats_SOURCES = \
         netloc_ib_extract_dats.c
 
 netloc_ib_extract_dats_LDADD = \
-        $(top_builddir)/netloc/libnetloc.la
+        $(top_builddir)/netloc/libnetloc.la \
+		$(top_builddir)/hwloc/libhwloc.la

@@ -1,4 +1,4 @@
-# Copyright © 2016-2017 Inria.  All rights reserved.
+# Copyright © 2016-2018 Inria.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -10,7 +10,8 @@ AM_CPPFLAGS = $(HWLOC_CPPFLAGS) \
         -I$(top_srcdir)/include
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-LDADD = $(top_builddir)/netloc/libnetloc.la
+LDADD = $(top_builddir)/netloc/libnetloc.la \
+		$(top_builddir)/hwloc/libhwloc.la
 
 if BUILD_MPITOOLS
 bin_PROGRAMS = \
