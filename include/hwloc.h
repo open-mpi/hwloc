@@ -745,6 +745,7 @@ HWLOC_DECLSPEC int hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict to
  * hwloc_get_obj_by_depth() but it should not be considered as an actual
  * depth by the application. In particular, it should not be compared with
  * any other object depth or with the entire topology depth.
+ * \sa hwloc_get_memory_parents_depth().
  *
  * \sa hwloc_type_sscanf_as_depth() for returning the depth of objects
  * whose type is given as a string.
