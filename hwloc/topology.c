@@ -3477,7 +3477,6 @@ hwloc_topology_set_icache_types_filter(hwloc_topology_t topology, enum hwloc_typ
 int
 hwloc_topology_set_io_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter)
 {
-  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MISC, filter);
   hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, filter);
   hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, filter);
   hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE, filter);

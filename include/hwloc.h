@@ -2047,7 +2047,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_cache_types_filter(hwloc_topology_t topolo
  */
 HWLOC_DECLSPEC int hwloc_topology_set_icache_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter);
 
-/** \brief Set the filtering for I/O and Misc object types.
+/** \brief Set the filtering for all I/O object types.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_io_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter);
 
