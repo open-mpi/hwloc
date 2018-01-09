@@ -520,8 +520,12 @@ Make sure to have had a look at those too!
   <dd>Interesting kind of part of the system, such as a Core, a L2Cache,
   a NUMA memory node, etc. The different types detected by hwloc are
   detailed in the ::hwloc_obj_type_t enumeration.
-  
-  They are topologically sorted by CPU set into a tree (see \ref termsanddefs_tree).
+
+  There are four kinds of Objects: Memory (NUMA nodes), I/O (Bridges, PCI and OS devices),
+  Misc, and Normal (everything else, including Machine, Package, Core, PU, CPU Caches, etc.).
+
+  Objects are topologically sorted by locality (CPU and node sets)
+  into a tree (see \ref termsanddefs_tree).
   </dd>
 
 <dt>Processing Unit (or Logical Processor)</dt>
@@ -654,7 +658,7 @@ Make sure to have had a look at those too!
   <dd>Set of objects of the same type and depth. All these objects
   are cousins.
 
-  Memory, I/O and Misc objects also have their own specific levels and depth.
+  Memory, I/O and Misc objects also have their own specific levels and (virtual) depth.
   </dd>
 
 <dt>Depth</dt>
