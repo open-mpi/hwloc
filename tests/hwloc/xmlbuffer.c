@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2017 Inria.  All rights reserved.
+ * Copyright © 2010-2018 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -34,7 +34,7 @@ static int one_test(void)
   t[9] = '\0';
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
   hwloc_topology_load(topology);
   assert(hwloc_topology_is_thissystem(topology));
   hwloc_obj_add_info(hwloc_get_root_obj(topology), "UglyString", s);
@@ -44,7 +44,7 @@ static int one_test(void)
   printf("exported to buffer %p length %d\n", buf1, size1);
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
   assert(!hwloc_topology_set_xmlbuffer(topology, buf1, size1));
   hwloc_topology_load(topology);
   assert(!hwloc_topology_is_thissystem(topology));
