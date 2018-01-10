@@ -3356,7 +3356,6 @@ look_sysfscpu(struct hwloc_topology *topology,
   caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset) {
     hwloc_bitmap_t packageset, coreset, bookset, threadset;
-    unsigned mypackageid, mycoreid, mybookid;
     int tmpint;
 
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
@@ -3368,7 +3367,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	if (hwloc_bitmap_first(packageset) == i) {
 	  /* first cpu in this package, add the package */
 	  struct hwloc_obj *package;
-
+	  unsigned mypackageid;
 	  mypackageid = (unsigned) -1;
 	  sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i); /* contains %d at least up to 4.9 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
@@ -3442,6 +3441,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (coreset) {
+        unsigned mycoreid;
 	int gotcoreid = 0; /* to avoid reading the coreid twice */
 	hwloc_bitmap_and(coreset, coreset, cpuset);
 	if (hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
@@ -3496,7 +3496,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	hwloc_bitmap_and(bookset, bookset, cpuset);
 	if (hwloc_bitmap_first(bookset) == i) {
 	  struct hwloc_obj *book;
-
+	  unsigned mybookid;
 	  mybookid = (unsigned) -1;
 	  sprintf(str, "%s/cpu%d/topology/book_id", path, i); /* contains %d at least up to 4.9 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
