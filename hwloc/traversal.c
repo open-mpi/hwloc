@@ -594,14 +594,12 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   if (verbose) {
     unsigned i;
     for(i=0; i<obj->infos_count; i++) {
-      if (strchr(obj->infos[i].value, ' '))
-	res = hwloc_snprintf(tmp, tmplen, "%s%s=\"%s\"",
+      struct hwloc_info_s *info = &obj->infos[i];
+      const char *quote = strchr(info->value, ' ') ? "\"" : "";
+      res = hwloc_snprintf(tmp, tmplen, "%s%s=%s%s%s",
 			     prefix,
-			     obj->infos[i].name, obj->infos[i].value);
-      else
-	res = hwloc_snprintf(tmp, tmplen, "%s%s=%s",
-			     prefix,
-			     obj->infos[i].name, obj->infos[i].value);
+			     info->name,
+			     quote, info->value, quote);
       if (res < 0)
         return -1;
       ret += res;

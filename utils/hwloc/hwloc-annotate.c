@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2017 Inria.  All rights reserved.
+ * Copyright © 2012-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -47,8 +47,9 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 	if (clearinfos) {
 		/* this may be considered dangerous, applications should not modify objects directly */
 		for(i=0; i<obj->infos_count; i++) {
-			free(obj->infos[i].name);
-			free(obj->infos[i].value);
+			struct hwloc_info_s *info = &obj->infos[i];
+			free(info->name);
+			free(info->value);
 		}
 		free(obj->infos);
 		obj->infos = NULL;
@@ -61,16 +62,17 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 		if (replaceinfos) {
 			/* this may be considered dangerous, applications should not modify objects directly */
 			for(i=0, j=0; i<obj->infos_count; i++) {
-				if (!strcmp(infoname, obj->infos[i].name)) {
+				struct hwloc_info_s *info = &obj->infos[i];
+				if (!strcmp(infoname, info->name)) {
 					/* remove info */
-					free(obj->infos[i].name);
-					free(obj->infos[i].value);
-					obj->infos[i].name = NULL;
+					free(info->name);
+					info->name = NULL;
+					free(info->value);
 				} else {
 					if (i != j) {
 						/* shift info to where it belongs */
-						obj->infos[j].name = obj->infos[i].name;
-						obj->infos[j].value = obj->infos[i].value;
+						obj->infos[j].name = info->name;
+						obj->infos[j].value = info->value;
 					}
 					j++;
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2017 Inria.  All rights reserved.
+ * Copyright © 2013-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -215,15 +215,16 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 	if (obj1->infos_count != obj2->infos_count)
 		goto out_too_complex;
 	for(i=0; i<obj1->infos_count; i++) {
-		if (strcmp(obj1->infos[i].name, obj2->infos[i].name))
+		struct hwloc_info_s *info1 = &obj1->infos[i], *info2 = &obj2->infos[i];
+		if (strcmp(info1->name, info2->name))
 			goto out_too_complex;
 		if (strcmp(obj1->infos[i].value, obj2->infos[i].value)) {
 			err = hwloc_append_diff_obj_attr_string(obj1,
-							       HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO,
-							       obj1->infos[i].name,
-							       obj1->infos[i].value,
-							       obj2->infos[i].value,
-							       firstdiffp, lastdiffp);
+								HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO,
+								info1->name,
+								info1->value,
+								info2->value,
+								firstdiffp, lastdiffp);
 			if (err < 0)
 				return err;
 		}
@@ -425,10 +426,11 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 			unsigned i;
 			int found = 0;
 			for(i=0; i<obj->infos_count; i++) {
-				if (!strcmp(obj->infos[i].name, name)
-				    && !strcmp(obj->infos[i].value, oldvalue)) {
-					free(obj->infos[i].value);
-					obj->infos[i].value = strdup(newvalue);
+				struct hwloc_info_s *info = &obj->infos[i];
+				if (!strcmp(info->name, name)
+				    && !strcmp(info->value, oldvalue)) {
+					free(info->value);
+					info->value = strdup(newvalue);
 					found = 1;
 					break;
 				}
