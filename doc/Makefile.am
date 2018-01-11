@@ -325,7 +325,7 @@ man3_objects_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_group_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_osdev_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_pcidev_attr_s.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_info_s.3
+        $(DOX_MAN_DIR)/man3/hwloc_info_s.3
 
 man3_creationdir = $(man3dir)
 man3_creation_DATA = \

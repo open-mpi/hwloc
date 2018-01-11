@@ -221,10 +221,10 @@ extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_t
  */
 extern int hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology);
 
-extern int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
-extern int hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);
-extern int hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);
-extern void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count);
+extern int hwloc__add_info(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value);
+extern int hwloc__add_info_nodup(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);
+extern int hwloc__move_infos(struct hwloc_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_info_s **src_infosp, unsigned *src_countp);
+extern void hwloc__free_infos(struct hwloc_info_s *infos, unsigned count);
 
 /* set native OS binding hooks */
 extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);

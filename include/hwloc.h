@@ -518,7 +518,7 @@ struct hwloc_obj {
                                           * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
                                           */
 
-  struct hwloc_obj_info_s *infos;	/**< \brief Array of stringified info type=name. */
+  struct hwloc_info_s *infos;		/**< \brief Array of stringified info type=name. */
   unsigned infos_count;			/**< \brief Size of infos array. */
 
   /* misc */
@@ -605,7 +605,7 @@ union hwloc_obj_attr_u {
  *
  * \sa hwlocality_info_attr
  */
-struct hwloc_obj_info_s {
+struct hwloc_info_s {
   char *name;	/**< \brief Info name */
   char *value;	/**< \brief Info value */
 };

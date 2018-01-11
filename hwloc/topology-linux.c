@@ -2038,7 +2038,7 @@ struct hwloc_linux_cpuinfo_proc {
   long Lcore, Lpkg;
 
   /* custom info, set during hwloc_linux_parse_cpuinfo */
-  struct hwloc_obj_info_s *infos;
+  struct hwloc_info_s *infos;
   unsigned infos_count;
 };
 
@@ -3664,7 +3664,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 static int
 hwloc_linux_parse_cpuinfo_x86(const char *prefix, const char *value,
-			      struct hwloc_obj_info_s **infos, unsigned *infos_count,
+			      struct hwloc_info_s **infos, unsigned *infos_count,
 			      int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("vendor_id", prefix)) {
@@ -3688,7 +3688,7 @@ hwloc_linux_parse_cpuinfo_x86(const char *prefix, const char *value,
 
 static int
 hwloc_linux_parse_cpuinfo_ia64(const char *prefix, const char *value,
-			       struct hwloc_obj_info_s **infos, unsigned *infos_count,
+			       struct hwloc_info_s **infos, unsigned *infos_count,
 			       int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("vendor", prefix)) {
@@ -3709,7 +3709,7 @@ hwloc_linux_parse_cpuinfo_ia64(const char *prefix, const char *value,
 
 static int
 hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
-			      struct hwloc_obj_info_s **infos, unsigned *infos_count,
+			      struct hwloc_info_s **infos, unsigned *infos_count,
 			      int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("Processor", prefix) /* old kernels with one Processor header */
@@ -3746,7 +3746,7 @@ hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
 
 static int
 hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
-			      struct hwloc_obj_info_s **infos, unsigned *infos_count,
+			      struct hwloc_info_s **infos, unsigned *infos_count,
 			      int is_global)
 {
   /* common fields */
@@ -3811,7 +3811,7 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
  */
 static int
 hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
-				  struct hwloc_obj_info_s **infos, unsigned *infos_count,
+				  struct hwloc_info_s **infos, unsigned *infos_count,
 				  int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("model name", prefix)
@@ -3833,7 +3833,7 @@ static int
 hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 			  const char *path,
 			  struct hwloc_linux_cpuinfo_proc ** Lprocs_p,
-			  struct hwloc_obj_info_s **global_infos, unsigned *global_infos_count)
+			  struct hwloc_info_s **global_infos, unsigned *global_infos_count)
 {
   FILE *fd;
   unsigned len = 128;
@@ -3843,7 +3843,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   unsigned numprocs = 0;
   int curproc = -1;
-  int (*parse_cpuinfo_func)(const char *, const char *, struct hwloc_obj_info_s **, unsigned *, int) = NULL;
+  int (*parse_cpuinfo_func)(const char *, const char *, struct hwloc_info_s **, unsigned *, int) = NULL;
 
   if (!(fd=hwloc_fopen(path,"r", data->root_fd)))
     {
@@ -3980,7 +3980,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 
 static void
 hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned numprocs,
-			 struct hwloc_obj_info_s *global_infos, unsigned global_infos_count)
+			 struct hwloc_info_s *global_infos, unsigned global_infos_count)
 {
   if (Lprocs) {
     unsigned i;
@@ -4328,7 +4328,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   unsigned nbnodes;
   char *cpuset_name;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
-  struct hwloc_obj_info_s *global_infos = NULL;
+  struct hwloc_info_s *global_infos = NULL;
   unsigned global_infos_count = 0;
   int numprocs;
   int already_pus;
@@ -5408,7 +5408,7 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
   unsigned foff; /* offset in raw file */
   unsigned boff; /* offset in buffer read from raw file */
   unsigned i;
-  struct hwloc_obj_info_s *infos = NULL;
+  struct hwloc_info_s *infos = NULL;
   unsigned infos_count = 0;
   hwloc_obj_t misc;
   int foundinfo = 0;

@@ -292,7 +292,7 @@ hwloc_debug_print_objects(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 #define hwloc_debug_print_objects(indent, obj) do { /* nothing */ } while (0)
 #endif /* !HWLOC_DEBUG */
 
-void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count)
+void hwloc__free_infos(struct hwloc_info_s *infos, unsigned count)
 {
   unsigned i;
   for(i=0; i<count; i++) {
@@ -302,15 +302,15 @@ void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count)
   free(infos);
 }
 
-int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value)
+int hwloc__add_info(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value)
 {
   unsigned count = *countp;
-  struct hwloc_obj_info_s *infos = *infosp;
+  struct hwloc_info_s *infos = *infosp;
 #define OBJECT_INFO_ALLOC 8
   /* nothing allocated initially, (re-)allocate by multiple of 8 */
   unsigned alloccount = (count + 1 + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
   if (count != alloccount) {
-    struct hwloc_obj_info_s *tmpinfos = realloc(infos, alloccount*sizeof(*infos));
+    struct hwloc_info_s *tmpinfos = realloc(infos, alloccount*sizeof(*infos));
     if (!tmpinfos)
       /* failed to allocate, ignore this info */
       goto out_with_array;
@@ -332,11 +332,11 @@ int hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const ch
   return -1;
 }
 
-int hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp,
+int hwloc__add_info_nodup(struct hwloc_info_s **infosp, unsigned *countp,
 			  const char *name, const char *value,
 			  int replace)
 {
-  struct hwloc_obj_info_s *infos = *infosp;
+  struct hwloc_info_s *infos = *infosp;
   unsigned count = *countp;
   unsigned i;
   for(i=0; i<count; i++) {
@@ -354,19 +354,19 @@ int hwloc__add_info_nodup(struct hwloc_obj_info_s **infosp, unsigned *countp,
   return hwloc__add_info(infosp, countp, name, value);
 }
 
-int hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp,
-		      struct hwloc_obj_info_s **src_infosp, unsigned *src_countp)
+int hwloc__move_infos(struct hwloc_info_s **dst_infosp, unsigned *dst_countp,
+		      struct hwloc_info_s **src_infosp, unsigned *src_countp)
 {
   unsigned dst_count = *dst_countp;
-  struct hwloc_obj_info_s *dst_infos = *dst_infosp;
+  struct hwloc_info_s *dst_infos = *dst_infosp;
   unsigned src_count = *src_countp;
-  struct hwloc_obj_info_s *src_infos = *src_infosp;
+  struct hwloc_info_s *src_infos = *src_infosp;
   unsigned i;
 #define OBJECT_INFO_ALLOC 8
   /* nothing allocated initially, (re-)allocate by multiple of 8 */
   unsigned alloccount = (dst_count + src_count + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
   if (dst_count != alloccount) {
-    struct hwloc_obj_info_s *tmp_infos = realloc(dst_infos, alloccount*sizeof(*dst_infos));
+    struct hwloc_info_s *tmp_infos = realloc(dst_infos, alloccount*sizeof(*dst_infos));
     if (!tmp_infos)
       /* Failed to realloc, ignore the appended infos */
       goto drop;
