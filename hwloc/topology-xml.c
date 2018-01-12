@@ -453,7 +453,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 
 
 static int
-hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj,
+hwloc__xml_import_info(struct hwloc_xml_backend_data_s *data,
+		       hwloc_obj_t obj,
 		       hwloc__xml_import_state_t state)
 {
   char *infoname = NULL;
@@ -473,7 +474,9 @@ hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
 
   if (infoname) {
     /* empty strings are ignored by libxml */
-    if (!strcmp(infoname, "Type") || !strcmp(infoname, "CoProcType")) {
+    if (data->version_major < 2 &&
+	(!strcmp(infoname, "Type") || !strcmp(infoname, "CoProcType"))) {
+      /* 1.x stored subtype in Type or CoProcType */
       if (infovalue) {
 	if (obj->subtype)
 	  free(obj->subtype);
@@ -844,7 +847,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
 
     } else if (!strcmp(tag, "info")) {
-      ret = hwloc__xml_import_info(topology, obj, &childstate);
+      ret = hwloc__xml_import_info(data, obj, &childstate);
     } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
       ret = hwloc__xml_v1import_distances(data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
