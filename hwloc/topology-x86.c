@@ -1081,19 +1081,21 @@ static void hwloc_x86_os_state_save(hwloc_x86_os_state_t *state __hwloc_attribut
 static void hwloc_x86_os_state_restore(hwloc_x86_os_state_t *state __hwloc_attribute_unused, struct cpuiddump *src_cpuiddump __hwloc_attribute_unused) { }
 #endif /* !defined HWLOC_FREEBSD_SYS || !defined HAVE_CPUSET_SETID */
 
-
+/* GenuineIntel */
 #define INTEL_EBX ('G' | ('e'<<8) | ('n'<<16) | ('u'<<24))
 #define INTEL_EDX ('i' | ('n'<<8) | ('e'<<16) | ('I'<<24))
 #define INTEL_ECX ('n' | ('t'<<8) | ('e'<<16) | ('l'<<24))
 
+/* AuthenticAMD */
 #define AMD_EBX ('A' | ('u'<<8) | ('t'<<16) | ('h'<<24))
 #define AMD_EDX ('e' | ('n'<<8) | ('t'<<16) | ('i'<<24))
 #define AMD_ECX ('c' | ('A'<<8) | ('M'<<16) | ('D'<<24))
 
+/* (Zhaoxin) CentaurHauls */
 #define ZX_EBX ('C' | ('e'<<8) | ('n'<<16) | ('t'<<24))
 #define ZX_EDX ('a' | ('u'<<8) | ('r'<<16) | ('H'<<24))
 #define ZX_ECX ('a' | ('u'<<8) | ('l'<<16) | ('s'<<24))
-
+/* (Zhaoxin) Shanghai */
 #define SH_EBX (' ' | (' '<<8) | ('S'<<16) | ('h'<<24))
 #define SH_EDX ('a' | ('n'<<8) | ('g'<<16) | ('h'<<24))
 #define SH_ECX ('a' | ('i'<<8) | (' '<<16) | (' '<<24))
@@ -1180,12 +1182,10 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
   highest_cpuid = eax;
   if (ebx == INTEL_EBX && ecx == INTEL_ECX && edx == INTEL_EDX)
     cpuid_type = intel;
-  if (ebx == AMD_EBX && ecx == AMD_ECX && edx == AMD_EDX)
+  else if (ebx == AMD_EBX && ecx == AMD_ECX && edx == AMD_EDX)
     cpuid_type = amd;
-  /* support for zhaoxin x86 cpu vendor id */
-  if (ebx == ZX_EBX && ecx == ZX_ECX && edx == ZX_EDX)
-    cpuid_type = zhaoxin;
-  if (ebx == SH_EBX && ecx == SH_ECX && edx == SH_EDX)
+  else if ((ebx == ZX_EBX && ecx == ZX_ECX && edx == ZX_EDX)
+	   || (ebx == SH_EBX && ecx == SH_ECX && edx == SH_EDX))
     cpuid_type = zhaoxin;
 
   hwloc_debug("highest cpuid %x, cpuid type %u\n", highest_cpuid, cpuid_type);
