@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2017 Inria.  All rights reserved.
+ * Copyright © 2010-2018 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -250,6 +250,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
     unsigned apic_id, node_id, nodes_per_proc;
 
+    /* the code below doesn't want any other cache yet */
+    assert(!infos->numcaches);
+
     eax = 0x8000001e;
     hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
     infos->apicid = apic_id = eax;
@@ -357,6 +360,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    */
   if (cpuid_type != amd && highest_cpuid >= 0x04) {
     unsigned level;
+
+    unsigned oldnumcaches = infos->numcaches; /* in case we got caches above */
+
     for (cachenum = 0; ; cachenum++) {
       unsigned type;
       eax = 0x04;
@@ -386,7 +392,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       }
     }
 
-    cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
+    infos->cache = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
+    cache = &infos->cache[oldnumcaches];
 
     for (cachenum = 0; ; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
