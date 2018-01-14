@@ -360,6 +360,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
     unsigned apic_id, node_id, nodes_per_proc;
 
+    /* the code below doesn't want any other cache yet */
+    assert(!infos->numcaches);
+
     eax = 0x8000001e;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     infos->apicid = apic_id = eax;
@@ -476,6 +479,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     unsigned max_nbthreads;
     unsigned level;
 
+    unsigned oldnumcaches = infos->numcaches; /* in case we got caches above */
+
     for (cachenum = 0; ; cachenum++) {
       eax = 0x04;
       ecx = cachenum;
@@ -501,7 +506,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       }
     }
 
-    cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
+    infos->cache = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
+    cache = &infos->cache[oldnumcaches];
 
     for (cachenum = 0; ; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
