@@ -75,7 +75,10 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   unsigned nr;
 
   cpuiddump = malloc(sizeof(*cpuiddump));
-  cpuiddump->nr = 0; /* return a cpuiddump that will raise errors because it matches nothing */
+  if (!cpuiddump) {
+    fprintf(stderr, "Failed to allocate cpuiddump for PU #%u, ignoring cpuiddump.\n", idx);
+    goto out;
+  }
 
  {
   size_t filenamelen = strlen(dirpath) + 15;
@@ -83,8 +86,8 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   snprintf(filename, filenamelen, "%s/pu%u", dirpath, idx);
   file = fopen(filename, "r");
   if (!file) {
-    fprintf(stderr, "Could not read dumped cpuid file %s\n", filename);
-    return cpuiddump;
+    fprintf(stderr, "Could not read dumped cpuid file %s, ignoring cpuiddump.\n", filename);
+    goto out_with_dump;
   }
  }
 
@@ -92,6 +95,10 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   while (fgets(line, sizeof(line), file))
     nr++;
   cpuiddump->entries = malloc(nr * sizeof(struct cpuiddump_entry));
+  if (!cpuiddump->entries) {
+    fprintf(stderr, "Failed to allocate %u cpuiddump entries for PU #%u, ignoring cpuiddump.\n", nr, idx);
+    goto out_with_dump;
+  }
 
   fseek(file, 0, SEEK_SET);
   cur = &cpuiddump->entries[0];
@@ -107,9 +114,15 @@ cpuiddump_read(const char *dirpath, unsigned idx)
       nr++;
     }
   }
+
   cpuiddump->nr = nr;
   fclose(file);
   return cpuiddump;
+
+ out_with_dump:
+  free(cpuiddump);
+ out:
+  return NULL;
 }
 
 static void
@@ -1033,6 +1046,8 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
     struct cpuiddump *src_cpuiddump = NULL;
     if (data->src_cpuiddump_path) {
       src_cpuiddump = cpuiddump_read(data->src_cpuiddump_path, i);
+      if (!src_cpuiddump)
+	continue;
     } else {
       hwloc_bitmap_only(set, i);
       hwloc_debug("binding to CPU%u\n", i);
@@ -1145,6 +1160,9 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
   if (data->src_cpuiddump_path) {
     /* just read cpuid from the dump */
     src_cpuiddump = cpuiddump_read(data->src_cpuiddump_path, 0);
+    if (!src_cpuiddump)
+      goto out;
+
   } else {
     /* otherwise check if binding works */
     memset(&hooks, 0, sizeof(hooks));
