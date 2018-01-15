@@ -494,7 +494,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     unsigned max_nbcores;
     unsigned max_nbthreads;
     unsigned level;
-
+    struct cacheinfo *tmpcaches;
     unsigned oldnumcaches = infos->numcaches; /* in case we got caches above */
 
     for (cachenum = 0; ; cachenum++) {
@@ -522,10 +522,12 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       }
     }
 
-    infos->cache = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
-    cache = &infos->cache[oldnumcaches];
+    tmpcaches = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
+    if (tmpcaches) {
+     infos->cache = tmpcaches;
+     cache = &infos->cache[oldnumcaches];
 
-    for (cachenum = 0; ; cachenum++) {
+     for (cachenum = 0; ; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
       eax = 0x04;
       ecx = cachenum;
@@ -563,6 +565,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
 		  cache->nbthreads_sharing, linesize, linepart, ways, sets, cache->size >> 10);
       cache++;
+     }
     }
   }
 
