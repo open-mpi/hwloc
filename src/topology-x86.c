@@ -363,7 +363,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    */
   if (cpuid_type != amd && highest_cpuid >= 0x04) {
     unsigned level;
-
+    struct cacheinfo *tmpcaches;
     unsigned oldnumcaches = infos->numcaches; /* in case we got caches above */
 
     for (cachenum = 0; ; cachenum++) {
@@ -395,10 +395,12 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       }
     }
 
-    infos->cache = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
-    cache = &infos->cache[oldnumcaches];
+    tmpcaches = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
+    if (tmpcaches) {
+     infos->cache = tmpcaches;
+     cache = &infos->cache[oldnumcaches];
 
-    for (cachenum = 0; ; cachenum++) {
+     for (cachenum = 0; ; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
       unsigned type;
       eax = 0x04;
@@ -433,6 +435,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
 
       cache++;
+     }
     }
   }
 
