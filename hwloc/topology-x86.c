@@ -420,8 +420,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
 
     cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
-
-    for (cachenum = 0; ; cachenum++) {
+    if (cache) {
+     for (cachenum = 0; ; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
       eax = 0x8000001d;
       ecx = cachenum;
@@ -458,6 +458,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 		  cache->nbthreads_sharing, linesize, linepart, ways, sets, cache->size >> 10);
 
       cache++;
+     }
+    } else {
+     infos->numcaches = 0;
     }
   } else {
     /* If there's no topoext,
@@ -576,9 +579,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
         break;
     }
     if (level) {
-      infos->levels = level;
       infos->otherids = malloc(level * sizeof(*infos->otherids));
-      for (level = 0; ; level++) {
+      if (infos->otherids) {
+       infos->levels = level;
+       for (level = 0; ; level++) {
 	ecx = level;
 	eax = 0x0b;
 	cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
@@ -612,6 +616,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       infos->packageid = apic_id >> apic_shift;
       hwloc_debug("x2APIC remainder: %u\n", infos->packageid);
       hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
+     }
     }
   }
 
