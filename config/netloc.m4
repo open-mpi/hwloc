@@ -2,7 +2,7 @@ dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 dnl
-dnl Copyright © 2014-2017 Inria.  All rights reserved.
+dnl Copyright © 2014-2018 Inria.  All rights reserved.
 dnl See COPYING in top-level directory.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -63,20 +63,11 @@ EOF])
            NETLOC_EMBEDDED_CPPFLAGS=$NETLOC_CPPFLAGS
            NETLOC_EMBEDDED_LDADD='$(HWLOC_top_builddir)/netloc/libnetloc_embedded.la'
            NETLOC_EMBEDDED_LIBS=$NETLOC_LIBS
-           NETLOC_LIBS=],
-          [AC_CONFIG_FILES(netloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw])
-	   AC_CONFIG_COMMANDS([chmoding-netloc-scripts], [
-	       chmod +x ]hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw
-	     ])
-	  ])
+           NETLOC_LIBS=])
     AC_SUBST(NETLOC_EMBEDDED_CFLAGS)
     AC_SUBST(NETLOC_EMBEDDED_CPPFLAGS)
     AC_SUBST(NETLOC_EMBEDDED_LDADD)
     AC_SUBST(NETLOC_EMBEDDED_LIBS)
-
-    AC_CONFIG_FILES(
-        netloc_config_prefix[netloc/Makefile]
-    )
 
     AS_IF([test "$netloc_happy" = "yes"],
           [$2],

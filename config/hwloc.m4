@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2017 Inria.  All rights reserved.
+dnl Copyright © 2009-2018 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -1154,7 +1154,8 @@ EOF])
     AC_CONFIG_FILES(
         hwloc_config_prefix[Makefile]
         hwloc_config_prefix[include/Makefile]
-        hwloc_config_prefix[hwloc/Makefile ]
+        hwloc_config_prefix[hwloc/Makefile]
+        hwloc_config_prefix[netloc/Makefile]
     )
 
     # Cleanup

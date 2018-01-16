@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2010-2017 Inria.  All rights reserved.
+dnl Copyright © 2010-2018 Inria.  All rights reserved.
 dnl Copyright © 2009, 2011 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -414,6 +414,7 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/Makefile]
         hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh]
         hwloc_config_prefix[utils/lstopo/test-lstopo.sh]
+        hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw]
         hwloc_config_prefix[contrib/systemd/Makefile]
         hwloc_config_prefix[contrib/misc/Makefile]
         hwloc_config_prefix[tests/netloc/Makefile]
@@ -438,6 +439,7 @@ chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
       ]hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh \
       ]hwloc_config_prefix[utils/lstopo/test-lstopo.sh \
+      ]hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw \
       ]hwloc_config_prefix[tests/netloc/tests.sh])
 
     # These links are only needed in standalone mode.  It would
