@@ -97,7 +97,7 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   cpuiddump->entries = malloc(nr * sizeof(struct cpuiddump_entry));
   if (!cpuiddump->entries) {
     fprintf(stderr, "Failed to allocate %u cpuiddump entries for PU #%u, ignoring cpuiddump.\n", nr, idx);
-    goto out_with_dump;
+    goto out_with_file;
   }
 
   fseek(file, 0, SEEK_SET);
@@ -119,6 +119,8 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   fclose(file);
   return cpuiddump;
 
+ out_with_file:
+  fclose(file);
  out_with_dump:
   free(cpuiddump);
  out:
