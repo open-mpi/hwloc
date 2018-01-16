@@ -25,11 +25,6 @@ AC_DEFUN([NETLOC_SETUP_CORE],[
 ###
 EOF])
 
-    # If no prefix was defined, set a good value
-    m4_ifval([$1],
-             [m4_define([netloc_config_prefix],[$1/])],
-             [m4_define([netloc_config_prefix], [])])
-
     # These flags are specific to netloc, and should not be redundant
     # with hwloc.  I.e., if the flag already exists in hwloc, there's
     # no need to put it here.
