@@ -2,13 +2,12 @@
 # Copyright © 2014      University of Wisconsin-La Crosse.
 #                         All rights reserved.
 #
-# Copyright © 2016 Inria.  All rights reserved.
+# Copyright © 2016-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 # $HEADER$
 #
 
-if BUILD_NETLOC
 AM_CPPFLAGS = \
         $(NETLOC_CPPFLAGS) \
         $(HWLOC_CPPFLAGS)
@@ -51,6 +50,9 @@ libnetloc_embedded_la_LDFLAGS = $(ldflags)
 libnetloc_embedded_la_LIBADD = \
         $(HWLOC_top_builddir)/hwloc/libhwloc_embedded.la
 
+scotchsources = \
+        scotch.c
+
 if BUILD_NETLOCSCOTCH
 # If we're in standalone mode, build the installable library.
 # Otherwise, build the embedded library.
@@ -60,9 +62,6 @@ lib_LTLIBRARIES += libnetlocscotch.la
 else
 noinst_LTLIBRARIES += libnetlocscotch_embedded.la
 endif
-
-scotchsources = \
-        scotch.c
 
 # Installable library
 
@@ -83,5 +82,6 @@ libnetlocscotch_embedded_la_LIBADD = \
         $(HWLOC_top_builddir)/hwloc/libhwloc_embedded.la \
         $(HWLOC_top_builddir)/hwloc/libnetloc_embedded.la
 
-endif BUILD_NETLOCSCOTCH
-endif BUILD_NETLOC
+else !BUILD_NETLOCSCOTCH
+EXTRA_DIST = $(scotchsources)
+endif !BUILD_NETLOCSCOTCH
