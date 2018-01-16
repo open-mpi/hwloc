@@ -49,7 +49,7 @@ lcov --directory . --capture --output-file hwloc.lcov
 lcov_cobertura.py hwloc.lcov --output hwloc-coverage.xml
 
 # Run cppcheck analysis
-SOURCES_TO_ANALYZE="hwloc netloc tests utils"
+SOURCES_TO_ANALYZE="hwloc tests utils"
 SOURCES_TO_EXCLUDE="-itests/hwloc/ports -ihwloc/topology-aix.c -ihwloc/topology-bgq.c -ihwloc/topology-darwin.c -ihwloc/topology-freebsd.c -ihwloc/topology-hpux.c -ihwloc/topology-netbsd.c -ihwloc/topology-solaris.c -ihwloc/topology-solaris-chiptype.c -ihwloc/topology-windows.c -ihwloc/topology-cuda.c -ihwloc/topology-gl.c -ihwloc/topology-nvml.c -ihwloc/topology-opencl.c -iutils/lstopo/lstopo-windows.c"
 CPPCHECK_INCLUDES="-Iinclude -Ihwloc -Iutils/lstopo -Iutils/hwloc"
 CPPCHECK="cppcheck -v -f --language=c --platform=unix64 --enable=all --xml --xml-version=2 --suppress=purgedConfiguration --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES}"
@@ -119,7 +119,7 @@ sonar.branch=$hwloc_branch
 sonar.scm.disabled=false
 sonar.sourceEncoding=UTF-8
 sonar.language=c++
-sonar.sources=hwloc, netloc, tests, utils
+sonar.sources=hwloc, tests, utils
 sonar.exclusions=tests/hwloc/ports
 sonar.cxx.errorRecoveryEnabled=true
 sonar.cxx.compiler.parser=GCC
