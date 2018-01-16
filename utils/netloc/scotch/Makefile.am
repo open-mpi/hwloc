@@ -1,4 +1,4 @@
-# Copyright © 2016-2017 Inria.  All rights reserved.
+# Copyright © 2016-2018 Inria.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -12,6 +12,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 LDADD = $(top_builddir)/netloc/libnetloc.la \
         $(top_builddir)/netloc/libnetlocscotch.la \
+        $(top_builddir)/hwloc/libhwloc.la \
         -lscotch -lscotcherr -lm -lpthread
 
 if BUILD_NETLOCSCOTCH
