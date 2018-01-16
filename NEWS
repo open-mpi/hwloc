@@ -158,6 +158,17 @@ Version 2.0.0
   + hwloc now requires a C99 compliant compiler.
 
 
+Version 1.11.9 (not final yet)
+--------------
+* Add support for Zhaoxin ZX-C and ZX-D processors in the x86 backend,
+  thanks to Jeff Zhao for the patch.
+* Fix AMD Epyc 24-core L3 cache locality in the x86 backend.
+* Don't crash in the x86 backend when the CPUID vendor string is unknown.
+* Fix the missing pu discovery support bit on some OS.
+* Fix the management of the lstopoStyle info attribute for custom colors.
+* Add verbose warnings when failing to load hwloc v2.0+ XMLs.
+
+
 Version 1.11.8
 --------------
 * Multiple Solaris improvements, thanks to Maureen Chew for the help:
