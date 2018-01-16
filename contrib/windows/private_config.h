@@ -640,7 +640,7 @@
 
 
 /* Version number of package */
-#define HWLOC_VERSION "2.0.0"
+#define HWLOC_VERSION "2.1.0"
 #define VERSION HWLOC_VERSION
 
 /* Define to 1 if the X Window System is missing or not being used. */
