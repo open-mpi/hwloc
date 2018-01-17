@@ -1308,13 +1308,14 @@ typedef enum {
    * \hideinitializer */
   HWLOC_MEMBIND_DEFAULT =	0,
 
-  /** \brief Allocate memory
-   * but do not immediately bind it to a specific locality. Instead,
-   * each page in the allocation is bound only when it is first
-   * touched. Pages are individually bound to the local NUMA node of
-   * the first thread that touches it. If there is not enough memory
-   * on the node, allocation may be done in the specified nodes
-   * before allocating on other nodes.
+  /** \brief Allocate each memory page individually on the local NUMA
+   * node of the thread that touches it.
+   *
+   * The given nodeset should usually be hwloc_topology_get_topology_nodeset()
+   * so that the touching thread may run and allocate on any node in the system.
+   *
+   * On AIX, if the nodeset is smaller, pages are allocated locally (if the local
+   * node is in the nodeset) or from a random non-local node (otherwise).
    * \hideinitializer */
   HWLOC_MEMBIND_FIRSTTOUCH =	1,
 
