@@ -1673,9 +1673,15 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   if (err < 0)
     return err;
 
-  if (linuxpolicy == MPOL_DEFAULT)
+  if (linuxpolicy == MPOL_DEFAULT) {
+    if (policy == HWLOC_MEMBIND_FIRSTTOUCH
+	&& !hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
+      errno = EXDEV;
+      return -1;
+    }
     /* Some Linux kernels don't like being passed a set */
     return hwloc_mbind((void *) addr, len, linuxpolicy, NULL, 0, 0);
+  }
 
   err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
   if (err < 0)
@@ -1731,9 +1737,15 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
   if (err < 0)
     return err;
 
-  if (linuxpolicy == MPOL_DEFAULT)
+  if (linuxpolicy == MPOL_DEFAULT) {
+    if (policy == HWLOC_MEMBIND_FIRSTTOUCH
+	&& !hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
+      errno = EXDEV;
+      return -1;
+    }
     /* Some Linux kernels don't like being passed a set */
     return hwloc_set_mempolicy(linuxpolicy, NULL, 0);
+  }
 
   err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
   if (err < 0)
