@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -390,7 +390,6 @@ int main(int argc, char *argv[])
       else
 	hwloc_bitmap_asprintf(&s, membind_set);
       switch (policy) {
-      case HWLOC_MEMBIND_DEFAULT: policystr = "default"; break;
       case HWLOC_MEMBIND_FIRSTTOUCH: policystr = "firsttouch"; break;
       case HWLOC_MEMBIND_BIND: policystr = "bind"; break;
       case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
