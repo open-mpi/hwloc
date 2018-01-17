@@ -1304,10 +1304,7 @@ typedef enum {
    * Depending on the operating system, this may correspond to
    * ::HWLOC_MEMBIND_FIRSTTOUCH (Linux),
    * or ::HWLOC_MEMBIND_BIND (AIX, HP-UX, Solaris, Windows).
-   * This policy is never returned by get membind functions when running
-   * on normal machines.
-   * It is only returned when binding hooks are empty because the topology
-   * was loaded from XML, or HWLOC_THISSYSTEM=0, etc.
+   * This policy is never returned by get membind functions.
    * \hideinitializer */
   HWLOC_MEMBIND_DEFAULT =	0,
 
@@ -1344,6 +1341,8 @@ typedef enum {
   /** \brief Returned by get_membind() functions when multiple
    * threads or parts of a memory area have differing memory binding
    * policies.
+   * Also returned when binding is unknown because binding hooks are empty
+   * when the topology is loaded from XML without HWLOC_THISSYSTEM=1, etc.
    * \hideinitializer */
   HWLOC_MEMBIND_MIXED = -1
 } hwloc_membind_policy_t;

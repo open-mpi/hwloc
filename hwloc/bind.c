@@ -739,7 +739,7 @@ static int dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_un
 static int dontset_return_complete_nodeset(hwloc_topology_t topology, hwloc_nodeset_t set, hwloc_membind_policy_t *policy)
 {
   hwloc_bitmap_copy(set, hwloc_topology_get_complete_nodeset(topology));
-  *policy = HWLOC_MEMBIND_DEFAULT;
+  *policy = HWLOC_MEMBIND_MIXED;
   return 0;
 }
 
