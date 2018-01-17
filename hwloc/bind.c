@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011-2015 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -37,12 +37,6 @@ hwloc_fix_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t set)
 {
   hwloc_const_bitmap_t topology_set = hwloc_topology_get_topology_cpuset(topology);
   hwloc_const_bitmap_t complete_set = hwloc_topology_get_complete_cpuset(topology);
-
-  if (!topology_set) {
-    /* The topology is composed of several systems, the cpuset is ambiguous. */
-    errno = EXDEV;
-    return NULL;
-  }
 
   if (hwloc_bitmap_iszero(set)) {
     errno = EINVAL;
@@ -244,19 +238,6 @@ hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
   hwloc_const_bitmap_t topology_nodeset = hwloc_topology_get_topology_nodeset(topology);
   hwloc_const_bitmap_t complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
 
-  if (!hwloc_topology_get_topology_cpuset(topology)) {
-    /* The topology is composed of several systems, the nodeset is thus
-     * ambiguous. */
-    errno = EXDEV;
-    return NULL;
-  }
-
-  if (!complete_nodeset) {
-    /* There is no NUMA node */
-    errno = ENODEV;
-    return NULL;
-  }
-
   if (hwloc_bitmap_iszero(nodeset)) {
     errno = EINVAL;
     return NULL;
@@ -279,19 +260,6 @@ hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwl
   hwloc_const_bitmap_t topology_set = hwloc_topology_get_topology_cpuset(topology);
   hwloc_const_bitmap_t complete_set = hwloc_topology_get_complete_cpuset(topology);
   hwloc_const_bitmap_t complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
-
-  if (!topology_set) {
-    /* The topology is composed of several systems, the cpuset is thus
-     * ambiguous. */
-    errno = EXDEV;
-    return -1;
-  }
-
-  if (!complete_nodeset) {
-    /* There is no NUMA node */
-    errno = ENODEV;
-    return -1;
-  }
 
   if (hwloc_bitmap_iszero(cpuset)) {
     errno = EINVAL;
@@ -729,12 +697,8 @@ hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
 
 static int dontset_return_complete_cpuset(hwloc_topology_t topology, hwloc_cpuset_t set)
 {
-  hwloc_const_cpuset_t cpuset = hwloc_topology_get_complete_cpuset(topology);
-  if (cpuset) {
-    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-    return 0;
-  } else
-    return -1;
+  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  return 0;
 }
 
 static int dontset_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
@@ -774,13 +738,9 @@ static int dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_un
 
 static int dontset_return_complete_nodeset(hwloc_topology_t topology, hwloc_nodeset_t set, hwloc_membind_policy_t *policy)
 {
-  hwloc_const_nodeset_t nodeset = hwloc_topology_get_complete_nodeset(topology);
-  if (nodeset) {
-    hwloc_bitmap_copy(set, hwloc_topology_get_complete_nodeset(topology));
-    *policy = HWLOC_MEMBIND_DEFAULT;
-    return 0;
-  } else
-    return -1;
+  hwloc_bitmap_copy(set, hwloc_topology_get_complete_nodeset(topology));
+  *policy = HWLOC_MEMBIND_DEFAULT;
+  return 0;
 }
 
 static int dontset_thisproc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
