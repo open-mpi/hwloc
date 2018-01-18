@@ -1,4 +1,4 @@
-# Copyright © 2009-2017 Inria.  All rights reserved.
+# Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2009      Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -18,11 +18,10 @@ EXTRA_DIST = \
 
 SUBDIRS = include hwloc
 
+if HWLOC_BUILD_STANDALONE
 if BUILD_NETLOC
 SUBDIRS += netloc
 endif
-
-if HWLOC_BUILD_STANDALONE
 SUBDIRS += utils tests contrib/systemd contrib/misc
 # We need doc/ if HWLOC_BUILD_DOXYGEN, or during make install if HWLOC_INSTALL_DOXYGEN.
 # There's no INSTALL_SUBDIRS, so always enter doc/ and check HWLOC_BUILD/INSTALL_DOXYGEN there
@@ -32,8 +31,10 @@ endif
 # Do not let automake automatically add the non-standalone dirs to the
 # distribution tarball if we're building in embedded mode.
 DIST_SUBDIRS = $(SUBDIRS)
+if HWLOC_BUILD_STANDALONE
 if !BUILD_NETLOC
 DIST_SUBDIRS += netloc
+endif
 endif
 
 # Only install the pkg file if we're building in standalone mode (and not on Windows)
