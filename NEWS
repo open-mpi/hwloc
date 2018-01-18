@@ -158,7 +158,7 @@ Version 2.0.0
   + hwloc now requires a C99 compliant compiler.
 
 
-Version 1.11.9 (not final yet)
+Version 1.11.9
 --------------
 * Add support for Zhaoxin ZX-C and ZX-D processors in the x86 backend,
   thanks to Jeff Zhao for the patch.
