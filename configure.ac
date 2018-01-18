@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -146,7 +146,7 @@ AC_ARG_ENABLE([netloc],
                               [The Netloc functionality is enabled by default, but will be silently skipped it if cannot be built (e.g., not supported on your platform).  Using --enable-netloc will cause configure to abort if Netloc cannot be build.  Using --disable-netloc will cause configure to skip attempting to build netloc at all.])
               ])
 
-AS_IF([test "$enable_netloc" != "no"],
+AS_IF([test "$enable_netloc" != "no" -a "$hwloc_mode" = "standalone"],
       [NETLOC_SETUP_CORE([], [],
            [AS_IF([test "$enable_netloc" = "yes"],
                   [AC_MSG_ERROR([Cannot build netloc core])])
