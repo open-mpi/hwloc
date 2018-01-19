@@ -657,7 +657,8 @@ hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size
     return NULL;
   }
 
-  if (policy == HWLOC_MEMBIND_DEFAULT)
+  if (policy == HWLOC_MEMBIND_DEFAULT
+      || hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology)))
     return hwloc_win_alloc(topology, len);
 
   if (hwloc_bitmap_weight(nodeset) != 1) {
