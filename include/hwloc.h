@@ -1305,6 +1305,7 @@ typedef enum {
    * ::HWLOC_MEMBIND_FIRSTTOUCH (Linux),
    * or ::HWLOC_MEMBIND_BIND (AIX, HP-UX, Solaris, Windows).
    * This policy is never returned by get membind functions.
+   * The nodeset argument is ignored.
    * \hideinitializer */
   HWLOC_MEMBIND_DEFAULT =	0,
 

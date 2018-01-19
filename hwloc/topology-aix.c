@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -359,8 +359,9 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
 }
 
 static int
-hwloc_aix_set_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, pid_t pid, hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy, int flags)
+hwloc_aix_set_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, pid_t pid, hwloc_const_bitmap_t _nodeset, hwloc_membind_policy_t policy, int flags)
 {
+  hwloc_const_nodeset_t nodeset;
   rsethandle_t rad;
   int res;
 
@@ -368,6 +369,11 @@ hwloc_aix_set_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     errno = ENOSYS;
     return -1;
   }
+
+  if (policy == HWLOC_MEMBIND_DEFAULT)
+    nodeset = hwloc_topology_get_complete_nodeset(topology);
+  else
+    nodeset = _nodeset;
 
   switch (policy) {
     case HWLOC_MEMBIND_DEFAULT:
@@ -522,8 +528,9 @@ hwloc_aix_get_thread_membind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 /* TODO: seems to be right, but doesn't seem to be working (EINVAL), even after
  * aligning the range on 64K... */
 static int
-hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t _nodeset, hwloc_membind_policy_t policy, int flags)
 {
+  hwloc_const_nodeset_t nodeset;
   subrange_t subrange;
   rsid_t rsid = { .at_subrange = &subrange };
   uint_t aix_policy;
@@ -535,6 +542,11 @@ hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
     errno = ENOSYS;
     return -1;
   }
+
+  if (policy == HWLOC_MEMBIND_DEFAULT)
+    nodeset = hwloc_topology_get_complete_nodeset(topology);
+  else
+    nodeset = _nodeset;
 
   subrange.su_offset = (uintptr_t) addr;
   subrange.su_length = len;
@@ -565,11 +577,17 @@ hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
 #endif
 
 static void *
-hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t _nodeset, hwloc_membind_policy_t policy, int flags)
 {
+  hwloc_const_nodeset_t nodeset;
   void *ret;
   rsid_t rsid;
   uint_t aix_policy;
+
+  if (policy == HWLOC_MEMBIND_DEFAULT)
+    nodeset = hwloc_topology_get_complete_nodeset(topology);
+  else
+    nodeset = _nodeset;
 
   if (hwloc_aix_membind_policy_from_hwloc(&aix_policy, policy))
     return hwloc_alloc_or_fail(topology, len, flags);

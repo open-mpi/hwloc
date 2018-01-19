@@ -175,9 +175,10 @@ hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t h
 /* TODO: given thread, probably not easy because of the historical n:m implementation */
 #ifdef HAVE_LIBLGRP
 static int
-hwloc_solaris_set_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+hwloc_solaris_set_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_nodeset_t _nodeset, hwloc_membind_policy_t policy, int flags)
 {
   int n, i;
+  hwloc_const_nodeset_t nodeset;
 
   switch (policy) {
     case HWLOC_MEMBIND_DEFAULT:
@@ -192,6 +193,11 @@ hwloc_solaris_set_sth_membind(hwloc_topology_t topology, idtype_t idtype, id_t i
     errno = ENOSYS;
     return -1;
   }
+
+  if (policy == HWLOC_MEMBIND_DEFAULT)
+    nodeset = hwloc_topology_get_complete_nodeset(topology);
+  else
+    nodeset = _nodeset;
 
   n = hwloc_get_nbobjs_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE);
 
@@ -280,7 +286,8 @@ hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size
   size_t remainder;
 
   /* Can not give a set of nodes just for an area.  */
-  if (!hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
+  if (policy != HWLOC_MEMBIND_DEFAULT
+      && !hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
     errno = EXDEV;
     return -1;
   }

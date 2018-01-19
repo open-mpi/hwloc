@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2013 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -139,13 +139,16 @@ hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_
 
 #ifdef MAP_MEM_FIRST_TOUCH
 static void*
-hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t _nodeset, hwloc_membind_policy_t policy, int flags)
 {
+  hwloc_const_nodeset_t nodeset;
   int mmap_flags;
   void *p;
 
   /* Can not give a set of nodes.  */
-  if (!hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
+  nodeset = hwloc_topology_get_complete_nodeset(topology);
+  if (policy != HWLOC_MEMBIND_DEFAULT
+      && !hwloc_bitmap_isequal(nodeset, _nodeset)) {
     errno = EXDEV;
     return hwloc_alloc_or_fail(topology, len, flags);
   }
