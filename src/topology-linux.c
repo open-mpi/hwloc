@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -1396,13 +1396,19 @@ hwloc_linux_get_thisthread_last_cpu_location(hwloc_topology_t topology, hwloc_bi
  ***************************/
 
 #if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
+
+/* MPOL_LOCAL is not in numaif.h, and it's a enum if linux/mempolicy.h, define ours to avoid conflicts */
+#define HWLOC_MPOL_LOCAL 4
+
 static int
 hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t policy, int flags)
 {
   switch (policy) {
   case HWLOC_MEMBIND_DEFAULT:
-  case HWLOC_MEMBIND_FIRSTTOUCH:
     *linuxpolicy = MPOL_DEFAULT;
+    break;
+  case HWLOC_MEMBIND_FIRSTTOUCH:
+    *linuxpolicy = HWLOC_MPOL_LOCAL;
     break;
   case HWLOC_MEMBIND_BIND:
     if (flags & HWLOC_MEMBIND_STRICT)
@@ -1499,9 +1505,14 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   if (err < 0)
     return err;
 
-  if (linuxpolicy == MPOL_DEFAULT)
+  if (linuxpolicy == MPOL_DEFAULT) {
     /* Some Linux kernels don't like being passed a set */
     return mbind((void *) addr, len, linuxpolicy, NULL, 0, 0);
+
+  } else if (linuxpolicy == HWLOC_MPOL_LOCAL) {
+    /* MPOL_LOCAL isn't supported before 3.8, and it's identical to PREFERRED with no nodeset, which was supported way before */
+    return mbind((void *) addr, len, MPOL_PREFERRED, NULL, 0, 0);
+  }
 
   err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
   if (err < 0)
@@ -1566,9 +1577,14 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
   if (err < 0)
     return err;
 
-  if (linuxpolicy == MPOL_DEFAULT)
+  if (linuxpolicy == MPOL_DEFAULT) {
     /* Some Linux kernels don't like being passed a set */
     return set_mempolicy(linuxpolicy, NULL, 0);
+
+  } else if (linuxpolicy == HWLOC_MPOL_LOCAL) {
+    /* MPOL_LOCAL isn't supported before 3.8, and it's identical to PREFERRED with no nodeset, which was supported way before */
+    return set_mempolicy(MPOL_PREFERRED, NULL, 0);
+  }
 
   err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
   if (err < 0)
@@ -1641,6 +1657,7 @@ hwloc_linux_membind_policy_to_hwloc(int linuxpolicy, hwloc_membind_policy_t *pol
 {
   switch (linuxpolicy) {
   case MPOL_DEFAULT:
+  case HWLOC_MPOL_LOCAL: /* converted from MPOL_PREFERRED + empty nodeset by the caller */
     *policy = HWLOC_MEMBIND_FIRSTTOUCH;
     return 0;
   case MPOL_PREFERRED:
@@ -1654,6 +1671,15 @@ hwloc_linux_membind_policy_to_hwloc(int linuxpolicy, hwloc_membind_policy_t *pol
     errno = EINVAL;
     return -1;
   }
+}
+
+static int hwloc_linux_mask_is_empty(unsigned max_os_index, unsigned long *linuxmask)
+{
+  unsigned i;
+  for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
+    if (linuxmask[i])
+      return 0;
+  return 1;
 }
 
 static int
@@ -1676,7 +1702,11 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
   if (err < 0)
     goto out_with_mask;
 
-  if (linuxpolicy == MPOL_DEFAULT) {
+  /* MPOL_PREFERRED with empty mask is MPOL_LOCAL */
+  if (linuxpolicy == MPOL_PREFERRED && hwloc_linux_mask_is_empty(max_os_index, linuxmask))
+    linuxpolicy = HWLOC_MPOL_LOCAL;
+
+  if (linuxpolicy == MPOL_DEFAULT || linuxpolicy == HWLOC_MPOL_LOCAL) {
     hwloc_bitmap_copy(nodeset, hwloc_topology_get_topology_nodeset(topology));
   } else {
     hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, linuxmask);
@@ -1729,14 +1759,18 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
     if (err < 0)
       goto out_with_masks;
 
+    /* MPOL_PREFERRED with empty mask is MPOL_LOCAL */
+    if (linuxpolicy == MPOL_PREFERRED && hwloc_linux_mask_is_empty(max_os_index, linuxmask))
+      linuxpolicy = HWLOC_MPOL_LOCAL;
+
     /* use the first found policy. if we find a different one later, set mixed to 1 */
     if (first)
       globallinuxpolicy = linuxpolicy;
     else if (globallinuxpolicy != linuxpolicy)
       mixed = 1;
 
-    /* agregate masks, and set full to 1 if we ever find DEFAULT */
-    if (full || linuxpolicy == MPOL_DEFAULT) {
+    /* agregate masks, and set full to 1 if we ever find DEFAULT or LOCAL */
+    if (full || linuxpolicy == MPOL_DEFAULT || linuxpolicy == HWLOC_MPOL_LOCAL) {
       full = 1;
     } else {
       for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
