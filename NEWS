@@ -95,6 +95,7 @@ Version 2.0.0
     hwloc/diff.h do not need a topology as first parameter anymore.
   + hwloc_parse_cpumap_file () superseded by hwloc_linux_read_path_as_cpumask()
     in hwloc/linux.h.
+  + HWLOC_MEMBIND_DEFAULT and HWLOC_MEMBIND_FIRSTTOUCH were clarified.
 * New APIs and Features
   + Add hwloc/shmem.h for sharing topologies between processes running on
     the same machine (for reducing the memory footprint).
