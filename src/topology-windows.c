@@ -253,9 +253,9 @@ static void hwloc_win_get_function_ptrs(void)
 	(PFN_GETNUMAAVAILABLEMEMORYNODEEX) GetProcAddress(kernel32, "GetNumaAvailableMemoryNodeEx");
       GetLogicalProcessorInformationExProc =
 	(PFN_GETLOGICALPROCESSORINFORMATIONEX)GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
+      QueryWorkingSetExProc =
+	(PFN_QUERYWORKINGSETEX) GetProcAddress(kernel32, "K32QueryWorkingSetEx");
       VirtualAllocExNumaProc =
-	(PFN_VIRTUALALLOCEXNUMA) GetProcAddress(kernel32, "K32QueryWorkingSetEx");
-      VirtualAllocExNumaProc =*
 	(PFN_VIRTUALALLOCEXNUMA) GetProcAddress(kernel32, "VirtualAllocExNuma");
       VirtualFreeExProc =
 	(PFN_VIRTUALFREEEX) GetProcAddress(kernel32, "VirtualFreeEx");
@@ -264,10 +264,10 @@ static void hwloc_win_get_function_ptrs(void)
     if (GetActiveProcessorGroupCountProc)
       nr_processor_groups = GetActiveProcessorGroupCountProc();
 
-    if (!VirtualAllocExNumaProc) {
+    if (!QueryWorkingSetExProc) {
       HMODULE psapi = LoadLibrary("psapi.dll");
       if (psapi)
-        VirtualAllocExNumaProc = (PFN_VIRTUALALLOCEXNUMA) GetProcAddress(psapi, "QueryWorkingSetEx");
+        QueryWorkingSetExProc = (PFN_QUERYWORKINGSETEX) GetProcAddress(psapi, "QueryWorkingSetEx");
     }
 }
 
