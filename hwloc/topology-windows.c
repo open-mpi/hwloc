@@ -190,6 +190,7 @@ typedef WORD (WINAPI *PFN_GETACTIVEPROCESSORGROUPCOUNT)(void);
 static PFN_GETACTIVEPROCESSORGROUPCOUNT GetActiveProcessorGroupCountProc;
 
 static unsigned long nr_processor_groups = 1;
+static unsigned long max_numanode_index = 0;
 
 typedef WORD (WINAPI *PFN_GETACTIVEPROCESSORCOUNT)(WORD);
 static PFN_GETACTIVEPROCESSORCOUNT GetActiveProcessorCountProc;
@@ -799,6 +800,8 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	    type = HWLOC_OBJ_NUMANODE;
 	    id = procInfo[i].NumaNode.NodeNumber;
 	    gotnuma++;
+	    if (id > max_numanode_index)
+	      max_numanode_index = id;
 	    break;
 	  case RelationProcessorPackage:
 	    type = HWLOC_OBJ_PACKAGE;
@@ -929,6 +932,8 @@ hwloc_look_windows(struct hwloc_backend *backend)
             GroupMask = &procInfo->NumaNode.GroupMask;
 	    id = procInfo->NumaNode.NodeNumber;
 	    gotnuma++;
+	    if (id > max_numanode_index)
+	      max_numanode_index = id;
 	    break;
 	  case RelationProcessorPackage:
 	    type = HWLOC_OBJ_PACKAGE;
@@ -1128,7 +1133,7 @@ hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
     support->membind->bind_membind = 1;
   }
 
-  if (QueryWorkingSetExProc)
+  if (QueryWorkingSetExProc && max_numanode_index <= 63 /* PSAPI_WORKING_SET_EX_BLOCK.Node is 6 bits only */)
     hooks->get_area_membind = hwloc_win_get_area_membind;
 }
 
