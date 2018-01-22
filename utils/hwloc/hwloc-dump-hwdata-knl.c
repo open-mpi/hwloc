@@ -18,7 +18,7 @@
 
 #define KERNEL_SMBIOS_SYSFS "/sys/firmware/dmi/entries"
 
-#define KNL_SMBIOS_GROUP_STRING "Group: Knights Landing Information"
+#define KNL_SMBIOS_GROUP_STRING "Group: Intel(R) Xeon Phi(TM) Processor Information"
 
 /* Header is common part of all SMBIOS entries */
 struct smbios_header
@@ -209,7 +209,7 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
     h = (struct smbios_header*)file_buf;
     end = file_buf+size;
     if (!is_knl_group(h, end)) {
-        fprintf(stderr, "SMBIOS table does not contain KNL entries\n");
+        fprintf(stderr, "SMBIOS table does not contain Intel(R) Xeon Phi(TM) processor entries\n");
         return -1;
     }
 
@@ -225,7 +225,7 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
     for (; p < end; i++, p+=3) {
         struct smbios_group_entry *e = (struct smbios_group_entry*)p;
         data->knl_types[i] = e->type;
-        printf("  Found KNL type = %d\n", e->type);
+        printf("  Found Intel(R) Xeon Phi(TM) processor type = %d\n", e->type);
     }
 
     data->type_count = i;
@@ -254,7 +254,7 @@ static int process_knl_entry(const char *input_fsroot, char *dir_name, struct pa
     if (h->member_id & KNL_MEMBER_ID_GENERAL) {
         struct knl_general_info *info =
             (struct knl_general_info*) (file_buf+SMBIOS_KNL_HEADER_SIZE);
-        printf("  Getting general KNL info\n");
+        printf("  Getting general Intel(R) Xeon Phi(TM) processor info\n");
         data->cluster_mode = info->cluster_mode;
         data->memory_mode = info->memory_mode;
         data->cache_info = info->cache_info;
@@ -271,11 +271,11 @@ static int process_knl_entry(const char *input_fsroot, char *dir_name, struct pa
                 printf("  MCDRAM info size is set to 0, falling back to known size\n");
                 struct_size = sizeof(*mi);
             }
-            printf("  Getting MCDRAM KNL info. Count=%d struct size=%d\n",
+            printf("  Getting Intel(R) Xeon Phi(TM) processor MCDRAM info. Count=%d struct size=%d\n",
                    (int)info->mcdram_info_count, struct_size);
             for ( ; i < info->mcdram_info_count; i++) {
                 if ((char*)mi >= end) {
-                    fprintf(stderr, "SMBIOS KNL entry is too small\n");
+                    fprintf(stderr, "Intel(R) Xeon Phi(TM) processor SMBIOS entry is too small\n");
                     return -1;
                 }
                 printf("  MCDRAM controller %d\n", mi->controller);
@@ -449,7 +449,7 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
     char path[PATH_SIZE];
     int err;
 
-    printf("Dumping KNL SMBIOS Memory-Side Cache information:\n");
+    printf("Dumping Intel(R) Xeon Phi(TM) processor SMBIOS Memory-Side Cache information:\n");
 
     snprintf(path, PATH_SIZE-1, "%s/" KERNEL_SMBIOS_SYSFS, input_fsroot);
     path[PATH_SIZE-1] = 0;
@@ -475,7 +475,7 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
     }
 
     if (!data.type_count) {
-      fprintf (stderr, "  Couldn't find any KNL information.\n");
+      fprintf (stderr, "  Couldn't find any Intel(R) Xeon Phi(TM) processor information.\n");
       closedir(d);
       return -1;
     }

@@ -38,8 +38,7 @@ hwloc supports the following operating systems:
 <ul>
 <li>Linux (including old kernels not having sysfs topology
 information, with knowledge of cpusets, ScaleMP vSMP support, etc.)
-on all supported hardware, including Intel Xeon Phi
-(KNL and KNC, either standalone or as a coprocessor)
+on all supported hardware, including Intel(R) Xeon Phi(TM) processors and coprocessors,
 and NumaScale NumaConnect.</li>
 <li>Solaris (with support for processor sets and logical domains)</li>
 <li>AIX</li>
@@ -1091,7 +1090,7 @@ following environment variables.
   uses /proc/cpuinfo instead of sysfs.
   may be useful in the doc for debugging?
  HWLOC_KNL_NUMA_QUIRK
-  disables the KNL NUMA Cluster quirk in the linux backend
+  disables the Intel(R) Xeon Phi(TM) processor NUMA Cluster quirk in the linux backend
  HWLOC_DEBUG_CHECK
   runs sanity checks during discovery, as if \--enable-debug was passed but
   without debug messages
@@ -1870,8 +1869,8 @@ These groups are merged back into the parent when possible
 (typically when a single NUMA node is requested below each parent).
 
 It is also possible the explicitly attach NUMA nodes to specific levels.
-For instance, a KNL-like topology with 2 NUMA nodes per 16-core group
-may be created with:
+For instance, an Intel(R) Xeon Phi(TM) processor topology with 2 NUMA nodes
+per 16-core group may be created with:
 \verbatim
 $ lstopo -i "package:1 group:4 [numa] [numa] core:16 pu:4"
 \endverbatim
@@ -3265,7 +3264,7 @@ Starting with version 2.0, hwloc properly exposes this memory
 configuration.
 DDR and MCDRAM are attached as two memory children of the same parent,
 DDR first, and MCDRAM second if any.
-Depending on the KNL configuration, that parent may be a Package,
+Depending on the Intel(R) Xeon Phi(TM) processor configuration, that parent may be a Package,
 a Cache, or a Group object of type <tt>Cluster</tt>.
 
 Hence cores may have one or two local NUMA nodes, listed by the core nodeset.
@@ -3316,7 +3315,7 @@ https://github.com/TresysTechnology/refpolicy-contrib
 
 hwloc-dump-hwdata requires <tt>dmi-sysfs</tt> kernel module loaded.
 
-The utility is currently unneeded on non-KNL platforms.
+The utility is currently unneeded on platforms without Intel(R) Xeon Phi(TM) processors.
 
 See <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
 about the location of dumped files.
