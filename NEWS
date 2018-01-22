@@ -23,7 +23,7 @@ Version 2.0.0
   For instance some hwloc_obj fields were reordered, added or removed, see below.
   + HWLOC_API_VERSION and hwloc_get_api_version() now give 0x00020000.
   + See "How do I handle ABI breaks and API upgrades ?" in the FAQ
-    and https://github.com/open-mpi/hwloc/wiki/Upgrading-to-v2.0-API
+    and "Upgrading to hwloc 2.0 API" in the documentation.
 * Major API changes
   + Memory, I/O and Misc objects are now stored in dedicated children lists,
     not in the usual children list that is now only used for CPU-side objects.
