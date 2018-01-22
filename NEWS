@@ -155,6 +155,7 @@ Version 2.0.0
       anymore, they should be passed in HWLOC_XMLFILE or HWLOC_SYNTHETIC instead.
     - HWLOC_COMPONENTS takes precedence over other environment variables
       for selecting components.
+  + Add get_area_memlocation() on Windows.
   + Remove the dependency on libnuma on Linux.
   + hwloc now requires a C99 compliant compiler.
 

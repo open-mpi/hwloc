@@ -687,12 +687,14 @@ hwloc_win_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void 
  */
 
 static int
-hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
+hwloc_win_get_area_memlocation(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr, size_t len, hwloc_nodeset_t nodeset, int flags __hwloc_attribute_unused)
 {
   SYSTEM_INFO SystemInfo;
   DWORD page_size;
   uintptr_t start;
   unsigned nb;
+  PSAPI_WORKING_SET_EX_INFORMATION *pv;
+  unsigned i;
 
   GetSystemInfo(&SystemInfo);
   page_size = SystemInfo.dwPageSize;
@@ -703,38 +705,24 @@ hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, c
   if (!nb)
     nb = 1;
 
-  {
-    PSAPI_WORKING_SET_EX_INFORMATION *pv;
-    unsigned i;
+  pv = calloc(nb, sizeof(*pv));
+  if (!pv)
+    return -1;
 
-    pv = calloc(nb, sizeof(*pv));
-
-    for (i = 0; i < nb; i++)
-      pv[i].VirtualAddress = (void*) (start + i * page_size);
-    if (!QueryWorkingSetExProc(GetCurrentProcess(), pv, nb * sizeof(*pv))) {
-      free(pv);
-      return -1;
-    }
-    *policy = HWLOC_MEMBIND_BIND;
-    if (flags & HWLOC_MEMBIND_STRICT) {
-      unsigned node = pv[0].VirtualAttributes.Node;
-      for (i = 1; i < nb; i++) {
-	if (pv[i].VirtualAttributes.Node != node) {
-	  errno = EXDEV;
-          free(pv);
-	  return -1;
-	}
-      }
-      hwloc_bitmap_only(nodeset, node);
-      free(pv);
-      return 0;
-    }
-    hwloc_bitmap_zero(nodeset);
-    for (i = 0; i < nb; i++)
-      hwloc_bitmap_set(nodeset, pv[i].VirtualAttributes.Node);
+  for (i = 0; i < nb; i++)
+    pv[i].VirtualAddress = (void*) (start + i * page_size);
+  if (!QueryWorkingSetExProc(GetCurrentProcess(), pv, nb * sizeof(*pv))) {
     free(pv);
-    return 0;
+    return -1;
   }
+
+  for (i = 0; i < nb; i++) {
+    if (pv[i].VirtualAttributes.Valid)
+      hwloc_bitmap_set(nodeset, pv[i].VirtualAttributes.Node);
+  }
+
+  free(pv);
+  return 0;
 }
 
 
@@ -1134,7 +1122,7 @@ hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
   }
 
   if (QueryWorkingSetExProc && max_numanode_index <= 63 /* PSAPI_WORKING_SET_EX_BLOCK.Node is 6 bits only */)
-    hooks->get_area_membind = hwloc_win_get_area_membind;
+    hooks->get_area_memlocation = hwloc_win_get_area_memlocation;
 }
 
 static int hwloc_windows_component_init(unsigned long flags __hwloc_attribute_unused)
