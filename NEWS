@@ -21,7 +21,7 @@ Version 1.11.10
 ---------------
 * Fix first touch area memory binding on Linux when thread memory
   binding is different.
-
+* Add get_area_memlocation() on Windows.
 
 
 Version 1.11.9
