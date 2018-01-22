@@ -696,6 +696,16 @@ See \ref faq_asymmetric for more information about such strange topologies.
 It should be noted that for PU objects, the logical index -- as
 computed linearly by hwloc -- is not the same as the OS index.
 
+The NUMA node is on the side because it is not part of the main tree
+but rather attached to the object that corresponds to its locality
+(the entire machine here, hence the root object).
+It is attached as a <i>Memory</i> child (in green) and has a virtual depth (negative).
+It could also have siblings if there were multiple local NUMA nodes,
+or cousins if other NUMA nodes were attached somewhere else in the machine.
+
+I/O or Misc object could be attached in a similar manner.
+
+
 
 \page tools Command-Line Tools 
 
