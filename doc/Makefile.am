@@ -109,7 +109,7 @@ images/diagram.png: $(srcdir)/images/diagram.fig
 	    echo "ERROR: Cannot find the 'fig2dev' executable -- cannot make $@"; \
 	    exit 1; \
 	fi
-	$(FIG2DEV) -L png $< $@
+	$(FIG2DEV) -m 1.5 -L png $< $@
 
 images/diagram.eps: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
