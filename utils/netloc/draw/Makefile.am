@@ -20,4 +20,10 @@ netloc_draw_to_json_SOURCES = \
 
 netloc_draw_to_json_LDADD = \
         $(top_builddir)/netloc/libnetloc.la \
-		$(top_builddir)/hwloc/libhwloc.la
+        $(top_builddir)/hwloc/libhwloc.la
+
+dist_pkgdata_DATA = \
+        netloc_draw.html \
+        netloc_draw.js \
+        visdist/vis.min.js \
+        visdist/vis.min.css
