@@ -480,27 +480,33 @@ EOF])
     AC_CHECK_DECLS([_putenv], [], [], [AC_INCLUDES_DEFAULT])
     # Could add mkdir and access for hwloc-gather-cpuid.c on Windows
 
-    # Do a full link test instead of just using AC_CHECK_FUNCS, which
-    # just checks to see if the symbol exists or not.  For example,
-    # the prototype of sysctl uses u_int, which on some platforms
-    # (such as FreeBSD) is only defined under __BSD_VISIBLE, __USE_BSD
-    # or other similar definitions.  So while the symbols "sysctl" and
-    # "sysctlbyname" might still be available in libc (which autoconf
-    # checks for), they might not be actually usable.
-    AC_TRY_LINK([
-               #include <stdio.h>
-               #include <sys/types.h>
-               #include <sys/sysctl.h>
-               ],
-                [return sysctl(NULL,0,NULL,NULL,NULL,0);],
-                AC_DEFINE([HAVE_SYSCTL],[1],[Define to '1' if sysctl is present and usable]))
-    AC_TRY_LINK([
-               #include <stdio.h>
-               #include <sys/types.h>
-               #include <sys/sysctl.h>
-               ],
-                [return sysctlbyname(NULL,NULL,NULL,NULL,0);],
-                AC_DEFINE([HAVE_SYSCTLBYNAME],[1],[Define to '1' if sysctlbyname is present and usable]))
+    if test "x$hwloc_linux" != "xyes" ; then
+      # Don't detect sysctl* on Linux because its sysctl() syscall is
+      # long deprecated and unneeded. Some libc still expose the symbol
+      # and raise a big warning at link time.
+
+      # Do a full link test instead of just using AC_CHECK_FUNCS, which
+      # just checks to see if the symbol exists or not.  For example,
+      # the prototype of sysctl uses u_int, which on some platforms
+      # (such as FreeBSD) is only defined under __BSD_VISIBLE, __USE_BSD
+      # or other similar definitions.  So while the symbols "sysctl" and
+      # "sysctlbyname" might still be available in libc (which autoconf
+      # checks for), they might not be actually usable.
+      AC_TRY_LINK([
+                 #include <stdio.h>
+                 #include <sys/types.h>
+                 #include <sys/sysctl.h>
+                 ],
+                  [return sysctl(NULL,0,NULL,NULL,NULL,0);],
+                  AC_DEFINE([HAVE_SYSCTL],[1],[Define to '1' if sysctl is present and usable]))
+      AC_TRY_LINK([
+                 #include <stdio.h>
+                 #include <sys/types.h>
+                 #include <sys/sysctl.h>
+                 ],
+                  [return sysctlbyname(NULL,NULL,NULL,NULL,0);],
+                  AC_DEFINE([HAVE_SYSCTLBYNAME],[1],[Define to '1' if sysctlbyname is present and usable]))
+    fi
 
     AC_CHECK_DECLS([getprogname], [], [], [AC_INCLUDES_DEFAULT])
     AC_CHECK_DECLS([getexecname], [], [], [AC_INCLUDES_DEFAULT])
