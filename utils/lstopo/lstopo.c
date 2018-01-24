@@ -422,7 +422,7 @@ void usage(const char *name, FILE *where)
 #ifdef LSTOPO_HAVE_GRAPHICS
 #ifdef HWLOC_WIN_SYS
 		  "graphical"
-#elif CAIRO_HAS_XLIB_SURFACE && (defined HWLOC_HAVE_X11_KEYSYM)
+#elif (defined CAIRO_HAS_XLIB_SURFACE) && (defined HWLOC_HAVE_X11_KEYSYM)
 		  "graphical (X11) if DISPLAY is set, console otherwise"
 #else
 		  "console"
@@ -434,16 +434,16 @@ void usage(const char *name, FILE *where)
 
   fprintf (where, "Supported output file formats: console, ascii, fig"
 #ifdef LSTOPO_HAVE_GRAPHICS
-#if CAIRO_HAS_PDF_SURFACE
+#ifdef CAIRO_HAS_PDF_SURFACE
 		  ", pdf"
 #endif /* CAIRO_HAS_PDF_SURFACE */
-#if CAIRO_HAS_PS_SURFACE
+#ifdef CAIRO_HAS_PS_SURFACE
 		  ", ps"
 #endif /* CAIRO_HAS_PS_SURFACE */
-#if CAIRO_HAS_PNG_FUNCTIONS
+#ifdef CAIRO_HAS_PNG_FUNCTIONS
 		  ", png"
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
-#if CAIRO_HAS_SVG_SURFACE
+#ifdef CAIRO_HAS_SVG_SURFACE
 		  ", svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* LSTOPO_HAVE_GRAPHICS */
@@ -1038,7 +1038,7 @@ main (int argc, char *argv[])
   switch (output_format) {
   case LSTOPO_OUTPUT_DEFAULT:
 #ifdef LSTOPO_HAVE_GRAPHICS
-#if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11_KEYSYM
+#if (defined CAIRO_HAS_XLIB_SURFACE) && (defined HWLOC_HAVE_X11_KEYSYM)
     if (getenv("DISPLAY")) {
       output_func = output_x11;
     } else
@@ -1069,26 +1069,26 @@ main (int argc, char *argv[])
     output_func = output_fig;
     break;
 #ifdef LSTOPO_HAVE_GRAPHICS
-# if CAIRO_HAS_PNG_FUNCTIONS
+# ifdef CAIRO_HAS_PNG_FUNCTIONS
   case LSTOPO_OUTPUT_PNG:
     output_func = output_png;
     break;
 # endif /* CAIRO_HAS_PNG_FUNCTIONS */
-# if CAIRO_HAS_PDF_SURFACE
+# ifdef CAIRO_HAS_PDF_SURFACE
   case LSTOPO_OUTPUT_PDF:
     output_func = output_pdf;
     break;
 # endif /* CAIRO_HAS_PDF_SURFACE */
-# if CAIRO_HAS_PS_SURFACE
+# ifdef CAIRO_HAS_PS_SURFACE
   case LSTOPO_OUTPUT_PS:
     output_func = output_ps;
     break;
-#endif /* CAIRO_HAS_PS_SURFACE */
-#if CAIRO_HAS_SVG_SURFACE
+# endif /* CAIRO_HAS_PS_SURFACE */
+# ifdef CAIRO_HAS_SVG_SURFACE
   case LSTOPO_OUTPUT_SVG:
     output_func = output_svg;
     break;
-#endif /* CAIRO_HAS_SVG_SURFACE */
+# endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* LSTOPO_HAVE_GRAPHICS */
   case LSTOPO_OUTPUT_XML:
     output_func = output_xml;
