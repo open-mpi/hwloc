@@ -243,12 +243,12 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
       fprintf(stderr, "Failed to pass input filesystem root directory to HWLOC_FSROOT environment variable\n");
     else
       putenv(env);
-    putenv("HWLOC_DUMPED_HWDATA_DIR=/var/run/hwloc");
+    putenv((char *) "HWLOC_DUMPED_HWDATA_DIR=/var/run/hwloc");
     env = getenv("HWLOC_COMPONENTS");
     if (env)
       fprintf(stderr, "Cannot force linux and linuxio components first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
-      putenv("HWLOC_COMPONENTS=linux,linuxio,stop");
+      putenv((char *) "HWLOC_COMPONENTS=linux,linuxio,stop");
 #else /* HWLOC_LINUX_SYS */
     fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
     exit(EXIT_FAILURE);
@@ -270,7 +270,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     if (env)
       fprintf(stderr, "Cannot force x86 component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
-      putenv("HWLOC_COMPONENTS=x86,stop");
+      putenv((char *) "HWLOC_COMPONENTS=x86,stop");
 #else
     fprintf(stderr, "This installation of hwloc does not support loading from a cpuid dump, sorry.\n");
     exit(EXIT_FAILURE);

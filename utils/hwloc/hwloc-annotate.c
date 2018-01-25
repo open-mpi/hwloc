@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 
 	hwloc_utils_check_api_version(callname);
 
-	putenv("HWLOC_XML_VERBOSE=1");
+	putenv((char *) "HWLOC_XML_VERBOSE=1");
 
 	while (argc && *argv[0] == '-') {
 		if (!strcmp(argv[0], "--ci"))
@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 	if (err < 0)
 		goto out;
 
-	putenv("HWLOC_XML_USERDATA_NOT_DECODED=1");
+	putenv((char *) "HWLOC_XML_USERDATA_NOT_DECODED=1");
 	hwloc_topology_set_userdata_import_callback(topology, hwloc_utils_userdata_import_cb);
 	hwloc_topology_set_userdata_export_callback(topology, hwloc_utils_userdata_export_cb);
 
