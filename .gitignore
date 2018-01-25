@@ -70,6 +70,7 @@ test-suite.log
 
 /hwloc/static-components.h
 /hwloc/libhwloc.la
+/hwloc/libhwloc_embedded.la
 
 /tests/hwloc/wrapper.sh
 /tests/hwloc/hwloc_list_components
