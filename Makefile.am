@@ -39,15 +39,15 @@ endif
 
 # Only install the pkg file if we're building in standalone mode (and not on Windows)
 if HWLOC_BUILD_STANDALONE
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = hwloc.pc
+hwlocpkgconfigdir = $(libdir)/pkgconfig
+hwlocpkgconfig_DATA = hwloc.pc
 if BUILD_NETLOC
 # JMS Need to compare hwloc.pc and netloc.pc -- I think netloc.pc is
 # missing some things.
 # pkgconfig_DATA += netloc.pc Disabled until the netloc API is public
 EXTRA_DIST += netloc.pc
 if BUILD_NETLOCSCOTCH
-pkgconfig_DATA += netlocscotch.pc
+hwlocpkgconfig_DATA += netlocscotch.pc
 endif BUILD_NETLOCSCOTCH
 endif BUILD_NETLOC
 endif HWLOC_BUILD_STANDALONE
