@@ -571,8 +571,8 @@ main (int argc, char *argv[])
   }
 
   /* enable verbose backends */
-  putenv("HWLOC_XML_VERBOSE=1");
-  putenv("HWLOC_SYNTHETIC_VERBOSE=1");
+  putenv((char *) "HWLOC_XML_VERBOSE=1");
+  putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
 
   /* Use localized time prints, and utf-8 characters in the ascii output */
 #ifdef HAVE_SETLOCALE
@@ -881,7 +881,7 @@ main (int argc, char *argv[])
   if (input_format == HWLOC_UTILS_INPUT_XML
       && output_format == LSTOPO_OUTPUT_XML) {
     /* must be after parsing output format and before loading the topology */
-    putenv("HWLOC_XML_USERDATA_NOT_DECODED=1");
+    putenv((char *) "HWLOC_XML_USERDATA_NOT_DECODED=1");
     hwloc_topology_set_userdata_import_callback(topology, hwloc_utils_userdata_import_cb);
     hwloc_topology_set_userdata_export_callback(topology, hwloc_utils_userdata_export_cb);
   }
