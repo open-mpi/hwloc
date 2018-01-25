@@ -701,7 +701,7 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
       }
 
   } else { /* always handle length==0 in the non-encoded case */
-      char *buffer = "";
+      char *buffer = (char *) "";
       if (length) {
 	ret = state->global->get_content(state, &buffer, length);
 	if (ret < 0)

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2015-2016, 2015 Intel
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -311,7 +311,7 @@ static int process_knl_entry(const char *input_fsroot, char *dir_name, struct pa
 
     return 0;
 }
-static char* get_memory_mode_str(int memory_mode, int hybrid_cache_size)
+static const char* get_memory_mode_str(int memory_mode, int hybrid_cache_size)
 {
     switch (memory_mode) {
         case CACHE: return "Cache";
@@ -328,7 +328,7 @@ static char* get_memory_mode_str(int memory_mode, int hybrid_cache_size)
     }
 }
 
-static char* get_cluster_mode_str(int cluster_mode)
+static const char* get_cluster_mode_str(int cluster_mode)
 {
     switch (cluster_mode) {
         case QUADRANT: return "Quadrant";

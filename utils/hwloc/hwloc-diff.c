@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2017 Inria.  All rights reserved.
+ * Copyright © 2013-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
 	hwloc_utils_check_api_version(callname);
 
-	putenv("HWLOC_XML_VERBOSE=1");
+	putenv((char *) "HWLOC_XML_VERBOSE=1");
 
 	while (argc && *argv[0] == '-') {
 		if (!strcmp (argv[0], "--refname")) {
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 		argv++;
 	} else  {
 		output = NULL;
-		outputname = "stdout";
+		outputname = (char *) "stdout";
 	}
 
 	hwloc_topology_init(&topo1);

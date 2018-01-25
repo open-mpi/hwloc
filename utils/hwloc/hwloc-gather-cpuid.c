@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2017 Inria.  All rights reserved.
+ * Copyright © 2015-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -375,7 +375,7 @@ int main(int argc, const char * const argv[])
     basedir = argv[0];
 
   if (!getenv("HWLOC_COMPONENTS"))
-    putenv("HWLOC_COMPONENTS=no_os,stop");
+    putenv((char *) "HWLOC_COMPONENTS=no_os,stop");
 
   hwloc_topology_init(&topo);
   hwloc_topology_set_all_types_filter(topo, HWLOC_TYPE_FILTER_KEEP_NONE);
