@@ -1210,7 +1210,7 @@ Moreover, some operating systems require privileges for probing PCI devices,
 see \ref faq_privileged for details.
 
 The actual locality of I/O devices is only currently detected on Linux.
-Other operating system will just reported I/O devices as being attached
+Other operating system will just report I/O devices as being attached
 to the topology root object.
 
 \section iodevices_objects I/O objects
@@ -1448,7 +1448,7 @@ This is an flexible way to annotate topologies with
 large sets of information since Misc objects may be inserted
 anywhere in the topology (to annotate specific objects or
 parts of the topology), even below other Misc objects, and each
-of them may contain multiple attributes (ee also \ref faq_annotate).
+of them may contain multiple attributes (see also \ref faq_annotate).
 
 These Misc objects may have a <tt>Type</tt> info attribute
 to replace <tt>Misc</tt> with something else in the lstopo
