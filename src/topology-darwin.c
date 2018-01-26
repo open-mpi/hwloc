@@ -45,8 +45,11 @@ hwloc_look_darwin(struct hwloc_backend *backend)
 
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
-  if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
-    return -1;
+  if (hwloc_get_sysctlbyname("hw.logicalcpu", &_nprocs) || _nprocs <= 0)
+    /* fallback to deprecated way */
+    if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
+      return -1;
+
   nprocs = _nprocs;
   topology->support.discovery->pu = 1;
 
