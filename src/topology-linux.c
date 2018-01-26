@@ -5133,7 +5133,7 @@ hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   size_t pathlen;
-  DIR *devicedir, *hostdir;
+  DIR *devicedir, *hostdir, *nvmedir;
   struct dirent *devicedirent, *hostdirent;
   size_t devicedlen, hostdlen;
   char path[256];
@@ -5143,7 +5143,44 @@ hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
   strcpy(path, pcidevpath);
   pathlen = strlen(path);
 
-  /* look for a direct block device here (such as NVMe, something without controller subdirs in the middle) */
+  /* look for a NVMe class (Linux 4.0+) under nvme/nvme%d/nvme%dn%d/ */
+  strcpy(&path[pathlen], "/nvme");
+  nvmedir = hwloc_opendir(path, root_fd);
+  if (nvmedir) {
+    struct dirent *nvmedirent;
+    while ((nvmedirent = readdir(nvmedir)) != NULL) {
+      DIR *nvmesubdir;
+      if (strncmp(nvmedirent->d_name, "nvme", 4))
+	continue;
+      path[pathlen+5] = '/';
+      strcpy(&path[pathlen+6], nvmedirent->d_name);
+      nvmesubdir = hwloc_opendir(path, root_fd);
+      if (nvmesubdir) {
+	struct dirent *nvmesubdirent;
+	while ((nvmesubdirent = readdir(nvmesubdir)) != NULL) {
+	  hwloc_obj_t obj;
+	  size_t nvmednamelen = strlen(nvmedirent->d_name);
+	  if (strncmp(nvmedirent->d_name, nvmesubdirent->d_name, nvmednamelen))
+	    continue;
+	  obj = hwloc_linux_add_os_device(backend, pcidev, HWLOC_OBJ_OSDEV_BLOCK, nvmesubdirent->d_name);
+	  if (obj) {
+	    path[pathlen+6+nvmednamelen] = '/';
+	    strcpy(&path[pathlen+6+nvmednamelen+1], nvmesubdirent->d_name);
+	    hwloc_linux_block_class_fillinfos(backend, obj, path);
+	    res++;
+	  }
+	}
+	closedir(nvmesubdir);
+      }
+    }
+    closedir(nvmedir);
+    return res;
+  }
+  path[pathlen] = '\0';
+
+  /* look for a direct block device here (such as NVMe before Linux 4.0,
+   * or something without controller subdirs in the middle)
+   */
   res += hwloc_linux_class_readdir(backend, pcidev, path,
 				   HWLOC_OBJ_OSDEV_BLOCK, "block",
 				   hwloc_linux_block_class_fillinfos);

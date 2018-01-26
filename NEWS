@@ -21,6 +21,7 @@ Version 1.11.10
 ---------------
 * Fix first touch area memory binding on Linux when thread memory
   binding is different.
+* Fix discovery of NVMe OS devices on Linux >= 4.0.
 * Add get_area_memlocation() on Windows.
 
 
