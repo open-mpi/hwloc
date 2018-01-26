@@ -65,12 +65,19 @@ hwloc_look_darwin(struct hwloc_backend *backend)
   if (!hwloc_get_sysctlbyname("hw.packages", &_npackages) && _npackages > 0) {
     unsigned npackages = _npackages;
     int64_t _cores_per_package;
+    unsigned cores_per_package;
     int64_t _logical_per_package;
     unsigned logical_per_package;
 
     hwloc_debug("%u packages\n", npackages);
 
-    if (!hwloc_get_sysctlbyname("machdep.cpu.logical_per_package", &_logical_per_package) && _logical_per_package > 0)
+    if (!hwloc_get_sysctlbyname("machdep.cpu.thread_count", &_logical_per_package) && _logical_per_package > 0)
+      /* official/modern way */
+      logical_per_package = _logical_per_package;
+    else if (!hwloc_get_sysctlbyname("machdep.cpu.logical_per_package", &_logical_per_package) && _logical_per_package > 0)
+      /* old way, gives the max supported by this "kind" of processor,
+       * can be larger than the actual number for this model.
+       */
       logical_per_package = _logical_per_package;
     else
       /* Assume the trivia.  */
@@ -97,9 +104,20 @@ hwloc_look_darwin(struct hwloc_backend *backend)
       if (cpumodel[0] != '\0')
         hwloc_obj_add_info(topology->levels[0][0], "CPUModel", cpumodel);
 
-    if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &_cores_per_package) && _cores_per_package > 0
+    if (!hwloc_get_sysctlbyname("machdep.cpu.core_count", &_cores_per_package) && _cores_per_package > 0)
+      /* official/modern way */
+      cores_per_package = _cores_per_package;
+    else if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &_cores_per_package) && _cores_per_package > 0)
+      /* old way, gives the max supported by this "kind" of processor,
+       * can be larger than the actual number for this model.
+       */
+      cores_per_package = _cores_per_package;
+    else
+      /* no idea */
+      cores_per_package = 0;
+
+    if (cores_per_package > 0
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
-      unsigned cores_per_package = _cores_per_package;
       hwloc_debug("%u cores per package\n", cores_per_package);
 
       if (!(logical_per_package % cores_per_package))
