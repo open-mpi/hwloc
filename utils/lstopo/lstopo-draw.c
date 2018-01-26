@@ -43,7 +43,7 @@ const struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff };
 const struct lstopo_color MACHINE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
 const struct lstopo_color GROUP_IN_PACKAGE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
 const struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff };
-const struct lstopo_color PCI_DEVICE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR };
+const struct lstopo_color PCI_DEVICE_COLOR = { DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR };
 const struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde };
 const struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff };
 
