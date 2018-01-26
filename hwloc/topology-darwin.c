@@ -50,9 +50,15 @@ hwloc_look_darwin(struct hwloc_backend *backend)
   /* Don't use hwloc_fallback_nbprocessors() because it would return online cpus only,
    * while we need all cpus when computing logical_per_package, etc below.
    * We don't know which CPUs are offline, but Darwin doesn't support binding anyway.
+   *
+   * TODO: try hw.logicalcpu_max
    */
-  if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
-    return -1;
+
+  if (hwloc_get_sysctlbyname("hw.logicalcpu", &_nprocs) || _nprocs <= 0)
+    /* fallback to deprecated way */
+    if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
+      return -1;
+
   nprocs = _nprocs;
   topology->support.discovery->pu = 1;
 
