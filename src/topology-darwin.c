@@ -35,6 +35,7 @@ hwloc_look_darwin(struct hwloc_backend *backend)
   int64_t l1dcachesize, l1icachesize;
   int64_t cacheways[2];
   int64_t l2cachesize;
+  int64_t l3cachesize;
   int64_t cachelinesize;
   int64_t memsize;
   char cpumodel[64];
@@ -143,6 +144,9 @@ hwloc_look_darwin(struct hwloc_backend *backend)
   if (hwloc_get_sysctlbyname("hw.l2cachesize", &l2cachesize))
     l2cachesize = 0;
 
+  if (hwloc_get_sysctlbyname("hw.l3cachesize", &l3cachesize))
+    l3cachesize = 0;
+
   if (hwloc_get_sysctlbyname("machdep.cpu.cache.L1_associativity", &cacheways[0]))
     cacheways[0] = 0;
   else if (cacheways[0] == 0xff)
@@ -197,6 +201,8 @@ hwloc_look_darwin(struct hwloc_backend *backend)
           cachesize[1] = l1dcachesize;
         if (n > 2)
           cachesize[2] = l2cachesize;
+        if (n > 3)
+          cachesize[3] = l3cachesize;
       }
 
       hwloc_debug("%s", "caches");
