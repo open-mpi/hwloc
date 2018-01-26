@@ -1236,12 +1236,6 @@ See \ref iodevices_osdev.
 <tt>::HWLOC_OBJ_PCI_DEVICE</tt> and <tt>::HWLOC_OBJ_BRIDGE</tt> build up
 a PCI hierarchy made of devices and bridges.
 See \ref iodevices_pci.
-</li><li>
-<tt>Additionally ::HWLOC_OBJ_MISC</tt> describes miscellaneous devices such as
-memory modules (DIMMs).
-These are not actual I/O objects (neither PCI nor OS handles),
-therefore they appear as Misc objects.
-See \ref miscobjs_auto.
 </li></ul>
 Any of these types may be filtered individually with <tt>hwloc_topology_set_type_filter()</tt>.
 
