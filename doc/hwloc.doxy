@@ -54,8 +54,8 @@ and NumaScale NumaConnect.</li>
 
 Since it uses standard Operating System information, hwloc's support is mostly
 independant from the processor type (x86, powerpc, ...) and just relies on the
-Operating System support. The only exception to this is kFreeBSD, which does
-not support topology information, and hwloc thus uses an x86-only CPUID-based
+Operating System support. The main exception is BSD operating systems (NetBSD, FreeBSD, etc.)
+because they do not provide support topology information, hence hwloc uses an x86-only CPUID-based
 backend (which can be used for other OSes too, see the \ref plugins section).
 
 To check whether hwloc works on a particular machine, just try to build it
