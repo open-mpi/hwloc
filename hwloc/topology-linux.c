@@ -5350,8 +5350,18 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_fla
 	&& hwloc_stat(path, &stbuf, root_fd) < 0)
       continue;
 
-    /* FIXME: only keep cardX ? */
-    /* FIXME: drop cardX for proprietary drivers that get CUDA/OpenCL devices? */
+    /* Most drivers expose a card%d device.
+     * Some (free?) drivers also expose render%d.
+     * Old kernels also have a controlD%d. On recent kernels, it's a symlink to card%d (deprecated?).
+     * There can also exist some output-specific files such as card0-DP-1.
+     *
+     * All these aren't very useful compared to CUDA/OpenCL/...
+     * Hence the DRM class is only enabled when KEEP_ALL.
+     *
+     * FIXME: We might want to filter everything out but card%d.
+     * Maybe look at the driver (read the end of /sys/class/drm/<name>/device/driver symlink),
+     * to decide whether card%d could be useful (likely not for NVIDIA).
+     */
 
     err = snprintf(path, sizeof(path), "/sys/class/drm/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
