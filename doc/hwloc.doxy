@@ -367,13 +367,13 @@ Here's the graphical output from lstopo on this platform when
 Simultaneous Multi-Threading (SMT) is enabled:
 
 \image html ppc64-with-smt.png
-\image latex ppc64-with-smt.pdf "" width=\textwidth
+\image latex ppc64-with-smt.png "" width=\textwidth
 
 And here's the graphical output from lstopo on this platform when SMT is
 disabled:
 
 \image html ppc64-without-smt.png
-\image latex ppc64-without-smt.pdf "" width=\textwidth
+\image latex ppc64-without-smt.png "" width=\textwidth
 
 Notice that hwloc only sees half the PUs when SMT is disabled.  PU #15,
 for example, seems to change location from NUMA node #0 to #1.  In
@@ -392,7 +392,7 @@ information.  The following picture shows the entire topology layout
 when SMT is enabled:
 
 \image html ppc64-full-with-smt.png
-\image latex ppc64-full-with-smt.pdf "" width=\textwidth
+\image latex ppc64-full-with-smt.png "" width=\textwidth
 
 Developers using the hwloc API or XML output for portable applications
 should therefore be extremely careful to not make any assumptions
@@ -1385,7 +1385,7 @@ The following picture shows a dual-package dual-core host whose
 PCI bus is connected to the first package and NUMA node.
 
 \image html devel09-pci.png
-\image latex devel09-pci.pdf "" width=\textwidth
+\image latex devel09-pci.png "" width=\textwidth
 
 Six interesting PCI devices were discovered.
 However hwloc found some corresponding software devices
