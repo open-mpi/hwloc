@@ -309,16 +309,7 @@ $prefix, of course).
 
 \subsection portability Portability
 
-As shown in \ref cli_examples, hwloc can obtain information on a wide
-variety of hardware topologies.  However, some platforms and/or
-operating system versions will only report a subset of this
-information.  For example, on an PPC64-based system with 32 cores
-(each with 2 hardware threads) running a default 2.6.18-based kernel
-from RHEL 5.4, hwloc is only able to glean information about NUMA
-nodes and processor units (PUs).  No information about caches,
-packages, or cores is available.
-
-Similarly, Operating System have varying support for CPU and memory binding,
+Operating System have varying support for CPU and memory binding,
 e.g. while some Operating Systems provide interfaces for all kinds of CPU and
 memory bindings, some others provide only interfaces for a limited number of
 kinds of CPU and memory binding, and some do not provide any binding interface
@@ -328,6 +319,17 @@ does not provide any interface for them. \ref hwlocality_cpubinding and
 \ref hwlocality_membinding provide more information on which hwloc binding functions
 should be preferred because interfaces for them are usually available on the
 supported Operating Systems.
+
+Similarly, the ability of reporting topology information varies from
+one platform to another.
+As shown in \ref cli_examples, hwloc can obtain information on a wide
+variety of hardware topologies.  However, some platforms and/or
+operating system versions will only report a subset of this
+information.  For example, on an PPC64-based system with 32 cores
+(each with 2 hardware threads) running a default 2.6.18-based kernel
+from RHEL 5.4, hwloc is only able to glean information about NUMA
+nodes and processor units (PUs).  No information about caches,
+packages, or cores is available.
 
 Here's the graphical output from lstopo on this platform when
 Simultaneous Multi-Threading (SMT) is enabled:
