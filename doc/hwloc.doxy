@@ -252,8 +252,10 @@ Note that there is also an equivalent output in XML that is meant for
 exporting/importing topologies but it is hardly readable to human-beings
 (see \ref xml for details).
 
-On a 4-package 2-core Opteron NUMA machine, the \c lstopo tool may show
-the following graphical output:
+On a 4-package 2-core Opteron NUMA machine
+(with two core cores disallowed by the administrator),
+the \c lstopo tool may show the following graphical output
+(with <tt>\--whole-system</tt> for displaying disallowed objects):
 
 \image html hagrid.png
 \image latex hagrid.png "" width=\textwidth
