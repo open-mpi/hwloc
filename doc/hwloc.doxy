@@ -224,7 +224,7 @@ the \c lstopo tool may show the following graphical output
 Here's the equivalent output in textual form:
 
 \verbatim
-Machine (32GB)
+Machine (32GB total)
   Package L#0
     NUMANode L#0 (P#0 8190MB)
     L2 L#0 (1024KB) + L1 L#0 (64KB) + Core L#0 + PU L#0 (P#0)
@@ -252,8 +252,8 @@ each package):
 Here's the same output in textual form:
 
 \verbatim
-Machine (16GB)
-  NUMANode L#0 (P#0)
+Machine (total 16GB)
+  NUMANode L#0 (P#0 16GB)
   Package L#0
     L2 L#0 (4096KB)
       L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
@@ -1418,31 +1418,33 @@ because lstopo was privileged when it discovered the topology.
 Here is the corresponding textual output:
 
 \verbatim
-Machine (24GB)
-  Package L#0 + L3 L#0 (8192KB)
+Machine (24GB total)
+  Package L#0
     NUMANode L#0 (P#0 12GB)
-    L2 L#0 (256KB) + L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
-    L2 L#1 (256KB) + L1 L#1 (32KB) + Core L#1 + PU L#1 (P#2)
+    L3 L#0 (8192KB)
+      L2 L#0 (256KB) + L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
+      L2 L#1 (256KB) + L1 L#1 (32KB) + Core L#1 + PU L#1 (P#2)
     HostBridge
       PCIBridge
-        PCI 14e4:163b
+        PCI 01:00.0 (Ethernet)
           Net "eth0"
-        PCI 14e4:163b
+        PCI 01:00.1 (Ethernet)
           Net "eth1"
       PCIBridge
-        PCI 1000:0060
+        PCI 03:00.0 (RAID)
           Block "sda"
       PCIBridge
-        PCI 102b:0532
-      PCI 8086:3a20
-      PCI 15b3:634a
+        PCI 04:03.0 (VGA)
+      PCI 00:1f.2 (IDE)
+      PCI 51:00.0 (InfiniBand)
         Net "ib0"
         Net "ib1"
         Net "mlx4_0"
-  Package L#1 + L3 L#1 (8192KB)
+  Package L#1
     NUMANode L#1 (P#1 12GB)
-    L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
-    L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
+    L3 L#1 (8192KB)
+      L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
+      L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
 \endverbatim
 
 
