@@ -404,8 +404,8 @@ Additionally, future hardware may insert new topology elements that
 are not available in this version of hwloc.  Long-lived applications
 that are meant to span multiple different hardware platforms should
 also be careful about making structure assumptions.  For example,
-there may someday be an element "lower" than a PU, or perhaps a new
-element may exist between a core and a PU.
+a new element may someday exist between a core and a PU.
+
 
 \subsection interface_example API Example
 
