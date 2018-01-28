@@ -341,13 +341,14 @@ And here's the graphical output from lstopo on this platform when SMT is
 disabled:
 
 \image html ppc64-without-smt.png
-\image latex ppc64-without-smt.png "" width=\textwidth
+\image latex ppc64-without-smt.png "" width=.5\textwidth
 
 Notice that hwloc only sees half the PUs when SMT is disabled.
-PU #7, for example, seems to change location from NUMA node #0 to #1.  In
-reality, no PUs "moved" -- they were simply re-numbered when hwloc
-only saw half as many.  Hence, PU #7 in the SMT-disabled picture
-probably corresponds to PU #14 in the SMT-enabled picture.
+PU L#6, for example, seems to change location from NUMA node #0 to #1.
+In reality, no PUs "moved" -- they were simply re-numbered when hwloc
+only saw half as many (see also Logical index in \ref termsanddefs_indexes).
+Hence, PU L#6 in the SMT-disabled picture probably corresponds to
+PU L#12 in the SMT-enabled picture.
 
 This same "PUs have disappeared" effect can be seen on other platforms
 -- even platforms / OSs that provide much more information than the
