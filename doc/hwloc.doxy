@@ -325,7 +325,7 @@ one platform to another.
 As shown in \ref cli_examples, hwloc can obtain information on a wide
 variety of hardware topologies.  However, some platforms and/or
 operating system versions will only report a subset of this
-information.  For example, on an PPC64-based system with 32 cores
+information.  For example, on an PPC64-based system with 8 cores
 (each with 2 hardware threads) running a default 2.6.18-based kernel
 from RHEL 5.4, hwloc is only able to glean information about NUMA
 nodes and processor units (PUs).  No information about caches,
@@ -343,11 +343,11 @@ disabled:
 \image html ppc64-without-smt.png
 \image latex ppc64-without-smt.png "" width=\textwidth
 
-Notice that hwloc only sees half the PUs when SMT is disabled.  PU #15,
-for example, seems to change location from NUMA node #0 to #1.  In
+Notice that hwloc only sees half the PUs when SMT is disabled.
+PU #7, for example, seems to change location from NUMA node #0 to #1.  In
 reality, no PUs "moved" -- they were simply re-numbered when hwloc
-only saw half as many.  Hence, PU #15 in the SMT-disabled picture
-probably corresponds to PU #30 in the SMT-enabled picture.  
+only saw half as many.  Hence, PU #7 in the SMT-disabled picture
+probably corresponds to PU #14 in the SMT-enabled picture.
 
 This same "PUs have disappeared" effect can be seen on other platforms
 -- even platforms / OSs that provide much more information than the
