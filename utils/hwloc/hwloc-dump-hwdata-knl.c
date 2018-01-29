@@ -158,13 +158,13 @@ static int is_knl_entry(struct smbios_header *h, const char *end, const char *qu
     char *group_strings = (char*)h + h->length;
     do {
         int len = strlen(group_strings);
-        if (!strncmp(group_strings, query, len))
-            return 1;
         /* SMBIOS string entries end with "\0\0"
          * if length is 0 break and return
          * */
         if (len == 0)
             break;
+        if (!strncmp(group_strings, query, len))
+            return 1;
         group_strings += len;
     } while(group_strings < end);
 
