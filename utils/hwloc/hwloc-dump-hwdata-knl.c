@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2016, 2015 Intel
+ * Copyright © 2015-2018 Intel
  * Copyright © 2015-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -19,6 +19,7 @@
 #define KERNEL_SMBIOS_SYSFS "/sys/firmware/dmi/entries"
 
 #define KNL_SMBIOS_GROUP_STRING "Group: Knights Landing Information"
+#define KNM_SMBIOS_GROUP_STRING "Group: Knights Mill Information"
 
 /* Header is common part of all SMBIOS entries */
 struct smbios_header
@@ -153,7 +154,7 @@ static int get_file_buffer(const char *file, char *buffer, int size)
     return size;
 }
 
-static int is_knl_entry(struct smbios_header *h, const char *end, const char *query)
+static int check_entry(struct smbios_header *h, const char *end, const char *query)
 {
     char *group_strings = (char*)h + h->length;
     do {
@@ -171,14 +172,15 @@ static int is_knl_entry(struct smbios_header *h, const char *end, const char *qu
     return 0;
 }
 
-static int is_knl_group(struct smbios_header *h, const char *end)
+static int is_phi_group(struct smbios_header *h, const char *end)
 {
     if (h->type != 14) {
         fprintf(stderr, "SMBIOS table is not group table\n");
         return -1;
     }
 
-    return is_knl_entry(h, end, KNL_SMBIOS_GROUP_STRING);
+    return check_entry(h, end, KNL_SMBIOS_GROUP_STRING) ||
+           check_entry(h, end, KNM_SMBIOS_GROUP_STRING);
 }
 
 #define KNL_MEMBER_ID_GENERAL 0x1
@@ -208,7 +210,7 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
 
     h = (struct smbios_header*)file_buf;
     end = file_buf+size;
-    if (!is_knl_group(h, end)) {
+    if (!is_phi_group(h, end)) {
         fprintf(stderr, "SMBIOS table does not contain KNL entries\n");
         return -1;
     }
