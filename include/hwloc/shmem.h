@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2017 Inria.  All rights reserved.
+ * Copyright © 2013-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -29,7 +29,7 @@ extern "C" {
  *
  * Then it must find a virtual memory area of that size that is available
  * in all processes (identical virtual addresses in all processes).
- * On Linux, this can be done by comparing holes found in /proc/<pid>/maps
+ * On Linux, this can be done by comparing holes found in /proc/\<pid\>/maps
  * for each process.
  *
  * Once found, it must open a destination file for storing the buffer,
