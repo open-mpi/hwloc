@@ -88,6 +88,42 @@ static int adopt(int fd, unsigned long fileoffset, unsigned long mmap_address, u
   return ret;
 }
 
+static unsigned long
+find_mmap_addr(unsigned long length)
+{
+  unsigned long addr;
+  void *tmp_mmap;
+  int err;
+
+  /* try to find a good address starting from something in the middle of the entire/full address space */
+#if SIZEOF_VOID_P == 8
+  addr = 0x8000000000000000UL;
+#else
+  addr = 0x80000000UL;
+#endif
+  printf("testing mmaps to find room for length %ld\n", length);
+
+again:
+  tmp_mmap = mmap((void*)(uintptr_t)addr, length, PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_SHARED, -1, 0);
+  if (tmp_mmap != MAP_FAILED) {
+    err = munmap((void*)(uintptr_t)tmp_mmap, length);
+    assert(!err);
+    if (tmp_mmap == (void*)(uintptr_t) addr) {
+      /* worked! */
+      printf(" test mmap at 0x%lx succeeded, let's use that!\n", addr);
+      return addr;
+    }
+    printf(" test mmap at 0x%lx returned another address\n", addr);
+  } else
+    printf(" test mmap at 0x%lx failed (errno %d)\n", addr, errno);
+  /* couldn't map there, try again with a smaller address */
+  addr >>= 3;
+  if (addr)
+    goto again;
+
+  return 0;
+}
+
 static int test(hwloc_topology_t orig, const char *callname) {
   unsigned long forced_addr;
   unsigned long fileoffset;
@@ -121,11 +157,10 @@ static int test(hwloc_topology_t orig, const char *callname) {
   assert(!err);
   printf("need mmap length %lu\n", (unsigned long) shmem_length);
 
-#if SIZEOF_VOID_P == 8
-  forced_addr = 0x300000000000UL;
-#else
-  forced_addr = 0xb0000000UL;
-#endif
+  forced_addr = find_mmap_addr((unsigned long) shmem_length);
+  if (!forced_addr)
+    goto out_with_fd;
+
   printf("write to shmem at address 0x%lx in file %s offset %lu\n", forced_addr, tmpname, fileoffset);
   err = hwloc_shmem_topology_write(orig, fd, fileoffset, (void*)(uintptr_t)forced_addr, shmem_length, 0);
   if (err == -1 && errno == EBUSY) {
