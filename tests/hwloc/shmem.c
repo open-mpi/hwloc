@@ -49,7 +49,7 @@ static int adopt(int fd, unsigned long fileoffset, unsigned long mmap_address, u
   err = read(fd, origxmlbuf, fileoffset);
   assert(err > 0);
 
-  printf(" adopting from file at offset %lu with addr %lx len %lu\n", fileoffset, mmap_address, mmap_length);
+  printf(" adopting from file at offset %lu with address 0x%lx len %lu\n", fileoffset, mmap_address, mmap_length);
 
   err = hwloc_shmem_topology_adopt(&adopted, fd, fileoffset, (void*)(uintptr_t)mmap_address, mmap_length, 0);
   if (err == -1 && errno == EBUSY) {
@@ -126,7 +126,7 @@ static int test(hwloc_topology_t orig, const char *callname) {
 #else
   forced_addr = 0xb0000000UL;
 #endif
-  printf("write to shmem at address %lx in file %s offset %lu\n", forced_addr, tmpname, fileoffset);
+  printf("write to shmem at address 0x%lx in file %s offset %lu\n", forced_addr, tmpname, fileoffset);
   err = hwloc_shmem_topology_write(orig, fd, fileoffset, (void*)(uintptr_t)forced_addr, shmem_length, 0);
   if (err == -1 && errno == EBUSY) {
     fprintf(stderr, "Failed to shmem write, requested mapping is busy\n");
@@ -140,7 +140,7 @@ static int test(hwloc_topology_t orig, const char *callname) {
   assert(ret == EXIT_SUCCESS || ret == EXIT_SKIP);
 
   printf("adopting in other child process\n");
-  snprintf(cmd, sizeof(cmd), "%s %s %lu %lu %lu %d", callname, tmpname, fileoffset, forced_addr, (unsigned long) shmem_length, synthetic_with_distances);
+  snprintf(cmd, sizeof(cmd), "%s %s %lu 0x%lx %lu %d", callname, tmpname, fileoffset, forced_addr, (unsigned long) shmem_length, synthetic_with_distances);
   printf("running command %s\n", cmd);
   err = system(cmd);
   assert(WIFEXITED(err));
