@@ -11,12 +11,15 @@ platforms.
 hwloc is actually made of two subprojects distributed together:
 
   * The original hwloc project for describing the internals of computing nodes.
- It is described in details between sections Hardware Locality (hwloc)
- Introduction and Network Locality (netloc).
+ It is described in details starting at section Hardware Locality (hwloc)
+ Introduction.
   * The network-oriented companion called netloc (Network Locality), described
- in details starting at section Network Locality (netloc). Netloc may be
- disabled, but the original hwloc cannot. Both hwloc and netloc APIs are
- documented after these sections.
+ in details starting with section Network Locality (netloc).
+
+See also the Related pages tab above for links to other sections.
+
+Netloc may be disabled, but the original hwloc cannot. Both hwloc and netloc
+APIs are documented after these sections.
 
 Installation
 

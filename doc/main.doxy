@@ -21,13 +21,21 @@ code and/or data locality on modern computing platforms.
 
 hwloc is actually made of two subprojects distributed together:
 <ul>
-<li>The original hwloc project for describing the internals of computing nodes.
-It is described in details between sections \ref hwloc_intro and \ref netloc_intro.
+<li>
+<b>The original hwloc project for describing the internals of computing nodes</b>.
+It is described in details starting at section \ref hwloc_intro.
 </li>
-<li>The network-oriented companion called netloc (Network Locality),
-described in details starting at section \ref netloc_intro.
+<li>
+<b>The network-oriented companion called netloc (Network Locality)</b>,
+described in details starting with section \ref netloc_intro.
+</li>
+</ul>
+
+\htmlonly
+<b>See also the Related pages tab above for links to other sections.</b>
+\endhtmlonly
+
 Netloc may be disabled, but the original hwloc cannot.
-</li>
 Both hwloc and netloc APIs are documented after these sections.
 
 
