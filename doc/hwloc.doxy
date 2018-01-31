@@ -71,7 +71,7 @@ backend (which can be used for other OSes too, see the \ref plugins section).
 
 To check whether hwloc works on a particular machine, just try to build it
 and run <tt>lstopo</tt> or <tt>lstopo-no-graphics</tt>. If some things do not look right
-(e.g. bogus or missing cache information), see \ref bugs..
+(e.g. bogus or missing cache information), see \ref bugs.
 
 hwloc only reports the number of processors on unsupported operating
 systems; no topology information is available.
