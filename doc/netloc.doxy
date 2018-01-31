@@ -58,24 +58,13 @@ planned to be extended it very soon.
 The generic installation procedure for both hwloc and netloc
 is described in \ref common_installation.
 
-Note that netloc is currently not supported on as many platform as
+Note that netloc is currently not supported on as many platforms as
 the original hwloc project.
 netloc is enabled by default when supported, or can be disabled
 by passing <tt>\--disable-netloc</tt> to the configure command-line.
 
 
 <!-- ********************************************* -->
-\htmlonly
-</div><div class="section" id="netloc_bugs">
-\endhtmlonly
-\section netloc_bugs Netloc Questions and Bugs
-
-Questions should be sent to the hwloc users and/or developers mailing list
-(http://www.open-mpi.org/community/lists/hwloc.php).
-
-Bug reports should be reported in the tracker
-(https://github.com/open-mpi/hwloc/issues).
-
 \section netloc_setup Setup
 
 To use Netloc tools, we need two steps. The first step consists in getting

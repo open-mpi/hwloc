@@ -63,6 +63,17 @@ Running the "lstopo" tool is a good way to check as a graphical output whether
 hwloc properly detected the architecture of your node. Netloc command-line
 tools can be used to display the network topology interconnecting your nodes.
 
+Questions and Bugs
+
+Bugs should be reported in the tracker (https://github.com/open-mpi/hwloc/
+issues). Opening a new issue automatically displays lots of hints about how to
+debug and report issues.
+
+Questions may be sent to the users or developers mailing lists (http://
+www.open-mpi.org/community/lists/hwloc.php).
+
+There is also a #hwloc IRC channel on Freenode (irc.freenode.net).
+
 
 
 See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation.
