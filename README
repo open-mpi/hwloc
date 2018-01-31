@@ -29,17 +29,9 @@ www.open-mpi.org/). Note that hwloc does not require any functionality from
 Open MPI -- it is a wholly separate (and much smaller!) project and code base.
 It just happens to be hosted as part of the overall Open MPI project.
 
-Nightly development snapshots are available on the web site. Additionally, the
-code can be directly cloned from Git:
+Basic Installation
 
-shell$ git clone https://github.com/open-mpi/hwloc.git
-shell$ cd hwloc
-shell$ ./autogen.sh
-
-Note that GNU Autoconf >=2.63, Automake >=1.11 and Libtool >=2.2.6 are required
-when building from a Git clone.
-
-Installation by itself is the fairly common GNU-based process:
+Installation is the fairly common GNU-based process:
 
 shell$ ./configure --prefix=...
 shell$ make
@@ -62,6 +54,20 @@ configure script may not find it be default. Try adding PKG_CONFIG_PATH to the
 Running the "lstopo" tool is a good way to check as a graphical output whether
 hwloc properly detected the architecture of your node. Netloc command-line
 tools can be used to display the network topology interconnecting your nodes.
+
+Installing from a Git clone
+
+Additionally, the code can be directly cloned from Git:
+
+shell$ git clone https://github.com/open-mpi/hwloc.git
+shell$ cd hwloc
+shell$ ./autogen.sh
+
+Note that GNU Autoconf >=2.63, Automake >=1.11 and Libtool >=2.2.6 are required
+when building from a Git clone.
+
+Nightly development snapshots are available on the web site, they can be
+configured and built without any need for Git or GNU Autotools.
 
 Questions and Bugs
 
