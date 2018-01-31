@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2018 Inria.  All rights reserved.
+# Copyright (c) 2017      IBM Corporation. All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -68,6 +69,7 @@ my $HELP = 0;
 # Defaults
 my $my_search_name = "Inria";
 my $my_formal_name = "Inria.  All rights reserved.";
+my $my_manual_list = "";
 
 my @tokens;
 push(@tokens, "See COPYING in top-level directory");
@@ -77,6 +79,8 @@ $my_search_name = $ENV{HWLOC_COPYRIGHT_SEARCH_NAME}
     if (defined($ENV{HWLOC_COPYRIGHT_SEARCH_NAME}));
 $my_formal_name = $ENV{HWLOC_COPYRIGHT_FORMAL_NAME}
     if (defined($ENV{HWLOC_COPYRIGHT_FORMAL_NAME}));
+$my_manual_list = $ENV{HWLOC_COPYRIGHT_MANUAL_LIST}
+    if (defined($ENV{HWLOC_COPYRIGHT_MANUAL_LIST}));
 
 print "==> Copyright search name: $my_search_name\n";
 print "==> Copyright formal name: $my_formal_name\n";
@@ -87,6 +91,7 @@ GetOptions(
     "check-only" => \$CHECK_ONLY,
     "search-name=s" => \$my_search_name,
     "formal-name=s" => \$my_formal_name,
+    "manual-list=s" => \$my_manual_list,
 ) or die "unable to parse options, stopped";
 
 if ($HELP) {
@@ -100,6 +105,7 @@ $0 [options] [directory]
 --check-only         exit(111) if there are files with copyrights to edit
 --search-name=NAME   Set search name to NAME
 --formal-same=NAME   Set formal name to NAME
+--manual-list=FNAME  Use specified file as list of files to mod copyright
 EOT
     exit(0);
 }
@@ -135,6 +141,10 @@ chdir($start);
 
 quiet_print "==> Top-level hwloc dir: $top\n";
 quiet_print "==> Current directory: $start\n";
+
+my $vcs = "git";
+$vcs = "manual"
+    if ("$my_manual_list" ne "");
 
 my @files = find_modified_files();
 
@@ -265,6 +275,11 @@ if ($CHECK_ONLY and $would_replace) {
 # to be modified.
 sub find_modified_files {
     my @files = ();
+
+    if ($vcs eq "manual") {
+        @files = split(/\n/, `cat $my_manual_list`);
+        return @files;
+    }
 
     # Number of path entries to remove from ${top}-relative paths.
     # (--show-cdup either returns the empty string or sequence of "../"
