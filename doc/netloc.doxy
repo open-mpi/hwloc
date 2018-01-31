@@ -3,7 +3,7 @@
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  *
- * Copyright © 2014-2017 Inria.  All rights reserved.
+ * Copyright © 2014-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * $HEADER$
@@ -12,6 +12,17 @@
 /*! \page netloc_intro Network Locality (netloc)
 
 Portable abstraction of network topologies for high-performance computing.
+
+The netloc documentation spans of these sections:
+<ul>
+<li>
+  \ref netloc_intro, this section below
+</li>
+<li>
+  \ref netloc_scotch
+</li>
+</ul>
+
 
 \section netloc_summary Netloc Summary
 
