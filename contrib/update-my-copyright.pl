@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
-# Copyright © 2011-2018 Inria.  All rights reserved.
+# Copyright © 2011-2025 Inria.  All rights reserved.
 # Copyright (c) 2017      IBM Corporation. All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -71,8 +71,7 @@ my $my_search_name = "Inria";
 my $my_formal_name = "Inria.  All rights reserved.";
 my $my_manual_list = "";
 
-my @tokens;
-push(@tokens, "See COPYING in top-level directory");
+my $token = "See COPYING in top-level directory";
 
 # Override the defaults if some values are set in the environment
 $my_search_name = $ENV{HWLOC_COPYRIGHT_SEARCH_NAME}
@@ -158,7 +157,7 @@ foreach my $f (@files) {
     quiet_print "Processing added/changed file: $f\n";
     open(FILE, $f) || die "Can't open file: $f";
 
-    # Read in the file, and look for the special tokens; that's the
+    # Read in the file, and look for the token; that's the
     # end of the copyright block that we're allowed to edit.  Do not
     # edit any copyright notices that may appear below that.
 
@@ -168,24 +167,24 @@ foreach my $f (@files) {
     my @lines;
     my $my_line_index;
     my $token_line_index;
-    my $token;
     while (<FILE>) {
         push(@lines, $_);
-        foreach my $t (@tokens) {
-            if ($_ =~ /$t/) {
-                $token_line_index = $i;
-                $token = $t;
-            }
+        if (!$found_copyright && $_ =~ /$token/) {
+            $token_line_index = $i;
+            $found_copyright = 1;
         }
-        $my_line_index = $i
-            if (!defined($token_line_index) && $_ =~ /$my_search_name/i);
+        if (!$found_me &&
+            !defined($token_line_index) && $_ =~ /$my_search_name/i) {
+            $my_line_index = $i;
+            $found_me = 1;
+        }
         ++$i;
     }
     close(FILE);
 
     # If there was not copyright token, don't do anything
     if (!defined($token_line_index)) {
-        quiet_print "==> WARNING: Did not find any end-of-copyright tokens!\n";
+        quiet_print "==> WARNING: Did not find the `$token' token!\n";
         quiet_print "    File left unchanged\n";
         next;
     }
