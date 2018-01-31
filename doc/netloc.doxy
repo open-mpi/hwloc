@@ -11,6 +11,10 @@
 
 /*! \page netloc_intro Network Locality (netloc)
 
+\htmlonly
+<div class="section">
+\endhtmlonly
+
 Portable abstraction of network topologies for high-performance computing.
 
 The netloc documentation spans of these sections:
@@ -24,6 +28,11 @@ The netloc documentation spans of these sections:
 </ul>
 
 
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="netloc_summary">
+\endhtmlonly
 \section netloc_summary Netloc Summary
 
 The Portable Network Locality (netloc) software package provides network
@@ -44,10 +53,18 @@ topology-aware mapping of the processes of an application.
 \image html netloc_design.png
 \image latex netloc_design.png "" width=9cm
 
+
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="supportednetworks">
+\endhtmlonly
 \subsection supportednetworks Supported Networks
 
 For now, only InfiniBand (See \ref netloc_setup) is supported, but it is
 planned to be extended it very soon.
+
+
 
 <!-- ********************************************* -->
 \htmlonly
@@ -64,7 +81,11 @@ netloc is enabled by default when supported, or can be disabled
 by passing <tt>\--disable-netloc</tt> to the configure command-line.
 
 
+
 <!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="netloc_setup">
+\endhtmlonly
 \section netloc_setup Setup
 
 To use Netloc tools, we need two steps. The first step consists in getting
@@ -162,6 +183,12 @@ Read subnet: fe80:0000:0000:0000
         'admin'
 \endverbatim
 
+
+
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="netloc_draw">
+\endhtmlonly
 \section netloc_draw Topology display
 
 Netloc provides a tool, \c netloc_draw.html, that displays a topology in a web
@@ -210,11 +237,19 @@ time consuming.
 
 <!-- ********************************************* -->
 
+\htmlonly
+<div class="section">
+\endhtmlonly
+
 Scotch is a toolbox for graph partitioning [XXX], that can do mapping between a
 communication graph and an architecture. Netloc interfaces with Scotch, by
 getting the topology of the machine and building the Scotch architecture. It is
 also possible to directly build a mapping file that can be given to \c mpirun.
 
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="scotch_intro">
+\endhtmlonly
 \section scotch_intro Introduction
 
 Scotch is able to deal architectures to represent the topology of a complete
@@ -224,6 +259,10 @@ able to manage parts of architectures that are called sub-architectures. Thus,
 from a complete architecture, we can create a sub-architecture that will
 represent the available resources of the complete machine.
 
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="scotch_setup">
+\endhtmlonly
 \section scotch_setup Setup
 
 The first step in order to use Netloc tools is to discover the network. For
@@ -235,6 +274,10 @@ generic format independent to the fabric by extract_dats. Figure 1 shows how
 the different modules of Netloc are linked, and what are the tools provided by
 Netloc.
 
+<!-- ********************************************* -->
+\htmlonly
+</div><div class="section" id="scotch_tools_api">
+\endhtmlonly
 \section scotch_tools_api Tools and API
 
 When the machine is discovered and all the needed files are generated as seen
