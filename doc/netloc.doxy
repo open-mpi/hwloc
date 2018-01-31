@@ -3,7 +3,7 @@
  *                         All rights reserved.
  * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  *
- * Copyright © 2014-2017 Inria.  All rights reserved.
+ * Copyright © 2014-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * $HEADER$
@@ -47,10 +47,10 @@ planned to be extended it very soon.
 The generic installation procedure for both hwloc and netloc
 is described in \ref common_installation.
 
-Note that netloc is currently not supported on as many platform as
+netloc is disabled by default in this release.
+It can be enabled by passing <tt>\--enable-netloc</tt> to the configure command-line.
+Note that netloc is currently not supported on as many platforms as
 the original hwloc project.
-netloc is enabled by default when supported, or can be disabled
-by passing <tt>\--disable-netloc</tt> to the configure command-line.
 
 
 <!-- ********************************************* -->
