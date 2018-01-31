@@ -111,19 +111,9 @@ any functionality from Open MPI -- it is a wholly separate (and much
 smaller!) project and code base.  It just happens to be hosted as part
 of the overall Open MPI project.
 
-Nightly development snapshots are available on the web site.
-Additionally, the code can be directly cloned from Git:
+\subsection basic_installation Basic Installation
 
-\verbatim
-shell$ git clone https://github.com/open-mpi/hwloc.git
-shell$ cd hwloc
-shell$ ./autogen.sh
-\endverbatim
-
-Note that GNU Autoconf >=2.63, Automake >=1.10 and Libtool >=2.2.6 are
-required when building from a Git clone.
-
-Installation by itself is the fairly common GNU-based process:
+Installation is the fairly common GNU-based process:
 
 \verbatim
 shell$ ./configure --prefix=...
@@ -137,6 +127,25 @@ format.  Support for PDF, Postscript, and PNG exporting is provided if
 the "Cairo" development package (usually <tt>cairo-devel</tt> or
 <tt>libcairo2-dev</tt>) can be found in "lstopo" when hwloc
 is configured and build.
+
+\subsection gitclone_installation Installing from a Git clone
+
+Additionally, the code can be directly cloned from Git:
+
+\verbatim
+shell$ git clone https://github.com/open-mpi/hwloc.git
+shell$ cd hwloc
+shell$ ./autogen.sh
+\endverbatim
+
+Note that GNU Autoconf >=2.63, Automake >=1.10 and Libtool >=2.2.6 are
+required when building from a Git clone.
+
+Nightly development snapshots are available on the web site,
+they can be configured and built without any need for Git
+or GNU Autotools.
+
+\subsection depends_installation Optional Dependencies
 
 The hwloc core may also benefit from the following development packages:
 <ul>
