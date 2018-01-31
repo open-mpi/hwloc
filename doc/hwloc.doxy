@@ -217,7 +217,7 @@ may show the following graphical output:
 Here's the equivalent output in textual form:
 
 \verbatim
-Machine (16GB)
+Machine
   Package L#0 + L3 L#0 (4096KB)
     L2 L#0 (1024KB) + L1 L#0 (16KB) + Core L#0
       PU L#0 (P#0)
@@ -253,9 +253,9 @@ exporting/importing topologies but it is hardly readable to human-beings
 (see \ref xml for details).
 
 On a 4-package 2-core Opteron NUMA machine
-(with two core cores disallowed by the administrator),
+(with two core cores disallowed by the administrator, and two offline cores),
 the \c lstopo tool may show the following graphical output
-(with <tt>\--whole-system</tt> for displaying disallowed objects):
+(with <tt>\--whole-system</tt> for displaying disallowed/offline objects):
 
 \image html hagrid.png
 \image latex hagrid.png "" width=\textwidth
@@ -263,7 +263,7 @@ the \c lstopo tool may show the following graphical output
 Here's the equivalent output in textual form:
 
 \verbatim
-Machine (32GB)
+Machine (32GB total)
   NUMANode L#0 (P#0 8190MB) + Package L#0
     L2 L#0 (1024KB) + L1 L#0 (64KB) + Core L#0 + PU L#0 (P#0)
     L2 L#1 (1024KB) + L1 L#1 (64KB) + Core L#1 + PU L#1 (P#1)
@@ -1403,27 +1403,27 @@ because lstopo was privileged when it discovered the topology.
 Here is the corresponding textual output:
 
 \verbatim
-Machine (24GB)
+Machine (24GB total)
   NUMANode L#0 (P#0 12GB)
     Package L#0 + L3 L#0 (8192KB)
       L2 L#0 (256KB) + L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
       L2 L#1 (256KB) + L1 L#1 (32KB) + Core L#1 + PU L#1 (P#2)
-    HostBridge
+    HostBridge L#0
       PCIBridge
         PCI 14e4:163b
-          Net "eth0"
+          Net L#0 "eth0"
         PCI 14e4:163b
-          Net "eth1"
+          Net L#1 "eth1"
       PCIBridge
         PCI 1000:0060
-          Block "sda"
+          Block L#2 "sda"
       PCIBridge
         PCI 102b:0532
       PCI 8086:3a20
       PCI 15b3:634a
-        Net "ib0"
-        Net "ib1"
-        Net "mlx4_0"
+        Net L#3 "ib0"
+        Net L#4 "ib1"
+        Net L#5 "mlx4_0"
   NUMANode L#1 (P#1 12GB) + Package L#1 + L3 L#1 (8192KB)
     L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
     L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
