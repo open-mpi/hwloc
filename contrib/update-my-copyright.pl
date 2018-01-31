@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
-# Copyright © 2011-2016 Inria.  All rights reserved.
+# Copyright © 2011-2018 Inria.  All rights reserved.
 # $COPYRIGHT$
 #
 
@@ -47,6 +47,8 @@
 use strict;
 use Cwd;
 use Getopt::Long;
+use File::stat;
+use Fcntl ':mode';
 
 # Set to true if the script should merely check for up-to-date copyrights.
 # Will exit with status 111 if there are out of date copyrights which this
@@ -245,7 +247,9 @@ foreach my $f (@files) {
         ++$would_replace;
     }
     else {
-        # Now replace the old one
+        # Now replace the old one, keeping its mode
+        my $mode = (stat($f))->mode;
+        chmod $mode, $newf;
         unlink($f);
         rename($newf, $f);
     }
