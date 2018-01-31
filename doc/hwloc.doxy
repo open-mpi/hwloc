@@ -1627,6 +1627,12 @@ for instance when applying algorithms to an entire cluster topology.
 hwloc therefore offers the ability to agregate multiple host topologies
 into a single global one.
 
+\note
+<b>
+  The multinode interface has been removed from hwloc starting
+  with release 2.0.0.
+</b>
+
 
 \htmlonly
 </div><div class="section" id="multinode_cpusets">
