@@ -101,7 +101,7 @@ find_mmap_addr(unsigned long length)
 #else
   addr = 0x80000000UL;
 #endif
-  printf("testing mmaps to find room for length %ld\n", length);
+  printf("testing mmaps to find room for length %lu\n", length);
 
 again:
   tmp_mmap = mmap((void*)(uintptr_t)addr, length, PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_SHARED, -1, 0);
