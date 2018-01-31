@@ -59,7 +59,7 @@ backend (which can be used for other OSes too, see the \ref plugins section).
 
 To check whether hwloc works on a particular machine, just try to build it
 and run <tt>lstopo</tt> or <tt>lstopo-no-graphics</tt>. If some things do not look right
-(e.g. bogus or missing cache information), see \ref bugs below.
+(e.g. bogus or missing cache information), see \ref bugs..
 
 hwloc only reports the number of processors on unsupported operating
 systems; no topology information is available.
@@ -437,20 +437,6 @@ Machine
 shell$ 
 \endverbatim
 
-\htmlonly
-</div><div class="section" id="bugs">
-\endhtmlonly
-\section bugs Questions and Bugs
-
-Bugs should be reported in the tracker
-(https://github.com/open-mpi/hwloc/issues).
-Opening a new issue automatically displays lots of hints about
-how to debug and report issues.
-
-Questions may be sent to the users or developers mailing lists
-(http://www.open-mpi.org/community/lists/hwloc.php).
-
-There is also a <tt>\#hwloc</tt> IRC channel on Freenode (<tt>irc.freenode.net</tt>).
 
 
 \htmlonly

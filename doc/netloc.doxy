@@ -65,17 +65,6 @@ the original hwloc project.
 
 
 <!-- ********************************************* -->
-\htmlonly
-</div><div class="section" id="netloc_bugs">
-\endhtmlonly
-\section netloc_bugs Netloc Questions and Bugs
-
-Questions should be sent to the hwloc users and/or developers mailing list
-(http://www.open-mpi.org/community/lists/hwloc.php).
-
-Bug reports should be reported in the tracker
-(https://github.com/open-mpi/hwloc/issues).
-
 \section netloc_setup Setup
 
 To use Netloc tools, we need two steps. The first step consists in getting
