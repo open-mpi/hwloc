@@ -3698,7 +3698,7 @@ hwloc_obj_t obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 4);
 hwloc_obj_t node = hwloc_get_next_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, prev);
 \endverbatim
 
-Also tt is still possible to look at a nodeset and then iterate
+Also it is still possible to look at a nodeset and then iterate
 over NUMA nodes whose nodeset is included.
 
 However, applications that ever walked up/down to find NUMANode parent/children must now be updated.
