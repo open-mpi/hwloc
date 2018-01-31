@@ -3250,6 +3250,9 @@ Otherwise, as explained in the message, reporting this issue to the hwloc develo
  on this platform) is a good way to make sure that this is a software
 (operating system) or hardware bug (BIOS, etc).
 
+See also \ref bugs. Opening an issue on GitHub automatically displays hints
+on what information you should provide when reporting such bugs.
+
 
 \subsection faq_valgrind Why does Valgrind complain about hwloc memory leaks?
 
