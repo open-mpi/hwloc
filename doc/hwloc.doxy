@@ -13,6 +13,18 @@
 <hr>
 
 \htmlonly
+<div class="section">
+\endhtmlonly
+See also \ref further_reading
+\htmlonly
+or the Related pages tab above
+\endhtmlonly
+for links to more sections about hwloc concepts.
+\htmlonly
+</div>
+\endhtmlonly
+
+\htmlonly
 <div class="section" id="hwloc_summary">
 \endhtmlonly
 \section hwloc_summary hwloc Summary
