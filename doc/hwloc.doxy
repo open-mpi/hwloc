@@ -3731,6 +3731,8 @@ Misc children are not in the main object children list anymore.
 They are in the list starting at <code>obj->misc_first_child</code>
 nd whose size if <code>obj->misc_arity</code>.
 
+See hwloc_obj for details about children lists.
+
 hwloc_get_next_child() may still be used to iterate over all children of all lists.
 
 
@@ -3746,6 +3748,7 @@ Given the above, objects may now be of 4 kinds:
 <li>I/O (Bridges, PCI and OS devices), attached to parents as I/O children;</li>
 <li>Misc objects, attached to parents as Misc children.</li>
 </ul>
+See hwloc_obj for details about children lists.
 
 For a given object type, the kind may be found with hwloc_obj_type_is_normal(),
 hwloc_obj_type_is_memory(), hwloc_obj_type_is_normal(),
@@ -3817,11 +3820,18 @@ in <code>obj->attr->numanode.local_memory</code>.
 <code>obj->memory.total_memory</code> is available
 in all objects as <code>obj->total_memory</code>.
 
+See hwloc_obj_attr_u::hwloc_numanode_attr_s and hwloc_obj for details.
+
 
 \htmlonly
 </div><div class="section" id="upgrade_to_api_2x_config">
 \endhtmlonly
 \section upgrade_to_api_2x_config Topology configuration changes
+
+The old ignoring API as well as several configuration flags
+are replaced with the new filtering API,
+see hwloc_topology_set_type_filter() and its variants,
+and ::hwloc_type_filter_e for details.
 
 <ul>
 
@@ -3988,12 +3998,12 @@ with hwloc_topology_insert_misc_object().
 
 <li>
 HWLOC_OBJ_SYSTEM removed:
-The root object is always HWLOC_OBJ_MACHINE
+The root object is always ::HWLOC_OBJ_MACHINE
 </li>
 
 <li>
 *_membind_nodeset() memory binding interfaces deprecated:
-One should use the variant without _nodeset suffix and pass the new HWLOC_MEMBIND_BYNODESET flag
+One should use the variant without _nodeset suffix and pass the ::HWLOC_MEMBIND_BYNODESET flag.
 </li>
 
 <li>
