@@ -3954,7 +3954,7 @@ However the preallocated storage is 512 bits,
 hence realloc will not even be used unless you run
 hwloc on machines with larger PU or NUMAnode indexes.
 
-hwloc_obj_add_info(), hwloc_cpuset_from_nodeset() and hwloc_nodeset_to_cpuset()
+hwloc_obj_add_info(), hwloc_cpuset_from_nodeset() and hwloc_cpuset_from_nodeset()
 also return an int, which would be -1 in case of allocation errors.
 
 
@@ -4027,7 +4027,7 @@ Now useless since all topologies are NUMA. Use the variant without the _strict s
 
 <li>
 hwloc_distribute() and hwloc_distributev() removed,
-deprecated by hwloc_distrib()
+deprecated by hwloc_distrib().
 </li>
 
 <li>
