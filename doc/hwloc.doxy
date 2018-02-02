@@ -520,6 +520,7 @@ Make sure to have had a look at those too!
 
   There are four kinds of Objects: Memory (NUMA nodes), I/O (Bridges, PCI and OS devices),
   Misc, and Normal (everything else, including Machine, Package, Core, PU, CPU Caches, etc.).
+  Normal and Memory objects have (non-NULL) CPU sets and nodesets, while I/O and Misc don't.
 
   Objects are topologically sorted by locality (CPU and node sets)
   into a tree (see \ref termsanddefs_tree).
@@ -597,7 +598,7 @@ Make sure to have had a look at those too!
   ::hwloc_bitmap_t opaque structure.  hwloc CPU sets are just masks, they
   do \em not have any relation with an operating system actual binding notion like
   Linux' cpusets.
-  I/O and Misc objects do not have CPU sets while all normal and memory objects have a non-NULL one.</dd>
+  I/O and Misc objects do not have CPU sets while all Normal and Memory objects have non-NULL CPU sets.</dd>
 
 <dt>Node set</dt>
   <dd>The set of NUMA memory nodes logically included in an object
@@ -605,7 +606,7 @@ Make sure to have had a look at those too!
   numbers (as announced by the OS).  They are implemented with the
   ::hwloc_bitmap_t opaque structure.
   as bitmaps.
-  I/O and Misc objects do not have Node sets while all normal and memory objects have a non-NULL one.</dd>
+  I/O and Misc objects do not have Node sets while all Normal and Memory objects have non-NULL nodesets.</dd>
 
 <dt>Bitmap</dt>
   <dd>A possibly-infinite set of bits used for describing sets of objects
@@ -3747,6 +3748,9 @@ Given the above, objects may now be of 4 kinds:
 For a given object type, the kind may be found with hwloc_obj_type_is_normal(),
 hwloc_obj_type_is_memory(), hwloc_obj_type_is_normal(),
 or comparing with ::HWLOC_OBJ_MISC.
+
+Normal and Memory objects have (non-NULL) CPU sets and nodesets,
+while I/O and Misc objects don't have any sets (they are NULL).
 
 
 \htmlonly
