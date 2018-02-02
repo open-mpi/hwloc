@@ -3618,7 +3618,9 @@ while memory is attached to that hierarchy depending on its affinity.
 
 For instance:
 <ul>
-<li>a machine with 2 packages but a single NUMA node is now modeled as a "Machine" object with two "Package" children and one "NUMANode" memory children (displayed first in lstopo below).
+<li>a UMA machine with 2 packages and a single NUMA node is now modeled
+ as a "Machine" object with two "Package" children
+ and one "NUMANode" memory children (displayed first in lstopo below):
 \verbatim
 Machine (1024MB total)
   NUMANode L#0 (P#0 1024MB)
@@ -3631,7 +3633,7 @@ Machine (1024MB total)
 \endverbatim
 </li>
 
-<li>a machine with 2 packages with one NUMA node and 2 cores in each is now
+<li>a machine with 2 packages with one NUMA node and 2 cores in each is now:
 \verbatim
 Machine (2048MB total)
   Package L#0
@@ -3645,7 +3647,7 @@ Machine (2048MB total)
 \endverbatim
 </li>
 
-<li>if there are two NUMA nodes per package, a Group object is used to keep
+<li>if there are two NUMA nodes per package, a Group object may be added to keep
 cores together with their local NUMA node:
 \verbatim
 Machine (4096MB total)
@@ -3663,7 +3665,7 @@ Machine (4096MB total)
 \endverbatim
 </li>
 
-<li>In practice, if the NUMA node locality is identical to a L3, the Group isn't needed:
+<li>if the platform has L3 caches whose localities are identical to NUMA nodes, Groups aren't needed:
 \verbatim
 Machine (4096MB total)
   Package L#0
