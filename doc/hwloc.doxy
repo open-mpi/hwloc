@@ -3687,13 +3687,14 @@ Machine (4096MB total)
 </ul>
 
 
-\subsection upgrade_to_api_2x_numa_level NUMA level and depth, and finding NUMA parent/children
+\subsection upgrade_to_api_2x_numa_level NUMA level and depth
 
 NUMA nodes are not in "main" tree of normal objects anymore.
-Hence, they don't have a meaningful depth anymore.
+Hence, they don't have a meaningful depth anymore (like I/O and Misc objects).
 They have a virtual (negative) depth (::HWLOC_TYPE_DEPTH_NUMANODE)
-so that functions manipulating depths still work,
+so that functions manipulating depths and level still work,
 and so that we can still iterate over the level of NUMA nodes just like for any other level.
+
 For instance we can still use lines such as
 \verbatim
 int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
