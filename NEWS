@@ -95,11 +95,12 @@ Version 2.0.0
     hwloc/diff.h do not need a topology as first parameter anymore.
   + hwloc_parse_cpumap_file () superseded by hwloc_linux_read_path_as_cpumask()
     in hwloc/linux.h.
+  + HWLOC_MEMBIND_DEFAULT and HWLOC_MEMBIND_FIRSTTOUCH were clarified.
 * New APIs and Features
   + Add hwloc/shmem.h for sharing topologies between processes running on
     the same machine (for reducing the memory footprint).
-  + Add the experimental netloc subproject. It is enabled by default when
-    supported and can be disabled with --disable-netloc.
+  + Add the experimental netloc subproject. It is disabled by default
+    and can be enabled with --enable-netloc.
     It currently brings command-line tools to gather and visualize the
     topology of InfiniBand fabrics, and an API to convert such topologies
     into Scotch architectures for process mapping.
@@ -123,20 +124,23 @@ Version 2.0.0
   + Remove Kerrighed support from the Linux backend.
   + Remove Tru64 (OSF/1) support.
     - Remove HWLOC_MEMBIND_REPLICATE which wasn't available anywhere else.
+* Backend improvements
+  + Linux
+    - OS devices do not have to be attached through PCI anymore,
+      for instance enabling the discovery of NVDIMM block devices.
+    - Remove the dependency on libnuma.
+    - Add a SectorSize attribute to block OS devices.
+  + Mac OS X
+    - Fix detection of cores and hyperthreads.
+    - Add CPUVendor, Model, ... attributes.
+  + Windows
+    - Add get_area_memlocation().
 * Tools
   + lstopo and hwloc-info have a new --filter option matching the new filtering API.
   + lstopo can be given --children-layout=plain to force a basic displaying
     of memory and normal children together below their parent.
   + hwloc-distances was removed and replaced with lstopo --distances.
 * Misc
-  + About Objects
-    - Linux OS devices do not have to be attached through PCI anymore,
-      for instance enabling the discovery of NVDIMM block devices.
-    - Add a SectorSize attribute to block OS devices on Linux.
-    - MemoryModule objects are not added by default because Misc objects are
-      filtered-out by default.
-    - Do not set PCI devices and bridges name automatically. Vendor and device
-      names are already in info attributes.
   + Exports
     - Exporting to synthetic now ignores I/O and Misc objects.
   + PCI discovery
@@ -147,6 +151,8 @@ Version 2.0.0
       only the `pci' name from hwloc 1.7 is now recognized.
     - The HWLOC_PCI_<domain>_<bus>_LOCALCPUS environment variables are superseded
       with a single HWLOC_PCI_LOCALITY where bus ranges may be specified.
+    - Do not set PCI devices and bridges name automatically. Vendor and device
+      names are already in info attributes.
   + Components and discovery
     - Add HWLOC_SYNTHETIC environment variable to enforce a synthetic topology
       as if hwloc_topology_set_synthetic() had been called.
@@ -154,7 +160,6 @@ Version 2.0.0
       anymore, they should be passed in HWLOC_XMLFILE or HWLOC_SYNTHETIC instead.
     - HWLOC_COMPONENTS takes precedence over other environment variables
       for selecting components.
-  + Remove the dependency on libnuma on Linux.
   + hwloc now requires a C99 compliant compiler.
 
 
