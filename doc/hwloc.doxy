@@ -3702,21 +3702,77 @@ hwloc_obj_t obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 4);
 hwloc_obj_t node = hwloc_get_next_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, prev);
 \endverbatim
 
-Also it is still possible to look at a nodeset and then iterate
-over NUMA nodes whose nodeset is included.
-
-However, applications that ever walked up/down to find NUMANode parent/children must now be updated.
-For instance, finding a NUMANode parent should be replaced with
-finding a parent that has a memory child, and using that child.
-
-Also the NUMA depth should not be compared with others.
-An unmodified code that still NUMA and Package depths (to find out whether Packages contain NUMA or the contrary)
+The NUMA depth should not be compared with others.
+An unmodified code that still compares NUMA and Package depths
+(to find out whether Packages contain NUMA or the contrary)
 would now always assume Packages contain NUMA (because the NUMA depth is negative).
-If all NUMA nodes are attached to Normal parents at the same depth,
-the depth of these parents may be used instead.
-It may be retrieved with hwloc_get_memory_parents_depth().
+
+However the depth of the Normal parents of NUMA nodes may be used instead.
+In the last example above, NUMA nodes are attached to L3 caches,
+hence one may compare the depth of Packages and L3 to find out
+that NUMA nodes are contained in Packages.
+This depth of parents may be retrieved with hwloc_get_memory_parents_depth().
 However this function may return ::HWLOC_TYPE_DEPTH_MULTIPLE
-on future platforms with NUMA nodes attached to different levels.
+on future platforms if NUMA nodes are attached to different levels.
+
+
+\subsection upgrade_to_api_2x_memory_find Finding Local NUMA nodes and looking at Children and Parents
+
+Applications that walked up/down to find NUMANode parent/children must
+now be updated.
+Instead of looking directly for a NUMA node, one should now look for
+an object that has some memory children.
+NUMA node(s) will be be attached there.
+For instance, when looking for a NUMA node above a given core <tt>core</tt>:
+\verbatim
+hwloc_obj_t parent = core->parent;
+while (parent && !parent->memory_arity)
+  parent = parent->parent; /* no memory child, walk up */
+if (parent)
+  /* use parent->memory_first_child (and its siblings if there are multiple local NUMA nodes) */
+\endverbatim
+
+The list of local NUMA nodes (usually a single one) is also described
+by the <tt>nodeset</tt> attribute of each object (which contains the
+physical indexes of these nodes).
+Iterating over the NUMA level is also an easy way to find local NUMA nodes:
+\verbatim
+hwloc_obj_t tmp = NULL;
+while ((tmp = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, tmp)) != NULL) {
+  if (hwloc_bitmap_isset(obj->nodeset, tmp->os_index))
+    /* tmp is a NUMA node local to obj, use it */
+}
+\endverbatim
+
+Similarly finding objects that are close to a given NUMA nodes
+should be updated too.
+Instead of looking at the NUMA node parents/children, one should
+now find a Normal parent above that NUMA node, and then look
+at its parents/children as usual:
+\verbatim
+hwloc_obj_t tmp = obj->parent;
+while (hwloc_obj_type_is_memory(tmp))
+  tmp = tmp->parent;
+/* now use tmp instead of obj */
+\endverbatim
+
+To avoid such NUMA-specific cases in the code,
+a <b>generic lookup for any kind of object, including NUMA nodes</b>,
+might also be implemented by iterating over a level.
+For instance finding an object of type <tt>type</tt> which either
+contains or is included in object <tt>obj</tt> can be
+performed by traversing the level of that type and comparing CPU sets:
+\verbatim
+hwloc_obj_t tmp = NULL;
+while ((tmp = hwloc_get_next_obj_by_type(topology, type, tmp)) != NULL) {
+  if (hwloc_bitmap_intersects(tmp->cpuset, obj->cpuset))
+    /* tmp matches, use it */
+}
+\endverbatim
+This generic lookup works whenever <tt>type</tt> or <tt>obj</tt>
+are Normal or Memory objects since both have CPU sets.
+
+
 
 
 \htmlonly
