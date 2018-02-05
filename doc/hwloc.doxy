@@ -3756,7 +3756,7 @@ while (hwloc_obj_type_is_memory(tmp))
 /* now use tmp instead of obj */
 \endverbatim
 
-To avoid such NUMA-specific cases in the code,
+To avoid such hwloc v2.x-specific and NUMA-specific cases in the code,
 a <b>generic lookup for any kind of object, including NUMA nodes</b>,
 might also be implemented by iterating over a level.
 For instance finding an object of type <tt>type</tt> which either
@@ -3769,8 +3769,11 @@ while ((tmp = hwloc_get_next_obj_by_type(topology, type, tmp)) != NULL) {
     /* tmp matches, use it */
 }
 \endverbatim
+<b>
 This generic lookup works whenever <tt>type</tt> or <tt>obj</tt>
 are Normal or Memory objects since both have CPU sets.
+Moreover, it is compatible with the hwloc v1.x API.
+</b>
 
 
 
