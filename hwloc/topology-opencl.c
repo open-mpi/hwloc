@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012-2018 Inria.  All rights reserved.
- * Copyright © 2013 Université Bordeaux.  All right reserved.
+ * Copyright © 2013, 2018 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
 
@@ -12,7 +12,11 @@
 #include <private/misc.h>
 #include <private/debug.h>
 
+#ifdef __APPLE__
+#include <OpenCL/cl_ext.h>
+#else
 #include <CL/cl_ext.h>
+#endif
 
 static int
 hwloc_opencl_discover(struct hwloc_backend *backend)
