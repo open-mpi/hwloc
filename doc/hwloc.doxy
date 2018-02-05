@@ -737,7 +737,7 @@ Advanced graphical outputs require the "Cairo" development package
 (usually <tt>cairo-devel</tt> or <tt>libcairo2-dev</tt>).
 
 lstopo and lstopo-no-graphics accept the same command-line options.
-However graphical outputs are only available in lstopo.
+However, graphical outputs are only available in lstopo.
 Textual outputs (those that do not depend on heavy external libraries
 such as Cairo) are supported in both lstopo and lstopo-no-graphics.
 
@@ -1478,7 +1478,7 @@ PCI bus is connected to the first package and NUMA node.
 \image latex devel09-pci.png "" width=\textwidth
 
 Six interesting PCI devices were discovered.
-However hwloc found some corresponding software devices
+However, hwloc found some corresponding software devices
 (<em>eth0</em>, <em>eth1</em>, <em>sda</em>, <em>mlx4_0</em>,
 <em>ib0</em>, and <em>ib1</em>) for only four of these physical
 devices.
@@ -1886,7 +1886,7 @@ minimalistic XML backend cannot be guaranteed to work with external
 programs.
 It should only be assumed to be compatible with the same hwloc
 release (even if using the libxml2 backend).
-Its advantage is however to always be available without requiring
+Its advantage is, however, to always be available without requiring
 any external dependency.
 
 If libxml2 is available but the core hwloc library should not directly
@@ -2079,7 +2079,7 @@ It means that the <tt>symmetric_subtree</tt> field of the root object
 is set.
 Also memory children should be attached in a symmetric way
 (e.g. the same number of memory children below each Package object, etc.).
-However I/O devices and Misc objects are ignored when looking at
+However, I/O devices and Misc objects are ignored when looking at
 symmetry and exporting the string.
 
 
@@ -2901,7 +2901,7 @@ clearly shows which four cores are together.
 Latencies between all pairs of cores of the same processor are likely
 identical, and also likely lower than the latency between cores of
 different processors.
-However the structural model cannot guarantee such implementation
+However, the structural model cannot guarantee such implementation
 details.
 On the other side, performance models would reveal such details
 without always clearly identifying which cores are in the same
@@ -3141,7 +3141,7 @@ in a shared-memory buffer so that other processes (running on the same machine)
 may use it directly.
 This has the advantage of reducing the memory footprint since a single
 topology is stored in physical memory for multiple processes.
-However it requires all processes to map this shared-memory buffer
+However, it requires all processes to map this shared-memory buffer
 at the same virtual address, which may be difficult in some cases.
 This API is described in \ref hwlocality_shmem.
 
@@ -3149,7 +3149,7 @@ This API is described in \ref hwlocality_shmem.
 \subsection faq_multitopo How many topologies may I use in my program?
 
 hwloc lets you manipulate multiple topologies at the same time.
-However these topologies consume memory and system resources
+However, these topologies consume memory and system resources
 (for instance file descriptors) until they are destroyed.
 It is therefore discouraged to open the same topology multiple
 times.
@@ -3171,7 +3171,7 @@ lots of information will be duplicated.
 hwloc/diff.h (see also \ref hwlocality_diff) offers the ability to
 compute topology differences, apply or unapply them, or export/import
 to/from XML.
-However this feature is limited to basic differences such as attribute changes.
+However, this feature is limited to basic differences such as attribute changes.
 It does not support complex modifications such as adding or removing some objects.
 
 
@@ -3196,7 +3196,7 @@ and that may be extended by the user with
 Contrary to the <tt>userdata</tt> field which is unique, multiple info
 attributes may exist for each object, even with the same name.
 These attributes are always exported to XML.
-However only character strings may be used as key names and values.
+However, only character strings may be used as key names and values.
 
 It is also possible to insert Misc objects with a custom name
 anywhere as a leaf of the topology (see \ref miscobjs).
@@ -3282,7 +3282,7 @@ than querying the operating system again.
 The utility <tt>hwloc-dump-hwdata</tt> is also involved in gathering
 privileged information at boot time and making it available to
 non-privileged users (note that this may require a specific SELinux
-MLS policy module). However it only applies to Intel Knights Landing
+MLS policy module). However, it only applies to Intel Knights Landing
 Xeon Phi for now (see \ref faq_knl_dump).
 See also <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
 about the location of dumped files.
@@ -3345,7 +3345,7 @@ program.
 
 hwloc itself is often checked with Valgrind to make sure it does
 not leak memory.
-However some global variables in hwloc dependencies are never freed.
+However, some global variables in hwloc dependencies are never freed.
 For instance libz allocates its global state once at startup and
 never frees it so that it may be reused later.
 Some libxml2 global state is also never freed because hwloc does not
@@ -3707,12 +3707,12 @@ An unmodified code that still compares NUMA and Package depths
 (to find out whether Packages contain NUMA or the contrary)
 would now always assume Packages contain NUMA (because the NUMA depth is negative).
 
-However the depth of the Normal parents of NUMA nodes may be used instead.
+However, the depth of the Normal parents of NUMA nodes may be used instead.
 In the last example above, NUMA nodes are attached to L3 caches,
 hence one may compare the depth of Packages and L3 to find out
 that NUMA nodes are contained in Packages.
 This depth of parents may be retrieved with hwloc_get_memory_parents_depth().
-However this function may return ::HWLOC_TYPE_DEPTH_MULTIPLE
+However, this function may return ::HWLOC_TYPE_DEPTH_MULTIPLE
 on future platforms if NUMA nodes are attached to different levels.
 
 
@@ -4006,7 +4006,7 @@ Bitmap functions (and a couple other functions) can return errors (in theory).
 Most bitmap functions may have to reallocate the internal bitmap storage.
 In v1.x, they would silently crash if realloc failed.
 In v2.0, they now return an int that can be negative on error.
-However the preallocated storage is 512 bits,
+However, the preallocated storage is 512 bits,
 hence realloc will not even be used unless you run
 hwloc on machines with larger PU or NUMAnode indexes.
 
