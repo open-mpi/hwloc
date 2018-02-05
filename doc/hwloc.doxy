@@ -3618,7 +3618,8 @@ hwloc_get_next_child() may still be used to iterate over all children of all lis
 Hence the CPU-side hierarchy is built using normal children,
 while memory is attached to that hierarchy depending on its affinity.
 
-For instance:
+\subsection upgrade_to_api_2x_memory_examples Examples
+
 <ul>
 <li>a UMA machine with 2 packages and a single NUMA node is now modeled
  as a "Machine" object with two "Package" children
