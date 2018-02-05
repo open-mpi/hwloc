@@ -3592,9 +3592,11 @@ and/or running against.
 
 
 \htmlonly
-</div><div class="section" id="upgrade_to_api_2x_memory_children">
+</div><div class="section" id="upgrade_to_api_2x_memory">
 \endhtmlonly
-\section upgrade_to_api_2x_memory_children Memory children
+\section upgrade_to_api_2x_memory New Organization of NUMA nodes and Memory
+
+\subsection upgrade_to_api_2x_memory_children Memory children
 
 In hwloc v1.x, NUMA nodes were inside the tree, for instance Packages
 contained 2 NUMA nodes which contained a L3 and several cache.
@@ -3684,10 +3686,7 @@ Machine (4096MB total)
 </ul>
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_numa_level">
-\endhtmlonly
-\section upgrade_to_api_2x_numa_level NUMA level and depth, and finding NUMA parent/children
+\subsection upgrade_to_api_2x_numa_level NUMA level and depth, and finding NUMA parent/children
 
 NUMA nodes are not in "main" tree of normal objects anymore.
 Hence, they don't have a meaningful depth anymore.
@@ -3719,9 +3718,11 @@ on future platforms with NUMA nodes attached to different levels.
 
 
 \htmlonly
-</div><div class="section" id="upgrade_to_api_2x_io_misc_children">
+</div><div class="section" id="upgrade_to_api_2x_children">
 \endhtmlonly
-\section upgrade_to_api_2x_io_misc_children I/O and Misc children
+\section upgrade_to_api_2x_children 4 Kinds of Objects and Children
+
+\subsection upgrade_to_api_2x_io_misc_children I/O and Misc children
 
 I/O children are not in the main object children list anymore either.
 They are in the list starting at <code>obj->io_first_child</code>
@@ -3736,10 +3737,7 @@ See hwloc_obj for details about children lists.
 hwloc_get_next_child() may still be used to iterate over all children of all lists.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_kinds">
-\endhtmlonly
-\section upgrade_to_api_2x_kinds Kinds of objects
+\subsection upgrade_to_api_2x_kinds_subsec Kinds of objects
 
 Given the above, objects may now be of 4 kinds:
 <ul>
