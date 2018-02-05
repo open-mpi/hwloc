@@ -37,9 +37,6 @@ and even I/O devices.
 hwloc also gathers various attributes such as
 cache and memory information, and is portable across a variety of
 different operating systems and platforms.
-Additionally it may assemble the topologies of multiple machines
-into a single one so as to let applications consult the topology
-of an entire fabric or cluster at once.
 
 hwloc primarily aims at helping high-performance computing (HPC)
 applications, but is also applicable to any project seeking to exploit
