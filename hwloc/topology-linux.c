@@ -4101,7 +4101,8 @@ look_cpuinfo(struct hwloc_topology *topology,
     }
   /* create package objects */
   hwloc_debug("%u pkgs%s\n", numpkgs, missingpkg ? ", but some missing package" : "");
-  if (!missingpkg && numpkgs>0) {
+  if (!missingpkg && numpkgs>0
+      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
     for (i = 0; i < numpkgs; i++) {
       struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, Lpkg_to_Ppkg[i]);
       int doneinfos = 0;
@@ -4145,7 +4146,8 @@ look_cpuinfo(struct hwloc_topology *topology,
     }
   /* create Core objects */
   hwloc_debug("%u cores%s\n", numcores, missingcore ? ", but some missing core" : "");
-  if (!missingcore && numcores>0) {
+  if (!missingcore && numcores>0
+      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
     for (i = 0; i < numcores; i++) {
       struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, Lcore_to_Pcore[i]);
       obj->cpuset = hwloc_bitmap_alloc();
