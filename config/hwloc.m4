@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2017 Inria.  All rights reserved.
+dnl Copyright © 2009-2018 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -814,12 +814,38 @@ EOF])
     # OpenCL support
     hwloc_opencl_happy=no
     if test "x$enable_opencl" != "xno"; then
-        hwloc_opencl_happy=yes
+      hwloc_opencl_happy=yes
+      case ${target} in
+      *-*-darwin*)
+        # On Darwin, only use the OpenCL framework
+        AC_CHECK_HEADERS([OpenCL/cl_ext.h], [
+	  AC_MSG_CHECKING([for the OpenCL framework])
+          tmp_save_LDFLAGS="$LDFLAGS"
+          LDFLAGS="$LDFLAGS -framework OpenCL"
+	  AC_LINK_IFELSE([
+            AC_LANG_PROGRAM([[
+#include <OpenCL/opencl.h>
+            ]], [[
+return clGetDeviceIDs(0, 0, 0, NULL, NULL);
+            ]])],
+          [AC_MSG_RESULT(yes)
+	   HWLOC_OPENCL_LDFLAGS="-framework OpenCL"],
+	  [AC_MSG_RESULT(no)
+	   hwloc_opencl_happy=no])
+          LDFLAGS="$tmp_save_LDFLAGS"
+        ], [hwloc_opencl_happy=no])
+      ;;
+      *)
+        # On Others, look for OpenCL at normal locations
         AC_CHECK_HEADERS([CL/cl_ext.h], [
 	  AC_CHECK_LIB([OpenCL], [clGetDeviceIDs], [HWLOC_OPENCL_LIBS="-lOpenCL"], [hwloc_opencl_happy=no])
         ], [hwloc_opencl_happy=no])
+      ;;
+      esac
     fi
+    AC_SUBST(HWLOC_OPENCL_CFLAGS)
     AC_SUBST(HWLOC_OPENCL_LIBS)
+    AC_SUBST(HWLOC_OPENCL_LDFLAGS)
     # Check if required extensions are available
     if test "x$hwloc_opencl_happy" = "xyes"; then
       tmp_save_CFLAGS="$CFLAGS"
@@ -1151,6 +1177,7 @@ EOF])
            HWLOC_REQUIRES="$HWLOC_PCIACCESS_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_opencl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_OPENCL_LIBS"
+           HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_OPENCL_LDFLAGS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_OPENCL_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_cuda_component" = "static"],
