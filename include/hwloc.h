@@ -171,9 +171,12 @@ typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
 #define HWLOC_OBJ_TYPE_MIN HWLOC_OBJ_MACHINE /**< \private Sentinel value */
 typedef enum {
   HWLOC_OBJ_MACHINE,	/**< \brief Machine.
-			  * The root object type.
 			  * A set of processors and memory with cache
 			  * coherency.
+			  *
+			  * This type is always used for the root object of a topology,
+			  * and never used anywhere else.
+			  * Hence its parent is always \c NULL.
 			  */
 
   HWLOC_OBJ_PACKAGE,	/**< \brief Physical package.
@@ -189,6 +192,9 @@ typedef enum {
 			  * An execution unit (may share a core with some
 			  * other logical processors, e.g. in the case of
 			  * an SMT core).
+			  *
+			  * This is the smallest object representing CPU resources,
+			  * it cannot have any child except Misc objects.
 			  *
 			  * Objects of this kind are always reported and can
 			  * thus be used as fallback when others are not.
