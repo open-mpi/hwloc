@@ -623,10 +623,12 @@ Make sure to have had a look at those too!
 
 <dt>Parent object</dt>
   <dd>The object logically containing the current object, for example
-  because its CPU set includes the CPU set of the current object.</dd>
+  because its CPU set includes the CPU set of the current object.
+  All objects have a non-NULL parent, except the root of the topology (Machine object).
+  </dd>
 
 <dt>Ancestor object</dt>
-  <dd>The parent object, or its own parent object, and so on.</dd>
+  <dd>The parent object, or its own parent, and so on.</dd>
 
 <dt>Children object(s)</dt>
   <dd>The object (or objects) contained in the current object because
@@ -673,6 +675,11 @@ Make sure to have had a look at those too!
   and child depths may be larger than one when some intermediate levels
   (for instance groups) are missing in only some parts of the machine.
 
+  The depth of the Machine object is always 0 since it is always the
+  root of the topology.
+  The depth of PU objects is equal to the number of levels in the topology
+  minus one.
+
   Memory, I/O and Misc objects also have their own specific levels and depth.
   </dd>
 
@@ -684,6 +691,9 @@ hardware threads); thus, a topology with 5 levels. Each box with rounded corner
 corresponds to one ::hwloc_obj_t, containing the values of the different integer
 fields (depth, logical_index, etc.), and arrows show to which other ::hwloc_obj_t
 pointers point to (first_child, parent, etc.).
+
+The topology always starts with a Machine object as root (depth 0)
+and ends with PU objects at the bottom (depth 4 here).
 
 Objects of the same level (cousins) are listed in red boxes and linked
 with red arrows.
