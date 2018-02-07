@@ -110,7 +110,7 @@
           </object>
         </object>
         <object type="PCIDev" pci_busid="0000:00:02.0" pci_type="0108 [8086:0953] [8086:3709] 01" pci_link_speed="0.000000">
-          <object type="OSDev" name="nvme0n1" osdev_type="0">
+          <object type="OSDev" name="nvme0n1" subtype="Disk" osdev_type="0">
             <info name="Size" value="390711384"/>
             <info name="SectorSize" value="512"/>
             <info name="LinuxDeviceID" value="259:0"/>
