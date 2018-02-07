@@ -137,7 +137,11 @@ hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cp
   void *p = hwloc_alloc_membind(topology, len, set, policy, flags);
   if (p)
     return p;
-  hwloc_set_membind(topology, set, policy, flags);
+
+  if (hwloc_set_membind(topology, set, policy, flags) < 0)
+    /* hwloc_set_membind() takes care of ignoring errors if non-STRICT */
+    return NULL;
+
   p = hwloc_alloc(topology, len);
   if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
     /* Enforce the binding by touching the data */
