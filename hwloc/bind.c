@@ -280,10 +280,21 @@ hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwl
   return 0;
 }
 
+static __hwloc_inline int hwloc__check_membind_policy(hwloc_membind_policy_t policy)
+{
+  if (policy == HWLOC_MEMBIND_DEFAULT
+      || policy == HWLOC_MEMBIND_FIRSTTOUCH
+      || policy == HWLOC_MEMBIND_BIND
+      || policy == HWLOC_MEMBIND_INTERLEAVE
+      || policy == HWLOC_MEMBIND_NEXTTOUCH)
+    return 0;
+  return -1;
+}
+
 static int
 hwloc_set_membind_by_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
-  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+  if ((flags & ~HWLOC_MEMBIND_ALLFLAGS) || hwloc__check_membind_policy(policy) < 0) {
     errno = EINVAL;
     return -1;
   }
@@ -381,7 +392,7 @@ hwloc_get_membind(hwloc_topology_t topology, hwloc_bitmap_t set, hwloc_membind_p
 static int
 hwloc_set_proc_membind_by_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
-  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+  if ((flags & ~HWLOC_MEMBIND_ALLFLAGS) || hwloc__check_membind_policy(policy) < 0) {
     errno = EINVAL;
     return -1;
   }
@@ -453,7 +464,7 @@ hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_
 static int
 hwloc_set_area_membind_by_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
-  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+  if ((flags & ~HWLOC_MEMBIND_ALLFLAGS) || hwloc__check_membind_policy(policy) < 0) {
     errno = EINVAL;
     return -1;
   }
@@ -623,7 +634,7 @@ hwloc_alloc_membind_by_nodeset(hwloc_topology_t topology, size_t len, hwloc_cons
 {
   void *p;
 
-  if (flags & ~HWLOC_MEMBIND_ALLFLAGS) {
+  if ((flags & ~HWLOC_MEMBIND_ALLFLAGS) || hwloc__check_membind_policy(policy) < 0) {
     errno = EINVAL;
     return NULL;
   }
