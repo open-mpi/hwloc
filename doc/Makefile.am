@@ -568,7 +568,7 @@ man3_helper_ancestors_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3
 
-man3_helper_find_typesdir = $(mandir)
+man3_helper_find_typesdir = $(man3dir)
 man3_helper_find_types_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_types.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_is_normal.3 \
