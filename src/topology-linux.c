@@ -4932,10 +4932,10 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
 
   snprintf(path, sizeof(path), "%s/dev", osdevpath);
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) < 0)
-    return;
+    goto done;
 
   if (sscanf(line, "%u:%u", &major_id, &minor_id) != 2)
-    return;
+    goto done;
   tmp = strchr(line, '\n');
   if (tmp)
     *tmp = '\0';
@@ -4947,7 +4947,7 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
     const char *prop;
     dev = udev_device_new_from_subsystem_sysname(data->udev, "block", obj->name);
     if (!dev)
-      return;
+      goto done;
     prop = udev_device_get_property_value(dev, "ID_VENDOR");
     if (prop) {
       strncpy(vendor, prop, sizeof(vendor));
@@ -4982,7 +4982,7 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
   snprintf(path, sizeof(path), "/run/udev/data/b%u:%u", major_id, minor_id);
   file = hwloc_fopen(path, "r", root_fd);
   if (!file)
-    return;
+    goto done;
 
   while (NULL != fgets(line, sizeof(line), file)) {
     tmp = strchr(line, '\n');
@@ -5008,6 +5008,7 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
   fclose(file);
  }
 
+ done:
   /* clear fake "ATA" vendor name */
   if (!strcasecmp(vendor, "ATA"))
     *vendor = '\0';
@@ -5034,7 +5035,7 @@ hwloc_linux_block_class_fillinfos(struct hwloc_backend *backend,
   if (*serial)
     hwloc_obj_add_info(obj, "SerialNumber", serial);
 
-  if (!strcmp(blocktype, "disk"))
+  if (!strcmp(blocktype, "disk") || !strncmp(obj->name, "nvme", 4))
     hwloc_obj_add_info(obj, "Type", "Disk");
   else if (!strcmp(blocktype, "tape"))
     hwloc_obj_add_info(obj, "Type", "Tape");
