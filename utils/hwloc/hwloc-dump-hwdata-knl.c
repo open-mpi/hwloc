@@ -18,8 +18,16 @@
 
 #define KERNEL_SMBIOS_SYSFS "/sys/firmware/dmi/entries"
 
-#define KNL_SMBIOS_GROUP_STRING "Group: Knights Landing Information"
-#define KNM_SMBIOS_GROUP_STRING "Group: Knights Mill Information"
+#define KNL_INTEL_GROUP_STRING "Group: Knights Landing Information"
+#define KNM_INTEL_GROUP_STRING "Group: Knights Mill Information"
+#define KNL_DELL_GROUP_STRING "Knights Landing Association"
+
+static char *allowed_group_strings[] =
+{
+    KNL_INTEL_GROUP_STRING,
+    KNM_INTEL_GROUP_STRING,
+    KNL_DELL_GROUP_STRING
+};
 
 /* Header is common part of all SMBIOS entries */
 struct smbios_header
@@ -174,13 +182,18 @@ static int check_entry(struct smbios_header *h, const char *end, const char *que
 
 static int is_phi_group(struct smbios_header *h, const char *end)
 {
+    unsigned i;
     if (h->type != 14) {
         fprintf(stderr, "SMBIOS table is not group table\n");
         return -1;
     }
 
-    return check_entry(h, end, KNL_SMBIOS_GROUP_STRING) ||
-           check_entry(h, end, KNM_SMBIOS_GROUP_STRING);
+    for (i = 0; i < sizeof(allowed_group_strings)/sizeof(char*); i++) {
+        if (check_entry(h, end, allowed_group_strings[i]))
+                return 1;
+    }
+
+    return 0;
 }
 
 #define KNL_MEMBER_ID_GENERAL 0x1
