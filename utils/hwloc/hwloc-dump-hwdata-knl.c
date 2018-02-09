@@ -138,6 +138,8 @@ static int get_file_buffer(const char *file, char *buffer, int size)
 {
     FILE *f;
 
+    printf("  File = %s\n", file);
+
     if (!buffer) {
         fprintf(stderr, "Unable to allocate buffer\n");
         return 0;
@@ -149,14 +151,13 @@ static int get_file_buffer(const char *file, char *buffer, int size)
         return 0;
     }
 
-    printf("  File = %s, size = %d\n", file, size);
-
     size = fread(buffer, 1, size, f);
     if (size == 0) {
         fprintf(stderr, "Unable to read file\n");
         fclose(f);
         return 0;
     }
+    printf("    Read %d bytes\n", size);
 
     fclose(f);
     return size;
@@ -172,8 +173,11 @@ static int check_entry(struct smbios_header *h, const char *end, const char *que
          * */
         if (len == 0)
             break;
+
+        printf("  Looking for \"%s\" in group string \"%s\"\n", query, group_strings);
         if (!strncmp(group_strings, query, len))
             return 1;
+
         group_strings += len;
     } while(group_strings < end);
 
@@ -212,6 +216,7 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
     char *end;
     int size;
     int i;
+
     snprintf(path, PATH_SIZE-1, "%s/" KERNEL_SMBIOS_SYSFS "/%s/raw", input_fsroot, dir_name);
     path[PATH_SIZE-1] = 0;
 
@@ -224,9 +229,11 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
     h = (struct smbios_header*)file_buf;
     end = file_buf+size;
     if (!is_phi_group(h, end)) {
+        printf("  Failed to find Phi group\n");
         fprintf(stderr, "SMBIOS table does not contain KNL entries\n");
         return -1;
     }
+    printf("  Found Phi group\n");
 
     p = file_buf + sizeof(struct smbios_header) + sizeof(struct smbios_group);
     if ((char*)p >= end) {
@@ -240,7 +247,7 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
     for (; p < end; i++, p+=3) {
         struct smbios_group_entry *e = (struct smbios_group_entry*)p;
         data->knl_types[i] = e->type;
-        printf("  Found KNL type = %d\n", e->type);
+        printf("    Found KNL type = %d\n", e->type);
     }
 
     data->type_count = i;
@@ -499,6 +506,7 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
     for (i = 0; i < data.type_count; i++) {
         char tab[16] = {0};
         int l = snprintf(tab, sizeof(tab)-1, "%d-", data.knl_types[i]);
+        printf("\n");
         printf ("  Seeking dir ̀`%s' %d\n", tab, l);
         rewinddir(d);
         while ((dir = readdir(d))) {
