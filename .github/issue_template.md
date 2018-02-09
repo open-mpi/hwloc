@@ -24,7 +24,7 @@
 
 If your issue consists in a wrong topology detection, we also need the following for debugging remotely:
 
-* On Linux, run `hwloc-gather-topology myhost` and post the `myhost.*` files that it will generate
+* On Linux, run `hwloc-gather-topology myhost` and post the `myhost.*` files that it will generate. Note that this tool may be slow on large nodes or when I/O is enabled.
 * On MacOS, `sysctl hw` and `sysctl machdep.cpu`
 * On Solaris, `kstat cpu_info` and `lgrp_info -a`
 * On BSD, `sysctl hw`
