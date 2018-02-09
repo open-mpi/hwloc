@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2012-2017 Inria.  All rights reserved.
+# Copyright © 2012-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -105,32 +105,30 @@ sed -e '/#define HWLOC_HAVE_ATTRIBUTE/d' -i include/private/autogen/config.h
 
 # Create the config for sonar-scanner
 cat > sonar-project.properties << EOF
-sonar.host.url=https://hpclib-sed.bordeaux.inria.fr/sonarqube-dev
-sonar.login=$(cat ~/.sonarqube-dev-hwloc-token)
+sonar.host.url=https://sonarqube.bordeaux.inria.fr/
+sonar.login=$(cat ~/.sonarqube-hwloc-token)
 sonar.links.homepage=https://www.open-mpi.org/projects/hwloc/
 sonar.links.ci=https://ci.inria.fr/hwloc/
 sonar.links.scm=https://github.com/open-mpi/hwloc.git
 sonar.links.issue=https://github.com/open-mpi/hwloc/issues
-sonar.projectKey=hwloc
-sonar.projectName=hwloc
+sonar.projectKey=tadaam:hwloc:github:$hwloc_branch
 sonar.projectDescription=Hardware locality (hwloc)
-sonar.projectVersion=git
-sonar.branch=$hwloc_branch
+sonar.projectVersion=$hwloc_branch
 sonar.scm.disabled=false
 sonar.sourceEncoding=UTF-8
-sonar.language=c++
+sonar.language=c
 sonar.sources=hwloc, tests, utils
 sonar.exclusions=tests/hwloc/ports
-sonar.cxx.errorRecoveryEnabled=true
-sonar.cxx.compiler.parser=GCC
-sonar.cxx.compiler.charset=UTF-8
-sonar.cxx.compiler.regex=^(.*):([0-9]+):[0-9]+: warning: (.*)\\[(.*)\\]$
-sonar.cxx.compiler.reportPath=hwloc-build.log
-sonar.cxx.coverage.reportPath=hwloc-coverage.xml
-sonar.cxx.cppcheck.reportPath=${CPPCHECK_XMLS}
-sonar.cxx.includeDirectories=$(echo | gcc -E -Wp,-v - 2>&1 | grep "^ " | tr '\n' ',')include,hwloc,utils/lstopo,utils/hwloc
-sonar.cxx.rats.reportPath=${RATS_XMLS}
-sonar.cxx.valgrind.reportPath=${VALGRIND_XMLS}
+sonar.c.errorRecoveryEnabled=true
+sonar.c.compiler.parser=GCC
+sonar.c.compiler.charset=UTF-8
+sonar.c.compiler.regex=^(.*):([0-9]+):[0-9]+: warning: (.*)\\[(.*)\\]$
+sonar.c.compiler.reportPath=hwloc-build.log
+sonar.c.coverage.reportPath=hwloc-coverage.xml
+sonar.c.cppcheck.reportPath=${CPPCHECK_XMLS}
+sonar.c.includeDirectories=$(echo | gcc -E -Wp,-v - 2>&1 | grep "^ " | tr '\n' ',')include,hwloc,utils/lstopo,utils/hwloc
+sonar.c.rats.reportPath=${RATS_XMLS}
+sonar.c.valgrind.reportPath=${VALGRIND_XMLS}
 sonar.issue.ignore.multicriteria=e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14
 # Complete the task associated to this TODO comment.
 sonar.issue.ignore.multicriteria.e1.ruleKey=cxx:TodoTagPresence
