@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2017 Inria.  All rights reserved.
+# Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -92,7 +92,7 @@ destdir=`mktemp -d`
 
 # Use cat so that we properly get proc/sys files even if their
 # file length is wrong
-savefile() {
+_savefile() {
   local dest="$1"
   local file="$2"
   if test -r "$file"; then
@@ -102,7 +102,7 @@ savefile() {
   fi
 }
 
-savelink() {
+_savelink() {
   local dest="$1"
   local file="$2"
   dir=`dirname "$file"`
@@ -110,15 +110,12 @@ savelink() {
   cp -P "$file" "$dest/$file"
 }
 
-# Gather the following list of files
-savefile "$destdir/$basename" /proc/cmdline
-savefile "$destdir/$basename" /proc/cpuinfo
-savefile "$destdir/$basename" /proc/meminfo
-savefile "$destdir/$basename" /proc/mounts
-savefile "$destdir/$basename" /proc/stat
-savefile "$destdir/$basename" /proc/version
-savefile "$destdir/$basename" /proc/self/cpuset
-savefile "$destdir/$basename" /proc/self/cgroup
+# Get a file
+savefile() {
+  local dest="$1"
+  local file="$2"
+  _savefile "$dest" "$file"
+}
 
 # Get all files from the given directory
 # Ignore errors since some files may be missing, and some may be
@@ -132,13 +129,35 @@ savedir() {
   done
   # gather all files now
   find "$path" -type f 2>/dev/null | while read -r file ; do
-    savefile "$dest" "$file"
+    _savefile "$dest" "$file"
   done
   # gather symlinks
   find "$path" -type l 2>/dev/null | while read -r link ; do
-    savelink "$dest" "$link"
+    _savelink "$dest" "$link"
   done
 }
+
+# Get an entire mount point, after decoding its path
+# we don't support path with \n since it would break in 'find ... | while read ..." above
+savemntpnt() {
+  local encodedpath=$1
+  if echo "$1" | grep "\\012" ; then
+    echo "Ignoring mount point whose filename contains an end of line."
+    return
+  fi
+  local path=$(echo "$1" | sed -e 's@\\134@\\@g' -e 's@\\040@ @g' -e 's@\\011@	@g')
+  savedir "$destdir/$basename" "${path}/"
+}
+
+# Gather the following list of files
+savefile "$destdir/$basename" /proc/cmdline
+savefile "$destdir/$basename" /proc/cpuinfo
+savefile "$destdir/$basename" /proc/meminfo
+savefile "$destdir/$basename" /proc/mounts
+savefile "$destdir/$basename" /proc/stat
+savefile "$destdir/$basename" /proc/version
+savefile "$destdir/$basename" /proc/self/cpuset
+savefile "$destdir/$basename" /proc/self/cgroup
 
 # Gather the following list of directories
 savedir "$destdir/$basename" /sys/devices/system/cpu/
@@ -175,6 +194,12 @@ if ! test -d "$destdir/$basename/var/run/hwloc"; then
   fi fi
 fi
 
+# Gather cgroup/cpuset mntpnts
+cat /proc/mounts | while read -r dummy1 mntpath mnttype mntopts dummy2 ; do
+  [ x$mnttype = xcpuset ] && savemntpnt "$mntpath"
+  [ x$mnttype = xcgroup ] && echo $mntopts | grep -w cpuset >/dev/null && savemntpnt "$mntpath"
+done
+
 # Optionally gather I/O directories too
 if [ x$gatherio = x1 ]; then
   savedir "$destdir/$basename" /sys/bus/pci/devices/
@@ -202,24 +227,6 @@ fi
 if [ x$gatherdmi = x1 ]; then
   savedir "$destdir/$basename" /sys/firmware/dmi/
 fi
-
-# Get an entire mount point, after decoding its path
-# we don't support path with \n since it would break in 'find ... | while read ..." above
-savemntpnt() {
-  local encodedpath=$1
-  if echo "$1" | grep "\\012" ; then
-    echo "Ignoring mount point whose filename contains an end of line."
-    return
-  fi
-  local path=$(echo "$1" | sed -e 's@\\134@\\@g' -e 's@\\040@ @g' -e 's@\\011@	@g')
-  savedir "$destdir/$basename" "${path}/"
-}
-
-# Gather cgroup/cpuset mntpnts
-cat /proc/mounts | while read -r dummy1 mntpath mnttype mntopts dummy2 ; do
-  [ x$mnttype = xcpuset ] && savemntpnt "$mntpath"
-  [ x$mnttype = xcgroup ] && echo $mntopts | grep -w cpuset >/dev/null && savemntpnt "$mntpath"
-done
 
 # export /proc/hwloc-nofile-info during lstopo (needs HWLOC_DUMP_NOFILE_INFO with HWLOC_THISSYSTEM=1)
 export HWLOC_DUMP_NOFILE_INFO="$destdir/$basename/proc/hwloc-nofile-info"
