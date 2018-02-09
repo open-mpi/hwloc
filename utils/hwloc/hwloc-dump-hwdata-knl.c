@@ -186,7 +186,7 @@ static int is_phi_group(struct smbios_header *h, const char *end)
     unsigned i;
     if (h->type != 14) {
         fprintf(stderr, "SMBIOS table is not group table\n");
-        return -1;
+        return 0;
     }
 
     for (i = 0; i < sizeof(allowed_group_strings)/sizeof(char*); i++) {
