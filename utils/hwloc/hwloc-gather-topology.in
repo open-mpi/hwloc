@@ -116,6 +116,7 @@ _savelink() {
 savefile() {
   local dest="$1"
   local file="$2"
+  echo " file $file"
   _savefile "$dest" "$file"
 }
 
@@ -125,6 +126,7 @@ savefile() {
 savedir() {
   local dest="$1"
   local path="$2"
+  echo " directory $path"
   # gather all directories, including empty ones
   find "$path" -type d 2>/dev/null | while read -r dir ; do
     mkdir -p "$dest/$dir" 2>/dev/null
@@ -150,6 +152,11 @@ savemntpnt() {
   local path=$(echo "$1" | sed -e 's@\\134@\\@g' -e 's@\\040@ @g' -e 's@\\011@	@g')
   savedir "$destdir/$basename" "${path}/"
 }
+
+#
+# Main stuff
+#
+echo "Gathering main files and directories..."
 
 # Gather the following list of files
 savefile "$destdir/$basename" /proc/cmdline
@@ -202,8 +209,11 @@ cat /proc/mounts | while read -r dummy1 mntpath mnttype mntopts dummy2 ; do
   [ x$mnttype = xcgroup ] && echo $mntopts | grep -w cpuset >/dev/null && savemntpnt "$mntpath"
 done
 
+#
 # Optionally gather I/O directories too
+#
 if [ x$gatherio = x1 ]; then
+  echo "Gathering I/O files..."
   savedir "$destdir/$basename" /sys/bus/pci/devices/
   savedir "$destdir/$basename" /sys/bus/pci/slots/
   # gather class links, we'll parse that the target path for PCI busids
@@ -226,17 +236,25 @@ if [ x$gatherio = x1 ]; then
   ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
 fi
 
+#
+# Optionally gather DMI directories too
+#
 if [ x$gatherdmi = x1 ]; then
+  echo "Gathering DMI files..."
   savedir "$destdir/$basename" /sys/firmware/dmi/
 fi
 
-# export /proc/hwloc-nofile-info during lstopo (needs HWLOC_DUMP_NOFILE_INFO with HWLOC_THISSYSTEM=1)
+#
+# Export /proc/hwloc-nofile-info during lstopo (needs HWLOC_DUMP_NOFILE_INFO with HWLOC_THISSYSTEM=1)
+#
+echo "Exporting /proc/hwloc-nofile-info"
 export HWLOC_DUMP_NOFILE_INFO="$destdir/$basename/proc/hwloc-nofile-info"
 "$lstopo" - >/dev/null
 # disable HWLOC_DUMP_NOFILE_INFO for next lstopo invocation
 export HWLOC_DUMP_NOFILE_INFO=
 
 # Create the archive and keep the tree in /tmp for testing
+echo
 ( cd "$destdir/" && tar cfj "$basename.tar.bz2" "$basename" )
 mv "$destdir/$basename.tar.bz2" "$dirname/$basename.tar.bz2"
 echo "Topology files gathered in $dirname/$basename.tar.bz2 and kept in $destdir/$basename/"
