@@ -149,8 +149,6 @@ static int get_file_buffer(const char *file, char *buffer, int size)
         return 0;
     }
 
-    printf("  File = %s, size = %d\n", file, size);
-
     size = fread(buffer, 1, size, f);
     if (size == 0) {
         fprintf(stderr, "Unable to read file\n");
@@ -172,8 +170,11 @@ static int check_entry(struct smbios_header *h, const char *end, const char *que
          * */
         if (len == 0)
             break;
+
+        printf("    Looking for '%s' in group string '%s'\n", query, group_strings);
         if (!strncmp(group_strings, query, len))
             return 1;
+
         group_strings += len;
     } while(group_strings < end);
 
@@ -190,7 +191,7 @@ static int is_phi_group(struct smbios_header *h, const char *end)
 
     for (i = 0; i < sizeof(allowed_group_strings)/sizeof(char*); i++) {
         if (check_entry(h, end, allowed_group_strings[i]))
-                return 1;
+            return 1;
     }
 
     return 0;
@@ -215,19 +216,24 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
     snprintf(path, PATH_SIZE-1, "%s/" KERNEL_SMBIOS_SYSFS "/%s/raw", input_fsroot, dir_name);
     path[PATH_SIZE-1] = 0;
 
+    printf("  File = %s\n", path);
     size = get_file_buffer(path, file_buf, SMBIOS_FILE_BUF_SIZE);
     if (!size) {
         fprintf(stderr, "Unable to read raw table file\n");
         return -1;
     }
 
+    printf("  Read %d bytes\n", size);
+
     h = (struct smbios_header*)file_buf;
     end = file_buf+size;
     if (!is_phi_group(h, end)) {
+        printf("  Failed to find phi group\n");
         fprintf(stderr, "SMBIOS table does not contain KNL entries\n");
         return -1;
     }
 
+    printf("  Found phi group\n");
     p = file_buf + sizeof(struct smbios_header) + sizeof(struct smbios_group);
     if ((char*)p >= end) {
         fprintf(stderr, "SMBIOS table does not have entries\n");
