@@ -18,8 +18,10 @@
 
 #define KERNEL_SMBIOS_SYSFS "/sys/firmware/dmi/entries"
 
+/* official strings, found at least in Intel S7200AP boards (also used by Cray) and some SuperMicro boards */
 #define KNL_INTEL_GROUP_STRING "Group: Knights Landing Information"
 #define KNM_INTEL_GROUP_STRING "Group: Knights Mill Information"
+/* unexpected strings, found at least in Dell C6320p BIOS <=1.4.1 */
 #define KNL_DELL_GROUP_STRING "Knights Landing Association"
 
 static char *allowed_group_strings[] =
