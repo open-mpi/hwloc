@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2015-2016 Inria.  All rights reserved.
+.\" Copyright © 2015-2018 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-DUMP-HWDATA "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
@@ -36,7 +36,8 @@ hwloc may benefit from some locality and topology information from
 SMBIOS or ACPI tables.
 They are accessible from raw hardware files under directories such
 /sys/firmware/dmi/ or /sys/firmware/acpi/ on Linux.
-These files are usually only accessible to root.
+These files are usually only accessible to root,
+and they only exist when there is \fIdmi-sysfs\fR support in the Linux kernel.
 .
 .PP
 The hwloc-dump-hwdata tool dumps the useful contents of such files into
