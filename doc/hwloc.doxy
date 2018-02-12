@@ -1157,6 +1157,9 @@ following environment variables.
   may be useful in the doc for debugging?
  HWLOC_KNL_NUMA_QUIRK
   disables the KNL NUMA Cluster quirk in the linux backend
+ HWLOC_KNL_HDH_FALLBACK
+  if 1, ignore KNL info from hwloc-dump-hwdata and fallback to heuristic
+  if 0, never fallback to the hardwired heuristic, useful if the heuristic is wrong
  HWLOC_DEBUG_CHECK
   runs sanity checks during discovery, as if \--enable-debug was passed but
   without debug messages
@@ -1708,8 +1711,10 @@ hwloc failed to discover any package.
 </dd>
 <dt>MemoryMode, ClusterMode (topology root, Machine object)</dt>
 <dd>
-Intel Knights Landing configuration modes, only available if
-hwloc-dump-hwdata was used (see \ref faq_knl_dump).
+Intel Knights Landing configuration modes.
+Available if hwloc-dump-hwdata was used (see \ref faq_knl_dump)
+or if hwloc managed to guess them from the NUMA configuration.
+
 The memory mode may be <em>Cache</em>, <em>Flat</em>,
 <em>Hybrid50</em> (half the MCDRAM is used as a cache)
 or <em>Hybrid25</em> (25% of MCDRAM as cache).
@@ -3496,6 +3501,7 @@ as either memory or a memory-side cache (currently reported as a L3 cache by hwl
 There are also several clustering modes that significantly affect the memory organization
 (see \ref faq_knl_numa for more information about these modes).
 Details about these are currently only available to privileged users.
+Without them, hwloc relies on a heuristic for guessing the modes.
 
 The hwloc-dump-hwdata utility may be used to dump this privileged binary information
 into human-readable and world-accessible files that the hwloc library will later load.

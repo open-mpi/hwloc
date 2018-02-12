@@ -2950,12 +2950,18 @@ struct knl_hwdata {
 /* Try to handle knl hwdata properties
  * Returns 0 on success and -1 otherwise */
 static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backend_data_s *data,
-							struct knl_hwdata *hwdata)
+							struct knl_hwdata *hwdata,
+							unsigned DDR_nbnodes,
+							unsigned long DDR_numa_size,
+							unsigned MCDRAM_nbnodes,
+							unsigned long MCDRAM_numa_size)
 {
   char *knl_cache_file;
   int version = 0;
   char buffer[512] = {0};
   char *data_beg = NULL;
+  char * fallback_env = getenv("HWLOC_KNL_HDH_FALLBACK");
+  int fallback = fallback_env ? atoi(fallback_env) : -1; /* by default, only fallback if needed */
 
   hwdata->memory_mode[0] = '\0';
   hwdata->cluster_mode[0] = '\0';
@@ -2964,14 +2970,19 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
   hwdata->mcdram_cache_inclusiveness = -1;
   hwdata->mcdram_cache_line_size = -1;
 
+  if (fallback == 1) {
+    hwloc_debug("KNL dumped hwdata ignored, forcing fallback\n");
+    goto fallback;
+  }
+
   if (asprintf(&knl_cache_file, "%s/knl_memoryside_cache", data->dumped_hwdata_dirname) < 0)
-    return -1;
+    goto fallback;
 
   hwloc_debug("Reading knl cache data from: %s\n", knl_cache_file);
   if (hwloc_read_path_by_length(knl_cache_file, buffer, sizeof(buffer), data->root_fd) < 0) {
     hwloc_debug("Unable to open KNL data file `%s' (%s)\n", knl_cache_file, strerror(errno));
     free(knl_cache_file);
-    return -1;
+    goto fallback;
   }
   free(knl_cache_file);
 
@@ -2980,7 +2991,7 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
   /* file must start with version information */
   if (sscanf(data_beg, "version: %d", &version) != 1) {
     fprintf(stderr, "Invalid knl_memoryside_cache header, expected \"version: <int>\".\n");
-    return -1;
+    goto fallback;
   }
 
   while (1) {
@@ -3038,6 +3049,64 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
 		hwdata->mcdram_cache_inclusiveness);
     hwdata->mcdram_cache_size = -1; /* mark cache as invalid */
   }
+
+  return 0;
+
+ fallback:
+  if (fallback == 0) {
+    hwloc_debug("KNL hwdata fallback disabled\n");
+    return -1;
+  }
+
+  hwloc_debug("Falling back to a heuristic\n");
+
+  /* there can be 0 MCDRAM_nbnodes, but we must have at least one DDR node (not cpuless) */
+  assert(DDR_nbnodes);
+  /* there are either no MCDRAM nodes, or as many as DDR nodes */
+  assert(!MCDRAM_nbnodes || MCDRAM_nbnodes == DDR_nbnodes);
+
+  if (!MCDRAM_nbnodes && DDR_numa_size <= 16UL*1024*1024*1024) {
+    /* We only found DDR numa nodes, but they are <=16GB.
+     * It could be a DDR-less KNL where numa nodes are actually MCDRAM, we can't know for sure.
+     * Both cases are unlikely, disable the heuristic for now.
+     *
+     * In theory we could check if DDR_numa_size == 8/12/16GB exactly (amount of MCDRAM numa size in H50/H25/Flat modes),
+     * but that's never the case since some kilobytes are always stolen by the system.
+     */
+    hwloc_debug("Cannot guess if MCDRAM is in Cache or if the node is DDR-less (total NUMA node size %ld)\n",
+		DDR_numa_size);
+    return -1;
+  }
+
+  /* all commercial KNL/KNM have 16GB of MCDRAM */
+  unsigned long total_cache_size = 16UL*1024*1024*1024 - MCDRAM_numa_size;
+
+  if (!MCDRAM_nbnodes) {
+    strcpy(hwdata->memory_mode, "Cache");
+  } else {
+    if (!total_cache_size)
+      strcpy(hwdata->memory_mode, "Flat");
+    else if (total_cache_size == 8UL*1024*1024*1024)
+      strcpy(hwdata->memory_mode, "Hybrid50");
+    else if (total_cache_size == 4UL*1024*1024*1024)
+      strcpy(hwdata->memory_mode, "Hybrid25");
+    else
+      fprintf(stderr, "Unexpected KNL MCDRAM cache size %lu\n", total_cache_size);
+  }
+  if (DDR_nbnodes == 4) {
+    strcpy(hwdata->cluster_mode, "SNC4");
+  } else if (DDR_nbnodes == 2) {
+    strcpy(hwdata->cluster_mode, "SNC2");
+  } else if (DDR_nbnodes == 1) {
+    /* either Quadrant, All2ALL or Hemisphere */
+  } else {
+    fprintf(stderr, "Unexpected number of KNL non-MCDRAM NUMA nodes %d\n", DDR_nbnodes);
+  }
+
+  hwdata->mcdram_cache_size = total_cache_size/DDR_nbnodes;
+  hwdata->mcdram_cache_associativity = 1;
+  hwdata->mcdram_cache_inclusiveness = 1;
+  hwdata->mcdram_cache_line_size = 64;
 
   return 0;
 }
@@ -3212,8 +3281,26 @@ look_sysfsnode(struct hwloc_topology *topology,
 	int noquirk = (env && !atoi(env)) || !distances || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP);
 	int mscache;
 	unsigned j, closest;
+	unsigned long MCDRAM_numa_size, DDR_numa_size;
+	unsigned MCDRAM_nbnodes, DDR_nbnodes;
 
-	hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata);
+	DDR_numa_size = 0;
+	DDR_nbnodes = 0;
+	MCDRAM_numa_size = 0;
+	MCDRAM_nbnodes = 0;
+	for(i=0; i<nbnodes; i++)
+	  if (hwloc_bitmap_iszero(nodes[i]->cpuset)) {
+	    MCDRAM_numa_size += nodes[i]->attr->numanode.local_memory;
+	    MCDRAM_nbnodes++;
+	  } else {
+	    DDR_numa_size += nodes[i]->attr->numanode.local_memory;
+	    DDR_nbnodes++;
+	  }
+	assert(DDR_nbnodes + MCDRAM_nbnodes == nbnodes);
+
+	hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata,
+						     DDR_nbnodes, DDR_numa_size,
+						     MCDRAM_nbnodes, MCDRAM_numa_size);
 	mscache = knl_hwdata.mcdram_cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE);
 
 	if (knl_hwdata.cluster_mode[0])
