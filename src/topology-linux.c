@@ -3250,7 +3250,7 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
      * In theory we could check if DDR_numa_size == 8/12/16GB exactly (amount of MCDRAM numa size in H50/H25/Flat modes),
      * but that's never the case since some kilobytes are always stolen by the system.
      */
-    hwloc_debug("Cannot guess if MCDRAM is in Cache or if the node is DDR-less (total NUMA node size %ld)\n",
+    hwloc_debug("Cannot guess if MCDRAM is in Cache or if the node is DDR-less (total NUMA node size %lu)\n",
 		DDR_numa_size);
     return -1;
   }
@@ -3277,7 +3277,7 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(hwloc_topology_t topolog
   } else if (DDR_nbnodes == 1) {
     /* either Quadrant, All2ALL or Hemisphere */
   } else {
-    fprintf(stderr, "Unexpected number of KNL non-MCDRAM NUMA nodes %d\n", DDR_nbnodes);
+    fprintf(stderr, "Unexpected number of KNL non-MCDRAM NUMA nodes %u\n", DDR_nbnodes);
   }
 
   cache_size = total_cache_size/DDR_nbnodes;
