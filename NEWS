@@ -20,6 +20,8 @@ in v0.9.1).
 Version 1.11.10
 ---------------
 * Fix detection of cores and hyperthreads on Mac OS X.
+* Serialize pciaccess discovery to fix concurrent topology loads in
+  multiple threads.
 * Fix first touch area memory binding on Linux when thread memory
   binding is different.
 * Some minor fixes to memory binding.
