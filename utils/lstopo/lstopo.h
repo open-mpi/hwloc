@@ -66,14 +66,16 @@ struct lstopo_output {
   unsigned plain_children_order;
   unsigned int gridsize, fontsize;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
-  void *backend_data;
-  struct draw_methods *methods;
-  unsigned width, height; /* total output size */
-  unsigned min_pu_textwidth;
   unsigned no_half_lines; /* set by ASCII backend because it cannot write between lines of the terminal */
   int show_indexes[HWLOC_OBJ_TYPE_MAX];
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
+
+  /* draw internal data */
+  void *backend_data;
+  struct draw_methods *methods;
   enum lstopo_drawing_e drawing;
+  unsigned min_pu_textwidth;
+  unsigned width, height; /* total output size */
 };
 
 struct lstopo_color { int r, g, b; };
