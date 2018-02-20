@@ -3420,8 +3420,65 @@ look_sysfscpu(struct hwloc_topology *topology,
   hwloc_bitmap_foreach_begin(i, cpuset) {
     hwloc_bitmap_t packageset, coreset, bookset, threadset;
     int tmpint;
+    int notfirstofcore = 0; /* set if we have core info and if we're not the first PU of our core */
 
-    if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
+    if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
+      /* look at the core */
+      sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+      coreset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
+      if (coreset) {
+        unsigned mycoreid;
+	int gotcoreid = 0; /* to avoid reading the coreid twice */
+	hwloc_bitmap_and(coreset, coreset, cpuset);
+	if (hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
+	  /* check if this is hyper-threading or different coreids */
+	  unsigned siblingid, siblingcoreid;
+
+	  mycoreid = (unsigned) -1;
+	  sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.9 */
+	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
+	    mycoreid = (unsigned) tmpint;
+	  gotcoreid = 1;
+
+	  siblingid = hwloc_bitmap_first(coreset);
+	  if (siblingid == (unsigned) i)
+	    siblingid = hwloc_bitmap_next(coreset, i);
+	  siblingcoreid = (unsigned) -1;
+	  sprintf(str, "%s/cpu%u/topology/core_id", path, siblingid); /* contains %d at least up to 4.9 */
+	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
+	    siblingcoreid = (unsigned) tmpint;
+	  threadwithcoreid = (siblingcoreid != mycoreid);
+	}
+	if (hwloc_bitmap_first(coreset) != i)
+	  notfirstofcore = 1;
+	if (!notfirstofcore || threadwithcoreid) {
+	  /* regular core */
+	  struct hwloc_obj *core;
+
+	  if (!gotcoreid) {
+	    mycoreid = (unsigned) -1;
+	    sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.9 */
+	    if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
+	      mycoreid = (unsigned) tmpint;
+	  }
+
+	  core = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, mycoreid);
+	  if (threadwithcoreid)
+	    /* amd multicore compute-unit, create one core per thread */
+	    hwloc_bitmap_only(coreset, i);
+	  core->cpuset = coreset;
+	  hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
+				  mycoreid, core->cpuset);
+	  hwloc_insert_object_by_cpuset(topology, core);
+	  coreset = NULL; /* don't free it */
+	} else
+
+	hwloc_bitmap_free(coreset);
+      }
+    }
+
+    if (!notfirstofcore /* don't look at the package unless we are the first of the core */
+	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
       /* look at the package */
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       packageset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
@@ -3496,58 +3553,6 @@ look_sysfscpu(struct hwloc_topology *topology,
 	}
       package_done:
 	hwloc_bitmap_free(packageset);
-      }
-    }
-
-    if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
-      /* look at the core */
-      sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
-      coreset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
-      if (coreset) {
-        unsigned mycoreid;
-	int gotcoreid = 0; /* to avoid reading the coreid twice */
-	hwloc_bitmap_and(coreset, coreset, cpuset);
-	if (hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
-	  /* check if this is hyper-threading or different coreids */
-	  unsigned siblingid, siblingcoreid;
-
-	  mycoreid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.9 */
-	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
-	    mycoreid = (unsigned) tmpint;
-	  gotcoreid = 1;
-
-	  siblingid = hwloc_bitmap_first(coreset);
-	  if (siblingid == (unsigned) i)
-	    siblingid = hwloc_bitmap_next(coreset, i);
-	  siblingcoreid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%u/topology/core_id", path, siblingid); /* contains %d at least up to 4.9 */
-	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
-	    siblingcoreid = (unsigned) tmpint;
-	  threadwithcoreid = (siblingcoreid != mycoreid);
-	}
-	if (hwloc_bitmap_first(coreset) == i || threadwithcoreid) {
-	  /* regular core */
-	  struct hwloc_obj *core;
-
-	  if (!gotcoreid) {
-	    mycoreid = (unsigned) -1;
-	    sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.9 */
-	    if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
-	      mycoreid = (unsigned) tmpint;
-	  }
-
-	  core = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, mycoreid);
-	  if (threadwithcoreid)
-	    /* amd multicore compute-unit, create one core per thread */
-	    hwloc_bitmap_only(coreset, i);
-	  core->cpuset = coreset;
-	  hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
-				  mycoreid, core->cpuset);
-	  hwloc_insert_object_by_cpuset(topology, core);
-	  coreset = NULL; /* don't free it */
-	}
-	hwloc_bitmap_free(coreset);
       }
     }
 
