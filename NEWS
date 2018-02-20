@@ -19,6 +19,9 @@ in v0.9.1).
 
 Version 2.1.0
 -------------
+* API
+  + Add HWLOC_RESTRICT_FLAG_BYNODESET and _REMOVE_MEMLESS for restricting
+    topologies based on some memory nodes.
 * Tools
   + Add --nodeset options to hwloc-calc for converting between cpusets and
     nodesets.

@@ -2094,6 +2094,18 @@ enum hwloc_restrict_flags_e {
    */
   HWLOC_RESTRICT_FLAG_REMOVE_CPULESS = (1<<0),
 
+  /** \brief Restrict by nodeset instead of CPU set.
+   * Only keep objects whose nodeset is included or partially included in the given set.
+   */
+  HWLOC_RESTRICT_FLAG_BYNODESET =  (1<<3),
+
+  /** \brief Remove all objects that became Memory-less.
+   * By default, only objects that contain no PU and no memory are removed.
+   * This flag may only be used with ::HWLOC_RESTRICT_FLAG_BYNODESET.
+   * \hideinitializer
+   */
+  HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS = (1<<4),
+
   /** \brief Move Misc objects to ancestors if their parents are removed during restriction.
    * If this flag is not set, Misc objects are removed when their parents are removed.
    * \hideinitializer
