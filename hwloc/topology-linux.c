@@ -2341,7 +2341,6 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
   uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
   struct stat st;
   int has_sysfs_hugepages = 0;
-  const char *pagesize_env = getenv("HWLOC_DEBUG_PAGESIZE");
   int types = 2;
   int err;
 
@@ -2383,14 +2382,7 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
       }
     }
 
-    if (pagesize_env) {
-      /* We cannot get the pagesize if not thissystem, use the env-given one to experience the code during make check */
-      memory->page_types[0].size = strtoull(pagesize_env, NULL, 10);
-      /* If failed, use 4kB */
-      if (!memory->page_types[0].size)
-	memory->page_types[0].size = 4096;
-    }
-    assert(memory->page_types[0].size); /* from sysconf if local or from the env */
+    assert(memory->page_types[0].size); /* from sysconf if local or from /proc/hwloc-nofile-info */
     /* memory->page_types[1].size from sysconf if local, or from /proc/meminfo, or from sysfs,
      * may be 0 if no hugepage support in the kernel */
 

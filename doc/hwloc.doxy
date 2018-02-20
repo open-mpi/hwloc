@@ -1173,8 +1173,6 @@ following environment variables.
   don't apply PICL info from a single CPU to all CPUs since the machine isn't homogeneous
  HWLOC_DEBUG_FAKE_COMPONENT
   enables debugging message to check that the fake component gets loaded
- HWLOC_DEBUG_PAGESIZE
-  forces the page size in the Linux code for debugging in topology chroots
  HWLOC_LIBXML=0
  HWLOC_LIBXML_EXPORT=0
  HWLOC_LIBXML_IMPORT=0
