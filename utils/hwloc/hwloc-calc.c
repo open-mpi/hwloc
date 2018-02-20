@@ -40,6 +40,9 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --lo --logical-output     Use logical indexes for output (default)\n");
   fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
   fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
+  fprintf(where, "  -n --nodeset              Manipulate nodesets instead of cpusets\n");
+  fprintf(where, "  --ni --nodeset-input      Manipulate nodesets instead of cpusets for inputs\n");
+  fprintf(where, "  --no --nodeset-output     Manipulate nodesets instead of cpusets for outputs\n");
   fprintf(where, "  --sep <sep>               Use separator <sep> in the output\n");
   fprintf(where, "  --taskset                 Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
@@ -56,6 +59,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 static int verbose = 0;
 static int logicali = 1;
 static int logicalo = 1;
+static int nodeseti = 0;
+static int nodeseto = 0;
 static int numberofdepth = -1;
 static int intersectdepth = -1;
 static int hiernblevels = 0;
@@ -354,6 +359,19 @@ int main(int argc, char *argv[])
 	logicalo = 0;
 	goto next;
       }
+      if (!strcmp(argv[0], "-n") || !strcmp(argv[0], "--nodeset")) {
+	nodeseti = 1;
+	nodeseto = 1;
+	goto next;
+      }
+      if (!strcmp(argv[0], "--ni") || !strcmp(argv[0], "--nodeset-input")) {
+	nodeseti = 1;
+	goto next;
+      }
+      if (!strcmp(argv[0], "--no") || !strcmp(argv[0], "--nodeset-output")) {
+	nodeseto = 1;
+	goto next;
+      }
       if (!strcmp(argv[0], "--sep")) {
 	if (argc < 2) {
 	  usage (callname, stderr);
@@ -398,8 +416,8 @@ int main(int argc, char *argv[])
     lcontext.logical = logicali;
     lcontext.verbose = verbose;
     scontext.output_set = set;
-    scontext.nodeset_input = 0;
-    scontext.nodeset_output = 0;
+    scontext.nodeset_input = nodeseti;
+    scontext.nodeset_output = nodeseto;
     if (hwloc_calc_process_location_as_set(&lcontext, &scontext, argv[0]) < 0)
       fprintf(stderr, "ignored unrecognized argument %s\n", argv[0]);
 
@@ -488,8 +506,8 @@ int main(int argc, char *argv[])
 	lcontext.logical = logicali;
 	lcontext.verbose = verbose;
 	scontext.output_set = set;
-	scontext.nodeset_input = 0;
-	scontext.nodeset_output = 0;
+	scontext.nodeset_input = nodeseti;
+	scontext.nodeset_output = nodeseto;
 	if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", token);
       }

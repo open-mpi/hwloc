@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2016 Inria.  All rights reserved.
+.\" Copyright © 2010-2018 Inria.  All rights reserved.
 .\" Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-CALC "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
@@ -42,6 +42,15 @@ Use OS/physical indexes instead of logical indexes for output.
 .TP
 \fB\-\-lo\fR \fB\-\-logical\-output\fR
 Use logical indexes instead of physical/OS indexes for output (default, except for cpusets which are always physical).
+.TP
+\fB\-n\fR \fB\-\-nodeset\fR
+Interpret both input and output sets as nodesets instead of CPU sets.
+.TP
+\fB\-\-no\fR \fB\-\-nodeset\-output\fR
+Report nodesets instead of CPU sets.
+.TP
+\fB\-\-ni\fR \fB\-\-nodeset\-input\fR
+Interpret input sets as nodesets instead of CPU sets.
 .TP
 \fB\-N \-\-number-of <type|depth>\fR
 Report the number of objects of the given type or depth that intersect the CPU set.
