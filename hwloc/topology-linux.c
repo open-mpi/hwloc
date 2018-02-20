@@ -2351,20 +2351,15 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
     has_sysfs_hugepages = 1;
   }
 
-  if (topology->is_thissystem || pagesize_env) {
-    /* we cannot report any page_type info unless we have the page size.
-     * we'll take it either from the system if local, or from the debug env variable
-     */
-    memory->page_types_len = types;
-    memory->page_types = calloc(types, sizeof(*memory->page_types));
-  }
+  memory->page_types_len = types;
+  memory->page_types = calloc(types, sizeof(*memory->page_types));
+  memory->page_types[0].size = data->pagesize; /* might be overwritten later by /proc/meminfo or sysfs */
 
   if (topology->is_thissystem) {
     /* Get the page and hugepage sizes from sysconf */
 #if HAVE_DECL__SC_LARGE_PAGESIZE
     memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-    memory->page_types[0].size = data->pagesize; /* might be overwritten later by /proc/meminfo or sysfs */
   }
 
   hwloc_parse_meminfo_info(data, "/proc/meminfo",
