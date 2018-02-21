@@ -239,6 +239,14 @@ int main(void)
   hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS);
   hwloc_topology_check(topology);
   check(0, 1, 2, 8);
+  printf("restricting with invalid flags\n");
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS);
+  assert(err == -1);
+  assert(errno == EINVAL);
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
+  assert(err == -1);
+  assert(errno == EINVAL);
+
   hwloc_topology_destroy(topology);
 
   hwloc_bitmap_free(cpuset);

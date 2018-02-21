@@ -2096,6 +2096,7 @@ enum hwloc_restrict_flags_e {
 
   /** \brief Restrict by nodeset instead of CPU set.
    * Only keep objects whose nodeset is included or partially included in the given set.
+   * This flag may not be used with ::HWLOC_RESTRICT_FLAG_BYNODESET.
    */
   HWLOC_RESTRICT_FLAG_BYNODESET =  (1<<3),
 

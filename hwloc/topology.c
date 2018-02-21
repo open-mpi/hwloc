@@ -3776,11 +3776,18 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
     return -1;
   }
 
-  /* cannot use MEMLESS without BYNODESET */
-  if ((flags & (HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS))
-      == HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS) {
-    errno = EINVAL;
-    return -1;
+  if (flags & HWLOC_RESTRICT_FLAG_BYNODESET) {
+    /* cannot use CPULESS with BYNODESET */
+    if (flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS) {
+      errno = EINVAL;
+      return -1;
+    }
+  } else {
+    /* cannot use MEMLESS without BYNODESET */
+    if (flags & HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS) {
+      errno = EINVAL;
+      return -1;
+    }
   }
 
   /* make sure we'll keep something in the topology */
