@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2017 Inria.  All rights reserved.
+ * Copyright © 2011-2018 Inria.  All rights reserved.
  * Copyright © 2011 Université Bordeaux.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -36,7 +36,7 @@ static void print_distances(const struct hwloc_distances_s *distances)
   }
 }
 
-static void check(int has_groups, unsigned nbnodes, unsigned nbcores, unsigned nbpus)
+static void check(unsigned nbgroups, unsigned nbnodes, unsigned nbcores, unsigned nbpus)
 {
   int depth;
   unsigned nb;
@@ -44,21 +44,21 @@ static void check(int has_groups, unsigned nbnodes, unsigned nbcores, unsigned n
 
   /* sanity checks */
   depth = hwloc_topology_get_depth(topology);
-  assert(depth == 3 + has_groups);
+  assert(depth == 3 + (nbgroups > 0));
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
   assert(depth == HWLOC_TYPE_DEPTH_NUMANODE);
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP);
-  assert(depth == (has_groups ? 1 : HWLOC_TYPE_DEPTH_UNKNOWN));
+  assert(depth == ((nbgroups > 0) ? 1 : HWLOC_TYPE_DEPTH_UNKNOWN));
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_CORE);
-  assert(depth == 1 + has_groups);
+  assert(depth == 1 + (nbgroups > 0));
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
-  assert(depth == 2 + has_groups);
+  assert(depth == 2 + (nbgroups > 0));
 
   /* actual checks */
   nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
   assert(nb == nbnodes);
   nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_GROUP);
-  assert(nb == (has_groups ? nbnodes : 0));
+  assert(nb == nbgroups);
   nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
   assert(nb == nbcores);
   nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU);
@@ -137,7 +137,7 @@ int main(void)
 
   /* entire topology */
   printf("starting from full topology\n");
-  check(1, 3, 6, 24);
+  check(3, 3, 6, 24);
   check_distances(3, 6);
 
   /* restrict to nothing, impossible */
@@ -149,7 +149,7 @@ int main(void)
   hwloc_bitmap_only(cpuset, 24);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(err < 0 && errno == EINVAL);
-  check(1, 3, 6, 24);
+  check(3, 3, 6, 24);
   check_distances(3, 6);
 
   /* restrict to everything, will do nothing */
@@ -157,7 +157,7 @@ int main(void)
   hwloc_bitmap_fill(cpuset);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
-  check(1, 3, 6, 24);
+  check(3, 3, 6, 24);
   check_distances(3, 6);
 
   /* remove a single pu (second PU of second core of second node) */
@@ -166,7 +166,7 @@ int main(void)
   hwloc_bitmap_clr(cpuset, 13);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
-  check(1, 3, 6, 23);
+  check(3, 3, 6, 23);
   check_distances(3, 6);
 
   /* remove the entire second core of first node */
@@ -175,7 +175,7 @@ int main(void)
   hwloc_bitmap_clr_range(cpuset, 4, 7);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
-  check(1, 3, 5, 19);
+  check(3, 3, 5, 19);
   check_distances(3, 5);
 
   /* remove the entire third node */
@@ -184,7 +184,7 @@ int main(void)
   hwloc_bitmap_clr_range(cpuset, 16, 23);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
-  check(1, 3, 3, 11);
+  check(3, 3, 3, 11);
   check_distances(3, 3);
 
   /* only keep three PUs (first and last of first core, and last of last core of second node) */
