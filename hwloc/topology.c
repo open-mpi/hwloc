@@ -3680,7 +3680,7 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
       && hwloc_bitmap_iszero(obj->cpuset)
       && (obj->type != HWLOC_OBJ_NUMANODE || (flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS))) {
     /* remove object */
-    hwloc_debug("%s", "\nRemoving object during restrict");
+    hwloc_debug("%s", "\nRemoving object during restrict by cpuset");
     hwloc_debug_print_object(0, obj);
 
     if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
@@ -3741,7 +3741,7 @@ restrict_object_by_nodeset(hwloc_topology_t topology, unsigned long flags, hwloc
       && hwloc_bitmap_iszero(obj->nodeset)
       && (obj->type != HWLOC_OBJ_PU || (flags & HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS))) {
     /* remove object */
-    hwloc_debug("%s", "\nRemoving object during restrict");
+    hwloc_debug("%s", "\nRemoving object during restrict by nodeset");
     hwloc_debug_print_object(0, obj);
 
     if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
