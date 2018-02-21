@@ -224,6 +224,23 @@ int main(void)
   hwloc_topology_check(topology);
   hwloc_topology_destroy(topology);
 
+  /* check memory-based restricting */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:3 core:2 pu:4");
+  hwloc_topology_load(topology);
+  printf("restricting bynodeset to two numa nodes\n");
+  hwloc_bitmap_zero(cpuset);
+  hwloc_bitmap_set_range(cpuset, 1, 2);
+  hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET);
+  hwloc_topology_check(topology);
+  check(3, 2, 6, 24);
+  printf("further restricting bynodeset to a single numa node\n");
+  hwloc_bitmap_only(cpuset, 1);
+  hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS);
+  hwloc_topology_check(topology);
+  check(0, 1, 2, 8);
+  hwloc_topology_destroy(topology);
+
   hwloc_bitmap_free(cpuset);
 
   return 0;
