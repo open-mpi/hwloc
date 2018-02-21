@@ -46,14 +46,14 @@ once during boot and have the main (non-privileged) hwloc library gather
 information from these human-readable files.
 .
 .PP
-\fBhwloc-dump-hwdata is currently only useful on Intel Knights Landing
-Xeon Phi platforms\fR.
+\fBhwloc-dump-hwdata is currently only useful for Intel Xeon Phi processors\fR
+(Knights Landing and Knights Mill).
 .
 .PP
 The current list of dumped information is:
 .
 .TP 5
-\fBIntel Knights Landing memory, cache and clustering configuration\fR
+\fBIntel Xeon Phi processor memory, cache and clustering configuration\fR
 gathered from specific SMBIOS entries such as
 \fI/sys/firmware/dmi/entries/14-*\fR and
 \fI/sys/firmware/dmi/entries/160-*\fR,
