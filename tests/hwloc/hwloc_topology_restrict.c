@@ -231,12 +231,14 @@ int main(void)
   printf("restricting bynodeset to two numa nodes\n");
   hwloc_bitmap_zero(cpuset);
   hwloc_bitmap_set_range(cpuset, 1, 2);
-  hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET);
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET);
+  assert(!err);
   hwloc_topology_check(topology);
   check(3, 2, 6, 24);
   printf("further restricting bynodeset to a single numa node\n");
   hwloc_bitmap_only(cpuset, 1);
-  hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS);
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS);
+  assert(!err);
   hwloc_topology_check(topology);
   check(0, 1, 2, 8);
   printf("restricting with invalid flags\n");
