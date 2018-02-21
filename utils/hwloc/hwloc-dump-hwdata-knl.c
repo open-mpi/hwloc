@@ -232,7 +232,7 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
     end = file_buf+size;
     if (!is_phi_group(h, end)) {
         printf("  Failed to find Phi group\n");
-        fprintf(stderr, "SMBIOS table does not contain KNL entries\n");
+        fprintf(stderr, "SMBIOS table does not contain Xeon Phi entries\n");
         return -1;
     }
     printf("  Found Phi group\n");
@@ -249,7 +249,7 @@ static int process_smbios_group(const char *input_fsroot, char *dir_name, struct
     for (; p < end; i++, p+=3) {
         struct smbios_group_entry *e = (struct smbios_group_entry*)p;
         data->knl_types[i] = e->type;
-        printf("    Found KNL type = %d\n", e->type);
+        printf("    Found Xeon Phi type = %d\n", e->type);
     }
 
     data->type_count = i;
@@ -278,7 +278,7 @@ static int process_knl_entry(const char *input_fsroot, char *dir_name, struct pa
     if (h->member_id & KNL_MEMBER_ID_GENERAL) {
         struct knl_general_info *info =
             (struct knl_general_info*) (file_buf+SMBIOS_KNL_HEADER_SIZE);
-        printf("  Getting general KNL info\n");
+        printf("  Getting general Xeon Phi info\n");
         data->cluster_mode = info->cluster_mode;
         data->memory_mode = info->memory_mode;
         data->cache_info = info->cache_info;
@@ -295,11 +295,11 @@ static int process_knl_entry(const char *input_fsroot, char *dir_name, struct pa
                 printf("  MCDRAM info size is set to 0, falling back to known size\n");
                 struct_size = sizeof(*mi);
             }
-            printf("  Getting MCDRAM KNL info. Count=%d struct size=%d\n",
+            printf("  Getting Xeon Phi MCDRAM info. Count=%d struct size=%d\n",
                    (int)info->mcdram_info_count, struct_size);
             for ( ; i < info->mcdram_info_count; i++) {
                 if ((char*)mi >= end) {
-                    fprintf(stderr, "SMBIOS KNL entry is too small\n");
+                    fprintf(stderr, "SMBIOS Xeon Phi entry is too small\n");
                     return -1;
                 }
                 printf("  MCDRAM controller %d\n", mi->controller);
@@ -473,7 +473,7 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
     char path[PATH_SIZE];
     int err;
 
-    printf("Dumping KNL SMBIOS Memory-Side Cache information:\n");
+    printf("Dumping Xeon Phi SMBIOS Memory-Side Cache information:\n");
 
     snprintf(path, PATH_SIZE-1, "%s/" KERNEL_SMBIOS_SYSFS, input_fsroot);
     path[PATH_SIZE-1] = 0;
@@ -484,7 +484,7 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
         return -1;
     }
 
-    /* process KNL entries
+    /* process Xeon Phi entries
      * start with group (type 14, dash os to omit 140 types) then find SMBIOS types for
      * Knights Landing mcdram indofrmation
      */
@@ -499,12 +499,12 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
     }
 
     if (!data.type_count) {
-      fprintf (stderr, "  Couldn't find any KNL information.\n");
+      fprintf (stderr, "  Couldn't find any Xeon Phi information.\n");
       closedir(d);
       return -1;
     }
 
-    /* We probably have KNL type identifiers here */
+    /* We probably have Xeon Phi type identifiers here */
     for (i = 0; i < data.type_count; i++) {
         char tab[16] = {0};
         int l = snprintf(tab, sizeof(tab)-1, "%d-", data.knl_types[i]);
