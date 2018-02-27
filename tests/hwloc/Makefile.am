@@ -4,7 +4,7 @@
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
-AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS) -DXMLTESTDIR=\"$(abs_top_srcdir)/tests/hwloc/xml/\"
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 SUBDIRS = . ports xml
