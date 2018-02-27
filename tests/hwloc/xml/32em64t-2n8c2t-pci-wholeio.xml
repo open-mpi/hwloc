@@ -123,7 +123,7 @@
         <object type="PCIDev" gp_index="79" pci_busid="0000:00:1f.2" pci_type="0106 [8086:1d02] [00d9:0062] 06" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="C600/X79 series chipset 6-Port SATA AHCI Controller"/>
-          <object type="OSDev" gp_index="80" name="sda" osdev_type="0"/>
+          <object type="OSDev" gp_index="80" name="sda" subtype="Disk" osdev_type="0"/>
         </object>
       </object>
     </object>
@@ -233,6 +233,54 @@
           <object type="PCIDev" gp_index="135" pci_busid="0000:84:00.0" pci_type="0302 [10de:1094] [00de:0088] a1" pci_link_speed="0.000000">
             <info name="PCIVendor" value="NVIDIA Corporation"/>
             <info name="PCIDevice" value="Tesla M2075 Dual-Slot Computing Processor Module"/>
+            <object type="OSDev" gp_index="136" name="cuda0" subtype="CUDA" osdev_type="5">
+              <info name="Backend" value="CUDA"/>
+              <info name="GPUVendor" value="NVIDIA Corporation"/>
+              <info name="GPUModel" value="Tesla K40m"/>
+              <info name="CUDAGlobalMemorySize" value="11796032"/>
+              <info name="CUDAL2CacheSize" value="1536"/>
+              <info name="CUDAMultiProcessors" value="15"/>
+              <info name="CUDACoresPerMP" value="192"/>
+              <info name="CUDASharedMemorySizePerMP" value="48"/>
+            </object>
+            <object type="OSDev" gp_index="137" name="card0" osdev_type="1"/>
+          </object>
+          <object type="PCIDev" gp_index="138" pci_busid="0000:84:00.1" pci_type="0300 [1002:6798] [174b:e208] 00" pci_link_speed="0.000000">
+            <info name="PCIVendor" value="Advanced Micro Devices, Inc. [AMD/ATI]"/>
+            <info name="PCIDevice" value="Tahiti XT [Radeon HD 7970/8970 OEM / R9 280X]"/>
+            <object type="OSDev" gp_index="139" name="opencl0d1" subtype="OpenCL" osdev_type="5">
+              <info name="Backend" value="OpenCL"/>
+              <info name="OpenCLDeviceType" value="GPU"/>
+              <info name="GPUVendor" value="Advanced Micro Devices, Inc."/>
+              <info name="GPUModel" value="AMD Radeon R9 200 / HD 7900 Series"/>
+              <info name="OpenCLPlatformIndex" value="0"/>
+              <info name="OpenCLPlatformName" value="AMD Accelerated Parallel Processing"/>
+              <info name="OpenCLPlatformDeviceIndex" value="1"/>
+              <info name="OpenCLComputeUnits" value="32"/>
+              <info name="OpenCLGlobalMemorySize" value="3087360"/>
+            </object>
+          </object>
+          <object type="PCIDev" gp_index="140" pci_busid="0000:04:00.0" pci_type="0207 [15b3:1013] [15b3:0013] 00" pci_link_speed="0.000000">
+            <info name="PCIVendor" value="Mellanox Technologies"/>
+            <info name="PCIDevice" value="MT27700 Family [ConnectX-4]"/>
+            <object type="OSDev" gp_index="141" name="ib0" osdev_type="2">
+              <info name="Address" value="80:00:00:26:fe:80:00:00:00:00:00:00:24:8a:07:03:00:1e:39:fe"/>
+              <info name="Port" value="1"/>
+            </object>
+            <object type="OSDev" gp_index="142" name="mlx5_0" osdev_type="3">
+              <info name="NodeGUID" value="248a:0703:001e:39fe"/>
+              <info name="SysImageGUID" value="248a:0703:001e:39fe"/>
+              <info name="Port1State" value="4"/>
+              <info name="Port1LID" value="0x1"/>
+              <info name="Port1LMC" value="0"/>
+              <info name="Port1GID0" value="fe80:0000:0000:0000:248a:0703:001e:39fe"/>
+            </object>
+          </object>
+          <object type="PCIDev" gp_index="143" pci_busid="0000:84:00.2" pci_type="1180 [8086:9d62] [1028:07a0] 21" pci_link_speed="0.000000">
+            <info name="PCIVendor" value="Intel Corporation"/>
+            <info name="PCIDevice" value="Sunrise Point-LP Serial IO I2C Controller #2"/>
+            <object type="OSDev" gp_index="144" name="dma2chan0" osdev_type="4"/>
+            <object type="OSDev" gp_index="145" name="dma2chan1" osdev_type="4"/>
           </object>
         </object>
       </object>
