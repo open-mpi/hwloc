@@ -18,6 +18,11 @@ static void check(hwloc_topology_t topology, hwloc_obj_t obj, int verbose)
   int depth;
   int err;
 
+  printf("  checking %s L#%u %s%s%s...\n",
+	 hwloc_obj_type_string(obj->type), obj->logical_index,
+	 obj->subtype ? "(" : "",
+	 obj->subtype ? obj->subtype : "",
+	 obj->subtype ? ") " : "");
   err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, verbose);
   assert(err > 0);
   err = hwloc_type_sscanf(buffer, &type, &attr, sizeof(attr));
@@ -49,8 +54,7 @@ static void check(hwloc_topology_t topology, hwloc_obj_t obj, int verbose)
     check(topology, child, verbose);
 }
 
-/* check whether type_sscanf() understand what type_snprintf() wrote */
-int main(void)
+static void check_topo(void)
 {
   int err;
   hwloc_topology_t topology;
@@ -65,4 +69,15 @@ int main(void)
   check(topology, hwloc_get_root_obj(topology), 1);
 
   hwloc_topology_destroy(topology);
+}
+
+/* check whether type_sscanf() understand what type_snprintf() wrote */
+int main(void)
+{
+  printf("testing the local topology ...\n");
+  check_topo();
+
+  printf("testing topology 32em64t-2n8c2t-pci-wholeio.xml ...\n");
+  putenv("HWLOC_XMLFILE=" XMLTESTDIR "/32em64t-2n8c2t-pci-wholeio.xml");
+  check_topo();
 }
