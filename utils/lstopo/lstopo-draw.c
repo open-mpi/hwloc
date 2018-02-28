@@ -630,7 +630,7 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     break;
 
   case HWLOC_OBJ_NUMANODE:
-    if (lstopo_numa_disallowed(loutput, obj)) {
+    if (loutput->show_disallowed && lstopo_numa_disallowed(loutput, obj)) {
       s->bg = DISALLOWED_COLOR;
     } else if (lstopo_numa_binding(loutput, obj)) {
       s->bg = BINDING_COLOR;
@@ -659,7 +659,7 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     break;
 
   case HWLOC_OBJ_PU:
-    if (lstopo_pu_disallowed(loutput, obj)) {
+    if (loutput->show_disallowed && lstopo_pu_disallowed(loutput, obj)) {
       s->bg = DISALLOWED_COLOR;
     } else if (lstopo_pu_binding(loutput, obj)) {
       s->bg = BINDING_COLOR;

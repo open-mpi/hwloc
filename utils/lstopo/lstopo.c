@@ -503,6 +503,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-attrs=[<type,.>] Do not display attributes for the given object types\n");
   fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
+  fprintf (where, "  --binding-color=none    Do not colorize PU and NUMA nodes according to the binding\n");
+  fprintf (where, "  --disallowed-color=none Do not colorize disallowed PU and NUMA nodes\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --export-xml-flags <n>\n"
 		  "                        Set flags during the XML topology export\n");
@@ -630,6 +632,9 @@ main (int argc, char *argv[])
     loutput.show_indexes[i] = 1;
     loutput.show_attrs[i] = 1;
   }
+
+  loutput.show_binding = 1;
+  loutput.show_disallowed = 1;
 
   /* enable verbose backends */
   putenv((char *) "HWLOC_XML_VERBOSE=1");
@@ -838,6 +843,10 @@ main (int argc, char *argv[])
         }
       }
 
+      else if (!strcmp (argv[0], "--binding-color=none"))
+        loutput.show_binding = 0;
+      else if (!strcmp (argv[0], "--disallowed-color=none"))
+        loutput.show_disallowed = 0;
       else if (!strcmp (argv[0], "--no-index")
 	       || !strcmp (argv[0], "--index")
 	       || !strcmp (argv[0], "--no-attrs")

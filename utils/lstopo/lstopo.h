@@ -69,6 +69,8 @@ struct lstopo_output {
   unsigned no_half_lines; /* set by ASCII backend because it cannot write between lines of the terminal */
   int show_indexes[HWLOC_OBJ_TYPE_MAX];
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
+  int show_binding;
+  int show_disallowed;
 
   /* draw internal data */
   void *backend_data;
