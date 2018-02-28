@@ -111,16 +111,16 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     free(cpusetstr);
   }
 
-  /* annotate if the PU/NUMA is forbidden/binding */
+  /* annotate if the PU/NUMA is disallowed/binding */
   if (verbose_mode >= 2) {
     if (l->type == HWLOC_OBJ_PU) {
-      if (lstopo_pu_forbidden(loutput, l))
-	fprintf(output, " (forbidden)");
+      if (lstopo_pu_disallowed(loutput, l))
+	fprintf(output, " (disallowed)");
       else if (lstopo_pu_binding(loutput, l))
 	fprintf(output, " (binding)");
     } else if (l->type == HWLOC_OBJ_NUMANODE) {
-      if (lstopo_numa_forbidden(loutput, l))
-	fprintf(output, " (forbidden)");
+      if (lstopo_numa_disallowed(loutput, l))
+	fprintf(output, " (disallowed)");
       else if (lstopo_numa_binding(loutput, l))
 	fprintf(output, " (binding)");
     }
