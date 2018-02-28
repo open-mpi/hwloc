@@ -873,7 +873,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lud->width = lud->textwidth + gridsize + overlaidoffset + FONTGRIDSIZE;
     lud->height = fontsize + gridsize + overlaidoffset + FONTGRIDSIZE;
     place_children(loutput, level,
-		   gridsize, fontsize + gridsize + FONTGRIDSIZE);
+		   gridsize, lud->height);
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
@@ -973,24 +973,29 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned myheight = fontsize + gridsize + FONTGRIDSIZE; /* totheight also contains children outside of this actual cache box */
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
     lud->width = lud->textwidth + gridsize + FONTGRIDSIZE;
-    lud->height = myheight;
+    lud->height = gridsize + fontsize + FONTGRIDSIZE;
     place_children(loutput, level,
-		   0, myheight + gridsize);
+		   0, lud->height + gridsize);
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
     struct lstopo_style style;
     unsigned totwidth;
     unsigned myoff = 0;
+    unsigned myheight;
 
     /* restore our size that was computed during prepare */
     totwidth = lud->width;
+
+    /* totheight also contains children outside of this actual cache box,
+     * recompute our height without outside children (just like above)
+     */
+    myheight = gridsize + fontsize + FONTGRIDSIZE;
 
     if (lud->above_children.kinds) {
       /* display above_children even above the cache itself */
@@ -1021,7 +1026,7 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     lud->width = lud->textwidth + gridsize + FONTGRIDSIZE;
     lud->height = gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext;
     place_children(loutput, level,
-		   gridsize, gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext);
+		   gridsize, lud->height);
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
