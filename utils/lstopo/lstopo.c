@@ -837,45 +837,56 @@ main (int argc, char *argv[])
         }
       }
 
-      else if (!strcmp (argv[0], "--no-index")
-	       || !strcmp (argv[0], "--index")
-	       || !strcmp (argv[0], "--no-attrs")
-	       || !strcmp (argv[0], "--attrs")) {
-	int flag = argv[0][2] != 'n';
-	int *array = argv[0][5-flag*3] == 'a' ? loutput.show_attrs : loutput.show_indexes;
-	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
-	  array[i] = flag;
-      }
+      else if (!strncmp (argv[0], "--no-index", 10)
+	       || !strncmp (argv[0], "--index", 7)
+	       || !strncmp (argv[0], "--no-attrs", 10)
+	       || !strncmp (argv[0], "--attrs", 7)) {
+	int enable = argv[0][2] != 'n';
+	const char *kind = enable ? argv[0]+2 : argv[0]+5;
+	const char *end;
+	int *array;
+	if (*kind == 'a') {
+	  array = loutput.show_attrs;
+	  end = kind+5;
+	} else if (*kind == 'i') {
+	  array = loutput.show_indexes;
+	  end = kind+5;
+	} else {
+	  abort();
+	}
+	if (!*end) {
+	  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	    array[i] = enable;
 
-      else if (!strncmp (argv[0], "--no-index=", 11)
-	       || !strncmp (argv[0], "--index=", 8)
-	       || !strncmp (argv[0], "--no-attrs=", 11)
-	       || !strncmp (argv[0], "--attrs=", 8)) {
-	int flag = argv[0][2] != 'n';
-	int *array = argv[0][5-flag*3] == 'a' ? loutput.show_attrs : loutput.show_indexes;
-	char *tmp = argv[0] + (flag ? 8 : 11);
-	while (tmp) {
-	  char *end = strchr(tmp, ',');
-	  hwloc_obj_type_t type;
-	  if (end)
-	    *end = '\0';
-	  if (hwloc_type_sscanf(tmp, &type, NULL, 0) < 0) {
-	    if (!hwloc_strncasecmp(tmp, "cache", 5)) {
-	      for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
-		if (hwloc_obj_type_is_cache(i))
-		  array[i] = flag;
-	    } else if (!hwloc_strncasecmp(tmp, "io", 2)) {
-	      for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
-		if (hwloc_obj_type_is_io(i))
-		  array[i] = flag;
-	    } else
-	      fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
-	  } else
-	    array[type] = flag;
-	  if (!end)
-	    break;
-	  tmp = end+1;
-        }
+	} else if (*end == '=') {
+	  const char *tmp = end+1;
+	  while (tmp) {
+	    char *sep = strchr(tmp, ',');
+	    hwloc_obj_type_t type;
+	    if (sep)
+	      *sep = '\0';
+	    if (hwloc_type_sscanf(tmp, &type, NULL, 0) < 0)
+	      if (!hwloc_strncasecmp(tmp, "cache", 5)) {
+		for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+		  if (hwloc_obj_type_is_cache(i))
+		    array[i] = enable;
+	      } else if (!hwloc_strncasecmp(tmp, "io", 2)) {
+		for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+		  if (hwloc_obj_type_is_io(i))
+		    array[i] = enable;
+	      } else
+		fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
+	    else
+	      array[type] = enable;
+	    if (!sep)
+	      break;
+	    tmp = sep+1;
+	  }
+
+	} else {
+	  fprintf(stderr, "Unexpected character %c in option %s\n", *end, argv[0]);
+	  goto out_usagefailure;
+	}
       }
 
       else if (!strncmp (argv[0], "--children-order=", 18)) {
