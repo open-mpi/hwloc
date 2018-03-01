@@ -92,12 +92,18 @@ fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int s
   fprintf(file, "4 0 %d %u -1 0 %d 0.0 4 %d %d %u %u %s\\001\n", color, depth, size, size * 10, len * size * 10, x, y + size * 10, text);
 }
 
+static void
+fig_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned fontsize, unsigned *width)
+{
+  *width = (textlength * fontsize * 3) / 4;
+}
+
 static struct draw_methods fig_draw_methods = {
   fig_declare_color,
   fig_box,
   fig_line,
   fig_text,
-  NULL, /* textsize not supported, fallback to default estimation in get_textsize() */
+  fig_textsize,
 };
 
 int

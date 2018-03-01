@@ -135,12 +135,13 @@ get_textwidth(void *output,
 	      unsigned fontsize)
 {
   struct lstopo_output *loutput = output;
-  if (loutput->methods->textsize) {
-    unsigned width;
-    loutput->methods->textsize(output, text, length, fontsize, &width);
-    return width;
-  }
-  return (length * fontsize * 3) / 4;
+  unsigned width;
+
+#ifdef HWLOC_DEBUG
+  assert(loutput->methods->textsize);
+#endif
+  loutput->methods->textsize(output, text, length, fontsize, &width);
+  return width;
 }
 
 /* preferred width/height compromise */
