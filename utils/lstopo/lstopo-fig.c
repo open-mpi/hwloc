@@ -57,6 +57,9 @@ fig_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsign
 {
   FILE *file = loutput->file;
 
+  if (!width || !height)
+    return;
+
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   width *= FIG_FACTOR;
