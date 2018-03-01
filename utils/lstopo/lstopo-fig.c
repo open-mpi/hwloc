@@ -78,6 +78,9 @@ fig_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsig
   fprintf(file, "\n");
 }
 
+/* assume character width is half their height on average */
+#define FIG_TEXT_WIDTH(length, fontsize) (((length) * (fontsize))/2)
+
 static void
 fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
@@ -89,13 +92,14 @@ fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int s
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   size = (size * 16) / 10;
-  fprintf(file, "4 0 %d %u -1 0 %d 0.0 4 %d %d %u %u %s\\001\n", color, depth, size, size * 10, len * size * 10, x, y + size * 10, text);
+  fprintf(file, "4 0 %d %u -1 0 %d 0.0 4 %d %d %u %u %s\\001\n", color, depth, size, size * FIG_FACTOR, FIG_TEXT_WIDTH(len, size) * FIG_FACTOR, x, y + size * 10, text);
 }
 
 static void
 fig_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned fontsize, unsigned *width)
 {
-  *width = (textlength * fontsize * 3) / 4;
+  fontsize = (fontsize * 16) / 10;
+  *width = FIG_TEXT_WIDTH(textlength, fontsize);
 }
 
 static struct draw_methods fig_draw_methods = {
