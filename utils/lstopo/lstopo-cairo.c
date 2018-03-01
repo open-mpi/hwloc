@@ -138,7 +138,6 @@ static void topo_cairo_declare_color (struct lstopo_output *loutput __hwloc_attr
 
 #ifdef CAIRO_HAS_XLIB_SURFACE
 /* X11 back-end */
-static struct draw_methods x11_draw_methods;
 
 struct lstopo_x11_output {
   struct lstopo_cairo_output coutput; /* must be at the beginning */
@@ -490,7 +489,6 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 
 #ifdef CAIRO_HAS_PNG_FUNCTIONS
 /* PNG back-end */
-static struct draw_methods png_draw_methods;
 
 static struct draw_methods png_draw_methods = {
   topo_cairo_declare_color,
@@ -551,7 +549,6 @@ output_png(struct lstopo_output *loutput, const char *filename)
 
 #ifdef CAIRO_HAS_PDF_SURFACE
 /* PDF back-end */
-static struct draw_methods pdf_draw_methods;
 
 static struct draw_methods pdf_draw_methods = {
   topo_cairo_declare_color,
@@ -612,7 +609,6 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
 
 #ifdef CAIRO_HAS_PS_SURFACE
 /* PS back-end */
-static struct draw_methods ps_draw_methods;
 
 static struct draw_methods ps_draw_methods = {
   topo_cairo_declare_color,
@@ -673,7 +669,6 @@ output_ps(struct lstopo_output *loutput, const char *filename)
 
 #ifdef CAIRO_HAS_SVG_SURFACE
 /* SVG back-end */
-static struct draw_methods svg_draw_methods;
 
 static struct draw_methods svg_draw_methods = {
   topo_cairo_declare_color,

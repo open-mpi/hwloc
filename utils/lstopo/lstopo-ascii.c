@@ -67,8 +67,6 @@ struct lstopo_ascii_output {
   int height;
 };
 
-static struct draw_methods ascii_draw_methods;
-
 #ifdef HWLOC_HAVE_LIBTERMCAP
 /* Standard terminfo strings */
 static char *initc = NULL, *initp = NULL;

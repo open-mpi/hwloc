@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -49,8 +49,6 @@ lcolor_to_brush(const struct lstopo_color *lcolor)
   fprintf(stderr, "color #%02x%02x%02x not declared\n", r, g, b);
   exit(EXIT_FAILURE);
 }
-
-struct draw_methods windows_draw_methods;
 
 static struct lstopo_windows_output the_output;
 static int state, control;
