@@ -78,6 +78,7 @@ fig_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsig
   fprintf(file, "\n");
 }
 
+#define FIG_FONTSIZE_SCALE(size) (((size) * 11) / 10)
 /* assume character width is half their height on average */
 #define FIG_TEXT_WIDTH(length, fontsize) (((length) * (fontsize))/2)
 
@@ -91,14 +92,18 @@ fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int s
   color = lcolor->private.fig.color;
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
-  size = (size * 16) / 10;
+  /* move the origin of the text away from the box corner */
+  x += (size * FIG_FACTOR * 2) / 10;
+  y += (size * FIG_FACTOR * 4) / 10;
+
+  size = FIG_FONTSIZE_SCALE(size);
   fprintf(file, "4 0 %d %u -1 0 %d 0.0 4 %d %d %u %u %s\\001\n", color, depth, size, size * FIG_FACTOR, FIG_TEXT_WIDTH(len, size) * FIG_FACTOR, x, y + size * 10, text);
 }
 
 static void
 fig_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned fontsize, unsigned *width)
 {
-  fontsize = (fontsize * 16) / 10;
+  fontsize = FIG_FONTSIZE_SCALE(fontsize);
   *width = FIG_TEXT_WIDTH(textlength, fontsize);
 }
 
