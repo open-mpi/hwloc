@@ -294,20 +294,30 @@ merge(struct lstopo_ascii_output *disp, int x, int y, int or, int andnot, int r,
   put(disp, x, y, from_directions(disp, directions), -1, -1, -1, r, g, b);
 }
 
+/* 10 is the only allowed gridsize/fontsize.
+ * vertically, it's a line of text.
+ * horizontally, it's 2 chars (so that we get a space between text and boxes
+ */
+#define SCALE 10
+/* convert generic coordinates to ASCII coordinates */
+#define XSCALE(x) ((x)*2/SCALE)
+#define YSCALE(y) ((y)/SCALE)
+/* reverse conversion from text to generic x coordinate */
+#define XSCALE_REVERSE(x) ((x)*SCALE/2)
+
 /* Now we can implement the standard drawing helpers */
 static void
 ascii_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned width, unsigned y1, unsigned height)
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
-  unsigned gridsize = loutput->gridsize;
   unsigned i, j;
   unsigned x2, y2;
 
-  x1 /= (gridsize/2);
-  width /= (gridsize/2);
-  y1 /= gridsize;
-  height /= gridsize;
+  x1 = XSCALE(x1);
+  width = XSCALE(width);
+  y1 = YSCALE(y1);
+  height = YSCALE(height);
   x2 = x1 + width - 1;
   y2 = y1 + height - 1;
 
@@ -340,13 +350,12 @@ static void
 ascii_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
-  unsigned gridsize = loutput->gridsize;
   unsigned i, j, z;
 
-  x1 /= (gridsize/2);
-  y1 /= gridsize;
-  x2 /= (gridsize/2);
-  y2 /= gridsize;
+  x1 = XSCALE(x1);
+  y1 = YSCALE(y1);
+  x2 = XSCALE(x2);
+  y2 = YSCALE(y2);
 
   /* Canonicalize coordinates */
   if (x1 > x2) {
@@ -393,10 +402,9 @@ ascii_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
-  unsigned gridsize = loutput->gridsize;
 
-  x /= (gridsize/2);
-  y /= gridsize;
+  x = XSCALE(x);
+  y = YSCALE(y);
 
 #if defined(HAVE_PUTWC) && !defined(__MINGW32__) && !defined(_MSC_VER)
   {
@@ -414,10 +422,9 @@ ascii_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int
 }
 
 static void
-ascii_textsize(struct lstopo_output *loutput, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned fontsize __hwloc_attribute_unused, unsigned *width)
+ascii_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, const char *text __hwloc_attribute_unused, unsigned textlength, unsigned fontsize __hwloc_attribute_unused, unsigned *width)
 {
-  unsigned gridsize = loutput->gridsize;
-  *width = textlength*(gridsize/2);
+  *width = XSCALE_REVERSE(textlength);
 }
 
 static struct draw_methods ascii_draw_methods = {
@@ -440,7 +447,6 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   int term = 0;
   char *tmp;
 #endif
-  unsigned gridsize = loutput->gridsize;
   int width, height;
 
   output = open_output(filename, loutput->overwrite);
@@ -449,9 +455,11 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
     return -1;
   }
 
-  if (gridsize <= 1) { /* we divide by gridsize or gridsize/2 in the code */
-    fprintf(stderr, "ASCII backend requires gridsize > 1\n");
-    return -1;
+  if (loutput->gridsize != 10) {
+    fprintf(stderr, "--gridsize ignored in the ASCII backend.\n");
+  }
+  if (loutput->fontsize && loutput->fontsize != 10) {
+    fprintf(stderr, "--fontsize ignored in the ASCII backend.\n");
   }
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
@@ -493,8 +501,8 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   /* recurse once for preparing sizes and positions */
   loutput->drawing = LSTOPO_DRAWING_PREPARE;
   output_draw(loutput);
-  width = disp.width = (loutput->width + 1) / (gridsize/2);
-  height = disp.height = (loutput->height + 1) / gridsize;
+  width = disp.width = XSCALE(loutput->width + 1);
+  height = disp.height = YSCALE(loutput->height + 1);
   loutput->drawing = LSTOPO_DRAWING_DRAW;
 
   /* terminals usually have narrow characters, so let's make them wider */
