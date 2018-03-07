@@ -616,6 +616,7 @@ main (int argc, char *argv[])
   loutput.backend_data = NULL;
   loutput.methods = NULL;
 
+  loutput.no_half_lines = 0;
   loutput.plain_children_order = 0;
   loutput.fontsize = 10;
   loutput.gridsize = 10;

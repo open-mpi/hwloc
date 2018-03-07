@@ -462,6 +462,9 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
     fprintf(stderr, "--fontsize ignored in the ASCII backend.\n");
   }
 
+  /* cannot write between lines of the terminal */
+  loutput->no_half_lines = 1;
+
 #ifdef HWLOC_HAVE_LIBTERMCAP
   /* If we are outputing to a tty, use colors */
   if (output == stdout && isatty(STDOUT_FILENO)) {

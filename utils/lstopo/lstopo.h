@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2015 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -70,6 +70,7 @@ struct lstopo_output {
   struct draw_methods *methods;
   unsigned width, height; /* total output size */
   unsigned min_pu_textwidth;
+  unsigned no_half_lines; /* set by ASCII backend because it cannot write between lines of the terminal */
   int show_indexes[HWLOC_OBJ_TYPE_MAX];
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
   enum lstopo_drawing_e drawing;

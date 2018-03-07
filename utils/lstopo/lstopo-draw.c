@@ -865,6 +865,8 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     } else {
       overlaidoffset = gridsize/2;
     }
+    if (loutput->no_half_lines)
+      overlaidoffset *= 2;
   }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
