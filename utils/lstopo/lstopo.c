@@ -859,9 +859,18 @@ main (int argc, char *argv[])
 	  hwloc_obj_type_t type;
 	  if (end)
 	    *end = '\0';
-	  if (hwloc_type_sscanf(tmp, &type, NULL, 0) < 0)
-	    fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
-	  else
+	  if (hwloc_type_sscanf(tmp, &type, NULL, 0) < 0) {
+	    if (!hwloc_strncasecmp(tmp, "cache", 5)) {
+	      for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+		if (hwloc_obj_type_is_cache(i))
+		  array[i] = flag;
+	    } else if (!hwloc_strncasecmp(tmp, "io", 2)) {
+	      for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+		if (hwloc_obj_type_is_io(i))
+		  array[i] = flag;
+	    } else
+	      fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
+	  } else
 	    array[type] = flag;
 	  if (!end)
 	    break;
