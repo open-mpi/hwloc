@@ -1038,8 +1038,13 @@ hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwl
 /** \brief Get the first non-I/O ancestor object.
  *
  * Given the I/O object \p ioobj, find the smallest non-I/O ancestor
- * object. This regular object may then be used for binding because
- * its locality is the same as \p ioobj.
+ * object. This object (normal or memory) may then be used for binding
+ * because it has non-NULL CPU and node sets
+ * and because its locality is the same as \p ioobj.
+ *
+ * \note The resulting object is usually a normal object but it could also
+ * be a memory object (e.g. NUMA node) in future platforms if I/O objects
+ * ever get attached to memory instead of CPUs.
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_non_io_ancestor_obj(hwloc_topology_t topology __hwloc_attribute_unused,
