@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -30,7 +30,7 @@ hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
 
-  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN || type == HWLOC_OBJ_MISC)
     return depth;
 
   /* find the highest existing level with type order >= */
@@ -47,7 +47,7 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
 
-  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN || type == HWLOC_OBJ_MISC)
     return depth;
 
   /* find the lowest existing level with type order <= */
