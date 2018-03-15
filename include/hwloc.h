@@ -795,6 +795,10 @@ HWLOC_DECLSPEC int hwloc_get_memory_parents_depth (hwloc_topology_t topology);
  * function returns the depth of the first "present" object typically found
  * inside \p type.
  *
+ * This function is only meaningful for normal object types.
+ * If a memory, I/O or Misc object type is given, the corresponding virtual
+ * depth is always returned (see hwloc_get_type_depth()).
+ *
  * May return ::HWLOC_TYPE_DEPTH_MULTIPLE for ::HWLOC_OBJ_GROUP just like
  * hwloc_get_type_depth().
  */
@@ -806,6 +810,10 @@ hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * If no object of this type is present on the underlying architecture, the
  * function returns the depth of the first "present" object typically
  * containing \p type.
+ *
+ * This function is only meaningful for normal object types.
+ * If a memory, I/O or Misc object type is given, the corresponding virtual
+ * depth is always returned (see hwloc_get_type_depth()).
  *
  * May return ::HWLOC_TYPE_DEPTH_MULTIPLE for ::HWLOC_OBJ_GROUP just like
  * hwloc_get_type_depth().
