@@ -1002,7 +1002,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	goto error_with_object;
       }
     } else if (!obj->nodeset != !obj->complete_nodeset) {
-      /* has some nodeset withot others */
+      /* has some nodeset without others */
       if (obj->type == HWLOC_OBJ_GROUP) {
 	ignored = 1;
       } else {
