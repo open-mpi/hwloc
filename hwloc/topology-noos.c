@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -20,7 +20,7 @@ hwloc_look_noos(struct hwloc_backend *backend)
     /* somebody discovered things */
     return -1;
 
-  nbprocs = hwloc_fallback_nbprocessors(topology);
+  nbprocs = hwloc_fallback_nbprocessors(0);
   if (nbprocs >= 1)
     topology->support.discovery->pu = 1;
   else

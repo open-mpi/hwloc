@@ -4233,7 +4233,7 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
   /* read thissystem info */
   if (topology->is_thissystem) {
     uname(&data->utsname);
-    data->fallback_nbprocessors = hwloc_fallback_nbprocessors(topology); /* errors managed in hwloc_linux_fallback_pu_level() */
+    data->fallback_nbprocessors = hwloc_fallback_nbprocessors(0); /* errors managed in hwloc_linux_fallback_pu_level() */
     data->pagesize = hwloc_getpagesize();
   }
 

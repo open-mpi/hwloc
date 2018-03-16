@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012 Aleksej Saushev, The NetBSD Foundation
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -152,7 +152,7 @@ hwloc_look_netbsd(struct hwloc_backend *backend)
 
   if (!topology->levels[0][0]->cpuset) {
     /* Nobody (even the x86 backend) created objects yet, setup basic objects */
-    int nbprocs = hwloc_fallback_nbprocessors(topology);
+    int nbprocs = hwloc_fallback_nbprocessors(0);
     if (nbprocs >= 1)
       topology->support.discovery->pu = 1;
     else

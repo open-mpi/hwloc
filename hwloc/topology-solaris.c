@@ -980,7 +980,7 @@ hwloc_look_solaris(struct hwloc_backend *backend)
 #endif /* HAVE_LIBKSTAT */
 
   if (!alreadypus) {
-    int nbprocs = hwloc_fallback_nbprocessors (topology);
+    int nbprocs = hwloc_fallback_nbprocessors(0);
     if (nbprocs >= 1)
       topology->support.discovery->pu = 1;
     else

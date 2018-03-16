@@ -1168,9 +1168,11 @@ const struct hwloc_component hwloc_windows_component = {
 };
 
 int
-hwloc_fallback_nbprocessors(struct hwloc_topology *topology __hwloc_attribute_unused) {
+hwloc_fallback_nbprocessors(unsigned flags __hwloc_attribute_unused) {
   int n;
   SYSTEM_INFO sysinfo;
+
+  assert(!flags);
 
   /* by default, ignore groups (return only the number in the current group) */
   GetSystemInfo(&sysinfo);
