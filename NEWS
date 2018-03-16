@@ -22,6 +22,8 @@ Version 2.1.0
 * API
   + Add HWLOC_RESTRICT_FLAG_BYNODESET and _REMOVE_MEMLESS for restricting
     topologies based on some memory nodes.
+* Backends
+  + The x86 now properly handles offline CPUs.
 * Tools
   + Add --nodeset options to hwloc-calc for converting between cpusets and
     nodesets.

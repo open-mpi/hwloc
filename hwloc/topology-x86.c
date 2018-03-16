@@ -1307,7 +1307,7 @@ hwloc_x86_discover(struct hwloc_backend *backend)
     assert(data->nbprocs > 0); /* enforced by hwloc_x86_component_instantiate() */
     topology->support.discovery->pu = 1;
   } else {
-    int nbprocs = hwloc_fallback_nbprocessors(0);
+    int nbprocs = hwloc_fallback_nbprocessors(HWLOC_FALLBACK_NBPROCESSORS_INCLUDE_OFFLINE);
     if (nbprocs >= 1)
       topology->support.discovery->pu = 1;
     else
