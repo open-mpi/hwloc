@@ -1172,7 +1172,7 @@ hwloc_fallback_nbprocessors(unsigned flags __hwloc_attribute_unused) {
   int n;
   SYSTEM_INFO sysinfo;
 
-  assert(!flags);
+  /* TODO handle flags & HWLOC_FALLBACK_NBPROCESSORS_INCLUDE_OFFLINE */
 
   /* by default, ignore groups (return only the number in the current group) */
   GetSystemInfo(&sysinfo);

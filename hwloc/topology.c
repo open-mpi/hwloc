@@ -140,9 +140,23 @@ int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
    have the desired effect.  */
 #ifndef HWLOC_WIN_SYS /* The windows implementation is in topology-windows.c */
 int
-hwloc_fallback_nbprocessors(unsigned flags __hwloc_attribute_unused) {
+hwloc_fallback_nbprocessors(unsigned flags) {
   int n;
-  assert(!flags);
+
+  if (flags & HWLOC_FALLBACK_NBPROCESSORS_INCLUDE_OFFLINE) {
+    /* try to get all CPUs for Linux and Solaris that can handle offline CPUs */
+#if HAVE_DECL__SC_NPROCESSORS_CONF
+    n = sysconf(_SC_NPROCESSORS_CONF);
+#elif HAVE_DECL__SC_NPROC_CONF
+    n = sysconf(_SC_NPROC_CONF);
+#else
+    n = -1;
+#endif
+    if (n != -1)
+      return n;
+  }
+
+  /* try getting only online CPUs, or whatever we can get */
 #if HAVE_DECL__SC_NPROCESSORS_ONLN
   n = sysconf(_SC_NPROCESSORS_ONLN);
 #elif HAVE_DECL__SC_NPROC_ONLN

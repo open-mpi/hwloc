@@ -191,6 +191,8 @@ extern void hwloc_alloc_root_sets(hwloc_obj_t root);
 extern void hwloc_setup_pu_level(struct hwloc_topology *topology, unsigned nb_pus);
 extern int hwloc_get_sysctlbyname(const char *name, int64_t *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);
+
+#define HWLOC_FALLBACK_NBPROCESSORS_INCLUDE_OFFLINE 1 /* by default we try to get only the online CPUs */
 extern int hwloc_fallback_nbprocessors(unsigned flags);
 
 extern int hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2);
