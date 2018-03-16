@@ -161,8 +161,8 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology __hwloc_attribute_un
     nn = -1;
   n = nn;
 #elif defined(HAVE_SYSCTL) && HAVE_DECL_CTL_HW && HAVE_DECL_HW_NCPU
-  static int name[2] = {CTL_HW, HW_NPCU};
-  if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name)), &n)
+  static int name[2] = {CTL_HW, HW_NCPU};
+  if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name), &n))
     n = -1;
 #else
 #ifdef __GNUC__
