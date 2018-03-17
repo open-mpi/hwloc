@@ -17,7 +17,7 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
-Version 1.11.10
+Version 1.11.10 (also included in 2.0.1)
 ---------------
 * Fix detection of cores and hyperthreads on Mac OS X.
 * Serialize pciaccess discovery to fix concurrent topology loads in
