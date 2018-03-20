@@ -18,7 +18,7 @@ release=1
 # requirement is that it must be entirely printable ASCII characters
 # and have no white space.
 
-greek=rc1
+greek=rc2
 
 # The date when this release was created
 
