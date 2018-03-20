@@ -67,6 +67,7 @@ struct lstopo_output {
   unsigned int gridsize, fontsize;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
   unsigned no_half_lines; /* set by ASCII backend because it cannot write between lines of the terminal */
+  int show_text[HWLOC_OBJ_TYPE_MAX];
   int show_indexes[HWLOC_OBJ_TYPE_MAX];
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
   int show_binding;

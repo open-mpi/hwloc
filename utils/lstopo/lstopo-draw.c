@@ -796,7 +796,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   lud->textwidth = 0;
   lud->textxoffset = 0;
 
-  if (!fontsize)
+  if (!fontsize || !loutput->show_text[obj->type])
     return;
 
   /* main object identifier line */
@@ -841,7 +841,7 @@ draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *l
   unsigned gridsize = loutput->gridsize;
   unsigned i;
 
-  if (!fontsize)
+  if (!fontsize || !loutput->show_text[obj->type])
     return;
 
   methods->text(loutput, lcolor, fontsize, depth, x + lud->textxoffset, y, lud->text[0]);
@@ -979,8 +979,12 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
-    lud->width = lud->textwidth + gridsize + FONTGRIDSIZE;
-    lud->height = gridsize + fontsize + FONTGRIDSIZE;
+    lud->width = gridsize;
+    lud->height = gridsize;
+    if (lud->ntext > 0) {
+      lud->width += lud->textwidth + FONTGRIDSIZE;
+      lud->height += fontsize + FONTGRIDSIZE;
+    }
     place_children(loutput, level,
 		   0, lud->height + gridsize);
 
@@ -997,7 +1001,9 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     /* totheight also contains children outside of this actual cache box,
      * recompute our height without outside children (just like above)
      */
-    myheight = gridsize + fontsize + FONTGRIDSIZE;
+    myheight = gridsize;
+    if (lud->ntext > 0)
+      myheight += fontsize + FONTGRIDSIZE;
 
     if (lud->above_children.kinds) {
       /* display above_children even above the cache itself */
@@ -1025,8 +1031,12 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
-    lud->width = lud->textwidth + gridsize + FONTGRIDSIZE;
-    lud->height = gridsize + (fontsize + FONTGRIDSIZE) * lud->ntext;
+    lud->width = gridsize;
+    lud->height = gridsize;
+    if (lud->ntext > 0) {
+      lud->width += lud->textwidth + FONTGRIDSIZE;
+      lud->height += (fontsize + FONTGRIDSIZE) * lud->ntext;
+    }
     place_children(loutput, level,
 		   gridsize, lud->height);
 

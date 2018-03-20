@@ -497,6 +497,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --horiz[=<type,...>]  Horizontal graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --vert[=<type,...>]   Vertical graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --rect[=<type,...>]   Rectangular graphical layout with nearly 4/3 ratio\n");
+  fprintf (where, "  --text[=<type,...>]   Display text for the given object types\n");
+  fprintf (where, "  --no-text[=<type,..>] Do not display text for the given object types\n");
   fprintf (where, "  --index=[<type,...>]  Display indexes for the given object types\n");
   fprintf (where, "  --no-index=[<type,.>] Do not display indexes for the given object types\n");
   fprintf (where, "  --attrs=[<type,...>]  Display attributes for the given object types\n");
@@ -631,6 +633,7 @@ main (int argc, char *argv[])
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
     loutput.show_indexes[i] = 1;
     loutput.show_attrs[i] = 1;
+    loutput.show_text[i] = 1;
   }
 
   loutput.show_binding = 1;
@@ -848,7 +851,9 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--disallowed-color=none"))
         loutput.show_disallowed = 0;
 
-      else if (!strncmp (argv[0], "--no-index", 10)
+      else if (!strncmp (argv[0], "--no-text", 9)
+	       || !strncmp (argv[0], "--text", 6)
+	       || !strncmp (argv[0], "--no-index", 10)
 	       || !strncmp (argv[0], "--index", 7)
 	       || !strncmp (argv[0], "--no-attrs", 10)
 	       || !strncmp (argv[0], "--attrs", 7)) {
@@ -856,7 +861,10 @@ main (int argc, char *argv[])
 	const char *kind = enable ? argv[0]+2 : argv[0]+5;
 	const char *end;
 	int *array;
-	if (*kind == 'a') {
+	if (*kind == 't') {
+	  array = loutput.show_text;
+	  end = kind+4;
+	} else if (*kind == 'a') {
 	  array = loutput.show_attrs;
 	  end = kind+5;
 	} else if (*kind == 'i') {
@@ -967,6 +975,15 @@ main (int argc, char *argv[])
       argc -= opt+1;
       argv += opt+1;
     }
+
+  /* no-text currently not supported for bridges and pci devices:
+   * - pci devices become 1-gridsize-high (unless they contain osdevs),
+   *   causing the bridge link to be too low if text is enabled for bridges.
+   * - bridges move up when there's no text, pci devices aren't linked
+   *   at the middle of the box anymore. not too bad.
+   */
+  loutput.show_text[HWLOC_OBJ_BRIDGE] = 1;
+  loutput.show_text[HWLOC_OBJ_PCI_DEVICE] = 1;
 
   err = hwloc_topology_set_flags(topology, flags);
   if (err < 0) {
