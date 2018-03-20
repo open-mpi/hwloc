@@ -25,6 +25,8 @@ Version 2.0.1
   to the KNL and KNM configuration.
 * Add a heuristic for guessing KNL/KNM memory and cluster modes when
   hwloc-dump-hwdata could not run as root earlier.
+* Add --no-text lstopo option to remove text from some boxes in the
+  graphical output. Mostly useful for removing Group labels.
 * Some minor fixes to memory binding.
 
 
