@@ -29,6 +29,22 @@ Version 2.1.0
     nodesets.
 
 
+Version 2.0.1 (also included in 1.11.10 when relevant)
+-------------
+* Bump the library soname to 15:0:0 to avoid conflicts with hwloc 1.11.x
+  releases. The hwloc 2.0.0 soname was buggy (12:0:0), applications will
+  have to be recompiled.
+* Serialize pciaccess discovery to fix concurrent topology loads in
+  multiple threads.
+* Fix hwloc-dump-hwdata to only process SMBIOS information that correspond
+  to the KNL and KNM configuration.
+* Add a heuristic for guessing KNL/KNM memory and cluster modes when
+  hwloc-dump-hwdata could not run as root earlier.
+* Add --no-text lstopo option to remove text from some boxes in the
+  graphical output. Mostly useful for removing Group labels.
+* Some minor fixes to memory binding.
+
+
 Version 2.0.0
 -------------
 *** The ABI of the library has changed. ***
