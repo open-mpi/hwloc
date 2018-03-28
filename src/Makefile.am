@@ -21,7 +21,7 @@ endif
 
 pluginsdir = @HWLOC_PLUGINS_DIR@
 plugins_LTLIBRARIES =
-plugins_ldflags = -module -avoid-version -lltdl
+plugins_ldflags = -module -avoid-version $(HWLOC_LTDL_LIBS)
 # Beware that files are not rebuilt automatically when reconfiguring with different paths in these flags.
 AM_CPPFLAGS += -DHWLOC_PLUGINS_PATH=\"$(HWLOC_PLUGINS_PATH)\" -DRUNSTATEDIR=\"$(HWLOC_runstatedir)\"
 
@@ -208,7 +208,7 @@ libhwloc_la_LDFLAGS = $(ldflags) -version-info $(libhwloc_so_version) $(HWLOC_LI
 
 if HWLOC_HAVE_PLUGINS
 AM_CPPFLAGS += $(LTDLINCL)
-libhwloc_la_LDFLAGS += -export-dynamic
+libhwloc_la_LDFLAGS += -export-dynamic $(HWLOC_LTDL_LIBS)
 libhwloc_la_LIBADD = $(LIBLTDL)
 endif
 
