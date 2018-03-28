@@ -1201,7 +1201,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 	[AC_MSG_WARN([Plugin support requested, but could not find ltdl.h])
 	 AC_MSG_ERROR([Cannot continue])])
       AC_CHECK_LIB([ltdl], [lt_dlopenext],
-	[HWLOC_LIBS="$HWLOC_LIBS -lltdl"],
+        [HWLOC_LTDL_LIBS="-lltdl"
+         AC_SUBST(HWLOC_LTDL_LIBS)],
 	[AC_MSG_WARN([Plugin support requested, but could not find libltdl])
 	 AC_MSG_ERROR([Cannot continue])])
       # Add libltdl static-build dependencies to hwloc.pc
