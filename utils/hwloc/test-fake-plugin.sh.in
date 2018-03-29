@@ -12,7 +12,7 @@ HWLOC_top_builddir="@HWLOC_top_builddir@"
 builddir="$HWLOC_top_builddir/utils/lstopo"
 lstopo="$builddir/lstopo-no-graphics"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc/.libs
 export HWLOC_PLUGINS_PATH
 
 HWLOC_DEBUG_FAKE_COMPONENT=1
