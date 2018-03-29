@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2015 Inria.  All rights reserved.
+ * Copyright © 2013-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -15,7 +15,11 @@ struct hwloc_backend;
 #include <hwloc.h>
 #ifdef HWLOC_INSIDE_PLUGIN
 /* needed for hwloc_plugin_check_namespace() */
+#ifdef HWLOC_HAVE_LTDL
 #include <ltdl.h>
+#else
+#include <dlfcn.h>
+#endif
 #endif
 
 
@@ -366,14 +370,22 @@ static __hwloc_inline int
 hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, const char *symbol __hwloc_attribute_unused)
 {
 #ifdef HWLOC_INSIDE_PLUGIN
-  lt_dlhandle handle;
   void *sym;
-  handle = lt_dlopen(NULL);
+#ifdef HWLOC_HAVE_LTDL
+  lt_dlhandle handle = lt_dlopen(NULL);
+#else
+  void *handle = dlopen(NULL, RTLD_NOW|RTLD_LOCAL);
+#endif
   if (!handle)
     /* cannot check, assume things will work */
     return 0;
+#ifdef HWLOC_HAVE_LTDL
   sym = lt_dlsym(handle, symbol);
   lt_dlclose(handle);
+#else
+  sym = dlsym(handle, symbol);
+  dlclose(handle);
+#endif
   if (!sym) {
     static int verboseenv_checked = 0;
     static int verboseenv_value = 0;

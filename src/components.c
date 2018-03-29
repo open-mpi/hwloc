@@ -1,6 +1,9 @@
 /*
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeaux
+ * Copyright © 2015 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2015 Los Alamos National Security, LLC. All rights reserved.
+ * Copyright © 2016 IBM Corporation.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -62,14 +65,139 @@ static pthread_mutex_t hwloc_components_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #ifdef HWLOC_HAVE_PLUGINS
 
+#ifdef HWLOC_HAVE_LTDL
+/* ltdl-based plugin load */
 #include <ltdl.h>
+typedef lt_dlhandle hwloc_dlhandle;
+#define hwloc_dlinit lt_dlinit
+#define hwloc_dlexit lt_dlexit
+#define hwloc_dlopenext lt_dlopenext
+#define hwloc_dlclose lt_dlclose
+#define hwloc_dlerror lt_dlerror
+#define hwloc_dlsym lt_dlsym
+#define hwloc_dlforeachfile lt_dlforeachfile
+
+#else /* !HWLOC_HAVE_LTDL */
+/* no-ltdl plugin load relies on less portable libdl */
+#include <dlfcn.h>
+typedef void * hwloc_dlhandle;
+static __hwloc_inline int hwloc_dlinit(void) { return 0; }
+static __hwloc_inline int hwloc_dlexit(void) { return 0; }
+#define hwloc_dlclose dlclose
+#define hwloc_dlerror dlerror
+#define hwloc_dlsym dlsym
+
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
+
+static hwloc_dlhandle hwloc_dlopenext(const char *_filename)
+{
+  hwloc_dlhandle handle;
+  char *filename = NULL;
+  asprintf(&filename, "%s.so", _filename);
+  if (!filename)
+    return NULL;
+  handle = dlopen(filename, RTLD_NOW|RTLD_LOCAL);
+  free(filename);
+  return handle;
+}
+
+static int
+hwloc_dlforeachfile(const char *_paths,
+		    int (*func)(const char *filename, void *data),
+		    void *data)
+{
+  char *paths = NULL, *path;
+
+  paths = strdup(_paths);
+  if (!paths)
+    return -1;
+
+  path = paths;
+  while (*path) {
+    char *colon;
+    DIR *dp;
+    struct dirent *de;
+
+    colon = strchr(path, ':');
+    if (colon)
+      *colon = '\0';
+
+    if (hwloc_plugins_verbose)
+      fprintf(stderr, " Looking under %s\n", path);
+
+    dp = opendir(path);
+    if (NULL == dp)
+      goto next;
+
+    while (NULL != (de = readdir(dp))) {
+      /* Make the absolute path name */
+      char *abs_name = NULL;
+      asprintf(&abs_name, "%s/%s", path, de->d_name);
+      if (NULL == abs_name) {
+	closedir(dp);
+	goto error;
+      }
+
+      /* Stat the file */
+      struct stat buf;
+      if (stat(abs_name, &buf) < 0) {
+	free(abs_name);
+	closedir(dp);
+	goto error;
+      }
+
+      /* Skip if not a file */
+      if (!S_ISREG(buf.st_mode)) {
+	free(abs_name);
+	continue;
+      }
+
+      /* Find the suffix */
+      char *ptr = strrchr(abs_name, '.');
+      /* Only keep .so files */
+      if (NULL == ptr
+	  || strcmp(ptr, ".so")) {
+	free (abs_name);
+	continue;
+      }
+      *ptr = '\0';
+
+      int ret = func(abs_name, data);
+      if (0 != ret) {
+	free(abs_name);
+	closedir(dp);
+	goto error;
+      }
+
+      free(abs_name);
+    }
+
+    closedir(dp);
+
+  next:
+    if (!colon)
+      break;
+    path = colon+1;
+  }
+
+  free(paths);
+  return 0;
+
+ error:
+  free(paths);
+  return -1;
+}
+#endif /* !HWLOC_HAVE_LTDL */
 
 /* array of pointers to dynamically loaded plugins */
 static struct hwloc__plugin_desc {
   char *name;
   struct hwloc_component *component;
   char *filename;
-  lt_dlhandle handle;
+  hwloc_dlhandle handle;
   struct hwloc__plugin_desc *next;
 } *hwloc_plugins = NULL;
 
@@ -77,7 +205,7 @@ static int
 hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
 {
   const char *basename;
-  lt_dlhandle handle;
+  hwloc_dlhandle handle;
   char *componentsymbolname = NULL;
   struct hwloc_component *component;
   struct hwloc__plugin_desc *desc, **prevdesc;
@@ -98,15 +226,15 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   }
 
   /* dlopen and get the component structure */
-  handle = lt_dlopenext(filename);
+  handle = hwloc_dlopenext(filename);
   if (!handle) {
     if (hwloc_plugins_verbose)
-      fprintf(stderr, "Failed to load plugin: %s\n", lt_dlerror());
+      fprintf(stderr, "Failed to load plugin: %s\n", hwloc_dlerror());
     goto out;
   }
   componentsymbolname = malloc(strlen(basename)+10+1);
   sprintf(componentsymbolname, "%s_component", basename);
-  component = lt_dlsym(handle, componentsymbolname);
+  component = hwloc_dlsym(handle, componentsymbolname);
   if (!component) {
     if (hwloc_plugins_verbose)
       fprintf(stderr, "Failed to find component symbol `%s'\n",
@@ -166,7 +294,7 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   return 0;
 
  out_with_handle:
-  lt_dlclose(handle);
+  hwloc_dlclose(handle);
   free(componentsymbolname); /* NULL if already freed */
  out:
   return 0;
@@ -183,7 +311,7 @@ hwloc_plugins_exit(void)
   desc = hwloc_plugins;
   while (desc) {
     next = desc->next;
-    lt_dlclose(desc->handle);
+    hwloc_dlclose(desc->handle);
     free(desc->name);
     free(desc->filename);
     free(desc);
@@ -191,7 +319,7 @@ hwloc_plugins_exit(void)
   }
   hwloc_plugins = NULL;
 
-  lt_dlexit();
+  hwloc_dlexit();
 }
 
 static int
@@ -207,7 +335,7 @@ hwloc_plugins_init(void)
 
   hwloc_plugins_blacklist = getenv("HWLOC_PLUGINS_BLACKLIST");
 
-  err = lt_dlinit();
+  err = hwloc_dlinit();
   if (err)
     goto out;
 
@@ -219,7 +347,7 @@ hwloc_plugins_init(void)
 
   if (hwloc_plugins_verbose)
     fprintf(stderr, "Starting plugin dlforeach in %s\n", path);
-  err = lt_dlforeachfile(path, hwloc__dlforeach_cb, NULL);
+  err = hwloc_dlforeachfile(path, hwloc__dlforeach_cb, NULL);
   if (err)
     goto out_with_init;
 

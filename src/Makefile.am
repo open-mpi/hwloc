@@ -21,7 +21,7 @@ endif
 
 pluginsdir = @HWLOC_PLUGINS_DIR@
 plugins_LTLIBRARIES =
-plugins_ldflags = -module -avoid-version $(HWLOC_LTDL_LIBS)
+plugins_ldflags = -module -avoid-version $(HWLOC_LTDL_LIBS) $(HWLOC_DL_LIBS)
 # Beware that files are not rebuilt automatically when reconfiguring with different paths in these flags.
 AM_CPPFLAGS += -DHWLOC_PLUGINS_PATH=\"$(HWLOC_PLUGINS_PATH)\" -DRUNSTATEDIR=\"$(HWLOC_runstatedir)\"
 
@@ -207,9 +207,11 @@ libhwloc_la_SOURCES = $(sources)
 libhwloc_la_LDFLAGS = $(ldflags) -version-info $(libhwloc_so_version) $(HWLOC_LIBS) $(HWLOC_LDFLAGS)
 
 if HWLOC_HAVE_PLUGINS
+if HWLOC_HAVE_LTDL
 AM_CPPFLAGS += $(LTDLINCL)
-libhwloc_la_LDFLAGS += -export-dynamic $(HWLOC_LTDL_LIBS)
 libhwloc_la_LIBADD = $(LIBLTDL)
+endif
+libhwloc_la_LDFLAGS += -export-dynamic $(HWLOC_LTDL_LIBS) $(HWLOC_DL_LIBS)
 endif
 
 # Embedded library (note the lack of a .so version number -- that

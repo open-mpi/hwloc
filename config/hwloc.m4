@@ -1131,16 +1131,40 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 
     # If we want plugins, look for ltdl.h and libltdl
     if test "x$hwloc_have_plugins" = xyes; then
-      AC_CHECK_HEADER([ltdl.h], [],
-	[AC_MSG_WARN([Plugin support requested, but could not find ltdl.h])
-	 AC_MSG_ERROR([Cannot continue])])
-      AC_CHECK_LIB([ltdl], [lt_dlopenext],
-	[HWLOC_LTDL_LIBS="-lltdl"],
-	[AC_MSG_WARN([Plugin support requested, but could not find libltdl])
-	 AC_MSG_ERROR([Cannot continue])])
-      AC_SUBST(HWLOC_LTDL_LIBS)
-      # Add libltdl static-build dependencies to hwloc.pc
-      HWLOC_CHECK_LTDL_DEPS
+      AC_ARG_ENABLE([ltdl],
+                    AC_HELP_STRING([--disable-ltdl],
+		                   [Try to use basic dlopen instead of libltdl for plugins.]))
+      if test "x$enable_ltdl" != xno; then
+        AC_CHECK_HEADER([ltdl.h], [],
+          [AC_MSG_WARN([Plugin support requested, but could not find ltdl.h])
+	   AC_MSG_ERROR([Cannot continue])])
+        AC_CHECK_LIB([ltdl], [lt_dlopenext],
+	  [HWLOC_LTDL_LIBS="-lltdl"],
+	  [AC_MSG_WARN([Plugin support requested, but could not find libltdl])
+	   AC_MSG_ERROR([Cannot continue])])
+	AC_SUBST(HWLOC_LTDL_LIBS)
+	AC_DEFINE([HWLOC_HAVE_LTDL], 1, [Define to 1 if the hwloc library should use ltdl for loading plugins])
+	hwloc_have_ltdl=yes
+	# Add libltdl static-build dependencies to hwloc.pc
+        HWLOC_CHECK_LTDL_DEPS
+      else
+        AC_MSG_CHECKING([for dlopen])
+        AC_LINK_IFELSE([
+          AC_LANG_PROGRAM([[
+            #include <dlfcn.h>
+            #include <stdlib.h>
+            void *handle;
+          ]], [[
+            handle = dlopen(NULL, RTLD_NOW|RTLD_LOCAL);
+          ]])],
+	  [AC_MSG_RESULT([yes])],
+          [AC_MSG_RESULT([no])
+	   AC_CHECK_LIB([dl], [dlopen],
+             HWLOC_DL_LIBS="-ldl",
+	    [AC_MSG_WARN([Plugin support requested without ltdl, but could not find dlopen])
+	     AC_MSG_ERROR([Cannot continue])])])
+	AC_SUBST(HWLOC_DL_LIBS)
+      fi
     fi
 
     AC_ARG_WITH([hwloc-plugins-path],
@@ -1312,6 +1336,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_X86_CPUID], [test "x$hwloc_have_x86_cpuid" = "xyes"])
 
         AM_CONDITIONAL([HWLOC_HAVE_PLUGINS], [test "x$hwloc_have_plugins" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_LTDL], [test "x$hwloc_have_ltdl" = "xyes"])
         AM_CONDITIONAL([HWLOC_PCI_BUILD_STATIC], [test "x$hwloc_pci_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_OPENCL_BUILD_STATIC], [test "x$hwloc_opencl_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_CUDA_BUILD_STATIC], [test "x$hwloc_cuda_component" = "xstatic"])
