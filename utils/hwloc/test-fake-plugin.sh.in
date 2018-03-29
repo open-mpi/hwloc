@@ -46,8 +46,8 @@ export HWLOC_DEBUG_FAKE_COMPONENT
 
 $lstopo > $file
 
-grep "fake component initialized" $file \
-&& grep "fake component instantiated" $file \
-&& grep "fake component finalized" $file
+grep "fake component initialized" $file || false
+grep "fake component instantiated" $file || false
+grep "fake component finalized" $file || false
 
 rm -rf "$tmp"
