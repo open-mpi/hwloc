@@ -13,7 +13,7 @@ builddir="$HWLOC_top_builddir"
 lstopo="$builddir/utils/lstopo/lstopo-no-graphics"
 hcalc="$builddir/utils/hwloc/hwloc-calc"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc/.libs
 export HWLOC_PLUGINS_PATH
 
 HWLOC_DEBUG_CHECK=1
