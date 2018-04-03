@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2017 Inria.  All rights reserved.
+# Copyright © 2012-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -10,9 +10,24 @@ set -x
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
+# jenkins multibranch pipelines set BRANCH_NAME
+echo "Trying to get GIT branch name from BRANCH_NAME ..."
+branch="$BRANCH_NAME"
+if test -z "$branch"; then
+  # old jenkins non-pipeline jobs set GIt_BRANCH
+  echo "Try falling back to GIT_BRANCH ..."
+  branch="$GIT_BRANCH"
+  if test -z "$branch"; then
+    # other jobs must force git local branch name to match remote branch name
+    echo "Fallback to the output of git branch | cut -c3- ..."
+    branch=$(git branch | cut -c3-)
+  fi
+fi
+echo "Got GIT branch name $branch"
+
 # keep branch-name before the first - (e.g. v2.0-beta becomes v2.0)
 # and look for the corresponding autotools
-branch=$( echo $GIT_BRANCH | sed -r -e 's@^.*/([^/]+)$@\1@' -e 's/-.*//' )
+branch=$( echo $branch | sed -r -e 's@^.*/([^/]+)$@\1@' -e 's/-.*//' )
 if test -d $HOME/local/hwloc-$branch ; then
   export PATH=$HOME/local/hwloc-${branch}/bin:$PATH
   echo using specific $HOME/local/hwloc-$branch
