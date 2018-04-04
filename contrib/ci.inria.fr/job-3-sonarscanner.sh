@@ -7,12 +7,20 @@
 set -e
 set -x
 
-# Define the version
-if test x$1 = x; then
-  echo "Missing branch name as first argument"
-  exit 1
+# jenkins multibranch pipelines set BRANCH_NAME
+echo "Trying to get GIT branch name from BRANCH_NAME ..."
+branch="$BRANCH_NAME"
+if test -z "$branch"; then
+  # old jenkins non-pipeline jobs set GIt_BRANCH
+  echo "Try falling back to GIT_BRANCH ..."
+  branch="$GIT_BRANCH"
+  if test -z "$branch"; then
+    # other jobs must force git local branch name to match remote branch name
+    echo "Fallback to the output of git branch | cut -c3- ..."
+    branch=$(git branch | cut -c3-)
+  fi
 fi
-export hwloc_branch=$1
+echo "Got GIT branch name $branch"
 
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
@@ -111,9 +119,9 @@ sonar.links.homepage=https://www.open-mpi.org/projects/hwloc/
 sonar.links.ci=https://ci.inria.fr/hwloc/
 sonar.links.scm=https://github.com/open-mpi/hwloc.git
 sonar.links.issue=https://github.com/open-mpi/hwloc/issues
-sonar.projectKey=tadaam:hwloc:github:$hwloc_branch
+sonar.projectKey=tadaam:hwloc:github:$branch
 sonar.projectDescription=Hardware locality (hwloc)
-sonar.projectVersion=$hwloc_branch
+sonar.projectVersion=$branch
 sonar.scm.disabled=false
 sonar.sourceEncoding=UTF-8
 sonar.language=c
