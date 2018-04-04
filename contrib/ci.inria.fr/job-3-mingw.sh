@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2017 Inria.  All rights reserved.
+# Copyright © 2012-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -50,6 +50,9 @@ done
 
 oldPWD=$PWD
 oldPATH=$PATH
+
+# remove previous artifacts so that they don't exported again by this build
+rm -f hwloc-win*-build-*.zip || true
 
 if test x$dotar = x1; then
   # remove everything but the last 10 builds
