@@ -43,18 +43,20 @@ pipeline {
 					  node -> node.getLabelString().contains(labelToSelect) ? node.name : null
 					}
 					listOfNodeNames.removeAll(Collections.singleton(null))
-					listOfNodeNames.push('windows')
+					listOfNodeNames.push('VisualStudio')
 
 					def p = listOfNodeNames.collectEntries {
 					[ (it): {
-						node(it) {
-							if (it != 'windows') {
+						if (it != 'VisualStudio') {
+							node(it) {
 								dir('check-unix') {
 									unstash 'tarballgz'
 									unstash 'script-unix-check'
 									sh 'chmod 755 job-1-check.sh && ./job-1-check.sh'
 								}
-							} else {
+							}
+						} else {
+							node('windows') {
 								dir('check-msvc') {
 									unstash 'tarballgz'
 									unstash 'script-msvc'
