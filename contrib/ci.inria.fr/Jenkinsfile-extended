@@ -1,0 +1,101 @@
+#!groovy
+
+// This "extended pipeline" runs longer tests:
+// * builds a tarball as usual
+// * uses that tarball for
+//   + running Unix Debug checks
+//   + building MinGW Windows zipballs
+//   + running Embedded checks
+//   + running Sonarscanner analysis
+//
+// The GIT checkout must use the remote branch name as the checkout local
+// branch name so that tarball names contain the branch name.
+// In "Additional Behaviours", enable "Checkout to specific local branch"
+// and leave "Branch name" empty.
+// Not needed for multi-branch pipelines which already BRANCH_NAME in the environment.
+
+pipeline {
+        agent none
+
+	// Trigger the build
+	triggers {
+		// Poll GitHub explicitly on per night, in case webhooks aren't used
+		pollSCM('0 3 * * *')
+	}
+
+        stages {
+		stage('Tarball') {
+			steps {
+				node('autotools') {
+                                        checkout scm
+                                        sh 'contrib/ci.inria.fr/job-0-tarball.sh'
+                                        script {
+                                                env.tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
+                                                env.tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
+                                        }
+                                        stash includes: "${env.tarballgz}", name: 'tarballgz'
+                                        dir('contrib/ci.inria.fr') {
+						stash includes: "job-3-debug.sh", name: 'script-unix-debug'
+						stash includes: "job-3-embedded.sh", name: 'script-embedded'
+						stash includes: "job-3-sonarscanner.sh", name: 'script-sonarscanner'
+						stash includes: "job-3-mingw.*", name: 'scripts-mingw'
+                                       }
+					archiveArtifacts artifacts: "${env.tarballgz},${env.tarballbz2},doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
+				}
+			}
+		}
+		stage('Check') {
+			steps {
+				script {
+					labelToSelect = 'unix'
+					listOfNodeNames = jenkins.model.Jenkins.instance.nodes.collect {
+					  node -> node.getLabelString().contains(labelToSelect) ? node.name : null
+					}
+					listOfNodeNames.removeAll(Collections.singleton(null))
+					listOfNodeNames.push('MinGW')
+					listOfNodeNames.push('SonarQube Scanner')
+					listOfNodeNames.push('Embedded')
+
+					def p = listOfNodeNames.collectEntries {
+					[ (it): {
+						if (it == 'MinGW') {
+							node('windows') {
+								dir('check-mingw') {
+									unstash 'tarballgz'
+									unstash 'scripts-mingw'
+									bat 'job-3-mingw.bat'
+									archiveArtifacts artifacts: "*.zip", fingerprint: true, onlyIfSuccessful: true
+								}
+							}
+						} else if (it == 'SonarQube Scanner') {
+							node('sonarscanner') {
+								dir('check-sonarscanner') {
+									unstash 'tarballgz'
+									unstash 'script-sonarscanner'
+									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh'
+								}
+							}
+						} else if (it == 'Embedded') {
+							node('autotools') {
+								dir('check-embedded') {
+									unstash 'tarballgz'
+									unstash 'script-embedded'
+									sh 'chmod 755 job-3-embedded.sh && ./job-3-embedded.sh'
+								}
+							}
+						} else {
+							node(it) {
+								dir('check-unix-debug') {
+									unstash 'tarballgz'
+									unstash 'script-unix-debug'
+									sh 'chmod 755 job-3-debug.sh && ./job-3-debug.sh'
+								}
+							}
+						}
+					}]}
+					parallel p;
+				}
+			}
+		}
+	}
+}
