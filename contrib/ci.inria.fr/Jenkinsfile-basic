@@ -12,6 +12,8 @@
 // and leave "Branch name" empty.
 // Not needed for multi-branch pipelines which already BRANCH_NAME in the environment.
 
+def statusHasChanged = false
+
 pipeline {
 	agent none
 
@@ -75,6 +77,26 @@ pipeline {
 	}
 
 	post {
+		// hooks are called in order: always, changed, aborted, failure, success, unstable
+		changed {
+			echo "Build status has changed."
+			script {
+				statusHasChanged = true
+			}
+		}
+		success {
+			echo "Build success."
+			// email when changed to success
+			script {
+				if (statusHasChanged) {
+					emailext(body: '${DEFAULT_CONTENT}',
+						 subject: '${DEFAULT_SUBJECT}',
+						 replyTo: '$DEFAULT_REPLYTO',
+						 to: '$DEFAULT_RECIPIENTS',
+						 recipientProviders: [[$class: 'CulpritsRecipientProvider'],[$class: 'RequesterRecipientProvider']])
+				}
+			}
+		}
 		failure {
 			echo "Build failure."
 			// always email on failure
