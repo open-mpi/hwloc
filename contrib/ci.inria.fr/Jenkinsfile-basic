@@ -73,4 +73,16 @@ pipeline {
 			}
 		}
 	}
+
+	post {
+		failure {
+			echo "Build failure."
+			// always email on failure
+			emailext(body: '${DEFAULT_CONTENT}',
+				 subject: '${DEFAULT_SUBJECT}',
+				 replyTo: '$DEFAULT_REPLYTO',
+				 to: '$DEFAULT_RECIPIENTS',
+				 recipientProviders: [[$class: 'CulpritsRecipientProvider'],[$class: 'RequesterRecipientProvider']])
+		}
+        }
 }
