@@ -39,8 +39,9 @@ pipeline {
 						stash includes: "job-3-embedded.sh", name: 'script-embedded'
 						stash includes: "job-3-sonarscanner.sh", name: 'script-sonarscanner'
 						stash includes: "job-3-mingw.*", name: 'scripts-mingw'
-                                       }
+					}
 					archiveArtifacts artifacts: "${env.tarballgz},${env.tarballbz2},doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
+					deleteDir()
 				}
 			}
 		}
@@ -65,6 +66,7 @@ pipeline {
 									unstash 'scripts-mingw'
 									bat 'job-3-mingw.bat'
 									archiveArtifacts artifacts: "*.zip", fingerprint: true, onlyIfSuccessful: true
+									deleteDir()
 								}
 							}
 						} else if (it == 'SonarQube Scanner') {
@@ -73,6 +75,7 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-sonarscanner'
 									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh'
+									deleteDir()
 								}
 							}
 						} else if (it == 'Embedded') {
@@ -81,6 +84,7 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-embedded'
 									sh 'chmod 755 job-3-embedded.sh && ./job-3-embedded.sh'
+									deleteDir()
 								}
 							}
 						} else {
@@ -89,6 +93,7 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-unix-debug'
 									sh 'chmod 755 job-3-debug.sh && ./job-3-debug.sh'
+									deleteDir()
 								}
 							}
 						}

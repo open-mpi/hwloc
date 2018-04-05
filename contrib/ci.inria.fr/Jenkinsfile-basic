@@ -32,6 +32,7 @@ pipeline {
 						stash includes: "job-3-visualstudio.bat", name: 'script-msvc'
 					}
 					archiveArtifacts artifacts: "${env.tarballgz},${env.tarballbz2},doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
+					deleteDir()
 				}
 			}
 		}
@@ -53,6 +54,7 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-unix-check'
 									sh 'chmod 755 job-1-check.sh && ./job-1-check.sh'
+									deleteDir()
 								}
 							}
 						} else {
@@ -61,6 +63,7 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-msvc'
 									bat 'job-3-visualstudio.bat'
+									deleteDir()
 								}
 							}
 						}
