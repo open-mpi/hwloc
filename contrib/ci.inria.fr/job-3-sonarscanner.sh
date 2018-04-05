@@ -7,21 +7,6 @@
 set -e
 set -x
 
-# jenkins multibranch pipelines set BRANCH_NAME
-echo "Trying to get GIT branch name from BRANCH_NAME ..."
-branch="$BRANCH_NAME"
-if test -z "$branch"; then
-  # old jenkins non-pipeline jobs set GIt_BRANCH
-  echo "Try falling back to GIT_BRANCH ..."
-  branch="$GIT_BRANCH"
-  if test -z "$branch"; then
-    # other jobs must force git local branch name to match remote branch name
-    echo "Fallback to the output of git branch | cut -c3- ..."
-    branch=$(git branch | cut -c3-)
-  fi
-fi
-echo "Got GIT branch name $branch"
-
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
@@ -37,6 +22,11 @@ test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
 tar xfz $tarball
 rm $tarball
 cd $basename
+
+# extract branch name
+hwloc_branch=$(echo $basename | sed -r -e 's/^hwloc-//' -e 's/-[0-9]{8}.*//')
+export hwloc_branch
+echo $hwloc_branch
 
 # ignore clock problems
 touch configure
@@ -119,9 +109,9 @@ sonar.links.homepage=https://www.open-mpi.org/projects/hwloc/
 sonar.links.ci=https://ci.inria.fr/hwloc/
 sonar.links.scm=https://github.com/open-mpi/hwloc.git
 sonar.links.issue=https://github.com/open-mpi/hwloc/issues
-sonar.projectKey=tadaam:hwloc:github:$branch
+sonar.projectKey=tadaam:hwloc:github:$hwloc_branch
 sonar.projectDescription=Hardware locality (hwloc)
-sonar.projectVersion=$branch
+sonar.projectVersion=$hwloc_branch
 sonar.scm.disabled=false
 sonar.sourceEncoding=UTF-8
 sonar.language=c
