@@ -339,15 +339,12 @@ EOF
     ])
 
     # Only generate this if we're building the utilities
-    # Even the netloc library Makefile is here because
-    # we don't embed libnetloc yet, it's useless without tools
     AC_CONFIG_FILES(
         hwloc_config_prefix[utils/Makefile]
         hwloc_config_prefix[utils/hwloc/Makefile]
         hwloc_config_prefix[utils/lstopo/Makefile]
         hwloc_config_prefix[hwloc.pc]
 
-        hwloc_config_prefix[netloc/Makefile]
         hwloc_config_prefix[utils/netloc/infiniband/Makefile]
         hwloc_config_prefix[utils/netloc/draw/Makefile]
         hwloc_config_prefix[utils/netloc/scotch/Makefile]

@@ -18,10 +18,11 @@ EXTRA_DIST = \
 
 SUBDIRS = include hwloc
 
-if HWLOC_BUILD_STANDALONE
 if BUILD_NETLOC
 SUBDIRS += netloc
 endif
+
+if HWLOC_BUILD_STANDALONE
 SUBDIRS += utils tests contrib/systemd contrib/completion contrib/misc contrib/hwloc-ps.www
 # We need doc/ if HWLOC_BUILD_DOXYGEN, or during make install if HWLOC_INSTALL_DOXYGEN.
 # There's no INSTALL_SUBDIRS, so always enter doc/ and check HWLOC_BUILD/INSTALL_DOXYGEN there
@@ -33,9 +34,9 @@ endif
 DIST_SUBDIRS = $(SUBDIRS)
 if HWLOC_BUILD_STANDALONE
 DIST_SUBDIRS += contrib/windows
+endif
 if !BUILD_NETLOC
 DIST_SUBDIRS += netloc
-endif
 endif
 
 # Only install the pkg file if we're building in standalone mode (and not on Windows)
