@@ -83,7 +83,7 @@ if test x$dobuild32 = x1; then
   cd $oldPWD
 
   # for MS 'lib' program in dolib.c
-  export PATH=$PATH:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE"
+  export PATH=$PATH:$MSLIB_PATH
 
   mkdir ${basename}/build32 || true
   cd ${basename}/build32
@@ -131,7 +131,7 @@ if test x$dobuild64 = x1; then
   cd $oldPWD
 
   # for MS 'lib' program in dolib.c
-  export PATH=$PATH:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE"
+  export PATH=$PATH:$MSLIB_PATH
 
   mkdir ${basename}/build64 || true
   cd ${basename}/build64

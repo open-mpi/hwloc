@@ -19,7 +19,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 cd %TARBALL%\contrib\windows
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild hwloc.sln /p:Configuration=Release /p:Platform=x64
+%MSBUILD_PATH%\MSBuild hwloc.sln /p:Configuration=Release /p:Platform=x64
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 x64\Release\lstopo-no-graphics.exe
