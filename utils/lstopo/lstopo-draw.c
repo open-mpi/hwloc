@@ -559,7 +559,11 @@ lstopo__prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
 	s->bg.b = forceb & 255;
 	lud->style_set |= LSTOPO_STYLE_BG;
 	loutput->methods->declare_color(loutput, &s->bg);
-	s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
+	/* if there's no style for text, make sure it's not dark over dark bg */
+	if (!(lud->style_set & LSTOPO_STYLE_T)) {
+	  s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
+	  lud->style_set |= LSTOPO_STYLE_T;
+	}
       } else if (sscanf(stylestr, "Text=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
 	s->t.r = forcer & 255;
 	s->t.g = forceg & 255;
