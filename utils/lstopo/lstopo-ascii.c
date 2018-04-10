@@ -53,8 +53,7 @@ static int myputchar(int c) {
 struct cell {
   character c;
 #ifdef HWLOC_HAVE_LIBTERMCAP
-  int fr, fg, fb;
-  int br, bg, bb;
+  struct lstopo_color fcolor, bcolor;
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 };
 
@@ -86,20 +85,20 @@ static int set_textcolor(int rr, int gg, int bb)
 }
 
 static void
-set_color(int fr, int fg, int fb, int br, int bg, int bb)
+set_color(struct lstopo_color *fcolor, struct lstopo_color *bcolor)
 {
   char *toput;
   int color, textcolor;
 
   if (initc || initp) {
     /* Can set rgb color, easy */
-    textcolor = rgb_to_color(fr, fg, fb) + 16;
-    color = rgb_to_color(br, bg, bb) + 16;
+    textcolor = rgb_to_color(fcolor->r, fcolor->g, fcolor->b) + 16;
+    color = rgb_to_color(bcolor->r, bcolor->g, bcolor->b) + 16;
   } else {
     /* Magic trigger: it seems to separate colors quite well */
-    int brr = br >= 0xe0;
-    int bgg = bg >= 0xe0;
-    int bbb = bb >= 0xe0;
+    int brr = bcolor->r >= 0xe0;
+    int bgg = bcolor->g >= 0xe0;
+    int bbb = bcolor->b >= 0xe0;
 
     if (set_a_background)
       /* ANSI colors */
@@ -162,7 +161,7 @@ ascii_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, cons
 
 /* output text, erasing any previous content */
 static void
-put(struct lstopo_ascii_output *disp, int x, int y, character c, int fr __hwloc_attribute_unused, int fg __hwloc_attribute_unused, int fb __hwloc_attribute_unused, int br __hwloc_attribute_unused, int bg __hwloc_attribute_unused, int bb __hwloc_attribute_unused)
+put(struct lstopo_ascii_output *disp, int x, int y, character c, const struct lstopo_color *fcolor __hwloc_attribute_unused, const struct lstopo_color *bcolor __hwloc_attribute_unused)
 {
   if (x >= disp->width || y >= disp->height) {
     /* fprintf(stderr, "%"PRIchar" overflowed to (%d,%d)\n", c, x, y); */
@@ -170,16 +169,10 @@ put(struct lstopo_ascii_output *disp, int x, int y, character c, int fr __hwloc_
   }
   disp->cells[y][x].c = c;
 #ifdef HWLOC_HAVE_LIBTERMCAP
-  if (fr != -1) {
-    disp->cells[y][x].fr = fr;
-    disp->cells[y][x].fg = fg;
-    disp->cells[y][x].fb = fb;
-  }
-  if (br != -1) {
-    disp->cells[y][x].br = br;
-    disp->cells[y][x].bg = bg;
-    disp->cells[y][x].bb = bb;
-  }
+  if (fcolor)
+    disp->cells[y][x].fcolor = *fcolor;
+  if (bcolor)
+    disp->cells[y][x].bcolor = *bcolor;
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 }
 
@@ -279,7 +272,7 @@ from_directions(struct lstopo_ascii_output *disp, int direction)
 
 /* output bars, merging with existing bars: `andnot' are removed, `or' are added */
 static void
-merge(struct lstopo_ascii_output *disp, int x, int y, int or, int andnot, int r, int g, int b)
+merge(struct lstopo_ascii_output *disp, int x, int y, int or, int andnot, const struct lstopo_color *color)
 {
   character current;
   int directions;
@@ -289,7 +282,7 @@ merge(struct lstopo_ascii_output *disp, int x, int y, int or, int andnot, int r,
   }
   current = disp->cells[y][x].c;
   directions = (to_directions(disp, current) & ~andnot) | or;
-  put(disp, x, y, from_directions(disp, directions), -1, -1, -1, r, g, b);
+  put(disp, x, y, from_directions(disp, directions), NULL, color);
 }
 
 /* 10 is the only allowed gridsize/fontsize.
@@ -308,7 +301,6 @@ static void
 ascii_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned width, unsigned y1, unsigned height)
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   unsigned i, j;
   unsigned x2, y2;
 
@@ -320,26 +312,26 @@ ascii_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsi
   y2 = y1 + height - 1;
 
   /* Corners */
-  merge(disp, x1, y1, down|right, 0, r, g, b);
-  merge(disp, x2, y1, down|left, 0, r, g, b);
-  merge(disp, x1, y2, up|right, 0, r, g, b);
-  merge(disp, x2, y2, up|left, 0, r, g, b);
+  merge(disp, x1, y1, down|right, 0, lcolor);
+  merge(disp, x2, y1, down|left, 0, lcolor);
+  merge(disp, x1, y2, up|right, 0, lcolor);
+  merge(disp, x2, y2, up|left, 0, lcolor);
 
   for (i = 1; i < width - 1; i++) {
     /* upper line */
-    merge(disp, x1 + i, y1, left|right, down, r, g, b);
+    merge(disp, x1 + i, y1, left|right, down, lcolor);
     /* lower line */
-    merge(disp, x1 + i, y2, left|right, up, r, g, b);
+    merge(disp, x1 + i, y2, left|right, up, lcolor);
   }
   for (j = 1; j < height - 1; j++) {
     /* left line */
-    merge(disp, x1, y1 + j, up|down, right, r, g, b);
+    merge(disp, x1, y1 + j, up|down, right, lcolor);
     /* right line */
-    merge(disp, x2, y1 + j, up|down, left, r, g, b);
+    merge(disp, x2, y1 + j, up|down, left, lcolor);
   }
   for (j = y1 + 1; j < y2; j++) {
     for (i = x1 + 1; i < x2; i++) {
-      put(disp, i, j, ' ', -1, -1, -1, r, g, b);
+      put(disp, i, j, ' ', NULL, lcolor);
     }
   }
 }
@@ -376,20 +368,20 @@ ascii_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor __hw
       /* Hu ?! That's a point, let's do nothing... */
     } else {
       /* top */
-      merge(disp, x1, y1, down, 0, -1, -1, -1);
+      merge(disp, x1, y1, down, 0, NULL);
       /* bottom */
-      merge(disp, x1, y2, up, 0, -1, -1, -1);
+      merge(disp, x1, y2, up, 0, NULL);
     }
     for (j = y1 + 1; j < y2; j++)
-      merge(disp, x1, j, down|up, 0, -1, -1, -1);
+      merge(disp, x1, j, down|up, 0, NULL);
   } else if (y1 == y2) {
     /* Horizontal */
     /* left */
-    merge(disp, x1, y1, right, 0, -1, -1, -1);
+    merge(disp, x1, y1, right, 0, NULL);
     /* right */
-    merge(disp, x2, y1, left, 0, -1, -1, -1);
+    merge(disp, x2, y1, left, 0, NULL);
     for (i = x1 + 1; i < x2; i++)
-      merge(disp, i, y1, left|right, 0, -1, -1, -1);
+      merge(disp, i, y1, left|right, 0, NULL);
   } else {
     /* Unsupported, sorry */
   }
@@ -399,7 +391,6 @@ static void
 ascii_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   x = XSCALE(x);
   y = YSCALE(y);
@@ -410,12 +401,12 @@ ascii_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int
     wchar_t *wbuf = malloc(len * sizeof(wchar_t)), *wtext;
     swprintf(wbuf, len, L"%s", text);
     for (wtext = wbuf ; *wtext; wtext++)
-      put(disp, x++, y, *wtext, r, g, b, -1, -1, -1);
+      put(disp, x++, y, *wtext, lcolor, NULL);
     free(wbuf);
   }
 #else
   for ( ; *text; text++)
-    put(disp, x++, y, *text, r, g, b, -1, -1, -1);
+    put(disp, x++, y, *text, lcolor, NULL);
 #endif
 }
 
@@ -530,23 +521,19 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
 #ifdef HWLOC_HAVE_LIBTERMCAP
       if (term) {
 	/* TTY output, use colors */
-	int fr = disp.cells[j][i].fr;
-	int fg = disp.cells[j][i].fg;
-	int fb = disp.cells[j][i].fb;
-	int br = disp.cells[j][i].br;
-	int bg = disp.cells[j][i].bg;
-	int bb = disp.cells[j][i].bb;
+	struct lstopo_color *fcolor = &disp.cells[j][i].fcolor;
+	struct lstopo_color *bcolor = &disp.cells[j][i].bcolor;
 
 	/* Avoid too much work for the TTY */
-	if (fr != lfr || fg != lfg || fb != lfb
-	 || br != lbr || bg != lbg || bb != lbb) {
-	  set_color(fr, fg, fb, br, bg, bb);
-	  lfr = fr;
-	  lfg = fg;
-	  lfb = fb;
-	  lbr = br;
-	  lbg = bg;
-	  lbb = bb;
+	if (fcolor->r != lfr || fcolor->g != lfg || fcolor->b != lfb
+	 || bcolor->r != lbr || bcolor->g != lbg || bcolor->b != lbb) {
+	  set_color(fcolor, bcolor);
+	  lfr = fcolor->r;
+	  lfg = fcolor->g;
+	  lfb = fcolor->b;
+	  lbr = bcolor->r;
+	  lbg = bcolor->g;
+	  lbb = bcolor->b;
 	}
       }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
