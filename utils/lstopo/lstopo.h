@@ -81,13 +81,35 @@ struct lstopo_output {
   unsigned width, height; /* total output size */
 };
 
-struct lstopo_color { int r, g, b; };
+struct lstopo_color {
+  /* these variables must be initialized before passing the structure to declare_color() */
+  int r, g, b;
+
+  /* these variable are initialized by declare_color() */
+  /* backend specific private data */
+  union lstopo_color_private_u {
+    struct lstopo_color_private_ascii_s {
+      int color;
+    } ascii;
+    struct lstopo_color_private_fig_s {
+      int color;
+    } fig;
+#ifdef HWLOC_WIN_SYS
+    struct lstopo_color_private_windows_s {
+      HGDIOBJ brush;
+      COLORREF color;
+    } windows;
+#endif
+  } private;
+  /* list of colors */
+  struct lstopo_color *next;
+};
 
 struct lstopo_style {
   struct lstopo_color
-	bg,	/* main box background color */
-	t,	/* main text color */
-	t2;	/* other text color */
+	*bg,	/* main box background color */
+	*t,	/* main text color */
+	*t2;	/* other text color */
 };
 
 #define LSTOPO_CHILD_KIND_NORMAL 0x1
@@ -146,8 +168,8 @@ typedef int output_method (struct lstopo_output *output, const char *filename);
 extern output_method output_console, output_synthetic, output_ascii, output_fig, output_png, output_pdf, output_ps, output_svg, output_x11, output_windows, output_xml;
 
 struct draw_methods {
+  int (*declare_color) (struct lstopo_output *loutput, struct lstopo_color *lcolor);
   /* only called when loutput->draw_methods == LSTOPO_DRAWING_DRAW */
-  void (*declare_color) (struct lstopo_output *loutput, const struct lstopo_color *lcolor);
   void (*box) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height);
   void (*line) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2);
   void (*text) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth, unsigned x, unsigned y, const char *text);
@@ -159,10 +181,6 @@ extern void output_draw(struct lstopo_output *output);
 
 extern void lstopo_prepare_custom_styles(struct lstopo_output *loutput);
 extern void declare_colors(struct lstopo_output *output);
-
-int rgb_to_color(int r, int g, int b) __hwloc_attribute_const;
-int declare_color(int r, int g, int b);
-
 
 static __hwloc_inline int lstopo_pu_disallowed(struct lstopo_output *loutput, hwloc_obj_t l)
 {

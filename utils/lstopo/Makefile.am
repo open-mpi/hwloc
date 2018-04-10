@@ -1,4 +1,4 @@
-# Copyright © 2009-2017 Inria.  All rights reserved.
+# Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2009-2012, 2014 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -22,7 +22,6 @@ EXTRA_DIST = \
 lstopo_no_graphics_SOURCES = \
         lstopo.h \
         lstopo.c \
-        lstopo-color.c \
         lstopo-draw.c \
         lstopo-fig.c \
         lstopo-ascii.c \

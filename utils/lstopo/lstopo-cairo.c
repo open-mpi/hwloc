@@ -132,7 +132,7 @@ topo_cairo_paint(struct lstopo_cairo_output *coutput)
 
 
 
-static void topo_cairo_declare_color (struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor __hwloc_attribute_unused) {}
+static int topo_cairo_declare_color (struct lstopo_output *loutput __hwloc_attribute_unused, struct lstopo_color *lcolor __hwloc_attribute_unused) {}
 #endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 

@@ -53,7 +53,7 @@ static int myputchar(int c) {
 struct cell {
   character c;
 #ifdef HWLOC_HAVE_LIBTERMCAP
-  struct lstopo_color fcolor, bcolor;
+  const struct lstopo_color *fcolor, *bcolor;
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 };
 
@@ -85,15 +85,15 @@ static int set_textcolor(int rr, int gg, int bb)
 }
 
 static void
-set_color(struct lstopo_color *fcolor, struct lstopo_color *bcolor)
+set_color(const struct lstopo_color *fcolor, const struct lstopo_color *bcolor)
 {
   char *toput;
   int color, textcolor;
 
   if (initc || initp) {
     /* Can set rgb color, easy */
-    textcolor = rgb_to_color(fcolor->r, fcolor->g, fcolor->b) + 16;
-    color = rgb_to_color(bcolor->r, bcolor->g, bcolor->b) + 16;
+    textcolor = fcolor->private.ascii.color;
+    color = bcolor->private.ascii.color;
   } else {
     /* Magic trigger: it seems to separate colors quite well */
     int brr = bcolor->r >= 0xe0;
@@ -132,31 +132,38 @@ set_color(struct lstopo_color *fcolor, struct lstopo_color *bcolor)
 }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
-/* We we can, allocate rgb colors */
-static void
-ascii_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor __hwloc_attribute_unused)
-{
-#ifdef HWLOC_HAVE_LIBTERMCAP
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
-  int color, rr, gg, bb;
-  char *toput;
-#endif
+static int ascii_color_index = 16;
+static struct lstopo_color *default_color = NULL;
 
+/* When we can, allocate rgb colors */
+static int
+ascii_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, struct lstopo_color *lcolor)
+{
+  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 #ifdef HWLOC_HAVE_LIBTERMCAP
-  color = declare_color(r, g, b);
+  int rr, gg, bb;
+  char *toput;
+
+  lcolor->private.ascii.color = ascii_color_index++;
+
   /* Yes, values seem to range from 0 to 1000 inclusive */
   rr = (r * 1001) / 256;
   gg = (g * 1001) / 256;
   bb = (b * 1001) / 256;
 
   if (initc) {
-    if ((toput = tparm(initc, color + 16, rr, gg, bb, 0, 0, 0, 0, 0)))
+    if ((toput = tparm(initc, lcolor->private.ascii.color, rr, gg, bb, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   } else if (initp) {
-    if ((toput = tparm(initp, color + 16, 0, 0, 0, rr, gg, bb, 0, 0)))
+    if ((toput = tparm(initp, lcolor->private.ascii.color, 0, 0, 0, rr, gg, bb, 0, 0)))
       tputs(toput, 1, myputchar);
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
+
+  if (!default_color && !r && !g && !b)
+    default_color = lcolor;
+
+  return 0;
 }
 
 /* output text, erasing any previous content */
@@ -170,9 +177,9 @@ put(struct lstopo_ascii_output *disp, int x, int y, character c, const struct ls
   disp->cells[y][x].c = c;
 #ifdef HWLOC_HAVE_LIBTERMCAP
   if (fcolor)
-    disp->cells[y][x].fcolor = *fcolor;
+    disp->cells[y][x].fcolor = fcolor;
   if (bcolor)
-    disp->cells[y][x].bcolor = *bcolor;
+    disp->cells[y][x].bcolor = bcolor;
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 }
 
@@ -430,8 +437,8 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   FILE *output;
   struct lstopo_ascii_output disp;
   int i, j;
-  int lfr, lfg, lfb; /* Last foreground color */
-  int lbr, lbg, lbb; /* Last background color */
+  const struct lstopo_color *lfcolor; /* Last foreground color */
+  const struct lstopo_color *lbcolor; /* Last background color */
 #ifdef HWLOC_HAVE_LIBTERMCAP
   int term = 0;
   char *tmp;
@@ -497,43 +504,44 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   height = disp.height = YSCALE(loutput->height + 1);
   loutput->drawing = LSTOPO_DRAWING_DRAW;
 
+  /* prepare colors */
+  declare_colors(loutput);
+  lstopo_prepare_custom_styles(loutput);
+
   /* terminals usually have narrow characters, so let's make them wider */
   disp.cells = malloc(height * sizeof(*disp.cells));
   for (j = 0; j < height; j++) {
     disp.cells[j] = calloc(width, sizeof(**disp.cells));
-    for (i = 0; i < width; i++)
+    for (i = 0; i < width; i++) {
       disp.cells[j][i].c = ' ';
+#ifdef HWLOC_HAVE_LIBTERMCAP
+      disp.cells[j][i].fcolor = default_color;
+      disp.cells[j][i].bcolor = default_color;
+#endif
+    }
   }
 #ifdef HAVE_NL_LANGINFO
   disp.utf8 = !strcmp(nl_langinfo(CODESET), "UTF-8");
 #endif /* HAVE_NL_LANGINFO */
 
   /* ready */
-  declare_colors(loutput);
-  lstopo_prepare_custom_styles(loutput);
-
   output_draw(loutput);
 
-  lfr = lfg = lfb = -1;
-  lbr = lbg = lbb = -1;
+  lfcolor = NULL;
+  lbcolor = NULL;
   for (j = 0; j < disp.height; j++) {
     for (i = 0; i < disp.width; i++) {
 #ifdef HWLOC_HAVE_LIBTERMCAP
       if (term) {
 	/* TTY output, use colors */
-	struct lstopo_color *fcolor = &disp.cells[j][i].fcolor;
-	struct lstopo_color *bcolor = &disp.cells[j][i].bcolor;
+	const struct lstopo_color *fcolor = disp.cells[j][i].fcolor;
+	const struct lstopo_color *bcolor = disp.cells[j][i].bcolor;
 
 	/* Avoid too much work for the TTY */
-	if (fcolor->r != lfr || fcolor->g != lfg || fcolor->b != lfb
-	 || bcolor->r != lbr || bcolor->g != lbg || bcolor->b != lbb) {
+	if (fcolor != lfcolor || bcolor != lbcolor) {
 	  set_color(fcolor, bcolor);
-	  lfr = fcolor->r;
-	  lfg = fcolor->g;
-	  lfb = fcolor->b;
-	  lbr = bcolor->r;
-	  lbg = bcolor->g;
-	  lbb = bcolor->b;
+	  lfcolor = fcolor;
+	  lbcolor = bcolor;
 	}
       }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
@@ -542,8 +550,8 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
 #ifdef HWLOC_HAVE_LIBTERMCAP
     /* Keep the rest of the line as default */
     if (term && orig_pair) {
-      lfr = lfg = lfb = -1;
-      lbr = lbg = lbb = -1;
+      lfcolor = NULL;
+      lbcolor = NULL;
       tputs(orig_pair, 1, myputchar);
     }
 #endif /* HWLOC_HAVE_LIBTERMCAP */

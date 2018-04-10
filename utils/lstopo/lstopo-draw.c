@@ -30,22 +30,89 @@
 #define DARKER_EPOXY_B_COLOR ((DARK_EPOXY_B_COLOR * 100) / 110)
 
 /* each of these colors must be declared in declare_colors() */
-const struct lstopo_color BLACK_COLOR = { 0, 0, 0 };
-const struct lstopo_color WHITE_COLOR = { 0xff, 0xff, 0xff };
-const struct lstopo_color PACKAGE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR };
-const struct lstopo_color MEMORY_COLOR = { 0xef, 0xdf, 0xde };
-const struct lstopo_color MEMORIES_COLOR = { 0xf2, 0xe8, 0xe8}; /* slightly lighter than MEMORY_COLOR */
-const struct lstopo_color CORE_COLOR = { 0xbe, 0xbe, 0xbe };
-const struct lstopo_color THREAD_COLOR = { 0xff, 0xff, 0xff };
-const struct lstopo_color BINDING_COLOR = { 0, 0xff, 0 };
-const struct lstopo_color DISALLOWED_COLOR = { 0xff, 0, 0 };
-const struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff };
-const struct lstopo_color MACHINE_COLOR = { 0xff, 0xff, 0xff };
-const struct lstopo_color GROUP_IN_PACKAGE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
-const struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff };
-const struct lstopo_color PCI_DEVICE_COLOR = { DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR };
-const struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde };
-const struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff };
+struct lstopo_color BLACK_COLOR = { 0, 0, 0 };
+struct lstopo_color WHITE_COLOR = { 0xff, 0xff, 0xff };
+struct lstopo_color PACKAGE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR };
+struct lstopo_color MEMORY_COLOR = { 0xef, 0xdf, 0xde };
+struct lstopo_color MEMORIES_COLOR = { 0xf2, 0xe8, 0xe8}; /* slightly lighter than MEMORY_COLOR */
+struct lstopo_color CORE_COLOR = { 0xbe, 0xbe, 0xbe };
+struct lstopo_color THREAD_COLOR = { 0xff, 0xff, 0xff };
+struct lstopo_color BINDING_COLOR = { 0, 0xff, 0 };
+struct lstopo_color DISALLOWED_COLOR = { 0xff, 0, 0 };
+struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff };
+struct lstopo_color MACHINE_COLOR = { 0xff, 0xff, 0xff };
+struct lstopo_color GROUP_IN_PACKAGE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
+struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff };
+struct lstopo_color PCI_DEVICE_COLOR = { DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR };
+struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde };
+struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff };
+
+static struct lstopo_color *colors = NULL;
+
+static struct lstopo_color *
+declare_color(struct lstopo_output *loutput, struct lstopo_color *color)
+{
+  int ret;
+
+  memset(&color->private, 0, sizeof(color->private));
+
+  /* call the backend callback */
+  ret = loutput->methods->declare_color(loutput, color);
+  if (ret < 0)
+    return NULL;
+
+  /* insert */
+  color->next = colors;
+  colors = color;
+
+  return color;
+}
+
+void
+declare_colors(struct lstopo_output *output)
+{
+  /* don't bother looking for duplicate colors here,
+   * we want to be able to use those structs so always queue them
+   */
+  declare_color(output, &BLACK_COLOR);
+  declare_color(output, &WHITE_COLOR);
+  declare_color(output, &PACKAGE_COLOR);
+  declare_color(output, &MEMORY_COLOR);
+  declare_color(output, &MEMORIES_COLOR);
+  declare_color(output, &CORE_COLOR);
+  declare_color(output, &THREAD_COLOR);
+  declare_color(output, &BINDING_COLOR);
+  declare_color(output, &DISALLOWED_COLOR);
+  declare_color(output, &CACHE_COLOR);
+  declare_color(output, &MACHINE_COLOR);
+  declare_color(output, &GROUP_IN_PACKAGE_COLOR);
+  declare_color(output, &MISC_COLOR);
+  declare_color(output, &PCI_DEVICE_COLOR);
+  declare_color(output, &OS_DEVICE_COLOR);
+  declare_color(output, &BRIDGE_COLOR);
+}
+
+static struct lstopo_color *
+find_or_declare_rgb_color(struct lstopo_output *loutput, int r, int g, int b)
+{
+  struct lstopo_color *color, *tmp;
+
+  for(tmp = colors; tmp; tmp = tmp->next)
+    if (tmp->r == r && tmp->g == g && tmp->b == b)
+      return tmp;
+
+  color = malloc(sizeof(*color));
+  if (!color)
+    return NULL;
+
+  color->r = r & 255;
+  color->g = g & 255;
+  color->b = b & 255;
+  tmp = declare_color(loutput, color);
+  if (!tmp)
+    free(color);
+  return tmp;
+}
 
 static unsigned
 get_textwidth(void *output,
@@ -546,6 +613,7 @@ lstopo__prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
   hwloc_obj_t child;
   unsigned forcer, forceg, forceb;
   const char *stylestr;
+  struct lstopo_color *lcolor;
 
   lud->style_set = 0;
 
@@ -554,28 +622,27 @@ lstopo__prepare_custom_styles(struct lstopo_output *loutput, hwloc_obj_t obj)
     while (*stylestr != '\0') {
       if (sscanf(stylestr, "%02x%02x%02x", &forcer, &forceg, &forceb) == 3
 	  || sscanf(stylestr, "Background=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
-	s->bg.r = forcer & 255;
-	s->bg.g = forceg & 255;
-	s->bg.b = forceb & 255;
-	lud->style_set |= LSTOPO_STYLE_BG;
-	loutput->methods->declare_color(loutput, &s->bg);
-	/* if there's no style for text, make sure it's not dark over dark bg */
-	if (!(lud->style_set & LSTOPO_STYLE_T)) {
-	  s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
-	  lud->style_set |= LSTOPO_STYLE_T;
+	lcolor = find_or_declare_rgb_color(loutput, forcer, forceg, forceb);
+	if (lcolor) {
+	  s->bg = lcolor;
+	  lud->style_set |= LSTOPO_STYLE_BG;
+	  if (!(lud->style_set & LSTOPO_STYLE_T)) {
+	    s->t = (lcolor->r + lcolor->g + lcolor->b < 0xff) ? &WHITE_COLOR : &BLACK_COLOR;
+	    lud->style_set |= LSTOPO_STYLE_T;
+	  }
 	}
       } else if (sscanf(stylestr, "Text=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
-	s->t.r = forcer & 255;
-	s->t.g = forceg & 255;
-	s->t.b = forceb & 255;
-	lud->style_set |= LSTOPO_STYLE_T;
-	loutput->methods->declare_color(loutput, &s->t);
+	lcolor = find_or_declare_rgb_color(loutput, forcer, forceg, forceb);
+	if (lcolor) {
+	  s->t = lcolor;
+	  lud->style_set |= LSTOPO_STYLE_T;
+	}
       } else if (sscanf(stylestr, "Text2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
-	s->t2.r = forcer & 255;
-	s->t2.g = forceg & 255;
-	s->t2.b = forceb & 255;
-	lud->style_set |= LSTOPO_STYLE_T2;
-	loutput->methods->declare_color(loutput, &s->t2);
+	lcolor = find_or_declare_rgb_color(loutput, forcer, forceg, forceb);
+	if (lcolor) {
+	  s->t2 = lcolor;
+	  lud->style_set |= LSTOPO_STYLE_T2;
+	}
       }
       stylestr = strchr(stylestr, ';');
       if (!stylestr)
@@ -607,21 +674,23 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 {
   struct lstopo_obj_userdata *lud = obj->userdata;
 
-  memset(s, 0, sizeof(*s));
+  s->bg = &BLACK_COLOR;
+  s->t = &BLACK_COLOR;
+  s->t2 = &BLACK_COLOR;
 
   switch (obj->type) {
 
   case HWLOC_OBJ_MACHINE:
-    s->bg = MACHINE_COLOR;
+    s->bg = &MACHINE_COLOR;
     break;
 
   case HWLOC_OBJ_GROUP: {
     hwloc_obj_t parent;
-    s->bg = MISC_COLOR;
+    s->bg = &MISC_COLOR;
     parent = obj->parent;
     while (parent) {
       if (parent->type == HWLOC_OBJ_PACKAGE) {
-	s->bg = GROUP_IN_PACKAGE_COLOR;
+	s->bg = &GROUP_IN_PACKAGE_COLOR;
 	break;
       }
       parent = parent->parent;
@@ -630,25 +699,25 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   }
 
   case HWLOC_OBJ_MISC:
-    s->bg = MISC_COLOR;
+    s->bg = &MISC_COLOR;
     break;
 
   case HWLOC_OBJ_NUMANODE:
     if (loutput->show_disallowed && lstopo_numa_disallowed(loutput, obj)) {
-      s->bg = DISALLOWED_COLOR;
+      s->bg = &DISALLOWED_COLOR;
     } else if (lstopo_numa_binding(loutput, obj)) {
-      s->bg = BINDING_COLOR;
+      s->bg = &BINDING_COLOR;
     } else {
-      s->bg = MEMORY_COLOR;
+      s->bg = &MEMORY_COLOR;
     }
     break;
 
   case HWLOC_OBJ_PACKAGE:
-    s->bg = PACKAGE_COLOR;
+    s->bg = &PACKAGE_COLOR;
     break;
 
   case HWLOC_OBJ_CORE:
-    s->bg = CORE_COLOR;
+    s->bg = &CORE_COLOR;
     break;
 
   case HWLOC_OBJ_L1CACHE:
@@ -659,29 +728,29 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   case HWLOC_OBJ_L1ICACHE:
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
-    s->bg = CACHE_COLOR;
+    s->bg = &CACHE_COLOR;
     break;
 
   case HWLOC_OBJ_PU:
     if (loutput->show_disallowed && lstopo_pu_disallowed(loutput, obj)) {
-      s->bg = DISALLOWED_COLOR;
+      s->bg = &DISALLOWED_COLOR;
     } else if (lstopo_pu_binding(loutput, obj)) {
-      s->bg = BINDING_COLOR;
+      s->bg = &BINDING_COLOR;
     } else {
-      s->bg = THREAD_COLOR;
+      s->bg = &THREAD_COLOR;
     }
     break;
 
   case HWLOC_OBJ_BRIDGE:
-    s->bg = BRIDGE_COLOR;
+    s->bg = &BRIDGE_COLOR;
     break;
 
   case HWLOC_OBJ_PCI_DEVICE:
-    s->bg = PCI_DEVICE_COLOR;
+    s->bg = &PCI_DEVICE_COLOR;
     break;
 
   case HWLOC_OBJ_OS_DEVICE:
-    s->bg = OS_DEVICE_COLOR;
+    s->bg = &OS_DEVICE_COLOR;
     break;
 
   default:
@@ -689,11 +758,11 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   }
 
   if (lud->style_set & LSTOPO_STYLE_BG)
-    memcpy(&s->bg, &lud->style.bg, sizeof(struct lstopo_color));
+    s->bg = lud->style.bg;
   if (lud->style_set & LSTOPO_STYLE_T)
-    memcpy(&s->t, &lud->style.t, sizeof(struct lstopo_color));
+    s->t = lud->style.t;
   if (lud->style_set & LSTOPO_STYLE_T2)
-    memcpy(&s->t2, &lud->style.t2, sizeof(struct lstopo_color));
+    s->t2 = lud->style.t2;
 }
 
 static void
@@ -893,15 +962,15 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lstopo_set_object_color(loutput, level, &style);
 
     if (lud->pci_collapsed > 1) {
-      methods->box(loutput, &style.bg, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
+      methods->box(loutput, style.bg, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
       if (lud->pci_collapsed > 2)
-	methods->box(loutput, &style.bg, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset);
-      methods->box(loutput, &style.bg, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset);
+	methods->box(loutput, style.bg, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset);
+      methods->box(loutput, style.bg, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset);
     } else {
-      methods->box(loutput, &style.bg, depth, x, totwidth, y, totheight);
+      methods->box(loutput, style.bg, depth, x, totwidth, y, totheight);
     }
 
-    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
+    draw_text(loutput, level, style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
@@ -932,7 +1001,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
     /* Square and left link */
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, &style.bg, depth, x, gridsize, y + BRIDGE_HEIGHT/2 - gridsize/2, gridsize);
+    methods->box(loutput, style.bg, depth, x, gridsize, y + BRIDGE_HEIGHT/2 - gridsize/2, gridsize);
     methods->line(loutput, &BLACK_COLOR, depth, x + gridsize, y + BRIDGE_HEIGHT/2, x + 2*gridsize, y + BRIDGE_HEIGHT/2);
 
     if (level->io_arity > 0) {
@@ -961,7 +1030,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);
 	    else
 	      snprintf(text, sizeof(text), "%0.1f", child->attr->pcidev.linkspeed);
-	    methods->text(loutput, &style.t2, fontsize, depth-1, x + 3*gridsize, ymid - BRIDGE_HEIGHT/2, text);
+	    methods->text(loutput, style.t2, fontsize, depth-1, x + 3*gridsize, ymid - BRIDGE_HEIGHT/2, text);
 	  }
 	}
       }
@@ -1016,9 +1085,9 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     }
 
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, &style.bg, depth, x, totwidth, y + myoff, myheight);
+    methods->box(loutput, style.bg, depth, x, totwidth, y + myoff, myheight);
 
-    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize + myoff);
+    draw_text(loutput, level, style.t, depth-1, x + gridsize, y + gridsize + myoff);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
@@ -1054,8 +1123,8 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     totheight = lud->height;
 
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, &style.bg, depth, x, totwidth, y, totheight);
-    draw_text(loutput, level, &style.t, depth-1, x + gridsize, y + gridsize);
+    methods->box(loutput, style.bg, depth, x, totwidth, y, totheight);
+    draw_text(loutput, level, style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
     draw_children(loutput, level, depth-1, x, y);
@@ -1230,26 +1299,4 @@ get_type_fun(hwloc_obj_type_t type)
   }
   /* for dumb compilers */
   return normal_draw;
-}
-
-void
-declare_colors(struct lstopo_output *output)
-{
-  struct draw_methods *methods = output->methods;
-  methods->declare_color(output, &BLACK_COLOR);
-  methods->declare_color(output, &WHITE_COLOR);
-  methods->declare_color(output, &PACKAGE_COLOR);
-  methods->declare_color(output, &MEMORY_COLOR);
-  methods->declare_color(output, &MEMORIES_COLOR);
-  methods->declare_color(output, &CORE_COLOR);
-  methods->declare_color(output, &THREAD_COLOR);
-  methods->declare_color(output, &BINDING_COLOR);
-  methods->declare_color(output, &DISALLOWED_COLOR);
-  methods->declare_color(output, &CACHE_COLOR);
-  methods->declare_color(output, &MACHINE_COLOR);
-  methods->declare_color(output, &GROUP_IN_PACKAGE_COLOR);
-  methods->declare_color(output, &MISC_COLOR);
-  methods->declare_color(output, &PCI_DEVICE_COLOR);
-  methods->declare_color(output, &OS_DEVICE_COLOR);
-  methods->declare_color(output, &BRIDGE_COLOR);
 }

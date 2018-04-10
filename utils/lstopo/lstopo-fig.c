@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -20,36 +20,26 @@
 
 #define FIG_FACTOR 20
 
-static int __hwloc_attribute_const
-lcolor_to_fig(const struct lstopo_color *lcolor)
-{
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
+static int fig_color_index = 32;
 
-  if (r == 0xff && g == 0xff && b == 0xff)
-    return 7;
-
-  if (!r && !g && !b)
-    return 0;
-
-  return 32 + rgb_to_color(r, g, b);
-}
-
-static void
-fig_declare_color(struct lstopo_output *loutput, const struct lstopo_color *lcolor)
+static int
+fig_declare_color(struct lstopo_output *loutput, struct lstopo_color *lcolor)
 {
   FILE *file = loutput->file;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
-  int color;
 
-  if (r == 0xff && g == 0xff && b == 0xff)
-    return;
+  if (r == 0xff && g == 0xff && b == 0xff) {
+    lcolor->private.fig.color = 7;
+    return 0;
+  } else if (!r && !g && !b) {
+    lcolor->private.fig.color = 0;
+    return 0;
+  } else {
+    lcolor->private.fig.color = fig_color_index++;
+  }
 
-  if (!r && !g && !b)
-    return;
-
-  color = declare_color(r, g, b);
-
-  fprintf(file, "0 %d #%02x%02x%02x\n", 32 + color, (unsigned) r, (unsigned) g, (unsigned) b);
+  fprintf(file, "0 %d #%02x%02x%02x\n", lcolor->private.fig.color, (unsigned) r, (unsigned) g, (unsigned) b);
+  return 0;
 }
 
 static void
@@ -64,7 +54,7 @@ fig_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsign
   y *= FIG_FACTOR;
   width *= FIG_FACTOR;
   height *= FIG_FACTOR;
-  fprintf(file, "2 2 0 1 0 %d %u -1 20 0.0 0 0 -1 0 0 5\n\t", lcolor_to_fig(lcolor), depth);
+  fprintf(file, "2 2 0 1 0 %d %u -1 20 0.0 0 0 -1 0 0 5\n\t", lcolor->private.fig.color, depth);
   fprintf(file, " %u %u", x, y);
   fprintf(file, " %u %u", x + width, y);
   fprintf(file, " %u %u", x + width, y + height);
@@ -82,7 +72,7 @@ fig_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsig
   y1 *= FIG_FACTOR;
   x2 *= FIG_FACTOR;
   y2 *= FIG_FACTOR;
-  fprintf(file, "2 1 0 1 0 %d %u -1 -1 0.0 0 0 -1 0 0 2\n\t", lcolor_to_fig(lcolor), depth);
+  fprintf(file, "2 1 0 1 0 %d %u -1 -1 0.0 0 0 -1 0 0 2\n\t", lcolor->private.fig.color, depth);
   fprintf(file, " %u %u", x1, y1);
   fprintf(file, " %u %u", x2, y2);
   fprintf(file, "\n");
@@ -95,7 +85,7 @@ fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int s
   int len = (int)strlen(text);
   int color;
 
-  color = lcolor_to_fig(lcolor);
+  color = lcolor->private.fig.color;
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   size = (size * 16) / 10;

@@ -23,32 +23,11 @@
 
 /* windows back-end.  */
 
-static struct color {
-  struct lstopo_color color;
-  HGDIOBJ brush;
-} *colors;
-
 struct lstopo_windows_output {
   struct lstopo_output *loutput;
   PAINTSTRUCT ps;
   HWND toplevel;
 };
-
-static int numcolors;
-
-static HGDIOBJ
-lcolor_to_brush(const struct lstopo_color *lcolor)
-{
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
-  int i;
-
-  for (i = 0; i < numcolors; i++)
-    if (colors[i].color.r == r && colors[i].color.g == g && colors[i].color.b == b)
-      return colors[i].brush;
-
-  fprintf(stderr, "color #%02x%02x%02x not declared\n", r, g, b);
-  exit(EXIT_FAILURE);
-}
 
 static struct lstopo_windows_output the_output;
 static int state, control;
@@ -232,13 +211,12 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
-static void
-windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor)
+static int
+windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, struct lstopo_color *lcolor)
 {
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   HBRUSH brush;
   COLORREF color;
-  struct color *tmp;
 
   color = RGB(r, g, b);
   brush = CreateSolidBrush(color);
@@ -247,15 +225,9 @@ windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, co
     exit(EXIT_FAILURE);
   }
 
-  tmp = realloc(colors, sizeof(*colors) * (numcolors + 1));
-  if (!tmp) {
-    fprintf(stderr, "Failed to realloc the colors array\n");
-    return;
-  }
-  colors = tmp;
-  colors[numcolors].color = *lcolor;
-  colors[numcolors].brush = (HGDIOBJ) brush;
-  numcolors++;
+  lcolor->private.windows.brush = (HGDIOBJ) brush;
+  lcolor->private.windows.color = color;
+  return 0;
 }
 
 static void
@@ -263,10 +235,9 @@ windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, un
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
-  SelectObject(ps->hdc, lcolor_to_brush(lcolor));
-  SetBkColor(ps->hdc, RGB(r, g, b));
+  SelectObject(ps->hdc, lcolor->private.windows.brush);
+  SetBkColor(ps->hdc, lcolor->private.windows.color);
   Rectangle(ps->hdc, x - x_delta, y - y_delta, x + width - x_delta, y + height - y_delta);
 }
 
@@ -276,7 +247,7 @@ windows_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, u
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  SelectObject(ps->hdc, lcolor_to_brush(lcolor));
+  SelectObject(ps->hdc, lcolor->private.windows.brush);
   MoveToEx(ps->hdc, x1 - x_delta, y1 - y_delta, NULL);
   LineTo(ps->hdc, x2 - x_delta, y2 - y_delta);
 }
@@ -286,9 +257,8 @@ windows_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, i
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
-  SetTextColor(ps->hdc, RGB(r, g, b));
+  SetTextColor(ps->hdc, lcolor->private.windows.color);
   TextOut(ps->hdc, x - x_delta, y - y_delta, text, (int)strlen(text));
 }
 
