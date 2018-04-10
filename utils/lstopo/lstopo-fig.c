@@ -136,5 +136,6 @@ output_fig (struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
+  destroy_colors();
   return 0;
 }

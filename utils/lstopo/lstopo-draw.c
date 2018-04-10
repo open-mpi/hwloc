@@ -30,22 +30,22 @@
 #define DARKER_EPOXY_B_COLOR ((DARK_EPOXY_B_COLOR * 100) / 110)
 
 /* each of these colors must be declared in declare_colors() */
-struct lstopo_color BLACK_COLOR = { 0, 0, 0 };
-struct lstopo_color WHITE_COLOR = { 0xff, 0xff, 0xff };
-struct lstopo_color PACKAGE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR };
-struct lstopo_color MEMORY_COLOR = { 0xef, 0xdf, 0xde };
-struct lstopo_color MEMORIES_COLOR = { 0xf2, 0xe8, 0xe8}; /* slightly lighter than MEMORY_COLOR */
-struct lstopo_color CORE_COLOR = { 0xbe, 0xbe, 0xbe };
-struct lstopo_color THREAD_COLOR = { 0xff, 0xff, 0xff };
-struct lstopo_color BINDING_COLOR = { 0, 0xff, 0 };
-struct lstopo_color DISALLOWED_COLOR = { 0xff, 0, 0 };
-struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff };
-struct lstopo_color MACHINE_COLOR = { 0xff, 0xff, 0xff };
-struct lstopo_color GROUP_IN_PACKAGE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR };
-struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff };
-struct lstopo_color PCI_DEVICE_COLOR = { DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR };
-struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde };
-struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff };
+struct lstopo_color BLACK_COLOR = { 0, 0, 0, 0 };
+struct lstopo_color WHITE_COLOR = { 0xff, 0xff, 0xff, 0 };
+struct lstopo_color PACKAGE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR, 0 };
+struct lstopo_color MEMORY_COLOR = { 0xef, 0xdf, 0xde, 0 };
+struct lstopo_color MEMORIES_COLOR = { 0xf2, 0xe8, 0xe8, 0}; /* slightly lighter than MEMORY_COLOR */
+struct lstopo_color CORE_COLOR = { 0xbe, 0xbe, 0xbe, 0 };
+struct lstopo_color THREAD_COLOR = { 0xff, 0xff, 0xff, 0 };
+struct lstopo_color BINDING_COLOR = { 0, 0xff, 0, 0 };
+struct lstopo_color DISALLOWED_COLOR = { 0xff, 0, 0, 0 };
+struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff, 0 };
+struct lstopo_color MACHINE_COLOR = { 0xff, 0xff, 0xff, 0 };
+struct lstopo_color GROUP_IN_PACKAGE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, 0 };
+struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff, 0 };
+struct lstopo_color PCI_DEVICE_COLOR = { DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR, 0 };
+struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde, 0 };
+struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff, 0 };
 
 static struct lstopo_color *colors = NULL;
 
@@ -92,6 +92,20 @@ declare_colors(struct lstopo_output *output)
   declare_color(output, &BRIDGE_COLOR);
 }
 
+void
+destroy_colors(void)
+{
+  struct lstopo_color *tmp = colors;
+
+  while (tmp) {
+    struct lstopo_color *next = tmp->next;
+
+    if (tmp->free)
+      free(tmp);
+    tmp = next;
+  }
+}
+
 static struct lstopo_color *
 find_or_declare_rgb_color(struct lstopo_output *loutput, int r, int g, int b)
 {
@@ -108,6 +122,7 @@ find_or_declare_rgb_color(struct lstopo_output *loutput, int r, int g, int b)
   color->r = r & 255;
   color->g = g & 255;
   color->b = b & 255;
+  color->free = 1;
   tmp = declare_color(loutput, color);
   if (!tmp)
     free(color);

@@ -84,6 +84,7 @@ struct lstopo_output {
 struct lstopo_color {
   /* these variables must be initialized before passing the structure to declare_color() */
   int r, g, b;
+  int free; /* 1 if lstopo should free() this structure at exit */
 
   /* these variable are initialized by declare_color() */
   /* backend specific private data */
@@ -181,6 +182,7 @@ extern void output_draw(struct lstopo_output *output);
 
 extern void lstopo_prepare_custom_styles(struct lstopo_output *loutput);
 extern void declare_colors(struct lstopo_output *output);
+extern void destroy_colors(void);
 
 static __hwloc_inline int lstopo_pu_disallowed(struct lstopo_output *loutput, hwloc_obj_t l)
 {

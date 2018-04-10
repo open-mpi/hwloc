@@ -481,6 +481,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   XFreeCursor(disp->dpy, disp->hand);
   XCloseDisplay(disp->dpy);
 
+  destroy_colors();
   return 0;
 }
 #endif /* CAIRO_HAS_XLIB_SURFACE */
@@ -541,6 +542,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
+  destroy_colors();
   return 0;
 }
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
@@ -601,6 +603,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
+  destroy_colors();
   return 0;
 }
 #endif /* CAIRO_HAS_PDF_SURFACE */
@@ -661,6 +664,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
+  destroy_colors();
   return 0;
 }
 #endif /* CAIRO_HAS_PS_SURFACE */
@@ -721,6 +725,7 @@ output_svg(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
+  destroy_colors();
   return 0;
 }
 #endif /* CAIRO_HAS_SVG_SURFACE */
