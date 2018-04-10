@@ -132,7 +132,6 @@ topo_cairo_paint(struct lstopo_cairo_output *coutput)
 
 
 
-static int topo_cairo_declare_color (struct lstopo_output *loutput __hwloc_attribute_unused, struct lstopo_color *lcolor __hwloc_attribute_unused) {}
 #endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
@@ -233,7 +232,7 @@ move_x11(struct lstopo_x11_output *disp)
 }
 
 static struct draw_methods x11_draw_methods = {
-  topo_cairo_declare_color,
+  NULL,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -491,7 +490,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 /* PNG back-end */
 
 static struct draw_methods png_draw_methods = {
-  topo_cairo_declare_color,
+  NULL,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -551,7 +550,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
 /* PDF back-end */
 
 static struct draw_methods pdf_draw_methods = {
-  topo_cairo_declare_color,
+  NULL,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -611,7 +610,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
 /* PS back-end */
 
 static struct draw_methods ps_draw_methods = {
-  topo_cairo_declare_color,
+  NULL,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -671,7 +670,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
 /* SVG back-end */
 
 static struct draw_methods svg_draw_methods = {
-  topo_cairo_declare_color,
+  NULL,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,

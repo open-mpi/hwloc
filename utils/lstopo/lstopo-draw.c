@@ -52,14 +52,14 @@ static struct lstopo_color *colors = NULL;
 static struct lstopo_color *
 declare_color(struct lstopo_output *loutput, struct lstopo_color *color)
 {
-  int ret;
-
   memset(&color->private, 0, sizeof(color->private));
 
-  /* call the backend callback */
-  ret = loutput->methods->declare_color(loutput, color);
-  if (ret < 0)
-    return NULL;
+  /* call the backend callback if any */
+  if (loutput->methods->declare_color) {
+    int ret = loutput->methods->declare_color(loutput, color);
+    if (ret < 0)
+      return NULL;
+  }
 
   /* insert */
   color->next = colors;
