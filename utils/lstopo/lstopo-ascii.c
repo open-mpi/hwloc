@@ -453,9 +453,11 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
 
   if (loutput->gridsize != 10) {
     fprintf(stderr, "--gridsize ignored in the ASCII backend.\n");
+    loutput->gridsize = 10;
   }
   if (loutput->fontsize && loutput->fontsize != 10) {
     fprintf(stderr, "--fontsize ignored in the ASCII backend.\n");
+    loutput->fontsize = 10;
   }
 
   /* cannot write between lines of the terminal */
