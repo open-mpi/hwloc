@@ -66,8 +66,6 @@ struct hwloc_linux_backend_data_s {
  * Misc Abstraction layers *
  ***************************/
 
-#include <linux/unistd.h>
-
 #if !(defined HWLOC_HAVE_SCHED_SETAFFINITY) && (defined HWLOC_HAVE_SYSCALL)
 /* libc doesn't have support for sched_setaffinity, make system call
  * ourselves: */
