@@ -191,6 +191,7 @@ static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
 #if (defined __NR_mbind) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_mbind, (long) addr, len, mode, (long)nodemask, maxnode, flags);
 #else
+#warning Couldn't find __NR_mbind syscall number, memory binding won't be supported
   errno = ENOSYS;
   return -1;
 #endif
@@ -216,6 +217,7 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
 #if (defined __NR_set_mempolicy) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_set_mempolicy, mode, nodemask, maxnode);
 #else
+#warning Couldn't find __NR_set_mempolicy syscall number, memory binding won't be supported
   errno = ENOSYS;
   return -1;
 #endif
@@ -243,6 +245,7 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unuse
 #if (defined __NR_get_mempolicy) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_get_mempolicy, mode, nodemask, maxnode, addr, flags);
 #else
+#warning Couldn't find __NR_get_mempolicy syscall number, memory binding won't be supported
   errno = ENOSYS;
   return -1;
 #endif
@@ -269,6 +272,7 @@ static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
 #if (defined __NR_migrate_pages) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_migrate_pages, pid, maxnode, oldnodes, newnodes);
 #else
+#warning Couldn't find __NR_migrate_pages syscall number, memory migration won't be supported
   errno = ENOSYS;
   return -1;
 #endif
@@ -297,6 +301,7 @@ static __hwloc_inline long hwloc_move_pages(int pid __hwloc_attribute_unused,
 #if (defined __NR_move_pages) && (defined HWLOC_HAVE_SYSCALL)
   return syscall(__NR_move_pages, pid, count, pages, nodes, status, flags);
 #else
+#warning Couldn't find __NR_move_pages syscall number, getting memory location won't be supported
   errno = ENOSYS;
   return -1;
 #endif
