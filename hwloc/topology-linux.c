@@ -179,6 +179,8 @@ struct hwloc_linux_backend_data_s {
 #  define __NR_mbind 259
 # elif defined(__sparc__)
 #  define __NR_mbind 353
+# elif defined(__aarch64__)
+#  define __NR_mbind 235
 # endif
 #endif
 static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
@@ -208,6 +210,8 @@ static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
 #  define __NR_set_mempolicy 261
 # elif defined(__sparc__)
 #  define __NR_set_mempolicy 305
+# elif defined(__aarch64__)
+#  define __NR_set_mempolicy 237
 # endif
 #endif
 static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused,
@@ -234,6 +238,8 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
 #  define __NR_get_mempolicy 260
 # elif defined(__sparc__)
 #  define __NR_get_mempolicy 304
+# elif defined(__aarch64__)
+#  define __NR_get_mempolicy 236
 # endif
 #endif
 static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unused,
@@ -262,6 +268,8 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unuse
 #  define __NR_migrate_pages 258
 # elif defined(__sparc__)
 #  define __NR_migrate_pages 302
+# elif defined(__aarch64__)
+#  define __NR_migrate_pages 238
 # endif
 #endif
 static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
@@ -289,6 +297,8 @@ static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
 #  define __NR_move_pages 301
 # elif defined(__sparc__)
 #  define __NR_move_pages 307
+# elif defined(__aarch64__)
+#  define __NR_move_pages 239
 # endif
 #endif
 static __hwloc_inline long hwloc_move_pages(int pid __hwloc_attribute_unused,
