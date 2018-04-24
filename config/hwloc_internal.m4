@@ -197,7 +197,7 @@ EOF
     AC_MSG_CHECKING([whether to enable "picky" compiler mode])
     hwloc_want_picky=0
     AS_IF([test "$hwloc_c_vendor" = "gnu"],
-          [AS_IF([test -d "$srcdir/.hg" -o -d "$srcdir/.git"],
+          [AS_IF([test -e "$srcdir/.git"],
                  [hwloc_want_picky=1])])
     if test "$enable_picky" = "yes"; then
         if test "$GCC" = "yes"; then
