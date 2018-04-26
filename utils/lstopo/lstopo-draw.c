@@ -992,8 +992,8 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   }
 }
 
-/* bridge object height: linkspeed + a small empty box */
-#define BRIDGE_HEIGHT (gridsize + fontsize + FONTGRIDSIZE)
+/* bridge object height: small empty box */
+#define BRIDGE_HEIGHT (gridsize)
 
 static void
 bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
@@ -1045,7 +1045,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);
 	    else
 	      snprintf(text, sizeof(text), "%0.1f", child->attr->pcidev.linkspeed);
-	    methods->text(loutput, style.t2, fontsize, depth-1, x + 3*gridsize, ymid - BRIDGE_HEIGHT/2, text);
+	    methods->text(loutput, style.t2, fontsize, depth-1, x + 3*gridsize, ymid + BRIDGE_HEIGHT/2, text);
 	  }
 	}
       }
