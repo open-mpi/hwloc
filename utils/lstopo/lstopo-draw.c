@@ -960,8 +960,12 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     prepare_text(loutput, level);
-    lud->width = lud->textwidth + gridsize + overlaidoffset + FONTGRIDSIZE;
-    lud->height = fontsize + gridsize + overlaidoffset + FONTGRIDSIZE;
+    lud->width = gridsize + overlaidoffset;
+    lud->height = gridsize + overlaidoffset;
+    if (lud->ntext > 0) {
+      lud->width += lud->textwidth + FONTGRIDSIZE;
+      lud->height += fontsize + FONTGRIDSIZE;
+    }
     place_children(loutput, level,
 		   gridsize, lud->height);
 
@@ -1033,7 +1037,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	  ymin = ymid;
 	ymax = ymid;
 	/* Negotiated link speed */
-	if (fontsize) {
+	if (fontsize && loutput->show_text[HWLOC_OBJ_BRIDGE]) {
 	  float speed = 0.;
 	  if (child->type == HWLOC_OBJ_PCI_DEVICE)
 	    speed = child->attr->pcidev.linkspeed;
