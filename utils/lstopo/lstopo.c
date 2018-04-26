@@ -976,15 +976,6 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
-  /* no-text currently not supported for bridges and pci devices:
-   * - pci devices become 1-gridsize-high (unless they contain osdevs),
-   *   causing the bridge link to be too low if text is enabled for bridges.
-   * - bridges move up when there's no text, pci devices aren't linked
-   *   at the middle of the box anymore. not too bad.
-   */
-  loutput.show_text[HWLOC_OBJ_BRIDGE] = 1;
-  loutput.show_text[HWLOC_OBJ_PCI_DEVICE] = 1;
-
   err = hwloc_topology_set_flags(topology, flags);
   if (err < 0) {
     fprintf(stderr, "Failed to set flags %lx (%s).\n", flags, strerror(errno));
