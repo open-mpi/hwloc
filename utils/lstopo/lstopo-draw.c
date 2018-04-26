@@ -230,6 +230,15 @@ static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent,
   return obj;
 }
 
+static float pci_link_speed(hwloc_obj_t obj)
+{
+  if (obj->type == HWLOC_OBJ_PCI_DEVICE)
+    return obj->attr->pcidev.linkspeed;
+  if (obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
+    return obj->attr->bridge.upstream.pci.linkspeed;
+  return 0.;
+}
+
 /**************************
  * Placing children
  */
@@ -1038,11 +1047,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	ymax = ymid;
 	/* Negotiated link speed */
 	if (fontsize && loutput->show_text[HWLOC_OBJ_BRIDGE]) {
-	  float speed = 0.;
-	  if (child->type == HWLOC_OBJ_PCI_DEVICE)
-	    speed = child->attr->pcidev.linkspeed;
-	  if (child->type == HWLOC_OBJ_BRIDGE && child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
-	    speed = child->attr->bridge.upstream.pci.linkspeed;
+	  float speed = pci_link_speed(child);
 	  if (loutput->show_attrs[HWLOC_OBJ_BRIDGE] && speed != 0.) {
 	    char text[4];
 	    if (speed >= 10.)
