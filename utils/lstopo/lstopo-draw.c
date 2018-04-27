@@ -906,7 +906,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   lud->textwidth = 0;
   lud->textxoffset = 0;
 
-  if (!fontsize || !loutput->show_text[obj->type])
+  if (!loutput->show_text[obj->type])
     return;
 
   /* main object identifier line */
@@ -951,7 +951,7 @@ draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *l
   unsigned gridsize = loutput->gridsize;
   unsigned i;
 
-  if (!fontsize || !loutput->show_text[obj->type])
+  if (!loutput->show_text[obj->type])
     return;
 
   methods->text(loutput, lcolor, fontsize, depth, x + lud->textxoffset, y, lud->text[0]);
@@ -1024,7 +1024,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  unsigned speedwidth = fontsize ? fontsize + gridsize : 0;
+  unsigned speedwidth = loutput->show_text[HWLOC_OBJ_BRIDGE] ? fontsize + gridsize : 0;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
@@ -1056,7 +1056,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	  ymin = ymid;
 	ymax = ymid;
 	/* Negotiated link speed */
-	if (fontsize && loutput->show_text[HWLOC_OBJ_BRIDGE]) {
+	if (loutput->show_text[HWLOC_OBJ_BRIDGE]) {
 	  float speed = pci_link_speed(child);
 	  if (loutput->show_attrs[HWLOC_OBJ_BRIDGE] && speed != 0.) {
 	    char text[4];
@@ -1211,7 +1211,7 @@ output_draw(struct lstopo_output *loutput)
   unsigned long hostname_size = sizeof(hostname);
   unsigned maxtextwidth = 0, textwidth;
 
-  if (legend && fontsize) {
+  if (legend) {
     forcedhostname = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "HostName");
     if (!forcedhostname && hwloc_topology_is_thissystem(topology)) {
 #if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
@@ -1279,7 +1279,7 @@ output_draw(struct lstopo_output *loutput)
 
     /* loutput height is sum(root, legend) */
     totheight = rlud->height;
-    if (legend && fontsize)
+    if (legend)
       totheight += gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize);
     loutput->height = totheight;
 
@@ -1292,7 +1292,7 @@ output_draw(struct lstopo_output *loutput)
     get_type_fun(root->type)(loutput, root, depth, 0, 0);
 
     /* Draw legend */
-    if (legend && fontsize) {
+    if (legend) {
       offset = rlud->height + gridsize;
       methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
       for(i=0; i<ntext; i++, offset += gridsize + fontsize)

@@ -976,6 +976,12 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
+  if (!loutput.fontsize) {
+    for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+      loutput.show_text[i] = 0;
+    loutput.legend = 0;
+  }
+
   err = hwloc_topology_set_flags(topology, flags);
   if (err < 0) {
     fprintf(stderr, "Failed to set flags %lx (%s).\n", flags, strerror(errno));
