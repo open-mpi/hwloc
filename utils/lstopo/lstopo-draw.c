@@ -556,9 +556,6 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
  * Drawing children
  */
 
-/* additional gridsize when fontsize > 0 */
-#define FONTGRIDSIZE (fontsize ? gridsize : 0)
-
 static void
 draw__children(struct lstopo_output *loutput, hwloc_obj_t parent,
 	       struct lstopo_children_position *children,
@@ -985,8 +982,8 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lud->width = gridsize + overlaidoffset;
     lud->height = gridsize + overlaidoffset;
     if (lud->ntext > 0) {
-      lud->width += lud->textwidth + FONTGRIDSIZE;
-      lud->height += fontsize + FONTGRIDSIZE;
+      lud->width += lud->textwidth + gridsize;
+      lud->height += fontsize + gridsize;
     }
     place_children(loutput, level,
 		   gridsize, lud->height);
@@ -1089,8 +1086,8 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     lud->width = gridsize;
     lud->height = gridsize;
     if (lud->ntext > 0) {
-      lud->width += lud->textwidth + FONTGRIDSIZE;
-      lud->height += fontsize + FONTGRIDSIZE;
+      lud->width += lud->textwidth + fontsize;
+      lud->height += fontsize + gridsize;
     }
     place_children(loutput, level,
 		   0, lud->height + gridsize);
@@ -1110,7 +1107,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
      */
     myheight = gridsize;
     if (lud->ntext > 0)
-      myheight += fontsize + FONTGRIDSIZE;
+      myheight += fontsize + gridsize;
 
     if (lud->above_children.kinds) {
       /* display above_children even above the cache itself */
@@ -1141,8 +1138,8 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     lud->width = gridsize;
     lud->height = gridsize;
     if (lud->ntext > 0) {
-      lud->width += lud->textwidth + FONTGRIDSIZE;
-      lud->height += (fontsize + FONTGRIDSIZE) * lud->ntext;
+      lud->width += lud->textwidth + gridsize;
+      lud->height += (fontsize + gridsize) * lud->ntext;
     }
     place_children(loutput, level,
 		   gridsize, lud->height);
