@@ -266,6 +266,9 @@ place_children_horiz(struct lstopo_output *loutput, hwloc_obj_t parent,
   *height = maxh + 2*border;
 }
 
+/* bridge object height: small empty box */
+#define BRIDGE_HEIGHT (gridsize)
+
 static void
 place_children_vert(struct lstopo_output *loutput, hwloc_obj_t parent,
 		    unsigned kind, unsigned border, unsigned separator,
@@ -273,17 +276,27 @@ place_children_vert(struct lstopo_output *loutput, hwloc_obj_t parent,
 {
   unsigned cury = 0;
   unsigned maxw = 0;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
+  int bridge_parent_with_pcilinkspeed = parent->type == HWLOC_OBJ_BRIDGE && loutput->show_text[HWLOC_OBJ_BRIDGE];
   hwloc_obj_t child;
   int ncstate;
   for(child = next_child(loutput, parent, kind, NULL, &ncstate);
       child;
       child = next_child(loutput, parent, kind, child, &ncstate)) {
     struct lstopo_obj_userdata *clud = child->userdata;
+    unsigned child_height = clud->height;
     clud->xrel = border;
     clud->yrel = cury + border;
     if (clud->width > maxw)
       maxw = clud->width;
-    cury += separator + clud->height;
+
+    if (bridge_parent_with_pcilinkspeed && pci_link_speed(child) != 0.)
+      /* make sure padding between children is enough to display pci link speed */
+      if (child_height <= BRIDGE_HEIGHT + fontsize)
+	child_height = BRIDGE_HEIGHT + fontsize;
+
+    cury += separator + child_height;
   }
   *width = maxw + 2*border;
   *height = cury - separator + 2*border;
@@ -1005,9 +1018,6 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   }
 }
 
-/* bridge object height: small empty box */
-#define BRIDGE_HEIGHT (gridsize)
-
 static void
 bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
@@ -1019,7 +1029,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
     lud->width = 2*gridsize + gridsize + speedwidth;
-    lud->height = gridsize + FONTGRIDSIZE;
+    lud->height = BRIDGE_HEIGHT;
     place_children(loutput, level,
 		   3*gridsize + speedwidth, 0);
 
