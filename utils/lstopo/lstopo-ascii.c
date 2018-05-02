@@ -292,7 +292,7 @@ merge(struct lstopo_ascii_output *disp, int x, int y, int or, int andnot, const 
   put(disp, x, y, from_directions(disp, directions), NULL, color);
 }
 
-/* 10 is the only allowed gridsize/fontsize/linespacing.
+/* 10 is the only allowed gridsize/fontsize/linespacing (enforced in output_ascii()).
  * vertically, it's a line of text.
  * horizontally, it's 2 chars (so that we get a space between text and boxes
  */
@@ -451,18 +451,9 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
     return -1;
   }
 
-  if (loutput->gridsize != 10) {
-    fprintf(stderr, "--gridsize ignored in the ASCII backend.\n");
-    loutput->gridsize = 10;
-  }
-  if (loutput->fontsize && loutput->fontsize != 10) {
-    fprintf(stderr, "--fontsize ignored in the ASCII backend.\n");
-    loutput->fontsize = 10;
-  }
-  if (loutput->linespacing != 10) {
-    fprintf(stderr, "--linespacing ignored in the ASCII backend.\n");
-    loutput->linespacing = 10;
-  }
+  loutput->gridsize = 10;
+  loutput->fontsize = 10;
+  loutput->linespacing = 10;
 
   /* cannot write between lines of the terminal */
   loutput->no_half_lines = 1;
