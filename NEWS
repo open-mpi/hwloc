@@ -27,6 +27,7 @@ Version 2.1.0
 * Tools
   + Add --nodeset options to hwloc-calc for converting between cpusets and
     nodesets.
+  + Add --linespacing to lstopo.
 
 
 Version 2.0.1 (also included in 1.11.10 when relevant)

@@ -945,7 +945,7 @@ draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *l
   struct draw_methods *methods = loutput->methods;
   struct lstopo_obj_userdata *lud = obj->userdata;
   unsigned fontsize = loutput->fontsize;
-  unsigned gridsize = loutput->gridsize;
+  unsigned linespacing = loutput->linespacing;
   unsigned i;
 
   if (!loutput->show_text[obj->type])
@@ -953,7 +953,7 @@ draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *l
 
   methods->text(loutput, lcolor, fontsize, depth, x + lud->textxoffset, y, lud->text[0]);
   for(i=1; i<lud->ntext; i++)
-    methods->text(loutput, lcolor, fontsize, depth, x, y + i*gridsize + i*fontsize, lud->text[i]);
+    methods->text(loutput, lcolor, fontsize, depth, x, y + i*(linespacing + fontsize), lud->text[i]);
 }
 
 static void
@@ -1131,6 +1131,7 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  unsigned linespacing = loutput->linespacing;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
@@ -1139,7 +1140,7 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     lud->height = gridsize;
     if (lud->ntext > 0) {
       lud->width += lud->textwidth + gridsize;
-      lud->height += (fontsize + gridsize) * lud->ntext;
+      lud->height += fontsize + (fontsize + linespacing) * (lud->ntext - 1) + gridsize;
     }
     place_children(loutput, level,
 		   gridsize, lud->height);
@@ -1196,6 +1197,7 @@ output_draw(struct lstopo_output *loutput)
   int legend = loutput->legend;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  unsigned linespacing = loutput->linespacing;
   hwloc_obj_t root = hwloc_get_root_obj(topology);
   struct lstopo_obj_userdata *rlud = root->userdata;
   unsigned depth = 100;
@@ -1277,7 +1279,7 @@ output_draw(struct lstopo_output *loutput)
     /* loutput height is sum(root, legend) */
     totheight = rlud->height;
     if (legend)
-      totheight += gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize);
+      totheight += gridsize + (ntext+loutput->legend_append_nr - 1) * (linespacing+fontsize) + fontsize + gridsize;
     loutput->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
@@ -1291,10 +1293,10 @@ output_draw(struct lstopo_output *loutput)
     /* Draw legend */
     if (legend) {
       offset = rlud->height + gridsize;
-      methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr) * (gridsize+fontsize));
-      for(i=0; i<ntext; i++, offset += gridsize + fontsize)
+      methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr-1) * (linespacing + fontsize) + fontsize + gridsize);
+      for(i=0; i<ntext; i++, offset += linespacing + fontsize)
 	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, text[i]);
-      for(i=0; i<loutput->legend_append_nr; i++, offset += gridsize + fontsize)
+      for(i=0; i<loutput->legend_append_nr; i++, offset += linespacing + fontsize)
 	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
     }
   }
