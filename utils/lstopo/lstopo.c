@@ -493,8 +493,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --children-order=plain\n"
 		  "                        Display memory children below the parent like any other child\n");
   fprintf (where, "  --fontsize 10         Set size of text font\n");
-  fprintf (where, "  --gridsize 10         Set size of margin between elements\n");
-  fprintf (where, "  --linespacing 10      Set spacing between lines of text\n");
+  fprintf (where, "  --gridsize 7          Set size of margin between elements\n");
+  fprintf (where, "  --linespacing 4       Set spacing between lines of text\n");
   fprintf (where, "  --horiz[=<type,...>]  Horizontal graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --vert[=<type,...>]   Vertical graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --rect[=<type,...>]   Rectangular graphical layout with nearly 4/3 ratio\n");
@@ -624,8 +624,8 @@ main (int argc, char *argv[])
   loutput.no_half_lines = 0;
   loutput.plain_children_order = 0;
   loutput.fontsize = 10;
-  loutput.gridsize = 10;
-  loutput.linespacing = 10;
+  loutput.gridsize = 7;
+  loutput.linespacing = 4;
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
     loutput.force_orient[i] = LSTOPO_ORIENT_NONE;
   loutput.force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;
