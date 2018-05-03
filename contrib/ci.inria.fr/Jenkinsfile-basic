@@ -31,7 +31,7 @@ pipeline {
 					// Stash those scripts because they are not in make dist
 					dir('contrib/ci.inria.fr') {
 						stash includes: "job-1-check.sh", name: 'script-unix-check'
-						stash includes: "job-3-visualstudio.bat", name: 'script-msvc'
+						stash includes: "job-1-visualstudio.bat", name: 'script-msvc'
 					}
 					archiveArtifacts artifacts: "${env.tarballgz},${env.tarballbz2},doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
 					deleteDir()
@@ -64,7 +64,7 @@ pipeline {
 								dir('check-msvc') {
 									unstash 'tarballgz'
 									unstash 'script-msvc'
-									bat 'job-3-visualstudio.bat'
+									bat 'job-1-visualstudio.bat'
 									deleteDir()
 								}
 							}
