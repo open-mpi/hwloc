@@ -230,8 +230,18 @@ AS_IF([test "$netloc_happy" = "yes"], [
   AS_IF([test "$scotch_found_headers" = "yes"], [netlocscotch_status=with])
   netloc_status="yes ($netlocscotch_status scotch)"
 ])
-hwloc_cairo_status=$hwloc_cairo_happy
-AS_IF([test "$enable_embedded_mode" = "yes"], [hwloc_cairo_status="no (disabled in embedded mode)"])
+
+AS_IF([test "$enable_embedded_mode" = "yes"],
+      [hwloc_graphical_lstopo_status="no (disabled in embedded mode)"],
+      [AS_IF([test "$hwloc_windows" = "yes"],
+             [hwloc_graphical_lstopo_status="yes (Windows)"],
+             [AS_IF([test "$hwloc_cairo_happy" = "yes"],
+                    [AS_IF([test "$lstopo_have_x11" = "yes"],
+                           [hwloc_graphical_lstopo_status="yes (Cairo)"],
+                           [hwloc_graphical_lstopo_status="partial (Cairo, without X11)"])],
+                    [hwloc_graphical_lstopo_status="no"])
+             ])
+      ])
 
 # Prepare the I/O summary
 hwloc_probeio_list=
@@ -256,7 +266,7 @@ cat <<EOF
 Hwloc optional build support status (more details can be found above):
 
 Probe / display I/O devices:$hwloc_probeio_list
-Graphical output (Cairo):    $hwloc_cairo_status
+Graphical output:            $hwloc_graphical_lstopo_status
 XML input / output:          $hwloc_xml_status
 Netloc functionality:        $netloc_status
 EOF
