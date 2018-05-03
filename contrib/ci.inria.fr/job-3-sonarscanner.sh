@@ -7,13 +7,6 @@
 set -e
 set -x
 
-# Define the version
-if test x$1 = x; then
-  echo "Missing branch name as first argument"
-  exit 1
-fi
-export hwloc_branch=$1
-
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
@@ -22,9 +15,25 @@ ls | grep -v ^hwloc- | grep -v ^job- | xargs rm -rf || true
 ls -td hwloc-* | tail -n +11 | xargs chmod u+w -R || true
 ls -td hwloc-* | tail -n +11 | xargs rm -rf || true
 
-# find the tarball, extract it
+# find the tarball
 tarball=$(ls -tr hwloc-*.tar.gz | grep -v build.tar.gz | tail -1)
 basename=$(basename $tarball .tar.gz)
+
+# extract branch name
+hwloc_branch=$(echo $basename | sed -r -e 's/^hwloc-//' -e 's/-[0-9]{8}.*//')
+export hwloc_branch
+
+# check that this is either master or vX.Y
+if test x$hwloc_branch != xmaster; then
+  if test x$(echo "x${hwloc_branch}x" | sed -r -e 's/xv[0-9]+\.[0-9]+x//') != x; then
+    echo "This job only runs on master and stable branches"
+    exit 0
+    # TODO add an option for force a run?
+    # TODO or rename vX.Y* to vX.Y and anything else to master?
+  fi
+fi
+
+# extract the tarball
 test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
 tar xfz $tarball
 rm $tarball
@@ -121,7 +130,7 @@ sonar.exclusions=tests/ports
 sonar.c.errorRecoveryEnabled=true
 sonar.c.compiler.parser=GCC
 sonar.c.compiler.charset=UTF-8
-sonar.c.compiler.regex=^(.*):([0-9]+):[0-9]+: warning: (.*)\\[(.*)\\]$
+sonar.c.compiler.regex=^(.*):(\\\d+):\\\d+: warning: (.*)\\\[(.*)\\\]$
 sonar.c.compiler.reportPath=hwloc-build.log
 sonar.c.coverage.reportPath=hwloc-coverage.xml
 sonar.c.cppcheck.reportPath=${CPPCHECK_XMLS}

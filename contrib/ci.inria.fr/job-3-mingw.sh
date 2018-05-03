@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2017 Inria.  All rights reserved.
+# Copyright © 2012-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -51,6 +51,9 @@ done
 oldPWD=$PWD
 oldPATH=$PATH
 
+# remove previous artifacts so that they don't exported again by this build
+rm -f hwloc-win*-build-*.zip || true
+
 if test x$dotar = x1; then
   # remove everything but the last 10 builds
   rm -rf $(ls | grep -v ^hwloc- | grep -v ^job-) || true
@@ -80,7 +83,7 @@ if test x$dobuild32 = x1; then
   cd $oldPWD
 
   # for MS 'lib' program in dolib.c
-  export PATH=$PATH:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE"
+  export PATH=$PATH:$MSLIB_PATH
 
   mkdir ${basename}/build32 || true
   cd ${basename}/build32
@@ -128,7 +131,7 @@ if test x$dobuild64 = x1; then
   cd $oldPWD
 
   # for MS 'lib' program in dolib.c
-  export PATH=$PATH:"/c/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin":"/c/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE"
+  export PATH=$PATH:$MSLIB_PATH
 
   mkdir ${basename}/build64 || true
   cd ${basename}/build64
