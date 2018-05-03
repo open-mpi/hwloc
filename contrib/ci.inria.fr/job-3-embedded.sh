@@ -27,7 +27,7 @@ cd $basename
 touch configure
 
 # embedded tests
-(cd tests/embedded && ./run-embedded-tests.sh ../../../$tarball)
+(cd tests/embedded && ./run-embedded-tests.sh ../../$tarball)
 
 # cleanup
 rm -rf doc
