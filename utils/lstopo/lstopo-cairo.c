@@ -22,20 +22,26 @@
 #include <cairo-svg.h>
 #endif /* CAIRO_HAS_SVG_SURFACE */
 
-#ifndef HWLOC_HAVE_X11_KEYSYM
-/* In case X11 headers aren't availble, forcefully disable Cairo/Xlib.  */
-# undef CAIRO_HAS_XLIB_SURFACE
-#endif
-
-#ifdef CAIRO_HAS_XLIB_SURFACE
-#include <cairo-xlib.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
-#include <X11/cursorfont.h>
+#ifdef LSTOPO_HAVE_X11
+/* configure should enable X11 only if Cairo has XLIB SURFACE and there are X11 headers */
+# ifndef HWLOC_HAVE_X11_KEYSYM
+#  error LSTOPO_HAVE_X11 enabled without HWLOC_HAVE_X11_KEYSYM?!
+# endif
+# ifndef CAIRO_HAS_XLIB_SURFACE
+#  error LSTOPO_HAVE_X11 enabled without CAIRO_HAS_XLIB_SURFACE?!
+# endif
+# include <cairo-xlib.h>
+# include <X11/Xlib.h>
+# include <X11/Xutil.h>
+# include <X11/keysym.h>
+# include <X11/cursorfont.h>
 /* Avoid Xwindow's definition conflict with Windows' use for fields names.  */
-#undef Status
-#endif /* CAIRO_HAS_XLIB_SURFACE */
+# undef Status
+#else /* LSTOPO_HAVE_X11 */
+# if (defined HWLOC_HAVE_X11_KEYSYM) && (defined CAIRO_HAS_XLIB_SURFACE)
+#  error HWLOC_HAVE_X11_KEYSYM and CAIRO_HAS_XLIB_SURFACE defined but LSTOPO_HAVE_X11 not enabled?!
+# endif
+#endif /* LSTOPO_HAVE_X11 */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +51,7 @@
 
 #include "lstopo.h"
 
-#if (defined CAIRO_HAS_XLIB_SURFACE) + (defined CAIRO_HAS_PNG_FUNCTIONS) + (defined CAIRO_HAS_PDF_SURFACE) + (defined CAIRO_HAS_PS_SURFACE) + (defined CAIRO_HAS_SVG_SURFACE)
+#if (defined LSTOPO_HAVE_X11) + (defined CAIRO_HAS_PNG_FUNCTIONS) + (defined CAIRO_HAS_PDF_SURFACE) + (defined CAIRO_HAS_PS_SURFACE) + (defined CAIRO_HAS_SVG_SURFACE)
 struct lstopo_cairo_output {
   struct lstopo_output *loutput;
   cairo_surface_t *surface;
@@ -132,10 +138,10 @@ topo_cairo_paint(struct lstopo_cairo_output *coutput)
 
 
 
-#endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
+#endif /* (LSTOPO_HAVE_X11 + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
-#ifdef CAIRO_HAS_XLIB_SURFACE
+#ifdef LSTOPO_HAVE_X11
 /* X11 back-end */
 
 struct lstopo_x11_output {
@@ -484,7 +490,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   destroy_colors();
   return 0;
 }
-#endif /* CAIRO_HAS_XLIB_SURFACE */
+#endif /* LSTOPO_HAVE_X11 */
 
 
 #ifdef CAIRO_HAS_PNG_FUNCTIONS

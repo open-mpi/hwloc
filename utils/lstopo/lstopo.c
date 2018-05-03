@@ -422,7 +422,7 @@ void usage(const char *name, FILE *where)
 #ifdef LSTOPO_HAVE_GRAPHICS
 #ifdef HWLOC_WIN_SYS
 		  "graphical"
-#elif (defined CAIRO_HAS_XLIB_SURFACE) && (defined HWLOC_HAVE_X11_KEYSYM)
+#elif (defined LSTOPO_HAVE_X11)
 		  "graphical (X11) if DISPLAY is set, console otherwise"
 #else
 		  "console"
@@ -1091,11 +1091,11 @@ main (int argc, char *argv[])
   switch (output_format) {
   case LSTOPO_OUTPUT_DEFAULT:
 #ifdef LSTOPO_HAVE_GRAPHICS
-#if (defined CAIRO_HAS_XLIB_SURFACE) && (defined HWLOC_HAVE_X11_KEYSYM)
+#if (defined LSTOPO_HAVE_X11)
     if (getenv("DISPLAY")) {
       output_func = output_x11;
     } else
-#endif /* CAIRO_HAS_XLIB_SURFACE */
+#endif /* LSTOPO_HAVE_X11 */
 #ifdef HWLOC_WIN_SYS
     {
       output_func = output_windows;

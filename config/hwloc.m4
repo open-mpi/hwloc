@@ -923,6 +923,7 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
              AC_CHECK_HEADERS([X11/Xutil.h],
                 [AC_CHECK_HEADERS([X11/keysym.h],
                     [AC_DEFINE([HWLOC_HAVE_X11_KEYSYM], [1], [Define to 1 if X11 headers including Xutil.h and keysym.h are available.])
+                     hwloc_x11_keysym_happy=yes
                      HWLOC_X11_CPPFLAGS="$X_CFLAGS"
                      AC_SUBST([HWLOC_X11_CPPFLAGS])
                      HWLOC_X11_LIBS="$X_PRE_LIBS $X_LIBS -lX11 $X_EXTRA_LIBS"

@@ -264,6 +264,29 @@ EOF
 
     if test "x$hwloc_cairo_happy" = "xyes"; then
         AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
+        AC_MSG_CHECKING([whether lstopo Cairo/X11 interactive graphical output is supported])
+        if test "x$hwloc_x11_keysym_happy" = xyes; then
+          save_CPPFLAGS="$CPPFLAGS"
+          CPPFLAGS="$CPPFLAGS $HWLOC_CAIRO_CFLAGS $HWLOC_X11_CPPFLAGS"
+          AC_PREPROC_IFELSE([
+            AC_LANG_PROGRAM([[
+              #include <cairo.h>
+            ]], [[
+              #ifndef CAIRO_HAS_XLIB_SURFACE
+              #error
+              #endif
+            ]])
+          ], [
+            AC_MSG_RESULT([yes])
+            lstopo_have_x11=yes
+            AC_DEFINE([LSTOPO_HAVE_X11], 1, [Define if lstopo Cairo/X11 interactive graphical output is supported])
+          ], [
+            AC_MSG_RESULT([no (missing CAIRO_HAS_XLIB_SURFACE)])
+          ])
+          CPPFLAGS="$save_CPPFLAGS"
+        else
+          AC_MSG_RESULT([no (missing X11)])
+        fi
     else
         AS_IF([test "$enable_cairo" = "yes"],
               [AC_MSG_WARN([--enable-cairo requested, but Cairo/X11 support was not found])
