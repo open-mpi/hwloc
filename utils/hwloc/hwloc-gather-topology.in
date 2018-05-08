@@ -90,7 +90,7 @@ if [ ! -w  "$dirname" ] ; then
     exit 1
 fi
 
-destdir=`mktemp -d`
+destdir=`mktemp -d --tmpdir hwloc-gather-topology.XXXXXXXX`
 
 # Use cat so that we properly get proc/sys files even if their
 # file length is wrong
