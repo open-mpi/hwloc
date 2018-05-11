@@ -25,6 +25,12 @@ enum lstopo_orient_e {
   LSTOPO_ORIENT_RECT
 };
 
+enum lstopo_index_type_e {
+  LSTOPO_INDEX_TYPE_DEFAULT,
+  LSTOPO_INDEX_TYPE_PHYSICAL,
+  LSTOPO_INDEX_TYPE_LOGICAL
+};
+
 FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
 
 struct draw_methods;
@@ -38,7 +44,7 @@ struct lstopo_output {
   int overwrite;
 
   /* misc config */
-  int logical;
+  enum lstopo_index_type_e index_type;
   int verbose_mode;
   int ignore_pus;
   int ignore_numanodes;

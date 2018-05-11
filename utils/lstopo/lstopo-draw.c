@@ -651,9 +651,9 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
 static int
 lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, hwloc_obj_t obj)
 {
-  int logical = loutput->logical;
-  unsigned idx = logical ? obj->logical_index : obj->os_index;
-  const char *indexprefix = logical ? " L#" : " P#";
+  enum lstopo_index_type_e index_type = loutput->index_type;
+  unsigned idx = (index_type == LSTOPO_INDEX_TYPE_LOGICAL ? obj->logical_index : obj->os_index);
+  const char *indexprefix = (index_type == LSTOPO_INDEX_TYPE_LOGICAL ? " L#" : " P#");
   char typestr[32];
   char indexstr[32]= "";
   char attrstr[256];
@@ -1222,7 +1222,7 @@ output_compute_pu_min_textwidth(struct lstopo_output *output)
     return;
   }
 
-  if (output->logical) {
+  if (output->index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
     int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
     lastpu = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth)-1);
   } else {
@@ -1276,7 +1276,7 @@ output_draw(struct lstopo_output *loutput)
     }
 
     /* Display whether we're showing physical or logical IDs */
-    snprintf(text[ntext], sizeof(text[ntext]), "Indexes: %s", loutput->logical ? "logical" : "physical");
+    snprintf(text[ntext], sizeof(text[ntext]), "Indexes: %s", (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL ? "logical" : "physical"));
     textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
     if (textwidth > maxtextwidth)
       maxtextwidth = textwidth;

@@ -597,7 +597,7 @@ main (int argc, char *argv[])
 
   loutput.overwrite = 0;
 
-  loutput.logical = -1;
+  loutput.index_type = LSTOPO_INDEX_TYPE_DEFAULT;
   loutput.verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   loutput.ignore_pus = 0;
   loutput.ignore_numanodes = 0;
@@ -671,9 +671,9 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[0], "-f") || !strcmp (argv[0], "--force"))
 	loutput.overwrite = 1;
       else if (!strcmp (argv[0], "-l") || !strcmp (argv[0], "--logical"))
-	loutput.logical = 1;
+	loutput.index_type = LSTOPO_INDEX_TYPE_LOGICAL;
       else if (!strcmp (argv[0], "-p") || !strcmp (argv[0], "--physical"))
-	loutput.logical = 0;
+	loutput.index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
       else if (!strcmp (argv[0], "-c") || !strcmp (argv[0], "--cpuset"))
 	loutput.show_cpuset = 1;
       else if (!strcmp (argv[0], "-C") || !strcmp (argv[0], "--cpuset-only"))
@@ -1151,11 +1151,11 @@ main (int argc, char *argv[])
     goto out_usagefailure;
   }
 
-  if (loutput.logical == -1) {
+  if (loutput.index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
     if (output_func == output_console)
-      loutput.logical = 1;
+      loutput.index_type = LSTOPO_INDEX_TYPE_LOGICAL;
     else
-      loutput.logical = 0;
+      loutput.index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
   }
 
   loutput.topology = topology;

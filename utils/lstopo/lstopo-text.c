@@ -28,9 +28,9 @@ static void
 output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
 {
   FILE *output = loutput->file;
-  int logical = loutput->logical;
+  enum lstopo_index_type_e index_type = loutput->index_type;
   int verbose_mode = loutput->verbose_mode;
-  unsigned idx = logical ? l->logical_index : l->os_index;
+  unsigned idx = (index_type == LSTOPO_INDEX_TYPE_LOGICAL ? l->logical_index : l->os_index);
   char pidxstr[16];
   char lidxstr[16];
   char busidstr[32];
@@ -55,10 +55,10 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
       fprintf(output, "%s", type);
     if (l->depth != 0 && idx != HWLOC_UNKNOWN_INDEX
 	&& (verbose_mode >= 2 || (hwloc_obj_type_is_normal(l->type) || hwloc_obj_type_is_memory(l->type))))
-      fprintf(output, " %s", logical ? lidxstr : pidxstr);
+      fprintf(output, " %s", index_type == LSTOPO_INDEX_TYPE_LOGICAL ? lidxstr : pidxstr);
     if (l->name && (l->type == HWLOC_OBJ_MISC || l->type == HWLOC_OBJ_GROUP))
       fprintf(output, " %s", l->name);
-    if (logical && l->os_index != HWLOC_UNKNOWN_INDEX /* if logical, still print os_index in some cases */
+    if (index_type == LSTOPO_INDEX_TYPE_LOGICAL && l->os_index != HWLOC_UNKNOWN_INDEX /* if logical, still print os_index in some cases */
 	&& (verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NUMANODE))
       snprintf(phys, sizeof(phys), "%s", pidxstr);
     if (l->type == HWLOC_OBJ_PCI_DEVICE && verbose_mode <= 1)
@@ -205,7 +205,7 @@ output_only (struct lstopo_output *loutput, hwloc_obj_t l)
 static void output_distances(struct lstopo_output *loutput)
 {
   hwloc_topology_t topology = loutput->topology;
-  int logical = loutput->logical;
+  enum lstopo_index_type_e index_type = loutput->index_type;
   FILE *output = loutput->file;
   struct hwloc_distances_s **dist;
   unsigned nr = 0, j;
@@ -224,8 +224,8 @@ static void output_distances(struct lstopo_output *loutput)
 	      dist[j]->nbobjs,
 	      hwloc_obj_type_string(dist[j]->objs[0]->type),
 	      dist[j]->objs[0]->depth,
-	      logical ? "logical" : "physical");
-      hwloc_utils_print_distance_matrix(output, dist[j]->nbobjs, dist[j]->objs, dist[j]->values, logical);
+	      index_type == LSTOPO_INDEX_TYPE_LOGICAL ? "logical" : "physical");
+      hwloc_utils_print_distance_matrix(output, dist[j]->nbobjs, dist[j]->objs, dist[j]->values, index_type != LSTOPO_INDEX_TYPE_PHYSICAL);
       hwloc_distances_release(topology, dist[j]);
     }
   }
