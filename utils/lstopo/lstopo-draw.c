@@ -801,108 +801,16 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 }
 
 static void
-prepare_more_text(struct lstopo_output *loutput, hwloc_obj_t obj)
-{
-  struct lstopo_obj_userdata *lud = obj->userdata;
-  unsigned i;
-
-  if (!loutput->show_attrs[obj->type])
-    return;
-
-  if (HWLOC_OBJ_OS_DEVICE == obj->type) {
-    if (HWLOC_OBJ_OSDEV_COPROC == obj->attr->osdev.type && obj->subtype) {
-      /* Coprocessor */
-      if (!strcmp(obj->subtype, "CUDA")) {
-	/* CUDA */
-	const char *value, *value2, *value3;
-	value = hwloc_obj_get_info_by_name(obj, "CUDAGlobalMemorySize");
-	if (value) {
-	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
-		   mb >= 10240 ? "%llu GB" : "%llu MB",
-		   mb >= 10240 ? mb/1024 : mb);
-	}
-	value = hwloc_obj_get_info_by_name(obj, "CUDAL2CacheSize");
-	if (value) {
-	  unsigned long long kb = strtoull(value, NULL, 10);
-	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
-		   kb >= 10240 ? "L2 (%llu MB)" : "L2 (%llu kB)",
-		   kb >= 10240 ? kb/1024 : kb);
-	}
-	value = hwloc_obj_get_info_by_name(obj, "CUDAMultiProcessors");
-	value2 = hwloc_obj_get_info_by_name(obj, "CUDACoresPerMP");
-	value3 = hwloc_obj_get_info_by_name(obj, "CUDASharedMemorySizePerMP");
-	if (value && value2 && value3) {
-	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
-		   "%s MP x (%s cores + %s kB)", value, value2, value3);
-	}
-
-      } else if (!strcmp(obj->subtype, "MIC")) {
-	/* MIC */
-	const char *value;
-	value = hwloc_obj_get_info_by_name(obj, "MICActiveCores");
-	if (value) {
-	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
-		   "%s cores", value);
-	}
-	value = hwloc_obj_get_info_by_name(obj, "MICMemorySize");
-	if (value) {
-	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
-		   mb >= 10240 ? "%llu GB" : "%llu MB",
-		   mb >= 10240 ? mb/1024 : mb);
-	}
-
-      } else if (!strcmp(obj->subtype, "OpenCL")) {
-	/* OpenCL */
-	const char *value;
-	value = hwloc_obj_get_info_by_name(obj, "OpenCLComputeUnits");
-	if (value) {
-	  unsigned long long cu = strtoull(value, NULL, 10);
-	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
-		   "%llu compute units", cu);
-	}
-	value = hwloc_obj_get_info_by_name(obj, "OpenCLGlobalMemorySize");
-	if (value) {
-	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	  snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
-		   mb >= 10240 ? "%llu GB" : "%llu MB",
-		   mb >= 10240 ? mb/1024 : mb);
-	}
-      }
-
-    } else if (HWLOC_OBJ_OSDEV_BLOCK == obj->attr->osdev.type) {
-      /* Block */
-      const char *value;
-      value = hwloc_obj_get_info_by_name(obj, "Size");
-      if (value) {
-	unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	snprintf(lud->text[lud->ntext++], sizeof(lud->text[0]),
-		 mb >= 10485760 ? "%llu TB" : mb >= 10240 ? "%llu GB" : "%llu MB",
-		 mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
-      }
-    }
-  }
-
-  for(i=1; i<lud->ntext; i++) {
-    unsigned nn = (unsigned)strlen(lud->text[i]);
-    unsigned ntextwidth = get_textwidth(loutput, lud->text[i], nn, loutput->fontsize);
-    if (ntextwidth > lud->textwidth)
-      lud->textwidth = ntextwidth;
-  }
-}
-
-static void
 prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 {
   struct lstopo_obj_userdata *lud = obj->userdata;
   unsigned fontsize = loutput->fontsize;
+  unsigned i;
   int n;
 
   /* sane defaults */
   lud->ntext = 0;
   lud->textwidth = 0;
-  lud->textxoffset = 0;
 
   if (!loutput->show_text[obj->type])
     return;
@@ -915,29 +823,112 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
     lstopo_obj_snprintf(loutput, _text, sizeof(_text), obj);
     lstopo_busid_snprintf(busid, sizeof(busid), obj, lud->pci_collapsed, loutput->need_pci_domain);
     if (lud->pci_collapsed > 1) {
-      n = snprintf(lud->text[0], sizeof(lud->text[0]), "%d x { %s %s }", lud->pci_collapsed, _text, busid);
+      n = snprintf(lud->text[0].text, sizeof(lud->text[0].text), "%d x { %s %s }", lud->pci_collapsed, _text, busid);
     } else {
-      n = snprintf(lud->text[0], sizeof(lud->text[0]), "%s %s", _text, busid);
+      n = snprintf(lud->text[0].text, sizeof(lud->text[0].text), "%s %s", _text, busid);
     }
   } else {
     /* normal object text */
-    n = lstopo_obj_snprintf(loutput, lud->text[0], sizeof(lud->text[0]), obj);
+    n = lstopo_obj_snprintf(loutput, lud->text[0].text, sizeof(lud->text[0].text), obj);
   }
-  lud->textwidth = get_textwidth(loutput, lud->text[0], n, fontsize);
   lud->ntext = 1;
 
-  if (obj->type == HWLOC_OBJ_PU) {
-    /* if smaller than other PU, artificially extend/shift it
-     * to make PU boxes nicer when vertically stacked.
-     */
-    if (lud->textwidth < loutput->min_pu_textwidth) {
-      lud->textxoffset = (loutput->min_pu_textwidth - lud->textwidth) / 2;
-      lud->textwidth = loutput->min_pu_textwidth;
+  /* additional lines of text */
+  if (loutput->show_attrs[obj->type]) {
+    if (HWLOC_OBJ_OS_DEVICE == obj->type) {
+      if (HWLOC_OBJ_OSDEV_COPROC == obj->attr->osdev.type && obj->subtype) {
+	/* Coprocessor */
+	if (!strcmp(obj->subtype, "CUDA")) {
+	  /* CUDA */
+	  const char *value, *value2, *value3;
+	  value = hwloc_obj_get_info_by_name(obj, "CUDAGlobalMemorySize");
+	  if (value) {
+	    unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		     mb >= 10240 ? "%llu GB" : "%llu MB",
+		     mb >= 10240 ? mb/1024 : mb);
+	  }
+	  value = hwloc_obj_get_info_by_name(obj, "CUDAL2CacheSize");
+	  if (value) {
+	    unsigned long long kb = strtoull(value, NULL, 10);
+	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		     kb >= 10240 ? "L2 (%llu MB)" : "L2 (%llu kB)",
+		     kb >= 10240 ? kb/1024 : kb);
+	  }
+	  value = hwloc_obj_get_info_by_name(obj, "CUDAMultiProcessors");
+	  value2 = hwloc_obj_get_info_by_name(obj, "CUDACoresPerMP");
+	  value3 = hwloc_obj_get_info_by_name(obj, "CUDASharedMemorySizePerMP");
+	  if (value && value2 && value3) {
+	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		     "%s MP x (%s cores + %s kB)", value, value2, value3);
+	  }
+
+	} else if (!strcmp(obj->subtype, "MIC")) {
+	  /* MIC */
+	  const char *value;
+	  value = hwloc_obj_get_info_by_name(obj, "MICActiveCores");
+	  if (value) {
+	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		     "%s cores", value);
+	  }
+	  value = hwloc_obj_get_info_by_name(obj, "MICMemorySize");
+	  if (value) {
+	    unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		     mb >= 10240 ? "%llu GB" : "%llu MB",
+		     mb >= 10240 ? mb/1024 : mb);
+	  }
+
+	} else if (!strcmp(obj->subtype, "OpenCL")) {
+	  /* OpenCL */
+	  const char *value;
+	  value = hwloc_obj_get_info_by_name(obj, "OpenCLComputeUnits");
+	  if (value) {
+	    unsigned long long cu = strtoull(value, NULL, 10);
+	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		     "%llu compute units", cu);
+	  }
+	  value = hwloc_obj_get_info_by_name(obj, "OpenCLGlobalMemorySize");
+	  if (value) {
+	    unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		     mb >= 10240 ? "%llu GB" : "%llu MB",
+		     mb >= 10240 ? mb/1024 : mb);
+	  }
+	}
+
+      } else if (HWLOC_OBJ_OSDEV_BLOCK == obj->attr->osdev.type) {
+	/* Block */
+	const char *value;
+	value = hwloc_obj_get_info_by_name(obj, "Size");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		   mb >= 10485760 ? "%llu TB" : mb >= 10240 ? "%llu GB" : "%llu MB",
+		   mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
+	}
+      }
     }
   }
 
-  /* additional text */
-  prepare_more_text(loutput, obj);
+  lud->textwidth = 0;
+  for(i=0; i<lud->ntext; i++) {
+    unsigned textwidth, textxoffset = 0;
+    if (i) /* already computed above for n=0 */
+      n = (unsigned)strlen(lud->text[i].text);
+    textwidth = get_textwidth(loutput, lud->text[i].text, n, fontsize);
+    if (obj->type == HWLOC_OBJ_PU && textwidth < loutput->min_pu_textwidth) {
+      /* if smaller than other PU, artificially extend/shift it
+       * to make PU boxes nicer when vertically stacked.
+       */
+      textxoffset = (loutput->min_pu_textwidth - textwidth) / 2;
+      textwidth = loutput->min_pu_textwidth;
+    }
+    lud->text[i].width = textwidth;
+    lud->text[i].xoffset = textxoffset;
+    if (textwidth > lud->textwidth)
+      lud->textwidth = textwidth;
+  }
 }
 
 static void
@@ -952,9 +943,8 @@ draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *l
   if (!loutput->show_text[obj->type])
     return;
 
-  methods->text(loutput, lcolor, fontsize, depth, x + lud->textxoffset, y, lud->text[0]);
-  for(i=1; i<lud->ntext; i++)
-    methods->text(loutput, lcolor, fontsize, depth, x, y + i*(linespacing + fontsize), lud->text[i]);
+  for(i=0; i<lud->ntext; i++)
+    methods->text(loutput, lcolor, fontsize, depth, x + lud->text[i].xoffset, y + i*(linespacing + fontsize), lud->text[i].text);
 }
 
 static void

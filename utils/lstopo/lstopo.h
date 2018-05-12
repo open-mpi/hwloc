@@ -159,10 +159,16 @@ struct lstopo_obj_userdata {
   enum lstopo_orient_e orient;
 
   /* text lines within object */
-  char text[4][128]; /* current max number of lines is osdev name + 3 cuda attributes */
+#define LSTOPO_OBJ_TEXT_MAX 4 /* current max number of lines is osdev name + 3 cuda attributes */
+  struct lstopo_text_line {
+    char text[128];
+    unsigned width;
+    unsigned xoffset;
+  } text[LSTOPO_OBJ_TEXT_MAX];
   unsigned ntext;
-  unsigned textwidth;
-  unsigned textxoffset;
+  unsigned textwidth; /* required width for all lines of text,
+		       * max of above text[].width + optional padding
+		       */
 };
 
 typedef int output_method (struct lstopo_output *output, const char *filename);
