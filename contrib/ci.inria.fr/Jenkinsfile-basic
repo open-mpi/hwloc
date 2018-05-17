@@ -12,6 +12,8 @@
 // and leave "Branch name" empty.
 // Not needed for multi-branch pipelines which already BRANCH_NAME in the environment.
 
+def gitBranch = ""
+
 def statusHasChanged = false
 
 pipeline {
@@ -22,7 +24,10 @@ pipeline {
 			steps {
 				node('autotools') {
 					checkout scm
-					sh 'contrib/ci.inria.fr/job-0-tarball.sh'
+					script {
+						gitBranch = sh (script: 'if test "$BRANCH_NAME"; then echo $BRANCH_NAME; else git branch | cut -c3-; fi', returnStdout: true).trim()
+					}
+					sh 'contrib/ci.inria.fr/job-0-tarball.sh '+gitBranch
 					script {
 					       env.tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
 					       env.tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
