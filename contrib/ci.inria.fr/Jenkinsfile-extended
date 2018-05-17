@@ -14,6 +14,7 @@
 // and leave "Branch name" empty.
 // Not needed for multi-branch pipelines which already BRANCH_NAME in the environment.
 
+def gitRepoURL = ""
 def statusHasChanged = false
 
 pipeline {
@@ -30,6 +31,9 @@ pipeline {
 			steps {
 				node('autotools') {
                                         checkout scm
+					script {
+						gitRepoURL = sh (script: 'git config --get remote.origin.url', returnStdout: true).trim()
+					}
                                         sh 'contrib/ci.inria.fr/job-0-tarball.sh'
                                         script {
                                                 env.tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
@@ -76,7 +80,7 @@ pipeline {
 								dir('check-sonarscanner') {
 									unstash 'tarballgz'
 									unstash 'script-sonarscanner'
-									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh'
+									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh '+gitRepoURL
 									deleteDir()
 								}
 							}
