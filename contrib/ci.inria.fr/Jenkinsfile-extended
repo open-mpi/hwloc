@@ -15,6 +15,8 @@
 // Not needed for multi-branch pipelines which already BRANCH_NAME in the environment.
 
 def gitRepoURL = ""
+def gitBranch = ""
+
 def statusHasChanged = false
 
 pipeline {
@@ -33,8 +35,9 @@ pipeline {
                                         checkout scm
 					script {
 						gitRepoURL = sh (script: 'git config --get remote.origin.url', returnStdout: true).trim()
+						gitBranch = sh (script: 'if test "$BRANCH_NAME"; then echo $BRANCH_NAME; else git branch | cut -c3-; fi', returnStdout: true).trim()
 					}
-                                        sh 'contrib/ci.inria.fr/job-0-tarball.sh'
+                                        sh 'contrib/ci.inria.fr/job-0-tarball.sh '+gitBranch
                                         script {
                                                 env.tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
                                                 env.tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
@@ -80,7 +83,7 @@ pipeline {
 								dir('check-sonarscanner') {
 									unstash 'tarballgz'
 									unstash 'script-sonarscanner'
-									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh '+gitRepoURL
+									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh '+gitRepoURL+' '+gitBranch
 									deleteDir()
 								}
 							}

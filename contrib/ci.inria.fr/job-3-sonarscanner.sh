@@ -8,6 +8,12 @@ set -e
 set -x
 
 git_repo_url="$1"
+hwloc_branch="$2"
+
+if test -z "$git_repo_url" || test -z "$hwloc_branch"; then
+  echo "Need repo URL and branch name as arguments."
+  exit 1
+fi
 
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
@@ -20,10 +26,6 @@ ls -td hwloc-* | tail -n +11 | xargs rm -rf || true
 # find the tarball
 tarball=$(ls -tr hwloc-*.tar.gz | grep -v build.tar.gz | tail -1)
 basename=$(basename $tarball .tar.gz)
-
-# extract branch name
-hwloc_branch=$(echo $basename | sed -r -e 's/^hwloc-//' -e 's/-[0-9]{8}.*//')
-export hwloc_branch
 
 # check that this is either master or vX.Y
 if test x$hwloc_branch != xmaster; then
