@@ -26,10 +26,8 @@ export hwloc_branch
 # check that this is either master or vX.Y
 if test x$hwloc_branch != xmaster; then
   if test x$(echo "x${hwloc_branch}x" | sed -r -e 's/xv[0-9]+\.[0-9]+x//') != x; then
-    echo "This job only runs on master and stable branches"
-    exit 0
-    # TODO add an option for force a run?
-    # TODO or rename vX.Y* to vX.Y and anything else to master?
+    echo "Sending non-master and non-stable branch output to `tmp` branch on sonarqube server."
+    hwloc_branch=tmp
   fi
 fi
 
