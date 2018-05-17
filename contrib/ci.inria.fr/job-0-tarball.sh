@@ -7,23 +7,16 @@
 set -e
 set -x
 
+branch="$1"
+if test -z "$branch"; then
+  echo "Need branch name as argument."
+  exit 1
+fi
+
+echo "Got GIT branch name $branch"
+
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
-
-# jenkins multibranch pipelines set BRANCH_NAME
-echo "Trying to get GIT branch name from BRANCH_NAME ..."
-branch="$BRANCH_NAME"
-if test -z "$branch"; then
-  # old jenkins non-pipeline jobs set GIt_BRANCH
-  echo "Try falling back to GIT_BRANCH ..."
-  branch="$GIT_BRANCH"
-  if test -z "$branch"; then
-    # other jobs must force git local branch name to match remote branch name
-    echo "Fallback to the output of git branch | cut -c3- ..."
-    branch=$(git branch | cut -c3-)
-  fi
-fi
-echo "Got GIT branch name $branch"
 
 # keep branch-name before the first - (e.g. v2.0-beta becomes v2.0)
 # and look for the corresponding autotools
