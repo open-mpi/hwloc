@@ -7,6 +7,8 @@
 set -e
 set -x
 
+git_repo_url="$1"
+
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
@@ -28,6 +30,17 @@ if test x$hwloc_branch != xmaster; then
   if test x$(echo "x${hwloc_branch}x" | sed -r -e 's/xv[0-9]+\.[0-9]+x//') != x; then
     echo "Sending non-master and non-stable branch output to `tmp` branch on sonarqube server."
     hwloc_branch=tmp
+  fi
+fi
+
+# check that the repo is the official one
+if test x$git_repo_url != xhttps://github.com/open-mpi/hwloc.git; then
+  if test x$FORCE_SONAR_SCANNER = xtrue; then
+    echo "Sending non-official repository output to 'tmp' branch on sonarqube server."
+    hwloc_branch=tmp
+  else
+    echo "Ignoring non-official repository."
+    exit 0
   fi
 fi
 
