@@ -367,7 +367,13 @@ hwloc_get_next_obj_covering_cpuset_by_type(hwloc_topology_t topology, hwloc_cons
  * package has fewer caches than its peers.
  */
 
-/** \brief Returns the ancestor object of \p obj at depth \p depth. */
+/** \brief Returns the ancestor object of \p obj at depth \p depth.
+ *
+ * \note \p depth should not be the depth of PU or NUMA objects
+ * since they are ancestors of no objects (except Misc or I/O).
+ * This function rather expects an intermediate level depth,
+ * such as the depth of Packages, Cores, or Caches.
+ */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, int depth, hwloc_obj_t obj) __hwloc_attribute_pure;
 static __hwloc_inline hwloc_obj_t
@@ -381,7 +387,13 @@ hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unu
   return ancestor;
 }
 
-/** \brief Returns the ancestor object of \p obj with type \p type. */
+/** \brief Returns the ancestor object of \p obj with type \p type.
+ *
+ * \note \p type should not be ::HWLOC_OBJ_PU or ::HWLOC_OBJ_NUMANODE
+ * since these objects are ancestors of no objects (except Misc or I/O).
+ * This function rather expects an intermediate object type,
+ * such as ::HWLOC_OBJ_PACKAGE, ::HWLOC_OBJ_CORE, etc.
+ */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_ancestor_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj) __hwloc_attribute_pure;
 static __hwloc_inline hwloc_obj_t
