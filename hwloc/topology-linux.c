@@ -4927,7 +4927,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   struct hwloc_linux_backend_data_s *data = backend->private_data;
 #endif
   FILE *file;
-  char path[256];
+  char path[296]; /* osdevpath <= 256 */
   char line[128];
   char vendor[64] = "";
   char model[64] = "";
@@ -5140,7 +5140,7 @@ hwloc_linuxfs_net_class_fillinfos(int root_fd,
 				  struct hwloc_obj *obj, const char *osdevpath)
 {
   struct stat st;
-  char path[256];
+  char path[296]; /* osdevpath <= 256 */
   char address[128];
   snprintf(path, sizeof(path), "%s/address", osdevpath);
   if (!hwloc_read_path_by_length(path, address, sizeof(address), root_fd)) {
@@ -5207,7 +5207,7 @@ static void
 hwloc_linuxfs_infiniband_class_fillinfos(int root_fd,
 					 struct hwloc_obj *obj, const char *osdevpath)
 {
-  char path[256];
+  char path[296]; /* osdevpath <= 256 */
   char guidvalue[20];
   unsigned i,j;
 
@@ -5328,7 +5328,7 @@ static void
 hwloc_linuxfs_mic_class_fillinfos(int root_fd,
 				  struct hwloc_obj *obj, const char *osdevpath)
 {
-  char path[256];
+  char path[296]; /* osdevpath <= 256 */
   char family[64];
   char sku[64];
   char sn[64];

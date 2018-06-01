@@ -1101,7 +1101,7 @@ output_draw(struct lstopo_output *loutput)
   time_t t;
   char text[3][128];
   unsigned ntext = 0;
-  char hostname[128] = "";
+  char hostname[122] = "";
   const char *forcedhostname = NULL;
   unsigned long hostname_size = sizeof(hostname);
   unsigned maxtextwidth = 0, textwidth;
