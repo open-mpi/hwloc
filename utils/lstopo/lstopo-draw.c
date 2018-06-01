@@ -1260,7 +1260,7 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
   unsigned totwidth, totheight, offset, i;
   time_t t;
   char text[128];
-  char hostname[128] = "";
+  char hostname[122] = "";
   const char *forcedhostname = NULL;
   unsigned long hostname_size = sizeof(hostname);
 

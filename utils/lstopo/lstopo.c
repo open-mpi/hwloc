@@ -357,7 +357,7 @@ lstopo_add_collapse_attributes(hwloc_topology_t topology)
   }
   if (collapsed > 1) {
     /* end this collapsing */
-    char text[10];
+    char text[11];
     snprintf(text, sizeof(text), "%u", collapsed);
     hwloc_obj_add_info(collapser, "lstopoCollapse", text);
   }
