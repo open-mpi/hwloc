@@ -53,3 +53,5 @@ rm -rf doc build/doc build-plugins/doc
 cd ..
 tar cfz ${basename}.build.tar.gz $basename
 rm -rf $basename
+
+exit 0

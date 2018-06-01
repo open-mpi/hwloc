@@ -170,3 +170,5 @@ if test x$dobuild64 = x1; then
 fi
 
 PATH=$oldPATH
+
+exit 0

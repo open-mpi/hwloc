@@ -48,3 +48,5 @@ sed	-e 's/^snapshot_version=.*/snapshot_version='$snapshot/ \
 ./configure
 make
 make distcheck
+
+exit 0

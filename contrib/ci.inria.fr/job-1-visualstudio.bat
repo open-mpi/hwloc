@@ -34,3 +34,5 @@ sh -c "tar cfz %TARBALL%-build.tar.gz %TARBALL%"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 sh -c "rm -rf %TARBALL%"
+
+exit /b 0
