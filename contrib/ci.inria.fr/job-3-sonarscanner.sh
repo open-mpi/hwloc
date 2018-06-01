@@ -204,3 +204,5 @@ rm -rf doc
 cd ..
 tar cfz ${basename}.build.tar.gz $basename
 rm -rf $basename
+
+exit 0
