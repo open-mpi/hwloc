@@ -24,18 +24,30 @@ extern "C" {
 
 /** \defgroup hwlocality_bitmap The bitmap API
  *
- * The ::hwloc_bitmap_t type represents a set of objects, typically OS
- * processors -- which may actually be hardware threads (represented
- * by ::hwloc_cpuset_t, which is a typedef for ::hwloc_bitmap_t) -- or
- * memory nodes (represented by ::hwloc_nodeset_t, which is also a
- * typedef for ::hwloc_bitmap_t).
- *
- * <em>Both CPU and node sets are always indexed by OS physical number.</em>
- *
- * \note CPU sets and nodesets are described in \ref hwlocality_object_sets.
- *
+ * The ::hwloc_bitmap_t type represents a set of integers (positive or null).
  * A bitmap may be of infinite size (all bits are set after some point).
  * A bitmap may even be full if all bits are set.
+ *
+ * Bitmaps are used by hwloc for sets of OS processors
+ * (which may actually be hardware threads) as by ::hwloc_cpuset_t
+ * (a typedef for ::hwloc_bitmap_t), or sets of NUMA memory nodes
+ * as ::hwloc_nodeset_t (also a typedef for ::hwloc_bitmap_t).
+ * Those are used for cpuset and nodeset fields in the ::hwloc_obj structure,
+ * see \ref hwlocality_object_sets.
+ *
+ * <em>Both CPU and node sets are always indexed by OS physical number.</em>
+ * However users should usually not build CPU and node sets manually
+ * (e.g. with hwloc_bitmap_set()).
+ * One should rather use existing object sets and combine them with
+ * hwloc_bitmap_or(), etc.
+ * For instance, binding the current thread on a pair of cores may be performed with:
+ * \code
+ * hwloc_obj_t core1 = ... , core2 = ... ;
+ * hwloc_bitmap_t set = hwloc_bitmap_alloc();
+ * hwloc_bitmap_or(set, core1->cpuset, core2->cpuset);
+ * hwloc_set_cpubind(topology, set, HWLOC_CPUBIND_THREAD);
+ * hwloc_bitmap_free(set);
+ * \endcode
  *
  * \note Most functions below return an int that may be negative in case of
  * error. The usual error case would be an internal failure to realloc/extend
