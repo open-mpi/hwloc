@@ -25,7 +25,7 @@ pipeline {
 	// Trigger the build
 	triggers {
 		// Poll GitHub explicitly on per night, in case webhooks aren't used
-		pollSCM('0 3 * * *')
+		pollSCM('0 5 * * *')
 	}
 
         stages {
