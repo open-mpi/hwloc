@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2015 Inria.  All rights reserved.
+# Copyright © 2012-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -40,3 +40,5 @@ rm -rf doc build-plugins-debug/doc
 cd ..
 tar cfz ${basename}.build.tar.gz $basename
 rm -rf $basename
+
+exit 0
