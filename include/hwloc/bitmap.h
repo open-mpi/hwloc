@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -213,6 +213,12 @@ HWLOC_DECLSPEC void hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin
  * May be useful before binding so that the process does not
  * have a chance of migrating between multiple logical CPUs
  * in the original mask.
+ *
+ * \note This function is NOT meant to distribute multiple processes
+ * within a single CPU set. It always return the same single bit when
+ * called multiple times on the same input set. hwloc_distrib() may
+ * be used for generating CPU sets to distribute multiple tasks below
+ * a single multi-PU object.
  */
 HWLOC_DECLSPEC void hwloc_bitmap_singlify(hwloc_bitmap_t bitmap);
 
