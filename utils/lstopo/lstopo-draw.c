@@ -144,20 +144,6 @@ get_textwidth(void *output,
   return width;
 }
 
-/* preferred width/height compromise */
-#define RATIO (4.f/3.f)
-
-/* do we prefer ratio1 over ratio2? */
-static int prefer_ratio(float ratio1, float ratio2) {
-  float _ratio1 = (ratio1) / RATIO;
-  float _ratio2 = (ratio2) / RATIO;
-  if (_ratio1 < 1)
-    _ratio1 = 1/_ratio1;
-  if (_ratio2 < 1)
-    _ratio2 = 1/_ratio2;
-  return _ratio1 < _ratio2;
-}
-
 /*
  * foo_draw functions take a OBJ, computes which size it needs, recurse into
  * sublevels with drawing=PREPARE to recursively compute the needed size
@@ -240,6 +226,86 @@ static float pci_link_speed(hwloc_obj_t obj)
   return 0.;
 }
 
+/********************************
+ * Placing children in rectangle
+ */
+
+/* preferred width/height compromise */
+#define RATIO (4.f/3.f)
+
+/* do we prefer ratio1 over ratio2? */
+static int prefer_ratio(float ratio1, float ratio2) {
+  /* we want the closest one to RATIO, normalize them */
+  float _ratio1 = (ratio1) / RATIO;
+  float _ratio2 = (ratio2) / RATIO;
+  /* invert those < 1, it doesn't change which one is the closest to 1 */
+  if (_ratio1 < 1)
+    _ratio1 = 1/_ratio1;
+  if (_ratio2 < 1)
+    _ratio2 = 1/_ratio2;
+  /* now use the smallest one, aka the closest to 1, aka the closest to RATIO initially */
+  return _ratio1 < _ratio2;
+}
+
+static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t parent,
+				    unsigned kind, unsigned separator,
+				    unsigned *rowsp, unsigned *columnsp)
+{
+  unsigned rows, columns;
+  unsigned numsubobjs = 0, obj_totwidth = 0, obj_totheight = 0;
+  unsigned obj_avgwidth, obj_avgheight;
+  unsigned area = 0;
+  float idealtotheight, under_ratio, over_ratio;
+  hwloc_obj_t child;
+  int ncstate;
+
+  /* Total area for subobjects */
+  child = NULL;
+  while ((child=next_child(loutput, parent, kind, child, &ncstate)) != NULL) {
+    struct lstopo_obj_userdata *clud = child->userdata;
+    numsubobjs++;
+    obj_totwidth += clud->width + separator;
+    obj_totheight += clud->height + separator;
+    area += (clud->width + separator) * (clud->height + separator);
+  }
+
+  /* Try to find a fitting rectangle */
+  for (rows = (unsigned) (float) floor(sqrt(numsubobjs));
+       rows >= (unsigned) (float) ceil(pow(numsubobjs, 0.33)) && rows > 1;
+       rows--) {
+    columns = numsubobjs / rows;
+    if (columns > 1 && columns * rows == numsubobjs) {
+      *rowsp = rows;
+      *columnsp = columns;
+      return;
+    }
+  }
+
+  /* Average object size */
+  obj_avgwidth = obj_totwidth / numsubobjs;
+  obj_avgheight = obj_totheight / numsubobjs;
+  /* Ideal total height for spreading that area with RATIO */
+  idealtotheight = (float) sqrt(area/RATIO);
+  /* approximation of number of rows */
+  rows = (unsigned) (idealtotheight / obj_avgheight);
+  columns = rows ? (numsubobjs + rows - 1) / rows : 1;
+  /* Ratio obtained by underestimation */
+  under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight);
+  /* try to overestimate too */
+  rows++;
+  columns = (numsubobjs + rows - 1) / rows;
+  /* Ratio obtained by overestimation */
+  over_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight);
+  /* Did we actually preferred underestimation? (good row/column fit or good ratio) */
+  if (rows > 1 && prefer_ratio(under_ratio, over_ratio)) {
+    rows--;
+    columns = (numsubobjs + rows - 1) / rows;
+  }
+
+  *rowsp = rows;
+  *columnsp = columns;
+}
+
 /**************************
  * Placing children
  */
@@ -308,60 +374,15 @@ place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent,
 		    unsigned kind, unsigned border, unsigned separator,
 		    unsigned *width, unsigned *height)
 {
-  unsigned numsubobjs = 0, obj_totwidth = 0, obj_totheight = 0;
-  unsigned area = 0;
   unsigned rows, columns;
   unsigned totwidth, totheight; /* total children array size, without borders */
   unsigned rowwidth; /* current row width */
   unsigned maxheight; /* max height for current row */
-  int found, i;
-  hwloc_obj_t child = NULL;
+  hwloc_obj_t child;
   int ncstate;
+  int i;
 
-  /* Total area for subobjects */
-  while ((child=next_child(loutput, parent, kind, child, &ncstate)) != NULL) {
-    struct lstopo_obj_userdata *clud = child->userdata;
-    numsubobjs++;
-    obj_totwidth += clud->width + separator;
-    obj_totheight += clud->height + separator;
-    area += (clud->width + separator) * (clud->height + separator);
-  }
-
-  /* Try to find a fitting rectangle */
-  found = 0;
-  for (rows = (unsigned) (float) floor(sqrt(numsubobjs));
-       rows >= (unsigned) (float) ceil(pow(numsubobjs, 0.33)) && rows > 1;
-       rows--) {
-    columns = numsubobjs / rows;
-    if (columns > 1 && columns * rows == numsubobjs) {
-      found = 1;
-      break;
-    }
-  }
-
-  if (!found) {
-    /* Average object size */
-    unsigned obj_avgwidth = obj_totwidth / numsubobjs;
-    unsigned obj_avgheight = obj_totheight / numsubobjs;
-    /* Ideal total height for spreading that area with RATIO */
-    float idealtotheight = (float) sqrt(area/RATIO);
-    float under_ratio, over_ratio;
-    /* approximation of number of rows */
-    rows = (unsigned) (idealtotheight / obj_avgheight);
-    columns = rows ? (numsubobjs + rows - 1) / rows : 1;
-    /* Ratio obtained by underestimation */
-    under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight);
-    /* try to overestimate too */
-    rows++;
-    columns = (numsubobjs + rows - 1) / rows;
-    /* Ratio obtained by overestimation */
-    over_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight);
-    /* Did we actually preferred underestimation? (good row/column fit or good ratio) */
-    if (rows > 1 && prefer_ratio(under_ratio, over_ratio)) {
-      rows--;
-      columns = (numsubobjs + rows - 1) / rows;
-    }
-  }
+  find_children_rectangle(loutput, parent, kind, separator, &rows, &columns);
 
   rowwidth = 0;
   maxheight = 0;
