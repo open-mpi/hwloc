@@ -233,18 +233,14 @@ static float pci_link_speed(hwloc_obj_t obj)
 /* preferred width/height compromise */
 #define RATIO (4.f/3.f)
 
-/* do we prefer ratio1 over ratio2? */
-static int prefer_ratio(float ratio1, float ratio2) {
-  /* we want the closest one to RATIO, normalize them */
-  float _ratio1 = (ratio1) / RATIO;
-  float _ratio2 = (ratio2) / RATIO;
-  /* invert those < 1, it doesn't change which one is the closest to 1 */
-  if (_ratio1 < 1)
-    _ratio1 = 1/_ratio1;
-  if (_ratio2 < 1)
-    _ratio2 = 1/_ratio2;
-  /* now use the smallest one, aka the closest to 1, aka the closest to RATIO initially */
-  return _ratio1 < _ratio2;
+/* returns a score <= 1. close to 1 is better */
+static __hwloc_inline
+float rectangle_score(unsigned width, unsigned height)
+{
+  float score = ((float) width)/height/RATIO;
+  if (score > 1)
+    score = 1/score;
+  return score;
 }
 
 static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t parent,
@@ -255,7 +251,7 @@ static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t p
   unsigned numsubobjs = 0, obj_totwidth = 0, obj_totheight = 0;
   unsigned obj_avgwidth, obj_avgheight;
   unsigned area = 0;
-  float idealtotheight, under_ratio, over_ratio;
+  float idealtotheight, under_score, over_score;
   hwloc_obj_t child;
   int ncstate;
 
@@ -289,15 +285,15 @@ static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t p
   /* approximation of number of rows */
   rows = (unsigned) (idealtotheight / obj_avgheight);
   columns = rows ? (numsubobjs + rows - 1) / rows : 1;
-  /* Ratio obtained by underestimation */
-  under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight);
+  /* Score obtained by underestimation */
+  under_score = rectangle_score(columns * obj_avgwidth, rows * obj_avgheight);
   /* try to overestimate too */
   rows++;
   columns = (numsubobjs + rows - 1) / rows;
-  /* Ratio obtained by overestimation */
-  over_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight);
-  /* Did we actually preferred underestimation? (good row/column fit or good ratio) */
-  if (rows > 1 && prefer_ratio(under_ratio, over_ratio)) {
+  /* Score obtained by overestimation */
+  over_score = rectangle_score(columns * obj_avgwidth, rows * obj_avgheight);
+  /* Revert back to under estimation if it was better */
+  if (rows > 1 && under_score > over_score) {
     rows--;
     columns = (numsubobjs + rows - 1) / rows;
   }
