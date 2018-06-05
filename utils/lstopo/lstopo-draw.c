@@ -247,11 +247,11 @@ static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t p
 				    unsigned kind, unsigned separator,
 				    unsigned *rowsp, unsigned *columnsp)
 {
-  unsigned rows, columns;
+  unsigned rows = 0, columns = 0, n;
   unsigned numsubobjs = 0, obj_totwidth = 0, obj_totheight = 0;
   unsigned obj_avgwidth, obj_avgheight;
   unsigned area = 0;
-  float idealtotheight, under_score, over_score;
+  float idealtotheight, under_score, over_score, best_score = 0.f;
   hwloc_obj_t child;
   int ncstate;
 
@@ -265,21 +265,51 @@ static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t p
     area += (clud->width + separator) * (clud->height + separator);
   }
 
-  /* Try to find a fitting rectangle */
-  for (rows = (unsigned) (float) floor(sqrt(numsubobjs));
-       rows >= (unsigned) (float) ceil(pow(numsubobjs, 0.33)) && rows > 1;
-       rows--) {
-    columns = numsubobjs / rows;
-    if (columns > 1 && columns * rows == numsubobjs) {
-      *rowsp = rows;
-      *columnsp = columns;
-      return;
-    }
-  }
-
   /* Average object size */
   obj_avgwidth = obj_totwidth / numsubobjs;
   obj_avgheight = obj_totheight / numsubobjs;
+
+  /* Try to find a rectangle fitting exactly */
+  for (n = (unsigned) (float) floor(sqrt(numsubobjs));
+       rows >= (unsigned) (float) ceil(pow(numsubobjs, 0.33)) && n > 1;
+       n--) {
+    float old_best_score = best_score;
+    unsigned p = numsubobjs / n;
+    float np_score; /* n rows x p columns */
+    float pn_score; /* p rows x n columns */
+    if (p <= 1 || p * n != numsubobjs)
+      continue;
+    /* Try both n*p and n*p rectangles */
+    np_score = rectangle_score(p * obj_avgwidth, obj_avgheight * n);
+    pn_score = rectangle_score(n * obj_avgwidth, obj_avgheight * p);
+    if (np_score > pn_score) {
+      if (np_score > best_score) {
+	rows = n;
+	columns = p;
+	best_score = np_score;
+      }
+    } else {
+      if (pn_score > best_score) {
+	rows = p;
+	columns = n;
+	best_score = pn_score;
+      }
+    }
+    if (old_best_score == best_score)
+      /* Score didn't improve, no need to try further.
+       * The graph score(n) is an inverted U, with np_score on the left and pn_score on the right.
+       * Se start somewhere in the middle and walk to both ends simultaneously,
+       * Only one side can improve towards the maximum, we stop once once it stops improving.
+       * The other side can just decrease for ever.
+       */
+      goto done;
+  }
+  if (best_score)
+    /* We got a rectangle fitting exactly, it may not be perfect but it's good looking */
+    goto done;
+
+  /* Try to find a rectangle with an incomplete last row */
+
   /* Ideal total height for spreading that area with RATIO */
   idealtotheight = (float) sqrt(area/RATIO);
   /* approximation of number of rows */
@@ -298,6 +328,7 @@ static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t p
     columns = (numsubobjs + rows - 1) / rows;
   }
 
+ done:
   *rowsp = rows;
   *columnsp = columns;
 }
