@@ -652,10 +652,11 @@ static int
 lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, hwloc_obj_t obj)
 {
   enum lstopo_index_type_e index_type = loutput->index_type;
-  unsigned idx = (index_type == LSTOPO_INDEX_TYPE_LOGICAL ? obj->logical_index : obj->os_index);
-  const char *indexprefix = (index_type == LSTOPO_INDEX_TYPE_LOGICAL ? " L#" : " P#");
+  unsigned idx;
+  const char *indexprefix;
   char typestr[32];
   char indexstr[32]= "";
+  char index2str[32] = "";
   char attrstr[256];
   char totmemstr[64] = "";
   int attrlen;
@@ -672,11 +673,33 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
     hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
   }
 
+  if (index_type == LSTOPO_INDEX_TYPE_DEFAULT ) {
+    if (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE) {
+      /* by default we show logical+physical for PU/NUMA */
+      idx = obj->logical_index;
+      indexprefix = " L#";
+    } else {
+      /* by default we show nothing for others */
+      idx = HWLOC_UNKNOWN_INDEX;
+      indexprefix = "";
+    }
+  } else if (index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
+    idx = obj->logical_index;
+    indexprefix = " L#";
+  } else {
+    idx = obj->os_index;
+    indexprefix = " P#";
+  }
+
   if (loutput->show_indexes[obj->type]
       && idx != (unsigned)-1 && obj->depth != 0
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
+
+  if (index_type == LSTOPO_INDEX_TYPE_DEFAULT && obj->type == HWLOC_OBJ_NUMANODE && loutput->show_indexes[obj->type]) {
+    snprintf(index2str, sizeof(index2str), " P#%u", obj->os_index);
+  }
 
   if (loutput->show_attrs[obj->type]) {
     attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
@@ -689,9 +712,9 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
     attrlen = 0;
 
   if (attrlen > 0)
-    return snprintf(text, textlen, "%s%s (%s)%s", typestr, indexstr, attrstr, totmemstr);
+    return snprintf(text, textlen, "%s%s%s (%s)%s", typestr, indexstr, index2str, attrstr, totmemstr);
   else
-    return snprintf(text, textlen, "%s%s%s", typestr, indexstr, totmemstr);
+    return snprintf(text, textlen, "%s%s%s%s", typestr, indexstr, index2str, totmemstr);
 }
 
 static void
@@ -888,6 +911,10 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   lud->ntext = 1;
 
   /* additional lines of text */
+  if (HWLOC_OBJ_PU == obj->type && loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT && loutput->show_indexes[obj->type]) {
+    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "P#%u", obj->os_index);
+  }
+
   if (loutput->show_attrs[obj->type]) {
     if (HWLOC_OBJ_OS_DEVICE == obj->type) {
       if (HWLOC_OBJ_OSDEV_COPROC == obj->attr->osdev.type && obj->subtype) {
@@ -1276,11 +1303,13 @@ output_draw(struct lstopo_output *loutput)
     }
 
     /* Display whether we're showing physical or logical IDs */
-    snprintf(text[ntext], sizeof(text[ntext]), "Indexes: %s", (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL ? "logical" : "physical"));
-    textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
-    if (textwidth > maxtextwidth)
-      maxtextwidth = textwidth;
-    ntext++;
+    if (loutput->index_type != LSTOPO_INDEX_TYPE_DEFAULT) {
+      snprintf(text[ntext], sizeof(text[ntext]), "Indexes: %s", (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL ? "logical" : "physical"));
+      textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
+      if (textwidth > maxtextwidth)
+	maxtextwidth = textwidth;
+      ntext++;
+    }
 
     /* Display timestamp */
     t = time(NULL);

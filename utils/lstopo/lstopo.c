@@ -451,9 +451,7 @@ void usage(const char *name, FILE *where)
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
   fprintf (where, "  -l --logical          Display hwloc logical object indexes\n");
-  fprintf (where, "                        (default for console output)\n");
-  fprintf (where, "  -p --physical         Display physical object indexes\n");
-  fprintf (where, "                        (default for graphical output)\n");
+  fprintf (where, "  -p --physical         Display OS/physical object indexes\n");
   fprintf (where, "Output options:\n");
   fprintf (where, "  --output-format <format>\n");
   fprintf (where, "  --of <format>         Force the output to use the given format\n");
@@ -1149,13 +1147,6 @@ main (int argc, char *argv[])
   default:
     fprintf(stderr, "file format not supported\n");
     goto out_usagefailure;
-  }
-
-  if (loutput.index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
-    if (output_func == output_console)
-      loutput.index_type = LSTOPO_INDEX_TYPE_LOGICAL;
-    else
-      loutput.index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
   }
 
   loutput.topology = topology;

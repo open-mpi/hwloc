@@ -87,14 +87,14 @@ Only display distance matrices.
 If the destination file already exists, overwrite it.
 .TP
 \fB\-l\fR \fB\-\-logical\fR
-Display hwloc logical indexes instead of physical/OS indexes (default for console output).
-These indexes are prefixed with "L#".
-The physical indexes of some objects (PU and Node by default, all
-objects if verbose) will appear as object attribute "P#...".
+Display hwloc logical indexes of all objects, with prefix "L#".
+.
+By default, both logical and physical/OS indexes are displayed, but only for PUs and NUMA nodes.
 .TP
 \fB\-p\fR \fB\-\-physical\fR
-Display OS/physical indexes instead of hwloc logical indexes (default for graphical output).
-These indexes are prefixed with "P#" instead of "L#" in the console output.
+Display OS/physical indexes of all objects, with prefix "P#".
+.
+By default, both logical and physical/OS indexes are displayed, but only for PUs and NUMA nodes.
 .TP
 \fB\-c\fR \fB\-\-cpuset\fR
 Display the cpuset of each object.

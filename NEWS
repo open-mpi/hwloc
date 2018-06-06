@@ -25,9 +25,11 @@ Version 2.1.0
 * Backends
   + The x86 now properly handles offline CPUs.
 * Tools
+  + lstopo
+    - Both logical and OS/physical indexes are now displayed by default.
+    - Add --linespacing and change default margins and linespacing.
   + Add --nodeset options to hwloc-calc for converting between cpusets and
     nodesets.
-  + Add --linespacing to lstopo and change default margins and linespacing.
 
 
 Version 2.0.1 (also included in 1.11.10 when relevant)
