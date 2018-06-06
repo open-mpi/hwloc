@@ -235,9 +235,9 @@ static float pci_link_speed(hwloc_obj_t obj)
 
 /* returns a score <= 1. close to 1 is better */
 static __hwloc_inline
-float rectangle_score(unsigned width, unsigned height)
+float rectangle_score(unsigned width, unsigned height, float ratio)
 {
-  float score = ((float) width)/height/RATIO;
+  float score = ((float) width)/height/ratio;
   if (score > 1)
     score = 1/score;
   return score;
@@ -245,7 +245,8 @@ float rectangle_score(unsigned width, unsigned height)
 
 static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t parent,
 				    unsigned kind, unsigned separator,
-				    unsigned *rowsp, unsigned *columnsp)
+				    unsigned *rowsp, unsigned *columnsp,
+				    float ratio)
 {
   unsigned rows = 0, columns = 0, n;
   unsigned numsubobjs = 0, obj_totwidth = 0, obj_totheight = 0;
@@ -280,8 +281,8 @@ static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t p
     if (p <= 1 || p * n != numsubobjs)
       continue;
     /* Try both n*p and n*p rectangles */
-    np_score = rectangle_score(p * obj_avgwidth, obj_avgheight * n);
-    pn_score = rectangle_score(n * obj_avgwidth, obj_avgheight * p);
+    np_score = rectangle_score(p * obj_avgwidth, obj_avgheight * n, ratio);
+    pn_score = rectangle_score(n * obj_avgwidth, obj_avgheight * p, ratio);
     if (np_score > pn_score) {
       if (np_score > best_score) {
 	rows = n;
@@ -310,18 +311,18 @@ static void find_children_rectangle(struct lstopo_output *loutput, hwloc_obj_t p
 
   /* Try to find a rectangle with an incomplete last row */
 
-  /* Ideal total height for spreading that area with RATIO */
-  idealtotheight = (float) sqrt(area/RATIO);
+  /* Ideal total height for spreading that area with ratio */
+  idealtotheight = (float) sqrt(area/ratio);
   /* approximation of number of rows */
   rows = (unsigned) (idealtotheight / obj_avgheight);
   columns = rows ? (numsubobjs + rows - 1) / rows : 1;
   /* Score obtained by underestimation */
-  under_score = rectangle_score(columns * obj_avgwidth, rows * obj_avgheight);
+  under_score = rectangle_score(columns * obj_avgwidth, rows * obj_avgheight, ratio);
   /* try to overestimate too */
   rows++;
   columns = (numsubobjs + rows - 1) / rows;
   /* Score obtained by overestimation */
-  over_score = rectangle_score(columns * obj_avgwidth, rows * obj_avgheight);
+  over_score = rectangle_score(columns * obj_avgwidth, rows * obj_avgheight, ratio);
   /* Revert back to under estimation if it was better */
   if (rows > 1 && under_score > over_score) {
     rows--;
@@ -407,9 +408,14 @@ place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned maxheight; /* max height for current row */
   hwloc_obj_t child;
   int ncstate;
+  float ratio;
   int i;
 
-  find_children_rectangle(loutput, parent, kind, separator, &rows, &columns);
+  if (parent->type == HWLOC_OBJ_CORE)
+    ratio = 1/RATIO;
+  else
+    ratio = RATIO;
+  find_children_rectangle(loutput, parent, kind, separator, &rows, &columns, ratio);
 
   rowwidth = 0;
   maxheight = 0;
