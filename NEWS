@@ -27,6 +27,8 @@ Version 2.1.0
 * Tools
   + lstopo
     - Both logical and OS/physical indexes are now displayed by default.
+    - The X11 interactive output has additional keyboard shortcuts to
+      dynamically change the displaying of indexes, attributes and text.
     - Add --linespacing and change default margins and linespacing.
   + Add --nodeset options to hwloc-calc for converting between cpusets and
     nodesets.

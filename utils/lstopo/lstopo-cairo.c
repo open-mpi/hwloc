@@ -156,6 +156,7 @@ struct lstopo_x11_output {
   int width, height;				/** total normal display size */
   int x, y;					/** top left corner of the visible part */
   float scale, last_scale;
+  int needs_redraw;
 };
 
 static void
@@ -192,7 +193,8 @@ move_x11(struct lstopo_x11_output *disp)
     disp->y = disp->scale / disp->last_scale * (float)disp->y;
   }
 
-  if (disp->screen_width != disp->last_screen_width
+  if (disp->needs_redraw
+      || disp->screen_width != disp->last_screen_width
       || disp->screen_height != disp->last_screen_height
       || disp->scale != disp->last_scale) {
     disp->last_screen_width = disp->screen_width;
@@ -216,6 +218,7 @@ move_x11(struct lstopo_x11_output *disp)
     topo_cairo_paint(coutput);
     disp->width = loutput->width;
     disp->height = loutput->height;
+    disp->needs_redraw = 0;
   }
 
   if (disp->width <= disp->screen_width) {
@@ -260,6 +263,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   int state = 0;
   int x = 0, y = 0; /* shut warning down */
   int lastx, lasty;
+  unsigned i;
 
   coutput = &disp->coutput;
   memset(coutput, 0, sizeof(*coutput));
@@ -320,6 +324,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   disp->y = 0;
   disp->scale = disp->last_scale = 1.0f;
   /* TODO: if window got truncated, scale down? */
+  disp->needs_redraw = 0;
 
   x11_create(disp, loutput->width, loutput->height);
 
@@ -327,14 +332,16 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 
   printf("\n");
   printf("Keyboard shortcuts:\n");
-  printf(" Zoom-in or out .................... + -\n");
-  printf(" Try to fit scale to window ........ f F\n");
-  printf(" Reset scale to default ............ 1\n");
-  printf(" Scroll vertically ................. Up Down PageUp PageDown\n");
-  printf(" Scroll horizontally ............... Left Right Ctrl+PageUp/Down\n");
-  printf(" Scroll to the top-left corner ..... Home\n");
-  printf(" Scroll to the bottom-right corner . End\n");
-  printf(" Exit .............................. q Q Esc\n");
+  printf(" Zoom-in or out ...................... + -\n");
+  printf(" Try to fit scale to window .......... f F\n");
+  printf(" Reset scale to default .............. 1\n");
+  printf(" Scroll vertically ................... Up Down PageUp PageDown\n");
+  printf(" Scroll horizontally ................. Left Right Ctrl+PageUp/Down\n");
+  printf(" Scroll to the top-left corner ....... Home\n");
+  printf(" Scroll to the bottom-right corner ... End\n");
+  printf(" Show/Hide Attributes/Indexes/Text ... A/I/T\n");
+  printf(" Show Physical/Logical/Both indexes .. P/L/B\n");
+  printf(" Exit ................................ q Q Esc\n");
   printf("\n\n");
 
   /* ready */
@@ -476,6 +483,45 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	case XK_1:
 	case XK_KP_1:
 	  disp->scale = 1.0f;
+	  move_x11(disp);
+	  break;
+	case XK_A: {
+	  int v = !loutput->show_attrs[0]; /* if show_attrs[] contains different values, assume it's all like the first type */
+	  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	    loutput->show_attrs[i] = v;
+	  disp->needs_redraw = 1;
+	  move_x11(disp);
+	  break;
+	}
+	case XK_I: {
+	  int v = !loutput->show_indexes[0]; /* if show_indexes[] contains different values, assume it's all like the first type */
+	  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	    loutput->show_indexes[i] = v;
+	  disp->needs_redraw = 1;
+	  move_x11(disp);
+	  break;
+	}
+	case XK_T: {
+	  int v = !loutput->show_text[0]; /* if show_text[] contains different values, assume it's all like the first type */
+	  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	    loutput->show_text[i] = v;
+	  disp->needs_redraw = 1;
+	  move_x11(disp);
+	  break;
+	}
+	case XK_L:
+	  loutput->index_type = LSTOPO_INDEX_TYPE_LOGICAL;
+	  disp->needs_redraw = 1;
+	  move_x11(disp);
+	  break;
+	case XK_P:
+	  loutput->index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
+	  disp->needs_redraw = 1;
+	  move_x11(disp);
+	  break;
+	case XK_B:
+	  loutput->index_type = LSTOPO_INDEX_TYPE_DEFAULT;
+	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;
 	}
