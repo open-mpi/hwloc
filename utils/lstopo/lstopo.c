@@ -1063,13 +1063,15 @@ main (int argc, char *argv[])
   hwloc_bitmap_fill(loutput.cpubind_set);
   if (loutput.pid_number != -1 && loutput.pid_number != 0)
     hwloc_get_proc_cpubind(topology, loutput.pid, loutput.cpubind_set, 0);
-  else if (loutput.pid_number == 0)
+  else
+    /* get our binding even if --pid not given, it may be used by --restrict */
     hwloc_get_cpubind(topology, loutput.cpubind_set, 0);
 
   hwloc_bitmap_fill(loutput.membind_set);
   if (loutput.pid_number != -1 && loutput.pid_number != 0)
     hwloc_get_proc_membind(topology, loutput.pid, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
-  else if (loutput.pid_number == 0)
+  else
+    /* get our binding even if --pid not given, it may be used by --restrict */
     hwloc_get_membind(topology, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
 
 #ifdef HAVE_CLOCK_GETTIME
@@ -1088,10 +1090,7 @@ main (int argc, char *argv[])
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     if (!strcmp (restrictstring, "binding")) {
-      if (loutput.pid_number > 0)
-	hwloc_get_proc_cpubind(topology, loutput.pid, restrictset, HWLOC_CPUBIND_PROCESS);
-      else
-	hwloc_get_cpubind(topology, restrictset, HWLOC_CPUBIND_PROCESS);
+      hwloc_bitmap_copy(restrictset, loutput.cpubind_set);
     } else {
       hwloc_bitmap_sscanf(restrictset, restrictstring);
     }
