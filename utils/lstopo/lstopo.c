@@ -574,6 +574,7 @@ main (int argc, char *argv[])
   char *restrictstring = NULL;
   struct lstopo_output loutput;
   output_method *output_func;
+  hwloc_membind_policy_t policy;
 #ifdef HAVE_CLOCK_GETTIME
   struct timespec ts1, ts2;
   unsigned long ms;
@@ -647,6 +648,11 @@ main (int argc, char *argv[])
 #ifdef HAVE_SETLOCALE
   setlocale(LC_ALL, "");
 #endif
+
+  loutput.cpubind_set = hwloc_bitmap_alloc();
+  loutput.membind_set = hwloc_bitmap_alloc();
+  if (!loutput.cpubind_set || !loutput.membind_set)
+    goto out;
 
   err = hwloc_topology_init (&topology);
   if (err)
@@ -1054,6 +1060,18 @@ main (int argc, char *argv[])
     goto out_with_topology;
   }
 
+  hwloc_bitmap_fill(loutput.cpubind_set);
+  if (loutput.pid_number != -1 && loutput.pid_number != 0)
+    hwloc_get_proc_cpubind(topology, loutput.pid, loutput.cpubind_set, 0);
+  else if (loutput.pid_number == 0)
+    hwloc_get_cpubind(topology, loutput.cpubind_set, 0);
+
+  hwloc_bitmap_fill(loutput.membind_set);
+  if (loutput.pid_number != -1 && loutput.pid_number != 0)
+    hwloc_get_proc_membind(topology, loutput.pid, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
+  else if (loutput.pid_number == 0)
+    hwloc_get_membind(topology, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
+
 #ifdef HAVE_CLOCK_GETTIME
   if (measure_load_time) {
     clock_gettime(CLOCK_MONOTONIC, &ts2);
@@ -1167,6 +1185,9 @@ main (int argc, char *argv[])
     free(loutput.legend_append[i]);
   free(loutput.legend_append);
 
+  hwloc_bitmap_free(loutput.cpubind_set);
+  hwloc_bitmap_free(loutput.membind_set);
+
   return err ? EXIT_FAILURE : EXIT_SUCCESS;
 
  out_usagefailure:
@@ -1175,5 +1196,7 @@ main (int argc, char *argv[])
   lstopo_destroy_userdata(hwloc_get_root_obj(topology));
   hwloc_topology_destroy(topology);
  out:
+  hwloc_bitmap_free(loutput.cpubind_set);
+  hwloc_bitmap_free(loutput.membind_set);
   return EXIT_FAILURE;
 }
