@@ -51,8 +51,8 @@ void usage(const char *name, FILE *where)
 #endif
   fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "Input topology options:\n");
-  fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
-  fprintf(where, "  --whole-system   Do not consider administration limitations\n");
+  fprintf(where, "  --restrict <set>   Restrict the topology to processors listed in <set>\n");
+  fprintf(where, "  --disallowed   Include objects disallowed by administrative limitations\n");
   fprintf(where, "  --hbm          Only consider high bandwidth memory nodes\n");
   fprintf(where, "  --no-hbm       Ignore high-bandwidth memory nodes\n");
   fprintf(where, "Miscellaneous options:\n");
@@ -235,12 +235,12 @@ int main(int argc, char *argv[])
 	only_hbm = 0;
 	goto next;
       }
-      if (!strcmp (argv[0], "--whole-system")) {
+      if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
 	if (loaded) {
 	  fprintf(stderr, "Input option %s disallowed after options using the topology\n", argv[0]);
 	  exit(EXIT_FAILURE);
 	}
-	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
 	goto next;
       }
       if (!strcmp (argv[0], "--restrict")) {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2017 Inria.  All rights reserved.
+ * Copyright © 2016-2018 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -113,7 +113,7 @@ int netloc_topology_read_hwloc(netloc_topology_t *topology, int num_nodes,
             /* Read the hwloc topology */
             hwloc_topology_t topology;
             hwloc_topology_init(&topology);
-            hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM);
+            hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED);
 
             char *hwloc_ref_path;
             asprintf(&hwloc_ref_path, "%s/%s.xml", hwloc_path, refname);

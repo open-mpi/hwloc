@@ -225,7 +225,7 @@ exporting/importing topologies but it is hardly readable to human-beings
 On a 4-package 2-core Opteron NUMA machine
 (with two core cores disallowed by the administrator),
 the \c lstopo tool may show the following graphical output
-(with <tt>\--whole-system</tt> for displaying disallowed objects):
+(with <tt>\--disallowed</tt> for displaying disallowed objects):
 
 \image html hagrid.png
 \image latex hagrid.png "" width=\textwidth
@@ -3945,7 +3945,7 @@ Objects do not have <code>allowed_cpuset</code> and <code>allowed_nodeset</code>
 They are only available for the entire topology using
 hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset().
 
-As usual, those are only needed when the WHOLE_SYSTEM topology flag is given,
+As usual, those are only needed when the INCLUDE_DISALLOWED topology flag is given,
 which means disallowed objects are kept in the topology.
 If so, one may find out whether some PUs inside an object is allowed by checking
 \verbatim

@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 {
 	hwloc_topology_t topo;
 	hwloc_topology_diff_t firstdiff = NULL;
-	unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+	unsigned long flags = HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
 	unsigned long patchflags = 0;
 	char *callname, *input, *inputdiff, *output = NULL, *refname = NULL;
 	int err;

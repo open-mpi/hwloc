@@ -55,8 +55,8 @@ Note that the result may already be outdated when reported
 since the operating system may move the tasks to other processors
 at any time according to the binding.
 .TP
-\fB\-\-whole\-system\fR
-Do not consider administration limitations.
+\fB\-\-disallowed\fR
+Include objects disallowed by administrative limitations.
 .TP
 \fB\-\-pid\-cmd <cmd>\fR
 Append the output of the given command to each PID line.
@@ -83,7 +83,7 @@ binding.  The binding may be reported as objects or cpusets.
 .PP
 By default, process bindings are restricted to the currently available
 topology. If some processes are bound to processors that are not available
-to the current process, they are ignored unless \fB\-\-whole\-system\fR
+to the current process, they are ignored unless \fB\-\-include\-disallowed\fR
 is given.
 .
 .PP

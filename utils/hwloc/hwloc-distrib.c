@@ -26,7 +26,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --reverse        Distribute by starting from last objects\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
-  fprintf(where, "  --whole-system   Do not consider administration limitations\n");
+  fprintf(where, "  --disallowed     Include objects disallowed by administrative limitations\n");
   hwloc_utils_input_format_usage(where, 0);
   fprintf(where, "Formatting options:\n");
   fprintf(where, "  --single         Singlify each output to a single CPU\n");
@@ -86,8 +86,8 @@ int main(int argc, char *argv[])
 	verbose = 1;
 	goto next;
       }
-      if (!strcmp (argv[0], "--whole-system")) {
-	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+      if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
+	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
 	goto next;
       }
       if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {

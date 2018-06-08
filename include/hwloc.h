@@ -471,7 +471,7 @@ struct hwloc_obj {
                                           * object and known how (the children path between this object and the PU
                                           * objects).
                                           *
-                                          * If the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
+                                          * If the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED configuration flag is set,
                                           * some of these CPUs may not be allowed for binding,
                                           * see hwloc_topology_get_allowed_cpuset().
                                           *
@@ -483,7 +483,7 @@ struct hwloc_obj {
                                           *
                                           * This may include not only the same as the cpuset field, but also some CPUs for
                                           * which topology information is unknown or incomplete, some offlines CPUs, and
-                                          * the CPUs that are ignored when the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag
+                                          * the CPUs that are ignored when the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED flag
                                           * is not set.
                                           * Thus no corresponding PU object may be found in the topology, because the
                                           * precise position is undefined. It is however known that it would be somewhere
@@ -501,7 +501,7 @@ struct hwloc_obj {
                                           *
                                           * In the end, these nodes are those that are close to the current object.
                                           *
-                                          * If the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set,
+                                          * If the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED configuration flag is set,
                                           * some of these nodes may not be allowed for allocation,
                                           * see hwloc_topology_get_allowed_nodeset().
                                           *
@@ -516,7 +516,7 @@ struct hwloc_obj {
                                           *
                                           * This may include not only the same as the nodeset field, but also some NUMA
                                           * nodes for which topology information is unknown or incomplete, some offlines
-                                          * nodes, and the nodes that are ignored when the ::HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM
+                                          * nodes, and the nodes that are ignored when the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
                                           * flag is not set.
                                           * Thus no corresponding NUMA node object may be found in the topology, because the
                                           * precise position is undefined. It is however known that it would be
@@ -1821,28 +1821,27 @@ HWLOC_DECLSPEC int hwloc_topology_set_components(hwloc_topology_t __hwloc_restri
  * They may also be returned by hwloc_topology_get_flags().
  */
 enum hwloc_topology_flags_e {
- /** \brief Detect the whole system, ignore reservations.
+ /** \brief Detect the whole system, ignore reservations, include disallowed objects.
    *
    * Gather all resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cgroup/Cpusets and gather all processors and memory nodes.
    *
    * When this flag is not set, PUs and NUMA nodes that are disallowed are not added to the topology.
    * Parent objects (package, core, cache, etc.) are added only if some of their children are allowed.
+   * All existing PUs and NUMA nodes in the topology are allowed.
+   * hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset()
+   * are equal to the root object cpuset and nodeset.
    *
    * When this flag is set, the actual sets of allowed PUs and NUMA nodes are given
    * by hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset().
    * They may be smaller than the root object cpuset and nodeset.
-   *
-   * When this flag is not set, all existing PUs and NUMA nodes in the topology
-   * are allowed. hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset()
-   * are equal to the root object cpuset and nodeset.
    *
    * If the current topology is exported to XML and reimported later, this flag
    * should be set again in the reimported topology so that disallowed resources
    * are reimported as well.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1UL<<0),
+  HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED = (1UL<<0),
 
  /** \brief Assume that the selected backend provides the topology for the
    * system on which we are running.

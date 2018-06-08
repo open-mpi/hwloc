@@ -26,6 +26,9 @@ Version 2.1.0
   + Add hwloc_bitmap_nr_ulongs() and hwloc_bitmap_from/to_ulongs(),
     thanks to Junchao Zhang for the suggestion.
   + Improve the API for dealing with disallowed resources
+    - HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM is replaced with FLAG_INCLUDE_DISALLOWED
+      and --whole-system command-line options with --disallowed.
+      Former names are still accepted for backward compatibility.
     - Add disallowed_pu and disallowed_numa bits to the discovery support
       structure.
 * Backends

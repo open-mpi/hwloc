@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 
 	hwloc_topology_init(&topology);
 	hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
-	hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM);
+	hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED);
 	err = hwloc_topology_set_xml(topology, input);
 	if (err < 0)
 		goto out;

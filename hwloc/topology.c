@@ -3068,7 +3068,7 @@ next_cpubackend:
 
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
-  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED)) {
     hwloc_debug("%s", "\nRemoving unauthorized sets from all sets\n");
     remove_unused_sets(topology, topology->levels[0][0]);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
@@ -3376,7 +3376,7 @@ hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
     return -1;
   }
 
-  if (flags & ~(HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM|HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM|HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES)) {
+  if (flags & ~(HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED|HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM|HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES)) {
     errno = EINVAL;
     return -1;
   }
@@ -4087,7 +4087,7 @@ hwloc__check_children_cpusets(hwloc_topology_t topology __hwloc_attribute_unused
     assert(hwloc_bitmap_first(obj->cpuset) == (int) obj->os_index);
     assert(hwloc_bitmap_weight(obj->complete_cpuset) == 1);
     assert(hwloc_bitmap_first(obj->complete_cpuset) == (int) obj->os_index);
-    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
+    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED)) {
       assert(hwloc_bitmap_isset(topology->allowed_cpuset, (int) obj->os_index));
     }
     assert(!obj->arity);
@@ -4301,7 +4301,7 @@ hwloc__check_nodesets(hwloc_topology_t topology, hwloc_obj_t obj, hwloc_bitmap_t
     assert(hwloc_bitmap_first(obj->nodeset) == (int) obj->os_index);
     assert(hwloc_bitmap_weight(obj->complete_nodeset) == 1);
     assert(hwloc_bitmap_first(obj->complete_nodeset) == (int) obj->os_index);
-    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
+    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED)) {
       assert(hwloc_bitmap_isset(topology->allowed_nodeset, (int) obj->os_index));
     }
     assert(!obj->arity);
@@ -4501,7 +4501,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
   assert(!obj->depth);
 
   /* check that allowed sets are larger than the main sets */
-  if (topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED) {
     assert(hwloc_bitmap_isincluded(topology->allowed_cpuset, obj->cpuset));
     assert(hwloc_bitmap_isincluded(topology->allowed_nodeset, obj->nodeset));
   } else {

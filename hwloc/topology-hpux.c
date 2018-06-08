@@ -190,7 +190,7 @@ hwloc_look_hpux(struct hwloc_backend *backend)
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
   if (has_numa) {
-    nbnodes = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) ?
+    nbnodes = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED) ?
       MPC_GETNUMLDOMS_SYS : MPC_GETNUMLDOMS, 0, 0);
   }
   hwloc_debug("%d nodes\n", nbnodes);
@@ -199,7 +199,7 @@ hwloc_look_hpux(struct hwloc_backend *backend)
 
   if (has_numa) {
     i = 0;
-    currentnode = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) ?
+    currentnode = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED) ?
       MPC_GETFIRSTLDOM_SYS : MPC_GETFIRSTLDOM, 0, 0);
     while (currentnode != -1 && i < nbnodes) {
       hwloc_debug("node %d is %d\n", i, currentnode);
@@ -210,14 +210,14 @@ hwloc_look_hpux(struct hwloc_backend *backend)
       /* TODO: obj->attr->node.memory_kB */
       /* TODO: obj->attr->node.huge_page_free */
 
-      currentnode = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) ?
+      currentnode = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED) ?
         MPC_GETNEXTLDOM_SYS : MPC_GETNEXTLDOM, currentnode, 0);
       i++;
     }
   }
 
   i = 0;
-  currentcpu = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) ?
+  currentcpu = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED) ?
       MPC_GETFIRSTSPU_SYS : MPC_GETFIRSTSPU, 0,0);
   while (currentcpu != -1) {
     obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, (unsigned) currentcpu);
@@ -245,7 +245,7 @@ hwloc_look_hpux(struct hwloc_backend *backend)
     /* Add cpu */
     hwloc_insert_object_by_cpuset(topology, obj);
 
-    currentcpu = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) ?
+    currentcpu = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED) ?
       MPC_GETNEXTSPU_SYS : MPC_GETNEXTSPU, currentcpu, 0);
   }
 

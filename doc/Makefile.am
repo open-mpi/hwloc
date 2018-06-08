@@ -430,7 +430,7 @@ man3_setsource_DATA = \
 man3_configurationdir = $(man3dir)
 man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \

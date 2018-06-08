@@ -57,7 +57,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --thissystem          Assume that the input topology provides the topology\n"
 		  "                        for the system on which we are running\n");
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
-  fprintf (where, "  --whole-system        Do not consider administration limitations\n");
+  fprintf (where, "  --disallowed          Include objects disallowed by administrative limitations\n");
   fprintf (where, "  -l --logical          Use logical object indexes for input (default)\n");
   fprintf (where, "  -p --physical         Use physical object indexes for input\n");
   fprintf (where, "Miscellaneous options:\n");
@@ -465,8 +465,8 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[0], "--no-icaches")) {
 	hwloc_topology_set_icache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
-      } else if (!strcmp (argv[0], "--whole-system"))
-	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+      } else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system"))
+	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
       else if (!strcmp (argv[0], "--no-io")) {
 	hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
       } else if (!strcmp (argv[0], "--no-bridges")) {

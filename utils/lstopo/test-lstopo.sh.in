@@ -68,8 +68,8 @@ $ls --whole-io > $tmp/test.whole-io
 echo "** Verbose with all I/Os in $tmp/test.wholeio_verbose ..."
 $ls -v --whole-io > $tmp/test.wholeio_verbose
 
-echo "** With disallowed objects in $tmp/test.whole-system ..."
-$ls --whole-system > $tmp/test.whole-system
+echo "** With disallowed objects in $tmp/test.disallowed ..."
+$ls --disallowed > $tmp/test.disallowed
 echo "** With --top in $tmp/test.top ..."
 $ls --top > $tmp/test.top
 

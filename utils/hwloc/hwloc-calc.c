@@ -48,7 +48,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <cpuset>       Restrict the topology to processors listed in <cpuset>\n");
-  fprintf(where, "  --whole-system            Do not consider administration limitations\n");
+  fprintf(where, "  --disallowed              Include objects disallowed by administrative limitations\n");
   hwloc_utils_input_format_usage(where, 10);
   fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -q --quiet                Hide non-fatal error messages\n");
@@ -254,12 +254,12 @@ int main(int argc, char *argv[])
         verbose--;
         goto next;
       }
-      if (!strcmp (argv[0], "--whole-system")) {
+      if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
 	if (loaded) {
 	  fprintf(stderr, "Input option %s disallowed after options using the topology\n", argv[0]);
 	  exit(EXIT_FAILURE);
 	}
-	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
 	goto next;
       }
       if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {

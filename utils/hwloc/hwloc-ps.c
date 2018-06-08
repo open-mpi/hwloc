@@ -37,19 +37,19 @@ void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] ...\n", name);
   fprintf (where, "Options:\n");
-  fprintf (where, "  -a               Show all processes, including those that are not bound\n");
-  fprintf (where, "  --pid <pid>      Only show process of pid number <pid>\n");
-  fprintf (where, "  --name <name>    Only show processes whose name contains <name>\n");
-  fprintf (where, "  -l --logical     Use logical object indexes (default)\n");
-  fprintf (where, "  -p --physical    Use physical object indexes\n");
-  fprintf (where, "  -c --cpuset      Show cpuset instead of objects\n");
+  fprintf (where, "  -a                 Show all processes, including those that are not bound\n");
+  fprintf (where, "  --pid <pid>        Only show process of pid number <pid>\n");
+  fprintf (where, "  --name <name>      Only show processes whose name contains <name>\n");
+  fprintf (where, "  -l --logical       Use logical object indexes (default)\n");
+  fprintf (where, "  -p --physical      Use physical object indexes\n");
+  fprintf (where, "  -c --cpuset        Show cpuset instead of objects\n");
 #ifdef HWLOC_LINUX_SYS
-  fprintf (where, "  -t --threads     Show threads\n");
+  fprintf (where, "  -t --threads       Show threads\n");
 #endif
   fprintf (where, "  -e --get-last-cpu-location\n");
-  fprintf (where, "                   Retrieve the last processors where the tasks ran\n");
-  fprintf (where, "  --pid-cmd <cmd>  Append the output of <cmd> <pid> to each PID line\n");
-  fprintf (where, "  --whole-system   Do not consider administration limitations\n");
+  fprintf (where, "                     Retrieve the last processors where the tasks ran\n");
+  fprintf (where, "  --pid-cmd <cmd>    Append the output of <cmd> <pid> to each PID line\n");
+  fprintf (where, "  --disallowed       Include objects disallowed by administrative limitations\n");
 }
 
 static void print_task(hwloc_topology_t topology,
@@ -318,8 +318,8 @@ int main(int argc, char *argv[])
       }
       only_name = argv[1];
       opt = 1;
-    } else if (!strcmp (argv[0], "--whole-system")) {
-      flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+    } else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
+      flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
     } else if (!strcmp (argv[0], "--pid-cmd")) {
       if (argc < 2) {
 	usage(callname, stdout);

@@ -273,7 +273,7 @@ fi
 export HWLOC_THISSYSTEM=0
 "$lstopo" - -v > "$dirname/$basename.output"
 echo "Expected topology output stored in $dirname/$basename.output"
-"$lstopo" -.xml --whole-system > "$dirname/$basename.xml"
+"$lstopo" -.xml --disallowed > "$dirname/$basename.xml"
 echo "XML topology stored in in $dirname/$basename.xml"
 
 echo

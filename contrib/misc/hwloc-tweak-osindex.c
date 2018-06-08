@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2017 Inria.  All rights reserved.
+ * Copyright © 2016-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * This program modifies PU and NUMA node os_index for debugging.
@@ -127,11 +127,11 @@ int main(int argc, char *argv[])
 
 #ifdef HWLOC2
   err = hwloc_topology_set_flags(topology,
-				 HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM);
+				 HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED);
   err = hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
 #else
   err = hwloc_topology_set_flags(topology,
-				 HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM
+				 HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
 				 | HWLOC_TOPOLOGY_FLAG_WHOLE_IO
 				 | HWLOC_TOPOLOGY_FLAG_ICACHES);
 #endif

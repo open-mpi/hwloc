@@ -339,7 +339,7 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
   int node;
 
   MCMlevel = rs_getinfo(NULL, R_MCMSDL, 0);
-  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
+  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED))
     rset = rs_alloc(RS_ALL);
   else
     rset = rs_alloc(RS_PARTITION);
@@ -610,7 +610,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
   int nbnodes;
   struct hwloc_obj *obj;
 
-  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
+  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED))
     rset = rs_alloc(RS_ALL);
   else
     rset = rs_alloc(RS_PARTITION);
