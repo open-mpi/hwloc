@@ -19,6 +19,8 @@
 * How did you start your process?
 * How did it fail? Crash? Unexpected result?
 * If it crashed, please include a `gdb` backtrace if possible.
+  * Passing `CFLAGS='-g -O0'` on the configure line may make the backtrace more useful.
+  * Passing `--enable-debug` to the configure line should also enable lots of debug messages before the crash.
 
 ### Additional information
 
