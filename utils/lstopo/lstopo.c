@@ -44,8 +44,6 @@
 # endif
 #endif
 
-static unsigned int top = 0;
-
 FILE *open_output(const char *filename, int overwrite)
 {
   const char *extn;
@@ -580,6 +578,7 @@ main (int argc, char *argv[])
   unsigned long ms;
   int measure_load_time = !!getenv("HWLOC_DEBUG_LOAD_TIME");
 #endif
+  int top = 0;
   int opt;
   unsigned i;
 
