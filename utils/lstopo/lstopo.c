@@ -1168,15 +1168,22 @@ main (int argc, char *argv[])
   loutput.topology = topology;
   loutput.file = NULL;
 
-  lstopo_populate_userdata(hwloc_get_root_obj(topology));
-
-  if (output_format != LSTOPO_OUTPUT_XML && loutput.collapse)
-    lstopo_add_collapse_attributes(topology);
+  if (output_format != LSTOPO_OUTPUT_XML) {
+    /* there might be some xml-imported userdata in objects, add lstopo-specific userdata in front of them */
+    lstopo_populate_userdata(hwloc_get_root_obj(topology));
+    if (loutput.collapse)
+      lstopo_add_collapse_attributes(topology);
+  }
 
   err = output_func(&loutput, filename);
 
-  lstopo_destroy_userdata(hwloc_get_root_obj(topology));
+  if (output_format != LSTOPO_OUTPUT_XML) {
+    /* remove lstopo-specific userdata in front of the list of userdata */
+    lstopo_destroy_userdata(hwloc_get_root_obj(topology));
+  }
+  /* remove the remaining lists of xml-imported userdata */
   hwloc_utils_userdata_free_recursive(hwloc_get_root_obj(topology));
+
   hwloc_topology_destroy (topology);
 
   for(i=0; i<loutput.legend_append_nr; i++)
