@@ -89,8 +89,10 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
   obj = hwloc_topology_insert_misc_object(topology, group, name);
   if (!obj)
     fprintf(stderr, "Failed to insert process `%s'\n", name);
-  else
+  else {
     obj->subtype = strdup("Process");
+    hwloc_obj_add_info(obj, "lstopoStyle", "Background=#ffff00");
+  }
 
   return obj;
 }
