@@ -64,6 +64,8 @@ FILE *open_output(const char *filename, int overwrite)
   return fopen(filename, "w");
 }
 
+const char *task_background_color_string = "#ffff00";
+
 static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char * name)
 {
   hwloc_obj_t group, obj;
@@ -91,7 +93,11 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
     fprintf(stderr, "Failed to insert process `%s'\n", name);
   else {
     obj->subtype = strdup("Process");
-    hwloc_obj_add_info(obj, "lstopoStyle", "Background=#ffff00");
+    if (strcmp(task_background_color_string, "none")) {
+      char style[19];
+      snprintf(style, sizeof(style), "Background=%s", task_background_color_string);
+      hwloc_obj_add_info(obj, "lstopoStyle", style);
+    }
   }
 
   return obj;
@@ -506,6 +512,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "  --binding-color=none    Do not colorize PU and NUMA nodes according to the binding\n");
   fprintf (where, "  --disallowed-color=none Do not colorize disallowed PU and NUMA nodes\n");
+  fprintf (where, "  --top-color=<none|#xxyyzz> Change task background color for --top\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --export-xml-flags <n>\n"
 		  "                        Set flags during the XML topology export\n");
@@ -857,6 +864,8 @@ main (int argc, char *argv[])
         loutput.show_binding = 0;
       else if (!strcmp (argv[0], "--disallowed-color=none"))
         loutput.show_disallowed = 0;
+      else if (!strncmp (argv[0], "--top-color=", 12))
+	task_background_color_string = argv[0]+12;
 
       else if (!strncmp (argv[0], "--no-text", 9)
 	       || !strncmp (argv[0], "--text", 6)
