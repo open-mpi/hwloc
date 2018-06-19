@@ -97,8 +97,8 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
   $ls -i "$SI" - -l --verbose
   echo "** Export to synthetic..."
   $ls -i "$SI" -.synthetic
-  echo "** Export to XML..."
-  $ls -i "$SI" -.xml
+  echo "** Export to XML after changing disallowed..."
+  $ls -i "$SI" -.xml --allow 0x30 --allow nodeset=0x2
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-lstopo.output "$file"
 rm -rf "$tmp"

@@ -63,11 +63,11 @@ Special depth -3:  2 NUMANode (type #13)
 Topology not from this system
 ** Export to synthetic...
 Package:1 Core:2 [NUMANode(memory=1073741824)] L2Cache:2(size=4194304) PU:2
-** Export to XML...
+** Export to XML after changing disallowed...
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="2.0">
-  <object type="Machine" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" allowed_cpuset="0x000000ff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" gp_index="1">
+  <object type="Machine" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" allowed_cpuset="0x00000030" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000002" gp_index="1">
     <info name="Backend" value="Synthetic"/>
     <info name="SyntheticDescription" value="pa:1 no:2 co:1 l2:2 2"/>
     <object type="Package" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000003" complete_nodeset="0x00000003" gp_index="18">

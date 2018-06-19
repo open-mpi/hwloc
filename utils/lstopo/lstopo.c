@@ -499,6 +499,7 @@ void usage(const char *name, FILE *where)
 		  "                        for the system on which we are running\n");
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "  --disallowed          Include objects disallowed by administrative limitations\n");
+  fprintf (where, "  --allow <all|local|...>   Change the set of objects marked as allowed\n");
   fprintf (where, "Graphical output options:\n");
   fprintf (where, "  --children-order=plain\n"
 		  "                        Display memory children below the parent like any other child\n");
@@ -625,6 +626,8 @@ main (int argc, char *argv[])
   const char *filename = NULL;
   unsigned long flags = 0;
   unsigned long restrict_flags = 0;
+  unsigned long allow_flags = 0;
+  hwloc_bitmap_t allow_cpuset = NULL, allow_nodeset = NULL;
   char * callname;
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
@@ -839,7 +842,30 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
-      else if (!strcmp (argv[0], "--no-io")) {
+      else if (!strcmp (argv[0], "--allow")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	if (!strcmp(argv[1], "all")) {
+	  allow_flags = HWLOC_ALLOW_FLAG_ALL;
+	} else if (!strcmp(argv[1], "local")) {
+	  allow_flags = HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS;
+	  flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
+	} else {
+	  hwloc_bitmap_t set = hwloc_bitmap_alloc();
+	  const char *begin = argv[1];
+	  if (!strncmp(begin, "nodeset=", 8))
+	    begin += 8;
+	  hwloc_bitmap_sscanf(set, begin);
+	  if (begin == argv[1])
+	    allow_cpuset = set;
+	  else
+	    allow_nodeset = set;
+	  allow_flags = HWLOC_ALLOW_FLAG_CUSTOM;
+	}
+	opt = 1;
+	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
+
+      } else if (!strcmp (argv[0], "--no-io")) {
 	hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
       } else if (!strcmp (argv[0], "--no-bridges")) {
 	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_NONE);
@@ -1121,6 +1147,18 @@ main (int argc, char *argv[])
     goto out_with_topology;
   }
 
+  if (allow_flags) {
+    if (allow_flags == HWLOC_ALLOW_FLAG_CUSTOM) {
+      err = hwloc_topology_allow(topology, allow_cpuset, allow_nodeset, HWLOC_ALLOW_FLAG_CUSTOM);
+    } else {
+      err = hwloc_topology_allow(topology, NULL, NULL, allow_flags);
+    }
+    if (err < 0) {
+      fprintf(stderr, "hwloc_topology_allow() failed (%s)\n", strerror(errno));
+      goto out_with_topology;
+    }
+  }
+
   hwloc_bitmap_fill(loutput.cpubind_set);
   if (loutput.pid_number != -1 && loutput.pid_number != 0)
     hwloc_get_proc_cpubind(topology, loutput.pid, loutput.cpubind_set, 0);
@@ -1263,6 +1301,8 @@ main (int argc, char *argv[])
   lstopo_destroy_userdata(hwloc_get_root_obj(topology));
   hwloc_topology_destroy(topology);
  out:
+  hwloc_bitmap_free(allow_cpuset);
+  hwloc_bitmap_free(allow_nodeset);
   hwloc_bitmap_free(loutput.cpubind_set);
   hwloc_bitmap_free(loutput.membind_set);
   return EXIT_FAILURE;

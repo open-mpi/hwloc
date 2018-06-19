@@ -145,6 +145,23 @@ This is identical to \fB-\-filter icache:none\fR.
 \fB\-\-disallowed\fR
 Include objects disallowed by administrative limitations.
 .TP
+\fB\-\-allow <all|local|0xff|nodeset=0xf0>\fR
+Include objects disallowed by administrative limitations (implies \fB\-\-disallowed\fR)
+and also change the set of allowed ones.
+
+If \fBlocal\fR is given, only objects available to the current process are allowed
+(default behavior when loading from the native operating system backend).
+It may be useful if the topology was created by another process (with different
+administrative restrictions such as Linux Cgroups) and loaded here loaded from XML
+or synthetic.
+This case implies \fB\-\-thissystem\fR.
+
+If \fBall\fR, all objects are allowed.
+
+If a bitmap is given as a hexadecimal string, it is used as the set of allowed PUs.
+
+If a bitmap is given after prefix \fBnodeset=\fR, it is the set of allowed NUMA nodes.
+.TP
 \fB\-\-flags\fR <flags>
 Enforce topology flags.
 The default is \fB0\fR.
@@ -195,8 +212,8 @@ interesting bridges are shown.
 \fB\-\-thissystem\fR
 Assume that the selected backend provides the topology for the
 system on which we are running.
-This is useful when using \fB\-\-restrict\fR binding and loading
-a custom topology such as an XML file.
+This is useful when loading a custom topology such as an XML file
+and using \fB\-\-restrict binding\fR or \fB\-\-allow all\fR.
 .TP
 \fB\-\-pid\fR <pid>
 Detect topology as seen by process <pid>, i.e. as if process <pid> did the
