@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2015-2017 Inria.  All rights reserved.
+# Copyright © 2015-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -13,6 +13,9 @@ lstopo="$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
 export HWLOC_PLUGINS_PATH
+
+HWLOC_DONT_ADD_VERSION_INFO=1
+export HWLOC_DONT_ADD_VERSION_INFO
 
 actual_output="$1"
 
@@ -45,17 +48,10 @@ test_topology ()
     [ -r "$options" ] && opts=`cat $options`
 
     if ! "$lstopo" -i "$dir" --if cpuid $opts \
-	| sed	-e 's/ hwlocVersion='$HWLOC_VERSION'//' \
-		-e 's/ ProcessName=lstopo-no-graphics//' \
-		-e 's/ ProcessName=lt-lstopo-no-graphics//' \
-		-e 's/ gp_index="[0-9]*"//' \
-	| grep -v "<info name=\"hwlocVersion\" value=\"$HWLOC_VERSION\"/>" \
-	| grep -v "<info name=\"ProcessName\" value=\"lstopo-no-graphics" \
-	| grep -v "<info name=\"ProcessName\" value=\"lt-lstopo-no-graphics" \
+	| sed	-e 's/ gp_index="[0-9]*"//' \
 	> "$output"
-	# filtered gp_index because it can if we reorder discovery
+	# filtered gp_index because it may change if we reorder discovery
 	# (not used in NUMA/PU distances, and regenerated (differently) during XML import).
-	# filtered hwlocVersion since it often changes, or can be a .exe .
     then
 	result=1
     else

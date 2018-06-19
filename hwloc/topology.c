@@ -3177,7 +3177,8 @@ next_noncpubackend:
 
   /* add some identification attributes if not loading from XML */
   if (topology->backends
-      && strcmp(topology->backends->component->name, "xml")) {
+      && strcmp(topology->backends->component->name, "xml")
+      && !getenv("HWLOC_DONT_ADD_VERSION_INFO")) {
     char *value;
     /* add a hwlocVersion */
     hwloc_obj_add_info(topology->levels[0][0], "hwlocVersion", HWLOC_VERSION);
