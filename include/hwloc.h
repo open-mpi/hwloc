@@ -2186,6 +2186,45 @@ enum hwloc_restrict_flags_e {
  */
 HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_bitmap_t set, unsigned long flags);
 
+/** \brief Flags to be given to hwloc_topology_allow(). */
+enum hwloc_allow_flags_e {
+  /** \brief Mark all objects as allowed in the topology.
+   *
+   * \p cpuset and \p nođeset given to hwloc_topology_allow() must be \c NULL.
+   * \hideinitializer */
+  HWLOC_ALLOW_FLAG_ALL = (1<<0),
+
+  /** \brief Only allow objects that are available to the current process.
+   *
+   * The topology must have ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM so that the set
+   * of available resources can actually be retrieved from the operating system.
+   *
+   * \p cpuset and \p nođeset given to hwloc_topology_allow() must be \c NULL.
+   * \hideinitializer */
+  HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS = (1<<1),
+
+  /** \brief Allow a custom set of objects, given to hwloc_topology_allow() as \p cpuset and/or \p nodeset parameters.
+   * \hideinitializer */
+  HWLOC_ALLOW_FLAG_CUSTOM = (1<<2)
+};
+
+/** \brief Change the sets of allowed PUs and NUMA nodes in the topology.
+ *
+ * This function only works if the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
+ * was set on the topology. It does not modify any object, it only changes
+ * the sets returned by hwloc_topology_get_allowed_cpuset() and
+ * hwloc_topology_get_allowed_nodeset().
+ *
+ * It is notably useful when importing a topology from another process
+ * running in a different Linux Cgroup.
+ *
+ * \p flags must be set to one flag among ::hwloc_allow_flags_e.
+ *
+ * \note Removing objects from a topology should rather be performed with
+ * hwloc_topology_restrict().
+ */
+HWLOC_DECLSPEC int hwloc_topology_allow(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, hwloc_const_nodeset_t nodeset, unsigned long flags);
+
 /** \brief Add a MISC object as a leaf of the topology
  *
  * A new MISC object will be created and inserted into the topology at the

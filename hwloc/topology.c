@@ -3938,6 +3938,73 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
 }
 
 int
+hwloc_topology_allow(struct hwloc_topology *topology,
+		     hwloc_const_cpuset_t cpuset, hwloc_const_nodeset_t nodeset,
+		     unsigned long flags)
+{
+  if (!topology->is_loaded)
+    goto einval;
+
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    goto error;
+  }
+
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED))
+    goto einval;
+
+  if (flags & ~(HWLOC_ALLOW_FLAG_ALL|HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS|HWLOC_ALLOW_FLAG_CUSTOM))
+    goto einval;
+
+  switch (flags) {
+  case HWLOC_ALLOW_FLAG_ALL: {
+    if (cpuset || nodeset)
+      goto einval;
+    hwloc_bitmap_copy(topology->allowed_cpuset, hwloc_get_root_obj(topology)->complete_cpuset);
+    hwloc_bitmap_copy(topology->allowed_nodeset, hwloc_get_root_obj(topology)->complete_nodeset);
+    break;
+  }
+  case HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS: {
+    if (cpuset || nodeset)
+      goto einval;
+    if (!topology->is_thissystem)
+      goto einval;
+    if (!topology->binding_hooks.get_allowed_resources) {
+      errno = ENOSYS;
+      goto error;
+    }
+    topology->got_allowed_resources = 0; /* make sure we'll reread current resources */
+    topology->binding_hooks.get_allowed_resources(topology);
+    break;
+  }
+  case HWLOC_ALLOW_FLAG_CUSTOM: {
+    if (cpuset) {
+      /* keep the intersection with the full topology cpuset, if not empty */
+      if (!hwloc_bitmap_intersects(hwloc_get_root_obj(topology)->cpuset, cpuset))
+	goto einval;
+      hwloc_bitmap_and(topology->allowed_cpuset, hwloc_get_root_obj(topology)->cpuset, cpuset);
+    }
+    if (nodeset) {
+      /* keep the intersection with the full topology nodeset, if not empty */
+      if (!hwloc_bitmap_intersects(hwloc_get_root_obj(topology)->nodeset, nodeset))
+	goto einval;
+      hwloc_bitmap_and(topology->allowed_nodeset, hwloc_get_root_obj(topology)->nodeset, nodeset);
+    }
+    break;
+  }
+  default:
+    goto einval;
+  }
+
+  return 0;
+
+ einval:
+  errno = EINVAL;
+ error:
+  return -1;
+}
+
+int
 hwloc_topology_is_thissystem(struct hwloc_topology *topology)
 {
   return topology->is_thissystem;

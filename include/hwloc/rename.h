@@ -160,6 +160,12 @@ extern "C" {
 #define HWLOC_RESTRICT_FLAG_ADAPT_IO HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_IO)
 #define hwloc_topology_restrict HWLOC_NAME(topology_restrict)
 
+#define hwloc_allow_flags_e HWLOC_NAME(allow_flags_e)
+#define HWLOC_ALLOW_FLAG_ALL HWLOC_NAME_CAPS(ALLOW_FLAG_ALL)
+#define HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS HWLOC_NAME_CAPS(ALLOW_FLAG_LOCAL_RESTRICTIONS)
+#define HWLOC_ALLOW_FLAG_CUSTOM HWLOC_NAME_CAPS(ALLOW_FLAG_CUSTOM)
+#define hwloc_topology_allow HWLOC_NAME(topology_allow)
+
 #define hwloc_topology_insert_misc_object HWLOC_NAME(topology_insert_misc_object)
 #define hwloc_topology_alloc_group_object HWLOC_NAME(topology_alloc_group_object)
 #define hwloc_topology_insert_group_object HWLOC_NAME(topology_insert_group_object)

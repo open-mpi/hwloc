@@ -465,6 +465,11 @@ man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_MISC.3 \
         $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_ALLOW_FLAG_ALL.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_ALLOW_FLAG_CUSTOM.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_allow_flags_e.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_allow.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_alloc_group_object.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_group_object.3 \
