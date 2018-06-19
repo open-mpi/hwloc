@@ -11,8 +11,10 @@ depth 0:           1 Machine (type #0)
 Special depth -3:  2 NUMANode (type #13)
 
 discovery:pu = 1
+discovery:disallowed_pu = 0
 discovery:numa = 1
 discovery:numa_memory = 1
+discovery:disallowed_numa = 0
 cpubind:set_thisproc_cpubind = 0
 cpubind:get_thisproc_cpubind = 0
 cpubind:set_proc_cpubind = 0

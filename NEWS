@@ -25,6 +25,9 @@ Version 2.1.0
     from being enabled in a topology.
   + Add hwloc_bitmap_nr_ulongs() and hwloc_bitmap_from/to_ulongs(),
     thanks to Junchao Zhang for the suggestion.
+  + Improve the API for dealing with disallowed resources
+    - Add disallowed_pu and disallowed_numa bits to the discovery support
+      structure.
 * Backends
   + The x86 now properly handles offline CPUs.
   + Add support for IBM S/390 drawers.

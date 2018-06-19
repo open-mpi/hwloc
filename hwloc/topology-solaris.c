@@ -941,6 +941,9 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     }
     hwloc_debug("%s", "\n");
     topology->support.discovery->pu = 1;
+#ifdef HAVE_LIBLGRP
+    topology->support.discovery->disallowed_pu = 1;
+#endif
   }
 
   kstat_close(kc);

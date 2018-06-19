@@ -141,6 +141,7 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 
   /* PUs */
   topology->support.discovery->pu = 1;
+  topology->support.discovery->disallowed_pu = 1;
   hwloc_setup_pu_level(topology, HWLOC_BGQ_CORES*4);
 
   /* Add BGQ specific information */

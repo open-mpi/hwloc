@@ -1922,6 +1922,10 @@ struct hwloc_topology_discovery_support {
   unsigned char numa;
   /** \brief Detecting the amount of memory in NUMA nodes is supported. */
   unsigned char numa_memory;
+  /** \brief Detecting and identifying PU objects that are not available to the current process is supported. */
+  unsigned char disallowed_pu;
+  /** \brief Detecting and identifying NUMA nodes that are not available to the current process is supported. */
+  unsigned char disallowed_numa;
 };
 
 /** \brief Flags describing actual PU binding support for this topology.

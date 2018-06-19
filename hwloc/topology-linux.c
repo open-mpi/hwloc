@@ -3810,6 +3810,7 @@ look_sysfsnode(struct hwloc_topology *topology,
       }
       topology->support.discovery->numa = 1;
       topology->support.discovery->numa_memory = 1;
+      topology->support.discovery->disallowed_numa = 1;
 
       hwloc_bitmap_free(nodes_cpuset);
 
@@ -3945,6 +3946,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   }
 
   topology->support.discovery->pu = 1;
+  topology->support.discovery->disallowed_pu = 1;
   hwloc_debug_1arg_bitmap("found %d cpu topologies, cpuset %s\n",
 	     hwloc_bitmap_weight(cpuset), cpuset);
 
@@ -4660,6 +4662,7 @@ look_cpuinfo(struct hwloc_topology *topology,
   }
 
   topology->support.discovery->pu = 1;
+  topology->support.discovery->disallowed_pu = 1;
 
   hwloc_debug("%s", "\n * Topology summary *\n");
   hwloc_debug("%u processors)\n", numprocs);
