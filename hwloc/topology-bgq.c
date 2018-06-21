@@ -22,6 +22,9 @@
 static int
 hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
 {
+  /* FIXME: if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
+   * (once in the main bgq discovery, and later again by the core through the get_allowed_resources() hook).
+   */
   const char *env;
   unsigned i;
 

@@ -322,6 +322,9 @@ hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size
 static void
 lgrp_list_allowed(struct hwloc_topology *topology)
 {
+  /* FIXME: if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
+   * (once in the main solaris discovery, and later again by the core through the get_allowed_resources() hook).
+   */
   lgrp_cookie_t cookie;
   lgrp_id_t root;
   int npids, nnids;
