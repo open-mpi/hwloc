@@ -3808,7 +3808,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
 
   /* make sure we'll keep something in the topology */
   if (((flags & HWLOC_RESTRICT_FLAG_BYNODESET) && !hwloc_bitmap_intersects(set, topology->allowed_nodeset))
-      || !hwloc_bitmap_intersects(set, topology->allowed_cpuset)) {
+      || (!(flags & HWLOC_RESTRICT_FLAG_BYNODESET) && !hwloc_bitmap_intersects(set, topology->allowed_cpuset))) {
     errno = EINVAL; /* easy failure, just don't touch the topology */
     return -1;
   }
