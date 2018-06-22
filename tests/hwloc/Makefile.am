@@ -49,6 +49,7 @@ check_PROGRAMS = hwloc_list_components \
         hwloc_distances \
         hwloc_groups \
         hwloc_insert_misc \
+        hwloc_topology_allow \
         hwloc_topology_restrict \
         hwloc_topology_dup \
         hwloc_topology_diff \
