@@ -2,7 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
- * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -132,7 +132,9 @@ set_color(const struct lstopo_color *fcolor, const struct lstopo_color *bcolor)
 }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
+#ifdef HWLOC_HAVE_LIBTERMCAP
 static int ascii_color_index = 16;
+#endif
 static struct lstopo_color *default_color = NULL;
 
 /* When we can, allocate rgb colors */
@@ -437,9 +439,9 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   FILE *output;
   struct lstopo_ascii_output disp;
   int i, j;
-  const struct lstopo_color *lfcolor; /* Last foreground color */
-  const struct lstopo_color *lbcolor; /* Last background color */
 #ifdef HWLOC_HAVE_LIBTERMCAP
+  const struct lstopo_color *lfcolor = NULL; /* Last foreground color */
+  const struct lstopo_color *lbcolor = NULL; /* Last background color */
   int term = 0;
   char *tmp;
 #endif
@@ -524,8 +526,6 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   /* ready */
   output_draw(loutput);
 
-  lfcolor = NULL;
-  lbcolor = NULL;
   for (j = 0; j < disp.height; j++) {
     for (i = 0; i < disp.width; i++) {
 #ifdef HWLOC_HAVE_LIBTERMCAP
