@@ -1710,6 +1710,10 @@ hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
     errno = EINVAL;
     return NULL;
   }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    return NULL;
+  }
   return hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 }
 
@@ -1726,6 +1730,10 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     /* this could actually work, we would just need to disable connect_children/levels below */
     hwloc_free_unlinked_object(obj);
     errno = EINVAL;
+    return NULL;
+  }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
     return NULL;
   }
 
@@ -1789,6 +1797,10 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
 
   if (!topology->is_loaded) {
     errno = EINVAL;
+    return NULL;
+  }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
     return NULL;
   }
 
@@ -3782,6 +3794,10 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
 
   if (!topology->is_loaded) {
     errno = EINVAL;
+    return -1;
+  }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
     return -1;
   }
 

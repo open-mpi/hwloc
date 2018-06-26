@@ -463,6 +463,10 @@ int hwloc_topology_diff_apply(hwloc_topology_t topology,
 	  errno = EINVAL;
 	  return -1;
 	}
+	if (topology->adopted_shmem_addr) {
+	  errno = EPERM;
+	  return -1;
+	}
 
 	if (flags & ~HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE) {
 		errno = EINVAL;

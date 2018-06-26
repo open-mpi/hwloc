@@ -150,6 +150,10 @@ int hwloc_distances_remove(hwloc_topology_t topology)
     errno = EINVAL;
     return -1;
   }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    return -1;
+  }
   hwloc_internal_distances_destroy(topology);
   return 0;
 }
@@ -161,6 +165,10 @@ int hwloc_distances_remove_by_depth(hwloc_topology_t topology, int depth)
 
   if (!topology->is_loaded) {
     errno = EINVAL;
+    return -1;
+  }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
     return -1;
   }
 
@@ -356,6 +364,10 @@ int hwloc_distances_add(hwloc_topology_t topology,
 
   if (nbobjs < 2 || !objs || !values || !topology->is_loaded) {
     errno = EINVAL;
+    return -1;
+  }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
     return -1;
   }
   if ((kind & ~HWLOC_DISTANCES_KIND_ALL)
