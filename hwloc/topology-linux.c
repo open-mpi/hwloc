@@ -2033,7 +2033,8 @@ static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
 
   hwloc_linux__get_allowed_resources(topology, fsroot_path, root_fd, &cpuset_name);
   if (cpuset_name) {
-    hwloc_obj_add_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
+    hwloc__add_info_nodup(&topology->levels[0][0]->infos, &topology->levels[0][0]->infos_count,
+			  "LinuxCgroup", cpuset_name, 1 /* replace */);
     free(cpuset_name);
   }
   if (root_fd != -1)
