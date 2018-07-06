@@ -406,6 +406,29 @@ HWLOC_DECLSPEC int hwloc_bitmap_compare_inclusion(hwloc_const_bitmap_t bitmap1, 
 /* Return a stringified PCI class. */
 HWLOC_DECLSPEC extern const char * hwloc_pci_class_string(unsigned short class_id);
 
+/* Parse a PCI link speed (GT/s) string from Linux sysfs */
+#ifdef HWLOC_LINUX_SYS
+#include <stdlib.h> /* for atof() */
+static __hwloc_inline float
+hwloc_linux_pci_link_speed_from_string(const char *string)
+{
+  /* don't parse Gen1 with atof() since it expects a localized string
+   * while the kernel sysfs files aren't.
+   */
+  if (!strncmp(string, "2.5 ", 4))
+    /* "2.5 GT/s" is Gen1 with 8/10 encoding */
+    return 2.5 * .8;
+
+  /* also hardwire Gen2 since it also has a specific encoding */
+  if (!strncmp(string, "5 ", 2))
+    /* "5 GT/s" is Gen2 with 8/10 encoding */
+    return 5 * .8;
+
+  /* handle Gen3+ in a generic way */
+  return atof(string) * 128./130; /* Gen3+ encoding is 128/130 */
+}
+#endif
+
 /* Traverse children of a parent */
 #define for_each_child(child, parent) for(child = parent->first_child; child; child = child->next_sibling)
 #define for_each_memory_child(child, parent) for(child = parent->memory_first_child; child; child = child->next_sibling)
