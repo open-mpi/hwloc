@@ -530,6 +530,8 @@ extern "C" {
 #define hwloc_weight_long HWLOC_NAME(weight_long)
 #define hwloc_strncasecmp HWLOC_NAME(strncasecmp)
 
+#define hwloc_linux_pci_link_speed_from_string HWLOC_NAME(linux_pci_link_speed_from_string)
+
 /* private/cpuid-x86.h */
 
 #define hwloc_have_x86_cpuid HWLOC_NAME(have_x86_cpuid)

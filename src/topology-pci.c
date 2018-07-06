@@ -223,8 +223,38 @@ hwloc_look_pci(struct hwloc_backend *backend)
     obj->attr->pcidev.linkspeed = 0; /* unknown */
     offset = hwloc_pci_find_cap(config_space_cache, PCI_CAP_ID_EXP);
 
-    if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE)
+    if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE) {
       hwloc_pci_find_linkspeed(config_space_cache, offset, &obj->attr->pcidev.linkspeed);
+#ifdef HWLOC_LINUX_SYS
+    } else {
+      /* if not available from config-space (extended part is root-only), look in Linux sysfs files added in 4.13 */
+      char path[64];
+      char value[16];
+      FILE *file;
+      size_t read;
+      float speed = 0.f;
+      unsigned width = 0;
+      snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/current_link_speed",
+	       domain, pcidev->bus, pcidev->dev, pcidev->func);
+      file = fopen(path, "r");
+      if (file) {
+	read = fread(value, 1, sizeof(value), file);
+	fclose(file);
+	if (read)
+	  speed = hwloc_linux_pci_link_speed_from_string(value);
+      }
+      snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/current_link_width",
+	       domain, pcidev->bus, pcidev->dev, pcidev->func);
+      file = fopen(path, "r");
+      if (file) {
+	read = fread(value, 1, sizeof(value), file);
+	fclose(file);
+	if (read)
+	  width = atoi(value);
+      }
+      obj->attr->pcidev.linkspeed = speed*width/8;
+#endif
+    }
 
     if (hwloc_pci_prepare_bridge(obj, config_space_cache) < 0)
       continue;
