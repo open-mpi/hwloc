@@ -1502,9 +1502,6 @@ Indeed this OpenFabrics HCA PCI device object contains one
 one OpenFabrics software device (<em>mlx4_0</em>) and two virtual
 network interface software devices (<em>ib0</em> and <em>ib1</em>).
 
-PCI link speed is also reported for some bridges and devices
-because lstopo was privileged when it discovered the topology.
-
 
 Here is the corresponding textual output:
 
@@ -3271,8 +3268,7 @@ and at runtime with the environment variable
 hwloc discovers the topology by querying the operating system.
 Some minor features may require privileged access to the operation
 system.
-For instance memory module and PCI link speed discovery on Linux
-is reserved to root,
+For instance memory module discovery on Linux is reserved to root,
 and the entire PCI discovery on Solaris and BSDs requires access to
 some special files that are usually restricted to root
 (/dev/pci* or /devices/pci*).
