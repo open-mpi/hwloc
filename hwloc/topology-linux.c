@@ -5763,6 +5763,9 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 
     /* bridge specific attributes */
     if (type == HWLOC_OBJ_BRIDGE) {
+      /* since 4.13, there's secondary_bus_number and subordinate_bus_number in sysfs,
+       * but reading them from the config-space is easy anyway.
+       */
       if (hwloc_pcidisc_setup_bridge_attr(obj, config_space_cache) < 0)
 	continue;
     }
