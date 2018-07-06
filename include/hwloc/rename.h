@@ -587,6 +587,7 @@ extern "C" {
 #define hwloc_bitmap_compare_inclusion HWLOC_NAME(bitmap_compare_inclusion)
 
 #define hwloc_pci_class_string HWLOC_NAME(pci_class_string)
+#define hwloc_linux_pci_link_speed_from_string HWLOC_NAME(linux_pci_link_speed_from_string)
 
 #define hwloc_cache_type_by_depth_type HWLOC_NAME(cache_type_by_depth_type)
 #define hwloc__obj_type_is_normal HWLOC_NAME(_obj_type_is_normal)
