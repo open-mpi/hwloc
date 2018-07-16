@@ -1777,20 +1777,22 @@ hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
     fprintf(stderr, "%s: XML component discovery failed.\n",
 	    data->msgprefix);
  err:
-  hwloc_free_object_siblings_and_children(root->first_child);
-  root->first_child = NULL;
-  hwloc_free_object_siblings_and_children(root->memory_first_child);
-  root->memory_first_child = NULL;
-  hwloc_free_object_siblings_and_children(root->io_first_child);
-  root->io_first_child = NULL;
-  hwloc_free_object_siblings_and_children(root->misc_first_child);
-  root->misc_first_child = NULL;
+  if (NULL != root) {
+    hwloc_free_object_siblings_and_children(root->first_child);
+    root->first_child = NULL;
+    hwloc_free_object_siblings_and_children(root->memory_first_child);
+    root->memory_first_child = NULL;
+    hwloc_free_object_siblings_and_children(root->io_first_child);
+    root->io_first_child = NULL;
+    hwloc_free_object_siblings_and_children(root->misc_first_child);
+    root->misc_first_child = NULL;
 
-  /* make sure the core will abort */
-  if (root->cpuset)
-    hwloc_bitmap_zero(root->cpuset);
-  if (root->nodeset)
-    hwloc_bitmap_zero(root->nodeset);
+    /* make sure the core will abort */
+    if (root->cpuset)
+      hwloc_bitmap_zero(root->cpuset);
+    if (root->nodeset)
+      hwloc_bitmap_zero(root->nodeset);
+  }
 
   hwloc_localeswitch_fini();
   return -1;
