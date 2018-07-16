@@ -469,6 +469,7 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
 {
   hwloc__free_object_contents(obj);
   free(obj);
+  obj = NULL;
 }
 
 /* Replace old with contents of new object, and make new freeable by the caller.
