@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 2.0.2
 -------------
+* Add support for Hygon Dhyana processors in the x86 backend,
+  thanks to Pu Wen for the patch.
 * Fix symbol renaming to also rename internal components,
   thanks to Evan Ramos for the patch.
 * Detect PCI link speed without being root on Linux >= 4.13.
