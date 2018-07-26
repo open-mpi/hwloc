@@ -1,4 +1,4 @@
-# Copyright © 2015-2017 Inria.  All rights reserved.
+# Copyright © 2015-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -26,6 +26,7 @@ cpuid_outputs = \
 	AMD-K10-Istanbul-8xOpteron-8439SE.output \
 	AMD-K8-SantaRosa-2xOpteron-2218.output \
 	AMD-K8-SledgeHammer-2xOpteron-250.output \
+	Hygon-Dhyana-32cores.output \
 	Zhaoxin-CentaurHauls-ZXD-4600.output \
 	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.output
 
@@ -52,6 +53,7 @@ cpuid_tarballs = \
 	AMD-K10-Istanbul-8xOpteron-8439SE.tar.bz2 \
 	AMD-K8-SantaRosa-2xOpteron-2218.tar.bz2 \
 	AMD-K8-SledgeHammer-2xOpteron-250.tar.bz2 \
+	Hygon-Dhyana-32cores.tar.bz2 \
 	Zhaoxin-CentaurHauls-ZXD-4600.tar.bz2 \
 	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.tar.bz2
 
