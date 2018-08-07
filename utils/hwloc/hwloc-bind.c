@@ -2,7 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
   int loaded = 0;
-  int depth;
+  int depth = -1;
   hwloc_bitmap_t cpubind_set, membind_set;
   int got_cpubind = 0, got_membind = 0;
   int working_on_cpubind = 1; /* membind if 0 */
