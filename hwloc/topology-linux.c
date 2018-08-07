@@ -2,7 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
- * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
  * Copyright © 2010 IBM
  * See COPYING in top-level directory.
@@ -3441,7 +3441,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (coreset) {
-        unsigned mycoreid;
+        unsigned mycoreid = (unsigned) -1;
 	int gotcoreid = 0; /* to avoid reading the coreid twice */
 	hwloc_bitmap_and(coreset, coreset, cpuset);
 	if (hwloc_bitmap_weight(coreset) > 1 && threadwithcoreid == -1) {
