@@ -845,7 +845,7 @@ threads) are not displayed.
 \endhtmlonly
 \section cli_hwloc_annotate hwloc-annotate
 
-hwloc-annotate may add object attributes such as string information
+hwloc-annotate may modify object (and topology) attributes such as string information
 (see \ref attributes_info for details) or Misc children objects.
 It reads an input topology from a XML file and outputs
 the annotated topology as another XML file.
