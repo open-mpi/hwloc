@@ -245,13 +245,21 @@ HWLOC_DECLSPEC unsigned long hwloc_bitmap_to_ulong(hwloc_const_bitmap_t bitmap) 
 /** \brief Convert the \p i -th subset of bitmap \p bitmap into unsigned long mask */
 HWLOC_DECLSPEC unsigned long hwloc_bitmap_to_ith_ulong(hwloc_const_bitmap_t bitmap, unsigned i) __hwloc_attribute_pure;
 
-/** \brief Test whether index \p id is part of bitmap \p bitmap */
+/** \brief Test whether index \p id is part of bitmap \p bitmap.
+ *
+ * \return 1 if the bit at index \p id is set in bitmap \p bitmap, 0 otherwise.
+ */
 HWLOC_DECLSPEC int hwloc_bitmap_isset(hwloc_const_bitmap_t bitmap, unsigned id) __hwloc_attribute_pure;
 
-/** \brief Test whether bitmap \p bitmap is empty */
+/** \brief Test whether bitmap \p bitmap is empty
+ *
+ * \return 1 if bitmap is empty, 0 otherwise.
+ */
 HWLOC_DECLSPEC int hwloc_bitmap_iszero(hwloc_const_bitmap_t bitmap) __hwloc_attribute_pure;
 
 /** \brief Test whether bitmap \p bitmap is completely full
+ *
+ * \return 1 if bitmap is full, 0 otherwise.
  *
  * \note A full bitmap is always infinitely set.
  */
@@ -359,22 +367,42 @@ HWLOC_DECLSPEC void hwloc_bitmap_not (hwloc_bitmap_t res, hwloc_const_bitmap_t b
  * Comparing bitmaps.
  */
 
-/** \brief Test whether bitmaps \p bitmap1 and \p bitmap2 intersects */
+/** \brief Test whether bitmaps \p bitmap1 and \p bitmap2 intersects.
+ *
+ * \return 1 if bitmaps intersect, 0 otherwise.
+ */
 HWLOC_DECLSPEC int hwloc_bitmap_intersects (hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
 
 /** \brief Test whether bitmap \p sub_bitmap is part of bitmap \p super_bitmap.
+ *
+ * \return 1 if \p sub_bitmap is included in \p super_bitmap, 0 otherwise.
  *
  * \note The empty bitmap is considered included in any other bitmap.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_isincluded (hwloc_const_bitmap_t sub_bitmap, hwloc_const_bitmap_t super_bitmap) __hwloc_attribute_pure;
 
-/** \brief Test whether bitmap \p bitmap1 is equal to bitmap \p bitmap2 */
+/** \brief Test whether bitmap \p bitmap1 is equal to bitmap \p bitmap2.
+ *
+ * \return 1 if bitmaps are equal, 0 otherwise.
+ */
 HWLOC_DECLSPEC int hwloc_bitmap_isequal (hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
 
 /** \brief Compare bitmaps \p bitmap1 and \p bitmap2 using their lowest index.
  *
- * Smaller least significant bit is smaller.
- * The empty bitmap is considered higher than anything.
+ * A bitmap is considered smaller if its least significant bit is smaller.
+ * The empty bitmap is considered higher than anything (because its least significant bit does not exist).
+ *
+ * \return -1 if \p bitmap1 is considered smaller than \p bitmap2.
+ * \return 1 if \p bitmap1 is considered larger than \p bitmap2.
+ *
+ * For instance comparing binary bitmaps 0011 and 0110 returns -1
+ * (hence 0011 is considered smaller than 0110)
+ * because least significant bit of 0011 (0001) is smaller than least significant bit of 0110 (0010).
+ * Comparing 01001 and 00110 would also return -1 for the same reason.
+ *
+ * \return 0 if bitmaps are considered equal, even if they are not strictly equal.
+ * They just need to have the same least significant bit.
+ * For instance, comparing binary bitmaps 0010 and 0110 returns 0 because they have the same least significant bit.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_compare_first(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
 
@@ -383,6 +411,14 @@ HWLOC_DECLSPEC int hwloc_bitmap_compare_first(hwloc_const_bitmap_t bitmap1, hwlo
  * Lexicographic comparison of bitmaps, starting for their highest indexes.
  * Compare last indexes first, then second, etc.
  * The empty bitmap is considered lower than anything.
+ *
+ * \return -1 if \p bitmap1 is considered smaller than \p bitmap2.
+ * \return 1 if \p bitmap1 is considered larger than \p bitmap2.
+ * \return 0 if bitmaps are equal (contrary to hwloc_bitmap_compare_first()).
+ *
+ * For instance comparing binary bitmaps 0011 and 0110 returns -1
+ * (hence 0011 is considered smaller than 0110).
+ * Comparing 00101 and 01010 returns -1 too.
  *
  * \note This is different from the non-existing hwloc_bitmap_compare_last()
  * which would only compare the highest index of each bitmap.
