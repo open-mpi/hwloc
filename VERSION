@@ -5,7 +5,7 @@
 # major, minor, and release are generally combined in the form
 # <major>.<minor>.<release>.  If release is zero, then it is omitted.
 
-# Please update HWLOC_VERSION in contrib/windows/private_config.h too.
+# Please update HWLOC_VERSION* in contrib/windows/hwloc_config.h too.
 
 major=2
 minor=0
