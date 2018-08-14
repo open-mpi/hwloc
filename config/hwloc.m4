@@ -85,12 +85,13 @@ EOF])
     if test "$?" != "0"; then
         AC_MSG_ERROR([Cannot continue])
     fi
-    HWLOC_RELEASE_DATE="`$HWLOC_top_srcdir/config/hwloc_get_version.sh $HWLOC_top_srcdir/VERSION --release-date`"
+    AC_MSG_RESULT([$HWLOC_VERSION])
     AC_SUBST(HWLOC_VERSION)
     AC_DEFINE_UNQUOTED([HWLOC_VERSION], ["$HWLOC_VERSION"],
                        [The library version, always available, even in embedded mode, contrary to VERSION])
+
+    HWLOC_RELEASE_DATE="`$HWLOC_top_srcdir/config/hwloc_get_version.sh $HWLOC_top_srcdir/VERSION --release-date`"
     AC_SUBST(HWLOC_RELEASE_DATE)
-    AC_MSG_RESULT([$HWLOC_VERSION])
 
     # Debug mode?
     AC_MSG_CHECKING([if want hwloc maintainer support])
