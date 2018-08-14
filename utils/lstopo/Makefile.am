@@ -70,9 +70,9 @@ APPLICATIONSdir = @datarootdir@/applications
 dist_APPLICATIONS_DATA = lstopo.desktop
 endif
 
-SEDMAN = $(SED) -e 's/\#PACKAGE_NAME\#/@PACKAGE_NAME@/g' \
-	  -e 's/\#PACKAGE_VERSION\#/@PACKAGE_VERSION@/g' \
-	  -e 's/\#HWLOC_DATE\#/@HWLOC_RELEASE_DATE@/g'
+SEDMAN = $(SED) -e 's/£PACKAGE_NAME£/@PACKAGE_NAME@/g' \
+	  -e 's/£PACKAGE_VERSION£/@PACKAGE_VERSION@/g' \
+	  -e 's/£HWLOC_DATE£/@HWLOC_RELEASE_DATE@/g'
 
 .1in.1:
 	@ echo Creating $@ man page...
