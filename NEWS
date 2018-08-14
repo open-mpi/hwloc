@@ -25,6 +25,7 @@ Version 1.11.11
   thanks to Evan Ramos for the patch.
 * Detect PCI link speed without being root on Linux >= 4.13.
 
+
 Version 1.11.10 (also included in 2.0.1)
 ---------------
 * Fix detection of cores and hyperthreads on Mac OS X.
