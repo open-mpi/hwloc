@@ -12,7 +12,6 @@
 # Check the conformance of `lstopo' for all the Linux sysfs
 # hierarchies available here.  Return true on success.
 
-HWLOC_VERSION="@HWLOC_VERSION@"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 lstopo="$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics"

@@ -8,7 +8,6 @@
 # See COPYING in top-level directory.
 #
 
-HWLOC_VERSION="@HWLOC_VERSION@"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 srcdir="$HWLOC_top_srcdir/utils/lstopo"
