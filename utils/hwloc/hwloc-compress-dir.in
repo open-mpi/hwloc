@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2013 Inria.  All rights reserved.
+# Copyright © 2013-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -31,7 +31,7 @@ usage()
 	echo "  -v --verbose        Display verbose messages"
 }
 
-while test $# -gt 2 ; do
+while test $# -gt 0 ; do
 	case "$1" in
 	-R|--reverse)
 		reverse=1
@@ -39,7 +39,7 @@ while test $# -gt 2 ; do
 	-v|--verbose)
 		verbose=1
 		;;
-	-h)
+	-h|--help)
 		usage
 		exit 0
 		;;
@@ -47,6 +47,9 @@ while test $# -gt 2 ; do
 		error "Unrecognized option: $1"
 		usage
 		exit 1
+		;;
+	*)
+		break
 		;;
 	esac
 	shift

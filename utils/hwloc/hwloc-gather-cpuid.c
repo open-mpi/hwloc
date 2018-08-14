@@ -362,10 +362,12 @@ int main(int argc, const char * const argv[])
       idx = atoi(argv[1]);
       argc -= 2;
       argv += 2;
+    } else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
+      usage(callname, stdout);
+      goto out;
     } else {
       usage(callname, stderr);
-      if (strcmp(argv[0], "-h") && strcmp(argv[0], "--help"))
-	ret = EXIT_FAILURE;
+      ret = EXIT_FAILURE;
       goto out;
     }
   }

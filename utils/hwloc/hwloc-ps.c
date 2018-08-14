@@ -327,6 +327,9 @@ int main(int argc, char *argv[])
       }
       pidcmd = argv[1];
       opt = 1;
+    } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
+      usage (callname, stdout);
+      exit(EXIT_SUCCESS);
     } else {
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage (callname, stderr);

@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 	verbose--;
 	goto next;
       }
-      if (!strcmp(argv[0], "--help")) {
+      if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
         usage("hwloc-bind", stdout);
 	return EXIT_SUCCESS;
       }

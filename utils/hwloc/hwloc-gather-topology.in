@@ -59,6 +59,7 @@ while [ x`echo "$1" | cut -c1` = x- ] ; do
   --io) gatherio=1;;
   --dmi) gatherdmi=1;;
   --keep) keep=1;;
+  -h|--help) usage; exit 0;;
   *) echo "Unrecognized option: $1"; usage; exit 1;;
   esac
   shift

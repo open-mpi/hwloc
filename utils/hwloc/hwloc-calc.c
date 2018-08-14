@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
 	goto next;
       }
-      if (!strcmp(argv[0], "--help")) {
+      if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
 	usage(callname, stdout);
 	return EXIT_SUCCESS;
       }

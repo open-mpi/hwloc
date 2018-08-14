@@ -261,7 +261,10 @@ int main(int argc, char *argv[])
 			clearuserdata = 1;
 		else if (!strcmp(argv[0], "--cd"))
 			cleardistances = 1;
-		else {
+		else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
+			usage(callname, stdout);
+			exit(EXIT_SUCCESS);
+		} else {
 			fprintf(stderr, "Unrecognized options: %s\n", argv[0]);
 			usage(callname, stderr);
 			exit(EXIT_FAILURE);
