@@ -90,6 +90,15 @@ EOF])
     AC_DEFINE_UNQUOTED([HWLOC_VERSION], ["$HWLOC_VERSION"],
                        [The library version, always available, even in embedded mode, contrary to VERSION])
 
+    HWLOC_VERSION_MAJOR="`$HWLOC_top_srcdir/config/hwloc_get_version.sh $HWLOC_top_srcdir/VERSION --major`"
+    AC_DEFINE_UNQUOTED([HWLOC_VERSION_MAJOR], [$HWLOC_VERSION_MAJOR], [The library version major number])
+    HWLOC_VERSION_MINOR="`$HWLOC_top_srcdir/config/hwloc_get_version.sh $HWLOC_top_srcdir/VERSION --minor`"
+    AC_DEFINE_UNQUOTED([HWLOC_VERSION_MINOR], [$HWLOC_VERSION_MINOR], [The library version minor number])
+    HWLOC_VERSION_RELEASE="`$HWLOC_top_srcdir/config/hwloc_get_version.sh $HWLOC_top_srcdir/VERSION --release`"
+    AC_DEFINE_UNQUOTED([HWLOC_VERSION_RELEASE], [$HWLOC_VERSION_RELEASE], [The library version release number])
+    HWLOC_VERSION_GREEK="`$HWLOC_top_srcdir/config/hwloc_get_version.sh $HWLOC_top_srcdir/VERSION --greek`"
+    AC_DEFINE_UNQUOTED([HWLOC_VERSION_GREEK], ["$HWLOC_VERSION_GREEK"], [The library version optional greek suffix string])
+
     HWLOC_RELEASE_DATE="`$HWLOC_top_srcdir/config/hwloc_get_version.sh $HWLOC_top_srcdir/VERSION --release-date`"
     AC_SUBST(HWLOC_RELEASE_DATE)
 
