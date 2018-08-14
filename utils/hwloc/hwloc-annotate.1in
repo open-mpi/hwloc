@@ -13,6 +13,15 @@ hwloc-annotate \- Modify attributes in a XML topology
 [\fIoptions\fR]
 \fI<input.xml>\fR
 \fI<output.xml>\fR
+-- \fI<location1>\fR \fI<location2>\fR ... --
+\fI<mode>\fR
+\fI<annotation>\fR
+.
+
+.B hwloc-annotate
+[\fIoptions\fR]
+\fI<input.xml>\fR
+\fI<output.xml>\fR
 \fI<location>\fR
 \fI<mode>\fR
 \fI<annotation>\fR
@@ -92,6 +101,7 @@ No new annotation is added. This is useful when clearing existing attributes.
 Annotations may be added to one specific object in the topology,
 all of them, or all of a given type.
 This is specified by the \fIlocation\fR (see also EXAMPLES below).
+Multiple locations may be affected if they are specified between \fB--\fR.
 Objects may be specified as location tuples, as explained in hwloc(7).
 However hexadecimal bitmasks are not accepted since they may correspond to multiple objects.
 .
@@ -112,7 +122,11 @@ hwloc(7) directly apply to the hwloc-annotate utility.
 hwloc-annotate's operation is best described through several examples.
 .
 .PP
-Add an info attribute to all Core objects:
+Add an info attribute to all Core and PU objects:
+
+    $ hwloc-annotate input.xml output.xml -- Core:all PU:all -- info infoname infovalue
+
+Only add to all Core objects:
 
     $ hwloc-annotate input.xml output.xml Core:all info infoname infovalue
 

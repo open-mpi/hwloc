@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -45,7 +45,7 @@ $annotate $srcdir/test-hwloc-annotate.input $file pu:0 misc pumisc
 $annotate $file $file root misc rootmisc
 $annotate $file $file misc:0 misc miscmisc1
 $annotate $file $file all info Foo Bar
-$annotate --ci $file $file Core:all info Foo2 Bar2
+$annotate --ci $file $file -- Core:all L3:all -- info Foo2 Bar2
 $annotate --ci $file $file L2Cache:0 none
 $annotate --ri $file $file pack:all info Foo
 $annotate $file $file pack:0 info Foo2 Bar

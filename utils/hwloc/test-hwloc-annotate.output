@@ -37,7 +37,7 @@
       <userdata name="MyName" length="16">0000000000000001</userdata>
       <userdata name="EncodedShort0" length="0" encoding="base64"/>
       <object type="L3Cache" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" cache_size="4194304" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">
-        <info name="Foo" value="Bar"/>
+        <info name="Foo2" value="Bar2"/>
         <object type="L2Cache" cpuset="0x00000005" complete_cpuset="0x00000005" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <userdata name="EncodedShort1" length="1" encoding="base64">rg==</userdata>
           <userdata name="EncodedShort2" length="2" encoding="base64">ZH8=</userdata>

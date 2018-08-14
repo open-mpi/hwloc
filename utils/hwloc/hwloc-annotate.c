@@ -15,6 +15,7 @@
 
 void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
+	fprintf(where, "Usage: hwloc-annotate [options] <input.xml> <output.xml> -- <location1> <location2> ... -- <annotation>\n");
 	fprintf(where, "Usage: hwloc-annotate [options] <input.xml> <output.xml> <location> <annotation>\n");
 	fprintf(where, "  <location> may be:\n");
 	fprintf(where, "    all, root, <type>:<logicalindex>, <type>:all\n");
@@ -239,7 +240,9 @@ out:
 int main(int argc, char *argv[])
 {
 	hwloc_topology_t topology;
-	char *callname, *input, *output, *location;
+	char *callname, *input, *output;
+	char **locations;
+	int nr_locations;
 	int topodepth;
 	int err;
 
@@ -279,9 +282,32 @@ int main(int argc, char *argv[])
 	}
 	input = argv[0];
 	output = argv[1];
-	location = argv[2];
-	argc -= 3;
-	argv += 3;
+	argc -= 2;
+	argv += 2;
+
+	if (!strcmp(argv[0], "--")) {
+	  /* modern syntax with locations between "--" */
+	  argc--;
+	  argv++;
+	  locations = &argv[0];
+	  nr_locations = 0;
+	  while (nr_locations < argc && strcmp(argv[nr_locations], "--"))
+	    nr_locations++;
+	  /* check we have an ending "--" */
+	  if (nr_locations == argc || strcmp(argv[nr_locations], "--")) {
+	    usage(callname, stderr);
+	    exit(EXIT_FAILURE);
+	  }
+	  /* skip those locations and the ending "--" */
+	  argc -= nr_locations+1;
+	  argv += nr_locations+1;
+	} else {
+	  /* old syntax with a single location without "--" before and after */
+	  locations = &argv[0];
+	  nr_locations = 1;
+	  argc--;
+	  argv++;
+	}
 
 	if (argc < 1) {
 		usage(callname, stderr);
@@ -345,12 +371,17 @@ int main(int argc, char *argv[])
 	}
 
 	if (distancesfilename) {
-		add_distances(topology, topodepth);
-	} else if (!strcmp(location, "all")) {
-		apply_recursive(topology, hwloc_get_root_obj(topology));
-	} else if (!strcmp(location, "root")) {
-		apply(topology, hwloc_get_root_obj(topology));
+	  /* ignore locations */
+	  add_distances(topology, topodepth);
 	} else {
+	  int i;
+	  for(i=0; i<nr_locations; i++) {
+	    char *location = locations[i];
+	    if (!strcmp(location, "all")) {
+	      apply_recursive(topology, hwloc_get_root_obj(topology));
+	    } else if (!strcmp(location, "root")) {
+	      apply(topology, hwloc_get_root_obj(topology));
+	    } else {
 		size_t typelen;
 		typelen = strspn(location, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 		if (typelen && (location[typelen] == ':' || location[typelen] == '=' || location[typelen] == '[')) {
@@ -363,6 +394,8 @@ int main(int argc, char *argv[])
 			err = hwloc_calc_process_location(&lcontext, location, typelen,
 							  hwloc_calc_process_location_annotate_cb, topology);
 		}
+	    }
+	  }
 	}
 
 	err = hwloc_topology_export_xml(topology, output, 0);
