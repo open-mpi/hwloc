@@ -24,6 +24,8 @@ Version 2.0.2
 * Fix symbol renaming to also rename internal components,
   thanks to Evan Ramos for the patch.
 * Detect PCI link speed without being root on Linux >= 4.13.
+* Add HWLOC_VERSION* macros to the public headers,
+  thanks to Gilles Gouaillardet for the suggestion.
 
 
 Version 2.0.1 (also included in 1.11.10 when relevant)
