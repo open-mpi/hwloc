@@ -3586,6 +3586,20 @@ sysctl variable must be set to 1 to do so.
 Otherwise, only the number of logical processors will be detected.
 
 
+\subsection faq_aix_bind Why does binding fail on AIX?
+
+The AIX operating system requires specific user capabilities for
+attaching processes to resource sets (CAP_NUMA_ATTACH).
+Otherwise functions such as hwloc_set_cpubind() fail (return -1 with errno set to EPERM).
+
+This capability must also be inherited (through the additional CAP_PROPAGATE capability)
+if you plan to bind a process before forking another process,
+for instance with <tt>hwloc-bind</tt>.
+
+These capabilities may be given by the administrator with:
+\verbatim
+chuser "capabilities=CAP_PROPAGATE,CAP_NUMA_ATTACH" <username>
+\endverbatim
 
 
 \page upgrade_to_api_2x Upgrading to the hwloc 2.0 API
