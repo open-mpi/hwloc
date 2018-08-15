@@ -3436,6 +3436,11 @@ and <tt>hwloc_get_api_version()</tt> came only in 1.1.1.
 Also do not use the old cpuset API since it was deprecated and superseded
 by the bitmap API in 1.1, and later removed in 1.5.
 
+If you ever need to look at the library version instead of the API version,
+you may want to use HWLOC_VERSION instead.
+Two stable releases of the same series usually have the same ::HWLOC_API_VERSION
+even if their HWLOC_VERSION are different.
+
 
 
 \htmlonly

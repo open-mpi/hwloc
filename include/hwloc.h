@@ -87,6 +87,10 @@ extern "C" {
  *
  * Users may check for available features at build time using this number
  * (see \ref faq_upgrade).
+ *
+ * \note This should not be confused with HWLOC_VERSION, the library version.
+ * Two stable releases of the same series usually have the same ::HWLOC_API_VERSION
+ * even if their HWLOC_VERSION are different.
  */
 #define HWLOC_API_VERSION 0x00020100
 
