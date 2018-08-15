@@ -20,10 +20,10 @@ test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
 # keep branch-name before the first - (e.g. v2.0-beta becomes v2.0)
 # and look for the corresponding autotools
-branch=$( echo $branch | sed -r -e 's@^.*/([^/]+)$@\1@' -e 's/-.*//' )
-if test -d $HOME/local/hwloc-$branch ; then
-  export PATH=$HOME/local/hwloc-${branch}/bin:$PATH
-  echo using specific $HOME/local/hwloc-$branch
+basebranch=$( echo $branch | sed -r -e 's@^.*/([^/]+)$@\1@' -e 's/-.*//' )
+if test -d $HOME/local/hwloc-$basebranch ; then
+  export PATH=$HOME/local/hwloc-${basebranch}/bin:$PATH
+  echo using specific $HOME/local/hwloc-$basebranch
 else
   export PATH=$HOME/local/hwloc-master/bin:$PATH
   echo using generic $HOME/local/hwloc-master
