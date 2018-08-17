@@ -142,18 +142,20 @@ hwloc_look_pci(struct hwloc_backend *backend)
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     hwloc_obj_type_t type;
     struct hwloc_obj *obj;
-    unsigned domain;
+    unsigned domain, bus, dev, func;
     unsigned device_class;
     unsigned short tmp16;
     unsigned offset;
+
+    domain = pcidev->domain;
+    bus = pcidev->bus;
+    dev = pcidev->dev;
+    func = pcidev->func;
 
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
     pci_device_probe(pcidev);
     pci_device_cfg_read(pcidev, config_space_cache, 0, CONFIG_SPACE_CACHESIZE, NULL);
-
-    /* try to read the domain */
-    domain = pcidev->domain;
 
     /* try to read the device_class */
     device_class = pcidev->device_class >> 8;
@@ -207,7 +209,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
       size_t bytes_read;
 
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/vendor",
-	       domain, pcidev->bus, pcidev->dev, pcidev->func);
+	       domain, bus, dev, func);
       file = fopen(path, "r");
       if (file) {
 	bytes_read = fread(value, 1, sizeof(value), file);
@@ -218,7 +220,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
       }
 
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/device",
-	       domain, pcidev->bus, pcidev->dev, pcidev->func);
+	       domain, bus, dev, func);
       file = fopen(path, "r");
       if (file) {
 	bytes_read = fread(value, 1, sizeof(value), file);
@@ -232,9 +234,9 @@ hwloc_look_pci(struct hwloc_backend *backend)
 
     obj = hwloc_alloc_setup_object(topology, type, HWLOC_UNKNOWN_INDEX);
     obj->attr->pcidev.domain = domain;
-    obj->attr->pcidev.bus = pcidev->bus;
-    obj->attr->pcidev.dev = pcidev->dev;
-    obj->attr->pcidev.func = pcidev->func;
+    obj->attr->pcidev.bus = bus;
+    obj->attr->pcidev.dev = dev;
+    obj->attr->pcidev.func = func;
     obj->attr->pcidev.vendor_id = pcidev->vendor_id;
     obj->attr->pcidev.device_id = pcidev->device_id;
     obj->attr->pcidev.class_id = device_class;
@@ -255,7 +257,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
       float speed = 0.f;
       unsigned width = 0;
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/current_link_speed",
-	       domain, pcidev->bus, pcidev->dev, pcidev->func);
+	       domain, bus, dev, func);
       file = fopen(path, "r");
       if (file) {
 	bytes_read = fread(value, 1, sizeof(value), file);
@@ -264,7 +266,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
 	  speed = hwloc_linux_pci_link_speed_from_string(value);
       }
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/current_link_width",
-	       domain, pcidev->bus, pcidev->dev, pcidev->func);
+	       domain, bus, dev, func);
       file = fopen(path, "r");
       if (file) {
 	bytes_read = fread(value, 1, sizeof(value), file);
@@ -304,7 +306,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
       hwloc_obj_add_info(obj, "PCIDevice", devicename);
 
     hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s %s\n",
-		domain, pcidev->bus, pcidev->dev, pcidev->func,
+		domain, bus, dev, func,
 		device_class, pcidev->vendor_id, pcidev->device_id,
 		vendorname && *vendorname ? vendorname : "??",
 		devicename && *devicename ? devicename : "??");
