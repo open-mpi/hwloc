@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -753,7 +753,6 @@ hwloc_pcidisc_setup_bridge_attr(hwloc_obj_t obj,
 		pattr->domain, pattr->bus, pattr->dev, pattr->func, config[HWLOC_PCI_PRIMARY_BUS]);
   }
 
-  obj->type = HWLOC_OBJ_BRIDGE;
   battr->upstream_type = HWLOC_OBJ_BRIDGE_PCI;
   battr->downstream_type = HWLOC_OBJ_BRIDGE_PCI;
   battr->downstream.pci.domain = pattr->domain;
