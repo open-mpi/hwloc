@@ -135,6 +135,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     hwloc_obj_type_t type;
     struct hwloc_obj *obj;
     unsigned domain, bus, dev, func;
+    unsigned secondary_bus, subordinate_bus;
     unsigned device_class;
     unsigned short tmp16;
     unsigned offset;
@@ -154,6 +155,12 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
     /* bridge or pci dev? */
     type = hwloc_pcidisc_check_bridge_type(device_class, config_space_cache);
+    if (type == HWLOC_OBJ_BRIDGE) {
+      if (hwloc_pcidisc_find_bridge_buses(domain, bus, dev, func,
+					  &secondary_bus, &subordinate_bus,
+					  config_space_cache) < 0)
+	continue;
+    }
 
     /* filtered? */
     if (type == HWLOC_OBJ_PCI_DEVICE) {
@@ -234,6 +241,16 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     obj->attr->pcidev.class_id = device_class;
     obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
 
+    /* bridge specific attributes */
+    if (type == HWLOC_OBJ_BRIDGE) {
+      struct hwloc_bridge_attr_s *battr = &obj->attr->bridge;
+      battr->upstream_type = HWLOC_OBJ_BRIDGE_PCI;
+      battr->downstream_type = HWLOC_OBJ_BRIDGE_PCI;
+      battr->downstream.pci.domain = domain;
+      battr->downstream.pci.secondary_bus = secondary_bus;
+      battr->downstream.pci.subordinate_bus = subordinate_bus;
+    }
+
     obj->attr->pcidev.linkspeed = 0; /* unknown */
     offset = hwloc_pcidisc_find_cap(config_space_cache, PCI_CAP_ID_EXP);
 
@@ -268,11 +285,6 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       }
       obj->attr->pcidev.linkspeed = speed*width/8;
 #endif
-    }
-
-    if (type == HWLOC_OBJ_BRIDGE) {
-      if (hwloc_pcidisc_setup_bridge_attr(obj, config_space_cache) < 0)
-	continue;
     }
 
     if (obj->type == HWLOC_OBJ_PCI_DEVICE) {

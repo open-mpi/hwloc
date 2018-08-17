@@ -560,7 +560,7 @@ extern "C" {
 #define hwloc_pcidisc_find_cap HWLOC_NAME(pcidisc_find_cap)
 #define hwloc_pcidisc_find_linkspeed HWLOC_NAME(pcidisc_find_linkspeed)
 #define hwloc_pcidisc_check_bridge_type HWLOC_NAME(pcidisc_check_bridge_type)
-#define hwloc_pcidisc_setup_bridge_attr HWLOC_NAME(pcidisc_setup_bridge_attr)
+#define hwloc_pcidisc_find_bridge_buses HWLOC_NAME(pcidisc_find_bridge_buses)
 #define hwloc_pcidisc_tree_insert_by_busid HWLOC_NAME(pcidisc_tree_insert_by_busid)
 #define hwloc_pcidisc_tree_attach HWLOC_NAME(pcidisc_tree_attach)
 

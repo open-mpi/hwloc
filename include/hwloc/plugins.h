@@ -498,7 +498,9 @@ HWLOC_DECLSPEC hwloc_obj_type_t hwloc_pcidisc_check_bridge_type(unsigned device_
  *
  * Returns -1 and destroys /p obj if bridge fields are invalid.
  */
-HWLOC_DECLSPEC int hwloc_pcidisc_setup_bridge_attr(hwloc_obj_t obj, const unsigned char *config);
+HWLOC_DECLSPEC int hwloc_pcidisc_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
+						   unsigned *secondary_busp, unsigned *subordinate_busp,
+						   const unsigned char *config);
 
 /** \brief Insert a PCI object in the given PCI tree by looking at PCI bus IDs.
  *

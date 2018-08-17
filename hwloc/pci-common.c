@@ -820,30 +820,27 @@ hwloc_pcidisc_check_bridge_type(unsigned device_class, const unsigned char *conf
 #define HWLOC_PCI_SUBORDINATE_BUS 0x1a
 
 int
-hwloc_pcidisc_setup_bridge_attr(hwloc_obj_t obj,
+hwloc_pcidisc_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
+				unsigned *secondary_busp, unsigned *subordinate_busp,
 				const unsigned char *config)
 {
-  struct hwloc_bridge_attr_s *battr = &obj->attr->bridge;
-  struct hwloc_pcidev_attr_s *pattr = &battr->upstream.pci;
+  unsigned secondary_bus, subordinate_bus;
 
-  if (config[HWLOC_PCI_PRIMARY_BUS] != pattr->bus) {
+  if (config[HWLOC_PCI_PRIMARY_BUS] != bus) {
     /* Sometimes the config space contains 00 instead of the actual primary bus number.
      * Always trust the bus ID because it was built by the system which has more information
      * to workaround such problems (e.g. ACPI information about PCI parent/children).
      */
     hwloc_debug("  %04x:%02x:%02x.%01x bridge with (ignored) invalid PCI_PRIMARY_BUS %02x\n",
-		pattr->domain, pattr->bus, pattr->dev, pattr->func, config[HWLOC_PCI_PRIMARY_BUS]);
+		domain, bus, dev, func, config[HWLOC_PCI_PRIMARY_BUS]);
   }
 
-  battr->upstream_type = HWLOC_OBJ_BRIDGE_PCI;
-  battr->downstream_type = HWLOC_OBJ_BRIDGE_PCI;
-  battr->downstream.pci.domain = pattr->domain;
-  battr->downstream.pci.secondary_bus = config[HWLOC_PCI_SECONDARY_BUS];
-  battr->downstream.pci.subordinate_bus = config[HWLOC_PCI_SUBORDINATE_BUS];
+  secondary_bus = config[HWLOC_PCI_SECONDARY_BUS];
+  subordinate_bus = config[HWLOC_PCI_SUBORDINATE_BUS];
 
-  if (battr->downstream.pci.secondary_bus <= pattr->bus
-      || battr->downstream.pci.subordinate_bus <= pattr->bus
-      || battr->downstream.pci.secondary_bus > battr->downstream.pci.subordinate_bus) {
+  if (secondary_bus <= bus
+      || subordinate_bus <= bus
+      || secondary_bus > subordinate_bus) {
     /* This should catch most cases of invalid bridge information
      * (e.g. 00 for secondary and subordinate).
      * Ideally we would also check that [secondary-subordinate] is included
@@ -851,12 +848,13 @@ hwloc_pcidisc_setup_bridge_attr(hwloc_obj_t obj,
      * because objects may be discovered out of order (especially in the fsroot case).
      */
     hwloc_debug("  %04x:%02x:%02x.%01x bridge has invalid secondary-subordinate buses [%02x-%02x]\n",
-		pattr->domain, pattr->bus, pattr->dev, pattr->func,
-		battr->downstream.pci.secondary_bus, battr->downstream.pci.subordinate_bus);
-    hwloc_free_unlinked_object(obj);
+		domain, bus, dev, func,
+		secondary_bus, subordinate_bus);
     return -1;
   }
 
+  *secondary_busp = secondary_bus;
+  *subordinate_busp = subordinate_bus;
   return 0;
 }
 

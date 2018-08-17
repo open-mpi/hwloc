@@ -6265,6 +6265,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 #define CONFIG_SPACE_CACHESIZE 256
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     unsigned domain, bus, dev, func;
+    unsigned secondary_bus, subordinate_bus;
     unsigned short class_id;
     hwloc_obj_type_t type;
     hwloc_obj_t obj;
@@ -6299,6 +6300,16 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 
     type = hwloc_pcidisc_check_bridge_type(class_id, config_space_cache);
 
+    if (type == HWLOC_OBJ_BRIDGE) {
+      /* since 4.13, there's secondary_bus_number and subordinate_bus_number in sysfs,
+       * but reading them from the config-space is easy anyway.
+       */
+      if (hwloc_pcidisc_find_bridge_buses(domain, bus, dev, func,
+					  &secondary_bus, &subordinate_bus,
+					  config_space_cache) < 0)
+	continue;
+    }
+
     /* filtered? */
     if (type == HWLOC_OBJ_PCI_DEVICE) {
       enum hwloc_type_filter_e filter;
@@ -6325,6 +6336,16 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     attr->bus = bus;
     attr->dev = dev;
     attr->func = func;
+
+    /* bridge specific attributes */
+    if (type == HWLOC_OBJ_BRIDGE) {
+      struct hwloc_bridge_attr_s *battr = &obj->attr->bridge;
+      battr->upstream_type = HWLOC_OBJ_BRIDGE_PCI;
+      battr->downstream_type = HWLOC_OBJ_BRIDGE_PCI;
+      battr->downstream.pci.domain = domain;
+      battr->downstream.pci.secondary_bus = secondary_bus;
+      battr->downstream.pci.subordinate_bus = subordinate_bus;
+    }
 
     /* default (unknown) values */
     attr->vendor_id = 0;
@@ -6354,15 +6375,6 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     if ((size_t) err < sizeof(path)
 	&& !hwloc_read_path_by_length(path, value, sizeof(value), root_fd))
       attr->subdevice_id = strtoul(value, NULL, 16);
-
-    /* bridge specific attributes */
-    if (type == HWLOC_OBJ_BRIDGE) {
-      /* since 4.13, there's secondary_bus_number and subordinate_bus_number in sysfs,
-       * but reading them from the config-space is easy anyway.
-       */
-      if (hwloc_pcidisc_setup_bridge_attr(obj, config_space_cache) < 0)
-	continue;
-    }
 
     /* get the revision */
     attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
