@@ -517,6 +517,10 @@ hwloc__obj_type_is_icache(hwloc_obj_type_t type)
 #define fabsf(f) fabs((double)(f))
 #endif
 
+#if !HAVE_DECL_MODFF
+#define modff(x,iptr) (float)modf((double)x,(double *)iptr)
+#endif
+
 #if HAVE_DECL__SC_PAGE_SIZE
 #define hwloc_getpagesize() sysconf(_SC_PAGE_SIZE)
 #elif HAVE_DECL__SC_PAGESIZE
