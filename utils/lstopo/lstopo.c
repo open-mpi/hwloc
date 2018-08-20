@@ -44,6 +44,12 @@
 # endif
 #endif
 
+#ifdef HAVE_CLOCK_GETTIME
+# ifndef CLOCK_MONOTONIC /* HP-UX doesn't have CLOCK_MONOTONIC */
+#  define CLOCK_MONOTONIC CLOCK_REALTIME
+# endif
+#endif
+
 static unsigned int top = 0;
 
 FILE *open_output(const char *filename, int overwrite)
