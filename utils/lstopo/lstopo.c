@@ -44,6 +44,12 @@
 # endif
 #endif
 
+#ifdef HAVE_CLOCK_GETTIME
+# ifndef CLOCK_MONOTONIC /* HP-UX doesn't have CLOCK_MONOTONIC */
+#  define CLOCK_MONOTONIC CLOCK_REALTIME
+# endif
+#endif
+
 int lstopo_pid_number = -1;
 hwloc_pid_t lstopo_pid;
 hwloc_obj_type_t lstopo_show_only = (hwloc_obj_type_t) -1;
