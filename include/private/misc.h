@@ -402,6 +402,10 @@ hwloc_linux_pci_link_speed_from_string(const char *string)
 }
 #endif
 
+#if !HAVE_DECL_MODFF
+#define modff(x,iptr) (float)modf((double)x,(double *)iptr)
+#endif
+
 #ifdef HWLOC_WIN_SYS
 #  ifndef HAVE_SSIZE_T
 typedef SSIZE_T ssize_t;

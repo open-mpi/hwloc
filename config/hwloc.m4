@@ -427,8 +427,15 @@ EOF])
 
     AC_CHECK_DECLS([fabsf], [
       AC_CHECK_LIB([m], [fabsf],
-                   [HWLOC_LIBS="-lm $HWLOC_LIBS"])
+                   [need_libm=yes])
     ], [], [[#include <math.h>]])
+    AC_CHECK_DECLS([modff], [
+      AC_CHECK_LIB([m], [modff],
+                   [need_libm=yes])
+    ], [], [[#include <math.h>]])
+    if test x$need_libm = xyes; then
+      HWLOC_LIBS="-lm $HWLOC_LIBS"
+    fi
 
     AC_CHECK_HEADERS([picl.h], [
       AC_CHECK_LIB([picl], [picl_initialize],
