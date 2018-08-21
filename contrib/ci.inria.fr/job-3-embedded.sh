@@ -4,6 +4,11 @@
 # See COPYING in top-level directory.
 #
 
+echo "############################"
+echo "Running on:"
+uname -a
+echo "############################"
+
 set -e
 set -x
 
