@@ -497,6 +497,35 @@ EOF])
     AC_CHECK_DECLS([_putenv], [], [], [AC_INCLUDES_DEFAULT])
     # Could add mkdir and access for hwloc-gather-cpuid.c on Windows
 
+    broken_snprintf=no
+    AC_MSG_CHECKING([whether snprintf is correct])
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+        ]], [[
+char buf[7];
+assert(snprintf(buf, 7, "abcdef") == 6);
+assert(snprintf(buf, 6, "abcdef") == 6);
+assert(snprintf(buf, 5, "abcdef") == 6);
+assert(snprintf(buf, 0, "abcdef") == 6);
+assert(snprintf(NULL, 0, "abcdef") == 6);
+return 0;
+        ]])],
+	AC_MSG_RESULT([yes]),
+	[
+	  AC_MSG_RESULT([no])
+	  broken_snprintf=yes
+	], [
+	  AC_MSG_RESULT([don't know (cross-compiling)])
+	  broken_snprintf=maybe
+	])
+
+    if test x$broken_snprintf = xno; then
+      AC_DEFINE([HWLOC_HAVE_CORRECT_SNPRINTF], 1, [Define to 1 if snprintf supports NULL output buffer and returns the correct length on truncation])
+    fi
+
     if test "x$hwloc_linux" != "xyes" ; then
       # Don't detect sysctl* on Linux because its sysctl() syscall is
       # long deprecated and unneeded. Some libc still expose the symbol

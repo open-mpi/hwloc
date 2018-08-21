@@ -336,9 +336,13 @@ extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsi
  * to a colon or \0 */
 extern int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
 
+#ifdef HWLOC_HAVE_CORRECT_SNPRINTF
+#define hwloc_snprintf snprintf
+#else
 /* On some systems, snprintf returns the size of written data, not the actually
  * required size.  hwloc_snprintf always report the actually required size. */
 extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
+#endif
 
 /* Return the name of the currently running program, if supported.
  * If not NULL, must be freed by the caller.

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2015 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -28,6 +28,7 @@ extern char *program_invocation_name;
 extern char *__progname;
 #endif
 
+#ifndef HWLOC_HAVE_CORRECT_SNPRINTF
 int hwloc_snprintf(char *str, size_t size, const char *format, ...)
 {
   int ret;
@@ -77,6 +78,7 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
 
   return ret;
 }
+#endif
 
 int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
 {
