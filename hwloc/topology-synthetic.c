@@ -1162,8 +1162,8 @@ hwloc__export_synthetic_indexes(hwloc_obj_t *level, unsigned total,
   /* dump all indexes */
   cur = level[0];
   while (cur) {
-    res = snprintf(tmp, tmplen, "%u%s", cur->os_index,
-		   cur->next_cousin ? "," : ")");
+    res = hwloc_snprintf(tmp, tmplen, "%u%s", cur->os_index,
+			 cur->next_cousin ? "," : ")");
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
     cur = cur->next_cousin;
@@ -1225,7 +1225,7 @@ hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
 	level = topology->levels[obj->depth];
       }
 
-      res = snprintf(tmp, tmplen, "%sindexes=", prefix);
+      res = hwloc_snprintf(tmp, tmplen, "%sindexes=", prefix);
       if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
 	return -1;
 
