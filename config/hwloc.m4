@@ -1325,34 +1325,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 
 #-----------------------------------------------------------------------
 
-AC_DEFUN([_HWLOC_CHECK_DIFF_U], [
-  AC_MSG_CHECKING([whether diff accepts -u])
-  if diff -u /dev/null /dev/null 2> /dev/null
-  then
-    AC_MSG_RESULT([yes])
-    HWLOC_DIFF_U="-u"
-  else
-    AC_MSG_RESULT([no])
-    HWLOC_DIFF_U=""
-  fi
-  AC_SUBST([HWLOC_DIFF_U])
-])
-
-AC_DEFUN([_HWLOC_CHECK_DIFF_W], [
-  AC_MSG_CHECKING([whether diff accepts -w])
-  if diff -w /dev/null /dev/null 2> /dev/null
-  then
-    AC_MSG_RESULT([yes])
-    HWLOC_DIFF_W="-w"
-  else
-    AC_MSG_RESULT([no])
-    HWLOC_DIFF_W=""
-  fi
-  AC_SUBST([HWLOC_DIFF_W])
-])
-
-#-----------------------------------------------------------------------
-
 dnl HWLOC_CHECK_DECL
 dnl
 dnl Check that the declaration of the given function has a complete prototype
