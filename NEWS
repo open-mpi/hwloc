@@ -23,6 +23,7 @@ Version 1.11.11
   thanks to Pu Wen for the patch.
 * Fix symbol renaming to also rename internal components,
   thanks to Evan Ramos for the patch.
+* Fix build on HP-UX, thanks to Richard Lloyd for reporting the issues.
 * Detect PCI link speed without being root on Linux >= 4.13.
 
 
