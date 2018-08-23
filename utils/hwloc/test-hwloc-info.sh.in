@@ -64,5 +64,5 @@ set -e
  > "$file"
 # filtered hwlocVersion since it often changes
 # filtered ProcessName since it may be hwloc-info or lt-hwloc-info
-diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-info.output "$file"
+@DIFF@ @HWLOC_DIFF_U@ $srcdir/test-hwloc-info.output "$file"
 rm -rf "$tmp"

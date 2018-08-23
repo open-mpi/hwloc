@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2013 Inria.  All rights reserved.
+# Copyright © 2013-2018 Inria.  All rights reserved.
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -46,10 +46,10 @@ set -e
 
 $compress "$tmp/test-hwloc-compress-dir.input" "$tmp/test-hwloc-compress-dir.newoutput"
 
-diff @HWLOC_DIFF_U@ -r "$tmp/test-hwloc-compress-dir.output" "$tmp/test-hwloc-compress-dir.newoutput"
+@DIFF@ @HWLOC_DIFF_U@ -r "$tmp/test-hwloc-compress-dir.output" "$tmp/test-hwloc-compress-dir.newoutput"
 
 $compress -R "$tmp/test-hwloc-compress-dir.newoutput" "$tmp/test-hwloc-compress-dir.newoutput2"
 
-diff @HWLOC_DIFF_U@ -r "$tmp/test-hwloc-compress-dir.input" "$tmp/test-hwloc-compress-dir.newoutput2"
+@DIFF@ @HWLOC_DIFF_U@ -r "$tmp/test-hwloc-compress-dir.input" "$tmp/test-hwloc-compress-dir.newoutput2"
 
 rm -rf "$tmp"
