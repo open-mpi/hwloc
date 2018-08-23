@@ -336,11 +336,17 @@ extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsi
  * to a colon or \0 */
 extern int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
 
+/* On some systems, snprintf returns the size of written data, not the actually
+ * required size. Sometimes it returns -1 on truncation too.
+ * And sometimes it doesn't like NULL output buffers.
+ * http://www.gnu.org/software/gnulib/manual/html_node/snprintf.html
+ *
+ * hwloc_snprintf behaves properly, but it's a bit overkill on the vast majority
+ * of platforms, so don't enable it unless really needed.
+ */
 #ifdef HWLOC_HAVE_CORRECT_SNPRINTF
 #define hwloc_snprintf snprintf
 #else
-/* On some systems, snprintf returns the size of written data, not the actually
- * required size.  hwloc_snprintf always report the actually required size. */
 extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
 #endif
 
