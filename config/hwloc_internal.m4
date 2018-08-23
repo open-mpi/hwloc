@@ -494,9 +494,15 @@ chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
 
 #-----------------------------------------------------------------------
 
+AC_DEFUN([_HWLOC_PROG_DIFF], [
+  AC_ARG_VAR(DIFF, [diff tool])
+  AC_PATH_PROG([DIFF], [diff])
+])
+
 AC_DEFUN([_HWLOC_CHECK_DIFF_U], [
+  AC_REQUIRE([_HWLOC_PROG_DIFF])
   AC_MSG_CHECKING([whether diff accepts -u])
-  if diff -u /dev/null /dev/null 2> /dev/null
+  if $DIFF -u /dev/null /dev/null 2> /dev/null
   then
     AC_MSG_RESULT([yes])
     HWLOC_DIFF_U="-u"
@@ -508,8 +514,9 @@ AC_DEFUN([_HWLOC_CHECK_DIFF_U], [
 ])
 
 AC_DEFUN([_HWLOC_CHECK_DIFF_W], [
+  AC_REQUIRE([_HWLOC_PROG_DIFF])
   AC_MSG_CHECKING([whether diff accepts -w])
-  if diff -w /dev/null /dev/null 2> /dev/null
+  if $DIFF -w /dev/null /dev/null 2> /dev/null
   then
     AC_MSG_RESULT([yes])
     HWLOC_DIFF_W="-w"

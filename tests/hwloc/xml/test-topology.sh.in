@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2017 Inria.  All rights reserved.
+# Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -85,9 +85,9 @@ do_run()
 
   if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
   then
-    diff @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$output" "$file"
+    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$output" "$file"
   else
-    if ! diff "$output" "$file" >/dev/null
+    if ! @DIFF@ "$output" "$file" >/dev/null
     then
 	cp -f "$file" "$output"
 	echo "Updated $filename"
@@ -110,9 +110,9 @@ do_run_with_output()
 
   if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
   then
-    diff @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$output" "$file"
+    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$output" "$file"
   else
-    if ! diff "$output" "$file" >/dev/null
+    if ! @DIFF@ "$output" "$file" >/dev/null
     then
         cp -f "$file" "$output"
         echo "Updated ${basename}.xml"

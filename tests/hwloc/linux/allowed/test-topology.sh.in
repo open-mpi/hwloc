@@ -67,10 +67,10 @@ test_topology ()
     else
 	if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
 	then
-	    diff @HWLOC_DIFF_U@ -b "$expected_output" "$output"
+	    @DIFF@ @HWLOC_DIFF_U@ -b "$expected_output" "$output"
 	    result=$?
 	else
-	    if ! diff "$expected_output" "$output" >/dev/null
+	    if ! @DIFF@ "$expected_output" "$output" >/dev/null
 	    then
 		cp -f "$output" "$expected_output"
 		echo "Updated $expected_output"

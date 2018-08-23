@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2015-2016 Inria.  All rights reserved.
+# Copyright © 2015-2018 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -33,6 +33,6 @@ export HWLOC_FSROOT
 
 $hdhd -o $tmp/output
 
-diff @HWLOC_DIFF_U@ -r "$HWLOC_FSROOT/expected_output" "$tmp/output"
+@DIFF@ @HWLOC_DIFF_U@ -r "$HWLOC_FSROOT/expected_output" "$tmp/output"
 
 rm -rf "$tmp"
