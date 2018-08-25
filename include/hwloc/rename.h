@@ -268,10 +268,12 @@ extern "C" {
 #define hwloc_bitmap_zero HWLOC_NAME(bitmap_zero)
 #define hwloc_bitmap_fill HWLOC_NAME(bitmap_fill)
 #define hwloc_bitmap_from_ulong HWLOC_NAME(bitmap_from_ulong)
-
+#define hwloc_bitmap_from_ulongs HWLOC_NAME(bitmap_from_ulongs)
 #define hwloc_bitmap_from_ith_ulong HWLOC_NAME(bitmap_from_ith_ulong)
 #define hwloc_bitmap_to_ulong HWLOC_NAME(bitmap_to_ulong)
 #define hwloc_bitmap_to_ith_ulong HWLOC_NAME(bitmap_to_ith_ulong)
+#define hwloc_bitmap_to_ulongs HWLOC_NAME(bitmap_to_ulongs)
+#define hwloc_bitmap_nr_ulongs HWLOC_NAME(bitmap_nr_ulongs)
 #define hwloc_bitmap_only HWLOC_NAME(bitmap_only)
 #define hwloc_bitmap_allbut HWLOC_NAME(bitmap_allbut)
 #define hwloc_bitmap_set HWLOC_NAME(bitmap_set)

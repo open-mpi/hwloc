@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -15,6 +15,7 @@
 int main(void)
 {
   hwloc_bitmap_t set;
+  unsigned long masks[10];
 
   /* check an empty bitmap */
   set = hwloc_bitmap_alloc();
@@ -25,6 +26,18 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == 0);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == 0UL);
+  assert(masks[1] == 0UL);
+  assert(masks[2] == 0UL);
+  assert(masks[3] == 0UL);
+  assert(masks[4] == 0UL);
+  assert(masks[5] == 0UL);
+  assert(masks[6] == 0UL);
+  assert(masks[7] == 0UL);
+  assert(masks[8] == 0UL);
+  assert(masks[9] == 0UL);
   /* check a non-empty bitmap */
   hwloc_bitmap_from_ith_ulong(set, 4, 0xff);
   assert(hwloc_bitmap_to_ith_ulong(set, 4) == 0xff);
@@ -32,6 +45,18 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == 5);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == 0UL);
+  assert(masks[1] == 0UL);
+  assert(masks[2] == 0UL);
+  assert(masks[3] == 0UL);
+  assert(masks[4] == 0xff);
+  assert(masks[5] == 0UL);
+  assert(masks[6] == 0UL);
+  assert(masks[7] == 0UL);
+  assert(masks[8] == 0UL);
+  assert(masks[9] == 0UL);
   /* check a two-long bitmap */
   hwloc_bitmap_from_ith_ulong(set, 4, 0xfe);
   hwloc_bitmap_set_ith_ulong(set, 6, 0xef);
@@ -41,6 +66,52 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == 7);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == 0UL);
+  assert(masks[1] == 0UL);
+  assert(masks[2] == 0UL);
+  assert(masks[3] == 0UL);
+  assert(masks[4] == 0xfe);
+  assert(masks[5] == 0UL);
+  assert(masks[6] == 0xef);
+  assert(masks[7] == 0UL);
+  assert(masks[8] == 0UL);
+  assert(masks[9] == 0UL);
+  /* check setting multiple ulongs at once */
+  masks[0] = 0UL;
+  masks[1] = 1UL;
+  masks[2] = 2UL;
+  masks[3] = 3UL;
+  masks[4] = 4UL;
+  masks[5] = 5UL;
+  masks[6] = 6UL;
+  masks[7] = 7UL;
+  masks[8] = 0UL;
+  assert(!hwloc_bitmap_from_ulongs(set, 9, masks));
+  assert(hwloc_bitmap_to_ulong(set) == 0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 1) == 1UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 2) == 2UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 3) == 3UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 4) == 4UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 5) == 5UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 6) == 6UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 7) == 7UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 8) == 0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == 8);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == 0UL);
+  assert(masks[1] == 1UL);
+  assert(masks[2] == 2UL);
+  assert(masks[3] == 3UL);
+  assert(masks[4] == 4UL);
+  assert(masks[5] == 5UL);
+  assert(masks[6] == 6UL);
+  assert(masks[7] == 7UL);
+  assert(masks[8] == 0UL);
+  assert(masks[9] == 0UL);
   /* check a zeroed bitmap */
   hwloc_bitmap_zero(set);
   assert(hwloc_bitmap_weight(set) == 0);
@@ -51,6 +122,18 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 4) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == 0);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == 0UL);
+  assert(masks[1] == 0UL);
+  assert(masks[2] == 0UL);
+  assert(masks[3] == 0UL);
+  assert(masks[4] == 0UL);
+  assert(masks[5] == 0UL);
+  assert(masks[6] == 0UL);
+  assert(masks[7] == 0UL);
+  assert(masks[8] == 0UL);
+  assert(masks[9] == 0UL);
   hwloc_bitmap_free(set);
 
   /* check a full bitmap */
@@ -62,6 +145,18 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == ~0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == ~0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == ~0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == -1);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == ~0UL);
+  assert(masks[1] == ~0UL);
+  assert(masks[2] == ~0UL);
+  assert(masks[3] == ~0UL);
+  assert(masks[4] == ~0UL);
+  assert(masks[5] == ~0UL);
+  assert(masks[6] == ~0UL);
+  assert(masks[7] == ~0UL);
+  assert(masks[8] == ~0UL);
+  assert(masks[9] == ~0UL);
   /* check a almost full bitmap */
   hwloc_bitmap_set_ith_ulong(set, 4, 0xff);
   assert(hwloc_bitmap_to_ith_ulong(set, 4) == 0xff);
@@ -69,6 +164,18 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == ~0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == ~0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == ~0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == -1);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == ~0UL);
+  assert(masks[1] == ~0UL);
+  assert(masks[2] == ~0UL);
+  assert(masks[3] == ~0UL);
+  assert(masks[4] == 0xff);
+  assert(masks[5] == ~0UL);
+  assert(masks[6] == ~0UL);
+  assert(masks[7] == ~0UL);
+  assert(masks[8] == ~0UL);
+  assert(masks[9] == ~0UL);
   /* check a almost empty bitmap */
   hwloc_bitmap_from_ith_ulong(set, 4, 0xff);
   assert(hwloc_bitmap_to_ith_ulong(set, 4) == 0xff);
@@ -76,6 +183,18 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == 5);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == 0UL);
+  assert(masks[1] == 0UL);
+  assert(masks[2] == 0UL);
+  assert(masks[3] == 0UL);
+  assert(masks[4] == 0xff);
+  assert(masks[5] == 0UL);
+  assert(masks[6] == 0UL);
+  assert(masks[7] == 0UL);
+  assert(masks[8] == 0UL);
+  assert(masks[9] == 0UL);
   /* check a filled bitmap */
   hwloc_bitmap_fill(set);
   assert(hwloc_bitmap_weight(set) == -1);
@@ -86,6 +205,18 @@ int main(void)
   assert(hwloc_bitmap_to_ith_ulong(set, 0) == ~0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 1) == ~0UL);
   assert(hwloc_bitmap_to_ith_ulong(set, 23) == ~0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == -1);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == ~0UL);
+  assert(masks[1] == ~0UL);
+  assert(masks[2] == ~0UL);
+  assert(masks[3] == ~0UL);
+  assert(masks[4] == ~0UL);
+  assert(masks[5] == ~0UL);
+  assert(masks[6] == ~0UL);
+  assert(masks[7] == ~0UL);
+  assert(masks[8] == ~0UL);
+  assert(masks[9] == ~0UL);
   hwloc_bitmap_free(set);
 
   /* check ranges */

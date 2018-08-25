@@ -512,6 +512,7 @@ man3_bitmap_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_free.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_intersects.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_isequal.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_isfull.3 \
@@ -524,6 +525,7 @@ man3_bitmap_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_next.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_not.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_nr_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_only.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_or.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set.3 \
@@ -537,6 +539,7 @@ man3_bitmap_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_taskset_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_weight.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_xor.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_zero.3
