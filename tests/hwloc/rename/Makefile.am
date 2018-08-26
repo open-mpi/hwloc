@@ -64,7 +64,7 @@ useless:
 needed: include/hwloc/autogen/config.h include/private/autogen/config.h
 	@echo "# Finding needed renaming"
 	@echo "# using $(TEST_CPPFLAGS)"
-	@if cpp $(CPPFLAGS) $(TEST_CPPFLAGS) -Iinclude -I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include $(srcdir)/main.c \
+	@if $(CPP) $(CPPFLAGS) $(TEST_CPPFLAGS) -Iinclude -I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include $(srcdir)/main.c \
 		| sed -e 's/foobar_ ##   hwloc_ ## /foobar_hwloc_/g' \
 		| sed -e 's/FOOBAR_ ##   hwloc_ ## /FOOBAR_hwloc_/g' \
 		| grep -vw HWLOC_DEBUG_VERBOSE \
