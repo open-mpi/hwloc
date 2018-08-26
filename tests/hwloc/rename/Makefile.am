@@ -53,7 +53,7 @@ useless:
 		| egrep -v '(HWLOC_RENAME_H|HWLOC_MUNGE_NAME|HWLOC_NAME)' \
 		| while read name ; do \
 			grep $$name -rwH $(HWLOC_top_srcdir)/include/ \
-			| grep -v rename.h: | grep -v .svn >/dev/null \
+			| grep -v rename.h: >/dev/null \
 			|| echo $$name; \
 			done \
 	 | grep '' ; then false ; else true ; fi
