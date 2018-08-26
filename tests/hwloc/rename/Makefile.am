@@ -59,12 +59,16 @@ useless:
 	 | grep '' ; then false ; else true ; fi
 	@echo "# done"
 
+cpp.out: include/hwloc/autogen/config.h include/private/autogen/config.h
+	@echo "# Checking for warnings/errors during renaming"
+	@echo "# using $(TEST_CPPFLAGS)"
+	@$(CPP) -Werror $(CPPFLAGS) $(TEST_CPPFLAGS) -Iinclude -I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include $(srcdir)/main.c >$@
+
 # hwloc_uint64_t is ignored because it's always a typedef.
 # we have to manually concat a##b because some cpp let gcc do it (at least cpp 4.2.1 on OpenBSD 5.2).
-needed: include/hwloc/autogen/config.h include/private/autogen/config.h
+needed: cpp.out
 	@echo "# Finding needed renaming"
-	@echo "# using $(TEST_CPPFLAGS)"
-	@if $(CPP) $(CPPFLAGS) $(TEST_CPPFLAGS) -Iinclude -I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include $(srcdir)/main.c \
+	@if cat cpp.out \
 		| sed -e 's/foobar_ ##   hwloc_ ## /foobar_hwloc_/g' \
 		| sed -e 's/FOOBAR_ ##   hwloc_ ## /FOOBAR_hwloc_/g' \
 		| grep -vw HWLOC_DEBUG_VERBOSE \
