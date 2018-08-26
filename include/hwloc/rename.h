@@ -573,7 +573,9 @@ extern "C" {
 
 /* private/misc.h */
 
+#ifndef HWLOC_HAVE_CORRECT_SNPRINTF
 #define hwloc_snprintf HWLOC_NAME(snprintf)
+#endif
 #define hwloc_namecoloncmp HWLOC_NAME(namecoloncmp)
 #define hwloc_ffsl_manual HWLOC_NAME(ffsl_manual)
 #define hwloc_ffs32 HWLOC_NAME(ffs32)

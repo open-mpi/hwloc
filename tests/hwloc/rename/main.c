@@ -5,8 +5,11 @@
 #define _GNU_SOURCE 1
 #include "sched.h"
 
-/* all headers should be included */
-#include "hwloc.h"
+/* all headers should be explicitly included */
+
+#include "private/autogen/config.h" /* autoheaders definitions first, to avoid conflicts later */
+
+#include "hwloc.h" /* hwloc/rename.h required before everything else */
 #include "hwloc/bitmap.h"
 #include "hwloc/shmem.h"
 #include "hwloc/helper.h"
@@ -39,7 +42,6 @@
 #include "hwloc/gl.h"
 #include "hwloc/intel-mic.h"
 
-#include "private/autogen/config.h"
 #include "private/components.h"
 #include "private/internal-components.h"
 #include "private/cpuid-x86.h"
