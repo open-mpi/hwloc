@@ -46,6 +46,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
   struct lstopo_output *loutput = the_output.loutput;
   int redraw = 0;
+  unsigned i;
   switch (message) {
     case WM_CHAR:  {
       switch (wparam) {
@@ -68,6 +69,47 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       }
       case '1':
 	the_scale = 1.0;
+	redraw = 1;
+	break;
+      case 'A': {
+	int v = !loutput->show_attrs[0]; /* if show_attrs[] contains different values, assume it's all like the first type */
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	  loutput->show_attrs[i] = v;
+	redraw = 1;
+	break;
+      }
+      case 'I': {
+	int v = !loutput->show_indexes[0]; /* if show_indexes[] contains different values, assume it's all like the first type */
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	  loutput->show_indexes[i] = v;
+	redraw = 1;
+	break;
+      }
+      case 'T': {
+	int v = !loutput->show_text[0]; /* if show_text[] contains different values, assume it's all like the first type */
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	  loutput->show_text[i] = v;
+	redraw = 1;
+	break;
+      }
+      case 'L':
+	loutput->index_type = LSTOPO_INDEX_TYPE_LOGICAL;
+	redraw = 1;
+	break;
+      case 'P':
+	loutput->index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
+	redraw = 1;
+	break;
+      case 'B':
+	loutput->index_type = LSTOPO_INDEX_TYPE_DEFAULT;
+	redraw = 1;
+	break;
+      case 'd':
+	loutput->show_disallowed ^= 1;
+	redraw = 1;
+	break;
+      case 'b':
+	loutput->show_binding ^= 1;
 	redraw = 1;
 	break;
       case 'q':
@@ -353,14 +395,18 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
 
   printf("\n");
   printf("Keyboard shortcuts:\n");
-  printf(" Zoom-in or out .................... + -\n");
-  printf(" Try to fit scale to window ........ f F\n");
-  printf(" Reset scale to default ............ 1\n");
-  printf(" Scroll vertically ................. Up Down PageUp PageDown\n");
-  printf(" Scroll horizontally ............... Left Right Ctrl+PageUp/Down\n");
-  printf(" Scroll to the top-left corner ..... Home\n");
-  printf(" Scroll to the bottom-right corner . End\n");
-  printf(" Exit .............................. q Q Esc\n");
+  printf(" Zoom-in or out ...................... + -\n");
+  printf(" Try to fit scale to window .......... f F\n");
+  printf(" Reset scale to default .............. 1\n");
+  printf(" Scroll vertically ................... Up Down PageUp PageDown\n");
+  printf(" Scroll horizontally ................. Left Right Ctrl+PageUp/Down\n");
+  printf(" Scroll to the top-left corner ....... Home\n");
+  printf(" Scroll to the bottom-right corner ... End\n");
+  printf(" Toggle color for disallowed objects . d\n");
+  printf(" Toggle color for binding objects .... b\n");
+  printf(" Show/Hide Attributes/Indexes/Text ... A/I/T\n");
+  printf(" Show Physical/Logical/Both indexes .. P/L/B\n");
+  printf(" Exit ................................ q Q Esc\n");
   printf("\n\n");
 
   /* ready */
