@@ -232,12 +232,19 @@ HWLOC_DECLSPEC int hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin,
  * May be useful before binding so that the process does not
  * have a chance of migrating between multiple logical CPUs
  * in the original mask.
+ * Instead of running the task on any PU inside the given CPU set,
+ * the operating system scheduler will be forced to run it on a single
+ * of these PUs.
+ * It avoids a migration overhead and cache-line ping-pongs between PUs.
  *
  * \note This function is NOT meant to distribute multiple processes
  * within a single CPU set. It always return the same single bit when
  * called multiple times on the same input set. hwloc_distrib() may
  * be used for generating CPU sets to distribute multiple tasks below
  * a single multi-PU object.
+ *
+ * \note This function cannot be applied to an object set directly. It
+ * should be applied to a copy (which may be obtained with hwloc_bitmap_dup()).
  */
 HWLOC_DECLSPEC int hwloc_bitmap_singlify(hwloc_bitmap_t bitmap);
 
