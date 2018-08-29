@@ -7,6 +7,7 @@
 echo "############################"
 echo "Running on:"
 uname -a
+echo "Tarball: $1"
 echo "############################"
 
 set -e
@@ -14,6 +15,7 @@ set -x
 
 git_repo_url="$1"
 hwloc_branch="$2"
+tarball="$3"
 
 if test -z "$git_repo_url" || test -z "$hwloc_branch"; then
   echo "Need repo URL and branch name as arguments."
@@ -27,10 +29,6 @@ test -f $HOME/.ciprofile && . $HOME/.ciprofile
 ls | grep -v ^hwloc- | grep -v ^job- | xargs rm -rf || true
 ls -td hwloc-* | tail -n +11 | xargs chmod u+w -R || true
 ls -td hwloc-* | tail -n +11 | xargs rm -rf || true
-
-# find the tarball
-tarball=$(ls -tr hwloc-*.tar.gz | grep -v build.tar.gz | tail -1)
-basename=$(basename $tarball .tar.gz)
 
 # check that this is either master or vX.Y
 if test x$hwloc_branch != xmaster; then
@@ -52,6 +50,7 @@ if test x$git_repo_url != xhttps://github.com/open-mpi/hwloc.git; then
 fi
 
 # extract the tarball
+basename=$(basename $tarball .tar.gz)
 test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
 tar xfz $tarball
 rm $tarball
