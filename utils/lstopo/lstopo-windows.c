@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -394,6 +394,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   printf(" Scroll to the bottom-right corner . End\n");
   printf(" Exit .............................. q Q Esc\n");
   printf("\n\n");
+  fflush(stdout);
 
   /* ready */
   declare_colors(loutput);
