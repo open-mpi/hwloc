@@ -7,6 +7,7 @@
 echo "############################"
 echo "Running on:"
 uname -a
+echo "Tarball: $1"
 echo "############################"
 
 set -e
@@ -20,8 +21,8 @@ ls | grep -v ^hwloc- | grep -v ^job- | xargs rm -rf || true
 ls -td hwloc-* | tail -n +11 | xargs chmod u+w -R || true
 ls -td hwloc-* | tail -n +11 | xargs rm -rf || true
 
-# find the tarball, extract it
-tarball=$(ls -tr hwloc-*.tar.gz | grep -v build.tar.gz | tail -1)
+# extract the tarball
+tarball="$1"
 basename=$(basename $tarball .tar.gz)
 test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
 tar xfz $tarball

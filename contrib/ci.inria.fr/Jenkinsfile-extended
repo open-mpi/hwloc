@@ -16,7 +16,8 @@
 
 def gitRepoURL = ""
 def gitBranch = ""
-
+def tarballgz
+def tarballbz2
 def statusHasChanged = false
 
 pipeline {
@@ -39,17 +40,17 @@ pipeline {
 					}
                                         sh 'contrib/ci.inria.fr/job-0-tarball.sh '+gitBranch
                                         script {
-                                                env.tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
-                                                env.tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
+                                                tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
+                                                tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
                                         }
-                                        stash includes: "${env.tarballgz}", name: 'tarballgz'
+                                        stash includes: tarballgz, name: 'tarballgz'
                                         dir('contrib/ci.inria.fr') {
 						stash includes: "job-3-debug.sh", name: 'script-unix-debug'
 						stash includes: "job-3-embedded.sh", name: 'script-embedded'
 						stash includes: "job-3-sonarscanner.sh", name: 'script-sonarscanner'
 						stash includes: "job-3-mingw.*", name: 'scripts-mingw'
 					}
-					archiveArtifacts artifacts: "${env.tarballgz},${env.tarballbz2},doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
+					archiveArtifacts artifacts: tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
 					deleteDir()
 				}
 			}
@@ -73,7 +74,7 @@ pipeline {
 								dir('check-mingw') {
 									unstash 'tarballgz'
 									unstash 'scripts-mingw'
-									bat 'job-3-mingw.bat'
+									bat 'job-3-mingw.bat '+tarballgz
 									archiveArtifacts artifacts: "*.zip", fingerprint: true, onlyIfSuccessful: true
 									deleteDir()
 								}
@@ -83,7 +84,7 @@ pipeline {
 								dir('check-sonarscanner') {
 									unstash 'tarballgz'
 									unstash 'script-sonarscanner'
-									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh '+gitRepoURL+' '+gitBranch
+									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh '+gitRepoURL+' '+gitBranch+' '+tarballgz
 									deleteDir()
 								}
 							}
@@ -92,7 +93,7 @@ pipeline {
 								dir('check-embedded') {
 									unstash 'tarballgz'
 									unstash 'script-embedded'
-									sh 'chmod 755 job-3-embedded.sh && ./job-3-embedded.sh'
+									sh 'chmod 755 job-3-embedded.sh && ./job-3-embedded.sh '+tarballgz
 									deleteDir()
 								}
 							}
@@ -101,7 +102,7 @@ pipeline {
 								dir('check-unix-debug') {
 									unstash 'tarballgz'
 									unstash 'script-unix-debug'
-									sh 'chmod 755 job-3-debug.sh && ./job-3-debug.sh'
+									sh 'chmod 755 job-3-debug.sh && ./job-3-debug.sh '+tarballgz
 									deleteDir()
 								}
 							}
