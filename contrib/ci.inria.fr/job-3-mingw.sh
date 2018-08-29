@@ -63,11 +63,6 @@ oldPATH=$PATH
 rm -f hwloc-win*-build-*.zip || true
 
 if test x$dotar = x1; then
-  # remove everything but the last 10 builds
-  rm -rf $(ls | grep -v ^hwloc- | grep -v ^job-) || true
-  chmod u+w -R $(ls -td hwloc-* | tail -n +11) || true
-  rm -rf $(ls -td hwloc-* | tail -n +11) || true
-
   # extract the tarball
   tarball="$1"
   if ! test -f "$tarball"; then
