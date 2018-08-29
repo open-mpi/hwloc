@@ -339,11 +339,13 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   printf(" Scroll horizontally ................. Left Right Ctrl+PageUp/Down\n");
   printf(" Scroll to the top-left corner ....... Home\n");
   printf(" Scroll to the bottom-right corner ... End\n");
+  printf(" Exit ................................ q Q Esc\n");
+  printf("Configuration tweaks:\n");
   printf(" Toggle color for disallowed objects . d\n");
   printf(" Toggle color for binding objects .... b\n");
   printf(" Show/Hide Attributes/Indexes/Text ... A/I/T\n");
   printf(" Show Physical/Logical/Both indexes .. P/L/B\n");
-  printf(" Exit ................................ q Q Esc\n");
+  printf(" Command-line options for tweaks ..... c\n");
   printf("\n\n");
 
   /* ready */
@@ -535,6 +537,9 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  loutput->show_disallowed ^= 1;
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
+	  break;
+	case XK_c:
+	  lstopo_show_interactive_cli_options(loutput);
 	  break;
 	}
       }

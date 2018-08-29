@@ -32,6 +32,7 @@ Version 2.1.0
     - The X11 interactive output has additional keyboard shortcuts to
       dynamically change the displaying of indexes, attributes and text.
     - Add --linespacing and change default margins and linespacing.
+    - Add keyboard shortcuts to tweak the graphical output interactively.
   + Add --nodeset options to hwloc-calc for converting between cpusets and
     nodesets.
   + hwloc-annotate may annotate multiple locations at once.

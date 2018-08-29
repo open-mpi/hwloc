@@ -528,6 +528,51 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --version             Report version and exit\n");
 }
 
+static void lstopo_show_interactive_cli_options_array(const int *array, const char *name)
+{
+  int enabled = 0, disabled = 0, i;
+  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
+    if (array[i])
+      enabled++;
+    else
+      disabled++;
+  }
+  if (!enabled)
+    printf(" --no-%s", name);
+  else if (!disabled)
+    printf(" --%s", name);
+  else {
+    printf(" --%s --no-%s=", name, name);
+    for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
+      if (!array[i]) {
+	printf("%s%s", hwloc_obj_type_string(i), disabled > 1 ? "," : "");
+	disabled--;
+      }
+    }
+  }
+}
+
+void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
+{
+  printf("Command-line options for the current configuration tweaks:\n");
+
+  if (loutput->index_type == LSTOPO_INDEX_TYPE_PHYSICAL)
+    printf(" -p");
+  else if (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL)
+    printf(" -l");
+
+  lstopo_show_interactive_cli_options_array(loutput->show_indexes, "index");
+  lstopo_show_interactive_cli_options_array(loutput->show_attrs, "attrs");
+  lstopo_show_interactive_cli_options_array(loutput->show_text, "text");
+
+  if (!loutput->show_binding)
+    printf(" --binding-color=none");
+  if (!loutput->show_disallowed)
+    printf(" --disallowed-color=none");
+
+  printf("\n\n");
+}
+
 enum output_format {
   LSTOPO_OUTPUT_DEFAULT,
   LSTOPO_OUTPUT_CONSOLE,
