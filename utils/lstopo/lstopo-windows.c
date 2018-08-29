@@ -114,6 +114,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	break;
       case 'c':
 	lstopo_show_interactive_cli_options(loutput);
+	fflush(stdout);
 	break;
       case 'q':
       case 'Q':
@@ -413,6 +414,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   printf(" Show Physical/Logical/Both indexes .. P/L/B\n");
   printf(" Command-line options for tweaks ..... c\n");
   printf("\n\n");
+  fflush(stdout);
 
   /* ready */
   declare_colors(loutput);
