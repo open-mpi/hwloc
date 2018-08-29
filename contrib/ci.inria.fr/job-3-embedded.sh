@@ -16,11 +16,6 @@ set -x
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
-# remove everything but the last 10 builds
-ls | grep -v ^hwloc- | grep -v ^job- | xargs rm -rf || true
-ls -td hwloc-* | tail -n +11 | xargs chmod u+w -R || true
-ls -td hwloc-* | tail -n +11 | xargs rm -rf || true
-
 # extract the tarball
 tarball="$1"
 basename=$(basename $tarball .tar.gz)
@@ -34,11 +29,5 @@ touch configure
 
 # embedded tests
 (cd tests/embedded && ./run-embedded-tests.sh ../../$tarball)
-
-# cleanup
-rm -rf doc
-cd ..
-tar cfz ${basename}.build.tar.gz $basename
-rm -rf $basename
 
 exit 0

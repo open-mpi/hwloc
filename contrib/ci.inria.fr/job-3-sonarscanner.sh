@@ -25,11 +25,6 @@ fi
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
-# remove everything but the last 10 builds
-ls | grep -v ^hwloc- | grep -v ^job- | xargs rm -rf || true
-ls -td hwloc-* | tail -n +11 | xargs chmod u+w -R || true
-ls -td hwloc-* | tail -n +11 | xargs rm -rf || true
-
 # check that this is either master or vX.Y
 if test x$hwloc_branch != xmaster; then
   if test x$(echo "x${hwloc_branch}x" | sed -r -e 's/xv[0-9]+\.[0-9]+x//') != x; then
@@ -202,11 +197,5 @@ EOF
 
 # Run the sonar-scanner analysis and submit to SonarQube server
 sonar-scanner -X > sonar.log
-
-# cleanup
-rm -rf doc
-cd ..
-tar cfz ${basename}.build.tar.gz $basename
-rm -rf $basename
 
 exit 0
