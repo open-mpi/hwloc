@@ -13,7 +13,8 @@
 // Not needed for multi-branch pipelines which already BRANCH_NAME in the environment.
 
 def gitBranch = ""
-
+def tarballgz
+def tarballbz2
 def statusHasChanged = false
 
 pipeline {
@@ -29,16 +30,16 @@ pipeline {
 					}
 					sh 'contrib/ci.inria.fr/job-0-tarball.sh '+gitBranch
 					script {
-					       env.tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
-					       env.tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
+					       tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
+					       tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
 					}
-					stash includes: "${env.tarballgz}", name: 'tarballgz'
+					stash includes: tarballgz, name: 'tarballgz'
 					// Stash those scripts because they are not in make dist
 					dir('contrib/ci.inria.fr') {
 						stash includes: "job-1-check.sh", name: 'script-unix-check'
 						stash includes: "job-1-visualstudio.bat", name: 'script-msvc'
 					}
-					archiveArtifacts artifacts: "${env.tarballgz},${env.tarballbz2},doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
+					archiveArtifacts artifacts: tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
 					deleteDir()
 				}
 			}
@@ -60,7 +61,7 @@ pipeline {
 								dir('check-unix') {
 									unstash 'tarballgz'
 									unstash 'script-unix-check'
-									sh 'chmod 755 job-1-check.sh && ./job-1-check.sh'
+									sh 'chmod 755 job-1-check.sh && ./job-1-check.sh '+tarballgz
 									deleteDir()
 								}
 							}
@@ -69,7 +70,7 @@ pipeline {
 								dir('check-msvc') {
 									unstash 'tarballgz'
 									unstash 'script-msvc'
-									bat 'job-1-visualstudio.bat'
+									bat 'job-1-visualstudio.bat '+tarballgz
 									deleteDir()
 								}
 							}

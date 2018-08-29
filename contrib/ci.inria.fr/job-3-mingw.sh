@@ -7,6 +7,7 @@
 echo "############################"
 echo "Running on:"
 uname -a
+echo "Options: $0"
 echo "############################"
 
 set -e
@@ -49,6 +50,8 @@ while test $# -gt 0; do
     echo "  --no-install  Don't install"
     echo "  --help        Show this help"
     exit 0
+  else
+    break
   fi fi fi fi fi fi fi fi fi
   shift
 done
@@ -65,8 +68,12 @@ if test x$dotar = x1; then
   chmod u+w -R $(ls -td hwloc-* | tail -n +11) || true
   rm -rf $(ls -td hwloc-* | tail -n +11) || true
 
-  # find the tarball and extract it
-  tarball=$(ls -tr hwloc-*.tar.gz | tail -1)
+  # extract the tarball
+  tarball="$1"
+  if ! test -f "$tarball"; then
+    echo "Invalid tarball parameter."
+    exit 0
+  fi
   basename=$(basename $tarball .tar.gz)
   version=$(echo $basename | cut -d- -f2-)
   test -d $basename && chmod -R u+rwX $basename && rm -rf $basename
