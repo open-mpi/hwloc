@@ -1851,11 +1851,11 @@ Many of them will therefore be missing on some OS.
 <dd>The operating system name, release, version, the hostname and the
 architecture name, as reported by the Unix <tt>uname</tt> command.
 </dd>
-<dt>Backend (Machine object or topology root object)</dt>
+<dt>Backend (Machine object, topology root object, or specific object added by that backend)</dt>
 <dd>The name of the hwloc backend/component that filled the topology.
 If several components were combined, multiple Backend keys may exist,
-with different values, for instance <tt>x86</tt>, <tt>Linux</tt>
-and <tt>pci</tt>.
+with different values, for instance <tt>x86</tt> and <tt>Linux</tt> in the root
+object and <tt>CUDA</tt> in CUDA OS device objects.
 </dd>
 <dt>LinuxCgroup (Machine object)</dt>
 <dd>The name the Linux control group where the calling process is
