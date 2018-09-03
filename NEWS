@@ -13,8 +13,7 @@ $HEADER$
 
 This file contains the main features as well as overviews of specific
 bug fixes (and other actions) for each version of hwloc since version
-0.9 (as initially released as "libtopology", then re-branded to "hwloc"
-in v0.9.1).
+0.9.
 
 
 Version 2.1.0
@@ -1579,7 +1578,7 @@ Version 0.9.1
   the physical location of IB devices.
 
 
-Version 0.9 (libtopology)
--------------------------
+Version 0.9 (formerly named "libtopology")
+-----------
 
 * First release.
