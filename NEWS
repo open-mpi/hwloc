@@ -926,7 +926,7 @@ Version 1.6.0
   + Add a section about Synthetic topologies in the documentation.
 
 
-Version 1.5.2 (some of these changes are in v1.6.2 but not in v1.6)
+Version 1.5.2 (some of these changes are in 1.6.2 but not in 1.6)
 -------------
 * Use libpciaccess instead of pciutils/libpci by default for I/O discovery.
   pciutils/libpci is only used if --enable-libpci is given to configure
@@ -1061,9 +1061,8 @@ Version 1.4.2
   for most of them.
 
 
-Version 1.4.1
+Version 1.4.1 (contains all 1.3.2 changes)
 -------------
-* This release contains all changes from v1.3.2.
 * Fix hwloc_alloc_membind, thanks Karl Napf for reporting the issue.
 * Fix memory leaks in some get_membind() functions.
 * Fix helpers converting from Linux libnuma to hwloc (hwloc/linux-libnuma.h)
@@ -1076,7 +1075,7 @@ Version 1.4.1
   issues.
 
 
-Version 1.4.0 (does not contain all v1.3.2 changes)
+Version 1.4.0 (does not contain all 1.3.2 changes)
 -------------
 * Major features
   + Add "custom" interface and "assembler" tools to build multi-node
@@ -1521,7 +1520,7 @@ Version 1.0.0
 
 
 Version 0.9.4 (unreleased)
---------------------------
+-------------
 
 * Fix reseting colors to normal in lstopo -.txt output.
 * Fix Linux pthread_t binding error report.
