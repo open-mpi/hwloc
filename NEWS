@@ -37,6 +37,18 @@ Version 2.1.0
   + hwloc-annotate may annotate multiple locations at once.
 
 
+Version 2.0.2 (also included in 1.11.11 when appropriate)
+-------------
+* Add support for Hygon Dhyana processors in the x86 backend,
+  thanks to Pu Wen for the patch.
+* Fix symbol renaming to also rename internal components,
+  thanks to Evan Ramos for the patch.
+* Fix build on HP-UX, thanks to Richard Lloyd for reporting the issues.
+* Detect PCI link speed without being root on Linux >= 4.13.
+* Add HWLOC_VERSION* macros to the public headers,
+  thanks to Gilles Gouaillardet for the suggestion.
+
+
 Version 2.0.1 (also included in 1.11.10 when relevant)
 -------------
 * Bump the library soname to 15:0:0 to avoid conflicts with hwloc 1.11.x
@@ -197,6 +209,33 @@ Version 2.0.0
     - HWLOC_COMPONENTS takes precedence over other environment variables
       for selecting components.
   + hwloc now requires a C99 compliant compiler.
+
+
+Version 1.11.11 (also included in 2.0.2)
+---------------
+* Add support for Hygon Dhyana processors in the x86 backend,
+  thanks to Pu Wen for the patch.
+* Fix symbol renaming to also rename internal components,
+  thanks to Evan Ramos for the patch.
+* Fix build on HP-UX, thanks to Richard Lloyd for reporting the issues.
+* Detect PCI link speed without being root on Linux >= 4.13.
+
+
+Version 1.11.10 (also included in 2.0.1)
+---------------
+* Fix detection of cores and hyperthreads on Mac OS X.
+* Serialize pciaccess discovery to fix concurrent topology loads in
+  multiple threads.
+* Fix first touch area memory binding on Linux when thread memory
+  binding is different.
+* Some minor fixes to memory binding.
+* Fix hwloc-dump-hwdata to only process SMBIOS information that correspond
+  to the KNL and KNM configuration.
+* Add a heuristic for guessing KNL/KNM memory and cluster modes when
+  hwloc-dump-hwdata could not run as root earlier.
+* Fix discovery of NVMe OS devices on Linux >= 4.0.
+* Add get_area_memlocation() on Windows.
+* Add CPUVendor, Model, ... attributes on Mac OS X.
 
 
 Version 1.11.9
