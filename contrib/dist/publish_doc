@@ -1,0 +1,64 @@
+#!/bin/sh
+
+exit_usage() {
+  echo "$0 <ompi-www-dir>"
+  echo "  copy built documentation from current hwloc directory"
+  echo "  to destination clone of the ompi-www repository."
+  exit 1
+}
+
+dst="$1"
+if test "x$dst" = "x" -o "x$dst" = "x-h" -o "x$dst" = "x--help"; then
+  exit_usage
+fi
+
+EXAMPLE=v2.0.0
+if test -d "$dst/projects/hwloc/doc/$EXAMPLE/"; then
+  dst="$dst/projects/hwloc/doc/"
+else if test -d "$dst/hwloc/doc/$EXAMPLE/"; then
+  dst="$dst/hwloc/doc/"
+else if test -d "$dst/doc/$EXAMPLE/"; then
+  dst="$dst/doc/"
+else if test -d "$dst/$EXAMPLE/"; then
+  :
+else
+  echo "ERROR: Cannot find doc subdirectory in destination path."
+  exit 1
+fi fi fi fi
+echo "Will copy documentation to $dst"
+
+while test `pwd` != /; do
+  test -f VERSION && break
+  cd ..
+done
+if ! test -f VERSION; then
+  echo "ERROR: Cannot find hwloc VERSION file in current directory or its parents."
+  exit 1
+fi
+
+VERSION=$(./config/hwloc_get_version.sh ./VERSION)
+if test x$VERSION = x; then
+  echo "ERROR: Failed to extract VERSION number from VERSION file."
+  exit 1
+fi
+echo "Found version $VERSION"
+
+if ! test -e doc/doxygen-doc/hwloc-a4.pdf; then
+  echo "ERROR: doc/doxygen-doc/hwloc-a4.pdf not found."
+  exit 1
+else if ! test -e doc/doxygen-doc/hwloc-letter.pdf; then
+  echo "ERROR: doc/doxygen-doc/hwloc-letter.pdf not found."
+  exit 1
+else if ! test -d doc/www.open-mpi.org/html/; then
+  echo "ERROR: doc/www.open-mpi.org/html/ not found."
+  exit 1
+fi fi fi
+
+echo "Installing hwloc-v${VERSION}-a4.pdf ..."
+cp -f doc/doxygen-doc/hwloc-a4.pdf "$dst/hwloc-v${VERSION}-a4.pdf"
+
+echo "Installing hwloc-v${VERSION}-letter.pdf ..."
+cp -f doc/doxygen-doc/hwloc-letter.pdf "$dst/hwloc-v${VERSION}-letter.pdf"
+
+echo "Installing v${VERSION}/ HTML directory ..."
+rsync -avz doc/www.open-mpi.org*inc doc/www.open-mpi.org/html/ "$dst/v${VERSION}/"
