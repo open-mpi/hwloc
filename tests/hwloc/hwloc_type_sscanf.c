@@ -9,49 +9,71 @@
 #include <hwloc.h>
 #include <private/misc.h> /* for for_each_*child() */
 
-static void check(hwloc_topology_t topology, hwloc_obj_t obj, int verbose)
+static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffer, int checkattrs)
 {
-  hwloc_obj_t child;
-  char buffer[64];
   hwloc_obj_type_t type;
   union hwloc_obj_attr_u attr;
   int depth;
   int err;
 
-  printf("  checking %s L#%u %s%s%s...\n",
-	 hwloc_obj_type_string(obj->type), obj->logical_index,
-	 obj->subtype ? "(" : "",
-	 obj->subtype ? obj->subtype : "",
-	 obj->subtype ? ") " : "");
-  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, verbose);
-  assert(err > 0);
   err = hwloc_type_sscanf(buffer, &type, &attr, sizeof(attr));
   assert(!err);
   assert(obj->type == type);
-  if (hwloc_obj_type_is_cache(type)) {
-    assert(attr.cache.type == obj->attr->cache.type);
-    assert(attr.cache.depth == obj->attr->cache.depth);
-  } else if (type == HWLOC_OBJ_GROUP) {
-    assert(attr.group.depth == obj->attr->group.depth);
-  } else if (type == HWLOC_OBJ_BRIDGE) {
-    assert(attr.bridge.upstream_type == obj->attr->bridge.upstream_type);
-    assert(attr.bridge.downstream_type == obj->attr->bridge.downstream_type);
-  } else if (type == HWLOC_OBJ_OS_DEVICE) {
-    assert(attr.osdev.type == obj->attr->osdev.type);
+
+  if (checkattrs) {
+    if (hwloc_obj_type_is_cache(type)) {
+      assert(attr.cache.type == obj->attr->cache.type);
+      assert(attr.cache.depth == obj->attr->cache.depth);
+    } else if (type == HWLOC_OBJ_GROUP) {
+      assert(attr.group.depth == obj->attr->group.depth);
+    } else if (type == HWLOC_OBJ_BRIDGE) {
+      assert(attr.bridge.upstream_type == obj->attr->bridge.upstream_type);
+      assert(attr.bridge.downstream_type == obj->attr->bridge.downstream_type);
+    } else if (type == HWLOC_OBJ_OS_DEVICE) {
+      assert(attr.osdev.type == obj->attr->osdev.type);
+    }
   }
 
   err = hwloc_type_sscanf_as_depth(buffer, NULL, topology, &depth);
   assert(!err);
   assert(depth == (int) obj->depth);
+}
+
+static void check(hwloc_topology_t topology, hwloc_obj_t obj)
+{
+  hwloc_obj_t child;
+  char buffer[64];
+  const char *constname;
+  int err;
+
+  constname = hwloc_obj_type_string(obj->type);
+
+  printf("  checking %s L#%u %s%s%s...\n",
+	 constname, obj->logical_index,
+	 obj->subtype ? "(" : "",
+	 obj->subtype ? obj->subtype : "",
+	 obj->subtype ? ") " : "");
+  printf("    parsing hwloc_obj_type_string() output = %s\n", constname);
+  _check(topology, obj, constname, 0);
+
+  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, 0);
+  assert(err > 0);
+  printf("    parsing hwloc_obj_type_snprintf() normal output = %s\n", buffer);
+  _check(topology, obj, buffer, 1);
+
+  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, 1);
+  assert(err > 0);
+  printf("    parsing hwloc_obj_type_snprintf() verbose output = %s\n", buffer);
+  _check(topology, obj, buffer, 1);
 
   for_each_child(child, obj)
-    check(topology, child, verbose);
+    check(topology, child);
   for_each_memory_child(child, obj)
-    check(topology, child, verbose);
+    check(topology, child);
   for_each_io_child(child, obj)
-    check(topology, child, verbose);
+    check(topology, child);
   for_each_misc_child(child, obj)
-    check(topology, child, verbose);
+    check(topology, child);
 }
 
 static void check_topo(void)
@@ -65,8 +87,7 @@ static void check_topo(void)
   err = hwloc_topology_load(topology);
   assert(!err);
 
-  check(topology, hwloc_get_root_obj(topology), 0);
-  check(topology, hwloc_get_root_obj(topology), 1);
+  check(topology, hwloc_get_root_obj(topology));
 
   hwloc_topology_destroy(topology);
 }
