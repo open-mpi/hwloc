@@ -51,6 +51,7 @@ struct hwloc_linux_backend_data_s {
     HWLOC_LINUX_ARCH_IA64,
     HWLOC_LINUX_ARCH_ARM,
     HWLOC_LINUX_ARCH_POWER,
+    HWLOC_LINUX_ARCH_S390,
     HWLOC_LINUX_ARCH_UNKNOWN
   } arch;
   int is_knl;
@@ -3570,7 +3571,8 @@ look_sysfscpu(struct hwloc_topology *topology,
       }
     }
 
-    if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+    if (data->arch == HWLOC_LINUX_ARCH_S390
+	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
       /* look at the books */
       sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
       bookset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
@@ -4359,6 +4361,8 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
     else if (!strncmp(data->utsname.machine, "ppc", 3)
 	     || !strncmp(data->utsname.machine, "power", 5))
       data->arch = HWLOC_LINUX_ARCH_POWER;
+    else if (!strncmp(data->utsname.machine, "s390", 4))
+      data->arch = HWLOC_LINUX_ARCH_S390;
     else if (!strcmp(data->utsname.machine, "ia64"))
       data->arch = HWLOC_LINUX_ARCH_IA64;
   }
