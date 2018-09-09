@@ -3449,7 +3449,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  unsigned siblingid, siblingcoreid;
 
 	  mycoreid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.9 */
+	  sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.19 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	    mycoreid = (unsigned) tmpint;
 	  gotcoreid = 1;
@@ -3458,7 +3458,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  if (siblingid == (unsigned) i)
 	    siblingid = hwloc_bitmap_next(coreset, i);
 	  siblingcoreid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%u/topology/core_id", path, siblingid); /* contains %d at least up to 4.9 */
+	  sprintf(str, "%s/cpu%u/topology/core_id", path, siblingid); /* contains %d at least up to 4.19 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	    siblingcoreid = (unsigned) tmpint;
 	  threadwithcoreid = (siblingcoreid != mycoreid);
@@ -3471,7 +3471,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  if (!gotcoreid) {
 	    mycoreid = (unsigned) -1;
-	    sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.9 */
+	    sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.19 */
 	    if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	      mycoreid = (unsigned) tmpint;
 	  }
@@ -3503,7 +3503,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  struct hwloc_obj *package;
 	  unsigned mypackageid;
 	  mypackageid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i); /* contains %d at least up to 4.9 */
+	  sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i); /* contains %d at least up to 4.19 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	    mypackageid = (unsigned) tmpint;
 
@@ -3580,7 +3580,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  struct hwloc_obj *book;
 	  unsigned mybookid;
 	  mybookid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%d/topology/book_id", path, i); /* contains %d at least up to 4.9 */
+	  sprintf(str, "%s/cpu%d/topology/book_id", path, i); /* contains %d at least up to 4.19 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
 	    mybookid = (unsigned) tmpint;
 
@@ -3641,7 +3641,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  struct hwloc_obj *cache;
 
 	  /* get the cache level depth */
-	  sprintf(str, "%s/cpu%d/cache/index%d/level", path, i, j); /* contains %u at least up to 4.9 */
+	  sprintf(str, "%s/cpu%d/cache/index%d/level", path, i, j); /* contains %u at least up to 4.19 */
 	  if (hwloc_read_path_as_uint(str, &depth, data->root_fd) < 0) {
 	    hwloc_bitmap_free(cacheset);
 	    continue;
@@ -3670,7 +3670,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  /* get the cache size */
 	  kB = 0;
-	  sprintf(str, "%s/cpu%d/cache/index%d/size", path, i, j); /* contains %uK at least up to 4.9 */
+	  sprintf(str, "%s/cpu%d/cache/index%d/size", path, i, j); /* contains %uK at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &kB, data->root_fd);
 	  /* KNL reports L3 with size=0 and full cpuset in cpuid.
 	   * Let hwloc_linux_try_add_knl_mcdram_cache() detect it better.
@@ -3682,7 +3682,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  /* get the line size */
 	  linesize = 0;
-	  sprintf(str, "%s/cpu%d/cache/index%d/coherency_line_size", path, i, j); /* contains %u at least up to 4.9 */
+	  sprintf(str, "%s/cpu%d/cache/index%d/coherency_line_size", path, i, j); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &linesize, data->root_fd);
 
 	  /* get the number of sets and lines per tag.
@@ -3690,11 +3690,11 @@ look_sysfscpu(struct hwloc_topology *topology,
 	   * some archs (ia64, ppc) put 0 there when fully-associative, while others (x86) put something like -1 there.
 	   */
 	  sets = 0;
-	  sprintf(str, "%s/cpu%d/cache/index%d/number_of_sets", path, i, j); /* contains %u at least up to 4.9 */
+	  sprintf(str, "%s/cpu%d/cache/index%d/number_of_sets", path, i, j); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &sets, data->root_fd);
 
 	  lines_per_tag = 1;
-	  sprintf(str, "%s/cpu%d/cache/index%d/physical_line_partition", path, i, j); /* contains %u at least up to 4.9 */
+	  sprintf(str, "%s/cpu%d/cache/index%d/physical_line_partition", path, i, j); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &lines_per_tag, data->root_fd);
 
 	  /* first cpu in this cache, add the cache */
