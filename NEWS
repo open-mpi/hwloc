@@ -25,6 +25,7 @@ Version 2.1.0
     thanks to Junchao Zhang for the suggestion.
 * Backends
   + The x86 now properly handles offline CPUs.
+  + Add support for IBM S/390 drawers.
 * Tools
   + lstopo
     - Both logical and OS/physical indexes are now displayed by default.

@@ -3432,7 +3432,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   merge_buggy_core_siblings = (data->arch == HWLOC_LINUX_ARCH_X86);
   caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset) {
-    hwloc_bitmap_t packageset, coreset, bookset, threadset;
+    hwloc_bitmap_t packageset, coreset, bookset, drawerset, threadset;
     int tmpint;
     int notfirstofcore = 0; /* set if we have core info and if we're not the first PU of our core */
 
@@ -3584,17 +3584,44 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
 	    mybookid = (unsigned) tmpint;
 
-	  book = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, mybookid);
-          book->cpuset = bookset;
-          hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
-                       mybookid, bookset);
-          book->subtype = strdup("Book");
-	  book->attr->group.kind = HWLOC_GROUP_KIND_S390_BOOK;
-          hwloc_insert_object_by_cpuset(topology, book);
-          bookset = NULL; /* don't free it */
+	    book = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, mybookid);
+	    book->cpuset = bookset;
+	    hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
+				    mybookid, bookset);
+	    book->subtype = strdup("Book");
+	    book->attr->group.kind = HWLOC_GROUP_KIND_S390_BOOK;
+	    book->attr->group.subkind = 0;
+	    hwloc_insert_object_by_cpuset(topology, book);
+	    bookset = NULL; /* don't free it */
 	  }
         }
 	hwloc_bitmap_free(bookset);
+
+	sprintf(str, "%s/cpu%d/topology/drawer_siblings", path, i);
+	drawerset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
+	if (drawerset) {
+	  hwloc_bitmap_and(drawerset, drawerset, cpuset);
+	  if (hwloc_bitmap_first(drawerset) == i) {
+	    struct hwloc_obj *drawer;
+	    unsigned mydrawerid;
+	    mydrawerid = (unsigned) -1;
+	    sprintf(str, "%s/cpu%d/topology/drawer_id", path, i); /* contains %d at least up to 4.19 */
+	    if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
+	      mydrawerid = (unsigned) tmpint;
+
+	      drawer = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, mydrawerid);
+	      drawer->cpuset = drawerset;
+	      hwloc_debug_1arg_bitmap("os drawer %u has cpuset %s\n",
+				      mydrawerid, drawerset);
+	      drawer->subtype = strdup("Drawer");
+	      drawer->attr->group.kind = HWLOC_GROUP_KIND_S390_BOOK;
+	      drawer->attr->group.subkind = 1;
+	      hwloc_insert_object_by_cpuset(topology, drawer);
+	      drawerset = NULL; /* don't free it */
+	    }
+	  }
+	  hwloc_bitmap_free(drawerset);
+	}
       }
     }
 
