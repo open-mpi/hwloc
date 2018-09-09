@@ -250,7 +250,7 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
 static void
 hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
-  char type[64], idx[10], attr[1024], *cpuset = NULL;
+  char type[64], idx[12], attr[1024], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
   hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
   if (obj->os_index != HWLOC_UNKNOWN_INDEX)
