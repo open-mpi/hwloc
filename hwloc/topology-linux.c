@@ -898,6 +898,11 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
     /* start from scratch, the topology isn't ready yet (complete_cpuset is missing (-1) or empty (0))*/
     nr_cpus = 1;
 
+  /* reading /sys/devices/system/cpu/kernel_max would be easier (single value to parse instead of a list),
+   * but its value may be way too large (5119 on CentOS7).
+   * /sys/devices/system/cpu/possible is better because it matches the current hardware.
+   */
+
   fd = open("/sys/devices/system/cpu/possible", O_RDONLY); /* binding only supported in real fsroot, no need for data->root_fd */
   if (fd >= 0) {
     hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc();
