@@ -1845,6 +1845,7 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
 {
   static int _max_numnodes = -1, max_numnodes;
   int linuxpolicy;
+  int fd;
 
   if (_max_numnodes != -1)
     /* already computed */
@@ -1852,6 +1853,22 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
 
   /* start with a single ulong, it's the minimal and it's enough for most machines */
   max_numnodes = HWLOC_BITS_PER_LONG;
+
+  /* try to get the max from sysfs */
+  fd = open("/sys/devices/system/node/possible", O_RDONLY); /* binding only supported in real fsroot, no need for data->root_fd */
+  if (fd >= 0) {
+    hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc();
+    if (hwloc__read_fd_as_cpulist(fd, possible_bitmap) == 0) {
+      int max_possible = hwloc_bitmap_last(possible_bitmap);
+      hwloc_debug_bitmap("possible NUMA nodes are %s\n", possible_bitmap);
+
+      if (max_numnodes < max_possible + 1)
+        max_numnodes = max_possible + 1;
+    }
+    close(fd);
+    hwloc_bitmap_free(possible_bitmap);
+  }
+
   while (1) {
     unsigned long mask[max_numnodes / HWLOC_BITS_PER_LONG];
     int err = hwloc_get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
