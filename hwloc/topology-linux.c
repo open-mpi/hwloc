@@ -3134,8 +3134,10 @@ list_sysfsnode(struct hwloc_linux_backend_data_s *data,
     return NULL;
 
   nodeset = hwloc_bitmap_alloc();
-  if (!nodeset)
+  if (!nodeset) {
+    closedir(dir);
     return NULL;
+  }
 
   while ((dirent = readdir(dir)) != NULL) {
     if (strncmp(dirent->d_name, "node", 4))
