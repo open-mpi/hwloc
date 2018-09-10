@@ -810,6 +810,23 @@ hwloc__read_path_as_cpulist(const char *maskpath, hwloc_bitmap_t set, int fsroot
   return err;
 }
 
+/* on failure, the content of set is undefined */
+static __hwloc_inline hwloc_bitmap_t
+hwloc__alloc_read_path_as_cpulist(const char *maskpath, int fsroot_fd)
+{
+  hwloc_bitmap_t set;
+  int err;
+  set = hwloc_bitmap_alloc_full();
+  if (!set)
+    return NULL;
+  err = hwloc__read_path_as_cpulist(maskpath, set, fsroot_fd);
+  if (err < 0) {
+    hwloc_bitmap_free(set);
+    return NULL;
+  } else
+    return set;
+}
+
 
 /*****************************
  ******* CpuBind Hooks *******
@@ -3392,6 +3409,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	      struct hwloc_linux_cpuinfo_proc * cpuinfo_Lprocs, unsigned cpuinfo_numprocs)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
+  hwloc_bitmap_t online_set; /* Set of online CPUs if easily available, or NULL */
 #define CPU_TOPOLOGY_STR_LEN 128
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
@@ -3400,11 +3418,21 @@ look_sysfscpu(struct hwloc_topology *topology,
   hwloc_obj_t packages = NULL; /* temporary list of packages before actual insert in the tree */
   int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
 
+  /* try to get the list of online CPUs at once.
+   * otherwise we'll use individual per-CPU "online" files.
+   *
+   * don't use <path>/online, /sys/bus/cpu/devices only contains cpu%d
+   */
+  online_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/system/cpu/online", data->root_fd);
+  if (online_set)
+    hwloc_debug_bitmap("online CPUs %s\n", online_set);
+
   /* fill the cpuset of interesting cpus */
   dir = hwloc_opendir(path, data->root_fd);
-  if (!dir)
+  if (!dir) {
+    hwloc_bitmap_free(online_set);
     return -1;
-  else {
+  } else {
     struct dirent *dirent;
     cpuset = hwloc_bitmap_alloc();
 
@@ -3420,11 +3448,19 @@ look_sysfscpu(struct hwloc_topology *topology,
       hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, cpu);
 
       /* check whether this processor is online */
-      sprintf(str, "%s/cpu%lu/online", path, cpu);
-      if (hwloc_read_path_by_length(str, online, sizeof(online), data->root_fd) == 0) {
-	if (!atoi(online)) {
+      if (online_set) {
+	if (!hwloc_bitmap_isset(online_set, cpu)) {
 	  hwloc_debug("os proc %lu is offline\n", cpu);
 	  continue;
+	}
+      } else {
+	/* /sys/devices/system/cpu/online unavailable, check the cpu online file */
+	sprintf(str, "%s/cpu%lu/online", path, cpu);
+	if (hwloc_read_path_by_length(str, online, sizeof(online), data->root_fd) == 0) {
+	  if (!atoi(online)) {
+	    hwloc_debug("os proc %lu is offline\n", cpu);
+	    continue;
+	  }
 	}
       }
 
@@ -3778,6 +3814,7 @@ look_sysfscpu(struct hwloc_topology *topology,
     look_powerpc_device_tree(topology, data);
 
   hwloc_bitmap_free(cpuset);
+  hwloc_bitmap_free(online_set);
 
   return 0;
 }
