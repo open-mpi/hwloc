@@ -797,6 +797,19 @@ hwloc__read_fd_as_cpulist(int fd, hwloc_bitmap_t set)
   return 0;
 }
 
+/* on failure, the content of set is undefined */
+static __hwloc_inline int
+hwloc__read_path_as_cpulist(const char *maskpath, hwloc_bitmap_t set, int fsroot_fd)
+{
+  int fd, err;
+  fd = hwloc_open(maskpath, fsroot_fd);
+  if (fd < 0)
+    return -1;
+  err = hwloc__read_fd_as_cpulist(fd, set);
+  close(fd);
+  return err;
+}
+
 
 /*****************************
  ******* CpuBind Hooks *******
@@ -2245,11 +2258,10 @@ static void
 hwloc_admin_disable_set_from_cpuset(int root_fd,
 				    const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name,
 				    const char *attr_name,
-				    hwloc_bitmap_t admin_enabled_cpus_set)
+				    hwloc_bitmap_t admin_enabled_set)
 {
 #define CPUSET_FILENAME_LEN 256
   char cpuset_filename[CPUSET_FILENAME_LEN];
-  int fd;
   int err;
 
   if (cgroup_mntpnt) {
@@ -2262,20 +2274,14 @@ hwloc_admin_disable_set_from_cpuset(int root_fd,
     hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
   }
 
-  fd = hwloc_open(cpuset_filename, root_fd);
-  if (fd < 0) {
-    /* found no cpuset description, ignore it */
-    hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
-    return;
+  err = hwloc__read_path_as_cpulist(cpuset_filename, admin_enabled_set, root_fd);
+
+  if (err < 0) {
+    hwloc_debug("failed to read cpuset '%s' attribute '%s'\n", cpuset_name, attr_name);
+    hwloc_bitmap_fill(admin_enabled_set);
+  } else {
+    hwloc_debug_bitmap("cpuset includes %s\n", admin_enabled_set);
   }
-
-  err = hwloc__read_fd_as_cpulist(fd, admin_enabled_cpus_set);
-  close(fd);
-
-  if (err < 0)
-    hwloc_bitmap_fill(admin_enabled_cpus_set);
-  else
-    hwloc_debug_bitmap("cpuset includes %s\n", admin_enabled_cpus_set);
 }
 
 static void
