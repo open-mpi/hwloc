@@ -28,6 +28,9 @@ hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
   const char *env;
   unsigned i;
 
+  /* start from everything */
+  hwloc_bitmap_copy(topology->allowed_cpuset, topology->levels[0][0]->cpuset);
+
   /* mark the 17th core (OS-reserved) as disallowed */
   hwloc_bitmap_clr_range(topology->allowed_cpuset, (HWLOC_BGQ_CORES-1)*4, HWLOC_BGQ_CORES*4-1);
 
