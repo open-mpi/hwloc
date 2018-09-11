@@ -1676,7 +1676,7 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
    * and round up to the nearest multiple of BITS_PER_LONG */
   max_os_index = (max_os_index + 1 + HWLOC_BITS_PER_LONG - 1) & ~(HWLOC_BITS_PER_LONG - 1);
 
-  linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
+  linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(unsigned long));
   if (!linuxmask) {
     hwloc_bitmap_free(linux_nodeset);
     errno = ENOMEM;
@@ -1815,7 +1815,7 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
 
   if (flags & HWLOC_MEMBIND_MIGRATE) {
     unsigned long fullmask[max_os_index/HWLOC_BITS_PER_LONG];
-    memset(fullmask, 0xf, max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
+    memset(fullmask, 0xf, max_os_index/HWLOC_BITS_PER_LONG * sizeof(unsigned long));
     err = hwloc_migrate_pages(0, max_os_index+1, fullmask, linuxmask);
     if (err < 0 && (flags & HWLOC_MEMBIND_STRICT))
       goto out_with_mask;
