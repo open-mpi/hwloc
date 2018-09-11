@@ -796,6 +796,7 @@ hwloc___nolibxml_prepare_export_diff(hwloc_topology_diff_t diff, const char *ref
   state.new_prop = hwloc__nolibxml_export_new_prop;
   state.add_content = hwloc__nolibxml_export_add_content;
   state.end_object = hwloc__nolibxml_export_end_object;
+  state.global = NULL;
 
   ndata->indent = 0;
   ndata->written = 0;

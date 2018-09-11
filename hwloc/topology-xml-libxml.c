@@ -532,6 +532,7 @@ hwloc__libxml2_prepare_export_diff(hwloc_topology_diff_t diff, const char *refna
   state.new_prop = hwloc__libxml_export_new_prop;
   state.add_content = hwloc__libxml_export_add_content;
   state.end_object = hwloc__libxml_export_end_object;
+  state.global = NULL;
 
   data->current_node = root_node;
 
