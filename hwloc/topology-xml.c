@@ -598,8 +598,11 @@ hwloc__xml_v1import_distances(struct hwloc_xml_backend_data_s *data,
       matrix[i] = val * latbase;
 
       ret = state->global->close_tag(&childstate);
-      if (ret < 0)
+      if (ret < 0) {
+	free(matrix);
+	free(v1dist);
 	return -1;
+      }
 
       state->global->close_child(&childstate);
     }
