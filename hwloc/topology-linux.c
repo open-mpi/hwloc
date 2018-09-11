@@ -3125,6 +3125,20 @@ list_sysfsnode(struct hwloc_linux_backend_data_s *data,
   hwloc_bitmap_t nodeset;
   struct dirent *dirent;
 
+  /* try to get the list of NUMA nodes at once.
+   * otherwise we'll list the entire directory.
+   *
+   * don't use <path>/possible, /sys/bus/node/devices only contains node%d
+   */
+  nodeset = hwloc__alloc_read_path_as_cpulist("/sys/devices/system/node/possible", data->root_fd);
+  if (nodeset) {
+    int _nbnodes = hwloc_bitmap_weight(nodeset);
+    assert(_nbnodes >= 1);
+    nbnodes = (unsigned)_nbnodes;
+    hwloc_debug_bitmap("possible NUMA nodes %s\n", nodeset);
+    goto found;
+  }
+
   /* Get the list of nodes first */
   dir = hwloc_opendir(path, data->root_fd);
   if (!dir)
@@ -3145,13 +3159,16 @@ list_sysfsnode(struct hwloc_linux_backend_data_s *data,
   }
   closedir(dir);
 
+  assert(nbnodes >= 1); /* linux cannot have a "node/" subdirectory without at least one "node%d" */
+
+  /* we don't know if sysfs returns nodes in order, we can't merge above and below loops */
+
+ found:
   indexes = calloc(nbnodes, sizeof(*indexes));
   if (!indexes) {
     hwloc_bitmap_free(nodeset);
     return NULL;
   }
-
-  /* we don't know if sysfs returns nodes in order, we can't merge these loops */
 
   /* Unsparsify node indexes.
    * We'll need them later because Linux groups sparse distances
