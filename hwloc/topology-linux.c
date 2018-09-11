@@ -749,7 +749,7 @@ hwloc_linux_read_path_as_cpumask(const char *maskpath, hwloc_bitmap_t set)
   return err;
 }
 
-/* set must be full on input */
+/* on failure, the content of set is undefined */
 static __hwloc_inline int
 hwloc__read_fd_as_cpulist(int fd, hwloc_bitmap_t set)
 {
@@ -764,6 +764,8 @@ hwloc__read_fd_as_cpulist(int fd, hwloc_bitmap_t set)
 
   if (hwloc__read_fd(fd, &buffer, &filesize) < 0)
     return -1;
+
+  hwloc_bitmap_fill(set);
 
   current = buffer;
   prevlast = -1;
@@ -885,7 +887,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
 
   fd = open("/sys/devices/system/cpu/possible", O_RDONLY); /* binding only supported in real fsroot, no need for data->root_fd */
   if (fd >= 0) {
-    hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc_full();
+    hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc();
     if (hwloc__read_fd_as_cpulist(fd, possible_bitmap) == 0) {
       int max_possible = hwloc_bitmap_last(possible_bitmap);
       hwloc_debug_bitmap("possible CPUs are %s\n", possible_bitmap);
