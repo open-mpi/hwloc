@@ -527,7 +527,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
 
     tmpcaches = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
-    if (tmpcaches) {
+    if (!tmpcaches) {
+     infos->numcaches = oldnumcaches;
+    } else {
      infos->cache = tmpcaches;
      cache = &infos->cache[oldnumcaches];
 
