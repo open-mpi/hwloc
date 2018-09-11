@@ -1093,10 +1093,10 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
     hwloc_bitmap_free(orig_cpuset);
   }
 
-  if (!data->apicid_unique)
-    fulldiscovery = 0;
-  else
+  if (data->apicid_unique)
     summarize(backend, infos, fulldiscovery);
+  /* if !data->apicid_unique, do nothing and return success, so that the caller does nothing either */
+
   return 0;
 }
 
