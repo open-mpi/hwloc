@@ -527,6 +527,7 @@ hwloc_nolibxml_import_diff(struct hwloc__xml_import_state_s *state,
 
 out_with_buffer:
   free(buffer);
+  free(refname);
 out:
   return -1;
 }
