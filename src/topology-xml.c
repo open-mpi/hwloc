@@ -578,8 +578,11 @@ hwloc__xml_import_distances(struct hwloc_xml_backend_data_s *data,
 	latmax = val;
 
       ret = state->global->close_tag(&childstate);
-      if (ret < 0)
+      if (ret < 0) {
+	free(distances->distances.latency);
+	free(distances);
 	return -1;
+      }
 
       state->global->close_child(&childstate);
     }
