@@ -2583,19 +2583,19 @@ hwloc_connect_children(hwloc_obj_t parent)
 }
 
 /*
- * Check whether there is an object below ROOT that has the same type as OBJ
+ * Check whether there is an object strictly below ROOT that has the same type as OBJ
  */
 static int
 find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
-  if (hwloc_type_cmp(root, obj) == HWLOC_OBJ_EQUAL)
-    return 1;
-
-  for_each_child (child, root)
+  for_each_child (child, root) {
+    if (hwloc_type_cmp(child, obj) == HWLOC_OBJ_EQUAL)
+      return 1;
     if (find_same_type(child, obj))
       return 1;
+  }
 
   return 0;
 }
