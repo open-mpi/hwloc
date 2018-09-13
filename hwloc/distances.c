@@ -683,20 +683,22 @@ hwloc_distances_get_by_depth(hwloc_topology_t topology, int depth,
 
 static void hwloc_report_user_distance_error(const char *msg, int line)
 {
-    static int reported = 0;
+  static int reported = 0;
 
-    if (!reported && !hwloc_hide_errors()) {
-        fprintf(stderr, "****************************************************************************\n");
-        fprintf(stderr, "* hwloc %s has encountered what looks like an error from user-given distances.\n", HWLOC_VERSION);
-        fprintf(stderr, "*\n");
-        fprintf(stderr, "* %s\n", msg);
-        fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
-        fprintf(stderr, "*\n");
-        fprintf(stderr, "* Please make sure that distances given through the interface or environment\n");
-        fprintf(stderr, "* variables do not contradict any other topology information.\n");
-        fprintf(stderr, "****************************************************************************\n");
-        reported = 1;
-    }
+  if (!reported && !hwloc_hide_errors()) {
+    fprintf(stderr, "****************************************************************************\n");
+    fprintf(stderr, "* hwloc %s was given invalid distances by the user.\n", HWLOC_VERSION);
+    fprintf(stderr, "*\n");
+    fprintf(stderr, "* %s\n", msg);
+    fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
+    fprintf(stderr, "*\n");
+    fprintf(stderr, "* Please make sure that distances given through the programming API\n");
+    fprintf(stderr, "* do not contradict any other topology information.\n");
+    fprintf(stderr, "* \n");
+    fprintf(stderr, "* hwloc will now ignore this invalid topology information and continue.\n");
+    fprintf(stderr, "****************************************************************************\n");
+    reported = 1;
+  }
 }
 
 static int hwloc_compare_values(uint64_t a, uint64_t b, float accuracy)
