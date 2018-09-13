@@ -2600,40 +2600,6 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
   return 0;
 }
 
-/* traverse the array of current object and compare them with top_obj.
- * if equal, take the object and put its children into the remaining objs.
- * if not equal, put the object into the remaining objs.
- */
-static unsigned
-hwloc_level_take_objects(hwloc_obj_t top_obj,
-			 hwloc_obj_t *current_objs, unsigned n_current_objs,
-			 hwloc_obj_t *taken_objs, unsigned n_taken_objs __hwloc_attribute_unused,
-			 hwloc_obj_t *remaining_objs, unsigned n_remaining_objs __hwloc_attribute_unused)
-{
-  unsigned taken_i = 0;
-  unsigned new_i = 0;
-  unsigned i, j;
-
-  for (i = 0; i < n_current_objs; i++)
-    if (hwloc_type_cmp(top_obj, current_objs[i]) == HWLOC_OBJ_EQUAL) {
-      /* Take it, add main children.  */
-      taken_objs[taken_i++] = current_objs[i];
-      for (j = 0; j < current_objs[i]->arity; j++)
-	remaining_objs[new_i++] = current_objs[i]->children[j];
-    } else {
-      /* Leave it.  */
-      remaining_objs[new_i++] = current_objs[i];
-    }
-
-#ifdef HWLOC_DEBUG
-  /* Make sure we didn't mess up.  */
-  assert(taken_i == n_taken_objs);
-  assert(new_i == n_current_objs - n_taken_objs + n_remaining_objs);
-#endif
-
-  return new_i;
-}
-
 static int
 hwloc_build_level_from_list(struct hwloc_special_level_s *slevel)
 {
@@ -2831,32 +2797,39 @@ hwloc_connect_levels(hwloc_topology_t topology)
     /* Now peek all objects of the same type, build a level with that and
      * replace them with their children.  */
 
-    /* First count them.  */
-    n_taken_objs = 0;
+    /* allocate enough to take all current objects and an ending NULL */
+    taken_objs = malloc((n_objs+1) * sizeof(taken_objs[0]));
+    assert(taken_objs);
+
+    /* allocate enough to keep all current objects or their children */
     n_new_objs = 0;
+    for (i = 0; i < n_objs; i++) {
+      if (objs[i]->arity)
+	n_new_objs += objs[i]->arity;
+      else
+	n_new_objs++;
+    }
+    new_objs = malloc(n_new_objs * sizeof(new_objs[0]));
+    assert(new_objs);
+
+    /* now actually take these objects */
+    n_new_objs = 0;
+    n_taken_objs = 0;
     for (i = 0; i < n_objs; i++)
       if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_OBJ_EQUAL) {
-	n_taken_objs++;
+	/* Take it, add main children.  */
+	taken_objs[n_taken_objs++] = objs[i];
+	memcpy(&new_objs[n_new_objs], objs[i]->children, objs[i]->arity * sizeof(new_objs[0]));
 	n_new_objs += objs[i]->arity;
+      } else {
+	/* Leave it.  */
+	new_objs[n_new_objs++] = objs[i];
       }
 
-    /* New level.  */
-    taken_objs = malloc((n_taken_objs + 1) * sizeof(taken_objs[0]));
-    /* New list of pending objects.  */
-    if (n_objs - n_taken_objs + n_new_objs) {
-      new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
-    } else {
-#ifdef HWLOC_DEBUG
-      assert(!n_new_objs);
-      assert(n_objs == n_taken_objs);
-#endif
+    if (!n_new_objs) {
+      free(new_objs);
       new_objs = NULL;
     }
-
-    n_new_objs = hwloc_level_take_objects(top_obj,
-					  objs, n_objs,
-					  taken_objs, n_taken_objs,
-					  new_objs, n_new_objs);
 
     /* Ok, put numbers in the level and link cousins.  */
     for (i = 0; i < n_taken_objs; i++) {
