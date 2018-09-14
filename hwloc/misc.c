@@ -80,21 +80,6 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
 }
 #endif
 
-int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
-{
-  size_t i = 0;
-  while (*haystack && *haystack != ':') {
-    int ha = *haystack++;
-    int low_h = tolower(ha);
-    int ne = *needle++;
-    int low_n = tolower(ne);
-    if (low_h != low_n)
-      return 1;
-    i++;
-  }
-  return i < n;
-}
-
 void hwloc_add_uname_info(struct hwloc_topology *topology __hwloc_attribute_unused,
 			  void *cached_uname __hwloc_attribute_unused)
 {

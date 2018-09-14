@@ -332,10 +332,6 @@ extern int hwloc_encode_to_base64(const char *src, size_t srclength, char *targe
  */
 extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsize);
 
-/* Check whether needle matches the beginning of haystack, at least n, and up
- * to a colon or \0 */
-extern int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
-
 /* On some systems, snprintf returns the size of written data, not the actually
  * required size. Sometimes it returns -1 on truncation too.
  * And sometimes it doesn't like NULL output buffers.
