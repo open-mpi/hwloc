@@ -2935,6 +2935,10 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
   free(cpus.p);
 }
 
+/***************************************
+ * KNL NUMA quirks
+ */
+
 struct knl_hwdata {
   char memory_mode[32];
   char cluster_mode[32];
@@ -3108,6 +3112,139 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
   return 0;
 }
 
+#define NUMA_QUIRK_STATUS_ALREADY_INSERTED (1<<0)
+#define NUMA_QUIRK_STATUS_DROP_DISTANCES (1<<1)
+
+static void
+hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
+			   struct hwloc_linux_backend_data_s *data,
+			   hwloc_obj_t *nodes, unsigned nbnodes,
+			   uint64_t * distances,
+			   unsigned *quirk_status, unsigned *failednodes)
+{
+  struct knl_hwdata knl_hwdata;
+  unsigned nr_knl_clusters = 0;
+  hwloc_obj_t knl_clusters[4]= { NULL, NULL, NULL, NULL };
+  int node_knl_cluster[8] = { -1, -1, -1, -1, -1, -1, -1, -1};
+  int mscache;
+  unsigned i, j, closest;
+  unsigned long MCDRAM_numa_size, DDR_numa_size;
+  unsigned MCDRAM_nbnodes, DDR_nbnodes;
+
+  DDR_numa_size = 0;
+  DDR_nbnodes = 0;
+  MCDRAM_numa_size = 0;
+  MCDRAM_nbnodes = 0;
+  for(i=0; i<nbnodes; i++)
+    if (hwloc_bitmap_iszero(nodes[i]->cpuset)) {
+      MCDRAM_numa_size += nodes[i]->attr->numanode.local_memory;
+      MCDRAM_nbnodes++;
+    } else {
+      DDR_numa_size += nodes[i]->attr->numanode.local_memory;
+      DDR_nbnodes++;
+    }
+  assert(DDR_nbnodes + MCDRAM_nbnodes == nbnodes);
+
+  hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata,
+					       DDR_nbnodes, DDR_numa_size,
+					       MCDRAM_nbnodes, MCDRAM_numa_size);
+  mscache = knl_hwdata.mcdram_cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE);
+
+  if (knl_hwdata.cluster_mode[0])
+    hwloc_obj_add_info(topology->levels[0][0], "ClusterMode", knl_hwdata.cluster_mode);
+  if (knl_hwdata.memory_mode[0])
+    hwloc_obj_add_info(topology->levels[0][0], "MemoryMode", knl_hwdata.memory_mode);
+
+  for(i=0; i<nbnodes; i++) {
+    if (!hwloc_bitmap_iszero(nodes[i]->cpuset)) {
+      /* DDR, see if there's a MCDRAM cache to add */
+      if (mscache) {
+	hwloc_obj_t cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, HWLOC_UNKNOWN_INDEX);
+	if (cache) {
+	  cache->attr->cache.depth = 3;
+	  cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+	  cache->attr->cache.size = knl_hwdata.mcdram_cache_size;
+	  cache->attr->cache.linesize = knl_hwdata.mcdram_cache_line_size;
+	  cache->attr->cache.associativity = knl_hwdata.mcdram_cache_associativity;
+	  hwloc_obj_add_info(cache, "Inclusive", knl_hwdata.mcdram_cache_inclusiveness ? "1" : "0");
+	  cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
+	  cache->nodeset = hwloc_bitmap_dup(nodes[i]->nodeset); /* only applies to DDR */
+	  cache->subtype = strdup("MemorySideCache");
+	  hwloc_insert_object_by_cpuset(topology, cache);
+	}
+      }
+      /* nothing else to do for DDR */
+      continue;
+    }
+    /* MCDRAM */
+    nodes[i]->subtype = strdup("MCDRAM");
+
+    if (!distances || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP))
+      continue;
+
+    /* DDR is the closest node with CPUs */
+    closest = (unsigned)-1;
+    for(j=0; j<nbnodes; j++) {
+      if (j==i)
+	continue;
+      if (hwloc_bitmap_iszero(nodes[j]->cpuset))
+	/* nodes without CPU, that's another MCDRAM, skip it */
+	continue;
+      if (closest == (unsigned)-1 || distances[i*nbnodes+j]<distances[i*nbnodes+closest])
+	closest = j;
+    }
+    if (closest != (unsigned) -1) {
+      /* Change MCDRAM cpuset to DDR cpuset for clarity.
+       * Not actually useful if we insert with hwloc__attach_memory_object() below.
+       * The cpuset will be updated by the core later anyway.
+       */
+      hwloc_bitmap_copy(nodes[i]->cpuset, nodes[closest]->cpuset);
+      /* Add a Group for Cluster containing this MCDRAM + DDR */
+      hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
+      hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
+      hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
+      cluster->subtype = strdup("Cluster");
+      cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER;
+      knl_clusters[nr_knl_clusters] = cluster;
+      node_knl_cluster[i] = nr_knl_clusters;
+      node_knl_cluster[closest] = nr_knl_clusters;
+      nr_knl_clusters++;
+    }
+  }
+
+  /* insert knl clusters */
+  if (data->is_knl) {
+    for(i=0; i<nr_knl_clusters; i++) {
+      knl_clusters[i] = hwloc_insert_object_by_cpuset(topology, knl_clusters[i]);
+      /* failure or replace can be ignored */
+    }
+  }
+
+  /* insert actual numa nodes */
+  for (i = 0; i < nbnodes; i++) {
+    hwloc_obj_t node = nodes[i];
+    if (node) {
+      hwloc_obj_t res_obj;
+      if (node_knl_cluster[i] != -1) {
+	/* directly attach to the existing cluster */
+	hwloc_obj_t parent = knl_clusters[node_knl_cluster[i]];
+	res_obj = hwloc__attach_memory_object(topology, parent, node, hwloc_report_os_error);
+      } else {
+	/* we don't know where to attach, let the core find or insert if needed */
+	res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, hwloc_report_os_error);
+      }
+      if (res_obj != node)
+	/* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
+	 * This object disappeared, but we'll ignore distances anyway */
+	(*failednodes)++;
+    }
+  }
+
+  /* we inserted object, the caller doesn't have to do it */
+  *quirk_status |= NUMA_QUIRK_STATUS_ALREADY_INSERTED;
+  /* drop KNL crazy distance matrix, don't expose it to users */
+  *quirk_status |= NUMA_QUIRK_STATUS_DROP_DISTANCES;
+}
 
 
 /**************************************
@@ -3205,8 +3342,8 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned *indexes;
   uint64_t * distances;
   hwloc_bitmap_t nodes_cpuset;
-  struct knl_hwdata knl_hwdata;
-  int failednodes = 0;
+  unsigned failednodes = 0;
+  unsigned quirk_status = 0;
   unsigned i;
 
   /* NUMA nodes cannot be filtered out */
@@ -3288,136 +3425,29 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       free(indexes);
 
-      unsigned nr_knl_clusters = 0;
-      hwloc_obj_t knl_clusters[4]= { NULL, NULL, NULL, NULL };
-      int node_knl_cluster[8] = { -1, -1, -1, -1, -1, -1, -1, -1};
-
       if (data->is_knl && !failednodes) {
+	/* apply KNL quirks */
 	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
-	int noquirk = (env && !atoi(env)) || !distances || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP);
-	int mscache;
-	unsigned j, closest;
-	unsigned long MCDRAM_numa_size, DDR_numa_size;
-	unsigned MCDRAM_nbnodes, DDR_nbnodes;
+	int noquirk = (env && !atoi(env));
+	if (!noquirk)
+	  hwloc_linux_knl_numa_quirk(topology, data, nodes, nbnodes, distances, &quirk_status, &failednodes);
+      }
 
-	DDR_numa_size = 0;
-	DDR_nbnodes = 0;
-	MCDRAM_numa_size = 0;
-	MCDRAM_nbnodes = 0;
-	for(i=0; i<nbnodes; i++)
-	  if (hwloc_bitmap_iszero(nodes[i]->cpuset)) {
-	    MCDRAM_numa_size += nodes[i]->attr->numanode.local_memory;
-	    MCDRAM_nbnodes++;
-	  } else {
-	    DDR_numa_size += nodes[i]->attr->numanode.local_memory;
-	    DDR_nbnodes++;
+      if (!(quirk_status & NUMA_QUIRK_STATUS_ALREADY_INSERTED)) {
+	/* insert actual numa nodes */
+	for (i = 0; i < nbnodes; i++) {
+	  hwloc_obj_t node = nodes[i];
+	  if (node) {
+	    hwloc_obj_t res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, hwloc_report_os_error);
+	    if (res_obj != node)
+	      /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
+	       * This object disappeared, we'll ignore distances */
+	      failednodes++;
 	  }
-	assert(DDR_nbnodes + MCDRAM_nbnodes == nbnodes);
-
-	hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata,
-						     DDR_nbnodes, DDR_numa_size,
-						     MCDRAM_nbnodes, MCDRAM_numa_size);
-	mscache = knl_hwdata.mcdram_cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE);
-
-	if (knl_hwdata.cluster_mode[0])
-	  hwloc_obj_add_info(topology->levels[0][0], "ClusterMode", knl_hwdata.cluster_mode);
-	if (knl_hwdata.memory_mode[0])
-	  hwloc_obj_add_info(topology->levels[0][0], "MemoryMode", knl_hwdata.memory_mode);
-
-	for(i=0; i<nbnodes; i++) {
-	  if (!hwloc_bitmap_iszero(nodes[i]->cpuset)) {
-	    /* DDR, see if there's a MCDRAM cache to add */
-	    if (mscache) {
-	      hwloc_obj_t cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, HWLOC_UNKNOWN_INDEX);
-	      if (cache) {
-		cache->attr->cache.depth = 3;
-		cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-		cache->attr->cache.size = knl_hwdata.mcdram_cache_size;
-		cache->attr->cache.linesize = knl_hwdata.mcdram_cache_line_size;
-		cache->attr->cache.associativity = knl_hwdata.mcdram_cache_associativity;
-		hwloc_obj_add_info(cache, "Inclusive", knl_hwdata.mcdram_cache_inclusiveness ? "1" : "0");
-		cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
-		cache->nodeset = hwloc_bitmap_dup(nodes[i]->nodeset); /* only applies to DDR */
-		cache->subtype = strdup("MemorySideCache");
-		hwloc_insert_object_by_cpuset(topology, cache);
-	      }
-	    }
-	    /* nothing else to do for DDR */
-	    continue;
-	  }
-	  /* MCDRAM */
-	  nodes[i]->subtype = strdup("MCDRAM");
-
-	  if (noquirk)
-	    continue;
-
-	  /* DDR is the closest node with CPUs */
-	  closest = (unsigned)-1;
-	  for(j=0; j<nbnodes; j++) {
-	    if (j==i)
-	      continue;
-	    if (hwloc_bitmap_iszero(nodes[j]->cpuset))
-	      /* nodes without CPU, that's another MCDRAM, skip it */
-	      continue;
-	    if (closest == (unsigned)-1 || distances[i*nbnodes+j]<distances[i*nbnodes+closest])
-	      closest = j;
-	  }
-	  if (closest != (unsigned) -1) {
-	    /* Change MCDRAM cpuset to DDR cpuset for clarity.
-	     * Not actually useful if we insert with hwloc__attach_memory_object() below.
-	     * The cpuset will be updated by the core later anyway.
-	     */
-	    hwloc_bitmap_copy(nodes[i]->cpuset, nodes[closest]->cpuset);
-	    /* Add a Group for Cluster containing this MCDRAM + DDR */
-	    hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
-	    hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
-	    hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
-	    cluster->subtype = strdup("Cluster");
-	    cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER;
-	    knl_clusters[nr_knl_clusters] = cluster;
-	    node_knl_cluster[i] = nr_knl_clusters;
-	    node_knl_cluster[closest] = nr_knl_clusters;
-	    nr_knl_clusters++;
-	  }
-	}
-	if (!noquirk) {
-	  /* drop the distance matrix, it contradicts the above NUMA layout groups */
-	  free(distances);
-	  distances = NULL;
 	}
       }
 
-      /* everything is ready for insertion now */
-
-      /* insert knl clusters */
-      if (data->is_knl) {
-	for(i=0; i<nr_knl_clusters; i++) {
-	  knl_clusters[i] = hwloc_insert_object_by_cpuset(topology, knl_clusters[i]);
-	  /* failure or replace can be ignored */
-	}
-      }
-
-      /* insert actual numa nodes */
-      for (i = 0; i < nbnodes; i++) {
-	hwloc_obj_t node = nodes[i];
-	if (node) {
-	  hwloc_obj_t res_obj;
-	  if (data->is_knl && node_knl_cluster[i] != -1) {
-	    /* directly attach to the existing cluster */
-	    hwloc_obj_t parent = knl_clusters[node_knl_cluster[i]];
-	    res_obj = hwloc__attach_memory_object(topology, parent, node, hwloc_report_os_error);
-	  } else {
-	    /* we don't know where to attach, let the core find or insert if needed */
-	    res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, hwloc_report_os_error);
-	  }
-	  if (res_obj != node)
-	    /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
-	     * This object disappeared, we'll ignore distances */
-	    failednodes++;
-	}
-      }
-
-      if (failednodes) {
+      if (failednodes || (quirk_status & NUMA_QUIRK_STATUS_DROP_DISTANCES)) {
 	free(distances);
 	distances = NULL;
       }
