@@ -2951,39 +2951,21 @@ struct knl_hwdata {
 /* Try to handle knl hwdata properties
  * Returns 0 on success and -1 otherwise */
 static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backend_data_s *data,
-							struct knl_hwdata *hwdata,
-							unsigned DDR_nbnodes,
-							unsigned long DDR_numa_size,
-							unsigned MCDRAM_nbnodes,
-							unsigned long MCDRAM_numa_size)
+							struct knl_hwdata *hwdata)
 {
   char *knl_cache_file;
   int version = 0;
   char buffer[512] = {0};
   char *data_beg = NULL;
-  char * fallback_env = getenv("HWLOC_KNL_HDH_FALLBACK");
-  int fallback = fallback_env ? atoi(fallback_env) : -1; /* by default, only fallback if needed */
-
-  hwdata->memory_mode[0] = '\0';
-  hwdata->cluster_mode[0] = '\0';
-  hwdata->mcdram_cache_size = -1;
-  hwdata->mcdram_cache_associativity = -1;
-  hwdata->mcdram_cache_inclusiveness = -1;
-  hwdata->mcdram_cache_line_size = -1;
-
-  if (fallback == 1) {
-    hwloc_debug("KNL dumped hwdata ignored, forcing fallback\n");
-    goto fallback;
-  }
 
   if (asprintf(&knl_cache_file, "%s/knl_memoryside_cache", data->dumped_hwdata_dirname) < 0)
-    goto fallback;
+    return -1;
 
   hwloc_debug("Reading knl cache data from: %s\n", knl_cache_file);
   if (hwloc_read_path_by_length(knl_cache_file, buffer, sizeof(buffer), data->root_fd) < 0) {
     hwloc_debug("Unable to open KNL data file `%s' (%s)\n", knl_cache_file, strerror(errno));
     free(knl_cache_file);
-    goto fallback;
+    return -1;
   }
   free(knl_cache_file);
 
@@ -2992,7 +2974,7 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
   /* file must start with version information */
   if (sscanf(data_beg, "version: %d", &version) != 1) {
     fprintf(stderr, "Invalid knl_memoryside_cache header, expected \"version: <int>\".\n");
-    goto fallback;
+    return -1;
   }
 
   while (1) {
@@ -3053,14 +3035,14 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
 
   return 0;
 
- fallback:
-  if (fallback == 0) {
-    hwloc_debug("KNL hwdata fallback disabled\n");
-    return -1;
-  }
+}
 
-  hwloc_debug("Falling back to a heuristic\n");
-
+static int hwloc_linux_knl_guess_hwdata_properties(struct knl_hwdata *hwdata,
+						   unsigned DDR_nbnodes,
+						   unsigned long DDR_numa_size,
+						   unsigned MCDRAM_nbnodes,
+						   unsigned long MCDRAM_numa_size)
+{
   /* there can be 0 MCDRAM_nbnodes, but we must have at least one DDR node (not cpuless) */
   assert(DDR_nbnodes);
   /* there are either no MCDRAM nodes, or as many as DDR nodes */
@@ -3130,6 +3112,9 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
   unsigned i, j, closest;
   unsigned long MCDRAM_numa_size, DDR_numa_size;
   unsigned MCDRAM_nbnodes, DDR_nbnodes;
+  char * fallback_env = getenv("HWLOC_KNL_HDH_FALLBACK");
+  int fallback = fallback_env ? atoi(fallback_env) : -1; /* by default, only fallback if needed */
+  int err;
 
   DDR_numa_size = 0;
   DDR_nbnodes = 0;
@@ -3145,9 +3130,25 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
     }
   assert(DDR_nbnodes + MCDRAM_nbnodes == nbnodes);
 
-  hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata,
-					       DDR_nbnodes, DDR_numa_size,
-					       MCDRAM_nbnodes, MCDRAM_numa_size);
+  knl_hwdata.memory_mode[0] = '\0';
+  knl_hwdata.cluster_mode[0] = '\0';
+  knl_hwdata.mcdram_cache_size = -1;
+  knl_hwdata.mcdram_cache_associativity = -1;
+  knl_hwdata.mcdram_cache_inclusiveness = -1;
+  knl_hwdata.mcdram_cache_line_size = -1;
+
+  if (fallback == 1) {
+    hwloc_debug("KNL dumped hwdata ignored, forcing fallback\n");
+    err = -1;
+  } else {
+    err = hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata);
+  }
+  if (err < 0 && fallback != 0) {
+    hwloc_debug("Falling back to a heuristic to determine KNL configuration\n");
+    hwloc_linux_knl_guess_hwdata_properties(&knl_hwdata,
+					    DDR_nbnodes, DDR_numa_size,
+					    MCDRAM_nbnodes, MCDRAM_numa_size);
+  }
   mscache = knl_hwdata.mcdram_cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE);
 
   if (knl_hwdata.cluster_mode[0])
