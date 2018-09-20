@@ -28,6 +28,9 @@ Version 2.1.0
 * Backends
   + The x86 now properly handles offline CPUs.
   + Add support for IBM S/390 drawers.
+  + Rework the heuristics for discovering KNL Cluster and Memory modes
+    to stop assuming all CPUs are online (required for mOS support).
+    Thanks to Sharath K Bhat for testing patches.
 * Tools
   + lstopo
     - Both logical and OS/physical indexes are now displayed by default.

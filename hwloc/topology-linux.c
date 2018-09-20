@@ -2948,10 +2948,247 @@ struct knl_hwdata {
   int mcdram_cache_line_size;
 };
 
+struct knl_distances_summary {
+  unsigned nb_values; /* number of different values found in the matrix */
+  struct knl_distances_value {
+    unsigned occurences;
+    uint64_t value;
+  } values[4]; /* sorted by occurences */
+};
+
+static int hwloc_knl_distances_value_compar(const void *_v1, const void *_v2)
+{
+  const struct knl_distances_value *v1 = _v1, *v2 = _v2;
+  return v1->occurences - v2->occurences;
+}
+
+static int
+hwloc_linux_knl_parse_numa_distances(unsigned nbnodes,
+				     uint64_t *distances,
+				     struct knl_distances_summary *summary)
+{
+  unsigned i, j, k;
+
+  summary->nb_values = 1;
+  summary->values[0].value = 10;
+  summary->values[0].occurences = nbnodes;
+
+  if (nbnodes == 1)
+    /* nothing else needed */
+    return 0;
+
+  if (nbnodes != 2 && nbnodes != 4 && nbnodes != 8)
+    return -1;
+
+  for(i=0; i<nbnodes; i++) {
+    /* check we have 10 on the diagonal */
+    if (distances[i*nbnodes+i] != 10) {
+      fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix does not contain 10 on the diagonal.\n");
+      return -1;
+    }
+    for(j=i+1; j<nbnodes; j++) {
+      uint64_t distance = distances[i*nbnodes+j];
+      /* check things are symmetric */
+      if (distance != distances[i+j*nbnodes]) {
+	fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix isn't symmetric.\n");
+	return -1;
+      }
+      /* check everything outside the diagonal is > 10 */
+      if (distance <= 10) {
+	fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix contains values <= 10.\n");
+	return -1;
+      }
+      /* did we already see this value? */
+      for(k=0; k<summary->nb_values; k++)
+	if (distance == summary->values[k].value) {
+	  summary->values[k].occurences++;
+	  break;
+	}
+      if (k == summary->nb_values) {
+	/* add a new value */
+	if (k == 4) {
+	  fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix contains more than 4 different values.\n");
+	  return -1;
+	}
+	summary->values[k].value = distance;
+	summary->values[k].occurences = 1;
+	summary->nb_values++;
+      }
+    }
+  }
+
+  qsort(summary->values, summary->nb_values, sizeof(struct knl_distances_value), hwloc_knl_distances_value_compar);
+
+  if (nbnodes == 2) {
+    if (summary->nb_values != 2) {
+      fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix for 2 nodes cannot contain %u different values instead of 2.\n",
+	      summary->nb_values);
+      return -1;
+    }
+
+  } else if (nbnodes == 4) {
+    if (summary->nb_values != 2 && summary->nb_values != 4) {
+      fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix for 8 nodes cannot contain %u different values instead of 2 or 4.\n",
+	      summary->nb_values);
+      return -1;
+    }
+
+  } else if (nbnodes == 8) {
+    if (summary->nb_values != 4) {
+      fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix for 8 nodes cannot contain %u different values instead of 4.\n",
+	      summary->nb_values);
+      return -1;
+    }
+
+  } else {
+    abort(); /* checked above */
+  }
+
+  hwloc_debug("Summary of KNL distance matrix:\n");
+  for(k=0; k<summary->nb_values; k++)
+    hwloc_debug("  Found %u times distance %llu\n", summary->values[k].occurences, (unsigned long long) summary->values[k].value);
+  return 0;
+}
+
+static int
+hwloc_linux_knl_identify_4nodes(uint64_t *distances,
+				struct knl_distances_summary *distsum,
+				unsigned *ddr, unsigned *mcdram) /* ddr and mcdram arrays must be 2-long */
+{
+  uint64_t value;
+  unsigned i;
+
+  hwloc_debug("Trying to identify 4 KNL NUMA nodes in SNC-2 cluster mode...\n");
+
+  /* The SNC2-Flat/Hybrid matrix should be something like
+   * 10 21 31 41
+   * 21 10 41 31
+   * 31 41 10 41
+   * 41 31 41 10
+   * which means there are (above 4*10 on the diagonal):
+   * 1 unique value for DDR to other DDR,
+   * 2 identical values for DDR to local MCDRAM
+   * 3 identical values for everything else.
+   */
+  if (distsum->nb_values != 4
+      || distsum->values[0].occurences != 1 /* DDR to DDR */
+      || distsum->values[1].occurences != 2 /* DDR to local MCDRAM */
+      || distsum->values[2].occurences != 3 /* others */
+      || distsum->values[3].occurences != 4 /* local */ )
+    return -1;
+
+  /* DDR:0 is always first */
+  ddr[0] = 0;
+
+  /* DDR:1 is at distance distsum->values[0].value from ddr[0] */
+  value = distsum->values[0].value;
+  ddr[1] = 0;
+  hwloc_debug("  DDR#0 is NUMAnode#0\n");
+  for(i=0; i<4; i++)
+    if (distances[i] == value) {
+      ddr[1] = i;
+      hwloc_debug("  DDR#1 is NUMAnode#%u\n", i);
+      break;
+    }
+  if (!ddr[1])
+    return -1;
+
+  /* MCDRAMs are at distance distsum->values[1].value from their local DDR */
+  value = distsum->values[1].value;
+  mcdram[0] = mcdram[1] = 0;
+  for(i=1; i<4; i++) {
+    if (distances[i] == value) {
+      hwloc_debug("  MCDRAM#0 is NUMAnode#%u\n", i);
+      mcdram[0] = i;
+    } else if (distances[ddr[1]*4+i] == value) {
+      hwloc_debug("  MCDRAM#1 is NUMAnode#%u\n", i);
+      mcdram[1] = i;
+    }
+  }
+  if (!mcdram[0] || !mcdram[1])
+    return -1;
+
+  return 0;
+}
+
+static int
+hwloc_linux_knl_identify_8nodes(uint64_t *distances,
+				struct knl_distances_summary *distsum,
+				unsigned *ddr, unsigned *mcdram) /* ddr and mcdram arrays must be 4-long */
+{
+  uint64_t value;
+  unsigned i, nb;
+
+  hwloc_debug("Trying to identify 8 KNL NUMA nodes in SNC-4 cluster mode...\n");
+
+  /* The SNC4-Flat/Hybrid matrix should be something like
+   * 10 21 21 21 31 41 41 41
+   * 21 10 21 21 41 31 41 41
+   * 21 21 10 21 41 41 31 41
+   * 21 21 21 10 41 41 41 31
+   * 31 41 41 41 10 41 41 41
+   * 41 31 41 41 41 10 41 41
+   * 41 41 31 41 41 41 31 41
+   * 41 41 41 31 41 41 41 41
+   * which means there are (above 8*10 on the diagonal):
+   * 4 identical values for DDR to local MCDRAM
+   * 6 identical values for DDR to other DDR,
+   * 18 identical values for everything else.
+   */
+  if (distsum->nb_values != 4
+      || distsum->values[0].occurences != 4 /* DDR to local MCDRAM */
+      || distsum->values[1].occurences != 6 /* DDR to DDR */
+      || distsum->values[2].occurences != 8 /* local */
+      || distsum->values[3].occurences != 18 /* others */ )
+    return -1;
+
+  /* DDR:0 is always first */
+  ddr[0] = 0;
+  hwloc_debug("  DDR#0 is NUMAnode#0\n");
+
+  /* DDR:[1-3] are at distance distsum->values[1].value from ddr[0] */
+  value = distsum->values[1].value;
+  ddr[1] = ddr[2] = ddr[3] = 0;
+  nb = 1;
+  for(i=0; i<8; i++)
+    if (distances[i] == value) {
+      hwloc_debug("  DDR#%u is NUMAnode#%u\n", nb, i);
+      ddr[nb++] = i;
+      if (nb == 4)
+	break;
+    }
+  if (nb != 4 || !ddr[1] || !ddr[2] || !ddr[3])
+    return -1;
+
+  /* MCDRAMs are at distance distsum->values[0].value from their local DDR */
+  value = distsum->values[0].value;
+  mcdram[0] = mcdram[1] = mcdram[2] = mcdram[3] = 0;
+  for(i=1; i<8; i++) {
+    if (distances[i] == value) {
+      hwloc_debug("  MCDRAM#0 is NUMAnode#%u\n", i);
+      mcdram[0] = i;
+    } else if (distances[ddr[1]*8+i] == value) {
+      hwloc_debug("  MCDRAM#1 is NUMAnode#%u\n", i);
+      mcdram[1] = i;
+    } else if (distances[ddr[2]*8+i] == value) {
+      hwloc_debug("  MCDRAM#2 is NUMAnode#%u\n", i);
+      mcdram[2] = i;
+    } else if (distances[ddr[3]*8+i] == value) {
+      hwloc_debug("  MCDRAM#3 is NUMAnode#%u\n", i);
+      mcdram[3] = i;
+    }
+  }
+  if (!mcdram[0] || !mcdram[1] || !mcdram[2] || !mcdram[3])
+    return -1;
+
+  return 0;
+}
+
 /* Try to handle knl hwdata properties
  * Returns 0 on success and -1 otherwise */
-static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backend_data_s *data,
-							struct knl_hwdata *hwdata)
+static int
+hwloc_linux_knl_read_hwdata_properties(struct hwloc_linux_backend_data_s *data,
+				       struct knl_hwdata *hwdata)
 {
   char *knl_cache_file;
   int version = 0;
@@ -3034,64 +3271,223 @@ static int hwloc_linux_try_handle_knl_hwdata_properties(struct hwloc_linux_backe
   }
 
   return 0;
-
 }
 
-static int hwloc_linux_knl_guess_hwdata_properties(struct knl_hwdata *hwdata,
-						   unsigned DDR_nbnodes,
-						   unsigned long DDR_numa_size,
-						   unsigned MCDRAM_nbnodes,
-						   unsigned long MCDRAM_numa_size)
+static void
+hwloc_linux_knl_guess_hwdata_properties(struct knl_hwdata *hwdata,
+					hwloc_obj_t *nodes, unsigned nbnodes,
+					struct knl_distances_summary *distsum)
 {
-  /* there can be 0 MCDRAM_nbnodes, but we must have at least one DDR node (not cpuless) */
-  assert(DDR_nbnodes);
-  /* there are either no MCDRAM nodes, or as many as DDR nodes */
-  assert(!MCDRAM_nbnodes || MCDRAM_nbnodes == DDR_nbnodes);
+  /* Try to guess KNL configuration (Cluster mode, Memory mode, and MCDRAM cache info)
+   * from the NUMA configuration (number of nodes, CPUless or not, distances).
+   * Keep in mind that some CPUs might be offline (hence DDR could be CPUless too.
+   * Keep in mind that part of the memory might be offline (hence MCDRAM could contain less than 16GB total).
+   */
 
-  if (!MCDRAM_nbnodes && DDR_numa_size <= 16UL*1024*1024*1024) {
-    /* We only found DDR numa nodes, but they are <=16GB.
-     * It could be a DDR-less KNL where numa nodes are actually MCDRAM, we can't know for sure.
-     * Both cases are unlikely, disable the heuristic for now.
-     *
-     * In theory we could check if DDR_numa_size == 8/12/16GB exactly (amount of MCDRAM numa size in H50/H25/Flat modes),
-     * but that's never the case since some kilobytes are always stolen by the system.
-     */
-    hwloc_debug("Cannot guess if MCDRAM is in Cache or if the node is DDR-less (total NUMA node size %lu)\n",
-		DDR_numa_size);
-    return -1;
-  }
+  hwloc_debug("Trying to guess missing KNL configuration information...\n");
 
-  /* all commercial KNL/KNM have 16GB of MCDRAM */
-  unsigned long total_cache_size = 16UL*1024*1024*1024 - MCDRAM_numa_size;
-
-  if (!MCDRAM_nbnodes) {
-    strcpy(hwdata->memory_mode, "Cache");
-  } else {
-    if (!total_cache_size)
-      strcpy(hwdata->memory_mode, "Flat");
-    else if (total_cache_size == 8UL*1024*1024*1024)
-      strcpy(hwdata->memory_mode, "Hybrid50");
-    else if (total_cache_size == 4UL*1024*1024*1024)
-      strcpy(hwdata->memory_mode, "Hybrid25");
-    else
-      fprintf(stderr, "Unexpected KNL MCDRAM cache size %lu\n", total_cache_size);
-  }
-  if (DDR_nbnodes == 4) {
-    strcpy(hwdata->cluster_mode, "SNC4");
-  } else if (DDR_nbnodes == 2) {
-    strcpy(hwdata->cluster_mode, "SNC2");
-  } else if (DDR_nbnodes == 1) {
-    /* either Quadrant, All2ALL or Hemisphere */
-  } else {
-    fprintf(stderr, "Unexpected number of KNL non-MCDRAM NUMA nodes %u\n", DDR_nbnodes);
-  }
-
-  hwdata->mcdram_cache_size = total_cache_size/DDR_nbnodes;
+  /* These MCDRAM cache attributes are always valid.
+   * We'll only use them if mcdram_cache_size > 0
+   */
   hwdata->mcdram_cache_associativity = 1;
   hwdata->mcdram_cache_inclusiveness = 1;
   hwdata->mcdram_cache_line_size = 64;
+  /* All commercial KNL/KNM have 16GB of MCDRAM, we'll divide that in the number of SNC */
 
-  return 0;
+  if (hwdata->mcdram_cache_size > 0
+      && hwdata->cluster_mode[0]
+      && hwdata->memory_mode[0])
+    /* Nothing to guess */
+    return;
+
+  /* Quadrant/All2All/Hemisphere are basically identical from the application point-of-view,
+   * and Quadrant is recommended (except if underpopulating DIMMs).
+   * Hence we'll assume Quadrant when unknown.
+   */
+
+  /* Flat/Hybrid25/Hybrid50 cannot be distinguished unless we know the Cache size
+   * (if running a old hwloc-dump-hwdata that reports Cache size without modes)
+   * or we're sure MCDRAM NUMAnode size was not decreased by offlining some memory.
+   * Hence we'll assume Flat when unknown.
+   */
+
+  if (nbnodes == 1) {
+    /* Quadrant-Cache */
+    if (!hwdata->cluster_mode[0])
+      strcpy(hwdata->cluster_mode, "Quadrant");
+    if (!hwdata->memory_mode[0])
+      strcpy(hwdata->memory_mode, "Cache");
+    if (hwdata->mcdram_cache_size <= 0)
+      hwdata->mcdram_cache_size = 16UL*1024*1024*1024;
+
+  } else if (nbnodes == 2) {
+    /* most likely Quadrant-Flat/Hybrid,
+     * or SNC2/Cache (unlikely)
+     */
+
+    if (!strcmp(hwdata->memory_mode, "Cache")
+	|| !strcmp(hwdata->cluster_mode, "SNC2")
+	|| !hwloc_bitmap_iszero(nodes[1]->cpuset)) { /* MCDRAM cannot be nodes[0], and its cpuset is always empty */
+      /* SNC2-Cache */
+      if (!hwdata->cluster_mode[0])
+	strcpy(hwdata->cluster_mode, "SNC2");
+      if (!hwdata->memory_mode[0])
+	strcpy(hwdata->memory_mode, "Cache");
+      if (hwdata->mcdram_cache_size <= 0)
+	hwdata->mcdram_cache_size = 8UL*1024*1024*1024;
+
+    } else {
+      /* Assume Quadrant-Flat/Hybrid.
+       * Could also be SNC2-Cache with offline CPUs in nodes[1] (unlikely).
+       */
+      if (!hwdata->cluster_mode[0])
+	strcpy(hwdata->cluster_mode, "Quadrant");
+      if (!hwdata->memory_mode[0]) {
+	if (hwdata->mcdram_cache_size == 4UL*1024*1024*1024)
+	  strcpy(hwdata->memory_mode, "Hybrid25");
+	else if (hwdata->mcdram_cache_size == 8UL*1024*1024*1024)
+	  strcpy(hwdata->memory_mode, "Hybrid50");
+	else
+	  strcpy(hwdata->memory_mode, "Flat");
+      } else {
+	if (hwdata->mcdram_cache_size <= 0) {
+	  if (!strcmp(hwdata->memory_mode, "Hybrid25"))
+	    hwdata->mcdram_cache_size = 4UL*1024*1024*1024;
+	  else if (!strcmp(hwdata->memory_mode, "Hybrid50"))
+	    hwdata->mcdram_cache_size = 8UL*1024*1024*1024;
+	}
+      }
+    }
+
+  } else if (nbnodes == 4) {
+    /* most likely SNC4-Cache
+     * or SNC2-Flat/Hybrid (unlikely)
+     *
+     * SNC2-Flat/Hybrid has 4 different values in distsum,
+     * while SNC4-Cache only has 2.
+     */
+
+    if (!strcmp(hwdata->cluster_mode, "SNC2") || distsum->nb_values == 4) {
+      /* SNC2-Flat/Hybrid */
+      if (!hwdata->cluster_mode[0])
+	strcpy(hwdata->cluster_mode, "SNC2");
+      if (!hwdata->memory_mode[0]) {
+	if (hwdata->mcdram_cache_size == 2UL*1024*1024*1024)
+	  strcpy(hwdata->memory_mode, "Hybrid25");
+	else if (hwdata->mcdram_cache_size == 4UL*1024*1024*1024)
+	  strcpy(hwdata->memory_mode, "Hybrid50");
+	else
+	  strcpy(hwdata->memory_mode, "Flat");
+      } else {
+	if (hwdata->mcdram_cache_size <= 0) {
+	  if (!strcmp(hwdata->memory_mode, "Hybrid25"))
+	    hwdata->mcdram_cache_size = 2UL*1024*1024*1024;
+	  else if (!strcmp(hwdata->memory_mode, "Hybrid50"))
+	    hwdata->mcdram_cache_size = 4UL*1024*1024*1024;
+	}
+      }
+
+    } else {
+      /* Assume SNC4-Cache.
+       * SNC2 is unlikely.
+       */
+      if (!hwdata->cluster_mode[0])
+	strcpy(hwdata->cluster_mode, "SNC4");
+      if (!hwdata->memory_mode[0])
+	strcpy(hwdata->memory_mode, "Cache");
+      if (hwdata->mcdram_cache_size <= 0)
+	hwdata->mcdram_cache_size = 4UL*1024*1024*1024;
+    }
+
+  } else if (nbnodes == 8) {
+    /* SNC4-Flat/Hybrid */
+
+    if (!hwdata->cluster_mode[0])
+      strcpy(hwdata->cluster_mode, "SNC4");
+    if (!hwdata->memory_mode[0]) {
+      if (hwdata->mcdram_cache_size == 1UL*1024*1024*1024)
+	strcpy(hwdata->memory_mode, "Hybrid25");
+      else if (hwdata->mcdram_cache_size == 2UL*1024*1024*1024)
+	strcpy(hwdata->memory_mode, "Hybrid50");
+      else
+	strcpy(hwdata->memory_mode, "Flat");
+    } else {
+      if (hwdata->mcdram_cache_size <= 0) {
+	if (!strcmp(hwdata->memory_mode, "Hybrid25"))
+	  hwdata->mcdram_cache_size = 1UL*1024*1024*1024;
+	else if (!strcmp(hwdata->memory_mode, "Hybrid50"))
+	  hwdata->mcdram_cache_size = 2UL*1024*1024*1024;
+      }
+    }
+  }
+
+  hwloc_debug("  Found cluster=%s memory=%s cache=%lld\n",
+	      hwdata->cluster_mode, hwdata->memory_mode,
+	      hwdata->mcdram_cache_size);
+}
+
+static void
+hwloc_linux_knl_add_mscache(struct hwloc_topology *topology,
+			    hwloc_obj_t ddr,
+			    struct knl_hwdata *knl_hwdata)
+{
+  hwloc_obj_t cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, HWLOC_UNKNOWN_INDEX);
+  if (!cache)
+    /* failure is harmless */
+    return;
+  cache->attr->cache.depth = 3;
+  cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+  cache->attr->cache.size = knl_hwdata->mcdram_cache_size;
+  cache->attr->cache.linesize = knl_hwdata->mcdram_cache_line_size;
+  cache->attr->cache.associativity = knl_hwdata->mcdram_cache_associativity;
+  hwloc_obj_add_info(cache, "Inclusive", knl_hwdata->mcdram_cache_inclusiveness ? "1" : "0");
+  cache->cpuset = hwloc_bitmap_dup(ddr->cpuset);
+  cache->nodeset = hwloc_bitmap_dup(ddr->nodeset); /* only applies to DDR */
+  cache->subtype = strdup("MemorySideCache");
+  hwloc_insert_object_by_cpuset(topology, cache);
+}
+
+static void
+hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
+			    hwloc_obj_t ddr, hwloc_obj_t mcdram,
+			    unsigned *failednodes)
+{
+  hwloc_obj_t cluster = NULL;
+
+  mcdram->subtype = strdup("MCDRAM");
+  /* Change MCDRAM cpuset to DDR cpuset for clarity.
+   * Not actually useful if we insert with hwloc__attach_memory_object() below.
+   * The cpuset will be updated by the core later anyway.
+   */
+  hwloc_bitmap_copy(mcdram->cpuset, ddr->cpuset);
+
+  /* Add a Group for Cluster containing this MCDRAM + DDR */
+  cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
+  hwloc_obj_add_other_obj_sets(cluster, ddr);
+  hwloc_obj_add_other_obj_sets(cluster, mcdram);
+  cluster->subtype = strdup("Cluster");
+  cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER;
+  cluster = hwloc__insert_object_by_cpuset(topology, NULL, cluster, hwloc_report_os_error);
+
+  if (cluster) {
+    /* Now insert NUMA nodes below this cluster */
+    hwloc_obj_t res;
+    res = hwloc__attach_memory_object(topology, cluster, ddr, hwloc_report_os_error);
+    if (res != ddr)
+      (*failednodes)++;
+    res = hwloc__attach_memory_object(topology, cluster, mcdram, hwloc_report_os_error);
+    if (res != mcdram)
+      (*failednodes)++;
+  } else {
+    /* we don't know where to attach, let the core find or insert if needed */
+    hwloc_obj_t res;
+    res = hwloc__insert_object_by_cpuset(topology, NULL, ddr, hwloc_report_os_error);
+    if (res != ddr)
+      (*failednodes)++;
+    res = hwloc__insert_object_by_cpuset(topology, NULL, mcdram, hwloc_report_os_error);
+    if (res != mcdram)
+      (*failednodes)++;
+  }
 }
 
 #define NUMA_QUIRK_STATUS_ALREADY_INSERTED (1<<0)
@@ -3104,145 +3500,144 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
 			   uint64_t * distances,
 			   unsigned *quirk_status, unsigned *failednodes)
 {
-  struct knl_hwdata knl_hwdata;
-  unsigned nr_knl_clusters = 0;
-  hwloc_obj_t knl_clusters[4]= { NULL, NULL, NULL, NULL };
-  int node_knl_cluster[8] = { -1, -1, -1, -1, -1, -1, -1, -1};
-  int mscache;
-  unsigned i, j, closest;
-  unsigned long MCDRAM_numa_size, DDR_numa_size;
-  unsigned MCDRAM_nbnodes, DDR_nbnodes;
+  struct knl_hwdata hwdata;
+  struct knl_distances_summary dist;
   char * fallback_env = getenv("HWLOC_KNL_HDH_FALLBACK");
   int fallback = fallback_env ? atoi(fallback_env) : -1; /* by default, only fallback if needed */
-  int err;
 
-  DDR_numa_size = 0;
-  DDR_nbnodes = 0;
-  MCDRAM_numa_size = 0;
-  MCDRAM_nbnodes = 0;
-  for(i=0; i<nbnodes; i++)
-    if (hwloc_bitmap_iszero(nodes[i]->cpuset)) {
-      MCDRAM_numa_size += nodes[i]->attr->numanode.local_memory;
-      MCDRAM_nbnodes++;
+  if (hwloc_linux_knl_parse_numa_distances(nbnodes, distances, &dist) < 0)
+    return;
+
+  hwdata.memory_mode[0] = '\0';
+  hwdata.cluster_mode[0] = '\0';
+  hwdata.mcdram_cache_size = -1;
+  hwdata.mcdram_cache_associativity = -1;
+  hwdata.mcdram_cache_inclusiveness = -1;
+  hwdata.mcdram_cache_line_size = -1;
+  if (fallback == 1)
+    hwloc_debug("KNL dumped hwdata ignored, forcing fallback to heuristics\n");
+  else
+    hwloc_linux_knl_read_hwdata_properties(data, &hwdata);
+  if (fallback != 0)
+    hwloc_linux_knl_guess_hwdata_properties(&hwdata, nodes, nbnodes, &dist);
+
+  if (strcmp(hwdata.cluster_mode, "All2All")
+      && strcmp(hwdata.cluster_mode, "Hemisphere")
+      && strcmp(hwdata.cluster_mode, "Quadrant")
+      && strcmp(hwdata.cluster_mode, "SNC2")
+      && strcmp(hwdata.cluster_mode, "SNC4")) {
+    fprintf(stderr, "Failed to find a usable KNL cluster mode (%s)\n", hwdata.cluster_mode);
+    return;
+  }
+  if (strcmp(hwdata.memory_mode, "Cache")
+      && strcmp(hwdata.memory_mode, "Flat")
+      && strcmp(hwdata.memory_mode, "Hybrid25")
+      && strcmp(hwdata.memory_mode, "Hybrid50")) {
+    fprintf(stderr, "Failed to find a usable KNL memory mode (%s)\n", hwdata.memory_mode);
+    return;
+  }
+
+  hwloc_obj_add_info(topology->levels[0][0], "ClusterMode", hwdata.cluster_mode);
+  hwloc_obj_add_info(topology->levels[0][0], "MemoryMode", hwdata.memory_mode);
+
+  if (!strcmp(hwdata.cluster_mode, "All2All")
+      || !strcmp(hwdata.cluster_mode, "Hemisphere")
+      || !strcmp(hwdata.cluster_mode, "Quadrant")) {
+    if (!strcmp(hwdata.memory_mode, "Cache")) {
+      /* Quadrant-Cache */
+      if (nbnodes != 1) {
+	fprintf(stderr, "Found %u NUMA nodes instead of 1 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+	return;
+      }
+      if (hwdata.mcdram_cache_size > 0)
+	hwloc_linux_knl_add_mscache(topology, nodes[0], &hwdata);
+
     } else {
-      DDR_numa_size += nodes[i]->attr->numanode.local_memory;
-      DDR_nbnodes++;
-    }
-  assert(DDR_nbnodes + MCDRAM_nbnodes == nbnodes);
-
-  knl_hwdata.memory_mode[0] = '\0';
-  knl_hwdata.cluster_mode[0] = '\0';
-  knl_hwdata.mcdram_cache_size = -1;
-  knl_hwdata.mcdram_cache_associativity = -1;
-  knl_hwdata.mcdram_cache_inclusiveness = -1;
-  knl_hwdata.mcdram_cache_line_size = -1;
-
-  if (fallback == 1) {
-    hwloc_debug("KNL dumped hwdata ignored, forcing fallback\n");
-    err = -1;
-  } else {
-    err = hwloc_linux_try_handle_knl_hwdata_properties(data, &knl_hwdata);
-  }
-  if (err < 0 && fallback != 0) {
-    hwloc_debug("Falling back to a heuristic to determine KNL configuration\n");
-    hwloc_linux_knl_guess_hwdata_properties(&knl_hwdata,
-					    DDR_nbnodes, DDR_numa_size,
-					    MCDRAM_nbnodes, MCDRAM_numa_size);
-  }
-  mscache = knl_hwdata.mcdram_cache_size > 0 && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE);
-
-  if (knl_hwdata.cluster_mode[0])
-    hwloc_obj_add_info(topology->levels[0][0], "ClusterMode", knl_hwdata.cluster_mode);
-  if (knl_hwdata.memory_mode[0])
-    hwloc_obj_add_info(topology->levels[0][0], "MemoryMode", knl_hwdata.memory_mode);
-
-  for(i=0; i<nbnodes; i++) {
-    if (!hwloc_bitmap_iszero(nodes[i]->cpuset)) {
-      /* DDR, see if there's a MCDRAM cache to add */
-      if (mscache) {
-	hwloc_obj_t cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L3CACHE, HWLOC_UNKNOWN_INDEX);
-	if (cache) {
-	  cache->attr->cache.depth = 3;
-	  cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-	  cache->attr->cache.size = knl_hwdata.mcdram_cache_size;
-	  cache->attr->cache.linesize = knl_hwdata.mcdram_cache_line_size;
-	  cache->attr->cache.associativity = knl_hwdata.mcdram_cache_associativity;
-	  hwloc_obj_add_info(cache, "Inclusive", knl_hwdata.mcdram_cache_inclusiveness ? "1" : "0");
-	  cache->cpuset = hwloc_bitmap_dup(nodes[i]->cpuset);
-	  cache->nodeset = hwloc_bitmap_dup(nodes[i]->nodeset); /* only applies to DDR */
-	  cache->subtype = strdup("MemorySideCache");
-	  hwloc_insert_object_by_cpuset(topology, cache);
-	}
+      /* Quadrant-Flat/Hybrid */
+      if (nbnodes != 2) {
+	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+	return;
       }
-      /* nothing else to do for DDR */
-      continue;
+      if (strcmp(hwdata.memory_mode, "Flat") && hwdata.mcdram_cache_size > 0)
+	hwloc_linux_knl_add_mscache(topology, nodes[0], &hwdata); /* MCDRAM cannot be nodes[0] */
+      hwloc_linux_knl_add_cluster(topology, nodes[0], nodes[1], failednodes);
+      /* we inserted nodes, the caller doesn't have to do it */
+      *quirk_status |= NUMA_QUIRK_STATUS_ALREADY_INSERTED;
     }
-    /* MCDRAM */
-    nodes[i]->subtype = strdup("MCDRAM");
 
-    if (!distances || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP))
-      continue;
-
-    /* DDR is the closest node with CPUs */
-    closest = (unsigned)-1;
-    for(j=0; j<nbnodes; j++) {
-      if (j==i)
-	continue;
-      if (hwloc_bitmap_iszero(nodes[j]->cpuset))
-	/* nodes without CPU, that's another MCDRAM, skip it */
-	continue;
-      if (closest == (unsigned)-1 || distances[i*nbnodes+j]<distances[i*nbnodes+closest])
-	closest = j;
-    }
-    if (closest != (unsigned) -1) {
-      /* Change MCDRAM cpuset to DDR cpuset for clarity.
-       * Not actually useful if we insert with hwloc__attach_memory_object() below.
-       * The cpuset will be updated by the core later anyway.
-       */
-      hwloc_bitmap_copy(nodes[i]->cpuset, nodes[closest]->cpuset);
-      /* Add a Group for Cluster containing this MCDRAM + DDR */
-      hwloc_obj_t cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
-      hwloc_obj_add_other_obj_sets(cluster, nodes[i]);
-      hwloc_obj_add_other_obj_sets(cluster, nodes[closest]);
-      cluster->subtype = strdup("Cluster");
-      cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER;
-      knl_clusters[nr_knl_clusters] = cluster;
-      node_knl_cluster[i] = nr_knl_clusters;
-      node_knl_cluster[closest] = nr_knl_clusters;
-      nr_knl_clusters++;
-    }
-  }
-
-  /* insert knl clusters */
-  if (data->is_knl) {
-    for(i=0; i<nr_knl_clusters; i++) {
-      knl_clusters[i] = hwloc_insert_object_by_cpuset(topology, knl_clusters[i]);
-      /* failure or replace can be ignored */
-    }
-  }
-
-  /* insert actual numa nodes */
-  for (i = 0; i < nbnodes; i++) {
-    hwloc_obj_t node = nodes[i];
-    if (node) {
-      hwloc_obj_t res_obj;
-      if (node_knl_cluster[i] != -1) {
-	/* directly attach to the existing cluster */
-	hwloc_obj_t parent = knl_clusters[node_knl_cluster[i]];
-	res_obj = hwloc__attach_memory_object(topology, parent, node, hwloc_report_os_error);
-      } else {
-	/* we don't know where to attach, let the core find or insert if needed */
-	res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, hwloc_report_os_error);
+  } else if (!strcmp(hwdata.cluster_mode, "SNC2")) {
+    if (!strcmp(hwdata.memory_mode, "Cache")) {
+      /* SNC2-Cache */
+      if (nbnodes != 2) {
+	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+	return;
       }
-      if (res_obj != node)
-	/* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
-	 * This object disappeared, but we'll ignore distances anyway */
-	(*failednodes)++;
+      if (hwdata.mcdram_cache_size > 0) {
+	hwloc_linux_knl_add_mscache(topology, nodes[0], &hwdata);
+	hwloc_linux_knl_add_mscache(topology, nodes[1], &hwdata);
+      }
+
+    } else {
+      /* SNC2-Flat/Hybrid */
+      unsigned ddr[2], mcdram[2];
+      if (nbnodes != 4) {
+	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+	return;
+      }
+      if (hwloc_linux_knl_identify_4nodes(distances, &dist, ddr, mcdram) < 0) {
+	fprintf(stderr, "Unexpected distance layout for mode %s-%s\n", hwdata.cluster_mode, hwdata.memory_mode);
+	return;
+      }
+      if (strcmp(hwdata.memory_mode, "Flat") && hwdata.mcdram_cache_size > 0) {
+	hwloc_linux_knl_add_mscache(topology, nodes[ddr[0]], &hwdata);
+	hwloc_linux_knl_add_mscache(topology, nodes[ddr[1]], &hwdata);
+      }
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[0]], nodes[mcdram[0]], failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[1]], nodes[mcdram[1]], failednodes);
+      /* we inserted nodes, the caller doesn't have to do it */
+      *quirk_status |= NUMA_QUIRK_STATUS_ALREADY_INSERTED;
+    }
+
+  } else if (!strcmp(hwdata.cluster_mode, "SNC4")) {
+    if (!strcmp(hwdata.memory_mode, "Cache")) {
+      /* SNC4-Cache */
+      if (nbnodes != 4) {
+	fprintf(stderr, "Found %u NUMA nodes instead of 4 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+	return;
+      }
+      if (hwdata.mcdram_cache_size > 0) {
+	hwloc_linux_knl_add_mscache(topology, nodes[0], &hwdata);
+	hwloc_linux_knl_add_mscache(topology, nodes[1], &hwdata);
+	hwloc_linux_knl_add_mscache(topology, nodes[2], &hwdata);
+	hwloc_linux_knl_add_mscache(topology, nodes[3], &hwdata);
+      }
+
+    } else {
+      /* SNC4-Flat/Hybrid */
+      unsigned ddr[4], mcdram[4];
+      if (nbnodes != 8) {
+	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+	return;
+      }
+      if (hwloc_linux_knl_identify_8nodes(distances, &dist, ddr, mcdram) < 0) {
+	fprintf(stderr, "Unexpected distance layout for mode %s-%s\n", hwdata.cluster_mode, hwdata.memory_mode);
+	return;
+      }
+      if (strcmp(hwdata.memory_mode, "Flat") && hwdata.mcdram_cache_size > 0) {
+	hwloc_linux_knl_add_mscache(topology, nodes[ddr[0]], &hwdata);
+	hwloc_linux_knl_add_mscache(topology, nodes[ddr[1]], &hwdata);
+	hwloc_linux_knl_add_mscache(topology, nodes[ddr[2]], &hwdata);
+	hwloc_linux_knl_add_mscache(topology, nodes[ddr[3]], &hwdata);
+      }
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[0]], nodes[mcdram[0]], failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[1]], nodes[mcdram[1]], failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[2]], nodes[mcdram[2]], failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[3]], nodes[mcdram[3]], failednodes);
+      /* we inserted nodes, the caller doesn't have to do it */
+      *quirk_status |= NUMA_QUIRK_STATUS_ALREADY_INSERTED;
     }
   }
 
-  /* we inserted object, the caller doesn't have to do it */
-  *quirk_status |= NUMA_QUIRK_STATUS_ALREADY_INSERTED;
   /* drop KNL crazy distance matrix, don't expose it to users */
   *quirk_status |= NUMA_QUIRK_STATUS_DROP_DISTANCES;
 }
