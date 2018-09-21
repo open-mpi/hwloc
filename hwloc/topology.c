@@ -3133,11 +3133,19 @@ next_noncpubackend:
   hwloc_filter_bridges(topology, topology->levels[0][0]);
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
-  hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
+  hwloc_debug("%s", "\nRemoving empty objects\n");
   remove_empty(topology, &topology->levels[0][0]);
-    if (!topology->levels[0][0]) {
+  if (!topology->levels[0][0]) {
     fprintf(stderr, "Topology became empty, aborting!\n");
-    abort();
+    return -1;
+  }
+  if (hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
+    fprintf(stderr, "Topology does not contain any PU, aborting!\n");
+    return -1;
+  }
+  if (hwloc_bitmap_iszero(topology->levels[0][0]->nodeset)) {
+    fprintf(stderr, "Topology does not contain any NUMA node, aborting!\n");
+    return -1;
   }
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
