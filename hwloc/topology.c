@@ -3259,7 +3259,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->tma = tma;
 
   hwloc_components_init(); /* uses malloc without tma, but won't need it since dup() caller already took a reference */
-  hwloc_backends_init(topology);
+  hwloc_topology_components_init(topology);
   hwloc_pci_discovery_init(topology); /* make sure both dup() and load() get sane variables */
 
   /* Setup topology context */
@@ -3531,6 +3531,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   }
 
   hwloc_backends_disable_all(topology);
+  hwloc_topology_components_fini(topology);
   hwloc_components_fini();
 
   hwloc_topology_clear(topology);

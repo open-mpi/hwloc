@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -415,7 +415,7 @@ hwloc_components_init(void)
 }
 
 void
-hwloc_backends_init(struct hwloc_topology *topology)
+hwloc_topology_components_init(struct hwloc_topology *topology)
 {
   topology->backends = NULL;
   topology->backend_excludes = 0;
@@ -782,4 +782,11 @@ hwloc_backends_disable_all(struct hwloc_topology *topology)
   }
   topology->backends = NULL;
   topology->backend_excludes = 0;
+}
+
+void
+hwloc_topology_components_fini(struct hwloc_topology *topology)
+{
+  /* hwloc_backends_disable_all() must have been called earlier */
+  assert(!topology->backends);
 }

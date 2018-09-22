@@ -636,8 +636,9 @@ extern "C" {
 #define hwloc_backends_is_thissystem HWLOC_NAME(backends_is_thissystem)
 #define hwloc_backends_find_callbacks HWLOC_NAME(backends_find_callbacks)
 
-#define hwloc_backends_init HWLOC_NAME(backends_init)
+#define hwloc_topology_components_init HWLOC_NAME(topology_components_init)
 #define hwloc_backends_disable_all HWLOC_NAME(backends_disable_all)
+#define hwloc_topology_components_fini HWLOC_NAME(topology_components_fini)
 
 #define hwloc_components_init HWLOC_NAME(components_init)
 #define hwloc_components_fini HWLOC_NAME(components_fini)

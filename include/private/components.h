@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2015 Inria.  All rights reserved.
+ * Copyright © 2012-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -30,10 +30,12 @@ extern void hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 extern void hwloc_backends_is_thissystem(struct hwloc_topology *topology);
 extern void hwloc_backends_find_callbacks(struct hwloc_topology *topology);
 
-/* Initialize the list of backends used by a topology */
-extern void hwloc_backends_init(struct hwloc_topology *topology);
+/* Initialize the lists of components and backends used by a topology */
+extern void hwloc_topology_components_init(struct hwloc_topology *topology);
 /* Disable and destroy all backends used by a topology */
 extern void hwloc_backends_disable_all(struct hwloc_topology *topology);
+/* Cleanup the lists of components used by a topology */
+extern void hwloc_topology_components_fini(struct hwloc_topology *topology);
 
 /* Used by the core to setup/destroy the list of components */
 extern void hwloc_components_init(void); /* increases components refcount, should be called exactly once per topology (during init) */
