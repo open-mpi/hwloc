@@ -3409,7 +3409,7 @@ variable may avoid this.
 Also remember that these components may be disabled at build-time with
 configure flags such as <tt>\--disable-opencl</tt>, <tt>\--disable-cuda</tt> or <tt>\--disable-nvml</tt>,
 and at runtime with the environment variable
-<tt>HWLOC_COMPONENTS=-opencl,cuda,nvml</tt>.
+<tt>HWLOC_COMPONENTS=-opencl,-cuda,-nvml</tt>.
 
 
 \subsection faq_privileged Does hwloc require privileged access?
