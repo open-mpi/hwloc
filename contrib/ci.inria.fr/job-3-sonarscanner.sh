@@ -59,7 +59,6 @@ export CFLAGS="-O0 -g -fPIC --coverage -Wall -Wunused-parameter -Wundef -Wno-lon
 export LDFLAGS="--coverage"
 ./configure
 make V=1 |tee hwloc-build.log
-
 # Execute unitary tests (autotest)
 make check
 
@@ -68,6 +67,14 @@ find . -path '*/.libs/*.gcno' -exec rename 's@/.libs/@/@' {} \;
 find . -path '*/.libs/*.gcda' -exec rename 's@/.libs/@/@' {} \;
 lcov --directory . --capture --output-file hwloc.lcov
 lcov_cobertura.py hwloc.lcov --output hwloc-coverage.xml
+
+# Clang/Scan-build
+make distclean
+export CFLAGS="-Wall -std=gnu99"
+unset LDFLAGS
+scan-build -plist --intercept-first --analyze-headers -o analyzer_reports ./configure
+scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make
+scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make check
 
 # Run cppcheck analysis
 SOURCES_TO_ANALYZE="hwloc tests utils"
@@ -140,6 +147,7 @@ sonar.sourceEncoding=UTF-8
 sonar.language=c
 sonar.sources=hwloc, tests, utils
 sonar.exclusions=tests/hwloc/ports
+sonar.c.clangsa.reportPath=analyzer_reports/*/*.plist
 sonar.c.errorRecoveryEnabled=true
 sonar.c.compiler.parser=GCC
 sonar.c.compiler.charset=UTF-8
