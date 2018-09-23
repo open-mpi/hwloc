@@ -1780,6 +1780,28 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
 
+/** \brief Flags to be passed to hwloc_topology_set_components()
+ */
+enum hwloc_topology_components_flag_e {
+  /** \brief Blacklist the target component from being used.
+   * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST = (1<<0)
+};
+
+/** \brief Prevent a discovery component from being used for a topology.
+ *
+ * \p name is the name of the discovery component that should not be used
+ * when loading topology \p topology. The name is a string such as "cuda".
+ *
+ * \p flags should be ::HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST.
+ *
+ * This may be used to avoid expensive parts of the discovery process.
+ * For instance, CUDA-specific discovery may be expensive and unneeded
+ * while generic I/O discovery could still be useful.
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_components(hwloc_topology_t __hwloc_restrict topology, unsigned flags, const char * __hwloc_restrict name);
+
 /** @} */
 
 

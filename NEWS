@@ -21,6 +21,8 @@ Version 2.1.0
 * API
   + Add HWLOC_RESTRICT_FLAG_BYNODESET and _REMOVE_MEMLESS for restricting
     topologies based on some memory nodes.
+  + Add hwloc_topology_set_components() for blacklisting some components
+    from being enabled in a topology.
   + Add hwloc_bitmap_nr_ulongs() and hwloc_bitmap_from/to_ulongs(),
     thanks to Junchao Zhang for the suggestion.
 * Backends

@@ -185,6 +185,11 @@ struct hwloc_topology {
     hwloc_bitmap_t cpuset;
   } * pci_forced_locality;
 
+  /* component blacklisting */
+  unsigned nr_blacklisted_components;
+  struct hwloc_topology_forced_component_s {
+    struct hwloc_disc_component *component;
+  } *blacklisted_components;
 };
 
 extern void hwloc_alloc_root_sets(hwloc_obj_t root);

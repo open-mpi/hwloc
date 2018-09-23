@@ -417,6 +417,9 @@ hwloc_components_init(void)
 void
 hwloc_topology_components_init(struct hwloc_topology *topology)
 {
+  topology->nr_blacklisted_components = 0;
+  topology->blacklisted_components = NULL;
+
   topology->backends = NULL;
   topology->backend_excludes = 0;
 }
@@ -433,6 +436,45 @@ hwloc_disc_component_find(int type /* hwloc_disc_component_type_t or -1 if any *
     comp = comp->next;
   }
   return NULL;
+}
+
+int
+hwloc_topology_set_components(struct hwloc_topology *topology,
+			      unsigned flags,
+			      const char *name)
+{
+  struct hwloc_disc_component *comp;
+  struct hwloc_topology_forced_component_s *blacklisted;
+
+  if (topology->is_loaded) {
+    errno = EBUSY;
+    return -1;
+  }
+
+  if (flags & ~HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  /* this flag is strictly required for now */
+  if (flags != HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  comp = hwloc_disc_component_find(-1, name);
+  if (!comp) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  blacklisted = realloc(topology->blacklisted_components, (topology->nr_blacklisted_components+1)*sizeof(*blacklisted));
+  if (!blacklisted)
+    return -1;
+
+  blacklisted[topology->nr_blacklisted_components++].component = comp;
+  topology->blacklisted_components = blacklisted;
+  return 0;
 }
 
 /* used by set_xml(), set_synthetic(), ... environment variables, ... to force the first backend */
@@ -502,6 +544,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   int tryall = 1;
   const char *_env;
   char *env; /* we'll to modify the env value, so duplicate it */
+  unsigned i;
 
   _env = getenv("HWLOC_COMPONENTS");
   env = _env ? strdup(_env) : NULL;
@@ -568,6 +611,14 @@ nextname:
     while (NULL != comp) {
       if (!comp->enabled_by_default)
 	goto nextcomp;
+      /* check if this component was blacklisted by the application */
+      for(i=0; i<topology->nr_blacklisted_components; i++)
+	if (comp == topology->blacklisted_components[i].component) {
+	    if (hwloc_components_verbose)
+	      fprintf(stderr, "Excluding %s discovery component `%s' on application request\n",
+	    hwloc_disc_component_type_string(comp->type), comp->name);
+	    goto nextcomp;
+	}
       /* check if this component was explicitly excluded in env */
       if (env) {
 	char *curenv = env;
@@ -789,4 +840,6 @@ hwloc_topology_components_fini(struct hwloc_topology *topology)
 {
   /* hwloc_backends_disable_all() must have been called earlier */
   assert(!topology->backends);
+
+  free(topology->blacklisted_components);
 }

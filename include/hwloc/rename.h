@@ -124,6 +124,9 @@ extern "C" {
 #define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)
 #define hwloc_topology_set_xml HWLOC_NAME(topology_set_xml)
 #define hwloc_topology_set_xmlbuffer HWLOC_NAME(topology_set_xmlbuffer)
+#define hwloc_topology_components_flag_e HWLOC_NAME(hwloc_topology_components_flag_e)
+#define HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST HWLOC_NAME_CAPS(TOPOLOGY_COMPONENTS_FLAG_BLACKLIST)
+#define hwloc_topology_set_components HWLOC_NAME(topology_set_components)
 
 #define hwloc_topology_set_flags HWLOC_NAME(topology_set_flags)
 #define hwloc_topology_is_thissystem HWLOC_NAME(topology_is_thissystem)
@@ -675,6 +678,8 @@ extern "C" {
 #define hwloc_special_level_s HWLOC_NAME(special_level_s)
 
 #define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
+
+#define hwloc_topology_forced_component_s HWLOC_NAME(topology_forced_component)
 
 #define hwloc_alloc_root_sets HWLOC_NAME(alloc_root_sets)
 #define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)

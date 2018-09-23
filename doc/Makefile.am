@@ -422,7 +422,10 @@ man3_setsource_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_pid.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_set_xmlbuffer.3
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_xmlbuffer.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_components_flag_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_components.3
 
 man3_configurationdir = $(man3dir)
 man3_configuration_DATA = \
