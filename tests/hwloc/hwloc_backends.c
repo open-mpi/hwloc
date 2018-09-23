@@ -22,7 +22,11 @@
 static inline int mkstemp(char *name)
 {
   mktemp(name);
+#ifdef _MSC_VER
+  return open(name, O_RDWR|O_CREAT, 00700);
+#else
   return open(name, O_RDWR|O_CREAT, S_IRWXU);
+#endif
 }
 #endif
 
