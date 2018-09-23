@@ -491,7 +491,7 @@ EOF])
     # Needed for Windows in private/misc.h
     AC_CHECK_TYPES([ssize_t])
     AC_CHECK_DECLS([snprintf], [], [], [AC_INCLUDES_DEFAULT])
-    AC_CHECK_DECLS([strcasecmp], [], [], [AC_INCLUDES_DEFAULT])
+    AC_CHECK_DECLS([strcasecmp], [], [], [[#include <strings.h>]])
     # strdup and putenv are declared in windows headers but marked deprecated
     AC_CHECK_DECLS([_strdup], [], [], [AC_INCLUDES_DEFAULT])
     AC_CHECK_DECLS([_putenv], [], [], [AC_INCLUDES_DEFAULT])
