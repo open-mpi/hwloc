@@ -158,7 +158,7 @@ sonar.c.cppcheck.reportPath=${CPPCHECK_XMLS}
 sonar.c.includeDirectories=$(echo | gcc -E -Wp,-v - 2>&1 | grep "^ " | tr '\n' ',')include,hwloc,utils/lstopo,utils/hwloc
 sonar.c.rats.reportPath=${RATS_XMLS}
 sonar.c.valgrind.reportPath=${VALGRIND_XMLS}
-sonar.issue.ignore.multicriteria=e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14
+sonar.issue.ignore.multicriteria=e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14,e15
 # Complete the task associated to this TODO comment.
 sonar.issue.ignore.multicriteria.e1.ruleKey=c:TodoTagPresence
 sonar.issue.ignore.multicriteria.e1.resourceKey=**
@@ -177,6 +177,9 @@ sonar.issue.ignore.multicriteria.e5.resourceKey=**
 # Split this 166 characters long line (which is greater than 160 authorized).
 sonar.issue.ignore.multicriteria.e6.ruleKey=c:TooLongLine
 sonar.issue.ignore.multicriteria.e6.resourceKey=**
+# Sharing some naming conventions is a key point to make it possible for a team to efficiently collaborate. This rule allows to check that all class names match a provided regular expression.
+sonar.issue.ignore.multicriteria.e15.ruleKey=c:ClassName
+sonar.issue.ignore.multicriteria.e15.resourceKey=**
 # 196 more comment lines need to be written to reach the minimum threshold of 25.0% comment density.
 # BUG: doesn't seem to match properly, even with * or so on instead of ++
 sonar.issue.ignore.multicriteria.e7.ruleKey=common-c++:InsufficientCommentDensity
