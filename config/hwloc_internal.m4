@@ -339,6 +339,7 @@ EOF
 
     _HWLOC_CHECK_DIFF_U
     _HWLOC_CHECK_DIFF_W
+    _HWLOC_CHECK_DIFF_STRIP_TRAILING_CR
 
     AC_CHECK_HEADERS([time.h], [
       AC_CHECK_FUNCS([clock_gettime])
@@ -410,6 +411,7 @@ int foo(void) {
     AC_MSG_RESULT([$hwloc_have_cxx])
 
     _HWLOC_CHECK_DIFF_U
+    _HWLOC_CHECK_DIFF_STRIP_TRAILING_CR
 
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(
@@ -511,6 +513,20 @@ AC_DEFUN([_HWLOC_CHECK_DIFF_U], [
     HWLOC_DIFF_U=""
   fi
   AC_SUBST([HWLOC_DIFF_U])
+])
+
+AC_DEFUN([_HWLOC_CHECK_DIFF_STRIP_TRAILING_CR], [
+  AC_REQUIRE([_HWLOC_PROG_DIFF])
+  AC_MSG_CHECKING([whether diff accepts --strip-trailing-cr])
+  if $DIFF --strip-trailing-cr /dev/null /dev/null 2> /dev/null
+  then
+    AC_MSG_RESULT([yes])
+    HWLOC_DIFF_STRIP_TRAILING_CR="--strip-trailing-cr"
+  else
+    AC_MSG_RESULT([no])
+    HWLOC_DIFF_STRIP_TRAILING_CR=""
+  fi
+  AC_SUBST([HWLOC_DIFF_STRIP_TRAILING_CR])
 ])
 
 AC_DEFUN([_HWLOC_CHECK_DIFF_W], [

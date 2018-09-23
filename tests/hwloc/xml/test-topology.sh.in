@@ -85,7 +85,7 @@ do_run()
 
   if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
   then
-    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$output" "$file"
+    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_STRIP_TRAILING_CR@ @HWLOC_DIFF_W@ "$output" "$file"
   else
     if ! @DIFF@ "$output" "$file" >/dev/null
     then
@@ -110,7 +110,7 @@ do_run_with_output()
 
   if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
   then
-    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$output" "$file"
+    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_STRIP_TRAILING_CR@ @HWLOC_DIFF_W@ "$output" "$file"
   else
     if ! @DIFF@ "$output" "$file" >/dev/null
     then
