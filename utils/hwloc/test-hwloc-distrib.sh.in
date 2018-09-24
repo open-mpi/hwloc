@@ -69,5 +69,5 @@ set -e
   $distrib --if synthetic --input "2 2 2 2" --to core 9
   echo
 ) > "$file"
-@DIFF@ @HWLOC_DIFF_U@ $srcdir/test-hwloc-distrib.output "$file"
+@DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_STRIP_TRAILING_CR@ $srcdir/test-hwloc-distrib.output "$file"
 rm -rf "$tmp"

@@ -56,7 +56,7 @@ test_topology ()
     else
 	if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
 	then
-	    @DIFF@ -b @HWLOC_DIFF_U@ "$expected_output" "$output"
+	    @DIFF@ -b @HWLOC_DIFF_U@ @HWLOC_DIFF_STRIP_TRAILING_CR@ "$expected_output" "$output"
 	    result=$?
 	else
 	    if ! @DIFF@ "$expected_output" "$output" >/dev/null

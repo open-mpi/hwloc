@@ -68,5 +68,5 @@ pu:1
 EOF
 $annotate $file $file dummy distances $distances
 
-@DIFF@ @HWLOC_DIFF_U@ $srcdir/test-hwloc-annotate.output "$file"
+@DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_STRIP_TRAILING_CR@ $srcdir/test-hwloc-annotate.output "$file"
 rm -rf "$tmp"

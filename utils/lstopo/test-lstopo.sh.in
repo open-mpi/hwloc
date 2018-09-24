@@ -100,5 +100,5 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
   echo "** Export to XML..."
   $ls -i "$SI" -.xml
 ) > "$file"
-@DIFF@ @HWLOC_DIFF_U@ $srcdir/test-lstopo.output "$file"
+@DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_STRIP_TRAILING_CR@ $srcdir/test-lstopo.output "$file"
 rm -rf "$tmp"
