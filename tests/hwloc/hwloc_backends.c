@@ -187,7 +187,10 @@ int main(void)
 
   /* blacklist everything but noos with hwloc_topology_set_components() */
   printf("disabling everything but noos with hwloc_topology_set_components()\n");
-  putenv("HWLOC_COMPONENTS=");
+  putenv("HWLOC_COMPONENTS="); /* means 'unset' on windows, which means HWLOC_XMLFILE and HWLOC_SYNTHETIC
+				* would be processed if not empty, so clear them too. */
+  putenv("HWLOC_XMLFILE=");
+  putenv("HWLOC_SYNTHETIC=");
   hwloc_topology_init(&topology1);
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "foobar");
   assert(err == -1);
