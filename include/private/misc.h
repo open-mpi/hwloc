@@ -558,7 +558,7 @@ typedef SSIZE_T ssize_t;
 #  ifndef S_IRWXU
 #    define S_IRWXU 00700
 #  endif
-#  if !HAVE_DECL_STRCASECMP
+#  if !HWLOC_HAVE_DECL_STRCASECMP
 #    define strcasecmp _stricmp
 #  endif
 #  if !HAVE_DECL_SNPRINTF
