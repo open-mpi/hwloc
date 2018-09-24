@@ -419,6 +419,9 @@ typedef SSIZE_T ssize_t;
 #  ifndef S_ISDIR
 #    define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #  endif
+#  ifndef S_IRWXU
+#    define S_IRWXU 00700
+#  endif
 #  if !HAVE_DECL_STRCASECMP
 #    define strcasecmp _stricmp
 #  endif
