@@ -203,7 +203,12 @@ int main(void)
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "xml");
   assert(!err);
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "x86");
+#ifdef HWLOC_HAVE_X86_CPUID
   assert(!err);
+#else
+  assert(err == -1);
+  assert(errno == EINVAL);
+#endif
 #ifdef HWLOC_LINUX_SYS
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "linux");
   assert(!err);
