@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Inria.  All rights reserved.
+ * Copyright © 2017-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -11,7 +11,9 @@
 #ifndef HWLOC_WIN_SYS
 
 #include <sys/mman.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <assert.h>
 
 #define HWLOC_SHMEM_HEADER_VERSION 1
