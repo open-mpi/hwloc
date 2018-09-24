@@ -783,7 +783,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	  curlevel->attr.memorysize = 32*1024;
 	else
 	  /* *4 at each level, starting from 1MB for L2, unified */
-	  curlevel->attr.memorysize = 256*1024 << (2*curlevel->attr.depth);
+	  curlevel->attr.memorysize = 256ULL*1024 << (2*curlevel->attr.depth);
       }
 
     } else if (type == HWLOC_OBJ_NUMANODE && !curlevel->attr.memorysize) {
