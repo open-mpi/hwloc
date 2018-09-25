@@ -107,5 +107,5 @@ node:0 node:3
 root
 EOF
 ) > "$file"
-@DIFF@ @HWLOC_DIFF_U@ $srcdir/test-hwloc-calc.output "$file"
+@DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-calc.output "$file"
 rm -rf "$tmp"
