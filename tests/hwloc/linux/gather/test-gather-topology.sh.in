@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2012-2017 Inria.  All rights reserved.
+# Copyright © 2012-2018 Inria.  All rights reserved.
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011 Université Bordeaux
 # See COPYING in top-level directory.
@@ -82,7 +82,7 @@ if ! "$lstopo" --no-io "$tmpdir/save2.xml" ; then
 fi
 
 echo "Comparing XML outputs..."
-( cd $tmpdir && diff -u save1.xml save2.xml )
+( cd $tmpdir && @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ save1.xml save2.xml )
 result=$?
 
 rm -rf "$tmpdir"

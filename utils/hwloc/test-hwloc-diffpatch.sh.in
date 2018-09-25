@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -52,8 +52,8 @@ cp $srcdir/test-hwloc-diffpatch.input1 .
 cat $diffoutput | $patch refname - $output1
 $patch -R $srcdir/test-hwloc-diffpatch.input2 $diffoutput $output2
 
-diff -u $srcdir/test-hwloc-diffpatch.input1 "$output2"
-diff -u $srcdir/test-hwloc-diffpatch.input2 "$output1"
+@DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-diffpatch.input1 "$output2"
+@DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-diffpatch.input2 "$output1"
 
 cd ..
 rm -rf "$tmp"
