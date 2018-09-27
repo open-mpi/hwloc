@@ -286,6 +286,16 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     }
   }
 
+  /* 0x1f = V2 Extended Topology Enumeration on Intel ; Reserved on AMD */
+  if (highest_cpuid >= 0x1f) {
+    for(i=0; ; i++) {
+      regs[0] = 0x1f; regs[2] = i;
+      dump_one_cpuid(output, regs, 0x5);
+      if (!regs[0] && !regs[1])
+	break;
+    }
+  }
+
   if (highest_cpuid > 0x1b) {
     static int reported = 0;
     if (!reported)
