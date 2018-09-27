@@ -829,11 +829,11 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   }
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
-    /* Look for Compute units inside packages */
     if (fulldiscovery) {
       hwloc_bitmap_t unit_cpuset;
       hwloc_obj_t unit;
 
+      /* Look for Compute units inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
 	unsigned packageid = infos[i].packageid;
@@ -864,33 +864,33 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 				unitid, unit_cpuset);
 	hwloc_insert_object_by_cpuset(topology, unit);
       }
-    }
 
-    /* Look for unknown objects */
-    if (infos[one].otherids) {
-      for (level = infos[one].levels-1; level <= infos[one].levels-1; level--) {
-	if (infos[one].otherids[level] != UINT_MAX) {
-	  hwloc_bitmap_t unknown_cpuset;
-	  hwloc_obj_t unknown_obj;
+      /* Look for unknown objects */
+      if (infos[one].otherids) {
+	for (level = infos[one].levels-1; level <= infos[one].levels-1; level--) {
+	  if (infos[one].otherids[level] != UINT_MAX) {
+	    hwloc_bitmap_t unknown_cpuset;
+	    hwloc_obj_t unknown_obj;
 
-	  hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
-	  while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
-	    unsigned unknownid = infos[i].otherids[level];
+	    hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+	    while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
+	      unsigned unknownid = infos[i].otherids[level];
 
-	    unknown_cpuset = hwloc_bitmap_alloc();
-	    for (j = i; j < nbprocs; j++) {
-	      if (infos[j].otherids[level] == unknownid) {
-		hwloc_bitmap_set(unknown_cpuset, j);
-		hwloc_bitmap_clr(remaining_cpuset, j);
+	      unknown_cpuset = hwloc_bitmap_alloc();
+	      for (j = i; j < nbprocs; j++) {
+		if (infos[j].otherids[level] == unknownid) {
+		  hwloc_bitmap_set(unknown_cpuset, j);
+		  hwloc_bitmap_clr(remaining_cpuset, j);
+		}
 	      }
+	      unknown_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, unknownid);
+	      unknown_obj->cpuset = unknown_cpuset;
+	      unknown_obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN;
+	      unknown_obj->attr->group.subkind = level;
+	      hwloc_debug_2args_bitmap("os unknown%u %u has cpuset %s\n",
+				       level, unknownid, unknown_cpuset);
+	      hwloc_insert_object_by_cpuset(topology, unknown_obj);
 	    }
-	    unknown_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, unknownid);
-	    unknown_obj->cpuset = unknown_cpuset;
-	    unknown_obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN;
-	    unknown_obj->attr->group.subkind = level;
-	    hwloc_debug_2args_bitmap("os unknown%u %u has cpuset %s\n",
-				     level, unknownid, unknown_cpuset);
-	    hwloc_insert_object_by_cpuset(topology, unknown_obj);
 	  }
 	}
       }
