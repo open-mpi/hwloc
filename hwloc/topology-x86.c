@@ -193,7 +193,6 @@ struct procinfo {
   unsigned packageid;
   unsigned nodeid;
   unsigned unitid;
-  unsigned threadid;
   unsigned coreid;
   unsigned *otherids;
   unsigned levels;
@@ -342,6 +341,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     unsigned max_nbthreads;
     unsigned coreidsize;
     unsigned logprocid;
+    unsigned threadid __hwloc_attribute_unused;
     eax = 0x80000008;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     coreidsize = (ecx >> 12) & 0xf;
@@ -357,13 +357,13 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     /* legacy_max_log_proc is deprecated, it can be smaller than max_nbcores,
      * which is the maximum number of cores that the processor could theoretically support
      * (see "Multiple Core Calculation" in the AMD CPUID specification).
-     * Recompute packageid/threadid/coreid accordingly.
+     * Recompute packageid/coreid accordingly.
      */
     infos->packageid = infos->apicid / max_nbcores;
     logprocid = infos->apicid % max_nbcores;
-    infos->threadid = logprocid % max_nbthreads;
     infos->coreid = logprocid / max_nbthreads;
-    hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
+    threadid = logprocid % max_nbthreads;
+    hwloc_debug("this is thread %u of core %u\n", threadid, infos->coreid);
   }
 
   infos->numcaches = 0;
@@ -516,13 +516,14 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       infos->numcaches++;
 
       if (!cachenum) {
+	unsigned threadid __hwloc_attribute_unused;
 	/* by the way, get thread/core information from the first cache */
 	max_nbcores = ((eax >> 26) & 0x3f) + 1;
 	max_nbthreads = legacy_max_log_proc / max_nbcores;
 	hwloc_debug("thus %u threads\n", max_nbthreads);
-	infos->threadid = legacy_log_proc_id % max_nbthreads;
+	threadid = legacy_log_proc_id % max_nbthreads;
 	infos->coreid = legacy_log_proc_id / max_nbthreads;
-	hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
+	hwloc_debug("this is thread %u of core %u\n", threadid, infos->coreid);
       }
     }
 
@@ -580,6 +581,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    */
   if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
     unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
+    unsigned threadid __hwloc_attribute_unused;
     for (level = 0; ; level++) {
       ecx = level;
       eax = 0x0b;
@@ -607,7 +609,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	infos->otherids[level] = UINT_MAX;
 	switch (apic_type) {
 	case 1:
-	  infos->threadid = id;
+	  threadid = id;
 	  /* apic_number is the actual number of threads per core */
 	  break;
 	case 2:
@@ -624,7 +626,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       infos->apicid = apic_id;
       infos->packageid = apic_id >> apic_shift;
       hwloc_debug("x2APIC remainder: %u\n", infos->packageid);
-      hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
+      hwloc_debug("this is thread %u of core %u\n", threadid, infos->coreid);
      }
     }
   }
@@ -1226,7 +1228,6 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
     infos[i].packageid = (unsigned) -1;
     infos[i].unitid = (unsigned) -1;
     infos[i].coreid = (unsigned) -1;
-    infos[i].threadid = (unsigned) -1;
   }
 
   eax = 0x00;
