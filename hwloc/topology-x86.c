@@ -190,10 +190,12 @@ struct cacheinfo {
 struct procinfo {
   unsigned present;
   unsigned apicid;
-  unsigned packageid;
-  unsigned nodeid;
-  unsigned unitid;
-  unsigned coreid;
+#define PKG 0
+#define CORE 1
+#define NODE 2
+#define UNIT 3
+#define HWLOC_X86_PROCINFO_ID_NR 4
+  unsigned ids[HWLOC_X86_PROCINFO_ID_NR];
   unsigned *otherids;
   unsigned levels;
   unsigned numcaches;
@@ -284,9 +286,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   else
     legacy_max_log_proc = 1;
   hwloc_debug("APIC ID 0x%02x legacy_max_log_proc %u\n", infos->apicid, legacy_max_log_proc);
-  infos->packageid = infos->apicid / legacy_max_log_proc;
+  infos->ids[PKG] = infos->apicid / legacy_max_log_proc;
   legacy_log_proc_id = infos->apicid % legacy_max_log_proc;
-  hwloc_debug("phys %u legacy thread %u\n", infos->packageid, legacy_log_proc_id);
+  hwloc_debug("phys %u legacy thread %u\n", infos->ids[PKG], legacy_log_proc_id);
 
   /* Get cpu model/family/stepping numbers from same cpuid */
   _model          = (eax>>4) & 0xf;
@@ -359,11 +361,11 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
      * (see "Multiple Core Calculation" in the AMD CPUID specification).
      * Recompute packageid/coreid accordingly.
      */
-    infos->packageid = infos->apicid / max_nbcores;
+    infos->ids[PKG] = infos->apicid / max_nbcores;
     logprocid = infos->apicid % max_nbcores;
-    infos->coreid = logprocid / max_nbthreads;
+    infos->ids[CORE] = logprocid / max_nbthreads;
     threadid = logprocid % max_nbthreads;
-    hwloc_debug("this is thread %u of core %u\n", threadid, infos->coreid);
+    hwloc_debug("this is thread %u of core %u\n", threadid, infos->ids[CORE]);
   }
 
   infos->numcaches = 0;
@@ -374,7 +376,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    * (AMD topology extension)
    */
   if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
-    unsigned apic_id, node_id, nodes_per_proc;
+    unsigned apic_id, nodes_per_proc;
 
     /* the code below doesn't want any other cache yet */
     assert(!infos->numcaches);
@@ -385,33 +387,32 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
     if (infos->cpufamilynumber == 0x16) {
       /* ecx is reserved */
-      node_id = 0;
+      infos->ids[NODE] = 0;
       nodes_per_proc = 1;
     } else {
       /* AMD other families or Hygon family 18h */
-      node_id = ecx & 0xff;
+      infos->ids[NODE] = ecx & 0xff;
       nodes_per_proc = ((ecx >> 8) & 7) + 1;
     }
-    infos->nodeid = node_id;
     if ((infos->cpufamilynumber == 0x15 && nodes_per_proc > 2)
 	|| ((infos->cpufamilynumber == 0x17 || infos->cpufamilynumber == 0x18) && nodes_per_proc > 4)) {
       hwloc_debug("warning: undefined nodes_per_proc value %u, assuming it means %u\n", nodes_per_proc, nodes_per_proc);
     }
 
     if (infos->cpufamilynumber <= 0x16) { /* topoext appeared in 0x15 and compute-units were only used in 0x15 and 0x16 */
-      unsigned unit_id, cores_per_unit;
-      infos->unitid = unit_id = ebx & 0xff;
+      unsigned cores_per_unit;
+      infos->ids[UNIT] = ebx & 0xff;
       cores_per_unit = ((ebx >> 8) & 0xff) + 1;
-      hwloc_debug("topoext %08x, %u nodes, node %u, %u cores in unit %u\n", apic_id, nodes_per_proc, node_id, cores_per_unit, unit_id);
+      hwloc_debug("topoext %08x, %u nodes, node %u, %u cores in unit %u\n", apic_id, nodes_per_proc, infos->ids[NODE], cores_per_unit, infos->ids[UNIT]);
       /* coreid and unitid are package-wide (core 0-15 and unit 0-7 on 16-core 2-NUMAnode processor).
        * The Linux kernel reduces theses to NUMA-node-wide (by applying %core_per_node and %unit_per node respectively).
        * It's not clear if we should do this as well.
        */
     } else {
-      unsigned core_id, threads_per_core;
-      infos->coreid = core_id = ebx & 0xff;
+      unsigned threads_per_core;
+      infos->ids[CORE] = ebx & 0xff;
       threads_per_core = ((ebx >> 8) & 0xff) + 1;
-      hwloc_debug("topoext %08x, %u nodes, node %u, %u threads in core %u\n", apic_id, nodes_per_proc, node_id, threads_per_core, core_id);
+      hwloc_debug("topoext %08x, %u nodes, node %u, %u threads in core %u\n", apic_id, nodes_per_proc, infos->ids[NODE], threads_per_core, infos->ids[CORE]);
     }
 
     for (cachenum = 0; ; cachenum++) {
@@ -522,8 +523,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	max_nbthreads = legacy_max_log_proc / max_nbcores;
 	hwloc_debug("thus %u threads\n", max_nbthreads);
 	threadid = legacy_log_proc_id % max_nbthreads;
-	infos->coreid = legacy_log_proc_id / max_nbthreads;
-	hwloc_debug("this is thread %u of core %u\n", threadid, infos->coreid);
+	infos->ids[CORE] = legacy_log_proc_id / max_nbthreads;
+	hwloc_debug("this is thread %u of core %u\n", threadid, infos->ids[CORE]);
       }
     }
 
@@ -615,7 +616,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	  /* apic_number is the actual number of threads per core */
 	  break;
 	case 2:
-	  infos->coreid = id;
+	  infos->ids[CORE] = id;
 	  /* apic_number is the actual number of threads per package */
 	  break;
 	default:
@@ -626,9 +627,9 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	apic_shift = apic_nextshift;
       }
       infos->apicid = apic_id;
-      infos->packageid = apic_id >> apic_shift;
-      hwloc_debug("x2APIC remainder: %u\n", infos->packageid);
-      hwloc_debug("this is thread %u of core %u\n", threadid, infos->coreid);
+      infos->ids[PKG] = apic_id >> apic_shift;
+      hwloc_debug("x2APIC remainder: %u\n", infos->ids[PKG]);
+      hwloc_debug("this is thread %u of core %u\n", threadid, infos->ids[CORE]);
      }
     }
   }
@@ -755,11 +756,11 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
     hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
     while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
       if (fulldiscovery) {
-	unsigned packageid = infos[i].packageid;
+	unsigned packageid = infos[i].ids[PKG];
 	hwloc_bitmap_t package_cpuset = hwloc_bitmap_alloc();
 
 	for (j = i; j < nbprocs; j++) {
-	  if (infos[j].packageid == packageid) {
+	  if (infos[j].ids[PKG] == packageid) {
 	    hwloc_bitmap_set(package_cpuset, j);
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	  }
@@ -801,8 +802,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
     hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
     while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
-      unsigned packageid = infos[i].packageid;
-      unsigned nodeid = infos[i].nodeid;
+      unsigned packageid = infos[i].ids[PKG];
+      unsigned nodeid = infos[i].ids[NODE];
 
       if (nodeid == (unsigned)-1) {
         hwloc_bitmap_clr(remaining_cpuset, i);
@@ -811,12 +812,12 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
       node_cpuset = hwloc_bitmap_alloc();
       for (j = i; j < nbprocs; j++) {
-	if (infos[j].nodeid == (unsigned) -1) {
+	if (infos[j].ids[NODE] == (unsigned) -1) {
 	  hwloc_bitmap_clr(remaining_cpuset, j);
 	  continue;
 	}
 
-        if (infos[j].packageid == packageid && infos[j].nodeid == nodeid) {
+        if (infos[j].ids[PKG] == packageid && infos[j].ids[NODE] == nodeid) {
           hwloc_bitmap_set(node_cpuset, j);
           hwloc_bitmap_clr(remaining_cpuset, j);
         }
@@ -840,8 +841,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
       /* Look for Compute units inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
-	unsigned packageid = infos[i].packageid;
-	unsigned unitid = infos[i].unitid;
+	unsigned packageid = infos[i].ids[PKG];
+	unsigned unitid = infos[i].ids[UNIT];
 
 	if (unitid == (unsigned)-1) {
 	  hwloc_bitmap_clr(remaining_cpuset, i);
@@ -850,12 +851,12 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
 	unit_cpuset = hwloc_bitmap_alloc();
 	for (j = i; j < nbprocs; j++) {
-	  if (infos[j].unitid == (unsigned) -1) {
+	  if (infos[j].ids[UNIT] == (unsigned) -1) {
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	    continue;
 	  }
 
-	  if (infos[j].packageid == packageid && infos[j].unitid == unitid) {
+	  if (infos[j].ids[PKG] == packageid && infos[j].ids[UNIT] == unitid) {
 	    hwloc_bitmap_set(unit_cpuset, j);
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	  }
@@ -909,9 +910,9 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
-	unsigned packageid = infos[i].packageid;
-	unsigned nodeid = infos[i].nodeid;
-	unsigned coreid = infos[i].coreid;
+	unsigned packageid = infos[i].ids[PKG];
+	unsigned nodeid = infos[i].ids[NODE];
+	unsigned coreid = infos[i].ids[CORE];
 
 	if (coreid == (unsigned) -1) {
 	  hwloc_bitmap_clr(remaining_cpuset, i);
@@ -920,12 +921,12 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
 	core_cpuset = hwloc_bitmap_alloc();
 	for (j = i; j < nbprocs; j++) {
-	  if (infos[j].coreid == (unsigned) -1) {
+	  if (infos[j].ids[CORE] == (unsigned) -1) {
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	    continue;
 	  }
 
-	  if (infos[j].packageid == packageid && infos[j].nodeid == nodeid && infos[j].coreid == coreid) {
+	  if (infos[j].ids[PKG] == packageid && infos[j].ids[NODE] == nodeid && infos[j].ids[CORE] == coreid) {
 	    hwloc_bitmap_set(core_cpuset, j);
 	    hwloc_bitmap_clr(remaining_cpuset, j);
 	  }
@@ -1001,7 +1002,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	} else {
 	  /* Add the missing cache */
 	  hwloc_bitmap_t cache_cpuset;
-	  unsigned packageid = infos[i].packageid;
+	  unsigned packageid = infos[i].ids[PKG];
 	  unsigned cacheid = infos[i].cache[l].cacheid;
 	  /* Now look for others sharing it */
 	  cache_cpuset = hwloc_bitmap_alloc();
@@ -1016,7 +1017,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	      hwloc_bitmap_clr(remaining_cpuset, j);
 	      continue;
 	    }
-	    if (infos[j].packageid == packageid && infos[j].cache[l2].cacheid == cacheid) {
+	    if (infos[j].ids[PKG] == packageid && infos[j].cache[l2].cacheid == cacheid) {
 	      hwloc_bitmap_set(cache_cpuset, j);
 	      hwloc_bitmap_clr(remaining_cpuset, j);
 	    }
@@ -1226,10 +1227,10 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
   if (NULL == infos)
     goto out;
   for (i = 0; i < nbprocs; i++) {
-    infos[i].nodeid = (unsigned) -1;
-    infos[i].packageid = (unsigned) -1;
-    infos[i].unitid = (unsigned) -1;
-    infos[i].coreid = (unsigned) -1;
+    infos[i].ids[PKG] = (unsigned) -1;
+    infos[i].ids[CORE] = (unsigned) -1;
+    infos[i].ids[NODE] = (unsigned) -1;
+    infos[i].ids[UNIT] = (unsigned) -1;
   }
 
   eax = 0x00;
