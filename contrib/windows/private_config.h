@@ -85,7 +85,7 @@
 
 /* Define to 1 if you have the declaration of `strcasecmp', and to 0 if you
    don't. */
-#define HWLOC_HAVE_DECL_STRCASECMP 0
+/* #undef HWLOC_HAVE_DECL_STRCASECMP */
 
 /* Define to 1 if you have the declaration of `snprintf', and to 0 if you
    don't. */
