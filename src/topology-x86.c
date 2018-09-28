@@ -717,11 +717,11 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
     }
   }
 
-  /* Look for Compute units inside packages */
   if (fulldiscovery) {
     hwloc_bitmap_t unit_cpuset;
     hwloc_obj_t unit;
 
+    /* Look for Compute units inside packages */
     hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
     while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
       unsigned packageid = infos[i].packageid;
@@ -751,10 +751,9 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
           unitid, unit_cpuset);
       hwloc_insert_object_by_cpuset(topology, unit);
     }
-  }
 
-  /* Look for unknown objects */
-  if (infos[one].otherids) {
+   /* Look for unknown objects */
+   if (infos[one].otherids) {
     for (level = infos[one].levels-1; level <= infos[one].levels-1; level--) {
       if (infos[one].otherids[level] != UINT_MAX) {
 	hwloc_bitmap_t unknown_cpuset;
@@ -783,6 +782,7 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
 	}
       }
     }
+   }
   }
 
   /* Look for cores */
