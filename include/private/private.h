@@ -190,6 +190,9 @@ struct hwloc_topology {
   struct hwloc_topology_forced_component_s {
     struct hwloc_disc_component *component;
   } *blacklisted_components;
+
+  /* avoid multiple calls to the get_allowed_resources hook during discovery. */
+  int got_allowed_resources;
 };
 
 extern void hwloc_alloc_root_sets(hwloc_obj_t root);

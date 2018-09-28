@@ -22,11 +22,15 @@
 static int
 hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
 {
-  /* FIXME: if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
-   * (once in the main bgq discovery, and later again by the core through the get_allowed_resources() hook).
-   */
   const char *env;
   unsigned i;
+
+  /* if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
+   * (once in the main bgq discovery, and later again by the core through the get_allowed_resources() hook).
+   */
+  if (topology->got_allowed_resources)
+    return 0;
+  topology->got_allowed_resources = 1;
 
   /* start from everything */
   hwloc_bitmap_copy(topology->allowed_cpuset, topology->levels[0][0]->cpuset);

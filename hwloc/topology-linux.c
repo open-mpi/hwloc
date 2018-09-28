@@ -4930,10 +4930,17 @@ hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
 
 static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const char *root_path, int root_fd, char **cpuset_namep)
 {
-  /* FIXME: if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
+  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
+
+  /* if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
    * (once in the main linux discovery, and later again by the core through the get_allowed_resources() hook).
    */
-  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
+  if (topology->got_allowed_resources) {
+    *cpuset_namep = NULL;
+    return;
+  }
+  topology->got_allowed_resources = 1;
+
   hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, root_path);
   if (cgroup_mntpnt || cpuset_mntpnt) {
     cpuset_name = hwloc_read_linux_cpuset_name(root_fd, topology->pid);

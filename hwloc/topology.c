@@ -3216,6 +3216,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   /* Allowed stuff */
   topology->allowed_cpuset = NULL;
   topology->allowed_nodeset = NULL;
+  topology->got_allowed_resources = 0;
 
   /* NULLify other special levels */
   memset(&topology->slevels, 0, sizeof(topology->slevels));
