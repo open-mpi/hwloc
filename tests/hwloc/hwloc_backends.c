@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <private/misc.h> /* for S_IRWXU */
 static inline int mkstemp(char *name)
 {
   mktemp(name);
