@@ -973,6 +973,13 @@ following environment variables.
   of the machine (for instance because of Linux Cgroup/Cpuset).
   </dd>
 
+<dt>HWLOC_ALLOW=all</dt>
+  <dd>Totally ignore administrative restrictions such as Linux Cgroups
+  and consider all resources (PUs and NUMA nodes) as allowed.
+  This is different from setting HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
+  which gathers all resources but marks the unavailable ones as disallowed.
+  </dt>
+
 <dt>HWLOC_HIDE_ERRORS=0</dt>
   <dd>enables or disables verbose reporting of errors.
   The hwloc library may issue warnings to the standard error stream

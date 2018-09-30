@@ -3550,6 +3550,7 @@ int
 hwloc_topology_load (struct hwloc_topology *topology)
 {
   int err;
+  const char *env;
 
   if (topology->is_loaded) {
     errno = EBUSY;
@@ -3603,6 +3604,10 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					  xmlpath_env, NULL, NULL);
     }
   }
+
+  env = getenv("HWLOC_ALLOW");
+  if (env && !strcmp(env, "all"))
+    topology->got_allowed_resources = 1;
 
   /* instantiate all possible other backends now */
   hwloc_disc_components_enable_others(topology);

@@ -29,6 +29,8 @@ Version 2.1.0
     - HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM is replaced with FLAG_INCLUDE_DISALLOWED
       and --whole-system command-line options with --disallowed.
       Former names are still accepted for backward compatibility.
+    - Add the HWLOC_ALLOW=all environment variable to totally ignore
+      administrative restrictions such as Linux Cgroups.
     - Add disallowed_pu and disallowed_numa bits to the discovery support
       structure.
 * Backends
