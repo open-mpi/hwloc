@@ -58,7 +58,7 @@ touch configure
 export CFLAGS="-O0 -g -fPIC --coverage -Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare -Wmissing-prototypes -Wstrict-prototypes -Wcomment -pedantic -fdiagnostics-show-option -fno-inline"
 export LDFLAGS="--coverage"
 ./configure
-make V=1 |tee hwloc-build.log
+make V=1 | tee hwloc-build.log
 # Execute unitary tests (autotest)
 make check
 
@@ -72,9 +72,9 @@ lcov_cobertura.py hwloc.lcov --output hwloc-coverage.xml
 make distclean
 export CFLAGS="-Wall -std=gnu99"
 unset LDFLAGS
-scan-build -plist --intercept-first --analyze-headers -o analyzer_reports ./configure
-scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make
-scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make check
+scan-build -plist --intercept-first --analyze-headers -o analyzer_reports ./configure | tee scan-build.log
+scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make | tee -a scan-build.log
+scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make check | tee -a scan-build.log
 
 # Run cppcheck analysis
 SOURCES_TO_ANALYZE="hwloc tests utils"
