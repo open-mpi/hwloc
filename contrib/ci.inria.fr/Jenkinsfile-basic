@@ -47,12 +47,17 @@ pipeline {
 		stage('Check') {
 			steps {
 				script {
-					labelToSelect = 'unix'
-					listOfNodeNames = jenkins.model.Jenkins.instance.nodes.collect {
-					  node -> node.getLabelString().contains(labelToSelect) ? node.name : null
+					listOfNodeNames = []
+					if (env.NO_UNIX != 'true') {
+						labelToSelect = 'unix'
+						listOfNodeNames = jenkins.model.Jenkins.instance.nodes.collect {
+						  node -> node.getLabelString().contains(labelToSelect) ? node.name : null
+						}
+						listOfNodeNames.removeAll(Collections.singleton(null))
 					}
-					listOfNodeNames.removeAll(Collections.singleton(null))
-					listOfNodeNames.push('VisualStudio')
+					if (env.NO_MSVC != 'true') {
+						listOfNodeNames.push('VisualStudio')
+					}
 
 					def p = listOfNodeNames.collectEntries {
 					[ (it): {
