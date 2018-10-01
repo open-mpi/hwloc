@@ -136,12 +136,14 @@ sonar.host.url=https://sonarqube.bordeaux.inria.fr/sonarqube
 sonar.login=$(cat ~/.sonarqube-hwloc-token)
 sonar.links.homepage=https://www.open-mpi.org/projects/hwloc/
 sonar.links.ci=https://ci.inria.fr/hwloc/
-sonar.links.scm=https://github.com/open-mpi/hwloc.git
+sonar.links.scm=https://github.com/open-mpi/hwloc
 sonar.links.issue=https://github.com/open-mpi/hwloc/issues
 sonar.projectKey=tadaam:hwloc:github:$hwloc_branch
 sonar.projectDescription=Hardware locality (hwloc)
+# SED doesn't want us to define projectName
 sonar.projectVersion=$hwloc_branch
 sonar.scm.disabled=false
+# sonar.scm.provider=git requires sonar-scanner to run inside a git clone
 sonar.sourceEncoding=UTF-8
 sonar.language=c
 sonar.sources=src, tests, utils
