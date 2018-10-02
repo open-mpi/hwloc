@@ -16,7 +16,7 @@
 #endif
 #include <sys/stat.h>
 
-#ifdef HWLOC_WIN_SYS
+#if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
 #include <io.h>
 #define open _open
 #define read _read

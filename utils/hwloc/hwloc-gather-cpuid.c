@@ -15,7 +15,7 @@
 
 #include <private/cpuid-x86.h>
 
-#ifdef HWLOC_WIN_SYS
+#if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
 #include <direct.h>
 #define mkdir(name, mode) _mkdir(name)
 #include <io.h>
