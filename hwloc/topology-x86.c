@@ -581,7 +581,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    */
   if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
     unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
-    unsigned threadid __hwloc_attribute_unused;
+    unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
     for (level = 0; ; level++) {
       ecx = level;
       eax = 0x0b;
