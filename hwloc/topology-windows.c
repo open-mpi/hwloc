@@ -811,7 +811,7 @@ hwloc_look_windows(struct hwloc_backend *backend)
 
 	obj = hwloc_alloc_setup_object(topology, type, id);
         obj->cpuset = hwloc_bitmap_alloc();
-	hwloc_debug("%s#%u mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
+	hwloc_debug("%s#%u mask %llx\n", hwloc_obj_type_string(type), id, (unsigned long long) procInfo[i].ProcessorMask);
 	/* ProcessorMask is a ULONG_PTR */
 	hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, 0, procInfo[i].ProcessorMask);
 	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
