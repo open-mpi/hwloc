@@ -376,11 +376,19 @@ EOF
 
     AC_CHECK_LIB([pthread], [pthread_self], [hwloc_have_pthread=yes])
 
-    # linux-libnuma.h testing requires libnuma with numa_bitmask_alloc()
-    AC_CHECK_LIB([numa], [numa_available], [
-      AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
-    	      [#include <numa.h>])
-    ])
+    HWLOC_PKG_CHECK_MODULES([NUMA], [numa], [numa_available], [numa.h],
+                            [hwloc_have_linux_libnuma=yes],
+			    [
+			     # libnuma didn't have a .pc before 2.0.12, look for it manually.
+			     AC_CHECK_LIB([numa], [numa_available], [
+				# and make sure this old release has at least numa_bitmask_alloc() for our tests
+			        AC_CHECK_DECL([numa_bitmask_alloc],
+				              [hwloc_have_linux_libnuma=yes
+					       HWLOC_NUMA_LIBS=-lnuma
+					      ],
+					      [],
+					      [#include <numa.h>])
+			     ])])
 
     AC_CHECK_HEADERS([stdlib.h], [
       AC_CHECK_FUNCS([mkstemp])

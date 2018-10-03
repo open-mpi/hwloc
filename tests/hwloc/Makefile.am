@@ -105,7 +105,8 @@ endif
 
 LDADD += $(HWLOC_top_builddir)/hwloc/$(hwloc_lib)
 
-linux_libnuma_LDADD = $(LDADD) -lnuma
+linux_libnuma_CFLAGS = $(AM_CFLAGS) $(HWLOC_NUMA_CFLAGS)
+linux_libnuma_LDADD = $(LDADD) $(HWLOC_NUMA_LIBS)
 openfabrics_verbs_LDADD = $(LDADD) -libverbs
 opencl_LDADD = $(LDADD) $(HWLOC_OPENCL_LIBS) $(HWLOC_OPENCL_LDFLAGS)
 cuda_LDADD = $(LDADD) -lcuda
