@@ -1382,14 +1382,15 @@ fulldiscovery:
 static int
 hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t set)
 {
-#if !(defined HWLOC_WIN_SYS && !defined __MINGW32__) /* needs a lot of work */
+
+#if !(defined HWLOC_WIN_SYS && !defined __MINGW32__ && !defined __CYGWIN__) /* needs a lot of work */
   struct dirent *dirent;
   DIR *dir;
   FILE *file;
   char line [32];
 
   dir = opendir(src_cpuiddump_path);
-  if (!dir)
+  if (!dir) 
     return -1;
 
   char path[strlen(src_cpuiddump_path) + strlen("/hwloc-cpuid-info") + 1];
