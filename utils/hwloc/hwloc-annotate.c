@@ -120,7 +120,7 @@ add_distances(hwloc_topology_t topology, int topodepth)
 	unsigned long kind = 0;
 	unsigned nbobjs = 0;
 	hwloc_obj_t *objs = NULL;
-	uint64_t *values = NULL;
+	hwloc_uint64_t *values = NULL;
 	FILE *file;
 	char line[64];
 	unsigned i, x, y, z;

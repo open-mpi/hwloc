@@ -293,7 +293,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 }
 
 static __hwloc_inline void
-hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *matrix, int logical)
+hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *matrix, int logical)
 {
   unsigned i, j;
 

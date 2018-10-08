@@ -64,7 +64,7 @@ int main(void)
   hwloc_topology_t topology;
   struct hwloc_distances_s *distances[2];
   hwloc_obj_t objs[16];
-  uint64_t values[16*16], value1, value2;
+  hwloc_uint64_t values[16*16], value1, value2;
   int topodepth;
   unsigned i, j, k, nr;
   int err;
