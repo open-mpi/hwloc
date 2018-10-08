@@ -78,7 +78,7 @@ hwloc_shmem_topology_get_length(hwloc_topology_t topology,
 
 int
 hwloc_shmem_topology_write(hwloc_topology_t topology,
-			   int fd, uint64_t fileoffset,
+			   int fd, hwloc_uint64_t fileoffset,
 			   void *mmap_address, size_t length,
 			   unsigned long flags)
 {
@@ -146,7 +146,7 @@ hwloc_shmem_topology_write(hwloc_topology_t topology,
 
 int
 hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
-			   int fd, uint64_t fileoffset,
+			   int fd, hwloc_uint64_t fileoffset,
 			   void *mmap_address, size_t length,
 			   unsigned long flags)
 {
@@ -261,7 +261,7 @@ hwloc_shmem_topology_get_length(hwloc_topology_t topology __hwloc_attribute_unus
 
 int
 hwloc_shmem_topology_write(hwloc_topology_t topology __hwloc_attribute_unused,
-			   int fd __hwloc_attribute_unused, uint64_t fileoffset __hwloc_attribute_unused,
+			   int fd __hwloc_attribute_unused, hwloc_uint64_t fileoffset __hwloc_attribute_unused,
 			   void *mmap_address __hwloc_attribute_unused, size_t length __hwloc_attribute_unused,
 			   unsigned long flags __hwloc_attribute_unused)
 {
@@ -271,7 +271,7 @@ hwloc_shmem_topology_write(hwloc_topology_t topology __hwloc_attribute_unused,
 
 int
 hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp __hwloc_attribute_unused,
-			   int fd __hwloc_attribute_unused, uint64_t fileoffset __hwloc_attribute_unused,
+			   int fd __hwloc_attribute_unused, hwloc_uint64_t fileoffset __hwloc_attribute_unused,
 			   void *mmap_address __hwloc_attribute_unused, size_t length __hwloc_attribute_unused,
 			   unsigned long flags __hwloc_attribute_unused)
 {

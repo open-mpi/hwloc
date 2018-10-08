@@ -17,7 +17,7 @@ int main(void)
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   struct hwloc_distances_s *distances;
   hwloc_obj_t nodes[3], cores[6];
-  uint64_t node_distances[9], core_distances[36];
+  hwloc_uint64_t node_distances[9], core_distances[36];
   unsigned i,j,nr;
   int err;
 

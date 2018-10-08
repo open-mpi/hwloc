@@ -16,7 +16,7 @@ int main(void)
   hwloc_topology_t topology;
   hwloc_obj_t obj;
   hwloc_obj_t objs[32];
-  uint64_t values[32*32];
+  hwloc_uint64_t values[32*32];
   int depth;
   hwloc_obj_type_t type;
   unsigned width;

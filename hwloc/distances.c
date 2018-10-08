@@ -353,7 +353,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology,
 /* The actual function exported to the user
  */
 int hwloc_distances_add(hwloc_topology_t topology,
-			unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
+			unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,
 			unsigned long kind, unsigned long flags)
 {
   hwloc_obj_type_t type;
