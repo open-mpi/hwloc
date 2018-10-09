@@ -2977,8 +2977,10 @@ hwloc_linux_knl_parse_numa_distances(unsigned nbnodes,
     /* nothing else needed */
     return 0;
 
-  if (nbnodes != 2 && nbnodes != 4 && nbnodes != 8)
+  if (nbnodes != 2 && nbnodes != 4 && nbnodes != 8) {
+    fprintf(stderr, "Ignoring KNL NUMA quirk, nbnodes (%u) isn't 2, 4 or 8.\n", nbnodes);
     return -1;
+  }
 
   for(i=0; i<nbnodes; i++) {
     /* check we have 10 on the diagonal */
