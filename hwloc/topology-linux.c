@@ -3459,7 +3459,7 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
 			    hwloc_obj_t ddr, hwloc_obj_t mcdram,
 			    unsigned *failednodes)
 {
-  hwloc_obj_t cluster = NULL;
+  hwloc_obj_t cluster;
 
   mcdram->subtype = strdup("MCDRAM");
   /* Change MCDRAM cpuset to DDR cpuset for clarity.
