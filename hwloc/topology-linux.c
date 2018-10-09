@@ -2982,6 +2982,11 @@ hwloc_linux_knl_parse_numa_distances(unsigned nbnodes,
     return -1;
   }
 
+  if (!distances) {
+    fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix missing.\n");
+    return -1;
+  }
+
   for(i=0; i<nbnodes; i++) {
     /* check we have 10 on the diagonal */
     if (distances[i*nbnodes+i] != 10) {
