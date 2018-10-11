@@ -83,7 +83,7 @@ pipeline {
 					def p = listOfNodeNames.collectEntries {
 					[ (it): {
 						if (it == 'MinGW') {
-							node('windows') {
+							node('mingw') {
 								dir('check-mingw') {
 									unstash 'tarballgz'
 									unstash 'scripts-mingw'
