@@ -71,7 +71,7 @@ pipeline {
 								}
 							}
 						} else {
-							node('windows') {
+							node('msvc') {
 								dir('check-msvc') {
 									unstash 'tarballgz'
 									unstash 'script-msvc'
