@@ -254,7 +254,7 @@ int main(void)
   /* check that restricting PUs maintains ordering of normal children */
   printf("restricting so that PUs get reordered\n");
   hwloc_topology_init(&topology);
-  hwloc_topology_set_synthetic(topology, "node:1 core:2 pu:2(index=0,2,1,3)");
+  hwloc_topology_set_synthetic(topology, "node:1 core:2 pu:2(indexes=0,2,1,3)");
   hwloc_topology_load(topology);
   hwloc_bitmap_zero(cpuset);
   hwloc_bitmap_set_range(cpuset, 1, 2);
