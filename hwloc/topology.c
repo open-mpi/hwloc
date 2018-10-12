@@ -3681,8 +3681,13 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
   if (modified) {
     for_each_child_safe(child, obj, pchild)
       restrict_object_by_cpuset(topology, flags, pchild, droppedcpuset, droppednodeset);
+    /* if some hwloc_bitmap_first(child->complete_cpuset) changed, children might need to be reordered */
+    hwloc__reorder_children(obj);
+
     for_each_memory_child_safe(child, obj, pchild)
       restrict_object_by_cpuset(topology, flags, pchild, droppedcpuset, droppednodeset);
+    /* local NUMA nodes have the same cpusets, no need to reorder them */
+
     /* Nothing to restrict under I/O or Misc */
   }
 

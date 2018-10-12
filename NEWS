@@ -20,6 +20,8 @@ in v0.9.1).
 Version 2.0.3
 -------------
 * Fix build on Cygwin, thanks to Marco Atzeri for the patches.
+* Fix a corner case of hwloc_topology_restrict() where children would
+  become out-of-order.
 
 
 Version 2.0.2 (also included in 1.11.11 when appropriate)
