@@ -903,9 +903,9 @@ main (int argc, char *argv[])
 	}
       }
 
-      else if (!strncmp (argv[0], "--children-order=", 18)) {
-	char *tmp = argv[0]+18;
-	argv[0][17] = '\0';
+      else if (!strncmp (argv[0], "--children-order=", 17)) {
+	char *tmp = argv[0]+17;
+	argv[0][16] = '\0';
 	if (!strcmp(tmp, "plain"))
 	  loutput.plain_children_order = 1;
 	else if (strcmp(tmp, "memoryabove"))
