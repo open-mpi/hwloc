@@ -191,7 +191,7 @@ Version 2.0.0
     - Add get_area_memlocation().
 * Tools
   + lstopo and hwloc-info have a new --filter option matching the new filtering API.
-  + lstopo can be given --children-layout=plain to force a basic displaying
+  + lstopo can be given --children-order=plain to force a basic displaying
     of memory and normal children together below their parent.
   + hwloc-distances was removed and replaced with lstopo --distances.
 * Misc
