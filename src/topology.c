@@ -1816,9 +1816,13 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
     dropping = droppingparent || (obj->cpuset && hwloc_bitmap_iszero(obj->cpuset));
   }
 
-  if (modified)
+  if (modified) {
     for_each_child_safe(child, obj, pchild)
       restrict_object(topology, flags, pchild, droppedcpuset, droppednodeset, dropping);
+
+    /* if some hwloc_bitmap_first(child->complete_cpuset) changed, children might need to be reordered */
+    reorder_children(obj);
+  }
 
   if (dropping) {
     hwloc_debug("%s", "\nRemoving object during restrict");

@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.11.12
+---------------
+* Fix a corner case of hwloc_topology_restrict() where children would
+  become out-of-order.
+
+
 Version 1.11.11 (also included in 2.0.2)
 ---------------
 * Add support for Hygon Dhyana processors in the x86 backend,
