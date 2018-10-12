@@ -461,7 +461,6 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       errno = EINVAL;
       goto error;
     }
-    data->level[count-1].arity = (unsigned)item;
 
     totalarity *= item;
     data->level[count].totalwidth = totalarity;
@@ -487,6 +486,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       goto error;
     }
 
+    data->level[count-1].arity = (unsigned)item;
     count++;
   }
 
