@@ -97,7 +97,7 @@ pipeline {
 			echo "Build success."
 			// email when changed to success
 			script {
-				if (statusHasChanged) {
+				if (statusHasChanged || env.EMAIL_NOTIFICATION == 'true') {
 					emailext(body: '${DEFAULT_CONTENT}',
 						 subject: '${DEFAULT_SUBJECT}',
 						 replyTo: '$DEFAULT_REPLYTO',
