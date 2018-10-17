@@ -144,7 +144,8 @@ static void add_process_objects(hwloc_topology_t topology)
 
     snprintf(name, sizeof(name), "%ld", local_pid_number);
 
-    local_pid = hwloc_pid_from_number(local_pid_number, 0);
+    if (hwloc_pid_from_number(&local_pid, local_pid_number, 0, 0 /* ignore failures */) < 0)
+      continue;
 
     proc_cpubind = hwloc_get_proc_cpubind(topology, local_pid, cpuset, 0) != -1;
 
@@ -993,8 +994,8 @@ main (int argc, char *argv[])
   }
 
   if (loutput.pid_number > 0) {
-    loutput.pid = hwloc_pid_from_number(loutput.pid_number, 0);
-    if (hwloc_topology_set_pid(topology, loutput.pid)) {
+    if (hwloc_pid_from_number(&loutput.pid, loutput.pid_number, 0, 1 /* verbose */) < 0
+	|| hwloc_topology_set_pid(topology, loutput.pid)) {
       perror("Setting target pid");
       goto out_with_topology;
     }
