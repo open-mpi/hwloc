@@ -303,7 +303,10 @@ int main(int argc, char *argv[])
   }
 
   if (pid_number > 0) {
-    pid = hwloc_pid_from_number(pid_number, !(get_binding || get_last_cpu_location));
+    if (hwloc_pid_from_number(&pid, pid_number, !(get_binding || get_last_cpu_location), 1 /* verbose */) < 0) {
+      fprintf(stderr, "failed to use pid\n");
+      return EXIT_FAILURE;
+    }
     /* no need to set_pid()
      * the doc just says we're operating on pid, not that we're retrieving the topo/cpuset as seen from inside pid
      */

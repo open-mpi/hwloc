@@ -526,8 +526,8 @@ main (int argc, char *argv[])
   }
 
   if (pid_number > 0) {
-    pid = hwloc_pid_from_number(pid_number, 0);
-    if (hwloc_topology_set_pid(topology, pid)) {
+    if (hwloc_pid_from_number(&pid, pid_number, 0, 1 /* verbose */) < 0
+	|| hwloc_topology_set_pid(topology, pid)) {
       perror("Setting target pid");
       return EXIT_FAILURE;
     }
