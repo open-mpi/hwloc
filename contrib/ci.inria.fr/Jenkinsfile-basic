@@ -67,7 +67,8 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-unix-check'
 									sh 'chmod 755 job-1-check.sh && ./job-1-check.sh '+tarballgz
-									deleteDir()
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
 								}
 							}
 						} else {
@@ -76,7 +77,8 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-msvc'
 									bat 'job-1-visualstudio.bat '+tarballgz
-									deleteDir()
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
 								}
 							}
 						}
