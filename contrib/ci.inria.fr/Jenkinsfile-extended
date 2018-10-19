@@ -85,7 +85,8 @@ pipeline {
 									unstash 'scripts-mingw'
 									bat 'job-3-mingw.bat '+tarballgz
 									archiveArtifacts artifacts: "*.zip", fingerprint: true, onlyIfSuccessful: true
-									deleteDir()
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
 								}
 							}
 						} else if (it == 'SonarQube Scanner') {
@@ -94,7 +95,8 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-sonarscanner'
 									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh '+gitRepoURL+' '+gitBranch+' '+tarballgz
-									deleteDir()
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
 								}
 							}
 						} else if (it == 'Embedded') {
@@ -103,7 +105,8 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-embedded'
 									sh 'chmod 755 job-3-embedded.sh && ./job-3-embedded.sh '+tarballgz
-									deleteDir()
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
 								}
 							}
 						} else {
@@ -112,7 +115,8 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-unix-debug'
 									sh 'chmod 755 job-3-debug.sh && ./job-3-debug.sh '+tarballgz
-									deleteDir()
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
 								}
 							}
 						}
