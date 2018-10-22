@@ -1918,8 +1918,11 @@ The Solaris kstat processor group name that was used to build this Group object.
 <dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
 </dd>
-<dt>PCISlot (PCI devices)</dt>
+<dt>PCISlot (PCI devices or Bridges)</dt>
 <dd>The name/number of the physical slot where the device is plugged.
+ If the physical device contains PCI bridges above the actual PCI device,
+ the attribute may be attached to the highest bridge
+ (i.e. the first object that actually appears below the physical slot).
 </dd>
 <dt>Vendor, Model, Revision, SerialNumber (Block OS devices)</dt>
 <dd>The vendor and model names, revision, and serial number of a Block OS device.
