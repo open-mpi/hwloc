@@ -1267,6 +1267,7 @@ main (int argc, char *argv[])
   }
 
   loutput.topology = topology;
+  loutput.depth = hwloc_topology_get_depth(topology);
   loutput.file = NULL;
 
   if (output_format != LSTOPO_OUTPUT_XML) {
