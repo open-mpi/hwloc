@@ -6361,47 +6361,6 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
   return 0;
 }
 
-static hwloc_obj_t
-hwloc_linuxfs_pci_find_pcislot_obj(struct hwloc_obj *tree,
-				   unsigned domain, unsigned bus, unsigned dev)
-{
-  for ( ; tree; tree = tree->next_sibling) {
-    if (tree->type == HWLOC_OBJ_PCI_DEVICE
-	|| (tree->type == HWLOC_OBJ_BRIDGE
-	    && tree->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
-      if (tree->attr->pcidev.domain == domain
-	  && tree->attr->pcidev.bus == bus
-	  && tree->attr->pcidev.dev == dev
-	  && tree->attr->pcidev.func == 0)
-	/* that's the right bus id */
-	return tree;
-      if (tree->attr->pcidev.domain > domain
-	  || (tree->attr->pcidev.domain == domain
-	      && tree->attr->pcidev.bus > bus))
-	/* bus id too high, won't find anything later */
-	return NULL;
-      if (tree->type == HWLOC_OBJ_BRIDGE
-	  && tree->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
-	  && tree->attr->bridge.downstream.pci.domain == domain
-	  && tree->attr->bridge.downstream.pci.secondary_bus <= bus
-	  && tree->attr->bridge.downstream.pci.subordinate_bus >= bus)
-	/* not the right bus id, but it's included in the bus below that bridge */
-	return hwloc_linuxfs_pci_find_pcislot_obj(tree->io_first_child, domain, bus, dev);
-
-    } else if (tree->type == HWLOC_OBJ_BRIDGE
-	       && tree->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI
-	       && tree->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
-	       /* non-PCI to PCI bridge, just look at the subordinate bus */
-	       && tree->attr->bridge.downstream.pci.domain == domain
-	       && tree->attr->bridge.downstream.pci.secondary_bus <= bus
-	       && tree->attr->bridge.downstream.pci.subordinate_bus >= bus) {
-      /* contains our bus, recurse */
-      return hwloc_linuxfs_pci_find_pcislot_obj(tree->io_first_child, domain, bus, dev);
-    }
-  }
-  return NULL;
-}
-
 static int
 hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 {
@@ -6426,7 +6385,10 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 	  && !hwloc_read_path_by_length(path, buf, sizeof(buf), root_fd)
 	  && sscanf(buf, "%x:%x:%x", &domain, &bus, &dev) == 3) {
 	/* may also be %x:%x without a device number but that's only for hotplug when nothing is plugged, ignore those */
-	hwloc_obj_t obj = hwloc_linuxfs_pci_find_pcislot_obj(hwloc_get_root_obj(topology)->io_first_child, domain, bus, dev);
+	hwloc_obj_t obj = hwloc_pcidisc_find_by_busid(topology, domain, bus, dev, 0);
+	/* obj may be higher in the hierarchy that requested (if that exact bus didn't exist),
+	 * we'll check below whether the bus ID is correct.
+	 */
 	while (obj) {
 	  /* Apply the slot to that device and its siblings with same domain/bus/dev ID.
 	   * Make sure that siblings are still PCI and on the same bus
