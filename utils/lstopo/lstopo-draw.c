@@ -363,9 +363,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     return;
 
 
-  /* no separator between core or L1 children */
-  if (parent->type == HWLOC_OBJ_CORE
-      || (hwloc_obj_type_is_cache(parent->type) && parent->attr->cache.depth == 1))
+  /* no separator between PUs */
+  if ((unsigned)parent->depth == loutput->depth-2)
     separator = 0;
 
   /* place non-memory children */

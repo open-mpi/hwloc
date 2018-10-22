@@ -32,6 +32,7 @@ struct draw_methods;
 /* if embedded in backend-specific output structure, must be at the beginning */
 struct lstopo_output {
   hwloc_topology_t topology;
+  unsigned depth;
 
   /* file config */
   FILE *file;

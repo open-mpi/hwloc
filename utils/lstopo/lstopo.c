@@ -1150,6 +1150,7 @@ main (int argc, char *argv[])
   }
 
   loutput.topology = topology;
+  loutput.depth = hwloc_topology_get_depth(topology);
   loutput.file = NULL;
 
   lstopo_populate_userdata(hwloc_get_root_obj(topology));
