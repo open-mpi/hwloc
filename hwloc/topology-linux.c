@@ -6425,12 +6425,23 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
       if ((size_t) err < sizeof(path)
 	  && !hwloc_read_path_by_length(path, buf, sizeof(buf), root_fd)
 	  && sscanf(buf, "%x:%x:%x", &domain, &bus, &dev) == 3) {
+	/* may also be %x:%x without a device number but that's only for hotplug when nothing is plugged, ignore those */
 	hwloc_obj_t obj = hwloc_linuxfs_pci_find_pcislot_obj(hwloc_get_root_obj(topology)->io_first_child, domain, bus, dev);
-	if (obj) {
-	  while (obj && obj->attr->pcidev.dev == dev /* sibling have same domain+bus */) {
-	    hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
-	    obj = obj->next_sibling;
-	  }
+	while (obj) {
+	  /* Apply the slot to that device and its siblings with same domain/bus/dev ID.
+	   * Make sure that siblings are still PCI and on the same bus
+	   * (optional bridge filtering can put different things together).
+	   */
+	  if (obj->type != HWLOC_OBJ_PCI_DEVICE &&
+	      (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI))
+	    break;
+	  if (obj->attr->pcidev.domain != domain
+	      || obj->attr->pcidev.bus != bus
+	      || obj->attr->pcidev.dev != dev)
+	    break;
+
+	  hwloc_obj_add_info(obj, "PCISlot", dirent->d_name);
+	  obj = obj->next_sibling;
 	}
       }
     }
