@@ -684,6 +684,7 @@ extern "C" {
 #define hwloc_special_level_s HWLOC_NAME(special_level_s)
 
 #define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
+#define hwloc_pci_locality_s HWLOC_NAME(pci_locality_s)
 
 #define hwloc_topology_forced_component_s HWLOC_NAME(topology_forced_component)
 
@@ -705,7 +706,6 @@ extern "C" {
 #define hwloc_pci_discovery_prepare HWLOC_NAME(pci_discovery_prepare)
 #define hwloc_pci_discovery_exit HWLOC_NAME(pci_discovery_exit)
 #define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
-#define hwloc_pci_belowroot_apply_locality HWLOC_NAME(pci_belowroot_apply_locality)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)
 #define hwloc__add_info_nodup HWLOC_NAME(_add_info_nodup)

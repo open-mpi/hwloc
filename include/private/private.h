@@ -176,7 +176,6 @@ struct hwloc_topology {
   struct hwloc_numanode_attr_s machine_memory;
 
   /* pci stuff */
-  int need_pci_belowroot_apply_locality;
   int pci_has_forced_locality;
   unsigned pci_forced_locality_nr;
   struct hwloc_pci_forced_locality_s {
@@ -193,6 +192,16 @@ struct hwloc_topology {
 
   /* avoid multiple calls to the get_allowed_resources hook during discovery. */
   int got_allowed_resources;
+
+  /* FIXME: keep until topo destroy and reuse for finding specific buses */
+  struct hwloc_pci_locality_s {
+    unsigned domain;
+    unsigned bus_min;
+    unsigned bus_max;
+    hwloc_bitmap_t cpuset;
+    hwloc_obj_t parent;
+    struct hwloc_pci_locality_s *prev, *next;
+  } *first_pci_locality, *last_pci_locality;
 };
 
 extern void hwloc_alloc_root_sets(hwloc_obj_t root);
@@ -223,13 +232,6 @@ extern void hwloc_pci_discovery_exit(struct hwloc_topology *topology);
  * Return a good fallback (object above) on failure to insert.
  */
 extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset);
-
-/* Move PCI objects currently attached to the root object ot their actual location.
- * Called by the core at the end of hwloc_topology_load().
- * Prior to this call, all PCI objects may be found below the root object.
- * After this call and a reconnect of levels, all PCI objects are available through levels.
- */
-extern int hwloc_pci_belowroot_apply_locality(struct hwloc_topology *topology);
 
 extern int hwloc__add_info(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value);
 extern int hwloc__add_info_nodup(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);

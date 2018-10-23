@@ -777,9 +777,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   /* place us for real */
   assert(newobj->logical_index < level_width);
   level[newobj->logical_index] = newobj;
-  /* link to already-inserted cousins
-   * (hwloc_pci_belowroot_apply_locality() can cause out-of-order logical indexes)
-   */
+  /* link to already-inserted cousins */
   if (newobj->logical_index > 0 && level[newobj->logical_index-1]) {
     newobj->prev_cousin = level[newobj->logical_index-1];
     level[newobj->logical_index-1]->next_cousin = newobj;
@@ -3121,8 +3119,6 @@ next_cpubackend:
 next_noncpubackend:
     backend = backend->next;
   }
-
-  hwloc_pci_belowroot_apply_locality(topology);
 
   hwloc_debug("%s", "\nNow reconnecting\n");
   hwloc_debug_print_objects(0, topology->levels[0][0]);
