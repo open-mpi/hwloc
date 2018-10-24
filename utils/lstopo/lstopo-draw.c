@@ -1092,6 +1092,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  /* align all children even if only some of them have a linkspeed */
   unsigned speedwidth = loutput->show_text[HWLOC_OBJ_BRIDGE] ? fontsize + gridsize : 0;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
@@ -1132,7 +1133,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);
 	    else
 	      snprintf(text, sizeof(text), "%0.1f", child->attr->pcidev.linkspeed);
-	    methods->text(loutput, style.t2, fontsize, depth-1, x + 3*gridsize, ymid + BRIDGE_HEIGHT/2, text);
+	    methods->text(loutput, style.t2, fontsize, depth-1, x + 2.5*gridsize, ymid + BRIDGE_HEIGHT/2, text);
 	  }
 	}
       }
