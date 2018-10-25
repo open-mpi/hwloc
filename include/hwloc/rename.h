@@ -482,6 +482,7 @@ extern "C" {
 
 /* opencl.h */
 
+#define hwloc_opencl_get_device_pci_busid HWLOC_NAME(opencl_get_device_pci_ids)
 #define hwloc_opencl_get_device_cpuset HWLOC_NAME(opencl_get_device_cpuset)
 #define hwloc_opencl_get_device_osdev HWLOC_NAME(opencl_get_device_osdev)
 #define hwloc_opencl_get_device_osdev_by_index HWLOC_NAME(opencl_get_device_osdev_by_index)

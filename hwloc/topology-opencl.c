@@ -19,6 +19,8 @@
 #include <CL/cl_ext.h>
 #endif
 
+#include <hwloc/opencl.h>
+
 static int
 hwloc_opencl_discover(struct hwloc_backend *backend)
 {
@@ -58,9 +60,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
     for(i=0; i<nr_devices; i++) {
       cl_platform_id platform_id = 0;
       cl_device_type type;
-#ifdef CL_DEVICE_TOPOLOGY_AMD
-      cl_device_topology_amd amdtopo;
-#endif
+      unsigned pcidomain, pcibus, pcidev, pcifunc;
       cl_ulong globalmemsize;
       cl_uint computeunits;
       hwloc_obj_t osdev, parent;
@@ -128,20 +128,13 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
       hwloc_obj_add_info(osdev, "OpenCLGlobalMemorySize", buffer);
 
       parent = NULL;
-#ifdef CL_DEVICE_TOPOLOGY_AMD
-      clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
-      if (CL_SUCCESS != clret) {
-	hwloc_debug("no AMD-specific device information: %d\n", clret);
-      } else if (CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD != amdtopo.raw.type) {
-	hwloc_debug("AMD-specific device topology reports non-PCIe device type: %u\n", amdtopo.raw.type);
-      } else {
-	parent = hwloc_pcidisc_find_by_busid(topology, 0, (unsigned)amdtopo.pcie.bus, (unsigned)amdtopo.pcie.device, (unsigned)amdtopo.pcie.function);
+      if (hwloc_opencl_get_device_pci_busid(device_ids[i], &pcidomain, &pcibus, &pcidev, &pcifunc) == 0) {
+	parent = hwloc_pcidisc_find_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
 	if (!parent)
-	  parent = hwloc_pcidisc_find_busid_parent(topology, 0, (unsigned)amdtopo.pcie.bus, (unsigned)amdtopo.pcie.device, (unsigned)amdtopo.pcie.function);
+	  parent = hwloc_pcidisc_find_busid_parent(topology, pcidomain, pcibus, pcidev, pcifunc);
+      } else {
+	hwloc_debug("Failed to find the PCI id of the device\n");
       }
-#else
-      hwloc_debug("No locality information found.\n");
-#endif
       if (!parent)
 	parent = hwloc_get_root_obj(topology);
 

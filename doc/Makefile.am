@@ -691,6 +691,7 @@ man3_diff_DATA = \
 man3_cudadir = $(man3dir)
 man3_cuda_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_opencl.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_opencl_get_device_pci_busid.3 \
         $(DOX_MAN_DIR)/man3/hwloc_opencl_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_opencl_get_device_osdev.3 \
         $(DOX_MAN_DIR)/man3/hwloc_opencl_get_device_osdev_by_index.3 \

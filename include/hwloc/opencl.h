@@ -48,6 +48,32 @@ extern "C" {
  * @{
  */
 
+/** \brief Return the domain, bus and device IDs of the OpenCL device \p device.
+ *
+ * Device \p device must match the local machine.
+ */
+static __hwloc_inline int
+hwloc_opencl_get_device_pci_busid(cl_device_id device,
+                               unsigned *domain, unsigned *bus, unsigned *dev, unsigned *func)
+{
+#ifdef CL_DEVICE_TOPOLOGY_AMD
+	cl_device_topology_amd amdtopo;
+	cl_int clret;
+
+	clret = clGetDeviceInfo(device, CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
+	if (CL_SUCCESS == clret
+	    && CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD == amdtopo.raw.type) {
+		*domain = 0; /* can't do anything better */
+		*bus = (unsigned) amdtopo.pcie.bus;
+		*dev = (unsigned) amdtopo.pcie.device;
+		*func = (unsigned) amdtopo.pcie.function;
+		return 0;
+	}
+#endif
+
+	return -1;
+}
+
 /** \brief Get the CPU set of logical processors that are physically
  * close to OpenCL device \p device.
  *
@@ -70,35 +96,28 @@ hwloc_opencl_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
 			       cl_device_id device __hwloc_attribute_unused,
 			       hwloc_cpuset_t set)
 {
-#if (defined HWLOC_LINUX_SYS) && (defined CL_DEVICE_TOPOLOGY_AMD)
+#if (defined HWLOC_LINUX_SYS)
 	/* If we're on Linux + AMD OpenCL, use the AMD extension + the sysfs mechanism to get the local cpus */
 #define HWLOC_OPENCL_DEVICE_SYSFS_PATH_MAX 128
 	char path[HWLOC_OPENCL_DEVICE_SYSFS_PATH_MAX];
-	cl_device_topology_amd amdtopo;
-	cl_int clret;
+	unsigned pcidomain, pcibus, pcidev, pcifunc;
 
 	if (!hwloc_topology_is_thissystem(topology)) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	clret = clGetDeviceInfo(device, CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
-	if (CL_SUCCESS != clret) {
-		hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-		return 0;
-	}
-	if (CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD != amdtopo.raw.type) {
+	if (hwloc_opencl_get_device_pci_busid(device, &pcidomain, &pcibus, &pcidev, &pcifunc) < 0) {
 		hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
 		return 0;
 	}
 
-	sprintf(path, "/sys/bus/pci/devices/0000:%02x:%02x.%01x/local_cpus",
-		(unsigned) amdtopo.pcie.bus, (unsigned) amdtopo.pcie.device, (unsigned) amdtopo.pcie.function);
+	sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus", pcidomain, pcibus, pcidev, pcifunc);
 	if (hwloc_linux_read_path_as_cpumask(path, set) < 0
 	    || hwloc_bitmap_iszero(set))
 		hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
 #else
-	/* Non-Linux + AMD OpenCL systems simply get a full cpuset */
+	/* Non-Linux systems simply get a full cpuset */
 	hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
 #endif
   return 0;
@@ -159,17 +178,10 @@ static __hwloc_inline hwloc_obj_t
 hwloc_opencl_get_device_osdev(hwloc_topology_t topology __hwloc_attribute_unused,
 			      cl_device_id device __hwloc_attribute_unused)
 {
-#ifdef CL_DEVICE_TOPOLOGY_AMD
 	hwloc_obj_t osdev;
-	cl_device_topology_amd amdtopo;
-	cl_int clret;
+	unsigned pcidomain, pcibus, pcidevice, pcifunc;
 
-	clret = clGetDeviceInfo(device, CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
-	if (CL_SUCCESS != clret) {
-		errno = EINVAL;
-		return NULL;
-	}
-	if (CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD != amdtopo.raw.type) {
+	if (hwloc_opencl_get_device_pci_busid(device, &pcidomain, &pcibus, &pcidevice, &pcifunc) < 0) {
 		errno = EINVAL;
 		return NULL;
 	}
@@ -181,18 +193,15 @@ hwloc_opencl_get_device_osdev(hwloc_topology_t topology __hwloc_attribute_unused
 			continue;
 		if (pcidev
 		    && pcidev->type == HWLOC_OBJ_PCI_DEVICE
-		    && pcidev->attr->pcidev.domain == 0
-		    && pcidev->attr->pcidev.bus == amdtopo.pcie.bus
-		    && pcidev->attr->pcidev.dev == amdtopo.pcie.device
-		    && pcidev->attr->pcidev.func == amdtopo.pcie.function)
+		    && pcidev->attr->pcidev.domain == pcidomain
+		    && pcidev->attr->pcidev.bus == pcibus
+		    && pcidev->attr->pcidev.dev == pcidevice
+		    && pcidev->attr->pcidev.func == pcifunc)
 			return osdev;
 		/* if PCI are filtered out, we need a info attr to match on */
 	}
 
 	return NULL;
-#else
-	return NULL;
-#endif
 }
 
 /** @} */
