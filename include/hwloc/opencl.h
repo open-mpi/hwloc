@@ -37,6 +37,21 @@ extern "C" {
 #endif
 
 
+/* OpenCL extensions aren't always shipped with default headers, and
+ * they don't always reflect what the installed implementations support.
+ * Try everything and let the implementation return errors when non supported.
+ */
+/* Copyright (c) 2008-2018 The Khronos Group Inc. */
+
+/* needs "cl_amd_device_attribute_query" device extension, but not strictly required for clGetDeviceInfo() */
+#define HWLOC_CL_DEVICE_TOPOLOGY_AMD 0x4037
+typedef union {
+    struct { cl_uint type; cl_uint data[5]; } raw;
+    struct { cl_uint type; cl_char unused[17]; cl_char bus; cl_char device; cl_char function; } pcie;
+} hwloc_cl_device_topology_amd;
+#define HWLOC_CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD 1
+
+
 /** \defgroup hwlocality_opencl Interoperability with OpenCL
  *
  * This interface offers ways to retrieve topology information about
@@ -56,20 +71,18 @@ static __hwloc_inline int
 hwloc_opencl_get_device_pci_busid(cl_device_id device,
                                unsigned *domain, unsigned *bus, unsigned *dev, unsigned *func)
 {
-#ifdef CL_DEVICE_TOPOLOGY_AMD
-	cl_device_topology_amd amdtopo;
+	hwloc_cl_device_topology_amd amdtopo;
 	cl_int clret;
 
-	clret = clGetDeviceInfo(device, CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
+	clret = clGetDeviceInfo(device, HWLOC_CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
 	if (CL_SUCCESS == clret
-	    && CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD == amdtopo.raw.type) {
+	    && HWLOC_CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD == amdtopo.raw.type) {
 		*domain = 0; /* can't do anything better */
 		*bus = (unsigned) amdtopo.pcie.bus;
 		*dev = (unsigned) amdtopo.pcie.device;
 		*func = (unsigned) amdtopo.pcie.function;
 		return 0;
 	}
-#endif
 
 	return -1;
 }

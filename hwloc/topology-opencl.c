@@ -21,6 +21,15 @@
 
 #include <hwloc/opencl.h>
 
+
+/* OpenCL extensions aren't always shipped with default headers,
+ * and it doesn't always reflect what the implementation supports.
+ * Try everything and let the implementation return errors when non supported.
+ */
+/* Copyright (c) 2008-2018 The Khronos Group Inc. */
+#define HWLOC_CL_DEVICE_BOARD_NAME_AMD 0x4038
+
+
 static int
 hwloc_opencl_discover(struct hwloc_backend *backend)
 {
@@ -97,10 +106,8 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 	hwloc_obj_add_info(osdev, "GPUVendor", buffer);
 
       buffer[0] = '\0';
-#ifdef CL_DEVICE_BOARD_NAME_AMD
-      clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_BOARD_NAME_AMD, sizeof(buffer), buffer, NULL);
+      clret = clGetDeviceInfo(device_ids[i], HWLOC_CL_DEVICE_BOARD_NAME_AMD, sizeof(buffer), buffer, NULL);
       if (CL_SUCCESS != clret || buffer[0] == '\0')
-#endif
         clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
       if (buffer[0] != '\0')
 	hwloc_obj_add_info(osdev, "GPUModel", buffer);
