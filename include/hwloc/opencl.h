@@ -49,14 +49,18 @@ typedef union {
 } hwloc_cl_device_topology_amd;
 #define HWLOC_CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD 1
 
+/* needs "cl_nv_device_attribute_query" device extension, but not strictly required for clGetDeviceInfo() */
+#define HWLOC_CL_DEVICE_PCI_BUS_ID_NV 0x4008
+#define HWLOC_CL_DEVICE_PCI_SLOT_ID_NV 0x4009
+
 
 /** \defgroup hwlocality_opencl Interoperability with OpenCL
  *
  * This interface offers ways to retrieve topology information about
  * OpenCL devices.
  *
- * Only the AMD OpenCL interface currently offers useful locality information
- * about its devices.
+ * Only AMD and NVIDIA OpenCL implementations currently offer useful locality
+ * information about their devices.
  *
  * @{
  */
@@ -70,6 +74,7 @@ hwloc_opencl_get_device_pci_busid(cl_device_id device,
                                unsigned *domain, unsigned *bus, unsigned *dev, unsigned *func)
 {
 	hwloc_cl_device_topology_amd amdtopo;
+	cl_uint nvbus, nvslot;
 	cl_int clret;
 
 	clret = clGetDeviceInfo(device, HWLOC_CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
@@ -80,6 +85,20 @@ hwloc_opencl_get_device_pci_busid(cl_device_id device,
 		*dev = (unsigned) amdtopo.pcie.device;
 		*func = (unsigned) amdtopo.pcie.function;
 		return 0;
+	}
+
+	clret = clGetDeviceInfo(device, HWLOC_CL_DEVICE_PCI_BUS_ID_NV, sizeof(nvbus), &nvbus, NULL);
+	if (CL_SUCCESS == clret) {
+		clret = clGetDeviceInfo(device, HWLOC_CL_DEVICE_PCI_SLOT_ID_NV, sizeof(nvslot), &nvslot, NULL);
+		if (CL_SUCCESS == clret) {
+			/* FIXME: PCI bus only uses 8bit, assume nvidia hardcodes the domain in higher bits */
+			*domain = nvbus >> 8;
+			*bus = nvbus & 0xff;
+			/* non-documented but used in many other projects */
+			*dev = nvslot >> 3;
+			*func = nvslot & 0x7;
+			return 0;
+		}
 	}
 
 	return -1;
@@ -99,7 +118,7 @@ hwloc_opencl_get_device_pci_busid(cl_device_id device,
  * and hwloc_opencl_get_device_osdev_by_index().
  *
  * This function is currently only implemented in a meaningful way for
- * Linux with the AMD OpenCL implementation; other systems will simply
+ * Linux with the AMD or NVIDIA OpenCL implementation; other systems will simply
  * get a full cpuset.
  */
 static __hwloc_inline int
@@ -108,7 +127,7 @@ hwloc_opencl_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
 			       hwloc_cpuset_t set)
 {
 #if (defined HWLOC_LINUX_SYS)
-	/* If we're on Linux + AMD OpenCL, use the AMD extension + the sysfs mechanism to get the local cpus */
+	/* If we're on Linux, try AMD/NVIDIA extensions + the sysfs mechanism to get the local cpus */
 #define HWLOC_OPENCL_DEVICE_SYSFS_PATH_MAX 128
 	char path[HWLOC_OPENCL_DEVICE_SYSFS_PATH_MAX];
 	unsigned pcidomain, pcibus, pcidev, pcifunc;
@@ -170,8 +189,8 @@ hwloc_opencl_get_device_osdev_by_index(hwloc_topology_t topology,
  * Use OpenCL device attributes to find the corresponding hwloc OS device object.
  * Return NULL if there is none or if useful attributes are not available.
  *
- * This function currently only works on AMD OpenCL devices that support
- * the CL_DEVICE_TOPOLOGY_AMD extension. hwloc_opencl_get_device_osdev_by_index()
+ * This function currently only works on AMD and NVIDIA OpenCL devices that support
+ * relevant OpenCL extensions. hwloc_opencl_get_device_osdev_by_index()
  * should be preferred whenever possible, i.e. when platform and device index
  * are known.
  *

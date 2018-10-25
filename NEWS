@@ -36,6 +36,7 @@ Version 2.1.0
       structure.
 * Backends
   + The x86 now properly handles offline CPUs.
+  + Detect the locality of NVIDIA GPU OpenCL devices.
   + Add support for IBM S/390 drawers.
   + Rework the heuristics for discovering KNL Cluster and Memory modes
     to stop assuming all CPUs are online (required for mOS support).
