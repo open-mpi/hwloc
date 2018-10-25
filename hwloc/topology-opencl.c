@@ -14,9 +14,9 @@
 
 #define CL_TARGET_OPENCL_VERSION 220
 #ifdef __APPLE__
-#include <OpenCL/cl_ext.h>
+#include <OpenCL/cl.h>
 #else
-#include <CL/cl_ext.h>
+#include <CL/cl.h>
 #endif
 
 #include <hwloc/opencl.h>

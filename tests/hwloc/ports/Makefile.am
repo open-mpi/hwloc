@@ -139,8 +139,7 @@ liblstopo_port_windows_a_CPPFLAGS = $(common_CPPFLAGS) \
 
 nodist_libhwloc_port_opencl_la_SOURCES = topology-opencl.c
 libhwloc_port_opencl_la_SOURCES = \
-        include/opencl/CL/cl.h \
-        include/opencl/CL/cl_ext.h
+        include/opencl/CL/cl.h
 libhwloc_port_opencl_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/opencl
 
