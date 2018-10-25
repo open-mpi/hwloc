@@ -1,4 +1,4 @@
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2018 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -139,6 +139,7 @@ liblstopo_port_windows_a_CPPFLAGS = $(common_CPPFLAGS) \
 
 nodist_libhwloc_port_opencl_la_SOURCES = topology-opencl.c
 libhwloc_port_opencl_la_SOURCES = \
+        include/opencl/CL/cl.h \
         include/opencl/CL/cl_ext.h
 libhwloc_port_opencl_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/opencl
