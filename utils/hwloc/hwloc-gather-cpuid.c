@@ -48,6 +48,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   unsigned highest_cpuid, highest_ext_cpuid;
   unsigned i;
   int has_intel_x2apic = 0;
+  int has_intel_pconfig = 0;
   int has_intel_sgx = 0;
   int has_amd_topoext = 0;
   FILE *output;
@@ -134,6 +135,8 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     unsigned max;
     regs[0] = 0x7; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
+    if (regs[3] & (1<<18))
+      has_intel_pconfig = 1;
     if (regs[1] & (1<<2))
       has_intel_sgx = 1;
     max = regs[0];
@@ -273,7 +276,17 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     }
   }
 
-  if (highest_cpuid > 0x18) {
+  /* 0x1b = PCONFIG Information on Intel ; Reserved on AMD */
+  if (has_intel_pconfig && highest_cpuid >= 0x1b) {
+    for(i=0; ; i++) {
+      regs[0] = 0x1b; regs[2] = i;
+      dump_one_cpuid(output, regs, 0x5);
+      if (!(regs[0] & 0xfff))
+	break;
+    }
+  }
+
+  if (highest_cpuid > 0x1b) {
     static int reported = 0;
     if (!reported)
       fprintf(stderr, "WARNING: Processor supports new CPUID leaves upto 0x%x\n", highest_cpuid);
