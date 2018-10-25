@@ -47,6 +47,9 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   unsigned regs[4];
   unsigned highest_cpuid, highest_ext_cpuid;
   unsigned i;
+  int has_intel_x2apic = 0;
+  int has_intel_sgx = 0;
+  int has_amd_topoext = 0;
   FILE *output;
   int err;
 
@@ -88,6 +91,8 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   if (highest_cpuid >= 0x1) {
     regs[0] = 0x1;
     dump_one_cpuid(output, regs, 0x1);
+    if (regs[2] & (1 << 21))
+      has_intel_x2apic = 1;
   }
 
   /* 0x2 = Cache + TLB on Intel ; Reserved on AMD */
@@ -129,6 +134,8 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     unsigned max;
     regs[0] = 0x7; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
+    if (regs[1] & (1<<2))
+      has_intel_sgx = 1;
     max = regs[0];
     for(i=1; i<=max; i++) {
       regs[0] = 0x7; regs[2] = i;
@@ -149,7 +156,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   }
 
   /* 0xb = Extended topology on Intel ; Reserved on AMD */
-  if (highest_cpuid >= 0xb) {
+  if (has_intel_x2apic && highest_cpuid >= 0xb) {
     for(i=0; ; i++) {
       regs[0] = 0xb; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
@@ -209,7 +216,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   }
 
   /* 0x12 = SGX Attributes Enumeration on Intel ; Reserved on AMD */
-  if (highest_cpuid >= 0x12) {
+  if (has_intel_sgx && highest_cpuid >= 0x12) {
     regs[0] = 0x12; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
     regs[0] = 0x12; regs[2] = 1;
@@ -281,6 +288,8 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   if (highest_ext_cpuid >= 0x80000001) {
     regs[0] = 0x80000001;
     dump_one_cpuid(output, regs, 0x1);
+    if (regs[2] & (1 << 22))
+      has_amd_topoext = 1;
   }
 
   /* 0x80000002-4 = Processor name string */
@@ -356,7 +365,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   }
 
   /* 0x8000001e = Topoext on AMD ; Reserved on Intel */
-  if (highest_ext_cpuid >= 0x8000001e) {
+  if (has_amd_topoext && highest_ext_cpuid >= 0x8000001e) {
     regs[0] = 0x8000001e;
     dump_one_cpuid(output, regs, 0x1);
   }
