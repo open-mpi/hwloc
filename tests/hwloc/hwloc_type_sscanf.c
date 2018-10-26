@@ -95,6 +95,70 @@ static void check_topo(void)
 /* check whether type_sscanf() understand what type_snprintf() wrote */
 int main(void)
 {
+  hwloc_obj_type_t type;
+  union hwloc_obj_attr_u attr;
+  int err;
+
+  printf("testing basic strings ...\n");
+
+  err = hwloc_type_sscanf("osdev", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  err = hwloc_type_sscanf("osdev0", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  err = hwloc_type_sscanf("osdev:", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  err = hwloc_type_sscanf("osde_", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  err = hwloc_type_sscanf("osD[", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  err = hwloc_type_sscanf("os(", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  err = hwloc_type_sscanf("os-", &type, &attr, sizeof(attr));
+  assert(err == -1);
+  err = hwloc_type_sscanf("o1", &type, &attr, sizeof(attr));
+  printf("err %d %s for type %s\n", errno, strerror(errno), hwloc_obj_type_string(type));
+  assert(err == -1);
+
+  err = hwloc_type_sscanf("l3IcaChe", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_L3ICACHE);
+  assert(attr.cache.type == HWLOC_OBJ_CACHE_INSTRUCTION);
+  err = hwloc_type_sscanf("l2dcA", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_L2CACHE);
+  assert(attr.cache.type == HWLOC_OBJ_CACHE_DATA);
+  err = hwloc_type_sscanf("l1U", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_L1CACHE);
+  assert(attr.cache.type == HWLOC_OBJ_CACHE_UNIFIED);
+  err = hwloc_type_sscanf("l3cacHe:", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_L3CACHE);
+  assert(attr.cache.type == HWLOC_OBJ_CACHE_UNIFIED);
+  err = hwloc_type_sscanf("l1", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_L1CACHE);
+  assert(attr.cache.type == HWLOC_OBJ_CACHE_UNIFIED);
+  err = hwloc_type_sscanf("l1cc", &type, &attr, sizeof(attr));
+  assert(err == -1);
+
+  err = hwloc_type_sscanf("group2", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_GROUP);
+  assert(attr.group.depth == 2);
+  err = hwloc_type_sscanf("GR3:", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_GROUP);
+  assert(attr.group.depth == 3);
+  err = hwloc_type_sscanf("GRa", &type, &attr, sizeof(attr));
+  assert(err == -1);
+
   printf("testing the local topology ...\n");
   check_topo();
 
