@@ -193,7 +193,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     }
   }
 
-  /* 0xf = Platform/L3 QoS enumeration on Intel ; Reserved on AMD */
+  /* 0xf = Platform/L3 QoS enumeration on Intel and AMD */
   if (highest_cpuid >= 0xf) {
     regs[0] = 0xf; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
@@ -201,7 +201,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x5);
   }
 
-  /* 0x10 = Platform/L3 QoS enforcement enumeration on Intel ; Reserved on AMD */
+  /* 0x10 = Platform/L3 QoS enforcement enumeration on Intel and AMD */
   if (highest_cpuid >= 0x10) {
     /* Intel Resource Director Technology (Intel RDT) Allocation */
     regs[0] = 0x10; regs[2] = 0;
@@ -397,6 +397,14 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   if (highest_ext_cpuid >= 0x8000001f) {
     regs[0] = 0x8000001f;
     dump_one_cpuid(output, regs, 0x1);
+  }
+
+  /* 0x80000020 = Platform QoS Enforcement for Memory Bandwidth */
+  if (highest_ext_cpuid >= 0x80000020) {
+    regs[0] = 0x80000020; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+    regs[0] = 0x80000020; regs[2] = 1;
+    dump_one_cpuid(output, regs, 0x5);
   }
 
   if (highest_ext_cpuid > 0x8000001f) {
