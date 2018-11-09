@@ -297,8 +297,8 @@ typedef enum hwloc_obj_bridge_type_e {
 
 /** \brief Type of a OS device. */
 typedef enum hwloc_obj_osdev_type_e {
-  HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device.
-				  * For instance "sda" on Linux. */
+  HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device, or non-volatile memory device.
+				  * For instance "sda" or "dax2.0" on Linux. */
   HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
 				  * For instance ":0.0" for a GL display,
 				  * "card0" for a Linux DRM device. */

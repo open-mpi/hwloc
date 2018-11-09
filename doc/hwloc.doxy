@@ -1373,9 +1373,9 @@ Here is a list of OS device objects commonly created by hwloc
 components when I/O discovery is enabled and supported.
 
 <ul>
-<li>Hard disks (::HWLOC_OBJ_OSDEV_BLOCK)
+<li>Hard disks or non-volatile memory devices (::HWLOC_OBJ_OSDEV_BLOCK)
  <ul>
- <li><em>sda</em> (Linux component)</li>
+ <li><em>sda</em> or <em>dax2.0</em> (Linux component)</li>
  </ul>
 </li>
 <li>Network interfaces (::HWLOC_OBJ_OSDEV_NETWORK)

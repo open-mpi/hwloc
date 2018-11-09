@@ -5438,7 +5438,8 @@ hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcide
 
 static void
 hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused, int root_fd,
-				    struct hwloc_obj *obj, const char *osdevpath)
+				    struct hwloc_obj *obj, const char *osdevpath,
+				    int uses_sectors)
 {
 #ifdef HWLOC_HAVE_LIBUDEV
   struct hwloc_linux_backend_data_s *data = backend->private_data;
@@ -5457,9 +5458,9 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 
   snprintf(path, sizeof(path), "%s/size", osdevpath);
   if (!hwloc_read_path_by_length(path, line, sizeof(line), root_fd)) {
-    unsigned long long sectors = strtoull(line, NULL, 10);
-    /* linux always reports size in 512-byte units, we want kB */
-    snprintf(line, sizeof(line), "%llu", sectors / 2);
+    unsigned long long value = strtoull(line, NULL, 10);
+    /* linux always reports size in 512-byte units for blocks, and bytes for dax, we want kB */
+    snprintf(line, sizeof(line), "%llu", uses_sectors ? value / 2 : value >> 10);
     hwloc_obj_add_info(obj, "Size", line);
   }
 
@@ -5644,7 +5645,44 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
 
     obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
-    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path);
+    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, 1 /* uses 512B sectors */);
+  }
+
+  closedir(dir);
+
+  return 0;
+}
+
+static int
+hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_flags)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/dax", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    hwloc_obj_t obj, parent;
+    int err;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+
+    err = snprintf(path, sizeof(path), "/sys/class/dax/%s", dirent->d_name);
+    if ((size_t) err >= sizeof(path))
+      continue;
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    if (!parent)
+      continue;
+
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+
+    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, 0 /* no sectors */);
   }
 
   closedir(dir);
@@ -6487,6 +6525,7 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend)
       osdev_flags |= HWLOC_LINUXFS_FIND_OSDEV_FLAG_USB;
 
     hwloc_linuxfs_lookup_block_class(backend, osdev_flags);
+    hwloc_linuxfs_lookup_dax_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_mic_class(backend, osdev_flags);
