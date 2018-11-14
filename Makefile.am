@@ -55,6 +55,8 @@ endif HWLOC_BUILD_STANDALONE
 # Only install the valgrind suppressions file if we're building in
 # standalone mode
 if HWLOC_BUILD_STANDALONE
+bashcompdir = $(sysconfdir)/bash_completion.d
+dist_bashcomp_DATA = contrib/completion/hwloc-completion.bash
 dist_pkgdata_DATA = contrib/hwloc-valgrind.supp
 endif
 
