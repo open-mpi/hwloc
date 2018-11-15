@@ -88,8 +88,10 @@ test-suite.log
 /tests/hwloc/hwloc_bitmap_first_last_weight
 /tests/hwloc/hwloc_bitmap_singlify
 /tests/hwloc/hwloc_type_depth
+/tests/hwloc/hwloc_type_sscanf
 /tests/hwloc/hwloc_bind
 /tests/hwloc/hwloc_get_last_cpu_location
+/tests/hwloc/hwloc_get_area_memlocation
 /tests/hwloc/hwloc_object_userdata
 /tests/hwloc/hwloc_synthetic
 /tests/hwloc/hwloc_custom
@@ -100,9 +102,11 @@ test-suite.log
 /tests/hwloc/hwloc_groups
 /tests/hwloc/hwloc_groups2
 /tests/hwloc/hwloc_insert_misc
+/tests/hwloc/hwloc_topology_abi
 /tests/hwloc/hwloc_topology_diff
 /tests/hwloc/hwloc_topology_dup
 /tests/hwloc/hwloc_topology_restrict
+/tests/hwloc/shmem
 /tests/hwloc/hwloc_obj_infos
 /tests/hwloc/hwloc_iodevs
 /tests/hwloc/xmlbuffer
@@ -209,3 +213,4 @@ test-suite.log
 /tests/netloc/data/scotch/scotch_get_arch
 
 /contrib/systemd/hwloc-dump-hwdata.service
+/contrib/misc/hwloc-tweak-osindex
