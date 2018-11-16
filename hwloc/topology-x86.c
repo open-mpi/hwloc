@@ -582,12 +582,14 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
     unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
     unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
+    int apic_packageshift = 0;
     for (level = 0; ; level++) {
       ecx = level;
       eax = 0x0b;
       cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
       if (!eax && !ebx)
         break;
+      apic_packageshift = eax & 0x1f;
     }
     if (level) {
       infos->otherids = malloc(level * sizeof(*infos->otherids));
@@ -603,7 +605,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	apic_number = ebx & 0xffff;
 	apic_type = (ecx & 0xff00) >> 8;
 	apic_id = edx;
-	id = (apic_id >> apic_shift) & ((1 << (apic_nextshift - apic_shift)) - 1);
+	id = (apic_id >> apic_shift) & ((1 << (apic_packageshift - apic_shift)) - 1);
 	hwloc_debug("x2APIC %08x %u: nextshift %u num %2u type %u id %2u\n", apic_id, level, apic_nextshift, apic_number, apic_type, id);
 	infos->apicid = apic_id;
 	infos->otherids[level] = UINT_MAX;
