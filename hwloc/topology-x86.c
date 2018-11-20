@@ -633,7 +633,13 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
   }
 
-  if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
+  if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
+    /* Get package/die/module/tile/core/thread information from cpuid 0x1f
+     * (Intel v2 Extended Topology Enumeration)
+     */
+    look_exttopoenum(infos, 0x1f, src_cpuiddump);
+
+  } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
     /* Get package/core/thread information from cpuid 0x0b
      * (Intel v1 Extended Topology Enumeration)
      */
