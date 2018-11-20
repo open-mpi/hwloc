@@ -719,6 +719,51 @@ hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int replace)
   hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUStepping", number, replace);
 }
 
+static void
+hwloc_x86_add_groups(hwloc_topology_t topology,
+		     struct procinfo *infos,
+		     unsigned nbprocs,
+		     hwloc_bitmap_t remaining_cpuset,
+		     unsigned type,
+		     const char *subtype,
+		     unsigned kind)
+{
+  hwloc_bitmap_t obj_cpuset;
+  hwloc_obj_t obj;
+  unsigned i, j;
+
+  while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
+    unsigned packageid = infos[i].ids[PKG];
+    unsigned id = infos[i].ids[type];
+
+    if (id == (unsigned)-1) {
+      hwloc_bitmap_clr(remaining_cpuset, i);
+      continue;
+    }
+
+    obj_cpuset = hwloc_bitmap_alloc();
+    for (j = i; j < nbprocs; j++) {
+      if (infos[j].ids[type] == (unsigned) -1) {
+	hwloc_bitmap_clr(remaining_cpuset, j);
+	continue;
+      }
+
+      if (infos[j].ids[PKG] == packageid && infos[j].ids[type] == id) {
+	hwloc_bitmap_set(obj_cpuset, j);
+	hwloc_bitmap_clr(remaining_cpuset, j);
+      }
+    }
+
+    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, id);
+    obj->cpuset = obj_cpuset;
+    obj->subtype = strdup(subtype);
+    obj->attr->group.kind = kind;
+    hwloc_debug_2args_bitmap("os %s %u has cpuset %s\n",
+			     subtype, id, obj_cpuset);
+    hwloc_insert_object_by_cpuset(topology, obj);
+  }
+}
+
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */
 static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery)
 {
@@ -835,40 +880,11 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
     if (fulldiscovery) {
-      hwloc_bitmap_t unit_cpuset;
-      hwloc_obj_t unit;
-
       /* Look for Compute units inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
-      while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
-	unsigned packageid = infos[i].ids[PKG];
-	unsigned unitid = infos[i].ids[UNIT];
-
-	if (unitid == (unsigned)-1) {
-	  hwloc_bitmap_clr(remaining_cpuset, i);
-	  continue;
-	}
-
-	unit_cpuset = hwloc_bitmap_alloc();
-	for (j = i; j < nbprocs; j++) {
-	  if (infos[j].ids[UNIT] == (unsigned) -1) {
-	    hwloc_bitmap_clr(remaining_cpuset, j);
-	    continue;
-	  }
-
-	  if (infos[j].ids[PKG] == packageid && infos[j].ids[UNIT] == unitid) {
-	    hwloc_bitmap_set(unit_cpuset, j);
-	    hwloc_bitmap_clr(remaining_cpuset, j);
-	  }
-	}
-	unit = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, unitid);
-	unit->cpuset = unit_cpuset;
-	unit->subtype = strdup("ComputeUnit");
-	unit->attr->group.kind = HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT;
-	hwloc_debug_1arg_bitmap("os unit %u has cpuset %s\n",
-				unitid, unit_cpuset);
-	hwloc_insert_object_by_cpuset(topology, unit);
-      }
+      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
+                          UNIT, "Compute Unit",
+                          HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT);
 
       /* Look for unknown objects */
       if (infos[one].otherids) {
