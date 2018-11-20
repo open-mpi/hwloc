@@ -194,7 +194,10 @@ struct procinfo {
 #define CORE 1
 #define NODE 2
 #define UNIT 3
-#define HWLOC_X86_PROCINFO_ID_NR 4
+#define TILE 4
+#define MODULE 5
+#define DIE 6
+#define HWLOC_X86_PROCINFO_ID_NR 7
   unsigned ids[HWLOC_X86_PROCINFO_ID_NR];
   unsigned *otherids;
   unsigned levels;
@@ -303,6 +306,18 @@ static void look_exttopoenum(struct procinfo *infos, unsigned leaf, struct cpuid
 	  break;
 	case 2:
 	  infos->ids[CORE] = id;
+	  /* apic_number is the actual number of threads per die */
+	  break;
+	case 3:
+	  infos->ids[MODULE] = id;
+	  /* apic_number is the actual number of threads per tile */
+	  break;
+	case 4:
+	  infos->ids[TILE] = id;
+	  /* apic_number is the actual number of threads per die */
+	  break;
+	case 5:
+	  infos->ids[DIE] = id;
 	  /* apic_number is the actual number of threads per package */
 	  break;
 	default:
@@ -894,11 +909,26 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
     if (fulldiscovery) {
-      /* Look for Compute units inside packages */
+      /* Look for AMD Compute units inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
-                          UNIT, "Compute Unit",
-                          HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT);
+			   UNIT, "Compute Unit",
+			   HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT);
+      /* Look for Intel Modules inside packages */
+      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
+			   MODULE, "Module",
+			   HWLOC_GROUP_KIND_INTEL_MODULE);
+      /* Look for Intel Tiles inside packages */
+      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
+			   TILE, "Tile",
+			   HWLOC_GROUP_KIND_INTEL_TILE);
+      /* Look for Intel Dies inside packages */
+      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
+			   DIE, "Die",
+			   HWLOC_GROUP_KIND_INTEL_DIE);
 
       /* Look for unknown objects */
       if (infos[one].otherids) {
@@ -920,7 +950,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 	      }
 	      unknown_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, unknownid);
 	      unknown_obj->cpuset = unknown_cpuset;
-	      unknown_obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN;
+	      unknown_obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_EXTTOPOENUM_UNKNOWN;
 	      unknown_obj->attr->group.subkind = level;
 	      hwloc_debug_2args_bitmap("os unknown%u %u has cpuset %s\n",
 				       level, unknownid, unknown_cpuset);
@@ -1261,6 +1291,9 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
     infos[i].ids[CORE] = (unsigned) -1;
     infos[i].ids[NODE] = (unsigned) -1;
     infos[i].ids[UNIT] = (unsigned) -1;
+    infos[i].ids[TILE] = (unsigned) -1;
+    infos[i].ids[MODULE] = (unsigned) -1;
+    infos[i].ids[DIE] = (unsigned) -1;
   }
 
   eax = 0x00;

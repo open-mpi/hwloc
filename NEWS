@@ -35,6 +35,8 @@ Version 2.1.0
     - Add disallowed_pu and disallowed_numa bits to the discovery support
       structure.
 * Backends
+  + Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
+    Tiles, Modules and Dies are exposed as Groups for now.
   + The x86 now properly handles offline CPUs.
   + Detect the locality of NVIDIA GPU OpenCL devices.
   + Expose Linux DAX devices as hwloc Block OS devices.

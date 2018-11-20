@@ -370,7 +370,10 @@ extern char * hwloc_progname(struct hwloc_topology *topology);
 #define HWLOC_GROUP_KIND_SYNTHETIC			10	/* subkind is group depth within synthetic description */
 /* then, hardware-specific groups */
 #define HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER	100	/* no subkind */
-#define HWLOC_GROUP_KIND_INTEL_X2APIC_UNKNOWN		101	/* subkind is x2APIC unknown level */
+#define HWLOC_GROUP_KIND_INTEL_EXTTOPOENUM_UNKNOWN	101	/* subkind is unknown level */
+#define HWLOC_GROUP_KIND_INTEL_MODULE			102	/* no subkind */
+#define HWLOC_GROUP_KIND_INTEL_TILE			103	/* no subkind */
+#define HWLOC_GROUP_KIND_INTEL_DIE			104	/* no subkind */
 #define HWLOC_GROUP_KIND_S390_BOOK			110	/* subkind 0 is book, subkind 1 is drawer (group of books) */
 #define HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT		120	/* no subkind */
 /* then, OS-specific groups */
