@@ -261,6 +261,64 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cac
   hwloc_debug("cache L%u t%u linesize %u ways %d size %luKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
 }
 
+static void look_exttopoenum(struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
+{
+  unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
+  unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
+  unsigned eax, ebx, ecx = 0, edx;
+  int apic_packageshift = 0;
+
+  for (level = 0; ; level++) {
+    ecx = level;
+    eax = leaf;
+    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+    if (!eax && !ebx)
+      break;
+    apic_packageshift = eax & 0x1f;
+  }
+
+  if (level) {
+    infos->otherids = malloc(level * sizeof(*infos->otherids));
+    if (infos->otherids) {
+      infos->levels = level;
+      for (level = 0; ; level++) {
+	ecx = level;
+	eax = leaf;
+	cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+	if (!eax && !ebx)
+	  break;
+	apic_nextshift = eax & 0x1f;
+	apic_number = ebx & 0xffff;
+	apic_type = (ecx & 0xff00) >> 8;
+	apic_id = edx;
+	id = (apic_id >> apic_shift) & ((1 << (apic_packageshift - apic_shift)) - 1);
+	hwloc_debug("x2APIC %08x %u: nextshift %u num %2u type %u id %2u\n", apic_id, level, apic_nextshift, apic_number, apic_type, id);
+	infos->apicid = apic_id;
+	infos->otherids[level] = UINT_MAX;
+	switch (apic_type) {
+	case 1:
+	  threadid = id;
+	  /* apic_number is the actual number of threads per core */
+	  break;
+	case 2:
+	  infos->coreid = id;
+	  /* apic_number is the actual number of threads per package */
+	  break;
+	default:
+	  hwloc_debug("x2APIC %u: unknown type %u\n", level, apic_type);
+	  infos->otherids[level] = apic_id >> apic_shift;
+	  break;
+	}
+	apic_shift = apic_nextshift;
+      }
+      infos->apicid = apic_id;
+      infos->packageid = apic_id >> apic_shift;
+      hwloc_debug("x2APIC remainder: %u\n", infos->packageid);
+      hwloc_debug("this is thread %u of core %u\n", threadid, infos->coreid);
+    }
+  }
+}
+
 /* Fetch information from the processor itself thanks to cpuid and store it in
  * infos for summarize to analyze them globally */
 static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
@@ -575,58 +633,11 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
   }
 
-  /* Get package/core/thread information from cpuid 0x0b
-   * (Intel x2APIC)
-   */
   if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
-    unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
-    for (level = 0; ; level++) {
-      ecx = level;
-      eax = 0x0b;
-      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-      if (!eax && !ebx)
-        break;
-    }
-    if (level) {
-      infos->otherids = malloc(level * sizeof(*infos->otherids));
-      if (infos->otherids) {
-       infos->levels = level;
-       for (level = 0; ; level++) {
-	ecx = level;
-	eax = 0x0b;
-	cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-	if (!eax && !ebx)
-	  break;
-	apic_nextshift = eax & 0x1f;
-	apic_number = ebx & 0xffff;
-	apic_type = (ecx & 0xff00) >> 8;
-	apic_id = edx;
-	id = (apic_id >> apic_shift) & ((1 << (apic_nextshift - apic_shift)) - 1);
-	hwloc_debug("x2APIC %08x %u: nextshift %u num %2u type %u id %2u\n", apic_id, level, apic_nextshift, apic_number, apic_type, id);
-	infos->apicid = apic_id;
-	infos->otherids[level] = UINT_MAX;
-	switch (apic_type) {
-	case 1:
-	  infos->threadid = id;
-	  /* apic_number is the actual number of threads per core */
-	  break;
-	case 2:
-	  infos->coreid = id;
-	  /* apic_number is the actual number of threads per package */
-	  break;
-	default:
-	  hwloc_debug("x2APIC %u: unknown type %u\n", level, apic_type);
-	  infos->otherids[level] = apic_id >> apic_shift;
-	  break;
-	}
-	apic_shift = apic_nextshift;
-      }
-      infos->apicid = apic_id;
-      infos->packageid = apic_id >> apic_shift;
-      hwloc_debug("x2APIC remainder: %u\n", infos->packageid);
-      hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
-     }
-    }
+    /* Get package/core/thread information from cpuid 0x0b
+     * (Intel v1 Extended Topology Enumeration)
+     */
+    look_exttopoenum(infos, 0x0b, src_cpuiddump);
   }
 
   /* Now that we have all info, compute cacheids and apply quirks */
