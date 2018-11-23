@@ -22,7 +22,7 @@ Version 2.0.3
 * Fix build on Cygwin, thanks to Marco Atzeri for the patches.
 * Fix a corner case of hwloc_topology_restrict() where children would
   become out-of-order.
-* Fix lstopo --children-order= parsing.
+* Fix lstopo --children-order argument parsing.
 
 
 Version 2.0.2 (also included in 1.11.11 when appropriate)
