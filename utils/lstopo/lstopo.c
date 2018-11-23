@@ -502,7 +502,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --disallowed          Include objects disallowed by administrative limitations\n");
   fprintf (where, "  --allow <all|local|...>   Change the set of objects marked as allowed\n");
   fprintf (where, "Graphical output options:\n");
-  fprintf (where, "  --children-order=plain\n"
+  fprintf (where, "  --children-order plain\n"
 		  "                        Display memory children below the parent like any other child\n");
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 7          Set size of margin between elements\n");
@@ -1018,13 +1018,14 @@ main (int argc, char *argv[])
 	}
       }
 
-      else if (!strncmp (argv[0], "--children-order=", 17)) {
-	char *tmp = argv[0]+17;
-	argv[0][16] = '\0';
-	if (!strcmp(tmp, "plain"))
+      else if (!strcmp (argv[0], "--children-order")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	if (!strcmp(argv[1], "plain"))
 	  loutput.plain_children_order = 1;
-	else if (strcmp(tmp, "memoryabove"))
-	  fprintf(stderr, "Unsupported order `%s' passed to %s, ignoring.\n", tmp, argv[0]);
+	else if (strcmp(argv[1], "memoryabove"))
+	  fprintf(stderr, "Unsupported order `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
+	opt = 1;
       }
       else if (!strcmp (argv[0], "--fontsize")) {
 	if (argc < 2)
