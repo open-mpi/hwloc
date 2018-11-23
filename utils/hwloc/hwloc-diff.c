@@ -13,9 +13,9 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
 	fprintf(where, "Usage: hwloc-diff [options] <old.xml> <new.xml> [<output.diff.xml>]\n");
 	fprintf(where, "Options:\n");
-	fprintf(where, "  --refname        Change the XML reference identifier in the output\n");
-	fprintf(where, "                   (default is the filename of the first topology\n");
-	fprintf(where, "  --version        Report version and exit\n");
+	fprintf(where, "  --refname <name>  Change the XML reference identifier to <name> in the output\n");
+	fprintf(where, "                    (default is the filename of the first topology\n");
+	fprintf(where, "  --version         Report version and exit\n");
 }
 
 int main(int argc, char *argv[])
@@ -40,6 +40,10 @@ int main(int argc, char *argv[])
 
 	while (argc && *argv[0] == '-') {
 		if (!strcmp (argv[0], "--refname")) {
+			if (argc < 2) {
+				usage(callname, stderr);
+				exit(EXIT_FAILURE);
+			}
 			refname = argv[1];
 			argc--;
 			argv++;
