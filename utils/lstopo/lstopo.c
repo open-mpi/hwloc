@@ -518,9 +518,9 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-attrs=[<type,.>] Do not display attributes for the given object types\n");
   fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
-  fprintf (where, "  --binding-color=none    Do not colorize PU and NUMA nodes according to the binding\n");
-  fprintf (where, "  --disallowed-color=none Do not colorize disallowed PU and NUMA nodes\n");
-  fprintf (where, "  --top-color=<none|#xxyyzz> Change task background color for --top\n");
+  fprintf (where, "  --binding-color none    Do not colorize PU and NUMA nodes according to the binding\n");
+  fprintf (where, "  --disallowed-color none Do not colorize disallowed PU and NUMA nodes\n");
+  fprintf (where, "  --top-color <none|#xxyyzz> Change task background color for --top\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --export-xml-flags <n>\n"
 		  "                        Set flags during the XML topology export\n");
@@ -568,9 +568,9 @@ void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
   lstopo_show_interactive_cli_options_array(loutput->show_text, "text");
 
   if (!loutput->show_binding)
-    printf(" --binding-color=none");
+    printf(" --binding-color none");
   if (!loutput->show_disallowed)
-    printf(" --disallowed-color=none");
+    printf(" --disallowed-color none");
 
   printf("\n\n");
 }
@@ -938,13 +938,29 @@ main (int argc, char *argv[])
         }
       }
 
-      else if (!strcmp (argv[0], "--binding-color=none"))
-        loutput.show_binding = 0;
-      else if (!strcmp (argv[0], "--disallowed-color=none"))
-        loutput.show_disallowed = 0;
-      else if (!strncmp (argv[0], "--top-color=", 12))
-	task_background_color_string = argv[0]+12;
-
+      else if (!strcmp (argv[0], "--binding-color")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	if (!strcmp(argv[1], "none"))
+	  loutput.show_binding = 0;
+	else
+	  fprintf(stderr, "Unsupported color `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
+	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--disallowed-color")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	if (!strcmp(argv[1], "none"))
+	  loutput.show_disallowed = 0;
+	else
+	  fprintf(stderr, "Unsupported color `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
+	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--top-color")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	task_background_color_string = argv[1];
+      }
       else if (!strncmp (argv[0], "--no-text", 9)
 	       || !strncmp (argv[0], "--text", 6)
 	       || !strncmp (argv[0], "--no-index", 10)
