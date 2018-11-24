@@ -4802,9 +4802,10 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
     data->pagesize = hwloc_getpagesize();
   }
 
-  /* overwrite with optional /proc/hwloc-nofile-info */
-  file = hwloc_fopen("/proc/hwloc-nofile-info", "r", data->root_fd);
-  if (file) {
+  if (!data->is_real_fsroot) {
+   /* overwrite with optional /proc/hwloc-nofile-info */
+   file = hwloc_fopen("/proc/hwloc-nofile-info", "r", data->root_fd);
+   if (file) {
     while (fgets(line, sizeof(line), file)) {
       char *tmp = strchr(line, '\n');
       if (!strncmp("OSName: ", line, 8)) {
@@ -4846,6 +4847,7 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
       }
     }
     fclose(file);
+   }
   }
 
   env = getenv("HWLOC_DUMP_NOFILE_INFO");
