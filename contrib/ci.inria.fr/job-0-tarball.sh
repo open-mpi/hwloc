@@ -54,4 +54,7 @@ sed	-e 's/^snapshot_version=.*/snapshot_version='$snapshot/ \
 make
 make distcheck
 
+# this test requires bash and grep -P, only run it in the main job
+make check -C contrib/windows
+
 exit 0
