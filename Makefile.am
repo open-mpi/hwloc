@@ -32,6 +32,7 @@ endif
 # distribution tarball if we're building in embedded mode.
 DIST_SUBDIRS = $(SUBDIRS)
 if HWLOC_BUILD_STANDALONE
+DIST_SUBDIRS += contrib/windows
 if !BUILD_NETLOC
 DIST_SUBDIRS += netloc
 endif
