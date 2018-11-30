@@ -4,56 +4,57 @@ _lstopo() {
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(-l --logical
-		    -p --physical
-		    --output-format --of
-		    -f --force
-		    --only
-		    -v --verbose
-		    -s --silent
-		    --distances
-		    -c --cpuset
-		    -C --cpuset-only
-		    --taskset
-		    --filter --ignore
-		    --no-caches
-		    --no-useless-caches
-		    --no-icaches
-		    --merge
-		    --no-collapse
-		    --restrict
-		    --restrict-flags
-		    --no-io
-		    --no-bridges
-		    --whole-io
-		    --input -i
-		    --input-format --if
-		    --thissystem
-		    --pid
-		    --disallowed --whole-system
-		    --allow
-		    --children-order
-		    --fontsize
-		    --gridsize
-		    --linespacing
-		    --horiz --horiz=
-		    --vert --vert=
-		    --rect --rect=
-		    --text --text=
-		    --no-text --no-text=
-		    --index --index=
-		    --no-index --no-index=
-		    --attrs --attrs=
-		    --no-attrs --no-attrs=
-		    --no-legend
-		    --append-legend
-		    --binding-color
-		    --disallowed-color
-		    --top-color
-		    --export-xml-flags
-		    --export-synthetic-flags
-		    --ps --top
-		    --version
-		   )
+		   -p --physical
+		   --output-format --of
+		   -f --force
+		   --only
+		   -v --verbose
+		   -s --silent
+		   --distances
+		   -c --cpuset
+		   -C --cpuset-only
+		   --taskset
+		   --filter --ignore
+		   --no-caches
+		   --no-useless-caches
+		   --no-icaches
+		   --merge
+		   --no-collapse
+		   --restrict
+		   --restrict-flags
+		   --no-io
+		   --no-bridges
+		   --whole-io
+		   --input -i
+		   --input-format --if
+		   --thissystem
+		   --pid
+		   --disallowed --whole-system
+		   --allow
+		   --children-order
+		   --fontsize
+		   --gridsize
+		   --linespacing
+		   --horiz --horiz=
+		   --vert --vert=
+		   --rect --rect=
+		   --text --text=
+		   --no-text --no-text=
+		   --index --index=
+		   --no-index --no-index=
+		   --attrs --attrs=
+		   --no-attrs --no-attrs=
+		   --no-legend
+		   --append-legend
+		   --binding-color
+		   --disallowed-color
+		   --top-color
+		   --export-xml-flags
+		   --export-synthetic-flags
+		   --ps --top
+		   --version
+		   -h --help
+		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
     local pprev=${COMP_WORDS[COMP_CWORD-2]}
@@ -121,33 +122,32 @@ complete -F _lstopo hwloc-ls
 _hwloc-info(){
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local FILTERKINDS=("none" "all" "structure" "important")
-    local OPTIONS=(
-	--objects
-	--topology
-	--support
-	-v --verbose
-	-s --silent
-	--ancestors
-	--ancestor
-	--children
-	--descendants
-	-n
-	--restruct
-	--filter
-	--no-icaches
-	--no-io
-	--no-bridges
-	--whole-io
-	--input -i
-	--input-format --if
-	--thissystem
-	--pid
-	--disallowed --whole-system
-	-l --logical
-	-p --physical
-	--version
-	-h --help
-    )
+    local OPTIONS=(--objects
+		   --topology
+		   --support
+		   -v --verbose
+		   -s --silent
+		   --ancestors
+		   --ancestor
+		   --children
+		   --descendants
+		   -n
+		   --restruct
+		   --filter
+		   --no-icaches
+		   --no-io
+		   --no-bridges
+		   --whole-io
+		   --input -i
+		   --input-format --if
+		   --thissystem
+		   --pid
+		   --disallowed --whole-system
+		   -l --logical
+		   -p --physical
+		   --version
+		   -h --help
+		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
     local pprev=${COMP_WORDS[COMP_CWORD-2]}
@@ -244,8 +244,8 @@ _hwloc-calc(){
 		   -p --physical
 		   --li --logical-input
 		   --lo --logical-output
-		   -pi --physical-input
-		   -po --physical-output
+		   --pi --physical-input
+		   --po --physical-output
 		   -n --nodeset
 		   --ni --nodeset-input
 		   --no --nodeset-output
@@ -306,9 +306,9 @@ complete -F _hwloc-annotate hwloc-annotate
 
 _hwloc-diff(){
     local OPTIONS=(--refname
-		    --version
-		    -h --help
-		   )
+		   --version
+		   -h --help
+		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
 
@@ -409,6 +409,7 @@ _hwloc-ps(){
 		   -e --get-last-cpu-location
 		   --pid-cmd
 		   --disallowed --whole-system
+		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
