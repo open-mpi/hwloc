@@ -1,3 +1,8 @@
+#
+# Copyright © 2018 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
 _lstopo() {
     local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local OUTPUT_FORMAT=(console ascii fig pdf ps png svg xml synthetic)
