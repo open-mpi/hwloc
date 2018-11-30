@@ -62,7 +62,7 @@ _lstopo() {
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     elif [[ "$pprev" == "--filter" && "$cur" == ":" ]] ; then
-	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- ""` )
+	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}"` )
     elif [[ "$ppprev" == "--filter" && "$prev" == ":" ]] ; then
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
     else
@@ -151,7 +151,7 @@ _hwloc-info(){
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     elif [[ "$pprev" == "--filter" && "$cur" == ":" ]] ; then
-	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- ""` )
+	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}"` )
     elif [[ "$ppprev" == "--filter" && "$prev" == ":" ]] ; then
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
     else
