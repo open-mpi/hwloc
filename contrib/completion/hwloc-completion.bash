@@ -35,15 +35,15 @@ _lstopo() {
 		    --fontsize
 		    --gridsize
 		    --linespacing
-		    --horiz --horiz=\<type\>
-		    --vert --vert=\<type\>
-		    --rect --rect=\<type\>
-		    --text --text=\<type\>,...
-		    --no-text --no-text=\<type\>,...
-		    --index --index=\<type\>,...
-		    --no-index --no-index=\<type\>,...
-		    --attrs --attrs=\<type\>,...
-		    --no-attrs --no-attrs=\<type\>,...
+		    --horiz --horiz=
+		    --vert --vert=
+		    --rect --rect=
+		    --text --text=
+		    --no-text --no-text=
+		    --index --index=
+		    --no-index --no-index=
+		    --attrs --attrs=
+		    --no-attrs --no-attrs=
 		    --no-legend
 		    --append-legend
 		    --binding-color
@@ -65,6 +65,11 @@ _lstopo() {
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}"` )
     elif [[ "$ppprev" == "--filter" && "$prev" == ":" ]] ; then
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
+    elif [[ "$cur" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs " =~ " $prev " ]] ; then
+	COMPREPLY=( `compgen -W "${TYPES[*]}"` )
+	# we could also support "<type1>,<type2>,..." for --index/attrs/text but "," is not a completion word separator
+    elif [[ "$prev" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs " =~ " $pprev " ]] ; then
+	COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
     else
 	case "$prev" in
 	    --of | --output-format)
