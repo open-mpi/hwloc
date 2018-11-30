@@ -479,7 +479,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --filter <type>:<knd> Filter objects of the given type, or all.\n");
-  fprintf (where, "     <knd> may be `all' (keep all), `none' (remove all), `structure' or `basic'\n");
+  fprintf (where, "     <knd> may be `all' (keep all), `none' (remove all), `structure' or `important'\n");
   fprintf (where, "  --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "  --no-caches           Do not show caches\n");
   fprintf (where, "  --no-useless-caches   Do not show caches which do not have a hierarchical\n"
