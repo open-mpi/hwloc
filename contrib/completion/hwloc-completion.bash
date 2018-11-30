@@ -54,11 +54,12 @@ _lstopo() {
 		    --version
 		   )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [ $COMP_CWORD == 1 ]; then
-	COMPREPLY=($( compgen -W "${OPTIONS[*]}" -- "$cur" ))
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     else
-	case "$3" in
+	case "$prev" in
 	    --of | --output-format)
 		COMPREPLY=( `compgen -W "${OUTPUT_FORMAT[*]}" -- "$cur"` )
 		;;
@@ -135,11 +136,12 @@ _hwloc-info(){
 	-h --help
     )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     else
-	case "$3" in
+	case "$prev" in
 	    --restrict)
 		COMPREPLY=( `compgen -W "binding <cpuset>" -- "$cur"` )
 		;;
@@ -189,11 +191,12 @@ _hwloc-bind(){
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     else
-	case "$3" in
+	case "$prev" in
 	    --mempolicy)
 		COMPREPLY=( `compgen -W "default firsttouch bind interleave nexttouch" -- "$cur"` )
 		;;
@@ -240,11 +243,12 @@ _hwloc-calc(){
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     else
-	case "$3" in
+	case "$prev" in
 	    -N | --number-of | -I | --intersect)
 		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
 		;;
@@ -273,7 +277,7 @@ _hwloc-annotate(){
     local OPTIONS=(--ci --ri --cu --cd -h --help)
     local cur=${COMP_WORDS[COMP_CWORD]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"`)
     fi
     _filedir xml
@@ -287,11 +291,12 @@ _hwloc-diff(){
 		    -h --help
 		   )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     else
-	case "$3" in
+	case "$prev" in
 	    --refname)
 		COMPREPLY=( "<reference topology identifier>" "")
 		;;
@@ -309,7 +314,7 @@ _hwloc-patch(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     fi
     _filedir xml
@@ -324,7 +329,7 @@ _hwloc-compress-dir(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     fi
     _filedir -d
@@ -349,12 +354,13 @@ _hwloc-distrib(){
 		   --version
 		   -h --help
 		  )
-        local cur=${COMP_WORDS[COMP_CWORD]}
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     else
-	case "$3" in
+	case "$prev" in
 	    --ignore | --from | --to | --at)
 		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
 		;;
@@ -386,11 +392,12 @@ _hwloc-ps(){
 		   --disallowed --whole-system
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     else
-	case "$3" in
+	case "$prev" in
 	--name)
 	    COMPREPLY=( "<task name>" "" )
 	    ;;
@@ -411,11 +418,12 @@ _hwloc-gather-cpuid(){
 		   -h --help
 		   )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     else
-	case "$3" in
+	case "$prev" in
 	    -c)
 	        COMPREPLY=( "<index of cpu to operate on>" "" )
 		;;
@@ -433,7 +441,7 @@ _hwloc-gather-topology(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
 
-    if [ $COMP_CWORD == 1 ]; then
+    if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     fi
 }
