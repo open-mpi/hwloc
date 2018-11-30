@@ -2,6 +2,7 @@ _lstopo() {
     local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local OUTPUT_FORMAT=(console ascii fig pdf ps png svg xml synthetic)
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+    local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(-l --logical
 		    -p --physical
 		    --output-format --of
@@ -55,9 +56,15 @@ _lstopo() {
 		   )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    local pprev=${COMP_WORDS[COMP_CWORD-2]}
+    local ppprev=${COMP_WORDS[COMP_CWORD-3]}
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+    elif [[ "$pprev" == "--filter" && "$cur" == ":" ]] ; then
+	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- ""` )
+    elif [[ "$ppprev" == "--filter" && "$prev" == ":" ]] ; then
+	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
     else
 	case "$prev" in
 	    --of | --output-format)
@@ -67,7 +74,7 @@ _lstopo() {
 		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
 		;;
 	    --filter)
-		COMPREPLY=( "<type>:<none,all,structure>" "" )
+		COMPREPLY=( `compgen -W "${TYPES[*]/%/:} cache: icache: io:" -- "$cur"` ) && compopt -o nospace
 		;;
 	    --restrict)
 		COMPREPLY=( `compgen -W "binding <cpuset>" -- "$cur"` )
@@ -108,6 +115,7 @@ complete -F _lstopo hwloc-ls
 
 _hwloc-info(){
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+    local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(
 	--objects
 	--topology
@@ -137,9 +145,15 @@ _hwloc-info(){
     )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    local pprev=${COMP_WORDS[COMP_CWORD-2]}
+    local ppprev=${COMP_WORDS[COMP_CWORD-3]}
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+    elif [[ "$pprev" == "--filter" && "$cur" == ":" ]] ; then
+	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- ""` )
+    elif [[ "$ppprev" == "--filter" && "$prev" == ":" ]] ; then
+	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
     else
 	case "$prev" in
 	    --restrict)
@@ -155,7 +169,7 @@ _hwloc-info(){
 		COMPREPLY=( "<pid>" "" )
 		;;
 	    --filter)
-		COMPREPLY=( "<type>:<none,all,structure>" "" )
+		COMPREPLY=( `compgen -W "${TYPES[*]/%/:} cache: icache: io:" -- "$cur"` ) && compopt -o nospace
 		;;
 	    --ancestor | --descendants)
 		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
