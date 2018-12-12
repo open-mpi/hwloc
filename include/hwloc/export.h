@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -85,6 +85,9 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  * If there is any chance that the exported buffer may ever be imported
  * back by a process using hwloc 1.x, one should consider detecting
  * it at runtime and using the corresponding export format.
+ *
+ * The returned buffer ends with a \0 that is included in the returned
+ * length.
  *
  * \p flags is a OR'ed set of ::hwloc_topology_export_xml_flags_e.
  *
