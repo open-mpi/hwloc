@@ -717,7 +717,7 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, struct hwloc__xml_exp
   hwloc__xml_export_topology (&childstate, topology, flags);
   hwloc__nolibxml_export_end_object(&childstate, "topology");
 
-  return ndata->written+1;
+  return ndata->written+1; /* ending \0 */
 }
 
 static int

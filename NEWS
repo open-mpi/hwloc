@@ -22,6 +22,8 @@ Version 2.0.3 (also included in 1.11.12 when appropriate)
 * Fix build on Cygwin, thanks to Marco Atzeri for the patches.
 * Fix a corner case of hwloc_topology_restrict() where children would
   become out-of-order.
+* Fix the return length of export_xmlbuffer() functions to always
+  include the ending \0.
 * Fix lstopo --children-order argument parsing.
 
 

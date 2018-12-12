@@ -271,6 +271,9 @@ HWLOC_DECLSPEC int hwloc_topology_diff_load_xmlbuffer(const char *xmlbuffer, int
  * that contains the reference topology.
  * This attribute is given back when reading the diff from XML.
  *
+ * The returned buffer ends with a \0 that is included in the returned
+ * length.
+ *
  * \note The XML buffer should later be freed with hwloc_free_xmlbuffer().
  */
 HWLOC_DECLSPEC int hwloc_topology_diff_export_xmlbuffer(hwloc_topology_diff_t diff, const char *refname, char **xmlbuffer, int *buflen);
