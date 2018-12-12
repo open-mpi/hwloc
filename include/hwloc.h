@@ -2430,6 +2430,9 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  *
  * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
  *
+ * The returned buffer ends with a \0 that is included in the returned
+ * length.
+ *
  * \return -1 if a failure occured.
  *
  * \note See also hwloc_topology_set_userdata_export_callback()
