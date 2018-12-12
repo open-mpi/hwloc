@@ -27,9 +27,8 @@
  *******************/
 
 struct hwloc__nolibxml_backend_data_s {
-  size_t buflen; /* size of both buffer and copy buffers, set during backend_init() */
+  size_t buflen; /* size of both buffer, set during backend_init() */
   char *buffer; /* allocated and filled during backend_init() */
-  char *copy; /* allocated during backend_init(), used later during actual parsing */
 };
 
 typedef struct hwloc__nolibxml_import_state_data_s {
@@ -260,14 +259,10 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   struct hwloc__nolibxml_backend_data_s *nbdata = bdata->data;
   unsigned major, minor;
   char *end;
-  char *buffer;
+  char *buffer = nbdata->buffer;
   char *tagname;
 
   HWLOC_BUILD_ASSERT(sizeof(*nstate) <= sizeof(state->data));
-
-  /* use a copy in the temporary buffer, we may modify during parsing */
-  buffer = nbdata->copy;
-  memcpy(buffer, nbdata->buffer, nbdata->buflen);
 
   /* skip headers */
   while (!strncmp(buffer, "<?xml ", 6) || !strncmp(buffer, "<!DOCTYPE ", 10)) {
@@ -323,10 +318,6 @@ hwloc_nolibxml_free_buffers(struct hwloc_xml_backend_data_s *bdata)
   if (nbdata->buffer) {
     free(nbdata->buffer);
     nbdata->buffer = NULL;
-  }
-  if (nbdata->copy) {
-    free(nbdata->copy);
-    nbdata->copy = NULL;
   }
 }
 
@@ -433,19 +424,11 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
       goto out_with_nbdata;
   }
 
-  /* allocate a temporary copy buffer that we may modify during parsing */
-  nbdata->copy = malloc(nbdata->buflen+1);
-  if (!nbdata->copy)
-    goto out_with_buffer;
-  nbdata->copy[nbdata->buflen] = '\0';
-
   bdata->look_init = hwloc_nolibxml_look_init;
   bdata->look_done = hwloc_nolibxml_look_done;
   bdata->backend_exit = hwloc_nolibxml_backend_exit;
   return 0;
 
-out_with_buffer:
-  free(nbdata->buffer);
 out_with_nbdata:
   free(nbdata);
 out:
