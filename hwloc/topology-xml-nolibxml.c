@@ -416,11 +416,12 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
   bdata->data = nbdata;
 
   if (xmlbuffer) {
-    nbdata->buffer = malloc(xmlbuflen);
+    nbdata->buffer = malloc(xmlbuflen+1);
     if (!nbdata->buffer)
       goto out_with_nbdata;
-    nbdata->buflen = xmlbuflen;
+    nbdata->buflen = xmlbuflen+1;
     memcpy(nbdata->buffer, xmlbuffer, xmlbuflen);
+    nbdata->buffer[xmlbuflen] = '\0';
 
   } else {
     int err = hwloc_nolibxml_read_file(xmlpath, &nbdata->buffer, &nbdata->buflen);
@@ -429,9 +430,10 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
   }
 
   /* allocate a temporary copy buffer that we may modify during parsing */
-  nbdata->copy = malloc(nbdata->buflen);
+  nbdata->copy = malloc(nbdata->buflen+1);
   if (!nbdata->copy)
     goto out_with_buffer;
+  nbdata->copy[nbdata->buflen] = '\0';
 
   bdata->look_init = hwloc_nolibxml_look_init;
   bdata->look_done = hwloc_nolibxml_look_done;
