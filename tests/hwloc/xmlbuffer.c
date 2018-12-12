@@ -73,36 +73,35 @@ static int one_test(void)
   return err;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
   int err;
 
+  if (argc < 3) {
+    fprintf(stderr, "Need 0 or 1 twice as arguments for enabling/disabling libxml import and export\n");
+    fprintf(stderr, "For instance `xmlbuffer 0 1' enables libxml for export only\n");
+    fprintf(stderr, "Those arguments are passed by wrapper.sh during make check\n");
+    exit(EXIT_FAILURE);
+  }
+
   putenv("HWLOC_LIBXML_CLEANUP=1");
 
-  printf("using default import and export\n");
-  putenv("HWLOC_LIBXML_IMPORT=1");
-  putenv("HWLOC_LIBXML_EXPORT=1");
-  err = one_test();
-  if (err < 0)
-    return err;
+  if (atoi(argv[1])) {
+    putenv("HWLOC_LIBXML_IMPORT=1");
+    printf("import=libxml   ");
+  } else {
+    putenv("HWLOC_LIBXML_IMPORT=0");
+    printf("import=nolibxml ");
+  }
 
-  printf("using minimalistic import and default export\n");
-  putenv("HWLOC_LIBXML_IMPORT=0");
-  putenv("HWLOC_LIBXML_EXPORT=1");
-  err = one_test();
-  if (err < 0)
-    return err;
+  if (atoi(argv[2])) {
+    putenv("HWLOC_LIBXML_EXPORT=1");
+    printf("export=libxml\n");
+  } else {
+    putenv("HWLOC_LIBXML_EXPORT=0");
+    printf("export=nolibxml\n");
+  }
 
-  printf("using default import and minimalistic export\n");
-  putenv("HWLOC_LIBXML_IMPORT=1");
-  putenv("HWLOC_LIBXML_EXPORT=0");
-  err = one_test();
-  if (err < 0)
-    return err;
-
-  printf("using minimalistic import and export\n");
-  putenv("HWLOC_LIBXML_IMPORT=0");
-  putenv("HWLOC_LIBXML_EXPORT=0");
   err = one_test();
   if (err < 0)
     return err;
