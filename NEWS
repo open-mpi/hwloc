@@ -58,6 +58,16 @@ Version 2.1.0
   + Add bash completions.
 
 
+Version 2.0.3 (also included in 1.11.12 when appropriate)
+-------------
+* Fix build on Cygwin, thanks to Marco Atzeri for the patches.
+* Fix a corner case of hwloc_topology_restrict() where children would
+  become out-of-order.
+* Fix the return length of export_xmlbuffer() functions to always
+  include the ending \0.
+* Fix lstopo --children-order argument parsing.
+
+
 Version 2.0.2 (also included in 1.11.11 when appropriate)
 -------------
 * Add support for Hygon Dhyana processors in the x86 backend,
@@ -230,6 +240,14 @@ Version 2.0.0
     - HWLOC_COMPONENTS takes precedence over other environment variables
       for selecting components.
   + hwloc now requires a C99 compliant compiler.
+
+
+Version 1.11.12 (also included in 2.0.3)
+---------------
+* Fix a corner case of hwloc_topology_restrict() where children would
+  become out-of-order.
+* Fix the return length of export_xmlbuffer() functions to always
+  include the ending \0.
 
 
 Version 1.11.11 (also included in 2.0.2)
