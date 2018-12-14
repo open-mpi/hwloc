@@ -3537,7 +3537,7 @@ For instance, to check whether the hwloc version is at least 1.10, you should us
 \endverbatim
 
 To check for the API of release X.Y.Z at build time,
-you may compare ::HWLOC_API_VERSION with <tt>(X>>16)+(Y>>8)+Z</tt>.
+you may compare ::HWLOC_API_VERSION with <tt>(X<<16)+(Y<<8)+Z</tt>.
 
 For supporting older releases that do not have <tt>HWLOC_OBJ_NUMANODE</tt>
 and <tt>HWLOC_OBJ_PACKAGE</tt> yet, you may use:
