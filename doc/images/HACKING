@@ -1,0 +1,12 @@
+To update PNG files, do:
+
+cd <srcdir>/doc/images
+export PATH=<builddir>/utils/lstopo:$PATH
+
+for f in dudley emmett hagrid devel09-pci; do
+  LANG=C lstopo -i ${f}.xml --horiz=machine --no-legend --disallowed -f ${f}.png ;
+done
+
+for f in ppc64-without-smt ppc64-with-smt ppc64-full-with-smt ; do
+  LANG=C lstopo -i ${f}.xml --horiz --no-legend --logical --no-index --index=pu --index=numa --index=core --index=pack -f ${f}.png ;
+done

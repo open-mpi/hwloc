@@ -1,0 +1,143 @@
+-*- text -*-
+
+Notes to developers:
+
+- Note that the README file is automatically generated from the main
+  page of the doxygen documentation by running "make doc" (or "make
+  readme").
+
+- To check that all the code is working:
+
+  make check
+  make distcheck
+  make check with --enable-debug
+
+  Do this both from inside and outside sources.
+
+- The following tools are necessary to generate all documentation (any
+  flavor of "make dist" will fail if these tools are not available):
+
+  - doxygen with man, pdf and html support
+  - a latex distribution with pdflatex, and the usually recommended
+    package files (such as float.sty) and fonts (such as ptmr8t)
+  - fig2dev (transfig package)
+  - gs (ghostscript package)
+  - epstopdf
+  - w3m or lynx (to generate the README)
+
+  On Debian systems, the following packages should be enough:
+    doxygen ghostscript texlive-latex-base texlive-latex-recommended
+    texlive-fonts-recommended texlive-font-utils transfig w3m
+  On RedHat systems:
+    ghostscript doxygen transfig tetex tetex-latex w3m
+
+- *** BEFORE MAKING AN OFFICIAL RELEASE TARBALL: the release manager
+  MUST update the VERSION file:
+
+  - ensure that the major, minor, and release version numbers are
+    correct.  The greek/svn numbers will automatically be stripped by
+    make_dist_tarball (see below).
+  - ensure that increment the so_version number as appropriate (see
+    the GNU Libtool documentation for a description of what to do).
+
+- Create a distribution tarball by running the following from the
+  top-level source directory:
+
+  shell$ ./contrib/dist/make_dist_tarball
+
+  It will take a few minutes because it runs "make distcheck" and it
+  builds two tarballs (an official release and a greek release).  For
+  example, after "make_dist_tarball" completes, you'll have two
+  tarballs, like this:
+
+  hwloc-0.9.1.tar.gz
+  hwloc-0.9.1rc1.tar.gz
+
+  The "rc1" tarball (or whatever the greek version is) can be
+  distributed for testing and validation.  If it passes, then the
+  non-rc1 tarball can be released (it's identical to the rc1 tarball
+  except for its version).
+
+- Check tarballs by configuring and building them and then running
+  "make check".
+
+- make maintainer-clean can be used to properly remove the generated
+  documentations.
+
+- Silent rules are used by default to reduce the build verbosity:
+
+  shell$ make
+  CC	src/topology.lo
+
+  To revert to the old verbose rules, pass V=1 to make:
+
+  shell$ make V=1
+  /bin/sh ../libtool  --tag=CC   --mode=compile gcc [...] -c -o topology.lo topology.c
+
+
+Building the Windows zipballs on Windows with MinGW:
+
+- Install prerequisites:
+  - Visual C++ Express, currently available at:
+     http://www.microsoft.com/visualstudio/en-us/products/2010-editions/express)
+  - mingw-w64-bin_i686-mingw_<date>.zip if building a 64bits zipball:
+     http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Automated%20Builds/
+  - mingw-w32-bin_i686-mingw_<date>.zip If building a 32bits zipball,
+     or if building a 64bits zipball on a 32bits Windows:
+     http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Automated%20Builds/
+  - MSYS-<date>.zip
+     http://sourceforge.net/projects/mingw-w64/files/External%20binary%20packages%20%28Win64%20hosted%29/MSYS%20%2832-bit%29/
+  - findutils-<version>-bin.zip
+     http://sourceforge.net/projects/ezwinports/files/
+  Unpack all these ZIPs in a path that does not contain spaces,
+  to avoid problems later.
+
+- Launch msys.bat (in the root directory of the extracted MSYS ZIP).
+
+- Your path must contain:
+  - The bin directory of the extracted MinGW ZIP
+    (it contains <arch>-gcc)
+  - The <arch>/lib directory of the extracted MinGW ZIP
+    (it contains libgcc*.DLL, needed for C++ tests during make check)
+  - Visual C++ Express bin and IDE directories
+  - The bin directory of the non-cross-compiling MinGW ZIP
+    when building a 64bits zipball on a 32bits Windows
+  - The bin directory of the findutils ZIP to find the "find" command
+    (the Windows find command cannot be used)
+- Examples of PATH (depends on where ZIPs were extracted and were Visual Studio was installed):
+  - For a 32bits zipball:
+    $ PATH=/c/hwloc/mingw32/bin:/c/hwloc/mingw32/i686-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
+  - For a 64bits zipball:
+    $ PATH=/c/hwloc/mingw64/bin:/c/hwloc/mingw64/x86_64-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
+  - For a 64bits zipball on a 32bits Windows:
+    $ PATH=/c/hwloc/mingw64/bin:/c/hwloc/mingw32/bin:/c/hwloc/mingw32/i686-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
+- Check that running "lib", "link" and "cl" finds the right tools (installed by Visual Studio)
+  and displays their usage output (list of command-line options).
+
+- Download a hwloc tarball (building from SVN requires autotools, doxygen, LaTeX, etc.),
+  extract it and enter the directory.
+
+- Set the install prefix to what the zipball name must be:
+  $ prefix=$PWD/hwloc-win<size>-build-<version>
+- Configure
+  - For a 32bits zipball:
+    $ ./configure --prefix=$prefix --enable-static --host=i686-w64-mingw32
+  - For a 64bits zipball:
+    $ ./configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32
+  - For a 64bits zipball on a 32bits Windows:
+    $ ./configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32 CC_FOR_BUILD=i686-w64-mingw32-gcc
+
+- Build
+  $ make
+- If not building a 64bits zipball on a 32bits machine, test things:
+  $ make check
+  If your Windows is not configured in English, some failure may occur in tests/xml
+  because floats are localized.
+
+- Install
+  $ make install
+- Create the zipball
+  $ zip -r hwloc-win<size>-build-<version>.zip hwloc-win<size>-build-<version>
+
+- Compare the contents of the new zipball with a previous one.
+  Make sure the .lib file was generated.

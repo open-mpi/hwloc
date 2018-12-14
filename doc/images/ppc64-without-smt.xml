@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topology SYSTEM "hwloc2.dtd">
+<topology version="2.0">
+  <object type="Machine" os_index="0" cpuset="0x50505050" complete_cpuset="0xf0f0f0f0" allowed_cpuset="0x50505050" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" gp_index="1">
+    <object type="Group" cpuset="0x00005050" complete_cpuset="0x00005050" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="42" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="0" cpuset="0x00005050" complete_cpuset="0x00005050" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" local_memory="31943819264">
+        <page_type size="65536" count="487424"/>
+        <page_type size="16777216" count="0"/>
+      </object>
+      <object type="PU" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="6"/>
+      <object type="PU" os_index="6" cpuset="0x00000040" complete_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="7"/>
+      <object type="PU" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="10"/>
+      <object type="PU" os_index="14" cpuset="0x00004000" complete_cpuset="0x00004000" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="11"/>
+    </object>
+    <object type="Group" cpuset="0x50500000" complete_cpuset="0x50500000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="43" kind="1001" subkind="0">
+      <object type="NUMANode" os_index="1" cpuset="0x50500000" complete_cpuset="0x50500000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="12" local_memory="33554432000">
+        <page_type size="65536" count="512000"/>
+        <page_type size="16777216" count="0"/>
+      </object>
+      <object type="PU" os_index="20" cpuset="0x00100000" complete_cpuset="0x00100000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="16"/>
+      <object type="PU" os_index="22" cpuset="0x00400000" complete_cpuset="0x00400000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="17"/>
+      <object type="PU" os_index="28" cpuset="0x10000000" complete_cpuset="0x10000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="20"/>
+      <object type="PU" os_index="30" cpuset="0x40000000" complete_cpuset="0x40000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="21"/>
+    </object>
+  </object>
+</topology>
