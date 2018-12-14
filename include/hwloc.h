@@ -82,7 +82,7 @@ extern "C" {
 
 /** \brief Indicate at build time which hwloc API version is being used.
  *
- * This number is updated to (X>>16)+(Y>>8)+Z when a new release X.Y.Z
+ * This number is updated to (X<<16)+(Y<<8)+Z when a new release X.Y.Z
  * actually modifies the API.
  *
  * Users may check for available features at build time using this number
