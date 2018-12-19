@@ -56,7 +56,6 @@ struct hwloc_linux_backend_data_s {
   } arch;
   int is_knl;
   int is_amd_with_CU;
-  int use_dt;
   int use_numa_distances;
   int use_numa_distances_for_cpuless;
   int use_numa_initiators;
@@ -2699,368 +2698,6 @@ hwloc__get_dmi_id_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
 }
 
 
-/***********************************
- ****** Device tree Discovery ******
- ***********************************/
-
-/* Reads the entire file and returns bytes read if bytes_read != NULL
- * Returned pointer can be freed by using free().  */
-static void *
-hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
-{
-  char fname[256];
-  char *ret = NULL;
-  struct stat fs;
-  int file = -1;
-
-  snprintf(fname, sizeof(fname), "%s/%s", p, p1);
-
-  file = hwloc_open(fname, root_fd);
-  if (-1 == file) {
-      goto out_no_close;
-  }
-  if (fstat(file, &fs)) {
-    goto out;
-  }
-
-  ret = (char *) malloc(fs.st_size);
-  if (NULL != ret) {
-    ssize_t cb = read(file, ret, fs.st_size);
-    if (cb == -1) {
-      free(ret);
-      ret = NULL;
-    } else {
-      if (NULL != bytes_read)
-        *bytes_read = cb;
-    }
-  }
-
- out:
-  close(file);
- out_no_close:
-  return ret;
-}
-
-/* Reads the entire file and returns it as a 0-terminated string
- * Returned pointer can be freed by using free().  */
-static char *
-hwloc_read_str(const char *p, const char *p1, int root_fd)
-{
-  size_t cb = 0;
-  char *ret = hwloc_read_raw(p, p1, &cb, root_fd);
-  if ((NULL != ret) && (0 < cb) && (0 != ret[cb-1])) {
-    char *tmp = realloc(ret, cb + 1);
-    if (!tmp) {
-      free(ret);
-      return NULL;
-    }
-    ret = tmp;
-    ret[cb] = 0;
-  }
-  return ret;
-}
-
-/* Reads first 32bit bigendian value */
-static ssize_t
-hwloc_read_unit32be(const char *p, const char *p1, uint32_t *buf, int root_fd)
-{
-  size_t cb = 0;
-  uint32_t *tmp = hwloc_read_raw(p, p1, &cb, root_fd);
-  if ((NULL == tmp) || sizeof(*buf) != cb) {
-    errno = EINVAL;
-    free(tmp); /* tmp is either NULL or contains useless things */
-    return -1;
-  }
-  *buf = htonl(*tmp);
-  free(tmp);
-  return sizeof(*buf);
-}
-
-typedef struct {
-  unsigned int n, allocated;
-  struct {
-    hwloc_bitmap_t cpuset;
-    uint32_t phandle;
-    uint32_t l2_cache;
-    char *name;
-  } *p;
-} device_tree_cpus_t;
-
-static void
-add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
-    uint32_t l2_cache, uint32_t phandle, const char *name)
-{
-  if (cpus->n == cpus->allocated) {
-    void *tmp;
-    unsigned allocated;
-    if (!cpus->allocated)
-      allocated = 64;
-    else
-      allocated = 2 * cpus->allocated;
-    tmp = realloc(cpus->p, allocated * sizeof(cpus->p[0]));
-    if (!tmp)
-      return; /* failed to realloc, ignore this entry */
-    cpus->p = tmp;
-    cpus->allocated = allocated;
-  }
-  cpus->p[cpus->n].phandle = phandle;
-  cpus->p[cpus->n].cpuset = (NULL == cpuset)?NULL:hwloc_bitmap_dup(cpuset);
-  cpus->p[cpus->n].l2_cache = l2_cache;
-  cpus->p[cpus->n].name = strdup(name);
-  ++cpus->n;
-}
-
-/* Walks over the cache list in order to detect nested caches and CPU mask for each */
-static int
-look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
-    uint32_t phandle, unsigned int *level, hwloc_bitmap_t cpuset)
-{
-  unsigned int i;
-  int ret = -1;
-  if ((NULL == level) || (NULL == cpuset) || phandle == (uint32_t) -1)
-    return ret;
-  for (i = 0; i < cpus->n; ++i) {
-    if (phandle != cpus->p[i].l2_cache)
-      continue;
-    if (NULL != cpus->p[i].cpuset) {
-      hwloc_bitmap_or(cpuset, cpuset, cpus->p[i].cpuset);
-      ret = 0;
-    } else {
-      ++(*level);
-      if (0 == look_powerpc_device_tree_discover_cache(cpus,
-            cpus->p[i].phandle, level, cpuset))
-        ret = 0;
-    }
-  }
-  return ret;
-}
-
-static void
-try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
-				    unsigned int level, hwloc_obj_cache_type_t ctype,
-				    uint32_t cache_line_size, uint32_t cache_size, uint32_t cache_sets,
-				    hwloc_bitmap_t cpuset)
-{
-  struct hwloc_obj *c = NULL;
-  hwloc_obj_type_t otype;
-
-  if (0 == cache_size)
-    return;
-
-  otype = hwloc_cache_type_by_depth_type(level, ctype);
-  if (otype == HWLOC_OBJ_TYPE_NONE)
-    return;
-  if (!hwloc_filter_check_keep_object_type(topology, otype))
-    return;
-
-  c = hwloc_alloc_setup_object(topology, otype, HWLOC_UNKNOWN_INDEX);
-  c->attr->cache.depth = level;
-  c->attr->cache.linesize = cache_line_size;
-  c->attr->cache.size = cache_size;
-  c->attr->cache.type = ctype;
-  if (cache_sets == 1)
-    /* likely wrong, make it unknown */
-    cache_sets = 0;
-  if (cache_sets && cache_line_size)
-    c->attr->cache.associativity = cache_size / (cache_sets * cache_line_size);
-  else
-    c->attr->cache.associativity = 0;
-  c->cpuset = hwloc_bitmap_dup(cpuset);
-  hwloc_debug_2args_bitmap("cache (%s) depth %u has cpuset %s\n",
-			   ctype == HWLOC_OBJ_CACHE_UNIFIED ? "unified" : (ctype == HWLOC_OBJ_CACHE_DATA ? "data" : "instruction"),
-			   level, c->cpuset);
-  hwloc_insert_object_by_cpuset(topology, c);
-}
-
-static void
-try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
-				   struct hwloc_linux_backend_data_s *data,
-				   const char *cpu, unsigned int level, hwloc_bitmap_t cpuset)
-{
-  /* d-cache-block-size - ignore */
-  /* d-cache-line-size - to read, in bytes */
-  /* d-cache-sets - ignore */
-  /* d-cache-size - to read, in bytes */
-  /* i-cache, same for instruction */
-  /* cache-unified only exist if data and instruction caches are unified */
-  /* d-tlb-sets - ignore */
-  /* d-tlb-size - ignore, always 0 on power6 */
-  /* i-tlb-*, same */
-  uint32_t d_cache_line_size = 0, d_cache_size = 0, d_cache_sets = 0;
-  uint32_t i_cache_line_size = 0, i_cache_size = 0, i_cache_sets = 0;
-  char unified_path[1024];
-  struct stat statbuf;
-  int unified;
-
-  snprintf(unified_path, sizeof(unified_path), "%s/cache-unified", cpu);
-  unified = (hwloc_stat(unified_path, &statbuf, data->root_fd) == 0);
-
-  hwloc_read_unit32be(cpu, "d-cache-line-size", &d_cache_line_size,
-      data->root_fd);
-  hwloc_read_unit32be(cpu, "d-cache-size", &d_cache_size,
-      data->root_fd);
-  hwloc_read_unit32be(cpu, "d-cache-sets", &d_cache_sets,
-      data->root_fd);
-  hwloc_read_unit32be(cpu, "i-cache-line-size", &i_cache_line_size,
-      data->root_fd);
-  hwloc_read_unit32be(cpu, "i-cache-size", &i_cache_size,
-      data->root_fd);
-  hwloc_read_unit32be(cpu, "i-cache-sets", &i_cache_sets,
-      data->root_fd);
-
-  if (!unified)
-    try__add_cache_from_device_tree_cpu(topology, level, HWLOC_OBJ_CACHE_INSTRUCTION,
-					i_cache_line_size, i_cache_size, i_cache_sets, cpuset);
-  try__add_cache_from_device_tree_cpu(topology, level, unified ? HWLOC_OBJ_CACHE_UNIFIED : HWLOC_OBJ_CACHE_DATA,
-				      d_cache_line_size, d_cache_size, d_cache_sets, cpuset);
-}
-
-/*
- * Discovers L1/L2/L3 cache information on IBM PowerPC systems for old kernels (RHEL5.*)
- * which provide NUMA nodes information without any details
- */
-static void
-look_powerpc_device_tree(struct hwloc_topology *topology,
-			 struct hwloc_linux_backend_data_s *data)
-{
-  device_tree_cpus_t cpus;
-  const char ofroot[] = "/proc/device-tree/cpus";
-  unsigned int i;
-  int root_fd = data->root_fd;
-  DIR *dt = hwloc_opendir(ofroot, root_fd);
-  struct dirent *dirent;
-
-  if (NULL == dt)
-    return;
-
-  /* only works for Power so far, and not useful on ARM */
-  if (data->arch != HWLOC_LINUX_ARCH_POWER) {
-    closedir(dt);
-    return;
-  }
-
-  cpus.n = 0;
-  cpus.p = NULL;
-  cpus.allocated = 0;
-
-  while (NULL != (dirent = readdir(dt))) {
-    char cpu[256];
-    char *device_type;
-    uint32_t reg = -1, l2_cache = -1, phandle = -1;
-    int err;
-
-    if ('.' == dirent->d_name[0])
-      continue;
-
-    err = snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, dirent->d_name);
-    if ((size_t) err >= sizeof(cpu))
-      continue;
-
-    device_type = hwloc_read_str(cpu, "device_type", root_fd);
-    if (NULL == device_type)
-      continue;
-
-    hwloc_read_unit32be(cpu, "reg", &reg, root_fd);
-    if (hwloc_read_unit32be(cpu, "next-level-cache", &l2_cache, root_fd) == -1)
-      hwloc_read_unit32be(cpu, "l2-cache", &l2_cache, root_fd);
-    if (hwloc_read_unit32be(cpu, "phandle", &phandle, root_fd) == -1)
-      if (hwloc_read_unit32be(cpu, "ibm,phandle", &phandle, root_fd) == -1)
-        hwloc_read_unit32be(cpu, "linux,phandle", &phandle, root_fd);
-
-    if (0 == strcmp(device_type, "cache")) {
-      add_device_tree_cpus_node(&cpus, NULL, l2_cache, phandle, dirent->d_name);
-    }
-    else if (0 == strcmp(device_type, "cpu")) {
-      /* Found CPU */
-      hwloc_bitmap_t cpuset = NULL;
-      size_t cb = 0;
-      uint32_t *threads = hwloc_read_raw(cpu, "ibm,ppc-interrupt-server#s", &cb, root_fd);
-      uint32_t nthreads = cb / sizeof(threads[0]);
-
-      if (NULL != threads) {
-        cpuset = hwloc_bitmap_alloc();
-        for (i = 0; i < nthreads; ++i) {
-          if (hwloc_bitmap_isset(topology->levels[0][0]->complete_cpuset, ntohl(threads[i])))
-            hwloc_bitmap_set(cpuset, ntohl(threads[i]));
-        }
-        free(threads);
-      } else if ((unsigned int)-1 != reg) {
-        /* Doesn't work on ARM because cpu "reg" do not start at 0.
-	 * We know the first cpu "reg" is the lowest. The others are likely
-	 * in order assuming the device-tree shows objects in order.
-	 */
-        cpuset = hwloc_bitmap_alloc();
-        hwloc_bitmap_set(cpuset, reg);
-      }
-
-      if (NULL == cpuset) {
-        hwloc_debug("%s has no \"reg\" property, skipping\n", cpu);
-      } else {
-        struct hwloc_obj *core = NULL;
-        add_device_tree_cpus_node(&cpus, cpuset, l2_cache, phandle, dirent->d_name);
-
-	if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
-	  /* Add core */
-	  core = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, (unsigned) reg);
-	  core->cpuset = hwloc_bitmap_dup(cpuset);
-	  hwloc_insert_object_by_cpuset(topology, core);
-	}
-
-        /* Add L1 cache */
-        try_add_cache_from_device_tree_cpu(topology, data, cpu, 1, cpuset);
-
-        hwloc_bitmap_free(cpuset);
-      }
-    }
-    free(device_type);
-  }
-  closedir(dt);
-
-  /* No cores and L2 cache were found, exiting */
-  if (0 == cpus.n) {
-    hwloc_debug("No cores and L2 cache were found in %s, exiting\n", ofroot);
-    return;
-  }
-
-#ifdef HWLOC_DEBUG
-  for (i = 0; i < cpus.n; ++i) {
-    hwloc_debug("%u: %s  ibm,phandle=%08X l2_cache=%08X ",
-      i, cpus.p[i].name, cpus.p[i].phandle, cpus.p[i].l2_cache);
-    if (NULL == cpus.p[i].cpuset) {
-      hwloc_debug("%s\n", "no cpuset");
-    } else {
-      hwloc_debug_bitmap("cpuset %s\n", cpus.p[i].cpuset);
-    }
-  }
-#endif
-
-  /* Scan L2/L3/... caches */
-  for (i = 0; i < cpus.n; ++i) {
-    unsigned int level = 2;
-    hwloc_bitmap_t cpuset;
-    /* Skip real CPUs */
-    if (NULL != cpus.p[i].cpuset)
-      continue;
-
-    /* Calculate cache level and CPU mask */
-    cpuset = hwloc_bitmap_alloc();
-    if (0 == look_powerpc_device_tree_discover_cache(&cpus,
-          cpus.p[i].phandle, &level, cpuset)) {
-      char cpu[256];
-      snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, cpus.p[i].name);
-      try_add_cache_from_device_tree_cpu(topology, data, cpu, level, cpuset);
-    }
-    hwloc_bitmap_free(cpuset);
-  }
-
-  /* Do cleanup */
-  for (i = 0; i < cpus.n; ++i) {
-    hwloc_bitmap_free(cpus.p[i].cpuset);
-    free(cpus.p[i].name);
-  }
-  free(cpus.p);
-}
-
 /***************************************
  * KNL NUMA quirks
  */
@@ -4389,7 +4026,6 @@ look_sysfscpu(struct hwloc_topology *topology,
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
   int i,j;
-  unsigned caches_added;
   int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
 
   /* try to get the list of online CPUs at once.
@@ -4456,7 +4092,6 @@ look_sysfscpu(struct hwloc_topology *topology,
   hwloc_debug_1arg_bitmap("found %d cpu topologies, cpuset %s\n",
 	     hwloc_bitmap_weight(cpuset), cpuset);
 
-  caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset) {
     int tmpint;
     int notfirstofcore = 0; /* set if we have core info and if we're not the first PU of our core */
@@ -4779,16 +4414,12 @@ look_sysfscpu(struct hwloc_topology *topology,
 				  depth, cacheset);
 	  hwloc_insert_object_by_cpuset(topology, cache);
 	  cacheset = NULL; /* don't free it */
-	  ++caches_added;
 	}
       }
       hwloc_bitmap_free(cacheset);
      }
 
   } hwloc_bitmap_foreach_end();
-
-  if (0 == caches_added && data->use_dt)
-    look_powerpc_device_tree(topology, data);
 
   hwloc_bitmap_free(cpuset);
   hwloc_bitmap_free(online_set);
@@ -5465,8 +5096,6 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
     /* /sys/.../topology unavailable (before 2.6.16)
      * or not containing anything interesting */
     hwloc_linux_fallback_pu_level(backend);
-    if (data->use_dt)
-      look_powerpc_device_tree(topology, data);
 
   } else {
     /* sysfs */
@@ -6821,7 +6450,6 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->is_knl = 0;
   data->is_amd_with_CU = 0;
-  data->use_dt = 0;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");
@@ -6879,10 +6507,6 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
     data->use_numa_distances_for_cpuless = !!(val & 2);
     data->use_numa_initiators = !!(val & 4);
   }
-
-  env = getenv("HWLOC_USE_DT");
-  if (env)
-    data->use_dt = atoi(env);
 
   return backend;
 
