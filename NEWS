@@ -47,6 +47,8 @@ Version 2.1.0
   + Ignore NUMA node information from AMD topoext in the x86 backend,
     unless HWLOC_X86_TOPOEXT_NUMANODES=1 is set in the environment.
   + Improve support for new kinds of dax devices on Linux.
+  + Remove support for /proc/cpuinfo-only topology discovery in Linux
+    kernel prior to 2.6.16.
 * Tools
   + lstopo
     - Both logical and OS/physical indexes are now displayed by default

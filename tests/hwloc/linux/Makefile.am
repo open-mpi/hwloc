@@ -16,15 +16,12 @@ sysfs_outputs = \
 		2ps3-2t.output \
 		4em64t-2c2t-ignore-reorder.output \
 		4ia64-4s.output \
-		4ppc-4c.output \
 		4fake-4gr1nu1pu.output \
 		256ppc-8n8s4t.output \
 		256ppc-8n8s4t-nocache.output \
-		256ppc-8n8s4t-nosys.output \
 		28em64t-2s2n7c-buggycoresiblings.output \
 		32amd64-4s2n4c-cgroup.output \
 		32amd64-4s2n4c-cgroup.xml.output \
-		32ppc-4n4c2c.output \
 		8amd64-4n2c.output  \
 		8em64t-4c2t.output \
 		8em64t-2s2ca2c.output \
@@ -56,10 +53,8 @@ sysfs_outputs = \
 		64intel64-fakeKNL-A2A-cache.output \
 		64intel64-fakeKNL-SNC4-hybrid.output \
 		96em64t-4n4d3ca2co.output \
-		96em64t-4n4d3ca2co-forcecpuinfo.output \
 		128ia64-17n4s2c.output \
 		256ia64-64n2s2c.output \
-		4qs22-2s2t.output \
 		2s390-2c.output \
 		20s390-2g6s4c.output \
 		1alpha.output \
@@ -77,15 +72,12 @@ sysfs_tarballs = \
 		2ps3-2t.tar.bz2 \
 		4em64t-2c2t-ignore-reorder.tar.bz2 \
 		4ia64-4s.tar.bz2 \
-		4ppc-4c.tar.bz2 \
 		4fake-4gr1nu1pu.tar.bz2 \
 		256ppc-8n8s4t.tar.bz2 \
 		256ppc-8n8s4t-nocache.source \
-		256ppc-8n8s4t-nosys.source \
 		28em64t-2s2n7c-buggycoresiblings.tar.bz2 \
 		32amd64-4s2n4c-cgroup.tar.bz2 \
 		32amd64-4s2n4c-cgroup.xml.source \
-		32ppc-4n4c2c.tar.bz2 \
 		8amd64-4n2c.tar.bz2  \
 		8em64t-4c2t.tar.bz2 \
 		8em64t-2s2ca2c.tar.bz2 \
@@ -117,10 +109,8 @@ sysfs_tarballs = \
 		64intel64-fakeKNL-A2A-cache.tar.bz2 \
 		64intel64-fakeKNL-SNC4-hybrid.tar.bz2 \
 		96em64t-4n4d3ca2co.tar.bz2 \
-		96em64t-4n4d3ca2co-forcecpuinfo.source \
 		128ia64-17n4s2c.tar.bz2 \
 		256ia64-64n2s2c.tar.bz2 \
-		4qs22-2s2t.tar.bz2 \
 		2s390-2c.tar.bz2 \
 		20s390-2g6s4c.tar.bz2 \
 		1alpha.tar.bz2 \
@@ -129,8 +119,7 @@ sysfs_tarballs = \
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
 sysfs_excludes = \
-		256ppc-8n8s4t-nocache.exclude \
-		256ppc-8n8s4t-nosys.exclude
+		256ppc-8n8s4t-nocache.exclude
 
 # Each output `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
@@ -156,7 +145,6 @@ sysfs_options = \
 sysfs_envs = \
 		40intel64-2g2n4c+pci.env \
 		40intel64-4n10c+pci-conflicts.env \
-		96em64t-4n4d3ca2co-forcecpuinfo.env \
 		fakeheteronuma.env
 
 if HWLOC_HAVE_OPENAT
