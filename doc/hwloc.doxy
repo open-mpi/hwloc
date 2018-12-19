@@ -1158,9 +1158,6 @@ following environment variables.
 </dl>
 
 <!-- not documented:
- HWLOC_LINUX_USE_CPUINFO
-  uses /proc/cpuinfo instead of sysfs.
-  may be useful in the doc for debugging?
  HWLOC_KNL_NUMA_QUIRK
   disables the KNL NUMA Cluster quirk in the linux backend
  HWLOC_KNL_HDH_FALLBACK

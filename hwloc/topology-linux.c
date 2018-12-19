@@ -2168,10 +2168,6 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 struct hwloc_linux_cpuinfo_proc {
   /* set during hwloc_linux_parse_cpuinfo */
   unsigned long Pproc;
-  /* set during hwloc_linux_parse_cpuinfo or -1 if unknown*/
-  long Pcore, Ppkg;
-  /* set later, or -1 if unknown */
-  long Lcore, Lpkg;
 
   /* custom info, set during hwloc_linux_parse_cpuinfo */
   struct hwloc_info_s *infos;
@@ -4507,6 +4503,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 			  struct hwloc_linux_cpuinfo_proc ** Lprocs_p,
 			  struct hwloc_info_s **global_infos, unsigned *global_infos_count)
 {
+  /* FIXME: only parse once per package and once for globals? */
   FILE *fd;
   char str[128]; /* vendor/model can be very long */
   char *endptr;
@@ -4523,11 +4520,9 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     }
 
 #      define PROCESSOR	"processor"
-#      define PACKAGEID "physical id" /* the longest one */
-#      define COREID "core id"
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
   while (fgets(str, sizeof(str), fd)!=NULL) {
-    unsigned long Ppkg, Pcore, Pproc;
+    unsigned long Pproc;
     char *end, *dot, *prefix, *value;
     int noend = 0;
 
@@ -4588,18 +4583,8 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
       Lprocs = tmp;
     }
     Lprocs[curproc].Pproc = Pproc;
-    Lprocs[curproc].Pcore = -1;
-    Lprocs[curproc].Ppkg = -1;
-    Lprocs[curproc].Lcore = -1;
-    Lprocs[curproc].Lpkg = -1;
     Lprocs[curproc].infos = NULL;
     Lprocs[curproc].infos_count = 0;
-    getprocnb_end() else
-    getprocnb_begin(PACKAGEID, Ppkg);
-    Lprocs[curproc].Ppkg = Ppkg;
-    getprocnb_end() else
-    getprocnb_begin(COREID, Pcore);
-    Lprocs[curproc].Pcore = Pcore;
     getprocnb_end() else {
 
       /* architecture specific or default routine for parsing cpumodel */
@@ -4661,140 +4646,6 @@ hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned nump
     free(Lprocs);
   }
   hwloc__free_infos(global_infos, global_infos_count);
-}
-
-static int
-look_cpuinfo(struct hwloc_topology *topology,
-	     struct hwloc_linux_cpuinfo_proc * Lprocs,
-	     unsigned numprocs)
-{
-  /* P for physical/OS index, L for logical (e.g. in we order we get them, not in the final hwloc logical order) */
-  unsigned *Lcore_to_Pcore;
-  unsigned *Lcore_to_Ppkg; /* needed because Lcore is equivalent to Pcore+Ppkg, not to Pcore alone */
-  unsigned *Lpkg_to_Ppkg;
-  unsigned numpkgs=0;
-  unsigned numcores=0;
-  unsigned long Lproc;
-  unsigned missingpkg;
-  unsigned missingcore;
-  unsigned i,j;
-
-  /* initialize misc arrays, there can be at most numprocs entries */
-  Lcore_to_Pcore = malloc(numprocs * sizeof(*Lcore_to_Pcore));
-  Lcore_to_Ppkg = malloc(numprocs * sizeof(*Lcore_to_Ppkg));
-  Lpkg_to_Ppkg = malloc(numprocs * sizeof(*Lpkg_to_Ppkg));
-  for (i = 0; i < numprocs; i++) {
-    Lcore_to_Pcore[i] = -1;
-    Lcore_to_Ppkg[i] = -1;
-    Lpkg_to_Ppkg[i] = -1;
-  }
-
-  /* create PU objects */
-  for(Lproc=0; Lproc<numprocs; Lproc++) {
-    unsigned long Pproc = Lprocs[Lproc].Pproc;
-    hwloc_obj_t obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, (unsigned)Pproc);
-    obj->cpuset = hwloc_bitmap_alloc();
-    hwloc_bitmap_only(obj->cpuset, Pproc);
-    hwloc_debug_2args_bitmap("cpu %lu (os %lu) has cpuset %s\n",
-			     Lproc, Pproc, obj->cpuset);
-    hwloc_insert_object_by_cpuset(topology, obj);
-  }
-
-  topology->support.discovery->pu = 1;
-  topology->support.discovery->disallowed_pu = 1;
-
-  hwloc_debug("%s", "\n * Topology summary *\n");
-  hwloc_debug("%u processors)\n", numprocs);
-
-  /* fill Lprocs[].Lpkg and Lpkg_to_Ppkg */
-  for(Lproc=0; Lproc<numprocs; Lproc++) {
-    long Ppkg = Lprocs[Lproc].Ppkg;
-    if (Ppkg != -1) {
-      unsigned long Pproc = Lprocs[Lproc].Pproc;
-      for (i=0; i<numpkgs; i++)
-	if ((unsigned) Ppkg == Lpkg_to_Ppkg[i])
-	  break;
-      Lprocs[Lproc].Lpkg = i;
-      hwloc_debug("%lu on package %u (%lx)\n", Pproc, i, (unsigned long) Ppkg);
-      if (i==numpkgs) {
-	Lpkg_to_Ppkg[numpkgs] = Ppkg;
-	numpkgs++;
-      }
-    }
-  }
-  /* Some buggy Linuxes don't provide numbers for processor 0, which makes us
-   * provide bogus information. We should rather drop it. */
-  missingpkg=0;
-  for(j=0; j<numprocs; j++)
-    if (Lprocs[j].Ppkg == -1) {
-      missingpkg=1;
-      break;
-    }
-  /* create package objects */
-  hwloc_debug("%u pkgs%s\n", numpkgs, missingpkg ? ", but some missing package" : "");
-  if (!missingpkg && numpkgs>0
-      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
-    for (i = 0; i < numpkgs; i++) {
-      struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, Lpkg_to_Ppkg[i]);
-      int doneinfos = 0;
-      obj->cpuset = hwloc_bitmap_alloc();
-      for(j=0; j<numprocs; j++)
-	if ((unsigned) Lprocs[j].Lpkg == i) {
-	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
-	  if (!doneinfos) {
-	    hwloc__move_infos(&obj->infos, &obj->infos_count, &Lprocs[j].infos, &Lprocs[j].infos_count);
-	    doneinfos = 1;
-	  }
-	}
-      hwloc_debug_1arg_bitmap("Package %u has cpuset %s\n", i, obj->cpuset);
-      hwloc_insert_object_by_cpuset(topology, obj);
-    }
-    hwloc_debug("%s", "\n");
-  }
-
-  /* fill Lprocs[].Lcore, Lcore_to_Ppkg and Lcore_to_Pcore */
-  for(Lproc=0; Lproc<numprocs; Lproc++) {
-    long Pcore = Lprocs[Lproc].Pcore;
-    if (Pcore != -1) {
-      for (i=0; i<numcores; i++)
-	if ((unsigned) Pcore == Lcore_to_Pcore[i] && (unsigned) Lprocs[Lproc].Ppkg == Lcore_to_Ppkg[i])
-	  break;
-      Lprocs[Lproc].Lcore = i;
-      if (i==numcores) {
-	Lcore_to_Ppkg[numcores] = Lprocs[Lproc].Ppkg;
-	Lcore_to_Pcore[numcores] = Pcore;
-	numcores++;
-      }
-    }
-  }
-  /* Some buggy Linuxes don't provide numbers for processor 0, which makes us
-   * provide bogus information. We should rather drop it. */
-  missingcore=0;
-  for(j=0; j<numprocs; j++)
-    if (Lprocs[j].Pcore == -1) {
-      missingcore=1;
-      break;
-    }
-  /* create Core objects */
-  hwloc_debug("%u cores%s\n", numcores, missingcore ? ", but some missing core" : "");
-  if (!missingcore && numcores>0
-      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
-    for (i = 0; i < numcores; i++) {
-      struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, Lcore_to_Pcore[i]);
-      obj->cpuset = hwloc_bitmap_alloc();
-      for(j=0; j<numprocs; j++)
-	if ((unsigned) Lprocs[j].Lcore == i)
-	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
-      hwloc_debug_1arg_bitmap("Core %u has cpuset %s\n", i, obj->cpuset);
-      hwloc_insert_object_by_cpuset(topology, obj);
-    }
-    hwloc_debug("%s", "\n");
-  }
-
-  free(Lcore_to_Pcore);
-  free(Lcore_to_Ppkg);
-  free(Lpkg_to_Ppkg);
-  return 0;
 }
 
 
@@ -5116,15 +4967,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
 		    &global_infos, &global_infos_count);
 
-  if (getenv("HWLOC_LINUX_USE_CPUINFO") || !sysfs_cpu_path) {
-    /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16)
+  if (!sysfs_cpu_path) {
+    /* /sys/.../topology unavailable (before 2.6.16)
      * or not containing anything interesting */
-    if (numprocs > 0)
-      err = look_cpuinfo(topology, Lprocs, numprocs);
-    else
-      err = -1;
-    if (err < 0)
-      hwloc_linux_fallback_pu_level(backend);
+    hwloc_linux_fallback_pu_level(backend);
     look_powerpc_device_tree(topology, data);
 
   } else {
