@@ -29,6 +29,8 @@ Version 2.3.0
   + Add a ROCm SMI backend and a hwloc/rsmi.h helper file for getting
     the locality of AMD GPUs, now exposed as "rsmi" OS devices.
     Thanks to Mike Li.
+  + Remove POWER device-tree-based topology on Linux,
+    (it was disabled by default since 2.1).
 * Tools
   + Command-line options for specifying flags now understand comma-separated
     lists of flag names (substrings).

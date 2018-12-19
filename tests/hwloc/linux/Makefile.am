@@ -18,7 +18,6 @@ sysfs_outputs = \
 		4ia64-4s.output \
 		4fake-4gr1nu1pu.output \
 		256ppc-8n8s4t.output \
-		256ppc-8n8s4t-nocache.output \
 		32amd64-4s2n4c-cgroup2.output \
 		32amd64-4s2n4c-cgroup2.xml.output \
 		8amd64-4n2c.output  \
@@ -86,7 +85,6 @@ sysfs_tarballs = \
 		4ia64-4s.tar.bz2 \
 		4fake-4gr1nu1pu.tar.bz2 \
 		256ppc-8n8s4t.tar.bz2 \
-		256ppc-8n8s4t-nocache.source \
 		32amd64-4s2n4c-cgroup2.tar.bz2 \
 		32amd64-4s2n4c-cgroup2.xml.source \
 		8amd64-4n2c.tar.bz2  \
@@ -136,8 +134,7 @@ sysfs_tarballs = \
 		fakeheteronuma.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
-sysfs_excludes = \
-		256ppc-8n8s4t-nocache.exclude
+sysfs_excludes = 
 
 # Each output `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
@@ -161,7 +158,6 @@ sysfs_options = \
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 sysfs_envs = \
-		256ppc-8n8s4t-nocache.env \
 		40intel64-2g2n4c+pci.env \
 		40intel64-4n10c+pci-conflicts.env \
 		64intel64-fakeKNL-SNC4-hybrid-msc.env \
