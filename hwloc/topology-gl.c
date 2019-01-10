@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012-2013 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2017 Inria.  All rights reserved.
+ * Copyright © 2012-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -22,7 +22,7 @@
 #define HWLOC_GL_SCREEN_MAX 10
 
 static int
-hwloc_gl_discover(struct hwloc_backend *backend)
+hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e filter;

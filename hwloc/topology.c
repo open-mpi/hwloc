@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2950,6 +2950,9 @@ static int
 hwloc_discover(struct hwloc_topology *topology)
 {
   struct hwloc_backend *backend;
+  struct hwloc_disc_status dstatus;
+
+  dstatus.flags = 0; /* did nothing yet */
 
   topology->modified = 0; /* no need to reconnect yet */
 
@@ -3002,7 +3005,7 @@ hwloc_discover(struct hwloc_topology *topology)
       goto next_cpubackend;
     if (!backend->discover)
       goto next_cpubackend;
-    backend->discover(backend);
+    backend->discover(backend, &dstatus);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_cpubackend:
@@ -3113,7 +3116,7 @@ next_cpubackend:
       goto next_noncpubackend;
     if (!backend->discover)
       goto next_noncpubackend;
-    backend->discover(backend);
+    backend->discover(backend, &dstatus);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_noncpubackend:

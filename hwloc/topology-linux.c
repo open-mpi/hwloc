@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -4970,7 +4970,7 @@ hwloc_linux_fallback_pu_level(struct hwloc_backend *backend)
 }
 
 static int
-hwloc_look_linuxfs(struct hwloc_backend *backend)
+hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = backend->private_data;
@@ -6455,7 +6455,7 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 #endif /* HWLOC_HAVE_LINUXPCI */
 
 static int
-hwloc_look_linuxfs_io(struct hwloc_backend *backend)
+hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = NULL;

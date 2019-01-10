@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Inria.  All rights reserved.
+ * Copyright © 2013-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -53,7 +53,7 @@ hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
 }
 
 static int
-hwloc_look_bgq(struct hwloc_backend *backend)
+hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
   struct hwloc_topology *topology = backend->topology;
   hwloc_bitmap_t set;

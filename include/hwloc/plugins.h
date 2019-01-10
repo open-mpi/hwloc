@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2017 Inria.  All rights reserved.
+ * Copyright © 2013-2019 Inria.  All rights reserved.
  * Copyright © 2016 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -107,6 +107,21 @@ struct hwloc_disc_component {
  * @{
  */
 
+/** \brief Discovery status flags */
+enum hwloc_disc_status_flag_e {
+  HWLOC_DISC_STATUS_FLAG_DUMMY
+};
+
+/** \brief Discovery status structure
+ *
+ * Used by the core and backends to inform about what has been/is being done
+ * during the discovery process.
+ */
+struct hwloc_disc_status {
+  /** \brief OR'ed set of hwloc_disc_status_flag_e */
+  unsigned long flags;
+};
+
 /** \brief Discovery backend structure
  *
  * A backend is the instantiation of a discovery component.
@@ -147,7 +162,7 @@ struct hwloc_backend {
    * or because of an actual discovery/gathering failure.
    * May be NULL.
    */
-  int (*discover)(struct hwloc_backend *backend);
+  int (*discover)(struct hwloc_backend *backend, struct hwloc_disc_status *status);
 
   /** \brief Callback used by the PCI backend to retrieve the locality of a PCI object from the OS/cpu backend.
    * May be NULL. */
