@@ -329,13 +329,6 @@ lgrp_list_allowed(struct hwloc_topology *topology)
   processorid_t *pids;
   lgrp_id_t *nids;
 
-  /* if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
-   * (once in the main solaris discovery, and later again by the core through the get_allowed_resources() hook).
-   */
-  if (topology->got_allowed_resources)
-    return;
-  topology->got_allowed_resources = 1;
-
   cookie = lgrp_init(LGRP_VIEW_CALLER);
   if (cookie == LGRP_COOKIE_NONE) {
     hwloc_debug("lgrp_init LGRP_VIEW_CALLER failed: %s\n", strerror(errno));
@@ -486,14 +479,17 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_look_lgrp(struct hwloc_topology *topology)
+hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstatus)
 {
   lgrp_cookie_t cookie;
   unsigned curlgrp = 0;
   int nlgrps;
   lgrp_id_t root;
 
-  lgrp_list_allowed(topology);
+  if (!(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)) {
+    lgrp_list_allowed(topology);
+    dstatus->flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
+  }
 
   cookie = lgrp_init(LGRP_VIEW_OS);
   if (cookie == LGRP_COOKIE_NONE)
@@ -982,7 +978,7 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
 #ifdef HAVE_LIBLGRP
-  hwloc_look_lgrp(topology);
+  hwloc_look_lgrp(topology, dstatus);
 #endif /* HAVE_LIBLGRP */
 #ifdef HAVE_LIBKSTAT
   if (hwloc_look_kstat(topology) > 0)

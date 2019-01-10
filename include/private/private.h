@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -189,9 +189,6 @@ struct hwloc_topology {
   struct hwloc_topology_forced_component_s {
     struct hwloc_disc_component *component;
   } *blacklisted_components;
-
-  /* avoid multiple calls to the get_allowed_resources hook during discovery. */
-  int got_allowed_resources;
 
   /* FIXME: keep until topo destroy and reuse for finding specific buses */
   struct hwloc_pci_locality_s {

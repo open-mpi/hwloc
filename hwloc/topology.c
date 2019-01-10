@@ -2951,8 +2951,14 @@ hwloc_discover(struct hwloc_topology *topology)
 {
   struct hwloc_backend *backend;
   struct hwloc_disc_status dstatus;
+  const char *env;
 
   dstatus.flags = 0; /* did nothing yet */
+
+  env = getenv("HWLOC_ALLOW");
+  if (env && !strcmp(env, "all"))
+    /* don't retrieve the sets of allowed resources */
+    dstatus.flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
 
   topology->modified = 0; /* no need to reconnect yet */
 
@@ -3021,11 +3027,17 @@ next_cpubackend:
     return -1;
   }
 
-  if (topology->binding_hooks.get_allowed_resources && topology->is_thissystem) {
-    const char *env = getenv("HWLOC_THISSYSTEM_ALLOWED_RESOURCES");
-    if ((env && atoi(env))
-	|| (topology->flags & HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES))
-      topology->binding_hooks.get_allowed_resources(topology);
+  if (/* check if getting the sets of locally allowed resources is possible */
+      topology->binding_hooks.get_allowed_resources
+      && topology->is_thissystem
+      /* check whether it has been done already */
+      && !(dstatus.flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)
+      /* check whether it was explicitly requested */
+      && ((topology->flags & HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES) != 0
+	  || ((env = getenv("HWLOC_THISSYSTEM_ALLOWED_RESOURCES")) != NULL && atoi(env)))) {
+    /* OK, get the sets of locally allowed resources */
+    topology->binding_hooks.get_allowed_resources(topology);
+    dstatus.flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
   }
 
   /* If there's no NUMA node, add one with all the memory.
@@ -3215,7 +3227,6 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   /* Allowed stuff */
   topology->allowed_cpuset = NULL;
   topology->allowed_nodeset = NULL;
-  topology->got_allowed_resources = 0;
 
   /* NULLify other special levels */
   memset(&topology->slevels, 0, sizeof(topology->slevels));
@@ -3549,7 +3560,6 @@ int
 hwloc_topology_load (struct hwloc_topology *topology)
 {
   int err;
-  const char *env;
 
   if (topology->is_loaded) {
     errno = EBUSY;
@@ -3603,10 +3613,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					  xmlpath_env, NULL, NULL);
     }
   }
-
-  env = getenv("HWLOC_ALLOW");
-  if (env && !strcmp(env, "all"))
-    topology->got_allowed_resources = 1;
 
   /* instantiate all possible other backends now */
   hwloc_disc_components_enable_others(topology);
@@ -3972,7 +3978,6 @@ hwloc_topology_allow(struct hwloc_topology *topology,
       errno = ENOSYS;
       goto error;
     }
-    topology->got_allowed_resources = 0; /* make sure we'll reread current resources */
     topology->binding_hooks.get_allowed_resources(topology);
     break;
   }

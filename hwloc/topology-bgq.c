@@ -25,13 +25,6 @@ hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
   const char *env;
   unsigned i;
 
-  /* if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
-   * (once in the main bgq discovery, and later again by the core through the get_allowed_resources() hook).
-   */
-  if (topology->got_allowed_resources)
-    return 0;
-  topology->got_allowed_resources = 1;
-
   /* start from everything */
   hwloc_bitmap_copy(topology->allowed_cpuset, topology->levels[0][0]->cpuset);
 
@@ -53,7 +46,7 @@ hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
 }
 
 static int
-hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   struct hwloc_topology *topology = backend->topology;
   hwloc_bitmap_t set;
@@ -66,7 +59,10 @@ hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus 
 
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
-  hwloc_bgq__get_allowed_resources(topology);
+  if (!(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)) {
+    hwloc_bgq__get_allowed_resources(topology);
+    dstatus->flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
+  }
 
   /* a single memory bank */
   obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, 0);

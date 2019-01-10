@@ -2060,7 +2060,7 @@ static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const 
 static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
 {
   const char *fsroot_path;
-  char *cpuset_name;
+  char *cpuset_name = NULL;
   int root_fd = -1;
 
   fsroot_path = getenv("HWLOC_FSROOT");
@@ -4934,15 +4934,6 @@ static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const 
 {
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
 
-  /* if THISSYSTEM_ALLOWED_RESOURCES, this function is called twice during discovery
-   * (once in the main linux discovery, and later again by the core through the get_allowed_resources() hook).
-   */
-  if (topology->got_allowed_resources) {
-    *cpuset_namep = NULL;
-    return;
-  }
-  topology->got_allowed_resources = 1;
-
   hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, root_path);
   if (cgroup_mntpnt || cpuset_mntpnt) {
     cpuset_name = hwloc_read_linux_cpuset_name(root_fd, topology->pid);
@@ -4975,7 +4966,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   unsigned nbnodes;
-  char *cpuset_name;
+  char *cpuset_name = NULL;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   struct hwloc_info_s *global_infos = NULL;
   unsigned global_infos_count = 0;
@@ -5064,7 +5055,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   /**********************
    * Gather the list of admin-disabled cpus and mems
    */
-  hwloc_linux__get_allowed_resources(topology, data->root_path, data->root_fd, &cpuset_name);
+  if (!(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)) {
+    hwloc_linux__get_allowed_resources(topology, data->root_path, data->root_fd, &cpuset_name);
+    dstatus->flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
+  }
 
   /**********************
    * CPU information
