@@ -164,9 +164,6 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology)
   cur = topology->first_pci_locality;
   while (cur) {
     struct hwloc_pci_locality_s *next = cur->next;
-    char *s;
-    hwloc_bitmap_asprintf(&s, cur->cpuset);
-    free(s);
     hwloc_bitmap_free(cur->cpuset);
     free(cur);
     cur = next;
