@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1158,7 +1158,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     lud->width = gridsize;
     lud->height = gridsize;
     if (lud->ntext > 0) {
-      lud->width += lud->textwidth + fontsize;
+      lud->width += lud->textwidth + gridsize;
       lud->height += fontsize + gridsize;
     }
     place_children(loutput, level,
