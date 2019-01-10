@@ -109,7 +109,8 @@ struct hwloc_disc_component {
 
 /** \brief Discovery status flags */
 enum hwloc_disc_status_flag_e {
-  HWLOC_DISC_STATUS_FLAG_DUMMY
+  /** \brief PCI discovery has been performed \hideinitializer */
+  HWLOC_DISC_STATUS_FLAG_PCI_DONE = (1UL<<0)
 };
 
 /** \brief Discovery status structure

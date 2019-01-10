@@ -6455,17 +6455,13 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 #endif /* HWLOC_HAVE_LINUXPCI */
 
 static int
-hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = NULL;
   struct hwloc_backend *tmpbackend;
   enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
   int root_fd = -1;
-#ifdef HWLOC_HAVE_LINUXPCI
-  struct hwloc_obj *child;
-  int needpcidiscovery;
-#endif
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
@@ -6497,23 +6493,12 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
   if (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
       || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
 #ifdef HWLOC_HAVE_LINUXPCI
-  /* don't rediscovery PCI devices if another backend did it
-   * (they are attached to root until later in the core discovery)
-   */
-  needpcidiscovery = 1;
-  for_each_io_child(child, hwloc_get_root_obj(topology)) {
-    if (child->type == HWLOC_OBJ_PCI_DEVICE
-	|| (child->type == HWLOC_OBJ_BRIDGE &&
-	    (child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI
-	     || child->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI))) {
-      hwloc_debug("%s", "Topology already contains PCI objects, skipping linuxio PCI discovery.\n");
-      needpcidiscovery = 0;
-      break;
-    }
-  }
-
-  if (needpcidiscovery)
+  if (dstatus->flags & HWLOC_DISC_STATUS_FLAG_PCI_DONE) {
+    hwloc_debug("%s", "PCI discovery has already been performed, skipping PCI in linuxio backend.\n");
+  } else {
     hwloc_linuxfs_pci_look_pcidevices(backend);
+    dstatus->flags |= HWLOC_DISC_STATUS_FLAG_PCI_DONE;
+  }
 
   hwloc_linuxfs_pci_look_pcislots(backend);
 #endif /* HWLOC_HAVE_LINUXPCI */

@@ -88,11 +88,11 @@ static pthread_mutex_t hwloc_pciaccess_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static int
-hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e pfilter, bfilter;
-  struct hwloc_obj *tree = NULL, *child;
+  struct hwloc_obj *tree = NULL;
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
@@ -103,17 +103,9 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus 
       && pfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
-  /* don't do anything if another backend attached PCI already
-   * (they are attached to root until later in the core discovery)
-   */
-  for_each_io_child(child, hwloc_get_root_obj(topology)) {
-    if (child->type == HWLOC_OBJ_PCI_DEVICE
-       || (child->type == HWLOC_OBJ_BRIDGE &&
-	   (child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI
-	    || child->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI))) {
-      hwloc_debug("%s", "Topology already contains PCI objects, skipping PCI backend.\n");
-      return 0;
-    }
+  if (dstatus->flags & HWLOC_DISC_STATUS_FLAG_PCI_DONE) {
+    hwloc_debug("%s", "PCI discovery has already been performed, skipping PCI backend.\n");
+    return 0;
   }
 
   hwloc_debug("%s", "\nScanning PCI buses...\n");
@@ -320,6 +312,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus 
   HWLOC_PCIACCESS_UNLOCK();
 
   hwloc_pcidisc_tree_attach(topology, tree);
+  dstatus->flags |= HWLOC_DISC_STATUS_FLAG_PCI_DONE;
   return 0;
 }
 
