@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -101,7 +101,7 @@ extern "C" {
 HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
 
 /** \brief Current component and plugin ABI version (see hwloc/plugins.h) */
-#define HWLOC_COMPONENT_ABI 5
+#define HWLOC_COMPONENT_ABI 6
 
 /** @} */
 
