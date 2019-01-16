@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2018 Inria.  All rights reserved.
+ * Copyright © 2012-2019 Inria.  All rights reserved.
  * Copyright © 2013, 2018 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -18,6 +18,10 @@
 #else
 #include <CL/cl_ext.h>
 #endif
+
+/* Only supported since OpenCL 1.2 */
+/* Copyright (c) 2008-2018 The Khronos Group Inc. */
+#define HWLOC_CL_DEVICE_TYPE_CUSTOM (1<<4)
 
 static int
 hwloc_opencl_discover(struct hwloc_backend *backend)
@@ -86,7 +90,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend)
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "GPU");
       else if (type == CL_DEVICE_TYPE_ACCELERATOR)
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Accelerator");
-      else if (type == CL_DEVICE_TYPE_CUSTOM)
+      else if (type == HWLOC_CL_DEVICE_TYPE_CUSTOM)
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Custom");
       else
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Unknown");
