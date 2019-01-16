@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -273,7 +273,7 @@ fi
 export HWLOC_THISSYSTEM=0
 "$lstopo" - -v > "$dirname/$basename.output"
 echo "Expected topology output stored in $dirname/$basename.output"
-"$lstopo" -.xml --disallowed > "$dirname/$basename.xml"
+"$lstopo" -.xml --whole-io --disallowed > "$dirname/$basename.xml"
 echo "XML topology stored in in $dirname/$basename.xml"
 
 echo
