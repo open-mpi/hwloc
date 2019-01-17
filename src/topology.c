@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1940,6 +1940,7 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
     if (parent == topology->levels[0][0]) {
       child->parent = NULL;
       child->depth = 0;
+      child->next_cousin = child->prev_cousin = NULL; /* this level is never rebuilt, make sure it's sane */
     }
     unlink_and_free_single_object(pparent);
 
