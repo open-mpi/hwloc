@@ -751,7 +751,7 @@ static struct draw_methods svg_draw_methods = {
 };
 
 int
-output_svg(struct lstopo_output *loutput, const char *filename)
+output_cairosvg(struct lstopo_output *loutput, const char *filename)
 {
   struct lstopo_cairo_output coutput;
   FILE *output;
