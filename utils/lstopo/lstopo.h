@@ -179,7 +179,7 @@ struct lstopo_obj_userdata {
 };
 
 typedef int output_method (struct lstopo_output *output, const char *filename);
-extern output_method output_console, output_synthetic, output_ascii, output_fig, output_png, output_pdf, output_ps, output_cairosvg, output_x11, output_windows, output_xml;
+extern output_method output_console, output_synthetic, output_ascii, output_fig, output_png, output_pdf, output_ps, output_nativesvg, output_cairosvg, output_x11, output_windows, output_xml;
 
 struct draw_methods {
   int (*declare_color) (struct lstopo_output *loutput, struct lstopo_color *lcolor);

@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2018 Inria.  All rights reserved.
+.\" Copyright © 2009-2019 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -405,6 +405,24 @@ the output will be colorized.
 Output a representation of the map that can be loaded in Xfig.
 .
 .TP
+.B svg
+Output a SVG representation of the map,
+using Cairo (by default, if supported)
+or a native SVG backend (fallback, always supported).
+See \fBcairosvg\fR and \fBnativesvg\fR below.
+.
+.TP
+\fBcairosvg\fR or \fBsvg(cairo)\fR
+If lstopo was compiled with the proper support,
+output a SVG representation of the map using Cairo.
+.
+.TP
+\fBnativesvg\fR or \fBsvg(native)\fR
+Output a SVG representation of the map using the native SVG backend.
+It may be less pretty than the Cairo output, but it is always supported,
+and SVG objects have attributes for identifying and manipulating them.
+.
+.TP
 .B pdf
 If lstopo was compiled with the proper
 support, lstopo outputs a PDF representation of the map.
@@ -418,11 +436,6 @@ support, lstopo outputs a Postscript representation of the map.
 .B png
 If lstopo was compiled with the proper
 support, lstopo outputs a PNG representation of the map.
-.
-.TP
-.B svg
-If lstopo was compiled with the proper
-support, lstopo outputs an SVG representation of the map.
 .
 .TP
 .B synthetic

@@ -289,9 +289,12 @@ void usage(const char *name, FILE *where)
 		  ", png"
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 #ifdef CAIRO_HAS_SVG_SURFACE
-		  ", svg (cairosvg)"
+		  ", svg(cairo,native)"
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* LSTOPO_HAVE_GRAPHICS */
+#if !(defined LSTOPO_HAVE_GRAPHICS) || !(defined CAIRO_HAS_SVG_SURFACE)
+		  ", svg(native)"
+#endif
 		  ", xml, synthetic"
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
@@ -418,6 +421,7 @@ enum output_format {
   LSTOPO_OUTPUT_PS,
   LSTOPO_OUTPUT_SVG,
   LSTOPO_OUTPUT_CAIROSVG,
+  LSTOPO_OUTPUT_NATIVESVG,
   LSTOPO_OUTPUT_XML,
   LSTOPO_OUTPUT_ERROR
 };
@@ -446,6 +450,8 @@ parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
     return LSTOPO_OUTPUT_SVG;
   else if (!strcasecmp(name, "cairosvg") || !strcasecmp(name, "svg(cairo)"))
     return LSTOPO_OUTPUT_CAIROSVG;
+  else if (!strcasecmp(name, "nativesvg") || !strcasecmp(name, "svg(native)"))
+    return LSTOPO_OUTPUT_NATIVESVG;
   else if (!strcasecmp(name, "xml"))
     return LSTOPO_OUTPUT_XML;
   else
@@ -1111,6 +1117,12 @@ main (int argc, char *argv[])
     break;
 # endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* LSTOPO_HAVE_GRAPHICS */
+#if !(defined LSTOPO_HAVE_GRAPHICS) || !(defined CAIRO_HAS_SVG_SURFACE)
+  case LSTOPO_OUTPUT_SVG:
+#endif
+  case LSTOPO_OUTPUT_NATIVESVG:
+    output_func = output_nativesvg;
+    break;
   case LSTOPO_OUTPUT_XML:
     output_func = output_xml;
     break;

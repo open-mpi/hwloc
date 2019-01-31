@@ -27,6 +27,9 @@
     <ClCompile Include="..\..\utils\lstopo\lstopo-fig.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\utils\lstopo\lstopo-svg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\utils\lstopo\lstopo-text.c">
       <Filter>Source Files</Filter>
     </ClCompile>

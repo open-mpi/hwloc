@@ -69,6 +69,7 @@
     <ClCompile Include="..\..\utils\lstopo\lstopo-ascii.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-draw.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-fig.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo-svg.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-text.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-xml.c" />
     <ClCompile Include="..\..\utils\hwloc\common-ps.c" />
