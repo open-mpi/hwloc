@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -39,7 +39,7 @@ static unsigned int the_fontsize, the_gridsize;
 static float the_scale;
 
 static void
-windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height);
+windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused);
 
 static LRESULT CALLBACK
 WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
@@ -130,7 +130,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       BeginPaint(hwnd, &the_output.ps);
       font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
       SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
-      windows_box(loutput, &white, 0, 0, win_width, 0, win_height);
+      windows_box(loutput, &white, 0, 0, win_width, 0, win_height, NULL, 0);
       loutput->drawing = LSTOPO_DRAWING_PREPARE;
       output_draw(loutput);
       the_width = loutput->width;
@@ -277,7 +277,7 @@ windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, st
 }
 
 static void
-windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
+windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
@@ -288,7 +288,7 @@ windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, un
 }
 
 static void
-windows_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+windows_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
@@ -299,7 +299,7 @@ windows_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, u
 }
 
 static void
-windows_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
+windows_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj __hwloc_attribute_unused, unsigned text_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;

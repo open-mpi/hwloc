@@ -636,7 +636,7 @@ draw__children(struct lstopo_output *loutput, hwloc_obj_t parent,
   int ncstate;
 
   if (children->box)
-    loutput->methods->box(loutput, children->boxcolor, depth, x, children->width, y, children->height);
+    loutput->methods->box(loutput, children->boxcolor, depth, x, children->width, y, children->height, parent, 1);
 
   for(child = next_child(loutput, parent, children->kinds, NULL, &ncstate);
       child;
@@ -1033,7 +1033,7 @@ draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *l
     return;
 
   for(i=0; i<lud->ntext; i++)
-    methods->text(loutput, lcolor, fontsize, depth, x + lud->text[i].xoffset, y + i*(linespacing + fontsize), lud->text[i].text);
+    methods->text(loutput, lcolor, fontsize, depth, x + lud->text[i].xoffset, y + i*(linespacing + fontsize), lud->text[i].text, obj, i);
 }
 
 static void
@@ -1080,12 +1080,12 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lstopo_set_object_color(loutput, level, &style);
 
     if (lud->pci_collapsed > 1) {
-      methods->box(loutput, style.bg, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset);
+      methods->box(loutput, style.bg, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset, level, 2);
       if (lud->pci_collapsed > 2)
-	methods->box(loutput, style.bg, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset);
-      methods->box(loutput, style.bg, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset);
+	methods->box(loutput, style.bg, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset, level, 1);
+      methods->box(loutput, style.bg, depth, x, totwidth - overlaidoffset, y, totheight - overlaidoffset, level, 0);
     } else {
-      methods->box(loutput, style.bg, depth, x, totwidth, y, totheight);
+      methods->box(loutput, style.bg, depth, x, totwidth, y, totheight, level, 0);
     }
 
     draw_text(loutput, level, style.t, depth-1, x + gridsize, y + gridsize);
@@ -1117,19 +1117,20 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
     /* Square and left link */
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg, depth, x, gridsize, y + BRIDGE_HEIGHT/2 - gridsize/2, gridsize);
-    methods->line(loutput, &BLACK_COLOR, depth, x + gridsize, y + BRIDGE_HEIGHT/2, x + 2*gridsize, y + BRIDGE_HEIGHT/2);
+    methods->box(loutput, style.bg, depth, x, gridsize, y + BRIDGE_HEIGHT/2 - gridsize/2, gridsize, level, 0);
+    methods->line(loutput, &BLACK_COLOR, depth, x + gridsize, y + BRIDGE_HEIGHT/2, x + 2*gridsize, y + BRIDGE_HEIGHT/2, level, 0);
 
     if (level->io_arity > 0) {
       hwloc_obj_t child = NULL;
       unsigned ymax = -1;
       unsigned ymin = (unsigned) -1;
       int ncstate;
+      int i = 0;
       while ((child=next_child(loutput, level, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) != NULL) {
 	struct lstopo_obj_userdata *clud = child->userdata;
 	unsigned ymid = y + clud->yrel + BRIDGE_HEIGHT/2;
 	/* Line to PCI device */
-	methods->line(loutput, &BLACK_COLOR, depth-1, x+2*gridsize, ymid, x+3*gridsize+speedwidth, ymid);
+	methods->line(loutput, &BLACK_COLOR, depth-1, x+2*gridsize, ymid, x+3*gridsize+speedwidth, ymid, level, i+2);
 	if (ymin == (unsigned) -1)
 	  ymin = ymid;
 	ymax = ymid;
@@ -1142,11 +1143,12 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);
 	    else
 	      snprintf(text, sizeof(text), "%0.1f", child->attr->pcidev.linkspeed);
-	    methods->text(loutput, style.t2, fontsize, depth-1, x + 2.5*gridsize, ymid + BRIDGE_HEIGHT/2, text);
+	    methods->text(loutput, style.t2, fontsize, depth-1, x + 2.5*gridsize, ymid + BRIDGE_HEIGHT/2, text, level, i+2);
 	  }
 	}
+	i++;
       }
-      methods->line(loutput, &BLACK_COLOR, depth-1, x+2*gridsize, ymin, x+2*gridsize, ymax);
+      methods->line(loutput, &BLACK_COLOR, depth-1, x+2*gridsize, ymin, x+2*gridsize, ymax, level, 1);
 
       /* Draw sublevels for real */
       draw_children(loutput, level, depth-1, x, y);
@@ -1197,7 +1199,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     }
 
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg, depth, x, totwidth, y + myoff, myheight);
+    methods->box(loutput, style.bg, depth, x, totwidth, y + myoff, myheight, level, 0);
 
     draw_text(loutput, level, style.t, depth-1, x + gridsize, y + gridsize + myoff);
 
@@ -1237,7 +1239,7 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     totheight = lud->height;
 
     lstopo_set_object_color(loutput, level, &style);
-    methods->box(loutput, style.bg, depth, x, totwidth, y, totheight);
+    methods->box(loutput, style.bg, depth, x, totwidth, y, totheight, level, 0);
     draw_text(loutput, level, style.t, depth-1, x + gridsize, y + gridsize);
 
     /* Draw sublevels for real */
@@ -1381,11 +1383,11 @@ output_draw(struct lstopo_output *loutput)
     /* Draw legend */
     if (legend) {
       offset = rlud->height + gridsize;
-      methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr-1) * (linespacing + fontsize) + fontsize + gridsize);
+      methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr-1) * (linespacing + fontsize) + fontsize + gridsize, NULL, 0);
       for(i=0; i<ntext; i++, offset += linespacing + fontsize)
-	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, text[i]);
+	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, text[i], NULL, i);
       for(i=0; i<loutput->legend_append_nr; i++, offset += linespacing + fontsize)
-	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_append[i]);
+	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_append[i], NULL, i+ntext);
     }
   }
 }
