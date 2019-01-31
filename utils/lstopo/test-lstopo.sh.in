@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # See COPYING in top-level directory.
 #
@@ -77,6 +77,10 @@ echo "** ASCII output in $tmp/test.ascii ..."
 $ls $tmp/test.ascii
 echo "** FIG output in $tmp/test.fig ..."
 $ls $tmp/test.fig
+echo "** Native SVG output in $tmp/test.nativesvg ..."
+$ls $tmp/test.nativesvg
+echo "** (Native by default) SVG output in $tmp/test.svg ..."
+$ls $tmp/test.svg
 
 echo "** XML output in $tmp/test.xml ..."
 $ls $tmp/test.xml
