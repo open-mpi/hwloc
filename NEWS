@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2018 Inria.  All rights reserved.
+Copyright © 2009-2019 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -44,6 +44,8 @@ Version 2.1.0
   + Rework the heuristics for discovering KNL Cluster and Memory modes
     to stop assuming all CPUs are online (required for mOS support).
     Thanks to Sharath K Bhat for testing patches.
+  + Ignore NUMA node information from AMD topoext in the x86 backend,
+    unless HWLOC_X86_TOPOEXT_NUMANODES=1 is set in the environment.
 * Tools
   + lstopo
     - Both logical and OS/physical indexes are now displayed by default.

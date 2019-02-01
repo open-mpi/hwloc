@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2015-2018 Inria.  All rights reserved.
+# Copyright © 2015-2019 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -15,6 +15,9 @@ export HWLOC_PLUGINS_PATH
 
 HWLOC_DONT_ADD_VERSION_INFO=1
 export HWLOC_DONT_ADD_VERSION_INFO
+
+HWLOC_X86_TOPOEXT_NUMANODES=1
+export HWLOC_X86_TOPOEXT_NUMANODES
 
 actual_output="$1"
 
