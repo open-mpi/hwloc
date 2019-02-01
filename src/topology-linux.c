@@ -4493,7 +4493,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   already_pus = (topology->levels[0][0]->complete_cpuset != NULL
 		 && !hwloc_bitmap_iszero(topology->levels[0][0]->complete_cpuset));
   /* if there are PUs, still look at memory information
-   * since x86 misses NUMA node information (unless the processor supports topoext)
+   * since x86 misses NUMA node information (unless we forced AMD topoext NUMA nodes)
    * memory size.
    */
 

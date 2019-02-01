@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2018 Inria.  All rights reserved.
+ * Copyright © 2010-2019 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -681,7 +681,7 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
   }
 
   /* Look for Numa nodes inside packages */
-  if (fulldiscovery) {
+  if (fulldiscovery && getenv("HWLOC_X86_TOPOEXT_NUMANODES")) {
     hwloc_bitmap_t node_cpuset;
     hwloc_obj_t node;
 
