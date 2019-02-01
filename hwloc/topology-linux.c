@@ -6461,7 +6461,7 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 #endif /* HWLOC_HAVE_LINUXPCI */
 
 static int
-hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
+hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = NULL;
