@@ -789,7 +789,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   }
 
   /* Look for Numa nodes inside packages (cannot be filtered-out) */
-  if (fulldiscovery) {
+  if (fulldiscovery && getenv("HWLOC_X86_TOPOEXT_NUMANODES")) {
     hwloc_bitmap_t node_cpuset;
     hwloc_obj_t node;
 

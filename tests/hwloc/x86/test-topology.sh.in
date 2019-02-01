@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2015-2017 Inria.  All rights reserved.
+# Copyright © 2015-2019 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -13,6 +13,9 @@ lstopo="$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
 export HWLOC_PLUGINS_PATH
+
+HWLOC_X86_TOPOEXT_NUMANODES=1
+export HWLOC_X86_TOPOEXT_NUMANODES
 
 actual_output="$1"
 
