@@ -410,6 +410,27 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     /* infos was calloc'ed, already ends with \0 */
   }
 
+  if ((cpuid_type != amd && cpuid_type != hygon) && highest_cpuid >= 0x04) {
+    /* Get core/thread information from first cache reported by cpuid 0x04
+     * (not supported on AMD)
+     */
+    eax = 0x04;
+    ecx = 0;
+    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+    if ((eax & 0x1f) != 0) {
+      /* cache looks valid */
+      unsigned max_nbcores;
+      unsigned max_nbthreads;
+      unsigned threadid __hwloc_attribute_unused;
+      max_nbcores = ((eax >> 26) & 0x3f) + 1;
+      max_nbthreads = legacy_max_log_proc / max_nbcores;
+      hwloc_debug("thus %u threads\n", max_nbthreads);
+      threadid = legacy_log_proc_id % max_nbthreads;
+      infos->ids[CORE] = legacy_log_proc_id / max_nbthreads;
+      hwloc_debug("this is thread %u of core %u\n", threadid, infos->ids[CORE]);
+    }
+  }
+
   /* Get core/thread information from cpuid 0x80000008
    * (not supported on Intel)
    */
@@ -568,12 +589,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
   }
 
-  /* Get thread/core + cache information from cpuid 0x04
+  /* Get cache information from cpuid 0x04
    * (not supported on AMD)
    */
   if ((cpuid_type != amd && cpuid_type != hygon) && highest_cpuid >= 0x04) {
-    unsigned max_nbcores;
-    unsigned max_nbthreads;
     unsigned level;
     struct cacheinfo *tmpcaches;
     unsigned oldnumcaches = infos->numcaches; /* in case we got caches above */
@@ -591,17 +610,6 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 	/* KNL reports wrong L3 information (size always 0, cpuset always the entire machine, ignore it */
 	break;
       infos->numcaches++;
-
-      if (!cachenum) {
-	unsigned threadid __hwloc_attribute_unused;
-	/* by the way, get thread/core information from the first cache */
-	max_nbcores = ((eax >> 26) & 0x3f) + 1;
-	max_nbthreads = legacy_max_log_proc / max_nbcores;
-	hwloc_debug("thus %u threads\n", max_nbthreads);
-	threadid = legacy_log_proc_id % max_nbthreads;
-	infos->ids[CORE] = legacy_log_proc_id / max_nbthreads;
-	hwloc_debug("this is thread %u of core %u\n", threadid, infos->ids[CORE]);
-      }
     }
 
     tmpcaches = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
