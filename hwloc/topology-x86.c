@@ -218,6 +218,7 @@ enum cpuid_type {
   unknown
 };
 
+/* AMD legacy cache information from specific CPUID 0x80000005-6 leaves */
 static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cache_type_t type, unsigned nbthreads_sharing, unsigned cpuid)
 {
   struct cacheinfo *cache, *tmpcaches;
@@ -265,6 +266,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cac
   hwloc_debug("cache L%u t%u linesize %u ways %d size %luKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
 }
 
+/* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration) */
 static void look_exttopoenum(struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
 {
   unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
@@ -426,7 +428,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     } else
       max_nbcores = 1 << coreidsize;
     hwloc_debug("Thus max # of cores: %u\n", max_nbcores);
-    /* Still no multithreaded AMD */
+    /* No multithreaded AMD for this old CPUID leaf */
     max_nbthreads = 1 ;
     hwloc_debug("and max # of threads: %u\n", max_nbthreads);
     /* legacy_max_log_proc is deprecated, it can be smaller than max_nbcores,
@@ -474,6 +476,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
     if (infos->cpufamilynumber <= 0x16) { /* topoext appeared in 0x15 and compute-units were only used in 0x15 and 0x16 */
       unsigned cores_per_unit;
+      /* coreid was obtained from look_amd_cores_cpuid0x80000008() earlier */
       infos->ids[UNIT] = ebx & 0xff;
       cores_per_unit = ((ebx >> 8) & 0xff) + 1;
       hwloc_debug("topoext %08x, %u nodes, node %u, %u cores in unit %u\n", apic_id, nodes_per_proc, infos->ids[NODE], cores_per_unit, infos->ids[UNIT]);
