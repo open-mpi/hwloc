@@ -670,6 +670,10 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
   }
 
+  /*********************************************************************************
+   * Get the hierarchy of thread, core, die, package, etc. from CPU-specific leaves
+   */
+
   if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000008) {
     /* Get core/thread information from cpuid 0x80000008
      * (not supported on Intel)
@@ -677,15 +681,36 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     read_amd_cores_legacy(infos, src_cpuiddump);
   }
 
+  if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
+    /* Get apicid, nodeid, unitid/coreid from cpuid 0x8000001e (AMD topology extension).
+     * Requires read_amd_cores_legacy() for coreid on family 0x15-16.
+     */
+    read_amd_cores_topoext(infos, src_cpuiddump);
+  }
+
+  if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
+    /* Get package/die/module/tile/core/thread information from cpuid 0x1f
+     * (Intel v2 Extended Topology Enumeration)
+     */
+    read_intel_cores_exttopoenum(infos, 0x1f, src_cpuiddump);
+
+  } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
+    /* Get package/core/thread information from cpuid 0x0b
+     * (Intel v1 Extended Topology Enumeration)
+     */
+    read_intel_cores_exttopoenum(infos, 0x0b, src_cpuiddump);
+  }
+
+  /**************************************
+   * Get caches from CPU-specific leaves
+   */
+
   infos->numcaches = 0;
   infos->cache = NULL;
 
   if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
     /* Get cache information from cpuid 0x8000001d (AMD topology extension) */
     read_amd_caches_topoext(infos, src_cpuiddump);
-
-    /* Get apicid, nodeid, unitid/coreid from cpuid 0x8000001e (AMD topology extension) */
-    read_amd_cores_topoext(infos, src_cpuiddump);
 
   } else if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000006) {
     /* If there's no topoext,
@@ -701,19 +726,6 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
      * (not supported on AMD)
      */
     read_intel_caches(data, infos, src_cpuiddump);
-  }
-
-  if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
-    /* Get package/die/module/tile/core/thread information from cpuid 0x1f
-     * (Intel v2 Extended Topology Enumeration)
-     */
-    read_intel_cores_exttopoenum(infos, 0x1f, src_cpuiddump);
-
-  } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
-    /* Get package/core/thread information from cpuid 0x0b
-     * (Intel v1 Extended Topology Enumeration)
-     */
-    read_intel_cores_exttopoenum(infos, 0x0b, src_cpuiddump);
   }
 
   /* Now that we have all info, compute cacheids and apply quirks */
