@@ -219,7 +219,7 @@ enum cpuid_type {
 };
 
 /* AMD legacy cache information from specific CPUID 0x80000005-6 leaves */
-static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cache_type_t type, unsigned nbthreads_sharing, unsigned cpuid)
+static void setup__amd_cache_legacy(struct procinfo *infos, unsigned level, hwloc_obj_cache_type_t type, unsigned nbthreads_sharing, unsigned cpuid)
 {
   struct cacheinfo *cache, *tmpcaches;
   unsigned cachenum;
@@ -266,8 +266,247 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, hwloc_obj_cac
   hwloc_debug("cache L%u t%u linesize %u ways %d size %luKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
 }
 
+/* AMD legacy cache information from CPUID 0x80000005-6 leaves */
+static void read_amd_caches_legacy(struct procinfo *infos, struct cpuiddump *src_cpuiddump, unsigned legacy_max_log_proc)
+{
+  unsigned eax, ebx, ecx, edx;
+
+  eax = 0x80000005;
+  cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+  setup__amd_cache_legacy(infos, 1, HWLOC_OBJ_CACHE_DATA, 1, ecx); /* private L1d */
+  setup__amd_cache_legacy(infos, 1, HWLOC_OBJ_CACHE_INSTRUCTION, 1, edx); /* private L1i */
+
+  eax = 0x80000006;
+  cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+  if (ecx & 0xf000)
+    /* This is actually supported on Intel but LinePerTag isn't returned in bits 8-11.
+     * Could be useful if some Intels (at least before Core micro-architecture)
+     * support this leaf without leaf 0x4.
+     */
+    setup__amd_cache_legacy(infos, 2, HWLOC_OBJ_CACHE_UNIFIED, 1, ecx); /* private L2u */
+  if (edx & 0xf000)
+    setup__amd_cache_legacy(infos, 3, HWLOC_OBJ_CACHE_UNIFIED, legacy_max_log_proc, edx); /* package-wide L3u */
+}
+
+/* AMD caches from CPUID 0x8000001d leaf (topoext) */
+static void read_amd_caches_topoext(struct procinfo *infos, struct cpuiddump *src_cpuiddump)
+{
+  unsigned eax, ebx, ecx, edx;
+  unsigned cachenum;
+  struct cacheinfo *cache;
+
+  /* the code below doesn't want any other cache yet */
+  assert(!infos->numcaches);
+
+  for (cachenum = 0; ; cachenum++) {
+    eax = 0x8000001d;
+    ecx = cachenum;
+    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+    if ((eax & 0x1f) == 0)
+      break;
+    infos->numcaches++;
+  }
+
+  cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
+  if (cache) {
+    for (cachenum = 0; ; cachenum++) {
+      unsigned long linesize, linepart, ways, sets;
+      eax = 0x8000001d;
+      ecx = cachenum;
+      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+
+      if ((eax & 0x1f) == 0)
+	break;
+      switch (eax & 0x1f) {
+      case 1: cache->type = HWLOC_OBJ_CACHE_DATA; break;
+      case 2: cache->type = HWLOC_OBJ_CACHE_INSTRUCTION; break;
+      default: cache->type = HWLOC_OBJ_CACHE_UNIFIED; break;
+      }
+
+      cache->level = (eax >> 5) & 0x7;
+      /* Note: actually number of cores */
+      cache->nbthreads_sharing = ((eax >> 14) &  0xfff) + 1;
+
+      cache->linesize = linesize = (ebx & 0xfff) + 1;
+      cache->linepart = linepart = ((ebx >> 12) & 0x3ff) + 1;
+      ways = ((ebx >> 22) & 0x3ff) + 1;
+
+      if (eax & (1 << 9))
+	/* Fully associative */
+	cache->ways = -1;
+      else
+	cache->ways = ways;
+      cache->sets = sets = ecx + 1;
+      cache->size = linesize * linepart * ways * sets;
+      cache->inclusive = edx & 0x2;
+
+      hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
+		  cachenum, cache->level,
+		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
+		  cache->nbthreads_sharing, linesize, linepart, ways, sets, cache->size >> 10);
+
+      cache++;
+    }
+  } else {
+    infos->numcaches = 0;
+  }
+}
+
+/* Intel cache info from CPUID 0x04 leaf */
+static void read_intel_caches(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, struct cpuiddump *src_cpuiddump)
+{
+  unsigned level;
+  struct cacheinfo *tmpcaches;
+  unsigned eax, ebx, ecx, edx;
+  unsigned oldnumcaches = infos->numcaches; /* in case we got caches above */
+  unsigned cachenum;
+  struct cacheinfo *cache;
+
+  for (cachenum = 0; ; cachenum++) {
+    eax = 0x04;
+    ecx = cachenum;
+    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+
+    hwloc_debug("cache %u type %u\n", cachenum, eax & 0x1f);
+    if ((eax & 0x1f) == 0)
+      break;
+    level = (eax >> 5) & 0x7;
+    if (data->is_knl && level == 3)
+      /* KNL reports wrong L3 information (size always 0, cpuset always the entire machine, ignore it */
+      break;
+    infos->numcaches++;
+  }
+
+  tmpcaches = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
+  if (!tmpcaches) {
+    infos->numcaches = oldnumcaches;
+  } else {
+    infos->cache = tmpcaches;
+    cache = &infos->cache[oldnumcaches];
+
+    for (cachenum = 0; ; cachenum++) {
+      unsigned long linesize, linepart, ways, sets;
+      eax = 0x04;
+      ecx = cachenum;
+      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+
+      if ((eax & 0x1f) == 0)
+	break;
+      level = (eax >> 5) & 0x7;
+      if (data->is_knl && level == 3)
+	/* KNL reports wrong L3 information (size always 0, cpuset always the entire machine, ignore it */
+	break;
+      switch (eax & 0x1f) {
+      case 1: cache->type = HWLOC_OBJ_CACHE_DATA; break;
+      case 2: cache->type = HWLOC_OBJ_CACHE_INSTRUCTION; break;
+      default: cache->type = HWLOC_OBJ_CACHE_UNIFIED; break;
+      }
+
+      cache->level = level;
+      cache->nbthreads_sharing = ((eax >> 14) & 0xfff) + 1;
+
+      cache->linesize = linesize = (ebx & 0xfff) + 1;
+      cache->linepart = linepart = ((ebx >> 12) & 0x3ff) + 1;
+      ways = ((ebx >> 22) & 0x3ff) + 1;
+      if (eax & (1 << 9))
+        /* Fully associative */
+        cache->ways = -1;
+      else
+        cache->ways = ways;
+      cache->sets = sets = ecx + 1;
+      cache->size = linesize * linepart * ways * sets;
+      cache->inclusive = edx & 0x2;
+
+      hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
+		  cachenum, cache->level,
+		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
+		  cache->nbthreads_sharing, linesize, linepart, ways, sets, cache->size >> 10);
+      cache++;
+    }
+  }
+}
+
+/* AMD core/thread info from CPUID 0x80000008 leaf */
+static void read_amd_cores_legacy(struct procinfo *infos, struct cpuiddump *src_cpuiddump)
+{
+  unsigned eax, ebx, ecx, edx;
+  unsigned max_nbcores;
+  unsigned max_nbthreads;
+  unsigned coreidsize;
+  unsigned logprocid;
+  unsigned threadid __hwloc_attribute_unused;
+
+  eax = 0x80000008;
+  cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+
+  coreidsize = (ecx >> 12) & 0xf;
+  hwloc_debug("core ID size: %u\n", coreidsize);
+  if (!coreidsize) {
+    max_nbcores = (ecx & 0xff) + 1;
+  } else
+    max_nbcores = 1 << coreidsize;
+  hwloc_debug("Thus max # of cores: %u\n", max_nbcores);
+
+  /* No multithreaded AMD for this old CPUID leaf */
+  max_nbthreads = 1 ;
+  hwloc_debug("and max # of threads: %u\n", max_nbthreads);
+
+  /* legacy_max_log_proc is deprecated, it can be smaller than max_nbcores,
+   * which is the maximum number of cores that the processor could theoretically support
+   * (see "Multiple Core Calculation" in the AMD CPUID specification).
+   * Recompute packageid/coreid accordingly.
+   */
+  infos->ids[PKG] = infos->apicid / max_nbcores;
+  logprocid = infos->apicid % max_nbcores;
+  infos->ids[CORE] = logprocid / max_nbthreads;
+  threadid = logprocid % max_nbthreads;
+  hwloc_debug("this is thread %u of core %u\n", threadid, infos->ids[CORE]);
+}
+
+/* AMD unit/node from CPUID 0x8000001e leaf (topoext) */
+static void read_amd_cores_topoext(struct procinfo *infos, struct cpuiddump *src_cpuiddump)
+{
+  unsigned apic_id, nodes_per_proc;
+  unsigned eax, ebx, ecx, edx;
+
+  eax = 0x8000001e;
+  cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+  infos->apicid = apic_id = eax;
+
+  if (infos->cpufamilynumber == 0x16) {
+    /* ecx is reserved */
+    infos->ids[NODE] = 0;
+    nodes_per_proc = 1;
+  } else {
+    /* AMD other families or Hygon family 18h */
+    infos->ids[NODE] = ecx & 0xff;
+    nodes_per_proc = ((ecx >> 8) & 7) + 1;
+  }
+  if ((infos->cpufamilynumber == 0x15 && nodes_per_proc > 2)
+      || ((infos->cpufamilynumber == 0x17 || infos->cpufamilynumber == 0x18) && nodes_per_proc > 4)) {
+    hwloc_debug("warning: undefined nodes_per_proc value %u, assuming it means %u\n", nodes_per_proc, nodes_per_proc);
+  }
+
+  if (infos->cpufamilynumber <= 0x16) { /* topoext appeared in 0x15 and compute-units were only used in 0x15 and 0x16 */
+    unsigned cores_per_unit;
+    /* coreid was obtained from read_amd_cores_legacy() earlier */
+    infos->ids[UNIT] = ebx & 0xff;
+    cores_per_unit = ((ebx >> 8) & 0xff) + 1;
+    hwloc_debug("topoext %08x, %u nodes, node %u, %u cores in unit %u\n", apic_id, nodes_per_proc, infos->ids[NODE], cores_per_unit, infos->ids[UNIT]);
+    /* coreid and unitid are package-wide (core 0-15 and unit 0-7 on 16-core 2-NUMAnode processor).
+     * The Linux kernel reduces theses to NUMA-node-wide (by applying %core_per_node and %unit_per node respectively).
+     * It's not clear if we should do this as well.
+     */
+  } else {
+    unsigned threads_per_core;
+    infos->ids[CORE] = ebx & 0xff;
+    threads_per_core = ((ebx >> 8) & 0xff) + 1;
+    hwloc_debug("topoext %08x, %u nodes, node %u, %u threads in core %u\n", apic_id, nodes_per_proc, infos->ids[NODE], threads_per_core, infos->ids[CORE]);
+  }
+}
+
 /* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration) */
-static void look_exttopoenum(struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
+static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
 {
   unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
   unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
@@ -431,247 +670,50 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
   }
 
-  /* Get core/thread information from cpuid 0x80000008
-   * (not supported on Intel)
-   */
   if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000008) {
-    unsigned max_nbcores;
-    unsigned max_nbthreads;
-    unsigned coreidsize;
-    unsigned logprocid;
-    unsigned threadid __hwloc_attribute_unused;
-    eax = 0x80000008;
-    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-    coreidsize = (ecx >> 12) & 0xf;
-    hwloc_debug("core ID size: %u\n", coreidsize);
-    if (!coreidsize) {
-      max_nbcores = (ecx & 0xff) + 1;
-    } else
-      max_nbcores = 1 << coreidsize;
-    hwloc_debug("Thus max # of cores: %u\n", max_nbcores);
-    /* No multithreaded AMD for this old CPUID leaf */
-    max_nbthreads = 1 ;
-    hwloc_debug("and max # of threads: %u\n", max_nbthreads);
-    /* legacy_max_log_proc is deprecated, it can be smaller than max_nbcores,
-     * which is the maximum number of cores that the processor could theoretically support
-     * (see "Multiple Core Calculation" in the AMD CPUID specification).
-     * Recompute packageid/coreid accordingly.
+    /* Get core/thread information from cpuid 0x80000008
+     * (not supported on Intel)
      */
-    infos->ids[PKG] = infos->apicid / max_nbcores;
-    logprocid = infos->apicid % max_nbcores;
-    infos->ids[CORE] = logprocid / max_nbthreads;
-    threadid = logprocid % max_nbthreads;
-    hwloc_debug("this is thread %u of core %u\n", threadid, infos->ids[CORE]);
+    read_amd_cores_legacy(infos, src_cpuiddump);
   }
 
   infos->numcaches = 0;
   infos->cache = NULL;
 
-  /* Get apicid, nodeid, unitid from cpuid 0x8000001e
-   * and cache information from cpuid 0x8000001d
-   * (AMD topology extension)
-   */
   if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
-    unsigned apic_id, nodes_per_proc;
+    /* Get cache information from cpuid 0x8000001d (AMD topology extension) */
+    read_amd_caches_topoext(infos, src_cpuiddump);
 
-    /* the code below doesn't want any other cache yet */
-    assert(!infos->numcaches);
+    /* Get apicid, nodeid, unitid/coreid from cpuid 0x8000001e (AMD topology extension) */
+    read_amd_cores_topoext(infos, src_cpuiddump);
 
-    eax = 0x8000001e;
-    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-    infos->apicid = apic_id = eax;
-
-    if (infos->cpufamilynumber == 0x16) {
-      /* ecx is reserved */
-      infos->ids[NODE] = 0;
-      nodes_per_proc = 1;
-    } else {
-      /* AMD other families or Hygon family 18h */
-      infos->ids[NODE] = ecx & 0xff;
-      nodes_per_proc = ((ecx >> 8) & 7) + 1;
-    }
-    if ((infos->cpufamilynumber == 0x15 && nodes_per_proc > 2)
-	|| ((infos->cpufamilynumber == 0x17 || infos->cpufamilynumber == 0x18) && nodes_per_proc > 4)) {
-      hwloc_debug("warning: undefined nodes_per_proc value %u, assuming it means %u\n", nodes_per_proc, nodes_per_proc);
-    }
-
-    if (infos->cpufamilynumber <= 0x16) { /* topoext appeared in 0x15 and compute-units were only used in 0x15 and 0x16 */
-      unsigned cores_per_unit;
-      /* coreid was obtained from look_amd_cores_cpuid0x80000008() earlier */
-      infos->ids[UNIT] = ebx & 0xff;
-      cores_per_unit = ((ebx >> 8) & 0xff) + 1;
-      hwloc_debug("topoext %08x, %u nodes, node %u, %u cores in unit %u\n", apic_id, nodes_per_proc, infos->ids[NODE], cores_per_unit, infos->ids[UNIT]);
-      /* coreid and unitid are package-wide (core 0-15 and unit 0-7 on 16-core 2-NUMAnode processor).
-       * The Linux kernel reduces theses to NUMA-node-wide (by applying %core_per_node and %unit_per node respectively).
-       * It's not clear if we should do this as well.
-       */
-    } else {
-      unsigned threads_per_core;
-      infos->ids[CORE] = ebx & 0xff;
-      threads_per_core = ((ebx >> 8) & 0xff) + 1;
-      hwloc_debug("topoext %08x, %u nodes, node %u, %u threads in core %u\n", apic_id, nodes_per_proc, infos->ids[NODE], threads_per_core, infos->ids[CORE]);
-    }
-
-    for (cachenum = 0; ; cachenum++) {
-      eax = 0x8000001d;
-      ecx = cachenum;
-      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-      if ((eax & 0x1f) == 0)
-	break;
-      infos->numcaches++;
-    }
-
-    cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
-    if (cache) {
-     for (cachenum = 0; ; cachenum++) {
-      unsigned long linesize, linepart, ways, sets;
-      eax = 0x8000001d;
-      ecx = cachenum;
-      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-
-      if ((eax & 0x1f) == 0)
-	break;
-      switch (eax & 0x1f) {
-      case 1: cache->type = HWLOC_OBJ_CACHE_DATA; break;
-      case 2: cache->type = HWLOC_OBJ_CACHE_INSTRUCTION; break;
-      default: cache->type = HWLOC_OBJ_CACHE_UNIFIED; break;
-      }
-
-      cache->level = (eax >> 5) & 0x7;
-      /* Note: actually number of cores */
-      cache->nbthreads_sharing = ((eax >> 14) &  0xfff) + 1;
-
-      cache->linesize = linesize = (ebx & 0xfff) + 1;
-      cache->linepart = linepart = ((ebx >> 12) & 0x3ff) + 1;
-      ways = ((ebx >> 22) & 0x3ff) + 1;
-
-      if (eax & (1 << 9))
-	/* Fully associative */
-	cache->ways = -1;
-      else
-	cache->ways = ways;
-      cache->sets = sets = ecx + 1;
-      cache->size = linesize * linepart * ways * sets;
-      cache->inclusive = edx & 0x2;
-
-      hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
-		  cachenum, cache->level,
-		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
-		  cache->nbthreads_sharing, linesize, linepart, ways, sets, cache->size >> 10);
-
-      cache++;
-     }
-    } else {
-     infos->numcaches = 0;
-    }
-  } else {
+  } else if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000006) {
     /* If there's no topoext,
-     * get cache information from cpuid 0x80000005 and 0x80000006
+     * get cache information from cpuid 0x80000005 and 0x80000006.
      * (not supported on Intel)
+     * It looks like we cannot have 0x80000005 without 0x80000006.
      */
-    if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000005) {
-      eax = 0x80000005;
-      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-      fill_amd_cache(infos, 1, HWLOC_OBJ_CACHE_DATA, 1, ecx); /* private L1d */
-      fill_amd_cache(infos, 1, HWLOC_OBJ_CACHE_INSTRUCTION, 1, edx); /* private L1i */
-    }
-    if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000006) {
-      eax = 0x80000006;
-      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-      if (ecx & 0xf000)
-	/* This is actually supported on Intel but LinePerTag isn't returned in bits 8-11.
-	 * Could be useful if some Intels (at least before Core micro-architecture)
-	 * support this leaf without leaf 0x4.
-	 */
-	fill_amd_cache(infos, 2, HWLOC_OBJ_CACHE_UNIFIED, 1, ecx); /* private L2u */
-      if (edx & 0xf000)
-	fill_amd_cache(infos, 3, HWLOC_OBJ_CACHE_UNIFIED, legacy_max_log_proc, edx); /* package-wide L3u */
-    }
+    read_amd_caches_legacy(infos, src_cpuiddump, legacy_max_log_proc);
   }
 
-  /* Get cache information from cpuid 0x04
-   * (not supported on AMD)
-   */
   if ((cpuid_type != amd && cpuid_type != hygon) && highest_cpuid >= 0x04) {
-    unsigned level;
-    struct cacheinfo *tmpcaches;
-    unsigned oldnumcaches = infos->numcaches; /* in case we got caches above */
-
-    for (cachenum = 0; ; cachenum++) {
-      eax = 0x04;
-      ecx = cachenum;
-      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-
-      hwloc_debug("cache %u type %u\n", cachenum, eax & 0x1f);
-      if ((eax & 0x1f) == 0)
-	break;
-      level = (eax >> 5) & 0x7;
-      if (data->is_knl && level == 3)
-	/* KNL reports wrong L3 information (size always 0, cpuset always the entire machine, ignore it */
-	break;
-      infos->numcaches++;
-    }
-
-    tmpcaches = realloc(infos->cache, infos->numcaches * sizeof(*infos->cache));
-    if (!tmpcaches) {
-     infos->numcaches = oldnumcaches;
-    } else {
-     infos->cache = tmpcaches;
-     cache = &infos->cache[oldnumcaches];
-
-     for (cachenum = 0; ; cachenum++) {
-      unsigned long linesize, linepart, ways, sets;
-      eax = 0x04;
-      ecx = cachenum;
-      cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-
-      if ((eax & 0x1f) == 0)
-	break;
-      level = (eax >> 5) & 0x7;
-      if (data->is_knl && level == 3)
-	/* KNL reports wrong L3 information (size always 0, cpuset always the entire machine, ignore it */
-	break;
-      switch (eax & 0x1f) {
-      case 1: cache->type = HWLOC_OBJ_CACHE_DATA; break;
-      case 2: cache->type = HWLOC_OBJ_CACHE_INSTRUCTION; break;
-      default: cache->type = HWLOC_OBJ_CACHE_UNIFIED; break;
-      }
-
-      cache->level = level;
-      cache->nbthreads_sharing = ((eax >> 14) & 0xfff) + 1;
-
-      cache->linesize = linesize = (ebx & 0xfff) + 1;
-      cache->linepart = linepart = ((ebx >> 12) & 0x3ff) + 1;
-      ways = ((ebx >> 22) & 0x3ff) + 1;
-      if (eax & (1 << 9))
-        /* Fully associative */
-        cache->ways = -1;
-      else
-        cache->ways = ways;
-      cache->sets = sets = ecx + 1;
-      cache->size = linesize * linepart * ways * sets;
-      cache->inclusive = edx & 0x2;
-
-      hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
-		  cachenum, cache->level,
-		  cache->type == HWLOC_OBJ_CACHE_DATA ? 'd' : cache->type == HWLOC_OBJ_CACHE_INSTRUCTION ? 'i' : 'u',
-		  cache->nbthreads_sharing, linesize, linepart, ways, sets, cache->size >> 10);
-      cache++;
-     }
-    }
+    /* Get cache information from cpuid 0x04
+     * (not supported on AMD)
+     */
+    read_intel_caches(data, infos, src_cpuiddump);
   }
 
   if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
     /* Get package/die/module/tile/core/thread information from cpuid 0x1f
      * (Intel v2 Extended Topology Enumeration)
      */
-    look_exttopoenum(infos, 0x1f, src_cpuiddump);
+    read_intel_cores_exttopoenum(infos, 0x1f, src_cpuiddump);
 
   } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
     /* Get package/core/thread information from cpuid 0x0b
      * (Intel v1 Extended Topology Enumeration)
      */
-    look_exttopoenum(infos, 0x0b, src_cpuiddump);
+    read_intel_cores_exttopoenum(infos, 0x0b, src_cpuiddump);
   }
 
   /* Now that we have all info, compute cacheids and apply quirks */
