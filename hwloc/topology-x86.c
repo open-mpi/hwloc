@@ -170,6 +170,11 @@ static void cpuid_or_from_dump(unsigned *eax, unsigned *ebx, unsigned *ecx, unsi
  * Core detection routines and structures
  */
 
+enum hwloc_x86_disc_flags {
+  HWLOC_X86_DISC_FLAG_FULL = (1<<0), /* discover everything instead of only annotating */
+  HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES = (1<<0) /* use AMD topoext numanode information */
+};
+
 #define has_topoext(features) ((features)[6] & (1 << 22))
 #define has_x2apic(features) ((features)[4] & (1 << 21))
 
@@ -464,7 +469,7 @@ static void read_amd_cores_legacy(struct procinfo *infos, struct cpuiddump *src_
 }
 
 /* AMD unit/node from CPUID 0x8000001e leaf (topoext) */
-static void read_amd_cores_topoext(struct procinfo *infos, struct cpuiddump *src_cpuiddump)
+static void read_amd_cores_topoext(struct procinfo *infos, unsigned long flags, struct cpuiddump *src_cpuiddump)
 {
   unsigned apic_id, nodes_per_proc;
   unsigned eax, ebx, ecx, edx;
@@ -473,18 +478,20 @@ static void read_amd_cores_topoext(struct procinfo *infos, struct cpuiddump *src
   cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
   infos->apicid = apic_id = eax;
 
-  if (infos->cpufamilynumber == 0x16) {
-    /* ecx is reserved */
-    infos->ids[NODE] = 0;
-    nodes_per_proc = 1;
-  } else {
-    /* AMD other families or Hygon family 18h */
-    infos->ids[NODE] = ecx & 0xff;
-    nodes_per_proc = ((ecx >> 8) & 7) + 1;
-  }
-  if ((infos->cpufamilynumber == 0x15 && nodes_per_proc > 2)
-      || ((infos->cpufamilynumber == 0x17 || infos->cpufamilynumber == 0x18) && nodes_per_proc > 4)) {
-    hwloc_debug("warning: undefined nodes_per_proc value %u, assuming it means %u\n", nodes_per_proc, nodes_per_proc);
+  if (flags & HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES) {
+    if (infos->cpufamilynumber == 0x16) {
+      /* ecx is reserved */
+      infos->ids[NODE] = 0;
+      nodes_per_proc = 1;
+    } else {
+      /* AMD other families or Hygon family 18h */
+      infos->ids[NODE] = ecx & 0xff;
+      nodes_per_proc = ((ecx >> 8) & 7) + 1;
+    }
+    if ((infos->cpufamilynumber == 0x15 && nodes_per_proc > 2)
+	|| ((infos->cpufamilynumber == 0x17 || infos->cpufamilynumber == 0x18) && nodes_per_proc > 4)) {
+      hwloc_debug("warning: undefined nodes_per_proc value %u, assuming it means %u\n", nodes_per_proc, nodes_per_proc);
+    }
   }
 
   if (infos->cpufamilynumber <= 0x16) { /* topoext appeared in 0x15 and compute-units were only used in 0x15 and 0x16 */
@@ -578,7 +585,7 @@ static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, 
 
 /* Fetch information from the processor itself thanks to cpuid and store it in
  * infos for summarize to analyze them globally */
-static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
+static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   unsigned eax, ebx, ecx = 0, edx;
@@ -689,7 +696,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
      *
      * Only needed when x2apic supported if NUMA nodes are needed.
      */
-    read_amd_cores_topoext(infos, src_cpuiddump);
+    read_amd_cores_topoext(infos, flags, src_cpuiddump);
   }
 
   if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
@@ -864,7 +871,7 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
 }
 
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */
-static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery)
+static void summarize(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_x86_backend_data_s *data = backend->private_data;
@@ -874,6 +881,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   int one = -1;
   hwloc_bitmap_t remaining_cpuset;
   int gotnuma = 0;
+  int fulldiscovery = (flags & HWLOC_X86_DISC_FLAG_FULL);
 
   for (i = 0; i < nbprocs; i++)
     if (infos[i].present) {
@@ -938,7 +946,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
   }
 
   /* Look for Numa nodes inside packages (cannot be filtered-out) */
-  if (fulldiscovery && getenv("HWLOC_X86_TOPOEXT_NUMANODES")) {
+  if (fulldiscovery && (flags & HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES)) {
     hwloc_bitmap_t node_cpuset;
     hwloc_obj_t node;
 
@@ -1179,7 +1187,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, int
 }
 
 static int
-look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscovery,
+look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags,
 	   unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type,
 	   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags),
 	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags))
@@ -1215,7 +1223,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
       }
     }
 
-    look_proc(backend, &infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
+    look_proc(backend, &infos[i], flags, highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
 
     if (data->src_cpuiddump_path) {
       cpuiddump_free(src_cpuiddump);
@@ -1229,7 +1237,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, int fulldiscov
   }
 
   if (data->apicid_unique)
-    summarize(backend, infos, fulldiscovery);
+    summarize(backend, infos, flags);
   /* if !data->apicid_unique, do nothing and return success, so that the caller does nothing either */
 
   return 0;
@@ -1299,7 +1307,7 @@ static int fake_set_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 }
 
 static
-int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
+int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   unsigned nbprocs = data->nbprocs;
@@ -1411,7 +1419,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
 
   hwloc_x86_os_state_save(&os_state, src_cpuiddump);
 
-  ret = look_procs(backend, infos, fulldiscovery,
+  ret = look_procs(backend, infos, flags,
 		   highest_cpuid, highest_ext_cpuid, features, cpuid_type,
 		   get_cpubind, set_cpubind);
   if (!ret)
@@ -1420,8 +1428,8 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
-    look_proc(backend, &infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
-    summarize(backend, infos, fulldiscovery);
+    look_proc(backend, &infos[0], flags, highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
+    summarize(backend, infos, flags);
     ret = 0;
   }
 
@@ -1448,8 +1456,13 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   struct hwloc_topology *topology = backend->topology;
+  unsigned long flags = 0;
   int alreadypus = 0;
   int ret;
+
+  if (getenv("HWLOC_X86_TOPOEXT_NUMANODES")) {
+    flags |= HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES;
+  }
 
 #if HAVE_DECL_RUNNING_ON_VALGRIND
   if (RUNNING_ON_VALGRIND && !data->src_cpuiddump_path) {
@@ -1482,7 +1495,7 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
     /* several object types were added, we can't easily complete, just do partial discovery */
     hwloc_topology_reconnect(topology, 0);
-    ret = hwloc_look_x86(backend, 0);
+    ret = hwloc_look_x86(backend, flags);
     if (ret)
       hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
     return 0;
@@ -1492,7 +1505,7 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
 fulldiscovery:
-  if (hwloc_look_x86(backend, 1) < 0) {
+  if (hwloc_look_x86(backend, flags | HWLOC_X86_DISC_FLAG_FULL) < 0) {
     /* if failed, create PUs */
     if (!alreadypus)
       hwloc_setup_pu_level(topology, data->nbprocs);
