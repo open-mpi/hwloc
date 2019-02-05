@@ -674,9 +674,11 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
    * Get the hierarchy of thread, core, die, package, etc. from CPU-specific leaves
    */
 
-  if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000008) {
+  if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000008 && !has_x2apic(features)) {
     /* Get core/thread information from cpuid 0x80000008
      * (not supported on Intel)
+     * We could ignore this codepath when x2apic is supported, but we may need
+     * nodeids if HWLOC_X86_TOPOEXT_NUMANODES is set.
      */
     read_amd_cores_legacy(infos, src_cpuiddump);
   }
@@ -684,6 +686,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
     /* Get apicid, nodeid, unitid/coreid from cpuid 0x8000001e (AMD topology extension).
      * Requires read_amd_cores_legacy() for coreid on family 0x15-16.
+     *
+     * Only needed when x2apic supported if NUMA nodes are needed.
      */
     read_amd_cores_topoext(infos, src_cpuiddump);
   }
@@ -694,7 +698,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
      */
     read_intel_cores_exttopoenum(infos, 0x1f, src_cpuiddump);
 
-  } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x0b && has_x2apic(features)) {
+  } else if ((cpuid_type == intel || cpuid_type == amd || cpuid_type == zhaoxin)
+	     && highest_cpuid >= 0x0b && has_x2apic(features)) {
     /* Get package/core/thread information from cpuid 0x0b
      * (Intel v1 Extended Topology Enumeration)
      */
