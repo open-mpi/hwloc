@@ -42,22 +42,68 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
   if (!cpuset)
     return -1;
 
-  pathlen = 6 + 21 + 1 + 7 + 1;
+  pathlen = 6 + 21 + 1 + 7 + 1; /* enough for /proc/%ld/cmdline /proc/%ld/comm and /proc/%ld/stat */
   path = malloc(pathlen);
   snprintf(path, pathlen, "/proc/%ld/cmdline", proc->pid);
   fd = open(path, O_RDONLY);
-  free(path);
 
   if (fd >= 0) {
     ssize_t n = read(fd, proc->name, sizeof(proc->name) - 1);
     close(fd);
 
-    if (n <= 0)
+    if (n <= 0) {
       /* Ignore kernel threads and errors */
+      free(path);
       goto out;
+    }
 
     proc->name[n] = 0;
   }
+
+  if (flags & HWLOC_PS_FLAG_SHORTNAME) {
+    /* try to get a small name from comm */
+    char comm[16] = "";
+    unsigned n;
+    snprintf(path, pathlen, "/proc/%ld/comm", proc->pid);
+    fd = open(path, O_RDONLY);
+    if (fd >= 0) {
+      n = read(fd, comm, sizeof(comm) - 1);
+      close(fd);
+      if (n > 0) {
+	comm[n] = 0;
+	if (n > 1 && comm[n-1] == '\n')
+	  comm[n-1] = 0;
+      }
+
+    } else {
+      /* Old kernel, have to look at old file */
+      char stats[32];
+      char *parenl = NULL, *parenr;
+
+      snprintf(path, pathlen, "/proc/%ld/stat", proc->pid);
+      fd = open(path, O_RDONLY);
+      if (fd >= 0) {
+	/* "pid (comm) ..." */
+	n = read(fd, stats, sizeof(stats) - 1);
+	close(fd);
+	if (n > 0) {
+	  stats[n] = 0;
+	  parenl = strchr(stats, '(');
+	  parenr = strchr(stats, ')');
+	  if (!parenr)
+	    parenr = &stats[sizeof(stats)-1];
+	  *parenr = 0;
+	  if (parenl)
+	    snprintf(comm, sizeof(comm), "%s", parenl+1);
+	}
+      }
+    }
+
+    if (*comm)
+      snprintf(proc->name, sizeof(proc->name), comm);
+  }
+
+  free(path);
 
   proc->string[0] = '\0';
   if (pidcmd) {

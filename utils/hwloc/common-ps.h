@@ -31,6 +31,7 @@ struct hwloc_ps_process {
 
 #define HWLOC_PS_FLAG_THREADS (1UL<<0)
 #define HWLOC_PS_FLAG_LASTCPULOCATION (1UL<<1)
+#define HWLOC_PS_FLAG_SHORTNAME (1UL<<2)
 
 int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 			  struct hwloc_ps_process *proc,
