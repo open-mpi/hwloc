@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -31,8 +31,6 @@ static char *only_name = NULL;
 static char *pidcmd = NULL;
 static int logical = 1;
 
-#define TIDNAME_MAX 16 /* specified in pthread_setname_np.3 */
-
 void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] ...\n", name);
@@ -51,6 +49,24 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --pid-cmd <cmd>    Append the output of <cmd> <pid> to each PID line\n");
   fprintf (where, "  --disallowed       Include objects disallowed by administrative limitations\n");
 }
+
+#define TIDNAME_MAX 16 /* specified in pthread_setname_np.3 */
+
+struct hwloc_ps_process {
+  long pid;
+  char string[1024];
+  char name[64];
+  hwloc_bitmap_t cpuset;
+  int bound;
+  unsigned nthreads;
+  unsigned nboundthreads;
+  struct hwloc_ps_thread {
+    long tid;
+    hwloc_bitmap_t cpuset;
+    int bound;
+    char name[TIDNAME_MAX];
+  } *threads;
+};
 
 static void print_task(hwloc_topology_t topology,
 		       long pid, const char *name, hwloc_bitmap_t cpuset,
@@ -89,14 +105,22 @@ static void print_task(hwloc_topology_t topology,
   printf("\t\t%s%s%s\n", name, pidoutput ? "\t" : "", pidoutput ? pidoutput : "");
 }
 
-static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
-			long pid)
+static void print_process(hwloc_topology_t topology,
+			  struct hwloc_ps_process *proc)
 {
-    char pidoutput[1024];
-    char name[64] = "";
-    /* management of threads */
-    unsigned boundthreads = 0, i;
-    struct hwlocpstid { long tid; hwloc_bitmap_t cpuset; char name[TIDNAME_MAX]; } *tids = NULL;
+  unsigned i;
+
+  print_task(topology, proc->pid, proc->name, proc->cpuset, proc->string[0] == '\0' ? NULL : proc->string, 0);
+  if (proc->nthreads)
+    for(i=0; i<proc->nthreads; i++)
+      if (proc->threads[i].cpuset)
+	print_task(topology, proc->threads[i].tid, proc->threads[i].name, proc->threads[i].cpuset, NULL, 1);
+}
+
+static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
+			struct hwloc_ps_process *proc)
+{
+    unsigned i;
     hwloc_bitmap_t cpuset;
     char *end;
 
@@ -111,21 +135,21 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
       ssize_t n;
 
       path = malloc(pathlen);
-      snprintf(path, pathlen, "/proc/%ld/cmdline", pid);
+      snprintf(path, pathlen, "/proc/%ld/cmdline", proc->pid);
       file = open(path, O_RDONLY);
       free(path);
 
       if (file >= 0) {
-        n = read(file, name, sizeof(name) - 1);
+        n = read(file, proc->name, sizeof(proc->name) - 1);
         close(file);
 
         if (n <= 0)
           /* Ignore kernel threads and errors */
           goto out;
 
-        name[n] = 0;
+        proc->name[n] = 0;
 
-	if (only_name && !strstr(name, only_name))
+	if (only_name && !strstr(proc->name, only_name))
 	  goto out;
       }
     }
@@ -138,7 +162,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
       DIR *taskdir;
 
       path = malloc(pathlen);
-      snprintf(path, pathlen, "/proc/%ld/task", pid);
+      snprintf(path, pathlen, "/proc/%ld/task", proc->pid);
       taskdir = opendir(path);
       if (taskdir) {
 	struct dirent *taskdirent;
@@ -154,8 +178,8 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 	}
 	if (n > 1) {
 	  /* if there's more than one thread, see if some are bound */
-	  tids = calloc(n+1, sizeof(*tids));
-	  if (tids) {
+	  proc->threads = calloc(n, sizeof(*proc->threads));
+	  if (proc->threads) {
 	    /* reread the directory but gather info now */
 	    rewinddir(taskdir);
 	    i = 0;
@@ -164,22 +188,8 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 	      if (*end)
 		/* Not a number */
 		continue;
-	      if (get_last_cpu_location) {
-		if (hwloc_linux_get_tid_last_cpu_location(topology, tid, cpuset))
-		  continue;
-	      } else {
-		if (hwloc_linux_get_tid_cpubind(topology, tid, cpuset))
-		  continue;
-	      }
-	      hwloc_bitmap_and(cpuset, cpuset, topocpuset);
-	      tids[i].tid = tid;
-	      tids[i].cpuset = hwloc_bitmap_dup(cpuset);
-	      i++;
-	      if (hwloc_bitmap_iszero(cpuset))
-		continue;
-	      if (hwloc_bitmap_isequal(cpuset, topocpuset) && !show_all && only_pid == NO_ONLY_PID && !only_name)
-		continue;
-	      boundthreads++;
+
+	      proc->threads[i].tid = tid;
 
 	      {
 		unsigned path2len = pathlen + 1 + 21 + 1 + 4 + 1;
@@ -189,10 +199,10 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 		  snprintf(path2, path2len, "%s/%ld/comm", path, tid);
 		  commfile = open(path2, O_RDWR);
 		  if (commfile >= 0) {
-		    read(commfile, tids[i-1].name, TIDNAME_MAX);
+		    read(commfile, proc->threads[i].name, TIDNAME_MAX);
 		    close(commfile);
-		    tids[i-1].name[TIDNAME_MAX-1] = '\0';
-		    end = strchr(tids[i-1].name, '\n');
+		    proc->threads[i].name[TIDNAME_MAX-1] = '\0';
+		    end = strchr(proc->threads[i].name, '\n');
 		    if (end)
 		      *end = '\0';
 		  }
@@ -200,8 +210,28 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 		}
 	      }
 
+	      if (get_last_cpu_location) {
+		if (hwloc_linux_get_tid_last_cpu_location(topology, tid, cpuset))
+		  goto next;
+	      } else {
+		if (hwloc_linux_get_tid_cpubind(topology, tid, cpuset))
+		  goto next;
+	      }
+	      hwloc_bitmap_and(cpuset, cpuset, topocpuset);
+	      if (hwloc_bitmap_iszero(cpuset))
+		goto next;
+
+	      proc->threads[i].cpuset = hwloc_bitmap_dup(cpuset);
+	      if (!hwloc_bitmap_isequal(cpuset, topocpuset)) {
+		proc->threads[i].bound = 1;
+		proc->nboundthreads++;
+	      }
+
+	    next:
+	      i++;
+	      proc->nthreads++;
 	      if (i == n)
-		/* ignore the lastly created threads, we need cpuset==NULL if the last slot */
+		/* ignore the lastly created threads, I'm too lazy to reallocate */
 		break;
 	    }
 	  } else {
@@ -215,10 +245,10 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
     }
 
     if (get_last_cpu_location) {
-      if (hwloc_get_proc_last_cpu_location(topology, pid, cpuset, 0))
+      if (hwloc_get_proc_last_cpu_location(topology, proc->pid, cpuset, 0))
 	goto out;
     } else {
-      if (hwloc_get_proc_cpubind(topology, pid, cpuset, 0))
+      if (hwloc_get_proc_cpubind(topology, proc->pid, cpuset, 0))
 	goto out;
     }
 
@@ -226,20 +256,22 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
     if (hwloc_bitmap_iszero(cpuset))
       goto out;
 
+    proc->bound = !hwloc_bitmap_isequal(cpuset, topocpuset);
     /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
-    if (hwloc_bitmap_isequal(cpuset, topocpuset) && (!tids || !boundthreads) && !show_all && only_pid == NO_ONLY_PID && !only_name)
+    if (!proc->bound && (!proc->nthreads || !proc->nboundthreads) && !show_all && only_pid == NO_ONLY_PID && !only_name)
       goto out;
+    proc->cpuset = cpuset;
 
-    pidoutput[0] = '\0';
+    proc->string[0] = '\0';
     if (pidcmd) {
       char *cmd;
       FILE *file;
       cmd = malloc(strlen(pidcmd)+1+5+2+1);
-      sprintf(cmd, "%s %u", pidcmd, (unsigned) pid);
+      sprintf(cmd, "%s %u", pidcmd, (unsigned) proc->pid);
       file = popen(cmd, "r");
       if (file) {
-	if (fgets(pidoutput, sizeof(pidoutput), file)) {
-	  end = strchr(pidoutput, '\n');
+	if (fgets(proc->string, sizeof(proc->string), file)) {
+	  end = strchr(proc->string, '\n');
 	  if (end)
 	    *end = '\0';
 	}
@@ -248,18 +280,15 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
       free(cmd);
     }
 
-    /* print the process */
-    print_task(topology, pid, name, cpuset, pidoutput[0] == '\0' ? NULL : pidoutput, 0);
-    if (tids)
-      /* print each tid we found with a cpuset, the n+1-th is NULL */
-      for(i=0; tids[i].cpuset != NULL; i++) {
-	print_task(topology, tids[i].tid, tids[i].name, tids[i].cpuset, NULL, 1);
-	hwloc_bitmap_free(tids[i].cpuset);
-      }
+    print_process(topology, proc);
 
  out:
     /* free threads stuff */
-    free(tids);
+    if (proc->nthreads)
+      for(i=0; i<proc->nthreads; i++)
+	if (proc->threads[i].cpuset)
+	  hwloc_bitmap_free(proc->threads[i].cpuset);
+    free(proc->threads);
     hwloc_bitmap_free(cpuset);
 }
 
@@ -368,6 +397,7 @@ int main(int argc, char *argv[])
   if (only_pid == NO_ONLY_PID) {
     /* show all */
     while ((dirent = readdir(dir))) {
+      struct hwloc_ps_process proc;
       long pid;
       char *end;
 
@@ -376,11 +406,22 @@ int main(int argc, char *argv[])
 	/* Not a number */
 	continue;
 
-      one_process(topology, topocpuset, pid);
+      proc.pid = pid;
+      proc.bound = 0;
+      proc.nthreads = 0;
+      proc.nboundthreads = 0;
+      proc.threads = NULL;
+      one_process(topology, topocpuset, &proc);
     }
   } else {
     /* show only one */
-    one_process(topology, topocpuset, only_pid);
+    struct hwloc_ps_process proc;
+    proc.pid = only_pid;
+    proc.bound = 0;
+    proc.nthreads = 0;
+    proc.nboundthreads = 0;
+    proc.threads = NULL;
+    one_process(topology, topocpuset, &proc);
   }
 
   err = 0;
