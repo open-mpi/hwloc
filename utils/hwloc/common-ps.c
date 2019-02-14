@@ -27,12 +27,16 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 			  unsigned long flags, char *pidcmd)
 {
 #ifdef HAVE_DIRENT_H
+  hwloc_pid_t realpid;
   unsigned i;
   hwloc_bitmap_t cpuset;
   unsigned pathlen;
   char *path;
   char *end;
   int fd;
+
+  if (hwloc_pid_from_number(&realpid, proc->pid, 0, 0 /* ignore failures */) < 0)
+    return -1;
 
   cpuset = hwloc_bitmap_alloc();
   if (!cpuset)
@@ -164,10 +168,10 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
   }
 
   if (flags & HWLOC_PS_FLAG_LASTCPULOCATION) {
-    if (hwloc_get_proc_last_cpu_location(topology, proc->pid, cpuset, 0))
+    if (hwloc_get_proc_last_cpu_location(topology, realpid, cpuset, 0))
       goto out;
   } else {
-    if (hwloc_get_proc_cpubind(topology, proc->pid, cpuset, 0))
+    if (hwloc_get_proc_cpubind(topology, realpid, cpuset, 0))
       goto out;
   }
 
