@@ -33,6 +33,9 @@
     <ClCompile Include="..\..\utils\lstopo\lstopo-xml.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\utils\hwloc\common-ps.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hwloc.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\utils\hwloc\misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\utils\hwloc\common-ps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\utils\lstopo\lstopo.h">

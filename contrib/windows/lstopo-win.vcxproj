@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\utils\lstopo\lstopo-text.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-xml.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-windows.c" />
+    <ClCompile Include="..\..\utils\hwloc\common-ps.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hwloc\autogen\config.h" />
@@ -89,6 +90,7 @@
     <ClInclude Include="..\..\include\private\private.h" />
     <ClInclude Include="..\..\include\private\xml.h" />
     <ClInclude Include="..\..\utils\hwloc\misc.h" />
+    <ClInclude Include="..\..\utils\hwloc\common-ps.h" />
     <ClInclude Include="..\..\utils\lstopo\lstopo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

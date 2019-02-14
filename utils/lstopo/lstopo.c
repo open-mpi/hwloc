@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -36,6 +36,7 @@
 #endif
 
 #include "lstopo.h"
+#include "common-ps.h"
 #include "misc.h"
 
 #ifdef __MINGW32__
@@ -109,214 +110,45 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
   return obj;
 }
 
+static void foreach_process_cb(hwloc_topology_t topology,
+			       struct hwloc_ps_process *proc,
+			       void *cbdata __hwloc_attribute_unused)
+{
+  char name[80];
+  unsigned i;
+
+  snprintf(name, sizeof(name), "%ld", proc->pid);
+  if (*proc->name)
+    snprintf(name, sizeof(name), "%ld %s", proc->pid, proc->name);
+
+  if (proc->bound)
+    insert_task(topology, proc->cpuset, name);
+
+  if (proc->nthreads)
+    for(i=0; i<proc->nthreads; i++)
+      if (proc->threads[i].cpuset
+	  && !hwloc_bitmap_isequal(proc->threads[i].cpuset, proc->cpuset)) {
+	char task_name[150];
+	if (*proc->threads[i].name)
+	  snprintf(task_name, sizeof(task_name), "%s %li %s", name, proc->threads[i].tid, proc->threads[i].name);
+	else
+	  snprintf(task_name, sizeof(task_name), "%s %li", name, proc->threads[i].tid);
+
+	insert_task(topology, proc->threads[i].cpuset, task_name);
+      }
+}
+
 static void add_process_objects(hwloc_topology_t topology)
 {
-#ifdef HAVE_DIRENT_H
-  hwloc_obj_t root;
-  hwloc_bitmap_t cpuset;
-#ifdef HWLOC_LINUX_SYS
-  hwloc_bitmap_t task_cpuset;
-#endif /* HWLOC_LINUX_SYS */
-  DIR *dir;
-  struct dirent *dirent;
-  const struct hwloc_topology_support *support;
-
-  root = hwloc_get_root_obj(topology);
-
-  support = hwloc_topology_get_support(topology);
+  const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
+  hwloc_obj_t root = hwloc_get_root_obj(topology);
 
   if (!support->cpubind->get_proc_cpubind)
     return;
 
-  dir  = opendir("/proc");
-  if (!dir)
-    return;
-  cpuset = hwloc_bitmap_alloc();
-#ifdef HWLOC_LINUX_SYS
-  task_cpuset = hwloc_bitmap_alloc();
-#endif /* HWLOC_LINUX_SYS */
-
-  while ((dirent = readdir(dir))) {
-    long local_pid_number;
-    hwloc_pid_t local_pid;
-    char *end;
-    char name[80];
-    int proc_cpubind;
-
-    local_pid_number = strtol(dirent->d_name, &end, 10);
-    if (*end)
-      /* Not a number */
-      continue;
-
-    snprintf(name, sizeof(name), "%ld", local_pid_number);
-
-    if (hwloc_pid_from_number(&local_pid, local_pid_number, 0, 0 /* ignore failures */) < 0)
-      continue;
-
-    proc_cpubind = hwloc_get_proc_cpubind(topology, local_pid, cpuset, 0) != -1;
-
-#ifdef HWLOC_LINUX_SYS
-    {
-      char comm[16];
-      char *path;
-      size_t pathlen = 6 + strlen(dirent->d_name) + 1 + 7 + 1;
-
-      path = malloc(pathlen);
-
-      {
-        /* Get the process name */
-        char cmd[64];
-        int file;
-        ssize_t n;
-
-        snprintf(path, pathlen, "/proc/%s/cmdline", dirent->d_name);
-        file = open(path, O_RDONLY);
-        if (file < 0) {
-          /* Ignore errors */
-          free(path);
-          continue;
-        }
-        n = read(file, cmd, sizeof(cmd));
-        close(file);
-
-        if (n <= 0) {
-          /* Ignore kernel threads and errors */
-          free(path);
-          continue;
-        }
-
-        snprintf(path, pathlen, "/proc/%s/comm", dirent->d_name);
-        file = open(path, O_RDONLY);
-
-        if (file >= 0) {
-          n = read(file, comm, sizeof(comm) - 1);
-          close(file);
-          if (n > 0) {
-            comm[n] = 0;
-            if (n > 1 && comm[n-1] == '\n')
-              comm[n-1] = 0;
-          } else {
-            snprintf(comm, sizeof(comm), "(unknown)");
-          }
-        } else {
-          /* Old kernel, have to look at old file */
-          char stats[32];
-          char *parenl = NULL, *parenr;
-
-          snprintf(path, pathlen, "/proc/%s/stat", dirent->d_name);
-          file = open(path, O_RDONLY);
-
-          if (file < 0) {
-            /* Ignore errors */
-            free(path);
-            continue;
-          }
-
-          /* "pid (comm) ..." */
-          n = read(file, stats, sizeof(stats) - 1);
-          close(file);
-          if (n > 0) {
-            stats[n] = 0;
-            parenl = strchr(stats, '(');
-            parenr = strchr(stats, ')');
-            if (!parenr)
-              parenr = &stats[sizeof(stats)-1];
-            *parenr = 0;
-          }
-          if (!parenl) {
-            snprintf(comm, sizeof(comm), "(unknown)");
-          } else {
-            snprintf(comm, sizeof(comm), "%s", parenl+1);
-          }
-        }
-
-        snprintf(name, sizeof(name), "%ld %s", local_pid_number, comm);
-      }
-
-      {
-        /* Get threads */
-        DIR *task_dir;
-        struct dirent *task_dirent;
-
-        snprintf(path, pathlen, "/proc/%s/task", dirent->d_name);
-        task_dir = opendir(path);
-
-        if (task_dir) {
-          while ((task_dirent = readdir(task_dir))) {
-            long local_tid;
-            char *task_end;
-            const size_t tid_len = sizeof(local_tid)*3+1;
-            size_t task_pathlen = 6 + strlen(dirent->d_name) + 1 + 4 + 1
-                                    + strlen(task_dirent->d_name) + 1 + 4 + 1;
-            char *task_path;
-            int comm_file;
-            char task_comm[16] = "";
-            char task_name[sizeof(name) + 1 + tid_len + 1 + sizeof(task_comm) + 1];
-            ssize_t n;
-
-            local_tid = strtol(task_dirent->d_name, &task_end, 10);
-            if (*task_end)
-              /* Not a number, or the main task */
-              continue;
-
-            task_path = malloc(task_pathlen);
-            snprintf(task_path, task_pathlen, "/proc/%s/task/%s/comm",
-                     dirent->d_name, task_dirent->d_name);
-            comm_file = open(task_path, O_RDONLY);
-            free(task_path);
-
-            if (comm_file >= 0) {
-              n = read(comm_file, task_comm, sizeof(task_comm) - 1);
-              if (n < 0)
-                n = 0;
-              close(comm_file);
-              task_comm[n] = 0;
-              if (n > 1 && task_comm[n-1] == '\n')
-                task_comm[n-1] = 0;
-              if (!strcmp(comm, task_comm))
-                /* Same as process comm, do not show it again */
-                n = 0;
-            } else {
-              n = 0;
-            }
-
-            if (hwloc_linux_get_tid_cpubind(topology, local_tid, task_cpuset))
-              continue;
-
-            if (proc_cpubind && hwloc_bitmap_isequal(task_cpuset, cpuset))
-              continue;
-
-            if (n) {
-              snprintf(task_name, sizeof(task_name), "%s %li %s", name, local_tid, task_comm);
-            } else {
-              snprintf(task_name, sizeof(task_name), "%s %li", name, local_tid);
-            }
-
-            insert_task(topology, task_cpuset, task_name);
-          }
-          closedir(task_dir);
-        }
-      }
-
-      free(path);
-    }
-#endif /* HWLOC_LINUX_SYS */
-
-    if (!proc_cpubind)
-      continue;
-
-    if (hwloc_bitmap_isincluded(root->cpuset, cpuset))
-      continue;
-
-    insert_task(topology, cpuset, name);
-  }
-
-  hwloc_bitmap_free(cpuset);
-#ifdef HWLOC_LINUX_SYS
-  hwloc_bitmap_free(task_cpuset);
-#endif /* HWLOC_LINUX_SYS */
-  closedir(dir);
-#endif /* HAVE_DIRENT_H */
+  hwloc_ps_foreach_process(topology, root->cpuset,
+			   foreach_process_cb, NULL,
+			   HWLOC_PS_FLAG_THREADS | HWLOC_PS_FLAG_SHORTNAME, NULL);
 }
 
 static void
