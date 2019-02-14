@@ -36,6 +36,11 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 			  struct hwloc_ps_process *proc,
 			  unsigned long flags, char *pidcmd);
 
+int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
+			     void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
+			     void *cbdata,
+			     unsigned long flags, char *pidcmd);
+
 void hwloc_ps_free_process(struct hwloc_ps_process *proc);
 
 #endif /* UTILS_HWLOC_PS_H */

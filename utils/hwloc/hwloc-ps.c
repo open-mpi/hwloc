@@ -19,6 +19,9 @@
 #include "common-ps.h"
 #include "misc.h"
 
+static int show_all = 0;
+static int show_threads = 0;
+static char *only_name = NULL;
 static int show_cpuset = 0;
 static int logical = 1;
 
@@ -90,6 +93,20 @@ static void print_process(hwloc_topology_t topology,
 	print_task(topology, proc->threads[i].tid, proc->threads[i].name, proc->threads[i].cpuset, NULL, 1);
 }
 
+static void foreach_process_cb(hwloc_topology_t topology,
+			       struct hwloc_ps_process *proc,
+			       void *cbdata __hwloc_attribute_unused)
+{
+  if (only_name && !strstr(proc->name, only_name))
+    return;
+
+  /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
+  if (!proc->bound && (!proc->nthreads || !proc->nboundthreads) && !show_all && !only_name)
+    return;
+
+  print_process(topology, proc);
+}
+
 int main(int argc, char *argv[])
 {
   const struct hwloc_topology_support *support;
@@ -97,15 +114,10 @@ int main(int argc, char *argv[])
   hwloc_const_bitmap_t topocpuset;
   unsigned long flags = 0;
   unsigned long psflags = 0;
-  int show_all = 0;
-  int show_threads = 0;
   int get_last_cpu_location = 0;
 #define NO_ONLY_PID -1
   long only_pid = NO_ONLY_PID;
-  char *only_name = NULL;
   char *pidcmd = NULL;
-  DIR *dir;
-  struct dirent *dirent;
   char *callname;
   int err;
   int opt;
@@ -201,40 +213,11 @@ int main(int argc, char *argv[])
   if (get_last_cpu_location)
     psflags |= HWLOC_PS_FLAG_LASTCPULOCATION;
 
-  dir  = opendir("/proc");
-  if (!dir)
-    goto out_with_topology;
-
   if (only_pid == NO_ONLY_PID) {
     /* show all */
-    while ((dirent = readdir(dir))) {
-      struct hwloc_ps_process proc;
-      long pid;
-      char *end;
+    if (hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, NULL, psflags, pidcmd))
+      goto out_with_topology;
 
-      pid = strtol(dirent->d_name, &end, 10);
-      if (*end)
-	/* Not a number */
-	continue;
-
-      proc.pid = pid;
-      proc.cpuset = NULL;
-      proc.nthreads = 0;
-      proc.nboundthreads = 0;
-      proc.threads = NULL;
-      if (hwloc_ps_read_process(topology, topocpuset, &proc, psflags, pidcmd) < 0)
-	goto next;
-
-      if (only_name && !strstr(proc.name, only_name))
-	goto next;
-      /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
-      if (!proc.bound && (!proc.nthreads || !proc.nboundthreads) && !show_all && only_pid == NO_ONLY_PID && !only_name)
-	goto next;
-
-      print_process(topology, &proc);
-    next:
-      hwloc_ps_free_process(&proc);
-    }
   } else {
     /* show only one */
     struct hwloc_ps_process proc;
@@ -250,7 +233,6 @@ int main(int argc, char *argv[])
 
   err = 0;
 
-  closedir(dir);
  out_with_topology:
   hwloc_topology_destroy(topology);
  out:

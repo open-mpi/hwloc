@@ -197,3 +197,45 @@ void hwloc_ps_free_process(struct hwloc_ps_process *proc)
 
   hwloc_bitmap_free(proc->cpuset);
 }
+
+int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
+			     void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
+			     void *cbdata,
+			     unsigned long flags, char *pidcmd)
+{
+#ifdef HAVE_DIRENT_H
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir  = opendir("/proc");
+  if (!dir)
+    return -1;
+
+  while ((dirent = readdir(dir))) {
+    struct hwloc_ps_process proc;
+    long pid;
+    char *end;
+
+    pid = strtol(dirent->d_name, &end, 10);
+    if (*end)
+      /* Not a number */
+      continue;
+
+    proc.pid = pid;
+    proc.cpuset = NULL;
+    proc.nthreads = 0;
+    proc.nboundthreads = 0;
+    proc.threads = NULL;
+    if (hwloc_ps_read_process(topology, topocpuset, &proc, flags, pidcmd) < 0)
+      goto next;
+    callback(topology, &proc, cbdata);
+  next:
+    hwloc_ps_free_process(&proc);
+  }
+
+  closedir(dir);
+  return 0;
+#else /* HAVE_DIRENT_H */
+  return -1;
+#endif /* HAVE_DIRENT_H */
+}
