@@ -22,13 +22,6 @@
 #include "misc.h"
 
 static int show_cpuset = 0;
-static int show_all = 0;
-static int show_threads = 0;
-static int get_last_cpu_location = 0;
-#define NO_ONLY_PID -1
-static long only_pid = NO_ONLY_PID;
-static char *only_name = NULL;
-static char *pidcmd = NULL;
 static int logical = 1;
 
 void usage(const char *name, FILE *where)
@@ -117,8 +110,13 @@ static void print_process(hwloc_topology_t topology,
 	print_task(topology, proc->threads[i].tid, proc->threads[i].name, proc->threads[i].cpuset, NULL, 1);
 }
 
-static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
-			struct hwloc_ps_process *proc)
+
+#define HWLOC_PS_FLAG_THREADS (1UL<<0)
+#define HWLOC_PS_FLAG_LASTCPULOCATION (1UL<<1)
+
+static int read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
+			struct hwloc_ps_process *proc,
+			unsigned long flags, char *pidcmd)
 {
     unsigned i;
     hwloc_bitmap_t cpuset;
@@ -126,7 +124,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 
     cpuset = hwloc_bitmap_alloc();
     if (!cpuset)
-      return;
+      return -1;
 
     {
       unsigned pathlen = 6 + 21 + 1 + 7 + 1;
@@ -148,13 +146,28 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
           goto out;
 
         proc->name[n] = 0;
-
-	if (only_name && !strstr(proc->name, only_name))
-	  goto out;
       }
     }
 
-    if (show_threads) {
+    proc->string[0] = '\0';
+    if (pidcmd) {
+      char *cmd;
+      FILE *file;
+      cmd = malloc(strlen(pidcmd)+1+5+2+1);
+      sprintf(cmd, "%s %u", pidcmd, (unsigned) proc->pid);
+      file = popen(cmd, "r");
+      if (file) {
+	if (fgets(proc->string, sizeof(proc->string), file)) {
+	  end = strchr(proc->string, '\n');
+	  if (end)
+	    *end = '\0';
+	}
+	pclose(file);
+      }
+      free(cmd);
+    }
+
+    if (flags & HWLOC_PS_FLAG_THREADS) {
 #ifdef HWLOC_LINUX_SYS
       /* check if some threads must be displayed */
       unsigned pathlen = 6 + 21 + 1 + 4 + 1;
@@ -210,7 +223,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 		}
 	      }
 
-	      if (get_last_cpu_location) {
+	      if (flags & HWLOC_PS_FLAG_LASTCPULOCATION) {
 		if (hwloc_linux_get_tid_last_cpu_location(topology, tid, cpuset))
 		  goto next;
 	      } else {
@@ -244,7 +257,7 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
 #endif /* HWLOC_LINUX_SYS */
     }
 
-    if (get_last_cpu_location) {
+    if (flags & HWLOC_PS_FLAG_LASTCPULOCATION) {
       if (hwloc_get_proc_last_cpu_location(topology, proc->pid, cpuset, 0))
 	goto out;
     } else {
@@ -257,39 +270,25 @@ static void one_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpus
       goto out;
 
     proc->bound = !hwloc_bitmap_isequal(cpuset, topocpuset);
-    /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
-    if (!proc->bound && (!proc->nthreads || !proc->nboundthreads) && !show_all && only_pid == NO_ONLY_PID && !only_name)
-      goto out;
     proc->cpuset = cpuset;
-
-    proc->string[0] = '\0';
-    if (pidcmd) {
-      char *cmd;
-      FILE *file;
-      cmd = malloc(strlen(pidcmd)+1+5+2+1);
-      sprintf(cmd, "%s %u", pidcmd, (unsigned) proc->pid);
-      file = popen(cmd, "r");
-      if (file) {
-	if (fgets(proc->string, sizeof(proc->string), file)) {
-	  end = strchr(proc->string, '\n');
-	  if (end)
-	    *end = '\0';
-	}
-	pclose(file);
-      }
-      free(cmd);
-    }
-
-    print_process(topology, proc);
+    return 0;
 
  out:
-    /* free threads stuff */
-    if (proc->nthreads)
-      for(i=0; i<proc->nthreads; i++)
-	if (proc->threads[i].cpuset)
-	  hwloc_bitmap_free(proc->threads[i].cpuset);
-    free(proc->threads);
     hwloc_bitmap_free(cpuset);
+    return -1;
+}
+
+static void free_process(struct hwloc_ps_process *proc)
+{
+  unsigned i;
+
+  if (proc->nthreads)
+    for(i=0; i<proc->nthreads; i++)
+      if (proc->threads[i].cpuset)
+	hwloc_bitmap_free(proc->threads[i].cpuset);
+  free(proc->threads);
+
+  hwloc_bitmap_free(proc->cpuset);
 }
 
 int main(int argc, char *argv[])
@@ -298,6 +297,14 @@ int main(int argc, char *argv[])
   hwloc_topology_t topology;
   hwloc_const_bitmap_t topocpuset;
   unsigned long flags = 0;
+  unsigned long psflags = 0;
+  int show_all = 0;
+  int show_threads = 0;
+  int get_last_cpu_location = 0;
+#define NO_ONLY_PID -1
+  long only_pid = NO_ONLY_PID;
+  char *only_name = NULL;
+  char *pidcmd = NULL;
   DIR *dir;
   struct dirent *dirent;
   char *callname;
@@ -390,6 +397,11 @@ int main(int argc, char *argv[])
 
   topocpuset = hwloc_topology_get_topology_cpuset(topology);
 
+  if (show_threads)
+    psflags |= HWLOC_PS_FLAG_THREADS;
+  if (get_last_cpu_location)
+    psflags |= HWLOC_PS_FLAG_LASTCPULOCATION;
+
   dir  = opendir("/proc");
   if (!dir)
     goto out_with_topology;
@@ -407,21 +419,36 @@ int main(int argc, char *argv[])
 	continue;
 
       proc.pid = pid;
+      proc.cpuset = NULL;
       proc.bound = 0;
       proc.nthreads = 0;
       proc.nboundthreads = 0;
       proc.threads = NULL;
-      one_process(topology, topocpuset, &proc);
+      if (read_process(topology, topocpuset, &proc, psflags, pidcmd) < 0)
+	goto next;
+
+      if (only_name && !strstr(proc.name, only_name))
+	goto next;
+      /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
+      if (!proc.bound && (!proc.nthreads || !proc.nboundthreads) && !show_all && only_pid == NO_ONLY_PID && !only_name)
+	goto next;
+
+      print_process(topology, &proc);
+    next:
+      free_process(&proc);
     }
   } else {
     /* show only one */
     struct hwloc_ps_process proc;
     proc.pid = only_pid;
+    proc.cpuset = NULL;
     proc.bound = 0;
     proc.nthreads = 0;
     proc.nboundthreads = 0;
     proc.threads = NULL;
-    one_process(topology, topocpuset, &proc);
+    if (read_process(topology, topocpuset, &proc, psflags, pidcmd) >= 0)
+      print_process(topology, &proc);
+    free_process(&proc);
   }
 
   err = 0;
