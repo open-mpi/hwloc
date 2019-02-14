@@ -22,6 +22,11 @@ EXTRA_DIST = \
 
 noinst_HEADERS = misc.h common-ps.h
 
+# convenience library used by both hwloc-ps and lstopo
+noinst_LTLIBRARIES = libutils_common.la
+libutils_common_la_SOURCES = common-ps.c
+libutils_common_la_LIBADD = $(LDADD)
+
 bin_PROGRAMS = \
         hwloc-annotate \
         hwloc-bind \
@@ -57,9 +62,8 @@ hwloc_calc_SOURCES = \
         hwloc-calc.h \
         hwloc-calc.c
 
-hwloc_ps_SOURCES = \
-	hwloc-ps.c \
-	common-ps.c
+hwloc_ps_SOURCES = hwloc-ps.c
+hwloc_ps_LDADD = $(LDADD) libutils_common.la
 
 bin_SCRIPTS = hwloc-compress-dir
 if HWLOC_HAVE_LINUX
