@@ -24,7 +24,7 @@
 
 int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 			  struct hwloc_ps_process *proc,
-			  unsigned long flags, char *pidcmd)
+			  unsigned long flags, const char *pidcmd)
 {
 #ifdef HAVE_DIRENT_H
   hwloc_pid_t realpid;
@@ -251,7 +251,7 @@ void hwloc_ps_free_process(struct hwloc_ps_process *proc)
 int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 			     void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
 			     void *cbdata,
-			     unsigned long flags, char *pidcmd)
+			     unsigned long flags, const char *pidcmd)
 {
 #ifdef HAVE_DIRENT_H
   DIR *dir;
