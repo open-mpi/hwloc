@@ -340,6 +340,17 @@ EOF
     _HWLOC_CHECK_DIFF_U
     _HWLOC_CHECK_DIFF_W
 
+    # Solaris needs -lsocket for socket/bind/... in hwloc-ps
+    AC_CHECK_DECLS([bind], [
+      AC_CHECK_LIB([socket], [bind],
+                   [need_libsocket=yes])
+    ], [], [[#include <sys/socket.h>]])
+    if test x$need_libsocket = xyes; then
+      # keep -lsocket first in case there's also -lnsl which cannot be before -lsocket
+      HWLOC_PS_LIBS="-lsocket $HWLOC_PS_LIBS"
+    fi
+    AC_SUBST(HWLOC_PS_LIBS)
+
     AC_CHECK_HEADERS([time.h], [
       AC_CHECK_FUNCS([clock_gettime])
     ])

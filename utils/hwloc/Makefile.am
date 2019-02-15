@@ -63,7 +63,8 @@ hwloc_calc_SOURCES = \
         hwloc-calc.c
 
 hwloc_ps_SOURCES = hwloc-ps.c
-hwloc_ps_LDADD = $(LDADD) libutils_common.la
+# keep HWLOC_PS_LIBS first in case there's also -lnsl which cannot be before -lsocket
+hwloc_ps_LDADD = $(HWLOC_PS_LIBS) $(LDADD) libutils_common.la
 
 bin_SCRIPTS = hwloc-compress-dir
 if HWLOC_HAVE_LINUX

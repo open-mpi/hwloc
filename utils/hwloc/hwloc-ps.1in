@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2018 Inria.  All rights reserved.
+.\" Copyright © 2010-2019 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-PS "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -63,6 +63,17 @@ Append the output of the given command to each PID line.
 For each displayed process ID, execute the command \fI<cmd> <pid>\fR
 and append \fBthe first line\fR of its output to the regular hwloc-ps
 line.
+.TP
+\fB\-\-json\-server\fR
+Run the tool as a JSON server that waits for other process' requests
+on a port and sends back binding information.
+See contrib/hwloc-ps.www/ for details.
+.TP
+\fB\-\-json\-port <port>\fR
+Use the given port number instead of the default 8888.
+.TP
+\fB\-v\fR \fB\-\-verbose\fR
+Increase verbosity of the JSON server.
 .TP
 \fB\-h\fR \fB\-\-help\fR
 Display help message and exit.

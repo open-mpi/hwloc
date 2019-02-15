@@ -1,5 +1,5 @@
 #
-# Copyright © 2018 Inria.  All rights reserved.
+# Copyright © 2018-2019 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -414,6 +414,9 @@ _hwloc-ps(){
 		   -e --get-last-cpu-location
 		   --pid-cmd
 		   --disallowed --whole-system
+		   --json-server
+		   --json-port
+		   -v --verbose
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
@@ -431,6 +434,9 @@ _hwloc-ps(){
 	    ;;
 	--pid-cmd)
 	    _filedir
+	    ;;
+	--json-port)
+	    COMPREPLY=( "<port>" "" )
 	    ;;
 	esac
     fi

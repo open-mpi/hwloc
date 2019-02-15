@@ -15,15 +15,29 @@
 #include <dirent.h>
 #endif
 #include <fcntl.h>
+#include <assert.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 #include "common-ps.h"
 #include "misc.h"
+
+#define JSON_PORT 8888
 
 static int show_all = 0;
 static int show_threads = 0;
 static char *only_name = NULL;
 static int show_cpuset = 0;
 static int logical = 1;
+#define NO_ONLY_PID -1
+static long only_pid = NO_ONLY_PID;
+static int json_server = 0;
+static int json_port = JSON_PORT;
+static FILE *json_output = NULL;
+static int verbose = 0;
 
 void usage(const char *name, FILE *where)
 {
@@ -42,6 +56,9 @@ void usage(const char *name, FILE *where)
   fprintf (where, "                     Retrieve the last processors where the tasks ran\n");
   fprintf (where, "  --pid-cmd <cmd>    Append the output of <cmd> <pid> to each PID line\n");
   fprintf (where, "  --disallowed       Include objects disallowed by administrative limitations\n");
+  fprintf (where, "  --json-server      Run as a JSON server\n");
+  fprintf (where, "  --json-port <n>    Use port <n> for JSON server (default is %d)\n", JSON_PORT);
+  fprintf (where, "  -v --verbose       Increase verbosity\n");
 }
 
 static void print_task(hwloc_topology_t topology,
@@ -93,6 +110,63 @@ static void print_process(hwloc_topology_t topology,
 	print_task(topology, proc->threads[i].tid, proc->threads[i].name, proc->threads[i].cpuset, NULL, 1);
 }
 
+static void print_process_json(hwloc_topology_t topology,
+			       struct hwloc_ps_process *proc)
+{
+  hwloc_obj_t obj;
+  char type[64];
+
+  assert(json_output);
+
+  if (verbose > 1)
+    printf("  sending process PID %ld name %s\n", proc->pid, proc->name);
+
+  /* process */
+  obj = hwloc_get_obj_covering_cpuset(topology, proc->cpuset);
+  while (obj->parent && hwloc_bitmap_isequal(obj->cpuset, obj->parent->cpuset))
+    obj = obj->parent;
+  hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+  fprintf(json_output,
+	  "{\n"
+	  "  \"PID\": %ld,\n"
+	  "  \"name\": \"%s\",\n"
+	  "  \"object\": \"%s:%u\"%s\n",
+	  proc->pid,
+	  proc->name,
+	  type, obj->logical_index,
+	  proc->nthreads ? "," : "");
+
+  /* threads */
+  if (proc->nthreads) {
+    unsigned i;
+    fprintf(json_output, "  \"threads\": [\n");
+    for(i=0; i<proc->nthreads; i++) {
+      struct hwloc_ps_thread *thread = &proc->threads[i];
+      if (thread->cpuset) {
+	obj = hwloc_get_obj_covering_cpuset(topology, thread->cpuset);
+	while (obj->parent && hwloc_bitmap_isequal(obj->cpuset, obj->parent->cpuset))
+	  obj = obj->parent;
+	hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+
+	fprintf(json_output,
+		"    {\n"
+		"      \"PID\": %ld,\n"
+		"      \"name\": \"%s\",\n"
+		"      \"object\": \"%s:%u\"\n"
+		"    }%s\n",
+		thread->tid,
+		thread->name,
+		type, obj->logical_index,
+		i < proc->nthreads-1 ? "," : "");
+      }
+    }
+    fprintf(json_output, "  ]\n");
+  }
+
+  /* close the process */
+  fprintf(json_output, "},\n");
+}
+
 static void foreach_process_cb(hwloc_topology_t topology,
 			       struct hwloc_ps_process *proc,
 			       void *cbdata __hwloc_attribute_unused)
@@ -101,7 +175,159 @@ static void foreach_process_cb(hwloc_topology_t topology,
   if (!proc->bound && (!proc->nthreads || !proc->nboundthreads) && !show_all && !only_name)
     return;
 
-  print_process(topology, proc);
+  if (json_output)
+    print_process_json(topology, proc);
+  else
+    print_process(topology, proc);
+}
+
+static int run(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
+	       unsigned long psflags, char *pidcmd)
+{
+  if (only_pid == NO_ONLY_PID) {
+    /* show all */
+    return hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, NULL, psflags, only_name, pidcmd);
+
+  } else {
+    /* show only one */
+    struct hwloc_ps_process proc;
+    int ret;
+
+    proc.pid = only_pid;
+    proc.cpuset = NULL;
+    proc.nthreads = 0;
+    proc.nboundthreads = 0;
+    proc.threads = NULL;
+    ret = hwloc_ps_read_process(topology, topocpuset, &proc, psflags, pidcmd);
+    if (ret >= 0) {
+      if (json_output)
+	print_process_json(topology, &proc);
+      else
+	print_process(topology, &proc);
+    }
+    hwloc_ps_free_process(&proc);
+    return ret;
+  }
+}
+
+#define JSON_REQLENMAX 100
+
+static int
+run_json_server(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset)
+{
+  int server_socket;
+  struct sockaddr_in server_addr;
+  int err;
+
+  /* open the socket */
+  server_socket = socket(AF_INET, SOCK_STREAM, 0);
+  if (server_socket < 0) {
+    perror("json-server: socket");
+    return -1;
+  }
+
+  /* bind it to port */
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = INADDR_ANY;
+  server_addr.sin_port = htons(json_port);
+  err = bind(server_socket, (struct sockaddr *)&server_addr , sizeof server_addr);
+  if (err < 0) {
+    perror("json-server: bind");
+    return -1;
+  }
+
+  /* listen to connections, up to 1 awaiting */
+  err = listen(server_socket, 1);
+  if (err < 0) {
+    perror("json-server: listen");
+    return -1;
+  }
+
+  printf("server running on port %d...\n", json_port);
+
+  while (1) {
+    int client_socket;
+    char req[JSON_REQLENMAX+1];
+    int ret;
+
+    /* wait for a new client connection */
+    client_socket = accept(server_socket, NULL, NULL);
+    if (client_socket < 0) {
+      perror("json-server: accept");
+      continue;
+    }
+    printf("client connected\n");
+    json_output = fdopen(client_socket, "r+");
+    if (!json_output) {
+      perror("json-server: fdopen");
+      close(client_socket);
+      continue;
+    }
+
+    while (1) {
+      char *end, *current;
+      unsigned long psflags = HWLOC_PS_FLAG_SHORTNAME;
+
+      /* read the client request */
+      ret = read(client_socket, req, sizeof req);
+      if (ret <= 0)
+	break;
+      req[ret] = '\0';
+      end = strchr(req, '\n');
+      if (end)
+	*end = '\0';
+
+      if (verbose > 0)
+	printf(" received request `%s'\n", req);
+
+      only_name = NULL;
+      only_pid = NO_ONLY_PID;
+      current = req;
+      while (*current) {
+	if (!strncmp(current, "lastcpulocation ", 16)) {
+	  psflags |= HWLOC_PS_FLAG_LASTCPULOCATION;
+	  current += 16;
+	  continue;
+	} else if (!strncmp(current, "threads ", 8)) {
+	  psflags |= HWLOC_PS_FLAG_THREADS;
+	  current += 8;
+	  continue;
+	} else if (!strcmp(current, "all")) {
+	  show_all = 1;
+	  break;
+	} else if (!strcmp(current, "bound")) {
+	  show_all = 0;
+	  break;
+	} else if (!strncmp(current, "pid=", 4)) {
+	  only_pid = atoi(current+4);
+	  psflags |= HWLOC_PS_FLAG_THREADS;
+	  show_all = 1;
+	  break;
+	} else if (!strncmp(current, "name=", 5)) {
+	  only_name = current+5;
+	  show_all = 1;
+	  break;
+	}
+      }
+
+      fprintf(json_output, "[ ");
+      run(topology, topocpuset, psflags, NULL);
+      fprintf(json_output, "{ } ]\n");
+      fflush(json_output);
+    }
+
+    if (ret == 0) {
+      printf("disconnected\n");
+    } else if (ret < -1) {
+      perror("json-server: read");
+    }
+    fclose(json_output);
+    json_output = NULL;
+    close(client_socket);
+  }
+
+  close(server_socket);
+  return 0;
 }
 
 int main(int argc, char *argv[])
@@ -112,8 +338,6 @@ int main(int argc, char *argv[])
   unsigned long flags = 0;
   unsigned long psflags = 0;
   int get_last_cpu_location = 0;
-#define NO_ONLY_PID -1
-  long only_pid = NO_ONLY_PID;
   char *pidcmd = NULL;
   char *callname;
   int err;
@@ -171,6 +395,20 @@ int main(int argc, char *argv[])
       }
       pidcmd = argv[1];
       opt = 1;
+
+    } else if (!strcmp (argv[0], "--json-server")) {
+      json_server = 1;
+    } else if (!strcmp (argv[0], "--json-port")) {
+      if (argc < 2) {
+	usage(callname, stdout);
+	exit(EXIT_FAILURE);
+      }
+      json_port = atoi(argv[1]);
+      opt = 1;
+
+    } else if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
+      verbose++;
+
     } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
       usage (callname, stdout);
       exit(EXIT_SUCCESS);
@@ -210,22 +448,11 @@ int main(int argc, char *argv[])
   if (get_last_cpu_location)
     psflags |= HWLOC_PS_FLAG_LASTCPULOCATION;
 
-  if (only_pid == NO_ONLY_PID) {
-    /* show all */
-    if (hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, NULL, psflags, only_name, pidcmd))
-      goto out_with_topology;
-
+  if (json_server) {
+    run_json_server(topology, topocpuset);
   } else {
-    /* show only one */
-    struct hwloc_ps_process proc;
-    proc.pid = only_pid;
-    proc.cpuset = NULL;
-    proc.nthreads = 0;
-    proc.nboundthreads = 0;
-    proc.threads = NULL;
-    if (hwloc_ps_read_process(topology, topocpuset, &proc, psflags, pidcmd) >= 0)
-      print_process(topology, &proc);
-    hwloc_ps_free_process(&proc);
+    if (run(topology, topocpuset, psflags, pidcmd))
+      goto out_with_topology;
   }
 
   err = 0;
