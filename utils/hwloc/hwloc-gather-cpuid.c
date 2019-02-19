@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2018 Inria.  All rights reserved.
+ * Copyright © 2015-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -467,7 +467,12 @@ int main(int argc, const char * const argv[])
 
   hwloc_topology_init(&topo);
   hwloc_topology_set_all_types_filter(topo, HWLOC_TYPE_FILTER_KEEP_NONE);
-  hwloc_topology_load(topo);
+  err = hwloc_topology_load(topo);
+  if (err < 0) {
+    fprintf(stderr, "Failed to load topology\n");
+    ret = EXIT_FAILURE;
+    goto out;
+  }
 
   if (!hwloc_topology_is_thissystem(topo)) {
     fprintf(stderr, "%s must run on the current system topology, while this topology doesn't come from this system.\n", callname);

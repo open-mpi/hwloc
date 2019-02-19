@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -235,10 +235,10 @@ int main(int argc, char *argv[])
     hwloc_topology_set_flags(topology, flags); \
     if (input) { \
       err = hwloc_utils_enable_input_format(topology, input, &input_format, verbose, callname); \
-      if (err) \
-        return err; \
+      if (err) return EXIT_FAILURE; \
     } \
-    hwloc_topology_load(topology); \
+    err = hwloc_topology_load(topology); \
+    if (err < 0) return EXIT_FAILURE; \
     depth = hwloc_topology_get_depth(topology); \
     loaded = 1; \
   } \
