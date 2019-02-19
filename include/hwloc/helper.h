@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -512,17 +512,6 @@ hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_normal(hwloc_obj_type_t type);
 
-/** \brief Check whether an object type is Memory.
- *
- * Memory objects are objects attached to their parents
- * in the Memory children list.
- * This current only includes NUMA nodes.
- *
- * \return 1 if an object of type \p type is a Memory object, 0 otherwise.
- */
-HWLOC_DECLSPEC int
-hwloc_obj_type_is_io(hwloc_obj_type_t type);
-
 /** \brief Check whether an object type is I/O.
  *
  * I/O objects are objects attached to their parents
@@ -530,6 +519,17 @@ hwloc_obj_type_is_io(hwloc_obj_type_t type);
  * This current includes Bridges, PCI and OS devices.
  *
  * \return 1 if an object of type \p type is a I/O object, 0 otherwise.
+ */
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_io(hwloc_obj_type_t type);
+
+/** \brief Check whether an object type is Memory.
+ *
+ * Memory objects are objects attached to their parents
+ * in the Memory children list.
+ * This current only includes NUMA nodes.
+ *
+ * \return 1 if an object of type \p type is a Memory object, 0 otherwise.
  */
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_memory(hwloc_obj_type_t type);
