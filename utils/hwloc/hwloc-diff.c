@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Inria.  All rights reserved.
+ * Copyright © 2013-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -79,18 +79,26 @@ int main(int argc, char *argv[])
 	err = hwloc_topology_set_xml(topo1, input1);
 	if (err < 0) {
 		fprintf(stderr, "Failed to load 1st XML topology %s\n", input1);
-		goto out;
+		goto out_with_topo1;
 	}
-	hwloc_topology_load(topo1);
+	err = hwloc_topology_load(topo1);
+	if (err < 0) {
+		fprintf(stderr, "Failed to load 1st topology %s\n", input1);
+		goto out_with_topo1;
+	}
 
 	hwloc_topology_init(&topo2);
 	hwloc_topology_set_flags(topo2, flags);
 	err = hwloc_topology_set_xml(topo2, input2);
 	if (err < 0) {
 		fprintf(stderr, "Failed to load 2nd XML topology %s\n", input2);
-		goto out_with_topo1;
+		goto out_with_topo2;
 	}
-	hwloc_topology_load(topo2);
+	err = hwloc_topology_load(topo2);
+	if (err < 0) {
+		fprintf(stderr, "Failed to load 2nd topology %s\n", input2);
+		goto out_with_topo2;
+	}
 
 	if (!refname) {
 		refname = strrchr(input1, '/');
@@ -150,6 +158,5 @@ out_with_topo2:
 	hwloc_topology_destroy(topo2);
 out_with_topo1:
 	hwloc_topology_destroy(topo1);
-out:
 	exit(EXIT_FAILURE);
 }
