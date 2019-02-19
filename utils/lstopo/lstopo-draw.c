@@ -487,6 +487,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   enum lstopo_orient_e orient = loutput->force_orient[parent->type];
   unsigned border = loutput->gridsize;
   unsigned separator = loutput->gridsize;
+  unsigned normal_children_separator = separator;
   unsigned totwidth = plud->width, totheight = plud->height;
   unsigned children_width = 0, children_height = 0;
   unsigned above_children_width, above_children_height;
@@ -524,11 +525,11 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
   /* no separator between PUs */
   if ((unsigned)parent->depth == loutput->depth-2)
-    separator = 0;
+    normal_children_separator = 0;
 
   /* place non-memory children */
   if (parent->arity + parent->io_arity + parent->misc_arity)
-    place__children(loutput, parent, plud->children.kinds, &orient, 0, separator, &children_width, &children_height);
+    place__children(loutput, parent, plud->children.kinds, &orient, 0, normal_children_separator, &children_width, &children_height);
 
   /* place memory children */
   if (plud->above_children.kinds) {
