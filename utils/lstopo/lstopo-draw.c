@@ -1004,19 +1004,12 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 
   lud->textwidth = 0;
   for(i=0; i<lud->ntext; i++) {
-    unsigned textwidth, textxoffset = 0;
+    unsigned textwidth;
     if (i) /* already computed above for n=0 */
       n = (unsigned)strlen(lud->text[i].text);
     textwidth = get_textwidth(loutput, lud->text[i].text, n, fontsize);
-    if (obj->type == HWLOC_OBJ_PU && textwidth < loutput->min_pu_textwidth) {
-      /* if smaller than other PU, artificially extend/shift it
-       * to make PU boxes nicer when vertically stacked.
-       */
-      textxoffset = (loutput->min_pu_textwidth - textwidth) / 2;
-      textwidth = loutput->min_pu_textwidth;
-    }
     lud->text[i].width = textwidth;
-    lud->text[i].xoffset = textxoffset;
+    lud->text[i].xoffset = 0; /* only used for PU in output_compute_pu_min_textwidth() */
     if (textwidth > lud->textwidth)
       lud->textwidth = textwidth;
   }
@@ -1218,7 +1211,8 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
-    prepare_text(loutput, level);
+    if (level->type != HWLOC_OBJ_PU) /* PU already computed in output_compute_pu_min_textwidth() earlier */
+      prepare_text(loutput, level);
     lud->width = gridsize;
     lud->height = gridsize;
     if (lud->ntext > 0) {
@@ -1247,29 +1241,33 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 }
 
 static void
-output_compute_pu_min_textwidth(struct lstopo_output *output)
+output_align_PU_textwidth(struct lstopo_output *loutput)
 {
-  unsigned fontsize = output->fontsize;
-  char text[64];
-  int n;
-  hwloc_topology_t topology = output->topology;
-  hwloc_obj_t lastpu;
+  hwloc_topology_t topology = loutput->topology;
+  unsigned textwidth_max = 0;
+  hwloc_obj_t pu;
+  unsigned i;
 
-  if (!output->methods->textsize) {
-    output->min_pu_textwidth = 0;
-    return;
+  /* compute the max PU textwidth */
+  pu = NULL;
+  while ((pu = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PU, pu)) != NULL) {
+    struct lstopo_obj_userdata *lud = pu->userdata;
+    prepare_text(loutput, pu);
+    if (lud->textwidth > textwidth_max)
+      textwidth_max = lud->textwidth;
   }
 
-  if (output->index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
-    int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
-    lastpu = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth)-1);
-  } else {
-    unsigned lastidx = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
-    lastpu = hwloc_get_pu_obj_by_os_index(topology, lastidx);
+  /* update text placement to match the max textwidth */
+  pu = NULL;
+  while ((pu = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PU, pu)) != NULL) {
+    struct lstopo_obj_userdata *lud = pu->userdata;
+    for(i=0; i<lud->ntext; i++)
+      if (lud->text[i].width < textwidth_max) {
+	lud->text[i].xoffset = (textwidth_max-lud->text[i].width)/2;
+	lud->text[i].width = textwidth_max;
+      }
+    lud->textwidth = textwidth_max;
   }
-
-  n = lstopo_obj_snprintf(output, text, sizeof(text), lastpu);
-  output->min_pu_textwidth = get_textwidth(output, text, n, fontsize);
 }
 
 void
@@ -1351,7 +1349,7 @@ output_draw(struct lstopo_output *loutput)
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute root size, our size, and save it */
 
-    output_compute_pu_min_textwidth(loutput);
+    output_align_PU_textwidth(loutput);
 
     get_type_fun(root->type)(loutput, root, depth, 0, 0);
 
