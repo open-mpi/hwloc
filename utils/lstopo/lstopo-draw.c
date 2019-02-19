@@ -487,7 +487,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   enum lstopo_orient_e orient = loutput->force_orient[parent->type];
   unsigned border = loutput->gridsize;
   unsigned separator = loutput->gridsize;
-  unsigned normal_children_separator = separator;
+  unsigned separator_below_cache = loutput->gridsize;
+  unsigned normal_children_separator = loutput->gridsize;
   unsigned totwidth = plud->width, totheight = plud->height;
   unsigned children_width = 0, children_height = 0;
   unsigned above_children_width, above_children_height;
@@ -527,6 +528,15 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   if ((unsigned)parent->depth == loutput->depth-2)
     normal_children_separator = 0;
 
+  /* add separator between a cache parent and its children */
+  if (hwloc_obj_type_is_cache(parent->type)) {
+    if ((unsigned)parent->depth == loutput->depth-2)
+      /* except between cache parent and PU children */
+      separator_below_cache = 0;
+    /* update children placement */
+    yrel += separator_below_cache;
+  }
+
   /* place non-memory children */
   if (parent->arity + parent->io_arity + parent->misc_arity)
     place__children(loutput, parent, plud->children.kinds, &orient, 0, normal_children_separator, &children_width, &children_height);
@@ -565,7 +575,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     if (children_width > totwidth)
       totwidth = children_width;
     if (children_height)
-      totheight += children_height + border;
+      totheight += children_height + separator_below_cache;
     if (plud->above_children.kinds) {
       totheight += above_children_height + separator;
       if (above_children_width > totwidth)
@@ -1163,7 +1173,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
       lud->height += fontsize + gridsize;
     }
     place_children(loutput, level,
-		   0, lud->height + gridsize);
+		   0, lud->height /* the callee with add vertical space if needed */);
 
   } else { /* LSTOPO_DRAWING_DRAW */
     struct draw_methods *methods = loutput->methods;
