@@ -233,7 +233,7 @@ typedef enum {
 			  * It is usually close to some cores (the corresponding objects
 			  * are descendants of the NUMA node object in the hwloc tree).
 			  *
-			  * There is always at one such object in the topology
+			  * There is always at least one such object in the topology
 			  * even if the machine is not NUMA.
 			  *
 			  * Memory objects are not listed in the main children list,
