@@ -153,7 +153,7 @@ struct lstopo_obj_userdata {
     unsigned xrel;
     unsigned yrel;
     unsigned box;
-    struct lstopo_color boxcolor;
+    struct lstopo_color *boxcolor;
   } children;
   /* relative position of first memory child */
   struct lstopo_children_position above_children;

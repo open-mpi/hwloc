@@ -556,7 +556,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       if (above_children_width < children_width) {
 	above_children_width = children_width;
       }
-      plud->above_children.boxcolor = MEMORIES_COLOR;
+      plud->above_children.boxcolor = &MEMORIES_COLOR;
       plud->above_children.box = 1;
 
     } else {
@@ -631,7 +631,7 @@ draw__children(struct lstopo_output *loutput, hwloc_obj_t parent,
   int ncstate;
 
   if (children->box)
-    loutput->methods->box(loutput, &children->boxcolor, depth, x, children->width, y, children->height);
+    loutput->methods->box(loutput, children->boxcolor, depth, x, children->width, y, children->height);
 
   for(child = next_child(loutput, parent, children->kinds, NULL, &ncstate);
       child;
