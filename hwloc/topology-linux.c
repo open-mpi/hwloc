@@ -3544,6 +3544,9 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
     return;
   }
 
+  if (!hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE))
+    hwdata.mcdram_cache_size = 0;
+
   hwloc_obj_add_info(topology->levels[0][0], "ClusterMode", hwdata.cluster_mode);
   hwloc_obj_add_info(topology->levels[0][0], "MemoryMode", hwdata.memory_mode);
 
