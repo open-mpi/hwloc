@@ -492,6 +492,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned totwidth = plud->width, totheight = plud->height;
   unsigned children_width = 0, children_height = 0;
   unsigned above_children_width, above_children_height;
+  unsigned existing_kinds;
   hwloc_obj_t child;
   int ncstate;
   unsigned i;
@@ -500,15 +501,19 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   plud->children.box = 0;
   plud->above_children.box = 0;
 
-  /* select which children kinds go where */
-  if (loutput->plain_children_order)
-    plud->children.kinds = LSTOPO_CHILD_KIND_ALL;
-  else
-    plud->children.kinds = LSTOPO_CHILD_KIND_ALL & ~LSTOPO_CHILD_KIND_MEMORY;
-  if (parent->memory_arity && !(plud->children.kinds & LSTOPO_CHILD_KIND_MEMORY))
-    plud->above_children.kinds = LSTOPO_CHILD_KIND_MEMORY;
-  else
+  /* list the kinds of children that exist in that parent */
+  existing_kinds = (parent->arity ? LSTOPO_CHILD_KIND_NORMAL : 0)
+    | (parent->memory_arity ? LSTOPO_CHILD_KIND_MEMORY : 0)
+    | (parent->io_arity ? LSTOPO_CHILD_KIND_IO : 0)
+    | (parent->misc_arity ? LSTOPO_CHILD_KIND_MISC : 0);
+  /* now assign them below or above the parent */
+  if (loutput->plain_children_order) {
+    plud->children.kinds = existing_kinds;
     plud->above_children.kinds = 0;
+  } else {
+    plud->children.kinds = existing_kinds & ~LSTOPO_CHILD_KIND_MEMORY;
+    plud->above_children.kinds = existing_kinds & LSTOPO_CHILD_KIND_MEMORY;
+  }
 
   /* bridge children always vertical */
   if (parent->type == HWLOC_OBJ_BRIDGE)
@@ -537,11 +542,11 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     yrel += separator_below_cache;
   }
 
-  /* place non-memory children */
-  if (parent->arity + parent->io_arity + parent->misc_arity)
+  /* place children below the parent */
+  if (plud->children.kinds)
     place__children(loutput, parent, plud->children.kinds, &orient, 0, normal_children_separator, &children_width, &children_height);
 
-  /* place memory children */
+  /* place children above the parent, if any*/
   if (plud->above_children.kinds) {
     enum lstopo_orient_e morient = LSTOPO_ORIENT_HORIZ;
     unsigned memory_border;
