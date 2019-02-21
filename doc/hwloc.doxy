@@ -1166,6 +1166,8 @@ following environment variables.
  HWLOC_KNL_HDH_FALLBACK
   if 1, ignore KNL info from hwloc-dump-hwdata and fallback to heuristic
   if 0, never fallback to the hardwired heuristic, useful if the heuristic is wrong
+ HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS
+  don't ignore linux numa nodes with overlapping cpusets
  HWLOC_DEBUG_CHECK
   runs sanity checks during discovery, as if \--enable-debug was passed but
   without debug messages

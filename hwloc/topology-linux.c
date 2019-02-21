@@ -3751,6 +3751,7 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned failednodes = 0;
   unsigned quirk_status = 0;
   unsigned i;
+  int allow_overlapping_node_cpusets = (getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS") != NULL);
 
   /* NUMA nodes cannot be filtered out */
   indexes = list_sysfsnode(data, path, &nbnodes);
@@ -3791,14 +3792,18 @@ look_sysfsnode(struct hwloc_topology *topology,
 	      continue;
 	    }
 	    if (hwloc_bitmap_intersects(nodes_cpuset, cpuset)) {
-	      /* crazy BIOS with overlapping NUMA node cpusets, impossible on Linux so far */
-	      hwloc_debug_1arg_bitmap("node P#%u cpuset %s intersects with previous nodes, ignoring that node.\n", osnode, cpuset);
-	      hwloc_bitmap_free(cpuset);
-	      failednodes++;
-	      continue;
-	    } else {
-	      hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
+	      /* Buggy BIOS with overlapping NUMA node cpusets, impossible on Linux so far, we should ignore them.
+	       * But it may be useful for debugging the core.
+	       */
+	      if (!allow_overlapping_node_cpusets) {
+		hwloc_debug_1arg_bitmap("node P#%u cpuset %s intersects with previous nodes, ignoring that node.\n", osnode, cpuset);
+		hwloc_bitmap_free(cpuset);
+		failednodes++;
+		continue;
+	      }
+	      fprintf(stderr, "node P#%u cpuset intersects with previous nodes, forcing its acceptance\n", osnode);
 	    }
+	    hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
 
 	    node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, osnode);
 	    node->cpuset = cpuset;
