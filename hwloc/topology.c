@@ -1509,6 +1509,7 @@ hwloc__find_insert_memory_parent(struct hwloc_topology *topology, hwloc_obj_t ob
   return group;
 }
 
+/* only works for MEMCACHE and NUMAnode with a single bit in nodeset */
 static hwloc_obj_t
 hwloc___attach_memory_object_by_nodeset(struct hwloc_topology *topology, hwloc_obj_t parent,
 					hwloc_obj_t obj,
@@ -1533,19 +1534,47 @@ hwloc___attach_memory_object_by_nodeset(struct hwloc_topology *topology, hwloc_o
 
     if (first == curfirst) {
       /* identical nodeset */
-      assert(obj->type == HWLOC_OBJ_NUMANODE);
-      assert(cur->type == HWLOC_OBJ_NUMANODE);
-      /* identical NUMA nodes? ignore the new one */
-      if (report_error) {
-	char curstr[512];
-	char objstr[512];
-	char msg[1100];
-	hwloc__report_error_format_obj(curstr, sizeof(curstr), cur);
-	hwloc__report_error_format_obj(objstr, sizeof(objstr), obj);
-	snprintf(msg, sizeof(msg), "%s and %s have identical nodesets!", objstr, curstr);
-	report_error(msg, __LINE__);
+      if (obj->type == HWLOC_OBJ_NUMANODE) {
+	if (cur->type == HWLOC_OBJ_NUMANODE) {
+	  /* identical NUMA nodes? ignore the new one */
+	  if (report_error) {
+	    char curstr[512];
+	    char objstr[512];
+	    char msg[1100];
+	    hwloc__report_error_format_obj(curstr, sizeof(curstr), cur);
+	    hwloc__report_error_format_obj(objstr, sizeof(objstr), obj);
+	    snprintf(msg, sizeof(msg), "%s and %s have identical nodesets!", objstr, curstr);
+	    report_error(msg, __LINE__);
+	  }
+	  return NULL;
+	}
+	assert(cur->type == HWLOC_OBJ_MEMCACHE);
+	/* insert the new NUMA node below that existing memcache */
+	return hwloc___attach_memory_object_by_nodeset(topology, cur, obj, report_error);
+
+      } else {
+	assert(obj->type == HWLOC_OBJ_MEMCACHE);
+	if (cur->type == HWLOC_OBJ_MEMCACHE) {
+	  if (cur->attr->cache.depth == obj->attr->cache.depth)
+	    /* memcache with same nodeset and depth, ignore the new one */
+	    return NULL;
+	  if (cur->attr->cache.depth > obj->attr->cache.depth)
+	    /* memcache with higher cache depth is actually *higher* in the hierarchy
+	     * (depth starts from the NUMA node).
+	     * insert the new memcache below the existing one
+	     */
+	    return hwloc___attach_memory_object_by_nodeset(topology, cur, obj, report_error);
+	}
+	/* insert the memcache above the existing memcache or numa node */
+	obj->next_sibling = cur->next_sibling;
+	cur->next_sibling = NULL;
+	obj->memory_first_child = cur;
+	cur->parent = obj;
+	*curp = obj;
+	obj->parent = parent;
+	topology->modified = 1;
+	return obj;
       }
-      return NULL;
     }
 
     curp = &cur->next_sibling;
@@ -1587,6 +1616,8 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
   } else if (!hwloc_bitmap_isincluded(obj->nodeset, obj->complete_nodeset)) {
     return NULL;
   }
+  /* Neither ACPI nor Linux support multinode mscache */
+  assert(hwloc_bitmap_weight(obj->nodeset) == 1);
 
 #if 0
   /* TODO: enable this instead of hack in fixup_sets once NUMA nodes are inserted late */
@@ -1598,9 +1629,6 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
   hwloc_bitmap_copy(obj->cpuset, parent->cpuset);
   hwloc_bitmap_copy(obj->complete_cpuset, parent->complete_cpuset);
 #endif
-
-  /* only NUMA nodes are memory for now, just append to the end of the list */
-  assert(obj->type == HWLOC_OBJ_NUMANODE);
 
   result = hwloc___attach_memory_object_by_nodeset(topology, parent, obj, report_error);
   if (result == obj) {
