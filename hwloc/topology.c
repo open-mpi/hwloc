@@ -1543,13 +1543,71 @@ hwloc__find_insert_memory_parent(struct hwloc_topology *topology, hwloc_obj_t ob
   return group;
 }
 
-/* Attach the given memory object below the given normal parent. */
+static hwloc_obj_t
+hwloc___attach_memory_object_by_nodeset(struct hwloc_topology *topology, hwloc_obj_t parent,
+					hwloc_obj_t obj,
+					hwloc_report_error_t report_error)
+{
+  hwloc_obj_t *curp = &parent->memory_first_child;
+  unsigned first = hwloc_bitmap_first(obj->nodeset);
+
+  while (*curp) {
+    hwloc_obj_t cur = *curp;
+    unsigned curfirst = hwloc_bitmap_first(cur->nodeset);
+
+    if (first < curfirst) {
+      /* insert before cur */
+      obj->next_sibling = cur;
+      *curp = obj;
+      obj->memory_first_child = NULL;
+      obj->parent = parent;
+      topology->modified = 1;
+      return obj;
+    }
+
+    if (first == curfirst) {
+      /* identical nodeset */
+      assert(obj->type == HWLOC_OBJ_NUMANODE);
+      assert(cur->type == HWLOC_OBJ_NUMANODE);
+      /* identical NUMA nodes? ignore the new one */
+      if (report_error) {
+	char curstr[512];
+	char objstr[512];
+	char msg[1100];
+	hwloc__report_error_format_obj(curstr, sizeof(curstr), cur);
+	hwloc__report_error_format_obj(objstr, sizeof(objstr), obj);
+	snprintf(msg, sizeof(msg), "%s and %s have identical nodesets!", objstr, curstr);
+	report_error(msg, __LINE__);
+      }
+      return NULL;
+    }
+
+    curp = &cur->next_sibling;
+  }
+
+  /* append to the end of the list */
+  obj->next_sibling = NULL;
+  *curp = obj;
+  obj->memory_first_child = NULL;
+  obj->parent = parent;
+  topology->modified = 1;
+  return obj;
+}
+
+/* Attach the given memory object below the given normal parent.
+ *
+ * Only the nodeset is used to find the location inside memory children below parent.
+ *
+ * Nodeset inclusion inside the given memory hierarchy is guaranteed by this function,
+ * but nodesets are not propagated to CPU-side parent yet. It will be done by
+ * propagate_nodeset() later.
+ */
 struct hwloc_obj *
 hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
 			    hwloc_obj_t obj,
-			    hwloc_report_error_t report_error __hwloc_attribute_unused)
+			    hwloc_report_error_t report_error)
 {
-  hwloc_obj_t *cur_children;
+  hwloc_obj_t result;
 
   assert(parent);
   assert(hwloc__obj_type_is_normal(parent->type));
@@ -1577,26 +1635,20 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
 
   /* only NUMA nodes are memory for now, just append to the end of the list */
   assert(obj->type == HWLOC_OBJ_NUMANODE);
-  assert(obj->nodeset);
-  cur_children = &parent->memory_first_child;
-  while (*cur_children) {
-    /* TODO check that things are inserted in order.
-     * it's OK for KNL, the only user so far
-     */
-    cur_children = &(*cur_children)->next_sibling;
+
+  result = hwloc___attach_memory_object_by_nodeset(topology, parent, obj, report_error);
+  if (result == obj) {
+    /* Add the bit to the top sets, and to the parent CPU-side object */
+    if (obj->type == HWLOC_OBJ_NUMANODE) {
+      hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
+      hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
+    }
   }
-  *cur_children = obj;
-  obj->next_sibling = NULL;
-
-
-  /* Add the bit to the top sets, and to the parent CPU-side object */
-  if (obj->type == HWLOC_OBJ_NUMANODE) {
-    hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
-    hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
+  if (result != obj) {
+    /* either failed to insert, or got merged, free the original object */
+    hwloc_free_unlinked_object(obj);
   }
-
-  topology->modified = 1;
-  return obj;
+  return result;
 }
 
 /* insertion routine that lets you change the error reporting callback */
@@ -2047,9 +2099,8 @@ hwloc_obj_add_children_sets(hwloc_obj_t obj)
 /* CPU objects are inserted by cpusets, we know their cpusets are properly included.
  * We just need fixup_sets() to make sure they aren't too wide.
  *
- * Memory objects are inserted by cpusets to find their CPU parent,
- * but nodesets are only used inside the memory hierarchy below that parent.
- * Thus we need to propagate nodesets to CPU-side parents and children.
+ * Within each memory hierarchy, nodeset are consistent as well.
+ * However they must be propagated to their CPU-side parents.
  *
  * A memory object nodeset consists of NUMA nodes below it.
  * A normal object nodeset consists in NUMA nodes attached to any
@@ -2082,11 +2133,12 @@ propagate_nodeset(hwloc_obj_t obj)
 
   /* now add our local nodeset */
   for_each_memory_child(child, obj) {
-    /* FIXME rather recurse in the memory hierarchy */
-
     /* add memory children nodesets to ours */
     hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
     hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
+    /* no need to recurse because hwloc__attach_memory_object()
+     * makes sure nodesets are consistent within each memory hierarchy.
+     */
   }
 
   /* Propagate our nodeset to CPU children. */
