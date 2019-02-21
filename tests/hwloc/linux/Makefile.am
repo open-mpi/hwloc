@@ -1,4 +1,4 @@
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -63,7 +63,8 @@ sysfs_outputs = \
 		2s390-2c.output \
 		20s390-2g6s4c.output \
 		1alpha.output \
-		2arm-2c.output
+		2arm-2c.output \
+		fakeheteronuma.output
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # or a corresponding `xyz.source' specifying which tarball to use
@@ -123,7 +124,8 @@ sysfs_tarballs = \
 		2s390-2c.tar.bz2 \
 		20s390-2g6s4c.tar.bz2 \
 		1alpha.tar.bz2 \
-		2arm-2c.tar.bz2
+		2arm-2c.tar.bz2 \
+		fakeheteronuma.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
 sysfs_excludes = \
@@ -146,14 +148,16 @@ sysfs_options = \
 		16em64t-4s2c2t.xml.options \
 		32amd64-4s2n4c-cgroup.xml.options \
 		32em64t-2n8c+1mic.options \
-		40intel64-2g2n4c+pci.options
+		40intel64-2g2n4c+pci.options \
+		fakeheteronuma.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 sysfs_envs = \
 		40intel64-2g2n4c+pci.env \
 		40intel64-4n10c+pci-conflicts.env \
-		96em64t-4n4d3ca2co-forcecpuinfo.env
+		96em64t-4n4d3ca2co-forcecpuinfo.env \
+		fakeheteronuma.env
 
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
