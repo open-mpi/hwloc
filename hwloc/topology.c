@@ -1543,7 +1543,7 @@ hwloc__find_insert_memory_parent(struct hwloc_topology *topology, hwloc_obj_t ob
   return group;
 }
 
-/*attach the given memory object below the given normal parent. */
+/* Attach the given memory object below the given normal parent. */
 struct hwloc_obj *
 hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
 			    hwloc_obj_t obj,
@@ -1553,6 +1553,16 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
 
   assert(parent);
   assert(hwloc__obj_type_is_normal(parent->type));
+
+  /* Check the nodeset */
+  if (!obj->nodeset || hwloc_bitmap_iszero(obj->nodeset))
+    return NULL;
+  /* Initialize or check the complete nodeset */
+  if (!obj->complete_nodeset) {
+    obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
+  } else if (!hwloc_bitmap_isincluded(obj->nodeset, obj->complete_nodeset)) {
+    return NULL;
+  }
 
 #if 0
   /* TODO: enable this instead of hack in fixup_sets once NUMA nodes are inserted late */
@@ -1577,15 +1587,10 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
   *cur_children = obj;
   obj->next_sibling = NULL;
 
-  /* Initialize the complete nodeset if needed */
-  if (!obj->complete_nodeset) {
-    obj->complete_nodeset = hwloc_bitmap_dup(obj->nodeset);
-  }
 
   /* Add the bit to the top sets, and to the parent CPU-side object */
   if (obj->type == HWLOC_OBJ_NUMANODE) {
-    if (hwloc_bitmap_isset(obj->nodeset, obj->os_index))
-      hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
+    hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
     hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
   }
 
@@ -2070,12 +2075,6 @@ propagate_nodeset(hwloc_obj_t obj)
   /* now add our local nodeset */
   for_each_memory_child(child, obj) {
     /* FIXME rather recurse in the memory hierarchy */
-
-    /* first, update children complete_nodeset if needed */
-    if (!child->complete_nodeset)
-      child->complete_nodeset = hwloc_bitmap_dup(child->nodeset);
-    else
-      hwloc_bitmap_or(child->complete_nodeset, child->complete_nodeset, child->nodeset);
 
     /* add memory children nodesets to ours */
     hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
