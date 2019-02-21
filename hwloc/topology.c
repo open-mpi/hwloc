@@ -1572,6 +1572,7 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
    * However, the user decided the ignore Groups, so hierarchy/locality loss is expected.
    */
   hwloc_bitmap_copy(obj->cpuset, parent->cpuset);
+  hwloc_bitmap_copy(obj->complete_cpuset, parent->complete_cpuset);
 #endif
 
   /* only NUMA nodes are memory for now, just append to the end of the list */
@@ -1977,6 +1978,7 @@ fixup_sets(hwloc_obj_t obj)
   in_memory_list = 0;
   /* iterate over normal children first, we'll come back for memory children later */
 
+  /* FIXME: if memory objects are inserted late, we should update their cpuset and complete_cpuset at insertion instead of here */
  iterate:
   while (child) {
     /* our cpuset must be included in our parent's one */
@@ -1992,6 +1994,12 @@ fixup_sets(hwloc_obj_t obj)
       hwloc_bitmap_and(child->complete_nodeset, child->complete_nodeset, obj->complete_nodeset);
     } else {
       child->complete_nodeset = hwloc_bitmap_dup(child->nodeset);
+    }
+
+    if (hwloc_obj_type_is_memory(child->type)) {
+      /* update memory children cpusets in case some CPU-side parent was removed */
+      hwloc_bitmap_copy(child->cpuset, obj->cpuset);
+      hwloc_bitmap_copy(child->complete_cpuset, obj->complete_cpuset);
     }
 
     fixup_sets(child);
@@ -2079,16 +2087,6 @@ propagate_nodeset(hwloc_obj_t obj)
     /* add memory children nodesets to ours */
     hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
     hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
-
-    /* by the way, copy our cpusets to memory children */
-    if (child->cpuset)
-      hwloc_bitmap_copy(child->cpuset, obj->cpuset);
-    else
-      child->cpuset = hwloc_bitmap_dup(obj->cpuset);
-    if (child->complete_cpuset)
-      hwloc_bitmap_copy(child->complete_cpuset, obj->complete_cpuset);
-    else
-      child->complete_cpuset = hwloc_bitmap_dup(obj->complete_cpuset);
   }
 
   /* Propagate our nodeset to CPU children. */
