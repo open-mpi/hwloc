@@ -234,6 +234,10 @@ typedef enum {
 			  * It is usually close to some cores (the corresponding objects
 			  * are descendants of the NUMA node object in the hwloc tree).
 			  *
+			  * This is the smallest object representing Memory resources,
+			  * it cannot have any child except Misc objects.
+			  * However it may have Memory-side cache parents.
+			  *
 			  * There is always at least one such object in the topology
 			  * even if the machine is not NUMA.
 			  *
@@ -278,6 +282,19 @@ typedef enum {
 			  * Misc objects may only have Misc objects as children,
 			  * and those are in the dedicated misc children list as well.
 			  * Misc objects have NULL CPU and node sets.
+			  */
+
+  HWLOC_OBJ_MEMCACHE,	/**< \brief Memory-side cache (filtered out by default).
+			  * A cache in front of a specific NUMA node.
+			  *
+			  * This object always has at least one NUMA node as a memory child.
+			  *
+			  * Memory objects are not listed in the main children list,
+			  * but rather in the dedicated Memory children list.
+			  *
+			  * Memory-side cache have a special depth ::HWLOC_TYPE_DEPTH_MEMCACHE
+			  * instead of a normal depth just like other objects in the
+			  * main tree.
 			  */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
@@ -435,9 +452,15 @@ struct hwloc_obj {
 					 * These children are listed in \p memory_first_child.
 					 */
   struct hwloc_obj *memory_first_child;	/**< \brief First Memory child.
-					 * NUMA nodes are listed here (\p memory_arity and \p memory_first_child)
+					 * NUMA nodes and Memory-side caches are listed here
+					 * (\p memory_arity and \p memory_first_child)
 					 * instead of in the normal children list.
 					 * See also hwloc_obj_type_is_memory().
+					 *
+					 * A memory hierarchy starts from a normal CPU-side object
+					 * (e.g. Package) and ends with NUMA nodes as leaves.
+					 * There might exist some memory-side caches between them
+					 * in the middle of the memory subtree.
 					 */
   /**@}*/
 
@@ -770,7 +793,8 @@ enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_BRIDGE = -4,     /**< \brief Virtual depth for bridge object level. \hideinitializer */
     HWLOC_TYPE_DEPTH_PCI_DEVICE = -5, /**< \brief Virtual depth for PCI device object level. \hideinitializer */
     HWLOC_TYPE_DEPTH_OS_DEVICE = -6,  /**< \brief Virtual depth for software device object level. \hideinitializer */
-    HWLOC_TYPE_DEPTH_MISC = -7        /**< \brief Virtual depth for Misc object. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MISC = -7,       /**< \brief Virtual depth for Misc object. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MEMCACHE = -8    /**< \brief Virtual depth for MemCache object. \hideinitializer */
 };
 
 /** \brief Return the depth of parents where memory objects are attached.
@@ -2088,11 +2112,15 @@ HWLOC_DECLSPEC int hwloc_topology_get_type_filter(hwloc_topology_t topology, hwl
  */
 HWLOC_DECLSPEC int hwloc_topology_set_all_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter);
 
-/** \brief Set the filtering for all cache object types.
+/** \brief Set the filtering for all CPU cache object types.
+ *
+ * Memory-side caches are not involved since they are not CPU caches.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_cache_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter);
 
-/** \brief Set the filtering for all instruction cache object types.
+/** \brief Set the filtering for all CPU instruction cache object types.
+ *
+ * Memory-side caches are not involved since they are not CPU caches.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_icache_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter);
 

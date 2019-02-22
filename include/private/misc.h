@@ -442,11 +442,11 @@ static __hwloc_inline int hwloc__obj_type_is_normal (hwloc_obj_type_t type)
   return type <= HWLOC_OBJ_GROUP;
 }
 
-/* Any object attached to memory children, currently only NUMA nodes */
+/* Any object attached to memory children, currently NUMA nodes or Memory-side caches */
 static __hwloc_inline int hwloc__obj_type_is_memory (hwloc_obj_type_t type)
 {
   /* type contiguity is asserted in topology_check() */
-  return type == HWLOC_OBJ_NUMANODE;
+  return type == HWLOC_OBJ_NUMANODE || type == HWLOC_OBJ_MEMCACHE;
 }
 
 /* I/O or Misc object, without cpusets or nodesets. */
@@ -463,6 +463,7 @@ static __hwloc_inline int hwloc__obj_type_is_io (hwloc_obj_type_t type)
   return type >= HWLOC_OBJ_BRIDGE && type <= HWLOC_OBJ_OS_DEVICE;
 }
 
+/* Any CPU caches (not Memory-side caches) */
 static __hwloc_inline int
 hwloc__obj_type_is_cache(hwloc_obj_type_t type)
 {

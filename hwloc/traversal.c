@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -41,6 +41,8 @@ hwloc_get_depth_type (hwloc_topology_t topology, int depth)
       return HWLOC_OBJ_OS_DEVICE;
     case HWLOC_TYPE_DEPTH_MISC:
       return HWLOC_OBJ_MISC;
+    case HWLOC_TYPE_DEPTH_MEMCACHE:
+      return HWLOC_OBJ_MEMCACHE;
     default:
       return HWLOC_OBJ_TYPE_NONE;
     }
@@ -238,6 +240,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_MACHINE: return "Machine";
     case HWLOC_OBJ_MISC: return "Misc";
     case HWLOC_OBJ_GROUP: return "Group";
+    case HWLOC_OBJ_MEMCACHE: return "MemCache";
     case HWLOC_OBJ_NUMANODE: return "NUMANode";
     case HWLOC_OBJ_PACKAGE: return "Package";
     case HWLOC_OBJ_L1CACHE: return "L1Cache";
@@ -337,6 +340,9 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   } else if (hwloc__type_match(string, "numanode", 2)
 	     || hwloc__type_match(string, "node", 2)) { /* for convenience */
     type = HWLOC_OBJ_NUMANODE;
+  } else if (hwloc__type_match(string, "memcache", 5)
+	     || hwloc__type_match(string, "memory-side cache", 8)) {
+    type = HWLOC_OBJ_MEMCACHE;
   } else if (hwloc__type_match(string, "package", 2)
 	     || hwloc__type_match(string, "socket", 2)) { /* backward compat with v1.10 */
     type = HWLOC_OBJ_PACKAGE;
@@ -468,6 +474,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_MISC:
   case HWLOC_OBJ_MACHINE:
   case HWLOC_OBJ_NUMANODE:
+  case HWLOC_OBJ_MEMCACHE:
   case HWLOC_OBJ_PACKAGE:
   case HWLOC_OBJ_CORE:
   case HWLOC_OBJ_PU:
@@ -570,6 +577,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_L1ICACHE:
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
+  case HWLOC_OBJ_MEMCACHE:
     if (verbose) {
       char assoc[32];
       if (obj->attr->cache.associativity == -1)

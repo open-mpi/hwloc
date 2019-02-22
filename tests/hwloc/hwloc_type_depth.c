@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -72,6 +72,7 @@ int main(void)
   assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_OS_DEVICE) == HWLOC_OBJ_OS_DEVICE);
   assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_MISC) == HWLOC_OBJ_MISC);
   assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_NUMANODE) == HWLOC_OBJ_NUMANODE);
+  assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_MEMCACHE) == HWLOC_OBJ_MEMCACHE);
 
   assert(hwloc_get_type_depth(topology, 123) == HWLOC_TYPE_DEPTH_UNKNOWN);
   assert(hwloc_get_type_depth(topology, -14) == HWLOC_TYPE_DEPTH_UNKNOWN);
@@ -79,8 +80,8 @@ int main(void)
   assert(hwloc_get_depth_type(topology, 123) == HWLOC_OBJ_TYPE_NONE);
   assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_UNKNOWN) == HWLOC_OBJ_TYPE_NONE); /* -1 */
   assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_MULTIPLE) == HWLOC_OBJ_TYPE_NONE); /* -2 */
-  /* special level depth are from -3 to -7 */
-  assert(hwloc_get_depth_type(topology, -8) == HWLOC_OBJ_TYPE_NONE);
+  /* special level depth are from -3 to -8 */
+  assert(hwloc_get_depth_type(topology, -9) == HWLOC_OBJ_TYPE_NONE);
   assert(hwloc_get_depth_type(topology, -134) == HWLOC_OBJ_TYPE_NONE);
 
   assert(hwloc_get_memory_parents_depth(topology) == 0);

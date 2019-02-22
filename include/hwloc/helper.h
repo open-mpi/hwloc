@@ -527,30 +527,36 @@ hwloc_obj_type_is_io(hwloc_obj_type_t type);
  *
  * Memory objects are objects attached to their parents
  * in the Memory children list.
- * This current only includes NUMA nodes.
+ * This current includes NUMA nodes and Memory-side caches.
  *
  * \return 1 if an object of type \p type is a Memory object, 0 otherwise.
  */
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_memory(hwloc_obj_type_t type);
 
-/** \brief Check whether an object type is a Cache (Data, Unified or Instruction).
+/** \brief Check whether an object type is a CPU Cache (Data, Unified or Instruction).
+ *
+ * Memory-side caches are not CPU caches.
  *
  * \return 1 if an object of type \p type is a Cache, 0 otherwise.
  */
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_cache(hwloc_obj_type_t type);
 
-/** \brief Check whether an object type is a Data or Unified Cache.
+/** \brief Check whether an object type is a CPU Data or Unified Cache.
  *
- * \return 1 if an object of type \p type is a Data or Unified Cache, 0 otherwise.
+ * Memory-side caches are not CPU caches.
+ *
+ * \return 1 if an object of type \p type is a CPU Data or Unified Cache, 0 otherwise.
  */
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_dcache(hwloc_obj_type_t type);
 
-/** \brief Check whether an object type is a Instruction Cache,
+/** \brief Check whether an object type is a CPU Instruction Cache,
  *
- * \return 1 if an object of type \p type is a Instruction Cache, 0 otherwise.
+ * Memory-side caches are not CPU caches.
+ *
+ * \return 1 if an object of type \p type is a CPU Instruction Cache, 0 otherwise.
  */
 HWLOC_DECLSPEC int
 hwloc_obj_type_is_icache(hwloc_obj_type_t type);

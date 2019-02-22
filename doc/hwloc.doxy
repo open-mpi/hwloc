@@ -514,7 +514,7 @@ Make sure to have had a look at those too!
   a NUMA memory node, etc. The different types detected by hwloc are
   detailed in the ::hwloc_obj_type_t enumeration.
 
-  There are four kinds of Objects: Memory (NUMA nodes), I/O (Bridges, PCI and OS devices),
+  There are four kinds of Objects: Memory (NUMA nodes and Memory-side caches), I/O (Bridges, PCI and OS devices),
   Misc, and Normal (everything else, including Machine, Package, Core, PU, CPU Caches, etc.).
   Normal and Memory objects have (non-NULL) CPU sets and nodesets, while I/O and Misc don't.
 
@@ -552,6 +552,16 @@ Make sure to have had a look at those too!
   (see \ref termsanddefs_tree).
   </dd>
 
+<dt>Memory-side Cache</dt>
+  <dd>
+  A cache in front of a specific memory region (e.g. a range of physical addresses).
+  It caches all accesses to that region without caring about which core issued the request.
+  This is the opposite of usual CPU caches where only accesses from the local cores
+  are cached, without caring about the target memory.
+
+  In hwloc, memory-side caches are memory objects placed between their local CPU objects
+  (parent) and the target NUMA node memory (child).
+  </dd>
 </dl>
 
 
@@ -3948,7 +3958,7 @@ hwloc_get_next_child() may still be used to iterate over all children of all lis
 Given the above, objects may now be of 4 kinds:
 <ul>
 <li>Normal (everything not listed below, including Machine, Package, Core, PU, CPU Caches, etc);</li>
-<li>Memory (currently only NUMA nodes), attached to parents as Memory children;</li>
+<li>Memory (currently NUMA nodes or Memory-side Caches), attached to parents as Memory children;</li>
 <li>I/O (Bridges, PCI and OS devices), attached to parents as I/O children;</li>
 <li>Misc objects, attached to parents as Misc children.</li>
 </ul>

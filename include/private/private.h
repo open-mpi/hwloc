@@ -40,7 +40,7 @@
 #endif
 #include <string.h>
 
-#define HWLOC_TOPOLOGY_ABI 0x20000 /* version of the layout of struct topology */
+#define HWLOC_TOPOLOGY_ABI 0x20100 /* version of the layout of struct topology */
 
 /*****************************************************
  * WARNING:
@@ -68,12 +68,13 @@ struct hwloc_topology {
   void *adopted_shmem_addr;
   size_t adopted_shmem_length;
 
-#define HWLOC_NR_SLEVELS 5
+#define HWLOC_NR_SLEVELS 6
 #define HWLOC_SLEVEL_NUMANODE 0
 #define HWLOC_SLEVEL_BRIDGE 1
 #define HWLOC_SLEVEL_PCIDEV 2
 #define HWLOC_SLEVEL_OSDEV 3
 #define HWLOC_SLEVEL_MISC 4
+#define HWLOC_SLEVEL_MEMCACHE 5
   /* order must match negative depth, it's asserted in setup_defaults() */
 #define HWLOC_SLEVEL_FROM_DEPTH(x) (HWLOC_TYPE_DEPTH_NUMANODE-(x))
 #define HWLOC_SLEVEL_TO_DEPTH(x) (HWLOC_TYPE_DEPTH_NUMANODE-(x))

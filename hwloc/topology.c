@@ -1003,29 +1003,31 @@ hwloc_topology_dup(hwloc_topology_t *newp,
 /***** Make sure you update obj_type_priority[] below as well. *****/
 static const unsigned obj_type_order[] = {
     /* first entry is HWLOC_OBJ_MACHINE */  0,
-    /* next entry is HWLOC_OBJ_PACKAGE */  3,
-    /* next entry is HWLOC_OBJ_CORE */     12,
-    /* next entry is HWLOC_OBJ_PU */       16,
-    /* next entry is HWLOC_OBJ_L1CACHE */  10,
-    /* next entry is HWLOC_OBJ_L2CACHE */  8,
-    /* next entry is HWLOC_OBJ_L3CACHE */  6,
-    /* next entry is HWLOC_OBJ_L4CACHE */  5,
-    /* next entry is HWLOC_OBJ_L5CACHE */  4,
-    /* next entry is HWLOC_OBJ_L1ICACHE */ 11,
-    /* next entry is HWLOC_OBJ_L2ICACHE */ 9,
-    /* next entry is HWLOC_OBJ_L3ICACHE */ 7,
+    /* next entry is HWLOC_OBJ_PACKAGE */  4,
+    /* next entry is HWLOC_OBJ_CORE */     13,
+    /* next entry is HWLOC_OBJ_PU */       17,
+    /* next entry is HWLOC_OBJ_L1CACHE */  11,
+    /* next entry is HWLOC_OBJ_L2CACHE */  9,
+    /* next entry is HWLOC_OBJ_L3CACHE */  7,
+    /* next entry is HWLOC_OBJ_L4CACHE */  6,
+    /* next entry is HWLOC_OBJ_L5CACHE */  5,
+    /* next entry is HWLOC_OBJ_L1ICACHE */ 12,
+    /* next entry is HWLOC_OBJ_L2ICACHE */ 10,
+    /* next entry is HWLOC_OBJ_L3ICACHE */ 8,
     /* next entry is HWLOC_OBJ_GROUP */    1,
-    /* next entry is HWLOC_OBJ_NUMANODE */ 2,
-    /* next entry is HWLOC_OBJ_BRIDGE */   13,
-    /* next entry is HWLOC_OBJ_PCI_DEVICE */  14,
-    /* next entry is HWLOC_OBJ_OS_DEVICE */   15,
-    /* next entry is HWLOC_OBJ_MISC */     17
+    /* next entry is HWLOC_OBJ_NUMANODE */ 3,
+    /* next entry is HWLOC_OBJ_BRIDGE */   14,
+    /* next entry is HWLOC_OBJ_PCI_DEVICE */  15,
+    /* next entry is HWLOC_OBJ_OS_DEVICE */   16,
+    /* next entry is HWLOC_OBJ_MISC */     18,
+    /* next entry is HWLOC_OBJ_MEMCACHE */ 2
 };
 
 #ifndef NDEBUG /* only used in debug check assert if !NDEBUG */
 static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_MACHINE,
   HWLOC_OBJ_GROUP,
+  HWLOC_OBJ_MEMCACHE,
   HWLOC_OBJ_NUMANODE,
   HWLOC_OBJ_PACKAGE,
   HWLOC_OBJ_L5CACHE,
@@ -1077,7 +1079,8 @@ static const int obj_type_priority[] = {
   /* next entry is HWLOC_OBJ_BRIDGE */      0,
   /* next entry is HWLOC_OBJ_PCI_DEVICE */  100,
   /* next entry is HWLOC_OBJ_OS_DEVICE */   100,
-  /* next entry is HWLOC_OBJ_MISC */        0
+  /* next entry is HWLOC_OBJ_MISC */        0,
+  /* next entry is HWLOC_OBJ_MEMCACHE */    19
 };
 
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
@@ -2698,7 +2701,17 @@ hwloc_list_special_objects(hwloc_topology_t topology, hwloc_obj_t obj)
     /* Insert the main NUMA node list */
     hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_NUMANODE], obj);
 
-    /* Recurse */
+    /* Recurse, NUMA nodes only have Misc children */
+    for_each_misc_child(child, obj)
+      hwloc_list_special_objects(topology, child);
+
+  } else if (obj->type == HWLOC_OBJ_MEMCACHE) {
+    obj->next_cousin = NULL;
+    obj->depth = HWLOC_TYPE_DEPTH_MEMCACHE;
+    /* Insert the main MemCache list */
+    hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_MEMCACHE], obj);
+
+    /* Recurse, MemCaches have NUMA nodes or Misc children */
     for_each_memory_child(child, obj)
       hwloc_list_special_objects(topology, child);
     for_each_misc_child(child, obj)
@@ -2731,6 +2744,7 @@ hwloc_list_special_objects(hwloc_topology_t topology, hwloc_obj_t obj)
       /* Insert in the main osdev list */
       hwloc_append_special_object(&topology->slevels[HWLOC_SLEVEL_OSDEV], obj);
     }
+
     /* Recurse, I/O only have I/O and Misc children */
     for_each_io_child(child, obj)
       hwloc_list_special_objects(topology, child);
@@ -3337,6 +3351,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_BRIDGE == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_BRIDGE));
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_PCIDEV == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_PCI_DEVICE));
   HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_OSDEV == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_OS_DEVICE));
+  HWLOC_BUILD_ASSERT(HWLOC_SLEVEL_MEMCACHE == HWLOC_SLEVEL_FROM_DEPTH(HWLOC_TYPE_DEPTH_MEMCACHE));
 
   /* sane values to type_depth */
   hwloc_reset_normal_type_depths(topology);
@@ -3345,6 +3360,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->type_depth[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_DEPTH_BRIDGE;
   topology->type_depth[HWLOC_OBJ_PCI_DEVICE] = HWLOC_TYPE_DEPTH_PCI_DEVICE;
   topology->type_depth[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_DEPTH_OS_DEVICE;
+  topology->type_depth[HWLOC_OBJ_MEMCACHE] = HWLOC_TYPE_DEPTH_MEMCACHE;
 
   /* Create the actual machine object, but don't touch its attributes yet
    * since the OS backend may still change the object into something else
@@ -3513,6 +3529,7 @@ hwloc__topology_filter_init(struct hwloc_topology *topology)
   topology->type_filter[HWLOC_OBJ_L1ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_L2ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_L3ICACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
+  topology->type_filter[HWLOC_OBJ_MEMCACHE] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_GROUP] = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
   topology->type_filter[HWLOC_OBJ_MISC] = HWLOC_TYPE_FILTER_KEEP_NONE;
   topology->type_filter[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_FILTER_KEEP_NONE;
@@ -4426,6 +4443,8 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
     assert(obj->cpuset);
     if (obj->type == HWLOC_OBJ_NUMANODE)
       assert(obj->depth == HWLOC_TYPE_DEPTH_NUMANODE);
+    else if (obj->type == HWLOC_OBJ_MEMCACHE)
+      assert(obj->depth == HWLOC_TYPE_DEPTH_MEMCACHE);
     else
       assert(obj->depth >= 0);
   }
@@ -4622,7 +4641,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_BRIDGE     + 1 == HWLOC_OBJ_PCI_DEVICE);
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_PCI_DEVICE + 1 == HWLOC_OBJ_OS_DEVICE);
   HWLOC_BUILD_ASSERT(HWLOC_OBJ_OS_DEVICE  + 1 == HWLOC_OBJ_MISC);
-  HWLOC_BUILD_ASSERT(HWLOC_OBJ_MISC       + 1 == HWLOC_OBJ_TYPE_MAX);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_MISC       + 1 == HWLOC_OBJ_MEMCACHE);
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_MEMCACHE   + 1 == HWLOC_OBJ_TYPE_MAX);
 
   /* make sure order and priority arrays have the right size */
   HWLOC_BUILD_ASSERT(sizeof(obj_type_order)/sizeof(*obj_type_order) == HWLOC_OBJ_TYPE_MAX);
@@ -4668,6 +4688,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
     int d;
     type = hwloc_get_depth_type(topology, j);
     assert(type != HWLOC_OBJ_NUMANODE);
+    assert(type != HWLOC_OBJ_MEMCACHE);
     assert(type != HWLOC_OBJ_PCI_DEVICE);
     assert(type != HWLOC_OBJ_BRIDGE);
     assert(type != HWLOC_OBJ_OS_DEVICE);
@@ -4683,6 +4704,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
     if (type == HWLOC_OBJ_NUMANODE) {
       assert(d == HWLOC_TYPE_DEPTH_NUMANODE);
       assert(hwloc_get_depth_type(topology, d) == HWLOC_OBJ_NUMANODE);
+    } else if (type == HWLOC_OBJ_MEMCACHE) {
+      assert(d == HWLOC_TYPE_DEPTH_MEMCACHE);
+      assert(hwloc_get_depth_type(topology, d) == HWLOC_OBJ_MEMCACHE);
     } else if (type == HWLOC_OBJ_BRIDGE) {
       assert(d == HWLOC_TYPE_DEPTH_BRIDGE);
       assert(hwloc_get_depth_type(topology, d) == HWLOC_OBJ_BRIDGE);
