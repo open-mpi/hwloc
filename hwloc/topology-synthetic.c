@@ -1336,16 +1336,26 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
   }
 
   while (mchild) {
-    /* v2: export all NUMA children */
-
-    assert(mchild->type == HWLOC_OBJ_NUMANODE); /* only NUMA node memory children for now */
+    /* FIXME: really recurse to export memcaches and numanode,
+     * but it requires clever parsing of [ memcache [numa] [numa] ] during import,
+     * better attaching of things to describe the hierarchy.
+     */
+    hwloc_obj_t numanode = mchild;
+    /* only export the first NUMA node leaf of each memory child
+     * FIXME: This assumes mscache aren't shared between nodes, that's true in current platforms
+     */
+    while (numanode && numanode->type != HWLOC_OBJ_NUMANODE) {
+      assert(numanode->arity == 1);
+      numanode = numanode->memory_first_child;
+    }
+    assert(numanode); /* there's always a numanode at the bottom of the memory tree */
 
     if (needprefix)
       hwloc__export_synthetic_add_char(&ret, &tmp, &tmplen, ' ');
 
     hwloc__export_synthetic_add_char(&ret, &tmp, &tmplen, '[');
 
-    res = hwloc__export_synthetic_obj(topology, flags, mchild, (unsigned)-1, tmp, tmplen);
+    res = hwloc__export_synthetic_obj(topology, flags, numanode, (unsigned)-1, tmp, tmplen);
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
 
@@ -1379,9 +1389,8 @@ hwloc_check_memory_symmetric(struct hwloc_topology * topology)
     assert(node);
 
     first_parent = node->parent;
-    assert(hwloc__obj_type_is_normal(first_parent->type)); /* only depth-1 memory children for now */
 
-    /* check whether all object on parent's level have same number of NUMA children */
+    /* check whether all object on parent's level have same number of NUMA bits */
     for(i=0; i<hwloc_get_nbobjs_by_depth(topology, first_parent->depth); i++) {
       hwloc_obj_t parent, mchild;
 
@@ -1392,10 +1401,9 @@ hwloc_check_memory_symmetric(struct hwloc_topology * topology)
       if (parent->memory_arity != first_parent->memory_arity)
 	goto out_with_bitmap;
 
-      /* clear these NUMA children from remaining_nodes */
+      /* clear children NUMA bits from remaining_nodes */
       mchild = parent->memory_first_child;
       while (mchild) {
-	assert(mchild->type == HWLOC_OBJ_NUMANODE); /* only NUMA node memory children for now */
 	hwloc_bitmap_clr(remaining_nodes, mchild->os_index); /* cannot use parent->nodeset, some normal children may have other NUMA nodes */
 	mchild = mchild->next_sibling;
       }
