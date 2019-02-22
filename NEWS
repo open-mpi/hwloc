@@ -21,6 +21,8 @@ Version 2.1.0
 * API
   + Add the new HWLOC_OBJ_MEMCACHE object type for memory-side caches.
     - They are filtered-out by default, except in command-line tools.
+    - They are only available on very recent platforms running Linux 5.2+
+      and uptodate ACPI tables.
     - The KNL MCDRAM in cache mode is still exposed as a L3 unless
       HWLOC_KNL_MSCACHE_L3=0 in the environment.
   + Add HWLOC_RESTRICT_FLAG_BYNODESET and _REMOVE_MEMLESS for restricting

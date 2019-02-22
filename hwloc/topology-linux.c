@@ -557,6 +557,16 @@ hwloc_read_path_as_uint(const char *path, unsigned *value, int fsroot_fd)
   return 0;
 }
 
+static __hwloc_inline int
+hwloc_read_path_as_uint64(const char *path, uint64_t *value, int fsroot_fd)
+{
+  char string[22];
+  if (hwloc_read_path_by_length(path, string, sizeof(string), fsroot_fd) < 0)
+    return -1;
+  *value = (uint64_t) strtoull(string, NULL, 10);
+  return 0;
+}
+
 /* Read everything from fd and save it into a newly allocated buffer
  * returned in bufferp. Use sizep as a default buffer size, and returned
  * the actually needed size in sizep.
@@ -3789,6 +3799,72 @@ read_node_initiators(struct hwloc_linux_backend_data_s *data,
   return 0;
 }
 
+/* return -1 if the kernel doesn't support mscache,
+ * or update tree (containing only the node on input) with caches (if any)
+ */
+static int
+read_node_mscaches(struct hwloc_topology *topology,
+		   struct hwloc_linux_backend_data_s *data,
+		   const char *path,
+		   hwloc_obj_t *treep)
+{
+  hwloc_obj_t tree = *treep, node = tree;
+  unsigned osnode = node->os_index;
+  char mscpath[SYSFS_NUMA_NODE_PATH_LEN];
+  DIR *mscdir;
+  struct dirent *dirent;
+
+  sprintf(mscpath, "%s/node%u/memory_side_cache", path, osnode);
+  mscdir = hwloc_opendir(mscpath, data->root_fd);
+  if (!mscdir)
+    return -1;
+
+  while ((dirent = readdir(mscdir)) != NULL) {
+    unsigned depth;
+    uint64_t size;
+    unsigned line_size;
+    unsigned associativity;
+    hwloc_obj_t cache;
+
+    if (strncmp(dirent->d_name, "index", 5))
+      continue;
+
+    depth = atoi(dirent->d_name+5);
+
+    sprintf(mscpath, "%s/node%u/memory_side_cache/index%u/size", path, osnode, depth);
+    if (hwloc_read_path_as_uint64(mscpath, &size, data->root_fd) < 0)
+      continue;
+
+    sprintf(mscpath, "%s/node%u/memory_side_cache/index%u/line_size", path, osnode, depth);
+    if (hwloc_read_path_as_uint(mscpath, &line_size, data->root_fd) < 0)
+      continue;
+
+    sprintf(mscpath, "%s/node%u/memory_side_cache/index%u/indexing", path, osnode, depth);
+    if (hwloc_read_path_as_uint(mscpath, &associativity, data->root_fd) < 0)
+      continue;
+    /* 0 for direct-mapped, 1 for indexed (don't know how many ways), 2 for custom/other */
+
+    cache = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MEMCACHE, HWLOC_UNKNOWN_INDEX);
+    if (cache) {
+      cache->nodeset = hwloc_bitmap_dup(node->nodeset);
+      cache->cpuset = hwloc_bitmap_dup(node->cpuset);
+      cache->attr->cache.size = size;
+      cache->attr->cache.depth = depth;
+      cache->attr->cache.linesize = line_size;
+      cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+      cache->attr->cache.associativity = !associativity ? 1 /* direct-mapped */ : 0 /* unknown */;
+      hwloc_debug_1arg_bitmap("mscache %s has nodeset %s\n",
+			      dirent->d_name, cache->nodeset);
+
+      cache->memory_first_child = tree;
+      tree = cache;
+    }
+  }
+  closedir(mscdir);
+  *treep = tree;
+  return 0;
+}
+
 static unsigned *
 list_sysfsnode(struct hwloc_topology *topology,
 	       struct hwloc_linux_backend_data_s *data,
@@ -3954,6 +4030,7 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned i;
   DIR *dir;
   int allow_overlapping_node_cpusets = (getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS") != NULL);
+  int need_memcaches = hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_MEMCACHE);
 
   /* NUMA nodes cannot be filtered out */
   indexes = list_sysfsnode(topology, data, path, &nbnodes);
@@ -4120,7 +4197,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  hwloc_linux_knl_numa_quirk(topology, data, nodes, nbnodes, distances, &failednodes);
 	  free(distances);
 	  free(nodes);
-	  free(trees);
 	  goto out;
 	}
       }
@@ -4134,10 +4210,14 @@ look_sysfsnode(struct hwloc_topology *topology,
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
 	if (node && !hwloc_bitmap_iszero(node->cpuset)) {
+	  hwloc_obj_t tree;
 	  /* update from HMAT initiators if any */
 	  read_node_initiators(data, node, nbnodes, nodes, path);
 
-	  trees[nr_trees++] = node;
+	  tree = node;
+	  if (need_memcaches)
+	    read_node_mscaches(topology, data, path, &tree);
+	  trees[nr_trees++] = tree;
 	}
       }
       /* Now look for empty-cpumap nodes.
@@ -4148,6 +4228,7 @@ look_sysfsnode(struct hwloc_topology *topology,
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
 	if (node && hwloc_bitmap_iszero(node->cpuset)) {
+	  hwloc_obj_t tree;
 	  /* update from HMAT initiators if any */
 	  if (!read_node_initiators(data, node, nbnodes, nodes, path))
 	    if (!hwloc_bitmap_iszero(node->cpuset))
@@ -4158,29 +4239,34 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    fixup_cpuless_node_locality_from_distances(i, nbnodes, nodes, distances);
 
 	fixed:
-	  trees[nr_trees++] = node;
+	  tree = node;
+	  if (need_memcaches)
+	    read_node_mscaches(topology, data, path, &tree);
+	  trees[nr_trees++] = tree;
 	}
       }
 
       /* insert memory trees for real */
       for (i = 0; i < nr_trees; i++) {
 	hwloc_obj_t tree = trees[i];
-	hwloc_obj_t cur_obj = tree;
-	hwloc_obj_type_t cur_type = cur_obj->type;
-	hwloc_obj_t res_obj;
-
-	assert(!cur_obj->next_sibling);
-	assert(!cur_obj->memory_first_child);
-
-	res_obj = hwloc__insert_object_by_cpuset(topology, NULL, cur_obj, hwloc_report_os_error);
-	if (res_obj != cur_obj && cur_type == HWLOC_OBJ_NUMANODE) {
-	  /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
-	   * Update it in the array for the distance matrix. */
-	  unsigned j;
-	  for(j=0; j<nbnodes; j++)
-	    if (nodes[j] == cur_obj)
-	      nodes[j] = res_obj;
-	  failednodes++;
+	while (tree) {
+	  hwloc_obj_t cur_obj;
+	  hwloc_obj_t res_obj;
+	  hwloc_obj_type_t cur_type;
+	  cur_obj = tree;
+	  cur_type = cur_obj->type;
+	  tree = cur_obj->memory_first_child;
+	  assert(!cur_obj->next_sibling);
+	  res_obj = hwloc__insert_object_by_cpuset(topology, NULL, cur_obj, hwloc_report_os_error);
+	  if (res_obj != cur_obj && cur_type == HWLOC_OBJ_NUMANODE) {
+	    /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
+	     * Update it in the array for the distance matrix. */
+	    unsigned j;
+	    for(j=0; j<nbnodes; j++)
+	      if (nodes[j] == cur_obj)
+		nodes[j] = res_obj;
+	    failednodes++;
+	  }
 	}
       }
       free(trees);
