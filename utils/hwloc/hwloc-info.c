@@ -131,6 +131,7 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
   case HWLOC_OBJ_L1ICACHE:
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
+  case HWLOC_OBJ_MEMCACHE:
     printf("%s attr cache depth = %u\n", prefix, obj->attr->cache.depth);
     switch (obj->attr->cache.type) {
     case HWLOC_OBJ_CACHE_UNIFIED: printf("%s attr cache type = Unified\n", prefix); break;
@@ -455,9 +456,10 @@ main (int argc, char *argv[])
           hwloc_topology_set_all_types_filter(topology, filter);
 	else if (allio)
           hwloc_topology_set_io_types_filter(topology, filter);
-	else if (allcaches)
+	else if (allcaches) {
 	  hwloc_topology_set_cache_types_filter(topology, filter);
-	else if (allicaches)
+	  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, filter);
+	} else if (allicaches)
 	  hwloc_topology_set_icache_types_filter(topology, filter);
         else
           hwloc_topology_set_type_filter(topology, type, filter);

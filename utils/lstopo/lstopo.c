@@ -628,6 +628,7 @@ main (int argc, char *argv[])
   for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
     loutput.force_orient[i] = LSTOPO_ORIENT_HORIZ;
   loutput.force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
+  loutput.force_orient[HWLOC_OBJ_MEMCACHE] = LSTOPO_ORIENT_HORIZ;
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
     loutput.show_indexes[i] = 1;
     loutput.show_attrs[i] = 1;
@@ -742,9 +743,10 @@ main (int argc, char *argv[])
 	  hwloc_topology_set_all_types_filter(topology, filter);
 	else if (allio)
 	  hwloc_topology_set_io_types_filter(topology, filter);
-	else if (allcaches)
+	else if (allcaches) {
 	  hwloc_topology_set_cache_types_filter(topology, filter);
-	else if (allicaches)
+	  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, filter);
+	} else if (allicaches)
 	  hwloc_topology_set_icache_types_filter(topology, filter);
 	else
 	  hwloc_topology_set_type_filter(topology, type, filter);
@@ -770,9 +772,11 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[0], "--no-caches")) {
 	hwloc_topology_set_cache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, HWLOC_TYPE_FILTER_KEEP_NONE);
       }
       else if (!strcmp (argv[0], "--no-useless-caches")) {
 	hwloc_topology_set_cache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
+	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
       }
       else if (!strcmp (argv[0], "--no-icaches")) {
 	hwloc_topology_set_icache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);

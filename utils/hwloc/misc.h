@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -389,6 +389,7 @@ hwloc_lstopo_show_summary(FILE *output, hwloc_topology_t topology)
     hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, depth);
   /* FIXME: which order? */
   hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_NUMANODE);
+  hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_MEMCACHE);
   hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_BRIDGE);
   hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_PCI_DEVICE);
   hwloc_lstopo_show_summary_depth(output, prefixmaxlen, topology, HWLOC_TYPE_DEPTH_OS_DEVICE);

@@ -516,7 +516,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     | (parent->io_arity ? LSTOPO_CHILD_KIND_IO : 0)
     | (parent->misc_arity ? LSTOPO_CHILD_KIND_MISC : 0);
   /* now assign them below or above the parent */
-  if (loutput->plain_children_order) {
+  if (loutput->plain_children_order || hwloc_obj_type_is_memory(parent->type)) {
     plud->children.kinds = existing_kinds;
     plud->above_children.kinds = 0;
   } else {
@@ -552,8 +552,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     normal_children_separator = 0;
 
   /* add separator between a cache parent and its children */
-  if (hwloc_obj_type_is_cache(parent->type)) {
-    if ((unsigned)parent->depth == loutput->depth-2)
+  if (hwloc_obj_type_is_cache(parent->type) || parent->type == HWLOC_OBJ_MEMCACHE) {
+    if ((unsigned)parent->depth == loutput->depth-2 || parent->type == HWLOC_OBJ_MEMCACHE)
       /* except between cache parent and PU children */
       separator_below_cache = 0;
     /* update children placement */
@@ -567,14 +567,21 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* place children above the parent, if any*/
   if (plud->above_children.kinds) {
     enum lstopo_orient_e morient = LSTOPO_ORIENT_HORIZ;
-    unsigned memory_border;
+    int need_box;
 
     assert(plud->above_children.kinds == LSTOPO_CHILD_KIND_MEMORY);
-    memory_border = parent->memory_arity > 1 ? border : 0;
 
-    place__children(loutput, parent, plud->above_children.kinds, &morient, memory_border, separator, &above_children_width, &above_children_height);
+    /* we need a memory children box if parent isn't a memory object
+     * and if there are multiple objects in the box
+     */
+    need_box = !hwloc_obj_type_is_memory(parent->type)
+      && (parent->memory_arity + parent->memory_first_child->memory_arity > 1);
 
-    if (parent->memory_arity > 1) {
+    place__children(loutput, parent, plud->above_children.kinds, &morient, need_box ? border : 0, separator, &above_children_width, &above_children_height);
+    if (parent->type == HWLOC_OBJ_MEMCACHE)
+      above_children_height -= separator;
+
+    if (need_box) {
       /* if there are multiple memory children, add a box, as large as the parent */
       if (above_children_width < children_width) {
 	above_children_width = children_width;
@@ -593,7 +600,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   }
 
   /* adjust parent size */
-  if (hwloc_obj_type_is_cache(parent->type)) {
+  if (hwloc_obj_type_is_cache(parent->type) || parent->type == HWLOC_OBJ_MEMCACHE) {
     /* cache children are below */
     if (children_width > totwidth)
       totwidth = children_width;
@@ -882,6 +889,7 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   case HWLOC_OBJ_L1ICACHE:
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
+  case HWLOC_OBJ_MEMCACHE:
     s->bg = &CACHE_COLOR;
     break;
 
@@ -1505,6 +1513,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_L1ICACHE: return cache_draw;
     case HWLOC_OBJ_L2ICACHE: return cache_draw;
     case HWLOC_OBJ_L3ICACHE: return cache_draw;
+    case HWLOC_OBJ_MEMCACHE: return cache_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
     case HWLOC_OBJ_BRIDGE: return bridge_draw;
     default:
