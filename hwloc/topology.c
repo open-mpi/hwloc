@@ -1130,12 +1130,10 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 /*
  * How to compare objects based on cpusets.
  */
-
 static int
 hwloc_obj_cmp_sets(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   hwloc_bitmap_t set1, set2;
-  int res = HWLOC_OBJ_DIFFERENT;
 
   assert(!hwloc__obj_type_is_special(obj1->type));
   assert(!hwloc__obj_type_is_special(obj2->type));
@@ -1148,45 +1146,10 @@ hwloc_obj_cmp_sets(hwloc_obj_t obj1, hwloc_obj_t obj2)
     set1 = obj1->cpuset;
     set2 = obj2->cpuset;
   }
-  if (set1 && set2 && !hwloc_bitmap_iszero(set1) && !hwloc_bitmap_iszero(set2)) {
-    res = hwloc_bitmap_compare_inclusion(set1, set2);
-    if (res == HWLOC_OBJ_INTERSECTS)
-      return HWLOC_OBJ_INTERSECTS;
-  }
+  if (set1 && set2 && !hwloc_bitmap_iszero(set1) && !hwloc_bitmap_iszero(set2))
+    return hwloc_bitmap_compare_inclusion(set1, set2);
 
-  /* then compare nodesets, and combine the results */
-  if (obj1->complete_nodeset && obj2->complete_nodeset) {
-    set1 = obj1->complete_nodeset;
-    set2 = obj2->complete_nodeset;
-  } else {
-    set1 = obj1->nodeset;
-    set2 = obj2->nodeset;
-  }
-  if (set1 && set2 && !hwloc_bitmap_iszero(set1) && !hwloc_bitmap_iszero(set2)) {
-    int noderes = hwloc_bitmap_compare_inclusion(set1, set2);
-    /* deal with conflicting cpusets/nodesets inclusions */
-    if (noderes == HWLOC_OBJ_INCLUDED) {
-      if (res == HWLOC_OBJ_CONTAINS)
-	/* contradicting order for cpusets and nodesets */
-	return HWLOC_OBJ_INTERSECTS;
-      res = HWLOC_OBJ_INCLUDED;
-
-    } else if (noderes == HWLOC_OBJ_CONTAINS) {
-      if (res == HWLOC_OBJ_INCLUDED)
-	/* contradicting order for cpusets and nodesets */
-	return HWLOC_OBJ_INTERSECTS;
-      res = HWLOC_OBJ_CONTAINS;
-
-    } else if (noderes == HWLOC_OBJ_INTERSECTS) {
-      return HWLOC_OBJ_INTERSECTS;
-
-    } else {
-      /* nodesets are different, keep the cpuset order */
-
-    }
-  }
-
-  return res;
+  return HWLOC_OBJ_DIFFERENT;
 }
 
 /* Compare object cpusets based on complete_cpuset if defined (always correctly ordered),
@@ -1201,10 +1164,6 @@ hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2)
     return hwloc_bitmap_compare_first(obj1->complete_cpuset, obj2->complete_cpuset);
   else if (obj1->cpuset && obj2->cpuset)
     return hwloc_bitmap_compare_first(obj1->cpuset, obj2->cpuset);
-  else if (obj1->complete_nodeset && obj2->complete_nodeset)
-    return hwloc_bitmap_compare_first(obj1->complete_nodeset, obj2->complete_nodeset);
-  else if (obj1->nodeset && obj2->nodeset)
-    return hwloc_bitmap_compare_first(obj1->nodeset, obj2->nodeset);
   return 0;
 }
 
@@ -1343,7 +1302,11 @@ hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
   return NULL;
 }
 
-/* Try to insert OBJ in CUR, recurse if needed.
+/*
+ * The main insertion routine, only used for CPU-side object (normal types)
+ * uisng cpuset only (or complete_cpuset).
+ *
+ * Try to insert OBJ in CUR, recurse if needed.
  * Returns the object if it was inserted,
  * the remaining object it was merged,
  * NULL if failed to insert.
@@ -1817,12 +1780,30 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     hwloc_bitmap_and(obj->complete_nodeset, obj->complete_nodeset, root->complete_nodeset);
 
   if ((!obj->cpuset || hwloc_bitmap_iszero(obj->cpuset))
-      && (!obj->complete_cpuset || hwloc_bitmap_iszero(obj->complete_cpuset))
-      && (!obj->nodeset || hwloc_bitmap_iszero(obj->nodeset))
-      && (!obj->complete_nodeset || hwloc_bitmap_iszero(obj->complete_nodeset))) {
-    hwloc_free_unlinked_object(obj);
-    errno = EINVAL;
-    return NULL;
+      && (!obj->complete_cpuset || hwloc_bitmap_iszero(obj->complete_cpuset))) {
+    /* we'll insert by cpuset, so build cpuset from the nodeset */
+    hwloc_const_bitmap_t nodeset = obj->nodeset ? obj->nodeset : obj->complete_nodeset;
+    hwloc_obj_t numa;
+
+    if ((!obj->nodeset || hwloc_bitmap_iszero(obj->nodeset))
+	&& (!obj->complete_nodeset || hwloc_bitmap_iszero(obj->complete_nodeset))) {
+      hwloc_free_unlinked_object(obj);
+      errno = EINVAL;
+      return NULL;
+    }
+
+    if (!obj->cpuset) {
+      obj->cpuset = hwloc_bitmap_alloc();
+      if (!obj->cpuset) {
+	hwloc_free_unlinked_object(obj);
+	return NULL;
+      }
+    }
+
+    numa = NULL;
+    while ((numa = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, numa)) != NULL)
+      if (hwloc_bitmap_isset(nodeset, numa->os_index))
+	hwloc_bitmap_or(obj->cpuset, obj->cpuset, numa->cpuset);
   }
 
   cmp = hwloc_obj_cmp_sets(obj, root);
