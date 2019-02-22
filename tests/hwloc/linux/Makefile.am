@@ -52,6 +52,7 @@ sysfs_outputs = \
 		64fake-4n2s2ca2c2t.output \
 		64intel64-fakeKNL-A2A-cache.output \
 		64intel64-fakeKNL-SNC4-hybrid.output \
+		64intel64-fakeKNL-SNC4-hybrid-msc.output \
 		96em64t-4n4d3ca2co.output \
 		128ia64-17n4s2c.output \
 		256ia64-64n2s2c.output \
@@ -111,6 +112,7 @@ sysfs_tarballs = \
 		64fake-4n2s2ca2c2t.tar.bz2 \
 		64intel64-fakeKNL-A2A-cache.tar.bz2 \
 		64intel64-fakeKNL-SNC4-hybrid.tar.bz2 \
+		64intel64-fakeKNL-SNC4-hybrid-msc.source \
 		96em64t-4n4d3ca2co.tar.bz2 \
 		128ia64-17n4s2c.tar.bz2 \
 		256ia64-64n2s2c.tar.bz2 \
@@ -152,6 +154,7 @@ sysfs_envs = \
 		256ppc-8n8s4t-nocache.env \
 		40intel64-2g2n4c+pci.env \
 		40intel64-4n10c+pci-conflicts.env \
+		64intel64-fakeKNL-SNC4-hybrid-msc.env \
 		nvidiagpunumanodes.kept.env \
 		fakeheteronuma.env
 
