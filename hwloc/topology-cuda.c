@@ -17,7 +17,8 @@
 
 static unsigned hwloc_cuda_cores_per_MP(int major, int minor)
 {
-  /* FP32 cores per MP, based on CUDA C Programming Guide, Annex G */
+  /* FP32 cores per MP, based on CUDA C Programming Guide, Annex "Compute
+   * Capabilities" */
   switch (major) {
     case 1:
       switch (minor) {
