@@ -113,6 +113,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
       regs[0] = 0x4; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[0] & 0x1f))
+	/* invalid, no more caches */
 	break;
     }
   }
@@ -160,7 +161,8 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     for(i=0; ; i++) {
       regs[0] = 0xb; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
-      if (!regs[0] && !regs[1])
+      if (!(regs[2] & 0xff00))
+	/* invalid, no more levels */
 	break;
     }
   }
@@ -225,6 +227,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
       regs[0] = 0x12; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[0] & 0xf))
+	/* invalid, no more subleaves */
 	break;
     }
   }
@@ -255,9 +258,11 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     regs[0] = 0x17; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
     maxsocid = regs[0];
-    for(i=1; i<=maxsocid; i++) {
-      regs[0] = 0x17; regs[2] = i;
-      dump_one_cpuid(output, regs, 0x5);
+    if (maxsocid >= 3) {
+      for(i=1; i<=maxsocid; i++) {
+	regs[0] = 0x17; regs[2] = i;
+	dump_one_cpuid(output, regs, 0x5);
+      }
     }
   }
 
@@ -269,7 +274,11 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     max = regs[0];
     for(i=1; i<=max; i++) {
       regs[0] = 0x18; regs[2] = i;
+      regs[3] = 0; /* mark as invalid in case the cpuid call doesn't do anything */
       dump_one_cpuid(output, regs, 0x5);
+      if (!(regs[3] & 0x1f))
+	/* invalid, but it doesn't mean the next subleaf will be invalid */
+        continue;
     }
   }
 
@@ -280,7 +289,8 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     for(i=0; ; i++) {
       regs[0] = 0x1f; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
-      if (!regs[0] && !regs[1])
+      if (!(regs[2] & 0xff00))
+	/* invalid, no more levels */
 	break;
     }
   }
@@ -372,6 +382,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
       regs[0] = 0x8000001d; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[0] & 0x1f))
+	/* no such cache, no more cache */
 	break;
     }
   }
