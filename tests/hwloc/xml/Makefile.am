@@ -1,4 +1,4 @@
-# Copyright © 2009-2017 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -26,6 +26,7 @@ xml_outputs = \
         32em64t-2n8c2t-pci-wholeio.xml \
         64intel64-3g2n+2n-irregulargroups+pci.xml \
         64intel64-3g2n+2n-irregulargroups+pci.console.output \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.xml \
         64intel64-fakeKNL-SNC4-hybrid.xml \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t.xml \
@@ -37,6 +38,8 @@ xml_outputs = \
         2intel64-1n2c-numaroot.v1tov2.xml \
         28intel64-2p2g7c-CoDgroups.v1tov2.xml \
         28intel64-2p2g7c-CoD.nogroups.v1tov2.xml \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v1tov2.xml \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.xml \
         64intel64-fakeKNL-SNC4-hybrid.v1tov2.xml \
         64intel64-fakeKNL-SNC4-hybrid.v2tov1.xml
 
@@ -65,6 +68,8 @@ xml_source = \
         28intel64-2p2g7c-CoDgroups.v1tov2.source \
         28intel64-2p2g7c-CoD.nogroups.v1tov2.source \
         28intel64-2p2g7c-CoDgroups.v1.xml \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v1tov2.source \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.source \
         64intel64-fakeKNL-SNC4-hybrid.v1tov2.source \
         64intel64-fakeKNL-SNC4-hybrid.v2tov1.source
 
@@ -82,6 +87,7 @@ xml_options = \
         64intel64-3g2n+2n-irregulargroups+pci.console.options \
         16amd64-4distances.v2tov1.options \
         28intel64-2p2g7c-CoD.nogroups.v1tov2.options \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.options \
         64intel64-fakeKNL-SNC4-hybrid.v2tov1.options
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.env'
