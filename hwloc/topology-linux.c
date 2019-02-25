@@ -4370,7 +4370,6 @@ look_sysfscpu(struct hwloc_topology *topology,
   env = getenv("HWLOC_DONT_MERGE_DIE_GROUPS");
   dont_merge_die_groups = env && atoi(env);
   hwloc_bitmap_foreach_begin(i, cpuset) {
-    hwloc_bitmap_t coreset, bookset, drawerset, threadset;
     int tmpint;
     int notfirstofcore = 0; /* set if we have core info and if we're not the first PU of our core */
     int notfirstofdie = 0; /* set if we have die info and if we're not the first PU of our die */
@@ -4378,6 +4377,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
       /* look at the core */
+      hwloc_bitmap_t coreset;
       if (old_filenames)
 	sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       else
@@ -4517,6 +4517,7 @@ look_sysfscpu(struct hwloc_topology *topology,
     if (data->arch == HWLOC_LINUX_ARCH_S390
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
       /* look at the books */
+      hwloc_bitmap_t bookset, drawerset;
       sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
       bookset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (bookset) {
@@ -4573,6 +4574,7 @@ look_sysfscpu(struct hwloc_topology *topology,
     /* PU cannot be filtered-out */
     {
       /* look at the thread */
+      hwloc_bitmap_t threadset;
       struct hwloc_obj *thread = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, (unsigned) i);
       threadset = hwloc_bitmap_alloc();
       hwloc_bitmap_only(threadset, i);
