@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -3449,7 +3449,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 static int
 look_sysfscpu(struct hwloc_topology *topology,
 	      struct hwloc_linux_backend_data_s *data,
-	      const char *path,
+	      const char *path, int old_filenames,
 	      struct hwloc_linux_cpuinfo_proc * cpuinfo_Lprocs, unsigned cpuinfo_numprocs)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
@@ -3514,7 +3514,10 @@ look_sysfscpu(struct hwloc_topology *topology,
 
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_PACKAGE)) {
       /* look at the package */
-      sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
+      if (old_filenames)
+	sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
+      else
+	sprintf(str, "%s/cpu%d/topology/package_cpus", path, i);
       packageset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (packageset) {
 	hwloc_bitmap_and(packageset, packageset, cpuset);
@@ -3592,7 +3595,10 @@ look_sysfscpu(struct hwloc_topology *topology,
 
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
       /* look at the core */
-      sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+      if (old_filenames)
+	sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+      else
+	sprintf(str, "%s/cpu%d/topology/core_cpus", path, i);
       coreset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (coreset) {
         unsigned mycoreid = (unsigned) -1;
@@ -3693,7 +3699,10 @@ look_sysfscpu(struct hwloc_topology *topology,
 	if (hwloc_bitmap_iszero(cacheset)) {
 	  /* ia64 returning empty L3 and L2i? use the core set instead */
 	  hwloc_bitmap_t tmpset;
-	  sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+	  if (old_filenames)
+	    sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+	  else
+	    sprintf(str, "%s/cpu%d/topology/core_cpus", path, i);
 	  tmpset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
 	  /* only use it if we actually got something */
 	  if (tmpset) {
@@ -4491,18 +4500,29 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   int already_numanodes;
   const char *sysfs_cpu_path;
   const char *sysfs_node_path;
+  int old_siblings_filenames = 0;
   int err;
 
-  /* look for sysfs cpu path containing at least one of core_siblings and thread_siblings */
-  if (!hwloc_access("/sys/bus/cpu/devices/cpu0/topology/thread_siblings", R_OK, data->root_fd)
-      || !hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, data->root_fd))
+  /* look for sysfs cpu path containing at least one of topology file */
+  if (!hwloc_access("/sys/bus/cpu/devices/cpu0/topology/package_cpus", R_OK, data->root_fd)
+      || !hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_cpus", R_OK, data->root_fd)) {
     sysfs_cpu_path = "/sys/bus/cpu/devices";
-  else if (!hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, data->root_fd)
-      || !hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, data->root_fd))
+  } else if (!hwloc_access("/sys/bus/cpu/devices/cpu0/topology/thread_siblings", R_OK, data->root_fd)
+	     || !hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, data->root_fd)) {
+    sysfs_cpu_path = "/sys/bus/cpu/devices";
+    old_siblings_filenames = 1;
+  } else if (!hwloc_access("/sys/devices/system/cpu/cpu0/topology/package_cpus", R_OK, data->root_fd)
+	     || !hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_cpus", R_OK, data->root_fd)) {
     sysfs_cpu_path = "/sys/devices/system/cpu";
-  else
+  } else if (!hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, data->root_fd)
+	     || !hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, data->root_fd)) {
+    sysfs_cpu_path = "/sys/devices/system/cpu";
+    old_siblings_filenames = 1;
+  } else {
     sysfs_cpu_path = NULL;
-  hwloc_debug("Found sysfs cpu files under %s\n", sysfs_cpu_path);
+  }
+  hwloc_debug("Found sysfs cpu files under %s with %s topology filenames\n",
+	      sysfs_cpu_path, old_siblings_filenames ? "old" : "new");
 
   /* look for sysfs node path */
   if (!hwloc_access("/sys/bus/node/devices/node0/cpumap", R_OK, data->root_fd))
@@ -4603,7 +4623,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
   } else {
     /* sysfs */
-    if (look_sysfscpu(topology, data, sysfs_cpu_path, Lprocs, numprocs) < 0)
+    if (look_sysfscpu(topology, data, sysfs_cpu_path, old_siblings_filenames, Lprocs, numprocs) < 0)
       /* sysfs but we failed to read cpu topology, fallback */
       hwloc_linux_fallback_pu_level(backend);
   }
