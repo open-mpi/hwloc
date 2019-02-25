@@ -2344,10 +2344,42 @@ hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topol
 void
 hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology, unsigned long flags)
 {
+  hwloc_obj_t root = hwloc_get_root_obj(topology);
+
   if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
-    hwloc__xml_v1export_object (state, topology, hwloc_get_root_obj(topology), flags);
+    if (root->memory_first_child) {
+      /* we don't use hwloc__xml_v1export_object_with_memory() because we want/can keep root above the numa node */
+      struct hwloc__xml_export_state_s rstate, mstate;
+      hwloc_obj_t child;
+      /* export the root */
+      state->new_child(state, &rstate, "object");
+      hwloc__xml_export_object_contents (&rstate, topology, root, flags);
+      /* export first memory child */
+      child = root->memory_first_child;
+      assert(child->type == HWLOC_OBJ_NUMANODE);
+      rstate.new_child(&rstate, &mstate, "object");
+      hwloc__xml_export_object_contents (&mstate, topology, child, flags);
+      /* then its normal/io/misc children */
+      for_each_child(child, root)
+	hwloc__xml_v1export_object (&mstate, topology, child, flags);
+      for_each_io_child(child, root)
+	hwloc__xml_v1export_object (&mstate, topology, child, flags);
+      for_each_misc_child(child, root)
+	hwloc__xml_v1export_object (&mstate, topology, child, flags);
+      /* close first memory child */
+      mstate.end_object(&mstate, "object");
+      /* now other memory children */
+      for_each_memory_child(child, root)
+	if (child->sibling_rank > 0)
+	  hwloc__xml_v1export_object (&rstate, topology, child, flags);
+      /* close the root */
+      rstate.end_object(&rstate, "object");
+    } else {
+      hwloc__xml_v1export_object(state, topology, root, flags);
+    }
+
   } else {
-    hwloc__xml_v2export_object (state, topology, hwloc_get_root_obj(topology), flags);
+    hwloc__xml_v2export_object (state, topology, root, flags);
     hwloc__xml_v2export_distances (state, topology);
   }
 }
