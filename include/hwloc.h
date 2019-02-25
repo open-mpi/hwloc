@@ -187,7 +187,8 @@ typedef enum {
   HWLOC_OBJ_PACKAGE,	/**< \brief Physical package.
 			  * The physical package that usually gets inserted
 			  * into a socket on the motherboard.
-			  * A processor package usually contains multiple cores.
+			  * A processor package usually contains multiple cores,
+			  * and possibly some dies.
 			  */
   HWLOC_OBJ_CORE,	/**< \brief Core.
 			  * A computation unit (may be shared by several
@@ -296,6 +297,11 @@ typedef enum {
 			  * instead of a normal depth just like other objects in the
 			  * main tree.
 			  */
+
+  HWLOC_OBJ_DIE,	/**< \brief Die within a physical package.
+			 * A subpart of the physical package, that contains multiple cores.
+			 * \hideinitializer
+			 */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
 } hwloc_obj_type_t;
@@ -2048,7 +2054,7 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
  *
  * By default, most objects are kept (::HWLOC_TYPE_FILTER_KEEP_ALL).
  * Instruction caches, I/O and Misc objects are ignored by default (::HWLOC_TYPE_FILTER_KEEP_NONE).
- * Group levels are ignored unless they bring structure (::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
+ * Die and Group levels are ignored unless they bring structure (::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
  *
  * Note that group objects are also ignored individually (without the entire level)
  * when they do not bring structure.

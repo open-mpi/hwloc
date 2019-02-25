@@ -243,6 +243,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_MEMCACHE: return "MemCache";
     case HWLOC_OBJ_NUMANODE: return "NUMANode";
     case HWLOC_OBJ_PACKAGE: return "Package";
+    case HWLOC_OBJ_DIE: return "Die";
     case HWLOC_OBJ_L1CACHE: return "L1Cache";
     case HWLOC_OBJ_L2CACHE: return "L2Cache";
     case HWLOC_OBJ_L3CACHE: return "L3Cache";
@@ -346,6 +347,8 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   } else if (hwloc__type_match(string, "package", 2)
 	     || hwloc__type_match(string, "socket", 2)) { /* backward compat with v1.10 */
     type = HWLOC_OBJ_PACKAGE;
+  } else if (hwloc__type_match(string, "die", 2)) {
+    type = HWLOC_OBJ_DIE;
   } else if (hwloc__type_match(string, "core", 2)) {
     type = HWLOC_OBJ_CORE;
   } else if (hwloc__type_match(string, "pu", 2)) {
@@ -476,6 +479,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_NUMANODE:
   case HWLOC_OBJ_MEMCACHE:
   case HWLOC_OBJ_PACKAGE:
+  case HWLOC_OBJ_DIE:
   case HWLOC_OBJ_CORE:
   case HWLOC_OBJ_PU:
     return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));

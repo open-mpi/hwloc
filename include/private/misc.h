@@ -439,7 +439,7 @@ hwloc_linux_pci_link_speed_from_string(const char *string)
 static __hwloc_inline int hwloc__obj_type_is_normal (hwloc_obj_type_t type)
 {
   /* type contiguity is asserted in topology_check() */
-  return type <= HWLOC_OBJ_GROUP;
+  return type <= HWLOC_OBJ_GROUP || type == HWLOC_OBJ_DIE;
 }
 
 /* Any object attached to memory children, currently NUMA nodes or Memory-side caches */

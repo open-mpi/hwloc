@@ -33,6 +33,7 @@
 struct lstopo_color BLACK_COLOR = { 0, 0, 0, 0 };
 struct lstopo_color WHITE_COLOR = { 0xff, 0xff, 0xff, 0 };
 struct lstopo_color PACKAGE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR, 0 };
+struct lstopo_color DIE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, 0 };
 struct lstopo_color MEMORY_COLOR = { 0xef, 0xdf, 0xde, 0 };
 struct lstopo_color MEMORIES_COLOR = { 0xf2, 0xe8, 0xe8, 0}; /* slightly lighter than MEMORY_COLOR */
 struct lstopo_color CORE_COLOR = { 0xbe, 0xbe, 0xbe, 0 };
@@ -77,6 +78,7 @@ declare_colors(struct lstopo_output *output)
   declare_color(output, &BLACK_COLOR);
   declare_color(output, &WHITE_COLOR);
   declare_color(output, &PACKAGE_COLOR);
+  declare_color(output, &DIE_COLOR);
   declare_color(output, &MEMORY_COLOR);
   declare_color(output, &MEMORIES_COLOR);
   declare_color(output, &CORE_COLOR);
@@ -877,6 +879,10 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     s->bg = &PACKAGE_COLOR;
     break;
 
+  case HWLOC_OBJ_DIE:
+    s->bg = &DIE_COLOR;
+    break;
+
   case HWLOC_OBJ_CORE:
     s->bg = &CORE_COLOR;
     break;
@@ -1500,6 +1506,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_MACHINE:
     case HWLOC_OBJ_NUMANODE:
     case HWLOC_OBJ_PACKAGE:
+    case HWLOC_OBJ_DIE:
     case HWLOC_OBJ_CORE:
     case HWLOC_OBJ_PU:
     case HWLOC_OBJ_GROUP:
