@@ -539,7 +539,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     if (*pos < '0' || *pos > '9') {
       if (hwloc_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
-	if (!strncmp(pos, "Die", 3) || !strncmp(pos, "Tile", 4) || !strncmp(pos, "Module", 6)) {
+	if (!strncmp(pos, "Tile", 4) || !strncmp(pos, "Module", 6)) {
 	  /* possible future types */
 	  type = HWLOC_OBJ_GROUP;
 	} else {
@@ -655,6 +655,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   if (type_count[HWLOC_OBJ_PACKAGE] > 1) {
     if (verbose)
       fprintf(stderr, "Synthetic string cannot have several package levels\n");
+    errno = EINVAL;
+    return -1;
+  }
+  if (type_count[HWLOC_OBJ_DIE] > 1) {
+    if (verbose)
+      fprintf(stderr, "Synthetic string cannot have several die levels\n");
     errno = EINVAL;
     return -1;
   }
@@ -842,6 +848,7 @@ hwloc_synthetic_set_attr(struct hwloc_synthetic_attr_s *sattr,
     obj->attr->numanode.page_types[0].count = sattr->memorysize / 4096;
     break;
   case HWLOC_OBJ_PACKAGE:
+  case HWLOC_OBJ_DIE:
     break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
@@ -1284,6 +1291,12 @@ hwloc__export_synthetic_obj(struct hwloc_topology * topology, unsigned long flag
 			  |HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1))) {
     /* if exporting to v1 or without extended-types, use all-v1-compatible Socket name */
     res = hwloc_snprintf(tmp, tmplen, "Socket%s", aritys);
+
+  } else if (obj->type == HWLOC_OBJ_DIE
+	     && (flags & (HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES
+			  |HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1))) {
+    /* if exporting to v1 or without extended-types, use all-v1-compatible Group name */
+    res = hwloc_snprintf(tmp, tmplen, "Group%s", aritys);
 
   } else if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
       || flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {

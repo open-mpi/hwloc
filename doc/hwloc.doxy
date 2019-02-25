@@ -31,7 +31,7 @@ for links to more sections about hwloc concepts.
 
 hwloc provides command line tools and a C API to obtain the
 hierarchical map of key computing elements within a node, such as: NUMA memory
-nodes, shared caches, processor packages, processor cores,
+nodes, shared caches, processor packages, dies and cores,
 processing units (logical processors or "threads")
 and even I/O devices.
 hwloc also gathers various attributes such as
@@ -515,7 +515,7 @@ Make sure to have had a look at those too!
   detailed in the ::hwloc_obj_type_t enumeration.
 
   There are four kinds of Objects: Memory (NUMA nodes and Memory-side caches), I/O (Bridges, PCI and OS devices),
-  Misc, and Normal (everything else, including Machine, Package, Core, PU, CPU Caches, etc.).
+  Misc, and Normal (everything else, including Machine, Package, Die, Core, PU, CPU Caches, etc.).
   Normal and Memory objects have (non-NULL) CPU sets and nodesets, while I/O and Misc don't.
 
   Objects are topologically sorted by locality (CPU and node sets)
