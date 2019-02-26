@@ -1045,6 +1045,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* end of 1.x specific checks */
   }
 
+  /* 2.0 backward compatibility */
+  if (obj->type == HWLOC_OBJ_GROUP) {
+    if (obj->attr->group.kind == HWLOC_GROUP_KIND_INTEL_DIE
+	|| (obj->subtype && !strcmp(obj->subtype, "Die")))
+      obj->type = HWLOC_OBJ_DIE;
+  }
+
   /* check that cache attributes are coherent with the actual type */
   if (hwloc__obj_type_is_cache(obj->type)
       && obj->type != hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type)) {
@@ -1949,6 +1956,8 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 
   if (v1export && obj->type == HWLOC_OBJ_PACKAGE)
     state->new_prop(state, "type", "Socket");
+  else if (v1export && obj->type == HWLOC_OBJ_DIE)
+    state->new_prop(state, "type", "Group");
   else if (v1export && hwloc__obj_type_is_cache(obj->type))
     state->new_prop(state, "type", "Cache");
   else
@@ -2152,6 +2161,13 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     childstate.new_prop(&childstate, "value", subtype);
     childstate.end_object(&childstate, "info");
     free(subtype);
+  }
+  if (v1export && obj->type == HWLOC_OBJ_DIE) {
+    struct hwloc__xml_export_state_s childstate;
+    state->new_child(state, &childstate, "info");
+    childstate.new_prop(&childstate, "name", "Type");
+    childstate.new_prop(&childstate, "value", "Die");
+    childstate.end_object(&childstate, "info");
   }
 
   if (v1export && !obj->parent) {
