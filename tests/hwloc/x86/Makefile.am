@@ -65,8 +65,7 @@ cpuid_options =
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
-cpuid_envs = \
-	Intel-CPUID.1F-Qemu-2p3d3c2t.env
+cpuid_envs =
 
 if HWLOC_HAVE_BUNZIPP
 TESTS = $(cpuid_outputs)

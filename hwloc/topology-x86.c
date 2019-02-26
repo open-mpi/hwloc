@@ -993,8 +993,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
     if (fulldiscovery) {
-      char *env;
-      int dont_merge;
       /* Look for AMD Compute units inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
@@ -1010,13 +1008,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
 			   TILE, "Tile",
 			   HWLOC_GROUP_KIND_INTEL_TILE, 0);
-      /* Look for Intel Dies inside packages */
-      env = getenv("HWLOC_DONT_MERGE_DIE_GROUPS");
-      dont_merge = env && atoi(env);
-      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
-      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
-			   DIE, "Die",
-			   HWLOC_GROUP_KIND_INTEL_DIE, dont_merge);
 
       /* Look for unknown objects */
       if (infos[one].otherids) {
@@ -1046,6 +1037,43 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	    }
 	  }
 	}
+      }
+    }
+  }
+
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_DIE)) {
+    /* Look for Intel Dies inside packages */
+    if (fulldiscovery) {
+      hwloc_bitmap_t die_cpuset;
+      hwloc_obj_t die;
+
+      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+      while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
+	unsigned packageid = infos[i].ids[PKG];
+	unsigned dieid = infos[i].ids[DIE];
+
+	if (dieid == (unsigned) -1) {
+	  hwloc_bitmap_clr(remaining_cpuset, i);
+	  continue;
+	}
+
+	die_cpuset = hwloc_bitmap_alloc();
+	for (j = i; j < nbprocs; j++) {
+	  if (infos[j].ids[DIE] == (unsigned) -1) {
+	    hwloc_bitmap_clr(remaining_cpuset, j);
+	    continue;
+	  }
+
+	  if (infos[j].ids[PKG] == packageid && infos[j].ids[DIE] == dieid) {
+	    hwloc_bitmap_set(die_cpuset, j);
+	    hwloc_bitmap_clr(remaining_cpuset, j);
+	  }
+	}
+	die = hwloc_alloc_setup_object(topology, HWLOC_OBJ_DIE, dieid);
+	die->cpuset = die_cpuset;
+	hwloc_debug_1arg_bitmap("os die %u has cpuset %s\n",
+				dieid, die_cpuset);
+	hwloc_insert_object_by_cpuset(topology, die);
       }
     }
   }
