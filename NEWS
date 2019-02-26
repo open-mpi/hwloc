@@ -19,9 +19,9 @@ in v0.9.1).
 
 Version 1.11.13 (also included in 2.0.4)
 ---------------
-* Add support for Linux 5.3 new sysfs cpu topology files.
+* Add support for Linux 5.3 new sysfs cpu topology files with Die information.
 * Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
-  Tiles, Modules and Dies are exposed as Groups for now.
+* Tiles, Modules and Dies are exposed as Groups for now.
   + HWLOC_DONT_MERGE_DIE_GROUPS=1 may be set in the environment to prevent
     Die groups from being automatically merged with identical parent or children.
 * Ignore NUMA node information from AMD topoext in the x86 backend,

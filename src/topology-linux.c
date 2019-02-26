@@ -3505,6 +3505,8 @@ look_sysfscpu(struct hwloc_topology *topology,
   unsigned caches_added, merge_buggy_core_siblings;
   hwloc_obj_t packages = NULL; /* temporary list of packages before actual insert in the tree */
   int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
+  int dont_merge_die_groups;
+  const char *env;
 
   /* fill the cpuset of interesting cpus */
   dir = hwloc_opendir(path, data->root_fd);
@@ -3555,10 +3557,23 @@ look_sysfscpu(struct hwloc_topology *topology,
 
   merge_buggy_core_siblings = (data->arch == HWLOC_LINUX_ARCH_X86);
   caches_added = 0;
+  env = getenv("HWLOC_DONT_MERGE_DIE_GROUPS");
+  dont_merge_die_groups = env && atoi(env);
   hwloc_bitmap_foreach_begin(i, cpuset) {
-    hwloc_bitmap_t packageset, coreset, bookset, threadset;
-    unsigned mypackageid, mycoreid, mybookid;
+    hwloc_bitmap_t packageset, coreset, bookset, threadset, dieset = NULL;
+    unsigned mypackageid, mydieid, mycoreid, mybookid;
     int tmpint;
+
+    /* look at the die */
+    sprintf(str, "%s/cpu%d/topology/die_cpus", path, i);
+    dieset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
+    if (dieset) {
+      if (hwloc_bitmap_first(dieset) == i) {
+	hwloc_bitmap_free(dieset);
+	dieset = NULL;
+      }
+      /* look at packages before deciding whether we keep that die or not */
+    }
 
     /* look at the package */
     if (old_filenames)
@@ -3566,6 +3581,11 @@ look_sysfscpu(struct hwloc_topology *topology,
     else
       sprintf(str, "%s/cpu%d/topology/package_cpus", path, i);
     packageset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
+    if (packageset && dieset && hwloc_bitmap_isequal(packageset, dieset)) {
+      /* die is identical to package, ignore it */
+      hwloc_bitmap_free(dieset);
+      dieset = NULL;
+    }
     if (packageset && hwloc_bitmap_first(packageset) == i) {
       /* first cpu in this package, add the package */
       struct hwloc_obj *package;
@@ -3635,6 +3655,24 @@ look_sysfscpu(struct hwloc_topology *topology,
     }
 package_done:
     hwloc_bitmap_free(packageset);
+
+    if (dieset) {
+      struct hwloc_obj *die;
+
+      mydieid = (unsigned) -1;
+      sprintf(str, "%s/cpu%d/topology/die_id", path, i); /* contains %d when added in 5.2 */
+      if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
+	mydieid = (unsigned) tmpint;
+
+	die = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, mydieid);
+	die->cpuset = dieset;
+	hwloc_debug_1arg_bitmap("os die %u has cpuset %s\n",
+				  mydieid, dieset);
+	hwloc_obj_add_info(die, "Type", "Die");
+	die->attr->group.dont_merge = dont_merge_die_groups;
+	hwloc_insert_object_by_cpuset(topology, die);
+      }
+    }
 
     /* look at the core */
     if (old_filenames)
