@@ -57,6 +57,7 @@ struct procinfo {
   unsigned max_nbcores;
   unsigned max_nbthreads;
   unsigned packageid;
+  unsigned dieid;
   unsigned nodeid;
   unsigned unitid;
   unsigned logprocid;
@@ -173,6 +174,10 @@ static void look_exttopoenum(struct procinfo *infos, unsigned leaf)
 	  break;
 	case 2:
 	  infos->coreid = id;
+	  /* apic_number is the actual number of threads per module */
+	  break;
+	case 5:
+	  infos->dieid = id;
 	  /* apic_number is the actual number of threads per package */
 	  break;
 	default:
@@ -738,8 +743,8 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
   }
 
   if (fulldiscovery) {
-    hwloc_bitmap_t unit_cpuset;
-    hwloc_obj_t unit;
+    hwloc_bitmap_t unit_cpuset, die_cpuset;
+    hwloc_obj_t unit, die;
 
     /* Look for Compute units inside packages */
     hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
@@ -770,6 +775,37 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
       hwloc_debug_1arg_bitmap("os unit %u has cpuset %s\n",
           unitid, unit_cpuset);
       hwloc_insert_object_by_cpuset(topology, unit);
+    }
+
+    /* Look for Dies inside packages */
+    hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+    while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
+      unsigned packageid = infos[i].packageid;
+      unsigned dieid = infos[i].dieid;
+
+      if (dieid == (unsigned)-1) {
+        hwloc_bitmap_clr(remaining_cpuset, i);
+	continue;
+      }
+
+      die_cpuset = hwloc_bitmap_alloc();
+      for (j = i; j < nbprocs; j++) {
+	if (infos[j].dieid == (unsigned) -1) {
+	  hwloc_bitmap_clr(remaining_cpuset, j);
+	  continue;
+	}
+
+        if (infos[j].packageid == packageid && infos[j].dieid == dieid) {
+          hwloc_bitmap_set(die_cpuset, j);
+          hwloc_bitmap_clr(remaining_cpuset, j);
+        }
+      }
+      die = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, dieid);
+      die->cpuset = die_cpuset;
+      hwloc_obj_add_info(die, "Type", "Die");
+      hwloc_debug_1arg_bitmap("os die %u has cpuset %s\n",
+          dieid, die_cpuset);
+      hwloc_insert_object_by_cpuset(topology, die);
     }
 
    /* Look for unknown objects */
@@ -1104,6 +1140,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, int fulldiscovery)
   for (i = 0; i < nbprocs; i++) {
     infos[i].nodeid = (unsigned) -1;
     infos[i].packageid = (unsigned) -1;
+    infos[i].dieid = (unsigned) -1;
     infos[i].unitid = (unsigned) -1;
     infos[i].coreid = (unsigned) -1;
     infos[i].threadid = (unsigned) -1;
