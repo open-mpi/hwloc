@@ -999,15 +999,6 @@ following environment variables.
   actual displaying of these error messages.
   </dd>
 
-<dt>HWLOC_DONT_MERGE_DIE_GROUPS=0</dt>
-  <dd>always keep Group objects that describe CPU Dies.
-  CPU Dies are represented as generic Group objects.
-  By default, Groups are merged with identical children or parent
-  unless they bring some additional structure.
-  Setting this environment variable to 1 ensures these Die Groups
-  will never be merged.
-  </dd>
-
 <dt>HWLOC_GROUPING=1</dt>
   <dd>enables or disables objects grouping based on distances.
   By default, hwloc uses distance matrices between objects (either read

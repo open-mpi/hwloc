@@ -4299,8 +4299,6 @@ look_sysfscpu(struct hwloc_topology *topology,
   int i,j;
   unsigned caches_added;
   int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
-  int dont_merge_die_groups;
-  const char *env;
 
   /* try to get the list of online CPUs at once.
    * otherwise we'll use individual per-CPU "online" files.
@@ -4367,8 +4365,6 @@ look_sysfscpu(struct hwloc_topology *topology,
 	     hwloc_bitmap_weight(cpuset), cpuset);
 
   caches_added = 0;
-  env = getenv("HWLOC_DONT_MERGE_DIE_GROUPS");
-  dont_merge_die_groups = env && atoi(env);
   hwloc_bitmap_foreach_begin(i, cpuset) {
     int tmpint;
     int notfirstofcore = 0; /* set if we have core info and if we're not the first PU of our core */
@@ -4435,7 +4431,7 @@ look_sysfscpu(struct hwloc_topology *topology,
     }
 
     if (!notfirstofcore /* don't look at the package unless we are the first of the core */
-	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_DIE)) {
       /* look at the die */
       sprintf(str, "%s/cpu%d/topology/die_cpus", path, i);
       dieset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
@@ -4503,14 +4499,10 @@ look_sysfscpu(struct hwloc_topology *topology,
       if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	mydieid = (unsigned) tmpint;
 
-      die = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, mydieid);
+      die = hwloc_alloc_setup_object(topology, HWLOC_OBJ_DIE, mydieid);
       die->cpuset = dieset;
       hwloc_debug_1arg_bitmap("os die %u has cpuset %s\n",
 			      mydieid, dieset);
-      die->subtype = strdup("Die");
-      die->attr->group.kind = HWLOC_GROUP_KIND_INTEL_DIE;
-      die->attr->group.subkind = 0;
-      die->attr->group.dont_merge = dont_merge_die_groups;
       hwloc_insert_object_by_cpuset(topology, die);
     }
 
