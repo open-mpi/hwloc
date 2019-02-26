@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 2.0.4 (also included in 1.11.13 when appropriate)
 -------------
+* Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
+  Tiles, Modules and Dies are exposed as Groups for now.
 * Ignore NUMA node information from AMD topoext in the x86 backend,
   unless HWLOC_X86_TOPOEXT_NUMANODES=1 is set in the environment.
 
