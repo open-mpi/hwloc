@@ -1730,6 +1730,7 @@ hwloc_obj_t
 hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
   hwloc_obj_t res, root;
+  int cmp;
 
   if (!topology->is_loaded) {
     /* this could actually work, we would just need to disable connect_children/levels below */
@@ -1767,7 +1768,14 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     return NULL;
   }
 
-  res = hwloc__insert_object_by_cpuset(topology, NULL, obj, NULL /* do not show errors on stdout */);
+  cmp = hwloc_obj_cmp_sets(obj, root);
+  if (cmp == HWLOC_OBJ_INCLUDED) {
+    res = hwloc__insert_object_by_cpuset(topology, NULL, obj, NULL /* do not show errors on stdout */);
+  } else {
+    /* just merge root */
+    res = root;
+  }
+
   if (!res)
     return NULL;
   if (res != obj)
