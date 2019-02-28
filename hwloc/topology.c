@@ -1187,8 +1187,13 @@ hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   if (obj1->complete_cpuset && obj2->complete_cpuset)
     return hwloc_bitmap_compare_first(obj1->complete_cpuset, obj2->complete_cpuset);
-  else
+  else if (obj1->cpuset && obj2->cpuset)
     return hwloc_bitmap_compare_first(obj1->cpuset, obj2->cpuset);
+  else if (obj1->complete_nodeset && obj2->complete_nodeset)
+    return hwloc_bitmap_compare_first(obj1->complete_nodeset, obj2->complete_nodeset);
+  else if (obj1->nodeset && obj2->nodeset)
+    return hwloc_bitmap_compare_first(obj1->nodeset, obj2->nodeset);
+  return 0;
 }
 
 /* format the obj info to print in error messages */
