@@ -2017,9 +2017,7 @@ int
 hwloc_obj_add_children_sets(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
-  assert(obj->cpuset != NULL);
   for_each_child(child, obj) {
-    assert(child->cpuset != NULL);
     hwloc_obj_add_other_obj_sets(obj, child);
   }
   /* No need to look at Misc children, they contain no PU. */
