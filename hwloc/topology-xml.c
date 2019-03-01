@@ -1936,8 +1936,23 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   }
 
   if (obj->cpuset) {
-    if (v1export && obj->type == HWLOC_OBJ_NUMANODE && obj->sibling_rank > 0) {
-      /* v1 non-first NUMA nodes have empty cpusets */
+    int empty_cpusets = 0;
+
+    if (v1export && obj->type == HWLOC_OBJ_NUMANODE) {
+      /* walk up this memory hierarchy to find-out if we are the first numa node.
+       * v1 non-first NUMA nodes have empty cpusets.
+       */
+      hwloc_obj_t parent = obj;
+      while (!hwloc_obj_type_is_normal(parent->type)) {
+	if (parent->sibling_rank > 0) {
+	  empty_cpusets = 1;
+	  break;
+	}
+	parent = parent->parent;
+      }
+    }
+
+    if (empty_cpusets) {
       state->new_prop(state, "cpuset", "0x0");
       state->new_prop(state, "online_cpuset", "0x0");
       state->new_prop(state, "complete_cpuset", "0x0");
@@ -2216,13 +2231,90 @@ hwloc__xml_v2export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
 static void
 hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags);
 
+static hwloc_obj_t
+hwloc__xml_v1export_object_next_numanode(hwloc_obj_t obj, hwloc_obj_t cur)
+{
+  hwloc_obj_t parent;
+
+  if (!cur) {
+    /* first numa node is on the very bottom left */
+    cur = obj->memory_first_child;
+    goto find_first;
+  }
+
+  /* walk-up until there's a next sibling */
+  parent = cur;
+  while (1) {
+    if (parent->next_sibling) {
+      /* found a next sibling, we'll walk down-left from there */
+      cur = parent->next_sibling;
+      break;
+    }
+    parent = parent->parent;
+    if (parent == obj)
+      return NULL;
+  }
+
+ find_first:
+  while (cur->type != HWLOC_OBJ_NUMANODE)
+    cur = cur->memory_first_child;
+  assert(cur);
+  return cur;
+}
+
+static unsigned
+hwloc__xml_v1export_object_list_numanodes(hwloc_obj_t obj, hwloc_obj_t *first_p, hwloc_obj_t **nodes_p)
+{
+  hwloc_obj_t *nodes, cur;
+  unsigned nr;
+
+  if (!obj->memory_first_child) {
+    *first_p = NULL;
+    *nodes_p = NULL;
+    return 0;
+  }
+  /* we're sure there's at least one numa node */
+
+  nr = hwloc_bitmap_weight(obj->nodeset);
+  assert(nr > 0);
+  /* these are local nodes, but some of them may be attached above instead of here */
+
+  nodes = calloc(nr, sizeof(*nodes));
+  if (!nodes) {
+    /* only return the first node */
+    cur = hwloc__xml_v1export_object_next_numanode(obj, NULL);
+    assert(cur);
+    *first_p = cur;
+    *nodes_p = NULL;
+    return 1;
+  }
+
+  nr = 0;
+  cur = NULL;
+  while (1) {
+    cur = hwloc__xml_v1export_object_next_numanode(obj, cur);
+    if (!cur)
+      break;
+    nodes[nr++] = cur;
+  }
+
+  *first_p = nodes[0];
+  *nodes_p = nodes;
+  return nr;
+}
+
 static void
 hwloc__xml_v1export_object_with_memory(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
   struct hwloc__xml_export_state_s gstate, mstate, ostate, *state = parentstate;
   hwloc_obj_t child;
+  unsigned nr_numanodes;
+  hwloc_obj_t *numanodes, first_numanode;
+  unsigned i;
 
-  if (obj->parent->arity > 1 && obj->memory_arity > 1 && parentstate->global->v1_memory_group) {
+  nr_numanodes = hwloc__xml_v1export_object_list_numanodes(obj, &first_numanode, &numanodes);
+
+  if (obj->parent->arity > 1 && nr_numanodes > 1 && parentstate->global->v1_memory_group) {
     /* child has sibling, we must add a Group around those memory children */
     hwloc_obj_t group = parentstate->global->v1_memory_group;
     parentstate->new_child(parentstate, &gstate, "object");
@@ -2239,10 +2331,8 @@ hwloc__xml_v1export_object_with_memory(hwloc__xml_export_state_t parentstate, hw
   }
 
   /* export first memory child */
-  child = obj->memory_first_child;
-  assert(child->type == HWLOC_OBJ_NUMANODE);
   state->new_child(state, &mstate, "object");
-  hwloc__xml_export_object_contents (&mstate, topology, child, flags);
+  hwloc__xml_export_object_contents (&mstate, topology, first_numanode, flags);
 
   /* then the actual object */
   mstate.new_child(&mstate, &ostate, "object");
@@ -2261,9 +2351,10 @@ hwloc__xml_v1export_object_with_memory(hwloc__xml_export_state_t parentstate, hw
   mstate.end_object(&mstate, "object");
 
   /* now other memory children */
-  for_each_memory_child(child, obj)
-    if (child->sibling_rank > 0)
-      hwloc__xml_v1export_object (state, topology, child, flags);
+  for(i=1; i<nr_numanodes; i++)
+    hwloc__xml_v1export_object (state, topology, numanodes[i], flags);
+
+  free(numanodes);
 
   if (state == &gstate) {
     /* close group if any */
@@ -2351,18 +2442,22 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
   hwloc_obj_t root = hwloc_get_root_obj(topology);
 
   if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
-    if (root->memory_first_child) {
+    hwloc_obj_t *numanodes, first_numanode;
+    unsigned nr_numanodes;
+
+    nr_numanodes = hwloc__xml_v1export_object_list_numanodes(root, &first_numanode, &numanodes);
+
+    if (nr_numanodes) {
       /* we don't use hwloc__xml_v1export_object_with_memory() because we want/can keep root above the numa node */
       struct hwloc__xml_export_state_s rstate, mstate;
       hwloc_obj_t child;
+      unsigned i;
       /* export the root */
       state->new_child(state, &rstate, "object");
       hwloc__xml_export_object_contents (&rstate, topology, root, flags);
       /* export first memory child */
-      child = root->memory_first_child;
-      assert(child->type == HWLOC_OBJ_NUMANODE);
       rstate.new_child(&rstate, &mstate, "object");
-      hwloc__xml_export_object_contents (&mstate, topology, child, flags);
+      hwloc__xml_export_object_contents (&mstate, topology, first_numanode, flags);
       /* then its normal/io/misc children */
       for_each_child(child, root)
 	hwloc__xml_v1export_object (&mstate, topology, child, flags);
@@ -2373,14 +2468,15 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
       /* close first memory child */
       mstate.end_object(&mstate, "object");
       /* now other memory children */
-      for_each_memory_child(child, root)
-	if (child->sibling_rank > 0)
-	  hwloc__xml_v1export_object (&rstate, topology, child, flags);
+      for(i=1; i<nr_numanodes; i++)
+	hwloc__xml_v1export_object (&rstate, topology, numanodes[i], flags);
       /* close the root */
       rstate.end_object(&rstate, "object");
     } else {
       hwloc__xml_v1export_object(state, topology, root, flags);
     }
+
+    free(numanodes);
 
   } else {
     hwloc__xml_v2export_object (state, topology, root, flags);

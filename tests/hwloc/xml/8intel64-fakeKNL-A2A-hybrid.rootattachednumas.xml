@@ -36,10 +36,12 @@
       <page_type size="2097152" count="0"/>
       <page_type size="1073741824" count="0"/>
     </object>
-    <object type="NUMANode" os_index="1" cpuset="0x00006000,,0x00040000,0x00006007" complete_cpuset="0x00006000,,0x00040000,0x00006007" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="543" subtype="MCDRAM" local_memory="8589934592">
-      <page_type size="4096" count="2097152"/>
-      <page_type size="2097152" count="0"/>
-      <page_type size="1073741824" count="0"/>
+    <object type="MemCache" os_index="1" cpuset="0x00006000,,0x00040000,0x00006007" complete_cpuset="0x00006000,,0x00040000,0x00006007" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="543" cache_size="10000000" depth="1" cache_linesize="64" cache_associativity="0" cache_type="0">
+      <object type="NUMANode" os_index="1" cpuset="0x00006000,,0x00040000,0x00006007" complete_cpuset="0x00006000,,0x00040000,0x00006007" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="544" subtype="MCDRAM" local_memory="8589934592">
+        <page_type size="4096" count="2097152"/>
+        <page_type size="2097152" count="0"/>
+        <page_type size="1073741824" count="0"/>
+      </object>
     </object>
     <object type="L2Cache" cpuset="0x00006000,,0x00040000,0x00000001" complete_cpuset="0x00006000,,0x00040000,0x00000001" nodeset="0x00000003" complete_nodeset="0x00000003" gp_index="6" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
       <object type="L1Cache" cpuset="0x00002000,,,0x00000001" complete_cpuset="0x00002000,,,0x00000001" nodeset="0x00000003" complete_nodeset="0x00000003" gp_index="4" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
