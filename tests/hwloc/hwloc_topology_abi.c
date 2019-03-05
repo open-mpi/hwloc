@@ -63,7 +63,7 @@ int main(void)
     offset = offsetof(struct hwloc_topology, first_dist);
     assert(offset == 696);
     size = sizeof(struct hwloc_internal_distances_s);
-    assert(size == 72);
+    assert(size == 88);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
     assert(offset == 748);

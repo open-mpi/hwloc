@@ -87,7 +87,12 @@ enum hwloc_distances_kind_e {
    * Such values are currently ignored for distance-based grouping.
    * \hideinitializer
    */
-  HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH = (1UL<<3)
+  HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH = (1UL<<3),
+
+  /** \brief This distances structure covers objects of different types.
+   * \hideinitializer
+   */
+  HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES = (1UL<<4)
 };
 
 /** \brief Retrieve distance matrices.
@@ -241,11 +246,11 @@ enum hwloc_distances_add_flag_e {
  * The distance from object i to object j is in slot i*nbobjs+j.
  *
  * \p kind specifies the kind of distance as a OR'ed set of ::hwloc_distances_kind_e.
+ * Kind ::HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES will be automatically added
+ * if objects of different types are given.
  *
  * \p flags configures the behavior of the function using an optional OR'ed set of
  * ::hwloc_distances_add_flag_e.
- *
- * Objects must be of the same type.
  */
 HWLOC_DECLSPEC int hwloc_distances_add(hwloc_topology_t topology,
 				       unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,

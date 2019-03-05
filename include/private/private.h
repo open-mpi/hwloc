@@ -40,7 +40,7 @@
 #endif
 #include <string.h>
 
-#define HWLOC_TOPOLOGY_ABI 0x20100 /* version of the layout of struct topology */
+#define HWLOC_TOPOLOGY_ABI 0x20200 /* version of the layout of struct topology */
 
 /*****************************************************
  * WARNING:
@@ -131,7 +131,13 @@ struct hwloc_topology {
 
   struct hwloc_internal_distances_s {
     char *name; /* FIXME: needs an API to set it from user */
-    hwloc_obj_type_t type;
+
+    /* if all objects have the same type, different_types is NULL and unique_type is valid.
+     * otherwise unique_type is HWLOC_OBJ_TYPE_NONE and different_types contains individual objects types.
+     */
+    hwloc_obj_type_t unique_type;
+    hwloc_obj_type_t *different_types;
+
     /* add union hwloc_obj_attr_u if we ever support groups */
     unsigned nbobjs;
     uint64_t *indexes; /* array of OS or GP indexes before we can convert them into objs.
@@ -336,7 +342,7 @@ extern void hwloc_internal_distances_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_distances_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern void hwloc_internal_distances_refresh(hwloc_topology_t topology);
 extern int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
-extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name, hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name, hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
 extern void hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology);
 
 /* encode src buffer into target buffer.
