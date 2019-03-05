@@ -1415,7 +1415,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     }
   }
 
-  hwloc_internal_distances_add_by_index(topology, name, type, nbobjs, indexes, u64values, kind, 0);
+  hwloc_internal_distances_add_by_index(topology, name, type, NULL, nbobjs, indexes, u64values, kind, 0);
 
   /* prevent freeing below */
   indexes = NULL;
@@ -2200,9 +2200,11 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
       unsigned *logical_to_v2array;
       int depth;
 
-      if (nbobjs != (unsigned) hwloc_get_nbobjs_by_type(topology, dist->type))
+      if (nbobjs != (unsigned) hwloc_get_nbobjs_by_type(topology, dist->unique_type))
 	continue;
       if (!(dist->kind & HWLOC_DISTANCES_KIND_MEANS_LATENCY))
+	continue;
+      if (dist->kind & HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES)
 	continue;
 
       logical_to_v2array = malloc(nbobjs * sizeof(*logical_to_v2array));
@@ -2215,7 +2217,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 	logical_to_v2array[dist->objs[i]->logical_index] = i;
 
       /* compute the relative depth */
-      if (dist->type == HWLOC_OBJ_NUMANODE) {
+      if (dist->unique_type == HWLOC_OBJ_NUMANODE) {
 	/* for NUMA nodes, use the highest normal-parent depth + 1 */
 	depth = -1;
 	for(i=0; i<nbobjs; i++) {
@@ -2239,7 +2241,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 	  }
 	}
       done:
-	depth = hwloc_get_type_depth(topology, dist->type) + parent_with_memory;
+	depth = hwloc_get_type_depth(topology, dist->unique_type) + parent_with_memory;
       }
 
       state->new_child(state, &childstate, "distances");
@@ -2480,9 +2482,11 @@ hwloc___xml_v2export_distances(hwloc__xml_export_state_t parentstate, struct hwl
   unsigned nbobjs = dist->nbobjs;
   struct hwloc__xml_export_state_s state;
 
+  assert(!dist->different_types); // FIXME
+
   parentstate->new_child(parentstate, &state, "distances2");
 
-  state.new_prop(&state, "type", hwloc_obj_type_string(dist->type));
+  state.new_prop(&state, "type", hwloc_obj_type_string(dist->unique_type));
   sprintf(tmp, "%u", nbobjs);
   state.new_prop(&state, "nbobjs", tmp);
   sprintf(tmp, "%lu", dist->kind);
@@ -2491,7 +2495,7 @@ hwloc___xml_v2export_distances(hwloc__xml_export_state_t parentstate, struct hwl
     state.new_prop(&state, "name", dist->name);
 
   state.new_prop(&state, "indexing",
-		 HWLOC_DIST_TYPE_USE_OS_INDEX(dist->type) ? "os" : "gp");
+		 HWLOC_DIST_TYPE_USE_OS_INDEX(dist->unique_type) ? "os" : "gp");
   /* TODO don't hardwire 10 below. either snprintf the max to guess it, or just append until the end of the buffer */
   EXPORT_ARRAY(&state, unsigned long long, nbobjs, dist->indexes, "indexes", "%llu", 10);
   EXPORT_ARRAY(&state, unsigned long long, nbobjs*nbobjs, dist->values, "u64values", "%llu", 10);

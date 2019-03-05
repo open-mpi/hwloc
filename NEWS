@@ -44,12 +44,14 @@ Version 2.1.0
       structure.
   + Group objects have a new "dont_merge" attribute to prevent them from
     being automatically merged with identical parent or children.
-  + Add more distances-related functions:
+  + Add more distances-related features:
     - Add hwloc_distances_get_name() to retrieve a string describing
       what a distances structure contain.
     - Add hwloc_distances_get_by_name() to retrieve distances structures
       based on their name.
     - Add hwloc_distances_release_remove()
+    - Distances may now cover objects of different types with new kind
+      HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES.
 * Backends
   + Add support for Linux 5.3 new sysfs cpu topology files with Die information.
   + Add support for Intel v2 Extended Topology Enumeration in the x86 backend.

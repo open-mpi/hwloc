@@ -293,15 +293,20 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 }
 
 static __hwloc_inline void
-hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *matrix, int logical)
+hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *matrix, int logical, int show_types)
 {
   unsigned i, j;
 
   /* column header */
   fprintf(output, "  index");
   for(j=0; j<nbobjs; j++) {
-    fprintf(output, " % 5d",
-	    (int) (logical ? objs[j]->logical_index : objs[j]->os_index));
+    if (show_types)
+      fprintf(output, " %s:%d",
+	      hwloc_obj_type_string(objs[j]->type),
+	      (int) (logical ? objs[j]->logical_index : objs[j]->os_index));
+    else
+      fprintf(output, " % 5d",
+	      (int) (logical ? objs[j]->logical_index : objs[j]->os_index));
   }
   fprintf(output, "\n");
 
