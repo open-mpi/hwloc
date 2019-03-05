@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2018 Inria.  All rights reserved.
+ * Copyright © 2010-2019 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -239,7 +239,7 @@ hwloc_internal_distances__add(hwloc_topology_t topology,
     dist->indexes = malloc(nbobjs * sizeof(*dist->indexes));
     if (!dist->indexes)
       goto err_with_dist;
-    if (dist->type == HWLOC_OBJ_PU || dist->type == HWLOC_OBJ_NUMANODE) {
+    if (HWLOC_DIST_TYPE_USE_OS_INDEX(dist->type)) {
       for(i=0; i<nbobjs; i++)
 	dist->indexes[i] = objs[i]->os_index;
     } else {
@@ -319,7 +319,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology,
 
     if (topology->grouping_verbose) {
       unsigned i, j;
-      int gp = (objs[0]->type != HWLOC_OBJ_NUMANODE && objs[0]->type != HWLOC_OBJ_PU);
+      int gp = !HWLOC_DIST_TYPE_USE_OS_INDEX(objs[0]->type);
       fprintf(stderr, "Trying to group objects using distance matrix:\n");
       fprintf(stderr, "%s", gp ? "gp_index" : "os_index");
       for(j=0; j<nbobjs; j++)
@@ -480,12 +480,16 @@ hwloc_internal_distances_refresh_one(hwloc_topology_t topology,
     /* TODO use cpuset/nodeset to find pus/numas from the root?
      * faster than traversing the entire level?
      */
-    if (type == HWLOC_OBJ_PU)
-      obj = hwloc_get_pu_obj_by_os_index(topology, (unsigned) indexes[i]);
-    else if (type == HWLOC_OBJ_NUMANODE)
-      obj = hwloc_get_numanode_obj_by_os_index(topology, (unsigned) indexes[i]);
-    else
+    if (HWLOC_DIST_TYPE_USE_OS_INDEX(type)) {
+      if (type == HWLOC_OBJ_PU)
+	obj = hwloc_get_pu_obj_by_os_index(topology, (unsigned) indexes[i]);
+      else if (type == HWLOC_OBJ_NUMANODE)
+	obj = hwloc_get_numanode_obj_by_os_index(topology, (unsigned) indexes[i]);
+      else
+	abort();
+    } else {
       obj = hwloc_find_obj_by_type_and_gp_index(topology, type, indexes[i]);
+    }
     objs[i] = obj;
     if (!obj)
       disappeared++;

@@ -2333,7 +2333,7 @@ hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topol
     state.new_prop(&state, "kind", tmp);
 
     state.new_prop(&state, "indexing",
-		   (dist->type == HWLOC_OBJ_NUMANODE || dist->type == HWLOC_OBJ_PU) ? "os" : "gp");
+		   HWLOC_DIST_TYPE_USE_OS_INDEX(dist->type) ? "os" : "gp");
     /* TODO don't hardwire 10 below. either snprintf the max to guess it, or just append until the end of the buffer */
     EXPORT_ARRAY(&state, unsigned long long, nbobjs, dist->indexes, "indexes", "%llu", 10);
     EXPORT_ARRAY(&state, unsigned long long, nbobjs*nbobjs, dist->values, "u64values", "%llu", 10);

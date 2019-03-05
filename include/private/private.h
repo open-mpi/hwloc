@@ -130,7 +130,10 @@ struct hwloc_topology {
     hwloc_obj_type_t type;
     /* add union hwloc_obj_attr_u if we ever support groups */
     unsigned nbobjs;
-    uint64_t *indexes; /* array of OS or GP indexes before we can convert them into objs. */
+    uint64_t *indexes; /* array of OS or GP indexes before we can convert them into objs.
+			* OS indexes for distances covering only PUs or only NUMAnodes.
+			*/
+#define HWLOC_DIST_TYPE_USE_OS_INDEX(_type) ((_type) == HWLOC_OBJ_PU || (_type == HWLOC_OBJ_NUMANODE))
     uint64_t *values; /* distance matrices, ordered according to the above indexes/objs array.
 		       * distance from i to j is stored in slot i*nbnodes+j.
 		       */
