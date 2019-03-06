@@ -534,7 +534,7 @@ main (int argc, char *argv[])
   loutput.text_xscale = 1.0f;
   env = getenv("LSTOPO_TEXT_XSCALE");
   if (env)
-    loutput.text_xscale = atof(env);
+    loutput.text_xscale = (float) atof(env);
 
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
     loutput.force_orient[i] = LSTOPO_ORIENT_NONE;
