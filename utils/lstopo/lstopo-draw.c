@@ -141,6 +141,7 @@ get_textwidth(void *output,
   assert(loutput->methods->textsize);
 #endif
   loutput->methods->textsize(output, text, length, fontsize, &width);
+  width = loutput->text_xscale * ((float)width);
   return width;
 }
 

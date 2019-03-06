@@ -483,6 +483,7 @@ main (int argc, char *argv[])
   unsigned long ms;
   int measure_load_time = !!getenv("HWLOC_DEBUG_LOAD_TIME");
 #endif
+  char *env;
   int top = 0;
   int opt;
   unsigned i;
@@ -529,6 +530,12 @@ main (int argc, char *argv[])
   loutput.fontsize = 10;
   loutput.gridsize = 7;
   loutput.linespacing = 4;
+
+  loutput.text_xscale = 1.0f;
+  env = getenv("LSTOPO_TEXT_XSCALE");
+  if (env)
+    loutput.text_xscale = atof(env);
+
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
     loutput.force_orient[i] = LSTOPO_ORIENT_NONE;
   loutput.force_orient[HWLOC_OBJ_PU] = LSTOPO_ORIENT_HORIZ;

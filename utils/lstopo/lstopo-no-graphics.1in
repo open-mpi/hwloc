@@ -251,7 +251,11 @@ Set size of text font.
 
 The default is 10.
 
-This option is ignored in the ASCII backend.
+Boxes are scaled according to the text size.
+The \fILSTOPO_TEXT_XSCALE\fR environment variable may be used
+to further scale the width of boxes (its default value is 1.0).
+
+The \fB\-\-fontsize\fR option is ignored in the ASCII backend.
 .TP
 \fB\-\-gridsize\fR <size>
 Set size of margin between elements.
