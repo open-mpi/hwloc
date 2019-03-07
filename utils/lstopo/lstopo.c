@@ -114,7 +114,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
 			       struct hwloc_ps_process *proc,
 			       void *cbdata __hwloc_attribute_unused)
 {
-  char name[80];
+  char name[100];
   unsigned i;
 
   snprintf(name, sizeof(name), "%ld", proc->pid);

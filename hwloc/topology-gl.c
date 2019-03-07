@@ -35,7 +35,7 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
   for (i = 0; i < HWLOC_GL_SERVER_MAX; ++i) {
     Display* display;
-    char displayName[10];
+    char displayName[12];
     int opcode, event, error;
     unsigned j;
 

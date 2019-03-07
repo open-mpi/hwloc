@@ -259,7 +259,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 #ifdef HWLOC_LINUX_SYS
     } else {
       /* if not available from config-space (extended part is root-only), look in Linux sysfs files added in 4.13 */
-      char path[64];
+      char path[128];
       char value[16];
       FILE *file;
       size_t bytes_read;

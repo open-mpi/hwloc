@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -31,7 +31,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
   enum lstopo_index_type_e index_type = loutput->index_type;
   int verbose_mode = loutput->verbose_mode;
   char pidxstr[16];
-  char lidxstr[16];
+  char lidxstr[32];
   char busidstr[32];
 
   if (collapse > 1 && l->type == HWLOC_OBJ_PCI_DEVICE) {
