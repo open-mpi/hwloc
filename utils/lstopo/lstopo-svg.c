@@ -83,7 +83,7 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     if (text_id)
       snprintf(complement, sizeof complement, "_%d", text_id);
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
-    snprintf(id, sizeof id, " id='%s_%d_line%s'", type, obj->logical_index, complement);
+    snprintf(id, sizeof id, " id='%s_%d_text%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
   }
 
