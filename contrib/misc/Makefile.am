@@ -12,6 +12,4 @@ LDADD = $(HWLOC_top_builddir)/hwloc/libhwloc.la
 
 check_PROGRAMS = hwloc-tweak-osindex
 
-html_DATA = dynamic_SVG_example.html
-
 EXTRA_DIST = hwloc-export-sysfs
