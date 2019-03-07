@@ -57,6 +57,7 @@ Version 2.1.0
     - Add a native SVG backend. Its graphical output may be slightly less
       pretty than Cairo (still used by default if available) but the SVG
       code provides attributes to manipulate objects from HTML/JS.
+      See dynamic_SVG_example.html for an example.
   + Add --nodeset options to hwloc-calc for converting between cpusets and
     nodesets.
   + hwloc-annotate may annotate multiple locations at once.
