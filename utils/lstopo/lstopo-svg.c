@@ -28,13 +28,13 @@ native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
     char type[64];
     char complement[12] = "";
     if (box_id)
-      snprintf(complement, sizeof complement, "_%d", box_id);
+      snprintf(complement, sizeof complement, "_%u", box_id);
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
-    snprintf(id, sizeof id, " id='%s_%d_rect%s'", type, obj->logical_index, complement);
+    snprintf(id, sizeof id, " id='%s_%u_rect%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
   }
 
-  fprintf(file,"\t<rect%s%s x='%d' y='%d' width='%d' height='%d' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='1'/>\n",
+  fprintf(file,"\t<rect%s%s x='%u' y='%u' width='%u' height='%u' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='1'/>\n",
 	  id, class, x, y, width, height, r, g, b);
 }
 
@@ -51,13 +51,13 @@ native_svg_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     char type[64];
     char complement[12] = "";
     if (line_id)
-      snprintf(complement, sizeof complement, "_%d", line_id);
+      snprintf(complement, sizeof complement, "_%u", line_id);
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
-    snprintf(id, sizeof id, " id='%s_%d_line%s'", type, obj->logical_index, complement);
+    snprintf(id, sizeof id, " id='%s_%u_line%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
   }
 
-  fprintf(file,"\t<line%s%s x1='%d' y1='%d' x2='%d' y2='%d' stroke='rgb(%d,%d,%d)' stroke-width='1'/>\n",
+  fprintf(file,"\t<line%s%s x1='%u' y1='%u' x2='%u' y2='%u' stroke='rgb(%d,%d,%d)' stroke-width='1'/>\n",
 	  id, class, x1, y1, x2, y2, r, g, b);
 }
 
@@ -81,13 +81,13 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     char type[64];
     char complement[12] = "";
     if (text_id)
-      snprintf(complement, sizeof complement, "_%d", text_id);
+      snprintf(complement, sizeof complement, "_%u", text_id);
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
-    snprintf(id, sizeof id, " id='%s_%d_text%s'", type, obj->logical_index, complement);
+    snprintf(id, sizeof id, " id='%s_%u_text%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
   }
 
-  fprintf(file,"\t<text%s%s font-family='Monospace' x='%d' y='%d' fill='rgb(%d,%d,%d)' font-size='%dpx'>%s</text>\n",
+  fprintf(file,"\t<text%s%s font-family='Monospace' x='%u' y='%u' fill='rgb(%d,%d,%d)' font-size='%dpx'>%s</text>\n",
 	  id, class, x, y+size, r, g, b, size, text);
 }
 
@@ -116,7 +116,7 @@ int output_nativesvg(struct lstopo_output * loutput, const char *filename)
   loutput->drawing = LSTOPO_DRAWING_DRAW;
 
   fprintf(output, "<?xml version='1.0' encoding='UTF-8'?>\n");
-  fprintf(output, "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='%dpx' height='%dpx' viewBox='0 0 %dpx %dpx' version='1.1'>\n",
+  fprintf(output, "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='%upx' height='%upx' viewBox='0 0 %upx %upx' version='1.1'>\n",
 	  loutput->width, loutput->height, loutput->width, loutput->height);
 
   /* ready */
