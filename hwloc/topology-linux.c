@@ -2171,7 +2171,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
   if (!pid)
     file = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
   else {
-    char path[] = "/proc/XXXXXXXXXX/cgroup";
+    char path[] = "/proc/XXXXXXXXXXX/cgroup";
     snprintf(path, sizeof(path), "/proc/%d/cgroup", pid);
     file = hwloc_fopen(path, "r", fsroot_fd);
   }
@@ -2201,7 +2201,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
   if (!pid)
     err = hwloc_read_path_by_length("/proc/self/cpuset", cpuset_name, sizeof(cpuset_name), fsroot_fd);
   else {
-    char path[] = "/proc/XXXXXXXXXX/cpuset";
+    char path[] = "/proc/XXXXXXXXXXX/cpuset";
     snprintf(path, sizeof(path), "/proc/%d/cpuset", pid);
     err = hwloc_read_path_by_length(path, cpuset_name, sizeof(cpuset_name), fsroot_fd);
   }
@@ -5160,7 +5160,7 @@ hwloc_linuxfs_net_class_fillinfos(int root_fd,
       unsigned long port;
       port = strtoul(hexid, &eoid, 0);
       if (eoid != hexid) {
-	char portstr[16];
+	char portstr[21];
 	snprintf(portstr, sizeof(portstr), "%lu", port+1);
 	hwloc_obj_add_info(obj, "Port", portstr);
       }
@@ -5334,7 +5334,7 @@ hwloc_linuxfs_mic_class_fillinfos(int root_fd,
   char family[64];
   char sku[64];
   char sn[64];
-  char string[20];
+  char string[21];
 
   obj->subtype = strdup("MIC");
 

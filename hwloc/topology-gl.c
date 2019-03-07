@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012-2013 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2017 Inria.  All rights reserved.
+ * Copyright © 2012-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -35,7 +35,7 @@ hwloc_gl_discover(struct hwloc_backend *backend)
 
   for (i = 0; i < HWLOC_GL_SERVER_MAX; ++i) {
     Display* display;
-    char displayName[10];
+    char displayName[12];
     int opcode, event, error;
     unsigned j;
 
