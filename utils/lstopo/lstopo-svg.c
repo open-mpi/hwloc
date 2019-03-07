@@ -23,15 +23,17 @@ native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   char id[128] = "";
   char class[128] = "";
+  char complement[12] = "";
+  if (box_id)
+    snprintf(complement, sizeof complement, "_%u", box_id);
 
   if (obj) {
     char type[64];
-    char complement[12] = "";
-    if (box_id)
-      snprintf(complement, sizeof complement, "_%u", box_id);
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
     snprintf(id, sizeof id, " id='%s_%u_rect%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
+  } else {
+    snprintf(id, sizeof id, " id='anon_rect%s'", complement);
   }
 
   fprintf(file,"\t<rect%s%s x='%u' y='%u' width='%u' height='%u' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='1'/>\n",
@@ -46,15 +48,17 @@ native_svg_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   char id[128] = "";
   char class[128] = "";
+  char complement[12] = "";
+  if (line_id)
+    snprintf(complement, sizeof complement, "_%u", line_id);
 
   if (obj) {
     char type[64];
-    char complement[12] = "";
-    if (line_id)
-      snprintf(complement, sizeof complement, "_%u", line_id);
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
     snprintf(id, sizeof id, " id='%s_%u_line%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
+  } else {
+    snprintf(id, sizeof id, " id='anon_line%s'", complement);
   }
 
   fprintf(file,"\t<line%s%s x1='%u' y1='%u' x2='%u' y2='%u' stroke='rgb(%d,%d,%d)' stroke-width='1'/>\n",
@@ -76,15 +80,17 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   char id[128] = "";
   char class[128] = "";
+  char complement[12] = "";
+  if (text_id)
+    snprintf(complement, sizeof complement, "_%u", text_id);
 
   if (obj) {
     char type[64];
-    char complement[12] = "";
-    if (text_id)
-      snprintf(complement, sizeof complement, "_%u", text_id);
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
     snprintf(id, sizeof id, " id='%s_%u_text%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
+  } else {
+    snprintf(id, sizeof id, " id='anon_text%s'", complement);
   }
 
   fprintf(file,"\t<text%s%s font-family='Monospace' x='%u' y='%u' fill='rgb(%d,%d,%d)' font-size='%dpx'>%s</text>\n",
