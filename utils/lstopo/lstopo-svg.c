@@ -34,7 +34,7 @@ native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
     snprintf(class, sizeof class, " class='%s'", type);
   }
 
-  fprintf(file,"\t<rect%s%s x='%d' y='%d' width='%d' height='%d' style='fill:rgb(%d,%d,%d);stroke-width:1;stroke:rgb(0,0,0)'/>\n",
+  fprintf(file,"\t<rect%s%s x='%d' y='%d' width='%d' height='%d' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='1'/>\n",
 	  id, class, x, y, width, height, r, g, b);
 }
 
@@ -57,7 +57,7 @@ native_svg_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     snprintf(class, sizeof class, " class='%s'", type);
   }
 
-  fprintf(file,"\t<line%s%s x1='%d' y1='%d' x2='%d' y2='%d' style='stroke:rgb(%d,%d,%d);stroke-width:1;'/>\n",
+  fprintf(file,"\t<line%s%s x1='%d' y1='%d' x2='%d' y2='%d' stroke='rgb(%d,%d,%d)' stroke-width='1'/>\n",
 	  id, class, x1, y1, x2, y2, r, g, b);
 }
 
@@ -87,7 +87,7 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     snprintf(class, sizeof class, " class='%s'", type);
   }
 
-  fprintf(file,"\t<text%s%s font-family='Monospace' x='%d' y='%d' fill='rgb(%d,%d,%d)' style='font-size:%dpx'>%s</text>\n",
+  fprintf(file,"\t<text%s%s font-family='Monospace' x='%d' y='%d' fill='rgb(%d,%d,%d)' font-size='%dpx'>%s</text>\n",
 	  id, class, x, y+size, r, g, b, size, text);
 }
 
