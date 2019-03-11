@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Inria.  All rights reserved.
+ * Copyright © 2017-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -60,8 +60,6 @@ int main(void)
 
     offset = offsetof(struct hwloc_topology, support);
     assert(offset == 600);
-    size = sizeof(struct hwloc_topology_support);
-    assert(size == 24);
 
     offset = offsetof(struct hwloc_topology, first_dist);
     assert(offset == 648);
@@ -111,6 +109,35 @@ int main(void)
      * WARNING: if anything breaks above, the topology ABI has changed.
      * HWLOC_TOPOLOGY_ABI must be bumped when updating these checks.
      *******************************************************************/
+
+    printf("checking sizes of public objects...\n");
+
+    /* if these first lines break, you may be breaking the main library ABI.
+     * adding fields may be OK. changing/removing likely isn't.
+     */
+    size = sizeof(struct hwloc_obj);
+    assert(size == 248);
+    size = sizeof(union hwloc_obj_attr_u);
+    assert(size == 40);
+    size = sizeof(struct hwloc_info_s);
+    assert(size == 16);
+
+    size = sizeof(struct hwloc_topology_support);
+    assert(size == 24);
+    size = sizeof(struct hwloc_topology_discovery_support);
+    assert(size == 5);
+    size = sizeof(struct hwloc_topology_cpubind_support);
+    assert(size == 11);
+    size = sizeof(struct hwloc_topology_membind_support);
+    assert(size == 15);
+
+    size = sizeof(struct hwloc_distances_s);
+    assert(size == 32);
+
+    size = sizeof(union hwloc_topology_diff_u);
+    assert(size == 56);
+    size = sizeof(union hwloc_topology_diff_obj_attr_u);
+    assert(size == 32);
 
   } else {
     /* if building with non-binary-compatible compiler flags */
