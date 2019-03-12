@@ -1,4 +1,4 @@
-# Copyright © 2015-2018 Inria.  All rights reserved.
+# Copyright © 2015-2019 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -8,6 +8,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # Add your expected output file here.
 # By default, it shows the output of `lstopo --of xml -'.
 cpuid_outputs = \
+	Intel-CPUID.1F-Qemu-2p3d3c2t.output \
 	Intel-Skylake-2xXeon6140.output \
 	Intel-Broadwell-2xXeon-E5-2650Lv4.output \
 	Intel-Haswell-2xXeon-E5-2680v3.output \
@@ -35,6 +36,7 @@ cpuid_outputs = \
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # specifying which tarball to use
 cpuid_tarballs = \
+	Intel-CPUID.1F-Qemu-2p3d3c2t.tar.bz2 \
 	Intel-Skylake-2xXeon6140.tar.bz2 \
 	Intel-Broadwell-2xXeon-E5-2650Lv4.tar.bz2 \
 	Intel-Haswell-2xXeon-E5-2680v3.tar.bz2 \
@@ -59,7 +61,8 @@ cpuid_tarballs = \
 
 # Each output `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
-cpuid_options = 
+cpuid_options = \
+	Intel-CPUID.1F-Qemu-2p3d3c2t.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo

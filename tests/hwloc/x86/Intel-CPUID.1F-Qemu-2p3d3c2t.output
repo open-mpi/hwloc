@@ -1,0 +1,64 @@
+Machine
+  NUMANode L#0 (P#0)
+  Package L#0
+    Group0(Die) L#0
+      L2 L#0 (4096KB) + Core L#0
+        L1d L#0 (32KB) + L1i L#0 (32KB) + PU L#0 (P#0)
+        L1d L#1 (32KB) + L1i L#1 (32KB) + PU L#1 (P#1)
+      L2 L#1 (4096KB) + Core L#1
+        L1d L#2 (32KB) + L1i L#2 (32KB) + PU L#2 (P#2)
+        L1d L#3 (32KB) + L1i L#3 (32KB) + PU L#3 (P#3)
+      L2 L#2 (4096KB) + Core L#2
+        L1d L#4 (32KB) + L1i L#4 (32KB) + PU L#4 (P#4)
+        L1d L#5 (32KB) + L1i L#5 (32KB) + PU L#5 (P#5)
+    Group0(Die) L#1
+      L2 L#3 (4096KB) + Core L#3
+        L1d L#6 (32KB) + L1i L#6 (32KB) + PU L#6 (P#6)
+        L1d L#7 (32KB) + L1i L#7 (32KB) + PU L#7 (P#7)
+      L2 L#4 (4096KB) + Core L#4
+        L1d L#8 (32KB) + L1i L#8 (32KB) + PU L#8 (P#8)
+        L1d L#9 (32KB) + L1i L#9 (32KB) + PU L#9 (P#9)
+      L2 L#5 (4096KB) + Core L#5
+        L1d L#10 (32KB) + L1i L#10 (32KB) + PU L#10 (P#10)
+        L1d L#11 (32KB) + L1i L#11 (32KB) + PU L#11 (P#11)
+    Group0(Die) L#2
+      L2 L#6 (4096KB) + Core L#6
+        L1d L#12 (32KB) + L1i L#12 (32KB) + PU L#12 (P#12)
+        L1d L#13 (32KB) + L1i L#13 (32KB) + PU L#13 (P#13)
+      L2 L#7 (4096KB) + Core L#7
+        L1d L#14 (32KB) + L1i L#14 (32KB) + PU L#14 (P#14)
+        L1d L#15 (32KB) + L1i L#15 (32KB) + PU L#15 (P#15)
+      L2 L#8 (4096KB) + Core L#8
+        L1d L#16 (32KB) + L1i L#16 (32KB) + PU L#16 (P#16)
+        L1d L#17 (32KB) + L1i L#17 (32KB) + PU L#17 (P#17)
+  Package L#1
+    Group0(Die) L#3
+      L2 L#9 (4096KB) + Core L#9
+        L1d L#18 (32KB) + L1i L#18 (32KB) + PU L#18 (P#18)
+        L1d L#19 (32KB) + L1i L#19 (32KB) + PU L#19 (P#19)
+      L2 L#10 (4096KB) + Core L#10
+        L1d L#20 (32KB) + L1i L#20 (32KB) + PU L#20 (P#20)
+        L1d L#21 (32KB) + L1i L#21 (32KB) + PU L#21 (P#21)
+      L2 L#11 (4096KB) + Core L#11
+        L1d L#22 (32KB) + L1i L#22 (32KB) + PU L#22 (P#22)
+        L1d L#23 (32KB) + L1i L#23 (32KB) + PU L#23 (P#23)
+    Group0(Die) L#4
+      L2 L#12 (4096KB) + Core L#12
+        L1d L#24 (32KB) + L1i L#24 (32KB) + PU L#24 (P#24)
+        L1d L#25 (32KB) + L1i L#25 (32KB) + PU L#25 (P#25)
+      L2 L#13 (4096KB) + Core L#13
+        L1d L#26 (32KB) + L1i L#26 (32KB) + PU L#26 (P#26)
+        L1d L#27 (32KB) + L1i L#27 (32KB) + PU L#27 (P#27)
+      L2 L#14 (4096KB) + Core L#14
+        L1d L#28 (32KB) + L1i L#28 (32KB) + PU L#28 (P#28)
+        L1d L#29 (32KB) + L1i L#29 (32KB) + PU L#29 (P#29)
+    Group0(Die) L#5
+      L2 L#15 (4096KB) + Core L#15
+        L1d L#30 (32KB) + L1i L#30 (32KB) + PU L#30 (P#30)
+        L1d L#31 (32KB) + L1i L#31 (32KB) + PU L#31 (P#31)
+      L2 L#16 (4096KB) + Core L#16
+        L1d L#32 (32KB) + L1i L#32 (32KB) + PU L#32 (P#32)
+        L1d L#33 (32KB) + L1i L#33 (32KB) + PU L#33 (P#33)
+      L2 L#17 (4096KB) + Core L#17
+        L1d L#34 (32KB) + L1i L#34 (32KB) + PU L#34 (P#34)
+        L1d L#35 (32KB) + L1i L#35 (32KB) + PU L#35 (P#35)
