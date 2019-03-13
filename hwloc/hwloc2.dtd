@@ -30,6 +30,7 @@
 <!ATTLIST object depth CDATA "-1" >
 <!ATTLIST object kind CDATA "0" >
 <!ATTLIST object subkind CDATA "0" >
+<!ATTLIST object dont_merge CDATA "0" >
 <!ATTLIST object bridge_type CDATA "" >
 <!ATTLIST object bridge_pci CDATA "" >
 <!ATTLIST object pci_busid CDATA "" >

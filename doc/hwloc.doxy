@@ -3106,8 +3106,11 @@ It means that a Group containing a single child is merged
 into that child.
 And a Group is merged into its parent if it is its only child.
 For instance a Windows processor group containing a single NUMA node
-would be  merged with that NUMA node since it already contains the
+would be merged with that NUMA node since it already contains the
 relevant hierarchy information.
+
+When inserting a custom Group with hwloc_hwloc_topology_insert_group_object(),
+this merging may be disabled by setting its <tt>dont_merge</tt> attribute.
 
 
 \subsection faq_asymmetric What happens if my topology is asymmetric?
