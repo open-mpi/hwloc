@@ -580,6 +580,7 @@ union hwloc_obj_attr_u {
 					   *   It may change if intermediate Group objects are added. */
     unsigned kind;			  /**< \brief Internally-used kind of group. */
     unsigned subkind;			  /**< \brief Internally-used subkind to distinguish different levels of groups with same kind */
+    unsigned char dont_merge;		  /**< \brief Flag preventing groups from being automatically merged with identical parent or children. */
   } group;
   /** \brief PCI Device specific Object Attributes */
   struct hwloc_pcidev_attr_s {
@@ -2196,6 +2197,9 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  * Then it must setup at least one of its CPU or node sets to specify
  * the final location of the Group in the topology.
  * Then the object can be passed to this function for actual insertion in the topology.
+ *
+ * The group \p dont_merge attribute may be set to prevent the core from
+ * ever merging this object with another object hierarchically-identical.
  *
  * Either the cpuset or nodeset field (or both, if compatible) must be set
  * to a non-empty bitmap. The complete_cpuset or complete_nodeset may be set

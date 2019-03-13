@@ -238,6 +238,15 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	      state->global->msgprefix);
   }
 
+  else if (!strcmp(name, "dont_merge")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_GROUP)
+      obj->attr->group.dont_merge = lvalue;
+    else if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring dont_merge attribute for non-group object type\n",
+	      state->global->msgprefix);
+  }
+
   else if (!strcmp(name, "pci_busid")) {
     switch (obj->type) {
     case HWLOC_OBJ_PCI_DEVICE:
@@ -2043,11 +2052,15 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     if (v1export) {
       sprintf(tmp, "%u", obj->attr->group.depth);
       state->new_prop(state, "depth", tmp);
+      if (obj->attr->group.dont_merge)
+        state->new_prop(state, "dont_merge", "1");
     } else {
       sprintf(tmp, "%u", obj->attr->group.kind);
       state->new_prop(state, "kind", tmp);
       sprintf(tmp, "%u", obj->attr->group.subkind);
       state->new_prop(state, "subkind", tmp);
+      if (obj->attr->group.dont_merge)
+        state->new_prop(state, "dont_merge", "1");
     }
     break;
   case HWLOC_OBJ_BRIDGE:

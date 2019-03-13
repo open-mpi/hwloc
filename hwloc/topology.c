@@ -1294,8 +1294,30 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
 static __hwloc_inline hwloc_obj_t
 hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
 {
-  if (new->type == HWLOC_OBJ_GROUP) {
-    /* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible (asserted in topology_check()). */
+  if (new->type == HWLOC_OBJ_GROUP && old->type == HWLOC_OBJ_GROUP) {
+    /* which group do we keep? */
+    if (new->attr->group.dont_merge) {
+      if (old->attr->group.dont_merge)
+	/* nobody wants to be merged */
+	return NULL;
+
+      /* keep the new one, it doesn't want to be merged */
+      hwloc_replace_linked_object(old, new);
+      return new;
+
+    } else {
+      if (old->attr->group.dont_merge)
+	/* keep the old one, it doesn't want to be merged */
+	return old;
+
+      /* compare subkinds to decice who to keep */
+      if (new->attr->group.kind < old->attr->group.kind)
+	hwloc_replace_linked_object(old, new);
+      return old;
+    }
+  }
+
+  if (new->type == HWLOC_OBJ_GROUP && !new->attr->group.dont_merge) {
 
     if (old->type == HWLOC_OBJ_PU && new->attr->group.kind == HWLOC_GROUP_KIND_MEMORY)
       /* Never merge Memory groups with PU, we don't want to attach Memory under PU */
@@ -1304,18 +1326,9 @@ hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
     /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not,
      * while some callers need to know (at least hwloc_topology_insert_group()).
      */
-
-    /* If merging two groups, keep the smallest kind.
-     * Replace the existing Group with the new Group contents
-     * and let the caller free the new Group.
-     */
-    if (old->type == HWLOC_OBJ_GROUP
-	&& (new->attr->group.kind < old->attr->group.kind))
-      hwloc_replace_linked_object(old, new);
-
     return old;
 
-  } else if (old->type == HWLOC_OBJ_GROUP) {
+  } else if (old->type == HWLOC_OBJ_GROUP && !old->attr->group.dont_merge) {
 
     if (new->type == HWLOC_OBJ_PU && old->attr->group.kind == HWLOC_GROUP_KIND_MEMORY)
       /* Never merge Memory groups with PU, we don't want to attach Memory under PU */
@@ -1326,9 +1339,11 @@ hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
      */
     hwloc_replace_linked_object(old, new);
     return old;
-  }
 
-  return NULL;
+  } else {
+    /* cannot merge */
+    return NULL;
+  }
 }
 
 /* Try to insert OBJ in CUR, recurse if needed.
@@ -2206,6 +2221,19 @@ hwloc_reset_normal_type_depths(hwloc_topology_t topology)
   /* type contiguity is asserted in topology_check() */
 }
 
+static int
+hwloc_dont_merge_group_level(hwloc_topology_t topology, unsigned i)
+{
+  unsigned j;
+
+  /* Don't merge some groups in that level? */
+  for(j=0; j<topology->level_nbobjects[i]; j++)
+    if (topology->levels[i][j]->attr->group.dont_merge)
+      return 1;
+
+  return 0;
+}
+
 /* compare i-th and i-1-th levels structure */
 static int
 hwloc_compare_levels_structure(hwloc_topology_t topology, unsigned i)
@@ -2243,12 +2271,18 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
     hwloc_obj_type_t type2 = obj2->type;
 
     /* Check whether parents and/or children can be replaced */
-    if (topology->type_filter[type1] == HWLOC_TYPE_FILTER_KEEP_STRUCTURE)
+    if (topology->type_filter[type1] == HWLOC_TYPE_FILTER_KEEP_STRUCTURE) {
       /* Parents can be ignored in favor of children.  */
       replaceparent = 1;
-    if (topology->type_filter[type2] == HWLOC_TYPE_FILTER_KEEP_STRUCTURE)
+      if (type1 == HWLOC_OBJ_GROUP && hwloc_dont_merge_group_level(topology, i-1))
+	replaceparent = 0;
+    }
+    if (topology->type_filter[type2] == HWLOC_TYPE_FILTER_KEEP_STRUCTURE) {
       /* Children can be ignored in favor of parents.  */
       replacechild = 1;
+      if (type1 == HWLOC_OBJ_GROUP && hwloc_dont_merge_group_level(topology, i))
+	replacechild = 0;
+    }
     if (!replacechild && !replaceparent)
       /* no ignoring */
       continue;
