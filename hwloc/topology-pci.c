@@ -145,6 +145,14 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     dev = pcidev->dev;
     func = pcidev->func;
 
+    if (domain > 0xffff) {
+      static int warned = 0;
+      if (!warned)
+	fprintf(stderr, "Ignoring PCI device with non-16bit domain\n");
+      warned = 1;
+      continue;
+    }
+
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
     pci_device_probe(pcidev);
