@@ -836,7 +836,8 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
 		     hwloc_bitmap_t remaining_cpuset,
 		     unsigned type,
 		     const char *subtype,
-		     unsigned kind)
+		     unsigned kind,
+		     int dont_merge)
 {
   hwloc_bitmap_t obj_cpuset;
   hwloc_obj_t obj;
@@ -868,6 +869,7 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
     obj->cpuset = obj_cpuset;
     obj->subtype = strdup(subtype);
     obj->attr->group.kind = kind;
+    obj->attr->group.dont_merge = dont_merge;
     hwloc_debug_2args_bitmap("os %s %u has cpuset %s\n",
 			     subtype, id, obj_cpuset);
     hwloc_insert_object_by_cpuset(topology, obj);
@@ -991,26 +993,30 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
     if (fulldiscovery) {
+      char *env;
+      int dont_merge;
       /* Look for AMD Compute units inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
 			   UNIT, "Compute Unit",
-			   HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT);
+			   HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT, 0);
       /* Look for Intel Modules inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
 			   MODULE, "Module",
-			   HWLOC_GROUP_KIND_INTEL_MODULE);
+			   HWLOC_GROUP_KIND_INTEL_MODULE, 0);
       /* Look for Intel Tiles inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
 			   TILE, "Tile",
-			   HWLOC_GROUP_KIND_INTEL_TILE);
+			   HWLOC_GROUP_KIND_INTEL_TILE, 0);
       /* Look for Intel Dies inside packages */
+      env = getenv("HWLOC_DONT_MERGE_DIE_GROUPS");
+      dont_merge = env && atoi(env);
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
 			   DIE, "Die",
-			   HWLOC_GROUP_KIND_INTEL_DIE);
+			   HWLOC_GROUP_KIND_INTEL_DIE, dont_merge);
 
       /* Look for unknown objects */
       if (infos[one].otherids) {
