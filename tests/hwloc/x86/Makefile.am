@@ -59,12 +59,12 @@ cpuid_tarballs = \
 
 # Each output `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
-cpuid_options = \
-	Intel-CPUID.1F-Qemu-2p3d3c2t.options
+cpuid_options =
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
-cpuid_envs = 
+cpuid_envs = \
+	Intel-CPUID.1F-Qemu-2p3d3c2t.env
 
 if HWLOC_HAVE_BUNZIPP
 TESTS = $(cpuid_outputs)

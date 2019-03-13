@@ -21,6 +21,8 @@ Version 2.0.4 (also included in 1.11.13 when appropriate)
 -------------
 * Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
   Tiles, Modules and Dies are exposed as Groups for now.
+  + HWLOC_DONT_MERGE_DIE_GROUPS=1 may be set in the environment to prevent
+    Die groups from being automatically merged with identical parent or children.
 * Ignore NUMA node information from AMD topoext in the x86 backend,
   unless HWLOC_X86_TOPOEXT_NUMANODES=1 is set in the environment.
 * Group objects have a new "dont_merge" attribute to prevent them from
