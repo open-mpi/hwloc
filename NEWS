@@ -40,6 +40,8 @@ Version 2.1.0
       administrative restrictions such as Linux Cgroups.
     - Add disallowed_pu and disallowed_numa bits to the discovery support
       structure.
+  + Group objects have a new "dont_merge" attribute to prevent them from
+    being automatically merged with identical parent or children.
 * Backends
   + Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
     Tiles, Modules and Dies are exposed as Groups for now.
