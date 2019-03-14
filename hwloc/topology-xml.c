@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -805,8 +805,24 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		      state->global->msgprefix);
 	    goto error_with_object;
 	  }
+	} else if (!strcasecmp(attrvalue, "Die")) {
+	  /* deal with possible future type */
+	  obj->type = HWLOC_OBJ_GROUP;
+	  obj->subtype = strdup("Die");
+	  obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_DIE;
+	  obj->attr->group.dont_merge = data->dont_merge_die_groups;
+	} else if (!strcasecmp(attrvalue, "Tile")) {
+	  /* deal with possible future type */
+	  obj->type = HWLOC_OBJ_GROUP;
+	  obj->subtype = strdup("Tile");
+	  obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_TILE;
+	} else if (!strcasecmp(attrvalue, "Module")) {
+	  /* deal with possible future type */
+	  obj->type = HWLOC_OBJ_GROUP;
+	  obj->subtype = strdup("Module");
+	  obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_MODULE;
 	} else if (!strcasecmp(attrvalue, "MemCache")) {
-	  /* ignore likely-future types */
+	  /* ignore possible future type */
 	  obj->type = _HWLOC_OBJ_FUTURE;
 	  ignored = 1;
 	  if (hwloc__xml_verbose())
@@ -1618,6 +1634,7 @@ hwloc_look_xml(struct hwloc_backend *backend)
   char *tag;
   int gotignored = 0;
   hwloc_localeswitch_declare;
+  char *env;
   int ret;
 
   state.global = data;
@@ -1629,6 +1646,9 @@ hwloc_look_xml(struct hwloc_backend *backend)
   data->nbnumanodes = 0;
   data->first_numanode = data->last_numanode = NULL;
   data->first_v1dist = data->last_v1dist = NULL;
+
+  env = getenv("HWLOC_DONT_MERGE_DIE_GROUPS");
+  data->dont_merge_die_groups = env && atoi(env);
 
   ret = data->look_init(data, &state);
   if (ret < 0)

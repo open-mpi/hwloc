@@ -353,6 +353,8 @@ extern char * hwloc_progname(struct hwloc_topology *topology);
 /* then, hardware-specific groups */
 #define HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER	100	/* no subkind */
 #define HWLOC_GROUP_KIND_INTEL_EXTTOPOENUM_UNKNOWN	101	/* subkind is unknown level */
+#define HWLOC_GROUP_KIND_INTEL_MODULE			102	/* no subkind */
+#define HWLOC_GROUP_KIND_INTEL_TILE			103	/* no subkind */
 #define HWLOC_GROUP_KIND_INTEL_DIE			104	/* no subkind */
 #define HWLOC_GROUP_KIND_S390_BOOK			110	/* no subkind */
 #define HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT		120	/* no subkind */

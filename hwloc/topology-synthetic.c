@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -527,11 +527,15 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     if (*pos < '0' || *pos > '9') {
       if (hwloc_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
-	/* FIXME: allow generic "Cache" string? would require to deal with possibly duplicate cache levels */
-	if (verbose)
-	  fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
-	errno = EINVAL;
-	goto error;
+	if (!strncmp(pos, "Die", 3) || !strncmp(pos, "Tile", 4) || !strncmp(pos, "Module", 6)) {
+	  type = HWLOC_OBJ_GROUP;
+	} else {
+	  /* FIXME: allow generic "Cache" string? would require to deal with possibly duplicate cache levels */
+	  if (verbose)
+	    fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
+	  errno = EINVAL;
+	  goto error;
+	}
       }
       if (type == HWLOC_OBJ_MACHINE || type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	if (verbose)
