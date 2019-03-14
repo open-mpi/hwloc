@@ -805,6 +805,25 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		      state->global->msgprefix);
 	    goto error_with_object;
 	  }
+	} else if (!strcasecmp(attrvalue, "Die")) {
+	  /* deal with possible future type */
+	  obj->type = HWLOC_OBJ_GROUP;
+	  obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_DIE;
+	} else if (!strcasecmp(attrvalue, "Tile")) {
+	  /* deal with possible future type */
+	  obj->type = HWLOC_OBJ_GROUP;
+	  obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_TILE;
+	} else if (!strcasecmp(attrvalue, "Module")) {
+	  /* deal with possible future type */
+	  obj->type = HWLOC_OBJ_GROUP;
+	  obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_MODULE;
+	} else if (!strcasecmp(attrvalue, "MemCache")) {
+	  /* ignore possible future type */
+	  obj->type = _HWLOC_OBJ_FUTURE;
+	  ignored = 1;
+	  if (hwloc__xml_verbose())
+	    fprintf(stderr, "%s: %s object not-supported, will be ignored\n",
+		    state->global->msgprefix, attrvalue);
 	} else {
 	  if (hwloc__xml_verbose())
 	    fprintf(stderr, "%s: unrecognized object type string %s\n",
