@@ -1014,17 +1014,34 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     int res = hwloc_obj_cmp_sets(obj, child);
 
     if (res == HWLOC_OBJ_EQUAL) {
-      if (obj->type == HWLOC_OBJ_GROUP) {
+
+      if (obj->type == HWLOC_OBJ_GROUP && child->type == HWLOC_OBJ_GROUP) {
 	/* Groups are ignored keep_structure or always. Non-ignored Groups isn't possible. */
 	assert(topology->ignored_types[HWLOC_OBJ_GROUP] != HWLOC_IGNORE_TYPE_NEVER);
+	/* which group do we keep? */
+	if (obj->attr->group.dont_merge) {
+	  if (child->attr->group.dont_merge)
+	    /* nobody wants to be merged */
+	    return obj;
+
+	  /* replace the old one, the new one doesn't want to be merged */
+	  hwloc_replace_linked_object(child, obj);
+	  return child;
+
+	} else {
+	  /* merge the new one into the old one */
+	  return child;
+	}
+      }
+
+      if (obj->type == HWLOC_OBJ_GROUP && !obj->attr->group.dont_merge) {
         /* Remove the Group now. The normal ignore code path wouldn't tell us whether the Group was removed or not.
 	 *
 	 * The Group doesn't contain anything to keep, just let the caller free it.
 	 */
 	return child;
 
-      } else if (child->type == HWLOC_OBJ_GROUP) {
-
+      } else if (child->type == HWLOC_OBJ_GROUP && !child->attr->group.dont_merge) {
 	/* Replace the Group with the new object contents
 	 * and let the caller free the new object
 	 */
@@ -1865,6 +1882,8 @@ can_merge_group(hwloc_topology_t topology, hwloc_obj_t obj)
   /* custom-inserted groups are in custom topologies and have no cpusets,
    * don't bother calling hwloc_obj_get_info_by_name() and strcmp() uselessly.
    */
+  if (obj->attr->group.dont_merge)
+    return 0;
   if (!topology->backends->is_custom || obj->cpuset)
     return 1;
   value = hwloc_obj_get_info_by_name(obj, "Backend");

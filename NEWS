@@ -23,6 +23,8 @@ Version 1.11.13 (also included in 2.0.4)
   Tiles, Modules and Dies are exposed as Groups for now.
 * Ignore NUMA node information from AMD topoext in the x86 backend,
   unless HWLOC_X86_TOPOEXT_NUMANODES=1 is set in the environment.
+* Group objects have a new "dont_merge" attribute to prevent them from
+  being automatically merged with identical parent or children.
 
 
 Version 1.11.12 (also included in 2.0.3)

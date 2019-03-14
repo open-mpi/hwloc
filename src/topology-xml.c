@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -208,6 +208,15 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 		  state->global->msgprefix);
 	break;
     }
+  }
+
+  else if (!strcmp(name, "dont_merge")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_GROUP)
+      obj->attr->group.dont_merge = lvalue;
+    else if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring dont_merge attribute for non-group object type\n",
+	      state->global->msgprefix);
   }
 
   else if (!strcmp(name, "pci_busid")) {
@@ -1317,6 +1326,8 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   case HWLOC_OBJ_GROUP:
     sprintf(tmp, "%u", obj->attr->group.depth);
     state.new_prop(&state, "depth", tmp);
+    if (obj->attr->group.dont_merge)
+      state.new_prop(&state, "dont_merge", "1");
     break;
   case HWLOC_OBJ_BRIDGE:
     sprintf(tmp, "%d-%d", (int) obj->attr->bridge.upstream_type, (int) obj->attr->bridge.downstream_type);

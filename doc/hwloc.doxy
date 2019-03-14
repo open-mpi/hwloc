@@ -3134,7 +3134,7 @@ It means that a Group containing a single child is merged
 into that child.
 And a Group is merged into its parent if it is its only child.
 For instance a Windows processor group containing a single NUMA node
-would be  merged with that NUMA node since it already contains the
+would be merged with that NUMA node since it already contains the
 relevant hierarchy information.
 
 
