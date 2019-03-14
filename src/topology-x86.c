@@ -745,6 +745,8 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
   if (fulldiscovery) {
     hwloc_bitmap_t unit_cpuset, die_cpuset;
     hwloc_obj_t unit, die;
+    char *env;
+    int dont_merge;
 
     /* Look for Compute units inside packages */
     hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
@@ -778,6 +780,8 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
     }
 
     /* Look for Dies inside packages */
+    env = getenv("HWLOC_DONT_MERGE_DIE_GROUPS");
+    dont_merge = env && atoi(env);
     hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
     while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
       unsigned packageid = infos[i].packageid;
@@ -803,6 +807,7 @@ static int summarize(struct hwloc_backend *backend, struct procinfo *infos, int 
       die = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, dieid);
       die->cpuset = die_cpuset;
       hwloc_obj_add_info(die, "Type", "Die");
+      die->attr->group.dont_merge = dont_merge;
       hwloc_debug_1arg_bitmap("os die %u has cpuset %s\n",
           dieid, die_cpuset);
       hwloc_insert_object_by_cpuset(topology, die);
