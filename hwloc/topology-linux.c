@@ -5305,6 +5305,7 @@ const struct hwloc_component hwloc_linux_component = {
 
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL (1<<0)
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_USB (1<<1)
+#define HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS (1<<2)
 
 static hwloc_obj_t
 hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
@@ -5442,8 +5443,7 @@ hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcide
 
 static void
 hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused, int root_fd,
-				    struct hwloc_obj *obj, const char *osdevpath,
-				    int uses_sectors)
+				    struct hwloc_obj *obj, const char *osdevpath, unsigned osdev_flags)
 {
 #ifdef HWLOC_HAVE_LIBUDEV
   struct hwloc_linux_backend_data_s *data = backend->private_data;
@@ -5464,7 +5464,8 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   if (!hwloc_read_path_by_length(path, line, sizeof(line), root_fd)) {
     unsigned long long value = strtoull(line, NULL, 10);
     /* linux always reports size in 512-byte units for blocks, and bytes for dax, we want kB */
-    snprintf(line, sizeof(line), "%llu", uses_sectors ? value / 2 : value >> 10);
+    snprintf(line, sizeof(line), "%llu",
+	     (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS) ? value / 2 : value >> 10);
     hwloc_obj_add_info(obj, "Size", line);
   }
 
@@ -5621,6 +5622,8 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
   if (!dir)
     return 0;
 
+  osdev_flags |= HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS; /* uses 512B sectors */
+
   while ((dirent = readdir(dir)) != NULL) {
     char path[256];
     struct stat stbuf;
@@ -5649,7 +5652,7 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
 
     obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
-    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, 1 /* uses 512B sectors */);
+    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags);
   }
 
   closedir(dir);
@@ -5686,7 +5689,7 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 
     obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
-    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, 0 /* no sectors */);
+    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags);
   }
 
   closedir(dir);
