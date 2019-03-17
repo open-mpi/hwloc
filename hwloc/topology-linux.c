@@ -5688,6 +5688,7 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
     int found = 0;
     while ((dirent = readdir(dir)) != NULL) {
       char path[300];
+      char driver[256];
       hwloc_obj_t obj, parent;
       int err;
 
@@ -5695,9 +5696,18 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 	continue;
       found++;
 
-      err = snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s", dirent->d_name);
+      /* ignore kmem-device, those appear as additional NUMA nodes */
+      err = snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s/driver", dirent->d_name);
       if ((size_t) err >= sizeof(path))
 	continue;
+      err = hwloc_readlink(path, driver, sizeof(driver), root_fd);
+      if (err >= 0) {
+	driver[err] = '\0';
+	if (!strcmp(driver+err-5, "/kmem"))
+	  continue;
+      }
+
+      snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s", dirent->d_name);
       parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS);
       if (!parent)
 	continue;
@@ -5722,6 +5732,8 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 
       if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
 	continue;
+
+      /* kmem not supported in class mode, driver may only be changed under bus */
 
       err = snprintf(path, sizeof(path), "/sys/class/dax/%s", dirent->d_name);
       if ((size_t) err >= sizeof(path))
