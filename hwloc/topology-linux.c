@@ -5306,6 +5306,7 @@ const struct hwloc_component hwloc_linux_component = {
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL (1<<0)
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_USB (1<<1)
 #define HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS (1<<2)
+#define HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS (1<<31)
 
 static hwloc_obj_t
 hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
@@ -5320,7 +5321,13 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   hwloc_bitmap_t cpuset;
   const char *tmp;
   hwloc_obj_t parent;
+  char *devicesubdir;
   int err;
+
+  if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS)
+    devicesubdir = "..";
+  else
+    devicesubdir = "device";
 
   err = hwloc_readlink(osdevpath, path, sizeof(path), root_fd);
   if (err < 0) {
@@ -5388,7 +5395,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 
  nopci:
   /* attach directly near the right NUMA node */
-  snprintf(path, sizeof(path), "%s/device/numa_node", osdevpath);
+  snprintf(path, sizeof(path), "%s/%s/numa_node", osdevpath, devicesubdir);
   fd = hwloc_open(path, root_fd);
   if (fd >= 0) {
     err = read(fd, buf, sizeof(buf));
@@ -5408,7 +5415,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   }
 
   /* attach directly to the right cpuset */
-  snprintf(path, sizeof(path), "%s/device/local_cpus", osdevpath);
+  snprintf(path, sizeof(path), "%s/%s/local_cpus", osdevpath, devicesubdir);
   cpuset = hwloc__alloc_read_path_as_cpumask(path, root_fd);
   if (cpuset) {
     parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
@@ -5458,7 +5465,13 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   char blocktype[64] = "";
   unsigned sectorsize = 0;
   unsigned major_id, minor_id;
+  char *devicesubdir;
   char *tmp;
+
+  if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS)
+    devicesubdir = "..";
+  else
+    devicesubdir = "device";
 
   snprintf(path, sizeof(path), "%s/size", osdevpath);
   if (!hwloc_read_path_by_length(path, line, sizeof(line), root_fd)) {
@@ -5480,7 +5493,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
    * (512/4096 block + 0/N) while queue/hw_sector_size above is the user sectorsize
    * without metadata.
    */
-  snprintf(path, sizeof(path), "%s/device/devtype", osdevpath);
+  snprintf(path, sizeof(path), "%s/%s/devtype", osdevpath, devicesubdir);
   if (!hwloc_read_path_by_length(path, line, sizeof(line), root_fd)) {
     if (!strncmp(line, "nd_", 3)) {
       strcpy(blocktype, "NVDIMM"); /* Save the blocktype now since udev reports "" so far */
@@ -5668,31 +5681,61 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
   DIR *dir;
   struct dirent *dirent;
 
-  dir = hwloc_opendir("/sys/class/dax", root_fd);
-  if (!dir)
-    return 0;
+  /* depending on the kernel config, dax devices may appear either in /sys/bus/dax or /sys/class/dax */
 
-  while ((dirent = readdir(dir)) != NULL) {
-    char path[256];
-    hwloc_obj_t obj, parent;
-    int err;
+  dir = hwloc_opendir("/sys/bus/dax/devices", root_fd);
+  if (dir) {
+    int found = 0;
+    while ((dirent = readdir(dir)) != NULL) {
+      char path[300];
+      hwloc_obj_t obj, parent;
+      int err;
 
-    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
-      continue;
+      if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+	continue;
+      found++;
 
-    err = snprintf(path, sizeof(path), "/sys/class/dax/%s", dirent->d_name);
-    if ((size_t) err >= sizeof(path))
-      continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
-    if (!parent)
-      continue;
+      err = snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s", dirent->d_name);
+      if ((size_t) err >= sizeof(path))
+	continue;
+      parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS);
+      if (!parent)
+	continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
-    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags);
+      hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS);
+    }
+    closedir(dir);
+
+    /* don't look in /sys/class/dax if we found something in /sys/bus/dax */
+    if (found)
+      return 0;
   }
 
-  closedir(dir);
+  dir = hwloc_opendir("/sys/class/dax", root_fd);
+  if (dir) {
+    while ((dirent = readdir(dir)) != NULL) {
+      char path[256];
+      hwloc_obj_t obj, parent;
+      int err;
+
+      if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+	continue;
+
+      err = snprintf(path, sizeof(path), "/sys/class/dax/%s", dirent->d_name);
+      if ((size_t) err >= sizeof(path))
+	continue;
+      parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+      if (!parent)
+	continue;
+
+      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+
+      hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags);
+    }
+    closedir(dir);
+  }
 
   return 0;
 }
