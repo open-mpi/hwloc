@@ -3786,7 +3786,9 @@ look_sysfsnode(struct hwloc_topology *topology,
 {
   unsigned osnode;
   unsigned nbnodes;
-  hwloc_obj_t * nodes;
+  hwloc_obj_t * nodes; /* the array of NUMA node objects, to be used for inserting distances */
+  unsigned nr_trees;
+  hwloc_obj_t * trees; /* the array of memory hierarchies to insert */
   unsigned *indexes;
   uint64_t * distances;
   hwloc_bitmap_t nodes_cpuset;
@@ -3800,12 +3802,13 @@ look_sysfsnode(struct hwloc_topology *topology,
   if (!indexes)
     return 0;
 
-  nodes = calloc(nbnodes,
-		 sizeof(hwloc_obj_t));
+  nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+  trees = calloc(nbnodes, sizeof(hwloc_obj_t));
   distances = malloc(nbnodes*nbnodes*sizeof(*distances));
   nodes_cpuset  = hwloc_bitmap_alloc();
-  if (NULL == nodes_cpuset || NULL == nodes || NULL == distances) {
+  if (NULL == nodes || NULL == trees || NULL == distances || NULL == nodes_cpuset) {
     free(nodes);
+    free(trees);
     free(indexes);
     free(distances);
     hwloc_bitmap_free(nodes_cpuset);
@@ -3912,17 +3915,33 @@ look_sysfsnode(struct hwloc_topology *topology,
 	}
       }
 
-      /* insert actual numa nodes */
+      /* list trees */
+      nr_trees = 0;
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
-	if (node) {
-	  hwloc_obj_t res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, hwloc_report_os_error);
-	  if (res_obj != node) {
-	    /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
-	     * Update it in the array for the distance matrix. */
-	    failednodes++;
-	    nodes[i] = node;
-	  }
+	if (node)
+	  trees[nr_trees++] = node;
+      }
+
+      /* insert memory trees for real */
+      for (i = 0; i < nr_trees; i++) {
+	hwloc_obj_t tree = trees[i];
+	hwloc_obj_t cur_obj = tree;
+	hwloc_obj_type_t cur_type = cur_obj->type;
+	hwloc_obj_t res_obj;
+
+	assert(!cur_obj->next_sibling);
+	assert(!cur_obj->memory_first_child);
+
+	res_obj = hwloc__insert_object_by_cpuset(topology, NULL, cur_obj, hwloc_report_os_error);
+	if (res_obj != cur_obj && cur_type == HWLOC_OBJ_NUMANODE) {
+	  /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
+	   * Update it in the array for the distance matrix. */
+	  unsigned j;
+	  for(j=0; j<nbnodes; j++)
+	    if (nodes[j] == cur_obj)
+	      nodes[j] = res_obj;
+	  failednodes++;
 	}
       }
 
@@ -3936,6 +3955,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 
  out:
   *found = nbnodes - failednodes;
+  free(trees);
   return 0;
 }
 
