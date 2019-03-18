@@ -4573,12 +4573,42 @@ hwloc_topology_check(struct hwloc_topology *topology)
     assert(hwloc_get_depth_type(topology, j) != HWLOC_OBJ_MACHINE);
   }
 
-  /* check that we have a NUMA level */
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE) == HWLOC_TYPE_DEPTH_NUMANODE);
-  assert(hwloc_get_depth_type(topology, HWLOC_TYPE_DEPTH_NUMANODE) == HWLOC_OBJ_NUMANODE);
-  /* check that normal levels are not NUMA */
-  for(j=0; j<depth; j++)
-    assert(hwloc_get_depth_type(topology, j) != HWLOC_OBJ_NUMANODE);
+  /* check normal levels */
+  for(j=0; j<depth; j++) {
+    int d;
+    type = hwloc_get_depth_type(topology, j);
+    assert(type != HWLOC_OBJ_NUMANODE);
+    assert(type != HWLOC_OBJ_PCI_DEVICE);
+    assert(type != HWLOC_OBJ_BRIDGE);
+    assert(type != HWLOC_OBJ_OS_DEVICE);
+    assert(type != HWLOC_OBJ_MISC);
+    d = hwloc_get_type_depth(topology, type);
+    assert(d == j || d == HWLOC_TYPE_DEPTH_MULTIPLE);
+  }
+
+  /* check type depths, even if there's no such level */
+  for(type=HWLOC_OBJ_TYPE_MIN; type<HWLOC_OBJ_TYPE_MAX; type++) {
+    int d;
+    d = hwloc_get_type_depth(topology, type);
+    if (type == HWLOC_OBJ_NUMANODE) {
+      assert(d == HWLOC_TYPE_DEPTH_NUMANODE);
+      assert(hwloc_get_depth_type(topology, d) == HWLOC_OBJ_NUMANODE);
+    } else if (type == HWLOC_OBJ_BRIDGE) {
+      assert(d == HWLOC_TYPE_DEPTH_BRIDGE);
+      assert(hwloc_get_depth_type(topology, d) == HWLOC_OBJ_BRIDGE);
+    } else if (type == HWLOC_OBJ_PCI_DEVICE) {
+      assert(d == HWLOC_TYPE_DEPTH_PCI_DEVICE);
+      assert(hwloc_get_depth_type(topology, d) == HWLOC_OBJ_PCI_DEVICE);
+    } else if (type == HWLOC_OBJ_OS_DEVICE) {
+      assert(d == HWLOC_TYPE_DEPTH_OS_DEVICE);
+      assert(hwloc_get_depth_type(topology, d) == HWLOC_OBJ_OS_DEVICE);
+    } else if (type == HWLOC_OBJ_MISC) {
+      assert(d == HWLOC_TYPE_DEPTH_MISC);
+      assert(hwloc_get_depth_type(topology, d) == HWLOC_OBJ_MISC);
+    } else {
+      assert(d >=0 || d == HWLOC_TYPE_DEPTH_UNKNOWN || d == HWLOC_TYPE_DEPTH_MULTIPLE);
+    }
+  }
 
   /* top-level specific checks */
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
