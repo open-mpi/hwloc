@@ -1175,6 +1175,8 @@ following environment variables.
  HWLOC_HIDE_DEPRECATED
   hides some warnings about deprecated features.
   listed in those warnings so no need to document it
+ HWLOC_TEST_GATHER_TOPOLOGY=0
+  disable the hwloc-gather-topology test when too long on large servers
  HWLOC_FORCE_BGQ
   makes the bgq component run even if it doesn't recognize the running platform as a BGQ/CNK
  HWLOC_PICL_HETEROGENEOUS
