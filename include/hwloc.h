@@ -224,7 +224,7 @@ typedef enum {
 			  * See also \ref faq_groups.
 			  *
 			  * These objects are removed when they do not bring
-			  * any structure.
+			  * any structure (see ::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
 			  */
 
   HWLOC_OBJ_NUMANODE,	/**< \brief NUMA node.
