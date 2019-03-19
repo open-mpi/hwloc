@@ -6501,7 +6501,7 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 	  && !hwloc_read_path_by_length(path, buf, sizeof(buf), root_fd)
 	  && sscanf(buf, "%x:%x:%x", &domain, &bus, &dev) == 3) {
 	/* may also be %x:%x without a device number but that's only for hotplug when nothing is plugged, ignore those */
-	hwloc_obj_t obj = hwloc_pcidisc_find_by_busid(topology, domain, bus, dev, 0);
+	hwloc_obj_t obj = hwloc_pci_find_by_busid(topology, domain, bus, dev, 0);
 	/* obj may be higher in the hierarchy that requested (if that exact bus didn't exist),
 	 * we'll check below whether the bus ID is correct.
 	 */

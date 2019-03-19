@@ -524,20 +524,6 @@ HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, st
  * @{
  */
 
-/** \brief Find the PCI object that matches the bus ID.
- *
- * To be used after a PCI backend added PCI devices with hwloc_pcidisc_tree_attach().
- *
- * If no exactly matching object is found, return the container bridge if any, or NULL.
- *
- * On failure, it may be possible to find the PCI locality (instead of the PCI device)
- * by calling hwloc_pcidisc_find_busid_parent().
- *
- * \note This is semantically identical to hwloc_get_pcidev_by_busid() which only works
- * after the topology is fully loaded.
- */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_pcidisc_find_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
-
 /** \brief Find the normal parent of a PCI bus ID.
  *
  * Look at PCI affinity to find out where the given PCI bus ID should be attached.
