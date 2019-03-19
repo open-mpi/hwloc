@@ -140,9 +140,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
 
       parent = NULL;
       if (hwloc_opencl_get_device_pci_busid(device_ids[i], &pcidomain, &pcibus, &pcidev, &pcifunc) == 0) {
-	parent = hwloc_pcidisc_find_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
-	if (!parent)
-	  parent = hwloc_pcidisc_find_busid_parent(topology, pcidomain, pcibus, pcidev, pcifunc);
+	parent = hwloc_pci_find_parent_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
       } else {
 	hwloc_debug("Failed to find the PCI id of the device\n");
       }

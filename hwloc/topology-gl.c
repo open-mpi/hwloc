@@ -119,9 +119,7 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       if (productname)
 	hwloc_obj_add_info(osdev, "GPUModel", productname);
 
-      parent = hwloc_pcidisc_find_by_busid(topology, (unsigned)nv_ctrl_pci_domain, (unsigned)nv_ctrl_pci_bus, (unsigned)nv_ctrl_pci_device, (unsigned)nv_ctrl_pci_func);
-      if (!parent)
-	parent = hwloc_pcidisc_find_busid_parent(topology, (unsigned)nv_ctrl_pci_domain, (unsigned)nv_ctrl_pci_bus, (unsigned)nv_ctrl_pci_device, (unsigned)nv_ctrl_pci_func);
+      parent = hwloc_pci_find_parent_by_busid(topology, (unsigned)nv_ctrl_pci_domain, (unsigned)nv_ctrl_pci_bus, (unsigned)nv_ctrl_pci_device, (unsigned)nv_ctrl_pci_func);
       if (!parent)
 	parent = hwloc_get_root_obj(topology);
 

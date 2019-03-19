@@ -5383,12 +5383,8 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   }
 
   if (foundpci) {
-    /* attach to a PCI parent */
-    parent = hwloc_pcidisc_find_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
-    if (parent)
-      return parent;
-    /* attach to a normal (non-I/O) parent found by PCI affinity */
-    parent = hwloc_pcidisc_find_busid_parent(topology, pcidomain, pcibus, pcidev, pcifunc);
+    /* attach to a PCI parent or to a normal (non-I/O) parent found by PCI affinity */
+    parent = hwloc_pci_find_parent_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
     if (parent)
       return parent;
   }

@@ -542,13 +542,10 @@ HWLOC_DECLSPEC struct hwloc_obj * hwloc_pcidisc_find_by_busid(struct hwloc_topol
  *
  * Look at PCI affinity to find out where the given PCI bus ID should be attached.
  *
- * This function should be used to attach an I/O device directly under a normal
- * (non-I/O) object, instead of below a PCI object.
- * It is usually used by backends when hwloc_pcidisc_find_by_busid() failed
- * to find the hwloc object corresponding to this bus ID, for instance because
- * PCI discovery is not supported on this platform.
+ * This function should be used to attach an I/O device under the corresponding
+ * PCI object (if any), or under a normal (non-I/O) object with same locality.
  */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_pcidisc_find_busid_parent(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 /** @} */
 

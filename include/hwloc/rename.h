@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2018 Inria.  All rights reserved.
+ * Copyright © 2010-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -565,7 +565,7 @@ extern "C" {
 #define hwloc_pcidisc_tree_attach HWLOC_NAME(pcidisc_tree_attach)
 
 #define hwloc_pcidisc_find_by_busid HWLOC_NAME(pcidisc_find_by_busid)
-#define hwloc_pcidisc_find_busid_parent HWLOC_NAME(pcidisc_find_busid_parent)
+#define hwloc_pci_find_parent_by_busid HWLOC_NAME(pcidisc_find_busid_parent)
 
 /* hwloc/deprecated.h */
 

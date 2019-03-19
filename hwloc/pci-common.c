@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -633,10 +633,18 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
 }
 
 struct hwloc_obj *
-hwloc_pcidisc_find_busid_parent(struct hwloc_topology *topology,
-				unsigned domain, unsigned bus, unsigned dev, unsigned func)
+hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
+			       unsigned domain, unsigned bus, unsigned dev, unsigned func)
 {
   struct hwloc_pcidev_attr_s busid;
+  hwloc_obj_t parent;
+
+  /* try to find that exact busid */
+  parent = hwloc_pcidisc_find_by_busid(topology, domain, bus, dev, func);
+  if (parent)
+    return parent;
+
+  /* try to find the locality of that bus instead */
   busid.domain = domain;
   busid.bus = bus;
   busid.dev = dev;
