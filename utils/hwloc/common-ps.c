@@ -28,7 +28,6 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 {
 #ifdef HAVE_DIRENT_H
   hwloc_pid_t realpid;
-  unsigned i;
   hwloc_bitmap_t cpuset;
   unsigned pathlen;
   char *path;
@@ -100,7 +99,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
     }
 
     if (*comm)
-      snprintf(proc->name, sizeof(proc->name), comm);
+      snprintf(proc->name, sizeof(proc->name), "%s", comm);
   }
 
   free(path);
@@ -150,7 +149,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 	if (proc->threads) {
 	  /* reread the directory but gather info now */
 	  rewinddir(taskdir);
-	  i = 0;
+	  unsigned i = 0;
 	  while ((taskdirent = readdir(taskdir))) {
 	    char *path2;
 	    unsigned path2len;
