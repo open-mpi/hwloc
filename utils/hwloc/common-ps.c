@@ -134,18 +134,18 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
     if (taskdir) {
       struct dirent *taskdirent;
       long tid;
-      unsigned n = 0;
+      unsigned nbth = 0;
       /* count threads */
       while ((taskdirent = readdir(taskdir))) {
 	tid = strtol(taskdirent->d_name, &end, 10);
 	if (*end)
 	  /* Not a number */
 	  continue;
-	n++;
+	nbth++;
       }
-      if (n > 1) {
+      if (nbth > 1) {
 	/* if there's more than one thread, see if some are bound */
-	proc->threads = calloc(n, sizeof(*proc->threads));
+	proc->threads = calloc(nbth, sizeof(*proc->threads));
 	if (proc->threads) {
 	  /* reread the directory but gather info now */
 	  rewinddir(taskdir);
@@ -198,7 +198,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 	  next:
 	    i++;
 	    proc->nthreads++;
-	    if (i == n)
+	    if (i == nbth)
 	      /* ignore the lastly created threads, I'm too lazy to reallocate */
 	      break;
 	  }
