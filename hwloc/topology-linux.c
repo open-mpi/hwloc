@@ -3671,9 +3671,11 @@ list_sysfsnode(struct hwloc_linux_backend_data_s *data,
   /* try to get the list of NUMA nodes at once.
    * otherwise we'll list the entire directory.
    *
-   * don't use <path>/possible, /sys/bus/node/devices only contains node%d
+   * offline nodes don't exist at all under /sys (they are in "possible", we may ignore them).
+   *
+   * don't use <path>/online, /sys/bus/node/devices only contains node%d
    */
-  nodeset = hwloc__alloc_read_path_as_cpulist("/sys/devices/system/node/possible", data->root_fd);
+  nodeset = hwloc__alloc_read_path_as_cpulist("/sys/devices/system/node/online", data->root_fd);
   if (nodeset) {
     int _nbnodes = hwloc_bitmap_weight(nodeset);
     assert(_nbnodes >= 1);
