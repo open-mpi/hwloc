@@ -70,6 +70,8 @@ cpuiddump_read(const char *dirpath, unsigned idx)
 {
   struct cpuiddump *cpuiddump;
   struct cpuiddump_entry *cur;
+  size_t filenamelen;
+  char *filename;
   FILE *file;
   char line[128];
   unsigned nr;
@@ -80,16 +82,16 @@ cpuiddump_read(const char *dirpath, unsigned idx)
     goto out;
   }
 
- {
-  size_t filenamelen = strlen(dirpath) + 15;
-  HWLOC_VLA(char, filename, filenamelen);
+  filenamelen = strlen(dirpath) + 15;
+  filename = malloc(filenamelen);
+  if (!filename)
+    goto out_with_dump;
   snprintf(filename, filenamelen, "%s/pu%u", dirpath, idx);
   file = fopen(filename, "r");
   if (!file) {
     fprintf(stderr, "Could not read dumped cpuid file %s, ignoring cpuiddump.\n", filename);
-    goto out_with_dump;
+    goto out_with_filename;
   }
- }
 
   nr = 0;
   while (fgets(line, sizeof(line), file))
@@ -117,10 +119,13 @@ cpuiddump_read(const char *dirpath, unsigned idx)
 
   cpuiddump->nr = nr;
   fclose(file);
+  free(filename);
   return cpuiddump;
 
  out_with_file:
   fclose(file);
+ out_with_filename:
+  free(filename);
  out_with_dump:
   free(cpuiddump);
  out:
@@ -1536,6 +1541,7 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
 #if !(defined HWLOC_WIN_SYS && !defined __MINGW32__ && !defined __CYGWIN__) /* needs a lot of work */
   struct dirent *dirent;
   DIR *dir;
+  char *path;
   FILE *file;
   char line [32];
 
@@ -1543,23 +1549,26 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
   if (!dir) 
     return -1;
 
-  char path[strlen(src_cpuiddump_path) + strlen("/hwloc-cpuid-info") + 1];
+  path = malloc(strlen(src_cpuiddump_path) + strlen("/hwloc-cpuid-info") + 1);
+  if (!path)
+    goto out_with_dir;
   sprintf(path, "%s/hwloc-cpuid-info", src_cpuiddump_path);
   file = fopen(path, "r");
   if (!file) {
     fprintf(stderr, "Couldn't open dumped cpuid summary %s\n", path);
-    goto out_with_dir;
+    goto out_with_path;
   }
   if (!fgets(line, sizeof(line), file)) {
     fprintf(stderr, "Found read dumped cpuid summary in %s\n", path);
     fclose(file);
-    goto out_with_dir;
+    goto out_with_path;
   }
   fclose(file);
   if (strcmp(line, "Architecture: x86\n")) {
     fprintf(stderr, "Found non-x86 dumped cpuid summary in %s: %s\n", path, line);
-    goto out_with_dir;
+    goto out_with_path;
   }
+  free(path);
 
   while ((dirent = readdir(dir)) != NULL) {
     if (!strncmp(dirent->d_name, "pu", 2)) {
@@ -1587,7 +1596,9 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
 
   return 0;
 
-out_with_dir:
+ out_with_path:
+  free(path);
+ out_with_dir:
   closedir(dir);
 #endif /* HWLOC_WIN_SYS & !__MINGW32__ needs a lot of work */
   return -1;

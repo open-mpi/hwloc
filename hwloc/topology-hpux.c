@@ -181,6 +181,7 @@ hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
   int has_numa = sysconf(_SC_CCNUMA_SUPPORT) == 1;
   spu_t currentcpu;
   ldom_t currentnode;
+  hwloc_obj_t *nodes, obj;
   int i, nbnodes = 0;
 
   if (topology->levels[0][0]->cpuset)
@@ -195,7 +196,9 @@ hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
   }
   hwloc_debug("%d nodes\n", nbnodes);
 
-  hwloc_obj_t nodes[nbnodes], obj;
+  nodes = malloc(nbnodes * sizeof(*nodes));
+  if (!nodes)
+    has_numa = 0;
 
   if (has_numa) {
     i = 0;
@@ -262,6 +265,8 @@ hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "HP-UX");
   hwloc_add_uname_info(topology, NULL);
+
+  free(nodes);
   return 0;
 }
 

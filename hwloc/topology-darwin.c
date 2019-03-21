@@ -223,11 +223,16 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
   if (!sysctlbyname("hw.cacheconfig", NULL, &size, NULL, 0)) {
     unsigned n = size / sizeof(uint32_t);
-    uint64_t cacheconfig[n];
-    uint64_t cachesize[n];
-    uint32_t cacheconfig32[n];
+    uint64_t *cacheconfig;
+    uint64_t *cachesize;
+    uint32_t *cacheconfig32;
 
-    if ((!sysctlbyname("hw.cacheconfig", cacheconfig, &size, NULL, 0))) {
+    cacheconfig = malloc(n * sizeof(*cacheconfig));
+    cachesize = malloc(n * sizeof(*cachesize));
+    cacheconfig32 = malloc(n * sizeof(*cacheconfig32));
+
+    if (cacheconfig && cachesize && cacheconfig32
+	&& (!sysctlbyname("hw.cacheconfig", cacheconfig, &size, NULL, 0))) {
       /* Yeech. Darwin seemingly has changed from 32bit to 64bit integers for
        * cacheconfig, with apparently no way for detection. Assume the machine
        * won't have more than 4 billion cpus */
@@ -329,6 +334,9 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
         }
       }
     }
+    free(cacheconfig);
+    free(cachesize);
+    free(cacheconfig32);
   }
 
   if (gotnuma)

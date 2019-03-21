@@ -839,10 +839,14 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
 			   float *accuracies,
 			   int needcheck)
 {
-  HWLOC_VLA(unsigned, groupids, nbobjs);
+  unsigned *groupids;
   unsigned nbgroups = 0;
   unsigned i,j;
   int verbose = topology->grouping_verbose;
+  hwloc_obj_t *groupobjs;
+  unsigned * groupsizes;
+  uint64_t *groupvalues;
+  unsigned failed = 0;
 
   if (nbobjs <= 2)
       return;
@@ -850,6 +854,10 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
   if (!(kind & HWLOC_DISTANCES_KIND_MEANS_LATENCY))
     /* don't know use to use those for grouping */
     /* TODO hwloc__find_groups_by_max_distance() for bandwidth */
+    return;
+
+  groupids = malloc(nbobjs * sizeof(*groupids));
+  if (!groupids)
     return;
 
   for(i=0; i<nbaccuracies; i++) {
@@ -863,13 +871,13 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
       break;
   }
   if (!nbgroups)
-    return;
+    goto out_with_groupids;
 
-  {
-      HWLOC_VLA(hwloc_obj_t, groupobjs, nbgroups);
-      HWLOC_VLA(unsigned, groupsizes, nbgroups);
-      HWLOC_VLA(uint64_t, groupvalues, nbgroups*nbgroups);
-      unsigned failed = 0;
+  groupobjs = malloc(nbgroups * sizeof(*groupobjs));
+  groupsizes = malloc(nbgroups * sizeof(*groupsizes));
+  groupvalues = malloc(nbgroups * nbgroups * sizeof(*groupvalues));
+  if (!groupobjs || !groupsizes || !groupsizes)
+    goto out_with_groups;
 
       /* create new Group objects and record their size */
       memset(&(groupsizes[0]), 0, sizeof(groupsizes[0]) * nbgroups);
@@ -900,7 +908,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
 
       if (failed)
 	/* don't try to group above if we got a NULL group here, just keep this incomplete level */
-	return;
+	goto out_with_groups;
 
       /* factorize values */
       memset(&(groupvalues[0]), 0, sizeof(groupvalues[0]) * nbgroups * nbgroups);
@@ -932,5 +940,11 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
 #endif
 
       hwloc__groups_by_distances(topology, nbgroups, groupobjs, groupvalues, kind, nbaccuracies, accuracies, 0 /* no need to check generated matrix */);
-  }
+
+ out_with_groups:
+  free(groupobjs);
+  free(groupsizes);
+  free(groupvalues);
+ out_with_groupids:
+  free(groupids);
 }

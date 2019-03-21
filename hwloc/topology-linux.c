@@ -1814,9 +1814,13 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
     goto out;
 
   if (flags & HWLOC_MEMBIND_MIGRATE) {
-    unsigned long fullmask[max_os_index/HWLOC_BITS_PER_LONG];
+    unsigned long *fullmask;
+    fullmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(*fullmask));
+    if (!fullmask)
+      goto out_with_mask;
     memset(fullmask, 0xf, max_os_index/HWLOC_BITS_PER_LONG * sizeof(unsigned long));
     err = hwloc_migrate_pages(0, max_os_index+1, fullmask, linuxmask);
+    free(fullmask);
     if (err < 0 && (flags & HWLOC_MEMBIND_STRICT))
       goto out_with_mask;
   }
@@ -1870,8 +1874,15 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
   }
 
   while (1) {
-    unsigned long mask[max_numnodes / HWLOC_BITS_PER_LONG];
-    int err = hwloc_get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
+    unsigned long *mask;
+    int err;
+    mask = malloc(max_numnodes / HWLOC_BITS_PER_LONG * sizeof(*mask));
+    if (!mask)
+      /* we can't return anything sane, assume the default size will work */
+      return _max_numnodes = max_numnodes;
+
+    err = hwloc_get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
+    free(mask);
     if (!err || errno != EINVAL)
       /* Found it. Only update the static value with the final one,
        * to avoid sharing intermediate values that we modify,
@@ -1916,16 +1927,19 @@ static int
 hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
   unsigned max_os_index;
+  unsigned long *linuxmask;
   int linuxpolicy;
   int err;
 
   max_os_index = hwloc_linux_find_kernel_max_numnodes(topology);
 
-  unsigned long linuxmask[max_os_index/HWLOC_BITS_PER_LONG];
+  linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(*linuxmask));;
+  if (!linuxmask)
+    goto out;
 
   err = hwloc_get_mempolicy(&linuxpolicy, linuxmask, max_os_index, 0, 0);
   if (err < 0)
-    goto out;
+    goto out_with_linuxmask;
 
   /* MPOL_PREFERRED with empty mask is MPOL_LOCAL */
   if (linuxpolicy == MPOL_PREFERRED && hwloc_linux_mask_is_empty(max_os_index, linuxmask))
@@ -1939,10 +1953,13 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
 
   err = hwloc_linux_membind_policy_to_hwloc(linuxpolicy, policy);
   if (err < 0)
-    goto out;
+    goto out_with_linuxmask;
 
+  free(linuxmask);
   return 0;
 
+ out_with_linuxmask:
+  free(linuxmask);
  out:
   return -1;
 }
@@ -1951,6 +1968,8 @@ static int
 hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
   unsigned max_os_index;
+  unsigned long *linuxmask;
+  unsigned long *globallinuxmask;
   int linuxpolicy = 0, globallinuxpolicy = 0; /* shut-up the compiler */
   int mixed = 0;
   int full = 0;
@@ -1962,16 +1981,19 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
 
   max_os_index = hwloc_linux_find_kernel_max_numnodes(topology);
 
-  unsigned long linuxmask[max_os_index/HWLOC_BITS_PER_LONG];
-  unsigned long globallinuxmask[max_os_index/HWLOC_BITS_PER_LONG];
-  memset(globallinuxmask, 0, sizeof(globallinuxmask));
+  linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(*linuxmask));
+  globallinuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(*globallinuxmask));
+  if (!linuxmask || !globallinuxmask)
+    goto out_with_linuxmasks;
+
+  memset(globallinuxmask, 0, sizeof(*globallinuxmask));
 
   for(tmpaddr = (char *)((unsigned long)addr & ~(pagesize-1));
       tmpaddr < (char *)addr + len;
       tmpaddr += pagesize) {
     err = hwloc_get_mempolicy(&linuxpolicy, linuxmask, max_os_index, tmpaddr, MPOL_F_ADDR);
     if (err < 0)
-      goto out;
+      goto out_with_linuxmasks;
 
     /* MPOL_PREFERRED with empty mask is MPOL_LOCAL */
     if (linuxpolicy == MPOL_PREFERRED && hwloc_linux_mask_is_empty(max_os_index, linuxmask))
@@ -1999,7 +2021,7 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
   } else {
     err = hwloc_linux_membind_policy_to_hwloc(linuxpolicy, policy);
     if (err < 0)
-      goto out;
+      goto out_with_linuxmasks;
   }
 
   if (full) {
@@ -2008,9 +2030,13 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
     hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, globallinuxmask);
   }
 
+  free(linuxmask);
+  free(globallinuxmask);
   return 0;
 
- out:
+ out_with_linuxmasks:
+  free(linuxmask);
+  free(globallinuxmask);
   return -1;
 }
 
@@ -2157,6 +2183,7 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
 {
   char *mount_path;
   struct mntent mntent;
+  char *buf;
   FILE *fd;
   int err;
   size_t bufsize;
@@ -2186,7 +2213,9 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
    * so use 4*pagesize to be far above both.
    */
   bufsize = hwloc_getpagesize()*4;
-  char buf[bufsize];
+  buf = malloc(bufsize);
+  if (!buf)
+    return;
 
   while (getmntent_r(fd, &mntent, buf, bufsize)) {
     if (!strcmp(mntent.mnt_type, "cpuset")) {
@@ -2219,6 +2248,7 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
   }
 
   endmntent(fd);
+  free(buf);
 }
 
 /*
@@ -4478,8 +4508,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 			  struct hwloc_info_s **global_infos, unsigned *global_infos_count)
 {
   FILE *fd;
-  unsigned len = 128;
-  char str[len]; /* vendor/model can be very long */
+  char str[128]; /* vendor/model can be very long */
   char *endptr;
   unsigned allocated_Lprocs = 0;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
@@ -4497,7 +4526,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 #      define PACKAGEID "physical id" /* the longest one */
 #      define COREID "core id"
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
-  while (fgets(str,len,fd)!=NULL) {
+  while (fgets(str, sizeof(str), fd)!=NULL) {
     unsigned long Ppkg, Pcore, Pproc;
     char *end, *dot, *prefix, *value;
     int noend = 0;

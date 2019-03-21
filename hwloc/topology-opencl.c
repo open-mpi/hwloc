@@ -40,6 +40,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e filter;
   cl_uint nr_platforms;
+  cl_platform_id *platform_ids;
   cl_int clret;
   unsigned j;
 
@@ -52,23 +53,34 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
     return -1;
   hwloc_debug("%u OpenCL platforms\n", nr_platforms);
 
-  cl_platform_id platform_ids[nr_platforms];
-  clret = clGetPlatformIDs(nr_platforms, platform_ids, &nr_platforms);
-  if (CL_SUCCESS != clret || !nr_platforms)
+  platform_ids = malloc(nr_platforms * sizeof(*platform_ids));
+  if (!platform_ids)
     return -1;
+
+  clret = clGetPlatformIDs(nr_platforms, platform_ids, &nr_platforms);
+  if (CL_SUCCESS != clret || !nr_platforms) {
+    free(platform_ids);
+    return -1;
+  }
 
   for(j=0; j<nr_platforms; j++) {
     cl_uint nr_devices;
+    cl_device_id *device_ids;
     unsigned i;
 
     clret = clGetDeviceIDs(platform_ids[j], CL_DEVICE_TYPE_ALL, 0, NULL, &nr_devices);
     if (CL_SUCCESS != clret)
       continue;
 
-    cl_device_id device_ids[nr_devices];
-    clret = clGetDeviceIDs(platform_ids[j], CL_DEVICE_TYPE_ALL, nr_devices, device_ids, &nr_devices);
-    if (CL_SUCCESS != clret)
+    device_ids = malloc(nr_devices * sizeof(*device_ids));
+    if (!device_ids)
       continue;
+
+    clret = clGetDeviceIDs(platform_ids[j], CL_DEVICE_TYPE_ALL, nr_devices, device_ids, &nr_devices);
+    if (CL_SUCCESS != clret) {
+      free(device_ids);
+      continue;
+    }
 
     for(i=0; i<nr_devices; i++) {
       cl_platform_id platform_id = 0;
@@ -149,7 +161,9 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
 
       hwloc_insert_object_by_parent(topology, parent, osdev);
     }
+    free(device_ids);
   }
+  free(platform_ids);
   return 0;
 }
 
