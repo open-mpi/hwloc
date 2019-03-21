@@ -720,7 +720,7 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
       /* by default we show logical+physical for PU/NUMA */
       idx = obj->logical_index;
       indexprefix = " L#";
-    } else if (obj->type == HWLOC_OBJ_PACKAGE || obj->type == HWLOC_OBJ_CORE) {
+    } else if (obj->type == HWLOC_OBJ_PACKAGE || obj->type == HWLOC_OBJ_DIE || obj->type == HWLOC_OBJ_CORE) {
       /* logical only for package+core (so that we see easily how many packages/cores there are */
       idx = obj->logical_index;
       indexprefix = " L#";
