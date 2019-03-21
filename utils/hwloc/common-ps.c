@@ -33,6 +33,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
   char *path;
   char *end;
   int fd;
+  ssize_t n;
 
   if (hwloc_pid_from_number(&realpid, proc->pid, 0, 0 /* ignore failures */) < 0)
     return -1;
@@ -47,7 +48,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
   fd = open(path, O_RDONLY);
 
   if (fd >= 0) {
-    ssize_t n = read(fd, proc->name, sizeof(proc->name) - 1);
+    n = read(fd, proc->name, sizeof(proc->name) - 1);
     close(fd);
 
     if (n <= 0) {
@@ -62,7 +63,6 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
   if (flags & HWLOC_PS_FLAG_SHORTNAME) {
     /* try to get a small name from comm */
     char comm[16] = "";
-    unsigned n;
     snprintf(path, pathlen, "/proc/%ld/comm", proc->pid);
     fd = open(path, O_RDONLY);
     if (fd >= 0) {
@@ -168,8 +168,12 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 	      snprintf(path2, path2len, "%s/%ld/comm", path, tid);
 	      commfd = open(path2, O_RDWR);
 	      if (commfd >= 0) {
-		read(commfd, proc->threads[i].name, sizeof(proc->threads[i].name));
+		n = read(commfd, proc->threads[i].name, sizeof(proc->threads[i].name));
 		close(commfd);
+		if (n <= 0)
+		  proc->threads[i].name[0] = '\0';
+		else if ((size_t)n < sizeof(proc->threads[i].name))
+		  proc->threads[i].name[n] = '\0';
 		proc->threads[i].name[sizeof(proc->threads[i].name)-1] = '\0';
 		end = strchr(proc->threads[i].name, '\n');
 		if (end)
