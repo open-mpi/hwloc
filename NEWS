@@ -49,7 +49,8 @@ Version 2.1.0
   + Improve support for new kinds of dax devices on Linux.
 * Tools
   + lstopo
-    - Both logical and OS/physical indexes are now displayed by default.
+    - Both logical and OS/physical indexes are now displayed by default
+      for PU and NUMA nodes.
     - The X11 interactive output has additional keyboard shortcuts to
       dynamically change the displaying of indexes, attributes and text.
     - Add --linespacing and change default margins and linespacing.

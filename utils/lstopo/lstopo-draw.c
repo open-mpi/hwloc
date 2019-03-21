@@ -689,13 +689,17 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
     hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
   }
 
-  if (index_type == LSTOPO_INDEX_TYPE_DEFAULT ) {
+  if (index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
     if (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE) {
       /* by default we show logical+physical for PU/NUMA */
       idx = obj->logical_index;
       indexprefix = " L#";
+    } else if (obj->type == HWLOC_OBJ_PACKAGE || obj->type == HWLOC_OBJ_CORE) {
+      /* logical only for package+core (so that we see easily how many packages/cores there are */
+      idx = obj->logical_index;
+      indexprefix = " L#";
     } else {
-      /* by default we show nothing for others */
+      /* nothing for others */
       idx = HWLOC_UNKNOWN_INDEX;
       indexprefix = "";
     }
@@ -713,9 +717,9 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
 
-  if (index_type == LSTOPO_INDEX_TYPE_DEFAULT && obj->type == HWLOC_OBJ_NUMANODE && loutput->show_indexes[obj->type]) {
+  if (index_type == LSTOPO_INDEX_TYPE_DEFAULT && obj->type == HWLOC_OBJ_NUMANODE && loutput->show_indexes[obj->type])
+    /* NUMA have both P# and L# on the same line (PU is split on 2 lines) */
     snprintf(index2str, sizeof(index2str), " P#%u", obj->os_index);
-  }
 
   if (loutput->show_attrs[obj->type]) {
     attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
@@ -927,7 +931,9 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   lud->ntext = 1;
 
   /* additional lines of text */
+
   if (HWLOC_OBJ_PU == obj->type && loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT && loutput->show_indexes[obj->type]) {
+    /* PU P# is on second line */
     snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "P#%u", obj->os_index);
   }
 
