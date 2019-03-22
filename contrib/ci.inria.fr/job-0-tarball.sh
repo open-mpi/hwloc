@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2018 Inria.  All rights reserved.
+# Copyright © 2012-2019 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -52,6 +52,12 @@ sed	-e 's/^snapshot_version=.*/snapshot_version='$snapshot/ \
 ./autogen.sh
 ./configure
 make
-make distcheck
+
+if ! make distcheck; then
+  # make distcheck temporarily sets the source directory as R/O.
+  # a failure during that R/O step may cause git clean -fdx to fail during the next build
+  chmod u+w -R .
+  false
+fi
 
 exit 0
