@@ -5180,10 +5180,10 @@ const struct hwloc_component hwloc_linux_component = {
  ******* Linux I/O component *******
  ***********************************/
 
-#define HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL (1<<0)
-#define HWLOC_LINUXFS_OSDEV_FLAG_FIND_USB (1<<1)
-#define HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS (1<<2)
-#define HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS (1<<31)
+#define HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL (1U<<0)
+#define HWLOC_LINUXFS_OSDEV_FLAG_FIND_USB (1U<<1)
+#define HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS (1U<<2)
+#define HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS (1U<<31)
 
 static hwloc_obj_t
 hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
