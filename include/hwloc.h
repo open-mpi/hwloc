@@ -2132,32 +2132,32 @@ enum hwloc_restrict_flags_e {
    * By default, only objects that contain no PU and no memory are removed.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_REMOVE_CPULESS = (1<<0),
+  HWLOC_RESTRICT_FLAG_REMOVE_CPULESS = (1UL<<0),
 
   /** \brief Restrict by nodeset instead of CPU set.
    * Only keep objects whose nodeset is included or partially included in the given set.
    * This flag may not be used with ::HWLOC_RESTRICT_FLAG_BYNODESET.
    */
-  HWLOC_RESTRICT_FLAG_BYNODESET =  (1<<3),
+  HWLOC_RESTRICT_FLAG_BYNODESET =  (1UL<<3),
 
   /** \brief Remove all objects that became Memory-less.
    * By default, only objects that contain no PU and no memory are removed.
    * This flag may only be used with ::HWLOC_RESTRICT_FLAG_BYNODESET.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS = (1<<4),
+  HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS = (1UL<<4),
 
   /** \brief Move Misc objects to ancestors if their parents are removed during restriction.
    * If this flag is not set, Misc objects are removed when their parents are removed.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_ADAPT_MISC = (1<<1),
+  HWLOC_RESTRICT_FLAG_ADAPT_MISC = (1UL<<1),
 
   /** \brief Move I/O objects to ancestors if their parents are removed during restriction.
    * If this flag is not set, I/O devices and bridges are removed when their parents are removed.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_ADAPT_IO = (1<<2)
+  HWLOC_RESTRICT_FLAG_ADAPT_IO = (1UL<<2)
 };
 
 /** \brief Restrict the topology to the given CPU set or nodeset.
