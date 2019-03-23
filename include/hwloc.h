@@ -1786,7 +1786,7 @@ enum hwloc_topology_components_flag_e {
   /** \brief Blacklist the target component from being used.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST = (1<<0)
+  HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST = (1UL<<0)
 };
 
 /** \brief Prevent a discovery component from being used for a topology.
@@ -1800,7 +1800,7 @@ enum hwloc_topology_components_flag_e {
  * For instance, CUDA-specific discovery may be expensive and unneeded
  * while generic I/O discovery could still be useful.
  */
-HWLOC_DECLSPEC int hwloc_topology_set_components(hwloc_topology_t __hwloc_restrict topology, unsigned flags, const char * __hwloc_restrict name);
+HWLOC_DECLSPEC int hwloc_topology_set_components(hwloc_topology_t __hwloc_restrict topology, unsigned long flags, const char * __hwloc_restrict name);
 
 /** @} */
 

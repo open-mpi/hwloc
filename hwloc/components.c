@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -440,7 +440,7 @@ hwloc_disc_component_find(int type /* hwloc_disc_component_type_t or -1 if any *
 
 int
 hwloc_topology_set_components(struct hwloc_topology *topology,
-			      unsigned flags,
+			      unsigned long flags,
 			      const char *name)
 {
   struct hwloc_disc_component *comp;
