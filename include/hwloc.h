@@ -2192,7 +2192,7 @@ enum hwloc_allow_flags_e {
    *
    * \p cpuset and \p nođeset given to hwloc_topology_allow() must be \c NULL.
    * \hideinitializer */
-  HWLOC_ALLOW_FLAG_ALL = (1<<0),
+  HWLOC_ALLOW_FLAG_ALL = (1UL<<0),
 
   /** \brief Only allow objects that are available to the current process.
    *
@@ -2201,11 +2201,11 @@ enum hwloc_allow_flags_e {
    *
    * \p cpuset and \p nođeset given to hwloc_topology_allow() must be \c NULL.
    * \hideinitializer */
-  HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS = (1<<1),
+  HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS = (1UL<<1),
 
   /** \brief Allow a custom set of objects, given to hwloc_topology_allow() as \p cpuset and/or \p nodeset parameters.
    * \hideinitializer */
-  HWLOC_ALLOW_FLAG_CUSTOM = (1<<2)
+  HWLOC_ALLOW_FLAG_CUSTOM = (1UL<<2)
 };
 
 /** \brief Change the sets of allowed PUs and NUMA nodes in the topology.
