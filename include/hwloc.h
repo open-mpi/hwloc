@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2107,19 +2107,19 @@ enum hwloc_restrict_flags_e {
    * By default, only objects that contain no PU and no memory are removed.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_REMOVE_CPULESS = (1<<0),
+  HWLOC_RESTRICT_FLAG_REMOVE_CPULESS = (1UL<<0),
 
   /** \brief Move Misc objects to ancestors if their parents are removed during restriction.
    * If this flag is not set, Misc objects are removed when their parents are removed.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_ADAPT_MISC = (1<<1),
+  HWLOC_RESTRICT_FLAG_ADAPT_MISC = (1UL<<1),
 
   /** \brief Move I/O objects to ancestors if their parents are removed during restriction.
    * If this flag is not set, I/O devices and bridges are removed when their parents are removed.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_ADAPT_IO = (1<<2)
+  HWLOC_RESTRICT_FLAG_ADAPT_IO = (1UL<<2)
 };
 
 /** \brief Restrict the topology to the given CPU set.
