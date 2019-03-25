@@ -3862,6 +3862,45 @@ look_sysfsnode(struct hwloc_topology *topology,
                                   osnode, node->cpuset);
       }
 
+      /* try to find NUMA nodes that correspond to NVIDIA GPU memory */
+      dir = hwloc_opendir("/proc/driver/nvidia/gpus", data->root_fd);
+      if (dir) {
+	struct dirent *dirent;
+	while ((dirent = readdir(dir)) != NULL) {
+	  char nvgpunumapath[300], line[256];
+	  int fd;
+	  snprintf(nvgpunumapath, sizeof(nvgpunumapath), "/proc/driver/nvidia/gpus/%s/numa_status", dirent->d_name);
+	  fd = hwloc_open(nvgpunumapath, data->root_fd);
+	  if (fd >= 0) {
+	    int ret;
+	    ret = read(fd, line, sizeof(line)-1);
+	    line[sizeof(line)-1] = '\0';
+	    if (ret >= 0) {
+	      const char *nvgpu_node_line = strstr(line, "Node:");
+	      if (nvgpu_node_line) {
+		unsigned nvgpu_node;
+		const char *value = nvgpu_node_line+5;
+		while (*value == ' ' || *value == '\t')
+		  value++;
+		nvgpu_node = atoi(value);
+		hwloc_debug("os node %u is NVIDIA GPU %s integrated memory\n", nvgpu_node, dirent->d_name);
+		for(i=0; i<nbnodes; i++) {
+		  hwloc_obj_t node = nodes[i];
+		  if (node && node->os_index == nvgpu_node) {
+		    /* drop this NUMA node */
+		    hwloc_free_unlinked_object(node);
+		    nodes[i] = NULL;
+		    break;
+		  }
+		}
+	      }
+	    }
+	    close(fd);
+	  }
+	}
+	closedir(dir);
+      }
+
       /* try to find DAX devices of KMEM NUMA nodes */
       dir = hwloc_opendir("/sys/bus/dax/devices/", data->root_fd);
       if (dir) {

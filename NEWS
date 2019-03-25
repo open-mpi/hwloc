@@ -39,6 +39,8 @@ Version 2.1.0
     Tiles, Modules and Dies are exposed as Groups for now.
   + The x86 now properly handles offline CPUs.
   + Detect the locality of NVIDIA GPU OpenCL devices.
+  + Ignore NUMA nodes that correspond to NVIDIA GPU by default.
+    Thanks to Max Katz and Edgar Leon for the help.
   + Expose Linux DAX devices as hwloc Block OS devices.
   + Add support for IBM S/390 drawers.
   + Rework the heuristics for discovering KNL Cluster and Memory modes
