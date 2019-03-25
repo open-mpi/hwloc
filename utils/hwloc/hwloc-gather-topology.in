@@ -171,6 +171,7 @@ savefile "$destdir/$basename" /proc/stat
 savefile "$destdir/$basename" /proc/version
 savefile "$destdir/$basename" /proc/self/cpuset
 savefile "$destdir/$basename" /proc/self/cgroup
+savefile "$destdir/$basename" /proc/driver/nvidia
 
 # Gather the following list of directories
 savedir "$destdir/$basename" /sys/devices/system/cpu/
