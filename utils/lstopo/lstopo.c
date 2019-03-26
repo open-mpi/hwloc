@@ -389,10 +389,8 @@ static void lstopo_show_interactive_cli_options_array(const int *array, const ch
   }
 }
 
-void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
+static void lstopo__show_interactive_cli_options(const struct lstopo_output *loutput)
 {
-  printf("\nCommand-line options for the current configuration tweaks:\n");
-
   if (loutput->index_type == LSTOPO_INDEX_TYPE_PHYSICAL)
     printf(" -p");
   else if (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL)
@@ -411,8 +409,16 @@ void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
     printf(" --disallowed-color none");
   if (!loutput->legend)
     printf(" --no-legend");
+}
 
-  printf("\n\n");
+void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
+{
+  printf("\nCommand-line options for the current configuration tweaks:\n");
+  lstopo__show_interactive_cli_options(loutput);
+  printf("\n\nTo export to PDF:\n");
+  printf("  lstopo  <your options>");
+  lstopo__show_interactive_cli_options(loutput);
+  printf(" topology.pdf\n\n");
 }
 
 enum output_format {

@@ -120,7 +120,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
 	redraw = 1;
 	break;
-      case 'C':
+      case 'E':
 	lstopo_show_interactive_cli_options(loutput);
 	fflush(stdout);
 	break;
@@ -423,7 +423,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   printf("  Toggle color for disallowed objects . d\n");
   printf("  Toggle color for binding objects .... b\n");
   printf("  Toggle displaying of the legend ..... l\n");
-  printf("  Show updated command-line options ... C\n");
+  printf("  Export to file with current config .. E\n");
   printf("\n\n");
   fflush(stdout);
 
