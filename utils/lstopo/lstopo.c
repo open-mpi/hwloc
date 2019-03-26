@@ -365,6 +365,32 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --version             Report version and exit\n");
 }
 
+void lstopo_show_interactive_help(void)
+{
+  printf("\n");
+  printf("Keyboard shortcuts:\n");
+  printf(" Zooming, scrolling and closing:\n");
+  printf("  Zoom-in or out ...................... + -\n");
+  printf("  Try to fit scale to window .......... f F\n");
+  printf("  Reset scale to default .............. 1\n");
+  printf("  Scroll vertically ................... Up Down PageUp PageDown\n");
+  printf("  Scroll horizontally ................. Left Right Ctrl+PageUp/Down\n");
+  printf("  Scroll to the top-left corner ....... Home\n");
+  printf("  Scroll to the bottom-right corner ... End\n");
+  printf("  Show this help ...................... h H\n");
+  printf("  Exit ................................ q Q Esc\n");
+  printf(" Configuration tweaks:\n");
+  printf("  Switch display mode for indexes ..... i\n");
+  printf("  Toggle displaying of object text .... t\n");
+  printf("  Toggle displaying of obj attributes . a\n");
+  printf("  Toggle color for disallowed objects . d\n");
+  printf("  Toggle color for binding objects .... b\n");
+  printf("  Toggle displaying of the legend ..... l\n");
+  printf("  Export to file with current config .. E\n");
+  printf("\n\n");
+  fflush(stdout);
+}
+
 static void lstopo_show_interactive_cli_options_array(const int *array, const char *name)
 {
   int enabled = 0, disabled = 0, i;

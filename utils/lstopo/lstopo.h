@@ -264,5 +264,6 @@ static __hwloc_inline int lstopo_busid_snprintf(char *text, size_t textlen, hwlo
 }
 
 extern void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput);
+extern void lstopo_show_interactive_help(void);
 
 #endif /* UTILS_LSTOPO_H */

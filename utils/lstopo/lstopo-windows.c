@@ -124,6 +124,10 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	lstopo_show_interactive_cli_options(loutput);
 	fflush(stdout);
 	break;
+      case 'h':
+      case 'H':
+	lstopo_show_interactive_help();
+	break;
       case 'q':
       case 'Q':
 	finish = 1;
@@ -405,27 +409,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   /* and display the window */
   ShowWindow(toplevel, SW_SHOWDEFAULT);
 
-  printf("\n");
-  printf("Keyboard shortcuts:\n");
-  printf(" Zooming, scrolling and closing:\n");
-  printf("  Zoom-in or out ...................... + -\n");
-  printf("  Try to fit scale to window .......... f F\n");
-  printf("  Reset scale to default .............. 1\n");
-  printf("  Scroll vertically ................... Up Down PageUp PageDown\n");
-  printf("  Scroll horizontally ................. Left Right Ctrl+PageUp/Down\n");
-  printf("  Scroll to the top-left corner ....... Home\n");
-  printf("  Scroll to the bottom-right corner ... End\n");
-  printf("  Exit ................................ q Q Esc\n");
-  printf(" Configuration tweaks:\n");
-  printf("  Switch display mode for indexes ..... i\n");
-  printf("  Toggle displaying of object text .... t\n");
-  printf("  Toggle displaying of obj attributes . a\n");
-  printf("  Toggle color for disallowed objects . d\n");
-  printf("  Toggle color for binding objects .... b\n");
-  printf("  Toggle displaying of the legend ..... l\n");
-  printf("  Export to file with current config .. E\n");
-  printf("\n\n");
-  fflush(stdout);
+  lstopo_show_interactive_help();
 
   /* ready */
   declare_colors(loutput);
