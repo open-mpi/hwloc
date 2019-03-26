@@ -42,7 +42,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     snprintf(lidxstr, sizeof(lidxstr), "L#%u", l->logical_index);
   }
   if (l->type == HWLOC_OBJ_PCI_DEVICE)
-    lstopo_busid_snprintf(busidstr, sizeof(busidstr), l, collapse, loutput->need_pci_domain);
+    lstopo_busid_snprintf(loutput, busidstr, sizeof(busidstr), l, collapse, loutput->need_pci_domain);
 
   if (loutput->show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
@@ -141,7 +141,7 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
   int verbose_mode = loutput->verbose_mode;
   hwloc_obj_t child;
   int group_identical = (verbose_mode <= 1) && !loutput->show_cpuset;
-  int collapse = ((struct lstopo_obj_userdata *) l->userdata)->pci_collapsed;
+  int collapse = loutput->collapse ? ((struct lstopo_obj_userdata *) l->userdata)->pci_collapsed : 0;
 
   if (l->type == HWLOC_OBJ_PCI_DEVICE && collapse == -1)
     return;

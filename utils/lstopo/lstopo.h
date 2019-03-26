@@ -221,25 +221,25 @@ static __hwloc_inline int lstopo_numa_binding(struct lstopo_output *loutput, hwl
   return loutput->pid_number != -1 && hwloc_bitmap_isset(loutput->membind_set, l->os_index);
 }
 
-static __hwloc_inline int lstopo_busid_snprintf(char *text, size_t textlen, hwloc_obj_t firstobj, int collapse, unsigned needdomain)
+static __hwloc_inline int lstopo_busid_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, hwloc_obj_t firstobj, int collapse, unsigned needdomain)
 {
   hwloc_obj_t lastobj;
   char domain[6] = "";
   unsigned i;
 
-  assert(collapse >= 0); /* should be called on the first object of a collapsed range */
-
   if (needdomain)
     snprintf(domain, sizeof(domain), "%04x:", firstobj->attr->pcidev.domain);
 
   /* single busid */
-  if (collapse <= 1) {
+  if (!loutput->collapse || collapse <= 1) {
       return snprintf(text, textlen, "%s%02x:%02x.%01x",
 		      domain,
 		      firstobj->attr->pcidev.bus,
 		      firstobj->attr->pcidev.dev,
 		      firstobj->attr->pcidev.func);
   }
+
+  assert(collapse >= 0); /* should be called on the first object of a collapsed range */
 
   for(lastobj=firstobj, i=1; i<(unsigned)collapse; i++)
     lastobj = lastobj->next_cousin;
