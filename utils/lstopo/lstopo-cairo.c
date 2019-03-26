@@ -546,6 +546,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
+	  break;
 	case XK_C:
 	  lstopo_show_interactive_cli_options(loutput);
 	  break;
