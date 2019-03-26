@@ -385,6 +385,7 @@ void lstopo_show_interactive_help(void)
   printf("  Toggle displaying of obj attributes . a\n");
   printf("  Toggle color for disallowed objects . d\n");
   printf("  Toggle color for binding objects .... b\n");
+  printf("  Toggle collapsing of PCI devices .... c\n");
   printf("  Toggle displaying of the legend ..... l\n");
   printf("  Export to file with current config .. E\n");
   printf("\n\n");
@@ -429,6 +430,8 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
   lstopo_show_interactive_cli_options_array(loutput->show_attrs, "attrs");
   lstopo_show_interactive_cli_options_array(loutput->show_text, "text");
 
+  if (!loutput->collapse)
+    printf(" --no-collapse");
   if (!loutput->show_binding)
     printf(" --binding-color none");
   if (!loutput->show_disallowed)

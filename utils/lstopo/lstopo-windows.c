@@ -120,6 +120,11 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
 	redraw = 1;
 	break;
+      case 'c':
+	loutput->collapse ^= 1;
+	printf("%s collapsing of identical PCI devices\n", loutput->collapse ? "enabled" : "disabled");
+	redraw = 1;
+	break;
       case 'E':
 	lstopo_show_interactive_cli_options(loutput);
 	fflush(stdout);

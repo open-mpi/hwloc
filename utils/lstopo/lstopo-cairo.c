@@ -526,6 +526,12 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;
+	case XK_c:
+	  loutput->collapse ^= 1;
+	  printf("%s collapsing of identical PCI devices\n", loutput->collapse ? "enabled" : "disabled");
+	  disp->needs_redraw = 1;
+	  move_x11(disp);
+	  break;
 	case XK_l:
 	  loutput->legend ^= 1;
 	  printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
