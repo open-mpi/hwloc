@@ -3779,6 +3779,7 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned failednodes = 0;
   unsigned quirk_status = 0;
   unsigned i;
+  DIR *dir;
   int allow_overlapping_node_cpusets = (getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS") != NULL);
 
   /* NUMA nodes cannot be filtered out */
@@ -3844,6 +3845,27 @@ look_sysfsnode(struct hwloc_topology *topology,
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
       }
+
+      /* try to find DAX devices of KMEM NUMA nodes */
+      dir = hwloc_opendir("/sys/bus/dax/devices/", data->root_fd);
+      if (dir) {
+	struct dirent *dirent;
+	while ((dirent = readdir(dir)) != NULL) {
+	  char daxpath[300];
+	  int tmp;
+	  osnode = (unsigned) -1;
+	  snprintf(daxpath, sizeof(daxpath), "/sys/bus/dax/devices/%s/target_node", dirent->d_name);
+	  if (!hwloc_read_path_as_int(daxpath, &tmp, data->root_fd)) { /* contains %d when added in 5.1 */
+	    osnode = (unsigned) tmp;
+	    for(i=0; i<nbnodes; i++) {
+	      hwloc_obj_t node = nodes[i];
+	      if (node && node->os_index == osnode)
+		hwloc_obj_add_info(node, "DAXDevice", dirent->d_name);
+	    }
+	  }
+	}
+      }
+
       topology->support.discovery->numa = 1;
       topology->support.discovery->numa_memory = 1;
       topology->support.discovery->disallowed_numa = 1;

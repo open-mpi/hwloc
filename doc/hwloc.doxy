@@ -1859,6 +1859,10 @@ and GID #1 of port #3.
 These info attributes are attached to objects specified in parentheses.
 
 <dl>
+<dt>DAXDevice (NUMA Nodes)</dt>
+<dd>The name of the Linux DAX device that was used to expose a non-volatile
+memory region as a volatile NUMA node.
+</dd>
 <dt>Inclusive (Caches)</dt>
 <dd>The inclusiveness of a cache (1 if inclusive, 0 otherwise).
 Currently only available on x86 processors.
