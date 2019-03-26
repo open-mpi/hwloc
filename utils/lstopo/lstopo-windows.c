@@ -71,17 +71,19 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	the_scale = 1.0;
 	redraw = 1;
 	break;
-      case 'A': {
+      case 'a': {
 	int v = !loutput->show_attrs[0]; /* if show_attrs[] contains different values, assume it's all like the first type */
 	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  loutput->show_attrs[i] = v;
+	printf("%s object attributes\n", v ? "enabled" : "disabled");
 	redraw = 1;
 	break;
       }
-      case 'T': {
+      case 't': {
 	int v = !loutput->show_text[0]; /* if show_text[] contains different values, assume it's all like the first type */
 	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  loutput->show_text[i] = v;
+	printf("%s object text\n", v ? "enabled" : "disabled");
 	redraw = 1;
 	break;
       }
@@ -408,9 +410,10 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   printf(" Exit ................................ q Q Esc\n");
   printf("Configuration tweaks:\n");
   printf(" Switch display mode for indexes ..... i\n");
+  printf(" Toggle displaying of object text .... t\n");
+  printf(" Toggle displaying of obj attributes . a\n");
   printf(" Toggle color for disallowed objects . d\n");
   printf(" Toggle color for binding objects .... b\n");
-  printf(" Show/Hide Attributes/Text ........... A/T\n");
   printf(" Command-line options for tweaks ..... c\n");
   printf("\n\n");
   fflush(stdout);
