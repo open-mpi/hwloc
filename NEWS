@@ -53,11 +53,10 @@ Version 2.1.0
   + lstopo
     - Both logical and OS/physical indexes are now displayed by default
       for PU and NUMA nodes.
-    - The X11 interactive output has additional keyboard shortcuts to
-      dynamically change the displaying of indexes, attributes and text.
+    - The X11 and Windows interactive outputs support many keyboard
+      shortcuts to dynamically customize the attributes, legend, etc.
     - Add --linespacing and change default margins and linespacing.
     - Add --allow for changing allowed sets.
-    - Add keyboard shortcuts to tweak the graphical output interactively.
     - Add a native SVG backend. Its graphical output may be slightly less
       pretty than Cairo (still used by default if available) but the SVG
       code provides attributes to manipulate objects from HTML/JS.
