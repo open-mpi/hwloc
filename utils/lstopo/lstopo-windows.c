@@ -92,16 +92,19 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	redraw = 1;
 	break;
       }
-      case 'L':
-	loutput->index_type = LSTOPO_INDEX_TYPE_LOGICAL;
-	redraw = 1;
-	break;
-      case 'P':
-	loutput->index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
-	redraw = 1;
-	break;
-      case 'B':
-	loutput->index_type = LSTOPO_INDEX_TYPE_DEFAULT;
+      case 'i':
+	if (loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
+	  loutput->index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
+	  printf("switched to physical indexes\n");
+	} else if (loutput->index_type == LSTOPO_INDEX_TYPE_PHYSICAL) {
+	  loutput->index_type = LSTOPO_INDEX_TYPE_LOGICAL;
+	  printf("switched to logical indexes\n");
+	} else if (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
+	  loutput->index_type = LSTOPO_INDEX_TYPE_DEFAULT;
+	  printf("switched to default indexes\n");
+	} else {
+	  abort();
+	}
 	redraw = 1;
 	break;
       case 'd':
@@ -411,7 +414,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   printf(" Toggle color for disallowed objects . d\n");
   printf(" Toggle color for binding objects .... b\n");
   printf(" Show/Hide Attributes/Indexes/Text ... A/I/T\n");
-  printf(" Show Physical/Logical/Both indexes .. P/L/B\n");
+  printf(" Show physical/logical/both indexes .. i\n");
   printf(" Command-line options for tweaks ..... c\n");
   printf("\n\n");
   fflush(stdout);

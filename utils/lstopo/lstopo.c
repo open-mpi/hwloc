@@ -391,7 +391,7 @@ static void lstopo_show_interactive_cli_options_array(const int *array, const ch
 
 void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
 {
-  printf("Command-line options for the current configuration tweaks:\n");
+  printf("\nCommand-line options for the current configuration tweaks:\n");
 
   if (loutput->index_type == LSTOPO_INDEX_TYPE_PHYSICAL)
     printf(" -p");
