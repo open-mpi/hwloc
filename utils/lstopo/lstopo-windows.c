@@ -113,7 +113,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	loutput->show_binding ^= 1;
 	redraw = 1;
 	break;
-      case 'c':
+      case 'C':
 	lstopo_show_interactive_cli_options(loutput);
 	fflush(stdout);
 	break;
@@ -414,7 +414,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   printf(" Toggle displaying of obj attributes . a\n");
   printf(" Toggle color for disallowed objects . d\n");
   printf(" Toggle color for binding objects .... b\n");
-  printf(" Command-line options for tweaks ..... c\n");
+  printf(" Show updated command-line options ... C\n");
   printf("\n\n");
   fflush(stdout);
 
