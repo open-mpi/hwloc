@@ -530,11 +530,13 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  break;
 	case XK_b:
 	  loutput->show_binding ^= 1;
+	  printf("%s coloring of binding resources\n", loutput->show_binding ? "enabled" : "disabled");
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;
 	case XK_d:
 	  loutput->show_disallowed ^= 1;
+	  printf("%s coloring of disallowed resources\n", loutput->show_disallowed ? "enabled" : "disabled");
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;

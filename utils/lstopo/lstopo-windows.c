@@ -107,10 +107,12 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	break;
       case 'd':
 	loutput->show_disallowed ^= 1;
+	printf("%s coloring of disallowed resources\n", loutput->show_disallowed ? "enabled" : "disabled");
 	redraw = 1;
 	break;
       case 'b':
 	loutput->show_binding ^= 1;
+	printf("%s coloring of binding resources\n", loutput->show_binding ? "enabled" : "disabled");
 	redraw = 1;
 	break;
       case 'l':
