@@ -706,12 +706,13 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
   } else if (index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
     idx = obj->logical_index;
     indexprefix = " L#";
-  } else {
+  } else if (index_type == LSTOPO_INDEX_TYPE_PHYSICAL) {
     idx = obj->os_index;
     indexprefix = " P#";
   }
 
   if (loutput->show_indexes[obj->type]
+      && index_type != LSTOPO_INDEX_TYPE_NONE
       && idx != (unsigned)-1 && obj->depth != 0
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))

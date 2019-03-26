@@ -78,13 +78,6 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	redraw = 1;
 	break;
       }
-      case 'I': {
-	int v = !loutput->show_indexes[0]; /* if show_indexes[] contains different values, assume it's all like the first type */
-	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
-	  loutput->show_indexes[i] = v;
-	redraw = 1;
-	break;
-      }
       case 'T': {
 	int v = !loutput->show_text[0]; /* if show_text[] contains different values, assume it's all like the first type */
 	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
@@ -100,6 +93,9 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	  loutput->index_type = LSTOPO_INDEX_TYPE_LOGICAL;
 	  printf("switched to logical indexes\n");
 	} else if (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
+	  loutput->index_type = LSTOPO_INDEX_TYPE_NONE;
+	  printf("switched to no indexes\n");
+	} else if (loutput->index_type == LSTOPO_INDEX_TYPE_NONE) {
 	  loutput->index_type = LSTOPO_INDEX_TYPE_DEFAULT;
 	  printf("switched to default indexes\n");
 	} else {
@@ -411,10 +407,10 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   printf(" Scroll to the bottom-right corner ... End\n");
   printf(" Exit ................................ q Q Esc\n");
   printf("Configuration tweaks:\n");
+  printf(" Switch display mode for indexes ..... i\n");
   printf(" Toggle color for disallowed objects . d\n");
   printf(" Toggle color for binding objects .... b\n");
-  printf(" Show/Hide Attributes/Indexes/Text ... A/I/T\n");
-  printf(" Show physical/logical/both indexes .. i\n");
+  printf(" Show/Hide Attributes/Text ........... A/T\n");
   printf(" Command-line options for tweaks ..... c\n");
   printf("\n\n");
   fflush(stdout);

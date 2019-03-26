@@ -28,7 +28,8 @@ enum lstopo_orient_e {
 enum lstopo_index_type_e {
   LSTOPO_INDEX_TYPE_DEFAULT,
   LSTOPO_INDEX_TYPE_PHYSICAL,
-  LSTOPO_INDEX_TYPE_LOGICAL
+  LSTOPO_INDEX_TYPE_LOGICAL,
+  LSTOPO_INDEX_TYPE_NONE /* only used during the interactive display */
 };
 
 FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
