@@ -346,6 +346,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   printf(" Toggle displaying of obj attributes . a\n");
   printf(" Toggle color for disallowed objects . d\n");
   printf(" Toggle color for binding objects .... b\n");
+  printf(" Toggle displaying of the legend ..... l\n");
   printf(" Show updated command-line options ... C\n");
   printf("\n\n");
 
@@ -537,6 +538,11 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;
+	case XK_l:
+	  loutput->legend ^= 1;
+	  printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
+	  disp->needs_redraw = 1;
+	  move_x11(disp);
 	case XK_C:
 	  lstopo_show_interactive_cli_options(loutput);
 	  break;

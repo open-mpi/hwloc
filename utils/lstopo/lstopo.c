@@ -409,6 +409,8 @@ void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
     printf(" --binding-color none");
   if (!loutput->show_disallowed)
     printf(" --disallowed-color none");
+  if (!loutput->legend)
+    printf(" --no-legend");
 
   printf("\n\n");
 }
