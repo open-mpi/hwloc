@@ -3866,6 +3866,8 @@ look_sysfsnode(struct hwloc_topology *topology,
       dir = hwloc_opendir("/proc/driver/nvidia/gpus", data->root_fd);
       if (dir) {
 	struct dirent *dirent;
+	char *env = getenv("HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES");
+	int keep = env && atoi(env);
 	while ((dirent = readdir(dir)) != NULL) {
 	  char nvgpunumapath[300], line[256];
 	  int fd;
@@ -3887,9 +3889,22 @@ look_sysfsnode(struct hwloc_topology *topology,
 		for(i=0; i<nbnodes; i++) {
 		  hwloc_obj_t node = nodes[i];
 		  if (node && node->os_index == nvgpu_node) {
-		    /* drop this NUMA node */
-		    hwloc_free_unlinked_object(node);
-		    nodes[i] = NULL;
+		    if (keep) {
+		      /* keep this NUMA node but fixed its locality and add an info about the GPU */
+		      char nvgpulocalcpuspath[300];
+		      int err;
+		      node->subtype = strdup("GPUMemory");
+		      hwloc_obj_add_info(node, "PCIBusID", dirent->d_name);
+		      snprintf(nvgpulocalcpuspath, sizeof(nvgpulocalcpuspath), "/sys/bus/pci/devices/%s/local_cpus", dirent->d_name);
+		      err = hwloc__read_path_as_cpumask(nvgpulocalcpuspath, node->cpuset, data->root_fd);
+		      if (err)
+			/* the core will attach to the root */
+			hwloc_bitmap_zero(node->cpuset);
+		    } else {
+		      /* drop this NUMA node */
+		      hwloc_free_unlinked_object(node);
+		      nodes[i] = NULL;
+		    }
 		    break;
 		  }
 		}
