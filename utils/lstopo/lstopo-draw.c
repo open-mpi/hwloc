@@ -709,6 +709,10 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
   } else if (index_type == LSTOPO_INDEX_TYPE_PHYSICAL) {
     idx = obj->os_index;
     indexprefix = " P#";
+  } else {
+    /* shutup the compiler */
+    idx = 0;
+    indexprefix = "";
   }
 
   if (loutput->show_indexes[obj->type]
