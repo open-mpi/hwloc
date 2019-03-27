@@ -64,6 +64,7 @@ Version 2.1.0
   + Add --nodeset options to hwloc-calc for converting between cpusets and
     nodesets.
   + hwloc-annotate may annotate multiple locations at once.
+  + Add a HTML/JS version of hwloc-ps. See contrib/hwloc-ps.www/README.
   + Add bash completions.
 
 
