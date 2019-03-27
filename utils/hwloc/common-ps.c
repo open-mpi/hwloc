@@ -44,21 +44,21 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 
   pathlen = 6 + 21 + 1 + 7 + 1; /* enough for /proc/%ld/cmdline /proc/%ld/comm and /proc/%ld/stat */
   path = malloc(pathlen);
+
   snprintf(path, pathlen, "/proc/%ld/cmdline", proc->pid);
   fd = open(path, O_RDONLY);
-
-  if (fd >= 0) {
-    n = read(fd, proc->name, sizeof(proc->name) - 1);
-    close(fd);
-
-    if (n <= 0) {
-      /* Ignore kernel threads and errors */
-      free(path);
-      goto out;
-    }
-
-    proc->name[n] = 0;
+  if (fd < 0) {
+    free(path);
+    goto out;
   }
+  n = read(fd, proc->name, sizeof(proc->name) - 1);
+  close(fd);
+  if (n <= 0) {
+    /* Ignore kernel threads and errors */
+    free(path);
+    goto out;
+  }
+  proc->name[n] = 0;
 
   if (flags & HWLOC_PS_FLAG_SHORTNAME) {
     /* try to get a small name from comm */
