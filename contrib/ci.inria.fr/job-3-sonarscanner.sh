@@ -160,7 +160,7 @@ sonar.c.cppcheck.reportPath=${CPPCHECK_XMLS}
 sonar.c.includeDirectories=$(echo | gcc -E -Wp,-v - 2>&1 | grep "^ " | tr '\n' ',')include,hwloc,utils/lstopo,utils/hwloc
 sonar.c.rats.reportPath=${RATS_XMLS}
 sonar.c.valgrind.reportPath=${VALGRIND_XMLS}
-sonar.issue.ignore.multicriteria=c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,r1,r2,r3,r4,r5,r6,r7
+sonar.issue.ignore.multicriteria=c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,r1,r2,r3,r4,r5,r6,r7
 # Sharing some naming conventions is a key point to make it possible for a team to efficiently collaborate. This rule allows to check that all class names match a provided regular expression.
 sonar.issue.ignore.multicriteria.c1.ruleKey=c:ClassName
 sonar.issue.ignore.multicriteria.c1.resourceKey=**/*
@@ -211,15 +211,18 @@ sonar.issue.ignore.multicriteria.c15.resourceKey=**/*
 # Split this 166 characters long line (which is greater than 160 authorized).
 sonar.issue.ignore.multicriteria.c16.ruleKey=c:TooLongLine
 sonar.issue.ignore.multicriteria.c16.resourceKey=**/*
-# At most one statement is allowed per line, but 2 statements were found on this line.
-sonar.issue.ignore.multicriteria.c17.ruleKey=c:TooManyStatementsPerLine
+# The number of code lines in this function is 212 which is greater than 200 authorized.
+sonar.issue.ignore.multicriteria.c17.ruleKey=c:TooManyLinesOfCodeInFunction
 sonar.issue.ignore.multicriteria.c17.resourceKey=**/*
-# parameter list has 9 parameters, which is greater than the 7 authorized.
-sonar.issue.ignore.multicriteria.c18.ruleKey=c:TooManyParameters
+# At most one statement is allowed per line, but 2 statements were found on this line.
+sonar.issue.ignore.multicriteria.c18.ruleKey=c:TooManyStatementsPerLine
 sonar.issue.ignore.multicriteria.c18.resourceKey=**/*
-# Undocumented API: hwloc_noos_component
-sonar.issue.ignore.multicriteria.c19.ruleKey=c:UndocumentedApi
+# parameter list has 9 parameters, which is greater than the 7 authorized.
+sonar.issue.ignore.multicriteria.c19.ruleKey=c:TooManyParameters
 sonar.issue.ignore.multicriteria.c19.resourceKey=**/*
+# Undocumented API: hwloc_noos_component
+sonar.issue.ignore.multicriteria.c20.ruleKey=c:UndocumentedApi
+sonar.issue.ignore.multicriteria.c20.resourceKey=**/*
 # Extra care should be taken to ensure that character arrays that are allocated on the stack are used safely. They are prime targets for buffer overflow attacks.
 sonar.issue.ignore.multicriteria.r1.ruleKey=rats-c:fixed size global buffer
 sonar.issue.ignore.multicriteria.r1.resourceKey=**/*
