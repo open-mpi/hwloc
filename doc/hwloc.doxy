@@ -1050,6 +1050,16 @@ following environment variables.
   PCI locality reported by the platform is used.
   </dd>
 
+<dt>HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES=0</dt>
+  <dd>show or hide NUMA nodes that correspond to NVIDIA GPU memory.
+  By default they are ignored to avoid interleaved memory being allocated
+  on GPU by mistake.
+  Setting this environment variable to 1 exposes these NUMA nodes.
+  They may be recognized by the <em>GPUMemory</em> subtype.
+  They also have a <em>PCIBusID</em> info attribute to identify the
+  corresponding GPU.
+  </dd>
+
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
   <dd>switches to reading the topology from the specified
   Linux filesystem root instead of the main file-system root.
@@ -1635,6 +1645,8 @@ It may also specify that a Block OS device is a <em>Disk</em>,
 or that a CoProcessor OS device is a <em>CUDA</em> device.
 This subtype is displayed by lstopo either in place or after the
 main <tt>obj->type</tt> attribute.
+NUMA nodes that correspond GPU memory may also have <em>GPUMemory</em>
+as subtype.
 
 Each object also contains an <tt>attr</tt> field that, if non NULL,
 points to a union ::hwloc_obj_attr_u of type-specific attribute
@@ -1862,6 +1874,9 @@ These info attributes are attached to objects specified in parentheses.
 <dt>DAXDevice (NUMA Nodes)</dt>
 <dd>The name of the Linux DAX device that was used to expose a non-volatile
 memory region as a volatile NUMA node.
+</dd>
+<dt>PCIBusID (GPUMemory NUMA Nodes)</dt>
+<dd>The PCI bus ID of the GPU whose memory is exposed in this NUMA node.
 </dd>
 <dt>Inclusive (Caches)</dt>
 <dd>The inclusiveness of a cache (1 if inclusive, 0 otherwise).
