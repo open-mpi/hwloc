@@ -97,9 +97,6 @@ static void foreach_process_cb(hwloc_topology_t topology,
 			       struct hwloc_ps_process *proc,
 			       void *cbdata __hwloc_attribute_unused)
 {
-  if (only_name && !strstr(proc->name, only_name))
-    return;
-
   /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
   if (!proc->bound && (!proc->nthreads || !proc->nboundthreads) && !show_all && !only_name)
     return;
@@ -215,7 +212,7 @@ int main(int argc, char *argv[])
 
   if (only_pid == NO_ONLY_PID) {
     /* show all */
-    if (hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, NULL, psflags, pidcmd))
+    if (hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, NULL, psflags, only_name, pidcmd))
       goto out_with_topology;
 
   } else {
