@@ -4890,20 +4890,24 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   int err;
 
   /* look for sysfs cpu path containing at least one of core_siblings and thread_siblings */
-  if (!hwloc_access("/sys/bus/cpu/devices/cpu0/topology/thread_siblings", R_OK, data->root_fd)
-      || !hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, data->root_fd))
+  if (!hwloc_access("/sys/bus/cpu/devices", R_OK|X_OK, data->root_fd)
+      && (!hwloc_access("/sys/bus/cpu/devices/cpu0/topology/thread_siblings", R_OK, data->root_fd)
+	  || !hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, data->root_fd)))
     sysfs_cpu_path = "/sys/bus/cpu/devices";
-  else if (!hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, data->root_fd)
-      || !hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, data->root_fd))
+  else if (!hwloc_access("/sys/devices/system/cpu", R_OK|X_OK, data->root_fd)
+	   && (!hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, data->root_fd)
+	       || !hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, data->root_fd)))
     sysfs_cpu_path = "/sys/devices/system/cpu";
   else
     sysfs_cpu_path = NULL;
   hwloc_debug("Found sysfs cpu files under %s\n", sysfs_cpu_path);
 
   /* look for sysfs node path */
-  if (!hwloc_access("/sys/bus/node/devices/node0/cpumap", R_OK, data->root_fd))
+  if (!hwloc_access("/sys/bus/node/devices", R_OK|X_OK, data->root_fd)
+      && !hwloc_access("/sys/bus/node/devices/node0/cpumap", R_OK, data->root_fd))
     sysfs_node_path = "/sys/bus/node/devices";
-  else if (!hwloc_access("/sys/devices/system/node/node0/cpumap", R_OK, data->root_fd))
+  else if (!hwloc_access("/sys/devices/system/node", R_OK|X_OK, data->root_fd)
+	   && !hwloc_access("/sys/devices/system/node/node0/cpumap", R_OK, data->root_fd))
     sysfs_node_path = "/sys/devices/system/node";
   else
     sysfs_node_path = NULL;
