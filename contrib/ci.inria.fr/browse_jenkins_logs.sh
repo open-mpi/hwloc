@@ -24,6 +24,8 @@ if test "x$BUILD" = x; then
 fi
 
 URL=https://ci.inria.fr/hwloc/job/$JOB/$BUILD/flowGraphTable/
+echo "Reading $URL"
+
 LIST=$(wget -O - $URL \
         | sed -e 's@</tr>@</tr>\n@g' \
         | egrep '(Shell|Windows Batch) Script' \
@@ -36,5 +38,5 @@ if test "x$HWLOC_JENKINS_BROWSER" = x; then
   echo $LIST
 else
   echo "Opening URLs with HWLOC_JENKINS_BROWSER=$HWLOC_JENKINS_BROWSER ..."
-  $HWLOC_CI_BROWSER $LIST
+  $HWLOC_JENKINS_BROWSER $LIST
 fi
