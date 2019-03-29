@@ -328,14 +328,11 @@ static __hwloc_inline long hwloc_move_pages(int pid __hwloc_attribute_unused,
 static const char *
 hwloc_checkat(const char *path, int fsroot_fd)
 {
-  const char *relative_path;
-  if (fsroot_fd < 0) {
-    errno = EBADF;
-    return NULL;
-  }
+  const char *relative_path = path;
 
-  /* Skip leading slashes.  */
-  for (relative_path = path; *relative_path == '/'; relative_path++);
+  if (fsroot_fd >= 0)
+    /* Skip leading slashes.  */
+    for (; *relative_path == '/'; relative_path++);
 
   return relative_path;
 }
@@ -2093,16 +2090,16 @@ static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
   if (!fsroot_path)
     fsroot_path = "/";
 
-#ifdef HAVE_OPENAT
-  root_fd = open(fsroot_path, O_RDONLY | O_DIRECTORY);
-  if (root_fd < 0)
-    goto out;
-#else
   if (strcmp(fsroot_path, "/")) {
+#ifdef HAVE_OPENAT
+    root_fd = open(fsroot_path, O_RDONLY | O_DIRECTORY);
+    if (root_fd < 0)
+      goto out;
+#else
     errno = ENOSYS;
     goto out;
-  }
 #endif
+  }
 
   /* we could also error-out if the current topology doesn't actually match the system,
    * at least for PUs and NUMA nodes. But it would increase the overhead of loading XMLs.
@@ -5099,7 +5096,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   struct hwloc_backend *backend;
   struct hwloc_linux_backend_data_s *data;
   const char * fsroot_path;
-  int flags, root = -1;
+  int root = -1;
 
   backend = hwloc_backend_alloc(component);
   if (!backend)
@@ -5126,33 +5123,34 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   if (!fsroot_path)
     fsroot_path = "/";
 
-#ifdef HAVE_OPENAT
-  root = open(fsroot_path, O_RDONLY | O_DIRECTORY);
-  if (root < 0)
-    goto out_with_data;
-
   if (strcmp(fsroot_path, "/")) {
+#ifdef HAVE_OPENAT
+    int flags;
+
+    root = open(fsroot_path, O_RDONLY | O_DIRECTORY);
+    if (root < 0)
+      goto out_with_data;
+
     backend->is_thissystem = 0;
     data->is_real_fsroot = 0;
     data->root_path = strdup(fsroot_path);
-  }
 
-  /* Since this fd stays open after hwloc returns, mark it as
-     close-on-exec so that children don't inherit it.  Stevens says
-     that we should GETFD before we SETFD, so we do. */
-  flags = fcntl(root, F_GETFD, 0);
-  if (-1 == flags ||
-      -1 == fcntl(root, F_SETFD, FD_CLOEXEC | flags)) {
+    /* Since this fd stays open after hwloc returns, mark it as
+       close-on-exec so that children don't inherit it.  Stevens says
+       that we should GETFD before we SETFD, so we do. */
+    flags = fcntl(root, F_GETFD, 0);
+    if (-1 == flags ||
+	-1 == fcntl(root, F_SETFD, FD_CLOEXEC | flags)) {
       close(root);
       root = -1;
       goto out_with_data;
-  }
+    }
 #else
-  if (strcmp(fsroot_path, "/")) {
+    fprintf(stderr, "Cannot change Linux fsroot without openat() support.\n");
     errno = ENOSYS;
     goto out_with_data;
-  }
 #endif
+  }
   data->root_fd = root;
 
 #ifdef HWLOC_HAVE_LIBUDEV
