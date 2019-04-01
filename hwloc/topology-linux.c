@@ -89,6 +89,8 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_setaffinity 311
 #       elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
 #         define __NR_sched_setaffinity 222
+#       elif defined(__aarch64__)
+#         define __NR_sched_setaffinity 122
 #       elif defined(__arm__)
 #         define __NR_sched_setaffinity 241
 #       elif defined(__cris__)
@@ -122,6 +124,8 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_getaffinity 312
 #       elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
 #         define __NR_sched_getaffinity 223
+#       elif defined(__aarch64__)
+#         define __NR_sched_getaffinity 123
 #       elif defined(__arm__)
 #         define __NR_sched_getaffinity 242
 #       elif defined(__cris__)
