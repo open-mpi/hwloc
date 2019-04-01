@@ -167,8 +167,10 @@ struct hwloc_backend {
    */
   int (*discover)(struct hwloc_backend *backend, struct hwloc_disc_status *status);
 
-  /** \brief Callback used by the PCI backend to retrieve the locality of a PCI object from the OS/cpu backend.
-   * May be NULL. */
+  /** \brief Callback to retrieve the locality of a PCI object.
+   * Called by the PCI core when attaching PCI hierarchy to CPU objects.
+   * May be NULL.
+   */
   int (*get_pci_busid_cpuset)(struct hwloc_backend *backend, struct hwloc_pcidev_attr_s *busid, hwloc_bitmap_t cpuset);
 };
 

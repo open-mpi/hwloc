@@ -500,7 +500,7 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
   }
 
   if (!forced) {
-    /* get the cpuset by asking the OS backend. */
+    /* get the cpuset by asking the backend that provides the relevant hook, if any. */
     struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
     if (backend)
       err = backend->get_pci_busid_cpuset(backend, busid, cpuset);
