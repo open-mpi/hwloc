@@ -295,13 +295,38 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology,
   return -1;
 }
 
+static void
+hwloc_internal_distances_restrict(hwloc_obj_t *objs,
+				  uint64_t *indexes,
+				  hwloc_uint64_t *values,
+				  unsigned nbobjs, unsigned disappeared);
+
 int hwloc_internal_distances_add(hwloc_topology_t topology,
 				 unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
 				 unsigned long kind, unsigned long flags)
 {
+  unsigned i, disappeared = 0;
+
   if (nbobjs < 2) {
     errno = EINVAL;
     goto err;
+  }
+
+  /* is there any NULL object? (useful in case of problem during insert in backends) */
+  for(i=0; i<nbobjs; i++)
+    if (!objs[i])
+      disappeared++;
+  if (disappeared) {
+    /* some objects are NULL */
+    if (disappeared == nbobjs) {
+      /* nothing left, drop the matrix */
+      free(objs);
+      free(values);
+      return 0;
+    }
+    /* restrict the matrix */
+    hwloc_internal_distances_restrict(objs, NULL, values, nbobjs, disappeared);
+    nbobjs -= disappeared;
   }
 
   if (topology->grouping && (flags & HWLOC_DISTANCES_ADD_FLAG_GROUP)) {
@@ -318,7 +343,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology,
     }
 
     if (topology->grouping_verbose) {
-      unsigned i, j;
+      unsigned j;
       int gp = !HWLOC_DIST_TYPE_USE_OS_INDEX(objs[0]->type);
       fprintf(stderr, "Trying to group objects using distance matrix:\n");
       fprintf(stderr, "%s", gp ? "gp_index" : "os_index");
