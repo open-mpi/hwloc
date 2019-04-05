@@ -433,11 +433,11 @@ static hwloc_obj_t hwloc_find_obj_by_type_and_gp_index(hwloc_topology_t topology
 }
 
 static void
-hwloc_internal_distances_restrict(struct hwloc_internal_distances_s *dist,
-				  hwloc_obj_t *objs,
-				  unsigned disappeared)
+hwloc_internal_distances_restrict(hwloc_obj_t *objs,
+				  uint64_t *indexes,
+				  hwloc_uint64_t *values,
+				  unsigned nbobjs, unsigned disappeared)
 {
-  unsigned nbobjs = dist->nbobjs;
   unsigned i, newi;
   unsigned j, newj;
 
@@ -445,7 +445,7 @@ hwloc_internal_distances_restrict(struct hwloc_internal_distances_s *dist,
     if (objs[i]) {
       for(j=0, newj=0; j<nbobjs; j++)
 	if (objs[j]) {
-	  dist->values[newi*(nbobjs-disappeared)+newj] = dist->values[i*nbobjs+j];
+	  values[newi*(nbobjs-disappeared)+newj] = values[i*nbobjs+j];
 	  newj++;
 	}
       newi++;
@@ -454,11 +454,10 @@ hwloc_internal_distances_restrict(struct hwloc_internal_distances_s *dist,
   for(i=0, newi=0; i<nbobjs; i++)
     if (objs[i]) {
       objs[newi] = objs[i];
-      dist->indexes[newi] = dist->indexes[i];
+      if (indexes)
+	indexes[newi] = indexes[i];
       newi++;
     }
-
-  dist->nbobjs -= disappeared;
 }
 
 static int
@@ -499,8 +498,10 @@ hwloc_internal_distances_refresh_one(hwloc_topology_t topology,
     /* became useless, drop */
     return -1;
 
-  if (disappeared)
-    hwloc_internal_distances_restrict(dist, objs, disappeared);
+  if (disappeared) {
+    hwloc_internal_distances_restrict(objs, dist->indexes, dist->values, nbobjs, disappeared);
+    dist->nbobjs -= disappeared;
+  }
 
   dist->objs_are_valid = 1;
   return 0;
