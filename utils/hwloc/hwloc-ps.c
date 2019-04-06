@@ -249,7 +249,6 @@ run_json_server(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset)
 
   while (1) {
     int client_socket;
-    char req[JSON_REQLENMAX+1];
     int ret;
 
     /* wait for a new client connection */
@@ -267,11 +266,12 @@ run_json_server(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset)
     }
 
     while (1) {
+      char req[JSON_REQLENMAX+1];
       char *end, *current;
       unsigned long psflags = HWLOC_PS_FLAG_SHORTNAME;
 
       /* read the client request */
-      ret = read(client_socket, req, sizeof req);
+      ret = read(client_socket, req, sizeof(req)-1);
       if (ret <= 0)
 	break;
       req[ret] = '\0';
