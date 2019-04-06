@@ -233,6 +233,7 @@ run_json_server(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset)
   err = bind(server_socket, (struct sockaddr *)&server_addr , sizeof server_addr);
   if (err < 0) {
     perror("json-server: bind");
+    close(server_socket);
     return -1;
   }
 
@@ -240,6 +241,7 @@ run_json_server(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset)
   err = listen(server_socket, 1);
   if (err < 0) {
     perror("json-server: listen");
+    close(server_socket);
     return -1;
   }
 
