@@ -3885,7 +3885,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       hwloc_bitmap_free(nodes_cpuset);
 
-      if (failednodes || nbnodes <= 1) {
+      if (nbnodes <= 1) {
 	/* failed to read/create some nodes, don't bother reading/fixing
 	 * a distance matrix that would likely be wrong anyway.
 	 */
@@ -3919,15 +3919,11 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  hwloc_obj_t res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, hwloc_report_os_error);
 	  if (res_obj != node) {
 	    /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
-	     * This object disappeared, we'll ignore distances */
+	     * Update it in the array for the distance matrix. */
 	    failednodes++;
+	    nodes[i] = node;
 	  }
 	}
-      }
-
-      if (failednodes) {
-	free(distances);
-	distances = NULL;
       }
 
       /* Inserted distances now that nodes are properly inserted */
