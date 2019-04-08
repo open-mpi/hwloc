@@ -3733,6 +3733,44 @@ fixup_cpuless_node_locality_from_distances(unsigned i,
   return 0;
 }
 
+/* try to find locality of CPU-less NUMA nodes by looking at HMAT initiators.
+ *
+ * In theory, we may have HMAT info only for some nodes.
+ * In practice, if this never occurs, we may want to assume HMAT for either all or no nodes.
+ */
+static int
+read_node_initiators(struct hwloc_linux_backend_data_s *data,
+		     hwloc_obj_t node, unsigned nbnodes, hwloc_obj_t *nodes,
+		     const char *path)
+{
+  char accesspath[SYSFS_NUMA_NODE_PATH_LEN];
+  DIR *dir;
+  struct dirent *dirent;
+
+  sprintf(accesspath, "%s/node%u/access0/initiators", path, node->os_index);
+  dir = hwloc_opendir(accesspath, data->root_fd);
+  if (!dir)
+    return -1;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    unsigned initiator_os_index;
+    if (sscanf(dirent->d_name, "node%u", &initiator_os_index) == 1
+	&& initiator_os_index != node->os_index) {
+      /* we found an initiator that's not ourself,
+       * find the corresponding node and add its cpuset
+       */
+      unsigned j;
+      for(j=0; j<nbnodes; j++)
+	if (nodes[j] && nodes[j]->os_index == initiator_os_index) {
+	  hwloc_bitmap_or(node->cpuset, node->cpuset, nodes[j]->cpuset);
+	  break;
+	}
+    }
+  }
+  closedir(dir);
+  return 0;
+}
+
 static unsigned *
 list_sysfsnode(struct hwloc_topology *topology,
 	       struct hwloc_linux_backend_data_s *data,
@@ -4078,6 +4116,9 @@ look_sysfsnode(struct hwloc_topology *topology,
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
 	if (node && !hwloc_bitmap_iszero(node->cpuset)) {
+	  /* update from HMAT initiators if any */
+	  read_node_initiators(data, node, nbnodes, nodes, path);
+
 	  trees[nr_trees++] = node;
 	}
       }
@@ -4089,9 +4130,16 @@ look_sysfsnode(struct hwloc_topology *topology,
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
 	if (node && hwloc_bitmap_iszero(node->cpuset)) {
+	  /* update from HMAT initiators if any */
+	  if (!read_node_initiators(data, node, nbnodes, nodes, path))
+	    if (!hwloc_bitmap_iszero(node->cpuset))
+	      goto fixed;
+
+	  /* if HMAT didn't help, try to find locality of CPU-less NUMA nodes by looking at their distances */
 	  if (distances)
 	    fixup_cpuless_node_locality_from_distances(i, nbnodes, nodes, distances);
 
+	fixed:
 	  trees[nr_trees++] = node;
 	}
       }
