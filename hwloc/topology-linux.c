@@ -3977,10 +3977,26 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       /* Fill the array of trees */
       nr_trees = 0;
+      /* First list nodes that have a non-empty cpumap.
+       * They are likely the default nodes where we want to allocate from (DDR),
+       * make sure they are listed first in their parent memory subtree.
+       */
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
-	if (node)
+	if (node && !hwloc_bitmap_iszero(node->cpuset)) {
 	  trees[nr_trees++] = node;
+	}
+      }
+      /* Now look for empty-cpumap nodes.
+       * Those may be the non-default nodes for allocation.
+       * Hence we don't want them to be listed first,
+       * especially if we end up fixing their actual cpumap.
+       */
+      for (i = 0; i < nbnodes; i++) {
+	hwloc_obj_t node = nodes[i];
+	if (node && hwloc_bitmap_iszero(node->cpuset)) {
+	  trees[nr_trees++] = node;
+	}
       }
 
       /* insert memory trees for real */
