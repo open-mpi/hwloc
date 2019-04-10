@@ -58,7 +58,6 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	the_scale /= 1.2f;
 	redraw = 1;
 	break;
-      case 'f':
       case 'F': {
 	float wscale, hscale;
 	wscale = win_width / (float)the_width;

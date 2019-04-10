@@ -371,7 +371,7 @@ void lstopo_show_interactive_help(void)
   printf("Keyboard shortcuts:\n");
   printf(" Zooming, scrolling and closing:\n");
   printf("  Zoom-in or out ...................... + -\n");
-  printf("  Try to fit scale to window .......... f F\n");
+  printf("  Try to fit scale to window .......... F\n");
   printf("  Reset scale to default .............. 1\n");
   printf("  Scroll vertically ................... Up Down PageUp PageDown\n");
   printf("  Scroll horizontally ................. Left Right Ctrl+PageUp/Down\n");

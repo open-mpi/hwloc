@@ -449,7 +449,6 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
             disp->y = INT_MAX;
             move_x11(disp);
             break;
-	case XK_f:
 	case XK_F: {
 	  float wscale = disp->screen_width / (float)disp->width;
 	  float hscale = disp->screen_height / (float)disp->height;
