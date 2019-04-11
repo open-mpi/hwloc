@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2016 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -161,6 +161,8 @@ BOOL LineTo(HDC hdc, int nXEnd, int nYEnd);
 HFONT CreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet, DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily, LPCTSTR lpszFace);
 BOOL TextOut(HDC hdc, int nXStart, int nYStart, LPCTSTR lpString, int cchString);
 BOOL GetTextExtentPoint32(HDC hdc, LPCTSTR lpString, int c, LPSIZE lpSize);
+#define TRANSPARENT 0
+int SetBkMode(HDC hdc, int mode);
 
 LRESULT DispatchMessage(const MSG *lpmsg);
 BOOL TranslateMessage(const MSG *lpMsg);
