@@ -46,7 +46,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
   struct lstopo_output *loutput = the_output.loutput;
   int redraw = 0;
-  unsigned i;
+
   switch (message) {
     case WM_CHAR:  {
       switch (wparam) {
@@ -71,22 +71,16 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	the_scale = 1.0;
 	redraw = 1;
 	break;
-      case 'a': {
-	int v = !loutput->show_attrs[0]; /* if show_attrs[] contains different values, assume it's all like the first type */
-	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
-	  loutput->show_attrs[i] = v;
-	printf("%s object attributes\n", v ? "enabled" : "disabled");
+      case 'a':
+	loutput->show_attrs_enabled ^= 1;
+	printf("%s object attributes\n", loutput->show_attrs_enabled ? "enabled" : "disabled");
 	redraw = 1;
 	break;
-      }
-      case 't': {
-	int v = !loutput->show_text[0]; /* if show_text[] contains different values, assume it's all like the first type */
-	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
-	  loutput->show_text[i] = v;
-	printf("%s object text\n", v ? "enabled" : "disabled");
+      case 't':
+	loutput->show_text_enabled ^= 1;
+	printf("%s object text\n", loutput->show_text_enabled ? "enabled" : "disabled");
 	redraw = 1;
 	break;
-      }
       case 'i':
 	if (loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
 	  loutput->index_type = LSTOPO_INDEX_TYPE_PHYSICAL;

@@ -374,7 +374,8 @@ place_children_vert(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned maxw = 0;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
-  int bridge_parent_with_pcilinkspeed = parent->type == HWLOC_OBJ_BRIDGE && loutput->show_text[HWLOC_OBJ_BRIDGE];
+  int bridge_parent_with_pcilinkspeed = parent->type == HWLOC_OBJ_BRIDGE
+    && loutput->show_text_enabled && loutput->show_text[HWLOC_OBJ_BRIDGE];
   hwloc_obj_t child;
   int ncstate;
   for(child = next_child(loutput, parent, kind, NULL, &ncstate);
@@ -726,7 +727,7 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
     /* NUMA have both P# and L# on the same line (PU is split on 2 lines) */
     snprintf(index2str, sizeof(index2str), " P#%u", obj->os_index);
 
-  if (loutput->show_attrs[obj->type]) {
+  if (loutput->show_attrs_enabled && loutput->show_attrs[obj->type]) {
     attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
     /* display the root total_memory (cannot be local_memory since root cannot be a NUMA node) */
     if (!obj->parent && obj->total_memory)
@@ -914,11 +915,11 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   lud->ntext = 0;
   lud->textwidth = 0;
 
-  if (!loutput->show_text[obj->type])
+  if (!loutput->show_text_enabled || !loutput->show_text[obj->type])
     return;
 
   /* main object identifier line */
-  if (obj->type == HWLOC_OBJ_PCI_DEVICE && loutput->show_attrs[HWLOC_OBJ_PCI_DEVICE]) {
+  if (obj->type == HWLOC_OBJ_PCI_DEVICE && loutput->show_attrs_enabled && loutput->show_attrs[HWLOC_OBJ_PCI_DEVICE]) {
     /* PCI text collapsing */
     char busid[32];
     char _text[64];
@@ -942,7 +943,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
     snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "P#%u", obj->os_index);
   }
 
-  if (loutput->show_attrs[obj->type]) {
+  if (loutput->show_attrs_enabled && loutput->show_attrs[obj->type]) {
     if (HWLOC_OBJ_OS_DEVICE == obj->type) {
       if (HWLOC_OBJ_OSDEV_COPROC == obj->attr->osdev.type && obj->subtype) {
 	/* Coprocessor */
@@ -1041,7 +1042,7 @@ draw_text(struct lstopo_output *loutput, hwloc_obj_t obj, struct lstopo_color *l
   unsigned linespacing = loutput->linespacing;
   unsigned i;
 
-  if (!loutput->show_text[obj->type])
+  if (!loutput->show_text_enabled || !loutput->show_text[obj->type])
     return;
 
   for(i=0; i<lud->ntext; i++)
@@ -1114,7 +1115,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   /* align all children even if only some of them have a linkspeed */
-  unsigned speedwidth = loutput->show_text[HWLOC_OBJ_BRIDGE] ? fontsize + gridsize : 0;
+  unsigned speedwidth = (loutput->show_text_enabled && loutput->show_text[HWLOC_OBJ_BRIDGE]) ? fontsize + gridsize : 0;
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
@@ -1147,9 +1148,9 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	  ymin = ymid;
 	ymax = ymid;
 	/* Negotiated link speed */
-	if (loutput->show_text[HWLOC_OBJ_BRIDGE]) {
+	if (loutput->show_text_enabled && loutput->show_text[HWLOC_OBJ_BRIDGE]) {
 	  float speed = pci_link_speed(child);
-	  if (loutput->show_attrs[HWLOC_OBJ_BRIDGE] && speed != 0.) {
+	  if (loutput->show_attrs_enabled && loutput->show_attrs[HWLOC_OBJ_BRIDGE] && speed != 0.) {
 	    char text[4];
 	    if (speed >= 10.)
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);

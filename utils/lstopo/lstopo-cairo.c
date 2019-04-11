@@ -263,7 +263,6 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   int state = 0;
   int x = 0, y = 0; /* shut warning down */
   int lastx, lasty;
-  unsigned i;
 
   coutput = &disp->coutput;
   memset(coutput, 0, sizeof(*coutput));
@@ -477,24 +476,18 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	case XK_H:
 	  lstopo_show_interactive_help();
 	  break;
-	case XK_a: {
-	  int v = !loutput->show_attrs[0]; /* if show_attrs[] contains different values, assume it's all like the first type */
-	  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
-	    loutput->show_attrs[i] = v;
-	  printf("%s object attributes\n", v ? "enabled" : "disabled");
+	case XK_a:
+	  loutput->show_attrs_enabled ^= 1;
+	  printf("%s object attributes\n", loutput->show_attrs_enabled ? "enabled" : "disabled");
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;
-	}
-	case XK_t: {
-	  int v = !loutput->show_text[0]; /* if show_text[] contains different values, assume it's all like the first type */
-	  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
-	    loutput->show_text[i] = v;
-	  printf("%s object text\n", v ? "enabled" : "disabled");
+	case XK_t:
+	  loutput->show_text_enabled ^= 1;
+	  printf("%s object text\n", loutput->show_text_enabled ? "enabled" : "disabled");
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;
-	}
 	case XK_i:
 	  if (loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
 	    loutput->index_type = LSTOPO_INDEX_TYPE_PHYSICAL;

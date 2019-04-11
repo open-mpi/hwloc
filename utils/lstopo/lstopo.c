@@ -392,30 +392,6 @@ void lstopo_show_interactive_help(void)
   fflush(stdout);
 }
 
-static void lstopo_show_interactive_cli_options_array(const int *array, const char *name)
-{
-  int enabled = 0, disabled = 0, i;
-  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
-    if (array[i])
-      enabled++;
-    else
-      disabled++;
-  }
-  if (!enabled)
-    printf(" --no-%s", name);
-  else if (!disabled)
-    printf(" --%s", name);
-  else {
-    printf(" --%s --no-%s=", name, name);
-    for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
-      if (!array[i]) {
-	printf("%s%s", hwloc_obj_type_string(i), disabled > 1 ? "," : "");
-	disabled--;
-      }
-    }
-  }
-}
-
 static void lstopo__show_interactive_cli_options(const struct lstopo_output *loutput)
 {
   if (loutput->index_type == LSTOPO_INDEX_TYPE_PHYSICAL)
@@ -425,8 +401,10 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
   else if (loutput->index_type == LSTOPO_INDEX_TYPE_NONE)
     printf(" --no-index");
 
-  lstopo_show_interactive_cli_options_array(loutput->show_attrs, "attrs");
-  lstopo_show_interactive_cli_options_array(loutput->show_text, "text");
+  if (!loutput->show_attrs_enabled)
+    printf(" --no-attrs");
+  if (!loutput->show_text_enabled)
+    printf(" --no-text");
 
   if (!loutput->collapse)
     printf(" --no-collapse");
@@ -585,6 +563,8 @@ main (int argc, char *argv[])
     loutput.show_attrs[i] = 1;
     loutput.show_text[i] = 1;
   }
+  loutput.show_attrs_enabled = 1;
+  loutput.show_text_enabled = 1;
 
   loutput.show_binding = 1;
   loutput.show_disallowed = 1;
