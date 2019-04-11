@@ -424,8 +424,6 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
     printf(" -l");
   else if (loutput->index_type == LSTOPO_INDEX_TYPE_NONE)
     printf(" --no-index");
-  else
-    lstopo_show_interactive_cli_options_array(loutput->show_indexes, "index");
 
   lstopo_show_interactive_cli_options_array(loutput->show_attrs, "attrs");
   lstopo_show_interactive_cli_options_array(loutput->show_text, "text");
