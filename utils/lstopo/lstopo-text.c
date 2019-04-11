@@ -141,7 +141,7 @@ output_topology (struct lstopo_output *loutput, hwloc_obj_t l, hwloc_obj_t paren
   int verbose_mode = loutput->verbose_mode;
   hwloc_obj_t child;
   int group_identical = (verbose_mode <= 1) && !loutput->show_cpuset;
-  int collapse = loutput->collapse ? ((struct lstopo_obj_userdata *) l->userdata)->pci_collapsed : 0;
+  int collapse = loutput->pci_collapse_enabled ? ((struct lstopo_obj_userdata *) l->userdata)->pci_collapsed : 0;
 
   if (l->type == HWLOC_OBJ_PCI_DEVICE && collapse == -1)
     return;

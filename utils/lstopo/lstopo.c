@@ -406,7 +406,7 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
   if (!loutput->show_text_enabled)
     printf(" --no-text");
 
-  if (!loutput->collapse)
+  if (!loutput->pci_collapse_enabled)
     printf(" --no-collapse");
   if (!loutput->show_binding)
     printf(" --binding-color none");
@@ -521,7 +521,7 @@ main (int argc, char *argv[])
   loutput.verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   loutput.ignore_pus = 0;
   loutput.ignore_numanodes = 0;
-  loutput.collapse = 1;
+  loutput.pci_collapse_enabled = 1;
   loutput.pid_number = -1;
   loutput.pid = 0;
   loutput.need_pci_domain = 0;
@@ -742,7 +742,7 @@ main (int argc, char *argv[])
 	hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
       }
       else if (!strcmp (argv[0], "--no-collapse"))
-	loutput.collapse = 0;
+	loutput.pci_collapse_enabled = 0;
       else if (!strcmp (argv[0], "--thissystem"))
 	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
       else if (!strcmp (argv[0], "--flags")) {

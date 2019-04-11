@@ -50,7 +50,7 @@ struct lstopo_output {
   int verbose_mode;
   int ignore_pus;
   int ignore_numanodes;
-  int collapse;
+  int pci_collapse_enabled; /* global toggle for PCI collapsing */
   int pid_number;
   hwloc_pid_t pid;
   int need_pci_domain;
@@ -233,7 +233,7 @@ static __hwloc_inline int lstopo_busid_snprintf(struct lstopo_output *loutput, c
     snprintf(domain, sizeof(domain), "%04x:", firstobj->attr->pcidev.domain);
 
   /* single busid */
-  if (!loutput->collapse || collapse <= 1) {
+  if (!loutput->pci_collapse_enabled || collapse <= 1) {
       return snprintf(text, textlen, "%s%02x:%02x.%01x",
 		      domain,
 		      firstobj->attr->pcidev.bus,

@@ -115,8 +115,8 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	redraw = 1;
 	break;
       case 'c':
-	loutput->collapse ^= 1;
-	printf("%s collapsing of identical PCI devices\n", loutput->collapse ? "enabled" : "disabled");
+	loutput->pci_collapse_enabled ^= 1;
+	printf("%s collapsing of identical PCI devices\n", loutput->pci_collapse_enabled ? "enabled" : "disabled");
 	redraw = 1;
 	break;
       case 'E':

@@ -207,7 +207,7 @@ static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent,
     obj = obj->next_sibling;
     goto again;
   }
-  if (loutput->collapse && obj->type == HWLOC_OBJ_PCI_DEVICE) {
+  if (loutput->pci_collapse_enabled && obj->type == HWLOC_OBJ_PCI_DEVICE) {
     struct lstopo_obj_userdata *lud = obj->userdata;
     if (lud->pci_collapsed == -1) {
       obj = obj->next_sibling;
@@ -925,7 +925,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
     char _text[64];
     lstopo_obj_snprintf(loutput, _text, sizeof(_text), obj);
     lstopo_busid_snprintf(loutput, busid, sizeof(busid), obj, lud->pci_collapsed, loutput->need_pci_domain);
-    if (loutput->collapse && lud->pci_collapsed > 1) {
+    if (loutput->pci_collapse_enabled && lud->pci_collapsed > 1) {
       n = snprintf(lud->text[0].text, sizeof(lud->text[0].text), "%d x { %s %s }", lud->pci_collapsed, _text, busid);
     } else {
       n = snprintf(lud->text[0].text, sizeof(lud->text[0].text), "%s %s", _text, busid);
@@ -1057,7 +1057,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   unsigned fontsize = loutput->fontsize;
   unsigned overlaidoffset = 0;
 
-  if (loutput->collapse && lud->pci_collapsed > 1) {
+  if (loutput->pci_collapse_enabled && lud->pci_collapsed > 1) {
     /* additional depths and height for overlaid boxes */
     depth -= 2;
     if (lud->pci_collapsed > 2) {
@@ -1092,7 +1092,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
 
     lstopo_set_object_color(loutput, level, &style);
 
-    if (loutput->collapse && lud->pci_collapsed > 1) {
+    if (loutput->pci_collapse_enabled && lud->pci_collapsed > 1) {
       methods->box(loutput, style.bg, depth+2, x + overlaidoffset, totwidth - overlaidoffset, y + overlaidoffset, totheight - overlaidoffset, level, 2);
       if (lud->pci_collapsed > 2)
 	methods->box(loutput, style.bg, depth+1, x + overlaidoffset/2, totwidth - overlaidoffset, y + overlaidoffset/2, totheight - overlaidoffset, level, 1);
