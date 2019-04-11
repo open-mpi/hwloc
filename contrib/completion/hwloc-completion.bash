@@ -25,6 +25,8 @@ _lstopo() {
 		   --no-icaches
 		   --merge
 		   --no-collapse
+		   --factorize --factorize=
+		   --no-factorize --no-factorize=
 		   --restrict
 		   --restrict-flags
 		   --no-io
@@ -71,11 +73,13 @@ _lstopo() {
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}"` )
     elif [[ "$ppprev" == "--filter" && "$prev" == ":" ]] ; then
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
-    elif [[ "$cur" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs " =~ " $prev " ]] ; then
+    elif [[ "$cur" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs --no-factorize " =~ " $prev " ]] ; then
 	COMPREPLY=( `compgen -W "${TYPES[*]}"` )
 	# we could also support "<type1>,<type2>,..." for --index/attrs/text but "," is not a completion word separator
-    elif [[ "$prev" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs " =~ " $pprev " ]] ; then
+    elif [[ "$prev" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs --no-factorize --factorize " =~ " $pprev " ]] ; then
 	COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
+    elif [[ "$cur" == "=" && "--factorize" = "$prev" ]] ; then
+	COMPREPLY=( `compgen -W "${TYPES[*]}"` "<N>" "<N,F,L>" )
     else
 	case "$prev" in
 	    --of | --output-format)

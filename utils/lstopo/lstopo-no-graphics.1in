@@ -174,6 +174,23 @@ Do not show levels that do not have a hierarchical impact.
 This sets HWLOC_TYPE_FILTER_KEEP_STRUCTURE for all object types.
 This is identical to \fB\-\-filter all:structure\fR.
 .TP
+\fB\-\-no-factorize\fR \fB\-\-no-factorize\fR=<type>
+Never factorize identical objects in the graphical output.
+
+If an object type is given, only factorizing of these objects is disabled.
+This only applies to normal CPU-side objects, it is independent from PCI collapsing.
+.TP
+\fB\-\-factorize\fR \fB\-\-factorize\fR=[<type>,]<N>[,<L>[,<F>]
+Factorize identical children in the graphical output (enabled by default).
+
+If <N> is specified (4 by default), factorizing only occurs when there are strictly
+more than N identical children.
+If <L> and <F> are specified, they set the numbers of first and last children to keep
+after factorizing.
+
+If an object type is given, only factorizing of these objects is configured.
+This only applies to normal CPU-side object, it is independent from PCI collapsing.
+.TP
 \fB\-\-no\-collapse\fR
 Do not collapse identical PCI devices.
 By default, identical sibling PCI devices (such as many virtual functions

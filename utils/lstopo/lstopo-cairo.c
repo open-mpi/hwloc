@@ -518,9 +518,19 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;
-	case XK_c:
-	  loutput->pci_collapse_enabled ^= 1;
-	  printf("%s collapsing of identical PCI devices\n", loutput->pci_collapse_enabled ? "enabled" : "disabled");
+	case XK_f:
+	  /* alternate between factorize+collapse, collapse only, and none */
+	  if (loutput->factorize_enabled && loutput->pci_collapse_enabled) {
+	    loutput->factorize_enabled = 0;
+	    printf("factorizing disabled, PCI collapsing still enabled\n");
+	  } else if (!loutput->factorize_enabled && loutput->pci_collapse_enabled) {
+	    loutput->pci_collapse_enabled = 0;
+	    printf("factorizing and PCI collapsing disabled\n");
+	  } else {
+	    loutput->factorize_enabled = 1;
+	    loutput->pci_collapse_enabled = 1;
+	    printf("factorizing and PCI collapsing enabled\n");
+	  }
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;

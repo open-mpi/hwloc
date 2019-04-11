@@ -151,6 +151,61 @@ static void add_process_objects(hwloc_topology_t topology)
 			   HWLOC_PS_FLAG_THREADS | HWLOC_PS_FLAG_SHORTNAME, NULL, NULL);
 }
 
+static __hwloc_inline void lstopo_update_factorize_bounds(unsigned min, unsigned *first, unsigned *last)
+{
+  switch (min) {
+  case 0:
+  case 1:
+  case 2:
+    *first = 1;
+    *last = 0;
+    break;
+  case 3:
+    *first = 1;
+    *last = 1;
+    break;
+  default:
+    *first = 2;
+    *last = 1;
+    break;
+  }
+}
+
+static __hwloc_inline void lstopo_update_factorize_alltypes_bounds(struct lstopo_output *loutput)
+{
+  hwloc_obj_type_t type;
+  for(type = 0; type < HWLOC_OBJ_TYPE_MAX; type++)
+    lstopo_update_factorize_bounds(loutput->factorize_min[type], &loutput->factorize_first[type], &loutput->factorize_last[type]);
+}
+
+static void
+lstopo_add_factorized_attributes(struct lstopo_output *loutput, hwloc_obj_t obj)
+{
+  hwloc_obj_t child;
+
+  if (!obj->first_child)
+    return;
+
+  if (obj->symmetric_subtree && obj->arity > loutput->factorize_min[obj->first_child->type]){
+    /* factorize those children */
+    for_each_child(child, obj) {
+      unsigned factorized;
+      if (child->sibling_rank < loutput->factorize_first[child->type]
+	  || child->sibling_rank >= obj->arity - loutput->factorize_last[child->type])
+	factorized = 0; /* keep first and last */
+      else if (child->sibling_rank == loutput->factorize_first[child->type])
+	factorized = 1; /* replace with dots */
+      else
+	factorized = -1; /* remove that one */
+
+      ((struct lstopo_obj_userdata *)child->userdata)->factorized = factorized;
+    }
+  }
+  /* recurse */
+  for_each_child(child, obj)
+    lstopo_add_factorized_attributes(loutput, child);
+}
+
 static void
 lstopo_add_collapse_attributes(hwloc_topology_t topology)
 {
@@ -224,6 +279,7 @@ lstopo_populate_userdata(hwloc_obj_t parent)
 
   save->common.buffer = NULL; /* so that it is ignored on XML export */
   save->common.next = parent->userdata;
+  save->factorized = 0;
   save->pci_collapsed = 0;
   parent->userdata = save;
 
@@ -339,6 +395,13 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Graphical output options:\n");
   fprintf (where, "  --children-order plain\n"
 		  "                        Display memory children below the parent like any other child\n");
+  fprintf (where, "  --no-factorize        Do not factorize identical objects\n");
+  fprintf (where, "  --no-factorize=<type> Do not factorize identical objects of type <type>\n");
+  fprintf (where, "  --factorize           Factorize identical objects (default)\n");
+  fprintf (where, "  --factorize=[<type>,]<N>[,<L>[,<F>]]\n");
+  fprintf (where, "                        Set the minimum number <N> of objects to factorize,\n");
+  fprintf (where, "                        the numbers of first <F> and last <L> to keep,\n");
+  fprintf (where, "                        for all or only the given object type <type>\n");
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 7          Set size of margin between elements\n");
   fprintf (where, "  --linespacing 4       Set spacing between lines of text\n");
@@ -380,12 +443,12 @@ void lstopo_show_interactive_help(void)
   printf("  Show this help ...................... h H\n");
   printf("  Exit ................................ q Q Esc\n");
   printf(" Configuration tweaks:\n");
+  printf("  Toggle factorizing or collapsing .... f\n");
   printf("  Switch display mode for indexes ..... i\n");
   printf("  Toggle displaying of object text .... t\n");
   printf("  Toggle displaying of obj attributes . a\n");
   printf("  Toggle color for disallowed objects . d\n");
   printf("  Toggle color for binding objects .... b\n");
-  printf("  Toggle collapsing of PCI devices .... c\n");
   printf("  Toggle displaying of the legend ..... l\n");
   printf("  Export to file with current config .. E\n");
   printf("\n\n");
@@ -406,6 +469,8 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
   if (!loutput->show_text_enabled)
     printf(" --no-text");
 
+  if(!loutput->factorize_enabled)
+    printf(" --no-factorize");
   if (!loutput->pci_collapse_enabled)
     printf(" --no-collapse");
   if (!loutput->show_binding)
@@ -525,6 +590,11 @@ main (int argc, char *argv[])
   loutput.pid_number = -1;
   loutput.pid = 0;
   loutput.need_pci_domain = 0;
+
+  loutput.factorize_enabled = 1;
+  for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+    loutput.factorize_min[i] = FACTORIZE_MIN_DEFAULT;
+  lstopo_update_factorize_alltypes_bounds(&loutput);
 
   loutput.export_synthetic_flags = 0;
   loutput.export_xml_flags = 0;
@@ -743,6 +813,67 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[0], "--no-collapse"))
 	loutput.pci_collapse_enabled = 0;
+
+      else if (!strcmp (argv[0], "--no-factorize")) {
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	  loutput.factorize_min[i] = FACTORIZE_MIN_DISABLED;
+      }
+      else if (!strncmp (argv[0], "--no-factorize=", 15)) {
+	hwloc_obj_type_t type;
+	const char *tmp = argv[0]+15;
+	if (hwloc_type_sscanf(tmp, &type, NULL, 0) < 0) {
+	  fprintf(stderr, "Unsupported parameter `%s' passed to %s, ignoring.\n", tmp, argv[0]);
+	  goto out_usagefailure;
+	}
+	loutput.factorize_min[type] = FACTORIZE_MIN_DISABLED;
+      }
+      else if (!strcmp (argv[0], "--factorize")) {
+	for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
+	  loutput.factorize_min[i] = FACTORIZE_MIN_DEFAULT;
+	lstopo_update_factorize_alltypes_bounds(&loutput);
+      }
+      else if (!strncmp (argv[0], "--factorize=", 12)) {
+	hwloc_obj_type_t type, type_min, type_max;
+	unsigned min, first, last;
+	const char *tmp = argv[0]+12;
+	const char *sep1, *sep2, *sep3;
+
+	if (*tmp < '0' || *tmp > '9') {
+	  if (hwloc_type_sscanf(tmp, &type, NULL, 0) < 0) {
+	    fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
+	    goto out_usagefailure;
+	  }
+	  type_min = type;
+	  type_max = type+1;
+	  sep1 = strchr(tmp, ',');
+	} else {
+	  type_min = HWLOC_OBJ_TYPE_MIN;
+	  type_max = HWLOC_OBJ_TYPE_MAX;
+	  sep1 = tmp-1;
+	}
+
+	if (!sep1) {
+	  min = FACTORIZE_MIN_DEFAULT;
+	  lstopo_update_factorize_bounds(min, &first, &last);
+	} else {
+	  min = atoi(sep1+1);
+	  lstopo_update_factorize_bounds(min, &first, &last);
+	  sep2 = strchr(sep1+1, ',');
+	  if (sep2) {
+	    first = atoi(sep2+1);
+	    sep3 = strchr(sep2+1, ',');
+	    if (sep3)
+	      last = atoi(sep3+1);
+	  }
+	}
+
+	for(i=type_min; i<type_max; i++) {
+	  loutput.factorize_min[i] = min;
+	  loutput.factorize_first[i] = first;
+	  loutput.factorize_last[i] = last;
+	}
+      }
+
       else if (!strcmp (argv[0], "--thissystem"))
 	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
       else if (!strcmp (argv[0], "--flags")) {
@@ -1163,6 +1294,7 @@ main (int argc, char *argv[])
   if (output_format != LSTOPO_OUTPUT_XML) {
     /* there might be some xml-imported userdata in objects, add lstopo-specific userdata in front of them */
     lstopo_populate_userdata(hwloc_get_root_obj(topology));
+    lstopo_add_factorized_attributes(&loutput, hwloc_get_root_obj(topology));
     lstopo_add_collapse_attributes(topology);
   }
 

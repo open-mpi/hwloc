@@ -51,6 +51,10 @@ Version 2.1.0
     kernel prior to 2.6.16.
 * Tools
   + lstopo
+    - lstopo factorizes objects by default in the graphical output when
+      there are more than 4 identical children.
+      New options --no-factorize and --factorize may be used to configure this.
+      Also hit the 'f' key to disable factorizing in interactive outputs.
     - Both logical and OS/physical indexes are now displayed by default
       for PU and NUMA nodes.
     - The X11 and Windows interactive outputs support many keyboard

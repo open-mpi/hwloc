@@ -84,6 +84,12 @@ struct lstopo_output {
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
   int show_binding;
   int show_disallowed;
+  int factorize_enabled; /* global toggle for interactive keyboard shortcuts */
+  unsigned factorize_min[HWLOC_OBJ_TYPE_MAX]; /* minimum number of object before factorizing (parent->arity must be strictly higher) */
+#define FACTORIZE_MIN_DEFAULT 4
+#define FACTORIZE_MIN_DISABLED UINT_MAX
+  unsigned factorize_first[HWLOC_OBJ_TYPE_MAX]; /* number of first children to keep before factorizing */
+  unsigned factorize_last[HWLOC_OBJ_TYPE_MAX]; /* number of last children to keep after factorizing */
 
   /* draw internal data */
   void *backend_data;
@@ -136,6 +142,7 @@ struct lstopo_obj_userdata {
 
   /* PCI collapsing */
   int pci_collapsed; /* 0 if no collapsing, -1 if collapsed with a previous one, >1 if collapsed with several next */
+  int factorized; /* 0 if no factorizing, -1 if hidden, 1 if replaced with dots */
 
   /* custom style */
   struct lstopo_style style;

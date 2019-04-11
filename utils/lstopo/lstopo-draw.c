@@ -199,6 +199,13 @@ static hwloc_obj_t next_child(struct lstopo_output *loutput, hwloc_obj_t parent,
   if (!obj)
     return NULL;
 
+  if (loutput->factorize_enabled && parent->arity > loutput->factorize_min[obj->type]) {
+    if (((struct lstopo_obj_userdata *)obj->userdata)->factorized < 0) {
+      obj = obj->next_sibling;
+      goto again;
+    }
+  }
+
   if (obj->type == HWLOC_OBJ_PU && loutput->ignore_pus) {
     obj = obj->next_sibling;
     goto again;
@@ -520,6 +527,15 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* bridge children always vertical */
   if (parent->type == HWLOC_OBJ_BRIDGE)
     orient = LSTOPO_ORIENT_VERT;
+
+  /* if factorizing children, use horizontal by default */
+  if (orient == LSTOPO_ORIENT_NONE
+      && parent->symmetric_subtree
+      && parent->first_child
+      && loutput->factorize_enabled
+      && parent->arity > loutput->factorize_min[parent->first_child->type]) {
+    orient = LSTOPO_ORIENT_HORIZ;
+  }
 
   /* recurse into children to prepare their sizes */
   for(i = 0, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
@@ -1170,11 +1186,65 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 }
 
 static void
+factorized_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
+{
+  struct lstopo_obj_userdata *lud = level->userdata;
+  unsigned gridsize = loutput->gridsize;
+  unsigned fontsize = loutput->fontsize;
+  unsigned linespacing = loutput->linespacing;
+  unsigned missingseparator;
+
+  /* we need a separator even between PUs */
+  if ((unsigned)level->depth == loutput->depth-1)
+    missingseparator = gridsize;
+  else
+    missingseparator = 0;
+
+  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
+    /* compute children size and position, our size, and save it */
+    unsigned n, textwidth;
+    lud->width = gridsize*5; /* space, box, space, box, space */
+    lud->height = gridsize*2 + linespacing + fontsize + gridsize; /* space, box, linespace, text, gridsize */
+    sprintf(lud->text[0].text, "%ux total", level->parent->arity);
+    n = strlen(lud->text[0].text);
+    textwidth = get_textwidth(loutput, lud->text[0].text, n, fontsize);
+    lud->text[0].width = textwidth;
+    if (textwidth > lud->width) {
+      lud->width = textwidth;
+      lud->text[0].xoffset = 0;
+    } else {
+      lud->text[0].xoffset = (lud->width - textwidth)/2;
+    }
+    lud->ntext = 1;
+    lud->width += 2*missingseparator;
+
+  } else { /* LSTOPO_DRAWING_DRAW */
+    struct draw_methods *methods = loutput->methods;
+    struct lstopo_style boxstyle, textstyle;
+    unsigned boxoffset = (lud->width - 5*gridsize - 2*missingseparator) / 2;
+    /* boxes use object style, but the text outside uses the parent style */
+    lstopo_set_object_color(loutput, level, &boxstyle);
+    lstopo_set_object_color(loutput, level->parent, &textstyle);
+    methods->box(loutput, boxstyle.bg, depth, x + missingseparator + boxoffset, gridsize, y + gridsize, gridsize, level, 0);
+    methods->box(loutput, boxstyle.bg, depth, x + missingseparator + boxoffset + 2*gridsize, gridsize, y + gridsize, gridsize, level, 0);
+    methods->box(loutput, boxstyle.bg, depth, x + missingseparator + boxoffset + 4*gridsize, gridsize, y + gridsize, gridsize, level, 0);
+    methods->text(loutput, textstyle.t, fontsize, depth, x + missingseparator + lud->text[0].xoffset, y + 2 * gridsize + linespacing, lud->text[0].text, level, 0);
+  }
+}
+
+static void
 cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, unsigned x, unsigned y)
 {
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+
+  if (loutput->factorize_enabled
+      && lud->factorized == 1
+      && level->parent->arity > loutput->factorize_min[level->type]) {
+    factorized_draw(loutput, level, depth, x, y);
+    return;
+  }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
@@ -1228,6 +1298,13 @@ normal_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned linespacing = loutput->linespacing;
+
+  if (loutput->factorize_enabled
+      && lud->factorized == 1
+      && level->parent->arity > loutput->factorize_min[level->type]) {
+    factorized_draw(loutput, level, depth, x, y);
+    return;
+  }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
     /* compute children size and position, our size, and save it */
