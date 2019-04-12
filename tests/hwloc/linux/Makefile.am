@@ -59,6 +59,8 @@ sysfs_outputs = \
 		20s390-2g6s4c.output \
 		1alpha.output \
 		2arm-2c.output \
+		nvidiagpunumanodes.output \
+		nvidiagpunumanodes.kept.output \
 		fakeheteronuma.output
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
@@ -115,6 +117,8 @@ sysfs_tarballs = \
 		20s390-2g6s4c.tar.bz2 \
 		1alpha.tar.bz2 \
 		2arm-2c.tar.bz2 \
+		nvidiagpunumanodes.tar.bz2 \
+		nvidiagpunumanodes.kept.source \
 		fakeheteronuma.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
@@ -145,6 +149,7 @@ sysfs_options = \
 sysfs_envs = \
 		40intel64-2g2n4c+pci.env \
 		40intel64-4n10c+pci-conflicts.env \
+		nvidiagpunumanodes.kept.env \
 		fakeheteronuma.env
 
 if HWLOC_HAVE_OPENAT
