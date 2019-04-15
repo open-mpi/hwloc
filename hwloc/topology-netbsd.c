@@ -171,8 +171,8 @@ hwloc_look_netbsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 }
 
 void
-hwloc_set_netbsd_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
-                        struct hwloc_topology_support *support __hwloc_attribute_unused)
+hwloc_set_netbsd_hooks(struct hwloc_binding_hooks *hooks,
+		       struct hwloc_topology_support *support __hwloc_attribute_unused)
 {
   hooks->set_proc_cpubind = hwloc_netbsd_set_proc_cpubind;
   hooks->get_proc_cpubind = hwloc_netbsd_get_proc_cpubind;

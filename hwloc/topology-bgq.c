@@ -240,7 +240,7 @@ hwloc_bgq_get_allowed_resources(struct hwloc_topology *topology)
 }
 
 void
-hwloc_set_bgq_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
+hwloc_set_bgq_hooks(struct hwloc_binding_hooks *hooks,
 		    struct hwloc_topology_support *support __hwloc_attribute_unused)
 {
   hooks->set_thisthread_cpubind = hwloc_bgq_set_thisthread_cpubind;

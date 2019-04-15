@@ -2138,7 +2138,7 @@ static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
 
 void
 hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
-			struct hwloc_topology_support *support __hwloc_attribute_unused)
+			struct hwloc_topology_support *support)
 {
   hooks->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
   hooks->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
