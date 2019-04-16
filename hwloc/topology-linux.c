@@ -3687,7 +3687,7 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
       if (res_obj != node)
 	/* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
 	 * This object disappeared, we'll ignore distances */
-	failednodes++;
+	(*failednodes)++;
     }
   }
 }
