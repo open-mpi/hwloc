@@ -232,17 +232,6 @@ hwloc_plugins_init(void)
 
 #endif /* HWLOC_HAVE_PLUGINS */
 
-static const char *
-hwloc_disc_component_type_string(hwloc_disc_component_type_t type)
-{
-  switch (type) {
-  case HWLOC_DISC_COMPONENT_TYPE_CPU: return "cpu";
-  case HWLOC_DISC_COMPONENT_TYPE_GLOBAL: return "global";
-  case HWLOC_DISC_COMPONENT_TYPE_MISC: return "misc";
-  default: return "**unknown**";
-  }
-}
-
 static int
 hwloc_disc_component_register(struct hwloc_disc_component *component,
 			      const char *filename)
@@ -295,8 +284,8 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
     prev = &((*prev)->next);
   }
   if (hwloc_components_verbose)
-    fprintf(stderr, "Registered %s discovery component `%s' with priority %u (%s%s)\n",
-	    hwloc_disc_component_type_string(component->type), component->name, component->priority,
+    fprintf(stderr, "Registered discovery component `%s' type %x with priority %u (%s%s)\n",
+	    component->name, component->type, component->priority,
 	    filename ? "from plugin " : "statically build", filename ? filename : "");
 
   prev = &hwloc_disc_components;
@@ -528,8 +517,8 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
     if (hwloc_components_verbose)
       /* do not warn if envvar_forced since system-wide HWLOC_COMPONENTS must be silently ignored after set_xml() etc.
        */
-      fprintf(stderr, "Excluding %s discovery component `%s', conflicts with excludes 0x%x\n",
-	      hwloc_disc_component_type_string(comp->type), comp->name, topology->backend_excludes);
+      fprintf(stderr, "Excluding discovery component `%s' type %x, conflicts with excludes 0x%x\n",
+	      comp->name, comp->type, topology->backend_excludes);
     return -1;
   }
 
@@ -650,8 +639,8 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
       for(i=0; i<topology->nr_blacklisted_components; i++)
 	if (comp == topology->blacklisted_components[i].component) {
 	    if (hwloc_components_verbose)
-	      fprintf(stderr, "Excluding blacklisted %s discovery component `%s'\n",
-	    hwloc_disc_component_type_string(comp->type), comp->name);
+	      fprintf(stderr, "Excluding blacklisted discovery component `%s' type %x\n",
+		      comp->name, comp->type);
 	    goto nextcomp;
 	}
 
@@ -744,8 +733,8 @@ hwloc_backend_enable(struct hwloc_backend *backend)
 
   /* check backend flags */
   if (backend->flags) {
-    fprintf(stderr, "Cannot enable %s discovery component `%s' with unknown flags %lx\n",
-	    hwloc_disc_component_type_string(backend->component->type), backend->component->name, backend->flags);
+    fprintf(stderr, "Cannot enable discovery component `%s' type %x with unknown flags %lx\n",
+	    backend->component->name, backend->component->type, backend->flags);
     return -1;
   }
 
@@ -754,8 +743,8 @@ hwloc_backend_enable(struct hwloc_backend *backend)
   while (NULL != *pprev) {
     if ((*pprev)->component == backend->component) {
       if (hwloc_components_verbose)
-	fprintf(stderr, "Cannot enable %s discovery component `%s' twice\n",
-		hwloc_disc_component_type_string(backend->component->type), backend->component->name);
+	fprintf(stderr, "Cannot enable  discovery component `%s' type %x twice\n",
+		backend->component->name, backend->component->type);
       hwloc_backend_disable(backend);
       errno = EBUSY;
       return -1;
@@ -764,8 +753,8 @@ hwloc_backend_enable(struct hwloc_backend *backend)
   }
 
   if (hwloc_components_verbose)
-    fprintf(stderr, "Enabling %s discovery component `%s'\n",
-	    hwloc_disc_component_type_string(backend->component->type), backend->component->name);
+    fprintf(stderr, "Enabling discovery component `%s' type %x\n",
+	    backend->component->name, backend->component->type);
 
   /* enqueue at the end */
   pprev = &topology->backends;
@@ -847,8 +836,8 @@ hwloc_backends_disable_all(struct hwloc_topology *topology)
   while (NULL != (backend = topology->backends)) {
     struct hwloc_backend *next = backend->next;
     if (hwloc_components_verbose)
-      fprintf(stderr, "Disabling %s discovery component `%s'\n",
-	      hwloc_disc_component_type_string(backend->component->type), backend->component->name);
+      fprintf(stderr, "Disabling discovery component `%s' type %x\n",
+	      backend->component->name, backend->component->type);
     hwloc_backend_disable(backend);
     topology->backends = next;
   }
