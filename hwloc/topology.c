@@ -3148,12 +3148,27 @@ void hwloc_alloc_root_sets(hwloc_obj_t root)
     root->complete_nodeset = hwloc_bitmap_alloc();
 }
 
+static void
+hwloc_discover_by_backend_type(struct hwloc_topology *topology,
+			       unsigned types,
+			       struct hwloc_disc_status *dstatus)
+{
+  struct hwloc_backend *backend;
+  for(backend = topology->backends; backend; backend = backend->next) {
+    if (!(backend->component->type & types))
+      continue;
+    if (!backend->discover)
+      continue;
+    backend->discover(backend, dstatus);
+    hwloc_debug_print_objects(0, topology->levels[0][0]);
+  }
+}
+
 /* Main discovery loop */
 static int
 hwloc_discover(struct hwloc_topology *topology,
 	       struct hwloc_disc_status *dstatus)
 {
-  struct hwloc_backend *backend;
   const char *env;
 
   topology->modified = 0; /* no need to reconnect yet */
@@ -3199,20 +3214,9 @@ hwloc_discover(struct hwloc_topology *topology,
   /*
    * Discover CPUs first
    */
-  backend = topology->backends;
-  while (NULL != backend) {
-    if (backend->component->type != HWLOC_DISC_COMPONENT_TYPE_CPU
-	&& backend->component->type != HWLOC_DISC_COMPONENT_TYPE_GLOBAL)
-      /* not yet */
-      goto next_cpubackend;
-    if (!backend->discover)
-      goto next_cpubackend;
-    backend->discover(backend, dstatus);
-    hwloc_debug_print_objects(0, topology->levels[0][0]);
-
-next_cpubackend:
-    backend = backend->next;
-  }
+  hwloc_discover_by_backend_type(topology,
+				 HWLOC_DISC_COMPONENT_TYPE_CPU|HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+				 dstatus);
 
   /* One backend should have called hwloc_alloc_root_sets()
    * and set bits during PU and NUMA insert.
@@ -3315,21 +3319,9 @@ next_cpubackend:
   /*
    * Additional discovery with other backends
    */
-
-  backend = topology->backends;
-  while (NULL != backend) {
-    if (backend->component->type == HWLOC_DISC_COMPONENT_TYPE_CPU
-	|| backend->component->type == HWLOC_DISC_COMPONENT_TYPE_GLOBAL)
-      /* already done above */
-      goto next_noncpubackend;
-    if (!backend->discover)
-      goto next_noncpubackend;
-    backend->discover(backend, dstatus);
-    hwloc_debug_print_objects(0, topology->levels[0][0]);
-
-next_noncpubackend:
-    backend = backend->next;
-  }
+  hwloc_discover_by_backend_type(topology,
+				 HWLOC_DISC_COMPONENT_TYPE_MISC,
+				 dstatus);
 
   if (getenv("HWLOC_DEBUG_SORT_CHILDREN"))
     hwloc_debug_sort_children(topology->levels[0][0]);
