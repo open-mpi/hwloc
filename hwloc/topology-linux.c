@@ -2168,6 +2168,12 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->interleave_membind = 1;
   support->membind->migrate_membind = 1;
   hooks->get_allowed_resources = hwloc_linux_get_allowed_resources_hook;
+
+  /* The get_allowed_resources() hook also works in the !thissystem case
+   * (it just reads fsroot files) but hooks are only setup if thissystem.
+   * Not an issue because this hook isn't used unless THISSYSTEM_ALLOWED_RESOURCES
+   * which also requires THISSYSTEM which means this functions is called.
+   */
 }
 
 

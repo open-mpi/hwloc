@@ -86,6 +86,7 @@ struct hwloc_topology {
   hwloc_bitmap_t allowed_nodeset;
 
   struct hwloc_binding_hooks {
+    /* These are actually rather OS hooks since some of them are not about binding */
     int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
     int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
     int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
