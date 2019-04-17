@@ -134,6 +134,14 @@ struct hwloc_disc_status {
  * hwloc_backend_alloc() initializes all fields to default values
  * that the component may change (except "component" and "next")
  * before enabling the backend with hwloc_backend_enable().
+ *
+ * Most backends assume that the topology is_thissystem flag is
+ * set because they talk to the underlying operating system.
+ * However they may still be used in topologies without the
+ * is_thissystem flag for debugging reasons.
+ * In practice, they are usually auto-disabled in such cases
+ * (excluded by xml or synthetic backends, or by environment
+ *  variables when changing the Linux fsroot or the x86 cpuid path).
  */
 struct hwloc_backend {
   /** \private Reserved for the core, set by hwloc_backend_alloc() */
@@ -149,8 +157,11 @@ struct hwloc_backend {
   unsigned long flags;
 
   /** \brief Backend-specific 'is_thissystem' property.
-   * Set to 0 or 1 if the backend should enforce the thissystem flag when it gets enabled.
-   * Set to -1 if the backend doesn't care (default). */
+   * Set to 0 if the backend disables the thissystem flag for this topology
+   * (e.g. loading from xml or synthetic string,
+   *  or using a different fsroot on Linux, or a x86 CPUID dump).
+   * Set to -1 if the backend doesn't care (default).
+   */
   int is_thissystem;
 
   /** \brief Backend private data, or NULL if none. */

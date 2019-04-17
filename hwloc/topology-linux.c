@@ -4941,6 +4941,11 @@ hwloc_linux_fallback_pu_level(struct hwloc_backend *backend)
 static int
 hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
+  /*
+   * This backend may be used with topology->is_thissystem set (default)
+   * or not (modified fsroot path).
+   */
+
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   unsigned nbnodes;
@@ -6503,6 +6508,11 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 static int
 hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
+  /*
+   * This backend may be used with topology->is_thissystem set (default)
+   * or not (modified fsroot path).
+   */
+
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = NULL;
   struct hwloc_backend *tmpbackend;

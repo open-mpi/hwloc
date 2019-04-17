@@ -733,6 +733,12 @@ hwloc_win_get_area_memlocation(hwloc_topology_t topology __hwloc_attribute_unuse
 static int
 hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
+  /*
+   * This backend uses the underlying OS.
+   * However we don't enforce topology->is_thissystem so that
+   * we may still force use this backend when debugging with !thissystem.
+   */
+
   struct hwloc_topology *topology = backend->topology;
   hwloc_bitmap_t groups_pu_set = NULL;
   SYSTEM_INFO SystemInfo;

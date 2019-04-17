@@ -963,6 +963,10 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 static int
 hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
+  /*
+   * This backend enforces !topology->is_thissystem by default.
+   */
+
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_synthetic_backend_data_s *data = backend->private_data;
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();

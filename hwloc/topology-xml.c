@@ -1602,6 +1602,10 @@ hwloc_convert_from_v1dist_floats(hwloc_topology_t topology, unsigned nbobjs, flo
 static int
 hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
 {
+  /*
+   * This backend enforces !topology->is_thissystem by default.
+   */
+
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_xml_backend_data_s *data = backend->private_data;
   struct hwloc__xml_import_state_s state, childstate;

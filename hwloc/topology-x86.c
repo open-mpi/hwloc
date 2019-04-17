@@ -1334,13 +1334,18 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
   int ret = -1;
 
   if (data->src_cpuiddump_path) {
-    /* just read cpuid from the dump */
+    /* Just read cpuid from the dump (implies !topology->is_thissystem by default) */
     src_cpuiddump = cpuiddump_read(data->src_cpuiddump_path, 0);
     if (!src_cpuiddump)
       goto out;
 
   } else {
-    /* otherwise check if binding works */
+    /* Using real hardware.
+     * However we don't enforce topology->is_thissystem so that
+     * we may still force use this backend when debugging with !thissystem.
+     */
+
+    /* check if binding works */
     memset(&hooks, 0, sizeof(hooks));
     support.membind = &memsupport;
     hwloc_set_native_binding_hooks(&hooks, &support);

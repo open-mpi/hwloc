@@ -209,6 +209,7 @@ extern void hwloc_setup_pu_level(struct hwloc_topology *topology, unsigned nb_pu
 extern int hwloc_get_sysctlbyname(const char *name, int64_t *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);
 
+/* returns the number of CPU from the OS (only valid if thissystem) */
 #define HWLOC_FALLBACK_NBPROCESSORS_INCLUDE_OFFLINE 1 /* by default we try to get only the online CPUs */
 extern int hwloc_fallback_nbprocessors(unsigned flags);
 

@@ -48,6 +48,11 @@ hwloc_bgq__get_allowed_resources(struct hwloc_topology *topology)
 static int
 hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
+  /*
+   * This backend may be used with topology->is_thissystem set (default)
+   * or not (CNK-emulation on Linux).
+   */
+
   struct hwloc_topology *topology = backend->topology;
   hwloc_bitmap_t set;
   hwloc_obj_t obj;

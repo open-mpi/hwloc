@@ -136,10 +136,9 @@ int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
 }
 #endif
 
-/* Return the OS-provided number of processors.  Unlike other methods such as
-   reading sysfs on Linux, this method is not virtualizable; thus it's only
-   used as a fall-back method, allowing virtual backends (FSROOT, etc) to
-   have the desired effect.  */
+/* Return the OS-provided number of processors.
+ * Assumes topology->is_thissystem is true.
+ */
 #ifndef HWLOC_WIN_SYS /* The windows implementation is in topology-windows.c */
 int
 hwloc_fallback_nbprocessors(unsigned flags) {

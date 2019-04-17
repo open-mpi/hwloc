@@ -763,7 +763,7 @@ hwloc_backends_is_thissystem(struct hwloc_topology *topology)
   struct hwloc_backend *backend;
   const char *local_env;
 
-  /* Apply is_thissystem topology flag before we enforce envvar backends.
+  /*
    * If the application changed the backend with set_foo(),
    * it may use set_flags() update the is_thissystem flag here.
    * If it changes the backend with environment variables below,
