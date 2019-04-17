@@ -1661,7 +1661,7 @@ hwloc_convert_from_v1dist_floats(hwloc_topology_t topology, unsigned nbobjs, flo
 
 /* this canNOT be the first XML call */
 static int
-hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend enforces !topology->is_thissystem by default.
@@ -1675,6 +1675,8 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus 
   int gotignored = 0;
   hwloc_localeswitch_declare;
   int ret;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_GLOBAL);
 
   state.global = data;
 
@@ -3081,8 +3083,8 @@ retry:
 }
 
 static struct hwloc_disc_component hwloc_xml_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   "xml",
+  HWLOC_DISC_PHASE_GLOBAL,
   ~0,
   hwloc_xml_component_instantiate,
   30,

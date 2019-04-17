@@ -26,47 +26,31 @@ struct hwloc_backend;
  * @{
  */
 
-/** \brief Discovery component type */
-typedef enum hwloc_disc_component_type_e {
-  /** \brief CPU-only discovery through the OS, or generic no-OS support.
-   * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_CPU = (1<<0),
-
-  /** \brief xml or synthetic,
-   * platform-specific components such as bgq.
-   * Anything the discovers CPU and everything else.
-   * No misc backend is expected to complement a global component.
-   * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL = (1<<1),
-
-  /** \brief OpenCL, Cuda, etc.
-   * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_MISC = (1<<2)
-} hwloc_disc_component_type_t;
-
 /** \brief Discovery component structure
  *
  * This is the major kind of components, taking care of the discovery.
  * They are registered by generic components, either statically-built or as plugins.
  */
 struct hwloc_disc_component {
-  /** \brief Discovery component type */
-  hwloc_disc_component_type_t type;
-
   /** \brief Name.
    * If this component is built as a plugin, this name does not have to match the plugin filename.
    */
   const char *name;
 
-  /** \brief Component types to exclude, as an OR'ed set of ::hwloc_disc_component_type_e.
+  /** \brief Discovery phases performed by this component.
+   * OR'ed set of ::hwloc_disc_phase_t
+   */
+  unsigned phases;
+
+  /** \brief Component phases to exclude, as an OR'ed set of ::hwloc_disc_phase_t.
    *
-   * For a GLOBAL component, this usually includes all other types (~0).
+   * For a GLOBAL component, this usually includes all other phases (\c ~UL).
    *
    * Other components only exclude types that may bring conflicting
    * topology information. MISC components should likely not be excluded
    * since they usually bring non-primary additional information.
    */
-  unsigned excludes;
+  unsigned excluded_phases;
 
   /** \brief Instantiate callback to create a backend from the component.
    * Parameters data1, data2, data3 are NULL except for components
@@ -108,6 +92,23 @@ struct hwloc_disc_component {
  * @{
  */
 
+/** \brief Discovery phase */
+typedef enum hwloc_disc_phase_e {
+  /** \brief xml or synthetic, platform-specific components such as bgq.
+   * Discovers everything including CPU, memory, I/O and everything else.
+   * A component with a Global phase usually excludes all other phases.
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_GLOBAL = (1U<<0),
+
+  /** \brief CPU discovery.
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_CPU = (1U<<1),
+
+  /** \brief Everything else.
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_MISC = (1U<<2)
+} hwloc_disc_phase_t;
+
 /** \brief Discovery status flags */
 enum hwloc_disc_status_flag_e {
   /** \brief PCI discovery has been performed \hideinitializer */
@@ -122,6 +123,11 @@ enum hwloc_disc_status_flag_e {
  * during the discovery process.
  */
 struct hwloc_disc_status {
+  /** \brief The current discovery phase that is performed.
+   * Must match one of the phases in the component phases field.
+   */
+  hwloc_disc_phase_t phase;
+
   /** \brief OR'ed set of hwloc_disc_status_flag_e */
   unsigned long flags;
 };
@@ -153,6 +159,11 @@ struct hwloc_backend {
   int envvar_forced;
   /** \private Reserved for the core. Used internally to list backends topology->backends. */
   struct hwloc_backend * next;
+
+  /** \brief Discovery phases performed by this component, possibly without some of them if excluded by other components.
+   * OR'ed set of ::hwloc_disc_phase_t
+   */
+  unsigned phases;
 
   /** \brief Backend flags, currently always 0. */
   unsigned long flags;

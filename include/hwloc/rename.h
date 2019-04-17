@@ -524,11 +524,11 @@ extern "C" {
 
 /* hwloc/plugins.h */
 
-#define hwloc_disc_component_type_e HWLOC_NAME(disc_component_type_e)
-#define HWLOC_DISC_COMPONENT_TYPE_CPU HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_CPU)
-#define HWLOC_DISC_COMPONENT_TYPE_GLOBAL HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_GLOBAL)
-#define HWLOC_DISC_COMPONENT_TYPE_MISC HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_MISC)
-#define hwloc_disc_component_type_t HWLOC_NAME(disc_component_type_t)
+#define hwloc_disc_phase_e HWLOC_NAME(disc_phase_e)
+#define HWLOC_DISC_PHASE_GLOBAL HWLOC_NAME_CAPS(DISC_PHASE_GLOBAL)
+#define HWLOC_DISC_PHASE_CPU HWLOC_NAME_CAPS(DISC_PHASE_CPU)
+#define HWLOC_DISC_PHASE_MISC HWLOC_NAME_CAPS(DISC_PHASE_MISC)
+#define hwloc_disc_phase_t HWLOC_NAME(disc_phase_t)
 #define hwloc_disc_component HWLOC_NAME(disc_component)
 
 #define hwloc_disc_status_flag_e HWLOC_NAME(disc_status_flag_e)

@@ -22,8 +22,8 @@ hwloc_fake_component_instantiate(struct hwloc_topology *topology __hwloc_attribu
 }
 
 static struct hwloc_disc_component hwloc_fake_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_MISC, /* so that it's always enabled when using the OS discovery */
   "fake",
+  HWLOC_DISC_PHASE_MISC, /* so that it's always enabled when using the OS discovery */
   0, /* nothing to exclude */
   hwloc_fake_component_instantiate,
   100, /* make sure it's loaded before anything conflicting excludes it */

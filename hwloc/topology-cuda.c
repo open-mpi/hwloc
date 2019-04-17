@@ -53,7 +53,7 @@ static unsigned hwloc_cuda_cores_per_MP(int major, int minor)
 }
 
 static int
-hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend uses the underlying OS.
@@ -65,6 +65,8 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   enum hwloc_type_filter_e filter;
   cudaError_t cures;
   int nb, i;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_MISC);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &filter);
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
@@ -145,9 +147,9 @@ hwloc_cuda_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_cuda_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_MISC,
   "cuda",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_MISC,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_cuda_component_instantiate,
   10, /* after pci */
   1,
