@@ -1495,13 +1495,15 @@ out:
 }
 
 static int
-hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   struct hwloc_topology *topology = backend->topology;
   unsigned long flags = 0;
   int alreadypus = 0;
   int ret;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (getenv("HWLOC_X86_TOPOEXT_NUMANODES")) {
     flags |= HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES;
@@ -1705,9 +1707,9 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_x86_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_CPU,
   "x86",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_CPU,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_x86_component_instantiate,
   45, /* between native and no_os */
   1,

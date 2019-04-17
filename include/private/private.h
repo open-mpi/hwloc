@@ -172,7 +172,8 @@ struct hwloc_topology {
   /* list of enabled backends. */
   struct hwloc_backend * backends;
   struct hwloc_backend * get_pci_busid_cpuset_backend; /* first backend that provides get_pci_busid_cpuset() callback */
-  unsigned backend_excludes;
+  unsigned backend_phases;
+  unsigned backend_excluded_phases;
 
   /* memory allocator for topology objects */
   struct hwloc_tma * tma;

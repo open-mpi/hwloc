@@ -5282,7 +5282,7 @@ static const char *find_sysfs_node_path(int root_fd)
 }
 
 static int
-hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend may be used with topology->is_thissystem set (default)
@@ -5303,6 +5303,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   const char *sysfs_node_path;
   int old_siblings_filenames = 0;
   int err;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   /* look for sysfs cpu path containing at least one of core_siblings and thread_siblings */
   sysfs_cpu_path = find_sysfs_cpu_path(data->root_fd, &old_siblings_filenames);
@@ -5595,9 +5597,9 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_linux_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_CPU,
   "linux",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_CPU,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_linux_component_instantiate,
   50,
   1,
@@ -6851,7 +6853,7 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 #endif /* HWLOC_HAVE_LINUXPCI */
 
 static int
-hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend may be used with topology->is_thissystem set (default)
@@ -6863,6 +6865,8 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
   struct hwloc_backend *tmpbackend;
   enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
   int root_fd = -1;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_MISC);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
@@ -6955,9 +6959,9 @@ hwloc_linuxio_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_linuxio_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_MISC,
   "linuxio",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_MISC,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_linuxio_component_instantiate,
   19, /* after pci */
   1,

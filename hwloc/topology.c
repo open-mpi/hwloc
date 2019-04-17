@@ -3149,13 +3149,12 @@ void hwloc_alloc_root_sets(hwloc_obj_t root)
 }
 
 static void
-hwloc_discover_by_backend_type(struct hwloc_topology *topology,
-			       unsigned types,
-			       struct hwloc_disc_status *dstatus)
+hwloc_discover_by_phase(struct hwloc_topology *topology,
+			struct hwloc_disc_status *dstatus)
 {
   struct hwloc_backend *backend;
   for(backend = topology->backends; backend; backend = backend->next) {
-    if (!(backend->component->type & types))
+    if (!(backend->phases & dstatus->phase))
       continue;
     if (!backend->discover)
       continue;
@@ -3211,18 +3210,44 @@ hwloc_discover(struct hwloc_topology *topology,
    * automatically propagated to the whole tree after detection.
    */
 
-  /*
-   * Discover CPUs first
+  if (topology->backend_phases == HWLOC_DISC_PHASE_GLOBAL) {
+    struct hwloc_backend *global_backend = topology->backends;
+    assert(global_backend);
+    assert(!global_backend->next);
+    assert(global_backend->phases == HWLOC_DISC_PHASE_GLOBAL);
+
+    /*
+     * Perform the single-component-based GLOBAL discovery
+     */
+    dstatus->phase = HWLOC_DISC_PHASE_GLOBAL;
+    global_backend->discover(global_backend, dstatus);
+    hwloc_debug_print_objects(0, topology->levels[0][0]);
+  }
+  /* Don't explicitly ignore other phases, in case there's ever
+   * a need to bring them back.
+   * The component with usually exclude them by default anyway.
+   * Except if annotating global components is explicitly requested.
    */
-  hwloc_discover_by_backend_type(topology,
-				 HWLOC_DISC_COMPONENT_TYPE_CPU|HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
-				 dstatus);
+
+  if (topology->backend_phases & HWLOC_DISC_PHASE_CPU) {
+    assert(!(topology->backend_phases & HWLOC_DISC_PHASE_GLOBAL));
+    /*
+     * Discover CPUs first
+     */
+    dstatus->phase = HWLOC_DISC_PHASE_CPU;
+    hwloc_discover_by_phase(topology, dstatus);
+  }
+
+  if (!(topology->backend_phases & (HWLOC_DISC_PHASE_GLOBAL|HWLOC_DISC_PHASE_CPU))) {
+    hwloc_debug("No GLOBAL or CPU component phase found\n");
+    /* we'll fail below */
+  }
 
   /* One backend should have called hwloc_alloc_root_sets()
    * and set bits during PU and NUMA insert.
    */
   if (!topology->levels[0][0]->cpuset || hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
-    hwloc_debug("%s", "No PU added by any CPU and global backend\n");
+    hwloc_debug("%s", "No PU added by any CPU or GLOBAL component phase\n");
     errno = EINVAL;
     return -1;
   }
@@ -3316,18 +3341,16 @@ hwloc_discover(struct hwloc_topology *topology,
     return -1;
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
-  /*
-   * Additional discovery with other backends
-   */
-  hwloc_discover_by_backend_type(topology,
-				 HWLOC_DISC_COMPONENT_TYPE_MISC,
-				 dstatus);
+  if (topology->backend_phases & HWLOC_DISC_PHASE_MISC) {
+    /*
+     * Additional discovery with other backends
+     */
+    dstatus->phase = HWLOC_DISC_PHASE_MISC;
+    hwloc_discover_by_phase(topology, dstatus);
+  }
 
   if (getenv("HWLOC_DEBUG_SORT_CHILDREN"))
     hwloc_debug_sort_children(topology->levels[0][0]);
-
-  hwloc_debug("%s", "\nNow reconnecting\n");
-  hwloc_debug_print_objects(0, topology->levels[0][0]);
 
   /* Remove some stuff */
 

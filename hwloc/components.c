@@ -251,15 +251,14 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
 	      component->name, HWLOC_COMPONENT_EXCLUDE_CHAR);
     return -1;
   }
-  /* check that the component type is valid */
-  switch ((unsigned) component->type) {
-  case HWLOC_DISC_COMPONENT_TYPE_CPU:
-  case HWLOC_DISC_COMPONENT_TYPE_GLOBAL:
-  case HWLOC_DISC_COMPONENT_TYPE_MISC:
-    break;
-  default:
-    fprintf(stderr, "Cannot register discovery component `%s' with unknown type %u\n",
-	    component->name, (unsigned) component->type);
+
+  /* check that the component phases are valid */
+  if (!component->phases
+      || (component->phases != HWLOC_DISC_PHASE_GLOBAL
+	  && component->phases & ~(HWLOC_DISC_PHASE_CPU
+				   |HWLOC_DISC_PHASE_MISC))) {
+    fprintf(stderr, "Cannot register discovery component `%s' with invalid phases 0x%x\n",
+	    component->name, component->phases);
     return -1;
   }
 
@@ -284,8 +283,8 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
     prev = &((*prev)->next);
   }
   if (hwloc_components_verbose)
-    fprintf(stderr, "Registered discovery component `%s' type %x with priority %u (%s%s)\n",
-	    component->name, component->type, component->priority,
+    fprintf(stderr, "Registered discovery component `%s' phases 0x%x with priority %u (%s%s)\n",
+	    component->name, component->phases, component->priority,
 	    filename ? "from plugin " : "statically build", filename ? filename : "");
 
   prev = &hwloc_disc_components;
@@ -410,7 +409,8 @@ hwloc_topology_components_init(struct hwloc_topology *topology)
   topology->blacklisted_components = NULL;
 
   topology->backends = NULL;
-  topology->backend_excludes = 0;
+  topology->backend_phases = 0;
+  topology->backend_excluded_phases = 0;
 }
 
 static struct hwloc_disc_component *
@@ -513,12 +513,13 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
 {
   struct hwloc_backend *backend;
 
-  if (topology->backend_excludes & comp->type) {
+  if (!(comp->phases & ~topology->backend_excluded_phases)) {
+    /* all this backend phases are already excluded, exclude the backend entirely */
     if (hwloc_components_verbose)
       /* do not warn if envvar_forced since system-wide HWLOC_COMPONENTS must be silently ignored after set_xml() etc.
        */
-      fprintf(stderr, "Excluding discovery component `%s' type %x, conflicts with excludes 0x%x\n",
-	      comp->name, comp->type, topology->backend_excludes);
+      fprintf(stderr, "Excluding discovery component `%s' phases 0x%x, conflicts with excludes 0x%x\n",
+	      comp->name, comp->phases, topology->backend_excluded_phases);
     return -1;
   }
 
@@ -639,8 +640,8 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
       for(i=0; i<topology->nr_blacklisted_components; i++)
 	if (comp == topology->blacklisted_components[i].component) {
 	    if (hwloc_components_verbose)
-	      fprintf(stderr, "Excluding blacklisted discovery component `%s' type %x\n",
-		      comp->name, comp->type);
+	      fprintf(stderr, "Excluding blacklisted discovery component `%s' phases 0x%x\n",
+		      comp->name, comp->phases);
 	    goto nextcomp;
 	}
 
@@ -656,7 +657,7 @@ nextcomp:
     backend = topology->backends;
     fprintf(stderr, "Final list of enabled discovery components: ");
     while (backend != NULL) {
-      fprintf(stderr, "%s%s", first ? "" : ",", backend->component->name);
+      fprintf(stderr, "%s%s(0x%x)", first ? "" : ",", backend->component->name, backend->phases);
       backend = backend->next;
       first = 0;
     }
@@ -707,6 +708,11 @@ hwloc_backend_alloc(struct hwloc_topology *topology,
   }
   backend->component = component;
   backend->topology = topology;
+  /* filter-out component phases that are excluded */
+  backend->phases = component->phases & ~topology->backend_excluded_phases;
+  if (backend->phases != component->phases && hwloc_components_verbose)
+    fprintf(stderr, "Trying discovery component `%s' with phases 0x%x instead of 0x%x\n",
+	    component->name, backend->phases, component->phases);
   backend->flags = 0;
   backend->discover = NULL;
   backend->get_pci_busid_cpuset = NULL;
@@ -733,8 +739,8 @@ hwloc_backend_enable(struct hwloc_backend *backend)
 
   /* check backend flags */
   if (backend->flags) {
-    fprintf(stderr, "Cannot enable discovery component `%s' type %x with unknown flags %lx\n",
-	    backend->component->name, backend->component->type, backend->flags);
+    fprintf(stderr, "Cannot enable discovery component `%s' phases 0x%x with unknown flags %lx\n",
+	    backend->component->name, backend->component->phases, backend->flags);
     return -1;
   }
 
@@ -743,8 +749,8 @@ hwloc_backend_enable(struct hwloc_backend *backend)
   while (NULL != *pprev) {
     if ((*pprev)->component == backend->component) {
       if (hwloc_components_verbose)
-	fprintf(stderr, "Cannot enable  discovery component `%s' type %x twice\n",
-		backend->component->name, backend->component->type);
+	fprintf(stderr, "Cannot enable  discovery component `%s' phases 0x%x twice\n",
+		backend->component->name, backend->component->phases);
       hwloc_backend_disable(backend);
       errno = EBUSY;
       return -1;
@@ -753,8 +759,8 @@ hwloc_backend_enable(struct hwloc_backend *backend)
   }
 
   if (hwloc_components_verbose)
-    fprintf(stderr, "Enabling discovery component `%s' type %x\n",
-	    backend->component->name, backend->component->type);
+    fprintf(stderr, "Enabling discovery component `%s' with phases 0x%x (among 0x%x)\n",
+	    backend->component->name, backend->phases, backend->component->phases);
 
   /* enqueue at the end */
   pprev = &topology->backends;
@@ -763,7 +769,8 @@ hwloc_backend_enable(struct hwloc_backend *backend)
   backend->next = *pprev;
   *pprev = backend;
 
-  topology->backend_excludes |= backend->component->excludes;
+  topology->backend_phases |= backend->component->phases;
+  topology->backend_excluded_phases |= backend->component->excluded_phases;
   return 0;
 }
 
@@ -836,13 +843,13 @@ hwloc_backends_disable_all(struct hwloc_topology *topology)
   while (NULL != (backend = topology->backends)) {
     struct hwloc_backend *next = backend->next;
     if (hwloc_components_verbose)
-      fprintf(stderr, "Disabling discovery component `%s' type %x\n",
-	      backend->component->name, backend->component->type);
+      fprintf(stderr, "Disabling discovery component `%s'\n",
+	      backend->component->name);
     hwloc_backend_disable(backend);
     topology->backends = next;
   }
   topology->backends = NULL;
-  topology->backend_excludes = 0;
+  topology->backend_excluded_phases = 0;
 }
 
 void

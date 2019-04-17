@@ -14,7 +14,7 @@
 #include <nvml.h>
 
 static int
-hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend uses the underlying OS.
@@ -26,6 +26,8 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   enum hwloc_type_filter_e filter;
   nvmlReturn_t ret;
   unsigned nb, i;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_MISC);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &filter);
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
@@ -120,9 +122,9 @@ hwloc_nvml_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_nvml_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_MISC,
   "nvml",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_MISC,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_nvml_component_instantiate,
   5, /* after pci, and after cuda since likely less useful */
   1,

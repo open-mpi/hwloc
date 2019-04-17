@@ -175,7 +175,7 @@ hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_node
 #endif /* MAP_MEM_FIRST_TOUCH */
 
 static int
-hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend uses the underlying OS.
@@ -189,6 +189,8 @@ hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
   ldom_t currentnode;
   hwloc_obj_t *nodes, obj;
   int i, nbnodes = 0;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
@@ -312,9 +314,9 @@ hwloc_hpux_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_hpux_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_CPU,
   "hpux",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_CPU,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_hpux_component_instantiate,
   50,
   1,

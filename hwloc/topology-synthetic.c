@@ -973,7 +973,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 }
 
 static int
-hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend enforces !topology->is_thissystem by default.
@@ -983,6 +983,8 @@ hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *ds
   struct hwloc_synthetic_backend_data_s *data = backend->private_data;
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   unsigned i;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_GLOBAL);
 
   assert(!topology->levels[0][0]->cpuset);
 
@@ -1076,8 +1078,8 @@ hwloc_synthetic_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_synthetic_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   "synthetic",
+  HWLOC_DISC_PHASE_GLOBAL,
   ~0,
   hwloc_synthetic_component_instantiate,
   30,
