@@ -425,13 +425,11 @@ hwloc_topology_components_init(struct hwloc_topology *topology)
 }
 
 static struct hwloc_disc_component *
-hwloc_disc_component_find(int type /* hwloc_disc_component_type_t or -1 if any */,
-			       const char *name /* name of NULL if any */)
+hwloc_disc_component_find(const char *name /* name of NULL if any */)
 {
   struct hwloc_disc_component *comp = hwloc_disc_components;
   while (NULL != comp) {
-    if ((-1 == type || type == (int) comp->type)
-       && (NULL == name || !strcmp(name, comp->name)))
+    if (NULL == name || !strcmp(name, comp->name))
       return comp;
     comp = comp->next;
   }
@@ -462,7 +460,7 @@ hwloc_topology_set_components(struct hwloc_topology *topology,
     return -1;
   }
 
-  comp = hwloc_disc_component_find(-1, name);
+  comp = hwloc_disc_component_find(name);
   if (!comp) {
     errno = EINVAL;
     return -1;
@@ -481,7 +479,7 @@ hwloc_topology_set_components(struct hwloc_topology *topology,
 int
 hwloc_disc_component_force_enable(struct hwloc_topology *topology,
 				  int envvar_forced,
-				  int type, const char *name,
+				  const char *name,
 				  const void *data1, const void *data2, const void *data3)
 {
   struct hwloc_disc_component *comp;
@@ -492,7 +490,7 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
     return -1;
   }
 
-  comp = hwloc_disc_component_find(type, name);
+  comp = hwloc_disc_component_find(name);
   if (!comp) {
     errno = ENOSYS;
     return -1;
@@ -584,7 +582,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	c = curenv[s];
 	curenv[s] = '\0';
 
-	comp = hwloc_disc_component_find(-1, curenv);
+	comp = hwloc_disc_component_find(curenv);
 	if (comp) {
 	  hwloc_disc_component_try_enable(topology, comp, NULL, 1 /* envvar forced */);
 	} else {

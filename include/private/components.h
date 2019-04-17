@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2018 Inria.  All rights reserved.
+ * Copyright © 2012-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -22,7 +22,7 @@ struct hwloc_topology;
 
 extern int hwloc_disc_component_force_enable(struct hwloc_topology *topology,
 					     int envvar_forced, /* 1 if forced through envvar, 0 if forced through API */
-					     int type, const char *name,
+					     const char *name,
 					     const void *data1, const void *data2, const void *data3);
 extern void hwloc_disc_components_enable_others(struct hwloc_topology *topology);
 

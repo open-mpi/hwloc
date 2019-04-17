@@ -3414,7 +3414,7 @@ hwloc_topology_set_synthetic(struct hwloc_topology *topology, const char *descri
 
   return hwloc_disc_component_force_enable(topology,
 					   0 /* api */,
-					   -1, "synthetic",
+					   "synthetic",
 					   description, NULL, NULL);
 }
 
@@ -3429,7 +3429,7 @@ hwloc_topology_set_xml(struct hwloc_topology *topology,
 
   return hwloc_disc_component_force_enable(topology,
 					   0 /* api */,
-					   -1, "xml",
+					   "xml",
 					   xmlpath, NULL, NULL);
 }
 
@@ -3445,7 +3445,7 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology,
 
   return hwloc_disc_component_force_enable(topology,
 					   0 /* api */,
-					   -1, "xml", NULL,
+					   "xml", NULL,
 					   xmlbuffer, (void*) (uintptr_t) size);
 }
 
@@ -3656,7 +3656,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
       if (fsroot_path_env)
 	hwloc_disc_component_force_enable(topology,
 					  1 /* env force */,
-					  HWLOC_DISC_COMPONENT_TYPE_CPU, "linux",
+					  "linux",
 					  NULL /* backend will getenv again */, NULL, NULL);
     }
     if (!topology->backends) {
@@ -3664,7 +3664,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
       if (cpuid_path_env)
 	hwloc_disc_component_force_enable(topology,
 					  1 /* env force */,
-					  HWLOC_DISC_COMPONENT_TYPE_CPU, "x86",
+					  "x86",
 					  NULL /* backend will getenv again */, NULL, NULL);
     }
     if (!topology->backends) {
@@ -3672,7 +3672,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
       if (synthetic_env)
 	hwloc_disc_component_force_enable(topology,
 					  1 /* env force */,
-					  -1, "synthetic",
+					  "synthetic",
 					  synthetic_env, NULL, NULL);
     }
     if (!topology->backends) {
@@ -3680,7 +3680,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
       if (xmlpath_env)
 	hwloc_disc_component_force_enable(topology,
 					  1 /* env force */,
-					  -1, "xml",
+					  "xml",
 					  xmlpath_env, NULL, NULL);
     }
   }
