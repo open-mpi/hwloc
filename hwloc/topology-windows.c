@@ -9,10 +9,10 @@
 /* To try to get all declarations duplicated below.  */
 #define _WIN32_WINNT 0x0601
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/debug.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/debug.h"
 
 #include <windows.h>
 

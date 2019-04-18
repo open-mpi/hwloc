@@ -6,7 +6,7 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
+#include "private/autogen/config.h"
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -23,9 +23,9 @@
 #include <sys/sysctl.h>
 #endif
 
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/debug.h>
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/debug.h"
 
 #if defined(HAVE_SYS_CPUSET_H) && defined(HAVE_CPUSET_SETAFFINITY)
 static void

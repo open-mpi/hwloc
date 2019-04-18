@@ -11,8 +11,9 @@
 #else
 #include <CL/cl.h>
 #endif
-#include <hwloc.h>
-#include <hwloc/opencl.h>
+
+#include "hwloc.h"
+#include "hwloc/opencl.h"
 
 /* check the OpenCL helpers */
 

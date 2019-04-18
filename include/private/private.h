@@ -22,11 +22,12 @@
 #ifndef HWLOC_PRIVATE_H
 #define HWLOC_PRIVATE_H
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <hwloc/bitmap.h>
-#include <private/components.h>
-#include <private/misc.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "hwloc/bitmap.h"
+#include "private/components.h"
+#include "private/misc.h"
+
 #include <sys/types.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

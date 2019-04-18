@@ -9,7 +9,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
+#include "hwloc.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>

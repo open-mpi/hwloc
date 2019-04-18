@@ -4,7 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
+#include "private/autogen/config.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <dirent.h>

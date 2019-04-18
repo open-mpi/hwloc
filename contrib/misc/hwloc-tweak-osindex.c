@@ -8,7 +8,8 @@
  * with respect to their cpusets.
  */
 
-#include <hwloc.h>
+#include "hwloc.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

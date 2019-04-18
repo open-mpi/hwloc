@@ -8,7 +8,7 @@
 
 /* TODO: use SIGRECONFIG & dr_reconfig for state change */
 
-#include <private/autogen/config.h>
+#include "private/autogen/config.h"
 
 #include <sys/types.h>
 #ifdef HAVE_DIRENT_H
@@ -23,10 +23,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/misc.h>
-#include <private/debug.h>
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/misc.h"
+#include "private/debug.h"
 
 #include <procinfo.h>
 #include <sys/types.h>

@@ -5,10 +5,10 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
 #ifdef HWLOC_LINUX_SYS
-#include <hwloc/linux.h>
+#include "hwloc/linux.h"
 #endif
 
 #include <stdlib.h>

@@ -13,7 +13,8 @@
 #ifndef HWLOC_BITMAP_H
 #define HWLOC_BITMAP_H
 
-#include <hwloc/autogen/config.h>
+#include "hwloc/autogen/config.h"
+
 #include <assert.h>
 
 

@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h> /* for HWLOC_WIN_SYS */
-#include <hwloc.h>
+#include "private/autogen/config.h" /* for HWLOC_WIN_SYS */
+#include "hwloc.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <private/misc.h> /* for S_IRWXU */
+#include "private/misc.h" /* for S_IRWXU */
 static inline int mkstemp(char *name)
 {
   mktemp(name);

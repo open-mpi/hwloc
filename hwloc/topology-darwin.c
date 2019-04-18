@@ -11,16 +11,16 @@
 
 /* Apparently, Darwin people do not _want_ to provide binding functions.  */
 
-#include <private/autogen/config.h>
+#include "private/autogen/config.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <stdlib.h>
 #include <inttypes.h>
 
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/debug.h>
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/debug.h"
 
 static int
 hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)

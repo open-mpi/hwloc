@@ -10,11 +10,11 @@
  * $HEADER$
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <private/solaris-chiptype.h>
-#include <private/misc.h>
-#include <private/debug.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "private/solaris-chiptype.h"
+#include "private/misc.h"
+#include "private/debug.h"
 
 #include <stdlib.h>
 #include <strings.h>

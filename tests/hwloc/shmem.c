@@ -3,9 +3,9 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
-#include <hwloc/shmem.h>
-#include <private/misc.h> /* for hwloc_getpagesize() */
+#include "hwloc.h"
+#include "hwloc/shmem.h"
+#include "private/misc.h" /* for hwloc_getpagesize() */
 
 #include <stdlib.h>
 #include <fcntl.h>

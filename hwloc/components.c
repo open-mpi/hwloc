@@ -4,11 +4,11 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/xml.h>
-#include <private/misc.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/xml.h"
+#include "private/misc.h"
 
 #define HWLOC_COMPONENT_STOP_NAME "stop"
 #define HWLOC_COMPONENT_EXCLUDE_CHAR '-'
@@ -310,7 +310,7 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
   return 0;
 }
 
-#include <static-components.h>
+#include "static-components.h"
 
 static void (**hwloc_component_finalize_cbs)(unsigned long);
 static unsigned hwloc_component_finalize_cb_count;

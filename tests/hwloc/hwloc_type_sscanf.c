@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <hwloc.h>
-#include <private/misc.h> /* for for_each_*child() */
+#include "hwloc.h"
+#include "private/misc.h" /* for for_each_*child() */
 
 static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffer, int checkattrs)
 {

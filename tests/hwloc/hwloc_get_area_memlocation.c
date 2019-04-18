@@ -3,7 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
+#include "hwloc.h"
+
 #include <stdio.h>
 #include <assert.h>
 

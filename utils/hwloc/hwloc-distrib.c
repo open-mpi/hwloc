@@ -6,9 +6,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-
+#include "private/autogen/config.h"
+#include "hwloc.h"
 #include "misc.h"
 
 #ifdef HAVE_UNISTD_H

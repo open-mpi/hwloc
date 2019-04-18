@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
-#include <private/misc.h> /* for hwloc_bitmap_compare_inclusion() */
+#include "hwloc.h"
+#include "private/misc.h" /* for hwloc_bitmap_compare_inclusion() */
 
 #include <assert.h>
 

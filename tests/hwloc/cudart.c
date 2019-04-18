@@ -7,8 +7,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <cuda_runtime_api.h>
-#include <hwloc.h>
-#include <hwloc/cudart.h>
+
+#include "hwloc.h"
+#include "hwloc/cudart.h"
 
 /* check the CUDA Runtime API helpers */
 

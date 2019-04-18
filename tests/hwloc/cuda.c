@@ -7,8 +7,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <cuda.h>
-#include <hwloc.h>
-#include <hwloc/cuda.h>
+
+#include "hwloc.h"
+#include "hwloc/cuda.h"
 
 /* check the CUDA Driver API helpers */
 

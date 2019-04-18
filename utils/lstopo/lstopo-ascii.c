@@ -10,8 +10,8 @@
  * Pretty text output
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
 
 #ifdef HAVE_NL_LANGINFO
 #include <langinfo.h>

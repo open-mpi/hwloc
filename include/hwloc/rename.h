@@ -7,7 +7,7 @@
 #ifndef HWLOC_RENAME_H
 #define HWLOC_RENAME_H
 
-#include <hwloc/autogen/config.h>
+#include "hwloc/autogen/config.h"
 
 
 #ifdef __cplusplus

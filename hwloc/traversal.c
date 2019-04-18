@@ -6,11 +6,12 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/misc.h>
-#include <private/debug.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/misc.h"
+#include "private/debug.h"
+
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */

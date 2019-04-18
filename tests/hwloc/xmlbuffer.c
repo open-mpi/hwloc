@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <hwloc.h>
+
+#include "hwloc.h"
 
 static int one_test(void)
 {

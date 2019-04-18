@@ -16,7 +16,7 @@
 #ifndef PRIVATE_COMPONENTS_H
 #define PRIVATE_COMPONENTS_H 1
 
-#include <hwloc/plugins.h>
+#include "hwloc/plugins.h"
 
 struct hwloc_topology;
 

@@ -8,8 +8,8 @@
 #ifndef UTILS_HWLOC_PS_H
 #define UTILS_HWLOC_PS_H
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
 
 #define HWLOC_PS_TIDNAME_MAX 16 /* specified in pthread_setname_np.3 */
 

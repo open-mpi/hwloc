@@ -3,11 +3,10 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/debug.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/debug.h"
 
 #include <stdlib.h>
 #include <pthread.h>

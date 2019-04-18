@@ -5,7 +5,7 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
+#include "hwloc.h"
 
 #include <stdlib.h>
 #include <stdio.h>

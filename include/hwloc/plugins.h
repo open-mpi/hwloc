@@ -13,7 +13,8 @@
 
 struct hwloc_backend;
 
-#include <hwloc.h>
+#include "hwloc.h"
+
 #ifdef HWLOC_INSIDE_PLUGIN
 /* needed for hwloc_plugin_check_namespace() */
 #include <ltdl.h>

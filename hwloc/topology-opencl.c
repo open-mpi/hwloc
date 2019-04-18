@@ -4,13 +4,13 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <hwloc/plugins.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "hwloc/plugins.h"
 
 /* private headers allowed for convenience because this plugin is built within hwloc */
-#include <private/misc.h>
-#include <private/debug.h>
+#include "private/misc.h"
+#include "private/debug.h"
 
 #define CL_TARGET_OPENCL_VERSION 220
 #ifdef __APPLE__
@@ -19,7 +19,7 @@
 #include <CL/cl.h>
 #endif
 
-#include <hwloc/opencl.h>
+#include "hwloc/opencl.h"
 
 
 /* OpenCL extensions aren't always shipped with default headers,

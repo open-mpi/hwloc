@@ -6,9 +6,9 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <private/private.h>
-#include <private/misc.h>
+#include "private/autogen/config.h"
+#include "private/private.h"
+#include "private/misc.h"
 
 #include <stdarg.h>
 #ifdef HAVE_SYS_UTSNAME_H

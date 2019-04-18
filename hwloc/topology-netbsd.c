@@ -8,7 +8,7 @@
 
 #define _NETBSD_SOURCE /* request "_np" functions */
 
-#include <private/autogen/config.h>
+#include "private/autogen/config.h"
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -20,9 +20,9 @@
 #include <sys/sysctl.h>
 #endif
 
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/debug.h>
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/debug.h"
 
 static void
 hwloc_netbsd_bsd2hwloc(hwloc_bitmap_t hwloc_cpuset, const cpuset_t *cpuset)

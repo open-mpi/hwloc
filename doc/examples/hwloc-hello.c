@@ -11,7 +11,8 @@
  * hwloc-hello.c
  */
 
-#include <hwloc.h>
+#include "hwloc.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>

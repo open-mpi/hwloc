@@ -6,7 +6,7 @@
 #ifndef PRIVATE_XML_H
 #define PRIVATE_XML_H 1
 
-#include <hwloc.h>
+#include "hwloc.h"
 
 #include <sys/types.h>
 

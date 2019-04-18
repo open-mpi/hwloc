@@ -6,10 +6,11 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <private/private.h>
-#include <hwloc/helper.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "private/private.h"
+#include "hwloc/helper.h"
+
 #ifdef HAVE_SYS_MMAN_H
 #  include <sys/mman.h>
 #endif

@@ -3,9 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-
+#include "private/autogen/config.h"
+#include "hwloc.h"
 #include "misc.h"
 
 #include <stdio.h>
@@ -13,7 +12,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-#include <private/cpuid-x86.h>
+#include "private/cpuid-x86.h"
 
 #if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
 #include <direct.h>

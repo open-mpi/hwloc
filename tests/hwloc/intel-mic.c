@@ -5,8 +5,9 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <hwloc.h>
-#include <hwloc/intel-mic.h>
+
+#include "hwloc.h"
+#include "hwloc/intel-mic.h"
 
 int main(void)
 {

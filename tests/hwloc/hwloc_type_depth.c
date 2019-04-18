@@ -6,8 +6,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
-#include <private/misc.h> /* for HWLOC_OBJ_TYPE_NONE */
+#include "hwloc.h"
+#include "private/misc.h" /* for HWLOC_OBJ_TYPE_NONE */
 
 #include <stdio.h>
 #include <assert.h>

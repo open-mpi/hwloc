@@ -9,7 +9,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <hwloc.h>
+#include "hwloc.h"
 
 hwloc_topology_t topology;
 const struct hwloc_topology_support *support;

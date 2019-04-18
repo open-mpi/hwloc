@@ -14,13 +14,12 @@
  * on various architectures, without having to use this x86-specific code.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/debug.h>
-#include <private/misc.h>
-
-#include <private/cpuid-x86.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/debug.h"
+#include "private/misc.h"
+#include "private/cpuid-x86.h"
 
 #include <sys/types.h>
 #ifdef HAVE_DIRENT_H

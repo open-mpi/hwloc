@@ -15,7 +15,7 @@
    pthread_pset_bind_np()
  */
 
-#include <private/autogen/config.h>
+#include "private/autogen/config.h"
 
 #include <sys/types.h>
 #ifdef HAVE_UNISTD_H
@@ -25,9 +25,9 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include <hwloc.h>
-#include <private/private.h>
-#include <private/debug.h>
+#include "hwloc.h"
+#include "private/private.h"
+#include "private/debug.h"
 
 #include <sys/mpctl.h>
 #include <sys/mman.h>

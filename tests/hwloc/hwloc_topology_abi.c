@@ -3,10 +3,9 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
-
-#include <private/debug.h> /* HWLOC_BUILD_ASSERT */
-#include <private/private.h> /* for struct topology fields */
+#include "hwloc.h"
+#include "private/debug.h" /* HWLOC_BUILD_ASSERT */
+#include "private/private.h" /* for struct topology fields */
 
 #include <stdlib.h>
 #include <stdio.h>

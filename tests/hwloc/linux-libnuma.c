@@ -6,10 +6,12 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
+#include "hwloc.h"
+
 #include <assert.h>
+
 #define NUMA_VERSION1_COMPATIBILITY
-#include <hwloc/linux-libnuma.h>
+#include "hwloc/linux-libnuma.h"
 
 /* check the linux libnuma helpers */
 

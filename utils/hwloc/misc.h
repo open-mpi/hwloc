@@ -9,9 +9,9 @@
 #ifndef HWLOC_UTILS_MISC_H
 #define HWLOC_UTILS_MISC_H
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <private/misc.h> /* for hwloc_strncasecmp() */
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "private/misc.h" /* for hwloc_strncasecmp() */
 
 #include <stdio.h>
 #include <string.h>

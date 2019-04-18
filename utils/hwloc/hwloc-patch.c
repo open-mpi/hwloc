@@ -3,10 +3,9 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <hwloc/diff.h>
-
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "hwloc/diff.h"
 #include "misc.h"
 
 void usage(const char *callname __hwloc_attribute_unused, FILE *where)

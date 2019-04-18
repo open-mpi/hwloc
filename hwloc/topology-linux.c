@@ -8,13 +8,13 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <hwloc/linux.h>
-#include <private/misc.h>
-#include <private/private.h>
-#include <private/misc.h>
-#include <private/debug.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "hwloc/linux.h"
+#include "private/misc.h"
+#include "private/private.h"
+#include "private/misc.h"
+#include "private/debug.h"
 
 #include <limits.h>
 #include <stdio.h>

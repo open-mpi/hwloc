@@ -1,4 +1,5 @@
-#include <hwloc.h>
+#include "hwloc.h"
+
 #include <stdio.h>
 
 /* The body of the test is in a separate .c file and a separate

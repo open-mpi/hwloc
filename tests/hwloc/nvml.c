@@ -6,8 +6,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <nvml.h>
-#include <hwloc.h>
-#include <hwloc/nvml.h>
+
+#include "hwloc.h"
+#include "hwloc/nvml.h"
 
 /* check the NVML helpers */
 

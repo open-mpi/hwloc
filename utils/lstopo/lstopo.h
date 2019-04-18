@@ -9,9 +9,9 @@
 #ifndef UTILS_LSTOPO_H
 #define UTILS_LSTOPO_H
 
-#include <private/autogen/config.h>
-#include <hwloc.h>
-#include <misc.h>
+#include "private/autogen/config.h"
+#include "hwloc.h"
+#include "misc.h"
 
 enum lstopo_drawing_e {
   LSTOPO_DRAWING_PREPARE,

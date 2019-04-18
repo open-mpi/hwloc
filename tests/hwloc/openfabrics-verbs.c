@@ -9,8 +9,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <infiniband/verbs.h>
-#include <hwloc.h>
-#include <hwloc/openfabrics-verbs.h>
+
+#include "hwloc.h"
+#include "hwloc/openfabrics-verbs.h"
 
 /* check the ibverbs helpers */
 

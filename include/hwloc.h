@@ -53,7 +53,8 @@
 #ifndef HWLOC_H
 #define HWLOC_H
 
-#include <hwloc/autogen/config.h>
+#include "hwloc/autogen/config.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
@@ -62,13 +63,13 @@
 /*
  * Symbol transforms
  */
-#include <hwloc/rename.h>
+#include "hwloc/rename.h"
 
 /*
  * Bitmap definitions
  */
 
-#include <hwloc/bitmap.h>
+#include "hwloc/bitmap.h"
 
 
 #ifdef __cplusplus
@@ -2326,21 +2327,21 @@ HWLOC_DECLSPEC int hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src
 
 
 /* high-level helpers */
-#include <hwloc/helper.h>
+#include "hwloc/helper.h"
 
 /* inline code of some functions above */
-#include <hwloc/inlines.h>
+#include "hwloc/inlines.h"
 
 /* exporting to XML or synthetic */
-#include <hwloc/export.h>
+#include "hwloc/export.h"
 
 /* distances */
-#include <hwloc/distances.h>
+#include "hwloc/distances.h"
 
 /* topology diffs */
-#include <hwloc/diff.h>
+#include "hwloc/diff.h"
 
 /* deprecated headers */
-#include <hwloc/deprecated.h>
+#include "hwloc/deprecated.h"
 
 #endif /* HWLOC_H */
