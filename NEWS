@@ -43,14 +43,13 @@ Version 2.1.0
     - They may be kept if HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES=1 in the environment.
       Fix their CPU locality and add info attributes to identify them.
     Thanks to Max Katz and Edgar Leon for the help.
-  + Expose Linux DAX devices as hwloc Block OS devices.
   + Add support for IBM S/390 drawers.
   + Rework the heuristics for discovering KNL Cluster and Memory modes
     to stop assuming all CPUs are online (required for mOS support).
     Thanks to Sharath K Bhat for testing patches.
   + Ignore NUMA node information from AMD topoext in the x86 backend,
     unless HWLOC_X86_TOPOEXT_NUMANODES=1 is set in the environment.
-  + Improve support for new kinds of dax devices on Linux.
+  + Expose Linux DAX devices as hwloc Block OS devices.
   + Remove support for /proc/cpuinfo-only topology discovery in Linux
     kernel prior to 2.6.16.
 * Tools
