@@ -37,6 +37,7 @@ Version 2.1.0
 * Backends
   + Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
     Tiles, Modules and Dies are exposed as Groups for now.
+  + Improve memory locality on Linux by using NUMA distances for CPU-less nodes.
   + The x86 now properly handles offline CPUs.
   + Detect the locality of NVIDIA GPU OpenCL devices.
   + Ignore NUMA nodes that correspond to NVIDIA GPU by default.
