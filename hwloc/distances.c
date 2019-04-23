@@ -298,7 +298,7 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology,
 static void
 hwloc_internal_distances_restrict(hwloc_obj_t *objs,
 				  uint64_t *indexes,
-				  hwloc_uint64_t *values,
+				  uint64_t *values,
 				  unsigned nbobjs, unsigned disappeared);
 
 int hwloc_internal_distances_add(hwloc_topology_t topology,
@@ -460,7 +460,7 @@ static hwloc_obj_t hwloc_find_obj_by_type_and_gp_index(hwloc_topology_t topology
 static void
 hwloc_internal_distances_restrict(hwloc_obj_t *objs,
 				  uint64_t *indexes,
-				  hwloc_uint64_t *values,
+				  uint64_t *values,
 				  unsigned nbobjs, unsigned disappeared)
 {
   unsigned i, newi;
