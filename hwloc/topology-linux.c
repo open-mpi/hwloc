@@ -3703,6 +3703,35 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
  ****** Sysfs Topology Discovery ******
  **************************************/
 
+/* try to find locality of CPU-less NUMA nodes by looking at their distances */
+static int
+fixup_cpuless_node_locality_from_distances(unsigned i,
+					   unsigned nbnodes, hwloc_obj_t *nodes, uint64_t *distances)
+{
+  unsigned min = UINT_MAX;
+  unsigned nb = 0, j;
+
+  for(j=0; j<nbnodes; j++) {
+    if (j==i || !nodes[j])
+      continue;
+    if (distances[i*nbnodes+j] < min) {
+      min = distances[i*nbnodes+j];
+      nb = 1;
+    } else if (distances[i*nbnodes+j] == min) {
+      nb++;
+    }
+  }
+
+  if (min <= distances[i*nbnodes+i] || min == UINT_MAX || nb == nbnodes-1)
+    return -1;
+
+  /* not local, but closer to *some* other nodes */
+  for(j=0; j<nbnodes; j++)
+    if (j!=i && nodes[j] && distances[i*nbnodes+j] == min)
+      hwloc_bitmap_or(nodes[i]->cpuset, nodes[i]->cpuset, nodes[j]->cpuset);
+  return 0;
+}
+
 static unsigned *
 list_sysfsnode(struct hwloc_linux_backend_data_s *data,
 	       const char *path,
@@ -3995,27 +4024,8 @@ look_sysfsnode(struct hwloc_topology *topology,
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
 	if (node && hwloc_bitmap_iszero(node->cpuset)) {
-	 if (distances) {
-	  /* try to find locality of CPU-less NUMA nodes by looking at their distances */
-	  unsigned min = UINT_MAX;
-	  unsigned nb = 0, j;
-	  for(j=0; j<nbnodes; j++) {
-	    if (j==i || !nodes[j])
-	      continue;
-	    if (distances[i*nbnodes+j] < min) {
-	      min = distances[i*nbnodes+j];
-	      nb = 1;
-	    } else if (distances[i*nbnodes+j] == min) {
-	      nb++;
-	    }
-	  }
-	  if (min > distances[i*nbnodes+i] && min != UINT_MAX && nb != nbnodes-1) {
-	    /* not local, but closer to *some* other nodes */
-	    for(j=0; j<nbnodes; j++)
-	      if (j!=i && nodes[j] && distances[i*nbnodes+j] == min)
-		hwloc_bitmap_or(nodes[i]->cpuset, nodes[i]->cpuset, nodes[j]->cpuset);
-	  }
-	 }
+	  if (distances)
+	    fixup_cpuless_node_locality_from_distances(i, nbnodes, nodes, distances);
 
 	  trees[nr_trees++] = node;
 	}
