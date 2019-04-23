@@ -475,7 +475,7 @@ static void read_amd_cores_legacy(struct procinfo *infos, struct cpuiddump *src_
 /* AMD unit/node from CPUID 0x8000001e leaf (topoext) */
 static void read_amd_cores_topoext(struct procinfo *infos, unsigned long flags, struct cpuiddump *src_cpuiddump)
 {
-  unsigned apic_id, nodes_per_proc;
+  unsigned apic_id, nodes_per_proc = 0;
   unsigned eax, ebx, ecx, edx;
 
   eax = 0x8000001e;
