@@ -145,6 +145,52 @@ savedir() {
   done
 }
 
+# Save a class directory, including symlink targets (except in /devices/pci) and their device symlinks if any
+saveclassdir() {
+  local dest="$1"
+  local classname="$2"
+
+  test -d /sys/class/$classname/ || return
+
+  savedir "$dest" /sys/class/$classname/
+
+  for dev in $(ls /sys/class/$classname/); do
+    target=$(readlink /sys/class/$classname/$dev 2>/dev/null | grep -v /devices/pci)
+    if test "x$target" != x; then
+       savedir "$dest" "/sys/class/$classname/$target"
+    fi
+    device=$(readlink /sys/class/$classname/$target/device 2>/dev/null | grep -v /devices/pci)
+    if test "x$device" != x; then
+       savedir "$dest" "/sys/class/$classname/$target/$device"
+    fi
+  done
+}
+
+# Save a bus devices directory, include symlinks target (except in /devices/pci) with a possible relative path, and their device symlink if any
+savebusdir() {
+  local dest="$1"
+  local busname="$2"
+  local relpath="$3"
+
+  test -d /sys/bus/$busname/devices/ || return
+
+  savedir "$dest" /sys/bus/$busname/devices/
+
+  for dev in $(ls /sys/bus/$busname/devices/); do
+    target=$(readlink /sys/bus/$busname/devices/$dev 2>/dev/null | grep -v /devices/pci)
+    if test "x$target" != x; then
+       savedir "$dest" "/sys/bus/$busname/devices/$target/$relpath"
+    fi
+    device=$(readlink /sys/bus/$busname/devices/$target/$relpath/device 2>/dev/null | grep -v /devices/pci)
+    if test "x$device" != x; then
+       savedir "$dest" "/sys/bus/$busname/devices/$target/$relpath/$device"
+    fi
+  done
+}
+
+# savedir "$destdir/$basename" /sys/bus/dax/devices/
+# readlink /sys/bus/dax/devices/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/bus/dax/devices/$path/.." ; done
+
 # Get an entire mount point, after decoding its path
 # we don't support path with \n since it would break in 'find ... | while read ..." above
 savemntpnt() {
@@ -219,28 +265,19 @@ done
 #
 if [ x$gatherio = x1 ]; then
   echo "Gathering I/O files..."
+  # gather all PCI stuff, lots of links (/sys/bus/pci/devices/* and /sys/class/foo/*) point there
   savedir "$destdir/$basename" /sys/bus/pci/devices/
   savedir "$destdir/$basename" /sys/bus/pci/slots/
-  # gather class links, we'll parse that the target path for PCI busids
-  savedir "$destdir/$basename" /sys/class/block/
-  savedir "$destdir/$basename" /sys/class/dax/
-  savedir "$destdir/$basename" /sys/bus/dax/devices/
-  savedir "$destdir/$basename" /sys/class/dma/
-  savedir "$destdir/$basename" /sys/class/drm/
-  savedir "$destdir/$basename" /sys/class/infiniband/
-  savedir "$destdir/$basename" /sys/class/net/
-  savedir "$destdir/$basename" /sys/class/mic/
-  # gather all PCI stuff, lots of links (/sys/bus/pci/devices/* and /sys/class/foo/*) point there
   ls -d /sys/devices/pci* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
-  # gather what non-PCI class links point
-  readlink /sys/class/block/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/block/$path" ; done
-  readlink /sys/class/dax/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/dax/$path" ; done
-  readlink /sys/bus/dax/devices/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/bus/dax/devices/$path/.." ; done
-  readlink /sys/class/dma/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/dma/$path" ; done
-  readlink /sys/class/drm/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/drm/$path" ; done
-  readlink /sys/class/infiniband/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/infiniband/$path" ; done
-  readlink /sys/class/net/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/net/$path" ; done
-  readlink /sys/class/mic/* 2>/dev/null | grep -v /devices/pci | while read -r path ; do savedir "$destdir/$basename" "/sys/class/mic/$path" ; done
+  # gather class and bus links, we'll parse that the target path for PCI busids
+  saveclassdir "$destdir/$basename" block
+  saveclassdir "$destdir/$basename" dax
+  savebusdir "$destdir/$basename" dax ..
+  saveclassdir "$destdir/$basename" dma
+  saveclassdir "$destdir/$basename" drm
+  saveclassdir "$destdir/$basename" infiniband
+  saveclassdir "$destdir/$basename" net
+  saveclassdir "$destdir/$basename" mic
   # udev block data
   ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
 fi
