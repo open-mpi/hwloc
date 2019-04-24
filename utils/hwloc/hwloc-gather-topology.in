@@ -230,8 +230,6 @@ if [ x$gatherio = x1 ]; then
   savedir "$destdir/$basename" /sys/class/infiniband/
   savedir "$destdir/$basename" /sys/class/net/
   savedir "$destdir/$basename" /sys/class/mic/
-  savedir "$destdir/$basename" /sys/class/dax/
-  savedir "$destdir/$basename" /sys/bus/dax/devices/
   # gather all PCI stuff, lots of links (/sys/bus/pci/devices/* and /sys/class/foo/*) point there
   ls -d /sys/devices/pci* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
   # gather what non-PCI class links point
