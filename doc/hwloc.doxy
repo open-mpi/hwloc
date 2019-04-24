@@ -1168,6 +1168,8 @@ following environment variables.
 </dl>
 
 <!-- not documented:
+ HWLOC_USE_DT
+  enables the use of the POWER Device-Tree on Linux (disabled by default since 2.1)
  HWLOC_KNL_NUMA_QUIRK
   disables the KNL NUMA Cluster quirk in the linux backend
  HWLOC_KNL_HDH_FALLBACK

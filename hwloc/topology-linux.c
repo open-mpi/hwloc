@@ -56,6 +56,7 @@ struct hwloc_linux_backend_data_s {
   } arch;
   int is_knl;
   int is_amd_with_CU;
+  int use_dt;
   struct utsname utsname; /* fields contain \0 when unknown */
   int fallback_nbprocessors; /* only used in hwloc_linux_fallback_pu_level(), maybe be <= 0 (error) earlier */
   unsigned pagesize;
@@ -4477,7 +4478,7 @@ look_sysfscpu(struct hwloc_topology *topology,
     packages = next;
   }
 
-  if (0 == caches_added)
+  if (0 == caches_added && data->use_dt)
     look_powerpc_device_tree(topology, data);
 
   hwloc_bitmap_free(cpuset);
@@ -5142,7 +5143,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     /* /sys/.../topology unavailable (before 2.6.16)
      * or not containing anything interesting */
     hwloc_linux_fallback_pu_level(backend);
-    look_powerpc_device_tree(topology, data);
+    if (data->use_dt)
+      look_powerpc_device_tree(topology, data);
 
   } else {
     /* sysfs */
@@ -5245,6 +5247,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   struct hwloc_linux_backend_data_s *data;
   const char * fsroot_path;
   int root = -1;
+  char *env;
 
   backend = hwloc_backend_alloc(component);
   if (!backend)
@@ -5265,6 +5268,7 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->is_knl = 0;
   data->is_amd_with_CU = 0;
+  data->use_dt = 0;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");
@@ -5311,6 +5315,10 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   data->dumped_hwdata_dirname = getenv("HWLOC_DUMPED_HWDATA_DIR");
   if (!data->dumped_hwdata_dirname)
     data->dumped_hwdata_dirname = (char *) RUNSTATEDIR "/hwloc/";
+
+  env = getenv("HWLOC_USE_DT");
+  if (env)
+    data->use_dt = atoi(env);
 
   return backend;
 

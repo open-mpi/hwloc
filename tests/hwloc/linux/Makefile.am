@@ -147,6 +147,7 @@ sysfs_options = \
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 sysfs_envs = \
+		256ppc-8n8s4t-nocache.env \
 		40intel64-2g2n4c+pci.env \
 		40intel64-4n10c+pci-conflicts.env \
 		nvidiagpunumanodes.kept.env \
