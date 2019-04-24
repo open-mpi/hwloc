@@ -5540,19 +5540,21 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
     sectorsize = strtoul(line, NULL, 10);
   }
 
-  /* pmem have device/devtype containing "nd_btt" (sectors)
-   * or "nd_namespace_io" (byte-granularity).
-   * Note that device/sector_size in btt devices includes integrity metadata
-   * (512/4096 block + 0/N) while queue/hw_sector_size above is the user sectorsize
-   * without metadata.
-   */
   snprintf(path, sizeof(path), "%s/%s/devtype", osdevpath, devicesubdir);
   if (!hwloc_read_path_by_length(path, line, sizeof(line), root_fd)) {
-    if (!strncmp(line, "nd_", 3)) {
+    /* non-volatile devices use the following subtypes:
+     * nd_namespace_pmem for pmem/raw (/dev/pmemX)
+     * nd_btt for pmem/sector (/dev/pmemXs)
+     * nd_pfn for pmem/fsdax (/dev/pmemX)
+     * nd_dax for pmem/devdax (/dev/daxX) but it's not a block device anyway
+     * nd_namespace_blk for blk/raw and blk/sector (/dev/ndblkX) ?
+     *
+     * Note that device/sector_size in btt devices includes integrity metadata
+     * (512/4096 block + 0/N) while queue/hw_sector_size above is the user sectorsize
+     * without metadata.
+     */
+    if (!strncmp(line, "nd_", 3))
       strcpy(blocktype, "NVDIMM"); /* Save the blocktype now since udev reports "" so far */
-      if (!strcmp(line, "nd_namespace_io"))
-	sectorsize = 1;
-    }
   }
   if (sectorsize) {
     snprintf(line, sizeof(line), "%u", sectorsize);
