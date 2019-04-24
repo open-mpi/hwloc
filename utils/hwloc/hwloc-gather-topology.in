@@ -137,11 +137,11 @@ savedir() {
   done
   # gather all files now
   find "$path" -type f 2>/dev/null | while read -r file ; do
-    _savefile "$dest" "$file"
+    test -e "$dest/$file" || _savefile "$dest" "$file"
   done
   # gather symlinks
   find "$path" -type l 2>/dev/null | while read -r link ; do
-    _savelink "$dest" "$link"
+    test -e "$dest/$link" || _savelink "$dest" "$link"
   done
 }
 
