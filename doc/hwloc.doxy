@@ -1177,6 +1177,9 @@ following environment variables.
   if 0, never fallback to the hardwired heuristic, useful if the heuristic is wrong
  HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS
   don't ignore linux numa nodes with overlapping cpusets
+ HWLOC_DEBUG_SORT_CHILDREN
+  sort osdev I/O children by name to make sure the topology doesn't depend
+  on the ordering of dentries in the local filesystem (for Linux fsroot tests)
  HWLOC_DEBUG_CHECK
   runs sanity checks during discovery, as if \--enable-debug was passed but
   without debug messages

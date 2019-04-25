@@ -2937,6 +2937,61 @@ hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags)
   return 0;
 }
 
+/* for regression testing, make sure the order of io devices
+ * doesn't change with the dentry order in the filesystem
+ *
+ * Only needed for OSDev for now.
+ */
+static hwloc_obj_t
+hwloc_debug_insert_osdev_sorted(hwloc_obj_t queue, hwloc_obj_t obj)
+{
+  hwloc_obj_t *pcur = &queue;
+  while (*pcur && strcmp((*pcur)->name, obj->name) < 0)
+    pcur = &((*pcur)->next_sibling);
+  obj->next_sibling = *pcur;
+  *pcur = obj;
+  return queue;
+}
+
+static void
+hwloc_debug_sort_children(hwloc_obj_t root)
+{
+  hwloc_obj_t child;
+
+  if (root->io_first_child) {
+    hwloc_obj_t osdevqueue, *pchild;
+
+    pchild = &root->io_first_child;
+    osdevqueue = NULL;
+    while ((child = *pchild) != NULL) {
+      if (child->type != HWLOC_OBJ_OS_DEVICE) {
+	/* keep non-osdev untouched */
+	pchild = &child->next_sibling;
+	continue;
+      }
+
+      /* dequeue this child */
+      *pchild = child->next_sibling;
+      child->next_sibling = NULL;
+
+      /* insert in osdev queue in order */
+      osdevqueue = hwloc_debug_insert_osdev_sorted(osdevqueue, child);
+    }
+
+    /* requeue the now-sorted osdev queue */
+    *pchild = osdevqueue;
+  }
+
+  /* Recurse */
+  for_each_child(child, root)
+    hwloc_debug_sort_children(child);
+  for_each_memory_child(child, root)
+    hwloc_debug_sort_children(child);
+  for_each_io_child(child, root)
+    hwloc_debug_sort_children(child);
+  /* no I/O under Misc */
+}
+
 void hwloc_alloc_root_sets(hwloc_obj_t root)
 {
   /*
@@ -3147,6 +3202,9 @@ next_cpubackend:
 next_noncpubackend:
     backend = backend->next;
   }
+
+  if (getenv("HWLOC_DEBUG_SORT_CHILDREN"))
+    hwloc_debug_sort_children(topology->levels[0][0]);
 
   hwloc_debug("%s", "\nNow reconnecting\n");
   hwloc_debug_print_objects(0, topology->levels[0][0]);
