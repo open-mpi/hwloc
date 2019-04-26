@@ -87,6 +87,19 @@ static pthread_mutex_t hwloc_pciaccess_mutex = PTHREAD_MUTEX_INITIALIZER;
 #error No mutex implementation available
 #endif
 
+static void
+hwloc_pci_get_obj_names(hwloc_obj_t obj, struct pci_id_match *m)
+{
+  const char *vendorname, *devicename;
+  m->vendor_id = obj->attr->pcidev.vendor_id;
+  m->device_id = obj->attr->pcidev.device_id;
+  pci_get_strings(m, &devicename, &vendorname, NULL, NULL);
+  if (vendorname && *vendorname)
+    hwloc_obj_add_info(obj, "PCIVendor", vendorname);
+  if (devicename && *devicename)
+    hwloc_obj_add_info(obj, "PCIDevice", devicename);
+}
+
 static int
 hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -102,6 +115,13 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
+  struct pci_id_match m;
+
+  m.subvendor_id = PCI_MATCH_ANY;
+  m.subdevice_id = PCI_MATCH_ANY;
+  m.device_class = 0;
+  m.device_class_mask = 0;
+  m.match_data = 0;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_PCI);
 
@@ -133,7 +153,6 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
        pcidev;
        pcidev = pci_device_next(iter))
   {
-    const char *vendorname, *devicename;
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     hwloc_obj_type_t type;
     struct hwloc_obj *obj;
@@ -310,22 +329,11 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
        */
     }
 
-    /* get the vendor name */
-    vendorname = pci_device_get_vendor_name(pcidev);
-    if (vendorname && *vendorname)
-      hwloc_obj_add_info(obj, "PCIVendor", vendorname);
-
-    /* get the device name */
-    devicename = pci_device_get_device_name(pcidev);
-    if (devicename && *devicename)
-      hwloc_obj_add_info(obj, "PCIDevice", devicename);
-
-    hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s %s\n",
+    hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x\n",
 		domain, bus, dev, func,
-		device_class, pcidev->vendor_id, pcidev->device_id,
-		vendorname && *vendorname ? vendorname : "??",
-		devicename && *devicename ? devicename : "??");
+		device_class, pcidev->vendor_id, pcidev->device_id);
 
+    hwloc_pci_get_obj_names(obj, &m);
     hwloc_pcidisc_tree_insert_by_busid(&tree, obj);
   }
 
