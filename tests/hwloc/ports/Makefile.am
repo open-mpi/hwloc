@@ -1,4 +1,4 @@
-# Copyright © 2009-2016 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -28,10 +28,10 @@ check_LIBRARIES = \
 endif HWLOC_HAVE_LINUX
 
 # Note that AC_CONFIG_LINKS sets up the sym links for the files in
-# this directory (back to the $top_srcdir/src directory).  So if you
+# this directory (back to the $top_srcdir/hwloc directory).  So if you
 # need more sym-linked files in here, go edit configure.ac.  Note that
 # we have to use sym links in here rather than just directly
-# referencing the files via $HWLOC_top_srcdir/src/foo.c because of
+# referencing the files via $HWLOC_top_srcdir/hwloc/foo.c because of
 # dependencies issues when using the Automake option "subdir-objects".
 # We nodist these because they're created by configure.
 
