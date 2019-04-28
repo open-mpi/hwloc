@@ -23,6 +23,11 @@
 #define close _close
 #endif
 
+
+/**************************************
+ * Init/Exit and Forced PCI localities
+ */
+
 static void
 hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
 				    const char *string /* must contain a ' ' */,
@@ -171,6 +176,11 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology)
 
   hwloc_pci_discovery_init(topology);
 }
+
+
+/******************************
+ * Inserting in Tree by Bus ID
+ */
 
 #ifdef HWLOC_DEBUG
 static void
@@ -333,6 +343,11 @@ hwloc_pcidisc_tree_insert_by_busid(struct hwloc_obj **treep,
 {
   hwloc_pci_add_object(NULL /* no parent on top of tree */, treep, obj);
 }
+
+
+/**********************
+ * Attaching PCI Trees
+ */
 
 static struct hwloc_obj *
 hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
@@ -632,6 +647,11 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
   return 0;
 }
 
+
+/*********************************
+ * Finding PCI objects or parents
+ */
+
 struct hwloc_obj *
 hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
 			       unsigned domain, unsigned bus, unsigned dev, unsigned func)
@@ -740,6 +760,11 @@ hwloc_pci_find_by_busid(struct hwloc_topology *topology,
     return parent;
   }
 }
+
+
+/*******************************
+ * Parsing the PCI Config Space
+ */
 
 #define HWLOC_PCI_STATUS 0x06
 #define HWLOC_PCI_STATUS_CAP_LIST 0x10
@@ -865,6 +890,11 @@ hwloc_pcidisc_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, uns
   *subordinate_busp = subordinate_bus;
   return 0;
 }
+
+
+/****************
+ * Class Strings
+ */
 
 const char *
 hwloc_pci_class_string(unsigned short class_id)
