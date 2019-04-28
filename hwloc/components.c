@@ -509,7 +509,6 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
 static int
 hwloc_disc_component_try_enable(struct hwloc_topology *topology,
 				struct hwloc_disc_component *comp,
-				const char *comparg,
 				int envvar_forced)
 {
   struct hwloc_backend *backend;
@@ -523,7 +522,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
     return -1;
   }
 
-  backend = comp->instantiate(topology, comp, comparg, NULL, NULL);
+  backend = comp->instantiate(topology, comp, NULL, NULL, NULL);
   if (!backend) {
     if (hwloc_components_verbose || envvar_forced)
       fprintf(stderr, "Failed to instantiate discovery component `%s'\n", comp->name);
@@ -584,7 +583,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 
 	comp = hwloc_disc_component_find(curenv);
 	if (comp) {
-	  hwloc_disc_component_try_enable(topology, comp, NULL, 1 /* envvar forced */);
+	  hwloc_disc_component_try_enable(topology, comp, 1 /* envvar forced */);
 	} else {
 	  fprintf(stderr, "Cannot find discovery component `%s'\n", curenv);
 	}
@@ -634,7 +633,7 @@ nextname:
 	    curenv++;
 	}
       }
-      hwloc_disc_component_try_enable(topology, comp, NULL, 0 /* defaults, not envvar forced */);
+      hwloc_disc_component_try_enable(topology, comp, 0 /* defaults, not envvar forced */);
 nextcomp:
       comp = comp->next;
     }
