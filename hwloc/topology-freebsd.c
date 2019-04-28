@@ -233,13 +233,14 @@ hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unus
 }
 
 static struct hwloc_backend *
-hwloc_freebsd_component_instantiate(struct hwloc_disc_component *component,
+hwloc_freebsd_component_instantiate(struct hwloc_topology *topology,
+				    struct hwloc_disc_component *component,
 				    const void *_data1 __hwloc_attribute_unused,
 				    const void *_data2 __hwloc_attribute_unused,
 				    const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
-  backend = hwloc_backend_alloc(component);
+  backend = hwloc_backend_alloc(topology, component);
   if (!backend)
     return NULL;
   backend->discover = hwloc_look_freebsd;

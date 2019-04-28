@@ -496,12 +496,12 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
     return -1;
   }
 
-  backend = comp->instantiate(comp, data1, data2, data3);
+  backend = comp->instantiate(topology, comp, data1, data2, data3);
   if (backend) {
     backend->envvar_forced = envvar_forced;
     if (topology->backends)
       hwloc_backends_disable_all(topology);
-    return hwloc_backend_enable(topology, backend);
+    return hwloc_backend_enable(backend);
   } else
     return -1;
 }
@@ -523,7 +523,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
     return -1;
   }
 
-  backend = comp->instantiate(comp, comparg, NULL, NULL);
+  backend = comp->instantiate(topology, comp, comparg, NULL, NULL);
   if (!backend) {
     if (hwloc_components_verbose || envvar_forced)
       fprintf(stderr, "Failed to instantiate discovery component `%s'\n", comp->name);
@@ -531,7 +531,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
   }
 
   backend->envvar_forced = envvar_forced;
-  return hwloc_backend_enable(topology, backend);
+  return hwloc_backend_enable(backend);
 }
 
 void
@@ -687,7 +687,8 @@ hwloc_components_fini(void)
 }
 
 struct hwloc_backend *
-hwloc_backend_alloc(struct hwloc_disc_component *component)
+hwloc_backend_alloc(struct hwloc_topology *topology,
+		    struct hwloc_disc_component *component)
 {
   struct hwloc_backend * backend = malloc(sizeof(*backend));
   if (!backend) {
@@ -695,6 +696,7 @@ hwloc_backend_alloc(struct hwloc_disc_component *component)
     return NULL;
   }
   backend->component = component;
+  backend->topology = topology;
   backend->flags = 0;
   backend->discover = NULL;
   backend->get_pci_busid_cpuset = NULL;
@@ -714,8 +716,9 @@ hwloc_backend_disable(struct hwloc_backend *backend)
 }
 
 int
-hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *backend)
+hwloc_backend_enable(struct hwloc_backend *backend)
 {
+  struct hwloc_topology *topology = backend->topology;
   struct hwloc_backend **pprev;
 
   /* check backend flags */
@@ -750,7 +753,6 @@ hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *back
   backend->next = *pprev;
   *pprev = backend;
 
-  backend->topology = topology;
   topology->backend_excludes |= backend->component->excludes;
   return 0;
 }
