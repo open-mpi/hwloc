@@ -62,6 +62,7 @@ sysfs_outputs = \
 		nvidiagpunumanodes.output \
 		nvidiagpunumanodes.kept.output \
 		fakememinitiators-1npc+1npc.output \
+		fakecpuid1f-64intel64-2p4d2n2c2t.output \
 		fakeheteronuma.output
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
@@ -121,6 +122,7 @@ sysfs_tarballs = \
 		nvidiagpunumanodes.tar.bz2 \
 		nvidiagpunumanodes.kept.source \
 		fakememinitiators-1npc+1npc.tar.bz2 \
+		fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2 \
 		fakeheteronuma.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
