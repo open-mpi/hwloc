@@ -3043,7 +3043,8 @@ hwloc currently uses Groups for the following reasons:
 <li>Distance-based groups made of close objects.</li>
 <li>AMD Bulldozer dual-core compute units (<tt>subtype</tt> is <tt>ComputeUnit</tt>, in the x86 backend),
  but these objects are usually merged with the L2 caches.</li>
-<li>Intel extended topology enumeration unknown levels (in the x86 backend).</li>
+<li>Intel Dies on multi-die CPUs (Linux and x86 backends)
+    and other Extended Topology Enumeration levels (in the x86 backend).</li>
 <li>Windows processor groups (unless they contain a single NUMA node, or a single Package, etc.).</li>
 <li>IBM S/390 "Books" on Linux (<tt>subtype</tt> is <tt>Book</tt>).</li>
 <li>AIX unknown hierarchy levels.</li>
