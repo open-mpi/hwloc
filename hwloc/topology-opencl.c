@@ -50,7 +50,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
   cl_int clret;
   unsigned j;
 
-  assert(dstatus->phase == HWLOC_DISC_PHASE_MISC);
+  assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &filter);
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
@@ -193,7 +193,7 @@ hwloc_opencl_component_instantiate(struct hwloc_topology *topology,
 
 static struct hwloc_disc_component hwloc_opencl_disc_component = {
   "opencl",
-  HWLOC_DISC_PHASE_MISC,
+  HWLOC_DISC_PHASE_IO,
   HWLOC_DISC_PHASE_GLOBAL,
   hwloc_opencl_component_instantiate,
   10, /* after pci */

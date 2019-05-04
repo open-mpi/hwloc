@@ -66,7 +66,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   cudaError_t cures;
   int nb, i;
 
-  assert(dstatus->phase == HWLOC_DISC_PHASE_MISC);
+  assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &filter);
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
@@ -148,7 +148,7 @@ hwloc_cuda_component_instantiate(struct hwloc_topology *topology,
 
 static struct hwloc_disc_component hwloc_cuda_disc_component = {
   "cuda",
-  HWLOC_DISC_PHASE_MISC,
+  HWLOC_DISC_PHASE_IO,
   HWLOC_DISC_PHASE_GLOBAL,
   hwloc_cuda_component_instantiate,
   10, /* after pci */

@@ -256,7 +256,12 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
   if (!component->phases
       || (component->phases != HWLOC_DISC_PHASE_GLOBAL
 	  && component->phases & ~(HWLOC_DISC_PHASE_CPU
-				   |HWLOC_DISC_PHASE_MISC))) {
+				   |HWLOC_DISC_PHASE_MEMORY
+				   |HWLOC_DISC_PHASE_PCI
+				   |HWLOC_DISC_PHASE_IO
+				   |HWLOC_DISC_PHASE_MISC
+				   |HWLOC_DISC_PHASE_ANNOTATE
+				   |HWLOC_DISC_PHASE_TWEAK))) {
     fprintf(stderr, "Cannot register discovery component `%s' with invalid phases 0x%x\n",
 	    component->name, component->phases);
     return -1;

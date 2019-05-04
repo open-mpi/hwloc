@@ -3150,14 +3150,17 @@ void hwloc_alloc_root_sets(hwloc_obj_t root)
 
 static void
 hwloc_discover_by_phase(struct hwloc_topology *topology,
-			struct hwloc_disc_status *dstatus)
+			struct hwloc_disc_status *dstatus,
+			const char *phasename __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
+  hwloc_debug("%s phase discovery...\n", phasename);
   for(backend = topology->backends; backend; backend = backend->next) {
     if (!(backend->phases & dstatus->phase))
       continue;
     if (!backend->discover)
       continue;
+    hwloc_debug("%s phase discovery in component %s...\n", phasename, backend->component->name);
     backend->discover(backend, dstatus);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
   }
@@ -3219,6 +3222,8 @@ hwloc_discover(struct hwloc_topology *topology,
     /*
      * Perform the single-component-based GLOBAL discovery
      */
+    hwloc_debug("GLOBAL phase discovery...\n");
+    hwloc_debug("GLOBAL phase discovery with component %s...\n", global_backend->component->name);
     dstatus->phase = HWLOC_DISC_PHASE_GLOBAL;
     global_backend->discover(global_backend, dstatus);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
@@ -3235,7 +3240,7 @@ hwloc_discover(struct hwloc_topology *topology,
      * Discover CPUs first
      */
     dstatus->phase = HWLOC_DISC_PHASE_CPU;
-    hwloc_discover_by_phase(topology, dstatus);
+    hwloc_discover_by_phase(topology, dstatus, "CPU");
   }
 
   if (!(topology->backend_phases & (HWLOC_DISC_PHASE_GLOBAL|HWLOC_DISC_PHASE_CPU))) {
@@ -3250,6 +3255,14 @@ hwloc_discover(struct hwloc_topology *topology,
     hwloc_debug("%s", "No PU added by any CPU or GLOBAL component phase\n");
     errno = EINVAL;
     return -1;
+  }
+
+  /*
+   * Memory-specific discovery
+   */
+  if (topology->backend_phases & HWLOC_DISC_PHASE_MEMORY) {
+    dstatus->phase = HWLOC_DISC_PHASE_MEMORY;
+    hwloc_discover_by_phase(topology, dstatus, "MEMORY");
   }
 
   if (/* check if getting the sets of locally allowed resources is possible */
@@ -3341,12 +3354,24 @@ hwloc_discover(struct hwloc_topology *topology,
     return -1;
   hwloc_debug_print_objects(0, topology->levels[0][0]);
 
+  /*
+   * Additional discovery
+   */
+  if (topology->backend_phases & HWLOC_DISC_PHASE_PCI) {
+    dstatus->phase = HWLOC_DISC_PHASE_PCI;
+    hwloc_discover_by_phase(topology, dstatus, "PCI");
+  }
+  if (topology->backend_phases & HWLOC_DISC_PHASE_IO) {
+    dstatus->phase = HWLOC_DISC_PHASE_IO;
+    hwloc_discover_by_phase(topology, dstatus, "IO");
+  }
   if (topology->backend_phases & HWLOC_DISC_PHASE_MISC) {
-    /*
-     * Additional discovery with other backends
-     */
     dstatus->phase = HWLOC_DISC_PHASE_MISC;
-    hwloc_discover_by_phase(topology, dstatus);
+    hwloc_discover_by_phase(topology, dstatus, "MISC");
+  }
+  if (topology->backend_phases & HWLOC_DISC_PHASE_ANNOTATE) {
+    dstatus->phase = HWLOC_DISC_PHASE_ANNOTATE;
+    hwloc_discover_by_phase(topology, dstatus, "ANNOTATE");
   }
 
   if (getenv("HWLOC_DEBUG_SORT_CHILDREN"))
@@ -3876,6 +3901,12 @@ hwloc_topology_load (struct hwloc_topology *topology)
   hwloc_internal_distances_refresh(topology);
 
   topology->is_loaded = 1;
+
+  if (topology->backend_phases & HWLOC_DISC_PHASE_TWEAK) {
+    dstatus.phase = HWLOC_DISC_PHASE_TWEAK;
+    hwloc_discover_by_phase(topology, &dstatus, "TWEAK");
+  }
+
   return 0;
 
  out:
