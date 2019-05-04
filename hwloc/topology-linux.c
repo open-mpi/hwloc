@@ -6894,12 +6894,9 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
       && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
 	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
 #ifdef HWLOC_HAVE_LINUXPCI
-    if (dstatus->flags & HWLOC_DISC_STATUS_FLAG_PCI_DONE) {
-      hwloc_debug("%s", "PCI discovery has already been performed, skipping PCI in linuxio backend.\n");
-    } else {
-      hwloc_linuxfs_pci_look_pcidevices(backend);
-      dstatus->flags |= HWLOC_DISC_STATUS_FLAG_PCI_DONE;
-    }
+    hwloc_linuxfs_pci_look_pcidevices(backend);
+    /* no need to run another PCI phase */
+    dstatus->excluded_phases |= HWLOC_DISC_PHASE_PCI;
 #endif /* HWLOC_HAVE_LINUXPCI */
   }
 
