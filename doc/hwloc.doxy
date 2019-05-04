@@ -2613,7 +2613,8 @@ environment variable (see \ref envvar).
 <dt>pci</dt>
 <dd>
  PCI object discovery uses the external pciaccess library (aka libpciaccess);
- see \ref iodevices.
+ see \ref iodevices. It may also annotate existing PCI devices with vendor
+ and device names.
  <b>It may be built as a plugin</b>.
 </dd>
 <dt>linuxio (former linuxpci)</dt>
