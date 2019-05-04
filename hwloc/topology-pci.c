@@ -111,11 +111,6 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       && pfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
-  if (dstatus->flags & HWLOC_DISC_STATUS_FLAG_PCI_DONE) {
-    hwloc_debug("%s", "PCI discovery has already been performed, skipping PCI backend.\n");
-    return 0;
-  }
-
   hwloc_debug("%s", "\nScanning PCI buses...\n");
 
   /* pciaccess isn't thread-safe. it uses a single global variable that doesn't have
@@ -340,7 +335,9 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   HWLOC_PCIACCESS_UNLOCK();
 
   hwloc_pcidisc_tree_attach(topology, tree);
-  dstatus->flags |= HWLOC_DISC_STATUS_FLAG_PCI_DONE;
+
+  /* no need to run another PCI phase */
+  dstatus->excluded_phases |= HWLOC_DISC_PHASE_PCI;
   return 0;
 }
 

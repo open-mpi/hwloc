@@ -537,7 +537,6 @@ extern "C" {
 #define hwloc_disc_component HWLOC_NAME(disc_component)
 
 #define hwloc_disc_status_flag_e HWLOC_NAME(disc_status_flag_e)
-#define HWLOC_DISC_STATUS_FLAG_PCI_DONE HWLOC_NAME_CAPS(DISC_STATUS_FLAG_PCI_DONE)
 #define HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES HWLOC_NAME_CAPS(DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)
 #define hwloc_disc_status HWLOC_NAME(disc_status)
 
