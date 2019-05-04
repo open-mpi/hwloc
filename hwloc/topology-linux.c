@@ -6862,55 +6862,57 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
    */
 
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = NULL;
-  struct hwloc_backend *tmpbackend;
   enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
-  int root_fd = -1;
 
-  assert(dstatus->phase == HWLOC_DISC_PHASE_PCI);
+  if (!backend->private_data) {
+    /* hackily find the linux backend to steal its private_data (for fsroot) */
+    struct hwloc_backend *tmpbackend;
+    struct hwloc_linux_backend_data_s *data = NULL;
+    tmpbackend = topology->backends;
+    while (tmpbackend) {
+      if (tmpbackend->component == &hwloc_linux_disc_component) {
+	data = tmpbackend->private_data;
+	break;
+      }
+      tmpbackend = tmpbackend->next;
+    }
+    if (!data) {
+      hwloc_debug("linuxio failed to find linux backend private_data, aborting its discovery()\n");
+      backend->phases = 0; /* disable other phases */
+      return -1;
+    }
+    backend->private_data = data;
+    hwloc_debug("linuxio backend stole linux backend root_fd %d\n", data->root_fd);
+  }
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &ofilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_MISC, &mfilter);
- if (bfilter == HWLOC_TYPE_FILTER_KEEP_NONE
-      && pfilter == HWLOC_TYPE_FILTER_KEEP_NONE
-      && ofilter == HWLOC_TYPE_FILTER_KEEP_NONE
-      && mfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
-    return 0;
 
-  /* hackily find the linux backend to steal its private_data (for fsroot) */
-  tmpbackend = topology->backends;
-  while (tmpbackend) {
-    if (tmpbackend->component == &hwloc_linux_disc_component) {
-      data = tmpbackend->private_data;
-      break;
-    }
-    tmpbackend = tmpbackend->next;
-  }
-  if (!data) {
-    hwloc_debug("linuxio failed to find linux backend private_data, aborting its discovery()\n");
-    return -1;
-  }
-  backend->private_data = data;
-  root_fd = data->root_fd;
-  hwloc_debug("linuxio backend stole linux backend root_fd %d\n", root_fd);
-
-  if (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
-      || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
+  if (dstatus->phase == HWLOC_DISC_PHASE_PCI
+      && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
+	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
 #ifdef HWLOC_HAVE_LINUXPCI
-  if (dstatus->flags & HWLOC_DISC_STATUS_FLAG_PCI_DONE) {
-    hwloc_debug("%s", "PCI discovery has already been performed, skipping PCI in linuxio backend.\n");
-  } else {
-    hwloc_linuxfs_pci_look_pcidevices(backend);
-    dstatus->flags |= HWLOC_DISC_STATUS_FLAG_PCI_DONE;
-  }
-
-  hwloc_linuxfs_pci_look_pcislots(backend);
+    if (dstatus->flags & HWLOC_DISC_STATUS_FLAG_PCI_DONE) {
+      hwloc_debug("%s", "PCI discovery has already been performed, skipping PCI in linuxio backend.\n");
+    } else {
+      hwloc_linuxfs_pci_look_pcidevices(backend);
+      dstatus->flags |= HWLOC_DISC_STATUS_FLAG_PCI_DONE;
+    }
 #endif /* HWLOC_HAVE_LINUXPCI */
   }
 
-  if (ofilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
+  if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE
+      && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
+	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
+#ifdef HWLOC_HAVE_LINUXPCI
+    hwloc_linuxfs_pci_look_pcislots(backend);
+#endif /* HWLOC_HAVE_LINUXPCI */
+  }
+
+  if (dstatus->phase == HWLOC_DISC_PHASE_IO
+      && ofilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
     unsigned osdev_flags = 0;
     if (getenv("HWLOC_VIRTUAL_LINUX_OSDEV"))
       osdev_flags |= HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL;
@@ -6922,13 +6924,15 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
     hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_mic_class(backend, osdev_flags);
-      if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
-	hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
-	hwloc_linuxfs_lookup_dma_class(backend, osdev_flags);
-      }
+    if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
+      hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
+      hwloc_linuxfs_lookup_dma_class(backend, osdev_flags);
+    }
   }
-  if (mfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
-    hwloc__get_firmware_dmi_memory_info(topology, data);
+
+  if (dstatus->phase == HWLOC_DISC_PHASE_MISC
+      && mfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
+    hwloc__get_firmware_dmi_memory_info(topology, backend->private_data);
   }
 
   return 0;
@@ -6957,12 +6961,14 @@ hwloc_linuxio_component_instantiate(struct hwloc_topology *topology,
    * once the main linux component is instantiated for sure.
    * it remains valid until the main linux component gets disabled during topology destroy.
    */
+  backend->private_data = NULL;
+
   return backend;
 }
 
 static struct hwloc_disc_component hwloc_linuxio_disc_component = {
   "linuxio",
-  HWLOC_DISC_PHASE_PCI,
+  HWLOC_DISC_PHASE_PCI | HWLOC_DISC_PHASE_IO | HWLOC_DISC_PHASE_MISC | HWLOC_DISC_PHASE_ANNOTATE,
   HWLOC_DISC_PHASE_GLOBAL,
   hwloc_linuxio_component_instantiate,
   19, /* after pci */
