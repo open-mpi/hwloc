@@ -103,7 +103,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
 
-  assert(dstatus->phase == HWLOC_DISC_PHASE_MISC);
+  assert(dstatus->phase == HWLOC_DISC_PHASE_PCI);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
@@ -367,7 +367,7 @@ hwloc_pci_component_instantiate(struct hwloc_topology *topology,
 
 static struct hwloc_disc_component hwloc_pci_disc_component = {
   "pci",
-  HWLOC_DISC_PHASE_MISC,
+  HWLOC_DISC_PHASE_PCI,
   HWLOC_DISC_PHASE_GLOBAL,
   hwloc_pci_component_instantiate,
   20,

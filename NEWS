@@ -72,6 +72,7 @@ Version 2.1.0
   + Expose Linux DAX devices as hwloc Block OS devices.
   + Remove support for /proc/cpuinfo-only topology discovery in Linux
     kernel prior to 2.6.16.
+  + Discovery components are now divided in phases.
 * Tools
   + lstopo
     - lstopo factorizes objects by default in the graphical output when

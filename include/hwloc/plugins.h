@@ -104,9 +104,32 @@ typedef enum hwloc_disc_phase_e {
    * \hideinitializer */
   HWLOC_DISC_PHASE_CPU = (1U<<1),
 
-  /** \brief Everything else.
+  /** \brief Attach memory to existing CPU objects.
    * \hideinitializer */
-  HWLOC_DISC_PHASE_MISC = (1U<<2)
+  HWLOC_DISC_PHASE_MEMORY = (1U<<2),
+
+  /** \brief Attach PCI devices and bridges to existing CPU objects.
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_PCI = (1U<<3),
+
+  /** \brief I/O discovery that requires PCI devices (OS devices such as OpenCL, CUDA, etc.).
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_IO = (1U<<4),
+
+  /** \brief Misc objects that gets added below anything else.
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_MISC = (1U<<5),
+
+  /** \brief Annotating existing objects, adding distances, etc.
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_ANNOTATE = (1U<<6),
+
+  /** \brief Final tweaks to a ready-to-use topology.
+   * This phase runs once the topology is loaded, before it is returned to the topology.
+   * Hence it may only use the main hwloc API for modifying the topology,
+   * for instance by restricting it, adding info attributes, etc.
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_TWEAK = (1U<<7)
 } hwloc_disc_phase_t;
 
 /** \brief Discovery status flags */

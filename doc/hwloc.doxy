@@ -2475,6 +2475,8 @@ Most of them, including most native OS components, do nothing
 unless the topology is still empty.
 Some others, such as <tt>x86</tt> and <tt>pci</tt>,
 can complete and annotate what other backends found earlier.
+Discovery is performed by phases: CPUs are first discovered,
+then memory is attached, then PCI, etc.
 
 Default priorities ensure that clever components are invoked first.
 Native operating system components have higher priorities,

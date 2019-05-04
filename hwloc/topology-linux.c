@@ -6866,7 +6866,7 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
   enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
   int root_fd = -1;
 
-  assert(dstatus->phase == HWLOC_DISC_PHASE_MISC);
+  assert(dstatus->phase == HWLOC_DISC_PHASE_PCI);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
@@ -6960,7 +6960,7 @@ hwloc_linuxio_component_instantiate(struct hwloc_topology *topology,
 
 static struct hwloc_disc_component hwloc_linuxio_disc_component = {
   "linuxio",
-  HWLOC_DISC_PHASE_MISC,
+  HWLOC_DISC_PHASE_PCI,
   HWLOC_DISC_PHASE_GLOBAL,
   hwloc_linuxio_component_instantiate,
   19, /* after pci */
