@@ -257,7 +257,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     if (env)
       fprintf(stderr, "Cannot force linux and linuxio components first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
-      putenv((char *) "HWLOC_COMPONENTS=linux,linuxio,stop");
+      putenv((char *) "HWLOC_COMPONENTS=linux,linuxio,pci,stop");
 #else /* HWLOC_LINUX_SYS */
     fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
     exit(EXIT_FAILURE);
