@@ -5282,7 +5282,7 @@ static const char *find_sysfs_node_path(int root_fd)
 }
 
 static int
-hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
+hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend may be used with topology->is_thissystem set (default)
@@ -5303,8 +5303,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   const char *sysfs_node_path;
   int old_siblings_filenames = 0;
   int err;
-
-  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   /* look for sysfs cpu path containing at least one of core_siblings and thread_siblings */
   sysfs_cpu_path = find_sysfs_cpu_path(data->root_fd, &old_siblings_filenames);
@@ -5478,150 +5476,10 @@ hwloc_linux_backend_get_pci_busid_cpuset(struct hwloc_backend *backend,
 
 
 
-/*******************************
- ******* Linux component *******
- *******************************/
-
-static void
-hwloc_linux_backend_disable(struct hwloc_backend *backend)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-#ifdef HAVE_OPENAT
-  if (data->root_fd >= 0) {
-    free(data->root_path);
-    close(data->root_fd);
-  }
-#endif
-#ifdef HWLOC_HAVE_LIBUDEV
-  if (data->udev)
-    udev_unref(data->udev);
-#endif
-  free(data);
-}
-
-static struct hwloc_backend *
-hwloc_linux_component_instantiate(struct hwloc_topology *topology,
-				  struct hwloc_disc_component *component,
-				  unsigned excluded_phases __hwloc_attribute_unused,
-				  const void *_data1 __hwloc_attribute_unused,
-				  const void *_data2 __hwloc_attribute_unused,
-				  const void *_data3 __hwloc_attribute_unused)
-{
-  struct hwloc_backend *backend;
-  struct hwloc_linux_backend_data_s *data;
-  const char * fsroot_path;
-  int root = -1;
-  char *env;
-
-  backend = hwloc_backend_alloc(topology, component);
-  if (!backend)
-    goto out;
-
-  data = malloc(sizeof(*data));
-  if (!data) {
-    errno = ENOMEM;
-    goto out_with_backend;
-  }
-
-  backend->private_data = data;
-  backend->discover = hwloc_look_linuxfs;
-  backend->get_pci_busid_cpuset = hwloc_linux_backend_get_pci_busid_cpuset;
-  backend->disable = hwloc_linux_backend_disable;
-
-  /* default values */
-  data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
-  data->is_knl = 0;
-  data->is_amd_with_CU = 0;
-  data->use_dt = 0;
-  data->is_real_fsroot = 1;
-  data->root_path = NULL;
-  fsroot_path = getenv("HWLOC_FSROOT");
-  if (!fsroot_path)
-    fsroot_path = "/";
-
-  if (strcmp(fsroot_path, "/")) {
-#ifdef HAVE_OPENAT
-    int flags;
-
-    root = open(fsroot_path, O_RDONLY | O_DIRECTORY);
-    if (root < 0)
-      goto out_with_data;
-
-    backend->is_thissystem = 0;
-    data->is_real_fsroot = 0;
-    data->root_path = strdup(fsroot_path);
-
-    /* Since this fd stays open after hwloc returns, mark it as
-       close-on-exec so that children don't inherit it.  Stevens says
-       that we should GETFD before we SETFD, so we do. */
-    flags = fcntl(root, F_GETFD, 0);
-    if (-1 == flags ||
-	-1 == fcntl(root, F_SETFD, FD_CLOEXEC | flags)) {
-      close(root);
-      root = -1;
-      goto out_with_data;
-    }
-#else
-    fprintf(stderr, "Cannot change Linux fsroot without openat() support.\n");
-    errno = ENOSYS;
-    goto out_with_data;
-#endif
-  }
-  data->root_fd = root;
-
-#ifdef HWLOC_HAVE_LIBUDEV
-  data->udev = NULL;
-  if (data->is_real_fsroot) {
-    data->udev = udev_new();
-  }
-#endif
-
-  data->dumped_hwdata_dirname = getenv("HWLOC_DUMPED_HWDATA_DIR");
-  if (!data->dumped_hwdata_dirname)
-    data->dumped_hwdata_dirname = (char *) RUNSTATEDIR "/hwloc/";
-
-  env = getenv("HWLOC_USE_DT");
-  if (env)
-    data->use_dt = atoi(env);
-
-  return backend;
-
- out_with_data:
-#ifdef HAVE_OPENAT
-  free(data->root_path);
-#endif
-  free(data);
- out_with_backend:
-  free(backend);
- out:
-  return NULL;
-}
-
-static struct hwloc_disc_component hwloc_linux_disc_component = {
-  "linux",
-  HWLOC_DISC_PHASE_CPU,
-  HWLOC_DISC_PHASE_GLOBAL,
-  hwloc_linux_component_instantiate,
-  50,
-  1,
-  NULL
-};
-
-const struct hwloc_component hwloc_linux_component = {
-  HWLOC_COMPONENT_ABI,
-  NULL, NULL,
-  HWLOC_COMPONENT_TYPE_DISC,
-  0,
-  &hwloc_linux_disc_component
-};
-
-
-
-
 #ifdef HWLOC_HAVE_LINUXIO
 
 /***********************************
- ******* Linux I/O component *******
+ ******* Linux I/O discovery *******
  ***********************************/
 
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL (1U<<0)
@@ -6852,9 +6710,10 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
   return 0;
 }
 #endif /* HWLOC_HAVE_LINUXPCI */
+#endif /* HWLOC_HAVE_LINUXIO */
 
 static int
-hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
+hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend may be used with topology->is_thissystem set (default)
@@ -6862,29 +6721,16 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
    */
 
   struct hwloc_topology *topology = backend->topology;
+#ifdef HWLOC_HAVE_LINUXIO
   enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
+#endif /* HWLOC_HAVE_LINUXIO */
 
-  if (!backend->private_data) {
-    /* hackily find the linux backend to steal its private_data (for fsroot) */
-    struct hwloc_backend *tmpbackend;
-    struct hwloc_linux_backend_data_s *data = NULL;
-    tmpbackend = topology->backends;
-    while (tmpbackend) {
-      if (tmpbackend->component == &hwloc_linux_disc_component) {
-	data = tmpbackend->private_data;
-	break;
-      }
-      tmpbackend = tmpbackend->next;
-    }
-    if (!data) {
-      hwloc_debug("linuxio failed to find linux backend private_data, aborting its discovery()\n");
-      backend->phases = 0; /* disable other phases */
-      return -1;
-    }
-    backend->private_data = data;
-    hwloc_debug("linuxio backend stole linux backend root_fd %d\n", data->root_fd);
+  if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
+    hwloc_linuxfs_look_cpu(backend, dstatus);
+    return 0;
   }
 
+#ifdef HWLOC_HAVE_LINUXIO
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &ofilter);
@@ -6931,54 +6777,144 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
       && mfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
     hwloc__get_firmware_dmi_memory_info(topology, backend->private_data);
   }
+#endif /* HWLOC_HAVE_LINUXIO */
 
   return 0;
 }
 
+/*******************************
+ ******* Linux component *******
+ *******************************/
+
+static void
+hwloc_linux_backend_disable(struct hwloc_backend *backend)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+#ifdef HAVE_OPENAT
+  if (data->root_fd >= 0) {
+    free(data->root_path);
+    close(data->root_fd);
+  }
+#endif
+#ifdef HWLOC_HAVE_LIBUDEV
+  if (data->udev)
+    udev_unref(data->udev);
+#endif
+  free(data);
+}
+
 static struct hwloc_backend *
-hwloc_linuxio_component_instantiate(struct hwloc_topology *topology,
-				    struct hwloc_disc_component *component,
-				    unsigned excluded_phases __hwloc_attribute_unused,
-				    const void *_data1 __hwloc_attribute_unused,
-				    const void *_data2 __hwloc_attribute_unused,
-				    const void *_data3 __hwloc_attribute_unused)
+hwloc_linux_component_instantiate(struct hwloc_topology *topology,
+				  struct hwloc_disc_component *component,
+				  unsigned excluded_phases __hwloc_attribute_unused,
+				  const void *_data1 __hwloc_attribute_unused,
+				  const void *_data2 __hwloc_attribute_unused,
+				  const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
+  struct hwloc_linux_backend_data_s *data;
+  const char * fsroot_path;
+  int root = -1;
+  char *env;
 
   backend = hwloc_backend_alloc(topology, component);
   if (!backend)
-    return NULL;
-  backend->discover = hwloc_look_linuxfs_io;
+    goto out;
 
-  /* backend->is_thissystem should be what the linux backend has,
-   * but it's actually useless since both backends will change the main topology->is_thissystem in the same way.
-   */
+  data = malloc(sizeof(*data));
+  if (!data) {
+    errno = ENOMEM;
+    goto out_with_backend;
+  }
 
-  /* backend->private_data will point to the main linux private_data after load(),
-   * once the main linux component is instantiated for sure.
-   * it remains valid until the main linux component gets disabled during topology destroy.
-   */
-  backend->private_data = NULL;
+  backend->private_data = data;
+  backend->discover = hwloc_look_linuxfs;
+  backend->get_pci_busid_cpuset = hwloc_linux_backend_get_pci_busid_cpuset;
+  backend->disable = hwloc_linux_backend_disable;
+
+  /* default values */
+  data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
+  data->is_knl = 0;
+  data->is_amd_with_CU = 0;
+  data->use_dt = 0;
+  data->is_real_fsroot = 1;
+  data->root_path = NULL;
+  fsroot_path = getenv("HWLOC_FSROOT");
+  if (!fsroot_path)
+    fsroot_path = "/";
+
+  if (strcmp(fsroot_path, "/")) {
+#ifdef HAVE_OPENAT
+    int flags;
+
+    root = open(fsroot_path, O_RDONLY | O_DIRECTORY);
+    if (root < 0)
+      goto out_with_data;
+
+    backend->is_thissystem = 0;
+    data->is_real_fsroot = 0;
+    data->root_path = strdup(fsroot_path);
+
+    /* Since this fd stays open after hwloc returns, mark it as
+       close-on-exec so that children don't inherit it.  Stevens says
+       that we should GETFD before we SETFD, so we do. */
+    flags = fcntl(root, F_GETFD, 0);
+    if (-1 == flags ||
+	-1 == fcntl(root, F_SETFD, FD_CLOEXEC | flags)) {
+      close(root);
+      root = -1;
+      goto out_with_data;
+    }
+#else
+    fprintf(stderr, "Cannot change Linux fsroot without openat() support.\n");
+    errno = ENOSYS;
+    goto out_with_data;
+#endif
+  }
+  data->root_fd = root;
+
+#ifdef HWLOC_HAVE_LIBUDEV
+  data->udev = NULL;
+  if (data->is_real_fsroot) {
+    data->udev = udev_new();
+  }
+#endif
+
+  data->dumped_hwdata_dirname = getenv("HWLOC_DUMPED_HWDATA_DIR");
+  if (!data->dumped_hwdata_dirname)
+    data->dumped_hwdata_dirname = (char *) RUNSTATEDIR "/hwloc/";
+
+  env = getenv("HWLOC_USE_DT");
+  if (env)
+    data->use_dt = atoi(env);
 
   return backend;
+
+ out_with_data:
+#ifdef HAVE_OPENAT
+  free(data->root_path);
+#endif
+  free(data);
+ out_with_backend:
+  free(backend);
+ out:
+  return NULL;
 }
 
-static struct hwloc_disc_component hwloc_linuxio_disc_component = {
-  "linuxio",
-  HWLOC_DISC_PHASE_PCI | HWLOC_DISC_PHASE_IO | HWLOC_DISC_PHASE_MISC | HWLOC_DISC_PHASE_ANNOTATE,
+static struct hwloc_disc_component hwloc_linux_disc_component = {
+  "linux",
+  HWLOC_DISC_PHASE_CPU | HWLOC_DISC_PHASE_PCI | HWLOC_DISC_PHASE_IO | HWLOC_DISC_PHASE_MISC | HWLOC_DISC_PHASE_ANNOTATE,
   HWLOC_DISC_PHASE_GLOBAL,
-  hwloc_linuxio_component_instantiate,
-  19, /* after pci */
+  hwloc_linux_component_instantiate,
+  50,
   1,
   NULL
 };
 
-const struct hwloc_component hwloc_linuxio_component = {
+const struct hwloc_component hwloc_linux_component = {
   HWLOC_COMPONENT_ABI,
   NULL, NULL,
   HWLOC_COMPONENT_TYPE_DISC,
   0,
-  &hwloc_linuxio_disc_component
+  &hwloc_linux_disc_component
 };
-
-#endif /* HWLOC_HAVE_LINUXIO */

@@ -482,12 +482,13 @@ hwloc_disc_component_blacklist_one(struct hwloc_topology *topology,
   unsigned phases;
   unsigned i;
 
-  if (!strcmp(name, "linuxpci")) {
-    /* replace linuxpci with linuxio for backward compatibility with pre-v2.0 */
+  if (!strcmp(name, "linuxpci") || !strcmp(name, "linuxio")) {
+    /* replace linuxpci and linuxio with linux (with IO phases)
+     * for backward compatibility with pre-v2.0 and v2.0 respectively */
     if (hwloc_components_verbose)
-      fprintf(stderr, "Replacing deprecated component `%s' with `linuxio' in blacklisting\n", name);
-    comp = hwloc_disc_component_find("linuxio", NULL);
-    phases = ~0U;
+      fprintf(stderr, "Replacing deprecated component `%s' with `linux' IO phases in blacklisting\n", name);
+    comp = hwloc_disc_component_find("linux", NULL);
+    phases = HWLOC_DISC_PHASE_PCI | HWLOC_DISC_PHASE_IO | HWLOC_DISC_PHASE_MISC | HWLOC_DISC_PHASE_ANNOTATE;
 
   } else {
     /* normal lookup */
@@ -691,10 +692,10 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	curenv[s] = '\0';
 
 	name = curenv;
-	if (!strcmp(name, "linuxpci")) {
+	if (!strcmp(name, "linuxpci") || !strcmp(name, "linuxio")) {
 	  if (hwloc_components_verbose)
-	    fprintf(stderr, "Replacing deprecated component `%s' with `linuxio' in envvar forcing\n", name);
-	  name = "linuxio";
+	    fprintf(stderr, "Replacing deprecated component `%s' with `linux' in envvar forcing\n", name);
+	  name = "linux";
 	}
 
 	comp = hwloc_disc_component_find(name, NULL /* we enable the entire component, phases must be blacklisted separately */);

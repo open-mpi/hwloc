@@ -1105,7 +1105,7 @@ following environment variables.
   This directory may have been saved previously from another machine
   with <tt>hwloc-gather-topology</tt>.
   <br/>
-  One should likely also set <tt>HWLOC_COMPONENTS=linux,linuxio,stop</tt>
+  One should likely also set <tt>HWLOC_COMPONENTS=linux,stop</tt>
   so that non-Linux backends are disabled
   (the <tt>-i</tt> option of command-line tools takes care of both).
   <br/>
@@ -2594,7 +2594,14 @@ environment variable (see \ref envvar).
 
 <dl>
 
-<dt>aix, darwin, freebsd, hpux, linux, netbsd, solaris, windows</dt>
+<dt>linux</dt>
+<dd>
+ The official component for discovering CPU, memory and I/O devices on Linux.
+ It discovers PCI devices without the help of external libraries such as libpciaccess,
+ but requires the pci component for adding vendor/device names to PCI objects.
+ It also discovers many kinds of Linux-specific OS devices.
+</dd>
+<dt>aix, darwin, freebsd, hpux, netbsd, solaris, windows</dt>
 <dd>
  Each officially supported operating system has its own native component,
  which is statically built when supported, and which is used by default.
@@ -2624,13 +2631,6 @@ environment variable (see \ref envvar).
  see \ref iodevices. It may also annotate existing PCI devices with vendor
  and device names.
  <b>It may be built as a plugin</b>.
-</dd>
-<dt>linuxio (former linuxpci)</dt>
-<dd>
- This component can probe I/O devices on Linux.
- It discovers PCI devices without the help of external libraries such as libpciaccess.
- Its priority is lower than the pci component because it misses device names.
- It also discovers many kinds of Linux-specific OS devices.
 </dd>
 <dt>opencl</dt>
 <dd>

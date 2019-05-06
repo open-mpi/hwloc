@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2018 Inria.  All rights reserved.
+dnl Copyright © 2009-2019 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -217,8 +217,7 @@ EOF])
         AC_MSG_RESULT([Linux])
         hwloc_components="$hwloc_components linux"
         if test "x$enable_io" != xno; then
-	  hwloc_components="$hwloc_components linuxio"
-	  AC_DEFINE(HWLOC_HAVE_LINUXIO, 1, [Define to 1 if building the Linux I/O component])
+	  AC_DEFINE(HWLOC_HAVE_LINUXIO, 1, [Define to 1 for I/O discovery in the Linux component])
 	  hwloc_linuxio_happy=yes
 	  if test x$enable_pci != xno; then
 	    AC_DEFINE(HWLOC_HAVE_LINUXPCI, 1, [Define to 1 if enabling Linux-specific PCI discovery in the Linux I/O component])
