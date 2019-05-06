@@ -688,7 +688,6 @@ extern "C" {
 
 #define hwloc_cuda_component HWLOC_NAME(cuda_component)
 #define hwloc_gl_component HWLOC_NAME(gl_component)
-#define hwloc_linuxio_component HWLOC_NAME(linuxio_component)
 #define hwloc_nvml_component HWLOC_NAME(nvml_component)
 #define hwloc_opencl_component HWLOC_NAME(opencl_component)
 #define hwloc_pci_component HWLOC_NAME(pci_component)
