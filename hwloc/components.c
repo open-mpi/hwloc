@@ -574,10 +574,19 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
   backend = comp->instantiate(topology, comp, 0U /* force-enabled don't get any phase blacklisting */,
 			      data1, data2, data3);
   if (backend) {
+    int err;
     backend->envvar_forced = envvar_forced;
     if (topology->backends)
       hwloc_backends_disable_all(topology);
-    return hwloc_backend_enable(backend);
+    err = hwloc_backend_enable(backend);
+
+    if (comp->phases == HWLOC_DISC_PHASE_GLOBAL) {
+      char *env = getenv("HWLOC_ANNOTATE_GLOBAL_COMPONENTS");
+      if (env && atoi(env))
+	topology->backend_excluded_phases &= ~HWLOC_DISC_PHASE_ANNOTATE;
+    }
+
+    return err;
   } else
     return -1;
 }

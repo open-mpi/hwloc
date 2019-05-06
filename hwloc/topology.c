@@ -3215,10 +3215,12 @@ hwloc_discover(struct hwloc_topology *topology,
    * automatically propagated to the whole tree after detection.
    */
 
-  if (topology->backend_phases == HWLOC_DISC_PHASE_GLOBAL) {
+  if (topology->backend_phases & HWLOC_DISC_PHASE_GLOBAL) {
+    /* usually, GLOBAL is alone.
+     * but HWLOC_ANNOTATE_GLOBAL_COMPONENTS=1 allows optional ANNOTATE steps.
+     */
     struct hwloc_backend *global_backend = topology->backends;
     assert(global_backend);
-    assert(!global_backend->next);
     assert(global_backend->phases == HWLOC_DISC_PHASE_GLOBAL);
 
     /*
@@ -3237,7 +3239,6 @@ hwloc_discover(struct hwloc_topology *topology,
    */
 
   if (topology->backend_phases & HWLOC_DISC_PHASE_CPU) {
-    assert(!(topology->backend_phases & HWLOC_DISC_PHASE_GLOBAL));
     /*
      * Discover CPUs first
      */

@@ -1091,6 +1091,14 @@ following environment variables.
   Setting this environment variable to 1 will expose it as a proper Memory-side cache.
   </dd>
 
+<dt>HWLOC_ANNOTATE_GLOBAL_COMPONENTS=0</dt>
+  <dd>Allow components to annotate the topology even if they are
+  usually excluded by global components by default.
+  Setting this variable to 1 and also setting <tt>HWLOC_COMPONENTS=xml,pci,stop</tt>
+  enables the addition of PCI vendor and model info attributes to a XML topology
+  that was generated without those names (if pciaccess was missing).
+  </dd>
+
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
   <dd>switches to reading the topology from the specified
   Linux filesystem root instead of the main file-system root.
