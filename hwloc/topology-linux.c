@@ -1831,7 +1831,7 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
     if (!fullmask)
       goto out_with_mask;
     memset(fullmask, 0xf, max_os_index/HWLOC_BITS_PER_LONG * sizeof(unsigned long));
-    err = hwloc_migrate_pages(0, max_os_index+1, fullmask, linuxmask);
+    err = hwloc_migrate_pages(0, max_os_index+1, fullmask, linuxmask); /* returns the (positive) number of non-migrated pages on success */
     free(fullmask);
     if (err < 0 && (flags & HWLOC_MEMBIND_STRICT))
       goto out_with_mask;
@@ -2085,7 +2085,7 @@ hwloc_linux_get_area_memlocation(hwloc_topology_t topology __hwloc_attribute_unu
   for(i=0; i<count; i++)
     if (status[i] >= 0)
       hwloc_bitmap_set(nodeset, status[i]);
-  ret = 0;
+  ret = 0; /* not really useful since move_pages never returns > 0 */
 
  out_with_pages:
   free(pages);
