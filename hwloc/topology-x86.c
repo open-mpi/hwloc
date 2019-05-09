@@ -176,7 +176,7 @@ static void cpuid_or_from_dump(unsigned *eax, unsigned *ebx, unsigned *ecx, unsi
 
 enum hwloc_x86_disc_flags {
   HWLOC_X86_DISC_FLAG_FULL = (1<<0), /* discover everything instead of only annotating */
-  HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES = (1<<0) /* use AMD topoext numanode information */
+  HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES = (1<<1) /* use AMD topoext numanode information */
 };
 
 #define has_topoext(features) ((features)[6] & (1 << 22))
