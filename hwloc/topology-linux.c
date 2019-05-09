@@ -3734,7 +3734,8 @@ fixup_cpuless_node_locality_from_distances(unsigned i,
 }
 
 static unsigned *
-list_sysfsnode(struct hwloc_linux_backend_data_s *data,
+list_sysfsnode(struct hwloc_topology *topology,
+	       struct hwloc_linux_backend_data_s *data,
 	       const char *path,
 	       unsigned *nbnodesp)
 {
@@ -3785,6 +3786,19 @@ list_sysfsnode(struct hwloc_linux_backend_data_s *data,
   /* we don't know if sysfs returns nodes in order, we can't merge above and below loops */
 
  found:
+  /* if there are already some nodes, we'll annotate them. make sure the indexes match */
+  if (!hwloc_bitmap_iszero(topology->levels[0][0]->nodeset)
+      && !hwloc_bitmap_isequal(nodeset, topology->levels[0][0]->nodeset)) {
+    char *sn, *tn;
+    hwloc_bitmap_asprintf(&sn, nodeset);
+    hwloc_bitmap_asprintf(&tn, topology->levels[0][0]->nodeset);
+    fprintf(stderr, "linux/sysfs: ignoring nodes because nodeset %s doesn't match existing nodeset %s.\n", tn, sn);
+    free(sn);
+    free(tn);
+    hwloc_bitmap_free(nodeset);
+    return NULL;
+  }
+
   indexes = calloc(nbnodes, sizeof(*indexes));
   if (!indexes) {
     hwloc_bitmap_free(nodeset);
@@ -3834,7 +3848,7 @@ look_sysfsnode(struct hwloc_topology *topology,
   int allow_overlapping_node_cpusets = (getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS") != NULL);
 
   /* NUMA nodes cannot be filtered out */
-  indexes = list_sysfsnode(data, path, &nbnodes);
+  indexes = list_sysfsnode(topology, data, path, &nbnodes);
   if (!indexes)
     return 0;
 
