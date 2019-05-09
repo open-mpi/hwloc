@@ -3830,6 +3830,58 @@ list_sysfsnode(struct hwloc_topology *topology,
 }
 
 static int
+annotate_sysfsnode(struct hwloc_topology *topology,
+		   struct hwloc_linux_backend_data_s *data,
+		   const char *path, unsigned *found)
+{
+  unsigned nbnodes;
+  hwloc_obj_t * nodes; /* the array of NUMA node objects, to be used for inserting distances */
+  hwloc_obj_t node;
+  unsigned * indexes;
+  uint64_t * distances;
+  unsigned i;
+
+  /* NUMA nodes cannot be filtered out */
+  indexes = list_sysfsnode(topology, data, path, &nbnodes);
+  if (!indexes)
+    return 0;
+
+  nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+  distances = malloc(nbnodes*nbnodes*sizeof(*distances));
+  if (NULL == nodes || NULL == distances) {
+    free(nodes);
+    free(indexes);
+    free(distances);
+    return 0;
+  }
+
+  for(i=0, node=hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, NULL);
+      i<nbnodes;
+      i++, node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) {
+    assert(node); /* list_sysfsnode() ensured that sysfs nodes and existing nodes match */
+    nodes[i] = node;
+    hwloc_get_sysfs_node_meminfo(data, path, node->os_index, &node->attr->numanode);
+  }
+
+  topology->support.discovery->numa = 1;
+  topology->support.discovery->numa_memory = 1;
+  topology->support.discovery->disallowed_numa = 1;
+
+  if (nbnodes >= 2 && hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd) < 0) {
+    hwloc_internal_distances_add(topology, nbnodes, nodes, distances,
+				 HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
+				 HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  } else {
+    free(nodes);
+    free(distances);
+  }
+
+  free(indexes);
+  *found = nbnodes;
+  return 0;
+}
+
+static int
 look_sysfsnode(struct hwloc_topology *topology,
 	       struct hwloc_linux_backend_data_s *data,
 	       const char *path, unsigned *found)
@@ -3866,51 +3918,48 @@ look_sysfsnode(struct hwloc_topology *topology,
     goto out;
   }
 
-      /* Create NUMA objects */
-      for (i = 0; i < nbnodes; i++) {
-          hwloc_obj_t node;
-	  int annotate;
+  topology->support.discovery->numa = 1;
+  topology->support.discovery->numa_memory = 1;
+  topology->support.discovery->disallowed_numa = 1;
 
-	  osnode = indexes[i];
+  /* Create NUMA objects */
+  for (i = 0; i < nbnodes; i++) {
+    hwloc_obj_t node;
+    char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
+    hwloc_bitmap_t cpuset;
 
-	  node = hwloc_get_numanode_obj_by_os_index(topology, osnode);
-	  annotate = (node != NULL);
-	  if (!annotate) {
-	    /* create a new node */
-	    char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
-	    hwloc_bitmap_t cpuset;
-	    sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
-	    cpuset = hwloc__alloc_read_path_as_cpumask(nodepath, data->root_fd);
-	    if (!cpuset) {
-	      /* This NUMA object won't be inserted, we'll ignore distances */
-	      failednodes++;
-	      continue;
-	    }
-	    if (hwloc_bitmap_intersects(nodes_cpuset, cpuset)) {
-	      /* Buggy BIOS with overlapping NUMA node cpusets, impossible on Linux so far, we should ignore them.
-	       * But it may be useful for debugging the core.
-	       */
-	      if (!allow_overlapping_node_cpusets) {
-		hwloc_debug_1arg_bitmap("node P#%u cpuset %s intersects with previous nodes, ignoring that node.\n", osnode, cpuset);
-		hwloc_bitmap_free(cpuset);
-		failednodes++;
-		continue;
-	      }
-	      fprintf(stderr, "node P#%u cpuset intersects with previous nodes, forcing its acceptance\n", osnode);
-	    }
-	    hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
-
-	    node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, osnode);
-	    node->cpuset = cpuset;
-	    node->nodeset = hwloc_bitmap_alloc();
-	    hwloc_bitmap_set(node->nodeset, osnode);
-	  }
-          hwloc_get_sysfs_node_meminfo(data, path, osnode, &node->attr->numanode);
-
-	  nodes[i] = node;
-          hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
-                                  osnode, node->cpuset);
+    osnode = indexes[i];
+    sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
+    cpuset = hwloc__alloc_read_path_as_cpumask(nodepath, data->root_fd);
+    if (!cpuset) {
+      /* This NUMA object won't be inserted, we'll ignore distances */
+      failednodes++;
+      continue;
+    }
+    if (hwloc_bitmap_intersects(nodes_cpuset, cpuset)) {
+      /* Buggy BIOS with overlapping NUMA node cpusets, impossible on Linux so far, we should ignore them.
+       * But it may be useful for debugging the core.
+       */
+      if (!allow_overlapping_node_cpusets) {
+	hwloc_debug_1arg_bitmap("node P#%u cpuset %s intersects with previous nodes, ignoring that node.\n", osnode, cpuset);
+	hwloc_bitmap_free(cpuset);
+	failednodes++;
+	continue;
       }
+      fprintf(stderr, "node P#%u cpuset intersects with previous nodes, forcing its acceptance\n", osnode);
+    }
+    hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
+
+    node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, osnode);
+    node->cpuset = cpuset;
+    node->nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_set(node->nodeset, osnode);
+    hwloc_get_sysfs_node_meminfo(data, path, osnode, &node->attr->numanode);
+
+    nodes[i] = node;
+    hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
+			  osnode, node->cpuset);
+  }
 
       /* try to find NUMA nodes that correspond to NVIDIA GPU memory */
       dir = hwloc_opendir("/proc/driver/nvidia/gpus", data->root_fd);
@@ -5178,9 +5227,12 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   hwloc_get_machine_meminfo(data, &topology->machine_memory);
 
   /* Gather NUMA information. */
-  if (sysfs_node_path)
-    look_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
-  else
+  if (sysfs_node_path) {
+    if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE) > 0)
+      annotate_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
+    else
+      look_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
+  } else
     nbnodes = 0;
 
   /**********************
