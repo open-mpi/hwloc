@@ -61,6 +61,7 @@ sysfs_outputs = \
 		2arm-2c.output \
 		nvidiagpunumanodes.output \
 		nvidiagpunumanodes.kept.output \
+		fakememinitiators-1npc+1npc.output \
 		fakeheteronuma.output
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
@@ -119,6 +120,7 @@ sysfs_tarballs = \
 		2arm-2c.tar.bz2 \
 		nvidiagpunumanodes.tar.bz2 \
 		nvidiagpunumanodes.kept.source \
+		fakememinitiators-1npc+1npc.tar.bz2 \
 		fakeheteronuma.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
