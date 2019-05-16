@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2017 Inria.  All rights reserved.
+ * Copyright © 2010-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -97,19 +97,20 @@ enum hwloc_distances_kind_e {
  * \p flags is currently unused, should be \c 0.
  *
  * \p kind serves as a filter. If \c 0, all distance matrices are returned.
- * If it contains some HWLOC_DISTANCES_KIND_FROM_*, only distances whose kind
- * matches one of these are returned.
- * If it contains some HWLOC_DISTANCES_KIND_MEANS_*, only distances whose kind
- * matches one of these are returned.
+ * If it contains some HWLOC_DISTANCES_KIND_FROM_*, only distance matrices
+ * whose kind matches one of these are returned.
+ * If it contains some HWLOC_DISTANCES_KIND_MEANS_*, only distance matrices
+ * whose kind matches one of these are returned.
  *
- * On input, \p nr points to the number of distances that may be stored in \p distances.
- * On output, \p nr points to the number of distances that were actually found,
- * even if some of them couldn't be stored in \p distances.
- * Distances that couldn't be stored are ignored, but the function still returns
- * success (\c 0). The caller may find out by comparing the value pointed by \p nr
- * before and after the function call.
+ * On input, \p nr points to the number of distance matrices that may be stored
+ * in \p distances.
+ * On output, \p nr points to the number of distance matrices that were actually
+ * found, even if some of them couldn't be stored in \p distances.
+ * Distance matrices that couldn't be stored are ignored, but the function still
+ * returns success (\c 0). The caller may find out by comparing the value pointed
+ * by \p nr before and after the function call.
  *
- * Each distance structure returned in the \p distances array should be released
+ * Each distance matrix returned in the \p distances array should be released
  * by the caller using hwloc_distances_release().
  */
 HWLOC_DECLSPEC int
@@ -143,7 +144,7 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
   return hwloc_distances_get_by_depth(topology, depth, nr, distances, kind, flags);
 }
 
-/** \brief Release a distance structure previously returned by hwloc_distances_get(). */
+/** \brief Release a distance matrix structure previously returned by hwloc_distances_get(). */
 HWLOC_DECLSPEC void
 hwloc_distances_release(hwloc_topology_t topology, struct hwloc_distances_s *distances);
 
@@ -151,7 +152,7 @@ hwloc_distances_release(hwloc_topology_t topology, struct hwloc_distances_s *dis
 
 
 
-/** \defgroup hwlocality_distances_consult Helpers for consulting distances structures
+/** \defgroup hwlocality_distances_consult Helpers for consulting distance matrices
  * @{
  */
 
@@ -169,7 +170,7 @@ hwloc_distances_obj_index(struct hwloc_distances_s *distances, hwloc_obj_t obj)
   return -1;
 }
 
-/** \brief Find the values between two objects in a distances structure.
+/** \brief Find the values between two objects in a distance matrices.
  *
  * The distance from \p obj1 to \p obj2 is stored in the value pointed by
  * \p value1to2 and reciprocally.
@@ -212,7 +213,7 @@ enum hwloc_distances_add_flag_e {
   HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE = (1UL<<1)
 };
 
-/** \brief Provide a distance matrix.
+/** \brief Provide a new distance matrix.
  *
  * Provide the matrix of distances between a set of objects given by \p nbobjs
  * and the \p objs array. \p nbobjs must be at least 2.
