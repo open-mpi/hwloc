@@ -370,6 +370,7 @@ EOF
     AC_CONFIG_FILES(
         hwloc_config_prefix[utils/Makefile]
         hwloc_config_prefix[utils/hwloc/Makefile]
+	hwloc_config_prefix[utils/hwloc/hwloc-affinity/Makefile]
         hwloc_config_prefix[utils/lstopo/Makefile]
         hwloc_config_prefix[hwloc.pc]
 
