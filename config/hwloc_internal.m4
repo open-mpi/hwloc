@@ -376,6 +376,7 @@ int main(void){ return ptrace(PTRACE_SEIZE, -1, 0, (void*)(PTRACE_O_TRACECLONE|P
     AC_CONFIG_FILES(
         hwloc_config_prefix[utils/Makefile]
         hwloc_config_prefix[utils/hwloc/Makefile]
+	hwloc_config_prefix[utils/hwloc/hwloc-affinity/Makefile]
         hwloc_config_prefix[utils/lstopo/Makefile]
         hwloc_config_prefix[hwloc.pc]
 
