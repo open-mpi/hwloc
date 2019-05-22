@@ -355,12 +355,22 @@ EOF
       AC_CHECK_FUNCS([clock_gettime])
     ])
 
+    # Check for ptrace support
+    AC_CHECK_HEADERS([sys/ptrace.h], [
+      AC_CHECK_FUNCS([ptrace],[hwloc_have_ptrace=yes])
+    ])
+    if test x$hwloc_have_ptrace = xyes; then
+       AM_CONDITIONAL([HWLOC_HAVE_PTRACE],[ test "x$hwloc_have_ptrace" = xyes ])
+    fi
+
+
     # Only generate this if we're building the utilities
     # Even the netloc library Makefile is here because
     # we don't embed libnetloc yet, it's useless without tools
     AC_CONFIG_FILES(
         hwloc_config_prefix[utils/Makefile]
         hwloc_config_prefix[utils/hwloc/Makefile]
+	hwloc_config_prefix[utils/hwloc/hwloc-affinity/Makefile]
         hwloc_config_prefix[utils/lstopo/Makefile]
         hwloc_config_prefix[hwloc.pc]
 
@@ -385,7 +395,9 @@ AC_DEFUN([HWLOC_SETUP_TESTS],[
 ###
 EOF
 
-    AC_CHECK_LIB([pthread], [pthread_self], [hwloc_have_pthread=yes])
+    # Check thread support.
+    AX_PTHREAD([hwloc_have_pthread=yes])
+    AC_OPENMP
 
     HWLOC_PKG_CHECK_MODULES([NUMA], [numa], [numa_available], [numa.h],
                             [hwloc_have_linux_libnuma=yes],

@@ -37,7 +37,7 @@ bin_PROGRAMS = \
         hwloc-patch
 
 # start tests here before recursing into subdirs
-SUBDIRS = .
+SUBDIRS = . hwloc-affinity
 
 if !HWLOC_HAVE_WINDOWS
 bin_PROGRAMS += hwloc-ps
