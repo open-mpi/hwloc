@@ -20,7 +20,6 @@ EXTRA_DIST = \
         test-hwloc-distrib.output \
         test-hwloc-info.output
 
-noinst_HEADERS = misc.h common-ps.h
 
 # convenience library used by both hwloc-ps and lstopo
 noinst_LTLIBRARIES = libutils_common.la
