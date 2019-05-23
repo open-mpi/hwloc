@@ -8,6 +8,7 @@
 #include "affinity.h"
 #include "utils.h"
 #include "tleaf.h"
+#include "hwloc/helper.h"
 
 struct hwloc_tleaf_iterator {
 	hwloc_topology_t topology;
@@ -54,50 +55,18 @@ static inline int comp_unsigned(const void *a_ptr, const void *b_ptr)
 	return 0;
 }
 
-static inline int is_child(const hwloc_obj_t parent, hwloc_obj_t child)
-{
-	if (child->depth <= parent->depth)
-		return 0;
-	while (child != NULL && child->depth > parent->depth)
-		child = child->parent;
-	if (child == NULL)
-		return 0;
-	if (child->logical_index != parent->logical_index)
-		return 0;
-	return 1;
-}
-
-static inline unsigned num_children(const struct hwloc_tleaf_iterator *t,
+static inline unsigned max_arity(const struct hwloc_tleaf_iterator *t,
 				    const unsigned parent_depth,
 				    const unsigned child_depth)
 {
 	unsigned arity = 0, n = 0;
-	hwloc_obj_t c, p = hwloc_get_obj_by_depth(t->topology, parent_depth, 0);
-
+	hwloc_obj_t p = hwloc_get_obj_by_depth(t->topology, parent_depth, 0);
 	while(p){
-		c = hwloc_get_obj_by_depth(t->topology, child_depth, 0);
-		n = 0;
-		
-		while (c != NULL && is_child(p, c)) {
-			c = c->next_cousin;
-			n++;
-		}
+		n = hwloc_get_nbobjs_inside_cpuset_by_depth (t->topology, p->set, child_depth);
 		arity = n > arity ? n : arity;
 		p = p->next_cousin;
 	}
 	return arity;
-}
-
-static inline hwloc_obj_t get_child(const hwloc_obj_t parent,
-				    const int child_depth,
-				    unsigned child_index)
-{
-	hwloc_obj_t child = parent;
-	while (child && child->depth < child_depth)
-		child = child->first_child;
-	while (child && child_index--)
-		child = child->next_cousin;
-	return child;
 }
 
 #define chk_ptr(ptr, goto_flag) if(ptr == NULL){errno = ENOMEM; goto goto_flag;}
@@ -159,7 +128,7 @@ hwloc_tleaf_iterator_alloc(hwloc_topology_t topology,
 	for (i = 1; i < n_levels; i++) {
 		pd = t->depth[t->asc_order[i]];
 		cd = t->depth[t->asc_order[i - 1]];
-		t->arity[t->asc_order[i - 1]] = num_children(t, pd, cd);
+		t->arity[t->asc_order[i - 1]] = max_arity(t, pd, cd);
 	}
 	t->arity[t->asc_order[t->n - 1]] =
 	    hwloc_get_nbobjs_by_depth(t->topology,
@@ -244,7 +213,11 @@ hwloc_obj_t hwloc_tleaf_iterator_current(const struct hwloc_tleaf_iterator *t)
 
 	for (i = t->n - 2; i >= 0; i--) {
 		j = t->asc_order[i];
-		p = get_child(p, t->depth[j], t->index[j][t->it[j]]);
+		p = hwloc_get_obj_below_by_type(t->topology,
+						p->type,
+						p->logical_index,
+						hwloc_get_type_depth(t->depth[j]),
+						t->index[j][t->it[j]]);
 	}
 
 	return p;
