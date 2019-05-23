@@ -34,10 +34,11 @@ bin_PROGRAMS = \
         hwloc-diff \
         hwloc-distrib \
         hwloc-info \
-        hwloc-patch
+        hwloc-patch \
+	hwloc-tbind
 
 # start tests here before recursing into subdirs
-SUBDIRS = . hwloc-affinity
+SUBDIRS = .
 
 if !HWLOC_HAVE_WINDOWS
 bin_PROGRAMS += hwloc-ps
@@ -66,19 +67,32 @@ hwloc_ps_SOURCES = hwloc-ps.c
 # keep HWLOC_PS_LIBS first in case there's also -lnsl which cannot be before -lsocket
 hwloc_ps_LDADD = $(HWLOC_PS_LIBS) $(LDADD) libutils_common.la
 
+noinst_LTLIBRARIES = libhwloc-tbind.la
+libhwloc_tbind_la_SOURCES=hwloc-tbind-obj.c
+LIBDADD=$(HWLOC_top_builddir)/hwloc/libhwloc.la
+
+hwloc_tbind_SOURCES=hwloc-tbind.c
+LDADD=$(HWLOC_top_builddir)/hwloc/libhwloc.la
+LDADD+=libhwloc-tbind.la
+
 bin_SCRIPTS = hwloc-compress-dir
 if HWLOC_HAVE_LINUX
 bin_SCRIPTS += hwloc-gather-topology
 endif HWLOC_HAVE_LINUX
 
 if !HWLOC_HAVE_MINGW32
+
+check_PROGRAMS=hwloc-tbind
+
 TESTS = \
         test-hwloc-annotate.sh \
         test-hwloc-calc.sh \
         test-hwloc-compress-dir.sh \
         test-hwloc-diffpatch.sh \
         test-hwloc-distrib.sh \
-        test-hwloc-info.sh
+        test-hwloc-info.sh \
+	hwloc-tbind
+
 if HWLOC_HAVE_PLUGINS
 TESTS += test-fake-plugin.sh
 endif HWLOC_HAVE_PLUGINS
@@ -101,7 +115,9 @@ man1_pages = \
         hwloc-diff.1 \
         hwloc-distrib.1 \
         hwloc-info.1 \
-        hwloc-patch.1
+        hwloc-patch.1 \
+	hwloc-tbind.1
+
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 
