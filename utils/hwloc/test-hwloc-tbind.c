@@ -321,24 +321,30 @@ static void test_self(void)
 
 int main(void)
 {
+	struct hwloc_topology_support * support;
 	hwloc_topology_t topology;
 
-	system_topology = hwloc_test_topology_load(NULL);
+	system_topology = hwloc_test_topology_load(NULL);	
 	assert(system_topology != NULL);
 	test_topology(system_topology);
-	test_self();
+
+	support = hwloc_topology_get_support(system_topology);
+	if(support->cpubind->set_thread_cpubind &&
+	   support->cpubind->get_thread_cpubind){
+		test_self();
 #ifdef _OPENMP
-	test_openmp();
+		test_openmp();
 #ifdef HWLOC_HAVE_PTRACE	
-        check_attach(run_parallel_openmp_test); //Hangs because threads after fork
+		check_attach(run_parallel_openmp_test); //Hangs because threads after fork
 #endif // HWLOC_HAVE_PTRACE
 #endif
 #ifdef HAVE_PTHREAD
-	test_pthreads();
+		test_pthreads();
 #ifdef HWLOC_HAVE_PTRACE	
-	check_attach(run_parallel_pthread_test); //Hangs because threads after fork
+		check_attach(run_parallel_pthread_test); //Hangs because threads after fork
 #endif // HWLOC_HAVE_PTRACE	
-#endif	
+#endif
+	}
 	hwloc_topology_destroy(system_topology);
 
 	DIR* xml_dir = opendir(TBIND_XML_DIR);
