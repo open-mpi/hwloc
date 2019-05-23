@@ -26,7 +26,7 @@ pipeline {
 				node('autotools') {
 					checkout scm
 					script {
-						gitBranch = sh (script: 'if test "$BRANCH_NAME"; then echo $BRANCH_NAME; else git branch | cut -c3-; fi', returnStdout: true).trim()
+						gitBranch = sh (script: 'if test "$BRANCH_NAME"; then echo $BRANCH_NAME; else git rev-parse --abbrev-ref HEAD; fi', returnStdout: true).trim()
 					}
 					sh 'contrib/ci.inria.fr/job-0-tarball.sh '+gitBranch
 					script {
