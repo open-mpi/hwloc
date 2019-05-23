@@ -38,7 +38,7 @@ bin_PROGRAMS = \
 	hwloc-tbind
 
 # start tests here before recursing into subdirs
-SUBDIRS = . hwloc-affinity
+SUBDIRS = .
 
 if !HWLOC_HAVE_WINDOWS
 bin_PROGRAMS += hwloc-ps
