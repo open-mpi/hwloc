@@ -226,7 +226,7 @@ static void test_pthreads(void)
 /*                      Check attaching to this process                    */
 /***************************************************************************/
 
-#ifdef HAVE_SYS_PTRACE_H
+#ifdef HWLOC_HAVE_PTRACE
 #ifdef HAVE_PTHREAD
 struct thread_arg{
 	struct cpuaffinity_enum *e;
@@ -294,7 +294,7 @@ static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 	fn(e, num_threads);
 }
 #endif //defined(_OPENMP) || defined(HAVE_PTHREAD)
-#endif //HAVE_SYS_PTRACE_H
+#endif //HWLOC_HAVE_PTRACE
 
 /***************************************************************************/
 /*                         Check sequential binding                        */
@@ -329,15 +329,15 @@ int main(void)
 	test_self();
 #ifdef _OPENMP
 	test_openmp();
-#ifdef HAVE_SYS_PTRACE_H	
+#ifdef HWLOC_HAVE_PTRACE	
         check_attach(run_parallel_openmp_test); //Hangs because threads after fork
-#endif // HAVE_SYS_PTRACE_H
+#endif // HWLOC_HAVE_PTRACE
 #endif
 #ifdef HAVE_PTHREAD
 	test_pthreads();
-#ifdef HAVE_SYS_PTRACE_H	
+#ifdef HWLOC_HAVE_PTRACE	
 	check_attach(run_parallel_pthread_test); //Hangs because threads after fork
-#endif // HAVE_SYS_PTRACE_H	
+#endif // HWLOC_HAVE_PTRACE	
 #endif	
 	hwloc_topology_destroy(system_topology);
 
