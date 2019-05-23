@@ -431,7 +431,10 @@ cpuaffinity_tleaf(hwloc_topology_t topology,
 		  const int *depths,
 		  const int shuffle)
 {
-	int new_topo = topology == NULL ? 1 : 0;
+	if(topology == NULL){
+		errno = EINVAL;
+		return NULL;
+	}
 	struct hwloc_tleaf_iterator * it;
 	struct cpuaffinity_enum * e;
 	if(n_depths <= 1){
@@ -439,11 +442,6 @@ cpuaffinity_tleaf(hwloc_topology_t topology,
 		return NULL;
 	}
 		
-	if(new_topo){
-		topology = hwloc_affinity_topology_load(NULL);
-		if(topology == NULL)
-			return NULL;
-	}
 	it = hwloc_tleaf_iterator_alloc(topology, n_depths, depths);
 	if(it == NULL)
 		return NULL;
@@ -456,8 +454,6 @@ cpuaffinity_tleaf(hwloc_topology_t topology,
 
 	// Cleanup
 	hwloc_tleaf_iterator_free(it);
-	if(new_topo)
-		hwloc_topology_destroy(topology);
 	
 	return e;
 }
@@ -466,18 +462,16 @@ static struct cpuaffinity_enum *
 cpuaffinity_default_policy(hwloc_topology_t topology,
 			   const hwloc_obj_type_t level, int scatter)
 {
+	if(topology == NULL){
+		errno = EINVAL;
+		return NULL;
+	}
+
 	hwloc_obj_t obj;
 	int i, ldepth;
 	int *depths;
         struct hwloc_tleaf_iterator *it = NULL;
 	struct cpuaffinity_enum *e = NULL;
-	int new_topo = topology == NULL ? 1 : 0;
-
-	if(new_topo){
-		topology = hwloc_affinity_topology_load(NULL);
-		if(topology == NULL)
-			return NULL;
-	}
 
 	ldepth = hwloc_get_type_depth(topology, level);
 	if(ldepth < 0){
@@ -507,8 +501,6 @@ cpuaffinity_default_policy(hwloc_topology_t topology,
 	hwloc_tleaf_iterator_free(it);
 	
  out:
-	if(new_topo)
-		hwloc_topology_destroy(topology);
 	return e;
 }
 
