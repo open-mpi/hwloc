@@ -1,11 +1,7 @@
 #include "private/autogen/config.h"
 #include <stdio.h>
 #include <stdlib.h>
-<<<<<<< HEAD
 #ifdef HWLOC_HAVE_PTRACE
-=======
-#ifdef HAVE_SYS_PTRACE_H
->>>>>>> a1491427... move hwloc-tbind outside its directory
 #include <sys/ptrace.h>
 #endif
 #include <sys/types.h>
@@ -16,51 +12,6 @@
 #include "hwloc/helper.h"
 
 /***************************************************************************/
-<<<<<<< HEAD
-=======
-/*                                   utils                                 */
-/***************************************************************************/
-
-hwloc_topology_t hwloc_affinity_topology_load(const char *file)
-{
-	hwloc_topology_t topology;
-
-	if (hwloc_topology_init(&topology)) {
-		perror("hwloc_topology_init");
-		goto error;
-	}
-
-	if (file != NULL && hwloc_topology_set_xml(topology, file) != 0) {
-		perror("hwloc_topology_set_xml");
-		goto error;
-	}
-
-	/* hwloc_topology_set_all_types_filter(topology, */
-	/* 				    HWLOC_TYPE_FILTER_KEEP_STRUCTURE); */
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PU,
-				       HWLOC_TYPE_FILTER_KEEP_ALL);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_NUMANODE,
-				       HWLOC_TYPE_FILTER_KEEP_ALL);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE,
-				       HWLOC_TYPE_FILTER_KEEP_NONE);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE,
-				       HWLOC_TYPE_FILTER_KEEP_NONE);
-
-	if (hwloc_topology_load(topology) != 0) {
-		perror("hwloc_topology_load");
-		goto error_with_topology;
-	}
-
-	return topology;
-
-error_with_topology:
-	hwloc_topology_destroy(topology);
-error:
-	return NULL;
-}
-
-/***************************************************************************/
->>>>>>> a1491427... move hwloc-tbind outside its directory
 /*                              enum  structure                            */
 /***************************************************************************/
 
@@ -86,11 +37,7 @@ struct cpuaffinity_enum{
 };
 
 /** Maximum len of string containing a hwloc_obj logical index **/
-<<<<<<< HEAD
 #define STR_OBJ_MAX 32
-=======
-#define STR_INT_MAX 5
->>>>>>> a1491427... move hwloc-tbind outside its directory
 
 struct cpuaffinity_enum *cpuaffinity_enum_alloc(hwloc_topology_t topology)
 {
@@ -154,7 +101,6 @@ out_edom:
 	return -1;
 }
 
-<<<<<<< HEAD
 static int cpuaffinity_obj_snprintf(char* str,
 				    const size_t len,
 				    const char *sep,
@@ -186,16 +132,6 @@ void cpuaffinity_enum_print(const struct cpuaffinity_enum *e,
 	size_t len = e->n * (strlen(sep) + STR_OBJ_MAX);
 	char *c, *enum_str = malloc(len);
 	int i, start, end;
-=======
-void cpuaffinity_enum_print(const struct cpuaffinity_enum *e,
-			    const char *sep,
-			    const int logical,
-			    unsigned num)
-{
-	unsigned i;
-	size_t len = e->n * (strlen(sep) + STR_INT_MAX);
-	char *c, *enum_str = malloc(len);
->>>>>>> a1491427... move hwloc-tbind outside its directory
 	num = num == 0 ? e->n : num;
 	num = num > e->n ? e->n : num;
 
@@ -207,7 +143,6 @@ void cpuaffinity_enum_print(const struct cpuaffinity_enum *e,
 	memset(enum_str, 0, len);
 	c = enum_str;
 
-<<<<<<< HEAD
 	start = reverse ? num-1 : 0;
 	end   = reverse ? 0     : num-1;
 	for (i = start; i != end; reverse ? i-- : i++){
@@ -226,16 +161,6 @@ void cpuaffinity_enum_print(const struct cpuaffinity_enum *e,
 				    logical,
 				    cpuset,
 				    taskset);
-=======
-	for (i = 0; i < num-1; i++)
-		c += snprintf(c, len + enum_str - c, "%d%s",
-			      logical ? e->obj[i]->logical_index : e->obj[i]->
-			      os_index, sep);
-	c += snprintf(c, len + enum_str - c, "%d",
-		      logical ? e->obj[i]->logical_index : e->obj[i]->
-		      os_index);
-
->>>>>>> a1491427... move hwloc-tbind outside its directory
 	printf("%s\n", enum_str);
 	free(enum_str);
 }
@@ -269,15 +194,9 @@ struct hwloc_tleaf_iterator {
 	unsigned *asc_order;
 	/** Number of elements at level below parent. **/
 	unsigned *arity;
-<<<<<<< HEAD
 	/** Current iterator index of level. **/
 	unsigned *it;
 	/** For each level, indexing of elements. **/
-=======
-	/** Current iterator index of level.w **/
-	unsigned *it;
-	/** For each level indexing of elements. **/
->>>>>>> a1491427... move hwloc-tbind outside its directory
 	unsigned **index;
 };
 
