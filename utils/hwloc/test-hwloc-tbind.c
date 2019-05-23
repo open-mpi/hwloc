@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 *******************************************************************************/
 
+#include "private/autogen/config.h"
 #include "hwloc-tbind.h"
 #include <assert.h>
 #include <dirent.h>
@@ -126,6 +127,7 @@ static void test_topology(hwloc_topology_t topology)
 /*                     Check binding inside this process                   */
 /***************************************************************************/
 
+#if defined(_OPENMP) || defined(HAVE_PTHREAD)
 static void * bind_thread(void * arg)
 {
 	pid_t pid = getpid();
@@ -133,6 +135,7 @@ static void * bind_thread(void * arg)
 	hwloc_obj_t obj = cpuaffinity_bind_thread(e, pid);
 	return (void*) cpuaffinity_check(system_topology, obj, pid);
 }
+#endif
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -197,7 +200,7 @@ static void * check_pthread(void * arg)
 {
 	struct thread_arg *targ = arg;
 	hwloc_obj_t obj = cpuaffinity_enum_get(targ->e, targ->tid);
-	return (void*) cpuaffinity_check(system_topology, obj, getpid());
+	return (void*) (intptr_t)cpuaffinity_check(system_topology, obj, getpid());
 }
 
 static void run_parallel_pthread_test(struct cpuaffinity_enum *e, const unsigned num_threads)
@@ -241,9 +244,9 @@ static void run_parallel_openmp_test(struct cpuaffinity_enum *e,
 }
 #endif //_OPENMP
 
+#if defined(_OPENMP) || defined(HAVE_PTHREAD)
 static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 {
-	pid_t pid;
 	struct cpuaffinity_enum *e;
 	unsigned num_threads;
 
@@ -252,6 +255,7 @@ static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 	cpuaffinity_attach(e, getpid());
 	fn(e, num_threads);
 }
+#endif //defined(_OPENMP) || defined(HAVE_PTHREAD)
 #endif //HAVE_SYS_PTRACE_H
 
 /***************************************************************************/
@@ -299,7 +303,7 @@ int main(void)
 #endif	
 	hwloc_topology_destroy(system_topology);
 
-	DIR* xml_dir = opendir(XML_DIR);
+	DIR* xml_dir = opendir(TBIND_XML_DIR);
 	if(xml_dir == NULL){
 		perror("opendir");
 		return 1;
@@ -316,7 +320,11 @@ int main(void)
 			  ".xml"))
 			continue;
 		memset(fname, 0, sizeof(fname));
-		snprintf(fname, sizeof(fname), "%s/%s", XML_DIR, dirent->d_name);
+		snprintf(fname,
+			 sizeof(fname),
+			 "%s/%s",
+			 TBIND_XML_DIR,
+			 dirent->d_name);
 		topology = hwloc_affinity_topology_load(fname);
 		if(topology == NULL)
 			continue;

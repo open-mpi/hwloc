@@ -3,16 +3,16 @@
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
-.TH HWLOC-AFFINITY "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
+.TH HWLOC-TBIND "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
-hwloc-affinity \- Launch a command with threads bound to a single processing unit following a policy or output a list of processing units following a policy.
+hwloc-tbind \- Launch a command with threads bound to a single processing unit following a policy or output a list of processing units following a policy.
 .
 .\" **************************
 .\"    Synopsis Section
 .\" **************************
 .SH SYNOPSIS
 .
-.B hwloc-affinity
+.B hwloc-tbind
 [\fIoptions\fR] \fI[--] <command> \fR...
 .
 .PP
@@ -111,7 +111,7 @@ EXAMPLE section.
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-affinity builds a list of topology objects and bind new threads
+hwloc-tbind builds a list of topology objects and bind new threads
 in the order of there creation to match cpusets of objects inside this list.
 .
 .PP
@@ -131,10 +131,10 @@ bind threads. See EXAMPLES section.
 .\" **************************
 .SH EXAMPLES
 .PP
-hwloc-affinity's operation is best described through several examples.
+hwloc-tbind's operation is best described through several examples.
 .
 .PP
-hwloc-affinity default behaviour is to output os indexes of one processing
+hwloc-tbind default behaviour is to output os indexes of one processing
 unit (PU) per core in a round-robin fashion. If cores contain several hardware
 threads, then, on next rounds of cores, it will iterate PUs in a round-robin fashion,
 to avoid overlapping the same PUs:
@@ -143,42 +143,42 @@ to avoid overlapping the same PUs:
 
 which is exactly equivalent to the following line:
 
-    $ hwloc-affinity -p round-robin core
+    $ hwloc-tbind -p round-robin core
 
-hwloc-affinity can bind a process threads in the order of their creation
+hwloc-tbind can bind a process threads in the order of their creation
 to match the permutation of PUs:
 
-    $ hwloc-affinity -p round-robin core -- echo hello_affinity
+    $ hwloc-tbind -p round-robin core -- echo hello_affinity
 
-hwloc-affinity can be used in conjunction with gcc OpenMP to, for instance,
+hwloc-tbind can be used in conjunction with gcc OpenMP to, for instance,
 run an OpenMP application with one thread per core placed in a round-robin
 fashion:
 
     $ export OMP_NUM_THREADS=$(hwloc-calc Machine:0 -N core)
-    $ export GOMP_CPU_AFFINITY=$(hwloc-affinity -p round-robin core)
+    $ export GOMP_CPU_AFFINITY=$(hwloc-tbind -p round-robin core)
 
 Custom policies can be built with tleaf policy.
 For instance round-robin policy on cores is equivalent to:
 
-    $ hwloc-affinity -p tleaf pu:core:machine
-    $ hwloc-affinity -p tleaf pu:core
+    $ hwloc-tbind -p tleaf pu:core:machine
+    $ hwloc-tbind -p tleaf pu:core
 
 For a machine containing levels: Machine, Socket, L3, L2, L1, Core, PU,
 scatter policy on processing units is equivalent to:
 
-    $ hwloc-affinity -p tleaf machine:socket:L3:L2:L1:core:pu
+    $ hwloc-tbind -p tleaf machine:socket:L3:L2:L1:core:pu
 
 For iterating sockets in a round-robin fashion and scattering threads on sockets PUs:
 
-    $ hwloc-affinity -p tleaf socket:machine:L3:L2:L1:core:pu
+    $ hwloc-tbind -p tleaf socket:machine:L3:L2:L1:core:pu
 .
 .\" **************************
 .\"    Return value section
 .\" **************************
 .SH RETURN VALUE
-Upon successful execution, hwloc-affinity execs the command over itself.
+Upon successful execution, hwloc-tbind execs the command over itself.
 The return value is therefore whatever the return value of the command
-is. If no command is issued, then hwloc-affinity returns 0 on success
+is. If no command is issued, then hwloc-tbind returns 0 on success
 and 1 on failure if (not limited to) provided arguments can't lead to
 a correct execution.
 .
