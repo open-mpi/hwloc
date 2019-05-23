@@ -352,8 +352,9 @@ int main(void)
 	for(dirent = readdir(xml_dir);
 	    dirent != NULL;
 	    dirent = readdir(xml_dir)){
-		if(dirent->d_type != DT_REG)
-			continue;
+		// Not supported by solaris and not critical.
+		/* if(dirent->d_type != DT_REG) */
+		/* 	continue; */
 		if(strcmp(dirent->d_name + strlen(dirent->d_name) - 4,
 			  ".xml"))
 			continue;
