@@ -741,8 +741,11 @@ int cpuaffinity_attach(struct cpuaffinity_enum * objs, const pid_t pid)
 pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
 {
 	pid_t pid = fork();  
-	/* start program to trace */
+	/* Tracee */
 	if(pid == 0) {
+		// Attach
+		cpuaffinity_attach(objs, getpid());
+		// Start command
 		if(execvp(argv[0], argv) == -1){
 			perror("execvp");
 			return -1;
@@ -751,10 +754,9 @@ pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
 	}
 	/* Tracer code */
 	else if(pid > 0){
-		cpuaffinity_attach(objs, pid);
 		return pid;
 	}
-	/* fork error */
+	/* Fork error */
 	else {
 		perror("fork");
 		return -1;
