@@ -12,48 +12,6 @@
 #include "hwloc/helper.h"
 
 /***************************************************************************/
-/*                                   utils                                 */
-/***************************************************************************/
-
-hwloc_topology_t hwloc_affinity_topology_load(const char *file)
-{
-	hwloc_topology_t topology;
-
-	if (hwloc_topology_init(&topology)) {
-		perror("hwloc_topology_init");
-		goto error;
-	}
-
-	if (file != NULL && hwloc_topology_set_xml(topology, file) != 0) {
-		perror("hwloc_topology_set_xml");
-		goto error;
-	}
-
-	/* hwloc_topology_set_all_types_filter(topology, */
-	/* 				    HWLOC_TYPE_FILTER_KEEP_STRUCTURE); */
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PU,
-				       HWLOC_TYPE_FILTER_KEEP_ALL);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_NUMANODE,
-				       HWLOC_TYPE_FILTER_KEEP_ALL);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE,
-				       HWLOC_TYPE_FILTER_KEEP_NONE);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE,
-				       HWLOC_TYPE_FILTER_KEEP_NONE);
-
-	if (hwloc_topology_load(topology) != 0) {
-		perror("hwloc_topology_load");
-		goto error_with_topology;
-	}
-
-	return topology;
-
-error_with_topology:
-	hwloc_topology_destroy(topology);
-error:
-	return NULL;
-}
-
-/***************************************************************************/
 /*                              enum  structure                            */
 /***************************************************************************/
 
