@@ -1,10 +1,9 @@
-/***************************************************************************
+/*******************************************************************************
  * Copyright 2019 UChicago Argonne, LLC.
  * Author: Nicolas Denoyelle
  * SPDX-License-Identifier: BSD-3-Clause
-****************************************************************************/
+*******************************************************************************/
 
-#include "private/autogen/config.h"
 #include "hwloc-tbind.h"
 #include <assert.h>
 #include <dirent.h>
@@ -15,44 +14,6 @@
 #endif
 
 static hwloc_topology_t system_topology;
-
-static hwloc_topology_t hwloc_test_topology_load(const char *file)
-{
-	hwloc_topology_t topology;
-
-	if (hwloc_topology_init(&topology)) {
-		perror("hwloc_topology_init");
-		goto error;
-	}
-
-	if (file != NULL && hwloc_topology_set_xml(topology, file) != 0) {
-		perror("hwloc_topology_set_xml");
-		goto error;
-	}
-
-	hwloc_topology_set_all_types_filter(topology,
-					    HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PU,
-				       HWLOC_TYPE_FILTER_KEEP_ALL);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_NUMANODE,
-				       HWLOC_TYPE_FILTER_KEEP_ALL);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE,
-				       HWLOC_TYPE_FILTER_KEEP_NONE);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_OS_DEVICE,
-				       HWLOC_TYPE_FILTER_KEEP_NONE);
-
-	if (hwloc_topology_load(topology) != 0) {
-		perror("hwloc_topology_load");
-		goto error_with_topology;
-	}
-
-	return topology;
-
-error_with_topology:
-	hwloc_topology_destroy(topology);
-error:
-	return NULL;
-}
 
 static void test_enum(hwloc_topology_t topology)
 {
@@ -156,9 +117,8 @@ static int is_tleaf(hwloc_topology_t topology)
 static void test_topology(hwloc_topology_t topology)
 {
 	test_enum(topology);
-	if(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) > 0)
-		test_round_robin(topology);
-	if(is_tleaf(topology) && hwloc_get_type_depth(topology, HWLOC_OBJ_PU) > 0)
+	test_round_robin(topology);
+	if(is_tleaf(topology))
 		test_scatter(topology);
 }
 
@@ -166,7 +126,6 @@ static void test_topology(hwloc_topology_t topology)
 /*                     Check binding inside this process                   */
 /***************************************************************************/
 
-#if defined(_OPENMP) || defined(HAVE_PTHREAD)
 static void * bind_thread(void * arg)
 {
 	pid_t pid = getpid();
@@ -174,7 +133,6 @@ static void * bind_thread(void * arg)
 	hwloc_obj_t obj = cpuaffinity_bind_thread(e, pid);
 	return (void*) cpuaffinity_check(system_topology, obj, pid);
 }
-#endif
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -227,7 +185,7 @@ static void test_pthreads(void)
 /*                      Check attaching to this process                    */
 /***************************************************************************/
 
-#ifdef HWLOC_HAVE_PTRACE
+#ifdef HAVE_SYS_PTRACE_H
 #ifdef HAVE_PTHREAD
 struct thread_arg{
 	struct cpuaffinity_enum *e;
@@ -239,7 +197,7 @@ static void * check_pthread(void * arg)
 {
 	struct thread_arg *targ = arg;
 	hwloc_obj_t obj = cpuaffinity_enum_get(targ->e, targ->tid);
-	return (void*) (intptr_t)cpuaffinity_check(system_topology, obj, getpid());
+	return (void*) cpuaffinity_check(system_topology, obj, getpid());
 }
 
 static void run_parallel_pthread_test(struct cpuaffinity_enum *e, const unsigned num_threads)
@@ -283,9 +241,9 @@ static void run_parallel_openmp_test(struct cpuaffinity_enum *e,
 }
 #endif //_OPENMP
 
-#if defined(_OPENMP) || defined(HAVE_PTHREAD)
 static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 {
+	pid_t pid;
 	struct cpuaffinity_enum *e;
 	unsigned num_threads;
 
@@ -293,10 +251,8 @@ static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_CORE);
 	cpuaffinity_attach(e, getpid());
 	fn(e, num_threads);
-	cpuaffinity_enum_free(e);
 }
-#endif //defined(_OPENMP) || defined(HAVE_PTHREAD)
-#endif //HWLOC_HAVE_PTRACE
+#endif //HAVE_SYS_PTRACE_H
 
 /***************************************************************************/
 /*                         Check sequential binding                        */
@@ -324,33 +280,26 @@ static void test_self(void)
 int main(void)
 {
 	hwloc_topology_t topology;
-	system_topology = hwloc_test_topology_load(NULL);	
+
+	system_topology = hwloc_affinity_topology_load(NULL);
 	assert(system_topology != NULL);
-
-	const struct hwloc_topology_support * support =
-		hwloc_topology_get_support(system_topology);
 	test_topology(system_topology);
-
-	if(support->cpubind &&
-	   support->cpubind->set_thread_cpubind &&
-	   support->cpubind->get_thread_cpubind){
-		test_self();
+	test_self();
 #ifdef _OPENMP
-		test_openmp();
-#ifdef HWLOC_HAVE_PTRACE	
-		check_attach(run_parallel_openmp_test); //Hangs because threads after fork
-#endif // HWLOC_HAVE_PTRACE
+	test_openmp();
+#ifdef HAVE_SYS_PTRACE_H	
+        check_attach(run_parallel_openmp_test); //Hangs because threads after fork
+#endif // HAVE_SYS_PTRACE_H
 #endif
 #ifdef HAVE_PTHREAD
-		test_pthreads();
-#ifdef HWLOC_HAVE_PTRACE	
-		check_attach(run_parallel_pthread_test); //Hangs because threads after fork
-#endif // HWLOC_HAVE_PTRACE	
-#endif
-	}
+	test_pthreads();
+#ifdef HAVE_SYS_PTRACE_H	
+	check_attach(run_parallel_pthread_test); //Hangs because threads after fork
+#endif // HAVE_SYS_PTRACE_H	
+#endif	
 	hwloc_topology_destroy(system_topology);
 
-	DIR* xml_dir = opendir(TBIND_XML_DIR);
+	DIR* xml_dir = opendir(XML_DIR);
 	if(xml_dir == NULL){
 		perror("opendir");
 		return 1;
@@ -361,19 +310,14 @@ int main(void)
 	for(dirent = readdir(xml_dir);
 	    dirent != NULL;
 	    dirent = readdir(xml_dir)){
-		// Not supported by solaris and not critical.
-		/* if(dirent->d_type != DT_REG) */
-		/* 	continue; */
+		if(dirent->d_type != DT_REG)
+			continue;
 		if(strcmp(dirent->d_name + strlen(dirent->d_name) - 4,
 			  ".xml"))
 			continue;
 		memset(fname, 0, sizeof(fname));
-		snprintf(fname,
-			 sizeof(fname),
-			 "%s/%s",
-			 TBIND_XML_DIR,
-			 dirent->d_name);
-		topology = hwloc_test_topology_load(fname);
+		snprintf(fname, sizeof(fname), "%s/%s", XML_DIR, dirent->d_name);
+		topology = hwloc_affinity_topology_load(fname);
 		if(topology == NULL)
 			continue;
 		test_topology(topology);
