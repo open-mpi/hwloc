@@ -76,7 +76,7 @@ LDADD+=$(HWLOC_top_builddir)/hwloc/libhwloc.la
 LDADD+=libhwloc-tbind.la
 
 AM_CFLAGS+=-DTBIND_XML_DIR=\"$(HWLOC_top_builddir)/tests/hwloc/xml\"
-AM_CFLAGS+=-I$(HWLOC_top_builddir)/hwloc/utils
+AM_CFLAGS+=-I$(HWLOC_top_builddir)/utils/hwloc
 AM_CFLAGS+=@OPENMP_CFLAGS@
 AM_CFLAGS+=@PTHREAD_CFLAGS@
 AM_LDFLAGS+=@PTHREAD_LIBS@
