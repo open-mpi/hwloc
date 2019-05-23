@@ -395,7 +395,10 @@ AC_DEFUN([HWLOC_SETUP_TESTS],[
 EOF
 
     # Check thread support.
-    AX_PTHREAD([hwloc_have_pthread=yes])
+    AX_PTHREAD([
+	hwloc_have_pthread=yes;
+	AC_DEFINE([HAVE_PTHREAD], [1], [pthread support is here])
+    ])
     AC_OPENMP
 
     HWLOC_PKG_CHECK_MODULES([NUMA], [numa], [numa_available], [numa.h],
