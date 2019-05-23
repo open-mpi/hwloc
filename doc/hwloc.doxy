@@ -812,6 +812,19 @@ by exporting hwloc specifications into list of processor or NUMA node
 physical indexes.
 See also \ref faq_indexes.
 
+\htmlonly
+</div><div class="section" id="cli_hwloc_tbind">
+\endhtmlonly
+hwloc-tbind is a command line to enumeration processing units
+with a policy and to bind threads to enumerated processing units
+in the order of their creation. Application launched by hwloc-tbind
+will have their thread creation caught and their threads bound to
+a single processing unit according to the user selected policy.
+If not used to start an application hwloc-tbind can be used to output
+a list of processing units index in conjunction with environment
+variables such as GOMP_CPU_AFFINITY in order to bind the threads of a
+specific runtime. See hwloc-tbind(1) more more details on how to
+use it and what thread binding policies are implemented.
 
 \htmlonly
 </div><div class="section" id="cli_hwloc_info">
