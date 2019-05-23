@@ -1,4 +1,4 @@
-AM_CFLAGS = $(HWLOC_CFLAGS)
+AM_CFLAGS = $(HWLOC_CFLAGS) -I$(HWLOC_top_builddir)/utils/hwloc/hwloc-affinity
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
