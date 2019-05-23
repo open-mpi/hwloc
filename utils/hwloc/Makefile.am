@@ -68,15 +68,14 @@ hwloc_ps_SOURCES = hwloc-ps.c
 hwloc_ps_LDADD = $(HWLOC_PS_LIBS) $(LDADD) libutils_common.la
 
 noinst_LTLIBRARIES+=libhwloc-tbind.la
-libhwloc_tbind_la_SOURCES=hwloc-tbind-obj.c
+libhwloc_tbind_la_SOURCES=hwloc-tbind-obj.c hwloc-tbind.h
 LIBDADD=$(HWLOC_top_builddir)/hwloc/libhwloc.la
 
-hwloc_tbind_SOURCES=hwloc-tbind.c
+hwloc_tbind_SOURCES=hwloc-tbind.c hwloc-tbind.h
 LDADD+=$(HWLOC_top_builddir)/hwloc/libhwloc.la
 LDADD+=libhwloc-tbind.la
 
 AM_CFLAGS+=-DTBIND_XML_DIR=\"$(HWLOC_top_builddir)/tests/hwloc/xml\"
-AM_CFLAGS+=-I$(HWLOC_top_builddir)/utils/hwloc
 AM_CFLAGS+=@OPENMP_CFLAGS@
 AM_CFLAGS+=@PTHREAD_CFLAGS@
 AM_LDFLAGS+=@PTHREAD_LIBS@
