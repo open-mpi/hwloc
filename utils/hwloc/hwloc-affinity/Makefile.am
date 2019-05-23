@@ -2,22 +2,20 @@ AM_CFLAGS = $(HWLOC_CFLAGS) -I$(HWLOC_top_builddir)/utils/hwloc/hwloc-affinity
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-noinst_LTLIBRARIES = libcpuaffinity.la
-libcpuaffinity_la_SOURCES=tleaf.c utils.c enum.c
-if HWLOC_HAVE_PTRACE
-libcpuaffinity_la_SOURCES+=bind.c
-endif
-LIBADD=$(HWLOC_top_builddir)/hwloc/libhwloc.la
+noinst_LTLIBRARIES = libhwloc-tbind.la
+libhwloc_tbind_la_SOURCES=hwloc-tbind-obj.c
+LIBDADD=$(HWLOC_top_builddir)/hwloc/libhwloc.la
 
-bin_PROGRAMS=hwloc-affinity
-hwloc_affinity_SOURCES=hwloc-affinity.c
-LDADD=$(HWLOC_top_builddir)/hwloc/libhwloc.la libcpuaffinity.la
+bin_PROGRAMS=hwloc-tbind
+hwloc_tbind_SOURCES=hwloc-tbind.c
+LDADD=$(HWLOC_top_builddir)/hwloc/libhwloc.la
+LDADD+=libhwloc-tbind.la
 
 ###################################################
 # Man
 ###################################################
 
-man1_pages = hwloc-affinity.1
+man1_pages = hwloc-tbind.1
 EXTRA_DIST = $(man1_pages:.1=.1in)
 nodist_man_MANS = $(man1_pages)
 
@@ -36,12 +34,10 @@ SEDMAN = $(SED) -e 's/%PACKAGE_NAME%/@PACKAGE_NAME@/g' \
 
 AM_COLOR_TESTS=yes
 
+AM_CFLAGS+=-DXML_DIR=\"$(HWLOC_top_builddir)/tests/hwloc/xml\"
 AM_CFLAGS+=@OPENMP_CFLAGS@
 AM_CFLAGS+=@PTHREAD_CFLAGS@
-LDADD+=@PTHREAD_LIBS@
 
-UNIT_TESTS=test_tleaf test_enum test_bind
+UNIT_TESTS=test-hwloc-tbind
 check_PROGRAMS=$(UNIT_TESTS)
 TESTS=$(UNIT_TESTS)
-
-EXTRA_DIST+=knl.xml
