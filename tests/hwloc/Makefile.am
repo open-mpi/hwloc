@@ -1,4 +1,4 @@
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -8,7 +8,7 @@ AM_CPPFLAGS = $(HWLOC_CPPFLAGS) -DXMLTESTDIR=\"$(abs_top_srcdir)/tests/hwloc/xml
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 SUBDIRS = . ports xml
-DIST_SUBDIRS = ports xml linux x86 rename
+DIST_SUBDIRS = ports xml linux x86 x86+linux rename
 
 if HWLOC_HAVE_LINUX
 SUBDIRS += linux
@@ -17,6 +17,12 @@ endif HWLOC_HAVE_LINUX
 if HWLOC_HAVE_X86_CPUID
 SUBDIRS += x86
 endif HWLOC_HAVE_X86_CPUID
+
+if HWLOC_HAVE_LINUX
+if HWLOC_HAVE_X86_CPUID
+SUBDIRS += x86+linux
+endif HWLOC_HAVE_X86_CPUID
+endif HWLOC_HAVE_LINUX
 
 LDADD =
 
