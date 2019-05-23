@@ -53,7 +53,7 @@ to the policy. Works only with tleaf policy.
 \fB\-r\fR \fB\-\-restrict\fR <topology-area>
 Restrict the topology on which permutation is computed
 to a topology object cpuset. <topology-area> may have the
-format as input accepted by hwloc-calc: object_type:index, cpuset etc...
+same format as the ones accepted by hwloc-calc: object_type:index, cpuset etc...
 .TP
 \fB\-p\fR \fB\-\-policy\fR <policy> <policy arg>
 Output a permutation of topology objects fulfilling a specific policy.
@@ -136,7 +136,7 @@ unit (PU) per core in a round-robin fashion. If cores contain several hardware
 threads, then, on next rounds of cores, it will iterate PUs in a round-robin fashion,
 to avoid overlapping the same PUs:
 
-    $ hwloc-affinty
+    $ hwloc-tbind
 
 which is exactly equivalent to the following line:
 
