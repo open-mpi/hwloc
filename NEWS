@@ -61,6 +61,10 @@ Version 2.1.0
   + Remove support for /proc/cpuinfo-only topology discovery in Linux
     kernel prior to 2.6.16.
 * Tools
+  + hwloc-tbind
+    - hwloc-tbind is a new tool introduced in hwloc toolset to enumerate
+      processing units with policies and bind applications threads to them.
+      See hwloc-tbind(1) for more information.
   + lstopo
     - lstopo factorizes objects by default in the graphical output when
       there are more than 4 identical children.
