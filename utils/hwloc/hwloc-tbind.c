@@ -9,7 +9,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "hwloc-calc.h"
 #include "hwloc-tbind.h"
+#include "misc.h"
 
 /***************************************************************************/
 /*                                   Main                                  */
@@ -26,7 +28,8 @@ static void print_option(const char *opt_short,
 			 const char *opt_long,
 			 const char *arg,
 			 const char *arg2,
-			 char *desc)
+			 char *desc,
+			 FILE *where)
 {
         int len, n, desclen = strlen(desc);
 	char * descptr = desc;
@@ -75,67 +78,67 @@ static void print_option(const char *opt_short,
 		descptr += n;
 		len += n;
 	}
-	printf("%s\n", str);
+	fprintf(where, "%s\n", str);
 	free(str);
 }
 
-static void usage(const char * argv0)
+void usage(const char * argv0, FILE *where)
 {
-	printf("SYNOPSIS:\n");
-	printf("\tOutput a list of processing units with a particular policy.\n");
-	printf("\tThis policy can further be used to bind an application threads\n");
-	printf("\tweather by exporting the runtime environment to the\n");
-	printf("\toutput value or starting the application with this tool.\n");
-	printf("\n");
+	fprintf(where, "SYNOPSIS:\n");
+	fprintf(where, "\tOutput a list of processing units with a particular policy.\n");
+	fprintf(where, "\tThis policy can further be used to bind an application threads\n");
+	fprintf(where, "\tweather by exporting the runtime environment to the\n");
+	fprintf(where, "\toutput value or starting the application with this tool.\n");
+	fprintf(where, "\n");
 
-	printf("COMMAND:\n");
-	printf("\t%s OPTIONS\n", argv0);
+	fprintf(where, "COMMAND:\n");
+	fprintf(where, "\t%s OPTIONS\n", argv0);
 #ifdef HAVE_SYS_PTRACE_H
-	printf("\t%s OPTIONS -- prog <args>\n", argv0);
+	fprintf(where, "\t%s OPTIONS -- prog <args>\n", argv0);
 #endif
-	printf("\n");
+	fprintf(where, "\n");
 	
-	printf("OPTIONS:\n");
+	fprintf(where, "OPTIONS:\n");
 	print_option("-h","--help", NULL, NULL,
-		     "Display this help.");	
-	print_option("-i","--input","xml_topology", NULL,
-		     "Use a topology from an XML file.");
+		     "Display this help.", where);	
+	print_option("-i","--input","<input>", NULL,
+		     "Use a topology from an XML file, or any input supported by hwloc-calc(1).", where);
 	print_option("-n","--num","integer", NULL,
-		     "Output only this number of objects.");
+		     "Output only this number of objects.", where);
 	print_option("-l","--logical", NULL, NULL,
-		     "Output logical index instead of os index.");
+		     "Output logical index instead of os index. If set, also input indexes to --restrict option will be considered as logical.", where);
 	print_option("-s","--separator", "string", NULL,
-		     "Set the separator character between indexes in output.");
+		     "Set the separator character between indexes in output.", where);
 	print_option(NULL,"--shuffle", NULL, NULL,
-		     "Randomize policy indexes. Only with tleaf policy.");
+		     "Randomize policy indexes. Only with tleaf policy.", where);
 	print_option("-r","--restrict", "cpuset OR hwloc_obj:logical_index", NULL,
-		     "Restrict topology to cpuset or a topology object cpuset/nodeset.");
+		     "Restrict topology to cpuset or a topology object cpuset/nodeset.", where);
 	print_option("-p", "--policy", "policy", "policy_arg",
-		     "Set enumeration policy. Policy can be one of: scatter, round-robin, tleaf. See POLICIES below for further informations on policies and their arguments.");
-	printf("\n");
+		     "Set enumeration policy. Policy can be one of: scatter, round-robin, tleaf. See POLICIES below for further informations on policies and their arguments.", where);
+	fprintf(where, "\n");
 	
-	printf("POLICIES:\n");
+	fprintf(where, "POLICIES:\n");
 	print_option(NULL,
 		     "round-robin",
 		     "topology level",
 		     NULL,
-		     "Output one Processing Unit (PU) per topology object of level iterated in a round-robin fashion. If oversubscribing happens, i.e objects are queried more than once, then PU below topology level will be iterated, also in a round-robin fashion. This policy is used to favor neighbors locality");
+		     "Output one Processing Unit (PU, where) per topology object of level iterated in a round-robin fashion. If oversubscribing happens, i.e objects are queried more than once, then PU below topology level will be iterated, also in a round-robin fashion. This policy is used to favor neighbors locality", where);
 	print_option(NULL,
 		     "scatter",
 		     "topology level",
 		     NULL,
-		     "Output Processing Unit (PU) of the topology object enumerated in a scatter fashion, i.e object are enumerated such that next PU is as far as possible to previous PU indexes. If oversubscribing happens, i.e objects are queried more than once, then PU below topology level will be iterated in a round-robin fashion. This policy is known to favor balance and exclusivity of hierarchical topology resources.");
+		     "Output Processing Unit (PU, where) of the topology object enumerated in a scatter fashion, i.e object are enumerated such that next PU is as far as possible to previous PU indexes. If oversubscribing happens, i.e objects are queried more than once, then PU below topology level will be iterated in a round-robin fashion. This policy is known to favor balance and exclusivity of hierarchical topology resources.", where);
 	print_option(NULL,
 		     "tleaf",
 		     "topology_level:topology_level:...",
 		     NULL,
-		     "tleaf policy is a user customized policy. A tleaf is a tree where all nodes of a level has the same arity. Such property is verified in most machines topology. It is still possible to map a tleaf on a topology which does not exhibit such property by expanding the tleaf to span the topology and ignore unachievable nodes. tleaf policy is an iterator on tleaf leaves, i.e the deepest topology object it contains. Leaves coordinates of a tleaf are as numerous as their is level in the tleaf, and their range of value is an index of tleaf node level arity. The way these coordinates are incremented sets the policy on which leaves are iterated. These coordinates iteration is done from the first provided topology level to the last topology level. Round robin-policy is typically a tleaf where levels are stacked from the processing units to the topology root and scatter policy is a tleaf where levels are stacked in the opposite order. In the round-robin policy, leaves of a parent node are iterated. Then next parent is looked for and its leaves are iterated, and so on.");
+		     "tleaf policy is a user customized policy. A tleaf is a tree where all nodes of a level has the same arity. Such property is verified in most machines topology. It is still possible to map a tleaf on a topology which does not exhibit such property by expanding the tleaf to span the topology and ignore unachievable nodes. tleaf policy is an iterator on tleaf leaves, i.e the deepest topology object it contains. Leaves coordinates of a tleaf are as numerous as their is level in the tleaf, and their range of value is an index of tleaf node level arity. The way these coordinates are incremented sets the policy on which leaves are iterated. These coordinates iteration is done from the first provided topology level to the last topology level. Round robin-policy is typically a tleaf where levels are stacked from the processing units to the topology root and scatter policy is a tleaf where levels are stacked in the opposite order. In the round-robin policy, leaves of a parent node are iterated. Then next parent is looked for and its leaves are iterated, and so on.", where);
 }
 
 // All options have valid default values.
 char * topology_input = NULL;
 int    num_index      = 0;
-int    logical_output = 0;
+int    logical_opt = 0;
 char * separator      = " ";
 int    shuffle        = 0;
 char * restrict_topo  = NULL;
@@ -177,7 +180,7 @@ static void parse_options(int argc, char **argv)
 	int i = 0;
 	while(++i < argc){
 		if(match_opt(i, argc, argv, "-h", "--help", 0)){
-			usage(argv[0]);
+			usage(argv[0], stdout);
 			exit(1);
 		}
 		else if(match_opt(i, argc, argv, "-i", "--input", 1))
@@ -185,7 +188,7 @@ static void parse_options(int argc, char **argv)
 		else if(match_opt(i, argc, argv, "-n", "--num", 1))
 			num_index = atoi(argv[++i]);
 		else if(match_opt(i, argc, argv, "-l", "--logical", 0))
-			logical_output = 1;
+			logical_opt = 1;
 		else if(match_opt(i, argc, argv, "-s", "--separator", 1))
 			separator = argv[++i];
 		else if(match_opt(i, argc, argv, "NO_OPT", "--shuffle", 0))
@@ -213,40 +216,41 @@ static void parse_options(int argc, char **argv)
 
 static int restrict_topology(hwloc_topology_t topology)
 {
-	int hwloc_out = 0, err = 0;
-	hwloc_obj_t restrict_obj;
+	int err = 0;
 	hwloc_bitmap_t restrict_cpuset;
-
+	
 	restrict_cpuset = hwloc_bitmap_alloc();	
 	if(restrict_cpuset == NULL){
 		perror("hwloc_bitmap_alloc");
 		return -1;
 	}	
-
-	hwloc_out = hwloc_bitmap_sscanf(restrict_cpuset, restrict_topo);
-	restrict_obj = hwloc_obj_from_string(topology, restrict_topo);
-			
-	if(restrict_obj != NULL){
-		err = hwloc_topology_restrict_obj(topology, restrict_obj);
-		if(err < 0){
-			perror("hwloc_topology_restrict");
-		}
-	}
-	else if(hwloc_out >= 0) {
-		err = hwloc_topology_restrict(topology,
-					      restrict_cpuset,
-					      HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
-		if(err < 0){
-			perror("hwloc_topology_restrict");
-		}
-	}
-	else {
-		err = -1;
-		fprintf(stderr,
-			"Restrict string %s could not be interpreted as a valid hwloc_obj:logical_index or hwloc_cpuset_t\n",
-			restrict_topo);
-	}
 	
+	struct hwloc_calc_location_context_s lcontext = {
+		.topology = topology,
+		.topodepth = hwloc_topology_get_depth(topology),
+		.only_hbm = -1,
+		.logical = logical_opt,
+		.verbose = 0
+	};
+	struct hwloc_calc_set_context_s scontext = {
+		.nodeset_input = 0,
+		.nodeset_output = 0,
+		.output_set = restrict_cpuset,
+	};
+	
+	err = hwloc_calc_process_location_as_set(&lcontext,
+						 &scontext,
+						 restrict_topo);
+	if(err != 0)
+		goto out;
+
+	err = hwloc_topology_restrict(topology,
+				      restrict_cpuset,
+				      HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
+	if(err != 0)
+		perror("hwloc_topology_restrict");
+
+ out:
 	hwloc_bitmap_free(restrict_cpuset);
 	return err;			
 }
@@ -275,7 +279,9 @@ static int build_policy(hwloc_topology_t topology,
 		}
 		depth = hwloc_get_type_depth(topology, level);
 		if(depth < 0){
-			fprintf(stderr, "topology-level must be at a positive depth\n");
+			fprintf(stderr, "Invalid level: \"%s\". topology-level must be at a positive depth.\n",
+				policy_arg);
+			err = -1;
 			goto out_policy;
 		}
 		if(round_robin)
@@ -382,14 +388,28 @@ int main(int argc, char **argv)
 	hwloc_topology_t topology;
 	struct cpuaffinity_enum *affinity;
 
+	hwloc_utils_check_api_version(argv[0]);
 	srand(time(NULL));
 	parse_options(argc, argv);
 
 	// Build topology
-	topology = hwloc_affinity_topology_load(topology_input);
-	if(topology == NULL){
-		perror("topology_load");
+	if (hwloc_topology_init(&topology)) {
+		perror("hwloc_topology_init");
 		return 1;
+	}
+	if(topology_input != NULL){		
+		enum hwloc_utils_input_format format;
+		format = hwloc_utils_autodetect_input_format(topology_input, 0);
+		hwloc_utils_enable_input_format(topology,
+						topology_input,
+					        &format,
+					        0,
+						argv[0]);
+	}
+	if (hwloc_topology_load(topology) != 0) {
+		perror("hwloc_topology_load");
+	        err = 1;
+	        goto out_with_topology;
 	}
 
 	// Restrict topology
@@ -410,7 +430,7 @@ int main(int argc, char **argv)
 #endif
 		cpuaffinity_enum_print(affinity,
 				       separator,
-				       logical_output,
+				       logical_opt,
 				       num_index);
 	
 #ifdef HAVE_SYS_PTRACE_H
