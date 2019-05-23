@@ -62,7 +62,7 @@ static inline unsigned max_arity(const struct hwloc_tleaf_iterator *t,
 	unsigned arity = 0, n = 0;
 	hwloc_obj_t p = hwloc_get_obj_by_depth(t->topology, parent_depth, 0);
 	while(p){
-		n = hwloc_get_nbobjs_inside_cpuset_by_depth (t->topology, p->set, child_depth);
+		n = hwloc_get_nbobjs_inside_cpuset_by_depth (t->topology, p->cpuset, child_depth);
 		arity = n > arity ? n : arity;
 		p = p->next_cousin;
 	}
@@ -216,7 +216,7 @@ hwloc_obj_t hwloc_tleaf_iterator_current(const struct hwloc_tleaf_iterator *t)
 		p = hwloc_get_obj_below_by_type(t->topology,
 						p->type,
 						p->logical_index,
-						hwloc_get_type_depth(t->depth[j]),
+						hwloc_get_type_depth(t->topology, t->depth[j]),
 						t->index[j][t->it[j]]);
 	}
 
