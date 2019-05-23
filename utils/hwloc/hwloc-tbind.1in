@@ -3,16 +3,16 @@
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
-.TH HWLOC-TBIND "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
+.TH HWLOC-AFFINITY "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
-hwloc-tbind \- Launch a command with threads bound to topology objects following a policy or output a list of topology objects following a policy.
+hwloc-affinity \- Launch a command with threads bound to a single processing unit following a policy or output a list of processing units following a policy.
 .
 .\" **************************
 .\"    Synopsis Section
 .\" **************************
 .SH SYNOPSIS
 .
-.B hwloc-tbind
+.B hwloc-affinity
 [\fIoptions\fR] \fI[--] <command> \fR...
 .
 .PP
@@ -28,63 +28,35 @@ it should be read before reading this man page.
 \fB\-h\fR \fB\-\-help\fR 
 Display utility help.
 .TP
-\fB\-v\fR \fB\-\-version\fR
-Print hwloc-tbind version and exit.
-.TP
-\fB\-i\fR, \fB\-\-input\fR <file>
-Read topology from XML file <file> (instead of discovering the
-topology on the local machine).  If <file> is "\-", the standard input
-is used.  XML support must have been compiled in to hwloc for this
-option to be usable.
-.TP
-\fB\-i\fR, \fB\-\-input\fR <directory>
-Read topology from <directory> instead of discovering the topology
-of the local machine.
-On Linux, the directory may contain the topology files
-gathered from another machine topology with hwloc-gather-topology.
-On x86, the directory may contain a cpuid dump gathered
-with hwloc-gather-cpuid.
-.TP
-\fB\-i\fR, \fB\-\-input\fR <specification>
-Simulate a fake hierarchy (instead of discovering the topology on the
-local machine). If <specification> is "node:2 pu:3", the topology will
-contain two NUMA nodes with 3 processing units in each of them.
-The <specification> string must end with a number of PUs.
-.TP
-\fB\-\-if\fR, \fB\-\-input\-format\fR <format>
-Enforce the input in the given format, among xml, fsroot, cpuid
-and synthetic.
+\fB\-i\fR \fB\-\-input\fR <file>
+Output a processing unit permutation for a topology provided
+as an xml topology file. If not provided, the current system
+topology is used.
 .TP
 \fB\-n\fR \fB\-\-num\fR <integer>
-Output objects permutation of at most <integer> elements.
-The default behaviour is to output all objects.
+Output a processing unit permutation of at most <integer> elements.
+The default behaviour is to output all processing units.
 .TP
 \fB\-l\fR \fB\-\-logical\fR
 Output logical index of topology objects instead of os index.
 Default output is using physical (os) indexing.
 .TP
-\fB\-c\fR \fB\-\-cpuset\fR
-Output objects cpuset instead of os/logical index.
-.TP
-\fB\-t\fR \fB\-\-taskset\fR
-Output objects cpuset with taskset format instead of os/logical index.
-.TP
 \fB\-s\fR \fB\-\-separator\fR <string>
-Separate topology objects in output with a custom separator.
+Separate indexes of topology objects in output with a custom separator.
 The default separator is a space.
-.TP
-\fB\-\-reverse\fR
-Print objects in reverse order.
 .TP
 \fB\-\-shuffle\fR
 Shuffle indexes of topology levels when using tleaf policy.
 This is used to randomize the output permutation while sticking
 to the policy. Works only with tleaf policy.
 .TP
-\fB\-r\fR \fB\-\-restrict\fR <topology-area>
+\fB\-r\fR \fB\-\-restrict\fR <hwloc_obj_type:logical_index>
 Restrict the topology on which permutation is computed
-to a topology object cpuset. <topology-area> may have the
-same format as the ones accepted by hwloc-calc: object_type:index, cpuset etc...
+to a topology object cpuset.
+.TP
+\fB\-r\fR \fB\-\-restrict\fR <cpuset>
+Restrict the topology on which permutation is computed
+to a cpuset.
 .TP
 \fB\-p\fR \fB\-\-policy\fR <policy> <policy arg>
 Output a permutation of topology objects fulfilling a specific policy.
@@ -131,14 +103,15 @@ to the last topology level. Round robin-policy is typically a tleaf where levels
 are stacked from the processing units to the topology root and scatter policy is a
 tleaf where levels are stacked in the opposite order. In the round-robin policy,
 leaves of a parent node are iterated. Then next parent is looked for and its leaves
-are iterated, and so on. See EXAMPLE section.
+are iterated, and so on. Examples of output with tleaf policy are provided in
+EXAMPLE section.
 .
 .\" **************************
 .\"    Description Section
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-tbind builds a list of topology objects and bind new threads
+hwloc-affinity builds a list of topology objects and bind new threads
 in the order of there creation to match cpusets of objects inside this list.
 .
 .PP
@@ -148,7 +121,7 @@ This low-level binding makes the utility working on any threading paradigm
 based on clone system call such as OpenMP or pthread.
 .
 .PP
-More over when a runtime such as OpenMP implements its own binding feature,
+More over when a runtime such as OpenMP has implements its own binding feature,
 this utility remains usefull to output the settings to provide to the runtime to
 bind threads. See EXAMPLES section.
 .
@@ -158,66 +131,54 @@ bind threads. See EXAMPLES section.
 .\" **************************
 .SH EXAMPLES
 .PP
-hwloc-tbind's operation is best described through several examples.
+hwloc-affinity's operation is best described through several examples.
 .
 .PP
-hwloc-tbind default behaviour is to output os indexes of one processing
+hwloc-affinity default behaviour is to output os indexes of one processing
 unit (PU) per core in a round-robin fashion. If cores contain several hardware
 threads, then, on next rounds of cores, it will iterate PUs in a round-robin fashion,
 to avoid overlapping the same PUs:
 
-    $ hwloc-tbind
+    $ hwloc-affinty
 
 which is exactly equivalent to the following line:
 
-    $ hwloc-tbind -p round-robin core
+    $ hwloc-affinity -p round-robin core
 
-hwloc-tbind can bind a process threads in the order of their creation
+hwloc-affinity can bind a process threads in the order of their creation
 to match the permutation of PUs:
 
-    $ hwloc-tbind -p round-robin core -- echo hello_affinity
+    $ hwloc-affinity -p round-robin core -- echo hello_affinity
 
-For instance an application threads can be scattered one per L2 caches with:
-
-    $ hwloc-tbind -p scatter L2 -- <command> ...
-
-Or just output L2 caches cpusets:
-
-    $ hwloc-tbind -p tleaf L2:machine --cpuset
-
-Or even one random L2 cache cpuset:
-
-    $ hwloc-tbind -p tleaf L2:machine --cpuset --shuffle -n 1
-
-hwloc-tbind can be used in conjunction with gcc OpenMP to, for instance,
+hwloc-affinity can be used in conjunction with gcc OpenMP to, for instance,
 run an OpenMP application with one thread per core placed in a round-robin
 fashion:
 
     $ export OMP_NUM_THREADS=$(hwloc-calc Machine:0 -N core)
-    $ export GOMP_CPU_AFFINITY=$(hwloc-tbind -p round-robin core)
+    $ export GOMP_CPU_AFFINITY=$(hwloc-affinity -p round-robin core)
 
 Custom policies can be built with tleaf policy.
 For instance round-robin policy on cores is equivalent to:
 
-    $ hwloc-tbind -p tleaf pu:core:machine
-    $ hwloc-tbind -p tleaf pu:core
+    $ hwloc-affinity -p tleaf pu:core:machine
+    $ hwloc-affinity -p tleaf pu:core
 
 For a machine containing levels: Machine, Socket, L3, L2, L1, Core, PU,
 scatter policy on processing units is equivalent to:
 
-    $ hwloc-tbind -p tleaf machine:socket:L3:L2:L1:core:pu
+    $ hwloc-affinity -p tleaf machine:socket:L3:L2:L1:core:pu
 
 For iterating sockets in a round-robin fashion and scattering threads on sockets PUs:
 
-    $ hwloc-tbind -p tleaf socket:machine:L3:L2:L1:core:pu
+    $ hwloc-affinity -p tleaf socket:machine:L3:L2:L1:core:pu
 .
 .\" **************************
 .\"    Return value section
 .\" **************************
 .SH RETURN VALUE
-Upon successful execution, hwloc-tbind execs the command over itself.
+Upon successful execution, hwloc-affinity execs the command over itself.
 The return value is therefore whatever the return value of the command
-is. If no command is issued, then hwloc-tbind returns 0 on success
+is. If no command is issued, then hwloc-affinity returns 0 on success
 and 1 on failure if (not limited to) provided arguments can't lead to
 a correct execution.
 .
