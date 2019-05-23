@@ -1,20 +1,19 @@
-/*******************************************************************************
+/***************************************************************************
  * Copyright 2019 UChicago Argonne, LLC.
  * Author: Nicolas Denoyelle
  * SPDX-License-Identifier: BSD-3-Clause
-*******************************************************************************/
+****************************************************************************/
 
+#include "private/autogen/config.h"
 #include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "private/autogen/config.h"
-#include "affinity.h"
-#include "utils.h"
-#ifdef HAVE_SYS_PTRACE_H
-#include "bind.h"
-#endif
+#include "hwloc-tbind.h"
+
+/***************************************************************************/
+/*                                   Main                                  */
+/***************************************************************************/
 
 #define SHORT_OPT_LEN 2
 #define OPTION_LEN 55
@@ -36,7 +35,10 @@ static void print_option(const char *opt_short,
 	str[0] = '\t'; len = 1;
 	
 	if(opt_short != NULL){
-	        n = snprintf(str + len, OPTION_LEN - len, "%-*s, ", SHORT_OPT_LEN, opt_short);
+	        n = snprintf(str + len, OPTION_LEN - len,
+			     "%-*s, ",
+			     SHORT_OPT_LEN,
+			     opt_short);
 		len += MINI(n, OPTION_LEN - len -1);
 	}
 
@@ -156,7 +158,8 @@ static int match_opt(int i,
 	}
 	if(strcmp(argv[i], short_opt) && strcmp(argv[i],long_opt))
 		return 0;
-	if(strlen(argv[i]) != strlen(short_opt) && strlen(argv[i]) != strlen(long_opt))
+	if(strlen(argv[i]) != strlen(short_opt) &&
+	   strlen(argv[i]) != strlen(long_opt))
 		return 0;
 	
 	if(i+num_options >= argc){
@@ -200,7 +203,9 @@ static void parse_options(int argc, char **argv)
 		}
 #endif
 		else {
-			fprintf(stderr, "Unrecognized option: %s\n", argv[i]);
+			fprintf(stderr,
+				"Unrecognized option: %s\n",
+				argv[i]);
 			exit(1);
 		}
 	}
@@ -228,7 +233,8 @@ static int restrict_topology(hwloc_topology_t topology)
 		}
 	}
 	else if(hwloc_out >= 0) {
-		err = hwloc_topology_restrict(topology, restrict_cpuset,
+		err = hwloc_topology_restrict(topology,
+					      restrict_cpuset,
 					      HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
 		if(err < 0){
 			perror("hwloc_topology_restrict");
@@ -236,7 +242,9 @@ static int restrict_topology(hwloc_topology_t topology)
 	}
 	else {
 		err = -1;
-		fprintf(stderr, "Restrict string %s could not be interpreted as a valid hwloc_obj:logical_index or hwloc_cpuset_t\n", restrict_topo);
+		fprintf(stderr,
+			"Restrict string %s could not be interpreted as a valid hwloc_obj:logical_index or hwloc_cpuset_t\n",
+			restrict_topo);
 	}
 	
 	hwloc_bitmap_free(restrict_cpuset);
@@ -248,17 +256,26 @@ static int build_policy(hwloc_topology_t topology,
 {
 	int err = 0;
 	hwloc_obj_type_t level;
+	int depth;
 	int round_robin = !strcmp(policy, "round-robin");
 	int scatter = !strcmp(policy, "scatter");
 	int tleaf = !strcmp(policy, "tleaf");
 	
 	if(round_robin || scatter){
-		err = hwloc_type_sscanf(policy_arg, &level, NULL, 0);
+		err = hwloc_type_sscanf(policy_arg,
+					&level,
+					NULL,
+					0);
 		if(err < 0){
 			fprintf(stderr,
 				"Level %s of policy %s is not a valid hwloc obj type.\n",
 				policy_arg,
 				policy);
+			goto out_policy;
+		}
+		depth = hwloc_get_type_depth(topology, level);
+		if(depth < 0){
+			fprintf(stderr, "topology-level must be at a positive depth\n");
 			goto out_policy;
 		}
 		if(round_robin)
@@ -275,15 +292,17 @@ static int build_policy(hwloc_topology_t topology,
 		}
 	}
 	else if(tleaf){
-		int depth = hwloc_topology_get_depth(topology);
+	        depth = hwloc_topology_get_depth(topology);
+		int level_depth;
 		int n_levels = 0;
-		hwloc_obj_type_t *levels;
+		int  *depths;
+		hwloc_obj_type_t type;
 		char *level_str;
 		char *levels_str;
 		char *save_ptr;
 		
-		levels = malloc(depth * sizeof(*levels));
-		if(levels == NULL){
+		depths = malloc(depth * sizeof(*depths));
+		if(depths == NULL){
 			perror("malloc");
 			err = -1;
 			goto out_policy;			       
@@ -292,7 +311,7 @@ static int build_policy(hwloc_topology_t topology,
 		if(levels_str == NULL){
 			perror("strdup");
 			err = -1;
-			goto out_with_levels;			       
+			goto out_with_depths;			       
 		}
 		save_ptr = levels_str;
 
@@ -306,7 +325,7 @@ static int build_policy(hwloc_topology_t topology,
 			}
 				
 			err = hwloc_type_sscanf(level_str,
-						&levels[n_levels++],
+						&type,
 						NULL, 0);
 			if(err < 0){
 				fprintf(stderr,
@@ -314,38 +333,51 @@ static int build_policy(hwloc_topology_t topology,
 					level_str);
 				goto out_with_save_ptr;
 			}
+			level_depth = hwloc_get_type_depth(topology, type);
+			if(level_depth < 0){
+				fprintf(stderr, "topology-level must be at a positive depth\n");
+			        goto out_with_save_ptr;
+			}
+			depths[n_levels++] = level_depth;
+
+
 			level_str = strtok(NULL, ":");			
 		}
 
 		if(n_levels < 2){
 			err = -1;
-			fprintf(stderr, "tleaf policy requires at least two topology levels.\n");
+			fprintf(stderr,
+				"tleaf policy requires at least two topology levels.\n");
 			goto out_with_save_ptr;
 		}
-		*out = cpuaffinity_tleaf(topology, n_levels, levels, shuffle);
+		*out = cpuaffinity_tleaf(topology, n_levels, depths, shuffle);
 		if(*out == NULL){
 			err = -1;
 			if(errno == EINVAL)
-				fprintf(stderr, "All provided topology levels must have a positive depth.\n");
+				fprintf(stderr,
+					"All provided topology levels must have a positive depth.\n");
 			else
 				perror("cpuaffinity_tleaf");
 		}
 		
 	out_with_save_ptr:
 		free(save_ptr);
-	out_with_levels:
-		free(levels);
+	out_with_depths:
+		free(depths);
 	}
 	else {
 		err = -1;
-		fprintf(stderr, "Policy %s is not a valid policy.\nValid policies are: round-robin, scatter, tleaf\n", policy);
+		fprintf(stderr,
+			"Policy %s is not a valid policy.\nValid policies are: round-robin, scatter, tleaf\n",
+			policy);
 	}
  out_policy:
 	return err;
 }
 	
 
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
 	int err = 0;
 	hwloc_topology_t topology;
 	struct cpuaffinity_enum *affinity;
@@ -406,4 +438,3 @@ int main(int argc, char **argv){
 	
 	return err;
 }
-
