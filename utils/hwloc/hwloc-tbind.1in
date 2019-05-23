@@ -50,13 +50,10 @@ Shuffle indexes of topology levels when using tleaf policy.
 This is used to randomize the output permutation while sticking
 to the policy. Works only with tleaf policy.
 .TP
-\fB\-r\fR \fB\-\-restrict\fR <hwloc_obj_type:logical_index>
+\fB\-r\fR \fB\-\-restrict\fR <topology-area>
 Restrict the topology on which permutation is computed
-to a topology object cpuset.
-.TP
-\fB\-r\fR \fB\-\-restrict\fR <cpuset>
-Restrict the topology on which permutation is computed
-to a cpuset.
+to a topology object cpuset. <topology-area> may have the
+format as input accepted by hwloc-calc: object_type:index, cpuset etc...
 .TP
 \fB\-p\fR \fB\-\-policy\fR <policy> <policy arg>
 Output a permutation of topology objects fulfilling a specific policy.
