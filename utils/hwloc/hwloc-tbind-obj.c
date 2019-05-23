@@ -585,6 +585,13 @@ hwloc_obj_t cpuaffinity_bind_thread(struct cpuaffinity_enum * objs,
 #ifdef HWLOC_HAVE_PTRACE
 int cpuaffinity_attach(struct cpuaffinity_enum * objs, const pid_t pid)
 {
+	struct hwloc_topology_support * support;
+	support = hwloc_topology_get_support(objs->topology);
+	if(support->cpubind->set_thread_cpubind){
+		perror("cpuaffinity_attach: set_thread_cpubind not supported.");
+		return -1;
+	}
+
 	/*attach and set options to trace threads creation and process exit*/
 	if(ptrace(PTRACE_SEIZE,
 		  pid,
