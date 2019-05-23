@@ -96,7 +96,7 @@ TESTS = \
         test-hwloc-diffpatch.sh \
         test-hwloc-distrib.sh \
         test-hwloc-info.sh \
-	hwloc-tbind
+	test-hwloc-tbind
 
 if HWLOC_HAVE_PLUGINS
 TESTS += test-fake-plugin.sh
