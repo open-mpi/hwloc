@@ -23,7 +23,7 @@ EXTRA_DIST = \
 
 # convenience library used by both hwloc-ps and lstopo
 noinst_LTLIBRARIES = libutils_common.la
-libutils_common_la_SOURCES = common-ps.c
+libutils_common_la_SOURCES = common-ps.c common-ps.h
 libutils_common_la_LIBADD = $(LDADD)
 
 bin_PROGRAMS = \
