@@ -105,7 +105,7 @@ void usage(const char * argv0, FILE *where)
 		     "Print hwloc version and exit.", where);		
 	print_option("-i","--input","<input>", NULL,
 		     "Use a topology from an XML file, or any input supported by hwloc-calc(1).", where);
-	print_option("--if", "--inout-format","<input-format>", NULL,
+	print_option("--if", "--input-format","<input-format>", NULL,
 		     "Enforce the input in the given format, among xml, fsroot, cpuid and synthetic.", where);	
 	print_option("-n","--num","integer", NULL,
 		     "Output only this number of objects.", where);
