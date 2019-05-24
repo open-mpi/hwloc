@@ -92,18 +92,19 @@ static void test_enum(hwloc_topology_t topology)
 
 static void test_round_robin(hwloc_topology_t topology)
 {
-	size_t i, ncore = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
-	hwloc_obj_t Core;
+	int depth = hwloc_topology_get_depth(topology);
+	size_t i, ncore = hwloc_get_nbobjs_by_depth(topology, depth-2);
+	hwloc_obj_t Core = hwloc_get_obj_by_depth(topology, depth-2, 0);
 	hwloc_obj_t it_PU;
 	struct cpuaffinity_enum * it;
-	it = cpuaffinity_round_robin(topology, HWLOC_OBJ_CORE);
+	it = cpuaffinity_round_robin(topology, Core->type);
 	assert(it != NULL);
 
 	for(i=0; i<cpuaffinity_enum_size(it); i++){
 		it_PU = cpuaffinity_enum_next(it);
-		Core = hwloc_get_obj_by_type(topology,
-					     HWLOC_OBJ_CORE,
-					     i%ncore);
+		Core = hwloc_get_obj_by_depth(topology,
+					      depth-2,
+					      i%ncore);
 		Core = Core->children[i/ncore];
 		assert(it_PU->type == Core->type);
 		assert(it_PU->logical_index == Core->logical_index);
