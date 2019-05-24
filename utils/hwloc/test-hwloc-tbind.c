@@ -185,7 +185,7 @@ static void test_openmp(void)
 	unsigned num_threads;
 	int err = 0;
 	
-	e = cpuaffinity_scatter(system_topology, HWLOC_OBJ_CORE);
+	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_PU);
 	
 	num_threads = hwloc_get_nbobjs_by_type(system_topology, HWLOC_OBJ_PU);
 #pragma omp parallel num_threads(num_threads) shared(err)
@@ -338,15 +338,15 @@ int main(void)
 #ifdef _OPENMP
 		test_openmp();
 #ifdef HWLOC_HAVE_PTRACE	
-		check_attach(run_parallel_openmp_test); //Hangs because threads after fork
+		check_attach(run_parallel_openmp_test);
 #endif // HWLOC_HAVE_PTRACE
-#endif
+#endif // _OPENMP
 #ifdef HAVE_PTHREAD
 		test_pthreads();
 #ifdef HWLOC_HAVE_PTRACE	
-		check_attach(run_parallel_pthread_test); //Hangs because threads after fork
+		check_attach(run_parallel_pthread_test);
 #endif // HWLOC_HAVE_PTRACE	
-#endif
+#endif // HAVE_PTHREAD
 	}
 	hwloc_topology_destroy(system_topology);
 
