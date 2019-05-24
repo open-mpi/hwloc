@@ -620,7 +620,7 @@ int cpuaffinity_attach(struct cpuaffinity_enum * objs, const pid_t pid)
 {
 	const struct hwloc_topology_support * support =
 		hwloc_topology_get_support(objs->topology);
-	if(support->cpubind->set_thread_cpubind){
+	if(!support->cpubind->set_thread_cpubind){
 		perror("cpuaffinity_attach: set_thread_cpubind not supported.");
 		return -1;
 	}
