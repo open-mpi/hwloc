@@ -53,9 +53,12 @@ size_t cpuaffinity_enum_size(struct cpuaffinity_enum *obj);
  * @param num: The number of index to print. 
  *        If 0, all objects index are printed.
  **/
-void cpuaffinity_enum_print(const struct cpuaffinity_enum * e,
+void cpuaffinity_enum_print(const struct cpuaffinity_enum *e,
 			    const char *sep,
 			    const int logical,
+			    const int cpuset,
+			    const int taskset,
+			    const int reverse,
 			    unsigned num);
 
 /**

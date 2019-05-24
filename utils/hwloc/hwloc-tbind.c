@@ -100,13 +100,21 @@ void usage(const char * argv0, FILE *where)
 	
 	fprintf(where, "OPTIONS:\n");
 	print_option("-h","--help", NULL, NULL,
-		     "Display this help.", where);	
+		     "Display this help.", where);
+	print_option("-v","--version", NULL, NULL,
+		     "Print hwloc version and exit.", where);		
 	print_option("-i","--input","<input>", NULL,
 		     "Use a topology from an XML file, or any input supported by hwloc-calc(1).", where);
 	print_option("-n","--num","integer", NULL,
 		     "Output only this number of objects.", where);
 	print_option("-l","--logical", NULL, NULL,
 		     "Output logical index instead of os index. If set, also input indexes to --restrict option will be considered as logical.", where);
+	print_option("-c","--cpuset", NULL, NULL,
+		     "Output topology objects cpuset instead of their indexes", where);	
+	print_option("-t","--taskset", NULL, NULL,
+		     "Output taskset format of topology objects cpuset instead of their indexes", where);
+	print_option(NULL,"--reverse", NULL, NULL,
+		     "Output objects in reverse order.", where);
 	print_option("-s","--separator", "string", NULL,
 		     "Set the separator character between indexes in output.", where);
 	print_option(NULL,"--shuffle", NULL, NULL,
@@ -138,9 +146,12 @@ void usage(const char * argv0, FILE *where)
 // All options have valid default values.
 char * topology_input = NULL;
 int    num_index      = 0;
-int    logical_opt = 0;
+int    logical_opt    = 0;
+int    cpuset_opt     = 0;
+int    taskset_opt    = 0;
 char * separator      = " ";
 int    shuffle        = 0;
+int    reverse        = 0;
 char * restrict_topo  = NULL;
 char * policy         = "round-robin";
 char * policy_arg     = "Core";
@@ -183,14 +194,22 @@ static void parse_options(int argc, char **argv)
 			usage(argv[0], stdout);
 			exit(1);
 		}
-		else if(match_opt(i, argc, argv, "-i", "--input", 1))
+		else if(match_opt(i, argc, argv, "-v", "--version", 0)){
+			printf("%s %s\n", argv[0], HWLOC_VERSION);
+			exit(EXIT_SUCCESS);
+		}
+ 		else if(match_opt(i, argc, argv, "-i", "--input", 1))
 			topology_input = argv[++i];
 		else if(match_opt(i, argc, argv, "-n", "--num", 1))
 			num_index = atoi(argv[++i]);
 		else if(match_opt(i, argc, argv, "-l", "--logical", 0))
 			logical_opt = 1;
-		else if(match_opt(i, argc, argv, "-s", "--separator", 1))
-			separator = argv[++i];
+		else if(match_opt(i, argc, argv, "-c", "--cpuset", 0))
+			cpuset_opt = 1;
+		else if(match_opt(i, argc, argv, "-t", "--taskset", 0))
+			taskset_opt = 1;
+		else if(match_opt(i, argc, argv, "NO_OPT", "--reverse", 0))
+		        reverse = 1;
 		else if(match_opt(i, argc, argv, "NO_OPT", "--shuffle", 0))
 			shuffle = 1;
 		else if(match_opt(i, argc, argv, "-r", "--restrict", 1))
@@ -212,6 +231,10 @@ static void parse_options(int argc, char **argv)
 			exit(1);
 		}
 	}
+	if(cpuset_opt  + taskset_opt + logical_opt > 1){
+		fprintf(stderr, "--logical, --taskset and --cpuset options cannot be used together.");
+		exit(1);
+	}	
 }
 
 static int restrict_topology(hwloc_topology_t topology)
@@ -431,6 +454,9 @@ int main(int argc, char **argv)
 		cpuaffinity_enum_print(affinity,
 				       separator,
 				       logical_opt,
+				       cpuset_opt,
+				       taskset_opt,
+				       reverse,
 				       num_index);
 	
 #ifdef HWLOC_HAVE_PTRACE
