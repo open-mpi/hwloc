@@ -291,8 +291,8 @@ static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 
 	num_threads = hwloc_get_nbobjs_by_type(system_topology, HWLOC_OBJ_PU);
 	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_CORE);
-	cpuaffinity_attach(e, getpid());
-	fn(e, num_threads);
+	if(cpuaffinity_attach(e, getpid()) == 0)
+		fn(e, num_threads);
 	cpuaffinity_enum_free(e);
 }
 #endif //defined(_OPENMP) || defined(HAVE_PTHREAD)
