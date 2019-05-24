@@ -54,14 +54,21 @@ error:
 	return NULL;
 }
 
+static hwloc_obj_type_t topology_leaf_type(hwloc_topology_t topology){
+	int depth = hwloc_topology_get_depth(topology);
+	hwloc_obj_t leaf = hwloc_get_obj_by_depth(topology, depth-1, 0);
+	return leaf->type;
+}
+
 static void test_enum(hwloc_topology_t topology)
 {
 	unsigned i;
 	hwloc_obj_t obj, obj_e;
 	struct cpuaffinity_enum *it, *it_e;
+	hwloc_obj_type_t ltype = topology_leaf_type(topology);
 
 	it_e = cpuaffinity_enum_alloc(topology);
-	it = cpuaffinity_round_robin(topology, HWLOC_OBJ_PU);
+	it = cpuaffinity_round_robin(topology, ltype);
 	assert(it != NULL);
 	
 	for (i = 0; i < cpuaffinity_enum_size(it); i++){
@@ -72,6 +79,7 @@ static void test_enum(hwloc_topology_t topology)
 		obj = cpuaffinity_enum_next(it);
 		obj_e = cpuaffinity_enum_next(it_e);
 		assert(obj == obj_e);
+		assert(obj->logical_index == i);
 	}
 
 	cpuaffinity_enum_free(it);
@@ -110,7 +118,7 @@ static void test_scatter(hwloc_topology_t topology)
 	ssize_t i, j, r, n, c, val, depth, *arities;
 	struct cpuaffinity_enum * it;
 	
-	it = cpuaffinity_scatter(topology, HWLOC_OBJ_PU);
+	it = cpuaffinity_scatter(topology, topology_leaf_type(topology));
 	assert(it != NULL);
 	depth = hwloc_topology_get_depth(topology);
 	arities = malloc(depth * sizeof(*arities));
@@ -158,7 +166,7 @@ static void test_topology(hwloc_topology_t topology)
 	test_enum(topology);
 	if(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) > 0)
 		test_round_robin(topology);
-	if(is_tleaf(topology) && hwloc_get_type_depth(topology, HWLOC_OBJ_PU) > 0)
+	if(is_tleaf(topology))
 		test_scatter(topology);
 }
 
@@ -185,9 +193,11 @@ static void test_openmp(void)
 	unsigned num_threads;
 	int err = 0;
 	
-	e = cpuaffinity_scatter(system_topology, HWLOC_OBJ_CORE);
-	
-	num_threads = hwloc_get_nbobjs_by_type(system_topology, HWLOC_OBJ_PU);
+	e = cpuaffinity_scatter(system_topology,
+				topology_leaf_type(system_topology));
+		
+	num_threads = hwloc_get_nbobjs_by_type(system_topology,
+					       topology_leaf_type(system_topology));
 #pragma omp parallel num_threads(num_threads) shared(err)
 	if(!bind_thread(e)) {err++;}
 	assert(err == 0);
@@ -206,8 +216,10 @@ static void test_pthreads(void)
 	void *ret;
 	int err = 0;
 	
-	num_threads = hwloc_get_nbobjs_by_type(system_topology, HWLOC_OBJ_PU);
-	e = cpuaffinity_scatter(system_topology, HWLOC_OBJ_CORE);
+	num_threads = hwloc_get_nbobjs_by_type(system_topology,
+					       topology_leaf_type(system_topology));
+	e = cpuaffinity_scatter(system_topology,
+				    topology_leaf_type(system_topology));
 	tids = malloc(num_threads * sizeof(*tids));
 
 	for(i=0; i<num_threads; i++)
@@ -289,10 +301,12 @@ static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 	struct cpuaffinity_enum *e;
 	unsigned num_threads;
 
-	num_threads = hwloc_get_nbobjs_by_type(system_topology, HWLOC_OBJ_PU);
-	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_CORE);
-	cpuaffinity_attach(e, getpid());
-	fn(e, num_threads);
+	num_threads = hwloc_get_nbobjs_by_type(system_topology,
+					       topology_leaf_type(system_topology));
+	e = cpuaffinity_round_robin(system_topology,
+				    topology_leaf_type(system_topology));
+	if(cpuaffinity_attach(e, getpid()) == 0)
+		fn(e, num_threads);
 	cpuaffinity_enum_free(e);
 }
 #endif //defined(_OPENMP) || defined(HAVE_PTHREAD)
@@ -309,7 +323,8 @@ static void test_self(void)
 	hwloc_obj_t obj;
 	size_t i;
 	
-	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_PU);
+	e = cpuaffinity_round_robin(system_topology,
+				    topology_leaf_type(system_topology));
 	assert(e != NULL);
 
 	for(i=0; i<cpuaffinity_enum_size(e); i++){
@@ -338,15 +353,15 @@ int main(void)
 #ifdef _OPENMP
 		test_openmp();
 #ifdef HWLOC_HAVE_PTRACE	
-		check_attach(run_parallel_openmp_test); //Hangs because threads after fork
+		check_attach(run_parallel_openmp_test);
 #endif // HWLOC_HAVE_PTRACE
-#endif
+#endif // _OPENMP
 #ifdef HAVE_PTHREAD
 		test_pthreads();
 #ifdef HWLOC_HAVE_PTRACE	
-		check_attach(run_parallel_pthread_test); //Hangs because threads after fork
+		check_attach(run_parallel_pthread_test);
 #endif // HWLOC_HAVE_PTRACE	
-#endif
+#endif // HAVE_PTHREAD
 	}
 	hwloc_topology_destroy(system_topology);
 
