@@ -321,14 +321,14 @@ static void test_self(void)
 
 int main(void)
 {
-	struct hwloc_topology_support * support;
+	const struct hwloc_topology_support * support =
+		hwloc_topology_get_support(system_topology);
 	hwloc_topology_t topology;
 
 	system_topology = hwloc_test_topology_load(NULL);	
 	assert(system_topology != NULL);
 	test_topology(system_topology);
 
-	support = hwloc_topology_get_support(system_topology);
 	if(support->cpubind->set_thread_cpubind &&
 	   support->cpubind->get_thread_cpubind){
 		test_self();
