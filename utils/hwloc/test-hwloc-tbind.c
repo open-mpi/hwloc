@@ -1,8 +1,8 @@
-/*******************************************************************************
+/***************************************************************************
  * Copyright 2019 UChicago Argonne, LLC.
  * Author: Nicolas Denoyelle
  * SPDX-License-Identifier: BSD-3-Clause
-*******************************************************************************/
+****************************************************************************/
 
 #include "private/autogen/config.h"
 #include "hwloc-tbind.h"
@@ -30,8 +30,8 @@ static hwloc_topology_t hwloc_test_topology_load(const char *file)
 		goto error;
 	}
 
-	/* hwloc_topology_set_all_types_filter(topology, */
-	/* 				    HWLOC_TYPE_FILTER_KEEP_STRUCTURE); */
+	hwloc_topology_set_all_types_filter(topology,
+					    HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
 	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PU,
 				       HWLOC_TYPE_FILTER_KEEP_ALL);
 	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_NUMANODE,

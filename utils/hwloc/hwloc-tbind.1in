@@ -185,6 +185,10 @@ Or just output L2 caches cpusets:
 
     $ hwloc-tbind -p tleaf L2:machine --cpuset
 
+Or even one random L2 cache cpuset:
+
+    $ hwloc-tbind -p tleaf L2:machine --cpuset --shuffle -n 1
+
 hwloc-tbind can be used in conjunction with gcc OpenMP to, for instance,
 run an OpenMP application with one thread per core placed in a round-robin
 fashion:
