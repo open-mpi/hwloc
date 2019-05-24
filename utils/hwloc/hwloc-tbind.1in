@@ -31,14 +31,29 @@ Display utility help.
 \fB\-v\fR \fB\-\-version\fR
 Print hwloc-tbind version and exit.
 .TP
-\fB\-i\fR \fB\-\-input\fR <input>
-If not provided, the current system topology is used.
-Otherwise, input is interpreted in the same manner as
-hwloc-calc(1) input: e.g xml file, synthetic string etc...
+\fB\-i\fR, \fB\-\-input\fR <file>
+Read topology from XML file <file> (instead of discovering the
+topology on the local machine).  If <file> is "\-", the standard input
+is used.  XML support must have been compiled in to hwloc for this
+option to be usable.
+.TP
+\fB\-i\fR, \fB\-\-input\fR <directory>
+Read topology from <directory> instead of discovering the topology
+of the local machine.
+On Linux, the directory may contain the topology files
+gathered from another machine topology with hwloc-gather-topology.
+On x86, the directory may contain a cpuid dump gathered
+with hwloc-gather-cpuid.
+.TP
+\fB\-i\fR, \fB\-\-input\fR <specification>
+Simulate a fake hierarchy (instead of discovering the topology on the
+local machine). If <specification> is "node:2 pu:3", the topology will
+contain two NUMA nodes with 3 processing units in each of them.
+The <specification> string must end with a number of PUs.
 .TP
 \fB\-n\fR \fB\-\-num\fR <integer>
-Output a processing unit permutation of at most <integer> elements.
-The default behaviour is to output all processing units.
+Output objects permutation of at most <integer> elements.
+The default behaviour is to output all objects.
 .TP
 \fB\-l\fR \fB\-\-logical\fR
 Output logical index of topology objects instead of os index.
@@ -112,8 +127,7 @@ to the last topology level. Round robin-policy is typically a tleaf where levels
 are stacked from the processing units to the topology root and scatter policy is a
 tleaf where levels are stacked in the opposite order. In the round-robin policy,
 leaves of a parent node are iterated. Then next parent is looked for and its leaves
-are iterated, and so on. Examples of output with tleaf policy are provided in
-EXAMPLE section.
+are iterated, and so on. See EXAMPLE section.
 .
 .\" **************************
 .\"    Description Section
@@ -158,6 +172,10 @@ hwloc-tbind can bind a process threads in the order of their creation
 to match the permutation of PUs:
 
     $ hwloc-tbind -p round-robin core -- echo hello_affinity
+
+For instance an application threads can be scattered one per L2 caches with:
+
+    $ hwloc-tbind -p scatter L2 -- <command> ...
 
 hwloc-tbind can be used in conjunction with gcc OpenMP to, for instance,
 run an OpenMP application with one thread per core placed in a round-robin
