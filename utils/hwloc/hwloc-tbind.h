@@ -1,3 +1,9 @@
+/***************************************************************************
+ * Copyright 2019 UChicago Argonne, LLC.
+ * Author: Nicolas Denoyelle
+ * SPDX-License-Identifier: BSD-3-Clause
+****************************************************************************/
+
 #ifndef HWLOC_TBIND_H
 #define HWLOC_TBIND_H
 

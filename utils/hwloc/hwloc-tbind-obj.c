@@ -1,3 +1,9 @@
+/***************************************************************************
+ * Copyright 2019 UChicago Argonne, LLC.
+ * Author: Nicolas Denoyelle
+ * SPDX-License-Identifier: BSD-3-Clause
+****************************************************************************/
+
 #include "private/autogen/config.h"
 #include <stdio.h>
 #include <stdlib.h>
