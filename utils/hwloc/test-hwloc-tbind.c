@@ -306,7 +306,7 @@ static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 					       topology_leaf_type(system_topology));
 	e = cpuaffinity_round_robin(system_topology,
 				    topology_leaf_type(system_topology));
-	if(cpuaffinity_attach(e, getpid()) == 0)
+	if(cpuaffinity_attach(e, getpid(), 1) == 0)
 		fn(e, num_threads);
 	cpuaffinity_enum_free(e);
 }
