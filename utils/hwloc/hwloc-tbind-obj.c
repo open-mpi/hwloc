@@ -620,7 +620,7 @@ int cpuaffinity_attach(struct cpuaffinity_enum * objs, const pid_t pid)
 {
 	const struct hwloc_topology_support * support =
 		hwloc_topology_get_support(objs->topology);
-	if(support->cpubind->set_thread_cpubind){
+	if(!support->cpubind->set_thread_cpubind){
 		perror("cpuaffinity_attach: set_thread_cpubind not supported.");
 		return -1;
 	}
@@ -676,8 +676,8 @@ pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
 	pid_t pid = fork();  
 	/* Tracee */
 	if(pid == 0) {
-		// Attach
-		cpuaffinity_attach(objs, getpid());
+		// Stop child it will be resumed by ptrace
+		kill(getpid(), SIGSTOP);
 		// Start command
 		if(execvp(argv[0], argv) == -1){
 			perror("execvp");
@@ -687,6 +687,8 @@ pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
 	}
 	/* Tracer code */
 	else if(pid > 0){
+		// Attach
+		cpuaffinity_attach(objs, getpid());
 		return pid;
 	}
 	/* Fork error */
