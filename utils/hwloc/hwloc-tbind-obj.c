@@ -194,9 +194,9 @@ struct hwloc_tleaf_iterator {
 	unsigned *asc_order;
 	/** Number of elements at level below parent. **/
 	unsigned *arity;
-	/** Current iterator index of level.w **/
+	/** Current iterator index of level. **/
 	unsigned *it;
-	/** For each level indexing of elements. **/
+	/** For each level, indexing of elements. **/
 	unsigned **index;
 };
 
