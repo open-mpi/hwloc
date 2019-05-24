@@ -186,7 +186,8 @@ static void test_openmp(void)
 	int err = 0;
 	
 	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_PU);
-	
+	assert(e != NULL);
+		
 	num_threads = hwloc_get_nbobjs_by_type(system_topology, HWLOC_OBJ_PU);
 #pragma omp parallel num_threads(num_threads) shared(err)
 	if(!bind_thread(e)) {err++;}
@@ -207,7 +208,8 @@ static void test_pthreads(void)
 	int err = 0;
 	
 	num_threads = hwloc_get_nbobjs_by_type(system_topology, HWLOC_OBJ_PU);
-	e = cpuaffinity_scatter(system_topology, HWLOC_OBJ_CORE);
+	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_CORE);
+	assert(e!= NULL);
 	tids = malloc(num_threads * sizeof(*tids));
 
 	for(i=0; i<num_threads; i++)
