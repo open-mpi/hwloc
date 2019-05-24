@@ -293,6 +293,7 @@ static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_CORE);
 	cpuaffinity_attach(e, getpid());
 	fn(e, num_threads);
+	cpuaffinity_enum_free(e);
 }
 #endif //defined(_OPENMP) || defined(HAVE_PTHREAD)
 #endif //HWLOC_HAVE_PTRACE
