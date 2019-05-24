@@ -37,7 +37,7 @@ struct cpuaffinity_enum{
 };
 
 /** Maximum len of string containing a hwloc_obj logical index **/
-#define STR_INT_MAX 5
+#define STR_OBJ_MAX 32
 
 struct cpuaffinity_enum *cpuaffinity_enum_alloc(hwloc_topology_t topology)
 {
@@ -101,14 +101,37 @@ out_edom:
 	return -1;
 }
 
+static int cpuaffinity_obj_snprintf(char* str,
+				    const size_t len,
+				    const char *sep,
+				    const hwloc_obj_t obj,
+				    const int logical,
+				    const int cpuset,
+				    const int taskset)
+{
+	char* c = str;
+	int index = logical ? obj->logical_index : obj->os_index;
+	if(taskset)
+		c+=hwloc_bitmap_taskset_snprintf(str, len, obj->cpuset);
+	else if(cpuset)
+		c+=hwloc_bitmap_snprintf(str, len, obj->cpuset);
+	else
+		c += snprintf(c, len, "%d", index);
+	c += snprintf(c, c-str+len, "%s", sep);
+	return c-str;
+}
+
 void cpuaffinity_enum_print(const struct cpuaffinity_enum *e,
 			    const char *sep,
 			    const int logical,
+			    const int cpuset,
+			    const int taskset,
+			    const int reverse,
 			    unsigned num)
 {
-	unsigned i;
-	size_t len = e->n * (strlen(sep) + STR_INT_MAX);
+	size_t len = e->n * (strlen(sep) + STR_OBJ_MAX);
 	char *c, *enum_str = malloc(len);
+	int i, start, end;
 	num = num == 0 ? e->n : num;
 	num = num > e->n ? e->n : num;
 
@@ -120,14 +143,24 @@ void cpuaffinity_enum_print(const struct cpuaffinity_enum *e,
 	memset(enum_str, 0, len);
 	c = enum_str;
 
-	for (i = 0; i < num-1; i++)
-		c += snprintf(c, len + enum_str - c, "%d%s",
-			      logical ? e->obj[i]->logical_index : e->obj[i]->
-			      os_index, sep);
-	c += snprintf(c, len + enum_str - c, "%d",
-		      logical ? e->obj[i]->logical_index : e->obj[i]->
-		      os_index);
-
+	start = reverse ? num-1 : 0;
+	end   = reverse ? 0     : num-1;
+	for (i = start; i != end; reverse ? i-- : i++){
+		c+=cpuaffinity_obj_snprintf(c,
+					    len + enum_str - c,
+					    sep,
+					    e->obj[i],
+					    logical,
+					    cpuset,
+					    taskset);
+	}
+	c+=cpuaffinity_obj_snprintf(c,
+				    len + enum_str - c,
+				    "",
+				    e->obj[i],
+				    logical,
+				    cpuset,
+				    taskset);
 	printf("%s\n", enum_str);
 	free(enum_str);
 }
@@ -585,8 +618,8 @@ hwloc_obj_t cpuaffinity_bind_thread(struct cpuaffinity_enum * objs,
 #ifdef HWLOC_HAVE_PTRACE
 int cpuaffinity_attach(struct cpuaffinity_enum * objs, const pid_t pid)
 {
-	struct hwloc_topology_support * support;
-	support = hwloc_topology_get_support(objs->topology);
+	const struct hwloc_topology_support * support =
+		hwloc_topology_get_support(objs->topology);
 	if(support->cpubind->set_thread_cpubind){
 		perror("cpuaffinity_attach: set_thread_cpubind not supported.");
 		return -1;
