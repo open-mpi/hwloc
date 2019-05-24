@@ -105,6 +105,8 @@ void usage(const char * argv0, FILE *where)
 		     "Print hwloc version and exit.", where);		
 	print_option("-i","--input","<input>", NULL,
 		     "Use a topology from an XML file, or any input supported by hwloc-calc(1).", where);
+	print_option("--if", "--inout-format","<input-format>", NULL,
+		     "Enforce the input in the given format, among xml, fsroot, cpuid and synthetic.", where);	
 	print_option("-n","--num","integer", NULL,
 		     "Output only this number of objects.", where);
 	print_option("-l","--logical", NULL, NULL,
@@ -145,6 +147,7 @@ void usage(const char * argv0, FILE *where)
 
 // All options have valid default values.
 char * topology_input = NULL;
+char * input_format   = NULL;
 int    num_index      = 0;
 int    logical_opt    = 0;
 int    cpuset_opt     = 0;
@@ -200,6 +203,8 @@ static void parse_options(int argc, char **argv)
 		}
  		else if(match_opt(i, argc, argv, "-i", "--input", 1))
 			topology_input = argv[++i];
+ 		else if(match_opt(i, argc, argv, "--if", "--input-format", 1))
+		        input_format = argv[++i];		
 		else if(match_opt(i, argc, argv, "-n", "--num", 1))
 			num_index = atoi(argv[++i]);
 		else if(match_opt(i, argc, argv, "-l", "--logical", 0))
@@ -410,7 +415,8 @@ int main(int argc, char **argv)
 	int err = 0;
 	hwloc_topology_t topology;
 	struct cpuaffinity_enum *affinity;
-
+	enum hwloc_utils_input_format format;
+	
 	hwloc_utils_check_api_version(argv[0]);
 	srand(time(NULL));
 	parse_options(argc, argv);
@@ -420,14 +426,20 @@ int main(int argc, char **argv)
 		perror("hwloc_topology_init");
 		return 1;
 	}
-	if(topology_input != NULL){		
-		enum hwloc_utils_input_format format;
-		format = hwloc_utils_autodetect_input_format(topology_input, 0);
-		hwloc_utils_enable_input_format(topology,
-						topology_input,
-					        &format,
-					        0,
-						argv[0]);
+	if(topology_input != NULL){
+		format = input_format != NULL ?
+			hwloc_utils_parse_input_format(input_format,
+						       argv[0]) :
+			hwloc_utils_autodetect_input_format(topology_input,
+							    0);
+		if(hwloc_utils_enable_input_format(topology,
+						   topology_input,
+						   &format,
+						   0,
+						   argv[0]) != EXIT_SUCCESS){
+			err = 1;
+			goto out_with_topology;
+		}
 	}
 	if (hwloc_topology_load(topology) != 0) {
 		perror("hwloc_topology_load");
