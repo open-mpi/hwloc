@@ -191,8 +191,8 @@ static void test_openmp(void)
 	unsigned num_threads;
 	int err = 0;
 	
-	e = cpuaffinity_round_robin(system_topology,
-				    topology_leaf_type(system_topology));
+	e = cpuaffinity_scatter(system_topology,
+				topology_leaf_type(system_topology));
 		
 	num_threads = hwloc_get_nbobjs_by_type(system_topology,
 					       topology_leaf_type(system_topology));
@@ -216,7 +216,7 @@ static void test_pthreads(void)
 	
 	num_threads = hwloc_get_nbobjs_by_type(system_topology,
 					       topology_leaf_type(system_topology));
-	e = cpuaffinity_round_robin(system_topology,
+	e = cpuaffinity_scatter(system_topology,
 				    topology_leaf_type(system_topology));
 	tids = malloc(num_threads * sizeof(*tids));
 
@@ -299,8 +299,10 @@ static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
 	struct cpuaffinity_enum *e;
 	unsigned num_threads;
 
-	num_threads = hwloc_get_nbobjs_by_type(system_topology, HWLOC_OBJ_PU);
-	e = cpuaffinity_round_robin(system_topology, HWLOC_OBJ_CORE);
+	num_threads = hwloc_get_nbobjs_by_type(system_topology,
+					       topology_leaf_type(system_topology));
+	e = cpuaffinity_round_robin(system_topology,
+				    topology_leaf_type(system_topology));
 	if(cpuaffinity_attach(e, getpid()) == 0)
 		fn(e, num_threads);
 	cpuaffinity_enum_free(e);
