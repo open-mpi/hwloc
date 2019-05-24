@@ -157,6 +157,17 @@ struct cpuaffinity_enum * cpuaffinity_scatter(hwloc_topology_t topology,
 hwloc_obj_t cpuaffinity_bind_thread(struct cpuaffinity_enum * objs,
 				    const pid_t tid);
 
+
+/**
+ * Get topology object where a thread is bound.
+ * @param topology: The topology object to walk when looking for thread 
+ *        location.
+ * @param tid: The system thread id of the thread to check.
+ * @return NULL if thread location does not match any location in topology,
+ *         else the location in topology matching thread binding.
+ **/
+hwloc_obj_t cpuaffinity_get_binding(const hwloc_topology_t topology,
+				    const pid_t tid);
 /**
  * Enforce a thread binding by checking if it matches a topology object 
  * cpuset.
@@ -178,7 +189,8 @@ int cpuaffinity_check(const hwloc_topology_t topology,
  * @param pid: The pid of the process to bind.
  * @param stopped: A boolean telling the process has been sent a SIGSTOP 
  *        signal prior to call to cpuaffinity_attach().
- * @return -1 on failure, 0 on success.
+ * @return -1 on failure, pid exit status on success, 0 if pid has terminated
+ *         because of a signal.
  **/
 int cpuaffinity_attach(struct cpuaffinity_enum * objs,
 		       const pid_t pid,
@@ -191,9 +203,9 @@ int cpuaffinity_attach(struct cpuaffinity_enum * objs,
  *        policy.
  * @param argv: The argv argument provided by main function to provide
  *        to execvp.
- * @return The pid of child process on success, -1 on error to execvp call.
+ * @return -1 on error, else the exit status of the process.
  **/
-pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv);
+int cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv);
 
 /**
  * Parse a string hwloc_obj:logical_index and return the matching 

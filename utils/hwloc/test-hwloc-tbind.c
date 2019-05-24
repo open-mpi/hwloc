@@ -10,6 +10,12 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#if defined(_OPENMP) || defined(HAVE_PTHREAD)
+#include <sys/syscall.h>
+#endif
+#ifdef _OPENMP
+#include<omp.h>
+#endif
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
 #endif
@@ -162,7 +168,7 @@ static int is_tleaf(hwloc_topology_t topology)
 	return 1;
 }
 
-static void test_topology(hwloc_topology_t topology)
+static void test_policies(hwloc_topology_t topology)
 {
 	test_enum(topology);
 	if(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) > 0)
@@ -172,160 +178,174 @@ static void test_topology(hwloc_topology_t topology)
 }
 
 /***************************************************************************/
-/*                     Check binding inside this process                   */
+/*                      Testing binding inside thread                      */
 /***************************************************************************/
 
-#if defined(_OPENMP) || defined(HAVE_PTHREAD)
-static void * bind_thread(void * arg)
+#ifdef _OPENMP
+static int check_strategy_openmp(struct cpuaffinity_enum *
+				 (*strategy)(hwloc_topology_t,
+					     const hwloc_obj_type_t),
+				 int prebind)	
 {
-	pid_t pid = getpid();
-	struct cpuaffinity_enum *e = arg;
-	hwloc_obj_t obj = cpuaffinity_bind_thread(e, pid);
-	return (void*) cpuaffinity_check(system_topology, obj, pid);
+	hwloc_obj_t target;
+	unsigned num_threads;
+	int err = 0;
+	struct cpuaffinity_enum * it;
+	
+	num_threads = hwloc_get_nbobjs_by_type(system_topology,
+					       topology_leaf_type(system_topology));
+	it = strategy(system_topology, topology_leaf_type(system_topology));
+	if(it == NULL)
+		return 0;
+	
+	if(prebind){
+#pragma omp parallel num_threads(num_threads) shared(err, it) private(target)
+		{
+			pid_t pid = syscall(SYS_gettid);
+			target = cpuaffinity_enum_get(it, omp_get_thread_num());
+			hwloc_set_proc_cpubind(system_topology,
+					       pid,
+					       target->cpuset,
+					       HWLOC_CPUBIND_THREAD);
+			err += !cpuaffinity_check(system_topology, target, pid);
+		}
+		if(err != 0)
+			goto out;
+	}
+		
+#pragma omp parallel num_threads(num_threads) shared(it, err) private(target)
+	{
+		pid_t pid = syscall(SYS_gettid);
+		target = cpuaffinity_enum_get(it, omp_get_thread_num());
+		err += !cpuaffinity_check(system_topology, target, pid);
+	}
+
+ out:
+	cpuaffinity_enum_free(it);
+        return err == 0;
 }
 #endif
 
-#ifdef _OPENMP
-#include <omp.h>
-
-static void test_openmp(void)
-{
-	struct cpuaffinity_enum *e;
-	unsigned num_threads;
-	int err = 0;
-	
-	e = cpuaffinity_scatter(system_topology,
-				topology_leaf_type(system_topology));
-		
-	num_threads = hwloc_get_nbobjs_by_type(system_topology,
-					       topology_leaf_type(system_topology));
-#pragma omp parallel num_threads(num_threads) shared(err)
-	if(!bind_thread(e)) {err++;}
-	assert(err == 0);
-	cpuaffinity_enum_free(e);
-}
-#endif //_OPENMP
-
 #ifdef HAVE_PTHREAD
-#include <pthread.h>
 
-static void test_pthreads(void)
-{
-	struct cpuaffinity_enum *e;
-	unsigned i, num_threads;
-	pthread_t *tids;
-	void *ret;
-	int err = 0;
-	
-	num_threads = hwloc_get_nbobjs_by_type(system_topology,
-					       topology_leaf_type(system_topology));
-	e = cpuaffinity_scatter(system_topology,
-				    topology_leaf_type(system_topology));
-	tids = malloc(num_threads * sizeof(*tids));
-
-	for(i=0; i<num_threads; i++)
-	        assert(pthread_create(tids+i, NULL, bind_thread, e) == 0);
-	for(i=0; i<num_threads; i++){
-		assert(pthread_join(tids[i], &ret) == 0);
-		if(!ret) err++;
-	}
-	
-	assert(err == 0);
-	cpuaffinity_enum_free(e);
-	free(tids);
-}
-#endif //HAVE_PTHREAD
-
-/***************************************************************************/
-/*                      Check attaching to this process                    */
-/***************************************************************************/
-
-#ifdef HWLOC_HAVE_PTRACE
-#ifdef HAVE_PTHREAD
-struct thread_arg{
-	struct cpuaffinity_enum *e;
-	int tid;
-	pthread_t id;
+struct pthread_arg {
+	pthread_t tid;
+	int prebind;
+	hwloc_obj_t target;
 };
 
-static void * check_pthread(void * arg)
+static void* pthread_check(void* arg)
 {
-	struct thread_arg *targ = arg;
-	hwloc_obj_t obj = cpuaffinity_enum_get(targ->e, targ->tid);
-	return (void*) (intptr_t)cpuaffinity_check(system_topology, obj, getpid());
+	int ret;
+	int tid = syscall(SYS_gettid);
+	struct pthread_arg *parg = arg;
+	if(parg->prebind)
+		hwloc_set_proc_cpubind(system_topology,
+				       tid,
+				       parg->target->cpuset,
+				       HWLOC_CPUBIND_THREAD);
+	ret = cpuaffinity_check(system_topology, parg->target, tid);
+	return (void*)(intptr_t)ret;
 }
 
-static void run_parallel_pthread_test(struct cpuaffinity_enum *e, const unsigned num_threads)
+static int check_strategy_pthread(struct cpuaffinity_enum *
+				  (*strategy)(hwloc_topology_t,
+					      const hwloc_obj_type_t),
+				  int prebind)	
 {
-	unsigned i;
-        struct thread_arg *tids;
-	void *ret;
-	int err = 0;
+	int i, err = 0, num_threads;
+	intptr_t ret;
+	struct pthread_arg parg = {
+		.tid = 0,
+		.prebind = prebind,
+		.target = NULL,
+	};
+	struct cpuaffinity_enum * it;
 	
-	tids = malloc(num_threads * sizeof(*tids));
-	assert(tids);
+	it = strategy(system_topology, topology_leaf_type(system_topology));
+	if(it == NULL)
+		return 0;
 	
-	for(i=0; i<num_threads; i++){
-		tids[i].e = e;
-		tids[i].tid = i;
-	        assert(pthread_create(&(tids[i].id), NULL, check_pthread, tids+i) == 0);
-	}
-	for(i=0; i<num_threads; i++){
-		assert(pthread_join(tids[i].id, &ret) == 0);
-		if(!ret) err++;
-	}
-	free(tids);
-	assert(err == 0);
-}
-#endif //HAVE_PTHREAD
-
-
-#ifdef _OPENMP
-static void run_parallel_openmp_test(struct cpuaffinity_enum *e,
-				     const unsigned num_threads)
-{
-	int err = 0;	
-#pragma omp parallel num_threads(num_threads) shared(err)	
-	{
-		int tid = omp_get_thread_num();
-		fprintf(stderr, "In child %d\n", tid);			
-		hwloc_obj_t obj = cpuaffinity_enum_get(e, tid);
-		if(!cpuaffinity_check(system_topology, obj, getpid())) err++;
-	}
-        assert(err == 0);
-}
-#endif //_OPENMP
-
-#if defined(_OPENMP) || defined(HAVE_PTHREAD)
-static void check_attach(void(* fn)(struct cpuaffinity_enum *, const unsigned))
-{
-	struct cpuaffinity_enum *e;
-	unsigned num_threads;
-
 	num_threads = hwloc_get_nbobjs_by_type(system_topology,
 					       topology_leaf_type(system_topology));
-	e = cpuaffinity_round_robin(system_topology,
-				    topology_leaf_type(system_topology));
-	if(cpuaffinity_attach(e, getpid(), 1) == 0)
-		fn(e, num_threads);
-	cpuaffinity_enum_free(e);
+	for(i=0; i<num_threads; i++){
+		parg.target = cpuaffinity_enum_get(it, i);
+	        assert(pthread_create(&parg.tid, NULL, pthread_check, &parg) == 0);
+		assert(pthread_join(parg.tid, (void*)(&ret)) == 0);
+		if(!ret) err++;
+	}
+
+	cpuaffinity_enum_free(it);
+        return err == 0;
 }
-#endif //defined(_OPENMP) || defined(HAVE_PTHREAD)
-#endif //HWLOC_HAVE_PTRACE
+#endif
 
 /***************************************************************************/
-/*                         Check sequential binding                        */
+/*                    Check sequential, parallel, fork                     */
 /***************************************************************************/
 
-static void test_self(void)
+static void test_attach_parallel(int (*check_fn)(struct cpuaffinity_enum *
+						 (*)(hwloc_topology_t,
+						     const hwloc_obj_type_t),
+						 int),
+				 struct cpuaffinity_enum *
+				 (*strategy)(hwloc_topology_t,
+					     const hwloc_obj_type_t))
+{
+	struct cpuaffinity_enum * it;
+	it = strategy(system_topology, topology_leaf_type(system_topology));
+	assert(it != NULL);
+	
+	pid_t pid = fork();
+	assert(pid >= 0);
+	
+	/* Tracee */
+	if(pid == 0) {
+		// Stop child itself, it will be resumed by ptrace or
+		// killed if ptrace fails.
+		kill(getpid(), SIGSTOP);
+		// On resume do check. Return 0 if check succeeded.
+		int status = check_fn(strategy, 0);
+		exit(!status);
+	}
+	/* Tracer code */
+	else if(pid > 0){
+		int out;
+		// Attach and continue execution.
+	        out = cpuaffinity_attach(it, pid, 1);
+		if(out < 0){
+			kill(pid, SIGKILL);
+			waitpid(pid, NULL, 0);
+			assert(0);
+		}
+		assert(out == 0);
+	}	
+}
+
+static void test_strategy_parallel(int (*check_fn)(struct cpuaffinity_enum *
+						   (*)(hwloc_topology_t,
+						       const hwloc_obj_type_t),
+						   int),
+				   struct cpuaffinity_enum *
+				   (*strategy)(hwloc_topology_t,
+					       const hwloc_obj_type_t))
+{
+	struct cpuaffinity_enum * it;
+	it = strategy(system_topology, topology_leaf_type(system_topology));
+	assert(it != NULL);
+	assert(check_fn(strategy, 1));
+}
+
+static void test_strategy_sequential(struct cpuaffinity_enum *
+				     (*strategy)(hwloc_topology_t,
+						 const hwloc_obj_type_t))
 {
 	struct cpuaffinity_enum *e;
 	pid_t pid = getpid();
 	hwloc_obj_t obj;
 	size_t i;
 	
-	e = cpuaffinity_round_robin(system_topology,
-				    topology_leaf_type(system_topology));
+	e = strategy(system_topology, topology_leaf_type(system_topology));
 	assert(e != NULL);
 
 	for(i=0; i<cpuaffinity_enum_size(e); i++){
@@ -336,6 +356,9 @@ static void test_self(void)
 	cpuaffinity_enum_free(e);
 }
 
+/***************************************************************************/
+/*                                  Run Tests                              */
+/***************************************************************************/
 
 int main(void)
 {
@@ -345,27 +368,10 @@ int main(void)
 
 	const struct hwloc_topology_support * support =
 		hwloc_topology_get_support(system_topology);
-	test_topology(system_topology);
 
-	if(support->cpubind &&
-	   support->cpubind->set_thread_cpubind &&
-	   support->cpubind->get_thread_cpubind){
-		test_self();
-#ifdef _OPENMP
-		test_openmp();
-#ifdef HWLOC_HAVE_PTRACE	
-		check_attach(run_parallel_openmp_test);
-#endif // HWLOC_HAVE_PTRACE
-#endif // _OPENMP
-#ifdef HAVE_PTHREAD
-		test_pthreads();
-#ifdef HWLOC_HAVE_PTRACE	
-		check_attach(run_parallel_pthread_test);
-#endif // HWLOC_HAVE_PTRACE	
-#endif // HAVE_PTHREAD
-	}
-	hwloc_topology_destroy(system_topology);
-
+	// Test policies are outputing expected result.
+	
+	test_policies(system_topology);
 	DIR* xml_dir = opendir(TBIND_XML_DIR);
 	if(xml_dir == NULL){
 		perror("opendir");
@@ -392,11 +398,41 @@ int main(void)
 		topology = hwloc_test_topology_load(fname);
 		if(topology == NULL)
 			continue;
-		test_topology(topology);
+		test_policies(topology);
 		hwloc_topology_destroy(topology);
 	}
 	
 	closedir(xml_dir);
+
+
+	// Test binding is done as expected.
+	
+	if(!support->cpubind ||
+	   !support->cpubind->set_thread_cpubind ||
+	   !support->cpubind->get_thread_cpubind)
+		return 0;
+
+	test_strategy_sequential(cpuaffinity_round_robin);
+	test_strategy_sequential(cpuaffinity_scatter);
+
+#ifdef HWLOC_HAVE_PTRACE	
+#ifdef _OPENMP
+	test_strategy_parallel(check_strategy_openmp, cpuaffinity_round_robin);
+	test_strategy_parallel(check_strategy_openmp, cpuaffinity_scatter);
+	// OpenMP doesn't like to fork and hangs..
+	/* test_attach_parallel(check_strategy_openmp, cpuaffinity_round_robin); */
+	// OpenMP doesn't like to fork and hangs..	
+	/* test_attach_parallel(check_strategy_openmp, cpuaffinity_scatter); */
+#endif // _OPENMP
+#ifdef HAVE_PTHREAD
+	test_strategy_parallel(check_strategy_pthread, cpuaffinity_round_robin);
+	test_strategy_parallel(check_strategy_pthread, cpuaffinity_scatter);
+	test_attach_parallel(check_strategy_pthread, cpuaffinity_round_robin);
+	test_attach_parallel(check_strategy_pthread, cpuaffinity_scatter);
+#endif // HAVE_PTHREAD
+#endif // HWLOC_HAVE_PTRACE
+
+	hwloc_topology_destroy(system_topology);
 	return 0;
 }
 

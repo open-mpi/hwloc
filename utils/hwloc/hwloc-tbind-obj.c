@@ -561,11 +561,13 @@ cpuaffinity_round_robin(hwloc_topology_t topology,
 /*                         Binding process threads                         */
 /***************************************************************************/
 
-int cpuaffinity_check(const hwloc_topology_t topology, const hwloc_obj_t target, const pid_t tid)
+hwloc_obj_t cpuaffinity_get_binding(const hwloc_topology_t topology,
+				    const pid_t tid)
 {
-	int ret = 0;    
+	int depth = hwloc_topology_get_depth(topology);
 	hwloc_bitmap_t checkset = hwloc_bitmap_alloc();
-
+	hwloc_obj_t bound, ret = NULL;
+	
 	if(hwloc_get_proc_cpubind(topology,
 				  tid,
 				  checkset,
@@ -574,25 +576,33 @@ int cpuaffinity_check(const hwloc_topology_t topology, const hwloc_obj_t target,
 		goto check_cpubind_exit;
 	}
 
-	hwloc_obj_t bound = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0);
-
+        bound = hwloc_get_obj_by_depth(topology, depth-1, 0);
 	while(bound != NULL &&
-	      !hwloc_bitmap_isincluded(bound->cpuset, target->cpuset)){
-		if(bound->next_cousin == NULL){
-			bound = hwloc_get_obj_by_depth(topology,
-						       bound->depth-1,
-						       0);
-		} else {
-			bound = bound->next_cousin;
-		}
+	      !hwloc_bitmap_isincluded(bound->cpuset, checkset)){
+		bound = bound->next_cousin;
 	}
-	while(bound->depth > target->depth){bound = bound->parent;}
+	while(bound != NULL && bound->parent != NULL &&
+	      hwloc_bitmap_isincluded(bound->parent->cpuset, checkset)){
+		      bound = bound->parent;
+	}
+	ret = bound;
+	
+ check_cpubind_exit:
+	hwloc_bitmap_free(checkset);
+	return ret;
+}
 
+int cpuaffinity_check(const hwloc_topology_t topology, const hwloc_obj_t target, const pid_t tid)
+{
+	int ret = 0;
+	hwloc_bitmap_t checkset = hwloc_bitmap_alloc();
+
+	hwloc_obj_t bound = cpuaffinity_get_binding(topology, tid);
 	if(bound == NULL){
 		fprintf(stderr, "Binding outside of topology\n");
 		goto check_cpubind_exit;
 	}
-	if(bound != target){
+	if(!hwloc_bitmap_isequal(bound->cpuset, target->cpuset)){
 		fprintf(stderr, "Binding on %s:%d instead of %s:%d\n",
 			hwloc_obj_type_string(bound->type),
 			bound->logical_index,
@@ -654,7 +664,7 @@ int cpuaffinity_attach(struct cpuaffinity_enum * objs,
 	do{
 		int status;
 		pid_t child = waitpid(-1, &status, __WALL);
-		if(WIFEXITED(status) && child == pid){break;}
+		if(WIFEXITED(status) && child == pid){ return WEXITSTATUS(status);}
 		if(WIFSIGNALED(status) && child == pid){break;}
       
 		/* Child Stopped */
@@ -688,7 +698,7 @@ int cpuaffinity_attach(struct cpuaffinity_enum * objs,
 	return 0;
 }
 
-pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
+int cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
 {
 	pid_t pid = fork();  
 	/* Tracee */
@@ -706,12 +716,13 @@ pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
 	/* Tracer code */
 	else if(pid > 0){
 		// Attach
-		if(cpuaffinity_attach(objs, pid, 1) == -1){
+		int out = cpuaffinity_attach(objs, pid, 1);
+		if(out == -1){
 			kill(pid, SIGKILL);
 			waitpid(pid, NULL, 0);
 			return -1;
-		}			
-		return pid;
+		}		
+		return out;
 	}
 	/* Fork error */
 	else {
