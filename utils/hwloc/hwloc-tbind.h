@@ -169,8 +169,14 @@ int cpuaffinity_check(const hwloc_topology_t topology,
  * Bind the next threads spawned by a process with a particular cpuaffinity.
  * @param objs: The cpu affinity containing a list of object where to 
  * consecutively bind threads.
+ * @param pid: The pid of the process to bind.
+ * @param stopped: A boolean telling the process has been sent a SIGSTOP 
+ *        signal prior to call to cpuaffinity_attach().
+ * @return -1 on failure, 0 on success.
  **/
-int cpuaffinity_attach(struct cpuaffinity_enum * objs, const pid_t pid);
+int cpuaffinity_attach(struct cpuaffinity_enum * objs,
+		       const pid_t pid,
+		       const int stopped);
 
 /**
  * Fork a new process and bind the subsequent spawned threads with

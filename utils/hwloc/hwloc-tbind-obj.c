@@ -616,7 +616,9 @@ hwloc_obj_t cpuaffinity_bind_thread(struct cpuaffinity_enum * objs,
 }
 
 #ifdef HWLOC_HAVE_PTRACE
-int cpuaffinity_attach(struct cpuaffinity_enum * objs, const pid_t pid)
+int cpuaffinity_attach(struct cpuaffinity_enum * objs,
+		       const pid_t pid,
+		       const int stopped)
 {
 	const struct hwloc_topology_support * support =
 		hwloc_topology_get_support(objs->topology);
@@ -625,14 +627,23 @@ int cpuaffinity_attach(struct cpuaffinity_enum * objs, const pid_t pid)
 		return -1;
 	}
 
-	/*attach and set options to trace threads creation and process exit*/
+	/* Wait for child to stop */
+	if(!stopped)
+		kill(pid, SIGSTOP);
+	waitpid(pid, NULL, WUNTRACED);
+	
+	/* attach and set options to trace threads creation and process exit */
 	if(ptrace(PTRACE_SEIZE,
 		  pid,
 		  NULL,
 		  (void*)(PTRACE_O_TRACECLONE|PTRACE_O_TRACEFORK)) == -1){
-		perror("PTRACE_SEIZE"); return -1;
+		perror("PTRACE_SEIZE");
+		return -1;
 	}
 
+	/* Resume stopped child */
+	kill(pid, SIGCONT);
+	
 	/* wait childrens until process exits */
 	do{
 		int status;
@@ -676,7 +687,8 @@ pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
 	pid_t pid = fork();  
 	/* Tracee */
 	if(pid == 0) {
-		// Stop child it will be resumed by ptrace
+		// Stop child itself, it will be resumed by ptrace or
+		// killed if ptrace fails.
 		kill(getpid(), SIGSTOP);
 		// Start command
 		if(execvp(argv[0], argv) == -1){
@@ -688,13 +700,17 @@ pid_t cpuaffinity_exec(struct cpuaffinity_enum * objs, char** argv)
 	/* Tracer code */
 	else if(pid > 0){
 		// Attach
-		cpuaffinity_attach(objs, getpid());
+		if(cpuaffinity_attach(objs, pid, 1) == -1){
+			kill(pid, SIGKILL);
+			waitpid(pid, NULL, 0);
+			return -1;
+		}			
 		return pid;
 	}
 	/* Fork error */
 	else {
 		perror("fork");
 		return -1;
-	} 
+	}
 }
 #endif //HWLOC_HAVE_PTRACE
