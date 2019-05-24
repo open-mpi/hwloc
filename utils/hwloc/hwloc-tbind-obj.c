@@ -507,6 +507,7 @@ cpuaffinity_default_policy(hwloc_topology_t topology,
 	struct cpuaffinity_enum *e = NULL;
 
 	ldepth = hwloc_get_type_depth(topology, level);
+	assert(ldepth >= 0);
 	if(ldepth < 0){
 		errno = EINVAL;
 		goto out;
