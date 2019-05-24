@@ -156,8 +156,9 @@ static int is_tleaf(hwloc_topology_t topology)
 static void test_topology(hwloc_topology_t topology)
 {
 	test_enum(topology);
-	test_round_robin(topology);
-	if(is_tleaf(topology))
+	if(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) > 0)
+		test_round_robin(topology);
+	if(is_tleaf(topology) && hwloc_get_type_depth(topology, HWLOC_OBJ_PU) > 0)
 		test_scatter(topology);
 }
 
