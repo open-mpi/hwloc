@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#if defined(_OPENMP) || defined(HAVE_PTHREAD)
+#ifdef HWLOC_HAVE_SYS_GETTID
 #include <sys/syscall.h>
 #endif
 #ifdef _OPENMP
@@ -179,7 +179,7 @@ static void test_policies(hwloc_topology_t topology)
 /***************************************************************************/
 /*                      Testing binding inside thread                      */
 /***************************************************************************/
-#ifdef SYS_gettid
+#ifdef HWLOC_HAVE_SYS_GETTID
 #ifdef _OPENMP
 static int check_strategy_openmp(struct cpuaffinity_enum *
 				 (*strategy)(hwloc_topology_t,
@@ -278,7 +278,7 @@ static int check_strategy_pthread(struct cpuaffinity_enum *
         return err == 0;
 }
 #endif
-#endif //SYS_gettid
+
 /***************************************************************************/
 /*                    Check sequential, parallel, fork                     */
 /***************************************************************************/
@@ -334,6 +334,7 @@ static void test_strategy_parallel(int (*check_fn)(struct cpuaffinity_enum *
 	assert(it != NULL);
 	assert(check_fn(strategy, 1));
 }
+#endif //HWLOC_HAVE_SYS_GETTID
 
 static void test_strategy_sequential(struct cpuaffinity_enum *
 				     (*strategy)(hwloc_topology_t,
@@ -414,7 +415,7 @@ int main(void)
 	test_strategy_sequential(cpuaffinity_round_robin);
 	test_strategy_sequential(cpuaffinity_scatter);
 
-#ifdef SYS_gettid
+#ifdef HWLOC_HAVE_SYS_GETTID
 #ifdef HWLOC_HAVE_PTRACE	
 #ifdef _OPENMP
 	test_strategy_parallel(check_strategy_openmp, cpuaffinity_round_robin);
@@ -431,7 +432,7 @@ int main(void)
 	test_attach_parallel(check_strategy_pthread, cpuaffinity_scatter);
 #endif // HAVE_PTHREAD
 #endif // HWLOC_HAVE_PTRACE
-#endif
+#endif // HWLOC_HAVE_SYS_GETTID
 	
 	hwloc_topology_destroy(system_topology);
 	return 0;

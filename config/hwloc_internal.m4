@@ -359,15 +359,26 @@ EOF
     AC_CHECK_HEADERS([sys/ptrace.h], [
       AC_CHECK_FUNCS([ptrace],[hwloc_have_ptrace=yes], [hwloc_have_ptrace=no])
       AC_COMPILE_IFELSE([AC_LANG_SOURCE([[ 
-#include "sys/ptrace.h"
-int main(void){ return ptrace(PTRACE_SEIZE, -1, 0, (void*)(PTRACE_O_TRACECLONE|PTRACE_O_TRACEFORK)); }
+        #include "sys/ptrace.h"
+        int main(void){ return ptrace(PTRACE_SEIZE, -1, 0, (void*)(PTRACE_O_TRACECLONE|PTRACE_O_TRACEFORK)); }
       ]])],, [hwloc_have_ptrace=no])
     ])
-
     AM_CONDITIONAL([HWLOC_HAVE_PTRACE],[ test "x$hwloc_have_ptrace" = xyes ])
     if test x$hwloc_have_ptrace = xyes; then
        AC_DEFINE([HWLOC_HAVE_PTRACE], [1], [ptrace is present and supportes PTRACE_SEIZE])
     fi
+
+    # Check if syscall gettid is available. If so it will enable some tests for hwloc-tbind
+    AC_CHECK_HEADERS([sys/syscall.h], [hwloc_have_syscall=yes], [hwloc_have_syscall=no])
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+       #include "sys/syscall.h"
+       #ifndef SYS_gettid
+       #error "syscall SYS_gettid not found"
+       #endif
+       int main(void){return 0;}
+    ]])], AC_DEFINE([HWLOC_HAVE_SYS_GETTID], [1], [syscall header is present and SYS_gettid macro is defined]))
+    
+
 
 
     # Only generate this if we're building the utilities
