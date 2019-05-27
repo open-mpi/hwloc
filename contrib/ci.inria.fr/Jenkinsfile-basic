@@ -39,7 +39,7 @@ pipeline {
 						stash includes: "job-1-check.sh", name: 'script-unix-check'
 						stash includes: "job-1-visualstudio.bat", name: 'script-msvc'
 					}
-					archiveArtifacts artifacts: "utils/hwloc/test-suite.log",tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
+					archiveArtifacts artifacts: tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
 					deleteDir()
 				}
 			}
