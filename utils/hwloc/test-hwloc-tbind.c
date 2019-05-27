@@ -228,7 +228,6 @@ static int check_strategy_openmp(struct cpuaffinity_enum *
 #ifdef HAVE_PTHREAD
 
 struct pthread_arg {
-	pthread_t tid;
 	int prebind;
 	hwloc_obj_t target;
 };
@@ -254,8 +253,8 @@ static int check_strategy_pthread(struct cpuaffinity_enum *
 {
 	int i, err = 0, num_threads;
 	intptr_t ret;
+	pthread_t tid;
 	struct pthread_arg parg = {
-		.tid = 0,
 		.prebind = prebind,
 		.target = NULL,
 	};
@@ -269,8 +268,8 @@ static int check_strategy_pthread(struct cpuaffinity_enum *
 					       topology_leaf_type(system_topology));
 	for(i=0; i<num_threads; i++){
 		parg.target = cpuaffinity_enum_get(it, i);
-	        assert(pthread_create(&parg.tid, NULL, pthread_check, &parg) == 0);
-		assert(pthread_join(parg.tid, (void*)(&ret)) == 0);
+	        assert(pthread_create(&tid, NULL, pthread_check, &parg) == 0);
+		assert(pthread_join(tid, (void*)(&ret)) == 0);
 		if(!ret) err++;
 	}
 
