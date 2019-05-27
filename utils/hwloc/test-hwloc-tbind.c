@@ -19,7 +19,6 @@
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
 #endif
-
 static hwloc_topology_t system_topology;
 
 static hwloc_topology_t hwloc_test_topology_load(const char *file)
@@ -180,7 +179,7 @@ static void test_policies(hwloc_topology_t topology)
 /***************************************************************************/
 /*                      Testing binding inside thread                      */
 /***************************************************************************/
-
+#ifdef SYS_gettid
 #ifdef _OPENMP
 static int check_strategy_openmp(struct cpuaffinity_enum *
 				 (*strategy)(hwloc_topology_t,
@@ -279,7 +278,7 @@ static int check_strategy_pthread(struct cpuaffinity_enum *
         return err == 0;
 }
 #endif
-
+#endif //SYS_gettid
 /***************************************************************************/
 /*                    Check sequential, parallel, fork                     */
 /***************************************************************************/
@@ -415,6 +414,7 @@ int main(void)
 	test_strategy_sequential(cpuaffinity_round_robin);
 	test_strategy_sequential(cpuaffinity_scatter);
 
+#ifdef SYS_gettid
 #ifdef HWLOC_HAVE_PTRACE	
 #ifdef _OPENMP
 	test_strategy_parallel(check_strategy_openmp, cpuaffinity_round_robin);
@@ -431,7 +431,8 @@ int main(void)
 	test_attach_parallel(check_strategy_pthread, cpuaffinity_scatter);
 #endif // HAVE_PTHREAD
 #endif // HWLOC_HAVE_PTRACE
-
+#endif
+	
 	hwloc_topology_destroy(system_topology);
 	return 0;
 }
