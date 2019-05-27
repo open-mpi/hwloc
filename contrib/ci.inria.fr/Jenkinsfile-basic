@@ -71,7 +71,6 @@ pipeline {
 										deleteDir()
 								}
 							}
-							archiveArtifacts artifacts: "utils/hwloc/test-suite.log"
 						} else {
 							node('msvc') {
 								dir('check-msvc') {
