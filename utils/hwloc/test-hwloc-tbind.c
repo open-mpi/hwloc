@@ -377,7 +377,7 @@ int main(void)
 		return 1;
 	}
 
-	char fname[256];
+	char fname[512];
 	struct dirent *dirent;
 	for(dirent = readdir(xml_dir);
 	    dirent != NULL;
