@@ -213,7 +213,9 @@ static int check_strategy_openmp(struct cpuaffinity_enum *
 					       pid,
 					       target->cpuset,
 					       HWLOC_CPUBIND_THREAD);
-			err += !cpuaffinity_check(system_topology, target, pid);
+			err += !cpuaffinity_check(system_topology,
+						  target,
+						  pid);
 		}
 		if(err != 0)
 			goto out;
@@ -241,7 +243,7 @@ struct pthread_arg {
 
 static void* pthread_check(void* arg)
 {
-	int ret;
+	int ret = 0;
 	int tid = syscall(SYS_gettid);
 	struct pthread_arg *parg = arg;
 	if(parg->prebind)
@@ -249,6 +251,7 @@ static void* pthread_check(void* arg)
 				       tid,
 				       parg->target->cpuset,
 				       HWLOC_CPUBIND_THREAD);
+	// Return 1 if ok
 	ret = cpuaffinity_check(system_topology, parg->target, tid);
 	return (void*)(intptr_t)ret;
 }
@@ -259,7 +262,7 @@ static int check_strategy_pthread(struct cpuaffinity_enum *
 				  int prebind)	
 {
 	int i, err = 0, num_threads;
-	intptr_t ret;
+	intptr_t ret = 0;
 	pthread_t tid;
 	hwloc_obj_t leaf = topology_leaf(system_topology);
 	struct pthread_arg parg = {
@@ -277,11 +280,13 @@ static int check_strategy_pthread(struct cpuaffinity_enum *
 	for(i=0; i<num_threads; i++){
 		parg.target = cpuaffinity_enum_get(it, i);
 	        assert(pthread_create(&tid, NULL, pthread_check, &parg) == 0);
-		assert(pthread_join(tid, (void*)(&ret)) == 0);
+		assert(pthread_join(tid, (void**)(&ret)) == 0);
+		// If ret is 0, then check failed. 
 		if(!ret) err++;
 	}
 
 	cpuaffinity_enum_free(it);
+	// if err value is the number of failed check.
         return err == 0;
 }
 #endif
@@ -339,6 +344,7 @@ static void test_strategy_parallel(int (*check_fn)(struct cpuaffinity_enum *
 	struct cpuaffinity_enum * it;
 	it = strategy(system_topology, topology_leaf(system_topology));
 	assert(it != NULL);
+	// Check function return 1 if everything went as exepected
 	assert(check_fn(strategy, 1));
 }
 #endif //HWLOC_HAVE_SYS_GETTID
