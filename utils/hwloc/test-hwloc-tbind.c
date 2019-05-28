@@ -439,8 +439,8 @@ int main(void)
 	/* test_attach_parallel(check_strategy_openmp, cpuaffinity_scatter); */
 #endif // _OPENMP
 #ifdef HAVE_PTHREAD
-	test_strategy_parallel(check_strategy_pthread, cpuaffinity_round_robin);
-	test_strategy_parallel(check_strategy_pthread, cpuaffinity_scatter);
+	//test_strategy_parallel(check_strategy_pthread, cpuaffinity_round_robin);
+	//test_strategy_parallel(check_strategy_pthread, cpuaffinity_scatter);
 	//test_attach_parallel(check_strategy_pthread, cpuaffinity_round_robin);
 	//test_attach_parallel(check_strategy_pthread, cpuaffinity_scatter);
 #endif // HAVE_PTHREAD
