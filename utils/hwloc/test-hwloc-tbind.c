@@ -59,10 +59,9 @@ error:
 	return NULL;
 }
 
-static hwloc_obj_type_t topology_leaf_type(hwloc_topology_t topology){
+static inline hwloc_obj_t topology_leaf(hwloc_topology_t topology){
 	int depth = hwloc_topology_get_depth(topology);
-	hwloc_obj_t leaf = hwloc_get_obj_by_depth(topology, depth-1, 0);
-	return leaf->type;
+        return hwloc_get_obj_by_depth(topology, depth-1, 0);
 }
 
 static void test_enum(hwloc_topology_t topology)
@@ -70,10 +69,10 @@ static void test_enum(hwloc_topology_t topology)
 	unsigned i;
 	hwloc_obj_t obj, obj_e;
 	struct cpuaffinity_enum *it, *it_e;
-	hwloc_obj_type_t ltype = topology_leaf_type(topology);
+	hwloc_obj_t leaf = topology_leaf(topology);
 
 	it_e = cpuaffinity_enum_alloc(topology);
-	it = cpuaffinity_round_robin(topology, ltype);
+	it = cpuaffinity_round_robin(topology, leaf);
 	assert(it != NULL);
 	
 	for (i = 0; i < cpuaffinity_enum_size(it); i++){
@@ -97,22 +96,30 @@ static void test_enum(hwloc_topology_t topology)
 
 static void test_round_robin(hwloc_topology_t topology)
 {
-	int depth = hwloc_topology_get_depth(topology);
-	size_t i, ncore = hwloc_get_nbobjs_by_depth(topology, depth-2);
-	hwloc_obj_t Core = hwloc_get_obj_by_depth(topology, depth-2, 0);
+	hwloc_obj_t leaf = topology_leaf(topology);
+	hwloc_obj_t Core = leaf->parent;
+	hwloc_obj_t obj;
+	size_t i, n, ncore = hwloc_get_nbobjs_by_depth(topology, Core->depth);
 	hwloc_obj_t it_PU;
-	struct cpuaffinity_enum * it;
-	it = cpuaffinity_round_robin(topology, Core->type);
+	struct cpuaffinity_enum * it;	
+
+	it = cpuaffinity_round_robin(topology, Core);
 	assert(it != NULL);
 
 	for(i=0; i<cpuaffinity_enum_size(it); i++){
 		it_PU = cpuaffinity_enum_next(it);
-		Core = hwloc_get_obj_by_depth(topology,
-					      depth-2,
-					      i%ncore);
-		Core = Core->children[i/ncore];
-		assert(it_PU->type == Core->type);
-		assert(it_PU->logical_index == Core->logical_index);
+	        obj = hwloc_get_obj_by_depth(topology,
+					     Core->depth,
+					     i%ncore);
+		n = i/ncore;
+		while(n >= obj->arity){
+			obj = obj->next_cousin;
+			assert(obj);
+		}
+	        obj = obj->children[n];
+		assert(leaf->type == obj->type);
+		assert(it_PU->type == obj->type);
+		assert(it_PU->logical_index == obj->logical_index);
 	}
 	
 	cpuaffinity_enum_free(it);
@@ -124,7 +131,7 @@ static void test_scatter(hwloc_topology_t topology)
 	ssize_t i, j, r, n, c, val, depth, *arities;
 	struct cpuaffinity_enum * it;
 	
-	it = cpuaffinity_scatter(topology, topology_leaf_type(topology));
+	it = cpuaffinity_scatter(topology, topology_leaf(topology));
 	assert(it != NULL);
 	depth = hwloc_topology_get_depth(topology);
 	arities = malloc(depth * sizeof(*arities));
@@ -170,8 +177,7 @@ static int is_tleaf(hwloc_topology_t topology)
 static void test_policies(hwloc_topology_t topology)
 {
 	test_enum(topology);
-	if(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) > 0)
-		test_round_robin(topology);
+	test_round_robin(topology);
 	if(is_tleaf(topology))
 		test_scatter(topology);
 }
@@ -183,17 +189,17 @@ static void test_policies(hwloc_topology_t topology)
 #ifdef _OPENMP
 static int check_strategy_openmp(struct cpuaffinity_enum *
 				 (*strategy)(hwloc_topology_t,
-					     const hwloc_obj_type_t),
+					     const hwloc_obj_t),
 				 int prebind)	
 {
 	hwloc_obj_t target;
 	unsigned num_threads;
 	int err = 0;
 	struct cpuaffinity_enum * it;
+	hwloc_obj_t leaf = topology_leaf(system_topology);
 	
-	num_threads = hwloc_get_nbobjs_by_type(system_topology,
-					       topology_leaf_type(system_topology));
-	it = strategy(system_topology, topology_leaf_type(system_topology));
+	num_threads = hwloc_get_nbobjs_by_type(system_topology, leaf->type);
+	it = strategy(system_topology, leaf);
 	if(it == NULL)
 		return 0;
 	
@@ -248,24 +254,25 @@ static void* pthread_check(void* arg)
 
 static int check_strategy_pthread(struct cpuaffinity_enum *
 				  (*strategy)(hwloc_topology_t,
-					      const hwloc_obj_type_t),
+					      const hwloc_obj_t),
 				  int prebind)	
 {
 	int i, err = 0, num_threads;
 	intptr_t ret;
 	pthread_t tid;
+	hwloc_obj_t leaf = topology_leaf(system_topology);
 	struct pthread_arg parg = {
 		.prebind = prebind,
 		.target = NULL,
 	};
 	struct cpuaffinity_enum * it;
 	
-	it = strategy(system_topology, topology_leaf_type(system_topology));
+	it = strategy(system_topology, leaf);
 	if(it == NULL)
 		return 0;
 	
 	num_threads = hwloc_get_nbobjs_by_type(system_topology,
-					       topology_leaf_type(system_topology));
+					       leaf->type);
 	for(i=0; i<num_threads; i++){
 		parg.target = cpuaffinity_enum_get(it, i);
 	        assert(pthread_create(&tid, NULL, pthread_check, &parg) == 0);
@@ -284,14 +291,14 @@ static int check_strategy_pthread(struct cpuaffinity_enum *
 
 static void test_attach_parallel(int (*check_fn)(struct cpuaffinity_enum *
 						 (*)(hwloc_topology_t,
-						     const hwloc_obj_type_t),
+						     const hwloc_obj_t),
 						 int),
 				 struct cpuaffinity_enum *
 				 (*strategy)(hwloc_topology_t,
-					     const hwloc_obj_type_t))
+					     const hwloc_obj_t))
 {
 	struct cpuaffinity_enum * it;
-	it = strategy(system_topology, topology_leaf_type(system_topology));
+	it = strategy(system_topology, topology_leaf(system_topology));
 	assert(it != NULL);
 	
 	pid_t pid = fork();
@@ -322,14 +329,14 @@ static void test_attach_parallel(int (*check_fn)(struct cpuaffinity_enum *
 
 static void test_strategy_parallel(int (*check_fn)(struct cpuaffinity_enum *
 						   (*)(hwloc_topology_t,
-						       const hwloc_obj_type_t),
+						       const hwloc_obj_t),
 						   int),
 				   struct cpuaffinity_enum *
 				   (*strategy)(hwloc_topology_t,
-					       const hwloc_obj_type_t))
+					       const hwloc_obj_t))
 {
 	struct cpuaffinity_enum * it;
-	it = strategy(system_topology, topology_leaf_type(system_topology));
+	it = strategy(system_topology, topology_leaf(system_topology));
 	assert(it != NULL);
 	assert(check_fn(strategy, 1));
 }
@@ -337,14 +344,14 @@ static void test_strategy_parallel(int (*check_fn)(struct cpuaffinity_enum *
 
 static void test_strategy_sequential(struct cpuaffinity_enum *
 				     (*strategy)(hwloc_topology_t,
-						 const hwloc_obj_type_t))
+						 const hwloc_obj_t))
 {
 	struct cpuaffinity_enum *e;
 	pid_t pid = getpid();
 	hwloc_obj_t obj;
 	size_t i;
 	
-	e = strategy(system_topology, topology_leaf_type(system_topology));
+	e = strategy(system_topology, topology_leaf(system_topology));
 	assert(e != NULL);
 
 	for(i=0; i<cpuaffinity_enum_size(e); i++){

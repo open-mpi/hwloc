@@ -242,15 +242,15 @@ static void parse_options(int argc, char **argv)
 	}	
 }
 
-static int restrict_topology(hwloc_topology_t topology)
+static hwloc_cpuset_t hwloc_process_location(hwloc_topology_t topology, const char* str)
 {
-	int err = 0;
-	hwloc_bitmap_t restrict_cpuset;
+	int err;
+	hwloc_bitmap_t cpuset;
 	
-	restrict_cpuset = hwloc_bitmap_alloc();	
-	if(restrict_cpuset == NULL){
+        cpuset = hwloc_bitmap_alloc();	
+	if(cpuset == NULL){
 		perror("hwloc_bitmap_alloc");
-		return -1;
+		exit(1);
 	}	
 	
 	struct hwloc_calc_location_context_s lcontext = {
@@ -263,22 +263,34 @@ static int restrict_topology(hwloc_topology_t topology)
 	struct hwloc_calc_set_context_s scontext = {
 		.nodeset_input = 0,
 		.nodeset_output = 0,
-		.output_set = restrict_cpuset,
+		.output_set = cpuset,
 	};
 	
 	err = hwloc_calc_process_location_as_set(&lcontext,
 						 &scontext,
-						 restrict_topo);
-	if(err != 0)
-		goto out;
+						 str);
 
-	err = hwloc_topology_restrict(topology,
-				      restrict_cpuset,
-				      HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
+	if(err < 0){
+		fprintf(stderr, "Unrecognized obj %s\n", str);
+		exit(1);
+	}
+
+	return cpuset;
+}
+
+static int restrict_topology(hwloc_topology_t topology)
+{
+	int err = 0;
+	hwloc_bitmap_t restrict_cpuset;
+	
+	restrict_cpuset = hwloc_process_location(topology, restrict_topo);
+
+        hwloc_topology_restrict(topology,
+				restrict_cpuset,
+				HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
 	if(err != 0)
 		perror("hwloc_topology_restrict");
 
- out:
 	hwloc_bitmap_free(restrict_cpuset);
 	return err;			
 }
@@ -287,35 +299,22 @@ static int build_policy(hwloc_topology_t topology,
 			struct cpuaffinity_enum **out)
 {
 	int err = 0;
-	hwloc_obj_type_t level;
 	int depth;
 	int round_robin = !strcmp(policy, "round-robin");
 	int scatter = !strcmp(policy, "scatter");
 	int tleaf = !strcmp(policy, "tleaf");
+	hwloc_cpuset_t cpuset;
+	hwloc_obj_t obj;
 	
 	if(round_robin || scatter){
-		err = hwloc_type_sscanf(policy_arg,
-					&level,
-					NULL,
-					0);
-		if(err < 0){
-			fprintf(stderr,
-				"Level %s of policy %s is not a valid hwloc obj type.\n",
-				policy_arg,
-				policy);
-			goto out_policy;
-		}
-		depth = hwloc_get_type_depth(topology, level);
-		if(depth < 0){
-			fprintf(stderr, "Invalid level: \"%s\". topology-level must be at a positive depth.\n",
-				policy_arg);
-			err = -1;
-			goto out_policy;
-		}
+		cpuset = hwloc_process_location(topology, policy_arg);
+		obj = hwloc_get_first_largest_obj_inside_cpuset(topology, cpuset);
+		hwloc_bitmap_free(cpuset);
+		
 		if(round_robin)
-			*out = cpuaffinity_round_robin(topology, level);
+			*out = cpuaffinity_round_robin(topology, obj);
 		else if(scatter)
-			*out = cpuaffinity_scatter(topology, level);
+			*out = cpuaffinity_scatter(topology, obj);
 		if(*out == NULL){
 			err = -1;
 			if(errno == EINVAL)
@@ -327,16 +326,15 @@ static int build_policy(hwloc_topology_t topology,
 	}
 	else if(tleaf){
 	        depth = hwloc_topology_get_depth(topology);
-		int level_depth;
 		int n_levels = 0;
-		int  *depths;
-		hwloc_obj_type_t type;
+		hwloc_obj_t *levels;
 		char *level_str;
 		char *levels_str;
 		char *save_ptr;
 		
-		depths = malloc(depth * sizeof(*depths));
-		if(depths == NULL){
+		
+	        levels = malloc(depth * sizeof(*levels));
+		if(levels == NULL){
 			perror("malloc");
 			err = -1;
 			goto out_policy;			       
@@ -357,24 +355,10 @@ static int build_policy(hwloc_topology_t topology,
 					"There can't be more levels than topology depth.\n");
 				goto out_with_save_ptr;
 			}
-				
-			err = hwloc_type_sscanf(level_str,
-						&type,
-						NULL, 0);
-			if(err < 0){
-				fprintf(stderr,
-					"Level %s is not a valid hwloc obj\n",
-					level_str);
-				goto out_with_save_ptr;
-			}
-			level_depth = hwloc_get_type_depth(topology, type);
-			if(level_depth < 0){
-				fprintf(stderr, "topology-level must be at a positive depth\n");
-			        goto out_with_save_ptr;
-			}
-			depths[n_levels++] = level_depth;
-
-
+			cpuset = hwloc_process_location(topology, level_str);
+			obj = hwloc_get_first_largest_obj_inside_cpuset(topology, cpuset);
+			hwloc_bitmap_free(cpuset);
+			levels[n_levels++] = obj;
 			level_str = strtok(NULL, ":");			
 		}
 
@@ -384,7 +368,7 @@ static int build_policy(hwloc_topology_t topology,
 				"tleaf policy requires at least two topology levels.\n");
 			goto out_with_save_ptr;
 		}
-		*out = cpuaffinity_tleaf(topology, n_levels, depths, shuffle);
+		*out = cpuaffinity_tleaf(topology, n_levels, levels, shuffle);
 		if(*out == NULL){
 			err = -1;
 			if(errno == EINVAL)
@@ -397,7 +381,7 @@ static int build_policy(hwloc_topology_t topology,
 	out_with_save_ptr:
 		free(save_ptr);
 	out_with_depths:
-		free(depths);
+		free(levels);
 	}
 	else {
 		err = -1;

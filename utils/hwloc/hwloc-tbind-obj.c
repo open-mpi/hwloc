@@ -2,7 +2,7 @@
  * Copyright 2019 UChicago Argonne, LLC.
  * Author: Nicolas Denoyelle
  * SPDX-License-Identifier: BSD-3-Clause
-****************************************************************************/
+ ****************************************************************************/
 
 #include "private/autogen/config.h"
 #include <stdio.h>
@@ -16,6 +16,9 @@
 
 #include "hwloc-tbind.h"
 #include "hwloc/helper.h"
+
+#define hwloc_type_eq(a,b) (a->type == b->type && a->subtype == b->subtype)
+#define hwloc_obj_eq(a,b) (hwloc_type_eq(a,b) && a->logical_index == b->logical_index )
 
 /***************************************************************************/
 /*                              enum  structure                            */
@@ -99,10 +102,10 @@ int cpuaffinity_enum_append(struct cpuaffinity_enum *e, hwloc_obj_t obj)
 
 	e->obj[e->n++] = obj;
 	return 0;
-out_einval:
+ out_einval:
 	errno = EINVAL;
 	return -1;
-out_edom:
+ out_edom:
 	errno = EDOM;
 	return -1;
 }
@@ -194,8 +197,8 @@ struct hwloc_tleaf_iterator {
 	hwloc_topology_t topology;
 	/** Actual number of levels in hwloc_tleaf_iterator **/
 	int n;
-	/** Topology depth of levels. **/
-	unsigned *depth;
+	/** Topology types of levels. **/
+	hwloc_obj_t *levels;
 	/** Index for reordering levels in ascending order. **/
 	unsigned *asc_order;
 	/** Number of elements at level below parent. **/
@@ -230,10 +233,45 @@ static inline unsigned *build_index(const size_t n)
 	return ind;
 }
 
-static inline int comp_unsigned(const void *a_ptr, const void *b_ptr)
+static inline unsigned hwloc_get_nbcousins(hwloc_obj_t obj)
 {
-	const unsigned a = *(unsigned *)a_ptr;
-	const unsigned b = *(unsigned *)b_ptr;
+	unsigned n = 0;
+	hwloc_obj_t cousin;
+
+	cousin = obj;
+	while(cousin){
+		cousin = cousin->prev_cousin;
+		n++;
+	}
+	
+	cousin = obj->next_cousin;
+	while(cousin){
+		cousin = cousin->next_cousin;
+		n++;
+	}
+	return n;
+}
+
+static int hwloc_find_obj_depth(hwloc_topology_t topology,
+				hwloc_obj_t obj)
+{
+	int depth = 0;
+	hwloc_obj_t match = hwloc_get_obj_by_depth(topology, 0, 0);
+	while(match && !hwloc_type_eq(match, obj)){
+		match = match->first_child;
+		depth++;
+	}
+	if(obj == NULL)
+		return -1;
+	return depth;
+}
+
+static inline int comp_unsigned(const void *a_ptr,
+				const void *b_ptr)
+{
+	const unsigned a = *(unsigned*) a_ptr;
+	const unsigned b = *(unsigned*) b_ptr;
+	
 	if (a < b)
 		return 1;
 	if (a > b)
@@ -241,89 +279,103 @@ static inline int comp_unsigned(const void *a_ptr, const void *b_ptr)
 	return 0;
 }
 
-static inline unsigned max_arity(const struct hwloc_tleaf_iterator *t,
-				    const unsigned parent_depth,
-				    const unsigned child_depth)
+static inline unsigned max_arity(hwloc_obj_t parent,
+				 hwloc_obj_t child)
 {
-	unsigned arity = 0, n = 0;
-	hwloc_obj_t p = hwloc_get_obj_by_depth(t->topology, parent_depth, 0);
-	while(p){
-		n = hwloc_get_nbobjs_inside_cpuset_by_depth (t->topology,
-							     p->cpuset,
-							     child_depth);
-		arity = n > arity ? n : arity;
-		p = p->next_cousin;
+	unsigned n = 0, np;
+	hwloc_obj_t first, last;	
+
+	while(parent->logical_index > 0)
+		parent = parent->prev_cousin;
+
+	while(parent){
+		first = parent;
+		last = parent;
+		while(first &&
+		      last  &&
+		      !hwloc_type_eq(first, child)){
+			first = first->first_child;
+			last = last->last_child;		
+		}
+		if(first != NULL && last != NULL){
+			np = last->logical_index - first->logical_index + 1;
+			n = np > n ? np : n;
+		}
+		parent = parent->next_cousin;
 	}
-	return arity;
+	return n;
 }
 
-#define chk_ptr(ptr, goto_flag) \
+#define chk_ptr(ptr, goto_flag)					\
 	if(ptr == NULL){errno = ENOMEM; goto goto_flag;}
+
 
 struct hwloc_tleaf_iterator *
 hwloc_tleaf_iterator_alloc(hwloc_topology_t topology,
-			   const int n_depths,
-			   const int *depths)
+			   int n_levels,
+			   hwloc_obj_t *levels)
 {
-	int i, n, cd, pd;
+	int i, n, depth;
 	struct hwloc_tleaf_iterator *t;
+	unsigned * depths;
 
 	t = malloc(sizeof(*t));
 	if (t == NULL)
 		return NULL;
 
-	t->depth = malloc(n_depths * sizeof(*t->depth));
-	chk_ptr(t->depth, error);
+	t->levels = levels;
+        t->topology = topology;
+	t->n = n_levels;
 
-	t->asc_order = malloc(n_depths * sizeof(*t->asc_order));
-	chk_ptr(t->asc_order, error_with_depth);
+	depths = malloc(n_levels * sizeof(*depths));
+	chk_ptr(depths, error);
+	
+	t->asc_order = malloc(n_levels * sizeof(*t->asc_order));
+	chk_ptr(t->asc_order, error_with_depths);
 
-	t->arity = malloc(n_depths * sizeof(*t->arity));
+	t->arity = malloc(n_levels * sizeof(*t->arity));
 	chk_ptr(t->arity, error_with_order);
 
-	t->it = malloc(n_depths * sizeof(*t->it));
+	t->it = malloc(n_levels * sizeof(*t->it));
 	chk_ptr(t->it, error_with_size);
 
-	t->index = malloc(n_depths * sizeof(*t->index));
+	t->index = malloc(n_levels * sizeof(*t->index));
 	chk_ptr(t->index, error_with_it);
 
-        t->topology = topology;
-
-	t->n = n_depths;
-
 	// Assign depths and set iteration step
-	for (i = 0; i < n_depths; i++) {
-		if(depths[i] < 0){
+	for (i = 0; i < n_levels; i++) {
+		depth = hwloc_find_obj_depth(topology, levels[i]);
+		if(depth < 0){
 			errno = EINVAL;
 			goto error_with_index;
 		}
-		t->depth[i] = depths[i];
 		t->it[i] = 0;
+		t->asc_order[i] = depth;
+	        depths[i] = depth;
 	}
 
 	// order depths in asc_order
-	memcpy(t->asc_order, t->depth, n_depths * sizeof(*t->asc_order));
-	qsort(t->asc_order, n_depths, sizeof(*t->asc_order), comp_unsigned);
+	qsort(t->asc_order, n_levels, sizeof(*t->asc_order), comp_unsigned);
 
-	// replace asc_order with index of matching element in depth.
+	// replace asc_order with index of matching element in depths.
 	for (n = 0; n < t->n; n++)
-		for (i = 0; i < t->n; i++)
-			if (t->depth[i] == t->asc_order[n]) {
+		for (i = 0; i < t->n; i++)			
+			if (depths[i] == t->asc_order[n]){
 				t->asc_order[n] = i;
 				break;
 			}
+	
 	// Compute depths arity.
-	for (i = 1; i < n_depths; i++) {
-		pd = t->depth[t->asc_order[i]];
-		cd = t->depth[t->asc_order[i - 1]];
-		t->arity[t->asc_order[i - 1]] = max_arity(t, pd, cd);
+	for (i = 1; i < n_levels; i++) {
+		t->arity[t->asc_order[i - 1]] =
+			max_arity(t->levels[t->asc_order[i]],
+				  t->levels[t->asc_order[i - 1]]);
 	}
 	t->arity[t->asc_order[t->n - 1]] =
-	    hwloc_get_nbobjs_by_depth(t->topology,
-				      t->depth[t->asc_order[t->n - 1]]);
+		hwloc_get_nbcousins(t->levels[t->asc_order[t->n - 1]]);
 
 	// Allocate iteration index for depths
-	for (i = 0; i < n_depths; i++) {
+	for (i = 0; i < n_levels; i++) {
 		t->index[i] = build_index(t->arity[i]);
 		if (t->index[i] == NULL) {
 			while (i--)
@@ -335,17 +387,17 @@ hwloc_tleaf_iterator_alloc(hwloc_topology_t topology,
 
 	return t;
 
-error_with_index:
+ error_with_index:
 	free(t->index);
-error_with_it:
+ error_with_it:
 	free(t->it);
-error_with_size:
+ error_with_size:
 	free(t->arity);
-error_with_order:
+ error_with_order:
 	free(t->asc_order);
-error_with_depth:
-	free(t->depth);
-error:
+ error_with_depths:
+	free(depths);
+ error:
 	free(t);
 	return NULL;
 }
@@ -355,8 +407,6 @@ void hwloc_tleaf_iterator_free(struct hwloc_tleaf_iterator *t)
 	int i;
 	if (t == NULL)
 		return;
-
-	free(t->depth);
 	free(t->asc_order);
 	free(t->arity);
 	free(t->it);
@@ -396,23 +446,27 @@ hwloc_tleaf_iterator_current(const struct hwloc_tleaf_iterator *t)
 	hwloc_obj_t p;
 	int i, j;
 
-	i = t->asc_order[t->n - 1];
-	p = hwloc_get_obj_by_depth(t->topology, t->depth[i],
-				   t->index[i][t->it[i]]);
+	i = t->asc_order[t->n-1];
+	p = t->levels[i];
+	i = t->index[i][t->it[i]];
+	
+	while(p->logical_index < (unsigned)i)
+		p = p->next_cousin;
+	while(p->logical_index > (unsigned)i)
+		p = p->prev_cousin;
 
 	if (p == NULL)
 		return NULL;
 
+	
 	for (i = t->n - 2; i >= 0 && p != NULL; i--) {
 		j = t->asc_order[i];
-		p = hwloc_get_obj_below_by_type(t->topology,
-						p->type,
-						p->logical_index,
-						hwloc_get_depth_type(t->topology,
-								     t->depth[j]),
-						t->index[j][t->it[j]]);
+		while(p && !hwloc_type_eq(p, t->levels[j]))
+			p = p->first_child;		
+		j = t->index[j][t->it[j]];
+		while(p && j--)
+			p = p->next_cousin;
 	}
-
 	return p;
 }
 
@@ -466,8 +520,8 @@ hwloc_tleaf_iterator_enumeration(struct hwloc_tleaf_iterator *it)
 
 struct cpuaffinity_enum *
 cpuaffinity_tleaf(hwloc_topology_t topology,
-		  const size_t n_depths,
-		  const int *depths,
+		  size_t n_levels,
+		  hwloc_obj_t *levels,
 		  const int shuffle)
 {
 	if(topology == NULL){
@@ -476,12 +530,12 @@ cpuaffinity_tleaf(hwloc_topology_t topology,
 	}
 	struct hwloc_tleaf_iterator * it;
 	struct cpuaffinity_enum * e;
-	if(n_depths <= 1){
+	if(n_levels <= 1){
 		errno = EINVAL;
 		return NULL;
 	}
 		
-	it = hwloc_tleaf_iterator_alloc(topology, n_depths, depths);
+	it = hwloc_tleaf_iterator_alloc(topology, n_levels, levels);
 	if(it == NULL)
 		return NULL;
 
@@ -499,60 +553,69 @@ cpuaffinity_tleaf(hwloc_topology_t topology,
 
 static struct cpuaffinity_enum *
 cpuaffinity_default_policy(hwloc_topology_t topology,
-			   const hwloc_obj_type_t level, int scatter)
+			   const hwloc_obj_t level, int scatter)
 {
 	if(topology == NULL){
 		errno = EINVAL;
 		return NULL;
 	}
 
-	hwloc_obj_t obj;
-	int i, ldepth;
-	int *depths;
+	hwloc_obj_t obj, leaf;
+	int depth;
+        hwloc_obj_t *levels;
         struct hwloc_tleaf_iterator *it = NULL;
 	struct cpuaffinity_enum *e = NULL;
+	
+	depth = hwloc_topology_get_depth(topology);
+	leaf = hwloc_get_obj_by_depth(topology, depth-1, 0);
 
-	ldepth = hwloc_get_type_depth(topology, level);
-	if(ldepth < 0){
-		errno = EINVAL;
-		goto out;
-	}
-
-	depths = malloc((ldepth+2) * sizeof(*depths));
-	if (depths == NULL) {
+	obj = level;
+	depth = 0;
+	while(obj){ depth++; obj = obj->parent; }
+       
+        levels = malloc((depth+2) * sizeof(*levels));
+	if (levels == NULL) {
 		errno = ENOMEM;
 		goto out;
 	}
 
-	for (i = 0; i <= ldepth; i++) {
-		obj = hwloc_get_obj_by_depth(topology,
-					     scatter ? i : ldepth-i, 0);
-	        depths[i] = obj->depth; 
+	depth = 0;
+	if(scatter){
+		obj = hwloc_get_obj_by_depth(topology, 0, 0);
+		while(obj && !hwloc_type_eq(obj, level)){
+			levels[depth++] = obj; 
+			obj = obj->first_child;			
+		}		
+	} else {
+		obj = level;
+		while(obj != NULL){
+			levels[depth++] = obj; 
+			obj = obj->parent;
+		}
 	}
-	if(level != HWLOC_OBJ_PU){
-		depths[ldepth+1] = hwloc_get_type_depth(topology, HWLOC_OBJ_PU);
-		ldepth++;
-	}
+	
+	if(!hwloc_type_eq(level, leaf))
+	        levels[depth++] = leaf;
 
-	it = hwloc_tleaf_iterator_alloc(topology, ldepth+1, depths);
-	free(depths);
+	it = hwloc_tleaf_iterator_alloc(topology, depth, levels);
 	e = hwloc_tleaf_iterator_enumeration(it);
 	hwloc_tleaf_iterator_free(it);
 	
  out:
+	free(levels);	
 	return e;
 }
 
 struct cpuaffinity_enum *
 cpuaffinity_scatter(hwloc_topology_t topology,
-		  const hwloc_obj_type_t level)
+		    const hwloc_obj_t level)
 {
 	return cpuaffinity_default_policy(topology, level, 1);
 }
 
 struct cpuaffinity_enum *
 cpuaffinity_round_robin(hwloc_topology_t topology,
-		  const hwloc_obj_type_t level)
+			const hwloc_obj_t level)
 {
 	return cpuaffinity_default_policy(topology, level, 0);
 }
@@ -583,7 +646,7 @@ hwloc_obj_t cpuaffinity_get_binding(const hwloc_topology_t topology,
 	}
 	while(bound != NULL && bound->parent != NULL &&
 	      hwloc_bitmap_isincluded(bound->parent->cpuset, checkset)){
-		      bound = bound->parent;
+		bound = bound->parent;
 	}
 	ret = bound;
 	

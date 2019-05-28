@@ -91,7 +91,7 @@ hwloc_obj_t cpuaffinity_enum_get(struct cpuaffinity_enum * e,
  * same arity. This iterator is iterating on leaves of such a tree.
  * And such a tree is mapped on a machine topology.
  * Iteration is made level wise. For each level we consider the 
- * level node arity. Iteration works by incrementing a counter
+ * level node arity. Iteration works by incrementing a counterocl
  * of the last level until it reaches level arity. When it does,
  * it is reset to zero and next level arity is incremented, and
  * so on, recursively on levels.
@@ -102,9 +102,9 @@ hwloc_obj_t cpuaffinity_enum_get(struct cpuaffinity_enum * e,
  * topology object on tleaf leaves.
  * @param topology: The topology on which to map a tleaf.
  *        If NULL, the current system topology is loaded.
- * @params n_depths: The number of level in topology to use when building 
+ * @params n_levels: The number of level in topology to use when building 
  *         the tleaf.
- * @params depths: The topology levels to use in the tleaf. 
+ * @params levels: One object per topology level to use in the tleaf. 
  *         The order of this levels encodes the iteration policy.
  * @param  shuffle: If not 0, will shuffle iteration index on each level of 
  *         the tleaf so 
@@ -112,10 +112,11 @@ hwloc_obj_t cpuaffinity_enum_get(struct cpuaffinity_enum * e,
  *         randomized. 
  * @return an enumeration of the deepest objects in levels.
  **/
-struct cpuaffinity_enum * cpuaffinity_tleaf(hwloc_topology_t topology,
-					    const size_t n_depths,
-					    const int *depths,
-					    const int shuffle);
+struct cpuaffinity_enum *
+cpuaffinity_tleaf(hwloc_topology_t topology,
+		  size_t n_levels,
+		  hwloc_obj_t *levels,
+		  const int shuffle);
 
 /**
  * Iterate objects of a topology level in a round robin fashion,
@@ -130,7 +131,7 @@ struct cpuaffinity_enum * cpuaffinity_tleaf(hwloc_topology_t topology,
  **/
 struct cpuaffinity_enum *
 cpuaffinity_round_robin(hwloc_topology_t topology,
-			const hwloc_obj_type_t level);
+			const hwloc_obj_t level);
 
 /**
  * Returned Processing Units (PU) ordered in a scatter fashion, i.e
@@ -146,7 +147,7 @@ cpuaffinity_round_robin(hwloc_topology_t topology,
  * @return a HWLOC_OBJ_PU enumeration.
  **/
 struct cpuaffinity_enum * cpuaffinity_scatter(hwloc_topology_t topology,
-					      const hwloc_obj_type_t level);
+					      const hwloc_obj_t level);
 
 /**
  * Bind a thread on next topology object.
@@ -222,23 +223,16 @@ hwloc_obj_t hwloc_obj_from_string(hwloc_topology_t topology,
 				  const char* str);
 
 /**
- * Load a topology configured for the library. Topology require to use 
- * merge filter.
- * @param file: A string where to find topology file to load. 
- *        If NULL the current system topology will be loaded.
- * @return A topology object on success.
- * @return NULL on failure with errno set to the error.
+ * Walk the topology to find positive depth of a type,
+ * Look for topology root and descend first children to 
+ * to find type.
+ * @param topology: The topology to query,
+ * @param type: The type to look for in topology.
+ * @return The number of hop from root to find type if found,
+ * else -1.
  **/
-hwloc_topology_t hwloc_affinity_topology_load(const char * file);
-
-/**
- * Restrict topology to an object, its parents and children.
- * @param topology: The topology to restrict.
- * @param obj: The object to which the topology has to be restricted.
- * @return 0 on success.
- * @return -1 on failure with errno set to the error reason.
- **/
-int hwloc_topology_restrict_obj(hwloc_topology_t topology, hwloc_obj_t obj);
+int hwloc_find_type_depth(hwloc_topology_t topology,
+			  hwloc_obj_type_t type);
 
 /**
  * A tleaf is a tree where all levels at a same depth have the 
@@ -273,14 +267,14 @@ struct hwloc_tleaf_iterator;
 /**
  * Allocates a topology iterator.
  * @param topology: The topology to iterate on.
- * @param n_depths: The number of levels composing the policy.
- * @param depths: The topology levels. Order matters, it defines the policy.
+ * @param n_levelss: The number of levels composing the policy.
+ * @param levels: One object per topology levels. Order matters, it defines the policy.
  * @return NULL on failure, an iterator on success;
  **/
 struct hwloc_tleaf_iterator *
 hwloc_tleaf_iterator_alloc(hwloc_topology_t topology,
-			   const int n_depths,
-			   const int * depths);
+			   int n_levels,
+			   hwloc_obj_t *levels);
 
 /**
  * Free a topology iterator.
