@@ -375,7 +375,7 @@ EOF
        #ifndef SYS_gettid
        #error "syscall SYS_gettid not found"
        #endif
-       int main(void){return 0;}
+       int main(void){ return syscall(SYS_gettid) > 0;}
     ]])], AC_DEFINE([HWLOC_HAVE_SYS_GETTID], [1], [syscall header is present and SYS_gettid macro is defined]))
     
 
