@@ -3987,11 +3987,20 @@ annotate_sysfsnode(struct hwloc_topology *topology,
     return 0;
   }
 
-  for(i=0, node=hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, NULL);
-      i<nbnodes;
-      i++, node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) {
+  for(node=hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, NULL);
+      node != NULL;
+      node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) {
     assert(node); /* list_sysfsnode() ensured that sysfs nodes and existing nodes match */
-    nodes[i] = node;
+
+    /* hwloc_parse_nodes_distances() requires nodes in physical index order,
+     * and inserting distances requires nodes[] and indexes[] in same order.
+     */
+    for(i=0; i<nbnodes; i++)
+      if (indexes[i] == node->os_index) {
+	nodes[i] = node;
+	break;
+      }
+
     hwloc_get_sysfs_node_meminfo(data, path, node->os_index, &node->attr->numanode);
   }
 
