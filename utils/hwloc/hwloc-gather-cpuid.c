@@ -27,6 +27,8 @@
 #endif
 #endif
 
+static int verbose = 1;
+
 static void dump_one_cpuid(FILE *output, unsigned *regs, unsigned inregmask)
 {
   unsigned i;
@@ -67,10 +69,12 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
       fprintf(stderr, "Cannot open file '%s' for writing: %s\n", path, strerror(errno));
       return -1;
     }
-    printf("Gathering CPUID of PU P#%u in path %s ...\n", pu->os_index, path);
+    if (verbose)
+      printf("Gathering CPUID of PU P#%u in path %s ...\n", pu->os_index, path);
   } else {
     output = stdout;
-    printf("Gathering CPUID of PU P#%u on stdout ...\n", pu->os_index);
+    if (verbose)
+      printf("Gathering CPUID of PU P#%u on stdout ...\n", pu->os_index);
   }
 
   fprintf(output, "# mask e[abcd]x => e[abcd]x\n");
@@ -423,8 +427,9 @@ void usage(const char *callname, FILE *where)
   fprintf(where, "Usage : %s [ options ] ... [ outdir ]\n", callname);
   fprintf(where, "  outdir is an optional output directory instead of cpuid/\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "  -c <n>     Only gather for logical processor with logical index <n>\n");
-  fprintf(where, "  -h --help  Show this usage\n");
+  fprintf(where, "  -c <n>       Only gather for logical processor with logical index <n>\n");
+  fprintf(where, "  -s --silent  Do not show verbose messages\n");
+  fprintf(where, "  -h --help    Show this usage\n");
 }
 
 int main(int argc, const char * const argv[])
@@ -455,6 +460,10 @@ int main(int argc, const char * const argv[])
       idx = atoi(argv[1]);
       argc -= 2;
       argv += 2;
+    } else if (argc >= 1 && (!strcmp(argv[0], "-s") || !strcmp(argv[0], "--silent"))) {
+      verbose--;
+      argc--;
+      argv++;
     } else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
       usage(callname, stdout);
       goto out;
@@ -488,7 +497,8 @@ int main(int argc, const char * const argv[])
   }
 
   if (!strcmp(basedir, "-")) {
-    printf("Gathering on stdout ...\n");
+    if (verbose)
+      printf("Gathering on stdout ...\n");
     if (idx == (unsigned) -1) {
       fprintf(stderr, "Cannot gather multiple PUs on stdout.\n");
       ret = EXIT_FAILURE;
@@ -505,7 +515,8 @@ int main(int argc, const char * const argv[])
 	goto out_with_topo;
       }
     }
-    printf("Gathering in directory %s ...\n", basedir);
+    if (verbose)
+      printf("Gathering in directory %s ...\n", basedir);
 
     pathlen = strlen(basedir) + 20; /* for '/pu%u' or '/hwloc-cpuid-info' */
     path = malloc(pathlen);
@@ -526,7 +537,8 @@ int main(int argc, const char * const argv[])
     if (file) {
       fprintf(file, "Architecture: x86\n");
       fclose(file);
-      printf("Summary written to %s\n", path);
+      if (verbose)
+	printf("Summary written to %s\n", path);
     } else {
       fprintf(stderr, "Failed to open summary file '%s' for writing: %s\n", path, strerror(errno));
     }
@@ -543,9 +555,10 @@ int main(int argc, const char * const argv[])
     }
   }
 
-  printf("\n"
-	 "WARNING: Do not post these files on a public list or website unless you\n"
-	 "WARNING: are sure that no information about this platform is sensitive.\n");
+  if (verbose)
+    printf("\n"
+	   "WARNING: Do not post these files on a public list or website unless you\n"
+	   "WARNING: are sure that no information about this platform is sensitive.\n");
 
  out_with_path:
   free(path);
