@@ -684,4 +684,14 @@
       </object>
     </object>
   </object>
+  <distances2 type="NUMANode" nbobjs="8" kind="5" indexing="os">
+    <indexes length="16">0 1 6 7 2 3 4 5 </indexes>
+    <u64values length="30">10 16 16 22 16 22 16 22 16 10 </u64values>
+    <u64values length="30">22 16 16 22 22 16 16 22 10 16 </u64values>
+    <u64values length="30">16 16 16 16 22 16 16 10 16 16 </u64values>
+    <u64values length="30">22 22 16 16 16 16 10 16 16 22 </u64values>
+    <u64values length="30">22 22 16 16 16 10 22 16 16 22 </u64values>
+    <u64values length="30">16 22 16 22 10 16 22 16 16 22 </u64values>
+    <u64values length="12">22 16 16 10 </u64values>
+  </distances2>
 </topology>
