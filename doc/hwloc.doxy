@@ -907,6 +907,9 @@ hwloc-gather-cpuid is a x86-specific tool that dumps the
 result of CPUID instructions on the current machine into
 a directory.
 
+The output of hwloc-gather-cpuid is included in the tarball
+saved by hwloc-gather-topology when running on Linux/x86.
+
 These files may be used later (possibly offline) for simulating
 or debugging a machine without actually running on it.
 

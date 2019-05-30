@@ -472,6 +472,7 @@ complete -F _hwloc-gather-cpuid hwloc-gather-cpuid
 _hwloc-gather-topology(){
     local OPTIONS=(--io
 		   --dmi
+		   --no-cpuid
 		   --keep
 		   -h --help
 		  )
