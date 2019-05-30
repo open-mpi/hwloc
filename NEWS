@@ -45,7 +45,7 @@ Version 2.1.0
   + Group objects have a new "dont_merge" attribute to prevent them from
     being automatically merged with identical parent or children.
 * Backends
-  + Add support for Linux 5.2 new sysfs cpu topology files with Die information.
+  + Add support for Linux 5.3 new sysfs cpu topology files with Die information.
   + Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
   + Improve memory locality on Linux by using HMAT initiators (exposed
     since Linux 5.2+), and NUMA distances for CPU-less NUMA nodes.
