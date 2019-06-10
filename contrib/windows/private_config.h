@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
@@ -665,7 +665,7 @@
 
 
 /* Version number of package */
-#define HWLOC_VERSION "1.11.13"
+#define HWLOC_VERSION "1.11.14"
 #define VERSION HWLOC_VERSION
 
 /* Define to 1 if the X Window System is missing or not being used. */
