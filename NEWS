@@ -87,6 +87,19 @@ Version 2.1.0
   + Add bash completions.
 
 
+Version 2.0.4 (also included in 1.11.13 when appropriate)
+-------------
+* Add support for Linux 5.3 new sysfs cpu topology files with Die information.
+* Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
+* Tiles, Modules and Dies are exposed as Groups for now.
+  + HWLOC_DONT_MERGE_DIE_GROUPS=1 may be set in the environment to prevent
+    Die groups from being automatically merged with identical parent or children.
+* Ignore NUMA node information from AMD topoext in the x86 backend,
+  unless HWLOC_X86_TOPOEXT_NUMANODES=1 is set in the environment.
+* Group objects have a new "dont_merge" attribute to prevent them from
+  being automatically merged with identical parent or children.
+
+
 Version 2.0.3 (also included in 1.11.12 when appropriate)
 -------------
 * Fix build on Cygwin, thanks to Marco Atzeri for the patches.
@@ -269,6 +282,19 @@ Version 2.0.0
     - HWLOC_COMPONENTS takes precedence over other environment variables
       for selecting components.
   + hwloc now requires a C99 compliant compiler.
+
+
+Version 1.11.13 (also included in 2.0.4)
+---------------
+* Add support for Linux 5.3 new sysfs cpu topology files with Die information.
+* Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
+* Tiles, Modules and Dies are exposed as Groups for now.
+  + HWLOC_DONT_MERGE_DIE_GROUPS=1 may be set in the environment to prevent
+    Die groups from being automatically merged with identical parent or children.
+* Ignore NUMA node information from AMD topoext in the x86 backend,
+  unless HWLOC_X86_TOPOEXT_NUMANODES=1 is set in the environment.
+* Group objects have a new "dont_merge" attribute to prevent them from
+  being automatically merged with identical parent or children.
 
 
 Version 1.11.12 (also included in 2.0.3)
