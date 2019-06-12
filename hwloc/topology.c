@@ -2736,6 +2736,9 @@ hwloc_build_level_from_list(struct hwloc_special_level_s *slevel)
   if (nb) {
     /* allocate and fill level */
     slevel->objs = malloc(nb * sizeof(struct hwloc_obj *));
+    if (!slevel->objs)
+      return -1;
+
     obj = slevel->first;
     i = 0;
     while (obj) {
@@ -2839,7 +2842,7 @@ hwloc_list_special_objects(hwloc_topology_t topology, hwloc_obj_t obj)
 }
 
 /* Build I/O levels */
-static void
+static int
 hwloc_connect_io_misc_levels(hwloc_topology_t topology)
 {
   unsigned i;
@@ -2850,8 +2853,12 @@ hwloc_connect_io_misc_levels(hwloc_topology_t topology)
 
   hwloc_list_special_objects(topology, topology->levels[0][0]);
 
-  for(i=0; i<HWLOC_NR_SLEVELS; i++)
-    hwloc_build_level_from_list(&topology->slevels[i]);
+  for(i=0; i<HWLOC_NR_SLEVELS; i++) {
+    if (hwloc_build_level_from_list(&topology->slevels[i]) < 0)
+      return -1;
+  }
+
+  return 0;
 }
 
 /*
@@ -3057,7 +3064,8 @@ hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags)
   if (hwloc_connect_levels(topology) < 0)
     return -1;
 
-  hwloc_connect_io_misc_levels(topology);
+  if (hwloc_connect_io_misc_levels(topology) < 0)
+    return -1;
 
   topology->modified = 0;
 
