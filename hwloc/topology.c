@@ -1767,11 +1767,18 @@ hwloc_alloc_setup_object(hwloc_topology_t topology,
 			 hwloc_obj_type_t type, unsigned os_index)
 {
   struct hwloc_obj *obj = hwloc_tma_malloc(topology->tma, sizeof(*obj));
+  if (!obj)
+    return NULL;
   memset(obj, 0, sizeof(*obj));
   obj->type = type;
   obj->os_index = os_index;
   obj->gp_index = topology->next_gp_index++;
   obj->attr = hwloc_tma_malloc(topology->tma, sizeof(*obj->attr));
+  if (!obj->attr) {
+    assert(!topology->tma || !topology->tma->dontfree); /* this tma cannot fail to allocate */
+    free(obj);
+    return NULL;
+  }
   memset(obj->attr, 0, sizeof(*obj->attr));
   /* do not allocate the cpuset here, let the caller do it */
   return obj;
