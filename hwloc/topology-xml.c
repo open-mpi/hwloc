@@ -1937,6 +1937,9 @@ hwloc__xml_export_safestrdup(const char *old)
   char *new = malloc(strlen(old)+1);
   char *dst = new;
   const char *src = old;
+  if (!new)
+    return NULL;
+
   while (*src) {
     if (HWLOC_XML_CHAR_VALID(*src))
       *(dst++) = *src;
@@ -2042,13 +2045,17 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 
   if (obj->name) {
     char *name = hwloc__xml_export_safestrdup(obj->name);
-    state->new_prop(state, "name", name);
-    free(name);
+    if (name) {
+      state->new_prop(state, "name", name);
+      free(name);
+    }
   }
   if (!v1export && obj->subtype) {
     char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
-    state->new_prop(state, "subtype", subtype);
-    free(subtype);
+    if (subtype) {
+      state->new_prop(state, "subtype", subtype);
+      free(subtype);
+    }
   }
 
   switch (obj->type) {
@@ -2144,23 +2151,27 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   for(i=0; i<obj->infos_count; i++) {
     char *name = hwloc__xml_export_safestrdup(obj->infos[i].name);
     char *value = hwloc__xml_export_safestrdup(obj->infos[i].value);
-    struct hwloc__xml_export_state_s childstate;
-    state->new_child(state, &childstate, "info");
-    childstate.new_prop(&childstate, "name", name);
-    childstate.new_prop(&childstate, "value", value);
-    childstate.end_object(&childstate, "info");
+    if (name && value) {
+      struct hwloc__xml_export_state_s childstate;
+      state->new_child(state, &childstate, "info");
+      childstate.new_prop(&childstate, "name", name);
+      childstate.new_prop(&childstate, "value", value);
+      childstate.end_object(&childstate, "info");
+    }
     free(name);
     free(value);
   }
   if (v1export && obj->subtype) {
     char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
-    struct hwloc__xml_export_state_s childstate;
-    int is_coproctype = (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
-    state->new_child(state, &childstate, "info");
-    childstate.new_prop(&childstate, "name", is_coproctype ? "CoProcType" : "Type");
-    childstate.new_prop(&childstate, "value", subtype);
-    childstate.end_object(&childstate, "info");
-    free(subtype);
+    if (subtype) {
+      struct hwloc__xml_export_state_s childstate;
+      int is_coproctype = (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
+      state->new_child(state, &childstate, "info");
+      childstate.new_prop(&childstate, "name", is_coproctype ? "CoProcType" : "Type");
+      childstate.new_prop(&childstate, "value", subtype);
+      childstate.end_object(&childstate, "info");
+      free(subtype);
+    }
   }
   if (v1export && obj->type == HWLOC_OBJ_DIE) {
     struct hwloc__xml_export_state_s childstate;
