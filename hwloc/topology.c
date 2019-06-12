@@ -2928,7 +2928,11 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     /* allocate enough to take all current objects and an ending NULL */
     taken_objs = malloc((n_objs+1) * sizeof(taken_objs[0]));
-    assert(taken_objs);
+    if (!taken_objs) {
+      free(objs);
+      errno = ENOMEM;
+      return -1;
+    }
 
     /* allocate enough to keep all current objects or their children */
     n_new_objs = 0;
@@ -2939,7 +2943,12 @@ hwloc_connect_levels(hwloc_topology_t topology)
 	n_new_objs++;
     }
     new_objs = malloc(n_new_objs * sizeof(new_objs[0]));
-    assert(new_objs);
+    if (!new_objs) {
+      free(objs);
+      free(taken_objs);
+      errno = ENOMEM;
+      return -1;
+    }
 
     /* now actually take these objects */
     n_new_objs = 0;
