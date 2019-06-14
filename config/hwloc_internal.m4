@@ -378,9 +378,6 @@ EOF
        int main(void){ return syscall(SYS_gettid) > 0;}
     ]])], AC_DEFINE([HWLOC_HAVE_SYS_GETTID], [1], [syscall header is present and SYS_gettid macro is defined]))
     
-
-
-
     # Only generate this if we're building the utilities
     # Even the netloc library Makefile is here because
     # we don't embed libnetloc yet, it's useless without tools
@@ -412,10 +409,13 @@ AC_DEFUN([HWLOC_SETUP_TESTS],[
 EOF
 
     # Check thread support.
-    AX_PTHREAD([
-	hwloc_have_pthread=yes;
-	AC_DEFINE([HAVE_PTHREAD], [1], [pthread support is here])
-    ])
+    AC_CHECK_LIB([pthread], [pthread_self], [hwloc_have_pthread=yes])
+    if test x$hwloc_have_pthread = xyes; then
+       AC_DEFINE([HWLOC_HAVE_PTHREAD], [1], [pthread library is supported])
+    else
+       AC_DEFINE([HWLOC_HAVE_PTHREAD], [0], [pthread library is not supported])
+    fi
+    AM_CONDITIONAL([HWLOC_HAVE_PTHREAD],[ test "x$hwloc_have_pthread" = xyes ])
     AC_OPENMP
 
     HWLOC_PKG_CHECK_MODULES([NUMA], [numa], [numa_available], [numa.h],

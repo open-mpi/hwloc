@@ -16,7 +16,7 @@
 #ifdef _OPENMP
 #include<omp.h>
 #endif
-#ifdef HAVE_PTHREAD
+#if HWLOC_HAVE_PTHREAD
 #include <pthread.h>
 #endif
 
@@ -234,7 +234,7 @@ static int check_strategy_openmp(struct cpuaffinity_enum *
 }
 #endif
 
-#ifdef HAVE_PTHREAD
+#if HWLOC_HAVE_PTHREAD
 
 struct pthread_arg {
 	int prebind;
@@ -263,7 +263,7 @@ static int check_strategy_pthread(struct cpuaffinity_enum *
 {
 	int i, err = 0, num_threads;
 	intptr_t ret = 0;
-	pthread_t tid;
+        hwloc_thread_t tid;
 	hwloc_obj_t leaf = topology_leaf(system_topology);
 	struct pthread_arg parg = {
 		.prebind = prebind,
@@ -438,7 +438,7 @@ int main(void)
 	// OpenMP doesn't like to fork and hangs..	
 	/* test_attach_parallel(check_strategy_openmp, cpuaffinity_scatter); */
 #endif // _OPENMP
-#ifdef HAVE_PTHREAD
+#if HWLOC_HAVE_PTHREAD
 	test_strategy_parallel(check_strategy_pthread, cpuaffinity_round_robin);
 	//test_strategy_parallel(check_strategy_pthread, cpuaffinity_scatter);
 	//test_attach_parallel(check_strategy_pthread, cpuaffinity_round_robin);

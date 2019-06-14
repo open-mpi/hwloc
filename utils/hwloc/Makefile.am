@@ -77,8 +77,9 @@ LDADD+=libhwloc-tbind.la
 
 AM_CFLAGS+=-DTBIND_XML_DIR=\"$(HWLOC_top_builddir)/tests/hwloc/xml\"
 AM_CFLAGS+=@OPENMP_CFLAGS@
-AM_CFLAGS+=@PTHREAD_CFLAGS@
-AM_LDFLAGS+=@PTHREAD_LIBS@
+if HWLOC_HAVE_PTHREAD
+AM_LDFLAGS+=-lpthread
+endif
 
 bin_SCRIPTS = hwloc-compress-dir
 if HWLOC_HAVE_LINUX
