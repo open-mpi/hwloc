@@ -93,7 +93,7 @@ void usage(const char * argv0, FILE *where)
 
 	fprintf(where, "COMMAND:\n");
 	fprintf(where, "\t%s OPTIONS\n", argv0);
-#ifdef HWLOC_HAVE_PTRACE
+#if HWLOC_HAVE_PTRACE
 	fprintf(where, "\t%s OPTIONS -- prog <args>\n", argv0);
 #endif
 	fprintf(where, "\n");
@@ -158,7 +158,7 @@ int    reverse        = 0;
 char * restrict_topo  = NULL;
 char * policy         = "round-robin";
 char * policy_arg     = "Core";
-#ifdef HWLOC_HAVE_PTRACE
+#if HWLOC_HAVE_PTRACE
 char **user_argv      = NULL;
 #endif
 
@@ -223,7 +223,7 @@ static void parse_options(int argc, char **argv)
 			policy = argv[++i];
 			policy_arg = argv[++i];
 		}
-#ifdef HWLOC_HAVE_PTRACE		
+#if HWLOC_HAVE_PTRACE		
 		else if(match_opt(i, argc, argv, "NO_OPT", "--", 1)){
 			user_argv = &(argv[++i]);
 			break;
@@ -444,7 +444,7 @@ int main(int argc, char **argv)
 	}
 	
 	// Ouput object index
-#ifdef HWLOC_HAVE_PTRACE	
+#if HWLOC_HAVE_PTRACE	
 	if(user_argv == NULL)
 #endif
 		cpuaffinity_enum_print(affinity,
@@ -455,7 +455,7 @@ int main(int argc, char **argv)
 				       reverse,
 				       num_index);
 	
-#ifdef HWLOC_HAVE_PTRACE
+#if HWLOC_HAVE_PTRACE
 	// Bind program threads
         if(user_argv != NULL){
 		pid_t child;
@@ -471,7 +471,7 @@ int main(int argc, char **argv)
 	}
 #endif
 
-#ifdef HWLOC_HAVE_PTRACE	
+#if HWLOC_HAVE_PTRACE	
  out_with_affinity:
 #endif
 	cpuaffinity_enum_free(affinity);	

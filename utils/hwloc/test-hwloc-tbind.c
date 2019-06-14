@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#ifdef HWLOC_HAVE_SYS_GETTID
+#if HWLOC_HAVE_SYS_GETTID
 #include <sys/syscall.h>
 #endif
 #ifdef _OPENMP
@@ -186,7 +186,7 @@ static void test_policies(hwloc_topology_t topology)
 /***************************************************************************/
 /*                      Testing binding inside thread                      */
 /***************************************************************************/
-#ifdef HWLOC_HAVE_SYS_GETTID
+#if HWLOC_HAVE_SYS_GETTID
 #ifdef _OPENMP
 static int check_strategy_openmp(struct cpuaffinity_enum *
 				 (*strategy)(hwloc_topology_t,
@@ -428,8 +428,8 @@ int main(void)
 	test_strategy_sequential(cpuaffinity_round_robin);
 	test_strategy_sequential(cpuaffinity_scatter);
 
-#ifdef HWLOC_HAVE_SYS_GETTID
-#ifdef HWLOC_HAVE_PTRACE	
+#if HWLOC_HAVE_SYS_GETTID
+#if HWLOC_HAVE_PTRACE	
 #ifdef _OPENMP
 	//test_strategy_parallel(check_strategy_openmp, cpuaffinity_round_robin);
 	//test_strategy_parallel(check_strategy_openmp, cpuaffinity_scatter);

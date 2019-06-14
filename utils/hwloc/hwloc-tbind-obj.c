@@ -7,7 +7,7 @@
 #include "private/autogen/config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HWLOC_HAVE_PTRACE
+#if HWLOC_HAVE_PTRACE
 #include <sys/ptrace.h>
 #endif
 #include <sys/types.h>
@@ -694,7 +694,7 @@ hwloc_obj_t cpuaffinity_bind_thread(struct cpuaffinity_enum * objs,
 	return obj;
 }
 
-#ifdef HWLOC_HAVE_PTRACE
+#if HWLOC_HAVE_PTRACE
 int cpuaffinity_attach(struct cpuaffinity_enum * objs,
 		       const pid_t pid,
 		       const int stopped)

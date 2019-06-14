@@ -366,6 +366,8 @@ EOF
     AM_CONDITIONAL([HWLOC_HAVE_PTRACE],[ test "x$hwloc_have_ptrace" = xyes ])
     if test x$hwloc_have_ptrace = xyes; then
        AC_DEFINE([HWLOC_HAVE_PTRACE], [1], [ptrace is present and supportes PTRACE_SEIZE])
+    else
+       AC_DEFINE([HWLOC_HAVE_PTRACE], [0], [ptrace is not supported or not with PTRACE_SEIZE])
     fi
 
     # Check if syscall gettid is available. If so it will enable some tests for hwloc-tbind
@@ -376,7 +378,8 @@ EOF
        #error "syscall SYS_gettid not found"
        #endif
        int main(void){ return syscall(SYS_gettid) > 0;}
-    ]])], AC_DEFINE([HWLOC_HAVE_SYS_GETTID], [1], [syscall header is present and SYS_gettid macro is defined]))
+    ]])], [AC_DEFINE([HWLOC_HAVE_SYS_GETTID], [1], [syscall header is present and SYS_gettid macro is defined])],
+    	  [AC_DEFINE([HWLOC_HAVE_SYS_GETTID], [0], [syscall header is not present or SYS_gettid macro is not defined])])
     
     # Only generate this if we're building the utilities
     # Even the netloc library Makefile is here because
