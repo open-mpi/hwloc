@@ -75,7 +75,7 @@ hwloc_tbind_SOURCES=hwloc-tbind.c hwloc-tbind.h
 LDADD+=$(HWLOC_top_builddir)/hwloc/libhwloc.la
 LDADD+=libhwloc-tbind.la
 
-AM_CFLAGS+=-DTBIND_XML_DIR=\"$(HWLOC_top_builddir)/tests/hwloc/xml\"
+AM_CPPFLAGS+=-DTBIND_XML_DIR=\"$(HWLOC_top_builddir)/tests/hwloc/xml\"
 AM_CFLAGS+=@OPENMP_CFLAGS@
 if HWLOC_HAVE_PTHREAD
 AM_LDFLAGS+=-lpthread
