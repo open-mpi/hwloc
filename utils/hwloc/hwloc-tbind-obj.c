@@ -2,6 +2,7 @@
  * Copyright 2019 UChicago Argonne, LLC.
  * Author: Nicolas Denoyelle
  * SPDX-License-Identifier: BSD-3-Clause
+ * See COPYING in top-level directory.
  ****************************************************************************/
 
 #include "private/autogen/config.h"
