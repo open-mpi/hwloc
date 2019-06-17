@@ -283,8 +283,8 @@ int main(void)
 #if HWLOC_HAVE_SYS_GETTID
 #if HWLOC_HAVE_PTRACE	
 #ifdef _OPENMP
-	test_parallel(check_strategy_openmp);
-	test_attach_parallel(check_strategy_openmp);
+	//test_parallel(check_strategy_openmp);
+	//test_attach_parallel(check_strategy_openmp);
 	// OpenMP doesn't like to fork and hangs..
 	/* test_attach_parallel(check_strategy_openmp, cpuaffinity_round_robin); */
 	// OpenMP doesn't like to fork and hangs..	
