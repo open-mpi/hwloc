@@ -292,7 +292,7 @@ int main(void)
 #endif // _OPENMP
 #if HWLOC_HAVE_PTHREAD
 	test_parallel(check_strategy_pthread);
-	test_attach_parallel(check_strategy_pthread);
+	//test_attach_parallel(check_strategy_pthread);
 #endif // HWLOC_HAVE_PTHREAD
 #endif // HWLOC_HAVE_PTRACE
 #endif // HWLOC_HAVE_SYS_GETTID
