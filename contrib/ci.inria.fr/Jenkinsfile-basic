@@ -40,7 +40,6 @@ pipeline {
 						stash includes: "job-1-visualstudio.bat", name: 'script-msvc'
 					}
 					archiveArtifacts artifacts: tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
-					archiveArtifacts artifacts: "build/utils/hwloc/test-suite.log"
 				}
 			}
 		}
@@ -65,7 +64,6 @@ pipeline {
 									if (env.KEEP_WORKING_DIRECTORY != 'true')
 								}
 							}
-							archiveArtifacts artifacts: "build/utils/hwloc/test-suite.log"
 						} else {
 							node('msvc') {
 								dir('check-msvc') {
