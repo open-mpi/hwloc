@@ -245,7 +245,7 @@ enum hwloc_distances_add_flag_e {
  * \p flags configures the behavior of the function using an optional OR'ed set of
  * ::hwloc_distances_add_flag_e.
  *
- * Objects must be of the same type. They cannot be of type Group.
+ * Objects must be of the same type.
  */
 HWLOC_DECLSPEC int hwloc_distances_add(hwloc_topology_t topology,
 				       unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,
