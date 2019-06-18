@@ -444,12 +444,6 @@ int hwloc_distances_add(hwloc_topology_t topology,
   /* no strict need to check for duplicates, things shouldn't break */
 
   type = objs[0]->type;
-  if (type == HWLOC_OBJ_GROUP) {
-    /* not supported yet, would require we save the subkind together with the type. */
-    errno = EINVAL;
-    return -1;
-  }
-
   for(i=1; i<nbobjs; i++)
     if (!objs[i] || objs[i]->type != type) {
       errno = EINVAL;
@@ -484,15 +478,34 @@ int hwloc_distances_add(hwloc_topology_t topology,
  * Refresh objects in distances
  */
 
-static hwloc_obj_t hwloc_find_obj_by_type_and_gp_index(hwloc_topology_t topology, hwloc_obj_type_t type, uint64_t gp_index)
+static hwloc_obj_t hwloc_find_obj_by_depth_and_gp_index(hwloc_topology_t topology, unsigned depth, uint64_t gp_index)
 {
-  hwloc_obj_t obj = hwloc_get_obj_by_type(topology, type, 0);
+  hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, 0);
   while (obj) {
     if (obj->gp_index == gp_index)
       return obj;
     obj = obj->next_cousin;
   }
   return NULL;
+}
+
+static hwloc_obj_t hwloc_find_obj_by_type_and_gp_index(hwloc_topology_t topology, hwloc_obj_type_t type, uint64_t gp_index)
+{
+  int depth = hwloc_get_type_depth(topology, type);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+    return NULL;
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+    int topodepth = hwloc_topology_get_depth(topology);
+    for(depth=0; depth<topodepth; depth++) {
+      if (hwloc_get_depth_type(topology, depth) == type) {
+	hwloc_obj_t obj = hwloc_find_obj_by_depth_and_gp_index(topology, depth, gp_index);
+	if (obj)
+	  return obj;
+      }
+    }
+    return NULL;
+  }
+  return hwloc_find_obj_by_depth_and_gp_index(topology, depth, gp_index);
 }
 
 static void
