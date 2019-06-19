@@ -213,7 +213,7 @@ static int check_strategy_pthread(int prebind)
 /*                    Check sequential, parallel, fork                     */
 /***************************************************************************/
 
-static void test_attach_parallel(int (*check_fn)(int))
+static void test_attach(int (*check_fn)(int))
 {
 	pid_t pid = fork();
 	assert(pid >= 0);
@@ -284,7 +284,7 @@ int main(void)
 #if HWLOC_HAVE_PTRACE	
 #ifdef _OPENMP
 	test_parallel(check_strategy_openmp);
-	//test_attach_parallel(check_strategy_openmp);
+	//test_attach(check_strategy_openmp);
 	// OpenMP doesn't like to fork and hangs..
 	/* test_attach_parallel(check_strategy_openmp, cpuaffinity_round_robin); */
 	// OpenMP doesn't like to fork and hangs..	
@@ -292,7 +292,7 @@ int main(void)
 #endif // _OPENMP
 #if HWLOC_HAVE_PTHREAD
 	test_parallel(check_strategy_pthread);
-	test_attach_parallel(check_strategy_pthread);
+	test_attach(check_strategy_pthread);
 #endif // HWLOC_HAVE_PTHREAD
 #endif // HWLOC_HAVE_PTRACE
 #endif // HWLOC_HAVE_SYS_GETTID
