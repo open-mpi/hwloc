@@ -41,6 +41,7 @@ pipeline {
 					}
 					archiveArtifacts artifacts: tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
 					deleteDir()
+					archiveArtifacts artifacts: "build/utils/hwloc/test-suite.log", onlyIfSuccessful: false
 				}
 			}
 		}
