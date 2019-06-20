@@ -132,7 +132,7 @@ sed -e '/#define HWLOC_HAVE_ATTRIBUTE/d' -i include/private/autogen/config.h
 
 # Create the config for sonar-scanner
 cat > sonar-project.properties << EOF
-sonar.host.url=https://sonarqube.bordeaux.inria.fr/sonarqube
+sonar.host.url=https://sonarqube.inria.fr/sonarqube
 sonar.login=$(cat ~/.sonarqube-hwloc-token)
 sonar.links.homepage=https://www.open-mpi.org/projects/hwloc/
 sonar.links.ci=https://ci.inria.fr/hwloc/
