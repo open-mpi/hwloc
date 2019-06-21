@@ -1233,8 +1233,12 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     if (!strcmp(attrname, "nbobjs"))
       nbobjs = strtoul(attrvalue, NULL, 10);
     else if (!strcmp(attrname, "type")) {
-      if (hwloc_type_sscanf(attrvalue, &type, NULL, 0) < 0)
+      if (hwloc_type_sscanf(attrvalue, &type, NULL, 0) < 0) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "%s: unrecognized distances2 type %s\n",
+		  state->global->msgprefix, attrvalue);
 	goto out;
+      }
     }
     else if (!strcmp(attrname, "indexing")) {
       indexing = 1;
