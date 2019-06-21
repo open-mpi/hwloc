@@ -2470,31 +2470,36 @@ hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
 } while (0)
 
 static void
+hwloc___xml_v2export_distances(hwloc__xml_export_state_t parentstate, struct hwloc_internal_distances_s *dist)
+{
+  char tmp[255];
+  unsigned nbobjs = dist->nbobjs;
+  struct hwloc__xml_export_state_s state;
+
+  parentstate->new_child(parentstate, &state, "distances2");
+
+  state.new_prop(&state, "type", hwloc_obj_type_string(dist->type));
+  sprintf(tmp, "%u", nbobjs);
+  state.new_prop(&state, "nbobjs", tmp);
+  sprintf(tmp, "%lu", dist->kind);
+  state.new_prop(&state, "kind", tmp);
+  if (dist->name)
+    state.new_prop(&state, "name", dist->name);
+
+  state.new_prop(&state, "indexing",
+		 HWLOC_DIST_TYPE_USE_OS_INDEX(dist->type) ? "os" : "gp");
+  /* TODO don't hardwire 10 below. either snprintf the max to guess it, or just append until the end of the buffer */
+  EXPORT_ARRAY(&state, unsigned long long, nbobjs, dist->indexes, "indexes", "%llu", 10);
+  EXPORT_ARRAY(&state, unsigned long long, nbobjs*nbobjs, dist->values, "u64values", "%llu", 10);
+  state.end_object(&state, "distances2");
+}
+
+static void
 hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology)
 {
   struct hwloc_internal_distances_s *dist;
-  for(dist = topology->first_dist; dist; dist = dist->next) {
-    char tmp[255];
-    unsigned nbobjs = dist->nbobjs;
-    struct hwloc__xml_export_state_s state;
-
-    parentstate->new_child(parentstate, &state, "distances2");
-
-    state.new_prop(&state, "type", hwloc_obj_type_string(dist->type));
-    sprintf(tmp, "%u", nbobjs);
-    state.new_prop(&state, "nbobjs", tmp);
-    sprintf(tmp, "%lu", dist->kind);
-    state.new_prop(&state, "kind", tmp);
-    if (dist->name)
-      state.new_prop(&state, "name", dist->name);
-
-    state.new_prop(&state, "indexing",
-		   HWLOC_DIST_TYPE_USE_OS_INDEX(dist->type) ? "os" : "gp");
-    /* TODO don't hardwire 10 below. either snprintf the max to guess it, or just append until the end of the buffer */
-    EXPORT_ARRAY(&state, unsigned long long, nbobjs, dist->indexes, "indexes", "%llu", 10);
-    EXPORT_ARRAY(&state, unsigned long long, nbobjs*nbobjs, dist->values, "u64values", "%llu", 10);
-    state.end_object(&state, "distances2");
-  }
+  for(dist = topology->first_dist; dist; dist = dist->next)
+    hwloc___xml_v2export_distances(parentstate, dist);
 }
 
 void
