@@ -1255,7 +1255,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     }
     else {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: ignoring unknown distance attribute %s\n",
+	fprintf(stderr, "%s: ignoring unknown distances2 attribute %s\n",
 		state->global->msgprefix, attrname);
     }
   }
@@ -1263,7 +1263,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
   /* abort if missing attribute */
   if (!nbobjs || type == HWLOC_OBJ_TYPE_NONE || !indexing || !kind) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: distance2 missing some attributes\n",
+      fprintf(stderr, "%s: distances2 missing some attributes\n",
 	      state->global->msgprefix);
     goto out;
   }
@@ -1272,7 +1272,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
   u64values = malloc(nbobjs*nbobjs*sizeof(*u64values));
   if (!indexes || !u64values) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: failed to allocate distances arrays for %u objects\n",
+      fprintf(stderr, "%s: failed to allocate distances2 arrays for %u objects\n",
 	      state->global->msgprefix, nbobjs);
     goto out_with_arrays;
   }
@@ -1297,7 +1297,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
       is_u64values = 1;
     if (!is_index && !is_u64values) {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: distance2 with unrecognized child %s\n",
+	fprintf(stderr, "%s: distances2 with unrecognized child %s\n",
 		state->global->msgprefix, tag);
       goto out_with_arrays;
     }
@@ -1305,7 +1305,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     if (state->global->next_attr(&childstate, &attrname, &attrvalue) < 0
 	|| strcmp(attrname, "length")) {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: distance2 child must have length attribute\n",
+	fprintf(stderr, "%s: distances2 child must have length attribute\n",
 		state->global->msgprefix);
       goto out_with_arrays;
     }
@@ -1314,7 +1314,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     ret = state->global->get_content(&childstate, &buffer, length);
     if (ret < 0) {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: distance2 child needs content of length %d\n",
+	fprintf(stderr, "%s: distances2 child needs content of length %d\n",
 		state->global->msgprefix, length);
       goto out_with_arrays;
     }
@@ -1324,7 +1324,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
       char *tmp;
       if (nr_indexes >= nbobjs) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: distance2 with more than %u indexes\n",
+	  fprintf(stderr, "%s: distances2 with more than %u indexes\n",
 		  state->global->msgprefix, nbobjs);
 	goto out_with_arrays;
       }
@@ -1347,7 +1347,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
       char *tmp;
       if (nr_u64values >= nbobjs*nbobjs) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: distance2 with more than %u u64values\n",
+	  fprintf(stderr, "%s: distances2 with more than %u u64values\n",
 		  state->global->msgprefix, nbobjs*nbobjs);
 	goto out_with_arrays;
       }
@@ -1371,7 +1371,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     ret = state->global->close_tag(&childstate);
     if (ret < 0) {
       if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: distance2 with more than %u indexes\n",
+	fprintf(stderr, "%s: distances2 with more than %u indexes\n",
 		state->global->msgprefix, nbobjs);
       goto out_with_arrays;
     }
@@ -1381,13 +1381,13 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
 
   if (nr_indexes != nbobjs) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: distance2 with less than %u indexes\n",
+      fprintf(stderr, "%s: distances2 with less than %u indexes\n",
 	      state->global->msgprefix, nbobjs);
     goto out_with_arrays;
   }
   if (nr_u64values != nbobjs*nbobjs) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: distance2 with less than %u u64values\n",
+      fprintf(stderr, "%s: distances2 with less than %u u64values\n",
 	      state->global->msgprefix, nbobjs*nbobjs);
     goto out_with_arrays;
   }
