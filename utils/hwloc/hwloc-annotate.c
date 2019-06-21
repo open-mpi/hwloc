@@ -252,7 +252,8 @@ int main(int argc, char *argv[])
 
 	hwloc_utils_check_api_version(callname);
 
-	putenv((char *) "HWLOC_XML_VERBOSE=1");
+	if (!getenv("HWLOC_XML_VERBOSE"))
+		putenv((char *) "HWLOC_XML_VERBOSE=1");
 
 	while (argc && *argv[0] == '-') {
 		if (!strcmp(argv[0], "--ci"))
