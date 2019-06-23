@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -540,6 +540,9 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 	}
 	hwloc_distances_set(topology, HWLOC_OBJ_NUMANODE, curlgrp, indexes, glob_lgrps, distances, 0 /* OS cannot force */);
 	glob_lgrps = NULL; /* dont free it below */
+      } else {
+	free(distances);
+	free(indexes);
       }
     }
 #endif /* HAVE_DECL_LGRP_LATENCY_COOKIE */
