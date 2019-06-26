@@ -82,7 +82,7 @@ depth 0:           1 Machine (type #0)
       depth 6:     8 Core (type #2)
        depth 7:    32 PU (type #3)
 Special depth -3:  8 NUMANode (type #13)
-Relative latency matrix (kind 5) between 8 NUMANodes (depth -3) by logical indexes:
+Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3) by logical indexes:
   index     0     4     5     6     7     1     2     3
       0    10    40    80    80    80    80    80    80
       4    40    10    80    80    80    80    80    80

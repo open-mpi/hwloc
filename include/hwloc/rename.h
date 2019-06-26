@@ -400,6 +400,7 @@ extern "C" {
 #define hwloc_distances_get HWLOC_NAME(distances_get)
 #define hwloc_distances_get_by_depth HWLOC_NAME(distances_get_by_depth)
 #define hwloc_distances_get_by_type HWLOC_NAME(distances_get_by_type)
+#define hwloc_distances_get_name HWLOC_NAME(distances_get_name)
 #define hwloc_distances_release HWLOC_NAME(distances_release)
 #define hwloc_distances_obj_index HWLOC_NAME(distances_obj_index)
 #define hwloc_distances_obj_pair_values HWLOC_NAME(distances_pair_values)
