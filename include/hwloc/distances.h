@@ -144,6 +144,14 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
   return hwloc_distances_get_by_depth(topology, depth, nr, distances, kind, flags);
 }
 
+/** \brief Get a description of what a distances structure contains.
+ *
+ * For instance "NUMALatency" for hardware-provided NUMA distances (ACPI SLIT),
+ * or NULL if unknown.
+ */
+HWLOC_DECLSPEC const char *
+hwloc_distances_get_name(hwloc_topology_t topology, struct hwloc_distances_s *distances);
+
 /** \brief Release a distance matrix structure previously returned by hwloc_distances_get().
  *
  * \note This function is not required if the structure is removed with hwloc_distances_release_remove().

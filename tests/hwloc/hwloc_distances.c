@@ -52,9 +52,11 @@ static void check_distances(hwloc_topology_t topology, int depth, unsigned expec
   assert(!err);
   printf("distance matrix for depth %d:\n", depth);
   print_distances(distances[0]);
+  assert(!hwloc_distances_get_name(topology, distances[0]));
   hwloc_distances_release(topology, distances[0]);
   if (nr > 1) {
     print_distances(distances[1]);
+    assert(!hwloc_distances_get_name(topology, distances[1]));
     hwloc_distances_release(topology, distances[1]);
   }
 }

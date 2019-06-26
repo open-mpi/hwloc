@@ -225,7 +225,7 @@ Special depth -3:  4 NUMANode (type #13)
 Special depth -4:  2 Bridge (type #14)
 Special depth -5:  1 PCIDev (type #15)
 Special depth -6:  1 OSDev (type #16)
-Relative latency matrix (kind 5) between 4 NUMANodes (depth -3) by logical indexes:
+Relative latency matrix (name NUMALatency kind 5) between 4 NUMANodes (depth -3) by logical indexes:
   index     0     1     2     3
       0    10    20    20    20
       1    20    10    20    20

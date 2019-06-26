@@ -106,7 +106,7 @@ depth 0:           1 Machine (type #0)
       depth 6:     16 Core (type #2)
        depth 7:    16 PU (type #3)
 Special depth -3:  8 NUMANode (type #13)
-Relative latency matrix (kind 5) between 8 NUMANodes (depth -3) by logical indexes:
+Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3) by logical indexes:
   index     0     1     2     3     4     5     6     7
       0    10    20    20    20    20    20    20    20
       1    20    10    20    20    20    20    20    20
@@ -116,7 +116,7 @@ Relative latency matrix (kind 5) between 8 NUMANodes (depth -3) by logical index
       5    20    20    20    20    20    10    20    20
       6    20    20    20    20    20    20    10    20
       7    20    20    20    20    20    20    20    10
-Relative latency matrix (kind 5) between 8 Packages (depth 2) by logical indexes:
+Relative latency matrix (name (null) kind 5) between 8 Packages (depth 2) by logical indexes:
   index     1     0     3     6     4     7     2     5
       1    10    20    40    40    80    80    80    80
       0    20    10    40    40    80    80    80    80
@@ -126,13 +126,13 @@ Relative latency matrix (kind 5) between 8 Packages (depth 2) by logical indexes
       7    80    80    80    80    20    10    40    40
       2    80    80    80    80    40    40    10    20
       5    80    80    80    80    40    40    20    10
-Relative latency matrix (kind 5) between 4 PUs (depth 7) by logical indexes:
+Relative latency matrix (name (null) kind 5) between 4 PUs (depth 7) by logical indexes:
   index     0     1     2     3
       0   145   200   300   400
       1   567   687   457  2300
       2   450  12300    45    67
       3  4600  345600   100   100
-Relative latency matrix (kind 5) between 8 Cores (depth 6) by logical indexes:
+Relative latency matrix (name (null) kind 5) between 8 Cores (depth 6) by logical indexes:
   index     0     1     2     3     4     5     6     7
       0    10    20    40    40    80    80    80    80
       1    20    10    40    40    80    80    80    80

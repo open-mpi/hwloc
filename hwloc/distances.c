@@ -639,6 +639,13 @@ hwloc_distances_release(hwloc_topology_t topology __hwloc_attribute_unused,
   free(cont);
 }
 
+const char *
+hwloc_distances_get_name(hwloc_topology_t topology, struct hwloc_distances_s *distances)
+{
+  struct hwloc_internal_distances_s *dist = hwloc__internal_distances_from_public(topology, distances);
+  return dist ? dist->name : NULL;
+}
+
 static struct hwloc_distances_s *
 hwloc_distances_get_one(hwloc_topology_t topology __hwloc_attribute_unused,
 			struct hwloc_internal_distances_s *dist)
