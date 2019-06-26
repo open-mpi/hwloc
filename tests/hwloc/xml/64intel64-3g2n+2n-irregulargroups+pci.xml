@@ -797,7 +797,7 @@
       </object>
     </object>
   </object>
-  <distances2 type="NUMANode" nbobjs="8" kind="5" indexing="os">
+  <distances2 type="NUMANode" nbobjs="8" kind="5" name="NUMALatency" indexing="os">
     <indexes length="16">0 1 2 3 4 5 6 7 </indexes>
     <u64values length="30">10 50 65 65 65 65 65 65 50 10 </u64values>
     <u64values length="30">65 65 65 65 65 65 65 65 10 50 </u64values>

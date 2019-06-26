@@ -1218,6 +1218,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
   int indexing = 0;
   int os_indexing = 0;
   int gp_indexing = 0;
+  char *name = NULL;
   unsigned long kind = 0;
   unsigned nr_indexes, nr_u64values;
   uint64_t *indexes;
@@ -1244,6 +1245,9 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     }
     else if (!strcmp(attrname, "kind")) {
       kind = strtoul(attrvalue, NULL, 10);
+    }
+    else if (!strcmp(attrname, "name")) {
+      name = attrvalue;
     }
     else {
       if (hwloc__xml_verbose())
@@ -1407,7 +1411,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     }
   }
 
-  hwloc_internal_distances_add_by_index(topology, type, nbobjs, indexes, u64values, kind, 0);
+  hwloc_internal_distances_add_by_index(topology, name, type, nbobjs, indexes, u64values, kind, 0);
 
   /* prevent freeing below */
   indexes = NULL;
@@ -1741,8 +1745,8 @@ done:
 	      i<nbobjs;
 	      i++, node = node->next_cousin)
 	    objs[i] = node;
-hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
-	  hwloc_internal_distances_add(topology, nbobjs, objs, values, v1dist->kind, 0);
+	  hwloc_convert_from_v1dist_floats(topology, nbobjs, v1dist->floats, values);
+	  hwloc_internal_distances_add(topology, NULL, nbobjs, objs, values, v1dist->kind, 0);
 	} else {
 	  free(objs);
 	  free(values);
@@ -2481,6 +2485,8 @@ hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topol
     state.new_prop(&state, "nbobjs", tmp);
     sprintf(tmp, "%lu", dist->kind);
     state.new_prop(&state, "kind", tmp);
+    if (dist->name)
+      state.new_prop(&state, "name", dist->name);
 
     state.new_prop(&state, "indexing",
 		   HWLOC_DIST_TYPE_USE_OS_INDEX(dist->type) ? "os" : "gp");

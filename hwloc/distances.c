@@ -73,6 +73,7 @@ void hwloc_internal_distances_prepare(struct hwloc_topology *topology)
 
 static void hwloc_internal_distances_free(struct hwloc_internal_distances_s *dist)
 {
+  free(dist->name);
   free(dist->indexes);
   free(dist->objs);
   free(dist->values);
@@ -99,6 +100,16 @@ static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct h
   newdist = hwloc_tma_malloc(tma, sizeof(*newdist));
   if (!newdist)
     return -1;
+  if (olddist->name) {
+    newdist->name = hwloc_tma_strdup(tma, olddist->name);
+    if (!newdist->name) {
+      assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
+      hwloc_internal_distances_free(newdist);
+      return -1;
+    }
+  } else {
+    newdist->name = NULL;
+  }
 
   newdist->type = olddist->type;
   newdist->nbobjs = nbobjs;
@@ -233,13 +244,16 @@ hwloc__groups_by_distances(struct hwloc_topology *topology, unsigned nbobjs, str
  * the caller gives us the distances and objs pointers, we'll free them later.
  */
 static int
-hwloc_internal_distances__add(hwloc_topology_t topology,
+hwloc_internal_distances__add(hwloc_topology_t topology, const char *name,
 			      hwloc_obj_type_t type, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *indexes, uint64_t *values,
 			      unsigned long kind)
 {
   struct hwloc_internal_distances_s *dist = calloc(1, sizeof(*dist));
   if (!dist)
     goto err;
+
+  if (name)
+    dist->name = strdup(name); /* ignore failure */
 
   dist->type = type;
   dist->nbobjs = nbobjs;
@@ -294,7 +308,7 @@ hwloc_internal_distances__add(hwloc_topology_t topology,
   return -1;
 }
 
-int hwloc_internal_distances_add_by_index(hwloc_topology_t topology,
+int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name,
 					  hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, uint64_t *values,
 					  unsigned long kind, unsigned long flags)
 {
@@ -311,7 +325,7 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology,
     goto err;
   }
 
-  return hwloc_internal_distances__add(topology, type, nbobjs, NULL, indexes, values, kind);
+  return hwloc_internal_distances__add(topology, name, type, nbobjs, NULL, indexes, values, kind);
 
  err:
   free(indexes);
@@ -325,7 +339,7 @@ hwloc_internal_distances_restrict(hwloc_obj_t *objs,
 				  uint64_t *values,
 				  unsigned nbobjs, unsigned disappeared);
 
-int hwloc_internal_distances_add(hwloc_topology_t topology,
+int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
 				 unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
 				 unsigned long kind, unsigned long flags)
 {
@@ -386,7 +400,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology,
 			       kind, nbaccuracies, accuracies, 1 /* check the first matrice */);
   }
 
-  return hwloc_internal_distances__add(topology, objs[0]->type, nbobjs, objs, NULL, values, kind);
+  return hwloc_internal_distances__add(topology, name, objs[0]->type, nbobjs, objs, NULL, values, kind);
 
  err:
   free(objs);
@@ -450,7 +464,7 @@ int hwloc_distances_add(hwloc_topology_t topology,
 
   memcpy(_objs, objs, nbobjs*sizeof(hwloc_obj_t));
   memcpy(_values, values, nbobjs*nbobjs*sizeof(*_values));
-  err = hwloc_internal_distances_add(topology, nbobjs, _objs, _values, kind, flags);
+  err = hwloc_internal_distances_add(topology, NULL, nbobjs, _objs, _values, kind, flags);
   if (err < 0)
     goto out; /* _objs and _values freed in hwloc_internal_distances_add() */
 

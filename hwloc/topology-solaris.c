@@ -519,7 +519,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstat
             }
             distances[i*curlgrp+j] = (uint64_t) latency;
         }
-	hwloc_internal_distances_add(topology, curlgrp, glob_lgrps, distances,
+	hwloc_internal_distances_add(topology, "NUMA:Solaris", curlgrp, glob_lgrps, distances,
 				     HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
 				     HWLOC_DISTANCES_ADD_FLAG_GROUP);
 	glob_lgrps = NULL; /* dont free it below */

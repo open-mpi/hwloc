@@ -2301,7 +2301,7 @@
       </object>
     </object>
   </object>
-  <distances2 type="NUMANode" nbobjs="24" kind="5" indexing="os">
+  <distances2 type="NUMANode" nbobjs="24" kind="5" name="NUMALatency" indexing="os">
     <indexes length="20">0 1 2 3 4 5 6 7 8 9 </indexes>
     <indexes length="30">10 11 12 13 14 15 16 17 18 19 </indexes>
     <indexes length="12">20 21 22 23 </indexes>
