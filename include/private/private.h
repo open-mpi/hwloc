@@ -130,6 +130,7 @@ struct hwloc_topology {
   int userdata_not_decoded;
 
   struct hwloc_internal_distances_s {
+    char *name; /* FIXME: needs an API to set it from user */
     hwloc_obj_type_t type;
     /* add union hwloc_obj_attr_u if we ever support groups */
     unsigned nbobjs;
@@ -334,8 +335,8 @@ extern void hwloc_internal_distances_prepare(hwloc_topology_t topology);
 extern void hwloc_internal_distances_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_distances_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern void hwloc_internal_distances_refresh(hwloc_topology_t topology);
-extern int hwloc_internal_distances_add(hwloc_topology_t topology, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
-extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name, hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
 extern void hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology);
 
 /* encode src buffer into target buffer.

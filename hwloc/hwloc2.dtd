@@ -51,6 +51,7 @@
 <!ATTLIST distances2 nbobjs CDATA #REQUIRED>
 <!ATTLIST distances2 indexing CDATA #REQUIRED>
 <!ATTLIST distances2 kind CDATA #REQUIRED>
+<!ATTLIST distances2 name CDATA "">
 
 <!ELEMENT indexes (#PCDATA)>
 <!ATTLIST indexes length CDATA #REQUIRED>
