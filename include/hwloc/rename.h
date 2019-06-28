@@ -412,6 +412,7 @@ extern "C" {
 #define hwloc_distances_remove HWLOC_NAME(distances_remove)
 #define hwloc_distances_remove_by_depth HWLOC_NAME(distances_remove_by_depth)
 #define hwloc_distances_remove_by_type HWLOC_NAME(distances_remove_by_type)
+#define hwloc_distances_release_remove HWLOC_NAME(distances_release_remove)
 
 /* diff.h */
 

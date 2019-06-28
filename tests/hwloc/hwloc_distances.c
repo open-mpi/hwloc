@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2017 Inria.  All rights reserved.
+ * Copyright © 2010-2019 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -249,6 +249,19 @@ int main(void)
   assert(nr == 2);
   hwloc_distances_release(topology, distances[0]);
   hwloc_distances_release(topology, distances[1]);
+
+  /* removing one PU distance */
+  printf("Removing the 2nd PU distances\n");
+  nr = 2;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_PU, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == 2);
+  hwloc_distances_release(topology, distances[0]);
+  hwloc_distances_release_remove(topology, distances[1]);
+  nr = 0;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_PU, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == 1);
 
   /* remove distances */
   printf("Removing distances\n");

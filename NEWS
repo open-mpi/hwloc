@@ -44,6 +44,7 @@ Version 2.1.0
       structure.
   + Group objects have a new "dont_merge" attribute to prevent them from
     being automatically merged with identical parent or children.
+  + Add hwloc_distances_release_remove()
 * Backends
   + Add support for Linux 5.3 new sysfs cpu topology files with Die information.
   + Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
