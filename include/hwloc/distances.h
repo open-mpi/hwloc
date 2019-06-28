@@ -144,7 +144,10 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
   return hwloc_distances_get_by_depth(topology, depth, nr, distances, kind, flags);
 }
 
-/** \brief Release a distance matrix structure previously returned by hwloc_distances_get(). */
+/** \brief Release a distance matrix structure previously returned by hwloc_distances_get().
+ *
+ * \note This function is not required if the structure is removed with hwloc_distances_release_remove().
+ */
 HWLOC_DECLSPEC void
 hwloc_distances_release(hwloc_topology_t topology, struct hwloc_distances_s *distances);
 
@@ -259,6 +262,12 @@ hwloc_distances_remove_by_type(hwloc_topology_t topology, hwloc_obj_type_t type)
     return 0;
   return hwloc_distances_remove_by_depth(topology, depth);
 }
+
+/** \brief Release and remove the given distance matrice from the topology.
+ *
+ * This function includes a call to hwloc_distances_release().
+ */
+HWLOC_DECLSPEC int hwloc_distances_release_remove(hwloc_topology_t topology, struct hwloc_distances_s *distances);
 
 /** @} */
 

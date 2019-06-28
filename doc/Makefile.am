@@ -1,4 +1,4 @@
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009-2013 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -653,7 +653,8 @@ man3_helper_distances_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_distances_add.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_type.3
+        $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_release_remove.3
 
 man3_helper_advanced_iodir = $(man3dir)
 man3_helper_advanced_io_DATA = \

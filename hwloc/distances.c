@@ -14,6 +14,9 @@
 #include <float.h>
 #include <math.h>
 
+static struct hwloc_internal_distances_s *
+hwloc__internal_distances_from_public(hwloc_topology_t topology, struct hwloc_distances_s *distances);
+
 /******************************************************
  * Global init, prepare, destroy, dup
  */
@@ -195,6 +198,27 @@ int hwloc_distances_remove_by_depth(hwloc_topology_t topology, int depth)
     }
   }
 
+  return 0;
+}
+
+int hwloc_distances_release_remove(hwloc_topology_t topology,
+				   struct hwloc_distances_s *distances)
+{
+  struct hwloc_internal_distances_s *dist = hwloc__internal_distances_from_public(topology, distances);
+  if (!dist) {
+    errno = EINVAL;
+    return -1;
+  }
+  if (dist->prev)
+    dist->prev->next = dist->next;
+  else
+    topology->first_dist = dist->next;
+  if (dist->next)
+    dist->next->prev = dist->prev;
+  else
+    topology->last_dist = dist->prev;
+  hwloc_internal_distances_free(dist);
+  hwloc_distances_release(topology, distances);
   return 0;
 }
 
@@ -579,6 +603,17 @@ struct hwloc_distances_container_s {
 
 #define HWLOC_DISTANCES_CONTAINER_OFFSET ((char*)&((struct hwloc_distances_container_s*)NULL)->distances - (char*)NULL)
 #define HWLOC_DISTANCES_CONTAINER(_d) (struct hwloc_distances_container_s *) ( ((char*)_d) - HWLOC_DISTANCES_CONTAINER_OFFSET )
+
+static struct hwloc_internal_distances_s *
+hwloc__internal_distances_from_public(hwloc_topology_t topology, struct hwloc_distances_s *distances)
+{
+  struct hwloc_distances_container_s *cont = HWLOC_DISTANCES_CONTAINER(distances);
+  struct hwloc_internal_distances_s *dist;
+  for(dist = topology->first_dist; dist; dist = dist->next)
+    if (dist->id == cont->id)
+      return dist;
+  return NULL;
+}
 
 void
 hwloc_distances_release(hwloc_topology_t topology __hwloc_attribute_unused,
