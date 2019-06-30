@@ -136,18 +136,10 @@ hwloc_distances_get_by_depth(hwloc_topology_t topology, int depth,
  *
  * Identical to hwloc_distances_get() with the additional \p type filter.
  */
-static __hwloc_inline int
+HWLOC_DECLSPEC int
 hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 			    unsigned *nr, struct hwloc_distances_s **distances,
-			    unsigned long kind, unsigned long flags)
-{
-  int depth = hwloc_get_type_depth(topology, type);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-    *nr = 0;
-    return 0;
-  }
-  return hwloc_distances_get_by_depth(topology, depth, nr, distances, kind, flags);
-}
+			    unsigned long kind, unsigned long flags);
 
 /** \brief Retrieve a distance matrix with the given name.
  *
