@@ -827,7 +827,7 @@ hwloc_distances_get_by_depth(hwloc_topology_t topology, int depth,
     return -1;
   }
 
-  /* switch back to types since we don't support groups for now */
+  /* FIXME: passing the depth of a group level may return group distances at a different depth */
   type = hwloc_get_depth_type(topology, depth);
   if (type == (hwloc_obj_type_t)-1) {
     errno = EINVAL;
@@ -848,6 +848,19 @@ hwloc_distances_get_by_name(hwloc_topology_t topology, const char *name,
   }
 
   return hwloc__distances_get(topology, name, HWLOC_OBJ_TYPE_NONE, nrp, distancesp, HWLOC_DISTANCES_KIND_ALL, flags);
+}
+
+int
+hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
+			    unsigned *nrp, struct hwloc_distances_s **distancesp,
+			    unsigned long kind, unsigned long flags)
+{
+  if (flags || !topology->is_loaded) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  return hwloc__distances_get(topology, NULL, type, nrp, distancesp, kind, flags);
 }
 
 /******************************************************
