@@ -684,7 +684,7 @@ hwloc_distances_get_one(hwloc_topology_t topology __hwloc_attribute_unused,
 
 static int
 hwloc__distances_get(hwloc_topology_t topology,
-		     hwloc_obj_type_t type,
+		     const char *name, hwloc_obj_type_t type,
 		     unsigned *nrp, struct hwloc_distances_s **distancesp,
 		     unsigned long kind, unsigned long flags __hwloc_attribute_unused)
 {
@@ -714,6 +714,9 @@ hwloc__distances_get(hwloc_topology_t topology,
   for(dist = topology->first_dist; dist; dist = dist->next) {
     unsigned long kind_from = kind & HWLOC_DISTANCES_KIND_FROM_ALL;
     unsigned long kind_means = kind & HWLOC_DISTANCES_KIND_MEANS_ALL;
+
+    if (name && (!dist->name || strcmp(name, dist->name)))
+      continue;
 
     if (type != HWLOC_OBJ_TYPE_NONE && type != dist->type)
       continue;
@@ -753,7 +756,7 @@ hwloc_distances_get(hwloc_topology_t topology,
     return -1;
   }
 
-  return hwloc__distances_get(topology, HWLOC_OBJ_TYPE_NONE, nrp, distancesp, kind, flags);
+  return hwloc__distances_get(topology, NULL, HWLOC_OBJ_TYPE_NONE, nrp, distancesp, kind, flags);
 }
 
 int
@@ -775,7 +778,20 @@ hwloc_distances_get_by_depth(hwloc_topology_t topology, int depth,
     return -1;
   }
 
-  return hwloc__distances_get(topology, type, nrp, distancesp, kind, flags);
+  return hwloc__distances_get(topology, NULL, type, nrp, distancesp, kind, flags);
+}
+
+int
+hwloc_distances_get_by_name(hwloc_topology_t topology, const char *name,
+			    unsigned *nrp, struct hwloc_distances_s **distancesp,
+			    unsigned long flags)
+{
+  if (flags || !topology->is_loaded) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  return hwloc__distances_get(topology, name, HWLOC_OBJ_TYPE_NONE, nrp, distancesp, HWLOC_DISTANCES_KIND_ALL, flags);
 }
 
 /******************************************************

@@ -252,6 +252,16 @@ int main(void)
   hwloc_distances_release(topology, distances[0]);
   hwloc_distances_release(topology, distances[1]);
 
+  /* check distances by name */
+  nr = 0;
+  err = hwloc_distances_get_by_name(topology, NULL, &nr, distances, 0);
+  assert(!err);
+  assert(nr == 3);
+  nr = 0;
+  err = hwloc_distances_get_by_name(topology, "nomatch", &nr, distances, 0);
+  assert(!err);
+  assert(nr == 0);
+
   /* removing one PU distance */
   printf("Removing the 2nd PU distances\n");
   nr = 2;
