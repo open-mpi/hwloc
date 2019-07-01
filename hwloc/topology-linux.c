@@ -4175,6 +4175,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    }
 	  }
 	}
+	closedir(dir);
       }
 
       topology->support.discovery->numa = 1;
