@@ -237,7 +237,7 @@ HWLOC_DECLSPEC int hwloc_distances_add(hwloc_topology_t topology,
  * gathered through the OS.
  *
  * If these distances were used to group objects, these additional
- *Group objects are not removed from the topology.
+ * Group objects are not removed from the topology.
  */
 HWLOC_DECLSPEC int hwloc_distances_remove(hwloc_topology_t topology);
 
