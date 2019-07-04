@@ -2571,60 +2571,6 @@ embedding hwloc in another project, see \ref embed for details.
 
 
 \htmlonly
-</div><div class="section" id="plugins_add">
-\endhtmlonly
-\section plugins_adding Adding new discovery components and plugins
-
-The types and functions cited below are declared in the hwloc/plugins.h header.
-Components are supposed to only use hwloc public headers (hwloc.h and
-anything under the <tt>include/hwloc</tt> subdirectory) and nothing from the
-<tt>include/private</tt> subdirectory in the source tree.
-
-\subsection plugins_disc_basic Basics of discovery components
-
-Each discovery component is defined by a <tt>::hwloc_disc_component</tt>
-structure which contains an <tt>instantiate()</tt> callback.
-This function is invoked when this component is actually used by a topology.
-It fills a new <tt>::hwloc_backend</tt> structure that usually contains
-a <tt>discover()</tt> callback taking care of the actual topology discovery.
-
-\note If two discovery components have the same name, only the highest
-priority one is actually made available.
-This offers a way for third-party plugins to override existing components.
-
-\subsection plugins_disc_register Registering a new discovery component
-
-Registering components to the hwloc core relies on a <tt>::hwloc_component</tt> structure.
-Its <tt>data</tt> field points to the previously defined <tt>::hwloc_disc_component</tt>
-structure while its <tt>type</tt> should be ::HWLOC_COMPONENT_TYPE_DISC.
-This structure should be named <tt>hwloc_&lt;name&gt;_component</tt>.
-
-The configure script should be modified to add <tt>&lt;name&gt;</tt>
-to its <tt>hwloc_components</tt> shell variable so that the component
-is actually available.
-
-\note The symbol name of the <tt>::hwloc_component</tt> structure
-is independent of the name of the discovery component mentioned
-in the previous section.
-
-When the component is statically built inside the hwloc library,
-the symbol <tt>hwloc_&lt;name&gt;_component</tt> is added by configure
-to the <tt>src/static-components.h</tt>.
-The core then registers all components listed in this file.
-
-If the new component may be built as a plugin, the configure script
-should also define the shell variable
-<tt>hwloc_&lt;name&gt;_component_maybeplugin=1</tt>.
-When the configure script actually enables the component as a plugin,
-it will set the variable <tt>hwloc_&lt;name&gt;_component</tt>
-to <tt>plugin</tt>.
-The build system may then use this variable to change the way the component is built.
-It should create a <tt>hwloc_&lt;name&gt;.so</tt> shared object.
-All these files are loaded in alphabetic order, and the components
-they contain are registered to the hwloc core.
-
-
-\htmlonly
 </div><div class="section" id="plugins_list">
 \endhtmlonly
 \section plugins_list Existing components and plugins
