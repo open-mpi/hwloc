@@ -521,10 +521,12 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	  curenv[5] = 'i';
 	  curenv[6] = 'o';
 	  curenv[7] = *HWLOC_COMPONENT_SEPS;
+	  s = 7;
 	} else if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, "linuxpci", 8) && s == 9) {
 	  curenv[6] = 'i';
 	  curenv[7] = 'o';
 	  curenv[8] = *HWLOC_COMPONENT_SEPS;
+	  s = 8;
 	  /* skip this name, it's a negated one */
 	  goto nextname;
 	}
