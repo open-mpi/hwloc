@@ -436,14 +436,37 @@ hwloc_disc_component_find(const char *name)
   return NULL;
 }
 
+static int
+hwloc_disc_component_blacklist_one(struct hwloc_topology *topology,
+				   const char *name)
+{
+  struct hwloc_topology_forced_component_s *blacklisted;
+  struct hwloc_disc_component *comp;
+
+  /* replace linuxpci with linuxio for backward compatibility with pre-v2.0 */
+  if (!strcmp(name, "linuxpci"))
+    name = "linuxio";
+
+  comp = hwloc_disc_component_find(name);
+  if (!comp) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  blacklisted = realloc(topology->blacklisted_components, (topology->nr_blacklisted_components+1)*sizeof(*blacklisted));
+  if (!blacklisted)
+    return -1;
+
+  blacklisted[topology->nr_blacklisted_components++].component = comp;
+  topology->blacklisted_components = blacklisted;
+  return 0;
+}
+
 int
 hwloc_topology_set_components(struct hwloc_topology *topology,
 			      unsigned long flags,
 			      const char *name)
 {
-  struct hwloc_disc_component *comp;
-  struct hwloc_topology_forced_component_s *blacklisted;
-
   if (topology->is_loaded) {
     errno = EBUSY;
     return -1;
@@ -460,19 +483,7 @@ hwloc_topology_set_components(struct hwloc_topology *topology,
     return -1;
   }
 
-  comp = hwloc_disc_component_find(name);
-  if (!comp) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  blacklisted = realloc(topology->blacklisted_components, (topology->nr_blacklisted_components+1)*sizeof(*blacklisted));
-  if (!blacklisted)
-    return -1;
-
-  blacklisted[topology->nr_blacklisted_components++].component = comp;
-  topology->blacklisted_components = blacklisted;
-  return 0;
+  return hwloc_disc_component_blacklist_one(topology, name);
 }
 
 /* used by set_xml(), set_synthetic(), ... environment variables, ... to force the first backend */
@@ -546,6 +557,42 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   _env = getenv("HWLOC_COMPONENTS");
   env = _env ? strdup(_env) : NULL;
 
+  /* blacklist disabled components */
+  if (env) {
+    char *curenv = env;
+    size_t s;
+
+    while (*curenv) {
+      s = strcspn(curenv, HWLOC_COMPONENT_SEPS);
+      if (s) {
+	char c;
+
+	if (curenv[0] != HWLOC_COMPONENT_EXCLUDE_CHAR)
+	  goto nextname;
+
+	/* save the last char and replace with \0 */
+	c = curenv[s];
+	curenv[s] = '\0';
+
+	/* blacklist it, and just ignore failures to allocate */
+	hwloc_disc_component_blacklist_one(topology, curenv+1);
+
+	/* remove that blacklisted name from the string */
+	for(i=0; i<s; i++)
+	  curenv[i] = *HWLOC_COMPONENT_SEPS;
+
+	/* restore chars (the second loop below needs env to be unmodified) */
+	curenv[s] = c;
+      }
+
+    nextname:
+      curenv += s;
+      if (*curenv)
+	/* Skip comma */
+	curenv++;
+    }
+  }
+
   /* enable explicitly listed components */
   if (env) {
     char *curenv = env;
@@ -562,17 +609,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	  curenv[6] = 'o';
 	  curenv[7] = *HWLOC_COMPONENT_SEPS;
 	  s = 7;
-	} else if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, "linuxpci", 8) && s == 9) {
-	  curenv[6] = 'i';
-	  curenv[7] = 'o';
-	  curenv[8] = *HWLOC_COMPONENT_SEPS;
-	  s = 8;
-	  /* skip this name, it's a negated one */
-	  goto nextname;
 	}
-
-	if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR)
-	  goto nextname;
 
 	if (!strncmp(curenv, HWLOC_COMPONENT_STOP_NAME, s)) {
 	  tryall = 0;
@@ -594,7 +631,6 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	curenv[s] = c;
       }
 
-nextname:
       curenv += s;
       if (*curenv)
 	/* Skip comma */
@@ -614,27 +650,11 @@ nextname:
       for(i=0; i<topology->nr_blacklisted_components; i++)
 	if (comp == topology->blacklisted_components[i].component) {
 	    if (hwloc_components_verbose)
-	      fprintf(stderr, "Excluding %s discovery component `%s' on application request\n",
+	      fprintf(stderr, "Excluding blacklisted %s discovery component `%s'\n",
 	    hwloc_disc_component_type_string(comp->type), comp->name);
 	    goto nextcomp;
 	}
-      /* check if this component was explicitly excluded in env */
-      if (env) {
-	char *curenv = env;
-	while (*curenv) {
-	  size_t s = strcspn(curenv, HWLOC_COMPONENT_SEPS);
-	  if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, comp->name, s-1) && strlen(comp->name) == s-1) {
-	    if (hwloc_components_verbose)
-	      fprintf(stderr, "Excluding %s discovery component `%s' because of HWLOC_COMPONENTS environment variable\n",
-	    hwloc_disc_component_type_string(comp->type), comp->name);
-	    goto nextcomp;
-	  }
-	  curenv += s;
-	  if (*curenv)
-	    /* Skip comma */
-	    curenv++;
-	}
-      }
+
       hwloc_disc_component_try_enable(topology, comp, 0 /* defaults, not envvar forced */);
 nextcomp:
       comp = comp->next;
