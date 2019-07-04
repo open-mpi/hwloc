@@ -425,11 +425,11 @@ hwloc_topology_components_init(struct hwloc_topology *topology)
 }
 
 static struct hwloc_disc_component *
-hwloc_disc_component_find(const char *name /* name of NULL if any */)
+hwloc_disc_component_find(const char *name)
 {
   struct hwloc_disc_component *comp = hwloc_disc_components;
   while (NULL != comp) {
-    if (NULL == name || !strcmp(name, comp->name))
+    if (!strcmp(name, comp->name))
       return comp;
     comp = comp->next;
   }
