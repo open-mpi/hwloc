@@ -3150,18 +3150,11 @@ void hwloc_alloc_root_sets(hwloc_obj_t root)
 
 /* Main discovery loop */
 static int
-hwloc_discover(struct hwloc_topology *topology)
+hwloc_discover(struct hwloc_topology *topology,
+	       struct hwloc_disc_status *dstatus)
 {
   struct hwloc_backend *backend;
-  struct hwloc_disc_status dstatus;
   const char *env;
-
-  dstatus.flags = 0; /* did nothing yet */
-
-  env = getenv("HWLOC_ALLOW");
-  if (env && !strcmp(env, "all"))
-    /* don't retrieve the sets of allowed resources */
-    dstatus.flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
 
   topology->modified = 0; /* no need to reconnect yet */
 
@@ -3214,7 +3207,7 @@ hwloc_discover(struct hwloc_topology *topology)
       goto next_cpubackend;
     if (!backend->discover)
       goto next_cpubackend;
-    backend->discover(backend, &dstatus);
+    backend->discover(backend, dstatus);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_cpubackend:
@@ -3234,13 +3227,13 @@ next_cpubackend:
       topology->binding_hooks.get_allowed_resources
       && topology->is_thissystem
       /* check whether it has been done already */
-      && !(dstatus.flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)
+      && !(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)
       /* check whether it was explicitly requested */
       && ((topology->flags & HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES) != 0
 	  || ((env = getenv("HWLOC_THISSYSTEM_ALLOWED_RESOURCES")) != NULL && atoi(env)))) {
     /* OK, get the sets of locally allowed resources */
     topology->binding_hooks.get_allowed_resources(topology);
-    dstatus.flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
+    dstatus->flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
   }
 
   /* If there's no NUMA node, add one with all the memory.
@@ -3331,7 +3324,7 @@ next_cpubackend:
       goto next_noncpubackend;
     if (!backend->discover)
       goto next_noncpubackend;
-    backend->discover(backend, &dstatus);
+    backend->discover(backend, dstatus);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
 
 next_noncpubackend:
@@ -3768,6 +3761,8 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 int
 hwloc_topology_load (struct hwloc_topology *topology)
 {
+  struct hwloc_disc_status dstatus;
+  const char *env;
   int err;
 
   if (topology->is_loaded) {
@@ -3823,6 +3818,13 @@ hwloc_topology_load (struct hwloc_topology *topology)
     }
   }
 
+  dstatus.flags = 0; /* did nothing yet */
+
+  env = getenv("HWLOC_ALLOW");
+  if (env && !strcmp(env, "all"))
+    /* don't retrieve the sets of allowed resources */
+    dstatus.flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
+
   /* instantiate all possible other backends now */
   hwloc_disc_components_enable_others(topology);
   /* now that backends are enabled, update the thissystem flag and some callbacks */
@@ -3837,7 +3839,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   hwloc_pci_discovery_prepare(topology);
 
   /* actual topology discovery */
-  err = hwloc_discover(topology);
+  err = hwloc_discover(topology, &dstatus);
   if (err < 0)
     goto out;
 
