@@ -501,7 +501,7 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
     return -1;
   }
 
-  backend = comp->instantiate(topology, comp, data1, data2, data3);
+  backend = comp->instantiate(topology, comp, 0U, data1, data2, data3);
   if (backend) {
     backend->envvar_forced = envvar_forced;
     if (topology->backends)
@@ -528,7 +528,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
     return -1;
   }
 
-  backend = comp->instantiate(topology, comp, NULL, NULL, NULL);
+  backend = comp->instantiate(topology, comp, topology->backend_excluded_phases, NULL, NULL, NULL);
   if (!backend) {
     if (hwloc_components_verbose || envvar_forced)
       fprintf(stderr, "Failed to instantiate discovery component `%s'\n", comp->name);

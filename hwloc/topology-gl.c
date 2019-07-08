@@ -146,6 +146,7 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 static struct hwloc_backend *
 hwloc_gl_component_instantiate(struct hwloc_topology *topology,
 			       struct hwloc_disc_component *component,
+			       unsigned excluded_phases __hwloc_attribute_unused,
 			       const void *_data1 __hwloc_attribute_unused,
 			       const void *_data2 __hwloc_attribute_unused,
 			       const void *_data3 __hwloc_attribute_unused)

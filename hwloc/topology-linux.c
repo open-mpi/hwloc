@@ -5502,6 +5502,7 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
 static struct hwloc_backend *
 hwloc_linux_component_instantiate(struct hwloc_topology *topology,
 				  struct hwloc_disc_component *component,
+				  unsigned excluded_phases __hwloc_attribute_unused,
 				  const void *_data1 __hwloc_attribute_unused,
 				  const void *_data2 __hwloc_attribute_unused,
 				  const void *_data3 __hwloc_attribute_unused)
@@ -6936,6 +6937,7 @@ hwloc_look_linuxfs_io(struct hwloc_backend *backend, struct hwloc_disc_status *d
 static struct hwloc_backend *
 hwloc_linuxio_component_instantiate(struct hwloc_topology *topology,
 				    struct hwloc_disc_component *component,
+				    unsigned excluded_phases __hwloc_attribute_unused,
 				    const void *_data1 __hwloc_attribute_unused,
 				    const void *_data2 __hwloc_attribute_unused,
 				    const void *_data3 __hwloc_attribute_unused)
