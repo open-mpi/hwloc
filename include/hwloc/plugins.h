@@ -55,7 +55,7 @@ struct hwloc_disc_component {
   /** \brief Instantiate callback to create a backend from the component.
    * Parameters data1, data2, data3 are NULL except for components
    * that have special enabling routines such as hwloc_topology_set_xml(). */
-  struct hwloc_backend * (*instantiate)(struct hwloc_topology *topology, struct hwloc_disc_component *component, const void *data1, const void *data2, const void *data3);
+  struct hwloc_backend * (*instantiate)(struct hwloc_topology *topology, struct hwloc_disc_component *component, unsigned excluded_phases, const void *data1, const void *data2, const void *data3);
 
   /** \brief Component priority.
    * Used to sort topology->components, higher priority first.

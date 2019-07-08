@@ -196,6 +196,7 @@ hwloc_set_netbsd_hooks(struct hwloc_binding_hooks *hooks,
 static struct hwloc_backend *
 hwloc_netbsd_component_instantiate(struct hwloc_topology *topology,
 				   struct hwloc_disc_component *component,
+				   unsigned excluded_phases __hwloc_attribute_unused,
 				   const void *_data1 __hwloc_attribute_unused,
 				   const void *_data2 __hwloc_attribute_unused,
 				   const void *_data3 __hwloc_attribute_unused)
