@@ -353,6 +353,7 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char 
  err:
   free(indexes);
   free(values);
+  free(different_types);
   return -1;
 }
 

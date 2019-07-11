@@ -1445,13 +1445,16 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
   /* prevent freeing below */
   indexes = NULL;
   u64values = NULL;
+  different_types = NULL;
 
  out_ignore:
+  free(different_types);
   free(indexes);
   free(u64values);
   return state->global->close_tag(state);
 
  out_with_arrays:
+  free(different_types);
   free(indexes);
   free(u64values);
  out:
