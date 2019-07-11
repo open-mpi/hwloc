@@ -2365,7 +2365,7 @@ static unsigned
 hwloc__xml_v1export_object_list_numanodes(hwloc_obj_t obj, hwloc_obj_t *first_p, hwloc_obj_t **nodes_p)
 {
   hwloc_obj_t *nodes, cur;
-  unsigned nr;
+  int nr;
 
   if (!obj->memory_first_child) {
     *first_p = NULL;
