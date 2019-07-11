@@ -4207,6 +4207,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  hwloc_linux_knl_numa_quirk(topology, data, nodes, nbnodes, distances, &failednodes);
 	  free(distances);
 	  free(nodes);
+	  free(trees);
 	  goto out;
 	}
       }
