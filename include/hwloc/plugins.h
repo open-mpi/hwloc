@@ -151,6 +151,11 @@ struct hwloc_disc_status {
    */
   hwloc_disc_phase_t phase;
 
+  /** \brief Dynamically excluded phases.
+   * If a component decides during discovery that some phases are no longer needed.
+   */
+  unsigned excluded_phases;
+
   /** \brief OR'ed set of hwloc_disc_status_flag_e */
   unsigned long flags;
 };

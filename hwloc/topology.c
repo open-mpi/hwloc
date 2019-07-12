@@ -3156,6 +3156,8 @@ hwloc_discover_by_phase(struct hwloc_topology *topology,
   struct hwloc_backend *backend;
   hwloc_debug("%s phase discovery...\n", phasename);
   for(backend = topology->backends; backend; backend = backend->next) {
+    if (dstatus->phase & dstatus->excluded_phases)
+      break;
     if (!(backend->phases & dstatus->phase))
       continue;
     if (!backend->discover)
@@ -3858,6 +3860,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
     }
   }
 
+  dstatus.excluded_phases = 0;
   dstatus.flags = 0; /* did nothing yet */
 
   env = getenv("HWLOC_ALLOW");
