@@ -132,6 +132,10 @@ struct hwloc_topology {
   struct hwloc_internal_distances_s {
     char *name; /* FIXME: needs an API to set it from user */
 
+    unsigned id; /* to match the container id field of public distances structure
+		  * not exported to XML, regenerated during _add()
+		  */
+
     /* if all objects have the same type, different_types is NULL and unique_type is valid.
      * otherwise unique_type is HWLOC_OBJ_TYPE_NONE and different_types contains individual objects types.
      */
@@ -153,7 +157,6 @@ struct hwloc_topology {
     hwloc_obj_t *objs; /* array of objects */
     int objs_are_valid; /* set to 1 if the array objs is still valid, 0 if needs refresh */
 
-    unsigned id; /* to match the container id field of public distances structure */
     struct hwloc_internal_distances_s *prev, *next;
   } *first_dist, *last_dist;
   unsigned next_dist_id;
