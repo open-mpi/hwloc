@@ -81,7 +81,8 @@ enum hwloc_utils_input_format {
   HWLOC_UTILS_INPUT_XML,
   HWLOC_UTILS_INPUT_FSROOT,
   HWLOC_UTILS_INPUT_SYNTHETIC,
-  HWLOC_UTILS_INPUT_CPUID
+  HWLOC_UTILS_INPUT_CPUID,
+  HWLOC_UTILS_INPUT_SHMEM
 };
 
 static __hwloc_inline enum hwloc_utils_input_format
@@ -93,6 +94,8 @@ hwloc_utils_parse_input_format(const char *name, const char *callname)
     return HWLOC_UTILS_INPUT_XML;
   else if (!hwloc_strncasecmp(name, "fsroot", 1))
     return HWLOC_UTILS_INPUT_FSROOT;
+  else if (!hwloc_strncasecmp(name, "shmem", 5))
+    return HWLOC_UTILS_INPUT_SHMEM;
   else if (!hwloc_strncasecmp(name, "synthetic", 1))
     return HWLOC_UTILS_INPUT_SYNTHETIC;
   else if (!hwloc_strncasecmp(name, "cpuid", 1))
@@ -177,6 +180,12 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
     return HWLOC_UTILS_INPUT_SYNTHETIC;
   }
   if (S_ISREG(inputst.st_mode)) {
+    size_t len = strlen(input);
+    if (len >= 6 && !strcmp(input+len-6, ".shmem")) {
+      if (verbose > 0)
+	printf("assuming `%s' is a shmem topology file\n", input);
+      return HWLOC_UTILS_INPUT_SHMEM;
+    }
     if (verbose > 0)
       printf("assuming `%s' is a XML file\n", input);
     return HWLOC_UTILS_INPUT_XML;
@@ -283,6 +292,9 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
       perror("Setting synthetic topology description");
       return EXIT_FAILURE;
     }
+    break;
+
+  case HWLOC_UTILS_INPUT_SHMEM:
     break;
 
   case HWLOC_UTILS_INPUT_DEFAULT:
@@ -436,6 +448,22 @@ hwloc_utils_userdata_export_cb(void *reserved, hwloc_topology_t topology, hwloc_
       hwloc_export_obj_userdata(reserved, topology, obj, u->name, u->buffer, u->length);
     u = u->next;
   }
+}
+
+/* to be called when importing from shmem with non-NULL userdata pointing to stuff in the other process */
+static __hwloc_inline void
+hwloc_utils_userdata_clear_recursive(hwloc_obj_t obj)
+{
+  hwloc_obj_t child;
+  obj->userdata= NULL;
+  for_each_child(child, obj)
+    hwloc_utils_userdata_clear_recursive(child);
+  for_each_memory_child(child, obj)
+    hwloc_utils_userdata_clear_recursive(child);
+  for_each_io_child(child, obj)
+    hwloc_utils_userdata_clear_recursive(child);
+  for_each_misc_child(child, obj)
+    hwloc_utils_userdata_clear_recursive(child);
 }
 
 /* must be called once the caller has removed its own userdata */
