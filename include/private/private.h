@@ -40,7 +40,7 @@
 #endif
 #include <string.h>
 
-#define HWLOC_TOPOLOGY_ABI 0x20200 /* version of the layout of struct topology */
+#define HWLOC_TOPOLOGY_ABI 0x20100 /* version of the layout of struct topology */
 
 /*****************************************************
  * WARNING:
