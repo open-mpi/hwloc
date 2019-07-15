@@ -153,9 +153,11 @@ struct hwloc_topology {
 		       */
     unsigned long kind;
 
+#define HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID (1U<<0) /* if the objs array is valid below */
+    unsigned iflags;
+
     /* objects are currently stored in physical_index order */
     hwloc_obj_t *objs; /* array of objects */
-    int objs_are_valid; /* set to 1 if the array objs is still valid, 0 if needs refresh */
 
     struct hwloc_internal_distances_s *prev, *next;
   } *first_dist, *last_dist;
