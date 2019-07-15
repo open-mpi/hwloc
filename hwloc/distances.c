@@ -129,7 +129,7 @@ static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct h
 
   newdist->indexes = hwloc_tma_malloc(tma, nbobjs * sizeof(*newdist->indexes));
   newdist->objs = hwloc_tma_calloc(tma, nbobjs * sizeof(*newdist->objs));
-  newdist->objs_are_valid = 0;
+  newdist->iflags = olddist->iflags & ~HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID; /* must be revalidated after dup() */
   newdist->values = hwloc_tma_malloc(tma, nbobjs*nbobjs * sizeof(*newdist->values));
   if (!newdist->indexes || !newdist->objs || !newdist->values) {
     assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
@@ -258,7 +258,7 @@ static int
 hwloc_internal_distances__add(hwloc_topology_t topology, const char *name,
 			      hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types,
 			      unsigned nbobjs, hwloc_obj_t *objs, uint64_t *indexes, uint64_t *values,
-			      unsigned long kind)
+			      unsigned long kind, unsigned iflags)
 {
   struct hwloc_internal_distances_s *dist;
 
@@ -280,6 +280,9 @@ hwloc_internal_distances__add(hwloc_topology_t topology, const char *name,
   dist->different_types = different_types;
   dist->nbobjs = nbobjs;
   dist->kind = kind;
+  dist->iflags = iflags;
+
+  assert(!!(iflags & HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID) == !!objs);
 
   if (!objs) {
     assert(indexes);
@@ -288,14 +291,12 @@ hwloc_internal_distances__add(hwloc_topology_t topology, const char *name,
     dist->objs = calloc(nbobjs, sizeof(hwloc_obj_t));
     if (!dist->objs)
       goto err_with_dist;
-    dist->objs_are_valid = 0;
 
   } else {
     unsigned i;
     assert(!indexes);
     /* we only have objs, generate the indexes arrays so that we can refresh objs later */
     dist->objs = objs;
-    dist->objs_are_valid = 1;
     dist->indexes = malloc(nbobjs * sizeof(*dist->indexes));
     if (!dist->indexes)
       goto err_with_dist;
@@ -335,6 +336,8 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char 
 					  hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values,
 					  unsigned long kind, unsigned long flags)
 {
+  unsigned iflags = 0; /* objs not valid */
+
   if (nbobjs < 2) {
     errno = EINVAL;
     goto err;
@@ -348,7 +351,7 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char 
     goto err;
   }
 
-  return hwloc_internal_distances__add(topology, name, unique_type, different_types, nbobjs, NULL, indexes, values, kind);
+  return hwloc_internal_distances__add(topology, name, unique_type, different_types, nbobjs, NULL, indexes, values, kind, iflags);
 
  err:
   free(indexes);
@@ -369,6 +372,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
 {
   hwloc_obj_type_t unique_type, *different_types;
   unsigned i, disappeared = 0;
+  unsigned iflags = HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID;
 
   if (nbobjs < 2) {
     errno = EINVAL;
@@ -444,7 +448,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
 			       kind, nbaccuracies, accuracies, 1 /* check the first matrice */);
   }
 
-  return hwloc_internal_distances__add(topology, name, unique_type, different_types, nbobjs, objs, NULL, values, kind);
+  return hwloc_internal_distances__add(topology, name, unique_type, different_types, nbobjs, objs, NULL, values, kind, iflags);
 
  err:
   free(objs);
@@ -590,7 +594,7 @@ hwloc_internal_distances_refresh_one(hwloc_topology_t topology,
   unsigned disappeared = 0;
   unsigned i;
 
-  if (dist->objs_are_valid)
+  if (dist->iflags & HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID)
     return 0;
 
   for(i=0; i<nbobjs; i++) {
@@ -622,7 +626,7 @@ hwloc_internal_distances_refresh_one(hwloc_topology_t topology,
     dist->nbobjs -= disappeared;
   }
 
-  dist->objs_are_valid = 1;
+  dist->iflags |= HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID;
   return 0;
 }
 
@@ -656,7 +660,7 @@ hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology)
 {
   struct hwloc_internal_distances_s *dist;
   for(dist = topology->first_dist; dist; dist = dist->next)
-    dist->objs_are_valid = 0;
+    dist->iflags &= ~HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID;
 }
 
 /******************************************************
