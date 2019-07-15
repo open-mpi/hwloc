@@ -84,9 +84,9 @@ $ls $tmp/test.svg
 
 echo "** XML output in $tmp/test.xml ..."
 $ls $tmp/test.xml
-echo "** Minimalistic XML output in test.xml ..."
+echo "** Minimalistic XML output in $tmp/test.mini.xml ..."
 HWLOC_LIBXML_EXPORT=0 $ls $tmp/test.mini.xml
-echo "** XMLv1 output in test.v1.xml ..."
+echo "** XMLv1 output in $tmp/test.v1.xml ..."
 $ls --export-xml-flags 1 $tmp/test.v1.xml
 
 file="$tmp/test-lstopo.output"
