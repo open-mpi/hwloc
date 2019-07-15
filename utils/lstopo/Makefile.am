@@ -30,6 +30,10 @@ lstopo_no_graphics_SOURCES = \
         lstopo-text.c \
         lstopo-xml.c
 
+if !HWLOC_HAVE_WINDOWS
+lstopo_no_graphics_SOURCES += lstopo-shmem.c
+endif
+
 lstopo_no_graphics_CFLAGS = $(AM_CFLAGS)
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 

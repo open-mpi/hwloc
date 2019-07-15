@@ -11,6 +11,7 @@
 #ifdef HWLOC_LINUX_SYS
 #include "hwloc/linux.h"
 #endif /* HWLOC_LINUX_SYS */
+#include "hwloc/shmem.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -424,6 +425,7 @@ void usage(const char *name, FILE *where)
 		  "                        Set flags during the XML topology export\n");
   fprintf (where, "  --export-synthetic-flags <n>\n"
 		  "                        Set flags during the synthetic topology export\n");
+  /* --shmem-output-addr is undocumented on purpose */
   fprintf (where, "  --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "  --version             Report version and exit\n");
 }
@@ -504,6 +506,7 @@ enum output_format {
   LSTOPO_OUTPUT_CAIROSVG,
   LSTOPO_OUTPUT_NATIVESVG,
   LSTOPO_OUTPUT_XML,
+  LSTOPO_OUTPUT_SHMEM,
   LSTOPO_OUTPUT_ERROR
 };
 
@@ -535,6 +538,8 @@ parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
     return LSTOPO_OUTPUT_NATIVESVG;
   else if (!strcasecmp(name, "xml"))
     return LSTOPO_OUTPUT_XML;
+  else if (!strcasecmp(name, "shmem"))
+    return LSTOPO_OUTPUT_SHMEM;
   else
     return LSTOPO_OUTPUT_ERROR;
 }
@@ -598,6 +603,7 @@ main (int argc, char *argv[])
 
   loutput.export_synthetic_flags = 0;
   loutput.export_xml_flags = 0;
+  loutput.shmem_output_addr = 0;
 
   loutput.legend = 1;
   loutput.legend_append = NULL;
@@ -1066,6 +1072,13 @@ main (int argc, char *argv[])
 	opt = 1;
       }
 
+      else if (!strcmp (argv[0], "--shmem-output-addr")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	loutput.shmem_output_addr = strtoull(argv[1], NULL, 0);
+	opt = 1;
+      }
+
       else if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					       &input, &input_format,
 					       callname)) {
@@ -1162,10 +1175,26 @@ main (int argc, char *argv[])
     clock_gettime(CLOCK_MONOTONIC, &ts1);
 #endif
 
-  err = hwloc_topology_load (topology);
-  if (err) {
-    fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
-    goto out_with_topology;
+  if (input_format == HWLOC_UTILS_INPUT_SHMEM) {
+#ifdef HWLOC_WIN_SYS
+    fprintf(stderr, "shmem topology not supported\n");
+    goto out;
+#else /* !HWLOC_WIN_SYS */
+    /* load from shmem, and duplicate onto topology, so that we may modify it */
+    hwloc_topology_destroy(topology);
+    err = lstopo_shmem_adopt(input, &topology);
+    if (err < 0)
+      goto out;
+    hwloc_utils_userdata_clear_recursive(hwloc_get_root_obj(topology));
+#endif /* !HWLOC_WIN_SYS */
+
+  } else {
+    /* normal load */
+    err = hwloc_topology_load (topology);
+    if (err) {
+      fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
+      goto out_with_topology;
+    }
   }
 
   if (allow_flags) {
@@ -1288,6 +1317,11 @@ main (int argc, char *argv[])
   case LSTOPO_OUTPUT_XML:
     output_func = output_xml;
     break;
+#ifndef HWLOC_WIN_SYS
+  case LSTOPO_OUTPUT_SHMEM:
+    output_func = output_shmem;
+    break;
+#endif
   default:
     fprintf(stderr, "file format not supported\n");
     goto out_usagefailure;
