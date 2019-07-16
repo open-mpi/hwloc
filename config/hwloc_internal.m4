@@ -461,6 +461,7 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/Makefile]
         hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh]
         hwloc_config_prefix[utils/lstopo/test-lstopo.sh]
+        hwloc_config_prefix[utils/lstopo/test-lstopo-shmem.sh]
         hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw]
         hwloc_config_prefix[contrib/hwloc-ps.www/Makefile]
         hwloc_config_prefix[contrib/systemd/Makefile]
@@ -490,6 +491,7 @@ chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
       ]hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh \
       ]hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh \
       ]hwloc_config_prefix[utils/lstopo/test-lstopo.sh \
+      ]hwloc_config_prefix[utils/lstopo/test-lstopo-shmem.sh \
       ]hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw \
       ]hwloc_config_prefix[contrib/windows/test-windows-version.sh \
       ]hwloc_config_prefix[tests/netloc/tests.sh])

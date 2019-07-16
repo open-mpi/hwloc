@@ -87,7 +87,7 @@ output_shmem(struct lstopo_output *loutput, const char *filename)
   err = hwloc_shmem_topology_get_length(loutput->topology, &shmem_length, 0);
   if (err < 0) {
     if (errno == ENOSYS)
-      fprintf(stderr, "shmem topology not supported\n");
+      fprintf(stderr, "shmem topology not supported\n"); /* this line must match the grep line in test-lstopo-shmem */
     else
       fprintf(stderr, "Failed to compute shmem topology export length\n");
     return -1;
@@ -102,7 +102,7 @@ output_shmem(struct lstopo_output *loutput, const char *filename)
   if (!loutput->shmem_output_addr)
     loutput->shmem_output_addr = find_mmap_addr(shmem_length);
   if (!loutput->shmem_output_addr) {
-    fprintf(stderr, "Failed to find a shmem topology mmap address\n");
+    fprintf(stderr, "Failed to find a shmem topology mmap address\n"); /* this line must match the grep line in test-lstopo-shmem */
     close(fd);
     unlink(filename);
     return -1;
@@ -123,7 +123,7 @@ output_shmem(struct lstopo_output *loutput, const char *filename)
 
   if (hwloc_shmem_topology_write(loutput->topology, fd, header.file_offset, (void*)(uintptr_t)loutput->shmem_output_addr, shmem_length, 0) < 0) {
     if (errno == EBUSY)
-      fprintf(stderr, "Failed to export shmem topology, memory range is busy\n");
+      fprintf(stderr, "Failed to export shmem topology, memory range is busy\n"); /* this line must match the grep line in test-lstopo-shmem */
     else
       fprintf(stderr, "Failed to export shmem topology to %s (%s)\n", filename, strerror(errno));
     close(fd);
@@ -168,7 +168,7 @@ int lstopo_shmem_adopt(const char *input, hwloc_topology_t *topologyp)
   close(fd);
   if (err < 0) {
     if (errno == EBUSY)
-      fprintf(stderr, "Failed to adopt shmem topology, memory range is busy\n");
+      fprintf(stderr, "Failed to adopt shmem topology, memory range is busy\n"); /* this line must match the grep line in test-lstopo-shmem */
     else
       fprintf(stderr, "Failed to adopt shmem topology (%s)\n", strerror(errno));
     return -1;
