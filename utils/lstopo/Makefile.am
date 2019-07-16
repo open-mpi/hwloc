@@ -60,10 +60,8 @@ man1_pages = lstopo-no-graphics.1
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS = $(man1_pages)
 
-if !HWLOC_HAVE_MINGW32
 TESTS = \
         test-lstopo.sh
-endif !HWLOC_HAVE_MINGW32
 
 if HWLOC_HAVE_CAIRO
 # only installed when lstopo is built with Cairo/X11 support
