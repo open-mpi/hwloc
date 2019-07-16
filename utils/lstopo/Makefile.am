@@ -66,6 +66,9 @@ nodist_man_MANS = $(man1_pages)
 
 TESTS = \
         test-lstopo.sh
+if HWLOC_HAVE_LINUX
+TESTS += test-lstopo-shmem.sh
+endif HWLOC_HAVE_LINUX
 
 if HWLOC_HAVE_CAIRO
 # only installed when lstopo is built with Cairo/X11 support
