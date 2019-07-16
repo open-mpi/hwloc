@@ -71,7 +71,6 @@ if HWLOC_HAVE_LINUX
 bin_SCRIPTS += hwloc-gather-topology
 endif HWLOC_HAVE_LINUX
 
-if !HWLOC_HAVE_MINGW32
 TESTS = \
         test-hwloc-annotate.sh \
         test-hwloc-calc.sh \
@@ -82,7 +81,6 @@ TESTS = \
 if HWLOC_HAVE_PLUGINS
 TESTS += test-fake-plugin.sh
 endif HWLOC_HAVE_PLUGINS
-endif !HWLOC_HAVE_MINGW32
 
 SEDMAN = $(SED) -e 's/%PACKAGE_NAME%/@PACKAGE_NAME@/g' \
 	  -e 's/%PACKAGE_VERSION%/@PACKAGE_VERSION@/g' \
