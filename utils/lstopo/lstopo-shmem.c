@@ -16,7 +16,7 @@
 #include "lstopo.h"
 
 struct lstopo_shmem_header {
-#define LSTOPO_SHMEM_HEADER_VERSION 1
+#define LSTOPO_SHMEM_HEADER_VERSION 1U
   uint32_t header_version;
   uint32_t header_length;
   uint64_t mmap_address;
@@ -133,7 +133,7 @@ output_shmem(struct lstopo_output *loutput, const char *filename)
 
   close(fd);
 
-  printf("Exported shmem topology to %s for mmap address 0x%lx length %ld\n", filename, loutput->shmem_output_addr, shmem_length);
+  printf("Exported shmem topology to %s for mmap address 0x%lx length %lu\n", filename, loutput->shmem_output_addr, (unsigned long) shmem_length);
 
   return 0;
 }
