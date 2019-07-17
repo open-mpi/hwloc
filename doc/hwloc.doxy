@@ -1140,7 +1140,8 @@ following environment variables.
   <dd>forces a list of components to enable or disable.
   Enable or disable the given comma-separated list of components
   (if they do not conflict with each other). Component names prefixed with
-  <tt>-</tt> are disabled.
+  <tt>-</tt> are disabled (a single phase may also be disabled).
+
   Once the end of the list is reached, hwloc falls back to
   enabling the remaining components (sorted by priority) that do not
   conflict with the already enabled ones, and unless explicitly disabled in the
@@ -2533,8 +2534,9 @@ It is possible to prevent some components from being loaded by prefixing their
 name with <tt>-</tt> in the list. For instance <tt>x86,-pci</tt> will load the
 <tt>x86</tt> component, then let hwloc load all the usual components except
 <tt>pci</tt>.
+A single component phase may also be blacklisted, for instance with <tt>-linux:io</tt>.
 hwloc_topology_set_components() may also be used inside the program
-to prevent the loading of a specific component for the target topology.
+to prevent the loading of a specific component (or phases) for the target topology.
 
 It is possible to prevent all remaining components from being loaded
 by placing <tt>stop</tt> in the environment variable.
