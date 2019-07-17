@@ -1826,6 +1826,9 @@ enum hwloc_topology_components_flag_e {
  * \p name is the name of the discovery component that should not be used
  * when loading topology \p topology. The name is a string such as "cuda".
  *
+ * For components with multiple phases, it may also be suffixed with the name
+ * of a phase, for instance "linux:io".
+ *
  * \p flags should be ::HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST.
  *
  * This may be used to avoid expensive parts of the discovery process.

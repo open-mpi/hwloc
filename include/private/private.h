@@ -207,6 +207,7 @@ struct hwloc_topology {
   unsigned nr_blacklisted_components;
   struct hwloc_topology_forced_component_s {
     struct hwloc_disc_component *component;
+    unsigned phases;
   } *blacklisted_components;
 
   /* FIXME: keep until topo destroy and reuse for finding specific buses */
