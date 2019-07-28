@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2017 Inria.  All rights reserved.
+ * Copyright © 2011-2019 Inria.  All rights reserved.
  * Copyright © 2011 Université Bordeaux.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -79,7 +79,7 @@ int main(void)
   depth = hwloc_topology_get_depth(topology);
   /* check at intermediate level if it exists */
   if (depth >= 3) {
-    printf("testing at depth %d\n", (depth-1)/2);
+    printf("testing at depth %u\n", (depth-1)/2);
     obj = NULL;
     while ((obj = hwloc_get_next_obj_by_depth(topology, (depth-1)/2, obj)) != NULL)
       checkall(obj->cpuset);

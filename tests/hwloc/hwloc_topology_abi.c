@@ -36,7 +36,7 @@ int main(void)
 #if (defined HWLOC_LINUX_SYS) && (defined HWLOC_X86_64_ARCH)
   if (!getenv("HWLOC_IGNORE_TOPOLOGY_ABI")) {
     size_t size, offset __hwloc_attribute_unused;
-    printf("checking offsets and sizes in struct hwloc_topology for topology ABI 0x%x...\n", HWLOC_TOPOLOGY_ABI);
+    printf("checking offsets and sizes in struct hwloc_topology for topology ABI 0x%x...\n", (unsigned) HWLOC_TOPOLOGY_ABI);
 
     /*******************************************************************
      * WARNING: if anything breaks below, the topology ABI has changed.
@@ -71,7 +71,7 @@ int main(void)
     /* fields after this one aren't needed after discovery */
 
     /* check bitmap ABI too, but those fields are private to bitmap.c */
-    printf("checking bitmaps for topology ABI 0x%x...\n", HWLOC_TOPOLOGY_ABI);
+    printf("checking bitmaps for topology ABI 0x%x...\n", (unsigned) HWLOC_TOPOLOGY_ABI);
     {
       hwloc_bitmap_t set = hwloc_bitmap_alloc();
       unsigned *ulongs_count =     (unsigned*)       (((char*)set)   );
