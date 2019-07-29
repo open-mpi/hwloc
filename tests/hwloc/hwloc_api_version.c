@@ -5,7 +5,6 @@
 
 #include "hwloc.h"
 
-#include <printf.h>
 #include <assert.h>
 
 int main(void)
