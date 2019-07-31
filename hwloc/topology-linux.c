@@ -5485,8 +5485,10 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
 #ifdef HAVE_OPENAT
-  free(data->root_path);
-  close(data->root_fd);
+  if (data->root_fd >= 0) {
+    free(data->root_path);
+    close(data->root_fd);
+  }
 #endif
 #ifdef HWLOC_HAVE_LIBUDEV
   if (data->udev)
