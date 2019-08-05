@@ -479,21 +479,26 @@ hwloc_disc_component_blacklist_one(struct hwloc_topology *topology,
 {
   struct hwloc_topology_forced_component_s *blacklisted;
   struct hwloc_disc_component *comp;
-  const char *end;
   unsigned phases;
   unsigned i;
 
-  /* replace linuxpci with linuxio for backward compatibility with pre-v2.0 */
-  if (!strcmp(name, "linuxpci"))
-    name = "linuxio";
+  if (!strcmp(name, "linuxpci")) {
+    /* replace linuxpci with linuxio for backward compatibility with pre-v2.0 */
+    if (hwloc_components_verbose)
+      fprintf(stderr, "Replacing deprecated component `%s' with `linuxio' in blacklisting\n", name);
+    comp = hwloc_disc_component_find("linuxio", NULL);
+    phases = ~0U;
 
-  comp = hwloc_disc_component_find(name, &end);
+  } else {
+    /* normal lookup */
+    const char *end;
+    comp = hwloc_disc_component_find(name, &end);
+    phases = hwloc_phases_from_string(end);
+  }
   if (!comp) {
     errno = EINVAL;
     return -1;
   }
-
-  phases = hwloc_phases_from_string(end);
 
   if (hwloc_components_verbose)
     fprintf(stderr, "Blacklisting component `%s` phases 0x%x\n", comp->name, phases);
@@ -665,15 +670,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
     while (*curenv) {
       s = strcspn(curenv, HWLOC_COMPONENT_SEPS);
       if (s) {
-	char c;
-
-	/* replace linuxpci with linuxio for backward compatibility with pre-v2.0 */
-	if (!strncmp(curenv, "linuxpci", 8) && s == 8) {
-	  curenv[5] = 'i';
-	  curenv[6] = 'o';
-	  curenv[7] = *HWLOC_COMPONENT_SEPS;
-	  s = 7;
-	}
+	char c, *name;
 
 	if (!strncmp(curenv, HWLOC_COMPONENT_STOP_NAME, s)) {
 	  tryall = 0;
@@ -684,7 +681,14 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	c = curenv[s];
 	curenv[s] = '\0';
 
-	comp = hwloc_disc_component_find(curenv, NULL /* we enable the entire component, phases must be blacklisted separately */);
+	name = curenv;
+	if (!strcmp(name, "linuxpci")) {
+	  if (hwloc_components_verbose)
+	    fprintf(stderr, "Replacing deprecated component `%s' with `linuxio' in envvar forcing\n", name);
+	  name = "linuxio";
+	}
+
+	comp = hwloc_disc_component_find(name, NULL /* we enable the entire component, phases must be blacklisted separately */);
 	if (comp) {
 	  unsigned blacklisted_phases = 0U;
 	  for(i=0; i<topology->nr_blacklisted_components; i++)
@@ -695,7 +699,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	  if (comp->phases & ~blacklisted_phases)
 	    hwloc_disc_component_try_enable(topology, comp, 1 /* envvar forced */, blacklisted_phases);
 	} else {
-	  fprintf(stderr, "Cannot find discovery component `%s'\n", curenv);
+	  fprintf(stderr, "Cannot find discovery component `%s'\n", name);
 	}
 
 	/* restore chars (the second loop below needs env to be unmodified) */
