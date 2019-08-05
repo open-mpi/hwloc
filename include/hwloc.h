@@ -87,7 +87,7 @@ extern "C" {
  * actually modifies the API.
  *
  * Users may check for available features at build time using this number
- * (see \ref faq_upgrade).
+ * (see \ref faq_version_api).
  *
  * \note This should not be confused with HWLOC_VERSION, the library version.
  * Two stable releases of the same series usually have the same ::HWLOC_API_VERSION
