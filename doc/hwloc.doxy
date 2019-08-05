@@ -3468,80 +3468,6 @@ You should pass the following command-line option to Valgrind to use it:
 \endverbatim
 
 
-\subsection faq_upgrade How do I handle ABI breaks and API upgrades?
-
-The hwloc interface is extended with every new major release.
-Any application using the hwloc API should be prepared to check at
-compile-time whether some features are available in the currently
-installed hwloc distribution.
-
-For instance, to check whether the hwloc version is at least 2.0, you should use:
-\verbatim
-#include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00020000
-...
-#endif
-\endverbatim
-
-To check for the API of release X.Y.Z at build time,
-you may compare ::HWLOC_API_VERSION with <tt>(X<<16)+(Y<<8)+Z</tt>.
-
-For supporting older releases that do not have <tt>HWLOC_OBJ_NUMANODE</tt>
-and <tt>HWLOC_OBJ_PACKAGE</tt> yet, you may use:
-
-\verbatim
-#include <hwloc.h>
-#if HWLOC_API_VERSION < 0x00010b00
-#define HWLOC_OBJ_NUMANODE HWLOC_OBJ_NODE
-#define HWLOC_OBJ_PACKAGE HWLOC_OBJ_SOCKET
-#endif
-\endverbatim
-
-The hwloc interface was deeply modified in release 2.0
-to fix several issues of the 1.x interface
-(see \ref upgrade_to_api_2x and the NEWS file in the source directory for details).
-The ABI was broken, which means
-<b>applications must be recompiled against the new 2.0 interface</b>.
-
-To check that you are not mixing old/recent headers with a recent/old runtime library,
-check the major revision number in the API version:
-\verbatim
-#include <hwloc.h>
-  unsigned version = hwloc_get_api_version();
-  if ((version >> 16) != (HWLOC_API_VERSION >> 16)) {
-    fprintf(stderr,
-           "%s compiled for hwloc API 0x%x but running on library API 0x%x.\n"
-           "You may need to point LD_LIBRARY_PATH to the right hwloc library.\n"
-           "Aborting since the new ABI is not backward compatible.\n",
-           callname, HWLOC_API_VERSION, version);
-    exit(EXIT_FAILURE);
-  }
-\endverbatim
-To specifically detect v2.0 issues:
-\verbatim
-#include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00020000
-  /* headers are recent */
-  if (hwloc_get_api_version() < 0x20000)
-    ... error out, the hwloc runtime library is older than 2.0 ...
-#else
-  /* headers are pre-2.0 */
-  if (hwloc_get_api_version() >= 0x20000)
-    ... error out, the hwloc runtime library is more recent than 2.0 ...
-#endif
-\endverbatim
-
-You should not try to remain compatible with very old releases such as
-1.1.x or earlier because <tt>::HWLOC_API_VERSION</tt> was added in 1.0.0
-and <tt>hwloc_get_api_version()</tt> came only in 1.1.1.
-Also do not use the old cpuset API since it was deprecated and superseded
-by the bitmap API in 1.1, and later removed in 1.5.
-
-If you ever need to look at the library version instead of the API version,
-you may want to use HWLOC_VERSION instead.
-Two stable releases of the same series usually have the same ::HWLOC_API_VERSION
-even if their HWLOC_VERSION are different.
-
 
 
 \htmlonly
@@ -3710,13 +3636,110 @@ chuser "capabilities=CAP_PROPAGATE,CAP_NUMA_ATTACH" <username>
 \endverbatim
 
 
+\htmlonly
+</div><div class="section" id="faq5">
+\endhtmlonly
+\section faq5 Compatibility between hwloc versions
+
+\subsection faq_version_api How do I handle API changes?
+
+The hwloc interface is extended with every new major release.
+Any application using the hwloc API should be prepared to check at
+compile-time whether some features are available in the currently
+installed hwloc distribution.
+
+For instance, to check whether the hwloc version is at least 2.0, you should use:
+\verbatim
+#include <hwloc.h>
+#if HWLOC_API_VERSION >= 0x00020000
+...
+#endif
+\endverbatim
+
+To check for the API of release X.Y.Z at build time,
+you may compare ::HWLOC_API_VERSION with <tt>(X<<16)+(Y<<8)+Z</tt>.
+
+For supporting older releases that do not have <tt>HWLOC_OBJ_NUMANODE</tt>
+and <tt>HWLOC_OBJ_PACKAGE</tt> yet, you may use:
+
+\verbatim
+#include <hwloc.h>
+#if HWLOC_API_VERSION < 0x00010b00
+#define HWLOC_OBJ_NUMANODE HWLOC_OBJ_NODE
+#define HWLOC_OBJ_PACKAGE HWLOC_OBJ_SOCKET
+#endif
+\endverbatim
+
+Once a program is built against a hwloc library, it may also dynamically
+link with compatible libraries from other hwloc releases.
+The version of that runtime library may be queried with hwloc_get_api_version().
+See \ref faq_version_abi for using this function for testing ABI compatibility.
+
+
+
+\subsection faq_version What is the difference between API and library version numbers?
+
+::HWLOC_API_VERSION is the version of the API.
+It changes when functions are added, modified, etc.
+However it does not necessarily change from one release to another.
+For instance, two releases of the same series (e.g. 2.0.3 and 2.0.4)
+usually have the same ::HWLOC_API_VERSION (<tt>0x00020000</tt>).
+However their HWLOC_VERSION strings are different
+(<tt>\"2.0.3\"</tt> and <tt>\"2.0.4\"</tt> respectively).
+
+
+
+\subsection faq_version_abi How do I handle ABI breaks?
+
+The hwloc interface was deeply modified in release 2.0
+to fix several issues of the 1.x interface
+(see \ref upgrade_to_api_2x and the NEWS file in the source directory for details).
+The ABI was broken, which means
+<b>applications must be recompiled against the new 2.0 interface</b>.
+
+To check that you are not mixing old/recent headers with a recent/old runtime library,
+check the major revision number in the API version:
+\verbatim
+#include <hwloc.h>
+  unsigned version = hwloc_get_api_version();
+  if ((version >> 16) != (HWLOC_API_VERSION >> 16)) {
+    fprintf(stderr,
+           "%s compiled for hwloc API 0x%x but running on library API 0x%x.\n"
+           "You may need to point LD_LIBRARY_PATH to the right hwloc library.\n"
+           "Aborting since the new ABI is not backward compatible.\n",
+           callname, HWLOC_API_VERSION, version);
+    exit(EXIT_FAILURE);
+  }
+\endverbatim
+To specifically detect v2.0 issues:
+\verbatim
+#include <hwloc.h>
+#if HWLOC_API_VERSION >= 0x00020000
+  /* headers are recent */
+  if (hwloc_get_api_version() < 0x20000)
+    ... error out, the hwloc runtime library is older than 2.0 ...
+#else
+  /* headers are pre-2.0 */
+  if (hwloc_get_api_version() >= 0x20000)
+    ... error out, the hwloc runtime library is more recent than 2.0 ...
+#endif
+\endverbatim
+
+In theory, library sonames prevent linking with incompatible libraries.
+However custom hwloc installations or improperly configured build environments
+may still lead to such issues.
+Hence running one of the above (cheap) checks before initializing hwloc topology
+may be useful.
+
+
+
 \page upgrade_to_api_2x Upgrading to the hwloc 2.0 API
 
 \htmlonly
 <div class="section">
 \endhtmlonly
 
-See \ref faq_upgrade for detecting the hwloc version that you are compiling
+See \ref faq5 for detecting the hwloc version that you are compiling
 and/or running against.
 
 
