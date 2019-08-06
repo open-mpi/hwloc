@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2018 Inria.  All rights reserved.
+.\" Copyright © 2010-2019 Inria.  All rights reserved.
 .\" Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-CALC "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -92,6 +92,9 @@ while a comma is used to separate indexes
 .TP
 \fB\-\-single\fR
 Singlify the output to a single CPU.
+.TP
+\fB\-\-no\-smt\fR
+Only keep a single PU per core in the input locations.
 .TP
 \fB\-\-taskset\fR
 Display CPU set strings in the format recognized by the taskset command-line

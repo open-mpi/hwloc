@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -40,6 +40,7 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" all --taskset
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" 0xf
+  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt node:2-3
   $calc --if synthetic --input "node:4 core:4 pu:4" 0xf ~0x3 0xff0 '^0xf0'
   $calc --if synthetic --input "node:4 core:4 pu:4" core:0 pu:15 ~pu:0 '^pu:2'
   echo
