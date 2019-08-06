@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2018 Inria.  All rights reserved.
+.\" Copyright © 2009-2019 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -96,6 +96,9 @@ No location may be given since no binding is performed.
 .TP
 \fB\-\-single\fR
 Bind on a single CPU to prevent migration.
+.TP
+\fB\-\-no\-smt\fR
+Only keep a single PU per core before binding.
 .TP
 \fB\-\-strict\fR
 Require strict binding.
