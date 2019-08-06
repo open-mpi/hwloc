@@ -373,6 +373,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --filter <type>:<knd> Filter objects of the given type, or all.\n");
   fprintf (where, "     <knd> may be `all' (keep all), `none' (remove all), `structure' or `important'\n");
   fprintf (where, "  --ignore <type>       Ignore objects of the given type\n");
+  fprintf (where, "  --no-smt              Ignore PUs\n");
   fprintf (where, "  --no-caches           Do not show caches\n");
   fprintf (where, "  --no-useless-caches   Do not show caches which do not have a hierarchical\n"
                   "                        impact\n");
@@ -777,6 +778,9 @@ main (int argc, char *argv[])
 	else
 	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
 	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--no-smt")) {
+	loutput.ignore_pus = 1;
       }
       else if (!strcmp (argv[0], "--no-caches")) {
 	hwloc_topology_set_cache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
