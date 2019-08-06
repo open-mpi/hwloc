@@ -98,7 +98,9 @@ Version 2.1.0
   + hwloc-annotate may annotate multiple locations at once.
   + Add a HTML/JS version of hwloc-ps. See contrib/hwloc-ps.www/README.
   + Add bash completions.
-
+* Misc
+  + Add several FAQ entries in "Compatibility between hwloc versions"
+    about API version, ABI, XML, Synthetic strings, and shmem topologies.
 
 Version 2.0.4 (also included in 1.11.13 when appropriate)
 -------------
