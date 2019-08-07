@@ -274,6 +274,7 @@ To synthetize a set of cores into largest objects on a 2-node 2-package 2-core m
 To get the set of first threads of all cores:
 
     $ hwloc-calc core:all.pu:0
+    $ hwloc-calc --no-smt all
 
 This can also be very useful in order to make GNU OpenMP use exactly one thread
 per core, and in logical core order:
@@ -281,7 +282,7 @@ per core, and in logical core order:
     $ export OMP_NUM_THREADS=`hwloc-calc --number-of core all`
     $ echo $OMP_NUM_THREADS
     4
-    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU core:all.pu:0`
+    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU --no-smt all`
     $ echo $GOMP_CPU_AFFINITY
     0,2,1,3
 
