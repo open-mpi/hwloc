@@ -2245,6 +2245,8 @@ hwloc_compare_levels_structure(hwloc_topology_t topology, unsigned i)
     return -1;
 
   for(j=0; j<topology->level_nbobjects[i]; j++) {
+    if (topology->levels[i-1][j] != topology->levels[i][j]->parent)
+      return -1;
     if (topology->levels[i-1][j]->arity != 1)
       return -1;
     if (checkmemory && topology->levels[i-1][j]->memory_arity)
