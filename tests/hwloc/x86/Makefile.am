@@ -7,8 +7,12 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 # Add your expected output file here.
 # By default, it shows the output of `lstopo --of xml -'.
+#
+# XML outputs shouldn't have gp_index attributes to avoid spurious errors.
+# Remove them with: sed -r -e 's/ gp_index=\"[0-9]+\"//' -i foo.outpu
 cpuid_outputs = \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.output \
+	Intel-CascadeLake-2xXeon6230.output \
 	Intel-Skylake-2xXeon6140.output \
 	Intel-Broadwell-2xXeon-E5-2650Lv4.output \
 	Intel-Haswell-2xXeon-E5-2680v3.output \
@@ -37,6 +41,7 @@ cpuid_outputs = \
 # specifying which tarball to use
 cpuid_tarballs = \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.tar.bz2 \
+	Intel-CascadeLake-2xXeon6230.tar.bz2 \
 	Intel-Skylake-2xXeon6140.tar.bz2 \
 	Intel-Broadwell-2xXeon-E5-2650Lv4.tar.bz2 \
 	Intel-Haswell-2xXeon-E5-2680v3.tar.bz2 \
