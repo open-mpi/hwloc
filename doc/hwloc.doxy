@@ -1002,6 +1002,17 @@ following environment variables.
   actual displaying of these error messages.
   </dd>
 
+<dt>HWLOC_USE_NUMA_DISTANCES=7</dt>
+  <dd>enables or disables the use of NUMA distances.
+  NUMA distances and memory target/initiator information may be used
+  to improve the locality of NUMA nodes, especially CPU-less nodes.
+  Bits in the value of this environment variable enable different features:
+  Bit 0 enables the gathering of NUMA distances from the operating system.
+  Bit 1 further enables the use of NUMA distances to improve the
+  locality of CPU-less nodes.
+  Bit 2 enables the use of target/initiator information.
+  </dd>
+
 <dt>HWLOC_GROUPING=1</dt>
   <dd>enables or disables objects grouping based on distances.
   By default, hwloc uses distance matrices between objects (either read
