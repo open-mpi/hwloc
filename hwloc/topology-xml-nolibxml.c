@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -653,7 +653,7 @@ hwloc__nolibxml_export_end_object(hwloc__xml_export_state_t state, const char *n
 }
 
 static void
-hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *buffer, size_t length)
+hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *buffer, size_t length __hwloc_attribute_unused)
 {
   hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
   int res;
@@ -665,7 +665,7 @@ hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *
   }
   ndata->has_content = 1;
 
-  res = hwloc_snprintf(ndata->buffer, ndata->remaining, buffer, length);
+  res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%s", buffer);
   hwloc__nolibxml_export_update_buffer(ndata, res);
 }
 
