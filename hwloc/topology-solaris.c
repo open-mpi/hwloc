@@ -485,6 +485,8 @@ hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstat
   unsigned curlgrp = 0;
   int nlgrps;
   lgrp_id_t root;
+  const char *env = getenv("HWLOC_USE_NUMA_DISTANCES");
+  int need_distances = env && atoi(env);
 
   if (!(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)) {
     lgrp_list_allowed(topology);
@@ -505,7 +507,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstat
     lgrp_build_numanodes(topology, cookie, root, glob_lgrps, &curlgrp);
 
 #if HAVE_DECL_LGRP_LATENCY_COOKIE
-    if (nlgrps > 1) {
+    if (nlgrps > 1 && need_distances) {
       uint64_t *distances = calloc(curlgrp*curlgrp, sizeof(uint64_t));
       unsigned i, j;
       if (distances) {
