@@ -57,6 +57,9 @@ struct hwloc_linux_backend_data_s {
   int is_knl;
   int is_amd_with_CU;
   int use_dt;
+  int use_numa_distances;
+  int use_numa_distances_for_cpuless;
+  int use_numa_initiators;
   struct utsname utsname; /* fields contain \0 when unknown */
   int fallback_nbprocessors; /* only used in hwloc_linux_fallback_pu_level(), maybe be <= 0 (error) earlier */
   unsigned pagesize;
@@ -4008,7 +4011,9 @@ annotate_sysfsnode(struct hwloc_topology *topology,
   topology->support.discovery->numa_memory = 1;
   topology->support.discovery->disallowed_numa = 1;
 
-  if (nbnodes >= 2 && !hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd)) {
+  if (nbnodes >= 2
+      && data->use_numa_distances
+      && !hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd)) {
     hwloc_internal_distances_add(topology, "NUMALatency", nbnodes, nodes, distances,
 				 HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
 				 HWLOC_DISTANCES_ADD_FLAG_GROUP);
@@ -4188,6 +4193,10 @@ look_sysfsnode(struct hwloc_topology *topology,
 	/* failed to read/create some nodes, don't bother reading/fixing
 	 * a distance matrix that would likely be wrong anyway.
 	 */
+	data->use_numa_distances = 0;
+      }
+
+      if (!data->use_numa_distances) {
 	free(distances);
 	distances = NULL;
       }
@@ -4223,7 +4232,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 	if (node && !hwloc_bitmap_iszero(node->cpuset)) {
 	  hwloc_obj_t tree;
 	  /* update from HMAT initiators if any */
-	  read_node_initiators(data, node, nbnodes, nodes, path);
+	  if (data->use_numa_initiators)
+	    read_node_initiators(data, node, nbnodes, nodes, path);
 
 	  tree = node;
 	  if (need_memcaches)
@@ -4241,12 +4251,13 @@ look_sysfsnode(struct hwloc_topology *topology,
 	if (node && hwloc_bitmap_iszero(node->cpuset)) {
 	  hwloc_obj_t tree;
 	  /* update from HMAT initiators if any */
-	  if (!read_node_initiators(data, node, nbnodes, nodes, path))
-	    if (!hwloc_bitmap_iszero(node->cpuset))
-	      goto fixed;
+	  if (data->use_numa_initiators)
+	    if (!read_node_initiators(data, node, nbnodes, nodes, path))
+	      if (!hwloc_bitmap_iszero(node->cpuset))
+		goto fixed;
 
 	  /* if HMAT didn't help, try to find locality of CPU-less NUMA nodes by looking at their distances */
-	  if (distances)
+	  if (distances && data->use_numa_distances_for_cpuless)
 	    fixup_cpuless_node_locality_from_distances(i, nbnodes, nodes, distances);
 
 	fixed:
@@ -6883,6 +6894,17 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->dumped_hwdata_dirname = getenv("HWLOC_DUMPED_HWDATA_DIR");
   if (!data->dumped_hwdata_dirname)
     data->dumped_hwdata_dirname = (char *) RUNSTATEDIR "/hwloc/";
+
+  data->use_numa_distances = 1;
+  data->use_numa_distances_for_cpuless = 1;
+  data->use_numa_initiators = 1;
+  env = getenv("HWLOC_USE_NUMA_DISTANCES");
+  if (env) {
+    unsigned val = atoi(env);
+    data->use_numa_distances = !!(val & 3); /* 2 implies 1 */
+    data->use_numa_distances_for_cpuless = !!(val & 2);
+    data->use_numa_initiators = !!(val & 4);
+  }
 
   env = getenv("HWLOC_USE_DT");
   if (env)
