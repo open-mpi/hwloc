@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -334,6 +334,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned children_width = 0, children_height = 0;
   unsigned above_children_width, above_children_height;
   unsigned existing_kinds;
+  int normal_children_are_PUs;
   hwloc_obj_t child;
   int ncstate;
   unsigned i;
@@ -360,23 +361,27 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   if (parent->type == HWLOC_OBJ_BRIDGE)
     orient = LSTOPO_ORIENT_VERT;
 
-  /* recurse into children to prepare their sizes */
+  /* recurse into children to prepare their sizes,
+   * and check whether all normal children are PUs. */
+  normal_children_are_PUs = 1;
   for(i = 0, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
       child;
       i++, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
     get_type_fun(child->type)(loutput, child, 0, 0, 0);
+    if (hwloc_obj_type_is_normal(child->type) && child->type != HWLOC_OBJ_PU)
+      normal_children_are_PUs = 0;
   }
   if (!i)
     return;
 
 
   /* no separator between PUs */
-  if ((unsigned)parent->depth == loutput->depth-2)
+  if (normal_children_are_PUs)
     normal_children_separator = 0;
 
   /* add separator between a cache parent and its children */
   if (hwloc_obj_type_is_cache(parent->type)) {
-    if ((unsigned)parent->depth == loutput->depth-2)
+    if (normal_children_are_PUs)
       /* except between cache parent and PU children */
       separator_below_cache = 0;
     /* update children placement */
