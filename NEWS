@@ -36,7 +36,7 @@ Version 2.1.0
   + Improve the API for dealing with disallowed resources
     - HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM is replaced with FLAG_INCLUDE_DISALLOWED
       and --whole-system command-line options with --disallowed.
-      Former names are still accepted for backward compatibility.
+      . Former names are still accepted for backward compatibility.
     - Add hwloc_topology_allow() for changing allowed sets after load().
     - Add the HWLOC_ALLOW=all environment variable to totally ignore
       administrative restrictions such as Linux Cgroups.
@@ -57,11 +57,11 @@ Version 2.1.0
   + Add support for Intel v2 Extended Topology Enumeration in the x86 backend.
   + Improve memory locality on Linux by using HMAT initiators (exposed
     since Linux 5.2+), and NUMA distances for CPU-less NUMA nodes.
-  + The x86 now properly handles offline CPUs.
+  + The x86 backend now properly handles offline CPUs.
   + Detect the locality of NVIDIA GPU OpenCL devices.
   + Ignore NUMA nodes that correspond to NVIDIA GPU by default.
-    - They may be kept if HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES=1 in the environment.
-      Fix their CPU locality and add info attributes to identify them.
+    - They may be unignored if HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES=1 in the environment.
+    - Fix their CPU locality and add info attributes to identify them.
     Thanks to Max Katz and Edgar Leon for the help.
   + Add support for IBM S/390 drawers.
   + Rework the heuristics for discovering KNL Cluster and Memory modes
@@ -72,6 +72,8 @@ Version 2.1.0
   + Expose Linux DAX devices as hwloc Block OS devices.
   + Remove support for /proc/cpuinfo-only topology discovery in Linux
     kernel prior to 2.6.16.
+  + Disable POWER device-tree-based topology on Linux by default.
+    - It may be reenabled by setting HWLOC_USE_DT=1 in the environment.
   + Discovery components are now divided in phases that may be individually
     blacklisted.
     - The linuxio component has been merged back into the linux component.
@@ -79,8 +81,8 @@ Version 2.1.0
   + lstopo
     - lstopo factorizes objects by default in the graphical output when
       there are more than 4 identical children.
-      New options --no-factorize and --factorize may be used to configure this.
-      Also hit the 'f' key to disable factorizing in interactive outputs.
+      . New options --no-factorize and --factorize may be used to configure this.
+      . Hit the 'f' key to disable factorizing in interactive outputs.
     - Both logical and OS/physical indexes are now displayed by default
       for PU and NUMA nodes.
     - The X11 and Windows interactive outputs support many keyboard
