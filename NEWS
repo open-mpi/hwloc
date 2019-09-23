@@ -104,6 +104,7 @@ Version 2.1.0
   + Add several FAQ entries in "Compatibility between hwloc versions"
     about API version, ABI, XML, Synthetic strings, and shmem topologies.
 
+
 Version 2.0.4 (also included in 1.11.13 when appropriate)
 -------------
 * Add support for Linux 5.3 new sysfs cpu topology files with Die information.
