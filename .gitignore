@@ -130,6 +130,8 @@ test-suite.log
 
 /tests/hwloc/x86/test-topology.sh
 
+/tests/hwloc/x86+linux/test-topology.sh
+
 /tests/hwloc/xml/test-topology.sh
 
 /tests/hwloc/embedded/aclocal.m4
@@ -197,6 +199,7 @@ test-suite.log
 /utils/lstopo/lstopo-no-graphics
 /utils/lstopo/lstopo-no-graphics.1
 /utils/lstopo/test-lstopo.sh
+/utils/lstopo/test-lstopo-shmem.sh
 /utils/lstopo/test-*.sh.log
 /utils/lstopo/test-*.sh.trs
 
