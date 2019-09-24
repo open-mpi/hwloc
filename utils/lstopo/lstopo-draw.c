@@ -542,7 +542,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
   /* recurse into children to prepare their sizes,
    * and check whether all normal children are PUs. */
-  normal_children_are_PUs = 1;
+  normal_children_are_PUs = (parent->arity > 0);
   for(i = 0, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
       child;
       i++, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
