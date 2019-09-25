@@ -4,59 +4,26 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libhwloc", "libhwloc.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB8D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lstopo-no-graphics", "lstopo-no-graphics.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB8E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-annotate", "hwloc-annotate.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB8F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-bind", "hwloc-bind.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB91}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-calc", "hwloc-calc.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB92}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-diff", "hwloc-diff.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB93}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-distrib", "hwloc-distrib.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB95}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-info", "hwloc-info.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB96}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-patch", "hwloc-patch.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB97}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lstopo", "lstopo.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB98}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lstopo-win", "lstopo-win.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB99}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hwloc-gather-cpuid", "hwloc-gather-cpuid.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB9A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DE76C6D-4773-4766-9F93-69C56166CB8D} = {9DE76C6D-4773-4766-9F93-69C56166CB8D}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

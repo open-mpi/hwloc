@@ -86,6 +86,12 @@
     <ClInclude Include="..\..\include\private\xml.h" />
     <ClInclude Include="..\..\utils\hwloc\misc.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="libhwloc.vcxproj">
+      <Project>{9DE76C6D-4773-4766-9F93-69C56166CB8D}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
