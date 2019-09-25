@@ -30,8 +30,11 @@
     <LinkIncremental>false</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
     <TargetName>$(ProjectName)-12</TargetName>
-    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
