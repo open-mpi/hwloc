@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libhwloc", "libhwloc.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB8D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lstopo-no-graphics", "lstopo-no-graphics.vcxproj", "{9DE76C6D-4773-4766-9F93-69C56166CB8E}"
