@@ -70,7 +70,7 @@ pipeline {
 					if (env.NO_MINGW != 'true') {
 						listOfNodeNames.push('MinGW')
 					}
-					if (env.NO_SONAR != 'true') {
+					if (env.NO_SONARQUBE != 'true') {
 						listOfNodeNames.push('SonarQube Scanner')
 					}
 					if (env.NO_EMBEDDED != 'true') {
