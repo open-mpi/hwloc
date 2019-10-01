@@ -35,7 +35,7 @@ fi
 
 # check that the repo is the official one
 if test x$git_repo_url != xhttps://github.com/open-mpi/hwloc.git; then
-  if test x$FORCE_SONAR_SCANNER = xtrue; then
+  if test x$FORCE_SONARQUBE = xtrue; then
     echo "Sending non-official repository output to 'tmp' branch on sonarqube server."
     hwloc_branch=tmp
   else
