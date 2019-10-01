@@ -7,7 +7,7 @@
 echo "############################"
 echo "Running on:"
 uname -a
-echo "Tarball: $1"
+echo "Tarball: $3"
 echo "############################"
 
 set -e
