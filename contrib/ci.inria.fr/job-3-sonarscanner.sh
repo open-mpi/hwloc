@@ -28,7 +28,7 @@ test -f $HOME/.ciprofile && . $HOME/.ciprofile
 # check that this is either master or vX.Y
 if test x$hwloc_branch != xmaster; then
   if test x$(echo "x${hwloc_branch}x" | sed -r -e 's/xv[0-9]+\.[0-9]+x//') != x; then
-    echo "Sending non-master and non-stable branch output to `tmp` branch on sonarqube server."
+    echo "Sending non-master and non-stable branch output to 'tmp' branch on sonarqube server."
     hwloc_branch=tmp
   fi
 fi
