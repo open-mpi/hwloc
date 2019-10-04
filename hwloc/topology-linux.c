@@ -5053,24 +5053,6 @@ hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned nump
  *************************************/
 
 static void
-hwloc__linux_get_mic_sn(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data)
-{
-  char line[64], *tmp, *end;
-  if (hwloc_read_path_by_length("/proc/elog", line, sizeof(line), data->root_fd) < 0)
-    return;
-  if (strncmp(line, "Card ", 5))
-    return;
-  tmp = line + 5;
-  end = strchr(tmp, ':');
-  if (!end)
-    return;
-  *end = '\0';
-
-  if (tmp[0])
-    hwloc_obj_add_info(hwloc_get_root_obj(topology), "MICSerialNumber", tmp);
-}
-
-static void
 hwloc_gather_system_info(struct hwloc_topology *topology,
 			 struct hwloc_linux_backend_data_s *data)
 {
@@ -5449,8 +5431,6 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
     hwloc_obj_add_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
     free(cpuset_name);
   }
-
-  hwloc__linux_get_mic_sn(topology, data);
 
   /* data->utsname was filled with real uname or \0, we can safely pass it */
   hwloc_add_uname_info(topology, &data->utsname);
@@ -6136,95 +6116,6 @@ hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend, unsigned os
   return 0;
 }
 
-static void
-hwloc_linuxfs_mic_class_fillinfos(int root_fd,
-				  struct hwloc_obj *obj, const char *osdevpath)
-{
-  char path[296]; /* osdevpath <= 256 */
-  char family[64];
-  char sku[64];
-  char sn[64];
-  char string[21];
-
-  obj->subtype = strdup("MIC");
-
-  snprintf(path, sizeof(path), "%s/family", osdevpath);
-  if (!hwloc_read_path_by_length(path, family, sizeof(family), root_fd)) {
-    char *eol = strchr(family, '\n');
-    if (eol)
-      *eol = 0;
-    hwloc_obj_add_info(obj, "MICFamily", family);
-  }
-
-  snprintf(path, sizeof(path), "%s/sku", osdevpath);
-  if (!hwloc_read_path_by_length(path, sku, sizeof(sku), root_fd)) {
-    char *eol = strchr(sku, '\n');
-    if (eol)
-      *eol = 0;
-    hwloc_obj_add_info(obj, "MICSKU", sku);
-  }
-
-  snprintf(path, sizeof(path), "%s/serialnumber", osdevpath);
-  if (!hwloc_read_path_by_length(path, sn, sizeof(sn), root_fd)) {
-    char *eol;
-    eol = strchr(sn, '\n');
-    if (eol)
-      *eol = 0;
-    hwloc_obj_add_info(obj, "MICSerialNumber", sn);
-  }
-
-  snprintf(path, sizeof(path), "%s/active_cores", osdevpath);
-  if (!hwloc_read_path_by_length(path, string, sizeof(string), root_fd)) {
-    unsigned long count = strtoul(string, NULL, 16);
-    snprintf(string, sizeof(string), "%lu", count);
-    hwloc_obj_add_info(obj, "MICActiveCores", string);
-  }
-
-  snprintf(path, sizeof(path), "%s/memsize", osdevpath);
-  if (!hwloc_read_path_by_length(path, string, sizeof(string), root_fd)) {
-    unsigned long count = strtoul(string, NULL, 16);
-    snprintf(string, sizeof(string), "%lu", count);
-    hwloc_obj_add_info(obj, "MICMemorySize", string);
-  }
-}
-
-static int
-hwloc_linuxfs_lookup_mic_class(struct hwloc_backend *backend, unsigned osdev_flags)
-{
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  int root_fd = data->root_fd;
-  unsigned idx;
-  DIR *dir;
-  struct dirent *dirent;
-
-  dir = hwloc_opendir("/sys/class/mic", root_fd);
-  if (!dir)
-    return 0;
-
-  while ((dirent = readdir(dir)) != NULL) {
-    char path[256];
-    hwloc_obj_t obj, parent;
-
-    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
-      continue;
-    if (sscanf(dirent->d_name, "mic%u", &idx) != 1)
-      continue;
-
-    snprintf(path, sizeof(path), "/sys/class/mic/mic%u", idx);
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
-    if (!parent)
-      continue;
-
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_COPROC, dirent->d_name);
-
-    hwloc_linuxfs_mic_class_fillinfos(root_fd, obj, path);
-  }
-
-  closedir(dir);
-
-  return 0;
-}
-
 static int
 hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
@@ -6784,7 +6675,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     hwloc_linuxfs_lookup_dax_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
-    hwloc_linuxfs_lookup_mic_class(backend, osdev_flags);
     if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
       hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
       hwloc_linuxfs_lookup_dma_class(backend, osdev_flags);

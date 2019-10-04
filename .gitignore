@@ -112,7 +112,6 @@ test-suite.log
 /tests/hwloc/hwloc_iodevs
 /tests/hwloc/xmlbuffer
 /tests/hwloc/gl
-/tests/hwloc/intel-mic
 /tests/hwloc/linux-libnuma
 /tests/hwloc/glibc-sched
 /tests/hwloc/openfabrics-verbs

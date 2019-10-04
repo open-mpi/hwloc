@@ -1,4 +1,4 @@
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -30,7 +30,6 @@ include_hwloc_HEADERS = \
         hwloc/nvml.h \
         hwloc/plugins.h \
         hwloc/gl.h \
-        hwloc/intel-mic.h \
         hwloc/rename.h \
         hwloc/deprecated.h
 include_hwloc_autogendir = $(includedir)/hwloc/autogen

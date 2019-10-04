@@ -482,11 +482,6 @@ extern "C" {
 #define hwloc_ibv_get_device_osdev HWLOC_NAME(ibv_get_device_osdev)
 #define hwloc_ibv_get_device_osdev_by_name HWLOC_NAME(ibv_get_device_osdev_by_name)
 
-/* intel-mic.h */
-
-#define hwloc_intel_mic_get_device_cpuset HWLOC_NAME(intel_mic_get_device_cpuset)
-#define hwloc_intel_mic_get_device_osdev_by_index HWLOC_NAME(intel_mic_get_device_osdev_by_index)
-
 /* opencl.h */
 
 #define hwloc_cl_device_topology_amd HWLOC_NAME(cl_device_topology_amd)

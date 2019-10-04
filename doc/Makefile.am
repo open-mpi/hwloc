@@ -80,7 +80,6 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/cudart.h \
        $(hwloc_include_dir)/hwloc/nvml.h \
        $(hwloc_include_dir)/hwloc/gl.h \
-       $(hwloc_include_dir)/hwloc/intel-mic.h \
        $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
        $(srcdir)/netloc.doxy \
        $(hwloc_include_dir)/netloc.h
@@ -716,10 +715,7 @@ man3_cuda_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_gl.3 \
         $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_osdev_by_port_device.3 \
         $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_osdev_by_name.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_by_osdev.3 \
-        $(DOX_MAN_DIR)/man3/hwlocality_intel_mic.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_intel_mic_get_device_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_intel_mic_get_device_osdev_by_index.3
+        $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_by_osdev.3
 
 man3_glibc_scheddir = $(man3dir)
 man3_glibc_sched_DATA = \
