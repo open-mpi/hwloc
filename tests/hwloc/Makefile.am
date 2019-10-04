@@ -65,8 +65,7 @@ check_PROGRAMS = \
         hwloc_obj_infos \
         hwloc_iodevs \
         xmlbuffer \
-        gl \
-        intel-mic
+        gl
 
 if !HWLOC_HAVE_WINDOWS
 if !HWLOC_HAVE_DARWIN

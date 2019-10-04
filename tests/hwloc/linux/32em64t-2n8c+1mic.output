@@ -291,13 +291,6 @@
         <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[83-83]" pci_busid="0000:80:03.0" pci_type="0604 [8086:3c08] [0000:0000] 07" pci_link_speed="0.000000">
           <object type="PCIDev" pci_busid="0000:83:00.0" pci_type="0b40 [8086:225c] [8086:2500] 10" pci_link_speed="0.000000">
             <info name="PCISlot" value="02"/>
-            <object type="OSDev" name="mic0" subtype="MIC" osdev_type="5">
-              <info name="MICFamily" value="Knights Corner"/>
-              <info name="MICSKU" value="ES2-P/A/X 1750"/>
-              <info name="MICSerialNumber" value="ADKC23500189"/>
-              <info name="MICActiveCores" value="61"/>
-              <info name="MICMemorySize" value="8126464"/>
-            </object>
           </object>
         </object>
         <object type="PCIDev" pci_busid="0000:80:04.0" pci_type="0880 [8086:3c20] [1028:0518] 07" pci_link_speed="0.000000">

@@ -16,6 +16,11 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.2.0
+-------------
+* Remove support for Intel Xeon Phi (MIC, Knights Corner) co-processors.
+
+
 Version 2.1.0
 -------------
 * API

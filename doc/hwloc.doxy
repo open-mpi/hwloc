@@ -1470,9 +1470,6 @@ components when I/O discovery is enabled and supported.
   (OpenCL component)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   (CUDA component, using the NVIDIA CUDA Library)</li>
- <li><em>mic0</em> for the first Intel Xeon Phi (MIC) coprocessor
-  (Linux component)</li>
- </ul>
 </li>
 <li>DMA engine channel (::HWLOC_OBJ_OSDEV_DMA)
  <ul>
@@ -1888,23 +1885,6 @@ and SectorSize (in bytes).
  and size of the shared memory in each multiprocessor of a CUDA device.
  Sizes are in kB.
 </dd>
-<dt>MICSerialNumber (MIC coprocessor OS device)</dt>
-<dd>
- The serial number of an Intel Xeon Phi (MIC) coprocessor.
- hwloc may run either inside the coprocessor itself, or on the host processor.
- That attribute is set in both cases, so that the exact same coprocessor may be
- identified from both point of views, even if there are multiple nodes with
- multiple MICs.
- When running hwloc on the host, each hwloc OS device object that
- corresponds to a Xeon Phi gets such an attribute.
- When running hwloc inside a Xeon Phi coprocessor, the root of the topology
- (Machine object) gets this attribute.
-</dd>
-<dt>MICFamily, MICSKU, MICActiveCores, MICMemorySize (MIC coprocessor OS device)</dt>
-<dd>The family, SKU (model),
- number of active cores, and memory size (in kB)
- of an Intel Xeon Phi (MIC) coprocessor.
-</dd>
 <dt>Address, Port (Network interface OS devices)</dt>
 <dd>The MAC address and the port number of a software network
 interface, such as <tt>eth4</tt> on Linux.
@@ -2297,14 +2277,6 @@ enabled for the current topology.
   hwloc/openfabrics-verbs.h helps interoperability with the
   OpenFabrics Verbs interface.  For example, it can return a list of
   processors near an OpenFabrics device.
-  It may also return the corresponding OS device hwloc object for further
-  information (if I/O device discovery is enabled).
- </dd>
-
-<dt>Intel Xeon Phi (MIC)</dt>
- <dd>
-  hwloc/intel-mic.h helps interoperability with Intel Xeon Phi (MIC)
-  coprocessors by returning the list of processors near these devices.
   It may also return the corresponding OS device hwloc object for further
   information (if I/O device discovery is enabled).
  </dd>
@@ -3562,27 +3534,6 @@ The utility is currently unneeded on platforms without Intel Xeon Phi processors
 
 See <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
 about the location of dumped files.
-
-
-\subsection faq_phi How do I build for Intel Xeon Phi coprocessor?
-
-\note This section does not apply to standalone Intel Xeon Phi processors (Knights Landing and Knights Mill).
-
-Intel Xeon Phi coprocessors (Knights Corner) usually runs a Linux environment
-but cross-compiling from the host is required.
-hwloc uses standard autotools options for cross-compiling.
-
-If building with <tt>icc</tt>:
-\verbatim
-./configure CC="icc -mmic" --host=x86_64-k1om-linux --build=x86_64-unknown-linux-gnu
-\endverbatim
-
-If building with the Xeon Phi-specific GCC that comes with the MPSS environment,
-for instance <tt>/usr/linux-k1om-4.7/bin/x86_64-k1om-linux-gcc</tt>:
-\verbatim
-export PATH=$PATH:/usr/linux-k1om-4.7/bin/
-./configure --host=x86_64-k1om-linux --build=x86_64-unknown-linux-gnu
-\endverbatim
 
 
 \subsection faq_bgq How do I build hwloc for BlueGene/Q?
