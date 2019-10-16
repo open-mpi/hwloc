@@ -2791,7 +2791,7 @@ HWLOC_SETUP_CORE <em>must</em> be invoked if using the m4 macros):
   hwloc's types and public symbols with "foo_"; meaning that function
   hwloc_init() becomes foo_hwloc_init().  Enum values are prefixed
   with an upper-case translation if the prefix supplied;
-  HWLOC_OBJ_CORE becomes FOO_HWLOC_OBJ_CORE.  This is recommended
+  HWLOC_OBJ_CORE becomes FOO_hwloc_OBJ_CORE.  This is recommended
   behavior if you are including hwloc in middleware -- it is possible
   that your software will be combined with other software that links
   to another copy of hwloc.  If both uses of hwloc utilize different
