@@ -28,6 +28,7 @@ extern "C" {
 #define HWLOC_MUNGE_NAME(a, b) HWLOC_MUNGE_NAME2(a, b)
 #define HWLOC_MUNGE_NAME2(a, b) a ## b
 #define HWLOC_NAME(name) HWLOC_MUNGE_NAME(HWLOC_SYM_PREFIX, hwloc_ ## name)
+/* FIXME: should be "HWLOC_ ## name" below, unchanged because it doesn't matter much and could break some embedders hacks */
 #define HWLOC_NAME_CAPS(name) HWLOC_MUNGE_NAME(HWLOC_SYM_PREFIX_CAPS, hwloc_ ## name)
 
 /* Now define all the "real" names to be the prefixed names.  This
