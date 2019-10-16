@@ -714,7 +714,7 @@ It is attached as a <i>Memory</i> child (in green) and has a virtual depth (nega
 It could also have siblings if there were multiple local NUMA nodes,
 or cousins if other NUMA nodes were attached somewhere else in the machine.
 
-I/O or Misc object could be attached in a similar manner.
+I/O or Misc objects could be attached in a similar manner.
 
 
 
