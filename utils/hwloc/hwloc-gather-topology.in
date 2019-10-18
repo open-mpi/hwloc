@@ -270,6 +270,7 @@ fi
 cat /proc/mounts | while read -r dummy1 mntpath mnttype mntopts dummy2 ; do
   [ x$mnttype = xcpuset ] && savemntpnt "$mntpath"
   [ x$mnttype = xcgroup ] && echo $mntopts | grep -w cpuset >/dev/null && savemntpnt "$mntpath"
+  [ x$mnttype = xcgroup2 ] && savemntpnt "$mntpath"
 done
 
 #
