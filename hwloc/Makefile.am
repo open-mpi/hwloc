@@ -33,6 +33,7 @@ sources = \
         distances.c \
         components.c \
         bind.c \
+        distrib.c \
         bitmap.c \
         pci-common.c \
         diff.c \

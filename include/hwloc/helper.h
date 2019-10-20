@@ -803,7 +803,13 @@ enum hwloc_distrib_flags_e {
   /** \brief Distrib in reverse order, starting from the last objects.
    * \hideinitializer
    */
-  HWLOC_DISTRIB_FLAG_REVERSE = (1UL<<0)
+  HWLOC_DISTRIB_FLAG_REVERSE = (1UL<<0),
+  /** \brief Distrib in shuffled order. This flag preserves the iteration policy.
+   * See hwloc_distrib_build_iterator(). Does not work with hwloc_distrib().
+   * \hideinitializer
+   */  
+  HWLOC_DISTRIB_FLAG_SHUFFLE = (1UL<<1)
+	
 };
 
 /** \brief Distribute \p n items over the topology under \p roots
@@ -1153,6 +1159,82 @@ hwloc_bridge_covers_pcibus(hwloc_obj_t bridge,
     && bridge->attr->bridge.downstream.pci.secondary_bus <= bus
     && bridge->attr->bridge.downstream.pci.subordinate_bus >= bus;
 }
+
+/** Iterator of topology objects **/
+struct hwloc_distrib_iterator;
+
+/**
+ * Create a round-robin iterator of the whole topology on a specific type of resource.
+ * \p type must have a positive depth and a cpuset.
+ * Use HWLOC_DISTRIB_FLAG_REVERSE \p flags to iterate in a reversed round-robin fashion.
+ * Use HWLOC_DISTRIB_FLAG_SHUFFLE \p flags for a random iterator.
+ **/
+HWLOC_DECLSPEC struct hwloc_distrib_iterator *
+hwloc_distrib_iterator_round_robin(hwloc_topology_t topology,
+				   const hwloc_obj_type_t type,
+				   const unsigned long flags);
+
+/**
+ * Create a scatter iterator of the whole topology on a specific type of resources.
+ * Objects are iterated such that consecutive element are as far as possible of the 
+ * previously iterated objects.
+ * \p type must have a positive depth and a cpuset.
+ * Use HWLOC_DISTRIB_FLAG_REVERSE \p flags to iterate in a reversed scatter fashion.
+ * Use HWLOC_DISTRIB_FLAG_SHUFFLE \p flags to iterate in a randomized scatter fashion.
+ **/
+HWLOC_DECLSPEC struct hwloc_distrib_iterator *
+hwloc_distrib_iterator_scatter(hwloc_topology_t topology,
+			       const hwloc_obj_type_t type,
+			       const unsigned long flags);
+
+/**
+ * \brief Build a custom iterator to iterate over topology objects.
+ *
+ * This is the generic method for building iterators.
+ * Distributed objects are the deepest objects found in \p levels,
+ * below \p roots.
+ * On each iteration, \p it makes one step on the topology in the order of \p 
+ * levels and outputs a new object.
+ * Round-robin iterator is built by providing levels in ascending depth.
+ * Scatter iterator is built by providing levels in descending depth.
+ *
+ * \p topology: The topology used to distribute objects.
+ * \p roots: A set of topology objects below which are distributed objects.
+ * This is used to subset the topology.
+ * \p n_roots: The number of root objects.
+ * \p levels: The levels used to enumerate objects. The deepest level is used
+ * to output objects. The order of levels defines the distribution policy.
+ * \p n_levels: The number of levels.
+ * \p flags: Additional flags used to distribute objects. See hwloc_distrib_flags_e.
+ *
+ * All \p levels objects and \p roots must have a valid cpuset.
+ * All \p levels must have a single positive depth in the \p topology.
+ * All \p levels must have at least one object below \p roots.
+ *
+ * This function returns a new iterator populated on success.
+ * On failure, NULL is returned and the error is printed to stderr.
+ **/
+HWLOC_DECLSPEC struct hwloc_distrib_iterator *
+hwloc_distrib_build_iterator(hwloc_topology_t topology,
+			     hwloc_obj_t *roots,
+			     const size_t n_roots,
+			     const hwloc_obj_type_t *levels,
+			     const size_t n_levels,
+			     const unsigned long flags);
+
+/** \brief Free memory allocated for \p it **/
+HWLOC_DECLSPEC void hwloc_distrib_destroy_iterator(struct hwloc_distrib_iterator *it);
+
+/**
+ * On each iteration, \p it makes one step on the topology in the order of levels
+ * (see hwloc_distrib_build_iterator()) and output a new object in \p next.
+ * This iterator cycles and return 0 if the end of a cycle has been reached, else 1.
+ * Topology must be the same topology as the one used to create the iterator.
+ **/
+HWLOC_DECLSPEC int hwloc_distrib_iterator_next(hwloc_topology_t topology,
+					       struct hwloc_distrib_iterator *it,
+					       hwloc_obj_t *next);
+
 
 /** @} */
 
