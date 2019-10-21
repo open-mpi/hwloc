@@ -4242,6 +4242,9 @@ hwloc_topology_allow(struct hwloc_topology *topology,
       goto error;
     }
     topology->binding_hooks.get_allowed_resources(topology);
+    /* make sure the backend returned something sane (Linux cpusets may return offline PUs in some cases) */
+    hwloc_bitmap_and(topology->allowed_cpuset, topology->allowed_cpuset, hwloc_get_root_obj(topology)->cpuset);
+    hwloc_bitmap_and(topology->allowed_nodeset, topology->allowed_nodeset, hwloc_get_root_obj(topology)->nodeset);
     break;
   }
   case HWLOC_ALLOW_FLAG_CUSTOM: {
