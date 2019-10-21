@@ -2325,19 +2325,22 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
 #define CGROUP_LINE_LEN 256
     char line[CGROUP_LINE_LEN];
     while (fgets(line, sizeof(line), file)) {
-      char *end, *colon = strchr(line, ':');
+      char *end, *path, *colon;
+      colon = strchr(line, ':');
       if (!colon)
 	continue;
-      if (strncmp(colon, ":cpuset:", 8))
+      if (!strncmp(colon, ":cpuset:", 8)) /* cgroup v1 cpuset-specific hierarchy */
+	path = colon + 8;
+      else
 	continue;
 
-      /* found a cgroup-cpuset line, return the name */
+      /* found a cgroup with cpusets, return the name */
       fclose(file);
-      end = strchr(colon, '\n');
+      end = strchr(path, '\n');
       if (end)
 	*end = '\0';
-      hwloc_debug("Found cgroup-cpuset %s\n", colon+8);
-      return strdup(colon+8);
+      hwloc_debug("Found cgroup-cpuset %s\n", path);
+      return strdup(path);
     }
     fclose(file);
   }
