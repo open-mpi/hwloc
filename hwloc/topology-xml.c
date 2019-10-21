@@ -2051,13 +2051,17 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 	state->new_prop(state, "online_cpuset", setstring);
       free(setstring);
 
-      if (v1export || !obj->parent) {
+      if (v1export) {
 	hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
 	hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, topology->allowed_cpuset);
 	hwloc_bitmap_asprintf(&setstring, allowed_cpuset);
 	state->new_prop(state, "allowed_cpuset", setstring);
 	free(setstring);
 	hwloc_bitmap_free(allowed_cpuset);
+      } else if (!obj->parent) {
+	hwloc_bitmap_asprintf(&setstring, topology->allowed_cpuset);
+	state->new_prop(state, "allowed_cpuset", setstring);
+	free(setstring);
       }
     }
 
@@ -2072,13 +2076,17 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     state->new_prop(state, "complete_nodeset", setstring);
     free(setstring);
 
-    if (v1export || !obj->parent) {
+    if (v1export) {
       hwloc_bitmap_t allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
       hwloc_bitmap_and(allowed_nodeset, allowed_nodeset, topology->allowed_nodeset);
       hwloc_bitmap_asprintf(&setstring, allowed_nodeset);
       state->new_prop(state, "allowed_nodeset", setstring);
       free(setstring);
       hwloc_bitmap_free(allowed_nodeset);
+    } else if (!obj->parent) {
+      hwloc_bitmap_asprintf(&setstring, topology->allowed_nodeset);
+      state->new_prop(state, "allowed_nodeset", setstring);
+      free(setstring);
     }
   }
 
