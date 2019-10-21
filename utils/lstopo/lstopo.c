@@ -1126,7 +1126,7 @@ main (int argc, char *argv[])
   }
 
   if (input) {
-    err = hwloc_utils_enable_input_format(topology, input, &input_format, loutput.verbose_mode > 1, callname);
+    err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, loutput.verbose_mode > 1, callname);
     if (err)
       goto out_with_topology;
   }
