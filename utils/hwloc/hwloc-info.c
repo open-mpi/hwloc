@@ -524,7 +524,7 @@ main (int argc, char *argv[])
   hwloc_topology_set_flags(topology, flags);
 
   if (input) {
-    err = hwloc_utils_enable_input_format(topology, input, &input_format, verbose_mode, callname);
+    err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, verbose_mode, callname);
     if (err)
       return err;
   }
