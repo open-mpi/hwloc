@@ -2206,12 +2206,13 @@ struct hwloc_linux_cpuinfo_proc {
 };
 
 enum hwloc_linux_cgroup_type_e {
+      HWLOC_LINUX_CGROUP2,
       HWLOC_LINUX_CGROUP1,
       HWLOC_LINUX_CPUSET
 };
 
 static void
-hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mntpnt, const char *root_path)
+hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mntpnt, const char *root_path, int fsroot_fd)
 {
   char *mount_path;
   struct mntent mntent;
@@ -2252,7 +2253,39 @@ hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mn
 
   while (getmntent_r(fd, &mntent, buf, bufsize)) {
 
-    if (!strcmp(mntent.mnt_type, "cpuset")) {
+    if (!strcmp(mntent.mnt_type, "cgroup2")) {
+      char ctrls[1024]; /* there are about ten controllers with 10-char names */
+      char ctrlpath[256];
+      hwloc_debug("Found cgroup2 mount point on %s\n", mntent.mnt_dir);
+      /* read controllers */
+      snprintf(ctrlpath, sizeof(ctrlpath), "%s/cgroup.controllers", mntent.mnt_dir);
+      err = hwloc_read_path_by_length(ctrlpath, ctrls, sizeof(ctrls), fsroot_fd);
+      if (!err) {
+	/* look for cpuset separated by spaces */
+	char *ctrl, *_ctrls = ctrls;
+	char *tmp;
+	int cpuset_ctrl = 0;
+	tmp = strchr(ctrls, '\n');
+	if (tmp)
+	  *tmp = '\0';
+	hwloc_debug("Looking for `cpuset' controller in list `%s'\n", ctrls);
+	while ((ctrl = strsep(&_ctrls, " ")) != NULL) {
+	  if (!strcmp(ctrl, "cpuset")) {
+	    cpuset_ctrl = 1;
+	    break;
+	  }
+	}
+	if (cpuset_ctrl) {
+	  hwloc_debug("Found cgroup2/cpuset mount point on %s\n", mntent.mnt_dir);
+	  *cgtype = HWLOC_LINUX_CGROUP2;
+	  *mntpnt = strdup(mntent.mnt_dir);
+	  break;
+	}
+      } else {
+	hwloc_debug("Failed to read cgroup2 controllers from `%s'\n", ctrlpath);
+      }
+
+    } else if (!strcmp(mntent.mnt_type, "cpuset")) {
       hwloc_debug("Found cpuset mount point on %s\n", mntent.mnt_dir);
       *cgtype = HWLOC_LINUX_CPUSET;
       *mntpnt = strdup(mntent.mnt_dir);
@@ -2341,6 +2374,8 @@ hwloc_read_linux_cgroup_name(int fsroot_fd, hwloc_pid_t pid)
 	continue;
       if (!strncmp(colon, ":cpuset:", 8)) /* cgroup v1 cpuset-specific hierarchy */
 	path = colon + 8;
+      else if (!strncmp(colon, "::", 2)) /* cgroup v2 unified hierarchy */
+	path = colon + 2;
       else
 	continue;
 
@@ -2373,6 +2408,11 @@ hwloc_admin_disable_set_from_cgroup(int root_fd,
   int err;
 
   switch (cgtype) {
+  case HWLOC_LINUX_CGROUP2:
+    /* try to read the cpuset from cgroup2. use the last "effective" mask to get a AND of parent masks */
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s.effective", mntpnt, cpuset_name, attr_name);
+    hwloc_debug("Trying to read cgroup2 file <%s>\n", cpuset_filename);
+    break;
   case HWLOC_LINUX_CGROUP1:
     /* try to read the cpuset from cgroup1. no need to use "effective_cpus/mems" since we'll remove offline CPUs in the core */
     snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s", mntpnt, cpuset_name, attr_name);
@@ -5219,7 +5259,7 @@ static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const 
   enum hwloc_linux_cgroup_type_e cgtype;
   char *mntpnt, *cpuset_name = NULL;
 
-  hwloc_find_linux_cgroup_mntpnt(&cgtype, &mntpnt, root_path);
+  hwloc_find_linux_cgroup_mntpnt(&cgtype, &mntpnt, root_path, root_fd);
   if (mntpnt) {
     cpuset_name = hwloc_read_linux_cgroup_name(root_fd, topology->pid);
     if (cpuset_name) {
