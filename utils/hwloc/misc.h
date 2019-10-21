@@ -81,7 +81,8 @@ enum hwloc_utils_input_format {
   HWLOC_UTILS_INPUT_XML,
   HWLOC_UTILS_INPUT_FSROOT,
   HWLOC_UTILS_INPUT_SYNTHETIC,
-  HWLOC_UTILS_INPUT_CPUID
+  HWLOC_UTILS_INPUT_CPUID,
+  HWLOC_UTILS_INPUT_SHMEM
 };
 
 static __hwloc_inline enum hwloc_utils_input_format
@@ -93,6 +94,8 @@ hwloc_utils_parse_input_format(const char *name, const char *callname)
     return HWLOC_UTILS_INPUT_XML;
   else if (!hwloc_strncasecmp(name, "fsroot", 1))
     return HWLOC_UTILS_INPUT_FSROOT;
+  else if (!hwloc_strncasecmp(name, "shmem", 5))
+    return HWLOC_UTILS_INPUT_SHMEM;
   else if (!hwloc_strncasecmp(name, "synthetic", 1))
     return HWLOC_UTILS_INPUT_SYNTHETIC;
   else if (!hwloc_strncasecmp(name, "cpuid", 1))
@@ -177,6 +180,12 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
     return HWLOC_UTILS_INPUT_SYNTHETIC;
   }
   if (S_ISREG(inputst.st_mode)) {
+    size_t len = strlen(input);
+    if (len >= 6 && !strcmp(input+len-6, ".shmem")) {
+      if (verbose > 0)
+	printf("assuming `%s' is a shmem topology file\n", input);
+      return HWLOC_UTILS_INPUT_SHMEM;
+    }
     if (verbose > 0)
       printf("assuming `%s' is a XML file\n", input);
     return HWLOC_UTILS_INPUT_XML;
@@ -208,7 +217,7 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
 }
 
 static __hwloc_inline int
-hwloc_utils_enable_input_format(struct hwloc_topology *topology,
+hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long flags,
 				const char *input,
 				enum hwloc_utils_input_format *input_format,
 				int verbose, const char *callname)
@@ -246,9 +255,12 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     putenv((char *) "HWLOC_DUMPED_HWDATA_DIR=/var/run/hwloc");
     env = getenv("HWLOC_COMPONENTS");
     if (env)
-      fprintf(stderr, "Cannot force linux and linuxio components first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
+      fprintf(stderr, "Cannot force linux component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
-      putenv((char *) "HWLOC_COMPONENTS=linux,linuxio,stop");
+      putenv((char *) "HWLOC_COMPONENTS=linux,pci,stop");
+    /* normally-set flags are overriden by envvar-forced backends */
+    if (flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
+      putenv((char *) "HWLOC_THISSYSTEM=1");
 #else /* HWLOC_LINUX_SYS */
     fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
     exit(EXIT_FAILURE);
@@ -271,6 +283,9 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
       fprintf(stderr, "Cannot force x86 component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
       putenv((char *) "HWLOC_COMPONENTS=x86,stop");
+    /* normally-set flags are overriden by envvar-forced backends */
+    if (flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
+      putenv((char *) "HWLOC_THISSYSTEM=1");
 #else
     fprintf(stderr, "This installation of hwloc does not support loading from a cpuid dump, sorry.\n");
     exit(EXIT_FAILURE);
@@ -285,6 +300,9 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     }
     break;
 
+  case HWLOC_UTILS_INPUT_SHMEM:
+    break;
+
   case HWLOC_UTILS_INPUT_DEFAULT:
     assert(0);
   }
@@ -293,15 +311,20 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 }
 
 static __hwloc_inline void
-hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *matrix, int logical)
+hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *matrix, int logical, int show_types)
 {
   unsigned i, j;
 
   /* column header */
   fprintf(output, "  index");
   for(j=0; j<nbobjs; j++) {
-    fprintf(output, " % 5d",
-	    (int) (logical ? objs[j]->logical_index : objs[j]->os_index));
+    if (show_types)
+      fprintf(output, " %s:%d",
+	      hwloc_obj_type_string(objs[j]->type),
+	      (int) (logical ? objs[j]->logical_index : objs[j]->os_index));
+    else
+      fprintf(output, " % 5d",
+	      (int) (logical ? objs[j]->logical_index : objs[j]->os_index));
   }
   fprintf(output, "\n");
 
@@ -431,6 +454,22 @@ hwloc_utils_userdata_export_cb(void *reserved, hwloc_topology_t topology, hwloc_
       hwloc_export_obj_userdata(reserved, topology, obj, u->name, u->buffer, u->length);
     u = u->next;
   }
+}
+
+/* to be called when importing from shmem with non-NULL userdata pointing to stuff in the other process */
+static __hwloc_inline void
+hwloc_utils_userdata_clear_recursive(hwloc_obj_t obj)
+{
+  hwloc_obj_t child;
+  obj->userdata= NULL;
+  for_each_child(child, obj)
+    hwloc_utils_userdata_clear_recursive(child);
+  for_each_memory_child(child, obj)
+    hwloc_utils_userdata_clear_recursive(child);
+  for_each_io_child(child, obj)
+    hwloc_utils_userdata_clear_recursive(child);
+  for_each_misc_child(child, obj)
+    hwloc_utils_userdata_clear_recursive(child);
 }
 
 /* must be called once the caller has removed its own userdata */

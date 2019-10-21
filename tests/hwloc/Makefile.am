@@ -1,4 +1,4 @@
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -8,7 +8,7 @@ AM_CPPFLAGS = $(HWLOC_CPPFLAGS) -DXMLTESTDIR=\"$(abs_top_srcdir)/tests/hwloc/xml
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 SUBDIRS = . ports xml
-DIST_SUBDIRS = ports xml linux x86 rename
+DIST_SUBDIRS = ports xml linux x86 x86+linux rename
 
 if HWLOC_HAVE_LINUX
 SUBDIRS += linux
@@ -18,11 +18,19 @@ if HWLOC_HAVE_X86_CPUID
 SUBDIRS += x86
 endif HWLOC_HAVE_X86_CPUID
 
+if HWLOC_HAVE_LINUX
+if HWLOC_HAVE_X86_CPUID
+SUBDIRS += x86+linux
+endif HWLOC_HAVE_X86_CPUID
+endif HWLOC_HAVE_LINUX
+
 LDADD =
 
 LOG_COMPILER = $(builddir)/wrapper.sh
 
-check_PROGRAMS = hwloc_list_components \
+check_PROGRAMS = \
+        hwloc_api_version \
+        hwloc_list_components \
         hwloc_distrib \
         hwloc_bitmap \
         hwloc_bitmap_string \
@@ -58,8 +66,7 @@ check_PROGRAMS = hwloc_list_components \
         hwloc_obj_infos \
         hwloc_iodevs \
         xmlbuffer \
-        gl \
-        intel-mic
+        gl
 
 if !HWLOC_HAVE_WINDOWS
 if !HWLOC_HAVE_DARWIN

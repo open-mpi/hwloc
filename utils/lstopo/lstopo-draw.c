@@ -33,6 +33,7 @@
 struct lstopo_color BLACK_COLOR = { 0, 0, 0, 0 };
 struct lstopo_color WHITE_COLOR = { 0xff, 0xff, 0xff, 0 };
 struct lstopo_color PACKAGE_COLOR = { DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR, 0 };
+struct lstopo_color DIE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, 0 };
 struct lstopo_color MEMORY_COLOR = { 0xef, 0xdf, 0xde, 0 };
 struct lstopo_color MEMORIES_COLOR = { 0xf2, 0xe8, 0xe8, 0}; /* slightly lighter than MEMORY_COLOR */
 struct lstopo_color CORE_COLOR = { 0xbe, 0xbe, 0xbe, 0 };
@@ -77,6 +78,7 @@ declare_colors(struct lstopo_output *output)
   declare_color(output, &BLACK_COLOR);
   declare_color(output, &WHITE_COLOR);
   declare_color(output, &PACKAGE_COLOR);
+  declare_color(output, &DIE_COLOR);
   declare_color(output, &MEMORY_COLOR);
   declare_color(output, &MEMORIES_COLOR);
   declare_color(output, &CORE_COLOR);
@@ -502,6 +504,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned children_width = 0, children_height = 0;
   unsigned above_children_width, above_children_height;
   unsigned existing_kinds;
+  int normal_children_are_PUs;
   hwloc_obj_t child;
   int ncstate;
   unsigned i;
@@ -537,23 +540,27 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     orient = LSTOPO_ORIENT_HORIZ;
   }
 
-  /* recurse into children to prepare their sizes */
+  /* recurse into children to prepare their sizes,
+   * and check whether all normal children are PUs. */
+  normal_children_are_PUs = (parent->arity > 0);
   for(i = 0, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, NULL, &ncstate);
       child;
       i++, child = next_child(loutput, parent, LSTOPO_CHILD_KIND_ALL, child, &ncstate)) {
     get_type_fun(child->type)(loutput, child, 0, 0, 0);
+    if (hwloc_obj_type_is_normal(child->type) && child->type != HWLOC_OBJ_PU)
+      normal_children_are_PUs = 0;
   }
   if (!i)
     return;
 
 
   /* no separator between PUs */
-  if ((unsigned)parent->depth == loutput->depth-2)
+  if (normal_children_are_PUs)
     normal_children_separator = 0;
 
   /* add separator between a cache parent and its children */
   if (hwloc_obj_type_is_cache(parent->type) || parent->type == HWLOC_OBJ_MEMCACHE) {
-    if ((unsigned)parent->depth == loutput->depth-2 || parent->type == HWLOC_OBJ_MEMCACHE)
+    if (normal_children_are_PUs || parent->type == HWLOC_OBJ_MEMCACHE)
       /* except between cache parent and PU children */
       separator_below_cache = 0;
     /* update children placement */
@@ -718,7 +725,7 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
       /* by default we show logical+physical for PU/NUMA */
       idx = obj->logical_index;
       indexprefix = " L#";
-    } else if (obj->type == HWLOC_OBJ_PACKAGE || obj->type == HWLOC_OBJ_CORE) {
+    } else if (obj->type == HWLOC_OBJ_PACKAGE || obj->type == HWLOC_OBJ_DIE || obj->type == HWLOC_OBJ_CORE) {
       /* logical only for package+core (so that we see easily how many packages/cores there are */
       idx = obj->logical_index;
       indexprefix = " L#";
@@ -875,6 +882,10 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 
   case HWLOC_OBJ_PACKAGE:
     s->bg = &PACKAGE_COLOR;
+    break;
+
+  case HWLOC_OBJ_DIE:
+    s->bg = &DIE_COLOR;
     break;
 
   case HWLOC_OBJ_CORE:
@@ -1500,6 +1511,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_MACHINE:
     case HWLOC_OBJ_NUMANODE:
     case HWLOC_OBJ_PACKAGE:
+    case HWLOC_OBJ_DIE:
     case HWLOC_OBJ_CORE:
     case HWLOC_OBJ_PU:
     case HWLOC_OBJ_GROUP:

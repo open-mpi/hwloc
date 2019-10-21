@@ -36,42 +36,42 @@ int main(void)
 #if (defined HWLOC_LINUX_SYS) && (defined HWLOC_X86_64_ARCH)
   if (!getenv("HWLOC_IGNORE_TOPOLOGY_ABI")) {
     size_t size, offset __hwloc_attribute_unused;
-    printf("checking offsets and sizes in struct hwloc_topology for topology ABI 0x%x...\n", HWLOC_TOPOLOGY_ABI);
+    printf("checking offsets and sizes in struct hwloc_topology for topology ABI 0x%x...\n", (unsigned) HWLOC_TOPOLOGY_ABI);
 
     /*******************************************************************
      * WARNING: if anything breaks below, the topology ABI has changed.
      * HWLOC_TOPOLOGY_ABI must be bumped when updating these checks.
      *******************************************************************/
 
-    HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MAX == 19);
+    HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MAX == 20);
     HWLOC_BUILD_ASSERT(HWLOC_NR_SLEVELS == 6);
 
     offset = offsetof(struct hwloc_topology, topology_abi);
     assert(offset == 0);
 
     offset = offsetof(struct hwloc_topology, adopted_shmem_addr);
-    assert(offset == 224);
+    assert(offset == 232);
 
     offset = offsetof(struct hwloc_topology, binding_hooks);
-    assert(offset == 448);
+    assert(offset == 456);
     size = sizeof(struct hwloc_binding_hooks);
     assert(size == 192);
 
     offset = offsetof(struct hwloc_topology, support);
-    assert(offset == 640);
+    assert(offset == 648);
 
     offset = offsetof(struct hwloc_topology, first_dist);
-    assert(offset == 688);
+    assert(offset == 696);
     size = sizeof(struct hwloc_internal_distances_s);
-    assert(size == 64);
+    assert(size == 88);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 740);
+    assert(offset == 748);
 
     /* fields after this one aren't needed after discovery */
 
     /* check bitmap ABI too, but those fields are private to bitmap.c */
-    printf("checking bitmaps for topology ABI 0x%x...\n", HWLOC_TOPOLOGY_ABI);
+    printf("checking bitmaps for topology ABI 0x%x...\n", (unsigned) HWLOC_TOPOLOGY_ABI);
     {
       hwloc_bitmap_t set = hwloc_bitmap_alloc();
       unsigned *ulongs_count =     (unsigned*)       (((char*)set)   );

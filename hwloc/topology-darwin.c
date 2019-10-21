@@ -23,7 +23,7 @@
 #include "private/debug.h"
 
 static int
-hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend uses the underlying OS.
@@ -50,6 +50,8 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   char cpufamilynumber[20], cpumodelnumber[20], cpustepping[20];
   int gotnuma = 0;
   int gotnumamemory = 0;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
@@ -367,6 +369,7 @@ hwloc_set_darwin_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unuse
 static struct hwloc_backend *
 hwloc_darwin_component_instantiate(struct hwloc_topology *topology,
 				   struct hwloc_disc_component *component,
+				   unsigned excluded_phases __hwloc_attribute_unused,
 				   const void *_data1 __hwloc_attribute_unused,
 				   const void *_data2 __hwloc_attribute_unused,
 				   const void *_data3 __hwloc_attribute_unused)
@@ -380,9 +383,9 @@ hwloc_darwin_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_darwin_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_CPU,
   "darwin",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_CPU,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_darwin_component_instantiate,
   50,
   1,

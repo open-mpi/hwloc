@@ -450,6 +450,7 @@ complete -F _hwloc-ps hwloc-ps
 
 _hwloc-gather-cpuid(){
     local OPTIONS=(-c
+		   -s --silent
 		   -h --help
 		   )
     local cur=${COMP_WORDS[COMP_CWORD]}
@@ -471,6 +472,7 @@ complete -F _hwloc-gather-cpuid hwloc-gather-cpuid
 _hwloc-gather-topology(){
     local OPTIONS=(--io
 		   --dmi
+		   --no-cpuid
 		   --keep
 		   -h --help
 		  )

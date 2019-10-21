@@ -108,7 +108,7 @@
       <object type="NUMANode" os_index="4" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="34" local_memory="8589934592"/>
     </object>
   </object>
-  <distances2 type="NUMANode" nbobjs="5" kind="5" indexing="os">
+  <distances2 type="NUMANode" nbobjs="5" kind="5" name="NUMALatency" indexing="os">
     <indexes length="10">1 2 3 4 5 </indexes>
     <u64values length="30">10 20 20 20 20 20 10 20 20 20 </u64values>
     <u64values length="30">20 20 10 20 20 20 20 20 10 20 </u64values>

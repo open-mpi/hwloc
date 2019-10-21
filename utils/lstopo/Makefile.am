@@ -30,6 +30,10 @@ lstopo_no_graphics_SOURCES = \
         lstopo-text.c \
         lstopo-xml.c
 
+if !HWLOC_HAVE_WINDOWS
+lstopo_no_graphics_SOURCES += lstopo-shmem.c
+endif
+
 lstopo_no_graphics_CFLAGS = $(AM_CFLAGS)
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 
@@ -60,10 +64,11 @@ man1_pages = lstopo-no-graphics.1
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS = $(man1_pages)
 
-if !HWLOC_HAVE_MINGW32
 TESTS = \
         test-lstopo.sh
-endif !HWLOC_HAVE_MINGW32
+if HWLOC_HAVE_LINUX
+TESTS += test-lstopo-shmem.sh
+endif HWLOC_HAVE_LINUX
 
 if HWLOC_HAVE_CAIRO
 # only installed when lstopo is built with Cairo/X11 support

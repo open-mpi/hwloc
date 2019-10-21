@@ -4,6 +4,7 @@
     <ProjectGuid>{9DE76C6D-4773-4766-9F93-69C56166CB93}</ProjectGuid>
     <RootNamespace>hwloc-bind</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -17,7 +18,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -30,8 +31,11 @@
     <LinkIncremental>false</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
     <TargetName>$(ProjectName)-12</TargetName>
-    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -81,6 +85,12 @@
     <ClInclude Include="..\..\include\private\misc.h" />
     <ClInclude Include="..\..\include\private\private.h" />
     <ClInclude Include="..\..\include\private\xml.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="libhwloc.vcxproj">
+      <Project>{9DE76C6D-4773-4766-9F93-69C56166CB8D}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -87,7 +87,7 @@ extern "C" {
  * actually modifies the API.
  *
  * Users may check for available features at build time using this number
- * (see \ref faq_upgrade).
+ * (see \ref faq_version_api).
  *
  * \note This should not be confused with HWLOC_VERSION, the library version.
  * Two stable releases of the same series usually have the same ::HWLOC_API_VERSION
@@ -187,7 +187,8 @@ typedef enum {
   HWLOC_OBJ_PACKAGE,	/**< \brief Physical package.
 			  * The physical package that usually gets inserted
 			  * into a socket on the motherboard.
-			  * A processor package usually contains multiple cores.
+			  * A processor package usually contains multiple cores,
+			  * and possibly some dies.
 			  */
   HWLOC_OBJ_CORE,	/**< \brief Core.
 			  * A computation unit (may be shared by several
@@ -296,6 +297,11 @@ typedef enum {
 			  * instead of a normal depth just like other objects in the
 			  * main tree.
 			  */
+
+  HWLOC_OBJ_DIE,	/**< \brief Die within a physical package.
+			 * A subpart of the physical package, that contains multiple cores.
+			 * \hideinitializer
+			 */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
 } hwloc_obj_type_t;
@@ -604,6 +610,7 @@ union hwloc_obj_attr_u {
 					   *   It may change if intermediate Group objects are added. */
     unsigned kind;			  /**< \brief Internally-used kind of group. */
     unsigned subkind;			  /**< \brief Internally-used subkind to distinguish different levels of groups with same kind */
+    unsigned char dont_merge;		  /**< \brief Flag preventing groups from being automatically merged with identical parent or children. */
   } group;
   /** \brief PCI Device specific Object Attributes */
   struct hwloc_pcidev_attr_s {
@@ -1819,6 +1826,9 @@ enum hwloc_topology_components_flag_e {
  * \p name is the name of the discovery component that should not be used
  * when loading topology \p topology. The name is a string such as "cuda".
  *
+ * For components with multiple phases, it may also be suffixed with the name
+ * of a phase, for instance "linux:io".
+ *
  * \p flags should be ::HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST.
  *
  * This may be used to avoid expensive parts of the discovery process.
@@ -2047,7 +2057,7 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
  *
  * By default, most objects are kept (::HWLOC_TYPE_FILTER_KEEP_ALL).
  * Instruction caches, I/O and Misc objects are ignored by default (::HWLOC_TYPE_FILTER_KEEP_NONE).
- * Group levels are ignored unless they bring structure (::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
+ * Die and Group levels are ignored unless they bring structure (::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
  *
  * Note that group objects are also ignored individually (without the entire level)
  * when they do not bring structure.
@@ -2305,6 +2315,9 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  * Then it must setup at least one of its CPU or node sets to specify
  * the final location of the Group in the topology.
  * Then the object can be passed to this function for actual insertion in the topology.
+ *
+ * The group \p dont_merge attribute may be set to prevent the core from
+ * ever merging this object with another object hierarchically-identical.
  *
  * Either the cpuset or nodeset field (or both, if compatible) must be set
  * to a non-empty bitmap. The complete_cpuset or complete_nodeset may be set

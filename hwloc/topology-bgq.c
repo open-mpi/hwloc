@@ -57,6 +57,8 @@ hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   hwloc_obj_t obj;
   unsigned i;
 
+  assert(dstatus->phase == HWLOC_DISC_PHASE_GLOBAL);
+
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
     return -1;
@@ -261,6 +263,7 @@ hwloc_set_bgq_hooks(struct hwloc_binding_hooks *hooks,
 static struct hwloc_backend *
 hwloc_bgq_component_instantiate(struct hwloc_topology *topology,
 				struct hwloc_disc_component *component,
+				unsigned excluded_phases __hwloc_attribute_unused,
 				const void *_data1 __hwloc_attribute_unused,
 				const void *_data2 __hwloc_attribute_unused,
 				const void *_data3 __hwloc_attribute_unused)
@@ -297,8 +300,8 @@ hwloc_bgq_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_bgq_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   "bgq",
+  HWLOC_DISC_PHASE_GLOBAL,
   ~0,
   hwloc_bgq_component_instantiate,
   50,

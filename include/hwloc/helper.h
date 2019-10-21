@@ -926,7 +926,7 @@ hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
  *
- * \note This is equivalent to retrieving the root object complete CPU-set.
+ * \note This is equivalent to retrieving the root object CPU-set.
  */
 HWLOC_DECLSPEC hwloc_const_cpuset_t
 hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
@@ -957,7 +957,7 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology) __hwloc_attribute_p
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
  *
- * \note This is equivalent to retrieving the root object complete CPU-set.
+ * \note This is equivalent to retrieving the root object complete nodeset.
  */
 HWLOC_DECLSPEC hwloc_const_nodeset_t
 hwloc_topology_get_complete_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
@@ -971,7 +971,7 @@ hwloc_topology_get_complete_nodeset(hwloc_topology_t topology) __hwloc_attribute
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
  *
- * \note This is equivalent to retrieving the root object complete CPU-set.
+ * \note This is equivalent to retrieving the root object nodeset.
  */
 HWLOC_DECLSPEC hwloc_const_nodeset_t
 hwloc_topology_get_topology_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;

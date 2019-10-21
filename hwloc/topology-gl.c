@@ -22,7 +22,7 @@
 #define HWLOC_GL_SCREEN_MAX 10
 
 static int
-hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend uses the underlying OS.
@@ -34,6 +34,8 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   enum hwloc_type_filter_e filter;
   unsigned i;
   int err;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &filter);
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
@@ -144,6 +146,7 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 static struct hwloc_backend *
 hwloc_gl_component_instantiate(struct hwloc_topology *topology,
 			       struct hwloc_disc_component *component,
+			       unsigned excluded_phases __hwloc_attribute_unused,
 			       const void *_data1 __hwloc_attribute_unused,
 			       const void *_data2 __hwloc_attribute_unused,
 			       const void *_data3 __hwloc_attribute_unused)
@@ -158,9 +161,9 @@ hwloc_gl_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_gl_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_MISC,
   "gl",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_IO,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_gl_component_instantiate,
   10, /* after pci */
   1,

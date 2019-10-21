@@ -35,7 +35,7 @@
 
 
 static int
-hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend uses the underlying OS.
@@ -49,6 +49,8 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
   cl_platform_id *platform_ids;
   cl_int clret;
   unsigned j;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &filter);
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
@@ -176,6 +178,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
 static struct hwloc_backend *
 hwloc_opencl_component_instantiate(struct hwloc_topology *topology,
 				   struct hwloc_disc_component *component,
+				   unsigned excluded_phases __hwloc_attribute_unused,
 				   const void *_data1 __hwloc_attribute_unused,
 				   const void *_data2 __hwloc_attribute_unused,
 				   const void *_data3 __hwloc_attribute_unused)
@@ -190,9 +193,9 @@ hwloc_opencl_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_opencl_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_MISC,
   "opencl",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_IO,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_opencl_component_instantiate,
   10, /* after pci */
   1,

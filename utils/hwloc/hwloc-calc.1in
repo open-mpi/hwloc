@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2018 Inria.  All rights reserved.
+.\" Copyright © 2010-2019 Inria.  All rights reserved.
 .\" Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-CALC "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -92,6 +92,9 @@ while a comma is used to separate indexes
 .TP
 \fB\-\-single\fR
 Singlify the output to a single CPU.
+.TP
+\fB\-\-no\-smt\fR
+Only keep a single PU per core in the input locations.
 .TP
 \fB\-\-taskset\fR
 Display CPU set strings in the format recognized by the taskset command-line
@@ -214,7 +217,7 @@ package:
 To bind GNU OpenMP threads logically over the whole machine, we need to use
 physical number output instead:
 
-    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU machine:0`
+    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU all`
     $ echo $GOMP_CPU_AFFINITY
     0,4,1,5,2,6,3,7
 
@@ -271,14 +274,15 @@ To synthetize a set of cores into largest objects on a 2-node 2-package 2-core m
 To get the set of first threads of all cores:
 
     $ hwloc-calc core:all.pu:0
+    $ hwloc-calc --no-smt all
 
 This can also be very useful in order to make GNU OpenMP use exactly one thread
 per core, and in logical core order:
 
-    $ export OMP_NUM_THREADS=`hwloc-calc --number-of core machine:0`
+    $ export OMP_NUM_THREADS=`hwloc-calc --number-of core all`
     $ echo $OMP_NUM_THREADS
     4
-    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU core:all.pu:0`
+    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU --no-smt all`
     $ echo $GOMP_CPU_AFFINITY
     0,2,1,3
 

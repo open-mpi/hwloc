@@ -112,7 +112,6 @@ test-suite.log
 /tests/hwloc/hwloc_iodevs
 /tests/hwloc/xmlbuffer
 /tests/hwloc/gl
-/tests/hwloc/intel-mic
 /tests/hwloc/linux-libnuma
 /tests/hwloc/glibc-sched
 /tests/hwloc/openfabrics-verbs
@@ -129,6 +128,8 @@ test-suite.log
 /tests/hwloc/ports/liblstopo-port-windows.a
 
 /tests/hwloc/x86/test-topology.sh
+
+/tests/hwloc/x86+linux/test-topology.sh
 
 /tests/hwloc/xml/test-topology.sh
 
@@ -197,6 +198,7 @@ test-suite.log
 /utils/lstopo/lstopo-no-graphics
 /utils/lstopo/lstopo-no-graphics.1
 /utils/lstopo/test-lstopo.sh
+/utils/lstopo/test-lstopo-shmem.sh
 /utils/lstopo/test-*.sh.log
 /utils/lstopo/test-*.sh.trs
 

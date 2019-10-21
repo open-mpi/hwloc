@@ -7,7 +7,7 @@
 echo "############################"
 echo "Running on:"
 uname -a
-echo "Tarball: $1"
+echo "Tarball: $3"
 echo "############################"
 
 set -e
@@ -28,14 +28,14 @@ test -f $HOME/.ciprofile && . $HOME/.ciprofile
 # check that this is either master or vX.Y
 if test x$hwloc_branch != xmaster; then
   if test x$(echo "x${hwloc_branch}x" | sed -r -e 's/xv[0-9]+\.[0-9]+x//') != x; then
-    echo "Sending non-master and non-stable branch output to `tmp` branch on sonarqube server."
+    echo "Sending non-master and non-stable branch output to 'tmp' branch on sonarqube server."
     hwloc_branch=tmp
   fi
 fi
 
 # check that the repo is the official one
 if test x$git_repo_url != xhttps://github.com/open-mpi/hwloc.git; then
-  if test x$FORCE_SONAR_SCANNER = xtrue; then
+  if test x$FORCE_SONARQUBE = xtrue; then
     echo "Sending non-official repository output to 'tmp' branch on sonarqube server."
     hwloc_branch=tmp
   else
@@ -133,7 +133,7 @@ sed -e '/#define HWLOC_HAVE_ATTRIBUTE/d' -i include/private/autogen/config.h
 
 # Create the config for sonar-scanner
 cat > sonar-project.properties << EOF
-sonar.host.url=https://sonarqube.bordeaux.inria.fr/sonarqube
+sonar.host.url=https://sonarqube.inria.fr/sonarqube
 sonar.login=$(cat ~/.sonarqube-hwloc-token)
 sonar.links.homepage=https://www.open-mpi.org/projects/hwloc/
 sonar.links.ci=https://ci.inria.fr/hwloc/

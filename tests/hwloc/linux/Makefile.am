@@ -19,7 +19,6 @@ sysfs_outputs = \
 		4fake-4gr1nu1pu.output \
 		256ppc-8n8s4t.output \
 		256ppc-8n8s4t-nocache.output \
-		28em64t-2s2n7c-buggycoresiblings.output \
 		32amd64-4s2n4c-cgroup.output \
 		32amd64-4s2n4c-cgroup.xml.output \
 		8amd64-4n2c.output  \
@@ -63,6 +62,7 @@ sysfs_outputs = \
 		nvidiagpunumanodes.output \
 		nvidiagpunumanodes.kept.output \
 		fakememinitiators-1npc+1npc.output \
+		fakecpuid1f-64intel64-2p4d2n2c2t.output \
 		fakeheteronuma.output
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
@@ -79,7 +79,6 @@ sysfs_tarballs = \
 		4fake-4gr1nu1pu.tar.bz2 \
 		256ppc-8n8s4t.tar.bz2 \
 		256ppc-8n8s4t-nocache.source \
-		28em64t-2s2n7c-buggycoresiblings.tar.bz2 \
 		32amd64-4s2n4c-cgroup.tar.bz2 \
 		32amd64-4s2n4c-cgroup.xml.source \
 		8amd64-4n2c.tar.bz2  \
@@ -123,6 +122,7 @@ sysfs_tarballs = \
 		nvidiagpunumanodes.tar.bz2 \
 		nvidiagpunumanodes.kept.source \
 		fakememinitiators-1npc+1npc.tar.bz2 \
+		fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2 \
 		fakeheteronuma.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'

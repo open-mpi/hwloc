@@ -46,6 +46,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --taskset                 Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "Input topology options:\n");
+  fprintf(where, "  --no-smt                  Only keep a single PU per core\n");
   fprintf(where, "  --restrict <cpuset>       Restrict the topology to processors listed in <cpuset>\n");
   fprintf(where, "  --disallowed              Include objects disallowed by administrative limitations\n");
   hwloc_utils_input_format_usage(where, 10);
@@ -65,6 +66,7 @@ static int intersectdepth = -1;
 static int hiernblevels = 0;
 static int *hierdepth = NULL;
 static int showobjs = 0;
+static int no_smt = 0;
 static int singlify = 0;
 static int taskset = 0;
 
@@ -101,6 +103,24 @@ next:
 static int
 hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set)
 {
+  if (no_smt) {
+    if (hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "Topology has no Core object, ignoring --no-smt\n");
+    } else {
+      hwloc_obj_t core = NULL;
+      while ((core = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_CORE, core)) != NULL) {
+	int firstpu = hwloc_bitmap_first(core->cpuset);
+	int hadpu = hwloc_bitmap_isset(set, firstpu);
+	assert(firstpu >= 0);
+	/* remove the entire core */
+	hwloc_bitmap_andnot(set, set, core->cpuset);
+	/* put back its first PU if it was there */
+	if (hadpu)
+	  hwloc_bitmap_set(set, firstpu);
+      }
+    }
+  }
+
   if (singlify)
     hwloc_bitmap_singlify(set);
 
@@ -221,8 +241,10 @@ int main(int argc, char *argv[])
   hwloc_utils_check_api_version(callname);
 
   /* enable verbose backends */
-  putenv((char *) "HWLOC_XML_VERBOSE=1");
-  putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
+  if (!getenv("HWLOC_XML_VERBOSE"))
+    putenv((char *) "HWLOC_XML_VERBOSE=1");
+  if (!getenv("HWLOC_SYNTHETIC_VERBOSE"))
+    putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
 
   set = hwloc_bitmap_alloc();
 
@@ -233,7 +255,7 @@ int main(int argc, char *argv[])
     hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL); \
     hwloc_topology_set_flags(topology, flags); \
     if (input) { \
-      err = hwloc_utils_enable_input_format(topology, input, &input_format, verbose, callname); \
+      err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, verbose, callname); \
       if (err) return EXIT_FAILURE; \
     } \
     err = hwloc_topology_load(topology); \
@@ -264,6 +286,10 @@ int main(int argc, char *argv[])
       if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
 	usage(callname, stdout);
 	return EXIT_SUCCESS;
+      }
+      if (!strcmp (argv[0], "--no-smt")) {
+	no_smt = 1;
+	goto next;
       }
       if (!strcmp (argv[0], "--restrict")) {
 	hwloc_bitmap_t restrictset;

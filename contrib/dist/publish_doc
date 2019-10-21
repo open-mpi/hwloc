@@ -14,11 +14,11 @@ fi
 
 EXAMPLE=v2.0.0
 if test -d "$dst/projects/hwloc/doc/$EXAMPLE/"; then
-  dst="$dst/projects/hwloc/doc/"
+  dst=`realpath "$dst/projects/hwloc/doc/"`
 else if test -d "$dst/hwloc/doc/$EXAMPLE/"; then
-  dst="$dst/hwloc/doc/"
+  dst=`realpath "$dst/hwloc/doc/"`
 else if test -d "$dst/doc/$EXAMPLE/"; then
-  dst="$dst/doc/"
+  dst=`realpath "$dst/doc/"`
 else if test -d "$dst/$EXAMPLE/"; then
   :
 else

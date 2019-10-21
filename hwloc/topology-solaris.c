@@ -485,6 +485,8 @@ hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstat
   unsigned curlgrp = 0;
   int nlgrps;
   lgrp_id_t root;
+  const char *env = getenv("HWLOC_USE_NUMA_DISTANCES");
+  int need_distances = env && atoi(env);
 
   if (!(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)) {
     lgrp_list_allowed(topology);
@@ -505,7 +507,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstat
     lgrp_build_numanodes(topology, cookie, root, glob_lgrps, &curlgrp);
 
 #if HAVE_DECL_LGRP_LATENCY_COOKIE
-    if (nlgrps > 1) {
+    if (nlgrps > 1 && need_distances) {
       uint64_t *distances = calloc(curlgrp*curlgrp, sizeof(uint64_t));
       unsigned i, j;
       if (distances) {
@@ -519,7 +521,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstat
             }
             distances[i*curlgrp+j] = (uint64_t) latency;
         }
-	hwloc_internal_distances_add(topology, curlgrp, glob_lgrps, distances,
+	hwloc_internal_distances_add(topology, "NUMA:Solaris", curlgrp, glob_lgrps, distances,
 				     HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
 				     HWLOC_DISTANCES_ADD_FLAG_GROUP);
 	glob_lgrps = NULL; /* dont free it below */
@@ -966,7 +968,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 #endif /* LIBKSTAT */
 
 static int
-hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend uses the underlying OS.
@@ -976,6 +978,8 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   struct hwloc_topology *topology = backend->topology;
   int alreadypus = 0;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
@@ -1055,6 +1059,7 @@ hwloc_set_solaris_hooks(struct hwloc_binding_hooks *hooks,
 static struct hwloc_backend *
 hwloc_solaris_component_instantiate(struct hwloc_topology *topology,
 				    struct hwloc_disc_component *component,
+				    unsigned excluded_phases __hwloc_attribute_unused,
 				    const void *_data1 __hwloc_attribute_unused,
 				    const void *_data2 __hwloc_attribute_unused,
 				    const void *_data3 __hwloc_attribute_unused)
@@ -1068,9 +1073,9 @@ hwloc_solaris_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_solaris_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_CPU,
   "solaris",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_CPU,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_solaris_component_instantiate,
   50,
   1,

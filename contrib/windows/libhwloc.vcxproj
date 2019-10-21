@@ -4,6 +4,7 @@
     <ProjectGuid>{9DE76C6D-4773-4766-9F93-69C56166CB8D}</ProjectGuid>
     <RootNamespace>libhwloc</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugStatic|x64">
@@ -28,27 +29,27 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -70,28 +71,28 @@
     <LinkIncremental>false</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
     <TargetName>$(ProjectName)-15</TargetName>
-    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|x64'">
     <LinkIncremental>false</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
     <TargetName>$(ProjectName)-15</TargetName>
-    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
     <TargetName>$(ProjectName)-15</TargetName>
-    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">
     <LinkIncremental>false</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
     <TargetName>$(ProjectName)-15</TargetName>
-    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDll|x64'">

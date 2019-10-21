@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2018 Inria.  All rights reserved.
+ * Copyright © 2012-2019 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -211,7 +211,9 @@ int main(void)
   assert(errno == EINVAL);
 #endif
 #ifdef HWLOC_LINUX_SYS
-  err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "linux");
+  err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "linux:0xf");
+  assert(!err);
+  err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "linux:0xfffffff0");
   assert(!err);
 #endif
 #ifdef HWLOC_BGQ_SYS

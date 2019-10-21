@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2015-2018 Inria.  All rights reserved.
+.\" Copyright © 2015-2019 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-GATHER-CPUID "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -22,6 +22,9 @@ for later (possibly offline) usage
 \fB\-c <idx>
 Only gather cpuid values for logical processor whose OS/physical index
 is <idx>.
+.TP
+\fB\-s\fR \fB\-\-silent\fR
+Do not show verbose messages.
 .TP
 \fB\-h\fR \fB\-\-help\fR
 Display help message and exit.
@@ -61,6 +64,11 @@ unless it is clear that they contain no sensitive information.
 .
 .PP
 .B NOTE:
+The output of \fBhwloc-gather-cpuid\fR is included in the tarball
+saved by \fBhwloc-gather-topology\fR on Linux/x86.
+.
+.PP
+.B NOTE:
 It is highly recommended that you read the hwloc(7) overview page
 before reading this man page.
 .
@@ -95,5 +103,5 @@ such as (but not limited to) failure to create the output files.
 .SH SEE ALSO
 .
 .ft R
-hwloc(7), lstopo(1)
+hwloc(7), hwloc-gather-topology(1), lstopo(1)
 .sp

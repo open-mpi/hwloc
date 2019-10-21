@@ -438,6 +438,7 @@ int foo(void) {
         hwloc_config_prefix[tests/hwloc/linux/allowed/Makefile]
         hwloc_config_prefix[tests/hwloc/linux/gather/Makefile]
         hwloc_config_prefix[tests/hwloc/x86/Makefile]
+        hwloc_config_prefix[tests/hwloc/x86+linux/Makefile]
         hwloc_config_prefix[tests/hwloc/xml/Makefile]
         hwloc_config_prefix[tests/hwloc/ports/Makefile]
         hwloc_config_prefix[tests/hwloc/rename/Makefile]
@@ -445,6 +446,7 @@ int foo(void) {
         hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh]
         hwloc_config_prefix[tests/hwloc/linux/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/x86/test-topology.sh]
+        hwloc_config_prefix[tests/hwloc/x86+linux/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/xml/test-topology.sh]
         hwloc_config_prefix[tests/hwloc/wrapper.sh]
         hwloc_config_prefix[utils/hwloc/hwloc-compress-dir]
@@ -459,6 +461,7 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/Makefile]
         hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh]
         hwloc_config_prefix[utils/lstopo/test-lstopo.sh]
+        hwloc_config_prefix[utils/lstopo/test-lstopo-shmem.sh]
         hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw]
         hwloc_config_prefix[contrib/hwloc-ps.www/Makefile]
         hwloc_config_prefix[contrib/systemd/Makefile]
@@ -469,27 +472,29 @@ int foo(void) {
         hwloc_config_prefix[tests/netloc/tests.sh]
     )
 
-    AC_CONFIG_COMMANDS([chmoding-scripts], [
-chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
-      ]hwloc_config_prefix[tests/hwloc/x86/test-topology.sh \
-      ]hwloc_config_prefix[tests/hwloc/xml/test-topology.sh \
-      ]hwloc_config_prefix[tests/hwloc/linux/allowed/test-topology.sh \
-      ]hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh \
-      ]hwloc_config_prefix[tests/hwloc/wrapper.sh \
-      ]hwloc_config_prefix[utils/hwloc/hwloc-compress-dir \
-      ]hwloc_config_prefix[utils/hwloc/hwloc-gather-topology \
-      ]hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh \
-      ]hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh \
-      ]hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh \
-      ]hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh \
-      ]hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh \
-      ]hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh \
-      ]hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh \
-      ]hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh \
-      ]hwloc_config_prefix[utils/lstopo/test-lstopo.sh \
-      ]hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw \
-      ]hwloc_config_prefix[contrib/windows/test-windows-version.sh \
-      ]hwloc_config_prefix[tests/netloc/tests.sh])
+    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x] \
+      hwloc_config_prefix[tests/hwloc/linux/test-topology.sh] \
+      hwloc_config_prefix[tests/hwloc/x86/test-topology.sh] \
+      hwloc_config_prefix[tests/hwloc/x86+linux/test-topology.sh] \
+      hwloc_config_prefix[tests/hwloc/xml/test-topology.sh] \
+      hwloc_config_prefix[tests/hwloc/linux/allowed/test-topology.sh] \
+      hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh] \
+      hwloc_config_prefix[tests/hwloc/wrapper.sh] \
+      hwloc_config_prefix[utils/hwloc/hwloc-compress-dir] \
+      hwloc_config_prefix[utils/hwloc/hwloc-gather-topology] \
+      hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh] \
+      hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh] \
+      hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh] \
+      hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh] \
+      hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh] \
+      hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh] \
+      hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh] \
+      hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh] \
+      hwloc_config_prefix[utils/lstopo/test-lstopo.sh] \
+      hwloc_config_prefix[utils/lstopo/test-lstopo-shmem.sh] \
+      hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw] \
+      hwloc_config_prefix[contrib/windows/test-windows-version.sh] \
+      hwloc_config_prefix[tests/netloc/tests.sh])
 
     # These links are only needed in standalone mode.  It would
     # be nice to m4 foreach this somehow, but whenever I tried

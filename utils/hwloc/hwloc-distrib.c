@@ -157,8 +157,10 @@ int main(int argc, char *argv[])
   }
 
   /* enable verbose backends */
-  putenv((char *) "HWLOC_XML_VERBOSE=1");
-  putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
+  if (!getenv("HWLOC_XML_VERBOSE"))
+    putenv((char *) "HWLOC_XML_VERBOSE=1");
+  if (!getenv("HWLOC_SYNTHETIC_VERBOSE"))
+    putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
 
   hwloc_topology_init(&topology);
 
@@ -277,11 +279,7 @@ int main(int argc, char *argv[])
     hwloc_obj_t root, next=NULL;
     
     if (input) {
-      err = hwloc_utils_enable_input_format(topology,
-					    input,
-					    &input_format,
-					    verbose,
-					    callname);
+      err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, verbose, callname);
       if (err) {
 	free(cpuset);
 	return EXIT_FAILURE;

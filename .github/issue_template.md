@@ -27,9 +27,8 @@
 If your issue consists in a wrong topology detection, we also need the following for debugging remotely:
 
 * On Linux, run `hwloc-gather-topology myhost` and post the `myhost.*` files that it will generate. Note that this tool may be slow on large nodes or when I/O is enabled.
-* On MacOS, `sysctl hw` and `sysctl machdep.cpu`
-* On Solaris, `kstat cpu_info` and `lgrp_info -a`
-* On BSD, `sysctl hw`
+* On Solaris, `kstat -C cpu_info`, `lgrpinfo -a` and `psrinfo`
+* On MacOS and BSD, `sysctl hw` and `sysctl machdep`
 * On BSD x86 platforms, if using hwloc >= 2.0, also run `hwloc-gather-cpuid` and post an archive of the `cpuid` that was generated.
 * On Windows, `coreinfo -cgnlsm`
 
@@ -38,3 +37,4 @@ If your issue consists in a wrong topology detection, we also need the following
 You may need to archive the output from the above commands into a `.zip` or `.tar.gz` (not `.bz2`!) file before Github will allow you to drag-n-drop the file into the issue to attach it.
 
 Note that upgrading your operating system (e.g., Linux kernel) and platform firmwares (e.g., BIOS) might help solving issues about wrong topology detection.
+Some known issues are listed at https://github.com/open-mpi/hwloc/wiki/Linux-kernel-bugs

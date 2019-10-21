@@ -7,11 +7,11 @@
   This is the DTD for hwloc v2.x XMLs.
  -->
 
-<!ELEMENT topology (object+,distances2*)>
+<!ELEMENT topology (object+,distances2*,distances2hetero*)>
 <!ATTLIST topology version CDATA "">
 
 <!ELEMENT object (page_type*,info*,userdata*,object*)>
-<!ATTLIST object type (Machine | Misc | Group | NUMANode | MemCache | Package | L1Cache | L2Cache | L3Cache | L4Cache | L5Cache | L1iCache | L2iCache | L3iCache | Core | PU | Bridge | PCIDev | OSDev) #REQUIRED>
+<!ATTLIST object type (Machine | Misc | Group | NUMANode | MemCache | Package | Die | L1Cache | L2Cache | L3Cache | L4Cache | L5Cache | L1iCache | L2iCache | L3iCache | Core | PU | Bridge | PCIDev | OSDev) #REQUIRED>
 <!ATTLIST object subtype CDATA "" >
 <!ATTLIST object os_index CDATA "-1" >
 <!ATTLIST object gp_index CDATA "-1" >
@@ -30,6 +30,7 @@
 <!ATTLIST object depth CDATA "-1" >
 <!ATTLIST object kind CDATA "0" >
 <!ATTLIST object subkind CDATA "0" >
+<!ATTLIST object dont_merge CDATA "0" >
 <!ATTLIST object bridge_type CDATA "" >
 <!ATTLIST object bridge_pci CDATA "" >
 <!ATTLIST object pci_busid CDATA "" >
@@ -50,6 +51,11 @@
 <!ATTLIST distances2 nbobjs CDATA #REQUIRED>
 <!ATTLIST distances2 indexing CDATA #REQUIRED>
 <!ATTLIST distances2 kind CDATA #REQUIRED>
+<!ATTLIST distances2 name CDATA "">
+
+<!ELEMENT distances2hetero (indexes+,u64values+)>
+<!ATTLIST distances2hetero nbobjs CDATA #REQUIRED>
+<!ATTLIST distances2hetero kind CDATA #REQUIRED>
 
 <!ELEMENT indexes (#PCDATA)>
 <!ATTLIST indexes length CDATA #REQUIRED>

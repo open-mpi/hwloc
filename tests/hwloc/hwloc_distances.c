@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2017 Inria.  All rights reserved.
+ * Copyright © 2010-2019 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -52,9 +52,11 @@ static void check_distances(hwloc_topology_t topology, int depth, unsigned expec
   assert(!err);
   printf("distance matrix for depth %d:\n", depth);
   print_distances(distances[0]);
+  assert(!hwloc_distances_get_name(topology, distances[0]));
   hwloc_distances_release(topology, distances[0]);
   if (nr > 1) {
     print_distances(distances[1]);
+    assert(!hwloc_distances_get_name(topology, distances[1]));
     hwloc_distances_release(topology, distances[1]);
   }
 }
@@ -233,12 +235,35 @@ int main(void)
   hwloc_distances_release(topology, distances[0]);
   hwloc_distances_release(topology, distances[1]);
 
+  /* inserting heterogeneous distance */
+  printf("\nInserting heterogeneous distances\n");
+  objs[0] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
+  objs[1] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, 1);
+  objs[2] = hwloc_get_obj_by_depth(topology, 1, 0);
+  for(i=0; i<3; i++) {
+    for(j=0; j<3; j++)
+      values[i*3+j] = 10;
+    values[i*3+i] = 5;
+  }
+  err = hwloc_distances_add(topology, 3, objs, values,
+			    HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+			    0);
+  assert(!err);
+
   /* check distances by kind */
   nr = 2;
   err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH, 0);
   assert(!err);
-  assert(nr == 1);
+  assert(nr == 2);
   hwloc_distances_release(topology, distances[0]);
+  assert(distances[1]->objs[0]->type == HWLOC_OBJ_NUMANODE);
+  assert(distances[1]->objs[0]->logical_index == 0);
+  assert(distances[1]->objs[1]->type == HWLOC_OBJ_CORE);
+  assert(distances[1]->objs[1]->logical_index == 1);
+  assert(distances[1]->objs[2]->type == HWLOC_OBJ_GROUP);
+  assert(distances[1]->objs[2]->logical_index == 0);
+  assert(distances[1]->kind == (HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER|HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES));
+  hwloc_distances_release(topology, distances[1]);
   nr = 2;
   err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_OS, 0);
   assert(!err);
@@ -249,6 +274,29 @@ int main(void)
   assert(nr == 2);
   hwloc_distances_release(topology, distances[0]);
   hwloc_distances_release(topology, distances[1]);
+
+  /* check distances by name */
+  nr = 0;
+  err = hwloc_distances_get_by_name(topology, NULL, &nr, distances, 0);
+  assert(!err);
+  assert(nr == 4);
+  nr = 0;
+  err = hwloc_distances_get_by_name(topology, "nomatch", &nr, distances, 0);
+  assert(!err);
+  assert(nr == 0);
+
+  /* removing one PU distance */
+  printf("Removing the 2nd PU distances\n");
+  nr = 2;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_PU, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == 2);
+  hwloc_distances_release(topology, distances[0]);
+  hwloc_distances_release_remove(topology, distances[1]);
+  nr = 0;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_PU, &nr, distances, 0, 0);
+  assert(!err);
+  assert(nr == 1);
 
   /* remove distances */
   printf("Removing distances\n");

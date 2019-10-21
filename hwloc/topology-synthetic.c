@@ -539,11 +539,16 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     if (*pos < '0' || *pos > '9') {
       if (hwloc_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
-	/* FIXME: allow generic "Cache" string? would require to deal with possibly duplicate cache levels */
-	if (verbose)
-	  fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
-	errno = EINVAL;
-	goto error;
+	if (!strncmp(pos, "Tile", 4) || !strncmp(pos, "Module", 6)) {
+	  /* possible future types */
+	  type = HWLOC_OBJ_GROUP;
+	} else {
+	  /* FIXME: allow generic "Cache" string? would require to deal with possibly duplicate cache levels */
+	  if (verbose)
+	    fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
+	  errno = EINVAL;
+	  goto error;
+	}
       }
       if (type == HWLOC_OBJ_MACHINE || type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	if (verbose)
@@ -650,6 +655,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   if (type_count[HWLOC_OBJ_PACKAGE] > 1) {
     if (verbose)
       fprintf(stderr, "Synthetic string cannot have several package levels\n");
+    errno = EINVAL;
+    return -1;
+  }
+  if (type_count[HWLOC_OBJ_DIE] > 1) {
+    if (verbose)
+      fprintf(stderr, "Synthetic string cannot have several die levels\n");
     errno = EINVAL;
     return -1;
   }
@@ -837,6 +848,7 @@ hwloc_synthetic_set_attr(struct hwloc_synthetic_attr_s *sattr,
     obj->attr->numanode.page_types[0].count = sattr->memorysize / 4096;
     break;
   case HWLOC_OBJ_PACKAGE:
+  case HWLOC_OBJ_DIE:
     break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
@@ -961,7 +973,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 }
 
 static int
-hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend enforces !topology->is_thissystem by default.
@@ -971,6 +983,8 @@ hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *ds
   struct hwloc_synthetic_backend_data_s *data = backend->private_data;
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   unsigned i;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_GLOBAL);
 
   assert(!topology->levels[0][0]->cpuset);
 
@@ -1015,6 +1029,7 @@ hwloc_synthetic_backend_disable(struct hwloc_backend *backend)
 static struct hwloc_backend *
 hwloc_synthetic_component_instantiate(struct hwloc_topology *topology,
 				      struct hwloc_disc_component *component,
+				      unsigned excluded_phases __hwloc_attribute_unused,
 				      const void *_data1,
 				      const void *_data2 __hwloc_attribute_unused,
 				      const void *_data3 __hwloc_attribute_unused)
@@ -1064,8 +1079,8 @@ hwloc_synthetic_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_synthetic_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   "synthetic",
+  HWLOC_DISC_PHASE_GLOBAL,
   ~0,
   hwloc_synthetic_component_instantiate,
   30,
@@ -1279,6 +1294,12 @@ hwloc__export_synthetic_obj(struct hwloc_topology * topology, unsigned long flag
 			  |HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1))) {
     /* if exporting to v1 or without extended-types, use all-v1-compatible Socket name */
     res = hwloc_snprintf(tmp, tmplen, "Socket%s", aritys);
+
+  } else if (obj->type == HWLOC_OBJ_DIE
+	     && (flags & (HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES
+			  |HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1))) {
+    /* if exporting to v1 or without extended-types, use all-v1-compatible Group name */
+    res = hwloc_snprintf(tmp, tmplen, "Group%s", aritys);
 
   } else if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
       || flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {

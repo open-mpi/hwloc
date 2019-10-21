@@ -87,6 +87,48 @@ static pthread_mutex_t hwloc_pciaccess_mutex = PTHREAD_MUTEX_INITIALIZER;
 #error No mutex implementation available
 #endif
 
+static void
+hwloc_pci_get_obj_names(hwloc_obj_t obj, struct pci_id_match *m)
+{
+  const char *vendorname, *devicename;
+  m->vendor_id = obj->attr->pcidev.vendor_id;
+  m->device_id = obj->attr->pcidev.device_id;
+  pci_get_strings(m, &devicename, &vendorname, NULL, NULL);
+  if (vendorname && *vendorname)
+    hwloc_obj_add_info(obj, "PCIVendor", vendorname);
+  if (devicename && *devicename)
+    hwloc_obj_add_info(obj, "PCIDevice", devicename);
+}
+
+static void
+hwloc_pci_get_names(hwloc_topology_t topology)
+{
+  hwloc_obj_t obj;
+  struct pci_id_match m;
+
+  /* we need the lists of PCI and bridges */
+  hwloc_topology_reconnect(topology, 0);
+
+  m.subvendor_id = PCI_MATCH_ANY;
+  m.subdevice_id = PCI_MATCH_ANY;
+  m.device_class = 0;
+  m.device_class_mask = 0;
+  m.match_data = 0;
+
+  HWLOC_PCIACCESS_LOCK();
+
+  obj = NULL;
+  while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL)
+    hwloc_pci_get_obj_names(obj, &m);
+
+  obj = NULL;
+  while ((obj = hwloc_get_next_bridge(topology, obj)) != NULL)
+    if (obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
+      hwloc_pci_get_obj_names(obj, &m);
+
+  HWLOC_PCIACCESS_UNLOCK();
+}
+
 static int
 hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -102,6 +144,13 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
+  struct pci_id_match m;
+
+  m.subvendor_id = PCI_MATCH_ANY;
+  m.subdevice_id = PCI_MATCH_ANY;
+  m.device_class = 0;
+  m.device_class_mask = 0;
+  m.match_data = 0;
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
@@ -109,10 +158,11 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       && pfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
-  if (dstatus->flags & HWLOC_DISC_STATUS_FLAG_PCI_DONE) {
-    hwloc_debug("%s", "PCI discovery has already been performed, skipping PCI backend.\n");
+  if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE) {
+    hwloc_pci_get_names(topology);
     return 0;
   }
+  assert(dstatus->phase == HWLOC_DISC_PHASE_PCI);
 
   hwloc_debug("%s", "\nScanning PCI buses...\n");
 
@@ -136,7 +186,6 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
        pcidev;
        pcidev = pci_device_next(iter))
   {
-    const char *vendorname, *devicename;
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     hwloc_obj_type_t type;
     struct hwloc_obj *obj;
@@ -313,22 +362,11 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
        */
     }
 
-    /* get the vendor name */
-    vendorname = pci_device_get_vendor_name(pcidev);
-    if (vendorname && *vendorname)
-      hwloc_obj_add_info(obj, "PCIVendor", vendorname);
-
-    /* get the device name */
-    devicename = pci_device_get_device_name(pcidev);
-    if (devicename && *devicename)
-      hwloc_obj_add_info(obj, "PCIDevice", devicename);
-
-    hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s %s\n",
+    hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x\n",
 		domain, bus, dev, func,
-		device_class, pcidev->vendor_id, pcidev->device_id,
-		vendorname && *vendorname ? vendorname : "??",
-		devicename && *devicename ? devicename : "??");
+		device_class, pcidev->vendor_id, pcidev->device_id);
 
+    hwloc_pci_get_obj_names(obj, &m);
     hwloc_pcidisc_tree_insert_by_busid(&tree, obj);
   }
 
@@ -338,35 +376,41 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   HWLOC_PCIACCESS_UNLOCK();
 
   hwloc_pcidisc_tree_attach(topology, tree);
-  dstatus->flags |= HWLOC_DISC_STATUS_FLAG_PCI_DONE;
+
+  /* no need to run another PCI phase */
+  dstatus->excluded_phases |= HWLOC_DISC_PHASE_PCI;
+  /* no need to run the annotate phase, we did it above */
+  backend->phases &= HWLOC_DISC_PHASE_ANNOTATE;
   return 0;
 }
 
 static struct hwloc_backend *
 hwloc_pci_component_instantiate(struct hwloc_topology *topology,
 				struct hwloc_disc_component *component,
+				unsigned excluded_phases __hwloc_attribute_unused,
 				const void *_data1 __hwloc_attribute_unused,
 				const void *_data2 __hwloc_attribute_unused,
 				const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
 
-#ifdef HWLOC_SOLARIS_SYS
-  if ((uid_t)0 != geteuid())
-    return NULL;
-#endif
-
   backend = hwloc_backend_alloc(topology, component);
   if (!backend)
     return NULL;
   backend->discover = hwloc_look_pci;
+
+#ifdef HWLOC_SOLARIS_SYS
+  if ((uid_t)0 != geteuid())
+    backend->phases &= ~HWLOC_DISC_PHASE_PCI;
+#endif
+
   return backend;
 }
 
 static struct hwloc_disc_component hwloc_pci_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_MISC,
   "pci",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_PCI | HWLOC_DISC_PHASE_ANNOTATE,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_pci_component_instantiate,
   20,
   1,

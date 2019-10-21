@@ -28,6 +28,7 @@ extern "C" {
 #define HWLOC_MUNGE_NAME(a, b) HWLOC_MUNGE_NAME2(a, b)
 #define HWLOC_MUNGE_NAME2(a, b) a ## b
 #define HWLOC_NAME(name) HWLOC_MUNGE_NAME(HWLOC_SYM_PREFIX, hwloc_ ## name)
+/* FIXME: should be "HWLOC_ ## name" below, unchanged because it doesn't matter much and could break some embedders hacks */
 #define HWLOC_NAME_CAPS(name) HWLOC_MUNGE_NAME(HWLOC_SYM_PREFIX_CAPS, hwloc_ ## name)
 
 /* Now define all the "real" names to be the prefixed names.  This
@@ -51,6 +52,7 @@ extern "C" {
 #define HWLOC_OBJ_NUMANODE HWLOC_NAME_CAPS(OBJ_NUMANODE)
 #define HWLOC_OBJ_MEMCACHE HWLOC_NAME_CAPS(OBJ_MEMCACHE)
 #define HWLOC_OBJ_PACKAGE HWLOC_NAME_CAPS(OBJ_PACKAGE)
+#define HWLOC_OBJ_DIE HWLOC_NAME_CAPS(OBJ_DIE)
 #define HWLOC_OBJ_CORE HWLOC_NAME_CAPS(OBJ_CORE)
 #define HWLOC_OBJ_PU HWLOC_NAME_CAPS(OBJ_PU)
 #define HWLOC_OBJ_L1CACHE HWLOC_NAME_CAPS(OBJ_L1CACHE)
@@ -395,10 +397,13 @@ extern "C" {
 #define HWLOC_DISTANCES_KIND_FROM_USER HWLOC_NAME_CAPS(DISTANCES_KIND_FROM_USER)
 #define HWLOC_DISTANCES_KIND_MEANS_LATENCY HWLOC_NAME_CAPS(DISTANCES_KIND_MEANS_LATENCY)
 #define HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH HWLOC_NAME_CAPS(DISTANCES_KIND_MEANS_BANDWIDTH)
+#define HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES HWLOC_NAME_CAPS(DISTANCES_KIND_HETEROGENEOUS_TYPES)
 
 #define hwloc_distances_get HWLOC_NAME(distances_get)
 #define hwloc_distances_get_by_depth HWLOC_NAME(distances_get_by_depth)
 #define hwloc_distances_get_by_type HWLOC_NAME(distances_get_by_type)
+#define hwloc_distances_get_by_name HWLOC_NAME(distances_get_by_name)
+#define hwloc_distances_get_name HWLOC_NAME(distances_get_name)
 #define hwloc_distances_release HWLOC_NAME(distances_release)
 #define hwloc_distances_obj_index HWLOC_NAME(distances_obj_index)
 #define hwloc_distances_obj_pair_values HWLOC_NAME(distances_pair_values)
@@ -411,6 +416,7 @@ extern "C" {
 #define hwloc_distances_remove HWLOC_NAME(distances_remove)
 #define hwloc_distances_remove_by_depth HWLOC_NAME(distances_remove_by_depth)
 #define hwloc_distances_remove_by_type HWLOC_NAME(distances_remove_by_type)
+#define hwloc_distances_release_remove HWLOC_NAME(distances_release_remove)
 
 /* diff.h */
 
@@ -477,11 +483,6 @@ extern "C" {
 #define hwloc_ibv_get_device_osdev HWLOC_NAME(ibv_get_device_osdev)
 #define hwloc_ibv_get_device_osdev_by_name HWLOC_NAME(ibv_get_device_osdev_by_name)
 
-/* intel-mic.h */
-
-#define hwloc_intel_mic_get_device_cpuset HWLOC_NAME(intel_mic_get_device_cpuset)
-#define hwloc_intel_mic_get_device_osdev_by_index HWLOC_NAME(intel_mic_get_device_osdev_by_index)
-
 /* opencl.h */
 
 #define hwloc_cl_device_topology_amd HWLOC_NAME(cl_device_topology_amd)
@@ -519,15 +520,19 @@ extern "C" {
 
 /* hwloc/plugins.h */
 
-#define hwloc_disc_component_type_e HWLOC_NAME(disc_component_type_e)
-#define HWLOC_DISC_COMPONENT_TYPE_CPU HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_CPU)
-#define HWLOC_DISC_COMPONENT_TYPE_GLOBAL HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_GLOBAL)
-#define HWLOC_DISC_COMPONENT_TYPE_MISC HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_MISC)
-#define hwloc_disc_component_type_t HWLOC_NAME(disc_component_type_t)
+#define hwloc_disc_phase_e HWLOC_NAME(disc_phase_e)
+#define HWLOC_DISC_PHASE_GLOBAL HWLOC_NAME_CAPS(DISC_PHASE_GLOBAL)
+#define HWLOC_DISC_PHASE_CPU HWLOC_NAME_CAPS(DISC_PHASE_CPU)
+#define HWLOC_DISC_PHASE_MEMORY HWLOC_NAME_CAPS(DISC_PHASE_MEMORY)
+#define HWLOC_DISC_PHASE_PCI HWLOC_NAME_CAPS(DISC_PHASE_PCI)
+#define HWLOC_DISC_PHASE_IO HWLOC_NAME_CAPS(DISC_PHASE_IO)
+#define HWLOC_DISC_PHASE_MISC HWLOC_NAME_CAPS(DISC_PHASE_MISC)
+#define HWLOC_DISC_PHASE_ANNOTATE HWLOC_NAME_CAPS(DISC_PHASE_ANNOTATE)
+#define HWLOC_DISC_PHASE_TWEAK HWLOC_NAME_CAPS(DISC_PHASE_TWEAK)
+#define hwloc_disc_phase_t HWLOC_NAME(disc_phase_t)
 #define hwloc_disc_component HWLOC_NAME(disc_component)
 
 #define hwloc_disc_status_flag_e HWLOC_NAME(disc_status_flag_e)
-#define HWLOC_DISC_STATUS_FLAG_PCI_DONE HWLOC_NAME_CAPS(DISC_STATUS_FLAG_PCI_DONE)
 #define HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES HWLOC_NAME_CAPS(DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)
 #define hwloc_disc_status HWLOC_NAME(disc_status)
 
@@ -679,7 +684,6 @@ extern "C" {
 
 #define hwloc_cuda_component HWLOC_NAME(cuda_component)
 #define hwloc_gl_component HWLOC_NAME(gl_component)
-#define hwloc_linuxio_component HWLOC_NAME(linuxio_component)
 #define hwloc_nvml_component HWLOC_NAME(nvml_component)
 #define hwloc_opencl_component HWLOC_NAME(opencl_component)
 #define hwloc_pci_component HWLOC_NAME(pci_component)

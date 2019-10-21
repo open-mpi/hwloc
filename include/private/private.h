@@ -130,7 +130,18 @@ struct hwloc_topology {
   int userdata_not_decoded;
 
   struct hwloc_internal_distances_s {
-    hwloc_obj_type_t type;
+    char *name; /* FIXME: needs an API to set it from user */
+
+    unsigned id; /* to match the container id field of public distances structure
+		  * not exported to XML, regenerated during _add()
+		  */
+
+    /* if all objects have the same type, different_types is NULL and unique_type is valid.
+     * otherwise unique_type is HWLOC_OBJ_TYPE_NONE and different_types contains individual objects types.
+     */
+    hwloc_obj_type_t unique_type;
+    hwloc_obj_type_t *different_types;
+
     /* add union hwloc_obj_attr_u if we ever support groups */
     unsigned nbobjs;
     uint64_t *indexes; /* array of OS or GP indexes before we can convert them into objs.
@@ -142,11 +153,12 @@ struct hwloc_topology {
 		       */
     unsigned long kind;
 
+#define HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID (1U<<0) /* if the objs array is valid below */
+    unsigned iflags;
+
     /* objects are currently stored in physical_index order */
     hwloc_obj_t *objs; /* array of objects */
-    int objs_are_valid; /* set to 1 if the array objs is still valid, 0 if needs refresh */
 
-    unsigned id; /* to match the container id field of public distances structure */
     struct hwloc_internal_distances_s *prev, *next;
   } *first_dist, *last_dist;
   unsigned next_dist_id;
@@ -160,7 +172,8 @@ struct hwloc_topology {
   /* list of enabled backends. */
   struct hwloc_backend * backends;
   struct hwloc_backend * get_pci_busid_cpuset_backend; /* first backend that provides get_pci_busid_cpuset() callback */
-  unsigned backend_excludes;
+  unsigned backend_phases;
+  unsigned backend_excluded_phases;
 
   /* memory allocator for topology objects */
   struct hwloc_tma * tma;
@@ -194,6 +207,7 @@ struct hwloc_topology {
   unsigned nr_blacklisted_components;
   struct hwloc_topology_forced_component_s {
     struct hwloc_disc_component *component;
+    unsigned phases;
   } *blacklisted_components;
 
   /* FIXME: keep until topo destroy and reuse for finding specific buses */
@@ -334,8 +348,8 @@ extern void hwloc_internal_distances_prepare(hwloc_topology_t topology);
 extern void hwloc_internal_distances_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_distances_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern void hwloc_internal_distances_refresh(hwloc_topology_t topology);
-extern int hwloc_internal_distances_add(hwloc_topology_t topology, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
-extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, hwloc_obj_type_t type, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name, hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
 extern void hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology);
 
 /* encode src buffer into target buffer.

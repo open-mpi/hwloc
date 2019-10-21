@@ -361,8 +361,10 @@ main (int argc, char *argv[])
   hwloc_utils_check_api_version(callname);
 
   /* enable verbose backends */
-  putenv((char *) "HWLOC_XML_VERBOSE=1");
-  putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
+  if (!getenv("HWLOC_XML_VERBOSE"))
+    putenv((char *) "HWLOC_XML_VERBOSE=1");
+  if (!getenv("HWLOC_SYNTHETIC_VERBOSE"))
+    putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
 
   err = hwloc_topology_init (&topology);
   if (err)
@@ -522,7 +524,7 @@ main (int argc, char *argv[])
   hwloc_topology_set_flags(topology, flags);
 
   if (input) {
-    err = hwloc_utils_enable_input_format(topology, input, &input_format, verbose_mode, callname);
+    err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, verbose_mode, callname);
     if (err)
       return err;
   }

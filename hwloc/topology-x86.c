@@ -836,7 +836,8 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
 		     hwloc_bitmap_t remaining_cpuset,
 		     unsigned type,
 		     const char *subtype,
-		     unsigned kind)
+		     unsigned kind,
+		     int dont_merge)
 {
   hwloc_bitmap_t obj_cpuset;
   hwloc_obj_t obj;
@@ -868,6 +869,7 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
     obj->cpuset = obj_cpuset;
     obj->subtype = strdup(subtype);
     obj->attr->group.kind = kind;
+    obj->attr->group.dont_merge = dont_merge;
     hwloc_debug_2args_bitmap("os %s %u has cpuset %s\n",
 			     subtype, id, obj_cpuset);
     hwloc_insert_object_by_cpuset(topology, obj);
@@ -995,22 +997,17 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
 			   UNIT, "Compute Unit",
-			   HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT);
+			   HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT, 0);
       /* Look for Intel Modules inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
 			   MODULE, "Module",
-			   HWLOC_GROUP_KIND_INTEL_MODULE);
+			   HWLOC_GROUP_KIND_INTEL_MODULE, 0);
       /* Look for Intel Tiles inside packages */
       hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
       hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
 			   TILE, "Tile",
-			   HWLOC_GROUP_KIND_INTEL_TILE);
-      /* Look for Intel Dies inside packages */
-      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
-      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
-			   DIE, "Die",
-			   HWLOC_GROUP_KIND_INTEL_DIE);
+			   HWLOC_GROUP_KIND_INTEL_TILE, 0);
 
       /* Look for unknown objects */
       if (infos[one].otherids) {
@@ -1040,6 +1037,43 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	    }
 	  }
 	}
+      }
+    }
+  }
+
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_DIE)) {
+    /* Look for Intel Dies inside packages */
+    if (fulldiscovery) {
+      hwloc_bitmap_t die_cpuset;
+      hwloc_obj_t die;
+
+      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+      while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
+	unsigned packageid = infos[i].ids[PKG];
+	unsigned dieid = infos[i].ids[DIE];
+
+	if (dieid == (unsigned) -1) {
+	  hwloc_bitmap_clr(remaining_cpuset, i);
+	  continue;
+	}
+
+	die_cpuset = hwloc_bitmap_alloc();
+	for (j = i; j < nbprocs; j++) {
+	  if (infos[j].ids[DIE] == (unsigned) -1) {
+	    hwloc_bitmap_clr(remaining_cpuset, j);
+	    continue;
+	  }
+
+	  if (infos[j].ids[PKG] == packageid && infos[j].ids[DIE] == dieid) {
+	    hwloc_bitmap_set(die_cpuset, j);
+	    hwloc_bitmap_clr(remaining_cpuset, j);
+	  }
+	}
+	die = hwloc_alloc_setup_object(topology, HWLOC_OBJ_DIE, dieid);
+	die->cpuset = die_cpuset;
+	hwloc_debug_1arg_bitmap("os die %u has cpuset %s\n",
+				dieid, die_cpuset);
+	hwloc_insert_object_by_cpuset(topology, die);
       }
     }
   }
@@ -1461,13 +1495,15 @@ out:
 }
 
 static int
-hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus __hwloc_attribute_unused)
+hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   struct hwloc_topology *topology = backend->topology;
   unsigned long flags = 0;
   int alreadypus = 0;
   int ret;
+
+  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (getenv("HWLOC_X86_TOPOEXT_NUMANODES")) {
     flags |= HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES;
@@ -1620,6 +1656,7 @@ hwloc_x86_backend_disable(struct hwloc_backend *backend)
 static struct hwloc_backend *
 hwloc_x86_component_instantiate(struct hwloc_topology *topology,
 				struct hwloc_disc_component *component,
+				unsigned excluded_phases __hwloc_attribute_unused,
 				const void *_data1 __hwloc_attribute_unused,
 				const void *_data2 __hwloc_attribute_unused,
 				const void *_data3 __hwloc_attribute_unused)
@@ -1671,9 +1708,9 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
 }
 
 static struct hwloc_disc_component hwloc_x86_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_CPU,
   "x86",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_PHASE_CPU,
+  HWLOC_DISC_PHASE_GLOBAL,
   hwloc_x86_component_instantiate,
   45, /* between native and no_os */
   1,
