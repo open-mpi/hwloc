@@ -2205,8 +2205,13 @@ struct hwloc_linux_cpuinfo_proc {
   unsigned infos_count;
 };
 
+enum hwloc_linux_cgroup_type_e {
+      HWLOC_LINUX_CGROUP1,
+      HWLOC_LINUX_CPUSET
+};
+
 static void
-hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const char *root_path)
+hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mntpnt, const char *root_path)
 {
   char *mount_path;
   struct mntent mntent;
@@ -2215,8 +2220,7 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
   int err;
   size_t bufsize;
 
-  *cgroup_mntpnt = NULL;
-  *cpuset_mntpnt = NULL;
+  *mntpnt = NULL;
 
   if (root_path) {
     /* setmntent() doesn't support openat(), so use the root_path directly */
@@ -2247,10 +2251,13 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
   }
 
   while (getmntent_r(fd, &mntent, buf, bufsize)) {
+
     if (!strcmp(mntent.mnt_type, "cpuset")) {
       hwloc_debug("Found cpuset mount point on %s\n", mntent.mnt_dir);
-      *cpuset_mntpnt = strdup(mntent.mnt_dir);
+      *cgtype = HWLOC_LINUX_CPUSET;
+      *mntpnt = strdup(mntent.mnt_dir);
       break;
+
     } else if (!strcmp(mntent.mnt_type, "cgroup")) {
       /* found a cgroup mntpnt */
       char *opt, *opts = mntent.mnt_opts;
@@ -2266,13 +2273,16 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
       if (!cpuset_opt)
 	continue;
       if (noprefix_opt) {
-	hwloc_debug("Found cgroup emulating a cpuset mount point on %s\n", mntent.mnt_dir);
-	*cpuset_mntpnt = strdup(mntent.mnt_dir);
+	hwloc_debug("Found cgroup1 emulating a cpuset mount point on %s\n", mntent.mnt_dir);
+	*cgtype = HWLOC_LINUX_CPUSET;
+	*mntpnt = strdup(mntent.mnt_dir);
+	break;
       } else {
-	hwloc_debug("Found cgroup/cpuset mount point on %s\n", mntent.mnt_dir);
-	*cgroup_mntpnt = strdup(mntent.mnt_dir);
+	hwloc_debug("Found cgroup1/cpuset mount point on %s\n", mntent.mnt_dir);
+	*cgtype = HWLOC_LINUX_CGROUP1;
+	*mntpnt = strdup(mntent.mnt_dir);
+	break;
       }
-      break;
     }
   }
 
@@ -2287,7 +2297,7 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, const
  * containing <name>.
  */
 static char *
-hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
+hwloc_read_linux_cgroup_name(int fsroot_fd, hwloc_pid_t pid)
 {
 #define CPUSET_NAME_LEN 128
   char cpuset_name[CPUSET_NAME_LEN];
@@ -2308,7 +2318,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
     tmp = strchr(cpuset_name, '\n');
     if (tmp)
       *tmp = '\0';
-    hwloc_debug("Found cpuset %s\n", cpuset_name);
+    hwloc_debug("Found cgroup name `%s'\n", cpuset_name);
     return strdup(cpuset_name);
   }
 
@@ -2350,14 +2360,11 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
   return NULL;
 }
 
-/*
- * Then, the cpuset description is available from either the cgroup or
- * the cpuset filesystem (usually mounted in / or /dev) where there
- * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
- */
 static void
-hwloc_admin_disable_set_from_cpuset(int root_fd,
-				    const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name,
+hwloc_admin_disable_set_from_cgroup(int root_fd,
+				    enum hwloc_linux_cgroup_type_e cgtype,
+				    const char *mntpnt,
+				    const char *cpuset_name,
 				    const char *attr_name,
 				    hwloc_bitmap_t admin_enabled_set)
 {
@@ -2365,24 +2372,26 @@ hwloc_admin_disable_set_from_cpuset(int root_fd,
   char cpuset_filename[CPUSET_FILENAME_LEN];
   int err;
 
-  if (cgroup_mntpnt) {
-    /* try to read the cpuset from cgroup */
-    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s", cgroup_mntpnt, cpuset_name, attr_name);
-    hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
-  } else if (cpuset_mntpnt) {
+  switch (cgtype) {
+  case HWLOC_LINUX_CGROUP1:
+    /* try to read the cpuset from cgroup1. no need to use "effective_cpus/mems" since we'll remove offline CPUs in the core */
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s", mntpnt, cpuset_name, attr_name);
+    hwloc_debug("Trying to read cgroup1 file <%s>\n", cpuset_filename);
+    break;
+  case HWLOC_LINUX_CPUSET:
     /* try to read the cpuset directly */
-    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/%s", cpuset_mntpnt, cpuset_name, attr_name);
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/%s", mntpnt, cpuset_name, attr_name);
     hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
+    break;
   }
 
   err = hwloc__read_path_as_cpulist(cpuset_filename, admin_enabled_set, root_fd);
-
   if (err < 0) {
     hwloc_debug("failed to read cpuset '%s' attribute '%s'\n", cpuset_name, attr_name);
     hwloc_bitmap_fill(admin_enabled_set);
-  } else {
-    hwloc_debug_bitmap("cpuset includes %s\n", admin_enabled_set);
+    return;
   }
+  hwloc_debug_bitmap("cpuset includes %s\n", admin_enabled_set);
 }
 
 static void
@@ -5207,17 +5216,17 @@ hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
 
 static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const char *root_path, int root_fd, char **cpuset_namep)
 {
-  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
+  enum hwloc_linux_cgroup_type_e cgtype;
+  char *mntpnt, *cpuset_name = NULL;
 
-  hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, root_path);
-  if (cgroup_mntpnt || cpuset_mntpnt) {
-    cpuset_name = hwloc_read_linux_cpuset_name(root_fd, topology->pid);
+  hwloc_find_linux_cgroup_mntpnt(&cgtype, &mntpnt, root_path);
+  if (mntpnt) {
+    cpuset_name = hwloc_read_linux_cgroup_name(root_fd, topology->pid);
     if (cpuset_name) {
-      hwloc_admin_disable_set_from_cpuset(root_fd, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->allowed_cpuset);
-      hwloc_admin_disable_set_from_cpuset(root_fd, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->allowed_nodeset);
+      hwloc_admin_disable_set_from_cgroup(root_fd, cgtype, mntpnt, cpuset_name, "cpus", topology->allowed_cpuset);
+      hwloc_admin_disable_set_from_cgroup(root_fd, cgtype, mntpnt, cpuset_name, "mems", topology->allowed_nodeset);
     }
-    free(cgroup_mntpnt);
-    free(cpuset_mntpnt);
+    free(mntpnt);
   }
   *cpuset_namep = cpuset_name;
 }
