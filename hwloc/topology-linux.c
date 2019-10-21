@@ -2295,7 +2295,24 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
   int err;
   char *tmp;
 
-  /* check whether a cgroup-cpuset is enabled */
+  /* try to read from /proc/XXXX/cpuset */
+  if (!pid)
+    err = hwloc_read_path_by_length("/proc/self/cpuset", cpuset_name, sizeof(cpuset_name), fsroot_fd);
+  else {
+    char path[] = "/proc/XXXXXXXXXXX/cpuset";
+    snprintf(path, sizeof(path), "/proc/%d/cpuset", pid);
+    err = hwloc_read_path_by_length(path, cpuset_name, sizeof(cpuset_name), fsroot_fd);
+  }
+  if (!err) {
+    /* found a cpuset, return the name */
+    tmp = strchr(cpuset_name, '\n');
+    if (tmp)
+      *tmp = '\0';
+    hwloc_debug("Found cpuset %s\n", cpuset_name);
+    return strdup(cpuset_name);
+  }
+
+  /* try to read from /proc/XXXX/cgroup */
   if (!pid)
     file = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
   else {
@@ -2325,26 +2342,9 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
     fclose(file);
   }
 
-  /* check whether a cpuset is enabled */
-  if (!pid)
-    err = hwloc_read_path_by_length("/proc/self/cpuset", cpuset_name, sizeof(cpuset_name), fsroot_fd);
-  else {
-    char path[] = "/proc/XXXXXXXXXXX/cpuset";
-    snprintf(path, sizeof(path), "/proc/%d/cpuset", pid);
-    err = hwloc_read_path_by_length(path, cpuset_name, sizeof(cpuset_name), fsroot_fd);
-  }
-  if (err < 0) {
-    /* found nothing */
-    hwloc_debug("%s", "No cgroup or cpuset found\n");
-    return NULL;
-  }
-
-  /* found a cpuset, return the name */
-  tmp = strchr(cpuset_name, '\n');
-  if (tmp)
-    *tmp = '\0';
-  hwloc_debug("Found cpuset %s\n", cpuset_name);
-  return strdup(cpuset_name);
+  /* found nothing */
+  hwloc_debug("%s", "No cgroup or cpuset found\n");
+  return NULL;
 }
 
 /*
