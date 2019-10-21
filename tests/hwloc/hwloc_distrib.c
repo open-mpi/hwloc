@@ -106,6 +106,10 @@ static void test_round_robin_Core_PU(hwloc_topology_t topology)
 	// This test can only work if all the Cores have the same amount of child PU.
 	if ( !is_tleaf(topology) )
 		return;
+	if ( hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) < 0 )
+		return;
+	if ( hwloc_get_type_depth(topology, HWLOC_OBJ_PU) < 0 )
+		return;
 	
 	int i;
 	int nPU = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU);
