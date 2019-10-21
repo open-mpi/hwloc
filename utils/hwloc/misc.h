@@ -217,7 +217,7 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
 }
 
 static __hwloc_inline int
-hwloc_utils_enable_input_format(struct hwloc_topology *topology,
+hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long flags,
 				const char *input,
 				enum hwloc_utils_input_format *input_format,
 				int verbose, const char *callname)
@@ -258,6 +258,9 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
       fprintf(stderr, "Cannot force linux component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
       putenv((char *) "HWLOC_COMPONENTS=linux,pci,stop");
+    /* normally-set flags are overriden by envvar-forced backends */
+    if (flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
+      putenv((char *) "HWLOC_THISSYSTEM=1");
 #else /* HWLOC_LINUX_SYS */
     fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
     exit(EXIT_FAILURE);
@@ -280,6 +283,9 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
       fprintf(stderr, "Cannot force x86 component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
       putenv((char *) "HWLOC_COMPONENTS=x86,stop");
+    /* normally-set flags are overriden by envvar-forced backends */
+    if (flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
+      putenv((char *) "HWLOC_THISSYSTEM=1");
 #else
     fprintf(stderr, "This installation of hwloc does not support loading from a cpuid dump, sorry.\n");
     exit(EXIT_FAILURE);
