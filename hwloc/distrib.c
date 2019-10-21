@@ -49,10 +49,10 @@ static size_t* shuffled_range(const size_t n){
 	if ((ret = malloc(n*sizeof(*ret))) == NULL) { free(index); return NULL; }
   
 	srand(time(NULL));  
-	for(i=n-1;i>=0;i--){
-		val = rand()%(i+1);
-		ret[i] = index[val];
-		index[val] = index[i];
+	for(i=n;i>0;i--){
+		val = rand()%(i);
+		ret[i-1] = index[val];
+		index[val] = index[i-1];
   }
   free(index);
   return ret;
@@ -233,6 +233,8 @@ hwloc_distrib_iterator_scatter(hwloc_topology_t topology,
 		if ((obj->cpuset != NULL && !hwloc_bitmap_iszero(obj->cpuset)) &&
 		    hwloc_get_type_depth(topology, obj->type) >= 0)
 			n++;
+		if (obj->type == type)
+			break;
 		obj = obj->first_child;
 	}
 
@@ -245,6 +247,8 @@ hwloc_distrib_iterator_scatter(hwloc_topology_t topology,
 				levels[n-1-i] = obj->type;
 				i++;
 		}
+		if (obj->type == type)
+			break;		
 		obj = obj->first_child;
 	}
 	
@@ -257,7 +261,7 @@ hwloc_distrib_iterator_scatter(hwloc_topology_t topology,
 	*it->roots = root;	
 	it->n_roots = 1;
 	it->root_coord = 0;
-	it->n_levels = 1;
+	it->n_levels = n;
 	it->levels = (struct hwloc_distrib_level **)((char*)it +
 						     sizeof(*it) +
 						     sizeof(hwloc_obj_t));

@@ -35,38 +35,27 @@ file="$tmp/test-hwloc-distrib.output"
 
 set -e
 (
-  $distrib --if synthetic --input "2 2 2" 2
+  $distrib pu --if synthetic --input "4 4 4 4" -n 8
   echo
-  $distrib --if synthetic --input "2 2 2" 4
+  $distrib pu --if synthetic --input "1 2 2 2" -n 32
   echo
-  $distrib --if synthetic --input "2 2 2" 8
+  $distrib pu --if synthetic --input "3 3 3" -n 4 --single
   echo
-  $distrib --if synthetic --input "2 2 2" 13
+  $distrib pu --if synthetic --input "3 3 3" -n 4 --reverse
   echo
-  $distrib --if synthetic --input "2 2 2" 16
+  $distrib pu --if synthetic --input "3 3 3" -n 4 --logical-index
   echo
-  $distrib --if synthetic --input "3 3 3" 4
+  $distrib pu --if synthetic --input "3 3 3" -n 4 --physical-index
   echo
-  $distrib --if synthetic --input "3 3 3" 4 --single
+  $distrib pu --if synthetic --input "3 3 3" -n 4 --from 0
   echo
-  $distrib --if synthetic --input "3 3 3" 4 --reverse
+  $distrib pu:core:package --if synthetic --input "4 4 4 4" -n 8
+  echo  
+  $distrib scatter pu --if synthetic --input "4 4 4 4" -n 19
   echo
-  $distrib --if synthetic --input "3 3 3" 4 --reverse --single
+  $distrib round-robin pu --if synthetic --input "2 2 2 2" -n 9
   echo
-  $distrib --if synthetic --input "4 4" 2
-  echo
-  $distrib --if synthetic --input "4 4" 2 --single
-  echo
-  $distrib --if synthetic --input "4 4" 2 --reverse --single
-  echo
-  $distrib --if synthetic --input "4 4 4 4" 19
-  echo
-
-  $distrib --if synthetic --input "2 2 2 2" 9
-  echo
-  $distrib --if synthetic --input "2 2 2 2" --from pu 9
-  echo
-  $distrib --if synthetic --input "2 2 2 2" --to core 9
+  $distrib pu:core:package --if synthetic --input "4 4 4 4" -n 8 --logical-index --single --reverse --from 8
   echo
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-distrib.output "$file"

@@ -138,7 +138,7 @@ static void test_scatter(hwloc_topology_t topology)
 	if ( !is_tleaf(topology) )
 		return;
 
-	ssize_t i=0, j, r, n=0, c, val, nleaves=1;
+	ssize_t i=0, j, r, n_levels=0, n=0, c, val, nleaves=1;
 	hwloc_obj_t item, obj, root = hwloc_get_obj_by_depth(topology, 0, 0);
 	struct hwloc_distrib_iterator *it;
 
@@ -172,12 +172,13 @@ static void test_scatter(hwloc_topology_t topology)
 		item = obj;
 		goto next_level;
 	}
-	
+
+	n_levels=n;
 	for (i = 0; hwloc_distrib_iterator_next(topology, it, &item); i++) {
 		c = i;
 		n = nleaves;
 		val = 0;
-		for (j = (n-2); j >= 0; j--) {
+		for (j = (n_levels-1); j > 0; j--) {
 			r = c % arities[j];
 			n = n / arities[j];
 			c = c / arities[j];
