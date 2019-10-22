@@ -19,8 +19,8 @@ sysfs_outputs = \
 		4fake-4gr1nu1pu.output \
 		256ppc-8n8s4t.output \
 		256ppc-8n8s4t-nocache.output \
-		32amd64-4s2n4c-cgroup.output \
-		32amd64-4s2n4c-cgroup.xml.output \
+		32amd64-4s2n4c-cgroup2.output \
+		32amd64-4s2n4c-cgroup2.xml.output \
 		8amd64-4n2c.output  \
 		8em64t-4c2t.output \
 		8em64t-2s2ca2c.output \
@@ -79,8 +79,8 @@ sysfs_tarballs = \
 		4fake-4gr1nu1pu.tar.bz2 \
 		256ppc-8n8s4t.tar.bz2 \
 		256ppc-8n8s4t-nocache.source \
-		32amd64-4s2n4c-cgroup.tar.bz2 \
-		32amd64-4s2n4c-cgroup.xml.source \
+		32amd64-4s2n4c-cgroup2.tar.bz2 \
+		32amd64-4s2n4c-cgroup2.xml.source \
 		8amd64-4n2c.tar.bz2  \
 		8em64t-4c2t.tar.bz2 \
 		8em64t-2s2ca2c.tar.bz2 \
@@ -143,7 +143,7 @@ sysfs_options = \
 		16em64t-4s2c2t_ncaches.options \
 		16em64t-4s2c2t_merge.options \
 		16em64t-4s2c2t.xml.options \
-		32amd64-4s2n4c-cgroup.xml.options \
+		32amd64-4s2n4c-cgroup2.xml.options \
 		32em64t-2n8c+1mic.options \
 		40intel64-2g2n4c+pci.options \
 		fakeheteronuma.options
