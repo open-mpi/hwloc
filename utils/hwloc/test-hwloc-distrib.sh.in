@@ -60,4 +60,3 @@ set -e
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-distrib.output "$file"
 rm -rf "$tmp"
-return 0
