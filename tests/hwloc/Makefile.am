@@ -31,6 +31,7 @@ LOG_COMPILER = $(builddir)/wrapper.sh
 check_PROGRAMS = \
         hwloc_api_version \
         hwloc_list_components \
+        hwloc_distrib \
         hwloc_bitmap \
         hwloc_bitmap_string \
         hwloc_bitmap_compare_inclusion \
