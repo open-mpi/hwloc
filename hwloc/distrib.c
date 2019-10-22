@@ -58,17 +58,17 @@ static size_t* shuffled_range(const size_t n){
   return ret;
 }
 
-static int hwloc_distrib_level_cmp_depth(void *la, void* lb){
-	struct hwloc_distrib_level *a = (struct hwloc_distrib_level *)la;	
-	struct hwloc_distrib_level *b = (struct hwloc_distrib_level *)lb;
+static int hwloc_distrib_level_cmp_depth(const void *la, const void* lb){
+	const struct hwloc_distrib_level *a = (struct hwloc_distrib_level *)la;	
+	const struct hwloc_distrib_level *b = (struct hwloc_distrib_level *)lb;
 	if(a->depth > b->depth) { return 1; }
 	if(a->depth < b->depth) { return -1; }
 	return 0;
 }
 
-static int hwloc_distrib_level_cmp_user_index(void *la, void* lb){
-	struct hwloc_distrib_level *a = (struct hwloc_distrib_level *)la;	
-	struct hwloc_distrib_level *b = (struct hwloc_distrib_level *)lb;
+static int hwloc_distrib_level_cmp_user_index(const void *la, const void* lb){
+	const struct hwloc_distrib_level *a = (struct hwloc_distrib_level *)la;	
+	const struct hwloc_distrib_level *b = (struct hwloc_distrib_level *)lb;
 	if(a->user_index > b->user_index) { return 1; }
 	if(a->user_index < b->user_index) { return -1; }
 	return 0;
@@ -103,7 +103,7 @@ hwloc_distrib_root_levels(hwloc_topology_t topology,
 	qsort(levels,
 	      n_types,
 	      sizeof(*levels),
-	      (__compar_fn_t)hwloc_distrib_level_cmp_depth);	
+	      hwloc_distrib_level_cmp_depth);	
 	
 	// Walk from top to bottom and set arity to the maximum arity below root field.
 	size_t arity;
@@ -291,7 +291,7 @@ hwloc_distrib_iterator_inc(struct hwloc_distrib_iterator *it){
 	qsort(levels,
 	      it->n_levels,
 	      sizeof(*levels),
-	      (__compar_fn_t)hwloc_distrib_level_cmp_user_index);
+	      hwloc_distrib_level_cmp_user_index);
 		
 	for (i=it->n_levels-1; i>=0; i--){
 		if(++levels[i].coord >= levels[i].arity)
@@ -322,7 +322,7 @@ hwloc_distrib_iterator_next(hwloc_topology_t topology,
 	qsort(levels,
 	      it->n_levels,
 	      sizeof(*levels),
-	      (__compar_fn_t)hwloc_distrib_level_cmp_depth);	
+	      hwloc_distrib_level_cmp_depth);	
 	
 	for(size_t i=0; i<it->n_levels; i++){
 		coord = levels[i].index[levels[i].coord];
