@@ -1217,9 +1217,9 @@ hwloc_distrib_iterator_scatter(hwloc_topology_t topology,
 HWLOC_DECLSPEC struct hwloc_distrib_iterator *
 hwloc_distrib_build_iterator(hwloc_topology_t topology,
 			     hwloc_obj_t *roots,
-			     const size_t n_roots,
+			     const unsigned n_roots,
 			     const hwloc_obj_type_t *levels,
-			     const size_t n_levels,
+			     const unsigned n_levels,
 			     const unsigned long flags);
 
 /** \brief Free memory allocated for \p it **/

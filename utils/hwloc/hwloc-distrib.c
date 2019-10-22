@@ -72,6 +72,9 @@ static hwloc_obj_type_t parse_policy_type(const char* type){
 
 // Parse string in arg_types after topology create, load, filter etc...
 static void parse_policy(void){
+	size_t i;
+	char *type;
+
 	if (policy == ROUND_ROBIN){
 		num_types = 1;
 		policy_types = malloc(sizeof(*policy_types));
@@ -83,9 +86,6 @@ static void parse_policy(void){
 		*policy_types = parse_policy_type(arg_types);
 	}
 	else {
-		size_t i;
-		char *type;
-		
 		for(i=0; i<strlen(arg_types); i++)
 			if (arg_types[i] == ':')
 				num_types++;
@@ -104,19 +104,27 @@ int main(int argc, char *argv[])
 {
   long n = -1;
   char *input = NULL;
+  char *restrictstring = NULL;
+  char *str=NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   int taskset = 0;
   int singlify = 0;
   int logical_index = 0;
   int physical_index = 0;    
   int verbose = 0;
-  char *restrictstring = NULL;
+  int continue_it = 1;
   int from_index = -1;
-  unsigned long flags = 0;
-  unsigned long dflags = 0;
   int opt;
   int err;
-
+  unsigned long flags = 0;
+  unsigned long dflags = 0;
+  unsigned last;
+  struct hwloc_distrib_iterator *it;
+  hwloc_obj_type_t type;
+  hwloc_bitmap_t cpuset;
+  hwloc_bitmap_t restrictset;
+  hwloc_obj_t root, next;
+  
   callname = argv[0];
   hwloc_utils_check_api_version(callname);
   
@@ -207,7 +215,6 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--ignore")) {
-	hwloc_obj_type_t type;
 	if (argc < 2) {
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
@@ -273,12 +280,8 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  {
-    hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
-    struct hwloc_distrib_iterator *it;
-    hwloc_obj_t root, next=NULL;
-    
-    if (input) {
+  cpuset = hwloc_bitmap_alloc();    
+  if (input) {
       err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, verbose, callname);
       if (err) {
 	free(cpuset);
@@ -288,12 +291,12 @@ int main(int argc, char *argv[])
     hwloc_topology_set_flags(topology, flags);
     err = hwloc_topology_load(topology);
     if (err < 0) {
-      free(cpuset);
+      hwloc_bitmap_free(cpuset);
       return EXIT_FAILURE;
     }
 
     if (restrictstring) {
-      hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
+      restrictset = hwloc_bitmap_alloc();
       hwloc_bitmap_sscanf(restrictset, restrictstring);
       err = hwloc_topology_restrict (topology, restrictset, 0);
       if (err) {
@@ -311,21 +314,14 @@ int main(int argc, char *argv[])
     } else if (policy == SCATTER){
 	    it = hwloc_distrib_iterator_scatter(topology, *policy_types, dflags);
     } else {
-	    it = hwloc_distrib_build_iterator(topology,
-					      &root,
-					      1,
-					      policy_types,
-					      num_types,
-					      dflags);
+	    it = hwloc_distrib_build_iterator(topology, &root, 1, policy_types, num_types, dflags);
     }
     if (it == NULL)
 	    return EXIT_FAILURE;
 
     // Go to start index.
-    while ( hwloc_distrib_iterator_next(topology, it, &next) &&
-	    from_index > 0 && next->logical_index != from_index );
+    while ( hwloc_distrib_iterator_next(topology, it, &next) && from_index > 0 && next->logical_index != from_index ) {}
 
-    int continue_it = 1;
     do {
 	    if (logical_index) {
 		    printf("%d\n", next->logical_index);
@@ -333,10 +329,9 @@ int main(int argc, char *argv[])
 		    printf("%d\n", next->os_index);
 	    } else {
 		    hwloc_bitmap_copy(cpuset, next->cpuset);
-		    char *str = NULL;
 		    if (singlify) {
 			    if (dflags & HWLOC_DISTRIB_FLAG_REVERSE) {
-				    unsigned last = hwloc_bitmap_last(cpuset);
+				    last = hwloc_bitmap_last(cpuset);
 				    hwloc_bitmap_only(cpuset, last);
 			    } else {
 				    hwloc_bitmap_singlify(cpuset);
@@ -352,11 +347,10 @@ int main(int argc, char *argv[])
 	    if ((! continue_it && n < 0) || --n == 0)
 		    break;
 	    continue_it = hwloc_distrib_iterator_next(topology, it, &next);
-    } while (1);
-    hwloc_bitmap_free(cpuset);
-    hwloc_distrib_destroy_iterator(it);
-    free(policy_types);
-  }
+  } while (1);
+  hwloc_bitmap_free(cpuset);
+  hwloc_distrib_destroy_iterator(it);
+  free(policy_types);
   
   hwloc_topology_destroy(topology);
 
