@@ -201,6 +201,7 @@
     <ClCompile Include="..\..\hwloc\bitmap.c" />
     <ClCompile Include="..\..\hwloc\components.c" />
     <ClCompile Include="..\..\hwloc\distances.c" />
+    <ClCompile Include="..\..\hwloc\distrib.c" />
     <ClCompile Include="..\..\hwloc\diff.c" />
     <ClCompile Include="..\..\hwloc\shmem.c" />
     <ClCompile Include="..\..\hwloc\misc.c" />
