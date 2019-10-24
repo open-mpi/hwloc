@@ -486,12 +486,19 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
 
 void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
 {
+#if (defined LSTOPO_HAVE_GRAPHICS) && (defined CAIRO_HAS_PDF_SURFACE)
+  const char *format = "PDF";
+  const char *extension = "pdf";
+#else
+  const char *format = "SVG";
+  const char *extension = "svg";
+#endif
   printf("\nCommand-line options for the current configuration tweaks:\n");
   lstopo__show_interactive_cli_options(loutput);
-  printf("\n\nTo export to PDF:\n");
+  printf("\n\nTo export to %s:\n", format);
   printf("  lstopo  <your options>");
   lstopo__show_interactive_cli_options(loutput);
-  printf(" topology.pdf\n\n");
+  printf(" topology.%s\n\n", extension);
 }
 
 enum output_format {
