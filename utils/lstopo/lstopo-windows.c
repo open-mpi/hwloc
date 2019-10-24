@@ -134,6 +134,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	break;
       case 'h':
       case 'H':
+      case '?':
 	lstopo_show_interactive_help();
 	break;
       case 'q':

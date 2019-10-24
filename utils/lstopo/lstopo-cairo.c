@@ -473,6 +473,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  break;
 	case XK_h:
 	case XK_H:
+	case XK_question:
 	  lstopo_show_interactive_help();
 	  break;
 	case XK_a:
