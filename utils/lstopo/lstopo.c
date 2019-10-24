@@ -443,7 +443,7 @@ void lstopo_show_interactive_help(void)
   printf("  Scroll horizontally ................. Left Right Ctrl+PageUp/Down\n");
   printf("  Scroll to the top-left corner ....... Home\n");
   printf("  Scroll to the bottom-right corner ... End\n");
-  printf("  Show this help ...................... h H\n");
+  printf("  Show this help ...................... h H ?\n");
   printf("  Exit ................................ q Q Esc\n");
   printf(" Configuration tweaks:\n");
   printf("  Toggle factorizing or collapsing .... f\n");
