@@ -46,6 +46,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
   struct lstopo_output *loutput = the_output.loutput;
   int redraw = 0;
+  int resize = 0;
 
   switch (message) {
     case WM_CHAR:  {
@@ -69,6 +70,9 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       case '1':
 	the_scale = 1.0;
 	redraw = 1;
+	break;
+      case 'r':
+	resize = 1;
 	break;
       case 'a':
 	loutput->show_attrs_enabled ^= 1;
@@ -262,6 +266,20 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       redraw = 1;
       break;
     }
+  }
+  if (resize) {
+    RECT rect;
+    win_width = the_width;
+    win_height = the_height;
+    x_delta = 0;
+    y_delta = 0;
+    rect.top = 0;
+    rect.left = 0;
+    rect.right = the_width;
+    rect.bottom = the_height;
+    AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+    SetWindowPos(the_output.toplevel, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE|SWP_NOZORDER);
+    redraw = 1;
   }
   if (redraw) {
     if (x_delta > the_width - win_width)

@@ -471,6 +471,14 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  disp->scale = 1.0f;
 	  move_x11(disp);
 	  break;
+	case XK_r:
+	  disp->screen_width = disp->width;
+	  disp->screen_height = disp->height;
+	  disp->x = 0;
+	  disp->y = 0;
+	  XResizeWindow(disp->dpy, disp->top, disp->screen_width, disp->screen_height);
+	  move_x11(disp);
+	  break;
 	case XK_h:
 	case XK_H:
 	case XK_question:

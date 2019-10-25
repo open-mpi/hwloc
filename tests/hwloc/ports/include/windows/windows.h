@@ -227,6 +227,12 @@ WORD HIWORD(DWORD dwValue);
 
 LRESULT WINAPI DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
+BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
+#define SWP_NOMOVE 0x0002
+#define SWP_NOZORDER 0x0004
+
+#define HWND_TOP (HWND)0
+
 BOOL AdjustWindowRect(LPRECT lpRect, DWORD dwStyle, BOOL bMenu);
 
 #define WHITE_BRUSH 26
