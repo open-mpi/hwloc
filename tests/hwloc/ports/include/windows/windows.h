@@ -227,6 +227,8 @@ WORD HIWORD(DWORD dwValue);
 
 LRESULT WINAPI DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
+BOOL AdjustWindowRect(LPRECT lpRect, DWORD dwStyle, BOOL bMenu);
+
 #define WHITE_BRUSH 26
 
 HCURSOR WINAPI LoadCursor(HINSTANCE hInstance, LPCTSTR lpCursorName);
