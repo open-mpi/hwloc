@@ -357,6 +357,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   unsigned width, height;
   HFONT font;
   MSG msg;
+  RECT rect;
 
   memset(&the_output, 0, sizeof(the_output));
   the_output.loutput = loutput;
@@ -394,12 +395,18 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   width = loutput->width;
   height = loutput->height;
 
-  win_width = width + 2*GetSystemMetrics(SM_CXSIZEFRAME);
-  win_height = height + 2*GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION);
+  /* compute the window dimensions with borders/title/... */
+  rect.top = 0;
+  rect.left = 0;
+  rect.right = width;
+  rect.bottom = height;
+  AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+  win_width = rect.right - rect.left;
+  win_height = rect.bottom - rect.top;
 
+  /* don't make it bigger than the screen */
   if (win_width > GetSystemMetrics(SM_CXFULLSCREEN))
     win_width = GetSystemMetrics(SM_CXFULLSCREEN);
-
   if (win_height > GetSystemMetrics(SM_CYFULLSCREEN))
     win_height = GetSystemMetrics(SM_CYFULLSCREEN);
 
