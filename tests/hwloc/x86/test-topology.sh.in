@@ -106,7 +106,7 @@ actual_source="$topology".tar.bz2
 
 # if there's a .env file, source it
 if [ -f "$topology".env ] ; then
-    source "$topology".env
+    . "$topology".env
 fi
 
 result=1
