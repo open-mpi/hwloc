@@ -118,7 +118,7 @@ fi
 
 # if there's a .env file, source it
 if [ -f "$topology".env ] ; then
-    source "$topology".env
+    . "$topology".env
 fi
 
 # use an absolute path for tar options because tar is invoked from the temp directory
