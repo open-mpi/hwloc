@@ -38,6 +38,7 @@ static int win_width, win_height;
 static unsigned int the_fontsize, the_gridsize;
 static float the_scale;
 static int needs_resize;
+static int ignore_wm_size;
 
 static void
 windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused);
@@ -171,7 +172,12 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	rect.right = the_width;
 	rect.bottom = the_height;
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+
+	/* SetWindowPos() generates a WM_SIZE event, we don't want to scale the drawing there */
+	ignore_wm_size = 1;
 	SetWindowPos(the_output.toplevel, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_DEFERERASE|SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
+	ignore_wm_size = 0;
+
 	needs_resize = 0;
       }
 
@@ -270,15 +276,17 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	PostQuitMessage(0);
       return 0;
     case WM_SIZE: {
-      float wscale, hscale;
       win_width = LOWORD(lparam);
       win_height = HIWORD(lparam);
-      wscale = win_width / (float)the_width;
-      hscale = win_height / (float)the_height;
-      the_scale *= wscale > hscale ? hscale : wscale;
-      if (the_scale < 1.0f)
-	the_scale = 1.0f;
-      redraw = 1;
+      if (!ignore_wm_size) {
+	float wscale, hscale;
+	wscale = win_width / (float)the_width;
+	hscale = win_height / (float)the_height;
+	the_scale *= wscale > hscale ? hscale : wscale;
+	if (the_scale < 1.0f)
+	  the_scale = 1.0f;
+	redraw = 1;
+      }
       break;
     }
   }
@@ -447,6 +455,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   the_gridsize = loutput->gridsize;
 
   needs_resize = 0;
+  ignore_wm_size = 0;
 
   /* and display the window */
   ShowWindow(toplevel, SW_SHOWDEFAULT);
