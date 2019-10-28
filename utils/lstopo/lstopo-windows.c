@@ -37,6 +37,7 @@ static int the_width, the_height;
 static int win_width, win_height;
 static unsigned int the_fontsize, the_gridsize;
 static float the_scale;
+static int auto_resize;
 static int needs_resize;
 static int ignore_wm_size;
 
@@ -55,12 +56,17 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       case '+':
 	the_scale *= 1.2f;
 	redraw = 1;
+	if (auto_resize)
+	  needs_resize = 1;
 	break;
       case '-':
 	the_scale /= 1.2f;
 	redraw = 1;
+	if (auto_resize)
+	  needs_resize = 1;
 	break;
       case 'F': {
+	/* fit drawing to window, don't resize the window */
 	float wscale, hscale;
 	wscale = win_width / (float)the_width;
 	hscale = win_height / (float)the_height;
@@ -71,19 +77,31 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       case '1':
 	the_scale = 1.0;
 	redraw = 1;
+	if (auto_resize)
+	  needs_resize = 1;
 	break;
       case 'r':
-	needs_resize = 1;
+	needs_resize = 1; /* forced */
+	break;
+      case 'R':
+	auto_resize ^= 1;
+	if (auto_resize)
+	  needs_resize = 1;
+	printf("%s window autoresizing\n", auto_resize ? "enabled" : "disabled");
 	break;
       case 'a':
 	loutput->show_attrs_enabled ^= 1;
 	printf("%s object attributes\n", loutput->show_attrs_enabled ? "enabled" : "disabled");
 	redraw = 1;
+	if (auto_resize)
+	  needs_resize = 1;
 	break;
       case 't':
 	loutput->show_text_enabled ^= 1;
 	printf("%s object text\n", loutput->show_text_enabled ? "enabled" : "disabled");
 	redraw = 1;
+	if (auto_resize)
+	  needs_resize = 1;
 	break;
       case 'i':
 	if (loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
@@ -102,6 +120,8 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	  abort();
 	}
 	redraw = 1;
+	if (auto_resize)
+	  needs_resize = 1;
 	break;
       case 'd':
 	loutput->show_disallowed ^= 1;
@@ -117,6 +137,8 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	loutput->legend ^= 1;
 	printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
 	redraw = 1;
+	if (auto_resize)
+	  needs_resize = 1;
 	break;
       case 'f':
 	/* alternate between factorize+collapse, collapse only, and none */
@@ -132,6 +154,8 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	  printf("factorizing and PCI collapsing enabled\n");
 	}
 	redraw = 1;
+	if (auto_resize)
+	  needs_resize = 1;
 	break;
       case 'E':
 	lstopo_show_interactive_cli_options(loutput);
@@ -454,6 +478,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   the_fontsize = loutput->fontsize;
   the_gridsize = loutput->gridsize;
 
+  auto_resize = 1;
   needs_resize = 0;
   ignore_wm_size = 0;
 

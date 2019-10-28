@@ -157,6 +157,8 @@ struct lstopo_x11_output {
   int x, y;					/** top left corner of the visible part */
   float scale, last_scale;
   int needs_redraw;
+  int needs_resize;
+  int auto_resize;
 };
 
 static void
@@ -237,6 +239,17 @@ move_x11(struct lstopo_x11_output *disp)
       disp->y = 0;
     if (disp->y >= disp->height - disp->screen_height)
       disp->y = disp->height - disp->screen_height;
+  }
+
+  if (disp->needs_resize >= 1) {
+    if (disp->auto_resize || disp->needs_resize >= 2) {
+      disp->last_screen_width = disp->screen_width = disp->width;
+      disp->last_screen_height = disp->screen_height = disp->height;
+      disp->x = 0;
+      disp->y = 0;
+      XResizeWindow(disp->dpy, disp->top, disp->screen_width, disp->screen_height);
+    }
+    disp->needs_resize = 0;
   }
 }
 
@@ -324,6 +337,8 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   disp->scale = disp->last_scale = 1.0f;
   /* TODO: if window got truncated, scale down? */
   disp->needs_redraw = 0;
+  disp->needs_resize = 0;
+  disp->auto_resize = 1;
 
   x11_create(disp, loutput->width, loutput->height);
 
@@ -450,6 +465,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  move_x11(disp);
 	  break;
 	case XK_F: {
+	  /* fit drawing to window, dont't resize the window */
 	  float wscale = disp->screen_width / (float)disp->width;
 	  float hscale = disp->screen_height / (float)disp->height;
 	  disp->scale *= wscale > hscale ? hscale : wscale;
@@ -459,24 +475,29 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	case XK_plus:
 	case XK_KP_Add:
 	  disp->scale *= 1.2f;
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_minus:
 	case XK_KP_Subtract:
 	  disp->scale /= 1.2f;
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_1:
 	case XK_KP_1:
 	  disp->scale = 1.0f;
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_r:
-	  disp->screen_width = disp->width;
-	  disp->screen_height = disp->height;
-	  disp->x = 0;
-	  disp->y = 0;
-	  XResizeWindow(disp->dpy, disp->top, disp->screen_width, disp->screen_height);
+	  disp->needs_resize = 2;
+	  move_x11(disp);
+	  break;
+	case XK_R:
+	  disp->auto_resize ^= 1;
+	  printf("%s window autoresizing\n", disp->auto_resize ? "enabled" : "disabled");
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_h:
@@ -488,12 +509,14 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  loutput->show_attrs_enabled ^= 1;
 	  printf("%s object attributes\n", loutput->show_attrs_enabled ? "enabled" : "disabled");
 	  disp->needs_redraw = 1;
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_t:
 	  loutput->show_text_enabled ^= 1;
 	  printf("%s object text\n", loutput->show_text_enabled ? "enabled" : "disabled");
 	  disp->needs_redraw = 1;
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_i:
@@ -513,6 +536,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	    abort();
 	  }
 	  disp->needs_redraw = 1;
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_b:
@@ -541,12 +565,14 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	    printf("factorizing and PCI collapsing enabled\n");
 	  }
 	  disp->needs_redraw = 1;
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_l:
 	  loutput->legend ^= 1;
 	  printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
 	  disp->needs_redraw = 1;
+	  disp->needs_resize = 1;
 	  move_x11(disp);
 	  break;
 	case XK_E:
