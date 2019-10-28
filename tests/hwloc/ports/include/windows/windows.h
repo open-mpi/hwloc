@@ -230,6 +230,9 @@ LRESULT WINAPI DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
 #define SWP_NOMOVE 0x0002
 #define SWP_NOZORDER 0x0004
+#define SWP_NOCOPYBITS 0x0100
+#define SWP_NOOWNERZORDER 0x0200
+#define SWP_DEFERERASE 0x2000
 
 #define HWND_TOP (HWND)0
 

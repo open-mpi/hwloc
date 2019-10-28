@@ -37,6 +37,7 @@ static int the_width, the_height;
 static int win_width, win_height;
 static unsigned int the_fontsize, the_gridsize;
 static float the_scale;
+static int needs_resize;
 
 static void
 windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused);
@@ -46,7 +47,6 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
   struct lstopo_output *loutput = the_output.loutput;
   int redraw = 0;
-  int resize = 0;
 
   switch (message) {
     case WM_CHAR:  {
@@ -72,7 +72,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	redraw = 1;
 	break;
       case 'r':
-	resize = 1;
+	needs_resize = 1;
 	break;
       case 'a':
 	loutput->show_attrs_enabled ^= 1;
@@ -160,6 +160,21 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       output_draw(loutput);
       the_width = loutput->width;
       the_height = loutput->height;
+
+      /* now that we computed the new drawing size, resize the window if needed */
+      if (needs_resize) {
+	RECT rect;
+	x_delta = 0;
+	y_delta = 0;
+	rect.top = 0;
+	rect.left = 0;
+	rect.right = the_width;
+	rect.bottom = the_height;
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+	SetWindowPos(the_output.toplevel, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_DEFERERASE|SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
+	needs_resize = 0;
+      }
+
       loutput->drawing = LSTOPO_DRAWING_DRAW;
       windows_box(loutput, &white, 0, 0, win_width, 0, win_height, NULL, 0);
       output_draw(loutput);
@@ -267,18 +282,8 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       break;
     }
   }
-  if (resize) {
-    RECT rect;
-    win_width = the_width;
-    win_height = the_height;
-    x_delta = 0;
-    y_delta = 0;
-    rect.top = 0;
-    rect.left = 0;
-    rect.right = the_width;
-    rect.bottom = the_height;
-    AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
-    SetWindowPos(the_output.toplevel, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE|SWP_NOZORDER);
+  if (needs_resize) {
+    /* force a redraw since resizing occurs during redraw */
     redraw = 1;
   }
   if (redraw) {
@@ -440,6 +445,8 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
 
   the_fontsize = loutput->fontsize;
   the_gridsize = loutput->gridsize;
+
+  needs_resize = 0;
 
   /* and display the window */
   ShowWindow(toplevel, SW_SHOWDEFAULT);
