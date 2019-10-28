@@ -156,12 +156,12 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
       SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
       SetBkMode(the_output.ps.hdc, TRANSPARENT);
-      windows_box(loutput, &white, 0, 0, win_width, 0, win_height, NULL, 0);
       loutput->drawing = LSTOPO_DRAWING_PREPARE;
       output_draw(loutput);
       the_width = loutput->width;
       the_height = loutput->height;
       loutput->drawing = LSTOPO_DRAWING_DRAW;
+      windows_box(loutput, &white, 0, 0, win_width, 0, win_height, NULL, 0);
       output_draw(loutput);
       DeleteObject(font);
       EndPaint(hwnd, &the_output.ps);
