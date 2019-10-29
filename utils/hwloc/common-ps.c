@@ -122,6 +122,30 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
     free(cmd);
   }
 
+  if (flags & HWLOC_PS_FLAG_UID) {
+    proc->uid = HWLOC_PS_ALL_UIDS;
+#ifdef HWLOC_LINUX_SYS
+    pathlen = 6 + 21 + 1 + 6 + 1;
+    path = malloc(pathlen);
+    snprintf(path, pathlen, "/proc/%ld/status", proc->pid);
+    fd = open(path, O_RDONLY);
+    if (fd >= 0) {
+      char status[1024];
+      char *uid;
+      (void) read(fd, &status, sizeof(status));
+      status[1023] = '\0';
+      uid = strstr(status, "Uid:");
+      if (uid)
+	proc->uid = strtoul(uid+4, NULL, 0);
+    }
+    free(path);
+#endif
+    /* On *BSD, parse the end of the single-line in /proc/pid/status
+     * (but the format is different between FreeBSD and NetBSD).
+     * It may be a good time to switch to a portable library for gathering this info.
+     */
+  }
+
   if (flags & HWLOC_PS_FLAG_THREADS) {
 #ifdef HWLOC_LINUX_SYS
     /* check if some threads must be displayed */
@@ -254,7 +278,7 @@ void hwloc_ps_free_process(struct hwloc_ps_process *proc)
 int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 			     void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
 			     void *cbdata,
-			     unsigned long flags, const char *only_name, const char *pidcmd)
+			     unsigned long flags, const char *only_name, long uid, const char *pidcmd)
 {
 #ifdef HAVE_DIRENT_H
   DIR *dir;
@@ -282,6 +306,8 @@ int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t top
     if (hwloc_ps_read_process(topology, topocpuset, &proc, flags, pidcmd) < 0)
       goto next;
     if (only_name && !strstr(proc.name, only_name))
+      goto next;
+    if (uid != HWLOC_PS_ALL_UIDS && proc.uid != HWLOC_PS_ALL_UIDS && proc.uid != uid)
       goto next;
     callback(topology, &proc, cbdata);
   next:

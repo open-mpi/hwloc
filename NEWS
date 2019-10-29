@@ -21,7 +21,8 @@ Version 2.2.0
 * Backends
   + Add support for Linux cgroups v2.
   + Remove support for Intel Xeon Phi (MIC, Knights Corner) co-processors.
-
+* Tools
+  + Add --uid to filter the hwloc-ps output by uid on Linux.
 
 Version 2.1.0
 -------------

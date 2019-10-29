@@ -34,6 +34,7 @@ static int show_cpuset = 0;
 static int logical = 1;
 #define NO_ONLY_PID -1
 static long only_pid = NO_ONLY_PID;
+static long only_uid;
 static int json_server = 0;
 static int json_port = JSON_PORT;
 static FILE *json_output = NULL;
@@ -46,6 +47,10 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -a                 Show all processes, including those that are not bound\n");
   fprintf (where, "  --pid <pid>        Only show process of pid number <pid>\n");
   fprintf (where, "  --name <name>      Only show processes whose name contains <name>\n");
+#ifdef HWLOC_LINUX_SYS
+  fprintf (where, "  --uid <uid>        Only show processes of the user with the given uid\n");
+  fprintf (where, "  --uid all          Show processes of all users\n");
+#endif
   fprintf (where, "  -l --logical       Use logical object indexes (default)\n");
   fprintf (where, "  -p --physical      Use physical object indexes\n");
   fprintf (where, "  -c --cpuset        Show cpuset instead of objects\n");
@@ -186,7 +191,7 @@ static int run(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 {
   if (only_pid == NO_ONLY_PID) {
     /* show all */
-    return hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, NULL, psflags, only_name, pidcmd);
+    return hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, NULL, psflags, only_name, only_uid, pidcmd);
 
   } else {
     /* show only one */
@@ -194,6 +199,7 @@ static int run(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
     int ret;
 
     proc.pid = only_pid;
+    proc.uid = only_uid;
     proc.cpuset = NULL;
     proc.nthreads = 0;
     proc.nboundthreads = 0;
@@ -345,6 +351,8 @@ int main(int argc, char *argv[])
   int err;
   int opt;
 
+  only_uid = getuid();
+
   callname = strrchr(argv[0], '/');
   if (!callname)
     callname = argv[0];
@@ -388,6 +396,20 @@ int main(int argc, char *argv[])
       }
       only_name = argv[1];
       opt = 1;
+    } else if (!strcmp(argv[0], "--uid")) {
+#ifdef HWLOC_LINUX_SYS
+      if (argc < 2) {
+	usage(callname, stdout);
+	exit(EXIT_FAILURE);
+      }
+      if (!strcmp(argv[1], "all"))
+	only_uid = HWLOC_PS_ALL_UIDS;
+      else
+	only_uid = atoi(argv[1]);
+      opt = 1;
+#else
+      fprintf (stderr, "Filtering by UID is currently only supported on Linux\n");
+#endif
     } else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
       flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
     } else if (!strcmp (argv[0], "--pid-cmd")) {
@@ -449,6 +471,8 @@ int main(int argc, char *argv[])
     psflags |= HWLOC_PS_FLAG_THREADS;
   if (get_last_cpu_location)
     psflags |= HWLOC_PS_FLAG_LASTCPULOCATION;
+  if (only_uid != HWLOC_PS_ALL_UIDS)
+    psflags |= HWLOC_PS_FLAG_UID;
 
   if (json_server) {
     run_json_server(topology, topocpuset);
