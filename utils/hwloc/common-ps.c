@@ -137,6 +137,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
       uid = strstr(status, "Uid:");
       if (uid)
 	proc->uid = strtoul(uid+4, NULL, 0);
+      close(fd);
     }
     free(path);
 #endif
