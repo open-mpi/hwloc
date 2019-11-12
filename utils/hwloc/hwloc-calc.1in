@@ -93,8 +93,10 @@ while a comma is used to separate indexes
 \fB\-\-single\fR
 Singlify the output to a single CPU.
 .TP
-\fB\-\-no\-smt\fR
-Only keep a single PU per core in the input locations.
+\fB\-\-no\-smt\fR, \fB\-\-no\-smt=<N>\fR
+Only keep the first PU per core in the input locations.
+If \fI<N>\fR is specified, keep the <N>-th instead, if any.
+PUs are ordered by physical index during this filtering.
 .TP
 \fB\-\-taskset\fR
 Display CPU set strings in the format recognized by the taskset command-line

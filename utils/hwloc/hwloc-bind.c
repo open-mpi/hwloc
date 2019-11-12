@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
   int force = 0;
   int single = 0;
   int verbose = 0;
-  int no_smt = 0;
+  int no_smt = -1;
   int only_hbm = -1;
   int logical = 1;
   int taskset = 0;
@@ -145,7 +145,11 @@ int main(int argc, char *argv[])
 	goto next;
       }
       if (!strcmp(argv[0], "--no-smt")) {
-	no_smt = 1;
+	no_smt = 0;
+	goto next;
+      }
+      if (!strncmp(argv[0], "--no-smt=", 9)) {
+	no_smt = atoi(argv[0] + 9);
 	goto next;
       }
       if (!strcmp(argv[0], "-f") || !strcmp(argv[0], "--force")) {
@@ -454,7 +458,7 @@ int main(int argc, char *argv[])
       fprintf(stderr, "--mempolicy ignored unless memory binding is also requested with --membind.\n");
   }
 
-  if (!got_cpubind && no_smt) {
+  if (!got_cpubind && no_smt != -1) {
     hwloc_bitmap_copy(cpubind_set, hwloc_topology_get_topology_cpuset(topology));
     got_cpubind = 1;
   }
@@ -477,21 +481,11 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "Conflicting CPU and memory binding requested, adding HWLOC_CPUBIND_NOMEMBIND flag.\n");
       cpubind_flags |= HWLOC_CPUBIND_NOMEMBIND;
     }
-    if (no_smt) {
+    if (no_smt != -1) {
       if (hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == HWLOC_TYPE_DEPTH_UNKNOWN) {
 	fprintf(stderr, "Topology has no Core object, ignoring --no-smt\n");
       } else {
-	hwloc_obj_t core = NULL;
-	while ((core = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpubind_set, HWLOC_OBJ_CORE, core)) != NULL) {
-	  int firstpu = hwloc_bitmap_first(core->cpuset);
-	  int hadpu = hwloc_bitmap_isset(cpubind_set, firstpu);
-	  assert(firstpu >= 0);
-	  /* remove the entire core */
-	  hwloc_bitmap_andnot(cpubind_set, cpubind_set, core->cpuset);
-	  /* put back its first PU if it was there */
-	  if (hadpu)
-	    hwloc_bitmap_set(cpubind_set, firstpu);
-	}
+	hwloc_bitmap_singlify_per_core(topology, cpubind_set, no_smt);
       }
     }
     if (single)

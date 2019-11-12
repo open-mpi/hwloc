@@ -66,7 +66,7 @@ static int intersectdepth = -1;
 static int hiernblevels = 0;
 static int *hierdepth = NULL;
 static int showobjs = 0;
-static int no_smt = 0;
+static int no_smt = -1;
 static int singlify = 0;
 static int taskset = 0;
 
@@ -103,21 +103,11 @@ next:
 static int
 hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set)
 {
-  if (no_smt) {
+  if (no_smt != -1) {
     if (hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "Topology has no Core object, ignoring --no-smt\n");
     } else {
-      hwloc_obj_t core = NULL;
-      while ((core = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_CORE, core)) != NULL) {
-	int firstpu = hwloc_bitmap_first(core->cpuset);
-	int hadpu = hwloc_bitmap_isset(set, firstpu);
-	assert(firstpu >= 0);
-	/* remove the entire core */
-	hwloc_bitmap_andnot(set, set, core->cpuset);
-	/* put back its first PU if it was there */
-	if (hadpu)
-	  hwloc_bitmap_set(set, firstpu);
-      }
+      hwloc_bitmap_singlify_per_core(topology, set, no_smt);
     }
   }
 
@@ -288,7 +278,11 @@ int main(int argc, char *argv[])
 	return EXIT_SUCCESS;
       }
       if (!strcmp (argv[0], "--no-smt")) {
-	no_smt = 1;
+	no_smt = 0;
+	goto next;
+      }
+      if (!strncmp(argv[0], "--no-smt=", 9)) {
+	no_smt = atoi(argv[0] + 9);
 	goto next;
       }
       if (!strcmp (argv[0], "--restrict")) {

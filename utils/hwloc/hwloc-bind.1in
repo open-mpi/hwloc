@@ -97,8 +97,10 @@ No location may be given since no binding is performed.
 \fB\-\-single\fR
 Bind on a single CPU to prevent migration.
 .TP
-\fB\-\-no\-smt\fR
-Only keep a single PU per core before binding.
+\fB\-\-no\-smt\fR, \fB\-\-no\-smt=<N>\fR
+Only keep the first PU per core before binding.
+If \fI<N>\fR is specified, keep the <N>-th instead, if any.
+PUs are ordered by physical index during this filtering.
 .TP
 \fB\-\-strict\fR
 Require strict binding.
