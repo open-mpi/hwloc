@@ -40,9 +40,16 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" all --taskset
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" 0xf
-  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt node:2-3
   $calc --if synthetic --input "node:4 core:4 pu:4" 0xf ~0x3 0xff0 '^0xf0'
   $calc --if synthetic --input "node:4 core:4 pu:4" core:0 pu:15 ~pu:0 '^pu:2'
+  echo
+  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt node:2-3
+  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt 0x1fe
+  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt=1 0x1fe
+  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt=2 0x1fe
+  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt=3 0x1fe
+  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt=4 0x1fe
+  $calc --if synthetic --input "node:4 core:4 pu:4" --no-smt=-1 0x1fe
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:even
   $calc --if synthetic --input "node:4 core:4 pu:4" node:2-
