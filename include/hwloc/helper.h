@@ -672,6 +672,24 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute
  * package has fewer caches than its peers.
  */
 
+/** \brief Remove simultaneous multithreading PUs from a CPU set.
+ *
+ * For each core in \p topology, if \p cpuset contains some PUs of that core,
+ * modify \p cpuset to only keep a single PU for that core.
+ *
+ * \p which specifies which PU will be kept.
+ * PU are considered in physical index order.
+ * If 0, for each core, the function keeps the first PU that was originally set in \p cpuset.
+ *
+ * If \p which is larger than the number of PUs in a core there were originally set in \p cpuset,
+ * no PU is kept for that core.
+ *
+ * \note PUs that are not below a Core object are ignored
+ * (for instance if the topology does not contain any Core object).
+ * None of them is removed from \p cpuset.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_singlify_per_core(hwloc_topology_t topology, hwloc_bitmap_t cpuset, unsigned which);
+
 /** \brief Returns the object of type ::HWLOC_OBJ_PU with \p os_index.
  *
  * This function is useful for converting a CPU set into the PU

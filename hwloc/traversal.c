@@ -673,3 +673,31 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 
   return ret;
 }
+
+int hwloc_bitmap_singlify_per_core(hwloc_topology_t topology, hwloc_bitmap_t cpuset, unsigned which)
+{
+  hwloc_obj_t core = NULL;
+  while ((core = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_CORE, core)) != NULL) {
+    /* this core has some PUs in the cpuset, find the index-th one */
+    unsigned i = 0;
+    int pu = -1;
+    do {
+      pu = hwloc_bitmap_next(core->cpuset, pu);
+      if (pu == -1) {
+	/* no which-th PU in cpuset and core, remove the entire core */
+	hwloc_bitmap_andnot(cpuset, cpuset, core->cpuset);
+	break;
+      }
+      if (hwloc_bitmap_isset(cpuset, pu)) {
+	if (i == which) {
+	  /* remove the entire core except that exact pu */
+	  hwloc_bitmap_andnot(cpuset, cpuset, core->cpuset);
+	  hwloc_bitmap_set(cpuset, pu);
+	  break;
+	}
+	i++;
+      }
+    } while (1);
+  }
+  return 0;
+}

@@ -600,6 +600,7 @@ man3_helper_find_cache_DATA = \
 man3_helper_find_miscdir = $(man3dir)
 man3_helper_find_misc_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_misc.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_singlify_per_core.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_pu_obj_by_os_index.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_child.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \

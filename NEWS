@@ -18,6 +18,9 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.2.0
 -------------
+* API
+  + Add hwloc_bitmap_singlify_by_core() to remove SMT from a given cpuset,
+    thanks to Florian Reynier for the suggestion.
 * Backends
   + Add support for Linux cgroups v2.
   + Remove support for Intel Xeon Phi (MIC, Knights Corner) co-processors.
