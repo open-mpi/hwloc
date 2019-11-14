@@ -302,7 +302,6 @@ man3_object_types_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_osdev_type_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_osdev_type_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_compare_types_e.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_UNORDERED.3
 
 man3_objectsdir = $(man3dir)

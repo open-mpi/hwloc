@@ -93,9 +93,6 @@ extern "C" {
 
 #define hwloc_compare_types HWLOC_NAME(compare_types)
 
-#define hwloc_compare_types_e HWLOC_NAME(compare_types_e)
-#define HWLOC_TYPE_UNORDERED HWLOC_NAME_CAPS(TYPE_UNORDERED)
-
 #define hwloc_obj HWLOC_NAME(obj)
 #define hwloc_obj_t HWLOC_NAME(obj_t)
 

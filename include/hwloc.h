@@ -360,9 +360,8 @@ typedef enum hwloc_obj_osdev_type_e {
  */
 HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2) __hwloc_attribute_const;
 
-enum hwloc_compare_types_e {
-    HWLOC_TYPE_UNORDERED = INT_MAX	/**< \brief Value returned by hwloc_compare_types() when types can not be compared. \hideinitializer */
-};
+/** \brief Value returned by hwloc_compare_types() when types can not be compared. \hideinitializer */
+#define HWLOC_TYPE_UNORDERED INT_MAX
 
 /** @} */
 
