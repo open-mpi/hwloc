@@ -173,8 +173,12 @@ typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
  * may be defined in the future!  If you need to compare types, use
  * hwloc_compare_types() instead.
  */
-#define HWLOC_OBJ_TYPE_MIN HWLOC_OBJ_MACHINE /**< \private Sentinel value */
 typedef enum {
+
+/** \cond */
+#define HWLOC_OBJ_TYPE_MIN HWLOC_OBJ_MACHINE /* Sentinel value */
+/** \endcond */
+
   HWLOC_OBJ_MACHINE,	/**< \brief Machine.
 			  * A set of processors and memory with cache
 			  * coherency.
