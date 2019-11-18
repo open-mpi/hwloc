@@ -385,6 +385,13 @@ EOF])
     AC_CHECK_HEADERS([strings.h])
     AC_CHECK_HEADERS([ctype.h])
 
+    if test x$hwloc_freebsd = xyes; then
+
+      AC_CHECK_HEADERS([sys/domainset.h])
+
+    fi
+
+
     AC_CHECK_FUNCS([strcasecmp], [
       _HWLOC_CHECK_DECL([strcasecmp], [
 	AC_DEFINE([HWLOC_HAVE_DECL_STRCASECMP], [1], [Define to 1 if function `strcasecmp' is declared by system headers])

@@ -18,6 +18,7 @@ typedef int cpusetid_t;
 #define CPU_LEVEL_WHICH 3
 #define CPU_WHICH_TID 1
 #define CPU_WHICH_PID 2
+#define CPU_WHICH_DOMAIN 6
 
 int cpuset_setid(cpuwhich_t which, id_t id, cpusetid_t setid);
 int cpuset_getid(cpulevel_t level, cpuwhich_t which, id_t id, cpusetid_t *setid);

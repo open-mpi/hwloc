@@ -73,7 +73,8 @@ libhwloc_port_freebsd_la_SOURCES = \
         include/freebsd/pthread.h \
         include/freebsd/pthread_np.h \
         include/freebsd/sys/cpuset.h \
-        include/freebsd/sys/sysctl.h
+        include/freebsd/sys/sysctl.h \
+        include/freebsd/sys/domainset.h
 libhwloc_port_freebsd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/freebsd \
         -DHWLOC_FREEBSD_SYS \
@@ -85,7 +86,8 @@ libhwloc_port_freebsd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -Dhwloc_thread_t=pthread_t \
         -DHAVE_DECL_PTHREAD_SETAFFINITY_NP=1 \
         -DHAVE_DECL_PTHREAD_GETAFFINITY_NP=1 \
-        -DHAVE_CPUSET_SETID
+        -DHAVE_CPUSET_SETID \
+        -DHAVE_SYS_DOMAINSET_H
 
 nodist_libhwloc_port_hpux_la_SOURCES = topology-hpux.c
 libhwloc_port_hpux_la_SOURCES = \
