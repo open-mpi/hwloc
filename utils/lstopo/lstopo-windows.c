@@ -434,7 +434,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
 
   /* recurse once for preparing sizes and positions using a fake top level window */
   loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  faketoplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
+  faketoplevel = CreateWindow("lstopo", loutput->title, WS_OVERLAPPEDWINDOW,
 			      CW_USEDEFAULT, CW_USEDEFAULT,
 			      10, 10, NULL, NULL, NULL, NULL);
   BeginPaint(faketoplevel, &the_output.ps);
@@ -465,7 +465,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   if (win_height > GetSystemMetrics(SM_CYFULLSCREEN))
     win_height = GetSystemMetrics(SM_CYFULLSCREEN);
 
-  toplevel = CreateWindow("lstopo", "lstopo", WS_OVERLAPPEDWINDOW,
+  toplevel = CreateWindow("lstopo", loutput->title, WS_OVERLAPPEDWINDOW,
 		  CW_USEDEFAULT, CW_USEDEFAULT,
 		  win_width, win_height, NULL, NULL, NULL, NULL);
   the_output.toplevel = toplevel;

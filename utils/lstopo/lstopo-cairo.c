@@ -316,7 +316,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   screen_height = loutput->height;
 
   disp->top = top = XCreateSimpleWindow(dpy, root, 0, 0, screen_width, screen_height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
-  XStoreName(dpy, top, "lstopo");
+  XStoreName(dpy, top, loutput->title);
   XSetIconName(dpy, top, "lstopo");
   XSelectInput(dpy,top, StructureNotifyMask | KeyPressMask);
 

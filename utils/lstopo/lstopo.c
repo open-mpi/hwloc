@@ -618,6 +618,7 @@ main (int argc, char *argv[])
   loutput.legend = 1;
   loutput.legend_append = NULL;
   loutput.legend_append_nr = 0;
+  snprintf(loutput.title, sizeof(loutput.title), "lstopo");
 
   loutput.show_distances_only = 0;
   loutput.show_only = HWLOC_OBJ_TYPE_NONE;
@@ -1138,6 +1139,30 @@ main (int argc, char *argv[])
     err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, loutput.verbose_mode > 1, callname);
     if (err)
       goto out_with_topology;
+
+    if (input_format != HWLOC_UTILS_INPUT_DEFAULT) {
+      /* add the input path to the window title */
+      snprintf(loutput.title, sizeof(loutput.title), "lstopo - %s", input);
+
+#ifndef HWLOC_WIN_SYS
+      /* try to only add the last part of the input path to the window title.
+       * disabled on windows because it requires to deal with / or \ in both cygwin and native paths.
+       * looks like _fullpath() is good way to replace realpath() on !cygwin.
+       */
+      /* sanitize the path to avoid / ./ or ../ at the end */
+      char *fullpath = realpath(input, NULL);
+      if (fullpath) {
+	char *pos = strrchr(fullpath, '/');
+	/* now only keep the last part */
+	if (pos)
+	  pos++;
+	else
+	  pos = fullpath;
+	snprintf(loutput.title, sizeof(loutput.title), "lstopo - %s", pos);
+	free(fullpath);
+      }
+#endif
+    }
   }
 
   if (loutput.pid_number > 0) {

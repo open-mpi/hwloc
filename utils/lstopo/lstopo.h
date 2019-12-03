@@ -73,6 +73,7 @@ struct lstopo_output {
   int show_taskset;
 
   /* draw config */
+  char title[256];
   unsigned plain_children_order;
   unsigned int gridsize, fontsize, linespacing;
   float text_xscale;
