@@ -426,6 +426,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	    memory->page_types = malloc(sizeof(*memory->page_types));
 	    memory->page_types_len = 1;
 	  }
+	  assert(memory->page_types);
 	  memory->page_types[0].size = lvalue << 10;
 	} else if (hwloc__xml_verbose()) {
 	  fprintf(stderr, "%s: ignoring huge_page_size_kB attribute for non-NUMAnode non-root object\n",
@@ -440,6 +441,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	    memory->page_types = malloc(sizeof(*memory->page_types));
 	    memory->page_types_len = 1;
 	  }
+	  assert(memory->page_types);
 	  memory->page_types[0].count = lvalue;
 	} else if (hwloc__xml_verbose()) {
 	  fprintf(stderr, "%s: ignoring huge_page_free attribute for non-NUMAnode non-root object\n",
@@ -1778,6 +1780,8 @@ done:
       if (nbobjs == data->nbnumanodes) {
 	hwloc_obj_t *objs = malloc(nbobjs*sizeof(hwloc_obj_t));
 	uint64_t *values = malloc(nbobjs*nbobjs*sizeof(*values));
+        assert(data->nbnumanodes > 0); /* v1dist->nbobjs is >0 after import */
+        assert(data->first_numanode);
 	if (objs && values) {
 	  hwloc_obj_t node;
 	  unsigned i;
@@ -2921,6 +2925,7 @@ hwloc_export_obj_userdata(void *reserved,
     int encoded;
     size_t encoded_length;
     const char *realname;
+    assert(name);
     if (!strncmp(name, "base64", 6)) {
       encoded = 1;
       encoded_length = BASE64_ENCODED_LENGTH(length);
