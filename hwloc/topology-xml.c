@@ -1142,15 +1142,23 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       ret = -1;
     }
 
-    if (ret < 0)
-      goto error;
+    if (ret < 0) {
+      if (parent && !ignored)
+        goto error;
+      else
+        goto error_with_object;
+    }
 
     state->global->close_child(&childstate);
 
     tag = NULL;
     ret = state->global->find_child(state, &childstate, &tag);
-    if (ret < 0)
-      goto error;
+    if (ret < 0) {
+      if (parent && !ignored)
+        goto error;
+      else
+        goto error_with_object;
+    }
     if (!ret)
       break;
   }
