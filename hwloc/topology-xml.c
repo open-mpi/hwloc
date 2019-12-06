@@ -1558,7 +1558,7 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
       memset(&diff->obj_attr.diff, 0, sizeof(diff->obj_attr.diff));
       diff->obj_attr.diff.generic.type = obj_attr_type;
 
-      switch (atoi(obj_attr_type_s)) {
+      switch (obj_attr_type) {
       case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE:
 	diff->obj_attr.diff.uint64.oldvalue = strtoull(obj_attr_oldvalue_s, NULL, 0);
 	diff->obj_attr.diff.uint64.newvalue = strtoull(obj_attr_newvalue_s, NULL, 0);
