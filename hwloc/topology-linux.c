@@ -253,7 +253,7 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
 # endif
 #endif
 static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unused,
-					       const unsigned long *nodemask __hwloc_attribute_unused,
+					       unsigned long *nodemask __hwloc_attribute_unused,
 					       unsigned long maxnode __hwloc_attribute_unused,
 					       void *addr __hwloc_attribute_unused,
 					       int flags __hwloc_attribute_unused)
