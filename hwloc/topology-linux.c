@@ -2699,7 +2699,7 @@ hwloc_read_unit32be(const char *p, const char *p1, uint32_t *buf, int root_fd)
 {
   size_t cb = 0;
   uint32_t *tmp = hwloc_read_raw(p, p1, &cb, root_fd);
-  if (sizeof(*buf) != cb) {
+  if ((NULL == tmp) || sizeof(*buf) != cb) {
     errno = EINVAL;
     free(tmp); /* tmp is either NULL or contains useless things */
     return -1;
