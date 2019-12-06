@@ -3795,6 +3795,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   /* nodeset to clear */
   if (flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS) {
     hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
+    assert(node);
     do {
       /* node will be removed if nodeset gets or was empty */
       if (hwloc_bitmap_iszero(node->cpuset)
