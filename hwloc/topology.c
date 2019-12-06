@@ -4113,6 +4113,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
     /* cpuset to clear */
     if (flags & HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS) {
       hwloc_obj_t pu = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0);
+      assert(pu);
       do {
 	/* PU will be removed if cpuset gets or was empty */
 	if (hwloc_bitmap_iszero(pu->cpuset)
@@ -4148,6 +4149,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
     /* nodeset to clear */
     if (flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS) {
       hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
+      assert(node);
       do {
 	/* node will be removed if nodeset gets or was empty */
 	if (hwloc_bitmap_iszero(node->cpuset)
