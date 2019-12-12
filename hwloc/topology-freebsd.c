@@ -416,16 +416,18 @@ hwloc_look_freebsd_domains(struct hwloc_topology *topology){
 
         obj->attr->numanode.local_memory = domains_memory[i];
 
-        nodes[i] = obj;
+	if (nodes)
+	  nodes[i] = obj;
         hwloc_insert_object_by_cpuset(topology, obj);
       } else {
+	free(nodes);
         nodes = NULL;
       }
     }
   if(nodes != NULL)
     set_locality_info(topology, ndomains, nodes);
 
-  /*nodes is either free in set_locality_info() or sent to the kernel to set locality info*/
+  /* nodes is either freed or given to the core in set_locality_info() */
   free(domains_memory);
 
   topology->support.discovery->numa = 1;
