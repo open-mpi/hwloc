@@ -1393,7 +1393,9 @@ propagate_total_memory(hwloc_obj_t obj)
   /* By the way, sort the page_type array.
    * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
    */
-  qsort(obj->memory.page_types, obj->memory.page_types_len, sizeof(*obj->memory.page_types), hwloc_memory_page_type_compare);
+  if(obj->memory.page_types_len > 0)
+      qsort(obj->memory.page_types, obj->memory.page_types_len,
+            sizeof(*obj->memory.page_types), hwloc_memory_page_type_compare);
   /* Ignore 0-size page_types, they are at the end */
   for(i=obj->memory.page_types_len; i>=1; i--)
     if (obj->memory.page_types[i-1].size)
