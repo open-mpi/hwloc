@@ -2043,15 +2043,17 @@ propagate_total_memory(hwloc_obj_t obj)
   if (obj->type == HWLOC_OBJ_NUMANODE) {
     obj->total_memory += obj->attr->numanode.local_memory;
 
-    /* By the way, sort the page_type array.
-     * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
-     */
-    qsort(obj->attr->numanode.page_types, obj->attr->numanode.page_types_len, sizeof(*obj->attr->numanode.page_types), hwloc_memory_page_type_compare);
-    /* Ignore 0-size page_types, they are at the end */
-    for(i=obj->attr->numanode.page_types_len; i>=1; i--)
-      if (obj->attr->numanode.page_types[i-1].size)
-	break;
-    obj->attr->numanode.page_types_len = i;
+    if (obj->attr->numanode.page_types_len) {
+      /* By the way, sort the page_type array.
+       * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
+       */
+      qsort(obj->attr->numanode.page_types, obj->attr->numanode.page_types_len, sizeof(*obj->attr->numanode.page_types), hwloc_memory_page_type_compare);
+      /* Ignore 0-size page_types, they are at the end */
+      for(i=obj->attr->numanode.page_types_len; i>=1; i--)
+	if (obj->attr->numanode.page_types[i-1].size)
+	  break;
+      obj->attr->numanode.page_types_len = i;
+    }
   }
 }
 
