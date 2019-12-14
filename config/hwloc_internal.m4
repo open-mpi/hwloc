@@ -155,6 +155,8 @@ EOF
     AC_MSG_RESULT([$hwloc_generate_doxs])
     AS_IF([test "x$hwloc_generate_doxs" = xyes -a "x$HWLOC_DOXYGEN_VERSION" = x1.6.2],
                  [hwloc_generate_doxs="no"; AC_MSG_WARN([doxygen 1.6.2 has broken short name support, disabling])])
+    AS_IF([test "x$hwloc_generate_doxs" = xyes -a "x$HWLOC_DOXYGEN_VERSION" = x1.8.16 -a "$HWLOC_top_builddir" = "$HWLOC_top_srcdir"],
+                 [hwloc_generate_doxs="no"; AC_MSG_WARN([doxygen 1.8.16 fails when building inside the source-tree, disabling])])
 
     AC_REQUIRE([AC_PROG_SED])
 
