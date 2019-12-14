@@ -2968,7 +2968,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
       if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_OBJ_EQUAL) {
 	/* Take it, add main children.  */
 	taken_objs[n_taken_objs++] = objs[i];
-	memcpy(&new_objs[n_new_objs], objs[i]->children, objs[i]->arity * sizeof(new_objs[0]));
+	if (objs[i]->arity)
+	  memcpy(&new_objs[n_new_objs], objs[i]->children, objs[i]->arity * sizeof(new_objs[0]));
 	n_new_objs += objs[i]->arity;
       } else {
 	/* Leave it.  */
