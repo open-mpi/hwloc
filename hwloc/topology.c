@@ -126,15 +126,25 @@ int hwloc_get_sysctlbyname(const char *name, int64_t *ret)
 #endif
 
 #if defined(HAVE_SYSCTL)
-int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
+int hwloc_get_sysctl(int name[], unsigned namelen, int64_t *ret)
 {
-  int n;
+  union {
+    int32_t i32;
+    int64_t i64;
+  } n;
   size_t size = sizeof(n);
   if (sysctl(name, namelen, &n, &size, NULL, 0))
     return -1;
-  if (size != sizeof(n))
-    return -1;
-  *ret = n;
+  switch (size) {
+    case sizeof(n.i32):
+      *ret = n.i32;
+      break;
+    case sizeof(n.i64):
+      *ret = n.i64;
+      break;
+    default:
+      return -1;
+  }
   return 0;
 }
 #endif
@@ -181,8 +191,10 @@ hwloc_fallback_nbprocessors(unsigned flags) {
   n = nn;
 #elif defined(HAVE_SYSCTL) && HAVE_DECL_CTL_HW && HAVE_DECL_HW_NCPU
   static int name[2] = {CTL_HW, HW_NCPU};
-  if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name), &n))
+  int64_t nn;
+  if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name), &nn))
     n = -1;
+  n = nn;
 #else
 #ifdef __GNUC__
 #warning No known way to discover number of available processors on this system
