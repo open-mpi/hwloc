@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2009-2019 Inria.  All rights reserved.
-dnl Copyright © 2009-2012, 2015-2017 Université Bordeaux
+dnl Copyright © 2009-2012, 2015-2017, 2020 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -477,8 +477,9 @@ EOF])
     		_SC_PAGE_SIZE,
     		_SC_LARGE_PAGESIZE],,[:],[[#include <unistd.h>]])
 
-    AC_HAVE_HEADERS([mach/mach_host.h])
-    AC_HAVE_HEADERS([mach/mach_init.h], [
+    AC_HAVE_HEADERS([mach/mach_init.h])
+    AC_HAVE_HEADERS([mach_init.h])
+    AC_HAVE_HEADERS([mach/mach_host.h], [
       AC_CHECK_FUNCS([host_info])
     ])
 

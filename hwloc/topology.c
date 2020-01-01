@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2019 Inria.  All rights reserved.
- * Copyright © 2009-2012 Université Bordeaux
+ * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -32,6 +32,9 @@
 
 #ifdef HAVE_MACH_MACH_INIT_H
 #include <mach/mach_init.h>
+#endif
+#ifdef HAVE_MACH_INIT_H
+#include <mach_init.h>
 #endif
 #ifdef HAVE_MACH_MACH_HOST_H
 #include <mach/mach_host.h>
