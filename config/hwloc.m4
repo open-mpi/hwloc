@@ -485,7 +485,7 @@ EOF])
 
     AC_CHECK_HEADERS([sys/param.h])
     AC_CHECK_HEADERS([sys/sysctl.h], [
-      AC_CHECK_DECLS([CTL_HW, HW_NCPU],,,[[
+      AC_CHECK_DECLS([CTL_HW, HW_NCPU, HW_REALMEM64, HW_MEMSIZE64, HW_PHYSMEM64, HW_USERMEM64, HW_REALMEM, HW_MEMSIZE, HW_PHYSMEM, HW_USERMEM],,,[[
       #if HAVE_SYS_PARAM_H
       #include <sys/param.h>
       #endif

@@ -203,6 +203,46 @@ hwloc_fallback_nbprocessors(unsigned flags) {
 #endif
   return n;
 }
+
+int64_t
+hwloc_fallback_memsize(void) {
+  int64_t size;
+#if defined(HAVE_HOST_INFO) && HAVE_HOST_INFO
+  struct host_basic_info info;
+  mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
+  host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
+  size = info.memory_size;
+#elif defined(HAVE_SYSCTL) && HAVE_DECL_CTL_HW && (HAVE_DECL_HW_REALMEM64 || HAVE_DECL_HW_MEMSIZE64 || HAVE_DECL_HW_PHYSMEM64 || HAVE_DECL_HW_USERMEM64 || HAVE_DECL_HW_REALMEM || HAVE_DECL_HW_MEMSIZE || HAVE_DECL_HW_PHYSMEM || HAVE_DECL_HW_USERMEM)
+#if HAVE_DECL_HW_MEMSIZE64
+  static int name[2] = {CTL_HW, HW_MEMSIZE64};
+#elif HAVE_DECL_HW_REALMEM64
+  static int name[2] = {CTL_HW, HW_REALMEM64};
+#elif HAVE_DECL_HW_PHYSMEM64
+  static int name[2] = {CTL_HW, HW_PHYSMEM64};
+#elif HAVE_DECL_HW_USERMEM64
+  static int name[2] = {CTL_HW, HW_USERMEM64};
+#elif HAVE_DECL_HW_MEMSIZE
+  static int name[2] = {CTL_HW, HW_MEMSIZE};
+#elif HAVE_DECL_HW_REALMEM
+  static int name[2] = {CTL_HW, HW_REALMEM};
+#elif HAVE_DECL_HW_PHYSMEM
+  static int name[2] = {CTL_HW, HW_PHYSMEM};
+#elif HAVE_DECL_HW_USERMEM
+  static int name[2] = {CTL_HW, HW_USERMEM};
+#endif
+  if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name), &size))
+    size = -1;
+#elif defined(HAVE_SYSCTLBYNAME)
+  if (hwloc_get_sysctlbyname("hw.memsize", &size) &&
+      hwloc_get_sysctlbyname("hw.realmem", &size) &&
+      hwloc_get_sysctlbyname("hw.physmem", &size) &&
+      hwloc_get_sysctlbyname("hw.usermem", &size))
+      size = -1;
+#else
+  size = -1;
+#endif
+  return size;
+}
 #endif /* !HWLOC_WIN_SYS */
 
 /*
