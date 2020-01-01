@@ -703,6 +703,7 @@ extern "C" {
 #define hwloc_get_sysctlbyname HWLOC_NAME(get_sysctlbyname)
 #define hwloc_get_sysctl HWLOC_NAME(get_sysctl)
 #define hwloc_fallback_nbprocessors HWLOC_NAME(fallback_nbprocessors)
+#define hwloc_fallback_memsize HWLOC_NAME(fallback_memsize)
 
 #define hwloc__object_cpusets_compare_first HWLOC_NAME(_object_cpusets_compare_first)
 #define hwloc__reorder_children HWLOC_NAME(_reorder_children)

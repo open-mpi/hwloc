@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2019 Inria.  All rights reserved.
- * Copyright © 2009-2010, 2012 Université Bordeaux
+ * Copyright © 2009-2010, 2012, 2020 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -284,20 +284,6 @@ hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unu
 #endif
 #endif
 
-#if (defined HAVE_SYSCTL) && (defined HAVE_SYS_SYSCTL_H)
-static void
-hwloc_freebsd_node_meminfo_info(struct hwloc_topology *topology)
-{
-       int mib[2] = { CTL_HW, HW_PHYSMEM };
-       unsigned long physmem;
-       size_t len = sizeof(physmem);
-       sysctl(mib, 2, &physmem, &len, NULL, 0);
-       topology->machine_memory.local_memory = physmem;
-       /* we don't know anything about NUMA nodes in this backend.
-        * let another backend or the core move that memory to the right NUMA node */
-}
-#endif
-
 static int
 set_locality_info(hwloc_topology_t topology, int ndomains, hwloc_obj_t *nodes){
   char *locality, *ptr;
@@ -458,10 +444,11 @@ hwloc_look_freebsd(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       hwloc_setup_pu_level(topology, nbprocs);
     }
   } else if (dstatus->phase == HWLOC_DISC_PHASE_MEMORY) {
+      int64_t memsize;
       hwloc_look_freebsd_domains(topology);
-    #if (defined HAVE_SYSCTL) && (defined HAVE_SYS_SYSCTL_H)
-      hwloc_freebsd_node_meminfo_info(topology);
-    #endif
+      memsize = hwloc_fallback_memsize();
+      if (memsize > 0)
+        topology->machine_memory.local_memory = memsize;
       hwloc_obj_add_info(topology->levels[0][0], "Backend", "FreeBSD");
       hwloc_add_uname_info(topology, NULL);
   }

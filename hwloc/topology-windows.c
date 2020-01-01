@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2019 Inria.  All rights reserved.
- * Copyright © 2009-2012 Université Bordeaux
+ * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -1198,4 +1198,10 @@ hwloc_fallback_nbprocessors(unsigned flags __hwloc_attribute_unused) {
   }
 
   return n;
+}
+
+int64_t
+hwloc_fallback_memsize(void) {
+  /* Unused */
+  return -1;
 }

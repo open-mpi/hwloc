@@ -1,7 +1,7 @@
 /*
  * Copyright © 2012 Aleksej Saushev, The NetBSD Foundation
  * Copyright © 2009-2019 Inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux
+ * Copyright © 2009-2010, 2020 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -133,18 +133,6 @@ hwloc_netbsd_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hw
   return hwloc_netbsd_get_thread_cpubind(topology, pthread_self(), hwloc_cpuset, flags);
 }
 
-#if (defined HAVE_SYSCTL) && (defined HAVE_SYS_SYSCTL_H)
-static void
-hwloc_netbsd_node_meminfo_info(struct hwloc_topology *topology)
-{
-  int mib[2] = { CTL_HW, HW_PHYSMEM64 };
-  unsigned long physmem;
-  size_t len = sizeof(physmem);
-  sysctl(mib, 2, &physmem, &len, NULL, 0);
-  topology->machine_memory.local_memory = physmem;
-}
-#endif
-
 static int
 hwloc_look_netbsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -155,6 +143,7 @@ hwloc_look_netbsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
    */
 
   struct hwloc_topology *topology = backend->topology;
+  int64_t memsize;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
@@ -169,10 +158,11 @@ hwloc_look_netbsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
     hwloc_setup_pu_level(topology, nbprocs);
   }
 
+  memsize = hwloc_fallback_memsize();
+  if (memsize > 0)
+    topology->machine_memory.local_memory = memsize;;
+
   /* Add NetBSD specific information */
-#if (defined HAVE_SYSCTL) && (defined HAVE_SYS_SYSCTL_H)
-  hwloc_netbsd_node_meminfo_info(topology);
-#endif
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "NetBSD");
   hwloc_add_uname_info(topology, NULL);
   return 0;
