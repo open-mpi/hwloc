@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2019 Inria.  All rights reserved.
- * Copyright © 2009-2010, 2014, 2017 Université Bordeaux
+ * Copyright © 2009-2010, 2014, 2017, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -33,6 +33,7 @@
 # include <cairo-xlib.h>
 # include <X11/Xlib.h>
 # include <X11/Xutil.h>
+# include <X11/Xresource.h>
 # include <X11/keysym.h>
 # include <X11/cursorfont.h>
 /* Avoid Xwindow's definition conflict with Windows' use for fields names.  */
@@ -271,11 +272,12 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   int scr;
   Screen *screen;
   int screen_width, screen_height;
-  unsigned int dpi_x, dpi_y, dpi;
+  unsigned int dpi_x, dpi_y, dpi = 0;
   int finish = 0;
   int state = 0;
   int x = 0, y = 0; /* shut warning down */
   int lastx, lasty;
+  char *resources;
 
   coutput = &disp->coutput;
   memset(coutput, 0, sizeof(*coutput));
@@ -289,14 +291,33 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
     return -1;
   }
 
+  XrmInitialize();
+
   disp->dpy = dpy;
   disp->scr = scr = DefaultScreen(dpy);
   screen = ScreenOfDisplay(dpy, scr);
 
-  /* 25.4mm per inch */
-  dpi_x = ((double) DisplayWidth(dpy, scr) * 25.4) / DisplayWidthMM(dpy, scr);
-  dpi_y = ((double) DisplayHeight(dpy, scr) * 25.4) / DisplayHeightMM(dpy, scr);
-  dpi = (dpi_x + dpi_y) / 2;
+  /* Get DPI from xft, most often configured properly by users */
+  resources = XResourceManagerString(dpy);
+  if (resources) {
+    XrmDatabase database = XrmGetStringDatabase(resources);
+    char *type;
+    XrmValue value;
+
+    if (XrmGetResource(database, "Xft.dpi", "Xft.dpi", &type, &value))
+      if (type && strcmp(type, "String") == 0)
+        dpi = atoi(value.addr);
+
+    XrmDestroyDatabase(database);
+  }
+
+  if (dpi == 0) {
+    /* Fallback to value set by X server, but very often hardwired to 96dpi :/ */
+    /* 25.4mm per inch */
+    dpi_x = ((double) DisplayWidth(dpy, scr) * 25.4) / DisplayWidthMM(dpy, scr);
+    dpi_y = ((double) DisplayHeight(dpy, scr) * 25.4) / DisplayHeightMM(dpy, scr);
+    dpi = (dpi_x + dpi_y) / 2;
+  }
 
   /* Original values for fontsize/gridsize were tuned for 96dpi */
   coutput->loutput->fontsize = (coutput->loutput->fontsize * dpi) / 96;
