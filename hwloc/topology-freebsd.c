@@ -358,8 +358,11 @@ get_memory_domain_info(int ndomains){
     free(domains_memory);
     return NULL;
   }
-
-  sysctlbyname("vm.phys_segs", segs, &len_segs, NULL,	0);
+  if (sysctlbyname("vm.phys_segs", segs, &len_segs, NULL, 0) == -1) {
+    free(segs);
+    free(domains_memory);
+    return NULL;
+  }
 
   ptr = strstr(segs, "start");
   while(ptr){
