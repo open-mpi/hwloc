@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2020 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -302,7 +302,17 @@ set_locality_info(hwloc_topology_t topology, int ndomains, hwloc_obj_t *nodes){
     return -1;
   }
   locality = malloc(len_locality);
-  sysctlbyname("vm.phys_locality", locality, &len_locality, NULL,	0);
+  if (!locality) {
+    free(distances);
+    free(nodes);
+    return -1;
+  }
+  if (sysctlbyname("vm.phys_locality", locality, &len_locality, NULL, 0) == -1) {
+    free(distances);
+    free(nodes);
+    free(locality);
+    return -1;
+  }
   for(int i = 0 ; i < ndomains ; i++){
     sprintf(nb, "%d:", i);
     ptr = strstr(locality, nb);
