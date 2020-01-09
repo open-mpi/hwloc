@@ -373,7 +373,6 @@ get_memory_domain_info(int ndomains){
   }
 
   free(segs);
-  free(ptr);
 
   return domains_memory;
 }
