@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2019 Inria.  All rights reserved.
+dnl Copyright © 2009-2020 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017, 2020 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -374,6 +374,43 @@ EOF])
             AC_MSG_WARN([Configure will append '$HWLOC_STRICT_ARGS_CFLAGS' to the value of CFLAGS when needed.])
              AC_MSG_WARN([Alternatively you may configure with a different compiler.])
         ])
+    ])
+
+    AS_IF([test "$hwloc_mode" = "standalone"],[
+        # For the common developer case, if we're in a developer checkout and
+        # using the GNU compilers, turn on maximum warnings unless
+        # specifically disabled by the user.
+        AC_MSG_CHECKING([whether to enable "picky" compiler mode])
+        hwloc_want_picky=0
+        AS_IF([test "$hwloc_c_vendor" = "gnu"],
+              [AS_IF([test -e "$srcdir/.git"],
+                     [hwloc_want_picky=1])])
+        if test "$enable_picky" = "yes"; then
+            if test "$GCC" = "yes"; then
+                AC_MSG_RESULT([yes])
+                hwloc_want_picky=1
+            else
+                AC_MSG_RESULT([no])
+                AC_MSG_WARN([Warning: --enable-picky used, but is currently only defined for the GCC compiler set -- automatically disabled])
+                hwloc_want_picky=0
+            fi
+        elif test "$enable_picky" = "no"; then
+            AC_MSG_RESULT([no])
+            hwloc_want_picky=0
+        else
+            if test "$hwloc_want_picky" = 1; then
+                AC_MSG_RESULT([yes (default)])
+            else
+                AC_MSG_RESULT([no (default)])
+            fi
+        fi
+        if test "$hwloc_want_picky" = 1; then
+            add="-Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare"
+            add="$add -Wmissing-prototypes -Wstrict-prototypes"
+            add="$add -Wcomment -pedantic -Wshadow"
+
+            HWLOC_CFLAGS="$HWLOC_CFLAGS $add"
+        fi
     ])
 
     #
