@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -74,7 +74,7 @@ FILE *open_output(const char *filename, int overwrite)
 
 const char *task_background_color_string = "#ffff00";
 
-static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char * name)
+static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char * name, int thread)
 {
   hwloc_obj_t group, obj;
 
@@ -90,11 +90,14 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
   group = hwloc_topology_insert_group_object(topology, group);
   if (!group) {
     /* try to insert in a larger parent */
-    char *s;
+    char *s, *gs;
     hwloc_bitmap_asprintf(&s, cpuset);
     group = hwloc_get_obj_covering_cpuset(topology, cpuset);
-    fprintf(stderr, "Inserting process `%s' below parent larger than cpuset %s\n", name, s);
+    hwloc_bitmap_asprintf(&gs, group->cpuset);
+    fprintf(stderr, "%s `%s' binding %s doesn't match any object, extended to %s before inserting the %s in the topology.\n",
+	    thread ? "Thread" : "Process", name, s, gs, thread ? "thread" : "process");
     free(s);
+    free(gs);
   }
   obj = hwloc_topology_insert_misc_object(topology, group, name);
   if (!obj)
@@ -123,7 +126,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
     snprintf(name, sizeof(name), "%ld %s", proc->pid, proc->name);
 
   if (proc->bound)
-    insert_task(topology, proc->cpuset, name);
+    insert_task(topology, proc->cpuset, name, 0);
 
   if (proc->nthreads)
     for(i=0; i<proc->nthreads; i++)
@@ -135,7 +138,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
 	else
 	  snprintf(task_name, sizeof(task_name), "%s %li", name, proc->threads[i].tid);
 
-	insert_task(topology, proc->threads[i].cpuset, task_name);
+	insert_task(topology, proc->threads[i].cpuset, task_name, 1);
       }
 }
 
