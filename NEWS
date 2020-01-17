@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.4.0
+-------------
+* Backends
+  + Properly handle Linux kernel 5.10+ exposing ACPI HMAT information
+    with knowledge of Generic Initiators.
+
 
 Version 2.3.0
 -------------

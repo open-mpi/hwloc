@@ -3505,10 +3505,18 @@ read_node_initiators(struct hwloc_linux_backend_data_s *data,
   DIR *dir;
   struct dirent *dirent;
 
-  sprintf(accesspath, "%s/node%u/access0/initiators", path, node->os_index);
+  /* starting with Linux 5.6?, Generic Initiators may be preferred to CPU initiators.
+   * access0 contains the fastest of GI and CPU. access1 contains the fastest of CPU.
+   * Try access1 to avoid GI if any, or fallbacl to access0 otherwise.
+   */
+  sprintf(accesspath, "%s/node%u/access1/initiators", path, node->os_index);
   dir = hwloc_opendir(accesspath, data->root_fd);
-  if (!dir)
-    return -1;
+  if (!dir) {
+    sprintf(accesspath, "%s/node%u/access0/initiators", path, node->os_index);
+    dir = hwloc_opendir(accesspath, data->root_fd);
+    if (!dir)
+      return -1;
+  }
 
   while ((dirent = readdir(dir)) != NULL) {
     unsigned initiator_os_index;
