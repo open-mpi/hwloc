@@ -147,7 +147,7 @@ _hwloc_info(){
 		   --children
 		   --descendants
 		   -n
-		   --restruct
+		   --restrict
 		   --filter
 		   --no-icaches
 		   --no-io
