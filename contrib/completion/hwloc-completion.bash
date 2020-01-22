@@ -218,7 +218,7 @@ _hwloc_bind(){
 		   --disallowed --whole-system
 		   --hbm
 		   --no-hbm
-		   --no-smt
+		   --no-smt --no-smt=N
 		   -f --force
 		   -q --quiet
 		   -v --verbose
@@ -272,7 +272,7 @@ _hwloc_calc(){
 		   --disallowed --whole-system
 		   --input -i
 		   --input-format --if
-		   --no-smt
+		   --no-smt --no-smt=N
 		   -q --quiet
 		   -v --verbose
 		   --version
