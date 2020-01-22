@@ -133,7 +133,7 @@ complete -F _lstopo lstopo
 complete -F _lstopo hwloc-ls
 
 
-_hwloc-info(){
+_hwloc_info(){
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(--objects
@@ -196,10 +196,10 @@ _hwloc-info(){
 	esac
     fi
 }
-complete -F _hwloc-info hwloc-info
+complete -F _hwloc_info hwloc-info
 
 
-_hwloc-bind(){
+_hwloc_bind(){
     local OPTIONS=(--cpubind
 		   --membind
 		   --mempolicy
@@ -245,10 +245,10 @@ _hwloc-bind(){
 	esac
     fi
 }
-complete -F _hwloc-bind hwloc-bind
+complete -F _hwloc_bind hwloc-bind
 
 
-_hwloc-calc(){
+_hwloc_calc(){
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local OPTIONS=(-N --number-of
 		   -I --intersect
@@ -303,10 +303,10 @@ _hwloc-calc(){
 	esac
     fi
 }
-complete -F _hwloc-calc hwloc-calc
+complete -F _hwloc_calc hwloc-calc
 
 
-_hwloc-annotate(){
+_hwloc_annotate(){
     local OPTIONS=(--ci --ri --cu --cd -h --help)
     local cur=${COMP_WORDS[COMP_CWORD]}
 
@@ -315,10 +315,10 @@ _hwloc-annotate(){
     fi
     _filedir xml
 }
-complete -F _hwloc-annotate hwloc-annotate
+complete -F _hwloc_annotate hwloc-annotate
 
 
-_hwloc-diff(){
+_hwloc_diff(){
     local OPTIONS=(--refname
 		   --version
 		   -h --help
@@ -337,10 +337,10 @@ _hwloc-diff(){
     fi
     _filedir xml
 }
-complete -F _hwloc-diff hwloc-diff
+complete -F _hwloc_diff hwloc-diff
 
 
-_hwloc-patch(){
+_hwloc_patch(){
     local OPTIONS=(--R --reverse
 		   --version
 		   -h --help
@@ -352,10 +352,10 @@ _hwloc-patch(){
     fi
     _filedir xml
 }
-complete -F _hwloc-patch hwloc-patch
+complete -F _hwloc_patch hwloc-patch
 
 
-_hwloc-compress-dir(){
+_hwloc_compress_dir(){
     local OPTIONS=(-R --reverse
 		   -v --verbose
 		   -h --help
@@ -367,10 +367,10 @@ _hwloc-compress-dir(){
     fi
     _filedir -d
 }
-complete -F _hwloc-compress-dir hwloc-compress-dir
+complete -F _hwloc_compress_dir hwloc-compress-dir
 
 
-_hwloc-distrib(){
+_hwloc_distrib(){
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local OPTIONS=(--ignore
 		   --from
@@ -409,10 +409,10 @@ _hwloc-distrib(){
 	esac
     fi
 }
-complete -F _hwloc-distrib hwloc-distrib
+complete -F _hwloc_distrib hwloc-distrib
 
 
-_hwloc-ps(){
+_hwloc_ps(){
     local OPTIONS=(-a
 		   --pid
 		   --name
@@ -450,10 +450,10 @@ _hwloc-ps(){
 	esac
     fi
 }
-complete -F _hwloc-ps hwloc-ps
+complete -F _hwloc_ps hwloc-ps
 
 
-_hwloc-gather-cpuid(){
+_hwloc_gather_cpuid(){
     local OPTIONS=(-c
 		   -s --silent
 		   -h --help
@@ -471,10 +471,10 @@ _hwloc-gather-cpuid(){
 	esac
     fi
 }
-complete -F _hwloc-gather-cpuid hwloc-gather-cpuid
+complete -F _hwloc_gather_cpuid hwloc-gather-cpuid
 
 
-_hwloc-gather-topology(){
+_hwloc_gather_topology(){
     local OPTIONS=(--io
 		   --dmi
 		   --no-cpuid
@@ -487,4 +487,4 @@ _hwloc-gather-topology(){
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
     fi
 }
-complete -F _hwloc-gather-topology hwloc-gather-topology
+complete -F _hwloc_gather_topology hwloc-gather-topology
