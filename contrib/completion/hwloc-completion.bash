@@ -129,6 +129,7 @@ _lstopo() {
     fi
 }
 complete -F _lstopo lstopo
+complete -F _lstopo lstopo-no-graphics
 complete -F _lstopo hwloc-ls
 
 
