@@ -39,6 +39,7 @@ _lstopo() {
 		   --whole-io
 		   --input -i
 		   --input-format --if
+		   --no-smt
 		   --thissystem
 		   --pid
 		   --disallowed --whole-system
@@ -217,6 +218,7 @@ _hwloc_bind(){
 		   --disallowed --whole-system
 		   --hbm
 		   --no-hbm
+		   --no-smt
 		   -f --force
 		   -q --quiet
 		   -v --verbose
@@ -270,6 +272,7 @@ _hwloc_calc(){
 		   --disallowed --whole-system
 		   --input -i
 		   --input-format --if
+		   --no-smt
 		   -q --quiet
 		   -v --verbose
 		   --version
