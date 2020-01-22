@@ -1,7 +1,12 @@
 #
-# Copyright © 2018-2019 Inria.  All rights reserved.
+# Copyright © 2018-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
+
+# bash < 4 doesn't support compopt
+test ${BASH_VERSINFO[0]} -lt 4 && return
+# TODO only disable the nospace completion of "--filter"
+
 
 _lstopo() {
     local INPUT_FORMAT=(xml synthetic fsroot cpuid)
