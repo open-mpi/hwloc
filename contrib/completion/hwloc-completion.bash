@@ -425,6 +425,7 @@ _hwloc_ps(){
 		   -t --threads
 		   -e --get-last-cpu-location
 		   --pid-cmd
+		   --uid
 		   --disallowed --whole-system
 		   --json-server
 		   --json-port
@@ -440,6 +441,9 @@ _hwloc_ps(){
 	case "$prev" in
 	--name)
 	    COMPREPLY=( "<task name>" "" )
+	    ;;
+	--uid)
+	    COMPREPLY=( "<uid>" "all" "" )
 	    ;;
 	--pid)
 	    COMPREPLY=( "<pid>" "" )
