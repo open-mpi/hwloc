@@ -70,19 +70,17 @@ _lstopo() {
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
-    local pprev=${COMP_WORDS[COMP_CWORD-2]}
-    local ppprev=${COMP_WORDS[COMP_CWORD-3]}
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
-    elif [[ "$pprev" == "--filter" && "$cur" == ":" ]] ; then
+    elif [[ $COMP_CWORD -ge 3 && "${COMP_WORDS[COMP_CWORD-2]}" == "--filter" && "$cur" == ":" ]] ; then
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}"` )
-    elif [[ "$ppprev" == "--filter" && "$prev" == ":" ]] ; then
+    elif [[ $COMP_CWORD -ge 4 && "${COMP_WORDS[COMP_CWORD-3]}" == "--filter" && "$prev" == ":" ]] ; then
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
     elif [[ "$cur" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs --no-factorize " =~ " $prev " ]] ; then
 	COMPREPLY=( `compgen -W "${TYPES[*]}"` )
 	# we could also support "<type1>,<type2>,..." for --index/attrs/text but "," is not a completion word separator
-    elif [[ "$prev" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs --no-factorize --factorize " =~ " $pprev " ]] ; then
+    elif [[ $COMP_CWORD -ge 3 && "$prev" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs --no-factorize --factorize " =~ " ${COMP_WORDS[COMP_CWORD-2]} " ]] ; then
 	COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
     elif [[ "$cur" == "=" && "--factorize" = "$prev" ]] ; then
 	COMPREPLY=( `compgen -W "${TYPES[*]}"` "<N>" "<N,F,L>" )
@@ -165,14 +163,12 @@ _hwloc_info(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
-    local pprev=${COMP_WORDS[COMP_CWORD-2]}
-    local ppprev=${COMP_WORDS[COMP_CWORD-3]}
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
-    elif [[ "$pprev" == "--filter" && "$cur" == ":" ]] ; then
+    elif [[ $COMP_CWORD -ge 3 && "${COMP_WORDS[COMP_CWORD-2]}" == "--filter" && "$cur" == ":" ]] ; then
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}"` )
-    elif [[ "$ppprev" == "--filter" && "$prev" == ":" ]] ; then
+    elif [[ $COMP_CWORD -ge 4 && "${COMP_WORDS[COMP_CWORD-3]}" == "--filter" && "$prev" == ":" ]] ; then
 	COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
     else
 	case "$prev" in
