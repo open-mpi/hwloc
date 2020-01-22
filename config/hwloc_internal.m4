@@ -432,6 +432,7 @@ int foo(void) {
         hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw]
         hwloc_config_prefix[contrib/hwloc-ps.www/Makefile]
         hwloc_config_prefix[contrib/systemd/Makefile]
+        hwloc_config_prefix[contrib/completion/Makefile]
         hwloc_config_prefix[contrib/misc/Makefile]
         hwloc_config_prefix[contrib/windows/Makefile]
         hwloc_config_prefix[contrib/windows/test-windows-version.sh]

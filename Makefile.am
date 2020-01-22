@@ -22,7 +22,7 @@ if HWLOC_BUILD_STANDALONE
 if BUILD_NETLOC
 SUBDIRS += netloc
 endif
-SUBDIRS += utils tests contrib/systemd contrib/misc contrib/hwloc-ps.www
+SUBDIRS += utils tests contrib/systemd contrib/completion contrib/misc contrib/hwloc-ps.www
 # We need doc/ if HWLOC_BUILD_DOXYGEN, or during make install if HWLOC_INSTALL_DOXYGEN.
 # There's no INSTALL_SUBDIRS, so always enter doc/ and check HWLOC_BUILD/INSTALL_DOXYGEN there
 SUBDIRS += doc
@@ -56,8 +56,6 @@ endif HWLOC_BUILD_STANDALONE
 # Only install the valgrind suppressions file if we're building in
 # standalone mode
 if HWLOC_BUILD_STANDALONE
-bashcompdir = $(sysconfdir)/bash_completion.d
-dist_bashcomp_DATA = contrib/completion/hwloc-completion.bash
 dist_pkgdata_DATA = contrib/hwloc-valgrind.supp
 endif
 
