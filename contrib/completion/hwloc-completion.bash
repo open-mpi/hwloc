@@ -11,7 +11,7 @@ test ${BASH_VERSINFO[0]} -lt 4 && return
 _lstopo() {
     local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local OUTPUT_FORMAT=(console ascii fig pdf ps png svg xml synthetic)
-    local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+    local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(-l --logical
 		   -p --physical
@@ -134,7 +134,7 @@ complete -F _lstopo hwloc-ls
 
 
 _hwloc_info(){
-    local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+    local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(--objects
 		   --topology
@@ -249,7 +249,7 @@ complete -F _hwloc_bind hwloc-bind
 
 
 _hwloc_calc(){
-    local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+    local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local OPTIONS=(-N --number-of
 		   -I --intersect
 		   -H --hierarchical
@@ -371,7 +371,7 @@ complete -F _hwloc_compress_dir hwloc-compress-dir
 
 
 _hwloc_distrib(){
-    local TYPES=("Machine" "Misc" "Group" "NUMANode" "Package" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+    local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local OPTIONS=(--ignore
 		   --from
 		   --to
