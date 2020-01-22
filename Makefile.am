@@ -1,4 +1,4 @@
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009      Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -59,7 +59,6 @@ if HWLOC_BUILD_STANDALONE
 bashcompdir = $(sysconfdir)/bash_completion.d
 dist_bashcomp_DATA = contrib/completion/hwloc-completion.bash
 dist_pkgdata_DATA = contrib/hwloc-valgrind.supp
-dist_doc_DATA = contrib/misc/dynamic_SVG_example.html
 endif
 
 # Only install entire visual studio subdirectory if we're building in
