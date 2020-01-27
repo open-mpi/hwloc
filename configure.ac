@@ -17,7 +17,7 @@
 ####################################################################
 
 AC_INIT([hwloc],
-        [m4_normalize(esyscmd([config/hwloc_get_version.sh VERSION --version]))],
+        [m4_normalize(esyscmd([sh config/hwloc_get_version.sh VERSION --version]))],
         [http://github.com/open-mpi/hwloc/issues], [hwloc])
 AC_PREREQ(2.63)
 AC_CONFIG_AUX_DIR(./config)
