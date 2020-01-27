@@ -36,7 +36,7 @@ if ! test -f VERSION; then
   exit 1
 fi
 
-VERSION=$(./config/hwloc_get_version.sh ./VERSION)
+VERSION=$(sh config/hwloc_get_version.sh ./VERSION)
 if test x$VERSION = x; then
   echo "ERROR: Failed to extract VERSION number from VERSION file."
   exit 1
