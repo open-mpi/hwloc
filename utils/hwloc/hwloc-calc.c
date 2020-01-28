@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -69,6 +69,30 @@ static int showobjs = 0;
 static int no_smt = 0;
 static int singlify = 0;
 static int taskset = 0;
+
+static int
+hwloc_calc_intersects_set(hwloc_bitmap_t set, int use_nodeset, hwloc_obj_t obj)
+{
+  if (use_nodeset)
+    return hwloc_bitmap_intersects(set, obj->nodeset);
+  else
+    return hwloc_bitmap_intersects(set, obj->cpuset);
+}
+
+/* generalization of hwloc_get_next_obj_covering_cpuset_by_depth() which may also use nodeset instead of cpuset */
+static hwloc_obj_t
+hwloc_calc_get_next_obj_covering_set_by_depth(hwloc_topology_t topology,
+					      hwloc_bitmap_t set, int use_nodeset,
+					      int depth,
+					      hwloc_obj_t prev)
+{
+  hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
+  if (!next)
+    return NULL;
+  while (next && !hwloc_calc_intersects_set(set, use_nodeset, next))
+    next = next->next_cousin;
+  return next;
+}
 
 static void
 hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, const char *sep, hwloc_obj_t root, hwloc_bitmap_t set, int level)
@@ -152,14 +176,14 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   } else if (numberofdepth != -1) {
     unsigned nb = 0;
     hwloc_obj_t obj = NULL;
-    while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, numberofdepth, obj)) != NULL)
+    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, numberofdepth, obj)) != NULL)
       nb++;
     printf("%u\n", nb);
   } else if (intersectdepth != -1) {
     hwloc_obj_t proc, prev = NULL;
     if (!sep)
       sep = ",";
-    while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, intersectdepth, prev)) != NULL) {
+    while ((proc = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, intersectdepth, prev)) != NULL) {
       if (prev)
 	printf("%s", sep);
       printf("%u", logicalo ? proc->logical_index : proc->os_index);

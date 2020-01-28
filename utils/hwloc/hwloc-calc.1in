@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2019 Inria.  All rights reserved.
+.\" Copyright © 2010-2020 Inria.  All rights reserved.
 .\" Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-CALC "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -56,16 +56,25 @@ Interpret input sets as nodesets instead of CPU sets.
 Report the number of objects of the given type or depth that intersect the CPU set.
 This is convenient for finding how many cores, NUMA nodes or PUs are available
 in a machine.
+
+When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
+the nodeset is considered instead of the CPU set for finding matching objects.
+This is useful when reporting the output as a number or set of NUMA nodes.
 .TP
 \fB\-I \-\-intersect <type|depth>\fR
 Find the list of objects of the given type or depth that intersect the CPU set and
 report the comma-separated list of their indexes instead of the cpu mask string.
 This may be used for determining the list of objects above or below the input
 objects.
+
 When combined with \fB\-\-physical\fR, the list is convenient to pass to external
 tools such as taskset or numactl \fB\-\-physcpubind\fR or \fB\-\-membind\fR.
 This is different from \-\-largest since the latter requires that all reported
 objects are strictly included inside the input objects.
+
+When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
+the nodeset is considered instead of the CPU set for finding matching objects.
+This is useful when reporting the output as a number or set of NUMA nodes.
 .TP
 \fB\-H \-\-hierarchical <type1>.<type2>...\fR
 Find the list of objects of type <type2> that intersect the CPU set and
@@ -226,10 +235,23 @@ To display the list of NUMA nodes, by physical indexes, that intersect a given (
     $ hwloc-calc --physical --intersect NUMAnode 0xf0f0f0f0
     0,2
 
-To display the physical index of a processor given by its logical index:
+Converting object logical indexes (default) from/to physical/OS indexes
+may be performed with \fB--intersect\fR combined with either \fB--physical-output\fR
+(logical to physical conversion) or \fB--physical-input\fR (physical to logical):
 
-    $ hwloc-calc PU:2 --physical-output --intersect PU
+    $ hwloc-calc --physical-output PU:2 --intersect PU
     3
+    $ hwloc-calc --physical-input PU:3 --intersect PU
+    2
+
+One should add \fB--nodeset\fR when converting indexes of memory objects
+to make sure a single NUMA node index is returned on platforms
+with heterogeneous memory:
+
+    $ hwloc-calc --nodeset --physical-output node:2 --intersect node
+    3
+    $ hwloc-calc --nodeset --physical-input node:3 --intersect node
+    2
 
 To display the set of CPUs near network interface eth0:
 
