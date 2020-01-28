@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -67,12 +67,12 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" core:4-7 -I NUMANode
   $calc --if synthetic --input "node:4 core:4 pu:4" core:10-15 -I NUMANode
   echo
-  $calc --if synthetic --input "node:4 core:4 pu:4" pu:2-3 --hierarchical node.pu
-  $calc --if synthetic --input "node:4 core:4 pu:4" pu:3-6 -H node.core --sep foo
+  $calc --if synthetic --input "node:4 core:4 pu:4" pu:2-3 --hierarchical group.pu
+  $calc --if synthetic --input "node:4 core:4 pu:4" pu:3-6 -H group.core --sep foo
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:3-6 -H core.pu
   $calc --if synthetic --input "node:4 core:4 pu:4" -I pu `$calc --if synthetic --input "node:4 core:4 pu:4" pu:3-6 -H core.pu`
-  $calc --if synthetic --input "node:4 core:4 pu:4" pu:11:4 -H node.core.pu
-  $calc --if synthetic --input "node:4 core:4 pu:4" -I pu `$calc --if synthetic --input "node:4 core:4 pu:4" pu:11:4 -H node.core.pu`
+  $calc --if synthetic --input "node:4 core:4 pu:4" pu:11:4 -H group.core.pu
+  $calc --if synthetic --input "node:4 core:4 pu:4" -I pu `$calc --if synthetic --input "node:4 core:4 pu:4" pu:11:4 -H group.core.pu`
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:12-37 --largest
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --largest --sep "_"

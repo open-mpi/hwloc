@@ -83,6 +83,8 @@ to <type1>, <type2>, etc.
 For instance, if \fIpackage.core\fR is given, the output would be
 \fIPackage:1.Core:2 Package:2.Core:3\fR if the input contains the third
 core of the second package and the fourth core of the third package.
+
+Only normal CPU-side object types may be used. NUMA nodes cannot.
 .TP
 \fB\-\-largest\fR
 Report (in a human readable format) the list of largest objects which exactly
