@@ -151,6 +151,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   if (showobjs) {
     hwloc_bitmap_t remaining = hwloc_bitmap_dup(set);
     int first = 1;
+    assert(!nodeseto); /* disabled for now, not very useful since the hierarchy of nodes isn't complex */
     if (!sep)
       sep = " ";
     while (!hwloc_bitmap_iszero(remaining)) {
@@ -473,6 +474,11 @@ int main(int argc, char *argv[])
  next:
     argc--;
     argv++;
+
+    if (showobjs && nodeseto) {
+      fprintf(stderr, "ignoring --nodeset-output when --largest output is enabled\n");
+      nodeseto = 0;
+    }
   }
 
   ENSURE_LOADED();
