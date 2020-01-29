@@ -88,7 +88,7 @@ Only normal CPU-side object types may be used. NUMA nodes cannot.
 .TP
 \fB\-\-largest\fR
 Report (in a human readable format) the list of largest objects which exactly
-include all input objects.
+include all input objects (by looking at their CPU sets).
 None of these output objects intersect each other, and the sum of them is
 exactly equivalent to the input. No largest object is included in the input
 This is different from \-\-intersect where reported objects may not be
