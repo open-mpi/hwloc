@@ -497,7 +497,7 @@ hwloc_look_freebsd_domains(struct hwloc_topology *topology){
 
 	if (nodes)
 	  nodes[i] = obj;
-        hwloc_insert_object_by_cpuset(topology, obj);
+        hwloc__insert_object_by_cpuset(topology, NULL, obj, "freebsd:numanode");
       } else {
 	free(nodes);
         nodes = NULL;

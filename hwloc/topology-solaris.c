@@ -467,7 +467,7 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
 			      nids[i], obj->cpuset);
     }
 
-    hwloc_insert_object_by_cpuset(topology, obj);
+    hwloc__insert_object_by_cpuset(topology, NULL, obj, "solaris:lgrp:numa");
   }
   topology->support.discovery->numa = 1;
   topology->support.discovery->numa_memory = 1;
@@ -816,7 +816,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	      l3->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L3];
 	      l3->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L3];
 	      l3->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-	      hwloc_insert_object_by_cpuset(topology, l3);
+	      hwloc__insert_object_by_cpuset(topology, NULL, l3, "solaris:chipinfo:l3cache");
 	      cpuset = NULL; /* don't free below */
 	    }
 	  }
@@ -829,7 +829,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	      l2i->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L2I];
 	      l2i->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L2I];
 	      l2i->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
-	      hwloc_insert_object_by_cpuset(topology, l2i);
+	      hwloc__insert_object_by_cpuset(topology, NULL, l2i, "solaris:chipinfo:l2icache");
 	    }
 	    if (chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L2D] >= 0) {
 	      hwloc_obj_t l2 = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L2CACHE, HWLOC_UNKNOWN_INDEX);
@@ -839,7 +839,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	      l2->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L2D];
 	      l2->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L2D];
 	      l2->attr->cache.type = chip_info.l2_unified ? HWLOC_OBJ_CACHE_UNIFIED : HWLOC_OBJ_CACHE_DATA;
-	      hwloc_insert_object_by_cpuset(topology, l2);
+	      hwloc__insert_object_by_cpuset(topology, NULL, l2, "solaris:chipinfo:l2cache");
 	      cpuset = NULL; /* don't free below */
 	    }
 	  }
@@ -850,7 +850,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    group->attr->group.subkind = hwloc_bitmap_weight(cpuset);
 	    if (ksp->ks_name[0])
 	      hwloc_obj_add_info(group, "SolarisProcessorGroup", ksp->ks_name);
-	    hwloc_insert_object_by_cpuset(topology, group);
+	    hwloc__insert_object_by_cpuset(topology, NULL, group, "solaris:kstat:group");
 	    cpuset = NULL; /* don't free below */
 	  }
 	  hwloc_bitmap_free(cpuset);
@@ -875,7 +875,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	if (Pproc[k].Lpkg == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
       hwloc_debug_1arg_bitmap("Package %u has cpuset %s\n", j, obj->cpuset);
-      hwloc_insert_object_by_cpuset(topology, obj);
+      hwloc__insert_object_by_cpuset(topology, NULL, obj, "solaris:kstat:package");
     }
     hwloc_debug("%s", "\n");
   }
@@ -905,7 +905,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	l1->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L1D];
 	l1->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L1D];
 	l1->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L1D];
-	hwloc_insert_object_by_cpuset(topology, l1);
+	hwloc__insert_object_by_cpuset(topology, NULL, l1, "solaris:chipinfo:l1cache");
       }
       if (l1i_from_core) {
 	struct hwloc_obj *l1i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
@@ -915,12 +915,12 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	l1i->attr->cache.size = chip_info.cache_size[HWLOC_SOLARIS_CHIP_INFO_L1I];
 	l1i->attr->cache.linesize = chip_info.cache_linesize[HWLOC_SOLARIS_CHIP_INFO_L1I];
 	l1i->attr->cache.associativity = chip_info.cache_associativity[HWLOC_SOLARIS_CHIP_INFO_L1I];
-	hwloc_insert_object_by_cpuset(topology, l1i);
+	hwloc__insert_object_by_cpuset(topology, NULL, l1i, "solaris:chipinfo:l1icache");
       }
       if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
 	struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, Lcore[j].Pcore);
 	obj->cpuset = cpuset;
-	hwloc_insert_object_by_cpuset(topology, obj);
+	hwloc__insert_object_by_cpuset(topology, NULL, obj, "solaris:kstat:core");
       } else {
 	hwloc_bitmap_free(cpuset);
       }
@@ -939,7 +939,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	if (Pproc[k].Lproc == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
       hwloc_debug_1arg_bitmap("PU %u has cpuset %s\n", j, obj->cpuset);
-      hwloc_insert_object_by_cpuset(topology, obj);
+      hwloc__insert_object_by_cpuset(topology, NULL, obj, "solaris:kstat:pu");
     }
     hwloc_debug("%s", "\n");
     topology->support.discovery->pu = 1;

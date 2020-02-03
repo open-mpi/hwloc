@@ -887,7 +887,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	  default:
 	    break;
 	}
-	hwloc_insert_object_by_cpuset(topology, obj);
+	hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:GetLogicalProcessorInformation");
       }
 
       free(procInfo);
@@ -981,7 +981,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 		obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, id);
 		obj->cpuset = set;
 		obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP;
-		hwloc_insert_object_by_cpuset(topology, obj);
+		hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:GetLogicalProcessorInformation:ProcessorGroup");
 	      } else
 		hwloc_bitmap_free(set);
 	    }
@@ -1055,7 +1055,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	  default:
 	    break;
 	}
-	hwloc_insert_object_by_cpuset(topology, obj);
+	hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:GetLogicalProcessorInformationEx");
       }
       free(procInfoTotal);
   }
@@ -1076,7 +1076,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       hwloc_bitmap_only(obj->cpuset, idx);
       hwloc_debug_1arg_bitmap("cpu %u has cpuset %s\n",
 			      idx, obj->cpuset);
-      hwloc_insert_object_by_cpuset(topology, obj);
+      hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:ProcessorGroup:pu");
     } hwloc_bitmap_foreach_end();
     hwloc_bitmap_free(groups_pu_set);
   } else {
@@ -1092,7 +1092,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	hwloc_bitmap_only(obj->cpuset, idx);
 	hwloc_debug_1arg_bitmap("cpu %u has cpuset %s\n",
 				idx, obj->cpuset);
-	hwloc_insert_object_by_cpuset(topology, obj);
+	hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:pu");
       }
   }
 

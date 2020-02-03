@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -143,7 +143,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
         if (cpustepping[0] != '\0')
           hwloc_obj_add_info(obj, "CPUStepping", cpustepping);
 
-        hwloc_insert_object_by_cpuset(topology, obj);
+        hwloc__insert_object_by_cpuset(topology, NULL, obj, "darwin:package");
       }
     else {
       if (cpuvendor[0] != '\0')
@@ -185,7 +185,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
           hwloc_debug_1arg_bitmap("core %u has cpuset %s\n",
                      i, obj->cpuset);
-          hwloc_insert_object_by_cpuset(topology, obj);
+          hwloc__insert_object_by_cpuset(topology, NULL, obj, "darwin:core");
         }
     }
   } else {
@@ -303,7 +303,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
             l1i->attr->cache.associativity = 0;
             l1i->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
 
-            hwloc_insert_object_by_cpuset(topology, l1i);
+            hwloc__insert_object_by_cpuset(topology, NULL, l1i, "darwin:l1icache");
           }
           if (i) {
             hwloc_debug_2args_bitmap("L%ucache %u has cpuset %s\n",
@@ -334,11 +334,11 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 	    obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
           }
-
-	  if (hwloc_filter_check_keep_object_type(topology, obj->type))
-	    hwloc_insert_object_by_cpuset(topology, obj);
-	  else
-	    hwloc_free_unlinked_object(obj); /* FIXME: don't built at all, just build the cpuset in case l1i needs it */
+          if (hwloc_filter_check_keep_object_type(topology, obj->type))
+            hwloc__insert_object_by_cpuset(topology, NULL, obj,
+                                           obj->type == HWLOC_OBJ_NUMANODE ? "darwin:numanode" : "darwin:cache");
+          else
+            hwloc_free_unlinked_object(obj); /* FIXME: don't built at all, just build the cpuset in case l1i needs it */
         }
       }
     }

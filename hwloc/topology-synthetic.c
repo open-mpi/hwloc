@@ -912,7 +912,7 @@ hwloc_synthetic_insert_attached(struct hwloc_topology *topology,
 
   hwloc_synthetic_set_attr(&attached->attr, child);
 
-  hwloc_insert_object_by_cpuset(topology, child);
+  hwloc__insert_object_by_cpuset(topology, NULL, child, "synthetic:attached");
 
   hwloc_synthetic_insert_attached(topology, data, attached->next, set);
 }
@@ -964,7 +964,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 
     hwloc_synthetic_set_attr(&curlevel->attr, obj);
 
-    hwloc_insert_object_by_cpuset(topology, obj);
+    hwloc__insert_object_by_cpuset(topology, NULL, obj, "synthetic");
   }
 
   hwloc_synthetic_insert_attached(topology, data, curlevel->attached, set);

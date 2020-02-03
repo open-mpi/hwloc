@@ -878,7 +878,7 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
     obj->attr->group.dont_merge = dont_merge;
     hwloc_debug_2args_bitmap("os %s %u has cpuset %s\n",
 			     subtype, id, obj_cpuset);
-    hwloc_insert_object_by_cpuset(topology, obj);
+    hwloc__insert_object_by_cpuset(topology, NULL, obj, "x86:group");
   }
 }
 
@@ -936,7 +936,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 
 	hwloc_debug_1arg_bitmap("os package %u has cpuset %s\n",
 				packageid, package_cpuset);
-	hwloc_insert_object_by_cpuset(topology, package);
+	hwloc__insert_object_by_cpuset(topology, NULL, package, "x86:package");
 
       } else {
 	/* Annotate packages previously-existing packages */
@@ -992,7 +992,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
       hwloc_bitmap_set(node->nodeset, nodeid);
       hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
           nodeid, node_cpuset);
-      hwloc_insert_object_by_cpuset(topology, node);
+      hwloc__insert_object_by_cpuset(topology, NULL, node, "x86:numa");
       gotnuma++;
     }
   }
@@ -1039,7 +1039,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	      unknown_obj->attr->group.subkind = level;
 	      hwloc_debug_2args_bitmap("os unknown%u %u has cpuset %s\n",
 				       level, unknownid, unknown_cpuset);
-	      hwloc_insert_object_by_cpuset(topology, unknown_obj);
+	      hwloc__insert_object_by_cpuset(topology, NULL, unknown_obj, "x86:group:unknown");
 	    }
 	  }
 	}
@@ -1079,7 +1079,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	die->cpuset = die_cpuset;
 	hwloc_debug_1arg_bitmap("os die %u has cpuset %s\n",
 				dieid, die_cpuset);
-	hwloc_insert_object_by_cpuset(topology, die);
+	hwloc__insert_object_by_cpuset(topology, NULL, die, "x86:die");
       }
     }
   }
@@ -1117,7 +1117,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	core->cpuset = core_cpuset;
 	hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
 				coreid, core_cpuset);
-	hwloc_insert_object_by_cpuset(topology, core);
+	hwloc__insert_object_by_cpuset(topology, NULL, core, "x86:core");
       }
     }
   }
@@ -1131,7 +1131,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
        obj->cpuset = hwloc_bitmap_alloc();
        hwloc_bitmap_only(obj->cpuset, i);
        hwloc_debug_1arg_bitmap("PU %u has cpuset %s\n", i, obj->cpuset);
-       hwloc_insert_object_by_cpuset(topology, obj);
+       hwloc__insert_object_by_cpuset(topology, NULL, obj, "x86:pu");
      }
   }
 
@@ -1214,7 +1214,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	  hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
 	  hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 				   level, cacheid, cache_cpuset);
-	  hwloc_insert_object_by_cpuset(topology, cache);
+	  hwloc__insert_object_by_cpuset(topology, NULL, cache, "x86:cache");
 	}
       }
     }

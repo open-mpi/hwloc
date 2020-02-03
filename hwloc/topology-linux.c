@@ -3219,31 +3219,31 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
     hwloc_obj_add_other_obj_sets(cluster, mcdram);
     cluster->subtype = strdup("Cluster");
     cluster->attr->group.kind = HWLOC_GROUP_KIND_INTEL_KNL_SUBNUMA_CLUSTER;
-    cluster = hwloc__insert_object_by_cpuset(topology, NULL, cluster, hwloc_report_os_error);
+    cluster = hwloc__insert_object_by_cpuset(topology, NULL, cluster, "linux:knl:snc:group");
   }
 
   if (cluster) {
     /* Now insert NUMA nodes below this cluster */
     hwloc_obj_t res;
-    res = hwloc__attach_memory_object(topology, cluster, ddr, hwloc_report_os_error);
+    res = hwloc__attach_memory_object(topology, cluster, ddr, "linux:knl:snc:ddr");
     if (res != ddr) {
       (*failednodes)++;
       ddr = NULL;
     }
-    res = hwloc__attach_memory_object(topology, cluster, mcdram, hwloc_report_os_error);
+    res = hwloc__attach_memory_object(topology, cluster, mcdram, "linux:knl:snc:mcdram");
     if (res != mcdram)
       (*failednodes)++;
 
   } else {
     /* we don't know where to attach, let the core find or insert if needed */
     hwloc_obj_t res;
-    res = hwloc__insert_object_by_cpuset(topology, NULL, ddr, hwloc_report_os_error);
+    res = hwloc__insert_object_by_cpuset(topology, NULL, ddr, "linux:knl:ddr");
     if (res != ddr) {
       (*failednodes)++;
       ddr = NULL;
     }
     if (mcdram) {
-      res = hwloc__insert_object_by_cpuset(topology, NULL, mcdram, hwloc_report_os_error);
+      res = hwloc__insert_object_by_cpuset(topology, NULL, mcdram, "linux:knl:mcdram");
       if (res != mcdram)
 	(*failednodes)++;
     }
@@ -3266,15 +3266,15 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
     if (mscache_as_l3) {
       /* make it a L3 */
       cache->subtype = strdup("MemorySideCache");
-      hwloc_insert_object_by_cpuset(topology, cache);
+      hwloc__insert_object_by_cpuset(topology, NULL, cache, "linux:knl:memcache:l3cache");
     } else {
       /* make it a real mscache */
       cache->type = HWLOC_OBJ_MEMCACHE;
       cache->depth = 1;
       if (cluster)
-	hwloc__attach_memory_object(topology, cluster, cache, hwloc_report_os_error);
+	hwloc__attach_memory_object(topology, cluster, cache, "linux:knl:snc:memcache");
       else
-	hwloc__insert_object_by_cpuset(topology, NULL, cache, hwloc_report_os_error);
+	hwloc__insert_object_by_cpuset(topology, NULL, cache, "linux:knl:memcache");
     }
   }
 }
@@ -3428,7 +3428,7 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
   for (i = 0; i < nbnodes; i++) {
     hwloc_obj_t node = nodes[i];
     if (node) {
-      hwloc_obj_t res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, hwloc_report_os_error);
+      hwloc_obj_t res_obj = hwloc__insert_object_by_cpuset(topology, NULL, node, "linux:knl:basic:numa");
       if (res_obj != node)
 	/* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
 	 * This object disappeared, we'll ignore distances */
@@ -3986,7 +3986,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  cur_type = cur_obj->type;
 	  tree = cur_obj->memory_first_child;
 	  assert(!cur_obj->next_sibling);
-	  res_obj = hwloc__insert_object_by_cpuset(topology, NULL, cur_obj, hwloc_report_os_error);
+	  res_obj = hwloc__insert_object_by_cpuset(topology, NULL, cur_obj, "linux:sysfs:numa");
 	  if (res_obj != cur_obj && cur_type == HWLOC_OBJ_NUMANODE) {
 	    /* This NUMA node got merged somehow, could be a buggy BIOS reporting wrong NUMA node cpuset.
 	     * Update it in the array for the distance matrix. */
@@ -4149,7 +4149,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  core->cpuset = coreset;
 	  hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
 				  mycoreid, core->cpuset);
-	  hwloc_insert_object_by_cpuset(topology, core);
+	  hwloc__insert_object_by_cpuset(topology, NULL, core, "linux:sysfs:core");
 	  coreset = NULL; /* don't free it */
 	} else
 
@@ -4215,7 +4215,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 				  &cpuinfo_Lprocs[j].infos, &cpuinfo_Lprocs[j].infos_count);
 	      }
 	  }
-	  hwloc_insert_object_by_cpuset(topology, package);
+	  hwloc__insert_object_by_cpuset(topology, NULL, package, "linux:sysfs:package");
 	  packageset = NULL; /* don't free it */
 	}
 	hwloc_bitmap_free(packageset);
@@ -4234,7 +4234,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       die->cpuset = dieset;
       hwloc_debug_1arg_bitmap("os die %u has cpuset %s\n",
 			      mydieid, dieset);
-      hwloc_insert_object_by_cpuset(topology, die);
+      hwloc__insert_object_by_cpuset(topology, NULL, die, "linux:sysfs:die");
     }
 
     if (data->arch == HWLOC_LINUX_ARCH_S390
@@ -4260,7 +4260,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	    book->subtype = strdup("Book");
 	    book->attr->group.kind = HWLOC_GROUP_KIND_S390_BOOK;
 	    book->attr->group.subkind = 0;
-	    hwloc_insert_object_by_cpuset(topology, book);
+	    hwloc__insert_object_by_cpuset(topology, NULL, book, "linux:sysfs:group:book");
 	    bookset = NULL; /* don't free it */
 	  }
         }
@@ -4285,7 +4285,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	      drawer->subtype = strdup("Drawer");
 	      drawer->attr->group.kind = HWLOC_GROUP_KIND_S390_BOOK;
 	      drawer->attr->group.subkind = 1;
-	      hwloc_insert_object_by_cpuset(topology, drawer);
+	      hwloc__insert_object_by_cpuset(topology, NULL, drawer, "linux:sysfs:group:drawer");
 	      drawerset = NULL; /* don't free it */
 	    }
 	  }
@@ -4304,7 +4304,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       thread->cpuset = threadset;
       hwloc_debug_1arg_bitmap("thread %d has cpuset %s\n",
 		 i, threadset);
-      hwloc_insert_object_by_cpuset(topology, thread);
+      hwloc__insert_object_by_cpuset(topology, NULL, thread, "linux:sysfs:pu");
     }
 
     /* look at the caches */
@@ -4412,7 +4412,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  cache->cpuset = cacheset;
 	  hwloc_debug_1arg_bitmap("cache depth %u has cpuset %s\n",
 				  depth, cacheset);
-	  hwloc_insert_object_by_cpuset(topology, cache);
+	  hwloc__insert_object_by_cpuset(topology, NULL, cache, "linux:sysfs:cache");
 	  cacheset = NULL; /* don't free it */
 	}
       }

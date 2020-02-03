@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2019 Inria.  All rights reserved.
+ * Copyright © 2010-2020 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -874,26 +874,6 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
  * Grouping objects according to distances
  */
 
-static void hwloc_report_user_distance_error(const char *msg, int line)
-{
-  static int reported = 0;
-
-  if (!reported && !hwloc_hide_errors()) {
-    fprintf(stderr, "****************************************************************************\n");
-    fprintf(stderr, "* hwloc %s was given invalid distances by the user.\n", HWLOC_VERSION);
-    fprintf(stderr, "*\n");
-    fprintf(stderr, "* %s\n", msg);
-    fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
-    fprintf(stderr, "*\n");
-    fprintf(stderr, "* Please make sure that distances given through the programming API\n");
-    fprintf(stderr, "* do not contradict any other topology information.\n");
-    fprintf(stderr, "* \n");
-    fprintf(stderr, "* hwloc will now ignore this invalid topology information and continue.\n");
-    fprintf(stderr, "****************************************************************************\n");
-    reported = 1;
-  }
-}
-
 static int hwloc_compare_values(uint64_t a, uint64_t b, float accuracy)
 {
   if (accuracy != 0.0f && fabsf((float)a-(float)b) < (float)a * accuracy)
@@ -1086,7 +1066,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
           hwloc_debug_1arg_bitmap("adding Group object with %u objects and cpuset %s\n",
                                   groupsizes[i], group_obj->cpuset);
           res_obj = hwloc__insert_object_by_cpuset(topology, NULL, group_obj,
-						   (kind & HWLOC_DISTANCES_KIND_FROM_USER) ? hwloc_report_user_distance_error : hwloc_report_os_error);
+                                                   (kind & HWLOC_DISTANCES_KIND_FROM_USER) ? "distances:fromuser:group" : "distances:group");
 	  /* res_obj may be NULL on failure to insert. */
 	  if (!res_obj)
 	    failed++;

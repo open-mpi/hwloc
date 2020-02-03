@@ -240,8 +240,7 @@ extern void hwloc_topology_clear(struct hwloc_topology *topology);
 
 /* insert memory object as memory child of normal parent */
 extern struct hwloc_obj * hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
-						      hwloc_obj_t obj,
-						      hwloc_report_error_t report_error);
+                                                      hwloc_obj_t obj, const char *reason);
 
 extern void hwloc_pci_discovery_init(struct hwloc_topology *topology);
 extern void hwloc_pci_discovery_prepare(struct hwloc_topology *topology);

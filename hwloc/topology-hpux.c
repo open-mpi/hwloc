@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2013 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -254,7 +254,7 @@ hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
     }
 
     /* Add cpu */
-    hwloc_insert_object_by_cpuset(topology, obj);
+    hwloc__insert_object_by_cpuset(topology, NULL, obj, "hpux:pu");
 
     currentcpu = mpctl((topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED) ?
       MPC_GETNEXTSPU_SYS : MPC_GETNEXTSPU, currentcpu, 0);
@@ -263,7 +263,7 @@ hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
   if (has_numa) {
     /* Add nodes */
     for (i = 0 ; i < nbnodes ; i++)
-      hwloc_insert_object_by_cpuset(topology, nodes[i]);
+      hwloc__insert_object_by_cpuset(topology, NULL, nodes[i], "hpux:numanode");
   }
 
   topology->support.discovery->pu = 1;

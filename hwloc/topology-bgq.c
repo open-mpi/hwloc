@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Inria.  All rights reserved.
+ * Copyright © 2013-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -79,7 +79,7 @@ hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   hwloc_bitmap_set(set, 0);
   obj->nodeset = set;
   obj->attr->numanode.local_memory = 16ULL*1024*1024*1024ULL;
-  hwloc_insert_object_by_cpuset(topology, obj);
+  hwloc__insert_object_by_cpuset(topology, NULL, obj, "bgq:numa");
   topology->support.discovery->numa = 1;
   topology->support.discovery->numa_memory = 1;
 
@@ -95,7 +95,7 @@ hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     obj->attr->cache.size = 32*1024*1024;
     obj->attr->cache.linesize = 128;
     obj->attr->cache.associativity = 16;
-    hwloc_insert_object_by_cpuset(topology, obj);
+    hwloc__insert_object_by_cpuset(topology, NULL, obj, "bgq:l2cache");
   }
 
   /* package */
@@ -103,7 +103,7 @@ hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, 0);
     obj->cpuset = set;
     hwloc_obj_add_info(obj, "CPUModel", "IBM PowerPC A2");
-    hwloc_insert_object_by_cpuset(topology, obj);
+    hwloc__insert_object_by_cpuset(topology, NULL, obj, "bgq:package");
   } else
     hwloc_bitmap_free(set);
 
@@ -121,7 +121,7 @@ hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       obj->attr->cache.size = 16*1024;
       obj->attr->cache.linesize = 64;
       obj->attr->cache.associativity = 8;
-      hwloc_insert_object_by_cpuset(topology, obj);
+      hwloc__insert_object_by_cpuset(topology, NULL, obj, "bgq:l1dcache");
     }
     /* L1i */
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
@@ -132,7 +132,7 @@ hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       obj->attr->cache.size = 16*1024;
       obj->attr->cache.linesize = 64;
       obj->attr->cache.associativity = 4;
-      hwloc_insert_object_by_cpuset(topology, obj);
+      hwloc__insert_object_by_cpuset(topology, NULL, obj, "bgq:l1icache");
     }
     /* there's also a L1p "prefetch cache" of 4kB with 128B lines */
 
@@ -140,7 +140,7 @@ hwloc_look_bgq(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
       obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_CORE, i);
       obj->cpuset = set;
-      hwloc_insert_object_by_cpuset(topology, obj);
+      hwloc__insert_object_by_cpuset(topology, NULL, obj, "bgq:core");
     } else
       hwloc_bitmap_free(set);
   }
