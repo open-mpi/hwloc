@@ -23,4 +23,3 @@ int	cpuset_getdomain(cpulevel_t, cpuwhich_t, id_t, size_t, domainset_t *, int *)
 int	cpuset_setdomain(cpulevel_t, cpuwhich_t, id_t, size_t, const domainset_t *, int);
 
 #endif /* HWLOC_PORT_FREEBSD_SYS_DOMAINSET_H */
-

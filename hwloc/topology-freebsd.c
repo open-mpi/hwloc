@@ -12,7 +12,11 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <sys/param.h>
+#include <sys/user.h>
 #include <pthread.h>
+#include <sys/cdefs.h>
+#include <stddef.h>
+#include <sys/thr.h>
 #ifdef HAVE_PTHREAD_NP_H
 #include <pthread_np.h>
 #endif
@@ -60,7 +64,6 @@ hwloc_freebsd_set_sth_affinity(hwloc_topology_t topology __hwloc_attribute_unuse
 
   if (cpuset_setaffinity(level, which, id, sizeof(cset), &cset))
     return -1;
-
   return 0;
 }
 
@@ -285,6 +288,79 @@ hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unu
 #endif
 
 static int
+hwloc_freebsd_get_last_cpu_location(int *name, hwloc_cpuset_t set, long thr_id){
+  size_t len, old_len, i, cnt;
+  int err;
+  struct kinfo_proc *p, *newp;
+  len = 0;  
+  err = sysctl(name, 4, NULL, &len, NULL, 0);
+  if (err < 0 || len == 0)
+    return -1;
+  p = NULL;
+  do {
+    len *= 2;
+    newp = realloc(p, len);
+    if (newp == NULL) {
+      free(p);
+      return -1;
+    }
+    p = newp;
+    old_len = len;
+    err = sysctl(name, 4, p, &len, NULL, 0);
+  } while (err < 0 && errno == ENOMEM && old_len == len);
+  if (err < 0) {
+    free(p);
+    return -1;
+  }
+  cnt = len / sizeof(*p);
+  hwloc_bitmap_zero(set);
+  for (i = 0; i < cnt; i++) {
+    if(thr_id != 0 && thr_id != p[i].ki_tid)
+      continue;
+    if(p[i].ki_oncpu == -1)
+      hwloc_bitmap_set(set, p[i].ki_lastcpu);
+    else
+      hwloc_bitmap_set(set, p[i].ki_oncpu);
+  }
+  return 0;
+}
+
+static int
+hwloc_freebsd_get_thisproc_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int flags __hwloc_attribute_unused) {
+  int name[4];
+  name[0] = CTL_KERN;
+  name[1] = KERN_PROC;
+  name[2] = KERN_PROC_PID | KERN_PROC_INC_THREAD;
+  name[3] = getpid();
+  return hwloc_freebsd_get_last_cpu_location(name, set, 0);
+}
+
+static int
+hwloc_freebsd_get_proc_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid, hwloc_cpuset_t set, int flags __hwloc_attribute_unused) {
+  int name[4];
+  name[0] = CTL_KERN;
+  name[1] = KERN_PROC;
+  name[2] = KERN_PROC_PID | KERN_PROC_INC_THREAD;
+  name[3] = pid;
+  return hwloc_freebsd_get_last_cpu_location(name, set, 0);
+}
+
+static int
+hwloc_freebsd_get_thisthread_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int flags __hwloc_attribute_unused) {
+  long thr_id;
+  int name[4];
+  int err;
+  err = thr_self(&thr_id);
+  if (err < 0 && errno == EFAULT)
+    return -1;
+  name[0] = CTL_KERN;
+  name[1] = KERN_PROC;
+  name[2] = KERN_PROC_PID | KERN_PROC_INC_THREAD;
+  name[3] = getpid();
+  return hwloc_freebsd_get_last_cpu_location(name, set, thr_id);
+}
+
+static int
 set_locality_info(hwloc_topology_t topology, int ndomains, hwloc_obj_t *nodes){
   char *locality, *ptr;
   size_t len_locality;
@@ -495,7 +571,9 @@ hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unus
 #endif
 #endif
 #endif
-  /* TODO: get_last_cpu_location: find out ki_lastcpu */
+  hooks->get_thisproc_last_cpu_location = hwloc_freebsd_get_thisproc_last_cpu_location;
+  hooks->get_proc_last_cpu_location = hwloc_freebsd_get_proc_last_cpu_location;
+  hooks->get_thisthread_last_cpu_location = hwloc_freebsd_get_thisthread_last_cpu_location;
 }
 
 static struct hwloc_backend *
