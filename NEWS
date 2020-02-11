@@ -24,6 +24,7 @@ Version 2.2.0
 * Backends
   + Add support for Linux cgroups v2.
   + Add NUMA support for FreeBSD.
+  + Add last_cpu_location hooks for FreeBSD.
   + Remove support for Intel Xeon Phi (MIC, Knights Corner) co-processors.
 * Tools
   + Add --uid to filter the hwloc-ps output by uid on Linux.

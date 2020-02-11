@@ -74,6 +74,8 @@ libhwloc_port_freebsd_la_SOURCES = \
         include/freebsd/pthread_np.h \
         include/freebsd/sys/cpuset.h \
         include/freebsd/sys/sysctl.h \
+        include/freebsd/sys/thr.h \
+        include/freebsd/sys/user.h \
         include/freebsd/sys/domainset.h
 libhwloc_port_freebsd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/freebsd \
