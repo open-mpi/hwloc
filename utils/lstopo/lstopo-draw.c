@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -539,6 +539,12 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       && parent->arity > loutput->factorize_min[parent->first_child->type]) {
     orient = LSTOPO_ORIENT_HORIZ;
   }
+
+  /* if there are memory children and using plain children layout, use horizontal by default */
+  if (orient == LSTOPO_ORIENT_NONE
+      && parent->memory_arity
+      && loutput->plain_children_order)
+    orient = LSTOPO_ORIENT_HORIZ;
 
   /* recurse into children to prepare their sizes,
    * and check whether all normal children are PUs. */
