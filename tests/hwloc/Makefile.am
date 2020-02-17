@@ -1,4 +1,4 @@
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -64,6 +64,7 @@ check_PROGRAMS = \
         hwloc_topology_abi \
         hwloc_obj_infos \
         hwloc_iodevs \
+        cpuset_nodeset \
         xmlbuffer \
         gl
 
