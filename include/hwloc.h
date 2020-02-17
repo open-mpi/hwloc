@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2173,13 +2173,14 @@ HWLOC_DECLSPEC void * hwloc_topology_get_userdata(hwloc_topology_t topology);
 enum hwloc_restrict_flags_e {
   /** \brief Remove all objects that became CPU-less.
    * By default, only objects that contain no PU and no memory are removed.
+   * This flag may not be used with ::HWLOC_RESTRICT_FLAG_BYNODESET.
    * \hideinitializer
    */
   HWLOC_RESTRICT_FLAG_REMOVE_CPULESS = (1UL<<0),
 
   /** \brief Restrict by nodeset instead of CPU set.
    * Only keep objects whose nodeset is included or partially included in the given set.
-   * This flag may not be used with ::HWLOC_RESTRICT_FLAG_BYNODESET.
+   * This flag may not be used with ::HWLOC_RESTRICT_FLAG_REMOVE_CPULESS.
    */
   HWLOC_RESTRICT_FLAG_BYNODESET =  (1UL<<3),
 
