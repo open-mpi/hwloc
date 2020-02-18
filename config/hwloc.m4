@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2019 Inria.  All rights reserved.
+dnl Copyright © 2009-2020 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -475,21 +475,6 @@ EOF])
       AC_CHECK_FUNCS([host_info])
     ])
 
-    AC_CHECK_HEADERS([sys/param.h])
-    AC_CHECK_HEADERS([sys/sysctl.h], [
-      AC_CHECK_DECLS([CTL_HW, HW_NCPU],,,[[
-      #if HAVE_SYS_PARAM_H
-      #include <sys/param.h>
-      #endif
-      #include <sys/sysctl.h>
-      ]])
-    ],,[
-      AC_INCLUDES_DEFAULT
-      #if HAVE_SYS_PARAM_H
-      #include <sys/param.h>
-      #endif
-    ])
-
     AC_CHECK_DECLS([strtoull], [], [AC_CHECK_FUNCS([strtoull])], [AC_INCLUDES_DEFAULT])
 
     # Needed for Windows in private/misc.h
@@ -530,6 +515,23 @@ return 0;
     fi
 
     if test "x$hwloc_linux" != "xyes" ; then
+      # Don't look for sys/sysctl.h on Linux because it's deprecated and
+      # generates a warning in GCC10. Also it's unneeded.
+      AC_CHECK_HEADERS([sys/param.h])
+      AC_CHECK_HEADERS([sys/sysctl.h], [
+        AC_CHECK_DECLS([CTL_HW, HW_NCPU],,,[[
+        #if HAVE_SYS_PARAM_H
+        #include <sys/param.h>
+        #endif
+        #include <sys/sysctl.h>
+        ]])
+      ],,[
+        AC_INCLUDES_DEFAULT
+        #if HAVE_SYS_PARAM_H
+        #include <sys/param.h>
+        #endif
+      ])
+
       # Don't detect sysctl* on Linux because its sysctl() syscall is
       # long deprecated and unneeded. Some libc still expose the symbol
       # and raise a big warning at link time.
