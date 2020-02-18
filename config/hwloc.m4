@@ -520,21 +520,6 @@ EOF])
       AC_CHECK_FUNCS([host_info])
     ])
 
-    AC_CHECK_HEADERS([sys/param.h])
-    AC_CHECK_HEADERS([sys/sysctl.h], [
-      AC_CHECK_DECLS([CTL_HW, HW_NCPU, HW_REALMEM64, HW_MEMSIZE64, HW_PHYSMEM64, HW_USERMEM64, HW_REALMEM, HW_MEMSIZE, HW_PHYSMEM, HW_USERMEM],,,[[
-      #if HAVE_SYS_PARAM_H
-      #include <sys/param.h>
-      #endif
-      #include <sys/sysctl.h>
-      ]])
-    ],,[
-      AC_INCLUDES_DEFAULT
-      #if HAVE_SYS_PARAM_H
-      #include <sys/param.h>
-      #endif
-    ])
-
     AC_CHECK_DECLS([strtoull], [], [AC_CHECK_FUNCS([strtoull])], [AC_INCLUDES_DEFAULT])
 
     # Needed for Windows in private/misc.h
@@ -575,6 +560,23 @@ return 0;
     fi
 
     if test "x$hwloc_linux" != "xyes" ; then
+      # Don't look for sys/sysctl.h on Linux because it's deprecated and
+      # generates a warning in GCC10. Also it's unneeded.
+      AC_CHECK_HEADERS([sys/param.h])
+      AC_CHECK_HEADERS([sys/sysctl.h], [
+        AC_CHECK_DECLS([CTL_HW, HW_NCPU, HW_REALMEM64, HW_MEMSIZE64, HW_PHYSMEM64, HW_USERMEM64, HW_REALMEM, HW_MEMSIZE, HW_PHYSMEM, HW_USERMEM],,,[[
+        #if HAVE_SYS_PARAM_H
+        #include <sys/param.h>
+        #endif
+        #include <sys/sysctl.h>
+        ]])
+      ],,[
+        AC_INCLUDES_DEFAULT
+        #if HAVE_SYS_PARAM_H
+        #include <sys/param.h>
+        #endif
+      ])
+
       # Don't detect sysctl* on Linux because its sysctl() syscall is
       # long deprecated and unneeded. Some libc still expose the symbol
       # and raise a big warning at link time.
