@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -5545,7 +5545,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   hwloc_bitmap_t cpuset;
   const char *tmp;
   hwloc_obj_t parent;
-  char *devicesubdir;
+  const char *devicesubdir;
   int err;
 
   if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS)
@@ -5685,7 +5685,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   char blocktype[64] = "";
   unsigned sectorsize = 0;
   unsigned major_id, minor_id;
-  char *devicesubdir;
+  const char *devicesubdir;
   char *tmp;
 
   if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS)

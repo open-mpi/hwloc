@@ -1,6 +1,6 @@
 /*
  * Copyright © 2015-2018 Intel
- * Copyright © 2015-2018 Inria.  All rights reserved.
+ * Copyright © 2015-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -27,7 +27,7 @@
 /* unexpected strings, found at least in Dell C6320p BIOS <=1.4.1 */
 #define KNL_DELL_GROUP_STRING "Knights Landing Association"
 
-static char *allowed_group_strings[] =
+static const char *allowed_group_strings[] =
 {
     KNL_INTEL_GROUP_STRING,
     KNM_INTEL_GROUP_STRING,
