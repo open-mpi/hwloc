@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 Université Bordeaux
- * Copyright © 2015 Inria.  All rights reserved.
+ * Copyright © 2015-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -23,3 +23,4 @@ int	cpuset_getdomain(cpulevel_t, cpuwhich_t, id_t, size_t, domainset_t *, int *)
 int	cpuset_setdomain(cpulevel_t, cpuwhich_t, id_t, size_t, const domainset_t *, int);
 
 #endif /* HWLOC_PORT_FREEBSD_SYS_DOMAINSET_H */
+
