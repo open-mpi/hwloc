@@ -407,7 +407,7 @@ EOF])
         if test "$hwloc_want_picky" = 1; then
             add="-Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare"
             add="$add -Wmissing-prototypes -Wstrict-prototypes"
-            add="$add -Wcomment -pedantic -Wshadow"
+            add="$add -Wcomment -pedantic -Wshadow -Wwrite-strings"
 
             HWLOC_CFLAGS="$HWLOC_CFLAGS $add"
         fi
