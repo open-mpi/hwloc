@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
-# Copyright © 2019 Inria.  All rights reserved.
+# Copyright © 2019-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 # Simple script to help test embedding:
@@ -78,17 +78,27 @@ print Got tarball: $tarball
 ver=`basename $tarball | sed -e 's/^hwloc-//' -e 's/\.tar\..*$//'`
 print Got version: $ver
 
-# Extract
+# Extract and build an embedded tarball
+print Removing the old standalone directory...
+rm -rf standalone
+mkdir standalone
+cd standalone
 print Extracting tarball...
-rm -rf hwloc-$ver
 if test "`echo $tarball | grep .tar.bz2`" != ""; then
-    try tar jxf $tarball
+    try tar jxf ../$tarball
 else
-    try tar zxf $tarball
+    try tar zxf ../$tarball
 fi
+cd hwloc-$ver
+print Building embedded tarball...
+try ./configure --enable-embedded-mode
+try make dist
+cd ../..
 
-print Removing old tree...
-rm -rf hwloc-tree
+# Extract embedded tarball for real use
+print Extracting the embedded tarball...
+rm -rf hwloc-$tree hwloc-$ver
+try tar jxf standalone/hwloc-$ver/hwloc-$ver.tar.bz2
 mv hwloc-$ver hwloc-tree
 
 # Autogen
@@ -107,16 +117,9 @@ cd ..
 rm -rf build
 
 # Now whack the tree and do a clean VPATH
-print Re-extracting tarball...
-rm -rf hwloc-$ver
-if test "`echo $tarball | grep .tar.bz2`" != ""; then
-    try tar jxf $tarball
-else
-    try tar zxf $tarball
-fi
-
-print Removing old tree...
-rm -rf hwloc-tree
+print Re-extracting the embedded tarball...
+rm -rf hwloc-tree hwloc-$ver
+try tar jxf standalone/hwloc-$ver/hwloc-$ver.tar.bz2
 mv hwloc-$ver hwloc-tree
 
 # Autogen
