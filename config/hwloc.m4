@@ -405,9 +405,16 @@ EOF])
             fi
         fi
         if test "$hwloc_want_picky" = 1; then
-            add="-Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare"
-            add="$add -Wmissing-prototypes -Wstrict-prototypes"
-            add="$add -Wcomment -pedantic -Wshadow -Wwrite-strings"
+            add="-Wall -Wextra -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare"
+            add="$add -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes"
+            add="$add -Wcomment -pedantic -Wshadow -Wwrite-strings -Wnested-externs"
+            add="$add -Wpointer-arith -Wbad-function-cast -Wold-style-definition"
+            add="$add -Werror-implicit-function-declaration"
+
+	    _HWLOC_CHECK_GCC_OPTION([-Wdiscarded-qualifiers], [add])
+	    _HWLOC_CHECK_GCC_OPTION([-Wvariadic-macros], [add])
+	    _HWLOC_CHECK_GCC_OPTION([-Wtype-limits], [add])
+	    _HWLOC_CHECK_GCC_OPTION([-Wstack-usage=262144], [add])
 
             HWLOC_CFLAGS="$HWLOC_CFLAGS $add"
         fi
