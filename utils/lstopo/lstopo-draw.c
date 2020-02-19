@@ -1237,7 +1237,7 @@ factorized_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lud->width = gridsize*5; /* space, box, space, box, space */
     lud->height = gridsize*2 + linespacing + fontsize + gridsize; /* space, box, linespace, text, gridsize */
     sprintf(lud->text[0].text, "%ux total", level->parent->arity);
-    n = strlen(lud->text[0].text);
+    n = (unsigned)strlen(lud->text[0].text);
     textwidth = get_textwidth(loutput, lud->text[0].text, n, fontsize);
     lud->text[0].width = textwidth;
     if (textwidth > lud->width) {
@@ -1459,9 +1459,9 @@ output_draw(struct lstopo_output *loutput)
 #else /* HAVE_STRFTIME */
     {
       char *date;
-      int n;
+      unsigned n;
       date = ctime(&t);
-      n = strlen(date);
+      n = (unsigned) strlen(date);
       if (n && date[n-1] == '\n') {
         date[n-1] = 0;
       }

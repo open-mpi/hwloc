@@ -896,7 +896,7 @@ main (int argc, char *argv[])
 	  }
 	}
 
-	for(i=type_min; i<type_max; i++) {
+	for(i=type_min; i<(unsigned)type_max; i++) {
 	  loutput.factorize_min[i] = min;
 	  loutput.factorize_first[i] = first;
 	  loutput.factorize_last[i] = last;

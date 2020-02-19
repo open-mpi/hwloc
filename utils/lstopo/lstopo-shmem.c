@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018-2019 Inria.  All rights reserved.
+ * Copyright © 2018-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -133,7 +133,7 @@ output_shmem(struct lstopo_output *loutput, const char *filename)
 
   close(fd);
 
-  printf("Exported shmem topology to %s for mmap address 0x%lx length %lu\n", filename, loutput->shmem_output_addr, (unsigned long) shmem_length);
+  printf("Exported shmem topology to %s for mmap address 0x%llx length %lu\n", filename, (unsigned long long) loutput->shmem_output_addr, (unsigned long) shmem_length);
 
   return 0;
 }

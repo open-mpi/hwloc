@@ -472,9 +472,11 @@ int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *outfile)
     DIR *d;
     int i;
     struct dirent *dir;
-    struct parser_data data = { 0 };
+    struct parser_data data;
     char path[PATH_SIZE];
     int err;
+
+    memset(&data, 0, sizeof(data));
 
     printf("Dumping Xeon Phi SMBIOS Memory-Side Cache information:\n");
 
