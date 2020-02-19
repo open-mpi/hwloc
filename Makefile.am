@@ -71,7 +71,19 @@ endif
 if HWLOC_BUILD_STANDALONE
 dist-hook:
 	sh "$(top_srcdir)/config/distscript.sh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
-endif HWLOC_BUILD_STANDALONE
+else !HWLOC_BUILD_STANDALONE
+# Create directories needed by embedders' autogen (directories ignored by embedded dist)
+dist-hook:
+	@MKDIR_P@	\
+		$(distdir)/doc \
+		$(distdir)/netloc \
+		$(distdir)/utils \
+		$(distdir)/tests \
+		$(distdir)/contrib/hwloc-ps.www \
+		$(distdir)/contrib/misc \
+		$(distdir)/contrib/systemd \
+		$(distdir)/contrib/windows
+endif !HWLOC_BUILD_STANDALONE
 
 if HWLOC_BUILD_STANDALONE
 if HWLOC_HAVE_WINDOWS
