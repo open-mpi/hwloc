@@ -1,4 +1,4 @@
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2012 Oracle and/or its affiliates.  All rights reserved.
@@ -23,7 +23,7 @@ pluginsdir = @HWLOC_PLUGINS_DIR@
 plugins_LTLIBRARIES =
 plugins_ldflags = -module -avoid-version -lltdl
 # Beware that files are not rebuilt automatically when reconfiguring with different paths in these flags.
-AM_CPPFLAGS += -DHWLOC_PLUGINS_PATH=\"$(HWLOC_PLUGINS_PATH)\" -DRUNSTATEDIR=\"$(HWLOC_runstatedir)\"
+AM_CPPFLAGS += -DHWLOC_PLUGINS_PATH="\"$(HWLOC_PLUGINS_PATH)\"" -DRUNSTATEDIR="\"$(HWLOC_runstatedir)\""
 
 # Sources and ldflags
 

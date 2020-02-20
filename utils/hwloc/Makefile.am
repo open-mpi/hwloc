@@ -1,4 +1,4 @@
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009-2012, 2014, 2016 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -56,7 +56,7 @@ endif HWLOC_HAVE_LINUX
 hwloc_dump_hwdata_SOURCES = \
 	hwloc-dump-hwdata.c \
 	hwloc-dump-hwdata-knl.c
-hwloc_dump_hwdata_CPPFLAGS = $(AM_CPPFLAGS) -DRUNSTATEDIR=\"$(HWLOC_runstatedir)\"
+hwloc_dump_hwdata_CPPFLAGS = $(AM_CPPFLAGS) -DRUNSTATEDIR="\"$(HWLOC_runstatedir)\""
 
 hwloc_calc_SOURCES = \
         hwloc-calc.h \
