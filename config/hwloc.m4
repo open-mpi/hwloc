@@ -1170,25 +1170,33 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 
     # Plugin support
     AC_MSG_CHECKING([if plugin support is enabled])
-    # Plugins (even core support) are totally disabled by default
-    AS_IF([test "x$enable_plugins" = "x"], [enable_plugins=no])
-    AS_IF([test "x$enable_plugins" != "xno"], [hwloc_have_plugins=yes], [hwloc_have_plugins=no])
-    AC_MSG_RESULT([$hwloc_have_plugins])
-    AS_IF([test "x$hwloc_have_plugins" = "xyes"],
-          [AC_DEFINE([HWLOC_HAVE_PLUGINS], 1, [Define to 1 if the hwloc library should support dynamically-loaded plugins])])
+    # Plugins (even core support) are totally disabled by default.
+    # Pass --enable-plugins=foo (with "foo" NOT an existing component) to enable plugins but build none of them.
+    if test "x$enable_plugins" = xyes; then
+      hwloc_have_plugins=yes
+      requested_plugins="$hwloc_components"
+    else if test "x$enable_plugins" != xno -a "x$enable_plugins" != x; then
+      hwloc_have_plugins=yes
+      requested_plugins=`echo $enable_plugins | sed -e 's/,/ /g'`
+    else
+      hwloc_have_plugins=no
+    fi fi
+    AC_MSG_RESULT($hwloc_have_plugins)
 
-    # Some sanity checks about plugins
-    # libltdl doesn't work on AIX as of 2.4.2
-    AS_IF([test "x$enable_plugins" = "xyes" -a "x$hwloc_aix" = "xyes"],
-      [AC_MSG_WARN([libltdl does not work on AIX, plugins support cannot be enabled.])
-       AC_MSG_ERROR([Cannot continue])])
-    # posix linkers don't work well with plugins and windows dll constraints
-    AS_IF([test "x$enable_plugins" = "xyes" -a "x$hwloc_windows" = "xyes"],
-      [AC_MSG_WARN([Plugins not supported on non-native Windows build, plugins support cannot be enabled.])
-       AC_MSG_ERROR([Cannot continue])])
-
-    # If we want plugins, look for ltdl.h and libltdl
     if test "x$hwloc_have_plugins" = xyes; then
+      # Some sanity checks about plugins
+      # libltdl doesn't work on AIX as of 2.4.2
+      AS_IF([test "x$hwloc_aix" = "xyes"],
+        [AC_MSG_WARN([libltdl does not work on AIX, plugins support cannot be enabled.])
+         AC_MSG_ERROR([Cannot continue])])
+      # posix linkers don't work well with plugins and windows dll constraints
+      AS_IF([test "x$hwloc_windows" = "xyes"],
+        [AC_MSG_WARN([Plugins not supported on non-native Windows build, plugins support cannot be enabled.])
+         AC_MSG_ERROR([Cannot continue])])
+
+      AC_DEFINE([HWLOC_HAVE_PLUGINS], 1, [Define to 1 if the hwloc library should support dynamically-loaded plugins])
+
+      # If we want plugins, look for ltdl.h and libltdl
       AC_CHECK_HEADER([ltdl.h], [],
 	[AC_MSG_WARN([Plugin support requested, but could not find ltdl.h])
 	 AC_MSG_ERROR([Cannot continue])])
@@ -1215,14 +1223,13 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     hwloc_static_components_file=${hwloc_static_components_dir}/static-components.h
     rm -f ${hwloc_static_components_file}
 
-    # Make $enable_plugins easier to use (it contains either "yes" (all) or a list of <name>)
-    HWLOC_PREPARE_FILTER_COMPONENTS([$enable_plugins])
+    HWLOC_PREPARE_FILTER_COMPONENTS([$requested_plugins])
     # Now we have some hwloc_<name>_component_wantplugin=1
 
     # See which core components want plugin and support it
     HWLOC_FILTER_COMPONENTS
     # Now we have some hwloc_<name>_component=plugin/static
-    # and hwloc_static/plugin_components
+    # and hwloc_static/plugin_components=list (space separated)
     AC_MSG_CHECKING([components to build statically])
     AC_MSG_RESULT($hwloc_static_components)
     HWLOC_LIST_STATIC_COMPONENTS([$hwloc_static_components_file], [$hwloc_static_components])
