@@ -29,7 +29,7 @@
 #define DARKER_EPOXY_G_COLOR ((DARK_EPOXY_G_COLOR * 100) / 110)
 #define DARKER_EPOXY_B_COLOR ((DARK_EPOXY_B_COLOR * 100) / 110)
 
-#ifdef __GNUC__
+#ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
 /* each of these colors must be declared in declare_colors() */
@@ -50,7 +50,7 @@ struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff, 0 };
 struct lstopo_color PCI_DEVICE_COLOR = { DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR, 0 };
 struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde, 0 };
 struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff, 0 };
-#ifdef __GNUC__
+#ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
 #pragma GCC diagnostic warning "-Wmissing-field-initializers"
 #endif
 

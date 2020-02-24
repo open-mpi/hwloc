@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -176,7 +176,13 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
     case WM_PAINT: {
       HFONT font;
+#ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
       struct lstopo_color white = {0xff, 0xff, 0xff};
+#ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
+#pragma GCC diagnostic warning "-Wmissing-field-initializers"
+#endif
       BeginPaint(hwnd, &the_output.ps);
       font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
       SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
