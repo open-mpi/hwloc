@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2019 Inria.  All rights reserved.
+ * Copyright © 2011-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -266,7 +266,7 @@ int main(void)
   /* play with accuracy */
   values[0] = 29; /* diagonal, instead of 3 (0.0333% error) */
   values[1] = 51; values[16] = 52; /* smallest group, instead of 5 (0.02% error) */
-  putenv("HWLOC_GROUPING_ACCURACY=0.1"); /* ok */
+  putenv((char *) "HWLOC_GROUPING_ACCURACY=0.1"); /* ok */
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
   hwloc_topology_load(topology);
@@ -279,7 +279,7 @@ int main(void)
   assert(depth == 6);
   hwloc_topology_destroy(topology);
 
-  putenv("HWLOC_GROUPING_ACCURACY=try"); /* ok */
+  putenv((char *) "HWLOC_GROUPING_ACCURACY=try"); /* ok */
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
   hwloc_topology_load(topology);
@@ -304,7 +304,7 @@ int main(void)
   assert(depth == 4);
   hwloc_topology_destroy(topology);
 
-  putenv("HWLOC_GROUPING_ACCURACY=0.01"); /* too small, cannot group */
+  putenv((char *) "HWLOC_GROUPING_ACCURACY=0.01"); /* too small, cannot group */
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
   hwloc_topology_load(topology);
@@ -317,7 +317,7 @@ int main(void)
   assert(depth == 4);
   hwloc_topology_destroy(topology);
 
-  putenv("HWLOC_GROUPING_ACCURACY=0"); /* full accuracy, cannot group */
+  putenv((char *) "HWLOC_GROUPING_ACCURACY=0"); /* full accuracy, cannot group */
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
   hwloc_topology_load(topology);

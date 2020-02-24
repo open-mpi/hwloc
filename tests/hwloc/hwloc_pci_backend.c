@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2016 Inria.  All rights reserved.
+ * Copyright © 2011-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -25,9 +25,9 @@ static int get_nb_pcidev(int iolevel, int thissystem,
     filter = HWLOC_TYPE_FILTER_KEEP_ALL;
 
   if (thissystem)
-    putenv("HWLOC_THISSYSTEM=1");
+    putenv((char *) "HWLOC_THISSYSTEM=1");
   else
-    putenv("HWLOC_THISSYSTEM=0");
+    putenv((char *) "HWLOC_THISSYSTEM=0");
   hwloc_topology_init(&topology);
   hwloc_topology_set_io_types_filter(topology, filter);
   if (xmlbuf)

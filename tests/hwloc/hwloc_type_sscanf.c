@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2018 Inria.  All rights reserved.
+ * Copyright © 2016-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -163,6 +163,6 @@ int main(void)
   check_topo();
 
   printf("testing topology 32em64t-2n8c2t-pci-wholeio.xml ...\n");
-  putenv("HWLOC_XMLFILE=" XMLTESTDIR "/32em64t-2n8c2t-pci-wholeio.xml");
+  putenv((char *) "HWLOC_XMLFILE=" XMLTESTDIR "/32em64t-2n8c2t-pci-wholeio.xml");
   check_topo();
 }

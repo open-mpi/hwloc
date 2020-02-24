@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012 Inria.  All rights reserved.
+ * Copyright © 2012-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -11,7 +11,7 @@ int main(void)
 {
   hwloc_topology_t topology;
 
-  putenv("HWLOC_COMPONENTS_VERBOSE=1");
+  putenv((char *) "HWLOC_COMPONENTS_VERBOSE=1");
 
   hwloc_topology_init(&topology);
   /* no load, to avoid spurious "enable" messages */
