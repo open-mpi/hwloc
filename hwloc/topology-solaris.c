@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -646,7 +646,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
       hwloc_debug("cpu%u\n", cpuid);
       hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, cpuid);
 
-      stat = (kstat_named_t *) kstat_data_lookup(ksp, "state");
+      stat = (kstat_named_t *) kstat_data_lookup(ksp, (char *) "state");
       if (!stat)
           hwloc_debug("could not read state for CPU%u: %s\n", cpuid, strerror(errno));
       else if (stat->data_type != KSTAT_DATA_CHAR)
@@ -693,7 +693,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
       if (look_chips) do {
 	/* Get Chip ID */
-	stat = (kstat_named_t *) kstat_data_lookup(ksp, "chip_id");
+	stat = (kstat_named_t *) kstat_data_lookup(ksp, (char *) "chip_id");
 	if (!stat)
 	  {
 	    if (Lpkg_num)
@@ -743,7 +743,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
       if (look_cores) do {
 	/* Get Core ID */
-	stat = (kstat_named_t *) kstat_data_lookup(ksp, "core_id");
+	stat = (kstat_named_t *) kstat_data_lookup(ksp, (char *) "core_id");
 	if (!stat)
 	  {
 	    if (Lcore_num)
@@ -800,7 +800,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	fprintf(stderr, "kstat_read failed for module %s name %s instance %d: %s\n", ksp->ks_module, ksp->ks_name, ksp->ks_instance, strerror(errno));
 	continue;
       }
-      stat = (kstat_named_t *) kstat_data_lookup(ksp, "cpus");
+      stat = (kstat_named_t *) kstat_data_lookup(ksp, (char *) "cpus");
       if (stat) {
 	hwloc_debug("found kstat module %s name %s instance %d cpus type %d\n", ksp->ks_module, ksp->ks_name, ksp->ks_instance, stat->data_type);
 	if (stat->data_type == KSTAT_DATA_STRING) {
