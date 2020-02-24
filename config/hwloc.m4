@@ -1184,8 +1184,17 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     AC_MSG_RESULT($hwloc_have_plugins)
 
     if test "x$hwloc_have_plugins" = xyes; then
-      # ltdl (at least 2.4.2) doesn't work on AIX
+      # dlopen and ltdl (at least 2.4.2) doesn't work on AIX
       # posix linkers don't work well with plugins and windows dll constraints
+      if test "x$enable_plugin_dlopen" = x; then
+        if test "x$hwloc_aix" = "xyes"; then
+          AC_MSG_WARN([dlopen does not work on AIX, disabled by default.])
+          enable_plugin_dlopen=no
+        else if test "x$hwloc_windows" = "xyes"; then
+          AC_MSG_WARN([dlopen not supported on non-native Windows build, disabled by default.])
+          enable_plugin_dlopen=no
+        fi fi
+      fi
       if test "x$enable_plugin_ltdl" = x; then
         if test "x$hwloc_aix" = "xyes"; then
           AC_MSG_WARN([ltdl does not work on AIX, disabled by default.])
@@ -1196,27 +1205,37 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
         fi fi
       fi
 
+      # Look for dlopen
+      if test "x$enable_plugin_dlopen" != xno; then
+        HWLOC_CHECK_DLOPEN([hwloc_dlopen_ready], [hwloc_dlopen_libs])
+      fi
       # Look for ltdl
       if test "x$enable_plugin_ltdl" != xno; then
         HWLOC_CHECK_LTDL([hwloc_ltdl_ready], [hwloc_ltdl_libs])
       fi
 
-      # Now use ltdl, or just fail to enable plugins
+      # Now use dlopen by default, or ltdl, or just fail to enable plugins
       AC_MSG_CHECKING([which library to use for loading plugins])
-      if test x$hwloc_ltdl_ready = xyes; then
+      if test "x$hwloc_dlopen_ready" = xyes; then
+        AC_MSG_RESULT([dlopen])
+	hwloc_plugins_load=dlopen
+        # Now enable dlopen libs
+        HWLOC_DL_LIBS="$hwloc_dlopen_libs"
+        AC_SUBST(HWLOC_DL_LIBS)
+      else if test x$hwloc_ltdl_ready = xyes; then
         AC_MSG_RESULT([ltdl])
         hwloc_plugins_load=ltdl
         # Now enable ltdl libs
+        AC_DEFINE([HWLOC_HAVE_LTDL], 1, [Define to 1 if the hwloc library should use ltdl for loading plugins])
         HWLOC_LTDL_LIBS="$hwloc_ltdl_libs"
         AC_SUBST(HWLOC_LTDL_LIBS)
         # Add ltdl static-build dependencies to hwloc.pc
         HWLOC_CHECK_LTDL_DEPS
-	hwloc_plugins_load=ltdl
       else
         AC_MSG_RESULT([none])
-        AC_MSG_WARN([Plugin support requested, but could not enable ltdl])
+        AC_MSG_WARN([Plugin support requested, but could not enable dlopen or ltdl])
         AC_MSG_ERROR([Cannot continue])
-      fi
+      fi fi
 
       AC_DEFINE([HWLOC_HAVE_PLUGINS], 1, [Define to 1 if the hwloc library should support dynamically-loaded plugins])
     fi
@@ -1436,6 +1455,34 @@ AC_DEFUN([_HWLOC_CHECK_DECLS], [
   HWLOC_CHECK_DECL([$1], [ac_have_decl=1], [ac_have_decl=0], [$4])
   AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_DECL_$1]), [$ac_have_decl],
     [Define to 1 if you have the declaration of `$1', and to 0 if you don't])
+])
+
+#-----------------------------------------------------------------------
+
+dnl HWLOC_CHECK_DLOPEN
+dnl
+dnl set $1 to yes or not
+dnl set $2 to -ldl or so
+AC_DEFUN([HWLOC_CHECK_DLOPEN], [
+  [$1]=no
+  AC_MSG_CHECKING([for dlopen])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <dlfcn.h>
+      #include <stdlib.h>
+      void *handle;
+    ]], [[
+      handle = dlopen(NULL, RTLD_NOW|RTLD_LOCAL);
+    ]])],
+    [AC_MSG_RESULT([yes])
+     [$1]=yes],
+    [AC_MSG_RESULT([no])
+     AC_CHECK_HEADER([dlfcn.h],
+       [AC_CHECK_LIB([dl], [dlopen],
+                     [[$1]=yes
+	             [$2]=-ldl])
+        ])
+    ])
 ])
 
 #-----------------------------------------------------------------------

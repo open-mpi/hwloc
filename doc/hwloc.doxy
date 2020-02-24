@@ -157,7 +157,7 @@ The hwloc core may also benefit from the following development packages:
     The relevant development package is usually <tt>libudev-devel</tt>
     or <tt>libudev-dev</tt>.
 </li>
-<li>libtool's ltdl library for dynamic plugin loading.
+<li>libtool's ltdl library for dynamic plugin loading if the native dlopen cannot be used.
   The relevant development package is usually <tt>libtool-ltdl-devel</tt>
   or <tt>libltdl-dev</tt>.
 </li>
@@ -2710,7 +2710,7 @@ configure script.  You can then invoke hwloc's configuration tests and
 build setup by calling an m4 macro (see below).
 
 Although hwloc dynamic shared object plugins may be used in embedded
-mode, the embedder project will have to manually setup libltdl in its
+mode, the embedder project will have to manually setup dlopen or libltdl in its
 build system so that hwloc can load its plugins at run time.
 Also, embedders should be aware of complications that can arise due to
 public and private linker namespaces (e.g., if the embedder project is
@@ -2718,7 +2718,7 @@ loaded into a private namespace and then hwloc tries to dynamically
 load its plugins, such loading may fail since the hwloc plugins can't
 find the hwloc symbols they need).
 The embedder project is <b>strongly</b> advised not to use hwloc's
-dynamically loading plugins / libltdl capability.
+dynamically loading plugins / dlopen / libltdl capability.
 
 
 \htmlonly

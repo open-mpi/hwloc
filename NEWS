@@ -27,6 +27,10 @@ Version 2.2.0
   + Remove support for Intel Xeon Phi (MIC, Knights Corner) co-processors.
 * Tools
   + Add --uid to filter the hwloc-ps output by uid on Linux.
+* Misc
+  + Use the native dlopen instead of libltdl,
+    unless --disable-plugin-dlopen is passed at configure time.
+
 
 Version 2.1.0
 -------------

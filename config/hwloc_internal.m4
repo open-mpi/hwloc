@@ -104,7 +104,13 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--enable-plugins=name,...],
                                  [Build the given components as dynamically-loaded plugins]))
 
+    # Look for dlopen
+    # Not --disable-dlopen because $enable_dlopen is already used/set
+    AC_ARG_ENABLE([plugin-dlopen],
+                  AC_HELP_STRING([--disable-plugin-dlopen],
+                                 [Do not use dlopen for loading plugins.]))
     # Look for ltdl
+    # Not --disable-ltdl for consistency wrt dlopen above
     AC_ARG_ENABLE([plugin-ltdl],
                   AC_HELP_STRING([--disable-plugin-ltdl],
                                  [Do not use ltdl for loading plugins.]))
