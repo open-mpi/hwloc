@@ -81,6 +81,7 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   lt_dlhandle handle;
   struct hwloc_component *component;
   struct hwloc__plugin_desc *desc, **prevdesc;
+  char *componentsymbolname;
 
   if (hwloc_plugins_verbose)
     fprintf(stderr, "Plugin dlforeach found `%s'\n", filename);
@@ -105,16 +106,23 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
     goto out;
   }
 
-{
-  char componentsymbolname[strlen(basename)+10+1];
+  componentsymbolname = malloc(strlen(basename)+10+1);
+  if (!componentsymbolname) {
+    if (hwloc_plugins_verbose)
+      fprintf(stderr, "Failed to allocation component `%s' symbol\n",
+	      basename);
+    goto out_with_handle;
+  }
   sprintf(componentsymbolname, "%s_component", basename);
   component = lt_dlsym(handle, componentsymbolname);
   if (!component) {
     if (hwloc_plugins_verbose)
       fprintf(stderr, "Failed to find component symbol `%s'\n",
 	      componentsymbolname);
+    free(componentsymbolname);
     goto out_with_handle;
   }
+  free(componentsymbolname);
   if (component->abi != HWLOC_COMPONENT_ABI) {
     if (hwloc_plugins_verbose)
       fprintf(stderr, "Plugin symbol ABI %u instead of %d\n",
@@ -124,7 +132,6 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   if (hwloc_plugins_verbose)
     fprintf(stderr, "Plugin contains expected symbol `%s'\n",
 	    componentsymbolname);
-}
 
   if (HWLOC_COMPONENT_TYPE_DISC == component->type) {
     if (strncmp(basename, "hwloc_", 6)) {
