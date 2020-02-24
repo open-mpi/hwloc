@@ -1184,29 +1184,41 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     AC_MSG_RESULT($hwloc_have_plugins)
 
     if test "x$hwloc_have_plugins" = xyes; then
-      # Some sanity checks about plugins
-      # libltdl doesn't work on AIX as of 2.4.2
-      AS_IF([test "x$hwloc_aix" = "xyes"],
-        [AC_MSG_WARN([libltdl does not work on AIX, plugins support cannot be enabled.])
-         AC_MSG_ERROR([Cannot continue])])
+      # ltdl (at least 2.4.2) doesn't work on AIX
       # posix linkers don't work well with plugins and windows dll constraints
-      AS_IF([test "x$hwloc_windows" = "xyes"],
-        [AC_MSG_WARN([Plugins not supported on non-native Windows build, plugins support cannot be enabled.])
-         AC_MSG_ERROR([Cannot continue])])
+      if test "x$enable_plugin_ltdl" = x; then
+        if test "x$hwloc_aix" = "xyes"; then
+          AC_MSG_WARN([ltdl does not work on AIX, disabled by default.])
+          enable_plugin_dlopen=no
+        else if test "x$hwloc_windows" = "xyes"; then
+          AC_MSG_WARN([ltdl not supported on non-native Windows build, disabled by default.])
+          enable_plugin_dlopen=no
+        fi fi
+      fi
+
+      # Look for ltdl
+      if test "x$enable_plugin_ltdl" != xno; then
+        HWLOC_CHECK_LTDL([hwloc_ltdl_ready], [hwloc_ltdl_libs])
+      fi
+
+      # Now use ltdl, or just fail to enable plugins
+      AC_MSG_CHECKING([which library to use for loading plugins])
+      if test x$hwloc_ltdl_ready = xyes; then
+        AC_MSG_RESULT([ltdl])
+        hwloc_plugins_load=ltdl
+        # Now enable ltdl libs
+        HWLOC_LTDL_LIBS="$hwloc_ltdl_libs"
+        AC_SUBST(HWLOC_LTDL_LIBS)
+        # Add ltdl static-build dependencies to hwloc.pc
+        HWLOC_CHECK_LTDL_DEPS
+	hwloc_plugins_load=ltdl
+      else
+        AC_MSG_RESULT([none])
+        AC_MSG_WARN([Plugin support requested, but could not enable ltdl])
+        AC_MSG_ERROR([Cannot continue])
+      fi
 
       AC_DEFINE([HWLOC_HAVE_PLUGINS], 1, [Define to 1 if the hwloc library should support dynamically-loaded plugins])
-
-      # If we want plugins, look for ltdl.h and libltdl
-      AC_CHECK_HEADER([ltdl.h], [],
-	[AC_MSG_WARN([Plugin support requested, but could not find ltdl.h])
-	 AC_MSG_ERROR([Cannot continue])])
-      AC_CHECK_LIB([ltdl], [lt_dlopenext],
-        [HWLOC_LTDL_LIBS="-lltdl"
-         AC_SUBST(HWLOC_LTDL_LIBS)],
-	[AC_MSG_WARN([Plugin support requested, but could not find libltdl])
-	 AC_MSG_ERROR([Cannot continue])])
-      # Add libltdl static-build dependencies to hwloc.pc
-      HWLOC_CHECK_LTDL_DEPS
     fi
 
     AC_ARG_WITH([hwloc-plugins-path],
@@ -1424,6 +1436,21 @@ AC_DEFUN([_HWLOC_CHECK_DECLS], [
   HWLOC_CHECK_DECL([$1], [ac_have_decl=1], [ac_have_decl=0], [$4])
   AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_DECL_$1]), [$ac_have_decl],
     [Define to 1 if you have the declaration of `$1', and to 0 if you don't])
+])
+
+#-----------------------------------------------------------------------
+
+dnl HWLOC_CHECK_LTDL
+dnl
+dnl set $1 to yes or not
+dnl set $2 to -lltdl or so
+AC_DEFUN([HWLOC_CHECK_LTDL], [
+  [$1]=no
+  AC_CHECK_HEADER([ltdl.h],
+    [AC_CHECK_LIB([ltdl], [lt_dlopenext],
+                  [[$1]=yes
+		   [$2]=-lltdl])
+     ])
 ])
 
 #-----------------------------------------------------------------------

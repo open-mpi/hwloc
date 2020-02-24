@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -273,7 +273,7 @@ EOF
 
 # Plugin support
 hwloc_plugin_summary=$hwloc_have_plugins
-test "x$hwloc_plugin_components" != "x" && hwloc_plugin_summary="yes ("`echo $hwloc_plugin_components`")" # echo removes the starting space
+test "x$hwloc_plugin_components" != "x" && hwloc_plugin_summary="$hwloc_plugins_load ("`echo $hwloc_plugin_components`")" # echo removes the starting space
 cat <<EOF
 Plugin support:              $hwloc_plugin_summary
 EOF

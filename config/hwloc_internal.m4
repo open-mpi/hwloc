@@ -104,6 +104,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--enable-plugins=name,...],
                                  [Build the given components as dynamically-loaded plugins]))
 
+    # Look for ltdl
+    AC_ARG_ENABLE([plugin-ltdl],
+                  AC_HELP_STRING([--disable-plugin-ltdl],
+                                 [Do not use ltdl for loading plugins.]))
+
 ])dnl
 
 #-----------------------------------------------------------------------
