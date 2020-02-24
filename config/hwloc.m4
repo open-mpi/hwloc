@@ -418,6 +418,7 @@ EOF])
 
 	    # -Wextra enables some -Wfoo that we want to disable it at some place
 	    _HWLOC_CHECK_GCC_OPTION([-Wmissing-field-initializers], [add], [AC_DEFINE(HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS, 1, [Define to 1 if gcc -Wmissing-field-initializers is supported and enabled])])
+	    _HWLOC_CHECK_GCC_OPTION([-Wcast-function-type], [add], [AC_DEFINE(HWLOC_HAVE_GCC_W_CAST_FUNCTION_TYPE, 1, [Define to 1 if gcc -Wcast-function-type is supported and enabled])])
 
             HWLOC_CFLAGS="$HWLOC_CFLAGS $add"
         fi
