@@ -245,7 +245,7 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
     unset hwloc_check_compiler_vendor_result
 ])
 
-# _HWLOC_CHECK_GCC_OPTION([option], [variable to append the option to])
+# _HWLOC_CHECK_GCC_OPTION([option], [variable to append the option to], [action if supported])
 # ----------------------------------------------
 # Run gcc to determine if option is supported.
 AC_DEFUN([_HWLOC_CHECK_GCC_OPTION], [
@@ -254,7 +254,8 @@ AC_DEFUN([_HWLOC_CHECK_GCC_OPTION], [
     AC_MSG_CHECKING([if gcc supports $1])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[int i;]])],
 		      [AC_MSG_RESULT(yes)
-		       $2="$$2 $1"],
+		       $2="$$2 $1"
+		       $3],
 		      [AC_MSG_RESULT(no)])
     CFLAGS="$tmp_save_LDFLAGS"
 ])
