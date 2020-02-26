@@ -202,9 +202,7 @@ libhwloc_la_SOURCES = $(sources)
 libhwloc_la_LDFLAGS = $(ldflags) -version-info $(libhwloc_so_version) $(HWLOC_LIBS) $(HWLOC_LDFLAGS)
 
 if HWLOC_HAVE_PLUGINS
-AM_CPPFLAGS += $(LTDLINCL)
 libhwloc_la_LDFLAGS += -export-dynamic
-libhwloc_la_LIBADD = $(LIBLTDL)
 endif
 
 # Embedded library (note the lack of a .so version number -- that
