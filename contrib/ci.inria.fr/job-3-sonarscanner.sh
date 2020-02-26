@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2012-2019 Inria.  All rights reserved.
+# Copyright © 2012-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -57,7 +57,7 @@ touch configure
 # Configure, Make and Install
 export CFLAGS="-O0 -g -fPIC --coverage -Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare -Wmissing-prototypes -Wstrict-prototypes -Wcomment -pedantic -fdiagnostics-show-option -fno-inline"
 export LDFLAGS="--coverage"
-./configure
+./configure --enable-plugins
 make V=1 | tee hwloc-build.log
 # Execute unitary tests (autotest)
 make check
@@ -72,7 +72,7 @@ lcov_cobertura.py hwloc.lcov --output hwloc-coverage.xml
 make distclean
 export CFLAGS="-Wall -std=gnu99"
 unset LDFLAGS
-scan-build -plist --intercept-first --analyze-headers -o analyzer_reports ./configure | tee scan-build.log
+scan-build -plist --intercept-first --analyze-headers -o analyzer_reports ./configure --enable-plugins | tee scan-build.log
 scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make | tee -a scan-build.log
 scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make check | tee -a scan-build.log
 

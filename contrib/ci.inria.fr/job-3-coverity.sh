@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2012-2019 Inria.  All rights reserved.
+# Copyright © 2012-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -53,7 +53,7 @@ COVDIR=cov-int
 COVBALL=myproject.tgz
 
 # run
-./configure
+./configure --enable-plugins
 cov-build --dir ${COVDIR} make all
 cov-build --dir ${COVDIR} make check
 tar cfvz ${COVBALL} ${COVDIR}
