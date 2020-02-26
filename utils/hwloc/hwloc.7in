@@ -125,6 +125,9 @@ For example, "\fBpci=02:03.1\fR" is the PCI device with bus ID "02:03.1".
 PCI devices may also be filtered based on their vendor and/or device IDs,
 for instance "\fBpci[15b3:]:2\fR" for the third Mellanox PCI device (vendor ID 0x15b3).
 .
+OS devices may also be filtered based on their subtype,
+for instance "\fBos[gpu]:all\fR" for all GPU OS devices.
+.
 .TP
 .B Hex:
 For tools that manipulate object as sets (e.g. hwloc-calc and hwloc-bind),

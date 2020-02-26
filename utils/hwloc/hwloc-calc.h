@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -383,6 +383,7 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
   int verbose = lcontext->verbose;
   hwloc_obj_t obj, prev = NULL;
   int pcivendor = -1, pcidevice = -1;
+  int osdevtype = -1;
   const char *current, *dot;
   char *endp;
   int first = 0, step = 1, amount = 1, wrap = 0; /* assume the index suffix is `:0' by default */
@@ -418,6 +419,35 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
 	if (verbose >= 0)
 	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
       	return -1;
+      }
+
+    } else if (type == HWLOC_OBJ_OS_DEVICE) {
+      /* try to match by [osdevtype] */
+      hwloc_obj_type_t type2;
+      union hwloc_obj_attr_u attr;
+
+      endp = strchr(current, ']');
+      if (!endp) {
+	if (verbose >= 0)
+	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
+	return -1;
+      }
+      *endp = 0;
+
+      err = hwloc_type_sscanf(current, &type2, &attr, sizeof(attr));
+      *endp = ']';
+      if (err < 0 || type2 != HWLOC_OBJ_OS_DEVICE) {
+	if (verbose >= 0)
+	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
+	return -1;
+      }
+      osdevtype = attr.osdev.type;
+
+      current = endp+1;
+      if (*current != ':' && *current != '\0') {
+	if (verbose >= 0)
+	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
+        return -1;
       }
 
     } else {
@@ -463,6 +493,11 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
       if (pcivendor != -1 && (int) obj->attr->pcidev.vendor_id != pcivendor)
 	continue;
       if (pcidevice != -1 && (int) obj->attr->pcidev.device_id != pcidevice)
+	continue;
+    }
+
+    if (type == HWLOC_OBJ_OS_DEVICE) {
+      if (osdevtype != -1 && (int) obj->attr->osdev.type != osdevtype)
 	continue;
     }
 
