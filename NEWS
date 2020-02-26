@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2019 Inria.  All rights reserved.
+Copyright © 2009-2020 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -27,6 +27,7 @@ Version 2.2.0
   + Remove support for Intel Xeon Phi (MIC, Knights Corner) co-processors.
 * Tools
   + Add --uid to filter the hwloc-ps output by uid on Linux.
+  + Add a GRAPHICAL OUTPUT section in the manpage of lstopo.
 * Misc
   + Use the native dlopen instead of libltdl,
     unless --disable-plugin-dlopen is passed at configure time.

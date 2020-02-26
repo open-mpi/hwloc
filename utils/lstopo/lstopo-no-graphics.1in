@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2019 Inria.  All rights reserved.
+.\" Copyright © 2009-2020 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -268,6 +268,8 @@ in a basic manner that strictly matches the actual tree:
 memory children are listed below their parent just like any other child.
 PUs are therefore on the side of their local NUMA nodes,
 below a common ancestor.
+
+See also the GRAPHICAL OUTPUT section below.
 .TP
 \fB\-\-fontsize\fR <size>
 Set the size of text font in the graphical output.
@@ -506,6 +508,67 @@ is sent to the standard output.
 See the output of "lstopo \-\-help" for a specific list of what
 graphical output formats are supported in your hwloc installation.
 .
+.\" **************************
+.\"    Graphical Section
+.\" **************************
+.
+.SH GRAPHICAL OUTPUT
+The graphical output is made of nested boxes representing
+the inclusion of objects in the hierarchy of resources.
+Usually a Machine box contains one or several Package boxes,
+that contain multiple Core boxes, with one or several PUs each.
+
+.SS Caches
+Caches are displayed in a slightly different manner because
+they do not actually include computing resources such as cores.
+For instance, a L2 Cache shared by a pair of Cores is drawn
+as a Cache box on top of two Core boxes
+(instead of having Core boxes inside the Cache box).
+
+.SS NUMA nodes and Memory-side Caches
+By default, NUMA nodes boxes are drawn on top of their local
+computing resources.
+For instance, a processor Package containing one NUMA node
+and four Cores is displayed as a Package box containing
+the NUMA node box above four Core boxes.
+If a NUMA node is local to the L3 Cache, the NUMA node is displayed
+above that Cache box.
+All this specific drawing strategy for memory objects may be disabled
+by passing command-line option \fB\-\-children\-order plain\fR.
+
+If multiple NUMA nodes are attached to the same parent object,
+they are displayed inside an additional unnamed memory box.
+
+If some Memory-side Caches exist in front of some NUMA nodes,
+they are drawn as boxes immediately above them.
+
+.SS PCI bridges, PCI devices and OS devices
+The PCI hierarchy is not drawn as a set of included boxes but rather
+as a tree of bridges with links between them.
+The tree starts with a small square on the left for the
+hostbridge or root complex.
+It ends with PCI device boxes on the right.
+Intermediate PCI bridges switches may appear as additional small
+squares in the middle.
+
+PCI devices on the right of the tree are boxes containing
+their PCI bus ID (such as 00:02.3).
+They may also contain sub-boxes for OS device objects
+such as a network interface \fIeth0\fR or a CUDA GPU \fIcuda0\fR.
+
+The datarate of a PCI link may be written (in GB/s) right below
+its drawn line (if the operating system and/or libraries are able
+to report that information).
+This datarate is the currently configured PCI datarate.
+It may change during execution since some devices are able to
+slow their PCI links down when idle.
+
+When there is a single link (horizontal line) on the right of a
+PCI bridge, it means that a single device or bridge is connected
+on the secondary PCI bus behind that bridge.
+When there is a vertical line, it means that multiple devices
+and/or bridges are connected to the same secondary PCI bus.
+
 .\" **************************
 .\"    Colors Section
 .\" **************************
