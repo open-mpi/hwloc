@@ -270,7 +270,7 @@ PUs are therefore on the side of their local NUMA nodes,
 below a common ancestor.
 .TP
 \fB\-\-fontsize\fR <size>
-Set size of text font.
+Set the size of text font in the graphical output.
 
 The default is 10.
 
@@ -281,14 +281,14 @@ to further scale the width of boxes (its default value is 1.0).
 The \fB\-\-fontsize\fR option is ignored in the ASCII backend.
 .TP
 \fB\-\-gridsize\fR <size>
-Set size of margin between elements.
+Set the margin between elements in the graphical output.
 
 The default is 7. It was 10 prior to hwloc 2.1.
 
 This option is ignored in the ASCII backend.
 .TP
 \fB\-\-linespacing\fR <size>
-Set spacing between lines of text.
+Set the spacing between lines of text in the graphical output.
 
 The default is 4.
 
@@ -297,20 +297,20 @@ The option was included in \fB\-\-gridsize\fR prior to hwloc 2.1 (and its defaul
 This option is ignored in the ASCII backend.
 .TP
 \fB\-\-horiz\fR, \fB\-\-horiz\fR=<type1,...>
-Horizontal graphical layout instead of nearly 4/3 ratio.
+Force a horizontal graphical layout instead of nearly 4/3 ratio in the graphical output.
 If a comma-separated list of object types is given, the layout only
-applies to the corresponding container objects.
+applies to the corresponding \fIcontainer\fR objects.
 Ignored for bridges since their children are always vertically aligned.
 .TP
 \fB\-\-vert\fR, \fB\-\-vert\fR=<type1,...>
-Vertical graphical layout instead of nearly 4/3 ratio.
+Force a vertical graphical layout instead of nearly 4/3 ratio in the graphical output.
 If a comma-separated list of object types is given, the layout only
-applies to the corresponding container objects.
+applies to the corresponding \fIcontainer\fR objects.
 .TP
 \fB\-\-rect\fR, \fB\-\-rect\fR=<type1,...>
-Rectangular graphical layout with nearly 4/3 ratio.
+Force a rectangular graphical layout with nearly 4/3 ratio in the graphical output.
 If a comma-separated list of object types is given, the layout only
-applies to the corresponding container objects.
+applies to the corresponding \fIcontainer\fR objects.
 Ignored for bridges since their children are always vertically aligned.
 .TP
 \fB\-\-no\-text\fR, \fB\-\-no\-text=<type1,...>\fR
@@ -344,22 +344,22 @@ If a comma-separated list of object types is given, attributes are reenabled for
 (if they were previously disabled with \fB\-\-no\-attrs\fR).
 .TP
 \fB\-\-no\-legend\fR
-Remove the text legend at the bottom.
+Remove the text legend at the bottom of the graphical output.
 .TP
 \fB\-\-append\-legend\fB <line>
-Append the line of text to the bottom of the legend in graphical mode.
+Append the line of text to the bottom of the legend in the graphical output.
 If the line is too long, it will be truncated in the output.
 If adding multiple lines, each line should be given separately by
 passing this option multiple times.
 .TP
 \fB\-\-binding\-color none
-Do not colorize PUs and NUMA nodes according to the binding.
+Do not colorize PUs and NUMA nodes according to the binding in the graphical output.
 .TP
 \fB\-\-disallowed\-color none
-Do not colorize disallowed PUs and NUMA nodes.
+Do not colorize disallowed PUs and NUMA nodes in the graphical output.
 .TP
 \fB\-\-top\-color <none|#xxyyzz>
-Do not colorize task objects when \-\-top is given,
+Do not colorize task objects in the graphical output when \-\-top is given,
 or change the background color.
 .TP
 \fB\-\-version\fR
