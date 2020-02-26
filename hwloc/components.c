@@ -122,16 +122,17 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
     free(componentsymbolname);
     goto out_with_handle;
   }
-  free(componentsymbolname);
   if (component->abi != HWLOC_COMPONENT_ABI) {
     if (hwloc_plugins_verbose)
       fprintf(stderr, "Plugin symbol ABI %u instead of %d\n",
 	      component->abi, HWLOC_COMPONENT_ABI);
+    free(componentsymbolname);
     goto out_with_handle;
   }
   if (hwloc_plugins_verbose)
     fprintf(stderr, "Plugin contains expected symbol `%s'\n",
 	    componentsymbolname);
+  free(componentsymbolname);
 
   if (HWLOC_COMPONENT_TYPE_DISC == component->type) {
     if (strncmp(basename, "hwloc_", 6)) {
