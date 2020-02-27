@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2018 Inria.  All rights reserved.
+.\" Copyright © 2010-2020 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -121,6 +121,9 @@ PCI and OS devices may also be designed using their identifier.
 For example, "\fBpci=02:03.1\fR" is the PCI device with bus ID "02:03.1".
 .
 "\fBos=eth0\fR" is the network interface whose software name is "eth0".
+.
+PCI devices may also be filtered based on their vendor and/or device IDs,
+for instance "\fBpci[15b3:]:2\fR" for the third Mellanox PCI device (vendor ID 0x15b3).
 .
 .TP
 .B Hex:
