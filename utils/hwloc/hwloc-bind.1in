@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2019 Inria.  All rights reserved.
+.\" Copyright © 2009-2020 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -169,8 +169,9 @@ Display help message and exit.
 .SH DESCRIPTION
 .
 hwloc-bind execs an executable (with optional command line arguments)
-that is bound to the specified location (or list of locations).  Upon
-successful execution, hwloc-bind simply sets bindings and then execs
+that is bound to the specified location (or list of locations).
+Location specification is described in hwloc(7).
+Upon successful execution, hwloc-bind simply sets bindings and then execs
 the executable over itself.
 .
 .PP
