@@ -1019,22 +1019,6 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 		     "%s MP x (%s cores + %s kB)", value, value2, value3);
 	  }
 
-	} else if (!strcmp(obj->subtype, "MIC")) {
-	  /* MIC */
-	  const char *value;
-	  value = hwloc_obj_get_info_by_name(obj, "MICActiveCores");
-	  if (value) {
-	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
-		     "%s cores", value);
-	  }
-	  value = hwloc_obj_get_info_by_name(obj, "MICMemorySize");
-	  if (value) {
-	    unsigned long long mb = strtoull(value, NULL, 10) / 1024;
-	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
-		     mb >= 10240 ? "%llu GB" : "%llu MB",
-		     mb >= 10240 ? mb/1024 : mb);
-	  }
-
 	} else if (!strcmp(obj->subtype, "OpenCL")) {
 	  /* OpenCL */
 	  const char *value;
