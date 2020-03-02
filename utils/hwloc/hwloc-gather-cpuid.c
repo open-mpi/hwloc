@@ -373,6 +373,12 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x1);
   }
 
+  /* 0x8000001a = Performance Optimization Identifiers on AMD ; Reserved on Intel */
+  if (highest_ext_cpuid >= 0x8000001a) {
+    regs[0] = 0x8000001a;
+    dump_one_cpuid(output, regs, 0x1);
+  }
+
   /* 0x8000001b = IBS on AMD ; Reserved on Intel */
   if (highest_ext_cpuid >= 0x8000001b) {
     regs[0] = 0x8000001b;
