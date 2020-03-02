@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2019 Inria.  All rights reserved.
+ * Copyright © 2015-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -283,6 +283,12 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 	/* invalid, but it doesn't mean the next subleaf will be invalid */
         continue;
     }
+  }
+
+  /* 0x1a = Hybrid Information Enumeration Leaf on Intel ; Reserved on AMD */
+  if (highest_cpuid >= 0x1a) {
+    regs[0] = 0x1a; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
   }
 
   /* 0x1b = (Removed) PCONFIG Information on Intel ; Reserved on AMD */
