@@ -257,5 +257,5 @@ AC_DEFUN([_HWLOC_CHECK_GCC_OPTION], [
 		       $2="$$2 $1"
 		       $3],
 		      [AC_MSG_RESULT(no)])
-    CFLAGS="$tmp_save_LDFLAGS"
+    CFLAGS="$tmp_save_CFLAGS"
 ])
