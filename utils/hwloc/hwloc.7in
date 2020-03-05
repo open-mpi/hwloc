@@ -29,8 +29,8 @@ man page and other hwloc documentation.
 A set of processors included in an hwloc object, expressed as a bitmask
 indexed by the physical numbers of the CPUs (as announced by the OS).
 The hwloc definition
-of "CPU set" does not carry any the same connotations as Linux's "CPU
-set" (e.g., process affinity, etc.).
+of "CPU set" does not carry any of the same connotations as Linux's "CPU
+set" (e.g., process affinity, cgroup, etc.).
 .
 .TP
 .B hwloc node set:
