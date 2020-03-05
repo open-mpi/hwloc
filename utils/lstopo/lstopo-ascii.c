@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2019 Inria.  All rights reserved.
- * Copyright © 2009-2012 Université Bordeaux
+ * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -31,6 +31,8 @@
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
 #include "lstopo.h"
+
+#define TERM_COLOR_START 16
 
 /* Uses unicode bars if available */
 #ifdef HAVE_PUTWC
@@ -133,7 +135,7 @@ set_color(const struct lstopo_color *fcolor, const struct lstopo_color *bcolor)
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
-static int ascii_color_index = 16;
+static int ascii_color_index = TERM_COLOR_START;
 #endif
 static struct lstopo_color *default_color = NULL;
 
@@ -472,10 +474,10 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
 
       /* Get terminfo(5) strings */
       initp = initialize_pair;
-      if (max_pairs <= 16 || !initp || !set_color_pair) {
+      if (max_pairs <= TERM_COLOR_START || !initp || !set_color_pair) {
 	/* Can't use max_pairs to define our own colors */
 	initp = NULL;
-	if (max_colors > 16)
+	if (max_colors > TERM_COLOR_START)
 	  if (can_change)
             initc = initialize_color;
       }
