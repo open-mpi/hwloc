@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2019 Inria.  All rights reserved.
+ * Copyright © 2012-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 			lcontext.logical = 1;
 			lcontext.verbose = 0;
 			err = hwloc_calc_process_location(&lcontext, location, typelen,
-							  hwloc_calc_process_location_annotate_cb, topology);
+							  hwloc_calc_process_location_annotate_cb, NULL);
 		}
 	    }
 	  }
