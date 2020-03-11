@@ -1,6 +1,6 @@
 /* -*- c -*-
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -216,6 +216,9 @@ typedef DWORDLONG hwloc_uint64_t;
 typedef uint64_t hwloc_uint64_t;
 
 #endif /* HWLOC_HAVE_WINDOWS_H */
+
+/* Define to 1 if --enable-32bits-pci-domain is called. */
+#undef HAVE_32BITS_PCI_DOMAIN
 
 /* Whether we need to re-define all the hwloc public symbols or not */
 #undef HWLOC_SYM_TRANSFORM
