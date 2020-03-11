@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -107,7 +107,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 			      struct hwloc_xml_backend_data_s *data,
 			      struct hwloc_obj *obj,
 			      const char *name, const char *value,
-			      hwloc__xml_import_state_t state)
+			      hwloc__xml_import_state_t state,
+			      int *ignore)
 {
   if (!strcmp(name, "type")) {
     /* already handled */
@@ -257,6 +258,14 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid pci_busid format string %s\n",
 		  state->global->msgprefix, value);
+#ifndef HAVE_32BITS_PCI_DOMAIN
+      } else if (domain > 0xffff) {
+	static int warned = 0;
+	if (!warned && !hwloc_hide_errors())
+	  fprintf(stderr, "Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
+	warned = 1;
+	*ignore = 1;
+#endif
       } else {
 	obj->attr->pcidev.domain = domain;
 	obj->attr->pcidev.bus = bus;
@@ -347,6 +356,14 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid bridge_pci format string %s\n",
 		  state->global->msgprefix, value);
+#ifndef HAVE_32BITS_PCI_DOMAIN
+      } else if (domain > 0xffff) {
+	static int warned = 0;
+	if (!warned && !hwloc_hide_errors())
+	  fprintf(stderr, "Ignoring bridge to PCI with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
+	warned = 1;
+	*ignore = 1;
+#endif
       } else {
 	obj->attr->bridge.downstream.pci.domain = domain;
 	obj->attr->bridge.downstream.pci.secondary_bus = secbus;
@@ -837,7 +854,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		  state->global->msgprefix,  attrname);
 	goto error_with_object;
       }
-      hwloc__xml_import_object_attr(topology, data, obj, attrname, attrvalue, state);
+      hwloc__xml_import_object_attr(topology, data, obj, attrname, attrvalue, state, &ignored);
     }
   }
 
