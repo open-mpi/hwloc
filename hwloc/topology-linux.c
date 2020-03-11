@@ -5587,16 +5587,17 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   /* iterate through busid to find the last one (previous ones are bridges) */
   foundpci = 0;
  nextpci:
-  if (sscanf(tmp+1, "%x:%x:%x.%x", &_pcidomain, &_pcibus, &_pcidev, &_pcifunc) == 4) {
+  /* tmp points to a PCI [domain:]bus:device.function */
+  if (sscanf(tmp, "%x:%x:%x.%x", &_pcidomain, &_pcibus, &_pcidev, &_pcifunc) == 4) {
     foundpci = 1;
     pcidomain = _pcidomain;
     pcibus = _pcibus;
     pcidev = _pcidev;
     pcifunc = _pcifunc;
-    tmp = strchr(tmp+3, ':')+8;
+    tmp = strchr(tmp+4, ':')+9; /* tmp points to at least 4 digits for domain, then a ':' */
     goto nextpci;
   }
-  if (sscanf(tmp+1, "%x:%x.%x", &_pcibus, &_pcidev, &_pcifunc) == 3) {
+  if (sscanf(tmp, "%x:%x.%x", &_pcibus, &_pcidev, &_pcifunc) == 3) {
     foundpci = 1;
     pcidomain = 0;
     pcibus = _pcibus;
