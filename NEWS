@@ -21,6 +21,9 @@ Version 2.2.0
 * API
   + Add hwloc_bitmap_singlify_by_core() to remove SMT from a given cpuset,
     thanks to Florian Reynier for the suggestion.
+  + Add --enable-32bits-pci-domain to stop ignoring PCI devices with domain
+    >16bits (e.g. 10000:02:03.4). Enabling this option breaks the library ABI.
+    Thanks to Dylan Simon for the help.
 * Backends
   + Add support for Linux cgroups v2.
   + Add NUMA support for FreeBSD.
