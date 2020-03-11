@@ -237,7 +237,7 @@ static __hwloc_inline int lstopo_numa_binding(struct lstopo_output *loutput, hwl
 static __hwloc_inline int lstopo_busid_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, hwloc_obj_t firstobj, int collapse, unsigned needdomain)
 {
   hwloc_obj_t lastobj;
-  char domain[6] = "";
+  char domain[10] = "";
   unsigned i;
 
   if (needdomain)

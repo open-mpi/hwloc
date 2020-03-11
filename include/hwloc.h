@@ -617,7 +617,7 @@ union hwloc_obj_attr_u {
   } group;
   /** \brief PCI Device specific Object Attributes */
   struct hwloc_pcidev_attr_s {
-    unsigned short domain;
+    unsigned short domain; /* Only 16bits PCI domains are supported by default */
     unsigned char bus, dev, func;
     unsigned short class_id;
     unsigned short vendor_id, device_id, subvendor_id, subdevice_id;

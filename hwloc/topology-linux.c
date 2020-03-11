@@ -5593,7 +5593,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
     pcibus = _pcibus;
     pcidev = _pcidev;
     pcifunc = _pcifunc;
-    tmp += 13;
+    tmp = strchr(tmp+3, ':')+8;
     goto nextpci;
   }
   if (sscanf(tmp+1, "%x:%x.%x", &_pcibus, &_pcidev, &_pcifunc) == 3) {
@@ -6482,13 +6482,13 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     size_t ret;
     int fd, err;
 
-    if (sscanf(dirent->d_name, "%04x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
+    if (sscanf(dirent->d_name, "%x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
       continue;
 
     if (domain > 0xffff) {
       static int warned = 0;
       if (!warned)
-	fprintf(stderr, "Ignoring PCI device with non-16bit domain\n");
+	fprintf(stderr, "Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
       warned = 1;
       continue;
     }
