@@ -200,6 +200,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     dev = pcidev->dev;
     func = pcidev->func;
 
+    #ifndef HAVE_32BITS_PCI_DOMAIN
     if (domain > 0xffff) {
       static int warned = 0;
       if (!warned)
@@ -207,6 +208,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       warned = 1;
       continue;
     }
+    #endif
 
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
