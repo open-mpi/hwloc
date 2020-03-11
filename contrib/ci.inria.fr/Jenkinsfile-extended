@@ -13,12 +13,33 @@
 // In "Additional Behaviours", enable "Checkout to specific local branch"
 // and leave "Branch name" empty.
 // Not needed for multi-branch pipelines which already BRANCH_NAME in the environment.
+import hudson.model.*
 
 def gitRepoURL = ""
 def gitBranch = ""
 def tarballgz
 def tarballbz2
 def statusHasChanged = false
+
+def filterAvailableNode(nodeList) {
+  def nodeToDelete = []
+  nodeList.each { node ->
+    echo "Searching for $node";
+    if (node != null) {
+      computer = Jenkins.instance.getNode(node).toComputer();
+      if (computer.isOffline()) {
+        echo "Error: $node is offline.";
+        nodeToDelete.add(node);
+      }
+    }
+    else {
+      echo "Error: $node not found!";
+      nodeToDelete.add(node);
+    }
+  }
+
+  return nodeList.findAll { !nodeToDelete.contains(it) }
+}
 
 pipeline {
         agent none
@@ -67,6 +88,7 @@ pipeline {
 						  node -> node.getLabelString().contains(labelToSelect) ? node.name : null
 						}
 						listOfNodeNames.removeAll(Collections.singleton(null))
+						listOfNodeNames = filterAvailableNode(listOfNodeNames)
 					}
 					if (env.NO_MINGW != 'true') {
 						listOfNodeNames.push('MinGW')
