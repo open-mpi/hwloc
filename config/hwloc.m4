@@ -847,6 +847,11 @@ return 0;
       ])
     fi
 
+    AS_IF([test "x$enable_32bits_pci_domain" = "xyes"], [
+      AC_DEFINE([HAVE_32BITS_PCI_DOMAIN], 1,
+        [Define to 1 if --enable-32bits-pci-domain is called.])
+    ])
+
     # PCI support via libpciaccess.  NOTE: we do not support
     # libpci/pciutils because that library is GPL and is incompatible
     # with our BSD license.

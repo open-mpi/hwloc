@@ -89,6 +89,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--disable-nvml],
                                  [Disable the NVML device discovery]))
 
+    # 32bits_pci_domain?
+    AC_ARG_ENABLE([32bits-pci-domain],
+                  AS_HELP_STRING([--enable-32bits-pci-domain],
+                                 [Enable 32 bits PCI domains (domains > 16bits are ignored by default). WARNING: This breaks the library ABI, don't enable unless really needed.]))
+
     # GL/Display
     AC_ARG_ENABLE([gl],
 		  AS_HELP_STRING([--disable-gl],
