@@ -258,6 +258,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid pci_busid format string %s\n",
 		  state->global->msgprefix, value);
+	*ignore = 1;
 #ifndef HAVE_32BITS_PCI_DOMAIN
       } else if (domain > 0xffff) {
 	static int warned = 0;
@@ -356,6 +357,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid bridge_pci format string %s\n",
 		  state->global->msgprefix, value);
+	*ignore = 1;
 #ifndef HAVE_32BITS_PCI_DOMAIN
       } else if (domain > 0xffff) {
 	static int warned = 0;
