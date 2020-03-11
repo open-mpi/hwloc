@@ -252,7 +252,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     case HWLOC_OBJ_PCI_DEVICE:
     case HWLOC_OBJ_BRIDGE: {
       unsigned domain, bus, dev, func;
-      if (sscanf(value, "%04x:%02x:%02x.%01x",
+      if (sscanf(value, "%x:%02x:%02x.%01x",
 		 &domain, &bus, &dev, &func) != 4) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid pci_busid format string %s\n",
@@ -278,7 +278,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     case HWLOC_OBJ_PCI_DEVICE:
     case HWLOC_OBJ_BRIDGE: {
       unsigned classid, vendor, device, subvendor, subdevice, revision;
-      if (sscanf(value, "%04x [%04x:%04x] [%04x:%04x] %02x",
+      if (sscanf(value, "%x [%04x:%04x] [%04x:%04x] %02x",
 		 &classid, &vendor, &device, &subvendor, &subdevice, &revision) != 6) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid pci_type format string %s\n",
@@ -342,7 +342,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     switch (obj->type) {
     case HWLOC_OBJ_BRIDGE: {
       unsigned domain, secbus, subbus;
-      if (sscanf(value, "%04x:[%02x-%02x]",
+      if (sscanf(value, "%x:[%02x-%02x]",
 		 &domain, &secbus, &subbus) != 3) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid bridge_pci format string %s\n",
