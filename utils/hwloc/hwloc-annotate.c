@@ -107,12 +107,49 @@ hwloc_calc_process_location_annotate_cb(struct hwloc_calc_location_context_s *lc
 }
 
 static void
-hwloc_calc_get_obj_cb(struct hwloc_calc_location_context_s *lcontext __hwloc_attribute_unused,
-		      void *_data,
-		      hwloc_obj_t obj)
+hwloc_calc_get_unique_obj_cb(struct hwloc_calc_location_context_s *lcontext __hwloc_attribute_unused,
+			     void *_data,
+			     hwloc_obj_t obj)
 {
-	*(hwloc_obj_t*)_data = obj;
+  hwloc_obj_t *objp = _data;
+  if (!*objp)
+    *objp = obj;
 }
+
+static hwloc_obj_t
+get_unique_obj(hwloc_topology_t topology, int topodepth, char *str,
+	       int *ignored_multiple)
+{
+  struct hwloc_calc_location_context_s lcontext;
+  hwloc_obj_t obj;
+  size_t length;
+  size_t typelen;
+  int err;
+
+  typelen = strspn(str, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+  if (!typelen || str[typelen] != ':')
+    return NULL;
+
+  lcontext.topology = topology;
+  lcontext.topodepth = topodepth;
+  lcontext.only_hbm = -1;
+  lcontext.logical = 1;
+  lcontext.verbose = 0;
+  obj = NULL;
+  length = strspn(str+typelen+1, "0123456789");
+  if (str[typelen+1+length] == '-' || str[typelen+1+length] == ':') {
+    *ignored_multiple = 1;
+  } else {
+    *ignored_multiple = 0;
+  }
+  str[typelen+1+length] = '\0';
+  err = hwloc_calc_process_location(&lcontext, str, typelen,
+				    hwloc_calc_get_unique_obj_cb, &obj);
+  if (err < 0)
+    return NULL;
+  return obj;
+}
+
 
 static void
 add_distances(hwloc_topology_t topology, int topodepth)
@@ -154,34 +191,23 @@ add_distances(hwloc_topology_t topology, int topodepth)
 		goto out;
 
 	for(i=0; i<nbobjs; i++) {
-		size_t typelen;
-		hwloc_obj_t obj = NULL;
-		if (!fgets(line, sizeof(line), file)) {
-			fprintf(stderr, "Failed to read object #%u line\n", i);
-			goto out;
-		}
-		typelen = strspn(line, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-		if (typelen && line[typelen] == ':') {
-			struct hwloc_calc_location_context_s lcontext;
-			size_t length;
+		hwloc_obj_t obj;
+		int ignored_multiple;
 
-			lcontext.topology = topology;
-			lcontext.topodepth = topodepth;
-			lcontext.only_hbm = -1;
-			lcontext.logical = 1;
-			lcontext.verbose = 0;
-			length = strspn(line+typelen+1, "0123456789");
-			line[typelen+1+length] = '\0';
-			err = hwloc_calc_process_location(&lcontext, line, typelen,
-							  hwloc_calc_get_obj_cb, &obj);
-			if (err < 0)
-				goto out;
-		} else {
-			fprintf(stderr, "Cannot parse object #%u line\n", i);
-			goto out;
+		if (!fgets(line, sizeof(line), file)) {
+		  fprintf(stderr, "Failed to read object line #%u.\n", i);
+		  goto out;
 		}
-		if (!obj)
-			goto out;
+
+		obj = get_unique_obj(topology, topodepth, line, &ignored_multiple);
+		if (!obj) {
+		  fprintf(stderr, "Couldn't parse object line #%u.\n", i);
+		  goto out;
+		}
+
+		if (ignored_multiple) {
+		  fprintf(stderr, "Only the first object specified on line #%u was used.\n", i);
+		}
 
 		objs[i] = obj;
 	}
