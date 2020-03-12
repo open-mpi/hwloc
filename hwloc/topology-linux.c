@@ -6486,7 +6486,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     if (sscanf(dirent->d_name, "%x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
       continue;
 
-    #ifndef HAVE_32BITS_PCI_DOMAIN
+#ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
     if (domain > 0xffff) {
       static int warned = 0;
       if (!warned && !hwloc_hide_errors())
@@ -6494,7 +6494,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       warned = 1;
       continue;
     }
-    #endif
+#endif
 
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);

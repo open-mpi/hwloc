@@ -848,7 +848,7 @@ return 0;
     fi
 
     AS_IF([test "x$enable_32bits_pci_domain" = "xyes"], [
-      AC_DEFINE([HAVE_32BITS_PCI_DOMAIN], 1,
+      AC_DEFINE([HWLOC_HAVE_32BITS_PCI_DOMAIN], 1,
         [Define to 1 if --enable-32bits-pci-domain is called.])
     ])
 
