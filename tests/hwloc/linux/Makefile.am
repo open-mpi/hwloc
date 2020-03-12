@@ -1,4 +1,4 @@
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -65,6 +65,12 @@ sysfs_outputs = \
 		fakecpuid1f-64intel64-2p4d2n2c2t.output \
 		fakeheteronuma.output
 
+if HWLOC_HAVE_32BITS_PCI_DOMAIN
+sysfs_outputs += 2pa-pcidomain32bits.output
+else
+sysfs_outputs += 2pa-pcidomain32bits-disabled.output
+endif
+
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # or a corresponding `xyz.source' specifying which tarball to use
 sysfs_tarballs = \
@@ -119,6 +125,8 @@ sysfs_tarballs = \
 		20s390-2g6s4c.tar.bz2 \
 		1alpha.tar.bz2 \
 		2arm-2c.tar.bz2 \
+		2pa-pcidomain32bits.tar.bz2 \
+		2pa-pcidomain32bits-disabled.source \
 		nvidiagpunumanodes.tar.bz2 \
 		nvidiagpunumanodes.kept.source \
 		fakememinitiators-1npc+1npc.tar.bz2 \
