@@ -720,9 +720,19 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
   char totmemstr[64] = "";
   int attrlen;
 
-  /* For OSDev, Misc and Group, name replaces type+index+attrs */
-  if (obj->name && (obj->type == HWLOC_OBJ_OS_DEVICE || obj->type == HWLOC_OBJ_MISC || obj->type == HWLOC_OBJ_GROUP)) {
+  /* For Misc and Group, name replaces type+index+attrs */
+  if (obj->name && (obj->type == HWLOC_OBJ_MISC || obj->type == HWLOC_OBJ_GROUP)) {
     return snprintf(text, textlen, "%s", obj->name);
+  }
+  /* For OSDev, OSDev-type+name replaces type+index+attrs */
+  if (obj->type == HWLOC_OBJ_OS_DEVICE) {
+    /* consider the name as an index and remove it if LSTOPO_INDEX_TYPE_NONE */
+    if (index_type != LSTOPO_INDEX_TYPE_NONE) {
+      hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
+      return snprintf(text, textlen, "%s %s", typestr, obj->name);
+    } else {
+      return hwloc_obj_type_snprintf(text, textlen, obj, 0);
+    }
   }
 
   /* subtype replaces the basic type name */
