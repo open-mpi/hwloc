@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2018 Inria.  All rights reserved.
+# Copyright © 2012-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -30,7 +30,7 @@ touch configure
 # build with plugins and debug
 mkdir build-plugins-debug
 cd build-plugins-debug
-../configure --enable-plugins --enable-debug
+../configure --enable-plugins --enable-debug $HWLOC_CI_JOB3DEBUG_CONFOPTS
 make
 make check
 tests/hwloc/wrapper.sh utils/lstopo/lstopo-no-graphics
