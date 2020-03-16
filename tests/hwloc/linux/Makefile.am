@@ -67,8 +67,10 @@ sysfs_outputs = \
 
 if HWLOC_HAVE_32BITS_PCI_DOMAIN
 sysfs_outputs += 2pa-pcidomain32bits.output
+EXTRA_DIST = 2pa-pcidomain32bits-disabled.output
 else
 sysfs_outputs += 2pa-pcidomain32bits-disabled.output
+EXTRA_DIST = 2pa-pcidomain32bits.output
 endif
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
@@ -172,7 +174,7 @@ TESTS = $(sysfs_outputs)
 endif HWLOC_HAVE_BUNZIPP
 endif HWLOC_HAVE_OPENAT
 
-EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
+EXTRA_DIST += $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
 
 LOG_COMPILER = $(builddir)/test-topology.sh
 
