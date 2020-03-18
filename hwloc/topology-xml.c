@@ -1761,7 +1761,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	  goto failed;
       } else {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object, expected `distances2'\n",
+	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
 		  data->msgprefix, tag);
 	goto done;
       }
