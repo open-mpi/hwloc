@@ -303,6 +303,7 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
   int nextdepth = -1;
   int first, wrap, amount, step;
   unsigned i,j;
+  int found = 0;
   int err;
 
   err = hwloc_calc_parse_range(string,
@@ -373,6 +374,7 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
       free(sn);
     }
     if (obj) {
+      found++;
       if (dot) {
 	hwloc_calc_append_object_range(lcontext, obj->cpuset, obj->nodeset, nextdepth, nextsep+1, cbfunc, cbdata);
       } else {
@@ -383,6 +385,8 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
       }
     }
   }
+  if (!found && verbose >= 0)
+      fprintf(stderr, "failed to use any single object in index range %s\n", string);
 
   return 0;
 }
