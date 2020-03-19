@@ -309,8 +309,11 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 			       &first, &amount, &step, &wrap,
 			       &dot,
 			       verbose);
-  if (err < 0)
+  if (err < 0) {
+    if (verbose >= 0)
+      fprintf(stderr, "Failed to parse object index range %s\n", string);
     return -1;
+  }
   assert(amount != -1 || !wrap);
 
   if (dot) {
@@ -319,15 +322,26 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
     hwloc_obj_type_t type;
     const char *nextstring = dot+1;
     typelen = strspn(nextstring, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-    if (!typelen || nextstring[typelen] != ':')
+    if (!typelen || nextstring[typelen] != ':') {
+      if (verbose >= 0)
+	fprintf(stderr, "hierarchical sublocation %s contains types not followed by colon and index range\n", nextstring);
       return -1;
+    }
     nextsep = &nextstring[typelen];
 
     nextdepth = hwloc_calc_parse_depth_prefix(lcontext,
 					      nextstring, typelen,
 					      &type);
-    if (nextdepth == HWLOC_TYPE_DEPTH_UNKNOWN || nextdepth == HWLOC_TYPE_DEPTH_MULTIPLE)
+    if (nextdepth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      if (verbose >= 0)
+	fprintf(stderr, "could not find level specified by location %s\n", nextstring);
       return -1;
+    }
+    if (nextdepth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      if (verbose >= 0)
+	fprintf(stderr, "found multiple levels for location %s\n", nextstring);
+      return -1;
+    }
     /* we need an object with a cpuset, that's depth>=0 or memory */
     if (nextdepth < 0 && nextdepth != HWLOC_TYPE_DEPTH_NUMANODE) {
       if (verbose >= 0)
@@ -480,8 +494,11 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
       fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
       return -1;
     }
-    if (err < 0)
+    if (err < 0) {
+      if (verbose >= 0)
+	fprintf(stderr, "Failed to parse object index range %s\n", current);
       return -1;
+    }
   }
 
   max = hwloc_get_nbobjs_by_depth(topology, depth);
@@ -546,10 +563,18 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
   depth = hwloc_calc_parse_depth_prefix(lcontext,
 					arg, typelen,
 					&type);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+    if (verbose >= 0)
+      fprintf(stderr, "could not find level specified by location %s\n", arg);
     return -1;
+  }
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+    if (verbose >= 0)
+      fprintf(stderr, "found multiple levels for location %s\n", arg);
+    return -1;
+  }
 
-  } else if (depth < 0 && depth != HWLOC_TYPE_DEPTH_NUMANODE) {
+  if (depth < 0 && depth != HWLOC_TYPE_DEPTH_NUMANODE) {
     /* special object without cpusets */
 
     /* if we didn't find a depth but found a type, handle special cases */
