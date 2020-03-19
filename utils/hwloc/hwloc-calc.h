@@ -195,7 +195,8 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
 static __hwloc_inline int
 hwloc_calc_parse_range(const char *_string,
 		       int *firstp, int *amountp, int *stepp, int *wrapp,
-		       const char **dotp)
+		       const char **dotp,
+		       int verbose)
 {
   char string[65];
   size_t len;
@@ -211,7 +212,8 @@ hwloc_calc_parse_range(const char *_string,
     len = strlen(_string);
   }
   if (len >= sizeof(string)) {
-    fprintf(stderr, "invalid range `%s', too long\n", _string);
+    if (verbose >= 0)
+      fprintf(stderr, "invalid range `%s', too long\n", _string);
     return -1;
   }
   memcpy(string, _string, len);
@@ -237,7 +239,8 @@ hwloc_calc_parse_range(const char *_string,
       *wrapp = 0;
       return 0;
     } else {
-      fprintf(stderr, "unrecognized range keyword `%s'\n", string);
+      if (verbose >= 0)
+	fprintf(stderr, "unrecognized range keyword `%s'\n", string);
       return -1;
     }
   }
@@ -249,7 +252,8 @@ hwloc_calc_parse_range(const char *_string,
   if (*end == '-') {
     last = strtol(end+1, &end2, 10);
     if (*end2) {
-      fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
+      if (verbose >= 0)
+	fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
       return -1;
     } else if (end2 == end+1) {
       /* X- */
@@ -264,15 +268,18 @@ hwloc_calc_parse_range(const char *_string,
     wrap = 1;
     amount = strtol(end+1, &end2, 10);
     if (*end2) {
-      fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
+      if (verbose >= 0)
+	fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
       return -1;
     } else if (end2 == end+1) {
-      fprintf(stderr, "missing width at `%s' in range at `%s'\n", end2, string);
+      if (verbose >= 0)
+	fprintf(stderr, "missing width at `%s' in range at `%s'\n", end2, string);
       return -1;
     }
 
   } else if (*end) {
-    fprintf(stderr, "invalid character at `%s' after index at `%s'\n", end, string);
+    if (verbose >= 0)
+      fprintf(stderr, "invalid character at `%s' after index at `%s'\n", end, string);
     return -1;
   }
 
@@ -300,7 +307,8 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 
   err = hwloc_calc_parse_range(string,
 			       &first, &amount, &step, &wrap,
-			       &dot);
+			       &dot,
+			       verbose);
   if (err < 0)
     return -1;
   assert(amount != -1 || !wrap);
@@ -466,7 +474,8 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
     current++;
     err = hwloc_calc_parse_range(current,
 				 &first, &amount, &step, &wrap,
-				 &dot);
+				 &dot,
+				 verbose);
     if (dot) {
       fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
       return -1;
