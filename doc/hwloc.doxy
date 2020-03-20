@@ -1064,7 +1064,7 @@ following environment variables.
   </ul>
   Domain/bus specifications should usually match entire hierarchies of buses
   behind a bridge (including primary, secondary and subordinate buses).
-  For instance, if hostbridge 0000:00 is above other bridges with buses 0000:01 to 0000:09,
+  For instance, if hostbridge 0000:00 is above other bridges/switches with buses 0000:01 to 0000:09,
   the variable should be HWLOC_PCI_LOCALITY="0000:00-09 <cpuset>".
   It supersedes the old HWLOC_PCI_0000_00_LOCALCPUS=&lt;cpuset&gt;
   which only works when hostbridges exist in the topology.
@@ -1351,7 +1351,7 @@ before loading the topology, for instance with <tt>hwloc_topology_set_io_types_f
 
 Note that I/O discovery requires significant help from the operating system.
 The pciaccess library (the development package is usually <tt>libpciaccess-devel</tt>
-or <tt>libpciaccess-dev</tt>) is needed to fully detect PCI devices and bridges.
+or <tt>libpciaccess-dev</tt>) is needed to fully detect PCI devices and bridges/switches.
 On Linux, PCI discovery may still be performed even if <tt>libpciaccess</tt> cannot
 be used. But it misses PCI device names.
 Moreover, some operating systems require privileges for probing PCI devices,
@@ -1376,7 +1376,7 @@ handle such as the <em>sda</em> drive or the <em>eth0</em> network interface.
 See \ref iodevices_osdev.
 </li><li>
 <tt>::HWLOC_OBJ_PCI_DEVICE</tt> and <tt>::HWLOC_OBJ_BRIDGE</tt> build up
-a PCI hierarchy made of bridges and devices.
+a PCI hierarchy made of bridges (that may be actually be switches) and devices.
 See \ref iodevices_pci.
 </li></ul>
 Any of these types may be filtered individually with <tt>hwloc_topology_set_type_filter()</tt>.
@@ -1499,7 +1499,7 @@ different places, but all PCI devices are below one of them
 (unless the Bridge object type is filtered-out).
 
 Each hostbridge contains one or several children, either other bridges
-(usually PCI to PCI) or PCI devices (<tt>::HWLOC_OBJ_PCI_DEVICE</tt>).
+(usually PCI to PCI switches) or PCI devices (<tt>::HWLOC_OBJ_PCI_DEVICE</tt>).
 The number of bridges between the hostbridge and a PCI device depends
 on the machine.
 

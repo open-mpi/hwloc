@@ -218,19 +218,19 @@ These flags are passed to \fIhwloc_topology_restrict()\fR.
 Do not show any I/O device or bridge.
 This is identical to \fB\-\-filter io:none\fR.
 By default, common devices (GPUs, NICs, block devices, ...) and
-interesting bridges are shown.
+interesting bridges/switches are shown.
 .TP
 \fB\-\-no\-bridges\fB
 Do not show any I/O bridge except hostbridges.
 This is identical to \fB\-\-filter bridge:none\fR.
 By default, common devices (GPUs, NICs, block devices, ...) and
-interesting bridges are shown.
+interesting bridges/switches are shown.
 .TP
 \fB\-\-whole\-io\fB
 Show all I/O devices and bridges.
 This is identical to \fB\-\-filter io:all\fR.
 By default, only common devices (GPUs, NICs, block devices, ...) and
-interesting bridges are shown.
+interesting bridges/switches are shown.
 .TP
 \fB\-\-thissystem\fR
 Assume that the selected backend provides the topology for the
@@ -544,7 +544,7 @@ they are drawn as boxes immediately above them.
 
 .SS PCI bridges, PCI devices and OS devices
 The PCI hierarchy is not drawn as a set of included boxes but rather
-as a tree of bridges with links between them.
+as a tree of bridges (that may actually be switches) with links between them.
 The tree starts with a small square on the left for the
 hostbridge or root complex.
 It ends with PCI device boxes on the right.

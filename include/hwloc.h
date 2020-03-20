@@ -255,7 +255,7 @@ typedef enum {
 			  */
 
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge (filtered out by default).
-			  * Any bridge that connects the host or an I/O bus,
+			  * Any bridge (or PCI switch) that connects the host or an I/O bus,
 			  * to another I/O bus.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
