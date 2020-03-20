@@ -1064,7 +1064,7 @@ following environment variables.
   </ul>
   Domain/bus specifications should usually match entire hierarchies of buses
   behind a bridge (including primary, secondary and subordinate buses).
-  For instance, if hostbridge 0000:00 contains other bridges creating buses 0000:01 to 0000:09,
+  For instance, if hostbridge 0000:00 is above other bridges with buses 0000:01 to 0000:09,
   the variable should be HWLOC_PCI_LOCALITY="0000:00-09 <cpuset>".
   It supersedes the old HWLOC_PCI_0000_00_LOCALCPUS=&lt;cpuset&gt;
   which only works when hostbridges exist in the topology.
@@ -1376,14 +1376,14 @@ handle such as the <em>sda</em> drive or the <em>eth0</em> network interface.
 See \ref iodevices_osdev.
 </li><li>
 <tt>::HWLOC_OBJ_PCI_DEVICE</tt> and <tt>::HWLOC_OBJ_BRIDGE</tt> build up
-a PCI hierarchy made of devices and bridges.
+a PCI hierarchy made of bridges and devices.
 See \ref iodevices_pci.
 </li></ul>
 Any of these types may be filtered individually with <tt>hwloc_topology_set_type_filter()</tt>.
 
 hwloc tries to attach these new objects to normal objects
 (usually NUMA nodes) to match their actual physical location.
-For instance, if a I/O Hub is physically connected to a package,
+For instance, if a I/O hub (or root complex) is physically connected to a package,
 the corresponding hwloc bridge object (and its PCI bridges and devices children)
 is inserted as a child of the corresponding hwloc Package object.
 <b>These children are not in the normal children list but rather in the I/O-specific
