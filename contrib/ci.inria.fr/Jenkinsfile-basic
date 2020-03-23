@@ -49,11 +49,7 @@ pipeline {
 				script {
 					listOfNodeNames = []
 					if (env.NO_UNIX != 'true') {
-						labelToSelect = 'unix'
-						listOfNodeNames = jenkins.model.Jenkins.instance.nodes.collect {
-						  node -> node.getLabelString().contains(labelToSelect) ? node.name : null
-						}
-						listOfNodeNames.removeAll(Collections.singleton(null))
+						listOfNodeNames = nodesByLabel('unix')
 					}
 					if (env.NO_MSVC != 'true') {
 						listOfNodeNames.push('VisualStudio')
