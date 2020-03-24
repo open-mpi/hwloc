@@ -238,9 +238,6 @@ savedir "$destdir/$basename" /sys/devices/virtual/dmi/id/
 # Gather hugepage information
 savedir "$destdir/$basename" /sys/kernel/mm/hugepages/
 
-# Gather POWER device-tree
-savedir "$destdir/$basename" /proc/device-tree/cpus/
-
 # Gather the default /var/run/hwloc (in case it was created by a system-wide hwloc-dump-hwdata)
 if test -d /var/run/hwloc; then
   savedir "$destdir/$basename" /var/run/hwloc
