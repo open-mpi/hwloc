@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -24,9 +24,6 @@ export HWLOC_DONT_ADD_VERSION_INFO
 
 HWLOC_DEBUG_SORT_CHILDREN=1
 export HWLOC_DEBUG_SORT_CHILDREN
-
-HWLOC_COMPONENTS=linux,stop
-export HWLOC_COMPONENTS
 
 actual_output="$1"
 
@@ -57,7 +54,17 @@ test_topology ()
     opts="-v -"
     [ -r "$options" ] && opts=`cat $options`
 
-    if ! "$lstopo" -i "$dir" --if fsroot $opts \
+    # Use HWLOC_COMPONENTS explicitly instead of passing --if fsroot because
+    # we don't want the pci backend to annotate PCI vendor/device when supported.
+    # We'll set HWLOC_FSROOT and HWLOC_DUMPED_HWDATA_DIR manually below.
+    HWLOC_COMPONENTS=linux,stop
+    export HWLOC_COMPONENTS
+    HWLOC_FSROOT="$dir"
+    export HWLOC_FSROOT
+    HWLOC_DUMPED_HWDATA_DIR=/var/run/hwloc
+    export HWLOC_DUMPED_HWDATA_DIR
+
+    if ! "$lstopo" $opts \
 	| sed	-e 's/ gp_index="[0-9]\+"//' \
 	> "$output"
 	# filtered gp_index because it depends on the insertiong order, which may depend on pciaccess version, etc
