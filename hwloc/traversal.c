@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -136,6 +136,37 @@ int
 hwloc_obj_type_is_icache(hwloc_obj_type_t type)
 {
   return hwloc__obj_type_is_icache(type);
+}
+
+static hwloc_obj_t hwloc_get_obj_by_depth_and_gp_index(hwloc_topology_t topology, unsigned depth, uint64_t gp_index)
+{
+  hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, 0);
+  while (obj) {
+    if (obj->gp_index == gp_index)
+      return obj;
+    obj = obj->next_cousin;
+  }
+  return NULL;
+}
+
+hwloc_obj_t hwloc_get_obj_by_type_and_gp_index(hwloc_topology_t topology, hwloc_obj_type_t type, uint64_t gp_index)
+{
+  int depth = hwloc_get_type_depth(topology, type);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+    return NULL;
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+    for(depth=1 /* no multiple machine levels */;
+	(unsigned) depth < topology->nb_levels-1 /* no multiple PU levels */;
+	depth++) {
+      if (hwloc_get_depth_type(topology, depth) == type) {
+	hwloc_obj_t obj = hwloc_get_obj_by_depth_and_gp_index(topology, depth, gp_index);
+	if (obj)
+	  return obj;
+      }
+    }
+    return NULL;
+  }
+  return hwloc_get_obj_by_depth_and_gp_index(topology, depth, gp_index);
 }
 
 unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, unsigned max)
