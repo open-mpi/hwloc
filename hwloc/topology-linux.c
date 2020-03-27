@@ -2459,6 +2459,7 @@ static void
 hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
 			   const char *dirpath,
 			   struct hwloc_numanode_attr_s *memory,
+			   unsigned allocated_page_types,
 			   uint64_t *remaining_local_memory)
 {
   DIR *dir;
@@ -2473,6 +2474,14 @@ hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
       int err;
       if (strncmp(dirent->d_name, "hugepages-", 10))
         continue;
+      if (index_ >= allocated_page_types) {
+	/* we must increase the page_types array */
+	struct hwloc_memory_page_type_s *tmp = realloc(memory->page_types, allocated_page_types * 2 * sizeof(*tmp));
+	if (!tmp)
+	  break;
+	memory->page_types = tmp;
+	allocated_page_types *= 2;
+      }
       memory->page_types[index_].size = strtoul(dirent->d_name+10, NULL, 0) * 1024ULL;
       err = snprintf(path, sizeof(path), "%s/%s/nr_hugepages", dirpath, dirent->d_name);
       if ((size_t) err < sizeof(path)
@@ -2500,7 +2509,14 @@ hwloc_get_machine_meminfo(struct hwloc_linux_backend_data_s *data,
 
   err = hwloc_stat("/sys/kernel/mm/hugepages", &st, data->root_fd);
   if (!err) {
-    types = 1 + st.st_nlink-2;
+    types = 1 /* normal non-huge size */ + st.st_nlink - 2 /* ignore . and .. */;
+    if (types < 3)
+      /* some buggy filesystems (e.g. btrfs when reading from fsroot)
+       * return wrong st_nlink for directories (always 1 for btrfs).
+       * use 3 as a sane default (default page + 2 huge sizes).
+       * hwloc_parse_hugepages_info() will extend it if needed.
+       */
+      types = 3;
     has_sysfs_hugepages = 1;
   }
 
@@ -2518,7 +2534,8 @@ hwloc_get_machine_meminfo(struct hwloc_linux_backend_data_s *data,
 
   if (has_sysfs_hugepages) {
     /* read from node%d/hugepages/hugepages-%skB/nr_hugepages */
-    hwloc_parse_hugepages_info(data, "/sys/kernel/mm/hugepages", memory, &remaining_local_memory);
+    hwloc_parse_hugepages_info(data, "/sys/kernel/mm/hugepages", memory, types, &remaining_local_memory);
+    /* memory->page_types_len may have changed */
   }
 
   /* use remaining memory as normal pages */
@@ -2542,7 +2559,14 @@ hwloc_get_sysfs_node_meminfo(struct hwloc_linux_backend_data_s *data,
   sprintf(path, "%s/node%d/hugepages", syspath, node);
   err = hwloc_stat(path, &st, data->root_fd);
   if (!err) {
-    types = 1 + st.st_nlink-2;
+    types = 1 /* normal non-huge size */ + st.st_nlink - 2 /* ignore . and .. */;
+    if (types < 3)
+      /* some buggy filesystems (e.g. btrfs when reading from fsroot)
+       * return wrong st_nlink for directories (always 1 for btrfs).
+       * use 3 as a sane default (default page + 2 huge sizes).
+       * hwloc_parse_hugepages_info() will extend it if needed.
+       */
+      types = 3;
     has_sysfs_hugepages = 1;
   }
 
@@ -2561,7 +2585,8 @@ hwloc_get_sysfs_node_meminfo(struct hwloc_linux_backend_data_s *data,
 
   if (has_sysfs_hugepages) {
     /* read from node%d/hugepages/hugepages-%skB/nr_hugepages */
-    hwloc_parse_hugepages_info(data, path, memory, &remaining_local_memory);
+    hwloc_parse_hugepages_info(data, path, memory, types, &remaining_local_memory);
+    /* memory->page_types_len may have changed */
   }
 
   /* use remaining memory as normal pages */
