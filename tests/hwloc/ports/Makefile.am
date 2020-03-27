@@ -1,4 +1,4 @@
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -76,6 +76,7 @@ libhwloc_port_freebsd_la_SOURCES = \
         include/freebsd/sys/sysctl.h \
         include/freebsd/sys/thr.h \
         include/freebsd/sys/user.h \
+        include/freebsd/sys/param.h \
         include/freebsd/sys/domainset.h
 libhwloc_port_freebsd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/freebsd \
