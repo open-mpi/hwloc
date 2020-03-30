@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -225,14 +225,17 @@ static void output_distances(struct lstopo_output *loutput)
   if (!err) {
     for(j=0; j<nr; j++) {
       const char *kindmeans = (dist[j]->kind & HWLOC_DISTANCES_KIND_MEANS_LATENCY) ? "latency" : (dist[j]->kind & HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH) ? "bandwidth" : "distance";
+      const char *name = hwloc_distances_get_name(topology, dist[j]);
+      if (!name)
+        name = "(null)";
       if (dist[j]->kind & HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES) {
 	fprintf(output, "Relative %s matrix (name %s kind %lu) between %u heterogeneous objects by %s indexes:\n",
-		kindmeans, hwloc_distances_get_name(topology, dist[j]), dist[j]->kind,
+		kindmeans, name, dist[j]->kind,
 		dist[j]->nbobjs,
 		index_type != LSTOPO_INDEX_TYPE_PHYSICAL ? "logical" : "physical");
       } else {
 	fprintf(output, "Relative %s matrix (name %s kind %lu) between %u %ss (depth %d) by %s indexes:\n",
-		kindmeans, hwloc_distances_get_name(topology, dist[j]), dist[j]->kind,
+		kindmeans, name, dist[j]->kind,
 		dist[j]->nbobjs,
 		hwloc_obj_type_string(dist[j]->objs[0]->type),
 		dist[j]->objs[0]->depth,
