@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1392,7 +1392,7 @@ static struct hwloc_obj *
 hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj,
 			        hwloc_report_error_t report_error)
 {
-  hwloc_obj_t child, next_child = NULL;
+  hwloc_obj_t child, next_child = NULL, tmp;
   /* These will always point to the pointer to their next last child. */
   hwloc_obj_t *cur_children = &cur->first_child;
   hwloc_obj_t *obj_children = &obj->first_child;
@@ -1464,6 +1464,8 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	if (setres == HWLOC_OBJ_EQUAL) {
 	  obj->memory_first_child = child->memory_first_child;
 	  child->memory_first_child = NULL;
+	  for(tmp=obj->memory_first_child; tmp; tmp = tmp->next_sibling)
+	    tmp->parent = obj;
 	}
 	break;
     }
