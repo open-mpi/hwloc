@@ -1485,7 +1485,9 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   return obj;
 
  putback:
-  /* Put-back OBJ children in CUR and return an error. */
+  /* OBJ cannot be inserted.
+   * Put-back OBJ children in CUR and return an error.
+   */
   if (putp)
     cur_children = putp; /* No need to try to insert before where OBJ was supposed to go */
   else
@@ -1494,12 +1496,12 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   while ((child = obj->first_child) != NULL) {
     /* Remove from OBJ */
     obj->first_child = child->next_sibling;
-    obj->parent = cur;
-    /* Find child position in CUR, and insert. */
+    /* Find child position in CUR, and reinsert it. */
     while (*cur_children && hwloc__object_cpusets_compare_first(*cur_children, child) < 0)
       cur_children = &(*cur_children)->next_sibling;
     child->next_sibling = *cur_children;
     *cur_children = child;
+    child->parent = cur;
   }
   return NULL;
 }
