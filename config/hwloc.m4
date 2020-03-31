@@ -436,6 +436,7 @@ EOF])
     if test x$hwloc_freebsd = xyes; then
 
       AC_CHECK_HEADERS([sys/domainset.h])
+      AC_CHECK_HEADERS([sys/thr.h])
 
     fi
 

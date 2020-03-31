@@ -1,5 +1,5 @@
 # Copyright © 2009-2020 Inria.  All rights reserved.
-# Copyright © 2009, 2011-2012 Université Bordeaux
+# Copyright © 2009, 2011-2012, 2020 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -90,7 +90,8 @@ libhwloc_port_freebsd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -DHAVE_DECL_PTHREAD_SETAFFINITY_NP=1 \
         -DHAVE_DECL_PTHREAD_GETAFFINITY_NP=1 \
         -DHAVE_CPUSET_SETID \
-        -DHAVE_SYS_DOMAINSET_H
+        -DHAVE_SYS_DOMAINSET_H \
+        -DHAVE_SYS_THR_H
 
 nodist_libhwloc_port_hpux_la_SOURCES = topology-hpux.c
 libhwloc_port_hpux_la_SOURCES = \

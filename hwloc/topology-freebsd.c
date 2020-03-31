@@ -16,7 +16,9 @@
 #include <pthread.h>
 #include <sys/cdefs.h>
 #include <stddef.h>
+#ifdef HAVE_SYS_THR_H
 #include <sys/thr.h>
+#endif
 #ifdef HAVE_PTHREAD_NP_H
 #include <pthread_np.h>
 #endif
@@ -345,6 +347,7 @@ hwloc_freebsd_get_proc_last_cpu_location(hwloc_topology_t topology __hwloc_attri
   return hwloc_freebsd_get_last_cpu_location(name, set, 0);
 }
 
+#ifdef HAVE_SYS_THR_H
 static int
 hwloc_freebsd_get_thisthread_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int flags __hwloc_attribute_unused) {
   long thr_id;
@@ -359,6 +362,7 @@ hwloc_freebsd_get_thisthread_last_cpu_location(hwloc_topology_t topology __hwloc
   name[3] = getpid();
   return hwloc_freebsd_get_last_cpu_location(name, set, thr_id);
 }
+#endif
 
 static int
 set_locality_info(hwloc_topology_t topology, int ndomains, hwloc_obj_t *nodes){
@@ -573,7 +577,9 @@ hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unus
 #endif
   hooks->get_thisproc_last_cpu_location = hwloc_freebsd_get_thisproc_last_cpu_location;
   hooks->get_proc_last_cpu_location = hwloc_freebsd_get_proc_last_cpu_location;
+#ifdef HAVE_SYS_THR_H
   hooks->get_thisthread_last_cpu_location = hwloc_freebsd_get_thisthread_last_cpu_location;
+#endif
 }
 
 static struct hwloc_backend *
