@@ -460,6 +460,7 @@ get_memory_domain_info(int ndomains){
   return domains_memory;
 }
 
+#ifdef CPU_WHICH_DOMAIN
 static int
 hwloc_look_freebsd_domains(struct hwloc_topology *topology){
     unsigned ndomains, i;
@@ -513,6 +514,7 @@ hwloc_look_freebsd_domains(struct hwloc_topology *topology){
 
   return err;
 }
+#endif
 
 static int
 hwloc_look_freebsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
@@ -537,7 +539,9 @@ hwloc_look_freebsd(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     }
   } else if (dstatus->phase == HWLOC_DISC_PHASE_MEMORY) {
       int64_t memsize;
+#ifdef CPU_WHICH_DOMAIN
       hwloc_look_freebsd_domains(topology);
+#endif
       memsize = hwloc_fallback_memsize();
       if (memsize > 0)
         topology->machine_memory.local_memory = memsize;
