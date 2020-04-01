@@ -7,7 +7,9 @@
 
 /* all headers should be explicitly included */
 
-#include "private/autogen/config.h" /* autoheaders definitions first, to avoid conflicts later */
+/* autoheaders definitions first, to avoid conflicts later */
+#include "private/autogen/config.h"
+#include "hwloc/autogen/config.h"
 
 #include "hwloc.h" /* hwloc/rename.h required before everything else */
 #include "hwloc/bitmap.h"
