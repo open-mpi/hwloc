@@ -2,7 +2,7 @@
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
  * Copyright © 2009-2018 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -575,7 +575,7 @@
 #define PACKAGE "hwloc"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "http://www.open-mpi.org/projects/hwloc/"
+#define PACKAGE_BUGREPORT "https://www.open-mpi.org/projects/hwloc/"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "hwloc"
