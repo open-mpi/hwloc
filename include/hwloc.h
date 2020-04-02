@@ -2,7 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
- * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -11,7 +11,7 @@
  *         ------------------------------------------------
  *               $tarball_directory/doc/doxygen-doc/
  *                                or
- *           http://www.open-mpi.org/projects/hwloc/doc/
+ *           https://www.open-mpi.org/projects/hwloc/doc/
  *=====================================================================
  *
  * FAIR WARNING: Do NOT expect to be able to figure out all the
