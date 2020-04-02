@@ -2,7 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
- * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -455,7 +455,7 @@ shell$
 
 hwloc is the evolution and merger of the libtopology
 (http://runtime.bordeaux.inria.fr/libtopology/) project and the Portable
-Linux Processor Affinity (PLPA) (http://www.open-mpi.org/projects/plpa/)
+Linux Processor Affinity (PLPA) (https://www.open-mpi.org/projects/plpa/)
 project. Because of functional and ideological overlap, these two code bases
 and ideas were merged and released under the name "hwloc" as an Open MPI
 sub-project.
