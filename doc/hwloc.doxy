@@ -453,16 +453,14 @@ shell$
 \endhtmlonly
 \section history History / Credits
 
-hwloc is the evolution and merger of the libtopology
-(http://runtime.bordeaux.inria.fr/libtopology/) project and the Portable
+hwloc is the evolution and merger of the libtopology project and the Portable
 Linux Processor Affinity (PLPA) (https://www.open-mpi.org/projects/plpa/)
 project. Because of functional and ideological overlap, these two code bases
 and ideas were merged and released under the name "hwloc" as an Open MPI
 sub-project.
 
-libtopology was initially developed by the inria Runtime Team-Project
-(http://runtime.bordeaux.inria.fr/) (headed by Raymond Namyst
-(http://dept-info.labri.fr/~namyst/). PLPA was initially developed by
+libtopology was initially developed by the Inria Runtime Team-Project.
+PLPA was initially developed by
 the Open MPI development team as a sub-project. Both are now deprecated
 in favor of hwloc, which is distributed as an Open MPI sub-project.
 
