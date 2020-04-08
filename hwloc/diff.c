@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Inria.  All rights reserved.
+ * Copyright © 2013-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -333,10 +333,8 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 
 	if (!err) {
 		if (SETS_DIFFERENT(allowed_cpuset, topo1, topo2)
-		    || SETS_DIFFERENT(allowed_nodeset, topo1, topo2)) {
-			hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
-			err = 1;
-		}
+		    || SETS_DIFFERENT(allowed_nodeset, topo1, topo2))
+                  goto roottoocomplex;
 	}
 
 	if (!err) {
@@ -346,33 +344,28 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 		dist1 = topo1->first_dist;
 		dist2 = topo2->first_dist;
 		while (dist1 || dist2) {
-			if (!!dist1 != !!dist2) {
-				hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
-				err = 1;
-				break;
-			}
+			if (!!dist1 != !!dist2)
+                          goto roottoocomplex;
 			if (dist1->unique_type != dist2->unique_type
 			    || dist1->different_types || dist2->different_types /* too lazy to support this case */
 			    || dist1->nbobjs != dist2->nbobjs
 			    || dist1->kind != dist2->kind
-			    || memcmp(dist1->values, dist2->values, dist1->nbobjs * dist1->nbobjs * sizeof(*dist1->values))) {
-				hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
-				err = 1;
-				break;
-			}
+			    || memcmp(dist1->values, dist2->values, dist1->nbobjs * dist1->nbobjs * sizeof(*dist1->values)))
+                          goto roottoocomplex;
 			for(i=0; i<dist1->nbobjs; i++)
 				/* gp_index isn't enforced above. so compare logical_index instead, which is enforced. requires distances refresh() above */
-				if (dist1->objs[i]->logical_index != dist2->objs[i]->logical_index) {
-					hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
-					err = 1;
-					break;
-				}
+				if (dist1->objs[i]->logical_index != dist2->objs[i]->logical_index)
+                                  goto roottoocomplex;
 			dist1 = dist1->next;
 			dist2 = dist2->next;
 		}
 	}
 
 	return err;
+
+ roottoocomplex:
+  hwloc_append_diff_too_complex(hwloc_get_root_obj(topo1), diffp, &lastdiff);
+  return 1;
 }
 
 /********************
