@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2013-2018 Inria.  All rights reserved.
+.\" Copyright © 2013-2020 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-ANNOTATE "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -81,6 +81,25 @@ value is \fIvalue\fR.
 .B misc <name>
 Specifies a new Misc object name.
 .TP
+.B memattr <name> <ﬂags>
+Register a new memory attribute whose name is \fIname\fR and
+flags is \fIflags\fR.
+\fIlocation\fR is ignored in this mode.
+
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_memattr_register()\fR.
+Those names may be substrings of actual flag names as long as a single one matches.
+For instance, a value of \fB1\fR (or \fBhigher\fR) means that
+highest values are considered best for this attribute.
+.TP
+.B memattr <name> <initiator> <value>
+Set the memory attribute (whose name is \fIname\fR)
+from initiator \fIinitiator\fR (either an object or a CPU-set)
+to target NUMA node \fIlocation\fR
+to value \fIvalue\fR.
+If this attribute does not require specific initiators,
+\fIinitiator\fR is ignored.
+.TP
 .B distances <filename> [<flags>]
 Specifies new distances to be added to the topology using specifications in \fI<filename>\fR.
 The optional \fIflags\fR (0 unless specified) corresponds to the flags
@@ -143,6 +162,17 @@ Change package objects to green with red text in the lstopo graphical output:
 
     $ hwloc-annotate topo.xml topo.xml package:all info lstopoStyle "Background=#00ff00;Text=#ff0000"
     $ lstopo -i topo.xml
+
+Set the memory attribute latency to 123 nanoseconds from the PUs in the first package to the first NUMA node:
+
+    $ hwloc-annotate topo.xml topo.xml numanode:0 memattr Latency $(hwloc-calc package:0) 123
+
+Register a memory attribute \fBMyApplicationPerformance\fR
+(with flags specifying that it requires an initiator and reports higher values first)
+and set its value for initiator CPU-set 0x11 to NUMA node #2 to 2345:
+
+    $ hwloc-annotate topo.xml topo.xml ignored memattr MyApplicationPerformance need_init,higher
+    $ hwloc-annotate topo.xml topo.xml numanode:2 memattr MyApplicationPerformance 0x11 2345
 .
 .\" **************************
 .\" Return value section

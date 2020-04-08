@@ -22,6 +22,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "    info <name> <value>\n");
 	fprintf(where, "    misc <name>\n");
 	fprintf(where, "    distances <filename> [<flags>]\n");
+	fprintf(where, "    memattr <name> <flags>\n");
+	fprintf(where, "    memattr <name> <initiator> <value>\n");
 	fprintf(where, "    none\n");
         fprintf(where, "Options:\n");
 	fprintf(where, "  --ci\tClear existing infos\n");
@@ -33,6 +35,16 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 static char *infoname = NULL, *infovalue = NULL;
 static char *miscname = NULL;
 static char *distancesfilename = NULL;
+
+static char *maname = NULL;
+static unsigned long maflags;
+
+static char *mavname = NULL;
+static hwloc_memattr_id_t mavid;
+static hwloc_cpuset_t mavicpuset = NULL;
+static char *maviobjstr = NULL;
+static hwloc_obj_t maviobj = NULL;
+static hwloc_uint64_t mavvalue;
 
 static unsigned long distancesflags = 0;
 
@@ -88,6 +100,21 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 	}
 	if (miscname)
 		hwloc_topology_insert_misc_object(topology, obj, miscname);
+        if (mavname) {
+          struct hwloc_location loc, *locp = NULL;
+          if (maviobj) {
+            loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+            loc.location.object = maviobj;
+            locp = &loc;
+          } else if (mavicpuset) {
+            loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+            loc.location.cpuset = mavicpuset;
+            locp = &loc;
+          }
+          if (hwloc_memattr_set_value(topology, mavid, obj, locp, 0, mavvalue) < 0) {
+            fprintf(stderr, "Failed to add memattr value (%s)\n", strerror(errno));
+          }
+        }
 }
 
 static void apply_recursive(hwloc_topology_t topology, hwloc_obj_t obj)
@@ -365,6 +392,34 @@ int main(int argc, char *argv[])
                         if(distancesflags == (unsigned long)-1)
                                 goto out;
                 }
+
+        } else if (!strcmp(argv[0], "memattr")) {
+                if (argc < 3) {
+                        usage(callname, stderr);
+                        exit(EXIT_FAILURE);
+                }
+                if (argc == 3) {
+                        maname = argv[1];
+                        maflags = hwloc_utils_parse_memattr_flags(argv[2]);
+                } else {
+                        mavname = argv[1];
+                        mavvalue = strtoull(argv[3], NULL, 0);
+                        if (strcmp(argv[2], "none")) {
+                          if (!strncmp(argv[2], "0x", 2)) {
+                            /* parse a cpuset */
+                            mavicpuset = hwloc_bitmap_alloc();
+                            if (!mavicpuset) {
+                              fprintf(stderr, "Failed to allocate cpuset for memattr initiator\n");
+                              goto out;
+                            }
+                            hwloc_bitmap_sscanf(mavicpuset, argv[2]);
+                          } else {
+                            /* parse an object */
+                            maviobjstr = argv[2];
+                          }
+                        }
+                }
+
 	} else if (!strcmp(argv[0], "none")) {
 		/* do nothing (maybe clear) */
 	} else {
@@ -403,8 +458,39 @@ int main(int argc, char *argv[])
 	if (distancesfilename) {
 	  /* ignore locations */
 	  add_distances(topology, topodepth);
+
+        } else if (maname) {
+          hwloc_memattr_id_t id;
+          err = hwloc_memattr_register(topology, maname, maflags, &id);
+          if (err < 0) {
+            fprintf(stderr, "Failed to register new memattr (%s)\n", strerror(errno));
+            goto out_with_topology;
+          }
+
 	} else {
 	  int i;
+          unsigned long mavflags = 0;
+
+          if (mavname) {
+            if (hwloc_memattr_get_by_name(topology, mavname, &mavid) < 0) {
+              fprintf(stderr, "Failed to find memattr by name %s\n", mavname);
+              goto out_with_topology;
+            }
+            hwloc_memattr_get_flags(topology, mavid, &mavflags);
+          }
+
+          if (maviobjstr && (mavflags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR)) {
+            int ignored_multiple;
+            maviobj = get_unique_obj(topology, topodepth, maviobjstr, &ignored_multiple);
+            if (!maviobj) {
+              fprintf(stderr, "Failed to find memattr initiator object %s\n", maviobjstr);
+              goto out_with_topology;
+            }
+            if (ignored_multiple) {
+              fprintf(stderr, "Only the first object specified is used as a memattr initiator.\n");
+            }
+          }
+
 	  for(i=0; i<nr_locations; i++) {
 	    char *location = locations[i];
 	    if (!strcmp(location, "all")) {
@@ -440,5 +526,6 @@ out_with_topology:
 	hwloc_utils_userdata_free_recursive(hwloc_get_root_obj(topology));
 	hwloc_topology_destroy(topology);
 out:
+	hwloc_bitmap_free(mavicpuset);
 	exit(EXIT_FAILURE);
 }
