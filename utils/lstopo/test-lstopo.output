@@ -60,6 +60,14 @@ depth 0:           1 Machine (type #0)
    depth 3:        4 L2Cache (type #5)
     depth 4:       8 PU (type #3)
 Special depth -3:  2 NUMANode (type #13)
+Memory attribute #0 name `Capacity' flags 1
+  NUMANode L#0 = 1073741824
+  NUMANode L#1 = 1073741824
+Memory attribute #1 name `Locality' flags 2
+  NUMANode L#0 = 4
+  NUMANode L#1 = 4
+Memory attribute #2 name `Bandwidth' flags 5
+Memory attribute #3 name `Latency' flags 6
 Topology not from this system
 ** Export to synthetic...
 Package:1 Core:2 [NUMANode(memory=1073741824)] L2Cache:2(size=4194304) PU:2

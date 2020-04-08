@@ -23,6 +23,7 @@ _lstopo() {
 		   -v --verbose
 		   -s --silent
 		   --distances
+		   --memattrs
 		   -c --cpuset
 		   -C --cpuset-only
 		   --taskset

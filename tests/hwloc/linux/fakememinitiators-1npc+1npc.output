@@ -49,4 +49,18 @@ Relative latency matrix (name NUMALatency kind 5) between 6 NUMANodes (depth -3)
       4    40    40    20    10    50    30
       2    30    30    50    50    10    60
       5    50    50    30    30    60    10
+Memory attribute #2 name `Bandwidth' flags 5
+  NUMANode L#0 = 131072 from cpuset 0x00000001 (L2 L#0)
+  NUMANode L#1 = 131072 from cpuset 0x00000002 (L2 L#1)
+  NUMANode L#3 = 131072 from cpuset 0x00000004 (L2 L#2)
+  NUMANode L#4 = 131072 from cpuset 0x00000008 (L2 L#3)
+  NUMANode L#2 = 78644 from cpuset 0x00000003 (Package L#0)
+  NUMANode L#5 = 78644 from cpuset 0x0000000c (Package L#1)
+Memory attribute #3 name `Latency' flags 6
+  NUMANode L#0 = 26 from cpuset 0x00000001 (L2 L#0)
+  NUMANode L#1 = 26 from cpuset 0x00000002 (L2 L#1)
+  NUMANode L#3 = 26 from cpuset 0x00000004 (L2 L#2)
+  NUMANode L#4 = 26 from cpuset 0x00000008 (L2 L#3)
+  NUMANode L#2 = 77 from cpuset 0x00000003 (Package L#0)
+  NUMANode L#5 = 77 from cpuset 0x0000000c (Package L#1)
 Topology not from this system

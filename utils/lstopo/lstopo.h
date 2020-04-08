@@ -80,6 +80,7 @@ struct lstopo_output {
 
   /* text config */
   int show_distances_only;
+  int show_memattrs_only;
   hwloc_obj_type_t show_only;
   int show_cpuset;
   int show_taskset;

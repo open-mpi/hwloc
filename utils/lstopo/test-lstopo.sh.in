@@ -109,7 +109,7 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
   echo "** OS-index output merged..."
   $ls -i "$SI" - -p --merge
   echo "** Logical-index verbose output..."
-  $ls -i "$SI" - -l --verbose
+  $ls -i "$SI" - -l --verbose --verbose
   echo "** Export to synthetic..."
   $ls -i "$SI" -.synthetic
   echo "** Export to XML after changing disallowed..."
