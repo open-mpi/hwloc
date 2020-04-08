@@ -206,6 +206,64 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
     struct hwloc_info_s *info = &obj->infos[i];
     printf("%s info %s = %s\n", prefix, info->name, info->value);
   }
+
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
+    /* FIXME display for non-NUMA too.
+     * but that's rare so maybe detect in advance whether it's needed?
+     */
+    unsigned id;
+    for(id=0; ; id++) {
+      const char *name;
+      unsigned long flags;
+      int err;
+
+      err = hwloc_memattr_get_name(topology, id, &name);
+      if (err < 0)
+        break;
+      err = hwloc_memattr_get_flags(topology, id, &flags);
+      assert(!err);
+
+      if (!(flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR)) {
+        hwloc_uint64_t value;
+        err = hwloc_memattr_get_value(topology, id, obj, NULL, 0, &value);
+        if (!err)
+          printf("%s memory attribute %s = %llu\n",
+                 prefix, name, (unsigned long long) value);
+      } else {
+        unsigned nr_initiators = 0;
+        err = hwloc_memattr_get_initiators(topology, id, obj, 0, &nr_initiators, NULL, NULL);
+        if (!err) {
+          struct hwloc_location *initiators = malloc(nr_initiators * sizeof(*initiators));
+          hwloc_uint64_t *values = malloc(nr_initiators * sizeof(*values));
+          if (initiators && values) {
+            err = hwloc_memattr_get_initiators(topology, id, obj, 0, &nr_initiators, initiators, values);
+            if (!err) {
+              unsigned j;
+              for(j=0; j<nr_initiators; j++) {
+                char *inits, _inits[256];
+                if (initiators[j].type == HWLOC_LOCATION_TYPE_CPUSET) {
+                  hwloc_bitmap_asprintf(&inits, initiators[j].location.cpuset);
+                } else if (initiators[j].type == HWLOC_LOCATION_TYPE_OBJECT) {
+                  char types[64];
+                  hwloc_obj_type_snprintf(types, sizeof(types), initiators[j].location.object, 1);
+                  snprintf(_inits, sizeof(_inits), "%s L#%u P#%u", types, initiators[j].location.object->logical_index, initiators[j].location.object->os_index);
+                  inits = _inits;
+                } else {
+                  assert(0);
+                }
+                printf("%s memory attribute %s from initiator %s = %llu\n",
+                       prefix, name, inits, (unsigned long long) values[j]);
+                if (inits != _inits)
+                  free(inits);
+              }
+            }
+          }
+          free(initiators);
+          free(values);
+        }
+      }
+    }
+  }
 }
 
 static void
