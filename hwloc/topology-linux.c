@@ -3509,6 +3509,44 @@ read_node_initiators(struct hwloc_linux_backend_data_s *data,
   return 0;
 }
 
+static int
+read_node_local_memattrs(struct hwloc_topology *topology,
+                         struct hwloc_linux_backend_data_s *data,
+                         hwloc_obj_t node,
+                         const char *path)
+{
+  char accesspath[SYSFS_NUMA_NODE_PATH_LEN];
+  unsigned rbw = 0, rlat = 0;
+  struct hwloc_internal_location_s loc;
+
+  loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+  loc.location.cpuset = node->cpuset;
+
+  /* bandwidth in MiB/s and latency in ns, just like in our memattrs API */
+
+  /* only read bandwidth/latency for now */
+  sprintf(accesspath, "%s/node%u/access0/initiators/read_bandwidth", path, node->os_index);
+  if (hwloc_read_path_as_uint(accesspath, &rbw, data->root_fd) == 0 && rbw > 0) {
+    hwloc_internal_memattr_set_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH, HWLOC_OBJ_NUMANODE, (hwloc_uint64_t)-1, node->os_index, &loc, rbw);
+  }
+
+  sprintf(accesspath, "%s/node%u/access0/initiators/read_latency", path, node->os_index);
+  if (hwloc_read_path_as_uint(accesspath, &rlat, data->root_fd) == 0 && rlat > 0) {
+    hwloc_internal_memattr_set_value(topology, HWLOC_MEMATTR_ID_LATENCY, HWLOC_OBJ_NUMANODE, (hwloc_uint64_t)-1, node->os_index, &loc, rlat);
+  }
+
+#if 0
+  sprintf(accesspath, "%s/node%u/access0/initiators/write_bandwidth", path, node->os_index);
+  if (hwloc_read_path_as_uint(accesspath, &wbw, data->root_fd) == 0 && wbw > 0) {
+  }
+  sprintf(accesspath, "%s/node%u/access0/initiators/write_latency", path, node->os_index);
+  if (hwloc_read_path_as_uint(accesspath, &wlat, data->root_fd) == 0 && wlat > 0) {
+  }
+#endif
+
+  return 0;
+}
+
 /* return -1 if the kernel doesn't support mscache,
  * or update tree (containing only the node on input) with caches (if any)
  */
@@ -3955,7 +3993,9 @@ look_sysfsnode(struct hwloc_topology *topology,
        */
       for (i = 0; i < nbnodes; i++) {
 	hwloc_obj_t node = nodes[i];
-	if (node && hwloc_bitmap_iszero(node->cpuset)) {
+	if (!node)
+          continue;
+        if (hwloc_bitmap_iszero(node->cpuset)) {
 	  hwloc_obj_t tree;
 	  /* update from HMAT initiators if any */
 	  if (data->use_numa_initiators)
@@ -3973,6 +4013,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    read_node_mscaches(topology, data, path, &tree);
 	  trees[nr_trees++] = tree;
 	}
+        /* By the way, get their memattrs now that cpuset is fixed */
+        read_node_local_memattrs(topology, data, node, path);
       }
 
       /* insert memory trees for real */

@@ -23,6 +23,8 @@ Version 2.3.0
 * API
   + Add hwloc/memattrs.h for exposing latency/bandwidth information between
     initiators (CPU sets for now) and target NUMA nodes.
+    - When available, bandwidths and latencies are read from the ACPI HMAT
+      table exposed by Linux kernel 5.2+.
     - Attributes may also be customized to expose user-defined performance
       information.
   + The new topology flag HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT causes
