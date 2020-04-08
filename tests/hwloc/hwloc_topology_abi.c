@@ -65,8 +65,19 @@ int main(void)
     size = sizeof(struct hwloc_internal_distances_s);
     assert(size == 88);
 
+    offset = offsetof(struct hwloc_topology, memattrs);
+    assert(offset == 728);
+    size = sizeof(struct hwloc_internal_memattr_s);
+    assert(size == 32);
+    size = sizeof(struct hwloc_internal_memattr_target_s);
+    assert(size == 40);
+    size = sizeof(struct hwloc_internal_memattr_initiator_s);
+    assert(size == 32);
+    size = sizeof(struct hwloc_internal_location_s);
+    assert(size == 24);
+
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 756);
+    assert(offset == 768);
 
     /* fields after this one aren't needed after discovery */
 
@@ -138,6 +149,9 @@ int main(void)
 
     size = sizeof(struct hwloc_distances_s);
     assert(size == 32);
+
+    size = sizeof(struct hwloc_location);
+    assert(size == 16);
 
     size = sizeof(union hwloc_topology_diff_u);
     assert(size == 56);

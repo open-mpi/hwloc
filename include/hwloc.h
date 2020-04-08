@@ -2441,6 +2441,9 @@ HWLOC_DECLSPEC int hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src
 /* inline code of some functions above */
 #include "hwloc/inlines.h"
 
+/* memory attributes */
+#include "hwloc/memattrs.h"
+
 /* exporting to XML or synthetic */
 #include "hwloc/export.h"
 

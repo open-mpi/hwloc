@@ -15,6 +15,7 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/bitmap.h \
 		@top_srcdir@/include/hwloc/export.h \
 		@top_srcdir@/include/hwloc/distances.h \
+		@top_srcdir@/include/hwloc/memattrs.h \
 		@top_srcdir@/include/hwloc/linux.h \
 		@top_srcdir@/include/hwloc/linux-libnuma.h \
 		@top_srcdir@/include/hwloc/glibc-sched.h \

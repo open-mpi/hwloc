@@ -361,6 +361,66 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 		}
 	}
 
+        if (!err) {
+          /* memattrs */
+          hwloc_internal_memattrs_refresh(topo1);
+          hwloc_internal_memattrs_refresh(topo2);
+          if (topo1->nr_memattrs != topo2->nr_memattrs)
+            goto roottoocomplex;
+          for(i=0; i<topo1->nr_memattrs; i++) {
+            struct hwloc_internal_memattr_s *imattr1 = &topo1->memattrs[i], *imattr2 = &topo2->memattrs[i];
+            unsigned j;
+           if (strcmp(imattr1->name, imattr2->name)
+                || imattr1->flags != imattr2->flags
+                || imattr1->nr_targets != imattr2->nr_targets)
+              goto roottoocomplex;
+            if (i == HWLOC_MEMATTR_ID_CAPACITY
+                || i == HWLOC_MEMATTR_ID_LOCALITY)
+              /* no need to check virtual attributes, there were refreshed from other topology attributes, checked above */
+              continue;
+            for(j=0; j<imattr1->nr_targets; j++) {
+              struct hwloc_internal_memattr_target_s *imtg1 = &imattr1->targets[j], *imtg2 = &imattr2->targets[j];
+              hwloc_obj_t obj1, obj2;
+              if (imtg1->type != imtg2->type)
+                goto roottoocomplex;
+              /* gp_index isn't enforced above. so compare logical_index instead, which is enforced. requires memattrs refresh() above */
+              obj1 = hwloc_get_obj_by_type_and_gp_index(topo1, imtg1->type, imtg1->gp_index);
+              assert(obj1);
+              obj2 = hwloc_get_obj_by_type_and_gp_index(topo2, imtg2->type, imtg2->gp_index);
+              assert(obj2);
+              if (obj1->logical_index != obj2->logical_index)
+                goto roottoocomplex;
+              if (imattr1->flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR) {
+                unsigned k;
+                for(k=0; k<imtg1->nr_initiators; k++) {
+                  struct hwloc_internal_memattr_initiator_s *imi1 = &imtg1->initiators[k], *imi2 = &imtg2->initiators[k];
+                  if (imi1->value != imi2->value
+                      || imi1->initiator.type != imi2->initiator.type)
+                    goto roottoocomplex;
+                  if (imi1->initiator.type == HWLOC_LOCATION_TYPE_CPUSET) {
+                    if (!hwloc_bitmap_isequal(imi1->initiator.location.cpuset, imi2->initiator.location.cpuset))
+                      goto roottoocomplex;
+                  } else if (imi1->initiator.type == HWLOC_LOCATION_TYPE_OBJECT) {
+                    if (imi1->initiator.location.object.type != imi2->initiator.location.object.type)
+                      goto roottoocomplex;
+                    obj1 = hwloc_get_obj_by_type_and_gp_index(topo1, imi1->initiator.location.object.type, imi1->initiator.location.object.gp_index);
+                    assert(obj1);
+                    obj2 = hwloc_get_obj_by_type_and_gp_index(topo2, imi2->initiator.location.object.type, imi2->initiator.location.object.gp_index);
+                    assert(obj2);
+                    if (obj1->logical_index != obj2->logical_index)
+                      goto roottoocomplex;
+                  } else {
+                    assert(0);
+                  }
+                }
+              } else {
+                if (imtg1->noinitiator_value != imtg2->noinitiator_value)
+                  goto roottoocomplex;
+              }
+            }
+          }
+        }
+
 	return err;
 
  roottoocomplex:

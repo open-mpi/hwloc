@@ -677,4 +677,15 @@ hwloc_utils_parse_distances_add_flags(char * str) {
   return hwloc_utils_parse_flags(str, possible_flags, (int) sizeof(possible_flags) / sizeof(possible_flags[0]), "distances_add");
 }
 
+static __hwloc_inline unsigned long
+hwloc_utils_parse_memattr_flags(char *str) {
+  struct hwloc_utils_parsing_flag possible_flags[] = {
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_MEMATTR_FLAG_HIGHER_FIRST),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_MEMATTR_FLAG_LOWER_FIRST),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_MEMATTR_FLAG_NEED_INITIATOR)
+  };
+
+  return hwloc_utils_parse_flags(str, possible_flags, (int) sizeof(possible_flags) / sizeof(possible_flags[0]), "memattr");
+}
+
 #endif /* HWLOC_UTILS_MISC_H */

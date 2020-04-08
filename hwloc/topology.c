@@ -1042,6 +1042,10 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   if (err < 0)
     goto out_with_topology;
 
+  err = hwloc_internal_memattrs_dup(new, old);
+  if (err < 0)
+    goto out_with_topology;
+
   /* we connected everything during duplication */
   new->modified = 0;
 
@@ -3589,6 +3593,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   hwloc__topology_filter_init(topology);
 
   hwloc_internal_distances_init(topology);
+  hwloc_internal_memattrs_init(topology);
 
   topology->userdata_export_cb = NULL;
   topology->userdata_import_cb = NULL;
@@ -3819,6 +3824,7 @@ hwloc_topology_clear (struct hwloc_topology *topology)
   /* no need to set to NULL after free() since callers will call setup_defaults() or just destroy the rest of the topology */
   unsigned l;
   hwloc_internal_distances_destroy(topology);
+  hwloc_internal_memattrs_destroy(topology);
   hwloc_free_object_and_children(topology->levels[0][0]);
   hwloc_bitmap_free(topology->allowed_cpuset);
   hwloc_bitmap_free(topology->allowed_nodeset);
@@ -3865,7 +3871,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
     return -1;
   }
 
+  /* initialize envvar-related things */
   hwloc_internal_distances_prepare(topology);
+  hwloc_internal_memattrs_prepare(topology);
 
   if (getenv("HWLOC_XML_USERDATA_NOT_DECODED"))
     topology->userdata_not_decoded = 1;
@@ -3955,6 +3963,10 @@ hwloc_topology_load (struct hwloc_topology *topology)
    * don't refresh() concurrently (disallowed).
    */
   hwloc_internal_distances_refresh(topology);
+
+  /* Same for memattrs */
+  hwloc_internal_memattrs_need_refresh(topology);
+  hwloc_internal_memattrs_refresh(topology);
 
   topology->is_loaded = 1;
 
@@ -4238,6 +4250,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
 
   /* some objects may have disappeared, we need to update distances objs arrays */
   hwloc_internal_distances_invalidate_cached_objs(topology);
+  hwloc_internal_memattrs_need_refresh(topology);
 
   hwloc_filter_levels_keep_structure(topology);
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);

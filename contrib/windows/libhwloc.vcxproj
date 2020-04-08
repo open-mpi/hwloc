@@ -202,6 +202,7 @@
     <ClCompile Include="..\..\hwloc\components.c" />
     <ClCompile Include="..\..\hwloc\diff.c" />
     <ClCompile Include="..\..\hwloc\distances.c" />
+    <ClCompile Include="..\..\hwloc\memattrs.c" />
     <ClCompile Include="..\..\hwloc\misc.c" />
     <ClCompile Include="..\..\hwloc\pci-common.c" />
     <ClCompile Include="..\..\hwloc\shmem.c" />
@@ -226,6 +227,7 @@
     <ClInclude Include="..\..\include\hwloc\export.h" />
     <ClInclude Include="..\..\include\hwloc\helper.h" />
     <ClInclude Include="..\..\include\hwloc\inlines.h" />
+    <ClInclude Include="..\..\include\hwloc\memattrs.h" />
     <ClInclude Include="..\..\include\hwloc\plugins.h" />
     <ClInclude Include="..\..\include\hwloc\shmem.h" />
     <ClInclude Include="..\..\include\hwloc\rename.h" />

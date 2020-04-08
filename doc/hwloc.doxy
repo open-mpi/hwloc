@@ -2415,6 +2415,10 @@ For reference, ::hwloc_topology_t modification operations include
   (see \ref hwlocality_distances_add) modify the list of distance structures
   in the topology, and the former may even insert new Group objects.
 
+  <tt>hwloc_memattr_register()</tt> and <tt>hwloc_memattr_set_value()</tt>
+  (see \ref hwlocality_memattrs_manage) modify the memory attributes
+  of the topology.
+
   <tt>hwloc_topology_restrict()</tt> modifies the topology even more
   dramatically by removing some objects.
 
@@ -2435,6 +2439,21 @@ For reference, ::hwloc_topology_t modification operations include
 
   Once this refresh has been performed, multiple <tt>hwloc_distances_get()</tt>
   may then be performed concurrently by multiple threads.
+  </dd>
+
+<dt>Consulting memory attributes</dt>
+  <dd>
+  Functions consulting memory attributes in hwloc/memattrs.h
+  are thread-safe except if the topology was recently modified
+  (because memory attributes may involve objects that were removed).
+
+  Whenever the topology is modified (see above), one dummy (but valid) call to
+  <tt>hwloc_memattr_get_value()</tt> or <tt>hwloc_memattr_get_targets()</tt>
+  should be performed in the same thread-safe context to force the refresh
+  of internal structures for a given attribute.
+
+  Once this refresh has been performed, multiple functions consulting
+  memory attributes may then be performed concurrently by multiple threads.
   </dd>
 
 <dt>Locating topologies</dt>

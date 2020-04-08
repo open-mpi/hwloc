@@ -97,6 +97,7 @@ hwloc_shmem_topology_write(hwloc_topology_t topology,
    * without being able to free() them.
    */
   hwloc_internal_distances_refresh(topology);
+  hwloc_internal_memattrs_refresh(topology);
 
   header.header_version = HWLOC_SHMEM_HEADER_VERSION;
   header.header_length = sizeof(header);
@@ -136,6 +137,7 @@ hwloc_shmem_topology_write(hwloc_topology_t topology,
 
   /* now refresh the new distances so that adopters can use them without refreshing the R/O shmem mapping */
   hwloc_internal_distances_refresh(new);
+  /* no need to refresh memattrs since we don't cache objects there */
 
   /* topology is saved, release resources now */
   munmap(mmap_address, length);

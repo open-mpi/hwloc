@@ -42,6 +42,18 @@
 
 #define HWLOC_TOPOLOGY_ABI 0x20300 /* version of the layout of struct topology */
 
+struct hwloc_internal_location_s {
+  enum hwloc_location_type_e type;
+  union {
+    struct {
+      uint64_t gp_index;
+      hwloc_obj_type_t type;
+      // TODO cache object ?
+    } object; /* if type == HWLOC_LOCATION_TYPE_OBJECT */
+    hwloc_cpuset_t cpuset; /* if type == HWLOC_LOCATION_TYPE_CPUSET */
+  } location;
+};
+
 /*****************************************************
  * WARNING:
  * changes below in this structure (and its children)
@@ -162,6 +174,37 @@ struct hwloc_topology {
     struct hwloc_internal_distances_s *prev, *next;
   } *first_dist, *last_dist;
   unsigned next_dist_id;
+
+  /* memory attributes */
+  unsigned nr_memattrs;
+  struct hwloc_internal_memattr_s {
+    /* memattr info */
+    char *name; /* TODO unit is implicit, in the documentation of standard attributes, or in the name? */
+    unsigned long flags;
+#define HWLOC_IMATTR_FLAG_STATIC_NAME (1U<<0) /* no need to free name */
+#define HWLOC_IMATTR_FLAG_CACHE_VALID (1U<<1) /* target and initiator are valid */
+#define HWLOC_IMATTR_FLAG_CONVENIENCE (1U<<2) /* convenience attribute reporting values from non-memattr attributes (R/O and no actual targets stored) */
+    unsigned iflags;
+
+    /* array of values */
+    unsigned nr_targets;
+    struct hwloc_internal_memattr_target_s {
+      /* target object */
+      hwloc_obj_type_t type;
+      unsigned os_index; /* only used temporarily during discovery when there's no obj/gp_index yet */
+      hwloc_uint64_t gp_index;
+      /* TODO cache the object */
+
+      /* value if there are no initiator for this attr */
+      hwloc_uint64_t noinitiator_value;
+      /* initiators otherwise */
+      unsigned nr_initiators;
+      struct hwloc_internal_memattr_initiator_s {
+        struct hwloc_internal_location_s initiator;
+        hwloc_uint64_t value;
+      } *initiators;
+    } *targets;
+  } *memattrs;
 
   int grouping;
   int grouping_verbose;
@@ -354,6 +397,14 @@ extern void hwloc_internal_distances_refresh(hwloc_topology_t topology);
 extern int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
 extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name, hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
 extern void hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology);
+
+extern void hwloc_internal_memattrs_init(hwloc_topology_t topology);
+extern void hwloc_internal_memattrs_prepare(hwloc_topology_t topology);
+extern void hwloc_internal_memattrs_destroy(hwloc_topology_t topology);
+extern void hwloc_internal_memattrs_need_refresh(hwloc_topology_t topology);
+extern void hwloc_internal_memattrs_refresh(hwloc_topology_t topology);
+extern int hwloc_internal_memattrs_dup(hwloc_topology_t new, hwloc_topology_t old);
+extern int hwloc_internal_memattr_set_value(hwloc_topology_t topology, hwloc_memattr_id_t id, hwloc_obj_type_t target_type, hwloc_uint64_t target_gp_index, unsigned target_os_index, struct hwloc_internal_location_s *initiator, hwloc_uint64_t value);
 
 /* encode src buffer into target buffer.
  * targsize must be at least 4*((srclength+2)/3)+1.

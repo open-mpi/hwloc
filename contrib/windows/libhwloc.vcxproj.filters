@@ -33,6 +33,9 @@
     <ClCompile Include="..\..\hwloc\distances.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\hwloc\memattrs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\hwloc\misc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hwloc\inlines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hwloc\memattrs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hwloc\plugins.h">
