@@ -1567,6 +1567,186 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
 }
 
 static int
+hwloc__xml_import_memattr_value(hwloc_topology_t topology,
+                                hwloc_memattr_id_t id,
+                                unsigned long flags,
+                                hwloc__xml_import_state_t state)
+{
+  char *target_obj_gp_index_s = NULL;
+  char *target_obj_type_s = NULL;
+  hwloc_uint64_t target_obj_gp_index;
+  char *value_s = NULL;
+  hwloc_uint64_t value;
+  char *initiator_cpuset_s = NULL;
+  char *initiator_obj_gp_index_s = NULL;
+  char *initiator_obj_type_s = NULL;
+  hwloc_obj_type_t target_obj_type = HWLOC_OBJ_TYPE_NONE;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "target_obj_gp_index"))
+      target_obj_gp_index_s = attrvalue;
+    else if (!strcmp(attrname, "target_obj_type"))
+      target_obj_type_s = attrvalue;
+    else if (!strcmp(attrname, "value"))
+      value_s = attrvalue;
+    else if (!strcmp(attrname, "initiator_cpuset"))
+      initiator_cpuset_s = attrvalue;
+    else if (!strcmp(attrname, "initiator_obj_gp_index"))
+      initiator_obj_gp_index_s = attrvalue;
+    else if (!strcmp(attrname, "initiator_obj_type"))
+      initiator_obj_type_s = attrvalue;
+    else {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: ignoring unknown memattr_value attribute %s\n",
+                state->global->msgprefix, attrname);
+      return -1;
+    }
+  }
+
+  if (!target_obj_type_s) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring memattr_value without target_obj_type.\n",
+              state->global->msgprefix);
+    return -1;
+  }
+  if (hwloc_type_sscanf(target_obj_type_s, &target_obj_type, NULL, 0) < 0) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: failed to identify memattr_value target object type %s\n",
+              state->global->msgprefix, target_obj_type_s);
+    return -1;
+  }
+
+  if (!value_s || !target_obj_gp_index_s) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring memattr_value without value and target_obj_gp_index\n",
+              state->global->msgprefix);
+    return -1;
+  }
+  target_obj_gp_index = strtoull(target_obj_gp_index_s, NULL, 10);
+  value = strtoull(value_s, NULL, 10);
+
+  if (flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR) {
+    /* add a value with initiator */
+    struct hwloc_internal_location_s loc;
+    if (!initiator_cpuset_s && (!initiator_obj_gp_index_s || !initiator_obj_type_s)) {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: ignoring memattr_value without initiator attributes\n",
+                state->global->msgprefix);
+      return -1;
+    }
+
+    /* setup the initiator */
+    if (initiator_cpuset_s) {
+      loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+      loc.location.cpuset = hwloc_bitmap_alloc();
+      if (!loc.location.cpuset) {
+        if (hwloc__xml_verbose())
+          fprintf(stderr, "%s: failed to allocated memattr_value initiator cpuset\n",
+                  state->global->msgprefix);
+        return -1;
+      }
+      hwloc_bitmap_sscanf(loc.location.cpuset, initiator_cpuset_s);
+    } else {
+      loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+      loc.location.object.gp_index = strtoull(initiator_obj_gp_index_s, NULL, 10);
+      if (hwloc_type_sscanf(initiator_obj_type_s, &loc.location.object.type, NULL, 0) < 0) {
+        if (hwloc__xml_verbose())
+          fprintf(stderr, "%s: failed to identify memattr_value initiator object type %s\n",
+                  state->global->msgprefix, initiator_obj_type_s);
+        return -1;
+      }
+    }
+
+    hwloc_internal_memattr_set_value(topology, id, target_obj_type, target_obj_gp_index, (unsigned)-1, &loc, value);
+
+    if (loc.type == HWLOC_LOCATION_TYPE_CPUSET)
+      hwloc_bitmap_free(loc.location.cpuset);
+
+  } else {
+    /* add a value without initiator */
+    hwloc_internal_memattr_set_value(topology, id, target_obj_type, target_obj_gp_index, (unsigned)-1, NULL, value);
+  }
+
+  return 0;
+}
+
+static int
+hwloc__xml_import_memattr(hwloc_topology_t topology,
+                          hwloc__xml_import_state_t state)
+{
+  char *name = NULL;
+  unsigned long flags = (unsigned long) -1;
+  hwloc_memattr_id_t id = (hwloc_memattr_id_t) -1;
+  int ret;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "name"))
+      name = attrvalue;
+    else if (!strcmp(attrname, "flags"))
+      flags = strtoul(attrvalue, NULL, 10);
+    else {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: ignoring unknown memattr attribute %s\n",
+                state->global->msgprefix, attrname);
+      return -1;
+    }
+  }
+
+  if (name && flags != (unsigned long) -1) {
+    hwloc_memattr_id_t _id;
+
+    ret = hwloc_memattr_get_by_name(topology, name, &_id);
+    if (ret < 0) {
+      /* register a new attribute */
+      ret = hwloc_memattr_register(topology, name, flags, &_id);
+      if (!ret)
+        id = _id;
+    } else {
+      /* check the flags of the existing attribute  */
+      unsigned long mflags;
+      ret = hwloc_memattr_get_flags(topology, _id, &mflags);
+      if (!ret && mflags == flags)
+        id = _id;
+    }
+    /* if there's no matching attribute, id is -1 and values will be ignored below */
+  }
+
+  while (1) {
+    struct hwloc__xml_import_state_s childstate;
+    char *tag;
+
+    ret = state->global->find_child(state, &childstate, &tag);
+    if (ret <= 0)
+      break;
+
+    if (!strcmp(tag, "memattr_value")) {
+      ret = hwloc__xml_import_memattr_value(topology, id, flags, &childstate);
+    } else {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: memattr with unrecognized child %s\n",
+                state->global->msgprefix, tag);
+      ret = -1;
+    }
+
+    if (ret < 0)
+      goto error;
+
+    state->global->close_child(&childstate);
+  }
+
+  return state->global->close_tag(state);
+
+ error:
+  return -1;
+}
+
+static int
 hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 			   hwloc_topology_diff_t *firstdiffp,
 			   hwloc_topology_diff_t *lastdiffp)
@@ -1838,6 +2018,10 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	ret = hwloc__xml_v2import_support(topology, &childstate);
 	if (ret < 0)
 	  goto failed;
+      } else if (!strcmp(tag, "memattr")) {
+        ret = hwloc__xml_import_memattr(topology, &childstate);
+        if (ret < 0)
+          goto failed;
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
@@ -2771,6 +2955,88 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
 #undef DO
 }
 
+static void
+hwloc__xml_export_memattr_target(hwloc__xml_export_state_t state,
+                                 struct hwloc_internal_memattr_s *imattr,
+                                 struct hwloc_internal_memattr_target_s *imtg)
+{
+  struct hwloc__xml_export_state_s vstate;
+  char tmp[255];
+
+  if (imattr->flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR) {
+    /* export all initiators */
+    unsigned k;
+    for(k=0; k<imtg->nr_initiators; k++) {
+      struct hwloc_internal_memattr_initiator_s *imi = &imtg->initiators[k];
+      state->new_child(state, &vstate, "memattr_value");
+      vstate.new_prop(&vstate, "target_obj_type", hwloc_obj_type_string(imtg->type));
+      snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long) imtg->gp_index);
+      vstate.new_prop(&vstate, "target_obj_gp_index", tmp);
+      snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long) imi->value);
+      vstate.new_prop(&vstate, "value", tmp);
+      switch (imi->initiator.type) {
+      case HWLOC_LOCATION_TYPE_OBJECT:
+        snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long) imi->initiator.location.object.gp_index);
+        vstate.new_prop(&vstate, "initiator_obj_gp_index", tmp);
+        vstate.new_prop(&vstate, "initiator_obj_type", hwloc_obj_type_string(imi->initiator.location.object.type));
+        break;
+      case HWLOC_LOCATION_TYPE_CPUSET: {
+        char *setstring;
+        hwloc_bitmap_asprintf(&setstring, imi->initiator.location.cpuset);
+        if (setstring)
+          vstate.new_prop(&vstate, "initiator_cpuset", setstring);
+        free(setstring);
+        break;
+      }
+      default:
+        assert(0);
+      }
+      vstate.end_object(&vstate, "memattr_value");
+    }
+  } else {
+    /* just export the global value */
+    state->new_child(state, &vstate, "memattr_value");
+    vstate.new_prop(&vstate, "target_obj_type", hwloc_obj_type_string(imtg->type));
+    snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long) imtg->gp_index);
+    vstate.new_prop(&vstate, "target_obj_gp_index", tmp);
+    snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long) imtg->noinitiator_value);
+    vstate.new_prop(&vstate, "value", tmp);
+    vstate.end_object(&vstate, "memattr_value");
+  }
+}
+
+static void
+hwloc__xml_export_memattrs(hwloc__xml_export_state_t state, hwloc_topology_t topology)
+{
+  unsigned id;
+  for(id=0; id<topology->nr_memattrs; id++) {
+    struct hwloc_internal_memattr_s *imattr;
+    struct hwloc__xml_export_state_s mstate;
+    char tmp[255];
+    unsigned j;
+
+    if (id == HWLOC_MEMATTR_ID_CAPACITY || id == HWLOC_MEMATTR_ID_LOCALITY)
+      /* no need to export virtual memattrs */
+      continue;
+
+    imattr = &topology->memattrs[id];
+    if ((id == HWLOC_MEMATTR_ID_LATENCY || id == HWLOC_MEMATTR_ID_BANDWIDTH)
+        && !imattr->nr_targets)
+      /* no need to export target-less attributes for initial attributes, no release support attributes without those definitions */
+      continue;
+
+    state->new_child(state, &mstate, "memattr");
+    mstate.new_prop(&mstate, "name", imattr->name);
+    snprintf(tmp, sizeof(tmp), "%lu", imattr->flags);
+    mstate.new_prop(&mstate, "flags", tmp);
+
+    for(j=0; j<imattr->nr_targets; j++)
+      hwloc__xml_export_memattr_target(&mstate, imattr, &imattr->targets[j]);
+
+    mstate.end_object(&mstate, "memattr");
+  }
+}
+
 void
 hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology, unsigned long flags)
 {
@@ -2820,6 +3086,7 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
     env = getenv("HWLOC_XML_EXPORT_SUPPORT");
     if (!env || atoi(env))
       hwloc__xml_v2export_support(state, topology);
+    hwloc__xml_export_memattrs(state, topology);
   }
 }
 

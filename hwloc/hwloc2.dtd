@@ -7,7 +7,7 @@
   This is the DTD for hwloc v2.x XMLs.
  -->
 
-<!ELEMENT topology (object+,distances2*,distances2hetero*,support*)>
+<!ELEMENT topology (object+,distances2*,distances2hetero*,support*,memattr*)>
 <!ATTLIST topology version CDATA "">
 
 <!ELEMENT object (page_type*,info*,userdata*,object*)>
@@ -56,6 +56,18 @@
 <!ELEMENT distances2hetero (indexes+,u64values+)>
 <!ATTLIST distances2hetero nbobjs CDATA #REQUIRED>
 <!ATTLIST distances2hetero kind CDATA #REQUIRED>
+
+<!ELEMENT memattr (memattr_value*)>
+<!ATTLIST memattr name CDATA #REQUIRED>
+<!ATTLIST memattr flags CDATA #REQUIRED>
+
+<!ELEMENT memattr_value EMPTY>
+<!ATTLIST memattr_value target_obj_gp_index CDATA "">
+<!ATTLIST memattr_value target_obj_type CDATA #REQUIRED>
+<!ATTLIST memattr_value value CDATA #REQUIRED>
+<!ATTLIST memattr_value initiator_cpuset CDATA "">
+<!ATTLIST memattr_value initiator_obj_gp_index CDATA "">
+<!ATTLIST memattr_value initiator_obj_type CDATA "">
 
 <!ELEMENT indexes (#PCDATA)>
 <!ATTLIST indexes length CDATA #REQUIRED>
