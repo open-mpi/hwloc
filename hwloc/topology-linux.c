@@ -3201,6 +3201,7 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
 			    hwloc_obj_t ddr, hwloc_obj_t mcdram,
 			    struct knl_hwdata *knl_hwdata,
 			    int mscache_as_l3,
+                            int snclevel,
 			    unsigned *failednodes)
 {
   hwloc_obj_t cluster = NULL;
@@ -3231,8 +3232,10 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
       ddr = NULL;
     }
     res = hwloc__attach_memory_object(topology, cluster, mcdram, "linux:knl:snc:mcdram");
-    if (res != mcdram)
+    if (res != mcdram) {
       (*failednodes)++;
+      mcdram = NULL;
+    }
 
   } else {
     /* we don't know where to attach, let the core find or insert if needed */
@@ -3244,9 +3247,24 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
     }
     if (mcdram) {
       res = hwloc__insert_object_by_cpuset(topology, NULL, mcdram, "linux:knl:mcdram");
-      if (res != mcdram)
+      if (res != mcdram) {
 	(*failednodes)++;
+        mcdram = NULL;
+      }
     }
+  }
+
+  if (ddr && mcdram) {
+    /* add memattrs to distinguish DDR and MCDRAM */
+    struct hwloc_internal_location_s loc;
+    hwloc_uint64_t ddrbw;
+    hwloc_uint64_t mcdrambw;
+    ddrbw = 90000/snclevel;
+    mcdrambw = 360000/snclevel;
+    loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+    loc.location.cpuset = ddr->cpuset;
+    hwloc_internal_memattr_set_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH, HWLOC_OBJ_NUMANODE, (hwloc_uint64_t)-1, ddr->os_index, &loc, ddrbw);
+    hwloc_internal_memattr_set_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH, HWLOC_OBJ_NUMANODE, (hwloc_uint64_t)-1, mcdram->os_index, &loc, mcdrambw);
   }
 
   if (ddr && knl_hwdata->mcdram_cache_size > 0) {
@@ -3349,7 +3367,7 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
 	fprintf(stderr, "Found %u NUMA nodes instead of 1 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
-      hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, 1, failednodes);
 
     } else {
       /* Quadrant-Flat/Hybrid */
@@ -3359,7 +3377,7 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
       }
       if (!strcmp(hwdata.memory_mode, "Flat"))
 	hwdata.mcdram_cache_size = 0;
-      hwloc_linux_knl_add_cluster(topology, nodes[0], nodes[1], &hwdata, mscache_as_l3, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[0], nodes[1], &hwdata, mscache_as_l3, 1, failednodes);
     }
 
   } else if (!strcmp(hwdata.cluster_mode, "SNC2")) {
@@ -3369,8 +3387,8 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
 	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
-      hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, failednodes);
-      hwloc_linux_knl_add_cluster(topology, nodes[1], NULL, &hwdata, mscache_as_l3, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, 2, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[1], NULL, &hwdata, mscache_as_l3, 2, failednodes);
 
     } else {
       /* SNC2-Flat/Hybrid */
@@ -3385,8 +3403,8 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
       }
       if (!strcmp(hwdata.memory_mode, "Flat"))
 	hwdata.mcdram_cache_size = 0;
-      hwloc_linux_knl_add_cluster(topology, nodes[ddr[0]], nodes[mcdram[0]], &hwdata, mscache_as_l3, failednodes);
-      hwloc_linux_knl_add_cluster(topology, nodes[ddr[1]], nodes[mcdram[1]], &hwdata, mscache_as_l3, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[0]], nodes[mcdram[0]], &hwdata, mscache_as_l3, 2, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[1]], nodes[mcdram[1]], &hwdata, mscache_as_l3, 2, failednodes);
     }
 
   } else if (!strcmp(hwdata.cluster_mode, "SNC4")) {
@@ -3396,10 +3414,10 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
 	fprintf(stderr, "Found %u NUMA nodes instead of 4 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
-      hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, failednodes);
-      hwloc_linux_knl_add_cluster(topology, nodes[1], NULL, &hwdata, mscache_as_l3, failednodes);
-      hwloc_linux_knl_add_cluster(topology, nodes[2], NULL, &hwdata, mscache_as_l3, failednodes);
-      hwloc_linux_knl_add_cluster(topology, nodes[3], NULL, &hwdata, mscache_as_l3, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, 4, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[1], NULL, &hwdata, mscache_as_l3, 4, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[2], NULL, &hwdata, mscache_as_l3, 4, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[3], NULL, &hwdata, mscache_as_l3, 4, failednodes);
 
     } else {
       /* SNC4-Flat/Hybrid */
@@ -3414,10 +3432,10 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
       }
       if (!strcmp(hwdata.memory_mode, "Flat"))
 	hwdata.mcdram_cache_size = 0;
-      hwloc_linux_knl_add_cluster(topology, nodes[ddr[0]], nodes[mcdram[0]], &hwdata, mscache_as_l3, failednodes);
-      hwloc_linux_knl_add_cluster(topology, nodes[ddr[1]], nodes[mcdram[1]], &hwdata, mscache_as_l3, failednodes);
-      hwloc_linux_knl_add_cluster(topology, nodes[ddr[2]], nodes[mcdram[2]], &hwdata, mscache_as_l3, failednodes);
-      hwloc_linux_knl_add_cluster(topology, nodes[ddr[3]], nodes[mcdram[3]], &hwdata, mscache_as_l3, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[0]], nodes[mcdram[0]], &hwdata, mscache_as_l3, 4, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[1]], nodes[mcdram[1]], &hwdata, mscache_as_l3, 4, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[2]], nodes[mcdram[2]], &hwdata, mscache_as_l3, 4, failednodes);
+      hwloc_linux_knl_add_cluster(topology, nodes[ddr[3]], nodes[mcdram[3]], &hwdata, mscache_as_l3, 4, failednodes);
     }
   }
 
