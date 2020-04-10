@@ -3,6 +3,8 @@
 # See COPYING in top-level directory.
 #
 
+# This file is also compatible with zsh (once bashcompinit is enabled)
+
 # bash < 4 doesn't support compopt
 [[ -z "$ZSH_VERSION" ]] && [[ "${BASH_VERSINFO[0]:-0}" -lt 4 ]] && return
 # TODO only disable the nospace completion of "--filter"
