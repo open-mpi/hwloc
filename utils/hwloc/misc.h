@@ -610,6 +610,98 @@ hwloc_utils_parse_flags(char * str, struct hwloc_utils_parsing_flag possible_fla
   return ul_flags;
 }
 
+static __hwloc_inline hwloc_memattr_id_t
+hwloc_utils_parse_memattr_name(hwloc_topology_t topo, const char *str)
+{
+  const char *name;
+  hwloc_memattr_id_t id;
+  int err;
+  /* try by name, case insensitive */
+  for(id=0; ; id++) {
+    err = hwloc_memattr_get_name(topo, id, &name);
+    if (err < 0)
+      break;
+    if (!strcasecmp(name, str))
+      return id;
+  }
+  /* try by id */
+  if (*str < '0' || *str > '9')
+    return (hwloc_memattr_id_t) -1;
+  id = atoi(str);
+  err = hwloc_memattr_get_name(topo, id, &name);
+  if (err < 0)
+    return (hwloc_memattr_id_t) -1;
+  else
+    return id;
+}
+
+static __hwloc_inline int
+hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_memattr_id_t id,
+                                              unsigned nbnodes, hwloc_obj_t *nodes,
+                                              struct hwloc_location *initiator)
+{
+  unsigned nbtgs, i, j;
+  hwloc_obj_t *tgs;
+  int best;
+  hwloc_uint64_t *values, bestvalue;
+  unsigned long mflags;
+  int err;
+
+  err = hwloc_memattr_get_flags(topology, id, &mflags);
+  if (err < 0)
+    goto out;
+
+  nbtgs = 0;
+  err = hwloc_memattr_get_targets(topology, id, initiator, 0, &nbtgs, NULL, NULL);
+  if (err < 0)
+    goto out;
+
+  tgs = malloc(nbtgs * sizeof(*tgs));
+  values = malloc(nbtgs * sizeof(*values));
+  if (!tgs || !values)
+    goto out_with_arrays;
+
+  err = hwloc_memattr_get_targets(topology, id, initiator, 0, &nbtgs, tgs, values);
+  if (err < 0)
+    goto out_with_arrays;
+
+  best = -1;
+  bestvalue = 0;
+  for(i=0; i<nbnodes; i++) {
+    for(j=0; j<nbtgs; j++)
+      if (tgs[j] == nodes[i])
+        break;
+    if (j==nbtgs)
+      /* no target info for this node */
+      continue;
+    if (best == -1) {
+      best = i;
+      bestvalue = values[j];
+    } else if (mflags & HWLOC_MEMATTR_FLAG_HIGHER_FIRST) {
+      if (values[j] > bestvalue) {
+        best = i;
+        bestvalue = values[j];
+      }
+    } else {
+      assert(mflags & HWLOC_MEMATTR_FLAG_LOWER_FIRST);
+      if (values[j] < bestvalue) {
+        best = i;
+        bestvalue = values[j];
+      }
+    }
+  }
+
+  free(tgs);
+  free(values);
+  return best;
+
+ out_with_arrays:
+  free(tgs);
+  free(values);
+ out:
+  return -1;
+}
+
 static __hwloc_inline unsigned long
 hwloc_utils_parse_restrict_flags(char * str){
   struct hwloc_utils_parsing_flag possible_flags[] = {

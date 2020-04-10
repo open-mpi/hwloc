@@ -28,6 +28,9 @@ static int show_ancestor_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_children = 0;
 static int show_descendants_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_index_prefix = 0;
+static int show_local_memory = 0;
+static int show_local_memory_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY;
+static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
 static unsigned current_obj;
 
 void usage(const char *name, FILE *where)
@@ -43,6 +46,9 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --ancestor <type>     Only display the ancestor of the given type\n");
   fprintf (where, "  --children            Display all children\n");
   fprintf (where, "  --descendants <type>  Only display descendants of the given type\n");
+  fprintf (where, "  --local-memory        Only display the local memory nodes\n");
+  fprintf (where, "  --local-memory-flags <x>   Change flags for selecting local memory nodes\n");
+  fprintf (where, "  --best-memattr <attr> Only display the best target among the local nodes\n");
   fprintf (where, "  -n                    Prefix each line with the index of the considered object\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --restrict [nodeset=]<bitmap>\n");
@@ -384,6 +390,59 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
 	i++;
       }
     }
+  } else if (show_local_memory) {
+    unsigned nrnodes;
+    hwloc_obj_t *nodes;
+    nrnodes = hwloc_bitmap_weight(hwloc_topology_get_topology_nodeset(topology));
+    nodes = malloc(nrnodes * sizeof(*nodes));
+    if (nodes) {
+      struct hwloc_location loc;
+      int err;
+      loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+      loc.location.object = obj;
+      err = hwloc_get_local_numanode_objs(topology, &loc, &nrnodes, nodes, show_local_memory_flags);
+      if (!err) {
+        unsigned i;
+        if (best_memattr_id != (hwloc_memattr_id_t) -1) {
+          /* only keep the best one for that memattr */
+          int best;
+
+          /* won't work if obj is CPU-less: perf from I/O is likely different from perf from CPU objects */
+          loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+          loc.location.cpuset = obj->cpuset;
+          best = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id,
+                                                               nrnodes, nodes, &loc);
+          if (best == -1) {
+            /* no perf info found, report nothing */
+            if (verbose > 0)
+              fprintf(stderr, "Failed to find a best local node for memory attribute.\n");
+            nrnodes = 0;
+          } else {
+            /* only report the best node, but keep the index intact */
+            for(i=0; i<nrnodes; i++)
+              if (i != (unsigned) best)
+                nodes[i] = NULL;
+          }
+        }
+        for(i=0; i<nrnodes; i++) {
+          char nodestr[128];
+          if (!nodes[i])
+            continue;
+          if (show_index_prefix)
+	    snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
+          hwloc_obj_type_snprintf(nodestr, sizeof(nodestr), nodes[i], 1);
+          if (verbose < 0)
+            printf("%s%s:%u\n", prefix, nodestr, nodes[i]->logical_index);
+          else
+            printf("%s%s L#%u = local memory #%u of %s L#%u\n",
+                   prefix, nodestr, nodes[i]->logical_index, i, objs, obj->logical_index);
+          hwloc_info_show_obj(topology, nodes[i], nodestr, prefix, verbose);
+        }
+      }
+    } else {
+      fprintf(stderr, "Failed to allocate array of local NUMA nodes\n");
+    }
+    free(nodes);
   } else {
     if (verbose < 0)
       printf("%s%s:%u\n", prefix, objs, obj->logical_index);
@@ -408,6 +467,7 @@ main (int argc, char *argv[])
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   const char *show_ancestor_type = NULL;
   const char *show_descendants_type = NULL;
+  const char *best_memattr_str = NULL;
   char *restrictstring = NULL;
   size_t typelen;
   int opt;
@@ -475,6 +535,26 @@ main (int argc, char *argv[])
 	}
 	show_descendants_type = argv[1];
 	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--local-memory"))
+        show_local_memory = 1;
+      else if (!strcmp (argv[0], "--local-memory-flags")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        show_local_memory = 1;
+	show_local_memory_flags = hwloc_utils_parse_local_numanode_flags(argv[1]);
+	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--best-memattr")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        show_local_memory = 1;
+        best_memattr_str = argv[1];
+        opt = 1;
       }
       else if (!strcmp (argv[0], "--filter")) {
         hwloc_obj_type_t type;
@@ -672,6 +752,16 @@ main (int argc, char *argv[])
     }
     hwloc_bitmap_free(restrictset);
     free(restrictstring);
+  }
+
+  if (best_memattr_str) {
+    if (!show_local_memory)
+      fprintf(stderr, "--best-memattr is ignored without --local-memory.\n");
+    best_memattr_id = hwloc_utils_parse_memattr_name(topology, best_memattr_str);
+    if (best_memattr_id == (hwloc_memattr_id_t) -1) {
+      fprintf(stderr, "unrecognized memattr %s\n", best_memattr_str);
+      return EXIT_FAILURE;
+    }
   }
 
   if (mode == HWLOC_INFO_MODE_UNKNOWN) {

@@ -150,6 +150,9 @@ _hwloc_info(){
 		   --ancestor
 		   --children
 		   --descendants
+		   --local-memory
+		   --local-memory-flags
+		   --best-memattr
 		   -n
 		   --restrict
 		   --filter
@@ -195,6 +198,12 @@ _hwloc_info(){
 		;;
 	    --ancestor | --descendants)
 		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
+		;;
+	    --local-memory-flags)
+		COMPREPLY=( "<flags>" "" )
+		;;
+	    --best-memattr)
+		COMPREPLY=( "<memattr>" "" )
 		;;
 	esac
     fi

@@ -42,6 +42,8 @@ Version 2.3.0
 * Tools
   + Command-line options for specifying flags now understand comma-separated
     lists of flag names (substrings).
+  + hwloc-info has new --local-memory --local-memoty-flags and --best-memattr
+    options for reporting local memory nodes and filtering by memory attributes.
   + Tools that have a --restrict option may now receive a nodeset or
     some custom flags for restricting the topology.
   + Fix lstopo drawing when autoresizing on Windows 10.
