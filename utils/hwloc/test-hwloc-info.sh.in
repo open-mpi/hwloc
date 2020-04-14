@@ -74,6 +74,38 @@ set -e
   echo "# L1d descendants of Core range, silent"
   $info --if synthetic --input "node:2 core:2 l2:2 l1d:2 pu:2" --descendants l1d -s core:1-2
   echo
+
+  echo "# 2 local memory for one PU"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory pu:8
+  echo
+  echo "# 2 local-or-larger memories for one PU, silent"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory-flags larger -s pu:8
+  echo
+  echo "# no local-or-larger memory for root, silent"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory-flags larger -s root
+  echo
+  echo "# no local-or-smaller memory for one PU, silent"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory-flags smaller -s pu:8
+  echo
+  echo "# 3 local-or-smaller memories for on Package, silent"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory-flags smaller -s pack:1
+  echo
+  echo "# no strict-local memory for one PU, silent"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory-flags none -s pu:8
+  echo
+  echo "# 1 strict-local memory for one NUMANode, silent"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory-flags none -s node:1
+  echo
+  echo "# 12 local-all memories for one PU, silent"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory-flags all\$ -s pu:3
+  echo
+  echo "# only the smallest locality among 2 local-or-larger memories for one PU, silent"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] core:4 pu:2" --local-memory-flags larger --best-memattr locality -s pu:63
+  echo
+  echo "# only the highest capacity among 2 local-or-larger memories for one PU, silent"
+  $info --if synthetic --input "pack:4 [numa(memory=1000000)] l3:2 [numa(memory=1000)] core:4 pu:2" --local-memory-flags larger --best-memattr capacity -s pu:63
+  echo
+
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-info.output "$file"
 rm -rf "$tmp"
