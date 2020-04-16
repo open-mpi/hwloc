@@ -872,8 +872,8 @@ hwloc_distrib(hwloc_topology_t topology,
     unsigned chunk, weight;
     hwloc_obj_t root = roots[flags & HWLOC_DISTRIB_FLAG_REVERSE ? n_roots-1-i : i];
     hwloc_cpuset_t cpuset = root->cpuset;
-    if (root->type == HWLOC_OBJ_NUMANODE)
-      /* NUMANodes have same cpuset as their parent, but we need normal objects below */
+    while (!hwloc_obj_type_is_normal(root->type))
+      /* If memory/io/misc, walk up to normal parent */
       root = root->parent;
     weight = (unsigned) hwloc_bitmap_weight(cpuset);
     if (!weight)
