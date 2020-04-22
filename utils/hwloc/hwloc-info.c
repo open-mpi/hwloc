@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -44,7 +44,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --descendants <type>  Only display descendants of the given type\n");
   fprintf (where, "  -n                    Prefix each line with the index of the considered object\n");
   fprintf (where, "Object filtering options:\n");
-  fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
+  fprintf (where, "  --restrict [nodeset=]<bitmap>\n");
+  fprintf (where, "                        Restrict the topology to some processors or NUMA nodes.\n");
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
   fprintf (where, "  --filter <type>:<knd> Filter objects of the given type, or all.\n");
   fprintf (where, "     <knd> may be `all' (keep all), `none' (remove all), `structure' or `important'\n");
@@ -339,6 +340,7 @@ main (int argc, char *argv[])
   hwloc_topology_t topology;
   int topodepth;
   unsigned long flags = 0;
+  unsigned long restrict_flags = 0;
   char * callname;
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
@@ -484,7 +486,12 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	restrictstring = strdup(argv[1]);
+        if(strncmp(argv[1], "nodeset=", 8)) {
+          restrictstring = strdup(argv[1]);
+        } else {
+          restrictstring = strdup(argv[1]+8);
+          restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
+        }
 	opt = 1;
       }
 
@@ -588,7 +595,7 @@ main (int argc, char *argv[])
     } else {
       hwloc_bitmap_sscanf(restrictset, restrictstring);
     }
-    err = hwloc_topology_restrict (topology, restrictset, 0);
+    err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
     if (err) {
       perror("Restricting the topology");
       /* FALLTHRU */

@@ -47,7 +47,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --no-smt                  Only keep a single PU per core\n");
-  fprintf(where, "  --restrict <cpuset>       Restrict the topology to processors listed in <cpuset>\n");
+  fprintf(where, "  --restrict [nodeset=]<bitmap>\n");
+  fprintf(where, "                            Restrict the topology to some processors or NUMA nodes.\n");
   fprintf(where, "  --disallowed              Include objects disallowed by administrative limitations\n");
   hwloc_utils_input_format_usage(where, 10);
   fprintf(where, "Miscellaneous options:\n");
@@ -231,6 +232,7 @@ int main(int argc, char *argv[])
   hwloc_topology_t topology;
   int loaded = 0;
   unsigned long flags = 0;
+  unsigned long restrict_flags = 0;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   int depth = 0;
@@ -317,9 +319,14 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	restrictset = hwloc_bitmap_alloc();
-	hwloc_bitmap_sscanf(restrictset, argv[1]);
+        if(strncmp(argv[1], "nodeset=", 8)) {
+          hwloc_bitmap_sscanf(restrictset, argv[1]);
+        } else {
+          hwloc_bitmap_sscanf(restrictset, argv[1]+8);
+          restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
+        }
 	ENSURE_LOADED();
-	err = hwloc_topology_restrict (topology, restrictset, 0);
+        err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
 	if (err) {
 	  perror("Restricting the topology");
 	  /* FALLTHRU */
@@ -519,7 +526,6 @@ int main(int argc, char *argv[])
 #define HWLOC_CALC_LINE_LEN 64
     size_t len = HWLOC_CALC_LINE_LEN;
     char * line = malloc(len);
-
     while (1) {
       char *current, *tmpline;
 

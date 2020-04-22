@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -51,7 +51,8 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --no-smt       Only keep a single PU per core\n");
-  fprintf(where, "  --restrict <set>   Restrict the topology to processors listed in <set>\n");
+  fprintf(where, "  --restrict [nodeset=]<bitmap>\n");
+  fprintf(where, "                 Restrict the topology to some processors or NUMA nodes.\n");
   fprintf(where, "  --disallowed   Include objects disallowed by administrative limitations\n");
   fprintf(where, "  --hbm          Only consider high bandwidth memory nodes\n");
   fprintf(where, "  --no-hbm       Ignore high-bandwidth memory nodes\n");
@@ -74,6 +75,7 @@ int main(int argc, char *argv[])
   int use_nodeset = 0;
   int get_last_cpu_location = 0;
   unsigned long flags = 0;
+  unsigned long restrict_flags = 0;
   int force = 0;
   int single = 0;
   int verbose = 0;
@@ -261,9 +263,14 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	restrictset = hwloc_bitmap_alloc();
-	hwloc_bitmap_sscanf(restrictset, argv[1]);
+        if(strncmp(argv[1], "nodeset=", 8)) {
+          hwloc_bitmap_sscanf(restrictset, argv[1]);
+        } else {
+          hwloc_bitmap_sscanf(restrictset, argv[1]+8);
+          restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
+        }
 	ENSURE_LOADED();
-	err = hwloc_topology_restrict (topology, restrictset, 0);
+        err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
 	if (err) {
 	  perror("Restricting the topology");
 	  /* FALLTHRU */

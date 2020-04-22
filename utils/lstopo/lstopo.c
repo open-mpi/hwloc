@@ -384,7 +384,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --merge               Do not show levels that do not have a hierarchical\n"
                   "                        impact\n");
   fprintf (where, "  --no-collapse         Do not collapse identical PCI devices\n");
-  fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
+  fprintf (where, "  --restrict [nodeset=]<bitmap>\n");
+  fprintf (where, "                        Restrict the topology to some processors or NUMA nodes.\n");
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
   fprintf (where, "  --restrict-flags <n>  Set the flags to be used during restrict\n");
   fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
@@ -914,7 +915,12 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--restrict")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	restrictstring = strdup(argv[1]);
+        if(strncmp(argv[1], "nodeset=", 8)) {
+          restrictstring = strdup(argv[1]);
+        } else {
+          restrictstring = strdup(argv[1]+8);
+          restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
+        }
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--restrict-flags")) {

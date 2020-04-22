@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -24,7 +24,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --at <type>      Distribute among objects of the given type\n");
   fprintf(where, "  --reverse        Distribute by starting from last objects\n");
   fprintf(where, "Input topology options:\n");
-  fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
+  fprintf(where, "  --restrict [nodeset=]<bitmap>\n");
+  fprintf(where, "                   Restrict the topology to some processors or NUMA nodes.\n");
   fprintf(where, "  --disallowed     Include objects disallowed by administrative limitations\n");
   hwloc_utils_input_format_usage(where, 0);
   fprintf(where, "Formatting options:\n");
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
   const char *from_type = NULL, *to_type = NULL;
   hwloc_topology_t topology;
   unsigned long flags = 0;
+  unsigned long restrict_flags = 0;
   unsigned long dflags = 0;
   int opt;
   int err;
@@ -155,7 +157,12 @@ int main(int argc, char *argv[])
 	  usage (callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	restrictstring = strdup(argv[1]);
+        if(strncmp(argv[1], "nodeset=", 8)) {
+          restrictstring = strdup(argv[1]);
+        } else {
+          restrictstring = strdup(argv[1]+8);
+          restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
+        }
 	argc--;
 	argv++;
 	goto next;
@@ -216,7 +223,7 @@ int main(int argc, char *argv[])
     if (restrictstring) {
       hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
       hwloc_bitmap_sscanf(restrictset, restrictstring);
-      err = hwloc_topology_restrict (topology, restrictset, 0);
+      err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
       if (err) {
 	perror("Restricting the topology");
 	/* FALLTHRU */
