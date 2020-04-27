@@ -526,6 +526,7 @@ int main(int argc, char *argv[])
 #define HWLOC_CALC_LINE_LEN 64
     size_t len = HWLOC_CALC_LINE_LEN;
     char * line = malloc(len);
+    printf("Waiting for locations to process on stdin...\n");
     while (1) {
       char *current, *tmpline;
 

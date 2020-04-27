@@ -164,6 +164,7 @@ PU:22_PU:23_Core:6_Core:7_Group0:2
 0x00ffffff
 
 # Reading from stdin
+Waiting for locations to process on stdin...
 0x00000001
 0xf0000000,0x0000000f
 0xffff0000,0x0000ffff
