@@ -257,22 +257,31 @@ typedef enum {
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge (filtered out by default).
 			  * Any bridge (or PCI switch) that connects the host or an I/O bus,
 			  * to another I/O bus.
-			  * They are not added to the topology unless I/O discovery
-			  * is enabled with hwloc_topology_set_flags().
+			  *
+			  * Bridges are not added to the topology unless their
+			  * filtering is changed (see hwloc_topology_set_type_filter()
+			  * and hwloc_topology_set_io_types_filter()).
+			  *
 			  * I/O objects are not listed in the main children list,
 			  * but rather in the dedicated io children list.
 			  * I/O objects have NULL CPU and node sets.
 			  */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device (filtered out by default).
-			  * They are not added to the topology unless I/O discovery
-			  * is enabled with hwloc_topology_set_flags().
+			  *
+			  * PCI devices are not added to the topology unless their
+			  * filtering is changed (see hwloc_topology_set_type_filter()
+			  * and hwloc_topology_set_io_types_filter()).
+			  *
 			  * I/O objects are not listed in the main children list,
 			  * but rather in the dedicated io children list.
 			  * I/O objects have NULL CPU and node sets.
 			  */
   HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device (filtered out by default).
-			  * They are not added to the topology unless I/O discovery
-			  * is enabled with hwloc_topology_set_flags().
+			  *
+			  * OS devices are not added to the topology unless their
+			  * filtering is changed (see hwloc_topology_set_type_filter()
+			  * and hwloc_topology_set_io_types_filter()).
+			  *
 			  * I/O objects are not listed in the main children list,
 			  * but rather in the dedicated io children list.
 			  * I/O objects have NULL CPU and node sets.
@@ -282,6 +291,10 @@ typedef enum {
 			  * Objects without particular meaning, that can e.g. be
 			  * added by the application for its own use, or by hwloc
 			  * for miscellaneous objects such as MemoryModule (DIMMs).
+			  *
+			  * They are not added to the topology unless their filtering
+			  * is changed (see hwloc_topology_set_type_filter()).
+			  *
 			  * These objects are not listed in the main children list,
 			  * but rather in the dedicated misc children list.
 			  * Misc objects may only have Misc objects as children,
