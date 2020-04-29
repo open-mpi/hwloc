@@ -342,7 +342,7 @@ EOF
     hwloc_have_ptrace=1
     AC_CHECK_HEADERS([sys/ptrace.h],, [hwloc_have_ptrace=0])
     AC_CHECK_FUNCS([ptrace],, [hwloc_have_ptrace=0])
-    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[ 
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
         #include "sys/ptrace.h"
         int main(void){
 	  return ptrace(PTRACE_SEIZE,
@@ -350,7 +350,7 @@ EOF
 			0,
 			(void*)(PTRACE_O_TRACECLONE|PTRACE_O_TRACEFORK));
 	}
-      ]])],, [hwloc_have_ptrace=0])      
+      ]])],, [hwloc_have_ptrace=0])   
     AM_CONDITIONAL([HWLOC_HAVE_PTRACE],[test $hwloc_have_ptrace -eq 1])
     AC_DEFINE_UNQUOTED([HWLOC_HAVE_PTRACE], [$hwloc_have_ptrace], [Whether ptrace is present and supports PTRACE_SEIZE or not])
 
