@@ -5,15 +5,14 @@
  * See COPYING in top-level directory.
  ****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "misc.h"
+#include "hwloc-calc.h"
+#include "hwloc-thread-bind.h"
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/ptrace.h>
 #include <unistd.h>
-#include "hwloc-calc.h"
-#include "misc.h"
-#include "hwloc-thread-bind.h"
 
 //Options with default values.
 static char * topology_input = NULL;
@@ -165,16 +164,16 @@ int main(int argc, char **argv)
 		format = input_format != NULL ?
 			hwloc_utils_parse_input_format(input_format,
 						       argv[0]) :
-			hwloc_utils_autodetect_input_format(topology_input,
-							    0);
-		if(hwloc_utils_enable_input_format(topology,
-						   topology_input,
-						   &format,
-						   0,
-						   argv[0]) != EXIT_SUCCESS){
-			err = -1;
-			goto out_with_topology;
-		}
+			hwloc_utils_autodetect_input_format(topology_input, 0);
+		if (hwloc_utils_enable_input_format(topology,
+																				HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM,
+																				topology_input,
+																				&format, 0,
+																				argv[0]) != EXIT_SUCCESS)
+			{
+				err = -1;
+				goto out_with_topology;
+			}
 	}
 
 	if (hwloc_topology_load(topology) != 0) {

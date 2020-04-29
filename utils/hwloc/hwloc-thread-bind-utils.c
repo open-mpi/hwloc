@@ -1,5 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "misc.h"
+#include "hwloc-thread-bind.h"
+#include "hwloc/helper.h"
+#include "hwloc-calc.h"
+
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -7,10 +10,6 @@
 #if HWLOC_HAVE_PTRACE
 #include <sys/ptrace.h>
 #endif
-#include "hwloc-thread-bind.h"
-#include "hwloc/helper.h"
-#include "misc.h"
-#include "hwloc-calc.h"
 
 extern int logical; // Whether indexing is logical
 extern int verbose; // Whether to verbose print. 
