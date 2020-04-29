@@ -304,7 +304,6 @@ typedef enum {
 
   HWLOC_OBJ_DIE,	/**< \brief Die within a physical package.
 			 * A subpart of the physical package, that contains multiple cores.
-			 * \hideinitializer
 			 */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
