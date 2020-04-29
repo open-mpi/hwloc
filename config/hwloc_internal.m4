@@ -67,27 +67,27 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # I/O?
     AC_ARG_ENABLE([io],
                   AS_HELP_STRING([--disable-io],
-                                 [Disable I/O discovery entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, GL)]))
+                                 [Disable I/O discovery build entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, GL) instead of only disabling it at runtime by default]))
 
     # PCI?
     AC_ARG_ENABLE([pci],
                   AS_HELP_STRING([--disable-pci],
-                                 [Disable the PCI device discovery]))
+                                 [Disable the PCI device discovery build (instead of only disabling PCI at runtime by default)]))
 
     # OpenCL?
     AC_ARG_ENABLE([opencl],
                   AS_HELP_STRING([--disable-opencl],
-                                 [Disable the OpenCL device discovery]))
+                                 [Disable the OpenCL device discovery build (instead of only disabling OpenCL at runtime by default)]))
 
     # CUDA?
     AC_ARG_ENABLE([cuda],
                   AS_HELP_STRING([--disable-cuda],
-                                 [Disable the CUDA device discovery using libcudart]))
+                                 [Disable the CUDA device discovery build using libcudart (instead of only disabling CUDA at runtime by default)]))
 
     # NVML?
     AC_ARG_ENABLE([nvml],
                   AS_HELP_STRING([--disable-nvml],
-                                 [Disable the NVML device discovery]))
+                                 [Disable the NVML device discovery build (instead of only disabling NVML at runtime by default)]))
 
     # 32bits_pci_domain?
     AC_ARG_ENABLE([32bits-pci-domain],
@@ -97,7 +97,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # GL/Display
     AC_ARG_ENABLE([gl],
 		  AS_HELP_STRING([--disable-gl],
-				 [Disable the GL display device discovery]))
+				 [Disable the GL display device discovery (instead of only disabling GL at runtime by default)]))
 
     # LibUdev
     AC_ARG_ENABLE([libudev],
