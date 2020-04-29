@@ -919,7 +919,7 @@ hwloc_distrib(hwloc_topology_t topology,
 
 /** \brief Get complete CPU set
  *
- * \return the complete CPU set of logical processors of the system.
+ * \return the complete CPU set of processors of the system.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
@@ -931,7 +931,7 @@ hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_
 
 /** \brief Get topology CPU set
  *
- * \return the CPU set of logical processors of the system for which hwloc
+ * \return the CPU set of processors of the system for which hwloc
  * provides topology information. This is equivalent to the cpuset of the
  * system object.
  *
@@ -945,7 +945,7 @@ hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_
 
 /** \brief Get allowed CPU set
  *
- * \return the CPU set of allowed logical processors of the system.
+ * \return the CPU set of allowed processors of the system.
  *
  * \note If the topology flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was not set,
  * this is identical to hwloc_topology_get_topology_cpuset(), which means

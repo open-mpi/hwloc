@@ -520,14 +520,13 @@ Make sure to have had a look at those too!
   into a tree (see \ref termsanddefs_tree).
   </dd>
 
-<dt>Processing Unit (or Logical Processor)</dt>
+<dt>Processing Unit (PU)</dt>
   <dd>The smallest processing element that can be represented by a hwloc
   object. It may be a single-core processor, a core of a multicore
-  processor, or a single thread in a SMT processor.
+  processor, or a single thread in a SMT processor
+  (also sometimes called "Logical processor",
+   not to be confused with "Logical index of a processor").
   hwloc's PU acronym stands for Processing Unit.
-
-  "Logical processor" should not be confused with "Logical index of a
-  processor".
   </dd>
 
 <dt>Package</dt>
@@ -596,8 +595,8 @@ Make sure to have had a look at those too!
   See also \ref faq_indexes.</dd>
 
 <dt>CPU set</dt>
-  <dd>The set of logical processors (or processing units) logically included in an object
-  (if it makes sense).  They are always expressed using physical logical
+  <dd>The set of processing units (PU) logically included in an object
+  (if it makes sense).  They are always expressed using physical
   processor numbers (as announced by the OS).  They are implemented as the
   ::hwloc_bitmap_t opaque structure.  hwloc CPU sets are just masks, they
   do \em not have any relation with an operating system actual binding notion like
@@ -2933,7 +2932,7 @@ except I/Os and instruction caches.
 
 One of the original reasons why hwloc was created is that <b>physical/OS indexes</b>
 (<tt>obj->os_index</tt>) are often crazy and unpredictable:
-logical processors numbers are usually
+processors numbers are usually
 non-contiguous (processors 0 and 1 are not physically close), they vary from
 one machine to another, and may even change after a BIOS or system update.
 This numbers make task placement hardly portable.
@@ -3573,12 +3572,12 @@ under <tt>contrib/windows/</tt>.
 The NetBSD (and FreeBSD) backend uses x86-specific topology discovery
 (through the x86 component).
 This implementation requires CPU binding so as to query topology
-information from each individual logical processor.
+information from each individual processor.
 This means that hwloc cannot find any useful topology information
 unless user-level process binding is allowed by the NetBSD kernel.
 The <tt>security.models.extensions.user_set_cpu_affinity</tt>
 sysctl variable must be set to 1 to do so.
-Otherwise, only the number of logical processors will be detected.
+Otherwise, only the number of processors will be detected.
 
 
 \subsection faq_aix_bind Why does binding fail on AIX?
