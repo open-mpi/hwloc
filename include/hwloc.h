@@ -196,7 +196,7 @@ typedef enum {
 			  */
   HWLOC_OBJ_CORE,	/**< \brief Core.
 			  * A computation unit (may be shared by several
-			  * logical processors).
+			  * PUs, aka logical processors).
 			  */
   HWLOC_OBJ_PU,		/**< \brief Processing Unit, or (Logical) Processor.
 			  * An execution unit (may share a core with some
@@ -512,7 +512,7 @@ struct hwloc_obj {
 					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
                                           */
-  hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
+  hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of processors of this object,
                                           *
                                           * This may include not only the same as the cpuset field, but also some CPUs for
                                           * which topology information is unknown or incomplete, some offlines CPUs, and
