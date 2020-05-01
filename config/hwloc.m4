@@ -1019,6 +1019,30 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
+    # RSMI support, rocm_smi64 is just library name and not related to 32/64 bits
+    hwloc_rsmi_happy=no
+    if test "x$enable_io" != xno && test "x$enable_rsmi" != "xno"; then
+      hwloc_rsmi_happy=yes
+      AC_CHECK_HEADERS([rocm_smi.h], [
+        AC_CHECK_LIB([rocm_smi64], [rsmi_init], [HWLOC_RSMI_LIBS="-lrocm_smi64"], [hwloc_rsmi_happy=no])
+        ], [hwloc_rsmi_happy=no])
+    fi
+    AC_SUBST(HWLOC_RSMI_LIBS)
+    # If we asked for rsmi support but couldn't deliver, fail
+    AS_IF([test "$enable_rsmi" = "yes" -a "$hwloc_rsmi_happy" = "no"],
+      [AC_MSG_WARN([Specified --enable-rsmi switch, but could not])
+      AC_MSG_WARN([find appropriate support])
+      AC_MSG_ERROR([Cannot continue])])
+    if test "x$hwloc_rsmi_happy" = "xyes"; then
+      AC_DEFINE([HWLOC_HAVE_RSMI], [1], [Define to 1 if you have the `RSMI' library.])
+      AC_SUBST([HWLOC_HAVE_RSMI], [1])
+      hwloc_components="$hwloc_components rsmi"
+      hwloc_rsmi_component_maybeplugin=1
+    else
+      AC_SUBST([HWLOC_HAVE_RSMI], [0])
+    fi
+    # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
+
     # X11 support
     AC_PATH_XTRA
 
@@ -1291,6 +1315,10 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_NVML_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_NVML_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_NVML_REQUIRES $HWLOC_REQUIRES"])
+    AS_IF([test "$hwloc_rsmi_component" = "static"],
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_RSMI_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_RSMI_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_RSMI_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_gl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_GL_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_GL_CFLAGS"
@@ -1383,6 +1411,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_PCIACCESS], [test "$hwloc_pciaccess_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_OPENCL], [test "$hwloc_opencl_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_RSMI], [test "$hwloc_rsmi_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
         AM_CONDITIONAL([HWLOC_HAVE_USER32], [test "x$hwloc_have_user32" = "xyes"])
 
@@ -1417,6 +1446,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_OPENCL_BUILD_STATIC], [test "x$hwloc_opencl_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_CUDA_BUILD_STATIC], [test "x$hwloc_cuda_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_NVML_BUILD_STATIC], [test "x$hwloc_nvml_component" = "xstatic"])
+        AM_CONDITIONAL([HWLOC_RSMI_BUILD_STATIC], [test "x$hwloc_rsmi_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_GL_BUILD_STATIC], [test "x$hwloc_gl_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 
