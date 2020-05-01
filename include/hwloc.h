@@ -2121,7 +2121,7 @@ enum hwloc_type_filter_e {
    * It is only useful for I/O object types.
    * For ::HWLOC_OBJ_PCI_DEVICE and ::HWLOC_OBJ_OS_DEVICE, it means that only objects
    * of major/common kinds are kept (storage, network, OpenFabrics, Intel MICs, CUDA,
-   * OpenCL, NVML, and displays).
+   * OpenCL, RSMI, NVML, and displays).
    * Also, only OS devices directly attached on PCI (e.g. no USB) are reported.
    * For ::HWLOC_OBJ_BRIDGE, it means that bridges are kept only if they have children.
    *
