@@ -77,7 +77,8 @@ TESTS = \
         test-hwloc-compress-dir.sh \
         test-hwloc-diffpatch.sh \
         test-hwloc-distrib.sh \
-        test-hwloc-info.sh
+        test-hwloc-info.sh \
+        test-parsing-flags.sh
 if HWLOC_HAVE_PLUGINS
 TESTS += test-fake-plugin.sh
 endif HWLOC_HAVE_PLUGINS
