@@ -334,9 +334,11 @@ int main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 		distancesfilename = argv[1];
-		if (argc >= 3)
-			distancesflags = strtoul(argv[2], NULL, 0);
-
+		if (argc >= 3) {
+			distancesflags = hwloc_utils_parse_distances_add_flags(argv[2]);
+                        if(distancesflags == (unsigned long)-1)
+                                goto out;
+                }
 	} else if (!strcmp(argv[0], "none")) {
 		/* do nothing (maybe clear) */
 	} else {

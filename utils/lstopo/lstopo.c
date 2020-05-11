@@ -909,7 +909,9 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--flags")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	flags = strtoul(argv[1], NULL, 0);
+	flags = hwloc_utils_parse_topology_flags(argv[1]);
+        if(flags == (unsigned long)-1)
+          goto out_with_topology;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--restrict")) {
@@ -926,19 +928,25 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--restrict-flags")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	restrict_flags = (unsigned long) strtoull(argv[1], NULL, 0);
+	restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
+        if(restrict_flags == (unsigned long)-1)
+          goto out_with_topology;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--export-xml-flags")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	loutput.export_xml_flags = (unsigned long) strtoull(argv[1], NULL, 0);
+	loutput.export_xml_flags = hwloc_utils_parse_export_xml_flags(argv[1]);
+        if(loutput.export_xml_flags == (unsigned long)-1)
+          goto out_with_topology;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--export-synthetic-flags")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	loutput.export_synthetic_flags = (unsigned long) strtoull(argv[1], NULL, 0);
+	loutput.export_synthetic_flags = hwloc_utils_parse_export_synthetic_flags(argv[1]);
+        if(loutput.export_synthetic_flags == (unsigned long)-1)
+          goto out_with_topology;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--horiz"))

@@ -63,14 +63,20 @@ Enforce the input in the given format, among \fBxml\fR, \fBfsroot\fR,
 .TP
 \fB\-\-export\-xml\-flags\fR <flags>
 Enforce flags when exporting to the XML format.
-These flags are passed to \fIhwloc_topology_export_xml()\fR.
-A value of 1 reverts to the format of hwloc v1.x.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_topology_export_xml()\fR.
+Those names may be substrings of actual flag names as long as a single one matches.
+A value of \fB1\fR (or \fBv1\fR) reverts to the format of hwloc v1.x.
+The default is \fB0\fR (or \fBnone\fR).
 .TP
 \fB\-\-export\-synthetic\-flags\fR <flags>
 Enforce flags when exporting to the synthetic format.
-These flags are passed to \fIhwloc_topology_export_synthetic()\fR.
-A value of 2 reverts to the format of hwloc v1.9.
-A value of 3 reverts to the original minimalistic format (before v1.9).
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_topology_export_synthetic()\fR.
+Those names may be substrings of actual flag names as long as a single one matches.
+A value of \fB2\fR (or \fBno_attr\fR) reverts to the format of hwloc v1.9.
+A value of \fB3\fR (or \fBno_ext,no_attr\fR) reverts to the original minimalistic format (before v1.9).
+The default is \fB0\fR (or \fBnone\fR).
 .TP
 \fB\-v\fR \fB\-\-verbose\fR
 Include additional detail.
@@ -170,8 +176,11 @@ If a bitmap is given after prefix \fBnodeset=\fR, it is the set of allowed NUMA 
 .TP
 \fB\-\-flags\fR <flags>
 Enforce topology flags.
-The default is \fB0\fR.
-These flags are passed to \fIhwloc_topology_set_flags()\fR.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_topology_set_flags()\fR.
+Those names may be substrings of actual flag names as long as a single one matches,
+for instance \fBdisallowed,thissystem_allowed\fR.
+The default is \fB0\fR (or \fBnone\fR).
 .TP
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
@@ -214,8 +223,11 @@ HWLOC_THISSYSTEM set to 1 in the environment).
 .TP
 \fB\-\-restrict\-flags\fR <flags>
 Enforce flags when restricting the topology.
-The default is \fB0\fR.
-These flags are passed to \fIhwloc_topology_restrict()\fR.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_topology_restrict()\fR.
+Those names may be substrings of actual flag names as long as a single one matches,
+for instance \fBbynodeset,memless\fR.
+The default is \fB0\fR (or \fBnone\fR).
 .TP
 \fB\-\-no\-io\fB
 Do not show any I/O device or bridge.

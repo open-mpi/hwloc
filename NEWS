@@ -16,6 +16,14 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+
+Version 2.3.0
+-------------
+* Tools
+  + Command-line options for specifying flags now understand comma-separated
+    lists of flag names (substrings).
+
+
 Version 2.2.0
 -------------
 * API
