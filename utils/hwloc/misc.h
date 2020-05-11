@@ -545,13 +545,30 @@ hwloc_utils_parse_flags(char * str, struct hwloc_utils_parsing_flag possible_fla
   if(strcmp(str, "NONE") == 0)
     return 0;
 
-  ptr = strtok((char *)str, " ,|+");
-
-  while (ptr != NULL) {
+  ptr = str;
+  while (ptr) {
     int count = 0;
     unsigned long prv_flags = ul_flags;
     char *pch;
     int nosuffix = 0;
+
+    /* skip separators at the beginning */
+    ptr += strspn(ptr, ",|+");
+
+    /* find separator after next token */
+    j = strcspn(ptr, " ,|+");
+    if (!j)
+      break;
+
+    if (ptr[j]) {
+      /* mark the end of the token */
+      ptr[j] = '\0';
+      /* mark beginning of next token */
+      end = ptr + j + 1;
+    } else {
+      /* no next token */
+      end = NULL;
+    }
 
     /* '$' means matching the end of a flag */
     pch = strchr(ptr, '$');
@@ -587,7 +604,7 @@ hwloc_utils_parse_flags(char * str, struct hwloc_utils_parsing_flag possible_fla
       return (unsigned long) - 1;
     }
 
-    ptr = strtok(NULL, " ,|+");
+    ptr = end;
   }
 
   return ul_flags;
