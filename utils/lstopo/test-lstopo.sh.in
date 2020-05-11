@@ -105,8 +105,8 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
   $ls -i "$SI" -.xml --allow 0x30 --allow nodeset=0x2
   echo "** Restrict flag cpuless..."
   $ls -i "node:4 pu:4" --restrict 0xf0 --restrict-flags cpuless
-  echo "** Restrict flag bynodeset,memless..."
-  $ls -i "node:4 pu:4" --restrict 0x3 --restrict-flags bynodeset,memless
+  echo "** Restrict flag t\$,memless..."
+  $ls -i "node:4 pu:4" --restrict 0x3 --restrict-flags t\$,memless
   echo "** Restrict flag none..."
   $ls -i "node:4 pu:4" --restrict 0x3 --restrict-flags none
   echo "** Export synthetic flag extended,attrs,v1..."

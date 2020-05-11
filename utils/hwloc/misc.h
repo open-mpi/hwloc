@@ -550,23 +550,41 @@ hwloc_utils_parse_flags(char * str, struct hwloc_utils_parsing_flag possible_fla
   while (ptr != NULL) {
     int count = 0;
     unsigned long prv_flags = ul_flags;
-    for(i = 0; i < len_possible_flags; i++) {
-      if(strstr(possible_flags[i].str_flag, ptr)) {
-        if(count != 0){
-          fprintf(stderr, "Duplicate match for %s flag %s\n", kind, ptr);
-          hwloc_utils_parsing_flag_error(kind, possible_flags, len_possible_flags);
-          return (unsigned long) - 1;
-        }
-        ul_flags |= possible_flags[i].ulong_flag;
+    char *pch;
+    int nosuffix = 0;
 
-        count++;
+    /* '$' means matching the end of a flag */
+    pch = strchr(ptr, '$');
+    if(pch) {
+      nosuffix = 1;
+      *pch = '\0';
+    }
+
+    for(i = 0; i < len_possible_flags; i++) {
+      if(nosuffix == 1) {
+        /* match the end */
+        if(strcmp(ptr, possible_flags[i].str_flag + strlen(possible_flags[i].str_flag) - strlen(ptr)))
+          continue;
+      } else {
+        /* match anywhere */
+        if(!strstr(possible_flags[i].str_flag, ptr))
+          continue;
       }
+
+      if(count){
+        fprintf(stderr, "Duplicate match for %s flag `%s'.\n", kind, ptr);
+        hwloc_utils_parsing_flag_error(kind, possible_flags, len_possible_flags);
+        return (unsigned long) - 1;
+      }
+
+      ul_flags |= possible_flags[i].ulong_flag;
+      count++;
     }
 
     if(prv_flags == ul_flags) {
-        fprintf(stderr, "Failed to parse %s flag %s\n", kind, ptr);
-        hwloc_utils_parsing_flag_error(kind, possible_flags, len_possible_flags);
-        return (unsigned long) - 1;
+      fprintf(stderr, "Failed to parse %s flag `%s'.\n", kind, ptr);
+      hwloc_utils_parsing_flag_error(kind, possible_flags, len_possible_flags);
+      return (unsigned long) - 1;
     }
 
     ptr = strtok(NULL, " ,|+");

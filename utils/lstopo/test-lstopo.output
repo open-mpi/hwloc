@@ -107,7 +107,7 @@ Machine (1024MB total)
   PU L#1 (P#5)
   PU L#2 (P#6)
   PU L#3 (P#7)
-** Restrict flag bynodeset,memless...
+** Restrict flag t$,memless...
 Machine (2048MB total)
   Group0 L#0
     NUMANode L#0 (P#0 1024MB)
