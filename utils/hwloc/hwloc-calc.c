@@ -49,6 +49,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --no-smt                  Only keep a single PU per core\n");
   fprintf(where, "  --restrict [nodeset=]<bitmap>\n");
   fprintf(where, "                            Restrict the topology to some processors or NUMA nodes.\n");
+  fprintf(where, "  --restrict-flags <n>      Set the flags to be used during restrict\n");
   fprintf(where, "  --disallowed              Include objects disallowed by administrative limitations\n");
   hwloc_utils_input_format_usage(where, 10);
   fprintf(where, "Miscellaneous options:\n");
@@ -334,6 +335,16 @@ int main(int argc, char *argv[])
           restrictstring = strdup(argv[1]+8);
           restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
         }
+	argv++;
+	argc--;
+	goto next;
+      }
+      if (!strcmp (argv[0], "--restrict-flags")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+        }
+	restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
 	argv++;
 	argc--;
 	goto next;

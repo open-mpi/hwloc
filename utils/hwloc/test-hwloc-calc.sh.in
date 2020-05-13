@@ -214,6 +214,13 @@ set -e
   echo "# PCI devices intersection (again)"
   $calc --if xml --input $xmldir/96em64t-4n4d3ca2co-pci.xml pci=0000:02:00.0 xpci=0000:02:00.1
   echo
+  echo "# Restrict"
+  $calc -i "node:4 pu:4" --restrict 0xf0 --restrict-flags cpuless all -N pu
+  $calc -i "node:4 pu:4" --restrict 0xf0 --restrict-flags cpuless all -N numa
+  $calc -i "node:4 pu:4" --restrict-flags bynode,memless --restrict 0x3 all -N pu
+  $calc -i "node:4 pu:4" --restrict 0xff0 --restrict-flags none all -N pu
+  $calc -i "node:4 pu:4" --restrict-flags cpuless --restrict 0xff0 all -I numa --po
+  echo
 
   echo "# Reading from stdin"
   cat << EOF | $calc --if synthetic --input "node:4 core:4 pu:4"

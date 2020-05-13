@@ -163,6 +163,13 @@ PU:22_PU:23_Core:6_Core:7_Group0:2
 # PCI devices intersection (again)
 0x00ffffff
 
+# Restrict
+4
+1
+8
+8
+1,2
+
 # Reading from stdin
 Waiting for locations to process on stdin...
 0x00000001

@@ -113,6 +113,14 @@ This option requires the use of the actual current machine topology
 (or any other topology with \fB\-\-thissystem\fR or with
 HWLOC_THISSYSTEM set to 1 in the environment).
 .TP
+\fB\-\-restrict\-flags\fR <flags>
+Enforce flags when restricting the topology.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_topology_restrict()\fR.
+Those names may be substrings of actual flag names as long as a single one matches,
+for instance \fBbynodeset,memless\fR.
+The default is \fB0\fR (or \fBnone\fR).
+.TP
 \fB\-\-filter\fR <type>:<kind>, \fB\-\-filter\fR <type>
 Filter objects of type <type>, or of any type if <type> is "all".
 "io", "cache" and "icache" are also supported.

@@ -53,6 +53,7 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  --no-smt       Only keep a single PU per core\n");
   fprintf(where, "  --restrict [nodeset=]<bitmap>\n");
   fprintf(where, "                 Restrict the topology to some processors or NUMA nodes.\n");
+  fprintf(where, "  --restrict-flags <n>  Set the flags to be used during restrict\n");
   fprintf(where, "  --disallowed   Include objects disallowed by administrative limitations\n");
   fprintf(where, "  --hbm          Only consider high bandwidth memory nodes\n");
   fprintf(where, "  --no-hbm       Ignore high-bandwidth memory nodes\n");
@@ -277,6 +278,16 @@ int main(int argc, char *argv[])
           restrictstring = strdup(argv[1]+8);
           restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
         }
+	argv++;
+	argc--;
+	goto next;
+      }
+      if (!strcmp (argv[0], "--restrict-flags")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+        }
+	restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
 	argc--;
 	argv++;
 	goto next;

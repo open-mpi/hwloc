@@ -22,6 +22,8 @@ Version 2.3.0
 * Tools
   + Command-line options for specifying flags now understand comma-separated
     lists of flag names (substrings).
+  + Tools that have a --restrict option may now receive a nodeset or
+    some custom flags for restricting the topology.
 
 
 Version 2.2.0

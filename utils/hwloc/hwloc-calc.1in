@@ -121,6 +121,14 @@ Restrict the topology to the given cpuset.
 \fB\-\-restrict\fR nodeset=<nodeset>
 Restrict the topology to the given nodeset, unless \fB\-\-restrict\-flags\fR specifies something different.
 .TP
+\fB\-\-restrict\-flags\fR <flags>
+Enforce flags when restricting the topology.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_topology_restrict()\fR.
+Those names may be substrings of actual flag names as long as a single one matches,
+for instance \fBbynodeset,memless\fR.
+The default is \fB0\fR (or \fBnone\fR).
+.TP
 \fB\-\-disallowed\fR
 Include objects disallowed by administrative limitations.
 .TP
