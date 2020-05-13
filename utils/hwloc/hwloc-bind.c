@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
-        usage("hwloc-bind", stdout);
+        usage(callname, stdout);
 	return EXIT_SUCCESS;
       }
       if (!strcmp(argv[0], "--single")) {
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
       }
       if (!strcmp(argv[0], "--pid")) {
         if (argc < 2) {
-          usage ("hwloc-bind", stderr);
+          usage (callname, stderr);
           exit(EXIT_FAILURE);
         }
         pid_number = atoi(argv[1]);
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 #ifdef HWLOC_LINUX_SYS
       if (!strcmp(argv[0], "--tid")) {
         if (argc < 2) {
-          usage ("hwloc-bind", stderr);
+          usage (callname, stderr);
           exit(EXIT_FAILURE);
         }
         tid_number = atoi(argv[1]);
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 	  membind_policy = HWLOC_MEMBIND_NEXTTOUCH;
 	else {
 	  fprintf(stderr, "Unrecognized memory binding policy %s\n", argv[1]);
-          usage ("hwloc-bind", stderr);
+          usage (callname, stderr);
           exit(EXIT_FAILURE);
 	}
 	got_mempolicy = 1;
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
       }
 
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
-      usage("hwloc-bind", stderr);
+      usage(callname, stderr);
       return EXIT_FAILURE;
     }
 

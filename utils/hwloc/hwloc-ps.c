@@ -384,14 +384,14 @@ int main(int argc, char *argv[])
 #endif
     } else if (!strcmp(argv[0], "--pid")) {
       if (argc < 2) {
-	usage(callname, stdout);
+	usage(callname, stderr);
 	exit(EXIT_FAILURE);
       }
       only_pid = strtol(argv[1], NULL, 10);
       opt = 1;
     } else if (!strcmp(argv[0], "--name")) {
       if (argc < 2) {
-	usage(callname, stdout);
+	usage(callname, stderr);
 	exit(EXIT_FAILURE);
       }
       only_name = argv[1];
@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
     } else if (!strcmp(argv[0], "--uid")) {
 #ifdef HWLOC_LINUX_SYS
       if (argc < 2) {
-	usage(callname, stdout);
+	usage(callname, stderr);
 	exit(EXIT_FAILURE);
       }
       if (!strcmp(argv[1], "all"))
@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
       flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
     } else if (!strcmp (argv[0], "--pid-cmd")) {
       if (argc < 2) {
-	usage(callname, stdout);
+	usage(callname, stderr);
 	exit(EXIT_FAILURE);
       }
       pidcmd = argv[1];
@@ -424,7 +424,7 @@ int main(int argc, char *argv[])
       json_server = 1;
     } else if (!strcmp (argv[0], "--json-port")) {
       if (argc < 2) {
-	usage(callname, stdout);
+	usage(callname, stderr);
 	exit(EXIT_FAILURE);
       }
       json_port = atoi(argv[1]);
@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
       verbose++;
 
     } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
-      usage (callname, stdout);
+      usage (callname, stderr);
       exit(EXIT_SUCCESS);
     } else {
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
