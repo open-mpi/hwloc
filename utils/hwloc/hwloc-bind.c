@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
   int tid_number = -1;
   hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
   char *callname;
+  char *restrictstring = NULL;
   struct hwloc_calc_location_context_s lcontext;
   struct hwloc_calc_set_context_s scontext;
 
@@ -114,6 +115,16 @@ int main(int argc, char *argv[])
     hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL); \
     hwloc_topology_set_flags(topology, flags); \
     ret = hwloc_topology_load(topology); \
+    if (restrictstring) { \
+      hwloc_bitmap_t restrictset = hwloc_bitmap_alloc(); \
+      hwloc_bitmap_sscanf(restrictset, restrictstring); \
+      if (hwloc_topology_restrict (topology, restrictset, restrict_flags)) { \
+        perror("Restricting the topology"); \
+        /* FALLTHRU */ \
+      } \
+      hwloc_bitmap_free(restrictset); \
+      free(restrictstring); \
+    } \
     if (ret < 0) return EXIT_FAILURE; \
     depth = hwloc_topology_get_depth(topology); \
     loaded = 1; \
@@ -256,26 +267,16 @@ int main(int argc, char *argv[])
 	goto next;
       }
       if (!strcmp (argv[0], "--restrict")) {
-	hwloc_bitmap_t restrictset;
-	int err;
-	if (argc < 2) {
-	  usage (callname, stdout);
+        if (argc < 2) {
+	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
-	}
-	restrictset = hwloc_bitmap_alloc();
-        if(strncmp(argv[1], "nodeset=", 8)) {
-          hwloc_bitmap_sscanf(restrictset, argv[1]);
-        } else {
-          hwloc_bitmap_sscanf(restrictset, argv[1]+8);
+        }
+	if(strncmp(argv[1], "nodeset=", 7))
+          restrictstring = strdup(argv[1]);
+        else {
+          restrictstring = strdup(argv[1]+8);
           restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
         }
-	ENSURE_LOADED();
-        err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
-	if (err) {
-	  perror("Restricting the topology");
-	  /* FALLTHRU */
-	}
-	hwloc_bitmap_free(restrictset);
 	argc--;
 	argv++;
 	goto next;
