@@ -12,7 +12,7 @@ hwloc-calc \- Operate on cpu mask strings and objects
 .SH SYNOPSIS
 .
 .B hwloc-calc
-[\fIoptions\fR] \fI<location1> [<location2> [...] ]
+[\fItopology options\fR] [\fIoptions\fR] \fI<location1> [<location2> [...] ]
 .
 .PP
 Note that hwloc(7) provides a detailed explanation of the hwloc system
@@ -22,7 +22,60 @@ it should be read before reading this man page.
 .\" **************************
 .\"    Options Section
 .\" **************************
+.SH TOPOLOGY OPTIONS
+.
+All topology options must be given before all other options.
+.
+.TP 10
+\fB\-\-no\-smt\fR, \fB\-\-no\-smt=<N>\fR
+Only keep the first PU per core in the input locations.
+If \fI<N>\fR is specified, keep the <N>-th instead, if any.
+PUs are ordered by physical index during this filtering.
+.TP
+\fB\-\-restrict\fR <cpuset>
+Restrict the topology to the given cpuset.
+.TP
+\fB\-\-restrict\fR nodeset=<nodeset>
+Restrict the topology to the given nodeset, unless \fB\-\-restrict\-flags\fR specifies something different.
+.TP
+\fB\-\-restrict\-flags\fR <flags>
+Enforce flags when restricting the topology.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_topology_restrict()\fR.
+Those names may be substrings of actual flag names as long as a single one matches,
+for instance \fBbynodeset,memless\fR.
+The default is \fB0\fR (or \fBnone\fR).
+.TP
+\fB\-\-disallowed\fR
+Include objects disallowed by administrative limitations.
+.TP
+\fB\-i\fR <file>, \fB\-\-input\fR <file>
+Read topology from XML file <file> (instead of discovering the
+topology on the local machine).  If <file> is "\-", the standard input
+is used.  XML support must have been compiled in to hwloc for this
+option to be usable.
+.TP
+\fB\-i\fR <directory>, \fB\-\-input\fR <directory>
+Read topology from <directory> instead of discovering the topology
+of the local machine.
+On Linux, the directory may contain the topology files
+gathered from another machine topology with hwloc-gather-topology.
+On x86, the directory may contain a cpuid dump gathered
+with hwloc-gather-cpuid.
+.TP
+\fB\-i\fR <specification>, \fB\-\-input\fR <specification>
+Simulate a fake hierarchy (instead of discovering the topology on the
+local machine). If <specification> is "node:2 pu:3", the topology will
+contain two NUMA nodes with 3 processing units in each of them.
+The <specification> string must end with a number of PUs.
+.TP
+\fB\-\-if\fR <format>, \fB\-\-input\-format\fR <format>
+Enforce the input in the given format, among \fBxml\fR, \fBfsroot\fR,
+\fBcpuid\fR and \fBsynthetic\fR.
+.
 .SH OPTIONS
+.
+All these options must be given after all topology options above.
 .
 .TP 10
 \fB\-p\fR \fB\-\-physical\fR
@@ -104,57 +157,11 @@ while a comma is used to separate indexes
 \fB\-\-single\fR
 Singlify the output to a single CPU.
 .TP
-\fB\-\-no\-smt\fR, \fB\-\-no\-smt=<N>\fR
-Only keep the first PU per core in the input locations.
-If \fI<N>\fR is specified, keep the <N>-th instead, if any.
-PUs are ordered by physical index during this filtering.
-.TP
 \fB\-\-taskset\fR
 Display CPU set strings in the format recognized by the taskset command-line
 program instead of hwloc-specific CPU set string format.
 This option has no impact on the format of input CPU set strings,
 both formats are always accepted.
-.TP
-\fB\-\-restrict\fR <cpuset>
-Restrict the topology to the given cpuset.
-.TP
-\fB\-\-restrict\fR nodeset=<nodeset>
-Restrict the topology to the given nodeset, unless \fB\-\-restrict\-flags\fR specifies something different.
-.TP
-\fB\-\-restrict\-flags\fR <flags>
-Enforce flags when restricting the topology.
-Flags may be given as numeric values or as a comma-separated list of flag names
-that are passed to \fIhwloc_topology_restrict()\fR.
-Those names may be substrings of actual flag names as long as a single one matches,
-for instance \fBbynodeset,memless\fR.
-The default is \fB0\fR (or \fBnone\fR).
-.TP
-\fB\-\-disallowed\fR
-Include objects disallowed by administrative limitations.
-.TP
-\fB\-i\fR <file>, \fB\-\-input\fR <file>
-Read topology from XML file <file> (instead of discovering the
-topology on the local machine).  If <file> is "\-", the standard input
-is used.  XML support must have been compiled in to hwloc for this
-option to be usable.
-.TP
-\fB\-i\fR <directory>, \fB\-\-input\fR <directory>
-Read topology from <directory> instead of discovering the topology
-of the local machine.
-On Linux, the directory may contain the topology files
-gathered from another machine topology with hwloc-gather-topology.
-On x86, the directory may contain a cpuid dump gathered
-with hwloc-gather-cpuid.
-.TP
-\fB\-i\fR <specification>, \fB\-\-input\fR <specification>
-Simulate a fake hierarchy (instead of discovering the topology on the
-local machine). If <specification> is "node:2 pu:3", the topology will
-contain two NUMA nodes with 3 processing units in each of them.
-The <specification> string must end with a number of PUs.
-.TP
-\fB\-\-if\fR <format>, \fB\-\-input\-format\fR <format>
-Enforce the input in the given format, among \fBxml\fR, \fBfsroot\fR,
-\fBcpuid\fR and \fBsynthetic\fR.
 .TP
 \fB\-q\fR \fB\-\-quiet\fR
 Hide non-fatal error messages.
@@ -192,7 +199,8 @@ Different input lines will be processed separately.
 .
 .PP
 Command-line arguments and options are processed in order.
-For instance, it means that changing the type of input indexes
+First topology configuration options should be given.
+Then, for instance, changing the type of input indexes
 with \fB\-\-li\fR or changing the input topology with \fB\-i\fR
 only affects the processing the following arguments.
 .
