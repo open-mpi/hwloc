@@ -125,8 +125,7 @@ int main(int argc, char *argv[])
         restrictstring = strdup(argv[1]+8);
         restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
       }
-      argv++;
-      argc--;
+      opt = 1;
       goto next_config;
     }
     if (!strcmp (argv[0], "--restrict-flags")) {
@@ -135,8 +134,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
       }
       restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
-      argc--;
-      argv++;
+      opt = 1;
       goto next_config;
     }
     if (!strcmp(argv[0], "--no-smt")) {

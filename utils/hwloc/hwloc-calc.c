@@ -267,6 +267,8 @@ int main(int argc, char *argv[])
   set = hwloc_bitmap_alloc();
 
   while (argc >= 1) {
+    opt = 0;
+
     if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
       flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
       goto next_config;
@@ -282,8 +284,7 @@ int main(int argc, char *argv[])
         restrictstring = strdup(argv[1]+8);
         restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
       }
-      argv++;
-      argc--;
+      opt = 1;
       goto next_config;
     }
     if (!strcmp (argv[0], "--restrict-flags")) {
@@ -292,23 +293,21 @@ int main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
       }
       restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
-      argc--;
-      argv++;
+      opt = 1;
       goto next_config;
     }
     if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					  &input, &input_format,
 					  callname)) {
-      argc--;
-      argv++;
+      opt = 1;
       goto next_config;
     }
 
     break;
 
   next_config:
-    argc--;
-    argv++;
+    argc -= opt+1;
+    argv += opt+1;
   }
 
   hwloc_topology_init(&topology);
@@ -331,6 +330,8 @@ int main(int argc, char *argv[])
   }
 
   while (argc >= 1) {
+    opt = 0;
+
     if (*argv[0] == '-') {
       if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
         verbose++;
@@ -358,8 +359,7 @@ int main(int argc, char *argv[])
 	  return EXIT_FAILURE;
 	}
 	numberoftype = argv[1];
-	argv++;
-	argc--;
+	opt = 1;
 	goto next;
       }
       if (!strcmp(argv[0], "--intersect") || !strcmp(argv[0], "-I")) {
@@ -368,8 +368,7 @@ int main(int argc, char *argv[])
 	  return EXIT_FAILURE;
 	}
 	intersecttype = argv[1];
-	argv++;
-	argc--;
+	opt = 1;
 	goto next;
       }
       if (!strcmp(argv[0], "--hierarchical") || !strcmp(argv[0], "-H")) {
@@ -378,8 +377,7 @@ int main(int argc, char *argv[])
 	  return EXIT_FAILURE;
 	}
 	hiertype = argv[1];
-	argv++;
-	argc--;
+	opt = 1;
 	goto next;
       }
       if (!strcasecmp(argv[0], "--pulist") || !strcmp(argv[0], "--proclist")) {
@@ -445,8 +443,7 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	outsep = argv[1];
-	argv++;
-	argc--;
+	opt = 1;
 	goto next;
       }
       if (!strcmp(argv[0], "--single")) {
@@ -482,8 +479,8 @@ int main(int argc, char *argv[])
     }
 
   next:
-    argc--;
-    argv++;
+    argc -= opt+1;
+    argv += opt+1;
   }
 
   if (numberoftype && hwloc_calc_type_depth(topology, numberoftype, &numberofdepth, "--number-of") < 0)

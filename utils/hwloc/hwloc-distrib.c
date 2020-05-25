@@ -77,6 +77,8 @@ int main(int argc, char *argv[])
       break;
     }
 
+    opt = 0;
+
     if (*argv[0] == '-') {
       if (!strcmp(argv[0], "--single")) {
 	singlify = 1;
@@ -101,8 +103,7 @@ int main(int argc, char *argv[])
       if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					  &input, &input_format,
 					  callname)) {
-	argv += opt;
-	argc -= opt;
+	opt = 1;
 	goto next;
       }
       else if (!strcmp (argv[0], "--ignore")) {
@@ -115,8 +116,7 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	else
 	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
-	argc--;
-	argv++;
+	opt = 1;
 	goto next;
       }
       else if (!strcmp (argv[0], "--from")) {
@@ -125,8 +125,7 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	from_type = argv[1];
-	argc--;
-	argv++;
+	opt = 1;
 	goto next;
       }
       else if (!strcmp (argv[0], "--to")) {
@@ -135,8 +134,7 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	to_type = argv[1];
-	argc--;
-	argv++;
+	opt = 1;
 	goto next;
       }
       else if (!strcmp (argv[0], "--at")) {
@@ -145,8 +143,7 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	from_type = to_type = argv[1];
-	argc--;
-	argv++;
+	opt = 1;
 	goto next;
       }
       else if (!strcmp (argv[0], "--reverse")) {
@@ -164,8 +161,7 @@ int main(int argc, char *argv[])
           restrictstring = strdup(argv[1]+8);
           restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
         }
-	argc--;
-	argv++;
+	opt = 1;
 	goto next;
       }
       else if (!strcmp (argv[0], "--restrict-flags")) {
@@ -174,8 +170,7 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
         }
 	restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
-        argc--;
-	argv++;
+        opt = 1;
 	goto next;
       }
       else if (!strcmp (argv[0], "--version")) {
@@ -196,8 +191,8 @@ int main(int argc, char *argv[])
     n = atol(argv[0]);
 
   next:
-    argc--;
-    argv++;
+    argc -= opt+1;
+    argv += opt+1;
   }
 
   if (n == -1) {
