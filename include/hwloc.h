@@ -350,8 +350,7 @@ typedef enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma engine device.
 				  * For instance the "dma0chan0" DMA channel on Linux. */
   HWLOC_OBJ_OSDEV_COPROC	/**< \brief Operating system co-processor device.
-				  * For instance "mic0" for a Xeon Phi (MIC) on Linux,
-				  * "opencl0d0" for a OpenCL device,
+				  * For instance "opencl0d0" for a OpenCL device,
 				  * "cuda0" for a CUDA device. */
 } hwloc_obj_osdev_type_t;
 
@@ -2120,7 +2119,7 @@ enum hwloc_type_filter_e {
    *
    * It is only useful for I/O object types.
    * For ::HWLOC_OBJ_PCI_DEVICE and ::HWLOC_OBJ_OS_DEVICE, it means that only objects
-   * of major/common kinds are kept (storage, network, OpenFabrics, Intel MICs, CUDA,
+   * of major/common kinds are kept (storage, network, OpenFabrics, CUDA,
    * OpenCL, RSMI, NVML, and displays).
    * Also, only OS devices directly attached on PCI (e.g. no USB) are reported.
    * For ::HWLOC_OBJ_BRIDGE, it means that bridges are kept only if they have children.
