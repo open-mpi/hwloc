@@ -194,12 +194,10 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
       device = ((bdfid & 0xff)>>3) & 0x1f;
       func = bdfid & 0x7;
       parent = hwloc_pci_find_parent_by_busid(topology, domain, bus, device, func);
-      if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE) {
-        if (get_device_pci_linkspeed(i, &(parent->attr->pcidev.linkspeed)) == -1)
-          parent->attr->pcidev.linkspeed = 0;
-      } else {
+      if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE)
+        get_device_pci_linkspeed(i, &parent->attr->pcidev.linkspeed);
+      if (!parent)
         parent = hwloc_get_root_obj(topology);
-      }
     }
 
     hwloc_insert_object_by_parent(topology, parent, osdev);
