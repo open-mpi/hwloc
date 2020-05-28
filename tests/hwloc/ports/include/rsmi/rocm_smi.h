@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Inria.  All rights reserved.
+ * Copyright © 2013-2020 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -59,6 +59,7 @@ typedef struct {
 
 rsmi_status_t rsmi_init(uint64_t init_flags);
 rsmi_status_t rsmi_shut_down(void);
+rsmi_status_t rsmi_status_string(rsmi_status_t, const char **string);
 rsmi_status_t rsmi_num_monitor_devices(uint32_t *num_devices);
 rsmi_status_t rsmi_dev_pci_id_get(uint32_t dv_ind, uint64_t *bdfid);
 rsmi_status_t rsmi_dev_name_get(uint32_t dv_ind, char *name, size_t len);
