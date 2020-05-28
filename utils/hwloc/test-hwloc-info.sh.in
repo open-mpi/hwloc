@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2017 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009 Université Bordeaux
 # See COPYING in top-level directory.
 #
@@ -13,7 +13,7 @@ HWLOC_top_builddir="@HWLOC_top_builddir@"
 info="$HWLOC_top_builddir/utils/hwloc/hwloc-info"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src/.libs
 export HWLOC_PLUGINS_PATH
 
 : ${TMPDIR=/tmp}

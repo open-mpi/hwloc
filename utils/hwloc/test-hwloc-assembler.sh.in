@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2015 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # See COPYING in top-level directory.
 #
@@ -14,7 +14,7 @@ HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 SED="@SED@"
 EXEEXT="@EXEEXT@"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src/.libs
 export HWLOC_PLUGINS_PATH
 
 if test x@HWLOC_XML_LOCALIZED@ = x1; then

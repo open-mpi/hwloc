@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2013 Inria.  All rights reserved.
+# Copyright © 2013-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -10,7 +10,7 @@ HWLOC_top_builddir="@HWLOC_top_builddir@"
 compress="$HWLOC_top_builddir/utils/hwloc/hwloc-compress-dir"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src/.libs
 export HWLOC_PLUGINS_PATH
 
 if test x@HWLOC_XML_LOCALIZED@ = x1; then
