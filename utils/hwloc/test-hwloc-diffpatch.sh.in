@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2018 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -14,7 +14,7 @@ builddir="$HWLOC_top_builddir/utils/hwloc"
 diff="$builddir/hwloc-diff"
 patch="$builddir/hwloc-patch"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc/.libs
 export HWLOC_PLUGINS_PATH
 
 HWLOC_DEBUG_CHECK=1
