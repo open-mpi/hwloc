@@ -1,7 +1,7 @@
 #!/bin/sh
 #-*-sh-*-
 
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -9,7 +9,7 @@ HWLOC_top_builddir="@HWLOC_top_builddir@"
 builddir="$HWLOC_top_builddir/utils/lstopo"
 ls="$builddir/lstopo-no-graphics"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc/.libs
 export HWLOC_PLUGINS_PATH
 
 HWLOC_DEBUG_CHECK=1
