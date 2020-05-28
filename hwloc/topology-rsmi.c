@@ -140,7 +140,9 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e filter;
+  rsmi_version_t version;
   rsmi_status_t ret;
+  int may_shutdown;
   unsigned nb, i;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
@@ -150,6 +152,8 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     return 0;
 
   rsmi_init(0);
+
+  rsmi_version_get(&version);
 
   ret = rsmi_num_monitor_devices(&nb);
   if (RSMI_STATUS_SUCCESS != ret || !nb) {
@@ -203,7 +207,20 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     hwloc_insert_object_by_parent(topology, parent, osdev);
   }
 
-  rsmi_shut_down();
+  may_shutdown = 0;
+  if (version.major > 3 || (version.major == 3 && version.minor > 3)) {
+    may_shutdown = 1;
+  } else {
+    /* old RSMI libs didn't have refcounting, we don't want to shutdown what the app may be using.
+     * don't shutdown unless required for valgrind testing etc.
+     */
+    char *env = getenv("HWLOC_RSMI_SHUTDOWN");
+    if (env)
+      may_shutdown = 1;
+  }
+  if (may_shutdown)
+    rsmi_shut_down();
+
   return 0;
 }
 

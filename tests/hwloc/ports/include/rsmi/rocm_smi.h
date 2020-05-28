@@ -15,6 +15,9 @@
 
 typedef int rsmi_status_t;
 #define RSMI_STATUS_SUCCESS 0
+
+typedef struct { int major; int minor; int patch; } rsmi_version_t;
+
 #define RSMI_MAX_NUM_FREQUENCIES 32
 
 /**
@@ -59,6 +62,7 @@ typedef struct {
 
 rsmi_status_t rsmi_init(uint64_t init_flags);
 rsmi_status_t rsmi_shut_down(void);
+rsmi_status_t rsmi_version_get(rsmi_version_t *);
 rsmi_status_t rsmi_status_string(rsmi_status_t, const char **string);
 rsmi_status_t rsmi_num_monitor_devices(uint32_t *num_devices);
 rsmi_status_t rsmi_dev_pci_id_get(uint32_t dv_ind, uint64_t *bdfid);
