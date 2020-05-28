@@ -15,7 +15,7 @@ srcdir="$HWLOC_top_srcdir/utils/hwloc"
 builddir="$HWLOC_top_builddir/utils/hwloc"
 distrib="$builddir/hwloc-distrib"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc/.libs
 export HWLOC_PLUGINS_PATH
 
 HWLOC_DEBUG_CHECK=1
