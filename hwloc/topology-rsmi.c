@@ -44,7 +44,7 @@ static int get_device_name(uint32_t dv_ind, char *device_name, unsigned int size
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
     rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
     if (!hwloc_hide_rsmi_errors())
-      fprintf(stderr, "RSMI: GPU(%d): Failed to get name: %s\n", dv_ind, status_string);
+      fprintf(stderr, "RSMI: GPU(%u): Failed to get name: %s\n", (unsigned)dv_ind, status_string);
     return -1;
   }
   return 0;
@@ -64,7 +64,7 @@ static int get_device_pci_info(uint32_t dv_ind, uint64_t *bdfid)
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
     rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
     if (!hwloc_hide_rsmi_errors())
-      fprintf(stderr, "RSMI: GPU(%d): Failed to get PCI Info: %s\n", dv_ind, status_string);
+      fprintf(stderr, "RSMI: GPU(%u): Failed to get PCI Info: %s\n", (unsigned)dv_ind, status_string);
     return -1;
   }
   return 0;
@@ -165,7 +165,6 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   for (i=0; i<nb; i++) {
     uint64_t bdfid = 0;
-    unsigned domain, device, bus, func;
     hwloc_obj_t osdev, parent;
     char buffer[64];
 
@@ -193,6 +192,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
     parent = NULL;
     if (get_device_pci_info(i, &bdfid) == 0) {
+      unsigned domain, device, bus, func;
       domain = (bdfid>>32) & 0xffffffff;
       bus = ((bdfid & 0xffff)>>8) & 0xff;
       device = ((bdfid & 0xff)>>3) & 0x1f;
