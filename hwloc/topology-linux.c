@@ -483,16 +483,6 @@ hwloc_stat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
 #endif
 }
 
-static __hwloc_inline int
-hwloc_lstat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
-{
-#ifdef HAVE_OPENAT
-    return hwloc_fstatat(p, st, AT_SYMLINK_NOFOLLOW, d);
-#else
-    return lstat(p, st);
-#endif
-}
-
 /* Static inline version of opendir so that we can use openat if we have
    it, but still preserve compiler parameter checking */
 static __hwloc_inline DIR *
