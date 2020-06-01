@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2018 Inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux
+ * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -128,7 +128,7 @@ hwloc__libxml_import_close_child(hwloc__xml_import_state_t state __hwloc_attribu
 
 static int
 hwloc__libxml_import_get_content(hwloc__xml_import_state_t state,
-				 char **beginp, size_t expected_length)
+				 const char **beginp, size_t expected_length)
 {
   hwloc__libxml_import_state_data_t lstate = (void*) state->data;
   xmlNode *child;
@@ -138,14 +138,14 @@ hwloc__libxml_import_get_content(hwloc__xml_import_state_t state,
   if (!child || child->type != XML_TEXT_NODE) {
     if (expected_length)
       return -1;
-    *beginp = (char *) "";
+    *beginp = "";
     return 0;
   }
 
   length = strlen((char *) child->content);
   if (length != expected_length)
     return -1;
-  *beginp = (char *) child->content;
+  *beginp = (const char*) child->content;
   return 1;
 }
 
