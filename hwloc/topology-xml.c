@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2020 Inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux
+ * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -694,14 +694,15 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
   }
 
   if (!topology->userdata_import_cb) {
-    char *buffer;
+    const char *buffer;
     size_t reallength = encoded ? BASE64_ENCODED_LENGTH(length) : length;
     ret = state->global->get_content(state, &buffer, reallength);
     if (ret < 0)
       return -1;
 
   } else if (topology->userdata_not_decoded) {
-      char *buffer, *fakename;
+      const char *buffer;
+      char *fakename;
       size_t reallength = encoded ? BASE64_ENCODED_LENGTH(length) : length;
       ret = state->global->get_content(state, &buffer, reallength);
       if (ret < 0)
@@ -714,7 +715,7 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
       free(fakename);
 
   } else if (encoded && length) {
-      char *encoded_buffer;
+      const char *encoded_buffer;
       size_t encoded_length = BASE64_ENCODED_LENGTH(length);
       ret = state->global->get_content(state, &encoded_buffer, encoded_length);
       if (ret < 0)
@@ -734,7 +735,7 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
       }
 
   } else { /* always handle length==0 in the non-encoded case */
-      char *buffer = (char *) "";
+      const char *buffer = "";
       if (length) {
 	ret = state->global->get_content(state, &buffer, length);
 	if (ret < 0)
@@ -1317,7 +1318,8 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
   nr_u64values = 0;
   while (1) {
     struct hwloc__xml_import_state_s childstate;
-    char *attrname, *attrvalue, *tag, *buffer;
+    char *attrname, *attrvalue, *tag;
+    const char *buffer;
     int length;
     int is_index = 0;
     int is_u64values = 0;
@@ -1356,7 +1358,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
 
     if (is_index) {
       /* get indexes */
-      char *tmp, *tmp2;
+      const char *tmp, *tmp2;
       if (nr_indexes >= nbobjs) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: %s with more than %u indexes\n",
@@ -1398,7 +1400,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
 
     } else if (is_u64values) {
       /* get uint64_t values */
-      char *tmp;
+      const char *tmp;
       if (nr_u64values >= nbobjs*nbobjs) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: %s with more than %u u64values\n",
