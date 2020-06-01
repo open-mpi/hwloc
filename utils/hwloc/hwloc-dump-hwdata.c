@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 {
     const char *callname = argv[0];
     char *dirname = (char *) DEFAULT_DUMP_DIR;
-    char *input_fsroot;
+    const char *input_fsroot;
     char *filename;
     int err;
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
     input_fsroot = getenv("HWLOC_FSROOT");
     if (!input_fsroot)
-      input_fsroot = (char *) "/";
+      input_fsroot = "/";
 
     err = asprintf(&filename, "%s/knl_memoryside_cache", dirname);
     assert(err >= 0);
