@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2018 Inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux
+ * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -35,7 +35,7 @@ struct hwloc__nolibxml_backend_data_s {
 typedef struct hwloc__nolibxml_import_state_data_s {
   char *tagbuffer; /* buffer containing the next tag */
   char *attrbuffer; /* buffer containing the next attribute of the current node */
-  char *tagname; /* tag name of the current node */
+  const char *tagname; /* tag name of the current node */
   int closed; /* set if the current node is auto-closing */
 } __hwloc_attribute_may_alias * hwloc__nolibxml_import_state_data_t;
 
@@ -137,7 +137,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
     return 0;
 
   /* normal tag */
-  *tagp = nchildstate->tagname = buffer;
+  nchildstate->tagname = *tagp = buffer;
 
   /* find the end, mark it and return it */
   end = strchr(buffer, '>');
@@ -293,7 +293,7 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   state->parent = NULL;
   nstate->closed = 0;
   nstate->tagbuffer = buffer+10;
-  nstate->tagname = (char *) "topology";
+  nstate->tagname = "topology";
   nstate->attrbuffer = NULL;
   return 0; /* success */
 
