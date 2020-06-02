@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2019 Inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux
+ * Copyright © 2009-2010, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -654,7 +654,11 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     unsigned i;
     for(i=0; i<obj->infos_count; i++) {
       struct hwloc_info_s *info = &obj->infos[i];
-      const char *quote = strchr(info->value, ' ') ? "\"" : "";
+      const char *quote;
+      if (strchr(info->value, ' '))
+        quote = "\"";
+      else
+        quote = "";
       res = hwloc_snprintf(tmp, tmplen, "%s%s=%s%s%s",
 			     prefix,
 			     info->name,
