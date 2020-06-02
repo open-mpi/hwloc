@@ -13,7 +13,7 @@
 #include "private/misc.h"
 #include "private/debug.h"
 
-#include <rocm_smi.h>
+#include <rocm_smi/rocm_smi.h>
 
 /* duplicated from topology.c because cannot be used by plugins */
 static int hwloc_hide_rsmi_errors(void)

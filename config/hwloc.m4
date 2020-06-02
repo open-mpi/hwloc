@@ -1023,7 +1023,7 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     hwloc_rsmi_happy=no
     if test "x$enable_io" != xno && test "x$enable_rsmi" != "xno"; then
       hwloc_rsmi_happy=yes
-      AC_CHECK_HEADERS([rocm_smi.h], [
+      AC_CHECK_HEADERS([rocm_smi/rocm_smi.h], [
         AC_CHECK_LIB([rocm_smi64], [rsmi_init], [HWLOC_RSMI_LIBS="-lrocm_smi64"], [hwloc_rsmi_happy=no])
         ], [hwloc_rsmi_happy=no])
     fi
