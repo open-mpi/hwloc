@@ -25,6 +25,8 @@ Version 2.5.0
     with same locality, for instance NUMA nodes and Packages,
     or OS devices within a PCI device.
 * Backends
+  + Add a levelzero backend for oneAPI L0 devices, exposed as OS devices
+    of subtype "LevelZero" and name such as "ze0".
   + Expose NEC Vector Engine cards on Linux as OS devices of subtype
     "VectorEngine" and name "ve0", etc.
     Thanks to Anara Kozhokanova, Tim Cramer and Erich Focht for the help.
