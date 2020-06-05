@@ -102,6 +102,10 @@ if HWLOC_HAVE_NVML
 check_PROGRAMS += nvml
 endif HWLOC_HAVE_NVML
 
+if HWLOC_HAVE_RSMI
+check_PROGRAMS += rsmi
+endif HWLOC_HAVE_RSMI
+
 TESTS = $(check_PROGRAMS)
 
 # The library has a different name depending on whether we are
@@ -121,6 +125,7 @@ opencl_LDADD = $(LDADD) $(HWLOC_OPENCL_LIBS) $(HWLOC_OPENCL_LDFLAGS)
 cuda_LDADD = $(LDADD) -lcuda
 cudart_LDADD = $(LDADD) -lcuda -lcudart
 nvml_LDADD = $(LDADD) -lnvidia-ml
+rsmi_LDADD = $(LDADD) -lrocm_smi64
 hwloc_bind_LDADD = $(LDADD)
 if HWLOC_HAVE_PTHREAD
 hwloc_bind_LDADD += -lpthread

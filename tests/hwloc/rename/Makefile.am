@@ -30,6 +30,9 @@ endif HWLOC_HAVE_CUDART
 if HWLOC_HAVE_NVML
 TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_NVML=1
 endif HWLOC_HAVE_NVML
+if HWLOC_HAVE_RSMI
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_RSMI=1
+endif HWLOC_HAVE_RSMI
 
 dirs:
 	mkdir -p include/hwloc/autogen include/private/autogen

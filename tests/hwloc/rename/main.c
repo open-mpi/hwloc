@@ -41,6 +41,9 @@
 #if HWLOC_TEST_RENAME_NVML
 #include "hwloc/nvml.h"
 #endif
+#if HWLOC_TEST_RENAME_RSMI
+#include "hwloc/rsmi.h"
+#endif
 #include "hwloc/gl.h"
 
 #include "private/components.h"

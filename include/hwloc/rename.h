@@ -510,6 +510,12 @@ extern "C" {
 #define hwloc_nvml_get_device_osdev HWLOC_NAME(nvml_get_device_osdev)
 #define hwloc_nvml_get_device_osdev_by_index HWLOC_NAME(nvml_get_device_osdev_by_index)
 
+/* rsmi.h */
+
+#define hwloc_rsmi_get_device_cpuset HWLOC_NAME(rsmi_get_device_cpuset)
+#define hwloc_rsmi_get_device_osdev HWLOC_NAME(rsmi_get_device_osdev)
+#define hwloc_rsmi_get_device_osdev_by_index HWLOC_NAME(rsmi_get_device_osdev_by_index)
+
 /* gl.h */
 
 #define hwloc_gl_get_display_osdev_by_port_device HWLOC_NAME(gl_get_display_osdev_by_port_device)
