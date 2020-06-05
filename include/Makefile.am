@@ -28,6 +28,7 @@ include_hwloc_HEADERS = \
         hwloc/cuda.h \
         hwloc/cudart.h \
         hwloc/nvml.h \
+        hwloc/rsmi.h \
         hwloc/plugins.h \
         hwloc/gl.h \
         hwloc/rename.h \
