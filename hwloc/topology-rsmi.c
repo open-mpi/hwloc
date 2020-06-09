@@ -157,7 +157,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   ret = rsmi_num_monitor_devices(&nb);
   if (RSMI_STATUS_SUCCESS != ret || !nb) {
-    if (RSMI_STATUS_SUCCESS != ret)
+    if (RSMI_STATUS_SUCCESS != ret && !hwloc_hide_rsmi_errors())
       fprintf(stderr, "RSMI: Failed to get device count\n");
     rsmi_shut_down();
     return 0;
