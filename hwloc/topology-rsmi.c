@@ -24,13 +24,14 @@
  */
 static int get_device_name(uint32_t dv_ind, char *device_name, unsigned int size)
 {
-  const char *status_string;
   rsmi_status_t rsmi_rc = rsmi_dev_name_get(dv_ind, device_name, size);
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
-    rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
-    if (!hwloc_hide_errors())
+    if (!hwloc_hide_errors()) {
+      const char *status_string;
+      rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
       fprintf(stderr, "RSMI: GPU(%u): Failed to get name: %s\n", (unsigned)dv_ind, status_string);
+    }
     return -1;
   }
   return 0;
@@ -44,13 +45,14 @@ static int get_device_name(uint32_t dv_ind, char *device_name, unsigned int size
  */
 static int get_device_pci_info(uint32_t dv_ind, uint64_t *bdfid)
 {
-  const char *status_string;
   rsmi_status_t rsmi_rc = rsmi_dev_pci_id_get(dv_ind, bdfid);
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
-    rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
-    if (!hwloc_hide_errors())
+    if (!hwloc_hide_errors()) {
+      const char *status_string;
+      rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
       fprintf(stderr, "RSMI: GPU(%u): Failed to get PCI Info: %s\n", (unsigned)dv_ind, status_string);
+    }
     return -1;
   }
   return 0;
