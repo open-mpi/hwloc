@@ -15,20 +15,6 @@
 
 #include <rocm_smi/rocm_smi.h>
 
-/* duplicated from topology.c because cannot be used by plugins */
-static int hwloc_hide_rsmi_errors(void)
-{
-  static int hide = 0;
-  static int checked = 0;
-  if (!checked) {
-    const char *envvar = getenv("HWLOC_HIDE_ERRORS");
-    if (envvar)
-      hide = atoi(envvar);
-    checked = 1;
-  }
-  return hide;
-}
-
 /*
  * Get the name of the GPU
  *
@@ -43,7 +29,7 @@ static int get_device_name(uint32_t dv_ind, char *device_name, unsigned int size
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
     rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
-    if (!hwloc_hide_rsmi_errors())
+    if (!hwloc_hide_errors())
       fprintf(stderr, "RSMI: GPU(%u): Failed to get name: %s\n", (unsigned)dv_ind, status_string);
     return -1;
   }
@@ -63,7 +49,7 @@ static int get_device_pci_info(uint32_t dv_ind, uint64_t *bdfid)
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
     rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
-    if (!hwloc_hide_rsmi_errors())
+    if (!hwloc_hide_errors())
       fprintf(stderr, "RSMI: GPU(%u): Failed to get PCI Info: %s\n", (unsigned)dv_ind, status_string);
     return -1;
   }
@@ -157,7 +143,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   ret = rsmi_num_monitor_devices(&nb);
   if (RSMI_STATUS_SUCCESS != ret || !nb) {
-    if (RSMI_STATUS_SUCCESS != ret && !hwloc_hide_rsmi_errors())
+    if (RSMI_STATUS_SUCCESS != ret && !hwloc_hide_errors())
       fprintf(stderr, "RSMI: Failed to get device count\n");
     rsmi_shut_down();
     return 0;
