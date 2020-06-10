@@ -139,14 +139,25 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
-  rsmi_init(0);
+  ret = rsmi_init(0);
+  if (RSMI_STATUS_SUCCESS != ret) {
+    if (!hwloc_hide_errors()) {
+      const char *status_string;
+      rsmi_status_string(ret, &status_string);
+      fprintf(stderr, "RSMI: Failed to initialize with rsmi_init(): %s\n", status_string);
+    }
+    return 0;
+  }
 
   rsmi_version_get(&version);
 
   ret = rsmi_num_monitor_devices(&nb);
   if (RSMI_STATUS_SUCCESS != ret || !nb) {
-    if (RSMI_STATUS_SUCCESS != ret && !hwloc_hide_errors())
-      fprintf(stderr, "RSMI: Failed to get device count\n");
+    if (RSMI_STATUS_SUCCESS != ret && !hwloc_hide_errors()) {
+      const char *status_string;
+      rsmi_status_string(ret, &status_string);
+      fprintf(stderr, "RSMI: Failed to get number of devices with rsmi_num_monitor_devices(): %s\n", status_string);
+    }
     rsmi_shut_down();
     return 0;
   }
