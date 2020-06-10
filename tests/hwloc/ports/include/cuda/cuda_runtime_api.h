@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2017 Inria.  All rights reserved.
+ * Copyright © 2013-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -30,5 +30,6 @@ struct cudaDeviceProp {
 
 cudaError_t cudaGetDeviceProperties(struct cudaDeviceProp *, int);
 cudaError_t cudaGetDeviceCount(int *);
+const char * cudaGetErrorString(cudaError_t);
 
 #endif /* HWLOC_PORT_CUDA_CUDA_RUNTIME_API_H */

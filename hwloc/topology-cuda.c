@@ -74,8 +74,13 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     return 0;
 
   cures = cudaGetDeviceCount(&nb);
-  if (cures)
+  if (cures) {
+    if (!hwloc_hide_errors()) {
+      const char *error = cudaGetErrorString(cures);
+      fprintf(stderr, "CUDA: Failed to get number of devices with cudaGetDeviceCount(): %s\n", error);
+    }
     return -1;
+  }
 
   for (i = 0; i < nb; i++) {
     int domain, bus, dev;

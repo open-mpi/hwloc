@@ -175,7 +175,9 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   ret = pci_system_init();
   if (ret) {
     HWLOC_PCIACCESS_UNLOCK();
-    hwloc_debug("%s", "Can not initialize libpciaccess\n");
+    if (!hwloc_hide_errors())
+      fprintf(stderr, "PCI: Failed to initialize libpciaccess with pci_system_init(): %d (%s)\n",
+              ret, strerror(errno));
     return -1;
   }
 

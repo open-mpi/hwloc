@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Inria.  All rights reserved.
+ * Copyright © 2013-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -28,6 +28,7 @@ typedef struct nvmlDevice_st* nvmlDevice_t;
 
 nvmlReturn_t nvmlInit(void);
 nvmlReturn_t nvmlShutdown(void);
+char* nvmlErrorString(nvmlReturn_t result);
 nvmlReturn_t nvmlDeviceGetCount(unsigned int *deviceCount);
 nvmlReturn_t nvmlDeviceGetHandleByIndex(unsigned int index, nvmlDevice_t *device);
 nvmlReturn_t nvmlDeviceGetPciInfo(nvmlDevice_t device, nvmlPciInfo_t *pci);
