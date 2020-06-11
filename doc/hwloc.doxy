@@ -1872,7 +1872,7 @@ and SectorSize (in bytes).
 <dd>The number of compute units and global memory size (in kB) of an OpenCL device.
 </dd>
 <dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
-<dd>The UUID and Serial of NVIDIA GPUs.
+<dd>The UUID and serial number of NVIDIA GPUs.
 </dd>
 <dt>CUDAMultiProcessors, CUDACoresPerMP,</dt>
 <dt>CUDAGlobalMemorySize, CUDAL2CacheSize, CUDASharedMemorySizePerMP (CUDA OS devices)</dt>
