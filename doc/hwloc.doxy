@@ -1885,7 +1885,7 @@ and SectorSize (in bytes).
 <dd>The UUID and serial number of AMD GPUs.
 </dd>
 <dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
-<dd>The UUID and Serial of NVIDIA GPUs.
+<dd>The UUID and serial number of NVIDIA GPUs.
 </dd>
 <dt>CUDAMultiProcessors, CUDACoresPerMP,</dt>
 <dt>CUDAGlobalMemorySize, CUDAL2CacheSize, CUDASharedMemorySizePerMP (CUDA OS devices)</dt>
