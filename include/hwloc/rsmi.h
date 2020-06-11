@@ -6,9 +6,9 @@
  */
 
 /** \file
- * \brief Macros to help interaction between hwloc and the RSMI Management Library.
+ * \brief Macros to help interaction between hwloc and the ROCm SMI Management Library.
  *
- * Applications that use both hwloc and the RSMI Management Library may want to
+ * Applications that use both hwloc and the ROCm SMI Management Library may want to
  * include this file so as to get topology information for AMD GPU devices.
  */
 
@@ -30,10 +30,10 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_rsmi Interoperability with the RSMI Management Library
+/** \defgroup hwlocality_rsmi Interoperability with the ROCm SMI Management Library
  *
  * This interface offers ways to retrieve topology information about
- * devices managed by the RSMI Management Library.
+ * devices managed by the ROCm SMI Management Library.
  *
  * @{
  */

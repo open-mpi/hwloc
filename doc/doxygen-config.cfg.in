@@ -1,4 +1,4 @@
-# Copyright © 2010-2019 Inria.  All rights reserved.
+# Copyright © 2010-2020 Inria.  All rights reserved.
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -22,6 +22,7 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/cuda.h \
 		@top_srcdir@/include/hwloc/cudart.h \
 		@top_srcdir@/include/hwloc/nvml.h \
+		@top_srcdir@/include/hwloc/rsmi.h \
 		@top_srcdir@/include/hwloc/gl.h \
 		@top_srcdir@/include/hwloc/openfabrics-verbs.h \
 		@top_srcdir@/include/hwloc/diff.h \

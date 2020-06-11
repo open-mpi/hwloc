@@ -1,4 +1,4 @@
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009-2013 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -79,6 +79,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/cuda.h \
        $(hwloc_include_dir)/hwloc/cudart.h \
        $(hwloc_include_dir)/hwloc/nvml.h \
+       $(hwloc_include_dir)/hwloc/rsmi.h \
        $(hwloc_include_dir)/hwloc/gl.h \
        $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
        $(srcdir)/netloc.doxy \
@@ -690,8 +691,8 @@ man3_diff_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_diff_load_xmlbuffer.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_diff_export_xmlbuffer.3
 
-man3_cudadir = $(man3dir)
-man3_cuda_DATA = \
+man3_gpudir = $(man3dir)
+man3_gpu_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_opencl.3 \
         $(DOX_MAN_DIR)/man3/hwloc_opencl_get_device_pci_busid.3 \
         $(DOX_MAN_DIR)/man3/hwloc_opencl_get_device_cpuset.3 \
@@ -712,6 +713,10 @@ man3_cuda_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev_by_index.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_rsmi.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_rsmi_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_rsmi_get_device_osdev.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_rsmi_get_device_osdev_by_index.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_gl.3 \
         $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_osdev_by_port_device.3 \
         $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_osdev_by_name.3 \
