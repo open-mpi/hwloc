@@ -637,6 +637,70 @@ EOF])
       echo
     fi
 
+    if test "x$hwloc_linux" != "xyes" ; then
+      # Don't look for sys/sysctl.h on Linux because it's deprecated and
+      # generates a warning in GCC10. Also it's unneeded.
+      AC_CHECK_HEADERS([sys/param.h])
+      AC_CHECK_HEADERS([sys/sysctl.h], [
+        AC_CHECK_DECLS([CTL_HW, HW_NCPU, HW_REALMEM64, HW_MEMSIZE64, HW_PHYSMEM64, HW_USERMEM64, HW_REALMEM, HW_MEMSIZE, HW_PHYSMEM, HW_USERMEM],,,[[
+        #if HAVE_SYS_PARAM_H
+        #include <sys/param.h>
+        #endif
+        #include <sys/sysctl.h>
+        ]])
+      ],,[
+        AC_INCLUDES_DEFAULT
+        #if HAVE_SYS_PARAM_H
+        #include <sys/param.h>
+        #endif
+      ])
+
+      # Don't detect sysctl* on Linux because its sysctl() syscall is
+      # long deprecated and unneeded. Some libc still expose the symbol
+      # and raise a big warning at link time.
+
+      # Do a full link test instead of just using AC_CHECK_FUNCS, which
+      # just checks to see if the symbol exists or not.  For example,
+      # the prototype of sysctl uses u_int, which on some platforms
+      # (such as FreeBSD) is only defined under __BSD_VISIBLE, __USE_BSD
+      # or other similar definitions.  So while the symbols "sysctl" and
+      # "sysctlbyname" might still be available in libc (which autoconf
+      # checks for), they might not be actually usable.
+      AC_MSG_CHECKING([for sysctl])
+      AC_TRY_LINK([
+                 #include <stdio.h>
+                 #include <sys/types.h>
+                 #include <sys/sysctl.h>
+                 ],
+                  [return sysctl(NULL,0,NULL,NULL,NULL,0);],
+                  [AC_DEFINE([HAVE_SYSCTL],[1],[Define to '1' if sysctl is present and usable])
+                   AC_MSG_RESULT(yes)],
+                  [AC_MSG_RESULT(no)])
+      AC_MSG_CHECKING([for sysctlbyname])
+      AC_TRY_LINK([
+                 #include <stdio.h>
+                 #include <sys/types.h>
+                 #include <sys/sysctl.h>
+                 ],
+                  [return sysctlbyname(NULL,NULL,NULL,NULL,0);],
+                  [AC_DEFINE([HAVE_SYSCTLBYNAME],[1],[Define to '1' if sysctlbyname is present and usable])
+                   AC_MSG_RESULT(yes)],
+                  [AC_MSG_RESULT(no)])
+    fi
+
+    AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
+      #include <pthread.h>
+      #ifdef HAVE_PTHREAD_NP_H
+      #  include <pthread_np.h>
+      #endif
+    ]])
+    AC_CHECK_DECLS([pthread_getaffinity_np],,[:],[[
+      #include <pthread.h>
+      #ifdef HAVE_PTHREAD_NP_H
+      #  include <pthread_np.h>
+      #endif
+    ]])
+
     AC_CHECK_DECLS([fabsf], [
       AC_CHECK_LIB([m], [fabsf],
                    [need_libm=yes])
@@ -700,57 +764,6 @@ return 0;
 
     if test x$broken_snprintf = xno; then
       AC_DEFINE([HWLOC_HAVE_CORRECT_SNPRINTF], 1, [Define to 1 if snprintf supports NULL output buffer and returns the correct length on truncation])
-    fi
-
-    if test "x$hwloc_linux" != "xyes" ; then
-      # Don't look for sys/sysctl.h on Linux because it's deprecated and
-      # generates a warning in GCC10. Also it's unneeded.
-      AC_CHECK_HEADERS([sys/param.h])
-      AC_CHECK_HEADERS([sys/sysctl.h], [
-        AC_CHECK_DECLS([CTL_HW, HW_NCPU, HW_REALMEM64, HW_MEMSIZE64, HW_PHYSMEM64, HW_USERMEM64, HW_REALMEM, HW_MEMSIZE, HW_PHYSMEM, HW_USERMEM],,,[[
-        #if HAVE_SYS_PARAM_H
-        #include <sys/param.h>
-        #endif
-        #include <sys/sysctl.h>
-        ]])
-      ],,[
-        AC_INCLUDES_DEFAULT
-        #if HAVE_SYS_PARAM_H
-        #include <sys/param.h>
-        #endif
-      ])
-
-      # Don't detect sysctl* on Linux because its sysctl() syscall is
-      # long deprecated and unneeded. Some libc still expose the symbol
-      # and raise a big warning at link time.
-
-      # Do a full link test instead of just using AC_CHECK_FUNCS, which
-      # just checks to see if the symbol exists or not.  For example,
-      # the prototype of sysctl uses u_int, which on some platforms
-      # (such as FreeBSD) is only defined under __BSD_VISIBLE, __USE_BSD
-      # or other similar definitions.  So while the symbols "sysctl" and
-      # "sysctlbyname" might still be available in libc (which autoconf
-      # checks for), they might not be actually usable.
-      AC_MSG_CHECKING([for sysctl])
-      AC_TRY_LINK([
-                 #include <stdio.h>
-                 #include <sys/types.h>
-                 #include <sys/sysctl.h>
-                 ],
-                  [return sysctl(NULL,0,NULL,NULL,NULL,0);],
-                  [AC_DEFINE([HAVE_SYSCTL],[1],[Define to '1' if sysctl is present and usable])
-                   AC_MSG_RESULT(yes)],
-                  [AC_MSG_RESULT(no)])
-      AC_MSG_CHECKING([for sysctlbyname])
-      AC_TRY_LINK([
-                 #include <stdio.h>
-                 #include <sys/types.h>
-                 #include <sys/sysctl.h>
-                 ],
-                  [return sysctlbyname(NULL,NULL,NULL,NULL,0);],
-                  [AC_DEFINE([HAVE_SYSCTLBYNAME],[1],[Define to '1' if sysctlbyname is present and usable])
-                   AC_MSG_RESULT(yes)],
-                  [AC_MSG_RESULT(no)])
     fi
 
     AC_CHECK_DECLS([getprogname], [], [], [AC_INCLUDES_DEFAULT])
@@ -852,7 +865,6 @@ return 0;
 
     AS_IF([test "$hwloc_c_vendor" != "android"], [AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])])
 
-
     AC_CHECK_HEADERS([malloc.h])
     AC_CHECK_FUNCS([getpagesize memalign posix_memalign])
 
@@ -872,19 +884,6 @@ return 0;
 	],[
 	 AC_DEFINE([HAVE_DECL_RUNNING_ON_VALGRIND], [0], [Embedded mode; just assume we do not have Valgrind support])
 	])
-
-    AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
-      #include <pthread.h>
-      #ifdef HAVE_PTHREAD_NP_H
-      #  include <pthread_np.h>
-      #endif
-    ]])
-    AC_CHECK_DECLS([pthread_getaffinity_np],,[:],[[
-      #include <pthread.h>
-      #ifdef HAVE_PTHREAD_NP_H
-      #  include <pthread_np.h>
-      #endif
-    ]])
 
     AS_IF([test "x$enable_32bits_pci_domain" = "xyes"], [
       AC_DEFINE([HWLOC_HAVE_32BITS_PCI_DOMAIN], 1,
