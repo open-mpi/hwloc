@@ -460,34 +460,37 @@ EOF])
     ])
     AC_CHECK_HEADERS([sys/mman.h])
 
-    old_CPPFLAGS="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS -D_WIN32_WINNT=0x0601"
-    AC_CHECK_TYPES([KAFFINITY,
-                    PROCESSOR_CACHE_TYPE,
-                    CACHE_DESCRIPTOR,
-                    LOGICAL_PROCESSOR_RELATIONSHIP,
-                    RelationProcessorPackage,
-                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
-                    GROUP_AFFINITY,
-                    PROCESSOR_RELATIONSHIP,
-                    NUMA_NODE_RELATIONSHIP,
-                    CACHE_RELATIONSHIP,
-                    PROCESSOR_GROUP_INFO,
-                    GROUP_RELATIONSHIP,
-                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX,
-		    PSAPI_WORKING_SET_EX_BLOCK,
-		    PSAPI_WORKING_SET_EX_INFORMATION,
-		    PROCESSOR_NUMBER],
-                    [],[],[[#include <windows.h>]])
-    CPPFLAGS="$old_CPPFLAGS"
-    AC_CHECK_LIB([gdi32], [main],
-                 [HWLOC_LIBS="-lgdi32 $HWLOC_LIBS"
-                  AC_DEFINE([HAVE_LIBGDI32], 1, [Define to 1 if we have -lgdi32])])
-    AC_CHECK_LIB([user32], [PostQuitMessage], [hwloc_have_user32="yes"])
+    if test x$hwloc_windows = xyes; then
+      AC_CHECK_HEADER([windows.h], [
+        AC_DEFINE([HWLOC_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
+      ])
 
-    AC_CHECK_HEADER([windows.h], [
-      AC_DEFINE([HWLOC_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
-    ])
+      old_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -D_WIN32_WINNT=0x0601"
+      AC_CHECK_TYPES([KAFFINITY,
+                      PROCESSOR_CACHE_TYPE,
+                      CACHE_DESCRIPTOR,
+                      LOGICAL_PROCESSOR_RELATIONSHIP,
+                      RelationProcessorPackage,
+                      SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
+                      GROUP_AFFINITY,
+                      PROCESSOR_RELATIONSHIP,
+                      NUMA_NODE_RELATIONSHIP,
+                      CACHE_RELATIONSHIP,
+                      PROCESSOR_GROUP_INFO,
+                      GROUP_RELATIONSHIP,
+                      SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX,
+                      PSAPI_WORKING_SET_EX_BLOCK,
+                      PSAPI_WORKING_SET_EX_INFORMATION,
+                      PROCESSOR_NUMBER],
+                      [],[],[[#include <windows.h>]])
+      CPPFLAGS="$old_CPPFLAGS"
+
+      AC_CHECK_LIB([gdi32], [main],
+                   [HWLOC_LIBS="-lgdi32 $HWLOC_LIBS"
+                    AC_DEFINE([HAVE_LIBGDI32], 1, [Define to 1 if we have -lgdi32])])
+      AC_CHECK_LIB([user32], [PostQuitMessage], [hwloc_have_user32="yes"])
+    fi
 
     AC_CHECK_HEADERS([sys/lgrp_user.h], [
       AC_CHECK_LIB([lgrp], [lgrp_init],
