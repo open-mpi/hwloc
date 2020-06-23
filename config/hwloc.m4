@@ -1080,40 +1080,27 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
-    # X11 support
-    AC_PATH_XTRA
-
-    CPPFLAGS_save=$CPPFLAGS
-    LIBS_save=$LIBS
-
-    CPPFLAGS="$CPPFLAGS $X_CFLAGS"
-    LIBS="$LIBS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS"
-    AC_CHECK_HEADERS([X11/Xlib.h],
-        [AC_CHECK_LIB([X11], [XOpenDisplay],
-            [
-             # the GL backend just needs XOpenDisplay
-             hwloc_enable_X11=yes
-             # lstopo needs more
-             AC_CHECK_HEADERS([X11/Xutil.h],
-                [AC_CHECK_HEADERS([X11/keysym.h],
-                    [AC_DEFINE([HWLOC_HAVE_X11_KEYSYM], [1], [Define to 1 if X11 headers including Xutil.h and keysym.h are available.])
-                     hwloc_x11_keysym_happy=yes
-                     HWLOC_X11_CPPFLAGS="$X_CFLAGS"
-                     AC_SUBST([HWLOC_X11_CPPFLAGS])
-                     HWLOC_X11_LIBS="$X_PRE_LIBS $X_LIBS -lX11 $X_EXTRA_LIBS"
-                     AC_SUBST([HWLOC_X11_LIBS])])
-                ], [], [#include <X11/Xlib.h>])
-            ])
-         ])
-    CPPFLAGS=$CPPFLAGS_save
-    LIBS=$LIBS_save
-
     # GL Support
     hwloc_gl_happy=no
     if test "x$enable_io" != xno && test "x$enable_gl" != "xno"; then
 	hwloc_gl_happy=yes
 
-	AS_IF([test "$hwloc_enable_X11" != "yes"],
+        # some X11 support (less then lstopo in hwloc_internal.m4)
+        AC_PATH_XTRA
+
+        CPPFLAGS_save=$CPPFLAGS
+        LIBS_save=$LIBS
+
+        CPPFLAGS="$CPPFLAGS $X_CFLAGS"
+        LIBS="$LIBS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS"
+        AC_CHECK_HEADERS([X11/Xlib.h],
+            [AC_CHECK_LIB([X11], [XOpenDisplay],
+                [hwloc_enable_X11=yes])
+            ])
+        CPPFLAGS=$CPPFLAGS_save
+        LIBS=$LIBS_save
+
+        AS_IF([test "$hwloc_enable_X11" != "yes"],
               [AC_MSG_WARN([X11 not found; GL disabled])
                hwloc_gl_happy=no])
 
