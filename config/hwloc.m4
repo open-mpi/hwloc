@@ -461,6 +461,9 @@ EOF])
     AC_CHECK_HEADERS([sys/mman.h])
 
     if test x$hwloc_windows = xyes; then
+      echo
+      echo "**** Windows-specific checks"
+
       AC_CHECK_HEADER([windows.h], [
         AC_DEFINE([HWLOC_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
       ])
@@ -486,10 +489,18 @@ EOF])
                       [],[],[[#include <windows.h>]])
       CPPFLAGS="$old_CPPFLAGS"
 
+      AC_CHECK_DECLS([GetModuleFileName], [], [], [#include <windows.h>])
+
       AC_CHECK_LIB([gdi32], [main],
                    [HWLOC_LIBS="-lgdi32 $HWLOC_LIBS"
                     AC_DEFINE([HAVE_LIBGDI32], 1, [Define to 1 if we have -lgdi32])])
       AC_CHECK_LIB([user32], [PostQuitMessage], [hwloc_have_user32="yes"])
+
+      AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
+      AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
+
+      echo "**** end of Windows-specific checks"
+      echo
     fi
 
     AC_CHECK_HEADERS([sys/lgrp_user.h], [
@@ -627,7 +638,6 @@ return 0;
 
     AC_CHECK_DECLS([getprogname], [], [], [AC_INCLUDES_DEFAULT])
     AC_CHECK_DECLS([getexecname], [], [], [AC_INCLUDES_DEFAULT])
-    AC_CHECK_DECLS([GetModuleFileName], [], [], [#include <windows.h>])
     # program_invocation_name and __progname may be available but not exported in headers
     AC_MSG_CHECKING([for program_invocation_name])
     AC_TRY_LINK([
@@ -739,9 +749,6 @@ return 0;
         [AC_DEFINE([HWLOC_HAVE_SYSCALL], [1], [Define to 1 if function `syscall' is available with 6 parameters])
          AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])])
-
-    AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
-    AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
 
     AC_PATH_PROG([BASH], [bash])
 
