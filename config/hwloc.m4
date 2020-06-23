@@ -547,6 +547,96 @@ EOF])
       echo
     fi
 
+    if test x$hwloc_linux = xyes; then
+      echo
+      echo "**** Linux-specific checks"
+
+      AC_CHECK_DECLS([sched_getcpu],,[:],[[
+        #ifndef _GNU_SOURCE
+        # define _GNU_SOURCE
+        #endif
+        #include <sched.h>
+      ]])
+
+      _HWLOC_CHECK_DECL([sched_setaffinity], [
+	hwloc_have_sched_setaffinity=yes
+        AC_DEFINE([HWLOC_HAVE_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides a prototype of sched_setaffinity()])
+        AS_IF([test "$HWLOC_STRICT_ARGS_CFLAGS" = "FAIL"],[
+          AC_MSG_WARN([Support for sched_setaffinity() requires a C compiler which])
+          AC_MSG_WARN([considers incorrect argument counts to be a fatal error.])
+          AC_MSG_ERROR([Cannot continue.])
+        ])
+        AC_MSG_CHECKING([for old prototype of sched_setaffinity])
+        hwloc_save_CFLAGS=$CFLAGS
+        CFLAGS="$CFLAGS $HWLOC_STRICT_ARGS_CFLAGS"
+        AC_COMPILE_IFELSE([
+            AC_LANG_PROGRAM([[
+              #ifndef _GNU_SOURCE
+              # define _GNU_SOURCE
+              #endif
+              #include <sched.h>
+              static unsigned long mask;
+              ]], [[ sched_setaffinity(0, (void*) &mask); ]])],
+            [AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype (without length) of sched_setaffinity()])
+             AC_MSG_RESULT([yes])],
+            [AC_MSG_RESULT([no])])
+        CFLAGS=$hwloc_save_CFLAGS
+      ], , [[
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
+#include <sched.h>
+      ]])
+
+      AC_MSG_CHECKING([for working CPU_SET])
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([[
+          #include <sched.h>
+          cpu_set_t set;
+        ]], [[ CPU_ZERO(&set); CPU_SET(0, &set);]])],
+        [AC_DEFINE([HWLOC_HAVE_CPU_SET], [1], [Define to 1 if the CPU_SET macro works])
+         AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])])
+
+      AC_MSG_CHECKING([for working CPU_SET_S])
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([[
+          #include <sched.h>
+          cpu_set_t *set;
+        ]], [[
+          set = CPU_ALLOC(1024);
+          CPU_ZERO_S(CPU_ALLOC_SIZE(1024), set);
+          CPU_SET_S(CPU_ALLOC_SIZE(1024), 0, set);
+          CPU_FREE(set);
+        ]])],
+        [AC_DEFINE([HWLOC_HAVE_CPU_SET_S], [1], [Define to 1 if the CPU_SET_S macro works])
+         AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])])
+
+      AC_MSG_CHECKING([for working syscall with 6 parameters])
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([[
+          #include <unistd.h>
+          #include <sys/syscall.h>
+          ]], [[syscall(0, 1, 2, 3, 4, 5, 6);]])],
+        [AC_DEFINE([HWLOC_HAVE_SYSCALL], [1], [Define to 1 if function `syscall' is available with 6 parameters])
+         AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])])
+
+      # Linux libudev support
+      if test "x$enable_libudev" != xno; then
+        AC_CHECK_HEADERS([libudev.h], [
+          AC_CHECK_LIB([udev], [udev_device_new_from_subsystem_sysname], [
+            HWLOC_LIBS="$HWLOC_LIBS -ludev"
+            AC_DEFINE([HWLOC_HAVE_LIBUDEV], [1], [Define to 1 if you have libudev.])
+          ])
+        ])
+      fi
+
+      echo "**** end of Linux-specific checks"
+      echo
+    fi
+
     AC_CHECK_DECLS([fabsf], [
       AC_CHECK_LIB([m], [fabsf],
                    [need_libm=yes])
@@ -706,77 +796,6 @@ return 0;
       AC_DEFINE_UNQUOTED(hwloc_thread_t, $hwloc_thread_t, [Define this to the thread ID type])
     fi
 
-    AC_CHECK_DECLS([sched_getcpu],,[:],[[
-      #ifndef _GNU_SOURCE
-      # define _GNU_SOURCE
-      #endif
-      #include <sched.h>
-    ]])
-
-    _HWLOC_CHECK_DECL([sched_setaffinity], [
-      AC_DEFINE([HWLOC_HAVE_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides a prototype of sched_setaffinity()])
-      AS_IF([test "$HWLOC_STRICT_ARGS_CFLAGS" = "FAIL"],[
-        AC_MSG_WARN([Support for sched_setaffinity() requires a C compiler which])
-        AC_MSG_WARN([considers incorrect argument counts to be a fatal error.])
-        AC_MSG_ERROR([Cannot continue.])
-      ])
-      AC_MSG_CHECKING([for old prototype of sched_setaffinity])
-      hwloc_save_CFLAGS=$CFLAGS
-      CFLAGS="$CFLAGS $HWLOC_STRICT_ARGS_CFLAGS"
-      AC_COMPILE_IFELSE([
-          AC_LANG_PROGRAM([[
-              #ifndef _GNU_SOURCE
-              # define _GNU_SOURCE
-              #endif
-              #include <sched.h>
-              static unsigned long mask;
-              ]], [[ sched_setaffinity(0, (void*) &mask); ]])],
-          [AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype (without length) of sched_setaffinity()])
-           AC_MSG_RESULT([yes])],
-          [AC_MSG_RESULT([no])])
-      CFLAGS=$hwloc_save_CFLAGS
-    ], , [[
-#ifndef _GNU_SOURCE
-# define _GNU_SOURCE
-#endif
-#include <sched.h>
-]])
-
-    AC_MSG_CHECKING([for working CPU_SET])
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-        #include <sched.h>
-        cpu_set_t set;
-        ]], [[ CPU_ZERO(&set); CPU_SET(0, &set);]])],
-	[AC_DEFINE([HWLOC_HAVE_CPU_SET], [1], [Define to 1 if the CPU_SET macro works])
-         AC_MSG_RESULT([yes])],
-        [AC_MSG_RESULT([no])])
-
-    AC_MSG_CHECKING([for working CPU_SET_S])
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-          #include <sched.h>
-          cpu_set_t *set;
-        ]], [[
-          set = CPU_ALLOC(1024);
-          CPU_ZERO_S(CPU_ALLOC_SIZE(1024), set);
-          CPU_SET_S(CPU_ALLOC_SIZE(1024), 0, set);
-          CPU_FREE(set);
-        ]])],
-        [AC_DEFINE([HWLOC_HAVE_CPU_SET_S], [1], [Define to 1 if the CPU_SET_S macro works])
-         AC_MSG_RESULT([yes])],
-        [AC_MSG_RESULT([no])])
-
-    AC_MSG_CHECKING([for working syscall with 6 parameters])
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-          #include <unistd.h>
-          #include <sys/syscall.h>
-          ]], [[syscall(0, 1, 2, 3, 4, 5, 6);]])],
-        [AC_DEFINE([HWLOC_HAVE_SYSCALL], [1], [Define to 1 if function `syscall' is available with 6 parameters])
-         AC_MSG_RESULT([yes])],
-        [AC_MSG_RESULT([no])])
-
     AC_PATH_PROG([BASH], [bash])
 
     AC_CHECK_FUNCS([ffs], [
@@ -866,17 +885,6 @@ return 0;
       #  include <pthread_np.h>
       #endif
     ]])
-    AC_CHECK_FUNC([sched_setaffinity], [hwloc_have_sched_setaffinity=yes])
-
-    # Linux libudev support
-    if test "x$enable_libudev" != xno; then
-      AC_CHECK_HEADERS([libudev.h], [
-	AC_CHECK_LIB([udev], [udev_device_new_from_subsystem_sysname], [
-	  HWLOC_LIBS="$HWLOC_LIBS -ludev"
-	  AC_DEFINE([HWLOC_HAVE_LIBUDEV], [1], [Define to 1 if you have libudev.])
-	])
-      ])
-    fi
 
     AS_IF([test "x$enable_32bits_pci_domain" = "xyes"], [
       AC_DEFINE([HWLOC_HAVE_32BITS_PCI_DOMAIN], 1,
