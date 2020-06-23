@@ -510,18 +510,30 @@ EOF])
       echo
     fi
 
-    AC_CHECK_HEADERS([sys/lgrp_user.h], [
-      AC_CHECK_LIB([lgrp], [lgrp_init],
-                   [HWLOC_LIBS="-llgrp $HWLOC_LIBS"
-                    AC_DEFINE([HAVE_LIBLGRP], 1, [Define to 1 if we have -llgrp])
-                    AC_CHECK_DECLS([lgrp_latency_cookie],,,[[#include <sys/lgrp_user.h>]])
+    if test x$hwloc_solaris = xyes; then
+      echo
+      echo "**** Solaris-specific checks"
+
+      AC_CHECK_HEADERS([sys/lgrp_user.h], [
+        AC_CHECK_LIB([lgrp], [lgrp_init],
+                     [HWLOC_LIBS="-llgrp $HWLOC_LIBS"
+                      AC_DEFINE([HAVE_LIBLGRP], 1, [Define to 1 if we have -llgrp])
+                      AC_CHECK_DECLS([lgrp_latency_cookie],,,[[#include <sys/lgrp_user.h>]])
+        ])
       ])
-    ])
-    AC_CHECK_HEADERS([kstat.h], [
-      AC_CHECK_LIB([kstat], [main],
-                   [HWLOC_LIBS="-lkstat $HWLOC_LIBS"
-                    AC_DEFINE([HAVE_LIBKSTAT], 1, [Define to 1 if we have -lkstat])])
-    ])
+      AC_CHECK_HEADERS([kstat.h], [
+        AC_CHECK_LIB([kstat], [main],
+                     [HWLOC_LIBS="-lkstat $HWLOC_LIBS"
+                      AC_DEFINE([HAVE_LIBKSTAT], 1, [Define to 1 if we have -lkstat])])
+      ])
+
+      AC_CHECK_HEADERS([picl.h], [
+        AC_CHECK_LIB([picl], [picl_initialize],
+                     [HWLOC_LIBS="-lpicl $HWLOC_LIBS"])])
+
+      echo "**** end of Solaris-specific checks"
+      echo
+    fi
 
     AC_CHECK_DECLS([fabsf], [
       AC_CHECK_LIB([m], [fabsf],
@@ -534,10 +546,6 @@ EOF])
     if test x$need_libm = xyes; then
       HWLOC_LIBS="-lm $HWLOC_LIBS"
     fi
-
-    AC_CHECK_HEADERS([picl.h], [
-      AC_CHECK_LIB([picl], [picl_initialize],
-                   [HWLOC_LIBS="-lpicl $HWLOC_LIBS"])])
 
     AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
     		_SC_NPROCESSORS_CONF,
