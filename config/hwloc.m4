@@ -535,6 +535,18 @@ EOF])
       echo
     fi
 
+    if test x$hwloc_aix = xyes; then
+      echo
+      echo "**** AIX-specific checks"
+
+      AC_SEARCH_LIBS([pthread_getthrds_np], [pthread], [
+        AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, `Define to 1 if you have pthread_getthrds_np')
+      ])
+
+      echo "**** end of AIX-specific checks"
+      echo
+    fi
+
     AC_CHECK_DECLS([fabsf], [
       AC_CHECK_LIB([m], [fabsf],
                    [need_libm=yes])
@@ -855,9 +867,6 @@ return 0;
       #endif
     ]])
     AC_CHECK_FUNC([sched_setaffinity], [hwloc_have_sched_setaffinity=yes])
-    AC_SEARCH_LIBS([pthread_getthrds_np], [pthread],
-      AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, `Define to 1 if you have pthread_getthrds_np')
-    )
 
     # Linux libudev support
     if test "x$enable_libudev" != xno; then
