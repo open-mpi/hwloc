@@ -433,14 +433,6 @@ EOF])
     AC_CHECK_HEADERS([strings.h])
     AC_CHECK_HEADERS([ctype.h])
 
-    if test x$hwloc_freebsd = xyes; then
-
-      AC_CHECK_HEADERS([sys/domainset.h])
-      AC_CHECK_HEADERS([sys/thr.h])
-
-    fi
-
-
     AC_CHECK_FUNCS([strcasecmp], [
       _HWLOC_CHECK_DECL([strcasecmp], [
 	AC_DEFINE([HWLOC_HAVE_DECL_STRCASECMP], [1], [Define to 1 if function `strcasecmp' is declared by system headers])
@@ -459,6 +451,21 @@ EOF])
       AC_DEFINE([HWLOC_HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
     ])
     AC_CHECK_HEADERS([sys/mman.h])
+
+    if test x$hwloc_freebsd = xyes; then
+      echo
+      echo "**** FreeBSD-specific checks"
+
+      AC_CHECK_HEADERS([sys/domainset.h])
+      AC_CHECK_HEADERS([sys/thr.h])
+      AC_CHECK_HEADERS([pthread_np.h])
+      AC_CHECK_HEADERS([sys/cpuset.h],,,[[#include <sys/param.h>]])
+      AC_CHECK_FUNCS([cpuset_setaffinity])
+      AC_CHECK_FUNCS([cpuset_setid])
+
+      echo "**** end of FreeBSD-specific checks"
+      echo
+    fi
 
     if test x$hwloc_windows = xyes; then
       echo
@@ -827,7 +834,6 @@ return 0;
 	 AC_DEFINE([HAVE_DECL_RUNNING_ON_VALGRIND], [0], [Embedded mode; just assume we do not have Valgrind support])
 	])
 
-    AC_CHECK_HEADERS([pthread_np.h])
     AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
       #include <pthread.h>
       #ifdef HAVE_PTHREAD_NP_H
@@ -841,12 +847,9 @@ return 0;
       #endif
     ]])
     AC_CHECK_FUNC([sched_setaffinity], [hwloc_have_sched_setaffinity=yes])
-    AC_CHECK_HEADERS([sys/cpuset.h],,,[[#include <sys/param.h>]])
-    AC_CHECK_FUNCS([cpuset_setaffinity])
     AC_SEARCH_LIBS([pthread_getthrds_np], [pthread],
       AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, `Define to 1 if you have pthread_getthrds_np')
     )
-    AC_CHECK_FUNCS([cpuset_setid])
 
     # Linux libudev support
     if test "x$enable_libudev" != xno; then
