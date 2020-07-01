@@ -1150,49 +1150,9 @@ main (int argc, char *argv[])
     loutput.legend = 0;
   }
 
-  err = hwloc_topology_set_flags(topology, flags);
-  if (err < 0) {
-    fprintf(stderr, "Failed to set flags %lx (%s).\n", flags, strerror(errno));
-    goto out_with_topology;
-  }
-
-  if (input) {
-    err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, loutput.verbose_mode > 1, callname);
-    if (err)
-      goto out_with_topology;
-
-    if (input_format != HWLOC_UTILS_INPUT_DEFAULT) {
-      /* add the input path to the window title */
-      snprintf(loutput.title, sizeof(loutput.title), "lstopo - %s", input);
-
-#ifndef HWLOC_WIN_SYS
-      /* try to only add the last part of the input path to the window title.
-       * disabled on windows because it requires to deal with / or \ in both cygwin and native paths.
-       * looks like _fullpath() is good way to replace realpath() on !cygwin.
-       */
-      /* sanitize the path to avoid / ./ or ../ at the end */
-      char *fullpath = realpath(input, NULL);
-      if (fullpath) {
-	char *pos = strrchr(fullpath, '/');
-	/* now only keep the last part */
-	if (pos)
-	  pos++;
-	else
-	  pos = fullpath;
-	snprintf(loutput.title, sizeof(loutput.title), "lstopo - %s", pos);
-	free(fullpath);
-      }
-#endif
-    }
-  }
-
-  if (loutput.pid_number > 0) {
-    if (hwloc_pid_from_number(&loutput.pid, loutput.pid_number, 0, 1 /* verbose */) < 0
-	|| hwloc_topology_set_pid(topology, loutput.pid)) {
-      perror("Setting target pid");
-      goto out_with_topology;
-    }
-  }
+  /***********************
+   * Configure the output
+   */
 
   /* if the output format wasn't enforced, look at the filename */
   if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
@@ -1219,96 +1179,6 @@ main (int argc, char *argv[])
 	|| loutput.show_distances_only
         || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
       output_format = LSTOPO_OUTPUT_CONSOLE;
-  }
-
-  if (input_format == HWLOC_UTILS_INPUT_XML
-      && output_format == LSTOPO_OUTPUT_XML) {
-    /* must be after parsing output format and before loading the topology */
-    putenv((char *) "HWLOC_XML_USERDATA_NOT_DECODED=1");
-    hwloc_topology_set_userdata_import_callback(topology, hwloc_utils_userdata_import_cb);
-    hwloc_topology_set_userdata_export_callback(topology, hwloc_utils_userdata_export_cb);
-  }
-
-#ifdef HAVE_CLOCK_GETTIME
-  if (measure_load_time)
-    clock_gettime(CLOCK_MONOTONIC, &ts1);
-#endif
-
-  if (input_format == HWLOC_UTILS_INPUT_SHMEM) {
-#ifdef HWLOC_WIN_SYS
-    fprintf(stderr, "shmem topology not supported\n"); /* this line must match the grep line in test-lstopo-shmem */
-    goto out_with_topology;
-#else /* !HWLOC_WIN_SYS */
-    /* load from shmem, and duplicate onto topology, so that we may modify it */
-    hwloc_topology_destroy(topology);
-    err = lstopo_shmem_adopt(input, &topology);
-    if (err < 0)
-      goto out;
-    hwloc_utils_userdata_clear_recursive(hwloc_get_root_obj(topology));
-#endif /* !HWLOC_WIN_SYS */
-
-  } else {
-    /* normal load */
-    err = hwloc_topology_load (topology);
-    if (err) {
-      fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
-      goto out_with_topology;
-    }
-  }
-
-  if (allow_flags) {
-    if (allow_flags == HWLOC_ALLOW_FLAG_CUSTOM) {
-      err = hwloc_topology_allow(topology, allow_cpuset, allow_nodeset, HWLOC_ALLOW_FLAG_CUSTOM);
-    } else {
-      err = hwloc_topology_allow(topology, NULL, NULL, allow_flags);
-    }
-    if (err < 0) {
-      fprintf(stderr, "hwloc_topology_allow() failed (%s)\n", strerror(errno));
-      goto out_with_topology;
-    }
-  }
-
-  hwloc_bitmap_fill(loutput.cpubind_set);
-  if (loutput.pid_number != -1 && loutput.pid_number != 0)
-    hwloc_get_proc_cpubind(topology, loutput.pid, loutput.cpubind_set, 0);
-  else
-    /* get our binding even if --pid not given, it may be used by --restrict */
-    hwloc_get_cpubind(topology, loutput.cpubind_set, 0);
-
-  hwloc_bitmap_fill(loutput.membind_set);
-  if (loutput.pid_number != -1 && loutput.pid_number != 0)
-    hwloc_get_proc_membind(topology, loutput.pid, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
-  else
-    /* get our binding even if --pid not given, it may be used by --restrict */
-    hwloc_get_membind(topology, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
-
-#ifdef HAVE_CLOCK_GETTIME
-  if (measure_load_time) {
-    clock_gettime(CLOCK_MONOTONIC, &ts2);
-    ms = (ts2.tv_nsec-ts1.tv_nsec)/1000000+(ts2.tv_sec-ts1.tv_sec)*1000UL;
-    printf("hwloc_topology_load() took %lu ms\n", ms);
-  }
-#endif
-
-  loutput.need_pci_domain = lstopo_check_pci_domains(topology);
-
-  if (top)
-    add_process_objects(topology);
-
-  if (restrictstring) {
-    hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
-    if (!strcmp (restrictstring, "binding")) {
-      hwloc_bitmap_copy(restrictset, loutput.cpubind_set);
-    } else {
-      hwloc_bitmap_sscanf(restrictset, restrictstring);
-    }
-    err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
-    if (err) {
-      perror("Restricting the topology");
-      /* FALLTHRU */
-    }
-    hwloc_bitmap_free(restrictset);
-    free(restrictstring);
   }
 
   switch (output_format) {
@@ -1389,6 +1259,152 @@ main (int argc, char *argv[])
     goto out_usagefailure;
   }
 
+  /*************************
+   * Configure the topology
+   */
+
+  err = hwloc_topology_set_flags(topology, flags);
+  if (err < 0) {
+    fprintf(stderr, "Failed to set flags %lx (%s).\n", flags, strerror(errno));
+    goto out_with_topology;
+  }
+
+  if (input) {
+    err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, loutput.verbose_mode > 1, callname);
+    if (err)
+      goto out_with_topology;
+
+    if (input_format != HWLOC_UTILS_INPUT_DEFAULT) {
+      /* add the input path to the window title */
+      snprintf(loutput.title, sizeof(loutput.title), "lstopo - %s", input);
+
+#ifndef HWLOC_WIN_SYS
+      /* try to only add the last part of the input path to the window title.
+       * disabled on windows because it requires to deal with / or \ in both cygwin and native paths.
+       * looks like _fullpath() is good way to replace realpath() on !cygwin.
+       */
+      /* sanitize the path to avoid / ./ or ../ at the end */
+      char *fullpath = realpath(input, NULL);
+      if (fullpath) {
+	char *pos = strrchr(fullpath, '/');
+	/* now only keep the last part */
+	if (pos)
+	  pos++;
+	else
+	  pos = fullpath;
+	snprintf(loutput.title, sizeof(loutput.title), "lstopo - %s", pos);
+	free(fullpath);
+      }
+#endif
+    }
+  }
+
+  if (loutput.pid_number > 0) {
+    if (hwloc_pid_from_number(&loutput.pid, loutput.pid_number, 0, 1 /* verbose */) < 0
+	|| hwloc_topology_set_pid(topology, loutput.pid)) {
+      perror("Setting target pid");
+      goto out_with_topology;
+    }
+  }
+
+  if (input_format == HWLOC_UTILS_INPUT_XML
+      && output_format == LSTOPO_OUTPUT_XML) {
+    /* must be after parsing output format and before loading the topology */
+    putenv((char *) "HWLOC_XML_USERDATA_NOT_DECODED=1");
+    hwloc_topology_set_userdata_import_callback(topology, hwloc_utils_userdata_import_cb);
+    hwloc_topology_set_userdata_export_callback(topology, hwloc_utils_userdata_export_cb);
+  }
+
+  /*********************
+   * Build the topology
+   */
+
+#ifdef HAVE_CLOCK_GETTIME
+  if (measure_load_time)
+    clock_gettime(CLOCK_MONOTONIC, &ts1);
+#endif
+
+  if (input_format == HWLOC_UTILS_INPUT_SHMEM) {
+#ifdef HWLOC_WIN_SYS
+    fprintf(stderr, "shmem topology not supported\n"); /* this line must match the grep line in test-lstopo-shmem */
+    goto out_with_topology;
+#else /* !HWLOC_WIN_SYS */
+    /* load from shmem, and duplicate onto topology, so that we may modify it */
+    hwloc_topology_destroy(topology);
+    err = lstopo_shmem_adopt(input, &topology);
+    if (err < 0)
+      goto out;
+    hwloc_utils_userdata_clear_recursive(hwloc_get_root_obj(topology));
+#endif /* !HWLOC_WIN_SYS */
+
+  } else {
+    /* normal load */
+    err = hwloc_topology_load (topology);
+    if (err) {
+      fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
+      goto out_with_topology;
+    }
+  }
+
+#ifdef HAVE_CLOCK_GETTIME
+  if (measure_load_time) {
+    clock_gettime(CLOCK_MONOTONIC, &ts2);
+    ms = (ts2.tv_nsec-ts1.tv_nsec)/1000000+(ts2.tv_sec-ts1.tv_sec)*1000UL;
+    printf("hwloc_topology_load() took %lu ms\n", ms);
+  }
+#endif
+
+  /********************************
+   * Tweak the topology and output
+   */
+
+  if (allow_flags) {
+    if (allow_flags == HWLOC_ALLOW_FLAG_CUSTOM) {
+      err = hwloc_topology_allow(topology, allow_cpuset, allow_nodeset, HWLOC_ALLOW_FLAG_CUSTOM);
+    } else {
+      err = hwloc_topology_allow(topology, NULL, NULL, allow_flags);
+    }
+    if (err < 0) {
+      fprintf(stderr, "hwloc_topology_allow() failed (%s)\n", strerror(errno));
+      goto out_with_topology;
+    }
+  }
+
+  hwloc_bitmap_fill(loutput.cpubind_set);
+  if (loutput.pid_number != -1 && loutput.pid_number != 0)
+    hwloc_get_proc_cpubind(topology, loutput.pid, loutput.cpubind_set, 0);
+  else
+    /* get our binding even if --pid not given, it may be used by --restrict */
+    hwloc_get_cpubind(topology, loutput.cpubind_set, 0);
+
+  hwloc_bitmap_fill(loutput.membind_set);
+  if (loutput.pid_number != -1 && loutput.pid_number != 0)
+    hwloc_get_proc_membind(topology, loutput.pid, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
+  else
+    /* get our binding even if --pid not given, it may be used by --restrict */
+    hwloc_get_membind(topology, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
+
+  loutput.need_pci_domain = lstopo_check_pci_domains(topology);
+
+  if (top)
+    add_process_objects(topology);
+
+  if (restrictstring) {
+    hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
+    if (!strcmp (restrictstring, "binding")) {
+      hwloc_bitmap_copy(restrictset, loutput.cpubind_set);
+    } else {
+      hwloc_bitmap_sscanf(restrictset, restrictstring);
+    }
+    err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
+    if (err) {
+      perror("Restricting the topology");
+      /* FALLTHRU */
+    }
+    hwloc_bitmap_free(restrictset);
+    free(restrictstring);
+  }
+
   loutput.topology = topology;
   loutput.depth = hwloc_topology_get_depth(topology);
   loutput.file = NULL;
@@ -1400,6 +1416,9 @@ main (int argc, char *argv[])
     lstopo_add_collapse_attributes(topology);
   }
 
+  /******************
+   * Output for real
+   */
   err = output_func(&loutput, filename);
 
   if (output_format != LSTOPO_OUTPUT_XML) {
