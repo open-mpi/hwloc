@@ -14,6 +14,8 @@
 #endif /* HWLOC_LINUX_SYS */
 #include "hwloc/shmem.h"
 
+#include "private/debug.h" /* for HWLOC_BUILD_ASSERT() */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -562,6 +564,63 @@ parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
     return LSTOPO_OUTPUT_ERROR;
 }
 
+/****************************************************
+ * Store filters during parsing and apply them later
+ */
+
+struct lstopo_type_filter { enum hwloc_type_filter_e filter; int changed; };
+
+/* if these assert fails, some types were added,
+ * assumptions in macros below must be rechecked
+ */
+#define init_type_filters() do { \
+  unsigned _i; \
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MIN == 0); \
+  HWLOC_BUILD_ASSERT(HWLOC_OBJ_TYPE_MAX == 20); \
+  for(_i=HWLOC_OBJ_TYPE_MIN; _i<HWLOC_OBJ_TYPE_MAX; _i++) \
+    type_filter[_i].changed = 0; \
+} while (0)
+
+#define set_type_filter(_type, _filter) do { \
+  type_filter[_type].filter = _filter; \
+  type_filter[_type].changed = 1; \
+} while (0)
+
+#define set_all_types_filter(_filter) do { \
+  unsigned _i; \
+  for(_i=HWLOC_OBJ_TYPE_MIN; _i<HWLOC_OBJ_TYPE_MAX; _i++) \
+    set_type_filter(_i, _filter);                         \
+} while (0)
+
+/* must operate on same types as hwloc_topology_set_io_types_filter() */
+#define set_io_types_filter(_filter) do { \
+  set_type_filter(HWLOC_OBJ_BRIDGE, _filter); \
+  set_type_filter(HWLOC_OBJ_PCI_DEVICE, _filter); \
+  set_type_filter(HWLOC_OBJ_OS_DEVICE, _filter); \
+} while (0)
+
+/* must operate on same types as hwloc_topology_set_cache_types_filter() */
+#define set_cache_types_filter(_filter) do { \
+  unsigned _i; \
+  for(_i=HWLOC_OBJ_L1CACHE; _i<HWLOC_OBJ_L3ICACHE; _i++) \
+    set_type_filter(_i, _filter);                        \
+} while (0)
+
+/* must operate on same types as hwloc_topology_set_icache_types_filter() */
+#define set_icache_types_filter(_filter) do { \
+  unsigned _i; \
+  for(_i=HWLOC_OBJ_L1ICACHE; _i<HWLOC_OBJ_L3ICACHE; _i++) \
+    set_type_filter(_i, _filter);                         \
+} while (0)
+
+#define apply_type_filters(_topo) do { \
+  unsigned _i; \
+  for(_i=HWLOC_OBJ_TYPE_MIN; _i<HWLOC_OBJ_TYPE_MAX; _i++) \
+    if (type_filter[_i].changed) \
+      hwloc_topology_set_type_filter(_topo, _i, type_filter[_i].filter); \
+} while (0)
+
+
 #define LSTOPO_VERBOSE_MODE_DEFAULT 1
 
 int
@@ -578,6 +637,7 @@ main (int argc, char *argv[])
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
+  struct lstopo_type_filter type_filter[HWLOC_OBJ_TYPE_MAX];
   char *restrictstring = NULL;
   struct lstopo_output loutput;
   output_method *output_func;
@@ -613,6 +673,8 @@ main (int argc, char *argv[])
   loutput.pid_number = -1;
   loutput.pid = 0;
   loutput.need_pci_domain = 0;
+
+  init_type_filters();
 
   loutput.factorize_enabled = 1;
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
@@ -767,16 +829,16 @@ main (int argc, char *argv[])
 	    loutput.ignore_numanodes = 1;
 	}
 	else if (all)
-	  hwloc_topology_set_all_types_filter(topology, filter);
+	  set_all_types_filter(filter);
 	else if (allio)
-	  hwloc_topology_set_io_types_filter(topology, filter);
+	  set_io_types_filter(filter);
 	else if (allcaches) {
-	  hwloc_topology_set_cache_types_filter(topology, filter);
-	  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, filter);
+	  set_cache_types_filter(filter);
+	  set_type_filter(HWLOC_OBJ_MEMCACHE, filter);
 	} else if (allicaches)
-	  hwloc_topology_set_icache_types_filter(topology, filter);
+	  set_icache_types_filter(filter);
 	else
-	  hwloc_topology_set_type_filter(topology, type, filter);
+	  set_type_filter(type, filter);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--ignore")) {
@@ -794,22 +856,22 @@ main (int argc, char *argv[])
 	else if (type == HWLOC_OBJ_NUMANODE)
 	  loutput.ignore_numanodes = 1;
 	else
-	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
+          set_type_filter(type, HWLOC_TYPE_FILTER_KEEP_NONE);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-smt")) {
 	loutput.ignore_pus = 1;
       }
       else if (!strcmp (argv[0], "--no-caches")) {
-	hwloc_topology_set_cache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, HWLOC_TYPE_FILTER_KEEP_NONE);
+        set_cache_types_filter(HWLOC_TYPE_FILTER_KEEP_NONE);
+        set_type_filter(HWLOC_OBJ_MEMCACHE, HWLOC_TYPE_FILTER_KEEP_NONE);
       }
       else if (!strcmp (argv[0], "--no-useless-caches")) {
-	hwloc_topology_set_cache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
+        set_cache_types_filter(HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
+        set_type_filter(HWLOC_OBJ_MEMCACHE, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
       }
       else if (!strcmp (argv[0], "--no-icaches")) {
-	hwloc_topology_set_icache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
+	set_icache_types_filter(HWLOC_TYPE_FILTER_KEEP_NONE);
       }
       else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
@@ -837,13 +899,13 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
 
       } else if (!strcmp (argv[0], "--no-io")) {
-	hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
+	set_io_types_filter(HWLOC_TYPE_FILTER_KEEP_NONE);
       } else if (!strcmp (argv[0], "--no-bridges")) {
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_NONE);
+	set_type_filter(HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_NONE);
       } else if (!strcmp (argv[0], "--whole-io")) {
-	hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
+	set_io_types_filter(HWLOC_TYPE_FILTER_KEEP_ALL);
       } else if (!strcmp (argv[0], "--merge")) {
-	hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
+	set_all_types_filter(HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
       }
       else if (!strcmp (argv[0], "--no-collapse"))
 	loutput.pci_collapse_enabled = 0;
@@ -1314,6 +1376,8 @@ main (int argc, char *argv[])
     hwloc_topology_set_userdata_import_callback(topology, hwloc_utils_userdata_import_cb);
     hwloc_topology_set_userdata_export_callback(topology, hwloc_utils_userdata_export_cb);
   }
+
+  apply_type_filters(topology);
 
   /*********************
    * Build the topology
