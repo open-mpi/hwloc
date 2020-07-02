@@ -32,7 +32,7 @@ mkdir build-plugins-debug
 cd build-plugins-debug
 ../configure --enable-plugins --enable-debug $HWLOC_CI_JOB3DEBUG_CONFOPTS
 make
-make check
+test x$NO_CHECK = xtrue || make check
 tests/hwloc/wrapper.sh utils/lstopo/lstopo-no-graphics
 cd ..
 

@@ -32,7 +32,7 @@ mkdir build
 cd build
 ../configure $HWLOC_CI_JOB1CHECK_CONFOPTS
 make
-make check
+test x$NO_CHECK = xtrue || make check
 utils/lstopo/lstopo-no-graphics -v
 cd ..
 
@@ -41,12 +41,12 @@ mkdir build-plugins
 cd build-plugins
 $PWD/../configure --enable-plugins $HWLOC_CI_JOB1CHECK_CONFOPTS
 make
-make check
+test x$NO_CHECK = xtrue || make check
 tests/hwloc/wrapper.sh utils/lstopo/lstopo-no-graphics -v
 tests/hwloc/wrapper.sh utils/hwloc/hwloc-info --support
 cd ..
 
 # check renaming
-(cd build/tests/hwloc/rename && make check)
+test x$NO_CHECK = xtrue || (cd build/tests/hwloc/rename && make check)
 
 exit 0

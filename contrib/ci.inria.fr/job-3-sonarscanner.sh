@@ -60,7 +60,7 @@ export LDFLAGS="--coverage"
 ./configure --enable-plugins
 make V=1 | tee hwloc-build.log
 # Execute unitary tests (autotest)
-make check
+test x$NO_CHECK = xtrue || make check
 
 # Collect coverage data
 find . -path '*/.libs/*.gcno' -exec rename 's@/.libs/@/@' {} \;
@@ -74,7 +74,7 @@ export CFLAGS="-Wall -std=gnu99"
 unset LDFLAGS
 scan-build -plist --intercept-first --analyze-headers -o analyzer_reports ./configure --enable-plugins | tee scan-build.log
 scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make | tee -a scan-build.log
-scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make check | tee -a scan-build.log
+test x$NO_CHECK = xtrue || scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make check | tee -a scan-build.log
 
 # Run cppcheck analysis
 SOURCES_TO_ANALYZE="hwloc netloc tests utils"

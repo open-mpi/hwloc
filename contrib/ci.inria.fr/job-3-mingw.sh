@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2018 Inria.  All rights reserved.
+# Copyright © 2012-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -21,6 +21,8 @@ dobuild64=1
 docheck=1
 doinstall=1
 confopts=
+
+test x$NO_CHECK = xtrue && docheck=0
 
 while test $# -gt 0; do
   if test "$1" = "--no-tar"; then

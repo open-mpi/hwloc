@@ -55,7 +55,7 @@ COVBALL=myproject.tgz
 # run
 ./configure --enable-plugins
 cov-build --dir ${COVDIR} make all
-cov-build --dir ${COVDIR} make check
+test x$NO_CHECK = xtrue || cov-build --dir ${COVDIR} make check
 tar cfvz ${COVBALL} ${COVDIR}
 curl --form file=@${COVBALL} \
      --form "token=<${COVERITY_TOKEN_FILE}" \
