@@ -1219,7 +1219,7 @@ main (int argc, char *argv[])
   if (input_format == HWLOC_UTILS_INPUT_SHMEM) {
 #ifdef HWLOC_WIN_SYS
     fprintf(stderr, "shmem topology not supported\n"); /* this line must match the grep line in test-lstopo-shmem */
-    goto out;
+    goto out_with_topology;
 #else /* !HWLOC_WIN_SYS */
     /* load from shmem, and duplicate onto topology, so that we may modify it */
     hwloc_topology_destroy(topology);
