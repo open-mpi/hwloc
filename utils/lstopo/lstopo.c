@@ -743,12 +743,6 @@ main (int argc, char *argv[])
   if (!loutput.cpubind_set || !loutput.membind_set)
     goto out;
 
-  err = hwloc_topology_init (&topology);
-  if (err)
-    goto out;
-  hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
-  hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
-
   while (argc >= 1)
     {
       opt = 0;
@@ -977,7 +971,7 @@ main (int argc, char *argv[])
 	  goto out_usagefailure;
 	flags = hwloc_utils_parse_topology_flags(argv[1]);
         if(flags == (unsigned long)-1)
-          goto out_with_topology;
+          goto out;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--restrict")) {
@@ -996,7 +990,7 @@ main (int argc, char *argv[])
 	  goto out_usagefailure;
 	restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
         if(restrict_flags == (unsigned long)-1)
-          goto out_with_topology;
+          goto out;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--export-xml-flags")) {
@@ -1004,7 +998,7 @@ main (int argc, char *argv[])
 	  goto out_usagefailure;
 	loutput.export_xml_flags = hwloc_utils_parse_export_xml_flags(argv[1]);
         if(loutput.export_xml_flags == (unsigned long)-1)
-          goto out_with_topology;
+          goto out;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--export-synthetic-flags")) {
@@ -1012,7 +1006,7 @@ main (int argc, char *argv[])
 	  goto out_usagefailure;
 	loutput.export_synthetic_flags = hwloc_utils_parse_export_synthetic_flags(argv[1]);
         if(loutput.export_synthetic_flags == (unsigned long)-1)
-          goto out_with_topology;
+          goto out;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--horiz"))
@@ -1325,6 +1319,12 @@ main (int argc, char *argv[])
    * Configure the topology
    */
 
+  err = hwloc_topology_init (&topology);
+  if (err)
+    goto out;
+  hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
+
   err = hwloc_topology_set_flags(topology, flags);
   if (err < 0) {
     fprintf(stderr, "Failed to set flags %lx (%s).\n", flags, strerror(errno));
@@ -1505,6 +1505,8 @@ main (int argc, char *argv[])
 
  out_usagefailure:
   usage (callname, stderr);
+  goto out;
+
  out_with_topology:
   lstopo_destroy_userdata(hwloc_get_root_obj(topology));
   hwloc_topology_destroy(topology);
