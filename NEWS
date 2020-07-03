@@ -28,6 +28,7 @@ Version 2.3.0
     lists of flag names (substrings).
   + Tools that have a --restrict option may now receive a nodeset or
     some custom flags for restricting the topology.
+  + Fix lstopo drawing when autoresizing on Windows 10
 
 
 Version 2.2.0

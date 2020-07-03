@@ -205,7 +205,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 	/* SetWindowPos() generates a WM_SIZE event, we don't want to scale the drawing there */
 	ignore_wm_size = 1;
-	SetWindowPos(the_output.toplevel, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_DEFERERASE|SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
+	SetWindowPos(the_output.toplevel, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
 	ignore_wm_size = 0;
 
 	needs_resize = 0;
