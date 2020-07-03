@@ -26,7 +26,6 @@
 struct lstopo_windows_output {
   struct lstopo_output *loutput;
   PAINTSTRUCT ps;
-  HWND toplevel;
 };
 
 static struct lstopo_windows_output the_output;
@@ -205,7 +204,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 	/* SetWindowPos() generates a WM_SIZE event, we don't want to scale the drawing there */
 	ignore_wm_size = 1;
-	SetWindowPos(the_output.toplevel, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
+	SetWindowPos(hwnd, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
 	ignore_wm_size = 0;
 
 	needs_resize = 0;
@@ -486,7 +485,6 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   lstopo_prepare_custom_styles(loutput);
 
   lstopo_show_interactive_help();
-  the_output.toplevel = toplevel;
   ShowWindow(toplevel, SW_SHOWDEFAULT);
   UpdateWindow(toplevel);
 
