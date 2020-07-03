@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * See COPYING in top-level directory.
  */
