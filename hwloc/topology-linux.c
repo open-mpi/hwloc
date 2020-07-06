@@ -4521,14 +4521,18 @@ look_sysfscpu(struct hwloc_topology *topology,
       }
     }
 
-    if (!notfirstofcore /* don't look at the package unless we are the first of the core */
+    if (!notfirstofcore /* don't look at the die unless we are the first of the core */
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_DIE)) {
       /* look at the die */
       sprintf(str, "%s/cpu%d/topology/die_cpus", path, i);
       dieset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (dieset) {
 	hwloc_bitmap_and(dieset, dieset, cpuset);
-	if (hwloc_bitmap_first(dieset) != i) {
+        if (hwloc_bitmap_weight(dieset) == 1) {
+          /* die with single PU (non-x86 arch using default die sysfs values), ignore the die */
+          hwloc_bitmap_free(dieset);
+          dieset = NULL;
+        } else if (hwloc_bitmap_first(dieset) != i) {
 	  /* not first cpu in this die, ignore the die */
 	  hwloc_bitmap_free(dieset);
 	  dieset = NULL;
