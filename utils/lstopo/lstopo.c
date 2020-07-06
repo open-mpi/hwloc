@@ -452,6 +452,7 @@ void lstopo_show_interactive_help(void)
   printf("  Scroll horizontally ................. Left Right Ctrl+PageUp/Down\n");
   printf("  Scroll to the top-left corner ....... Home\n");
   printf("  Scroll to the bottom-right corner ... End\n");
+  printf("  Refresh the topology ................ F5\n");
   printf("  Show this help ...................... h H ?\n");
   printf("  Exit ................................ q Q Esc\n");
   printf(" Configuration tweaks:\n");
@@ -1315,6 +1316,9 @@ main (int argc, char *argv[])
     goto out_usagefailure;
   }
 
+ refresh:
+  loutput.needs_topology_refresh = 0;
+
   /*************************
    * Configure the topology
    */
@@ -1493,6 +1497,9 @@ main (int argc, char *argv[])
   hwloc_utils_userdata_free_recursive(hwloc_get_root_obj(topology));
 
   hwloc_topology_destroy (topology);
+
+  if (loutput.needs_topology_refresh)
+    goto refresh;
 
   for(i=0; i<loutput.legend_append_nr; i++)
     free(loutput.legend_append[i]);

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2014, 2017, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -376,7 +376,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 
   topo_cairo_paint(coutput);
 
-  while (!finish) {
+  while (!finish && !loutput->needs_topology_refresh) {
     XEvent e;
     if (!XEventsQueued(disp->dpy, QueuedAfterFlush)) {
       /* No pending event, flush moving windows before waiting for next event */
@@ -441,6 +441,9 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	case XK_Escape:
 	  finish = 1;
 	  break;
+        case XK_F5:
+          loutput->needs_topology_refresh = 1;
+          break;
 	case XK_Left:
 	  disp->x -= disp->screen_width/10;
 	  move_x11(disp);

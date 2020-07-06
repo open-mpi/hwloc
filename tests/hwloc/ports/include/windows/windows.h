@@ -148,6 +148,7 @@ HGDIOBJ SelectObject(HDC hdc, HGDIOBJ hgdiobj);
 
 HWND WINAPI CreateWindow(LPCTSTR lpClassName, LPCTSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
 BOOL WINAPI ShowWindow(HWND hWnd, int nCmdShow);
+BOOL InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase);
 BOOL UpdateWindow(HWND hWnd);
 BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
 BOOL DestroyWindow(HWND hWnd);
@@ -191,6 +192,7 @@ VOID WINAPI PostQuitMessage(int nExitCode);
 #define VK_UP 38
 #define VK_RIGHT 39
 #define VK_DOWN 40
+#define VK_F5 0x74
 
 #define RDW_INVALIDATE 1
 

@@ -290,6 +290,9 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       case VK_CONTROL:
         control = 1;
         break;
+      case VK_F5:
+        loutput->needs_topology_refresh = 1;
+        break;
       }
       break;
     case WM_KEYUP:
@@ -407,11 +410,11 @@ struct draw_methods windows_draw_methods = {
   windows_textsize,
 };
 
+static HWND toplevel = NULL;
+
 int
 output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribute_unused)
 {
-  WNDCLASS wndclass;
-  HWND toplevel;
   unsigned width, height;
   HFONT font;
   MSG msg;
@@ -422,21 +425,25 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   loutput->methods = &windows_draw_methods;
   loutput->backend_data = &the_output;
 
-  /* create the toplevel window, with random size for now */
-  memset(&wndclass, 0, sizeof(wndclass));
-  wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
-  wndclass.hCursor = LoadCursor(NULL, IDC_SIZEALL);
-  wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-  wndclass.lpfnWndProc = WndProc;
-  wndclass.lpszClassName = "lstopo";
+  if (!toplevel) {
+    /* create the toplevel window, with random size for now */
+    WNDCLASS wndclass;
+    memset(&wndclass, 0, sizeof(wndclass));
+    wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
+    wndclass.hCursor = LoadCursor(NULL, IDC_SIZEALL);
+    wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wndclass.lpfnWndProc = WndProc;
+    wndclass.lpszClassName = "lstopo";
 
-  RegisterClass(&wndclass);
+    RegisterClass(&wndclass);
+
+    toplevel = CreateWindow("lstopo", loutput->title, WS_OVERLAPPEDWINDOW,
+                            CW_USEDEFAULT, CW_USEDEFAULT,
+                            10, 10, NULL, NULL, NULL, NULL);
+  }
 
   /* recurse once for preparing sizes and positions using a fake top level window */
   loutput->drawing = LSTOPO_DRAWING_PREPARE;
-  toplevel = CreateWindow("lstopo", loutput->title, WS_OVERLAPPEDWINDOW,
-			      CW_USEDEFAULT, CW_USEDEFAULT,
-			      10, 10, NULL, NULL, NULL, NULL);
   BeginPaint(toplevel, &the_output.ps);
   font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
   SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
@@ -486,14 +493,16 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
 
   lstopo_show_interactive_help();
   ShowWindow(toplevel, SW_SHOWDEFAULT);
+  InvalidateRect(toplevel, NULL, 1); /* make sure UpdateWindow() will update something when refreshing the topology */
   UpdateWindow(toplevel);
 
-  while (!finish && GetMessage(&msg, NULL, 0, 0)) {
+  while (!finish && !loutput->needs_topology_refresh && GetMessage(&msg, NULL, 0, 0)) {
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }
 
-  DestroyWindow(toplevel);
+  if (!loutput->needs_topology_refresh)
+    DestroyWindow(toplevel);
   destroy_colors();
   return 0;
 }

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2015 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
@@ -41,6 +41,9 @@ struct draw_methods;
 struct lstopo_output {
   hwloc_topology_t topology;
   unsigned depth;
+
+  /* when an interactive backends want a refresh of the topology */
+  int needs_topology_refresh;
 
   /* file config */
   FILE *file;

@@ -112,6 +112,8 @@ destroy_colors(void)
       free(tmp);
     tmp = next;
   }
+
+  colors = NULL; /* so that it works after refresh */
 }
 
 static struct lstopo_color *
