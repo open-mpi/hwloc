@@ -493,6 +493,7 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
     DispatchMessage(&msg);
   }
 
+  DestroyWindow(toplevel);
   destroy_colors();
   return 0;
 }
