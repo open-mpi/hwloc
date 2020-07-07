@@ -117,6 +117,54 @@ static int get_device_serial_number(uint32_t dv_ind, char *serial, unsigned int 
   return 0;
 }
 
+/*
+ * Get the XGMI hive id of the GPU
+ *
+ * dv_ind  (IN) The device index
+ * hive_id (OUT) The XGMI hive id of GPU devices
+ */
+static int get_device_xgmi_hive_id(uint32_t dv_ind, char *buffer)
+{
+  uint64_t hive_id;
+  rsmi_status_t rsmi_rc = rsmi_dev_xgmi_hive_id_get(dv_ind, &hive_id);
+
+  if (rsmi_rc != RSMI_STATUS_SUCCESS) {
+    if (!hwloc_hide_errors()) {
+      const char *status_string;
+      rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
+      fprintf(stderr, "RSMI: GPU(%u): Failed to get hive id: %s\n", (unsigned)dv_ind, status_string);
+    }
+    return -1;
+  }
+  sprintf(buffer, "%lx", hive_id);
+  return 0;
+}
+
+/*
+ * Get the IO Link type of the GPU
+ *
+ * dv_ind_src  (IN)  The source device index
+ * dv_ind_dst  (IN)  The destination device index
+ * type        (OUT) The type of IO Link
+ */
+static int get_device_io_link_type(uint32_t dv_ind_src, uint32_t dv_ind_dst,
+                                   RSMI_IO_LINK_TYPE *type)
+{
+  uint64_t hops;
+  rsmi_status_t rsmi_rc = rsmi_topo_get_link_type(dv_ind_src, dv_ind_dst,
+                                                  &hops, type);
+
+  if (rsmi_rc != RSMI_STATUS_SUCCESS) {
+    if (!hwloc_hide_errors()) {
+      const char *status_string;
+      rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
+      fprintf(stderr, "RSMI: GPU(%u): Failed to get link type: %s\n", (unsigned)dv_ind_src, status_string);
+    }
+    return -1;
+  }
+  return 0;
+}
+
 static int
 hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -131,7 +179,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   rsmi_version_t version;
   rsmi_status_t ret;
   int may_shutdown;
-  unsigned nb, i;
+  unsigned nb, i, j;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
@@ -166,6 +214,8 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     uint64_t bdfid = 0;
     hwloc_obj_t osdev, parent;
     char buffer[64];
+    char *xgmi_peers, *xgmi_peers_ptr;
+    RSMI_IO_LINK_TYPE type;
 
     osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
     snprintf(buffer, sizeof(buffer), "rsmi%u", i);
@@ -188,6 +238,27 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     buffer[0] = '\0';
     if (get_device_unique_id(i, buffer) == 0)
       hwloc_obj_add_info(osdev, "AMDUUID", buffer);
+
+    buffer[0] = '\0';
+    if (get_device_xgmi_hive_id(i, buffer) == 0)
+      hwloc_obj_add_info(osdev, "XGMIHiveID", buffer);
+
+    xgmi_peers = malloc(nb*15+1);  /* "rsmi" + unsigned int + space = 15 chars max, + ending \0 */
+    if (xgmi_peers) {
+      xgmi_peers[0] = '\0';
+      xgmi_peers_ptr = xgmi_peers;
+      for (j=0; j<nb; j++) {
+        if (i == j)
+          continue;
+        if ((get_device_io_link_type(i, j, &type) == 0) &&
+            (type == RSMI_IOLINK_TYPE_XGMI)) {
+          xgmi_peers_ptr += sprintf(xgmi_peers_ptr, "rsmi%u ", j);
+      }
+      if (xgmi_peers[0] != '\0')
+        hwloc_obj_add_info(osdev, "XGMIPeers", xgmi_peers);
+      }
+      free(xgmi_peers);
+    }
 
     parent = NULL;
     if (get_device_pci_info(i, &bdfid) == 0) {

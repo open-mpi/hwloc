@@ -18,6 +18,9 @@ typedef int rsmi_status_t;
 
 typedef struct { int major; int minor; int patch; } rsmi_version_t;
 
+typedef int RSMI_IO_LINK_TYPE;
+#define RSMI_IOLINK_TYPE_XGMI 2
+
 #define RSMI_MAX_NUM_FREQUENCIES 32
 
 /**
@@ -70,5 +73,9 @@ rsmi_status_t rsmi_dev_name_get(uint32_t dv_ind, char *name, size_t len);
 rsmi_status_t rsmi_dev_serial_number_get(uint32_t dv_ind, char *serial_num, uint32_t len);
 rsmi_status_t rsmi_dev_unique_id_get(uint32_t dv_ind, uint64_t *id);
 rsmi_status_t rsmi_dev_pci_bandwidth_get(uint32_t dv_ind, rsmi_pcie_bandwidth_t *bandwidth);
+rsmi_status_t rsmi_dev_xgmi_hive_id_get(uint32_t dv_ind, uint64_t *hive_id);
+rsmi_status_t rsmi_topo_get_link_type(uint32_t dv_ind_src, uint32_t dv_ind_dst,
+                                      uint64_t *hops, RSMI_IO_LINK_TYPE *type);
+
 
 #endif /* HWLOC_PORT_RSMI_RSMI_H */
