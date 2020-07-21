@@ -3,6 +3,7 @@
  * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -84,7 +85,7 @@ work on "fake" topologies:
 
 hwloc can display the topology in a human-readable format, either in
 graphical mode (X11), or by exporting in one of several different
-formats, including: plain text, PDF, PNG, and FIG (see \ref cli_examples
+formats, including: plain text, LaTeX tikzpicture, PDF, PNG, and FIG (see \ref cli_examples
 below).  Note that some of the export formats require additional
 support libraries.
 

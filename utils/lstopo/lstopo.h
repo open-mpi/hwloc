@@ -3,6 +3,7 @@
  * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2015 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -192,7 +193,7 @@ struct lstopo_obj_userdata {
 };
 
 typedef int output_method (struct lstopo_output *output, const char *filename);
-extern output_method output_console, output_synthetic, output_ascii, output_fig, output_png, output_pdf, output_ps, output_nativesvg, output_cairosvg, output_x11, output_windows, output_xml, output_shmem;
+extern output_method output_console, output_synthetic, output_ascii, output_tikz, output_fig, output_png, output_pdf, output_ps, output_nativesvg, output_cairosvg, output_x11, output_windows, output_xml, output_shmem;
 
 extern int lstopo_shmem_adopt(const char *input, hwloc_topology_t *topologyp);
 
