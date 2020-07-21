@@ -2,6 +2,7 @@
 .\" Copyright © 2009-2020 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+.\" Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH LSTOPO "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -445,6 +446,11 @@ Output an ASCII art representation of the map
 (formerly called \fBtxt\fR).
 If outputting to stdout and if colors are supported on the terminal,
 the output will be colorized.
+.
+.TP
+.B tikz or tex
+Output a LaTeX tikzpicture representation of the map that can be
+compiled with a LaTeX compiler.
 .
 .TP
 .B fig

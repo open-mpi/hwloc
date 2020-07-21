@@ -5,6 +5,7 @@
 # Copyright © 2009 CNRS
 # Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
+# Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -75,6 +76,16 @@ $ls --top > $tmp/test.top
 
 echo "** ASCII output in $tmp/test.ascii ..."
 $ls $tmp/test.ascii
+
+echo "** LaTeX Tikzpicture output in $tmp/test.tikz ..."
+$ls $tmp/test.tikz
+echo "** LaTeX Tikzpicture output in $tmp/test.tex ..."
+$ls $tmp/test.tex
+if [ -n "$PDFLATEX" ]; then
+  echo "** Test validity of the generated LaTeX output from $tmp/test.tikz ..."
+  (cd $tmp && $PDFLATEX test.tikz && $PDFLATEX test.tex)
+fi
+
 echo "** FIG output in $tmp/test.fig ..."
 $ls $tmp/test.fig
 echo "** Native SVG output in $tmp/test.nativesvg ..."

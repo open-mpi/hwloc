@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\utils\lstopo\lstopo.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-ascii.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-draw.c" />
+    <ClCompile Include="..\..\utils\lstopo\lstopo-tikz.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-fig.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-svg.c" />
     <ClCompile Include="..\..\utils\lstopo\lstopo-text.c" />

@@ -2,6 +2,7 @@ Copyright © 2009 CNRS
 Copyright © 2009-2020 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
 
 $COPYRIGHT$
 
@@ -29,6 +30,8 @@ Version 2.3.0
   + Tools that have a --restrict option may now receive a nodeset or
     some custom flags for restricting the topology.
   + Fix lstopo drawing when autoresizing on Windows 10
+  + Add a tikz lstopo graphical backend to generate picture easily included into
+    LaTeX documents.
 
 
 Version 2.2.0

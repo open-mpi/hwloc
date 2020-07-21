@@ -3,6 +3,7 @@
  * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -337,7 +338,7 @@ void usage(const char *name, FILE *where)
 #endif
 		  ".\n");
 
-  fprintf (where, "Supported output file formats: console, ascii, fig"
+  fprintf (where, "Supported output file formats: console, ascii, tikz, fig"
 #ifdef LSTOPO_HAVE_GRAPHICS
 #ifdef CAIRO_HAS_PDF_SURFACE
 		  ", pdf"
@@ -512,6 +513,7 @@ enum output_format {
   LSTOPO_OUTPUT_CONSOLE,
   LSTOPO_OUTPUT_SYNTHETIC,
   LSTOPO_OUTPUT_ASCII,
+  LSTOPO_OUTPUT_TIKZ,
   LSTOPO_OUTPUT_FIG,
   LSTOPO_OUTPUT_PNG,
   LSTOPO_OUTPUT_PDF,
@@ -536,6 +538,8 @@ parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
   else if (!strcasecmp(name, "ascii")
 	   || !strcasecmp(name, "txt") /* backward compat with 1.10 */)
     return LSTOPO_OUTPUT_ASCII;
+  else if (!strcasecmp(name, "tikz") || !strcasecmp(name, "tex"))
+    return LSTOPO_OUTPUT_TIKZ;
   else if (!strcasecmp(name, "fig"))
     return LSTOPO_OUTPUT_FIG;
   else if (!strcasecmp(name, "png"))
@@ -1336,6 +1340,9 @@ main (int argc, char *argv[])
     break;
   case LSTOPO_OUTPUT_ASCII:
     output_func = output_ascii;
+    break;
+  case LSTOPO_OUTPUT_TIKZ:
+    output_func = output_tikz;
     break;
   case LSTOPO_OUTPUT_FIG:
     output_func = output_fig;

@@ -1,6 +1,7 @@
 # Copyright © 2009-2019 Inria.  All rights reserved.
 # Copyright © 2009-2012, 2014 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
 #
 # See COPYING in top-level directory.
 
@@ -24,6 +25,7 @@ lstopo_no_graphics_SOURCES = \
         lstopo.h \
         lstopo.c \
         lstopo-draw.c \
+        lstopo-tikz.c \
         lstopo-fig.c \
         lstopo-svg.c \
         lstopo-ascii.c \
