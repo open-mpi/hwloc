@@ -23,8 +23,12 @@ echo "Got GIT branch name $branch"
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
+# convert "pr/XYZ/head" into "PR-XYZ"
+branch=$(echo $branch | sed -r -e 's@pr/([0-9]+)/head@PR-\1@')
+
 # keep branch-name before the first - (e.g. v2.0-beta becomes v2.0)
-# and look for the corresponding autotools
+# and look for the corresponding autotools.
+# "PR-XYZ" will get "PR" which means they'll use master autotools (likely OK)
 basebranch=$( echo $branch | sed -r -e 's@^.*/([^/]+)$@\1@' -e 's/-.*//' )
 if test -d $HOME/local/hwloc-$basebranch ; then
   export PATH=$HOME/local/hwloc-${basebranch}/bin:$PATH
