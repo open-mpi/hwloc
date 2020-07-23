@@ -3633,6 +3633,7 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
     } else {
       /* make it a real mscache */
       cache->type = HWLOC_OBJ_MEMCACHE;
+      cache->depth = 1;
       if (cluster)
 	hwloc__attach_memory_object(topology, cluster, cache, hwloc_report_os_error);
       else
