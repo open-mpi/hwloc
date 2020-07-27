@@ -630,8 +630,19 @@ man3_helper_nodeset_convert_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_nodeset.3
 
-man3_helper_distancesdir = $(man3dir)
-man3_helper_distances_DATA = \
+man3_helper_advanced_iodir = $(man3dir)
+man3_helper_advanced_io_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_advanced_io.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_non_io_ancestor_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_pcidev.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_pcidev_by_busid.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_pcidev_by_busidstring.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_osdev.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_bridge.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bridge_covers_pcibus.3
+
+man3_distancesdir = $(man3dir)
+man3_distances_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_distances_get.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_kind_e.3 \
@@ -657,17 +668,6 @@ man3_helper_distances_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_release_remove.3
-
-man3_helper_advanced_iodir = $(man3dir)
-man3_helper_advanced_io_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_advanced_io.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_non_io_ancestor_obj.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_pcidev.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_pcidev_by_busid.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_pcidev_by_busidstring.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_osdev.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_bridge.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_bridge_covers_pcibus.3
 
 man3_diffdir = $(man3dir)
 man3_diff_DATA = \
@@ -799,8 +799,8 @@ $(man3_helper_find_misc_DATA): $(DOX_TAG)
 $(man3_helper_distribute_DATA): $(DOX_TAG)
 $(man3_helper_topology_sets_DATA): $(DOX_TAG)
 $(man3_helper_nodeset_convert_DATA): $(DOX_TAG)
-$(man3_helper_distances_DATA): $(DOX_TAG)
 $(man3_helper_advanced_io_DATA): $(DOX_TAG)
+$(man3_distances_DATA): $(DOX_TAG)
 $(man3_diff_DATA): $(DOX_TAG)
 $(man3_cuda_DATA): $(DOX_TAG)
 $(man3_glibc_sched_DATA): $(DOX_TAG)
