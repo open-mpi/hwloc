@@ -1305,9 +1305,9 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 
     # Static components output file
     hwloc_static_components_dir=${HWLOC_top_builddir}/hwloc
-    mkdir -p ${hwloc_static_components_dir}
+    mkdir -p "${hwloc_static_components_dir}"
     hwloc_static_components_file=${hwloc_static_components_dir}/static-components.h
-    rm -f ${hwloc_static_components_file}
+    rm -f "${hwloc_static_components_file}"
 
     HWLOC_PREPARE_FILTER_COMPONENTS([$requested_plugins])
     # Now we have some hwloc_<name>_component_wantplugin=1
@@ -1318,7 +1318,7 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     # and hwloc_static/plugin_components=list (space separated)
     AC_MSG_CHECKING([components to build statically])
     AC_MSG_RESULT($hwloc_static_components)
-    HWLOC_LIST_STATIC_COMPONENTS([$hwloc_static_components_file], [$hwloc_static_components])
+    HWLOC_LIST_STATIC_COMPONENTS(["$hwloc_static_components_file"], [$hwloc_static_components])
     AC_MSG_CHECKING([components to build as plugins])
     AC_MSG_RESULT([$hwloc_plugin_components])
 
