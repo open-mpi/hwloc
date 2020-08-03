@@ -1357,7 +1357,7 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     #
     AC_SUBST(HWLOC_REQUIRES)
     AC_SUBST(HWLOC_CFLAGS)
-    HWLOC_CPPFLAGS='-I$(HWLOC_top_builddir)/include -I$(HWLOC_top_srcdir)/include'
+    HWLOC_CPPFLAGS='-I"$(HWLOC_top_builddir)"/include -I"$(HWLOC_top_srcdir)"/include'
     AC_SUBST(HWLOC_CPPFLAGS)
     AC_SUBST(HWLOC_LDFLAGS)
     AC_SUBST(HWLOC_LIBS)
