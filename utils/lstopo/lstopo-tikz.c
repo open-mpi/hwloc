@@ -151,7 +151,7 @@ int output_tikz(struct lstopo_output * loutput, const char *filename)
   fprintf(output, "\n%%%%%%%%%% If inserting in another document, this is the actual source code of the picture %%%%%%%%%%\n\n");
   fprintf(output, "\\begin{tikzpicture}[x=1pt,y=1pt,yscale=-1,"
                   "hwloc-label/.style={fill=none,draw=none,text=black,align=left,anchor=north west,"
-                  "outer sep=0pt,inner sep=0pt,font=\\fontsize{%d}{%d}\\selectfont%s}]\n",
+                  "outer sep=0pt,inner sep=0pt,font=\\fontsize{%u}{%u}\\selectfont%s}]\n",
                   loutput->fontsize, loutput->fontsize + loutput->linespacing, font_family);
   fprintf(output, "\t\\clip (0,0) rectangle (%u,%u);\n", loutput->width, loutput->height);
   output_draw(loutput);
