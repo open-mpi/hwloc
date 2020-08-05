@@ -16,60 +16,60 @@ _lstopo() {
 	local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
 	local FILTERKINDS=("none" "all" "structure" "important")
 	local OPTIONS=(
-		-l --logical
-		-p --physical
-		--output-format --of
-		-f --force
-		--only
-		-v --verbose
-		-s --silent
-		--distances
+		--allow
+		--append-legend
+		--attrs --attrs=
+		--binding-color
 		-c --cpuset
 		-C --cpuset-only
-		--taskset
-		--filter --ignore
-		--no-caches
-		--no-useless-caches
-		--no-icaches
-		--merge
-		--no-collapse
-		--factorize --factorize=
-		--no-factorize --no-factorize=
-		--restrict
-		--restrict-flags
-		--no-io
-		--no-bridges
-		--whole-io
-		--input -i
-		--input-format --if
-		--no-smt
-		--thissystem
-		--pid
-		--disallowed --whole-system
-		--allow
 		--children-order
+		--disallowed-color
+		--disallowed --whole-system
+		--distances
+		--export-synthetic-flags
+		--export-xml-flags
+		--factorize --factorize=
+		-f --force
+		--filter --ignore
 		--fontsize
 		--gridsize
-		--linespacing
-		--horiz --horiz=
-		--vert --vert=
-		--rect --rect=
-		--text --text=
-		--no-text --no-text=
-		--index --index=
-		--no-index --no-index=
-		--attrs --attrs=
-		--no-attrs --no-attrs=
-		--no-legend
-		--append-legend
-		--binding-color
-		--disallowed-color
-		--top-color
-		--export-xml-flags
-		--export-synthetic-flags
-		--ps --top
-		--version
 		-h --help
+		--horiz --horiz=
+		--index --index=
+		--input-format --if
+		--input -i
+		--linespacing
+		-l --logical
+		--merge
+		--no-attrs --no-attrs=
+		--no-bridges
+		--no-caches
+		--no-collapse
+		--no-factorize --no-factorize=
+		--no-icaches
+		--no-index --no-index=
+		--no-io
+		--no-legend
+		--no-smt
+		--no-text --no-text=
+		--no-useless-caches
+		--only
+		--output-format --of
+		--pid
+		-p --physical
+		--ps --top
+		--rect --rect=
+		--restrict
+		--restrict-flags
+		-s --silent
+		--taskset
+		--text --text=
+		--thissystem
+		--top-color
+		--version
+		--vert --vert=
+		-v --verbose
+		--whole-io
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 	local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -139,31 +139,31 @@ _hwloc_info(){
 	local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
 	local FILTERKINDS=("none" "all" "structure" "important")
 	local OPTIONS=(
-		--objects
-		--topology
-		--support
-		-v --verbose
-		-s --silent
-		--ancestors
 		--ancestor
+		--ancestors
 		--children
 		--descendants
-		-n
-		--restrict
+		--disallowed --whole-system
 		--filter
+		-h --help
+		--input-format --if
+		--input -i
+		-l --logical
+		-n
+		--no-bridges
 		--no-icaches
 		--no-io
-		--no-bridges
-		--whole-io
-		--input -i
-		--input-format --if
-		--thissystem
+		--objects
 		--pid
-		--disallowed --whole-system
-		-l --logical
 		-p --physical
+		--restrict
+		-s --silent
+		--support
+		--thissystem
+		--topology
 		--version
-		-h --help
+		-v --verbose
+		--whole-io
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 	local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -201,28 +201,28 @@ complete -F _hwloc_info hwloc-info
 
 _hwloc_bind(){
 	local OPTIONS=(--cpubind
+		--disallowed --whole-system
+		-e --get-last-cpu-location
+		-f --force
+		--get
+		--hbm
+		-h --help
+		--logical -l
 		--membind
 		--mempolicy
-		--logical -l
-		--physical -p
-		--single
-		--strict
-		--get
-		-e --get-last-cpu-location
 		--nodeset
-		--pid
-		--tid
-		--taskset
-		--restrict
-		--disallowed --whole-system
-		--hbm
 		--no-hbm
 		--no-smt --no-smt=N
-		-f --force
+		--physical -p
+		--pid
 		-q --quiet
-		-v --verbose
+		--restrict
+		--single
+		--strict
+		--taskset
+		--tid
 		--version
-		-h --help
+		-v --verbose
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 	local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -251,31 +251,31 @@ complete -F _hwloc_bind hwloc-bind
 _hwloc_calc(){
 	local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
 	local OPTIONS=(
-		-N --number-of
-		-I --intersect
+		--disallowed --whole-system
+		-h --help
 		-H --hierarchical
+		-I --intersect
+		--input-format --if
+		--input -i
 		--largest
-		-l --logical
-		-p --physical
 		--li --logical-input
+		-l --logical
 		--lo --logical-output
+		--ni --nodeset-input
+		-n --nodeset
+		-N --number-of
+		--no --nodeset-output
+		--no-smt --no-smt=N
 		--pi --physical-input
 		--po --physical-output
-		-n --nodeset
-		--ni --nodeset-input
-		--no --nodeset-output
-		--sep
-		--taskset
-		--single
-		--restrict
-		--disallowed --whole-system
-		--input -i
-		--input-format --if
-		--no-smt --no-smt=N
+		-p --physical
 		-q --quiet
-		-v --verbose
+		--restrict
+		--sep
+		--single
+		--taskset
 		--version
-		-h --help
+		-v --verbose
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 	local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -309,7 +309,13 @@ complete -F _hwloc_calc hwloc-calc
 
 
 _hwloc_annotate(){
- 	local OPTIONS=(--ci --ri --cu --cd -h --help)
+ 	local OPTIONS=(
+		--cd
+		--ci 
+		--cu
+		-h --help
+		--ri
+	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 
 	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
@@ -321,9 +327,10 @@ complete -F _hwloc_annotate hwloc-annotate
 
 
 _hwloc_diff(){
-	local OPTIONS=(--refname
-		--version
+	local OPTIONS=(
 		-h --help
+		--refname
+		--version
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 	local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -342,9 +349,10 @@ _hwloc_diff(){
 complete -F _hwloc_diff hwloc-diff
 
 _hwloc_patch(){
-	local OPTIONS=(--R --reverse
-		--version
+	local OPTIONS=(
 		-h --help
+		--R --reverse
+		--version
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 
@@ -373,20 +381,20 @@ complete -F _hwloc_compress_dir hwloc-compress-dir
 _hwloc_distrib(){
 	local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
 	local OPTIONS=(
-		--ignore
-		--from
-		--to
 		--at
-		--reverse
-		--restrict
 		--disallowed --whole-system
-		--input -i
+		--from
+		-h --help
+		--ignore
 		--input-format --if
+		--input -i
+		--restrict
+		--reverse
 		--single
 		--taskset
-		-v --verbose
+		--to
 		--version
-		-h --help
+		-v --verbose
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 	local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -416,20 +424,20 @@ complete -F _hwloc_distrib hwloc-distrib
 _hwloc_ps(){
 	local OPTIONS=(
 		-a
-		--pid
-		--name
-		-l --logical
-		-p --physical
 		-c --cpuset
-		-t --threads
-		-e --get-last-cpu-location
-		--pid-cmd
-		--uid
 		--disallowed --whole-system
-		--json-server
-		--json-port
-		-v --verbose
+		-e --get-last-cpu-location
 		-h --help
+		--json-port
+		--json-server
+		-l --logical
+		--name
+		--pid
+		--pid-cmd
+		-p --physical
+		-t --threads
+		--uid
+		-v --verbose
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 	local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -461,8 +469,8 @@ complete -F _hwloc_ps hwloc-ps
 _hwloc_gather_cpuid(){
 	local OPTIONS=(
 		-c
-		-s --silent
 		-h --help
+		-s --silent
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 	local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -482,11 +490,11 @@ complete -F _hwloc_gather_cpuid hwloc-gather-cpuid
 
 _hwloc_gather_topology(){
 	local OPTIONS=(
-		--io
 		--dmi
-		--no-cpuid
-		--keep
 		-h --help
+		--io
+		--keep
+		--no-cpuid
 	)
 	local cur=${COMP_WORDS[COMP_CWORD]}
 
