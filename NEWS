@@ -27,6 +27,8 @@ Version 2.3.0
       table exposed by Linux kernel 5.2+.
     - Attributes may also be customized to expose user-defined performance
       information.
+  + Add hwloc_get_local_numanode_objs() for listing NUMA nodes that are
+    local to some locality.
   + The new topology flag HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT causes
     support arrays to be loaded from XML exported with hwloc 2.3+.
     - hwloc_topology_get_support() now returns an additional "misc"

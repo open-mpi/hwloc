@@ -686,6 +686,11 @@ man3_memattrs_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_location_type_e.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_LOCATION_TYPE_OBJECT.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_LOCATION_TYPE_CPUSET.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_local_numanode_flag_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_LOCAL_NUMANODE_FLAG_ALL.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_local_numanode_objs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_value.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_best_target.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_best_initiator.3 \

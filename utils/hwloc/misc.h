@@ -688,4 +688,15 @@ hwloc_utils_parse_memattr_flags(char *str) {
   return hwloc_utils_parse_flags(str, possible_flags, (int) sizeof(possible_flags) / sizeof(possible_flags[0]), "memattr");
 }
 
+static __hwloc_inline unsigned long
+hwloc_utils_parse_local_numanode_flags(char *str) {
+  struct hwloc_utils_parsing_flag possible_flags[] = {
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_LOCAL_NUMANODE_FLAG_ALL)
+  };
+
+  return hwloc_utils_parse_flags(str, possible_flags, (int) sizeof(possible_flags) / sizeof(possible_flags[0]), "local_numanode");
+}
+
 #endif /* HWLOC_UTILS_MISC_H */

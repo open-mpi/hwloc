@@ -390,6 +390,12 @@ extern "C" {
 #define hwloc_memattr_get_best_target HWLOC_NAME(memattr_get_best_target)
 #define hwloc_memattr_get_best_initiator HWLOC_NAME(memattr_get_best_initiator)
 
+#define hwloc_local_numanode_flag_e HWLOC_NAME(local_numanode_flag_e)
+#define HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY HWLOC_NAME_CAPS(LOCAL_NUMANODE_FLAG_LARGER_LOCALITY)
+#define HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY HWLOC_NAME_CAPS(LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY)
+#define HWLOC_LOCAL_NUMANODE_FLAG_ALL HWLOC_NAME_CAPS(LOCAL_NUMANODE_FLAG_ALL)
+#define hwloc_get_local_numanode_objs HWLOC_NAME(get_local_numanode_objs)
+
 #define hwloc_memattr_get_name HWLOC_NAME(memattr_get_name)
 #define hwloc_memattr_get_flags HWLOC_NAME(memattr_get_flags)
 #define hwloc_memattr_flag_e HWLOC_NAME(memattr_flag_e)

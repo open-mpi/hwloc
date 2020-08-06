@@ -50,6 +50,83 @@ main(void)
   err = hwloc_topology_load(topology);
   assert(!err);
 
+  /* check get local nodes */
+  err = hwloc_get_local_numanode_objs(topology, NULL, NULL, NULL, 0);
+  assert(err < 0);
+  /* get all nodes */
+  loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+  loc.location.object = hwloc_get_root_obj(topology);
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, HWLOC_LOCAL_NUMANODE_FLAG_ALL);
+  assert(!err);
+  assert(nrtgs == 4);
+  assert(targets[0] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0));
+  assert(targets[1] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1));
+  assert(targets[2] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2));
+  assert(targets[3] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 3));
+  /* get root local nodes (none) */
+  loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+  loc.location.object = hwloc_get_root_obj(topology);
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, 0);
+  assert(!err);
+  assert(nrtgs == 0);
+  /* get root-or-smaller local nodes (all) */
+  loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+  loc.location.object = hwloc_get_root_obj(topology);
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY);
+  assert(!err);
+  assert(nrtgs == 4);
+  assert(targets[0] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0));
+  assert(targets[1] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1));
+  assert(targets[2] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2));
+  assert(targets[3] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 3));
+  /* get PU local nodes (none) */
+  loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+  loc.location.object = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 1);
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, 0);
+  assert(!err);
+  assert(nrtgs == 0);
+  /* get PU-or-larger local nodes (1) */
+  loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+  loc.location.object = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 7);
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY);
+  assert(!err);
+  assert(nrtgs == 1);
+  assert(targets[0] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 3));
+  /* get node local nodes (1) */
+  loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+  loc.location.object = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2);
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, 0);
+  assert(!err);
+  assert(nrtgs == 1);
+  assert(targets[0] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2));
+  /* get 2-node local nodes (0) */
+  loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+  loc.location.cpuset = hwloc_bitmap_alloc();
+  hwloc_bitmap_set_range(loc.location.cpuset, 2, 5);
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, 0);
+  assert(!err);
+  assert(nrtgs == 0);
+  /* get 2-node-or-larger local nodes (0) */
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY);
+  assert(!err);
+  assert(nrtgs == 0);
+  /* get 2-node-or-smaller local nodes (2) */
+  nrtgs = 4;
+  err = hwloc_get_local_numanode_objs(topology, &loc, &nrtgs, targets, HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY);
+  assert(!err);
+  assert(nrtgs == 2);
+  assert(targets[0] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1));
+  assert(targets[1] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2));
+  hwloc_bitmap_free(loc.location.cpuset);
+
   /* check default memattrs */
   check_memattr(topology, "Capacity", HWLOC_MEMATTR_ID_CAPACITY, HWLOC_MEMATTR_FLAG_HIGHER_FIRST);
   check_memattr(topology, "Locality", HWLOC_MEMATTR_ID_LOCALITY, HWLOC_MEMATTR_FLAG_LOWER_FIRST);

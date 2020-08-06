@@ -1104,3 +1104,80 @@ hwloc_memattr_get_best_initiator(hwloc_topology_t topology,
     return -1;
   }
 }
+
+/****************************
+ * Listing local nodes
+ */
+
+static __hwloc_inline int
+match_local_obj_cpuset(hwloc_obj_t node, hwloc_cpuset_t cpuset, unsigned long flags)
+{
+  if (flags & HWLOC_LOCAL_NUMANODE_FLAG_ALL)
+    return 1;
+  if ((flags & HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY)
+      && hwloc_bitmap_isincluded(cpuset, node->cpuset))
+    return 1;
+  if ((flags & HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY)
+      && hwloc_bitmap_isincluded(node->cpuset, cpuset))
+    return 1;
+  return hwloc_bitmap_isequal(node->cpuset, cpuset);
+}
+
+int
+hwloc_get_local_numanode_objs(hwloc_topology_t topology,
+                              struct hwloc_location *location,
+                              unsigned *nrp,
+                              hwloc_obj_t *nodes,
+                              unsigned long flags)
+{
+  hwloc_cpuset_t cpuset;
+  hwloc_obj_t node;
+  unsigned i;
+
+  if (flags & ~(HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY
+                |HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY
+                | HWLOC_LOCAL_NUMANODE_FLAG_ALL)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (!nrp || (*nrp && !nodes)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (!location) {
+    if (!(flags & HWLOC_LOCAL_NUMANODE_FLAG_ALL)) {
+      errno = EINVAL;
+      return -1;
+    }
+    cpuset = NULL; /* unused */
+
+  } else {
+    if (location->type == HWLOC_LOCATION_TYPE_CPUSET) {
+      cpuset = location->location.cpuset;
+    } else if (location->type == HWLOC_LOCATION_TYPE_OBJECT) {
+      hwloc_obj_t obj = location->location.object;
+      while (!obj->cpuset)
+        obj = obj->parent;
+      cpuset = obj->cpuset;
+    } else {
+      errno = EINVAL;
+      return -1;
+    }
+  }
+
+  i = 0;
+  for(node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
+      node;
+      node = node->next_cousin) {
+    if (!match_local_obj_cpuset(node, cpuset, flags))
+      continue;
+    if (i < *nrp)
+      nodes[i] = node;
+    i++;
+  }
+
+  *nrp = i;
+  return 0;
+}

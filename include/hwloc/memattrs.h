@@ -45,6 +45,11 @@ extern "C" {
  * program on these Cores may be obtained by passing this cpuset as an initiator
  * to hwloc_memattr_get_best_target() with the relevant memory attribute.
  *
+ * A more flexible approach consists in getting the list of local NUMA nodes
+ * by passing this cpuset to hwloc_get_local_numanode_objs().
+ * Attribute values for these nodes, if any, may then be obtained with
+ * hwloc_memattr_get_value() and manually compared with the desired criteria.
+ *
  * \note The interface actually also accepts targets that are not NUMA nodes.
  * @{
  */
@@ -125,6 +130,63 @@ struct hwloc_location {
     hwloc_cpuset_t cpuset;
   } location;
 };
+
+
+/** \brief Flags for selecting target NUMA nodes. */
+enum hwloc_local_numanode_flag_e {
+  /** \brief Select NUMA nodes whose locality is larger than the given cpuset.
+   * For instance, if a single PU (or its cpuset) is given in \p initiator,
+   * select all nodes close to the package that contains this PU.
+   */
+  HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY = (1UL<<0),
+
+  /** \brief Select NUMA nodes whose locality is smaller than the given cpuset.
+   * For instance, if a package (or its cpuset) is given in \p initiator,
+   * also select nodes that are attached to only a half of that package.
+   */
+  HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY = (1UL<<1),
+
+  /** \brief Select all NUMA nodes in the topology.
+   * \p initiator is ignored.
+   */
+  HWLOC_LOCAL_NUMANODE_FLAG_ALL = (1UL<<2)
+};
+
+/** \brief Return an array of local NUMA nodes.
+ *
+ * By default only select the NUMA nodes whose locality is exactly
+ * the given \p location. More nodes may be selected if additional flags
+ * are given as a OR'ed set of ::hwloc_local_numanode_flag_e.
+ *
+ * If location is given as an explicit object, its CPU set is used
+ * to find NUMA nodes with the corresponding locality.
+ * If the object does not have a CPU set (e.g. I/O object), the CPU
+ * parent (where the I/O object is attached) is used.
+ *
+ * On input, \p nr points to the number of nodes that may be stored
+ * in the \p nodes array.
+ * On output, \p nr will be changed to the number of stored nodes,
+ * or the number of nodes that would have been stored if there were
+ * enough room.
+ *
+ * \note Some of these NUMA nodes may not have any memory attribute
+ * values and hence not be reported as actual targets in other functions.
+ *
+ * \note The number of NUMA nodes in the topology (obtained by
+ * hwloc_bitmap_weight() on the root object nodeset) may be used
+ * to allocate the \p nodes array.
+ *
+ * \note When an object CPU set is given as locality, for instance a Package,
+ * and when flags contain both ::HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY
+ * and ::HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY,
+ * the returned array corresponds to the nodeset of that object.
+ */
+HWLOC_DECLSPEC int
+hwloc_get_local_numanode_objs(hwloc_topology_t topology,
+                              struct hwloc_location *location,
+                              unsigned *nr,
+                              hwloc_obj_t *nodes,
+                              unsigned long flags);
 
 
 
@@ -296,6 +358,11 @@ hwloc_memattr_set_value(hwloc_topology_t topology,
  * that have a value for that initiator.
  *
  * \p flags must be \c 0 for now.
+ *
+ * \note This function is meant for tools and debugging (listing internal information)
+ * rather than for application queries. Applications should rather select useful
+ * NUMA nodes with hwloc_get_local_numanode_objs() and then look at their attribute
+ * values.
  */
 HWLOC_DECLSPEC int
 hwloc_memattr_get_targets(hwloc_topology_t topology,
@@ -327,6 +394,11 @@ hwloc_memattr_get_targets(hwloc_topology_t topology,
  * If the attribute does not relate to a specific initiator
  * (it does not have the flag ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR),
  * no initiator is returned.
+ *
+ * \note This function is meant for tools and debugging (listing internal information)
+ * rather than for application queries. Applications should rather select useful
+ * NUMA nodes with hwloc_get_local_numanode_objs() and then look at their attribute
+ * values for some relevant initiators.
  */
 HWLOC_DECLSPEC int
 hwloc_memattr_get_initiators(hwloc_topology_t topology,
