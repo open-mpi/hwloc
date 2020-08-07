@@ -1,0 +1,505 @@
+#
+# Copyright © 2018-2020 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
+# This file is also compatible with zsh (once bashcompinit is enabled)
+
+# bash < 4 doesn't support compopt
+[[ -z "$ZSH_VERSION" ]] && [[ "${BASH_VERSINFO[0]:-0}" -lt 4 ]] && return
+# TODO only disable the nospace completion of "--filter"
+
+
+_lstopo() {
+	local INPUT_FORMAT=(xml synthetic fsroot cpuid)
+	local OUTPUT_FORMAT=(console ascii fig pdf ps png svg xml synthetic)
+	local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+	local FILTERKINDS=("none" "all" "structure" "important")
+	local OPTIONS=(
+		--allow
+		--append-legend
+		--attrs --attrs=
+		--binding-color
+		-c --cpuset
+		-C --cpuset-only
+		--children-order
+		--disallowed-color
+		--disallowed --whole-system
+		--distances
+		--export-synthetic-flags
+		--export-xml-flags
+		--factorize --factorize=
+		-f --force
+		--filter --ignore
+		--fontsize
+		--gridsize
+		-h --help
+		--horiz --horiz=
+		--index --index=
+		--input-format --if
+		--input -i
+		--linespacing
+		-l --logical
+		--merge
+		--no-attrs --no-attrs=
+		--no-bridges
+		--no-caches
+		--no-collapse
+		--no-factorize --no-factorize=
+		--no-icaches
+		--no-index --no-index=
+		--no-io
+		--no-legend
+		--no-smt
+		--no-text --no-text=
+		--no-useless-caches
+		--only
+		--output-format --of
+		--pid
+		-p --physical
+		--ps --top
+		--rect --rect=
+		--restrict
+		--restrict-flags
+		-s --silent
+		--taskset
+		--text --text=
+		--thissystem
+		--top-color
+		--version
+		--vert --vert=
+		-v --verbose
+		--whole-io
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	elif [[ $COMP_CWORD -ge 3 && "${COMP_WORDS[COMP_CWORD-2]}" == "--filter" && "$cur" == ":" ]] ; then
+		COMPREPLY=( `compgen -W "${FILTERKINDS[*]}"` )
+	elif [[ $COMP_CWORD -ge 4 && "${COMP_WORDS[COMP_CWORD-3]}" == "--filter" && "$prev" == ":" ]] ; then
+		COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
+	elif [[ "$cur" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs --no-factorize " =~ " $prev " ]] ; then
+		COMPREPLY=( `compgen -W "${TYPES[*]}"` )
+		# we could also support "<type1>,<type2>,..." for --index/attrs/text but "," is not a completion word separator
+	elif [[ $COMP_CWORD -ge 3 && "$prev" == "=" && " --horiz --vert --rect --text --no-text --index --no-index --attrs --no-attrs --no-factorize --factorize " =~ " ${COMP_WORDS[COMP_CWORD-2]} " ]] ; then
+		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
+	elif [[ "$cur" == "=" && "--factorize" = "$prev" ]] ; then
+		COMPREPLY=( `compgen -W "${TYPES[*]}"` "<N>" "<N,F,L>" )
+	else
+		case "$prev" in
+			--of | --output-format)
+				COMPREPLY=( `compgen -W "${OUTPUT_FORMAT[*]}" -- "$cur"` )
+				;;
+			--only | --ignore)
+				COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
+				;;
+			--filter)
+				COMPREPLY=( `compgen -W "${TYPES[*]/%/:} cache: icache: io:" -- "$cur"` ) && compopt -o nospace
+				;;
+			--restrict)
+				COMPREPLY=( `compgen -W "binding <cpuset>" -- "$cur"` )
+				;;
+			-i | --input)
+				_filedir xml
+				;;
+			--if | --input-format)
+				COMPREPLY=( `compgen -W "${INPUT_FORMAT[*]}" -- "$cur"` )
+				;;
+			--pid)
+				COMPREPLY=( "<pid>" "" )
+				;;
+			--allow)
+				COMPREPLY=( `compgen -W "all local <mask> nodeset=<mask>" -- "$cur"` )
+				;;
+			--restrict-flags | --export-xml-flags | --export-synthetic-flags | --fontsize | --gridsize | --linespacing)
+				COMPREPLY=( "<integer>" "" )
+				;;
+			--append-legend)
+				COMPREPLY=( "<line of text>" "" )
+				;;
+			--binding-color | --disallowed-color)
+				COMPREPLY=( `compgen -W "none" -- "$cur"` )
+				;;
+			--top-color)
+				COMPREPLY=( `compgen -W "none <#xxyyzz>" -- "$cur"` )
+				;;
+			--children-order)
+				COMPREPLY=( `compgen -W "plain memoryabove" -- "$cur"` )
+				;;
+		esac
+	fi
+}
+complete -F _lstopo lstopo
+complete -F _lstopo lstopo-no-graphics
+complete -F _lstopo hwloc-ls
+
+_hwloc_info(){
+	local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+	local FILTERKINDS=("none" "all" "structure" "important")
+	local OPTIONS=(
+		--ancestor
+		--ancestors
+		--children
+		--descendants
+		--disallowed --whole-system
+		--filter
+		-h --help
+		--input-format --if
+		--input -i
+		-l --logical
+		-n
+		--no-bridges
+		--no-icaches
+		--no-io
+		--objects
+		--pid
+		-p --physical
+		--restrict
+		-s --silent
+		--support
+		--thissystem
+		--topology
+		--version
+		-v --verbose
+		--whole-io
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	elif [[ $COMP_CWORD -ge 3 && "${COMP_WORDS[COMP_CWORD-2]}" == "--filter" && "$cur" == ":" ]] ; then
+		COMPREPLY=( `compgen -W "${FILTERKINDS[*]}"` )
+	elif [[ $COMP_CWORD -ge 4 && "${COMP_WORDS[COMP_CWORD-3]}" == "--filter" && "$prev" == ":" ]] ; then
+		COMPREPLY=( `compgen -W "${FILTERKINDS[*]}" -- "$cur"` )
+	else
+		case "$prev" in
+			--restrict)
+				COMPREPLY=( `compgen -W "binding <cpuset>" -- "$cur"` )
+				;;
+			-i | --input)
+				_filedir xml
+				;;
+			--if | --input-format)
+				COMPREPLY=( `compgen -W "${INPUT_FORMAT[*]}" -- "$cur"` )
+				;;
+			--pid)
+				COMPREPLY=( "<pid>" "" )
+				;;
+			--filter)
+				COMPREPLY=( `compgen -W "${TYPES[*]/%/:} cache: icache: io:" -- "$cur"` ) && compopt -o nospace
+				;;
+			--ancestor | --descendants)
+				COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
+				;;
+		esac
+	fi
+}
+complete -F _hwloc_info hwloc-info
+
+_hwloc_bind(){
+	local OPTIONS=(--cpubind
+		--disallowed --whole-system
+		-e --get-last-cpu-location
+		-f --force
+		--get
+		--hbm
+		-h --help
+		--logical -l
+		--membind
+		--mempolicy
+		--nodeset
+		--no-hbm
+		--no-smt --no-smt=N
+		--physical -p
+		--pid
+		-q --quiet
+		--restrict
+		--single
+		--strict
+		--taskset
+		--tid
+		--version
+		-v --verbose
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	else
+		case "$prev" in
+			 --mempolicy)
+				COMPREPLY=( `compgen -W "default firsttouch bind interleave nexttouch" -- "$cur"` )
+				;;
+			 --pid)
+				COMPREPLY=( "<pid>" "" )
+				;;
+			 --tid)
+				COMPREPLY=( "<tid>" "" )
+				;;
+			 --restrict)
+				COMPREPLY=( "<bitmask>" "" )
+				;;
+		esac
+	fi
+}
+complete -F _hwloc_bind hwloc-bind
+
+_hwloc_calc(){
+	local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+	local OPTIONS=(
+		--disallowed --whole-system
+		-h --help
+		-H --hierarchical
+		-I --intersect
+		--input-format --if
+		--input -i
+		--largest
+		--li --logical-input
+		-l --logical
+		--lo --logical-output
+		--ni --nodeset-input
+		-n --nodeset
+		-N --number-of
+		--no --nodeset-output
+		--no-smt --no-smt=N
+		--pi --physical-input
+		--po --physical-output
+		-p --physical
+		-q --quiet
+		--restrict
+		--sep
+		--single
+		--taskset
+		--version
+		-v --verbose
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	else
+		case "$prev" in
+			 -N | --number-of | -I | --intersect)
+				COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
+				;;
+			 -H | --hierarchical)
+				COMPREPLY=( "<type1>.<type2>..." "" )
+				;;
+			 --sep)
+				COMPREPLY=( "<separator>" "" )
+				;;
+			 -i | --input)
+				_filedir xml
+				;;
+			 --if | --input-format)
+				COMPREPLY=( `compgen -W "${INPUT_FORMAT[*]}" -- "$cur"` )
+				;;
+			 --restrict)
+				COMPREPLY=( "<bitmask>" "" )
+				;;
+		esac
+	fi
+}
+complete -F _hwloc_calc hwloc-calc
+
+
+_hwloc_annotate(){
+ 	local OPTIONS=(
+		--cd
+		--ci 
+		--cu
+		-h --help
+		--ri
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"`)
+	fi
+	_filedir xml
+}
+complete -F _hwloc_annotate hwloc-annotate
+
+
+_hwloc_diff(){
+	local OPTIONS=(
+		-h --help
+		--refname
+		--version
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	else
+		case "$prev" in
+			 --refname)
+				COMPREPLY=( "<reference topology identifier>" "")
+				;;
+		esac
+	fi
+	_filedir xml
+}
+complete -F _hwloc_diff hwloc-diff
+
+_hwloc_patch(){
+	local OPTIONS=(
+		-h --help
+		--R --reverse
+		--version
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	fi
+	_filedir xml
+}
+complete -F _hwloc_patch hwloc-patch
+
+
+_hwloc_compress_dir(){
+	local OPTIONS=(-R --reverse
+		-v --verbose
+		-h --help
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	fi
+	_filedir -d
+}
+complete -F _hwloc_compress_dir hwloc-compress-dir
+
+_hwloc_distrib(){
+	local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
+	local OPTIONS=(
+		--at
+		--disallowed --whole-system
+		--from
+		-h --help
+		--ignore
+		--input-format --if
+		--input -i
+		--restrict
+		--reverse
+		--single
+		--taskset
+		--to
+		--version
+		-v --verbose
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	else
+		case "$prev" in
+			 --ignore | --from | --to | --at)
+				COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
+				;;
+			 -i | --input)
+				_filedir xml
+				;;
+			 --if | --input-format)
+				COMPREPLY=( `compgen -W "${INPUT_FORMAT[*]}" -- "$cur"` )
+				;;
+			 --restrict)
+				COMPREPLY=( "<bitmask>" "" )
+				;;
+		esac
+	fi
+}
+complete -F _hwloc_distrib hwloc-distrib
+
+
+_hwloc_ps(){
+	local OPTIONS=(
+		-a
+		-c --cpuset
+		--disallowed --whole-system
+		-e --get-last-cpu-location
+		-h --help
+		--json-port
+		--json-server
+		-l --logical
+		--name
+		--pid
+		--pid-cmd
+		-p --physical
+		-t --threads
+		--uid
+		-v --verbose
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	else
+		case "$prev" in
+			--name)
+				COMPREPLY=( "<task name>" "" )
+				;;
+			--uid)
+				COMPREPLY=( "<uid>" "all" "" )
+				;;
+			--pid)
+				COMPREPLY=( "<pid>" "" )
+				;;
+			--pid-cmd)
+				_filedir
+				;;
+			--json-port)
+				COMPREPLY=( "<port>" "" )
+				;;
+		esac
+	fi
+}
+complete -F _hwloc_ps hwloc-ps
+
+_hwloc_gather_cpuid(){
+	local OPTIONS=(
+		-c
+		-h --help
+		-s --silent
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	else
+		case "$prev" in
+			 -c)
+			  	COMPREPLY=( "<index of cpu to operate on>" "" )
+				;;
+		esac
+	fi
+}
+complete -F _hwloc_gather_cpuid hwloc-gather-cpuid
+
+
+_hwloc_gather_topology(){
+	local OPTIONS=(
+		--dmi
+		-h --help
+		--io
+		--keep
+		--no-cpuid
+	)
+	local cur=${COMP_WORDS[COMP_CWORD]}
+
+	if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
+		COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
+	fi
+}
+complete -F _hwloc_gather_topology hwloc-gather-topology
