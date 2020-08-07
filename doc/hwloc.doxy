@@ -1885,6 +1885,15 @@ and SectorSize (in bytes).
 <dt>AMDUUID, AMDSerial (RSMI GPU OS devices)</dt>
 <dd>The UUID and serial number of AMD GPUs.
 </dd>
+<dt>XGMIHiveID (RSMI GPU OS devices)</dt>
+<dd>The ID of the group of GPUs (Hive) interconnected by XGMI links
+</dd>
+<dt>XGMIPeers (RSMI GPU OS devices)</dt>
+<dd>The list of RSMI OS devices that are directly connected
+  to the current device through XGMI links.
+  They are given as a space-separated list of object names,
+  for instance <em>rsmi2 rsmi3</em>.
+</dd>
 <dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
 <dd>The UUID and serial number of NVIDIA GPUs.
 </dd>
