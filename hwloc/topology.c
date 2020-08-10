@@ -1921,6 +1921,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
       if (hwloc_bitmap_isset(nodeset, numa->os_index))
 	hwloc_bitmap_or(obj->cpuset, obj->cpuset, numa->cpuset);
   }
+  /* FIXME insert by nodeset to group NUMAs even if CPUless? */
 
   cmp = hwloc_obj_cmp_sets(obj, root);
   if (cmp == HWLOC_OBJ_INCLUDED) {

@@ -1381,6 +1381,9 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
     /* check if binding works */
     memset(&hooks, 0, sizeof(hooks));
     support.membind = &memsupport;
+    /* We could just copy the main hooks (except in some corner cases),
+     * but the current overhead is negligible, so just always reget them.
+     */
     hwloc_set_native_binding_hooks(&hooks, &support);
     if (hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind) {
       get_cpubind = hooks.get_thisthread_cpubind;
