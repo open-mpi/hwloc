@@ -1406,7 +1406,7 @@ output_draw(struct lstopo_output *loutput)
   hwloc_obj_t root = hwloc_get_root_obj(topology);
   struct lstopo_obj_userdata *rlud = root->userdata;
   unsigned depth = 100;
-  unsigned totwidth, totheight, offset, i;
+  unsigned totwidth, totheight, offset, i, j;
   time_t t;
   char text[3][128];
   unsigned ntext = 0;
@@ -1414,6 +1414,7 @@ output_draw(struct lstopo_output *loutput)
   const char *forcedhostname = NULL;
   unsigned long hostname_size = sizeof(hostname);
   unsigned maxtextwidth = 0, textwidth;
+  unsigned infocount = 0;
 
   if (legend) {
     forcedhostname = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "HostName");
@@ -1469,6 +1470,15 @@ output_draw(struct lstopo_output *loutput)
       maxtextwidth = textwidth;
     ntext++;
 
+    for(i=0; i<root->infos_count; i++) {
+      if (!strcmp(root->infos[i].name, "lstopoLegend")) {
+        infocount++;
+        textwidth = get_textwidth(loutput, root->infos[i].value, (unsigned) strlen(root->infos[i].value), fontsize);
+        if (textwidth > maxtextwidth)
+          maxtextwidth = textwidth;
+      }
+    }
+
     for(i=0; i<loutput->legend_append_nr; i++) {
       textwidth = get_textwidth(loutput, loutput->legend_append[i], (unsigned) strlen(loutput->legend_append[i]), fontsize);
       if (textwidth > maxtextwidth)
@@ -1492,7 +1502,7 @@ output_draw(struct lstopo_output *loutput)
     /* loutput height is sum(root, legend) */
     totheight = rlud->height;
     if (legend)
-      totheight += gridsize + (ntext+loutput->legend_append_nr - 1) * (linespacing+fontsize) + fontsize + gridsize;
+      totheight += gridsize + (ntext + infocount + loutput->legend_append_nr - 1) * (linespacing+fontsize) + fontsize + gridsize;
     loutput->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
@@ -1506,11 +1516,18 @@ output_draw(struct lstopo_output *loutput)
     /* Draw legend */
     if (legend) {
       offset = rlud->height + gridsize;
-      methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext+loutput->legend_append_nr-1) * (linespacing + fontsize) + fontsize + gridsize, NULL, 0);
+      methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext + infocount + loutput->legend_append_nr - 1) * (linespacing + fontsize) + fontsize + gridsize, NULL, 0);
       for(i=0; i<ntext; i++, offset += linespacing + fontsize)
 	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, text[i], NULL, i);
+      for(i=0, j=0; i<root->infos_count; i++) {
+        if (!strcmp(root->infos[i].name, "lstopoLegend")) {
+          methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, root->infos[i].value, NULL, j+ntext);
+          j++;
+          offset += linespacing + fontsize;
+        }
+      }
       for(i=0; i<loutput->legend_append_nr; i++, offset += linespacing + fontsize)
-	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_append[i], NULL, i+ntext);
+	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_append[i], NULL, i+ntext+infocount);
     }
   }
 }
