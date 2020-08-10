@@ -1468,6 +1468,12 @@ output_draw(struct lstopo_output *loutput)
     if (textwidth > maxtextwidth)
       maxtextwidth = textwidth;
     ntext++;
+
+    for(i=0; i<loutput->legend_append_nr; i++) {
+      textwidth = get_textwidth(loutput, loutput->legend_append[i], (unsigned) strlen(loutput->legend_append[i]), fontsize);
+      if (textwidth > maxtextwidth)
+        maxtextwidth = textwidth;
+    }
   }
 
   if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
