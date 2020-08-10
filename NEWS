@@ -29,7 +29,7 @@ Version 2.3.0
     lists of flag names (substrings).
   + Tools that have a --restrict option may now receive a nodeset or
     some custom flags for restricting the topology.
-  + Fix lstopo drawing when autoresizing on Windows 10
+  + Fix lstopo drawing when autoresizing on Windows 10.
   + Add a tikz lstopo graphical backend to generate picture easily included into
     LaTeX documents.
 
