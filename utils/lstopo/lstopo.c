@@ -664,6 +664,8 @@ main (int argc, char *argv[])
 
   hwloc_utils_check_api_version(callname);
 
+  loutput.refreshing = 0;
+
   loutput.overwrite = 0;
 
   loutput.index_type = LSTOPO_INDEX_TYPE_DEFAULT;
@@ -1498,8 +1500,10 @@ main (int argc, char *argv[])
 
   hwloc_topology_destroy (topology);
 
-  if (loutput.needs_topology_refresh)
+  if (loutput.needs_topology_refresh) {
+    loutput.refreshing = 1;
     goto refresh;
+  }
 
   for(i=0; i<loutput.legend_append_nr; i++)
     free(loutput.legend_append[i]);

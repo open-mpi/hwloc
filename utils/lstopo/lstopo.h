@@ -44,6 +44,8 @@ struct lstopo_output {
 
   /* when an interactive backends want a refresh of the topology */
   int needs_topology_refresh;
+  /* when actually doing a refresh */
+  int refreshing;
 
   /* file config */
   FILE *file;

@@ -440,6 +440,9 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
     toplevel = CreateWindow("lstopo", loutput->title, WS_OVERLAPPEDWINDOW,
                             CW_USEDEFAULT, CW_USEDEFAULT,
                             10, 10, NULL, NULL, NULL, NULL);
+    assert(!loutput->refreshing);
+  } else {
+    assert(loutput->refreshing);
   }
 
   /* recurse once for preparing sizes and positions using a fake top level window */
@@ -491,7 +494,9 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
   declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 
-  lstopo_show_interactive_help();
+  if (!loutput->refreshing)
+    lstopo_show_interactive_help();
+
   ShowWindow(toplevel, SW_SHOWDEFAULT);
   InvalidateRect(toplevel, NULL, 1); /* make sure UpdateWindow() will update something when refreshing the topology */
   UpdateWindow(toplevel);
