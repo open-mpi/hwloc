@@ -594,8 +594,18 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  move_x11(disp);
 	  break;
 	case XK_l:
-	  loutput->legend ^= 1;
-	  printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
+          if (loutput->show_legend == LSTOPO_SHOW_LEGEND_ALL) {
+            loutput->show_legend = LSTOPO_SHOW_LEGEND_NONE;
+            printf("switched to no legend lines\n");
+          } else if (loutput->show_legend == LSTOPO_SHOW_LEGEND_NONE) {
+            loutput->show_legend = LSTOPO_SHOW_LEGEND_NO_DEFAULT;
+            printf("switched to no default legend lines\n");
+          } else if (loutput->show_legend == LSTOPO_SHOW_LEGEND_NO_DEFAULT) {
+            loutput->show_legend = LSTOPO_SHOW_LEGEND_ALL;
+            printf("switched to all legend lines\n");
+          } else {
+            abort();
+          }
 	  disp->needs_redraw = 1;
 	  disp->needs_resize = 1;
 	  move_x11(disp);

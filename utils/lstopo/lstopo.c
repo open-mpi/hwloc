@@ -423,7 +423,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-index=[<type,.>] Do not display indexes for the given object types\n");
   fprintf (where, "  --attrs=[<type,...>]  Display attributes for the given object types\n");
   fprintf (where, "  --no-attrs=[<type,.>] Do not display attributes for the given object types\n");
-  fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
+  fprintf (where, "  --no-legend           Remove all text legend lines at the bottom\n");
+  fprintf (where, "  --no-default-legend   Remove default text legend lines at the bottom\n");
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "  --binding-color none    Do not colorize PU and NUMA nodes according to the binding\n");
   fprintf (where, "  --disallowed-color none Do not colorize disallowed PU and NUMA nodes\n");
@@ -462,7 +463,7 @@ void lstopo_show_interactive_help(void)
   printf("  Toggle displaying of obj attributes . a\n");
   printf("  Toggle color for disallowed objects . d\n");
   printf("  Toggle color for binding objects .... b\n");
-  printf("  Toggle displaying of the legend ..... l\n");
+  printf("  Toggle displaying of legend lines ... l\n");
   printf("  Export to file with current config .. E\n");
   printf("\n\n");
   fflush(stdout);
@@ -490,8 +491,10 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
     printf(" --binding-color none");
   if (!loutput->show_disallowed)
     printf(" --disallowed-color none");
-  if (!loutput->legend)
+  if (loutput->show_legend == LSTOPO_SHOW_LEGEND_NONE)
     printf(" --no-legend");
+  else if (loutput->show_legend == LSTOPO_SHOW_LEGEND_NO_DEFAULT)
+    printf(" --no-default-legend");
 }
 
 void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
@@ -688,7 +691,7 @@ main (int argc, char *argv[])
   loutput.export_xml_flags = 0;
   loutput.shmem_output_addr = 0;
 
-  loutput.legend = 1;
+  loutput.show_legend = LSTOPO_SHOW_LEGEND_ALL;
   loutput.legend_append = NULL;
   loutput.legend_append_nr = 0;
   snprintf(loutput.title, sizeof(loutput.title), "lstopo");
@@ -1149,7 +1152,10 @@ main (int argc, char *argv[])
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-legend")) {
-	loutput.legend = 0;
+	loutput.show_legend = LSTOPO_SHOW_LEGEND_NONE;
+      }
+      else if (!strcmp (argv[0], "--no-default-legend")) {
+	loutput.show_legend = LSTOPO_SHOW_LEGEND_NO_DEFAULT;
       }
       else if (!strcmp (argv[0], "--append-legend")) {
 	char **tmp;
@@ -1206,7 +1212,7 @@ main (int argc, char *argv[])
   if (!loutput.fontsize) {
     for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
       loutput.show_text[i] = 0;
-    loutput.legend = 0;
+    loutput.show_legend = LSTOPO_SHOW_LEGEND_NONE;
   }
 
   /***********************

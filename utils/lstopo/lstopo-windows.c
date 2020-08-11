@@ -133,8 +133,18 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	redraw = 1;
 	break;
       case 'l':
-	loutput->legend ^= 1;
-	printf("%s legend\n", loutput->legend ? "enabled" : "disabled");
+	if (loutput->show_legend == LSTOPO_SHOW_LEGEND_ALL) {
+          loutput->show_legend = LSTOPO_SHOW_LEGEND_NONE;
+          printf("switched to no legend lines\n");
+        } else if (loutput->show_legend == LSTOPO_SHOW_LEGEND_NONE) {
+          loutput->show_legend = LSTOPO_SHOW_LEGEND_NO_DEFAULT;
+          printf("switched to no default legend lines\n");
+        } else if (loutput->show_legend == LSTOPO_SHOW_LEGEND_NO_DEFAULT) {
+          loutput->show_legend = LSTOPO_SHOW_LEGEND_ALL;
+          printf("switched to all legend lines\n");
+        } else {
+          abort();
+        }
 	redraw = 1;
 	if (auto_resize)
 	  needs_resize = 1;

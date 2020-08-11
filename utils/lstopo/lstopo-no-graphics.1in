@@ -362,7 +362,12 @@ If a comma-separated list of object types is given, attributes are reenabled for
 (if they were previously disabled with \fB\-\-no\-attrs\fR).
 .TP
 \fB\-\-no\-legend\fR
-Remove the text legend at the bottom of the graphical output.
+Remove all text legend lines at the bottom of the graphical output.
+.TP
+\fB\-\-no\-default\-legend\fR
+Remove default text legend lines at the bottom of the graphical output.
+User-added legend lines with \fB\-\-append\-legend\fB or the "lstopoLegend" info
+are still displayed if any.
 .TP
 \fB\-\-append\-legend\fB <line>
 Append the line of text to the bottom of the legend in the graphical output.

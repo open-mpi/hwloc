@@ -1399,7 +1399,6 @@ output_draw(struct lstopo_output *loutput)
 {
   hwloc_topology_t topology = loutput->topology;
   struct draw_methods *methods = loutput->methods;
-  int legend = loutput->legend;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned linespacing = loutput->linespacing;
@@ -1416,7 +1415,8 @@ output_draw(struct lstopo_output *loutput)
   unsigned maxtextwidth = 0, textwidth;
   unsigned infocount = 0;
 
-  if (legend) {
+  if (loutput->show_legend == LSTOPO_SHOW_LEGEND_ALL) {
+    /* build the default legend lines */
     forcedhostname = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "HostName");
     if (!forcedhostname && hwloc_topology_is_thissystem(topology)) {
 #if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
@@ -1469,7 +1469,10 @@ output_draw(struct lstopo_output *loutput)
     if (textwidth > maxtextwidth)
       maxtextwidth = textwidth;
     ntext++;
+  }
 
+  if (loutput->show_legend != LSTOPO_SHOW_LEGEND_NONE) {
+    /* look at custom legend lines in root info attr and --append-legend */
     for(i=0; i<root->infos_count; i++) {
       if (!strcmp(root->infos[i].name, "lstopoLegend")) {
         infocount++;
@@ -1478,7 +1481,6 @@ output_draw(struct lstopo_output *loutput)
           maxtextwidth = textwidth;
       }
     }
-
     for(i=0; i<loutput->legend_append_nr; i++) {
       textwidth = get_textwidth(loutput, loutput->legend_append[i], (unsigned) strlen(loutput->legend_append[i]), fontsize);
       if (textwidth > maxtextwidth)
@@ -1501,7 +1503,8 @@ output_draw(struct lstopo_output *loutput)
 
     /* loutput height is sum(root, legend) */
     totheight = rlud->height;
-    if (legend)
+    if (loutput->show_legend != LSTOPO_SHOW_LEGEND_NONE
+        && (ntext + infocount + loutput->legend_append_nr))
       totheight += gridsize + (ntext + infocount + loutput->legend_append_nr - 1) * (linespacing+fontsize) + fontsize + gridsize;
     loutput->height = totheight;
 
@@ -1514,7 +1517,8 @@ output_draw(struct lstopo_output *loutput)
     get_type_fun(root->type)(loutput, root, depth, 0, 0);
 
     /* Draw legend */
-    if (legend) {
+    if (loutput->show_legend != LSTOPO_SHOW_LEGEND_NONE
+        && (ntext + infocount + loutput->legend_append_nr)) {
       offset = rlud->height + gridsize;
       methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext + infocount + loutput->legend_append_nr - 1) * (linespacing + fontsize) + fontsize + gridsize, NULL, 0);
       for(i=0; i<ntext; i++, offset += linespacing + fontsize)

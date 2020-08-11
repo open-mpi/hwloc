@@ -60,6 +60,7 @@ _lstopo() {
 		   --attrs --attrs=
 		   --no-attrs --no-attrs=
 		   --no-legend
+		   --no-default-legend
 		   --append-legend
 		   --binding-color
 		   --disallowed-color

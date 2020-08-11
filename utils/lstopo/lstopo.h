@@ -33,6 +33,12 @@ enum lstopo_index_type_e {
   LSTOPO_INDEX_TYPE_NONE /* only used during the interactive display */
 };
 
+enum lstopo_show_legend_e {
+  LSTOPO_SHOW_LEGEND_ALL,
+  LSTOPO_SHOW_LEGEND_NONE,
+  LSTOPO_SHOW_LEGEND_NO_DEFAULT
+};
+
 FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
 
 struct draw_methods;
@@ -68,7 +74,7 @@ struct lstopo_output {
   uint64_t shmem_output_addr;
 
   /* legend */
-  int legend;
+  enum lstopo_show_legend_e show_legend;
   char ** legend_append;
   unsigned legend_append_nr;
 
