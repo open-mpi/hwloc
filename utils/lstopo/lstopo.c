@@ -397,6 +397,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "  --disallowed          Include objects disallowed by administrative limitations\n");
   fprintf (where, "  --allow <all|local|...>   Change the set of objects marked as allowed\n");
+  fprintf (where, "  --flags <n>           Set the topology flags\n");
   fprintf (where, "Graphical output options:\n");
   fprintf (where, "  --children-order plain\n"
 		  "                        Display memory children below the parent like any other child\n");
