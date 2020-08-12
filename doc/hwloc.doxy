@@ -1261,6 +1261,8 @@ following environment variables.
  HWLOC_XML_USERDATA_NOT_DECODED
   do not decode base64 userdata on import,
   and reexport it the same (used by tools for leaving userdata untouched)
+ HWLOC_XML_SUPPORT_EXPORT=0
+  don't export support info to XML.
  HWLOC_RSMI_SHUTDOWN
   force rsmi_shutdown to make valgrind happy
   not enabled by default on rsmi <= 3.3.x because those old libs do not

@@ -20,6 +20,9 @@ export HWLOC_PLUGINS_PATH
 HWLOC_DEBUG_CHECK=1
 export HWLOC_DEBUG_CHECK
 
+HWLOC_XML_EXPORT_SUPPORT=0
+export HWLOC_XML_EXPORT_SUPPORT
+
 if test x@HWLOC_XML_LOCALIZED@ = x1; then
   # make sure we use default numeric formats
   LANG=C

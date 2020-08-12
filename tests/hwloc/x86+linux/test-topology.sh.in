@@ -16,6 +16,9 @@ export HWLOC_PLUGINS_PATH
 HWLOC_DONT_ADD_VERSION_INFO=1
 export HWLOC_DONT_ADD_VERSION_INFO
 
+HWLOC_XML_EXPORT_SUPPORT=0
+export HWLOC_XML_EXPORT_SUPPORT
+
 actual_output="$1"
 
 # make sure we use default numeric formats

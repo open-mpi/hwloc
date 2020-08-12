@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
   char *restrictstring = NULL;
   const char *from_type = NULL, *to_type = NULL;
   hwloc_topology_t topology;
-  unsigned long flags = 0;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT;
   unsigned long restrict_flags = 0;
   unsigned long dflags = 0;
   int opt;

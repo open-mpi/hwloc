@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Inria.  All rights reserved.
+ * Copyright © 2013-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 {
 	hwloc_topology_t topo1, topo2;
 	hwloc_topology_diff_t firstdiff = NULL, diff;
-	unsigned long flags = HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
+	unsigned long flags = HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED | HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT;
 	char *callname, *input1, *input2, *output, *outputname, *refname = NULL;
 	char *xmlbuffer;
 	int xmlbuflen;

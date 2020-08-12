@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2019 Inria.  All rights reserved.
+ * Copyright © 2010-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -119,6 +119,7 @@ extern "C" {
 #define HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED HWLOC_NAME_CAPS(TOPOLOGY_FLAG_WITH_DISALLOWED)
 #define HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IS_THISSYSTEM)
 #define HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES)
+#define HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IMPORT_SUPPORT)
 
 #define hwloc_topology_set_pid HWLOC_NAME(topology_set_pid)
 #define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)

@@ -99,6 +99,9 @@ Package:1 Core:2 [NUMANode(memory=1073741824)] L2Cache:2(size=4194304) PU:2
       </object>
     </object>
   </object>
+  <support name="discovery.pu"/>
+  <support name="discovery.numa"/>
+  <support name="discovery.numa_memory"/>
 </topology>
 ** Restrict flag cpuless...
 Machine (1024MB total)
