@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <assert.h>
 
+#include "private/debug.h" /* for HWLOC_BUILD_ASSERT() */
 #include "misc.h"
 #include "hwloc-calc.h"
 
@@ -625,6 +626,14 @@ main (int argc, char *argv[])
 
   } else if (mode == HWLOC_INFO_MODE_SUPPORT) {
     const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
+
+#ifdef HWLOC_DEBUG
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 3*sizeof(void*));
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+#endif
+
 #define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
     DO(discovery, pu);
     DO(discovery, disallowed_pu);
