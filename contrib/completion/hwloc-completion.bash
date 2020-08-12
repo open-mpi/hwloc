@@ -44,6 +44,7 @@ _lstopo() {
 		   --pid
 		   --disallowed --whole-system
 		   --allow
+		   --flags
 		   --children-order
 		   --fontsize
 		   --gridsize
