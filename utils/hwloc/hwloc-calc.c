@@ -231,7 +231,7 @@ static int hwloc_calc_type_depth(hwloc_topology_t topology, const char *string, 
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
-  unsigned long flags = 0;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT;
   unsigned long restrict_flags = 0;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;

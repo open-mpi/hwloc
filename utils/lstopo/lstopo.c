@@ -634,7 +634,7 @@ main (int argc, char *argv[])
   int err;
   hwloc_topology_t topology;
   const char *filename = NULL;
-  unsigned long flags = 0;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT;
   unsigned long restrict_flags = 0;
   unsigned long allow_flags = 0;
   hwloc_bitmap_t allow_cpuset = NULL, allow_nodeset = NULL;

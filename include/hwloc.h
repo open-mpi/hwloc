@@ -1940,7 +1940,28 @@ enum hwloc_topology_flags_e {
    * would result in the same behavior.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES = (1UL<<2)
+  HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES = (1UL<<2),
+
+  /** \brief Import support from the imported topology.
+   *
+   * When importing a XML topology from a remote machine, binding is
+   * disabled by default (see ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM).
+   * This disabling is also marked by putting zeroes in the corresponding
+   * supported feature bits reported by hwloc_topology_get_support().
+   *
+   * The flag ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT actually imports
+   * support bits from the remote machine.
+   *
+   * Note that these supported features are only relevant for the hwloc
+   * installation that actually exported the XML topology
+   * (it may vary with the operating system, or with how hwloc was compiled).
+   *
+   * Note that setting this flag however does not enable binding for the
+   * locally imported hwloc topology, it only reports what the remote
+   * hwloc and machine support.
+   *
+   */
+  HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT = (1UL<<3)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
@@ -2073,6 +2094,17 @@ struct hwloc_topology_support {
  * call may still fail in some corner cases.
  *
  * These features are also listed by hwloc-info \--support
+ *
+ * The reported features are what the current topology supports
+ * on the current machine. If the topology was exported to XML
+ * from another machine and later imported here, support still
+ * describes what is supported for this imported topology after
+ * import. By default, binding will be reported as unsupported
+ * in this case (see ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM).
+ *
+ * Topology flag ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT may be used
+ * to report the supported features of the original remote machine
+ * instead.
  */
 HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
 

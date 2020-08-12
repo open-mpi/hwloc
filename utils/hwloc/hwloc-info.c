@@ -341,7 +341,7 @@ main (int argc, char *argv[])
   int err;
   hwloc_topology_t topology;
   int topodepth;
-  unsigned long flags = 0;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT;
   unsigned long restrict_flags = 0;
   char * callname;
   char * input = NULL;

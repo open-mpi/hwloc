@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -77,6 +77,8 @@ int main(void)
   err = hwloc_topology_set_xmlbuffer(reload, buf1, buflen1);
   assert(!err);
   err = hwloc_topology_set_type_filter(reload, HWLOC_OBJ_MISC, HWLOC_TYPE_FILTER_KEEP_ALL);
+  assert(!err);
+  err = hwloc_topology_set_flags(reload, HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT);
   assert(!err);
   err = hwloc_topology_load(reload);
   assert(!err);

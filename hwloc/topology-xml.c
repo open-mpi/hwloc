@@ -1240,6 +1240,73 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 }
 
 static int
+hwloc__xml_v2import_support(hwloc_topology_t topology,
+                            hwloc__xml_import_state_t state)
+{
+  char *name = NULL;
+  int value = 1; /* value is optional */
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "name"))
+      name = attrvalue;
+    else if (!strcmp(attrname, "value"))
+      value = atoi(attrvalue);
+    else {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: ignoring unknown support attribute %s\n",
+		state->global->msgprefix, attrname);
+    }
+  }
+
+  if (name && topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT) {
+#ifdef HWLOC_DEBUG
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 3*sizeof(void*));
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+#endif
+
+#define DO(_cat,_name) if (!strcmp(#_cat "." #_name, name)) topology->support._cat->_name = value
+    DO(discovery,pu);
+    else DO(discovery,numa);
+    else DO(discovery,numa_memory);
+    else DO(discovery,disallowed_pu);
+    else DO(discovery,disallowed_numa);
+    else DO(cpubind,set_thisproc_cpubind);
+    else DO(cpubind,get_thisproc_cpubind);
+    else DO(cpubind,set_proc_cpubind);
+    else DO(cpubind,get_proc_cpubind);
+    else DO(cpubind,set_thisthread_cpubind);
+    else DO(cpubind,get_thisthread_cpubind);
+    else DO(cpubind,set_thread_cpubind);
+    else DO(cpubind,get_thread_cpubind);
+    else DO(cpubind,get_thisproc_last_cpu_location);
+    else DO(cpubind,get_proc_last_cpu_location);
+    else DO(cpubind,get_thisthread_last_cpu_location);
+    else DO(membind,set_thisproc_membind);
+    else DO(membind,get_thisproc_membind);
+    else DO(membind,set_proc_membind);
+    else DO(membind,get_proc_membind);
+    else DO(membind,set_thisthread_membind);
+    else DO(membind,get_thisthread_membind);
+    else DO(membind,set_area_membind);
+    else DO(membind,get_area_membind);
+    else DO(membind,alloc_membind);
+    else DO(membind,firsttouch_membind);
+    else DO(membind,bind_membind);
+    else DO(membind,interleave_membind);
+    else DO(membind,nexttouch_membind);
+    else DO(membind,migrate_membind);
+    else DO(membind,get_area_memlocation);
+#undef DO
+  }
+
+  return 0;
+}
+
+static int
 hwloc__xml_v2import_distances(hwloc_topology_t topology,
 			      hwloc__xml_import_state_t state,
 			      int heterotypes)
@@ -1761,6 +1828,10 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	ret = hwloc__xml_v2import_distances(topology, &childstate, 1);
 	if (ret < 0)
 	  goto failed;
+      } else if (!strcmp(tag, "support")) {
+	ret = hwloc__xml_v2import_support(topology, &childstate);
+	if (ret < 0)
+	  goto failed;
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
@@ -1866,12 +1937,14 @@ done:
   /* keep the "Backend" information intact */
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
-  topology->support.discovery->pu = 1;
-  topology->support.discovery->disallowed_pu = 1;
-  if (data->nbnumanodes) {
-    topology->support.discovery->numa = 1;
-    topology->support.discovery->numa_memory = 1; // FIXME
-    topology->support.discovery->disallowed_numa = 1;
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
+    topology->support.discovery->pu = 1;
+    topology->support.discovery->disallowed_pu = 1;
+    if (data->nbnumanodes) {
+      topology->support.discovery->numa = 1;
+      topology->support.discovery->numa_memory = 1; // FIXME
+      topology->support.discovery->disallowed_numa = 1;
+    }
   }
 
   if (data->look_done)
@@ -2622,9 +2695,70 @@ hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topol
       hwloc___xml_v2export_distances(parentstate, dist);
 }
 
+static void
+hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology)
+{
+  struct hwloc__xml_export_state_s state;
+  char tmp[11];
+
+#ifdef HWLOC_DEBUG
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 3*sizeof(void*));
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+#endif
+
+#define DO(_cat,_name) do {                                     \
+    if (topology->support._cat->_name) {                        \
+      parentstate->new_child(parentstate, &state, "support");   \
+      state.new_prop(&state, "name", #_cat "." #_name);         \
+      if (topology->support._cat->_name != 1) {                 \
+        sprintf(tmp, "%u", topology->support._cat->_name); \
+        state.new_prop(&state, "value", tmp);                   \
+      }                                                         \
+      state.end_object(&state, "support");                      \
+    }                                                           \
+  } while (0)
+
+  DO(discovery,pu);
+  DO(discovery,numa);
+  DO(discovery,numa_memory);
+  DO(discovery,disallowed_pu);
+  DO(discovery,disallowed_numa);
+  DO(cpubind,set_thisproc_cpubind);
+  DO(cpubind,get_thisproc_cpubind);
+  DO(cpubind,set_proc_cpubind);
+  DO(cpubind,get_proc_cpubind);
+  DO(cpubind,set_thisthread_cpubind);
+  DO(cpubind,get_thisthread_cpubind);
+  DO(cpubind,set_thread_cpubind);
+  DO(cpubind,get_thread_cpubind);
+  DO(cpubind,get_thisproc_last_cpu_location);
+  DO(cpubind,get_proc_last_cpu_location);
+  DO(cpubind,get_thisthread_last_cpu_location);
+  DO(membind,set_thisproc_membind);
+  DO(membind,get_thisproc_membind);
+  DO(membind,set_proc_membind);
+  DO(membind,get_proc_membind);
+  DO(membind,set_thisthread_membind);
+  DO(membind,get_thisthread_membind);
+  DO(membind,set_area_membind);
+  DO(membind,get_area_membind);
+  DO(membind,alloc_membind);
+  DO(membind,firsttouch_membind);
+  DO(membind,bind_membind);
+  DO(membind,interleave_membind);
+  DO(membind,nexttouch_membind);
+  DO(membind,migrate_membind);
+  DO(membind,get_area_memlocation);
+
+#undef DO
+}
+
 void
 hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology, unsigned long flags)
 {
+  char *env;
   hwloc_obj_t root = hwloc_get_root_obj(topology);
 
   if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
@@ -2667,6 +2801,9 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
   } else {
     hwloc__xml_v2export_object (state, topology, root, flags);
     hwloc__xml_v2export_distances (state, topology);
+    env = getenv("HWLOC_XML_EXPORT_SUPPORT");
+    if (!env || atoi(env))
+      hwloc__xml_v2export_support(state, topology);
   }
 }
 
