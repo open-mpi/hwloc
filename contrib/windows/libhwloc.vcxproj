@@ -172,7 +172,7 @@
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;NDEBUG;WIN64;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -186,7 +186,7 @@
       <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
       <OptimizeReferences>true</OptimizeReferences>
-      <OutputFile>$(OutDir)$(TargetName).dll</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName).lib</OutputFile>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName).pdb</ProgramDatabaseFile>
       <ShowProgress>LinkVerboseLib</ShowProgress>
       <SubSystem>Console</SubSystem>
