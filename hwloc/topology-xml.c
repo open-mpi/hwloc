@@ -1262,10 +1262,11 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
 
   if (name && topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT) {
 #ifdef HWLOC_DEBUG
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 3*sizeof(void*));
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
 #endif
 
 #define DO(_cat,_name) if (!strcmp(#_cat "." #_name, name)) topology->support._cat->_name = value
@@ -1300,6 +1301,11 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
     else DO(membind,nexttouch_membind);
     else DO(membind,migrate_membind);
     else DO(membind,get_area_memlocation);
+
+    else if (!strcmp("custom.exported_support", name))
+      /* support was exported in a custom/fake field, mark it as imported here */
+      topology->support.misc->imported_support = 1;
+
 #undef DO
   }
 
@@ -2702,10 +2708,11 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
   char tmp[11];
 
 #ifdef HWLOC_DEBUG
-  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 3*sizeof(void*));
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
 #endif
 
 #define DO(_cat,_name) do {                                     \
@@ -2751,6 +2758,15 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
   DO(membind,nexttouch_membind);
   DO(membind,migrate_membind);
   DO(membind,get_area_memlocation);
+
+  /* misc.imported_support would be meaningless in the remote importer,
+   * but the importer needs to know whether we exported support or not
+   * (in case there are no support bit set at all),
+   * use a custom/fake field to do so.
+   */
+  parentstate->new_child(parentstate, &state, "support");
+  state.new_prop(&state, "name", "custom.exported_support");
+  state.end_object(&state, "support");
 
 #undef DO
 }

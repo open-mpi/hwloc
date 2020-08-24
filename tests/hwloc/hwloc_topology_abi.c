@@ -61,12 +61,12 @@ int main(void)
     assert(offset == 648);
 
     offset = offsetof(struct hwloc_topology, first_dist);
-    assert(offset == 696);
+    assert(offset == 704);
     size = sizeof(struct hwloc_internal_distances_s);
     assert(size == 88);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 748);
+    assert(offset == 756);
 
     /* fields after this one aren't needed after discovery */
 
@@ -126,13 +126,15 @@ int main(void)
     assert(size == 16);
 
     size = sizeof(struct hwloc_topology_support);
-    assert(size == 24);
+    assert(size == 32);
     size = sizeof(struct hwloc_topology_discovery_support);
     assert(size == 5);
     size = sizeof(struct hwloc_topology_cpubind_support);
     assert(size == 11);
     size = sizeof(struct hwloc_topology_membind_support);
     assert(size == 15);
+    size = sizeof(struct hwloc_topology_misc_support);
+    assert(size == 1);
 
     size = sizeof(struct hwloc_distances_s);
     assert(size == 32);

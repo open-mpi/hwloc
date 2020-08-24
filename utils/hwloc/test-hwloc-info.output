@@ -44,6 +44,7 @@ membind:interleave_membind = 0
 membind:nexttouch_membind = 0
 membind:migrate_membind = 0
 membind:get_area_memlocation = 0
+misc:imported_support = 0
 
 # --objects
 

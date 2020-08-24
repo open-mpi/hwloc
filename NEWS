@@ -23,6 +23,8 @@ Version 2.3.0
 * API
   + The new topology flag HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT causes
     support arrays to be loaded from XML exported with hwloc 2.3+.
+    - hwloc_topology_get_support() now returns an additional "misc"
+      array with feature "imported_support" set when support was imported.
 * Backends
   + Add a ROCm SMI backend and a hwloc/rsmi.h helper file for getting
     the locality of AMD GPUs, now exposed as "rsmi" OS devices.

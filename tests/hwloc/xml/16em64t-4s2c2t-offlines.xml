@@ -63,4 +63,5 @@
       </object>
     </object>
   </object>
+  <support name="custom.exported_support"/>
 </topology>

@@ -807,4 +807,5 @@
     <u64values length="30">65 65 65 50 10 79 65 65 79 79 </u64values>
     <u64values length="12">65 79 79 10 </u64values>
   </distances2>
+  <support name="custom.exported_support"/>
 </topology>

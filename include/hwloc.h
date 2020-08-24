@@ -1950,7 +1950,10 @@ enum hwloc_topology_flags_e {
    * supported feature bits reported by hwloc_topology_get_support().
    *
    * The flag ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT actually imports
-   * support bits from the remote machine.
+   * support bits from the remote machine. It also sets the flag
+   * \p imported_support in the struct hwloc_topology_misc_support array.
+   * If the imported XML did not contain any support information
+   * (exporter hwloc is too old), this flag is not set.
    *
    * Note that these supported features are only relevant for the hwloc
    * installation that actually exported the XML topology
@@ -2074,6 +2077,13 @@ struct hwloc_topology_membind_support {
   unsigned char get_area_memlocation;
 };
 
+/** \brief Flags describing miscellaneous features.
+ */
+struct hwloc_topology_misc_support {
+  /** Support was imported when importing another topology, see ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT. */
+  unsigned char imported_support;
+};
+
 /** \brief Set of flags describing actual support for this topology.
  *
  * This is retrieved with hwloc_topology_get_support() and will be valid until
@@ -2084,6 +2094,7 @@ struct hwloc_topology_support {
   struct hwloc_topology_discovery_support *discovery;
   struct hwloc_topology_cpubind_support *cpubind;
   struct hwloc_topology_membind_support *membind;
+  struct hwloc_topology_misc_support *misc;
 };
 
 /** \brief Retrieve the topology support.
@@ -2104,7 +2115,8 @@ struct hwloc_topology_support {
  *
  * Topology flag ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT may be used
  * to report the supported features of the original remote machine
- * instead.
+ * instead. If it was successfully imported, \p imported_support
+ * will be set in the struct hwloc_topology_misc_support array.
  */
 HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
 
