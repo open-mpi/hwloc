@@ -970,6 +970,7 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   memcpy(new->support.discovery, old->support.discovery, sizeof(*old->support.discovery));
   memcpy(new->support.cpubind, old->support.cpubind, sizeof(*old->support.cpubind));
   memcpy(new->support.membind, old->support.membind, sizeof(*old->support.membind));
+  memcpy(new->support.misc, old->support.misc, sizeof(*old->support.misc));
 
   new->allowed_cpuset = hwloc_bitmap_tma_dup(tma, old->allowed_cpuset);
   new->allowed_nodeset = hwloc_bitmap_tma_dup(tma, old->allowed_nodeset);
@@ -3519,6 +3520,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
   memset(topology->support.cpubind, 0, sizeof(*topology->support.cpubind));
   memset(topology->support.membind, 0, sizeof(*topology->support.membind));
+  memset(topology->support.misc, 0, sizeof(*topology->support.misc));
 
   /* Only the System object on top by default */
   topology->next_gp_index = 1; /* keep 0 as an invalid value */
@@ -3595,6 +3597,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->support.discovery = hwloc_tma_malloc(tma, sizeof(*topology->support.discovery));
   topology->support.cpubind = hwloc_tma_malloc(tma, sizeof(*topology->support.cpubind));
   topology->support.membind = hwloc_tma_malloc(tma, sizeof(*topology->support.membind));
+  topology->support.misc = hwloc_tma_malloc(tma, sizeof(*topology->support.misc));
 
   topology->nb_levels_allocated = nblevels; /* enough for default 10 levels = Mach+Pack+Die+NUMA+L3+L2+L1d+L1i+Co+PU */
   topology->levels = hwloc_tma_calloc(tma, topology->nb_levels_allocated * sizeof(*topology->levels));
@@ -3863,6 +3866,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   free(topology->support.discovery);
   free(topology->support.cpubind);
   free(topology->support.membind);
+  free(topology->support.misc);
   free(topology);
 }
 

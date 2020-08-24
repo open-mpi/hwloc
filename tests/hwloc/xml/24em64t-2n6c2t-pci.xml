@@ -213,4 +213,5 @@
     <indexes length="4">0 1 </indexes>
     <u64values length="12">10 20 20 10 </u64values>
   </distances2>
+  <support name="custom.exported_support"/>
 </topology>

@@ -134,4 +134,5 @@
   <support name="membind.firsttouch_membind"/>
   <support name="membind.bind_membind"/>
   <support name="membind.get_area_memlocation"/>
+  <support name="custom.exported_support"/>
 </topology>

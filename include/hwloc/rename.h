@@ -135,6 +135,7 @@ extern "C" {
 #define hwloc_topology_discovery_support HWLOC_NAME(topology_discovery_support)
 #define hwloc_topology_cpubind_support HWLOC_NAME(topology_cpubind_support)
 #define hwloc_topology_membind_support HWLOC_NAME(topology_membind_support)
+#define hwloc_topology_misc_support HWLOC_NAME(topology_misc_support)
 #define hwloc_topology_support HWLOC_NAME(topology_support)
 #define hwloc_topology_get_support HWLOC_NAME(topology_get_support)
 

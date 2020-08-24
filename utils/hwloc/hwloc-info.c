@@ -628,10 +628,11 @@ main (int argc, char *argv[])
     const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
 
 #ifdef HWLOC_DEBUG
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 3*sizeof(void*));
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
 #endif
 
 #define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
@@ -668,6 +669,8 @@ main (int argc, char *argv[])
     DO(membind, nexttouch_membind);
     DO(membind, migrate_membind);
     DO(membind, get_area_memlocation);
+
+    DO(misc, imported_support);
 
   } else if (mode == HWLOC_INFO_MODE_OBJECTS) {
     struct hwloc_calc_location_context_s lcontext;

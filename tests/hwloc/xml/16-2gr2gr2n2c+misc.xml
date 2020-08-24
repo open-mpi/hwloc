@@ -139,4 +139,5 @@
   <support name="membind.interleave_membind"/>
   <support name="membind.migrate_membind"/>
   <support name="membind.get_area_memlocation"/>
+  <support name="custom.exported_support"/>
 </topology>
