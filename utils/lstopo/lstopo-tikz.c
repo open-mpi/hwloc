@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
+ * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
