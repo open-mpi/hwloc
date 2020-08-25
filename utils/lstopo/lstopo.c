@@ -3,7 +3,7 @@
  * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2020 Hewlett-Packard Enterprise.  All rights reserved.
+ * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
