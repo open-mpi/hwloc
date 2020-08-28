@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009-2010 Oracle and/or its affiliates.  All rights reserved.
  * Copyright © 2013 Université Bordeaux.  All rights reserved.
- * Copyright © 2016-2018 Inria.  All rights reserved.
+ * Copyright © 2016-2020 Inria.  All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -300,8 +300,10 @@ static void assign_string_value(int index, char* string_val) {
     }
   } else if (index == INDEX_PROCESSOR_TYPE) {  /* ProcessorType */
       strncpy(&dss_chip_type[0], string_val, PICL_PROPNAMELEN_MAX);
+      dss_chip_type[PICL_PROPNAMELEN_MAX] = 0;
   } else if (index == INDEX_BRAND_STRING) { /* brand-string */
       strncpy(&dss_chip_model[0], string_val, PICL_PROPNAMELEN_MAX);
+      dss_chip_type[PICL_PROPNAMELEN_MAX] = 0;
   }
 }
 
