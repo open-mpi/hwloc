@@ -685,6 +685,9 @@ main (int argc, char *argv[])
     while (argc >= 1) {
       if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
 	hwloc_calc_process_location_info_cb(&lcontext, NULL, hwloc_get_root_obj(topology));
+      } else if (*argv[0] == '-') {
+        fprintf(stderr, "Cannot handle command-line option %s after some locations.\n", argv[0]);
+        return EXIT_FAILURE;
       } else {
 	/* try to match a type/depth followed by a special character */
 	typelen = strspn(argv[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
