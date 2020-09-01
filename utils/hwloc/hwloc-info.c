@@ -73,6 +73,8 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
     return;
   printf("%s type = %s\n", prefix, hwloc_obj_type_string(obj->type));
   printf("%s full type = %s\n", prefix, type);
+  if (obj->subtype)
+    printf("%s subtype = %s\n", prefix, obj->subtype);
   printf("%s logical index = %u\n", prefix, obj->logical_index);
   if (obj->os_index != (unsigned) -1)
     printf("%s os index = %u\n", prefix, obj->os_index);
