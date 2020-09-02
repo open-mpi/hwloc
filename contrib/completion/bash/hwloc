@@ -215,6 +215,7 @@ _hwloc_bind(){
     local OPTIONS=(--cpubind
 		   --membind
 		   --mempolicy
+		   --best-memattr
 		   --logical -l
 		   --physical -p
 		   --single
@@ -254,6 +255,9 @@ _hwloc_bind(){
 		;;
 	    --restrict)
 		COMPREPLY=( "<bitmask>" "" )
+		;;
+	    --best-memattr)
+		COMPREPLY=( "<memattr>" "" )
 		;;
 	esac
     fi
