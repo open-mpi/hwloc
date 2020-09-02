@@ -271,6 +271,9 @@ _hwloc_calc(){
 		   -I --intersect
 		   -H --hierarchical
 		   --largest
+		   --local-memory
+		   --local-memory-flags
+		   --best-memattr
 		   -l --logical
 		   -p --physical
 		   --li --logical-input
@@ -317,6 +320,12 @@ _hwloc_calc(){
 		;;
 	    --restrict)
 		COMPREPLY=( "<bitmask>" "" )
+		;;
+	    --local-memory-flags)
+		COMPREPLY=( "<flags>" "" )
+		;;
+	    --best-memattr)
+		COMPREPLY=( "<memattr>" "" )
 		;;
 	esac
     fi

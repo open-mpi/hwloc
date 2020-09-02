@@ -147,6 +147,35 @@ exactly equivalent to the input. No largest object is included in the input
 This is different from \-\-intersect where reported objects may not be
 strictly included in the input.
 .TP
+\fB\-\-local\-memory\fR
+Report the list of NUMA nodes that are local to the input objects.
+
+This option is similar to \fB\-I numa\fR but the way nodes are selected
+is different:
+The selection performed by \fB\-\-local\-memory\fR may be precisely
+configured with \fB\-\-local\-memory\-flags\fR,
+while \fB\-I numa\fR just selects all nodes that are somehow local to
+any of the input objects.
+.TP
+\fB\-\-local\-memory\-flags\fR
+Change the flags used to select local NUMA nodes.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_get_local_numanode_objs()\fR.
+Those names may be substrings of actual flag names as long as a single one matches.
+The default is \fB3\fR (or \fBsmaller,larger\fR)
+which means NUMA nodes are displayed
+if their locality either contains or is contained
+in the locality of the given object.
+
+This option enables \fB\-\-local\-memory\fR.
+.TP
+\fB\-\-best\-memattr\fR <name>
+Enable the listing of local memory nodes with \fB\-\-local\-memory\fR,
+but only display the local node that has the best value for the memory
+attribute given by \fI<name>\fR (or as an index).
+If the memory attribute values depend on the initiator, the hwloc-calc
+input objects are used as the initiator.
+.TP
 \fB\-\-sep <sep>\fR
 Change the field separator in the output.
 By default, a space is used to separate output objects
@@ -252,6 +281,18 @@ To display the list of NUMA nodes, by physical indexes, that intersect a given (
 
     $ hwloc-calc --physical --intersect NUMAnode 0xf0f0f0f0
     0,2
+
+To display the list of NUMA nodes, by physical indexes,
+whose locality is exactly equal to a Package:
+
+    $ hwloc-calc --local-memory-flags 0 pack:1
+    4,7
+
+To display the best-capacity NUMA node, by physical indexe,
+whose locality is exactly equal to a Package:
+
+    $ hwloc-calc --local-memory-flags 0 --best-memattr capacity pack:1
+    4
 
 Converting object logical indexes (default) from/to physical/OS indexes
 may be performed with \fB--intersect\fR combined with either \fB--physical-output\fR

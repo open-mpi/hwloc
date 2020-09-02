@@ -39,6 +39,9 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 		 "                            display them as hierarchical combinations such as\n"
 		 "                            type1:index1.type2:index2...\n");
   fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
+  fprintf(where, "  --local-memory            Report the memory nodes that are local to the CPU set\n");
+  fprintf(where, "  --local-memory flags <x>  Change flags for selecting local memory nodes\n");
+  fprintf(where, "  --best-memattr <attr>     Only report the best memory node among the local ones\n");
   fprintf(where, "Formatting options:\n");
   fprintf(where, "  -l --logical              Use logical object indexes (default)\n");
   fprintf(where, "  -p --physical             Use physical object indexes\n");
@@ -67,6 +70,9 @@ static int numberofdepth = -1;
 static int intersectdepth = -1;
 static int hiernblevels = 0;
 static int *hierdepth = NULL;
+static int local_numanodes = 0;
+static unsigned long local_numanode_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY;
+static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
 static int showobjs = 0;
 static int no_smt = -1;
 static int singlify = 0;
@@ -188,6 +194,45 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       sep = " ";
     hwloc_calc_hierarch_output(topology, "", sep, hwloc_get_root_obj(topology), set, 0);
     printf("\n");
+
+  } else if (local_numanodes) {
+    unsigned nrnodes;
+    hwloc_obj_t *nodes;
+    nrnodes = hwloc_bitmap_weight(hwloc_topology_get_topology_nodeset(topology));
+    nodes = malloc(nrnodes * sizeof(*nodes));
+    if (nodes) {
+      int err;
+      struct hwloc_location loc;
+      loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+      loc.location.cpuset = set;
+      err = hwloc_get_local_numanode_objs(topology, &loc, &nrnodes, nodes, local_numanode_flags);
+      if (!err) {
+        unsigned i;
+        if (best_memattr_id != (hwloc_memattr_id_t) -1) {
+          int best = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc);
+          if (best == -1) {
+            /* no perf info found, report nothing */
+            nrnodes = 0;
+          } else {
+            /* only report the best nodes */
+            nodes[0] = nodes[best];
+            nrnodes = 1;
+          }
+        }
+        if (!sep)
+          sep = ",";
+        for(i=0; i<nrnodes; i++) {
+          char type[64];
+          unsigned idx;
+          hwloc_obj_type_snprintf(type, sizeof(type), nodes[i], 1);
+          idx = logicalo ? nodes[i]->logical_index : nodes[i]->os_index;
+          printf("%s%u", i==0 ? (const char *) "" : sep, idx);
+        }
+      }
+      free(nodes);
+    }
+    printf("\n");
+
   } else {
     char *string = NULL;
     if (taskset)
@@ -242,6 +287,7 @@ int main(int argc, char *argv[])
   const char * intersecttype = NULL;
   char *restrictstring = NULL;
   char * hiertype = NULL;
+  char * best_memattr_str = NULL;
   char *callname;
   char *outsep = NULL;
   int opt;
@@ -380,6 +426,30 @@ int main(int argc, char *argv[])
 	opt = 1;
 	goto next;
       }
+      if (!strcmp(argv[0], "--local-memory")) {
+        local_numanodes = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--local-memory-flags")) {
+        if (argc < 2) {
+          usage(callname, stderr);
+          return EXIT_FAILURE;
+        }
+        local_numanodes = 1;
+        local_numanode_flags = hwloc_utils_parse_local_numanode_flags(argv[1]);
+        opt = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--best-memattr")) {
+        if (argc < 2) {
+          usage(callname, stderr);
+          return EXIT_FAILURE;
+        }
+        local_numanodes = 1;
+        best_memattr_str = argv[1];
+        opt = 1;
+        goto next;
+      }
       if (!strcasecmp(argv[0], "--pulist") || !strcmp(argv[0], "--proclist")) {
 	/* backward compat with 1.0 */
 	intersecttype = "pu";
@@ -513,6 +583,14 @@ int main(int argc, char *argv[])
 	goto out;
       }
       tmp = next+1;
+    }
+  }
+
+  if (best_memattr_str) {
+    best_memattr_id = hwloc_utils_parse_memattr_name(topology, best_memattr_str);
+    if (best_memattr_id == (hwloc_memattr_id_t) -1) {
+      fprintf(stderr, "unrecognized memattr %s\n", best_memattr_str);
+      return EXIT_FAILURE;
     }
   }
 
