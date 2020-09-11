@@ -158,4 +158,10 @@
     <u64values length="27">10 80 80 80 10 80 80 80 10 </u64values>
   </distances2>
   <support name="custom.exported_support"/>
+  <memattr name="dummymemattr" flags="1">
+    <memattr_value target_obj_type="PU" target_obj_gp_index="9" value="1234"/>
+  </memattr>
+  <memattr name="dummymemattr2" flags="6">
+    <memattr_value target_obj_type="PU" target_obj_gp_index="15" value="123" initiator_cpuset="0x0000000f"/>
+  </memattr>
 </topology>

@@ -58,6 +58,10 @@ $annotate $file $file 'pci[8086:0046]:all' info mypcidev bymatch
 $annotate $file $file bridge:all info mybridges all
 $annotate --cu $file $file L1iCache:0 none
 $annotate --cd $file $file dummy none
+$annotate $file $file -- dummy -- memattr dummymemattr higher
+$annotate $file $file -- pu:0 -- memattr dummymemattr dummy 1234
+$annotate $file $file -- dummy -- memattr dummymemattr2 lower,need_init
+$annotate $file $file -- pu:2 -- memattr dummymemattr2 0xf 123
 cat > $distances << EOF
 5
 3
