@@ -380,15 +380,9 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
               continue;
             for(j=0; j<imattr1->nr_targets; j++) {
               struct hwloc_internal_memattr_target_s *imtg1 = &imattr1->targets[j], *imtg2 = &imattr2->targets[j];
-              hwloc_obj_t obj1, obj2;
               if (imtg1->type != imtg2->type)
                 goto roottoocomplex;
-              /* gp_index isn't enforced above. so compare logical_index instead, which is enforced. requires memattrs refresh() above */
-              obj1 = hwloc_get_obj_by_type_and_gp_index(topo1, imtg1->type, imtg1->gp_index);
-              assert(obj1);
-              obj2 = hwloc_get_obj_by_type_and_gp_index(topo2, imtg2->type, imtg2->gp_index);
-              assert(obj2);
-              if (obj1->logical_index != obj2->logical_index)
+              if (imtg1->obj->logical_index != imtg2->obj->logical_index)
                 goto roottoocomplex;
               if (imattr1->flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR) {
                 unsigned k;
@@ -403,11 +397,7 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
                   } else if (imi1->initiator.type == HWLOC_LOCATION_TYPE_OBJECT) {
                     if (imi1->initiator.location.object.type != imi2->initiator.location.object.type)
                       goto roottoocomplex;
-                    obj1 = hwloc_get_obj_by_type_and_gp_index(topo1, imi1->initiator.location.object.type, imi1->initiator.location.object.gp_index);
-                    assert(obj1);
-                    obj2 = hwloc_get_obj_by_type_and_gp_index(topo2, imi2->initiator.location.object.type, imi2->initiator.location.object.gp_index);
-                    assert(obj2);
-                    if (obj1->logical_index != obj2->logical_index)
+                    if (imi1->initiator.location.object.obj->logical_index != imi2->initiator.location.object.obj->logical_index)
                       goto roottoocomplex;
                   } else {
                     assert(0);

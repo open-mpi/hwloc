@@ -70,11 +70,11 @@ int main(void)
     size = sizeof(struct hwloc_internal_memattr_s);
     assert(size == 32);
     size = sizeof(struct hwloc_internal_memattr_target_s);
-    assert(size == 40);
+    assert(size == 48);
     size = sizeof(struct hwloc_internal_memattr_initiator_s);
-    assert(size == 32);
+    assert(size == 40);
     size = sizeof(struct hwloc_internal_location_s);
-    assert(size == 24);
+    assert(size == 32);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
     assert(offset == 768);

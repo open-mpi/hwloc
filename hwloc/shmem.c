@@ -135,9 +135,9 @@ hwloc_shmem_topology_write(hwloc_topology_t topology,
 
   assert((char *)mmap_res <= (char *)mmap_address + length);
 
-  /* now refresh the new distances so that adopters can use them without refreshing the R/O shmem mapping */
+  /* now refresh the new distances/memattrs so that adopters can use them without refreshing the R/O shmem mapping */
   hwloc_internal_distances_refresh(new);
-  /* no need to refresh memattrs since we don't cache objects there */
+  hwloc_internal_memattrs_refresh(topology);
 
   /* topology is saved, release resources now */
   munmap(mmap_address, length);

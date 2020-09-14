@@ -46,9 +46,9 @@ struct hwloc_internal_location_s {
   enum hwloc_location_type_e type;
   union {
     struct {
+      hwloc_obj_t obj; /* cached between refreshes */
       uint64_t gp_index;
       hwloc_obj_type_t type;
-      // TODO cache object ?
     } object; /* if type == HWLOC_LOCATION_TYPE_OBJECT */
     hwloc_cpuset_t cpuset; /* if type == HWLOC_LOCATION_TYPE_CPUSET */
   } location;
@@ -190,10 +190,10 @@ struct hwloc_topology {
     unsigned nr_targets;
     struct hwloc_internal_memattr_target_s {
       /* target object */
+      hwloc_obj_t obj; /* cached between refreshes */
       hwloc_obj_type_t type;
       unsigned os_index; /* only used temporarily during discovery when there's no obj/gp_index yet */
       hwloc_uint64_t gp_index;
-      /* TODO cache the object */
 
       /* value if there are no initiator for this attr */
       hwloc_uint64_t noinitiator_value;

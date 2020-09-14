@@ -146,6 +146,7 @@ hwloc_internal_memattrs_dup(struct hwloc_topology *new, struct hwloc_topology *o
       goto failed;
     }
     nimattr->iflags &= ~HWLOC_IMATTR_FLAG_STATIC_NAME;
+    nimattr->iflags &= ~HWLOC_IMATTR_FLAG_CACHE_VALID; /* cache will need refresh */
 
     if (!oimattr->nr_targets)
       continue;
@@ -162,6 +163,8 @@ hwloc_internal_memattrs_dup(struct hwloc_topology *new, struct hwloc_topology *o
       struct hwloc_internal_memattr_target_s *oimtg = &oimattr->targets[j];
       struct hwloc_internal_memattr_target_s *nimtg = &nimattr->targets[j];
       unsigned k;
+
+      nimtg->obj = NULL; /* cache will need refresh */
 
       if (!oimtg->nr_initiators)
         continue;
@@ -185,6 +188,8 @@ hwloc_internal_memattrs_dup(struct hwloc_topology *new, struct hwloc_topology *o
             new->nr_memattrs = id+1;
             goto failed;
           }
+        } else if (oimi->initiator.type == HWLOC_LOCATION_TYPE_OBJECT) {
+          nimi->initiator.location.object.obj = NULL; /* cache will need refresh */
         }
       }
     }
@@ -352,8 +357,7 @@ to_internal_location(struct hwloc_internal_location_s *iloc,
 }
 
 static int
-from_internal_location(hwloc_topology_t topology,
-                       struct hwloc_internal_location_s *iloc,
+from_internal_location(struct hwloc_internal_location_s *iloc,
                        struct hwloc_location *location)
 {
   location->type = iloc->type;
@@ -363,9 +367,8 @@ from_internal_location(hwloc_topology_t topology,
     location->location.cpuset = iloc->location.cpuset;
     return 0;
   case HWLOC_LOCATION_TYPE_OBJECT:
-    location->location.object = hwloc_get_obj_by_type_and_gp_index(topology,
-                                                                   iloc->location.object.type,
-                                                                   iloc->location.object.gp_index);
+    /* requires the cache to be refreshed */
+    location->location.object = iloc->location.object.obj;
     if (!location->location.object)
       return -1;
     return 0;
@@ -401,6 +404,7 @@ hwloc__imi_refresh(struct hwloc_topology *topology,
       hwloc__imi_destroy(imi);
       return -1;
     }
+    imi->initiator.location.object.obj = obj;
     return 0;
   }
   default:
@@ -438,6 +442,8 @@ hwloc__imtg_refresh(struct hwloc_topology *topology,
 
   /* save the gp_index in case it wasn't initialized yet */
   imtg->gp_index = node->gp_index;
+  /* cache the object */
+  imtg->obj = node;
 
   if (imattr->flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR) {
     /* check the initiators */
@@ -538,6 +544,17 @@ hwloc__memattr_get_target(struct hwloc_internal_memattr_s *imattr,
   new->type = target_type;
   new->gp_index = target_gp_index;
   new->os_index = target_os_index;
+
+  /* cached object will be refreshed later on actual access */
+  new->obj = NULL;
+  imattr->iflags &= ~HWLOC_IMATTR_FLAG_CACHE_VALID;
+  /* When setting a value after load(), the caller has the target object
+   * (and initiator object, if not CPU set). Hence, we could avoid invalidating
+   * the cache here.
+   * The overhead of the imattr-wide refresh isn't high enough so far
+   * to justify making the cache management more complex.
+   */
+
   new->nr_initiators = 0;
   new->initiators = NULL;
   new->noinitiator_value = 0;
@@ -615,7 +632,7 @@ hwloc_memattr_get_targets(hwloc_topology_t topology,
     }
 
     if (found<max) {
-      targets[found] = hwloc_get_obj_by_type_and_gp_index(topology, imtg->type, imtg->gp_index);
+      targets[found] = imtg->obj;
       if (values)
         values[found] = value;
     }
@@ -747,7 +764,7 @@ hwloc_memattr_get_initiators(hwloc_topology_t topology,
 
   for(i=0; i<imtg->nr_initiators && i<max; i++) {
     struct hwloc_internal_memattr_initiator_s *imi = &imtg->initiators[i];
-    int err = from_internal_location(topology, &imi->initiator, &initiators[i]);
+    int err = from_internal_location(&imi->initiator, &initiators[i]);
     assert(!err);
     if (values)
       /* no need to handle capacity/locality special cases here, those are initiator-less attributes */
@@ -924,8 +941,8 @@ hwloc_memattr_set_value(hwloc_topology_t topology,
  */
 
 static void
-hwloc__update_best_target(hwloc_uint64_t *best_gp_index, hwloc_obj_type_t *best_type, hwloc_uint64_t *best_value, int *found,
-                          hwloc_uint64_t new_gp_index, hwloc_obj_type_t new_type, hwloc_uint64_t new_value,
+hwloc__update_best_target(hwloc_obj_t *best_obj, hwloc_uint64_t *best_value, int *found,
+                          hwloc_obj_t new_obj, hwloc_uint64_t new_value,
                           int keep_highest)
 {
   if (*found) {
@@ -938,8 +955,7 @@ hwloc__update_best_target(hwloc_uint64_t *best_gp_index, hwloc_obj_type_t *best_
     }
   }
 
-  *best_gp_index = new_gp_index;
-  *best_type = new_type;
+  *best_obj = new_obj;
   *best_value = new_value;
   *found = 1;
 }
@@ -952,10 +968,8 @@ hwloc_memattr_get_best_target(hwloc_topology_t topology,
                               hwloc_obj_t *bestp, hwloc_uint64_t *valuep)
 {
   struct hwloc_internal_memattr_s *imattr;
-  hwloc_obj_type_t best_type = HWLOC_OBJ_TYPE_NONE;
   hwloc_uint64_t best_value = 0; /* shutup the compiler */
-  hwloc_uint64_t best_gp_index = (hwloc_uint64_t) -1;
-  hwloc_obj_t best;
+  hwloc_obj_t best = NULL;
   int found = 0;
   unsigned j;
 
@@ -978,8 +992,8 @@ hwloc_memattr_get_best_target(hwloc_topology_t topology,
       if (!node)
         break;
       value = hwloc__memattr_get_convenience_value(id, node);
-      hwloc__update_best_target(&best_gp_index, &best_type, &best_value, &found,
-                                node->gp_index, HWLOC_OBJ_NUMANODE, value,
+      hwloc__update_best_target(&best, &best_value, &found,
+                                node, value,
                                 imattr->flags & HWLOC_MEMATTR_FLAG_HIGHER_FIRST);
     }
     goto done;
@@ -1004,14 +1018,13 @@ hwloc_memattr_get_best_target(hwloc_topology_t topology,
       /* get the no-initiator value */
       value = imtg->noinitiator_value;
     }
-    hwloc__update_best_target(&best_gp_index, &best_type, &best_value, &found,
-                              imtg->gp_index, imtg->type, value,
+    hwloc__update_best_target(&best, &best_value, &found,
+                              imtg->obj, value,
                               imattr->flags & HWLOC_MEMATTR_FLAG_HIGHER_FIRST);
   }
 
  done:
   if (found) {
-    best = hwloc_get_obj_by_type_and_gp_index(topology, best_type, best_gp_index);
     assert(best);
     *bestp = best;
     if (valuep)
@@ -1098,7 +1111,7 @@ hwloc_memattr_get_best_initiator(hwloc_topology_t topology,
   if (found) {
     if (valuep)
       *valuep = best_value;
-    return from_internal_location(topology, &best_initiator, bestp);
+    return from_internal_location(&best_initiator, bestp);
   } else {
     errno = ENOENT;
     return -1;
