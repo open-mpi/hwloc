@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2019 Inria.  All rights reserved.
+ * Copyright © 2010-2020 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -751,7 +751,13 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     /* default cacheid value */
     cache->cacheid = infos->apicid / cache->nbthreads_sharing;
 
-    if (cpuid_type == amd) {
+    if (cpuid_type == intel) {
+      /* round nbthreads_sharing to nearest power of two to build a mask (for clearing lower bits) */
+      unsigned bits = hwloc_flsl(cache->nbthreads_sharing-1);
+      unsigned mask = ~((1U<<bits) - 1);
+      cache->cacheid = infos->apicid & mask;
+
+    } else if (cpuid_type == amd) {
       /* AMD quirks */
       if (infos->cpufamilynumber == 0x17
 	  && cache->level == 3 && cache->nbthreads_sharing == 6) {
