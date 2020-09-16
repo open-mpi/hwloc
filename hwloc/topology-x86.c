@@ -753,8 +753,8 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
     if (cpuid_type == intel) {
       /* round nbthreads_sharing to nearest power of two to build a mask (for clearing lower bits) */
-      unsigned bits = hwloc_flsl(cache->nbthreads_sharing-1)+1;
-      unsigned mask = ~((1U<<(bits-1)) - 1);
+      unsigned bits = hwloc_flsl(cache->nbthreads_sharing-1);
+      unsigned mask = ~((1U<<bits) - 1);
       cache->cacheid = infos->apicid & mask;
 
     } else if (cpuid_type == amd) {
