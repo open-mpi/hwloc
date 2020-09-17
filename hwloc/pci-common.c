@@ -440,39 +440,10 @@ hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
 
 static struct hwloc_obj *
 hwloc_pci_fixup_busid_parent(struct hwloc_topology *topology __hwloc_attribute_unused,
-			     struct hwloc_pcidev_attr_s *busid,
-			     struct hwloc_obj *parent)
+			     struct hwloc_pcidev_attr_s *busid __hwloc_attribute_unused,
+			     struct hwloc_obj *parent __hwloc_attribute_unused)
 {
-  /* Xeon E5v3 in cluster-on-die mode only have PCI on the first NUMA node of each package.
-   * but many dual-processor host report the second PCI hierarchy on 2nd NUMA of first package.
-   */
-  if (parent->depth >= 2
-      && parent->type == HWLOC_OBJ_NUMANODE
-      && parent->sibling_rank == 1 && parent->parent->arity == 2
-      && parent->parent->type == HWLOC_OBJ_PACKAGE
-      && parent->parent->sibling_rank == 0 && parent->parent->parent->arity == 2) {
-    const char *cpumodel = hwloc_obj_get_info_by_name(parent->parent, "CPUModel");
-    if (cpumodel && strstr(cpumodel, "Xeon")) {
-      if (!hwloc_hide_errors()) {
-	fprintf(stderr, "****************************************************************************\n");
-	fprintf(stderr, "* hwloc %s has encountered an incorrect PCI locality information.\n", HWLOC_VERSION);
-	fprintf(stderr, "* PCI bus %04x:%02x is supposedly close to 2nd NUMA node of 1st package,\n",
-		busid->domain, busid->bus);
-	fprintf(stderr, "* however hwloc believes this is impossible on this architecture.\n");
-	fprintf(stderr, "* Therefore the PCI bus will be moved to 1st NUMA node of 2nd package.\n");
-	fprintf(stderr, "*\n");
-	fprintf(stderr, "* If you feel this fixup is wrong, disable it by setting in your environment\n");
-	fprintf(stderr, "* HWLOC_PCI_%04x_%02x_LOCALCPUS= (empty value), and report the problem\n",
-		busid->domain, busid->bus);
-	fprintf(stderr, "* to the hwloc's user mailing list together with the XML output of lstopo.\n");
-	fprintf(stderr, "*\n");
-	fprintf(stderr, "* You may silence this message by setting HWLOC_HIDE_ERRORS=1 in your environment.\n");
-	fprintf(stderr, "****************************************************************************\n");
-      }
-      return parent->parent->next_sibling->first_child;
-    }
-  }
-
+  /* no quirk for now */
   return parent;
 }
 
