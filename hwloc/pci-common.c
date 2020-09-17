@@ -232,7 +232,8 @@ enum hwloc_pci_busid_comparison_e {
   HWLOC_PCI_BUSID_LOWER,
   HWLOC_PCI_BUSID_HIGHER,
   HWLOC_PCI_BUSID_INCLUDED,
-  HWLOC_PCI_BUSID_SUPERSET
+  HWLOC_PCI_BUSID_SUPERSET,
+  HWLOC_PCI_BUSID_EQUAL
 };
 
 static enum hwloc_pci_busid_comparison_e
@@ -274,11 +275,8 @@ hwloc_pci_compare_busids(struct hwloc_obj *a, struct hwloc_obj *b)
   if (a->attr->pcidev.func > b->attr->pcidev.func)
     return HWLOC_PCI_BUSID_HIGHER;
 
-  /* Should never reach here.  Abort on both debug builds and
-     non-debug builds */
-  assert(0);
-  fprintf(stderr, "Bad assertion in hwloc %s:%d (aborting)\n", __FILE__, __LINE__);
-  exit(1);
+  /* Should never reach here. */
+  return HWLOC_PCI_BUSID_EQUAL;
 }
 
 static void
@@ -327,6 +325,23 @@ hwloc_pci_add_object(struct hwloc_obj *parent, struct hwloc_obj **parent_io_firs
 	  }
 	}
       }
+      return;
+    }
+    case HWLOC_PCI_BUSID_EQUAL: {
+      static int reported = 0;
+      if (!reported && !hwloc_hide_errors()) {
+        fprintf(stderr, "*********************************************************\n");
+        fprintf(stderr, "* hwloc %s received invalid PCI information.\n", HWLOC_VERSION);
+        fprintf(stderr, "*\n");
+        fprintf(stderr, "* Trying to insert PCI object %04x:%02x:%02x.%01x at %04x:%02x:%02x.%01x\n",
+                new->attr->pcidev.domain, new->attr->pcidev.bus, new->attr->pcidev.dev, new->attr->pcidev.func,
+                (*curp)->attr->pcidev.domain, (*curp)->attr->pcidev.bus, (*curp)->attr->pcidev.dev, (*curp)->attr->pcidev.func);
+        fprintf(stderr, "*\n");
+        fprintf(stderr, "* hwloc will now ignore this object and continue.\n");
+        fprintf(stderr, "*********************************************************\n");
+        reported = 1;
+      }
+      hwloc_free_unlinked_object(new);
       return;
     }
     }
