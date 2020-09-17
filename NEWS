@@ -41,6 +41,9 @@ Version 2.3.0
     now refreshes the display according to the current topology and binding.
   + Add a tikz lstopo graphical backend to generate picture easily included into
     LaTeX documents.
+* Misc
+  + The default installation path of the Bash completion file has changed to
+    ${datadir}/bash-completion/completions/hwloc
 
 
 Version 2.2.0
