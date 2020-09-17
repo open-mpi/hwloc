@@ -4,5 +4,5 @@
 
 # This makefile is only reached when building in standalone mode
 
-bashcompdir = $(sysconfdir)/bash_completion.d
-dist_bashcomp_DATA = hwloc-completion.bash
+bashcompletionsdir = $(datadir)/bash-completion/completions
+dist_bashcompletions_DATA = hwloc-completion.bash
