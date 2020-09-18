@@ -172,6 +172,7 @@ extern "C" {
 #define hwloc_topology_alloc_group_object HWLOC_NAME(topology_alloc_group_object)
 #define hwloc_topology_insert_group_object HWLOC_NAME(topology_insert_group_object)
 #define hwloc_obj_add_other_obj_sets HWLOC_NAME(obj_add_other_obj_sets)
+#define hwloc_topology_refresh HWLOC_NAME(topology_refresh)
 
 #define hwloc_topology_get_depth HWLOC_NAME(topology_get_depth)
 #define hwloc_get_type_depth HWLOC_NAME(get_type_depth)

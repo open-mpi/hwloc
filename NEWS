@@ -33,6 +33,8 @@ Version 2.3.0
     support arrays to be loaded from XML exported with hwloc 2.3+.
     - hwloc_topology_get_support() now returns an additional "misc"
       array with feature "imported_support" set when support was imported.
+  + Add hwloc_topology_refresh() to refresh internal caches after modifying
+    the topology and before consulting the topology in a multithread context.
 * Backends
   + Add a ROCm SMI backend and a hwloc/rsmi.h helper file for getting
     the locality of AMD GPUs, now exposed as "rsmi" OS devices.

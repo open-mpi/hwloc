@@ -2428,6 +2428,22 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_group_object(hwloc_topology_t t
  */
 HWLOC_DECLSPEC int hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src);
 
+/** \brief Refresh internal structures after topology modification.
+ *
+ * Modifying the topology (by restricting, adding objects, modifying structures
+ * such as distances or memory attributes, etc.) may cause some internal caches
+ * to become invalid. These caches are automatically refreshed when accessed
+ * but this refreshing is not thread-safe.
+ *
+ * This function is not thread-safe either, but it is a good way to end a
+ * non-thread-safe phase of topology modification. Once this refresh is done,
+ * multiple threads may concurrently consult the topology, objects, distances,
+ * attributes, etc.
+ *
+ * See also \ref threadsafety
+ */
+HWLOC_DECLSPEC int hwloc_topology_refresh(hwloc_topology_t topology);
+
 /** @} */
 
 

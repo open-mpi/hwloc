@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2019 Inria.  All rights reserved.
+ * Copyright © 2010-2020 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -97,6 +97,9 @@ int main(void)
   err = hwloc_distances_add(topology, 4, objs, values,
 			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
 			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  assert(!err);
+
+  err = hwloc_topology_refresh(topology);
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);

@@ -4340,6 +4340,14 @@ hwloc_topology_allow(struct hwloc_topology *topology,
 }
 
 int
+hwloc_topology_refresh(struct hwloc_topology *topology)
+{
+  hwloc_internal_distances_refresh(topology);
+  hwloc_internal_memattrs_refresh(topology);
+  return 0;
+}
+
+int
 hwloc_topology_is_thissystem(struct hwloc_topology *topology)
 {
   return topology->is_thissystem;

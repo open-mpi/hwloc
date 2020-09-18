@@ -275,6 +275,10 @@ main(void)
                                 NULL, 0, 3456);
   assert(!err);
 
+  /* force refresh */
+  err = hwloc_topology_refresh(topology);
+  assert(!err);
+
   /* check 1 target */
   nrtgs = 4;
   err = hwloc_memattr_get_targets(topology, id2, NULL, 0, &nrtgs, targets, NULL);

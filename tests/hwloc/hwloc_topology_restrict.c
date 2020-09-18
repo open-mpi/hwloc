@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2018 Inria.  All rights reserved.
+ * Copyright © 2011-2020 Inria.  All rights reserved.
  * Copyright © 2011 Université Bordeaux.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -149,6 +149,8 @@ int main(void)
   hwloc_bitmap_only(cpuset, 24);
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(err < 0 && errno == EINVAL);
+  err = hwloc_topology_refresh(topology);
+  assert(!err);
   check(3, 3, 6, 24);
   check_distances(3, 6);
 

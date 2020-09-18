@@ -2422,6 +2422,9 @@ For reference, ::hwloc_topology_t modification operations include
   <tt>hwloc_topology_restrict()</tt> modifies the topology even more
   dramatically by removing some objects.
 
+  <tt>hwloc_topology_refresh()</tt> updates some internal cached structures.
+  (see below).
+
   Although references to former objects <em>may</em> still be valid
   after insertion or restriction, it is strongly advised to not rely on any such
   guarantee and always re-consult the topology to reacquire new
@@ -2433,9 +2436,11 @@ For reference, ::hwloc_topology_t modification operations include
   except if the topology was recently modified
   (because distances may involve objects that were removed).
 
-  Whenever the topology is modified (see above), one dummy (but valid)
-  <tt>hwloc_distances_get()</tt> call should be performed in the same
-  thread-safe context to force the refresh of internal distances structures.
+  Whenever the topology is modified (see above), <tt>hwloc_topology_refresh()</tt>
+  should be called in the same thread-safe context to force the refresh
+  of internal distances structures.
+  A call to <tt>hwloc_distances_get()</tt> may also refresh
+  distances-related structures.
 
   Once this refresh has been performed, multiple <tt>hwloc_distances_get()</tt>
   may then be performed concurrently by multiple threads.
@@ -2447,10 +2452,12 @@ For reference, ::hwloc_topology_t modification operations include
   are thread-safe except if the topology was recently modified
   (because memory attributes may involve objects that were removed).
 
-  Whenever the topology is modified (see above), one dummy (but valid) call to
-  <tt>hwloc_memattr_get_value()</tt> or <tt>hwloc_memattr_get_targets()</tt>
-  should be performed in the same thread-safe context to force the refresh
-  of internal structures for a given attribute.
+  Whenever the topology is modified (see above), <tt>hwloc_topology_refresh()</tt>
+  should be called in the same thread-safe context to force the refresh
+  of internal memory attribute structures.
+  A call to <tt>hwloc_memattr_get_value()</tt> or
+  <tt>hwloc_memattr_get_targets()</tt> may also refresh internal
+  structures for a given memory attribute.
 
   Once this refresh has been performed, multiple functions consulting
   memory attributes may then be performed concurrently by multiple threads.
