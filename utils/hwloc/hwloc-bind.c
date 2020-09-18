@@ -44,6 +44,8 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  --membind      Use following arguments for memory binding\n");
   fprintf(where, "  --mempolicy <default|firsttouch|bind|interleave|nexttouch>\n"
 		 "                 Change policy that --membind applies (default is bind)\n");
+  fprintf(where, "  --best-memattr <attr>\n");
+  fprintf(where, "                 Select the best target node in the given memory binding\n");
   fprintf(where, "  -l --logical   Take logical object indexes (default)\n");
   fprintf(where, "  -p --physical  Take physical object indexes\n");
   fprintf(where, "  --single       Bind on a single CPU to prevent migration\n");
@@ -92,6 +94,8 @@ int main(int argc, char *argv[])
   int pid_number = -1;
   int tid_number = -1;
   hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
+  hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
+  const char *best_memattr_str = NULL;
   char *callname;
   char *restrictstring = NULL;
   struct hwloc_calc_location_context_s lcontext;
@@ -151,6 +155,15 @@ int main(int argc, char *argv[])
     }
     if (!strcmp(argv[0], "--no-hbm")) {
       only_hbm = 0;
+      goto next_config;
+    }
+    if (!strcmp (argv[0], "--best-memattr")) {
+      if (argc < 2) {
+        usage (callname, stderr);
+        exit(EXIT_FAILURE);
+      }
+      best_memattr_str = argv[1];
+      opt = 1;
       goto next_config;
     }
 
@@ -437,6 +450,36 @@ int main(int argc, char *argv[])
       if (!force)
 	goto failed_binding;
     }
+
+    if (best_memattr_str) {
+      struct hwloc_location loc;
+      char *s;
+      best_memattr_id = hwloc_utils_parse_memattr_name(topology, best_memattr_str);
+      if (best_memattr_id == (hwloc_memattr_id_t) -1) {
+        fprintf(stderr, "unrecognized memattr %s\n", best_memattr_str);
+        return EXIT_FAILURE;
+      }
+
+      loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+      loc.location.cpuset = cpubind_set;
+      if (verbose > 0) {
+        hwloc_bitmap_asprintf(&s, membind_set);
+        fprintf(stderr, "memory binding set was %s before filtering by best memattr\n", s);
+        free(s);
+      }
+      hwloc_utils_get_best_node_in_nodeset_by_memattr(topology, best_memattr_id, membind_set, &loc);
+      if (verbose > 0) {
+        hwloc_bitmap_asprintf(&s, membind_set);
+        /* double-space before %s for alignment with previous verbose message */
+        fprintf(stderr, "memory binding is now  %s after filtering by best memattr\n", s);
+        free(s);
+      }
+      if (hwloc_bitmap_iszero(membind_set)) {
+        fprintf(stderr, "failed to find a best memory node for memory attribute `%s' among the given membind set.\n", best_memattr_str);
+        return EXIT_FAILURE;
+      }
+    }
+
     if (verbose > 0) {
       char *s;
       hwloc_bitmap_asprintf(&s, membind_set);

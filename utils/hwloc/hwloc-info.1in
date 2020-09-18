@@ -88,6 +88,28 @@ Display information about the object children.
 \fB\-\-descendants\fR <type>
 Display information about the object descendants that match the given type.
 .TP
+\fB\-\-local\-memory\fR
+Display information about the NUMA nodes that are local to the given object.
+.TP
+\fB\-\-local\-memory\-flags\fR
+Change the flags used to select local NUMA nodes.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_get_local_numanode_objs()\fR.
+Those names may be substrings of actual flag names as long as a single one matches.
+The default is \fB3\fR (or \fBsmaller,larger\fR)
+which means NUMA nodes are displayed
+if their locality either contains or is contained
+in the locality of the given object.
+
+This option enables \fB\-\-local\-memory\fR.
+.TP
+\fB\-\-best\-memattr\fR <name>
+Enable the listing local memory nodes with \fB\-\-local\-memory\fR,
+but only display the local node that has the best value for the memory
+attribute given by \fI<name>\fR (or as an index).
+If the memory attribute values depend on the initiator, the object given
+to hwloc-info is used as the initiator.
+.TP
 \fB\-n\fR
 When outputting object information, prefix each line with the index
 of the considered object within the input.
@@ -224,6 +246,24 @@ To display information about the core whose physical index is 2:
      logical index = 1
      os index = 2
     ...
+
+To list the NUMA nodes that are local a PU:
+
+    $ hwloc-info --local-memory pu:25
+    NUMANode L#6 = local memory #0 of PU L#25
+     type = NUMANode
+    ...
+    NUMANode L#7 = local memory #1 of PU L#25
+     type = NUMANode
+    ...
+
+To show the best-bandwidth node among NUMA nodes local to a PU:
+
+    $ hwloc-info --local-memory --best-memattr bandwidth pu:25
+    NUMANode L#7 = local memory #1 of PU L#25
+     type = NUMANode
+    ...
+
 .
 .\" **************************
 .\"    See also section

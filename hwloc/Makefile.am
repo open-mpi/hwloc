@@ -31,6 +31,7 @@ sources = \
         topology.c \
         traversal.c \
         distances.c \
+        memattrs.c \
         components.c \
         bind.c \
         bitmap.c \

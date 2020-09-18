@@ -21,6 +21,14 @@ bug fixes (and other actions) for each version of hwloc since version
 Version 2.3.0
 -------------
 * API
+  + Add hwloc/memattrs.h for exposing latency/bandwidth information between
+    initiators (CPU sets for now) and target NUMA nodes.
+    - When available, bandwidths and latencies are read from the ACPI HMAT
+      table exposed by Linux kernel 5.2+.
+    - Attributes may also be customized to expose user-defined performance
+      information.
+  + Add hwloc_get_local_numanode_objs() for listing NUMA nodes that are
+    local to some locality.
   + The new topology flag HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT causes
     support arrays to be loaded from XML exported with hwloc 2.3+.
     - hwloc_topology_get_support() now returns an additional "misc"
@@ -34,6 +42,11 @@ Version 2.3.0
 * Tools
   + Command-line options for specifying flags now understand comma-separated
     lists of flag names (substrings).
+  + hwloc-info and hwloc-calc have new --local-memory --local-memory-flags
+    and --best-memattr options for reporting local memory nodes and filtering
+    by memory attributes.
+  + hwloc-bind has a new --best-memattr option for filtering by memory attributes
+    among the memory binding set.
   + Tools that have a --restrict option may now receive a nodeset or
     some custom flags for restricting the topology.
   + Fix lstopo drawing when autoresizing on Windows 10.

@@ -374,3 +374,87 @@ L1dCache:9
 L1dCache:10
 L1dCache:11
 
+# 2 local memory for one PU
+NUMANode L#1 = local memory #0 of PU L#8
+ type = NUMANode
+ full type = NUMANode
+ logical index = 1
+ os index = 1
+ gp index = 29
+ depth = -3
+ sibling rank = 0
+ children = 0
+ memory children = 0
+ i/o children = 0
+ misc children = 0
+ local memory = 0
+ cpuset = 0x0000ff00
+ complete cpuset = 0x0000ff00
+ allowed cpuset = 0x0000ff00
+ nodeset = 0x00000002
+ complete nodeset = 0x00000002
+ allowed nodeset = 0x00000002
+ symmetric subtree = 0
+ memory attribute Capacity = 0
+ memory attribute Locality = 8
+NUMANode L#2 = local memory #1 of PU L#8
+ type = NUMANode
+ full type = NUMANode
+ logical index = 2
+ os index = 2
+ gp index = 31
+ depth = -3
+ sibling rank = 0
+ children = 0
+ memory children = 0
+ i/o children = 0
+ misc children = 0
+ local memory = 0
+ cpuset = 0x0000ffff
+ complete cpuset = 0x0000ffff
+ allowed cpuset = 0x0000ffff
+ nodeset = 0x00000004
+ complete nodeset = 0x00000004
+ allowed nodeset = 0x00000004
+ symmetric subtree = 0
+ memory attribute Capacity = 0
+ memory attribute Locality = 16
+
+# 2 local-or-larger memories for one PU, silent
+NUMANode:1
+NUMANode:2
+
+# no local-or-larger memory for root, silent
+
+# no local-or-smaller memory for one PU, silent
+
+# 3 local-or-smaller memories for on Package, silent
+NUMANode:3
+NUMANode:4
+NUMANode:5
+
+# no strict-local memory for one PU, silent
+
+# 1 strict-local memory for one NUMANode, silent
+NUMANode:1
+
+# 12 local-all memories for one PU, silent
+NUMANode:0
+NUMANode:1
+NUMANode:2
+NUMANode:3
+NUMANode:4
+NUMANode:5
+NUMANode:6
+NUMANode:7
+NUMANode:8
+NUMANode:9
+NUMANode:10
+NUMANode:11
+
+# only the smallest locality among 2 local-or-larger memories for one PU, silent
+NUMANode:10
+
+# only the highest capacity among 2 local-or-larger memories for one PU, silent
+NUMANode:11
+

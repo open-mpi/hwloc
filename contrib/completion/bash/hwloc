@@ -23,6 +23,7 @@ _lstopo() {
 		   -v --verbose
 		   -s --silent
 		   --distances
+		   --memattrs
 		   -c --cpuset
 		   -C --cpuset-only
 		   --taskset
@@ -149,6 +150,9 @@ _hwloc_info(){
 		   --ancestor
 		   --children
 		   --descendants
+		   --local-memory
+		   --local-memory-flags
+		   --best-memattr
 		   -n
 		   --restrict
 		   --filter
@@ -195,6 +199,12 @@ _hwloc_info(){
 	    --ancestor | --descendants)
 		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
 		;;
+	    --local-memory-flags)
+		COMPREPLY=( "<flags>" "" )
+		;;
+	    --best-memattr)
+		COMPREPLY=( "<memattr>" "" )
+		;;
 	esac
     fi
 }
@@ -205,6 +215,7 @@ _hwloc_bind(){
     local OPTIONS=(--cpubind
 		   --membind
 		   --mempolicy
+		   --best-memattr
 		   --logical -l
 		   --physical -p
 		   --single
@@ -245,6 +256,9 @@ _hwloc_bind(){
 	    --restrict)
 		COMPREPLY=( "<bitmask>" "" )
 		;;
+	    --best-memattr)
+		COMPREPLY=( "<memattr>" "" )
+		;;
 	esac
     fi
 }
@@ -257,6 +271,9 @@ _hwloc_calc(){
 		   -I --intersect
 		   -H --hierarchical
 		   --largest
+		   --local-memory
+		   --local-memory-flags
+		   --best-memattr
 		   -l --logical
 		   -p --physical
 		   --li --logical-input
@@ -303,6 +320,12 @@ _hwloc_calc(){
 		;;
 	    --restrict)
 		COMPREPLY=( "<bitmask>" "" )
+		;;
+	    --local-memory-flags)
+		COMPREPLY=( "<flags>" "" )
+		;;
+	    --best-memattr)
+		COMPREPLY=( "<memattr>" "" )
 		;;
 	esac
     fi

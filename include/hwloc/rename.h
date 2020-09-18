@@ -369,6 +369,44 @@ extern "C" {
 #define hwloc_cpuset_to_nodeset HWLOC_NAME(cpuset_to_nodeset)
 #define hwloc_cpuset_from_nodeset HWLOC_NAME(cpuset_from_nodeset)
 
+/* memattrs.h */
+
+#define hwloc_memattr_id_e HWLOC_NAME(memattr_id_e)
+#define HWLOC_MEMATTR_ID_CAPACITY HWLOC_NAME_CAPS(MEMATTR_ID_CAPACITY)
+#define HWLOC_MEMATTR_ID_LOCALITY HWLOC_NAME_CAPS(MEMATTR_ID_LOCALITY)
+#define HWLOC_MEMATTR_ID_BANDWIDTH HWLOC_NAME_CAPS(MEMATTR_ID_BANDWIDTH)
+#define HWLOC_MEMATTR_ID_LATENCY HWLOC_NAME_CAPS(MEMATTR_ID_LATENCY)
+
+#define hwloc_memattr_id_t HWLOC_NAME(memattr_id_t)
+#define hwloc_memattr_get_by_name HWLOC_NAME(memattr_get_by_name)
+
+#define hwloc_location HWLOC_NAME(location)
+#define hwloc_location_type_e HWLOC_NAME(location_type_e)
+#define HWLOC_LOCATION_TYPE_OBJECT HWLOC_NAME_CAPS(LOCATION_TYPE_OBJECT)
+#define HWLOC_LOCATION_TYPE_CPUSET HWLOC_NAME_CAPS(LOCATION_TYPE_CPUSET)
+#define hwloc_location_u HWLOC_NAME(location_u)
+
+#define hwloc_memattr_get_value HWLOC_NAME(memattr_get_value)
+#define hwloc_memattr_get_best_target HWLOC_NAME(memattr_get_best_target)
+#define hwloc_memattr_get_best_initiator HWLOC_NAME(memattr_get_best_initiator)
+
+#define hwloc_local_numanode_flag_e HWLOC_NAME(local_numanode_flag_e)
+#define HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY HWLOC_NAME_CAPS(LOCAL_NUMANODE_FLAG_LARGER_LOCALITY)
+#define HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY HWLOC_NAME_CAPS(LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY)
+#define HWLOC_LOCAL_NUMANODE_FLAG_ALL HWLOC_NAME_CAPS(LOCAL_NUMANODE_FLAG_ALL)
+#define hwloc_get_local_numanode_objs HWLOC_NAME(get_local_numanode_objs)
+
+#define hwloc_memattr_get_name HWLOC_NAME(memattr_get_name)
+#define hwloc_memattr_get_flags HWLOC_NAME(memattr_get_flags)
+#define hwloc_memattr_flag_e HWLOC_NAME(memattr_flag_e)
+#define HWLOC_MEMATTR_FLAG_HIGHER_FIRST HWLOC_NAME_CAPS(MEMATTR_FLAG_HIGHER_FIRST)
+#define HWLOC_MEMATTR_FLAG_LOWER_FIRST HWLOC_NAME_CAPS(MEMATTR_FLAG_LOWER_FIRST)
+#define HWLOC_MEMATTR_FLAG_NEED_INITIATOR HWLOC_NAME_CAPS(MEMATTR_FLAG_NEED_INITIATOR)
+#define hwloc_memattr_register HWLOC_NAME(memattr_register)
+#define hwloc_memattr_set_value HWLOC_NAME(memattr_set_value)
+#define hwloc_memattr_get_targets HWLOC_NAME(memattr_get_targets)
+#define hwloc_memattr_get_initiators HWLOC_NAME(memattr_get_initiators)
+
 /* export.h */
 
 #define hwloc_topology_export_xml_flags_e HWLOC_NAME(topology_export_xml_flags_e)
@@ -697,6 +735,8 @@ extern "C" {
 
 /* private/private.h */
 
+#define hwloc_internal_location_s HWLOC_NAME(internal_location_s)
+
 #define hwloc_special_level_s HWLOC_NAME(special_level_s)
 
 #define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
@@ -718,6 +758,8 @@ extern "C" {
 #define hwloc_topology_clear HWLOC_NAME(topology_clear)
 
 #define hwloc__attach_memory_object HWLOC_NAME(insert_memory_object)
+
+#define hwloc_get_obj_by_type_and_gp_index HWLOC_NAME(get_obj_by_type_and_gp_index)
 
 #define hwloc_pci_discovery_init HWLOC_NAME(pci_discovery_init)
 #define hwloc_pci_discovery_prepare HWLOC_NAME(pci_discovery_prepare)
@@ -769,6 +811,16 @@ extern "C" {
 #define hwloc_internal_distances_add HWLOC_NAME(internal_distances_add)
 #define hwloc_internal_distances_add_by_index HWLOC_NAME(internal_distances_add_by_index)
 #define hwloc_internal_distances_invalidate_cached_objs HWLOC_NAME(hwloc_internal_distances_invalidate_cached_objs)
+
+#define hwloc_internal_memattr_s HWLOC_NAME(internal_memattr_s)
+#define hwloc_internal_memattr_target_s HWLOC_NAME(internal_memattr_target_s)
+#define hwloc_internal_memattr_initiator_s HWLOC_NAME(internal_memattr_initiator_s)
+#define hwloc_internal_memattrs_init HWLOC_NAME(internal_memattrs_init)
+#define hwloc_internal_memattrs_prepare HWLOC_NAME(internal_memattrs_prepare)
+#define hwloc_internal_memattrs_dup HWLOC_NAME(internal_memattrs_dup)
+#define hwloc_internal_memattrs_destroy HWLOC_NAME(internal_memattrs_destroy)
+#define hwloc_internal_memattrs_need_refresh HWLOC_NAME(internal_memattrs_need_refresh)
+#define hwloc_internal_memattrs_refresh HWLOC_NAME(internal_memattrs_refresh)
 
 #define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
 #define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)

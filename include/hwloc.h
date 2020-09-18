@@ -544,6 +544,8 @@ struct hwloc_obj {
                                           * between this object and the NUMA node objects).
                                           *
                                           * In the end, these nodes are those that are close to the current object.
+                                          * Function hwloc_get_local_numanode_objs() may be used to list those NUMA
+                                          * nodes more precisely.
                                           *
                                           * If the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED configuration flag is set,
                                           * some of these nodes may not be allowed for allocation,
@@ -2440,6 +2442,9 @@ HWLOC_DECLSPEC int hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src
 
 /* inline code of some functions above */
 #include "hwloc/inlines.h"
+
+/* memory attributes */
+#include "hwloc/memattrs.h"
 
 /* exporting to XML or synthetic */
 #include "hwloc/export.h"

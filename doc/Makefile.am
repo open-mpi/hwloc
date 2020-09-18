@@ -69,6 +69,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/bitmap.h \
        $(hwloc_include_dir)/hwloc/export.h \
        $(hwloc_include_dir)/hwloc/distances.h \
+       $(hwloc_include_dir)/hwloc/memattrs.h \
        $(hwloc_include_dir)/hwloc/diff.h \
        $(hwloc_include_dir)/hwloc/shmem.h \
        $(hwloc_include_dir)/hwloc/plugins.h \
@@ -671,6 +672,40 @@ man3_distances_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_release_remove.3
 
+man3_memattrsdir = $(man3dir)
+man3_memattrs_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_memattrs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_id_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_MEMATTR_ID_CAPACITY.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_MEMATTR_ID_LOCALITY.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_MEMATTR_ID_BANDWIDTH.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_MEMATTR_ID_LATENCY.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_id_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_by_name.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_location.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_location_type_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_LOCATION_TYPE_OBJECT.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_LOCATION_TYPE_CPUSET.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_local_numanode_flag_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_LOCAL_NUMANODE_FLAG_ALL.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_local_numanode_objs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_value.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_best_target.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_best_initiator.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_memattrs_manage.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_name.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_flags.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_flag_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_MEMATTR_FLAG_HIGHER_FIRST.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_MEMATTR_FLAG_LOWER_FIRST.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_MEMATTR_FLAG_NEED_INITIATOR.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_register.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_set_value.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_targets.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_initiators.3
+
 man3_diffdir = $(man3dir)
 man3_diff_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_diff.3 \
@@ -803,6 +838,7 @@ $(man3_helper_topology_sets_DATA): $(DOX_TAG)
 $(man3_helper_nodeset_convert_DATA): $(DOX_TAG)
 $(man3_helper_advanced_io_DATA): $(DOX_TAG)
 $(man3_distances_DATA): $(DOX_TAG)
+$(man3_memattrs_DATA): $(DOX_TAG)
 $(man3_diff_DATA): $(DOX_TAG)
 $(man3_cuda_DATA): $(DOX_TAG)
 $(man3_glibc_sched_DATA): $(DOX_TAG)

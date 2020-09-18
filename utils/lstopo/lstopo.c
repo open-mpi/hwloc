@@ -372,6 +372,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  --distances           Only show distance matrices\n");
+  fprintf (where, "  --memattrs            Only show memory attributes\n");
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "  -C --cpuset-only      Only show the cpuset of each object\n");
   fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
@@ -698,6 +699,7 @@ main (int argc, char *argv[])
   snprintf(loutput.title, sizeof(loutput.title), "lstopo");
 
   loutput.show_distances_only = 0;
+  loutput.show_memattrs_only = 0;
   loutput.show_only = HWLOC_OBJ_TYPE_NONE;
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
@@ -759,6 +761,8 @@ main (int argc, char *argv[])
 	loutput.verbose_mode--;
       } else if (!strcmp (argv[0], "--distances")) {
 	loutput.show_distances_only = 1;
+      } else if (!strcmp (argv[0], "--memattrs")) {
+        loutput.show_memattrs_only = 1;
       } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
@@ -1243,6 +1247,7 @@ main (int argc, char *argv[])
     if (loutput.show_cpuset
         || loutput.show_only != HWLOC_OBJ_TYPE_NONE
 	|| loutput.show_distances_only
+        || loutput.show_memattrs_only
         || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }
