@@ -20,19 +20,22 @@ extern "C" {
 
 /** \defgroup hwlocality_memattrs Comparing memory node attributes for finding where to allocate on
  *
- * Performance usually depends on where the memory access comes from.
- * This location is called an Initiator while the memory node is a Target.
+ * Platforms with heterogeneous memory require ways to decide whether
+ * a buffer should be allocated on "fast" memory (such as HBM),
+ * "normal" memory (DDR) or even "slow" but large-capacity memory
+ * (non-volatile memory).
+ * These memory nodes are called "Targets" while the CPU accessing them
+ * is called the "Initiator". Access performance depends on their
+ * locality (NUMA platforms) as well as the intrinsic performance
+ * of the targets (heterogeneous platforms).
+ *
  * The following attributes describe the performance of memory accesses
  * from an Initiator to a memory Target, for instance their latency
  * or bandwidth.
- *
  * Initiators performing these memory accesses are usually some PUs or Cores
  * (described as a CPU set).
- * In the future, this API may also provide information about other Initiators
- * given as objects, for instance GPUs.
- *
- * Hence a Core may choose where to allocate memory by comparing the
- * attributes of different memory node targets nearby.
+ * Hence a Core may choose where to allocate a memory buffer by comparing
+ * the attributes of different target memory nodes nearby.
  *
  * There are also some attributes that are system-wide.
  * Their value does not depend on a specific initiator performing
@@ -44,11 +47,16 @@ extern "C" {
  * a program is bound. The best target NUMA node for allocating memory in this
  * program on these Cores may be obtained by passing this cpuset as an initiator
  * to hwloc_memattr_get_best_target() with the relevant memory attribute.
+ * For instance, if the code is latency limited, use the Latency attribute.
  *
  * A more flexible approach consists in getting the list of local NUMA nodes
  * by passing this cpuset to hwloc_get_local_numanode_objs().
  * Attribute values for these nodes, if any, may then be obtained with
  * hwloc_memattr_get_value() and manually compared with the desired criteria.
+ *
+ * \note The API also supports specific objects as initiator.
+ * This might for instance be used in the future when describing the
+ * performance of accesses from a GPU to some memory targets.
  *
  * \note The interface actually also accepts targets that are not NUMA nodes.
  * @{
