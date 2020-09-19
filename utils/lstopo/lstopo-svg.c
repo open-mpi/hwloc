@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Inria.  All rights reserved.
+ * Copyright © 2019-2020 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -36,8 +36,8 @@ native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
     snprintf(id, sizeof id, " id='anon_rect%s'", complement);
   }
 
-  fprintf(file,"\t<rect%s%s x='%u' y='%u' width='%u' height='%u' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='1'/>\n",
-	  id, class, x, y, width, height, r, g, b);
+  fprintf(file,"\t<rect%s%s x='%u' y='%u' width='%u' height='%u' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='%u'/>\n",
+	  id, class, x, y, width, height, r, g, b, loutput->thickness);
 }
 
 
@@ -61,8 +61,8 @@ native_svg_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     snprintf(id, sizeof id, " id='anon_line%s'", complement);
   }
 
-  fprintf(file,"\t<line%s%s x1='%u' y1='%u' x2='%u' y2='%u' stroke='rgb(%d,%d,%d)' stroke-width='1'/>\n",
-	  id, class, x1, y1, x2, y2, r, g, b);
+  fprintf(file,"\t<line%s%s x1='%u' y1='%u' x2='%u' y2='%u' stroke='rgb(%d,%d,%d)' stroke-width='%u'/>\n",
+	  id, class, x1, y1, x2, y2, r, g, b, loutput->thickness);
 }
 
 static void

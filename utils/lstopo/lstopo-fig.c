@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -54,7 +54,7 @@ fig_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsign
   y *= FIG_FACTOR;
   width *= FIG_FACTOR;
   height *= FIG_FACTOR;
-  fprintf(file, "2 2 0 1 0 %d %u -1 20 0.0 0 0 -1 0 0 5\n\t", lcolor->private.fig.color, depth);
+  fprintf(file, "2 2 0 %u 0 %d %u -1 20 0.0 0 0 -1 0 0 5\n\t", loutput->thickness, lcolor->private.fig.color, depth);
   fprintf(file, " %u %u", x, y);
   fprintf(file, " %u %u", x + width, y);
   fprintf(file, " %u %u", x + width, y + height);
@@ -72,7 +72,7 @@ fig_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsig
   y1 *= FIG_FACTOR;
   x2 *= FIG_FACTOR;
   y2 *= FIG_FACTOR;
-  fprintf(file, "2 1 0 1 0 %d %u -1 -1 0.0 0 0 -1 0 0 2\n\t", lcolor->private.fig.color, depth);
+  fprintf(file, "2 1 0 %u 0 %d %u -1 -1 0.0 0 0 -1 0 0 2\n\t", loutput->thickness, lcolor->private.fig.color, depth);
   fprintf(file, " %u %u", x1, y1);
   fprintf(file, " %u %u", x2, y2);
   fprintf(file, "\n");

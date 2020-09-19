@@ -49,6 +49,7 @@ typedef void *HBRUSH;
 typedef void *HICON;
 typedef void *HMENU;
 typedef void *HFONT;
+typedef void *HPEN;
 typedef HICON HCURSOR;
 typedef DWORD COLORREF;
 typedef LRESULT CALLBACK (*WNDPROC)(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
@@ -160,6 +161,8 @@ BOOL Rectangle(HDC hdc, int nLeftRect, int nTopRect, int nRightRect, int nBottom
 BOOL MoveToEx(HDC hdc, int X, int Y, LPPOINT lpPoint);
 BOOL LineTo(HDC hdc, int nXEnd, int nYEnd);
 HFONT CreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet, DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily, LPCTSTR lpszFace);
+#define PS_SOLID 0
+HPEN CreatePen(int iStyle, int cWidth, COLORREF color);
 BOOL TextOut(HDC hdc, int nXStart, int nYStart, LPCTSTR lpString, int cchString);
 BOOL GetTextExtentPoint32(HDC hdc, LPCTSTR lpString, int c, LPSIZE lpSize);
 #define TRANSPARENT 0

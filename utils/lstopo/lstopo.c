@@ -416,6 +416,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 7          Set size of margin between elements\n");
   fprintf (where, "  --linespacing 4       Set spacing between lines of text\n");
+  fprintf (where, "  --thickness 1         Set thickness of lines and boxes\n");
   fprintf (where, "  --horiz[=<type,...>]  Horizontal graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --vert[=<type,...>]   Vertical graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --rect[=<type,...>]   Rectangular graphical layout with nearly 4/3 ratio\n");
@@ -712,6 +713,7 @@ main (int argc, char *argv[])
   loutput.fontsize = 10;
   loutput.gridsize = 7;
   loutput.linespacing = 4;
+  loutput.thickness = 1;
 
   loutput.text_xscale = 1.0f;
   env = getenv("LSTOPO_TEXT_XSCALE");
@@ -1154,6 +1156,12 @@ main (int argc, char *argv[])
 	if (argc < 2)
 	  goto out_usagefailure;
 	loutput.linespacing = atoi(argv[1]);
+	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--thickness")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+	loutput.thickness = atoi(argv[1]);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-legend")) {

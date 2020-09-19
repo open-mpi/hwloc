@@ -52,6 +52,8 @@ Version 2.3.0
     among the memory binding set.
   + Tools that have a --restrict option may now receive a nodeset or
     some custom flags for restricting the topology.
+  + lstopo now has a --thickness option for changing line thickness in the
+    graphical output.
   + Fix lstopo drawing when autoresizing on Windows 10.
   + Pressing the F5 key in lstopo X11 and Windows graphical/interactive outputs
     now refreshes the display according to the current topology and binding.

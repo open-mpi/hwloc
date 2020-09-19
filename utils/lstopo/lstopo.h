@@ -88,7 +88,7 @@ struct lstopo_output {
   /* draw config */
   char title[256];
   unsigned plain_children_order;
-  unsigned int gridsize, fontsize, linespacing;
+  unsigned int gridsize, fontsize, linespacing, thickness;
   float text_xscale;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
   unsigned no_half_lines; /* set by ASCII backend because it cannot write between lines of the terminal */
