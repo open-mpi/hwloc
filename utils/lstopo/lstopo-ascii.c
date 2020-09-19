@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -429,6 +429,7 @@ ascii_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, const cha
 
 static struct draw_methods ascii_draw_methods = {
   ascii_declare_color,
+  NULL,
   ascii_box,
   ascii_line,
   ascii_text,
@@ -564,6 +565,6 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }

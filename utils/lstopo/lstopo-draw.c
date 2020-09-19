@@ -101,13 +101,15 @@ declare_colors(struct lstopo_output *output)
 }
 
 void
-destroy_colors(void)
+destroy_colors(struct lstopo_output *loutput)
 {
   struct lstopo_color *tmp = colors;
 
   while (tmp) {
     struct lstopo_color *next = tmp->next;
 
+    if (loutput->methods->destroy_color)
+      loutput->methods->destroy_color(loutput, tmp);
     if (tmp->free)
       free(tmp);
     tmp = next;

@@ -211,6 +211,7 @@ extern int lstopo_shmem_adopt(const char *input, hwloc_topology_t *topologyp);
 
 struct draw_methods {
   int (*declare_color) (struct lstopo_output *loutput, struct lstopo_color *lcolor);
+  void (*destroy_color) (struct lstopo_output *loutput, struct lstopo_color *lcolor);
   /* only called when loutput->draw_methods == LSTOPO_DRAWING_DRAW */
   void (*box) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id);
   void (*line) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj, unsigned line_id);
@@ -223,7 +224,7 @@ extern void output_draw(struct lstopo_output *output);
 
 extern void lstopo_prepare_custom_styles(struct lstopo_output *loutput);
 extern void declare_colors(struct lstopo_output *output);
-extern void destroy_colors(void);
+extern void destroy_colors(struct lstopo_output *output);
 
 static __hwloc_inline int lstopo_pu_disallowed(struct lstopo_output *loutput, hwloc_obj_t l)
 {

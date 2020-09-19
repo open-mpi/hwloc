@@ -374,6 +374,12 @@ windows_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, st
 }
 
 static void
+windows_destroy_color(struct lstopo_output *loutput __hwloc_attribute_unused, struct lstopo_color *lcolor)
+{
+  DeleteObject(lcolor->private.windows.brush);
+}
+
+static void
 windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
@@ -418,6 +424,7 @@ windows_textsize(struct lstopo_output *loutput, const char *text, unsigned textl
 
 struct draw_methods windows_draw_methods = {
   windows_declare_color,
+  windows_destroy_color,
   windows_box,
   windows_line,
   windows_text,
@@ -522,6 +529,6 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
 
   if (!loutput->needs_topology_refresh)
     DestroyWindow(toplevel);
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }

@@ -99,6 +99,7 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
 
 static struct draw_methods native_svg_draw_methods = {
   NULL,
+  NULL,
   native_svg_box,
   native_svg_line,
   native_svg_text,
@@ -135,6 +136,6 @@ int output_nativesvg(struct lstopo_output * loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }

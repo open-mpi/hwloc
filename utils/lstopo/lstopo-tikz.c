@@ -101,6 +101,7 @@ tikz_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int 
 
 static struct draw_methods tikz_draw_methods = {
   tikz_declare_color,
+  NULL,
   tikz_box,
   tikz_line,
   tikz_text,
@@ -165,6 +166,6 @@ int output_tikz(struct lstopo_output * loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }

@@ -109,6 +109,7 @@ fig_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, const char 
 
 static struct draw_methods fig_draw_methods = {
   fig_declare_color,
+  NULL,
   fig_box,
   fig_line,
   fig_text,
@@ -151,6 +152,6 @@ output_fig (struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }

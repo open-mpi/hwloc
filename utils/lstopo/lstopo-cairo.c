@@ -256,6 +256,7 @@ move_x11(struct lstopo_x11_output *disp)
 
 static struct draw_methods x11_draw_methods = {
   NULL,
+  NULL,
   topo_cairo_box,
   topo_cairo_line,
   topo_cairo_text,
@@ -622,7 +623,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   XFreeCursor(disp->dpy, disp->hand);
   XCloseDisplay(disp->dpy);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* LSTOPO_HAVE_X11 */
@@ -632,6 +633,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 /* PNG back-end */
 
 static struct draw_methods png_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -683,7 +685,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
@@ -693,6 +695,7 @@ output_png(struct lstopo_output *loutput, const char *filename)
 /* PDF back-end */
 
 static struct draw_methods pdf_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -744,7 +747,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* CAIRO_HAS_PDF_SURFACE */
@@ -754,6 +757,7 @@ output_pdf(struct lstopo_output *loutput, const char *filename)
 /* PS back-end */
 
 static struct draw_methods ps_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -805,7 +809,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* CAIRO_HAS_PS_SURFACE */
@@ -815,6 +819,7 @@ output_ps(struct lstopo_output *loutput, const char *filename)
 /* SVG back-end */
 
 static struct draw_methods svg_draw_methods = {
+  NULL,
   NULL,
   topo_cairo_box,
   topo_cairo_line,
@@ -866,7 +871,7 @@ output_cairosvg(struct lstopo_output *loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
-  destroy_colors();
+  destroy_colors(loutput);
   return 0;
 }
 #endif /* CAIRO_HAS_SVG_SURFACE */
