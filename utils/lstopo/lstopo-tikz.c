@@ -165,5 +165,6 @@ int output_tikz(struct lstopo_output * loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
+  destroy_colors();
   return 0;
 }
