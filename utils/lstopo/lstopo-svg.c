@@ -126,6 +126,7 @@ int output_nativesvg(struct lstopo_output * loutput, const char *filename)
 	  loutput->width, loutput->height, loutput->width, loutput->height);
 
   /* ready */
+  declare_colors(loutput);
   lstopo_prepare_custom_styles(loutput);
 
   output_draw(loutput);
@@ -134,5 +135,6 @@ int output_nativesvg(struct lstopo_output * loutput, const char *filename)
   if (output != stdout)
     fclose(output);
 
+  destroy_colors();
   return 0;
 }
