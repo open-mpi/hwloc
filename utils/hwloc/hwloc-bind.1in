@@ -117,6 +117,10 @@ cpuset is empty while their nodeset is correct.
 .TP
 \ 
 Also parse input bitmasks as nodesets instead of cpusets.
+.TP
+\ 
+When this option is not passed, individual input bitmasks may
+still be parsed as nodesets if they are prefixed with \fInodeset=\fR.
 
 .TP
 \fB\-e\fR \fB\-\-get-last-cpu-location\fR
@@ -197,6 +201,10 @@ that is bound to the specified location (or list of locations).
 Location specification is described in hwloc(7).
 Upon successful execution, hwloc-bind simply sets bindings and then execs
 the executable over itself.
+.
+.PP
+If a bitmask location is given with prefix \fInodeset=\fR, then it
+is considered a nodeset instead of a CPU set. See also \fB\-\-nodeset\fR.
 .
 .PP
 If multiple locations are given, they are combined in the sense that

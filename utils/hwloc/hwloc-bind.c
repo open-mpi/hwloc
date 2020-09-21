@@ -193,6 +193,9 @@ int main(int argc, char *argv[])
   depth = hwloc_topology_get_depth(topology);
 
   while (argc >= 1) {
+    char *location;
+    int nodeset_location;
+
     if (!strcmp(argv[0], "--")) {
       argc--;
       argv++;
@@ -309,15 +312,22 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
+    location = argv[0];
+    nodeset_location = 0;
+    if (!strncmp(location, "nodeset=", 8)) {
+      location += 8;
+      nodeset_location = 1;
+    }
+
     lcontext.topology = topology;
     lcontext.topodepth = depth;
     lcontext.only_hbm = only_hbm;
     lcontext.logical = logical;
     lcontext.verbose = verbose;
-    scontext.nodeset_input = use_nodeset;
+    scontext.nodeset_input = use_nodeset || nodeset_location;
     scontext.nodeset_output = working_on_cpubind ? 0 : 1;
     scontext.output_set = working_on_cpubind ? cpubind_set : membind_set;
-    ret = hwloc_calc_process_location_as_set(&lcontext, &scontext, argv[0]);
+    ret = hwloc_calc_process_location_as_set(&lcontext, &scontext, location);
     if (ret < 0) {
       if (verbose > 0)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
