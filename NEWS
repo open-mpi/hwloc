@@ -58,10 +58,10 @@ Version 2.3.0
   + Pressing the F5 key in lstopo X11 and Windows graphical/interactive outputs
     now refreshes the display according to the current topology and binding.
   + Add a tikz lstopo graphical backend to generate picture easily included into
-    LaTeX documents.
+    LaTeX documents. Thanks to Clement Foyer.
 * Misc
   + The default installation path of the Bash completion file has changed to
-    ${datadir}/bash-completion/completions/hwloc
+    ${datadir}/bash-completion/completions/hwloc. Thanks to Tomasz Kłoczko.
 
 
 Version 2.2.0
