@@ -44,6 +44,8 @@ pipeline {
                                                 tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
                                         }
                                         stash includes: tarballgz, name: 'tarballgz'
+                                        sh 'tar zcvf android.tar.gz contrib/android'
+                                        stash includes: "android.tar.gz", name: 'tar-android'
                                         dir('contrib/ci.inria.fr') {
 						stash includes: "job-3-debug.sh", name: 'script-unix-debug'
 						stash includes: "job-3-embedded.sh", name: 'script-embedded'
@@ -51,6 +53,7 @@ pipeline {
 						stash includes: "job-3-sonarscanner.sh", name: 'script-sonarscanner'
 						stash includes: "job-3-mingw.*", name: 'scripts-mingw'
 						stash includes: "job-3-cygwin.*", name: 'scripts-cygwin'
+						stash includes: "job-3-android.sh", name: 'script-android'
 					}
 					archiveArtifacts artifacts: tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
 					deleteDir()
@@ -78,6 +81,9 @@ pipeline {
 					}
 					if (env.NO_CYGWIN != 'true') {
 						listOfNodeNames.push('cygwin')
+					}
+					if(env.NO_ANDROID != 'true') {
+						listOfNodeNames.push('AndroidStudio')
 					}
 
 					def p = listOfNodeNames.collectEntries {
@@ -129,6 +135,18 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-embedded'
 									sh 'chmod 755 job-3-embedded.sh && ./job-3-embedded.sh '+tarballgz
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
+								}
+							}
+						} else if (it == 'AndroidStudio') {
+							node('android') {
+								dir('check-android') {
+									unstash 'script-android'
+									unstash 'tar-android'
+									unstash 'tarballgz'
+									sh 'chmod 755 job-3-android.sh && ./job-3-android.sh '+tarballgz
+									archiveArtifacts artifacts: "lstopo-android/*.apk", fingerprint: true, onlyIfSuccessful: true
 									if (env.KEEP_WORKING_DIRECTORY != 'true')
 										deleteDir()
 								}
