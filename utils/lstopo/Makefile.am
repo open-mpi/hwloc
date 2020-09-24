@@ -1,4 +1,4 @@
-# Copyright © 2009-2019 Inria.  All rights reserved.
+# Copyright © 2009-2020 Inria.  All rights reserved.
 # Copyright © 2009-2012, 2014 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -19,6 +19,7 @@ bin_PROGRAMS = \
         lstopo-no-graphics
 
 EXTRA_DIST = \
+        lstopo-android.c \
         test-lstopo.output
 
 lstopo_no_graphics_SOURCES = \

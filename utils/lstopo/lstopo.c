@@ -55,6 +55,10 @@
 # endif
 #endif
 
+#ifdef ANDROID
+extern void setJNIEnv();
+#endif
+
 FILE *open_output(const char *filename, int overwrite)
 {
   const char *extn;
@@ -1278,6 +1282,10 @@ main (int argc, char *argv[])
     {
       output_func = output_console;
     }
+#endif
+#ifdef ANDROID
+    setJNIEnv();
+    output_func = output_android;
 #endif
     break;
 
