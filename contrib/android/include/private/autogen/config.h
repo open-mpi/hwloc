@@ -409,7 +409,7 @@
 /* #undef HWLOC_DARWIN_SYS */
 
 /* Whether we are in debugging mode or not */
-/* #undef HWLOC_DEBUG */
+#define HWLOC_DEBUG 1
 
 /* Define to 1 on *FREEBSD */
 /* #undef HWLOC_FREEBSD_SYS */
