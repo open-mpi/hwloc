@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view"
+    android:checkableBehavior="all">
+        <item android:title="Output" android:id="@+id/output_format">
+            <menu android:id="@+id/menu_output_format">
+                <item
+                    android:id="@+id/activity_main_drawer_draw"
+                    android:title="Draw"
+                    android:color="@color/black" android:state_checked="true"/>
+                <item
+                    android:id="@+id/activity_main_drawer_text"
+                    android:title="Text" />
+                <item
+                    android:id="@+id/activity_main_drawer_xml"
+                    android:title="XML" />
+            </menu>
+        </item>
+        <item android:title="Input topology" android:id="@+id/input_topology">
+            <menu android:id="@+id/menu_input_topology">
+                <item
+                    android:id="@+id/activity_main_drawer_MyPhone"
+                    android:title="My Phone" />
+                 <item
+                    android:id="@+id/activity_main_drawer_API"
+                    android:title="Platforms database" />
+                <item
+                    android:id="@+id/activity_main_drawer_LocalXML"
+                    android:title="Local XML" />
+            </menu>
+        </item>
+</menu>

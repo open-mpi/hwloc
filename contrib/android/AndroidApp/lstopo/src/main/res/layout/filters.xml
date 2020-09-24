@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/border_radius">
+    <LinearLayout
+        android:id="@+id/main_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="5dp">
+        <EditText
+            android:id="@+id/input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Search for topology"
+            android:textColorHint="@color/darkgray"
+            android:textColor="@color/black"
+            android:layout_marginTop="10dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Spinner
+                android:id="@+id/architecture"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="architecture"
+                android:padding="7dp"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:spinnerMode="dropdown"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="10dp" />
+            <Spinner
+                android:id="@+id/uname_architecture"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="uname-architecture"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="10dp"
+                android:padding="7dp"
+                android:spinnerMode="dropdown" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Spinner
+                android:id="@+id/core"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="nbcores"
+                android:padding="7dp"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="10dp"
+                android:spinnerMode="dropdown" />
+
+            <Spinner
+                android:id="@+id/sub_architecture"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="sub-architecture"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="10dp"
+                android:padding="7dp"
+                android:spinnerMode="dropdown" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Spinner
+                android:id="@+id/cpu_vendor"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="cpu-vendor"
+                android:padding="7dp"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="10dp"
+                android:spinnerMode="dropdown" />
+
+            <Spinner
+                android:id="@+id/cpu_family"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="cpu-family"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="10dp"
+                android:padding="7dp"
+                android:spinnerMode="dropdown" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Spinner
+                android:id="@+id/NUMA"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="NUMA"
+                android:padding="7dp"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:spinnerMode="dropdown"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="10dp" />
+
+            <Spinner
+                android:id="@+id/packages"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="nbpackages"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="10dp"
+                android:padding="7dp"
+                android:spinnerMode="dropdown" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Spinner
+                android:id="@+id/chassis"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="chassis"
+                android:padding="7dp"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:spinnerMode="dropdown"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="10dp" />
+
+            <Spinner
+                android:id="@+id/year"
+                style="@android:style/Widget.Holo.Light.Spinner"
+                android:tag="year"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:dropDownVerticalOffset="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="10dp"
+                android:padding="7dp"
+                android:spinnerMode="dropdown" />
+        </RelativeLayout>
+        <Button
+        android:id="@+id/apply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="10dp"
+        android:text="Apply" />
+    </LinearLayout>
+</ScrollView>
