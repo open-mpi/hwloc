@@ -57,21 +57,21 @@ static __hwloc_inline void hwloc_debug(const char *s __hwloc_attribute_unused, .
 if (hwloc_debug_enabled()) { \
   char *s; \
   hwloc_bitmap_asprintf(&s, bitmap); \
-  fprintf(stderr, fmt, s); \
+  hwloc_debug(fmt, s); \
   free(s); \
 } } while (0)
 #define hwloc_debug_1arg_bitmap(fmt, arg1, bitmap) do { \
 if (hwloc_debug_enabled()) { \
   char *s; \
   hwloc_bitmap_asprintf(&s, bitmap); \
-  fprintf(stderr, fmt, arg1, s); \
+  hwloc_debug(fmt, arg1, s); \
   free(s); \
 } } while (0)
 #define hwloc_debug_2args_bitmap(fmt, arg1, arg2, bitmap) do { \
 if (hwloc_debug_enabled()) { \
   char *s; \
   hwloc_bitmap_asprintf(&s, bitmap); \
-  fprintf(stderr, fmt, arg1, arg2, s); \
+  hwloc_debug(fmt, arg1, arg2, s); \
   free(s); \
 } } while (0)
 #else
