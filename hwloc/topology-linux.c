@@ -3809,6 +3809,8 @@ look_sysfsnode(struct hwloc_topology *topology,
   int allow_overlapping_node_cpusets = (getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS") != NULL);
   int need_memcaches = hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_MEMCACHE);
 
+  hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
+
   /* NUMA nodes cannot be filtered out */
   indexes = list_sysfsnode(topology, data, path, &nbnodes);
   if (!indexes)
@@ -4088,6 +4090,8 @@ look_sysfscpu(struct hwloc_topology *topology,
   int i,j;
   int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
 
+  hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
+
   /* try to get the list of online CPUs at once.
    * otherwise we'll use individual per-CPU "online" files.
    *
@@ -4100,6 +4104,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   /* fill the cpuset of interesting cpus */
   dir = hwloc_opendir(path, data->root_fd);
   if (!dir) {
+    hwloc_debug("failed to open sysfscpu path %s (%d)\n", path, errno);
     hwloc_bitmap_free(online_set);
     return -1;
   } else {
