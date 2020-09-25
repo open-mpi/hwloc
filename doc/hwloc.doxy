@@ -1216,6 +1216,8 @@ following environment variables.
 <dt>HWLOC_DEBUG_VERBOSE=0</dt>
   <dd>disables all verbose messages that are enabled by default
   when <tt>--enable-debug</tt> is passed to configure.
+  When set to more than 1, even more verbose messages are displayed.
+  The default is 1.
   </dd>
 
 </dl>

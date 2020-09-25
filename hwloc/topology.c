@@ -380,16 +380,18 @@ hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 static void
 hwloc_debug_print_objects(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
-  hwloc_obj_t child;
-  hwloc_debug_print_object(indent, obj);
-  for_each_child (child, obj)
-    hwloc_debug_print_objects(indent + 1, child);
-  for_each_memory_child (child, obj)
-    hwloc_debug_print_objects(indent + 1, child);
-  for_each_io_child (child, obj)
-    hwloc_debug_print_objects(indent + 1, child);
-  for_each_misc_child (child, obj)
-    hwloc_debug_print_objects(indent + 1, child);
+  if (hwloc_debug_enabled() >= 2) {
+    hwloc_obj_t child;
+    hwloc_debug_print_object(indent, obj);
+    for_each_child (child, obj)
+      hwloc_debug_print_objects(indent + 1, child);
+    for_each_memory_child (child, obj)
+      hwloc_debug_print_objects(indent + 1, child);
+    for_each_io_child (child, obj)
+      hwloc_debug_print_objects(indent + 1, child);
+    for_each_misc_child (child, obj)
+      hwloc_debug_print_objects(indent + 1, child);
+  }
 }
 #else /* !HWLOC_DEBUG */
 #define hwloc_debug_print_object(indent, obj) do { /* nothing */ } while (0)
