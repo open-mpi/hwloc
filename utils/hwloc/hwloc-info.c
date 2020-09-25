@@ -821,6 +821,7 @@ main (int argc, char *argv[])
     DO(membind, get_area_memlocation);
 
     DO(misc, imported_support);
+#undef DO
 
   } else if (mode == HWLOC_INFO_MODE_OBJECTS) {
     struct hwloc_calc_location_context_s lcontext;
