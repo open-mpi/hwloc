@@ -22,6 +22,7 @@ hwloc_uint64_t hwloc__memattr_get_convenience_value(hwloc_memattr_id_t id,
     return hwloc_bitmap_weight(node->cpuset);
   else
     assert(0);
+  return 0; /* shut up the compiler */
 }
 
 void
