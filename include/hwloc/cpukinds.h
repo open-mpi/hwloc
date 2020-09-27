@@ -47,7 +47,8 @@ extern "C" {
  * Passing 0 as \p kind_index to hwloc_cpukinds_get_info() will
  * return information about the less efficient CPU kind.
  *
- * hwloc tries to compute efficiencies by comparing CPU kinds.
+ * Efficiency values are gathered from the Windows API when available.
+ * Otherwise hwloc tries to compute efficiencies by comparing CPU kinds.
  * If it fails, all kinds will have an unknown efficiency (\c -1),
  * and they are not indexed/ordered in any specific way.
  *
