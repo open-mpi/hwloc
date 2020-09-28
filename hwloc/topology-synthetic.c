@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -471,7 +471,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     /* initialize parent arity to 0 so that the levels are not infinite */
     data->level[count-1].arity = 0;
 
-    while (*pos == ' ')
+    while (*pos == ' ' || *pos == '\n')
       pos++;
 
     if (!*pos)
