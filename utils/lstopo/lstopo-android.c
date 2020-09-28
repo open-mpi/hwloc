@@ -21,12 +21,12 @@ extern void JNIprepare(int width, int height);
 #define ANDROID_TEXT_WIDTH(length, fontsize) (((length) * (fontsize))/2)
 #define ANDROID_FONTSIZE_SCALE(size) (((size) * 11) / 9)
 
-static void native_android_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id)
+static void native_android_box(struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id __hwloc_attribute_unused)
 {
     int gp_index = -1;
     int r = lcolor->r, g = lcolor->g, b = lcolor->b;
     char * info = malloc(1096);
-    char * sep = " ";
+    const char * sep = " ";
 
     if(obj){
         gp_index = obj->gp_index;
@@ -40,7 +40,7 @@ static void native_android_box(struct lstopo_output *loutput, const struct lstop
 
 
 static void
-native_android_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj, unsigned line_id)
+native_android_line(struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
 {
     JNIline(x1, y1, x2, y2);
 }
@@ -54,7 +54,7 @@ native_android_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, 
 
 
 static void
-native_android_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj, unsigned text_id)
+native_android_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor __hwloc_attribute_unused, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj, unsigned text_id __hwloc_attribute_unused)
 {
     int gp_index = -1;
     if(obj)
@@ -71,7 +71,7 @@ static struct draw_methods native_android_draw_methods = {
         native_android_textsize,
 };
 
-int output_android(struct lstopo_output * loutput, const char *filename)
+int output_android(struct lstopo_output * loutput, const char *filename __hwloc_attribute_unused)
 {
     loutput->methods = &native_android_draw_methods;
 
