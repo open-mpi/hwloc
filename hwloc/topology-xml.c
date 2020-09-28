@@ -481,11 +481,9 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
   }
 }
 
-
 static int
-hwloc__xml_import_info(struct hwloc_xml_backend_data_s *data,
-		       hwloc_obj_t obj,
-		       hwloc__xml_import_state_t state)
+hwloc___xml_import_info(char **infonamep, char **infovaluep,
+                        hwloc__xml_import_state_t state)
 {
   char *infoname = NULL;
   char *infovalue = NULL;
@@ -501,6 +499,25 @@ hwloc__xml_import_info(struct hwloc_xml_backend_data_s *data,
     else
       return -1;
   }
+
+  *infonamep = infoname;
+  *infovaluep = infovalue;
+
+  return state->global->close_tag(state);
+}
+
+static int
+hwloc__xml_import_obj_info(struct hwloc_xml_backend_data_s *data,
+                           hwloc_obj_t obj,
+                           hwloc__xml_import_state_t state)
+{
+  char *infoname = NULL;
+  char *infovalue = NULL;
+  int err;
+
+  err = hwloc___xml_import_info(&infoname, &infovalue, state);
+  if (err < 0)
+    return err;
 
   if (infoname) {
     /* empty strings are ignored by libxml */
@@ -518,7 +535,7 @@ hwloc__xml_import_info(struct hwloc_xml_backend_data_s *data,
     }
   }
 
-  return state->global->close_tag(state);
+  return err;
 }
 
 static int
@@ -889,7 +906,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
 
     } else if (!strcmp(tag, "info")) {
-      ret = hwloc__xml_import_info(data, obj, &childstate);
+      ret = hwloc__xml_import_obj_info(data, obj, &childstate);
     } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
       ret = hwloc__xml_v1import_distances(data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
