@@ -25,7 +25,8 @@ check_LTLIBRARIES = \
         libhwloc-port-rsmi.la \
         libhwloc-port-gl.la
 check_LIBRARIES = \
-	liblstopo-port-windows.a
+	liblstopo-port-windows.a \
+        liblstopo-port-android.a
 endif HWLOC_HAVE_LINUX
 
 # Note that AC_CONFIG_LINKS sets up the sym links for the files in
@@ -143,6 +144,11 @@ liblstopo_port_windows_a_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/utils/lstopo \
         -I$(HWLOC_top_srcdir)/utils/hwloc \
         -DHWLOC_WIN_SYS
+
+nodist_liblstopo_port_android_a_SOURCES = lstopo-android.c
+liblstopo_port_android_a_CPPFLAGS = $(common_CPPFLAGS) \
+        -I$(HWLOC_top_srcdir)/utils/lstopo \
+        -I$(HWLOC_top_srcdir)/utils/hwloc
 
 nodist_libhwloc_port_opencl_la_SOURCES = topology-opencl.c
 libhwloc_port_opencl_la_SOURCES = \

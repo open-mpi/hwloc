@@ -531,7 +531,8 @@ int foo(void) {
 	hwloc_config_prefix[tests/hwloc/ports/topology-nvml.c]:hwloc_config_prefix[hwloc/topology-nvml.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-rsmi.c]:hwloc_config_prefix[hwloc/topology-rsmi.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-gl.c]:hwloc_config_prefix[hwloc/topology-gl.c]
-	hwloc_config_prefix[tests/hwloc/ports/lstopo-windows.c]:hwloc_config_prefix[utils/lstopo/lstopo-windows.c])
+	hwloc_config_prefix[tests/hwloc/ports/lstopo-windows.c]:hwloc_config_prefix[utils/lstopo/lstopo-windows.c]
+        hwloc_config_prefix[tests/hwloc/ports/lstopo-android.c]:hwloc_config_prefix[utils/lstopo/lstopo-android.c])
     ])
 ])dnl
 
