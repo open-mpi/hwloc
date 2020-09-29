@@ -104,14 +104,14 @@ report_insert_error_format_obj(char *buf, size_t buflen, hwloc_obj_t obj)
 
 static void report_insert_error(hwloc_obj_t new, hwloc_obj_t old, const char *msg, const char *reason)
 {
-  char newstr[512];
-  char oldstr[512];
   static int reported = 0;
 
-  report_insert_error_format_obj(newstr, sizeof(newstr), new);
-  report_insert_error_format_obj(oldstr, sizeof(oldstr), old);
-
   if (reason && !reported && !hwloc_hide_errors()) {
+    char newstr[512];
+    char oldstr[512];
+    report_insert_error_format_obj(newstr, sizeof(newstr), new);
+    report_insert_error_format_obj(oldstr, sizeof(oldstr), old);
+
     fprintf(stderr, "****************************************************************************\n");
     fprintf(stderr, "* hwloc %s received invalid information from the operating system.\n", HWLOC_VERSION);
     fprintf(stderr, "*\n");
