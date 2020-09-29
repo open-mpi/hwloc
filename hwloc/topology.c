@@ -111,7 +111,7 @@ static void report_insert_error(hwloc_obj_t new, hwloc_obj_t old, const char *ms
   report_insert_error_format_obj(newstr, sizeof(newstr), new);
   report_insert_error_format_obj(oldstr, sizeof(oldstr), old);
 
-  if (!reported && !hwloc_hide_errors()) {
+  if (reason && !reported && !hwloc_hide_errors()) {
     fprintf(stderr, "****************************************************************************\n");
     fprintf(stderr, "* hwloc %s received invalid information from the operating system.\n", HWLOC_VERSION);
     fprintf(stderr, "*\n");
