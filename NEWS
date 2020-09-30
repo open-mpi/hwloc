@@ -19,6 +19,8 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.4.0
 -------------
+* API
+  + Add hwloc/cpukinds.h for reporting information about hybrid CPUs.
 * Backends
   + Properly handle Linux kernel 5.10+ exposing ACPI HMAT information
     with knowledge of Generic Initiators.

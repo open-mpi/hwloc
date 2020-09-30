@@ -18,6 +18,7 @@
 #include "../../../../../../../hwloc/topology-linux.c"
 #include "../../../../../../../hwloc/shmem.c"
 #include "../../../../../../../hwloc/memattrs.c"
+#include "../../../../../../../hwloc/cpukinds.c"
 #include "../../../../../../../hwloc/topology-xml.c"
 #include "../../../../../../../hwloc/topology-xml-nolibxml.c"
 #include "../../../../../../../hwloc/base64.c"

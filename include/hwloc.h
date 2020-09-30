@@ -2462,6 +2462,9 @@ HWLOC_DECLSPEC int hwloc_topology_refresh(hwloc_topology_t topology);
 /* memory attributes */
 #include "hwloc/memattrs.h"
 
+/* kinds of CPU cores */
+#include "hwloc/cpukinds.h"
+
 /* exporting to XML or synthetic */
 #include "hwloc/export.h"
 

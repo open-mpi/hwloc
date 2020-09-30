@@ -76,8 +76,13 @@ int main(void)
     size = sizeof(struct hwloc_internal_location_s);
     assert(size == 32);
 
+    offset = offsetof(struct hwloc_topology, cpukinds);
+    assert(offset == 744);
+    size = sizeof(struct hwloc_internal_cpukind_s);
+    assert(size == 40);
+
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 768);
+    assert(offset == 784);
 
     /* fields after this one aren't needed after discovery */
 

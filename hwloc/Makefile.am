@@ -32,6 +32,7 @@ sources = \
         traversal.c \
         distances.c \
         memattrs.c \
+        cpukinds.c \
         components.c \
         bind.c \
         bitmap.c \

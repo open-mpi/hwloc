@@ -40,7 +40,7 @@
 #endif
 #include <string.h>
 
-#define HWLOC_TOPOLOGY_ABI 0x20300 /* version of the layout of struct topology */
+#define HWLOC_TOPOLOGY_ABI 0x20400 /* version of the layout of struct topology */
 
 struct hwloc_internal_location_s {
   enum hwloc_location_type_e type;
@@ -205,6 +205,19 @@ struct hwloc_topology {
       } *initiators;
     } *targets;
   } *memattrs;
+
+  /* hybridcpus */
+  unsigned nr_cpukinds;
+  unsigned nr_cpukinds_allocated;
+  struct hwloc_internal_cpukind_s {
+    hwloc_cpuset_t cpuset;
+#define HWLOC_CPUKIND_EFFICIENCY_UNKNOWN -1
+    int efficiency;
+    int forced_efficiency; /* returned by the hardware or OS if any */
+    hwloc_uint64_t ranking_value; /* internal value for ranking */
+    unsigned nr_infos;
+    struct hwloc_info_s *infos;
+  } *cpukinds;
 
   int grouping;
   int grouping_verbose;
@@ -406,6 +419,14 @@ extern void hwloc_internal_memattrs_need_refresh(hwloc_topology_t topology);
 extern void hwloc_internal_memattrs_refresh(hwloc_topology_t topology);
 extern int hwloc_internal_memattrs_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern int hwloc_internal_memattr_set_value(hwloc_topology_t topology, hwloc_memattr_id_t id, hwloc_obj_type_t target_type, hwloc_uint64_t target_gp_index, unsigned target_os_index, struct hwloc_internal_location_s *initiator, hwloc_uint64_t value);
+
+extern void hwloc_internal_cpukinds_init(hwloc_topology_t topology);
+extern int hwloc_internal_cpukinds_rank(hwloc_topology_t topology);
+extern void hwloc_internal_cpukinds_destroy(hwloc_topology_t topology);
+extern int hwloc_internal_cpukinds_dup(hwloc_topology_t new, hwloc_topology_t old);
+#define HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY (1<<0)
+extern int hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuset, int forced_efficiency, const struct hwloc_info_s *infos, unsigned nr_infos, unsigned long flags);
+extern void hwloc_internal_cpukinds_restrict(hwloc_topology_t topology);
 
 /* encode src buffer into target buffer.
  * targsize must be at least 4*((srclength+2)/3)+1.
