@@ -507,29 +507,33 @@ int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 }
 
 /* This function may be called with topology->tma set, it cannot free() or realloc() */
-static int hwloc__tma_dup_infos(struct hwloc_tma *tma, hwloc_obj_t new, hwloc_obj_t src)
+int hwloc__tma_dup_infos(struct hwloc_tma *tma,
+                         struct hwloc_info_s **newip, unsigned *newcp,
+                         struct hwloc_info_s *oldi, unsigned oldc)
 {
+  struct hwloc_info_s *newi;
   unsigned i, j;
-  new->infos = hwloc_tma_calloc(tma, src->infos_count * sizeof(*src->infos));
-  if (!new->infos)
+  newi = hwloc_tma_calloc(tma, oldc * sizeof(*newi));
+  if (!newi)
     return -1;
-  for(i=0; i<src->infos_count; i++) {
-    new->infos[i].name = hwloc_tma_strdup(tma, src->infos[i].name);
-    new->infos[i].value = hwloc_tma_strdup(tma, src->infos[i].value);
-    if (!new->infos[i].name || !new->infos[i].value)
+  for(i=0; i<oldc; i++) {
+    newi[i].name = hwloc_tma_strdup(tma, oldi[i].name);
+    newi[i].value = hwloc_tma_strdup(tma, oldi[i].value);
+    if (!newi[i].name || !newi[i].value)
       goto failed;
   }
-  new->infos_count = src->infos_count;
+  *newip = newi;
+  *newcp = oldc;
   return 0;
 
  failed:
   assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
   for(j=0; j<=i; j++) {
-    free(new->infos[i].name);
-    free(new->infos[i].value);
+    free(newi[i].name);
+    free(newi[i].value);
   }
-  free(new->infos);
-  new->infos = NULL;
+  free(newi);
+  *newip = NULL;
   return -1;
 }
 
@@ -847,7 +851,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   newobj->nodeset = hwloc_bitmap_tma_dup(tma, src->nodeset);
   newobj->complete_nodeset = hwloc_bitmap_tma_dup(tma, src->complete_nodeset);
 
-  hwloc__tma_dup_infos(tma, newobj, src);
+  hwloc__tma_dup_infos(tma, &newobj->infos, &newobj->infos_count, src->infos, src->infos_count);
 
   /* find our level */
   if (src->depth < 0) {

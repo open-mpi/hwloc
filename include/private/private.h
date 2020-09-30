@@ -305,6 +305,7 @@ extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_t
 extern int hwloc__add_info(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value);
 extern int hwloc__add_info_nodup(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);
 extern int hwloc__move_infos(struct hwloc_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_info_s **src_infosp, unsigned *src_countp);
+extern int hwloc__tma_dup_infos(struct hwloc_tma *tma, struct hwloc_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_info_s *src_infos, unsigned src_count);
 extern void hwloc__free_infos(struct hwloc_info_s *infos, unsigned count);
 
 /* set native OS binding hooks */

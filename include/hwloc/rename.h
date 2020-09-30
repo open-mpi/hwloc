@@ -772,6 +772,7 @@ extern "C" {
 #define hwloc__add_info_nodup HWLOC_NAME(_add_info_nodup)
 #define hwloc__move_infos HWLOC_NAME(_move_infos)
 #define hwloc__free_infos HWLOC_NAME(_free_infos)
+#define hwloc__tma_dup_infos HWLOC_NAME(_tma_dup_infos)
 
 #define hwloc_binding_hooks HWLOC_NAME(binding_hooks)
 #define hwloc_set_native_binding_hooks HWLOC_NAME(set_native_binding_hooks)
