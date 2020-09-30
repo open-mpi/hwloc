@@ -24,6 +24,8 @@ Version 2.4.0
 * Backends
   + Properly handle Linux kernel 5.10+ exposing ACPI HMAT information
     with knowledge of Generic Initiators.
+* Tools
+  + lstopo has a new --cpukinds option for showing CPU kinds.
 
 
 Version 2.3.0

@@ -24,6 +24,7 @@ _lstopo() {
 		   -s --silent
 		   --distances
 		   --memattrs
+		   --cpukinds
 		   -c --cpuset
 		   -C --cpuset-only
 		   --taskset
