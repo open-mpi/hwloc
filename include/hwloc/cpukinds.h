@@ -21,7 +21,7 @@ extern "C" {
 /** \defgroup hwlocality_cpukinds Kinds of CPU cores
  *
  * Platforms with heterogeneous CPUs may have some cores with
- * different features or performance.
+ * different features or frequencies.
  * This API exposes identical PUs in sets called CPU kinds.
  * Each PU of the topology may only be in a single kind.
  *
@@ -35,8 +35,11 @@ extern "C" {
  * (if any, and not partially)
  * may be obtained with hwloc_cpukinds_get_by_cpuset().
  *
- * Each set is described by an abstracted efficiency value and
- * an array of info attributes (for instance the "CoreType").
+ * From the index of a kind, it is possible to retrieve information
+ * with hwloc_cpukinds_get_info():
+ * an abstracted efficiency value,
+ * and an array of info attributes
+ * (for instance the "CoreType" and "FrequencyMaxMHz").
  *
  * A higher efficiency value means intrinsic greater performance
  * (and possibly less performance/power efficiency).
@@ -99,7 +102,8 @@ hwloc_cpukinds_get_by_cpuset(hwloc_topology_t topology,
  * the efficiency of all kinds is set to \c -1,
  * and kinds are reported in no specific order.
  *
- * The array of info attributes (for instance the "CoreType")
+ * The array of info attributes (for instance the "CoreType",
+ * "FrequencyMaxMHz" or "FrequencyBaseMHz")
  * and its length are returned in \p infos or \p nr_infos.
  * The array belongs to the topology, it should not be freed or modified.
  *

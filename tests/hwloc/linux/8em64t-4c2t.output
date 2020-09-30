@@ -35,4 +35,6 @@ depth 0:           1 Machine (type #0)
       depth 6:     4 Core (type #2)
        depth 7:    8 PU (type #3)
 Special depth -3:  1 NUMANode (type #13)
+CPU kind #0 efficiency -1 cpuset 0x000000f1
+  FrequencyMaxMHz = 2927
 Topology not from this system
