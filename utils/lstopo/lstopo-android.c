@@ -16,7 +16,7 @@
 extern void JNIbox(int r, int g, int b, int x, int y, int width, int height, int gp_index, char *info);
 extern void JNItext(char *text, int gp_index, int x, int y, int fontsize);
 extern void JNIline(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
-extern void JNIprepare(int width, int height);
+extern void JNIprepare(int width, int height, int fontsize);
 
 #define ANDROID_TEXT_WIDTH(length, fontsize) (((length) * (fontsize))/2)
 #define ANDROID_FONTSIZE_SCALE(size) (((size) * 11) / 9)
@@ -83,7 +83,7 @@ int output_android(struct lstopo_output * loutput, const char *filename __hwloc_
     /* ready */
     declare_colors(loutput);
     lstopo_prepare_custom_styles(loutput);
-    JNIprepare(loutput->height, loutput->width);
+    JNIprepare(loutput->height, loutput->width, loutput->fontsize);
 
     output_draw(loutput);
 

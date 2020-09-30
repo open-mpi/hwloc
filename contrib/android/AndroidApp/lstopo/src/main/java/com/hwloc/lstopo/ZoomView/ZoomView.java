@@ -47,7 +47,7 @@ public class ZoomView extends RelativeLayout {
 
     // zooming
     float zoom = 1.0f;
-    float maxZoom = 2.0f;
+    float maxZoom = 4.0f;
     float smoothZoom = 1.0f;
     float zoomX, zoomY;
     float smoothZoomX, smoothZoomY;
@@ -453,5 +453,14 @@ public class ZoomView extends RelativeLayout {
         getRootView().invalidate();
         invalidate();
         // }
+    }
+
+    public void resetZoom() {
+        smoothZoomTo(1.0f, getWidth() / 2.0f,
+                getHeight() / 2.0f);
+    }
+
+    public void setZoom(float zoom) {
+        this.zoom = zoom;
     }
 }

@@ -1,10 +1,12 @@
 package com.hwloc.lstopo;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +21,6 @@ import java.io.IOException;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import static androidx.annotation.Dimension.DP;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -35,6 +36,7 @@ public class Lstopo extends AppCompatActivity {
     private int hwloc_screen_width;
     private float xscale = 1;
     private float yscale = 1;
+    private int fontsize;
     private File debugFile;
 
     public Lstopo(Activity activity) {
@@ -55,10 +57,10 @@ public class Lstopo extends AppCompatActivity {
         layout.addView(view);
         setBoxInfo(view, info);
         setBoxAttributes(view, r, b, g,
-                screen_width * x / hwloc_screen_width,
-                screen_height * y / hwloc_screen_height,
-                screen_width * width / hwloc_screen_width,
-                screen_height * height / hwloc_screen_height);
+                (int) (xscale * x),
+                (int) (yscale * y),
+                (int) (xscale * width),
+                (int) (yscale * height));
 
     }
 
@@ -74,7 +76,7 @@ public class Lstopo extends AppCompatActivity {
         TextView tv = new TextView(activity);
         view.addView(tv);
         tv.setText(info);
-        tv.setTextSize(DP, 100 / (float)((hwloc_screen_height + hwloc_screen_width) / 100));
+        tv.setTextSize((int) (this.fontsize / 1.5));
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -125,17 +127,24 @@ public class Lstopo extends AppCompatActivity {
 
         TextView tv = new TextView(activity);
         tv.setMinWidth(screen_width);
-
         if( id == -1 ){
-            tv.setTextIsSelectable(true);
-            ScrollView scrollView = new ScrollView(activity);
-            layout.addView(scrollView);
-            scrollView.addView(tv);
-            tv.setX(x);
-            tv.setY(y);
+            if(text.length() > 100) {
+                tv.setTextIsSelectable(true);
+                ScrollView scrollView = new ScrollView(activity);
+                layout.addView(scrollView);
+                scrollView.addView(tv);
+                tv.setX(x);
+                tv.setY(y);
+                tv.setMaxWidth(screen_width);
+            } else {
+                layout.addView(tv);
+                tv.setX(x * xscale);
+                tv.setY(y * yscale);
+            }
         } else {
             tv.setClickable(false);
             LinearLayout viewGroup = layout.findViewById(id);
+
             viewGroup.addView(tv);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -143,12 +152,11 @@ public class Lstopo extends AppCompatActivity {
             );
             params.setMargins((int) (10 * xscale), (int) (2 * yscale), 0, 0);
             tv.setLayoutParams(params);
+
+
         }
 
-        if(fontsize != 0){
-            tv.setTextSize(DP, fontsize * 15 / (float)((hwloc_screen_height + hwloc_screen_width) / 100));
-        }
-
+        tv.setTextSize(this.fontsize);
         tv.setText(text);
     }
 
@@ -165,26 +173,48 @@ public class Lstopo extends AppCompatActivity {
         Point size = new Point();
         display.getSize(size);
         int toolbars_height = 0;
+
         // status bar height
         int resourceId = activity.getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
             toolbars_height += activity.getResources().getDimensionPixelSize(resourceId);
         }
+
+        screen_height = size.y - dpToPx(toolbars_height);
+        screen_width = size.x;
+
         // navigation bar height
         resourceId = activity.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
         if (resourceId > 0) {
             toolbars_height += activity.getResources().getDimensionPixelSize(resourceId);
         }
 
-        screen_height = size.y - toolbars_height;
-        screen_width = size.x;
+
+
+
+
     }
 
-    public void setScale(int hwloc_screen_height, int hwloc_screen_width){
+    public void setScale(int hwloc_screen_height, int hwloc_screen_width, int fontsize){
         this.hwloc_screen_height = hwloc_screen_height;
         this.hwloc_screen_width = hwloc_screen_width;
-        xscale = ((float) screen_width / (float) hwloc_screen_width);
+
         yscale = ((float) screen_height / (float) hwloc_screen_height);
+        xscale = yscale;
+
+        this.fontsize = (int) pixelsToDp(fontsize * yscale);
+        if(this.fontsize > 15)
+            this.fontsize = 14;
+
+        layout.setMinimumHeight(screen_height);
+    }
+
+    public int getScreen_height() {
+        return this.screen_height;
+    }
+
+    public int getScreen_width() {
+        return this.screen_width;
     }
 
     public void setScreen_height(int screen_height) {
@@ -225,4 +255,15 @@ public class Lstopo extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    public static float pixelsToDp(float px){
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        float dp = px / (metrics.densityDpi / 160f);
+        return Math.round(dp);
+    }
+
+    public int dpToPx(int dp){
+        return (int) (dp * ((float) activity.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
 }

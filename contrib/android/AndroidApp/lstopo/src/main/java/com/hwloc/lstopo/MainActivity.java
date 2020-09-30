@@ -1,16 +1,19 @@
 package com.hwloc.lstopo;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.drawable.GradientDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 
@@ -27,17 +30,20 @@ import androidx.core.view.GravityCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ActionProvider;
 import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -50,6 +56,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.hwloc.lstopo.ZoomView.ZoomView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,11 +85,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     /**
      * Allows java to call lstopo : C library previously defined.
      * */
-    public native int start(Lstopo lstopo, int drawing_method, String outputFile);
-    public native int startWithInput(Lstopo lstopo, int drawing_method, String outputFile, String inputFile);
+    public native int start(Lstopo lstopo, int drawing_method, String outputFile, ArrayList<String> options);
+    public native int startWithInput(Lstopo lstopo, int drawing_method, String outputFile, String inputFile, ArrayList<String> options);
 
     // Frame the application draw on
     private RelativeLayout layout;
+    private ZoomView zoomView;
     // Graphic tools that draw the topology
     private Lstopo lstopo;
     private Toolbar toolbar;
@@ -105,16 +113,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProgressDialog progressDialog;
     // Buttons
     Button filters;
+    Button optionsButton;
     // Current navigation
     MenuItems menuItems;
+    // Communication with thread
+    Handler handler;
     // Current topology
     String topology = "phone";
+    // Options to draw the topology
+    ArrayList<String> options = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        zoomView = findViewById(R.id.zoomview);
 
         this.configureToolBar();
         this.configureDrawerLayout();
@@ -137,7 +151,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        start(lstopo, 1, "");
+        optionsButton = findViewById(R.id.options);
+        optionsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, Options.class);
+                for(int i = 0; i < options.size(); i++) {
+                    intent.putExtra(Integer.toString(i),options.get(i));
+                }
+                startActivityForResult(intent, 4);
+            }
+        });
+
+        handler = new Handler(Looper.getMainLooper()) {
+             @Override
+             public void handleMessage(Message inputMessage) {
+                 Toast.makeText(MainActivity.this, "Timeout. Retrying in case the online database was asleep.", Toast.LENGTH_LONG).show();
+             }
+        };
+
+        start(lstopo, 1, "", options);
         setMode("draw");
         menuItems = new MenuItems();
     }
@@ -183,25 +216,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         menuItems.setCheckedItems(item);
         lstopo.clearDebugFile();
+        zoomView.resetZoom();
 
         switch (id){
             case R.id.activity_main_drawer_draw :
+                if(topology.equals("phone") && menuItems.getInputTopologySelected() != 0)
+                    menuItems.setCheckedItems(menuItems.inputTopology.get(0));
+
                 layout.removeAllViews();
                 if(topology.equals("phone"))
-                    start(lstopo, 1, "");
+                    start(lstopo, 1, "", options);
                 else
-                    startWithInput(lstopo, 1, "", topology);
+                    startWithInput(lstopo, 1, "", topology, options);
                 setMode("draw");
                 break;
             case R.id.activity_main_drawer_text:
+                if(topology.equals("phone") && menuItems.getInputTopologySelected() != 0)
+                    menuItems.setCheckedItems(menuItems.inputTopology.get(0));
+
                 try {
                     layout.removeAllViews();
                     //JNI can't overwrite file
                     txtFile.delete();
                     if(topology.equals("phone"))
-                        start(lstopo, 2, txtFile.getAbsolutePath());
+                        start(lstopo, 2, txtFile.getAbsolutePath(), options);
                     else
-                        startWithInput(lstopo, 2, txtFile.getAbsolutePath(), topology);
+                        startWithInput(lstopo, 2, txtFile.getAbsolutePath(), topology, options);
                     setMode("txt");
                     String lstopoText = readFile(txtFile);
                     lstopo.text(lstopoText, 0, 0, 0, -1);
@@ -211,14 +251,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     break;
                 }
             case R.id.activity_main_drawer_xml:
+                if(topology.equals("phone") && menuItems.getInputTopologySelected() != 0)
+                    menuItems.setCheckedItems(menuItems.inputTopology.get(0));
+
                 try {
                     layout.removeAllViews();
                     //JNI can't overwrite file
                     xmlFile.delete();
                     if(topology.equals("phone"))
-                        start(lstopo, 3, xmlFile.getAbsolutePath());
+                        start(lstopo, 3, xmlFile.getAbsolutePath(), options);
                     else
-                        startWithInput(lstopo, 3, xmlFile.getAbsolutePath(), topology);
+                        startWithInput(lstopo, 3, xmlFile.getAbsolutePath(), topology, options);
                     setMode("xml");
                     String lstopoText = readFile(xmlFile);
                     lstopo.text(lstopoText, 0, 0, 0, -1);
@@ -231,17 +274,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 topology = "phone";
                 layout.removeAllViews();
 
-                start(lstopo, 1, "");
+                start(lstopo, 1, "", options);
                 menuItems.setCheckedItems(menuItems.outputFormat.get(0));
                 mode = "draw";
                 break;
             case R.id.activity_main_drawer_API:
                 menuItems.setCheckedItems(menuItems.outputFormat.get(0));
-                mode = "draw";
                 downloadTopology();
                 break;
             case R.id.activity_main_drawer_LocalXML:
-                startActivityForResult(new Intent(MainActivity.this, ImportXML.class), 1);
+                file_picker();
+                break;
+            case R.id.activity_main_drawer_Synthetic_Topology:
+                createSyntheticLayout();
                 break;
             default:
                 break;
@@ -260,13 +305,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch(mode){
             case "draw":
                 filters.setVisibility(GONE);
+                optionsButton.setVisibility(VISIBLE);
+
                 break;
             case "xml":
             case "txt":
                 filters.setVisibility(GONE);
+                optionsButton.setVisibility(VISIBLE);
                 break;
-            default :
+            case "download":
                 filters.setVisibility(VISIBLE);
+                optionsButton.setVisibility(GONE);
+                break;
+            case "synthetic":
+                filters.setVisibility(GONE);
+                optionsButton.setVisibility(GONE);
+                break;
         }
     }
 
@@ -292,7 +346,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (resultData != null) {
                 try {
                     String data;
-                    setMode("draw");
                     layout.removeAllViews();
 
                     //File from file picker
@@ -303,10 +356,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         data = resultData.getDataString();
 
                     topology = getAbsoluteFile("/inputTopology.xml").getAbsolutePath();
+                    setMode("draw");
                     writeFile(topology, data);
 
-                    if(startWithInput(lstopo, 1, "", topology) != 0)
-                        Toast.makeText(MainActivity.this, "XML not valid..", Toast.LENGTH_LONG).show();
+                    if(startWithInput(lstopo, 1, "", topology, options) != 0)
+                        Toast.makeText(MainActivity.this, "XML not valid.", Toast.LENGTH_LONG).show();
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -317,23 +371,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //Open file picker
             if (resultData.getData().toString().equals("xml"))
                 file_picker();
-            //Synthetic display
-            else {
-                menuItems.setCheckedItems(menuItems.outputFormat.get(0));
-                setMode("draw");
-                layout.removeAllViews();
-                topology = resultData.getData().toString();
-
-                if(topology.equals("") || startWithInput(lstopo, 1, "", topology) != 0 ) {
-                    menuItems.setCheckedItems(menuItems.outputFormat.get(0));
-                    Toast.makeText(MainActivity.this, "Synthetic topology not valid...", Toast.LENGTH_LONG).show();
-                }
-
-            }
             //Handle filters for API
         } else if (requestCode == 3 && resultCode == Activity.RESULT_OK) {
             requestTag = Uri.encode(resultData.getData().toString());
             downloadTopology();
+        } else if (requestCode == 4 && resultCode == Activity.RESULT_OK) {
+            layout.removeAllViews();
+            options = resultData.getStringArrayListExtra("options");
+            if(topology.equals("phone"))
+                start(lstopo, 1, "", options);
+            else
+                startWithInput(lstopo, 1, "", topology, options);
         }
     }
 
@@ -398,6 +446,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
     /**
      * Get the list of downloadable topology from API
      * */
@@ -407,28 +462,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String tags = requestTag != null ? "tags/" + requestTag : "";
         final String url ="https://hwloc-xmls.herokuapp.com/" + tags;
 
+        if(!isNetworkAvailable()) {
+            Toast.makeText(MainActivity.this, "No internet connection.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
 
         final LinearLayout linearLayout = new LinearLayout(activity);
-        linearLayout.setMinimumWidth(size.x);
+        linearLayout.setMinimumWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         ScrollView scrollView = new ScrollView(activity);
         scrollView.setFillViewport(true);
         layout.addView(scrollView);
         scrollView.addView(linearLayout);
 
+        final Thread checkTimeOut = new Thread(){
+            public void run()
+            {
+                try {
+                    Thread.sleep(2000);
+                    Message completeMessage = handler.obtainMessage();
+                    completeMessage.sendToTarget();
+                } catch (InterruptedException e) {
+                    Log.d("Utility info :", "Thread 'check time out' interrupted with success GET.");
+                }
+            }
+        };
+
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                checkTimeOut.interrupt();
                 setJsonList(response, linearLayout);
             }
         }, new Response.ErrorListener() {
-
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, "Timeout. Retrying in case the online database was asleep.", Toast.LENGTH_LONG).show();
+                if(error.networkResponse != null && error.networkResponse.statusCode == 503) {
+                    checkTimeOut.interrupt();
+                    Toast.makeText(MainActivity.this, "Platforms database is under maintenance.", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 JsonObjectRequest jsonObjectRequestRetry = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
                     @Override
@@ -438,9 +515,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this, "Timeout.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Something went wrong reaching the database.", Toast.LENGTH_LONG).show();
                     }
                 });
+
                 try {
                     Thread.sleep(3000);
                     queue.add(jsonObjectRequestRetry);
@@ -450,8 +528,66 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        checkTimeOut.start();
         queue.add(jsonObjectRequest);
         linearLayout.setMinimumHeight(linearLayout.getHeight() + 100);
+        linearLayout.setMinimumWidth(lstopo.getScreen_width());
+    }
+
+    public void createSyntheticLayout() {
+        setMode("synthetic");
+        layout.removeAllViews();
+        layout.setMinimumWidth(lstopo.getScreen_width());
+        layout.setMinimumHeight(lstopo.getScreen_height());
+
+        final EditText edit = new EditText(this);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                lstopo.getScreen_width() / 3,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+
+        edit.setX((float)(lstopo.getScreen_width() - params.width) / 2);
+        edit.setY((float) lstopo.getScreen_height() / 3);
+        //edit.setLayoutParams(params);
+
+        final Button startSynthetic = new Button(this);
+        startSynthetic.setText("Start synthetic");
+        RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(
+                lstopo.getScreen_width() / 4,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+
+        startSynthetic.setX((float)(lstopo.getScreen_width() - params2.width) / 2);
+        startSynthetic.setY((float) lstopo.getScreen_height() / 3 + (float) lstopo.getScreen_height() / 10);
+
+        layout.addView(edit, params);
+        layout.addView(startSynthetic, params2);
+
+        GradientDrawable shape =  new GradientDrawable();
+        shape.setStroke(4, Color.BLACK);
+        shape.setCornerRadius(12);
+        shape.setColor(Color.WHITE);
+
+        edit.setBackground(shape);
+        edit.setTextSize(20);
+        edit.setHintTextColor(Color.LTGRAY);
+        edit.setHint("node:2 pu:3");
+        edit.setPadding(30, 0, 30, 0);
+        edit.setVisibility(VISIBLE);
+
+        startSynthetic.setVisibility(VISIBLE);
+        startSynthetic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menuItems.setCheckedItems(menuItems.outputFormat.get(0));
+                layout.removeAllViews();
+                topology = edit.getText().toString();
+                setMode("draw");
+
+                if(topology.equals("") || startWithInput(lstopo, 1, "", topology, options) != 0 )
+                    Toast.makeText(MainActivity.this, "Synthetic topology not valid...", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /**
@@ -469,6 +605,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 tv.setY(i * 50);
                 tv.setText(title);
                 tv.setTextSize(20);
+                tv.setMaxWidth(lstopo.getScreen_width());
 
                 linearLayout.setMinimumHeight(linearLayout.getMinimumHeight() + 150);
                 linearLayout.addView(tv);
@@ -558,11 +695,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             lstopo.setScreen_width(dpToPx(newConfig.screenWidthDp));
             lstopo.setScreenSize();
             layout.removeAllViews();
-            if(topology == "phone")
-                start(lstopo, 1, "");
+            if(topology.equals("phone"))
+                start(lstopo, 1, "", options);
             else
-                startWithInput(lstopo, 4, "", topology);
+                startWithInput(lstopo, 4, "", topology, options);
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if ( v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                    Log.d("focus", "touchevent");
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if(imm != null)
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     public int dpToPx(int dp){
@@ -670,11 +826,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
+        public int getInputTopologySelected() {
+            for (MenuItem i : inputTopology) {
+                if (i.isChecked())
+                    return inputTopology.indexOf(i);
+            }
+
+            return -1;
+        }
+
     }
 }
-
-//TODO: Fix third xml on API
-//TODO: Rotation on tablet ?
-//TODO: y a des topos (genre une des premieres AMD où on ne peut pas zoomer assez pour voir le texte en tout petit dans les boites de lstopo)
-//TODO: avoir un endroit ou on peut configurer des trucs. activer/desactiver la factorisation notamment. on pourrait y mettre plein d'autres options mais la plupar sont inutile. --whole-io pour afficher tous les I/O devices eventuellement. et --disallowed pour les objets desactivés
-//TODO: dans l'infobulle des objets, tu peux mettre le cpuset et le nodeset (attention, ils sont nuls pour les objets I/O ou misc)

@@ -29,6 +29,14 @@
                 android:layout_height="40dp"
                 android:background="@drawable/button_border"
                 android:text="Filters"/>
+            <Button
+                android:id="@+id/options"
+                android:textAllCaps="false"
+                android:layout_marginStart="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/button_border"
+                android:text="Options"/>
         </androidx.appcompat.widget.Toolbar>
         <View
         android:background="@color/black"
@@ -36,24 +44,28 @@
         android:layout_height="2dp" />
         <com.hwloc.lstopo.ZoomView.ZoomView
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            android:id="@+id/zoomview">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/zoom">
+                    <HorizontalScrollView
+                        android:id="@+id/h_scrollview"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content">
+                        <RelativeLayout
+                            android:id="@+id/relative_layout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            app:layout_constraintRight_toRightOf="parent"
+                            tools:context="com.android.lstopo.com.example.lstopo.MainActivity">
 
-                <RelativeLayout
-                android:id="@+id/relative_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintRight_toRightOf="parent"
-                tools:context="com.android.lstopo.com.example.lstopo.MainActivity">
-                </RelativeLayout>
-
+                        </RelativeLayout>
+                    </HorizontalScrollView>
             </RelativeLayout>
-
         </com.hwloc.lstopo.ZoomView.ZoomView>
 
     </LinearLayout>

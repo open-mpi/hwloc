@@ -28,6 +28,9 @@
                 <item
                     android:id="@+id/activity_main_drawer_LocalXML"
                     android:title="Local XML" />
+                <item
+                    android:id="@+id/activity_main_drawer_Synthetic_Topology"
+                    android:title="Synthetic topology" />
             </menu>
         </item>
 </menu>
