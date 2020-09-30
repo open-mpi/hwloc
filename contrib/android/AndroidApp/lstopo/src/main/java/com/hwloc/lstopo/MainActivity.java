@@ -1,5 +1,6 @@
 package com.hwloc.lstopo;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 
@@ -426,7 +428,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Timeout. Retrying in case the online database was asleep.", Toast.LENGTH_LONG).show();
+
+                JsonObjectRequest jsonObjectRequestRetry = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        setJsonList(response, linearLayout);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainActivity.this, "Timeout.", Toast.LENGTH_LONG).show();
+                    }
+                });
+                try {
+                    Thread.sleep(3000);
+                    queue.add(jsonObjectRequestRetry);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 

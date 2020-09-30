@@ -7,9 +7,9 @@
     <uses-permission android:name = "android.permission.INTERNET"/>
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher_background"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <provider
@@ -35,6 +35,5 @@
             android:theme="@style/AppTheme.CustomTheme">
         </activity>
     </application>
-
 
 </manifest>

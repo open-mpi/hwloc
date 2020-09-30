@@ -225,3 +225,4 @@ test-suite.log
 /contrib/android/AndroidApp/.idea
 /contrib/android/AndroidApp/lstopo/.externalNativeBuild
 /contrib/android/AndroidApp/lstopo/build
+/contrib/android/AndroidApp/lstopo/release

@@ -20,26 +20,25 @@
             android:layout_marginBottom="50dp"
             android:textSize="20dp"
             android:text="How do you want to import your topology ?"/>
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal"
             android:layout_marginBottom="50dp">
             <Button
                 android:id="@+id/xml"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="12dp"
-                android:text="XML" />
+                android:layout_gravity="center_horizontal"
+                android:text="Local XML file" />
             <Button
                 android:id="@+id/synthetic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="12dp"
-                android:text="Synthetic" />
-        </RelativeLayout>
+                android:layout_gravity="center_horizontal"
+                android:text="Synthetic description" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
