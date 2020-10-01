@@ -21,6 +21,7 @@ Version 2.4.0
 -------------
 * API
   + Add hwloc/cpukinds.h for reporting information about hybrid CPUs.
+    - Use x86 CPUID hybrid leaf to identify Intel Atom and Core cores.
 * Backends
   + Properly handle Linux kernel 5.10+ exposing ACPI HMAT information
     with knowledge of Generic Initiators.

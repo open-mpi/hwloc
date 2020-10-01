@@ -36,7 +36,7 @@ extern "C" {
  * may be obtained with hwloc_cpukinds_get_by_cpuset().
  *
  * Each set is described by an abstracted efficiency value and
- * an array of info attributes.
+ * an array of info attributes (for instance the "CoreType").
  *
  * A higher efficiency value means intrinsic greater performance
  * (and possibly less performance/power efficiency).
@@ -99,7 +99,7 @@ hwloc_cpukinds_get_by_cpuset(hwloc_topology_t topology,
  * the efficiency of all kinds is set to \c -1,
  * and kinds are reported in no specific order.
  *
- * The array of info attributes
+ * The array of info attributes (for instance the "CoreType")
  * and its length are returned in \p infos or \p nr_infos.
  * The array belongs to the topology, it should not be freed or modified.
  *
