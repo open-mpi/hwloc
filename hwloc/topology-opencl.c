@@ -33,6 +33,9 @@
 /* Copyright (c) 2008-2018 The Khronos Group Inc. */
 #define HWLOC_CL_DEVICE_TYPE_CUSTOM (1<<4)
 
+/* Only supported since OpenCL 2.0 */
+/* Copyright (c) 2008-2013 The Khronos Group Inc. */
+#define HWLOC_CL_PLATFORM_NOT_FOUND_KHR -1001
 
 static int
 hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
@@ -58,7 +61,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
 
   clret = clGetPlatformIDs(0, NULL, &nr_platforms);
   if (CL_SUCCESS != clret || !nr_platforms) {
-    if (CL_SUCCESS != clret && !hwloc_hide_errors()) {
+    if (CL_SUCCESS != clret && HWLOC_CL_PLATFORM_NOT_FOUND_KHR != clret && !hwloc_hide_errors()) {
       fprintf(stderr, "OpenCL: Failed to get number of platforms with clGetPlatformIDs(): %d\n", clret);
     }
     return -1;
