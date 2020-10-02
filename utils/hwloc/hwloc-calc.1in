@@ -173,8 +173,16 @@ This option enables \fB\-\-local\-memory\fR.
 Enable the listing of local memory nodes with \fB\-\-local\-memory\fR,
 but only display the local node that has the best value for the memory
 attribute given by \fI<name>\fR (or as an index).
+
 If the memory attribute values depend on the initiator, the hwloc-calc
 input objects are used as the initiator.
+
+Standard attribute names are \fICapacity\fR, \fILocality\fR,
+\fIBandwidth\fR, and \fILatency\fR.
+All existing attributes in the current topology may be listed with
+
+    $ lstopo --memattrs
+
 .TP
 \fB\-\-sep <sep>\fR
 Change the field separator in the output.

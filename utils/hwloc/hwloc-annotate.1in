@@ -97,8 +97,16 @@ Set the memory attribute (whose name is \fIname\fR)
 from initiator \fIinitiator\fR (either an object or a CPU-set)
 to target NUMA node \fIlocation\fR
 to value \fIvalue\fR.
+
 If this attribute does not require specific initiators,
 \fIinitiator\fR is ignored.
+
+Standard attribute names are \fICapacity\fR, \fILocality\fR,
+\fIBandwidth\fR, and \fILatency\fR.
+All existing attributes in the input topology may be listed with
+
+    $ lstopo --memattrs -i input.xml
+
 .TP
 .B distances <filename> [<flags>]
 Specifies new distances to be added to the topology using specifications in \fI<filename>\fR.
