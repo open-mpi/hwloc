@@ -53,8 +53,16 @@ Include objects disallowed by administrative limitations.
 \fB--best-memattr\fR <name>
 Select the best NUMA node among the given memory binding set by looking
 at the memory attribute given by \fI<name>\fR (or as an index).
+
 If the memory attribute values depend on the initiator, the CPU binding
 set is used as the initiator.
+
+Standard attribute names are \fICapacity\fR, \fILocality\fR,
+\fIBandwidth\fR, and \fILatency\fR.
+All existing attributes in the current topology may be listed with
+
+    $ lstopo --memattrs
+
 .TP
 \fB--hbm\fR
 Only take high bandwidth memory nodes (Intel Xeon Phi MCDRAM)
