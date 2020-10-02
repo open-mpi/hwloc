@@ -472,7 +472,8 @@ int main(int argc, char *argv[])
           unsigned long mavflags = 0;
 
           if (mavname) {
-            if (hwloc_memattr_get_by_name(topology, mavname, &mavid) < 0) {
+            mavid = hwloc_utils_parse_memattr_name(topology, mavname);
+            if (mavid == (hwloc_memattr_id_t) -1) {
               fprintf(stderr, "Failed to find memattr by name %s\n", mavname);
               goto out_with_topology;
             }
