@@ -965,7 +965,7 @@ following environment variables.
   system calls and really do binding, while the XML backend would otherwise
   provide empty hooks just returning success.
   This can be used for efficiency reasons to first detect the topology once,
-  save it to an XML file, and quickly reload it later through the XML
+  save it to a XML file, and quickly reload it later through the XML
   backend, but still having binding functions actually do bind.
   This also enables support for the variable HWLOC_THISSYSTEM_ALLOWED_RESOURCES.
   </dd>
@@ -1514,7 +1514,7 @@ dedicated helpers (such as hwloc_get_pcidev_by_busid(), see
 I/O objects do not actually contain any locality information because
 their CPU sets and node sets are NULL.
 Their locality must be retrieved by walking up the object tree
-(through the <tt>parent</tt> link) until an non-I/O object is found
+(through the <tt>parent</tt> link) until a non-I/O object is found
 (see hwloc_get_non_io_ancestor_obj()).
 This normal object should have non-NULL CPU sets and node sets
 which describe the processing units and memory that are immediately
@@ -1615,7 +1615,7 @@ Machine (24GB total)
 hwloc topologies may be annotated with Misc objects
 (of type <tt>::HWLOC_OBJ_MISC</tt>)
 either automatically or by the user.
-This is an flexible way to annotate topologies with
+This is a flexible way to annotate topologies with
 large sets of information since Misc objects may be inserted
 anywhere in the topology (to annotate specific objects or
 parts of the topology), even below other Misc objects, and each
@@ -2704,7 +2704,7 @@ The second requires that your software project uses the GNU Autoconf /
 Automake / Libtool tool chain to build your software.  If you do this,
 you can directly integrate hwloc's m4 configure macro into your
 configure script.  You can then invoke hwloc's configuration tests and
-build setup by calling an m4 macro (see below).
+build setup by calling a m4 macro (see below).
 
 Although hwloc dynamic shared object plugins may be used in embedded
 mode, the embedder project will have to manually setup dlopen or libltdl in its
@@ -3885,7 +3885,7 @@ Applications that walked up/down to find NUMANode parent/children must
 now be updated.
 Instead of looking directly for a NUMA node, one should now look for
 an object that has some memory children.
-NUMA node(s) will be be attached there.
+NUMA node(s) will be attached there.
 For instance, when looking for a NUMA node above a given core <tt>core</tt>:
 \verbatim
 hwloc_obj_t parent = core->parent;
@@ -3950,11 +3950,11 @@ Moreover, it is compatible with the hwloc v1.x API.
 
 I/O children are not in the main object children list anymore either.
 They are in the list starting at <code>obj->io_first_child</code>
-and whose size if <code>obj->io_arity</code>.
+and its size is <code>obj->io_arity</code>.
 
 Misc children are not in the main object children list anymore.
 They are in the list starting at <code>obj->misc_first_child</code>
-nd whose size if <code>obj->misc_arity</code>.
+and its size is <code>obj->misc_arity</code>.
 
 See hwloc_obj for details about children lists.
 
