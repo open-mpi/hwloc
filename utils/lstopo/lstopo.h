@@ -75,8 +75,13 @@ struct lstopo_output {
 
   /* legend */
   enum lstopo_show_legend_e show_legend;
+#define LSTOPO_LEGEND_DEFAULT_LINES 3 /* hostname + index + date */
+  char legend_default_lines[LSTOPO_LEGEND_DEFAULT_LINES][128];
+  unsigned legend_default_lines_nr;
+  unsigned legend_info_lines_nr;
   char ** legend_append;
   unsigned legend_append_nr;
+  unsigned legend_maxtextwidth;
 
   /* text config */
   int show_distances_only;

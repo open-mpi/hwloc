@@ -1408,89 +1408,114 @@ output_draw(struct lstopo_output *loutput)
   struct lstopo_obj_userdata *rlud = root->userdata;
   unsigned depth = 100;
   unsigned totwidth, totheight, offset, i, j;
-  time_t t;
-  char text[3][128];
-  unsigned ntext = 0;
-  char hostname[122] = "";
-  const char *forcedhostname = NULL;
-  unsigned long hostname_size = sizeof(hostname);
-  unsigned maxtextwidth = 0, textwidth;
-  unsigned infocount = 0;
 
-  if (loutput->show_legend == LSTOPO_SHOW_LEGEND_ALL) {
-    /* build the default legend lines */
-    forcedhostname = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "HostName");
-    if (!forcedhostname && hwloc_topology_is_thissystem(topology)) {
+  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
+    unsigned maxtextwidth = 0, textwidth;
+    unsigned ndl = 0;
+    char hostname[122] = "";
+    unsigned long hostname_size = sizeof(hostname);
+    unsigned infocount = 0;
+
+    /* prepare legend lines and compute the width */
+    if (loutput->show_legend == LSTOPO_SHOW_LEGEND_ALL) {
+      time_t t;
+      const char *forcedhostname = NULL;
+
+      /* build the default legend lines */
+      forcedhostname = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "HostName");
+      if (!forcedhostname && hwloc_topology_is_thissystem(topology)) {
 #if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
-      GetComputerName(hostname, &hostname_size);
+        GetComputerName(hostname, &hostname_size);
 #else
-      gethostname(hostname, hostname_size);
+        gethostname(hostname, hostname_size);
 #endif
-    }
-    if (forcedhostname || *hostname) {
-      if (forcedhostname)
-	snprintf(text[ntext], sizeof(text[ntext]), "Host: %s", forcedhostname);
-      else
-	snprintf(text[ntext], sizeof(text[ntext]), "Host: %s", hostname);
-      textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
-      if (textwidth > maxtextwidth)
-	maxtextwidth = textwidth;
-      ntext++;
-    }
-
-    /* Display whether we're showing physical or logical IDs */
-    if (loutput->index_type != LSTOPO_INDEX_TYPE_DEFAULT) {
-      snprintf(text[ntext], sizeof(text[ntext]), "Indexes: %s", (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL ? "logical" : "physical"));
-      textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
-      if (textwidth > maxtextwidth)
-	maxtextwidth = textwidth;
-      ntext++;
-    }
-
-    /* Display timestamp */
-    t = time(NULL);
-#ifdef HAVE_STRFTIME
-    {
-      struct tm *tmp;
-      tmp = localtime(&t);
-      strftime(text[ntext], sizeof(text[ntext]), "Date: %c", tmp);
-    }
-#else /* HAVE_STRFTIME */
-    {
-      char *date;
-      unsigned n;
-      date = ctime(&t);
-      n = (unsigned) strlen(date);
-      if (n && date[n-1] == '\n') {
-        date[n-1] = 0;
       }
-      snprintf(text[ntext], sizeof(text[ntext]), "Date: %s", date);
-    }
-#endif /* HAVE_STRFTIME */
-    textwidth = get_textwidth(loutput, text[ntext], (unsigned) strlen(text[ntext]), fontsize);
-    if (textwidth > maxtextwidth)
-      maxtextwidth = textwidth;
-    ntext++;
-  }
+      if (forcedhostname || *hostname) {
+        snprintf(loutput->legend_default_lines[ndl],
+                 sizeof(loutput->legend_default_lines[ndl]),
+                 "Host: %s",
+                 forcedhostname ? forcedhostname : hostname);
+        textwidth = get_textwidth(loutput,
+                                  loutput->legend_default_lines[ndl],
+                                  (unsigned) strlen(loutput->legend_default_lines[ndl]),
+                                  fontsize);
+        if (textwidth > maxtextwidth)
+          maxtextwidth = textwidth;
+        ndl++;
+      }
 
-  if (loutput->show_legend != LSTOPO_SHOW_LEGEND_NONE) {
-    /* look at custom legend lines in root info attr and --append-legend */
-    for(i=0; i<root->infos_count; i++) {
-      if (!strcmp(root->infos[i].name, "lstopoLegend")) {
-        infocount++;
-        textwidth = get_textwidth(loutput, root->infos[i].value, (unsigned) strlen(root->infos[i].value), fontsize);
+      /* Display whether we're showing physical or logical IDs */
+      if (loutput->index_type != LSTOPO_INDEX_TYPE_DEFAULT) {
+        snprintf(loutput->legend_default_lines[ndl],
+                 sizeof(loutput->legend_default_lines[ndl]),
+                 "Indexes: %s",
+                 (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL ? "logical" : "physical"));
+        textwidth = get_textwidth(loutput,
+                                  loutput->legend_default_lines[ndl],
+                                  (unsigned) strlen(loutput->legend_default_lines[ndl]),
+                                  fontsize);
+        if (textwidth > maxtextwidth)
+          maxtextwidth = textwidth;
+        ndl++;
+      }
+
+      /* Display timestamp */
+      t = time(NULL);
+#ifdef HAVE_STRFTIME
+      {
+        struct tm *tmp;
+        tmp = localtime(&t);
+        strftime(loutput->legend_default_lines[ndl],
+                 sizeof(loutput->legend_default_lines[ndl]),
+                 "Date: %c",
+                 tmp);
+      }
+#else /* HAVE_STRFTIME */
+      {
+        char *date;
+        unsigned n;
+        date = ctime(&t);
+        n = (unsigned) strlen(date);
+        if (n && date[n-1] == '\n') {
+          date[n-1] = 0;
+        }
+        snprintf(loutput->legend_default_lines[ndl],
+                 sizeof(loutput->legend_default_lines[ndl]),
+                 "Date: %s",
+                 date);
+      }
+#endif /* HAVE_STRFTIME */
+      textwidth = get_textwidth(loutput,
+                                loutput->legend_default_lines[ndl],
+                                (unsigned) strlen(loutput->legend_default_lines[ndl]),
+                                fontsize);
+      if (textwidth > maxtextwidth)
+        maxtextwidth = textwidth;
+      ndl++;
+    }
+
+    if (loutput->show_legend != LSTOPO_SHOW_LEGEND_NONE) {
+      /* look at custom legend lines in root info attr and --append-legend */
+      for(i=0; i<root->infos_count; i++) {
+        if (!strcmp(root->infos[i].name, "lstopoLegend")) {
+          infocount++;
+          textwidth = get_textwidth(loutput, root->infos[i].value, (unsigned) strlen(root->infos[i].value), fontsize);
+          if (textwidth > maxtextwidth)
+            maxtextwidth = textwidth;
+        }
+      }
+      for(i=0; i<loutput->legend_append_nr; i++) {
+        textwidth = get_textwidth(loutput, loutput->legend_append[i], (unsigned) strlen(loutput->legend_append[i]), fontsize);
         if (textwidth > maxtextwidth)
           maxtextwidth = textwidth;
       }
     }
-    for(i=0; i<loutput->legend_append_nr; i++) {
-      textwidth = get_textwidth(loutput, loutput->legend_append[i], (unsigned) strlen(loutput->legend_append[i]), fontsize);
-      if (textwidth > maxtextwidth)
-        maxtextwidth = textwidth;
-    }
-  }
 
-  if (loutput->drawing == LSTOPO_DRAWING_PREPARE) {
+    /* save legend info for later */
+    loutput->legend_maxtextwidth = maxtextwidth;
+    loutput->legend_default_lines_nr = ndl;
+    loutput->legend_info_lines_nr = infocount;
+
     /* compute root size, our size, and save it */
 
     output_align_PU_textwidth(loutput);
@@ -1499,15 +1524,17 @@ output_draw(struct lstopo_output *loutput)
 
     /* loutput width is max(root, legend) */
     totwidth = rlud->width;
-    if (maxtextwidth + 2*gridsize > totwidth)
-      totwidth = maxtextwidth + 2*gridsize;
+    if (loutput->legend_maxtextwidth + 2*gridsize > totwidth)
+      totwidth = loutput->legend_maxtextwidth + 2*gridsize;
     loutput->width = totwidth;
 
     /* loutput height is sum(root, legend) */
     totheight = rlud->height;
     if (loutput->show_legend != LSTOPO_SHOW_LEGEND_NONE
-        && (ntext + infocount + loutput->legend_append_nr))
-      totheight += gridsize + (ntext + infocount + loutput->legend_append_nr - 1) * (linespacing+fontsize) + fontsize + gridsize;
+        && (ndl + infocount + loutput->legend_append_nr))
+      totheight += gridsize
+        + (ndl + infocount + loutput->legend_append_nr - 1) * (linespacing + fontsize)
+        + fontsize + gridsize;
     loutput->height = totheight;
 
   } else { /* LSTOPO_DRAWING_DRAW */
@@ -1520,20 +1547,27 @@ output_draw(struct lstopo_output *loutput)
 
     /* Draw legend */
     if (loutput->show_legend != LSTOPO_SHOW_LEGEND_NONE
-        && (ntext + infocount + loutput->legend_append_nr)) {
+        && (loutput->legend_default_lines_nr + loutput->legend_info_lines_nr + loutput->legend_append_nr)) {
       offset = rlud->height + gridsize;
-      methods->box(loutput, &WHITE_COLOR, depth, 0, loutput->width, totheight, gridsize + (ntext + infocount + loutput->legend_append_nr - 1) * (linespacing + fontsize) + fontsize + gridsize, NULL, 0);
-      for(i=0; i<ntext; i++, offset += linespacing + fontsize)
-	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, text[i], NULL, i);
+      methods->box(loutput, &WHITE_COLOR, depth,
+                   0,
+                   loutput->width,
+                   totheight,
+                   gridsize
+                   + (loutput->legend_default_lines_nr + loutput->legend_info_lines_nr + loutput->legend_append_nr - 1) * (linespacing + fontsize)
+                   + fontsize + gridsize,
+                   NULL, 0);
+      for(i=0; i<loutput->legend_default_lines_nr; i++, offset += linespacing + fontsize)
+	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_default_lines[i], NULL, i);
       for(i=0, j=0; i<root->infos_count; i++) {
         if (!strcmp(root->infos[i].name, "lstopoLegend")) {
-          methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, root->infos[i].value, NULL, j+ntext);
+          methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, root->infos[i].value, NULL, j+loutput->legend_default_lines_nr);
           j++;
           offset += linespacing + fontsize;
         }
       }
       for(i=0; i<loutput->legend_append_nr; i++, offset += linespacing + fontsize)
-	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_append[i], NULL, i+ntext+infocount);
+	methods->text(loutput, &BLACK_COLOR, fontsize, depth, gridsize, offset, loutput->legend_append[i], NULL, i+loutput->legend_default_lines_nr+loutput->legend_info_lines_nr);
     }
   }
 }
