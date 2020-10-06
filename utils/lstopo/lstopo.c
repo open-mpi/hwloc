@@ -1469,22 +1469,18 @@ main (int argc, char *argv[])
   }
 
   hwloc_bitmap_fill(loutput.cpubind_set);
-#ifndef ANDROID
   if (loutput.pid_number != -1 && loutput.pid_number != 0)
     hwloc_get_proc_cpubind(topology, loutput.pid, loutput.cpubind_set, 0);
   else
     /* get our binding even if --pid not given, it may be used by --restrict */
     hwloc_get_cpubind(topology, loutput.cpubind_set, 0);
-#endif
 
   hwloc_bitmap_fill(loutput.membind_set);
-#ifndef ANDROID
   if (loutput.pid_number != -1 && loutput.pid_number != 0)
     hwloc_get_proc_membind(topology, loutput.pid, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
   else
     /* get our binding even if --pid not given, it may be used by --restrict */
     hwloc_get_membind(topology, loutput.membind_set, &policy, HWLOC_MEMBIND_BYNODESET);
-#endif
 
   loutput.need_pci_domain = lstopo_check_pci_domains(topology);
 
