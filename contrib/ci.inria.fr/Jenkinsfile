@@ -1,13 +1,5 @@
 #!groovy
 
-// This "extended pipeline" runs longer tests:
-// * builds a tarball as usual
-// * uses that tarball for
-//   + running Unix Debug checks
-//   + building MinGW Windows zipballs
-//   + running Embedded checks
-//   + running Coverity and Sonarscanner analysis
-//
 // The GIT checkout must use the remote branch name as the checkout local
 // branch name so that tarball names contain the branch name.
 // In "Additional Behaviours", enable "Checkout to specific local branch"
@@ -19,11 +11,34 @@ def gitBranch = ""
 def tarballgz
 def tarballbz2
 def statusHasChanged = false
-def isBasicJob = env.JOB_NAME.matches("basic/(.*)")
-def isExtendedJob = env.JOB_NAME.matches("extended/(.*)")
 
+def isBasicJob = env.JOB_NAME.matches("basic/(.*)")
 println('This is '+(isBasicJob ? '' : 'NOT ')+'an official Basic job.')
+
+def isExtendedJob = env.JOB_NAME.matches("extended/(.*)")
 println('This is '+(isExtendedJob ? '' : 'NOT ')+'an official Extended job.')
+
+// all jobs run on Unix nodes (either with debug or not)
+def doUnix = (env.NO_UNIX != 'true')
+println('Unix is '+(doUnix ? 'enabled.' : 'disabled.'))
+def doDebug = (isExtendedJob || env.FORCE_DEBUG == 'true')
+println('Debug is '+(doDebug ? 'enabled.' : 'disabled.'))
+// extended job doesn't run MSVC
+def doMSVC = (!isExtendedJob && env.NO_MSVC != 'true')
+println('MSVC is '+(doMSVC ? 'enabled.' : 'disabled.'))
+// basic job doesn't run Coverity/Sonarqube/Embedded/MinGW/Cygwin/Android
+def doCoverity = (!isBasicJob && env.NO_COVERITY != 'true')
+println('Coverity is '+(doCoverity ? 'enabled.' : 'disabled.'))
+def doSonarQube = (!isBasicJob && env.NO_SONARQUBE != 'true')
+println('SonarQube is '+(doSonarQube ? 'enabled.' : 'disabled.'))
+def doEmbedded = (!isBasicJob && env.NO_EMBEDDED != 'true')
+println('Embedded is '+(doEmbedded ? 'enabled.' : 'disabled.'))
+def doMinGW = (!isBasicJob && env.NO_MINGW != 'true')
+println('MinGW is '+(doMinGW ? 'enabled.' : 'disabled.'))
+def doCygwin = (!isBasicJob && env.NO_CYGWIN != 'true')
+println('Cygwin is '+(doCygwin ? 'enabled.' : 'disabled.'))
+def doAndroid =  (!isBasicJob && env.NO_ANDROID != 'true')
+println('Android is '+(doAndroid ? 'enabled.' : 'disabled.'))
 
 pipeline {
         agent none
@@ -52,6 +67,8 @@ pipeline {
                                         sh 'tar zcvf android.tar.gz contrib/android'
                                         stash includes: "android.tar.gz", name: 'tar-android'
                                         dir('contrib/ci.inria.fr') {
+						stash includes: "job-1-check.sh", name: 'script-unix-check'
+						stash includes: "job-1-visualstudio.bat", name: 'script-msvc'
 						stash includes: "job-3-debug.sh", name: 'script-unix-debug'
 						stash includes: "job-3-embedded.sh", name: 'script-embedded'
 						stash includes: "job-3-coverity.sh", name: 'script-coverity'
@@ -69,31 +86,45 @@ pipeline {
 			steps {
 				script {
 					listOfNodeNames = []
-					if (env.NO_UNIX != 'true') {
+					if (doUnix) {
 						listOfNodeNames = nodesByLabel('unix')
 					}
-					if (env.NO_MINGW != 'true') {
+					if (doMSVC) {
+						listOfNodeNames.push('VisualStudio')
+					}
+					if (doMinGW) {
 						listOfNodeNames.push('MinGW')
 					}
-					if (env.NO_COVERITY != 'true') {
-						listOfNodeNames.push('Coverity')
+					if (doCygwin) {
+						listOfNodeNames.push('Cygwin')
 					}
-					if (env.NO_SONARQUBE != 'true') {
-						listOfNodeNames.push('SonarQube Scanner')
-					}
-					if (env.NO_EMBEDDED != 'true') {
-						listOfNodeNames.push('Embedded')
-					}
-					if (env.NO_CYGWIN != 'true') {
-						listOfNodeNames.push('cygwin')
-					}
-					if(env.NO_ANDROID != 'true') {
+					if (doAndroid) {
 						listOfNodeNames.push('AndroidStudio')
 					}
+					if (doCoverity) {
+						listOfNodeNames.push('Coverity')
+					}
+					if (doSonarQube) {
+						listOfNodeNames.push('SonarQube Scanner')
+					}
+					if (doEmbedded) {
+						listOfNodeNames.push('Embedded')
+					}
+					println('listOfNodeNames: '+listOfNodeNames)
 
 					def p = listOfNodeNames.collectEntries {
 					[ (it): {
-						if (it == 'MinGW') {
+						if (it == 'VisualStudio') {
+							node('msvc') {
+								dir('check-msvc') {
+									unstash 'tarballgz'
+									unstash 'script-msvc'
+									bat 'job-1-visualstudio.bat '+tarballgz
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
+								}
+							}
+						} else if (it == 'MinGW') {
 							node('mingw') {
 								dir('check-mingw') {
 									unstash 'tarballgz'
@@ -104,7 +135,7 @@ pipeline {
 										deleteDir()
 								}
 							}
-						} else if (it == 'cygwin') {
+						} else if (it == 'Cygwin') {
 							node('cygwin') {
 								dir('check-cygwin') {
 									unstash 'tarballgz'
@@ -156,12 +187,22 @@ pipeline {
 										deleteDir()
 								}
 							}
-						} else {
+						} else if (doDebug) {
 							node(it) {
 								dir('check-unix-debug') {
 									unstash 'tarballgz'
 									unstash 'script-unix-debug'
 									sh 'chmod 755 job-3-debug.sh && ./job-3-debug.sh '+tarballgz
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
+								}
+							}
+						} else {
+							node(it) {
+								dir('check-unix') {
+									unstash 'tarballgz'
+									unstash 'script-unix-check'
+									sh 'chmod 755 job-1-check.sh && ./job-1-check.sh '+tarballgz
 									if (env.KEEP_WORKING_DIRECTORY != 'true')
 										deleteDir()
 								}
