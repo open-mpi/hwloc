@@ -57,25 +57,45 @@ pipeline {
 					script {
 						gitRepoURL = sh (script: 'git config --get remote.origin.url', returnStdout: true).trim()
 						gitBranch = sh (script: 'if test "$BRANCH_NAME"; then echo $BRANCH_NAME; else git rev-parse --abbrev-ref HEAD; fi', returnStdout: true).trim()
+						sh 'contrib/ci.inria.fr/job-0-tarball.sh '+gitBranch
+						tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
+						tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
+						stash includes: tarballgz, name: 'tarballgz'
+						if (doAndroid) {
+							sh 'tar zcvf android.tar.gz contrib/android'
+							stash includes: "android.tar.gz", name: 'tar-android'
+						}
 					}
-                                        sh 'contrib/ci.inria.fr/job-0-tarball.sh '+gitBranch
-                                        script {
-                                                tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
-                                                tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
-                                        }
-                                        stash includes: tarballgz, name: 'tarballgz'
-                                        sh 'tar zcvf android.tar.gz contrib/android'
-                                        stash includes: "android.tar.gz", name: 'tar-android'
-                                        dir('contrib/ci.inria.fr') {
-						stash includes: "job-1-check.sh", name: 'script-unix-check'
-						stash includes: "job-1-visualstudio.bat", name: 'script-msvc'
-						stash includes: "job-3-debug.sh", name: 'script-unix-debug'
-						stash includes: "job-3-embedded.sh", name: 'script-embedded'
-						stash includes: "job-3-coverity.sh", name: 'script-coverity'
-						stash includes: "job-3-sonarscanner.sh", name: 'script-sonarscanner'
-						stash includes: "job-3-mingw.*", name: 'scripts-mingw'
-						stash includes: "job-3-cygwin.*", name: 'scripts-cygwin'
-						stash includes: "job-3-android.sh", name: 'script-android'
+					dir('contrib/ci.inria.fr') {
+						script {
+							if (doUnix && !doDebug) {
+								stash includes: "job-1-check.sh", name: 'script-unix-check'
+							}
+							if (doUnix && doDebug) {
+								stash includes: "job-3-debug.sh", name: 'script-unix-debug'
+							}
+							if (doMSVC) {
+								stash includes: "job-1-visualstudio.bat", name: 'script-msvc'
+							}
+							if (doMinGW) {
+								stash includes: "job-3-mingw.*", name: 'scripts-mingw'
+							}
+							if (doCygwin) {
+								stash includes: "job-3-cygwin.*", name: 'scripts-cygwin'
+							}
+							if (doAndroid) {
+								stash includes: "job-3-android.sh", name: 'script-android'
+							}
+							if (doEmbedded) {
+								stash includes: "job-3-embedded.sh", name: 'script-embedded'
+							}
+							if (doCoverity) {
+								stash includes: "job-3-coverity.sh", name: 'script-coverity'
+							}
+							if (doSonarQube) {
+								stash includes: "job-3-sonarscanner.sh", name: 'script-sonarscanner'
+							}
+						}
 					}
 					archiveArtifacts artifacts: tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
 					deleteDir()
