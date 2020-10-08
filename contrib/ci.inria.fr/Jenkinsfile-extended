@@ -19,14 +19,19 @@ def gitBranch = ""
 def tarballgz
 def tarballbz2
 def statusHasChanged = false
+def isBasicJob = env.JOB_NAME.matches("basic/(.*)")
+def isExtendedJob = env.JOB_NAME.matches("extended/(.*)")
+
+println('This is '+(isBasicJob ? '' : 'NOT ')+'an official Basic job.')
+println('This is '+(isExtendedJob ? '' : 'NOT ')+'an official Extended job.')
 
 pipeline {
         agent none
 
 	// Trigger the build
 	triggers {
-		// Poll GitHub explicitly on per night, in case webhooks aren't used
-		pollSCM('0 4 * * *')
+		// extended/* jobs poll GitHub explicitly once per night, in case webhooks aren't used
+		pollSCM(isExtendedJob ? '0 4 * * *' : '')
 	}
 
         stages {
