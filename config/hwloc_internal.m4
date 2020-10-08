@@ -366,6 +366,34 @@ EOF
       AC_CHECK_FUNCS([clock_gettime])
     ])
 
+    # Check for ptrace support
+    hwloc_have_ptrace=1
+    AC_CHECK_HEADERS([sys/ptrace.h],, [hwloc_have_ptrace=0])
+    AC_CHECK_FUNCS([ptrace],, [hwloc_have_ptrace=0])
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+        #include "sys/ptrace.h"
+        int main(void){
+	  return ptrace(PTRACE_SEIZE,
+	                -1,
+			0,
+			(void*)(PTRACE_O_TRACECLONE|PTRACE_O_TRACEFORK));
+	}
+      ]])],, [hwloc_have_ptrace=0])   
+    AM_CONDITIONAL([HWLOC_HAVE_PTRACE],[test $hwloc_have_ptrace -eq 1])
+    AC_DEFINE_UNQUOTED([HWLOC_HAVE_PTRACE], [$hwloc_have_ptrace], [Whether ptrace is present and supports PTRACE_SEIZE or not])
+
+    # Check if syscall gettid is available.
+    hwloc_have_sys_gettid=1
+    AC_CHECK_HEADERS([sys/syscall.h],, [hwloc_have_sys_gettid=0])
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+       #include "sys/syscall.h"
+       #ifndef SYS_gettid
+       #error "syscall SYS_gettid not found"
+       #endif
+       int main(void){ return syscall(SYS_gettid) > 0;}
+    ]])],,[hwloc_have_sys_gettid=0])
+    AC_DEFINE_UNQUOTED([HWLOC_HAVE_SYS_GETTID], [$hwloc_have_sys_gettid], [Whether syscall header is present and SYS_gettid macro is defined or not])
+
     # Only generate this if we're building the utilities
     # Even the netloc library Makefile is here because
     # we don't embed libnetloc yet, it's useless without tools
@@ -396,7 +424,11 @@ AC_DEFUN([HWLOC_SETUP_TESTS],[
 ###
 EOF
 
-    AC_CHECK_LIB([pthread], [pthread_self], [hwloc_have_pthread=yes])
+    # Check thread support.
+    AC_CHECK_LIB([pthread], [pthread_self], [hwloc_have_pthread=1], [hwloc_have_pthread=0])
+    AC_DEFINE_UNQUOTED([HWLOC_HAVE_PTHREAD], [$hwloc_have_pthread], [Whether we have the pthread library or not])
+    AM_CONDITIONAL([HWLOC_HAVE_PTHREAD], [test $hwloc_have_pthread -eq 1]) AC_CHECK_LIB([pthread], [pthread_self], [hwloc_have_pthread=yes])
+    AC_OPENMP
 
     HWLOC_PKG_CHECK_MODULES([NUMA], [numa], [numa_available], [numa.h],
                             [hwloc_have_linux_libnuma=yes],

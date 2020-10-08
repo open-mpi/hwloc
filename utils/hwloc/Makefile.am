@@ -168,3 +168,24 @@ endif HWLOC_HAVE_LINUX
 
 distclean-local:
 	rm -f $(nodist_man_MANS)
+
+# Build hwloc-thread-bind
+if HWLOC_HAVE_PTRACE
+if HWLOC_HAVE_PTHREAD
+AM_LDFLAGS+=-lpthread
+endif #HWLOC_HAVE_PHREAD
+noinst_LTLIBRARIES+=libhwloc-thread-bind.la
+libhwloc_thread_bind_la_SOURCES=hwloc-thread-bind-utils.c hwloc-thread-bind.h
+LIBDADD=$(HWLOC_top_builddir)/hwloc/libhwloc.la
+
+bin_PROGRAMS += hwloc-thread-bind
+hwloc_thread_bind_SOURCES = \
+	hwloc-thread-bind.c \
+	hwloc-thread-bind.h
+LDADD+=$(HWLOC_top_builddir)/hwloc/libhwloc.la
+LDADD+=libhwloc-thread-bind.la
+check_PROGRAMS=test-hwloc-thread-bind
+if !HWLOC_HAVE_MINGW32
+TESTS+=test-hwloc-thread-bind
+endif #!HWLOC_HAVE_MINGW32
+endif #HWLOC_HAVE_PTRACE
