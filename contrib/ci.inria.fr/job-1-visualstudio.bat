@@ -1,5 +1,5 @@
 REM
-REM  Copyright © 2012-2018 Inria.  All rights reserved.
+REM  Copyright © 2012-2020 Inria.  All rights reserved.
 REM  See COPYING in top-level directory.
 REM
 
@@ -13,7 +13,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 cd %TARBALL:~0,-7%\contrib\windows
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-%MSBUILD_PATH%\MSBuild hwloc.sln /p:Configuration=Release /p:Platform=x64
+MSBuild /p:Configuration=Release /p:Platform=x64 hwloc.sln
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 x64\Release\lstopo-no-graphics.exe
