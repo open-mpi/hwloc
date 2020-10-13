@@ -36,4 +36,5 @@ EXTRA_DIST = \
 	lstopo-win.vcxproj \
 	lstopo-win.vcxproj.filters \
 	lstopo.vcxproj \
-	lstopo.vcxproj.filters
+	lstopo.vcxproj.filters \
+	app.manifest
