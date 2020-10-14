@@ -88,7 +88,8 @@ pipeline {
 						listOfNodeNames.push('VisualStudio')
 					}
 					if (doMinGW) {
-						listOfNodeNames.push('MinGW')
+						listOfNodeNames.push('MinGW64')
+						listOfNodeNames.push('MinGW32')
 					}
 					if (doCygwin) {
 						listOfNodeNames.push('Cygwin')
@@ -116,12 +117,23 @@ pipeline {
 										deleteDir()
 								}
 							}
-						} else if (it == 'MinGW') {
-							node('mingw') {
-								dir('check-mingw') {
+						} else if (it == 'MinGW64') {
+							node('mingw64') {
+								dir('check-mingw64') {
 									unstash 'tarballgz'
 									unstash 'scripts-mingw'
-									bat 'job-3-mingw.bat '+tarballgz
+									bat 'job-3-mingw.bat '+tarballgz+' 64'
+									archiveArtifacts artifacts: "*.zip", fingerprint: true, onlyIfSuccessful: true
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
+								}
+							}
+						} else if (it == 'MinGW32') {
+							node('mingw32') {
+								dir('check-mingw32') {
+									unstash 'tarballgz'
+									unstash 'scripts-mingw'
+									bat 'job-3-mingw.bat '+tarballgz+' 32'
 									archiveArtifacts artifacts: "*.zip", fingerprint: true, onlyIfSuccessful: true
 									if (env.KEEP_WORKING_DIRECTORY != 'true')
 										deleteDir()
