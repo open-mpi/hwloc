@@ -1,7 +1,7 @@
 .\" -*- nroff -*-
 .\" Copyright © 2009-2020 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
-.\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+.\" Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-BIND "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -325,6 +325,17 @@ nesting hwloc-bind invocations to set a binding and then report it:
 
     $ hwloc-bind node:1.package:2 -- hwloc-bind --get
     0x00004444,0x44000000
+
+hwloc-calc can also be used to convert cpu mask strings to
+human-readable package/core/PU strings; see the description of -H in
+hwloc-calc(1) for more details.  The following example binds to all
+the PUs in a specific core, uses the --get option to retrieve where
+the process was actually bound, and then uses hwloc-calc to display
+the resulting cpu mask in space-delimited list of human-readable
+locations:
+
+    $ hwloc-bind package:1.core:2 -- hwloc-bind --get | hwloc-calc -H package.core.pu
+    Package:1.Core:2.PU:0 Package:1.Core:2.PU:1
 
 hwloc-calc may convert this output into actual objects, either with logical or physical indexes:
 
