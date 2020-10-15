@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
 .\" Copyright © 2010-2020 Inria.  All rights reserved.
-.\" Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+.\" Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-CALC "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -266,6 +266,18 @@ its even numbered logical processors:
 
     $ hwloc-calc package:2 ~PU:even
     0x00000c00
+
+To convert a cpu mask to human-readable output, the -H option can be
+used to emit a space-delimited list of locations:
+
+    $ echo 0x000000f0 | hwloc-calc -H package.core
+    Package:1.Core1 Package:1.Core:1 Package:1.Core:2 Package:1.Core:3
+
+To use some other character (e.g., a comma) instead of spaces in
+output, use the --sep option:
+
+    $ echo 0x000000f0 | hwloc-calc -H package.core --sep ,
+    Package:1.Core1,Package:1.Core:1,Package:1.Core:2,Package:1.Core:3
 
 To combine two (physical) CPU masks:
 
