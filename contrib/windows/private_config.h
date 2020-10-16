@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
@@ -667,6 +667,10 @@
 
 /* Define this to the thread ID type */
 #define hwloc_thread_t HANDLE
+
+/* Define to 1 if you have the declaration of `GetModuleFileName', and to 0 if
+   you don't. */
+#define HAVE_DECL_GETMODULEFILENAME 1
 
 
 #endif /* HWLOC_CONFIGURE_H */
