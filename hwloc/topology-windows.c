@@ -1081,12 +1081,10 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     hwloc_bitmap_free(groups_pu_set);
   } else {
     /* no processor groups */
-    SYSTEM_INFO sysinfo;
     hwloc_obj_t obj;
     unsigned idx;
-    GetSystemInfo(&sysinfo);
     for(idx=0; idx<32; idx++)
-      if (sysinfo.dwActiveProcessorMask & (((DWORD_PTR)1)<<idx)) {
+      if (SystemInfo.dwActiveProcessorMask & (((DWORD_PTR)1)<<idx)) {
 	obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, idx);
 	obj->cpuset = hwloc_bitmap_alloc();
 	hwloc_bitmap_only(obj->cpuset, idx);
