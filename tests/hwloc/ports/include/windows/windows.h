@@ -96,6 +96,7 @@ typedef int HANDLE;
 #define _ANONYMOUS_STRUCT
 #endif /* __GNUC__ */
 #define DUMMYUNIONNAME
+#define DUMMYSTRUCTNAME
 #define WINAPI
 
 #define ANYSIZE_ARRAY 1
@@ -124,9 +125,24 @@ PVOID WINAPI VirtualAlloc(PVOID,DWORD,DWORD,DWORD);
 BOOL GetNumaAvailableMemoryNode(UCHAR Node, PULONGLONG AvailableBytes);
 
 typedef struct _SYSTEM_INFO {
-  DWORD dwPageSize;
+  _ANONYMOUS_UNION
+  union {
+    DWORD dwOemId;
+    _ANONYMOUS_STRUCT
+    struct {
+      WORD wProcessorArchitecture;
+      WORD wReserved;
+    } DUMMYSTRUCTNAME;
+  } DUMMYUNIONNAME;
+  DWORD     dwPageSize;
+  LPVOID    lpMinimumApplicationAddress;
+  LPVOID    lpMaximumApplicationAddress;
   DWORD_PTR dwActiveProcessorMask;
-  DWORD dwNumberOfProcessors;
+  DWORD     dwNumberOfProcessors;
+  DWORD     dwProcessorType;
+  DWORD     dwAllocationGranularity;
+  WORD      wProcessorLevel;
+  WORD      wProcessorRevision;
 } SYSTEM_INFO, *LPSYSTEM_INFO;
 
 void WINAPI GetSystemInfo(LPSYSTEM_INFO lpSystemInfo);
@@ -172,6 +188,25 @@ LRESULT DispatchMessage(const MSG *lpmsg);
 BOOL TranslateMessage(const MSG *lpMsg);
 BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
 VOID WINAPI PostQuitMessage(int nExitCode);
+
+typedef struct _OSVERSIONINFOEX {
+  DWORD dwOSVersionInfoSize;
+  DWORD dwMajorVersion;
+  DWORD dwMinorVersion;
+  DWORD dwBuildNumber;
+  DWORD dwPlatformId;
+  CHAR  szCSDVersion[128];
+  WORD  wServicePackMajor;
+  WORD  wServicePackMinor;
+  WORD  wSuiteMask;
+  BYTE  wProductType;
+  BYTE  wReserved;
+} OSVERSIONINFOEX;
+typedef OSVERSIONINFOEX* LPOSVERSIONINFO;
+BOOL GetVersionEx(LPOSVERSIONINFO lpVersionInformation);
+void ZeroMemory(PVOID  Destination, SIZE_T Length);
+
+BOOL GetComputerName(LPSTR lpBuffer, LPDWORD nSize);
 
 #define WM_DESTROY 2
 #define WM_SIZE 5
