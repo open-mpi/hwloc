@@ -71,7 +71,7 @@ if test x$NO_CHECK != xtrue; then
 fi
 
 make install
-winball=$(basename $(head config.log | sed -r -n -e 's/.*--prefix=([^ ]+).*/\1/p'))
+
 cd ..
 
 zip -r ../${winball}.zip ${winball}
