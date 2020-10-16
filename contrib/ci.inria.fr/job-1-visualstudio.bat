@@ -16,7 +16,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 MSBuild /p:Configuration=Release /p:Platform=x64 hwloc.sln
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-x64\Release\lstopo-no-graphics.exe
+x64\Release\lstopo-no-graphics.exe -v
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 x64\Release\hwloc-info.exe --support
