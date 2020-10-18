@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.3.1
+-------------
+* Add a documentation section about
+  "Topology Attributes: Distances and Memory Attributes".
+
 
 Version 2.3.0
 -------------
