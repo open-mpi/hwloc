@@ -1983,6 +1983,73 @@ that have a special meaning:
 
 
 
+\page topoattrs Topology Attributes: Distances and Memory Attributes
+
+\htmlonly
+<div class="section">
+\endhtmlonly
+
+Besides the hierarchy of objects and individual object attributes
+(see \ref attributes), hwloc may also expose finer information about
+the hardware organization.
+
+
+\htmlonly
+</div><div class="section" id="topoattrs_distances">
+\endhtmlonly
+\section topoattrs_distances Distances
+
+A machine with 4 CPUs may have identical links between every pairs of CPUs,
+or those CPUs could also only be connected through a ring.
+In the ring case, accessing the memory of nearby CPUs is slower than local
+memory, but it is also faster than accessing the memory of CPU on the
+opposite side of the ring.
+These deep details cannot be exposed in the hwloc hierarchy,
+that is why hwloc also exposes distances.
+
+Distances are matrices of values between sets of objects,
+usually latencies or bandwidths.
+By default, hwloc tries to get a matrix of relative latencies
+between NUMA nodes when exposed by the hardware.
+
+In the aforementioned ring case, the matrix could report 10
+for latency between a NUMA node and itself, 20 for nearby nodes,
+and 30 for nodes that are opposites on the ring.
+Those are theoretical values exposed by hardware vendors
+(in the System Locality Distance Information Table (SLIT) in the ACPI)
+rather than physical latencies.
+
+Users may also specify their own matrices between any set of objects,
+even if these objects are of different types (e.g. bandwidths between GPUs and CPUs).
+
+See \ref hwlocality_distances_get for retrieving distance information
+and \ref hwlocality_distances_add for adding custom matrices.
+The entire API is located in hwloc/distances.h.
+
+
+\htmlonly
+</div><div class="section" id="topoattrs_memattrs">
+\endhtmlonly
+\section topoattrs_memattrs Memory Attributes
+
+Machines with heterogeneous memory, for instance high-bandwidth memory (HBM),
+normal memory (DDR), and/or high-capacity slow memory (such as non-volatile
+memory DIMMs, NVDIMMs) require applications to allocate buffers
+in the appropriate target memory depending on performance and capacity needs.
+Those target nodes may be exposed in the hwloc hierarchy as different
+memory children but there is a need for performance information to select
+the appropriate one.
+
+hwloc memory attributes are designed to expose memory
+information such as latency, bandwidth, etc.
+Users may also specify their own attributes and values.
+
+The memory attributes API is located in hwloc/memattrs.h,
+see \ref hwlocality_memattrs for details.
+
+
+
+
 \page xml Importing and exporting topologies from/to XML files
 
 \htmlonly
@@ -3064,7 +3131,9 @@ processor.
 The focus of hwloc is mainly of the structural modeling side.
 However, hwloc lets user adds performance information to the topology
 through distances
-(see \ref hwlocality_distances_get and \ref hwlocality_distances_add)
+(see \ref topoattrs_distances),
+memory attributes
+(see \ref topoattrs_memattrs)
 or even custom annotations (see \ref faq_annotate).
 hwloc may also use such distance information for grouping objects
 together (see \ref faq_onedim and \ref faq_groups).
@@ -3086,8 +3155,7 @@ of each level.
 For instance, there can be a distance matrix that representing the latencies
 between any pair of NUMA nodes if the BIOS and/or operating system reports them.
 
-For more information about the distance API, see \ref
-hwlocality_distances_get and \ref hwlocality_distances_add.
+For more information about the hwloc distances, see \ref topoattrs_distances.
 
 
 \subsection faq_groups What are these Group objects in my topology?
