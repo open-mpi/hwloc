@@ -484,6 +484,7 @@ The documentation chapters include
 <li> \ref iodevices
 <li> \ref miscobjs
 <li> \ref attributes
+<li> \ref topoattrs
 <li> \ref xml
 <li> \ref synthetic
 <li> \ref interoperability
@@ -859,6 +860,7 @@ threads) are not displayed.
 
 hwloc-annotate may modify object (and topology) attributes such as string information
 (see \ref attributes_info for details) or Misc children objects.
+It may also add distances, memory attributes, etc. to the topology.
 It reads an input topology from a XML file and outputs
 the annotated topology as another XML file.
 
@@ -2022,9 +2024,10 @@ rather than physical latencies.
 Users may also specify their own matrices between any set of objects,
 even if these objects are of different types (e.g. bandwidths between GPUs and CPUs).
 
-See \ref hwlocality_distances_get for retrieving distance information
-and \ref hwlocality_distances_add for adding custom matrices.
 The entire API is located in hwloc/distances.h.
+See also \ref hwlocality_distances_get,
+as well as \ref hwlocality_distances_consult
+and \ref hwlocality_distances_add.
 
 
 \htmlonly
@@ -2045,7 +2048,7 @@ information such as latency, bandwidth, etc.
 Users may also specify their own attributes and values.
 
 The memory attributes API is located in hwloc/memattrs.h,
-see \ref hwlocality_memattrs for details.
+see \ref hwlocality_memattrs and \ref hwlocality_memattrs_manage for details.
 
 
 
