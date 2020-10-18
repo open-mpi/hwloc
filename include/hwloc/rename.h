@@ -413,6 +413,7 @@ extern "C" {
 #define hwloc_cpukinds_get_nr HWLOC_NAME(cpukinds_get_nr)
 #define hwloc_cpukinds_get_by_cpuset HWLOC_NAME(cpukinds_get_by_cpuset)
 #define hwloc_cpukinds_get_info HWLOC_NAME(cpukinds_get_info)
+#define hwloc_cpukinds_register HWLOC_NAME(cpukinds_register)
 
 /* export.h */
 

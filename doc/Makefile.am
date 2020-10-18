@@ -713,7 +713,8 @@ man3_cpukinds_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_cpukinds.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpukinds_get_nr.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpukinds_get_by_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpukinds_get_info.3
+        $(DOX_MAN_DIR)/man3/hwloc_cpukinds_get_info.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpukinds_register.3
 
 man3_diffdir = $(man3dir)
 man3_diff_DATA = \

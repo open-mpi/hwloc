@@ -142,6 +142,11 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
     return -1;
   }
 
+  /* TODO: for now, only windows provides a forced efficiency.
+   * if another backend ever provides a conflicting value, the first backend value will be kept.
+   * (user-provided values are not an issue, they are meant to overwrite)
+   */
+
   /* If we have N kinds currently, we may need 2N+1 kinds after inserting the new one:
    * - each existing kind may get split into which PUs are in the new kind and which aren't.
    * - some PUs might not have been in any kind yet.
@@ -217,6 +222,40 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
   }
 
   topology->nr_cpukinds = newnr;
+  return 0;
+}
+
+int
+hwloc_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t _cpuset,
+                        int forced_efficiency,
+                        unsigned nr_infos, struct hwloc_info_s *infos,
+                        unsigned long flags)
+{
+  hwloc_bitmap_t cpuset;
+  int err;
+
+  if (flags) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (!_cpuset || hwloc_bitmap_iszero(_cpuset)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  cpuset = hwloc_bitmap_dup(_cpuset);
+  if (!cpuset)
+    return -1;
+
+  if (forced_efficiency < 0)
+    forced_efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
+
+  err = hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, nr_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+  if (err < 0)
+    return err;
+
+  hwloc_internal_cpukinds_rank(topology);
   return 0;
 }
 

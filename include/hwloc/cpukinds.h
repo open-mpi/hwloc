@@ -133,6 +133,50 @@ hwloc_cpukinds_get_info(hwloc_topology_t topology,
                         unsigned *nr_infos, struct hwloc_info_s **infos,
                         unsigned long flags);
 
+/** \brief Register a kind of CPU in the topology.
+ *
+ * Mark the PUs listed in \p cpuset as being of the same kind
+ * with respect to the given attributes.
+ *
+ * \p forced_efficiency should be \c -1 if unknown.
+ * Otherwise it is an abstracted efficiency value to enforce
+ * the ranking of all kinds if all of them have valid (and
+ * different) efficiencies.
+ *
+ * The array \p infos of size \p nr_infos may be used to provide
+ * info names and values describing this kind of PUs.
+ *
+ * \p flags must be \c 0 for now.
+ *
+ * Parameters \p cpuset and \p infos will be duplicated internally,
+ * the caller is responsible for freeing them.
+ *
+ * If \p cpuset overlaps with some existing kinds, those might get
+ * modified or split. For instance if existing kind A contains
+ * PUs 0 and 1, and one registers another kind for PU 1 and 2,
+ * there will be 3 resulting kinds:
+ * existing kind A is restricted to only PU 0;
+ * new kind B contains only PU 1 and combines information from A
+ * and from the newly-registered kind;
+ * new kind C contains only PU 2 and only gets information from
+ * the newly-registered kind.
+ *
+ * \note The efficiency \p forced_efficiency provided to this function
+ * may be different from the one reported later by hwloc_cpukinds_get_info()
+ * because hwloc will scale efficiency values down to
+ * between 0 and the number of kinds minus 1.
+ *
+ * \return \c 0 on success.
+ * \return \c -1 with \p errno set to \c EINVAL if some parameters are invalid,
+ * for instance if \p cpuset is \c NULL or empty.
+ */
+HWLOC_DECLSPEC int
+hwloc_cpukinds_register(hwloc_topology_t topology,
+                        hwloc_bitmap_t cpuset,
+                        int forced_efficiency,
+                        unsigned nr_infos, struct hwloc_info_s *infos,
+                        unsigned long flags);
+
 /** @} */
 
 #ifdef __cplusplus
