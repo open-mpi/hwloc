@@ -39,7 +39,8 @@ extern "C" {
  * with hwloc_cpukinds_get_info():
  * an abstracted efficiency value,
  * and an array of info attributes
- * (for instance the "CoreType" and "FrequencyMaxMHz").
+ * (for instance the "CoreType" and "FrequencyMaxMHz",
+ *  see \ref topoattrs_cpukinds).
  *
  * A higher efficiency value means intrinsic greater performance
  * (and possibly less performance/power efficiency).
@@ -112,7 +113,7 @@ hwloc_cpukinds_get_by_cpuset(hwloc_topology_t topology,
  * and kinds are reported in no specific order.
  *
  * The array of info attributes (for instance the "CoreType",
- * "FrequencyMaxMHz" or "FrequencyBaseMHz")
+ * "FrequencyMaxMHz" or "FrequencyBaseMHz", see \ref topoattrs_cpukinds)
  * and its length are returned in \p infos or \p nr_infos.
  * The array belongs to the topology, it should not be freed or modified.
  *
