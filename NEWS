@@ -29,6 +29,7 @@ Version 2.4.0
     with knowledge of Generic Initiators.
 * Tools
   + lstopo has a new --cpukinds option for showing CPU kinds.
+  + hwloc-calc has a new --cpukind option for filtering PUs by kind.
 
 
 Version 2.3.0

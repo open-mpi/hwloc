@@ -298,6 +298,7 @@ _hwloc_calc(){
 		   --restrict
 		   --restrict-flags
 		   --disallowed --whole-system
+		   --cpukind
 		   --input -i
 		   --input-format --if
 		   --no-smt --no-smt=N
@@ -339,6 +340,9 @@ _hwloc_calc(){
 		;;
 	    --best-memattr)
 		COMPREPLY=( "<memattr>" "" )
+		;;
+	    --cpukind)
+		COMPREPLY=( "<name>=<value>" "<n>" "" )
 		;;
 	esac
     fi
