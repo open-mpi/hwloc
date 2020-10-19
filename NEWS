@@ -30,6 +30,7 @@ Version 2.4.0
 * Tools
   + lstopo has a new --cpukinds option for showing CPU kinds.
   + hwloc-calc has a new --cpukind option for filtering PUs by kind.
+  + hwloc-annotate has a new cpukind command for modifying CPU kinds.
 
 
 Version 2.3.0

@@ -213,6 +213,33 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
     printf("%s info %s = %s\n", prefix, info->name, info->value);
   }
 
+  if (hwloc_obj_type_is_normal(obj->type)) {
+    unsigned nr = hwloc_cpukinds_get_nr(topology, 0);
+    hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+    for(i=0; i<nr; i++) {
+      int efficiency;
+      struct hwloc_info_s *infos;
+      unsigned nr_infos, j;
+      int partial;
+      hwloc_cpukinds_get_info(topology, i, cpuset, &efficiency, &nr_infos, &infos, 0);
+      if (hwloc_bitmap_isincluded(obj->cpuset, cpuset))
+        partial = 0;
+      else if (hwloc_bitmap_intersects(obj->cpuset, cpuset))
+        partial = 1;
+      else
+        continue;
+      printf("%s cpukind = %u%s\n",
+             prefix, i, partial ? " (partially)" : "");
+      if (efficiency != -1)
+        printf("%s cpukind efficiency = %d\n",
+               prefix, efficiency);
+      for(j=0; j<nr_infos; j++)
+        printf("%s cpukind info %s = %s\n",
+               prefix, infos[j].name, infos[j].value);
+    }
+    hwloc_bitmap_free(cpuset);
+  }
+
   if (obj->type == HWLOC_OBJ_NUMANODE) {
     /* FIXME display for non-NUMA too.
      * but that's rare so maybe detect in advance whether it's needed?
