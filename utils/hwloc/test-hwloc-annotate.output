@@ -164,4 +164,18 @@
   <memattr name="DummyMemattr2" flags="6">
     <memattr_value target_obj_type="PU" target_obj_gp_index="15" value="123" initiator_cpuset="0x0000000f"/>
   </memattr>
+  <cpukind cpuset="0x00000004" forced_efficiency="7">
+    <info name="foo2" value="bar3"/>
+  </cpukind>
+  <cpukind cpuset="0x00000008" forced_efficiency="7">
+    <info name="foo" value="bar"/>
+    <info name="foo2" value="bar3"/>
+  </cpukind>
+  <cpukind cpuset="0x00000001" forced_efficiency="4">
+    <info name="foo2" value="bar2"/>
+  </cpukind>
+  <cpukind cpuset="0x00000002" forced_efficiency="4">
+    <info name="foo" value="bar"/>
+    <info name="foo2" value="bar2"/>
+  </cpukind>
 </topology>
