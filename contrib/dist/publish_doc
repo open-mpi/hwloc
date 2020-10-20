@@ -62,3 +62,12 @@ cp -f doc/doxygen-doc/hwloc-letter.pdf "$dst/hwloc-v${VERSION}-letter.pdf"
 
 echo "Installing v${VERSION}/ HTML directory ..."
 rsync -avz doc/www.open-mpi.org*inc doc/www.open-mpi.org/html/ "$dst/v${VERSION}/"
+
+echo
+cd "$dst/v${VERSION}/"
+echo "Looking for main page links:"
+echo "- Examples:"
+grep -l '<div class="section" id="cli_examples">' *.php || echo "Not found!"
+echo "- 2.x API upgrade page:"
+grep -l '<div class="title">Upgrading to the hwloc 2.0 API' *.php || echo "Not found!"
+cd ../..
