@@ -1047,6 +1047,19 @@ following environment variables.
   This is useful when trying to find an interesting distance grouping
   accuracy.</dd>
 
+<dt>HWLOC_CPUKINDS_RANKING=default</dt>
+  <dd>change the ranking policy for CPU kinds.
+  By default, the OS-provided efficiency is used for ranking.
+  If not available, the frequency is used on ARM processors,
+  or core type and frequency on other architectures.
+  <br/>
+  This environment variable may be set to
+  <tt>coretype+frequency</tt>, <tt>coretype</tt>,
+  <tt>frequency</tt>, <tt>frequency_base</tt>, <tt>frequency_max</tt>,
+  <tt>forced_efficiency</tt>, <tt>no_forced_efficiency</tt>,
+  <tt>default</tt>, or <tt>none</tt>.
+  </dd>
+
 <dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
 <dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
 <dd>changes the locality of I/O devices behing the specified PCI buses.

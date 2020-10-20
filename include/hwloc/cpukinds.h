@@ -47,9 +47,17 @@ extern "C" {
  * Passing 0 as \p kind_index to hwloc_cpukinds_get_info() will
  * return information about the less efficient CPU kind.
  *
- * Efficiency values are gathered from the Windows API when available.
- * Otherwise hwloc tries to compute efficiencies by comparing CPU kinds.
- * If it fails, all kinds will have an unknown efficiency (\c -1),
+ * When available, efficiency values are gathered from the operating
+ * system (only on Windows 10 for now).
+ * Otherwise hwloc tries to compute efficiencies
+ * by comparing CPU kinds using frequencies (on ARM),
+ * or core types and frequencies (on other architectures).
+ * The environment variable HWLOC_CPUKINDS_RANKING may be used
+ * to change this heuristics, see \ref envvar.
+ *
+ * If hwloc fails to rank any kind, for instance because the operating
+ * system does not expose efficiencies and core frequencies,
+ * all kinds will have an unknown efficiency (\c -1),
  * and they are not indexed/ordered in any specific way.
  *
  * @{
@@ -92,7 +100,7 @@ hwloc_cpukinds_get_by_cpuset(hwloc_topology_t topology,
  * the set of PUs of this kind.
  *
  * The integer pointed by \p efficiency, if not \c NULL will, be filled
- * with the ranking of this kind of CPU in term of efficiency.
+ * with the ranking of this kind of CPU in term of efficiency (see above).
  * It ranges from \c 0 to the number of kinds
  * (as reported by hwloc_cpukinds_get_nr()) minus 1.
  *

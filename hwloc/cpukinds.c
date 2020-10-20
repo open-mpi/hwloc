@@ -6,6 +6,7 @@
 #include "private/autogen/config.h"
 #include "hwloc.h"
 #include "private/private.h"
+#include "private/debug.h"
 
 
 /*****************
@@ -209,10 +210,300 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
  * Ranking
  */
 
-int
-hwloc_internal_cpukinds_rank(struct hwloc_topology *topology __hwloc_attribute_unused)
+static int
+hwloc__cpukinds_try_rank_by_forced_efficiency(struct hwloc_topology *topology)
 {
-  /* TODO */
+  unsigned i,j;
+
+  hwloc_debug("Trying to rank cpukinds by forced efficiency...\n");
+  for(i=0; i<topology->nr_cpukinds; i++) {
+    if (topology->cpukinds[i].forced_efficiency == HWLOC_CPUKIND_EFFICIENCY_UNKNOWN)
+      /* if any unknown, fail */
+      return -1;
+    for(j=i+1; j<topology->nr_cpukinds; j++)
+      if (topology->cpukinds[i].forced_efficiency == topology->cpukinds[j].forced_efficiency)
+        /* if any duplicate, fail */
+        return -1;
+    topology->cpukinds[i].ranking_value = topology->cpukinds[i].forced_efficiency;
+  }
+
+  return 0;
+}
+
+struct hwloc_cpukinds_info_summary {
+  int have_max_freq;
+  int have_base_freq;
+  int have_intel_core_type;
+  struct hwloc_cpukind_info_summary {
+    unsigned intel_core_type; /* 1 for atom, 2 for core */
+    unsigned max_freq, base_freq; /* MHz, hence < 100000 */
+  } * summaries;
+};
+
+static void
+hwloc__cpukinds_summarize_info(struct hwloc_topology *topology,
+                               struct hwloc_cpukinds_info_summary *summary)
+{
+  unsigned i, j;
+
+  summary->have_max_freq = 1;
+  summary->have_base_freq = 1;
+  summary->have_intel_core_type = 1;
+
+  for(i=0; i<topology->nr_cpukinds; i++) {
+    struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
+    for(j=0; j<kind->nr_infos; j++) {
+      struct hwloc_info_s *info = &kind->infos[j];
+      if (!strcmp(info->name, "FrequencyMaxMHz")) {
+        summary->summaries[i].max_freq = atoi(info->value);
+      } else if (!strcmp(info->name, "FrequencyBaseMHz")) {
+        summary->summaries[i].base_freq = atoi(info->value);
+      } else if (!strcmp(info->name, "CoreType")) {
+        if (!strcmp(info->value, "IntelAtom"))
+          summary->summaries[i].intel_core_type = 1;
+        else if (!strcmp(info->value, "IntelCore"))
+          summary->summaries[i].intel_core_type = 2;
+      }
+    }
+    hwloc_debug("cpukind #%u has intel_core_type %u max_freq %u base_freq %u\n",
+                i, summary->summaries[i].intel_core_type,
+                summary->summaries[i].max_freq, summary->summaries[i].base_freq);
+    if (!summary->summaries[i].base_freq)
+      summary->have_base_freq = 0;
+    if (!summary->summaries[i].max_freq)
+      summary->have_max_freq = 0;
+    if (!summary->summaries[i].intel_core_type)
+      summary->have_intel_core_type = 0;
+  }
+}
+
+enum hwloc_cpukinds_ranking {
+  HWLOC_CPUKINDS_RANKING_DEFAULT, /* forced + frequency on ARM, forced + coretype_frequency otherwise */
+  HWLOC_CPUKINDS_RANKING_NO_FORCED_EFFICIENCY, /* default without forced */
+  HWLOC_CPUKINDS_RANKING_FORCED_EFFICIENCY,
+  HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY,
+  HWLOC_CPUKINDS_RANKING_CORETYPE,
+  HWLOC_CPUKINDS_RANKING_FREQUENCY,
+  HWLOC_CPUKINDS_RANKING_FREQUENCY_MAX,
+  HWLOC_CPUKINDS_RANKING_FREQUENCY_BASE,
+  HWLOC_CPUKINDS_RANKING_NONE
+};
+
+static int
+hwloc__cpukinds_try_rank_by_info(struct hwloc_topology *topology,
+                                 enum hwloc_cpukinds_ranking heuristics,
+                                 struct hwloc_cpukinds_info_summary *summary)
+{
+  unsigned i;
+
+  if (HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY == heuristics) {
+    hwloc_debug("Trying to rank cpukinds by coretype+frequency...\n");
+    /* we need intel_core_type + (base or max freq) for all kinds */
+    if (!summary->have_intel_core_type
+        || (!summary->have_max_freq && !summary->have_base_freq))
+      return -1;
+    /* rank first by coretype (Core>>Atom) then by frequency, base if available, max otherwise */
+    for(i=0; i<topology->nr_cpukinds; i++) {
+      struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
+      if (summary->have_base_freq)
+        kind->ranking_value = (summary->summaries[i].intel_core_type << 20) + summary->summaries[i].base_freq;
+      else
+        kind->ranking_value = (summary->summaries[i].intel_core_type << 20) + summary->summaries[i].max_freq;
+    }
+
+  } else if (HWLOC_CPUKINDS_RANKING_CORETYPE == heuristics) {
+    hwloc_debug("Trying to rank cpukinds by coretype...\n");
+    /* we need intel_core_type */
+    if (!summary->have_intel_core_type)
+      return -1;
+    /* rank by coretype (Core>>Atom) */
+    for(i=0; i<topology->nr_cpukinds; i++) {
+      struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
+      kind->ranking_value = (summary->summaries[i].intel_core_type << 20);
+    }
+
+  } else if (HWLOC_CPUKINDS_RANKING_FREQUENCY == heuristics) {
+    hwloc_debug("Trying to rank cpukinds by frequency...\n");
+    /* we need base or max freq for all kinds */
+    if (!summary->have_max_freq && !summary->have_base_freq)
+      return -1;
+    /* rank first by frequency, base if available, max otherwise */
+    for(i=0; i<topology->nr_cpukinds; i++) {
+      struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
+      if (summary->have_base_freq)
+        kind->ranking_value = summary->summaries[i].base_freq;
+      else
+        kind->ranking_value = summary->summaries[i].max_freq;
+    }
+
+  } else if (HWLOC_CPUKINDS_RANKING_FREQUENCY_MAX == heuristics) {
+    hwloc_debug("Trying to rank cpukinds by frequency max...\n");
+    /* we need max freq for all kinds */
+    if (!summary->have_max_freq)
+      return -1;
+    /* rank first by frequency, base if available, max otherwise */
+    for(i=0; i<topology->nr_cpukinds; i++) {
+      struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
+      kind->ranking_value = summary->summaries[i].max_freq;
+    }
+
+  } else if (HWLOC_CPUKINDS_RANKING_FREQUENCY_BASE == heuristics) {
+    hwloc_debug("Trying to rank cpukinds by frequency base...\n");
+    /* we need max freq for all kinds */
+    if (!summary->have_base_freq)
+      return -1;
+    /* rank first by frequency, base if available, max otherwise */
+    for(i=0; i<topology->nr_cpukinds; i++) {
+      struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
+      kind->ranking_value = summary->summaries[i].base_freq;
+    }
+
+  } else assert(0);
+
+  /* if some ranking values are identical, we don't have enough info to rank */
+  for(i=0; i<topology->nr_cpukinds-1; i++)
+    if (topology->cpukinds[i].ranking_value == topology->cpukinds[i+1].ranking_value)
+      return -1;
+  return 0;
+}
+
+static int hwloc__cpukinds_compare_ranking_values(const void *_a, const void *_b)
+{
+  const struct hwloc_internal_cpukind_s *a = _a;
+  const struct hwloc_internal_cpukind_s *b = _b;
+  return a->ranking_value - b->ranking_value;
+}
+
+/* this function requires ranking values to be unique */
+static void
+hwloc__cpukinds_finalize_ranking(struct hwloc_topology *topology)
+{
+  unsigned i;
+  /* sort */
+  qsort(topology->cpukinds, topology->nr_cpukinds, sizeof(*topology->cpukinds), hwloc__cpukinds_compare_ranking_values);
+  /* define our own efficiency between 0 and N-1 */
+  for(i=0; i<topology->nr_cpukinds; i++)
+    topology->cpukinds[i].efficiency = i;
+}
+
+int
+hwloc_internal_cpukinds_rank(struct hwloc_topology *topology)
+{
+  enum hwloc_cpukinds_ranking heuristics;
+  char *env;
+  unsigned i;
+  int err;
+
+  if (!topology->nr_cpukinds)
+    return 0;
+
+  if (topology->nr_cpukinds == 1) {
+    topology->cpukinds[0].efficiency = 0;
+    return 0;
+  }
+
+  heuristics = HWLOC_CPUKINDS_RANKING_DEFAULT;
+  env = getenv("HWLOC_CPUKINDS_RANKING");
+  if (env) {
+    if (!strcmp(env, "default"))
+      heuristics = HWLOC_CPUKINDS_RANKING_DEFAULT;
+    else if (!strcmp(env, "none"))
+      heuristics = HWLOC_CPUKINDS_RANKING_NONE;
+    else if (!strcmp(env, "coretype+frequency"))
+      heuristics = HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY;
+    else if (!strcmp(env, "coretype"))
+      heuristics = HWLOC_CPUKINDS_RANKING_CORETYPE;
+    else if (!strcmp(env, "frequency"))
+      heuristics = HWLOC_CPUKINDS_RANKING_FREQUENCY;
+    else if (!strcmp(env, "frequency_max"))
+      heuristics = HWLOC_CPUKINDS_RANKING_FREQUENCY_MAX;
+    else if (!strcmp(env, "frequency_base"))
+      heuristics = HWLOC_CPUKINDS_RANKING_FREQUENCY_BASE;
+    else if (!strcmp(env, "forced_efficiency"))
+      heuristics = HWLOC_CPUKINDS_RANKING_FORCED_EFFICIENCY;
+    else if (!strcmp(env, "no_forced_efficiency"))
+      heuristics = HWLOC_CPUKINDS_RANKING_NO_FORCED_EFFICIENCY;
+    else if (!hwloc_hide_errors())
+      fprintf(stderr, "Failed to recognize HWLOC_CPUKINDS_RANKING value %s\n", env);
+  }
+
+  if (heuristics == HWLOC_CPUKINDS_RANKING_DEFAULT
+      || heuristics == HWLOC_CPUKINDS_RANKING_NO_FORCED_EFFICIENCY) {
+    /* default is forced_efficiency first */
+    struct hwloc_cpukinds_info_summary summary;
+    enum hwloc_cpukinds_ranking subheuristics;
+    const char *arch;
+
+    if (heuristics == HWLOC_CPUKINDS_RANKING_DEFAULT)
+      hwloc_debug("Using default ranking strategy...\n");
+    else
+      hwloc_debug("Using custom ranking strategy from HWLOC_CPUKINDS_RANKING=%s\n", env);
+
+    if (heuristics != HWLOC_CPUKINDS_RANKING_NO_FORCED_EFFICIENCY) {
+      err = hwloc__cpukinds_try_rank_by_forced_efficiency(topology);
+      if (!err)
+        goto ready;
+    }
+
+    summary.summaries = calloc(topology->nr_cpukinds, sizeof(*summary.summaries));
+    if (!summary.summaries)
+      goto failed;
+    hwloc__cpukinds_summarize_info(topology, &summary);
+
+    arch = hwloc_obj_get_info_by_name(topology->levels[0][0], "Architecture");
+    /* TODO: rather coretype_frequency only on x86/Intel? */
+    if (arch && (!strncmp(arch, "arm", 3) || !strncmp(arch, "aarch", 5)))
+      /* then frequency on ARM */
+      subheuristics = HWLOC_CPUKINDS_RANKING_FREQUENCY;
+    else
+      /* or coretype+frequency otherwise */
+      subheuristics = HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY;
+
+    err = hwloc__cpukinds_try_rank_by_info(topology, subheuristics, &summary);
+    free(summary.summaries);
+    if (!err)
+      goto ready;
+
+  } else if (heuristics == HWLOC_CPUKINDS_RANKING_FORCED_EFFICIENCY) {
+    hwloc_debug("Using custom ranking strategy from HWLOC_CPUKINDS_RANKING=%s\n", env);
+
+    err = hwloc__cpukinds_try_rank_by_forced_efficiency(topology);
+    if (!err)
+      goto ready;
+
+  } else if (heuristics != HWLOC_CPUKINDS_RANKING_NONE) {
+    /* custom heuristics */
+    struct hwloc_cpukinds_info_summary summary;
+
+    hwloc_debug("Using custom ranking strategy from HWLOC_CPUKINDS_RANKING=%s\n", env);
+
+    summary.summaries = calloc(topology->nr_cpukinds, sizeof(*summary.summaries));
+    if (!summary.summaries)
+      goto failed;
+    hwloc__cpukinds_summarize_info(topology, &summary);
+
+    err = hwloc__cpukinds_try_rank_by_info(topology, heuristics, &summary);
+    free(summary.summaries);
+    if (!err)
+      goto ready;
+  }
+
+ failed:
+  /* failed to rank, clear efficiencies */
+  for(i=0; i<topology->nr_cpukinds; i++)
+    topology->cpukinds[i].efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
+  hwloc_debug("Failed to rank cpukinds.\n\n");
+  return 0;
+
+ ready:
+  for(i=0; i<topology->nr_cpukinds; i++)
+    hwloc_debug("cpukind #%u got ranking value %llu\n", i, (unsigned long long) topology->cpukinds[i].ranking_value);
+  hwloc__cpukinds_finalize_ranking(topology);
+#ifdef HWLOC_DEBUG
+  for(i=0; i<topology->nr_cpukinds; i++)
+    assert(topology->cpukinds[i].efficiency == (int) i);
+#endif
+  hwloc_debug("\n");
   return 0;
 }
 
