@@ -12,6 +12,7 @@ dnl Copyright © 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright © 2011      Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2015-2020 Inria.  All rights reserved.
+dnl Copyright © 2020      IBM Corporation.  All rights reserved.
 dnl $COPYRIGHT$
 dnl
 dnl Additional copyrights may follow
@@ -99,6 +100,11 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
           [HWLOC_IF_IFELSE([defined(__INTEL_COMPILER) || defined(__ICC)],
                [hwloc_check_compiler_vendor_result="intel"])])
+
+    # Portland Group
+    AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
+          [HWLOC_IFDEF_IFELSE([__PGI],
+               [hwloc_check_compiler_vendor_result="portland group"])])
 
     # GNU
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
@@ -205,11 +211,6 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
           [HWLOC_IFDEF_IFELSE([__POCC__],
                [hwloc_check_compiler_vendor_result="pelles"])])
-
-    # Portland Group
-    AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([__PGI],
-               [hwloc_check_compiler_vendor_result="portland group"])])
 
     # SAS/C
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
