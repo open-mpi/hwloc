@@ -3543,9 +3543,18 @@ read_node_local_memattrs(struct hwloc_topology *topology,
                          hwloc_obj_t node,
                          const char *path)
 {
-  char accesspath[SYSFS_NUMA_NODE_PATH_LEN];
+  char accessdirpath[SYSFS_NUMA_NODE_PATH_LEN];
+  char accesspath[SYSFS_NUMA_NODE_PATH_LEN+15];
   unsigned rbw = 0, rlat = 0;
   struct hwloc_internal_location_s loc;
+
+  /* starting with Linux 5.10, Generic Initiators may be preferred to CPU initiators.
+   * access0 contains the fastest of GI and CPU. access1 contains the fastest of CPU.
+   * Try access1 to avoid GI if any, or fallback to access0 otherwise.
+   */
+  sprintf(accessdirpath, "%s/node%u/access1/initiators", path, node->os_index);
+  if (hwloc_access(accessdirpath, X_OK, data->root_fd) < 0)
+    sprintf(accessdirpath, "%s/node%u/access0/initiators", path, node->os_index);
 
   loc.type = HWLOC_LOCATION_TYPE_CPUSET;
   loc.location.cpuset = node->cpuset;
@@ -3553,21 +3562,21 @@ read_node_local_memattrs(struct hwloc_topology *topology,
   /* bandwidth in MiB/s and latency in ns, just like in our memattrs API */
 
   /* only read bandwidth/latency for now */
-  sprintf(accesspath, "%s/node%u/access0/initiators/read_bandwidth", path, node->os_index);
+  sprintf(accesspath, "%s/read_bandwidth", accessdirpath);
   if (hwloc_read_path_as_uint(accesspath, &rbw, data->root_fd) == 0 && rbw > 0) {
     hwloc_internal_memattr_set_value(topology, HWLOC_MEMATTR_ID_BANDWIDTH, HWLOC_OBJ_NUMANODE, (hwloc_uint64_t)-1, node->os_index, &loc, rbw);
   }
 
-  sprintf(accesspath, "%s/node%u/access0/initiators/read_latency", path, node->os_index);
+  sprintf(accesspath, "%s/read_latency", accessdirpath);
   if (hwloc_read_path_as_uint(accesspath, &rlat, data->root_fd) == 0 && rlat > 0) {
     hwloc_internal_memattr_set_value(topology, HWLOC_MEMATTR_ID_LATENCY, HWLOC_OBJ_NUMANODE, (hwloc_uint64_t)-1, node->os_index, &loc, rlat);
   }
 
 #if 0
-  sprintf(accesspath, "%s/node%u/access0/initiators/write_bandwidth", path, node->os_index);
+  sprintf(accesspath, "%s/write_bandwidth", accessdirpath);
   if (hwloc_read_path_as_uint(accesspath, &wbw, data->root_fd) == 0 && wbw > 0) {
   }
-  sprintf(accesspath, "%s/node%u/access0/initiators/write_latency", path, node->os_index);
+  sprintf(accesspath, "%s/write_latency", accessdirpath);
   if (hwloc_read_path_as_uint(accesspath, &wlat, data->root_fd) == 0 && wlat > 0) {
   }
 #endif
