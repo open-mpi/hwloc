@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# This hook may be installed in .git/hooks (or ~/.git_template for future clones)
+# and additional/custom checks may be added if needed.
+
+function die() {
+    rc=$1
+    shift;
+    printf "*** GIT PRE-COMMIT HOOK FAILED ***:\n"
+    echo "$@"
+    exit $rc
+}
+
+if test -f contrib/git-hooks/check-versions.sh; then
+   echo "=== Checking versions..."
+   ./contrib/git-hooks/check-versions.sh || die $? "Versions are not up to date"
+else
+   echo "=== No check-versions.sh script -- skipping"
+fi
+
+# If we have a copyright-checking script, run it
+if test -x ./contrib/update-my-copyright.pl; then
+   echo "=== Checking copyrights..."
+   ./contrib/update-my-copyright.pl --check-only --quiet || die $? "Copyrights are not up to date"
+else
+   echo "=== No update-my-copyright.pl script -- skipping"
+fi
