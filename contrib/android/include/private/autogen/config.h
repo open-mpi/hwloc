@@ -625,22 +625,6 @@
 /* Define to 1 if ncurses works, preferred over curses */
 #define HWLOC_USE_NCURSES 1
 
-/* The library version, always available, even in embedded mode, contrary to
-   VERSION */
-#define HWLOC_VERSION "2.1.0a1-git"
-
-/* The library version optional greek suffix string */
-#define HWLOC_VERSION_GREEK "a1"
-
-/* The library version major number */
-#define HWLOC_VERSION_MAJOR 2
-
-/* The library version minor number */
-#define HWLOC_VERSION_MINOR 1
-
-/* The library version release number */
-#define HWLOC_VERSION_RELEASE 0
-
 /* Define to 1 on WINDOWS */
 /* #undef HWLOC_WIN_SYS */
 
