@@ -27,6 +27,7 @@ typedef long LONG, LONG_PTR;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)(void);
 typedef void *PVOID,*LPVOID;
+typedef LONG NTSTATUS;
 typedef char CHAR;
 typedef CHAR *LPSTR;
 typedef LPSTR LPTSTR;
@@ -110,6 +111,7 @@ typedef int HANDLE;
 #define PAGE_EXECUTE_READWRITE	0x0040
 
 WINAPI HINSTANCE LoadLibrary(LPCSTR);
+WINAPI HMODULE GetModuleHandle(LPCSTR);
 WINAPI FARPROC GetProcAddress(HINSTANCE, LPCSTR);
 WINAPI DWORD GetLastError(void);
 

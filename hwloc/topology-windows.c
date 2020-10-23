@@ -228,9 +228,12 @@ static PFN_VIRTUALFREEEX VirtualFreeExProc;
 typedef BOOL (WINAPI *PFN_QUERYWORKINGSETEX)(HANDLE hProcess, PVOID pv, DWORD cb);
 static PFN_QUERYWORKINGSETEX QueryWorkingSetExProc;
 
+typedef NTSTATUS (WINAPI *PFN_RTLGETVERSION)(OSVERSIONINFOEX*);
+PFN_RTLGETVERSION RtlGetVersionProc;
+
 static void hwloc_win_get_function_ptrs(void)
 {
-    HMODULE kernel32;
+  HMODULE kernel32, ntdll;
 
 #if HWLOC_HAVE_GCC_W_CAST_FUNCTION_TYPE
 #pragma GCC diagnostic ignored "-Wcast-function-type"
@@ -274,6 +277,9 @@ static void hwloc_win_get_function_ptrs(void)
       if (psapi)
         QueryWorkingSetExProc = (PFN_QUERYWORKINGSETEX) GetProcAddress(psapi, "QueryWorkingSetEx");
     }
+
+    ntdll = GetModuleHandle("ntdll");
+    RtlGetVersionProc = (PFN_RTLGETVERSION) GetProcAddress(ntdll, "RtlGetVersion");
 
 #if HWLOC_HAVE_GCC_W_CAST_FUNCTION_TYPE
 #pragma GCC diagnostic warning "-Wcast-function-type"
@@ -766,7 +772,17 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
   osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-  GetVersionEx((LPOSVERSIONINFO)&osvi);
+
+  if (RtlGetVersionProc) {
+    /* RtlGetVersion() returns the currently-running Windows version */
+    RtlGetVersionProc(&osvi);
+  } else {
+    /* GetVersionEx() and isWindows10OrGreater() depend on what the manifest says
+     * (manifest of the program, not of libhwloc.dll), they may return old versions
+     * if the currently-running Windows is not listed in the manifest.
+     */
+    GetVersionEx((LPOSVERSIONINFO)&osvi);
+  }
 
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
