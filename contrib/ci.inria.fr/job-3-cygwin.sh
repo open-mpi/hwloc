@@ -31,6 +31,7 @@ cd build
 make
 test x$NO_CHECK = xtrue || make check
 utils/lstopo/lstopo-no-graphics -v
+utils/hwloc/hwloc-info --support
 cd ..
 
 exit 0
