@@ -7,6 +7,13 @@ call %JENKINS_CONFIG_DIR%\\ciprofile.bat
 
 set TARBALL=%1
 
+echo ###############################
+echo Running on:
+hostname
+ver
+echo Tarball: %TARBALL%
+echo ############################
+
 sh -c "tar xfz %TARBALL%"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
