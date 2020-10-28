@@ -18,6 +18,7 @@ discovery:disallowed_pu = 0
 discovery:numa = 1
 discovery:numa_memory = 1
 discovery:disallowed_numa = 0
+discovery:cpukind_efficiency = 0
 cpubind:set_thisproc_cpubind = 0
 cpubind:get_thisproc_cpubind = 0
 cpubind:set_proc_cpubind = 0

@@ -1280,7 +1280,7 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
   if (name && topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT) {
 #ifdef HWLOC_DEBUG
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
@@ -1292,6 +1292,7 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
     else DO(discovery,numa_memory);
     else DO(discovery,disallowed_pu);
     else DO(discovery,disallowed_numa);
+    else DO(discovery,cpukind_efficiency);
     else DO(cpubind,set_thisproc_cpubind);
     else DO(cpubind,get_thisproc_cpubind);
     else DO(cpubind,set_proc_cpubind);
@@ -2987,7 +2988,7 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
 
 #ifdef HWLOC_DEBUG
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
@@ -3010,6 +3011,7 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
   DO(discovery,numa_memory);
   DO(discovery,disallowed_pu);
   DO(discovery,disallowed_numa);
+  DO(discovery,cpukind_efficiency);
   DO(cpubind,set_thisproc_cpubind);
   DO(cpubind,get_thisproc_cpubind);
   DO(cpubind,set_proc_cpubind);

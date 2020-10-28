@@ -806,7 +806,7 @@ main (int argc, char *argv[])
 
 #ifdef HWLOC_DEBUG
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
@@ -818,6 +818,7 @@ main (int argc, char *argv[])
     DO(discovery, numa);
     DO(discovery, numa_memory);
     DO(discovery, disallowed_numa);
+    DO(discovery, cpukind_efficiency);
 
     DO(cpubind, set_thisproc_cpubind);
     DO(cpubind, get_thisproc_cpubind);

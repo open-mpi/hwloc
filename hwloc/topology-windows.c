@@ -1219,8 +1219,10 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       }
   }
 
-  if (has_efficiencyclass)
+  if (has_efficiencyclass) {
+    topology->support.discovery->cpukind_efficiency = 1;
     hwloc_win_efficiency_classes_register(topology, &eclasses);
+  }
 
  out:
   if (has_efficiencyclass)

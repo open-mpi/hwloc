@@ -49,7 +49,8 @@ extern "C" {
  * return information about the less efficient CPU kind.
  *
  * When available, efficiency values are gathered from the operating
- * system (only on Windows 10 for now).
+ * system (when \p cpukind_efficiency is set in the
+ * struct hwloc_topology_discovery_support array, only on Windows 10 for now).
  * Otherwise hwloc tries to compute efficiencies
  * by comparing CPU kinds using frequencies (on ARM),
  * or core types and frequencies (on other architectures).

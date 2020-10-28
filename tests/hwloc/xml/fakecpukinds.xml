@@ -15,6 +15,7 @@
       </object>
     </object>
   </object>
+  <support name="discovery.cpukind_efficiency"/>
   <support name="custom.exported_support"/>
   <cpukind cpuset="0x00000003" forced_efficiency="0">
     <info name="CoreType" value="MySmallCore"/>
