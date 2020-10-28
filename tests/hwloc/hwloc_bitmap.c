@@ -1,12 +1,14 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2020 Inria.  All rights reserved.
  * Copyright © 2009, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 #include "hwloc.h"
+
+#include "private/misc.h" /* for HWLOC_BITS_PER_LONG */
 
 #include <assert.h>
 
@@ -29,6 +31,48 @@ int main(void)
   assert(hwloc_bitmap_nr_ulongs(set) == 0);
   assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
   assert(masks[0] == 0UL);
+  assert(masks[1] == 0UL);
+  assert(masks[2] == 0UL);
+  assert(masks[3] == 0UL);
+  assert(masks[4] == 0UL);
+  assert(masks[5] == 0UL);
+  assert(masks[6] == 0UL);
+  assert(masks[7] == 0UL);
+  assert(masks[8] == 0UL);
+  assert(masks[9] == 0UL);
+  /* check a bitmap with only the first bit */
+  hwloc_bitmap_only(set, 0);
+  assert(hwloc_bitmap_weight(set) == 1);
+  assert(hwloc_bitmap_first(set) == 0);
+  assert(hwloc_bitmap_last(set) == 0);
+  assert(hwloc_bitmap_to_ulong(set) == 0x1);
+  assert(hwloc_bitmap_to_ith_ulong(set, 0) == 0x1);
+  assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == 1);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == 0x1);
+  assert(masks[1] == 0UL);
+  assert(masks[2] == 0UL);
+  assert(masks[3] == 0UL);
+  assert(masks[4] == 0UL);
+  assert(masks[5] == 0UL);
+  assert(masks[6] == 0UL);
+  assert(masks[7] == 0UL);
+  assert(masks[8] == 0UL);
+  assert(masks[9] == 0UL);
+  /* check a bitmap with the entire first ulong */
+  hwloc_bitmap_from_ulong(set, ~0UL);
+  assert(hwloc_bitmap_weight(set) == HWLOC_BITS_PER_LONG);
+  assert(hwloc_bitmap_first(set) == 0);
+  assert(hwloc_bitmap_last(set) == HWLOC_BITS_PER_LONG-1);
+  assert(hwloc_bitmap_to_ulong(set) == ~0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 0) == ~0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 1) == 0UL);
+  assert(hwloc_bitmap_to_ith_ulong(set, 23) == 0UL);
+  assert(hwloc_bitmap_nr_ulongs(set) == 1);
+  assert(!hwloc_bitmap_to_ulongs(set, 10, masks));
+  assert(masks[0] == ~0UL);
   assert(masks[1] == 0UL);
   assert(masks[2] == 0UL);
   assert(masks[3] == 0UL);
