@@ -73,7 +73,6 @@ topo_cairo_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
 
   cairo_rectangle(c, x, y, width, height);
   cairo_set_source_rgb(c, 0, 0, 0);
-  cairo_set_line_width(c, loutput->thickness);
   cairo_stroke(c);
 }
 
@@ -86,7 +85,6 @@ topo_cairo_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor
 
   cairo_move_to(c, x1, y1);
   cairo_set_source_rgb(c, (float) r / 255, (float) g / 255, (float) b / 255);
-  cairo_set_line_width(c, loutput->thickness);
   cairo_line_to(c, x2, y2);
   cairo_stroke(c);
 }
@@ -131,6 +129,7 @@ topo_cairo_paint(struct lstopo_cairo_output *coutput)
   cairo_t *c = cairo_create(cs);
   coutput->context = c;
   cairo_set_font_size(c, fontsize);
+  cairo_set_line_width(c, coutput->loutput->thickness);
   output_draw(coutput->loutput);
   cairo_show_page(c);
   cairo_destroy(c);
