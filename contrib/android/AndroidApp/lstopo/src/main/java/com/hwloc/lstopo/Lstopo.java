@@ -51,13 +51,13 @@ public class Lstopo extends AppCompatActivity {
     /**
      * Draw topology box
      */
-    public void box(int r, int b, int g, int x, int y, final int width, final int height, int id, String info){
+    public void box(int r, int g, int b, int x, int y, final int width, final int height, int id, String info){
         LinearLayout view = new LinearLayout(activity);
         view.setOrientation(LinearLayout.VERTICAL);
         view.setId(id);
         layout.addView(view);
         setBoxInfo(view, info);
-        setBoxAttributes(view, r, b, g,
+        setBoxAttributes(view, r, g, b,
                 (int) (xscale * x),
                 (int) (yscale * y),
                 (int) (xscale * width),
@@ -106,7 +106,7 @@ public class Lstopo extends AppCompatActivity {
         });
     }
 
-    private void setBoxAttributes(View view, int r, int b, int g, int x, int y, int width, int height){
+    private void setBoxAttributes(View view, int r, int g, int b, int x, int y, int width, int height){
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
         view.setY(y);
         view.setX(x);

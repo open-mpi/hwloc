@@ -155,7 +155,7 @@ void JNIbox(int r, int g, int b, int x, int y, int width, int height, int gp_ind
     jmethodID ctor = (*tools.jni)->GetMethodID(tools.jni, class, "<init>", "([BLjava/lang/String;)V");
     jstring str = (jstring) (*tools.jni)->NewObject(tools.jni, class, ctor, array, strEncode);
 
-    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, tools.methods.box, r, b, g, x, y, width, height, gp_index, str);
+    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, tools.methods.box, r, g, b, x, y, width, height, gp_index, str);
     (*tools.jni)->DeleteLocalRef(tools.jni, str);
     (*tools.jni)->DeleteLocalRef(tools.jni, array);
     (*tools.jni)->DeleteLocalRef(tools.jni, strEncode);
