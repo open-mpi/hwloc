@@ -33,4 +33,14 @@
                     android:title="Synthetic topology" />
             </menu>
         </item>
+        <item android:title="Help" android:id="@+id/Help">
+            <menu android:id="@+id/menu_about">
+                <item
+                    android:id="@+id/activity_main_drawer_debug"
+                    android:title="Discovery log" />
+                <item
+                    android:id="@+id/activity_main_drawer_about"
+                    android:title="About" />
+            </menu>
+        </item>
 </menu>

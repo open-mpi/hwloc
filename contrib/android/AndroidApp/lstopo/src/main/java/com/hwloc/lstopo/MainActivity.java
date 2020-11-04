@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private File txtFile;
     private File xmlFile;
     private File jpgFile;
+    private File debugFile;
     // Queue to send API get requests
     private RequestQueue queue;
     // Current menu mode
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Progress dialog on URL request
     private ProgressDialog progressDialog;
     // Buttons
-    Button filters;
+    Button filtersButton;
     Button optionsButton;
     // Current navigation
     MenuItems menuItems;
@@ -142,9 +143,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         txtFile = getAbsoluteFile("/topology.txt");
         xmlFile = getAbsoluteFile("/topology.xml");
         jpgFile = getAbsoluteFile("/topology.jpg");
+        debugFile = getAbsoluteFile("/application_log.txt");
 
-        filters = findViewById(R.id.filters);
-        filters.setOnClickListener(new View.OnClickListener() {
+        filtersButton = findViewById(R.id.filters);
+        filtersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivityForResult(new Intent(MainActivity.this, Filters.class), 3);
@@ -187,9 +189,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * Add share button
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.share_menu, menu);
         return true;
     }
@@ -215,15 +219,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         menuItems.setCheckedItems(item);
-        lstopo.clearDebugFile();
         zoomView.resetZoom();
 
         switch (id){
             case R.id.activity_main_drawer_draw :
-                if(topology.equals("phone") && menuItems.getInputTopologySelected() != 0)
-                    menuItems.setCheckedItems(menuItems.inputTopology.get(0));
+                if(topology.equals("phone") && !menuItems.isInputPhoneSelected())
+                    menuItems.setPhoneInput();
 
+                lstopo.clearDebugFile();
                 layout.removeAllViews();
+
                 if(topology.equals("phone"))
                     start(lstopo, 1, "", options);
                 else
@@ -231,10 +236,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setMode("draw");
                 break;
             case R.id.activity_main_drawer_text:
-                if(topology.equals("phone") && menuItems.getInputTopologySelected() != 0)
-                    menuItems.setCheckedItems(menuItems.inputTopology.get(0));
+                if(topology.equals("phone") && !menuItems.isInputPhoneSelected())
+                    menuItems.setPhoneInput();
 
                 try {
+                    lstopo.clearDebugFile();
                     layout.removeAllViews();
                     //JNI can't overwrite file
                     txtFile.delete();
@@ -251,10 +257,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     break;
                 }
             case R.id.activity_main_drawer_xml:
-                if(topology.equals("phone") && menuItems.getInputTopologySelected() != 0)
-                    menuItems.setCheckedItems(menuItems.inputTopology.get(0));
+                if(topology.equals("phone") && !menuItems.isInputPhoneSelected())
+                    menuItems.setPhoneInput();
 
                 try {
+                    lstopo.clearDebugFile();
                     layout.removeAllViews();
                     //JNI can't overwrite file
                     xmlFile.delete();
@@ -275,11 +282,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 layout.removeAllViews();
 
                 start(lstopo, 1, "", options);
-                menuItems.setCheckedItems(menuItems.outputFormat.get(0));
+                menuItems.setDrawFormat();
                 mode = "draw";
                 break;
             case R.id.activity_main_drawer_API:
-                menuItems.setCheckedItems(menuItems.outputFormat.get(0));
+                menuItems.setDrawFormat();
                 downloadTopology();
                 break;
             case R.id.activity_main_drawer_LocalXML:
@@ -287,6 +294,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.activity_main_drawer_Synthetic_Topology:
                 createSyntheticLayout();
+                break;
+            case R.id.activity_main_drawer_debug:
+                final Uri data = FileProvider.getUriForFile(this, "com.hwloc.lstopo.fileprovider", debugFile);
+                this.grantUriPermission(this.getPackageName(), data, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                final Intent intent = new Intent(Intent.ACTION_VIEW)
+                        .setDataAndType(data, "text/plain")
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                this.startActivity(intent);
+                break;
+            case R.id.activity_main_drawer_about:
+                Intent intentAbout = new Intent(MainActivity.this, About.class);
+                startActivityForResult(intentAbout, 5);
                 break;
             default:
                 break;
@@ -298,27 +317,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     /**
-     * Handle button visibility according to current menu
+     * Set current mode and handle button visibility according to current menu
      * */
     private void setMode(String mode){
         this.mode = mode;
         switch(mode){
             case "draw":
-                filters.setVisibility(GONE);
+                filtersButton.setVisibility(GONE);
                 optionsButton.setVisibility(VISIBLE);
 
                 break;
             case "xml":
             case "txt":
-                filters.setVisibility(GONE);
+                filtersButton.setVisibility(GONE);
                 optionsButton.setVisibility(VISIBLE);
                 break;
             case "download":
-                filters.setVisibility(VISIBLE);
+                filtersButton.setVisibility(VISIBLE);
                 optionsButton.setVisibility(GONE);
                 break;
             case "synthetic":
-                filters.setVisibility(GONE);
+                filtersButton.setVisibility(GONE);
                 optionsButton.setVisibility(GONE);
                 break;
         }
@@ -446,6 +465,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * Check network connection
+     * */
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -534,6 +556,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         linearLayout.setMinimumWidth(lstopo.getScreen_width());
     }
 
+    /**
+     * Create synthetic input menu
+     * */
     public void createSyntheticLayout() {
         setMode("synthetic");
         layout.removeAllViews();
@@ -579,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startSynthetic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                menuItems.setCheckedItems(menuItems.outputFormat.get(0));
+                menuItems.setDrawFormat();
                 layout.removeAllViews();
                 topology = edit.getText().toString();
                 setMode("draw");
@@ -702,6 +727,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * Leave text input on touch elsewhere (for synthetic input)
+     * */
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -833,6 +861,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             return -1;
+        }
+
+        public boolean isInputPhoneSelected() {
+            return inputTopology.get(0).isChecked();
+        }
+
+        public void setDrawFormat() {
+            menuItems.setCheckedItems(menuItems.outputFormat.get(0));
+        }
+
+        public void setPhoneInput() {
+            menuItems.setCheckedItems(menuItems.inputTopology.get(0));
         }
 
     }

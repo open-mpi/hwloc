@@ -35,6 +35,9 @@
         <activity android:name="com.hwloc.lstopo.Options"
             android:theme="@style/AppTheme.CustomTheme">
         </activity>
+        <activity android:name="com.hwloc.lstopo.About"
+            android:theme="@style/AppTheme.CustomTheme">
+        </activity>
     </application>
 
 </manifest>
