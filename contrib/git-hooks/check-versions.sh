@@ -21,7 +21,7 @@ android_major=$(grep -w HWLOC_VERSION_MAJOR $android_config_h | grep -oP '[0-9]+
 android_minor=$(grep -w HWLOC_VERSION_MINOR $android_config_h | grep -oP '[0-9]+')
 android_release=$(grep -w HWLOC_VERSION_RELEASE $android_config_h | grep -oP '[0-9]+')
 android_greek=$(grep -w HWLOC_VERSION_GREEK $android_config_h | grep -oP '".*"' | tr -d \")
-android_gradle_version=$(grep -w versionName $android_gradle | grep -oP '".*"' | tr -d \" | grep -oP '.+?(?=~)') 
+android_gradle_version=$(grep -w versionName $android_gradle | grep -oP '".*"' | tr -d \" | grep -oP '.+?(?=[-~])')
 windows_major=$(grep -w HWLOC_VERSION_MAJOR $windows_config_h | grep -oP '[0-9]+')
 windows_minor=$(grep -w HWLOC_VERSION_MINOR $windows_config_h | grep -oP '[0-9]+')
 windows_release=$(grep -w HWLOC_VERSION_RELEASE $windows_config_h | grep -oP '[0-9]+')
