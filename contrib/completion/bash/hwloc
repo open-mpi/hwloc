@@ -50,6 +50,7 @@ _lstopo() {
 		   --allow
 		   --flags
 		   --children-order
+		   --no-cpukinds
 		   --fontsize
 		   --gridsize
 		   --linespacing

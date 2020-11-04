@@ -447,6 +447,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "                        Set the minimum number <N> of objects to factorize,\n");
   fprintf (where, "                        the numbers of first <F> and last <L> to keep,\n");
   fprintf (where, "                        for all or only the given object type <type>\n");
+  fprintf (where, "  --no-cpukinds         Do not show CPU kinds\n");
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 7          Set size of margin between elements\n");
   fprintf (where, "  --linespacing 4       Set spacing between lines of text\n");
@@ -498,6 +499,7 @@ void lstopo_show_interactive_help(void)
   printf("  Switch display mode for indexes ..... i\n");
   printf("  Toggle displaying of object text .... t\n");
   printf("  Toggle displaying of obj attributes . a\n");
+  printf("  Toggle displaying of CPU kinds ...... k\n");
   printf("  Toggle color for disallowed objects . d\n");
   printf("  Toggle color for binding objects .... b\n");
   printf("  Toggle displaying of legend lines ... l\n");
@@ -524,6 +526,8 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
     printf(" --no-factorize");
   if (!loutput->pci_collapse_enabled)
     printf(" --no-collapse");
+  if (!loutput->show_cpukinds)
+    printf(" --no-cpukinds");
   if (!loutput->show_binding)
     printf(" --binding-color none");
   if (!loutput->show_disallowed)
@@ -740,6 +744,8 @@ main (int argc, char *argv[])
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
 
+  loutput.nr_cpukind_styles = 0;
+
   loutput.backend_data = NULL;
   loutput.methods = NULL;
 
@@ -772,6 +778,7 @@ main (int argc, char *argv[])
 
   loutput.show_binding = 1;
   loutput.show_disallowed = 1;
+  loutput.show_cpukinds = 1;
 
   /* enable verbose backends */
   if (!getenv("HWLOC_XML_VERBOSE"))
@@ -1176,6 +1183,9 @@ main (int argc, char *argv[])
 	else if (strcmp(argv[1], "memoryabove"))
 	  fprintf(stderr, "Unsupported order `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
 	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--no-cpukinds")) {
+        loutput.show_cpukinds = 0;
       }
       else if (!strcmp (argv[0], "--fontsize")) {
 	if (argc < 2)

@@ -28,6 +28,11 @@ struct lstopo_windows_output {
   PAINTSTRUCT ps;
 };
 
+static HFONT font_default;
+static HFONT font_bold;
+static HPEN pen_default;
+static HPEN pen_style[4];
+
 static struct lstopo_windows_output the_output;
 static int state, control;
 static int the_x, the_y, x_delta, y_delta;
@@ -122,6 +127,11 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	if (auto_resize)
 	  needs_resize = 1;
 	break;
+      case 'k':
+	loutput->show_cpukinds ^= 1;
+	printf("%s displaying of CPU kinds\n", loutput->show_cpukinds ? "enabled" : "disabled");
+	redraw = 1;
+	break;
       case 'd':
 	loutput->show_disallowed ^= 1;
 	printf("%s coloring of disallowed resources\n", loutput->show_disallowed ? "enabled" : "disabled");
@@ -184,8 +194,6 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     }
 
     case WM_PAINT: {
-      HFONT font;
-      HPEN pen;
 #ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
@@ -194,10 +202,18 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 #pragma GCC diagnostic warning "-Wmissing-field-initializers"
 #endif
       BeginPaint(hwnd, &the_output.ps);
-      font = CreateFont(loutput->fontsize, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
-      SelectObject(the_output.ps.hdc, (HGDIOBJ) font);
-      pen = CreatePen(PS_SOLID, loutput->thickness, RGB(0,0,0));
-      SelectObject(the_output.ps.hdc, pen);
+      font_default = CreateFont(loutput->fontsize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
+      SelectObject(the_output.ps.hdc, (HGDIOBJ) font_default);
+      pen_default = CreatePen(PS_SOLID, loutput->thickness, RGB(0,0,0));
+      SelectObject(the_output.ps.hdc, pen_default);
+      if (loutput->nr_cpukind_styles > 1) {
+        font_bold = CreateFont(loutput->fontsize, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
+        /* only 1-pixel width is supported for dash and dots */
+        pen_style[0] = CreatePen(PS_DASH, 1, RGB(0,0,0));
+        pen_style[1] = CreatePen(PS_DOT, 1, RGB(0,0,0));
+        pen_style[2] = CreatePen(PS_DASHDOT, 1, RGB(0,0,0));
+        pen_style[3] = CreatePen(PS_DASHDOTDOT, 1, RGB(0,0,0));
+      }
       SetBkMode(the_output.ps.hdc, TRANSPARENT);
       loutput->drawing = LSTOPO_DRAWING_PREPARE;
       output_draw(loutput);
@@ -226,8 +242,15 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       loutput->drawing = LSTOPO_DRAWING_DRAW;
       windows_box(loutput, &white, 0, 0, win_width, 0, win_height, NULL, 0);
       output_draw(loutput);
-      DeleteObject(pen);
-      DeleteObject(font);
+      DeleteObject(pen_default);
+      DeleteObject(font_default);
+      if (loutput->nr_cpukind_styles > 1) {
+        DeleteObject(font_bold);
+        DeleteObject(pen_style[0]);
+        DeleteObject(pen_style[1]);
+        DeleteObject(pen_style[2]);
+        DeleteObject(pen_style[3]);
+      }
       EndPaint(hwnd, &the_output.ps);
       break;
     }
@@ -383,11 +406,16 @@ static void
 windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
+  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
   PAINTSTRUCT *ps = &woutput->ps;
 
   SelectObject(ps->hdc, lcolor->private.windows.brush);
   SetBkColor(ps->hdc, lcolor->private.windows.color);
+  if (loutput->show_cpukinds && ou && ou->cpukind_style)
+    SelectObject(ps->hdc, pen_style[(ou->cpukind_style-1)%4]);
   Rectangle(ps->hdc, x - x_delta, y - y_delta, x + width - x_delta, y + height - y_delta);
+  if (loutput->show_cpukinds && ou && ou->cpukind_style)
+    SelectObject(ps->hdc, pen_default);
 }
 
 static void
@@ -405,10 +433,15 @@ static void
 windows_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj __hwloc_attribute_unused, unsigned text_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
+  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
   PAINTSTRUCT *ps = &woutput->ps;
 
   SetTextColor(ps->hdc, lcolor->private.windows.color);
+  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+    SelectObject(ps->hdc, font_bold);
   TextOut(ps->hdc, x - x_delta, y - y_delta, text, (int)strlen(text));
+  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+    SelectObject(ps->hdc, font_default);
 }
 
 static void

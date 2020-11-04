@@ -5,6 +5,9 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.PathEffect;
+import android.graphics.DashPathEffect;
+import android.graphics.Typeface;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -51,7 +54,7 @@ public class Lstopo extends AppCompatActivity {
     /**
      * Draw topology box
      */
-    public void box(int r, int g, int b, int x, int y, final int width, final int height, int id, String info){
+    public void box(int r, int g, int b, int x, int y, final int width, final int height, int style, int id, String info){
         LinearLayout view = new LinearLayout(activity);
         view.setOrientation(LinearLayout.VERTICAL);
         view.setId(id);
@@ -61,7 +64,8 @@ public class Lstopo extends AppCompatActivity {
                 (int) (xscale * x),
                 (int) (yscale * y),
                 (int) (xscale * width),
-                (int) (yscale * height));
+                (int) (yscale * height),
+                style);
 
     }
 
@@ -106,7 +110,7 @@ public class Lstopo extends AppCompatActivity {
         });
     }
 
-    private void setBoxAttributes(View view, int r, int g, int b, int x, int y, int width, int height){
+    private void setBoxAttributes(View view, int r, int g, int b, int x, int y, int width, int height, int style){
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
         view.setY(y);
         view.setX(x);
@@ -114,7 +118,13 @@ public class Lstopo extends AppCompatActivity {
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.RECTANGLE);
         shape.setColor(Color.rgb(r, g, b));
-        shape.setStroke(2, Color.parseColor("#000000"));
+	int linewidth = 2;
+	float linedash = 0;
+        if(style != 0){
+	    linewidth += style;
+            linedash = (float)(1<<(2+style));
+        }
+        shape.setStroke(linewidth, Color.parseColor("#000000"), linedash, linedash);
         view.setBackground(shape);
 
         view.setLayoutParams(params);
@@ -123,7 +133,7 @@ public class Lstopo extends AppCompatActivity {
     /**
      * Draw topology text
      */
-    public void text(String text, int x, int y, int fontsize, int id){
+    public void text(String text, int x, int y, int fontsize, int bold, int id){
         currentContent = text;
 
         TextView tv = new TextView(activity);
@@ -156,7 +166,9 @@ public class Lstopo extends AppCompatActivity {
 
 
         }
-
+	if(bold != 0){
+	    tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
+	}
         tv.setTextSize(this.fontsize);
         tv.setText(text);
     }

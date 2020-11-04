@@ -108,6 +108,7 @@ struct lstopo_output {
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
   int show_binding;
   int show_disallowed;
+  int show_cpukinds;
   int factorize_enabled; /* global toggle for interactive keyboard shortcuts */
   unsigned factorize_min[HWLOC_OBJ_TYPE_MAX]; /* minimum number of object before factorizing (parent->arity must be strictly higher) */
 #define FACTORIZE_MIN_DEFAULT 4

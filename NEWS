@@ -28,7 +28,8 @@ Version 2.4.0
   + Properly handle Linux kernel 5.10+ exposing ACPI HMAT information
     with knowledge of Generic Initiators.
 * Tools
-  + lstopo has a new --cpukinds option for showing CPU kinds.
+  + lstopo has new --cpukinds and --no-cpukinds options for showing
+    CPU kinds or not in textual and graphical modes respectively.
   + hwloc-calc has a new --cpukind option for filtering PUs by kind.
   + hwloc-annotate has a new cpukind command for modifying CPU kinds.
 

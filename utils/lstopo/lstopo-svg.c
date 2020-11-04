@@ -20,10 +20,14 @@ static void
 native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id)
 {
   FILE *file = loutput->file;
+  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned thickness = loutput->thickness;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   char id[128] = "";
   char class[128] = "";
   char complement[12] = "";
+  char dash[32] = "";
+
   if (box_id)
     snprintf(complement, sizeof complement, "_%u", box_id);
 
@@ -36,8 +40,13 @@ native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
     snprintf(id, sizeof id, " id='anon_rect%s'", complement);
   }
 
-  fprintf(file,"\t<rect%s%s x='%u' y='%u' width='%u' height='%u' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='%u'/>\n",
-	  id, class, x, y, width, height, r, g, b, loutput->thickness);
+  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
+    snprintf(dash, sizeof(dash), " stroke-dasharray=\"%u\"", 1U << ou->cpukind_style);
+    thickness *= ou->cpukind_style;
+  }
+
+  fprintf(file,"\t<rect%s%s x='%u' y='%u' width='%u' height='%u' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='%u'%s/>\n",
+	  id, class, x, y, width, height, r, g, b, thickness, dash);
 }
 
 
@@ -77,10 +86,13 @@ static void
 native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj, unsigned text_id)
 {
   FILE *file = loutput->file;
+  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   char id[128] = "";
   char class[128] = "";
   char complement[12] = "";
+  const char *fontweight = "";
+
   if (text_id)
     snprintf(complement, sizeof complement, "_%u", text_id);
 
@@ -93,8 +105,13 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     snprintf(id, sizeof id, " id='anon_text%s'", complement);
   }
 
-  fprintf(file,"\t<text%s%s font-family='Monospace' x='%u' y='%u' fill='rgb(%d,%d,%d)' font-size='%dpx'>%s</text>\n",
-	  id, class, x, y+size, r, g, b, size, text);
+  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+    fontweight = " font-weight='bold'";
+
+  fprintf(file,"\t<text%s%s font-family='Monospace'%s x='%u' y='%u' fill='rgb(%d,%d,%d)' font-size='%dpx'>%s</text>\n",
+	  id, class,
+          fontweight,
+          x, y+size, r, g, b, size, text);
 }
 
 static struct draw_methods native_svg_draw_methods = {
