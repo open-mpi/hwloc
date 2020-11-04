@@ -65,8 +65,11 @@ struct lstopo_output {
   int pci_collapse_enabled; /* global toggle for PCI collapsing */
   int pid_number;
   hwloc_pid_t pid;
-  int need_pci_domain;
   hwloc_bitmap_t cpubind_set, membind_set;
+
+  /* misc cached data */
+  int need_pci_domain;
+  unsigned nr_cpukind_styles;
 
   /* export config */
   unsigned long export_synthetic_flags;
@@ -171,6 +174,9 @@ struct lstopo_obj_userdata {
 #define LSTOPO_STYLE_T   0x2
 #define LSTOPO_STYLE_T2  0x4
   unsigned style_set; /* OR'ed LSTOPO_STYLE_* */
+
+  /* PU style for CPU kind */
+  unsigned cpukind_style;
 
   /* object size (including children if they are outside of it, not including borders) */
   unsigned width;

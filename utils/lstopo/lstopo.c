@@ -190,7 +190,7 @@ static __hwloc_inline void lstopo_update_factorize_alltypes_bounds(struct lstopo
 }
 
 static void
-lstopo_add_factorized_attributes(struct lstopo_output *loutput, hwloc_obj_t obj)
+lstopo_add_factorized_attributes(struct lstopo_output *loutput, hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
@@ -198,23 +198,31 @@ lstopo_add_factorized_attributes(struct lstopo_output *loutput, hwloc_obj_t obj)
     return;
 
   if (obj->symmetric_subtree && obj->arity > loutput->factorize_min[obj->first_child->type]){
-    /* factorize those children */
-    for_each_child(child, obj) {
-      unsigned factorized;
-      if (child->sibling_rank < loutput->factorize_first[child->type]
-	  || child->sibling_rank >= obj->arity - loutput->factorize_last[child->type])
-	factorized = 0; /* keep first and last */
-      else if (child->sibling_rank == loutput->factorize_first[child->type])
-	factorized = 1; /* replace with dots */
-      else
-	factorized = -1; /* remove that one */
-
-      ((struct lstopo_obj_userdata *)child->userdata)->factorized = factorized;
+    int may_factorize = 1;
+    /* check that the object is in a single cpukind */
+    if (loutput->nr_cpukind_styles) {
+      int err = hwloc_cpukinds_get_by_cpuset(topology, obj->cpuset, 0);
+      if (err < 0 && errno == EXDEV)
+        may_factorize = 0;
+    }
+    if (may_factorize) {
+      /* factorize those children */
+      for_each_child(child, obj) {
+        unsigned factorized;
+        if (child->sibling_rank < loutput->factorize_first[child->type]
+            || child->sibling_rank >= obj->arity - loutput->factorize_last[child->type])
+          factorized = 0; /* keep first and last */
+        else if (child->sibling_rank == loutput->factorize_first[child->type])
+          factorized = 1; /* replace with dots */
+        else
+          factorized = -1; /* remove that one */
+        ((struct lstopo_obj_userdata *)child->userdata)->factorized = factorized;
+      }
     }
   }
   /* recurse */
   for_each_child(child, obj)
-    lstopo_add_factorized_attributes(loutput, child);
+    lstopo_add_factorized_attributes(loutput, topology, child);
 }
 
 static void
@@ -252,6 +260,26 @@ lstopo_add_collapse_attributes(hwloc_topology_t topology)
     /* end this collapsing */
     ((struct lstopo_obj_userdata *)collapser->userdata)->pci_collapsed = collapsed;
   }
+}
+
+static void
+lstopo_add_cpukind_style(struct lstopo_output *loutput, hwloc_topology_t topology)
+{
+  unsigned i, nr;
+  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+  if (!cpuset)
+    return;
+  nr = hwloc_cpukinds_get_nr(topology, 0);
+  for(i=0; i<nr; i++) {
+    hwloc_obj_t obj;
+    hwloc_cpukinds_get_info(topology, i, cpuset, NULL, NULL, NULL, 0);
+    obj = NULL;
+    while ((obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, cpuset, HWLOC_OBJ_PU, obj)) != NULL)
+      ((struct lstopo_obj_userdata *)obj->userdata)->cpukind_style = i;
+  }
+  hwloc_bitmap_free(cpuset);
+
+  loutput->nr_cpukind_styles = nr;
 }
 
 static int
@@ -292,6 +320,7 @@ lstopo_populate_userdata(hwloc_obj_t parent)
   save->common.next = parent->userdata;
   save->factorized = 0;
   save->pci_collapsed = 0;
+  save->cpukind_style = 0;
   parent->userdata = save;
 
   for_each_child(child, parent)
@@ -1515,7 +1544,9 @@ main (int argc, char *argv[])
   if (output_format != LSTOPO_OUTPUT_XML) {
     /* there might be some xml-imported userdata in objects, add lstopo-specific userdata in front of them */
     lstopo_populate_userdata(hwloc_get_root_obj(topology));
-    lstopo_add_factorized_attributes(&loutput, hwloc_get_root_obj(topology));
+    lstopo_add_cpukind_style(&loutput, topology);
+    /* cpukinds must be before factorizing */
+    lstopo_add_factorized_attributes(&loutput, topology, hwloc_get_root_obj(topology));
     lstopo_add_collapse_attributes(topology);
   }
 
