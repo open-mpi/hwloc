@@ -98,13 +98,28 @@ hwloc_internal_cpukinds_restrict(hwloc_topology_t topology)
  * Registering
  */
 
+static __hwloc_inline int
+hwloc__cpukind_check_duplicate_info(struct hwloc_internal_cpukind_s *kind,
+                                    const char *name, const char *value)
+{
+  unsigned i;
+  for(i=0; i<kind->nr_infos; i++)
+    if (!strcmp(kind->infos[i].name, name)
+        && !strcmp(kind->infos[i].value, value))
+      return 1;
+  return 0;
+}
+
 static __hwloc_inline void
 hwloc__cpukind_add_infos(struct hwloc_internal_cpukind_s *kind,
                          const struct hwloc_info_s *infos, unsigned nr_infos)
 {
-  unsigned j;
-  for(j=0; j<nr_infos; j++)
-    hwloc__add_info(&kind->infos, &kind->nr_infos, infos[j].name, infos[j].value);
+  unsigned i;
+  for(i=0; i<nr_infos; i++) {
+    if (hwloc__cpukind_check_duplicate_info(kind, infos[i].name, infos[i].value))
+      continue;
+    hwloc__add_info(&kind->infos, &kind->nr_infos, infos[i].name, infos[i].value);
+  }
 }
 
 int
