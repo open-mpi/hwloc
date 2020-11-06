@@ -22,7 +22,8 @@ Version 2.4.0
 * API
   + Add hwloc/cpukinds.h for reporting information about hybrid CPUs.
     - Use Linux cpufreq frequencies to rank cores by efficiency.
-    - Use x86 CPUID hybrid leaf to identify Intel Atom and Core cores.
+    - Use x86 CPUID hybrid leaf and Linux 5.11 CPU types sysfs files
+      to identify Intel Atom and Core cores.
     - Use the Windows native EfficiencyClass to separate kinds.
 * Backends
   + Properly handle Linux kernel 5.10+ exposing ACPI HMAT information
