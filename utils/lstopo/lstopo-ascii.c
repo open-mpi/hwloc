@@ -135,7 +135,7 @@ set_color(const struct lstopo_color *fcolor, const struct lstopo_color *bcolor)
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
-static int ascii_color_index = TERM_COLOR_START;
+static int ascii_color_index = TERM_COLOR_START, ascii_color_index_step = 1;
 #endif
 static struct lstopo_color *default_color = NULL;
 
@@ -148,7 +148,8 @@ ascii_declare_color(struct lstopo_output *loutput __hwloc_attribute_unused, stru
   int rr, gg, bb;
   char *toput;
 
-  lcolor->private.ascii.color = ascii_color_index++;
+  lcolor->private.ascii.color = ascii_color_index;
+  ascii_color_index += ascii_color_index_step;
 
   /* Yes, values seem to range from 0 to 1000 inclusive */
   rr = (r * 1001) / 256;
@@ -478,9 +479,13 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
       if (max_pairs <= TERM_COLOR_START || !initp || !set_color_pair) {
 	/* Can't use max_pairs to define our own colors */
 	initp = NULL;
-	if (max_colors > TERM_COLOR_START)
+	if (max_colors > TERM_COLOR_START) {
+	  /* Better start overwriting last colors */
+	  ascii_color_index = max_colors-1;
+	  ascii_color_index_step = -1;
 	  if (can_change)
             initc = initialize_color;
+        }
       }
       /* Prevent a trivial compiler warning because the param of
          tgetflag is (char*), not (const char*). */
