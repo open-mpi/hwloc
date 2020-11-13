@@ -560,7 +560,7 @@ hwloc_read_path_as_uint64(const char *path, uint64_t *value, int fsroot_fd)
 }
 
 /* Read everything from fd and save it into a newly allocated buffer
- * returned in bufferp. Use sizep as a default buffer size, and returned
+ * returned in bufferp. Use sizep as a default buffer size, and return
  * the actually needed size in sizep.
  */
 static __hwloc_inline int
@@ -626,7 +626,7 @@ hwloc__read_fd(int fd, char **bufferp, size_t *sizep)
 #define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
 
 static __hwloc_inline int
-hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
+hwloc__read_path_as_cpumask(const char *path, hwloc_bitmap_t set, int fsroot_fd)
 {
   static size_t _filesize = 0; /* will be dynamically initialized to hwloc_get_pagesize(), and increased later if needed */
   size_t filesize;
@@ -638,7 +638,12 @@ hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
 				      */
   int nr_maps_allocated = _nr_maps_allocated;
   char *buffer, *tmpbuf;
+  int fd, err;
   int i;
+
+  fd = hwloc_open(path, fsroot_fd);
+  if (fd < 0)
+    goto out;
 
   /* Kernel sysfs files are usually at most one page. 4kB may contain 455 32-bit
    * masks (followed by comma), enough for 14k PUs. So allocate a page by default for now.
@@ -650,8 +655,10 @@ hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
   filesize = _filesize;
   if (!filesize)
     filesize = hwloc_getpagesize();
-  if (hwloc__read_fd(fd, &buffer, &filesize) < 0)
-    return -1;
+  err = hwloc__read_fd(fd, &buffer, &filesize);
+  close(fd);
+  if (err < 0)
+    goto out;
   /* Only update the static value with the final one,
    * to avoid sharing intermediate values that we modify,
    * in case there's ever multiple concurrent calls.
@@ -659,10 +666,8 @@ hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
   _filesize = filesize;
 
   maps = malloc(nr_maps_allocated * sizeof(*maps));
-  if (!maps) {
-    free(buffer);
-    return -1;
-  }
+  if (!maps)
+    goto out_with_buffer;
 
   /* reset to zero first */
   hwloc_bitmap_zero(set);
@@ -673,11 +678,8 @@ hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
     /* read one kernel cpu mask and the ending comma */
     if (nr_maps == nr_maps_allocated) {
       unsigned long *tmp = realloc(maps, 2*nr_maps_allocated * sizeof(*maps));
-      if (!tmp) {
-	free(buffer);
-	free(maps);
-	return -1;
-      }
+      if (!tmp)
+        goto out_with_maps;
       maps = tmp;
       nr_maps_allocated *= 2;
     }
@@ -721,18 +723,13 @@ hwloc__read_fd_as_cpumask(int fd, hwloc_bitmap_t set)
   if (nr_maps_allocated > _nr_maps_allocated)
     _nr_maps_allocated = nr_maps_allocated;
   return 0;
-}
 
-static __hwloc_inline int
-hwloc__read_path_as_cpumask(const char *maskpath, hwloc_bitmap_t set, int fsroot_fd)
-{
-  int fd, err;
-  fd = hwloc_open(maskpath, fsroot_fd);
-  if (fd < 0)
-    return -1;
-  err = hwloc__read_fd_as_cpumask(fd, set);
-  close(fd);
-  return err;
+ out_with_maps:
+  free(maps);
+ out_with_buffer:
+  free(buffer);
+ out:
+  return -1;
 }
 
 static __hwloc_inline hwloc_bitmap_t
@@ -754,18 +751,12 @@ hwloc__alloc_read_path_as_cpumask(const char *maskpath, int fsroot_fd)
 int
 hwloc_linux_read_path_as_cpumask(const char *maskpath, hwloc_bitmap_t set)
 {
-  int fd, err;
-  fd = open(maskpath, O_RDONLY);
-  if (fd < 0)
-    return -1;
-  err = hwloc__read_fd_as_cpumask(fd, set);
-  close(fd);
-  return err;
+  return hwloc__read_path_as_cpumask(maskpath, set, -1);
 }
 
 /* on failure, the content of set is undefined */
 static __hwloc_inline int
-hwloc__read_fd_as_cpulist(int fd, hwloc_bitmap_t set)
+hwloc__read_path_as_cpulist(const char *path, hwloc_bitmap_t set, int fsroot_fd)
 {
   /* Kernel sysfs files are usually at most one page.
    * But cpulists can be of very different sizes depending on the fragmentation,
@@ -775,8 +766,14 @@ hwloc__read_fd_as_cpulist(int fd, hwloc_bitmap_t set)
   size_t filesize = hwloc_getpagesize();
   char *buffer, *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
+  int fd, err;
 
-  if (hwloc__read_fd(fd, &buffer, &filesize) < 0)
+  fd = hwloc_open(path, fsroot_fd);
+  if (fd < 0)
+    return -1;
+  err = hwloc__read_fd(fd, &buffer, &filesize);
+  close(fd);
+  if (err < 0)
     return -1;
 
   hwloc_bitmap_fill(set);
@@ -809,19 +806,6 @@ hwloc__read_fd_as_cpulist(int fd, hwloc_bitmap_t set)
   hwloc_bitmap_clr_range(set, prevlast+1, -1);
   free(buffer);
   return 0;
-}
-
-/* on failure, the content of set is undefined */
-static __hwloc_inline int
-hwloc__read_path_as_cpulist(const char *maskpath, hwloc_bitmap_t set, int fsroot_fd)
-{
-  int fd, err;
-  fd = hwloc_open(maskpath, fsroot_fd);
-  if (fd < 0)
-    return -1;
-  err = hwloc__read_fd_as_cpulist(fd, set);
-  close(fd);
-  return err;
 }
 
 /* on failure, the content of set is undefined */
@@ -916,7 +900,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
 {
   static int _nr_cpus = -1;
   int nr_cpus = _nr_cpus;
-  int fd;
+  hwloc_bitmap_t possible_bitmap;
 
   if (nr_cpus != -1)
     /* already computed */
@@ -934,17 +918,12 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
    * /sys/devices/system/cpu/possible is better because it matches the current hardware.
    */
 
-  fd = open("/sys/devices/system/cpu/possible", O_RDONLY); /* binding only supported in real fsroot, no need for data->root_fd */
-  if (fd >= 0) {
-    hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc();
-    if (hwloc__read_fd_as_cpulist(fd, possible_bitmap) == 0) {
-      int max_possible = hwloc_bitmap_last(possible_bitmap);
-      hwloc_debug_bitmap("possible CPUs are %s\n", possible_bitmap);
-
-      if (nr_cpus < max_possible + 1)
-        nr_cpus = max_possible + 1;
-    }
-    close(fd);
+  possible_bitmap = hwloc__alloc_read_path_as_cpulist("/sys/devices/system/cpu/possible", -1); /* binding only supported in real fsroot, no need for data->root_fd */
+  if (possible_bitmap) {
+    int max_possible = hwloc_bitmap_last(possible_bitmap);
+    hwloc_debug_bitmap("possible CPUs are %s\n", possible_bitmap);
+    if (nr_cpus < max_possible + 1)
+      nr_cpus = max_possible + 1;
     hwloc_bitmap_free(possible_bitmap);
   }
 
@@ -1863,7 +1842,7 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
 {
   static int _max_numnodes = -1, max_numnodes;
   int linuxpolicy;
-  int fd;
+  hwloc_bitmap_t possible_bitmap;
 
   if (_max_numnodes != -1)
     /* already computed */
@@ -1873,17 +1852,12 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
   max_numnodes = HWLOC_BITS_PER_LONG;
 
   /* try to get the max from sysfs */
-  fd = open("/sys/devices/system/node/possible", O_RDONLY); /* binding only supported in real fsroot, no need for data->root_fd */
-  if (fd >= 0) {
-    hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc();
-    if (hwloc__read_fd_as_cpulist(fd, possible_bitmap) == 0) {
-      int max_possible = hwloc_bitmap_last(possible_bitmap);
-      hwloc_debug_bitmap("possible NUMA nodes are %s\n", possible_bitmap);
-
-      if (max_numnodes < max_possible + 1)
-        max_numnodes = max_possible + 1;
-    }
-    close(fd);
+  possible_bitmap = hwloc__alloc_read_path_as_cpulist("/sys/devices/system/node/possible", -1); /* binding only supported in real fsroot, no need for data->root_fd */
+  if (possible_bitmap) {
+    int max_possible = hwloc_bitmap_last(possible_bitmap);
+    hwloc_debug_bitmap("possible NUMA nodes are %s\n", possible_bitmap);
+    if (max_numnodes < max_possible + 1)
+      max_numnodes = max_possible + 1;
     hwloc_bitmap_free(possible_bitmap);
   }
 
