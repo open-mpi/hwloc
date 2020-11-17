@@ -122,15 +122,18 @@ hwloc_memattr_get_by_name(hwloc_topology_t topology,
                           hwloc_memattr_id_t *id);
 
 
+/** \brief Type of location. */
+enum hwloc_location_type_e {
+  /** \brief Location is given as a cpuset, in the location cpuset union field. \hideinitializer */
+  HWLOC_LOCATION_TYPE_CPUSET = 1,
+  /** \brief Location is given as an object, in the location object union field. \hideinitializer */
+  HWLOC_LOCATION_TYPE_OBJECT = 0
+};
+
 /** \brief Where to measure attributes from. */
 struct hwloc_location {
   /** \brief Type of location. */
-  enum hwloc_location_type_e {
-    /** \brief Location is given as a cpuset, in the location cpuset union field. */
-    HWLOC_LOCATION_TYPE_CPUSET = 1,
-    /** \brief Location is given as an object, in the location object union field. */
-    HWLOC_LOCATION_TYPE_OBJECT = 0
-  } type;
+  enum hwloc_location_type_e type;
   /** \brief Actual location. */
   union hwloc_location_u {
     /** \brief Location as a cpuset, when the location type is ::HWLOC_LOCATION_TYPE_CPUSET. */
@@ -146,17 +149,20 @@ enum hwloc_local_numanode_flag_e {
   /** \brief Select NUMA nodes whose locality is larger than the given cpuset.
    * For instance, if a single PU (or its cpuset) is given in \p initiator,
    * select all nodes close to the package that contains this PU.
+   * \hideinitializer
    */
   HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY = (1UL<<0),
 
   /** \brief Select NUMA nodes whose locality is smaller than the given cpuset.
    * For instance, if a package (or its cpuset) is given in \p initiator,
    * also select nodes that are attached to only a half of that package.
+   * \hideinitializer
    */
   HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY = (1UL<<1),
 
   /** \brief Select all NUMA nodes in the topology.
-   * \p initiator is ignored.
+   * The initiator \p initiator is ignored.
+   * \hideinitializer
    */
   HWLOC_LOCAL_NUMANODE_FLAG_ALL = (1UL<<2)
 };
@@ -167,7 +173,7 @@ enum hwloc_local_numanode_flag_e {
  * the given \p location. More nodes may be selected if additional flags
  * are given as a OR'ed set of ::hwloc_local_numanode_flag_e.
  *
- * If location is given as an explicit object, its CPU set is used
+ * If \p location is given as an explicit object, its CPU set is used
  * to find NUMA nodes with the corresponding locality.
  * If the object does not have a CPU set (e.g. I/O object), the CPU
  * parent (where the I/O object is attached) is used.
