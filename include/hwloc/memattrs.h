@@ -54,9 +54,10 @@ extern "C" {
  * Attribute values for these nodes, if any, may then be obtained with
  * hwloc_memattr_get_value() and manually compared with the desired criteria.
  *
- * \note The API also supports specific objects as initiator.
- * This might for instance be used in the future when describing the
- * performance of accesses from a GPU to some memory targets.
+ * \note The API also supports specific objects as initiator,
+ * but it is currently not used internally by hwloc.
+ * Users may for instance use it to provide custom performance
+ * values for host memory accesses performed by GPUs.
  *
  * \note The interface actually also accepts targets that are not NUMA nodes.
  * @{
@@ -125,17 +126,17 @@ hwloc_memattr_get_by_name(hwloc_topology_t topology,
 struct hwloc_location {
   /** \brief Type of location. */
   enum hwloc_location_type_e {
+    /** \brief Location is given as a cpuset, in the location cpuset union field. */
+    HWLOC_LOCATION_TYPE_CPUSET = 1,
     /** \brief Location is given as an object, in the location object union field. */
-    HWLOC_LOCATION_TYPE_OBJECT = 0,
-    /** \brief Location is given as an cpuset, in the location cpuset union field. */
-    HWLOC_LOCATION_TYPE_CPUSET = 1
+    HWLOC_LOCATION_TYPE_OBJECT = 0
   } type;
   /** \brief Actual location. */
   union hwloc_location_u {
-    /** \brief Location as an object, when the location type is HWLOC_LOCATION_TYPE_OBJECT. */
-    hwloc_obj_t object;
-    /** \brief Location as a cpuset, when the location type is HWLOC_LOCATION_TYPE_CPUSET. */
+    /** \brief Location as a cpuset, when the location type is ::HWLOC_LOCATION_TYPE_CPUSET. */
     hwloc_cpuset_t cpuset;
+    /** \brief Location as an object, when the location type is ::HWLOC_LOCATION_TYPE_OBJECT. */
+    hwloc_obj_t object;
   } location;
 };
 
@@ -205,6 +206,12 @@ hwloc_get_local_numanode_objs(hwloc_topology_t topology,
  * location \p initiator is ignored and may be \c NULL.
  *
  * \p flags must be \c 0 for now.
+ *
+ * \note The initiator \p initiator should be of type ::HWLOC_LOCATION_TYPE_CPUSET
+ * when refering to accesses performed by CPU cores.
+ * ::HWLOC_LOCATION_TYPE_OBJECT is currently unused internally by hwloc,
+ * but users may for instance use it to provide custom information about
+ * host memory accesses performed by GPUs.
  */
 HWLOC_DECLSPEC int
 hwloc_memattr_get_value(hwloc_topology_t topology,
@@ -232,6 +239,12 @@ hwloc_memattr_get_value(hwloc_topology_t topology,
  * \p flags must be \c 0 for now.
  *
  * If there are no matching targets, \c -1 is returned with \p errno set to \c ENOENT;
+ *
+ * \note The initiator \p initiator should be of type ::HWLOC_LOCATION_TYPE_CPUSET
+ * when refering to accesses performed by CPU cores.
+ * ::HWLOC_LOCATION_TYPE_OBJECT is currently unused internally by hwloc,
+ * but users may for instance use it to provide custom information about
+ * host memory accesses performed by GPUs.
  */
 HWLOC_DECLSPEC int
 hwloc_memattr_get_best_target(hwloc_topology_t topology,
@@ -333,6 +346,12 @@ hwloc_memattr_register(hwloc_topology_t topology,
  * for instance the cpuset.
  *
  * \p flags must be \c 0 for now.
+ *
+ * \note The initiator \p initiator should be of type ::HWLOC_LOCATION_TYPE_CPUSET
+ * when refering to accesses performed by CPU cores.
+ * ::HWLOC_LOCATION_TYPE_OBJECT is currently unused internally by hwloc,
+ * but users may for instance use it to provide custom information about
+ * host memory accesses performed by GPUs.
  */
 HWLOC_DECLSPEC int
 hwloc_memattr_set_value(hwloc_topology_t topology,
@@ -371,6 +390,12 @@ hwloc_memattr_set_value(hwloc_topology_t topology,
  * rather than for application queries. Applications should rather select useful
  * NUMA nodes with hwloc_get_local_numanode_objs() and then look at their attribute
  * values.
+ *
+ * \note The initiator \p initiator should be of type ::HWLOC_LOCATION_TYPE_CPUSET
+ * when refering to accesses performed by CPU cores.
+ * ::HWLOC_LOCATION_TYPE_OBJECT is currently unused internally by hwloc,
+ * but users may for instance use it to provide custom information about
+ * host memory accesses performed by GPUs.
  */
 HWLOC_DECLSPEC int
 hwloc_memattr_get_targets(hwloc_topology_t topology,
