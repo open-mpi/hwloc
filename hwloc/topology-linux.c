@@ -3870,15 +3870,11 @@ look_sysfsnode(struct hwloc_topology *topology,
 	int keep = env && atoi(env);
 	while ((dirent = readdir(dir)) != NULL) {
 	  char nvgpunumapath[300], line[256];
-	  int fd;
+          int err;
 	  snprintf(nvgpunumapath, sizeof(nvgpunumapath), "/proc/driver/nvidia/gpus/%s/numa_status", dirent->d_name);
-	  fd = hwloc_open(nvgpunumapath, data->root_fd);
-	  if (fd >= 0) {
-	    int ret;
-	    ret = read(fd, line, sizeof(line)-1);
-	    line[sizeof(line)-1] = '\0';
-	    if (ret >= 0) {
-	      const char *nvgpu_node_line = strstr(line, "Node:");
+          err = hwloc_read_path_by_length(nvgpunumapath, line, sizeof(line), data->root_fd);
+          if (err > 0) {
+              const char *nvgpu_node_line = strstr(line, "Node:");
 	      if (nvgpu_node_line) {
 		unsigned nvgpu_node;
 		const char *value = nvgpu_node_line+5;
@@ -3892,7 +3888,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 		    if (keep) {
 		      /* keep this NUMA node but fixed its locality and add an info about the GPU */
 		      char nvgpulocalcpuspath[300];
-		      int err;
 		      node->subtype = strdup("GPUMemory");
 		      hwloc_obj_add_info(node, "PCIBusID", dirent->d_name);
 		      snprintf(nvgpulocalcpuspath, sizeof(nvgpulocalcpuspath), "/sys/bus/pci/devices/%s/local_cpus", dirent->d_name);
@@ -3909,8 +3904,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 		  }
 		}
 	      }
-	    }
-	    close(fd);
 	  }
 	}
 	closedir(dir);
