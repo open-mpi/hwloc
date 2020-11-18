@@ -1479,7 +1479,7 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
   char buf[1024] = "";
   char name[64];
   char *tmp;
-  int fd, i, err;
+  int i, err;
 
   /* TODO: find a way to use sched_getcpu().
    * either compare tid with gettid() in all callbacks.
@@ -1496,18 +1496,11 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
   }
 
   snprintf(name, sizeof(name), "/proc/%lu/stat", (unsigned long) tid);
-  fd = open(name, O_RDONLY); /* no fsroot for real /proc */
-  if (fd < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
-  err = read(fd, buf, sizeof(buf)-1); /* read -1 to put the ending \0 */
-  close(fd);
+  err = hwloc_read_path_by_length(name, buf, sizeof(buf), -1); /* no fsroot for real /proc */
   if (err <= 0) {
     errno = ENOSYS;
     return -1;
   }
-  buf[err-1] = '\0';
 
   tmp = strrchr(buf, ')');
   if (!tmp) {
