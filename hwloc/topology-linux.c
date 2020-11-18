@@ -5233,8 +5233,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 				const char *osdevpath, unsigned osdev_flags)
 {
   struct hwloc_topology *topology = backend->topology;
-  char path[256], buf[10];
-  int fd;
+  char path[256];
   int foundpci;
   unsigned pcidomain = 0, pcibus = 0, pcidev = 0, pcifunc = 0;
   unsigned _pcidomain, _pcibus, _pcidev, _pcifunc;
@@ -5242,7 +5241,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   const char *tmp;
   hwloc_obj_t parent;
   const char *devicesubdir;
-  int err;
+  int node, err;
 
   if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS)
     devicesubdir = "..";
@@ -5313,21 +5312,14 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
  nopci:
   /* attach directly near the right NUMA node */
   snprintf(path, sizeof(path), "%s/%s/numa_node", osdevpath, devicesubdir);
-  fd = hwloc_open(path, root_fd);
-  if (fd >= 0) {
-    err = read(fd, buf, sizeof(buf));
-    close(fd);
-    if (err > 0) {
-      int node = atoi(buf);
-      if (node >= 0) {
-	parent = hwloc_get_numanode_obj_by_os_index(topology, (unsigned) node);
-	if (parent) {
-	  /* don't attach I/O under numa node, attach to the same normal parent */
-	  while (hwloc__obj_type_is_memory(parent->type))
-	    parent = parent->parent;
-	  return parent;
-	}
-      }
+  err = hwloc_read_path_as_int(path, &node, root_fd);
+  if (!err && node >= 0) {
+    parent = hwloc_get_numanode_obj_by_os_index(topology, (unsigned) node);
+    if (parent) {
+      /* don't attach I/O under numa node, attach to the same normal parent */
+      while (hwloc__obj_type_is_memory(parent->type))
+        parent = parent->parent;
+      return parent;
     }
   }
 
