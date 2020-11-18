@@ -32,7 +32,7 @@ int main(void)
   assert(err == 0);
   assert(!diff);
 
-  printf("add a new info to topo2\n");
+  printf("add a new info to topo2 root\n");
   obj = hwloc_get_root_obj(topo1);
   hwloc_obj_add_info(obj, "Foo", "Bar");
   printf("check that topo2 cannot be diff'ed from topo1\n");
@@ -44,7 +44,7 @@ int main(void)
   assert(diff->too_complex.obj_index == 0);
   hwloc_topology_diff_destroy(diff);
 
-  printf("add a similar info to topo1, and change memory sizes\n");
+  printf("add a similar info to topo1, and change memory size of first NUMA\n");
   obj = hwloc_get_root_obj(topo2);
   hwloc_obj_add_info(obj, "Foo", "Bar2");
 
@@ -142,21 +142,31 @@ int main(void)
 
   hwloc_topology_diff_destroy(diff);
 
-  printf("adding new key to the bottom of topo3\n");
+  printf("adding new key to the bottom of topo3 on first PU\n");
   obj = hwloc_get_obj_by_type(topo3, HWLOC_OBJ_PU, 0);
   assert(obj);
   hwloc_obj_add_info(obj, "Bar", "Baz3");
-  printf("check that diff fails at the last entry\n");
+
+  printf("check that diff fails at the 2nd or 3rd entry\n");
   err = hwloc_topology_diff_build(topo1, topo3, 0, &diff);
   assert(err == 1);
   assert(diff);
   tmpdiff = diff;
   assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
   tmpdiff = tmpdiff->generic.next;
-  assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX);
-  tmpdiff = tmpdiff->generic.next;
-  assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
-  assert(tmpdiff->generic.next == NULL);
+  if (tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX) {
+    /* normal case, PU appears before NUMA, we get ATTR(root)+TOO_COMPLEX(pu)+ATTR(numa) */
+    tmpdiff = tmpdiff->generic.next;
+    assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR);
+    assert(tmpdiff->generic.next == NULL);
+  } else if (tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR) {
+    /* unusual case, PU appears after NUMA (first NUMA is CPUless), we get ATTR(root)+ATTR(numa)+TOO_COMPLEX(pu) */
+    tmpdiff = tmpdiff->generic.next;
+    assert(tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX);
+    assert(tmpdiff->generic.next == NULL);
+  } else {
+    assert(0);
+  }
   hwloc_topology_diff_destroy(diff);
 
   printf("adding similar key to topo1\n");
@@ -168,7 +178,7 @@ int main(void)
   assert(err == 0);
   assert(diff);
   err = hwloc_topology_diff_apply(topo2, diff, HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE);
-  assert(err == -2);
+  assert(err == -2 || err == -3);
   hwloc_topology_diff_destroy(diff);
 
   hwloc_topology_destroy(topo3);
