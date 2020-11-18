@@ -6158,7 +6158,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 
   while ((dirent = readdir(dir)) != NULL) {
 #define CONFIG_SPACE_CACHESIZE 256
-    unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
+    unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE+1]; /* one more byte for the ending \0 in hwloc_read_path_by_length() */
     unsigned domain, bus, dev, func;
     unsigned secondary_bus, subordinate_bus;
     unsigned short class_id;
@@ -6168,8 +6168,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     unsigned offset;
     char path[64];
     char value[16];
-    size_t ret;
-    int fd, err;
+    int err;
 
     if (sscanf(dirent->d_name, "%x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
       continue;
@@ -6188,13 +6187,8 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
     err = snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
     if ((size_t) err < sizeof(path)) {
-      /* don't use hwloc_read_path_by_length() because we don't want the ending \0 */
-      fd = hwloc_open(path, root_fd);
-      if (fd >= 0) {
-	ret = read(fd, config_space_cache, CONFIG_SPACE_CACHESIZE);
-	(void) ret; /* we initialized config_space_cache in case we don't read enough, ignore the read length */
-	close(fd);
-      }
+      hwloc_read_path_by_length(path, (char *) config_space_cache, sizeof(config_space_cache), root_fd);
+      /* we have CONFIG_SPACE_CACHESIZE bytes + the ending \0 */
     }
 
     class_id = HWLOC_PCI_CLASS_NOT_DEFINED;
