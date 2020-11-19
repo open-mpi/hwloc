@@ -481,11 +481,9 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
   }
 }
 
-
 static int
-hwloc__xml_import_info(struct hwloc_xml_backend_data_s *data,
-		       hwloc_obj_t obj,
-		       hwloc__xml_import_state_t state)
+hwloc___xml_import_info(char **infonamep, char **infovaluep,
+                        hwloc__xml_import_state_t state)
 {
   char *infoname = NULL;
   char *infovalue = NULL;
@@ -501,6 +499,25 @@ hwloc__xml_import_info(struct hwloc_xml_backend_data_s *data,
     else
       return -1;
   }
+
+  *infonamep = infoname;
+  *infovaluep = infovalue;
+
+  return state->global->close_tag(state);
+}
+
+static int
+hwloc__xml_import_obj_info(struct hwloc_xml_backend_data_s *data,
+                           hwloc_obj_t obj,
+                           hwloc__xml_import_state_t state)
+{
+  char *infoname = NULL;
+  char *infovalue = NULL;
+  int err;
+
+  err = hwloc___xml_import_info(&infoname, &infovalue, state);
+  if (err < 0)
+    return err;
 
   if (infoname) {
     /* empty strings are ignored by libxml */
@@ -518,7 +535,7 @@ hwloc__xml_import_info(struct hwloc_xml_backend_data_s *data,
     }
   }
 
-  return state->global->close_tag(state);
+  return err;
 }
 
 static int
@@ -889,7 +906,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
 
     } else if (!strcmp(tag, "info")) {
-      ret = hwloc__xml_import_info(data, obj, &childstate);
+      ret = hwloc__xml_import_obj_info(data, obj, &childstate);
     } else if (data->version_major < 2 && !strcmp(tag, "distances")) {
       ret = hwloc__xml_v1import_distances(data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
@@ -1263,7 +1280,7 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
   if (name && topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT) {
 #ifdef HWLOC_DEBUG
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
@@ -1275,6 +1292,7 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
     else DO(discovery,numa_memory);
     else DO(discovery,disallowed_pu);
     else DO(discovery,disallowed_numa);
+    else DO(discovery,cpukind_efficiency);
     else DO(cpubind,set_thisproc_cpubind);
     else DO(cpubind,get_thisproc_cpubind);
     else DO(cpubind,set_proc_cpubind);
@@ -1747,6 +1765,79 @@ hwloc__xml_import_memattr(hwloc_topology_t topology,
 }
 
 static int
+hwloc__xml_import_cpukind(hwloc_topology_t topology,
+                          hwloc__xml_import_state_t state)
+{
+  hwloc_bitmap_t cpuset = NULL;
+  int forced_efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
+  unsigned nr_infos = 0;
+  struct hwloc_info_s *infos = NULL;
+  int ret;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "cpuset")) {
+      if (!cpuset)
+        cpuset = hwloc_bitmap_alloc();
+      hwloc_bitmap_sscanf(cpuset, attrvalue);
+    } else if (!strcmp(attrname, "forced_efficiency")) {
+      forced_efficiency = atoi(attrvalue);
+    } else {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: ignoring unknown cpukind attribute %s\n",
+                state->global->msgprefix, attrname);
+      hwloc_bitmap_free(cpuset);
+      return -1;
+    }
+  }
+
+  while (1) {
+    struct hwloc__xml_import_state_s childstate;
+    char *tag;
+
+    ret = state->global->find_child(state, &childstate, &tag);
+    if (ret <= 0)
+      break;
+
+    if (!strcmp(tag, "info")) {
+      char *infoname = NULL;
+      char *infovalue = NULL;
+      ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
+      if (!ret && infoname && infovalue)
+        hwloc__add_info(&infos, &nr_infos, infoname, infovalue);
+    } else {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: cpukind with unrecognized child %s\n",
+                state->global->msgprefix, tag);
+      ret = -1;
+    }
+
+    if (ret < 0)
+      goto error;
+
+    state->global->close_child(&childstate);
+  }
+
+  if (!cpuset) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring cpukind without cpuset\n",
+              state->global->msgprefix);
+    goto error;
+  }
+
+  hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, nr_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+
+  return state->global->close_tag(state);
+
+ error:
+  hwloc__free_infos(infos, nr_infos);
+  hwloc_bitmap_free(cpuset);
+  return -1;
+}
+
+static int
 hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 			   hwloc_topology_diff_t *firstdiffp,
 			   hwloc_topology_diff_t *lastdiffp)
@@ -2020,6 +2111,10 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	  goto failed;
       } else if (!strcmp(tag, "memattr")) {
         ret = hwloc__xml_import_memattr(topology, &childstate);
+        if (ret < 0)
+          goto failed;
+      } else if (!strcmp(tag, "cpukind")) {
+        ret = hwloc__xml_import_cpukind(topology, &childstate);
         if (ret < 0)
           goto failed;
       } else {
@@ -2893,7 +2988,7 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
 
 #ifdef HWLOC_DEBUG
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 5);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
@@ -2916,6 +3011,7 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
   DO(discovery,numa_memory);
   DO(discovery,disallowed_pu);
   DO(discovery,disallowed_numa);
+  DO(discovery,cpukind_efficiency);
   DO(cpubind,set_thisproc_cpubind);
   DO(cpubind,get_thisproc_cpubind);
   DO(cpubind,set_proc_cpubind);
@@ -3037,6 +3133,42 @@ hwloc__xml_export_memattrs(hwloc__xml_export_state_t state, hwloc_topology_t top
   }
 }
 
+static void
+hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t topology)
+{
+  unsigned i;
+  for(i=0; i<topology->nr_cpukinds; i++) {
+    struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
+    struct hwloc__xml_export_state_s cstate;
+    char *setstring;
+    unsigned j;
+
+    state->new_child(state, &cstate, "cpukind");
+    hwloc_bitmap_asprintf(&setstring, kind->cpuset);
+    cstate.new_prop(&cstate, "cpuset", setstring);
+    free(setstring);
+    if (kind->forced_efficiency != HWLOC_CPUKIND_EFFICIENCY_UNKNOWN) {
+      char tmp[11];
+      snprintf(tmp, sizeof(tmp), "%d", kind->forced_efficiency);
+      cstate.new_prop(&cstate, "forced_efficiency", tmp);
+    }
+
+    for(j=0; j<kind->nr_infos; j++) {
+      char *name = hwloc__xml_export_safestrdup(kind->infos[j].name);
+      char *value = hwloc__xml_export_safestrdup(kind->infos[j].value);
+      struct hwloc__xml_export_state_s istate;
+      cstate.new_child(&cstate, &istate, "info");
+      istate.new_prop(&istate, "name", name);
+      istate.new_prop(&istate, "value", value);
+      istate.end_object(&istate, "info");
+      free(name);
+      free(value);
+    }
+
+    cstate.end_object(&cstate, "cpukind");
+  }
+}
+
 void
 hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology, unsigned long flags)
 {
@@ -3087,6 +3219,7 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
     if (!env || atoi(env))
       hwloc__xml_v2export_support(state, topology);
     hwloc__xml_export_memattrs(state, topology);
+    hwloc__xml_export_cpukinds(state, topology);
   }
 }
 

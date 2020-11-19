@@ -378,4 +378,6 @@ Relative latency matrix (name NUMALatency kind 5) between 17 NUMANodes (depth -3
      14    20    20    20    20    20    20    20    20    20    20    20    20    17    17    10    17    14
      15    20    20    20    20    20    20    20    20    20    20    20    20    17    17    17    10    14
      16    14    14    14    14    14    14    14    14    14    14    14    14    14    14    14    14    10
+CPU kind #0 efficiency 0 cpuset 0xffffffff,0xffffffff,0xffffffff,0xffffffff
+  FrequencyMaxMHz = 1598
 Topology not from this system

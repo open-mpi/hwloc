@@ -507,29 +507,33 @@ int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 }
 
 /* This function may be called with topology->tma set, it cannot free() or realloc() */
-static int hwloc__tma_dup_infos(struct hwloc_tma *tma, hwloc_obj_t new, hwloc_obj_t src)
+int hwloc__tma_dup_infos(struct hwloc_tma *tma,
+                         struct hwloc_info_s **newip, unsigned *newcp,
+                         struct hwloc_info_s *oldi, unsigned oldc)
 {
+  struct hwloc_info_s *newi;
   unsigned i, j;
-  new->infos = hwloc_tma_calloc(tma, src->infos_count * sizeof(*src->infos));
-  if (!new->infos)
+  newi = hwloc_tma_calloc(tma, oldc * sizeof(*newi));
+  if (!newi)
     return -1;
-  for(i=0; i<src->infos_count; i++) {
-    new->infos[i].name = hwloc_tma_strdup(tma, src->infos[i].name);
-    new->infos[i].value = hwloc_tma_strdup(tma, src->infos[i].value);
-    if (!new->infos[i].name || !new->infos[i].value)
+  for(i=0; i<oldc; i++) {
+    newi[i].name = hwloc_tma_strdup(tma, oldi[i].name);
+    newi[i].value = hwloc_tma_strdup(tma, oldi[i].value);
+    if (!newi[i].name || !newi[i].value)
       goto failed;
   }
-  new->infos_count = src->infos_count;
+  *newip = newi;
+  *newcp = oldc;
   return 0;
 
  failed:
   assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
   for(j=0; j<=i; j++) {
-    free(new->infos[i].name);
-    free(new->infos[i].value);
+    free(newi[i].name);
+    free(newi[i].value);
   }
-  free(new->infos);
-  new->infos = NULL;
+  free(newi);
+  *newip = NULL;
   return -1;
 }
 
@@ -847,7 +851,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   newobj->nodeset = hwloc_bitmap_tma_dup(tma, src->nodeset);
   newobj->complete_nodeset = hwloc_bitmap_tma_dup(tma, src->complete_nodeset);
 
-  hwloc__tma_dup_infos(tma, newobj, src);
+  hwloc__tma_dup_infos(tma, &newobj->infos, &newobj->infos_count, src->infos, src->infos_count);
 
   /* find our level */
   if (src->depth < 0) {
@@ -1045,6 +1049,10 @@ hwloc__topology_dup(hwloc_topology_t *newp,
     goto out_with_topology;
 
   err = hwloc_internal_memattrs_dup(new, old);
+  if (err < 0)
+    goto out_with_topology;
+
+  err = hwloc_internal_cpukinds_dup(new, old);
   if (err < 0)
     goto out_with_topology;
 
@@ -3596,6 +3604,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
 
   hwloc_internal_distances_init(topology);
   hwloc_internal_memattrs_init(topology);
+  hwloc_internal_cpukinds_init(topology);
 
   topology->userdata_export_cb = NULL;
   topology->userdata_import_cb = NULL;
@@ -3825,6 +3834,7 @@ hwloc_topology_clear (struct hwloc_topology *topology)
 {
   /* no need to set to NULL after free() since callers will call setup_defaults() or just destroy the rest of the topology */
   unsigned l;
+  hwloc_internal_cpukinds_destroy(topology);
   hwloc_internal_distances_destroy(topology);
   hwloc_internal_memattrs_destroy(topology);
   hwloc_free_object_and_children(topology->levels[0][0]);
@@ -3955,6 +3965,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
   if (getenv("HWLOC_DEBUG_CHECK"))
 #endif
     hwloc_topology_check(topology);
+
+  /* Rank cpukinds */
+  hwloc_internal_cpukinds_rank(topology);
 
   /* Mark distances objs arrays as invalid since we may have removed objects
    * from the topology after adding the distances (remove_empty, etc).
@@ -4257,6 +4270,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
   hwloc_filter_levels_keep_structure(topology);
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   propagate_total_memory(topology->levels[0][0]);
+  hwloc_internal_cpukinds_restrict(topology);
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
@@ -4344,6 +4358,7 @@ hwloc_topology_allow(struct hwloc_topology *topology,
 int
 hwloc_topology_refresh(struct hwloc_topology *topology)
 {
+  hwloc_internal_cpukinds_rank(topology);
   hwloc_internal_distances_refresh(topology);
   hwloc_internal_memattrs_refresh(topology);
   return 0;

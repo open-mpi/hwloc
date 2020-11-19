@@ -66,6 +66,7 @@ check_PROGRAMS = \
         hwloc_iodevs \
         cpuset_nodeset \
         memattrs \
+        cpukinds \
         xmlbuffer \
         gl
 

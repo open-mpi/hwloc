@@ -2009,6 +2009,8 @@ struct hwloc_topology_discovery_support {
   unsigned char disallowed_pu;
   /** \brief Detecting and identifying NUMA nodes that are not available to the current process is supported. */
   unsigned char disallowed_numa;
+  /** \brief Detecting the efficiency of CPU kinds is supported, see \ref hwlocality_cpukinds. */
+  unsigned char cpukind_efficiency;
 };
 
 /** \brief Flags describing actual PU binding support for this topology.
@@ -2461,6 +2463,9 @@ HWLOC_DECLSPEC int hwloc_topology_refresh(hwloc_topology_t topology);
 
 /* memory attributes */
 #include "hwloc/memattrs.h"
+
+/* kinds of CPU cores */
+#include "hwloc/cpukinds.h"
 
 /* exporting to XML or synthetic */
 #include "hwloc/export.h"

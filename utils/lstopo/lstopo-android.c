@@ -13,27 +13,32 @@
 
 #include "lstopo.h"
 
-extern void JNIbox(int r, int g, int b, int x, int y, int width, int height, int gp_index, char *info);
-extern void JNItext(char *text, int gp_index, int x, int y, int fontsize);
+extern void JNIbox(int r, int g, int b, int x, int y, int width, int height, unsigned style, int gp_index, char *info);
+extern void JNItext(char *text, int gp_index, int x, int y, int fontsize, int bold);
 extern void JNIline(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 extern void JNIprepare(int width, int height, int fontsize);
 
 #define ANDROID_TEXT_WIDTH(length, fontsize) (((length) * (fontsize))/2)
 #define ANDROID_FONTSIZE_SCALE(size) (((size) * 11) / 9)
 
-static void native_android_box(struct lstopo_output *loutput __hwloc_attribute_unused, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id __hwloc_attribute_unused)
+static void native_android_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id __hwloc_attribute_unused)
 {
+    struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
     int gp_index = -1;
     int r = lcolor->r, g = lcolor->g, b = lcolor->b;
     char * info = malloc(1096);
     const char * sep = " ";
+    unsigned style = 0;
 
     if(obj){
         gp_index = obj->gp_index;
         hwloc_obj_attr_snprintf(info, 1096, obj, sep, 1);
     }
 
-    JNIbox(r, g, b, x, y, width, height, gp_index, info);
+    if (loutput->show_cpukinds && ou && ou->cpukind_style)
+        style = ou->cpukind_style;
+
+    JNIbox(r, g, b, x, y, width, height, style, gp_index, info);
     //Creating a usable java string from char * may trigger an UTF-8 error
     //This code creates a byte array from the char * variable before creating the java string
 }
@@ -56,10 +61,17 @@ native_android_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, 
 static void
 native_android_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor __hwloc_attribute_unused, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj, unsigned text_id __hwloc_attribute_unused)
 {
+    struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
     int gp_index = -1;
+    int bold = 0;
+
     if(obj)
         gp_index = obj->gp_index;
-    JNItext((char *)text, gp_index, x, y, loutput->fontsize);
+
+    if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+        bold = 1;
+
+    JNItext((char *)text, gp_index, x, y, loutput->fontsize, bold);
 }
 
 static struct draw_methods native_android_draw_methods = {

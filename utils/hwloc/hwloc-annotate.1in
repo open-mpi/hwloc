@@ -108,6 +108,21 @@ All existing attributes in the input topology may be listed with
     $ lstopo --memattrs -i input.xml
 
 .TP
+.B cpukind <cpuset> <efficiency> <flags> [<infoname> <infovalue>]
+Specifies the kind of CPU for PUs listed in the given cpuset.
+\fIlocation\fR is ignored in this mode.
+
+\fIefficiency\fR is an abstracted efficiency value that will enforce
+ranking of kinds. It should be -1 if unknown.
+
+\fIflags\fR must be 0 for now.
+
+If \fIinfoname\fR and \fIinfovalue\fR are given and non-empty,
+they are added as info attributes to this kind of CPU.
+
+See the function hwloc_cpukinds_register() for details.
+
+.TP
 .B distances <filename> [<flags>]
 Specifies new distances to be added to the topology using specifications in \fI<filename>\fR.
 The optional \fIflags\fR (0 unless specified) corresponds to the flags
@@ -181,6 +196,11 @@ and set its value for initiator CPU-set 0x11 to NUMA node #2 to 2345:
 
     $ hwloc-annotate topo.xml topo.xml ignored memattr MyApplicationPerformance need_init,higher
     $ hwloc-annotate topo.xml topo.xml numanode:2 memattr MyApplicationPerformance 0x11 2345
+
+Specify that PU 0-3 and PU 4-7 are of different kinds, and the latter is more efficient:
+
+    $ hwloc-annotate topo.xml topo.xml dummy cpukind 0x0f 0 0 CoreType Small
+    $ hwloc-annotate topo.xml topo.xml dummy cpukind 0xf0 1 0 CoreType Big
 .
 .\" **************************
 .\" Return value section

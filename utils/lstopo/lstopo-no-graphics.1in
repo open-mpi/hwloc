@@ -95,6 +95,9 @@ Only display memory attributes.
 All of them are displayed (while the default textual output selects
 memory attribute details depending on the verbosity level).
 .TP
+\fB\-\-cpukinds\fR
+Only display CPU kinds.
+.TP
 \fB\-f\fR \fB\-\-force\fR
 If the destination file already exists, overwrite it.
 .TP
@@ -214,6 +217,11 @@ This only applies to normal CPU-side object, it is independent from PCI collapsi
 Do not collapse identical PCI devices.
 By default, identical sibling PCI devices (such as many virtual functions
 inside a single physical device) are collapsed.
+.TP
+\fB\-\-no\-cpukinds
+Do not show different kinds of CPUs in the graphical output.
+By default, when supported, different types of lines, thickness
+and bold font may be used to display PU boxes of different kinds.
 .TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.

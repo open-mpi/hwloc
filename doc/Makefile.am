@@ -70,6 +70,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/export.h \
        $(hwloc_include_dir)/hwloc/distances.h \
        $(hwloc_include_dir)/hwloc/memattrs.h \
+       $(hwloc_include_dir)/hwloc/cpukinds.h \
        $(hwloc_include_dir)/hwloc/diff.h \
        $(hwloc_include_dir)/hwloc/shmem.h \
        $(hwloc_include_dir)/hwloc/plugins.h \
@@ -707,6 +708,14 @@ man3_memattrs_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_targets.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_initiators.3
 
+man3_cpukindsdir = $(man3dir)
+man3_cpukinds_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_cpukinds.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpukinds_get_nr.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpukinds_get_by_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpukinds_get_info.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpukinds_register.3
+
 man3_diffdir = $(man3dir)
 man3_diff_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_diff.3 \
@@ -840,6 +849,7 @@ $(man3_helper_nodeset_convert_DATA): $(DOX_TAG)
 $(man3_helper_advanced_io_DATA): $(DOX_TAG)
 $(man3_distances_DATA): $(DOX_TAG)
 $(man3_memattrs_DATA): $(DOX_TAG)
+$(man3_cpukinds_DATA): $(DOX_TAG)
 $(man3_diff_DATA): $(DOX_TAG)
 $(man3_cuda_DATA): $(DOX_TAG)
 $(man3_glibc_sched_DATA): $(DOX_TAG)

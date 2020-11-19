@@ -190,7 +190,7 @@ static __hwloc_inline void lstopo_update_factorize_alltypes_bounds(struct lstopo
 }
 
 static void
-lstopo_add_factorized_attributes(struct lstopo_output *loutput, hwloc_obj_t obj)
+lstopo_add_factorized_attributes(struct lstopo_output *loutput, hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
@@ -198,23 +198,31 @@ lstopo_add_factorized_attributes(struct lstopo_output *loutput, hwloc_obj_t obj)
     return;
 
   if (obj->symmetric_subtree && obj->arity > loutput->factorize_min[obj->first_child->type]){
-    /* factorize those children */
-    for_each_child(child, obj) {
-      unsigned factorized;
-      if (child->sibling_rank < loutput->factorize_first[child->type]
-	  || child->sibling_rank >= obj->arity - loutput->factorize_last[child->type])
-	factorized = 0; /* keep first and last */
-      else if (child->sibling_rank == loutput->factorize_first[child->type])
-	factorized = 1; /* replace with dots */
-      else
-	factorized = -1; /* remove that one */
-
-      ((struct lstopo_obj_userdata *)child->userdata)->factorized = factorized;
+    int may_factorize = 1;
+    /* check that the object is in a single cpukind */
+    if (loutput->nr_cpukind_styles) {
+      int err = hwloc_cpukinds_get_by_cpuset(topology, obj->cpuset, 0);
+      if (err < 0 && errno == EXDEV)
+        may_factorize = 0;
+    }
+    if (may_factorize) {
+      /* factorize those children */
+      for_each_child(child, obj) {
+        unsigned factorized;
+        if (child->sibling_rank < loutput->factorize_first[child->type]
+            || child->sibling_rank >= obj->arity - loutput->factorize_last[child->type])
+          factorized = 0; /* keep first and last */
+        else if (child->sibling_rank == loutput->factorize_first[child->type])
+          factorized = 1; /* replace with dots */
+        else
+          factorized = -1; /* remove that one */
+        ((struct lstopo_obj_userdata *)child->userdata)->factorized = factorized;
+      }
     }
   }
   /* recurse */
   for_each_child(child, obj)
-    lstopo_add_factorized_attributes(loutput, child);
+    lstopo_add_factorized_attributes(loutput, topology, child);
 }
 
 static void
@@ -252,6 +260,26 @@ lstopo_add_collapse_attributes(hwloc_topology_t topology)
     /* end this collapsing */
     ((struct lstopo_obj_userdata *)collapser->userdata)->pci_collapsed = collapsed;
   }
+}
+
+static void
+lstopo_add_cpukind_style(struct lstopo_output *loutput, hwloc_topology_t topology)
+{
+  unsigned i, nr;
+  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+  if (!cpuset)
+    return;
+  nr = hwloc_cpukinds_get_nr(topology, 0);
+  for(i=0; i<nr; i++) {
+    hwloc_obj_t obj;
+    hwloc_cpukinds_get_info(topology, i, cpuset, NULL, NULL, NULL, 0);
+    obj = NULL;
+    while ((obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, cpuset, HWLOC_OBJ_PU, obj)) != NULL)
+      ((struct lstopo_obj_userdata *)obj->userdata)->cpukind_style = i;
+  }
+  hwloc_bitmap_free(cpuset);
+
+  loutput->nr_cpukind_styles = nr;
 }
 
 static int
@@ -292,6 +320,7 @@ lstopo_populate_userdata(hwloc_obj_t parent)
   save->common.next = parent->userdata;
   save->factorized = 0;
   save->pci_collapsed = 0;
+  save->cpukind_style = 0;
   parent->userdata = save;
 
   for_each_child(child, parent)
@@ -377,6 +406,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  --distances           Only show distance matrices\n");
   fprintf (where, "  --memattrs            Only show memory attributes\n");
+  fprintf (where, "  --cpukinds            Only show CPU kinds\n");
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "  -C --cpuset-only      Only show the cpuset of each object\n");
   fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
@@ -417,6 +447,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "                        Set the minimum number <N> of objects to factorize,\n");
   fprintf (where, "                        the numbers of first <F> and last <L> to keep,\n");
   fprintf (where, "                        for all or only the given object type <type>\n");
+  fprintf (where, "  --no-cpukinds         Do not show CPU kinds\n");
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 7          Set size of margin between elements\n");
   fprintf (where, "  --linespacing 4       Set spacing between lines of text\n");
@@ -468,6 +499,7 @@ void lstopo_show_interactive_help(void)
   printf("  Switch display mode for indexes ..... i\n");
   printf("  Toggle displaying of object text .... t\n");
   printf("  Toggle displaying of obj attributes . a\n");
+  printf("  Toggle displaying of CPU kinds ...... k\n");
   printf("  Toggle color for disallowed objects . d\n");
   printf("  Toggle color for binding objects .... b\n");
   printf("  Toggle displaying of legend lines ... l\n");
@@ -494,6 +526,8 @@ static void lstopo__show_interactive_cli_options(const struct lstopo_output *lou
     printf(" --no-factorize");
   if (!loutput->pci_collapse_enabled)
     printf(" --no-collapse");
+  if (!loutput->show_cpukinds)
+    printf(" --no-cpukinds");
   if (!loutput->show_binding)
     printf(" --binding-color none");
   if (!loutput->show_disallowed)
@@ -705,9 +739,12 @@ main (int argc, char *argv[])
 
   loutput.show_distances_only = 0;
   loutput.show_memattrs_only = 0;
+  loutput.show_cpukinds_only = 0;
   loutput.show_only = HWLOC_OBJ_TYPE_NONE;
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
+
+  loutput.nr_cpukind_styles = 0;
 
   loutput.backend_data = NULL;
   loutput.methods = NULL;
@@ -741,6 +778,7 @@ main (int argc, char *argv[])
 
   loutput.show_binding = 1;
   loutput.show_disallowed = 1;
+  loutput.show_cpukinds = 1;
 
   /* enable verbose backends */
   if (!getenv("HWLOC_XML_VERBOSE"))
@@ -769,6 +807,8 @@ main (int argc, char *argv[])
 	loutput.show_distances_only = 1;
       } else if (!strcmp (argv[0], "--memattrs")) {
         loutput.show_memattrs_only = 1;
+      } else if (!strcmp (argv[0], "--cpukinds")) {
+        loutput.show_cpukinds_only = 1;
       } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
@@ -1144,6 +1184,9 @@ main (int argc, char *argv[])
 	  fprintf(stderr, "Unsupported order `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
 	opt = 1;
       }
+      else if (!strcmp (argv[0], "--no-cpukinds")) {
+        loutput.show_cpukinds = 0;
+      }
       else if (!strcmp (argv[0], "--fontsize")) {
 	if (argc < 2)
 	  goto out_usagefailure;
@@ -1260,6 +1303,7 @@ main (int argc, char *argv[])
         || loutput.show_only != HWLOC_OBJ_TYPE_NONE
 	|| loutput.show_distances_only
         || loutput.show_memattrs_only
+        || loutput.show_cpukinds_only
         || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }
@@ -1510,7 +1554,9 @@ main (int argc, char *argv[])
   if (output_format != LSTOPO_OUTPUT_XML) {
     /* there might be some xml-imported userdata in objects, add lstopo-specific userdata in front of them */
     lstopo_populate_userdata(hwloc_get_root_obj(topology));
-    lstopo_add_factorized_attributes(&loutput, hwloc_get_root_obj(topology));
+    lstopo_add_cpukind_style(&loutput, topology);
+    /* cpukinds must be before factorizing */
+    lstopo_add_factorized_attributes(&loutput, topology, hwloc_get_root_obj(topology));
     lstopo_add_collapse_attributes(topology);
   }
 

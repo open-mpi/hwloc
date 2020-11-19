@@ -24,6 +24,7 @@ _lstopo() {
 		   -s --silent
 		   --distances
 		   --memattrs
+		   --cpukinds
 		   -c --cpuset
 		   -C --cpuset-only
 		   --taskset
@@ -49,6 +50,7 @@ _lstopo() {
 		   --allow
 		   --flags
 		   --children-order
+		   --no-cpukinds
 		   --fontsize
 		   --gridsize
 		   --linespacing
@@ -297,6 +299,7 @@ _hwloc_calc(){
 		   --restrict
 		   --restrict-flags
 		   --disallowed --whole-system
+		   --cpukind
 		   --input -i
 		   --input-format --if
 		   --no-smt --no-smt=N
@@ -338,6 +341,9 @@ _hwloc_calc(){
 		;;
 	    --best-memattr)
 		COMPREPLY=( "<memattr>" "" )
+		;;
+	    --cpukind)
+		COMPREPLY=( "<name>=<value>" "<n>" "" )
 		;;
 	esac
     fi

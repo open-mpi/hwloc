@@ -19,9 +19,19 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.4.0
 -------------
+* API
+  + Add hwloc/cpukinds.h for reporting information about hybrid CPUs.
+    - Use Linux cpufreq frequencies to rank cores by efficiency.
+    - Use x86 CPUID hybrid leaf to identify Intel Atom and Core cores.
+    - Use the Windows native EfficiencyClass to separate kinds.
 * Backends
   + Properly handle Linux kernel 5.10+ exposing ACPI HMAT information
     with knowledge of Generic Initiators.
+* Tools
+  + lstopo has new --cpukinds and --no-cpukinds options for showing
+    CPU kinds or not in textual and graphical modes respectively.
+  + hwloc-calc has a new --cpukind option for filtering PUs by kind.
+  + hwloc-annotate has a new cpukind command for modifying CPU kinds.
 
 
 Version 2.3.0

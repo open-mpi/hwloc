@@ -498,4 +498,7 @@
     <indexes length="4">0 1 </indexes>
     <u64values length="12">10 21 21 10 </u64values>
   </distances2>
+  <cpukind cpuset="0x0000ffff">
+    <info name="FrequencyMaxMHz" value="2701"/>
+  </cpukind>
 </topology>

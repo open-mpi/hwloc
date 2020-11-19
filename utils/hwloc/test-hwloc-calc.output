@@ -136,6 +136,15 @@ PU:22_PU:23_Core:6_Core:7_Group0:2
 # Best-capacity local node near a PU (node:6@Machine)
 6
 
+# CPU kind by index
+0x00fff000
+
+# CPU kind by wrong index
+0x0
+
+# CPU kind by info attr
+0x00000fff
+
 # Caches with attributes
 0x0000000b
 

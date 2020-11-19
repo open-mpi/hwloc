@@ -1047,6 +1047,19 @@ following environment variables.
   This is useful when trying to find an interesting distance grouping
   accuracy.</dd>
 
+<dt>HWLOC_CPUKINDS_RANKING=default</dt>
+  <dd>change the ranking policy for CPU kinds.
+  By default, the OS-provided efficiency is used for ranking.
+  If not available, the frequency is used on ARM processors,
+  or core type and frequency on other architectures.
+  <br/>
+  This environment variable may be set to
+  <tt>coretype+frequency</tt>, <tt>coretype</tt>,
+  <tt>frequency</tt>, <tt>frequency_base</tt>, <tt>frequency_max</tt>,
+  <tt>forced_efficiency</tt>, <tt>no_forced_efficiency</tt>,
+  <tt>default</tt>, or <tt>none</tt>.
+  </dd>
+
 <dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
 <dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
 <dd>changes the locality of I/O devices behing the specified PCI buses.
@@ -1985,7 +1998,7 @@ that have a special meaning:
 
 
 
-\page topoattrs Topology Attributes: Distances and Memory Attributes
+\page topoattrs Topology Attributes: Distances, Memory Attributes and CPU Kinds
 
 \htmlonly
 <div class="section">
@@ -2049,6 +2062,40 @@ Users may also specify their own attributes and values.
 
 The memory attributes API is located in hwloc/memattrs.h,
 see \ref hwlocality_memattrs and \ref hwlocality_memattrs_manage for details.
+
+\htmlonly
+</div><div class="section" id="topoattrs_cpukinds">
+\endhtmlonly
+\section topoattrs_cpukinds CPU Kinds
+
+Hybrid CPUs may contain different kinds of cores.
+The CPU kinds API in hwloc/cpukinds.h provides a way to list the sets
+of PUs in each kind and get some optional information about their
+hardware characteristics and efficiency.
+
+If the operating system provides efficiency information (e.g. Windows 10),
+it is used to rank hwloc CPU kinds by efficiency.
+Otherwise, hwloc implements several heuristics based on frequencies
+and core types (see HWLOC_CPUKINDS_RANKING in \ref envvar).
+
+Attributes include:
+<dl>
+<dt>FrequencyMaxMHz (Linux)</dt>
+<dd>The maximal operating frequency of the core,
+as reported by <tt>cpufreq</tt> drivers on Linux.
+</dd>
+<dt>FrequencyBaseMHz (Linux)</dt>
+<dd>The base operating frequency of the core,
+as reported by some <tt>cpufreq</tt> drivers on Linux (e.g. <tt>intel_pstate</tt>).
+</dd>
+<dt>CoreType (x86)</dt>
+<dd>A string describing the kind of core,
+currently <tt>IntelAtom</tt> or <tt>IntelCore</tt>,
+as reported by the x86 CPUID instruction on some Intel processors.
+</dd>
+</dl>
+
+See \ref hwlocality_cpukinds for details.
 
 
 

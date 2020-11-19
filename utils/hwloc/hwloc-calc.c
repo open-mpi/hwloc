@@ -23,6 +23,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   hwloc_calc_locations_usage(where);
   fprintf(where, "Input topology options (must be at the beginning):\n");
   fprintf(where, "  --no-smt                  Only keep a single PU per core\n");
+  fprintf(where, "  --cpukind <n>             Only keep PUs in the CPU kind <n>\n");
+  fprintf(where, "  --cpukind <name>=<value>  Only keep PUs whose CPU kind match info <name>=<value>\n");
   fprintf(where, "  --restrict [nodeset=]<bitmap>\n");
   fprintf(where, "                            Restrict the topology to some processors or NUMA nodes.\n");
   fprintf(where, "  --restrict-flags <n>      Set the flags to be used during restrict\n");
@@ -77,6 +79,7 @@ static int showobjs = 0;
 static int no_smt = -1;
 static int singlify = 0;
 static int taskset = 0;
+static hwloc_bitmap_t cpukind_cpuset = NULL;
 
 static int
 hwloc_calc_intersects_set(hwloc_bitmap_t set, int use_nodeset, hwloc_obj_t obj)
@@ -135,6 +138,9 @@ next:
 static int
 hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set)
 {
+  if (cpukind_cpuset)
+    hwloc_bitmap_and(set, set, cpukind_cpuset);
+
   if (no_smt != -1 && !nodeseto) {
     if (hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "Topology has no Core object, ignoring --no-smt\n");
@@ -290,6 +296,9 @@ int main(int argc, char *argv[])
   char * best_memattr_str = NULL;
   char *callname;
   char *outsep = NULL;
+  int cpukind_index = -1;
+  char *cpukind_infoname = NULL;
+  char *cpukind_infovalue = NULL;
   int opt;
   int i;
   int err;
@@ -342,6 +351,23 @@ int main(int argc, char *argv[])
       opt = 1;
       goto next_config;
     }
+    if (!strcmp(argv[0], "--cpukind")) {
+      char *equal;
+      if (argc < 2) {
+        usage(callname, stderr);
+        return EXIT_FAILURE;
+      }
+      equal = strchr(argv[1], '=');
+      if (equal) {
+        cpukind_infoname = argv[1];
+        cpukind_infovalue = equal+1;
+        *equal = 0;
+      } else {
+        cpukind_index = atoi(argv[1]);
+      }
+      opt = 1;
+      goto next_config;
+    }
     if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					  &input, &input_format,
 					  callname)) {
@@ -373,6 +399,33 @@ int main(int argc, char *argv[])
     }
     hwloc_bitmap_free(restrictset);
     free(restrictstring);
+  }
+  if (cpukind_index >= 0) {
+    cpukind_cpuset = hwloc_bitmap_alloc();
+    err = hwloc_cpukinds_get_info(topology, cpukind_index, cpukind_cpuset, NULL, NULL, NULL, 0);
+    if (err < 0) {
+      fprintf(stderr, "Couldn't find CPU kind #%d, keeping no PU.\n", cpukind_index);
+      /* FALLTHRU */
+    }
+  } else if (cpukind_infoname && cpukind_infovalue) {
+    hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+    int nr = hwloc_cpukinds_get_nr(topology, 0);
+    cpukind_cpuset = hwloc_bitmap_alloc();
+    for(i=0; i<nr; i++) {
+      struct hwloc_info_s *infos;
+      unsigned nr_infos, j;
+      hwloc_cpukinds_get_info(topology, i, cpuset, NULL, &nr_infos, &infos, 0);
+      for(j=0; j<nr_infos; j++)
+        if (!strcmp(infos[j].name, cpukind_infoname) && !strcmp(infos[j].value, cpukind_infovalue)) {
+          hwloc_bitmap_or(cpukind_cpuset, cpukind_cpuset, cpuset);
+          break;
+        }
+    }
+    hwloc_bitmap_free(cpuset);
+    if (hwloc_bitmap_iszero(cpukind_cpuset)) {
+      fprintf(stderr, "Couldn't find any CPU kind matching %s=%s, keeping no PU.\n", cpukind_infoname, cpukind_infovalue);
+      /* FALLTHRU */
+    }
   }
 
   while (argc >= 1) {
@@ -656,6 +709,7 @@ int main(int argc, char *argv[])
   hwloc_topology_destroy(topology);
 
   hwloc_bitmap_free(set);
+  hwloc_bitmap_free(cpukind_cpuset);
 
   free(hierdepth);
 
