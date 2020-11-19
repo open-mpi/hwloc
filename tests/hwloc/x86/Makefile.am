@@ -1,4 +1,4 @@
-# Copyright © 2015-2019 Inria.  All rights reserved.
+# Copyright © 2015-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -11,6 +11,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # XML outputs shouldn't have gp_index attributes to avoid spurious errors.
 # Remove them with: sed -r -e 's/ gp_index=\"[0-9]+\"//' -i foo.outpu
 cpuid_outputs = \
+	Intel-CPUID.1A-1p2co2t.output \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.output \
 	Intel-CascadeLake-2xXeon6230.output \
 	Intel-Skylake-2xXeon6140.output \
@@ -40,6 +41,7 @@ cpuid_outputs = \
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # specifying which tarball to use
 cpuid_tarballs = \
+	Intel-CPUID.1A-1p2co2t.tar.bz2 \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.tar.bz2 \
 	Intel-CascadeLake-2xXeon6230.tar.bz2 \
 	Intel-Skylake-2xXeon6140.tar.bz2 \
@@ -70,7 +72,7 @@ cpuid_options =
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
-cpuid_envs =
+cpuid_envs = Intel-CPUID.1A-1p2co2t.env
 
 if HWLOC_HAVE_BUNZIPP
 TESTS = $(cpuid_outputs)

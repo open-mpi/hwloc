@@ -33,6 +33,7 @@ xml_outputs = \
         192em64t-12gr2n8c2t.xml \
         192em64t-24n8c2t.xml \
         fakeheterodistances.xml \
+        fakecpukinds.xml \
         8em64t-2p2ca2co-nonodesets.v1tov2.xml \
         8ia64-2n2s2c+1n.v1tov2.xml \
         16amd64-4distances.v1tov2.xml \

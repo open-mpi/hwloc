@@ -91,4 +91,16 @@
     <u64values length="30">50 10 20 30 40 40 50 20 10 30 </u64values>
     <u64values length="18">40 40 50 30 30 10 </u64values>
   </distances2>
+  <cpukind cpuset="0x00000f00">
+    <info name="FrequencyMaxMHz" value="3000"/>
+    <info name="FrequencyBaseMHz" value="1200"/>
+  </cpukind>
+  <cpukind cpuset="0x00fff000">
+    <info name="FrequencyMaxMHz" value="2000"/>
+    <info name="FrequencyBaseMHz" value="1200"/>
+  </cpukind>
+  <cpukind cpuset="0x000000ff">
+    <info name="FrequencyMaxMHz" value="3000"/>
+    <info name="FrequencyBaseMHz" value="2500"/>
+  </cpukind>
 </topology>

@@ -181,6 +181,7 @@ enum hwloc_x86_disc_flags {
 
 #define has_topoext(features) ((features)[6] & (1 << 22))
 #define has_x2apic(features) ((features)[4] & (1 << 21))
+#define has_hybrid(features) ((features)[18] & (1 << 15))
 
 struct cacheinfo {
   hwloc_obj_cache_type_t type;
@@ -217,6 +218,9 @@ struct procinfo {
   unsigned cpustepping;
   unsigned cpumodelnumber;
   unsigned cpufamilynumber;
+
+  unsigned hybridcoretype;
+  unsigned hybridnativemodel;
 };
 
 enum cpuid_type {
@@ -679,6 +683,15 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       infos->ids[CORE] = legacy_log_proc_id / max_nbthreads;
       hwloc_debug("this is thread %u of core %u\n", threadid, infos->ids[CORE]);
     }
+  }
+
+  if (highest_cpuid >= 0x1a && has_hybrid(features)) {
+    /* Get hybrid cpu information from cpuid 0x1a */
+    eax = 0x1a;
+    ecx = 0;
+    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+    infos->hybridcoretype = eax >> 24;
+    infos->hybridnativemodel = eax & 0xffffff;
   }
 
   /*********************************************************************************
@@ -1280,8 +1293,41 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
     hwloc_bitmap_free(orig_cpuset);
   }
 
-  if (data->apicid_unique)
+  if (data->apicid_unique) {
     summarize(backend, infos, flags);
+
+    if (has_hybrid(features)) {
+      /* use hybrid info for cpukinds */
+      hwloc_bitmap_t atomset = hwloc_bitmap_alloc();
+      hwloc_bitmap_t coreset = hwloc_bitmap_alloc();
+      for(i=0; i<nbprocs; i++) {
+        if (infos[i].hybridcoretype == 0x20)
+          hwloc_bitmap_set(atomset, i);
+        else if (infos[i].hybridcoretype == 0x40)
+          hwloc_bitmap_set(coreset, i);
+      }
+      /* register IntelAtom set if any */
+      if (!hwloc_bitmap_iszero(atomset)) {
+        struct hwloc_info_s infoattr;
+        infoattr.name = (char *) "CoreType";
+        infoattr.value = (char *) "IntelAtom";
+        hwloc_internal_cpukinds_register(topology, atomset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+        /* the cpuset is given to the callee */
+      } else {
+        hwloc_bitmap_free(atomset);
+      }
+      /* register IntelCore set if any */
+      if (!hwloc_bitmap_iszero(coreset)) {
+        struct hwloc_info_s infoattr;
+        infoattr.name = (char *) "CoreType";
+        infoattr.value = (char *) "IntelCore";
+        hwloc_internal_cpukinds_register(topology, coreset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+        /* the cpuset is given to the callee */
+      } else {
+        hwloc_bitmap_free(coreset);
+      }
+    }
+  }
   /* if !data->apicid_unique, do nothing and return success, so that the caller does nothing either */
 
   return 0;
@@ -1360,7 +1406,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
   unsigned highest_cpuid;
   unsigned highest_ext_cpuid;
   /* This stores cpuid features with the same indexing as Linux */
-  unsigned features[10] = { 0 };
+  unsigned features[19] = { 0 };
   struct procinfo *infos = NULL;
   enum cpuid_type cpuid_type = unknown;
   hwloc_x86_os_state_t os_state;
@@ -1460,6 +1506,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
     ecx = 0;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     features[9] = ebx;
+    features[18] = edx;
   }
 
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000001) {

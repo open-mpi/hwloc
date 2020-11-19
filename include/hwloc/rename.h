@@ -408,6 +408,13 @@ extern "C" {
 #define hwloc_memattr_get_targets HWLOC_NAME(memattr_get_targets)
 #define hwloc_memattr_get_initiators HWLOC_NAME(memattr_get_initiators)
 
+/* cpukinds.h */
+
+#define hwloc_cpukinds_get_nr HWLOC_NAME(cpukinds_get_nr)
+#define hwloc_cpukinds_get_by_cpuset HWLOC_NAME(cpukinds_get_by_cpuset)
+#define hwloc_cpukinds_get_info HWLOC_NAME(cpukinds_get_info)
+#define hwloc_cpukinds_register HWLOC_NAME(cpukinds_register)
+
 /* export.h */
 
 #define hwloc_topology_export_xml_flags_e HWLOC_NAME(topology_export_xml_flags_e)
@@ -772,6 +779,7 @@ extern "C" {
 #define hwloc__add_info_nodup HWLOC_NAME(_add_info_nodup)
 #define hwloc__move_infos HWLOC_NAME(_move_infos)
 #define hwloc__free_infos HWLOC_NAME(_free_infos)
+#define hwloc__tma_dup_infos HWLOC_NAME(_tma_dup_infos)
 
 #define hwloc_binding_hooks HWLOC_NAME(binding_hooks)
 #define hwloc_set_native_binding_hooks HWLOC_NAME(set_native_binding_hooks)
@@ -822,6 +830,14 @@ extern "C" {
 #define hwloc_internal_memattrs_destroy HWLOC_NAME(internal_memattrs_destroy)
 #define hwloc_internal_memattrs_need_refresh HWLOC_NAME(internal_memattrs_need_refresh)
 #define hwloc_internal_memattrs_refresh HWLOC_NAME(internal_memattrs_refresh)
+
+#define hwloc_internal_cpukind_s HWLOC_NAME(internal_cpukind_s)
+#define hwloc_internal_cpukinds_init HWLOC_NAME(internal_cpukinds_init)
+#define hwloc_internal_cpukinds_destroy HWLOC_NAME(internal_cpukinds_destroy)
+#define hwloc_internal_cpukinds_dup HWLOC_NAME(internal_cpukinds_dup)
+#define hwloc_internal_cpukinds_register HWLOC_NAME(internal_cpukinds_register)
+#define hwloc_internal_cpukinds_rank HWLOC_NAME(internal_cpukinds_rank)
+#define hwloc_internal_cpukinds_restrict HWLOC_NAME(internal_cpukinds_restrict)
 
 #define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
 #define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)

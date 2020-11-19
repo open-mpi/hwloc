@@ -20,6 +20,7 @@ include_hwloc_HEADERS = \
         hwloc/helper.h \
         hwloc/inlines.h \
         hwloc/memattrs.h \
+        hwloc/cpukinds.h \
         hwloc/diff.h \
         hwloc/shmem.h \
         hwloc/distances.h \

@@ -376,6 +376,34 @@ static void output_memattrs(struct lstopo_output *loutput)
   }
 }
 
+static void output_cpukinds(struct lstopo_output *loutput)
+{
+  hwloc_topology_t topology = loutput->topology;
+  unsigned i, j, nr;
+  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+
+  nr = hwloc_cpukinds_get_nr(topology, 0);
+
+  for(i=0; i<nr; i++) {
+    int efficiency;
+    struct hwloc_info_s *infos;
+    unsigned nr_infos;
+    int err;
+
+    err = hwloc_cpukinds_get_info(topology, i, cpuset, &efficiency, &nr_infos, &infos, 0);
+    if (!err) {
+      char *cpusets;
+      hwloc_bitmap_asprintf(&cpusets, cpuset);
+      printf("CPU kind #%u efficiency %d cpuset %s\n", i, efficiency, cpusets);
+      free(cpusets);
+      for(j=0; j<nr_infos; j++)
+        printf("  %s = %s\n", infos[j].name, infos[j].value);
+    }
+  }
+
+  hwloc_bitmap_free(cpuset);
+}
+
 int
 output_console(struct lstopo_output *loutput, const char *filename)
 {
@@ -396,6 +424,10 @@ output_console(struct lstopo_output *loutput, const char *filename)
   }
   if (loutput->show_memattrs_only) {
     output_memattrs(loutput);
+    return 0;
+  }
+  if (loutput->show_cpukinds_only) {
+    output_cpukinds(loutput);
     return 0;
   }
 
@@ -421,6 +453,7 @@ output_console(struct lstopo_output *loutput, const char *filename)
   if (verbose_mode > 1 && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {
     output_distances(loutput);
     output_memattrs(loutput);
+    output_cpukinds(loutput);
   }
 
   if (verbose_mode > 1 && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {

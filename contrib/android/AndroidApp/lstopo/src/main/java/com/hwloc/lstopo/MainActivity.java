@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         startWithInput(lstopo, 2, txtFile.getAbsolutePath(), topology, options);
                     setMode("txt");
                     String lstopoText = readFile(txtFile);
-                    lstopo.text(lstopoText, 0, 0, 0, -1);
+                    lstopo.text(lstopoText, 0, 0, 0, 0, -1);
                     break;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         startWithInput(lstopo, 3, xmlFile.getAbsolutePath(), topology, options);
                     setMode("xml");
                     String lstopoText = readFile(xmlFile);
-                    lstopo.text(lstopoText, 0, 0, 0, -1);
+                    lstopo.text(lstopoText, 0, 0, 0, 0, -1);
                     break;
                 } catch (IOException e) {
                     e.printStackTrace();

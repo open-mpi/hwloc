@@ -15,7 +15,7 @@
 #include "lstopo.h"
 
 #define TIKZ_TEXT_WIDTH(length, fontsize) (((length) * (fontsize))/2.2)
-#define TIKZ_FONTSIZE_SCALE(size) (((size) * 11) / 9)
+#define TIKZ_FONTSIZE_SCALE(size) (((size) * 13) / 9)
 
 #define TIKZ_FONTFAMILY_ENV "LSTOPO_TIKZ_FONTFAMILY"
 
@@ -51,13 +51,29 @@ tikz_declare_color(struct lstopo_output *loutput, struct lstopo_color *lcolor)
 }
 
 static void
-tikz_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused)
+tikz_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id __hwloc_attribute_unused)
 {
   FILE *file = loutput->file;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
+  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  char linestyle[64] = "solid";
+  unsigned thickness = loutput->thickness;
+  float dashspace = 1.15; /* default dash size: 1.15pt */
 
-  fprintf(file, "\t\\filldraw [fill=hwloc-color-%d-%d-%d,draw=black,line width=%upt] (%u,%u) rectangle ++(%u,%u);\n",
-          r, g, b, loutput->thickness, x, y, width, height);
+  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
+    char dashsize[20], *comma = NULL;
+    thickness *= ou->cpukind_style;
+    dashspace *= 1U << ou->cpukind_style;
+    snprintf(dashsize, 20, "%.4f", dashspace);
+    comma = strchr(dashsize, ',');
+    if (comma)
+      *comma = '.'; /* Use decimal dot despite the locale's opinion. */
+    snprintf(linestyle, sizeof(linestyle), "dash pattern=on %spt off %spt",
+             dashsize, dashsize);
+  }
+
+  fprintf(file, "\t\\filldraw [fill=hwloc-color-%d-%d-%d,draw=black,line width=%upt,%s] (%u,%u) rectangle ++(%u,%u);\n",
+          r, g, b, thickness, linestyle, x, y, width, height);
 }
 
 
@@ -80,15 +96,21 @@ tikz_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, const char
 
 
 static void
-tikz_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj __hwloc_attribute_unused, unsigned text_id __hwloc_attribute_unused)
+tikz_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj, unsigned text_id __hwloc_attribute_unused)
 {
   FILE *file = loutput->file;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
+  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  const char *bf_style = "";
+
   const char *tikzdelim = "{}%&#";
 
-  fprintf(file, "\t\\node [hwloc-label,text=hwloc-color-%d-%d-%d] at (%u,%u) {",
-          r, g, b, x, y);
+  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+      bf_style = "-bold";
+
+  fprintf(file, "\t\\node [hwloc-label%s,text=hwloc-color-%d-%d-%d] at (%u,%u) {",
+          bf_style, r, g, b, x, y);
   while (*text) {
     size_t chunksize = strcspn(text, tikzdelim), n_delim;
     fprintf(file, "%.*s", (int) chunksize, text);
@@ -153,7 +175,9 @@ int output_tikz(struct lstopo_output * loutput, const char *filename)
   fprintf(output, "\n%%%%%%%%%% If inserting in another document, this is the actual source code of the picture %%%%%%%%%%\n\n");
   fprintf(output, "\\begin{tikzpicture}[x=1pt,y=1pt,yscale=-1,"
                   "hwloc-label/.style={fill=none,draw=none,text=black,align=left,anchor=north west,"
-                  "outer sep=0pt,inner sep=0pt,font=\\fontsize{%u}{%u}\\selectfont%s}]\n",
+                  "outer sep=0pt,inner sep=0pt,font=\\fontsize{%u}{%u}\\selectfont%s},"
+                  "hwloc-label-bold/.style={hwloc-label,font=\\fontsize{%u}{%u}\\selectfont%s\\bfseries}]\n",
+                  loutput->fontsize, loutput->fontsize + loutput->linespacing, font_family,
                   loutput->fontsize, loutput->fontsize + loutput->linespacing, font_family);
   fprintf(output, "\t\\clip (0,0) rectangle (%u,%u);\n", loutput->width, loutput->height);
   output_draw(loutput);

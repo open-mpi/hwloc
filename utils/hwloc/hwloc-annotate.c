@@ -24,6 +24,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "    distances <filename> [<flags>]\n");
 	fprintf(where, "    memattr <name> <flags>\n");
 	fprintf(where, "    memattr <name> <initiator> <value>\n");
+        fprintf(where, "    cpukind <cpuset> <efficiency> <flags> [<infoname> <infovalue>]\n");
 	fprintf(where, "    none\n");
         fprintf(where, "Options:\n");
 	fprintf(where, "  --ci\tClear existing infos\n");
@@ -47,6 +48,12 @@ static hwloc_obj_t maviobj = NULL;
 static hwloc_uint64_t mavvalue;
 
 static unsigned long distancesflags = 0;
+
+static hwloc_cpuset_t ckcpuset = NULL;
+static int ckefficiency = -1;
+static unsigned long ckflags = 0;
+static char * ckiname = NULL;
+static char * ckivalue = NULL;
 
 static int clearinfos = 0;
 static int replaceinfos = 0;
@@ -420,6 +427,28 @@ int main(int argc, char *argv[])
                         }
                 }
 
+        } else if (!strcmp(argv[0], "cpukind")) {
+          if (argc < 4) {
+            usage(callname, stderr);
+            exit(EXIT_FAILURE);
+          }
+          ckcpuset = hwloc_bitmap_alloc();
+          if (!ckcpuset) {
+            fprintf(stderr, "Failed to allocate cpuset for cpukind\n");
+            goto out;
+          }
+          hwloc_bitmap_sscanf(ckcpuset, argv[1]);
+          ckefficiency = atoi(argv[2]);
+          ckflags = atoi(argv[3]);
+          if (argc == 5) {
+            fprintf(stderr, "cpukind with info name without info value\n");
+            goto out;
+          }
+          if (argc >= 6 && *argv[4] && *argv[5]) {
+            ckiname = argv[4];
+            ckivalue = argv[5];
+          }
+
 	} else if (!strcmp(argv[0], "none")) {
 		/* do nothing (maybe clear) */
 	} else {
@@ -465,6 +494,16 @@ int main(int argc, char *argv[])
           if (err < 0) {
             fprintf(stderr, "Failed to register new memattr (%s)\n", strerror(errno));
             goto out_with_topology;
+          }
+
+        } else if (ckcpuset) {
+          struct hwloc_info_s info;
+          info.name = ckiname;
+          info.value = ckivalue;
+          if (hwloc_cpukinds_register(topology, ckcpuset, ckefficiency,
+                                      ckiname ? 1 : 0, ckiname ? &info : NULL,
+                                      ckflags) < 0) {
+            fprintf(stderr, "Failed to register CPU kind (%s)\n", strerror(errno));
           }
 
 	} else {
@@ -528,5 +567,6 @@ out_with_topology:
 	hwloc_topology_destroy(topology);
 out:
 	hwloc_bitmap_free(mavicpuset);
+        hwloc_bitmap_free(ckcpuset);
 	exit(EXIT_FAILURE);
 }

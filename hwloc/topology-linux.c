@@ -4057,7 +4057,94 @@ look_sysfsnode(struct hwloc_topology *topology,
   return 0;
 }
 
-/* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
+
+/*************************************
+ * sysfs CPU frequencies for cpukinds
+ */
+
+struct hwloc_linux_cpufreqs {
+  struct cpufreq_set {
+    unsigned maxfreq; /* linux in kHz */
+    hwloc_bitmap_t cpuset;
+  } *sets;
+  unsigned nr_sets, nr_sets_allocated;
+};
+
+static void
+hwloc_linux_cpufreqs_init(struct hwloc_linux_cpufreqs *cpufreqs)
+{
+  cpufreqs->nr_sets = 0;
+  cpufreqs->nr_sets_allocated = 4; /* enough for vast majority of cases */
+  cpufreqs->sets = malloc(cpufreqs->nr_sets_allocated * sizeof(*cpufreqs->sets));
+}
+
+static void
+hwloc_linux_cpufreqs_add(struct hwloc_linux_cpufreqs *cpufreqs,
+                         unsigned pu, unsigned maxfreq)
+{
+  unsigned i;
+
+  /* try to add to existing freq */
+  for(i=0; i<cpufreqs->nr_sets; i++) {
+    if (cpufreqs->sets[i].maxfreq == maxfreq) {
+      hwloc_bitmap_set(cpufreqs->sets[i].cpuset, pu);
+      return;
+    }
+  }
+
+  /* do we need to enlarge the array before adding a new frequency? */
+  if (cpufreqs->nr_sets == cpufreqs->nr_sets_allocated) {
+    struct cpufreq_set *new = realloc(cpufreqs->sets, 2 * cpufreqs->nr_sets_allocated * sizeof(*cpufreqs->sets));
+    if (!new)
+      /* failed, ignore this PU */
+      return;
+    cpufreqs->sets = new;
+    cpufreqs->nr_sets_allocated *= 2;
+  }
+
+  /* add a new frequency for real */
+  cpufreqs->sets[cpufreqs->nr_sets].cpuset = hwloc_bitmap_alloc();
+  if (!cpufreqs->sets[cpufreqs->nr_sets].cpuset)
+    /* failed, ignore this PU */
+    return;
+
+  cpufreqs->sets[cpufreqs->nr_sets].maxfreq = maxfreq;
+  hwloc_bitmap_set(cpufreqs->sets[cpufreqs->nr_sets].cpuset, pu);
+  cpufreqs->nr_sets++;
+}
+
+static void
+hwloc_linux_cpufreqs_register_cpukinds(struct hwloc_linux_cpufreqs *cpufreqs,
+                                       struct hwloc_topology *topology,
+                                       const char *name)
+{
+  unsigned i;
+  for(i=0; i<cpufreqs->nr_sets; i++) {
+    struct hwloc_info_s infoattr;
+    char value[11];
+    infoattr.name = (char *) name;
+    infoattr.value = value;
+    snprintf(value, sizeof(value), "%u", cpufreqs->sets[i].maxfreq/1000);
+    hwloc_internal_cpukinds_register(topology, cpufreqs->sets[i].cpuset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+    /* the cpuset is given to the callee */
+    cpufreqs->sets[i].cpuset = NULL;
+  }
+}
+
+static void
+hwloc_linux_cpufreqs_destroy(struct hwloc_linux_cpufreqs *cpufreqs)
+{
+  unsigned i;
+  for(i=0; i<cpufreqs->nr_sets; i++)
+    hwloc_bitmap_free(cpufreqs->sets[i].cpuset);
+  cpufreqs->nr_sets = 0;
+}
+
+
+/**********************************************
+ * sysfs CPU discovery
+ */
+
 static int
 look_sysfscpu(struct hwloc_topology *topology,
 	      struct hwloc_linux_backend_data_s *data,
@@ -4066,6 +4153,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
   hwloc_bitmap_t online_set; /* Set of online CPUs if easily available, or NULL */
+  struct hwloc_linux_cpufreqs cpufreqs_max,  cpufreqs_base;
 #define CPU_TOPOLOGY_STR_LEN 128
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
@@ -4133,6 +4221,9 @@ look_sysfscpu(struct hwloc_topology *topology,
     }
     closedir(dir);
   }
+
+  hwloc_linux_cpufreqs_init(&cpufreqs_max);
+  hwloc_linux_cpufreqs_init(&cpufreqs_base);
 
   topology->support.discovery->pu = 1;
   topology->support.discovery->disallowed_pu = 1;
@@ -4354,6 +4445,21 @@ look_sysfscpu(struct hwloc_topology *topology,
       hwloc__insert_object_by_cpuset(topology, NULL, thread, "linux:sysfs:pu");
     }
 
+    /* look at the PU frequency for cpukinds */
+    {
+      unsigned maxfreq, basefreq;
+      /* cpuinfo_max_freq is the hardware max. scaling_max_freq is the software policy current max */
+      sprintf(str, "%s/cpu%d/cpufreq/cpuinfo_max_freq", path, i);
+      if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
+        if (maxfreq)
+          hwloc_linux_cpufreqs_add(&cpufreqs_max, i, maxfreq);
+      /* base_frequency is intel_pstate specific */
+      sprintf(str, "%s/cpu%d/cpufreq/base_frequency", path, i);
+      if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0)
+        if (basefreq)
+          hwloc_linux_cpufreqs_add(&cpufreqs_base, i, basefreq);
+    }
+
     /* look at the caches */
     for(j=0; j<10; j++) {
       char str2[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
@@ -4468,6 +4574,10 @@ look_sysfscpu(struct hwloc_topology *topology,
 
   } hwloc_bitmap_foreach_end();
 
+  hwloc_linux_cpufreqs_register_cpukinds(&cpufreqs_max, topology, "FrequencyMaxMHz");
+  hwloc_linux_cpufreqs_register_cpukinds(&cpufreqs_base, topology, "FrequencyBaseMHz");
+  hwloc_linux_cpufreqs_destroy(&cpufreqs_max);
+  hwloc_linux_cpufreqs_destroy(&cpufreqs_base);
   hwloc_bitmap_free(cpuset);
   hwloc_bitmap_free(online_set);
 

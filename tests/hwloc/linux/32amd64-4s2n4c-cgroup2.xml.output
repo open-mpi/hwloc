@@ -107,4 +107,7 @@
     <u64values length="30">16 10 22 16 16 22 16 22 10 16 </u64values>
     <u64values length="18">22 16 22 16 16 10 </u64values>
   </distances2>
+  <cpukind cpuset="0xffffffff">
+    <info name="FrequencyMaxMHz" value="2300"/>
+  </cpukind>
 </topology>

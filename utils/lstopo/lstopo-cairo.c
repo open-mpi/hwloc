@@ -61,9 +61,10 @@ struct lstopo_cairo_output {
 
 /* Cairo methods */
 static void
-topo_cairo_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused)
+topo_cairo_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id __hwloc_attribute_unused)
 {
   struct lstopo_cairo_output *coutput = loutput->backend_data;
+  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
   cairo_t *c = coutput->context;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
@@ -73,7 +74,19 @@ topo_cairo_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
 
   cairo_rectangle(c, x, y, width, height);
   cairo_set_source_rgb(c, 0, 0, 0);
+
+  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
+    double dash = (double)(1U << ou->cpukind_style);
+    cairo_set_dash(c, &dash, 1, 0);
+    cairo_set_line_width(c, loutput->thickness * (1 + ou->cpukind_style));
+  }
+
   cairo_stroke(c);
+
+  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
+    cairo_set_dash(c, NULL, 0, 0);
+    cairo_set_line_width(c, loutput->thickness);
+  }
 }
 
 static void
@@ -93,12 +106,20 @@ static void
 topo_cairo_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int fontsize, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj __hwloc_attribute_unused, unsigned text_id __hwloc_attribute_unused)
 {
   struct lstopo_cairo_output *coutput = loutput->backend_data;
+  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
   cairo_t *c = coutput->context;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   cairo_move_to(c, x, y + fontsize);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
+
+  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+    cairo_select_font_face(c, "default", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+
   cairo_show_text(c, text);
+
+  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+    cairo_select_font_face(c, "default", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 }
 
 static void
@@ -576,6 +597,12 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	  disp->needs_redraw = 1;
 	  move_x11(disp);
 	  break;
+        case XK_k:
+          loutput->show_cpukinds ^= 1;
+          printf("%s displaying of CPU kinds\n", loutput->show_cpukinds ? "enabled" : "disabled");
+          disp->needs_redraw = 1;
+          move_x11(disp);
+          break;
 	case XK_f:
 	  /* alternate between factorize+collapse, collapse only, and none */
 	  if (loutput->factorize_enabled && loutput->pci_collapse_enabled) {

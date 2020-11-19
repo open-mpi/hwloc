@@ -14,6 +14,7 @@ HWLOC_top_builddir="@HWLOC_top_builddir@"
 srcdir="$HWLOC_top_srcdir/utils/hwloc"
 builddir="$HWLOC_top_builddir/utils/hwloc"
 info="$builddir/hwloc-info"
+linuxdir="$HWLOC_top_srcdir/tests/hwloc/linux"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc/.libs
 export HWLOC_PLUGINS_PATH
@@ -104,6 +105,14 @@ set -e
   echo
   echo "# only the highest capacity among 2 local-or-larger memories for one PU, silent"
   $info --if synthetic --input "pack:4 [numa(memory=1000000)] l3:2 [numa(memory=1000)] core:4 pu:2" --local-memory-flags larger --best-memattr capacity -s pu:63
+  echo
+
+  echo
+  echo "# cpukinds for the entire machine"
+  $info --if xml --input $linuxdir/fakeheterocpunuma.output all
+  echo
+  echo "# cpukind for a single PU"
+  $info --if xml --input $linuxdir/fakeheterocpunuma.output pu:15
   echo
 
 ) > "$file"

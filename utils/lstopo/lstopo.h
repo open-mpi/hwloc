@@ -65,8 +65,11 @@ struct lstopo_output {
   int pci_collapse_enabled; /* global toggle for PCI collapsing */
   int pid_number;
   hwloc_pid_t pid;
-  int need_pci_domain;
   hwloc_bitmap_t cpubind_set, membind_set;
+
+  /* misc cached data */
+  int need_pci_domain;
+  unsigned nr_cpukind_styles;
 
   /* export config */
   unsigned long export_synthetic_flags;
@@ -86,6 +89,7 @@ struct lstopo_output {
   /* text config */
   int show_distances_only;
   int show_memattrs_only;
+  int show_cpukinds_only;
   hwloc_obj_type_t show_only;
   int show_cpuset;
   int show_taskset;
@@ -104,6 +108,7 @@ struct lstopo_output {
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
   int show_binding;
   int show_disallowed;
+  int show_cpukinds;
   int factorize_enabled; /* global toggle for interactive keyboard shortcuts */
   unsigned factorize_min[HWLOC_OBJ_TYPE_MAX]; /* minimum number of object before factorizing (parent->arity must be strictly higher) */
 #define FACTORIZE_MIN_DEFAULT 4
@@ -170,6 +175,9 @@ struct lstopo_obj_userdata {
 #define LSTOPO_STYLE_T   0x2
 #define LSTOPO_STYLE_T2  0x4
   unsigned style_set; /* OR'ed LSTOPO_STYLE_* */
+
+  /* PU style for CPU kind */
+  unsigned cpukind_style;
 
   /* object size (including children if they are outside of it, not including borders) */
   unsigned width;

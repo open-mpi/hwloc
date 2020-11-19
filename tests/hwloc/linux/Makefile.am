@@ -62,7 +62,7 @@ sysfs_outputs = \
 		nvidiagpunumanodes.kept.output \
 		fakememinitiators-1np2c+1npp+gi.output \
 		fakecpuid1f-64intel64-2p4d2n2c2t.output \
-		fakeheteronuma.output
+		fakeheterocpunuma.output
 
 if HWLOC_HAVE_32BITS_PCI_DOMAIN
 sysfs_outputs += 2pa-pcidomain32bits.output
@@ -131,7 +131,7 @@ sysfs_tarballs = \
 		nvidiagpunumanodes.kept.source \
 		fakememinitiators-1np2c+1npp+gi.tar.bz2 \
 		fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2 \
-		fakeheteronuma.tar.bz2
+		fakeheterocpunuma.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
 sysfs_excludes = 
@@ -153,7 +153,7 @@ sysfs_options = \
 		32amd64-4s2n4c-cgroup2.xml.options \
 		32em64t-2n8c+1mic.options \
 		40intel64-2g2n4c+pci.options \
-		fakeheteronuma.options
+		fakeheterocpunuma.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
@@ -162,7 +162,7 @@ sysfs_envs = \
 		40intel64-4n10c+pci-conflicts.env \
 		64intel64-fakeKNL-SNC4-hybrid-msc.env \
 		nvidiagpunumanodes.kept.env \
-		fakeheteronuma.env
+		fakeheterocpunuma.env
 
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
