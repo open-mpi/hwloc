@@ -33,6 +33,12 @@ Version 2.4.0
     CPU kinds or not in textual and graphical modes respectively.
   + hwloc-calc has a new --cpukind option for filtering PUs by kind.
   + hwloc-annotate has a new cpukind command for modifying CPU kinds.
+* Misc
+  + Fix hwloc_bitmap_nr_ulongs(), thanks to Norbert Eicker.
+  + Add a documentation section about
+    "Topology Attributes: Distances, Memory Attributes and CPU Kinds".
+  + Silence some spurious warnings in the OpenCL backend and when showing
+    process binding with lstopo --ps.
 
 
 Version 2.3.0
