@@ -483,14 +483,14 @@ Machine L#0
  symmetric subtree = 0
  info Backend = Linux
  cpukind = 0 (partially)
- cpukind info FrequencyMaxMHz = 3000
- cpukind info FrequencyBaseMHz = 1200
- cpukind = 1 (partially)
  cpukind info FrequencyMaxMHz = 2000
  cpukind info FrequencyBaseMHz = 1200
- cpukind = 2 (partially)
+ cpukind = 1 (partially)
  cpukind info FrequencyMaxMHz = 3000
  cpukind info FrequencyBaseMHz = 2500
+ cpukind = 2 (partially)
+ cpukind info FrequencyMaxMHz = 3000
+ cpukind info FrequencyBaseMHz = 1200
 
 # cpukind for a single PU
 PU L#15
@@ -512,7 +512,7 @@ PU L#15
  complete nodeset = 0x00000020
  allowed nodeset = 0x00000020
  symmetric subtree = 1
- cpukind = 1
+ cpukind = 0
  cpukind info FrequencyMaxMHz = 2000
  cpukind info FrequencyBaseMHz = 1200
 

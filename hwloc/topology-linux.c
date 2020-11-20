@@ -4113,12 +4113,23 @@ hwloc_linux_cpufreqs_add(struct hwloc_linux_cpufreqs *cpufreqs,
   cpufreqs->nr_sets++;
 }
 
+static int
+hwloc_linux_cpufreqs_compar(const void *_a, const void *_b)
+{
+  const struct cpufreq_set *a = _a, *b = _b;
+  return a->freq - b->freq;
+}
+
 static void
 hwloc_linux_cpufreqs_register_cpukinds(struct hwloc_linux_cpufreqs *cpufreqs,
                                        struct hwloc_topology *topology,
                                        const char *name)
 {
   unsigned i;
+
+  /* sort by frequency, lower frequency likely means lower efficiency */
+  qsort(cpufreqs->sets, cpufreqs->nr_sets, sizeof(*cpufreqs->sets), hwloc_linux_cpufreqs_compar);
+
   for(i=0; i<cpufreqs->nr_sets; i++) {
     struct hwloc_info_s infoattr;
     char value[11];

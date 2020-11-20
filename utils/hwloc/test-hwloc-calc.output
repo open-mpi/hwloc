@@ -137,7 +137,7 @@ PU:22_PU:23_Core:6_Core:7_Group0:2
 6
 
 # CPU kind by index
-0x00fff000
+0x000000ff
 
 # CPU kind by wrong index
 0x0
