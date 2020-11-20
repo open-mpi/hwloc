@@ -9,7 +9,7 @@ if test "x$1" = x -o "x$1" = "x-h" -o "x$1" = "x--help"; then
   echo
   echo "  <job> may be 'basic/job/master' ('basic' multibranch pipeline on branch 'master')"
   echo "    or 'basic/view/change-requests/job/PR-302' ('basic' multibranch pipeline on pull request #302)"
-  echo "    or 'zbgoglin-basic' (normal pipeline)"
+  echo "    or 'bgoglin' (normal pipeline)"
   echo
   echo "  If the build number <build> isn't specified, 'lastBuild' is used."
   exit 1
