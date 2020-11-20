@@ -93,7 +93,7 @@ extern "C" {
  * Two stable releases of the same series usually have the same ::HWLOC_API_VERSION
  * even if their HWLOC_VERSION are different.
  */
-#define HWLOC_API_VERSION 0x00020300
+#define HWLOC_API_VERSION 0x00020400
 
 /** \brief Indicate at runtime which hwloc API version was used at build time.
  *
