@@ -4064,7 +4064,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 
 struct hwloc_linux_cpufreqs {
   struct cpufreq_set {
-    unsigned maxfreq; /* linux in kHz */
+    unsigned freq; /* linux in kHz */
     hwloc_bitmap_t cpuset;
   } *sets;
   unsigned nr_sets, nr_sets_allocated;
@@ -4080,13 +4080,13 @@ hwloc_linux_cpufreqs_init(struct hwloc_linux_cpufreqs *cpufreqs)
 
 static void
 hwloc_linux_cpufreqs_add(struct hwloc_linux_cpufreqs *cpufreqs,
-                         unsigned pu, unsigned maxfreq)
+                         unsigned pu, unsigned freq)
 {
   unsigned i;
 
   /* try to add to existing freq */
   for(i=0; i<cpufreqs->nr_sets; i++) {
-    if (cpufreqs->sets[i].maxfreq == maxfreq) {
+    if (cpufreqs->sets[i].freq == freq) {
       hwloc_bitmap_set(cpufreqs->sets[i].cpuset, pu);
       return;
     }
@@ -4108,7 +4108,7 @@ hwloc_linux_cpufreqs_add(struct hwloc_linux_cpufreqs *cpufreqs,
     /* failed, ignore this PU */
     return;
 
-  cpufreqs->sets[cpufreqs->nr_sets].maxfreq = maxfreq;
+  cpufreqs->sets[cpufreqs->nr_sets].freq = freq;
   hwloc_bitmap_set(cpufreqs->sets[cpufreqs->nr_sets].cpuset, pu);
   cpufreqs->nr_sets++;
 }
@@ -4124,7 +4124,7 @@ hwloc_linux_cpufreqs_register_cpukinds(struct hwloc_linux_cpufreqs *cpufreqs,
     char value[11];
     infoattr.name = (char *) name;
     infoattr.value = value;
-    snprintf(value, sizeof(value), "%u", cpufreqs->sets[i].maxfreq/1000);
+    snprintf(value, sizeof(value), "%u", cpufreqs->sets[i].freq/1000);
     hwloc_internal_cpukinds_register(topology, cpufreqs->sets[i].cpuset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
     /* the cpuset is given to the callee */
     cpufreqs->sets[i].cpuset = NULL;
