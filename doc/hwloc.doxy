@@ -2094,11 +2094,10 @@ currently <tt>IntelAtom</tt> or <tt>IntelCore</tt>,
 as reported by the x86 CPUID instruction and future Linux kernels
 on some Intel processors.
 </dd>
-<dt>LinuxCPUTyle (Linux)</dt>
+<dt>LinuxCPUType (Linux)</dt>
 <dd>The Linux-specific CPU type found in sysfs,
 such as <tt>intel_atom_0</tt>,
-as reported by the Linux kernel 5.11
-on some Intel processors.
+as reported by future Linux kernels on some Intel processors.
 </dd>
 </dl>
 
