@@ -14,7 +14,8 @@ ACLOCAL_AMFLAGS = -I ./config
 EXTRA_DIST = \
         README VERSION COPYING AUTHORS \
         config/hwloc_get_version.sh \
-        config/distscript.sh
+        config/distscript.sh config/distscript_embedded.sh \
+        autogen.sh
 
 SUBDIRS = include hwloc
 
@@ -26,6 +27,10 @@ SUBDIRS += utils tests contrib/systemd contrib/completion contrib/misc contrib/h
 # We need doc/ if HWLOC_BUILD_DOXYGEN, or during make install if HWLOC_INSTALL_DOXYGEN.
 # There's no INSTALL_SUBDIRS, so always enter doc/ and check HWLOC_BUILD/INSTALL_DOXYGEN there
 SUBDIRS += doc
+else
+EXTRA_DIST += utils/netloc/infiniband/netloc_ib_gather_raw.in
+dist-hook:
+	sh "$(top_srcdir)/config/distscript_embedded.sh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
 endif
 
 # Do not let automake automatically add the non-standalone dirs to the
