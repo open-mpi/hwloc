@@ -5,11 +5,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -70,6 +73,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.view.View.GONE;
 import static android.view.View.TEXT_ALIGNMENT_CENTER;
@@ -430,9 +434,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
                 if(mode == "draw"){
                     FileOutputStream os = new FileOutputStream(file);
-                    View v1 = getWindow().getDecorView().getRootView();
+                    View v1 = layout;
                     v1.setDrawingCacheEnabled(true);
-                    Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+                    Bitmap bitmap = getBitmapFromView(v1, ((RelativeLayout) v1).getChildAt(0).getHeight(), ((RelativeLayout) v1).getChildAt(0).getWidth());
                     v1.setDrawingCacheEnabled(false);
                     int quality = 100;
                     bitmap.compress(Bitmap.CompressFormat.JPEG, quality, os);
@@ -451,8 +455,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         emailIntent.setType("vnd.android.cursor.dir/email");
         emailIntent.putExtra(Intent.EXTRA_STREAM, path);
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "topology." + (mode.equals("draw") ? "jpg" : mode ));
-        emailIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(Intent.createChooser(emailIntent, "Send email..."));
+        
+        Intent intent = Intent.createChooser(emailIntent, "Send email...");
+        List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            grantUriPermission(packageName, path, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+        startActivity(intent);
     }
 
     private boolean checkPermission() {
@@ -692,6 +702,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
         }
+    }
+
+    private Bitmap getBitmapFromView(View view, int height, int width) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Drawable bgDrawable = view.getBackground();
+        if (bgDrawable != null)
+            bgDrawable.draw(canvas);
+        else
+            canvas.drawColor(Color.WHITE);
+        view.draw(canvas);
+        return bitmap;
     }
 
     @Override
