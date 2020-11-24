@@ -2033,6 +2033,14 @@ and 30 for nodes that are opposites on the ring.
 Those are theoretical values exposed by hardware vendors
 (in the System Locality Distance Information Table (SLIT) in the ACPI)
 rather than physical latencies.
+They are mostly meant for comparing node relative distances.
+
+Distances structures currently created by hwloc are:
+<dl>
+<dt>NUMALatency (Linux, Solaris, FreeBSD)</dt>
+<dd>This is the matrix of theoretical latencies described above.
+</dd>
+</dl>
 
 Users may also specify their own matrices between any set of objects,
 even if these objects are of different types (e.g. bandwidths between GPUs and CPUs).
