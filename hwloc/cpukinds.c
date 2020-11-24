@@ -265,23 +265,31 @@ hwloc_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t _cpuset,
  */
 
 static int
-hwloc__cpukinds_try_rank_by_forced_efficiency(struct hwloc_topology *topology)
+hwloc__cpukinds_check_duplicate_rankings(struct hwloc_topology *topology)
 {
   unsigned i,j;
+  for(i=0; i<topology->nr_cpukinds; i++)
+    for(j=i+1; j<topology->nr_cpukinds; j++)
+      if (topology->cpukinds[i].forced_efficiency == topology->cpukinds[j].forced_efficiency)
+        /* if any duplicate, fail */
+        return -1;
+  return 0;
+}
+
+static int
+hwloc__cpukinds_try_rank_by_forced_efficiency(struct hwloc_topology *topology)
+{
+  unsigned i;
 
   hwloc_debug("Trying to rank cpukinds by forced efficiency...\n");
   for(i=0; i<topology->nr_cpukinds; i++) {
     if (topology->cpukinds[i].forced_efficiency == HWLOC_CPUKIND_EFFICIENCY_UNKNOWN)
       /* if any unknown, fail */
       return -1;
-    for(j=i+1; j<topology->nr_cpukinds; j++)
-      if (topology->cpukinds[i].forced_efficiency == topology->cpukinds[j].forced_efficiency)
-        /* if any duplicate, fail */
-        return -1;
     topology->cpukinds[i].ranking_value = topology->cpukinds[i].forced_efficiency;
   }
 
-  return 0;
+  return hwloc__cpukinds_check_duplicate_rankings(topology);
 }
 
 struct hwloc_cpukinds_info_summary {
@@ -414,11 +422,7 @@ hwloc__cpukinds_try_rank_by_info(struct hwloc_topology *topology,
 
   } else assert(0);
 
-  /* if some ranking values are identical, we don't have enough info to rank */
-  for(i=0; i<topology->nr_cpukinds-1; i++)
-    if (topology->cpukinds[i].ranking_value == topology->cpukinds[i+1].ranking_value)
-      return -1;
-  return 0;
+  return hwloc__cpukinds_check_duplicate_rankings(topology);
 }
 
 static int hwloc__cpukinds_compare_ranking_values(const void *_a, const void *_b)
