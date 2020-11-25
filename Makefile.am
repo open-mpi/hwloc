@@ -14,7 +14,8 @@ ACLOCAL_AMFLAGS = -I ./config
 EXTRA_DIST = \
         README VERSION COPYING AUTHORS \
         config/hwloc_get_version.sh \
-        config/distscript.sh
+        config/distscript.sh \
+        config/libtool-big-sur-fixup.patch
 
 SUBDIRS = include hwloc
 
