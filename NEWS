@@ -38,8 +38,10 @@ Version 2.5.0
     Thanks to Anara Kozhokanova, Tim Cramer and Erich Focht for the help.
   + Add a NVLinkBandwidth distances structure between NVIDIA GPUs
     (and POWER processor or NVSwitches) in the NVML backend.
-    See Topology Attributes: Distances, Memory Attributes and CPU Kinds
-    in the documentation.
+  + Add a XGMIBandwidth distances structure between AMD GPUs
+    in the RSMI backends.
+  + See Topology Attributes: Distances, Memory Attributes and CPU Kinds
+    in the documentation for details about these new distances.
 * Build
   + Add --with-cuda-version=<version> or look at the CUDA_VERSION
     environment variable to find the appropriate CUDA pkg-config files.

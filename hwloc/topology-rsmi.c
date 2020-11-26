@@ -15,6 +15,38 @@
 
 #include <rocm_smi/rocm_smi.h>
 
+static int
+hwloc__rsmi_add_xgmi_bandwidth(hwloc_topology_t topology,
+                               unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *bws)
+{
+  void *handle;
+  int err;
+
+  handle = hwloc_backend_distances_add_create(topology, "XGMIBandwidth",
+                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH,
+                                              0);
+  if (!handle)
+    goto out;
+
+  err = hwloc_backend_distances_add_values(topology, handle, nbobjs, objs, bws, 0);
+  if (err < 0)
+    goto out;
+  /* arrays are now attached to the handle */
+  objs = NULL;
+  bws = NULL;
+
+  err = hwloc_backend_distances_add_commit(topology, handle, 0 /* don't group GPUs */);
+  if (err < 0)
+    goto out;
+
+  return 0;
+
+ out:
+  free(objs);
+  free(bws);
+  return -1;
+}
+
 /*
  * Get the name of the GPU
  *
@@ -176,6 +208,9 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e filter;
+  hwloc_obj_t *osdevs = NULL;
+  hwloc_uint64_t *xgmi_bws = NULL;
+  int got_xgmi_bws = 0;
   rsmi_version_t version;
   rsmi_status_t ret;
   int may_shutdown;
@@ -208,6 +243,11 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     }
     goto out;
   }
+
+  osdevs = malloc(nb *sizeof(*osdevs));
+  xgmi_bws = calloc(nb*nb, sizeof(*xgmi_bws));
+  if (!osdevs || !xgmi_bws)
+    goto out;
 
   for (i=0; i<nb; i++) {
     uint64_t bdfid = 0;
@@ -253,9 +293,11 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
         if ((get_device_io_link_type(i, j, &type) == 0) &&
             (type == RSMI_IOLINK_TYPE_XGMI)) {
           xgmi_peers_ptr += sprintf(xgmi_peers_ptr, "rsmi%u ", j);
-      }
-      if (xgmi_peers[0] != '\0')
-        hwloc_obj_add_info(osdev, "XGMIPeers", xgmi_peers);
+          xgmi_bws[i*nb+j] = 100000; /* TODO: verify the XGMI version before putting 100GB/s here? */
+          got_xgmi_bws = 1;
+        }
+        if (xgmi_peers[0] != '\0')
+          hwloc_obj_add_info(osdev, "XGMIPeers", xgmi_peers);
       }
       free(xgmi_peers);
     }
@@ -275,6 +317,20 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     }
 
     hwloc_insert_object_by_parent(topology, parent, osdev);
+    osdevs[i] = osdev;
+  }
+
+  if (got_xgmi_bws) {
+    /* add very high artifical values on the diagonal since local is faster than remote.
+     * XGMI links are 100GB/s, so use 1TB/s for local, it somehow matches the HBM.
+     */
+    for(i=0; i<nb; i++)
+      xgmi_bws[i*nb+i] = 1000000;
+
+    hwloc__rsmi_add_xgmi_bandwidth(topology, nb, osdevs, xgmi_bws);
+    /* don't free arrays, they were given to the distance internals */
+    osdevs = NULL;
+    xgmi_bws = NULL;
   }
 
  out:
@@ -292,6 +348,8 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   if (may_shutdown)
     rsmi_shut_down();
 
+  free(osdevs);
+  free(xgmi_bws);
   return 0;
 }
 

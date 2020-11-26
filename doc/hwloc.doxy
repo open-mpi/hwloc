@@ -2091,6 +2091,12 @@ Distances structures currently created by hwloc are:
 <dt>NUMALatency (Linux, Solaris, FreeBSD)</dt>
 <dd>This is the matrix of theoretical latencies described above.
 </dd>
+<dt>XGMIBandwidth (RSMI)</dt>
+<dd>This is matrix of unidirectional XGMI bandwidths between AMD GPUs (in MB/s).
+It contains 0 when there is no direct XGMI link between objects.
+Values on the diagonal are artificially set to very high so
+that local access always appears faster than remote access.
+</dt>
 <dt>NVLinkBandwidth (NVML)</dt>
 <dd>This is the matrix of unidirectional NVLink bandwidths between
 NVIDIA GPUs (in MB/s).
