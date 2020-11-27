@@ -336,11 +336,9 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
 	    (int) (logical ? objs[i]->logical_index : objs[i]->os_index));
 
     /* row values */
-    for(j=0; j<nbobjs; j++) {
-      for(j=0; j<nbobjs; j++)
-	fprintf(output, " % 5d", (int) matrix[i*nbobjs+j]);
-      fprintf(output, "\n");
-    }
+    for(j=0; j<nbobjs; j++)
+      fprintf(output, " % 5d", (int) matrix[i*nbobjs+j]);
+    fprintf(output, "\n");
   }
 }
 
