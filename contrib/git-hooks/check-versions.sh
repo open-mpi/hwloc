@@ -46,11 +46,11 @@ fi
 
 # check that it matchs the official version, without a GREEK
 if [ -z "$official_major" -o -z "$official_minor" -o -z "$official_release" ]; then
-	die "ERROR in $version_file: Failed to get official HWLOC_VERSION_MAJOR/MINOR/RELEASE"
+	die "ERROR in $windows_config_h: Failed to get official HWLOC_VERSION_MAJOR/MINOR/RELEASE"
 fi
 official_version_nogreek="$official_major.$official_minor.$official_release"
 if [ "$official_version_nogreek" != "$windows_version" ]; then
-	die "ERROR in $version_file: Windows-specific HWLOC_VERSION \"$windows_version\" doesn't match the official \"$official_version_nogreek\" without GREEK"
+	die "ERROR in $windows_config_h: Windows-specific HWLOC_VERSION \"$windows_version\" doesn't match the official \"$official_version_nogreek\" without GREEK"
 fi
 
 # get the windows soname
