@@ -6358,7 +6358,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       class_id = strtoul(value, NULL, 16) >> 8;
 
     type = hwloc_pcidisc_check_bridge_type(class_id, config_space_cache);
-
+    /* only HWLOC_OBJ_BRIDGE for bridges to-PCI */
     if (type == HWLOC_OBJ_BRIDGE) {
       /* since 4.13, there's secondary_bus_number and subordinate_bus_number in sysfs,
        * but reading them from the config-space is easy anyway.
@@ -6398,6 +6398,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 
     /* bridge specific attributes */
     if (type == HWLOC_OBJ_BRIDGE) {
+      /* assumes this is a Bridge to-PCI */
       struct hwloc_bridge_attr_s *battr = &obj->attr->bridge;
       battr->upstream_type = HWLOC_OBJ_BRIDGE_PCI;
       battr->downstream_type = HWLOC_OBJ_BRIDGE_PCI;

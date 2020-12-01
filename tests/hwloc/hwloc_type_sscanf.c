@@ -29,6 +29,7 @@ static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffe
     } else if (type == HWLOC_OBJ_BRIDGE) {
       assert(attr.bridge.upstream_type == obj->attr->bridge.upstream_type);
       assert(attr.bridge.downstream_type == obj->attr->bridge.downstream_type);
+      /* FIXME: if downstream_type can ever be non-PCI, we'll need to improve strings, or relax these checks */
     } else if (type == HWLOC_OBJ_OS_DEVICE) {
       assert(attr.osdev.type == obj->attr->osdev.type);
     }

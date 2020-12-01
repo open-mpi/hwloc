@@ -337,6 +337,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       } else {
 	obj->attr->bridge.upstream_type = (hwloc_obj_bridge_type_t) upstream_type;
 	obj->attr->bridge.downstream_type = (hwloc_obj_bridge_type_t) downstream_type;
+        /* FIXME verify that upstream/downstream type is valid */
       };
       break;
     }
@@ -367,6 +368,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	*ignore = 1;
 #endif
       } else {
+        /* FIXME verify that downstream type vs pci info are valid */
 	obj->attr->bridge.downstream.pci.domain = domain;
 	obj->attr->bridge.downstream.pci.secondary_bus = secbus;
 	obj->attr->bridge.downstream.pci.subordinate_bus = subbus;

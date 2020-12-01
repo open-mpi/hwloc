@@ -395,6 +395,8 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   } else if (hwloc__type_match(string, "pcibridge", 5)) {
     type = HWLOC_OBJ_BRIDGE;
     ubtype = HWLOC_OBJ_BRIDGE_PCI;
+    /* if downstream_type can ever be non-PCI, we'll have to make strings more precise,
+     * or relax the hwloc_type_sscanf test */
 
   } else if (hwloc__type_match(string, "pcidev", 3)) {
     type = HWLOC_OBJ_PCI_DEVICE;
@@ -448,7 +450,9 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
       attrp->group.depth = depthattr;
     } else if (type == HWLOC_OBJ_BRIDGE && attrsize >= sizeof(attrp->bridge)) {
       attrp->bridge.upstream_type = ubtype;
-      attrp->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI; /* nothing else so far */
+      attrp->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
+      /* if downstream_type can ever be non-PCI, we'll have to make strings more precise,
+       * or relax the hwloc_type_sscanf test */
     } else if (type == HWLOC_OBJ_OS_DEVICE && attrsize >= sizeof(attrp->osdev)) {
       attrp->osdev.type = ostype;
     }
@@ -531,6 +535,9 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     else
       return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_BRIDGE:
+    /* if downstream_type can ever be non-PCI, we'll have to make strings more precise,
+     * or relax the hwloc_type_sscanf test */
+    assert(obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI);
     return hwloc_snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
   case HWLOC_OBJ_PCI_DEVICE:
     return hwloc_snprintf(string, size, "PCI");
@@ -648,8 +655,11 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
       } else
         *up = '\0';
       /* downstream is_PCI */
-      snprintf(down, sizeof(down), "buses=%04x:[%02x-%02x]",
-	       obj->attr->bridge.downstream.pci.domain, obj->attr->bridge.downstream.pci.secondary_bus, obj->attr->bridge.downstream.pci.subordinate_bus);
+      if (obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI) {
+        snprintf(down, sizeof(down), "buses=%04x:[%02x-%02x]",
+                 obj->attr->bridge.downstream.pci.domain, obj->attr->bridge.downstream.pci.secondary_bus, obj->attr->bridge.downstream.pci.subordinate_bus);
+      } else
+        assert(0);
       if (*up)
 	res = hwloc_snprintf(string, size, "%s%s%s", up, separator, down);
       else

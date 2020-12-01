@@ -222,6 +222,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
     /* bridge or pci dev? */
     type = hwloc_pcidisc_check_bridge_type(device_class, config_space_cache);
+    /* only HWLOC_OBJ_BRIDGE for bridges to-PCI */
     if (type == HWLOC_OBJ_BRIDGE) {
       if (hwloc_pcidisc_find_bridge_buses(domain, bus, dev, func,
 					  &secondary_bus, &subordinate_bus,
@@ -310,6 +311,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
     /* bridge specific attributes */
     if (type == HWLOC_OBJ_BRIDGE) {
+      /* assumes this is a Bridge to-PCI */
       struct hwloc_bridge_attr_s *battr = &obj->attr->bridge;
       battr->upstream_type = HWLOC_OBJ_BRIDGE_PCI;
       battr->downstream_type = HWLOC_OBJ_BRIDGE_PCI;
