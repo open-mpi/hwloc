@@ -4149,6 +4149,8 @@ hwloc_linux_cpufreqs_destroy(struct hwloc_linux_cpufreqs *cpufreqs)
   for(i=0; i<cpufreqs->nr_sets; i++)
     hwloc_bitmap_free(cpufreqs->sets[i].cpuset);
   cpufreqs->nr_sets = 0;
+  cpufreqs->nr_sets_allocated = 0;
+  free (cpufreqs->sets);
 }
 
 
