@@ -80,7 +80,11 @@ hwloc__nvml_get_peer_obj_by_pci(struct hwloc_topology *topology, hwloc_obj_t gpu
     return obj;
   }
   case 0x10de: {
-    /* NVIDIA NVSwitch, return the PCI object, we don't have anything better. */
+    /* NVIDIA NVSwitch, return the PCI object, we don't have anything better.
+     * Mark it as subtype NVSwitch so that the core doesn't remove it.
+     */
+    if (!obj->subtype)
+      obj->subtype = strdup("NVSwitch");
     return obj;
   }
   default: {
