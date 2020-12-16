@@ -27,6 +27,9 @@ struct hwloc_backend;
 
 
 /** \defgroup hwlocality_disc_components Components and Plugins: Discovery components
+ *
+ * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
+ *
  * @{
  */
 
@@ -93,6 +96,9 @@ struct hwloc_disc_component {
 
 
 /** \defgroup hwlocality_disc_backends Components and Plugins: Discovery backends
+ *
+ * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
+ *
  * @{
  */
 
@@ -241,6 +247,9 @@ HWLOC_DECLSPEC int hwloc_backend_enable(struct hwloc_backend *backend);
 
 
 /** \defgroup hwlocality_generic_components Components and Plugins: Generic components
+ *
+ * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
+ *
  * @{
  */
 
@@ -310,6 +319,9 @@ struct hwloc_component {
 
 
 /** \defgroup hwlocality_components_core_funcs Components and Plugins: Core functions to be used by components
+ *
+ * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
+ *
  * @{
  */
 
@@ -455,6 +467,9 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
 
 
 /** \defgroup hwlocality_components_filtering Components and Plugins: Filtering objects
+ *
+ * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
+ *
  * @{
  */
 
@@ -527,6 +542,9 @@ hwloc_filter_check_keep_object(hwloc_topology_t topology, hwloc_obj_t obj)
 
 
 /** \defgroup hwlocality_components_pcidisc Components and Plugins: helpers for PCI discovery
+ *
+ * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
+ *
  * @{
  */
 
@@ -578,6 +596,9 @@ HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, st
 
 
 /** \defgroup hwlocality_components_pcifind Components and Plugins: finding PCI objects during other discoveries
+ *
+ * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
+ *
  * @{
  */
 
