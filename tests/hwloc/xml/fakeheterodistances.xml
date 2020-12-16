@@ -106,15 +106,22 @@
     <u64values length="30">16 22 16 22 10 16 22 16 16 22 </u64values>
     <u64values length="12">22 16 16 10 </u64values>
   </distances2>
-  <distances2hetero nbobjs="8" kind="21">
-    <indexes length="98">NUMANode:254 NUMANode:255 NUMANode:256 NUMANode:257 NUMANode:258 Group:500 Group:501 NUMANode:261 </indexes>
+  <distances2hetero nbobjs="11" kind="21">
+    <indexes length="124">NUMANode:254 NUMANode:255 NUMANode:256 NUMANode:257 NUMANode:258 NUMANode:259 NUMANode:260 NUMANode:261 Group:500 Group:501 </indexes>
+    <indexes length="10">Machine:1 </indexes>
     <u64values length="30">10 16 16 22 16 22 16 22 16 10 </u64values>
     <u64values length="30">22 16 16 22 22 16 16 22 10 16 </u64values>
     <u64values length="30">16 16 16 16 22 16 16 10 16 16 </u64values>
     <u64values length="30">22 22 16 16 16 16 10 16 16 22 </u64values>
     <u64values length="30">22 22 16 16 16 10 22 16 16 22 </u64values>
     <u64values length="30">16 22 16 22 10 16 22 16 16 22 </u64values>
-    <u64values length="12">22 16 16 10 </u64values>
+    <u64values length="30">10 16 16 22 16 22 16 22 16 10 </u64values>
+    <u64values length="30">22 16 16 22 22 16 16 22 10 16 </u64values>
+    <u64values length="30">16 16 16 16 22 16 16 10 16 16 </u64values>
+    <u64values length="30">22 22 16 16 16 16 10 16 16 22 </u64values>
+    <u64values length="30">22 22 16 16 16 10 22 16 16 22 </u64values>
+    <u64values length="30">16 22 16 22 10 16 22 16 16 22 </u64values>
+    <u64values length="3">22 </u64values>
   </distances2hetero>
   <support name="custom.exported_support"/>
 </topology>
