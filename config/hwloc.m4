@@ -13,6 +13,7 @@ dnl Copyright © 2006-2017 Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2012  Blue Brain Project, BBP/EPFL. All rights reserved.
 dnl Copyright © 2012       Oracle and/or its affiliates.  All rights reserved.
 dnl Copyright © 2012  Los Alamos National Security, LLC. All rights reserved.
+dnl Copyright © 2020 IBM Corporation.  All rights reserved.
 dnl See COPYING in top-level directory.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -170,7 +171,8 @@ EOF])
     fi
 
     # GCC specifics.
-    if test "x$GCC" = "xyes"; then
+    _HWLOC_C_COMPILER_VENDOR([hwloc_c_vendor])
+    if test "$hwloc_c_vendor" = "gnu"; then
         HWLOC_GCC_CFLAGS="-Wall -Wmissing-prototypes -Wundef"
         HWLOC_GCC_CFLAGS="$HWLOC_GCC_CFLAGS -Wpointer-arith -Wcast-align"
     fi
@@ -329,7 +331,6 @@ EOF])
     #
     # Check for compiler attributes and visibility
     #
-    _HWLOC_C_COMPILER_VENDOR([hwloc_c_vendor])
     _HWLOC_CHECK_ATTRIBUTES
     _HWLOC_CHECK_VISIBILITY
     HWLOC_CFLAGS="$HWLOC_FLAGS $HWLOC_VISIBILITY_CFLAGS"
@@ -386,7 +387,7 @@ EOF])
               [AS_IF([test -e "$srcdir/.git"],
                      [hwloc_want_picky=1])])
         if test "$enable_picky" = "yes"; then
-            if test "$GCC" = "yes"; then
+            if test "$hwloc_c_vendor" = "gnu"; then
                 AC_MSG_RESULT([yes])
                 hwloc_want_picky=1
             else
