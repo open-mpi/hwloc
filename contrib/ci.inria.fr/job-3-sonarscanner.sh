@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2012-2020 Inria.  All rights reserved.
+# Copyright © 2012-2021 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -151,7 +151,6 @@ sonar.projectVersion=$hwloc_branch
 sonar.scm.disabled=false
 # sonar.scm.provider=git requires sonar-scanner to run inside a git clone
 sonar.sourceEncoding=UTF-8
-sonar.language=c
 sonar.sources=hwloc, tests, utils
 sonar.exclusions=tests/hwloc/ports
 sonar.c.clangsa.reportPath=analyzer_reports/*/*.plist
@@ -165,6 +164,8 @@ sonar.c.cppcheck.reportPath=${CPPCHECK_XMLS}
 sonar.c.includeDirectories=$(echo | gcc -E -Wp,-v - 2>&1 | grep "^ " | tr '\n' ',')include,hwloc,utils/lstopo,utils/hwloc
 sonar.c.rats.reportPath=${RATS_XMLS}
 sonar.c.valgrind.reportPath=${VALGRIND_XMLS}
+# make sure only C matches our .c files
+sonar.lang.patterns.c++=**/*.cpp,**/*.hpp
 EOF
 
 # Run the sonar-scanner analysis and submit to SonarQube server
