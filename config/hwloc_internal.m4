@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2010-2020 Inria.  All rights reserved.
+dnl Copyright © 2010-2021 Inria.  All rights reserved.
 dnl Copyright © 2009, 2011 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -92,6 +92,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     AC_ARG_ENABLE([nvml],
                   AS_HELP_STRING([--disable-nvml],
                                  [Disable the NVML device discovery build (instead of only disabling NVML at runtime by default)]))
+
+    # CUDA install path (and NVML and OpenCL)
+    AC_ARG_WITH([cuda],
+                AS_HELP_STRING([--with-cuda=<dir>],
+                               [Specify the CUDA installation directory, used for NVIDIA NVML and OpenCL too]))
 
     # RSMI?
     AC_ARG_ENABLE([rsmi],
