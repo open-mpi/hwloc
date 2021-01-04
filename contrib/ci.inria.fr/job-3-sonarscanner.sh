@@ -170,6 +170,9 @@ sonar.c.valgrind.reportPath=${VALGRIND_XMLS}
 sonar.lang.patterns.c++=**/*.cpp,**/*.hpp
 EOF
 
+# Log the sonar-scanner version in case of problem
+sonar-scanner --version
+
 # Run the sonar-scanner analysis and submit to SonarQube server
 sonar-scanner -X > sonar.log
 
