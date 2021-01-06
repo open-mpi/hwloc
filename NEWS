@@ -17,6 +17,15 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.4.1
+-------------
+* Fix AMD OpenCL device locality when PCI bus or device number >= 128.
+  Thanks to Edgar Leon for reporting the issue.
+  + Applications using any of the following inline functions must
+    be recompiled to get the fix: hwloc_opencl_get_device_pci_busid()
+    hwloc_opencl_get_device_cpuset(), hwloc_opencl_get_device_osdev().
+
+
 Version 2.4.0
 -------------
 * API
