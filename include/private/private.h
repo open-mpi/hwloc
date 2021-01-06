@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -166,6 +166,7 @@ struct hwloc_topology {
     unsigned long kind;
 
 #define HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID (1U<<0) /* if the objs array is valid below */
+#define HWLOC_INTERNAL_DIST_FLAG_NOT_COMMITTED (1U<<1) /* if the distances isn't in the list yet */
     unsigned iflags;
 
     /* objects are currently stored in physical_index order */

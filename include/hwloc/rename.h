@@ -833,7 +833,6 @@ extern "C" {
 #define hwloc_internal_distances_dup HWLOC_NAME(internal_distances_dup)
 #define hwloc_internal_distances_refresh HWLOC_NAME(internal_distances_refresh)
 #define hwloc_internal_distances_destroy HWLOC_NAME(internal_distances_destroy)
-
 #define hwloc_internal_distances_add HWLOC_NAME(internal_distances_add)
 #define hwloc_internal_distances_add_by_index HWLOC_NAME(internal_distances_add_by_index)
 #define hwloc_internal_distances_invalidate_cached_objs HWLOC_NAME(hwloc_internal_distances_invalidate_cached_objs)

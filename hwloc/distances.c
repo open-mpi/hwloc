@@ -258,20 +258,29 @@ int hwloc_distances_release_remove(hwloc_topology_t topology,
  * Add distances to the topology
  */
 
-/* insert a distance matrix in the topology.
- * the caller gives us the distances and objs pointers, we'll free them later.
+/* cancel a distances handle. only needed internally for now */
+static void
+hwloc_backend_distances_add__cancel(struct hwloc_internal_distances_s *dist)
+{
+  /* everything is set to NULL in hwloc_backend_distances_create() */
+  free(dist->name);
+  free(dist->indexes);
+  free(dist->objs);
+  free(dist->different_types);
+  free(dist->values);
+  free(dist);
+}
+
+/* prepare a distances handle for later commit in the topology.
+ * we duplicate the caller's name.
  */
-static int
-hwloc_internal_distances__add(hwloc_topology_t topology, const char *name,
-			      hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types,
-			      unsigned nbobjs, hwloc_obj_t *objs, uint64_t *indexes, uint64_t *values,
-			      unsigned long kind, unsigned iflags)
+static struct hwloc_internal_distances_s *
+hwloc_backend_distances_add_create(hwloc_topology_t topology,
+                                   const char *name, unsigned long kind, unsigned long flags)
 {
   struct hwloc_internal_distances_s *dist;
 
-  if (different_types) {
-    kind |= HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES; /* the user isn't forced to give it */
-  } else if (kind & HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES) {
+  if (flags) {
     errno = EINVAL;
     goto err;
   }
@@ -280,104 +289,53 @@ hwloc_internal_distances__add(hwloc_topology_t topology, const char *name,
   if (!dist)
     goto err;
 
-  if (name)
+  if (name) {
     dist->name = strdup(name); /* ignore failure */
-
-  dist->unique_type = unique_type;
-  dist->different_types = different_types;
-  dist->nbobjs = nbobjs;
-  dist->kind = kind;
-  dist->iflags = iflags;
-
-  assert(!!(iflags & HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID) == !!objs);
-
-  if (!objs) {
-    assert(indexes);
-    /* we only have indexes, we'll refresh objs from there */
-    dist->indexes = indexes;
-    dist->objs = calloc(nbobjs, sizeof(hwloc_obj_t));
-    if (!dist->objs)
+    if (!dist->name)
       goto err_with_dist;
-
-  } else {
-    unsigned i;
-    assert(!indexes);
-    /* we only have objs, generate the indexes arrays so that we can refresh objs later */
-    dist->objs = objs;
-    dist->indexes = malloc(nbobjs * sizeof(*dist->indexes));
-    if (!dist->indexes)
-      goto err_with_dist;
-    if (HWLOC_DIST_TYPE_USE_OS_INDEX(dist->unique_type)) {
-      for(i=0; i<nbobjs; i++)
-	dist->indexes[i] = objs[i]->os_index;
-    } else {
-      for(i=0; i<nbobjs; i++)
-	dist->indexes[i] = objs[i]->gp_index;
-    }
   }
 
-  dist->values = values;
+  dist->kind = kind;
+  dist->iflags = HWLOC_INTERNAL_DIST_FLAG_NOT_COMMITTED;
+
+  dist->unique_type = HWLOC_OBJ_TYPE_NONE;
+  dist->different_types = NULL;
+  dist->nbobjs = 0;
+  dist->indexes = NULL;
+  dist->objs = NULL;
+  dist->values = NULL;
 
   dist->id = topology->next_dist_id++;
-
-  if (topology->last_dist)
-    topology->last_dist->next = dist;
-  else
-    topology->first_dist = dist;
-  dist->prev = topology->last_dist;
-  dist->next = NULL;
-  topology->last_dist = dist;
-  return 0;
+  return dist;
 
  err_with_dist:
-  if (name)
-    free(dist->name);
-  free(dist);
+  hwloc_backend_distances_add__cancel(dist);
  err:
-  free(different_types);
-  free(objs);
-  free(indexes);
-  free(values);
-  return -1;
+  return NULL;
 }
 
-int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name,
-					  hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values,
-					  unsigned long kind, unsigned long flags)
+/* attach objects and values to a distances handle.
+ * on success, objs and values arrays are attached and will be freed with the distances.
+ * on failure, the handle is freed.
+ */
+static int
+hwloc_backend_distances_add_values(hwloc_topology_t topology __hwloc_attribute_unused,
+                                   struct hwloc_internal_distances_s *dist,
+                                   unsigned nbobjs, hwloc_obj_t *objs,
+                                   hwloc_uint64_t *values,
+                                   unsigned long flags)
 {
-  unsigned iflags = 0; /* objs not valid */
-
-  if (nbobjs < 2) {
-    errno = EINVAL;
-    goto err;
-  }
-
-  /* cannot group without objects,
-   * and we don't group from XML anyway since the hwloc that generated the XML should have grouped already.
-   */
-  if (flags & HWLOC_DISTANCES_ADD_FLAG_GROUP) {
-    errno = EINVAL;
-    goto err;
-  }
-
-  return hwloc_internal_distances__add(topology, name, unique_type, different_types, nbobjs, NULL, indexes, values, kind, iflags);
-
- err:
-  free(indexes);
-  free(values);
-  free(different_types);
-  return -1;
-}
-
-int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
-				 unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
-				 unsigned long kind, unsigned long flags)
-{
-  hwloc_obj_type_t unique_type, *different_types;
+  hwloc_obj_type_t unique_type, *different_types = NULL;
+  hwloc_uint64_t *indexes = NULL;
   unsigned i, disappeared = 0;
-  unsigned iflags = HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID;
 
-  if (nbobjs < 2) {
+  if (dist->nbobjs || !(dist->iflags & HWLOC_INTERNAL_DIST_FLAG_NOT_COMMITTED)) {
+    /* target distances is already set */
+    errno = EINVAL;
+    goto err;
+  }
+
+  if (flags || nbobjs < 2 || !objs || !values) {
     errno = EINVAL;
     goto err;
   }
@@ -390,14 +348,17 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
     /* some objects are NULL */
     if (disappeared == nbobjs) {
       /* nothing left, drop the matrix */
-      free(objs);
-      free(values);
-      return 0;
+      errno = ENOENT;
+      goto err;
     }
     /* restrict the matrix */
     hwloc_internal_distances_restrict(objs, NULL, NULL, values, nbobjs, disappeared);
     nbobjs -= disappeared;
   }
+
+  indexes = malloc(nbobjs * sizeof(*indexes));
+  if (!indexes)
+    goto err;
 
   unique_type = objs[0]->type;
   for(i=1; i<nbobjs; i++)
@@ -409,16 +370,126 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
     /* heterogeneous types */
     different_types = malloc(nbobjs * sizeof(*different_types));
     if (!different_types)
-      goto err;
+      goto err_with_indexes;
     for(i=0; i<nbobjs; i++)
       different_types[i] = objs[i]->type;
-
-  } else {
-    /* homogeneous types */
-    different_types = NULL;
   }
 
-  if (topology->grouping && (flags & HWLOC_DISTANCES_ADD_FLAG_GROUP) && !different_types) {
+  dist->nbobjs = nbobjs;
+  dist->objs = objs;
+  dist->iflags |= HWLOC_INTERNAL_DIST_FLAG_OBJS_VALID;
+  dist->indexes = indexes;
+  dist->unique_type = unique_type;
+  dist->different_types = different_types;
+  dist->values = values;
+
+  if (different_types)
+    dist->kind |= HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES;
+
+  if (HWLOC_DIST_TYPE_USE_OS_INDEX(dist->unique_type)) {
+      for(i=0; i<nbobjs; i++)
+	dist->indexes[i] = objs[i]->os_index;
+    } else {
+      for(i=0; i<nbobjs; i++)
+	dist->indexes[i] = objs[i]->gp_index;
+    }
+
+  return 0;
+
+ err_with_indexes:
+  free(indexes);
+ err:
+  hwloc_backend_distances_add__cancel(dist);
+  return -1;
+}
+
+/* attach objects and values to a distance handle.
+ * on success, objs and values arrays are attached and will be freed with the distances.
+ * on failure, the handle is freed.
+ */
+static int
+hwloc_backend_distances_add_values_by_index(hwloc_topology_t topology __hwloc_attribute_unused,
+                                            struct hwloc_internal_distances_s *dist,
+                                            unsigned nbobjs, hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, hwloc_uint64_t *indexes,
+                                            hwloc_uint64_t *values)
+{
+  hwloc_obj_t *objs;
+
+  if (dist->nbobjs || !(dist->iflags & HWLOC_INTERNAL_DIST_FLAG_NOT_COMMITTED)) {
+    /* target distances is already set */
+    errno = EINVAL;
+    goto err;
+  }
+  if (nbobjs < 2 || !indexes || !values || (unique_type == HWLOC_OBJ_TYPE_NONE && !different_types)) {
+    errno = EINVAL;
+    goto err;
+  }
+
+  objs = malloc(nbobjs * sizeof(*objs));
+  if (!objs)
+    goto err;
+
+  dist->nbobjs = nbobjs;
+  dist->objs = objs;
+  dist->indexes = indexes;
+  dist->unique_type = unique_type;
+  dist->different_types = different_types;
+  dist->values = values;
+
+  if (different_types)
+    dist->kind |= HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES;
+
+  return 0;
+
+ err:
+  hwloc_backend_distances_add__cancel(dist);
+  return -1;
+}
+
+static void
+hwloc_internal_distances_print_matrix(struct hwloc_internal_distances_s *dist)
+{
+  unsigned nbobjs = dist->nbobjs;
+  hwloc_obj_t *objs = dist->objs;
+  hwloc_uint64_t *values = dist->values;
+  int gp = !HWLOC_DIST_TYPE_USE_OS_INDEX(dist->unique_type);
+  unsigned i, j;
+
+  fprintf(stderr, "%s", gp ? "gp_index" : "os_index");
+  for(j=0; j<nbobjs; j++)
+    fprintf(stderr, " % 5d", (int)(gp ? objs[j]->gp_index : objs[j]->os_index));
+  fprintf(stderr, "\n");
+  for(i=0; i<nbobjs; i++) {
+    fprintf(stderr, "  % 5d", (int)(gp ? objs[i]->gp_index : objs[i]->os_index));
+    for(j=0; j<nbobjs; j++)
+      fprintf(stderr, " % 5lld", (long long) values[i*nbobjs + j]);
+    fprintf(stderr, "\n");
+  }
+}
+
+/* commit a distances handle.
+ * on failure, the handle is freed with its objects and values arrays.
+ */
+static int
+hwloc_backend_distances_add_commit(hwloc_topology_t topology,
+                                   struct hwloc_internal_distances_s *dist,
+                                   unsigned long flags)
+{
+  if (!dist->nbobjs || !(dist->iflags & HWLOC_INTERNAL_DIST_FLAG_NOT_COMMITTED)) {
+    /* target distances not ready for commit */
+    errno = EINVAL;
+    goto err;
+  }
+
+  if ((flags & HWLOC_DISTANCES_ADD_FLAG_GROUP) && !dist->objs) {
+    /* cannot group without objects,
+     * and we don't group from XML anyway since the hwloc that generated the XML should have grouped already.
+     */
+    errno = EINVAL;
+    goto err;
+  }
+
+  if (topology->grouping && (flags & HWLOC_DISTANCES_ADD_FLAG_GROUP) && !dist->different_types) {
     float full_accuracy = 0.f;
     float *accuracies;
     unsigned nbaccuracies;
@@ -432,26 +503,92 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
     }
 
     if (topology->grouping_verbose) {
-      unsigned j;
-      int gp = !HWLOC_DIST_TYPE_USE_OS_INDEX(unique_type);
       fprintf(stderr, "Trying to group objects using distance matrix:\n");
-      fprintf(stderr, "%s", gp ? "gp_index" : "os_index");
-      for(j=0; j<nbobjs; j++)
-	fprintf(stderr, " % 5d", (int)(gp ? objs[j]->gp_index : objs[j]->os_index));
-      fprintf(stderr, "\n");
-      for(i=0; i<nbobjs; i++) {
-	fprintf(stderr, "  % 5d", (int)(gp ? objs[i]->gp_index : objs[i]->os_index));
-	for(j=0; j<nbobjs; j++)
-	  fprintf(stderr, " % 5lld", (long long) values[i*nbobjs + j]);
-	fprintf(stderr, "\n");
-      }
+      hwloc_internal_distances_print_matrix(dist);
     }
 
-    hwloc__groups_by_distances(topology, nbobjs, objs, values,
-			       kind, nbaccuracies, accuracies, 1 /* check the first matrice */);
+    hwloc__groups_by_distances(topology, dist->nbobjs, dist->objs, dist->values,
+			       dist->kind, nbaccuracies, accuracies, 1 /* check the first matrix */);
   }
 
-  return hwloc_internal_distances__add(topology, name, unique_type, different_types, nbobjs, objs, NULL, values, kind, iflags);
+  if (topology->last_dist)
+    topology->last_dist->next = dist;
+  else
+    topology->first_dist = dist;
+  dist->prev = topology->last_dist;
+  dist->next = NULL;
+  topology->last_dist = dist;
+
+  dist->iflags &= ~HWLOC_INTERNAL_DIST_FLAG_NOT_COMMITTED;
+  return 0;
+
+ err:
+  hwloc_backend_distances_add__cancel(dist);
+  return -1;
+}
+
+int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name,
+                                          hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values,
+                                          unsigned long kind, unsigned long flags)
+{
+  struct hwloc_internal_distances_s *dist;
+  int err;
+
+  dist = hwloc_backend_distances_add_create(topology, name, kind, 0);
+  if (!dist)
+    goto err;
+
+  err = hwloc_backend_distances_add_values_by_index(topology, dist,
+                                                    nbobjs, unique_type, different_types, indexes,
+                                                    values);
+  if (err < 0)
+    goto err;
+
+  /* arrays are now attached to the handle */
+  indexes = NULL;
+  different_types = NULL;
+  values = NULL;
+
+  err = hwloc_backend_distances_add_commit(topology, dist, flags);
+  if (err < 0)
+    goto err;
+
+  return 0;
+
+ err:
+  free(indexes);
+  free(different_types);
+  free(values);
+  return -1;
+}
+
+int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
+                                 unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
+                                 unsigned long kind, unsigned long flags)
+{
+  struct hwloc_internal_distances_s *dist;
+  int err;
+
+  dist = hwloc_backend_distances_add_create(topology, name, kind, 0);
+  if (!dist)
+    goto err;
+
+  err = hwloc_backend_distances_add_values(topology, dist,
+                                           nbobjs, objs,
+                                           values,
+                                           0);
+  if (err < 0)
+    goto err;
+
+  /* arrays are now attached to the handle */
+  objs = NULL;
+  values = NULL;
+
+  err = hwloc_backend_distances_add_commit(topology, dist, flags);
+  if (err < 0)
+    goto err;
+
+  return 0;
 
  err:
   free(objs);
