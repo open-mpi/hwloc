@@ -26,6 +26,9 @@ Version 2.4.1
     hwloc_opencl_get_device_cpuset(), hwloc_opencl_get_device_osdev().
 * Fix missing x86 Package and Core objects FreeBSD/NetBSD.
   Thanks to Thibault Payet and Yuri Victorovich for the report.
+* Fix the import of very large distances with heterogeneous object types.
+* Fix a memory leak in the Linux backend,
+  thanks to Perceval Anichini.
 
 
 Version 2.4.0
