@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2020 Inria.  All rights reserved.
+Copyright © 2009-2021 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -24,6 +24,8 @@ Version 2.4.1
   + Applications using any of the following inline functions must
     be recompiled to get the fix: hwloc_opencl_get_device_pci_busid()
     hwloc_opencl_get_device_cpuset(), hwloc_opencl_get_device_osdev().
+* Fix missing x86 Package and Core objects FreeBSD/NetBSD.
+  Thanks to Thibault Payet and Yuri Victorovich for the report.
 
 
 Version 2.4.0
