@@ -1597,7 +1597,8 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
   if (topology->levels[0][0]->cpuset) {
-    /* somebody else discovered things */
+    /* somebody else discovered things, reconnect levels so that we can look at them */
+    hwloc_topology_reconnect(topology, 0);
     if (topology->nb_levels == 2 && topology->level_nbobjects[1] == data->nbprocs) {
       /* only PUs were discovered, as much as we would, complete the topology with everything else */
       alreadypus = 1;
@@ -1605,7 +1606,6 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     }
 
     /* several object types were added, we can't easily complete, just do partial discovery */
-    hwloc_topology_reconnect(topology, 0);
     ret = hwloc_look_x86(backend, flags);
     if (ret)
       hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
