@@ -1,5 +1,5 @@
 # Copyright © 2009-2020 Inria.  All rights reserved.
-# Copyright © 2009-2013 Université Bordeaux
+# Copyright © 2009-2013, 2021 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -851,6 +851,7 @@ $(man3_distances_DATA): $(DOX_TAG)
 $(man3_memattrs_DATA): $(DOX_TAG)
 $(man3_cpukinds_DATA): $(DOX_TAG)
 $(man3_diff_DATA): $(DOX_TAG)
+$(man3_gpu_DATA): $(DOX_TAG)
 $(man3_cuda_DATA): $(DOX_TAG)
 $(man3_glibc_sched_DATA): $(DOX_TAG)
 $(man3_linux_DATA): $(DOX_TAG)
