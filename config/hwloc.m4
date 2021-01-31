@@ -412,14 +412,14 @@ EOF])
             add="$add -Wpointer-arith -Wbad-function-cast -Wold-style-definition"
             add="$add -Werror-implicit-function-declaration"
 
-	    _HWLOC_CHECK_GCC_OPTION([-Wdiscarded-qualifiers], [add])
-	    _HWLOC_CHECK_GCC_OPTION([-Wvariadic-macros], [add])
-	    _HWLOC_CHECK_GCC_OPTION([-Wtype-limits], [add])
-	    _HWLOC_CHECK_GCC_OPTION([-Wstack-usage=262144], [add])
+	    _HWLOC_CHECK_CC_OPTION([-Wdiscarded-qualifiers], [add])
+	    _HWLOC_CHECK_CC_OPTION([-Wvariadic-macros], [add])
+	    _HWLOC_CHECK_CC_OPTION([-Wtype-limits], [add])
+	    _HWLOC_CHECK_CC_OPTION([-Wstack-usage=262144], [add])
 
 	    # -Wextra enables some -Wfoo that we want to disable it at some place
-	    _HWLOC_CHECK_GCC_OPTION([-Wmissing-field-initializers], [add], [AC_DEFINE(HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS, 1, [Define to 1 if gcc -Wmissing-field-initializers is supported and enabled])])
-	    _HWLOC_CHECK_GCC_OPTION([-Wcast-function-type], [add], [AC_DEFINE(HWLOC_HAVE_GCC_W_CAST_FUNCTION_TYPE, 1, [Define to 1 if gcc -Wcast-function-type is supported and enabled])])
+	    _HWLOC_CHECK_CC_OPTION([-Wmissing-field-initializers], [add], [AC_DEFINE(HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS, 1, [Define to 1 if gcc -Wmissing-field-initializers is supported and enabled])])
+	    _HWLOC_CHECK_CC_OPTION([-Wcast-function-type], [add], [AC_DEFINE(HWLOC_HAVE_GCC_W_CAST_FUNCTION_TYPE, 1, [Define to 1 if gcc -Wcast-function-type is supported and enabled])])
 
             HWLOC_CFLAGS="$HWLOC_CFLAGS $add"
         fi
