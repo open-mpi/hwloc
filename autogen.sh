@@ -8,10 +8,17 @@ fi
 
 autoreconf ${autoreconf_args:-"-ivf"}
 
-echo "Trying to patching configure for MacOS Big Sur libtool.m4 bug"
-if patch -p1 --dry-run < config/libtool-big-sur-fixup.patch; then
-   echo "Patching for real now"
-   patch -p1 < config/libtool-big-sur-fixup.patch
+echo -n "Checking whether configure needs patching for MacOS Big Sur libtool.m4 bug... "
+if grep -A1 MACOSX_DEPLOYMENT_TARGET configure | grep powerpc >/dev/null \
+   || grep -A1 MACOSX_DEPLOYMENT_TARGET configure | grep 'darwin\[912' >/dev/null; then
+  echo "no"
 else
-   echo "WARNING: Couldn't apply Big Sur libtool.m4 bug fix."
+  echo "yes"
+  echo "Trying to patch configure..."
+  if patch -p1 --dry-run < config/libtool-big-sur-fixup.patch; then
+     echo "Patching for real now"
+     patch -p1 < config/libtool-big-sur-fixup.patch
+  else
+     echo "WARNING: Couldn't apply Big Sur libtool.m4 bug fix."
+  fi
 fi
