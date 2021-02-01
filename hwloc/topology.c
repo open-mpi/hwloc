@@ -1937,12 +1937,24 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
 
   if (!res)
     return NULL;
-  if (res != obj)
-    /* merged */
+
+  if (res != obj && res->type != HWLOC_OBJ_GROUP)
+    /* merged, not into a Group, nothing to update */
     return res;
 
+  /* res == obj means that the object was inserted.
+   * We need to reconnect levels, fill all its cpu/node sets,
+   * compute its total memory, group depth, etc.
+   *
+   * res != obj usually means that our new group was merged into an
+   * existing object, no need to recompute anything.
+   * However, if merging with an existing group, depending on their kinds,
+   * the contents of obj may overwrite the contents of the old group.
+   * This requires reconnecting levels, filling sets, recomputing total memory, etc.
+   */
+
   /* properly inserted */
-  hwloc_obj_add_children_sets(obj);
+  hwloc_obj_add_children_sets(res);
   if (hwloc_topology_reconnect(topology, 0) < 0)
     return NULL;
 
@@ -1954,7 +1966,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
 #endif
     hwloc_topology_check(topology);
 
-  return obj;
+  return res;
 }
 
 hwloc_obj_t
