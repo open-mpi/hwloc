@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -567,8 +567,9 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
 }
 
 /* Replace old with contents of new object, and make new freeable by the caller.
- * Only updates next_sibling/first_child pointers,
- * so may only be used during early discovery.
+ * Requires reconnect (for siblings pointers and group depth),
+ * fixup of sets (only the main cpuset was likely compared before merging),
+ * and update of total_memory and group depth.
  */
 static void
 hwloc_replace_linked_object(hwloc_obj_t old, hwloc_obj_t new)
@@ -1348,7 +1349,7 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
 
 /* returns the result of merge, or NULL if not merged */
 static __hwloc_inline hwloc_obj_t
-hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
+hwloc__insert_try_merge_group(hwloc_topology_t topology, hwloc_obj_t old, hwloc_obj_t new)
 {
   if (new->type == HWLOC_OBJ_GROUP && old->type == HWLOC_OBJ_GROUP) {
     /* which group do we keep? */
@@ -1359,6 +1360,7 @@ hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
 
       /* keep the new one, it doesn't want to be merged */
       hwloc_replace_linked_object(old, new);
+      topology->modified = 1;
       return new;
 
     } else {
@@ -1366,9 +1368,12 @@ hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
 	/* keep the old one, it doesn't want to be merged */
 	return old;
 
-      /* compare subkinds to decice who to keep */
-      if (new->attr->group.kind < old->attr->group.kind)
+      /* compare subkinds to decide which group to keep */
+      if (new->attr->group.kind < old->attr->group.kind) {
+        /* keep smaller kind */
 	hwloc_replace_linked_object(old, new);
+        topology->modified = 1;
+      }
       return old;
     }
   }
@@ -1394,6 +1399,7 @@ hwloc__insert_try_merge_group(hwloc_obj_t old, hwloc_obj_t new)
      * and let the caller free the new object
      */
     hwloc_replace_linked_object(old, new);
+    topology->modified = 1;
     return old;
 
   } else {
@@ -1435,7 +1441,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
     int setres = res;
 
     if (res == HWLOC_OBJ_EQUAL) {
-      hwloc_obj_t merged = hwloc__insert_try_merge_group(child, obj);
+      hwloc_obj_t merged = hwloc__insert_try_merge_group(topology, child, obj);
       if (merged)
 	return merged;
       /* otherwise compare actual types to decide of the inclusion */
