@@ -24,6 +24,8 @@ Version 2.4.1
   + Applications using any of the following inline functions must
     be recompiled to get the fix: hwloc_opencl_get_device_pci_busid()
     hwloc_opencl_get_device_cpuset(), hwloc_opencl_get_device_osdev().
+* Fix the insertion of custom Groups after loading the topology,
+  thanks to Scott Hicks.
 * Fix missing x86 Package and Core objects FreeBSD/NetBSD.
   Thanks to Thibault Payet and Yuri Victorovich for the report.
 * Fix the import of very large distances with heterogeneous object types.
