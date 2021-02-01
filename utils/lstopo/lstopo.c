@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -94,6 +94,7 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
   if (!group)
     return NULL;
   group->cpuset = hwloc_bitmap_dup(cpuset);
+  group->attr->group.kind = (unsigned) -1;
   group = hwloc_topology_insert_group_object(topology, group);
   if (!group) {
     /* try to insert in a larger parent */
