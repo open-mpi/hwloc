@@ -1,4 +1,4 @@
-:
+#!/usr/bin/env bash
 
 srcdir=$(dirname "$0")
 if test "x$srcdir" != x; then
