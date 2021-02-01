@@ -4676,6 +4676,9 @@ hwloc__check_misc_children(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes,
 static void
 hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_obj_t obj)
 {
+  hwloc_uint64_t total_memory;
+  hwloc_obj_t child;
+
   assert(!hwloc_bitmap_isset(gp_indexes, obj->gp_index));
   hwloc_bitmap_set(gp_indexes, obj->gp_index);
 
@@ -4732,6 +4735,18 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
       assert(0);
     assert(hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type) == obj->type);
   }
+
+  /* check total memory */
+  total_memory = 0;
+  if (obj->type == HWLOC_OBJ_NUMANODE)
+    total_memory += obj->attr->numanode.local_memory;
+  for_each_child(child, obj) {
+    total_memory += child->total_memory;
+  }
+  for_each_memory_child(child, obj) {
+    total_memory += child->total_memory;
+  }
+  assert(total_memory == obj->total_memory);
 
   /* check children */
   hwloc__check_normal_children(topology, gp_indexes, obj);
