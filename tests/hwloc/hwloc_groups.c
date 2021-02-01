@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2020 Inria.  All rights reserved.
+ * Copyright © 2011-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -14,7 +14,7 @@
 int main(void)
 {
   hwloc_topology_t topology;
-  hwloc_obj_t obj, group, res, root;
+  hwloc_obj_t obj, group, saved, res, root;
   hwloc_obj_t objs[32];
   hwloc_uint64_t values[32*32];
   int depth;
@@ -60,7 +60,7 @@ int main(void)
   res = hwloc_topology_insert_group_object(topology, group);
   assert(!res);
   assert(hwloc_topology_get_depth(topology) == 3);
-  /* insert a group of two packages */
+  /* insert a group of two packages with high kind (so that it gets merged later) */
   group = hwloc_topology_alloc_group_object(topology);
   assert(group);
   obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 1);
@@ -69,8 +69,38 @@ int main(void)
   obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 2);
   assert(obj);
   hwloc_bitmap_or(group->cpuset, group->cpuset, obj->cpuset);
+  group->attr->group.kind = (unsigned)-1;
   res = hwloc_topology_insert_group_object(topology, group);
   assert(res == group);
+  saved = group;
+  assert(hwloc_topology_get_depth(topology) == 4);
+  /* insert same group with lower kind to replace the previous one */
+  group = hwloc_topology_alloc_group_object(topology);
+  assert(group);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 1);
+  assert(obj);
+  group->cpuset = hwloc_bitmap_dup(obj->cpuset);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 2);
+  assert(obj);
+  hwloc_bitmap_or(group->cpuset, group->cpuset, obj->cpuset);
+  group->attr->group.kind = 0;
+  res = hwloc_topology_insert_group_object(topology, group);
+  assert(res == saved); /* the core should move the contents of this new group into a previous one */
+  assert(res != group);
+  assert(hwloc_topology_get_depth(topology) == 4);
+  /* insert yet another same group with higher kind, it will be dropped in favor of the previous-previous one */
+  group = hwloc_topology_alloc_group_object(topology);
+  assert(group);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 1);
+  assert(obj);
+  group->cpuset = hwloc_bitmap_dup(obj->cpuset);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 2);
+  assert(obj);
+  hwloc_bitmap_or(group->cpuset, group->cpuset, obj->cpuset);
+  group->attr->group.kind = (unsigned)-1;
+  res = hwloc_topology_insert_group_object(topology, group);
+  assert(res == saved);
+  assert(res != group);
   assert(hwloc_topology_get_depth(topology) == 4);
   /* insert a conflict group of two packages by nodeset, will fail */
   group = hwloc_topology_alloc_group_object(topology);
