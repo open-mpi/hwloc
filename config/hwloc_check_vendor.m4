@@ -158,7 +158,7 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
 
     # IBM XL C/C++
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IF_IFELSE([defined(__xlC__) || defined(__IBMC__) || defined(__IBMCPP__)],
+          [HWLOC_IF_IFELSE([defined(__xlC__) || defined(__IBMC__) || defined(__IBMCPP__) || defined(__ibmxl__)],
                [hwloc_check_compiler_vendor_result="ibm"],
                [HWLOC_IF_IFELSE([defined(_AIX) && !defined(__GNUC__)],
                     [hwloc_check_compiler_vendor_result="ibm"])])])
