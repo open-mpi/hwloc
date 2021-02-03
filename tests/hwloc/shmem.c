@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2018 Inria.  All rights reserved.
+ * Copyright © 2011-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -130,7 +130,7 @@ static int test(hwloc_topology_t orig, const char *callname) {
   unsigned long forced_addr;
   unsigned long fileoffset;
   size_t shmem_length;
-  int synthetic_with_distances = (hwloc_obj_get_info_by_name(hwloc_get_root_obj(orig), "SyntheticDescription") != NULL);
+  int synthetic_with_distances = (hwloc_obj_get_info_by_name(hwloc_get_root_obj(orig), "ShmemSyntheticWithDistances") != NULL);
   char tmpname[] = "/tmp/hwloc_test_shmem.XXXXXX";
   char cmd[512];
   struct stat st;
@@ -257,6 +257,8 @@ int main(int argc, char *argv[])
   err = hwloc_topology_set_synthetic(orig, "node:3 core:2 pu:4");
   assert(!err);
   err = hwloc_topology_load(orig);
+  assert(!err);
+  err = hwloc_obj_add_info(hwloc_get_root_obj(orig), "ShmemSyntheticWithDistances", "1");
   assert(!err);
 
   printf("adding distance matrix\n");
