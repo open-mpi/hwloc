@@ -205,6 +205,7 @@ int main(int argc, char *argv[])
   hwloc_obj_t nodes[3];
   uint64_t node_distances[9];
   unsigned i,j;
+  const char *top_srcdir;
   int err, ret, ret2;
 
   if (argc > 1) {
@@ -276,6 +277,39 @@ int main(int argc, char *argv[])
 
   printf("destroying original\n");
   hwloc_topology_destroy(orig);
+
+  top_srcdir = getenv("HWLOC_TOP_SRCDIR");
+  if (top_srcdir) {
+    const char *xmlnames[4] = {
+      "16intel64-manyVFs.xml",
+      "8intel64-4n2t-memattrs.xml",
+      "fakecpukinds.xml",
+      "fakeheterodistances.xml"
+    };
+    for(i=0; i<4; i++) {
+      char xmlpath[PATH_MAX];
+      snprintf(xmlpath, sizeof(xmlpath), "%s/tests/hwloc/xml/%s", top_srcdir, xmlnames[i]);
+
+      printf("#########################################\n");
+      printf("creating from XML %s\n", xmlpath);
+      err = hwloc_topology_init(&orig);
+      assert(!err);
+      err = hwloc_topology_set_xml(orig, xmlpath);
+      assert(!err);
+      err = hwloc_topology_set_all_types_filter(orig, HWLOC_TYPE_FILTER_KEEP_ALL);
+      assert(!err);
+      err = hwloc_topology_load(orig);
+      assert(!err);
+
+      ret = test(orig, argv[0]);
+
+      printf("destroying original\n");
+      hwloc_topology_destroy(orig);
+    }
+  } else {
+    printf("#########################################\n");
+    printf("Skipping XML tests because HWLOC_TOP_SRCDIR isn't defined in the environment\n");
+  }
 
   /* we caught errors above.
    * return SKIP if both returned SKIP. otherwise SUCCESS
