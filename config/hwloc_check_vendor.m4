@@ -106,11 +106,6 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
           [HWLOC_IFDEF_IFELSE([__PGI],
                [hwloc_check_compiler_vendor_result="portland group"])])
 
-    # GNU
-    AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
-          [HWLOC_IFDEF_IFELSE([__GNUC__],
-               [hwloc_check_compiler_vendor_result="gnu"])])
-
     # Borland Turbo C
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
           [HWLOC_IFDEF_IFELSE([__TURBOC__],
@@ -241,6 +236,11 @@ AC_DEFUN([_HWLOC_CHECK_COMPILER_VENDOR], [
     AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
           [HWLOC_IFDEF_IFELSE([__WATCOMC__],
                [hwloc_check_compiler_vendor_result="watcom"])])
+
+    # GNU
+    AS_IF([test "$hwloc_check_compiler_vendor_result" = "unknown"],
+          [HWLOC_IFDEF_IFELSE([__GNUC__],
+               [hwloc_check_compiler_vendor_result="gnu"])])
 
     $1="$hwloc_check_compiler_vendor_result"
     unset hwloc_check_compiler_vendor_result
