@@ -924,17 +924,21 @@ return 0;
            AC_MSG_ERROR([Cannot continue])])
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
-    # Generic NVIDIA variables since NVML/OpenCL are installed inside CUDA directories
-    if test "x$with_cuda" != xno -a "x$with_cuda" != x; then
-      # libnvidia-ml.so (and libcuda.so for tests) is under stubs
-      # when the driver isn't installed on the build machine.
-      # hwloc programs will fail to link if libnvidia-ml.so.1 is not available there too.
-      if test "x${ac_cv_sizeof_void_p}" = x4; then
-        HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib/ -L$with_cuda/lib/stubs/"
-      else
-        HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib64/ -L$with_cuda/lib64/stubs/"
+    if test "x$enable_io" != xno && test "x$enable_opencl" != xno -o "x$enable_cuda" != xno -o "x$enable_nvml" != xyes; then
+      # OpenCL/NVML/CUDA may use CUDA directories, define common directories
+
+      # Generic NVIDIA variables since NVML/OpenCL are installed inside CUDA directories
+      if test "x$with_cuda" != xno -a "x$with_cuda" != x; then
+        # libnvidia-ml.so (and libcuda.so for tests) is under stubs
+        # when the driver isn't installed on the build machine.
+        # hwloc programs will fail to link if libnvidia-ml.so.1 is not available there too.
+        if test "x${ac_cv_sizeof_void_p}" = x4; then
+          HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib/ -L$with_cuda/lib/stubs/"
+        else
+          HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib64/ -L$with_cuda/lib64/stubs/"
+        fi
+        HWLOC_CUDA_COMMON_CPPFLAGS="-I$with_cuda/include/"
       fi
-      HWLOC_CUDA_COMMON_CPPFLAGS="-I$with_cuda/include/"
     fi
 
     # OpenCL support
