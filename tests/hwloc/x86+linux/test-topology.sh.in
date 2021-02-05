@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2015-2020 Inria.  All rights reserved.
+# Copyright © 2015-2021 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -45,7 +45,6 @@ test_topology ()
 
     export HWLOC_THISSYSTEM=0
     export HWLOC_DEBUG_CHECK=1
-    export HWLOC_COMPONENTS=x86,linux,stop
     export HWLOC_FSROOT="$dir/fsroot"
     export HWLOC_CPUID_PATH="$dir/cpuid"
 
@@ -112,6 +111,9 @@ if [ -f "$topology".source ] ; then
 else
     actual_source="$topology".tar.bz2
 fi
+
+# set HWLOC_COMPONENTS here so that tests may change the order in the .env below
+export HWLOC_COMPONENTS=x86,linux,stop
 
 # if there's a .env file, source it
 if [ -f "$topology".env ] ; then
