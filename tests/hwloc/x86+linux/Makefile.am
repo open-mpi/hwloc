@@ -1,4 +1,4 @@
-# Copyright © 2019 Inria.  All rights reserved.
+# Copyright © 2019-2021 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -9,18 +9,21 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # By default, it shows the output of `lstopo - -v'.
 cpuid_sysfs_outputs = \
 	64amd64-4p2n4ca2co.output \
-	64amd64-4p2n4ca2co.topoextnuma.output
+	64amd64-4p2n4ca2co.topoextnuma.output \
+	5intel64-hybrid-lakefield.output
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # or a corresponding `xyz.source' specifying which tarball to use
 cpuid_sysfs_tarballs = \
 	64amd64-4p2n4ca2co.tar.bz2 \
-	64amd64-4p2n4ca2co.topoextnuma.source
+	64amd64-4p2n4ca2co.topoextnuma.source \
+	5intel64-hybrid-lakefield.tar.bz2
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 cpuid_sysfs_envs = \
-	64amd64-4p2n4ca2co.topoextnuma.env
+	64amd64-4p2n4ca2co.topoextnuma.env \
+	5intel64-hybrid-lakefield.env
 
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
