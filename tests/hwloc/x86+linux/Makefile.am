@@ -19,6 +19,11 @@ cpuid_sysfs_tarballs = \
 	64amd64-4p2n4ca2co.topoextnuma.source \
 	5intel64-hybrid-lakefield.tar.bz2
 
+# Each output `xyz.output' may have a corresponding `xyz.options'
+# file modifying the behavior of lstopo
+cpuid_sysfs_options = \
+	5intel64-hybrid-lakefield.options
+
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 cpuid_sysfs_envs = \
@@ -31,6 +36,6 @@ TESTS = $(cpuid_sysfs_outputs)
 endif HWLOC_HAVE_BUNZIPP
 endif HWLOC_HAVE_OPENAT
 
-EXTRA_DIST = $(cpuid_sysfs_outputs) $(cpuid_sysfs_tarballs) $(cpuid_sysfs_envs)
+EXTRA_DIST = $(cpuid_sysfs_outputs) $(cpuid_sysfs_tarballs) $(cpuid_sysfs_options) $(cpuid_sysfs_envs)
 
 LOG_COMPILER = $(builddir)/test-topology.sh
