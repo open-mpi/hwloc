@@ -638,6 +638,11 @@ extern "C" {
 
 #define hwloc_pci_find_parent_by_busid HWLOC_NAME(pcidisc_find_busid_parent)
 
+#define hwloc_backend_distances_add_handle_t HWLOC_NAME(backend_distances_add_handle_t)
+#define hwloc_backend_distances_add_create HWLOC_NAME(backend_distances_add_create)
+#define hwloc_backend_distances_add_values HWLOC_NAME(backend_distances_add_values)
+#define hwloc_backend_distances_add_commit HWLOC_NAME(backend_distances_add_commit)
+
 /* hwloc/deprecated.h */
 
 #define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)

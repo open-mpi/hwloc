@@ -409,9 +409,13 @@ extern void hwloc_internal_distances_prepare(hwloc_topology_t topology);
 extern void hwloc_internal_distances_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_distances_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern void hwloc_internal_distances_refresh(hwloc_topology_t topology);
-extern int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
-extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name, hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
 extern void hwloc_internal_distances_invalidate_cached_objs(hwloc_topology_t topology);
+
+/* these distances_add() functions are higher-level than those in hwloc/plugins.h
+ * but they may change in the future, hence they are not exported to plugins.
+ */
+extern int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name, hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values, unsigned long kind, unsigned long flags);
+extern int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name, unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values, unsigned long kind, unsigned long flags);
 
 extern void hwloc_internal_memattrs_init(hwloc_topology_t topology);
 extern void hwloc_internal_memattrs_prepare(hwloc_topology_t topology);

@@ -27,6 +27,27 @@ hwloc_internal_distances_restrict(hwloc_obj_t *objs,
 				  uint64_t *values,
 				  unsigned nbobjs, unsigned disappeared);
 
+static void
+hwloc_internal_distances_print_matrix(struct hwloc_internal_distances_s *dist)
+{
+  unsigned nbobjs = dist->nbobjs;
+  hwloc_obj_t *objs = dist->objs;
+  hwloc_uint64_t *values = dist->values;
+  int gp = !HWLOC_DIST_TYPE_USE_OS_INDEX(dist->unique_type);
+  unsigned i, j;
+
+  fprintf(stderr, "%s", gp ? "gp_index" : "os_index");
+  for(j=0; j<nbobjs; j++)
+    fprintf(stderr, " % 5d", (int)(gp ? objs[j]->gp_index : objs[j]->os_index));
+  fprintf(stderr, "\n");
+  for(i=0; i<nbobjs; i++) {
+    fprintf(stderr, "  % 5d", (int)(gp ? objs[i]->gp_index : objs[i]->os_index));
+    for(j=0; j<nbobjs; j++)
+      fprintf(stderr, " % 5lld", (long long) values[i*nbobjs + j]);
+    fprintf(stderr, "\n");
+  }
+}
+
 /******************************************************
  * Global init, prepare, destroy, dup
  */
@@ -254,15 +275,15 @@ int hwloc_distances_release_remove(hwloc_topology_t topology,
   return 0;
 }
 
-/******************************************************
- * Add distances to the topology
+/*********************************************************
+ * Backend functions for adding distances to the topology
  */
 
 /* cancel a distances handle. only needed internally for now */
 static void
 hwloc_backend_distances_add__cancel(struct hwloc_internal_distances_s *dist)
 {
-  /* everything is set to NULL in hwloc_backend_distances_create() */
+  /* everything is set to NULL in hwloc_backend_distances_add_create() */
   free(dist->name);
   free(dist->indexes);
   free(dist->objs);
@@ -274,7 +295,7 @@ hwloc_backend_distances_add__cancel(struct hwloc_internal_distances_s *dist)
 /* prepare a distances handle for later commit in the topology.
  * we duplicate the caller's name.
  */
-static struct hwloc_internal_distances_s *
+hwloc_backend_distances_add_handle_t
 hwloc_backend_distances_add_create(hwloc_topology_t topology,
                                    const char *name, unsigned long kind, unsigned long flags)
 {
@@ -318,13 +339,14 @@ hwloc_backend_distances_add_create(hwloc_topology_t topology,
  * on success, objs and values arrays are attached and will be freed with the distances.
  * on failure, the handle is freed.
  */
-static int
+int
 hwloc_backend_distances_add_values(hwloc_topology_t topology __hwloc_attribute_unused,
-                                   struct hwloc_internal_distances_s *dist,
+                                   hwloc_backend_distances_add_handle_t handle,
                                    unsigned nbobjs, hwloc_obj_t *objs,
                                    hwloc_uint64_t *values,
                                    unsigned long flags)
 {
+  struct hwloc_internal_distances_s *dist = handle;
   hwloc_obj_type_t unique_type, *different_types = NULL;
   hwloc_uint64_t *indexes = NULL;
   unsigned i, disappeared = 0;
@@ -409,10 +431,11 @@ hwloc_backend_distances_add_values(hwloc_topology_t topology __hwloc_attribute_u
  */
 static int
 hwloc_backend_distances_add_values_by_index(hwloc_topology_t topology __hwloc_attribute_unused,
-                                            struct hwloc_internal_distances_s *dist,
+                                            hwloc_backend_distances_add_handle_t handle,
                                             unsigned nbobjs, hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, hwloc_uint64_t *indexes,
                                             hwloc_uint64_t *values)
 {
+  struct hwloc_internal_distances_s *dist = handle;
   hwloc_obj_t *objs;
 
   if (dist->nbobjs || !(dist->iflags & HWLOC_INTERNAL_DIST_FLAG_NOT_COMMITTED)) {
@@ -446,35 +469,16 @@ hwloc_backend_distances_add_values_by_index(hwloc_topology_t topology __hwloc_at
   return -1;
 }
 
-static void
-hwloc_internal_distances_print_matrix(struct hwloc_internal_distances_s *dist)
-{
-  unsigned nbobjs = dist->nbobjs;
-  hwloc_obj_t *objs = dist->objs;
-  hwloc_uint64_t *values = dist->values;
-  int gp = !HWLOC_DIST_TYPE_USE_OS_INDEX(dist->unique_type);
-  unsigned i, j;
-
-  fprintf(stderr, "%s", gp ? "gp_index" : "os_index");
-  for(j=0; j<nbobjs; j++)
-    fprintf(stderr, " % 5d", (int)(gp ? objs[j]->gp_index : objs[j]->os_index));
-  fprintf(stderr, "\n");
-  for(i=0; i<nbobjs; i++) {
-    fprintf(stderr, "  % 5d", (int)(gp ? objs[i]->gp_index : objs[i]->os_index));
-    for(j=0; j<nbobjs; j++)
-      fprintf(stderr, " % 5lld", (long long) values[i*nbobjs + j]);
-    fprintf(stderr, "\n");
-  }
-}
-
 /* commit a distances handle.
  * on failure, the handle is freed with its objects and values arrays.
  */
-static int
+int
 hwloc_backend_distances_add_commit(hwloc_topology_t topology,
-                                   struct hwloc_internal_distances_s *dist,
+                                   hwloc_backend_distances_add_handle_t handle,
                                    unsigned long flags)
 {
+  struct hwloc_internal_distances_s *dist = handle;
+
   if (!dist->nbobjs || !(dist->iflags & HWLOC_INTERNAL_DIST_FLAG_NOT_COMMITTED)) {
     /* target distances not ready for commit */
     errno = EINVAL;
@@ -527,18 +531,19 @@ hwloc_backend_distances_add_commit(hwloc_topology_t topology,
   return -1;
 }
 
+/* all-in-one backend function not exported to plugins, only used by XML for now */
 int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char *name,
                                           hwloc_obj_type_t unique_type, hwloc_obj_type_t *different_types, unsigned nbobjs, uint64_t *indexes, uint64_t *values,
                                           unsigned long kind, unsigned long flags)
 {
-  struct hwloc_internal_distances_s *dist;
+  hwloc_backend_distances_add_handle_t handle;
   int err;
 
-  dist = hwloc_backend_distances_add_create(topology, name, kind, 0);
-  if (!dist)
+  handle = hwloc_backend_distances_add_create(topology, name, kind, 0);
+  if (!handle)
     goto err;
 
-  err = hwloc_backend_distances_add_values_by_index(topology, dist,
+  err = hwloc_backend_distances_add_values_by_index(topology, handle,
                                                     nbobjs, unique_type, different_types, indexes,
                                                     values);
   if (err < 0)
@@ -549,7 +554,7 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char 
   different_types = NULL;
   values = NULL;
 
-  err = hwloc_backend_distances_add_commit(topology, dist, flags);
+  err = hwloc_backend_distances_add_commit(topology, handle, flags);
   if (err < 0)
     goto err;
 
@@ -562,18 +567,19 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char 
   return -1;
 }
 
+/* all-in-one backend function not exported to plugins, used by OS backends */
 int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
                                  unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
                                  unsigned long kind, unsigned long flags)
 {
-  struct hwloc_internal_distances_s *dist;
+  hwloc_backend_distances_add_handle_t handle;
   int err;
 
-  dist = hwloc_backend_distances_add_create(topology, name, kind, 0);
-  if (!dist)
+  handle = hwloc_backend_distances_add_create(topology, name, kind, 0);
+  if (!handle)
     goto err;
 
-  err = hwloc_backend_distances_add_values(topology, dist,
+  err = hwloc_backend_distances_add_values(topology, handle,
                                            nbobjs, objs,
                                            values,
                                            0);
@@ -584,7 +590,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
   objs = NULL;
   values = NULL;
 
-  err = hwloc_backend_distances_add_commit(topology, dist, flags);
+  err = hwloc_backend_distances_add_commit(topology, handle, flags);
   if (err < 0)
     goto err;
 
@@ -596,13 +602,15 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
   return -1;
 }
 
+/********************************
+ * User API for adding distances
+ */
+
 #define HWLOC_DISTANCES_KIND_FROM_ALL (HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_FROM_USER)
 #define HWLOC_DISTANCES_KIND_MEANS_ALL (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH)
 #define HWLOC_DISTANCES_KIND_ALL (HWLOC_DISTANCES_KIND_FROM_ALL|HWLOC_DISTANCES_KIND_MEANS_ALL)
 #define HWLOC_DISTANCES_ADD_FLAG_ALL (HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE)
 
-/* The actual function exported to the user
- */
 int hwloc_distances_add(hwloc_topology_t topology,
 			unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,
 			unsigned long kind, unsigned long flags)
@@ -646,7 +654,7 @@ int hwloc_distances_add(hwloc_topology_t topology,
   memcpy(_values, values, nbobjs*nbobjs*sizeof(*_values));
   err = hwloc_internal_distances_add(topology, NULL, nbobjs, _objs, _values, kind, flags);
   if (err < 0)
-    goto out; /* _objs and _values freed in hwloc_internal_distances_add() */
+    goto out; /* _objs and _values freed in hwloc_backend_distances_add() */
 
   /* in case we added some groups, see if we need to reconnect */
   hwloc_topology_reconnect(topology, 0);
