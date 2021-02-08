@@ -63,6 +63,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --disallowed       Include objects disallowed by administrative limitations\n");
   fprintf (where, "  --json-server      Run as a JSON server\n");
   fprintf (where, "  --json-port <n>    Use port <n> for JSON server (default is %d)\n", JSON_PORT);
+  fprintf (where, "  --short-name       Show only the process short name instead of the path\n");
   fprintf (where, "  -v --verbose       Increase verbosity\n");
 }
 
@@ -432,6 +433,9 @@ int main(int argc, char *argv[])
 
     } else if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
       verbose++;
+
+    } else if (!strcmp (argv[0], "--short-name")) {
+      psflags |= HWLOC_PS_FLAG_SHORTNAME;
 
     } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
       usage (callname, stderr);

@@ -23,6 +23,9 @@ Version 2.5.0
   + Add --with-cuda=<dir> to specify the CUDA installation path
     (and its NVML and OpenCL components) without environment variables.
     Thanks to Andrea Bocci for the suggestion.
+* Tools
+  + hwloc-ps now has a --short-name option to avoid long/truncated
+    command path.
 
 
 Version 2.4.0
