@@ -629,6 +629,14 @@ HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, st
  */
 HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
+/** \brief Find the PCI device or bridge matching a PCI bus ID exactly.
+ *
+ * This is useful for adding specific information about some objects
+ * based on their PCI id. When it comes to attaching objects based on
+ * PCI locality, hwloc_pci_find_parent_by_busid() should be preferred.
+ */
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
+
 /** \brief Handle to a new distances structure during its addition to the topology. */
 typedef void * hwloc_backend_distances_add_handle_t;
 

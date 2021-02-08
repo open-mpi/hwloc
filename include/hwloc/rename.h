@@ -640,6 +640,7 @@ extern "C" {
 #define hwloc_pcidisc_tree_insert_by_busid HWLOC_NAME(pcidisc_tree_insert_by_busid)
 #define hwloc_pcidisc_tree_attach HWLOC_NAME(pcidisc_tree_attach)
 
+#define hwloc_pci_find_by_busid HWLOC_NAME(pcidisc_find_by_busid)
 #define hwloc_pci_find_parent_by_busid HWLOC_NAME(pcidisc_find_busid_parent)
 
 #define hwloc_backend_distances_add_handle_t HWLOC_NAME(backend_distances_add_handle_t)
@@ -800,7 +801,6 @@ extern "C" {
 #define hwloc_pci_discovery_init HWLOC_NAME(pci_discovery_init)
 #define hwloc_pci_discovery_prepare HWLOC_NAME(pci_discovery_prepare)
 #define hwloc_pci_discovery_exit HWLOC_NAME(pci_discovery_exit)
-#define hwloc_pci_find_by_busid HWLOC_NAME(pcidisc_find_by_busid)
 #define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)

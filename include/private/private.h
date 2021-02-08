@@ -305,11 +305,6 @@ extern void hwloc_pci_discovery_init(struct hwloc_topology *topology);
 extern void hwloc_pci_discovery_prepare(struct hwloc_topology *topology);
 extern void hwloc_pci_discovery_exit(struct hwloc_topology *topology);
 
-/* Look for an object matching the given domain/bus/func,
- * either exactly or return the smallest container bridge
- */
-extern struct hwloc_obj * hwloc_pci_find_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
-
 /* Look for an object matching complete cpuset exactly, or insert one.
  * Return NULL on failure.
  * Return a good fallback (object above) on failure to insert.
