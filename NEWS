@@ -28,6 +28,7 @@ Version 2.4.1
   thanks to Ivan Kochin for the report.
 * Fix the insertion of custom Groups after loading the topology,
   thanks to Scott Hicks.
+* Add support for CPU0 being offline in Linux, thanks to Garrett Clay.
 * Fix missing x86 Package and Core objects FreeBSD/NetBSD.
   Thanks to Thibault Payet and Yuri Victorovich for the report.
 * Fix the import of very large distances with heterogeneous object types.
