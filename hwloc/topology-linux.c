@@ -5157,6 +5157,9 @@ hwloc_linux_fallback_pu_level(struct hwloc_backend *backend)
 
 static const char *find_sysfs_cpu_path(int root_fd, int *old_filenames)
 {
+  unsigned first;
+  int err;
+
   if (!hwloc_access("/sys/bus/cpu/devices", R_OK|X_OK, root_fd)) {
     if (!hwloc_access("/sys/bus/cpu/devices/cpu0/topology/package_cpus", R_OK, root_fd)
 	|| !hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_cpus", R_OK, root_fd)) {
@@ -5180,6 +5183,58 @@ static const char *find_sysfs_cpu_path(int root_fd, int *old_filenames)
 	|| !hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, root_fd)) {
       *old_filenames = 1;
       return "/sys/devices/system/cpu";
+    }
+  }
+
+  /* cpu0 might be offline, fallback to looking at the first online cpu.
+   * online contains comma-separated ranges, just read the first number.
+   */
+  hwloc_debug("Failed to find sysfs cpu files using cpu0, looking at online CPUs...\n");
+  err = hwloc_read_path_as_uint("/sys/devices/system/cpu/online", &first, root_fd);
+  if (err) {
+    hwloc_debug("Failed to find read /sys/devices/system/cpu/online.\n");
+  } else {
+    char path[PATH_MAX];
+    hwloc_debug("Found CPU#%u as first online CPU\n", first);
+
+    if (!hwloc_access("/sys/bus/cpu/devices", R_OK|X_OK, root_fd)) {
+      snprintf(path, sizeof(path), "/sys/bus/cpu/devices/cpu%u/topology/package_cpus", first);
+      if (!hwloc_access(path, R_OK, root_fd))
+        return "/sys/bus/cpu/devices";
+      snprintf(path, sizeof(path), "/sys/bus/cpu/devices/cpu%u/topology/core_cpus", first);
+      if (!hwloc_access(path, R_OK, root_fd))
+        return "/sys/bus/cpu/devices";
+
+      snprintf(path, sizeof(path), "/sys/bus/cpu/devices/cpu%u/topology/core_siblings", first);
+      if (!hwloc_access(path, R_OK, root_fd)) {
+        *old_filenames = 1;
+        return "/sys/bus/cpu/devices";
+      }
+      snprintf(path, sizeof(path), "/sys/bus/cpu/devices/cpu%u/topology/thread_siblings", first);
+      if (!hwloc_access(path, R_OK, root_fd)) {
+        *old_filenames = 1;
+        return "/sys/bus/cpu/devices";
+      }
+    }
+
+    if (!hwloc_access("/sys/devices/system/cpu", R_OK|X_OK, root_fd)) {
+      snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%u/topology/package_cpus", first);
+      if (!hwloc_access(path, R_OK, root_fd))
+        return "/sys/devices/system/cpu";
+      snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%u/topology/core_cpus", first);
+      if (!hwloc_access(path, R_OK, root_fd))
+        return "/sys/devices/system/cpu";
+
+      snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%u/topology/core_siblings", first);
+      if (!hwloc_access(path, R_OK, root_fd)) {
+        *old_filenames = 1;
+        return "/sys/devices/system/cpu";
+      }
+      snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%u/topology/thread_siblings", first);
+      if (!hwloc_access(path, R_OK, root_fd)) {
+        *old_filenames = 1;
+        return "/sys/devices/system/cpu";
+      }
     }
   }
 
