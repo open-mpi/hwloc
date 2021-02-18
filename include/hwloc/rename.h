@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2020 Inria.  All rights reserved.
+ * Copyright © 2010-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -522,6 +522,11 @@ extern "C" {
 #define hwloc_linux_get_tid_cpubind HWLOC_NAME(linux_get_tid_cpubind)
 #define hwloc_linux_get_tid_last_cpu_location HWLOC_NAME(linux_get_tid_last_cpu_location)
 #define hwloc_linux_read_path_as_cpumask HWLOC_NAME(linux_read_file_cpumask)
+
+/* windows.h */
+
+#define hwloc_windows_get_nr_processor_groups HWLOC_NAME(windows_get_nr_processor_groups)
+#define hwloc_windows_get_processor_group_cpuset HWLOC_NAME(windows_get_processor_group_cpuset)
 
 /* openfabrics-verbs.h */
 

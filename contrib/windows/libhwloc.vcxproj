@@ -242,6 +242,7 @@
     <ClInclude Include="..\..\include\hwloc\inlines.h" />
     <ClInclude Include="..\..\include\hwloc\memattrs.h" />
     <ClInclude Include="..\..\include\hwloc\cpukinds.h" />
+    <ClInclude Include="..\..\include\hwloc\windows.h" />
     <ClInclude Include="..\..\include\hwloc\plugins.h" />
     <ClInclude Include="..\..\include\hwloc\shmem.h" />
     <ClInclude Include="..\..\include\hwloc\rename.h" />

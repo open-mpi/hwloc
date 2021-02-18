@@ -1,4 +1,4 @@
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2009-2013, 2021 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -83,6 +83,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/nvml.h \
        $(hwloc_include_dir)/hwloc/rsmi.h \
        $(hwloc_include_dir)/hwloc/gl.h \
+       $(hwloc_include_dir)/hwloc/windows.h \
        $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
        $(srcdir)/netloc.doxy \
        $(hwloc_include_dir)/netloc.h
@@ -796,6 +797,12 @@ man3_linux_libnuma_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nodeset_to_linux_libnuma_ulongs.3
 
+man3_windowsdir = $(man3dir)
+man3_windows_DATA = \
+	$(DOX_MAN_DIR)/man3/hwlocality_windows.3 \
+	$(DOX_MAN_DIR)/man3/hwloc_windows_get_nr_processor_groups.3 \
+	$(DOX_MAN_DIR)/man3/hwloc_windows_get_processor_group_cpuset.3
+
 man3_openfabricsdir = $(man3dir)
 man3_openfabrics_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_openfabrics.3 \
@@ -856,6 +863,7 @@ $(man3_cuda_DATA): $(DOX_TAG)
 $(man3_glibc_sched_DATA): $(DOX_TAG)
 $(man3_linux_DATA): $(DOX_TAG)
 $(man3_linux_libnuma_DATA): $(DOX_TAG)
+$(man3_windows_DATA): $(DOX_TAG)
 $(man3_openfabrics_DATA): $(DOX_TAG)
 
 $(DOX_LETTERPDF): $(DOX_TAG)

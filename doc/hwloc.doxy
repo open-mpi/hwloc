@@ -2417,6 +2417,12 @@ enabled for the current topology.
   through their thread ID ("tid") or parsing kernel CPU mask files.
  </dd>
 
+<dt>Windows specific features</dt>
+ <dd>
+  hwloc/windows.h offers Windows-specific helpers to query information
+  about Windows processor groups.
+ </dd>
+
 <dt>Linux libnuma</dt>
  <dd>
   hwloc/linux-libnuma.h provides conversion helpers between hwloc CPU

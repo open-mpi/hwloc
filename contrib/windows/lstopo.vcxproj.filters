@@ -59,6 +59,9 @@
     <ClInclude Include="..\..\include\hwloc\openfabrics-verbs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\hwloc\windows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\hwloc\plugins.h">
       <Filter>Header Files</Filter>
     </ClInclude>
