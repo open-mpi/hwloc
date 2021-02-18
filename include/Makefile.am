@@ -1,4 +1,4 @@
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -64,5 +64,10 @@ endif HWLOC_HAVE_SOLARIS
 if HWLOC_HAVE_SCHED_SETAFFINITY
 include_hwloc_HEADERS += hwloc/glibc-sched.h
 endif HWLOC_HAVE_SCHED_SETAFFINITY
+
+if HWLOC_HAVE_WINDOWS
+include_hwloc_HEADERS += \
+	hwloc/windows.h
+endif HWLOC_HAVE_WINDOWS
 
 endif HWLOC_BUILD_STANDALONE

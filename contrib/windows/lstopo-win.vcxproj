@@ -91,6 +91,7 @@
     <ClInclude Include="..\..\include\hwloc\bitmap.h" />
     <ClInclude Include="..\..\include\hwloc\helper.h" />
     <ClInclude Include="..\..\include\hwloc\openfabrics-verbs.h" />
+    <ClInclude Include="..\..\include\hwloc\windows.h" />
     <ClInclude Include="..\..\include\hwloc\plugins.h" />
     <ClInclude Include="..\..\include\hwloc\rename.h" />
     <ClInclude Include="..\..\include\private\components.h" />

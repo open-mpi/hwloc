@@ -1,4 +1,4 @@
-# Copyright © 2010-2020 Inria.  All rights reserved.
+# Copyright © 2010-2021 Inria.  All rights reserved.
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -19,6 +19,7 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/cpukinds.h \
 		@top_srcdir@/include/hwloc/linux.h \
 		@top_srcdir@/include/hwloc/linux-libnuma.h \
+		@top_srcdir@/include/hwloc/windows.h \
 		@top_srcdir@/include/hwloc/glibc-sched.h \
 		@top_srcdir@/include/hwloc/opencl.h \
 		@top_srcdir@/include/hwloc/cuda.h \
