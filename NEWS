@@ -21,6 +21,8 @@ Version 2.5.0
 -------------
 * API
   + Add hwloc/windows.h to query Windows processor groups.
+* Tools
+  + lstopo now has a --windows-processor-groups option on Windows.
 * Build
   + Add --with-cuda=<dir> to specify the CUDA installation path
     (and its NVML and OpenCL components) without environment variables.
