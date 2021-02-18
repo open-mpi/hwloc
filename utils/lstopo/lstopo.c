@@ -408,6 +408,9 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --distances           Only show distance matrices\n");
   fprintf (where, "  --memattrs            Only show memory attributes\n");
   fprintf (where, "  --cpukinds            Only show CPU kinds\n");
+#ifdef HWLOC_WIN_SYS
+  fprintf (where, "  --processor-groups    Only show Windows processor groups\n");
+#endif
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "  -C --cpuset-only      Only show the cpuset of each object\n");
   fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
@@ -741,6 +744,7 @@ main (int argc, char *argv[])
   loutput.show_distances_only = 0;
   loutput.show_memattrs_only = 0;
   loutput.show_cpukinds_only = 0;
+  loutput.show_windows_processor_groups_only = 0;
   loutput.show_only = HWLOC_OBJ_TYPE_NONE;
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
@@ -810,6 +814,10 @@ main (int argc, char *argv[])
         loutput.show_memattrs_only = 1;
       } else if (!strcmp (argv[0], "--cpukinds")) {
         loutput.show_cpukinds_only = 1;
+#ifdef HWLOC_WIN_SYS
+      } else if (!strcmp (argv[0], "--processor-groups")) {
+        loutput.show_windows_processor_groups_only = 1;
+#endif
       } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
@@ -1305,6 +1313,7 @@ main (int argc, char *argv[])
 	|| loutput.show_distances_only
         || loutput.show_memattrs_only
         || loutput.show_cpukinds_only
+        || loutput.show_windows_processor_groups_only
         || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }

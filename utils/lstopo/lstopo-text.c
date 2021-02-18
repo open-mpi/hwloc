@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -13,6 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
+#ifdef HWLOC_WIN_SYS
+#include <hwloc/windows.h>
+#endif
 
 #include "lstopo.h"
 #include "misc.h"
@@ -376,6 +380,35 @@ static void output_memattrs(struct lstopo_output *loutput)
   }
 }
 
+
+static void output_windows_processor_groups(struct lstopo_output *loutput __hwloc_attribute_unused,
+                                            int force __hwloc_attribute_unused)
+{
+#ifdef HWLOC_WIN_SYS
+  hwloc_topology_t topology = loutput->topology;
+  int err = hwloc_windows_get_nr_processor_groups(topology, 0);
+  if (err > 0) {
+    unsigned nr = (unsigned) err;
+    if (nr > 1 || force) {
+      hwloc_bitmap_t set = hwloc_bitmap_alloc();
+      if (set) {
+        unsigned i;
+        for(i=0; i<nr; i++) {
+          err = hwloc_windows_get_processor_group_cpuset(topology, i, set, 0);
+          if (!err) {
+            char *s;
+            hwloc_bitmap_asprintf(&s, set);
+            printf("Processor Group #%u = %s\n", i, s);
+            free(s);
+          }
+        }
+        hwloc_bitmap_free(set);
+      }
+    }
+  }
+#endif
+}
+
 static void output_cpukinds(struct lstopo_output *loutput)
 {
   hwloc_topology_t topology = loutput->topology;
@@ -430,6 +463,10 @@ output_console(struct lstopo_output *loutput, const char *filename)
     output_cpukinds(loutput);
     return 0;
   }
+  if (loutput->show_windows_processor_groups_only) {
+    output_windows_processor_groups(loutput, 1);
+    return 0;
+  }
 
   /*
    * if verbose_mode == 0, only print the summary.
@@ -454,6 +491,7 @@ output_console(struct lstopo_output *loutput, const char *filename)
     output_distances(loutput);
     output_memattrs(loutput);
     output_cpukinds(loutput);
+    output_windows_processor_groups(loutput, verbose_mode > 2);
   }
 
   if (verbose_mode > 1 && loutput->show_only == HWLOC_OBJ_TYPE_NONE) {

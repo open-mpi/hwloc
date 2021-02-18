@@ -21,6 +21,8 @@ Version 2.5.0
 -------------
 * API
   + Add hwloc/windows.h to query Windows processor groups.
+* Tools
+  + lstopo now has a --windows-processor-groups option on Windows.
 * Build
   + Add --with-cuda-version=<version> or look at the CUDA_VERSION
     environment variable to find the appropriate CUDA pkg-config files.
