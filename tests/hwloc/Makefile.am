@@ -70,6 +70,10 @@ check_PROGRAMS = \
         xmlbuffer \
         gl
 
+if HWLOC_HAVE_WINDOWS
+check_PROGRAMS += windows_processor_groups
+endif HWLOC_HAVE_WINDOWS
+
 if !HWLOC_HAVE_WINDOWS
 if !HWLOC_HAVE_DARWIN
 check_PROGRAMS += shmem

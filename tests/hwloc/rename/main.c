@@ -45,6 +45,7 @@
 #include "hwloc/rsmi.h"
 #endif
 #include "hwloc/gl.h"
+#include "hwloc/windows.h"
 
 #include "private/components.h"
 #include "private/internal-components.h"
