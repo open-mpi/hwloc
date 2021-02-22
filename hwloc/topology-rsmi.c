@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2020 Inria.  All rights reserved.
+ * Copyright © 2012-2021 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -30,7 +30,7 @@ static int get_device_name(uint32_t dv_ind, char *device_name, unsigned int size
     if (!hwloc_hide_errors()) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
-      fprintf(stderr, "RSMI: GPU(%u): Failed to get name: %s\n", (unsigned)dv_ind, status_string);
+      fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get name: %s\n", (unsigned)dv_ind, status_string);
     }
     return -1;
   }
@@ -51,7 +51,7 @@ static int get_device_pci_info(uint32_t dv_ind, uint64_t *bdfid)
     if (!hwloc_hide_errors()) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
-      fprintf(stderr, "RSMI: GPU(%u): Failed to get PCI Info: %s\n", (unsigned)dv_ind, status_string);
+      fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get PCI Info: %s\n", (unsigned)dv_ind, status_string);
     }
     return -1;
   }
@@ -132,7 +132,7 @@ static int get_device_xgmi_hive_id(uint32_t dv_ind, char *buffer)
     if (!hwloc_hide_errors()) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
-      fprintf(stderr, "RSMI: GPU(%u): Failed to get hive id: %s\n", (unsigned)dv_ind, status_string);
+      fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get hive id: %s\n", (unsigned)dv_ind, status_string);
     }
     return -1;
   }
@@ -158,7 +158,7 @@ static int get_device_io_link_type(uint32_t dv_ind_src, uint32_t dv_ind_dst,
     if (!hwloc_hide_errors()) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
-      fprintf(stderr, "RSMI: GPU(%u): Failed to get link type: %s\n", (unsigned)dv_ind_src, status_string);
+      fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get link type: %s\n", (unsigned)dv_ind_src, status_string);
     }
     return -1;
   }
@@ -192,7 +192,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     if (!hwloc_hide_errors()) {
       const char *status_string;
       rsmi_status_string(ret, &status_string);
-      fprintf(stderr, "RSMI: Failed to initialize with rsmi_init(): %s\n", status_string);
+      fprintf(stderr, "hwloc/rsmi: Failed to initialize with rsmi_init(): %s\n", status_string);
     }
     return 0;
   }
@@ -204,7 +204,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     if (RSMI_STATUS_SUCCESS != ret && !hwloc_hide_errors()) {
       const char *status_string;
       rsmi_status_string(ret, &status_string);
-      fprintf(stderr, "RSMI: Failed to get number of devices with rsmi_num_monitor_devices(): %s\n", status_string);
+      fprintf(stderr, "hwloc/rsmi: Failed to get number of devices with rsmi_num_monitor_devices(): %s\n", status_string);
     }
     rsmi_shut_down();
     return 0;

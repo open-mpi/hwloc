@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2020 Inria.  All rights reserved.
+ * Copyright © 2012-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -37,7 +37,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   if (NVML_SUCCESS != ret) {
     if (!hwloc_hide_errors()) {
       const char *error = nvmlErrorString(ret);
-      fprintf(stderr, "NVML: Failed to initialize with nvmlInit(): %s\n", error);
+      fprintf(stderr, "hwloc/nvml: Failed to initialize with nvmlInit(): %s\n", error);
     }
     return -1;
   }
