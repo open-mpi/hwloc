@@ -28,6 +28,25 @@ Version 2.5.0
     command path.
 
 
+Version 2.4.1
+-------------
+* Fix AMD OpenCL device locality when PCI bus or device number >= 128.
+  Thanks to Edgar Leon for reporting the issue.
+  + Applications using any of the following inline functions must
+    be recompiled to get the fix: hwloc_opencl_get_device_pci_busid()
+    hwloc_opencl_get_device_cpuset(), hwloc_opencl_get_device_osdev().
+* Fix the ranking of cpukinds on non-Windows systems,
+  thanks to Ivan Kochin for the report.
+* Fix the insertion of custom Groups after loading the topology,
+  thanks to Scott Hicks.
+* Add support for CPU0 being offline in Linux, thanks to Garrett Clay.
+* Fix missing x86 Package and Core objects FreeBSD/NetBSD.
+  Thanks to Thibault Payet and Yuri Victorovich for the report.
+* Fix the import of very large distances with heterogeneous object types.
+* Fix a memory leak in the Linux backend,
+  thanks to Perceval Anichini.
+
+
 Version 2.4.0
 -------------
 * API
