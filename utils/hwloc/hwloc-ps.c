@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -175,11 +175,16 @@ static void print_process_json(hwloc_topology_t topology,
 
 static void foreach_process_cb(hwloc_topology_t topology,
 			       struct hwloc_ps_process *proc,
-			       void *cbdata __hwloc_attribute_unused)
+			       void *cbdata)
 {
+  const char *pidcmd = cbdata;
+
   /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
   if (!proc->bound && (!proc->nthreads || !proc->nboundthreads) && !show_all && !only_name)
     return;
+
+  if (pidcmd)
+    hwloc_ps_pidcmd(proc, pidcmd);
 
   if (json_output)
     print_process_json(topology, proc);
@@ -192,7 +197,7 @@ static int run(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 {
   if (only_pid == NO_ONLY_PID) {
     /* show all */
-    return hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, NULL, psflags, only_name, only_uid, pidcmd);
+    return hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, pidcmd, psflags, only_name, only_uid);
 
   } else {
     /* show only one */
@@ -205,8 +210,12 @@ static int run(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
     proc.nthreads = 0;
     proc.nboundthreads = 0;
     proc.threads = NULL;
-    ret = hwloc_ps_read_process(topology, topocpuset, &proc, psflags, pidcmd);
+    ret = hwloc_ps_read_process(topology, topocpuset, &proc, psflags);
     if (ret >= 0) {
+
+      if (pidcmd)
+        hwloc_ps_pidcmd(&proc, pidcmd);
+
       if (json_output)
 	print_process_json(topology, &proc);
       else

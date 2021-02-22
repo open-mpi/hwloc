@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -24,7 +24,7 @@
 
 int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 			  struct hwloc_ps_process *proc,
-			  unsigned long flags, const char *pidcmd)
+			  unsigned long flags)
 {
 #ifdef HAVE_DIRENT_H
   hwloc_pid_t realpid;
@@ -104,23 +104,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 
   free(path);
 
-  proc->string[0] = '\0';
-  if (pidcmd) {
-    char *cmd;
-    FILE *file;
-    cmd = malloc(strlen(pidcmd)+1+5+2+1);
-    sprintf(cmd, "%s %u", pidcmd, (unsigned) proc->pid);
-    file = popen(cmd, "r");
-    if (file) {
-      if (fgets(proc->string, sizeof(proc->string), file)) {
-	end = strchr(proc->string, '\n');
-	if (end)
-	  *end = '\0';
-      }
-      pclose(file);
-    }
-    free(cmd);
-  }
+  proc->string[0] = '\0'; /* might be set later if hwloc_ps_pidcmd is called */
 
   if (flags & HWLOC_PS_FLAG_UID) {
     proc->uid = HWLOC_PS_ALL_UIDS;
@@ -263,6 +247,24 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
   return -1;
 }
 
+void hwloc_ps_pidcmd(struct hwloc_ps_process *proc, const char *pidcmd)
+{
+  char *cmd;
+  FILE *file;
+  cmd = malloc(strlen(pidcmd)+1+5+2+1);
+  sprintf(cmd, "%s %u", pidcmd, (unsigned) proc->pid);
+  file = popen(cmd, "r");
+  if (file) {
+    if (fgets(proc->string, sizeof(proc->string), file)) {
+      char *end = strchr(proc->string, '\n');
+      if (end)
+        *end = '\0';
+    }
+    pclose(file);
+  }
+  free(cmd);
+}
+
 void hwloc_ps_free_process(struct hwloc_ps_process *proc)
 {
   unsigned i;
@@ -279,7 +281,7 @@ void hwloc_ps_free_process(struct hwloc_ps_process *proc)
 int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 			     void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
 			     void *cbdata,
-			     unsigned long flags, const char *only_name, long uid, const char *pidcmd)
+			     unsigned long flags, const char *only_name, long uid)
 {
 #ifdef HAVE_DIRENT_H
   DIR *dir;
@@ -304,7 +306,7 @@ int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t top
     proc.nthreads = 0;
     proc.nboundthreads = 0;
     proc.threads = NULL;
-    if (hwloc_ps_read_process(topology, topocpuset, &proc, flags, pidcmd) < 0)
+    if (hwloc_ps_read_process(topology, topocpuset, &proc, flags) < 0)
       goto next;
     if (only_name && !strstr(proc.name, only_name))
       goto next;

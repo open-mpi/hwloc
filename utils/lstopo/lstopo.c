@@ -160,7 +160,7 @@ static void add_process_objects(hwloc_topology_t topology)
 
   hwloc_ps_foreach_process(topology, root->cpuset,
 			   foreach_process_cb, NULL,
-			   HWLOC_PS_FLAG_THREADS | HWLOC_PS_FLAG_SHORTNAME, NULL, HWLOC_PS_ALL_UIDS, NULL);
+			   HWLOC_PS_FLAG_THREADS | HWLOC_PS_FLAG_SHORTNAME, NULL, HWLOC_PS_ALL_UIDS);
 }
 
 static __hwloc_inline void lstopo_update_factorize_bounds(unsigned min, unsigned *first, unsigned *last)

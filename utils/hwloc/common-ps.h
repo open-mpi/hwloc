@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -15,8 +15,8 @@
 
 struct hwloc_ps_process {
   long pid;
-  char string[1024];
   char name[64];
+  char string[1024]; /* optional string, used by hwloc-ps --pid-cmd */
   hwloc_bitmap_t cpuset;
 #define HWLOC_PS_ALL_UIDS ((long)-1)
   long uid;
@@ -38,12 +38,14 @@ struct hwloc_ps_process {
 
 int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 			  struct hwloc_ps_process *proc,
-			  unsigned long flags, const char *pidcmd);
+			  unsigned long flags);
 
 int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 			     void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
 			     void *cbdata,
-			     unsigned long flags, const char *only_name, long only_uid, const char *pidcmd);
+			     unsigned long flags, const char *only_name, long only_uid);
+
+void hwloc_ps_pidcmd(struct hwloc_ps_process *proc, const char *pidcmd);
 
 void hwloc_ps_free_process(struct hwloc_ps_process *proc);
 
