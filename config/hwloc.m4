@@ -924,7 +924,7 @@ return 0;
            AC_MSG_ERROR([Cannot continue])])
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
-    if test "x$enable_io" != xno && test "x$enable_opencl" != xno -o "x$enable_cuda" != xno -o "x$enable_nvml" != xyes; then
+    if test "x$enable_io" != xno && test "x$enable_opencl" != xno -o "x$enable_cuda" != xno -o "x$enable_nvml" != xno; then
       # OpenCL/NVML/CUDA may use CUDA directories, define common directories
 
       # Generic NVIDIA variables since NVML/OpenCL are installed inside CUDA directories
