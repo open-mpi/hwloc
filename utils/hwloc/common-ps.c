@@ -247,6 +247,12 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
   return -1;
 }
 
+#ifdef HWLOC_WIN_SYS
+/* hwloc-ps isn't built for Windows, but lstopo is */
+#define popen _popen
+#define pclose _pclose
+#endif
+
 void hwloc_ps_pidcmd(struct hwloc_ps_process *proc, const char *pidcmd)
 {
   char *cmd;
