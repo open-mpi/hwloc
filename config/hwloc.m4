@@ -1002,6 +1002,7 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     hwloc_have_cuda=no
     hwloc_have_cudart=no
     if test "x$enable_io" != xno && test "x$enable_cuda" != "xno"; then
+      # Look for CUDA first, for our test only
       HWLOC_CUDA_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
       HWLOC_CUDA_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
       tmp_save_CPPFLAGS="$CPPFLAGS"
@@ -1018,11 +1019,28 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 #error CUDA_VERSION too old
 #endif]], [[int i = 3;]])],
          [AC_MSG_RESULT(yes)
-          AC_CHECK_LIB([cuda], [cuInit],
-                       [AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
-                        hwloc_have_cuda=yes])],
+          AC_CHECK_LIB([cuda], [cuInit], [
+            HWLOC_CUDA_LIBS="-lcuda"
+            hwloc_have_cuda=yes
+          ])
+         ],
          [AC_MSG_RESULT(no)])])
+      CPPFLAGS="$tmp_save_CPPFLAGS"
+      LDFLAGS="$tmp_save_LDFLAGS"
+      if test x$hwloc_have_cuda = xyes; then
+        AC_SUBST(HWLOC_CUDA_CPPFLAGS)
+        AC_SUBST(HWLOC_CUDA_LIBS)
+        AC_SUBST(HWLOC_CUDA_LDFLAGS)
+        AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
+      fi
 
+      # Look for CUDART now, for library and tests
+      HWLOC_CUDART_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
+      HWLOC_CUDART_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
+      tmp_save_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS $HWLOC_CUDART_CPPFLAGS"
+      tmp_save_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS $HWLOC_CUDART_LDFLAGS"
       AC_CHECK_HEADERS([cuda_runtime_api.h], [
         AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
@@ -1034,17 +1052,19 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 #endif]], [[int i = 3;]])],
          [AC_MSG_RESULT(yes)
           AC_CHECK_LIB([cudart], [cudaGetDeviceProperties], [
-            HWLOC_CUDA_LIBS="-lcudart"
-            AC_SUBST(HWLOC_CUDA_LIBS)
-            AC_SUBST(HWLOC_CUDA_LDFLAGS)
-            AC_SUBST(HWLOC_CUDA_CPPFLAGS)
+            HWLOC_CUDART_LIBS="-lcudart"
             hwloc_have_cudart=yes
-            AC_DEFINE([HWLOC_HAVE_CUDART], [1], [Define to 1 if you have the `cudart' SDK.])
           ])
         ])
       ])
       CPPFLAGS="$tmp_save_CPPFLAGS"
       LDFLAGS="$tmp_save_LDFLAGS"
+      if test x$hwloc_have_cudart = xyes; then
+        AC_SUBST(HWLOC_CUDART_CPPFLAGS)
+        AC_SUBST(HWLOC_CUDART_LIBS)
+        AC_SUBST(HWLOC_CUDART_LDFLAGS)
+        AC_DEFINE([HWLOC_HAVE_CUDART], [1], [Define to 1 if you have the `cudart' SDK.])
+      fi
 
       AS_IF([test "$enable_cuda" = "yes" -a "$hwloc_have_cudart" = "no"],
             [AC_MSG_WARN([Specified --enable-cuda switch, but could not])
@@ -1374,10 +1394,10 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CPPFLAGS"
            HWLOC_REQUIRES="$HWLOC_OPENCL_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_cuda_component" = "static"],
-          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_CUDA_LIBS"
-           HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_CUDA_LDFLAGS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_CUDA_CPPFLAGS"
-           HWLOC_REQUIRES="$HWLOC_CUDA_REQUIRES $HWLOC_REQUIRES"])
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_CUDART_LIBS"
+           HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_CUDART_LDFLAGS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_CUDART_CPPFLAGS"
+           HWLOC_REQUIRES="$HWLOC_CUDART_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_nvml_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_NVML_LIBS"
            HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_NVML_LDFLAGS"

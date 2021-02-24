@@ -88,8 +88,8 @@ sources += topology-cuda.c
 else
 plugins_LTLIBRARIES += hwloc_cuda.la
 hwloc_cuda_la_SOURCES = topology-cuda.c
-hwloc_cuda_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_CUDA_CPPFLAGS) -DHWLOC_INSIDE_PLUGIN
-hwloc_cuda_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_CUDA_LIBS) $(HWLOC_CUDA_LDFLAGS)
+hwloc_cuda_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_CUDART_CPPFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_cuda_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_CUDART_LIBS) $(HWLOC_CUDART_LDFLAGS)
 endif
 endif HWLOC_HAVE_CUDART
 
