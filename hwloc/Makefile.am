@@ -55,8 +55,8 @@ sources += topology-xml-libxml.c
 else
 plugins_LTLIBRARIES += hwloc_xml_libxml.la
 hwloc_xml_libxml_la_SOURCES = topology-xml-libxml.c
-hwloc_xml_libxml_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_LIBXML2_CFLAGS) -DHWLOC_INSIDE_PLUGIN
-hwloc_xml_libxml_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_LIBXML2_LIBS)
+hwloc_xml_libxml_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_LIBXML2_CPPFLAGS) $(HWLOC_LIBXML2_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_xml_libxml_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_LIBXML2_LIBS) $(HWLOC_LIBXML2_LDFLAGS)
 endif
 endif HWLOC_HAVE_LIBXML2
 
@@ -66,8 +66,8 @@ sources += topology-pci.c
 else
 plugins_LTLIBRARIES += hwloc_pci.la
 hwloc_pci_la_SOURCES = topology-pci.c
-hwloc_pci_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_PCIACCESS_CFLAGS) -DHWLOC_INSIDE_PLUGIN
-hwloc_pci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCIACCESS_LIBS)
+hwloc_pci_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_PCIACCESS_CPPFLAGS) $(HWLOC_PCIACCESS_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_pci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCIACCESS_LIBS) $(HWLOC_PCIACCESS_LDFLAGS)
 endif
 endif HWLOC_HAVE_PCIACCESS
 
@@ -77,7 +77,7 @@ sources += topology-opencl.c
 else
 plugins_LTLIBRARIES += hwloc_opencl.la
 hwloc_opencl_la_SOURCES = topology-opencl.c
-hwloc_opencl_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_OPENCL_CPPFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_opencl_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_OPENCL_CPPFLAGS) $(HWLOC_OPENCL_CFLAGS) -DHWLOC_INSIDE_PLUGIN
 hwloc_opencl_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_OPENCL_LIBS) $(HWLOC_OPENCL_LDFLAGS)
 endif
 endif HWLOC_HAVE_OPENCL
@@ -88,7 +88,7 @@ sources += topology-cuda.c
 else
 plugins_LTLIBRARIES += hwloc_cuda.la
 hwloc_cuda_la_SOURCES = topology-cuda.c
-hwloc_cuda_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_CUDART_CPPFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_cuda_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_CUDART_CPPFLAGS) $(HWLOC_CUDART_CFLAGS) -DHWLOC_INSIDE_PLUGIN
 hwloc_cuda_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_CUDART_LIBS) $(HWLOC_CUDART_LDFLAGS)
 endif
 endif HWLOC_HAVE_CUDART
@@ -99,7 +99,7 @@ sources += topology-nvml.c
 else
 plugins_LTLIBRARIES += hwloc_nvml.la
 hwloc_nvml_la_SOURCES = topology-nvml.c
-hwloc_nvml_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_NVML_CPPFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_nvml_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_NVML_CPPFLAGS) $(HWLOC_NVML_CFLAGS) -DHWLOC_INSIDE_PLUGIN
 hwloc_nvml_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_NVML_LIBS) $(HWLOC_NVML_LDFLAGS)
 endif
 endif HWLOC_HAVE_NVML
@@ -110,8 +110,8 @@ sources += topology-rsmi.c
 else
 plugins_LTLIBRARIES += hwloc_rsmi.la
 hwloc_rsmi_la_SOURCES = topology-rsmi.c
-hwloc_rsmi_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_RSMI_CFLAGS) -DHWLOC_INSIDE_PLUGIN
-hwloc_rsmi_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_RSMI_LIBS)
+hwloc_rsmi_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_RSMI_CPPFLAGS) $(HWLOC_RSMI_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_rsmi_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_RSMI_LIBS) $(HWLOC_RSMI_LDFLAGS)
 endif
 endif HWLOC_HAVE_RSMI
 
@@ -121,8 +121,8 @@ sources += topology-gl.c
 else
 plugins_LTLIBRARIES += hwloc_gl.la
 hwloc_gl_la_SOURCES = topology-gl.c
-hwloc_gl_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_GL_CFLAGS) -DHWLOC_INSIDE_PLUGIN
-hwloc_gl_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_GL_LIBS)
+hwloc_gl_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_GL_CPPFLAGS) $(HWLOC_GL_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_gl_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_GL_LIBS) $(HWLOC_GL_LDFLAGS)
 endif
 endif HWLOC_HAVE_GL
 
