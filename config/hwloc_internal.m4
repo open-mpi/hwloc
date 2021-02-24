@@ -427,7 +427,10 @@ EOF
     AC_CHECK_HEADERS([infiniband/verbs.h], [
       AC_CHECK_LIB([ibverbs], [ibv_open_device],
                    [AC_DEFINE([HAVE_LIBIBVERBS], 1, [Define to 1 if we have -libverbs])
-                    hwloc_have_libibverbs=yes])
+                    hwloc_have_libibverbs=yes
+		    HWLOC_IBVERBS_LIBS=-libverbs
+		    AC_SUBST(HWLOC_IBVERBS_LIBS)
+		   ])
     ])
 
     AC_CHECK_PROGS(XMLLINT, [xmllint])

@@ -1,4 +1,4 @@
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -122,12 +122,12 @@ LDADD += $(HWLOC_top_builddir)/hwloc/$(hwloc_lib)
 
 linux_libnuma_CFLAGS = $(AM_CFLAGS) $(HWLOC_NUMA_CFLAGS)
 linux_libnuma_LDADD = $(LDADD) $(HWLOC_NUMA_LIBS)
-openfabrics_verbs_LDADD = $(LDADD) -libverbs
+openfabrics_verbs_LDADD = $(LDADD) $(HWLOC_IBVERBS_LIBS)
 opencl_LDADD = $(LDADD) $(HWLOC_OPENCL_LIBS) $(HWLOC_OPENCL_LDFLAGS)
 cuda_LDADD = $(LDADD) $(HWLOC_CUDA_LIBS)
 cudart_LDADD = $(LDADD) $(HWLOC_CUDART_LIBS)
-nvml_LDADD = $(LDADD) -lnvidia-ml
-rsmi_LDADD = $(LDADD) -lrocm_smi64
+nvml_LDADD = $(LDADD) $(HWLOC_NVML_LIBS)
+rsmi_LDADD = $(LDADD) $(HWLOC_RSMI_LIBS)
 hwloc_bind_LDADD = $(LDADD)
 if HWLOC_HAVE_PTHREAD
 hwloc_bind_LDADD += -lpthread

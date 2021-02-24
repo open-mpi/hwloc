@@ -908,7 +908,9 @@ return 0;
          [AC_CHECK_HEADER([pciaccess.h],
               [AC_CHECK_LIB([pciaccess], [pci_slot_match_iterator_create],
                    [hwloc_pciaccess_happy=yes
-                    HWLOC_PCIACCESS_LIBS="-lpciaccess"])
+                    HWLOC_PCIACCESS_LIBS="-lpciaccess"
+                    AC_SUBST(HWLOC_PCIACCESS_LIBS)
+                   ])
               ])
          ])
 
