@@ -34,6 +34,9 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                 AC_HELP_STRING([--with-hwloc-symbol-prefix=STRING],
                                [STRING can be any valid C symbol name.  It will be prefixed to all public HWLOC symbols.  Default: "hwloc_"]))
 
+    # For the windows build
+    AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
+
     # Debug mode?
     AC_ARG_ENABLE([debug],
                   AC_HELP_STRING([--enable-debug],

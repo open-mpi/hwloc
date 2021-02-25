@@ -505,7 +505,6 @@ EOF])
       AC_CHECK_LIB([user32], [PostQuitMessage], [hwloc_have_user32="yes"])
 
       AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
-      AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
 
       echo "**** end of Windows-specific checks"
       echo
