@@ -926,20 +926,47 @@ return 0;
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
     if test "x$enable_io" != xno && test "x$enable_opencl" != xno -o "x$enable_cuda" != xno -o "x$enable_nvml" != xno; then
-      # OpenCL/NVML/CUDA may use CUDA directories, define common directories
+      # Try to find CUDA pkg-config using a specific CUDA version
+      # Use --with-cuda-version first, or $CUDA_VERSION
+      cuda_version=$CUDA_VERSION
+      if test "x$with_cuda_version" != xno -a "x$with_cuda_version" != x; then
+        cuda_version=$with_cuda_version
+      fi
+      if test x$cuda_version != x; then
+        AC_MSG_CHECKING([if cuda-$cuda_version.pc exists])
+        HWLOC_PKG_CHECK_EXISTS([cuda-$cuda_version], [
+           cudapc=cuda-$cuda_version
+           AC_MSG_RESULT(yes)
+            _HWLOC_PKG_CONFIG(cuda_includedir, [variable=includedir], $cudapc)
+            _HWLOC_PKG_CONFIG(cuda_libdir, [variable=libdir], $cudapc)
+         ], [AC_MSG_RESULT(no)])
+        AC_MSG_CHECKING([if cudart-$cuda_version.pc exists])
+        HWLOC_PKG_CHECK_EXISTS([cudart-$cuda_version], [
+           cudartpc=cudart-$cuda_version
+           AC_MSG_RESULT(yes)
+         ], [AC_MSG_RESULT(no)])
+      fi
 
-      # Generic NVIDIA variables since NVML/OpenCL are installed inside CUDA directories
+      # OpenCL/NVML/CUDA may use CUDA directories, define common directories
+      # libnvidia-ml.so (and libcuda.so for tests) is under stubs
+      # when the driver isn't installed on the build machine.
+      # hwloc programs will fail to link if libnvidia-ml.so.1 is not available there too.
       if test "x$with_cuda" != xno -a "x$with_cuda" != x; then
-        # libnvidia-ml.so (and libcuda.so for tests) is under stubs
-        # when the driver isn't installed on the build machine.
-        # hwloc programs will fail to link if libnvidia-ml.so.1 is not available there too.
         if test "x${ac_cv_sizeof_void_p}" = x4; then
           HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib/ -L$with_cuda/lib/stubs/"
         else
           HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib64/ -L$with_cuda/lib64/stubs/"
         fi
         HWLOC_CUDA_COMMON_CPPFLAGS="-I$with_cuda/include/"
+      else
+        # or use cuda libdir/includedir from cuda.pc above
+        if test x$HWLOC_pkg_cv_cuda_includedir != x -a x$HWLOC_pkg_cv_cuda_libdir != x; then
+          HWLOC_CUDA_COMMON_LDFLAGS="-L$HWLOC_pkg_cv_cuda_libdir -L$HWLOC_pkg_cv_cuda_libdir/stubs/"
+          HWLOC_CUDA_COMMON_CPPFLAGS="-I$HWLOC_pkg_cv_cuda_includedir"
+        fi
       fi
+      AC_MSG_NOTICE([common CUDA/OpenCL/NVML CPPFLAGS: $HWLOC_CUDA_COMMON_CPPFLAGS])
+      AC_MSG_NOTICE([common CUDA/OpenCL/NVML LDFLAGS: $HWLOC_CUDA_COMMON_LDFLAGS])
     fi
 
     # OpenCL support
@@ -1005,64 +1032,77 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     hwloc_have_cudart=no
     if test "x$enable_io" != xno && test "x$enable_cuda" != "xno"; then
       # Look for CUDA first, for our test only
-      HWLOC_CUDA_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
-      HWLOC_CUDA_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
-      tmp_save_CPPFLAGS="$CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS $HWLOC_CUDA_CPPFLAGS"
-      tmp_save_LDFLAGS="$LDFLAGS"
-      LDFLAGS="$LDFLAGS $HWLOC_CUDA_LDFLAGS"
-      AC_CHECK_HEADERS([cuda.h], [
-        AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
-        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      if test "x$cudapc" != x; then
+        HWLOC_PKG_CHECK_MODULES([CUDA], [$cudapc], [cuInit], [cuda.h], [hwloc_have_cuda=yes])
+      else
+        HWLOC_CUDA_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
+        HWLOC_CUDA_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
+        tmp_save_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_CUDA_CPPFLAGS"
+        tmp_save_LDFLAGS="$LDFLAGS"
+        LDFLAGS="$LDFLAGS $HWLOC_CUDA_LDFLAGS"
+        AC_CHECK_HEADERS([cuda.h], [
+          AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
+          AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <cuda.h>
 #ifndef CUDA_VERSION
 #error CUDA_VERSION undefined
 #elif CUDA_VERSION < 3020
 #error CUDA_VERSION too old
 #endif]], [[int i = 3;]])],
-         [AC_MSG_RESULT(yes)
-          AC_CHECK_LIB([cuda], [cuInit], [
-            HWLOC_CUDA_LIBS="-lcuda"
-            hwloc_have_cuda=yes
-          ])
-         ],
-         [AC_MSG_RESULT(no)])])
-      CPPFLAGS="$tmp_save_CPPFLAGS"
-      LDFLAGS="$tmp_save_LDFLAGS"
+           [AC_MSG_RESULT(yes)
+            AC_CHECK_LIB([cuda], [cuInit], [
+              HWLOC_CUDA_LIBS="-lcuda"
+              hwloc_have_cuda=yes
+            ])
+           ],
+           [AC_MSG_RESULT(no)])])
+        CPPFLAGS="$tmp_save_CPPFLAGS"
+        LDFLAGS="$tmp_save_LDFLAGS"
+      fi
       if test x$hwloc_have_cuda = xyes; then
         AC_SUBST(HWLOC_CUDA_CPPFLAGS)
+        AC_SUBST(HWLOC_CUDA_CFLAGS)
         AC_SUBST(HWLOC_CUDA_LIBS)
         AC_SUBST(HWLOC_CUDA_LDFLAGS)
         AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
       fi
 
       # Look for CUDART now, for library and tests
-      HWLOC_CUDART_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
-      HWLOC_CUDART_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
-      tmp_save_CPPFLAGS="$CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS $HWLOC_CUDART_CPPFLAGS"
-      tmp_save_LDFLAGS="$LDFLAGS"
-      LDFLAGS="$LDFLAGS $HWLOC_CUDART_LDFLAGS"
-      AC_CHECK_HEADERS([cuda_runtime_api.h], [
-        AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
-        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      if test "x$cudartpc" != x; then
+        HWLOC_PKG_CHECK_MODULES([CUDART], [$cudartpc], [cudaGetDeviceProperties], [cuda_runtime_api.h], [
+          hwloc_have_cudart=yes
+          HWLOC_CUDART_REQUIRES=$cudartpc
+        ])
+      else
+        HWLOC_CUDART_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
+        HWLOC_CUDART_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
+        tmp_save_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_CUDART_CPPFLAGS"
+        tmp_save_LDFLAGS="$LDFLAGS"
+        LDFLAGS="$LDFLAGS $HWLOC_CUDART_LDFLAGS"
+        AC_CHECK_HEADERS([cuda_runtime_api.h], [
+          AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
+          AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <cuda_runtime_api.h>
 #ifndef CUDART_VERSION
 #error CUDART_VERSION undefined
 #elif CUDART_VERSION < 3020
 #error CUDART_VERSION too old
 #endif]], [[int i = 3;]])],
-         [AC_MSG_RESULT(yes)
-          AC_CHECK_LIB([cudart], [cudaGetDeviceProperties], [
-            HWLOC_CUDART_LIBS="-lcudart"
-            hwloc_have_cudart=yes
+           [AC_MSG_RESULT(yes)
+            AC_CHECK_LIB([cudart], [cudaGetDeviceProperties], [
+              HWLOC_CUDART_LIBS="-lcudart"
+              hwloc_have_cudart=yes
+            ])
           ])
         ])
-      ])
-      CPPFLAGS="$tmp_save_CPPFLAGS"
-      LDFLAGS="$tmp_save_LDFLAGS"
+        CPPFLAGS="$tmp_save_CPPFLAGS"
+        LDFLAGS="$tmp_save_LDFLAGS"
+      fi
       if test x$hwloc_have_cudart = xyes; then
         AC_SUBST(HWLOC_CUDART_CPPFLAGS)
+        AC_SUBST(HWLOC_CUDART_CFLAGS)
         AC_SUBST(HWLOC_CUDART_LIBS)
         AC_SUBST(HWLOC_CUDART_LDFLAGS)
         AC_DEFINE([HWLOC_HAVE_CUDART], [1], [Define to 1 if you have the `cudart' SDK.])
@@ -1070,6 +1110,10 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 
       AS_IF([test "$enable_cuda" = "yes" -a "$hwloc_have_cudart" = "no"],
             [AC_MSG_WARN([Specified --enable-cuda switch, but could not])
+             AC_MSG_WARN([find appropriate support])
+             AC_MSG_ERROR([Cannot continue])])
+      AS_IF([test "x$with_cuda_version" != x -a "$hwloc_have_cudart" = "no"],
+            [AC_MSG_WARN([Specified --with-cuda-version switch, but could not])
              AC_MSG_WARN([find appropriate support])
              AC_MSG_ERROR([Cannot continue])])
 

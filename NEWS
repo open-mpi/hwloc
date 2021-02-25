@@ -20,9 +20,12 @@ bug fixes (and other actions) for each version of hwloc since version
 Version 2.5.0
 -------------
 * Build
-  + Add --with-cuda=<dir> to specify the CUDA installation path
-    (and its NVML and OpenCL components) without environment variables.
-    Thanks to Andrea Bocci for the suggestion.
+  + Add --with-cuda-version=<version> or look at the CUDA_VERSION
+    environment variable to find the appropriate CUDA pkg-config files.
+    Thanks to Stephen Herbein for the suggestion.
+    - Also add --with-cuda=<dir> to specify the CUDA installation path
+      manually (and its NVML and OpenCL components).
+      Thanks to Andrea Bocci for the suggestion.
 * Tools
   + hwloc-ps now has a --short-name option to avoid long/truncated
     command path.

@@ -96,6 +96,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--disable-nvml],
                                  [Disable the NVML device discovery build (instead of only disabling NVML at runtime by default)]))
 
+    # CUDA version (for using its pkg-config cuda-x.y.pc)
+    AC_ARG_WITH([cuda-version],
+                AS_HELP_STRING([--with-cuda-version=<version>],
+		               [Specify the CUDA version (e.g. 11.2) for selecting the appropriate pkg-config file]))
+    AC_ARG_VAR([CUDA_VERSION], [The CUDA version (e.g. 11.2) for selecting the appropriate pkg-config file])
     # CUDA install path (and NVML and OpenCL)
     AC_ARG_WITH([cuda],
                 AS_HELP_STRING([--with-cuda=<dir>],
