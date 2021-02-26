@@ -3766,6 +3766,8 @@ and <tt>make install</tt> steps without having to tweak too many variables or op
 One may look at <tt>contrib/ci.inria.fr/job-3-mingw.sh</tt> in the hwloc
 repository for an example used for nightly testing.
 
+hwloc also supports the Cygwin environment for porting Unix code to Windows.
+
 hwloc releases also contain a basic Microsoft Visual Studio solution
 under <tt>contrib/windows/</tt>.
 
