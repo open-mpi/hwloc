@@ -26,6 +26,8 @@ Version 2.5.0
     - Also add --with-cuda=<dir> to specify the CUDA installation path
       manually (and its NVML and OpenCL components).
       Thanks to Andrea Bocci for the suggestion.
+    - See "How do I enable CUDA and select which CUDA version to use?"
+      in the FAQ for details.
 * Tools
   + hwloc-ps now has a --short-name option to avoid long/truncated
     command path.

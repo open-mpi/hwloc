@@ -134,7 +134,7 @@ The hwloc core may also benefit from the following development packages:
 <li>AMD or NVIDIA OpenCL implementations for OpenCL device discovery.
 </li>
 <li>the NVIDIA CUDA Toolkit for CUDA device discovery.
-  It's installation path may be specified at configure time with <tt>--with-cuda=/path/to/cuda</tt>.
+  See \ref faq_cuda_build.
 </li>
 <li>the NVIDIA Management Library (NVML) for NVML device discovery.
   It is included in CUDA since version 8.0.
@@ -3658,6 +3658,31 @@ You should pass the following command-line option to Valgrind to use it:
 </div><div class="section" id="faq4">
 \endhtmlonly
 \section faq4 Platform-specific
+
+
+\subsection faq_cuda_build How do I enable CUDA and select which CUDA version to use?
+
+hwloc enables CUDA as soon as it finds CUDA development headers and libraries
+on the system.
+This detection may be performed thanks to <tt>pkg-config</tt> but it requires
+hwloc to know which CUDA version to look for. This may be done by passing
+<tt>\--with-cuda-version=11.0</tt> to the configure script. Otherwise hwloc
+will also look for the <tt>CUDA_VERSION</tt> environment variable.
+
+If <tt>pkg-config</tt> does not work, passing <tt>\--with-cuda=/path/to/cuda</tt>
+to the configure script is another way to define the corresponding library
+and header paths.
+Finally, these paths may also be set through environment variables such
+as <tt>LIBRARY_PATH</tt> and <tt>C_INCLUDE_PATH</tt>.
+
+These paths, either detected by <tt>pkg-config</tt> or given manually, will
+also be used to detect NVML and OpenCL libraries and enable their hwloc backends.
+
+To find out whether CUDA was detected and enabled, look in <i>Probe / display I/O devices</i>
+at the end of the configure script output.
+Passing <tt>\--enable-cuda</tt> will also cause configure to fail
+if CUDA could not be found and enabled in hwloc.
+
 
 
 \subsection faq_knl_numa How do I find the local MCDRAM NUMA node on Intel Xeon Phi processor?
