@@ -137,7 +137,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
 #-----------------------------------------------------------------------
 
 dnl We only build documentation if this is a developer checkout.
-dnl Distribution tarballs just install pre-built docuemntation that was
+dnl Distribution tarballs just install pre-built documentation that was
 dnl included in the tarball.
 
 # Probably only ever invoked by hwloc's configure.ac
