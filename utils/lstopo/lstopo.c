@@ -785,6 +785,9 @@ main (int argc, char *argv[])
   loutput.show_disallowed = 1;
   loutput.show_cpukinds = 1;
 
+  /* show all error messages */
+  if (!getenv("HWLOC_HIDE_ERRORS"))
+    putenv((char *) "HWLOC_HIDE_ERRORS=0");
   /* enable verbose backends */
   if (!getenv("HWLOC_XML_VERBOSE"))
     putenv((char *) "HWLOC_XML_VERBOSE=1");

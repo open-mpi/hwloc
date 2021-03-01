@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -262,7 +262,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 #ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
       } else if (domain > 0xffff) {
 	static int warned = 0;
-	if (!warned && !hwloc_hide_errors())
+	if (!warned && hwloc_hide_errors() < 2)
 	  fprintf(stderr, "Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
 	warned = 1;
 	*ignore = 1;
@@ -362,7 +362,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 #ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
       } else if (domain > 0xffff) {
 	static int warned = 0;
-	if (!warned && !hwloc_hide_errors())
+	if (!warned && hwloc_hide_errors() < 2)
 	  fprintf(stderr, "Ignoring bridge to PCI with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
 	warned = 1;
 	*ignore = 1;
@@ -1234,7 +1234,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	/* next should be before cur */
 	if (!childrengotignored) {
 	  static int reported = 0;
-	  if (!reported && !hwloc_hide_errors()) {
+	  if (!reported && hwloc_hide_errors() < 2) {
 	    hwloc__xml_import_report_outoforder(topology, next, cur);
 	    reported = 1;
 	  }

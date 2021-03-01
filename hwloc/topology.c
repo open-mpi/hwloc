@@ -64,7 +64,7 @@ int hwloc_topology_abi_check(hwloc_topology_t topology)
 
 int hwloc_hide_errors(void)
 {
-  static int hide = 0;
+  static int hide = 1; /* only show critical errors by default. lstopo will show others */
   static int checked = 0;
   if (!checked) {
     const char *envvar = getenv("HWLOC_HIDE_ERRORS");
@@ -106,7 +106,7 @@ static void report_insert_error(hwloc_obj_t new, hwloc_obj_t old, const char *ms
 {
   static int reported = 0;
 
-  if (reason && !reported && !hwloc_hide_errors()) {
+  if (reason && !reported && hwloc_hide_errors() < 2) {
     char newstr[512];
     char oldstr[512];
     report_insert_error_format_obj(newstr, sizeof(newstr), new);

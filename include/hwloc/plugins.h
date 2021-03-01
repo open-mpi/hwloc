@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Inria.  All rights reserved.
+ * Copyright © 2013-2021 Inria.  All rights reserved.
  * Copyright © 2016 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -325,7 +325,20 @@ struct hwloc_component {
  * @{
  */
 
-/** \brief Check whether insertion errors are hidden */
+/** \brief Check whether error messages are hidden.
+ *
+ * Callers should print critical error messages
+ * (e.g. invalid hw topo info, invalid config)
+ * only if this function returns strictly less than 2.
+ *
+ * Callers should print non-critical error messages
+ * (e.g. failure to initialize CUDA)
+ * if this function returns 0.
+ *
+ * This function return 1 by default (show critical only),
+ * 0 in lstopo (show all),
+ * or anything set in HWLOC_HIDE_ERRORS in the environment.
+ */
 HWLOC_DECLSPEC int hwloc_hide_errors(void);
 
 /** \brief Add an object to the topology.

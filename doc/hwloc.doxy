@@ -998,13 +998,21 @@ following environment variables.
   which gathers all resources but marks the unavailable ones as disallowed.
   </dt>
 
-<dt>HWLOC_HIDE_ERRORS=0</dt>
+<dt>HWLOC_HIDE_ERRORS=1</dt>
   <dd>enables or disables verbose reporting of errors.
   The hwloc library may issue warnings to the standard error stream
   when it detects a problem during topology discovery, for instance
   if the operating system (or user) gives contradictory topology
-  information.   Setting this environment variable to 1 removes the
-  actual displaying of these error messages.
+  information.
+
+  By default (1), hwloc only shows critical errors such as invalid
+  hardware topology information or invalid configuration.
+  If set to 0 (default in lstopo), more errors are displayed,
+  for instance a failure to initialize CUDA or NVML.
+  If set to 2, no hwloc error messages are shown.
+
+  Note that additional verbose messages may be enabled with
+  other variables such as HWLOC_GROUPING_VERBOSE.
   </dd>
 
 <dt>HWLOC_USE_NUMA_DISTANCES=7</dt>
