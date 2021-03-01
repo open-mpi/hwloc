@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Inria.  All rights reserved.
+ * Copyright © 2013-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -14,6 +14,7 @@
 #define HWLOC_HAVE_CUDA_L2CACHESIZE 1
 
 typedef unsigned cudaError_t;
+#define cudaErrorNoDevice 37
 
 struct cudaDeviceProp {
   char name[256];
