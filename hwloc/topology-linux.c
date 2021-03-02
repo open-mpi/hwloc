@@ -2713,31 +2713,36 @@ hwloc_linux_knl_parse_numa_distances(unsigned nbnodes,
     return 0;
 
   if (nbnodes != 2 && nbnodes != 4 && nbnodes != 8) {
-    fprintf(stderr, "Ignoring KNL NUMA quirk, nbnodes (%u) isn't 2, 4 or 8.\n", nbnodes);
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc/linux: Ignoring KNL NUMA quirk, nbnodes (%u) isn't 2, 4 or 8.\n", nbnodes);
     return -1;
   }
 
   if (!distances) {
-    fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix missing.\n");
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc/linux: Ignoring KNL NUMA quirk, distance matrix missing.\n");
     return -1;
   }
 
   for(i=0; i<nbnodes; i++) {
     /* check we have 10 on the diagonal */
     if (distances[i*nbnodes+i] != 10) {
-      fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix does not contain 10 on the diagonal.\n");
+      if (hwloc_hide_errors() < 2)
+        fprintf(stderr, "hwloc/linux: hwloc/linux: Ignoring KNL NUMA quirk, distance matrix does not contain 10 on the diagonal.\n");
       return -1;
     }
     for(j=i+1; j<nbnodes; j++) {
       uint64_t distance = distances[i*nbnodes+j];
       /* check things are symmetric */
       if (distance != distances[i+j*nbnodes]) {
-	fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix isn't symmetric.\n");
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Ignoring KNL NUMA quirk, distance matrix isn't symmetric.\n");
 	return -1;
       }
       /* check everything outside the diagonal is > 10 */
       if (distance <= 10) {
-	fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix contains values <= 10.\n");
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Ignoring KNL NUMA quirk, distance matrix contains values <= 10.\n");
 	return -1;
       }
       /* did we already see this value? */
@@ -2749,7 +2754,8 @@ hwloc_linux_knl_parse_numa_distances(unsigned nbnodes,
       if (k == summary->nb_values) {
 	/* add a new value */
 	if (k == 4) {
-	  fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix contains more than 4 different values.\n");
+          if (hwloc_hide_errors() < 2)
+            fprintf(stderr, "hwloc/linux: Ignoring KNL NUMA quirk, distance matrix contains more than 4 different values.\n");
 	  return -1;
 	}
 	summary->values[k].value = distance;
@@ -2763,22 +2769,25 @@ hwloc_linux_knl_parse_numa_distances(unsigned nbnodes,
 
   if (nbnodes == 2) {
     if (summary->nb_values != 2) {
-      fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix for 2 nodes cannot contain %u different values instead of 2.\n",
-	      summary->nb_values);
+      if (hwloc_hide_errors() < 2)
+        fprintf(stderr, "hwloc/linux: Ignoring KNL NUMA quirk, distance matrix for 2 nodes cannot contain %u different values instead of 2.\n",
+                summary->nb_values);
       return -1;
     }
 
   } else if (nbnodes == 4) {
     if (summary->nb_values != 2 && summary->nb_values != 4) {
-      fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix for 8 nodes cannot contain %u different values instead of 2 or 4.\n",
-	      summary->nb_values);
+      if (hwloc_hide_errors() < 2)
+        fprintf(stderr, "hwloc/linux: Ignoring KNL NUMA quirk, distance matrix for 8 nodes cannot contain %u different values instead of 2 or 4.\n",
+                summary->nb_values);
       return -1;
     }
 
   } else if (nbnodes == 8) {
     if (summary->nb_values != 4) {
-      fprintf(stderr, "Ignoring KNL NUMA quirk, distance matrix for 8 nodes cannot contain %u different values instead of 4.\n",
-	      summary->nb_values);
+      if (hwloc_hide_errors() < 2)
+        fprintf(stderr, "hwloc/linux: Ignoring KNL NUMA quirk, distance matrix for 8 nodes cannot contain %u different values instead of 4.\n",
+                summary->nb_values);
       return -1;
     }
 
@@ -3308,14 +3317,16 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
       && strcmp(hwdata.cluster_mode, "Quadrant")
       && strcmp(hwdata.cluster_mode, "SNC2")
       && strcmp(hwdata.cluster_mode, "SNC4")) {
-    fprintf(stderr, "Failed to find a usable KNL cluster mode (%s)\n", hwdata.cluster_mode);
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc/linux: Failed to find a usable KNL cluster mode (%s)\n", hwdata.cluster_mode);
     goto error;
   }
   if (strcmp(hwdata.memory_mode, "Cache")
       && strcmp(hwdata.memory_mode, "Flat")
       && strcmp(hwdata.memory_mode, "Hybrid25")
       && strcmp(hwdata.memory_mode, "Hybrid50")) {
-    fprintf(stderr, "Failed to find a usable KNL memory mode (%s)\n", hwdata.memory_mode);
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc/linux: Failed to find a usable KNL memory mode (%s)\n", hwdata.memory_mode);
     goto error;
   }
 
@@ -3336,7 +3347,8 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
     if (!strcmp(hwdata.memory_mode, "Cache")) {
       /* Quadrant-Cache */
       if (nbnodes != 1) {
-	fprintf(stderr, "Found %u NUMA nodes instead of 1 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Found %u NUMA nodes instead of 1 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
       hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, 1, failednodes);
@@ -3344,7 +3356,8 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
     } else {
       /* Quadrant-Flat/Hybrid */
       if (nbnodes != 2) {
-	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
       if (!strcmp(hwdata.memory_mode, "Flat"))
@@ -3356,7 +3369,8 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
     if (!strcmp(hwdata.memory_mode, "Cache")) {
       /* SNC2-Cache */
       if (nbnodes != 2) {
-	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
       hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, 2, failednodes);
@@ -3366,11 +3380,13 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
       /* SNC2-Flat/Hybrid */
       unsigned ddr[2], mcdram[2];
       if (nbnodes != 4) {
-	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
       if (hwloc_linux_knl_identify_4nodes(distances, &dist, ddr, mcdram) < 0) {
-	fprintf(stderr, "Unexpected distance layout for mode %s-%s\n", hwdata.cluster_mode, hwdata.memory_mode);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "Uhwloc/linux: nexpected distance layout for mode %s-%s\n", hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
       if (!strcmp(hwdata.memory_mode, "Flat"))
@@ -3383,7 +3399,8 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
     if (!strcmp(hwdata.memory_mode, "Cache")) {
       /* SNC4-Cache */
       if (nbnodes != 4) {
-	fprintf(stderr, "Found %u NUMA nodes instead of 4 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Found %u NUMA nodes instead of 4 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
       hwloc_linux_knl_add_cluster(topology, nodes[0], NULL, &hwdata, mscache_as_l3, 4, failednodes);
@@ -3395,11 +3412,13 @@ hwloc_linux_knl_numa_quirk(struct hwloc_topology *topology,
       /* SNC4-Flat/Hybrid */
       unsigned ddr[4], mcdram[4];
       if (nbnodes != 8) {
-	fprintf(stderr, "Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Found %u NUMA nodes instead of 2 in mode %s-%s\n", nbnodes, hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
       if (hwloc_linux_knl_identify_8nodes(distances, &dist, ddr, mcdram) < 0) {
-	fprintf(stderr, "Unexpected distance layout for mode %s-%s\n", hwdata.cluster_mode, hwdata.memory_mode);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc/linux: Unexpected distance layout for mode %s-%s\n", hwdata.cluster_mode, hwdata.memory_mode);
 	goto error;
       }
       if (!strcmp(hwdata.memory_mode, "Flat"))
