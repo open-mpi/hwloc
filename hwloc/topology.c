@@ -3088,7 +3088,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
       tmpnbobjs = realloc(topology->level_nbobjects,
 			  2 * topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
       if (!tmplevels || !tmpnbobjs) {
-	fprintf(stderr, "hwloc failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
+        if (hwloc_hide_errors() < 2)
+          fprintf(stderr, "hwloc: failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
 
 	/* if one realloc succeeded, make sure the caller will free the new buffer */
 	if (tmplevels)
@@ -3470,15 +3471,18 @@ hwloc_discover(struct hwloc_topology *topology,
   hwloc_debug("%s", "\nRemoving empty objects\n");
   remove_empty(topology, &topology->levels[0][0]);
   if (!topology->levels[0][0]) {
-    fprintf(stderr, "Topology became empty, aborting!\n");
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc: Topology became empty, aborting!\n");
     return -1;
   }
   if (hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
-    fprintf(stderr, "Topology does not contain any PU, aborting!\n");
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc: Topology does not contain any PU, aborting!\n");
     return -1;
   }
   if (hwloc_bitmap_iszero(topology->levels[0][0]->nodeset)) {
-    fprintf(stderr, "Topology does not contain any NUMA node, aborting!\n");
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc: Topology does not contain any NUMA node, aborting!\n");
     return -1;
   }
   hwloc_debug_print_objects(0, topology->levels[0][0]);
