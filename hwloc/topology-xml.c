@@ -263,7 +263,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       } else if (domain > 0xffff) {
 	static int warned = 0;
 	if (!warned && hwloc_hide_errors() < 2)
-	  fprintf(stderr, "Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
+	  fprintf(stderr, "hwloc/xml: Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
 	warned = 1;
 	*ignore = 1;
 #endif
@@ -363,7 +363,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       } else if (domain > 0xffff) {
 	static int warned = 0;
 	if (!warned && hwloc_hide_errors() < 2)
-	  fprintf(stderr, "Ignoring bridge to PCI with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
+	  fprintf(stderr, "hwloc/xml: Ignoring bridge to PCI with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
 	warned = 1;
 	*ignore = 1;
 #endif

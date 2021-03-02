@@ -6428,7 +6428,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     if (domain > 0xffff) {
       static int warned = 0;
       if (!warned && hwloc_hide_errors() < 2)
-	fprintf(stderr, "Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
+	fprintf(stderr, "hwloc/linux: Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
       warned = 1;
       continue;
     }
