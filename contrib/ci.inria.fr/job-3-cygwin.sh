@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2020 Inria.  All rights reserved.
+# Copyright © 2012-2021 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -31,6 +31,7 @@ cd build
 make
 test x$NO_CHECK = xtrue || make check
 utils/lstopo/lstopo-no-graphics -v
+utils/lstopo/lstopo-no-graphics --windows-processor-groups
 utils/hwloc/hwloc-info --support
 cd ..
 

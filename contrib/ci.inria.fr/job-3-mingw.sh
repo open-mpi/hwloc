@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2020 Inria.  All rights reserved.
+# Copyright © 2012-2021 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -78,6 +78,7 @@ zip -r ../${winball}.zip ${winball}
 test -f ${winball}/lib/libhwloc.lib || false
 
 build/utils/lstopo/lstopo-no-graphics -v
+build/utils/lstopo/lstopo-no-graphics --windows-processor-groups
 build/utils/hwloc/hwloc-info --support
 
 cd ..

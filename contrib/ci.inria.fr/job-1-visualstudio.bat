@@ -1,5 +1,5 @@
 REM
-REM  Copyright © 2012-2020 Inria.  All rights reserved.
+REM  Copyright © 2012-2021 Inria.  All rights reserved.
 REM  See COPYING in top-level directory.
 REM
 
@@ -24,6 +24,9 @@ MSBuild /p:Configuration=Release /p:Platform=x64 hwloc.sln
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 x64\Release\lstopo-no-graphics.exe -v
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+x64\Release\lstopo-no-graphics.exe --windows-processor-groups
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 x64\Release\hwloc-info.exe --support
