@@ -482,7 +482,7 @@ hwloc_internal_cpukinds_rank(struct hwloc_topology *topology)
     else if (!strcmp(env, "no_forced_efficiency"))
       heuristics = HWLOC_CPUKINDS_RANKING_NO_FORCED_EFFICIENCY;
     else if (hwloc_hide_errors() < 2)
-      fprintf(stderr, "Failed to recognize HWLOC_CPUKINDS_RANKING value %s\n", env);
+      fprintf(stderr, "hwloc: Failed to recognize HWLOC_CPUKINDS_RANKING value %s\n", env);
   }
 
   if (heuristics == HWLOC_CPUKINDS_RANKING_DEFAULT
