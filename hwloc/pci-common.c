@@ -146,8 +146,9 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
 	  }
 	  free(buffer);
 	} else {
-	  fprintf(stderr, "Ignoring HWLOC_PCI_LOCALITY file `%s' too large (%lu bytes)\n",
-		  env, (unsigned long) st.st_size);
+          if (hwloc_hide_errors() < 2)
+            fprintf(stderr, "hwloc/pci: Ignoring HWLOC_PCI_LOCALITY file `%s' too large (%lu bytes)\n",
+                    env, (unsigned long) st.st_size);
 	}
       }
       close(fd);
@@ -489,7 +490,8 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
     if (env) {
       static int reported = 0;
       if (!topology->pci_has_forced_locality && !reported) {
-	fprintf(stderr, "Environment variable %s is deprecated, please use HWLOC_PCI_LOCALITY instead.\n", env);
+        if (!hwloc_hide_errors())
+          fprintf(stderr, "hwloc/pci: Environment variable %s is deprecated, please use HWLOC_PCI_LOCALITY instead.\n", env);
 	reported = 1;
       }
       if (*env) {
