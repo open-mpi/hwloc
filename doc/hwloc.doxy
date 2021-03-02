@@ -2414,6 +2414,7 @@ enabled for the current topology.
   hwloc/linux.h offers Linux-specific helpers that utilize some
   non-portable features of the Linux system, such as binding threads
   through their thread ID ("tid") or parsing kernel CPU mask files.
+  See \ref hwlocality_linux.
  </dd>
 
 <dt>Linux libnuma</dt>
@@ -2421,6 +2422,7 @@ enabled for the current topology.
   hwloc/linux-libnuma.h provides conversion helpers between hwloc CPU
   sets and libnuma-specific types, such as  bitmasks.  It
   helps you use libnuma memory-binding functions with hwloc CPU sets.
+  See \ref hwlocality_linux_libnuma_bitmask and \ref hwlocality_linux_libnuma_ulongs.
  </dd>
 
 <dt>Glibc</dt>
@@ -2428,6 +2430,7 @@ enabled for the current topology.
   hwloc/glibc-sched.h offers conversion routines between Glibc and
   hwloc CPU sets in order to use hwloc with functions such as
   sched_getaffinity() or pthread_attr_setaffinity_np().
+  See \ref hwlocality_glibc_sched.
  </dd>
 
 <dt>OpenFabrics Verbs</dt>
@@ -2437,6 +2440,7 @@ enabled for the current topology.
   processors near an OpenFabrics device.
   It may also return the corresponding OS device hwloc object for further
   information (if I/O device discovery is enabled).
+  See \ref hwlocality_openfabrics.
  </dd>
 
 <dt>OpenCL</dt>
@@ -2447,6 +2451,7 @@ enabled for the current topology.
   a <tt>cl_device_id</tt>.
   It may also return the corresponding OS device hwloc object for further
   information (if I/O device discovery is enabled).
+  See \ref hwlocality_opencl.
  </dd>
 
 <dt>AMD ROCm SMI Library (RSMI)</dt>
@@ -2455,6 +2460,7 @@ enabled for the current topology.
   It may return the list of processors near an AMD GPU.
   It may also return the corresponding OS device hwloc object for further
   information (if I/O device discovery is enabled).
+  See \ref hwlocality_rsmi.
  </dd>
 
 <dt>NVIDIA CUDA</dt>
@@ -2464,6 +2470,7 @@ enabled for the current topology.
   return the list of processors near NVIDIA GPUs.
   It may also return the corresponding OS device hwloc object for further
   information (if I/O device discovery is enabled).
+  See \ref hwlocality_cuda and \ref hwlocality_cudart.
  </dd>
 
 <dt>NVIDIA Management Library (NVML)</dt>
@@ -2473,6 +2480,7 @@ enabled for the current topology.
   a <tt>nvmlDevice_t</tt>.
   It may also return the corresponding OS device hwloc object for further
   information (if I/O device discovery is enabled).
+  See \ref hwlocality_nvml.
  </dd>
 
 <dt>NVIDIA displays</dt>
@@ -2483,6 +2491,7 @@ enabled for the current topology.
   hwloc object that corresponds to a display
   given as a name such as <em>:0.0</em>
   or given as a port/device pair (server/screen).
+  See \ref hwlocality_gl.
  </dd>
 
 <dt>Taskset command-line tool</dt>
@@ -2493,6 +2502,9 @@ enabled for the current topology.
   string in fixed-size subsets and separates them with commas).
   To ease interoperability, hwloc offers routines to convert
   hwloc CPU sets from/to taskset-specific string format.
+  See for instance hwloc_bitmap_taskset_snprintf() in
+  \ref hwlocality_bitmap().
+
   Most hwloc command-line tools also support the <tt>\--taskset</tt>
   option to manipulate taskset-specific strings.
  </dd>
