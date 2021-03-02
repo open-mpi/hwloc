@@ -439,6 +439,7 @@ hwloc_win_get_processor_groups(void)
     if (processor_group_cpusets[i])
       hwloc_bitmap_free(processor_group_cpusets[i]);
   }
+  free(processor_group_cpusets);
   processor_group_cpusets = NULL;
  error_with_procinfo:
   free(procInfoTotal);
@@ -455,6 +456,7 @@ hwloc_win_free_processor_groups(void)
     if (processor_group_cpusets[i])
       hwloc_bitmap_free(processor_group_cpusets[i]);
   }
+  free(processor_group_cpusets);
   processor_group_cpusets = NULL;
   nr_processor_groups = 1;
 }
