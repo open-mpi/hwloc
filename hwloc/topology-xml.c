@@ -2650,7 +2650,8 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 
       logical_to_v2array = malloc(nbobjs * sizeof(*logical_to_v2array));
       if (!logical_to_v2array) {
-	fprintf(stderr, "xml/export/v1: failed to allocated logical_to_v2array\n");
+        if (!hwloc_hide_errors())
+          fprintf(stderr, "hwloc/xml/export/v1: failed to allocated logical_to_v2array\n");
 	continue;
       }
 
