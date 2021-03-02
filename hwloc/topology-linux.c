@@ -3698,7 +3698,8 @@ list_sysfsnode(struct hwloc_topology *topology,
     char *sn, *tn;
     hwloc_bitmap_asprintf(&sn, nodeset);
     hwloc_bitmap_asprintf(&tn, topology->levels[0][0]->nodeset);
-    fprintf(stderr, "linux/sysfs: ignoring nodes because nodeset %s doesn't match existing nodeset %s.\n", tn, sn);
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc/linux: ignoring nodes because nodeset %s doesn't match existing nodeset %s.\n", tn, sn);
     free(sn);
     free(tn);
     hwloc_bitmap_free(nodeset);
@@ -3866,7 +3867,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 	failednodes++;
 	continue;
       }
-      fprintf(stderr, "node P#%u cpuset intersects with previous nodes, forcing its acceptance\n", osnode);
+      if (hwloc_hide_errors() < 2)
+        fprintf(stderr, "hwloc/linux: node P#%u cpuset intersects with previous nodes, forcing its acceptance\n", osnode);
     }
     hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
 
@@ -6307,8 +6309,9 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
     }
     /* couldn't read a single full string from that buffer, we're screwed */
     if (!boff) {
-      fprintf(stderr, "hwloc could read a DMI firmware entry #%u in %s\n",
-	      i, path);
+      if (hwloc_hide_errors() < 2)
+        fprintf(stderr, "hwloc/linux: hwloc could read a DMI firmware entry #%u in %s\n",
+                i, path);
       break;
     }
     /* reread buffer after previous string */
@@ -6761,7 +6764,8 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
       goto out_with_data;
     }
 #else
-    fprintf(stderr, "Cannot change Linux fsroot without openat() support.\n");
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "hwloc/linux: Cannot change fsroot without openat() support.\n");
     errno = ENOSYS;
     goto out_with_data;
 #endif
