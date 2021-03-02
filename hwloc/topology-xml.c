@@ -192,8 +192,9 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	  || lvalue == HWLOC_OBJ_CACHE_INSTRUCTION)
 	obj->attr->cache.type = (hwloc_obj_cache_type_t) lvalue;
       else
-	fprintf(stderr, "%s: ignoring invalid cache_type attribute %lu\n",
-		state->global->msgprefix, lvalue);
+        if (hwloc__xml_verbose())
+          fprintf(stderr, "%s: ignoring invalid cache_type attribute %lu\n",
+                  state->global->msgprefix, lvalue);
     } else if (hwloc__xml_verbose())
       fprintf(stderr, "%s: ignoring cache_type attribute for non-cache object type\n",
 	      state->global->msgprefix);
