@@ -427,7 +427,7 @@ hwloc_win_get_processor_groups(void)
        * maybe scale id to id*8/sizeof(ULONG_PTR) so that groups are 64-PU aligned?
        */
       hwloc_debug_2args_bitmap("group %u %d bitmap %s\n", id, procInfo->Group.GroupInfo[id].ActiveProcessorCount, set);
-      processor_group_cpusets[id] = hwloc_bitmap_dup(set);
+      processor_group_cpusets[id] = set;
     }
   }
 
