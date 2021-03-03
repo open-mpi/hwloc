@@ -409,7 +409,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --memattrs            Only show memory attributes\n");
   fprintf (where, "  --cpukinds            Only show CPU kinds\n");
 #ifdef HWLOC_WIN_SYS
-  fprintf (where, "  --processor-groups    Only show Windows processor groups\n");
+  fprintf (where, "  --windows-processor-groups    Only show Windows processor groups\n");
 #endif
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "  -C --cpuset-only      Only show the cpuset of each object\n");
@@ -815,7 +815,7 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[0], "--cpukinds")) {
         loutput.show_cpukinds_only = 1;
 #ifdef HWLOC_WIN_SYS
-      } else if (!strcmp (argv[0], "--processor-groups")) {
+      } else if (!strcmp (argv[0], "--windows-processor-groups")) {
         loutput.show_windows_processor_groups_only = 1;
 #endif
       } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
