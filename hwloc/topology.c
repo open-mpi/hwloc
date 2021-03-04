@@ -3762,7 +3762,18 @@ hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
     return -1;
   }
 
-  if (flags & ~(HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED|HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM|HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES|HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
+  if (flags & ~(HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED|HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM|HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES|HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT|HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING|HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if ((flags & (HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING|HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)) == HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING) {
+    /* RESTRICT_TO_CPUBINDING requires THISSYSTEM for binding */
+    errno = EINVAL;
+    return -1;
+  }
+  if ((flags & (HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING|HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)) == HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING) {
+    /* RESTRICT_TO_MEMBINDING requires THISSYSTEM for binding */
     errno = EINVAL;
     return -1;
   }
@@ -4048,6 +4059,31 @@ hwloc_topology_load (struct hwloc_topology *topology)
   hwloc_internal_memattrs_refresh(topology);
 
   topology->is_loaded = 1;
+
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING) {
+    /* FIXME: filter directly in backends during the discovery.
+     * Only x86 does it because binding may cause issues on Windows.
+     */
+    hwloc_bitmap_t set = hwloc_bitmap_alloc();
+    if (set) {
+      err = hwloc_get_cpubind(topology, set, HWLOC_CPUBIND_STRICT);
+      if (!err)
+        hwloc_topology_restrict(topology, set, 0);
+      hwloc_bitmap_free(set);
+    }
+  }
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING) {
+    /* FIXME: filter directly in backends during the discovery.
+     */
+    hwloc_bitmap_t set = hwloc_bitmap_alloc();
+    hwloc_membind_policy_t policy;
+    if (set) {
+      err = hwloc_get_membind(topology, set, &policy, HWLOC_MEMBIND_STRICT | HWLOC_MEMBIND_BYNODESET);
+      if (!err)
+        hwloc_topology_restrict(topology, set, HWLOC_RESTRICT_FLAG_BYNODESET);
+      hwloc_bitmap_free(set);
+    }
+  }
 
   if (topology->backend_phases & HWLOC_DISC_PHASE_TWEAK) {
     dstatus.phase = HWLOC_DISC_PHASE_TWEAK;

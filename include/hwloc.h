@@ -1966,7 +1966,51 @@ enum hwloc_topology_flags_e {
    * hwloc and machine support.
    *
    */
-  HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT = (1UL<<3)
+  HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT = (1UL<<3),
+
+  /** \brief Do not consider resources outside of the process CPU binding.
+   *
+   * If the binding of the process is limited to a subset of cores,
+   * ignore the other cores during discovery.
+   *
+   * The resulting topology is identical to what a call to hwloc_topology_restrict()
+   * would generate, but this flag also prevents hwloc from ever touching other
+   * resources during the discovery.
+   *
+   * This flag especially tells the x86 backend to never temporarily
+   * rebind a thread on any excluded core. This is useful on Windows
+   * because such temporary rebinding can change the process binding.
+   *
+   * If process CPU binding is not supported,
+   * the thread CPU binding is considered instead if supported,
+   * or the flag is ignored.
+   *
+   * This flag requires ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM as well
+   * since binding support is required.
+   */
+  HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING = (1UL<<4),
+
+  /** \brief Do not consider resources outside of the process memory binding.
+   *
+   * If the binding of the process is limited to a subset of NUMA nodes,
+   * ignore the other NUMA nodes during discovery.
+   *
+   * The resulting topology is identical to what a call to hwloc_topology_restrict()
+   * would generate, but this flag also prevents hwloc from ever touching other
+   * resources during the discovery.
+   *
+   * This flag is meant to be used together with
+   * ::HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING when both cores
+   * and NUMA nodes should be ignored outside of the process binding.
+   *
+   * If process memory binding is not supported,
+   * the thread memory binding is considered instead if supported,
+   * or the flag is ignored.
+   *
+   * This flag requires ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM as well
+   * since binding support is required.
+   */
+  HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING = (1UL<<5)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
