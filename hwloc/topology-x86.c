@@ -1260,7 +1260,8 @@ static int
 look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags,
 	   unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type,
 	   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags),
-	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags))
+	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags),
+           hwloc_bitmap_t restrict_set)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
   struct hwloc_topology *topology = backend->topology;
@@ -1280,6 +1281,12 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
 
   for (i = 0; i < nbprocs; i++) {
     struct cpuiddump *src_cpuiddump = NULL;
+
+    if (restrict_set && !hwloc_bitmap_isset(restrict_set, i)) {
+      /* skip this CPU outside of the binding mask */
+      continue;
+    }
+
     if (data->src_cpuiddump_path) {
       src_cpuiddump = cpuiddump_read(data->src_cpuiddump_path, i);
       if (!src_cpuiddump)
@@ -1413,6 +1420,7 @@ static
 int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
 {
   struct hwloc_x86_backend_data_s *data = backend->private_data;
+  struct hwloc_topology *topology = backend->topology;
   unsigned nbprocs = data->nbprocs;
   unsigned eax, ebx, ecx = 0, edx;
   unsigned i;
@@ -1428,8 +1436,20 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
   struct hwloc_topology_membind_support memsupport __hwloc_attribute_unused;
   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags) = NULL;
   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags) = NULL;
+  hwloc_bitmap_t restrict_set = NULL;
   struct cpuiddump *src_cpuiddump = NULL;
   int ret = -1;
+
+  /* check if binding works */
+  memset(&hooks, 0, sizeof(hooks));
+  support.membind = &memsupport;
+  /* We could just copy the main hooks (except in some corner cases),
+   * but the current overhead is negligible, so just always reget them.
+   */
+  hwloc_set_native_binding_hooks(&hooks, &support);
+  /* in theory, those are only needed if !data->src_cpuiddump_path || HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_BINDING
+   * but that's the vast majority of cases anyway, and the overhead is very small.
+   */
 
   if (data->src_cpuiddump_path) {
     /* Just read cpuid from the dump (implies !topology->is_thissystem by default) */
@@ -1443,13 +1463,6 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
      * we may still force use this backend when debugging with !thissystem.
      */
 
-    /* check if binding works */
-    memset(&hooks, 0, sizeof(hooks));
-    support.membind = &memsupport;
-    /* We could just copy the main hooks (except in some corner cases),
-     * but the current overhead is negligible, so just always reget them.
-     */
-    hwloc_set_native_binding_hooks(&hooks, &support);
     if (hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind) {
       get_cpubind = hooks.get_thisthread_cpubind;
       set_cpubind = hooks.set_thisthread_cpubind;
@@ -1466,6 +1479,20 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
 	goto out;
       get_cpubind = fake_get_cpubind;
       set_cpubind = fake_set_cpubind;
+    }
+  }
+
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING) {
+    restrict_set = hwloc_bitmap_alloc();
+    if (!restrict_set)
+      goto out;
+    if (hooks.get_thisproc_cpubind)
+      hooks.get_thisproc_cpubind(topology, restrict_set, 0);
+    else if (hooks.get_thisthread_cpubind)
+      hooks.get_thisthread_cpubind(topology, restrict_set, 0);
+    if (hwloc_bitmap_iszero(restrict_set)) {
+      hwloc_bitmap_free(restrict_set);
+      restrict_set = NULL;
     }
   }
 
@@ -1533,7 +1560,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
 
   ret = look_procs(backend, infos, flags,
 		   highest_cpuid, highest_ext_cpuid, features, cpuid_type,
-		   get_cpubind, set_cpubind);
+		   get_cpubind, set_cpubind, restrict_set);
   if (!ret)
     /* success, we're done */
     goto out_with_os_state;
@@ -1558,6 +1585,7 @@ out_with_infos:
   }
 
 out:
+  hwloc_bitmap_free(restrict_set);
   if (src_cpuiddump)
     cpuiddump_free(src_cpuiddump);
   return ret;

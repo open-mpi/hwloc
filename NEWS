@@ -28,6 +28,8 @@ Version 2.5.0
     - hwloc-annotate and lstopo have new distances-transform options.
   + hwloc_distances_add() is replaced with _add_create() followed by
     _add_values() and _add_commit(). See hwloc/distances.h for details.
+  + Add HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING and _MEMBINDING
+    to mitigate binding changes on Windows during the x86 discovery.
 * Backends
   + Add a levelzero backend for oneAPI L0 devices, exposed as OS devices
     of subtype "LevelZero" and name such as "ze0".
