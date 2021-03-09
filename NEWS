@@ -34,6 +34,8 @@ Version 2.5.0
   + lstopo now has a --windows-processor-groups option on Windows.
   + hwloc-ps now has a --short-name option to avoid long/truncated
     command path.
+  + hwloc-ps now has a --single-ancestor option to return a single
+    (possibly too large) object where a process is bound.
 
 
 Version 2.4.1

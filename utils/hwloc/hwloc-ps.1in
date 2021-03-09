@@ -55,6 +55,10 @@ Otherwise, show all threads inside each process where at least one
 thread is bound.
 This is currently only supported on Linux.
 .TP
+\fB\-\-single\-ancestor\fR
+When the object is bound to different objects,
+report their common ancestor (even if it may be larger than the actual binding).
+.TP
 \fB\-e\fR \fB\-\-get\-last\-cpu\-location\fR
 Report  the last processors where the process/thread ran.
 Note that the result may already be outdated when reported
@@ -128,6 +132,17 @@ If a process is bound, it appears in the default output:
 
     $ hwloc-ps
     4759	Core:0		myprogram
+
+If a process is bound on two cores of a larger package,
+the output will show these cores.
+Option \-\-single\-ancestor will rather return the package
+even if it is actually larger than the binding here
+(the process is not bound to Core:0 of Package:0):
+
+    $ hwloc-ps
+    4863        Core:1 Core:2   myprogram
+    $ hwloc-ps --single-ancestor
+    4863        Package:0       myprogram
 
 If a process is not bound but 3 of his 4 threads are bound,
 it only appears in the thread-aware output (or if explicitly selected):

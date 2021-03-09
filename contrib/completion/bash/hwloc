@@ -1,5 +1,5 @@
 #
-# Copyright © 2018-2020 Inria.  All rights reserved.
+# Copyright © 2018-2021 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -468,6 +468,7 @@ _hwloc_ps(){
 		   -l --logical
 		   -p --physical
 		   -c --cpuset
+		   --single-ancestor
 		   -t --threads
 		   -e --get-last-cpu-location
 		   --pid-cmd
