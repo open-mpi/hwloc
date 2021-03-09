@@ -104,7 +104,7 @@ openfabrics_verbs_LDADD = $(LDADD) -libverbs
 myriexpress_LDADD = $(LDADD) -lmyriexpress
 opencl_LDADD = $(LDADD) $(HWLOC_OPENCL_LIBS) $(HWLOC_OPENCL_LDFLAGS)
 cuda_LDADD = $(LDADD) -lcuda
-cudart_LDADD = $(LDADD) -lcuda -lcudart
+cudart_LDADD = $(LDADD) -lcudart
 nvml_LDADD = $(LDADD) -lnvidia-ml
 hwloc_bind_LDADD = $(LDADD)
 if HWLOC_HAVE_PTHREAD
