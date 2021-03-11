@@ -24,6 +24,10 @@ Version 2.5.0
   + Add hwloc_get_obj_with_same_locality() to convert between objects
     with same locality, for instance NUMA nodes and Packages,
     or OS devices within a PCI device.
+* Backends
+  + Expose NEC Vector Engine cards on Linux as OS devices of subtype
+    "VectorEngine" and name "ve0", etc.
+    Thanks to Anara Kozhokanova, Tim Cramer and Erich Focht for the help.
 * Build
   + Add --with-cuda-version=<version> or look at the CUDA_VERSION
     environment variable to find the appropriate CUDA pkg-config files.

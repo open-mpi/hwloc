@@ -6109,6 +6109,117 @@ hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend, unsigned os
   return 0;
 }
 
+static void
+hwloc_linuxfs_ve_class_fillinfos(int root_fd,
+                                 struct hwloc_obj *obj, const char *osdevpath)
+{
+  char path[296]; /* osdevpath <= 256 */
+  char tmp[64];
+  unsigned val;
+  obj->subtype = strdup("VectorEngine");
+
+  snprintf(path, sizeof(path), "%s/model", osdevpath); /* in GB */
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    char *end = strchr(tmp, '\n');
+    if (end)
+      *end = '\0';
+    hwloc_obj_add_info(obj, "VectorEngineModel", tmp);
+  }
+
+  snprintf(path, sizeof(path), "%s/serial", osdevpath); /* in GB */
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    char *end = strchr(tmp, '\n');
+    if (end)
+      *end = '\0';
+    hwloc_obj_add_info(obj, "VectorEngineSerialNumber", tmp);
+  }
+
+  snprintf(path, sizeof(path), "%s/partitioning_mode", osdevpath); /* in GB */
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    if (atoi(tmp) > 0)
+      hwloc_obj_add_info(obj, "VectorEngineNUMAPartitioned", "1");
+  }
+
+  snprintf(path, sizeof(path), "%s/num_of_core", osdevpath);
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    size_t len;
+    len = strspn(tmp, "0123456789");
+    tmp[len] = '\0';
+    hwloc_obj_add_info(obj, "VectorEngineCores", tmp);
+  }
+
+  snprintf(path, sizeof(path), "%s/memory_size", osdevpath); /* in GB */
+  if (!hwloc_read_path_as_uint(path, &val, root_fd)) {
+    snprintf(tmp, sizeof(tmp), "%llu", ((unsigned long long) val) * 1024*1024); /* convert from GB to kB */
+    hwloc_obj_add_info(obj, "VectorEngineMemorySize", tmp);
+  }
+  snprintf(path, sizeof(path), "%s/cache_llc", osdevpath); /* in kB */
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    size_t len;
+    len = strspn(tmp, "0123456789");
+    tmp[len] = '\0';
+    hwloc_obj_add_info(obj, "VectorEngineLLCSize", tmp);
+  }
+  snprintf(path, sizeof(path), "%s/cache_l2", osdevpath); /* in kB */
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    size_t len;
+    len = strspn(tmp, "0123456789");
+    tmp[len] = '\0';
+    hwloc_obj_add_info(obj, "VectorEngineL2Size", tmp);
+  }
+  snprintf(path, sizeof(path), "%s/cache_l1d", osdevpath); /* in kB */
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    size_t len;
+    len = strspn(tmp, "0123456789");
+    tmp[len] = '\0';
+    hwloc_obj_add_info(obj, "VectorEngineL1dSize", tmp);
+  }
+  snprintf(path, sizeof(path), "%s/cache_l1i", osdevpath); /* in kB */
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    size_t len;
+    len = strspn(tmp, "0123456789");
+    tmp[len] = '\0';
+    hwloc_obj_add_info(obj, "VectorEngineL1iSize", tmp);
+  }
+}
+
+static int
+hwloc_linuxfs_lookup_ve_class(struct hwloc_backend *backend, unsigned osdev_flags)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/ve", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    hwloc_obj_t obj, parent;
+    int err;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+
+    err = snprintf(path, sizeof(path), "/sys/class/ve/%s", dirent->d_name);
+    if ((size_t) err > sizeof(path))
+      continue;
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    if (!parent)
+      continue;
+
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_COPROC, dirent->d_name);
+
+    hwloc_linuxfs_ve_class_fillinfos(root_fd, obj, path);
+  }
+
+  closedir(dir);
+
+  return 0;
+}
+
 static int
 hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
@@ -6666,6 +6777,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     hwloc_linuxfs_lookup_dax_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
+    hwloc_linuxfs_lookup_ve_class(backend, osdev_flags);
     if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
       hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
       hwloc_linuxfs_lookup_dma_class(backend, osdev_flags);
