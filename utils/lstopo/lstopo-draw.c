@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1049,7 +1049,23 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 		     mb >= 10240 ? "%llu GB" : "%llu MB",
 		     mb >= 10240 ? mb/1024 : mb);
 	  }
-	}
+	} else if (!strcmp(obj->subtype, "VectorEngine")) {
+          /* NEC Vector Engine */
+          const char *value;
+          value = hwloc_obj_get_info_by_name(obj, "VectorEngineCores");
+          if (value) {
+            unsigned long long cu = strtoull(value, NULL, 10);
+            snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+                     "%llu cores", cu);
+          }
+          value = hwloc_obj_get_info_by_name(obj, "VectorEngineMemorySize");
+          if (value) {
+            unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+            snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+                     mb >= 10240 ? "%llu GB" : "%llu MB",
+                     mb >= 10240 ? mb/1024 : mb);
+          }
+        }
 
       } else if (HWLOC_OBJ_OSDEV_BLOCK == obj->attr->osdev.type) {
 	/* Block */
