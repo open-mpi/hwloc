@@ -1497,6 +1497,7 @@ components when I/O discovery is enabled and supported.
   (OpenCL component)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   (CUDA component, using the NVIDIA CUDA Library)</li>
+ </ul>
 </li>
 <li>DMA engine channel (::HWLOC_OBJ_OSDEV_DMA)
  <ul>
