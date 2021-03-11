@@ -1508,6 +1508,8 @@ components when I/O discovery is enabled and supported.
   ("OpenCL" subtype, from the  OpenCL component)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   ("CUDA" subtype, from the CUDA component, using the NVIDIA CUDA Library)</li>
+ <li><em>ve0</em> for the first NEC Vector Engine device
+  ("VectorEngine" subtype, from the Linux component)</li>
  </ul>
 </li>
 <li>DMA engine channel (::HWLOC_OBJ_OSDEV_DMA)
@@ -1938,6 +1940,22 @@ and SectorSize (in bytes).
  multiprocessor, the global memory size, the (global) L2 cache size,
  and size of the shared memory in each multiprocessor of a CUDA device.
  Sizes are in kB.
+</dd>
+<dt>VectorEngineModel, VectorEngineSerialNumber</dt>
+<dd>
+ The model and serial number of a VectorEngine device.
+</dd>
+<dt>VectorEngineCores, VectorEngineMemorySize, VectorEngineLLCSize,</dt>
+<dt>VectorEngineL2Size, VectorEngineL1dSize, VectorEngineL1iSize</dt>
+<dd>
+ The number of cores, memory size, and the sizes of the (global)
+ last level cache and of L2, L1d and L1i caches of a VectorEngine device.
+ Sizes are in kB.
+</dd>
+<dt>VectorEngineNUMAPartitioned</dt>
+<dd>
+ If this attribute exists, the VectorEngine device is configured in
+ partitioned mode with multiple NUMA nodes.
 </dd>
 <dt>Address, Port (Network interface OS devices)</dt>
 <dd>The MAC address and the port number of a software network
