@@ -25,6 +25,7 @@ _lstopo() {
 		   --distances
 		   --memattrs
 		   --cpukinds
+		   --windows-processor-groups
 		   -c --cpuset
 		   -C --cpuset-only
 		   --taskset
