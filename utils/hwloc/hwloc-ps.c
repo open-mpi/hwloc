@@ -62,10 +62,10 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -e --get-last-cpu-location\n");
   fprintf (where, "                     Retrieve the last processors where the tasks ran\n");
   fprintf (where, "  --pid-cmd <cmd>    Append the output of <cmd> <pid> to each PID line\n");
+  fprintf (where, "  --short-name       Show only the process short name instead of the path\n");
   fprintf (where, "  --disallowed       Include objects disallowed by administrative limitations\n");
   fprintf (where, "  --json-server      Run as a JSON server\n");
   fprintf (where, "  --json-port <n>    Use port <n> for JSON server (default is %d)\n", JSON_PORT);
-  fprintf (where, "  --short-name       Show only the process short name instead of the path\n");
   fprintf (where, "  -v --verbose       Increase verbosity\n");
 }
 

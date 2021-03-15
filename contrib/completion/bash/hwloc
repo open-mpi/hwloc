@@ -466,6 +466,7 @@ _hwloc_ps(){
     local OPTIONS=(-a
 		   --pid
 		   --name
+		   --uid
 		   -l --logical
 		   -p --physical
 		   -c --cpuset
@@ -473,7 +474,7 @@ _hwloc_ps(){
 		   -t --threads
 		   -e --get-last-cpu-location
 		   --pid-cmd
-		   --uid
+		   --short-name
 		   --disallowed --whole-system
 		   --json-server
 		   --json-port
