@@ -1483,20 +1483,20 @@ components when I/O discovery is enabled and supported.
 <li>GPUs (::HWLOC_OBJ_OSDEV_GPU)
  <ul>
  <li><em>rsmi0</em> for the first RSMI device
-  (RSMI component, using the AMD ROCm SMI library)</li>
+  ("RSMI" subtype, from the RSMI component, using the AMD ROCm SMI library)</li>
  <li><em>nvml0</em> for the first NVML device
-  (NVML component, using the NVIDIA Management Library)</li>
+  ("NVML" subtype, from the NVML component, using the NVIDIA Management Library)</li>
  <li><em>:0.0</em> for the first display
-  (GL component, using the NV-CONTROL X extension library, NVCtrl)</li>
+  ("Display" subtype, from the GL component, using the NV-CONTROL X extension library, NVCtrl)</li>
  </ul>
 </li>
 <li>Co-Processors (::HWLOC_OBJ_OSDEV_COPROC)
  <ul>
  <li><em>opencl0d0</em> for the first device of the first OpenCL platform,
   <em>opencl1d3</em> for the fourth device of the second OpenCL platform
-  (OpenCL component)</li>
+  ("OpenCL" subtype, from the  OpenCL component)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
-  (CUDA component, using the NVIDIA CUDA Library)</li>
+  ("CUDA" subtype, from the CUDA component, using the NVIDIA CUDA Library)</li>
  </ul>
 </li>
 <li>DMA engine channel (::HWLOC_OBJ_OSDEV_DMA)

@@ -219,6 +219,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
     snprintf(buffer, sizeof(buffer), "rsmi%u", i);
     osdev->name = strdup(buffer);
+    osdev->subtype = strdup("RSMI");
     osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
 
