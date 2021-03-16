@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012-2013 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2019 Inria.  All rights reserved.
+ * Copyright © 2012-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -121,6 +121,7 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       osdev->name = strdup(name);
+      osdev->subtype = strdup("Display");
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
       hwloc_obj_add_info(osdev, "Backend", "GL");
       hwloc_obj_add_info(osdev, "GPUVendor", "NVIDIA Corporation");
