@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2020 Inria.  All rights reserved.
+ * Copyright © 2010-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -45,6 +45,10 @@ struct hwloc_distances_s {
 				 * These objects are not in any particular order,
 				 * see hwloc_distances_obj_index() and hwloc_distances_obj_pair_values()
 				 * for easy ways to find objects in this array and their corresponding values.
+                                 *
+                                 * Callers are allowed to replace objects in this array with others
+                                 * with same locality. For instance, if there is a single NUMA node per Package,
+                                 * hwloc_get_obj_with_same_locality() may be using convert between them.
 				 */
   unsigned long kind;		/**< \brief OR'ed set of ::hwloc_distances_kind_e. */
   hwloc_uint64_t *values;	/**< \brief Matrix of distances between objects, stored as a one-dimension array.

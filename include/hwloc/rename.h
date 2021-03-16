@@ -356,6 +356,7 @@ extern "C" {
 #define hwloc_get_closest_objs HWLOC_NAME(get_closest_objs)
 #define hwloc_get_obj_below_by_type HWLOC_NAME(get_obj_below_by_type)
 #define hwloc_get_obj_below_array_by_type HWLOC_NAME(get_obj_below_array_by_type)
+#define hwloc_get_obj_with_same_locality HWLOC_NAME(get_obj_with_same_locality)
 #define hwloc_distrib_flags_e HWLOC_NAME(distrib_flags_e)
 #define HWLOC_DISTRIB_FLAG_REVERSE HWLOC_NAME_CAPS(DISTRIB_FLAG_REVERSE)
 #define hwloc_distrib HWLOC_NAME(distrib)
