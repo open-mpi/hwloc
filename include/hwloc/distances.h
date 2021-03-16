@@ -48,7 +48,7 @@ struct hwloc_distances_s {
                                  *
                                  * Callers are allowed to replace objects in this array with others
                                  * with same locality. For instance, if there is a single NUMA node per Package,
-                                 * hwloc_get_obj_with_same_locality() may be using convert between them.
+                                 * hwloc_get_obj_with_same_locality() may be used to convert between them.
 				 */
   unsigned long kind;		/**< \brief OR'ed set of ::hwloc_distances_kind_e. */
   hwloc_uint64_t *values;	/**< \brief Matrix of distances between objects, stored as a one-dimension array.
