@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -341,6 +341,10 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
     if (obj->type == HWLOC_OBJ_OS_DEVICE)
       len = snprintf(tmp, MATRIX_ITEM_SIZE_MAX,
                      "%s", obj->name);
+    else if (obj->type == HWLOC_OBJ_PCI_DEVICE)
+      len = snprintf(tmp, MATRIX_ITEM_SIZE_MAX,
+                     "%04x:%02x:%02x.%01x",
+                     obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
     else if (show_types)
       len = snprintf(tmp, MATRIX_ITEM_SIZE_MAX,
                      "%s:%d", hwloc_obj_type_string(obj->type), (int) index);
