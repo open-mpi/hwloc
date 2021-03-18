@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Inria.  All rights reserved.
+ * Copyright © 2013-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -26,6 +26,7 @@ cl_int clGetDeviceIDs(cl_platform_id, cl_device_type, cl_uint, cl_device_id *, c
 cl_int clGetDeviceInfo(cl_device_id, cl_device_info, size_t, void *, size_t *);
 cl_int clGetPlatformInfo(cl_platform_id, cl_platform_info, size_t, void *, size_t *);
 
+#define CL_DEVICE_TYPE_DEFAULT                      (1 << 0)
 #define CL_DEVICE_TYPE_CPU                          (1 << 1)
 #define CL_DEVICE_TYPE_GPU                          (1 << 2)
 #define CL_DEVICE_TYPE_ACCELERATOR                  (1 << 3)
