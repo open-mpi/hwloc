@@ -1497,6 +1497,8 @@ components when I/O discovery is enabled and supported.
   ("NVML" subtype, from the NVML component, using the NVIDIA Management Library)</li>
  <li><em>:0.0</em> for the first display
   ("Display" subtype, from the GL component, using the NV-CONTROL X extension library, NVCtrl)</li>
+ <li><em>card0</em> and <em>renderD128</em> for DRM device files
+  (from the Linux component, filtered-out by default because considered non-important)</li>
  </ul>
 </li>
 <li>Co-Processors (::HWLOC_OBJ_OSDEV_COPROC)
