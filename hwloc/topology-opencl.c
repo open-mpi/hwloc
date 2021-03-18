@@ -109,8 +109,11 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
       hwloc_debug("This is opencl%ud%u\n", j, i);
 
       clGetDeviceInfo(device_ids[i], CL_DEVICE_TYPE, sizeof(type), &type, NULL);
+      /* type is a bitset, remove DEFAULT, we don't care about it */
+      type &= ~CL_DEVICE_TYPE_DEFAULT;
+
+      /* we don't want CPU-only opencl devices */
       if (type == CL_DEVICE_TYPE_CPU)
-	/* we don't want CPU opencl devices */
 	continue;
 
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
@@ -122,12 +125,13 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
       osdev->subtype = strdup("OpenCL");
       hwloc_obj_add_info(osdev, "Backend", "OpenCL");
 
-      if (type == CL_DEVICE_TYPE_GPU)
+      /* in theory, we should handle cases such GPU|Accelerator|CPU for strange platforms/devices */
+      if (type & CL_DEVICE_TYPE_GPU)
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "GPU");
-      else if (type == CL_DEVICE_TYPE_ACCELERATOR)
+      else if (type & CL_DEVICE_TYPE_ACCELERATOR)
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Accelerator");
-      else if (type == HWLOC_CL_DEVICE_TYPE_CUSTOM)
-	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Custom");
+      else if (type & HWLOC_CL_DEVICE_TYPE_CUSTOM)
+	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Custom"); /* Custom cannot be combined with any other type */
       else
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Unknown");
 
