@@ -43,6 +43,7 @@ sysfs_outputs = \
 		16em64t-4s2c2t.xml.output \
 		16ia64-8n2s.output \
 		32em64t-2n8c+1mic.output \
+		32intel64-2p8co2t+8ve.output \
 		40intel64-2g2n4c+pci.output \
 		40intel64-4n10c+pci-conflicts.output \
 		48amd64-4d2n6c-sparse.output \
@@ -110,6 +111,7 @@ sysfs_tarballs = \
 		16em64t-4s2c2t.xml.source \
 		16ia64-8n2s.tar.bz2 \
 		32em64t-2n8c+1mic.tar.bz2 \
+		32intel64-2p8co2t+8ve.tar.bz2 \
 		40intel64-2g2n4c+pci.tar.bz2 \
 		40intel64-4n10c+pci-conflicts.tar.bz2 \
 		48amd64-4d2n6c-sparse.tar.bz2 \
