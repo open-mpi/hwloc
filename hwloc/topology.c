@@ -52,6 +52,42 @@
 #include <windows.h>
 #endif
 
+/*
+ * Define ZES_ENABLE_SYSMAN=1 early so that the LevelZero backend gets Sysman enabled.
+ * Use the constructor if supported and/or the Windows DllMain callback.
+ * Do it in the main hwloc library instead of the levelzero component because
+ * the latter could be loaded later as a plugin.
+ *
+ * L0 seems to be using getenv() to check this variable on Windows
+ * (at least in the Intel Compute-Runtime of March 2021),
+ * so use putenv() to set the variable.
+ *
+ * For the record, Get/SetEnvironmentVariable() is not exactly the same as getenv/putenv():
+ * - getenv() doesn't see what was set with SetEnvironmentVariable()
+ * - GetEnvironmentVariable() doesn't see putenv() in cygwin (while it does in MSVC and MinGW).
+ * Hence, if L0 ever switches from getenv() to GetEnvironmentVariable(),
+ * it will break in cygwin, we'll have to use both putenv() and SetEnvironmentVariable().
+ * Hopefully L0 will be provide a way to enable Sysman without env vars before it happens.
+ */
+#ifdef HWLOC_HAVE_ATTRIBUTE_CONSTRUCTOR
+static void hwloc_constructor(void) __attribute__((constructor));
+static void hwloc_constructor(void)
+{
+  if (!getenv("ZES_ENABLE_SYSMAN"))
+    putenv((char *) "ZES_ENABLE_SYSMAN=1");
+}
+#endif
+#ifdef HWLOC_WIN_SYS
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
+{
+  if (fdwReason == DLL_PROCESS_ATTACH) {
+    if (!getenv("ZES_ENABLE_SYSMAN"))
+      putenv((char *) "ZES_ENABLE_SYSMAN=1");
+  }
+  return TRUE;
+}
+#endif
+
 unsigned hwloc_get_api_version(void)
 {
   return HWLOC_API_VERSION;
