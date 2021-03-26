@@ -10,7 +10,7 @@
 # Copyright © 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
 # and renamed for hwloc:
-# Copyright © 2009 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2009 Université Bordeaux
 # Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -217,6 +217,7 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
     hwloc_cv___attribute__cold=0
     hwloc_cv___attribute__const=0
     hwloc_cv___attribute__deprecated=0
+    hwloc_cv___attribute__constructor=0
     hwloc_cv___attribute__format=0
     hwloc_cv___attribute__hot=0
     hwloc_cv___attribute__malloc=0
@@ -267,6 +268,14 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
         [
          int foo(int arg1, int arg2) __attribute__ ((__deprecated__));
          int foo(int arg1, int arg2) { return arg1 * arg2 + arg1; }
+        ],
+        [],
+        [])
+
+    _HWLOC_CHECK_SPECIFIC_ATTRIBUTE([constructor],
+        [
+         void foo(void) __attribute__ ((__constructor__));
+         void foo(void) { return; }
         ],
         [],
         [])
@@ -504,6 +513,8 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
                      [Whether your compiler has __attribute__ const or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_DEPRECATED, [$hwloc_cv___attribute__deprecated],
                      [Whether your compiler has __attribute__ deprecated or not])
+  AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_CONSTRUCTOR, [$hwloc_cv___attribute__constructor],
+                     [Whether your compiler has __attribute__ constructor or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_FORMAT, [$hwloc_cv___attribute__format],
                      [Whether your compiler has __attribute__ format or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_HOT, [$hwloc_cv___attribute__hot],
