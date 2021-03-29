@@ -1941,18 +1941,18 @@ and SectorSize (in bytes).
  and size of the shared memory in each multiprocessor of a CUDA device.
  Sizes are in kB.
 </dd>
-<dt>VectorEngineModel, VectorEngineSerialNumber</dt>
+<dt>VectorEngineModel, VectorEngineSerialNumber (VectorEngine OS devices)</dt>
 <dd>
  The model and serial number of a VectorEngine device.
 </dd>
 <dt>VectorEngineCores, VectorEngineMemorySize, VectorEngineLLCSize,</dt>
-<dt>VectorEngineL2Size, VectorEngineL1dSize, VectorEngineL1iSize</dt>
+<dt>VectorEngineL2Size, VectorEngineL1dSize, VectorEngineL1iSize (VectorEngine OS devices)</dt>
 <dd>
  The number of cores, memory size, and the sizes of the (global)
  last level cache and of L2, L1d and L1i caches of a VectorEngine device.
  Sizes are in kB.
 </dd>
-<dt>VectorEngineNUMAPartitioned</dt>
+<dt>VectorEngineNUMAPartitioned (VectorEngine OS devices)</dt>
 <dd>
  If this attribute exists, the VectorEngine device is configured in
  partitioned mode with multiple NUMA nodes.
