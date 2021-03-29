@@ -27,6 +27,8 @@ Version 2.5.0
 * Backends
   + Add a levelzero backend for oneAPI L0 devices, exposed as OS devices
     of subtype "LevelZero" and name such as "ze0".
+    - Add hwloc/levelzero.h for interoperability between converting
+      between L0 API devices and hwloc cpusets or OS devices.
   + Expose NEC Vector Engine cards on Linux as OS devices of subtype
     "VectorEngine" and name "ve0", etc.
     Thanks to Anara Kozhokanova, Tim Cramer and Erich Focht for the help.

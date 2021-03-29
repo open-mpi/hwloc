@@ -2507,6 +2507,15 @@ enabled for the current topology.
   See \ref hwlocality_opencl.
  </dd>
 
+<dt>oneAPI Level Zero</dt>
+ <dd>
+  hwloc/levelzero.h enables interoperability with the oneAPI Level Zero interface.
+  It may return the list of processors near an accelerator or GPU.
+  It may also return the corresponding OS device hwloc object for further
+  information (if I/O device discovery is enabled).
+  See \ref hwlocality_levelzero.
+ </dd>
+
 <dt>AMD ROCm SMI Library (RSMI)</dt>
  <dd>
   hwloc/rsmi.h enables interoperability with the AMD ROCm SMI interface.
