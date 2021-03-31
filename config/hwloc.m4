@@ -1188,6 +1188,34 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
+    # LevelZero support
+    hwloc_levelzero_happy=no
+    if test "x$enable_io" != xno && test "x$enable_levelzero" != "xno"; then
+      hwloc_levelzero_happy=yes
+      AC_CHECK_HEADERS([ze_api.h], [
+        AC_CHECK_LIB([ze_loader], [zeInit], [
+          AC_CHECK_HEADERS([zes_api.h], [
+            AC_CHECK_LIB([ze_loader], [zesDevicePciGetProperties], [HWLOC_LEVELZERO_LIBS="-lze_loader"], [hwloc_levelzero_happy=no])
+          ], [hwloc_levelzero_happy=no])
+        ], [hwloc_levelzero_happy=no])
+      ], [hwloc_levelzero_happy=no])
+    fi
+    AC_SUBST(HWLOC_LEVELZERO_LIBS)
+    # If we asked for LevelZero support but couldn't deliver, fail
+    AS_IF([test "$enable_levelzero" = "yes" -a "$hwloc_levelzero_happy" = "no"],
+      [AC_MSG_WARN([Specified --enable-levelzero switch, but could not])
+      AC_MSG_WARN([find appropriate support])
+      AC_MSG_ERROR([Cannot continue])])
+    if test "x$hwloc_levelzero_happy" = "xyes"; then
+      AC_DEFINE([HWLOC_HAVE_LEVELZERO], [1], [Define to 1 if you have the `LevelZero' library.])
+      AC_SUBST([HWLOC_HAVE_LEVELZERO], [1])
+      hwloc_components="$hwloc_components levelzero"
+      hwloc_levelzero_component_maybeplugin=1
+    else
+      AC_SUBST([HWLOC_HAVE_LEVELZERO], [0])
+    fi
+    # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
+
     # GL Support
     hwloc_gl_happy=no
     if test "x$enable_io" != xno && test "x$enable_gl" != "xno"; then
@@ -1455,6 +1483,11 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
            HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_RSMI_LDFLAGS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_RSMI_CPPFLAGS $HWLOC_RSMI_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_RSMI_REQUIRES $HWLOC_REQUIRES"])
+    AS_IF([test "$hwloc_levelzero_component" = "static"],
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LEVELZERO_LIBS"
+           HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_LEVELZERO_LDFLAGS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LEVELZERO_CPPFLAGS $HWLOC_LEVELZERO_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_LEVELZERO_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_gl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_GL_LIBS"
            HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_GL_LDFLAGS"
@@ -1550,6 +1583,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_OPENCL], [test "$hwloc_opencl_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_RSMI], [test "$hwloc_rsmi_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_LEVELZERO], [test "$hwloc_levelzero_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
         AM_CONDITIONAL([HWLOC_HAVE_USER32], [test "x$hwloc_have_user32" = "xyes"])
 
@@ -1585,6 +1619,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_CUDA_BUILD_STATIC], [test "x$hwloc_cuda_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_NVML_BUILD_STATIC], [test "x$hwloc_nvml_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_RSMI_BUILD_STATIC], [test "x$hwloc_rsmi_component" = "xstatic"])
+        AM_CONDITIONAL([HWLOC_LEVELZERO_BUILD_STATIC], [test "x$hwloc_levelzero_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_GL_BUILD_STATIC], [test "x$hwloc_gl_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 

@@ -570,6 +570,11 @@ extern "C" {
 #define hwloc_rsmi_get_device_osdev HWLOC_NAME(rsmi_get_device_osdev)
 #define hwloc_rsmi_get_device_osdev_by_index HWLOC_NAME(rsmi_get_device_osdev_by_index)
 
+/* levelzero.h */
+
+#define hwloc_levelzero_get_device_cpuset HWLOC_NAME(levelzero_get_device_cpuset)
+#define hwloc_levelzero_get_device_osdev HWLOC_NAME(levelzero_get_device_osdev)
+
 /* gl.h */
 
 #define hwloc_gl_get_display_osdev_by_port_device HWLOC_NAME(gl_get_display_osdev_by_port_device)
@@ -739,6 +744,7 @@ extern "C" {
 
 #define hwloc_cuda_component HWLOC_NAME(cuda_component)
 #define hwloc_gl_component HWLOC_NAME(gl_component)
+#define hwloc_levelzero_component HWLOC_NAME(levelzero_component)
 #define hwloc_nvml_component HWLOC_NAME(nvml_component)
 #define hwloc_rsmi_component HWLOC_NAME(rsmi_component)
 #define hwloc_opencl_component HWLOC_NAME(opencl_component)

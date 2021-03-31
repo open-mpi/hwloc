@@ -70,7 +70,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # I/O?
     AC_ARG_ENABLE([io],
                   AS_HELP_STRING([--disable-io],
-                                 [Disable I/O discovery build entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, RSMI, GL) instead of only disabling it at runtime by default]))
+                                 [Disable I/O discovery build entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, RSMI, LevelZero, GL) instead of only disabling it at runtime by default]))
 
     # PCI?
     AC_ARG_ENABLE([pci],
@@ -110,6 +110,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     AC_ARG_ENABLE([rsmi],
                   AS_HELP_STRING([--disable-rsmi],
                                  [Disable the ROCm SMI device discovery]))
+
+    # LevelZero
+    AC_ARG_ENABLE([levelzero],
+                  AS_HELP_STRING([--disable-levelzero],
+                                 [Disable the oneAPI Level Zero device discovery]))
 
     # GL/Display
     AC_ARG_ENABLE([gl],
@@ -546,6 +551,7 @@ int foo(void) {
 	hwloc_config_prefix[tests/hwloc/ports/topology-cuda.c]:hwloc_config_prefix[hwloc/topology-cuda.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-nvml.c]:hwloc_config_prefix[hwloc/topology-nvml.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-rsmi.c]:hwloc_config_prefix[hwloc/topology-rsmi.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-levelzero.c]:hwloc_config_prefix[hwloc/topology-levelzero.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-gl.c]:hwloc_config_prefix[hwloc/topology-gl.c]
 	hwloc_config_prefix[tests/hwloc/ports/lstopo-windows.c]:hwloc_config_prefix[utils/lstopo/lstopo-windows.c]
         hwloc_config_prefix[tests/hwloc/ports/lstopo-android.c]:hwloc_config_prefix[utils/lstopo/lstopo-android.c])

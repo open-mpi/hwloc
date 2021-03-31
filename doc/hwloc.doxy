@@ -151,6 +151,10 @@ The hwloc core may also benefit from the following development packages:
   The relevant development package is usually <tt>rocm-smi-lib64</tt>
   or <tt>librocm-smi-dev</tt>.
 </li>
+<li>the oneAPI Level Zero library.
+  The relevant development package is usually <tt>level-zero-dev</tt>
+  or <tt>level-zero-devel</tt>.
+</li>
 <li>libxml2 for full XML import/export support (otherwise, the
     internal minimalistic parser will only be able to import
     XML files that were exported by the same hwloc release).
@@ -1493,6 +1497,8 @@ components when I/O discovery is enabled and supported.
  <ul>
  <li><em>rsmi0</em> for the first RSMI device
   ("RSMI" subtype, from the RSMI component, using the AMD ROCm SMI library)</li>
+ <li><em>ze0</em> for the first Level Zero device
+  ("LevelZero" subtype, from the levelzero component, using the oneAPI Level Zero library)</li>
  <li><em>nvml0</em> for the first NVML device
   ("NVML" subtype, from the NVML component, using the NVIDIA Management Library)</li>
  <li><em>:0.0</em> for the first display
@@ -1917,6 +1923,16 @@ and SectorSize (in bytes).
 </dd>
 <dt>OpenCLComputeUnits, OpenCLGlobalMemorySize (OpenCL OS devices)</dt>
 <dd>The number of compute units and global memory size (in kB) of an OpenCL device.
+</dd>
+<dt>LevelZeroVendor, LevelZeroModel, LevelZeroBrand,</dt>
+<dt>LevelZeroSerialNumber, LevelZeroBoardNumber (LevelZero OS devices)</dt>
+<dd>
+ The name of the vendor, device mode, brand of a Level Zero device,
+ and its serial and board numbers.
+</dd>
+<dt>LevelZeroDriverIndex, LevelZeroDriverDeviceIndex (LevelZero OS devices)</dt>
+<dd>The index of the Level Zero driver within the list of drivers,
+ and the index of the device within the list of devices managed by this driver.
 </dd>
 <dt>AMDUUID, AMDSerial (RSMI GPU OS devices)</dt>
 <dd>The UUID and serial number of AMD GPUs.
@@ -2491,6 +2507,15 @@ enabled for the current topology.
   See \ref hwlocality_opencl.
  </dd>
 
+<dt>oneAPI Level Zero</dt>
+ <dd>
+  hwloc/levelzero.h enables interoperability with the oneAPI Level Zero interface.
+  It may return the list of processors near an accelerator or GPU.
+  It may also return the corresponding OS device hwloc object for further
+  information (if I/O device discovery is enabled).
+  See \ref hwlocality_levelzero.
+ </dd>
+
 <dt>AMD ROCm SMI Library (RSMI)</dt>
  <dd>
   hwloc/rsmi.h enables interoperability with the AMD ROCm SMI interface.
@@ -2870,6 +2895,12 @@ environment variable (see \ref envvar).
 <dd>
  This component creates GPU OS device objects such as
  <em>rsmi0</em> for describing AMD GPUs.
+ <b>It may be built as a plugin</b>.
+</dd>
+<dt>levelzero</dt>
+<dd>
+ This component creates co-processor OS device objects such as
+ <em>ze0</em> for describing oneAPI Level Zero devices.
  <b>It may be built as a plugin</b>.
 </dd>
 <dt>cuda</dt>

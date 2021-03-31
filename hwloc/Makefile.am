@@ -115,6 +115,17 @@ hwloc_rsmi_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_RSMI_LIBS) $(HWLOC_RSMI_LDFLA
 endif
 endif HWLOC_HAVE_RSMI
 
+if HWLOC_HAVE_LEVELZERO
+if HWLOC_LEVELZERO_BUILD_STATIC
+sources += topology-levelzero.c
+else
+plugins_LTLIBRARIES += hwloc_levelzero.la
+hwloc_levelzero_la_SOURCES = topology-levelzero.c
+hwloc_levelzero_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_LEVELZERO_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_levelzero_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_LEVELZERO_LIBS)
+endif
+endif HWLOC_HAVE_LEVELZERO
+
 if HWLOC_HAVE_GL
 if HWLOC_GL_BUILD_STATIC
 sources += topology-gl.c

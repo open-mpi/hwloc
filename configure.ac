@@ -256,6 +256,7 @@ test "x$hwloc_opencl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list 
 test "x$hwloc_have_cudart" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list CUDA"
 test "x$hwloc_nvml_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list NVML"
 test "x$hwloc_rsmi_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list RSMI"
+test "x$hwloc_levelzero_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list LevelZero"
 test "x$hwloc_gl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list GL"
 # if nothing, say "no"
 test "x$hwloc_probeio_list" = "x" && hwloc_probeio_list=" no"
