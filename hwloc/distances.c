@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2020 Inria.  All rights reserved.
+ * Copyright © 2010-2021 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -365,6 +365,7 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char 
 static void
 hwloc_internal_distances_restrict(hwloc_obj_t *objs,
 				  uint64_t *indexes,
+				  hwloc_obj_type_t *different_types,
 				  uint64_t *values,
 				  unsigned nbobjs, unsigned disappeared);
 
@@ -394,7 +395,7 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
       return 0;
     }
     /* restrict the matrix */
-    hwloc_internal_distances_restrict(objs, NULL, values, nbobjs, disappeared);
+    hwloc_internal_distances_restrict(objs, NULL, NULL, values, nbobjs, disappeared);
     nbobjs -= disappeared;
   }
 
@@ -529,6 +530,7 @@ int hwloc_distances_add(hwloc_topology_t topology,
 static void
 hwloc_internal_distances_restrict(hwloc_obj_t *objs,
 				  uint64_t *indexes,
+                                  hwloc_obj_type_t *different_types,
 				  uint64_t *values,
 				  unsigned nbobjs, unsigned disappeared)
 {
@@ -550,6 +552,8 @@ hwloc_internal_distances_restrict(hwloc_obj_t *objs,
       objs[newi] = objs[i];
       if (indexes)
 	indexes[newi] = indexes[i];
+      if (different_types)
+        different_types[newi] = different_types[i];
       newi++;
     }
 }
@@ -594,7 +598,7 @@ hwloc_internal_distances_refresh_one(hwloc_topology_t topology,
     return -1;
 
   if (disappeared) {
-    hwloc_internal_distances_restrict(objs, dist->indexes, dist->values, nbobjs, disappeared);
+    hwloc_internal_distances_restrict(objs, dist->indexes, dist->different_types, dist->values, nbobjs, disappeared);
     dist->nbobjs -= disappeared;
   }
 
