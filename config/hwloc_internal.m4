@@ -339,7 +339,7 @@ EOF
     chosen_curses=""
     for curses in ncurses curses
     do
-      for lib in "" -ltermcap -l${curses}w -l$curses -ltinfo
+      for lib in "" -l${curses}w -l$curses -ltinfo -ltermcap
       do
         AC_MSG_CHECKING(termcap support using $curses and $lib)
         LIBS="$hwloc_old_LIBS $lib"
