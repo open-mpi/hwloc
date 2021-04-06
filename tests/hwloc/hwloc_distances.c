@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2020 Inria.  All rights reserved.
+ * Copyright © 2010-2021 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -329,6 +329,61 @@ int main(void)
   err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_NUMANODE, &nr, distances, 0, 0);
   assert(!err);
   assert(!nr);
+
+  /* add a bandwidth distance that we'll modify */
+  printf("\nInserting NUMA bandwidths\n");
+  for(i=0; i<4; i++)
+    objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
+  /* matrix 2*2 */
+  for(i=0; i<16; i++)
+    values[i] = 0;
+  values[0+4*1] = 100;
+  values[1+4*0] = 100;
+  values[2+4*3] = 200;
+  values[3+4*2] = 100;
+  for(i=0; i<4; i++)
+    values[i+4*i] = 1000;
+  err = hwloc_distances_add(topology, 4, objs, values,
+			    HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  assert(!err);
+
+  nr = 1;
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_NUMANODE, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH, 0);
+  assert(!err);
+  assert(nr == 1);
+  printf("make it links\n");
+  err = hwloc_distances_transform(topology, distances[0], HWLOC_DISTANCES_TRANSFORM_LINKS, NULL, 0);
+  assert(!err);
+  assert(distances[0]->nbobjs == 4);
+  assert(distances[0]->values[0] == 0);
+  assert(distances[0]->values[1] == 1);
+  assert(distances[0]->values[2] == 0);
+  assert(distances[0]->values[3] == 0);
+  assert(distances[0]->values[4] == 1);
+  assert(distances[0]->values[5] == 0);
+  assert(distances[0]->values[6] == 0);
+  assert(distances[0]->values[7] == 0);
+  assert(distances[0]->values[8] == 0);
+  assert(distances[0]->values[9] == 0);
+  assert(distances[0]->values[10] == 0);
+  assert(distances[0]->values[11] == 1);
+  assert(distances[0]->values[12] == 0);
+  assert(distances[0]->values[13] == 0);
+  assert(distances[0]->values[14] == 2);
+  assert(distances[0]->values[15] == 0);
+  printf("remove 2 objects\n");
+  distances[0]->objs[0] = NULL;
+  distances[0]->objs[1] = NULL;
+  err = hwloc_distances_transform(topology, distances[0], HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL, NULL, 0);
+  assert(!err);
+  assert(distances[0]->nbobjs == 2);
+  assert(distances[0]->values[0] == 0);
+  assert(distances[0]->values[1] == 1);
+  assert(distances[0]->values[2] == 2);
+  assert(distances[0]->values[3] == 0);
+
+  hwloc_distances_release(topology, distances[0]);
 
   hwloc_topology_destroy(topology);
 
