@@ -1091,3 +1091,105 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
  out_with_groupids:
   free(groupids);
 }
+static int
+hwloc__distances_transform_remove_null(struct hwloc_distances_s *distances)
+{
+  hwloc_uint64_t *values = distances->values;
+  hwloc_obj_t *objs = distances->objs;
+  unsigned i, nb, nbobjs = distances->nbobjs;
+  hwloc_obj_type_t unique_type;
+
+  for(i=0, nb=0; i<nbobjs; i++)
+    if (objs[i])
+      nb++;
+
+  if (nb < 2) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (nb == nbobjs)
+    return 0;
+
+  hwloc_internal_distances_restrict(objs, NULL, NULL, values, nbobjs, nbobjs-nb);
+  distances->nbobjs = nb;
+
+  /* update HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES for convenience */
+  unique_type = objs[0]->type;
+  for(i=1; i<nb; i++)
+    if (objs[i]->type != unique_type) {
+      unique_type = HWLOC_OBJ_TYPE_NONE;
+      break;
+    }
+  if (unique_type == HWLOC_OBJ_TYPE_NONE)
+    distances->kind |= HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES;
+  else
+    distances->kind &= ~HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES;
+
+  return 0;
+}
+
+static int
+hwloc__distances_transform_links(struct hwloc_distances_s *distances)
+{
+  /* FIXME: we should look for the greatest common denominator
+   * but we just use the smallest positive value, that's enough for current use-cases.
+   * We'll return -1 in other cases.
+   */
+  hwloc_uint64_t divider, *values = distances->values;
+  unsigned i, nbobjs = distances->nbobjs;
+
+  if (!(distances->kind & HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  for(i=0; i<nbobjs; i++)
+    values[i*nbobjs+i] = 0;
+
+  /* find the smallest positive value */
+  divider = 0;
+  for(i=0; i<nbobjs*nbobjs; i++)
+    if (values[i] && (!divider || values[i] < divider))
+      divider = values[i];
+
+  if (!divider)
+    /* only zeroes? do nothing */
+    return 0;
+
+  /* check it divides all values */
+  for(i=0; i<nbobjs*nbobjs; i++)
+    if (values[i]%divider) {
+      errno = ENOENT;
+      return -1;
+    }
+
+  /* ok, now divide for real */
+  for(i=0; i<nbobjs*nbobjs; i++)
+    values[i] /= divider;
+
+  return 0;
+}
+
+int
+hwloc_distances_transform(hwloc_topology_t topology __hwloc_attribute_unused,
+                          struct hwloc_distances_s *distances,
+                          enum hwloc_distances_transform_e transform,
+                          void *transform_attr,
+                          unsigned long flags)
+{
+  if (flags || transform_attr) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  switch (transform) {
+  case HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL:
+    return hwloc__distances_transform_remove_null(distances);
+  case HWLOC_DISTANCES_TRANSFORM_LINKS:
+    return hwloc__distances_transform_links(distances);
+  default:
+    errno = EINVAL;
+    return -1;
+  }
+}

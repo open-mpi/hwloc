@@ -663,6 +663,10 @@ man3_distances_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_distances_get_by_name.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_get_name.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_release.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_transform_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_TRANSFORM_LINKS.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distances_transform.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_distances_consult.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_obj_index.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_obj_pair_values.3 \

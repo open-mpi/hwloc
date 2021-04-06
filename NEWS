@@ -24,6 +24,7 @@ Version 2.5.0
   + Add hwloc_get_obj_with_same_locality() to convert between objects
     with same locality, for instance NUMA nodes and Packages,
     or OS devices within a PCI device.
+  + Add hwloc_distances_transform() to modify distances structures.
 * Backends
   + Add a levelzero backend for oneAPI L0 devices, exposed as OS devices
     of subtype "LevelZero" and name such as "ze0".

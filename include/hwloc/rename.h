@@ -455,6 +455,11 @@ extern "C" {
 #define hwloc_distances_obj_index HWLOC_NAME(distances_obj_index)
 #define hwloc_distances_obj_pair_values HWLOC_NAME(distances_pair_values)
 
+#define hwloc_distances_transform_e HWLOC_NAME(distances_transform_e)
+#define HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL HWLOC_NAME_CAPS(DISTANCES_TRANSFORM_REMOVE_NULL)
+#define HWLOC_DISTANCES_TRANSFORM_LINKS HWLOC_NAME_CAPS(DISTANCES_TRANSFORM_LINKS)
+#define hwloc_distances_transform HWLOC_NAME(distances_transform)
+
 #define hwloc_distances_add_flag_e HWLOC_NAME(distances_add_flag_e)
 #define HWLOC_DISTANCES_ADD_FLAG_GROUP HWLOC_NAME_CAPS(DISTANCES_ADD_FLAG_GROUP)
 #define HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE HWLOC_NAME_CAPS(DISTANCES_ADD_FLAG_GROUP_INACCURATE)

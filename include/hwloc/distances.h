@@ -38,6 +38,13 @@ extern "C" {
  *
  * The matrix may also contain bandwidths between random sets of objects,
  * possibly provided by the user, as specified in the \p kind attribute.
+ *
+ * Pointers \p objs and \p values should not be replaced, reallocated, freed, etc.
+ * However callers are allowed to modify \p kind as well as the contents
+ * of \p objs and \p values arrays.
+ * For instance, if there is a single NUMA node per Package,
+ * hwloc_get_obj_with_same_locality() may be used to convert between them
+ * and replace NUMA nodes in the \p objs array with the corresponding Packages.
  */
 struct hwloc_distances_s {
   unsigned nbobjs;		/**< \brief Number of objects described by the distance matrix. */
@@ -45,10 +52,6 @@ struct hwloc_distances_s {
 				 * These objects are not in any particular order,
 				 * see hwloc_distances_obj_index() and hwloc_distances_obj_pair_values()
 				 * for easy ways to find objects in this array and their corresponding values.
-                                 *
-                                 * Callers are allowed to replace objects in this array with others
-                                 * with same locality. For instance, if there is a single NUMA node per Package,
-                                 * hwloc_get_obj_with_same_locality() may be used to convert between them.
 				 */
   unsigned long kind;		/**< \brief OR'ed set of ::hwloc_distances_kind_e. */
   hwloc_uint64_t *values;	/**< \brief Matrix of distances between objects, stored as a one-dimension array.
@@ -171,6 +174,61 @@ hwloc_distances_get_name(hwloc_topology_t topology, struct hwloc_distances_s *di
  */
 HWLOC_DECLSPEC void
 hwloc_distances_release(hwloc_topology_t topology, struct hwloc_distances_s *distances);
+
+/** \brief Transformations of distances structures. */
+enum hwloc_distances_transform_e {
+  /** \brief Remove \c NULL objects from the distances structure.
+   *
+   * Every object that was replaced with \c NULL in the \p objs array
+   * is removed and the \p values array is updated accordingly.
+   *
+   * At least \c 2 objects must remain, otherwise hwloc_distances_transform()
+   * will return \c -1 with \p errno set to \c EINVAL.
+   *
+   * \p kind will be updated with or without ::HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES
+   * according to the remaining objects.
+   *
+   * \hideinitializer
+   */
+  HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL = 0,
+
+  /** \brief Replace bandwidth values with a number of links.
+   *
+   * Usually all values will be either \c 0 (no link) or \c 1 (one link).
+   * However some matrices could get larger values if some pairs of
+   * peers are connected by different numbers of links.
+   *
+   * Values on the diagonal are set to \c 0.
+   *
+   * This transformation only applies to bandwidth matrices.
+   *
+   * \hideinitializer
+   */
+  HWLOC_DISTANCES_TRANSFORM_LINKS = 1
+};
+
+/** \brief Apply a transformation to a distances structure.
+ *
+ * Modify a distances structure that was previously obtained with
+ * hwloc_distances_get() or one of its variants.
+ * This modifies the local copy of the distances structures but does
+ * not modify the distances information stored inside the topology.
+ * Hence these changes cannot be exported to XML or retrieved by
+ * another call to hwloc_distances_get().
+ *
+ * \p transform must be one of the transformations listed
+ * in ::hwloc_distances_transform_e.
+ *
+ * These transformations may modify the contents of the \p objs or \p values arrays.
+ *
+ * \p transform_attr must be \c NULL for now.
+ *
+ * \p flags must be \c 0 for now.
+ */
+HWLOC_DECLSPEC int hwloc_distances_transform(hwloc_topology_t topology, struct hwloc_distances_s *distances,
+                                             enum hwloc_distances_transform_e transform,
+                                             void *transform_attr,
+                                             unsigned long flags);
 
 /** @} */
 
