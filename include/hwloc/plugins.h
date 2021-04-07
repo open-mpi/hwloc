@@ -629,23 +629,9 @@ typedef void * hwloc_backend_distances_add_handle_t;
 
 /** \brief Create a new empty distances structure.
  *
- * Create an empty distances structure
- * to be filled with hwloc_backend_distances_add_values()
- * and then committed with hwloc_backend_distances_add_commit().
- *
- * Parameter \p name is optional, it may be \c NULL.
- * Otherwise, it will be copied internally and may later be freed by the caller.
- *
- * \p kind specifies the kind of distance as a OR'ed set of ::hwloc_distances_kind_e.
- * Kind ::HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES will be automatically set
- * according to objects having different types in hwloc_backend_distances_add_values().
- *
- * \p flags must be \c 0 for now.
- *
- * \return A hwloc_backend_distances_add_handle_t that should then be passed
- * to hwloc_backend_distances_add_values() and hwloc_backend_distances_add_commit().
- *
- * \return \c NULL on error.
+ * This is identical to hwloc_distances_add_create()
+ * but this variant is designed for backend inserting
+ * distances during topology discovery.
  */
 HWLOC_DECLSPEC hwloc_backend_distances_add_handle_t
 hwloc_backend_distances_add_create(hwloc_topology_t topology,
@@ -654,26 +640,14 @@ hwloc_backend_distances_add_create(hwloc_topology_t topology,
 
 /** \brief Specify the objects and values in a new empty distances structure.
  *
- * Specify the objects and values for a new distances structure
- * that was returned as a handle by hwloc_backend_distances_add_create().
- * The structure must then be committed with hwloc_backend_distances_add_commit().
+ * This is similar to hwloc_distances_add_values()
+ * but this variant is designed for backend inserting
+ * distances during topology discovery.
  *
- * The number of objects is \p nbobjs and the array of objects is \p objs.
- * Distance values are stored as a one-dimension array in \p values.
- * The distance from object i to object j is in slot i*nbobjs+j.
- *
- * \p nbobjs must be at least 2.
- *
- * Arrays \p objs and \p values are directly attached to the topology.
+ * The only semantical difference is that \p objs and \p values
+ * are not duplicated, but directly attached to the topology.
  * On success, these arrays are given to the core and should not
  * ever be freed by the caller anymore.
- *
- * On error, the temporary distances structure and its content are destroyed.
- *
- * \p flags must be \c 0 for now.
- *
- * \return \c 0 on success.
- * \return \c -1 on error.
  */
 HWLOC_DECLSPEC int
 hwloc_backend_distances_add_values(hwloc_topology_t topology,
@@ -684,20 +658,9 @@ hwloc_backend_distances_add_values(hwloc_topology_t topology,
 
 /** \brief Commit a new distances structure.
  *
- * This function finalizes the distances structure and inserts in it the topology.
- *
- * Parameter \p handle was previously returned by hwloc_backend_distances_add_create().
- * Then objects and values were specified with hwloc_backend_distances_add_values().
- *
- * \p flags configures the behavior of the function using an optional OR'ed set of
- * ::hwloc_distances_add_flag_e.
- * It may be used to request the grouping of existing objects based on distances.
- *
- * On error, the temporary distances structure is destroyed, together
- * with arrays that were attached in hwloc_backend_distances_set_values().
- *
- * \return \c 0 on success.
- * \return \c -1 on error.
+ * This is similar to hwloc_distances_add_commit()
+ * but this variant is designed for backend inserting
+ * distances during topology discovery.
  */
 HWLOC_DECLSPEC int
 hwloc_backend_distances_add_commit(hwloc_topology_t topology,

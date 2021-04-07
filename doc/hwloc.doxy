@@ -2621,7 +2621,7 @@ For reference, ::hwloc_topology_t modification operations include
   (see \ref hwlocality_tinker) may modify the topology significantly by adding
   objects inside the tree, changing the topology depth, etc.
 
-  <tt>hwloc_distances_add()</tt> and <tt>hwloc_distances_remove()</tt>
+  <tt>hwloc_distances_add_commit()</tt> and <tt>hwloc_distances_remove()</tt>
   (see \ref hwlocality_distances_add) modify the list of distance structures
   in the topology, and the former may even insert new Group objects.
 

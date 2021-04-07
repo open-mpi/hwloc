@@ -464,7 +464,11 @@ extern "C" {
 #define HWLOC_DISTANCES_ADD_FLAG_GROUP HWLOC_NAME_CAPS(DISTANCES_ADD_FLAG_GROUP)
 #define HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE HWLOC_NAME_CAPS(DISTANCES_ADD_FLAG_GROUP_INACCURATE)
 
-#define hwloc_distances_add HWLOC_NAME(distances_add)
+#define hwloc_distances_add_handle_t HWLOC_NAME(distances_add_handle_t)
+#define hwloc_distances_add_create HWLOC_NAME(distances_add_create)
+#define hwloc_distances_add_values HWLOC_NAME(distances_add_values)
+#define hwloc_distances_add_commit HWLOC_NAME(distances_add_commit)
+
 #define hwloc_distances_remove HWLOC_NAME(distances_remove)
 #define hwloc_distances_remove_by_depth HWLOC_NAME(distances_remove_by_depth)
 #define hwloc_distances_remove_by_type HWLOC_NAME(distances_remove_by_type)
@@ -644,6 +648,8 @@ extern "C" {
 #define hwloc_backend_distances_add_commit HWLOC_NAME(backend_distances_add_commit)
 
 /* hwloc/deprecated.h */
+
+#define hwloc_distances_add HWLOC_NAME(distances_add)
 
 #define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)

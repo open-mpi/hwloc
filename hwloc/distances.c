@@ -611,37 +611,45 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
 #define HWLOC_DISTANCES_KIND_ALL (HWLOC_DISTANCES_KIND_FROM_ALL|HWLOC_DISTANCES_KIND_MEANS_ALL)
 #define HWLOC_DISTANCES_ADD_FLAG_ALL (HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE)
 
-int hwloc_distances_add(hwloc_topology_t topology,
-			unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,
-			unsigned long kind, unsigned long flags)
+void * hwloc_distances_add_create(hwloc_topology_t topology,
+                                  const char *name, unsigned long kind,
+                                  unsigned long flags)
+{
+  if (!topology->is_loaded) {
+    errno = EINVAL;
+    return NULL;
+  }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    return NULL;
+  }
+  if ((kind & ~HWLOC_DISTANCES_KIND_ALL)
+      || hwloc_weight_long(kind & HWLOC_DISTANCES_KIND_FROM_ALL) != 1
+      || hwloc_weight_long(kind & HWLOC_DISTANCES_KIND_MEANS_ALL) != 1) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  return hwloc_backend_distances_add_create(topology, name, kind, flags);
+}
+
+int hwloc_distances_add_values(hwloc_topology_t topology,
+                               void *handle,
+                               unsigned nbobjs, hwloc_obj_t *objs,
+                               hwloc_uint64_t *values,
+                               unsigned long flags)
 {
   unsigned i;
   uint64_t *_values;
   hwloc_obj_t *_objs;
   int err;
 
-  if (nbobjs < 2 || !objs || !values || !topology->is_loaded) {
-    errno = EINVAL;
-    return -1;
-  }
-  if (topology->adopted_shmem_addr) {
-    errno = EPERM;
-    return -1;
-  }
-  if ((kind & ~HWLOC_DISTANCES_KIND_ALL)
-      || hwloc_weight_long(kind & HWLOC_DISTANCES_KIND_FROM_ALL) != 1
-      || hwloc_weight_long(kind & HWLOC_DISTANCES_KIND_MEANS_ALL) != 1
-      || (flags & ~HWLOC_DISTANCES_ADD_FLAG_ALL)) {
-    errno = EINVAL;
-    return -1;
-  }
-
   /* no strict need to check for duplicates, things shouldn't break */
 
   for(i=1; i<nbobjs; i++)
     if (!objs[i]) {
       errno = EINVAL;
-      return -1;
+      goto out;
     }
 
   /* copy the input arrays and give them to the topology */
@@ -652,20 +660,76 @@ int hwloc_distances_add(hwloc_topology_t topology,
 
   memcpy(_objs, objs, nbobjs*sizeof(hwloc_obj_t));
   memcpy(_values, values, nbobjs*nbobjs*sizeof(*_values));
-  err = hwloc_internal_distances_add(topology, NULL, nbobjs, _objs, _values, kind, flags);
-  if (err < 0)
-    goto out; /* _objs and _values freed in hwloc_backend_distances_add() */
+
+  err = hwloc_backend_distances_add_values(topology, handle, nbobjs, _objs, _values, flags);
+  if (err < 0) {
+    /* handle was canceled inside hwloc_backend_distances_add_values */
+    handle = NULL;
+    goto out_with_arrays;
+  }
+
+  return 0;
+
+ out_with_arrays:
+  free(_objs);
+  free(_values);
+ out:
+  if (handle)
+    hwloc_backend_distances_add__cancel(handle);
+  return -1;
+}
+
+int
+hwloc_distances_add_commit(hwloc_topology_t topology,
+                           void *handle,
+                           unsigned long flags)
+{
+  int err;
+
+  if (flags & ~HWLOC_DISTANCES_ADD_FLAG_ALL) {
+    errno = EINVAL;
+    goto out;
+  }
+
+  err = hwloc_backend_distances_add_commit(topology, handle, flags);
+  if (err < 0) {
+    /* handle was canceled inside hwloc_backend_distances_add_commit */
+    handle = NULL;
+    goto out;
+  }
 
   /* in case we added some groups, see if we need to reconnect */
   hwloc_topology_reconnect(topology, 0);
 
   return 0;
 
- out_with_arrays:
-  free(_values);
-  free(_objs);
  out:
+  if (handle)
+    hwloc_backend_distances_add__cancel(handle);
   return -1;
+}
+
+/* deprecated all-in-one user function */
+int hwloc_distances_add(hwloc_topology_t topology,
+			unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,
+			unsigned long kind, unsigned long flags)
+{
+  void *handle;
+  int err;
+
+  handle = hwloc_distances_add_create(topology, NULL, kind, 0);
+  if (!handle)
+    return -1;
+
+  err = hwloc_distances_add_values(topology, handle, nbobjs, objs, values, 0);
+  if (err < 0)
+    return -1;
+
+  err = hwloc_distances_add_commit(topology, handle, flags);
+  if (err < 0)
+    return -1;
+
+  return 0;
 }
 
 /******************************************************
