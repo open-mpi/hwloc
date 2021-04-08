@@ -17,6 +17,16 @@
 static struct hwloc_internal_distances_s *
 hwloc__internal_distances_from_public(hwloc_topology_t topology, struct hwloc_distances_s *distances);
 
+static void
+hwloc__groups_by_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, uint64_t *values, unsigned long kind, unsigned nbaccuracies, float *accuracies, int needcheck);
+
+static void
+hwloc_internal_distances_restrict(hwloc_obj_t *objs,
+				  uint64_t *indexes,
+				  hwloc_obj_type_t *different_types,
+				  uint64_t *values,
+				  unsigned nbobjs, unsigned disappeared);
+
 /******************************************************
  * Global init, prepare, destroy, dup
  */
@@ -248,9 +258,6 @@ int hwloc_distances_release_remove(hwloc_topology_t topology,
  * Add distances to the topology
  */
 
-static void
-hwloc__groups_by_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, uint64_t *values, unsigned long kind, unsigned nbaccuracies, float *accuracies, int needcheck);
-
 /* insert a distance matrix in the topology.
  * the caller gives us the distances and objs pointers, we'll free them later.
  */
@@ -361,13 +368,6 @@ int hwloc_internal_distances_add_by_index(hwloc_topology_t topology, const char 
   free(different_types);
   return -1;
 }
-
-static void
-hwloc_internal_distances_restrict(hwloc_obj_t *objs,
-				  uint64_t *indexes,
-				  hwloc_obj_type_t *different_types,
-				  uint64_t *values,
-				  unsigned nbobjs, unsigned disappeared);
 
 int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
 				 unsigned nbobjs, hwloc_obj_t *objs, uint64_t *values,
