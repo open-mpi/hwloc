@@ -284,6 +284,7 @@ hwloc_distances_obj_pair_values(struct hwloc_distances_s *distances,
 /** \brief Flags for adding a new distances to a topology. */
 enum hwloc_distances_add_flag_e {
   /** \brief Try to group objects based on the newly provided distance information.
+   * This is ignored for distances between objects of different types.
    * \hideinitializer
    */
   HWLOC_DISTANCES_ADD_FLAG_GROUP = (1UL<<0),
