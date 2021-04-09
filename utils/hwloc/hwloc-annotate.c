@@ -188,6 +188,7 @@ get_unique_obj(hwloc_topology_t topology, int topodepth, char *str,
 static void
 add_distances(hwloc_topology_t topology, int topodepth)
 {
+        char *name = NULL;
 	unsigned long kind = 0;
 	unsigned nbobjs = 0;
 	hwloc_obj_t *objs = NULL;
@@ -205,10 +206,22 @@ add_distances(hwloc_topology_t topology, int topodepth)
 	}
 
 	if (!fgets(line, sizeof(line), file)) {
-		fprintf(stderr, "Failed to read kind line\n");
+		fprintf(stderr, "Failed to read header line\n");
 		goto out;
 	}
-	kind = strtoul(line, NULL, 0);
+        if (!strncmp(line, "name=", 5)) {
+          char *end = strchr(line, '\n');
+          if (end) {
+            *end = '\0';
+            name = strdup(line+5);
+          }
+          if (!fgets(line, sizeof(line), file)) {
+            fprintf(stderr, "Failed to read kind line\n");
+            goto out;
+          }
+        }
+
+        kind = strtoul(line, NULL, 0);
 
 	if (!fgets(line, sizeof(line), file)) {
 		fprintf(stderr, "Failed to read nbobjs line\n");
@@ -285,7 +298,7 @@ add_distances(hwloc_topology_t topology, int topodepth)
 	}
 
         err = -1;
-        handle = hwloc_distances_add_create(topology, NULL, kind, 0);
+        handle = hwloc_distances_add_create(topology, name, kind, 0);
         if (handle) {
           err = hwloc_distances_add_values(topology, handle, nbobjs, objs, values, 0);
           if (!err) {
@@ -298,6 +311,7 @@ add_distances(hwloc_topology_t topology, int topodepth)
 	}
 
 out:
+        free(name);
 	free(objs);
 	free(values);
 	fclose(file);

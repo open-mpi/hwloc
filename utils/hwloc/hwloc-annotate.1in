@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2013-2020 Inria.  All rights reserved.
+.\" Copyright © 2013-2021 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-ANNOTATE "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -129,12 +129,14 @@ The optional \fIflags\fR (0 unless specified) corresponds to the flags
 given to the function \fBhwloc_distances_set()\fR.
 \fIlocation\fR is ignored in this mode.
 
-The first line of the pointed file must be a integer representing
+The real first line of the pointed file must be a integer representing
 a distances \fBkind\fR as defined in \fBhwloc/distances.h\fR.
 The second line is the number of objects involved in the distances.
 The next lines contain one object each.
 The next lines contain one distance value each,
 or a single line may be given with a integer combination of format \fBx*y\fR or \fBx*y*z\fR.
+An optional line before all others may start with \fBname=\fR
+to specify the name of the distances structure if any.
 .TP
 .B none
 No new annotation is added. This is useful when clearing existing attributes.

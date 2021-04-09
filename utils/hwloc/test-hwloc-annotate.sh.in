@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -67,6 +67,7 @@ $annotate $file $file -- dummy -- cpukind 0xa -1 0 foo bar
 $annotate $file $file -- dummy -- cpukind 0x3 4 0 foo2 bar2
 $annotate $file $file -- dummy -- cpukind 0xc 7 0 foo2 bar3
 cat > $distances << EOF
+name=mynewdistances
 5
 3
 pu:2
