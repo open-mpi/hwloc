@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2020 Inria.  All rights reserved.
+ * Copyright © 2011-2021 Inria.  All rights reserved.
  * Copyright © 2011 Université Bordeaux.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -107,6 +107,7 @@ int main(void)
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t nodes[3], cores[6];
   hwloc_uint64_t node_distances[9], core_distances[36];
+  hwloc_distances_add_handle_t handle;
   hwloc_obj_t obj;
   unsigned i,j;
   int err;
@@ -120,9 +121,14 @@ int main(void)
     for(j=0; j<3; j++)
       node_distances[i*3+j] = (i == j ? 10 : 20);
   }
-  err = hwloc_distances_add(topology, 3, nodes, node_distances,
-			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  handle = hwloc_distances_add_create(topology, NULL,
+                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      0);
+  assert(handle);
+  err = hwloc_distances_add_values(topology, handle, 3, nodes, node_distances, 0);
+  assert(!err);
+  err = hwloc_distances_add_commit(topology, handle,
+                                   HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   for(i=0; i<6; i++) {
@@ -130,9 +136,14 @@ int main(void)
     for(j=0; j<6; j++)
       core_distances[i*6+j] = (i == j ? 4 : 8);
   }
-  err = hwloc_distances_add(topology, 6, cores, core_distances,
-			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  handle = hwloc_distances_add_create(topology, NULL,
+                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      0);
+  assert(handle);
+  err = hwloc_distances_add_values(topology, handle, 6, cores, core_distances, 0);
+  assert(!err);
+  err = hwloc_distances_add_commit(topology, handle,
+                                   HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   /* entire topology */

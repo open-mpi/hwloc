@@ -204,6 +204,7 @@ int main(int argc, char *argv[])
   static hwloc_topology_t orig;
   hwloc_obj_t nodes[3];
   uint64_t node_distances[9];
+  hwloc_distances_add_handle_t handle;
   unsigned i,j;
   const char *top_srcdir;
   int err, ret, ret2;
@@ -268,9 +269,14 @@ int main(int argc, char *argv[])
     for(j=0; j<3; j++)
       node_distances[i*3+j] = (i == j ? 10 : 20);
   }
-  err = hwloc_distances_add(orig, 3, nodes, node_distances,
-                            HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-                            HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  handle = hwloc_distances_add_create(orig, NULL,
+                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      0);
+  assert(handle);
+  err = hwloc_distances_add_values(orig, handle, 3, nodes, node_distances, 0);
+  assert(!err);
+  err = hwloc_distances_add_commit(orig, handle,
+                                   HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   ret2 = test(orig, argv[0]);
