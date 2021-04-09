@@ -195,6 +195,7 @@ add_distances(hwloc_topology_t topology, int topodepth)
 	FILE *file;
 	char line[64];
 	unsigned i, x, y, z;
+        hwloc_distances_add_handle_t handle;
 	int err;
 
 	file = fopen(distancesfilename, "r");
@@ -283,10 +284,17 @@ add_distances(hwloc_topology_t topology, int topodepth)
 		}
 	}
 
-	err = hwloc_distances_add(topology, nbobjs, objs, values, kind, distancesflags);
-	if (err < 0) {
-		fprintf(stderr, "Failed to add distances\n");
-		goto out;
+        err = -1;
+        handle = hwloc_distances_add_create(topology, NULL, kind, 0);
+        if (handle) {
+          err = hwloc_distances_add_values(topology, handle, nbobjs, objs, values, 0);
+          if (!err) {
+            err = hwloc_distances_add_commit(topology, handle, distancesflags);
+          }
+        }
+        if (err < 0 || !handle) {
+          fprintf(stderr, "Failed to add distances\n");
+          goto out;
 	}
 
 out:
