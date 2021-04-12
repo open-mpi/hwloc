@@ -280,7 +280,7 @@ hwloc_distances_obj_pair_values(struct hwloc_distances_s *distances,
 
 
 
-/** \defgroup hwlocality_distances_add Add or remove distances between objects
+/** \defgroup hwlocality_distances_add Add distances between objects
  *
  * The usual way to add distances is:
  * \code
@@ -389,6 +389,13 @@ HWLOC_DECLSPEC int hwloc_distances_add_commit(hwloc_topology_t topology,
                                               hwloc_distances_add_handle_t handle,
                                               unsigned long flags);
 
+/** @} */
+
+
+
+/** \defgroup hwlocality_distances_remove Remove distances between objects
+ * @{
+ */
 
 /** \brief Remove all distance matrices from a topology.
  *

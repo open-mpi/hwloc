@@ -678,6 +678,7 @@ man3_distances_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_distances_add_create.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_add_values.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_add_commit.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_distances_remove.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_remove_by_type.3 \
