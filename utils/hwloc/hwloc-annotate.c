@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2020 Inria.  All rights reserved.
+ * Copyright © 2012-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -161,7 +161,7 @@ get_unique_obj(hwloc_topology_t topology, int topodepth, char *str,
   int err;
 
   typelen = strspn(str, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-  if (!typelen || str[typelen] != ':')
+  if (!typelen || (str[typelen] != ':' && str[typelen] != '=' && str[typelen] != '['))
     return NULL;
 
   lcontext.topology = topology;
@@ -176,7 +176,6 @@ get_unique_obj(hwloc_topology_t topology, int topodepth, char *str,
   } else {
     *ignored_multiple = 0;
   }
-  str[typelen+1+length] = '\0';
   err = hwloc_calc_process_location(&lcontext, str, typelen,
 				    hwloc_calc_get_unique_obj_cb, &obj);
   if (err < 0)
@@ -194,7 +193,7 @@ add_distances(hwloc_topology_t topology, int topodepth)
 	hwloc_obj_t *objs = NULL;
 	hwloc_uint64_t *values = NULL;
 	FILE *file;
-	char line[64];
+	char line[64], *end;
 	unsigned i, x, y, z;
         hwloc_distances_add_handle_t handle;
 	int err;
@@ -246,6 +245,9 @@ add_distances(hwloc_topology_t topology, int topodepth)
 		  fprintf(stderr, "Failed to read object line #%u.\n", i);
 		  goto out;
 		}
+                end = strchr(line, '\n');
+                if (end)
+                  *end = '\0';
 
 		obj = get_unique_obj(topology, topodepth, line, &ignored_multiple);
 		if (!obj) {
