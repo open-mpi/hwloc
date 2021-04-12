@@ -138,6 +138,20 @@ or a single line may be given with a integer combination of format \fBx*y\fR or 
 An optional line before all others may start with \fBname=\fR
 to specify the name of the distances structure if any.
 .TP
+.B distances-transform <name> links
+Transform a bandwidth distances structure named <name> into links.
+See the documentation of HWLOC_DISTANCES_TRANSFORM_LINKS in hwloc/distances.h for details.
+.TP
+.B distances-transform <name> remove-obj <obj>
+Remove the given object from the distances structure named <name>.
+.TP
+.B distances-transform <name> replace-objs <oldtype <newtype>
+Replace objects of type <oldtype> in distances structure named <name>
+with objects of type <newtype> with same locality.
+If <oldtype> or <newtype> are not object types, they are assumed
+subtypes of OS devices, e.g. "NVML" or "OpenCL".
+See the documentation of hwloc_get_obj_with_same_locality() in hwloc/helper.h for details.
+.TP
 .B none
 No new annotation is added. This is useful when clearing existing attributes.
 .
@@ -203,6 +217,16 @@ Specify that PU 0-3 and PU 4-7 are of different kinds, and the latter is more ef
 
     $ hwloc-annotate topo.xml topo.xml dummy cpukind 0x0f 0 0 CoreType Small
     $ hwloc-annotate topo.xml topo.xml dummy cpukind 0xf0 1 0 CoreType Big
+
+Replace NUMA nodes with Packages in the NUMALatency distances matrix,
+when they have the exact same locality.
+
+    $ hwloc-annotate topo.xml topo.xml -- dummy -- distances-transform NUMALatency replace-objs numanode packages
+
+Remove NUMA node #3 from the NUMALatency distances matrix:
+
+    $ hwloc-annotate topo.xml topo.xml -- dummy -- distances-transform NUMALatency remove-obj numa:3
+
 .
 .\" **************************
 .\" Return value section

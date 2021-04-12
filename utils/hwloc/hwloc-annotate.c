@@ -25,6 +25,9 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "    memattr <name> <flags>\n");
 	fprintf(where, "    memattr <name> <initiator> <value>\n");
         fprintf(where, "    cpukind <cpuset> <efficiency> <flags> [<infoname> <infovalue>]\n");
+        fprintf(where, "    distances-transform <name> links\n");
+        fprintf(where, "    distances-transform <name> remove-obj <obj>\n");
+        fprintf(where, "    distances-transform <name> replace-objs <oldtype <newtype>\n");
 	fprintf(where, "    none\n");
         fprintf(where, "Options:\n");
 	fprintf(where, "  --ci\tClear existing infos\n");
@@ -59,6 +62,12 @@ static int clearinfos = 0;
 static int replaceinfos = 0;
 static int clearuserdata = 0;
 static int cleardistances = 0;
+
+static char *distances_transform_name = NULL;
+static int distances_transform_links = 0;
+static char *distances_transform_removeobj = NULL;
+static char *distances_transform_replace_oldtype = NULL;
+static char *distances_transform_replace_newtype = NULL;
 
 static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 {
@@ -209,7 +218,7 @@ add_distances(hwloc_topology_t topology, int topodepth)
 		goto out;
 	}
         if (!strncmp(line, "name=", 5)) {
-          char *end = strchr(line, '\n');
+          end = strchr(line, '\n');
           if (end) {
             *end = '\0';
             name = strdup(line+5);
@@ -320,6 +329,111 @@ out:
 	return;
 }
 
+static void transform_distances(hwloc_topology_t topology, int topodepth)
+{
+  hwloc_distances_add_handle_t handle;
+  struct hwloc_distances_s *dist;
+  unsigned nr = 1;
+  int err;
+
+  err = hwloc_distances_get_by_name(topology, distances_transform_name, &nr, &dist, 0);
+  if (err < 0 || !nr) {
+    fprintf(stderr, "Failed to find a distances structure with name `%s'\n", distances_transform_name);
+    goto out;
+  }
+  if (nr > 1) {
+    fprintf(stderr, "Found %u distances structure with name `%s'\n", nr, distances_transform_name);
+    goto out_with_dist;
+  }
+
+  if (distances_transform_links) {
+    /* replace bandwidth with links */
+    err = hwloc_distances_transform(topology, dist, HWLOC_DISTANCES_TRANSFORM_LINKS, NULL, 0);
+    if (err < 0) {
+      fprintf(stderr, "Failed to transform distances `%s' into links\n", distances_transform_name);
+      goto out_with_dist;
+    }
+
+  } else if (distances_transform_removeobj) {
+    /* remove an object */
+    hwloc_obj_t obj;
+    unsigned i;
+    int ignored_multiple;
+    obj = get_unique_obj(topology, topodepth, distances_transform_removeobj, &ignored_multiple);
+    if (!obj) {
+      fprintf(stderr, "Failed to find object `%s' to remove from distances structure\n", distances_transform_removeobj);
+      goto out_with_dist;
+    }
+    for(i=0; i<dist->nbobjs; i++)
+      if (obj == dist->objs[i]) {
+        printf("Removing object #%u from distances structures `%s'\n",
+               i, distances_transform_name);
+        dist->objs[i] = NULL;
+      }
+    err = hwloc_distances_transform(topology, dist, HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL, NULL, 0);
+    if (err < 0) {
+      fprintf(stderr, "Failed to transform distances `%s' to remove NULL objects\n", distances_transform_name);
+      goto out_with_dist;
+    }
+
+  } else if (distances_transform_replace_oldtype) {
+    /* replace some objects */
+    hwloc_obj_type_t old_type, new_type;
+    char *old_subtype, *new_subtype;
+    unsigned i;
+
+    assert(distances_transform_replace_newtype);
+
+    if (hwloc_type_sscanf(distances_transform_replace_oldtype, &old_type, NULL, 0) < 0) {
+      old_type = HWLOC_OBJ_OS_DEVICE;
+      old_subtype = distances_transform_replace_oldtype;
+    } else {
+      old_subtype = NULL;
+    }
+    if (hwloc_type_sscanf(distances_transform_replace_newtype, &new_type, NULL, 0) < 0) {
+      new_type = HWLOC_OBJ_OS_DEVICE;
+      new_subtype = distances_transform_replace_newtype;
+    } else {
+      new_subtype = NULL;
+    }
+    for(i=0; i<dist->nbobjs; i++) {
+      hwloc_obj_t new, old = dist->objs[i];
+      if (old->type != old_type)
+        continue;
+      if (old_subtype && (!old->subtype || strcasecmp(old_subtype, old->subtype)))
+        continue;
+      new = hwloc_get_obj_with_same_locality(topology, old,
+                                             new_type, new_subtype, NULL, 0);
+      if (!new)
+        continue;
+      printf("Replacing object #%u in distances structures `%s'\n",
+             i, distances_transform_name);
+      dist->objs[i] = new;
+    }
+  }
+
+  handle = hwloc_distances_add_create(topology, distances_transform_name, dist->kind, 0);
+  if (!handle) {
+    fprintf(stderr, "Failed to create new distances handle after transformation\n");
+    goto out_with_dist;
+  }
+  err = hwloc_distances_add_values(topology, handle, dist->nbobjs, dist->objs, dist->values, 0);
+  if (err < 0) {
+    fprintf(stderr, "Failed to set values in new distances handle after transformation\n");
+    goto out_with_dist;
+  }
+  err = hwloc_distances_add_commit(topology, handle, 0);
+  if (err < 0) {
+    fprintf(stderr, "Failed to commit new distances handle after transformation\n");
+    goto out_with_dist;
+  }
+
+ out_with_dist:
+  hwloc_distances_release_remove(topology, dist);
+ out:
+  return;
+}
+
 int main(int argc, char *argv[])
 {
 	hwloc_topology_t topology;
@@ -424,6 +538,32 @@ int main(int argc, char *argv[])
                                 goto out;
                 }
 
+        } else if (!strcmp(argv[0], "distances-transform")) {
+          if (argc < 3) {
+            usage(callname, stderr);
+            exit(EXIT_FAILURE);
+          }
+          distances_transform_name = argv[1];
+          if (!strcmp(argv[2], "links")) {
+            distances_transform_links = 1;
+          } else if (!strcmp(argv[2], "remove-obj")) {
+            if (argc < 4) {
+              usage(callname, stderr);
+              exit(EXIT_FAILURE);
+            }
+            distances_transform_removeobj = argv[3];
+          } else if (!strcmp(argv[2], "replace-objs")) {
+            if (argc < 5) {
+              usage(callname, stderr);
+              exit(EXIT_FAILURE);
+            }
+            distances_transform_replace_oldtype = argv[3];
+            distances_transform_replace_newtype = argv[4];
+          } else {
+              usage(callname, stderr);
+              exit(EXIT_FAILURE);
+          }
+
         } else if (!strcmp(argv[0], "memattr")) {
                 if (argc < 3) {
                         usage(callname, stderr);
@@ -511,6 +651,9 @@ int main(int argc, char *argv[])
 	if (distancesfilename) {
 	  /* ignore locations */
 	  add_distances(topology, topodepth);
+
+        } else if (distances_transform_name) {
+          transform_distances(topology, topodepth);
 
         } else if (maname) {
           hwloc_memattr_id_t id;
