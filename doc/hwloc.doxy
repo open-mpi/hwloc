@@ -2096,6 +2096,12 @@ Distances structures currently created by hwloc are:
 It contains 0 when there is no direct XGMI link between objects.
 Values on the diagonal are artificially set to very high so
 that local access always appears faster than remote access.
+
+GPUs are identified by RSMI OS devices such as "rsmi0".
+hwloc_distances_transform() or the hwloc-annotate tool may be used
+to transform this matrix into something more convenient,
+for instance by replacing RSMI devices with OpenCL or PCI devices,
+or by replacing bandwidths with numbers of links between peers.
 </dt>
 <dt>NVLinkBandwidth (NVML)</dt>
 <dd>This is the matrix of unidirectional NVLink bandwidths between
@@ -2108,9 +2114,15 @@ that local access always appears faster than remote access.
 On POWER platforms, NVLinks may also connects GPUs to CPUs.
 On NVIDIA platforms such as DGX-2, a NVSwitch may interconnect GPUs through NVLinks.
 In these cases, the distances structure is heterogeneous.
-GPUs always appear first in the matrix (as NVML OS devices),
+GPUs always appear first in the matrix (as NVML OS devices such as "nvml0"),
 and non-GPU objects may appear at the end (Package for POWER processors,
 PCI device for NVSwitch).
+
+hwloc_distances_transform() or the hwloc-annotate tool may be used
+to transform this matrix into something more convenient,
+for instance by replacing NVML devices with OpenCL or PCI devices,
+by removing switches or CPU ports,
+or by replacing bandwidths with numbers of links between peers.
 </dl>
 
 Users may also specify their own matrices between any set of objects,
