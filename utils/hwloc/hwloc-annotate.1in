@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2013-2020 Inria.  All rights reserved.
+.\" Copyright © 2013-2021 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-ANNOTATE "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -129,12 +129,28 @@ The optional \fIflags\fR (0 unless specified) corresponds to the flags
 given to the function \fBhwloc_distances_set()\fR.
 \fIlocation\fR is ignored in this mode.
 
-The first line of the pointed file must be a integer representing
+The real first line of the pointed file must be a integer representing
 a distances \fBkind\fR as defined in \fBhwloc/distances.h\fR.
 The second line is the number of objects involved in the distances.
 The next lines contain one object each.
 The next lines contain one distance value each,
 or a single line may be given with a integer combination of format \fBx*y\fR or \fBx*y*z\fR.
+An optional line before all others may start with \fBname=\fR
+to specify the name of the distances structure if any.
+.TP
+.B distances-transform <name> links
+Transform a bandwidth distances structure named <name> into links.
+See the documentation of HWLOC_DISTANCES_TRANSFORM_LINKS in hwloc/distances.h for details.
+.TP
+.B distances-transform <name> remove-obj <obj>
+Remove the given object from the distances structure named <name>.
+.TP
+.B distances-transform <name> replace-objs <oldtype <newtype>
+Replace objects of type <oldtype> in distances structure named <name>
+with objects of type <newtype> with same locality.
+If <oldtype> or <newtype> are not object types, they are assumed
+subtypes of OS devices, e.g. "NVML" or "OpenCL".
+See the documentation of hwloc_get_obj_with_same_locality() in hwloc/helper.h for details.
 .TP
 .B none
 No new annotation is added. This is useful when clearing existing attributes.
@@ -201,6 +217,16 @@ Specify that PU 0-3 and PU 4-7 are of different kinds, and the latter is more ef
 
     $ hwloc-annotate topo.xml topo.xml dummy cpukind 0x0f 0 0 CoreType Small
     $ hwloc-annotate topo.xml topo.xml dummy cpukind 0xf0 1 0 CoreType Big
+
+Replace NUMA nodes with Packages in the NUMALatency distances matrix,
+when they have the exact same locality.
+
+    $ hwloc-annotate topo.xml topo.xml -- dummy -- distances-transform NUMALatency replace-objs numanode packages
+
+Remove NUMA node #3 from the NUMALatency distances matrix:
+
+    $ hwloc-annotate topo.xml topo.xml -- dummy -- distances-transform NUMALatency remove-obj numa:3
+
 .
 .\" **************************
 .\" Return value section
