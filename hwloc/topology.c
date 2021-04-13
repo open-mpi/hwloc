@@ -2343,9 +2343,15 @@ hwloc__filter_bridges(hwloc_topology_t topology, hwloc_obj_t root, unsigned dept
 
     child->attr->bridge.depth = depth;
 
-    if (child->type == HWLOC_OBJ_BRIDGE
-	&& filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
-	&& !child->io_first_child) {
+    /* remove bridges that have no child,
+     * and pci-to-non-pci bridges (pcidev) that no child either.
+     * keep NVSwitch since they may be used in NVLink matrices.
+     */
+    if (filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
+	&& !child->io_first_child
+        && (child->type == HWLOC_OBJ_BRIDGE
+            || (child->type == HWLOC_OBJ_PCI_DEVICE && (child->attr->pcidev.class_id >> 8) == 0x06
+                && (!child->subtype || strcmp(child->subtype, "NVSwitch"))))) {
       unlink_and_free_single_object(pchild);
       topology->modified = 1;
     }

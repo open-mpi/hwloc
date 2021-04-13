@@ -500,6 +500,7 @@ hwloc_filter_check_pcidev_subtype_important(unsigned classid)
 	  || baseclass == 0x0b /* PCI_BASE_CLASS_PROCESSOR */
 	  || classid == 0x0c04 /* PCI_CLASS_SERIAL_FIBER */
 	  || classid == 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */
+          || baseclass == 0x06 /* PCI_BASE_CLASS_BRIDGE with non-PCI downstream. the core will drop the useless ones later */
 	  || baseclass == 0x12 /* Processing Accelerators */);
 }
 
@@ -615,14 +616,26 @@ HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, st
  * @{
  */
 
-/** \brief Find the normal parent of a PCI bus ID.
+/** \brief Find the object or a parent of a PCI bus ID.
  *
- * Look at PCI affinity to find out where the given PCI bus ID should be attached.
+ * When attaching a new object (typically an OS device) whose locality
+ * is specified by PCI bus ID, this function returns the PCI object
+ * to use as a parent for attaching.
  *
- * This function should be used to attach an I/O device under the corresponding
- * PCI object (if any), or under a normal (non-I/O) object with same locality.
+ * If the exact PCI device with this bus ID exists, it is returned.
+ * Otherwise (for instance if it was filtered out), the function returns
+ * another object with similar locality (for instance a parent bridge,
+ * or the local CPU Package).
  */
 HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
+
+/** \brief Find the PCI device or bridge matching a PCI bus ID exactly.
+ *
+ * This is useful for adding specific information about some objects
+ * based on their PCI id. When it comes to attaching objects based on
+ * PCI locality, hwloc_pci_find_parent_by_busid() should be preferred.
+ */
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 /** \brief Handle to a new distances structure during its addition to the topology. */
 typedef void * hwloc_backend_distances_add_handle_t;

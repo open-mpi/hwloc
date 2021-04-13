@@ -7,7 +7,7 @@ Machine (P#0 total=2052540KB DMIProductName="CloudStack KVM Hypervisor" DMIProdu
           Core L#0 (P#0)
             PU L#0 (P#0)
     HostBridge L#0 (buses=0000:[00-00])
-      PCI L#0 (busid=0000:00:01.1 id=8086:7010 class=0101(IDE))
+      PCI L#0 (busid=0000:00:01.1 id=8086:7010 class=0101(IDE) PCISlot=1)
         Block(Removable Media Device) L#0 (Size=1048575 SectorSize=512 LinuxDeviceID=11:0 Model=QEMU_DVD-ROM Revision=1.5.3 SerialNumber=QM00003) "sr0"
       PCI L#1 (busid=0000:00:02.0 id=1013:00b8 class=0300(VGA) PCISlot=2)
       PCI L#2 (busid=0000:00:03.0 id=1af4:1000 class=0200(Ethernet) PCISlot=3)

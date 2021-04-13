@@ -35,6 +35,7 @@ extern "C" {
  * from a core in another node.
  * The corresponding kind is ::HWLOC_DISTANCES_KIND_FROM_OS | ::HWLOC_DISTANCES_KIND_FROM_USER.
  * The name of this distances structure is "NUMALatency".
+ * Others distance structures include "NVLinkBandwidth".
  *
  * The matrix may also contain bandwidths between random sets of objects,
  * possibly provided by the user, as specified in the \p kind attribute.
@@ -98,6 +99,8 @@ enum hwloc_distances_kind_e {
   HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH = (1UL<<3),
 
   /** \brief This distances structure covers objects of different types.
+   * This may apply to the "NVLinkBandwidth" structure in presence
+   * of a NVSwitch or POWER processor NVLink port.
    * \hideinitializer
    */
   HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES = (1UL<<4)
@@ -154,6 +157,7 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
  * Usually only one distances structure may match a given name.
  *
  * The name of the most common structure is "NUMALatency".
+ * Others include "NVLinkBandwidth".
  */
 HWLOC_DECLSPEC int
 hwloc_distances_get_by_name(hwloc_topology_t topology, const char *name,

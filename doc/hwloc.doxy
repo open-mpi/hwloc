@@ -1297,6 +1297,11 @@ following environment variables.
   force rsmi_shutdown to make valgrind happy
   not enabled by default on rsmi <= 3.3.x because those old libs do not
   refcount and somebody else might be using rsmi
+ HWLOC_NVML_USE_OPENCAPI_LOCALITY
+  use the OpenCAPI bridge locality for finding the CPU where a NVLink
+  OpenCAPI endpoint is connecter. this may be wrong on POWER8, that's
+  why we use the GPU locality instead (assuming GPU have PCIe and
+  NVLink connecting to the same socket).
 -->
 
 
@@ -2086,6 +2091,20 @@ Distances structures currently created by hwloc are:
 <dt>NUMALatency (Linux, Solaris, FreeBSD)</dt>
 <dd>This is the matrix of theoretical latencies described above.
 </dd>
+<dt>NVLinkBandwidth (NVML)</dt>
+<dd>This is the matrix of unidirectional NVLink bandwidths between
+NVIDIA GPUs (in MB/s).
+It contains 0 when there is no direct NVLink between objects.
+When there are multiple links, their bandwidth is aggregated.
+Values on the diagonal are artificially set to very high so
+that local access always appears faster than remote access.
+
+On POWER platforms, NVLinks may also connects GPUs to CPUs.
+On NVIDIA platforms such as DGX-2, a NVSwitch may interconnect GPUs through NVLinks.
+In these cases, the distances structure is heterogeneous.
+GPUs always appear first in the matrix (as NVML OS devices),
+and non-GPU objects may appear at the end (Package for POWER processors,
+PCI device for NVSwitch).
 </dl>
 
 Users may also specify their own matrices between any set of objects,
