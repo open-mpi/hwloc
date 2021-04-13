@@ -67,6 +67,7 @@ int main(void)
   struct hwloc_distances_s *distances[2];
   hwloc_obj_t objs[16];
   hwloc_uint64_t values[16*16], value1, value2;
+  hwloc_distances_add_handle_t handle;
   int topodepth;
   unsigned i, j, k, nr;
   int err;
@@ -94,9 +95,14 @@ int main(void)
   values[3+4*2] = 4;
   for(i=0; i<4; i++)
     values[i+4*i] = 1;
-  err = hwloc_distances_add(topology, 4, objs, values,
-			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  handle = hwloc_distances_add_create(topology, NULL,
+                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      0);
+  assert(handle);
+  err = hwloc_distances_add_values(topology, handle, 4, objs, values, 0);
+  assert(!err);
+  err = hwloc_distances_add_commit(topology, handle,
+                                   HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   err = hwloc_topology_refresh(topology);
@@ -163,9 +169,14 @@ int main(void)
   }
   for(i=0; i<16; i++)
     values[i+16*i] = 1;
-  err = hwloc_distances_add(topology, 16, objs, values,
-			    HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  handle = hwloc_distances_add_create(topology, NULL,
+                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      0);
+  assert(handle);
+  err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
+  assert(!err);
+  err = hwloc_distances_add_commit(topology, handle,
+                                   HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
@@ -206,9 +217,14 @@ int main(void)
     values[i] = 3;
   for(i=0; i<4; i++)
     values[i+4*i] = 7;
-  err = hwloc_distances_add(topology, 4, objs, values,
-			    HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  handle = hwloc_distances_add_create(topology, NULL,
+                                      HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      0);
+  assert(handle);
+  err = hwloc_distances_add_values(topology, handle, 4, objs, values, 0);
+  assert(!err);
+  err = hwloc_distances_add_commit(topology, handle,
+                                   HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   topodepth = hwloc_topology_get_depth(topology);
@@ -248,9 +264,14 @@ int main(void)
       values[i*3+j] = 10;
     values[i*3+i] = 5;
   }
-  err = hwloc_distances_add(topology, 3, objs, values,
-			    HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
-			    0);
+  handle = hwloc_distances_add_create(topology, NULL,
+                                      HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      0);
+  assert(handle);
+  err = hwloc_distances_add_values(topology, handle, 3, objs, values, 0);
+  assert(!err);
+  err = hwloc_distances_add_commit(topology, handle,
+                                   0);
   assert(!err);
 
   /* check distances by kind */
@@ -343,9 +364,14 @@ int main(void)
   values[3+4*2] = 100;
   for(i=0; i<4; i++)
     values[i+4*i] = 1000;
-  err = hwloc_distances_add(topology, 4, objs, values,
-			    HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
-			    HWLOC_DISTANCES_ADD_FLAG_GROUP);
+  handle = hwloc_distances_add_create(topology, NULL,
+                                      HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      0);
+  assert(handle);
+  err = hwloc_distances_add_values(topology, handle, 4, objs, values, 0);
+  assert(!err);
+  err = hwloc_distances_add_commit(topology, handle,
+                                   HWLOC_DISTANCES_ADD_FLAG_GROUP);
   assert(!err);
 
   nr = 1;

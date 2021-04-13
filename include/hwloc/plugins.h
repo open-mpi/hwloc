@@ -624,6 +624,49 @@ HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, st
  */
 HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
+/** \brief Handle to a new distances structure during its addition to the topology. */
+typedef void * hwloc_backend_distances_add_handle_t;
+
+/** \brief Create a new empty distances structure.
+ *
+ * This is identical to hwloc_distances_add_create()
+ * but this variant is designed for backend inserting
+ * distances during topology discovery.
+ */
+HWLOC_DECLSPEC hwloc_backend_distances_add_handle_t
+hwloc_backend_distances_add_create(hwloc_topology_t topology,
+                                   const char *name, unsigned long kind,
+                                   unsigned long flags);
+
+/** \brief Specify the objects and values in a new empty distances structure.
+ *
+ * This is similar to hwloc_distances_add_values()
+ * but this variant is designed for backend inserting
+ * distances during topology discovery.
+ *
+ * The only semantical difference is that \p objs and \p values
+ * are not duplicated, but directly attached to the topology.
+ * On success, these arrays are given to the core and should not
+ * ever be freed by the caller anymore.
+ */
+HWLOC_DECLSPEC int
+hwloc_backend_distances_add_values(hwloc_topology_t topology,
+                                   hwloc_backend_distances_add_handle_t handle,
+                                   unsigned nbobjs, hwloc_obj_t *objs,
+                                   hwloc_uint64_t *values,
+                                   unsigned long flags);
+
+/** \brief Commit a new distances structure.
+ *
+ * This is similar to hwloc_distances_add_commit()
+ * but this variant is designed for backend inserting
+ * distances during topology discovery.
+ */
+HWLOC_DECLSPEC int
+hwloc_backend_distances_add_commit(hwloc_topology_t topology,
+                                   hwloc_backend_distances_add_handle_t handle,
+                                   unsigned long flags);
+
 /** @} */
 
 

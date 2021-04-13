@@ -1568,7 +1568,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     }
   }
 
-  hwloc_internal_distances_add_by_index(topology, name, unique_type, different_types, nbobjs, indexes, u64values, kind, 0);
+  hwloc_internal_distances_add_by_index(topology, name, unique_type, different_types, nbobjs, indexes, u64values, kind, 0 /* assume grouping was applied when this matrix was discovered before exporting to XML */);
 
   /* prevent freeing below */
   indexes = NULL;
