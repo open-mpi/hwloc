@@ -26,6 +26,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "    memattr <name> <initiator> <value>\n");
         fprintf(where, "    cpukind <cpuset> <efficiency> <flags> [<infoname> <infovalue>]\n");
         fprintf(where, "    distances-transform <name> links\n");
+        fprintf(where, "    distances-transform <name> merge-switch-ports\n");
+        fprintf(where, "    distances-transform <name> transitive-closure\n");
         fprintf(where, "    distances-transform <name> remove-obj <obj>\n");
         fprintf(where, "    distances-transform <name> replace-objs <oldtype <newtype>\n");
 	fprintf(where, "    none\n");
@@ -67,6 +69,8 @@ static int cleardistances = 0;
 
 static char *distances_transform_name = NULL;
 static int distances_transform_links = 0;
+static int distances_transform_merge_switch_ports = 0;
+static int distances_transform_closure = 0;
 static char *distances_transform_removeobj = NULL;
 static char *distances_transform_replace_oldtype = NULL;
 static char *distances_transform_replace_newtype = NULL;
@@ -356,6 +360,22 @@ static void transform_distances(hwloc_topology_t topology, int topodepth)
       goto out_with_dist;
     }
 
+  } else if (distances_transform_merge_switch_ports) {
+    /* merge switch ports */
+    err = hwloc_distances_transform(topology, dist, HWLOC_DISTANCES_TRANSFORM_MERGE_SWITCH_PORTS, NULL, 0);
+    if (err < 0) {
+      fprintf(stderr, "Failed to transform distances `%s' by merging switch ports\n", distances_transform_name);
+      goto out_with_dist;
+    }
+
+  } else if (distances_transform_closure) {
+    /* closure */
+    err = hwloc_distances_transform(topology, dist, HWLOC_DISTANCES_TRANSFORM_TRANSITIVE_CLOSURE, NULL, 0);
+    if (err < 0) {
+      fprintf(stderr, "Failed to transform distances `%s' through transitive closure\n", distances_transform_name);
+      goto out_with_dist;
+    }
+
   } else if (distances_transform_removeobj) {
     /* remove an object */
     hwloc_obj_t obj;
@@ -574,6 +594,10 @@ int main(int argc, char *argv[])
           distances_transform_name = argv[1];
           if (!strcmp(argv[2], "links")) {
             distances_transform_links = 1;
+          } else if (!strcmp(argv[2], "merge-switch-ports")) {
+            distances_transform_merge_switch_ports = 1;
+          } else if (!strcmp(argv[2], "transitive-closure")) {
+            distances_transform_closure = 1;
           } else if (!strcmp(argv[2], "remove-obj")) {
             if (argc < 4) {
               usage(callname, stderr);
