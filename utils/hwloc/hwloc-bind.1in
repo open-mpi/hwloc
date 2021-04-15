@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2020 Inria.  All rights reserved.
+.\" Copyright © 2009-2021 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -50,7 +50,7 @@ The default is \fB0\fR (or \fBnone\fR).
 \fB\-\-disallowed\fR
 Include objects disallowed by administrative limitations.
 .TP
-\fB--best-memattr\fR <name>
+\fB\-\-best\-memattr\fR <name>
 Select the best NUMA node among the given memory binding set by looking
 at the memory attribute given by \fI<name>\fR (or as an index).
 
@@ -64,7 +64,7 @@ All existing attributes in the current topology may be listed with
     $ lstopo --memattrs
 
 .TP
-\fB--hbm\fR
+\fB\-\-hbm\fR
 Only take high bandwidth memory nodes (Intel Xeon Phi MCDRAM)
 in account when looking for NUMA nodes in the input locations.
 
@@ -72,7 +72,7 @@ This option must be combined with NUMA node locations,
 such as \fI--hbm numa:1\fR for binding on the second HBM node.
 It may also be written as \fIhbm:1\fR.
 .TP
-\fB--no-hbm\fR
+\fB\-\-no\-hbm\fR
 Ignore high bandwidth memory nodes (Intel Xeon Phi MCDRAM)
 when looking for NUMA nodes in the input locations.
 .
@@ -131,7 +131,7 @@ When this option is not passed, individual input bitmasks may
 still be parsed as nodesets if they are prefixed with \fInodeset=\fR.
 
 .TP
-\fB\-e\fR \fB\-\-get-last-cpu-location\fR
+\fB\-e\fR \fB\-\-get\-last\-cpu\-location\fR
 Report the last processors where the process ran.
 The output is an opaque bitmask that may be translated into objects with hwloc-calc
 (see EXAMPLES below).
