@@ -1300,6 +1300,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
  out_with_groupids:
   free(groupids);
 }
+
 static int
 hwloc__distances_transform_remove_null(struct hwloc_distances_s *distances)
 {
@@ -1380,8 +1381,102 @@ hwloc__distances_transform_links(struct hwloc_distances_s *distances)
   return 0;
 }
 
+static __hwloc_inline int is_nvswitch(hwloc_obj_t obj)
+{
+  return obj && obj->subtype && !strcmp(obj->subtype, "NVSwitch");
+}
+
+static int
+hwloc__distances_transform_merge_switch_ports(hwloc_topology_t topology,
+                                              struct hwloc_distances_s *distances)
+{
+  struct hwloc_internal_distances_s *dist = hwloc__internal_distances_from_public(topology, distances);
+  hwloc_obj_t *objs = distances->objs;
+  hwloc_uint64_t *values = distances->values;
+  unsigned first, i, j, nbobjs = distances->nbobjs;
+
+  if (strcmp(dist->name, "NVLinkBandwidth")) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  /* find the first port */
+  first = (unsigned) -1;
+  for(i=0; i<nbobjs; i++)
+    if (is_nvswitch(objs[i])) {
+      first = i;
+      break;
+    }
+  if (first == (unsigned)-1) {
+    errno = ENOENT;
+    return -1;
+  }
+
+  for(j=i+1; j<nbobjs; j++) {
+    if (is_nvswitch(objs[j])) {
+      /* another port, merge it */
+      unsigned k;
+      for(k=0; k<nbobjs; k++) {
+        if (k==i || k==j)
+          continue;
+        values[k*nbobjs+i] += values[k*nbobjs+j];
+        values[k*nbobjs+j] = 0;
+        values[i*nbobjs+k] += values[j*nbobjs+k];
+        values[j*nbobjs+k] = 0;
+      }
+      values[i*nbobjs+i] += values[j*nbobjs+j];
+      values[j*nbobjs+j] = 0;
+    }
+    /* the caller will also call REMOVE_NULL to remove other ports */
+    objs[j] = NULL;
+  }
+
+  return 0;
+}
+
+static int
+hwloc__distances_transform_transitive_closure(hwloc_topology_t topology,
+                                              struct hwloc_distances_s *distances)
+{
+  struct hwloc_internal_distances_s *dist = hwloc__internal_distances_from_public(topology, distances);
+  hwloc_obj_t *objs = distances->objs;
+  hwloc_uint64_t *values = distances->values;
+  unsigned nbobjs = distances->nbobjs;
+  unsigned i, j, k;
+
+  if (strcmp(dist->name, "NVLinkBandwidth")) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  for(i=0; i<nbobjs; i++) {
+    hwloc_uint64_t bw_i2sw = 0;
+    if (is_nvswitch(objs[i]))
+      continue;
+    /* count our BW to the switch */
+    for(k=0; k<nbobjs; k++)
+      if (is_nvswitch(objs[k]))
+        bw_i2sw += values[i*nbobjs+k];
+
+    for(j=0; j<nbobjs; j++) {
+      hwloc_uint64_t bw_sw2j = 0;
+      if (i == j || is_nvswitch(objs[j]))
+        continue;
+      /* count our BW from the switch */
+      for(k=0; k<nbobjs; k++)
+        if (is_nvswitch(objs[k]))
+          bw_sw2j += values[k*nbobjs+j];
+
+      /* bandwidth from i to j is now min(i2sw,sw2j) */
+      values[i*nbobjs+j] = bw_i2sw > bw_sw2j ? bw_sw2j : bw_i2sw;
+    }
+  }
+
+  return 0;
+}
+
 int
-hwloc_distances_transform(hwloc_topology_t topology __hwloc_attribute_unused,
+hwloc_distances_transform(hwloc_topology_t topology,
                           struct hwloc_distances_s *distances,
                           enum hwloc_distances_transform_e transform,
                           void *transform_attr,
@@ -1397,6 +1492,16 @@ hwloc_distances_transform(hwloc_topology_t topology __hwloc_attribute_unused,
     return hwloc__distances_transform_remove_null(distances);
   case HWLOC_DISTANCES_TRANSFORM_LINKS:
     return hwloc__distances_transform_links(distances);
+  case HWLOC_DISTANCES_TRANSFORM_MERGE_SWITCH_PORTS:
+  {
+    int err;
+    err = hwloc__distances_transform_merge_switch_ports(topology, distances);
+    if (!err)
+      err = hwloc__distances_transform_remove_null(distances);
+    return err;
+  }
+  case HWLOC_DISTANCES_TRANSFORM_TRANSITIVE_CLOSURE:
+    return hwloc__distances_transform_transitive_closure(topology, distances);
   default:
     errno = EINVAL;
     return -1;

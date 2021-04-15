@@ -210,7 +210,23 @@ enum hwloc_distances_transform_e {
    *
    * \hideinitializer
    */
-  HWLOC_DISTANCES_TRANSFORM_LINKS = 1
+  HWLOC_DISTANCES_TRANSFORM_LINKS = 1,
+
+  /** \brief Merge switches with multiple ports into a single object.
+   * This currently only applies to NVSwitches where GPUs seem connected to different
+   * separate switch ports in the NVLinkBandwidth matrix. This transformation will
+   * replace all of them with the same port connected to all GPUs.
+   * Other ports are removed by applying ::HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL internally.
+   * \hideinitializer
+   */
+  HWLOC_DISTANCES_TRANSFORM_MERGE_SWITCH_PORTS = 2,
+
+  /** \brief Apply a transitive closure to the matrix to connect objects across switches.
+   * This currently only applies to GPUs and NVSwitches in the NVLinkBandwidth matrix.
+   * All pairs of GPUs will be reported as directly connected.
+   * \hideinitializer
+   */
+  HWLOC_DISTANCES_TRANSFORM_TRANSITIVE_CLOSURE = 3
 };
 
 /** \brief Apply a transformation to a distances structure.

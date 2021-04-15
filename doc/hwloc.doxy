@@ -2129,6 +2129,12 @@ to transform this matrix into something more convenient,
 for instance by replacing NVML devices with OpenCL or PCI devices,
 by removing switches or CPU ports,
 or by replacing bandwidths with numbers of links between peers.
+
+When a NVSwitch interconnects GPUs, only links between one GPU and
+different NVSwitch ports are reported. They may be merged into a single
+switch port with hwloc_distances_transform() or the hwloc-annotate.
+Or a transitive closure may also be applied to report the bandwidth
+between GPUs across the NVSwitch.
 </dl>
 
 Users may also specify their own matrices between any set of objects,
