@@ -46,6 +46,8 @@ extern "C" {
  * For instance, if there is a single NUMA node per Package,
  * hwloc_get_obj_with_same_locality() may be used to convert between them
  * and replace NUMA nodes in the \p objs array with the corresponding Packages.
+ * See also hwloc_distances_transform() for applying some transformations
+ * to the structure.
  */
 struct hwloc_distances_s {
   unsigned nbobjs;		/**< \brief Number of objects described by the distance matrix. */
