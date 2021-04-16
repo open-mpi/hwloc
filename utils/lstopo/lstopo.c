@@ -406,6 +406,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  --distances           Only show distance matrices\n");
+  fprintf (where, "  --distances-transform <links|merge-switch-ports|transitive-closure>\n");
+  fprintf (where, "                        Transform distances before displaying them\n");
   fprintf (where, "  --memattrs            Only show memory attributes\n");
   fprintf (where, "  --cpukinds            Only show CPU kinds\n");
 #ifdef HWLOC_WIN_SYS
@@ -749,6 +751,7 @@ main (int argc, char *argv[])
   loutput.show_only = HWLOC_OBJ_TYPE_NONE;
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
+  loutput.transform_distances = -1;
 
   loutput.nr_cpukind_styles = 0;
 
@@ -814,6 +817,20 @@ main (int argc, char *argv[])
 	loutput.verbose_mode--;
       } else if (!strcmp (argv[0], "--distances")) {
 	loutput.show_distances_only = 1;
+      } else if (!strcmp (argv[0], "--distances-transform")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+        if (!strcmp (argv[1], "links"))
+          loutput.transform_distances = HWLOC_DISTANCES_TRANSFORM_LINKS;
+        else if (!strcmp (argv[1], "merge-switch-ports"))
+          loutput.transform_distances = HWLOC_DISTANCES_TRANSFORM_MERGE_SWITCH_PORTS;
+        else if (!strcmp (argv[1], "transitive-closure"))
+          loutput.transform_distances = HWLOC_DISTANCES_TRANSFORM_TRANSITIVE_CLOSURE;
+        else {
+          fprintf(stderr, "Unrecognized argument `%s' passed to --distances-transform\n", argv[1]);
+          goto out_usagefailure;
+        }
+        opt = 1;
       } else if (!strcmp (argv[0], "--memattrs")) {
         loutput.show_memattrs_only = 1;
       } else if (!strcmp (argv[0], "--cpukinds")) {

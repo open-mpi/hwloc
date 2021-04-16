@@ -23,6 +23,7 @@ _lstopo() {
 		   -v --verbose
 		   -s --silent
 		   --distances
+		   --distances-transform
 		   --memattrs
 		   --cpukinds
 		   --windows-processor-groups
@@ -133,6 +134,9 @@ _lstopo() {
 		;;
 	    --children-order)
 		COMPREPLY=( `compgen -W "plain memoryabove" -- "$cur"` )
+		;;
+	    --distances-transform)
+	        COMPREPLY=( `compgen -W "links merge-switch-ports transitive-closure" -- "$cur"` )
 		;;
 	esac
     fi

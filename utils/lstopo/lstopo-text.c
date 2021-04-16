@@ -232,6 +232,8 @@ static void output_distances(struct lstopo_output *loutput)
       const char *name = hwloc_distances_get_name(topology, dist[j]);
       if (!name)
         name = "(null)";
+      if (loutput->transform_distances != -1)
+        hwloc_distances_transform(topology, dist[j], loutput->transform_distances, NULL, 0);
       if (dist[j]->kind & HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES) {
 	fprintf(output, "Relative %s matrix (name %s kind %lu) between %u heterogeneous objects by %s indexes:\n",
 		kindmeans, name, dist[j]->kind,

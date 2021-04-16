@@ -90,6 +90,12 @@ Reduce the amount of details to show.
 \fB\-\-distances\fR
 Only display distance matrices.
 .TP
+\fB\-\-distances-transform\fR <links|merge-switch-ports|transitive-closure>
+Try applying a transformation to distances structures before displaying them.
+See hwloc_distances_transform() for details.
+More transformations may be applied using hwloc-annotate(1)
+(and it may save their output to XML).
+.TP
 \fB\-\-memattrs\fR
 Only display memory attributes.
 All of them are displayed (while the default textual output selects

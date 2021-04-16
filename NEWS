@@ -25,7 +25,7 @@ Version 2.5.0
     with same locality, for instance NUMA nodes and Packages,
     or OS devices within a PCI device.
   + Add hwloc_distances_transform() to modify distances structures.
-    - hwloc-annotate has a new similar distances-transform command.
+    - hwloc-annotate and lstopo have new distances-transform options.
   + Add hwloc_distances_add() is replaced with _add_create() followed
     by _add_values() and _add_commit(). See hwloc/distances.h for details.
 * Backends

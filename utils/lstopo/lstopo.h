@@ -94,6 +94,7 @@ struct lstopo_output {
   hwloc_obj_type_t show_only;
   int show_cpuset;
   int show_taskset;
+  int transform_distances;
 
   /* draw config */
   char title[256];
