@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
 .\" Copyright © 2010 Jirka Hladky
-.\" Copyright © 2010-2019 Inria.  All rights reserved.
+.\" Copyright © 2010-2021 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-GATHER-TOPOLOGY "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -32,6 +32,10 @@ The gathering requires root access, and the dmi-sysfs kernel module should be lo
 .TP
 \fB\-\-no\-cpuid\fR
 Do not gather x86 CPUID dump using \fIhwloc\-gather\-cpuid\fR.
+.
+.TP
+\fB\-\-keep\fR
+Keep the temporary copy of dumped files instead of destroying it.
 .
 .TP
 \fB\-h\fR \fB\-\-help\fR
