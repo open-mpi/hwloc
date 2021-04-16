@@ -382,6 +382,7 @@ static void transform_distances(hwloc_topology_t topology, int topodepth)
     /* replace some objects */
     hwloc_obj_type_t old_type, new_type;
     char *old_subtype, *new_subtype;
+    int replace_with_NULL;
     unsigned i;
 
     assert(distances_transform_replace_newtype);
@@ -392,26 +393,42 @@ static void transform_distances(hwloc_topology_t topology, int topodepth)
     } else {
       old_subtype = NULL;
     }
-    if (hwloc_type_sscanf(distances_transform_replace_newtype, &new_type, NULL, 0) < 0) {
-      new_type = HWLOC_OBJ_OS_DEVICE;
-      new_subtype = distances_transform_replace_newtype;
+
+    if (!strcasecmp(distances_transform_replace_newtype, "null")) {
+      replace_with_NULL = 1;
     } else {
-      new_subtype = NULL;
+      replace_with_NULL = 0;
+      if (hwloc_type_sscanf(distances_transform_replace_newtype, &new_type, NULL, 0) < 0) {
+        new_type = HWLOC_OBJ_OS_DEVICE;
+        new_subtype = distances_transform_replace_newtype;
+      } else {
+        new_subtype = NULL;
+      }
     }
+
     for(i=0; i<dist->nbobjs; i++) {
       hwloc_obj_t new, old = dist->objs[i];
       if (old->type != old_type)
         continue;
       if (old_subtype && (!old->subtype || strcasecmp(old_subtype, old->subtype)))
         continue;
-      new = hwloc_get_obj_with_same_locality(topology, old,
-                                             new_type, new_subtype, NULL, 0);
-      if (!new)
-        continue;
-      printf("Replacing object #%u in distances structures `%s'\n",
-             i, distances_transform_name);
+      if (replace_with_NULL) {
+        new = NULL;
+        printf("Replacing object #%u in distances structures `%s' with NULL\n",
+               i, distances_transform_name);
+      } else {
+        new = hwloc_get_obj_with_same_locality(topology, old,
+                                               new_type, new_subtype, NULL, 0);
+        if (!new)
+          continue;
+        printf("Replacing object #%u in distances structures `%s'\n",
+               i, distances_transform_name);
+      }
       dist->objs[i] = new;
     }
+
+    if (replace_with_NULL)
+      err = hwloc_distances_transform(topology, dist, HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL, NULL, 0);
   }
 
   handle = hwloc_distances_add_create(topology, distances_transform_name, dist->kind, 0);
