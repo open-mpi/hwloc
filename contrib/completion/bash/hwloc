@@ -54,6 +54,7 @@ _lstopo() {
 		   --fontsize
 		   --gridsize
 		   --linespacing
+		   --thickness
 		   --horiz --horiz=
 		   --vert --vert=
 		   --rect --rect=
@@ -117,7 +118,7 @@ _lstopo() {
 	    --allow)
 		COMPREPLY=( `compgen -W "all local <mask> nodeset=<mask>" -- "$cur"` )
 		;;
-	    --restrict-flags | --export-xml-flags | --export-synthetic-flags | --fontsize | --gridsize | --linespacing)
+	    --restrict-flags | --export-xml-flags | --export-synthetic-flags | --fontsize | --gridsize | --linespacing | --thickness)
 		COMPREPLY=( "<integer>" "" )
 		;;
 	    --append-legend)
