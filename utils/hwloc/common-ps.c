@@ -253,10 +253,73 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 #define pclose _pclose
 #endif
 
+static int
+hwloc_ps_pidcmd__from_env(struct hwloc_ps_process *proc,
+                          const char *envname, size_t envnamelen,
+                          const char *buffer)
+{
+  const char *cur = buffer;
+  while (*cur) {
+    size_t len;
+    if (!strncmp(cur, envname, envnamelen)) {
+      /* copy the entire "name=value" instead of only the value
+       * so that users know which variable was used.
+       */
+      strncpy(proc->string, cur, sizeof(proc->string));
+      proc->string[sizeof(proc->string)-1] = '\0';
+      return 0;
+    }
+    len = strlen(cur);
+    cur += len + 1;
+  }
+  return -1;
+}
+
+static void
+hwloc_ps_pidcmd_from_env(struct hwloc_ps_process *proc,
+                         unsigned nr_env, const char *env[])
+{
+  char path[64]; /* enough for "/proc/%ld/environ" */
+  char buffer[65536]; /* should be enough for the vast majority of cases */
+  FILE *file;
+  size_t len;
+  unsigned i;
+
+  snprintf(path, sizeof(path), "/proc/%ld/environ", proc->pid);
+  file = fopen(path, "r");
+  if (!file)
+    return;
+  len = fread(buffer, 1, sizeof(buffer)-2, file);
+  fclose(file);
+  if (!len)
+    return;
+
+  /* we must end with 2 '\0', one for the current variable if truncated, and one for an empty variable ending the environment array */
+  buffer[len] = '\0';
+  buffer[len+1] = '\0';
+
+  for(i=0; i<nr_env; i++)
+    if (hwloc_ps_pidcmd__from_env(proc, env[i], strlen(env[i]), buffer) == 0)
+      return;
+}
+
 void hwloc_ps_pidcmd(struct hwloc_ps_process *proc, const char *pidcmd)
 {
   char *cmd;
   FILE *file;
+
+  if (!strcmp(pidcmd, "mpirank")) {
+    /* SLURM_PROCID works in srun, but not in salloc+mpirun (returns the node ID?), hence use it as a last fallback */
+    const char *envs[] = { "OMPI_COMM_WORLD_RANK", "PMIX_RANK", "PMI_RANK", "SLURM_PROCID" };
+    hwloc_ps_pidcmd_from_env(proc, sizeof(envs)/sizeof(*envs), envs);
+    return;
+  }
+  if (!strncmp(pidcmd, "env=", 4)) {
+    const char *env = pidcmd+4;
+    hwloc_ps_pidcmd_from_env(proc, 1, &env);
+    return;
+  }
+
   cmd = malloc(strlen(pidcmd)+1+5+2+1);
   sprintf(cmd, "%s %u", pidcmd, (unsigned) proc->pid);
   file = popen(cmd, "r");

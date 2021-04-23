@@ -57,6 +57,8 @@ Version 2.5.0
     command path.
   + hwloc-ps now has a --single-ancestor option to return a single
     (possibly too large) object where a process is bound.
+  + hwloc-ps --pid-cmd may now query environment variables,
+    including MPI-specific variables to find out process ranks.
 
 
 Version 2.4.1

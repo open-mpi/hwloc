@@ -74,6 +74,15 @@ For each displayed process ID, execute the command \fI<cmd> <pid>\fR
 and append \fBthe first line\fR of its output to the regular hwloc-ps
 line.
 .TP
+\fB\-\-pid\-cmd env=<name>\fR
+On Linux, try to read the value of environment variable \fIname\fR
+in each process and display it at the end of the line.
+.TP
+\fB\-\-pid\-cmd mpirank\fR
+On Linux, try to find the process MPI rank (by querying some widespread
+environment variables) and display it at the end of the line.
+
+.TP
 \fB\-\-json\-server\fR
 Run the tool as a JSON server that waits for other process' requests
 on a port and sends back binding information.
@@ -159,16 +168,37 @@ it only appears in the thread-aware output (or if explicitly selected):
     $ hwloc-ps --pid 4759
     4759	Machine:0		myprogram
 
-To display the binding of already running MPI processes (launched by
-Open MPI) and append their MPI rank (in MPI_COMM_WORLD) to each line:
+On Linux, hwloc-ps may also display some process specific environment
+variable at the end of the line. This is for instance useful
+for identify MPI ranks among processes:
+
+    $ hwloc-ps --pid-cmd env=OMPI_COMM_WORLD_RANK
+    29093	PU:0	myprogram	OMPI_COMM_WORLD_RANK=0
+    29094	PU:2	myprogram	OMPI_COMM_WORLD_RANK=1
+    29095	PU:1	myprogram	OMPI_COMM_WORLD_RANK=2
+    29096	PU:3	myprogram	OMPI_COMM_WORLD_RANK=3
+
+Some widespread MPI specific environment variables
+(OMPI_COMM_WORLD_RANK, PMIX_RANK, PMI_RANK and SLURM_PROCID)
+are actually directly recognized by hwloc-ps when requesting the \fImpirank\fR command:
+
+    $ hwloc-ps --pid-cmd mpirank
+    29093	PU:0	myprogram	PMIX_RANK=0
+    29094	PU:2	myprogram	PMIX_RANK=1
+    29095	PU:1	myprogram	PMIX_RANK=2
+    29096	PU:3	myprogram	PMIX_RANK=3
+
+Beside reading environment variables, hwloc-ps may also append
+the output of a custom program. Again, for reading the Open MPI
+process rank:
 
     $ hwloc-ps --pid-cmd myscript
-    29093	L1dCache:0	myprogram	OMPI_COMM_WORLD_RANK=0
-    29094	L1dCache:2	myprogram	OMPI_COMM_WORLD_RANK=1
-    29095	L1dCache:1	myprogram	OMPI_COMM_WORLD_RANK=2
-    29096	L1dCache:3	myprogram	OMPI_COMM_WORLD_RANK=3
+    29093	PU:0	myprogram	OMPI_COMM_WORLD_RANK=0
+    29094	PU:2	myprogram	OMPI_COMM_WORLD_RANK=1
+    29095	PU:1	myprogram	OMPI_COMM_WORLD_RANK=2
+    29096	PU:3	myprogram	OMPI_COMM_WORLD_RANK=3
 
-where \fBmyscript\fR is a bash script doing:
+where \fBmyscript\fR is a shell script doing:
 
     #!/bin/sh
     cat /proc/$1/environ 2>/dev/null | xargs --null --max-args=1 echo | grep OMPI_COMM_WORLD_RANK
