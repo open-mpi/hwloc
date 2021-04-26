@@ -479,6 +479,7 @@ void usage(const char *name, FILE *where)
   /* --shmem-output-addr is undocumented on purpose */
   fprintf (where, "  --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "  --version             Report version and exit\n");
+  fprintf (where, "  -h --help             Show this usage\n");
 }
 
 void lstopo_show_interactive_help(void)

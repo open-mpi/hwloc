@@ -55,6 +55,7 @@ usage()
    echo "  --no-cpuid  Do not gather x86 CPUID using hwloc-gather-cpuid"
    echo "  --keep      Keep the temporary copy of dumped files"
    echo "  --version   Report version and exit"
+   echo "  -h --help   Show this usage"
    echo "Example:"
    echo "  $0 /tmp/\$(uname -n)"
 }

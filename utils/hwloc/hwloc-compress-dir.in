@@ -31,6 +31,7 @@ usage()
 	echo "  -R --reverse        Uncompress instead of compressing"
 	echo "  -v --verbose        Display verbose messages"
 	echo "  --version           Report version and exit"
+	echo "  -h --help           Show this usage"
 }
 
 while test $# -gt 0 ; do

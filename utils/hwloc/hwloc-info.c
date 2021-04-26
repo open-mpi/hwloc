@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -71,6 +71,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -p --physical         Use physical object indexes for input\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --version             Report version and exit\n");
+  fprintf (where, "  -h --help             Show this usage\n");
 }
 
 static void

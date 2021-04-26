@@ -68,6 +68,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --json-port <n>    Use port <n> for JSON server (default is %d)\n", JSON_PORT);
   fprintf (where, "  -v --verbose       Increase verbosity\n");
   fprintf (where, "  --version          Report version and exit\n");
+  fprintf (where, "  -h --help          Show this usage\n");
 }
 
 static void print_task(hwloc_topology_t topology,

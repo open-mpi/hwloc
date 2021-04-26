@@ -35,6 +35,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -v --verbose     Show verbose messages\n");
   fprintf(where, "  --version        Report version and exit\n");
+  fprintf(where, "  -h --help        Show this usage\n");
 }
 
 int main(int argc, char *argv[])

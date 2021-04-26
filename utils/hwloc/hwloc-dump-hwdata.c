@@ -28,6 +28,7 @@ static void usage(const char *name, FILE *where)
     fprintf (where, "Options:\n");
     fprintf (where, "  -o <dir>      Output files to directory <dir> instead of " DEFAULT_DUMP_DIR "\n");
     fprintf (where, "  --version     Report version and exit\n");
+    fprintf (where, "  -h --help     Show this usage\n");
 }
 
 int main(int argc, char *argv[])

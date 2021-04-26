@@ -35,6 +35,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "  --cu\tClear existing userdata\n");
 	fprintf(where, "  --cd\tClear existing distances\n");
         fprintf(where, "  --version\tReport version and exit\n");
+        fprintf(where, "  -h --help\tShow this usage\n");
 }
 
 static char *infoname = NULL, *infovalue = NULL;

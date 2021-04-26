@@ -14,6 +14,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "Options:\n");
 	fprintf(where, "  -R --reverse     Reverse the sense of the difference\n");
 	fprintf(where, "  --version        Report version and exit\n");
+        fprintf(where, "  -h --help        Show this usage\n");
 }
 
 static int hwloc_diff_read(const char *inputdiff,

@@ -64,6 +64,7 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  -q --quiet     Hide non-fatal error messages\n");
   fprintf(where, "  -v --verbose   Show verbose messages\n");
   fprintf(where, "  --version      Report version and exit\n");
+  fprintf(where, "  -h --help      Show this usage\n");
 }
 
 int main(int argc, char *argv[])
