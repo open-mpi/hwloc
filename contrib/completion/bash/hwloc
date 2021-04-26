@@ -405,6 +405,7 @@ complete -F _hwloc_patch hwloc-patch
 _hwloc_compress_dir(){
     local OPTIONS=(-R --reverse
 		   -v --verbose
+		   --version
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
