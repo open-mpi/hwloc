@@ -354,7 +354,7 @@ complete -F _hwloc_calc hwloc-calc
 
 
 _hwloc_annotate(){
-    local OPTIONS=(--ci --ri --cu --cd -h --help)
+    local OPTIONS=(--ci --ri --cu --cd --version -h --help)
     local cur=${COMP_WORDS[COMP_CWORD]}
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then

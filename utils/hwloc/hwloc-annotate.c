@@ -34,6 +34,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "  --ri\tReplace or remove existing infos with same name (annotation must be info)\n");
 	fprintf(where, "  --cu\tClear existing userdata\n");
 	fprintf(where, "  --cd\tClear existing distances\n");
+        fprintf(where, "  --version\tReport version and exit\n");
 }
 
 static char *infoname = NULL, *infovalue = NULL;
@@ -467,6 +468,10 @@ int main(int argc, char *argv[])
 			clearuserdata = 1;
 		else if (!strcmp(argv[0], "--cd"))
 			cleardistances = 1;
+                else if (!strcmp (argv[0], "--version")) {
+                  printf("%s %s\n", callname, HWLOC_VERSION);
+                  exit(EXIT_SUCCESS);
+                }
 		else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
 			usage(callname, stdout);
 			exit(EXIT_SUCCESS);
