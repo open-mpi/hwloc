@@ -447,6 +447,7 @@ void usage(const char *callname, FILE *where)
   fprintf(where, "Options:\n");
   fprintf(where, "  -c <n>       Only gather for logical processor with logical index <n>\n");
   fprintf(where, "  -s --silent  Do not show verbose messages\n");
+  fprintf(where, "  --version    Report version and exit\n");
   fprintf(where, "  -h --help    Show this usage\n");
 }
 
@@ -487,6 +488,9 @@ int main(int argc, const char * const argv[])
       verbose--;
       argc--;
       argv++;
+    } else if (!strcmp (argv[0], "--version")) {
+      printf("%s %s\n", callname, HWLOC_VERSION);
+      exit(EXIT_SUCCESS);
     } else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
       usage(callname, stdout);
       goto out;

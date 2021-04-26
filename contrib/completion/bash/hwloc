@@ -514,6 +514,7 @@ complete -F _hwloc_ps hwloc-ps
 _hwloc_gather_cpuid(){
     local OPTIONS=(-c
 		   -s --silent
+		   --version
 		   -h --help
 		   )
     local cur=${COMP_WORDS[COMP_CWORD]}
