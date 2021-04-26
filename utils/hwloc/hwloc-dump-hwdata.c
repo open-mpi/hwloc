@@ -27,6 +27,7 @@ static void usage(const char *name, FILE *where)
     fprintf (where, "Usage: %s [ options ] ...\n", name);
     fprintf (where, "Options:\n");
     fprintf (where, "  -o <dir>      Output files to directory <dir> instead of " DEFAULT_DUMP_DIR "\n");
+    fprintf (where, "  --version     Report version and exit\n");
 }
 
 int main(int argc, char *argv[])
@@ -47,6 +48,9 @@ int main(int argc, char *argv[])
     while (argc) {
       if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
         usage(callname, stdout);
+        exit(EXIT_SUCCESS);
+      } else if (!strcmp (argv[0], "--version")) {
+        printf("%s %s\n", callname, HWLOC_VERSION);
         exit(EXIT_SUCCESS);
       } else if (!strcmp(argv[0], "-o")) {
         if (argc == 1) {
