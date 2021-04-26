@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Inria.  All rights reserved.
+ * Copyright © 2013-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -71,7 +71,12 @@ int main(int argc, char *argv[])
 	char *callname, *input, *inputdiff, *output = NULL, *refname = NULL;
 	int err;
 
-	callname = argv[0];
+        callname = strrchr(argv[0], '/');
+        if (!callname)
+          callname = argv[0];
+        else
+          callname++;
+
 	/* skip argv[0], handle options */
 	argc--;
 	argv++;

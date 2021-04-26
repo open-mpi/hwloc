@@ -462,7 +462,12 @@ int main(int argc, const char * const argv[])
   int err;
   int ret = EXIT_SUCCESS;
 
-  callname = argv[0];
+  callname = strrchr(argv[0], '/');
+  if (!callname)
+    callname = argv[0];
+  else
+    callname++;
+
   argc--; argv++;
 
   hwloc_utils_check_api_version(callname);

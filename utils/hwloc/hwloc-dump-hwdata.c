@@ -1,6 +1,6 @@
 /*
  * Copyright © 2015 Intel, Inc.  All rights reserved.
- * Copyright © 2015-2018 Inria.  All rights reserved.
+ * Copyright © 2015-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -31,11 +31,17 @@ static void usage(const char *name, FILE *where)
 
 int main(int argc, char *argv[])
 {
-    const char *callname = argv[0];
+    const char *callname;
     char *dirname = (char *) DEFAULT_DUMP_DIR;
     const char *input_fsroot;
     char *filename;
     int err;
+
+    callname = strrchr(argv[0], '/');
+    if (!callname)
+      callname = argv[0];
+    else
+      callname++;
 
     argv++; argc--;
     while (argc) {

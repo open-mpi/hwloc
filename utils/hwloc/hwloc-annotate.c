@@ -443,7 +443,12 @@ int main(int argc, char *argv[])
 	int topodepth;
 	int err;
 
-	callname = argv[0];
+        callname = strrchr(argv[0], '/');
+        if (!callname)
+          callname = argv[0];
+        else
+          callname++;
+
 	/* skip argv[0], handle options */
 	argc--;
 	argv++;

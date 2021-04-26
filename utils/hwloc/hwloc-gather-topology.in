@@ -45,7 +45,7 @@ error()
 
 usage()
 {
-   echo "$0 [options] <savepath>"
+   echo `basename $0`" [options] <savepath>"
    echo "  Saves the Linux topology files (/sys, /proc, ...) under <savepath>.tar.bz2"
    echo "  and the corresponding lstopo verbose output under <savepath>.output"
    echo "Options:"

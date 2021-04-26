@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2013-2018 Inria.  All rights reserved.
+# Copyright © 2013-2021 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -24,7 +24,7 @@ error()
 
 usage()
 {
-	echo "$0 [options] <inputdir> <outputdir>"
+	echo `basename $0`" [options] <inputdir> <outputdir>"
 	echo "  Compress topologies from <inputdir> into <outputdir>"
 	echo "Options:"
 	echo "  -R --reverse        Uncompress instead of compressing"
