@@ -538,6 +538,7 @@ _hwloc_gather_topology(){
 		   --dmi
 		   --no-cpuid
 		   --keep
+		   --version
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}

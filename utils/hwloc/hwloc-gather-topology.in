@@ -9,6 +9,7 @@
 # See COPYING in top-level directory.
 #
 
+HWLOC_VERSION="@HWLOC_VERSION@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
@@ -53,6 +54,7 @@ usage()
    echo "  --dmi       Gather SMBIOS files. Works only when run as root. Requires dmi-sysfs kernel module"
    echo "  --no-cpuid  Do not gather x86 CPUID using hwloc-gather-cpuid"
    echo "  --keep      Keep the temporary copy of dumped files"
+   echo "  --version   Report version and exit"
    echo "Example:"
    echo "  $0 /tmp/\$(uname -n)"
 }
@@ -63,6 +65,7 @@ while [ x`echo "$1" | cut -c1` = x- ] ; do
   --dmi) gatherdmi=1;;
   --no-cpuid) gathercpuid=0;;
   --keep) keep=1;;
+  --version) echo `basename $0`" $HWLOC_VERSION"; exit 0;;
   -h|--help) usage; exit 0;;
   *) echo "Unrecognized option: $1"; usage; exit 1;;
   esac
