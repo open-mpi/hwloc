@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.4.2
+-------------
+* Add support for NUMA node 0 being offline in Linux, thanks to Jirka Hladky.
+
+
 Version 2.4.1
 -------------
 * Fix AMD OpenCL device locality when PCI bus or device number >= 128.
