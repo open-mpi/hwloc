@@ -480,6 +480,7 @@ _hwloc_ps(){
 		   --json-server
 		   --json-port
 		   -v --verbose
+		   --version
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}

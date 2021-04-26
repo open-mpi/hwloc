@@ -67,6 +67,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --json-server      Run as a JSON server\n");
   fprintf (where, "  --json-port <n>    Use port <n> for JSON server (default is %d)\n", JSON_PORT);
   fprintf (where, "  -v --verbose       Increase verbosity\n");
+  fprintf (where, "  --version          Report version and exit\n");
 }
 
 static void print_task(hwloc_topology_t topology,
@@ -462,6 +463,10 @@ int main(int argc, char *argv[])
 
     } else if (!strcmp (argv[0], "--short-name")) {
       psflags |= HWLOC_PS_FLAG_SHORTNAME;
+
+    } else if (!strcmp (argv[0], "--version")) {
+      printf("%s %s\n", callname, HWLOC_VERSION);
+      exit(EXIT_SUCCESS);
 
     } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
       usage (callname, stderr);
