@@ -63,7 +63,8 @@ sysfs_outputs = \
 		nvidiagpunumanodes.kept.output \
 		fakememinitiators-1np2c+1npp+gi.output \
 		fakecpuid1f-64intel64-2p4d2n2c2t.output \
-		fakeheterocpunuma.output
+		fakeheterocpunuma.output \
+		offline-cpu0-node0.output
 
 if HWLOC_HAVE_32BITS_PCI_DOMAIN
 sysfs_outputs += 2pa-pcidomain32bits.output
@@ -133,7 +134,8 @@ sysfs_tarballs = \
 		nvidiagpunumanodes.kept.source \
 		fakememinitiators-1np2c+1npp+gi.tar.bz2 \
 		fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2 \
-		fakeheterocpunuma.tar.bz2
+		fakeheterocpunuma.tar.bz2 \
+		offline-cpu0-node0.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
 sysfs_excludes = 
