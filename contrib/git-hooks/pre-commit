@@ -18,6 +18,13 @@ else
    echo "=== No check-versions.sh script -- skipping"
 fi
 
+if test -f contrib/git-hooks/check-manpages-completions.pl; then
+   echo "=== Checking manpages and completions..."
+   ./contrib/git-hooks/check-manpages-completions.pl || die $? "Manpages or completions are not up to date"
+else
+   echo "=== No check-manpages-completions.pl script -- skipping"
+fi
+
 # If we have a copyright-checking script, run it
 if test -x ./contrib/update-my-copyright.pl; then
    echo "=== Checking copyrights..."
