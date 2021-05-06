@@ -93,6 +93,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 
     for(j=0; j<nbdevices; j++) {
       zes_device_properties_t prop;
+      unsigned nr_cqprops;
       zes_pci_properties_t pci;
       zes_device_handle_t sdvh = dvh[j];
       hwloc_obj_t osdev, parent;
@@ -139,6 +140,27 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       if (strcmp((const char *) prop.boardNumber, "Unknown"))
         hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop.boardNumber);
 
+      nr_cqprops = 0;
+      res = zeDeviceGetCommandQueueGroupProperties(dvh[j], &nr_cqprops, NULL);
+      if (res == ZE_RESULT_SUCCESS && nr_cqprops) {
+        ze_command_queue_group_properties_t *cqprops;
+        cqprops = malloc(nr_cqprops * sizeof(*cqprops));
+        if (cqprops) {
+          res = zeDeviceGetCommandQueueGroupProperties(dvh[j], &nr_cqprops, cqprops);
+          if (res == ZE_RESULT_SUCCESS) {
+            char tmp[32];
+            snprintf(tmp, sizeof(tmp), "%u", nr_cqprops);
+            hwloc_obj_add_info(osdev, "LevelZeroCQGroups", tmp);
+            for(k=0; k<nr_cqprops; k++) {
+              char name[32];
+              snprintf(name, sizeof(name), "LevelZeroCQGroup%u", k);
+              snprintf(tmp, sizeof(tmp), "%u*0x%lx", (unsigned) cqprops[k].numQueues, (unsigned long) cqprops[k].flags);
+              hwloc_obj_add_info(osdev, name, tmp);
+            }
+          }
+          free(cqprops);
+        }
+      }
 
       parent = NULL;
       res = zesDevicePciGetProperties(sdvh, &pci);
