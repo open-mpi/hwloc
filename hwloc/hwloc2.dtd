@@ -1,6 +1,6 @@
 <!--
   Copyright © 2009      CNRS
-  Copyright © 2009-2020 Inria.  All rights reserved.
+  Copyright © 2009-2021 Inria.  All rights reserved.
   Copyright © 2009-2011 Université Bordeaux.
   See COPYING in top-level directory.
 
@@ -56,6 +56,7 @@
 <!ELEMENT distances2hetero (indexes+,u64values+)>
 <!ATTLIST distances2hetero nbobjs CDATA #REQUIRED>
 <!ATTLIST distances2hetero kind CDATA #REQUIRED>
+<!ATTLIST distances2hetero name CDATA "">
 
 <!ELEMENT memattr (memattr_value*)>
 <!ATTLIST memattr name CDATA #REQUIRED>
