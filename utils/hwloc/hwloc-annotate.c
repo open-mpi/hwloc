@@ -612,8 +612,9 @@ int main(int argc, char *argv[])
             distances_transform_replace_oldtype = argv[3];
             distances_transform_replace_newtype = argv[4];
           } else {
-              usage(callname, stderr);
-              exit(EXIT_FAILURE);
+	    fprintf(stderr, "Unrecognized distances-transform operation `%s'\n", argv[2]);
+            usage(callname, stderr);
+            exit(EXIT_FAILURE);
           }
 
         } else if (!strcmp(argv[0], "memattr")) {
