@@ -1,4 +1,4 @@
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -32,6 +32,7 @@ xml_outputs = \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t.xml \
         192em64t-24n8c2t.xml \
+        power8gpudistances.xml \
         fakeheterodistances.xml \
         fakecpukinds.xml \
         8em64t-2p2ca2co-nonodesets.v1tov2.xml \
