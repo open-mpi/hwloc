@@ -26,8 +26,8 @@ Version 2.5.0
     or OS devices within a PCI device.
   + Add hwloc_distances_transform() to modify distances structures.
     - hwloc-annotate and lstopo have new distances-transform options.
-  + Add hwloc_distances_add() is replaced with _add_create() followed
-    by _add_values() and _add_commit(). See hwloc/distances.h for details.
+  + hwloc_distances_add() is replaced with _add_create() followed by
+    _add_values() and _add_commit(). See hwloc/distances.h for details.
 * Backends
   + Add a levelzero backend for oneAPI L0 devices, exposed as OS devices
     of subtype "LevelZero" and name such as "ze0".
@@ -37,11 +37,11 @@ Version 2.5.0
     "VectorEngine" and name "ve0", etc.
     Thanks to Anara Kozhokanova, Tim Cramer and Erich Focht for the help.
   + Add a NVLinkBandwidth distances structure between NVIDIA GPUs
-    (and POWER processor or NVSwitches) in the NVML backend.
-  + Add a XGMIBandwidth distances structure between AMD GPUs
+    (and POWER processor or NVSwitches) in the NVML backend,
+    and a XGMIBandwidth distances structure between AMD GPUs
     in the RSMI backends.
-  + See Topology Attributes: Distances, Memory Attributes and CPU Kinds
-    in the documentation for details about these new distances.
+    - See "Topology Attributes: Distances, Memory Attributes and CPU Kinds"
+      in the documentation for details about these new distances.
 * Build
   + Add --with-cuda-version=<version> or look at the CUDA_VERSION
     environment variable to find the appropriate CUDA pkg-config files.
