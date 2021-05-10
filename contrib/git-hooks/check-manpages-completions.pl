@@ -37,7 +37,7 @@ EOT
 }
 
 # Go to the root of the GIT clone
-while (! -d ".git") {
+while (! -e ".git") {
     chdir("..");
     die "Can't find root of the GIT clone" if (cwd() eq "/");
 }
