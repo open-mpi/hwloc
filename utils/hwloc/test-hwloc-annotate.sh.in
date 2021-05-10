@@ -37,6 +37,7 @@ fi
   (umask 077 && mkdir "$tmp")
 } || exit $?
 file="$tmp/test-hwloc-annotate.output"
+file2="$tmp/test-hwloc-annotate.output2"
 distances="$tmp/test-hwloc-annotate.distances"
 
 set -e
@@ -80,4 +81,12 @@ $annotate $file $file dummy distances $distances group\$
 $annotate $file $file dummy distances-transform mynewdistances remove-obj pu:3
 
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-annotate.output "$file"
+
+
+$annotate $srcdir/../../tests/hwloc/xml/power8gpudistances.xml $file2 -- dummy -- distances-transform NVLinkBandwidth replace-objs nvml opencl
+$annotate $file2 $file2 -- dummy -- distances-transform NVLinkBandwidth replace-objs package numa
+
+@DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-annotate.output2 "$file2"
+
+
 rm -rf "$tmp"

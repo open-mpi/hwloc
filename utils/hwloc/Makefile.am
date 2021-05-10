@@ -1,4 +1,4 @@
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2009-2012, 2014, 2016 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
@@ -13,7 +13,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 LDADD = $(HWLOC_top_builddir)/hwloc/libhwloc.la
 
 EXTRA_DIST = \
-        test-hwloc-annotate.input test-hwloc-annotate.output \
+        test-hwloc-annotate.input test-hwloc-annotate.output test-hwloc-annotate.output2 \
         test-hwloc-calc.output \
         test-hwloc-compress-dir.input.tar.gz test-hwloc-compress-dir.output.tar.gz \
         test-hwloc-diffpatch.input1 test-hwloc-diffpatch.input2 \
