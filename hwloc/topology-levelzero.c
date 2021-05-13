@@ -27,7 +27,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   enum hwloc_type_filter_e filter;
   ze_result_t res;
   ze_driver_handle_t *drh;
-  uint32_t nbdrivers, i, k;
+  uint32_t nbdrivers, i, k, zeidx;
   int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early, 2 if ZES_ENABLE_SYSMAN=0 */
   char *env;
 
@@ -72,7 +72,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     return 0;
   }
 
-  k = 0;
+  zeidx = 0;
   for(i=0; i<nbdrivers; i++) {
     uint32_t nbdevices, j;
     ze_device_handle_t *dvh;
@@ -109,7 +109,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       }
 
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
-      snprintf(buffer, sizeof(buffer), "ze%u", k); // ze0d0 ?
+      snprintf(buffer, sizeof(buffer), "ze%u", zeidx); // ze0d0 ?
       osdev->name = strdup(buffer);
       osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
@@ -179,7 +179,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
         parent = hwloc_get_root_obj(topology);
 
       hwloc_insert_object_by_parent(topology, parent, osdev);
-      k++;
+      zeidx++;
     }
 
     free(dvh);
