@@ -11,8 +11,8 @@
 #include "private/misc.h"
 #include "private/debug.h"
 
-#include <ze_api.h>
-#include <zes_api.h>
+#include <level_zero/ze_api.h>
+#include <level_zero/zes_api.h>
 
 static int
 hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
