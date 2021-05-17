@@ -507,8 +507,6 @@ hwloc_internal_cpukinds_rank(struct hwloc_topology *topology)
       || heuristics == HWLOC_CPUKINDS_RANKING_NO_FORCED_EFFICIENCY) {
     /* default is forced_efficiency first */
     struct hwloc_cpukinds_info_summary summary;
-    enum hwloc_cpukinds_ranking subheuristics;
-    const char *arch;
 
     if (heuristics == HWLOC_CPUKINDS_RANKING_DEFAULT)
       hwloc_debug("Using default ranking strategy...\n");
@@ -526,16 +524,7 @@ hwloc_internal_cpukinds_rank(struct hwloc_topology *topology)
       goto failed;
     hwloc__cpukinds_summarize_info(topology, &summary);
 
-    arch = hwloc_obj_get_info_by_name(topology->levels[0][0], "Architecture");
-    /* TODO: rather coretype_frequency only on x86/Intel? */
-    if (arch && (!strncmp(arch, "arm", 3) || !strncmp(arch, "aarch", 5)))
-      /* then frequency on ARM */
-      subheuristics = HWLOC_CPUKINDS_RANKING_FREQUENCY;
-    else
-      /* or coretype+frequency otherwise */
-      subheuristics = HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY;
-
-    err = hwloc__cpukinds_try_rank_by_info(topology, subheuristics, &summary);
+    err = hwloc__cpukinds_try_rank_by_info(topology, HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY, &summary);
     free(summary.summaries);
     if (!err)
       goto ready;
