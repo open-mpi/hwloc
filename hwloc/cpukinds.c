@@ -343,7 +343,8 @@ enum hwloc_cpukinds_ranking {
   HWLOC_CPUKINDS_RANKING_DEFAULT, /* forced + frequency on ARM, forced + coretype_frequency otherwise */
   HWLOC_CPUKINDS_RANKING_NO_FORCED_EFFICIENCY, /* default without forced */
   HWLOC_CPUKINDS_RANKING_FORCED_EFFICIENCY,
-  HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY,
+  HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY, /* either coretype or frequency or both */
+  HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY_STRICT, /* both coretype and frequency are required */
   HWLOC_CPUKINDS_RANKING_CORETYPE,
   HWLOC_CPUKINDS_RANKING_FREQUENCY,
   HWLOC_CPUKINDS_RANKING_FREQUENCY_MAX,
@@ -358,11 +359,26 @@ hwloc__cpukinds_try_rank_by_info(struct hwloc_topology *topology,
 {
   unsigned i;
 
-  if (HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY == heuristics) {
-    hwloc_debug("Trying to rank cpukinds by coretype+frequency...\n");
-    /* we need intel_core_type + (base or max freq) for all kinds */
+  if (HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY_STRICT == heuristics) {
+    hwloc_debug("Trying to rank cpukinds by coretype+frequency_strict...\n");
+    /* we need intel_core_type AND (base or max freq) for all kinds */
     if (!summary->have_intel_core_type
         || (!summary->have_max_freq && !summary->have_base_freq))
+      return -1;
+    /* rank first by coretype (Core>>Atom) then by frequency, base if available, max otherwise */
+    for(i=0; i<topology->nr_cpukinds; i++) {
+      struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
+      if (summary->have_base_freq)
+        kind->ranking_value = (summary->summaries[i].intel_core_type << 20) + summary->summaries[i].base_freq;
+      else
+        kind->ranking_value = (summary->summaries[i].intel_core_type << 20) + summary->summaries[i].max_freq;
+    }
+
+  } else if (HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY == heuristics) {
+    hwloc_debug("Trying to rank cpukinds by coretype+frequency...\n");
+    /* we need intel_core_type OR (base or max freq) for all kinds */
+    if (!summary->have_intel_core_type
+        && (!summary->have_max_freq && !summary->have_base_freq))
       return -1;
     /* rank first by coretype (Core>>Atom) then by frequency, base if available, max otherwise */
     for(i=0; i<topology->nr_cpukinds; i++) {
@@ -469,6 +485,8 @@ hwloc_internal_cpukinds_rank(struct hwloc_topology *topology)
       heuristics = HWLOC_CPUKINDS_RANKING_NONE;
     else if (!strcmp(env, "coretype+frequency"))
       heuristics = HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY;
+    else if (!strcmp(env, "coretype+frequency_strict"))
+      heuristics = HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY_STRICT;
     else if (!strcmp(env, "coretype"))
       heuristics = HWLOC_CPUKINDS_RANKING_CORETYPE;
     else if (!strcmp(env, "frequency"))
