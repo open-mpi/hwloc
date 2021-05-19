@@ -1436,7 +1436,7 @@ main (int argc, char *argv[])
 
   err = hwloc_topology_set_flags(topology, flags);
   if (err < 0) {
-    fprintf(stderr, "Failed to set flags %lx (%s).\n", flags, strerror(errno));
+    fprintf(stderr, "Failed to set flags 0x%lx (%s).\n", flags, strerror(errno));
     goto out_with_topology;
   }
 

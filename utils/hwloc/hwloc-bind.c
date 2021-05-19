@@ -516,10 +516,10 @@ int main(int argc, char *argv[])
       char *s;
       hwloc_bitmap_asprintf(&s, membind_set);
       if (pid_number > 0)
-        fprintf(stderr, "hwloc_set_proc_membind %s (policy %d flags %x) PID %d failed (errno %d %s)\n",
+        fprintf(stderr, "hwloc_set_proc_membind %s (policy %d flags 0x%x) PID %d failed (errno %d %s)\n",
 		s, membind_policy, membind_flags, pid_number, bind_errno, errmsg);
       else
-        fprintf(stderr, "hwloc_set_membind %s (policy %d flags %x) failed (errno %d %s)\n",
+        fprintf(stderr, "hwloc_set_membind %s (policy %d flags 0x%x) failed (errno %d %s)\n",
 		s, membind_policy, membind_flags, bind_errno, errmsg);
       free(s);
     }
@@ -576,13 +576,13 @@ int main(int argc, char *argv[])
       char *s;
       hwloc_bitmap_asprintf(&s, cpubind_set);
       if (pid_number > 0)
-        fprintf(stderr, "hwloc_set_proc_cpubind %s (flags %x) PID %d failed (errno %d %s)\n",
+        fprintf(stderr, "hwloc_set_proc_cpubind %s (flags 0x%x) PID %d failed (errno %d %s)\n",
 		s, cpubind_flags, pid_number, bind_errno, errmsg);
       else if (tid_number > 0)
-        fprintf(stderr, "hwloc_set_tid_cpubind %s (flags %x) PID %d failed (errno %d %s)\n",
+        fprintf(stderr, "hwloc_set_tid_cpubind %s (flags 0x%x) PID %d failed (errno %d %s)\n",
 		s, cpubind_flags, tid_number, bind_errno, errmsg);
       else
-        fprintf(stderr, "hwloc_set_cpubind %s (flags %x) failed (errno %d %s)\n",
+        fprintf(stderr, "hwloc_set_cpubind %s (flags 0x%x) failed (errno %d %s)\n",
 		s, cpubind_flags, bind_errno, errmsg);
       free(s);
     }
