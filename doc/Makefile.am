@@ -439,6 +439,7 @@ man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_flags.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
