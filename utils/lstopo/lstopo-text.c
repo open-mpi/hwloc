@@ -254,11 +254,30 @@ static void output_distances(struct lstopo_output *loutput)
   free(dist);
 }
 
+static void output_memattr_obj(struct lstopo_output *loutput,
+                               hwloc_obj_t obj)
+{
+  enum lstopo_index_type_e index_type = loutput->index_type;
+  unsigned idx = (index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? obj->os_index : obj->logical_index);
+  char objtype[16];
+
+  hwloc_obj_type_snprintf(objtype, sizeof(objtype), obj, 0);
+  if (idx == (unsigned) -1)
+    printf("%s %c#-1", objtype,
+           index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? 'P' : 'L');
+  else
+    printf("%s %c#%u", objtype,
+           index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? 'P' : 'L',
+           idx);
+
+  if (obj->name)
+    printf(" \"%s\"", obj->name);
+}
+
 static void output_memattr_initiator(struct lstopo_output *loutput,
                                      struct hwloc_location *initiator)
 {
   hwloc_topology_t topology = loutput->topology;
-  enum lstopo_index_type_e index_type = loutput->index_type;
 
   if (initiator->type == HWLOC_LOCATION_TYPE_CPUSET) {
     hwloc_obj_t obj;
@@ -273,23 +292,16 @@ static void output_memattr_initiator(struct lstopo_output *loutput,
     if (obj && !hwloc_bitmap_isequal(obj->cpuset, initiator->location.cpuset))
       obj = NULL;
     if (obj) {
-      char objtype[16];
       while (obj->parent && hwloc_bitmap_isequal(obj->cpuset, obj->parent->cpuset))
         obj = obj->parent;
-      hwloc_obj_type_snprintf(objtype, sizeof(objtype), obj, 0);
-      printf(" (%s %c#%u)", objtype,
-             index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? 'P' : 'L',
-             index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? obj->os_index : obj->logical_index);
+      printf(" (");
+      output_memattr_obj(loutput, obj);
+      printf(")");
     }
 
   } else if (initiator->type == HWLOC_LOCATION_TYPE_OBJECT) {
-    hwloc_obj_t obj = initiator->location.object;
-    char objtype[16];
-    assert(obj);
-    hwloc_obj_type_snprintf(objtype, sizeof(objtype), obj, 0);
-    printf(" from %s %c#%u", objtype,
-           index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? 'P' : 'L',
-           index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? obj->os_index : obj->logical_index);
+    printf(" from ");
+    output_memattr_obj(loutput, initiator->location.object);
 
   } else {
     printf(" from initiator with unexpected type %d",
@@ -301,7 +313,6 @@ static void output_memattr_initiator(struct lstopo_output *loutput,
 static void output_memattrs(struct lstopo_output *loutput)
 {
   hwloc_topology_t topology = loutput->topology;
-  enum lstopo_index_type_e index_type = loutput->index_type;
   int verbose_mode = loutput->verbose_mode;
   int show_all = (loutput->show_memattrs_only || (verbose_mode >= 3));
   unsigned id;
@@ -345,12 +356,11 @@ static void output_memattrs(struct lstopo_output *loutput)
       if (!(flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR)) {
         hwloc_uint64_t value;
         err = hwloc_memattr_get_value(topology, id, targets[i], NULL, 0, &value);
-        if (!err)
-          printf("  %s %c#%u = %llu\n",
-                 hwloc_obj_type_string(targets[i]->type),
-                 index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? 'P' : 'L',
-                 index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? targets[i]->os_index : targets[i]->logical_index,
-                 (unsigned long long) value);
+        if (!err) {
+          printf("  ");
+          output_memattr_obj(loutput, targets[i]);
+          printf(" = %llu\n", (unsigned long long) value);
+        }
 
       } else {
         unsigned nr_initiators = 0;
@@ -363,10 +373,9 @@ static void output_memattrs(struct lstopo_output *loutput)
             if (!err) {
               unsigned j;
               for(j=0; j<nr_initiators; j++) {
-                printf("  %s %c#%u = %llu",
-                       hwloc_obj_type_string(targets[i]->type),
-                       index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? 'P' : 'L',
-                       index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? targets[i]->os_index : targets[i]->logical_index,
+                printf("  ");
+                output_memattr_obj(loutput, targets[i]);
+                printf(" = %llu",
                        (unsigned long long) values[j]);
                 output_memattr_initiator(loutput, &initiators[j]);
                 printf("\n");
