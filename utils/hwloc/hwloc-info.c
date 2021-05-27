@@ -280,7 +280,10 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
                 } else if (initiators[j].type == HWLOC_LOCATION_TYPE_OBJECT) {
                   char types[64];
                   hwloc_obj_type_snprintf(types, sizeof(types), initiators[j].location.object, 1);
-                  snprintf(_inits, sizeof(_inits), "%s L#%u P#%u", types, initiators[j].location.object->logical_index, initiators[j].location.object->os_index);
+                  if (initiators[j].location.object->os_index != (unsigned)-1)
+                    snprintf(_inits, sizeof(_inits), "%s L#%u P#%u", types, initiators[j].location.object->logical_index, initiators[j].location.object->os_index);
+                  else
+                    snprintf(_inits, sizeof(_inits), "%s L#%u", types, initiators[j].location.object->logical_index);
                   inits = _inits;
                 } else {
                   assert(0);
