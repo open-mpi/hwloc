@@ -286,7 +286,7 @@ static void output_memattr_initiator(struct lstopo_output *loutput,
            index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? obj->os_index : obj->logical_index);
 
   } else {
-    printf(" from initiator with unexpected type %d\n",
+    printf(" from initiator with unexpected type %d",
 	   (int) initiator->type);
   }
 
