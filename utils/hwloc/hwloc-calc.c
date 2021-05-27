@@ -115,10 +115,14 @@ hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, const 
   while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, root->cpuset, hierdepth[level], prev)) != NULL) {
     char string[256];
     char type[32];
+    unsigned idx = logicalo ? logi : obj->os_index;
     if (!hwloc_bitmap_intersects(set, obj->cpuset))
      goto next;
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
-    snprintf(string, sizeof(string), "%s%s%s:%u", prefix, level ? "." : "", type, logicalo ? logi : obj->os_index);
+    if (idx == (unsigned)-1)
+      snprintf(string, sizeof(string), "%s%s%s:-1", prefix, level ? "." : "", type);
+    else
+      snprintf(string, sizeof(string), "%s%s%s:%u", prefix, level ? "." : "", type, idx);
     if (!first)
       printf("%s", sep);
     first = 0;
@@ -190,9 +194,13 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
     if (!sep)
       sep = ",";
     while ((proc = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, intersectdepth, prev)) != NULL) {
+      unsigned idx = logicalo ? proc->logical_index : proc->os_index;
       if (prev)
 	printf("%s", sep);
-      printf("%u", logicalo ? proc->logical_index : proc->os_index);
+      if (idx == (unsigned)-1)
+        printf("-1");
+      else
+        printf("%u", idx);
       prev = proc;
     }
     printf("\n");
