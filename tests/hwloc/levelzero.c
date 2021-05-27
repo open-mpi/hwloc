@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <ze_api.h>
-#include <zes_api.h>
+#include <level_zero/ze_api.h>
+#include <level_zero/zes_api.h>
 
 #include "hwloc.h"
 #include "hwloc/levelzero.h"
