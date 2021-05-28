@@ -287,7 +287,7 @@ static void output_memattr_initiator(struct lstopo_output *loutput,
     char objtype[16];
     assert(obj);
     hwloc_obj_type_snprintf(objtype, sizeof(objtype), obj, 0);
-    printf(" (%s %c#%u)", objtype,
+    printf(" from %s %c#%u", objtype,
            index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? 'P' : 'L',
            index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? obj->os_index : obj->logical_index);
 
