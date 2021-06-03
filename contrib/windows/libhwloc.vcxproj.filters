@@ -45,6 +45,9 @@
     <ClCompile Include="..\..\hwloc\pci-common.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\hwloc\shmem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\hwloc\topology-noos.c">
       <Filter>Source Files</Filter>
     </ClCompile>
