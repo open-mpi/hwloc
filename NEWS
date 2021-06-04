@@ -48,6 +48,7 @@ Version 2.5.0
     in the RSMI backends.
     - See "Topology Attributes: Distances, Memory Attributes and CPU Kinds"
       in the documentation for details about these new distances.
+  + Add support for NUMA node 0 being offline in Linux, thanks to Jirka Hladky.
 * Build
   + Add --with-cuda-version=<version> or look at the CUDA_VERSION
     environment variable to find the appropriate CUDA pkg-config files.
