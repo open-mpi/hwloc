@@ -2104,10 +2104,12 @@ Values on the diagonal are artificially set to very high so
 that local access always appears faster than remote access.
 
 GPUs are identified by RSMI OS devices such as "rsmi0".
-hwloc_distances_transform() or the hwloc-annotate tool may be used
+They may be converted into the corresponding OpenCL or PCI devices
+using hwloc_get_obj_with_same_locality() or the hwloc-annotate tool.
+
+hwloc_distances_transform() or hwloc-annotate may also be used
 to transform this matrix into something more convenient,
-for instance by replacing RSMI devices with OpenCL or PCI devices,
-or by replacing bandwidths with numbers of links between peers.
+for instance by replacing bandwidths with numbers of links between peers.
 </dt>
 <dt>NVLinkBandwidth (NVML)</dt>
 <dd>This is the matrix of unidirectional NVLink bandwidths between
@@ -2124,15 +2126,17 @@ GPUs always appear first in the matrix (as NVML OS devices such as "nvml0"),
 and non-GPU objects may appear at the end (Package for POWER processors,
 PCI device for NVSwitch).
 
-hwloc_distances_transform() or the hwloc-annotate tool may be used
+NVML OS devices may be converted into the corresponding CUDA, OpenCL or PCI devices
+using hwloc_get_obj_with_same_locality() or the hwloc-annotate tool.
+
+hwloc_distances_transform() or hwloc-annotate may also be used
 to transform this matrix into something more convenient,
-for instance by replacing NVML devices with OpenCL or PCI devices,
-by removing switches or CPU ports,
+for instance by removing switches or CPU ports,
 or by replacing bandwidths with numbers of links between peers.
 
 When a NVSwitch interconnects GPUs, only links between one GPU and
 different NVSwitch ports are reported. They may be merged into a single
-switch port with hwloc_distances_transform() or the hwloc-annotate.
+switch port with hwloc_distances_transform() or hwloc-annotate.
 Or a transitive closure may also be applied to report the bandwidth
 between GPUs across the NVSwitch.
 </dl>
