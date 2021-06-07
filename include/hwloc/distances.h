@@ -249,6 +249,11 @@ enum hwloc_distances_transform_e {
  * \p transform_attr must be \c NULL for now.
  *
  * \p flags must be \c 0 for now.
+ *
+ * \note Objects in distances array \p objs may be directly modified
+ * in place without using hwloc_distances_transform().
+ * One may use hwloc_get_obj_with_same_locality() to easily convert
+ * between similar objects of different types.
  */
 HWLOC_DECLSPEC int hwloc_distances_transform(hwloc_topology_t topology, struct hwloc_distances_s *distances,
                                              enum hwloc_distances_transform_e transform,
