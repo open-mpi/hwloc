@@ -97,7 +97,8 @@ LT_LANG([C++])
 CFLAGS_save=$CFLAGS
 AC_PROG_CC
 AM_PROG_CC_C_O
-AC_PROG_CC_C99
+# AC_PROG_CC_C99 obsolete, detected inside AC_PROG_CC, since autoconf 2.70
+m4_version_prereq([2.70], [], [AC_PROG_CC_C99])
 CFLAGS=$CFLAGS_save
 
 AC_ARG_VAR(CC_FOR_BUILD,[build system C compiler])
