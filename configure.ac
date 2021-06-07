@@ -79,8 +79,8 @@ LT_PREREQ([2.2.6])
 
 # Setup libtool, but disable F77, Java and Windows Resource
 # Compiler support -- we don't need that stuff.
-AM_ENABLE_SHARED
-AM_DISABLE_STATIC
+AC_ENABLE_SHARED
+AC_DISABLE_STATIC
 
 # This did not exist pre AM 1.11.x (where x is somewhere >0 and <3),
 # but it is necessary in AM 1.12.x.
