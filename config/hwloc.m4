@@ -721,9 +721,9 @@ EOF])
     		_SC_PAGE_SIZE,
     		_SC_LARGE_PAGESIZE],,[:],[[#include <unistd.h>]])
 
-    AC_HAVE_HEADERS([mach/mach_init.h])
-    AC_HAVE_HEADERS([mach_init.h])
-    AC_HAVE_HEADERS([mach/mach_host.h], [
+    AC_CHECK_HEADERS([mach/mach_init.h])
+    AC_CHECK_HEADERS([mach_init.h])
+    AC_CHECK_HEADERS([mach/mach_host.h], [
       AC_CHECK_FUNCS([host_info])
     ])
 
