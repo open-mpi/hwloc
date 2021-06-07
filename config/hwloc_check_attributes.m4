@@ -96,7 +96,8 @@ AC_DEFUN([_HWLOC_CHECK_SPECIFIC_ATTRIBUTE], [
         #
         # Try to compile using the C compiler
         #
-        AC_TRY_COMPILE([$2],[],
+        AC_COMPILE_IFELSE(
+	               [AC_LANG_PROGRAM([$2], [])],
                        [
                         #
                         # In case we did succeed: Fine, but was this due to the
@@ -118,11 +119,14 @@ AC_DEFUN([_HWLOC_CHECK_SPECIFIC_ATTRIBUTE], [
             CFLAGS_safe=$CFLAGS
             CFLAGS="$CFLAGS [$4]"
 
-            AC_TRY_COMPILE([$3],
-                [
-                 int i=4711;
-                 i=usage(&i);
-                ],
+            AC_COMPILE_IFELSE(
+	        [AC_LANG_PROGRAM(
+		  [$3],
+                  [
+                   int i=4711;
+                   i=usage(&i);
+                  ])
+		],
                 [hwloc_cv___attribute__[$1]=0],
                 [
                  #
@@ -175,28 +179,34 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
   AC_MSG_CHECKING(for __attribute__)
 
   AC_CACHE_VAL(hwloc_cv___attribute__, [
-    AC_TRY_COMPILE(
-      [#include <stdlib.h>
-       /* Check for the longest available __attribute__ (since gcc-2.3) */
-       struct foo {
+    AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM(
+        [
+	 #include <stdlib.h>
+	], [
+         /* Check for the longest available __attribute__ (since gcc-2.3) */
+         struct foo {
            char a;
            int x[2] __attribute__ ((__packed__));
-        };
-      ],
+         };
+        ])],
       [],
       [hwloc_cv___attribute__=1],
       [hwloc_cv___attribute__=0],
     )
 
     if test "$hwloc_cv___attribute__" = "1" ; then
-        AC_TRY_COMPILE(
-          [#include <stdlib.h>
-           /* Check for the longest available __attribute__ (since gcc-2.3) */
-           struct foo {
+        AC_COMPILE_IFELSE(
+	  [AC_LANG_PROGRAM(
+            [
+	     #include <stdlib.h>
+	    ], [
+             /* Check for the longest available __attribute__ (since gcc-2.3) */
+             struct foo {
                char a;
                int x[2] __attribute__ ((__packed__));
-            };
-          ],
+              };
+            ])],
           [],
           [hwloc_cv___attribute__=1],
           [hwloc_cv___attribute__=0],
