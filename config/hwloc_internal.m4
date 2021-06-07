@@ -26,12 +26,12 @@ AC_DEFUN([HWLOC_BUILD_STANDALONE],[
 AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # Embedded mode, or standalone?
     AC_ARG_ENABLE([embedded-mode],
-                    AC_HELP_STRING([--enable-embedded-mode],
+                    AS_HELP_STRING([--enable-embedded-mode],
                                    [Using --enable-embedded-mode puts the HWLOC into "embedded" mode.  The default is --disable-embedded-mode, meaning that the HWLOC is in "standalone" mode.]))
 
     # Change the symbol prefix?
     AC_ARG_WITH([hwloc-symbol-prefix],
-                AC_HELP_STRING([--with-hwloc-symbol-prefix=STRING],
+                AS_HELP_STRING([--with-hwloc-symbol-prefix=STRING],
                                [STRING can be any valid C symbol name.  It will be prefixed to all public HWLOC symbols.  Default: "hwloc_"]))
 
     # For the windows build
@@ -39,17 +39,17 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
 
     # Debug mode?
     AC_ARG_ENABLE([debug],
-                  AC_HELP_STRING([--enable-debug],
+                  AS_HELP_STRING([--enable-debug],
                                  [Using --enable-debug enables various hwloc maintainer-level debugging controls.  This option is not recomended for end users.]))
 
     # Doxygen?
     AC_ARG_ENABLE([doxygen],
-        [AC_HELP_STRING([--enable-doxygen],
+        [AS_HELP_STRING([--enable-doxygen],
                         [enable support for building Doxygen documentation (note that this option is ONLY relevant in developer builds; Doxygen documentation is pre-built for tarball builds and this option is therefore ignored)])])
 
     # Picky?
     AC_ARG_ENABLE(picky,
-                  AC_HELP_STRING([--disable-picky],
+                  AS_HELP_STRING([--disable-picky],
                                  [When in developer checkouts of hwloc and compiling with gcc, the default is to enable maximum compiler pickyness.  Using --disable-picky or --enable-picky overrides any default setting]))
 
     # Cairo?
@@ -134,12 +134,12 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # Look for dlopen
     # Not --disable-dlopen because $enable_dlopen is already used/set
     AC_ARG_ENABLE([plugin-dlopen],
-                  AC_HELP_STRING([--disable-plugin-dlopen],
+                  AS_HELP_STRING([--disable-plugin-dlopen],
                                  [Do not use dlopen for loading plugins.]))
     # Look for ltdl
     # Not --disable-ltdl for consistency wrt dlopen above
     AC_ARG_ENABLE([plugin-ltdl],
-                  AC_HELP_STRING([--disable-plugin-ltdl],
+                  AS_HELP_STRING([--disable-plugin-ltdl],
                                  [Do not use ltdl for loading plugins.]))
 
 ])dnl
