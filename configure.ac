@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 #
@@ -142,7 +142,7 @@ HWLOC_SETUP_CORE([], [], [AC_MSG_ERROR([Cannot build hwloc core])], [1])
 AC_SUBST([libnetloc_so_version])
 
 AC_ARG_ENABLE([netloc],
-              [AC_HELP_STRING([--enable-netloc],
+              [AS_HELP_STRING([--enable-netloc],
                               [The Netloc functionality is enabled by default, but will be silently skipped it if cannot be built (e.g., not supported on your platform).  Using --enable-netloc will cause configure to abort if Netloc cannot be build.  Using --disable-netloc will cause configure to skip attempting to build netloc at all.])
               ])
 
