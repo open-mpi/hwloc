@@ -667,25 +667,29 @@ EOF])
       # "sysctlbyname" might still be available in libc (which autoconf
       # checks for), they might not be actually usable.
       AC_MSG_CHECKING([for sysctl])
-      AC_TRY_LINK([
-                 #include <stdio.h>
-                 #include <sys/types.h>
-                 #include <sys/sysctl.h>
-                 ],
-                  [return sysctl(NULL,0,NULL,NULL,NULL,0);],
-                  [AC_DEFINE([HAVE_SYSCTL],[1],[Define to '1' if sysctl is present and usable])
-                   AC_MSG_RESULT(yes)],
-                  [AC_MSG_RESULT(no)])
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([
+          #include <stdio.h>
+          #include <sys/types.h>
+          #include <sys/sysctl.h>
+        ], [
+          return sysctl(NULL,0,NULL,NULL,NULL,0);
+        ])],
+        [AC_DEFINE([HAVE_SYSCTL],[1],[Define to '1' if sysctl is present and usable])
+         AC_MSG_RESULT(yes)],
+        [AC_MSG_RESULT(no)])
       AC_MSG_CHECKING([for sysctlbyname])
-      AC_TRY_LINK([
-                 #include <stdio.h>
-                 #include <sys/types.h>
-                 #include <sys/sysctl.h>
-                 ],
-                  [return sysctlbyname(NULL,NULL,NULL,NULL,0);],
-                  [AC_DEFINE([HAVE_SYSCTLBYNAME],[1],[Define to '1' if sysctlbyname is present and usable])
-                   AC_MSG_RESULT(yes)],
-                  [AC_MSG_RESULT(no)])
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([
+          #include <stdio.h>
+          #include <sys/types.h>
+          #include <sys/sysctl.h>
+        ], [
+          return sysctlbyname(NULL,NULL,NULL,NULL,0);
+	])],
+        [AC_DEFINE([HAVE_SYSCTLBYNAME],[1],[Define to '1' if sysctlbyname is present and usable])
+         AC_MSG_RESULT(yes)],
+        [AC_MSG_RESULT(no)])
     fi
 
     AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
@@ -770,29 +774,31 @@ return 0;
     AC_CHECK_DECLS([getexecname], [], [], [AC_INCLUDES_DEFAULT])
     # program_invocation_name and __progname may be available but not exported in headers
     AC_MSG_CHECKING([for program_invocation_name])
-    AC_TRY_LINK([
-		#ifndef _GNU_SOURCE
-		# define _GNU_SOURCE
-		#endif
-		#include <errno.h>
-		#include <stdio.h>
-		extern char *program_invocation_name;
-		],[
-		return printf("%s\n", program_invocation_name);
-		],
-		[AC_DEFINE([HAVE_PROGRAM_INVOCATION_NAME], [1], [Define to '1' if program_invocation_name is present and usable])
-		 AC_MSG_RESULT([yes])
-		],[AC_MSG_RESULT([no])])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([
+        #ifndef _GNU_SOURCE
+        # define _GNU_SOURCE
+        #endif
+        #include <errno.h>
+        #include <stdio.h>
+        extern char *program_invocation_name;
+      ], [
+        return printf("%s\n", program_invocation_name);
+      ])],
+      [AC_DEFINE([HAVE_PROGRAM_INVOCATION_NAME], [1], [Define to '1' if program_invocation_name is present and usable])
+       AC_MSG_RESULT([yes])
+      ], [AC_MSG_RESULT([no])])
     AC_MSG_CHECKING([for __progname])
-    AC_TRY_LINK([
-		#include <stdio.h>
-		extern char *__progname;
-		],[
-		return printf("%s\n", __progname);
-		],
-		[AC_DEFINE([HAVE___PROGNAME], [1], [Define to '1' if __progname is present and usable])
-		 AC_MSG_RESULT([yes])
-		],[AC_MSG_RESULT([no])])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([
+        #include <stdio.h>
+        extern char *__progname;
+      ], [
+        return printf("%s\n", __progname);
+      ])],
+      [AC_DEFINE([HAVE___PROGNAME], [1], [Define to '1' if __progname is present and usable])
+       AC_MSG_RESULT([yes])
+      ],[AC_MSG_RESULT([no])])
 
     case ${target} in
       *-*-mingw*|*-*-cygwin*)
