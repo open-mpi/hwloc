@@ -21,6 +21,10 @@
 #include <stdint.h>
 #include <assert.h>
 
+#ifndef PATH_MAX
+#define PATH_MAX 1024
+#endif
+
 #define EXIT_SKIP 77
 
 /* must match the header defined in hwloc/shmem.c */
