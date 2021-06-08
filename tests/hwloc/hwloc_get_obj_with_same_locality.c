@@ -11,6 +11,10 @@
 #include <string.h>
 #include <assert.h>
 
+#ifndef PATH_MAX
+#define PATH_MAX 1024
+#endif
+
 int main(void)
 {
   const char *top_srcdir;
