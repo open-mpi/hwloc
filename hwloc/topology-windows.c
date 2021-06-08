@@ -383,6 +383,13 @@ hwloc_win_get_processor_groups(void)
   if (!nr_processor_groups)
     goto error;
 
+  hwloc_debug("found %lu windows processor groups\n", nr_processor_groups);
+
+  if (nr_processor_groups > 1 && SIZEOF_VOID_P == 4) {
+    if (!hwloc_hide_errors())
+      fprintf(stderr, "hwloc: multiple processor groups found on 32bits Windows, topology may be invalid/incomplete.\n");
+  }
+
   length = 0;
   procInfoTotal = NULL;
 
@@ -400,7 +407,6 @@ hwloc_win_get_processor_groups(void)
   processor_group_cpusets = calloc(nr_processor_groups, sizeof(*processor_group_cpusets));
   if (!processor_group_cpusets)
     goto error_with_procinfo;
-  hwloc_debug("found %lu windows processor groups\n", nr_processor_groups);
 
   for (procInfo = procInfoTotal;
        (void*) procInfo < (void*) ((uintptr_t) procInfoTotal + length);
