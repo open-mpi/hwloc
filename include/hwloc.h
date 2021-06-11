@@ -1980,6 +1980,9 @@ enum hwloc_topology_flags_e {
    * This flag especially tells the x86 backend to never temporarily
    * rebind a thread on any excluded core. This is useful on Windows
    * because such temporary rebinding can change the process binding.
+   * Another use-case is to avoid cores that would not be able to
+   * perform the hwloc discovery anytime soon because they are busy
+   * executing some high-priority real-time tasks.
    *
    * If process CPU binding is not supported,
    * the thread CPU binding is considered instead if supported,
