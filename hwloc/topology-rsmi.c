@@ -296,9 +296,9 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
           xgmi_bws[i*nb+j] = 100000; /* TODO: verify the XGMI version before putting 100GB/s here? */
           got_xgmi_bws = 1;
         }
-        if (xgmi_peers[0] != '\0')
-          hwloc_obj_add_info(osdev, "XGMIPeers", xgmi_peers);
       }
+      if (xgmi_peers[0] != '\0')
+        hwloc_obj_add_info(osdev, "XGMIPeers", xgmi_peers);
       free(xgmi_peers);
     }
 
