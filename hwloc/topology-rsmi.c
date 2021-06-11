@@ -253,10 +253,10 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
         if ((get_device_io_link_type(i, j, &type) == 0) &&
             (type == RSMI_IOLINK_TYPE_XGMI)) {
           xgmi_peers_ptr += sprintf(xgmi_peers_ptr, "rsmi%u ", j);
+        }
       }
       if (xgmi_peers[0] != '\0')
         hwloc_obj_add_info(osdev, "XGMIPeers", xgmi_peers);
-      }
       free(xgmi_peers);
     }
 
