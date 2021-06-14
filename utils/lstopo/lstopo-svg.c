@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Inria.  All rights reserved.
+ * Copyright © 2019-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -20,7 +20,7 @@ static void
 native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id)
 {
   FILE *file = loutput->file;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   unsigned thickness = loutput->thickness;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   char id[128] = "";
@@ -40,9 +40,9 @@ native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
     snprintf(id, sizeof id, " id='anon_rect%s'", complement);
   }
 
-  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
-    snprintf(dash, sizeof(dash), " stroke-dasharray=\"%u\"", 1U << ou->cpukind_style);
-    thickness *= ou->cpukind_style;
+  if (cpukind_style) {
+    snprintf(dash, sizeof(dash), " stroke-dasharray=\"%u\"", 1U << cpukind_style);
+    thickness *= cpukind_style;
   }
 
   fprintf(file,"\t<rect%s%s x='%u' y='%u' width='%u' height='%u' fill='rgb(%d,%d,%d)' stroke='rgb(0,0,0)' stroke-width='%u'%s/>\n",
@@ -86,7 +86,7 @@ static void
 native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj, unsigned text_id)
 {
   FILE *file = loutput->file;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   char id[128] = "";
   char class[128] = "";
@@ -105,7 +105,7 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     snprintf(id, sizeof id, " id='anon_text%s'", complement);
   }
 
-  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+  if (cpukind_style % 2)
     fontweight = " font-weight='bold'";
 
   fprintf(file,"\t<text%s%s font-family='Monospace'%s x='%u' y='%u' fill='rgb(%d,%d,%d)' font-size='%dpx'>%s</text>\n",

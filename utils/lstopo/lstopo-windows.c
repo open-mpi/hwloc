@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -406,15 +406,15 @@ static void
 windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   PAINTSTRUCT *ps = &woutput->ps;
 
   SelectObject(ps->hdc, lcolor->private.windows.brush);
   SetBkColor(ps->hdc, lcolor->private.windows.color);
-  if (loutput->show_cpukinds && ou && ou->cpukind_style)
-    SelectObject(ps->hdc, pen_style[(ou->cpukind_style-1)%4]);
+  if (cpukind_style)
+    SelectObject(ps->hdc, pen_style[(cpukind_style-1)%4]);
   Rectangle(ps->hdc, x - x_delta, y - y_delta, x + width - x_delta, y + height - y_delta);
-  if (loutput->show_cpukinds && ou && ou->cpukind_style)
+  if (cpukind_style)
     SelectObject(ps->hdc, pen_default);
 }
 
@@ -433,14 +433,14 @@ static void
 windows_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj __hwloc_attribute_unused, unsigned text_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   PAINTSTRUCT *ps = &woutput->ps;
 
   SetTextColor(ps->hdc, lcolor->private.windows.color);
-  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+  if (cpukind_style % 2)
     SelectObject(ps->hdc, font_bold);
   TextOut(ps->hdc, x - x_delta, y - y_delta, text, (int)strlen(text));
-  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+  if (cpukind_style % 2)
     SelectObject(ps->hdc, font_default);
 }
 

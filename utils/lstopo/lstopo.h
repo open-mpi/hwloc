@@ -178,7 +178,7 @@ struct lstopo_obj_userdata {
 #define LSTOPO_STYLE_T2  0x4
   unsigned style_set; /* OR'ed LSTOPO_STYLE_* */
 
-  /* PU style for CPU kind */
+  /* PU style for CPU kind, 0 for normal style */
   unsigned cpukind_style;
 
   /* object size (including children if they are outside of it, not including borders) */
@@ -218,6 +218,20 @@ struct lstopo_obj_userdata {
 		       * max of above text[].width + optional padding
 		       */
 };
+
+static __hwloc_inline unsigned
+lstopo_obj_cpukind_style(struct lstopo_output *loutput, hwloc_obj_t obj)
+{
+  if (loutput->show_cpukinds) {
+    if (obj && obj->userdata) {
+      struct lstopo_obj_userdata *ou = obj->userdata;
+      return ou->cpukind_style;
+    }
+  }
+  return 0;
+}
+
+#define CPUKIND_STYLE(_loutput, _obj) (((_loutput)->show_cpukinds && (_obj != NULL)) ? (_obj)->cpukind_style : 0)
 
 typedef int output_method (struct lstopo_output *output, const char *filename);
 extern output_method output_console, output_synthetic, output_ascii, output_tikz, output_fig, output_png, output_pdf, output_ps, output_nativesvg, output_cairosvg, output_x11, output_windows, output_xml, output_android, output_shmem;

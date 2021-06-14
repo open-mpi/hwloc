@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2014, 2017, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -64,7 +64,7 @@ static void
 topo_cairo_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id __hwloc_attribute_unused)
 {
   struct lstopo_cairo_output *coutput = loutput->backend_data;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   cairo_t *c = coutput->context;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
@@ -75,15 +75,15 @@ topo_cairo_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
   cairo_rectangle(c, x, y, width, height);
   cairo_set_source_rgb(c, 0, 0, 0);
 
-  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
-    double dash = (double)(1U << ou->cpukind_style);
+  if (cpukind_style) {
+    double dash = (double)(1U << cpukind_style);
     cairo_set_dash(c, &dash, 1, 0);
-    cairo_set_line_width(c, loutput->thickness * (1 + ou->cpukind_style));
+    cairo_set_line_width(c, loutput->thickness * (1 + cpukind_style));
   }
 
   cairo_stroke(c);
 
-  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
+  if (cpukind_style) {
     cairo_set_dash(c, NULL, 0, 0);
     cairo_set_line_width(c, loutput->thickness);
   }
@@ -106,19 +106,19 @@ static void
 topo_cairo_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int fontsize, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj __hwloc_attribute_unused, unsigned text_id __hwloc_attribute_unused)
 {
   struct lstopo_cairo_output *coutput = loutput->backend_data;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   cairo_t *c = coutput->context;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
   cairo_move_to(c, x, y + fontsize);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
 
-  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+  if (cpukind_style % 2)
     cairo_select_font_face(c, "default", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
 
   cairo_show_text(c, text);
 
-  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+  if (cpukind_style % 2)
     cairo_select_font_face(c, "default", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 }
 

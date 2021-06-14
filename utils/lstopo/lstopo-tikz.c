@@ -1,6 +1,6 @@
 /*
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
- * Copyright © 2020 Inria.  All rights reserved.
+ * Copyright © 2020-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -55,15 +55,15 @@ tikz_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsig
 {
   FILE *file = loutput->file;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   char linestyle[64] = "solid";
   unsigned thickness = loutput->thickness;
   float dashspace = 1.15; /* default dash size: 1.15pt */
 
-  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
+  if (cpukind_style) {
     char dashsize[20], *comma = NULL;
-    thickness *= ou->cpukind_style;
-    dashspace *= 1U << ou->cpukind_style;
+    thickness *= cpukind_style;
+    dashspace *= 1U << cpukind_style;
     snprintf(dashsize, 20, "%.4f", dashspace);
     comma = strchr(dashsize, ',');
     if (comma)
@@ -100,13 +100,12 @@ tikz_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int 
 {
   FILE *file = loutput->file;
   int r = lcolor->r, g = lcolor->g, b = lcolor->b;
-
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   const char *bf_style = "";
 
   const char *tikzdelim = "{}%&#";
 
-  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+  if (cpukind_style % 2)
       bf_style = "-bold";
 
   fprintf(file, "\t\\node [hwloc-label%s,text=hwloc-color-%d-%d-%d] at (%u,%u) {",

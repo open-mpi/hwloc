@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Inria.  All rights reserved.
+ * Copyright © 2019-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -23,7 +23,7 @@ extern void JNIprepare(int width, int height, int fontsize);
 
 static void native_android_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id __hwloc_attribute_unused)
 {
-    struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+    unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
     int gp_index = -1;
     int r = lcolor->r, g = lcolor->g, b = lcolor->b;
     char * info = malloc(1096);
@@ -35,8 +35,8 @@ static void native_android_box(struct lstopo_output *loutput, const struct lstop
         hwloc_obj_attr_snprintf(info, 1096, obj, sep, 1);
     }
 
-    if (loutput->show_cpukinds && ou && ou->cpukind_style)
-        style = ou->cpukind_style;
+    if (cpukind_style)
+        style = cpukind_style;
 
     JNIbox(r, g, b, x, y, width, height, style, gp_index, info);
     //Creating a usable java string from char * may trigger an UTF-8 error
@@ -61,14 +61,14 @@ native_android_textsize(struct lstopo_output *loutput __hwloc_attribute_unused, 
 static void
 native_android_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor __hwloc_attribute_unused, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text, hwloc_obj_t obj, unsigned text_id __hwloc_attribute_unused)
 {
-    struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+    unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
     int gp_index = -1;
     int bold = 0;
 
     if(obj)
         gp_index = obj->gp_index;
 
-    if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+    if (cpukind_style % 2)
         bold = 1;
 
     JNItext((char *)text, gp_index, x, y, loutput->fontsize, bold);

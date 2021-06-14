@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -46,7 +46,7 @@ static void
 fig_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj __hwloc_attribute_unused, unsigned box_id __hwloc_attribute_unused)
 {
   FILE *file = loutput->file;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   unsigned linestyle = 0; /* solid */
   unsigned dashspace = 0; /* no dash */
   unsigned thickness = loutput->thickness;
@@ -54,10 +54,10 @@ fig_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsign
   if (!width || !height)
     return;
 
-  if (loutput->show_cpukinds && ou && ou->cpukind_style) {
+  if (cpukind_style) {
     linestyle = 1; /* dash */
-    dashspace = 1U << ou->cpukind_style;
-    thickness *= (1 + ou->cpukind_style);
+    dashspace = 1U << cpukind_style;
+    thickness *= (1 + cpukind_style);
   }
 
   x *= FIG_FACTOR;
@@ -97,12 +97,12 @@ static void
 fig_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth, unsigned x, unsigned y, const char *text, hwloc_obj_t obj __hwloc_attribute_unused, unsigned text_id __hwloc_attribute_unused)
 {
   FILE *file = loutput->file;
-  struct lstopo_obj_userdata *ou = obj ? obj->userdata : NULL;
+  unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   unsigned fontflags = 0; /* normal */
   int len = (int)strlen(text);
   int color;
 
-  if (loutput->show_cpukinds && ou && (ou->cpukind_style % 2))
+  if (cpukind_style % 2)
     fontflags = 2; /* bold for odd styles */
 
   color = lcolor->private.fig.color;
