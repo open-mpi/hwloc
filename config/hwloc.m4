@@ -548,6 +548,46 @@ EOF])
       echo
     fi
 
+    if test x$hwloc_darwin = xyes; then
+      echo
+      echo "**** Darwin-specific checks"
+
+      AC_MSG_CHECKING([for the Foundation framework])
+      tmp_save_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -framework Foundation"
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([
+#include <CoreFoundation/CoreFoundation.h>
+          ], [
+return CFDictionaryGetTypeID();
+          ])],
+        [AC_MSG_RESULT(yes)
+         HWLOC_DARWIN_LDFLAGS="$HWLOC_DARWIN_LDFLAGS -framework Foundation"
+         AC_DEFINE(HWLOC_HAVE_DARWIN_FOUNDATION, 1, `Define to 1 if you have the Foundation Darwin framework')],
+        [AC_MSG_RESULT(no)])
+      LDFLAGS="$tmp_save_LDFLAGS"
+
+      AC_MSG_CHECKING([for the IOKit framework])
+      tmp_save_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -framework IOKit"
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([
+#include <IOKit/IOKitLib.h>
+          ], [
+io_registry_entry_t service = IORegistryGetRootEntry(kIOMasterPortDefault);
+          ])],
+        [AC_MSG_RESULT(yes)
+         HWLOC_DARWIN_LDFLAGS="$HWLOC_DARWIN_LDFLAGS -framework IOKit"
+         AC_DEFINE(HWLOC_HAVE_DARWIN_IOKIT, 1, `Define to 1 if you have the IOKit Darwin framework')],
+        [AC_MSG_RESULT(no)])
+      LDFLAGS="$tmp_save_LDFLAGS"
+
+      AC_SUBST(HWLOC_DARWIN_LDFLAGS)
+
+      echo "**** end of Darwin-specific checks"
+      echo
+    fi
+
     if test x$hwloc_linux = xyes; then
       echo
       echo "**** Linux-specific checks"

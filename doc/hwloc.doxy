@@ -2206,6 +2206,12 @@ on some Intel processors.
 such as <tt>intel_atom_0</tt>,
 as reported by future Linux kernels on some Intel processors.
 </dd>
+<dt>DarwinCompatible (Darwin / Mac OS X)</dt>
+<dd>The compatibility attribute of the CPUs as found
+in the IO registry on Darwin / Mac OS X.
+For instance <tt>apple,icestorm;ARM,v8</tt> for energy-efficient cores
+and <tt>apple,firestorm;ARM,v8</tt> on performance cores on Apple M1 CPU.
+</dd>
 </dl>
 
 See \ref hwlocality_cpukinds for details.
