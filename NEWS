@@ -17,6 +17,13 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.6.0
+-------------
+* Backends
+  + Expose two cpukinds for energy-efficient cores (icestorm) and
+    high-performance cores (firestorm) on Apple M1 on Mac OS X.
+
+
 Version 2.5.0
 -------------
 * API

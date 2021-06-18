@@ -66,10 +66,13 @@ libhwloc_port_bgq_la_CPPFLAGS = $(common_CPPFLAGS) \
 
 nodist_libhwloc_port_darwin_la_SOURCES = topology-darwin.c
 libhwloc_port_darwin_la_SOURCES = \
-        include/darwin/sys/sysctl.h
+        include/darwin/sys/sysctl.h \
+        include/darwin/IOKit/IOKitLib.h \
+        include/darwin/CoreFoundation/CoreFoundation.h
 libhwloc_port_darwin_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/darwin \
-        -DHWLOC_DARWIN_SYS
+        -DHWLOC_DARWIN_SYS \
+	-DHWLOC_HAVE_DARWIN_FOUNDATION -DHWLOC_HAVE_DARWIN_IOKIT
 
 nodist_libhwloc_port_freebsd_la_SOURCES = topology-freebsd.c
 libhwloc_port_freebsd_la_SOURCES = \

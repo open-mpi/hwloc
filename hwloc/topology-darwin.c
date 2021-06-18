@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -21,6 +21,290 @@
 #include "hwloc.h"
 #include "private/private.h"
 #include "private/debug.h"
+
+#if (defined HWLOC_HAVE_DARWIN_FOUNDATION) && (defined HWLOC_HAVE_DARWIN_IOKIT)
+
+#include <IOKit/IOKitLib.h>
+#include <CoreFoundation/CoreFoundation.h>
+
+#define DT_PLANE "IODeviceTree"
+
+struct hwloc_darwin_cpukinds {
+  struct hwloc_darwin_cpukind {
+    hwloc_bitmap_t cpuset;
+#define HWLOC_DARWIN_COMPATIBLE_MAX 128
+    char *compatible;
+  } P, E;
+};
+
+static int hwloc__look_darwin_cpukinds(struct hwloc_darwin_cpukinds *kinds)
+{
+  io_registry_entry_t cpus_root;
+  io_iterator_t cpus_iter;
+  io_registry_entry_t cpus_child;
+  kern_return_t kret;
+
+  hwloc_debug("\nLooking at cpukinds under " DT_PLANE ":/cpus ...\n");
+
+  cpus_root = IORegistryEntryFromPath(kIOMasterPortDefault, DT_PLANE ":/cpus");
+  if (!cpus_root) {
+    fprintf(stderr, "hwloc/darwin/cpukinds: failed to find " DT_PLANE ":/cpus\n");
+    return -1;
+  }
+
+  kret = IORegistryEntryGetChildIterator(cpus_root, DT_PLANE, &cpus_iter);
+  if (kret != KERN_SUCCESS) {
+    if (!hwloc_hide_errors())
+      fprintf(stderr, "hwloc/darwin/cpukinds: failed to create iterator\n");
+    IOObjectRelease(cpus_root);
+    return -1;
+  }
+
+  while ((cpus_child = IOIteratorNext(cpus_iter)) != 0) {
+    CFTypeRef ref;
+    unsigned logical_cpu_id;
+    char cluster_type;
+    char compatible[HWLOC_DARWIN_COMPATIBLE_MAX+2]; /* room for two \0 at the end */
+
+#ifdef HWLOC_DEBUG
+    {
+      /* get the name */
+      io_name_t name;
+      kret = IORegistryEntryGetNameInPlane(cpus_child, DT_PLANE, name);
+      if (kret != KERN_SUCCESS) {
+        hwloc_debug("failed to find cpu name\n");
+      } else {
+        hwloc_debug("looking at cpu `%s'\n", name);
+      }
+    }
+#endif
+
+    /* get logical-cpu-id */
+    ref = IORegistryEntrySearchCFProperty(cpus_child, DT_PLANE, CFSTR("logical-cpu-id"), kCFAllocatorDefault, kNilOptions);
+    if (!ref) {
+      /* this may happen on old/x86 systems that aren't hybrid, don't warn */
+      hwloc_debug("failed to find logical-cpu-id\n");
+      continue;
+    }
+    if (CFGetTypeID(ref) != CFNumberGetTypeID()) {
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/darwin/cpukinds: unexpected `logical-cpu-id' CF type %s\n",
+                CFStringGetCStringPtr(CFCopyTypeIDDescription(CFGetTypeID(ref)), kCFStringEncodingUTF8));
+      CFRelease(ref);
+      continue;
+    }
+    {
+      long long lld_value;
+      if (!CFNumberGetValue(ref, kCFNumberLongLongType, &lld_value)) {
+        if (!hwloc_hide_errors())
+          fprintf(stderr, "hwloc/darwin/cpukinds: failed to get logical-cpu-id\n");
+        CFRelease(ref);
+        continue;
+      }
+      hwloc_debug("got logical-cpu-id %lld\n", lld_value);
+      logical_cpu_id = lld_value;
+    }
+    CFRelease(ref);
+
+#ifdef HWLOC_DEBUG
+    /* get logical-cluster-id */
+    ref = IORegistryEntrySearchCFProperty(cpus_child, DT_PLANE, CFSTR("logical-cluster-id"), kCFAllocatorDefault, kNilOptions);
+    if (!ref) {
+      hwloc_debug("failed to find logical-cluster-id\n");
+      continue;
+    }
+    if (CFGetTypeID(ref) != CFNumberGetTypeID()) {
+      hwloc_debug("unexpected `logical-cluster-id' CF type is %s\n",
+                  CFStringGetCStringPtr(CFCopyTypeIDDescription(CFGetTypeID(ref)), kCFStringEncodingUTF8));
+      CFRelease(ref);
+      continue;
+    }
+    {
+      long long lld_value;
+      if (!CFNumberGetValue(ref, kCFNumberLongLongType, &lld_value)) {
+        hwloc_debug("failed to get logical-cluster-id\n");
+        CFRelease(ref);
+        continue;
+      }
+      hwloc_debug("got logical-cluster-id %lld\n", lld_value);
+    }
+    CFRelease(ref);
+#endif
+
+    /* get cluster-type */
+    ref = IORegistryEntrySearchCFProperty(cpus_child, DT_PLANE, CFSTR("cluster-type"), kCFAllocatorDefault, kNilOptions);
+    if (!ref) {
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/darwin/cpukinds: failed to find cluster-type\n");
+      continue;
+    }
+    if (CFGetTypeID(ref) != CFDataGetTypeID()) {
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/darwin/cpukinds: unexpected `cluster-type' CF type %s\n",
+                CFStringGetCStringPtr(CFCopyTypeIDDescription(CFGetTypeID(ref)), kCFStringEncodingUTF8));
+      CFRelease(ref);
+      continue;
+    }
+    if (CFDataGetLength(ref) < 2) {
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/darwin/cpukinds: only got %ld bytes from cluster-type data\n",
+                CFDataGetLength(ref));
+      CFRelease(ref);
+      continue;
+    }
+    {
+      UInt8 u8_values[2];
+      CFDataGetBytes(ref, CFRangeMake(0, 2), u8_values);
+      if (u8_values[1] == 0) {
+        hwloc_debug("got cluster-type %c\n", u8_values[0]);
+        cluster_type = u8_values[0];
+      } else {
+        if (!hwloc_hide_errors())
+          fprintf(stderr, "hwloc/darwin/cpukinds: got more than one character in cluster-type data %c%c...\n",
+                  u8_values[0], u8_values[1]);
+        CFRelease(ref);
+        continue;
+      }
+    }
+    CFRelease(ref);
+
+    /* get compatible */
+    ref = IORegistryEntrySearchCFProperty(cpus_child, DT_PLANE, CFSTR("compatible"), kCFAllocatorDefault, kNilOptions);
+    if (!ref) {
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/darwin/cpukinds: failed to find compatible\n");
+      continue;
+    }
+    if (CFGetTypeID(ref) != CFDataGetTypeID()) {
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/darwin/cpukinds: unexpected `compatible' CF type %s\n",
+                CFStringGetCStringPtr(CFCopyTypeIDDescription(CFGetTypeID(ref)), kCFStringEncodingUTF8));
+      CFRelease(ref);
+      continue;
+    }
+    {
+      unsigned i, length;
+      length = CFDataGetLength(ref);
+      if (length > HWLOC_DARWIN_COMPATIBLE_MAX)
+        length = HWLOC_DARWIN_COMPATIBLE_MAX;
+      CFDataGetBytes(ref, CFRangeMake(0, length), (UInt8*) compatible);
+      compatible[length] = 0;
+      compatible[length+1] = 0;
+      for(i=0; i<length; i++)
+        if (!compatible[i] && compatible[i+1])
+          compatible[i] = ';';
+      if (!compatible[0]) {
+        if (!hwloc_hide_errors())
+          fprintf(stderr, "hwloc/darwin/cpukinds: compatible is empty\n");
+        CFRelease(ref);
+        continue;
+      }
+      hwloc_debug("got compatible %s\n", compatible);
+      CFRelease(ref);
+    }
+
+    IOObjectRelease(cpus_child);
+
+    /*
+     * cluster types: https://developer.apple.com/news/?id=vk3m204o
+     * E=Efficiency, P=Performance
+     */
+    if (cluster_type == 'E') {
+      hwloc_bitmap_set(kinds->E.cpuset, logical_cpu_id);
+      if (!kinds->E.compatible)
+        kinds->E.compatible = strdup(compatible);
+      else if (strcmp(kinds->E.compatible, compatible))
+        fprintf(stderr, "got a different compatible string inside same cluster\n");
+
+    } else if (cluster_type == 'P') {
+      hwloc_bitmap_set(kinds->P.cpuset, logical_cpu_id);
+      if (!kinds->P.compatible)
+        kinds->P.compatible = strdup(compatible);
+      else if (strcmp(kinds->P.compatible, compatible))
+        fprintf(stderr, "got a different compatible string inside same cluster\n");
+
+    } else {
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/darwin/cpukinds: unrecognized cluster type %c compatible %s\n",
+                cluster_type, compatible);
+    }
+  }
+  IOObjectRelease(cpus_iter);
+  IOObjectRelease(cpus_root);
+
+  hwloc_debug("\n");
+  return 0;
+}
+
+static int hwloc_look_darwin_cpukinds(struct hwloc_topology *topology)
+{
+    struct hwloc_darwin_cpukinds kinds;
+
+    kinds.P.cpuset = hwloc_bitmap_alloc();
+    kinds.P.compatible = NULL;
+    kinds.E.cpuset = hwloc_bitmap_alloc();
+    kinds.E.compatible = NULL;
+
+    if (!kinds.P.cpuset || !kinds.E.cpuset)
+      goto out_with_kinds;
+
+    hwloc__look_darwin_cpukinds(&kinds);
+
+    /* register the cpukind for "P=performance" cores */
+    if (!hwloc_bitmap_iszero(kinds.P.cpuset)) {
+      struct hwloc_info_s infoattr;
+      unsigned nr_info = 0;
+      hwloc_debug_1arg_bitmap("building `P' cpukind with compatible `%s' and cpuset %s\n",
+                              kinds.P.compatible, kinds.P.cpuset);
+      if (kinds.P.compatible) {
+        infoattr.name = (char *) "DarwinCompatible";
+        infoattr.value = kinds.P.compatible;
+        nr_info = 1;
+      }
+      hwloc_internal_cpukinds_register(topology, kinds.P.cpuset, 1 /* P=performance */, &infoattr, nr_info, 0);
+      /* the cpuset is given to the callee */
+      topology->support.discovery->cpukind_efficiency = 1;
+    } else {
+      hwloc_bitmap_free(kinds.P.cpuset);
+    }
+    free(kinds.P.compatible);
+
+    /* register the cpukind for "E=efficiency" cores */
+    if (!hwloc_bitmap_iszero(kinds.E.cpuset)) {
+      struct hwloc_info_s infoattr;
+      unsigned nr_info = 0;
+      hwloc_debug_1arg_bitmap("building `E' cpukind with compatible `%s' and cpuset %s\n",
+                              kinds.E.compatible, kinds.E.cpuset);
+      if (kinds.E.compatible) {
+        infoattr.name = (char *) "DarwinCompatible";
+        infoattr.value = kinds.E.compatible;
+        nr_info = 1;
+      }
+      hwloc_internal_cpukinds_register(topology, kinds.E.cpuset, 0 /* E=efficiency */, &infoattr, nr_info, 0);
+      /* the cpuset is given to the callee */
+      topology->support.discovery->cpukind_efficiency = 1;
+    } else {
+      hwloc_bitmap_free(kinds.E.cpuset);
+    }
+    free(kinds.E.compatible);
+
+    hwloc_debug("\n");
+    return 0;
+
+ out_with_kinds:
+    hwloc_bitmap_free(kinds.P.cpuset);
+    free(kinds.P.compatible);
+    hwloc_bitmap_free(kinds.E.cpuset);
+    free(kinds.E.compatible);
+    return -1;
+}
+
+#else /* HWLOC_HAVE_DARWIN_FOUNDATION && HWLOC_HAVE_DARWIN_IOKIT */
+static int hwloc_look_darwin_cpukinds(struct hwloc_topology *topology __hwloc_attribute_unused)
+{
+  return 0;
+}
+#endif /* !HWLOC_HAVE_DARWIN_FOUNDATION || !HWLOC_HAVE_DARWIN_IOKIT */
 
 static int
 hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
@@ -354,6 +638,8 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
   /* add PU objects */
   hwloc_setup_pu_level(topology, nprocs);
+
+  hwloc_look_darwin_cpukinds(topology);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Darwin");
   hwloc_add_uname_info(topology, NULL);

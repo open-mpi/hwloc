@@ -166,6 +166,7 @@ endif HWLOC_HAVE_WINDOWS
 
 if HWLOC_HAVE_DARWIN
 sources += topology-darwin.c
+ldflags += $(HWLOC_DARWIN_LDFLAGS)
 endif HWLOC_HAVE_DARWIN
 
 if HWLOC_HAVE_FREEBSD
