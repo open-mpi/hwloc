@@ -22,6 +22,8 @@ Version 2.6.0
 * Backends
   + Expose two cpukinds for energy-efficient cores (icestorm) and
     high-performance cores (firestorm) on Apple M1 on Mac OS X.
+  + Use sysfs CPU "capacity" to rank hybrid cores by efficiency
+    on Linux when available (mostly on recent ARM platforms for now).
 
 
 Version 2.5.0

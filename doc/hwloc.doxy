@@ -2201,6 +2201,12 @@ currently <tt>IntelAtom</tt> or <tt>IntelCore</tt>,
 as reported by the x86 CPUID instruction and future Linux kernels
 on some Intel processors.
 </dd>
+<dt>LinuxCapacity (Linux)</dt>
+<dd>The Linux-specific CPU capacity found in sysfs,
+as reported by the Linux kernel on some recent platforms.
+Higher values usually mean that the Linux scheduler considers
+the core as high-performance rather than energy-efficient.
+</dd>
 <dt>LinuxCPUType (Linux)</dt>
 <dd>The Linux-specific CPU type found in sysfs,
 such as <tt>intel_atom_0</tt>,

@@ -4144,11 +4144,12 @@ hwloc_linux_cpukinds_compar(const void *_a, const void *_b)
 static void
 hwloc_linux_cpukinds_register(struct hwloc_linux_cpukinds *cpukinds,
                               struct hwloc_topology *topology,
-                              const char *name)
+                              const char *name,
+                              int forced_efficiency)
 {
   unsigned i;
 
-  /* sort by frequency, lower frequency likely means lower efficiency */
+  /* sort by value, lower frequency and lower capacity likely means lower performance */
   qsort(cpukinds->sets, cpukinds->nr_sets, sizeof(*cpukinds->sets), hwloc_linux_cpukinds_compar);
 
   for(i=0; i<cpukinds->nr_sets; i++) {
@@ -4157,10 +4158,16 @@ hwloc_linux_cpukinds_register(struct hwloc_linux_cpukinds *cpukinds,
     infoattr.name = (char *) name;
     infoattr.value = value;
     snprintf(value, sizeof(value), "%lu", cpukinds->sets[i].value);
-    hwloc_internal_cpukinds_register(topology, cpukinds->sets[i].cpuset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+    /* value (at least cpu_capacity) may be > INT_MAX, too large for a forced_efficiency, hence use i instead */
+    hwloc_internal_cpukinds_register(topology, cpukinds->sets[i].cpuset,
+                                     forced_efficiency ? (int) i : HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                     &infoattr, 1, 0);
     /* the cpuset is given to the callee */
     cpukinds->sets[i].cpuset = NULL;
   }
+
+  if (cpukinds->nr_sets)
+    topology->support.discovery->cpukind_efficiency = 1;
 }
 
 static void
@@ -4179,7 +4186,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
                    struct hwloc_linux_backend_data_s *data,
                    const char *path)
 {
-  struct hwloc_linux_cpukinds cpufreqs_max,  cpufreqs_base;
+  struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
   char str[293];
   int i;
   DIR *dir;
@@ -4200,10 +4207,21 @@ look_sysfscpukinds(struct hwloc_topology *topology,
       if (basefreq)
         hwloc_linux_cpukinds_add(&cpufreqs_base, i, basefreq/1000);
   } hwloc_bitmap_foreach_end();
-  hwloc_linux_cpukinds_register(&cpufreqs_max, topology, "FrequencyMaxMHz");
-  hwloc_linux_cpukinds_register(&cpufreqs_base, topology, "FrequencyBaseMHz");
+  hwloc_linux_cpukinds_register(&cpufreqs_max, topology, "FrequencyMaxMHz", 0);
+  hwloc_linux_cpukinds_register(&cpufreqs_base, topology, "FrequencyBaseMHz", 0);
   hwloc_linux_cpukinds_destroy(&cpufreqs_max);
   hwloc_linux_cpukinds_destroy(&cpufreqs_base);
+
+  /* look at the PU capacity */
+  hwloc_linux_cpukinds_init(&cpu_capacity);
+  hwloc_bitmap_foreach_begin(i, topology->levels[0][0]->cpuset) {
+    unsigned capacity;
+    sprintf(str, "%s/cpu%d/cpu_capacity", path, i);
+    if (hwloc_read_path_as_uint(str, &capacity, data->root_fd) >= 0)
+      hwloc_linux_cpukinds_add(&cpu_capacity, i, capacity);
+  } hwloc_bitmap_foreach_end();
+  hwloc_linux_cpukinds_register(&cpu_capacity, topology, "LinuxCapacity", 1);
+  hwloc_linux_cpukinds_destroy(&cpu_capacity);
 
   dir = hwloc_opendir("/sys/devices/system/cpu/types", data->root_fd); /* "types" is not in /sys/bus/cpu */
   if (dir) {
