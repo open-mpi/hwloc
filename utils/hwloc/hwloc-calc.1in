@@ -308,6 +308,12 @@ To display the list of NUMA nodes, by physical indexes, that intersect a given (
     $ hwloc-calc --physical --intersect NUMAnode 0xf0f0f0f0
     0,2
 
+To find how many cores are in the second CPU kind
+(those cores are likely higher-performance and more power-hungry than cores of the first kind):
+
+    $ hwloc-calc --cpukind 1 -N core all
+    4
+
 To display the list of NUMA nodes, by physical indexes,
 whose locality is exactly equal to a Package:
 
