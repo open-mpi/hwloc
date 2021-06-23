@@ -1067,7 +1067,7 @@ following environment variables.
   or core type and frequency on other architectures.
   <br/>
   This environment variable may be set to
-  <tt>coretype+frequency</tt>, <tt>coretype</tt>,
+  <tt>coretype+frequency</tt>, <tt>coretype+frequency_strict</tt>, <tt>coretype</tt>,
   <tt>frequency</tt>, <tt>frequency_base</tt>, <tt>frequency_max</tt>,
   <tt>forced_efficiency</tt>, <tt>no_forced_efficiency</tt>,
   <tt>default</tt>, or <tt>none</tt>.
