@@ -2195,11 +2195,10 @@ as reported by <tt>cpufreq</tt> drivers on Linux.
 <dd>The base operating frequency of the core,
 as reported by some <tt>cpufreq</tt> drivers on Linux (e.g. <tt>intel_pstate</tt>).
 </dd>
-<dt>CoreType (x86, Linux)</dt>
+<dt>CoreType (x86)</dt>
 <dd>A string describing the kind of core,
 currently <tt>IntelAtom</tt> or <tt>IntelCore</tt>,
-as reported by the x86 CPUID instruction and future Linux kernels
-on some Intel processors.
+as reported by the x86 CPUID instruction on some Intel processors.
 </dd>
 <dt>LinuxCapacity (Linux)</dt>
 <dd>The Linux-specific CPU capacity found in sysfs,

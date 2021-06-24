@@ -94,16 +94,13 @@
   <cpukind cpuset="0x00fff000">
     <info name="FrequencyMaxMHz" value="2000"/>
     <info name="FrequencyBaseMHz" value="1200"/>
-    <info name="LinuxCPUType" value="foo_bar"/>
   </cpukind>
   <cpukind cpuset="0x000000ff">
     <info name="FrequencyMaxMHz" value="3000"/>
     <info name="FrequencyBaseMHz" value="2500"/>
-    <info name="LinuxCPUType" value="foo_baz"/>
   </cpukind>
   <cpukind cpuset="0x00000f00">
     <info name="FrequencyMaxMHz" value="3000"/>
     <info name="FrequencyBaseMHz" value="1200"/>
-    <info name="LinuxCPUType" value="foo_baz"/>
   </cpukind>
 </topology>

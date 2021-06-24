@@ -4189,7 +4189,6 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
   char str[293];
   int i;
-  DIR *dir;
 
   /* look at the PU base+max frequency */
   hwloc_linux_cpukinds_init(&cpufreqs_max);
@@ -4222,45 +4221,6 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   } hwloc_bitmap_foreach_end();
   hwloc_linux_cpukinds_register(&cpu_capacity, topology, "LinuxCapacity", 1);
   hwloc_linux_cpukinds_destroy(&cpu_capacity);
-
-  dir = hwloc_opendir("/sys/devices/system/cpu/types", data->root_fd); /* "types" is not in /sys/bus/cpu */
-  if (dir) {
-    struct dirent *dirent;
-    while ((dirent = readdir(dir)) != NULL) {
-      hwloc_bitmap_t cpukind_cpuset;
-
-      if (*dirent->d_name == '.')
-        continue;
-
-      sprintf(str, "/sys/devices/system/cpu/types/%s/cpumap", dirent->d_name);
-      cpukind_cpuset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
-      if (cpukind_cpuset) {
-        if (!hwloc_bitmap_iszero(cpukind_cpuset)) {
-          struct hwloc_info_s infos[2];
-          unsigned nr_infos = 0;
-          /* expose a convenient CoreType if any */
-          if (!strncmp(dirent->d_name, "intel_atom", 10)) {
-            infos[nr_infos].name = (char*) "CoreType";
-            infos[nr_infos].value = (char*) "IntelAtom";
-            nr_infos++;
-          } else if (!strncmp(dirent->d_name, "intel_core", 10)) {
-            infos[nr_infos].name = (char*) "CoreType";
-            infos[nr_infos].value = (char*) "IntelCore";
-            nr_infos++;
-          }
-          /* then expose the raw LinuxCPUType */
-          infos[nr_infos].name = (char*) "LinuxCPUType";
-          infos[nr_infos].value = dirent->d_name;
-          nr_infos++;
-
-          hwloc_internal_cpukinds_register(topology, cpukind_cpuset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, infos, nr_infos, 0);
-        } else {
-          hwloc_bitmap_free(cpukind_cpuset);
-        }
-      }
-    }
-    closedir(dir);
-  }
 
   return 0;
 }
