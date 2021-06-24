@@ -51,12 +51,13 @@ extern "C" {
  * Higher \p kind_index values would rather return information
  * about power-hungry high-performance cores.
  *
- * When available, efficiency values are gathered from the operating
- * system (when \p cpukind_efficiency is set in the
- * struct hwloc_topology_discovery_support array, only on Windows 10 for now).
- * Otherwise hwloc tries to compute efficiencies
- * by comparing CPU kinds using frequencies (on ARM),
- * or core types and frequencies (on other architectures).
+ * When available, efficiency values are gathered from the operating system.
+ * If so, \p cpukind_efficiency is set in the struct hwloc_topology_discovery_support array.
+ * This is currently available on Windows 10 only.
+ *
+ * If the operating system does not expose core efficiencies natively,
+ * hwloc tries to compute efficiencies by comparing CPU kinds using
+ * frequencies (on ARM), or core types and frequencies (on other architectures).
  * The environment variable HWLOC_CPUKINDS_RANKING may be used
  * to change this heuristics, see \ref envvar.
  *
