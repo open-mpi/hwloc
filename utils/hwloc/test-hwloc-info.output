@@ -485,12 +485,15 @@ Machine L#0
  cpukind = 0 (partially)
  cpukind info FrequencyMaxMHz = 2000
  cpukind info FrequencyBaseMHz = 1200
+ cpukind info LinuxCapacity = 1025
  cpukind = 1 (partially)
  cpukind info FrequencyMaxMHz = 3000
  cpukind info FrequencyBaseMHz = 2500
+ cpukind info LinuxCapacity = 234
  cpukind = 2 (partially)
  cpukind info FrequencyMaxMHz = 3000
  cpukind info FrequencyBaseMHz = 1200
+ cpukind info LinuxCapacity = 234
 
 # cpukind for a single PU
 PU L#15
@@ -515,4 +518,5 @@ PU L#15
  cpukind = 0
  cpukind info FrequencyMaxMHz = 2000
  cpukind info FrequencyBaseMHz = 1200
+ cpukind info LinuxCapacity = 1025
 
