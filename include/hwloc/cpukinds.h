@@ -53,7 +53,8 @@ extern "C" {
  *
  * When available, efficiency values are gathered from the operating system.
  * If so, \p cpukind_efficiency is set in the struct hwloc_topology_discovery_support array.
- * This is currently available on Windows 10 and Mac OS X (Darwin).
+ * This is currently available on Windows 10, Mac OS X (Darwin),
+ * and on some Linux platforms where core "capacity" is exposed in sysfs.
  *
  * If the operating system does not expose core efficiencies natively,
  * hwloc tries to compute efficiencies by comparing CPU kinds using

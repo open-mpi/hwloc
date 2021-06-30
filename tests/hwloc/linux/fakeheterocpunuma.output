@@ -91,19 +91,19 @@
     <u64values length="30">50 10 20 30 40 40 50 20 10 30 </u64values>
     <u64values length="18">40 40 50 30 30 10 </u64values>
   </distances2>
-  <cpukind cpuset="0x00fff000">
+  <cpukind cpuset="0x00fff000" forced_efficiency="1">
     <info name="FrequencyMaxMHz" value="2000"/>
     <info name="FrequencyBaseMHz" value="1200"/>
-    <info name="LinuxCPUType" value="foo_bar"/>
+    <info name="LinuxCapacity" value="1025"/>
   </cpukind>
-  <cpukind cpuset="0x000000ff">
+  <cpukind cpuset="0x000000ff" forced_efficiency="0">
     <info name="FrequencyMaxMHz" value="3000"/>
     <info name="FrequencyBaseMHz" value="2500"/>
-    <info name="LinuxCPUType" value="foo_baz"/>
+    <info name="LinuxCapacity" value="234"/>
   </cpukind>
-  <cpukind cpuset="0x00000f00">
+  <cpukind cpuset="0x00000f00" forced_efficiency="0">
     <info name="FrequencyMaxMHz" value="3000"/>
     <info name="FrequencyBaseMHz" value="1200"/>
-    <info name="LinuxCPUType" value="foo_baz"/>
+    <info name="LinuxCapacity" value="234"/>
   </cpukind>
 </topology>
