@@ -180,6 +180,7 @@ struct lstopo_x11_output {
   int needs_redraw;
   int needs_resize;
   int auto_resize;
+  int maximized;
 };
 
 static void
@@ -202,6 +203,33 @@ x11_destroy(struct lstopo_x11_output *disp)
 {
   cairo_surface_destroy(disp->coutput.surface);
   XDestroyWindow(disp->dpy, disp->win);
+}
+
+static int
+x11_is_maximized(struct lstopo_x11_output *disp)
+{
+  Atom type, state, maxed_h, maxed_v;
+  int format;
+  unsigned char *props;
+  unsigned long i, nr, bytesAfter;
+  int got_maxed_h = 0, got_maxed_v = 0;
+
+  state = XInternAtom(disp->dpy, "_NET_WM_STATE", True);
+  props = NULL;
+  if (Success == XGetWindowProperty(disp->dpy, disp->top, state, 0, (~0L), False, AnyPropertyType, &type, &format, &nr, &bytesAfter, &props)) {
+    maxed_h = XInternAtom(disp->dpy, "_NET_WM_STATE_MAXIMIZED_VERT", True);
+    maxed_v = XInternAtom(disp->dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", True);
+    for(i=0; i<nr; i++) {
+      Atom prop = ((Atom*)(props))[i];
+      if (prop == maxed_h)
+        got_maxed_h = 1;
+      else if (prop == maxed_v)
+        got_maxed_v = 1;
+    }
+    XFree(props);
+  }
+  /* if the window is maximized in a single dimension, zoom in/out will unmaximize it */
+  return got_maxed_h && got_maxed_v;
 }
 
 /** Clip coordinates of the visible part. */
@@ -262,7 +290,7 @@ move_x11(struct lstopo_x11_output *disp)
       disp->y = disp->height - disp->screen_height;
   }
 
-  if (disp->needs_resize >= 1) {
+  if (disp->needs_resize >= 1 && !disp->maximized) {
     if (disp->auto_resize || disp->needs_resize >= 2) {
       disp->last_screen_width = disp->screen_width = disp->width;
       disp->last_screen_height = disp->screen_height = disp->height;
@@ -381,6 +409,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   disp->needs_redraw = 0;
   disp->needs_resize = 0;
   disp->auto_resize = 1;
+  disp->maximized = 0;
 
   x11_create(disp, loutput->width, loutput->height);
 
@@ -438,6 +467,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
 	}
 	if (disp->x != lastx || disp->y != lasty)
 	  XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
+        disp->maximized = x11_is_maximized(disp);
 	break;
       }
       case ButtonPress:
