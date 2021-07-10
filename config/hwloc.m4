@@ -1589,6 +1589,7 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
         hwloc_config_prefix[Makefile]
         hwloc_config_prefix[include/Makefile]
         hwloc_config_prefix[hwloc/Makefile]
+        hwloc_config_prefix[netloc/Makefile]
     )
 
     # Cleanup
