@@ -62,7 +62,7 @@ topology-aware mapping of the processes of an application.
 \subsection supportednetworks Supported Networks
 
 For now, only InfiniBand (See \ref netloc_setup) is supported, but it is
-planned to be extended it very soon.
+planned to be extended very soon.
 
 
 
@@ -297,7 +297,7 @@ When the network topology is a tree, the topology converted by netlocscotch is
 the complete topology of the machine containing intranode topologies from
 hwloc. In this case, merging the two levels results in a bigger tree. For other
 network topologies, the global graph created for Scotch is a generic graph
-since it not not (at this moment) possible to create nested known
+since it is not (at this moment) possible to create nested known
 architectures.
 
 \subsection netlocscotch_subarch Build Scotch sub-architectures
