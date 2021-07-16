@@ -800,11 +800,13 @@ either objects or cpusets (bitmaps as reported by hwloc-calc or hwloc-distrib).
 hwloc-calc is hwloc's Swiss Army Knife command-line tool for converting things.
 The input may be either objects or cpusets (bitmaps as reported by another hwloc-calc instance or by hwloc-distrib),
 that may be combined by addition, intersection or subtraction.
-The output kinds include:
+The output may be expressed as:
 <ul>
 <li>a cpuset bitmap: This compact opaque representation of objects is useful for shell scripts etc.
 It may passed to hwloc command-line tools such as hwloc-calc or hwloc-bind,
 or to hwloc command-line options such as <tt>lstopo \--restrict</tt>.</li>
+<li>a nodeset bitmap: Another opaque representation that represents memory locality more precisely,
+especially if some NUMA nodes are CPU less or if multiple NUMA nodes are local to the same CPUs.</li>
 <li>the amount of the equivalent hwloc objects from a specific type, or the list of their indexes.
 This is useful for iterating over all similar objects (for instance all cores) within a given
 part of a platform.</li>
