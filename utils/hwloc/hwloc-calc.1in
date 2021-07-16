@@ -104,9 +104,13 @@ Use logical indexes instead of physical/OS indexes for output (default, except f
 .TP
 \fB\-n\fR \fB\-\-nodeset\fR
 Interpret both input and output sets as nodesets instead of CPU sets.
+See \fB\-\-nodeset\-output\fR and \fB\-\-nodeset\-input\fR below for details.
 .TP
 \fB\-\-no\fR \fB\-\-nodeset\-output\fR
 Report nodesets instead of CPU sets.
+This output is more precise than the default CPU set output when memory
+locality matters because it properly describes CPU-less NUMA nodes,
+as well as NUMA-nodes that are local to multiple CPUs.
 .TP
 \fB\-\-ni\fR \fB\-\-nodeset\-input\fR
 Interpret input sets as nodesets instead of CPU sets.
