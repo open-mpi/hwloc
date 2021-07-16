@@ -37,6 +37,11 @@ PUs are ordered by physical index during this filtering.
 Only keep PUs whose CPU kind match.
 Either a single CPU kind is specified as an index,
 or the info name/value keypair will select matching kinds.
+
+When specified by index, it corresponds to hwloc ranking of CPU kinds
+which returns energy-efficient cores first, and high-performance
+power-hungry cores last.
+The full list of CPU kinds may be seen with \fIlstopo --cpukinds\fR.
 .TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.

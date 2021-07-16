@@ -1064,9 +1064,11 @@ following environment variables.
 
 <dt>HWLOC_CPUKINDS_RANKING=default</dt>
   <dd>change the ranking policy for CPU kinds.
-  By default, the OS-provided efficiency is used for ranking.
-  If not available, the frequency is used on ARM processors,
-  or core type and frequency on other architectures.
+  hwloc tries to rank CPU kinds that are energy efficiency first,
+  and then CPUs that are rather high-performance and power hungry.
+  <br/>
+  By default, if available, the OS-provided efficiency is used for ranking.
+  Otherwise, the frequency and/or core types are used when available.
   <br/>
   This environment variable may be set to
   <tt>coretype+frequency</tt>, <tt>coretype+frequency_strict</tt>, <tt>coretype</tt>,
@@ -2173,6 +2175,7 @@ Users may also specify their own attributes and values.
 The memory attributes API is located in hwloc/memattrs.h,
 see \ref hwlocality_memattrs and \ref hwlocality_memattrs_manage for details.
 
+
 \htmlonly
 </div><div class="section" id="topoattrs_cpukinds">
 \endhtmlonly
@@ -2183,12 +2186,16 @@ The CPU kinds API in hwloc/cpukinds.h provides a way to list the sets
 of PUs in each kind and get some optional information about their
 hardware characteristics and efficiency.
 
-If the operating system provides efficiency information (e.g. Windows 10),
+If the operating system provides efficiency information
+(e.g. Windows 10, MacOS X / Darwin and some Linux kernels),
 it is used to rank hwloc CPU kinds by efficiency.
 Otherwise, hwloc implements several heuristics based on frequencies
 and core types (see HWLOC_CPUKINDS_RANKING in \ref envvar).
 
-Attributes include:
+The ranking shows energy-efficient CPUs first, and high-performance
+power-hungry cores last.
+
+These CPU kinds may be annotated with the following native attributes:
 <dl>
 <dt>FrequencyMaxMHz (Linux)</dt>
 <dd>The maximal operating frequency of the core,
