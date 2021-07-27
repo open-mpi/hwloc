@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009 inria.  All rights reserved.
+ * Copyright © 2009-2021 Inria.  All rights reserved.
  * Copyright © 2009, 2012 Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -34,10 +34,10 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
 
   _snprintf(name, sizeof(name), "libhwloc-%d", current - age);
-  printf("using soname %s\n", name);
 
   _snprintf(s, sizeof(s), "\"%s\" /machine:%s /def:%s /name:%s /out:%s",
       prog, arch, def, name, lib);
+  printf("running command: %s\n", s);
   if (system(s)) {
     fprintf(stderr, "%s failed\n", s);
     exit(EXIT_FAILURE);
