@@ -47,6 +47,7 @@ noinst_HEADERS = \
         private/components.h \
         private/internal-components.h \
         private/cpuid-x86.h \
+        private/windows.h \
         private/netloc.h \
         netloc/utarray.h \
         netloc/uthash.h

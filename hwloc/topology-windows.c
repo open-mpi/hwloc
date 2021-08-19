@@ -13,6 +13,7 @@
 #include "hwloc.h"
 #include "hwloc/windows.h"
 #include "private/private.h"
+#include "private/windows.h" /* must be before windows.h */
 #include "private/debug.h"
 
 #include <windows.h>
