@@ -56,6 +56,9 @@ typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP {
   RelationCache,
   RelationProcessorPackage,
   RelationGroup,
+  RelationProcessorDie,
+  RelationNumaNodeEx, /* only used to *request* extended numa info only, but included in RelationAll, never returned on output */
+  RelationProcessorModule,
   RelationAll = 0xffff
 } LOGICAL_PROCESSOR_RELATIONSHIP;
 #else /* HAVE_LOGICAL_PROCESSOR_RELATIONSHIP */
@@ -64,6 +67,11 @@ typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP {
 #    define RelationGroup 4
 #    define RelationAll 0xffff
 #  endif /* HAVE_RELATIONPROCESSORPACKAGE */
+#  ifndef HAVE_RELATIONPROCESSORDIE
+#    define RelationProcessorDie 5
+#    define RelationNumaNodeEx 6
+#    define RelationProcessorModule 7
+#  endif
 #endif /* HAVE_LOGICAL_PROCESSOR_RELATIONSHIP */
 
 #ifndef HAVE_GROUP_AFFINITY
@@ -1062,6 +1070,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
 	id = HWLOC_UNKNOWN_INDEX;
 	switch (procInfo->Relationship) {
+          case RelationNumaNodeEx: /* only used on input anyway */
 	  case RelationNumaNode:
 	    type = HWLOC_OBJ_NUMANODE;
             /* Starting with Windows 11 and Server 2022, the GroupCount field is valid and >=1
