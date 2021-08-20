@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.12.0
+--------------
+* Add support for Die objects and Module groups on Windows.
+
+
 Version 2.11.1
 --------------
 * Fix bash completions, thanks Tavis Rudd.
