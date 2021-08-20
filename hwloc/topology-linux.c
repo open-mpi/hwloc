@@ -166,6 +166,9 @@ struct hwloc_linux_backend_data_s {
 #ifndef MPOL_LOCAL
 # define MPOL_LOCAL 4
 #endif
+#ifndef MPOL_PREFERRED_MANY
+# define MPOL_PREFERRED_MANY 5
+#endif
 #ifndef MPOL_F_ADDR
 # define  MPOL_F_ADDR (1<<1)
 #endif
@@ -1629,7 +1632,7 @@ hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t p
     if (flags & HWLOC_MEMBIND_STRICT)
       *linuxpolicy = MPOL_BIND;
     else
-      *linuxpolicy = MPOL_PREFERRED;
+      *linuxpolicy = MPOL_PREFERRED_MANY; /* will be converted to MPOL_PREFERRED by the caller if not supported */
     break;
   case HWLOC_MEMBIND_INTERLEAVE:
     *linuxpolicy = MPOL_INTERLEAVE;
@@ -1706,6 +1709,7 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   unsigned max_os_index; /* highest os_index + 1 */
   unsigned long *linuxmask;
   size_t remainder;
+  static int preferred_many_notsupported = -1; /* -1 = MPOL_PREFERRED not tested, 0 = ok, 1 = not supported */
   int linuxpolicy;
   unsigned linuxflags = 0;
   int err;
@@ -1717,6 +1721,9 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy, flags);
   if (err < 0)
     return err;
+
+  if (preferred_many_notsupported == 1 && linuxpolicy == MPOL_PREFERRED_MANY)
+    linuxpolicy = MPOL_PREFERRED;
 
   if (linuxpolicy == MPOL_DEFAULT) {
     /* Some Linux kernels don't like being passed a set */
@@ -1742,6 +1749,22 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   }
 
   err = hwloc_mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
+
+  if (linuxpolicy == MPOL_PREFERRED_MANY && preferred_many_notsupported == -1) {
+    if (!err) {
+      /* MPOL_PREFERRED_MANY is supported */
+      preferred_many_notsupported = 0;
+    } else if (errno == EINVAL) {
+      /* failed, try with MPOL_PREFERRED */
+      err = hwloc_mbind((void *) addr, len, MPOL_PREFERRED, linuxmask, max_os_index+1, linuxflags);
+      if (!err) {
+        /* worked fine, MPOL_PREFERRED_MANY isn't supported */
+        hwloc_debug("MPOL_PREFERRED_MANY not supported, reverting to MPOL_PREFERRED (with a single node)\n");
+        preferred_many_notsupported = 1;
+      }
+    }
+  }
+
   if (err < 0)
     goto out_with_mask;
 
@@ -1778,12 +1801,16 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
 {
   unsigned max_os_index; /* highest os_index + 1 */
   unsigned long *linuxmask;
+  static int preferred_many_notsupported = -1; /* -1 = MPOL_PREFERRED not tested, 0 = ok, 1 = not supported */
   int linuxpolicy;
   int err;
 
   err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy, flags);
   if (err < 0)
     return err;
+
+  if (preferred_many_notsupported == 1 && linuxpolicy == MPOL_PREFERRED_MANY)
+    linuxpolicy = MPOL_PREFERRED;
 
   if (linuxpolicy == MPOL_DEFAULT) {
     /* Some Linux kernels don't like being passed a set */
@@ -1815,6 +1842,22 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
   }
 
   err = hwloc_set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
+
+  if (linuxpolicy == MPOL_PREFERRED_MANY && preferred_many_notsupported == -1) {
+    if (!err) {
+      /* MPOL_PREFERRED_MANY is supported */
+      preferred_many_notsupported = 0;
+    } else if (errno == EINVAL) {
+      /* failed, try with MPOL_PREFERRED */
+      err = hwloc_set_mempolicy(MPOL_PREFERRED, linuxmask, max_os_index+1);
+      if (!err) {
+        /* worked fine, MPOL_PREFERRED_MANY isn't supported */
+        hwloc_debug("MPOL_PREFERRED_MANY not supported, reverting to MPOL_PREFERRED (with a single node)\n");
+        preferred_many_notsupported = 1;
+      }
+    }
+  }
+
   if (err < 0)
     goto out_with_mask;
 
@@ -1886,6 +1929,7 @@ hwloc_linux_membind_policy_to_hwloc(int linuxpolicy, hwloc_membind_policy_t *pol
     *policy = HWLOC_MEMBIND_FIRSTTOUCH;
     return 0;
   case MPOL_PREFERRED:
+  case MPOL_PREFERRED_MANY:
   case MPOL_BIND:
     *policy = HWLOC_MEMBIND_BIND;
     return 0;
