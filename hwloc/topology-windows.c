@@ -1098,9 +1098,19 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	    break;
 	  case RelationProcessorPackage:
 	    type = HWLOC_OBJ_PACKAGE;
+	    num = procInfo->Processor.GroupCount;
+	    GroupMask = procInfo->Processor.GroupMask;
+	    break;
+	  case RelationProcessorDie:
+            type = HWLOC_OBJ_DIE;
             num = procInfo->Processor.GroupCount;
             GroupMask = procInfo->Processor.GroupMask;
-	    break;
+            break;
+	  case RelationProcessorModule:
+            type = HWLOC_OBJ_GROUP;
+            num = procInfo->Processor.GroupCount;
+            GroupMask = procInfo->Processor.GroupMask;
+            break;
 	  case RelationCache:
 	    type = (procInfo->Cache.Type == CacheInstruction ? HWLOC_OBJ_L1ICACHE : HWLOC_OBJ_L1CACHE) + procInfo->Cache.Level - 1;
             /* GroupCount added approximately with NumaNode.GroupCount above */
@@ -1222,6 +1232,19 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 		continue;
 	    }
 	    break;
+          case HWLOC_OBJ_GROUP:
+            switch (procInfo[i].Relationship) {
+            case RelationGroup:
+              obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP;
+              break;
+            case RelationProcessorModule:
+              obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_MODULE;
+              obj->subtype = strdup("Module");
+              break;
+            default:
+              obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN;
+            }
+            break;
 	  default:
 	    break;
 	}
