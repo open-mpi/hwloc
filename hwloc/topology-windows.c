@@ -103,13 +103,17 @@ typedef struct HWLOC_PROCESSOR_RELATIONSHIP {
   GROUP_AFFINITY GroupMask[ANYSIZE_ARRAY];
 } HWLOC_PROCESSOR_RELATIONSHIP;
 
-#ifndef HAVE_NUMA_NODE_RELATIONSHIP
-typedef struct _NUMA_NODE_RELATIONSHIP {
+/* always use our own structure because the GroupCount and GroupMasks fields didn't exist in some Win10 */
+typedef struct HWLOC_NUMA_NODE_RELATIONSHIP {
   DWORD NodeNumber;
-  BYTE Reserved[20];
-  GROUP_AFFINITY GroupMask;
-} NUMA_NODE_RELATIONSHIP, *PNUMA_NODE_RELATIONSHIP;
-#endif
+  BYTE Reserved[18];
+  WORD GroupCount;
+  _ANONYMOUS_UNION
+  union {
+    GROUP_AFFINITY GroupMask;
+    GROUP_AFFINITY GroupMasks[ANYSIZE_ARRAY];
+  } DUMMYUNIONNAME;
+} HWLOC_NUMA_NODE_RELATIONSHIP;
 
 #ifndef HAVE_CACHE_RELATIONSHIP
 typedef struct _CACHE_RELATIONSHIP {
@@ -141,14 +145,14 @@ typedef struct _GROUP_RELATIONSHIP {
 } GROUP_RELATIONSHIP, *PGROUP_RELATIONSHIP;
 #endif
 
-/* always use our own structure because we need our own HWLOC_PROCESSOR_RELATIONSHIP */
+/* always use our own structure because we need our own HWLOC_PROCESSOR_RELATIONSHIP and HWLOC_NUMA_NODE_RELATIONSHIP */
 typedef struct HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
   LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
   DWORD Size;
   _ANONYMOUS_UNION
   union {
     HWLOC_PROCESSOR_RELATIONSHIP Processor;
-    NUMA_NODE_RELATIONSHIP NumaNode;
+    HWLOC_NUMA_NODE_RELATIONSHIP NumaNode;
     CACHE_RELATIONSHIP Cache;
     GROUP_RELATIONSHIP Group;
     /* Odd: no member to tell the cpu mask of the package... */
@@ -1208,8 +1212,16 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	switch (procInfo->Relationship) {
 	  case RelationNumaNode:
 	    type = HWLOC_OBJ_NUMANODE;
-            num = 1;
-            GroupMask = &procInfo->NumaNode.GroupMask;
+            /* Starting with Windows 10 Build 20348 and Windows 11, the GroupCount field is valid and >=1
+             * and we may read GroupMasks[]. Older releases have GroupCount==0 and we must read GroupMask.
+             */
+            if (procInfo->NumaNode.GroupCount) {
+              num = procInfo->NumaNode.GroupCount;
+              GroupMask = procInfo->NumaNode.GroupMasks;
+            } else {
+              num = 1;
+              GroupMask = &procInfo->NumaNode.GroupMask;
+            }
 	    id = procInfo->NumaNode.NodeNumber;
 	    gotnuma++;
 	    if (id > max_numanode_index)

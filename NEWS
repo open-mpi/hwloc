@@ -20,6 +20,8 @@ bug fixes (and other actions) for each version of hwloc since version
 Version 2.7.0
 -------------
 * Backends
+  + Add support for NUMA nodes spanning multiple processor groups
+    on recent Windows versions (NUMA nodes with more than 64 PUs).
   + Expose "Cluster" group objects on Linux kernel 5.16+ for CPUs
     that share some internal cache or bus. This can be equivalent
     to the L2 Cache level on some platforms (e.g. x86) or a specific
