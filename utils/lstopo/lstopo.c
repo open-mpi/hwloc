@@ -759,7 +759,7 @@ main (int argc, char *argv[])
   loutput.backend_flags = 0;
   loutput.methods = NULL;
 
-  loutput.plain_children_order = 0;
+  loutput.children_order = LSTOPO_ORDER_MEMORY_ABOVE;
   loutput.fontsize = 10;
   loutput.gridsize = 7;
   loutput.linespacing = 4;
@@ -1209,7 +1209,7 @@ main (int argc, char *argv[])
 	if (argc < 2)
 	  goto out_usagefailure;
 	if (!strcmp(argv[1], "plain"))
-	  loutput.plain_children_order = 1;
+	  loutput.children_order = LSTOPO_ORDER_PLAIN;
 	else if (strcmp(argv[1], "memoryabove"))
 	  fprintf(stderr, "Unsupported order `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
 	opt = 1;

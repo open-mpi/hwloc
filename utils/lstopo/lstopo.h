@@ -39,6 +39,11 @@ enum lstopo_show_legend_e {
   LSTOPO_SHOW_LEGEND_NO_DEFAULT
 };
 
+enum lstopo_order_e {
+  LSTOPO_ORDER_PLAIN = 0,
+  LSTOPO_ORDER_MEMORY_ABOVE = (1<<0)
+};
+
 FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
 
 struct draw_methods;
@@ -98,7 +103,7 @@ struct lstopo_output {
 
   /* draw config */
   char title[256];
-  unsigned plain_children_order;
+  unsigned children_order; /* OR'd set of enum lstopo_order_e */
   unsigned int gridsize, fontsize, linespacing, thickness;
   float text_xscale;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
@@ -198,7 +203,7 @@ struct lstopo_obj_userdata {
     unsigned box;
     struct lstopo_color *boxcolor;
   } children;
-  /* relative position of first memory child */
+  /* if memory is displayed separately above normal children */
   struct lstopo_children_position above_children;
 
   /* relative position of this object within its parent children zone */

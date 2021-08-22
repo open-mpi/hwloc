@@ -528,12 +528,13 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     | (parent->memory_arity ? LSTOPO_CHILD_KIND_MEMORY : 0)
     | (parent->io_arity ? LSTOPO_CHILD_KIND_IO : 0)
     | (parent->misc_arity ? LSTOPO_CHILD_KIND_MISC : 0);
-  /* now assign them below or above the parent */
-  if (loutput->plain_children_order || hwloc_obj_type_is_memory(parent->type)) {
-    plud->children.kinds = existing_kinds;
-    plud->above_children.kinds = 0;
-  } else {
-    plud->children.kinds = existing_kinds & ~LSTOPO_CHILD_KIND_MEMORY;
+  /* all children together by default */
+  plud->children.kinds = existing_kinds;
+  plud->above_children.kinds = 0;
+  /* if we're not inside a memory object, put memory children above if requested */
+  if (!hwloc_obj_type_is_memory(parent->type)
+      && (loutput->children_order & LSTOPO_ORDER_MEMORY_ABOVE)) {
+    plud->children.kinds &= ~LSTOPO_CHILD_KIND_MEMORY;
     plud->above_children.kinds = existing_kinds & LSTOPO_CHILD_KIND_MEMORY;
   }
 
@@ -553,7 +554,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* if there are memory children and using plain children layout, use horizontal by default */
   if (orient == LSTOPO_ORIENT_NONE
       && parent->memory_arity
-      && loutput->plain_children_order)
+      && !(loutput->children_order & LSTOPO_ORDER_MEMORY_ABOVE))
     orient = LSTOPO_ORIENT_HORIZ;
 
   /* recurse into children to prepare their sizes,
