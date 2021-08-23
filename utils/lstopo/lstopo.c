@@ -312,6 +312,37 @@ lstopo_check_pci_domains(hwloc_topology_t topology)
 }
 
 static void
+lstopo_parse_children_order(char *s, unsigned *children_order_p)
+{
+  char *tmp, *next;
+  unsigned children_order;
+
+  if (!strcmp(s, "plain")) {
+    *children_order_p = LSTOPO_ORDER_PLAIN;
+    return;
+  }
+
+  tmp = s;
+  children_order = LSTOPO_ORDER_PLAIN;
+  while (tmp && *tmp) {
+    next = strchr(tmp, ',');
+    if (next) {
+      *next = 0;
+      next++;
+    }
+
+    if (!strcmp(tmp, "memory:above") || !strcmp(tmp, "memoryabove") /* backward compat with 2.5 */)
+      children_order |= LSTOPO_ORDER_MEMORY_ABOVE;
+    else if (strcmp(tmp, "plain"))
+      fprintf(stderr, "Unsupported children order `%s', ignoring.\n", tmp);
+
+    tmp = next;
+  }
+
+  *children_order_p = children_order;
+}
+
+static void
 lstopo_populate_userdata(hwloc_obj_t parent)
 {
   hwloc_obj_t child;
@@ -1208,10 +1239,7 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--children-order")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	if (!strcmp(argv[1], "plain"))
-	  loutput.children_order = LSTOPO_ORDER_PLAIN;
-	else if (strcmp(argv[1], "memoryabove"))
-	  fprintf(stderr, "Unsupported order `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
+        lstopo_parse_children_order(argv[1], &loutput.children_order);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-cpukinds")) {
