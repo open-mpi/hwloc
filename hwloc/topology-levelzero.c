@@ -171,7 +171,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
                                                 pci.address.device,
                                                 pci.address.function);
         if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE) {
-          if (pci.maxSpeed.maxBandwidth)
+          if (pci.maxSpeed.maxBandwidth > 0)
             parent->attr->pcidev.linkspeed = ((float)pci.maxSpeed.maxBandwidth)/1000/1000/1000;
         }
       }
