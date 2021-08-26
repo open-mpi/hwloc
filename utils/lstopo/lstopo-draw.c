@@ -511,8 +511,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned separator_below_cache = loutput->gridsize;
   unsigned normal_children_separator = loutput->gridsize;
   unsigned totwidth = plud->width, totheight = plud->height;
-  unsigned children_width = 0, children_height = 0;
-  unsigned above_children_width, above_children_height;
+  unsigned children_width = 0, children_height = 0; /* Main children size */
+  unsigned above_children_width = 0, above_children_height = 0; /* Above children size */
   unsigned existing_kinds;
   int normal_children_are_PUs;
   hwloc_obj_t child;
@@ -584,11 +584,11 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     yrel += separator_below_cache;
   }
 
-  /* place children below the parent */
+  /* compute the size of the main children section */
   if (plud->children.kinds)
     place__children(loutput, parent, plud->children.kinds, &orient, 0, normal_children_separator, &children_width, &children_height);
 
-  /* place children above the parent, if any*/
+  /* compute the size of the above children section (Memory), if any */
   if (plud->above_children.kinds) {
     enum lstopo_orient_e morient = LSTOPO_ORIENT_HORIZ;
     int need_box;
@@ -621,6 +621,20 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 	above_children_width = children_width;
       }
     }
+  }
+
+  /* place the main section, assuming there's no above yet */
+  plud->children.width = children_width;
+  plud->children.height = children_height;
+  plud->children.xrel = xrel;
+  plud->children.yrel = yrel;
+  /* now place the above section and update main */
+  if (plud->above_children.kinds) {
+    plud->above_children.width = above_children_width;
+    plud->above_children.height = above_children_height;
+    plud->above_children.xrel = xrel;
+    plud->above_children.yrel = yrel;
+    plud->children.yrel += above_children_height + separator;
   }
 
   /* adjust parent size */
@@ -657,17 +671,6 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* save config for draw_children() later */
   plud->width = totwidth;
   plud->height = totheight;
-  plud->children.width = children_width;
-  plud->children.height = children_height;
-  plud->children.xrel = xrel;
-  plud->children.yrel = yrel;
-  if (plud->above_children.kinds) {
-    plud->above_children.width = above_children_width;
-    plud->above_children.height = above_children_height;
-    plud->above_children.xrel = xrel;
-    plud->above_children.yrel = yrel;
-    plud->children.yrel += above_children_height + separator;
-  }
 }
 
 /***********************
