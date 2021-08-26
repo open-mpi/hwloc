@@ -333,6 +333,14 @@ lstopo_parse_children_order(char *s, unsigned *children_order_p)
 
     if (!strcmp(tmp, "memory:above") || !strcmp(tmp, "memoryabove") /* backward compat with 2.5 */)
       children_order |= LSTOPO_ORDER_MEMORY_ABOVE;
+    else if (!strcmp(tmp, "io:right"))
+      children_order |= LSTOPO_ORDER_IO_RIGHT;
+    else if (!strcmp(tmp, "io:below"))
+      children_order |= LSTOPO_ORDER_IO_BELOW;
+    else if (!strcmp(tmp, "misc:right"))
+      children_order |= LSTOPO_ORDER_MISC_RIGHT;
+    else if (!strcmp(tmp, "misc:below"))
+      children_order |= LSTOPO_ORDER_MISC_BELOW;
     else if (strcmp(tmp, "plain"))
       fprintf(stderr, "Unsupported children order `%s', ignoring.\n", tmp);
 
@@ -475,8 +483,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --allow <all|local|...>   Change the set of objects marked as allowed\n");
   fprintf (where, "  --flags <n>           Set the topology flags\n");
   fprintf (where, "Graphical output options:\n");
-  fprintf (where, "  --children-order plain\n"
-		  "                        Display memory children below the parent like any other child\n");
+  fprintf (where, "  --children-order <memory:above|io:right|...|plain>\n"
+		  "                        Change the layout of Memory, I/O or Misc children\n");
   fprintf (where, "  --no-factorize        Do not factorize identical objects\n");
   fprintf (where, "  --no-factorize=<type> Do not factorize identical objects of type <type>\n");
   fprintf (where, "  --factorize           Factorize identical objects (default)\n");
@@ -790,7 +798,7 @@ main (int argc, char *argv[])
   loutput.backend_flags = 0;
   loutput.methods = NULL;
 
-  loutput.children_order = LSTOPO_ORDER_MEMORY_ABOVE;
+  loutput.children_order = LSTOPO_ORDER_MEMORY_ABOVE | LSTOPO_ORDER_IO_RIGHT | LSTOPO_ORDER_MISC_RIGHT;
   loutput.fontsize = 10;
   loutput.gridsize = 7;
   loutput.linespacing = 4;

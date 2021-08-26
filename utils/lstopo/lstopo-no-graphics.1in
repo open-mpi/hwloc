@@ -299,17 +299,35 @@ making the hwloc-ps program more practical.
 \fB\-\-children\-order <order>\fR
 Change the order of the different kinds of children with respect to
 their parent in the graphical output.
+\fI<order>\fR may be a comma-separated list of keywords among:
 
-The default order is \fImemory:above\fR:
-it displays memory children above other children
+\fImemory:above\fR displays memory children above other children
 (and above the parent if it is a cache).
 PUs are therefore below their local NUMA nodes, like hwloc 1.x did.
 
-If the order is changed to \fIplain\fR, lstopo displays the topology
+\fIio:right\fR and \fImisc:right\fR place I/O or Misc children
+on the right of CPU children.
+
+\fIio:below\fR  and \fImisc:below\fR place I/O or Misc children
+below CPU children.
+
+\fIplain\fR places everything not specified together with
+normal CPU children.
+
+If only \fIplain\fR is specified, lstopo displays the topology
 in a basic manner that strictly matches the actual tree:
-memory children are listed below their parent just like any other child.
+Memory, I/O and Misc children are listed below their parent just like any other child.
 PUs are therefore on the side of their local NUMA nodes,
 below a common ancestor.
+This output may result in strange layouts since the size of Memory,
+CPU and I/O children may be very different, causing the placement
+algorithm to poorly arrange them in rows.
+
+The default order is \fImemory:above,io:right,misc:right\fR which means
+Memory children are above CPU children while I/O and Misc are together
+on the right.
+
+Up to hwloc 2.5, the default was rather to \fImemory:above,plain\fR.
 
 See also the GRAPHICAL OUTPUT section below.
 .TP
@@ -707,8 +725,8 @@ complete graphs, etc.) is currently ignored.
 The layout of a level may be changed with \-\-vert, \-\-horiz,
 and \-\-rect.
 
-The position of memory children with respect to other children objects
-may be changed using \-\-children\-order.
+The position of Memory, I/O and Misc children with respect to other children
+objects may be changed using \-\-children\-order.
 .
 .\" **************************
 .\"    Examples Section

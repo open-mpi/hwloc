@@ -41,7 +41,11 @@ enum lstopo_show_legend_e {
 
 enum lstopo_order_e {
   LSTOPO_ORDER_PLAIN = 0,
-  LSTOPO_ORDER_MEMORY_ABOVE = (1<<0)
+  LSTOPO_ORDER_MEMORY_ABOVE = (1<<0),
+  LSTOPO_ORDER_IO_RIGHT = (1<<1),
+  LSTOPO_ORDER_IO_BELOW = (1<<2),
+  LSTOPO_ORDER_MISC_RIGHT = (1<<3),
+  LSTOPO_ORDER_MISC_BELOW = (1<<4)
 };
 
 FILE *open_output(const char *filename, int overwrite) __hwloc_attribute_malloc;
@@ -205,6 +209,10 @@ struct lstopo_obj_userdata {
   } children;
   /* if memory is displayed separately above normal children */
   struct lstopo_children_position above_children;
+  /* if I/O and/or Misc are displayed separately on the right */
+  struct lstopo_children_position right_children;
+  /* if I/O and/or Misc are displayed separately below */
+  struct lstopo_children_position below_children;
 
   /* relative position of this object within its parent children zone */
   unsigned xrel;

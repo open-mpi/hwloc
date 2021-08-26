@@ -511,8 +511,33 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   unsigned separator_below_cache = loutput->gridsize;
   unsigned normal_children_separator = loutput->gridsize;
   unsigned totwidth = plud->width, totheight = plud->height;
+
+  /* Children placement is divided in 4 zones:
+   *
+   *   +-------------------------------------------------------------------+
+   *   | Above = Memory Children (by default)                              |
+   *   +-----------------------------------+-------------------------------+
+   *   | Main = CPU (always),              | Right = I/O+Misc (by default) |
+   *   |        Memory+I/O+Misc (optional) |                               |
+   *   +-----------------------------------+-------------------------------+
+   *   | Below = I/O+Misc (optional)       |
+   *   +-----------------------------------+
+   *
+   * All these children are placed inside the parent box, except:
+   * - Cache parent are between Above and Main.
+   * - Bridges have a special drawing for PCI buses and links
+   *
+   * I/O and Misc parents only have the Main section because
+   * their children are either I/O or Misc, no CPU or Memory.
+   *
+   * Memory parents may have Main (for Memory children)
+   * and below/right for Misc.
+   */
   unsigned children_width = 0, children_height = 0; /* Main children size */
   unsigned above_children_width = 0, above_children_height = 0; /* Above children size */
+  unsigned right_children_width = 0, right_children_height = 0; /* Right children size */
+  unsigned below_children_width = 0, below_children_height = 0; /* Below children size */
+  unsigned mrb_children_width = 0, mrb_children_height = 0; /* sum of Main+Right+Below sizes */
   unsigned existing_kinds;
   int normal_children_are_PUs;
   hwloc_obj_t child;
@@ -522,6 +547,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* defaults */
   plud->children.box = 0;
   plud->above_children.box = 0;
+  plud->right_children.box = 0;
+  plud->below_children.box = 0;
 
   /* list the kinds of children that exist in that parent */
   existing_kinds = (parent->arity ? LSTOPO_CHILD_KIND_NORMAL : 0)
@@ -531,11 +558,37 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   /* all children together by default */
   plud->children.kinds = existing_kinds;
   plud->above_children.kinds = 0;
+  plud->right_children.kinds = 0;
+  plud->below_children.kinds = 0;
   /* if we're not inside a memory object, put memory children above if requested */
   if (!hwloc_obj_type_is_memory(parent->type)
       && (loutput->children_order & LSTOPO_ORDER_MEMORY_ABOVE)) {
     plud->children.kinds &= ~LSTOPO_CHILD_KIND_MEMORY;
-    plud->above_children.kinds = existing_kinds & LSTOPO_CHILD_KIND_MEMORY;
+    plud->above_children.kinds |= existing_kinds & LSTOPO_CHILD_KIND_MEMORY;
+  }
+  /* if we're not inside a I/O, put I/O on the right if requested */
+  if (!hwloc_obj_type_is_io(parent->type)
+      && (loutput->children_order & LSTOPO_ORDER_IO_RIGHT)) {
+    plud->children.kinds &= ~LSTOPO_CHILD_KIND_IO;
+    plud->right_children.kinds |= existing_kinds & LSTOPO_CHILD_KIND_IO;
+  }
+  /* if we're not inside a I/O, put I/O below if requested */
+  if (!hwloc_obj_type_is_io(parent->type)
+      && (loutput->children_order & LSTOPO_ORDER_IO_BELOW)) {
+    plud->children.kinds &= ~LSTOPO_CHILD_KIND_IO;
+    plud->below_children.kinds |= existing_kinds & LSTOPO_CHILD_KIND_IO;
+  }
+  /* if we're not inside a Misc, put Misc on the right if requested */
+  if (parent->type != HWLOC_OBJ_MISC
+      && (loutput->children_order & LSTOPO_ORDER_MISC_RIGHT)) {
+    plud->children.kinds &= ~LSTOPO_CHILD_KIND_MISC;
+    plud->right_children.kinds |= existing_kinds & LSTOPO_CHILD_KIND_MISC;
+  }
+  /* if we're not inside a Misc, put Misc below if requested */
+  if (parent->type != HWLOC_OBJ_MISC
+      && (loutput->children_order & LSTOPO_ORDER_MISC_BELOW)) {
+    plud->children.kinds &= ~LSTOPO_CHILD_KIND_MISC;
+    plud->below_children.kinds |= existing_kinds & LSTOPO_CHILD_KIND_MISC;
   }
 
   /* bridge children always vertical */
@@ -588,6 +641,24 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   if (plud->children.kinds)
     place__children(loutput, parent, plud->children.kinds, &orient, 0, normal_children_separator, &children_width, &children_height);
 
+  /* compute the size of the right children section (I/O and Misc), if any */
+  if (plud->right_children.kinds) {
+    enum lstopo_orient_e rorient = loutput->force_orient[parent->type];
+    place__children(loutput, parent, plud->right_children.kinds, &rorient, 0, separator, &right_children_width, &right_children_height);
+  }
+
+  /* compute the size of the below children section (I/O and Misc), if any */
+  if (plud->below_children.kinds) {
+    enum lstopo_orient_e borient = loutput->force_orient[parent->type];
+    place__children(loutput, parent, plud->below_children.kinds, &borient, 0, separator, &below_children_width, &below_children_height);
+  }
+
+  /* compute the width of the MRB children sections, it may be need for the above children section below */
+  mrb_children_width = children_width + right_children_width + (children_width && right_children_width ? separator : 0);
+  if (mrb_children_width < below_children_width)
+    mrb_children_width = below_children_width;
+  /* MRB height will be computed later, it's more difficult because of possible overlaps */
+
   /* compute the size of the above children section (Memory), if any */
   if (plud->above_children.kinds) {
     enum lstopo_orient_e morient = LSTOPO_ORIENT_HORIZ;
@@ -608,7 +679,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     if (need_box) {
       /* if there are multiple memory children, add a box, as large as the parent */
       if (above_children_width < children_width) {
-	above_children_width = children_width;
+	above_children_width = mrb_children_width;
       }
       plud->above_children.boxcolor = &MEMORIES_COLOR;
       plud->above_children.box = 1;
@@ -617,8 +688,8 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
       /* if there's a single memory child without wide memory box, enlarge that child */
       struct lstopo_obj_userdata *clud = parent->memory_first_child->userdata;
       if (clud->width < children_width) {
-	clud->width = children_width;
-	above_children_width = children_width;
+	clud->width = mrb_children_width;
+	above_children_width = mrb_children_width;
       }
     }
   }
@@ -636,31 +707,63 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     plud->above_children.yrel = yrel;
     plud->children.yrel += above_children_height + separator;
   }
+  /* place the right section */
+  if (plud->right_children.kinds) {
+    plud->right_children.width = right_children_width;
+    plud->right_children.height = right_children_height;
+    plud->right_children.xrel = plud->children.xrel + children_width + (children_width ? separator : 0);
+    plud->right_children.yrel = plud->children.yrel;
+  }
+  /* place the below section */
+  if (plud->below_children.kinds) {
+    plud->below_children.width = below_children_width;
+    plud->below_children.height = below_children_height;
+    plud->below_children.xrel = plud->children.xrel;
+
+    if (plud->right_children.kinds
+        && below_children_width > children_width
+        && right_children_height > children_height) {
+      /* below section is larger than CPU section, and right section is higher than CPU section.
+       * right and below would overlap.
+       * move the below section below right instead of below main
+       */
+      plud->below_children.yrel = plud->children.yrel + right_children_height + separator;
+      mrb_children_height = right_children_height + below_children_height + separator;
+    } else {
+      plud->below_children.yrel = plud->children.yrel + children_height + (children_height ? separator : 0);
+      mrb_children_height = children_height + below_children_height + (children_height ? separator : 0);
+    }
+  } else {
+    mrb_children_height = children_height > right_children_height ? children_height : right_children_height;
+  }
 
   /* adjust parent size */
   if (hwloc_obj_type_is_cache(parent->type) || parent->type == HWLOC_OBJ_MEMCACHE) {
     /* cache children are below */
-    if (children_width > totwidth)
-      totwidth = children_width;
-    if (children_height)
-      totheight += children_height + separator_below_cache;
+    if (mrb_children_width > totwidth)
+      totwidth = mrb_children_width;
+    if (mrb_children_height)
+      totheight += mrb_children_height + separator_below_cache;
     if (plud->above_children.kinds) {
       totheight += above_children_height + separator;
       if (above_children_width > totwidth)
 	totwidth = above_children_width;
     }
+
   } else if (parent->type == HWLOC_OBJ_BRIDGE) {
     /* bridge children are on the right, within any space between bridge and children */
     if (children_width)
       totwidth += children_width;
     if (children_height > totheight)
       totheight = children_height;
+    /* no right or below sections here */
+
   } else {
     /* normal objects have children inside their box, with space around them */
-    if (children_width + 2*border > totwidth)
-      totwidth = children_width + 2*border;
-    if (children_height)
-      totheight += children_height + border;
+    if (mrb_children_width + 2*border > totwidth)
+      totwidth = mrb_children_width + 2*border;
+    if (mrb_children_height)
+      totheight += mrb_children_height + border;
     if (plud->above_children.kinds) {
       totheight += above_children_height + separator;
       if (above_children_width + 2*border > totwidth)
@@ -708,6 +811,12 @@ draw_children(struct lstopo_output *loutput, hwloc_obj_t parent, unsigned depth,
 
   if (plud->above_children.kinds)
     draw__children(loutput, parent, &plud->above_children, depth, x + plud->above_children.xrel, y + plud->above_children.yrel);
+
+  if (plud->right_children.kinds)
+    draw__children(loutput, parent, &plud->right_children, depth, x + plud->right_children.xrel, y + plud->right_children.yrel);
+
+  if (plud->below_children.kinds)
+    draw__children(loutput, parent, &plud->below_children, depth, x + plud->below_children.xrel, y + plud->below_children.yrel);
 }
 
 /*******
