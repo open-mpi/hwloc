@@ -808,7 +808,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       } else if (infos->cpufamilynumber == 0x15
 		 && (infos->cpumodelnumber == 0x1 /* Bulldozer */ || infos->cpumodelnumber == 0x2 /* Piledriver */)
 		 && cache->level == 3 && cache->nbthreads_sharing == 6) {
-	/* AMD Bulldozer and Piledriver 12-core processors have same APIC ids as Magny-Cours below,
+	/* AMD Bulldozer and Piledriver 12-core processors have same APIC ids as Magny-Cours above,
 	 * but we can't merge the checks because the original nbthreads_sharing must be exactly 6 here.
 	 */
 	cache->cacheid = (infos->apicid % legacy_max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
