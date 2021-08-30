@@ -431,7 +431,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x1);
   }
 
-  /* 0x80000020 = Platform QoS Enforcement for Memory Bandwidth */
+  /* 0x80000020 = Platform QoS Enforcement for Memory Bandwidth ; Reserved on Intel */
   if (highest_ext_cpuid >= 0x80000020) {
     regs[0] = 0x80000020; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
@@ -439,7 +439,13 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x5);
   }
 
-  if (highest_ext_cpuid > 0x8000001f) {
+  /* 0x80000021 = Extended Feature 2 EAX ; Reserved on Intel */
+  if (highest_ext_cpuid >= 0x80000021) {
+    regs[0] = 0x80000021;
+    dump_one_cpuid(output, regs, 0x1);
+  }
+
+  if (highest_ext_cpuid > 0x80000021) {
     static int reported = 0;
     if (!reported)
       fprintf(stderr, "WARNING: Processor supports new extended CPUID leaves upto 0x%x\n", highest_ext_cpuid);
