@@ -776,13 +776,19 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 
     } else if (cpuid_type == amd) {
       /* AMD quirks */
-      if (infos->cpufamilynumber == 0x17
-	  && cache->level == 3 && cache->nbthreads_sharing == 6) {
-	/* AMD family 0x17 always shares L3 between 8 APIC ids,
-	 * even when only 6 APIC ids are enabled and reported in nbthreads_sharing
-	 * (on 24-core CPUs).
+      if (infos->cpufamilynumber >= 0x17 && cache->level == 3) {
+	/* AMD family 0x19 always shares L3 between 16 APIC ids (8 HT cores).
+         * while Family 0x17 shares between 8 APIC ids (4 HT cores).
+         * But many models have less APIC ids enabled and reported in nbthreads_sharing.
+         * It means we must round-up nbthreads_sharing to the nearest power of 2
+         * before computing cacheid.
 	 */
-	cache->cacheid = infos->apicid / 8;
+        unsigned nbapics_sharing = cache->nbthreads_sharing;
+        if (nbapics_sharing & (nbapics_sharing-1))
+          /* not a power of two, round-up */
+          nbapics_sharing = 1U<<(1+hwloc_ffsl(nbapics_sharing));
+
+	cache->cacheid = infos->apicid / nbapics_sharing;
 
       } else if (infos->cpufamilynumber== 0x10 && infos->cpumodelnumber == 0x9
 	  && cache->level == 3
