@@ -500,7 +500,8 @@ static void read_amd_cores_topoext(struct procinfo *infos, unsigned long flags, 
       nodes_per_proc = ((ecx >> 8) & 7) + 1;
     }
     if ((infos->cpufamilynumber == 0x15 && nodes_per_proc > 2)
-	|| ((infos->cpufamilynumber == 0x17 || infos->cpufamilynumber == 0x18) && nodes_per_proc > 4)) {
+	|| ((infos->cpufamilynumber == 0x17 || infos->cpufamilynumber == 0x18) && nodes_per_proc > 4)
+        || (infos->cpufamilynumber == 0x19 && nodes_per_proc > 1)) {
       hwloc_debug("warning: undefined nodes_per_proc value %u, assuming it means %u\n", nodes_per_proc, nodes_per_proc);
     }
   }
