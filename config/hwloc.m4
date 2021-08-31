@@ -999,19 +999,27 @@ return 0;
       # when the driver isn't installed on the build machine.
       # hwloc programs will fail to link if libnvidia-ml.so.1 is not available there too.
       if test "x$with_cuda" != xno -a "x$with_cuda" != x; then
+        AC_MSG_NOTICE([using custom CUDA install path $with_cuda ...])
         if test "x${ac_cv_sizeof_void_p}" = x4; then
           HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib/ -L$with_cuda/lib/stubs/"
         else
           HWLOC_CUDA_COMMON_LDFLAGS="-L$with_cuda/lib64/ -L$with_cuda/lib64/stubs/"
         fi
         HWLOC_CUDA_COMMON_CPPFLAGS="-I$with_cuda/include/"
-      else
+
+      else if test x$HWLOC_pkg_cv_cuda_includedir != x -a x$HWLOC_pkg_cv_cuda_libdir != x; then
         # or use cuda libdir/includedir from cuda.pc above
-        if test x$HWLOC_pkg_cv_cuda_includedir != x -a x$HWLOC_pkg_cv_cuda_libdir != x; then
-          HWLOC_CUDA_COMMON_LDFLAGS="-L$HWLOC_pkg_cv_cuda_libdir -L$HWLOC_pkg_cv_cuda_libdir/stubs/"
-          HWLOC_CUDA_COMMON_CPPFLAGS="-I$HWLOC_pkg_cv_cuda_includedir"
-        fi
-      fi
+	AC_MSG_NOTICE([using CUDA libdir and includedir from ${cudapc}.pc ...])
+        HWLOC_CUDA_COMMON_LDFLAGS="-L$HWLOC_pkg_cv_cuda_libdir -L$HWLOC_pkg_cv_cuda_libdir/stubs/"
+        HWLOC_CUDA_COMMON_CPPFLAGS="-I$HWLOC_pkg_cv_cuda_includedir"
+
+      else if test -f /usr/local/cuda/include/cuda.h; then
+        # or try the default /usr/local/cuda
+	AC_MSG_NOTICE([using default CUDA install path /usr/local/cuda ...])
+        HWLOC_CUDA_COMMON_LDFLAGS="-L/usr/local/cuda/lib64/ -L/usr/local/cuda/lib64/stubs/"
+        HWLOC_CUDA_COMMON_CPPFLAGS="-I/usr/local/cuda/include/"
+      fi fi fi
+
       AC_MSG_NOTICE([common CUDA/OpenCL/NVML CPPFLAGS: $HWLOC_CUDA_COMMON_CPPFLAGS])
       AC_MSG_NOTICE([common CUDA/OpenCL/NVML LDFLAGS: $HWLOC_CUDA_COMMON_LDFLAGS])
     fi
