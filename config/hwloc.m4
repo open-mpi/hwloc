@@ -968,6 +968,9 @@ return 0;
     # with our BSD license.
     hwloc_pciaccess_happy=no
     if test "x$enable_io" != xno && test "x$enable_pci" != xno; then
+      echo
+      echo "**** pciaccess configuration"
+
       hwloc_pciaccess_happy=yes
       HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [pciaccess.h], [:], [hwloc_pciaccess_happy=no])
 
@@ -990,6 +993,8 @@ return 0;
       AS_IF([test "$hwloc_pciaccess_happy" = "yes"],
          [hwloc_components="$hwloc_components pci"
           hwloc_pci_component_maybeplugin=1])
+
+      echo "**** end of pciaccess configuration"
     fi
     # If we asked for pci support but couldn't deliver, fail
     AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pciaccess_happy" = "no"],
@@ -999,6 +1004,9 @@ return 0;
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
     if test "x$enable_io" != xno && test "x$enable_opencl" != xno -o "x$enable_cuda" != xno -o "x$enable_nvml" != xno; then
+      echo
+      echo "**** NVIDIA-common configuration"
+
       # Try to find CUDA pkg-config using a specific CUDA version
       # Use --with-cuda-version first, or $CUDA_VERSION
       cuda_version=$CUDA_VERSION
@@ -1048,11 +1056,16 @@ return 0;
 
       AC_MSG_NOTICE([common CUDA/OpenCL/NVML CPPFLAGS: $HWLOC_CUDA_COMMON_CPPFLAGS])
       AC_MSG_NOTICE([common CUDA/OpenCL/NVML LDFLAGS: $HWLOC_CUDA_COMMON_LDFLAGS])
+
+      echo "**** end of NVIDIA-common configuration"
     fi
 
     # OpenCL support
     hwloc_opencl_happy=no
     if test "x$enable_io" != xno && test "x$enable_opencl" != "xno"; then
+      echo
+      echo "**** OpenCL configuration"
+
       hwloc_opencl_happy=yes
       case ${target} in
       *-*-darwin*)
@@ -1089,6 +1102,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
         LDFLAGS="$tmp_save_LDFLAGS"
       ;;
       esac
+
+      echo "**** end of OpenCL configuration"
     fi
     AC_SUBST(HWLOC_OPENCL_CPPFLAGS)
     AC_SUBST(HWLOC_OPENCL_LIBS)
@@ -1112,6 +1127,9 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     hwloc_have_cuda=no
     hwloc_have_cudart=no
     if test "x$enable_io" != xno && test "x$enable_cuda" != "xno"; then
+      echo
+      echo "**** CUDA configuration"
+
       # Look for CUDA first, for our test only
       if test "x$cudapc" != x; then
         HWLOC_PKG_CHECK_MODULES([CUDA], [$cudapc], [cuInit], [cuda.h], [hwloc_have_cuda=yes])
@@ -1202,12 +1220,17 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 	hwloc_components="$hwloc_components cuda"
         hwloc_cuda_component_maybeplugin=1
       fi
+
+      echo "**** end of CUDA configuration"
     fi
     # don't add LIBS/CFLAGS yet, depends on plugins
 
     # NVML support
     hwloc_nvml_happy=no
     if test "x$enable_io" != xno && test "x$enable_nvml" != "xno"; then
+      echo
+      echo "**** NVML configuration"
+
       hwloc_nvml_happy=yes
       HWLOC_NVML_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
       HWLOC_NVML_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
@@ -1227,6 +1250,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
         AC_CHECK_DECLS([nvmlDeviceGetMaxPcieLinkGeneration],,[:],[[#include <nvml.h>]])
         CPPFLAGS="$tmp_save_CPPFLAGS"
       fi
+
+      echo "**** end of NVML configuration"
     fi
     AC_SUBST(HWLOC_NVML_LIBS)
     AC_SUBST(HWLOC_NVML_LDFLAGS)
@@ -1249,10 +1274,15 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     # RSMI support, rocm_smi64 is just library name and not related to 32/64 bits
     hwloc_rsmi_happy=no
     if test "x$enable_io" != xno && test "x$enable_rsmi" != "xno"; then
+      echo
+      echo "**** RSMI configuration"
+
       hwloc_rsmi_happy=yes
       AC_CHECK_HEADERS([rocm_smi/rocm_smi.h], [
         AC_CHECK_LIB([rocm_smi64], [rsmi_init], [HWLOC_RSMI_LIBS="-lrocm_smi64"], [hwloc_rsmi_happy=no])
         ], [hwloc_rsmi_happy=no])
+
+      echo "**** end of RSMI configuration"
     fi
     AC_SUBST(HWLOC_RSMI_LIBS)
     # If we asked for rsmi support but couldn't deliver, fail
@@ -1273,6 +1303,9 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     # LevelZero support
     hwloc_levelzero_happy=no
     if test "x$enable_io" != xno && test "x$enable_levelzero" != "xno"; then
+      echo
+      echo "**** LevelZero configuration"
+
       HWLOC_PKG_CHECK_MODULES([LEVELZERO], [libze_loader], [zesDevicePciGetProperties], [level_zero/zes_api.h],
                               [hwloc_levelzero_happy=yes
                                HWLOC_LEVELZERO_REQUIRES=libze_loader
@@ -1287,6 +1320,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
           ], [hwloc_levelzero_happy=no])
         ], [hwloc_levelzero_happy=no])
       fi
+
+      echo "**** end of LevelZero configuration"
     fi
     AC_SUBST(HWLOC_LEVELZERO_LIBS)
     # If we asked for LevelZero support but couldn't deliver, fail
@@ -1307,6 +1342,9 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     # GL Support
     hwloc_gl_happy=no
     if test "x$enable_io" != xno && test "x$enable_gl" != "xno"; then
+      echo
+      echo "**** NVIDIA GL configuration"
+
 	hwloc_gl_happy=yes
 
         # some X11 support (less then lstopo in hwloc_internal.m4)
@@ -1349,15 +1387,22 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
                 AC_MSG_ERROR([Cannot continue])
             ])
         fi
+
+      echo "**** end of NVIDIA GL configuration"
     fi
     # don't add LIBS/CFLAGS yet, depends on plugins
 
     # libxml2 support
     hwloc_libxml2_happy=
     if test "x$enable_libxml2" != "xno"; then
+      echo
+      echo "**** libxml2 configuration"
+
         HWLOC_PKG_CHECK_MODULES([LIBXML2], [libxml-2.0], [xmlNewDoc], [libxml/parser.h],
                                 [hwloc_libxml2_happy=yes],
                                 [hwloc_libxml2_happy=no])
+
+      echo "**** end of libxml2 configuration"
     fi
     if test "x$hwloc_libxml2_happy" = "xyes"; then
         HWLOC_LIBXML2_REQUIRES="libxml-2.0"
@@ -1376,6 +1421,9 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 
     # Try to compile the x86 cpuid inlines
     if test "x$enable_cpuid" != "xno"; then
+      echo
+      echo "**** x86 CPUID configuration"
+
 	AC_MSG_CHECKING([for x86 cpuid])
 	old_CPPFLAGS="$CPPFLAGS"
 	CPPFLAGS="$CPPFLAGS -I$HWLOC_top_srcdir/include"
@@ -1415,11 +1463,14 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 	fi
 	CPPFLAGS="$old_CPPFLAGS"
 
+      echo "**** end of x86 CPUID configuration"
     fi
 
     #
     # Now enable registration of listed components
     #
+    echo
+    echo "**** component and plugin-specific configuration"
 
     # Plugin support
     AC_MSG_CHECKING([if plugin support is enabled])
@@ -1561,6 +1612,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
            HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_LIBXML2_LDFLAGS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CPPFLAGS $HWLOC_LIBXML2_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_LIBXML2_REQUIRES $HWLOC_REQUIRES"])
+
+    echo "**** end of component and plugin configuration"
 
     #
     # Setup HWLOC's C, CPP, and LD flags, and LIBS
