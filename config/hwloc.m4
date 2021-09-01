@@ -1277,13 +1277,44 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
       echo
       echo "**** RSMI configuration"
 
+      # Try to find the ROCm default path a specific ROCm version
+      # Use --with-rocm-version first, or $CUDA_VERSION
+      rocm_version=$ROCM_VERSION
+      if test "x$with_rocm_version" != xno -a "x$with_rocm_version" != x; then
+        rocm_version=$with_rocm_version
+      fi
+      if test "x$with_rocm" != x -a "x$with_rocm" != xyes; then
+        rocm_dir=$with_rocm
+        AC_MSG_NOTICE([using custom ROCm install path $rocm_dir ...])
+      else if test "x$rocm_version" != x; then
+        rocm_dir=/opt/rocm-${rocm_version}
+        AC_MSG_NOTICE([assuming ROCm $rocm_version is installed in $rocm_dir ...])
+      else if test -d /opt/rocm; then
+        rocm_dir=/opt/rocm
+        AC_MSG_NOTICE([using standard ROCm install path $rocm_dir ...])
+      else
+        AC_MSG_NOTICE([assuming ROCm is installed in standard directories ...])
+      fi fi fi
+      if test "x$rocm_dir" != x; then
+         HWLOC_RSMI_CPPFLAGS="-I$rocm_dir/rocm_smi/include/"
+         HWLOC_RSMI_LDFLAGS="-L$rocm_dir/rocm_smi/lib/"
+      fi
+
       hwloc_rsmi_happy=yes
+      CPPFLAGS_save="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS $HWLOC_RSMI_CPPFLAGS"
       AC_CHECK_HEADERS([rocm_smi/rocm_smi.h], [
+        LDFLAGS_save="$LDFLAGS"
+        LDFLAGS="$LDFLAGS $HWLOC_RSMI_LDFLAGS"
         AC_CHECK_LIB([rocm_smi64], [rsmi_init], [HWLOC_RSMI_LIBS="-lrocm_smi64"], [hwloc_rsmi_happy=no])
-        ], [hwloc_rsmi_happy=no])
+        LDFLAGS="$LDFLAGS_save"
+      ], [hwloc_rsmi_happy=no])
+      CPPFLAGS="$CPPFLAGS_save"
 
       echo "**** end of RSMI configuration"
     fi
+    AC_SUBST(HWLOC_RSMI_CPPFLAGS)
+    AC_SUBST(HWLOC_RSMI_LDFLAGS)
     AC_SUBST(HWLOC_RSMI_LIBS)
     # If we asked for rsmi support but couldn't deliver, fail
     AS_IF([test "$enable_rsmi" = "yes" -a "$hwloc_rsmi_happy" = "no"],

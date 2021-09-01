@@ -110,6 +110,15 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     AC_ARG_ENABLE([rsmi],
                   AS_HELP_STRING([--disable-rsmi],
                                  [Disable the ROCm SMI device discovery]))
+    # ROCm version (for selecting /opt/rocm-x.y/)
+    AC_ARG_WITH([rocm-version],
+                AS_HELP_STRING([--with-rocm-version=<version>],
+		               [Specify the ROCm version (e.g. 4.2.0) for selecting the default ROCm installation path (e.g. /opt/rocm-4.2.0)]))
+    AC_ARG_VAR([ROCM_VERSION], [The ROCm version (e.g. 4.2.0) for selecting the default ROCm installation path (e.g. /opt/rocm-4.2.0)])
+    # ROCm install path
+    AC_ARG_WITH([rocm],
+                AS_HELP_STRING([--with-rocm=<dir>],
+		               [Specify the ROCm installation directory]))
 
     # LevelZero
     AC_ARG_ENABLE([levelzero],

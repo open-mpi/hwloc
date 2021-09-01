@@ -24,7 +24,13 @@ Version 2.6.0
     high-performance cores (firestorm) on Apple M1 on Mac OS X.
   + Use sysfs CPU "capacity" to rank hybrid cores by efficiency
     on Linux when available (mostly on recent ARM platforms for now).
-
+* Build
+  + Allow to specify the ROCm installation for building the RSMI backend:
+    - Use a custom installation path if specified with --with-rocm=<dir>.
+    - Use /opt/rocm-<version> if specified with --with-rocm-version=<version>
+      or the ROCM_VERSION environment variable.
+    - Try /opt/rocm if it exists.
+  
 
 Version 2.5.0
 -------------
