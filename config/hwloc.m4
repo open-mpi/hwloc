@@ -1194,12 +1194,13 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
       ], [hwloc_nvml_happy=no])
       CPPFLAGS="$tmp_save_CPPFLAGS"
       LDFLAGS="$tmp_save_LDFLAGS"
-    fi
-    if test "x$hwloc_nvml_happy" = "xyes"; then
-      tmp_save_CPPFLAGS="$CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS $HWLOC_NVML_CPPFLAGS"
-      AC_CHECK_DECLS([nvmlDeviceGetMaxPcieLinkGeneration],,[:],[[#include <nvml.h>]])
-      CPPFLAGS="$tmp_save_CPPFLAGS"
+
+      if test "x$hwloc_nvml_happy" = "xyes"; then
+        tmp_save_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_NVML_CPPFLAGS"
+        AC_CHECK_DECLS([nvmlDeviceGetMaxPcieLinkGeneration],,[:],[[#include <nvml.h>]])
+        CPPFLAGS="$tmp_save_CPPFLAGS"
+      fi
     fi
     AC_SUBST(HWLOC_NVML_LIBS)
     AC_SUBST(HWLOC_NVML_LDFLAGS)
