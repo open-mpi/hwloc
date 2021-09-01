@@ -918,6 +918,32 @@ return 0;
     AC_CHECK_HEADERS([sys/utsname.h])
     AC_CHECK_FUNCS([uname])
 
+    # Components and pciaccess require pthread_mutex, see if it needs -lpthread
+    hwloc_pthread_mutex_happy=no
+    # Try without explicit -lpthread first
+    AC_CHECK_FUNC([pthread_mutex_lock],
+      [hwloc_pthread_mutex_happy=yes
+       HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE -lpthread"
+      ],
+      [AC_MSG_NOTICE([trying again with -lpthread ...])
+       # Try again with explicit -lpthread
+       $as_unset ac_cv_func_pthread_mutex_lock
+       tmp_save_LIBS=$LIBS
+       LIBS="$LIBS -lpthread"
+       AC_CHECK_FUNC([pthread_mutex_lock],
+         [hwloc_pthread_mutex_happy=yes
+          HWLOC_LIBS="$HWLOC_LIBS -lpthread"
+         ])
+       LIBS="$tmp_save_LIBS"
+      ])
+    AS_IF([test "x$hwloc_pthread_mutex_happy" = "xyes"],
+      [AC_DEFINE([HWLOC_HAVE_PTHREAD_MUTEX], 1, [Define to 1 if pthread mutexes are available])])
+
+    AS_IF([test "x$hwloc_pthread_mutex_happy" != xyes -a "x$hwloc_windows" != xyes],
+      [AC_MSG_WARN([pthread_mutex_lock not available, required for thread-safe initialization on non-Windows platforms.])
+       AC_MSG_WARN([Please report this to the hwloc-devel mailing list.])
+       AC_MSG_ERROR([Cannot continue])])
+
     dnl Don't check for valgrind in embedded mode because this may conflict
     dnl with the embedder projects also checking for it.
     dnl We only use Valgrind to nicely disable the x86 backend with a warning,
@@ -1388,33 +1414,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 	    hwloc_components="$hwloc_components x86"
 	fi
 	CPPFLAGS="$old_CPPFLAGS"
+
     fi
-
-    # Components require pthread_mutex, see if it needs -lpthread
-    hwloc_pthread_mutex_happy=no
-    # Try without explicit -lpthread first
-    AC_CHECK_FUNC([pthread_mutex_lock],
-      [hwloc_pthread_mutex_happy=yes
-       HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE -lpthread"
-      ],
-      [AC_MSG_CHECKING([for pthread_mutex_lock with -lpthread])
-       # Try again with explicit -lpthread, but don't use AC_CHECK_FUNC to avoid the cache
-       tmp_save_LIBS=$LIBS
-       LIBS="$LIBS -lpthread"
-       AC_LINK_IFELSE([AC_LANG_CALL([], [pthread_mutex_lock])],
-         [hwloc_pthread_mutex_happy=yes
-          HWLOC_LIBS="$HWLOC_LIBS -lpthread"
-         ])
-       AC_MSG_RESULT([$hwloc_pthread_mutex_happy])
-       LIBS="$tmp_save_LIBS"
-      ])
-    AS_IF([test "x$hwloc_pthread_mutex_happy" = "xyes"],
-      [AC_DEFINE([HWLOC_HAVE_PTHREAD_MUTEX], 1, [Define to 1 if pthread mutexes are available])])
-
-    AS_IF([test "x$hwloc_pthread_mutex_happy" != xyes -a "x$hwloc_windows" != xyes],
-      [AC_MSG_WARN([pthread_mutex_lock not available, required for thread-safe initialization on non-Windows platforms.])
-       AC_MSG_WARN([Please report this to the hwloc-devel mailing list.])
-       AC_MSG_ERROR([Cannot continue])])
 
     #
     # Now enable registration of listed components
