@@ -102,7 +102,6 @@ struct lstopo_output {
   unsigned int gridsize, fontsize, linespacing, thickness;
   float text_xscale;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
-  unsigned no_half_lines; /* set by ASCII backend because it cannot write between lines of the terminal */
   int show_indexes[HWLOC_OBJ_TYPE_MAX]; /* enabled by global toggle index_type */
   int show_text_enabled; /* global toggle for interactive keyboard shortcuts */
   int show_text[HWLOC_OBJ_TYPE_MAX];
@@ -120,6 +119,8 @@ struct lstopo_output {
 
   /* draw internal data */
   void *backend_data;
+#define LSTOPO_BACKEND_FLAG_NO_HALF_LINES (1UL<<0) /* ASCII backend cannot draw lines between grid lines */
+  unsigned long backend_flags;
   struct draw_methods *methods;
   enum lstopo_drawing_e drawing;
   unsigned width, height; /* total output size */

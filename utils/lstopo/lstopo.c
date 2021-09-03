@@ -756,9 +756,9 @@ main (int argc, char *argv[])
   loutput.nr_cpukind_styles = 0;
 
   loutput.backend_data = NULL;
+  loutput.backend_flags = 0;
   loutput.methods = NULL;
 
-  loutput.no_half_lines = 0;
   loutput.plain_children_order = 0;
   loutput.fontsize = 10;
   loutput.gridsize = 7;
