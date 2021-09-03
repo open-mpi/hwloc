@@ -133,6 +133,7 @@ int output_nativesvg(struct lstopo_output * loutput, const char *filename)
 
   loutput->file = output;
   loutput->methods = &native_svg_draw_methods;
+  loutput->backend_flags |= LSTOPO_BACKEND_FLAG_APPROXIMATIVE_TEXTWIDTH;
 
   /* recurse once for preparing sizes and positions */
   loutput->drawing = LSTOPO_DRAWING_PREPARE;

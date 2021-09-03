@@ -86,6 +86,7 @@ static struct draw_methods native_android_draw_methods = {
 int output_android(struct lstopo_output * loutput, const char *filename __hwloc_attribute_unused)
 {
     loutput->methods = &native_android_draw_methods;
+    loutput->backend_flags |= LSTOPO_BACKEND_FLAG_APPROXIMATIVE_TEXTWIDTH;
 
     /* recurse once for preparing sizes and positions */
     loutput->drawing = LSTOPO_DRAWING_PREPARE;

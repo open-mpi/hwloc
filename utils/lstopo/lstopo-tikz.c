@@ -150,6 +150,7 @@ int output_tikz(struct lstopo_output * loutput, const char *filename)
   loutput->file = output;
   loutput->methods = &tikz_draw_methods;
   loutput->backend_data = output;
+  loutput->backend_flags |= LSTOPO_BACKEND_FLAG_APPROXIMATIVE_TEXTWIDTH;
 
   /* recurse once for preparing sizes and positions */
   loutput->drawing = LSTOPO_DRAWING_PREPARE;

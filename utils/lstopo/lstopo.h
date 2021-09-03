@@ -120,6 +120,7 @@ struct lstopo_output {
   /* draw internal data */
   void *backend_data;
 #define LSTOPO_BACKEND_FLAG_NO_HALF_LINES (1UL<<0) /* ASCII backend cannot draw lines between grid lines */
+#define LSTOPO_BACKEND_FLAG_APPROXIMATIVE_TEXTWIDTH (1UL<<1) /* Tikz and fig backends cannot measure text width precisely */
   unsigned long backend_flags;
   struct draw_methods *methods;
   enum lstopo_drawing_e drawing;
