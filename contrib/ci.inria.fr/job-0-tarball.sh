@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2020 Inria.  All rights reserved.
+# Copyright © 2012-2021 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -69,7 +69,8 @@ if ! make $distcheck; then
   false
 fi
 
-# this test requires bash and grep -P, only run it in the main job
-make check -C contrib/windows
+# these tests require bash and grep -P, only run it in the main job
+contrib/windows/check-versions.sh
+contrib/android/check-versions.sh
 
 exit 0

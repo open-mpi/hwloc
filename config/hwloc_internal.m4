@@ -510,7 +510,6 @@ int foo(void) {
         hwloc_config_prefix[contrib/completion/Makefile]
         hwloc_config_prefix[contrib/misc/Makefile]
         hwloc_config_prefix[contrib/windows/Makefile]
-        hwloc_config_prefix[contrib/windows/test-windows-version.sh]
         hwloc_config_prefix[tests/netloc/Makefile]
         hwloc_config_prefix[tests/netloc/tests.sh]
     )
@@ -537,7 +536,6 @@ int foo(void) {
       hwloc_config_prefix[utils/lstopo/test-lstopo.sh] \
       hwloc_config_prefix[utils/lstopo/test-lstopo-shmem.sh] \
       hwloc_config_prefix[utils/netloc/infiniband/netloc_ib_gather_raw] \
-      hwloc_config_prefix[contrib/windows/test-windows-version.sh] \
       hwloc_config_prefix[tests/netloc/tests.sh])
 
     # These links are only needed in standalone mode.  It would

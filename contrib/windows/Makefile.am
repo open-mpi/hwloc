@@ -1,12 +1,6 @@
 # Copyright © 2009-2020 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
-# This Makefile isn't used outside of make dist by default
-# because test-windows-version.sh requires
-#  bash, and grep built with support for -P
-
-TESTS = test-windows-version.sh
-
 EXTRA_DIST = \
 	README \
 	hwloc.sln \
@@ -37,4 +31,5 @@ EXTRA_DIST = \
 	lstopo-win.vcxproj.filters \
 	lstopo.vcxproj \
 	lstopo.vcxproj.filters \
-	app.manifest
+	app.manifest \
+	check-versions.sh
