@@ -59,12 +59,12 @@ ext.versionCodes = ['armeabi': 3, 'armeabi-v7a': 4, 'arm64-v8a': 5, mips: 6, 'x8
 import com.android.build.OutputFile
 
 // For each APK output variant, override versionCode with a combination of
-// ABI APK value * 1000 + defaultConfig.versionCode
+// ABI APK value * 100xx + defaultConfig.versionCode
 android.applicationVariants.all { variant ->
     // assign different version code for each output
     variant.outputs.each { output ->
         output.versionCodeOverride =
-                project.ext.versionCodes.get(output.getFilter(OutputFile.ABI)) * 10000 + android.defaultConfig.versionCode
+                project.ext.versionCodes.get(output.getFilter(OutputFile.ABI)) * 10014 + android.defaultConfig.versionCode
     }
 }
 
