@@ -205,6 +205,9 @@ struct lstopo_obj_userdata {
   unsigned xrel;
   unsigned yrel;
 
+  /* internal offset for factorized_draw */
+  unsigned internal_xoffset;
+
   /* children orientation */
   enum lstopo_orient_e orient;
 
