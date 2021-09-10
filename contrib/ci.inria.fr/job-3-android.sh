@@ -27,7 +27,6 @@ cd $basename
 # build android
 tar zxvf ../android.tar.gz
 cd contrib/android/AndroidApp
-chmod +x gradlew
 ./gradlew --full-stacktrace build
 
 # move apk in specific folder (alphabetically ordered after the main tarballs in the jenkins artifacts)
