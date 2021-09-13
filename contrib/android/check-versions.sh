@@ -43,7 +43,7 @@ if [ -z "$official_major" -o -z "$official_minor" -o -z "$official_release" ]; t
 	die "ERROR in $version_file: Failed to get official HWLOC_VERSION_MAJOR/MINOR/RELEASE/GREEK"
 fi
 $echo "  Found major=$official_major minor=$official_minor release=$official_release greek=$official_greek"
-official_version_nogreek="$official_major.$official_minor.$official_release"
+official_version="$official_major.$official_minor.$official_release$official_greek"
 
 $echo
 
@@ -68,17 +68,17 @@ fi
 $echo "  Android-specific HWLOC_VERSION \"$android_version\" matches HWLOC_VERSION_MAJOR/MINOR/RELEASE/GREEK components"
 
 # check android config.h version
-if [ "$official_version_nogreek" != "$android_version" ]; then
-	die "ERROR in $android_config_h: Android-specific HWLOC_VERSION \"$android_version\" doesn't match \"$official_version_nogreek\" without GREEK"
+if [ "$official_version" != "$android_version" ]; then
+	die "ERROR in $android_config_h: Android-specific HWLOC_VERSION \"$android_version\" doesn't match \"$official_version\""
 fi
-$echo "  Android-specific version \"$android_version\" matches official version without GREEK"
+$echo "  Android-specific version \"$android_version\" matches official version"
 
 $echo
 
 # check android gradle version
 $echo "Looking for Android-specific version in $android_gradle ..."
-android_gradle_version=$(grep -w versionName $android_gradle | grep -oP '".*"' | tr -d \" | grep -oP '.+?(?=[-~])')
-if [ "$official_version_nogreek" != "$android_gradle_version" ]; then
-	die "ERROR in $android_gradle: Android gradle HWLOC_VERSION \"$android_gradle_version\" doesn't match \"$official_version_nogreek\" without GREEK"
+android_gradle_version=$(grep -w versionName $android_gradle | grep -oP '".*"' | tr -d \" | grep -oP '[0-9a-z\.]+(?=-.*-.*)')
+if [ "$official_version" != "$android_gradle_version" ]; then
+	die "ERROR in $android_gradle: Android gradle HWLOC_VERSION \"$android_gradle_version\" doesn't match \"$official_version\""
 fi
-$echo "  Android-specific gradle version \"$android_gradle_version\" matches official version without GREEK"
+$echo "  Android-specific gradle version \"$android_gradle_version\" matches official version"
