@@ -1,0 +1,7 @@
+The Portable Hardware Locality (hwloc) software package provides a portable abstraction (across OS, versions, architectures, ...) of the hierarchical topology of modern architectures. It also gathers various system attributes such as cache and memory information.
+
+hwloc is described at https://www.open-mpi.org/projects/hwloc/ and source code is hosted at https://github.com/open-mpi/hwloc
+
+lstopo is the graphical displaying tool of hwloc. This apps brings lstopo on Android to display the hardware topology of your phone (Cores, Packages, Caches, etc). The representation can be graphical or textual (text or XML).
+
+The XML format lets you either export your phone topology for use/display on another machine, or import the topology of another platform. A database of many different server topologies is available for testing platforms you don't have immediate access to (HPC servers with many processors, cores, GPUs, accelerators, heterogeneous memory, etc).
