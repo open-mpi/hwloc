@@ -27,6 +27,9 @@ Version 2.6.0
   + Improve HWLOC_MEMBIND_BIND (without the STRICT flag) on Linux kernel
     >= 5.15: If more than one node is given, the kernel may now use all
     of them instead of only the first one before falling back to others.
+  + Expose cache os_index when available on Linux, it may be needed
+    when using resctrl to configure cache partitioning, memory bandwidth
+    monitoring, etc.
 * Build
   + Allow to specify the ROCm installation for building the RSMI backend:
     - Use a custom installation path if specified with --with-rocm=<dir>.

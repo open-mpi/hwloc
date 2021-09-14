@@ -4601,6 +4601,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  unsigned depth; /* 1 for L1, .... */
 	  hwloc_obj_cache_type_t ctype = HWLOC_OBJ_CACHE_UNIFIED; /* default */
 	  hwloc_obj_type_t otype;
+          unsigned id = HWLOC_UNKNOWN_INDEX;
 	  struct hwloc_obj *cache;
 
 	  /* get the cache level depth */
@@ -4620,6 +4621,10 @@ look_sysfscpu(struct hwloc_topology *topology,
 	    else if (!strncmp(str2, "Instruction", 11))
 	      ctype = HWLOC_OBJ_CACHE_INSTRUCTION;
 	  }
+
+          /* cache id */
+          sprintf(str, "%s/cpu%d/cache/index%d/id", path, i, j);
+          hwloc_read_path_as_uint(str, &id, data->root_fd);
 
 	  otype = hwloc_cache_type_by_depth_type(depth, ctype);
 	  if (otype == HWLOC_OBJ_TYPE_NONE
@@ -4661,7 +4666,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  hwloc_read_path_as_uint(str, &lines_per_tag, data->root_fd);
 
 	  /* first cpu in this cache, add the cache */
-	  cache = hwloc_alloc_setup_object(topology, otype, HWLOC_UNKNOWN_INDEX);
+	  cache = hwloc_alloc_setup_object(topology, otype, id);
 	  cache->attr->cache.size = ((uint64_t)kB) << 10;
 	  cache->attr->cache.depth = depth;
 	  cache->attr->cache.linesize = linesize;
