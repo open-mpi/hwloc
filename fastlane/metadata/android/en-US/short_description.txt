@@ -1,0 +1,1 @@
+Display the topology of your hardware using the hwloc library and lstopo tool.
