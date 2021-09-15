@@ -1212,8 +1212,9 @@ HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpus
 
 /** \brief Get current process or thread binding.
  *
- * Writes into \p set the physical cpuset which the process or thread (according to \e
- * flags) was last bound to.
+ * The CPU-set \p set (previously allocated by the caller)
+ * is filled with the list of PUs which the process or
+ * thread (according to \e flags) was last bound to.
  */
 HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
@@ -1231,6 +1232,10 @@ HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t s
 HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int flags);
 
 /** \brief Get the current physical binding of process \p pid.
+ *
+ * The CPU-set \p set (previously allocated by the caller)
+ * is filled with the list of PUs which the process
+ * was last bound to.
  *
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
@@ -1257,6 +1262,10 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 #ifdef hwloc_thread_t
 /** \brief Get the current physical binding of thread \p tid.
  *
+ * The CPU-set \p set (previously allocated by the caller)
+ * is filled with the list of PUs which the thread
+ * was last bound to.
+ *
  * \note \p hwloc_thread_t is \p pthread_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
  *
@@ -1266,6 +1275,10 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 #endif
 
 /** \brief Get the last physical CPU where the current process or thread ran.
+ *
+ * The CPU-set \p set (previously allocated by the caller)
+ * is filled with the list of PUs which the process or
+ * thread (according to \e flags) last ran on.
  *
  * The operating system may move some tasks from one processor
  * to another at any time according to their binding,
@@ -1281,6 +1294,10 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
 /** \brief Get the last physical CPU where a process ran.
+ *
+ * The CPU-set \p set (previously allocated by the caller)
+ * is filled with the list of PUs which the process
+ * last ran on.
  *
  * The operating system may move some tasks from one processor
  * to another at any time according to their binding,
@@ -1511,6 +1528,9 @@ HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_bitm
 /** \brief Query the default memory binding policy and physical locality of the
  * current process or thread.
  *
+ * The bitmap \p set (previously allocated by the caller)
+ * is filled with the process or thread memory binding.
+ *
  * This function has two output parameters: \p set and \p policy.
  * The values returned in these parameters depend on both the \p flags
  * passed in and the current memory binding policies and nodesets in
@@ -1571,6 +1591,9 @@ HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 /** \brief Query the default memory binding policy and physical locality of the
  * specified process.
  *
+ * The bitmap \p set (previously allocated by the caller)
+ * is filled with the process memory binding.
+ *
  * This function has two output parameters: \p set and \p policy.
  * The values returned in these parameters depend on both the \p flags
  * passed in and the current memory binding policies and nodesets in
@@ -1624,6 +1647,9 @@ HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void 
 /** \brief Query the CPUs near the physical NUMA node(s) and binding policy of
  * the memory identified by (\p addr, \p len ).
  *
+ * The bitmap \p set (previously allocated by the caller)
+ * is filled with the memory area binding.
+ *
  * This function has two output parameters: \p set and \p policy.
  * The values returned in these parameters depend on both the \p flags
  * passed in and the memory binding policies and nodesets of the pages
@@ -1652,7 +1678,8 @@ HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void 
 
 /** \brief Get the NUMA nodes where memory identified by (\p addr, \p len ) is physically allocated.
  *
- * Fills \p set according to the NUMA nodes where the memory area pages
+ * The bitmap \p set (previously allocated by the caller)
+ * is filled according to the NUMA nodes where the memory area pages
  * are physically allocated. If no page is actually allocated yet,
  * \p set may be empty.
  *
