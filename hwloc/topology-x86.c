@@ -1231,6 +1231,18 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	    }
 	  }
 	  cache = hwloc_alloc_setup_object(topology, otype, HWLOC_UNKNOWN_INDEX);
+          /* We don't specify the os_index of caches because we want to be
+           * 100% sure they are identical to what the Linux kernel reports
+           * (so that things like resctrl work).
+           * However, vendor/model-specific quirks in the x86 code above
+           * make this difficult.
+           *
+           * Caveat: if the x86 backend is used on Linux to avoid kernel bugs,
+           * IDs won't be available to resctrl users. But resctrl heavily
+           * relies on the kernel x86 discovery being non-buggy anyway.
+           *
+           * TODO: make this optional? or only disable it on Linux?
+           */
 	  cache->attr->cache.depth = level;
 	  cache->attr->cache.size = infos[i].cache[l].size;
 	  cache->attr->cache.linesize = infos[i].cache[l].linesize;
