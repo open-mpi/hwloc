@@ -208,9 +208,6 @@ struct lstopo_obj_userdata {
   /* internal offset for factorized_draw */
   unsigned internal_xoffset;
 
-  /* children orientation */
-  enum lstopo_orient_e orient;
-
   /* text lines within object */
 #define LSTOPO_OBJ_TEXT_MAX 4 /* current max number of lines is osdev name + 3 cuda attributes */
   struct lstopo_text_line {

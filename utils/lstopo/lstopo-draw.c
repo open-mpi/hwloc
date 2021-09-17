@@ -654,7 +654,6 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   }
 
   /* save config for draw_children() later */
-  plud->orient = orient;
   plud->width = totwidth;
   plud->height = totheight;
   plud->children.width = children_width;
