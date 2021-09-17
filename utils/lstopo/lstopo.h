@@ -111,6 +111,8 @@ struct lstopo_output {
   unsigned int gridsize, fontsize, linespacing, thickness;
   float text_xscale;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
+  enum lstopo_orient_e right_force_orient;
+  enum lstopo_orient_e below_force_orient;
   int show_indexes[HWLOC_OBJ_TYPE_MAX]; /* enabled by global toggle index_type */
   int show_text_enabled; /* global toggle for interactive keyboard shortcuts */
   int show_text[HWLOC_OBJ_TYPE_MAX];

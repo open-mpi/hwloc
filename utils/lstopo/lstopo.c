@@ -312,10 +312,14 @@ lstopo_check_pci_domains(hwloc_topology_t topology)
 }
 
 static void
-lstopo_parse_children_order(char *s, unsigned *children_order_p)
+lstopo_parse_children_order(char *s, unsigned *children_order_p,
+                            enum lstopo_orient_e *right_force_orient_p,
+                            enum lstopo_orient_e *below_force_orient_p)
 {
   char *tmp, *next;
   unsigned children_order;
+  enum lstopo_orient_e right_force_orient = LSTOPO_ORIENT_NONE;
+  enum lstopo_orient_e below_force_orient= LSTOPO_ORIENT_NONE;
 
   if (!strcmp(s, "plain")) {
     *children_order_p = LSTOPO_ORDER_PLAIN;
@@ -331,23 +335,67 @@ lstopo_parse_children_order(char *s, unsigned *children_order_p)
       next++;
     }
 
-    if (!strcmp(tmp, "memory:above") || !strcmp(tmp, "memoryabove") /* backward compat with 2.5 */)
+    if (!strcmp(tmp, "memory:above") || !strcmp(tmp, "memoryabove") /* backward compat with 2.5 */) {
       children_order |= LSTOPO_ORDER_MEMORY_ABOVE;
-    else if (!strcmp(tmp, "io:right"))
+
+    } else if (!strcmp(tmp, "io:right")) {
       children_order |= LSTOPO_ORDER_IO_RIGHT;
-    else if (!strcmp(tmp, "io:below"))
+    } else if (!strcmp(tmp, "io:right:horiz")) {
+      children_order |= LSTOPO_ORDER_IO_RIGHT;
+      right_force_orient = LSTOPO_ORIENT_HORIZ;
+    } else if (!strcmp(tmp, "io:right:vert")) {
+      children_order |= LSTOPO_ORDER_IO_RIGHT;
+      right_force_orient = LSTOPO_ORIENT_VERT;
+    } else if (!strcmp(tmp, "io:right:rect")) {
+      children_order |= LSTOPO_ORDER_IO_RIGHT;
+      right_force_orient = LSTOPO_ORIENT_RECT;
+
+    } else if (!strcmp(tmp, "io:below")) {
       children_order |= LSTOPO_ORDER_IO_BELOW;
-    else if (!strcmp(tmp, "misc:right"))
+    } else if (!strcmp(tmp, "io:below:horiz")) {
+      children_order |= LSTOPO_ORDER_IO_BELOW;
+      below_force_orient = LSTOPO_ORIENT_HORIZ;
+    } else if (!strcmp(tmp, "io:below:vert")) {
+      children_order |= LSTOPO_ORDER_IO_BELOW;
+      below_force_orient = LSTOPO_ORIENT_VERT;
+    } else if (!strcmp(tmp, "io:below:rect")) {
+      children_order |= LSTOPO_ORDER_IO_BELOW;
+      below_force_orient = LSTOPO_ORIENT_RECT;
+
+    } else if (!strcmp(tmp, "misc:right")) {
       children_order |= LSTOPO_ORDER_MISC_RIGHT;
-    else if (!strcmp(tmp, "misc:below"))
+    } else if (!strcmp(tmp, "misc:right:horiz")) {
+      children_order |= LSTOPO_ORDER_MISC_RIGHT;
+      right_force_orient = LSTOPO_ORIENT_HORIZ;
+    } else if (!strcmp(tmp, "misc:right:vert")) {
+      children_order |= LSTOPO_ORDER_MISC_RIGHT;
+      right_force_orient = LSTOPO_ORIENT_VERT;
+    } else if (!strcmp(tmp, "misc:right:rect")) {
+      children_order |= LSTOPO_ORDER_MISC_RIGHT;
+      right_force_orient = LSTOPO_ORIENT_RECT;
+
+    } else if (!strcmp(tmp, "misc:below")) {
       children_order |= LSTOPO_ORDER_MISC_BELOW;
-    else if (strcmp(tmp, "plain"))
+    } else if (!strcmp(tmp, "misc:below:horiz")) {
+      children_order |= LSTOPO_ORDER_MISC_BELOW;
+      below_force_orient = LSTOPO_ORIENT_HORIZ;
+    } else if (!strcmp(tmp, "misc:below:vert")) {
+      children_order |= LSTOPO_ORDER_MISC_BELOW;
+      below_force_orient = LSTOPO_ORIENT_VERT;
+    } else if (!strcmp(tmp, "misc:below:rect")) {
+      children_order |= LSTOPO_ORDER_MISC_BELOW;
+      below_force_orient = LSTOPO_ORIENT_RECT;
+
+    } else if (strcmp(tmp, "plain")) {
       fprintf(stderr, "Unsupported children order `%s', ignoring.\n", tmp);
+    }
 
     tmp = next;
   }
 
   *children_order_p = children_order;
+  *right_force_orient_p = right_force_orient;
+  *below_force_orient_p = below_force_orient;
 }
 
 static void
@@ -483,7 +531,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --allow <all|local|...>   Change the set of objects marked as allowed\n");
   fprintf (where, "  --flags <n>           Set the topology flags\n");
   fprintf (where, "Graphical output options:\n");
-  fprintf (where, "  --children-order <memory:above|io:right|...|plain>\n"
+  fprintf (where, "  --children-order <memory:above|io:right:vert|...|plain>\n"
 		  "                        Change the layout of Memory, I/O or Misc children\n");
   fprintf (where, "  --no-factorize        Do not factorize identical objects\n");
   fprintf (where, "  --no-factorize=<type> Do not factorize identical objects of type <type>\n");
@@ -816,6 +864,8 @@ main (int argc, char *argv[])
     loutput.force_orient[i] = LSTOPO_ORIENT_HORIZ;
   loutput.force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
   loutput.force_orient[HWLOC_OBJ_MEMCACHE] = LSTOPO_ORIENT_HORIZ;
+  loutput.right_force_orient = LSTOPO_ORIENT_NONE;
+  loutput.below_force_orient = LSTOPO_ORIENT_NONE;
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
     loutput.show_indexes[i] = 1;
     loutput.show_attrs[i] = 1;
@@ -1247,7 +1297,8 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--children-order")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-        lstopo_parse_children_order(argv[1], &loutput.children_order);
+        lstopo_parse_children_order(argv[1], &loutput.children_order,
+                                    &loutput.right_force_orient, &loutput.below_force_orient);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-cpukinds")) {

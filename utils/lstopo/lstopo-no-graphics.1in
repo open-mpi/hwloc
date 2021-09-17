@@ -329,6 +329,11 @@ on the right.
 
 Up to hwloc 2.5, the default was rather to \fImemory:above,plain\fR.
 
+Additionally, \fIio:right\fR, \fIio:below\fR, \fImisc:right\fR
+and \fImisc:below\fR may be suffixed with
+\fI:horiz\fR, \fI:vert\fR or \fI:rect\fR to force the horizontal,
+vertical or rectangular layout of children inside these sections.
+
 See also the GRAPHICAL OUTPUT section below.
 .TP
 \fB\-\-fontsize\fR <size>
@@ -727,6 +732,7 @@ and \-\-rect.
 
 The position of Memory, I/O and Misc children with respect to other children
 objects may be changed using \-\-children\-order.
+The layout of these special children may also be changed with this option.
 .
 .\" **************************
 .\"    Examples Section

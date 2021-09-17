@@ -505,7 +505,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 	       unsigned xrel, unsigned yrel /* position of children within parent */)
 {
   struct lstopo_obj_userdata *plud = parent->userdata;
-  enum lstopo_orient_e orient = loutput->force_orient[parent->type];
+  enum lstopo_orient_e main_orient, right_orient, below_orient;
   unsigned border = loutput->gridsize;
   unsigned separator = loutput->gridsize;
   unsigned separator_below_cache = loutput->gridsize;
@@ -543,6 +543,16 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   hwloc_obj_t child;
   int ncstate;
   unsigned i;
+
+  /* place main children according to the parent type if specified, or to the main layout */
+  main_orient = loutput->force_orient[parent->type];
+  /* place right/below children according to right/below first, or fallback to the parent type */
+  right_orient = loutput->right_force_orient;
+  if (right_orient == LSTOPO_ORIENT_NONE)
+    right_orient = loutput->force_orient[parent->type];
+  below_orient = loutput->below_force_orient;
+  if (below_orient == LSTOPO_ORIENT_NONE)
+    below_orient = loutput->force_orient[parent->type];
 
   /* defaults */
   plud->children.box = 0;
@@ -593,22 +603,22 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
   /* bridge children always vertical */
   if (parent->type == HWLOC_OBJ_BRIDGE)
-    orient = LSTOPO_ORIENT_VERT;
+    main_orient = LSTOPO_ORIENT_VERT;
 
   /* if factorizing children, use horizontal by default */
-  if (orient == LSTOPO_ORIENT_NONE
+  if (main_orient == LSTOPO_ORIENT_NONE
       && parent->symmetric_subtree
       && parent->first_child
       && loutput->factorize_enabled
       && parent->arity > loutput->factorize_min[parent->first_child->type]) {
-    orient = LSTOPO_ORIENT_HORIZ;
+    main_orient = LSTOPO_ORIENT_HORIZ;
   }
 
   /* if there are memory children and using plain children layout, use horizontal by default */
-  if (orient == LSTOPO_ORIENT_NONE
+  if (main_orient == LSTOPO_ORIENT_NONE
       && parent->memory_arity
       && !(loutput->children_order & LSTOPO_ORDER_MEMORY_ABOVE))
-    orient = LSTOPO_ORIENT_HORIZ;
+    main_orient = LSTOPO_ORIENT_HORIZ;
 
   /* recurse into children to prepare their sizes,
    * and check whether all normal children are PUs. */
@@ -639,18 +649,16 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
   /* compute the size of the main children section */
   if (plud->children.kinds)
-    place__children(loutput, parent, plud->children.kinds, &orient, 0, normal_children_separator, &children_width, &children_height);
+    place__children(loutput, parent, plud->children.kinds, &main_orient, 0, normal_children_separator, &children_width, &children_height);
 
   /* compute the size of the right children section (I/O and Misc), if any */
   if (plud->right_children.kinds) {
-    enum lstopo_orient_e rorient = loutput->force_orient[parent->type];
-    place__children(loutput, parent, plud->right_children.kinds, &rorient, 0, separator, &right_children_width, &right_children_height);
+    place__children(loutput, parent, plud->right_children.kinds, &right_orient, 0, separator, &right_children_width, &right_children_height);
   }
 
   /* compute the size of the below children section (I/O and Misc), if any */
   if (plud->below_children.kinds) {
-    enum lstopo_orient_e borient = loutput->force_orient[parent->type];
-    place__children(loutput, parent, plud->below_children.kinds, &borient, 0, separator, &below_children_width, &below_children_height);
+    place__children(loutput, parent, plud->below_children.kinds, &below_orient, 0, separator, &below_children_width, &below_children_height);
   }
 
   /* compute the width of the MRB children sections, it may be need for the above children section below */
