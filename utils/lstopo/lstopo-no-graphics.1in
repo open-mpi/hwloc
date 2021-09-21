@@ -334,7 +334,7 @@ and \fImisc:below\fR may be suffixed with
 \fI:horiz\fR, \fI:vert\fR or \fI:rect\fR to force the horizontal,
 vertical or rectangular layout of children inside these sections.
 
-See also the GRAPHICAL OUTPUT section below.
+See also the GRAPHICAL OUTPUT and LAYOUT sections below.
 .TP
 \fB\-\-fontsize\fR <size>
 Set the size of text font in the graphical output.
@@ -651,7 +651,30 @@ PCI bridge, it means that a single device or bridge is connected
 on the secondary PCI bus behind that bridge.
 When there is a vertical line, it means that multiple devices
 and/or bridges are connected to the same secondary PCI bus.
+.
+.\" **************************
+.\"    Layout Section
+.\" **************************
+.SH LAYOUT
+In its graphical output, lstopo uses simple rectangular heuristics
+to try to achieve a 4/3 ratio between width and height.
+Although the hierarchy of resources is properly reflected,
+the exact physical organization (NUMA distances, rings,
+complete graphs, etc.) is currently ignored.
 
+The layout of a level may be changed with \fB\-\-vert\fR, \fB\-\-horiz\fR,
+and \fB\-\-rect\fR to force a parent object to arrange its children
+in vertical, horizontal or rectangular manners respectively.
+
+The position of Memory, I/O and Misc children with respect to other
+children objects may be changed using \fB\-\-children\-order\fR.
+This effectivement divides children into multiple sections.
+The layout of children is first computed inside each section,
+before sections are placed inside (or below) the parent box.
+
+The vertical/horizontal/rectangular layout of these additional
+sections may also be configured through \fB\-\-children\-order\fR.
+.
 .\" **************************
 .\"    Colors Section
 .\" **************************
@@ -716,23 +739,6 @@ For instance, to display all core objects in blue (with white names):
     lstopo save.xml
     hwloc-annotate save.xml save.xml core:all info lstopoStyle "Background=#0000ff;Text=#ffffff"
     lstopo -i save.xml
-.
-.\" **************************
-.\"    Layout Section
-.\" **************************
-.SH LAYOUT
-In its graphical output, lstopo uses simple rectangular heuristics
-to try to achieve a 4/3 ratio between width and height.
-Although the hierarchy of resources is properly reflected,
-the exact physical organization (NUMA distances, rings,
-complete graphs, etc.) is currently ignored.
-.
-The layout of a level may be changed with \-\-vert, \-\-horiz,
-and \-\-rect.
-
-The position of Memory, I/O and Misc children with respect to other children
-objects may be changed using \-\-children\-order.
-The layout of these special children may also be changed with this option.
 .
 .\" **************************
 .\"    Examples Section
