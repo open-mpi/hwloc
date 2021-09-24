@@ -1060,69 +1060,6 @@ return 0;
       echo "**** end of NVIDIA-common configuration"
     fi
 
-    # OpenCL support
-    hwloc_opencl_happy=no
-    if test "x$enable_io" != xno && test "x$enable_opencl" != "xno"; then
-      echo
-      echo "**** OpenCL configuration"
-
-      hwloc_opencl_happy=yes
-      case ${target} in
-      *-*-darwin*)
-        # On Darwin, only use the OpenCL framework
-        AC_CHECK_HEADERS([OpenCL/cl_ext.h], [
-	  AC_MSG_CHECKING([for the OpenCL framework])
-          tmp_save_LDFLAGS="$LDFLAGS"
-          LDFLAGS="$LDFLAGS -framework OpenCL"
-	  AC_LINK_IFELSE([
-            AC_LANG_PROGRAM([[
-#include <OpenCL/opencl.h>
-            ]], [[
-return clGetDeviceIDs(0, 0, 0, NULL, NULL);
-            ]])],
-          [AC_MSG_RESULT(yes)
-	   HWLOC_OPENCL_LDFLAGS="-framework OpenCL"],
-	  [AC_MSG_RESULT(no)
-	   hwloc_opencl_happy=no])
-          LDFLAGS="$tmp_save_LDFLAGS"
-        ], [hwloc_opencl_happy=no])
-      ;;
-      *)
-        # On Others, look for OpenCL at normal locations
-        HWLOC_OPENCL_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
-        HWLOC_OPENCL_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
-        tmp_save_CPPFLAGS="$CPPFLAGS"
-        CPPFLAGS="$CPPFLAGS $HWLOC_OPENCL_CPPFLAGS"
-        tmp_save_LDFLAGS="$LDFLAGS"
-        LDFLAGS="$LDFLAGS $HWLOC_OPENCL_LDFLAGS"
-        AC_CHECK_HEADERS([CL/cl_ext.h], [
-	  AC_CHECK_LIB([OpenCL], [clGetDeviceIDs], [HWLOC_OPENCL_LIBS="-lOpenCL"], [hwloc_opencl_happy=no])
-        ], [hwloc_opencl_happy=no])
-        CPPFLAGS="$tmp_save_CPPFLAGS"
-        LDFLAGS="$tmp_save_LDFLAGS"
-      ;;
-      esac
-
-      echo "**** end of OpenCL configuration"
-    fi
-    AC_SUBST(HWLOC_OPENCL_CPPFLAGS)
-    AC_SUBST(HWLOC_OPENCL_LIBS)
-    AC_SUBST(HWLOC_OPENCL_LDFLAGS)
-    # If we asked for opencl support but couldn't deliver, fail
-    AS_IF([test "$enable_opencl" = "yes" -a "$hwloc_opencl_happy" = "no"],
-          [AC_MSG_WARN([Specified --enable-opencl switch, but could not])
-           AC_MSG_WARN([find appropriate support])
-           AC_MSG_ERROR([Cannot continue])])
-    if test "x$hwloc_opencl_happy" = "xyes"; then
-      AC_DEFINE([HWLOC_HAVE_OPENCL], [1], [Define to 1 if you have the `OpenCL' library.])
-      AC_SUBST([HWLOC_HAVE_OPENCL], [1])
-      hwloc_components="$hwloc_components opencl"
-      hwloc_opencl_component_maybeplugin=1
-    else
-      AC_SUBST([HWLOC_HAVE_OPENCL], [0])
-    fi
-    # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
-
     # CUDA support
     hwloc_have_cuda=no
     hwloc_have_cudart=no
@@ -1328,6 +1265,73 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
       hwloc_rsmi_component_maybeplugin=1
     else
       AC_SUBST([HWLOC_HAVE_RSMI], [0])
+    fi
+    # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
+
+    # OpenCL support
+    hwloc_opencl_happy=no
+    if test "x$enable_io" != xno && test "x$enable_opencl" != "xno"; then
+      echo
+      echo "**** OpenCL configuration"
+
+      hwloc_opencl_happy=yes
+      case ${target} in
+      *-*-darwin*)
+        # On Darwin, only use the OpenCL framework
+        AC_CHECK_HEADERS([OpenCL/cl_ext.h], [
+	  AC_MSG_CHECKING([for the OpenCL framework])
+          tmp_save_LDFLAGS="$LDFLAGS"
+          LDFLAGS="$LDFLAGS -framework OpenCL"
+	  AC_LINK_IFELSE([
+            AC_LANG_PROGRAM([[
+#include <OpenCL/opencl.h>
+            ]], [[
+return clGetDeviceIDs(0, 0, 0, NULL, NULL);
+            ]])],
+          [AC_MSG_RESULT(yes)
+	   HWLOC_OPENCL_LDFLAGS="-framework OpenCL"],
+	  [AC_MSG_RESULT(no)
+	   hwloc_opencl_happy=no])
+          LDFLAGS="$tmp_save_LDFLAGS"
+        ], [hwloc_opencl_happy=no])
+      ;;
+      *)
+        # On Others, look for OpenCL at normal locations
+        HWLOC_OPENCL_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
+        HWLOC_OPENCL_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
+        if test "x$rocm_dir" != x; then
+           HWLOC_OPENCL_CPPFLAGS="$HWLOC_OPENCL_CPPFLAGS -I$rocm_dir/opencl/include/"
+           HWLOC_OPENCL_LDFLAGS="$HWLOC_OPENCL_LDFLAGS -L$rocm_dir/opencl/lib/"
+        fi
+        tmp_save_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_OPENCL_CPPFLAGS"
+        tmp_save_LDFLAGS="$LDFLAGS"
+        LDFLAGS="$LDFLAGS $HWLOC_OPENCL_LDFLAGS"
+        AC_CHECK_HEADERS([CL/cl_ext.h], [
+	  AC_CHECK_LIB([OpenCL], [clGetDeviceIDs], [HWLOC_OPENCL_LIBS="-lOpenCL"], [hwloc_opencl_happy=no])
+        ], [hwloc_opencl_happy=no])
+        CPPFLAGS="$tmp_save_CPPFLAGS"
+        LDFLAGS="$tmp_save_LDFLAGS"
+      ;;
+      esac
+
+      echo "**** end of OpenCL configuration"
+    fi
+    AC_SUBST(HWLOC_OPENCL_CPPFLAGS)
+    AC_SUBST(HWLOC_OPENCL_LIBS)
+    AC_SUBST(HWLOC_OPENCL_LDFLAGS)
+    # If we asked for opencl support but couldn't deliver, fail
+    AS_IF([test "$enable_opencl" = "yes" -a "$hwloc_opencl_happy" = "no"],
+          [AC_MSG_WARN([Specified --enable-opencl switch, but could not])
+           AC_MSG_WARN([find appropriate support])
+           AC_MSG_ERROR([Cannot continue])])
+    if test "x$hwloc_opencl_happy" = "xyes"; then
+      AC_DEFINE([HWLOC_HAVE_OPENCL], [1], [Define to 1 if you have the `OpenCL' library.])
+      AC_SUBST([HWLOC_HAVE_OPENCL], [1])
+      hwloc_components="$hwloc_components opencl"
+      hwloc_opencl_component_maybeplugin=1
+    else
+      AC_SUBST([HWLOC_HAVE_OPENCL], [0])
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
