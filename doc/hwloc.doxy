@@ -2117,6 +2117,12 @@ hwloc_distances_transform() or hwloc-annotate may also be used
 to transform this matrix into something more convenient,
 for instance by replacing bandwidths with numbers of links between peers.
 </dt>
+<dt>XGMIHops (RSMI)</dt>
+<dd>This matrix lists the number of XGMI hops between AMD GPUs.
+It reports 1 when there is a direct link between two distinct GPUs.
+If there is no XGMI route between them, the value is 0.
+The number of hops between a GPU and itself (on the diagonal) is 0 as well.
+</dd>
 <dt>NVLinkBandwidth (NVML)</dt>
 <dd>This is the matrix of unidirectional NVLink bandwidths between
 NVIDIA GPUs (in MB/s).
