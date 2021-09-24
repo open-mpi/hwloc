@@ -279,7 +279,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   xgmi_bws = calloc(nb*nb, sizeof(*xgmi_bws));
   osdevs2 = malloc(nb *sizeof(*osdevs2));
   xgmi_hops = calloc(nb*nb, sizeof(*xgmi_hops));
-  if (!osdevs || !xgmi_bws)
+  if (!osdevs || !xgmi_bws || !osdevs2 || !xgmi_hops)
     goto out;
 
   for (i=0; i<nb; i++) {
