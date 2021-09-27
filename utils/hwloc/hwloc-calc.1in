@@ -408,6 +408,17 @@ per core, and in logical core order:
     $ echo $GOMP_CPU_AFFINITY
     0,2,1,3
 
+To export bitmask in a format that is acceptable by the resctrl Linux subsystem
+(for configuring cache partitioning, etc), apply a sed regexp to the output of hwloc-calc:
+
+    $ hwloc-calc pack:all.core:7-9.pu:0
+    0x00000380,,0x00000380   <this format cannot be given to resctrl>
+    $ hwloc-calc pack:all.core:7-9.pu:0 | sed -e 's/0x//g' -e 's/,,/,0,/g'
+    00000380,0,00000380
+    # echo 00000380,0,00000380 > /sys/fs/resctrl/test/cpus
+    # cat /sys/fs/resctrl/test/cpus
+    00000000,00000380,00000000,00000380   <the modified bitmask was corrected parsed by resctrl>
+
 .
 .\" **************************
 .\"    Return value section
