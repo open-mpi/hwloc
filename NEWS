@@ -30,6 +30,8 @@ Version 2.6.0
   + Expose cache os_index when available on Linux, it may be needed
     when using resctrl to configure cache partitioning, memory bandwidth
     monitoring, etc.
+  + Add a "XGMIHops" distances matrix in the RSMI backend for AMD GPU
+    interconnected through XGMI links.
 * Tools
   + lstopo has a better placement algorithm with respect to I/O
     objects, see --children-order in the manpage for details.
