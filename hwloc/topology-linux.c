@@ -6162,6 +6162,60 @@ hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend, unsigned os
 }
 
 static void
+hwloc_linuxfs_bxi_class_fillinfos(int root_fd,
+                                  struct hwloc_obj *obj, const char *osdevpath)
+{
+  char path[296]; /* osdevpath <= 256 */
+  char tmp[64];
+  obj->subtype = strdup("BXI");
+
+  snprintf(path, sizeof(path), "%s/uuid", osdevpath);
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    char *end = strchr(tmp, '\n');
+    if (end)
+      *end = '\0';
+    hwloc_obj_add_info(obj, "BXIUUID", tmp);
+  }
+}
+
+static int
+hwloc_linuxfs_lookup_bxi_class(struct hwloc_backend *backend, unsigned osdev_flags)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/bxi", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    hwloc_obj_t obj, parent;
+    int err;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+
+    err = snprintf(path, sizeof(path), "/sys/class/bxi/%s", dirent->d_name);
+    if ((size_t) err > sizeof(path))
+      continue;
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    if (!parent)
+      continue;
+
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
+
+    hwloc_linuxfs_bxi_class_fillinfos(root_fd, obj, path);
+  }
+
+  closedir(dir);
+
+  return 0;
+}
+
+static void
 hwloc_linuxfs_ve_class_fillinfos(int root_fd,
                                  struct hwloc_obj *obj, const char *osdevpath)
 {
@@ -6830,6 +6884,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_ve_class(backend, osdev_flags);
+    hwloc_linuxfs_lookup_bxi_class(backend, osdev_flags);
     if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
       hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
       hwloc_linuxfs_lookup_dma_class(backend, osdev_flags);

@@ -32,6 +32,7 @@ Version 2.6.0
     monitoring, etc.
   + Add a "XGMIHops" distances matrix in the RSMI backend for AMD GPU
     interconnected through XGMI links.
+  + Add OS devices such as "bxi0" for Atos/Bull BXI HCAs on Linux.
 * Tools
   + lstopo has a better placement algorithm with respect to I/O
     objects, see --children-order in the manpage for details.

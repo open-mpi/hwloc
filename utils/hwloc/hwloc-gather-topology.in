@@ -292,6 +292,7 @@ if [ x$gatherio = x1 ]; then
   saveclassdir "$destdir/$basename" infiniband
   saveclassdir "$destdir/$basename" net
   saveclassdir "$destdir/$basename" ve
+  saveclassdir "$destdir/$basename" bxi
   saveclassdir "$destdir/$basename" mic
   # udev block data
   ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done

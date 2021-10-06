@@ -1501,6 +1501,7 @@ components when I/O discovery is enabled and supported.
 <li>OpenFabrics (InfiniBand, Omni-Path, usNIC, etc) HCAs (::HWLOC_OBJ_OSDEV_OPENFABRICS)
  <ul>
  <li><em>mlx5_0</em>, <em>hfi1_0</em>, <em>qib0</em>, <em>usnic_0</em> (Linux component)</li>
+ <li><em>bxi0</em> with "BXI" subtype for Atos/Bull BXI HCAs (Linux component) even if those are not really OpenFabrics.</li>
  </ul>
 </li>
 <li>GPUs (::HWLOC_OBJ_OSDEV_GPU)
@@ -1999,6 +2000,9 @@ interface, such as <tt>eth4</tt> on Linux.
 the state of a port #1 (value is 4 when active),
 the LID and LID mask count of port #2,
 and GID #1 of port #3.
+</dd>
+<dt>BXIUUID (OpenFabrics BXI OS devices)</dt>
+<dd>The UUID of an Atos/Bull BXI HCA.
 </dd>
 </dl>
 
