@@ -269,15 +269,15 @@ depth 0:           1 Machine (type #0)
        depth 7:    48 PU (type #3)
 Special depth -3:  8 NUMANode (type #13)
 Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3) by logical indexes:
-  index     0     1     2     3     4     5     6     7
-      0    10    16    16    22    16    22    16    22
-      1    16    10    22    16    16    22    22    16
-      2    16    22    10    16    16    16    16    16
-      3    22    16    16    10    16    16    22    22
-      4    16    16    16    16    10    16    16    22
-      5    22    22    16    16    16    10    22    16
-      6    16    22    16    22    16    22    10    16
-      7    22    16    16    22    22    16    16    10
+ index     0     1     2     3     4     5     6     7
+     0    10    16    16    22    16    22    16    22
+     1    16    10    22    16    16    22    22    16
+     2    16    22    10    16    16    16    16    16
+     3    22    16    16    10    16    16    22    22
+     4    16    16    16    16    10    16    16    22
+     5    22    22    16    16    16    10    22    16
+     6    16    22    16    22    16    22    10    16
+     7    22    16    16    22    22    16    16    10
 CPU kind #0 efficiency 0 cpuset 0x0000ffff,0xffffffff
   FrequencyMaxMHz = 1700
 Topology not from this system

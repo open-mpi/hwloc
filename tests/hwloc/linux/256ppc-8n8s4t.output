@@ -671,13 +671,13 @@ depth 0:             1 Machine (type #0)
          depth 9:    256 PU (type #3)
 Special depth -3:    8 NUMANode (type #13)
 Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3) by logical indexes:
-  index     0     1     2     3     4     5     6     7
-      0    10    20    40    40    40    40    40    40
-      1    20    10    40    40    40    40    40    40
-      2    40    40    10    20    40    40    40    40
-      3    40    40    20    10    40    40    40    40
-      4    40    40    40    40    10    20    40    40
-      5    40    40    40    40    20    10    40    40
-      6    40    40    40    40    40    40    10    20
-      7    40    40    40    40    40    40    20    10
+ index     0     1     2     3     4     5     6     7
+     0    10    20    40    40    40    40    40    40
+     1    20    10    40    40    40    40    40    40
+     2    40    40    10    20    40    40    40    40
+     3    40    40    20    10    40    40    40    40
+     4    40    40    40    40    10    20    40    40
+     5    40    40    40    40    20    10    40    40
+     6    40    40    40    40    40    40    10    20
+     7    40    40    40    40    40    40    20    10
 Topology not from this system
