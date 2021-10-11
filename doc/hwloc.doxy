@@ -3408,10 +3408,22 @@ symmetric. For example, there could be different types of processors
 in a single machine, each with different numbers of cores, symmetric
 multithreading, or levels of caches.
 
-In practice, asymmetric topologies mostly appear when intermediate groups
-are added for I/O affinity: on a 4-package machine, an I/O bus may be
+In practice, asymmetric topologies are rare but occur for at least two reasons:
+<ul>
+<li>Intermediate groups may added for I/O affinity:
+on a 4-package machine, an I/O bus may be
 connected to 2 packages. These packages are below an additional Group
 object, while the other packages are not (see also \ref faq_groups).
+</li><li>
+If only part of a node is available to the current process,
+for instance because the resource manager uses Linux Cgroups to restrict
+process resources, some cores (or NUMA nodes) will disappear from
+the topology (unless flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was passed).
+On a 32-core machine where 12 cores were allocated to the process,
+this may lead to one CPU package with 8 cores, another one with only 4 cores,
+and two missing packages.
+</li>
+</ul>
 
 To understand how hwloc manages such cases, one should first remember
 the meaning of levels and cousin objects. All objects of the same type
