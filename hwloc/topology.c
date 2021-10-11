@@ -1903,7 +1903,7 @@ static void propagate_total_memory(hwloc_obj_t obj);
 static void hwloc_set_group_depth(hwloc_topology_t topology);
 static void hwloc_connect_children(hwloc_obj_t parent);
 static int hwloc_connect_levels(hwloc_topology_t topology);
-static int hwloc_connect_io_misc_levels(hwloc_topology_t topology);
+static int hwloc_connect_special_levels(hwloc_topology_t topology);
 
 hwloc_obj_t
 hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
@@ -2672,7 +2672,7 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
      * So reconnect special levels only here at the end
      * (it's not needed at the beginning of this function).
      */
-    if (hwloc_connect_io_misc_levels(topology) < 0)
+    if (hwloc_connect_special_levels(topology) < 0)
       return -1;
     topology->modified = 0;
   }
@@ -2995,9 +2995,9 @@ hwloc_list_special_objects(hwloc_topology_t topology, hwloc_obj_t obj)
   }
 }
 
-/* Build I/O levels */
+/* Build Memory, I/O and Misc levels */
 static int
-hwloc_connect_io_misc_levels(hwloc_topology_t topology)
+hwloc_connect_special_levels(hwloc_topology_t topology)
 {
   unsigned i;
 
@@ -3224,7 +3224,7 @@ hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags)
   if (hwloc_connect_levels(topology) < 0)
     return -1;
 
-  if (hwloc_connect_io_misc_levels(topology) < 0)
+  if (hwloc_connect_special_levels(topology) < 0)
     return -1;
 
   topology->modified = 0;
