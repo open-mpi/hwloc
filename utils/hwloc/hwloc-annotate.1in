@@ -81,6 +81,10 @@ This is specified by the \fImode\fR:
 Specifies a new string info attribute whose name is \fIname\fR and
 value is \fIvalue\fR.
 .TP
+.B subtype <subtype>
+Specifies that the subtype attribute of the object should now be \fIsubtype\fR.
+If an empty string is given, the subtype is removed.
+.TP
 .B misc <name>
 Specifies a new Misc object name.
 .TP
@@ -233,6 +237,11 @@ and set its value for initiator CPU-set 0x11 to NUMA node #2 to 2345:
 
     $ hwloc-annotate topo.xml topo.xml ignored memattr MyApplicationPerformance need_init,higher
     $ hwloc-annotate topo.xml topo.xml numanode:2 memattr MyApplicationPerformance 0x11 2345
+
+To clarify that NUMA node #0 is DDR while NUMA node #1 is HBM:
+
+    $ hwloc-annotate topo.xml topo.xml numa:0 subtype DDR
+    $ hwloc-annotate topo.xml topo.xml numa:1 subtype HBM
 
 Specify that PU 0-3 and PU 4-7 are of different kinds, and the latter is more efficient:
 

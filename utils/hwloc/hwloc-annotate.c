@@ -20,6 +20,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "    all, root, <type>:<logicalindex>, <type>:all\n");
 	fprintf(where, "  <annotation> may be:\n");
 	fprintf(where, "    info <name> <value>\n");
+	fprintf(where, "    subtype <subtype>\n");
 	fprintf(where, "    misc <name>\n");
 	fprintf(where, "    distances <filename> [<flags>]\n");
 	fprintf(where, "    memattr <name> <flags>\n");
@@ -41,6 +42,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 }
 
 static char *infoname = NULL, *infovalue = NULL;
+static char *subtype = NULL;
 static char *miscname = NULL;
 static char *distancesfilename = NULL;
 
@@ -119,6 +121,14 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 		}
 		if (infovalue)
 			hwloc_obj_add_info(obj, infoname, infovalue);
+	}
+	if (subtype) {
+		if (obj->subtype)
+			free(obj->subtype);
+		if (!strcmp(subtype, ""))
+			obj->subtype = NULL;
+		else
+			obj->subtype = strdup(subtype);
 	}
 	if (miscname)
 		hwloc_topology_insert_misc_object(topology, obj, miscname);
@@ -566,6 +576,13 @@ int main(int argc, char *argv[])
 		}
 		infoname = argv[1];
 		infovalue = argc >= 3 ? argv[2] : NULL;
+
+	} else if (!strcmp(argv[0], "subtype")) {
+		if (argc < 2) {
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
+		subtype = argv[1];
 
 	} else if (!strcmp(argv[0], "misc")) {
 		if (argc < 2) {
