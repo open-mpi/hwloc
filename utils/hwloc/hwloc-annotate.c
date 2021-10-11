@@ -29,7 +29,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
         fprintf(where, "    distances-transform <name> merge-switch-ports\n");
         fprintf(where, "    distances-transform <name> transitive-closure\n");
         fprintf(where, "    distances-transform <name> remove-obj <obj>\n");
-        fprintf(where, "    distances-transform <name> replace-objs <oldtype <newtype>\n");
+        fprintf(where, "    distances-transform <name> replace-objs <oldtype> <newtype>\n");
 	fprintf(where, "    none\n");
         fprintf(where, "Options:\n");
 	fprintf(where, "  --ci\tClear existing infos\n");
