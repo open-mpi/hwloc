@@ -36,7 +36,8 @@ Version 2.6.0
 * Tools
   + lstopo has a better placement algorithm with respect to I/O
     objects, see --children-order in the manpage for details.
-  + hwloc-annotate may now change object subtypes.
+  + hwloc-annotate may now change object subtypes and cache or memory
+    sizes.
 * Build
   + Allow to specify the ROCm installation for building the RSMI backend:
     - Use a custom installation path if specified with --with-rocm=<dir>.

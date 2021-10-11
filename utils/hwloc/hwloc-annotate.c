@@ -21,6 +21,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "  <annotation> may be:\n");
 	fprintf(where, "    info <name> <value>\n");
 	fprintf(where, "    subtype <subtype>\n");
+	fprintf(where, "    size <memory or cache size>\n");
 	fprintf(where, "    misc <name>\n");
 	fprintf(where, "    distances <filename> [<flags>]\n");
 	fprintf(where, "    memattr <name> <flags>\n");
@@ -43,6 +44,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 
 static char *infoname = NULL, *infovalue = NULL;
 static char *subtype = NULL;
+static unsigned long long sizevalue = ~0ULL;
 static char *miscname = NULL;
 static char *distancesfilename = NULL;
 
@@ -130,6 +132,12 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 		else
 			obj->subtype = strdup(subtype);
 	}
+        if (sizevalue != ~0ULL) {
+          if (obj->type == HWLOC_OBJ_NUMANODE)
+            obj->attr->numanode.local_memory = sizevalue;
+          else if (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
+            obj->attr->cache.size = sizevalue;
+        }
 	if (miscname)
 		hwloc_topology_insert_misc_object(topology, obj, miscname);
         if (mavname) {
@@ -583,6 +591,24 @@ int main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 		subtype = argv[1];
+
+	} else if (!strcmp(argv[0], "size")) {
+		char *end;
+		if (argc < 2) {
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
+		sizevalue = strtoull(argv[1], &end, 0);
+                if (end) {
+                  if (!strcasecmp(end, "kB"))
+                    sizevalue <<= 10;
+                  else if (!strcasecmp(end, "MB"))
+                    sizevalue <<= 20;
+                  if (!strcasecmp(end, "GB"))
+                    sizevalue <<= 30;
+                  if (!strcasecmp(end, "TB"))
+                    sizevalue <<= 40;
+                }
 
 	} else if (!strcmp(argv[0], "misc")) {
 		if (argc < 2) {
