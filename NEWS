@@ -44,6 +44,9 @@ Version 2.6.0
     - Use /opt/rocm-<version> if specified with --with-rocm-version=<version>
       or the ROCM_VERSION environment variable.
     - Try /opt/rocm if it exists.
+* Documentation
+  + Add FAQ entry "How do I create a custom heterogeneous and
+     asymmetric topology?"
 
 
 Version 2.5.0

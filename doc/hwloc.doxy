@@ -2460,6 +2460,11 @@ space-separated attributes. For instance:
 </li>
 </ul>
 
+hwloc command-line tools may modify a synthetic topology,
+for instance to customize object attributes,
+or to remove some objects to make the topology heterogeneous or asymmetric.
+See many examples in \ref faq_create_asymmetric.
+
 
 \htmlonly
 </div><div class="section" id="synthetic_use">
@@ -3676,6 +3681,85 @@ There is also a topology-specific userdata pointer that can be used
 to recognize different topologies by storing a custom pointer.
 It may be manipulated with <tt>hwloc_topology_set_userdata()</tt>
 and <tt>hwloc_topology_get_userdata()</tt>.
+
+
+\subsection faq_create_asymmetric How do I create a custom heterogeneous and asymmetric topology?
+
+Synthetic topologies (see \ref synthetic) allow to create custom topologies
+but they are always symmetric: same numbers of cores in each package,
+same local NUMA nodes, same shared cache, etc.
+To create an asymmetric topology, for instance to simulate hybrid CPUs,
+one may want to start from a larger symmetric topology and restrict it.
+<br/>
+
+Assuming we want two packages, one with 4 dual-threaded cores, and one with 8 single-threaded cores,
+first we create a topology with two identical packages, each with 8 dual-threaded cores:
+\verbatim
+$ lstopo -i "pack:2 core:8 pu:2" topo.xml
+\endverbatim
+Then create the bitmask representing the PUs that we wish to keep and pass it to lstopo's restrict option:
+\verbatim
+$ hwloc-calc -i topo.xml pack:0.core:0-3.pu:0-1 pack:1.core:0-7.pu:0
+0x555500ff
+$ lstopo -i topo.xml --restrict 0x555500ff topo2.xml
+$ mv -f topo2.xml topo.xml
+\endverbatim
+To mark the cores of first package as Big (power hungry)
+and those of second package as Little (energy efficient), define CPU kinds:
+\verbatim
+$ hwloc-annotate topo.xml topo.xml none cpukind $(hwloc-calc -i topo.xml pack:0) 1 0 CoreType Big
+$ hwloc-annotate topo.xml topo.xml none cpukind $(hwloc-calc -i topo.xml pack:1) 0 0 CoreType Little
+\endverbatim
+<br/>
+
+A similar method may be used for heterogeneous memory.
+First we specify 2 NUMA nodes per package in our synthetic description:
+\verbatim
+$ lstopo -i "pack:2 [numa(memory=100GB)] [numa(memory=10GB)] core:8 pu:2" topo.xml
+\endverbatim
+Then remove the second node of first package:
+\verbatim
+$ hwloc-calc -i topo.xml --nodeset node:all ~pack:0.node:1
+0x0000000e
+$ lstopo -i topo.xml --restrict nodeset=0xe topo2.xml
+$ mv -f topo2.xml topo.xml
+\endverbatim
+Then make one large node even bigger:
+\verbatim
+$ hwloc-annotate topo.xml topo.xml pack:0.numa:0 size 200GB
+\endverbatim
+Now we have 200GB in first package, and 100GB+10GB in second package.
+<br/>
+
+Next we may specify that the small NUMA node (second of second package) is HBM while the large ones are DRAM:
+\verbatim
+$ hwloc-annotate topo.xml topo.xml pack:0.numa:0 subtype DRAM
+$ hwloc-annotate topo.xml topo.xml pack:1.numa:0 subtype DRAM
+$ hwloc-annotate topo.xml topo.xml pack:1.numa:1 subtype HBM
+\endverbatim
+Finally we may define memory performance attributes to specify that the HBM bandwidth (200GB/s)
+from local cores is higher than the DDR bandwidth (50GB/s):
+\verbatim
+$ hwloc-annotate topo.xml topo.xml pack:0.numa:0 memattr Bandwidth pack:0 50000
+$ hwloc-annotate topo.xml topo.xml pack:1.numa:0 memattr Bandwidth pack:1 50000
+$ hwloc-annotate topo.xml topo.xml pack:1.numa:1 memattr Bandwidth pack:1 200000
+\endverbatim
+<br/>
+
+There is currently no way to create or modify I/O devices attached to such fake topologies.
+There is also no way to have some <em>partial levels</em>, e.g. a L3 cache in one package
+but not in the other.
+<br/>
+
+More changes may obviously be performed by manually modifying the XML export file.
+Simple operations such as modifying object attributes (cache size, memory size
+info keypairs, etc.), moving I/O subtrees, moving Misc objects, or removing
+objects are easy to perform.
+
+However, modifying CPU and Memory objects requires care since cpusets and nodesets
+are supposed to remain consistent between parents and children.
+Similarly, PCI bus IDs should remain consistent between bridges and children within
+an I/O subtree.
 
 
 
