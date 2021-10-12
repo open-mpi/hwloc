@@ -18,7 +18,8 @@ EXTRA_DIST = \
         test-hwloc-compress-dir.input.tar.gz test-hwloc-compress-dir.output.tar.gz \
         test-hwloc-diffpatch.input1 test-hwloc-diffpatch.input2 \
         test-hwloc-distrib.output \
-        test-hwloc-info.output
+        test-hwloc-info.output \
+        test-build-custom-topology.output
 
 noinst_HEADERS = misc.h common-ps.h
 
@@ -78,6 +79,7 @@ TESTS = \
         test-hwloc-diffpatch.sh \
         test-hwloc-distrib.sh \
         test-hwloc-info.sh \
+        test-build-custom-topology.sh \
         test-parsing-flags.sh
 if HWLOC_HAVE_PLUGINS
 TESTS += test-fake-plugin.sh

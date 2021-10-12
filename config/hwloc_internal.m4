@@ -498,6 +498,7 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh]
+        hwloc_config_prefix[utils/hwloc/test-build-custom-topology.sh]
         hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh]
         hwloc_config_prefix[utils/hwloc/test-parsing-flags.sh]
         hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/Makefile]
@@ -530,6 +531,7 @@ int foo(void) {
       hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh] \
       hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh] \
       hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh] \
+      hwloc_config_prefix[utils/hwloc/test-build-custom-topology.sh] \
       hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh] \
       hwloc_config_prefix[utils/hwloc/test-parsing-flags.sh] \
       hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh] \
