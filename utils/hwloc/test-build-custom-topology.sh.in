@@ -20,6 +20,9 @@ calc="$builddir/hwloc-calc"
 lstopo="$builddir/../lstopo/lstopo-no-graphics"
 annotate="$builddir/hwloc-annotate"
 
+HWLOC_DONT_ADD_VERSION_INFO=1
+export HWLOC_DONT_ADD_VERSION_INFO
+
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc/.libs
 export HWLOC_PLUGINS_PATH
 
