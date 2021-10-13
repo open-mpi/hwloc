@@ -3714,8 +3714,8 @@ $ mv -f topo2.xml topo.xml
 To mark the cores of first package as Big (power hungry)
 and those of second package as Little (energy efficient), define CPU kinds:
 \verbatim
-$ hwloc-annotate topo.xml topo.xml none cpukind $(hwloc-calc -i topo.xml pack:0) 1 0 CoreType Big
-$ hwloc-annotate topo.xml topo.xml none cpukind $(hwloc-calc -i topo.xml pack:1) 0 0 CoreType Little
+$ hwloc-annotate topo.xml topo.xml -- none -- cpukind $(hwloc-calc -i topo.xml pack:0) 1 0 CoreType Big
+$ hwloc-annotate topo.xml topo.xml -- none -- cpukind $(hwloc-calc -i topo.xml pack:1) 0 0 CoreType Little
 \endverbatim
 <br/>
 
@@ -3733,23 +3733,22 @@ $ mv -f topo2.xml topo.xml
 \endverbatim
 Then make one large node even bigger:
 \verbatim
-$ hwloc-annotate topo.xml topo.xml pack:0.numa:0 size 200GB
+$ hwloc-annotate topo.xml topo.xml -- pack:0.numa:0 -- size 200GB
 \endverbatim
 Now we have 200GB in first package, and 100GB+10GB in second package.
 <br/>
 
 Next we may specify that the small NUMA node (second of second package) is HBM while the large ones are DRAM:
 \verbatim
-$ hwloc-annotate topo.xml topo.xml pack:0.numa:0 subtype DRAM
-$ hwloc-annotate topo.xml topo.xml pack:1.numa:0 subtype DRAM
-$ hwloc-annotate topo.xml topo.xml pack:1.numa:1 subtype HBM
+$ hwloc-annotate topo.xml topo.xml -- pack:0.numa:0 pack:1.numa:0 -- subtype DRAM
+$ hwloc-annotate topo.xml topo.xml -- pack:1.numa:1 -- subtype HBM
 \endverbatim
 Finally we may define memory performance attributes to specify that the HBM bandwidth (200GB/s)
 from local cores is higher than the DRAM bandwidth (50GB/s):
 \verbatim
-$ hwloc-annotate topo.xml topo.xml pack:0.numa:0 memattr Bandwidth pack:0 50000
-$ hwloc-annotate topo.xml topo.xml pack:1.numa:0 memattr Bandwidth pack:1 50000
-$ hwloc-annotate topo.xml topo.xml pack:1.numa:1 memattr Bandwidth pack:1 200000
+$ hwloc-annotate topo.xml topo.xml -- pack:0.numa:0 -- memattr Bandwidth pack:0 50000
+$ hwloc-annotate topo.xml topo.xml -- pack:1.numa:0 -- memattr Bandwidth pack:1 50000
+$ hwloc-annotate topo.xml topo.xml -- pack:1.numa:1 -- memattr Bandwidth pack:1 200000
 \endverbatim
 <br/>
 

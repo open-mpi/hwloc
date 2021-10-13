@@ -62,21 +62,20 @@ $lstopo --if xml -i $file --restrict nodeset=$nodeset --of xml $filetmp
 mv -f $filetmp $file
 
 echo "marking cores of first package as more power hungry ..."
-$annotate $file $file none cpukind `$calc -i $file pack:0` 1 0 CoreType Big
-$annotate $file $file none cpukind `$calc -i $file pack:1` 0 0 CoreType Little
+$annotate $file $file -- none -- cpukind `$calc -i $file pack:0` 1 0 CoreType Big
+$annotate $file $file -- none -- cpukind `$calc -i $file pack:1` 0 0 CoreType Little
 
-echo "marking 1st node of 2nd pack as HBM ..."
-$annotate $file $file pack:0.numa:0 subtype DRAM
-$annotate $file $file pack:1.numa:0 subtype DRAM
-$annotate $file $file pack:1.numa:1 subtype HBM
+echo "marking 1st node of 2nd pack as HBM and others as DRAM ..."
+$annotate $file $file -- pack:1.numa:1 -- subtype HBM
+$annotate $file $file -- pack:0.numa:0 pack:1.numa:0 -- subtype DRAM
 
 echo "making the first DRAM bigger ..."
-$annotate $file $file pack:0.numa:0 size 200GB
+$annotate $file $file -- pack:0.numa:0 -- size 200GB
 
 echo "adding bandwidth for memory nodes ..."
-$annotate $file $file pack:0.node:0 memattr Bandwidth pack:0 50000
-$annotate $file $file pack:1.node:0 memattr Bandwidth pack:1 50000
-$annotate $file $file pack:1.node:1 memattr Bandwidth pack:1 200000
+$annotate $file $file -- pack:0.node:0 -- memattr Bandwidth pack:0 50000
+$annotate $file $file -- pack:1.node:0 -- memattr Bandwidth pack:1 50000
+$annotate $file $file -- pack:1.node:1 -- memattr Bandwidth pack:1 200000
 
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-build-custom-topology.output "$file"
 rm -rf "$tmp"
