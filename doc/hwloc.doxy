@@ -3745,7 +3745,7 @@ $ hwloc-annotate topo.xml topo.xml pack:1.numa:0 subtype DRAM
 $ hwloc-annotate topo.xml topo.xml pack:1.numa:1 subtype HBM
 \endverbatim
 Finally we may define memory performance attributes to specify that the HBM bandwidth (200GB/s)
-from local cores is higher than the DDR bandwidth (50GB/s):
+from local cores is higher than the DRAM bandwidth (50GB/s):
 \verbatim
 $ hwloc-annotate topo.xml topo.xml pack:0.numa:0 memattr Bandwidth pack:0 50000
 $ hwloc-annotate topo.xml topo.xml pack:1.numa:0 memattr Bandwidth pack:1 50000
