@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Inria.  All rights reserved.
+ * Copyright © 2013-2021 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -63,6 +63,12 @@ typedef struct {
   uint32_t lanes[RSMI_MAX_NUM_FREQUENCIES];
 } rsmi_pcie_bandwidth_t;
 
+typedef enum {
+  RSMI_MEM_TYPE_VRAM,
+  RSMI_MEM_TYPE_VIS_VRAM,
+  RSMI_MEM_TYPE_GTT,
+} rsmi_memory_type_t;
+
 rsmi_status_t rsmi_init(uint64_t init_flags);
 rsmi_status_t rsmi_shut_down(void);
 rsmi_status_t rsmi_version_get(rsmi_version_t *);
@@ -76,6 +82,7 @@ rsmi_status_t rsmi_dev_pci_bandwidth_get(uint32_t dv_ind, rsmi_pcie_bandwidth_t 
 rsmi_status_t rsmi_dev_xgmi_hive_id_get(uint32_t dv_ind, uint64_t *hive_id);
 rsmi_status_t rsmi_topo_get_link_type(uint32_t dv_ind_src, uint32_t dv_ind_dst,
                                       uint64_t *hops, RSMI_IO_LINK_TYPE *type);
-
+rsmi_status_t rsmi_dev_memory_total_get(uint32_t dv_ind, rsmi_memory_type_t mem_type,
+                                        uint64_t *total);
 
 #endif /* HWLOC_PORT_RSMI_RSMI_H */

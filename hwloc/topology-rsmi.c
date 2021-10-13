@@ -241,6 +241,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   enum hwloc_type_filter_e filter;
   hwloc_obj_t *osdevs = NULL, *osdevs2 = NULL;
   hwloc_uint64_t *xgmi_bws = NULL, *xgmi_hops = NULL;
+  uint64_t memory;
   int got_xgmi_bws = 0;
   rsmi_version_t version;
   rsmi_status_t ret;
@@ -314,6 +315,26 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     buffer[0] = '\0';
     if (get_device_xgmi_hive_id(i, buffer) == 0)
       hwloc_obj_add_info(osdev, "XGMIHiveID", buffer);
+
+    ret = rsmi_dev_memory_total_get(i, RSMI_MEM_TYPE_VRAM, &memory);
+    if (ret == RSMI_STATUS_SUCCESS) {
+      char tmp[64];
+      snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long)memory/1024);
+      hwloc_obj_add_info(osdev, "RSMIVRAMSize", tmp);
+    }
+    ret = rsmi_dev_memory_total_get(i, RSMI_MEM_TYPE_VIS_VRAM, &memory);
+    if (ret == RSMI_STATUS_SUCCESS) {
+      char tmp[64];
+      snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long)memory/1024);
+      hwloc_obj_add_info(osdev, "RSMIVisibleVRAMSize", tmp);
+    }
+    ret = rsmi_dev_memory_total_get(i, RSMI_MEM_TYPE_GTT, &memory);
+    if (ret == RSMI_STATUS_SUCCESS) {
+      char tmp[64];
+      snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long)memory/1024);
+      hwloc_obj_add_info(osdev, "RSMIGTTSize", tmp);
+    }
+    /* there's also rsmi_dev_memory_usage_get() to get what's currently used in these memories */
 
     xgmi_peers = malloc(nb*15+1);  /* "rsmi" + unsigned int + space = 15 chars max, + ending \0 */
     if (xgmi_peers) {

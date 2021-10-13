@@ -1954,6 +1954,13 @@ and SectorSize (in bytes).
 <dt>AMDUUID, AMDSerial (RSMI GPU OS devices)</dt>
 <dd>The UUID and serial number of AMD GPUs.
 </dd>
+<dt>RSMIVRAMSize, RSMIVisibleVRAMSize, RSMIGTTSize (RSMI GPU OS devices)</dt>
+<dd>
+ The amount of GPU memory (VRAM),
+ of GPU memory that is visible from the host (Visible VRAM),
+ and of system memory that is usable by the GPU (Graphics Translation Table).
+ Sizes are in kB.
+</dd>
 <dt>XGMIHiveID (RSMI GPU OS devices)</dt>
 <dd>The ID of the group of GPUs (Hive) interconnected by XGMI links
 </dd>
