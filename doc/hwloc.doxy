@@ -3927,6 +3927,26 @@ You should pass the following command-line option to Valgrind to use it:
 \section faq4 Platform-specific
 
 
+\subsection faq_cuda_build How do I enable ROCm SMI and select which version to use?
+
+hwloc enables ROCm SMI as soon as it finds its development headers and libraries
+on the system.
+This detection consists in looking in <tt>/opt/rocm</tt> by default.
+If a ROCm version was specified with <tt>\--with-rocm-version=4.4.0</tt>
+or in the <tt>ROCM_VERSION</tt> environment variable,
+then <tt>/opt/rocm-<version></tt> is used instead.
+Finally, a specific installation path may be specified with <tt>\--with-rocm=/path/to/rocm</tt>.
+
+As usual, developer header and library paths may also be set through
+environment variables such as <tt>LIBRARY_PATH</tt> and <tt>C_INCLUDE_PATH</tt>.
+
+To find out whether ROCm SMI was detected and enabled, look in <i>Probe / display I/O devices</i>
+at the end of the configure script output.
+Passing <tt>\--enable-rsmi</tt> will also cause configure to fail
+if RSMI could not be found and enabled in hwloc.
+
+
+
 \subsection faq_cuda_build How do I enable CUDA and select which CUDA version to use?
 
 hwloc enables CUDA as soon as it finds CUDA development headers and libraries

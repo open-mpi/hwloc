@@ -45,6 +45,8 @@ Version 2.6.0
     - Use /opt/rocm-<version> if specified with --with-rocm-version=<version>
       or the ROCM_VERSION environment variable.
     - Try /opt/rocm if it exists.
+    - See "How do I enable ROCm SMI and select which version to use?"
+      in the FAQ for details.
 * Documentation
   + Add FAQ entry "How do I create a custom heterogeneous and
      asymmetric topology?"
