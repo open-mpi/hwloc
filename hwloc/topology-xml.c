@@ -123,6 +123,17 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       fprintf(stderr, "%s: unexpected zero gp_index, topology may be invalid\n", state->global->msgprefix);
     if (obj->gp_index >= topology->next_gp_index)
       topology->next_gp_index = obj->gp_index + 1;
+  } else if (!strcmp(name, "id")) { /* forward compat */
+    if (!strncmp(value, "obj", 3)) {
+      obj->gp_index = strtoull(value+3, NULL, 10);
+      if (!obj->gp_index && hwloc__xml_verbose())
+        fprintf(stderr, "%s: unexpected zero id, topology may be invalid\n", state->global->msgprefix);
+      if (obj->gp_index >= topology->next_gp_index)
+        topology->next_gp_index = obj->gp_index + 1;
+    } else {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: unexpected id `%s' not-starting with `obj', ignoring\n", value, state->global->msgprefix);
+    }
   } else if (!strcmp(name, "cpuset")) {
     if (!obj->cpuset)
       obj->cpuset = hwloc_bitmap_alloc();
