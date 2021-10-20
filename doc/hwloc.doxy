@@ -4079,6 +4079,9 @@ repository for an example used for nightly testing.
 
 hwloc also supports the Cygwin environment for porting Unix code to Windows.
 
+Windows support is also possible with CMake thanks to
+<tt>contrib/windows-cmake/CMakeLists.txt</tt>.
+
 hwloc releases also contain a basic Microsoft Visual Studio solution
 under <tt>contrib/windows/</tt>.
 
