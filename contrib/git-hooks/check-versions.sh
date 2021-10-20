@@ -6,3 +6,4 @@
 
 ./contrib/windows/check-versions.sh --quiet
 ./contrib/android/check-versions.sh --quiet
+./contrib/windows-cmake/check-versions.sh --quiet
