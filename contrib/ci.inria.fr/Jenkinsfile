@@ -23,9 +23,11 @@ def doUnix = (env.NO_UNIX != 'true')
 println('Unix is '+(doUnix ? 'enabled.' : 'disabled.'))
 def doDebug = (isExtendedJob || env.FORCE_DEBUG == 'true')
 println('Debug is '+(doDebug ? 'enabled.' : 'disabled.'))
-// extended job doesn't run MSVC
+// extended job doesn't run MSVC and WinCMake
 def doMSVC = (!isExtendedJob && env.NO_MSVC != 'true')
 println('MSVC is '+(doMSVC ? 'enabled.' : 'disabled.'))
+def doWinCMake = (!isExtendedJob && env.NO_WINCMAKE != 'true')
+println('WinCMake is '+(doWinCMake ? 'enabled.' : 'disabled.'))
 // basic job doesn't run Coverity/Sonarqube/Embedded/MinGW/Cygwin/Android
 def doCoverity = (!isBasicJob && env.NO_COVERITY != 'true')
 println('Coverity is '+(doCoverity ? 'enabled.' : 'disabled.'))
@@ -77,6 +79,9 @@ pipeline {
 							if (doMSVC) {
 								stash includes: "job-1-visualstudio.bat", name: 'script-msvc'
 							}
+							if (doWinCMake) {
+								stash includes: "job-1-wincmake.bat", name: 'script-wincmake'
+							}
 							if (doMinGW) {
 								stash includes: "job-3-mingw.*", name: 'scripts-mingw'
 							}
@@ -112,6 +117,9 @@ pipeline {
 					if (doMSVC) {
 						listOfNodeNames.push('VisualStudio')
 					}
+					if (doWinCMake) {
+						listOfNodeNames.push('WinCMake')
+					}
 					if (doMinGW) {
 						listOfNodeNames.push('MinGW64')
 						listOfNodeNames.push('MinGW32')
@@ -141,6 +149,16 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-msvc'
 									bat 'job-1-visualstudio.bat '+tarballgz
+									if (env.KEEP_WORKING_DIRECTORY != 'true')
+										deleteDir()
+								}
+							}
+						} else if (it == 'WinCMake') {
+							node('wincmake') {
+								dir('check-wincmake') {
+									unstash 'tarballgz'
+									unstash 'script-wincmake'
+									bat 'job-1-wincmake.bat '+tarballgz
 									if (env.KEEP_WORKING_DIRECTORY != 'true')
 										deleteDir()
 								}
