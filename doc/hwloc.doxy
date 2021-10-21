@@ -1508,8 +1508,6 @@ components when I/O discovery is enabled and supported.
  <ul>
  <li><em>rsmi0</em> for the first RSMI device
   ("RSMI" subtype, from the RSMI component, using the AMD ROCm SMI library)</li>
- <li><em>ze0</em> for the first Level Zero device
-  ("LevelZero" subtype, from the levelzero component, using the oneAPI Level Zero library)</li>
  <li><em>nvml0</em> for the first NVML device
   ("NVML" subtype, from the NVML component, using the NVIDIA Management Library)</li>
  <li><em>:0.0</em> for the first display
@@ -1523,6 +1521,8 @@ components when I/O discovery is enabled and supported.
  <li><em>opencl0d0</em> for the first device of the first OpenCL platform,
   <em>opencl1d3</em> for the fourth device of the second OpenCL platform
   ("OpenCL" subtype, from the  OpenCL component)</li>
+ <li><em>ze0</em> for the first Level Zero device
+  ("LevelZero" subtype, from the levelzero component, using the oneAPI Level Zero library)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   ("CUDA" subtype, from the CUDA component, using the NVIDIA CUDA Library)</li>
  <li><em>ve0</em> for the first NEC Vector Engine device
