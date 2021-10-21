@@ -184,7 +184,7 @@ ldflags += -Xlinker --output-def -Xlinker .libs/libhwloc.def
 
 if HWLOC_HAVE_MS_LIB
 dolib$(EXEEXT): dolib.c
-	$(CC_FOR_BUILD) $< -o $@
+	$(CC_FOR_BUILD) $(HWLOC_CPPFLAGS) $< -o $@
 .libs/libhwloc.lib: libhwloc.la dolib$(EXEEXT)
 	[ ! -r .libs/libhwloc.def ] || ./dolib$(EXEEXT) "$(HWLOC_MS_LIB)" $(HWLOC_MS_LIB_ARCH) .libs/libhwloc.def $(libhwloc_so_version) .libs/libhwloc.lib
 all-local: .libs/libhwloc.lib

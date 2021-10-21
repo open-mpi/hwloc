@@ -7,6 +7,8 @@
 
 /* Wrapper to avoid msys' tendency to turn / into \ and : into ;  */
 
+#include <private/misc.h> /* for snprintf/_snprintf */
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -33,11 +35,11 @@ int main(int argc, char *argv[]) {
   if (sscanf(version, "%d:%d:%d", &current, &revision, &age) != 3)
     exit(EXIT_FAILURE);
 
-  _snprintf(name, sizeof(name), "libhwloc-%d", current - age);
+  snprintf(name, sizeof(name), "libhwloc-%d", current - age);
   printf("using soname %s\n", name);
 
-  _snprintf(s, sizeof(s), "\"%s\" /machine:%s /def:%s /name:%s /out:%s",
-      prog, arch, def, name, lib);
+  snprintf(s, sizeof(s), "\"%s\" /machine:%s /def:%s /name:%s /out:%s",
+           prog, arch, def, name, lib);
   if (system(s)) {
     fprintf(stderr, "%s failed\n", s);
     exit(EXIT_FAILURE);
