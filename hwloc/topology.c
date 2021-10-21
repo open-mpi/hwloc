@@ -69,7 +69,7 @@
  * it will break in cygwin, we'll have to use both putenv() and SetEnvironmentVariable().
  * Hopefully L0 will be provide a way to enable Sysman without env vars before it happens.
  */
-#ifdef HWLOC_HAVE_ATTRIBUTE_CONSTRUCTOR
+#if HWLOC_HAVE_ATTRIBUTE_CONSTRUCTOR
 static void hwloc_constructor(void) __attribute__((constructor));
 static void hwloc_constructor(void)
 {
