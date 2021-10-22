@@ -42,6 +42,9 @@ hwloc_internal_cpukinds_dup(hwloc_topology_t new, hwloc_topology_t old)
   struct hwloc_internal_cpukind_s *kinds;
   unsigned i;
 
+  if (!old->nr_cpukinds)
+    return 0;
+
   kinds = hwloc_tma_malloc(tma, old->nr_cpukinds * sizeof(*kinds));
   if (!kinds)
     return -1;
