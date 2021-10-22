@@ -45,7 +45,8 @@ sources = \
         topology-synthetic.c \
         topology-xml.c \
         topology-xml-nolibxml.c
-ldflags =
+ldflags = -no-undefined
+
 
 # Conditionally add to the sources and ldflags
 
@@ -181,10 +182,6 @@ endif HWLOC_HAVE_NETBSD
 if HWLOC_HAVE_X86_CPUID
 sources += topology-x86.c
 endif HWLOC_HAVE_X86_CPUID
-
-if HWLOC_HAVE_GCC
-ldflags += -no-undefined
-endif HWLOC_HAVE_GCC
 
 
 if HWLOC_HAVE_WINDOWS
