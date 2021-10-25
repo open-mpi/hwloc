@@ -124,8 +124,6 @@ Building the Windows zipballs on Windows with MinGW:
     $ ./configure --prefix=$prefix --enable-static --host=i686-w64-mingw32
   - For a 64bits zipball:
     $ ./configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32
-  - For a 64bits zipball on a 32bits Windows:
-    $ ./configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32 CC_FOR_BUILD=i686-w64-mingw32-gcc
 
 - Build
   $ make

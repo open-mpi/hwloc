@@ -101,11 +101,6 @@ AM_PROG_CC_C_O
 m4_version_prereq([2.70], [], [AC_PROG_CC_C99])
 CFLAGS=$CFLAGS_save
 
-AC_ARG_VAR(CC_FOR_BUILD,[build system C compiler])
-AS_IF([test -z "$CC_FOR_BUILD"],[
-    AC_SUBST([CC_FOR_BUILD], [$CC])
-])
-
 ####################################################################
 # CLI arguments
 ####################################################################
