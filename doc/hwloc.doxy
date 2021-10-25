@@ -4069,18 +4069,32 @@ in a different directory.
 
 \subsection faq_windows How do I build hwloc for Windows?
 
-hwloc releases are available as pre-built ZIPs for Windows on both 32bits and
-64bits x86 platforms.
-They are built using MSYS2 and MinGW on a Windows host.
-Such an environment allows using the Unix-like <tt>configure</tt>, <tt>make</tt>
-and <tt>make install</tt> steps without having to tweak too many variables or options.
-One may look at <tt>contrib/ci.inria.fr/job-3-mingw.sh</tt> in the hwloc
-repository for an example used for nightly testing.
+<b>hwloc binary releases for Windows are available on the website download pages</b>
+(as pre-built ZIPs for both 32bits and 64bits x86 platforms).
+However hwloc also offers several ways to build on Windows:
 
-hwloc also supports the Cygwin environment for porting Unix code to Windows.
-
-hwloc releases also contain a basic Microsoft Visual Studio solution
-under <tt>contrib/windows/</tt>.
+<ul>
+<li>
+The usual Unix build steps (<tt>configure</tt>, <tt>make</tt> and <tt>make install</tt>)
+work on the <b>MSYS2/MinGW</b> environment on Windows
+(the official hwloc binary releases are built this way).
+Some environment variables and options must be configured,
+see <tt>contrib/ci.inria.fr/job-3-mingw.sh</tt> in the hwloc repository
+for an example (used for nightly testing).
+</li>
+<li>
+hwloc also supports such Unix-like builds in <b>Cygwin</b>
+(environment for porting Unix code to Windows).
+</li>
+<li>
+Windows build is also possible with <b>CMake</b>
+(<tt>CMakeLists.txt</tt> available under <tt>contrib/windows-cmake/</tt>).
+</li>
+<li>
+hwloc also comes with an example of <b>Microsoft Visual Studio solution</b>
+(under <tt>contrib/windows/</tt>) that may serve as a base for custom builds.
+</li>
+</ul>
 
 
 \subsection faq_netbsd_bind How to get useful topology information on NetBSD?

@@ -34,6 +34,7 @@ endif
 DIST_SUBDIRS = $(SUBDIRS)
 if HWLOC_BUILD_STANDALONE
 DIST_SUBDIRS += contrib/windows
+EXTRA_DIST += contrib/windows-cmake
 if !BUILD_NETLOC
 DIST_SUBDIRS += netloc
 endif
