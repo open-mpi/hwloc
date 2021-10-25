@@ -22,7 +22,7 @@ if test "x$arch" = "x32"; then
     echo "MINGW_CHOST is $MINGW_CHOST instead of i686-w64-mingw32."
     exit 1
   fi
-  # for MS 'lib' program in dolib.c
+  # for MS 'lib' program
   export PATH=$PATH:$MSLIB32_PATH
 else if test "x$arch" = "x64"; then
   # check the mingw shell
@@ -30,7 +30,7 @@ else if test "x$arch" = "x64"; then
     echo "MINGW_CHOST is $MINGW_CHOST instead of x86_64-w64-mingw32."
     exit 1
   fi
-  # for MS 'lib' program in dolib.c
+  # for MS 'lib' program
   export PATH=$PATH:$MSLIB64_PATH
 else
   echo "Architecture parameter must be 32 or 64."
