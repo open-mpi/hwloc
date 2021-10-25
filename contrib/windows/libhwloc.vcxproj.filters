@@ -72,9 +72,6 @@
     <ClCompile Include="..\..\hwloc\traversal.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\hwloc\dolib.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hwloc\autogen\config.h">
