@@ -185,6 +185,7 @@ test-suite.log
 /utils/hwloc/hwloc.7
 /utils/hwloc/test-fake-plugin.sh
 /utils/hwloc/test-hwloc-annotate.sh
+/utils/hwloc/test-build-custom-topology.sh
 /utils/hwloc/test-hwloc-calc.sh
 /utils/hwloc/test-hwloc-compress-dir.sh
 /utils/hwloc/test-hwloc-diffpatch.sh
