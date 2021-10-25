@@ -227,7 +227,6 @@
     <ClCompile Include="..\..\hwloc\topology-xml.c" />
     <ClCompile Include="..\..\hwloc\topology.c" />
     <ClCompile Include="..\..\hwloc\traversal.c" />
-    <ClCompile Include="..\..\hwloc\dolib.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hwloc\autogen\config.h" />

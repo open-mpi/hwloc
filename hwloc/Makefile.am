@@ -8,7 +8,7 @@ AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS) -DHWLOC_INSIDE_LIBHWLOC
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-EXTRA_DIST = dolib.c
+EXTRA_DIST =
 
 # If we're in standalone mode, build the installable library.
 # Otherwise, build the embedded library.
@@ -192,13 +192,9 @@ export LC_MESSAGES
 ldflags += -Xlinker --output-def -Xlinker .libs/libhwloc.def
 
 if HWLOC_HAVE_MS_LIB
-dolib$(EXEEXT): dolib.c
-	$(CC_FOR_BUILD) $(HWLOC_CPPFLAGS) $< -o $@
 .libs/libhwloc.lib: libhwloc.la
 	[ ! -r .libs/libhwloc.def ] || "$(HWLOC_MS_LIB)" -machine:$(HWLOC_MS_LIB_ARCH) -def:.libs/libhwloc.def -name:libhwloc-$(libhwloc_so_name) -out:.libs/libhwloc.lib
 all-local: .libs/libhwloc.lib
-clean-local:
-	$(RM) dolib$(EXEEXT)
 endif HWLOC_HAVE_MS_LIB
 
 install-exec-hook:
