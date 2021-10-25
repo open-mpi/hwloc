@@ -132,6 +132,7 @@ AS_IF([test "$enable_embedded_mode" != "yes"],
 ####################################################################
 
 AC_SUBST([libhwloc_so_version])
+AC_SUBST([libhwloc_so_name])
 
 # Setup the hwloc core
 HWLOC_SETUP_CORE([], [], [AC_MSG_ERROR([Cannot build hwloc core])], [1])
@@ -177,6 +178,10 @@ VERSION="${PACKAGE_VERSION}"
 # For standalone configurations, we also include a .so version number.
 
 . $srcdir/VERSION
+
+libhwloc_so_version_current=`echo $libhwloc_so_version | cut -d: -f1`
+libhwloc_so_version_age=`echo $libhwloc_so_version | cut -d: -f3`
+libhwloc_so_name=`expr $libhwloc_so_version_current - $libhwloc_so_version_age`
 
 ####################################################################
 # Setup the rest of the infrastructure
