@@ -575,17 +575,15 @@ hwloc_utils_parse_flags(char * str, struct hwloc_utils_parsing_flag possible_fla
   char *end;
   int ul_flag;
   int i;
-  int j = 0;
+  size_t j;
   unsigned long ul_flags = 0;
 
   ul_flag = strtoul(str, &end, 0);
   if(end != str && *end == '\0')
     return ul_flag;
 
-  while (str[j]) {
+  for(j=0; str[j]; j++)
     str[j] = toupper(str[j]);
-    j++;
-  }
 
   if(strcmp(str, "NONE") == 0)
     return 0;
