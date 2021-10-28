@@ -432,7 +432,9 @@ static int hwloc__cpukinds_compare_ranking_values(const void *_a, const void *_b
 {
   const struct hwloc_internal_cpukind_s *a = _a;
   const struct hwloc_internal_cpukind_s *b = _b;
-  return a->ranking_value - b->ranking_value;
+  uint64_t arv = a->ranking_value;
+  uint64_t brv = b->ranking_value;
+  return arv < brv ? -1 : arv > brv ? 1 : 0;
 }
 
 /* this function requires ranking values to be unique */
