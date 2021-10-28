@@ -20,6 +20,11 @@ if test "x$1" = "x--quiet"; then
   shift
 fi
 
+if test "x$1" = "x--update"; then
+  update=1
+  shift
+fi
+
 rootdir=.
 if test "x$1" != x; then
   rootdir="$1"
@@ -46,6 +51,21 @@ $echo "  Found major=$official_major minor=$official_minor release=$official_rel
 official_version="$official_major.$official_minor.$official_release$official_greek"
 
 $echo
+
+### ANDROID UPDATE? ###
+if test "x$update" = "x1"; then
+  $echo "Updating Android VERSION in $android_config_h ..."
+  sed -r -e '/define HWLOC_VERSION "/s/"[0-9a-zA-Z\.-]+"/"'$official_version'"/' -i "$android_config_h"
+  sed -r -e '/define HWLOC_VERSION_MAJOR /s/[0-9]+/'$official_major'/' -i "$android_config_h"
+  sed -r -e '/define HWLOC_VERSION_MINOR /s/[0-9]+/'$official_minor'/' -i "$android_config_h"
+  sed -r -e '/define HWLOC_VERSION_RELEASE /s/[0-9]+/'$official_release'/' -i "$android_config_h"
+  sed -r -e '/define HWLOC_VERSION_GREEK "/s/"[0-9a-zA-Z\.-]*"/"'$official_greek'"/' -i "$android_config_h"
+  echo "Updating Android VERSION in $android_gradle ..."
+  # replace oldversion-X-Y with newversion-1-Y since a version bump usually puts back snapshot number to 1
+  suffix=$(grep -w versionName $android_gradle | grep -oP '".*"' | tr -d \" | grep -oP -- '-[0-9\.]+$')
+  sed -r -e '/versionName "/s/"[0-9a-zA-Z\.-]+"/"'$official_version'-1'$suffix'"/' -i $android_gradle
+  $echo
+fi
 
 ### ANDROID CHECKS ###
 $echo "Looking for Android-specific version in $android_config_h ..."
