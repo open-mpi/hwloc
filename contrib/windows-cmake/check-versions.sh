@@ -20,6 +20,11 @@ if test "x$1" = "x--quiet"; then
   shift
 fi
 
+if test "x$1" = "x--update"; then
+  update=1
+  shift
+fi
+
 rootdir=.
 if test "x$1" != x; then
   rootdir="$1"
@@ -43,8 +48,17 @@ if [ -z "$official_major" -o -z "$official_minor" -o -z "$official_release" ]; t
 fi
 $echo "  Found major=$official_major minor=$official_minor release=$official_release greek=$official_greek"
 official_version_nogreek="$official_major.$official_minor.$official_release"
+# CMake only allows version x.y.z[.t], no greek
 
 $echo
+
+### CMAKE UPDATE? ###
+if test "x$update" = "x1"; then
+  $echo "Updating CMake VERSION in $windows_cmakelists ..."
+  # look for "   VERSION xxx"
+  sed -r -e '/^ *VERSION /s/[0-9\.]+/'$official_version_nogreek'/' -i "$windows_cmakelists"
+  $echo
+fi
 
 ### CMAKE CHECKS ###
 $echo "Looking for Windows-CMake-specific version in $windows_cmakelists ..."
