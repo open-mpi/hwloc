@@ -69,8 +69,10 @@ if ! make $distcheck; then
   false
 fi
 
-# these tests require bash and grep -P, only run it in the main job
+# Only check versions once in the main job.
+# Some of these tests require bash and grep -P anyway.
 contrib/windows/check-versions.sh
+contrib/windows-cmake/check-versions.sh
 contrib/android/check-versions.sh
 
 exit 0
