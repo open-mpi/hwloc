@@ -153,7 +153,7 @@ get_textwidth(void *output,
   assert(loutput->methods->textsize);
 #endif
   loutput->methods->textsize(output, text, length, fontsize, &width);
-  width = loutput->text_xscale * ((float)width);
+  width = (unsigned)(loutput->text_xscale * ((float)width));
   return width;
 }
 
@@ -1337,7 +1337,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	      snprintf(text, sizeof(text), "%.0f", child->attr->pcidev.linkspeed);
 	    else
 	      snprintf(text, sizeof(text), "%0.1f", child->attr->pcidev.linkspeed);
-	    methods->text(loutput, style.t2, fontsize, depth-1, x + 2.5*gridsize, ymid + BRIDGE_HEIGHT/2, text, level, i+2);
+	    methods->text(loutput, style.t2, fontsize, depth-1, x + (5*gridsize/2), ymid + BRIDGE_HEIGHT/2, text, level, i+2);
 	  }
 	}
 	i++;

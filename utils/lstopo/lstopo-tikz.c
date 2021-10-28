@@ -14,7 +14,7 @@
 
 #include "lstopo.h"
 
-#define TIKZ_TEXT_WIDTH(length, fontsize) (((length) * (fontsize))/2.2)
+#define TIKZ_TEXT_WIDTH(length, fontsize) (((length) * (fontsize) * 10) / 22)
 #define TIKZ_FONTSIZE_SCALE(size) (((size) * 13) / 9)
 
 #define TIKZ_FONTFAMILY_ENV "LSTOPO_TIKZ_FONTFAMILY"
@@ -58,7 +58,7 @@ tikz_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsig
   unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
   char linestyle[64] = "solid";
   unsigned thickness = loutput->thickness;
-  float dashspace = 1.15; /* default dash size: 1.15pt */
+  float dashspace = 1.15f; /* default dash size: 1.15pt */
 
   if (cpukind_style) {
     char dashsize[20], *comma = NULL;
