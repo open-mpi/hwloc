@@ -243,7 +243,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
   else if (!strcmp(name, "dont_merge")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_GROUP)
-      obj->attr->group.dont_merge = lvalue;
+      obj->attr->group.dont_merge = (unsigned char) lvalue;
     else if (hwloc__xml_verbose())
       fprintf(stderr, "%s: ignoring dont_merge attribute for non-group object type\n",
 	      state->global->msgprefix);
