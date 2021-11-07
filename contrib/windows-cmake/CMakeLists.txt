@@ -160,7 +160,7 @@ if(NOT HWLOC_SKIP_LSTOPO)
     )
     target_compile_definitions(lstopo PRIVATE LSTOPO_HAVE_GRAPHICS)
 
-    add_executable(lstopo-win
+    add_executable(lstopo-win WIN32
         ${LSTOPO_COMMON_SOURCES}
         ${TOPDIR}/utils/lstopo/lstopo-windows.c
     )
