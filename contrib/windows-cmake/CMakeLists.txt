@@ -174,23 +174,18 @@ endforeach(target)
 
 # Install
 
-install(TARGETS libhwloc
-    RUNTIME DESTINATION bin
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+install(TARGETS libhwloc)
 
 if(NOT HWLOC_SKIP_TOOLS)
-    install(TARGETS ${TOOLS}
-        RUNTIME DESTINATION bin)
+    install(TARGETS ${TOOLS})
 endif()
 
 if(NOT HWLOC_SKIP_LSTOPO)
-    install(TARGETS ${LSTOPOS}
-        RUNTIME DESTINATION bin)
+    install(TARGETS ${LSTOPOS})
 endif()
 
 if(NOT HWLOC_SKIP_INCLUDES)
-    install(FILES ${TOPDIR}/include/hwloc.h DESTINATION include)
-    install(DIRECTORY ${TOPDIR}/include/hwloc DESTINATION include FILES_MATCHING PATTERN "*.h")
+    install(FILES ${TOPDIR}/include/hwloc.h TYPE INCLUDE)
+    install(DIRECTORY ${TOPDIR}/include/hwloc TYPE INCLUDE FILES_MATCHING PATTERN "*.h")
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/hwloc/autogen/config.h DESTINATION include/hwloc/autogen)
 endif()
