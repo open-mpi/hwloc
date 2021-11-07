@@ -67,6 +67,19 @@ HWLOC_HAVE_MSVC_CPUIDEX
 # - strtoull() had some issues in the past (see 9559bd08b79ef63dce45df87fb7f875b73ecb512)
 #   set(HAVE_DECL_STRTOULL 1)
 
+# --- optional external libraries
+find_package(LibXml2)
+set(HWLOC_HAVE_LIBXML2)
+if(LibXml2_FOUND)
+    set(HWLOC_HAVE_LIBXML2 1)
+endif()
+
+find_package(OpenCL)
+set(HWLOC_HAVE_OPENCL)
+if(OpenCL_FOUND)
+    set(HWLOC_HAVE_OPENCL 1)
+endif()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/private_config.h.in include/private/autogen/config.h)
 
 # Library
@@ -94,6 +107,13 @@ add_library(hwloc
     ${TOPDIR}/hwloc/topology-xml-nolibxml.c
     ${TOPDIR}/hwloc/topology-windows.c
     ${TOPDIR}/hwloc/topology-x86.c
+    $<$<BOOL:${HWLOC_HAVE_LIBXML2}>:${TOPDIR}/hwloc/topology-xml-libxml.c>
+    $<$<BOOL:${HWLOC_HAVE_OPENCL}>:${TOPDIR}/hwloc/topology-opencl.c>
+)
+
+target_link_libraries(hwloc PRIVATE
+    $<$<BOOL:${HWLOC_HAVE_LIBXML2}>:LibXml2::LibXml2>
+    $<$<BOOL:${HWLOC_HAVE_OPENCL}>:OpenCL::OpenCL>
 )
 
 if(BUILD_SHARED_LIBS)

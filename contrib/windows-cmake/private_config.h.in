@@ -487,7 +487,7 @@
 /* #undef HWLOC_HAVE_LIBTERMCAP */
 
 /* Define to 1 if you have the `libxml2' library. */
-/* #undef HWLOC_HAVE_LIBXML2 */
+#cmakedefine HWLOC_HAVE_LIBXML2 @HWLOC_HAVE_LIBXML2@
 
 /* Define to 1 if building the Linux PCI component */
 /* #undef HWLOC_HAVE_LINUXPCI */
@@ -500,7 +500,7 @@
 /* #undef HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
 
 /* Define to 1 if you have the `OpenCL' library. */
-/* #undef HWLOC_HAVE_OPENCL */
+#cmakedefine HWLOC_HAVE_OPENCL @HWLOC_HAVE_OPENCL@
 
 /* Define to 1 if the hwloc library should support dynamically-loaded plugins
    */
