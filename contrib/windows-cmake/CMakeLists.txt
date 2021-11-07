@@ -3,12 +3,12 @@ project(hwloc
     LANGUAGES C
     VERSION 2.7.0)
 
-# Available configuration options
-# HWLOC_SKIP_LSTOPO doesn't build/install lstopo
-# HWLOC_SKIP_TOOLS doesn't build/install other hwloc tools
-# HWLOC_SKIP_INCLUDES doesn't install headers
+option(HWLOC_ENABLE_TESTING "Enable testing" ON)
+option(HWLOC_SKIP_LSTOPO "don't build/install lstopo")
+option(HWLOC_SKIP_TOOLS "don't build/install other hwloc tools")
+option(HWLOC_SKIP_INCLUDES "don't install headers")
 
-set(TOPDIR ../..)
+set(TOPDIR ${PROJECT_SOURCE_DIR}/../..)
 
 # Configure based on the MSVC config
 
