@@ -65,7 +65,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/private_config.h.in include/private/a
 
 # Library
 
-add_compile_options("$<$<CONFIG:DEBUG>:-DHWLOC_DEBUG=1>")
+add_compile_definitions($<$<CONFIG:DEBUG>:HWLOC_DEBUG=1>)
 
 # FIXME dll soname
 add_library(libhwloc
@@ -90,7 +90,9 @@ add_library(libhwloc
     ${TOPDIR}/hwloc/topology-x86.c
 )
 
-set_target_properties(libhwloc PROPERTIES DEFINE_SYMBOL _USRDLL)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(libhwloc PRIVATE $<$<BOOL:${MSVC}>:_USRDLL>)
+endif()
 
 target_include_directories(libhwloc PRIVATE ${TOPDIR}/include ${TOPDIR}/hwloc ${CMAKE_CURRENT_BINARY_DIR}/include)
 
@@ -148,14 +150,14 @@ if(NOT HWLOC_SKIP_LSTOPO)
         ${LSTOPO_COMMON_SOURCES}
         ${TOPDIR}/utils/lstopo/lstopo-windows.c
     )
-    set_target_properties(lstopo PROPERTIES COMPILE_FLAGS "-DLSTOPO_HAVE_GRAPHICS")
+    target_compile_definitions(lstopo PRIVATE LSTOPO_HAVE_GRAPHICS)
 
     add_executable(lstopo-win
         ${LSTOPO_COMMON_SOURCES}
         ${TOPDIR}/utils/lstopo/lstopo-windows.c
     )
-    set_target_properties(lstopo-win PROPERTIES COMPILE_FLAGS "-DLSTOPO_HAVE_GRAPHICS")
-    target_link_options(lstopo-win PRIVATE "/subsystem:windows" "/entry:mainCRTStartup")
+    target_compile_definitions(lstopo-win PRIVATE LSTOPO_HAVE_GRAPHICS)
+    target_link_options(lstopo-win PRIVATE "$<$<BOOL:${MSVC}>:/subsystem:windows;/entry:mainCRTStartup>")
 
     foreach(tool IN ITEMS ${LSTOPOS})
         target_include_directories(${tool} PRIVATE ${TOPDIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include ${TOPDIR}/utils/hwloc)
@@ -167,7 +169,7 @@ endif()
 # Misc
 
 foreach(target IN ITEMS libhwloc ${TOOLS} ${LSTOPOS})
-    target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(${target} PRIVATE $<$<BOOL:${MSVC}>:_CRT_SECURE_NO_WARNINGS>)
 endforeach(target)
 
 # Install
