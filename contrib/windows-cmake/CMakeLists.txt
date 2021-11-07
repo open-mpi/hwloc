@@ -3,6 +3,8 @@ project(hwloc
     LANGUAGES C
     VERSION 2.7.0)
 
+enable_testing()
+
 option(HWLOC_ENABLE_TESTING "Enable testing" ON)
 option(HWLOC_SKIP_LSTOPO "don't build/install lstopo")
 option(HWLOC_SKIP_TOOLS "don't build/install other hwloc tools")
@@ -194,4 +196,8 @@ if(NOT HWLOC_SKIP_INCLUDES)
     install(FILES ${TOPDIR}/include/hwloc.h TYPE INCLUDE)
     install(DIRECTORY ${TOPDIR}/include/hwloc TYPE INCLUDE FILES_MATCHING PATTERN "*.h")
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/hwloc/autogen/config.h DESTINATION include/hwloc/autogen)
+endif()
+
+if(HWLOC_ENABLE_TESTING)
+    add_subdirectory(${TOPDIR}/tests/hwloc ${CMAKE_CURRENT_BINARY_DIR}/tests/hwloc)
 endif()
