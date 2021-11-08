@@ -1726,9 +1726,12 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, 
 
 /** \brief Allocate some memory on NUMA memory nodes specified by \p set
  *
- * This is similar to hwloc_alloc_membind_nodeset() except that it is allowed to change
- * the current memory binding policy, thus providing more binding support, at
- * the expense of changing the current state.
+ * First, try to allocate properly with hwloc_alloc_membind().
+ * On failure, the current process or thread memory binding policy
+ * is changed with hwloc_set_membind() before allocating memory.
+ * Thus this function works in more cases, at the expense of changing
+ * the current state (possibly affecting future allocations that
+ * would not specify any policy).
  *
  * If ::HWLOC_MEMBIND_BYNODESET is specified, set is considered a nodeset.
  * Otherwise it's a cpuset.
