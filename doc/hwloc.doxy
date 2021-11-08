@@ -3933,7 +3933,7 @@ on the system.
 This detection consists in looking in <tt>/opt/rocm</tt> by default.
 If a ROCm version was specified with <tt>\--with-rocm-version=4.4.0</tt>
 or in the <tt>ROCM_VERSION</tt> environment variable,
-then <tt>/opt/rocm-<version></tt> is used instead.
+then <tt>/opt/rocm-&lt;version&gt;</tt> is used instead.
 Finally, a specific installation path may be specified with <tt>\--with-rocm=/path/to/rocm</tt>.
 
 As usual, developer header and library paths may also be set through
