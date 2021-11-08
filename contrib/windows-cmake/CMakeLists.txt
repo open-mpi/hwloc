@@ -17,7 +17,6 @@ set(CMAKE_SHARED_LIBRARY_PREFIX lib)
 # "libhwloc.*" naming for MSVC and non-MSVC
 
 configure_file(${TOPDIR}/contrib/windows/hwloc_config.h include/hwloc/autogen/config.h COPYONLY)
-configure_file(${TOPDIR}/contrib/windows/static-components.h include/static-components.h COPYONLY)
 
 # Configure dynamically based on platform capabilities
 include(CheckIncludeFile)
@@ -81,6 +80,7 @@ if(OpenCL_FOUND)
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/private_config.h.in include/private/autogen/config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/static-components.h.in include/static-components.h)
 
 # Library
 
