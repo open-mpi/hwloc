@@ -182,7 +182,7 @@ $(DOX_A4PDF): $(DOX_TAG)
 $(DOX_LETTERPDF): $(DOX_TAG)
 	cd $(DOX_LATEX_DIR); \
 	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
-	$(SED) -e 's/a4paper/letterpaper/g' -e 's/\\usepackage{a4wide}//' refman.tex > letter-refman.tex; \
+	$(SED) -e 's/a4paper/letterpaper/g' refman.tex > letter-refman.tex; \
 	$(PDFLATEX) letter-refman.tex; \
 	$(MAKEINDEX) letter-refman.idx; \
 	$(PDFLATEX) letter-refman.tex; \
