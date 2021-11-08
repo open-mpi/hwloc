@@ -14,6 +14,7 @@ option(HWLOC_WITH_OPENCL "enable OpenCL support")
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
     option(HWLOC_WITH_CUDA "enable CUDA support")
 endif()
+option(HWLOC_BUILD_SHARED_LIBS "build shared libraries" ${BUILD_SHARED_LIBS})
 
 set(TOPDIR ${PROJECT_SOURCE_DIR}/../..)
 
@@ -133,7 +134,7 @@ target_link_libraries(hwloc PRIVATE
     "$<$<BOOL:${HAVE_CUDA}>:CUDA::cudart;CUDA::cuda_driver>"
 )
 
-if(BUILD_SHARED_LIBS)
+if(HWLOC_BUILD_SHARED_LIBS)
     target_compile_definitions(hwloc PRIVATE $<$<BOOL:${MSVC}>:_USRDLL>)
 endif()
 
