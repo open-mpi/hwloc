@@ -4287,6 +4287,8 @@ look_sysfscpu(struct hwloc_topology *topology,
   DIR *dir;
   int i,j;
   int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
+  int dont_merge_cluster_groups;
+  const char *env;
 
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
 
@@ -4354,6 +4356,9 @@ look_sysfscpu(struct hwloc_topology *topology,
   topology->support.discovery->disallowed_pu = 1;
   hwloc_debug_1arg_bitmap("found %d cpu topologies, cpuset %s\n",
 	     hwloc_bitmap_weight(cpuset), cpuset);
+
+  env = getenv("HWLOC_DONT_MERGE_CLUSTER_GROUPS");
+  dont_merge_cluster_groups = env && atoi(env);
 
   hwloc_bitmap_foreach_begin(i, cpuset) {
     int tmpint;
@@ -4533,6 +4538,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       cluster->cpuset = clusterset;
       cluster->subtype = strdup("Cluster");
       cluster->attr->group.kind = HWLOC_GROUP_KIND_LINUX_CLUSTER;
+      cluster->attr->group.dont_merge = dont_merge_cluster_groups;
       hwloc_debug_1arg_bitmap("os cluster %u has cpuset %s\n",
 			      myclusterid, clusterset);
       hwloc__insert_object_by_cpuset(topology, NULL, cluster, "linux:sysfs:cluster");
