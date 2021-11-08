@@ -43,13 +43,13 @@
 /* #undef HAVE_CPUSET_SETID */
 
 /* Define to 1 if we have -lcuda */
-/* #undef HAVE_CUDA */
+#cmakedefine HAVE_CUDA @HAVE_CUDA@
 
 /* Define to 1 if you have the <cuda.h> header file. */
-/* #undef HAVE_CUDA_H */
+#cmakedefine HAVE_CUDA_H @HAVE_CUDA_H@
 
 /* Define to 1 if you have the <cuda_runtime_api.h> header file. */
-/* #undef HAVE_CUDA_RUNTIME_API_H */
+#cmakedefine HAVE_CUDA_RUNTIME_API_H @HAVE_CUDA_RUNTIME_API_H@
 
 /* Define to 1 if you have the declaration of `CL_DEVICE_TOPOLOGY_AMD', and to
    0 if you don't. */
@@ -448,7 +448,7 @@
 /* #undef HWLOC_HAVE_CPU_SET_S */
 
 /* Define to 1 if you have the `cudart' SDK. */
-/* #undef HWLOC_HAVE_CUDART */
+#cmakedefine HWLOC_HAVE_CUDART @HWLOC_HAVE_CUDART@
 
 /* Define to 1 if function `clz' is declared by system headers */
 /* #undef HWLOC_HAVE_DECL_CLZ */

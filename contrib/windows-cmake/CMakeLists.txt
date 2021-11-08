@@ -79,6 +79,20 @@ if(OpenCL_FOUND)
     set(HWLOC_HAVE_OPENCL 1)
 endif()
 
+set(HAVE_CUDA)
+set(HAVE_CUDA_H)
+set(HAVE_CUDA_RUNTIME_API_H)
+set(HWLOC_HAVE_CUDART)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
+find_package(CUDAToolkit)
+if(CUDAToolkit_FOUND)
+    set(HAVE_CUDA 1)
+    set(HAVE_CUDA_H 1)
+    set(HAVE_CUDA_RUNTIME_API_H 1)
+    set(HWLOC_HAVE_CUDART 1)
+endif()
+endif()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/private_config.h.in include/private/autogen/config.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/static-components.h.in include/static-components.h)
 
@@ -109,11 +123,13 @@ add_library(hwloc
     ${TOPDIR}/hwloc/topology-x86.c
     $<$<BOOL:${HWLOC_HAVE_LIBXML2}>:${TOPDIR}/hwloc/topology-xml-libxml.c>
     $<$<BOOL:${HWLOC_HAVE_OPENCL}>:${TOPDIR}/hwloc/topology-opencl.c>
+    $<$<BOOL:${HAVE_CUDA}>:${TOPDIR}/hwloc/topology-cuda.c>
 )
 
 target_link_libraries(hwloc PRIVATE
     $<$<BOOL:${HWLOC_HAVE_LIBXML2}>:LibXml2::LibXml2>
     $<$<BOOL:${HWLOC_HAVE_OPENCL}>:OpenCL::OpenCL>
+    "$<$<BOOL:${HAVE_CUDA}>:CUDA::cudart;CUDA::cuda_driver>"
 )
 
 if(BUILD_SHARED_LIBS)
