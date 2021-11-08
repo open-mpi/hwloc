@@ -4393,7 +4393,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  threadwithcoreid = (siblingcoreid != mycoreid);
 	}
 	if (hwloc_bitmap_first(coreset) != i)
-	  notfirstofcore = 1;
+	  notfirstofcore = notfirstofdie = 1;
 	if (!notfirstofcore || threadwithcoreid) {
 	  /* regular core */
 	  struct hwloc_obj *core;
