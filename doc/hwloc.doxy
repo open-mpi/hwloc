@@ -150,6 +150,7 @@ The hwloc core may also benefit from the following development packages:
 <li>the AMD ROCm SMI library for RSMI device discovery.
   The relevant development package is usually <tt>rocm-smi-lib64</tt>
   or <tt>librocm-smi-dev</tt>.
+  See \ref faq_rocm_build.
 </li>
 <li>the oneAPI Level Zero library.
   The relevant development package is usually <tt>level-zero-dev</tt>
@@ -3926,7 +3927,7 @@ You should pass the following command-line option to Valgrind to use it:
 \section faq4 Platform-specific
 
 
-\subsection faq_cuda_build How do I enable ROCm SMI and select which version to use?
+\subsection faq_rocm_build How do I enable ROCm SMI and select which version to use?
 
 hwloc enables ROCm SMI as soon as it finds its development headers and libraries
 on the system.
