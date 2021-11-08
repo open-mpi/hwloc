@@ -12,8 +12,6 @@ option(HWLOC_SKIP_INCLUDES "don't install headers")
 
 set(TOPDIR ${PROJECT_SOURCE_DIR}/../..)
 
-set(CMAKE_STATIC_LIBRARY_PREFIX lib)
-set(CMAKE_SHARED_LIBRARY_PREFIX lib)
 # "libhwloc.*" naming for MSVC and non-MSVC
 
 configure_file(${TOPDIR}/contrib/windows/hwloc_config.h include/hwloc/autogen/config.h COPYONLY)
