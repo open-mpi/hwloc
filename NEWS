@@ -17,6 +17,16 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.7.0
+-------------
+* Backends
+  + Expose "Cluster" group objects on Linux kernel 5.16+ for CPUs
+    that share some internal cache or bus. This can be equivalent
+    to the L2 Cache level on some platforms (e.g. x86) or a specific
+    level between L2 and L3 on others (e.g. ARM Kungpeng 920).
+    Thanks to Jonathan Cameron for the help.
+
+
 Version 2.6.0
 -------------
 * Backends
