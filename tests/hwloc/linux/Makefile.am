@@ -1,4 +1,4 @@
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2021 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -54,6 +54,7 @@ sysfs_outputs = \
 		64intel64-fakeKNL-SNC4-hybrid-msc.output \
 		96em64t-4n4d3ca2co.output \
 		128ia64-17n4s2c.output \
+		128arm-2pa2n8cluster4co.output \
 		256ia64-64n2s2c.output \
 		2s390-2c.output \
 		20s390-2g6s4c.output \
@@ -123,6 +124,7 @@ sysfs_tarballs = \
 		64intel64-fakeKNL-SNC4-hybrid-msc.source \
 		96em64t-4n4d3ca2co.tar.bz2 \
 		128ia64-17n4s2c.tar.bz2 \
+		128arm-2pa2n8cluster4co.tar.bz2 \
 		256ia64-64n2s2c.tar.bz2 \
 		2s390-2c.tar.bz2 \
 		20s390-2g6s4c.tar.bz2 \

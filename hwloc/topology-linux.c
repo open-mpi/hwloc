@@ -4287,6 +4287,8 @@ look_sysfscpu(struct hwloc_topology *topology,
   DIR *dir;
   int i,j;
   int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
+  int dont_merge_cluster_groups;
+  const char *env;
 
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
 
@@ -4355,11 +4357,16 @@ look_sysfscpu(struct hwloc_topology *topology,
   hwloc_debug_1arg_bitmap("found %d cpu topologies, cpuset %s\n",
 	     hwloc_bitmap_weight(cpuset), cpuset);
 
+  env = getenv("HWLOC_DONT_MERGE_CLUSTER_GROUPS");
+  dont_merge_cluster_groups = env && atoi(env);
+
   hwloc_bitmap_foreach_begin(i, cpuset) {
     int tmpint;
     int notfirstofcore = 0; /* set if we have core info and if we're not the first PU of our core */
+    int notfirstofcluster = 0; /* set if we have cluster info and if we're not the first PU of our cluster */
     int notfirstofdie = 0; /* set if we have die info and if we're not the first PU of our die */
     hwloc_bitmap_t dieset = NULL;
+    hwloc_bitmap_t clusterset = NULL;
 
     if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_CORE)) {
       /* look at the core */
@@ -4393,7 +4400,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  threadwithcoreid = (siblingcoreid != mycoreid);
 	}
 	if (hwloc_bitmap_first(coreset) != i)
-	  notfirstofcore = 1;
+	  notfirstofcore = notfirstofcluster = notfirstofdie = 1;
 	if (!notfirstofcore || threadwithcoreid) {
 	  /* regular core */
 	  struct hwloc_obj *core;
@@ -4420,7 +4427,31 @@ look_sysfscpu(struct hwloc_topology *topology,
       }
     }
 
-    if (!notfirstofcore /* don't look at the die unless we are the first of the core */
+    if (!notfirstofcore /* don't look at the cluster unless we are the first of the core */
+	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+      /* look at the cluster */
+      sprintf(str, "%s/cpu%d/topology/cluster_cpus", path, i);
+      clusterset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
+      if (clusterset) {
+	hwloc_bitmap_and(clusterset, clusterset, cpuset);
+        if (hwloc_bitmap_weight(clusterset) == 1) {
+          /* cluster with single PU, ignore the cluster */
+          hwloc_bitmap_free(clusterset);
+          clusterset = NULL;
+        } else if (hwloc_bitmap_first(clusterset) != i) {
+	  /* not first cpu in this cluster, ignore the cluster */
+	  hwloc_bitmap_free(clusterset);
+	  clusterset = NULL;
+	  notfirstofcluster = notfirstofdie = 1;
+	}
+        /* we don't have coreset anymore for ignoring clusters if equal to cores,
+         * the group will be merged by the core.
+         */
+	/* look at dies and packages before deciding whether we keep that cluster or not */
+      }
+    }
+
+    if (!notfirstofcluster /* don't look at the die unless we are the first of the core */
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_DIE)) {
       /* look at the die */
       sprintf(str, "%s/cpu%d/topology/die_cpus", path, i);
@@ -4436,6 +4467,11 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  hwloc_bitmap_free(dieset);
 	  dieset = NULL;
 	  notfirstofdie = 1;
+	}
+	if (clusterset && dieset && hwloc_bitmap_isequal(dieset, clusterset)) {
+	  /* cluster is identical to die, ignore it */
+	  hwloc_bitmap_free(clusterset);
+	  clusterset = NULL;
 	}
 	/* look at packages before deciding whether we keep that die or not */
       }
@@ -4456,6 +4492,11 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  /* die is identical to package, ignore it */
 	  hwloc_bitmap_free(dieset);
 	  dieset = NULL;
+	}
+	if (clusterset && hwloc_bitmap_isequal(packageset, clusterset)) {
+	  /* cluster is identical to package, ignore it */
+	  hwloc_bitmap_free(clusterset);
+	  clusterset = NULL;
 	}
 	if (hwloc_bitmap_first(packageset) == i) {
 	  /* first cpu in this package, add the package */
@@ -4483,6 +4524,24 @@ look_sysfscpu(struct hwloc_topology *topology,
 	}
 	hwloc_bitmap_free(packageset);
       }
+    }
+
+    if (clusterset) {
+      struct hwloc_obj *cluster;
+      unsigned myclusterid;
+      myclusterid = (unsigned) -1;
+      sprintf(str, "%s/cpu%d/topology/cluster_id", path, i); /* contains %d when added in 5.16 */
+      if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
+	myclusterid = (unsigned) tmpint;
+
+      cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, myclusterid);
+      cluster->cpuset = clusterset;
+      cluster->subtype = strdup("Cluster");
+      cluster->attr->group.kind = HWLOC_GROUP_KIND_LINUX_CLUSTER;
+      cluster->attr->group.dont_merge = dont_merge_cluster_groups;
+      hwloc_debug_1arg_bitmap("os cluster %u has cpuset %s\n",
+			      myclusterid, clusterset);
+      hwloc__insert_object_by_cpuset(topology, NULL, cluster, "linux:sysfs:cluster");
     }
 
     if (dieset) {

@@ -3420,6 +3420,12 @@ hwloc currently uses Groups for the following reasons:
 <li>Intel Extended Topology Enumeration levels (in the x86 backend).</li>
 <li>Windows processor groups (unless they contain a single NUMA node, or a single Package, etc.).</li>
 <li>IBM S/390 "Books" on Linux (<tt>subtype</tt> is <tt>Book</tt>).</li>
+<li>Linux Clusters of CPUs (<tt>subtype</tt> is <tt>Cluster</tt>),
+  for instance for ARM cores sharing of some internal cache or bus,
+  or x86 cores sharing a L2 cache (since Linux kernel 5.16).
+  <tt>HWLOC_DONT_MERGE_CLUSTER_GROUPS=1</tt> may be set in the environment
+  to disable the automerging of these groups with identical caches, etc.
+</li>
 <li>AIX unknown hierarchy levels.</li>
 </ul>
 
