@@ -115,17 +115,19 @@ typedef struct HWLOC_NUMA_NODE_RELATIONSHIP {
   } DUMMYUNIONNAME;
 } HWLOC_NUMA_NODE_RELATIONSHIP;
 
-#ifndef HAVE_CACHE_RELATIONSHIP
-typedef struct _CACHE_RELATIONSHIP {
+typedef struct HWLOC_CACHE_RELATIONSHIP {
   BYTE Level;
   BYTE Associativity;
   WORD LineSize;
   DWORD CacheSize;
   PROCESSOR_CACHE_TYPE Type;
-  BYTE Reserved[20];
-  GROUP_AFFINITY GroupMask;
-} CACHE_RELATIONSHIP, *PCACHE_RELATIONSHIP;
-#endif
+  BYTE Reserved[18];
+  WORD GroupCount;
+  union {
+    GROUP_AFFINITY GroupMask;
+    GROUP_AFFINITY GroupMasks[ANYSIZE_ARRAY];
+  } DUMMYUNIONNAME;
+} HWLOC_CACHE_RELATIONSHIP;
 
 #ifndef HAVE_PROCESSOR_GROUP_INFO
 typedef struct _PROCESSOR_GROUP_INFO {
@@ -145,7 +147,7 @@ typedef struct _GROUP_RELATIONSHIP {
 } GROUP_RELATIONSHIP, *PGROUP_RELATIONSHIP;
 #endif
 
-/* always use our own structure because we need our own HWLOC_PROCESSOR_RELATIONSHIP and HWLOC_NUMA_NODE_RELATIONSHIP */
+/* always use our own structure because we need our own HWLOC_PROCESSOR/CACHE/NUMA_NODE_RELATIONSHIP */
 typedef struct HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
   LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
   DWORD Size;
@@ -153,7 +155,7 @@ typedef struct HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
   union {
     HWLOC_PROCESSOR_RELATIONSHIP Processor;
     HWLOC_NUMA_NODE_RELATIONSHIP NumaNode;
-    CACHE_RELATIONSHIP Cache;
+    HWLOC_CACHE_RELATIONSHIP Cache;
     GROUP_RELATIONSHIP Group;
     /* Odd: no member to tell the cpu mask of the package... */
   } DUMMYUNIONNAME;
@@ -1234,8 +1236,14 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	    break;
 	  case RelationCache:
 	    type = (procInfo->Cache.Type == CacheInstruction ? HWLOC_OBJ_L1ICACHE : HWLOC_OBJ_L1CACHE) + procInfo->Cache.Level - 1;
-            num = 1;
-            GroupMask = &procInfo->Cache.GroupMask;
+            /* GroupCount added approximately with NumaNode.GroupCount above */
+            if (procInfo->Cache.GroupCount) {
+              num = procInfo->Cache.GroupCount;
+              GroupMask = procInfo->Cache.GroupMasks;
+            } else {
+              num = 1;
+              GroupMask = &procInfo->Cache.GroupMask;
+            }
 	    break;
 	  case RelationProcessorCore:
 	    type = HWLOC_OBJ_CORE;
