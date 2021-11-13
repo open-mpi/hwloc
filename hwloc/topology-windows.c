@@ -415,6 +415,8 @@ hwloc_win_get_processor_groups(void)
 
     assert(procInfo->Relationship == RelationGroup);
 
+    hwloc_debug("Found %u active windows processor groups\n",
+                (unsigned) procInfo->Group.ActiveGroupCount);
     for (id = 0; id < procInfo->Group.ActiveGroupCount; id++) {
       KAFFINITY mask;
       hwloc_bitmap_t set;
@@ -424,8 +426,8 @@ hwloc_win_get_processor_groups(void)
         goto error_with_cpusets;
 
       mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
-      hwloc_debug("group %u %d cpus mask %lx\n", id,
-                  procInfo->Group.GroupInfo[id].ActiveProcessorCount, mask);
+      hwloc_debug("group %u with %u cpus mask 0x%llx\n", id,
+                  (unsigned) procInfo->Group.GroupInfo[id].ActiveProcessorCount, (unsigned long long) mask);
       /* KAFFINITY is ULONG_PTR */
       hwloc_bitmap_set_ith_ULONG_PTR(set, id, mask);
       /* FIXME: what if running 32bits on a 64bits windows with 64-processor groups?
