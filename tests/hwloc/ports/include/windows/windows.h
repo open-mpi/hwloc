@@ -89,15 +89,6 @@ typedef struct _SIZE {
 typedef PVOID HANDLE; */
 typedef int HANDLE;
 
-#ifdef __GNUC__
-#define _ANONYMOUS_UNION __extension__
-#define _ANONYMOUS_STRUCT __extension__
-#else
-#define _ANONYMOUS_UNION
-#define _ANONYMOUS_STRUCT
-#endif /* __GNUC__ */
-#define DUMMYUNIONNAME
-#define DUMMYSTRUCTNAME
 #define WINAPI
 
 #define ANYSIZE_ARRAY 1

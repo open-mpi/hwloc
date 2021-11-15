@@ -13,6 +13,7 @@
 #include "hwloc.h"
 #include "hwloc/windows.h"
 #include "private/private.h"
+#include "private/windows.h" /* must be before windows.h */
 #include "private/debug.h"
 
 #include <windows.h>
@@ -93,35 +94,40 @@ typedef struct _GROUP_AFFINITY {
 } GROUP_AFFINITY, *PGROUP_AFFINITY;
 #endif
 
-#ifndef HAVE_PROCESSOR_RELATIONSHIP
+/* always use our own structure because the EfficiencyClass field didn't exist before Win10 */
 typedef struct HWLOC_PROCESSOR_RELATIONSHIP {
   BYTE Flags;
-  BYTE EfficiencyClass; /* for RelationProcessorCore, higher means greater performance but less efficiency, only available in Win10+ */
+  BYTE EfficiencyClass; /* for RelationProcessorCore, higher means greater performance but less efficiency */
   BYTE Reserved[20];
   WORD GroupCount;
   GROUP_AFFINITY GroupMask[ANYSIZE_ARRAY];
-} PROCESSOR_RELATIONSHIP, *PPROCESSOR_RELATIONSHIP;
-#endif
+} HWLOC_PROCESSOR_RELATIONSHIP;
 
-#ifndef HAVE_NUMA_NODE_RELATIONSHIP
-typedef struct _NUMA_NODE_RELATIONSHIP {
+/* always use our own structure because the GroupCount and GroupMasks fields didn't exist in some Win10 */
+typedef struct HWLOC_NUMA_NODE_RELATIONSHIP {
   DWORD NodeNumber;
-  BYTE Reserved[20];
-  GROUP_AFFINITY GroupMask;
-} NUMA_NODE_RELATIONSHIP, *PNUMA_NODE_RELATIONSHIP;
-#endif
+  BYTE Reserved[18];
+  WORD GroupCount;
+  _ANONYMOUS_UNION
+  union {
+    GROUP_AFFINITY GroupMask;
+    GROUP_AFFINITY GroupMasks[ANYSIZE_ARRAY];
+  } DUMMYUNIONNAME;
+} HWLOC_NUMA_NODE_RELATIONSHIP;
 
-#ifndef HAVE_CACHE_RELATIONSHIP
-typedef struct _CACHE_RELATIONSHIP {
+typedef struct HWLOC_CACHE_RELATIONSHIP {
   BYTE Level;
   BYTE Associativity;
   WORD LineSize;
   DWORD CacheSize;
   PROCESSOR_CACHE_TYPE Type;
-  BYTE Reserved[20];
-  GROUP_AFFINITY GroupMask;
-} CACHE_RELATIONSHIP, *PCACHE_RELATIONSHIP;
-#endif
+  BYTE Reserved[18];
+  WORD GroupCount;
+  union {
+    GROUP_AFFINITY GroupMask;
+    GROUP_AFFINITY GroupMasks[ANYSIZE_ARRAY];
+  } DUMMYUNIONNAME;
+} HWLOC_CACHE_RELATIONSHIP;
 
 #ifndef HAVE_PROCESSOR_GROUP_INFO
 typedef struct _PROCESSOR_GROUP_INFO {
@@ -141,20 +147,19 @@ typedef struct _GROUP_RELATIONSHIP {
 } GROUP_RELATIONSHIP, *PGROUP_RELATIONSHIP;
 #endif
 
-#ifndef HAVE_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
-typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
+/* always use our own structure because we need our own HWLOC_PROCESSOR/CACHE/NUMA_NODE_RELATIONSHIP */
+typedef struct HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
   LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
   DWORD Size;
   _ANONYMOUS_UNION
   union {
-    PROCESSOR_RELATIONSHIP Processor;
-    NUMA_NODE_RELATIONSHIP NumaNode;
-    CACHE_RELATIONSHIP Cache;
+    HWLOC_PROCESSOR_RELATIONSHIP Processor;
+    HWLOC_NUMA_NODE_RELATIONSHIP NumaNode;
+    HWLOC_CACHE_RELATIONSHIP Cache;
     GROUP_RELATIONSHIP Group;
     /* Odd: no member to tell the cpu mask of the package... */
   } DUMMYUNIONNAME;
-} SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, *PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX;
-#endif
+} HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX;
 
 #ifndef HAVE_PSAPI_WORKING_SET_EX_BLOCK
 typedef union _PSAPI_WORKING_SET_EX_BLOCK {
@@ -203,7 +208,7 @@ static PFN_GETCURRENTPROCESSORNUMBEREX GetCurrentProcessorNumberExProc;
 typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATION)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
 static PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
 
-typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATIONEX)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
+typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATIONEX)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *Buffer, PDWORD ReturnLength);
 static PFN_GETLOGICALPROCESSORINFORMATIONEX GetLogicalProcessorInformationExProc;
 
 typedef BOOL (WINAPI *PFN_SETTHREADGROUPAFFINITY)(HANDLE hThread, const GROUP_AFFINITY *GroupAffinity, PGROUP_AFFINITY PreviousGroupAffinity);
@@ -370,7 +375,7 @@ static hwloc_cpuset_t * processor_group_cpusets = NULL;
 static void
 hwloc_win_get_processor_groups(void)
 {
-  PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX procInfoTotal, tmpprocInfoTotal, procInfo;
+  HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *procInfoTotal, *tmpprocInfoTotal, *procInfo;
   DWORD length;
   unsigned i;
 
@@ -415,6 +420,8 @@ hwloc_win_get_processor_groups(void)
 
     assert(procInfo->Relationship == RelationGroup);
 
+    hwloc_debug("Found %u active windows processor groups\n",
+                (unsigned) procInfo->Group.ActiveGroupCount);
     for (id = 0; id < procInfo->Group.ActiveGroupCount; id++) {
       KAFFINITY mask;
       hwloc_bitmap_t set;
@@ -424,8 +431,8 @@ hwloc_win_get_processor_groups(void)
         goto error_with_cpusets;
 
       mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
-      hwloc_debug("group %u %d cpus mask %lx\n", id,
-                  procInfo->Group.GroupInfo[id].ActiveProcessorCount, mask);
+      hwloc_debug("group %u with %u cpus mask 0x%llx\n", id,
+                  (unsigned) procInfo->Group.GroupInfo[id].ActiveProcessorCount, (unsigned long long) mask);
       /* KAFFINITY is ULONG_PTR */
       hwloc_bitmap_set_ith_ULONG_PTR(set, id, mask);
       /* FIXME: what if running 32bits on a 64bits windows with 64-processor groups?
@@ -1168,7 +1175,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
   if (GetLogicalProcessorInformationExProc) {
-      PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX procInfoTotal, tmpprocInfoTotal, procInfo;
+      HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *procInfoTotal, *tmpprocInfoTotal, *procInfo;
       unsigned id;
       struct hwloc_obj *obj;
       hwloc_obj_type_t type;
@@ -1207,8 +1214,16 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	switch (procInfo->Relationship) {
 	  case RelationNumaNode:
 	    type = HWLOC_OBJ_NUMANODE;
-            num = 1;
-            GroupMask = &procInfo->NumaNode.GroupMask;
+            /* Starting with Windows 10 Build 20348 and Windows 11, the GroupCount field is valid and >=1
+             * and we may read GroupMasks[]. Older releases have GroupCount==0 and we must read GroupMask.
+             */
+            if (procInfo->NumaNode.GroupCount) {
+              num = procInfo->NumaNode.GroupCount;
+              GroupMask = procInfo->NumaNode.GroupMasks;
+            } else {
+              num = 1;
+              GroupMask = &procInfo->NumaNode.GroupMask;
+            }
 	    id = procInfo->NumaNode.NodeNumber;
 	    gotnuma++;
 	    if (id > max_numanode_index)
@@ -1221,18 +1236,20 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	    break;
 	  case RelationCache:
 	    type = (procInfo->Cache.Type == CacheInstruction ? HWLOC_OBJ_L1ICACHE : HWLOC_OBJ_L1CACHE) + procInfo->Cache.Level - 1;
-            num = 1;
-            GroupMask = &procInfo->Cache.GroupMask;
+            /* GroupCount added approximately with NumaNode.GroupCount above */
+            if (procInfo->Cache.GroupCount) {
+              num = procInfo->Cache.GroupCount;
+              GroupMask = procInfo->Cache.GroupMasks;
+            } else {
+              num = 1;
+              GroupMask = &procInfo->Cache.GroupMask;
+            }
 	    break;
 	  case RelationProcessorCore:
 	    type = HWLOC_OBJ_CORE;
             num = procInfo->Processor.GroupCount;
             GroupMask = procInfo->Processor.GroupMask;
-            if (has_efficiencyclass)
-              /* the EfficiencyClass field didn't exist before Windows10 and recent MSVC headers,
-               * so just access it manually instead of trying to detect it.
-               */
-              efficiency_class = * ((&procInfo->Processor.Flags) + 1);
+            efficiency_class = procInfo->Processor.EfficiencyClass;
 	    break;
 	  case RelationGroup:
 	    /* So strange an interface... */

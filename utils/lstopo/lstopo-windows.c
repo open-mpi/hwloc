@@ -16,6 +16,8 @@
 #endif
 #include <string.h>
 
+#include "private/windows.h" /* must be before windows.h */
+
 #include <windows.h>
 #include <windowsx.h>
 
