@@ -413,7 +413,7 @@ To export bitmask in a format that is acceptable by the resctrl Linux subsystem
 
     $ hwloc-calc pack:all.core:7-9.pu:0
     0x00000380,,0x00000380   <this format cannot be given to resctrl>
-    $ hwloc-calc pack:all.core:7-9.pu:0 | sed -e 's/0x//g' -e 's/,,/,0,/g'
+    $ hwloc-calc pack:all.core:7-9.pu:0 | sed -e 's/0x//g' -e 's/,,/,0,/g' -e 's/,,/,0,/g'
     00000380,0,00000380
     # echo 00000380,0,00000380 > /sys/fs/resctrl/test/cpus
     # cat /sys/fs/resctrl/test/cpus
