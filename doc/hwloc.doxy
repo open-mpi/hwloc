@@ -1749,16 +1749,41 @@ The kind of object is first described by the <tt>obj->type</tt>
 generic attribute (an integer).
 OS devices also have a specific <tt>obj->attr->osdev.type</tt> integer
 for distinguishing between NICs, GPUs, etc.
+
 Objects may also have an optional <tt>obj->subtype</tt> pointing
-to a better description string.
-For instance subtype is useful to say what Group objects are actually
-made of (e.g. <em>Book</em> for Linux S/390 books).
-It may also specify that a Block OS device is a <em>Disk</em>,
-or that a CoProcessor OS device is a <em>CUDA</em> device.
-This subtype is displayed by lstopo either in place or after the
-main <tt>obj->type</tt> attribute.
-NUMA nodes that correspond GPU memory may also have <em>GPUMemory</em>
-as subtype.
+to a better description string (displayed by lstopo either
+in place or after the main <tt>obj->type</tt> attribute):
+<ul>
+<li>NUMA nodes:
+subtype <tt>MCDRAM</tt> (on KNL)
+or <tt>GPUMemory</tt> (on POWER architecture with NVIDIA GPU memory shared over NVLink).
+</li>
+<li>Groups:
+subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
+<tt>Book</tt> or <tt>Drawer</tt> for different architecture-specific groups of CPUs
+(see also \ref faq_groups).
+</li>
+<li>OS devices (see also \ref iodevices_osdev):
+<ul>
+<li>Co-processor: subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, or <tt>VectorEngine</tt>.</li>
+<li>GPU: subtype <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU).</li>
+<li>OpenFabrics: subtype <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
+<li>Block: subtype <tt>Disk</tt>, <tt>NVDIMM</tt>, <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
+</ul>
+</li>
+<li>L3 Caches:
+subtype <tt>MemorySideCache</tt> when hwloc is configured to expose
+the KNL MCDRAM in Cache mode as a L3.
+</li>
+<li>PCI devices:
+subtype <tt>NVSwitch</tt> for NVLink switches
+(see also NVLinkBandwidth in \ref topoattrs_distances).
+</li>
+<li>Misc devices:
+subtype <tt>MemoryModule</tt>
+(see also \ref miscobjs_auto)
+</li>
+</ul>
 
 Each object also contains an <tt>attr</tt> field that, if non NULL,
 points to a union ::hwloc_obj_attr_u of type-specific attribute
