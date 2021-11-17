@@ -878,6 +878,8 @@ main (int argc, char *argv[])
   loutput.show_disallowed = 1;
   loutput.show_cpukinds = 1;
 
+  lstopo_palette_init(&loutput);
+
   /* show all error messages */
   if (!getenv("HWLOC_HIDE_ERRORS"))
     putenv((char *) "HWLOC_HIDE_ERRORS=0");
@@ -1222,6 +1224,7 @@ main (int argc, char *argv[])
 	else
 	  fprintf(stderr, "Unsupported color `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
 	opt = 1;
+        /* FIXME could set custom colors in the palette */
       }
       else if (!strcmp (argv[0], "--disallowed-color")) {
 	if (argc < 2)
@@ -1231,6 +1234,7 @@ main (int argc, char *argv[])
 	else
 	  fprintf(stderr, "Unsupported color `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
 	opt = 1;
+        /* FIXME could set custom colors in the palette */
       }
       else if (!strcmp (argv[0], "--top-color")) {
 	if (argc < 2)

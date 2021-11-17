@@ -127,6 +127,7 @@ struct lstopo_output {
 #define FACTORIZE_MIN_DISABLED UINT_MAX
   unsigned factorize_first[HWLOC_OBJ_TYPE_MAX]; /* number of first children to keep before factorizing */
   unsigned factorize_last[HWLOC_OBJ_TYPE_MAX]; /* number of last children to keep after factorizing */
+  struct lstopo_color_palette *palette;
 
   /* draw internal data */
   void *backend_data;
@@ -162,6 +163,31 @@ struct lstopo_color {
   /* list of colors */
   struct lstopo_color *next;
 };
+
+struct lstopo_color_palette {
+  struct lstopo_color
+    white, /* used for legend background, and text on dark background */
+    black, /* used for text on light background, and legend text */
+    /* all colors below are box backgrounds */
+    machine,
+    group,
+    package,
+    group_in_package,
+    die,
+    core,
+    pu,
+    numanode,
+    memories,
+    cache,
+    pcidev,
+    osdev,
+    bridge,
+    misc,
+    binding,
+    disallowed;
+};
+
+extern void lstopo_palette_init(struct lstopo_output *loutput);
 
 struct lstopo_style {
   struct lstopo_color
