@@ -46,6 +46,7 @@ struct lstopo_color DISALLOWED_COLOR = { 0xff, 0, 0, 0 };
 struct lstopo_color CACHE_COLOR = { 0xff, 0xff, 0xff, 0 };
 struct lstopo_color MACHINE_COLOR = { 0xff, 0xff, 0xff, 0 };
 struct lstopo_color GROUP_IN_PACKAGE_COLOR = { EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, 0 };
+struct lstopo_color GROUP_COLOR = { 0xff, 0xff, 0xff, 0 };
 struct lstopo_color MISC_COLOR = { 0xff, 0xff, 0xff, 0 };
 struct lstopo_color PCI_DEVICE_COLOR = { DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR, 0 };
 struct lstopo_color OS_DEVICE_COLOR = { 0xde, 0xde, 0xde, 0 };
@@ -94,6 +95,7 @@ declare_colors(struct lstopo_output *output)
   declare_color(output, &CACHE_COLOR);
   declare_color(output, &MACHINE_COLOR);
   declare_color(output, &GROUP_IN_PACKAGE_COLOR);
+  declare_color(output, &GROUP_COLOR);
   declare_color(output, &MISC_COLOR);
   declare_color(output, &PCI_DEVICE_COLOR);
   declare_color(output, &OS_DEVICE_COLOR);
@@ -1001,7 +1003,7 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 
   case HWLOC_OBJ_GROUP: {
     hwloc_obj_t parent;
-    s->bg = &MISC_COLOR;
+    s->bg = &GROUP_COLOR;
     parent = obj->parent;
     while (parent) {
       if (parent->type == HWLOC_OBJ_PACKAGE) {
