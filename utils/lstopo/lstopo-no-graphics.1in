@@ -432,6 +432,14 @@ passing this option multiple times.
 Additional legend lines may also be specified inside the topology using the
 "lstopoLegend" info attributes on the topology root object.
 .TP
+\fB\-\-grey\fR, \fB\-\-greyscale\fR
+Use greyscale instead of colors in the graphical output.
+.TP
+\fB\-\-palette\fR <grey|greyscale|defaut|colors>
+Change the color palette.
+Passing \fIgrey\fR or \fIgreyscale\fR is identical to passing \fB\-\-grey\fR or \fB\-\-greyscale\fR.
+Passing \fIdefault\fR or \fIcolors\fR reverts back to the default color palette.
+.TP
 \fB\-\-binding\-color\fR none
 Do not colorize PUs and NUMA nodes according to the binding in the graphical output.
 .TP
