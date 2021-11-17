@@ -54,7 +54,7 @@ struct lstopo_color BRIDGE_COLOR = { 0xff, 0xff, 0xff, 0 };
 #pragma GCC diagnostic warning "-Wmissing-field-initializers"
 #endif
 
-static struct lstopo_color *colors = NULL;
+static struct lstopo_color *color_list = NULL;
 
 static struct lstopo_color *
 declare_color(struct lstopo_output *loutput, struct lstopo_color *color)
@@ -69,8 +69,8 @@ declare_color(struct lstopo_output *loutput, struct lstopo_color *color)
   }
 
   /* insert */
-  color->next = colors;
-  colors = color;
+  color->next = color_list;
+  color_list = color;
 
   return color;
 }
@@ -103,7 +103,7 @@ declare_colors(struct lstopo_output *output)
 void
 destroy_colors(struct lstopo_output *loutput)
 {
-  struct lstopo_color *tmp = colors;
+  struct lstopo_color *tmp = color_list;
 
   while (tmp) {
     struct lstopo_color *next = tmp->next;
@@ -115,7 +115,7 @@ destroy_colors(struct lstopo_output *loutput)
     tmp = next;
   }
 
-  colors = NULL; /* so that it works after refresh */
+  color_list = NULL; /* so that it works after refresh */
 }
 
 static struct lstopo_color *
@@ -123,7 +123,7 @@ find_or_declare_rgb_color(struct lstopo_output *loutput, int r, int g, int b)
 {
   struct lstopo_color *color, *tmp;
 
-  for(tmp = colors; tmp; tmp = tmp->next)
+  for(tmp = color_list; tmp; tmp = tmp->next)
     if (tmp->r == r && tmp->g == g && tmp->b == b)
       return tmp;
 
