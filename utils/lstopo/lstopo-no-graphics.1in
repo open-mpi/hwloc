@@ -179,7 +179,7 @@ This is identical to \fB-\-filter icache:none\fR.
 \fB\-\-disallowed\fR
 Include objects disallowed by administrative limitations.
 .TP
-\fB\-\-allow <all|local|0xff|nodeset=0xf0>\fR
+\fB\-\-allow\fR <all|local|0xff|nodeset=0xf0>
 Include objects disallowed by administrative limitations (implies \fB\-\-disallowed\fR)
 and also change the set of allowed ones.
 
@@ -296,7 +296,7 @@ machine are shown.  On Linux, kernel threads are not shown.
 If many processes appear, the output may become hard to read anyway,
 making the hwloc-ps program more practical.
 .TP
-\fB\-\-children\-order <order>\fR
+\fB\-\-children\-order\fR <order>
 Change the order of the different kinds of children with respect to
 their parent in the graphical output.
 \fI<order>\fR may be a comma-separated list of keywords among:
@@ -387,31 +387,31 @@ If a comma-separated list of object types is given, the layout only
 applies to the corresponding \fIcontainer\fR objects.
 Ignored for bridges since their children are always vertically aligned.
 .TP
-\fB\-\-no\-text\fR, \fB\-\-no\-text=<type1,...>\fR
+\fB\-\-no\-text\fR, \fB\-\-no\-text\fR=<type1,...>
 Do not display any text in boxes in the graphical output.
 If a comma-separated list of object types is given, text is disabled for the corresponding objects.
 This is mostly useful for removing text from Group objects.
 .TP
-\fB\-\-text\fR, \fB\-\-text=<type1,...>\fR
+\fB\-\-text\fR, \fB\-\-text\fR=<type1,...>
 Display text in boxes in the graphical output (default).
 If a comma-separated list of object types is given, text is reenabled for the corresponding objects
 (if it was previously disabled with \fB\-\-no\-text\fR).
 .TP
-\fB\-\-no\-index\fR, \fB\-\-no\-index=<type1,...>\fR
+\fB\-\-no\-index\fR, \fB\-\-no\-index\fR=<type1,...>
 Do not show object indexes in the graphical output.
 If a comma-separated list of object types is given, indexes are disabled for the corresponding objects.
 .TP
-\fB\-\-index\fR, \fB\-\-index=<type1,...>\fR
+\fB\-\-index\fR, \fB\-\-index=\fR<type1,...>
 Show object indexes in the graphical output (default).
 If a comma-separated list of object types is given, indexes are reenabled for the corresponding objects
 (if they were previously disabled with \fB\-\-no\-index\fR).
 .TP
-\fB\-\-no\-attrs\fR, \fB\-\-no\-attrs=<type1,...>\fR
+\fB\-\-no\-attrs\fR, \fB\-\-no\-attrs\fR=<type1,...>
 Do not show object attributes (such as memory size, cache size, PCI bus ID, PCI link speed, etc.)
 in the graphical output.
 If a comma-separated list of object types is given, attributes are disabled for the corresponding objects.
 .TP
-\fB\-\-attrs\fR, \fB\-\-attrs=<type1,...>\fR
+\fB\-\-attrs\fR, \fB\-\-attrs=\fR<type1,...>
 Show object attributes (such as memory size, cache size, PCI bus ID, PCI link speed, etc.)
 in the graphical output (default).
 If a comma-separated list of object types is given, attributes are reenabled for the corresponding objects
@@ -425,20 +425,20 @@ Remove default text legend lines at the bottom of the graphical output.
 User-added legend lines with \fB\-\-append\-legend\fB or the "lstopoLegend" info
 are still displayed if any.
 .TP
-\fB\-\-append\-legend\fB <line>
+\fB\-\-append\-legend\fR <line>
 Append the line of text to the bottom of the legend in the graphical output.
 If adding multiple lines, each line should be given separately by
 passing this option multiple times.
 Additional legend lines may also be specified inside the topology using the
 "lstopoLegend" info attributes on the topology root object.
 .TP
-\fB\-\-binding\-color none
+\fB\-\-binding\-color\fR none
 Do not colorize PUs and NUMA nodes according to the binding in the graphical output.
 .TP
-\fB\-\-disallowed\-color none
+\fB\-\-disallowed\-color\fR none
 Do not colorize disallowed PUs and NUMA nodes in the graphical output.
 .TP
-\fB\-\-top\-color <none|#xxyyzz>
+\fB\-\-top\-color\fR <none|#xxyyzz>
 Do not colorize task objects in the graphical output when \-\-top is given,
 or change the background color.
 .TP
