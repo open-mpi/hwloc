@@ -75,7 +75,7 @@ fig_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsign
 }
 
 static void
-fig_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
+fig_line(struct lstopo_output *loutput, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
 {
   FILE *file = loutput->file;
 
@@ -83,7 +83,7 @@ fig_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsig
   y1 *= FIG_FACTOR;
   x2 *= FIG_FACTOR;
   y2 *= FIG_FACTOR;
-  fprintf(file, "2 1 0 %u 0 %d %u -1 -1 0.0 0 0 -1 0 0 2\n\t", loutput->thickness, lcolor->private.fig.color, depth);
+  fprintf(file, "2 1 0 %u 0 0 %u -1 -1 0.0 0 0 -1 0 0 2\n\t", loutput->thickness, depth);
   fprintf(file, " %u %u", x1, y1);
   fprintf(file, " %u %u", x2, y2);
   fprintf(file, "\n");

@@ -1313,7 +1313,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
     /* Square and left link */
     lstopo_set_object_color(loutput, level, &style);
     methods->box(loutput, style.bg, depth, x, gridsize, y + BRIDGE_HEIGHT/2 - gridsize/2, gridsize, level, 0);
-    methods->line(loutput, &BLACK_COLOR, depth, x + gridsize, y + BRIDGE_HEIGHT/2, x + 2*gridsize, y + BRIDGE_HEIGHT/2, level, 0);
+    methods->line(loutput, depth, x + gridsize, y + BRIDGE_HEIGHT/2, x + 2*gridsize, y + BRIDGE_HEIGHT/2, level, 0);
 
     if (level->io_arity > 0) {
       hwloc_obj_t child = NULL;
@@ -1325,7 +1325,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	struct lstopo_obj_userdata *clud = child->userdata;
 	unsigned ymid = y + clud->yrel + BRIDGE_HEIGHT/2;
 	/* Line to PCI device */
-	methods->line(loutput, &BLACK_COLOR, depth-1, x+2*gridsize, ymid, x+3*gridsize+speedwidth, ymid, level, i+2);
+	methods->line(loutput, depth-1, x+2*gridsize, ymid, x+3*gridsize+speedwidth, ymid, level, i+2);
 	if (ymin == (unsigned) -1)
 	  ymin = ymid;
 	ymax = ymid;
@@ -1343,7 +1343,7 @@ bridge_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, un
 	}
 	i++;
       }
-      methods->line(loutput, &BLACK_COLOR, depth-1, x+2*gridsize, ymin, x+2*gridsize, ymax, level, 1);
+      methods->line(loutput, depth-1, x+2*gridsize, ymin, x+2*gridsize, ymax, level, 1);
 
       /* Draw sublevels for real */
       draw_children(loutput, level, depth-1, x, y);

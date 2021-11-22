@@ -349,7 +349,7 @@ ascii_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsi
 }
 
 static void
-ascii_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
+ascii_line(struct lstopo_output *loutput, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
 {
   struct lstopo_ascii_output *disp = loutput->backend_data;
   unsigned i, j, z;
