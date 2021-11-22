@@ -79,8 +79,6 @@ FILE *open_output(const char *filename, int overwrite)
   return fopen(filename, "w");
 }
 
-const char *task_background_color_string = "#ffff00";
-
 static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char * name, int thread)
 {
   hwloc_obj_t group, obj;
@@ -110,14 +108,8 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
   obj = hwloc_topology_insert_misc_object(topology, group, name);
   if (!obj)
     fprintf(stderr, "Failed to insert process `%s'\n", name);
-  else {
+  else
     obj->subtype = strdup("Process");
-    if (strcmp(task_background_color_string, "none")) {
-      char style[19];
-      snprintf(style, sizeof(style), "Background=%s", task_background_color_string);
-      hwloc_obj_add_info(obj, "lstopoStyle", style);
-    }
-  }
 
   return obj;
 }
@@ -563,7 +555,8 @@ void usage(const char *name, FILE *where)
                   "                        Disable or change binding PU and NUMA nodes color\n");
   fprintf (where, "  --disallowed-color <none|#xxyyzz>\n"
                   "                        Disable or change disallowed PU and NUMA nodes color\n");
-  fprintf (where, "  --top-color <none|#xxyyzz> Change task background color for --top\n");
+  fprintf (where, "  --top-color <none|#xxyyzz>\n"
+                  "                        Disable or change task background color for --top\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --export-xml-flags <n>\n"
 		  "                        Set flags during the XML topology export\n");
@@ -882,6 +875,7 @@ main (int argc, char *argv[])
   loutput.show_disallowed = 1;
   loutput.show_cpukinds = 1;
 
+  loutput.show_process_color = 1;
   lstopo_palette_init(&loutput);
 
   /* show all error messages */
@@ -1254,7 +1248,12 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--top-color")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-	task_background_color_string = argv[1];
+        if (!strcmp(argv[1], "none"))
+          loutput.show_process_color = 0;
+        else if (*argv[1] == '#')
+          lstopo_palette_set_color(&loutput.palette->process, strtoul(argv[1]+1, NULL, 16));
+        else
+	  fprintf(stderr, "Unsupported color `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
         opt = 1;
       }
       else if (!strncmp (argv[0], "--no-text", 9)

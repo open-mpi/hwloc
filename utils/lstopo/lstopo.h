@@ -120,6 +120,7 @@ struct lstopo_output {
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
   int show_binding;
   int show_disallowed;
+  int show_process_color;
   int show_cpukinds;
   int factorize_enabled; /* global toggle for interactive keyboard shortcuts */
   unsigned factorize_min[HWLOC_OBJ_TYPE_MAX]; /* minimum number of object before factorizing (parent->arity must be strictly higher) */
@@ -184,7 +185,8 @@ struct lstopo_color_palette {
     bridge,
     misc,
     binding,
-    disallowed;
+    disallowed,
+    process;
 };
 
 extern void lstopo_palette_init(struct lstopo_output *loutput);

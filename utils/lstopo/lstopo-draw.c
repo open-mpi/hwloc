@@ -73,6 +73,7 @@ lstopo_palette_init(struct lstopo_output *loutput)
   lstopo_main_palette.misc =             RGB_WHITE;
   lstopo_main_palette.binding =          RGB(0, 0xff, 0); /* green */
   lstopo_main_palette.disallowed =       RGB(0xff, 0, 0); /* red */
+  lstopo_main_palette.process =          RGB(0xff, 0xff, 0); /* yellow */
 
   memcpy(&lstopo_grey_palette, &lstopo_main_palette, sizeof(lstopo_main_palette));
   /* replace non-grey colors by some grey */
@@ -84,6 +85,7 @@ lstopo_palette_init(struct lstopo_output *loutput)
   lstopo_grey_palette.pcidev =           RGB_GREY_DARKER_EPOXY;
   lstopo_grey_palette.binding =          RGB_GREY(0xbb);
   lstopo_grey_palette.disallowed =       RGB_GREY(0x77);
+  lstopo_grey_palette.process =          RGB_GREY(0x99);
 
   memcpy(&lstopo_white_palette, &lstopo_main_palette, sizeof(lstopo_main_palette));
   /* replace everything but white/black with white */
@@ -103,6 +105,7 @@ lstopo_palette_init(struct lstopo_output *loutput)
   lstopo_white_palette.misc =             RGB_WHITE;
   lstopo_white_palette.binding =          RGB_WHITE;
   lstopo_white_palette.disallowed =       RGB_WHITE;
+  lstopo_white_palette.process =          RGB_WHITE;
 
 #ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
 #pragma GCC diagnostic warning "-Wmissing-field-initializers"
@@ -178,6 +181,7 @@ declare_colors(struct lstopo_output *output)
   declare_color(output, &output->palette->misc);
   declare_color(output, &output->palette->binding);
   declare_color(output, &output->palette->disallowed);
+  declare_color(output, &output->palette->process);
 }
 
 void
@@ -1094,7 +1098,10 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   }
 
   case HWLOC_OBJ_MISC:
-    s->bg = &loutput->palette->misc;
+    if (loutput->show_process_color && obj->subtype && !strcmp(obj->subtype, "Process"))
+      s->bg = &loutput->palette->process;
+    else
+      s->bg = &loutput->palette->misc;
     break;
 
   case HWLOC_OBJ_NUMANODE:
