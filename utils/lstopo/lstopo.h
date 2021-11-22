@@ -192,6 +192,7 @@ struct lstopo_color_palette {
 extern void lstopo_palette_init(struct lstopo_output *loutput);
 extern void lstopo_palette_select(struct lstopo_output *loutput, const char *name);
 extern void lstopo_palette_set_color(struct lstopo_color *color, unsigned rrggbb);
+extern void lstopo_palette_set_color_by_name(struct lstopo_output *output, const char *name, unsigned rrggbb);
 
 struct lstopo_style {
   struct lstopo_color

@@ -31,7 +31,7 @@ Version 2.7.0
       to prevent these groups from being merged with identical caches, etc.
 * Tools
   + Add --grey and --palette options to switch lstopo to greyscale or
-    white-background-only graphics.
+    white-background-only graphics, or to tune individual colors.
 
 
 Version 2.6.0

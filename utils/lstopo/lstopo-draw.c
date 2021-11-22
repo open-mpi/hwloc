@@ -136,6 +136,42 @@ lstopo_palette_set_color(struct lstopo_color *color, unsigned rrggbb)
   color->b = (rrggbb >>  0) & 0xff;
 }
 
+void
+lstopo_palette_set_color_by_name(struct lstopo_output *loutput, const char *name, unsigned rrggbb)
+{
+  if (!strcasecmp(name, "machine"))
+    lstopo_palette_set_color(&loutput->palette->machine, rrggbb);
+  else if (!strcasecmp(name, "group"))
+    lstopo_palette_set_color(&loutput->palette->group, rrggbb);
+  else if (!strcasecmp(name, "package"))
+    lstopo_palette_set_color(&loutput->palette->package, rrggbb);
+  else if (!strcasecmp(name, "group_in_package"))
+    lstopo_palette_set_color(&loutput->palette->group_in_package, rrggbb);
+  else if (!strcasecmp(name, "die"))
+    lstopo_palette_set_color(&loutput->palette->die, rrggbb);
+  else if (!strcasecmp(name, "core"))
+    lstopo_palette_set_color(&loutput->palette->core, rrggbb);
+  else if (!strcasecmp(name, "pu"))
+    lstopo_palette_set_color(&loutput->palette->pu, rrggbb);
+  else if (!strcasecmp(name, "numanode"))
+    lstopo_palette_set_color(&loutput->palette->numanode, rrggbb);
+  else if (!strcasecmp(name, "memories"))
+    lstopo_palette_set_color(&loutput->palette->memories, rrggbb);
+  else if (!strcasecmp(name, "cache"))
+    lstopo_palette_set_color(&loutput->palette->cache, rrggbb);
+  else if (!strcasecmp(name, "pcidev"))
+    lstopo_palette_set_color(&loutput->palette->pcidev, rrggbb);
+  else if (!strcasecmp(name, "osdev"))
+    lstopo_palette_set_color(&loutput->palette->osdev, rrggbb);
+  else if (!strcasecmp(name, "bridge"))
+    lstopo_palette_set_color(&loutput->palette->bridge, rrggbb);
+  else if (!strcasecmp(name, "misc"))
+    lstopo_palette_set_color(&loutput->palette->misc, rrggbb);
+  else
+    fprintf(stderr, "Unrecognized palette color name `%s', ignoring\n", name);
+  /* binding/disallowed/process are handled by --binding/disallowed/top-color */
+}
+
 static struct lstopo_color *color_list = NULL;
 
 static struct lstopo_color *

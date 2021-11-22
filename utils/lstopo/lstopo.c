@@ -551,6 +551,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "  --grey --palette grey Use greyscale instead of colors\n");
   fprintf (where, "  --palette white       Use white instead of colors for background\n");
+  fprintf (where, "  --palette <type>=<#xxyyzz>\n"
+                  "                        Replace the color for object of the given type\n");
   fprintf (where, "  --binding-color <none|#xxyyzz>\n"
                   "                        Disable or change binding PU and NUMA nodes color\n");
   fprintf (where, "  --disallowed-color <none|#xxyyzz>\n"
@@ -1218,9 +1220,20 @@ main (int argc, char *argv[])
         lstopo_palette_select(&loutput, argv[0]+2);
 
       else if (!strcmp (argv[0], "--palette")) {
+        char *equal;
 	if (argc < 2)
 	  goto out_usagefailure;
-        lstopo_palette_select(&loutput, argv[1]);
+        equal = strchr(argv[1], '=');
+        if (equal) {
+          if (equal[1] != '#')
+            fprintf(stderr, "Unsupported palette color modification `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
+          else {
+            *equal = '\0';
+            lstopo_palette_set_color_by_name(&loutput, argv[1], strtoul(equal+2, NULL, 16));
+          }
+        } else {
+          lstopo_palette_select(&loutput, argv[1]);
+        }
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--binding-color")) {

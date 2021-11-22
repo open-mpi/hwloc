@@ -441,6 +441,12 @@ Passing \fIgrey\fR or \fIgreyscale\fR is identical to passing \fB\-\-grey\fR or 
 Passing \fIwhite\fR or \fInone\fR uses white instead of colors for all box backgrounds.
 Passing \fIdefault\fR or \fIcolors\fR reverts back to the default color palette.
 .TP
+\fB\-\-palette\fR type=#rrggbb
+Replace the color of the given box type with the given 3x8bit hexadecimal RGB combination (e.g. \fI#ff0000\fR is red).
+Existing types are \fImachine\fR, \fIgroup\fR, \fIpackage\fR, \fIgroup_in_package\fR, \fIdie\fR, \fIcore\fR, \fIpu\fR, \fInumanode\fR, \fImemories\fR (box containing multiple memory children), \fIcache\fR, \fIpcidev\fR, \fIosdev\fR, \fIbridge\fR, and \fImisc\fR.
+
+See also CUSTOM COLOR below for customizing individual objects.
+.TP
 \fB\-\-binding\-color\fR <none|#rrggbb>
 Do not colorize PUs and NUMA nodes according to the binding in the graphical output.
 Or change the color to the given 3x8bit hexadecimal RGB combination (e.g. \fI#ff0000\fR is red).
@@ -724,7 +730,9 @@ The console mode displays the above characteristics by appending text
 to each PU line if verbose messages are enabled.
 .
 .SH CUSTOM COLORS
-The color of each object in the graphical output may be enforced by
+The colors of different kinds of boxes may be configured with \fB\-\-palette\fR.
+
+The color of each object in the graphical output may also be enforced by
 specifying a "lstopoStyle" info attribute in that object.
 Its value should be a semi-colon separated list of "<attribute>=#rrggbb"
 where rr, gg and bb are the RGB components of a color,
