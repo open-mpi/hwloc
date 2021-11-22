@@ -988,7 +988,8 @@ lstopo_set_object_color(struct lstopo_output *loutput,
 {
   struct lstopo_obj_userdata *lud = obj->userdata;
 
-  s->bg = &BLACK_COLOR;
+  /* defaults */
+  s->bg = &WHITE_COLOR; /* always overwritten below */
   s->t = &BLACK_COLOR;
   s->t2 = &BLACK_COLOR;
 
