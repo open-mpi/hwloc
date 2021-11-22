@@ -559,8 +559,10 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "  --grey --palette grey Use greyscale instead of colors\n");
   fprintf (where, "  --palette white       Use white instead of colors for background\n");
-  fprintf (where, "  --binding-color none    Do not colorize PU and NUMA nodes according to the binding\n");
-  fprintf (where, "  --disallowed-color none Do not colorize disallowed PU and NUMA nodes\n");
+  fprintf (where, "  --binding-color <none|#xxyyzz>\n"
+                  "                        Disable or change binding PU and NUMA nodes color\n");
+  fprintf (where, "  --disallowed-color <none|#xxyyzz>\n"
+                  "                        Disable or change disallowed PU and NUMA nodes color\n");
   fprintf (where, "  --top-color <none|#xxyyzz> Change task background color for --top\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --export-xml-flags <n>\n"
@@ -1232,20 +1234,22 @@ main (int argc, char *argv[])
 	  goto out_usagefailure;
 	if (!strcmp(argv[1], "none"))
 	  loutput.show_binding = 0;
+        else if (*argv[1] == '#')
+          lstopo_palette_set_color(&loutput.palette->binding, strtoul(argv[1]+1, NULL, 16));
 	else
 	  fprintf(stderr, "Unsupported color `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
 	opt = 1;
-        /* FIXME could set custom colors in the palette */
       }
       else if (!strcmp (argv[0], "--disallowed-color")) {
 	if (argc < 2)
 	  goto out_usagefailure;
 	if (!strcmp(argv[1], "none"))
 	  loutput.show_disallowed = 0;
-	else
+        else if (*argv[1] == '#')
+          lstopo_palette_set_color(&loutput.palette->disallowed, strtoul(argv[1]+1, NULL, 16));
+        else
 	  fprintf(stderr, "Unsupported color `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
 	opt = 1;
-        /* FIXME could set custom colors in the palette */
       }
       else if (!strcmp (argv[0], "--top-color")) {
 	if (argc < 2)

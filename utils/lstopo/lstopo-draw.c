@@ -125,6 +125,13 @@ lstopo_palette_select(struct lstopo_output *loutput, const char *name)
     fprintf(stderr, "Unrecognized palette name `%s', ignoring\n", name);
 }
 
+void
+lstopo_palette_set_color(struct lstopo_color *color, unsigned rrggbb)
+{
+  color->r = (rrggbb >> 16) & 0xff;
+  color->g = (rrggbb >>  8) & 0xff;
+  color->b = (rrggbb >>  0) & 0xff;
+}
 
 static struct lstopo_color *color_list = NULL;
 

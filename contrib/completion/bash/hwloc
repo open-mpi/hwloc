@@ -131,11 +131,8 @@ _lstopo() {
 	    --palette)
 		COMPREPLY=( `compgen -W "grey" "greyscale" "default" "colors" "white" "none" -- "$cur"` )
 		;;
-	    --binding-color | --disallowed-color)
-		COMPREPLY=( `compgen -W "none" -- "$cur"` )
-		;;
-	    --top-color)
-		COMPREPLY=( `compgen -W "none <#xxyyzz>" -- "$cur"` )
+	    --binding-color | --disallowed-color | --top-color)
+		COMPREPLY=( `compgen -W "none <#rrggbb>" -- "$cur"` )
 		;;
 	    --children-order)
 		COMPREPLY=( `compgen -W "plain memoryabove" -- "$cur"` )
