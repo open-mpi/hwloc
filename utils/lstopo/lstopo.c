@@ -1236,6 +1236,7 @@ main (int argc, char *argv[])
 	if (argc < 2)
 	  goto out_usagefailure;
 	task_background_color_string = argv[1];
+        opt = 1;
       }
       else if (!strncmp (argv[0], "--no-text", 9)
 	       || !strncmp (argv[0], "--text", 6)
