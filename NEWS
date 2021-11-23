@@ -30,7 +30,8 @@ Version 2.7.0
     - HWLOC_DONT_MERGE_CLUSTER_GROUPS=1 may be set in the environment
       to prevent these groups from being merged with identical caches, etc.
 * Tools
-  + Add --grey option to switch lstopo to greyscale graphics.
+  + Add --grey and --palette options to switch lstopo to greyscale or
+    white-background-only graphics.
 
 
 Version 2.6.0

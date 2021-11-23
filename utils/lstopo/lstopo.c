@@ -558,6 +558,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-default-legend   Remove default text legend lines at the bottom\n");
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "  --grey --palette grey Use greyscale instead of colors\n");
+  fprintf (where, "  --palette white       Use white instead of colors for background\n");
   fprintf (where, "  --binding-color none    Do not colorize PU and NUMA nodes according to the binding\n");
   fprintf (where, "  --disallowed-color none Do not colorize disallowed PU and NUMA nodes\n");
   fprintf (where, "  --top-color <none|#xxyyzz> Change task background color for --top\n");

@@ -46,7 +46,7 @@
 #define DARKER_EPOXY_GREY_COLOR ((DARK_EPOXY_GREY_COLOR * 100) / 110)
 #define RGB_GREY_DARKER_EPOXY RGB_GREY(DARKER_EPOXY_GREY_COLOR)
 
-struct lstopo_color_palette lstopo_main_palette, lstopo_grey_palette;
+struct lstopo_color_palette lstopo_main_palette, lstopo_grey_palette, lstopo_white_palette;
 
 void
 lstopo_palette_init(struct lstopo_output *loutput)
@@ -85,6 +85,25 @@ lstopo_palette_init(struct lstopo_output *loutput)
   lstopo_grey_palette.binding =          RGB_GREY(0xbb);
   lstopo_grey_palette.disallowed =       RGB_GREY(0x77);
 
+  memcpy(&lstopo_white_palette, &lstopo_main_palette, sizeof(lstopo_main_palette));
+  /* replace everything but white/black with white */
+  lstopo_white_palette.machine =          RGB_WHITE;
+  lstopo_white_palette.group =            RGB_WHITE;
+  lstopo_white_palette.package =          RGB_WHITE;
+  lstopo_white_palette.group_in_package = RGB_WHITE;
+  lstopo_white_palette.die =              RGB_WHITE;
+  lstopo_white_palette.core =             RGB_WHITE;
+  lstopo_white_palette.pu =               RGB_WHITE;
+  lstopo_white_palette.numanode =         RGB_WHITE;
+  lstopo_white_palette.memories =         RGB_WHITE;
+  lstopo_white_palette.cache =            RGB_WHITE;
+  lstopo_white_palette.pcidev =           RGB_WHITE;
+  lstopo_white_palette.osdev =            RGB_WHITE;
+  lstopo_white_palette.bridge =           RGB_WHITE;
+  lstopo_white_palette.misc =             RGB_WHITE;
+  lstopo_white_palette.binding =          RGB_WHITE;
+  lstopo_white_palette.disallowed =       RGB_WHITE;
+
 #ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
 #pragma GCC diagnostic warning "-Wmissing-field-initializers"
 #endif
@@ -100,6 +119,8 @@ lstopo_palette_select(struct lstopo_output *loutput, const char *name)
     loutput->palette = &lstopo_grey_palette;
   else if (!strcmp(name, "colors") || !strcmp(name, "default"))
     loutput->palette = &lstopo_main_palette;
+  else if (!strcmp(name, "white") || !strcmp(name, "none"))
+    loutput->palette = &lstopo_white_palette;
   else
     fprintf(stderr, "Unrecognized palette name `%s', ignoring\n", name);
 }
