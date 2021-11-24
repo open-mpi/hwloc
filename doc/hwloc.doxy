@@ -1138,6 +1138,16 @@ following environment variables.
   Setting this environment variable to 1 will expose it as a proper Memory-side cache.
   </dd>
 
+<dt>HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS=0</dt>
+  <dd>Expose Windows processor groups as hwloc Group objects.
+  By default, these groups are disabled because they may be incompatible
+  with the hierarchy of resources that hwloc builds (leading to warnings).
+  Setting this variable to 1 reenables the addition of these groups to the topology.
+
+  This variable does not impact the querying of Windows processor groups
+  using the dedicated API in hwloc/windows.h, this feature is always supported.
+  </dd>
+
 <dt>HWLOC_ANNOTATE_GLOBAL_COMPONENTS=0</dt>
   <dd>Allow components to annotate the topology even if they are
   usually excluded by global components by default.
@@ -3443,7 +3453,8 @@ hwloc currently uses Groups for the following reasons:
 <li>AMD Bulldozer dual-core compute units (<tt>subtype</tt> is <tt>ComputeUnit</tt>, in the x86 backend),
  but these objects are usually merged with the L2 caches.</li>
 <li>Intel Extended Topology Enumeration levels (in the x86 backend).</li>
-<li>Windows processor groups (unless they contain a single NUMA node, or a single Package, etc.).</li>
+<li>Windows processor groups when HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS=1 is set in the environment
+  (except if they contain exactly a single NUMA node, or a single Package, etc.).</li>
 <li>IBM S/390 "Books" on Linux (<tt>subtype</tt> is <tt>Book</tt>).</li>
 <li>Linux Clusters of CPUs (<tt>subtype</tt> is <tt>Cluster</tt>),
   for instance for ARM cores sharing of some internal cache or bus,

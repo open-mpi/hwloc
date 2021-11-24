@@ -1015,6 +1015,8 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   unsigned hostname_size = sizeof(hostname);
   int has_efficiencyclass = 0;
   struct hwloc_win_efficiency_classes eclasses;
+  char *env = getenv("HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS");
+  int keep_pgroup_objs = (env && atoi(env));
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
@@ -1078,6 +1080,10 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 		&& procInfo->Cache.Type != CacheData
 		&& procInfo->Cache.Type != CacheInstruction)
 	  continue;
+
+        /* Ignore processor groups unless requested */
+        if (!keep_pgroup_objs && procInfo->Relationship == RelationGroup)
+          continue;
 
 	id = HWLOC_UNKNOWN_INDEX;
 	switch (procInfo[i].Relationship) {
@@ -1274,7 +1280,8 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 		groups_pu_set = hwloc_bitmap_alloc();
 	      hwloc_bitmap_or(groups_pu_set, groups_pu_set, set);
 
-	      if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+              /* Ignore processor groups unless requested and filtered-in */
+              if (keep_pgroup_objs && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
 		obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, id);
 		obj->cpuset = set;
 		obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP;

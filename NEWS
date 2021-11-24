@@ -29,6 +29,8 @@ Version 2.7.0
     Thanks to Jonathan Cameron for the help.
     - HWLOC_DONT_MERGE_CLUSTER_GROUPS=1 may be set in the environment
       to prevent these groups from being merged with identical caches, etc.
+  + Group objects are not created for Windows processor groups anymore,
+    except if HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS=1 in the environment.
 * Tools
   + Add --grey and --palette options to switch lstopo to greyscale or
     white-background-only graphics, or to tune individual colors.
