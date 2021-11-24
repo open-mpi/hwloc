@@ -78,13 +78,12 @@ tikz_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsig
 
 
 static void
-tikz_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
+tikz_line(struct lstopo_output *loutput, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
 {
   FILE *file = loutput->file;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
 
-  fprintf(file, "\t\\draw [draw=hwloc-color-%d-%d-%d,line width=%upt] (%u,%u) -- (%u,%u);\n",
-          r, g, b, loutput->thickness, x1, y1, x2, y2);
+  fprintf(file, "\t\\draw [draw=black,line width=%upt] (%u,%u) -- (%u,%u);\n",
+          loutput->thickness, x1, y1, x2, y2);
 }
 
 static void

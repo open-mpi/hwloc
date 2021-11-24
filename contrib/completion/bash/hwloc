@@ -69,6 +69,8 @@ _lstopo() {
 		   --no-legend
 		   --no-default-legend
 		   --append-legend
+		   --grey --greyscale
+		   --palette
 		   --binding-color
 		   --disallowed-color
 		   --top-color
@@ -126,11 +128,11 @@ _lstopo() {
 	    --append-legend)
 		COMPREPLY=( "<line of text>" "" )
 		;;
-	    --binding-color | --disallowed-color)
-		COMPREPLY=( `compgen -W "none" -- "$cur"` )
+	    --palette)
+		COMPREPLY=( `compgen -W "grey" "greyscale" "default" "colors" "white" "none" -- "$cur"` )
 		;;
-	    --top-color)
-		COMPREPLY=( `compgen -W "none <#xxyyzz>" -- "$cur"` )
+	    --binding-color | --disallowed-color | --top-color)
+		COMPREPLY=( `compgen -W "none <#rrggbb>" -- "$cur"` )
 		;;
 	    --children-order)
 		COMPREPLY=( `compgen -W "plain memoryabove" -- "$cur"` )

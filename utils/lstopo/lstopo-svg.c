@@ -51,10 +51,9 @@ native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
 
 
 static void
-native_svg_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj, unsigned line_id)
+native_svg_line(struct lstopo_output *loutput, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj, unsigned line_id)
 {
   FILE *file = loutput->file;
-  int r = lcolor->r, g = lcolor->g, b = lcolor->b;
   char id[128] = "";
   char class[128] = "";
   char complement[12] = "";
@@ -70,8 +69,8 @@ native_svg_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor
     snprintf(id, sizeof id, " id='anon_line%s'", complement);
   }
 
-  fprintf(file,"\t<line%s%s x1='%u' y1='%u' x2='%u' y2='%u' stroke='rgb(%d,%d,%d)' stroke-width='%u'/>\n",
-	  id, class, x1, y1, x2, y2, r, g, b, loutput->thickness);
+  fprintf(file,"\t<line%s%s x1='%u' y1='%u' x2='%u' y2='%u' stroke='rgb(0,0,0)' stroke-width='%u'/>\n",
+	  id, class, x1, y1, x2, y2, loutput->thickness);
 }
 
 static void

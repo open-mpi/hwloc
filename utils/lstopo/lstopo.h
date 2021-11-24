@@ -120,6 +120,7 @@ struct lstopo_output {
   int show_attrs[HWLOC_OBJ_TYPE_MAX];
   int show_binding;
   int show_disallowed;
+  int show_process_color;
   int show_cpukinds;
   int factorize_enabled; /* global toggle for interactive keyboard shortcuts */
   unsigned factorize_min[HWLOC_OBJ_TYPE_MAX]; /* minimum number of object before factorizing (parent->arity must be strictly higher) */
@@ -127,6 +128,7 @@ struct lstopo_output {
 #define FACTORIZE_MIN_DISABLED UINT_MAX
   unsigned factorize_first[HWLOC_OBJ_TYPE_MAX]; /* number of first children to keep before factorizing */
   unsigned factorize_last[HWLOC_OBJ_TYPE_MAX]; /* number of last children to keep after factorizing */
+  struct lstopo_color_palette *palette;
 
   /* draw internal data */
   void *backend_data;
@@ -162,6 +164,35 @@ struct lstopo_color {
   /* list of colors */
   struct lstopo_color *next;
 };
+
+struct lstopo_color_palette {
+  struct lstopo_color
+    white, /* used for legend background, and text on dark background */
+    black, /* used for text on light background, and legend text */
+    /* all colors below are box backgrounds */
+    machine,
+    group,
+    package,
+    group_in_package,
+    die,
+    core,
+    pu,
+    numanode,
+    memories,
+    cache,
+    pcidev,
+    osdev,
+    bridge,
+    misc,
+    binding,
+    disallowed,
+    process;
+};
+
+extern void lstopo_palette_init(struct lstopo_output *loutput);
+extern void lstopo_palette_select(struct lstopo_output *loutput, const char *name);
+extern void lstopo_palette_set_color(struct lstopo_color *color, unsigned rrggbb);
+extern void lstopo_palette_set_color_by_name(struct lstopo_output *output, const char *name, unsigned rrggbb);
 
 struct lstopo_style {
   struct lstopo_color
@@ -260,7 +291,7 @@ struct draw_methods {
   void (*destroy_color) (struct lstopo_output *loutput, struct lstopo_color *lcolor);
   /* only called when loutput->draw_methods == LSTOPO_DRAWING_DRAW */
   void (*box) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height, hwloc_obj_t obj, unsigned box_id);
-  void (*line) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj, unsigned line_id);
+  void (*line) (struct lstopo_output *loutput, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj, unsigned line_id);
   void (*text) (struct lstopo_output *loutput, const struct lstopo_color *lcolor, int size, unsigned depth, unsigned x, unsigned y, const char *text, hwloc_obj_t obj, unsigned text_id);
   /* may be called when loutput->drawing == LSTOPO_DRAWING_PREPARE */
   void (*textsize) (struct lstopo_output *loutput, const char *text, unsigned textlength, unsigned fontsize, unsigned *width);

@@ -421,12 +421,11 @@ windows_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor, un
 }
 
 static void
-windows_line(struct lstopo_output *loutput, const struct lstopo_color *lcolor, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
+windows_line(struct lstopo_output *loutput, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2, hwloc_obj_t obj __hwloc_attribute_unused, unsigned line_id __hwloc_attribute_unused)
 {
   struct lstopo_windows_output *woutput = loutput->backend_data;
   PAINTSTRUCT *ps = &woutput->ps;
 
-  SelectObject(ps->hdc, lcolor->private.windows.brush);
   MoveToEx(ps->hdc, x1 - x_delta, y1 - y_delta, NULL);
   LineTo(ps->hdc, x2 - x_delta, y2 - y_delta);
 }
