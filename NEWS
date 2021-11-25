@@ -22,6 +22,8 @@ Version 2.7.0
 * Backends
   + Add support for NUMA nodes and caches with more than 64 PUs across
     multiple processor groups on Windows 11 and Windows Server 2022.
+  + Group objects are not created for Windows processor groups anymore,
+    except if HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS=1 in the environment.
   + Expose "Cluster" group objects on Linux kernel 5.16+ for CPUs
     that share some internal cache or bus. This can be equivalent
     to the L2 Cache level on some platforms (e.g. x86) or a specific
@@ -29,8 +31,6 @@ Version 2.7.0
     Thanks to Jonathan Cameron for the help.
     - HWLOC_DONT_MERGE_CLUSTER_GROUPS=1 may be set in the environment
       to prevent these groups from being merged with identical caches, etc.
-  + Group objects are not created for Windows processor groups anymore,
-    except if HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS=1 in the environment.
 * Tools
   + Add --grey and --palette options to switch lstopo to greyscale or
     white-background-only graphics, or to tune individual colors.
