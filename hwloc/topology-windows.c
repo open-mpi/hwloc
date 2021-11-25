@@ -1261,7 +1261,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 		obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, id);
 		obj->cpuset = set;
 		obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP;
-		hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:GetLogicalProcessorInformation:ProcessorGroup");
+		hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:GetLogicalProcessorInformationEx:ProcessorGroup");
 	      } else
 		hwloc_bitmap_free(set);
 	    }
