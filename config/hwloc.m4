@@ -484,7 +484,6 @@ EOF])
                       CACHE_DESCRIPTOR,
                       LOGICAL_PROCESSOR_RELATIONSHIP,
                       RelationProcessorPackage,
-                      SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
                       GROUP_AFFINITY,
                       PROCESSOR_RELATIONSHIP,
                       NUMA_NODE_RELATIONSHIP,

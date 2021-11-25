@@ -66,26 +66,6 @@ typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP {
 #  endif /* HAVE_RELATIONPROCESSORPACKAGE */
 #endif /* HAVE_LOGICAL_PROCESSOR_RELATIONSHIP */
 
-#ifndef HAVE_SYSTEM_LOGICAL_PROCESSOR_INFORMATION
-typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION {
-  ULONG_PTR ProcessorMask;
-  LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
-  _ANONYMOUS_UNION
-  union {
-    struct {
-      BYTE flags;
-    } ProcessorCore;
-    struct {
-      DWORD NodeNumber;
-    } NumaNode;
-    CACHE_DESCRIPTOR Cache;
-    ULONGLONG Reserved[2];
-  } DUMMYUNIONNAME;
-} SYSTEM_LOGICAL_PROCESSOR_INFORMATION, *PSYSTEM_LOGICAL_PROCESSOR_INFORMATION;
-#endif
-
-/* Extended interface, for group support */
-
 #ifndef HAVE_GROUP_AFFINITY
 typedef struct _GROUP_AFFINITY {
   KAFFINITY Mask;
@@ -205,9 +185,6 @@ static PFN_GETCURRENTPROCESSORNUMBER GetCurrentProcessorNumberProc;
 typedef VOID (WINAPI *PFN_GETCURRENTPROCESSORNUMBEREX)(PPROCESSOR_NUMBER);
 static PFN_GETCURRENTPROCESSORNUMBEREX GetCurrentProcessorNumberExProc;
 
-typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATION)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
-static PFN_GETLOGICALPROCESSORINFORMATION GetLogicalProcessorInformationProc;
-
 typedef BOOL (WINAPI *PFN_GETLOGICALPROCESSORINFORMATIONEX)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *Buffer, PDWORD ReturnLength);
 static PFN_GETLOGICALPROCESSORINFORMATIONEX GetLogicalProcessorInformationExProc;
 
@@ -249,8 +226,6 @@ static void hwloc_win_get_function_ptrs(void)
 	(PFN_GETACTIVEPROCESSORGROUPCOUNT) GetProcAddress(kernel32, "GetActiveProcessorGroupCount");
       GetActiveProcessorCountProc =
 	(PFN_GETACTIVEPROCESSORCOUNT) GetProcAddress(kernel32, "GetActiveProcessorCount");
-      GetLogicalProcessorInformationProc =
-	(PFN_GETLOGICALPROCESSORINFORMATION) GetProcAddress(kernel32, "GetLogicalProcessorInformation");
       GetCurrentProcessorNumberProc =
 	(PFN_GETCURRENTPROCESSORNUMBER) GetProcAddress(kernel32, "GetCurrentProcessorNumber");
       GetCurrentProcessorNumberExProc =
@@ -1046,139 +1021,6 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
   GetSystemInfo(&SystemInfo);
-
-  if (!GetLogicalProcessorInformationExProc && GetLogicalProcessorInformationProc) {
-      PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo, tmpprocInfo;
-      unsigned id;
-      unsigned i;
-      struct hwloc_obj *obj;
-      hwloc_obj_type_t type;
-
-      length = 0;
-      procInfo = NULL;
-
-      while (1) {
-	if (GetLogicalProcessorInformationProc(procInfo, &length))
-	  break;
-	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-	  return -1;
-	tmpprocInfo = realloc(procInfo, length);
-	if (!tmpprocInfo) {
-	  free(procInfo);
-	  goto out;
-	}
-	procInfo = tmpprocInfo;
-      }
-
-      assert(!length || procInfo);
-
-      for (i = 0; i < length / sizeof(*procInfo); i++) {
-
-        /* Ignore unknown caches */
-	if (procInfo->Relationship == RelationCache
-		&& procInfo->Cache.Type != CacheUnified
-		&& procInfo->Cache.Type != CacheData
-		&& procInfo->Cache.Type != CacheInstruction)
-	  continue;
-
-        /* Ignore processor groups unless requested */
-        if (!keep_pgroup_objs && procInfo->Relationship == RelationGroup)
-          continue;
-
-	id = HWLOC_UNKNOWN_INDEX;
-	switch (procInfo[i].Relationship) {
-	  case RelationNumaNode:
-	    type = HWLOC_OBJ_NUMANODE;
-	    id = procInfo[i].NumaNode.NodeNumber;
-	    gotnuma++;
-	    if (id > max_numanode_index)
-	      max_numanode_index = id;
-	    break;
-	  case RelationProcessorPackage:
-	    type = HWLOC_OBJ_PACKAGE;
-	    break;
-	  case RelationCache:
-	    type = (procInfo[i].Cache.Type == CacheInstruction ? HWLOC_OBJ_L1ICACHE : HWLOC_OBJ_L1CACHE) + procInfo[i].Cache.Level - 1;
-	    break;
-	  case RelationProcessorCore:
-	    type = HWLOC_OBJ_CORE;
-	    break;
-	  case RelationGroup:
-	  default:
-	    type = HWLOC_OBJ_GROUP;
-	    break;
-	}
-
-	if (!hwloc_filter_check_keep_object_type(topology, type))
-	  continue;
-
-	obj = hwloc_alloc_setup_object(topology, type, id);
-        obj->cpuset = hwloc_bitmap_alloc();
-	hwloc_debug("%s#%u mask %llx\n", hwloc_obj_type_string(type), id, (unsigned long long) procInfo[i].ProcessorMask);
-	/* ProcessorMask is a ULONG_PTR */
-	hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, 0, procInfo[i].ProcessorMask);
-	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
-
-	switch (type) {
-	  case HWLOC_OBJ_NUMANODE:
-	    {
-	      ULONGLONG avail;
-	      obj->nodeset = hwloc_bitmap_alloc();
-	      hwloc_bitmap_set(obj->nodeset, id);
-	      if ((GetNumaAvailableMemoryNodeExProc && GetNumaAvailableMemoryNodeExProc(id, &avail))
-		  || (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail))) {
-		obj->attr->numanode.local_memory = avail;
-		gotnumamemory++;
-	      }
-	      obj->attr->numanode.page_types_len = 2;
-	      obj->attr->numanode.page_types = malloc(2 * sizeof(*obj->attr->numanode.page_types));
-	      memset(obj->attr->numanode.page_types, 0, 2 * sizeof(*obj->attr->numanode.page_types));
-	      obj->attr->numanode.page_types_len = 1;
-	      obj->attr->numanode.page_types[0].size = SystemInfo.dwPageSize;
-#if HAVE_DECL__SC_LARGE_PAGESIZE
-	      obj->attr->numanode.page_types_len++;
-	      obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
-#endif
-	      break;
-	    }
-	  case HWLOC_OBJ_L1CACHE:
-	  case HWLOC_OBJ_L2CACHE:
-	  case HWLOC_OBJ_L3CACHE:
-	  case HWLOC_OBJ_L4CACHE:
-	  case HWLOC_OBJ_L5CACHE:
-	  case HWLOC_OBJ_L1ICACHE:
-	  case HWLOC_OBJ_L2ICACHE:
-	  case HWLOC_OBJ_L3ICACHE:
-	    obj->attr->cache.size = procInfo[i].Cache.Size;
-	    obj->attr->cache.associativity = procInfo[i].Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo[i].Cache.Associativity ;
-	    obj->attr->cache.linesize = procInfo[i].Cache.LineSize;
-	    obj->attr->cache.depth = procInfo[i].Cache.Level;
-	    switch (procInfo->Cache.Type) {
-	      case CacheUnified:
-		obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-		break;
-	      case CacheData:
-		obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
-		break;
-	      case CacheInstruction:
-		obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
-		break;
-	      default:
-		hwloc_free_unlinked_object(obj);
-		continue;
-	    }
-	    break;
-	  case HWLOC_OBJ_GROUP:
-	    obj->attr->group.kind = procInfo[i].Relationship == RelationGroup ? HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP : HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN;
-	    break;
-	  default:
-	    break;
-	}
-	hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:GetLogicalProcessorInformation");
-      }
-
-      free(procInfo);
-  }
 
   if (GetLogicalProcessorInformationExProc) {
       HWLOC_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *procInfoTotal, *tmpprocInfoTotal, *procInfo;
