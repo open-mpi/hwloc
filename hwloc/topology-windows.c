@@ -381,7 +381,7 @@ hwloc_win_get_processor_groups(void)
 
   hwloc_debug("querying windows processor groups\n");
 
-  if (!GetActiveProcessorGroupCountProc || !GetLogicalProcessorInformationExProc)
+  if (!GetLogicalProcessorInformationExProc)
     goto error;
 
   nr_processor_groups = GetActiveProcessorGroupCountProc();
