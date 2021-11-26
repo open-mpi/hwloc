@@ -80,6 +80,37 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
   }
 }
 
+static void
+hwloc__levelzero_cqprops_get(ze_device_handle_t h,
+                             hwloc_obj_t osdev)
+{
+  ze_command_queue_group_properties_t *cqprops;
+  unsigned nr_cqprops = 0;
+  ze_result_t res;
+
+  res = zeDeviceGetCommandQueueGroupProperties(h, &nr_cqprops, NULL);
+  if (res != ZE_RESULT_SUCCESS || !nr_cqprops)
+    return;
+
+  cqprops = malloc(nr_cqprops * sizeof(*cqprops));
+  if (cqprops) {
+    res = zeDeviceGetCommandQueueGroupProperties(h, &nr_cqprops, cqprops);
+    if (res == ZE_RESULT_SUCCESS) {
+      unsigned k;
+      char tmp[32];
+      snprintf(tmp, sizeof(tmp), "%u", nr_cqprops);
+      hwloc_obj_add_info(osdev, "LevelZeroCQGroups", tmp);
+      for(k=0; k<nr_cqprops; k++) {
+        char name[32];
+        snprintf(name, sizeof(name), "LevelZeroCQGroup%u", k);
+        snprintf(tmp, sizeof(tmp), "%u*0x%lx", (unsigned) cqprops[k].numQueues, (unsigned long) cqprops[k].flags);
+        hwloc_obj_add_info(osdev, name, tmp);
+      }
+    }
+    free(cqprops);
+  }
+}
+
 static int
 hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -93,7 +124,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   enum hwloc_type_filter_e filter;
   ze_result_t res;
   ze_driver_handle_t *drh;
-  uint32_t nbdrivers, i, k, zeidx;
+  uint32_t nbdrivers, i, zeidx;
   int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early, 2 if ZES_ENABLE_SYSMAN=0 */
   char *env;
 
@@ -158,7 +189,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     }
 
     for(j=0; j<nbdevices; j++) {
-      unsigned nr_cqprops;
       zes_pci_properties_t pci;
       zes_device_handle_t sdvh = dvh[j];
       hwloc_obj_t osdev, parent;
@@ -178,27 +208,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 
       hwloc__levelzero_properties_get(dvh[j], osdev, sysman_maybe_missing);
 
-      nr_cqprops = 0;
-      res = zeDeviceGetCommandQueueGroupProperties(dvh[j], &nr_cqprops, NULL);
-      if (res == ZE_RESULT_SUCCESS && nr_cqprops) {
-        ze_command_queue_group_properties_t *cqprops;
-        cqprops = malloc(nr_cqprops * sizeof(*cqprops));
-        if (cqprops) {
-          res = zeDeviceGetCommandQueueGroupProperties(dvh[j], &nr_cqprops, cqprops);
-          if (res == ZE_RESULT_SUCCESS) {
-            char tmp[32];
-            snprintf(tmp, sizeof(tmp), "%u", nr_cqprops);
-            hwloc_obj_add_info(osdev, "LevelZeroCQGroups", tmp);
-            for(k=0; k<nr_cqprops; k++) {
-              char name[32];
-              snprintf(name, sizeof(name), "LevelZeroCQGroup%u", k);
-              snprintf(tmp, sizeof(tmp), "%u*0x%lx", (unsigned) cqprops[k].numQueues, (unsigned long) cqprops[k].flags);
-              hwloc_obj_add_info(osdev, name, tmp);
-            }
-          }
-          free(cqprops);
-        }
-      }
+      hwloc__levelzero_cqprops_get(dvh[j], osdev);
 
       parent = NULL;
       res = zesDevicePciGetProperties(sdvh, &pci);
