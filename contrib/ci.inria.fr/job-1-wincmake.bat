@@ -20,13 +20,13 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 cd %TARBALL:~0,-7%\contrib\windows-cmake
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake -DCMAKE_INSTALL_PREFIX=%cd%\install -DCMAKE_BUILD_TYPE=Release .
+cmake --install-prefix=%cd%/install -DCMAKE_BUILD_TYPE=Release -B build
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake --build .
+cmake --build build --parallel
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake --build . --target INSTALL
+cmake --install build
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 install\bin\lstopo-no-graphics.exe -v
@@ -36,6 +36,9 @@ install\bin\lstopo-no-graphics.exe --windows-processor-groups
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 install\bin\hwloc-info.exe --support
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+ctest --test-dir build -V
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 exit /b 0

@@ -167,4 +167,5 @@ EXTRA_DIST =    embedded/autogen.sh \
                 embedded/main.c \
                 embedded/run-embedded-tests.sh \
                 embedded/README.txt \
-                embedded/config/README.txt
+                embedded/config/README.txt \
+                CMakeLists.txt
