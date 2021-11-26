@@ -34,6 +34,10 @@ Version 2.7.0
 * Tools
   + Add --grey and --palette options to switch lstopo to greyscale or
     white-background-only graphics, or to tune individual colors.
+* Build
+  + Windows CMake builds now support non-MSVC compilers, detect several
+    features at build time, can build/run tests, etc.
+    Thanks to Michael Hirsch and Alexander Neumann .
 
 
 Version 2.6.0
