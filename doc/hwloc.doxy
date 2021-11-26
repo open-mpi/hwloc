@@ -1482,6 +1482,9 @@ are directly attached near their NUMA node
 Also, if hwloc could not discover PCI for some reason, PCI-related
 OS devices may also be attached directly to normal objects.
 
+Finally, OS <em>subdevices</em> may be exposed as OS devices children
+of another OS device. This is the case of LevelZero subdevices for instance.
+
 hwloc first tries to discover OS devices from the operating system,
 e.g. <em>eth0</em>, <em>sda</em> or <em>mlx4_0</em>.
 However, this ability is currently only available on Linux for some
@@ -1533,7 +1536,8 @@ components when I/O discovery is enabled and supported.
   <em>opencl1d3</em> for the fourth device of the second OpenCL platform
   ("OpenCL" subtype, from the  OpenCL component)</li>
  <li><em>ze0</em> for the first Level Zero device
-  ("LevelZero" subtype, from the levelzero component, using the oneAPI Level Zero library)</li>
+  ("LevelZero" subtype, from the levelzero component, using the oneAPI Level Zero library),
+  and <em>ze0.1</em> for its second subdevice (if any).</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   ("CUDA" subtype, from the CUDA component, using the NVIDIA CUDA Library)</li>
  <li><em>ve0</em> for the first NEC Vector Engine device
@@ -1981,6 +1985,12 @@ and SectorSize (in bytes).
 <dd>The index of the Level Zero driver within the list of drivers,
  and the index of the device within the list of devices managed by this driver.
 </dd>
+<dt>LevelZeroSubdevices (Level OS devices)</dt>
+<dd>The number of subdevices below this OS device.
+</dd>
+<dt>LevelZeroSubdeviceID (LevelZero OS subdevices)</dt>
+<dd>The index of this subdevice within its parent.
+</dd>
 <dt>LevelZeroDeviceType (LevelZero OS devices or subdevices)</dt>
 <dd>A string describing the type of device, for instance "GPU", "CPU", "FPGA", etc.
 </dd>
@@ -1988,7 +1998,7 @@ and SectorSize (in bytes).
 <dd>The number of slices in the devices, of subslices per slice,
  of execution units (EU) per subslice, and of threads per EU.
 </dd>
-<dt>LevelZeroCQGroups, LevelZeroCQGroup2 (LevelZero OS devices)</dt>
+<dt>LevelZeroCQGroups, LevelZeroCQGroup2 (LevelZero OS devices/subdevices)</dt>
 <dd>The number of completion queue groups, and the description of the third group
 (as <tt>N*0xX</tt> where <tt>N</tt> is the number of queues in the group,
  and <tt>0xX</tt> is the hexadecimal bitmask of <tt>ze_command_queue_group_property_flag_t</tt>
@@ -3041,6 +3051,7 @@ environment variable (see \ref envvar).
 <dd>
  This component creates co-processor OS device objects such as
  <em>ze0</em> for describing oneAPI Level Zero devices.
+ It may also create sub-OS-devices such as <em>ze0.0</em> inside those devices.
  <b>It may be built as a plugin</b>.
 </dd>
 <dt>cuda</dt>

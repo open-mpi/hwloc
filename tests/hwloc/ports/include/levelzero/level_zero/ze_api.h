@@ -24,8 +24,11 @@ typedef enum _ze_device_type {
   ZE_DEVICE_TYPE_VPU = 5
 } ze_device_type_t;
 
+#define ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE (1<<1)
+
 typedef struct ze_device_properties {
   ze_device_type_t type;
+  unsigned flags;
   uint32_t numThreadsPerEU;
   uint32_t numEUsPerSubslice;
   uint32_t numSubslicesPerSlice;
@@ -41,5 +44,6 @@ typedef struct ze_command_queue_group_properties {
 
 extern ze_result_t zeDeviceGetCommandQueueGroupProperties(ze_driver_handle_t, uint32_t *, ze_command_queue_group_properties_t *);
 
+extern ze_result_t zeDeviceGetSubDevices(ze_device_handle_t, uint32_t *, ze_device_handle_t*);
 
 #endif /* HWLOC_PORT_L0_ZE_API_H */

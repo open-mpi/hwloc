@@ -16,6 +16,7 @@ typedef struct {
   char *modelName;
   char *serialNumber;
   char *boardNumber;
+  unsigned numSubdevices;
 } zes_device_properties_t;
 
 typedef struct {

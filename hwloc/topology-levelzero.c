@@ -21,6 +21,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
   ze_result_t res;
   ze_device_properties_t prop;
   zes_device_properties_t prop2;
+  int is_subdevice = 0;
 
   memset(&prop, 0, sizeof(prop));
   res = zeDeviceGetProperties(h, &prop);
@@ -50,7 +51,14 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
     hwloc_obj_add_info(osdev, "LevelZeroDeviceNumEUsPerSubslice", tmp);
     snprintf(tmp, sizeof(tmp), "%u", prop.numThreadsPerEU);
     hwloc_obj_add_info(osdev, "LevelZeroDeviceNumThreadsPerEU", tmp);
+
+    if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
+      is_subdevice = 1;
   }
+
+  if (is_subdevice)
+    /* no need for the following info attrs in subdevices */
+    return;
 
   /* try to get additional info from sysman if enabled */
   memset(&prop2, 0, sizeof(prop2));
@@ -124,7 +132,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   enum hwloc_type_filter_e filter;
   ze_result_t res;
   ze_driver_handle_t *drh;
-  uint32_t nbdrivers, i, zeidx;
+  uint32_t nbdrivers, i, k, zeidx;
   int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early, 2 if ZES_ENABLE_SYSMAN=0 */
   char *env;
 
@@ -191,7 +199,8 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     for(j=0; j<nbdevices; j++) {
       zes_pci_properties_t pci;
       zes_device_handle_t sdvh = dvh[j];
-      hwloc_obj_t osdev, parent;
+      uint32_t nr_subdevices;
+      hwloc_obj_t osdev, parent, *subosdevs = NULL;
 
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       snprintf(buffer, sizeof(buffer), "ze%u", zeidx); // ze0d0 ?
@@ -210,6 +219,41 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 
       hwloc__levelzero_cqprops_get(dvh[j], osdev);
 
+      nr_subdevices = 0;
+      res = zeDeviceGetSubDevices(dvh[j], &nr_subdevices, NULL);
+      /* returns ZE_RESULT_ERROR_INVALID_ARGUMENT if there are no subdevices */
+      if (res == ZE_RESULT_SUCCESS && nr_subdevices > 0) {
+        zes_device_handle_t *subh;
+        char tmp[64];
+        snprintf(tmp, sizeof(tmp), "%u", nr_subdevices);
+        hwloc_obj_add_info(osdev, "LevelZeroSubdevices", tmp);
+        subh = malloc(nr_subdevices * sizeof(*subh));
+        subosdevs = malloc(nr_subdevices * sizeof(*subosdevs));
+        if (subosdevs && subh) {
+          zeDeviceGetSubDevices(dvh[j], &nr_subdevices, subh);
+          for(k=0; k<nr_subdevices; k++) {
+            subosdevs[k] = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
+            snprintf(buffer, sizeof(buffer), "ze%u.%u", zeidx, k);
+            subosdevs[k]->name = strdup(buffer);
+            subosdevs[k]->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+            subosdevs[k]->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+            subosdevs[k]->subtype = strdup("LevelZero");
+            hwloc_obj_add_info(subosdevs[k], "Backend", "LevelZero");
+            snprintf(tmp, sizeof(tmp), "%u", k);
+            hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
+
+            hwloc__levelzero_properties_get(dvh[j], subosdevs[k], sysman_maybe_missing);
+
+            hwloc__levelzero_cqprops_get(subh[k], subosdevs[k]);
+          }
+        } else {
+          free(subosdevs);
+          subosdevs = NULL;
+          nr_subdevices = 0;
+        }
+        free(subh);
+      }
+
       parent = NULL;
       res = zesDevicePciGetProperties(sdvh, &pci);
       if (res == ZE_RESULT_SUCCESS) {
@@ -227,6 +271,12 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
         parent = hwloc_get_root_obj(topology);
 
       hwloc_insert_object_by_parent(topology, parent, osdev);
+      if (nr_subdevices) {
+        for(k=0; k<nr_subdevices; k++)
+          if (subosdevs[k])
+            hwloc_insert_object_by_parent(topology, osdev, subosdevs[k]);
+        free(subosdevs);
+      }
       zeidx++;
     }
 
