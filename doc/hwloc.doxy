@@ -1998,6 +1998,12 @@ and SectorSize (in bytes).
 <dd>The number of slices in the devices, of subslices per slice,
  of execution units (EU) per subslice, and of threads per EU.
 </dd>
+<dt>LevelZeroHBMSize, LevelZeroDDRSize, LevelZeroMemorySize (LevelZero OS devices/subdevices)</dt>
+<dd>The amount of HBM or DDR memory (in kB) of a LevelZero device or subdevice.
+ If the type of memory could not be determined, the generic name LevelZeroMemorySize is used.
+ For devices that contain subdevices, the amount reported in the root device
+ includes the memories of all its subdevices.
+</dd>
 <dt>LevelZeroCQGroups, LevelZeroCQGroup2 (LevelZero OS devices/subdevices)</dt>
 <dd>The number of completion queue groups, and the description of the third group
 (as <tt>N*0xX</tt> where <tt>N</tt> is the number of queues in the group,

@@ -120,6 +120,198 @@ hwloc__levelzero_cqprops_get(ze_device_handle_t h,
 }
 
 static int
+hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
+                                        hwloc_obj_t root_osdev,
+                                        unsigned nr_osdevs, hwloc_obj_t *sub_osdevs)
+{
+  zes_mem_handle_t *mh;
+  uint32_t nr_mems;
+  ze_result_t res;
+  unsigned long long totalHBMkB = 0;
+  unsigned long long totalDDRkB = 0;
+
+  nr_mems = 0;
+  res = zesDeviceEnumMemoryModules(h, &nr_mems, NULL);
+  if (res != ZE_RESULT_SUCCESS)
+    return -1; /* notify that sysman failed */
+
+  hwloc_debug("L0/Sysman: found %u memory modules in osdev %s\n",
+              nr_mems, root_osdev->name);
+  if (!nr_mems)
+    return 0;
+
+  mh = malloc(nr_mems * sizeof(*mh));
+  if (mh) {
+    res = zesDeviceEnumMemoryModules(h, &nr_mems, mh);
+    if (res == ZE_RESULT_SUCCESS) {
+      unsigned m;
+      for(m=0; m<nr_mems; m++) {
+        zes_mem_properties_t mprop;
+        res = zesMemoryGetProperties(mh[m], &mprop);
+        if (res == ZE_RESULT_SUCCESS) {
+          const char *type;
+          hwloc_obj_t osdev;
+          char name[ZE_MAX_DEVICE_NAME+64], value[64];
+
+          if (!mprop.physicalSize) {
+            /* unknown, but memory state should have it */
+            zes_mem_state_t s;
+            res = zesMemoryGetState(mh[m], &s);
+            if (res == ZE_RESULT_SUCCESS) {
+              hwloc_debug("L0/Sysman: found size 0 for memory modules #%u, using memory state size instead\n", m);
+              mprop.physicalSize = s.size;
+            }
+          }
+
+          if (mprop.onSubdevice) {
+            if (mprop.subdeviceId >= nr_osdevs || !nr_osdevs || !sub_osdevs) {
+              if (!hwloc_hide_errors())
+                fprintf(stderr, "LevelZero: memory module #%u on unexpected subdeviceId #%u\n", m, mprop.subdeviceId);
+              osdev = NULL; /* we'll ignore it but we'll still agregate its subdevice memories into totalHBM/DDRkB */
+            } else {
+              osdev = sub_osdevs[mprop.subdeviceId];
+            }
+          } else {
+            osdev = root_osdev;
+          }
+          switch (mprop.type) {
+          case ZES_MEM_TYPE_HBM:
+            type = "HBM";
+            totalHBMkB += mprop.physicalSize >> 10;
+            break;
+          case ZES_MEM_TYPE_DDR:
+          case ZES_MEM_TYPE_DDR3:
+          case ZES_MEM_TYPE_DDR4:
+          case ZES_MEM_TYPE_DDR5:
+          case ZES_MEM_TYPE_LPDDR:
+          case ZES_MEM_TYPE_LPDDR3:
+          case ZES_MEM_TYPE_LPDDR4:
+          case ZES_MEM_TYPE_LPDDR5:
+            type = "DDR";
+            totalDDRkB += mprop.physicalSize >> 10;
+            break;
+          default:
+            type = "Memory";
+          }
+
+          hwloc_debug("L0/Sysman: found %llu bytes type %s for osdev %s (onsub %d subid %u)\n",
+                      (unsigned long long) mprop.physicalSize, type, osdev ? osdev->name : "NULL",
+                      mprop.onSubdevice, mprop.subdeviceId);
+          if (!osdev || !type || !mprop.physicalSize)
+            continue;
+
+          if (osdev != root_osdev) {
+            /* set the subdevice memory immediately */
+            snprintf(name, sizeof(name), "LevelZero%sSize", type);
+            snprintf(value, sizeof(value), "%llu", (unsigned long long) mprop.physicalSize >> 10);
+            hwloc_obj_add_info(osdev, name, value);
+          }
+        }
+      }
+    }
+    free(mh);
+  }
+
+  /* set the root device memory at the end, once subdevice memories were agregated */
+  if (totalHBMkB) {
+    char value[64];
+    snprintf(value, sizeof(value), "%llu", totalHBMkB);
+    hwloc_obj_add_info(root_osdev, "LevelZeroHBMSize", value);
+  }
+  if (totalDDRkB) {
+    char value[64];
+    snprintf(value, sizeof(value), "%llu", totalDDRkB);
+    hwloc_obj_add_info(root_osdev, "LevelZeroDDRSize", value);
+  }
+
+  return 0;
+}
+
+static void
+hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
+                                         hwloc_obj_t osdev)
+{
+  ze_device_memory_properties_t *mh;
+  uint32_t nr_mems;
+  ze_result_t res;
+
+  nr_mems = 0;
+  res = zeDeviceGetMemoryProperties(h, &nr_mems, NULL);
+  if (res != ZE_RESULT_SUCCESS || !nr_mems)
+    return;
+  hwloc_debug("L0/CoreAPI: found %u memories in osdev %s\n",
+              nr_mems, osdev->name);
+
+  mh = malloc(nr_mems * sizeof(*mh));
+  if (mh) {
+    res = zeDeviceGetMemoryProperties(h, &nr_mems, mh);
+    if (res == ZE_RESULT_SUCCESS) {
+      unsigned m;
+      for(m=0; m<nr_mems; m++) {
+        const char *_name = mh[m].name;
+        char name[300], value[64];
+        /* FIXME: discrete GPUs report 95% of the physical memory (what sysman sees)
+         * while integrated GPUs report 80% of the host RAM (sysman sees 0), adjust?
+         */
+        hwloc_debug("L0/CoreAPI: found memory name %s size %llu in osdev %s\n",
+                    mh[m].name, (unsigned long long) mh[m].totalSize, osdev->name);
+        if (!mh[m].totalSize)
+          continue;
+        if (!_name[0])
+          _name = "Memory";
+        snprintf(name, sizeof(name), "LevelZero%sSize", _name); /* HBM or DDR, or Memory if unknown */
+        snprintf(value, sizeof(value), "%llu", (unsigned long long) mh[m].totalSize >> 10);
+        hwloc_obj_add_info(osdev, name, value);
+      }
+    }
+    free(mh);
+  }
+}
+
+
+static void
+hwloc__levelzero_memory_get(zes_device_handle_t h, hwloc_obj_t root_osdev,
+                            unsigned nr_subdevices, zes_device_handle_t *subh, hwloc_obj_t *sub_osdevs)
+{
+  static int memory_from_coreapi = -1; /* 1 means coreapi, 0 means sysman, -1 means sysman if available or coreapi otherwise */
+  static int first = 1;
+
+  if (first) {
+    char *env;
+    env = getenv("HWLOC_L0_COREAPI_MEMORY");
+    if (env)
+      memory_from_coreapi = atoi(env);
+
+    if (memory_from_coreapi == -1) {
+      int ret = hwloc__levelzero_memory_get_from_sysman(h, root_osdev, nr_subdevices, sub_osdevs);
+      if (!ret) {
+        /* sysman worked, we're done, disable coreapi for next time */
+        hwloc_debug("levelzero: sysman/memory succeeded, disabling coreapi memory queries\n");
+        memory_from_coreapi = 0;
+        return;
+      }
+      /* sysman failed, enable coreapi */
+      hwloc_debug("levelzero: sysman/memory failed, enabling coreapi memory queries\n");
+      memory_from_coreapi = 1;
+    }
+
+    first = 0;
+  }
+
+  if (memory_from_coreapi == 1) {
+    unsigned k;
+    hwloc__levelzero_memory_get_from_coreapi(h, root_osdev);
+    for(k=0; k<nr_subdevices; k++)
+      hwloc__levelzero_memory_get_from_coreapi(subh[k], sub_osdevs[k]);
+  } else {
+    hwloc__levelzero_memory_get_from_sysman(h, root_osdev, nr_subdevices, sub_osdevs);
+    /* no need to call hwloc__levelzero_memory_get() on subdevices,
+     * the call on the root device is enough (and identical to a call on subdevices)
+     */
+  }
+}
+
+static int
 hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
   /*
@@ -200,6 +392,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     for(j=0; j<nbdevices; j++) {
       zes_pci_properties_t pci;
       zes_device_handle_t sdvh = dvh[j];
+      zes_device_handle_t *subh = NULL;
       uint32_t nr_subdevices;
       hwloc_obj_t osdev, parent, *subosdevs = NULL;
 
@@ -224,7 +417,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       res = zeDeviceGetSubDevices(dvh[j], &nr_subdevices, NULL);
       /* returns ZE_RESULT_ERROR_INVALID_ARGUMENT if there are no subdevices */
       if (res == ZE_RESULT_SUCCESS && nr_subdevices > 0) {
-        zes_device_handle_t *subh;
         char tmp[64];
         snprintf(tmp, sizeof(tmp), "%u", nr_subdevices);
         hwloc_obj_add_info(osdev, "LevelZeroSubdevices", tmp);
@@ -249,11 +441,14 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
           }
         } else {
           free(subosdevs);
+          free(subh);
           subosdevs = NULL;
           nr_subdevices = 0;
         }
-        free(subh);
       }
+
+      /* get all memory info at once */
+      hwloc__levelzero_memory_get(dvh[j], osdev, nr_subdevices, subh, subosdevs);
 
       parent = NULL;
       res = zesDevicePciGetProperties(sdvh, &pci);
@@ -277,6 +472,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
           if (subosdevs[k])
             hwloc_insert_object_by_parent(topology, osdev, subosdevs[k]);
         free(subosdevs);
+        free(subh);
       }
       zeidx++;
     }

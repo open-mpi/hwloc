@@ -9,6 +9,8 @@
 typedef int ze_result_t;
 #define ZE_RESULT_SUCCESS 0
 
+#define ZE_MAX_DEVICE_NAME 64
+
 typedef void * ze_driver_handle_t;
 typedef void * ze_device_handle_t;
 
@@ -45,5 +47,12 @@ typedef struct ze_command_queue_group_properties {
 extern ze_result_t zeDeviceGetCommandQueueGroupProperties(ze_driver_handle_t, uint32_t *, ze_command_queue_group_properties_t *);
 
 extern ze_result_t zeDeviceGetSubDevices(ze_device_handle_t, uint32_t *, ze_device_handle_t*);
+
+typedef struct ze_device_memory_properties {
+  uint64_t totalSize;
+  char *name;
+} ze_device_memory_properties_t;
+
+extern ze_result_t zeDeviceGetMemoryProperties(ze_device_handle_t, uint32_t *, ze_device_memory_properties_t*);
 
 #endif /* HWLOC_PORT_L0_ZE_API_H */
