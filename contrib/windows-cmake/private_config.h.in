@@ -294,10 +294,6 @@
 /* #undef HAVE_SYSCTLBYNAME */
 
 /* Define to 1 if the system has the type
-   `SYSTEM_LOGICAL_PROCESSOR_INFORMATION'. */
-#define HAVE_SYSTEM_LOGICAL_PROCESSOR_INFORMATION 1
-
-/* Define to 1 if the system has the type
    `SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX'. */
 #define HAVE_SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX 1
 
