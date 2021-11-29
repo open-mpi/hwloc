@@ -17,34 +17,34 @@
 
 #include "lstopo.h"
 
-#define RGB(r,g,b) (struct lstopo_color) { r, g, b, 0 }
-#define RGB_GREY(x) (struct lstopo_color) { x, x, x, 0 }
-#define RGB_WHITE RGB_GREY(0xff)
-#define RGB_BLACK RGB_GREY(0)
+#define LSTOPO_COLOR(r,g,b) (struct lstopo_color) { r, g, b, 0 }
+#define LSTOPO_COLOR_GREY(x) (struct lstopo_color) { x, x, x, 0 }
+#define LSTOPO_COLOR_WHITE LSTOPO_COLOR_GREY(0xff)
+#define LSTOPO_COLOR_BLACK LSTOPO_COLOR_GREY(0)
 
 #define EPOXY_R_COLOR 0xe7
 #define EPOXY_G_COLOR 0xff
 #define EPOXY_B_COLOR 0xb5
-#define RGB_EPOXY RGB(EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR)
+#define LSTOPO_COLOR_EPOXY LSTOPO_COLOR(EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR)
 
 #define EPOXY_GREY_COLOR ((EPOXY_R_COLOR+EPOXY_G_COLOR+EPOXY_B_COLOR)/3)
-#define RGB_GREY_EPOXY RGB_GREY(EPOXY_GREY_COLOR)
+#define LSTOPO_COLOR_GREY_EPOXY LSTOPO_COLOR_GREY(EPOXY_GREY_COLOR)
 
 #define DARK_EPOXY_R_COLOR ((EPOXY_R_COLOR * 100) / 110)
 #define DARK_EPOXY_G_COLOR ((EPOXY_G_COLOR * 100) / 110)
 #define DARK_EPOXY_B_COLOR ((EPOXY_B_COLOR * 100) / 110)
-#define RGB_DARK_EPOXY RGB(DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR)
+#define LSTOPO_COLOR_DARK_EPOXY LSTOPO_COLOR(DARK_EPOXY_R_COLOR, DARK_EPOXY_G_COLOR, DARK_EPOXY_B_COLOR)
 
 #define DARK_EPOXY_GREY_COLOR ((EPOXY_GREY_COLOR * 100) / 110)
-#define RGB_GREY_DARK_EPOXY RGB_GREY(DARK_EPOXY_GREY_COLOR)
+#define LSTOPO_COLOR_GREY_DARK_EPOXY LSTOPO_COLOR_GREY(DARK_EPOXY_GREY_COLOR)
 
 #define DARKER_EPOXY_R_COLOR ((DARK_EPOXY_R_COLOR * 100) / 110)
 #define DARKER_EPOXY_G_COLOR ((DARK_EPOXY_G_COLOR * 100) / 110)
 #define DARKER_EPOXY_B_COLOR ((DARK_EPOXY_B_COLOR * 100) / 110)
-#define RGB_DARKER_EPOXY RGB(DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR)
+#define LSTOPO_COLOR_DARKER_EPOXY LSTOPO_COLOR(DARKER_EPOXY_R_COLOR, DARKER_EPOXY_G_COLOR, DARKER_EPOXY_B_COLOR)
 
 #define DARKER_EPOXY_GREY_COLOR ((DARK_EPOXY_GREY_COLOR * 100) / 110)
-#define RGB_GREY_DARKER_EPOXY RGB_GREY(DARKER_EPOXY_GREY_COLOR)
+#define LSTOPO_COLOR_GREY_DARKER_EPOXY LSTOPO_COLOR_GREY(DARKER_EPOXY_GREY_COLOR)
 
 struct lstopo_color_palette lstopo_main_palette, lstopo_grey_palette, lstopo_white_palette;
 
@@ -55,57 +55,57 @@ lstopo_palette_init(struct lstopo_output *loutput)
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
   /* each of these colors must be declared in declare_colors() */
-  lstopo_main_palette.white =            RGB_WHITE;
-  lstopo_main_palette.black =            RGB_BLACK;
-  lstopo_main_palette.machine =          RGB_WHITE;
-  lstopo_main_palette.group =            RGB_WHITE;
-  lstopo_main_palette.package =          RGB_DARK_EPOXY;
-  lstopo_main_palette.group_in_package = RGB_EPOXY;
-  lstopo_main_palette.die =              RGB_EPOXY;
-  lstopo_main_palette.core =             RGB_GREY(0xbe);
-  lstopo_main_palette.pu =               RGB_WHITE;
-  lstopo_main_palette.numanode =         RGB(0xef, 0xdf, 0xde);
-  lstopo_main_palette.memories =         RGB(0xf2, 0xe8, 0xe8); /* slightly lighter than numanode */
-  lstopo_main_palette.cache =            RGB_WHITE;
-  lstopo_main_palette.pcidev =           RGB_DARKER_EPOXY;
-  lstopo_main_palette.osdev =            RGB_GREY(0xde);
-  lstopo_main_palette.bridge =           RGB_WHITE;
-  lstopo_main_palette.misc =             RGB_WHITE;
-  lstopo_main_palette.binding =          RGB(0, 0xff, 0); /* green */
-  lstopo_main_palette.disallowed =       RGB(0xff, 0, 0); /* red */
-  lstopo_main_palette.process =          RGB(0xff, 0xff, 0); /* yellow */
+  lstopo_main_palette.white =            LSTOPO_COLOR_WHITE;
+  lstopo_main_palette.black =            LSTOPO_COLOR_BLACK;
+  lstopo_main_palette.machine =          LSTOPO_COLOR_WHITE;
+  lstopo_main_palette.group =            LSTOPO_COLOR_WHITE;
+  lstopo_main_palette.package =          LSTOPO_COLOR_DARK_EPOXY;
+  lstopo_main_palette.group_in_package = LSTOPO_COLOR_EPOXY;
+  lstopo_main_palette.die =              LSTOPO_COLOR_EPOXY;
+  lstopo_main_palette.core =             LSTOPO_COLOR_GREY(0xbe);
+  lstopo_main_palette.pu =               LSTOPO_COLOR_WHITE;
+  lstopo_main_palette.numanode =         LSTOPO_COLOR(0xef, 0xdf, 0xde);
+  lstopo_main_palette.memories =         LSTOPO_COLOR(0xf2, 0xe8, 0xe8); /* slightly lighter than numanode */
+  lstopo_main_palette.cache =            LSTOPO_COLOR_WHITE;
+  lstopo_main_palette.pcidev =           LSTOPO_COLOR_DARKER_EPOXY;
+  lstopo_main_palette.osdev =            LSTOPO_COLOR_GREY(0xde);
+  lstopo_main_palette.bridge =           LSTOPO_COLOR_WHITE;
+  lstopo_main_palette.misc =             LSTOPO_COLOR_WHITE;
+  lstopo_main_palette.binding =          LSTOPO_COLOR(0, 0xff, 0); /* green */
+  lstopo_main_palette.disallowed =       LSTOPO_COLOR(0xff, 0, 0); /* red */
+  lstopo_main_palette.process =          LSTOPO_COLOR(0xff, 0xff, 0); /* yellow */
 
   memcpy(&lstopo_grey_palette, &lstopo_main_palette, sizeof(lstopo_main_palette));
   /* replace non-grey colors by some grey */
-  lstopo_grey_palette.package =          RGB_GREY_DARK_EPOXY;
-  lstopo_grey_palette.group_in_package = RGB_GREY_EPOXY;
-  lstopo_grey_palette.die =              RGB_GREY_EPOXY;
-  lstopo_grey_palette.numanode =         RGB_GREY(0xe4);
-  lstopo_grey_palette.memories =         RGB_GREY(0xe8); /* slightly lighter than numanode */
-  lstopo_grey_palette.pcidev =           RGB_GREY_DARKER_EPOXY;
-  lstopo_grey_palette.binding =          RGB_GREY(0xbb);
-  lstopo_grey_palette.disallowed =       RGB_GREY(0x77);
-  lstopo_grey_palette.process =          RGB_GREY(0x99);
+  lstopo_grey_palette.package =          LSTOPO_COLOR_GREY_DARK_EPOXY;
+  lstopo_grey_palette.group_in_package = LSTOPO_COLOR_GREY_EPOXY;
+  lstopo_grey_palette.die =              LSTOPO_COLOR_GREY_EPOXY;
+  lstopo_grey_palette.numanode =         LSTOPO_COLOR_GREY(0xe4);
+  lstopo_grey_palette.memories =         LSTOPO_COLOR_GREY(0xe8); /* slightly lighter than numanode */
+  lstopo_grey_palette.pcidev =           LSTOPO_COLOR_GREY_DARKER_EPOXY;
+  lstopo_grey_palette.binding =          LSTOPO_COLOR_GREY(0xbb);
+  lstopo_grey_palette.disallowed =       LSTOPO_COLOR_GREY(0x77);
+  lstopo_grey_palette.process =          LSTOPO_COLOR_GREY(0x99);
 
   memcpy(&lstopo_white_palette, &lstopo_main_palette, sizeof(lstopo_main_palette));
   /* replace everything but white/black with white */
-  lstopo_white_palette.machine =          RGB_WHITE;
-  lstopo_white_palette.group =            RGB_WHITE;
-  lstopo_white_palette.package =          RGB_WHITE;
-  lstopo_white_palette.group_in_package = RGB_WHITE;
-  lstopo_white_palette.die =              RGB_WHITE;
-  lstopo_white_palette.core =             RGB_WHITE;
-  lstopo_white_palette.pu =               RGB_WHITE;
-  lstopo_white_palette.numanode =         RGB_WHITE;
-  lstopo_white_palette.memories =         RGB_WHITE;
-  lstopo_white_palette.cache =            RGB_WHITE;
-  lstopo_white_palette.pcidev =           RGB_WHITE;
-  lstopo_white_palette.osdev =            RGB_WHITE;
-  lstopo_white_palette.bridge =           RGB_WHITE;
-  lstopo_white_palette.misc =             RGB_WHITE;
-  lstopo_white_palette.binding =          RGB_WHITE;
-  lstopo_white_palette.disallowed =       RGB_WHITE;
-  lstopo_white_palette.process =          RGB_WHITE;
+  lstopo_white_palette.machine =          LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.group =            LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.package =          LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.group_in_package = LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.die =              LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.core =             LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.pu =               LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.numanode =         LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.memories =         LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.cache =            LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.pcidev =           LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.osdev =            LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.bridge =           LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.misc =             LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.binding =          LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.disallowed =       LSTOPO_COLOR_WHITE;
+  lstopo_white_palette.process =          LSTOPO_COLOR_WHITE;
 
 #ifdef HWLOC_HAVE_GCC_W_MISSING_FIELD_INITIALIZERS
 #pragma GCC diagnostic warning "-Wmissing-field-initializers"
