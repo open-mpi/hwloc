@@ -16,6 +16,24 @@ extern ze_result_t zeInit(int);
 extern ze_result_t zeDriverGet(uint32_t *, ze_driver_handle_t *);
 extern ze_result_t zeDeviceGet(ze_driver_handle_t, uint32_t *, ze_device_handle_t *);
 
+typedef enum _ze_device_type {
+  ZE_DEVICE_TYPE_GPU = 1,
+  ZE_DEVICE_TYPE_CPU = 2,
+  ZE_DEVICE_TYPE_FPGA = 3,
+  ZE_DEVICE_TYPE_MCA = 4,
+  ZE_DEVICE_TYPE_VPU = 5
+} ze_device_type_t;
+
+typedef struct ze_device_properties {
+  ze_device_type_t type;
+  uint32_t numThreadsPerEU;
+  uint32_t numEUsPerSubslice;
+  uint32_t numSubslicesPerSlice;
+  uint32_t numSlices;
+} ze_device_properties_t;
+
+extern ze_result_t zeDeviceGetProperties(ze_device_handle_t, ze_device_properties_t *);
+
 typedef struct ze_command_queue_group_properties {
   unsigned long flags;
   unsigned numQueues;

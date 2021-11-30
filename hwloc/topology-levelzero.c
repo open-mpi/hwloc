@@ -14,6 +14,72 @@
 #include <level_zero/ze_api.h>
 #include <level_zero/zes_api.h>
 
+static void
+hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
+                                int sysman_maybe_missing)
+{
+  ze_result_t res;
+  ze_device_properties_t prop;
+  zes_device_properties_t prop2;
+
+  memset(&prop, 0, sizeof(prop));
+  res = zeDeviceGetProperties(h, &prop);
+  if (res == ZE_RESULT_SUCCESS) {
+    /* name is the model name followed by the deviceID
+     * flags 1<<0 means integrated (vs discrete).
+     */
+    char tmp[64];
+    const char *type;
+    switch (prop.type) {
+    case ZE_DEVICE_TYPE_GPU: type = "GPU"; break;
+    case ZE_DEVICE_TYPE_CPU: type = "CPU"; break;
+    case ZE_DEVICE_TYPE_FPGA: type = "FPGA"; break;
+    case ZE_DEVICE_TYPE_MCA: type = "MCA"; break;
+    case ZE_DEVICE_TYPE_VPU: type = "VPU"; break;
+    default:
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/levelzero: unexpected device type %u\n", (unsigned) prop.type);
+      type = "Unknown";
+    }
+    hwloc_obj_add_info(osdev, "LevelZeroDeviceType", type);
+    snprintf(tmp, sizeof(tmp), "%u", prop.numSlices);
+    hwloc_obj_add_info(osdev, "LevelZeroDeviceNumSlices", tmp);
+    snprintf(tmp, sizeof(tmp), "%u", prop.numSubslicesPerSlice);
+    hwloc_obj_add_info(osdev, "LevelZeroDeviceNumSubslicesPerSlice", tmp);
+    snprintf(tmp, sizeof(tmp), "%u", prop.numEUsPerSubslice);
+    hwloc_obj_add_info(osdev, "LevelZeroDeviceNumEUsPerSubslice", tmp);
+    snprintf(tmp, sizeof(tmp), "%u", prop.numThreadsPerEU);
+    hwloc_obj_add_info(osdev, "LevelZeroDeviceNumThreadsPerEU", tmp);
+  }
+
+  /* try to get additional info from sysman if enabled */
+  memset(&prop2, 0, sizeof(prop2));
+  res = zesDeviceGetProperties(h, &prop2);
+  if (res == ZE_RESULT_SUCCESS) {
+    /* old implementations may return "Unknown", recent may return "unknown" */
+    if (strcasecmp((const char *) prop2.vendorName, "Unknown"))
+      hwloc_obj_add_info(osdev, "LevelZeroVendor", (const char *) prop2.vendorName);
+    if (strcasecmp((const char *) prop2.vendorName, "Unknown"))
+      hwloc_obj_add_info(osdev, "LevelZeroModel", (const char *) prop2.modelName);
+    if (strcasecmp((const char *) prop2.brandName, "Unknown"))
+      hwloc_obj_add_info(osdev, "LevelZeroBrand", (const char *) prop2.brandName);
+    if (strcasecmp((const char *) prop2.serialNumber, "Unknown"))
+      hwloc_obj_add_info(osdev, "LevelZeroSerialNumber", (const char *) prop2.serialNumber);
+    if (strcasecmp((const char *) prop2.boardNumber, "Unknown"))
+      hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop2.boardNumber);
+  } else {
+    static int warned = 0;
+    if (!warned) {
+      if (sysman_maybe_missing == 1 && !hwloc_hide_errors())
+        fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
+      else if (sysman_maybe_missing == 2 && !hwloc_hide_errors())
+        fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
+      warned = 1;
+    }
+    /* continue in degraded mode, we'll miss locality and some attributes */
+  }
+}
+
 static int
 hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -45,7 +111,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   env = getenv("ZES_ENABLE_SYSMAN");
   if (!env) {
     putenv((char *) "ZES_ENABLE_SYSMAN=1");
-    /* we'll warn below if we fail to get zes devices */
+    /* we'll warn in hwloc__levelzero_properties_get() if we fail to get zes devices */
     sysman_maybe_missing = 1;
   } else if (!atoi(env)) {
     sysman_maybe_missing = 2;
@@ -92,7 +158,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     }
 
     for(j=0; j<nbdevices; j++) {
-      zes_device_properties_t prop;
       unsigned nr_cqprops;
       zes_pci_properties_t pci;
       zes_device_handle_t sdvh = dvh[j];
@@ -111,31 +176,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      memset(&prop, 0, sizeof(prop));
-      res = zesDeviceGetProperties(sdvh, &prop);
-      if (res == ZE_RESULT_SUCCESS) {
-        /* old implementations may return "Unknown", recent may return "unknown" */
-        if (strcasecmp((const char *) prop.vendorName, "Unknown"))
-          hwloc_obj_add_info(osdev, "LevelZeroVendor", (const char *) prop.vendorName);
-        if (strcasecmp((const char *) prop.vendorName, "Unknown"))
-          hwloc_obj_add_info(osdev, "LevelZeroModel", (const char *) prop.modelName);
-        if (strcasecmp((const char *) prop.brandName, "Unknown"))
-          hwloc_obj_add_info(osdev, "LevelZeroBrand", (const char *) prop.brandName);
-        if (strcasecmp((const char *) prop.serialNumber, "Unknown"))
-          hwloc_obj_add_info(osdev, "LevelZeroSerialNumber", (const char *) prop.serialNumber);
-        if (strcasecmp((const char *) prop.boardNumber, "Unknown"))
-          hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop.boardNumber);
-      } else {
-        static int warned = 0;
-        if (!warned) {
-          if (sysman_maybe_missing == 1 && !hwloc_hide_errors())
-            fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
-          else if (sysman_maybe_missing == 2 && !hwloc_hide_errors())
-            fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
-          warned = 1;
-        }
-        /* continue in degraded mode, we'll miss locality and some attributes */
-      }
+      hwloc__levelzero_properties_get(dvh[j], osdev, sysman_maybe_missing);
 
       nr_cqprops = 0;
       res = zeDeviceGetCommandQueueGroupProperties(dvh[j], &nr_cqprops, NULL);

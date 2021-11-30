@@ -1981,6 +1981,13 @@ and SectorSize (in bytes).
 <dd>The index of the Level Zero driver within the list of drivers,
  and the index of the device within the list of devices managed by this driver.
 </dd>
+<dt>LevelZeroDeviceType (LevelZero OS devices or subdevices)</dt>
+<dd>A string describing the type of device, for instance "GPU", "CPU", "FPGA", etc.
+</dd>
+<dt>LevelZeroDeviceNumSlices, LevelZeroDeviceNumSubslicesPerSlice, LevelZeroDeviceNumEUsPerSubslice, LevelZeroDeviceNumThreadsPerEU  (LevelZero OS devices or subdevices)</dt>
+<dd>The number of slices in the devices, of subslices per slice,
+ of execution units (EU) per subslice, and of threads per EU.
+</dd>
 <dt>LevelZeroCQGroups, LevelZeroCQGroup2 (LevelZero OS devices)</dt>
 <dd>The number of completion queue groups, and the description of the third group
 (as <tt>N*0xX</tt> where <tt>N</tt> is the number of queues in the group,
