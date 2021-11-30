@@ -133,10 +133,14 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
         if (strcmp((const char *) prop.boardNumber, "Unknown"))
           hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop.boardNumber);
       } else {
-        if (sysman_maybe_missing == 1 && !hwloc_hide_errors())
-          fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
-        else if (sysman_maybe_missing == 2 && !hwloc_hide_errors())
-          fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
+        static int warned = 0;
+        if (!warned) {
+          if (sysman_maybe_missing == 1 && !hwloc_hide_errors())
+            fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
+          else if (sysman_maybe_missing == 2 && !hwloc_hide_errors())
+            fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
+          warned = 1;
+        }
         /* continue in degraded mode, we'll miss locality and some attributes */
       }
 
