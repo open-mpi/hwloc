@@ -98,16 +98,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       zes_device_handle_t sdvh = dvh[j];
       hwloc_obj_t osdev, parent;
 
-      res = zesDeviceGetProperties(sdvh, &prop);
-      if (res != ZE_RESULT_SUCCESS) {
-        /* L0 was likely initialized without sysman, don't bother */
-        if (sysman_maybe_missing == 1 && !hwloc_hide_errors())
-          fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
-        else if (sysman_maybe_missing == 2 && !hwloc_hide_errors())
-          fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
-        continue;
-      }
-
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       snprintf(buffer, sizeof(buffer), "ze%u", zeidx); // ze0d0 ?
       osdev->name = strdup(buffer);
@@ -121,24 +111,34 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      /* these strings aren't useful with current implementations:
-       * prop.vendorName is "Unknown" or "Intel(R) Corporation"
-       * prop.modelName is "0x1234" (PCI device id)
-       * prop.brandName is "Unknown" (subvendor name)
-       * prop.serialNumber is "Unknown"
-       * prop.boardNumber is "Unknown"
-       */
-      if (strcmp((const char *) prop.vendorName, "Unknown"))
-        hwloc_obj_add_info(osdev, "LevelZeroVendor", (const char *) prop.vendorName);
-      if (strcmp((const char *) prop.vendorName, "Unknown"))
-        /* Model is always "0x...." in early implementations */
-        hwloc_obj_add_info(osdev, "LevelZeroModel", (const char *) prop.modelName);
-      if (strcmp((const char *) prop.brandName, "Unknown"))
-        hwloc_obj_add_info(osdev, "LevelZeroBrand", (const char *) prop.brandName);
-      if (strcmp((const char *) prop.serialNumber, "Unknown"))
-        hwloc_obj_add_info(osdev, "LevelZeroSerialNumber", (const char *) prop.serialNumber);
-      if (strcmp((const char *) prop.boardNumber, "Unknown"))
-        hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop.boardNumber);
+      memset(&prop, 0, sizeof(prop));
+      res = zesDeviceGetProperties(sdvh, &prop);
+      if (res == ZE_RESULT_SUCCESS) {
+        /* these strings aren't useful with current implementations:
+         * prop.vendorName is "Unknown" or "Intel(R) Corporation"
+         * prop.modelName is "0x1234" (PCI device id)
+         * prop.brandName is "Unknown" (subvendor name)
+         * prop.serialNumber is "Unknown"
+         * prop.boardNumber is "Unknown"
+         */
+        if (strcmp((const char *) prop.vendorName, "Unknown"))
+          hwloc_obj_add_info(osdev, "LevelZeroVendor", (const char *) prop.vendorName);
+        if (strcmp((const char *) prop.vendorName, "Unknown"))
+          /* Model is always "0x...." in early implementations */
+          hwloc_obj_add_info(osdev, "LevelZeroModel", (const char *) prop.modelName);
+        if (strcmp((const char *) prop.brandName, "Unknown"))
+          hwloc_obj_add_info(osdev, "LevelZeroBrand", (const char *) prop.brandName);
+        if (strcmp((const char *) prop.serialNumber, "Unknown"))
+          hwloc_obj_add_info(osdev, "LevelZeroSerialNumber", (const char *) prop.serialNumber);
+        if (strcmp((const char *) prop.boardNumber, "Unknown"))
+          hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop.boardNumber);
+      } else {
+        if (sysman_maybe_missing == 1 && !hwloc_hide_errors())
+          fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
+        else if (sysman_maybe_missing == 2 && !hwloc_hide_errors())
+          fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
+        /* continue in degraded mode, we'll miss locality and some attributes */
+      }
 
       nr_cqprops = 0;
       res = zeDeviceGetCommandQueueGroupProperties(dvh[j], &nr_cqprops, NULL);
