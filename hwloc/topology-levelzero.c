@@ -114,23 +114,16 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       memset(&prop, 0, sizeof(prop));
       res = zesDeviceGetProperties(sdvh, &prop);
       if (res == ZE_RESULT_SUCCESS) {
-        /* these strings aren't useful with current implementations:
-         * prop.vendorName is "Unknown" or "Intel(R) Corporation"
-         * prop.modelName is "0x1234" (PCI device id)
-         * prop.brandName is "Unknown" (subvendor name)
-         * prop.serialNumber is "Unknown"
-         * prop.boardNumber is "Unknown"
-         */
-        if (strcmp((const char *) prop.vendorName, "Unknown"))
+        /* old implementations may return "Unknown", recent may return "unknown" */
+        if (strcasecmp((const char *) prop.vendorName, "Unknown"))
           hwloc_obj_add_info(osdev, "LevelZeroVendor", (const char *) prop.vendorName);
-        if (strcmp((const char *) prop.vendorName, "Unknown"))
-          /* Model is always "0x...." in early implementations */
+        if (strcasecmp((const char *) prop.vendorName, "Unknown"))
           hwloc_obj_add_info(osdev, "LevelZeroModel", (const char *) prop.modelName);
-        if (strcmp((const char *) prop.brandName, "Unknown"))
+        if (strcasecmp((const char *) prop.brandName, "Unknown"))
           hwloc_obj_add_info(osdev, "LevelZeroBrand", (const char *) prop.brandName);
-        if (strcmp((const char *) prop.serialNumber, "Unknown"))
+        if (strcasecmp((const char *) prop.serialNumber, "Unknown"))
           hwloc_obj_add_info(osdev, "LevelZeroSerialNumber", (const char *) prop.serialNumber);
-        if (strcmp((const char *) prop.boardNumber, "Unknown"))
+        if (strcasecmp((const char *) prop.boardNumber, "Unknown"))
           hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop.boardNumber);
       } else {
         static int warned = 0;
