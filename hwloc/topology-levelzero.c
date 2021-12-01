@@ -67,7 +67,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
     /* old implementations may return "Unknown", recent may return "unknown" */
     if (strcasecmp((const char *) prop2.vendorName, "Unknown"))
       hwloc_obj_add_info(osdev, "LevelZeroVendor", (const char *) prop2.vendorName);
-    if (strcasecmp((const char *) prop2.vendorName, "Unknown"))
+    if (strcasecmp((const char *) prop2.modelName, "Unknown"))
       hwloc_obj_add_info(osdev, "LevelZeroModel", (const char *) prop2.modelName);
     if (strcasecmp((const char *) prop2.brandName, "Unknown"))
       hwloc_obj_add_info(osdev, "LevelZeroBrand", (const char *) prop2.brandName);
