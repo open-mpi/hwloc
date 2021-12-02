@@ -57,7 +57,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
   }
 
   if (is_subdevice)
-    /* no need for the following info attrs in subdevices */
+    /* sysman API on subdevice returns the same as root device, and we don't need those duplicate attributes */
     return;
 
   /* try to get additional info from sysman if enabled */
@@ -143,7 +143,8 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     return 0;
 
   /* Tell L0 to create sysman devices.
-   * If somebody already initialized L0 without Sysman, zesDeviceGetProperties() will fail below.
+   * If somebody already initialized L0 without Sysman,
+   * zesDeviceGetProperties() will fail and warn in hwloc__levelzero_properties_get().
    * The lib constructor and Windows DllMain tried to set ZES_ENABLE_SYSMAN=1 early (see topology.c),
    * we try again in case they didn't.
    */
