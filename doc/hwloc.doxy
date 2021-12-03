@@ -1939,7 +1939,7 @@ and SectorSize (in bytes).
 <dt>LevelZeroVendor, LevelZeroModel, LevelZeroBrand,</dt>
 <dt>LevelZeroSerialNumber, LevelZeroBoardNumber (LevelZero OS devices)</dt>
 <dd>
- The name of the vendor, device mode, brand of a Level Zero device,
+ The name of the vendor, device model, brand of a Level Zero device,
  and its serial and board numbers.
 </dd>
 <dt>LevelZeroDriverIndex, LevelZeroDriverDeviceIndex (LevelZero OS devices)</dt>
