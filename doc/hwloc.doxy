@@ -1994,7 +1994,8 @@ and SectorSize (in bytes).
 <dt>LevelZeroDeviceType (LevelZero OS devices or subdevices)</dt>
 <dd>A string describing the type of device, for instance "GPU", "CPU", "FPGA", etc.
 </dd>
-<dt>LevelZeroDeviceNumSlices, LevelZeroDeviceNumSubslicesPerSlice, LevelZeroDeviceNumEUsPerSubslice, LevelZeroDeviceNumThreadsPerEU  (LevelZero OS devices or subdevices)</dt>
+<dt>LevelZeroNumSlices, LevelZeroNumSubslicesPerSlice,</dt>
+<dt>LevelZeroNumEUsPerSubslice, LevelZeroNumThreadsPerEU (LevelZero OS devices or subdevices)</dt>
 <dd>The number of slices in the devices, of subslices per slice,
  of execution units (EU) per subslice, and of threads per EU.
 </dd>

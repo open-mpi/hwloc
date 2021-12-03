@@ -44,13 +44,13 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
     }
     hwloc_obj_add_info(osdev, "LevelZeroDeviceType", type);
     snprintf(tmp, sizeof(tmp), "%u", prop.numSlices);
-    hwloc_obj_add_info(osdev, "LevelZeroDeviceNumSlices", tmp);
+    hwloc_obj_add_info(osdev, "LevelZeroNumSlices", tmp);
     snprintf(tmp, sizeof(tmp), "%u", prop.numSubslicesPerSlice);
-    hwloc_obj_add_info(osdev, "LevelZeroDeviceNumSubslicesPerSlice", tmp);
+    hwloc_obj_add_info(osdev, "LevelZeroNumSubslicesPerSlice", tmp);
     snprintf(tmp, sizeof(tmp), "%u", prop.numEUsPerSubslice);
-    hwloc_obj_add_info(osdev, "LevelZeroDeviceNumEUsPerSubslice", tmp);
+    hwloc_obj_add_info(osdev, "LevelZeroNumEUsPerSubslice", tmp);
     snprintf(tmp, sizeof(tmp), "%u", prop.numThreadsPerEU);
-    hwloc_obj_add_info(osdev, "LevelZeroDeviceNumThreadsPerEU", tmp);
+    hwloc_obj_add_info(osdev, "LevelZeroNumThreadsPerEU", tmp);
 
     if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
       is_subdevice = 1;
