@@ -1978,7 +1978,7 @@ and SectorSize (in bytes).
 <dt>LevelZeroVendor, LevelZeroModel, LevelZeroBrand,</dt>
 <dt>LevelZeroSerialNumber, LevelZeroBoardNumber (LevelZero OS devices)</dt>
 <dd>
- The name of the vendor, device mode, brand of a Level Zero device,
+ The name of the vendor, device model, brand of a Level Zero device,
  and its serial and board numbers.
 </dd>
 <dt>LevelZeroDriverIndex, LevelZeroDriverDeviceIndex (LevelZero OS devices)</dt>
@@ -1996,7 +1996,7 @@ and SectorSize (in bytes).
 </dd>
 <dt>LevelZeroNumSlices, LevelZeroNumSubslicesPerSlice,</dt>
 <dt>LevelZeroNumEUsPerSubslice, LevelZeroNumThreadsPerEU (LevelZero OS devices or subdevices)</dt>
-<dd>The number of slices in the devices, of subslices per slice,
+<dd>The number of slices in the device, of subslices per slice,
  of execution units (EU) per subslice, and of threads per EU.
 </dd>
 <dt>LevelZeroHBMSize, LevelZeroDDRSize, LevelZeroMemorySize (LevelZero OS devices/subdevices)</dt>
