@@ -1062,7 +1062,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	switch (procInfo->Relationship) {
 	  case RelationNumaNode:
 	    type = HWLOC_OBJ_NUMANODE;
-            /* Starting with Windows 10 Build 20348 and Windows 11, the GroupCount field is valid and >=1
+            /* Starting with Windows 11 and Server 2022, the GroupCount field is valid and >=1
              * and we may read GroupMasks[]. Older releases have GroupCount==0 and we must read GroupMask.
              */
             if (procInfo->NumaNode.GroupCount) {
