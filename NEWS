@@ -38,10 +38,10 @@ Version 2.7.0
       numbers of slices, subslices, execution units and threads.
     - Expose the memory information as LevelZeroHBM/DDR/MemorySize infos.
   + Ignore the max frequencies of cores in Linux cpukinds when the
-    base frequencies is available (to avoid exposing hybrid CPUs
-    when Intel Turbo Boost Max 3.0 exposes slightly different max
-    frequencies among cores).
-    - May be reverted by setting HWLOC_CPUKINDS_MAXFREQ=1.
+    base frequencies are available (to avoid exposing hybrid CPUs
+    when Intel Turbo Boost Max 3.0 gives slightly different max
+    frequencies to CPU cores).
+    - May be reverted by setting HWLOC_CPUKINDS_MAXFREQ=1 in the environment.
 * Tools
   + Add --grey and --palette options to switch lstopo to greyscale or
     white-background-only graphics, or to tune individual colors.
