@@ -4231,14 +4231,21 @@ look_sysfscpukinds(struct hwloc_topology *topology,
                    const char *path)
 {
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
+  int max_without_basefreq = 0; /* any cpu where we have maxfreq without basefreq? */
   char str[293];
+  char *env;
+  int maxfreq_forced = 0;
   int i;
+
+  env = getenv("HWLOC_CPUKINDS_MAXFREQ");
+  if (env && !strcmp(env, "1"))
+    maxfreq_forced = 1;
 
   /* look at the PU base+max frequency */
   hwloc_linux_cpukinds_init(&cpufreqs_max);
   hwloc_linux_cpukinds_init(&cpufreqs_base);
   hwloc_bitmap_foreach_begin(i, topology->levels[0][0]->cpuset) {
-    unsigned maxfreq, basefreq;
+    unsigned maxfreq = 0, basefreq = 0;
     /* cpuinfo_max_freq is the hardware max. scaling_max_freq is the software policy current max */
     sprintf(str, "%s/cpu%d/cpufreq/cpuinfo_max_freq", path, i);
     if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
@@ -4249,8 +4256,13 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0)
       if (basefreq)
         hwloc_linux_cpukinds_add(&cpufreqs_base, i, basefreq/1000);
+    if (maxfreq && !basefreq)
+      max_without_basefreq = 1;
   } hwloc_bitmap_foreach_end();
-  hwloc_linux_cpukinds_register(&cpufreqs_max, topology, "FrequencyMaxMHz", 0);
+
+  if (max_without_basefreq || maxfreq_forced)
+    /* only expose maxfreq info if we miss some basefreq info */
+    hwloc_linux_cpukinds_register(&cpufreqs_max, topology, "FrequencyMaxMHz", 0);
   hwloc_linux_cpukinds_register(&cpufreqs_base, topology, "FrequencyBaseMHz", 0);
   hwloc_linux_cpukinds_destroy(&cpufreqs_max);
   hwloc_linux_cpukinds_destroy(&cpufreqs_base);

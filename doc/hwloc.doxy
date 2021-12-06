@@ -1078,6 +1078,18 @@ following environment variables.
   <tt>default</tt>, or <tt>none</tt>.
   </dd>
 
+<dt>HWLOC_CPUKINDS_MAXFREQ=0</dt>
+  <dd>change the use of the max frequency in the Linux backend.
+  hwloc tries to read the base and max frequencies of each core on Linux.
+  If base frequencies are found, max is ignored by default because max
+  frequencies are less reliable for identifying hybrid CPUs due to features
+  such as Intel Turbo Boost Max 3.0 (some cores may report slightly higher
+  max frequencies than others in the same CPU package).
+
+  If this variable is set to 1, the max frequency is not ignored anymore,
+  it is exposed and some processors may appear hybrid because of this.
+  </dd>
+
 <dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
 <dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
 <dd>changes the locality of I/O devices behing the specified PCI buses.
