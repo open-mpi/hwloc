@@ -27,9 +27,9 @@
 # Version of auto tools that we want
 #
 
-AM_TARGET_VERSION=1.14.1
-AC_TARGET_VERSION=2.69
-LT_TARGET_VERSION=2.4.2
+AM_TARGET_VERSION=1.16.5
+AC_TARGET_VERSION=2.71
+LT_TARGET_VERSION=2.4.6
 
 #
 # First things first -- check that the auto versions that we have are
