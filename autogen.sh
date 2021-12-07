@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Exit on error, useful if autoconf is missing, the script will stop instead of
+# trying to continue.
+set -e
+
 srcdir=$(dirname "$0")
 if test "x$srcdir" != x; then
    # in case we ever autogen on a platform without dirname
