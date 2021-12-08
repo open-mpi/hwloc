@@ -17,6 +17,15 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.8.0
+-------------
+* Backends
+  + Max frequencies are not ignored on Linux anymore (as in hwloc 2.7.0),
+    but they may be slightly adjusted to avoid reporting hybrid CPUs
+    because of features such as Intel Turbo Boost Max 3.0.
+    - See the documentation of environment variable HWLOC_CPUKINDS_MAXFREQ.
+
+
 Version 2.7.0
 -------------
 * Backends
