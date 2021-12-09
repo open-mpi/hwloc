@@ -26,6 +26,7 @@ typedef enum _ze_device_type {
   ZE_DEVICE_TYPE_VPU = 5
 } ze_device_type_t;
 
+#define ZE_DEVICE_PROPERTY_FLAG_INTEGRATED (1<<0)
 #define ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE (1<<1)
 
 typedef struct ze_device_properties {

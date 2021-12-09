@@ -16,12 +16,14 @@
 
 static void
 hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
-                                int sysman_maybe_missing)
+                                int sysman_maybe_missing,
+                                int *is_integrated_p)
 {
   ze_result_t res;
   ze_device_properties_t prop;
   zes_device_properties_t prop2;
   int is_subdevice = 0;
+  int is_integrated = 0;
 
   memset(&prop, 0, sizeof(prop));
   res = zeDeviceGetProperties(h, &prop);
@@ -54,7 +56,13 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
 
     if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
       is_subdevice = 1;
+
+    if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_INTEGRATED)
+      is_integrated = 1;
   }
+
+  if (is_integrated_p)
+    *is_integrated_p = is_integrated;
 
   if (is_subdevice)
     /* sysman API on subdevice returns the same as root device, and we don't need those duplicate attributes */
@@ -229,7 +237,8 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
 
 static void
 hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
-                                         hwloc_obj_t osdev)
+                                         hwloc_obj_t osdev,
+                                         int ignore_ddr)
 {
   ze_device_memory_properties_t *mh;
   uint32_t nr_mems;
@@ -257,6 +266,8 @@ hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
                     mh[m].name, (unsigned long long) mh[m].totalSize, osdev->name);
         if (!mh[m].totalSize)
           continue;
+        if (ignore_ddr && !strcmp(_name, "DDR"))
+          continue;
         if (!_name[0])
           _name = "Memory";
         snprintf(name, sizeof(name), "LevelZero%sSize", _name); /* HBM or DDR, or Memory if unknown */
@@ -270,7 +281,7 @@ hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
 
 
 static void
-hwloc__levelzero_memory_get(zes_device_handle_t h, hwloc_obj_t root_osdev,
+hwloc__levelzero_memory_get(zes_device_handle_t h, hwloc_obj_t root_osdev, int is_integrated,
                             unsigned nr_subdevices, zes_device_handle_t *subh, hwloc_obj_t *sub_osdevs)
 {
   static int memory_from_coreapi = -1; /* 1 means coreapi, 0 means sysman, -1 means sysman if available or coreapi otherwise */
@@ -298,11 +309,12 @@ hwloc__levelzero_memory_get(zes_device_handle_t h, hwloc_obj_t root_osdev,
     first = 0;
   }
 
-  if (memory_from_coreapi == 1) {
+  if (memory_from_coreapi > 0) {
     unsigned k;
-    hwloc__levelzero_memory_get_from_coreapi(h, root_osdev);
+    int ignore_ddr = (memory_from_coreapi != 2) && is_integrated; /* DDR ignored in integrated GPUs, it's like the host DRAM */
+    hwloc__levelzero_memory_get_from_coreapi(h, root_osdev, ignore_ddr);
     for(k=0; k<nr_subdevices; k++)
-      hwloc__levelzero_memory_get_from_coreapi(subh[k], sub_osdevs[k]);
+      hwloc__levelzero_memory_get_from_coreapi(subh[k], sub_osdevs[k], ignore_ddr);
   } else {
     hwloc__levelzero_memory_get_from_sysman(h, root_osdev, nr_subdevices, sub_osdevs);
     /* no need to call hwloc__levelzero_memory_get() on subdevices,
@@ -395,6 +407,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       zes_device_handle_t *subh = NULL;
       uint32_t nr_subdevices;
       hwloc_obj_t osdev, parent, *subosdevs = NULL;
+      int is_integrated = 0;
 
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       snprintf(buffer, sizeof(buffer), "ze%u", zeidx); // ze0d0 ?
@@ -409,7 +422,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      hwloc__levelzero_properties_get(dvh[j], osdev, sysman_maybe_missing);
+      hwloc__levelzero_properties_get(dvh[j], osdev, sysman_maybe_missing, &is_integrated);
 
       hwloc__levelzero_cqprops_get(dvh[j], osdev);
 
@@ -435,7 +448,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
             snprintf(tmp, sizeof(tmp), "%u", k);
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
 
-            hwloc__levelzero_properties_get(subh[j], subosdevs[k], sysman_maybe_missing);
+            hwloc__levelzero_properties_get(subh[j], subosdevs[k], sysman_maybe_missing, NULL);
 
             hwloc__levelzero_cqprops_get(subh[k], subosdevs[k]);
           }
@@ -448,7 +461,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       }
 
       /* get all memory info at once */
-      hwloc__levelzero_memory_get(dvh[j], osdev, nr_subdevices, subh, subosdevs);
+      hwloc__levelzero_memory_get(dvh[j], osdev, is_integrated, nr_subdevices, subh, subosdevs);
 
       parent = NULL;
       res = zesDevicePciGetProperties(sdvh, &pci);
