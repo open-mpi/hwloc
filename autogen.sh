@@ -19,7 +19,7 @@ if grep -A1 MACOSX_DEPLOYMENT_TARGET configure | grep powerpc >/dev/null \
 else
   echo "yes"
   echo "Trying to patch configure..."
-  if patch -p1 --dry-run < config/libtool-big-sur-fixup.patch; then
+  if patch -p1 --dry-run < config/libtool-big-sur-fixup.patch >/dev/null 2>&1; then
      echo "Patching for real now"
      patch -p1 < config/libtool-big-sur-fixup.patch
   else
