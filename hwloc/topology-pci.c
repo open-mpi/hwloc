@@ -193,7 +193,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     struct hwloc_obj *obj;
     unsigned domain, bus, dev, func;
     unsigned secondary_bus, subordinate_bus;
-    unsigned device_class;
+    unsigned device_class, prog_if;
     unsigned short tmp16;
     unsigned offset;
 
@@ -209,6 +209,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
     /* try to read the device_class */
     device_class = pcidev->device_class >> 8;
+    prog_if = pcidev->device_class & 0xff;
 
     /* bridge or pci dev? */
     type = hwloc_pcidisc_check_bridge_type(device_class, config_space_cache);
@@ -297,6 +298,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     obj->attr->pcidev.vendor_id = pcidev->vendor_id;
     obj->attr->pcidev.device_id = pcidev->device_id;
     obj->attr->pcidev.class_id = device_class;
+    obj->attr->pcidev.prog_if = prog_if;
     obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
 
     /* bridge specific attributes */
@@ -358,9 +360,9 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
        */
     }
 
-    hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x\n",
+    hwloc_debug("  %04x:%02x:%02x.%01x %04x %02x %04x:%04x\n",
 		domain, bus, dev, func,
-		device_class, pcidev->vendor_id, pcidev->device_id);
+		device_class, prog_if, pcidev->vendor_id, pcidev->device_id);
 
     hwloc_pci_get_obj_names(obj, &m);
     hwloc_pcidisc_tree_insert_by_busid(&tree, obj);

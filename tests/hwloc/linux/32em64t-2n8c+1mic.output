@@ -98,66 +98,66 @@
         </object>
       </object>
       <object type="Bridge" bridge_type="0-1" depth="0" bridge_pci="0000:[00-06]">
-        <object type="PCIDev" pci_busid="0000:00:00.0" pci_type="0600 [8086:3c00] [1028:0518] 07" pci_link_speed="0.000000"/>
-        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:01.0" pci_type="0604 [8086:3c02] [0000:0000] 07" pci_link_speed="0.000000"/>
-        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[02-02]" pci_busid="0000:00:01.1" pci_type="0604 [8086:3c03] [0000:0000] 07" pci_link_speed="0.000000">
-          <object type="PCIDev" pci_busid="0000:02:00.0" pci_type="0200 [8086:1521] [1028:0000] 01" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:00.0" pci_type="0600 [8086:3c00] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:01.0" pci_type="0604 [8086:3c02] [0000:0000] 07 00" pci_link_speed="0.000000"/>
+        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[02-02]" pci_busid="0000:00:01.1" pci_type="0604 [8086:3c03] [0000:0000] 07 00" pci_link_speed="0.000000">
+          <object type="PCIDev" pci_busid="0000:02:00.0" pci_type="0200 [8086:1521] [1028:0000] 01 00" pci_link_speed="0.000000">
             <object type="OSDev" name="eth0" osdev_type="2">
               <info name="Address" value="84:8f:69:fe:cc:40"/>
             </object>
           </object>
-          <object type="PCIDev" pci_busid="0000:02:00.3" pci_type="0200 [8086:1521] [1028:0000] 01" pci_link_speed="0.000000">
+          <object type="PCIDev" pci_busid="0000:02:00.3" pci_type="0200 [8086:1521] [1028:0000] 01 00" pci_link_speed="0.000000">
             <object type="OSDev" name="eth1" osdev_type="2">
               <info name="Address" value="84:8f:69:fe:cc:41"/>
             </object>
           </object>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:02.0" pci_type="0108 [8086:0953] [8086:3709] 01" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:02.0" pci_type="0108 [8086:0953] [8086:3709] 01 02" pci_link_speed="0.000000">
           <object type="OSDev" name="nvme0n1" subtype="Disk" osdev_type="0">
             <info name="Size" value="390711384"/>
             <info name="SectorSize" value="512"/>
             <info name="LinuxDeviceID" value="259:0"/>
           </object>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:04.0" pci_type="0880 [8086:3c20] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:04.0" pci_type="0880 [8086:3c20] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma0chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:04.1" pci_type="0880 [8086:3c21] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:04.1" pci_type="0880 [8086:3c21] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma1chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:04.2" pci_type="0880 [8086:3c22] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:04.2" pci_type="0880 [8086:3c22] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma2chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:04.3" pci_type="0880 [8086:3c23] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:04.3" pci_type="0880 [8086:3c23] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma3chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:04.4" pci_type="0880 [8086:3c24] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:04.4" pci_type="0880 [8086:3c24] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma4chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:04.5" pci_type="0880 [8086:3c25] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:04.5" pci_type="0880 [8086:3c25] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma5chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:04.6" pci_type="0880 [8086:3c26] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:04.6" pci_type="0880 [8086:3c26] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma6chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:04.7" pci_type="0880 [8086:3c27] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:04.7" pci_type="0880 [8086:3c27] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma7chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:05.0" pci_type="0880 [8086:3c28] [1028:0518] 07" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:00:05.2" pci_type="0880 [8086:3c2a] [1028:0518] 07" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:00:05.4" pci_type="0800 [8086:3c2c] [1028:0518] 07" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:00:16.0" pci_type="0780 [8086:1d3a] [1028:0518] 05" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:00:16.1" pci_type="0780 [8086:1d3b] [1028:0518] 05" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:00:1a.0" pci_type="0c03 [8086:1d2d] [1028:0518] 06" pci_link_speed="0.000000"/>
-        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[04-05]" pci_busid="0000:00:1c.0" pci_type="0604 [8086:1d10] [0000:0000] b6" pci_link_speed="0.000000">
-          <object type="Bridge" bridge_type="1-1" depth="2" bridge_pci="0000:[05-05]" pci_busid="0000:04:00.0" pci_type="0604 [1a03:1150] [0000:0000] 02" pci_link_speed="0.000000">
-            <object type="PCIDev" pci_busid="0000:05:00.0" pci_type="0300 [1a03:2000] [1028:0518] 21" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:05.0" pci_type="0880 [8086:3c28] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:05.2" pci_type="0880 [8086:3c2a] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:05.4" pci_type="0800 [8086:3c2c] [1028:0518] 07 20" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:16.0" pci_type="0780 [8086:1d3a] [1028:0518] 05 00" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:16.1" pci_type="0780 [8086:1d3b] [1028:0518] 05 00" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:1a.0" pci_type="0c03 [8086:1d2d] [1028:0518] 06 20" pci_link_speed="0.000000"/>
+        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[04-05]" pci_busid="0000:00:1c.0" pci_type="0604 [8086:1d10] [0000:0000] b6 00" pci_link_speed="0.000000">
+          <object type="Bridge" bridge_type="1-1" depth="2" bridge_pci="0000:[05-05]" pci_busid="0000:04:00.0" pci_type="0604 [1a03:1150] [0000:0000] 02 00" pci_link_speed="0.000000">
+            <object type="PCIDev" pci_busid="0000:05:00.0" pci_type="0300 [1a03:2000] [1028:0518] 21 00" pci_link_speed="0.000000"/>
           </object>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:1d.0" pci_type="0c03 [8086:1d26] [1028:0518] 06" pci_link_speed="0.000000"/>
-        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[06-06]" pci_busid="0000:00:1e.0" pci_type="0604 [8086:244e] [0000:0000] a6" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:00:1f.0" pci_type="0601 [8086:1d41] [1028:0518] 06" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:00:1f.2" pci_type="0106 [8086:1d02] [1028:0518] 06" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:00:1d.0" pci_type="0c03 [8086:1d26] [1028:0518] 06 20" pci_link_speed="0.000000"/>
+        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[06-06]" pci_busid="0000:00:1e.0" pci_type="0604 [8086:244e] [0000:0000] a6 01" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:1f.0" pci_type="0601 [8086:1d41] [1028:0518] 06 00" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:1f.2" pci_type="0106 [8086:1d02] [1028:0518] 06 01" pci_link_speed="0.000000">
           <object type="OSDev" name="sda" subtype="Disk" osdev_type="0">
             <info name="Size" value="244198584"/>
             <info name="SectorSize" value="512"/>
@@ -167,7 +167,7 @@
             <info name="SerialNumber" value="14090C05022B"/>
           </object>
         </object>
-        <object type="PCIDev" pci_busid="0000:00:1f.3" pci_type="0c05 [8086:1d22] [1028:0518] 06" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:00:1f.3" pci_type="0c05 [8086:1d22] [1028:0518] 06 00" pci_link_speed="0.000000"/>
       </object>
       <object type="OSDev" name="dax0.0" subtype="NVM" osdev_type="0">
         <info name="DAXType" value="NVM"/>
@@ -272,9 +272,9 @@
         </object>
       </object>
       <object type="Bridge" bridge_type="0-1" depth="0" bridge_pci="0000:[80-83]">
-        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[81-81]" pci_busid="0000:80:02.0" pci_type="0604 [8086:3c04] [0000:0000] 07" pci_link_speed="0.000000"/>
-        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[82-82]" pci_busid="0000:80:02.2" pci_type="0604 [8086:3c06] [0000:0000] 07" pci_link_speed="0.000000">
-          <object type="PCIDev" pci_busid="0000:82:00.0" pci_type="0280 [15b3:1003] [15b3:0059] 00" pci_link_speed="0.000000">
+        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[81-81]" pci_busid="0000:80:02.0" pci_type="0604 [8086:3c04] [0000:0000] 07 00" pci_link_speed="0.000000"/>
+        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[82-82]" pci_busid="0000:80:02.2" pci_type="0604 [8086:3c06] [0000:0000] 07 00" pci_link_speed="0.000000">
+          <object type="PCIDev" pci_busid="0000:82:00.0" pci_type="0280 [15b3:1003] [15b3:0059] 00 00" pci_link_speed="0.000000">
             <info name="PCISlot" value="01"/>
             <object type="OSDev" name="ib0" osdev_type="2">
               <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:00:02:c9:03:00:f9:bf:a1"/>
@@ -290,38 +290,38 @@
             </object>
           </object>
         </object>
-        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[83-83]" pci_busid="0000:80:03.0" pci_type="0604 [8086:3c08] [0000:0000] 07" pci_link_speed="0.000000">
-          <object type="PCIDev" pci_busid="0000:83:00.0" pci_type="0b40 [8086:225c] [8086:2500] 10" pci_link_speed="0.000000">
+        <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[83-83]" pci_busid="0000:80:03.0" pci_type="0604 [8086:3c08] [0000:0000] 07 00" pci_link_speed="0.000000">
+          <object type="PCIDev" pci_busid="0000:83:00.0" pci_type="0b40 [8086:225c] [8086:2500] 10 00" pci_link_speed="0.000000">
             <info name="PCISlot" value="02"/>
           </object>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:04.0" pci_type="0880 [8086:3c20] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:80:04.0" pci_type="0880 [8086:3c20] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma8chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:04.1" pci_type="0880 [8086:3c21] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:80:04.1" pci_type="0880 [8086:3c21] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma9chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:04.2" pci_type="0880 [8086:3c22] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:80:04.2" pci_type="0880 [8086:3c22] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma10chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:04.3" pci_type="0880 [8086:3c23] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:80:04.3" pci_type="0880 [8086:3c23] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma11chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:04.4" pci_type="0880 [8086:3c24] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:80:04.4" pci_type="0880 [8086:3c24] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma12chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:04.5" pci_type="0880 [8086:3c25] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:80:04.5" pci_type="0880 [8086:3c25] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma13chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:04.6" pci_type="0880 [8086:3c26] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:80:04.6" pci_type="0880 [8086:3c26] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma14chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:04.7" pci_type="0880 [8086:3c27] [1028:0518] 07" pci_link_speed="0.000000">
+        <object type="PCIDev" pci_busid="0000:80:04.7" pci_type="0880 [8086:3c27] [1028:0518] 07 00" pci_link_speed="0.000000">
           <object type="OSDev" name="dma15chan0" osdev_type="4"/>
         </object>
-        <object type="PCIDev" pci_busid="0000:80:05.0" pci_type="0880 [8086:3c28] [1028:0518] 07" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:80:05.2" pci_type="0880 [8086:3c2a] [1028:0518] 07" pci_link_speed="0.000000"/>
-        <object type="PCIDev" pci_busid="0000:80:05.4" pci_type="0800 [8086:3c2c] [1028:0518] 07" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:80:05.0" pci_type="0880 [8086:3c28] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:80:05.2" pci_type="0880 [8086:3c2a] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+        <object type="PCIDev" pci_busid="0000:80:05.4" pci_type="0800 [8086:3c2c] [1028:0518] 07 20" pci_link_speed="0.000000"/>
       </object>
       <object type="OSDev" name="dax1.3" subtype="NVM" osdev_type="0">
         <info name="DAXType" value="NVM"/>
@@ -346,100 +346,100 @@
       </object>
     </object>
     <object type="Bridge" bridge_type="0-1" depth="0" bridge_pci="0000:[7f-7f]">
-      <object type="PCIDev" pci_busid="0000:7f:08.0" pci_type="0880 [8086:3c80] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:08.3" pci_type="0880 [8086:3c83] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:08.4" pci_type="0880 [8086:3c84] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:09.0" pci_type="0880 [8086:3c90] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:09.3" pci_type="0880 [8086:3c93] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:09.4" pci_type="0880 [8086:3c94] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0a.0" pci_type="0880 [8086:3cc0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0a.1" pci_type="0880 [8086:3cc1] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0a.2" pci_type="0880 [8086:3cc2] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0a.3" pci_type="0880 [8086:3cd0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0b.0" pci_type="0880 [8086:3ce0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0b.3" pci_type="0880 [8086:3ce3] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0c.0" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0c.1" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0c.2" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0c.3" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0c.6" pci_type="0880 [8086:3cf4] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0c.7" pci_type="0880 [8086:3cf6] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0d.0" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0d.1" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0d.2" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0d.3" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0d.6" pci_type="0880 [8086:3cf5] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0e.0" pci_type="0880 [8086:3ca0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0e.1" pci_type="1101 [8086:3c46] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0f.0" pci_type="0880 [8086:3ca8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0f.1" pci_type="0880 [8086:3c71] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0f.2" pci_type="0880 [8086:3caa] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0f.3" pci_type="0880 [8086:3cab] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0f.4" pci_type="0880 [8086:3cac] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0f.5" pci_type="0880 [8086:3cad] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:0f.6" pci_type="0880 [8086:3cae] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:10.0" pci_type="0880 [8086:3cb0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:10.1" pci_type="0880 [8086:3cb1] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:10.2" pci_type="0880 [8086:3cb2] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:10.3" pci_type="0880 [8086:3cb3] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:10.4" pci_type="0880 [8086:3cb4] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:10.5" pci_type="0880 [8086:3cb5] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:10.6" pci_type="0880 [8086:3cb6] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:10.7" pci_type="0880 [8086:3cb7] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:11.0" pci_type="0880 [8086:3cb8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:13.0" pci_type="0880 [8086:3ce4] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:13.1" pci_type="1101 [8086:3c43] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:13.4" pci_type="1101 [8086:3ce6] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:13.5" pci_type="1101 [8086:3c44] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:7f:13.6" pci_type="0880 [8086:3c45] [1028:0518] 07" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:08.0" pci_type="0880 [8086:3c80] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:08.3" pci_type="0880 [8086:3c83] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:08.4" pci_type="0880 [8086:3c84] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:09.0" pci_type="0880 [8086:3c90] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:09.3" pci_type="0880 [8086:3c93] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:09.4" pci_type="0880 [8086:3c94] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0a.0" pci_type="0880 [8086:3cc0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0a.1" pci_type="0880 [8086:3cc1] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0a.2" pci_type="0880 [8086:3cc2] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0a.3" pci_type="0880 [8086:3cd0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0b.0" pci_type="0880 [8086:3ce0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0b.3" pci_type="0880 [8086:3ce3] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0c.0" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0c.1" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0c.2" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0c.3" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0c.6" pci_type="0880 [8086:3cf4] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0c.7" pci_type="0880 [8086:3cf6] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0d.0" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0d.1" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0d.2" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0d.3" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0d.6" pci_type="0880 [8086:3cf5] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0e.0" pci_type="0880 [8086:3ca0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0e.1" pci_type="1101 [8086:3c46] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0f.0" pci_type="0880 [8086:3ca8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0f.1" pci_type="0880 [8086:3c71] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0f.2" pci_type="0880 [8086:3caa] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0f.3" pci_type="0880 [8086:3cab] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0f.4" pci_type="0880 [8086:3cac] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0f.5" pci_type="0880 [8086:3cad] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:0f.6" pci_type="0880 [8086:3cae] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:10.0" pci_type="0880 [8086:3cb0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:10.1" pci_type="0880 [8086:3cb1] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:10.2" pci_type="0880 [8086:3cb2] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:10.3" pci_type="0880 [8086:3cb3] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:10.4" pci_type="0880 [8086:3cb4] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:10.5" pci_type="0880 [8086:3cb5] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:10.6" pci_type="0880 [8086:3cb6] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:10.7" pci_type="0880 [8086:3cb7] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:11.0" pci_type="0880 [8086:3cb8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:13.0" pci_type="0880 [8086:3ce4] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:13.1" pci_type="1101 [8086:3c43] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:13.4" pci_type="1101 [8086:3ce6] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:13.5" pci_type="1101 [8086:3c44] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:7f:13.6" pci_type="0880 [8086:3c45] [1028:0518] 07 00" pci_link_speed="0.000000"/>
     </object>
     <object type="Bridge" bridge_type="0-1" depth="0" bridge_pci="0000:[ff-ff]">
-      <object type="PCIDev" pci_busid="0000:ff:08.0" pci_type="0880 [8086:3c80] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:08.3" pci_type="0880 [8086:3c83] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:08.4" pci_type="0880 [8086:3c84] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:09.0" pci_type="0880 [8086:3c90] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:09.3" pci_type="0880 [8086:3c93] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:09.4" pci_type="0880 [8086:3c94] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0a.0" pci_type="0880 [8086:3cc0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0a.1" pci_type="0880 [8086:3cc1] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0a.2" pci_type="0880 [8086:3cc2] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0a.3" pci_type="0880 [8086:3cd0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0b.0" pci_type="0880 [8086:3ce0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0b.3" pci_type="0880 [8086:3ce3] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0c.0" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0c.1" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0c.2" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0c.3" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0c.6" pci_type="0880 [8086:3cf4] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0c.7" pci_type="0880 [8086:3cf6] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0d.0" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0d.1" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0d.2" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0d.3" pci_type="0880 [8086:3ce8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0d.6" pci_type="0880 [8086:3cf5] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0e.0" pci_type="0880 [8086:3ca0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0e.1" pci_type="1101 [8086:3c46] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0f.0" pci_type="0880 [8086:3ca8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0f.1" pci_type="0880 [8086:3c71] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0f.2" pci_type="0880 [8086:3caa] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0f.3" pci_type="0880 [8086:3cab] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0f.4" pci_type="0880 [8086:3cac] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0f.5" pci_type="0880 [8086:3cad] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:0f.6" pci_type="0880 [8086:3cae] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:10.0" pci_type="0880 [8086:3cb0] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:10.1" pci_type="0880 [8086:3cb1] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:10.2" pci_type="0880 [8086:3cb2] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:10.3" pci_type="0880 [8086:3cb3] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:10.4" pci_type="0880 [8086:3cb4] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:10.5" pci_type="0880 [8086:3cb5] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:10.6" pci_type="0880 [8086:3cb6] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:10.7" pci_type="0880 [8086:3cb7] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:11.0" pci_type="0880 [8086:3cb8] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:13.0" pci_type="0880 [8086:3ce4] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:13.1" pci_type="1101 [8086:3c43] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:13.4" pci_type="1101 [8086:3ce6] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:13.5" pci_type="1101 [8086:3c44] [1028:0518] 07" pci_link_speed="0.000000"/>
-      <object type="PCIDev" pci_busid="0000:ff:13.6" pci_type="0880 [8086:3c45] [1028:0518] 07" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:08.0" pci_type="0880 [8086:3c80] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:08.3" pci_type="0880 [8086:3c83] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:08.4" pci_type="0880 [8086:3c84] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:09.0" pci_type="0880 [8086:3c90] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:09.3" pci_type="0880 [8086:3c93] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:09.4" pci_type="0880 [8086:3c94] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0a.0" pci_type="0880 [8086:3cc0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0a.1" pci_type="0880 [8086:3cc1] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0a.2" pci_type="0880 [8086:3cc2] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0a.3" pci_type="0880 [8086:3cd0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0b.0" pci_type="0880 [8086:3ce0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0b.3" pci_type="0880 [8086:3ce3] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0c.0" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0c.1" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0c.2" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0c.3" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0c.6" pci_type="0880 [8086:3cf4] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0c.7" pci_type="0880 [8086:3cf6] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0d.0" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0d.1" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0d.2" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0d.3" pci_type="0880 [8086:3ce8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0d.6" pci_type="0880 [8086:3cf5] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0e.0" pci_type="0880 [8086:3ca0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0e.1" pci_type="1101 [8086:3c46] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0f.0" pci_type="0880 [8086:3ca8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0f.1" pci_type="0880 [8086:3c71] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0f.2" pci_type="0880 [8086:3caa] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0f.3" pci_type="0880 [8086:3cab] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0f.4" pci_type="0880 [8086:3cac] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0f.5" pci_type="0880 [8086:3cad] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:0f.6" pci_type="0880 [8086:3cae] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:10.0" pci_type="0880 [8086:3cb0] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:10.1" pci_type="0880 [8086:3cb1] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:10.2" pci_type="0880 [8086:3cb2] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:10.3" pci_type="0880 [8086:3cb3] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:10.4" pci_type="0880 [8086:3cb4] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:10.5" pci_type="0880 [8086:3cb5] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:10.6" pci_type="0880 [8086:3cb6] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:10.7" pci_type="0880 [8086:3cb7] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:11.0" pci_type="0880 [8086:3cb8] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:13.0" pci_type="0880 [8086:3ce4] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:13.1" pci_type="1101 [8086:3c43] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:13.4" pci_type="1101 [8086:3ce6] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:13.5" pci_type="1101 [8086:3c44] [1028:0518] 07 00" pci_link_speed="0.000000"/>
+      <object type="PCIDev" pci_busid="0000:ff:13.6" pci_type="0880 [8086:3c45] [1028:0518] 07 00" pci_link_speed="0.000000"/>
     </object>
     <object type="Misc" os_index="0" subtype="MemoryModule">
       <info name="DeviceLocation" value="DIMM_A1 "/>

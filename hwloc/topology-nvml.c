@@ -90,9 +90,9 @@ hwloc__nvml_get_peer_obj_by_pci(struct hwloc_topology *topology, hwloc_obj_t gpu
   default: {
     static int warned = 0;
     if (!warned && HWLOC_SHOW_ALL_ERRORS())
-      fprintf(stderr, "hwloc failed to recognize NVLink peer %04x:%02x:%02x class %04x vendor %04x device %04x\n",
+      fprintf(stderr, "hwloc failed to recognize NVLink peer %04x:%02x:%02x class %04x prog-if %02x vendor %04x device %04x\n",
               peer_bdf.domain, peer_bdf.bus, peer_bdf.device,
-              obj->attr->pcidev.class_id, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
+              obj->attr->pcidev.class_id, obj->attr->pcidev.prog_if, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
     warned = 1;
     return NULL;
   }

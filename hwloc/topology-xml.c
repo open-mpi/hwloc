@@ -291,14 +291,17 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     switch (obj->type) {
     case HWLOC_OBJ_PCI_DEVICE:
     case HWLOC_OBJ_BRIDGE: {
-      unsigned classid, vendor, device, subvendor, subdevice, revision;
-      if (sscanf(value, "%x [%04x:%04x] [%04x:%04x] %02x",
-		 &classid, &vendor, &device, &subvendor, &subdevice, &revision) != 6) {
+      unsigned classid, vendor, device, subvendor, subdevice, revision, prog_if = 0;
+      if (sscanf(value, "%x [%04x:%04x] [%04x:%04x] %02x %02x",
+		 &classid, &vendor, &device, &subvendor, &subdevice, &revision, &prog_if) != 7
+          && sscanf(value, "%x [%04x:%04x] [%04x:%04x] %02x", /* hwloc < 3.x didn't export the prog-if */
+                    &classid, &vendor, &device, &subvendor, &subdevice, &revision) != 6) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid pci_type format string %s\n",
 		  state->global->msgprefix, value);
       } else {
 	obj->attr->pcidev.class_id = classid;
+	obj->attr->pcidev.prog_if = prog_if;
 	obj->attr->pcidev.vendor_id = vendor;
 	obj->attr->pcidev.device_id = device;
 	obj->attr->pcidev.subvendor_id = subvendor;
@@ -2586,11 +2589,11 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 	    (unsigned) obj->attr->pcidev.dev,
 	    (unsigned) obj->attr->pcidev.func);
     state->new_prop(state, "pci_busid", tmp);
-    sprintf(tmp, "%04x [%04x:%04x] [%04x:%04x] %02x",
+    sprintf(tmp, "%04x [%04x:%04x] [%04x:%04x] %02x %02x",
 	    (unsigned) obj->attr->pcidev.class_id,
 	    (unsigned) obj->attr->pcidev.vendor_id, (unsigned) obj->attr->pcidev.device_id,
 	    (unsigned) obj->attr->pcidev.subvendor_id, (unsigned) obj->attr->pcidev.subdevice_id,
-	    (unsigned) obj->attr->pcidev.revision);
+	    (unsigned) obj->attr->pcidev.revision, (unsigned) obj->attr->pcidev.prog_if);
     state->new_prop(state, "pci_type", tmp);
     sprintf(tmp, "%f", obj->attr->pcidev.linkspeed);
     state->new_prop(state, "pci_link_speed", tmp);

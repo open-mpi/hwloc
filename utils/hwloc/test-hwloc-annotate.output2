@@ -42,8 +42,8 @@
         </object>
       </object>
       <object type="Bridge" gp_index="304" bridge_type="0-1" depth="0" bridge_pci="0002:[00-01]">
-        <object type="Bridge" gp_index="287" bridge_type="1-1" depth="1" bridge_pci="0002:[01-01]" pci_busid="0002:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00" pci_link_speed="7.876923">
-          <object type="PCIDev" gp_index="282" pci_busid="0002:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1" pci_link_speed="15.753846">
+        <object type="Bridge" gp_index="287" bridge_type="1-1" depth="1" bridge_pci="0002:[01-01]" pci_busid="0002:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00 00" pci_link_speed="7.876923">
+          <object type="PCIDev" gp_index="282" pci_busid="0002:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1 00" pci_link_speed="15.753846">
             <object type="OSDev" gp_index="328" name="cuda0" subtype="CUDA" osdev_type="5">
               <info name="Backend" value="CUDA"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>
@@ -76,8 +76,8 @@
         </object>
       </object>
       <object type="Bridge" gp_index="305" bridge_type="0-1" depth="0" bridge_pci="0003:[00-01]">
-        <object type="Bridge" gp_index="271" bridge_type="1-1" depth="1" bridge_pci="0003:[01-01]" pci_busid="0003:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00" pci_link_speed="7.876923">
-          <object type="PCIDev" gp_index="268" pci_busid="0003:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1" pci_link_speed="15.753846">
+        <object type="Bridge" gp_index="271" bridge_type="1-1" depth="1" bridge_pci="0003:[01-01]" pci_busid="0003:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00 00" pci_link_speed="7.876923">
+          <object type="PCIDev" gp_index="268" pci_busid="0003:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1 00" pci_link_speed="15.753846">
             <object type="OSDev" gp_index="329" name="cuda1" subtype="CUDA" osdev_type="5">
               <info name="Backend" value="CUDA"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>
@@ -139,8 +139,8 @@
         </object>
       </object>
       <object type="Bridge" gp_index="310" bridge_type="0-1" depth="0" bridge_pci="000a:[00-01]">
-        <object type="Bridge" gp_index="294" bridge_type="1-1" depth="1" bridge_pci="000a:[01-01]" pci_busid="000a:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00" pci_link_speed="7.876923">
-          <object type="PCIDev" gp_index="289" pci_busid="000a:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1" pci_link_speed="15.753846">
+        <object type="Bridge" gp_index="294" bridge_type="1-1" depth="1" bridge_pci="000a:[01-01]" pci_busid="000a:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00 00" pci_link_speed="7.876923">
+          <object type="PCIDev" gp_index="289" pci_busid="000a:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1 00" pci_link_speed="15.753846">
             <object type="OSDev" gp_index="330" name="cuda2" subtype="CUDA" osdev_type="5">
               <info name="Backend" value="CUDA"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>
@@ -173,8 +173,8 @@
         </object>
       </object>
       <object type="Bridge" gp_index="311" bridge_type="0-1" depth="0" bridge_pci="000b:[00-01]">
-        <object type="Bridge" gp_index="279" bridge_type="1-1" depth="1" bridge_pci="000b:[01-01]" pci_busid="000b:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00" pci_link_speed="7.876923">
-          <object type="PCIDev" gp_index="273" pci_busid="000b:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1" pci_link_speed="15.753846">
+        <object type="Bridge" gp_index="279" bridge_type="1-1" depth="1" bridge_pci="000b:[01-01]" pci_busid="000b:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00 00" pci_link_speed="7.876923">
+          <object type="PCIDev" gp_index="273" pci_busid="000b:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1 00" pci_link_speed="15.753846">
             <object type="OSDev" gp_index="331" name="cuda3" subtype="CUDA" osdev_type="5">
               <info name="Backend" value="CUDA"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>

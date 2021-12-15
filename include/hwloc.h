@@ -93,7 +93,7 @@ extern "C" {
  * Two stable releases of the same series usually have the same ::HWLOC_API_VERSION
  * even if their HWLOC_VERSION are different.
  */
-#define HWLOC_API_VERSION 0x00020800
+#define HWLOC_API_VERSION 0x00030000
 
 /** \brief Indicate at runtime which hwloc API version was used at build time.
  *
@@ -633,6 +633,7 @@ union hwloc_obj_attr_u {
   struct hwloc_pcidev_attr_s {
     unsigned int domain;
     unsigned char bus, dev, func;
+    unsigned char prog_if; /* the register-level programming interface */
     unsigned short class_id;
     unsigned short vendor_id, device_id, subvendor_id, subdevice_id;
     unsigned char revision;

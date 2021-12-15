@@ -21,6 +21,8 @@ Version 3.0.0
 -------------
 * API
   + PCI domains are now always 32bits.
+  + The "programming interface" of PCI devices is now exposed
+    in PCI object attributes.
 
 
 Version 2.9.0

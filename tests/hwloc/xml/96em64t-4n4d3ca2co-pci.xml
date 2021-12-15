@@ -188,17 +188,17 @@
         </object>
       </object>
       <object type="Bridge" gp_index="95" bridge_type="0-1" depth="0" bridge_pci="0000:[00-02]">
-        <object type="Bridge" gp_index="96" bridge_type="1-1" depth="1" bridge_pci="0000:[02-02]" pci_busid="0000:00:1c.0" pci_type="0604 [8086:27d0] [0000:0000] 01" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="96" bridge_type="1-1" depth="1" bridge_pci="0000:[02-02]" pci_busid="0000:00:1c.0" pci_type="0604 [8086:27d0] [0000:0000] 01 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="N10/ICH 7 Family PCI Express Port 1"/>
-          <object type="PCIDev" gp_index="97" pci_busid="0000:02:00.0" pci_type="0200 [14e4:1639] [0014:007c] 20" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="97" pci_busid="0000:02:00.0" pci_type="0200 [14e4:1639] [0014:007c] 20 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Broadcom Corporation"/>
             <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
             <object type="OSDev" gp_index="98" name="eth0" osdev_type="2">
               <info name="Address" value="00:21:5e:c4:8e:04"/>
             </object>
           </object>
-          <object type="PCIDev" gp_index="99" pci_busid="0000:02:00.1" pci_type="0200 [14e4:1639] [0014:007c] 20" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="99" pci_busid="0000:02:00.1" pci_type="0200 [14e4:1639] [0014:007c] 20 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Broadcom Corporation"/>
             <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
             <object type="OSDev" gp_index="100" name="eth1" osdev_type="2">
@@ -206,26 +206,26 @@
             </object>
           </object>
         </object>
-        <object type="Bridge" gp_index="101" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:1e.0" pci_type="0604 [8086:244e] [0000:0000] e1" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="101" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:1e.0" pci_type="0604 [8086:244e] [0000:0000] e1 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="82801 PCI Bridge"/>
-          <object type="PCIDev" gp_index="102" pci_busid="0000:01:00.0" pci_type="0300 [1002:515e] [0014:0019] 02" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="102" pci_busid="0000:01:00.0" pci_type="0300 [1002:515e] [0014:0019] 02 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="ATI Technologies Inc"/>
             <info name="PCIDevice" value="ES1000"/>
             <object type="OSDev" gp_index="103" name="card0" osdev_type="1"/>
           </object>
         </object>
-        <object type="PCIDev" gp_index="104" pci_busid="0000:00:1f.2" pci_type="0101 [8086:27c0] [0014:0081] 01" pci_link_speed="0.000000">
+        <object type="PCIDev" gp_index="104" pci_busid="0000:00:1f.2" pci_type="0101 [8086:27c0] [0014:0081] 01 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="N10/ICH7 Family SATA IDE Controller"/>
           <object type="OSDev" gp_index="105" name="sr0" osdev_type="0"/>
         </object>
       </object>
       <object type="Bridge" gp_index="106" bridge_type="0-1" depth="0" bridge_pci="0000:[03-04]">
-        <object type="Bridge" gp_index="107" bridge_type="1-1" depth="1" bridge_pci="0000:[04-04]" pci_busid="0000:03:00.0" pci_type="0604 [1014:0308] [0000:0000] 01" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="107" bridge_type="1-1" depth="1" bridge_pci="0000:[04-04]" pci_busid="0000:03:00.0" pci_type="0604 [1014:0308] [0000:0000] 01 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="IBM"/>
           <info name="PCIDevice" value="CalIOC2 PCI-E Root Port"/>
-          <object type="PCIDev" gp_index="108" pci_busid="0000:04:00.0" pci_type="0100 [1000:0062] [0014:0066] 04" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="108" pci_busid="0000:04:00.0" pci_type="0100 [1000:0062] [0014:0066] 04 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="LSI Logic / Symbios Logic"/>
             <info name="PCIDevice" value="SAS1078 PCI-Express Fusion-MPT SAS"/>
             <object type="OSDev" gp_index="109" name="sda" osdev_type="0"/>
@@ -399,17 +399,17 @@
         </object>
       </object>
       <object type="Bridge" gp_index="203" bridge_type="0-1" depth="0" bridge_pci="0000:[30-34]">
-        <object type="Bridge" gp_index="204" bridge_type="1-1" depth="1" bridge_pci="0000:[32-32]" pci_busid="0000:30:1c.0" pci_type="0604 [8086:27d0] [0000:0000] 01" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="204" bridge_type="1-1" depth="1" bridge_pci="0000:[32-32]" pci_busid="0000:30:1c.0" pci_type="0604 [8086:27d0] [0000:0000] 01 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="N10/ICH 7 Family PCI Express Port 1"/>
-          <object type="PCIDev" gp_index="205" pci_busid="0000:32:00.0" pci_type="0200 [14e4:1639] [0014:007c] 20" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="205" pci_busid="0000:32:00.0" pci_type="0200 [14e4:1639] [0014:007c] 20 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Broadcom Corporation"/>
             <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
             <object type="OSDev" gp_index="206" name="eth2" osdev_type="2">
               <info name="Address" value="00:21:5e:c4:88:dc"/>
             </object>
           </object>
-          <object type="PCIDev" gp_index="207" pci_busid="0000:32:00.1" pci_type="0200 [14e4:1639] [0014:007c] 20" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="207" pci_busid="0000:32:00.1" pci_type="0200 [14e4:1639] [0014:007c] 20 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Broadcom Corporation"/>
             <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
             <object type="OSDev" gp_index="208" name="eth3" osdev_type="2">
@@ -417,13 +417,13 @@
             </object>
           </object>
         </object>
-        <object type="Bridge" gp_index="209" bridge_type="1-1" depth="1" bridge_pci="0000:[33-34]" pci_busid="0000:30:1e.0" pci_type="0604 [8086:244e] [0000:0000] e1" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="209" bridge_type="1-1" depth="1" bridge_pci="0000:[33-34]" pci_busid="0000:30:1e.0" pci_type="0604 [8086:244e] [0000:0000] e1 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="82801 PCI Bridge"/>
-          <object type="Bridge" gp_index="210" bridge_type="1-1" depth="2" bridge_pci="0000:[34-34]" pci_busid="0000:33:00.0" pci_type="0604 [1014:0308] [0000:0000] 01" pci_link_speed="0.000000">
+          <object type="Bridge" gp_index="210" bridge_type="1-1" depth="2" bridge_pci="0000:[34-34]" pci_busid="0000:33:00.0" pci_type="0604 [1014:0308] [0000:0000] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="IBM"/>
             <info name="PCIDevice" value="CalIOC2 PCI-E Root Port"/>
-            <object type="PCIDev" gp_index="211" pci_busid="0000:34:00.0" pci_type="0100 [1000:0062] [0014:0066] 04" pci_link_speed="0.000000">
+            <object type="PCIDev" gp_index="211" pci_busid="0000:34:00.0" pci_type="0100 [1000:0062] [0014:0066] 04 00" pci_link_speed="0.000000">
               <info name="PCIVendor" value="LSI Logic / Symbios Logic"/>
               <info name="PCIDevice" value="SAS1078 PCI-Express Fusion-MPT SAS"/>
             </object>
@@ -597,17 +597,17 @@
         </object>
       </object>
       <object type="Bridge" gp_index="305" bridge_type="0-1" depth="0" bridge_pci="0000:[60-64]">
-        <object type="Bridge" gp_index="306" bridge_type="1-1" depth="1" bridge_pci="0000:[62-62]" pci_busid="0000:60:1c.0" pci_type="0604 [8086:27d0] [0000:0000] 01" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="306" bridge_type="1-1" depth="1" bridge_pci="0000:[62-62]" pci_busid="0000:60:1c.0" pci_type="0604 [8086:27d0] [0000:0000] 01 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="N10/ICH 7 Family PCI Express Port 1"/>
-          <object type="PCIDev" gp_index="307" pci_busid="0000:62:00.0" pci_type="0200 [14e4:1639] [0014:007c] 20" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="307" pci_busid="0000:62:00.0" pci_type="0200 [14e4:1639] [0014:007c] 20 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Broadcom Corporation"/>
             <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
             <object type="OSDev" gp_index="308" name="eth4" osdev_type="2">
               <info name="Address" value="00:21:5e:c4:8a:18"/>
             </object>
           </object>
-          <object type="PCIDev" gp_index="309" pci_busid="0000:62:00.1" pci_type="0200 [14e4:1639] [0014:007c] 20" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="309" pci_busid="0000:62:00.1" pci_type="0200 [14e4:1639] [0014:007c] 20 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Broadcom Corporation"/>
             <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
             <object type="OSDev" gp_index="310" name="eth5" osdev_type="2">
@@ -615,13 +615,13 @@
             </object>
           </object>
         </object>
-        <object type="Bridge" gp_index="311" bridge_type="1-1" depth="1" bridge_pci="0000:[63-64]" pci_busid="0000:60:1e.0" pci_type="0604 [8086:244e] [0000:0000] e1" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="311" bridge_type="1-1" depth="1" bridge_pci="0000:[63-64]" pci_busid="0000:60:1e.0" pci_type="0604 [8086:244e] [0000:0000] e1 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="82801 PCI Bridge"/>
-          <object type="Bridge" gp_index="312" bridge_type="1-1" depth="2" bridge_pci="0000:[64-64]" pci_busid="0000:63:00.0" pci_type="0604 [1014:0308] [0000:0000] 01" pci_link_speed="0.000000">
+          <object type="Bridge" gp_index="312" bridge_type="1-1" depth="2" bridge_pci="0000:[64-64]" pci_busid="0000:63:00.0" pci_type="0604 [1014:0308] [0000:0000] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="IBM"/>
             <info name="PCIDevice" value="CalIOC2 PCI-E Root Port"/>
-            <object type="PCIDev" gp_index="313" pci_busid="0000:64:00.0" pci_type="0100 [1000:0062] [0014:0066] 04" pci_link_speed="0.000000">
+            <object type="PCIDev" gp_index="313" pci_busid="0000:64:00.0" pci_type="0100 [1000:0062] [0014:0066] 04 00" pci_link_speed="0.000000">
               <info name="PCIVendor" value="LSI Logic / Symbios Logic"/>
               <info name="PCIDevice" value="SAS1078 PCI-Express Fusion-MPT SAS"/>
               <object type="OSDev" gp_index="314" name="sdb" osdev_type="0"/>
@@ -796,17 +796,17 @@
         </object>
       </object>
       <object type="Bridge" gp_index="408" bridge_type="0-1" depth="0" bridge_pci="0000:[90-94]">
-        <object type="Bridge" gp_index="409" bridge_type="1-1" depth="1" bridge_pci="0000:[92-92]" pci_busid="0000:90:1c.0" pci_type="0604 [8086:27d0] [0000:0000] 01" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="409" bridge_type="1-1" depth="1" bridge_pci="0000:[92-92]" pci_busid="0000:90:1c.0" pci_type="0604 [8086:27d0] [0000:0000] 01 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="N10/ICH 7 Family PCI Express Port 1"/>
-          <object type="PCIDev" gp_index="410" pci_busid="0000:92:00.0" pci_type="0200 [14e4:1639] [0014:007c] 20" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="410" pci_busid="0000:92:00.0" pci_type="0200 [14e4:1639] [0014:007c] 20 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Broadcom Corporation"/>
             <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
             <object type="OSDev" gp_index="411" name="eth6" osdev_type="2">
               <info name="Address" value="00:21:5e:c4:86:18"/>
             </object>
           </object>
-          <object type="PCIDev" gp_index="412" pci_busid="0000:92:00.1" pci_type="0200 [14e4:1639] [0014:007c] 20" pci_link_speed="0.000000">
+          <object type="PCIDev" gp_index="412" pci_busid="0000:92:00.1" pci_type="0200 [14e4:1639] [0014:007c] 20 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Broadcom Corporation"/>
             <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
             <object type="OSDev" gp_index="413" name="eth7" osdev_type="2">
@@ -814,13 +814,13 @@
             </object>
           </object>
         </object>
-        <object type="Bridge" gp_index="414" bridge_type="1-1" depth="1" bridge_pci="0000:[93-94]" pci_busid="0000:90:1e.0" pci_type="0604 [8086:244e] [0000:0000] e1" pci_link_speed="0.000000">
+        <object type="Bridge" gp_index="414" bridge_type="1-1" depth="1" bridge_pci="0000:[93-94]" pci_busid="0000:90:1e.0" pci_type="0604 [8086:244e] [0000:0000] e1 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="82801 PCI Bridge"/>
-          <object type="Bridge" gp_index="415" bridge_type="1-1" depth="2" bridge_pci="0000:[94-94]" pci_busid="0000:93:00.0" pci_type="0604 [1014:0308] [0000:0000] 01" pci_link_speed="0.000000">
+          <object type="Bridge" gp_index="415" bridge_type="1-1" depth="2" bridge_pci="0000:[94-94]" pci_busid="0000:93:00.0" pci_type="0604 [1014:0308] [0000:0000] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="IBM"/>
             <info name="PCIDevice" value="CalIOC2 PCI-E Root Port"/>
-            <object type="PCIDev" gp_index="416" pci_busid="0000:94:00.0" pci_type="0100 [1000:0062] [0014:0066] 04" pci_link_speed="0.000000">
+            <object type="PCIDev" gp_index="416" pci_busid="0000:94:00.0" pci_type="0100 [1000:0062] [0014:0066] 04 00" pci_link_speed="0.000000">
               <info name="PCIVendor" value="LSI Logic / Symbios Logic"/>
               <info name="PCIDevice" value="SAS1078 PCI-Express Fusion-MPT SAS"/>
               <object type="OSDev" gp_index="417" name="sdc" osdev_type="0"/>

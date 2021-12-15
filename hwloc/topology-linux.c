@@ -6864,6 +6864,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     unsigned domain, bus, dev, func;
     unsigned secondary_bus, subordinate_bus;
     unsigned short class_id;
+    unsigned char prog_if;
     hwloc_obj_type_t type;
     hwloc_obj_t obj;
     struct hwloc_pcidev_attr_s *attr;
@@ -6884,10 +6885,14 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     }
 
     class_id = HWLOC_PCI_CLASS_NOT_DEFINED;
+    prog_if = 0;
     err = snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/class", dirent->d_name);
     if ((size_t) err < sizeof(path)
-	&& hwloc_read_path_by_length(path, value, sizeof(value), root_fd) > 0)
-      class_id = strtoul(value, NULL, 16) >> 8;
+	&& hwloc_read_path_by_length(path, value, sizeof(value), root_fd) > 0) {
+      unsigned long fullclass = strtoul(value, NULL, 16);
+      class_id = fullclass >> 8;
+      prog_if = fullclass & 0xff;
+    }
 
     type = hwloc_pcidisc_check_bridge_type(class_id, config_space_cache);
     /* only HWLOC_OBJ_BRIDGE for bridges to-PCI */
@@ -6943,6 +6948,7 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     attr->vendor_id = 0;
     attr->device_id = 0;
     attr->class_id = class_id;
+    attr->prog_if = prog_if;
     attr->revision = 0;
     attr->subvendor_id = 0;
     attr->subdevice_id = 0;

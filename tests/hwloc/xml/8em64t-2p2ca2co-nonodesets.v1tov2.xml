@@ -98,11 +98,11 @@
       </object>
     </object>
     <object type="Bridge" os_index="0" gp_index="40" bridge_type="0-1" depth="0" bridge_pci="0000:[00-0e]">
-      <object type="Bridge" os_index="32" gp_index="41" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[04-09]" pci_busid="0000:00:02.0" pci_type="0604 [8086:25e2] [0000:0000] 12" pci_link_speed="0.000000">
-        <object type="Bridge" os_index="16384" gp_index="42" name="" bridge_type="1-1" depth="2" bridge_pci="0000:[05-08]" pci_busid="0000:04:00.0" pci_type="0604 [8086:3500] [0000:0000] 01" pci_link_speed="0.000000">
-          <object type="Bridge" os_index="20480" gp_index="43" name="" bridge_type="1-1" depth="3" bridge_pci="0000:[06-07]" pci_busid="0000:05:00.0" pci_type="0604 [8086:3510] [0000:0000] 01" pci_link_speed="0.000000">
-            <object type="Bridge" os_index="24576" gp_index="44" name="" bridge_type="1-1" depth="4" bridge_pci="0000:[07-07]" pci_busid="0000:06:00.0" pci_type="0604 [1166:0103] [0000:0000] c3" pci_link_speed="0.000000">
-              <object type="PCIDev" os_index="28672" gp_index="45" name="" pci_busid="0000:07:00.0" pci_type="0200 [14e4:164c] [0028:00b3] 12" pci_link_speed="0.000000">
+      <object type="Bridge" os_index="32" gp_index="41" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[04-09]" pci_busid="0000:00:02.0" pci_type="0604 [8086:25e2] [0000:0000] 12 00" pci_link_speed="0.000000">
+        <object type="Bridge" os_index="16384" gp_index="42" name="" bridge_type="1-1" depth="2" bridge_pci="0000:[05-08]" pci_busid="0000:04:00.0" pci_type="0604 [8086:3500] [0000:0000] 01 00" pci_link_speed="0.000000">
+          <object type="Bridge" os_index="20480" gp_index="43" name="" bridge_type="1-1" depth="3" bridge_pci="0000:[06-07]" pci_busid="0000:05:00.0" pci_type="0604 [8086:3510] [0000:0000] 01 00" pci_link_speed="0.000000">
+            <object type="Bridge" os_index="24576" gp_index="44" name="" bridge_type="1-1" depth="4" bridge_pci="0000:[07-07]" pci_busid="0000:06:00.0" pci_type="0604 [1166:0103] [0000:0000] c3 00" pci_link_speed="0.000000">
+              <object type="PCIDev" os_index="28672" gp_index="45" name="" pci_busid="0000:07:00.0" pci_type="0200 [14e4:164c] [0028:00b3] 12 00" pci_link_speed="0.000000">
                 <object type="OSDev" gp_index="46" name="eth1" osdev_type="2">
                   <info name="Address" value="00:22:19:4f:ee:09"/>
                 </object>
@@ -111,13 +111,13 @@
           </object>
         </object>
       </object>
-      <object type="Bridge" os_index="48" gp_index="47" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:03.0" pci_type="0604 [8086:25e3] [0000:0000] 12" pci_link_speed="0.000000">
-        <object type="PCIDev" os_index="4096" gp_index="48" name="" pci_busid="0000:01:00.0" pci_type="0100 [1000:0058] [0028:0010] 08" pci_link_speed="0.000000">
+      <object type="Bridge" os_index="48" gp_index="47" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:03.0" pci_type="0604 [8086:25e3] [0000:0000] 12 00" pci_link_speed="0.000000">
+        <object type="PCIDev" os_index="4096" gp_index="48" name="" pci_busid="0000:01:00.0" pci_type="0100 [1000:0058] [0028:0010] 08 00" pci_link_speed="0.000000">
           <object type="OSDev" gp_index="49" name="sda" osdev_type="0"/>
         </object>
       </object>
-      <object type="Bridge" os_index="64" gp_index="50" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[0a-0a]" pci_busid="0000:00:04.0" pci_type="0604 [8086:25f8] [0000:0000] 12" pci_link_speed="0.000000">
-        <object type="PCIDev" os_index="40960" gp_index="51" name="" pci_busid="0000:0a:00.0" pci_type="0c06 [15b3:634a] [00b3:0007] a0" pci_link_speed="0.000000">
+      <object type="Bridge" os_index="64" gp_index="50" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[0a-0a]" pci_busid="0000:00:04.0" pci_type="0604 [8086:25f8] [0000:0000] 12 00" pci_link_speed="0.000000">
+        <object type="PCIDev" os_index="40960" gp_index="51" name="" pci_busid="0000:0a:00.0" pci_type="0c06 [15b3:634a] [00b3:0007] a0 00" pci_link_speed="0.000000">
           <object type="OSDev" gp_index="52" name="ib0" osdev_type="2">
             <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:00:02:c9:03:00:02:a0:cf"/>
             <info name="Port" value="1"/>
@@ -138,17 +138,17 @@
           </object>
         </object>
       </object>
-      <object type="Bridge" os_index="448" gp_index="55" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[02-03]" pci_busid="0000:00:1c.0" pci_type="0604 [8086:2690] [0000:0000] 09" pci_link_speed="0.000000">
-        <object type="Bridge" os_index="8192" gp_index="56" name="" bridge_type="1-1" depth="2" bridge_pci="0000:[03-03]" pci_busid="0000:02:00.0" pci_type="0604 [1166:0103] [0000:0000] c3" pci_link_speed="0.000000">
-          <object type="PCIDev" os_index="12288" gp_index="57" name="" pci_busid="0000:03:00.0" pci_type="0200 [14e4:164c] [0028:00b3] 12" pci_link_speed="0.000000">
+      <object type="Bridge" os_index="448" gp_index="55" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[02-03]" pci_busid="0000:00:1c.0" pci_type="0604 [8086:2690] [0000:0000] 09 00" pci_link_speed="0.000000">
+        <object type="Bridge" os_index="8192" gp_index="56" name="" bridge_type="1-1" depth="2" bridge_pci="0000:[03-03]" pci_busid="0000:02:00.0" pci_type="0604 [1166:0103] [0000:0000] c3 00" pci_link_speed="0.000000">
+          <object type="PCIDev" os_index="12288" gp_index="57" name="" pci_busid="0000:03:00.0" pci_type="0200 [14e4:164c] [0028:00b3] 12 00" pci_link_speed="0.000000">
             <object type="OSDev" gp_index="58" name="eth0" osdev_type="2">
               <info name="Address" value="00:22:19:4f:ee:07"/>
             </object>
           </object>
         </object>
       </object>
-      <object type="Bridge" os_index="480" gp_index="59" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[0e-0e]" pci_busid="0000:00:1e.0" pci_type="0604 [8086:244e] [0000:0000] d9" pci_link_speed="0.000000">
-        <object type="PCIDev" os_index="57552" gp_index="60" name="" pci_busid="0000:0e:0d.0" pci_type="0300 [1002:515e] [0028:00b3] 02" pci_link_speed="0.000000"/>
+      <object type="Bridge" os_index="480" gp_index="59" name="" bridge_type="1-1" depth="1" bridge_pci="0000:[0e-0e]" pci_busid="0000:00:1e.0" pci_type="0604 [8086:244e] [0000:0000] d9 00" pci_link_speed="0.000000">
+        <object type="PCIDev" os_index="57552" gp_index="60" name="" pci_busid="0000:0e:0d.0" pci_type="0300 [1002:515e] [0028:00b3] 02 00" pci_link_speed="0.000000"/>
       </object>
     </object>
   </object>
