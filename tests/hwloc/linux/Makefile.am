@@ -58,6 +58,7 @@ sysfs_outputs = \
 		256ia64-64n2s2c.output \
 		2s390-2c.output \
 		20s390-2g6s4c.output \
+		2pa-pcidomain32bits.output \
 		2arm-2c.output \
 		nvidiagpunumanodes.output \
 		nvidiagpunumanodes.kept.output \
@@ -66,14 +67,6 @@ sysfs_outputs = \
 		fakeheterocpunuma.output \
 		fakeheteromemtiers.output \
 		offline-cpu0-node0.output
-
-if HWLOC_HAVE_32BITS_PCI_DOMAIN
-sysfs_outputs += 2pa-pcidomain32bits.output
-EXTRA_DIST = 2pa-pcidomain32bits-disabled.output
-else
-sysfs_outputs += 2pa-pcidomain32bits-disabled.output
-EXTRA_DIST = 2pa-pcidomain32bits.output
-endif
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # or a corresponding `xyz.source' specifying which tarball to use
@@ -130,7 +123,6 @@ sysfs_tarballs = \
 		20s390-2g6s4c.tar.bz2 \
 		2arm-2c.tar.bz2 \
 		2pa-pcidomain32bits.tar.bz2 \
-		2pa-pcidomain32bits-disabled.source \
 		nvidiagpunumanodes.tar.bz2 \
 		nvidiagpunumanodes.kept.source \
 		fakememinitiators-1np2c+1npp+gi.tar.bz2 \
@@ -176,7 +168,7 @@ TESTS = $(sysfs_outputs)
 endif HWLOC_HAVE_BUNZIPP
 endif HWLOC_HAVE_OPENAT
 
-EXTRA_DIST += $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
+EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
 
 LOG_COMPILER = $(builddir)/test-topology.sh
 

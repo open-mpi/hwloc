@@ -102,7 +102,7 @@ extern "C" {
 HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
 
 /** \brief Current component and plugin ABI version (see hwloc/plugins.h) */
-#define HWLOC_COMPONENT_ABI 7
+#define HWLOC_COMPONENT_ABI 8
 
 /** @} */
 
@@ -631,11 +631,7 @@ union hwloc_obj_attr_u {
   } group;
   /** \brief PCI Device specific Object Attributes */
   struct hwloc_pcidev_attr_s {
-#ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
-    unsigned short domain; /* Only 16bits PCI domains are supported by default */
-#else
-    unsigned int domain; /* 32bits PCI domain support break the library ABI, hence it's disabled by default */
-#endif
+    unsigned int domain;
     unsigned char bus, dev, func;
     unsigned short class_id;
     unsigned short vendor_id, device_id, subvendor_id, subdevice_id;
@@ -650,11 +646,7 @@ union hwloc_obj_attr_u {
     hwloc_obj_bridge_type_t upstream_type;
     union {
       struct {
-#ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
-	unsigned short domain; /* Only 16bits PCI domains are supported by default */
-#else
-	unsigned int domain; /* 32bits PCI domain support break the library ABI, hence it's disabled by default */
-#endif
+	unsigned int domain;
 	unsigned char secondary_bus, subordinate_bus;
       } pci;
     } downstream;

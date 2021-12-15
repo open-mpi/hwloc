@@ -40,7 +40,7 @@
 #endif
 #include <string.h>
 
-#define HWLOC_TOPOLOGY_ABI 0x20400 /* version of the layout of struct topology */
+#define HWLOC_TOPOLOGY_ABI 0x30000 /* version of the layout of struct topology */
 
 struct hwloc_internal_location_s {
   enum hwloc_location_type_e type;

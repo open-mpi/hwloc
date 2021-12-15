@@ -202,16 +202,6 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     dev = pcidev->dev;
     func = pcidev->func;
 
-#ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
-    if (domain > 0xffff) {
-      static int warned = 0;
-      if (!warned && HWLOC_SHOW_ALL_ERRORS())
-	fprintf(stderr, "hwloc/pci: Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
-      warned = 1;
-      continue;
-    }
-#endif
-
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
     pci_device_probe(pcidev);

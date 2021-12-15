@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017-2020 Inria.  All rights reserved.
+ * Copyright © 2017-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -133,11 +133,7 @@ int main(void)
     size = sizeof(struct hwloc_obj);
     assert(size == 248);
     size = sizeof(union hwloc_obj_attr_u);
-#ifdef HWLOC_HAVE_32BITS_PCI_DOMAIN
     assert(size == 48);
-#else
-    assert(size == 40);
-#endif
     size = sizeof(struct hwloc_info_s);
     assert(size == 16);
 

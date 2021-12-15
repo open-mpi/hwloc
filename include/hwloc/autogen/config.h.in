@@ -226,9 +226,6 @@ typedef uint64_t hwloc_uint64_t;
 
 #endif /* HWLOC_HAVE_WINDOWS_H */
 
-/* Define to 1 if --enable-32bits-pci-domain is called. */
-#undef HWLOC_HAVE_32BITS_PCI_DOMAIN
-
 /* Whether we need to re-define all the hwloc public symbols or not */
 #undef HWLOC_SYM_TRANSFORM
 

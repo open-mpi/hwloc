@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 3.0.0
+-------------
+* API
+  + PCI domains are now always 32bits.
+
+
 Version 2.9.0
 -------------
 * Backends

@@ -958,11 +958,6 @@ return 0;
 	 AC_DEFINE([HAVE_DECL_RUNNING_ON_VALGRIND], [0], [Embedded mode; just assume we do not have Valgrind support])
 	])
 
-    AS_IF([test "x$enable_32bits_pci_domain" = "xyes"], [
-      AC_DEFINE([HWLOC_HAVE_32BITS_PCI_DOMAIN], 1,
-        [Define to 1 if --enable-32bits-pci-domain is called.])
-    ])
-
     # PCI support via libpciaccess.  NOTE: we do not support
     # libpci/pciutils because that library is GPL and is incompatible
     # with our BSD license.
@@ -1835,8 +1830,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_X86_32], [test "x$hwloc_x86_32" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_X86_64], [test "x$hwloc_x86_64" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_X86_CPUID], [test "x$hwloc_have_x86_cpuid" = "xyes"])
-
-        AM_CONDITIONAL([HWLOC_HAVE_32BITS_PCI_DOMAIN], [test "x$enable_32bits_pci_domain" = "xyes"])
 
         AM_CONDITIONAL([HWLOC_HAVE_PLUGINS], [test "x$hwloc_have_plugins" = "xyes"])
         AM_CONDITIONAL([HWLOC_PCI_BUILD_STATIC], [test "x$hwloc_pci_component" = "xstatic"])

@@ -271,14 +271,6 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	  fprintf(stderr, "%s: ignoring invalid pci_busid format string %s\n",
 		  state->global->msgprefix, value);
 	*ignore = 1;
-#ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
-      } else if (domain > 0xffff) {
-	static int warned = 0;
-	if (!warned && HWLOC_SHOW_ALL_ERRORS())
-	  fprintf(stderr, "hwloc/xml: Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
-	warned = 1;
-	*ignore = 1;
-#endif
       } else {
 	obj->attr->pcidev.domain = domain;
 	obj->attr->pcidev.bus = bus;
@@ -371,14 +363,6 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	  fprintf(stderr, "%s: ignoring invalid bridge_pci format string %s\n",
 		  state->global->msgprefix, value);
 	*ignore = 1;
-#ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
-      } else if (domain > 0xffff) {
-	static int warned = 0;
-	if (!warned && HWLOC_SHOW_ALL_ERRORS())
-	  fprintf(stderr, "hwloc/xml: Ignoring bridge to PCI with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
-	warned = 1;
-	*ignore = 1;
-#endif
       } else {
         /* FIXME verify that downstream type vs pci info are valid */
 	obj->attr->bridge.downstream.pci.domain = domain;

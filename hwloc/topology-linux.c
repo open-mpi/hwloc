@@ -6875,16 +6875,6 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     if (sscanf(dirent->d_name, "%x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
       continue;
 
-#ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
-    if (domain > 0xffff) {
-      static int warned = 0;
-      if (!warned && HWLOC_SHOW_ALL_ERRORS())
-	fprintf(stderr, "hwloc/linux: Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
-      warned = 1;
-      continue;
-    }
-#endif
-
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
     err = snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
