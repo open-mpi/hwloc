@@ -573,10 +573,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE+i-1, HWLOC_UNKNOWN_INDEX);
 	  }
           obj->cpuset = hwloc_bitmap_alloc();
-          for (cpu = j*cacheconfig[i];
-               cpu < ((j+1)*cacheconfig[i]);
-               cpu++)
-            hwloc_bitmap_set(obj->cpuset, cpu);
+          hwloc_bitmap_set_range(obj->cpuset, j*cacheconfig[i], (j+1)*cacheconfig[i]-1);
 
           if (i == 1 && l1icachesize
 	      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
