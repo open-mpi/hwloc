@@ -13,7 +13,7 @@ typedef int kern_return_t;
 #define KERN_SUCCESS 0
 
 typedef int mach_port_t;
-#define kIOMasterPortDefault 0
+#define kIOMainPortDefault 0
 extern io_registry_entry_t IORegistryEntryFromPath(mach_port_t, const io_string_t);
 extern kern_return_t IOObjectRelease(io_object_t);
 

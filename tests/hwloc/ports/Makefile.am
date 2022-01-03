@@ -1,4 +1,4 @@
-# Copyright © 2009-2021 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012, 2020 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -68,7 +68,8 @@ nodist_libhwloc_port_darwin_la_SOURCES = topology-darwin.c
 libhwloc_port_darwin_la_SOURCES = \
         include/darwin/sys/sysctl.h \
         include/darwin/IOKit/IOKitLib.h \
-        include/darwin/CoreFoundation/CoreFoundation.h
+        include/darwin/CoreFoundation/CoreFoundation.h \
+        include/darwin/Availability.h
 libhwloc_port_darwin_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/darwin \
         -DHWLOC_DARWIN_SYS \

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -26,6 +26,11 @@
 
 #include <IOKit/IOKitLib.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <Availability.h>
+
+#if (defined __MAC_OS_X_VERSION_MIN_REQUIRED) && (__MAC_OS_X_VERSION_MIN_REQUIRED < 120000)
+#define kIOMainPortDefault kIOMasterPortDefault
+#endif
 
 #define DT_PLANE "IODeviceTree"
 
@@ -46,7 +51,7 @@ static int hwloc__look_darwin_cpukinds(struct hwloc_darwin_cpukinds *kinds)
 
   hwloc_debug("\nLooking at cpukinds under " DT_PLANE ":/cpus ...\n");
 
-  cpus_root = IORegistryEntryFromPath(kIOMasterPortDefault, DT_PLANE ":/cpus");
+  cpus_root = IORegistryEntryFromPath(kIOMainPortDefault, DT_PLANE ":/cpus");
   if (!cpus_root) {
     fprintf(stderr, "hwloc/darwin/cpukinds: failed to find " DT_PLANE ":/cpus\n");
     return -1;
