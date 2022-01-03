@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -31,7 +31,6 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
   hwloc_bitmap_t cpuset;
   unsigned pathlen;
   char *path;
-  char *end;
   int fd;
   ssize_t n;
 
@@ -143,6 +142,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
     if (taskdir) {
       struct dirent *taskdirent;
       long tid;
+      char *end;
       unsigned nbth = 0;
       /* count threads */
       while ((taskdirent = readdir(taskdir))) {
