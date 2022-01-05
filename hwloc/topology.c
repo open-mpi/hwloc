@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -3795,7 +3795,13 @@ hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
     return -1;
   }
 
-  if (flags & ~(HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED|HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM|HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES|HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT|HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING|HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING|HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING)) {
+  if (flags & ~(HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
+                |HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM
+                |HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES
+                |HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT
+                |HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING
+                |HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING
+                |HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING)) {
     errno = EINVAL;
     return -1;
   }
