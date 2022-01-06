@@ -1848,7 +1848,12 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
     goto error;
   }
 
-  hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, nr_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS) {
+    hwloc__free_infos(infos, nr_infos);
+    hwloc_bitmap_free(cpuset);
+  } else {
+    hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, nr_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+  }
 
   return state->global->close_tag(state);
 

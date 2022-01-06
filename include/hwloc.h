@@ -2072,7 +2072,13 @@ enum hwloc_topology_flags_e {
    *
    * Ignore memory attribues from the operating systems (and from XML).
    */
-  HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS = (1UL<<8)
+  HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS = (1UL<<8),
+
+  /** \brief Ignore CPU Kinds.
+   *
+   * Ignore CPU kind information from the operating systems (and from XML).
+   */
+  HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS = (1UL<<9)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

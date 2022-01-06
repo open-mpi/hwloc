@@ -5634,7 +5634,8 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   }
 
  cpudone:
-  look_sysfscpukinds(topology, data, sysfs_cpu_path);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
+    look_sysfscpukinds(topology, data, sysfs_cpu_path);
 
   /*********************
    * Memory information
