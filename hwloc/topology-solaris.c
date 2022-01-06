@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -492,6 +492,9 @@ hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstat
     lgrp_list_allowed(topology);
     dstatus->flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
   }
+
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)
+    need_distances = 0;
 
   cookie = lgrp_init(LGRP_VIEW_OS);
   if (cookie == LGRP_COOKIE_NONE)

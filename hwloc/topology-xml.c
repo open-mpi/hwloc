@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1579,6 +1579,9 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     }
   }
 
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)
+    goto out_ignore;
+
   hwloc_internal_distances_add_by_index(topology, name, unique_type, different_types, nbobjs, indexes, u64values, kind, 0 /* assume grouping was applied when this matrix was discovered before exporting to XML */);
 
   /* prevent freeing below */
@@ -2179,7 +2182,8 @@ done:
        * but it would require to have those objects in the original XML order (like the first_numanode cousin-list).
        * because the topology order can be different if some parents are ignored during load.
        */
-      if (nbobjs == data->nbnumanodes) {
+      if (nbobjs == data->nbnumanodes
+          && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)) {
 	hwloc_obj_t *objs = malloc(nbobjs*sizeof(hwloc_obj_t));
 	uint64_t *values = malloc(nbobjs*nbobjs*sizeof(*values));
         assert(data->nbnumanodes > 0); /* v1dist->nbobjs is >0 after import */

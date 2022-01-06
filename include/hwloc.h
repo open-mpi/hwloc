@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2059,7 +2059,14 @@ enum hwloc_topology_flags_e {
    * not change to due thread binding changes on Windows
    * (see ::HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING).
    */
-  HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING = (1UL<<6)
+  HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING = (1UL<<6),
+
+  /** \brief Ignore distances.
+   *
+   * Ignore distance information from the operating systems (and from XML)
+   * and hence do not use distances for grouping.
+   */
+  HWLOC_TOPOLOGY_FLAG_NO_DISTANCES = (1UL<<7)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

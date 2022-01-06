@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2021 Inria.  All rights reserved.
+ * Copyright © 2010-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -123,6 +123,7 @@ extern "C" {
 #define HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING HWLOC_NAME_CAPS(TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING)
 #define HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING HWLOC_NAME_CAPS(TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING)
 #define HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING HWLOC_NAME_CAPS(TOPOLOGY_FLAG_DONT_CHANGE_BINDING)
+#define HWLOC_TOPOLOGY_FLAG_NO_DISTANCES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_NO_DISTANCES)
 
 #define hwloc_topology_set_pid HWLOC_NAME(topology_set_pid)
 #define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)

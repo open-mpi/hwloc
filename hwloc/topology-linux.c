@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -3829,7 +3829,8 @@ annotate_sysfsnode(struct hwloc_topology *topology,
 
   if (nbnodes >= 2
       && data->use_numa_distances
-      && !hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd)) {
+      && !hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd)
+      && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)) {
     hwloc_internal_distances_add(topology, "NUMALatency", nbnodes, nodes, distances,
 				 HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
 				 HWLOC_DISTANCES_ADD_FLAG_GROUP);
@@ -4108,6 +4109,11 @@ look_sysfsnode(struct hwloc_topology *topology,
 	}
       }
       free(trees);
+
+      if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES) {
+        free(distances);
+        distances = NULL;
+      }
 
       /* Inserted distances now that nodes are properly inserted */
       if (distances)
