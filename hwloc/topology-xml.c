@@ -1736,7 +1736,8 @@ hwloc__xml_import_memattr(hwloc_topology_t topology,
     }
   }
 
-  if (name && flags != (unsigned long) -1) {
+  if (name && flags != (unsigned long) -1
+      && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
     hwloc_memattr_id_t _id;
 
     ret = hwloc_memattr_get_by_name(topology, name, &_id);

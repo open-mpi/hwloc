@@ -3279,7 +3279,7 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
     }
   }
 
-  if (ddr && mcdram) {
+  if (ddr && mcdram && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
     /* add memattrs to distinguish DDR and MCDRAM */
     struct hwloc_internal_location_s loc;
     hwloc_uint64_t ddrbw;
@@ -4082,7 +4082,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  trees[nr_trees++] = tree;
 	}
         /* By the way, get their memattrs now that cpuset is fixed */
-        read_node_local_memattrs(topology, data, node, path);
+        if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+          read_node_local_memattrs(topology, data, node, path);
       }
 
       /* insert memory trees for real */

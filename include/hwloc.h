@@ -2066,7 +2066,13 @@ enum hwloc_topology_flags_e {
    * Ignore distance information from the operating systems (and from XML)
    * and hence do not use distances for grouping.
    */
-  HWLOC_TOPOLOGY_FLAG_NO_DISTANCES = (1UL<<7)
+  HWLOC_TOPOLOGY_FLAG_NO_DISTANCES = (1UL<<7),
+
+  /** \brief Ignore memory attributes.
+   *
+   * Ignore memory attribues from the operating systems (and from XML).
+   */
+  HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS = (1UL<<8)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

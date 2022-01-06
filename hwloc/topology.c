@@ -3802,7 +3802,8 @@ hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
                 |HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING
                 |HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_MEMBINDING
                 |HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING
-                |HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)) {
+                |HWLOC_TOPOLOGY_FLAG_NO_DISTANCES
+                |HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
     errno = EINVAL;
     return -1;
   }
