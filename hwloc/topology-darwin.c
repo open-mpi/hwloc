@@ -30,6 +30,7 @@ struct hwloc_darwin_cpukinds {
     hwloc_bitmap_t cpuset;
 #define HWLOC_DARWIN_COMPATIBLE_MAX 128
     char *compatible;
+    int perflevel; /* -1 if unknown */
   } kinds[MAX_KINDS]; /* sorted by computing performance first, as sysctl hw.perflevels */
 };
 
@@ -44,8 +45,6 @@ hwloc__darwin_cpukinds_clear(struct hwloc_darwin_cpukinds *kinds)
   kinds->nr = 0;
 }
 
-#if (defined HWLOC_HAVE_DARWIN_FOUNDATION) && (defined HWLOC_HAVE_DARWIN_IOKIT)
-
 static struct hwloc_darwin_cpukind *
 hwloc__darwin_cpukinds_add(struct hwloc_darwin_cpukinds *kinds,
                            char cluster_type, const char *compatible)
@@ -58,6 +57,7 @@ hwloc__darwin_cpukinds_add(struct hwloc_darwin_cpukinds *kinds,
 
   kinds->kinds[kinds->nr].cluster_type = cluster_type;
   kinds->kinds[kinds->nr].compatible = compatible ? strdup(compatible) : NULL;
+  kinds->kinds[kinds->nr].perflevel = -1;
   kinds->kinds[kinds->nr].cpuset = hwloc_bitmap_alloc();
   if (!kinds->kinds[kinds->nr].cpuset) {
     /* cancel this new kind, cpu won't be in any kind */
@@ -69,6 +69,8 @@ hwloc__darwin_cpukinds_add(struct hwloc_darwin_cpukinds *kinds,
   kinds->nr++;
   return &kinds->kinds[kinds->nr-1];
 }
+
+#if (defined HWLOC_HAVE_DARWIN_FOUNDATION) && (defined HWLOC_HAVE_DARWIN_IOKIT)
 
 static void hwloc__darwin_cpukinds_add_cpu(struct hwloc_darwin_cpukinds *kinds,
                                            char cluster_type, const char *compatible,
@@ -282,7 +284,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
   IOObjectRelease(cpus_iter);
   IOObjectRelease(cpus_root);
 
-  /*
+  /* try to match sysctl hw.perflevel,
    * perflevel0 always refers to the highest performance core type in the system.
    * if we only have E and P, E=perflevel1, P=perflevel0, otherwise we don't know.
    */
@@ -291,7 +293,11 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
      * cluster types: https://developer.apple.com/news/?id=vk3m204o
      * E=Efficiency, P=Performance
      */
-    if (kinds->kinds[i].cluster_type != 'E' && kinds->kinds[1].cluster_type != 'P') {
+    if (kinds->kinds[i].cluster_type == 'E') {
+      kinds->kinds[i].perflevel = 1;
+    } else if (kinds->kinds[1].cluster_type == 'P') {
+      kinds->kinds[i].perflevel = 0;
+    } else {
       if (!hwloc_hide_errors())
         fprintf(stderr, "hwloc/darwin/cpukinds: unrecognized cluster type %c compatible %s, cannot match perflevels\n",
                 kinds->kinds[i].cluster_type, kinds->kinds[i].compatible);
@@ -313,18 +319,18 @@ static int hwloc__darwin_cpukinds_register(struct hwloc_topology *topology,
     struct hwloc_info_s infoattr;
     unsigned nr_info = 0;
     int efficiency;
-    hwloc_debug_1arg_bitmap("building cpukind with compatible `%s' and cpuset %s\n",
-                            kinds->kinds[i].compatible,
-                            kinds->kinds[i].cpuset);
+    hwloc_debug_2args_bitmap("building cpukind with perflevel %u compatible `%s' and cpuset %s\n",
+                             kinds->kinds[i].perflevel,
+                             kinds->kinds[i].compatible,
+                             kinds->kinds[i].cpuset);
     if (kinds->kinds[i].compatible) {
       infoattr.name = (char *) "DarwinCompatible";
       infoattr.value = kinds->kinds[i].compatible;
       nr_info = 1;
     }
-    if (kinds->kinds[i].cluster_type == 'E') {
-      efficiency = 0;
-    } else if (kinds->kinds[i].cluster_type == 'P') {
-      efficiency = 1;
+    if (kinds->kinds[i].perflevel >= 0) {
+      /* perflevel0 always refers to the highest performance core type in the system. */
+      efficiency = kinds->nr - 1 - kinds->kinds[i].perflevel;
     } else {
       efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
       got_efficiency = 0;
@@ -421,7 +427,10 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   char cpufamilynumber[20], cpumodelnumber[20], cpustepping[20];
   int gotnuma = 0;
   int gotnumamemory = 0;
+  int64_t nperflevels = 0;
   struct hwloc_darwin_cpukinds kinds;
+  int cpukinds_from_sysctl;
+  char *env;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
@@ -429,10 +438,48 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
     /* somebody discovered things */
     return -1;
 
+  if (hwloc_get_sysctlbyname("hw.nperflevels", &nperflevels))
+    nperflevels = 0;
+  else
+    hwloc_debug("\n%d sysctl perflevels\n", (int) nperflevels);
+
   kinds.nr = 0;
+  cpukinds_from_sysctl = -1; /* try IOKit, then sysctl */
+  env = getenv("HWLOC_DARWIN_CPUKINDS_FROM_SYSCTL");
+  if (env)
+    cpukinds_from_sysctl = atoi(env);
+
+  /* IOKit reports the precise list of cores,
+   * while sysctl only says how many cores per perflevel, not which.
+   * (TODO: hw.l[23]perflevels may help when available when those keys will be supported).
+   * Not very important since we cannot bind on Mac OS X,
+   * but that's why we use IOKit first.
+   */
 #if (defined HWLOC_HAVE_DARWIN_FOUNDATION) && (defined HWLOC_HAVE_DARWIN_IOKIT)
-  hwloc__darwin_look_iokit_cpukinds(&kinds);
+  if (cpukinds_from_sysctl != 1)
+    hwloc__darwin_look_iokit_cpukinds(&kinds);
 #endif
+
+  if (nperflevels > 0 && (cpukinds_from_sysctl == 1 || (cpukinds_from_sysctl ==  -1 && !kinds.nr))) {
+    /* if there are sysctl perflevels, and either we found nothing in IOKit and sysctl is allowed, or we're forced to use sysctl */
+    unsigned totalcpus = 0;
+    hwloc_debug("\nReading cpukinds from %d sysctl perflevels...\n", (int) nperflevels);
+    for(i=0; i<nperflevels; i++) {
+      char name[64];
+      int64_t ncpus;
+      snprintf(name, sizeof(name), "hw.perflevel%u.logicalcpu", i);
+      if (!hwloc_get_sysctlbyname(name, &ncpus)) {
+        struct hwloc_darwin_cpukind *kind;
+        hwloc_debug("found %d cpus in perflevel %u\n", (int)ncpus, i);
+        kind = hwloc__darwin_cpukinds_add(&kinds, '?', NULL);
+        if (kind) {
+          hwloc_bitmap_set_range(kind->cpuset, totalcpus, totalcpus+ncpus-1);
+          kind->perflevel = i;
+          totalcpus += ncpus;
+        }
+      }
+    }
+  }
   hwloc_debug("%s", "\n");
 
   hwloc_alloc_root_sets(topology->levels[0][0]);
