@@ -340,6 +340,59 @@ static int hwloc__darwin_cpukinds_register(struct hwloc_topology *topology,
   return 0;
 }
 
+static void hwloc__darwin_build_numa_level(struct hwloc_topology *topology,
+                                           unsigned nrobjs, unsigned width,
+                                           uint64_t size,
+                                           int *gotnuma, int *gotnumamemory)
+{
+  unsigned j;
+  for (j = 0; j < nrobjs; j++) {
+    hwloc_obj_t obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, j);
+    obj->cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_set_range(obj->cpuset, j*width, (j+1)*width-1);
+    obj->nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_set(obj->nodeset, j);
+    (*gotnuma)++;
+
+    hwloc_debug_1arg_bitmap("node %u has cpuset %s\n",
+                            j, obj->cpuset);
+    if (size) {
+      obj->attr->numanode.local_memory = size;
+      (*gotnumamemory)++;
+    }
+    obj->attr->numanode.page_types_len = 2;
+    obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
+    memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
+    obj->attr->numanode.page_types[0].size = hwloc_getpagesize();
+#if HAVE_DECL__SC_LARGE_PAGESIZE
+    obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+    hwloc__insert_object_by_cpuset(topology, NULL, obj ,"darwin:numanode");
+  }
+}
+
+static void hwloc__darwin_build_cache_level(struct hwloc_topology *topology,
+                                            unsigned nrobjs, unsigned width,
+                                            hwloc_obj_type_t type,
+                                            unsigned depth, uint64_t size, int64_t linesize, int64_t ways)
+{
+  unsigned j;
+  for (j = 0; j < nrobjs; j++) {
+    hwloc_obj_t obj = hwloc_alloc_setup_object(topology, type, HWLOC_UNKNOWN_INDEX);
+    obj->cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_set_range(obj->cpuset, j*width, (j+1)*width-1);
+    hwloc_debug_2args_bitmap("L%ucache %u has cpuset %s\n",
+                             depth, j, obj->cpuset);
+    obj->attr->cache.depth = depth;
+    obj->attr->cache.type = depth > 1 ? HWLOC_OBJ_CACHE_UNIFIED
+      : hwloc_obj_type_is_icache(type) ? HWLOC_OBJ_CACHE_INSTRUCTION : HWLOC_OBJ_CACHE_DATA;
+    obj->attr->cache.size = size;
+    obj->attr->cache.linesize = linesize;
+    obj->attr->cache.associativity = ways;
+    hwloc__insert_object_by_cpuset(topology, NULL, obj, "darwin:cache");
+  }
+}
+
 static int
 hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -353,7 +406,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   int64_t _nprocs;
   unsigned nprocs;
   int64_t _npackages;
-  unsigned i, j, cpu;
+  unsigned i, cpu;
   struct hwloc_obj *obj;
   size_t size;
   int64_t l1dcachesize, l1icachesize;
@@ -554,6 +607,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   if (hwloc_get_sysctlbyname("hw.memsize", &memsize))
     memsize = 0;
 
+  hwloc_debug("%s", "\n");
   if (!sysctlbyname("hw.cacheconfig", NULL, &size, NULL, 0)) {
     unsigned n = size / sizeof(uint32_t);
     uint64_t *cacheconfig;
@@ -596,71 +650,25 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       n = i;
       hwloc_debug("\n%u cache levels\n", n - 1);
 
-      /* For each cache level (0 is memory) */
-      for (i = 0; i < n; i++) {
-        /* cacheconfig tells us how many cpus share it, let's iterate on each cache */
-        for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
-	  if (!i) {
-	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, j);
-            obj->nodeset = hwloc_bitmap_alloc();
-            hwloc_bitmap_set(obj->nodeset, j);
-	    gotnuma++;
-          } else {
-	    obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1CACHE+i-1, HWLOC_UNKNOWN_INDEX);
-	  }
-          obj->cpuset = hwloc_bitmap_alloc();
-          hwloc_bitmap_set_range(obj->cpuset, j*cacheconfig[i], (j+1)*cacheconfig[i]-1);
-
-          if (i == 1 && l1icachesize
-	      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
-            /* FIXME assuming that L1i and L1d are shared the same way. Darwin
-             * does not yet provide a way to know.  */
-            hwloc_obj_t l1i = hwloc_alloc_setup_object(topology, HWLOC_OBJ_L1ICACHE, HWLOC_UNKNOWN_INDEX);
-            l1i->cpuset = hwloc_bitmap_dup(obj->cpuset);
-            hwloc_debug_1arg_bitmap("L1icache %u has cpuset %s\n",
-                j, l1i->cpuset);
-            l1i->attr->cache.depth = i;
-            l1i->attr->cache.size = l1icachesize;
-            l1i->attr->cache.linesize = cachelinesize;
-            l1i->attr->cache.associativity = 0;
-            l1i->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
-
-            hwloc__insert_object_by_cpuset(topology, NULL, l1i, "darwin:l1icache");
-          }
-          if (i) {
-            hwloc_debug_2args_bitmap("L%ucache %u has cpuset %s\n",
-                i, j, obj->cpuset);
-            obj->attr->cache.depth = i;
-            obj->attr->cache.size = cachesize[i];
-            obj->attr->cache.linesize = cachelinesize;
-            if (i <= sizeof(cacheways) / sizeof(cacheways[0]))
-              obj->attr->cache.associativity = cacheways[i-1];
-            else
-              obj->attr->cache.associativity = 0;
-            if (i == 1 && l1icachesize)
-              obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
-            else
-              obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
-          } else {
-            hwloc_debug_1arg_bitmap("node %u has cpuset %s\n",
-                j, obj->cpuset);
-	    if (cachesize[i]) {
-	      obj->attr->numanode.local_memory = cachesize[i];
-	      gotnumamemory++;
-	    }
-	    obj->attr->numanode.page_types_len = 2;
-	    obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
-	    memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
-	    obj->attr->numanode.page_types[0].size = hwloc_getpagesize();
-#if HAVE_DECL__SC_LARGE_PAGESIZE
-	    obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
-#endif
-          }
-          if (hwloc_filter_check_keep_object_type(topology, obj->type))
-            hwloc__insert_object_by_cpuset(topology, NULL, obj,
-                                           obj->type == HWLOC_OBJ_NUMANODE ? "darwin:numanode" : "darwin:cache");
-          else
-            hwloc_free_unlinked_object(obj); /* FIXME: don't built at all, just build the cpuset in case l1i needs it */
+      /* slot 0 is memory */
+      hwloc__darwin_build_numa_level(topology, nprocs / cacheconfig[0], cacheconfig[0], cachesize[0],
+                                     &gotnuma, &gotnumamemory);
+      /* other slots are caches L1d, L2u, L3u, etc.
+       * L1i doesn't have an explicit slot but we can assume things are shared similarly to L1d in first slot.
+       */
+      if (n>=2 && l1icachesize
+          && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
+        hwloc__darwin_build_cache_level(topology, nprocs / cacheconfig[1], cacheconfig[1],
+                                        HWLOC_OBJ_L1ICACHE,
+                                        1, l1icachesize, cachelinesize, 0 /* unknown */);
+      }
+      /* Use slots for L1d, L2u, L3u now. */
+      for (i = 1; i < n; i++) {
+        if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE+i-1)) {
+          hwloc__darwin_build_cache_level(topology, nprocs / cacheconfig[i], cacheconfig[i],
+                                          HWLOC_OBJ_L1CACHE+i-1,
+                                          i, cachesize[i], cachelinesize,
+                                          i <= sizeof(cacheways) / sizeof(cacheways[0]) ? cacheways[i-1] : 0);
         }
       }
     }
