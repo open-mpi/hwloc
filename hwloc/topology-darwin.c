@@ -110,7 +110,8 @@ static void hwloc__darwin_cpukinds_add_cpu(struct hwloc_darwin_cpukinds *kinds,
 
 #define DT_PLANE "IODeviceTree"
 
-static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds)
+static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds,
+                                             int *matched_perflevels)
 {
   io_registry_entry_t cpus_root;
   io_iterator_t cpus_iter;
@@ -288,6 +289,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
    * perflevel0 always refers to the highest performance core type in the system.
    * if we only have E and P, E=perflevel1, P=perflevel0, otherwise we don't know.
    */
+  *matched_perflevels = 1;
   for(i=0; i<kinds->nr; i++) {
     /*
      * cluster types: https://developer.apple.com/news/?id=vk3m204o
@@ -298,6 +300,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
     } else if (kinds->kinds[1].cluster_type == 'P') {
       kinds->kinds[i].perflevel = 0;
     } else {
+      *matched_perflevels = 0;
       if (!hwloc_hide_errors())
         fprintf(stderr, "hwloc/darwin/cpukinds: unrecognized cluster type %c compatible %s, cannot match perflevels\n",
                 kinds->kinds[i].cluster_type, kinds->kinds[i].compatible);
@@ -399,6 +402,135 @@ static void hwloc__darwin_build_cache_level(struct hwloc_topology *topology,
   }
 }
 
+static void hwloc__darwin_build_perflevel_cache_level(struct hwloc_topology *topology,
+                                                    hwloc_bitmap_t cpuset, unsigned width,
+                                                    hwloc_obj_type_t type,
+                                                    unsigned depth, uint64_t size, int64_t linesize)
+{
+  unsigned j,k;
+  int next = -1;
+  hwloc_debug_2args_bitmap("looking at perflevel cache depth %u width %u inside cpuset %s\n", depth, width, cpuset);
+  for (j = 0;; j++) {
+    hwloc_bitmap_t objcpuset;
+    hwloc_obj_t obj;
+
+    objcpuset = hwloc_bitmap_alloc();
+    for(k=0; k<width; k++) {
+      next = hwloc_bitmap_next(cpuset, next);
+      if (next < 0)
+        break;
+      hwloc_bitmap_set(objcpuset, next);
+    }
+    if (!k) {
+      /* failed to find any remaining cpu in cpuset, stop */
+      hwloc_bitmap_free(objcpuset);
+      return;
+    }
+
+    obj = hwloc_alloc_setup_object(topology, type, HWLOC_UNKNOWN_INDEX);
+    obj->cpuset = objcpuset;
+
+    hwloc_debug_2args_bitmap("L%ucache %u has cpuset %s\n",
+                             depth, j, obj->cpuset);
+    obj->attr->cache.depth = depth;
+    obj->attr->cache.type = depth > 1 ? HWLOC_OBJ_CACHE_UNIFIED
+      : hwloc_obj_type_is_icache(type) ? HWLOC_OBJ_CACHE_INSTRUCTION : HWLOC_OBJ_CACHE_DATA;
+    obj->attr->cache.size = size;
+    obj->attr->cache.linesize = linesize;
+    obj->attr->cache.associativity = 0; /* unknown */
+    hwloc__insert_object_by_cpuset(topology, NULL, obj, "darwin:perflevel:cache");
+  }
+}
+
+struct gothybrid {
+  unsigned l1i, l1d, l2, l3;
+};
+
+static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
+                                                unsigned level,
+                                                hwloc_bitmap_t cpuset,
+                                                int64_t linesize,
+                                                struct gothybrid *gothybrid)
+{
+  char name[64];
+  int64_t size;
+
+  snprintf(name, sizeof(name), "hw.perflevel%u.l1icachesize", level);
+  if (!hwloc_get_sysctlbyname(name, &size)) {
+    /* hw.perflevel%u.cpusperl1i missing, assume it's per PU */
+    hwloc_debug("found perflevel %u l1icachesize %ld, assuming width 1\n", level, (long) size);
+    hwloc__darwin_build_perflevel_cache_level(topology, cpuset, 1, HWLOC_OBJ_L1ICACHE, 1, size, linesize);
+    gothybrid->l1i++;
+  }
+
+  snprintf(name, sizeof(name), "hw.perflevel%u.l1dcachesize", level);
+  if (!hwloc_get_sysctlbyname(name, &size)) {
+    /* hw.perflevel%u.cpusperl1d missing, assume it's per PU */
+    hwloc_debug("found perflevel %u l1dcachesize %ld, assuming width 1\n", level, (long) size);
+    hwloc__darwin_build_perflevel_cache_level(topology, cpuset, 1, HWLOC_OBJ_L1CACHE, 1, size, linesize);
+    gothybrid->l1d++;
+  }
+
+  snprintf(name, sizeof(name), "hw.perflevel%u.l2cachesize", level);
+  if (!hwloc_get_sysctlbyname(name, &size)) {
+    int64_t cpus;
+
+    hwloc_debug("found perflevel %u l2cachesize %ld\n", level, (long) size);
+
+    snprintf(name, sizeof(name), "hw.perflevel%u.cpusperl2", level);
+    if (hwloc_get_sysctlbyname(name, &cpus)) {
+      hwloc_debug("couldn't find perflevel %u cpusperl2, assuming width 1\n", level);
+      cpus = 1;
+    } else {
+      hwloc_debug("found perflevel %u cpusperl2 %ld\n", level, (long) cpus);
+    }
+
+    {
+      /* hw.perflevelN.l2perflevels = "bitmap, where bit  number of CPUs of the same type that share L2",
+       * not available yet, warn if we see one.
+       */
+      size_t s;
+      snprintf(name, sizeof(name), "hw.perflevel%u.l2perflevels", level);
+      if (!sysctlbyname(name, NULL, &s, NULL, 0))
+        if (!hwloc_hide_errors())
+          fprintf(stderr, "hwloc/darwin: key %s succeeded size %lu, please report to hwloc developers.\n", name, s);
+    }
+
+    /* assume PUs are contigous for now. */
+    hwloc__darwin_build_perflevel_cache_level(topology, cpuset, cpus, HWLOC_OBJ_L2CACHE, 2, size, linesize);
+    gothybrid->l2++;
+}
+
+  snprintf(name, sizeof(name), "hw.perflevel%u.l3cachesize", level);
+  if (!hwloc_get_sysctlbyname(name, &size)) {
+    int64_t cpus;
+
+    hwloc_debug("found perflevel %u l3cachesize %ld\n", level, (long) size);
+
+    snprintf(name, sizeof(name), "hw.perflevel%u.cpusperl3", level);
+    if (hwloc_get_sysctlbyname(name, &cpus)) {
+      hwloc_debug("couldn't find perflevel %u cpusperl3, assuming width 1\n", level);
+      cpus = 1;
+    } else {
+      hwloc_debug("found perflevel %u cpusperl3 %ld\n", level, (long) cpus);
+    }
+
+    {
+      /* hw.perflevelN.l3perflevels = "bitmap, where bit  number of CPUs of the same type that share L2",
+       * not available yet, warn if we see one.
+       */
+      size_t s;
+      snprintf(name, sizeof(name), "hw.perflevel%u.l3perflevels", level);
+      if (!sysctlbyname(name, NULL, &s, NULL, 0))
+        if (!hwloc_hide_errors())
+          fprintf(stderr, "hwloc/darwin: key %s succeeded size %lu, please report to hwloc developers.\n", name, s);
+    }
+
+    hwloc__darwin_build_perflevel_cache_level(topology, cpuset, cpus, HWLOC_OBJ_L3CACHE, 3, size, linesize);
+    gothybrid->l3++;
+  }
+}
+
 static int
 hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -427,10 +559,13 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   char cpufamilynumber[20], cpumodelnumber[20], cpustepping[20];
   int gotnuma = 0;
   int gotnumamemory = 0;
+  struct gothybrid gothybrid;
   int64_t nperflevels = 0;
   struct hwloc_darwin_cpukinds kinds;
   int cpukinds_from_sysctl;
   char *env;
+
+  memset(&gothybrid, 0, sizeof(gothybrid));
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
@@ -456,8 +591,20 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
    * but that's why we use IOKit first.
    */
 #if (defined HWLOC_HAVE_DARWIN_FOUNDATION) && (defined HWLOC_HAVE_DARWIN_IOKIT)
-  if (cpukinds_from_sysctl != 1)
-    hwloc__darwin_look_iokit_cpukinds(&kinds);
+  if (cpukinds_from_sysctl != 1) {
+    int matched_perflevels = 0;
+    hwloc__darwin_look_iokit_cpukinds(&kinds, &matched_perflevels);
+    hwloc_debug("Found %u kinds with matched=%u in IOKit for %ld sysctl perflevels\n",
+                kinds.nr, matched_perflevels, (long) nperflevels);
+    if (nperflevels > 0 && cpukinds_from_sysctl == -1 && (!matched_perflevels || nperflevels != kinds.nr)) {
+      /* sysctl has perflevel info, but we couldn't rank iokit kinds accordingly,
+       * it means we won't be able to find out which perflevel caches correspond to which cpukind.
+       * remove iokit cpukinds and fallback to sysctl cpukinds.
+       */
+      hwloc_debug("Clearing IOKit cpukinds to read them from sysctl\n");
+      hwloc__darwin_cpukinds_clear(&kinds);
+    }
+  }
 #endif
 
   if (nperflevels > 0 && (cpukinds_from_sysctl == 1 || (cpukinds_from_sysctl ==  -1 && !kinds.nr))) {
@@ -626,6 +773,11 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       hwloc_obj_add_info(topology->levels[0][0], "CPUStepping", cpustepping);
   }
 
+  hwloc_debug("%s", "\nReading caches from sysctl perflevels\n");
+  for(i=0; i<kinds.nr; i++)
+    if (kinds.kinds[i].perflevel >= 0)
+      hwloc__darwin_look_perflevel_caches(topology, kinds.kinds[i].perflevel, kinds.kinds[i].cpuset, cachelinesize, &gothybrid);
+
   if (hwloc_get_sysctlbyname("hw.l1dcachesize", &l1dcachesize))
     l1dcachesize = 0;
 
@@ -689,13 +841,13 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
           cachesize[3] = l3cachesize;
       }
 
-      hwloc_debug("%s", "caches");
+      hwloc_debug("%s", "non-hybrid caches");
       for (i = 0; i < n && cacheconfig[i]; i++)
         hwloc_debug(" %"PRIu64"(%"PRIu64"kB)", cacheconfig[i], cachesize[i] / 1024);
 
       /* Now we know how many caches there are */
       n = i;
-      hwloc_debug("\n%u cache levels\n", n - 1);
+      hwloc_debug("\n%u non-hybrid cache levels\n", n - 1);
 
       /* slot 0 is memory */
       hwloc__darwin_build_numa_level(topology, nprocs / cacheconfig[0], cacheconfig[0], cachesize[0],
@@ -703,7 +855,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       /* other slots are caches L1d, L2u, L3u, etc.
        * L1i doesn't have an explicit slot but we can assume things are shared similarly to L1d in first slot.
        */
-      if (n>=2 && l1icachesize
+      if (!gothybrid.l1i && n>=2 && l1icachesize
           && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)) {
         hwloc__darwin_build_cache_level(topology, nprocs / cacheconfig[1], cacheconfig[1],
                                         HWLOC_OBJ_L1ICACHE,
@@ -711,6 +863,12 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       }
       /* Use slots for L1d, L2u, L3u now. */
       for (i = 1; i < n; i++) {
+        if (i == 1 && gothybrid.l1d)
+          continue;
+        if (i == 2 && gothybrid.l2)
+          continue;
+        if (i == 3 && gothybrid.l3)
+          continue;
         if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE+i-1)) {
           hwloc__darwin_build_cache_level(topology, nprocs / cacheconfig[i], cacheconfig[i],
                                           HWLOC_OBJ_L1CACHE+i-1,

@@ -23,6 +23,8 @@ Version 2.8.0
   + Add HWLOC_TOPOLOGY_FLAG_NO_DISTANCES, _NO_MEMATTRS and _NO_CPUKINDS
     to reduce the overhead when unneeded.
 * Backends
+  + Detect heterogeneous caches in hybrid CPUs on MacOS X,
+    thanks to Paul Bone for the help.
   + Max frequencies are not ignored on Linux anymore (as in hwloc 2.7.0),
     but they may be slightly adjusted to avoid reporting hybrid CPUs
     because of features such as Intel Turbo Boost Max 3.0.
