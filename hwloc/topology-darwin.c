@@ -22,7 +22,81 @@
 #include "private/private.h"
 #include "private/debug.h"
 
+#define MAX_KINDS 8 /* only 2 needed as of 2022/01 */
+struct hwloc_darwin_cpukinds {
+  unsigned nr;
+  struct hwloc_darwin_cpukind {
+    char cluster_type;
+    hwloc_bitmap_t cpuset;
+#define HWLOC_DARWIN_COMPATIBLE_MAX 128
+    char *compatible;
+  } kinds[MAX_KINDS]; /* sorted by computing performance first, as sysctl hw.perflevels */
+};
+
+static void
+hwloc__darwin_cpukinds_clear(struct hwloc_darwin_cpukinds *kinds)
+{
+  unsigned i;
+  for(i=0; i<kinds->nr; i++) {
+    hwloc_bitmap_free(kinds->kinds[i].cpuset);
+    free(kinds->kinds[i].compatible);
+  }
+  kinds->nr = 0;
+}
+
 #if (defined HWLOC_HAVE_DARWIN_FOUNDATION) && (defined HWLOC_HAVE_DARWIN_IOKIT)
+
+static struct hwloc_darwin_cpukind *
+hwloc__darwin_cpukinds_add(struct hwloc_darwin_cpukinds *kinds,
+                           char cluster_type, const char *compatible)
+{
+  if (kinds->nr == MAX_KINDS) {
+    if (!hwloc_hide_errors())
+      fprintf(stderr, "hwloc/darwin: failed to add new cpukinds, already %u used\n", kinds->nr);
+    return NULL;
+  }
+
+  kinds->kinds[kinds->nr].cluster_type = cluster_type;
+  kinds->kinds[kinds->nr].compatible = compatible ? strdup(compatible) : NULL;
+  kinds->kinds[kinds->nr].cpuset = hwloc_bitmap_alloc();
+  if (!kinds->kinds[kinds->nr].cpuset) {
+    /* cancel this new kind, cpu won't be in any kind */
+    free(kinds->kinds[kinds->nr].compatible);
+    hwloc_bitmap_free(kinds->kinds[kinds->nr].cpuset);
+    return NULL;
+  }
+
+  kinds->nr++;
+  return &kinds->kinds[kinds->nr-1];
+}
+
+static void hwloc__darwin_cpukinds_add_cpu(struct hwloc_darwin_cpukinds *kinds,
+                                           char cluster_type, const char *compatible,
+                                           unsigned cpu)
+{
+  struct hwloc_darwin_cpukind *kind;
+  unsigned i;
+
+  for(i=0; i<kinds->nr; i++) {
+    if (kinds->kinds[i].cluster_type == cluster_type) {
+      if (compatible) {
+        if (!kinds->kinds[i].compatible)
+          kinds->kinds[i].compatible = strdup(compatible);
+        else if (strcmp(kinds->kinds[i].compatible, compatible))
+          fprintf(stderr, "got a different compatible string inside same cluster type %c\n", cluster_type);
+      }
+      kind = &kinds->kinds[i];
+      goto found;
+    }
+  }
+
+  kind = hwloc__darwin_cpukinds_add(kinds, cluster_type, compatible);
+  if (!kind)
+    return;
+
+ found:
+  hwloc_bitmap_set(kind->cpuset, cpu);
+}
 
 #include <IOKit/IOKitLib.h>
 #include <CoreFoundation/CoreFoundation.h>
@@ -34,20 +108,13 @@
 
 #define DT_PLANE "IODeviceTree"
 
-struct hwloc_darwin_cpukinds {
-  struct hwloc_darwin_cpukind {
-    hwloc_bitmap_t cpuset;
-#define HWLOC_DARWIN_COMPATIBLE_MAX 128
-    char *compatible;
-  } P, E;
-};
-
-static int hwloc__look_darwin_cpukinds(struct hwloc_darwin_cpukinds *kinds)
+static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds)
 {
   io_registry_entry_t cpus_root;
   io_iterator_t cpus_iter;
   io_registry_entry_t cpus_child;
   kern_return_t kret;
+  unsigned i;
 
   hwloc_debug("\nLooking at cpukinds under " DT_PLANE ":/cpus ...\n");
 
@@ -188,7 +255,7 @@ static int hwloc__look_darwin_cpukinds(struct hwloc_darwin_cpukinds *kinds)
       continue;
     }
     {
-      unsigned i, length;
+      unsigned length;
       length = CFDataGetLength(ref);
       if (length > HWLOC_DARWIN_COMPATIBLE_MAX)
         length = HWLOC_DARWIN_COMPATIBLE_MAX;
@@ -210,106 +277,68 @@ static int hwloc__look_darwin_cpukinds(struct hwloc_darwin_cpukinds *kinds)
 
     IOObjectRelease(cpus_child);
 
-    /*
-     * cluster types: https://developer.apple.com/news/?id=vk3m204o
-     * E=Efficiency, P=Performance
-     */
-    if (cluster_type == 'E') {
-      hwloc_bitmap_set(kinds->E.cpuset, logical_cpu_id);
-      if (!kinds->E.compatible)
-        kinds->E.compatible = strdup(compatible);
-      else if (strcmp(kinds->E.compatible, compatible))
-        fprintf(stderr, "got a different compatible string inside same cluster\n");
-
-    } else if (cluster_type == 'P') {
-      hwloc_bitmap_set(kinds->P.cpuset, logical_cpu_id);
-      if (!kinds->P.compatible)
-        kinds->P.compatible = strdup(compatible);
-      else if (strcmp(kinds->P.compatible, compatible))
-        fprintf(stderr, "got a different compatible string inside same cluster\n");
-
-    } else {
-      if (!hwloc_hide_errors())
-        fprintf(stderr, "hwloc/darwin/cpukinds: unrecognized cluster type %c compatible %s\n",
-                cluster_type, compatible);
-    }
+    hwloc__darwin_cpukinds_add_cpu(kinds, cluster_type, compatible, logical_cpu_id);
   }
   IOObjectRelease(cpus_iter);
   IOObjectRelease(cpus_root);
 
+  /*
+   * perflevel0 always refers to the highest performance core type in the system.
+   * if we only have E and P, E=perflevel1, P=perflevel0, otherwise we don't know.
+   */
+  for(i=0; i<kinds->nr; i++) {
+    /*
+     * cluster types: https://developer.apple.com/news/?id=vk3m204o
+     * E=Efficiency, P=Performance
+     */
+    if (kinds->kinds[i].cluster_type != 'E' && kinds->kinds[1].cluster_type != 'P') {
+      if (!hwloc_hide_errors())
+        fprintf(stderr, "hwloc/darwin/cpukinds: unrecognized cluster type %c compatible %s, cannot match perflevels\n",
+                kinds->kinds[i].cluster_type, kinds->kinds[i].compatible);
+    }
+  }
+
   hwloc_debug("\n");
   return 0;
 }
+#endif /* !HWLOC_HAVE_DARWIN_FOUNDATION || !HWLOC_HAVE_DARWIN_IOKIT */
 
-static int hwloc_look_darwin_cpukinds(struct hwloc_topology *topology)
+static int hwloc__darwin_cpukinds_register(struct hwloc_topology *topology,
+                                           struct hwloc_darwin_cpukinds *kinds)
 {
-    struct hwloc_darwin_cpukinds kinds;
+  unsigned i;
+  int got_efficiency = kinds->nr ? 1 : 0;
 
-    kinds.P.cpuset = hwloc_bitmap_alloc();
-    kinds.P.compatible = NULL;
-    kinds.E.cpuset = hwloc_bitmap_alloc();
-    kinds.E.compatible = NULL;
-
-    if (!kinds.P.cpuset || !kinds.E.cpuset)
-      goto out_with_kinds;
-
-    hwloc__look_darwin_cpukinds(&kinds);
-
-    /* register the cpukind for "P=performance" cores */
-    if (!hwloc_bitmap_iszero(kinds.P.cpuset)) {
-      struct hwloc_info_s infoattr;
-      unsigned nr_info = 0;
-      hwloc_debug_1arg_bitmap("building `P' cpukind with compatible `%s' and cpuset %s\n",
-                              kinds.P.compatible, kinds.P.cpuset);
-      if (kinds.P.compatible) {
-        infoattr.name = (char *) "DarwinCompatible";
-        infoattr.value = kinds.P.compatible;
-        nr_info = 1;
-      }
-      hwloc_internal_cpukinds_register(topology, kinds.P.cpuset, 1 /* P=performance */, &infoattr, nr_info, 0);
-      /* the cpuset is given to the callee */
-      topology->support.discovery->cpukind_efficiency = 1;
-    } else {
-      hwloc_bitmap_free(kinds.P.cpuset);
+  for(i=0; i<kinds->nr; i++) {
+    struct hwloc_info_s infoattr;
+    unsigned nr_info = 0;
+    int efficiency;
+    hwloc_debug_1arg_bitmap("building cpukind with compatible `%s' and cpuset %s\n",
+                            kinds->kinds[i].compatible,
+                            kinds->kinds[i].cpuset);
+    if (kinds->kinds[i].compatible) {
+      infoattr.name = (char *) "DarwinCompatible";
+      infoattr.value = kinds->kinds[i].compatible;
+      nr_info = 1;
     }
-    free(kinds.P.compatible);
-
-    /* register the cpukind for "E=efficiency" cores */
-    if (!hwloc_bitmap_iszero(kinds.E.cpuset)) {
-      struct hwloc_info_s infoattr;
-      unsigned nr_info = 0;
-      hwloc_debug_1arg_bitmap("building `E' cpukind with compatible `%s' and cpuset %s\n",
-                              kinds.E.compatible, kinds.E.cpuset);
-      if (kinds.E.compatible) {
-        infoattr.name = (char *) "DarwinCompatible";
-        infoattr.value = kinds.E.compatible;
-        nr_info = 1;
-      }
-      hwloc_internal_cpukinds_register(topology, kinds.E.cpuset, 0 /* E=efficiency */, &infoattr, nr_info, 0);
-      /* the cpuset is given to the callee */
-      topology->support.discovery->cpukind_efficiency = 1;
+    if (kinds->kinds[i].cluster_type == 'E') {
+      efficiency = 0;
+    } else if (kinds->kinds[i].cluster_type == 'P') {
+      efficiency = 1;
     } else {
-      hwloc_bitmap_free(kinds.E.cpuset);
+      efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
+      got_efficiency = 0;
     }
-    free(kinds.E.compatible);
+    hwloc_internal_cpukinds_register(topology, kinds->kinds[i].cpuset, efficiency, &infoattr, nr_info, 0);
+    free(kinds->kinds[i].compatible);
+    /* the cpuset is given to the callee */
+  }
 
-    hwloc_debug("\n");
-    return 0;
+  hwloc_debug("\n");
 
- out_with_kinds:
-    hwloc_bitmap_free(kinds.P.cpuset);
-    free(kinds.P.compatible);
-    hwloc_bitmap_free(kinds.E.cpuset);
-    free(kinds.E.compatible);
-    return -1;
-}
-
-#else /* HWLOC_HAVE_DARWIN_FOUNDATION && HWLOC_HAVE_DARWIN_IOKIT */
-static int hwloc_look_darwin_cpukinds(struct hwloc_topology *topology __hwloc_attribute_unused)
-{
+  topology->support.discovery->cpukind_efficiency = got_efficiency;
   return 0;
 }
-#endif /* !HWLOC_HAVE_DARWIN_FOUNDATION || !HWLOC_HAVE_DARWIN_IOKIT */
 
 static int
 hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
@@ -339,12 +368,19 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   char cpufamilynumber[20], cpumodelnumber[20], cpustepping[20];
   int gotnuma = 0;
   int gotnumamemory = 0;
+  struct hwloc_darwin_cpukinds kinds;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
     return -1;
+
+  kinds.nr = 0;
+#if (defined HWLOC_HAVE_DARWIN_FOUNDATION) && (defined HWLOC_HAVE_DARWIN_IOKIT)
+  hwloc__darwin_look_iokit_cpukinds(&kinds);
+#endif
+  hwloc_debug("%s", "\n");
 
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
@@ -641,8 +677,10 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   /* add PU objects */
   hwloc_setup_pu_level(topology, nprocs);
 
-  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
-    hwloc_look_darwin_cpukinds(topology);
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)
+    hwloc__darwin_cpukinds_clear(&kinds);
+  else
+    hwloc__darwin_cpukinds_register(topology, &kinds);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Darwin");
   hwloc_add_uname_info(topology, NULL);
