@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2010-2021 Inria.  All rights reserved.
+dnl Copyright © 2010-2022 Inria.  All rights reserved.
 dnl Copyright © 2009, 2011 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -32,7 +32,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # Change the symbol prefix?
     AC_ARG_WITH([hwloc-symbol-prefix],
                 AS_HELP_STRING([--with-hwloc-symbol-prefix=STRING],
-                               [STRING can be any valid C symbol name.  It will be prefixed to all public HWLOC symbols.  Default: "hwloc_"]))
+                               [STRING can be any valid C symbol name.  It will be prefixed to all public HWLOC symbols.  Default: "" (no prefix)]))
 
     # For the windows build
     AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
