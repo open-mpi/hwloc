@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2021 Inria.  All rights reserved.
+ * Copyright © 2012-2022 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -375,6 +375,9 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     hwloc_insert_object_by_parent(topology, parent, osdev);
     osdevs[i] = osdevs2[i] = osdev;
   }
+
+  if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)
+    got_xgmi_bws = 0;
 
   if (got_xgmi_bws) {
     /* add very high artifical values on the diagonal since local is faster than remote.

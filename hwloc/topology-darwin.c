@@ -644,7 +644,8 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   /* add PU objects */
   hwloc_setup_pu_level(topology, nprocs);
 
-  hwloc_look_darwin_cpukinds(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
+    hwloc_look_darwin_cpukinds(topology);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Darwin");
   hwloc_add_uname_info(topology, NULL);

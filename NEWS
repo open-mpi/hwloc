@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2021 Inria.  All rights reserved.
+Copyright © 2009-2022 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -19,6 +19,9 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.8.0
 -------------
+* API
+  + Add HWLOC_TOPOLOGY_FLAG_NO_DISTANCES, _NO_MEMATTRS and _NO_CPUKINDS
+    to reduce the overhead when unneeded.
 * Backends
   + Max frequencies are not ignored on Linux anymore (as in hwloc 2.7.0),
     but they may be slightly adjusted to avoid reporting hybrid CPUs

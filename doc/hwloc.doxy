@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -3353,11 +3353,15 @@ However, using hwloc comes with an overhead since a topology must
 be loaded before gathering information and binding tasks or memory.
 Fortunately this overhead may be significantly reduced by filtering
 non-interesting information out of the topology.
-For instance the following code builds a topology that only contains
-Cores (explicitly filtered-in below),
+
+<br/>
+For instance, the default configuration is to keep all objects enabled
+(except I/Os and instruction caches).
+The following code tells hwloc to build a much smaller topology that
+only contains Cores (explicitly filtered-in below),
 hardware threads (PUs, cannot be filtered-out),
 NUMA nodes (cannot be filtered-out),
-and the root object (usually a Machine; the root cannot be removed without breaking the tree).
+and the root object (usually a Machine; the root cannot be removed without breaking the tree):
 
 \verbatim
 hwloc_topology_t topology;
@@ -3375,14 +3379,25 @@ For instance, we do not know anymore which PU is close to which NUMA
 node.
 This would be useful to applications that explicitly want to
 place specific memory buffers close to specific tasks.
-Those applications just need to tell hwloc to keep Group objects that
+Those applications should also tell hwloc to keep Group objects that
 bring structure information:
 \verbatim
 hwloc_topology_set_type_filter(topology, HWLOC_OBJ_GROUP, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
 \endverbatim
 
-Note that the default configuration is to keep all objects enabled,
-except I/Os and instruction caches.
+<br/>
+Starting with hwloc 2.8, it is also possible to ignore distances
+between objects, memory performance attributes, and kinds of CPU cores,
+by setting topology flags before load:
+\verbatim
+[...]
+/* disable distances, memory attributes and CPU kinds */
+hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_NO_DISTANCES
+                                   |HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS
+                                   |HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS);
+[...]
+hwloc_topology_load(topology);
+\endverbatim
 
 
 \subsection faq_indexes Should I use logical or physical/OS indexes? and how?

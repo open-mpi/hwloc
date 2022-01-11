@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2021 Inria.  All rights reserved.
+ * Copyright © 2012-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -321,6 +321,9 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     }
   }
   hwloc_debug("NVML found %u GPUs within %u peers total, with %u nvlinks total\n", nb, nbobjs, found_nvlinks);
+
+  if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)
+    found_nvlinks = 0;
 
   if (found_nvlinks) {
     /* now build the matrix */
