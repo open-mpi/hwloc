@@ -2088,13 +2088,18 @@ enum hwloc_topology_flags_e {
  * If this function is called multiple times, the last invokation will erase
  * and replace the set of flags that was previously set.
  *
- * The flags set in a topology may be retrieved with hwloc_topology_get_flags()
+ * By default, no flags are set (\c 0).
+ *
+ * The flags set in a topology may be retrieved with hwloc_topology_get_flags().
  */
 HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long flags);
 
 /** \brief Get OR'ed flags of a topology.
  *
  * Get the OR'ed set of ::hwloc_topology_flags_e of a topology.
+ *
+ * If hwloc_topology_set_flags() was not called earlier,
+ * no flags are set (\c 0 is returned).
  *
  * \return the flags previously set with hwloc_topology_set_flags().
  */
