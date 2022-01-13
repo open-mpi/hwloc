@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2012-2020 Inria.  All rights reserved.
+# Copyright © 2012-2022 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -55,7 +55,10 @@ COVBALL=myproject.tgz
 # run
 ./configure --enable-plugins
 cov-build --dir ${COVDIR} make all
-test x$NO_CHECK = xtrue || cov-build --dir ${COVDIR} make check
+# run 'make check' even if NO_CHECK is set
+# (we don't want some issues to disappear from coverity depending on custom job config)
+cov-build --dir ${COVDIR} make check
+
 tar cfvz ${COVBALL} ${COVDIR}
 curl --form file=@${COVBALL} \
      --form "token=<${COVERITY_TOKEN_FILE}" \
