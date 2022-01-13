@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2012-2021 Inria.  All rights reserved.
+# Copyright © 2012-2022 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -59,8 +59,9 @@ export CFLAGS="-O0 -g -fPIC --coverage -Wall -Wunused-parameter -Wundef -Wno-lon
 export LDFLAGS="--coverage"
 ./configure --enable-plugins
 make V=1 | tee hwloc-build.log
-# Execute unitary tests (autotest)
-test x$NO_CHECK = xtrue || make check
+# run 'make check' even if NO_CHECK is set
+# (we don't want some issues to disappear from sonarqube depending on custom job config)
+make check
 
 # Collect coverage data
 find . -path '*/.libs/*.gcno' -exec rename 's@/.libs/@/@' {} \;
