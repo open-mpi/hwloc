@@ -1997,7 +1997,7 @@ and SectorSize (in bytes).
 <dd>The index of the Level Zero driver within the list of drivers,
  and the index of the device within the list of devices managed by this driver.
 </dd>
-<dt>LevelZeroSubdevices (Level OS devices)</dt>
+<dt>LevelZeroSubdevices (LevelZero OS devices)</dt>
 <dd>The number of subdevices below this OS device.
 </dd>
 <dt>LevelZeroSubdeviceID (LevelZero OS subdevices)</dt>
