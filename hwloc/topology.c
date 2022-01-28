@@ -3,6 +3,7 @@
  * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2022 IBM Corporation.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -74,13 +75,14 @@ static void hwloc_constructor(void) __attribute__((constructor));
 static void hwloc_constructor(void)
 {
   if (!getenv("ZES_ENABLE_SYSMAN"))
-    putenv((char *) "ZES_ENABLE_SYSMAN=1");
+    setenv("ZES_ENABLE_SYSMAN", "1", 1);
 }
 #endif
 #ifdef HWLOC_WIN_SYS
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
   if (fdwReason == DLL_PROCESS_ATTACH) {
+    // Windows does not have a setenv, so use putenv
     if (!getenv("ZES_ENABLE_SYSMAN"))
       putenv((char *) "ZES_ENABLE_SYSMAN=1");
   }
