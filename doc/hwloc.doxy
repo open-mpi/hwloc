@@ -2010,6 +2010,9 @@ and SectorSize (in bytes).
 <dd>The index of the Level Zero driver within the list of drivers,
  and the index of the device within the list of devices managed by this driver.
 </dd>
+<dt>LevelZeroUUID (LevelZero OS devices or subdevices)</dt>
+<dd>The UUID of the device or subdevice.
+</dd>
 <dt>LevelZeroSubdevices (LevelZero OS devices)</dt>
 <dd>The number of subdevices below this OS device.
 </dd>

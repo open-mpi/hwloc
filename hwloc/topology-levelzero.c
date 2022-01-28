@@ -32,7 +32,10 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
      * flags 1<<0 means integrated (vs discrete).
      */
     char tmp[64];
+    char uuid[ZE_MAX_DEVICE_UUID_SIZE*2+1];
+    unsigned i;
     const char *type;
+
     switch (prop.type) {
     case ZE_DEVICE_TYPE_GPU: type = "GPU"; break;
     case ZE_DEVICE_TYPE_CPU: type = "CPU"; break;
@@ -53,6 +56,10 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
     hwloc_obj_add_info(osdev, "LevelZeroNumEUsPerSubslice", tmp);
     snprintf(tmp, sizeof(tmp), "%u", prop.numThreadsPerEU);
     hwloc_obj_add_info(osdev, "LevelZeroNumThreadsPerEU", tmp);
+
+    for(i=0; i<ZE_MAX_DEVICE_UUID_SIZE; i++)
+      snprintf(uuid+2*i, 3, "%02x", prop.uuid.id[i]);
+    hwloc_obj_add_info(osdev, "LevelZeroUUID", uuid);
 
     if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
       is_subdevice = 1;

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2021 Inria.  All rights reserved.
+ * Copyright © 2020-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -29,6 +29,12 @@ typedef enum _ze_device_type {
 #define ZE_DEVICE_PROPERTY_FLAG_INTEGRATED (1<<0)
 #define ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE (1<<1)
 
+#define ZE_MAX_DEVICE_UUID_SIZE 16
+
+typedef struct ze_device_uuid {
+  uint8_t id[ZE_MAX_DEVICE_UUID_SIZE];
+} ze_device_uuid_t;
+
 typedef struct ze_device_properties {
   ze_device_type_t type;
   unsigned flags;
@@ -36,6 +42,7 @@ typedef struct ze_device_properties {
   uint32_t numEUsPerSubslice;
   uint32_t numSubslicesPerSlice;
   uint32_t numSlices;
+  ze_device_uuid_t uuid;
 } ze_device_properties_t;
 
 extern ze_result_t zeDeviceGetProperties(ze_device_handle_t, ze_device_properties_t *);
