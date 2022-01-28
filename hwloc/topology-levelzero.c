@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2021 Inria.  All rights reserved.
+ * Copyright © 2020-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -361,6 +361,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   res = zeDriverGet(&nbdrivers, NULL);
   if (res != ZE_RESULT_SUCCESS || !nbdrivers)
     return 0;
+  hwloc_debug("hwloc/L0: found %u drivers\n", (unsigned) nbdrivers);
   drh = malloc(nbdrivers * sizeof(*drh));
   if (!drh)
     return 0;
@@ -380,6 +381,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     res = zeDeviceGet(drh[i], &nbdevices, NULL);
     if (res != ZE_RESULT_SUCCESS || !nbdevices)
       continue;
+    hwloc_debug("hwloc/L0: found %u devices in driver #%u\n", (unsigned) nbdevices, (unsigned) i);
     dvh = malloc(nbdevices * sizeof(*dvh));
     if (!dvh)
       continue;
