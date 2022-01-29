@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2021 Inria.  All rights reserved.
+Copyright © 2009-2022 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -15,6 +15,13 @@ $HEADER$
 This file contains the main features as well as overviews of specific
 bug fixes (and other actions) for each version of hwloc since version
 0.9.
+
+
+Version 2.7.1
+-------------
+* Use setenv() instead of putenv() when trying to force enable oneAPI L0
+  support, to avoid breaking applications that touch the environment,
+  thanks to Josh Hursey for the patch.
 
 
 Version 2.7.0

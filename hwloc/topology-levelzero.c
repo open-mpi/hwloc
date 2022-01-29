@@ -342,7 +342,12 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
    */
   env = getenv("ZES_ENABLE_SYSMAN");
   if (!env) {
-    putenv((char *) "ZES_ENABLE_SYSMAN=1");
+    /* setenv() is safer than putenv() but not available on Windows */
+#ifdef HWLOC_WIN_SYS
+    putenv("ZES_ENABLE_SYSMAN=1")
+#else
+    setenv("ZES_ENABLE_SYSMAN", "1", 1);
+#endif
     /* we'll warn in hwloc__levelzero_properties_get() if we fail to get zes devices */
     sysman_maybe_missing = 1;
   } else if (!atoi(env)) {
