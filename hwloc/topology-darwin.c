@@ -773,6 +773,9 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       hwloc_obj_add_info(topology->levels[0][0], "CPUStepping", cpustepping);
   }
 
+  if (hwloc_get_sysctlbyname("hw.cachelinesize", &cachelinesize))
+    cachelinesize = 0;
+
   hwloc_debug("%s", "\nReading caches from sysctl perflevels\n");
   for(i=0; i<kinds.nr; i++)
     if (kinds.kinds[i].perflevel >= 0)
@@ -799,9 +802,6 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
     cacheways[1] = 0;
   else if (cacheways[1] == 0xff)
     cacheways[1] = -1;
-
-  if (hwloc_get_sysctlbyname("hw.cachelinesize", &cachelinesize))
-    cachelinesize = 0;
 
   if (hwloc_get_sysctlbyname("hw.memsize", &memsize))
     memsize = 0;
