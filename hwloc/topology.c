@@ -76,7 +76,7 @@ static void hwloc_constructor(void)
 {
   if (!getenv("ZES_ENABLE_SYSMAN"))
 #ifdef HWLOC_WIN_SYS
-    putenv("ZES_ENABLE_SYSMAN=1")
+    putenv("ZES_ENABLE_SYSMAN=1");
 #else
     setenv("ZES_ENABLE_SYSMAN", "1", 1);
 #endif
