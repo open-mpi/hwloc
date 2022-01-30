@@ -363,7 +363,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   if (!env) {
     /* setenv() is safer than putenv() but not available on Windows */
 #ifdef HWLOC_WIN_SYS
-    putenv("ZES_ENABLE_SYSMAN=1")
+    putenv("ZES_ENABLE_SYSMAN=1");
 #else
     setenv("ZES_ENABLE_SYSMAN", "1", 1);
 #endif
