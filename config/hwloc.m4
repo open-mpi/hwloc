@@ -13,7 +13,7 @@ dnl Copyright © 2006-2017 Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2012  Blue Brain Project, BBP/EPFL. All rights reserved.
 dnl Copyright © 2012       Oracle and/or its affiliates.  All rights reserved.
 dnl Copyright © 2012  Los Alamos National Security, LLC. All rights reserved.
-dnl Copyright © 2020 IBM Corporation.  All rights reserved.
+dnl Copyright © 2020-2022 IBM Corporation.  All rights reserved.
 dnl See COPYING in top-level directory.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -1163,6 +1163,7 @@ return 0;
 
     # NVML support
     hwloc_nvml_happy=no
+    hwloc_nvml_warning=no
     if test "x$enable_io" != xno && test "x$enable_nvml" != "xno"; then
       echo
       echo "**** NVML configuration"
@@ -1174,9 +1175,30 @@ return 0;
       CPPFLAGS="$CPPFLAGS $HWLOC_NVML_CPPFLAGS"
       tmp_save_LDFLAGS="$LDFLAGS"
       LDFLAGS="$LDFLAGS $HWLOC_NVML_LDFLAGS"
+      tmp_save_LIBS="$LIBS"
       AC_CHECK_HEADERS([nvml.h], [
-        AC_CHECK_LIB([nvidia-ml], [nvmlInit], [HWLOC_NVML_LIBS="-lnvidia-ml"], [hwloc_nvml_happy=no])
+        AC_CHECK_LIB([nvidia-ml],
+                     [nvmlInit],
+                     [AC_MSG_CHECKING([whether a program linked with -lnvidia-ml can run])
+                      HWLOC_NVML_LIBS="-lnvidia-ml"
+                      LIBS="$LIBS $HWLOC_NVML_LIBS"
+                      AC_RUN_IFELSE([
+                        AC_LANG_PROGRAM([[
+#include <stdio.h>
+char nvmlInit ();
+]], [[
+ return nvmlInit ();
+]]
+                       )],
+                       [AC_MSG_RESULT([yes])
+                        hwloc_nvml_warning=no],
+                       [AC_MSG_RESULT([no])
+                        hwloc_nvml_warning=yes],
+                       [AC_MSG_RESULT([don't know (cross-compiling)])
+                        hwloc_nvml_happy=maybe])],
+                     [hwloc_nvml_happy=no])
       ], [hwloc_nvml_happy=no])
+      LIBS="$tmp_save_LIBS"
       CPPFLAGS="$tmp_save_CPPFLAGS"
       LDFLAGS="$tmp_save_LDFLAGS"
 
