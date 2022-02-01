@@ -29,7 +29,7 @@
  * THAT IS IN THE PDF/HTML THAT IS ***NOT*** IN hwloc.h!
  *
  * There are entire paragraph-length descriptions, discussions, and
- * pretty prictures to explain subtle corner cases, provide concrete
+ * pretty pictures to explain subtle corner cases, provide concrete
  * examples, etc.
  *
  * Please, go read the documentation.  :-)
@@ -642,7 +642,7 @@ union hwloc_obj_attr_u {
     unsigned char revision;
     float linkspeed; /* in GB/s */
   } pcidev;
-  /** \brief Bridge specific Object Attribues */
+  /** \brief Bridge specific Object Attributes */
   struct hwloc_bridge_attr_s {
     union {
       struct hwloc_pcidev_attr_s pci;
@@ -1089,7 +1089,7 @@ HWLOC_DECLSPEC int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const c
  *
  * Some operating systems only support binding threads or processes to a single PU.
  * Others allow binding to larger sets such as entire Cores or Packages or
- * even random sets of invididual PUs. In such operating system, the scheduler
+ * even random sets of individual PUs. In such operating system, the scheduler
  * is free to run the task on one of these PU, then migrate it to another PU, etc.
  * It is often useful to call hwloc_bitmap_singlify() on the target CPU set before
  * passing it to the binding function to avoid these expensive migrations.
@@ -1167,7 +1167,7 @@ typedef enum {
    * CPUs are idle, operating systems may execute the thread/process
    * on those other CPUs instead of the designated CPUs, to let them
    * progress anyway.  Strict binding means that the thread/process
-   * will _never_ execute on other cpus than the designated CPUs, even
+   * will _never_ execute on other CPUs than the designated CPUs, even
    * when those are busy with other tasks and other CPUs are idle.
    *
    * \note Depending on the operating system, strict binding may not
@@ -1204,7 +1204,7 @@ typedef enum {
   HWLOC_CPUBIND_NOMEMBIND = (1<<3)
 } hwloc_cpubind_flags_t;
 
-/** \brief Bind current process or thread on cpus given in physical bitmap \p set.
+/** \brief Bind current process or thread on CPUs given in physical bitmap \p set.
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
@@ -1219,7 +1219,7 @@ HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpus
  */
 HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
-/** \brief Bind a process \p pid on cpus given in physical bitmap \p set.
+/** \brief Bind a process \p pid on CPUs given in physical bitmap \p set.
  *
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
@@ -1250,7 +1250,7 @@ HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
 HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
 #ifdef hwloc_thread_t
-/** \brief Bind a thread \p thread on cpus given in physical bitmap \p set.
+/** \brief Bind a thread \p thread on CPUs given in physical bitmap \p set.
  *
  * \note \p hwloc_thread_t is \p pthread_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
@@ -2066,7 +2066,7 @@ enum hwloc_topology_flags_e {
  *
  * Set a OR'ed set of ::hwloc_topology_flags_e onto a topology that was not yet loaded.
  *
- * If this function is called multiple times, the last invokation will erase
+ * If this function is called multiple times, the last invocation will erase
  * and replace the set of flags that was previously set.
  *
  * By default, no flags are set (\c 0).
