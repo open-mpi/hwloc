@@ -1264,8 +1264,28 @@ char nvmlInit ();
       AC_CHECK_HEADERS([rocm_smi/rocm_smi.h], [
         LDFLAGS_save="$LDFLAGS"
         LDFLAGS="$LDFLAGS $HWLOC_RSMI_LDFLAGS"
-        AC_CHECK_LIB([rocm_smi64], [rsmi_init], [HWLOC_RSMI_LIBS="-lrocm_smi64"], [hwloc_rsmi_happy=no])
+        LIBS_save="$LIBS"
+        AC_CHECK_LIB([rocm_smi64],
+                     [rsmi_init],
+                     [AC_MSG_CHECKING([whether a program linked with -lrocm_smi64 can run])
+                      HWLOC_RSMI_LIBS="-lrocm_smi64"
+                      LIBS="$LIBS $HWLOC_RSMI_LIBS"
+                      AC_RUN_IFELSE([
+                        AC_LANG_PROGRAM([[
+#include <stdio.h>
+char rsmi_init(int);
+]], [[
+return rsmi_init(0);
+]]
+                        )],
+                        [AC_MSG_RESULT([yes])
+                         hwloc_rsmi_warning=no],
+                        [AC_MSG_RESULT([no])
+                         hwloc_rsmi_warning=yes],
+                        [AC_MSG_RESULT([don't know (cross-compiling)])])],
+                      [hwloc_rsmi_happy=no])
         LDFLAGS="$LDFLAGS_save"
+        LIBS="$LIBS_save"
       ], [hwloc_rsmi_happy=no])
       CPPFLAGS="$CPPFLAGS_save"
 

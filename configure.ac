@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2021 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux
 # Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 #
@@ -284,6 +284,21 @@ support in hwloc with the --disable-nvml option in configure.
 EOF
 fi
 
+if test "x$hwloc_rsmi_happy" = xyes -a "x$hwloc_rsmi_warning" = xyes; then
+    hwloc_rsmi_status="yes, but not in LD_LIBRARY_PATH or ld.so.conf (see warning above)"
+    cat <<EOF
+
+************************************************************************
+WARNING: The AMD ROCm SMI library was detected with link options
+$HWLOC_RSMI_LIBS $HWLOC_RSMI_LDFLAGS
+but programs linked against it cannot run.
+This often indicates that the ROCm SMI lib path is missing in
+ld.so.conf and LD_LIBRARY_PATH. If unneeded, this dependency may
+be removed from hwloc by passing --disable-rsmi to configure.
+************************************************************************
+EOF
+fi
+
 # Beginning of generic support
 cat <<EOF
 
@@ -295,6 +310,11 @@ EOF
 if test "x$hwloc_nvml_status" != x; then
   cat <<EOF
 NVML status:                 $hwloc_nvml_status
+EOF
+fi
+if test "x$hwloc_rsmi_status" != x; then
+  cat <<EOF
+ROCm SMI status:             $hwloc_rsmi_status
 EOF
 fi
 cat <<EOF
