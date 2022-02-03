@@ -258,9 +258,6 @@ test "x$hwloc_opencl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list 
 test "x$hwloc_have_cudart" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list CUDA"
 if test "x$hwloc_nvml_happy" = "xyes" ; then
     hwloc_probeio_list="$hwloc_probeio_list NVML"
-    hwloc_nvml_status="yes"
-else
-    hwloc_nvml_status="no"
 fi
 test "x$hwloc_rsmi_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list RSMI"
 test "x$hwloc_levelzero_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list LevelZero"
@@ -294,7 +291,13 @@ cat <<EOF
 Hwloc optional build support status (more details can be found above):
 
 Probe / display I/O devices:$hwloc_probeio_list
-NVML support:                $hwloc_nvml_status
+EOF
+if test "x$hwloc_nvml_status" != x; then
+  cat <<EOF
+NVML status:                 $hwloc_nvml_status
+EOF
+fi
+cat <<EOF
 Graphical output:            $hwloc_graphical_lstopo_status
 XML input / output:          $hwloc_xml_status
 Netloc functionality:        $netloc_status
