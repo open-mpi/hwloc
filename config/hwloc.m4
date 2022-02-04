@@ -1600,11 +1600,7 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
       AC_DEFINE([HWLOC_HAVE_PLUGINS], 1, [Define to 1 if the hwloc library should support dynamically-loaded plugins])
     fi
 
-    AC_ARG_WITH([hwloc-plugins-path],
-		AS_HELP_STRING([--with-hwloc-plugins-path=dir:...],
-                               [Colon-separated list of plugin directories. Default: "$prefix/lib/hwloc". Plugins will be installed in the first directory. They will be loaded from all of them, in order.]),
-		[HWLOC_PLUGINS_PATH="$with_hwloc_plugins_path"],
-		[HWLOC_PLUGINS_PATH="\$(libdir)/hwloc"])
+    # HWLOC_PLUGINS_PATH is defined in AC_ARG_WITH([hwloc-plugins-path]...)
     AC_SUBST(HWLOC_PLUGINS_PATH)
     HWLOC_PLUGINS_DIR=`echo "$HWLOC_PLUGINS_PATH" | cut -d: -f1`
     AC_SUBST(HWLOC_PLUGINS_DIR)

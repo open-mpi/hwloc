@@ -140,6 +140,12 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--enable-plugins=name,...],
                                  [Build the given components as dynamically-loaded plugins]))
 
+    AC_ARG_WITH([hwloc-plugins-path],
+		AS_HELP_STRING([--with-hwloc-plugins-path=dir:...],
+                               [Colon-separated list of plugin directories. Default: "$prefix/lib/hwloc". Plugins will be installed in the first directory. They will be loaded from all of them, in order.]),
+		[HWLOC_PLUGINS_PATH="$with_hwloc_plugins_path"],
+		[HWLOC_PLUGINS_PATH="\$(libdir)/hwloc"])
+
     # Look for dlopen
     # Not --disable-dlopen because $enable_dlopen is already used/set
     AC_ARG_ENABLE([plugin-dlopen],
