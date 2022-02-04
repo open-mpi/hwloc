@@ -1136,6 +1136,28 @@ return 0;
         LDFLAGS="$tmp_save_LDFLAGS"
       fi
       if test x$hwloc_have_cudart = xyes; then
+        AC_MSG_CHECKING([whether a program linked with -lcudart can run])
+        tmp_save_LDFLAGS="$LDFLAGS"
+        LDFLAGS="$LDFLAGS $HWLOC_CUDART_LDFLAGS"
+        tmp_save_LIBS="$LIBS"
+        LIBS="$LIBS $HWLOC_CUDART_LIBS"
+        AC_RUN_IFELSE([
+          AC_LANG_PROGRAM([[
+#include <stdio.h>
+int cudaGetDeviceCount(int *);
+]], [[
+int n;
+cudaGetDeviceCount(&n); /* may fail if using stubs, but we're looking for libcudart load error instead only */
+return 0;
+]]
+          )],
+          [AC_MSG_RESULT([yes])
+           hwloc_cuda_warning=no],
+          [AC_MSG_RESULT([no])
+           hwloc_cuda_warning=yes],
+          [AC_MSG_RESULT([don't know (cross-compiling)])])
+	LDFLAGS="$tmp_save_LDFLAGS"
+	LIBS="$tmp_save_LIBS"
         AC_SUBST(HWLOC_CUDART_CPPFLAGS)
         AC_SUBST(HWLOC_CUDART_CFLAGS)
         AC_SUBST(HWLOC_CUDART_LIBS)
