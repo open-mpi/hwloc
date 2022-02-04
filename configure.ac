@@ -284,6 +284,21 @@ support in hwloc with the --disable-nvml option in configure.
 EOF
 fi
 
+if test "x$hwloc_have_cudart" = xyes -a "x$hwloc_cuda_warning" = xyes; then
+    hwloc_cuda_status="yes, but not in LD_LIBRARY_PATH or ld.so.conf (see warning above)"
+    cat <<EOF
+
+************************************************************************
+WARNING: The NVIDIA CUDA library was detected with link options
+$HWLOC_CUDART_LIBS $HWLOC_CUDART_LDFLAGS
+but programs linked against it cannot run.
+This often indicates that the CUDA RT lib path is missing in
+ld.so.conf and LD_LIBRARY_PATH. If unneeded, this dependency may
+be removed from hwloc by passing --disable-cuda to configure.
+************************************************************************
+EOF
+fi
+
 if test "x$hwloc_rsmi_happy" = xyes -a "x$hwloc_rsmi_warning" = xyes; then
     hwloc_rsmi_status="yes, but not in LD_LIBRARY_PATH or ld.so.conf (see warning above)"
     cat <<EOF
@@ -307,6 +322,11 @@ Hwloc optional build support status (more details can be found above):
 
 Probe / display I/O devices:$hwloc_probeio_list
 EOF
+if test "x$hwloc_cuda_status" != x; then
+  cat <<EOF
+CUDA status:                 $hwloc_cuda_status
+EOF
+fi
 if test "x$hwloc_nvml_status" != x; then
   cat <<EOF
 NVML status:                 $hwloc_nvml_status
