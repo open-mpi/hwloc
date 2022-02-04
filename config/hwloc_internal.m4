@@ -104,7 +104,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # CUDA install path (and NVML and OpenCL)
     AC_ARG_WITH([cuda],
                 AS_HELP_STRING([--with-cuda=<dir>],
-                               [Specify the CUDA installation directory, used for NVIDIA NVML and OpenCL too]))
+                               [Specify the CUDA installation directory, used for NVIDIA NVML and OpenCL too. If a non-existent directory is given, all dependencies installed by CUDA are disabled (CUDA, NVML and NVIDIA OpenCL).]))
 
     # RSMI?
     AC_ARG_ENABLE([rsmi],

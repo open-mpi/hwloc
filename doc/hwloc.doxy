@@ -4049,6 +4049,10 @@ at the end of the configure script output.
 Passing <tt>\--enable-cuda</tt> will also cause configure to fail
 if CUDA could not be found and enabled in hwloc.
 
+Note that <tt>\--with-cuda=/nonexisting</tt> may be used to disable all dependencies
+that are installed by CUDA, i.e. the CUDA, NVML and NVIDIA OpenCL backends,
+since the given directory does not exist.
+
 
 
 \subsection faq_knl_numa How do I find the local MCDRAM NUMA node on Intel Xeon Phi processor?
