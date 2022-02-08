@@ -20,8 +20,10 @@ bug fixes (and other actions) for each version of hwloc since version
 Version 2.7.1
 -------------
 * Use setenv() instead of putenv() when trying to force enable oneAPI L0
-  support, to avoid breaking applications that touch the environment,
+  support, to avoid issues with applications that touch the environment,
   thanks to Josh Hursey for the patch.
+* Add some warnings at the end of configure when GPU libraries are
+  missing on the system or their path is missing in the environment.
 
 
 Version 2.7.0
