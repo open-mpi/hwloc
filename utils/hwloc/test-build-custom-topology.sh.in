@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2021 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -45,7 +45,7 @@ filetmp="$tmp/custom-topology.tmp.xml"
 set -e
 
 echo "creating symmetric topology ..."
-$lstopo -i "pack:2 [numa(memory=100GB)] [numa(memory=10GB)] core:8 pu:2" --of xml $file
+$lstopo -i "pack:2 [numa(memory=100GiB)] [numa(memory=10GiB)] core:8 pu:2" --of xml $file
 
 echo "listing PUs to keep ..."
 cpuset=`$calc -i $file pack:0.core:0-3.pu:0-1 pack:1.core:0-7.pu:0`
@@ -70,7 +70,7 @@ $annotate $file $file -- pack:1.numa:1 -- subtype HBM
 $annotate $file $file -- pack:0.numa:0 pack:1.numa:0 -- subtype DRAM
 
 echo "making the first DRAM bigger ..."
-$annotate $file $file -- pack:0.numa:0 -- size 200GB
+$annotate $file $file -- pack:0.numa:0 -- size 200GiB
 
 echo "adding bandwidth for memory nodes ..."
 $annotate $file $file -- pack:0.node:0 -- memattr Bandwidth pack:0 50000

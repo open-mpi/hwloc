@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -75,7 +75,7 @@ int main(void)
 
   hwloc_topology_init(&topology);
   err = hwloc_topology_set_type_filter(topology, HWLOC_OBJ_L1ICACHE, HWLOC_TYPE_FILTER_KEEP_ALL);
-  err = hwloc_topology_set_synthetic(topology, "pack:2(indexes=3,5) numa:2(memory=256GB indexes=pack) l3u:1(size=20mb) l2:2 l1i:1(size=16kB) l1dcache:2 core:1 pu:2(indexes=l2)");
+  err = hwloc_topology_set_synthetic(topology, "pack:2(indexes=3,5) numa:2(memory=256GiB indexes=pack) l3u:1(size=20mib) l2:2 l1i:1(size=16kiB) l1dcache:2 core:1 pu:2(indexes=l2)");
   assert(!err);
   hwloc_topology_load(topology);
 
@@ -155,7 +155,7 @@ int main(void)
 
 
   hwloc_topology_init(&topology);
-  err = hwloc_topology_set_synthetic(topology, "pack:2 [numa(memory=1GB)] [numa(memory=1MB)] core:2 [numa(indexes=8,7,5,6,4,3,1,2)] pu:4");
+  err = hwloc_topology_set_synthetic(topology, "pack:2 [numa(memory=1GiB)] [numa(memory=1MiB)] core:2 [numa(indexes=8,7,5,6,4,3,1,2)] pu:4");
   assert(!err);
   hwloc_topology_load(topology);
 
