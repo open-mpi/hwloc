@@ -1969,7 +1969,7 @@ These info attributes are attached to OS device objects specified in parentheses
 
 <dl>
 <dt>Vendor, Model, Revision, SerialNumber, Size, SectorSize (Block OS devices)</dt>
-<dd>The vendor and model names, revision, serial number, size (in kB)
+<dd>The vendor and model names, revision, serial number, size (in KiB = 1024 bytes)
 and SectorSize (in bytes).
 </dd>
 <dt>LinuxDeviceID (Block OS devices)</dt>
@@ -1985,7 +1985,8 @@ and SectorSize (in bytes).
  and the index of the device within the platform.
 </dd>
 <dt>OpenCLComputeUnits, OpenCLGlobalMemorySize (OpenCL OS devices)</dt>
-<dd>The number of compute units and global memory size (in kB) of an OpenCL device.
+<dd>The number of compute units and global memory size of an OpenCL device.
+ Sizes are in KiB (1024 bytes).
 </dd>
 <dt>LevelZeroVendor, LevelZeroModel, LevelZeroBrand,</dt>
 <dt>LevelZeroSerialNumber, LevelZeroBoardNumber (LevelZero OS devices)</dt>
@@ -2012,7 +2013,8 @@ and SectorSize (in bytes).
  of execution units (EU) per subslice, and of threads per EU.
 </dd>
 <dt>LevelZeroHBMSize, LevelZeroDDRSize, LevelZeroMemorySize (LevelZero OS devices or subdevices)</dt>
-<dd>The amount of HBM or DDR memory (in kB) of a LevelZero device or subdevice.
+<dd>The amount of HBM or DDR memory of a LevelZero device or subdevice.
+ Sizes are in KiB (1024 bytes).
  If the type of memory could not be determined, the generic name LevelZeroMemorySize is used.
  For devices that contain subdevices, the amount reported in the root device
  includes the memories of all its subdevices.
@@ -2031,7 +2033,7 @@ and SectorSize (in bytes).
  The amount of GPU memory (VRAM),
  of GPU memory that is visible from the host (Visible VRAM),
  and of system memory that is usable by the GPU (Graphics Translation Table).
- Sizes are in kB.
+ Sizes are in KiB (1024 bytes).
 </dd>
 <dt>XGMIHiveID (RSMI GPU OS devices)</dt>
 <dd>The ID of the group of GPUs (Hive) interconnected by XGMI links
@@ -2051,7 +2053,7 @@ and SectorSize (in bytes).
  The number of shared multiprocessors, the number of cores per
  multiprocessor, the global memory size, the (global) L2 cache size,
  and size of the shared memory in each multiprocessor of a CUDA device.
- Sizes are in kB.
+ Sizes are in KiB (1024 bytes).
 </dd>
 <dt>VectorEngineModel, VectorEngineSerialNumber (VectorEngine OS devices)</dt>
 <dd>
@@ -2062,7 +2064,7 @@ and SectorSize (in bytes).
 <dd>
  The number of cores, memory size, and the sizes of the (global)
  last level cache and of L2, L1d and L1i caches of a VectorEngine device.
- Sizes are in kB.
+ Sizes are in KiB (1024 bytes).
 </dd>
 <dt>VectorEngineNUMAPartitioned (VectorEngine OS devices)</dt>
 <dd>
