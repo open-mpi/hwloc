@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2021 Inria.  All rights reserved.
+.\" Copyright © 2009-2022 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -835,7 +835,17 @@ To count the number of logical processors in the system
 To append the kernel release and version to the graphical legend:
 
    lstopo --append-legend "Kernel release: $(uname -r)" --append-legend "Kernel version: $(uname -v)"
-
+.
+.\" **************************
+.\"    Notes Section
+.\" **************************
+.SH NOTES
+.
+lstopo displays memory and cache sizes with units such as
+\fBkB\fR (1 kilobyte = 1000 bytes) or \fBGB\fR (1 gigabyte = 1000*1000*1000 bytes)
+while it actually means
+\fBKiB\fR (1 kibibyte = 1024 bytes) or \fBGiB\fR (1 gibibytes = 1024*1024*1024 bytes) .
+.
 .\" **************************
 .\"    See also section
 .\" **************************
