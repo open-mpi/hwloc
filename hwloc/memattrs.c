@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2021 Inria.  All rights reserved.
+ * Copyright © 2020-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -68,8 +68,28 @@ hwloc_internal_memattrs_prepare(struct hwloc_topology *topology)
                        HWLOC_MEMATTR_FLAG_HIGHER_FIRST|HWLOC_MEMATTR_FLAG_NEED_INITIATOR,
                        HWLOC_IMATTR_FLAG_STATIC_NAME);
 
+  hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_READ_BANDWIDTH],
+                       (char *) "ReadBandwidth",
+                       HWLOC_MEMATTR_FLAG_HIGHER_FIRST|HWLOC_MEMATTR_FLAG_NEED_INITIATOR,
+                       HWLOC_IMATTR_FLAG_STATIC_NAME);
+
+  hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_WRITE_BANDWIDTH],
+                       (char *) "WriteBandwidth",
+                       HWLOC_MEMATTR_FLAG_HIGHER_FIRST|HWLOC_MEMATTR_FLAG_NEED_INITIATOR,
+                       HWLOC_IMATTR_FLAG_STATIC_NAME);
+
   hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_LATENCY],
                        (char *) "Latency",
+                       HWLOC_MEMATTR_FLAG_LOWER_FIRST|HWLOC_MEMATTR_FLAG_NEED_INITIATOR,
+                       HWLOC_IMATTR_FLAG_STATIC_NAME);
+
+  hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_READ_LATENCY],
+                       (char *) "ReadLatency",
+                       HWLOC_MEMATTR_FLAG_LOWER_FIRST|HWLOC_MEMATTR_FLAG_NEED_INITIATOR,
+                       HWLOC_IMATTR_FLAG_STATIC_NAME);
+
+  hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_WRITE_LATENCY],
+                       (char *) "WriteLatency",
                        HWLOC_MEMATTR_FLAG_LOWER_FIRST|HWLOC_MEMATTR_FLAG_NEED_INITIATOR,
                        HWLOC_IMATTR_FLAG_STATIC_NAME);
 

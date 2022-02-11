@@ -3146,7 +3146,10 @@ hwloc__xml_export_memattrs(hwloc__xml_export_state_t state, hwloc_topology_t top
 
     imattr = &topology->memattrs[id];
     if (id < HWLOC_MEMATTR_ID_MAX && !imattr->nr_targets)
-      /* no need to export target-less attributes for initial attributes, no release support attributes without those definitions */
+      /* no need to export standard attributes without any target,
+       * their definition is now standardized,
+       * the old hwloc importing this XML may recreate these attributes just like it would for a non-imported topology.
+       */
       continue;
 
     state->new_child(state, &mstate, "memattr");

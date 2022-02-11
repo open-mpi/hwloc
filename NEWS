@@ -22,6 +22,7 @@ Version 2.8.0
 * API
   + Add HWLOC_TOPOLOGY_FLAG_NO_DISTANCES, _NO_MEMATTRS and _NO_CPUKINDS
     to reduce the overhead when unneeded.
+  + Add separate Read/Write Bandwidth/Latency memory attributes.
 * Backends
   + Detect heterogeneous caches in hybrid CPUs on MacOS X,
     thanks to Paul Bone for the help.
