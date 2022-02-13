@@ -392,7 +392,17 @@ static int output_memattr(struct lstopo_output *loutput, unsigned id)
 static void output_memattrs(struct lstopo_output *loutput)
 {
   unsigned id;
-  for(id=0; ; id++)
+  /* output in a convenient instead of the native ID order */
+  output_memattr(loutput, HWLOC_MEMATTR_ID_CAPACITY);
+  output_memattr(loutput, HWLOC_MEMATTR_ID_LOCALITY);
+  output_memattr(loutput, HWLOC_MEMATTR_ID_BANDWIDTH);
+  output_memattr(loutput, HWLOC_MEMATTR_ID_READ_BANDWIDTH);
+  output_memattr(loutput, HWLOC_MEMATTR_ID_WRITE_BANDWIDTH);
+  output_memattr(loutput, HWLOC_MEMATTR_ID_LATENCY);
+  output_memattr(loutput, HWLOC_MEMATTR_ID_READ_LATENCY);
+  output_memattr(loutput, HWLOC_MEMATTR_ID_WRITE_LATENCY);
+  /* output others */
+  for(id=HWLOC_MEMATTR_ID_WRITE_LATENCY+1; ; id++)
     if (output_memattr(loutput, id) < 0)
       break;
 }
