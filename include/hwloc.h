@@ -517,7 +517,7 @@ struct hwloc_obj {
                                           * objects).
                                           *
                                           * If the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED configuration flag is set,
-                                          * some of these CPUs may not be allowed for binding,
+                                          * some of these CPUs may be online but not allowed for binding,
                                           * see hwloc_topology_get_allowed_cpuset().
                                           *
 					  * \note All objects have non-NULL CPU and node sets except Misc and I/O objects.
@@ -549,7 +549,7 @@ struct hwloc_obj {
                                           * nodes more precisely.
                                           *
                                           * If the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED configuration flag is set,
-                                          * some of these nodes may not be allowed for allocation,
+                                          * some of these nodes may be online but not allowed for allocation,
                                           * see hwloc_topology_get_allowed_nodeset().
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
@@ -1914,8 +1914,9 @@ HWLOC_DECLSPEC int hwloc_topology_set_components(hwloc_topology_t __hwloc_restri
 enum hwloc_topology_flags_e {
  /** \brief Detect the whole system, ignore reservations, include disallowed objects.
    *
-   * Gather all resources, even if some were disabled by the administrator.
+   * Gather all online resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cgroup/Cpusets and gather all processors and memory nodes.
+   * However offline PUs and NUMA nodes are still ignored.
    *
    * When this flag is not set, PUs and NUMA nodes that are disallowed are not added to the topology.
    * Parent objects (package, core, cache, etc.) are added only if some of their children are allowed.
