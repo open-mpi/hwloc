@@ -177,7 +177,8 @@ This is identical to \fB-\-filter cache:structure\fR.
 This is identical to \fB-\-filter icache:none\fR.
 .TP
 \fB\-\-disallowed\fR
-Include objects disallowed by administrative limitations.
+Include objects disallowed by administrative limitations (e.g Cgroups on Linux).
+Offline PUs and NUMA nodes are still ignored.
 .TP
 \fB\-\-allow\fR <all|local|0xff|nodeset=0xf0>
 Include objects disallowed by administrative limitations (implies \fB\-\-disallowed\fR)
