@@ -53,8 +53,16 @@
 #include <windows.h>
 #endif
 
+
+#ifdef HWLOC_HAVE_LEVELZERO
 /*
  * Define ZES_ENABLE_SYSMAN=1 early so that the LevelZero backend gets Sysman enabled.
+ *
+ * Only if the levelzero was enabled in this build so that we don't enable sysman
+ * for external levelzero users when hwloc doesn't need it. If somebody ever loads
+ * an external levelzero plugin in a hwloc library built without levelzero (unlikely),
+ * he may have to manually set ZES_ENABLE_SYSMAN=1.
+ *
  * Use the constructor if supported and/or the Windows DllMain callback.
  * Do it in the main hwloc library instead of the levelzero component because
  * the latter could be loaded later as a plugin.
@@ -93,6 +101,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
   return TRUE;
 }
 #endif
+#endif /* HWLOC_HAVE_LEVELZERO */
+
 
 unsigned hwloc_get_api_version(void)
 {
