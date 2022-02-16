@@ -3145,8 +3145,7 @@ hwloc__xml_export_memattrs(hwloc__xml_export_state_t state, hwloc_topology_t top
       continue;
 
     imattr = &topology->memattrs[id];
-    if ((id == HWLOC_MEMATTR_ID_LATENCY || id == HWLOC_MEMATTR_ID_BANDWIDTH)
-        && !imattr->nr_targets)
+    if (id < HWLOC_MEMATTR_ID_MAX && !imattr->nr_targets)
       /* no need to export target-less attributes for initial attributes, no release support attributes without those definitions */
       continue;
 

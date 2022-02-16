@@ -104,9 +104,11 @@ enum hwloc_memattr_id_e {
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_LOWER_FIRST
    * and ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR.
    */
-  HWLOC_MEMATTR_ID_LATENCY = 3
+  HWLOC_MEMATTR_ID_LATENCY = 3,
 
   /* TODO read vs write, persistence? */
+
+  HWLOC_MEMATTR_ID_MAX /**< \private Sentinel value */
 };
 
 /** \brief A memory attribute identifier.

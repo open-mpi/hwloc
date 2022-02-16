@@ -49,36 +49,31 @@ hwloc__setup_memattr(struct hwloc_internal_memattr_s *imattr,
 void
 hwloc_internal_memattrs_prepare(struct hwloc_topology *topology)
 {
-#define NR_DEFAULT_MEMATTRS 4
-  topology->memattrs = malloc(NR_DEFAULT_MEMATTRS * sizeof(*topology->memattrs));
+  topology->memattrs = malloc(HWLOC_MEMATTR_ID_MAX * sizeof(*topology->memattrs));
   if (!topology->memattrs)
     return;
 
-  assert(HWLOC_MEMATTR_ID_CAPACITY < NR_DEFAULT_MEMATTRS);
   hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_CAPACITY],
                        (char *) "Capacity",
                        HWLOC_MEMATTR_FLAG_HIGHER_FIRST,
                        HWLOC_IMATTR_FLAG_STATIC_NAME|HWLOC_IMATTR_FLAG_CONVENIENCE);
 
-  assert(HWLOC_MEMATTR_ID_LOCALITY < NR_DEFAULT_MEMATTRS);
   hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_LOCALITY],
                        (char *) "Locality",
                        HWLOC_MEMATTR_FLAG_LOWER_FIRST,
                        HWLOC_IMATTR_FLAG_STATIC_NAME|HWLOC_IMATTR_FLAG_CONVENIENCE);
 
-  assert(HWLOC_MEMATTR_ID_BANDWIDTH < NR_DEFAULT_MEMATTRS);
   hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_BANDWIDTH],
                        (char *) "Bandwidth",
                        HWLOC_MEMATTR_FLAG_HIGHER_FIRST|HWLOC_MEMATTR_FLAG_NEED_INITIATOR,
                        HWLOC_IMATTR_FLAG_STATIC_NAME);
 
-  assert(HWLOC_MEMATTR_ID_LATENCY < NR_DEFAULT_MEMATTRS);
   hwloc__setup_memattr(&topology->memattrs[HWLOC_MEMATTR_ID_LATENCY],
                        (char *) "Latency",
                        HWLOC_MEMATTR_FLAG_LOWER_FIRST|HWLOC_MEMATTR_FLAG_NEED_INITIATOR,
                        HWLOC_IMATTR_FLAG_STATIC_NAME);
 
-  topology->nr_memattrs = NR_DEFAULT_MEMATTRS;
+  topology->nr_memattrs = HWLOC_MEMATTR_ID_MAX;
 }
 
 static void
