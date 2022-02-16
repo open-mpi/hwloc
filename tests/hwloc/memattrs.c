@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Inria.  All rights reserved.
+ * Copyright © 2020-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -160,7 +160,7 @@ main(void)
   /* look for unexisting memattr */
   err = hwloc_memattr_get_by_name(topology, "foobarrrrr", &gotid);
   assert(err < 0);
-  err = hwloc_memattr_get_name(topology, HWLOC_MEMATTR_ID_LATENCY+1, &gotname);
+  err = hwloc_memattr_get_name(topology, HWLOC_MEMATTR_ID_MAX, &gotname);
   assert(err < 0);
 
   /* (fail to) register with invalid flags */
