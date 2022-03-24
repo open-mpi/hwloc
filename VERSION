@@ -9,7 +9,7 @@
 
 major=2
 minor=7
-release=1
+release=2
 
 # greek is used for alpha or beta release tags.  If it is non-empty,
 # it will be appended to the version number.  It does not have to be
@@ -18,7 +18,7 @@ release=1
 # requirement is that it must be entirely printable ASCII characters
 # and have no white space.
 
-greek=rc2
+greek=rc1
 
 # The date when this release was created
 
