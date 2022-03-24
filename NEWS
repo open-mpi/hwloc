@@ -31,6 +31,9 @@ Version 2.8.0
     but they may be slightly adjusted to avoid reporting hybrid CPUs
     because of features such as Intel Turbo Boost Max 3.0.
     - See the documentation of environment variable HWLOC_CPUKINDS_MAXFREQ.
+* Misc
+  + Add --disable-readme to avoid regenerating the top-level hwloc README
+    file from the documentation.
 
 
 Version 2.7.1

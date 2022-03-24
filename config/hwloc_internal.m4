@@ -47,6 +47,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
         [AS_HELP_STRING([--enable-doxygen],
                         [enable support for building Doxygen documentation (note that this option is ONLY relevant in developer builds; Doxygen documentation is pre-built for tarball builds and this option is therefore ignored)])])
 
+    # Building the README
+    AC_ARG_ENABLE([readme],
+        [AS_HELP_STRING([--disable-readme],
+                        [disable the updating of the top-level README file from the HTML documentation index])])
+
     # Picky?
     AC_ARG_ENABLE(picky,
                   AS_HELP_STRING([--disable-picky],
@@ -213,21 +218,27 @@ EOF
 
     AC_REQUIRE([AC_PROG_SED])
 
-    # Making the top-level README requires w3m or lynx.
-    AC_ARG_VAR([W3M], [Location of the w3m program (required to building the top-level hwloc README file)])
-    AC_PATH_TOOL([W3M], [w3m])
-    AC_ARG_VAR([LYNX], [Location of the lynx program (required to building the top-level hwloc README file)])
-    AC_PATH_TOOL([LYNX], [lynx])
+    AS_IF([test "x$enable_readme" != xno], [
+      # Making the top-level README requires w3m or lynx.
+      AC_ARG_VAR([W3M], [Location of the w3m program (required to building the top-level hwloc README file)])
+      AC_PATH_TOOL([W3M], [w3m])
+      AC_ARG_VAR([LYNX], [Location of the lynx program (required to building the top-level hwloc README file)])
+      AC_PATH_TOOL([LYNX], [lynx])
 
-    AC_MSG_CHECKING([if can build top-level README])
-    AS_IF([test "x$W3M" != "x"],
-          [hwloc_generate_readme=yes
-           HWLOC_W3_GENERATOR=$W3M],
-          [AS_IF([test "x$LYNX" != "x"],
-                 [hwloc_generate_readme=yes
-                  HWLOC_W3_GENERATOR="$LYNX -dump -nolist"],
-                 [hwloc_generate_readme=no])])
-    AC_SUBST(HWLOC_W3_GENERATOR)
+      AC_MSG_CHECKING([if can build top-level README])
+      AS_IF([test "x$W3M" != "x"],
+            [hwloc_generate_readme=yes
+             HWLOC_W3_GENERATOR=$W3M],
+            [AS_IF([test "x$LYNX" != "x"],
+                   [hwloc_generate_readme=yes
+                    HWLOC_W3_GENERATOR="$LYNX -dump -nolist"],
+                   [hwloc_generate_readme=no])])
+      AC_SUBST(HWLOC_W3_GENERATOR)
+      AC_MSG_RESULT([$hwloc_generate_readme])
+    ], [
+      hwloc_generate_readme=no
+    ])
+    AC_MSG_CHECKING([if will build top-level README])
     AC_MSG_RESULT([$hwloc_generate_readme])
 
     # If any one of the above tools is missing, we will refuse to make dist.
