@@ -3687,6 +3687,16 @@ read_node_mscaches(struct hwloc_topology *topology,
   return 0;
 }
 
+static int
+dax_is_kmem(const char *name, int fsroot_fd)
+{
+  char path[300];
+  struct stat stbuf;
+
+  snprintf(path, sizeof(path), "/sys/bus/dax/drivers/kmem/%s", name);
+  return hwloc_stat(path, &stbuf, fsroot_fd) == 0;
+}
+
 static unsigned *
 list_sysfsnode(struct hwloc_topology *topology,
 	       struct hwloc_linux_backend_data_s *data,
@@ -3986,6 +3996,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 	while ((dirent = readdir(dir)) != NULL) {
 	  char daxpath[300];
 	  int tmp;
+          if (!dax_is_kmem(dirent->d_name, data->root_fd))
+            continue;
 	  osnode = (unsigned) -1;
 	  snprintf(daxpath, sizeof(daxpath), "/sys/bus/dax/devices/%s/target_node", dirent->d_name);
 	  if (!hwloc_read_path_as_int(daxpath, &tmp, data->root_fd)) { /* contains %d when added in 5.1 */
@@ -6106,23 +6118,14 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
   if (dir) {
     while ((dirent = readdir(dir)) != NULL) {
       char path[300];
-      char driver[256];
       hwloc_obj_t obj, parent;
-      int err;
 
       if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
 	continue;
 
       /* ignore kmem-device, those appear as additional NUMA nodes */
-      err = snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s/driver", dirent->d_name);
-      if ((size_t) err >= sizeof(path))
-	continue;
-      err = hwloc_readlink(path, driver, sizeof(driver), root_fd);
-      if (err >= 0) {
-	driver[err] = '\0';
-	if (!strcmp(driver+err-5, "/kmem"))
-	  continue;
-      }
+      if (dax_is_kmem(dirent->d_name, root_fd))
+        continue;
 
       snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s", dirent->d_name);
       parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
