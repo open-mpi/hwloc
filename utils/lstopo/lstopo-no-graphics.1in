@@ -657,18 +657,19 @@ their PCI bus ID (such as 00:02.3).
 They may also contain sub-boxes for OS device objects
 such as a network interface \fIeth0\fR or a CUDA GPU \fIcuda0\fR.
 
-The datarate of a PCI link may be written (in GB/s) right below
-its drawn line (if the operating system and/or libraries are able
-to report that information).
-This datarate is the currently configured PCI datarate.
-It may change during execution since some devices are able to
-slow their PCI links down when idle.
-
 When there is a single link (horizontal line) on the right of a
 PCI bridge, it means that a single device or bridge is connected
 on the secondary PCI bus behind that bridge.
 When there is a vertical line, it means that multiple devices
 and/or bridges are connected to the same secondary PCI bus.
+
+The datarate of a PCI link may be written (in GB/s) right below
+its drawn line (if the operating system and/or libraries are able
+to report that information).
+This datarate is the currently configured speed of the entire PCI link
+(sum of the bandwidth of all PCI lanes in that link).
+It may change during execution since some devices are able to
+slow their PCI links down when idle.
 .
 .\" **************************
 .\"    Layout Section
