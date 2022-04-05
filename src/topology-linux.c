@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015, 2020 Université Bordeaux
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -2329,7 +2329,14 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
 
   err = hwloc_stat("/sys/kernel/mm/hugepages", &st, data->root_fd);
   if (!err) {
-    types = 1 + st.st_nlink-2;
+    types = 1 /* normal non-huge size */ + st.st_nlink - 2 /* ignore . and .. */;
+    if (types < 3)
+      /* some buggy filesystems (e.g. btrfs when reading from fsroot)
+       * return wrong st_nlink for directories (always 1 for btrfs).
+       * use 3 as a sane default (default page + 2 huge sizes).
+       * hwloc_parse_hugepages_info() will extend it if needed.
+       */
+      types = 3;
     has_sysfs_hugepages = 1;
   }
 
