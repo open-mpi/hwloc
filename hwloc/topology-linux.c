@@ -6201,6 +6201,7 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
       if (dax_is_kmem(dirent->d_name, root_fd))
         continue;
 
+      /* FIXME: target_node could be better than numa_node for finding the locality, but it's not possible yet, see #529 */
       snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s", dirent->d_name);
       parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
       if (!parent)
