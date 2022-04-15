@@ -216,6 +216,7 @@ EOF])
 	;;
       *-*-linux*)
         AC_DEFINE(HWLOC_LINUX_SYS, 1, [Define to 1 on Linux])
+        AC_SUBST(HWLOC_HAVE_LINUX, 1)
         hwloc_linux=yes
         AC_MSG_RESULT([Linux])
         hwloc_components="$hwloc_components linux"
@@ -1554,6 +1555,7 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
 	]])],
 	[AC_MSG_RESULT([yes])
 	 AC_DEFINE(HWLOC_HAVE_X86_CPUID, 1, [Define to 1 if you have x86 cpuid])
+         AC_SUBST(HWLOC_HAVE_X86_CPUID, 1)
 	 hwloc_have_x86_cpuid=yes],
 	[AC_MSG_RESULT([no])])
 	if test "x$hwloc_have_x86_cpuid" = xyes; then
