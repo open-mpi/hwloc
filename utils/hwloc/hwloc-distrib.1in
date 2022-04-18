@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2020 Inria.  All rights reserved.
+.\" Copyright © 2010-2022 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-DISTRIB "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -28,19 +28,21 @@ program instead of hwloc-specific CPU set string format.
 \fB\-v\fR \fB\-\-verbose\fR
 Verbose messages.
 .TP
-\fB\-i\fR <file>, \fB\-\-input\fR <file>
-Read topology from XML file <file> (instead of discovering the
-topology on the local machine).  If <file> is "\-", the standard input
-is used.  XML support must have been compiled in to hwloc for this
-option to be usable.
-.TP
-\fB\-i\fR <directory>, \fB\-\-input\fR <directory>
-Read topology from <directory> instead of discovering the topology
-of the local machine.
-On Linux, the directory may contain the topology files
+\fB\-i\fR <path>, \fB\-\-input\fR <path>
+Read the topology from <path> instead of discovering the topology of the local machine.
+
+If <path> is a file and XML support has been compiled in hwloc,
+it may be a XML file exported by a previous hwloc program.
+If <path> is "\-", the standard input may be used as a XML file.
+
+On Linux, <path> may be a directory containing the topology files
 gathered from another machine topology with hwloc-gather-topology.
-On x86, the directory may contain a cpuid dump gathered
+
+On x86, <path> may be a directory containing a cpuid dump gathered
 with hwloc-gather-cpuid.
+
+When the archivemount program is available, <path> may also be a tarball
+containing such Linux or x86 topology files.
 .TP
 \fB\-i\fR <specification>, \fB\-\-input\fR <specification>
 Simulate a fake hierarchy (instead of discovering the topology on the

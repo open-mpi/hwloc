@@ -410,6 +410,12 @@ EOF
       AC_CHECK_FUNCS([clock_gettime])
     ])
 
+    AC_ARG_VAR([ARCHIVEMOUNT], [Location of the archivemount program (for loading archive topology in tools)])
+    AC_PATH_TOOL([ARCHIVEMOUNT], [archivemount])
+    if test "x$ARCHIVEMOUNT" != x; then
+      AC_DEFINE_UNQUOTED([HWLOC_ARCHIVEMOUNT_PATH], ["$ARCHIVEMOUNT"], [Define to the location of the archivemount program])
+    fi
+
     # Only generate this if we're building the utilities
     # Even the netloc library Makefile is here because
     # we don't embed libnetloc yet, it's useless without tools

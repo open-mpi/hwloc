@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
 # See COPYING in top-level directory.
@@ -128,5 +128,22 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
   $ls -i "node:4 pu:4" - --allow 0xf --flags disallowed -v
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-lstopo.output "$file"
-rm -rf "$tmp"
 
+if test x@ARCHIVEMOUNT@ != x; then
+  if test x@HWLOC_HAVE_LINUX@ = x1; then
+    echo "**** Archivemount'ing a Linux fsroot archive ..."
+    file="$tmp/test-lstopo.archivemount.fsroot.output"
+    $ls -i $HWLOC_top_srcdir/tests/hwloc/linux/16amd64-8n2c.tar.bz2 -v - | egrep -v "^assuming " > "$file"
+    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $HWLOC_top_srcdir/tests/hwloc/linux/16amd64-8n2c.output "$file"
+  fi
+  if test x@HWLOC_HAVE_X86_CPUID@ = x1; then
+    echo "**** Archivemount'ing a x86 CPUID archive ..."
+    file="$tmp/test-lstopo.archivemount.cpuid.output"
+    HWLOC_XML_EXPORT_SUPPORT=0
+    export HWLOC_XML_EXPORT_SUPPORT
+    $ls -i $HWLOC_top_srcdir/tests/hwloc/x86/Intel-Skylake-2xXeon6140.tar.bz2 --of xml - | sed   -e 's/ gp_index="[0-9]*"//' | egrep -v "^assuming " > "$file"
+    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $HWLOC_top_srcdir/tests/hwloc/x86/Intel-Skylake-2xXeon6140.output "$file"
+  fi
+fi
+
+rm -rf "$tmp"
