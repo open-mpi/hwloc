@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2021 Inria.  All rights reserved.
+ * Copyright © 2015-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -162,7 +162,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x1);
   }
 
-  /* 0xb = Extended topology on Intel ; Reserved on AMD */
+  /* 0xb = Extended Topology Enumeration */
   if (has_intel_x2apic && highest_cpuid >= 0xb) {
     for(i=0; ; i++) {
       regs[0] = 0xb; regs[2] = i;
@@ -199,7 +199,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     }
   }
 
-  /* 0xf = Platform/L3 QoS enumeration on Intel and AMD */
+  /* 0xf = Platform/L3 QoS enumeration on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0xf) {
     regs[0] = 0xf; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
@@ -207,7 +207,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x5);
   }
 
-  /* 0x10 = Platform/L3 QoS enforcement enumeration on Intel and AMD */
+  /* 0x10 = Platform/L3 QoS enforcement enumeration on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x10) {
     /* Intel Resource Director Technology (Intel RDT) Allocation */
     regs[0] = 0x10; regs[2] = 0;
@@ -425,13 +425,13 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x1);
   }
 
-  /* 0x8000001f = Encrypted Memory Capabilities ; Reserved on Intel */
+  /* 0x8000001f = Encrypted Memory Capabilities on AMD ; Reserved on Intel */
   if (highest_ext_cpuid >= 0x8000001f) {
     regs[0] = 0x8000001f;
     dump_one_cpuid(output, regs, 0x1);
   }
 
-  /* 0x80000020 = Platform QoS Enforcement for Memory Bandwidth ; Reserved on Intel */
+  /* 0x80000020 = Platform QoS Enforcement for Memory Bandwidth on AMD ; Reserved on Intel */
   if (highest_ext_cpuid >= 0x80000020) {
     regs[0] = 0x80000020; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
@@ -439,7 +439,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x5);
   }
 
-  /* 0x80000021 = Extended Feature 2 EAX ; Reserved on Intel */
+  /* 0x80000021 = Extended Feature Identification 2 on AMD ; Reserved on Intel */
   if (highest_ext_cpuid >= 0x80000021) {
     regs[0] = 0x80000021;
     dump_one_cpuid(output, regs, 0x1);
