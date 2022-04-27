@@ -548,6 +548,9 @@ int main(int argc, const char * const argv[])
 
   hwloc_topology_init(&topo);
   hwloc_topology_set_all_types_filter(topo, HWLOC_TYPE_FILTER_KEEP_NONE);
+  hwloc_topology_set_flags(topo, HWLOC_TOPOLOGY_FLAG_NO_DISTANCES
+                                 |HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS
+                                 |HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS);
   err = hwloc_topology_load(topo);
   if (err < 0) {
     fprintf(stderr, "Failed to load topology\n");
