@@ -310,6 +310,12 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     }
   }
 
+  /* 0x1c = Last Branch Records Information on Intel ; Reserved on AMD */
+  if (highest_cpuid >= 0x1c) {
+    regs[0] = 0x1c; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+  }
+
   /* 0x1f = V2 Extended Topology Enumeration on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x1f) {
     for(i=0; ; i++) {
@@ -321,7 +327,16 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     }
   }
 
-  if (highest_cpuid > 0x1f) {
+  /* 0x20 = Processor History Reset on Intel ; Reserved on AMD */
+  if (highest_cpuid >= 0x20) {
+    regs[0] = 0x20; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+    /* eax is number of subleaves but subleaves aren't documented?! */
+  }
+
+  /* 0x21 is reserved on Intel */
+
+  if (highest_cpuid > 0x21) {
     static int reported = 0;
     if (!reported)
       fprintf(stderr, "WARNING: Processor supports new CPUID leaves upto 0x%x\n", highest_cpuid);
