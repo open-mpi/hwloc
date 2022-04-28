@@ -1807,7 +1807,7 @@ subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
 <li>Co-processor: subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, or <tt>VectorEngine</tt>.</li>
 <li>GPU: subtype <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU).</li>
 <li>OpenFabrics: subtype <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
-<li>Block: subtype <tt>Disk</tt>, <tt>NVDIMM</tt>, <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
+<li>Block: subtype <tt>Disk</tt>, <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
 </ul>
 </li>
 <li>L3 Caches:

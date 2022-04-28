@@ -5963,6 +5963,8 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   char blocktype[64] = "";
   unsigned sectorsize = 0;
   unsigned major_id, minor_id;
+  int is_nvm = 0;
+  const char *daxtype;
   char *tmp;
 
   snprintf(path, sizeof(path), "%s/size", osdevpath);
@@ -6008,7 +6010,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
      * without metadata.
      */
     if (!strncmp(line, "nd_", 3))
-      strcpy(blocktype, "NVDIMM"); /* Save the blocktype now since udev reports "" so far */
+      is_nvm = 1;
   }
 
   snprintf(path, sizeof(path), "%s/dev", osdevpath);
@@ -6115,10 +6117,13 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   if (*serial)
     hwloc_obj_add_info(obj, "SerialNumber", serial);
 
-  if (!strcmp(blocktype, "disk") || !strncmp(obj->name, "nvme", 4))
+  daxtype = hwloc_obj_get_info_by_name(obj, "DAXType");
+  if (daxtype)
+    obj->subtype = strdup(daxtype); /* SPM or NVM */
+  else if (is_nvm)
+    obj->subtype = strdup("NVM");
+  else if (!strcmp(blocktype, "disk") || !strncmp(obj->name, "nvme", 4))
     obj->subtype = strdup("Disk");
-  else if (!strcmp(blocktype, "NVDIMM")) /* FIXME: set by us above, to workaround udev returning "" so far */
-    obj->subtype = strdup("NVDIMM");
   else if (!strcmp(blocktype, "tape"))
     obj->subtype = strdup("Tape");
   else if (!strcmp(blocktype, "cd") || !strcmp(blocktype, "floppy") || !strcmp(blocktype, "optical"))
