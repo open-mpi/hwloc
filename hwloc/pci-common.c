@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -120,6 +120,7 @@ hwloc_pci_discovery_init(struct hwloc_topology *topology)
 
   topology->first_pci_locality = topology->last_pci_locality = NULL;
 
+#define HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A (1ULL<<0)
   topology->pci_locality_quirks = (uint64_t) -1; /* -1 is unknown, 0 is disabled, >0 is bitmask of enabled quirks */
 }
 
@@ -451,11 +452,63 @@ hwloc__pci_find_busid_parent_quirk(struct hwloc_topology *topology,
                                    hwloc_cpuset_t cpuset)
 {
   if (topology->pci_locality_quirks == (uint64_t)-1 /* unknown */) {
+    const char *dmi_board_name;
+
     /* first invokation, detect which quirks are needed */
     topology->pci_locality_quirks = 0; /* no quirk yet */
+
+    dmi_board_name = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "DMIBoardName");
+    if (dmi_board_name && !strcmp(dmi_board_name, "HPE CRAY EX235A")) {
+      hwloc_debug("enabling for PCI locality quirk for HPE Cray EX235A\n");
+      topology->pci_locality_quirks |= HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A;
+    }
   }
 
-  /* no quirk for now */
+  if (topology->pci_locality_quirks & HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A) {
+    if (busid->domain == 0) {
+      if (busid->bus >= 0xd0 && busid->bus <= 0xd1) {
+        hwloc_bitmap_set_range(cpuset, 0, 7);
+        hwloc_bitmap_set_range(cpuset, 64, 71);
+        return 1;
+      }
+      if (busid->bus >= 0xd4 && busid->bus <= 0xd6) {
+        hwloc_bitmap_set_range(cpuset, 8, 15);
+        hwloc_bitmap_set_range(cpuset, 72, 79);
+        return 1;
+      }
+      if (busid->bus >= 0xc8 && busid->bus <= 0xc9) {
+        hwloc_bitmap_set_range(cpuset, 16, 23);
+        hwloc_bitmap_set_range(cpuset, 80, 87);
+        return 1;
+      }
+      if (busid->bus >= 0xcc && busid->bus <= 0xce) {
+        hwloc_bitmap_set_range(cpuset, 24, 31);
+        hwloc_bitmap_set_range(cpuset, 88, 95);
+        return 1;
+      }
+      if (busid->bus >= 0xd8 && busid->bus <= 0xd9) {
+        hwloc_bitmap_set_range(cpuset, 32, 39);
+        hwloc_bitmap_set_range(cpuset, 96, 103);
+        return 1;
+      }
+      if (busid->bus >= 0xdc && busid->bus <= 0xde) {
+        hwloc_bitmap_set_range(cpuset, 40, 47);
+        hwloc_bitmap_set_range(cpuset, 104, 111);
+        return 1;
+      }
+      if (busid->bus >= 0xc0 && busid->bus <= 0xc1) {
+        hwloc_bitmap_set_range(cpuset, 48, 55);
+        hwloc_bitmap_set_range(cpuset, 112, 119);
+        return 1;
+      }
+      if (busid->bus >= 0xc4 && busid->bus <= 0xc6) {
+        hwloc_bitmap_set_range(cpuset, 56, 63);
+        hwloc_bitmap_set_range(cpuset, 120, 127);
+        return 1;
+      }
+    }
+  }
+
   return 0;
 }
 
