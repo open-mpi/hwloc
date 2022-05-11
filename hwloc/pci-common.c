@@ -119,6 +119,8 @@ hwloc_pci_discovery_init(struct hwloc_topology *topology)
   topology->pci_forced_locality = NULL;
 
   topology->first_pci_locality = topology->last_pci_locality = NULL;
+
+  topology->pci_locality_quirks = (uint64_t) -1; /* -1 is unknown, 0 is disabled, >0 is bitmask of enabled quirks */
 }
 
 void
@@ -442,13 +444,19 @@ hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
   return new;
 }
 
-static struct hwloc_obj *
-hwloc_pci_fixup_busid_parent(struct hwloc_topology *topology __hwloc_attribute_unused,
-			     struct hwloc_pcidev_attr_s *busid __hwloc_attribute_unused,
-			     struct hwloc_obj *parent __hwloc_attribute_unused)
+/* return 1 if a quirk was applied */
+static int
+hwloc__pci_find_busid_parent_quirk(struct hwloc_topology *topology,
+                                   struct hwloc_pcidev_attr_s *busid,
+                                   hwloc_cpuset_t cpuset)
 {
+  if (topology->pci_locality_quirks == (uint64_t)-1 /* unknown */) {
+    /* first invokation, detect which quirks are needed */
+    topology->pci_locality_quirks = 0; /* no quirk yet */
+  }
+
   /* no quirk for now */
-  return parent;
+  return 0;
 }
 
 static struct hwloc_obj *
@@ -457,7 +465,7 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t parent;
   int forced = 0;
-  int noquirks = 0;
+  int noquirks = 0, got_quirked = 0;
   unsigned i;
   int err;
 
@@ -505,7 +513,13 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
     }
   }
 
-  if (!forced) {
+  if (!forced && !noquirks && topology->pci_locality_quirks /* either quirks are unknown yet, or some are enabled */) {
+    err = hwloc__pci_find_busid_parent_quirk(topology, busid, cpuset);
+    if (err > 0)
+      got_quirked = 1;
+  }
+
+  if (!forced && !got_quirked) {
     /* get the cpuset by asking the backend that provides the relevant hook, if any. */
     struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
     if (backend)
@@ -520,11 +534,7 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
   hwloc_debug_bitmap("  will attach PCI bus to cpuset %s\n", cpuset);
 
   parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-  if (parent) {
-    if (!noquirks)
-      /* We found a valid parent. Check that the OS didn't report invalid locality */
-      parent = hwloc_pci_fixup_busid_parent(topology, busid, parent);
-  } else {
+  if (!parent) {
     /* Fallback to root */
     parent = hwloc_get_root_obj(topology);
   }
