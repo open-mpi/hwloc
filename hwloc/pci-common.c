@@ -121,7 +121,11 @@ hwloc_pci_discovery_init(struct hwloc_topology *topology)
   topology->first_pci_locality = topology->last_pci_locality = NULL;
 
 #define HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A (1ULL<<0)
-  topology->pci_locality_quirks = (uint64_t) -1; /* -1 is unknown, 0 is disabled, >0 is bitmask of enabled quirks */
+#define HWLOC_PCI_LOCALITY_QUIRK_FAKE (1ULL<<62)
+  topology->pci_locality_quirks = (uint64_t) -1;
+  /* -1 is unknown, 0 is disabled, >0 is bitmask of enabled quirks.
+   * bit 63 should remain unused so that -1 is unaccessible as a bitmask.
+   */
 }
 
 void
@@ -452,7 +456,7 @@ hwloc__pci_find_busid_parent_quirk(struct hwloc_topology *topology,
                                    hwloc_cpuset_t cpuset)
 {
   if (topology->pci_locality_quirks == (uint64_t)-1 /* unknown */) {
-    const char *dmi_board_name;
+    const char *dmi_board_name, *env;
 
     /* first invokation, detect which quirks are needed */
     topology->pci_locality_quirks = 0; /* no quirk yet */
@@ -462,6 +466,18 @@ hwloc__pci_find_busid_parent_quirk(struct hwloc_topology *topology,
       hwloc_debug("enabling for PCI locality quirk for HPE Cray EX235A\n");
       topology->pci_locality_quirks |= HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A;
     }
+
+    env = getenv("HWLOC_PCI_LOCALITY_QUIRK_FAKE");
+    if (env && atoi(env)) {
+      hwloc_debug("enabling for PCI locality fake quirk (attaching everything to last PU)\n");
+      topology->pci_locality_quirks |= HWLOC_PCI_LOCALITY_QUIRK_FAKE;
+    }
+  }
+
+  if (topology->pci_locality_quirks & HWLOC_PCI_LOCALITY_QUIRK_FAKE) {
+    unsigned last = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
+    hwloc_bitmap_set(cpuset, last);
+    return 1;
   }
 
   if (topology->pci_locality_quirks & HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A) {
