@@ -1,5 +1,5 @@
 #
-# Copyright © 2018-2021 Inria.  All rights reserved.
+# Copyright © 2018-2022 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -17,7 +17,9 @@ _lstopo() {
     local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(-l --logical
 		   -p --physical
-		   --output-format --of
+                   --logical-index-prefix
+                   --os-index-prefix
+                   --output-format --of
 		   -f --force
 		   --only
 		   -v --verbose
@@ -109,6 +111,9 @@ _lstopo() {
 		;;
 	    --restrict)
 		COMPREPLY=( `compgen -W "binding <cpuset>" -- "$cur"` )
+		;;
+            --logical-index-prefix | --os-index-prefix)
+	        COMPREPLY=( "<string>" "" )
 		;;
 	    -i | --input)
 		_filedir xml

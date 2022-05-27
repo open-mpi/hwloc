@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2015 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -122,6 +122,8 @@ struct lstopo_output {
   int show_disallowed;
   int show_process_color;
   int show_cpukinds;
+  char *logical_index_prefix;
+  char *os_index_prefix;
   int factorize_enabled; /* global toggle for interactive keyboard shortcuts */
   unsigned factorize_min[HWLOC_OBJ_TYPE_MAX]; /* minimum number of object before factorizing (parent->arity must be strictly higher) */
 #define FACTORIZE_MIN_DEFAULT 4

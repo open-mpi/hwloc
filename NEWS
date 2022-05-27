@@ -34,6 +34,8 @@ Version 2.8.0
 * Tools
   + lstopo and other tools may now load Linux and x86 cpuid topology files
     from a tarball.
+  + lstopo may now replace the P# and L# index prefixes with custom strings
+    thanks to --os-index-prefix and --logical-index-prefix options.
 * Misc
   + Add --disable-readme to avoid regenerating the top-level hwloc README
     file from the documentation.

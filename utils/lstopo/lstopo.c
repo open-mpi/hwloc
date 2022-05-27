@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -560,6 +560,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --top-color <none|#xxyyzz>\n"
                   "                        Disable or change task background color for --top\n");
   fprintf (where, "Miscellaneous options:\n");
+  fprintf (where, "  --logical-index-prefix <s> --os-index-prefix <s>\n");
+  fprintf (where, "                        Use <s> as a prefix for logical or physical/OS indexes\n");
   fprintf (where, "  --export-xml-flags <n>\n"
 		  "                        Set flags during the XML topology export\n");
   fprintf (where, "  --export-synthetic-flags <n>\n"
@@ -872,6 +874,8 @@ main (int argc, char *argv[])
   }
   loutput.show_attrs_enabled = 1;
   loutput.show_text_enabled = 1;
+  loutput.os_index_prefix = (char *) " P#";
+  loutput.logical_index_prefix = (char *) " L#";
 
   loutput.show_binding = 1;
   loutput.show_disallowed = 1;
@@ -1267,6 +1271,18 @@ main (int argc, char *argv[])
           lstopo_palette_set_color(&loutput.palette->process, strtoul(argv[1]+1, NULL, 16));
         else
 	  fprintf(stderr, "Unsupported color `%s' passed to %s, ignoring.\n", argv[1], argv[0]);
+        opt = 1;
+      }
+      else if (!strcmp(argv[0], "--os-index-prefix")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+        loutput.os_index_prefix = argv[1];
+        opt = 1;
+      }
+      else if (!strcmp(argv[0], "--logical-index-prefix")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+        loutput.logical_index_prefix = argv[1];
         opt = 1;
       }
       else if (!strncmp (argv[0], "--no-text", 9)

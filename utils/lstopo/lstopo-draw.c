@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -990,11 +990,11 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
     if (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE) {
       /* by default we show logical+physical for PU/NUMA */
       idx = obj->logical_index;
-      indexprefix = " L#";
+      indexprefix = loutput->logical_index_prefix;
     } else if (obj->type == HWLOC_OBJ_PACKAGE || obj->type == HWLOC_OBJ_DIE || obj->type == HWLOC_OBJ_CORE) {
       /* logical only for package+core (so that we see easily how many packages/cores there are */
       idx = obj->logical_index;
-      indexprefix = " L#";
+      indexprefix = loutput->logical_index_prefix;
     } else {
       /* nothing for others */
       idx = HWLOC_UNKNOWN_INDEX;
@@ -1002,10 +1002,10 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
     }
   } else if (index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
     idx = obj->logical_index;
-    indexprefix = " L#";
+    indexprefix = loutput->logical_index_prefix;
   } else if (index_type == LSTOPO_INDEX_TYPE_PHYSICAL) {
     idx = obj->os_index;
-    indexprefix = " P#";
+    indexprefix = loutput->os_index_prefix;
   } else {
     /* shutup the compiler */
     idx = 0;
@@ -1021,7 +1021,7 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
 
   if (index_type == LSTOPO_INDEX_TYPE_DEFAULT && obj->type == HWLOC_OBJ_NUMANODE && loutput->show_indexes[obj->type])
     /* NUMA have both P# and L# on the same line (PU is split on 2 lines) */
-    snprintf(index2str, sizeof(index2str), " P#%u", obj->os_index);
+    snprintf(index2str, sizeof(index2str), "%s%u", loutput->os_index_prefix, obj->os_index);
 
   if (loutput->show_attrs_enabled && loutput->show_attrs[obj->type]) {
     attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
@@ -1245,7 +1245,10 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 
   if (HWLOC_OBJ_PU == obj->type && loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT && loutput->show_indexes[obj->type]) {
     /* PU P# is on second line */
-    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "P#%u", obj->os_index);
+    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+             "%s%u",
+             loutput->os_index_prefix[0] == ' ' ? loutput->os_index_prefix+1 : loutput->os_index_prefix, /* skip the starting space if any */
+             obj->os_index);
   }
 
   if (loutput->show_attrs_enabled && loutput->show_attrs[obj->type]) {

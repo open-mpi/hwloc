@@ -40,10 +40,10 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
 
   if (collapse > 1 && l->type == HWLOC_OBJ_PCI_DEVICE) {
     strcpy(pidxstr, "P#[collapsed]"); /* shouldn't be used, os_index should be -1 except if importing old XMLs */
-    snprintf(lidxstr, sizeof(lidxstr), "L#%u-%u", l->logical_index, l->logical_index+collapse-1);
+    snprintf(lidxstr, sizeof(lidxstr), "%s%u-%u", loutput->logical_index_prefix, l->logical_index, l->logical_index+collapse-1);
   } else {
-    snprintf(pidxstr, sizeof(pidxstr), "P#%u", l->os_index);
-    snprintf(lidxstr, sizeof(lidxstr), "L#%u", l->logical_index);
+    snprintf(pidxstr, sizeof(pidxstr), "%s%u", loutput->os_index_prefix, l->os_index);
+    snprintf(lidxstr, sizeof(lidxstr), "%s%u", loutput->logical_index_prefix, l->logical_index);
   }
   if (l->type == HWLOC_OBJ_PCI_DEVICE)
     lstopo_busid_snprintf(loutput, busidstr, sizeof(busidstr), l, collapse, loutput->need_pci_domain);
@@ -59,10 +59,10 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     if (l->depth != 0 && (verbose_mode >= 2 || (hwloc_obj_type_is_normal(l->type) || hwloc_obj_type_is_memory(l->type)))) {
       if (index_type != LSTOPO_INDEX_TYPE_PHYSICAL)
 	/* print logical index in logical and default case */
-	fprintf(output, " %s", lidxstr);
+	fprintf(output, "%s", lidxstr);
       else if (index_type == LSTOPO_INDEX_TYPE_PHYSICAL && l->os_index != HWLOC_UNKNOWN_INDEX)
 	/* print physical index in physical case */
-	fprintf(output, " %s", pidxstr);
+	fprintf(output, "%s", pidxstr);
     }
     if (l->name && (l->type == HWLOC_OBJ_MISC || l->type == HWLOC_OBJ_GROUP))
       fprintf(output, " %s", l->name);
@@ -70,7 +70,10 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
 	&& l->os_index != HWLOC_UNKNOWN_INDEX
 	&& (verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NUMANODE))
       /* print physical index too if default index */
-      snprintf(phys, sizeof(phys), "%s", pidxstr);
+      snprintf(phys, sizeof(phys),
+               "%s",
+               pidxstr[0] == ' ' ? pidxstr+1 : pidxstr /* skip the starting space if any */
+        );
     if (l->type == HWLOC_OBJ_PCI_DEVICE && verbose_mode <= 1)
       fprintf(output, " %s (%s)",
 	      busidstr, hwloc_pci_class_string(l->attr->pcidev.class_id));
