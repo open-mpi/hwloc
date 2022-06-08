@@ -1794,7 +1794,11 @@ to a better description string (displayed by lstopo either
 in place or after the main <tt>obj->type</tt> attribute):
 <ul>
 <li>NUMA nodes:
-subtype <tt>MCDRAM</tt> (on KNL)
+subtype <tt>DRAM</tt> (for usual main memory),
+<tt>HBM</tt> (high-bandwidth memory),
+<tt>SPM</tt> (specific-purpose memory, usually reserved for some custom applications),
+<tt>NVM</tt> (non-volatile memory when used as main memory),
+<tt>MCDRAM</tt> (on KNL)
 or <tt>GPUMemory</tt> (on POWER architecture with NVIDIA GPU memory shared over NVLink).
 </li>
 <li>Groups:

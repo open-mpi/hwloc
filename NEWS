@@ -25,6 +25,8 @@ Version 2.8.0
   + Add separate Read/Write Bandwidth/Latency memory attributes and
     implement them on Linux.
 * Backends
+  + NUMA nodes may now have a subtype such as DRAM, HBM, SPM, or NVM
+    on heterogeneous memory platforms.
   + Detect heterogeneous caches in hybrid CPUs on MacOS X,
     thanks to Paul Bone for the help.
   + Max frequencies are not ignored in Linux cpukinds anymore (they were

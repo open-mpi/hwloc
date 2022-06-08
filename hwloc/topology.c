@@ -4115,6 +4115,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* Same for memattrs */
   hwloc_internal_memattrs_need_refresh(topology);
   hwloc_internal_memattrs_refresh(topology);
+  hwloc_internal_memattrs_guess_memory_tiers(topology);
 
   topology->is_loaded = 1;
 

@@ -870,6 +870,7 @@ extern "C" {
 #define hwloc_internal_memattrs_destroy HWLOC_NAME(internal_memattrs_destroy)
 #define hwloc_internal_memattrs_need_refresh HWLOC_NAME(internal_memattrs_need_refresh)
 #define hwloc_internal_memattrs_refresh HWLOC_NAME(internal_memattrs_refresh)
+#define hwloc_internal_memattrs_guess_memory_tiers HWLOC_NAME(internal_memattrs_guess_memory_tiers)
 
 #define hwloc_internal_cpukind_s HWLOC_NAME(internal_cpukind_s)
 #define hwloc_internal_cpukinds_init HWLOC_NAME(internal_cpukinds_init)
