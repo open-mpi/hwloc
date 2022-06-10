@@ -1408,13 +1408,18 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
       HWLOC_PKG_CHECK_MODULES([LEVELZERO], [libze_loader], [zesDevicePciGetProperties], [level_zero/zes_api.h],
                               [hwloc_levelzero_happy=yes
                                HWLOC_LEVELZERO_REQUIRES=libze_loader
+			       AC_CHECK_LIB([ze_loader], [zeDevicePciGetPropertiesExt], [AC_DEFINE(HWLOC_HAVE_ZEDEVICEPCIGETPROPERTIESEXT, 1, [Define to 1 if zeDevicePciGetPropertiesExt is available])])
                               ], [hwloc_levelzero_happy=no])
       if test x$hwloc_levelzero_happy = xno; then
         hwloc_levelzero_happy=yes
         AC_CHECK_HEADERS([level_zero/ze_api.h], [
           AC_CHECK_LIB([ze_loader], [zeInit], [
             AC_CHECK_HEADERS([level_zero/zes_api.h], [
-              AC_CHECK_LIB([ze_loader], [zesDevicePciGetProperties], [HWLOC_LEVELZERO_LIBS="-lze_loader"], [hwloc_levelzero_happy=no])
+              AC_CHECK_LIB([ze_loader],
+	                   [zesDevicePciGetProperties],
+	                   [HWLOC_LEVELZERO_LIBS="-lze_loader"
+			    AC_CHECK_LIB([ze_loader], [zeDevicePciGetPropertiesExt], [AC_DEFINE(HWLOC_HAVE_ZEDEVICEPCIGETPROPERTIESEXT, 1, [Define to 1 if zeDevicePciGetPropertiesExt is available])])
+                           ], [hwloc_levelzero_happy=no])
             ], [hwloc_levelzero_happy=no])
           ], [hwloc_levelzero_happy=no])
         ], [hwloc_levelzero_happy=no])

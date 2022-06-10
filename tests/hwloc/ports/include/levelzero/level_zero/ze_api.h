@@ -63,4 +63,25 @@ typedef struct ze_device_memory_properties {
 
 extern ze_result_t zeDeviceGetMemoryProperties(ze_device_handle_t, uint32_t *, ze_device_memory_properties_t*);
 
+typedef struct ze_pci_address_ext {
+  uint32_t domain, bus, device, function;
+} ze_pci_address_ext_t;
+
+typedef struct ze_pci_speed_ext {
+  int64_t maxBandwidth;
+} ze_pci_speed_ext_t;
+
+typedef int ze_structure_type_t;
+
+#define ZE_STRUCTURE_TYPE_PCI_EXT_PROPERTIES 0x10008
+
+typedef struct ze_pci_ext_properties {
+  ze_structure_type_t stype;
+  void* pNext;
+  ze_pci_address_ext_t address;
+  ze_pci_speed_ext_t maxSpeed;
+} ze_pci_ext_properties_t;
+
+extern ze_result_t zeDevicePciGetPropertiesExt(ze_device_handle_t, ze_pci_ext_properties_t *);
+
 #endif /* HWLOC_PORT_L0_ZE_API_H */
