@@ -5718,6 +5718,39 @@ hwloc_linux_backend_get_pci_busid_cpuset(struct hwloc_backend *backend,
 #define HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS (1U<<31) /* bus devices are actual hardware devices, while class devices point to hardware devices through the "device" symlink */
 
 static hwloc_obj_t
+hwloc_linuxfs_read_osdev_numa_node(struct hwloc_topology *topology, int root_fd,
+                                   const char *osdevpath, unsigned osdev_flags)
+{
+  char path[256];
+  int node, err;
+
+  if (!(osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS)) {
+    /* class device have numa_node under the actual device pointed by "device" */
+    snprintf(path, sizeof(path), "%s/device/numa_node", osdevpath);
+    err = hwloc_read_path_as_int(path, &node, root_fd);
+    if (!err && node >= 0)
+      return hwloc_get_numanode_obj_by_os_index(topology, (unsigned) node);
+    return NULL;
+  }
+
+  /* bus devices are actual hardware devices, they should have numa_node directly */
+  snprintf(path, sizeof(path), "%s/numa_node", osdevpath);
+  err = hwloc_read_path_as_int(path, &node, root_fd);
+  if (!err && node >= 0)
+    return hwloc_get_numanode_obj_by_os_index(topology, (unsigned) node);
+
+  if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS) {
+    /* before 5.5, nvdimm dax had numa_node only in parent */
+    snprintf(path, sizeof(path), "%s/../numa_node", osdevpath);
+    err = hwloc_read_path_as_int(path, &node, root_fd);
+    if (!err && node >= 0)
+      return hwloc_get_numanode_obj_by_os_index(topology, (unsigned) node);
+  }
+
+  return NULL;
+}
+
+static hwloc_obj_t
 hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 				const char *osdevpath, unsigned osdev_flags)
 {
@@ -5728,13 +5761,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   unsigned _pcidomain, _pcibus, _pcidev, _pcifunc;
   const char *tmp;
   hwloc_obj_t parent;
-  const char *devicesubdir;
-  int node, err;
-
-  if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS)
-    devicesubdir = "..";
-  else
-    devicesubdir = "device";
+  int err;
 
   err = hwloc_readlink(osdevpath, path, sizeof(path), root_fd);
   if (err < 0) {
@@ -5799,16 +5826,12 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 
  nopci:
   /* attach directly near the right NUMA node */
-  snprintf(path, sizeof(path), "%s/%s/numa_node", osdevpath, devicesubdir);
-  err = hwloc_read_path_as_int(path, &node, root_fd);
-  if (!err && node >= 0) {
-    parent = hwloc_get_numanode_obj_by_os_index(topology, (unsigned) node);
-    if (parent) {
-      /* don't attach I/O under numa node, attach to the same normal parent */
-      while (hwloc__obj_type_is_memory(parent->type))
-        parent = parent->parent;
-      return parent;
-    }
+  parent = hwloc_linuxfs_read_osdev_numa_node(topology, root_fd, osdevpath, osdev_flags);
+  if (parent) {
+    /* don't attach I/O under numa node, attach to the same normal parent */
+    while (hwloc__obj_type_is_memory(parent->type))
+      parent = parent->parent;
+    return parent;
   }
 
   /* don't use local_cpus, it's only available for PCI sysfs device, not for our osdevs */
@@ -6102,7 +6125,7 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
       }
 
       snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s", dirent->d_name);
-      parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS);
+      parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
       if (!parent)
 	continue;
 
