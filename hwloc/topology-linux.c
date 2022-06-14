@@ -5714,7 +5714,8 @@ hwloc_linux_backend_get_pci_busid_cpuset(struct hwloc_backend *backend,
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL (1U<<0)
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_USB (1U<<1)
 #define HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS (1U<<2)
-#define HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS (1U<<31)
+#define HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS (1U<<30) /* DAX devices have some attributes in their parent */
+#define HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS (1U<<31) /* bus devices are actual hardware devices, while class devices point to hardware devices through the "device" symlink */
 
 static hwloc_obj_t
 hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
@@ -5862,13 +5863,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   char blocktype[64] = "";
   unsigned sectorsize = 0;
   unsigned major_id, minor_id;
-  const char *devicesubdir;
   char *tmp;
-
-  if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS)
-    devicesubdir = "..";
-  else
-    devicesubdir = "device";
 
   snprintf(path, sizeof(path), "%s/size", osdevpath);
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
@@ -5888,7 +5883,18 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
     hwloc_obj_add_info(obj, "SectorSize", line);
   }
 
-  snprintf(path, sizeof(path), "%s/%s/devtype", osdevpath, devicesubdir);
+  if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS) {
+    /* "bus" devices are the actual hardware devices. */
+    if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS)
+      /* some bus devices (DAX) only have devtype in the parent. */
+      snprintf(path, sizeof(path), "%s/../devtype", osdevpath);
+    else
+      /* currently unused since DAX is the only "bus" we look at */
+      snprintf(path, sizeof(path), "%s/devtype", osdevpath);
+  } else {
+    /* "class" devices are not the actual hardware device, we need to follow their "device" symlibk first. */
+    snprintf(path, sizeof(path), "%s/device/devtype", osdevpath);
+  }
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
     /* non-volatile devices use the following subtypes:
      * nd_namespace_pmem for pmem/raw (/dev/pmemX)
@@ -6111,7 +6117,7 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 
       obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
-      hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS);
+      hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
     }
     closedir(dir);
   }
