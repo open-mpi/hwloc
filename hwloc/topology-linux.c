@@ -5726,7 +5726,6 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
   int foundpci;
   unsigned pcidomain = 0, pcibus = 0, pcidev = 0, pcifunc = 0;
   unsigned _pcidomain, _pcibus, _pcidev, _pcifunc;
-  hwloc_bitmap_t cpuset;
   const char *tmp;
   hwloc_obj_t parent;
   const char *devicesubdir;
@@ -5812,15 +5811,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
     }
   }
 
-  /* attach directly to the right cpuset */
-  snprintf(path, sizeof(path), "%s/%s/local_cpus", osdevpath, devicesubdir);
-  cpuset = hwloc__alloc_read_path_as_cpumask(path, root_fd);
-  if (cpuset) {
-    parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-    hwloc_bitmap_free(cpuset);
-    if (parent)
-      return parent;
-  }
+  /* don't use local_cpus, it's only available for PCI sysfs device, not for our osdevs */
 
   /* FIXME: {numa_node,local_cpus} may be missing when the device link points to a subdirectory.
    * For instance, device of scsi blocks may point to foo/ata1/host0/target0:0:0/0:0:0:0/ instead of foo/
