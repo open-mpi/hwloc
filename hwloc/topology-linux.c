@@ -6080,11 +6080,10 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
   DIR *dir;
   struct dirent *dirent;
 
-  /* depending on the kernel config, dax devices may appear either in /sys/bus/dax or /sys/class/dax */
+  /* old kernels with /sys/class/dax aren't supported anymore */
 
   dir = hwloc_opendir("/sys/bus/dax/devices", root_fd);
   if (dir) {
-    int found = 0;
     while ((dirent = readdir(dir)) != NULL) {
       char path[300];
       char driver[256];
@@ -6093,7 +6092,6 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 
       if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
 	continue;
-      found++;
 
       /* ignore kmem-device, those appear as additional NUMA nodes */
       err = snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s/driver", dirent->d_name);
@@ -6114,36 +6112,6 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
       obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
       hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS);
-    }
-    closedir(dir);
-
-    /* don't look in /sys/class/dax if we found something in /sys/bus/dax */
-    if (found)
-      return 0;
-  }
-
-  dir = hwloc_opendir("/sys/class/dax", root_fd);
-  if (dir) {
-    while ((dirent = readdir(dir)) != NULL) {
-      char path[256];
-      hwloc_obj_t obj, parent;
-      int err;
-
-      if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
-	continue;
-
-      /* kmem not supported in class mode, driver may only be changed under bus */
-
-      err = snprintf(path, sizeof(path), "/sys/class/dax/%s", dirent->d_name);
-      if ((size_t) err >= sizeof(path))
-	continue;
-      parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
-      if (!parent)
-	continue;
-
-      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
-
-      hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags);
     }
     closedir(dir);
   }
