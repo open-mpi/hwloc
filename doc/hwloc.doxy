@@ -2116,6 +2116,16 @@ These info attributes are attached to objects specified in parentheses.
 <dd>The name of the Linux DAX device that was used to expose a non-volatile
 memory region as a volatile NUMA node.
 </dd>
+<dt>DAXType (NUMA Nodes or DAX OS devices)</dt>
+<dd>The type of memory exposed in a Linux DAX device or in the corresponding NUMA node,
+either "NVM" (non-volatile memory) or "SPM" (specific-purpose memory).
+</dd>
+<dt>DAXParent (NUMA Nodes or DAX OS devices)</dt>
+<dd>
+A string describing the Linux sysfs hierarchy that exposes the DAX device,
+for instance containing "hmem1" for specific-purpose memory or "ndbus0" for NVDIMMs.
+</dd>
+<dt>
 <dt>PCIBusID (GPUMemory NUMA Nodes)</dt>
 <dd>The PCI bus ID of the GPU whose memory is exposed in this NUMA node.
 </dd>

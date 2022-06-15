@@ -3697,6 +3697,101 @@ dax_is_kmem(const char *name, int fsroot_fd)
   return hwloc_stat(path, &stbuf, fsroot_fd) == 0;
 }
 
+static void
+annotate_dax_parent(hwloc_obj_t obj, const char *name, int fsroot_fd)
+{
+  char daxpath[300];
+  char link[PATH_MAX];
+  char *begin, *end;
+  const char *type;
+  int err;
+
+  snprintf(daxpath, sizeof(daxpath), "/sys/bus/dax/devices/%s", name);
+  err = hwloc_readlink(daxpath, link, sizeof(link), fsroot_fd);
+  if (err < 0)
+    /* this isn't a symlink? we won't be to find what memory this is, ignore */
+    return;
+
+  /* usually the link is one of these:
+   * ../../../devices/LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region2/dax2.0/dax2.0/ for NVDIMMs
+   * ../../../devices/platform/e820_pmem/ndbus0/region0/dax0.0/dax0.0/ for fake NVM (memmap=size!start kernel parameter)
+   * ../../../devices/platform/hmem.0/dax0.0/ for "soft-reserved" specific-purpose memory
+   */
+  begin = link;
+  /* remove the starting ".." (likely multiple) */
+  while (!strncmp(begin, "../", 3))
+    begin += 3;
+  /* remove the starting "devices/" and "platform/" */
+  if (!strncmp(begin, "devices/", 8))
+    begin += 8;
+  if (!strncmp(begin, "platform/", 9))
+    begin += 9;
+  /* remove the ending "daxX.Y" (either one or two) */
+  end = strstr(begin, name);
+  if (end) {
+    *end = '\0';
+    if (end != begin && end[-1] == '/')
+      end[-1] = '\0';
+  }
+
+  /* we'll convert SPM (specific-purpose memory) into a HBM subtype later by looking at memattrs */
+  type = strstr(begin, "ndbus") ? "NVM" : "SPM";
+  hwloc_obj_add_info(obj, "DAXType", type);
+
+  hwloc_obj_add_info(obj, "DAXParent", begin);
+
+  /*
+   * Note:
+   * "ndbus" or "ndctl" in the path should be enough since these are specifically for NVDIMMs.
+   * For additional information about the nv hardware:
+   * /sys/class/nd/ndctl%u/device/region%u/mapping%u starts with "nmem%u,"
+   * /sys/class/nd/ndctl%u/device/nmem%u/devtype currently contains "nvdimm"
+   */
+}
+
+static void
+annotate_dax_nodes(struct hwloc_topology *topology __hwloc_attribute_unused,
+                   unsigned nbnodes, hwloc_obj_t *nodes,
+                   int fsroot_fd)
+{
+  DIR *dir;
+  struct dirent *dirent;
+
+  /* try to find DAX devices of KMEM NUMA nodes */
+  dir = hwloc_opendir("/sys/bus/dax/devices/",fsroot_fd);
+  if (!dir)
+    return;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char daxpath[300];
+    unsigned target_node, i;
+    int tmp;
+
+    if (!dax_is_kmem(dirent->d_name, fsroot_fd))
+      continue;
+
+    snprintf(daxpath, sizeof(daxpath), "/sys/bus/dax/devices/%s/target_node", dirent->d_name);
+    if (hwloc_read_path_as_int(daxpath, &tmp, fsroot_fd) < 0) /* contains %d when added in 5.1 */
+      continue;
+    if (tmp < 0)
+      /* no NUMA node, ignore this DAX, we cannot know which target_node to annotate */
+      continue;
+    target_node = (unsigned) tmp;
+
+    /* iterate over NUMA nodes and annotate target_node */
+    for(i=0; i<nbnodes; i++) {
+      hwloc_obj_t node = nodes[i];
+      if (node && node->os_index == target_node) {
+        hwloc_obj_add_info(node, "DAXDevice", dirent->d_name);
+        annotate_dax_parent(node, dirent->d_name, fsroot_fd);
+        break;
+      }
+    }
+  }
+  closedir(dir);
+}
+
+
 static unsigned *
 list_sysfsnode(struct hwloc_topology *topology,
 	       struct hwloc_linux_backend_data_s *data,
@@ -3989,28 +4084,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	closedir(dir);
       }
 
-      /* try to find DAX devices of KMEM NUMA nodes */
-      dir = hwloc_opendir("/sys/bus/dax/devices/", data->root_fd);
-      if (dir) {
-	struct dirent *dirent;
-	while ((dirent = readdir(dir)) != NULL) {
-	  char daxpath[300];
-	  int tmp;
-          if (!dax_is_kmem(dirent->d_name, data->root_fd))
-            continue;
-	  osnode = (unsigned) -1;
-	  snprintf(daxpath, sizeof(daxpath), "/sys/bus/dax/devices/%s/target_node", dirent->d_name);
-	  if (!hwloc_read_path_as_int(daxpath, &tmp, data->root_fd)) { /* contains %d when added in 5.1 */
-	    osnode = (unsigned) tmp;
-	    for(i=0; i<nbnodes; i++) {
-	      hwloc_obj_t node = nodes[i];
-	      if (node && node->os_index == osnode)
-		hwloc_obj_add_info(node, "DAXDevice", dirent->d_name);
-	    }
-	  }
-	}
-	closedir(dir);
-      }
+      annotate_dax_nodes(topology, nbnodes, nodes, data->root_fd);
 
       topology->support.discovery->numa = 1;
       topology->support.discovery->numa_memory = 1;
@@ -6133,6 +6207,8 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 	continue;
 
       obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+
+      annotate_dax_parent(obj, dirent->d_name, root_fd);
 
       hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
     }
