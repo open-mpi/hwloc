@@ -3536,6 +3536,8 @@ hwloc_discover(struct hwloc_topology *topology,
   /*
    * Additional discovery
    */
+  hwloc_pci_discovery_prepare(topology);
+
   if (topology->backend_phases & HWLOC_DISC_PHASE_PCI) {
     dstatus->phase = HWLOC_DISC_PHASE_PCI;
     hwloc_discover_by_phase(topology, dstatus, "PCI");
@@ -3552,6 +3554,8 @@ hwloc_discover(struct hwloc_topology *topology,
     dstatus->phase = HWLOC_DISC_PHASE_ANNOTATE;
     hwloc_discover_by_phase(topology, dstatus, "ANNOTATE");
   }
+
+  hwloc_pci_discovery_exit(topology); /* pci needed up to annotate */
 
   if (getenv("HWLOC_DEBUG_SORT_CHILDREN"))
     hwloc_debug_sort_children(topology->levels[0][0]);
@@ -4085,14 +4089,10 @@ hwloc_topology_load (struct hwloc_topology *topology)
    */
   hwloc_set_binding_hooks(topology);
 
-  hwloc_pci_discovery_prepare(topology);
-
   /* actual topology discovery */
   err = hwloc_discover(topology, &dstatus);
   if (err < 0)
     goto out;
-
-  hwloc_pci_discovery_exit(topology);
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))

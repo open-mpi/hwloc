@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -259,6 +259,7 @@ struct hwloc_topology {
     unsigned bus_first, bus_last;
     hwloc_bitmap_t cpuset;
   } * pci_forced_locality;
+  hwloc_uint64_t pci_locality_quirks;
 
   /* component blacklisting */
   unsigned nr_blacklisted_components;
