@@ -5883,6 +5883,10 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
     sectorsize = strtoul(line, NULL, 10);
   }
+  if (sectorsize) {
+    snprintf(line, sizeof(line), "%u", sectorsize);
+    hwloc_obj_add_info(obj, "SectorSize", line);
+  }
 
   snprintf(path, sizeof(path), "%s/%s/devtype", osdevpath, devicesubdir);
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
@@ -5899,10 +5903,6 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
      */
     if (!strncmp(line, "nd_", 3))
       strcpy(blocktype, "NVDIMM"); /* Save the blocktype now since udev reports "" so far */
-  }
-  if (sectorsize) {
-    snprintf(line, sizeof(line), "%u", sectorsize);
-    hwloc_obj_add_info(obj, "SectorSize", line);
   }
 
   snprintf(path, sizeof(path), "%s/dev", osdevpath);
