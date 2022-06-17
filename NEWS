@@ -27,9 +27,9 @@ Version 2.8.0
 * Backends
   + Detect heterogeneous caches in hybrid CPUs on MacOS X,
     thanks to Paul Bone for the help.
-  + Max frequencies are not ignored on Linux anymore (as in hwloc 2.7.0),
-    but they may be slightly adjusted to avoid reporting hybrid CPUs
-    because of features such as Intel Turbo Boost Max 3.0.
+  + Max frequencies are not ignored in Linux cpukinds anymore (they were
+    ignored in hwloc 2.7.0), but they may be slightly adjusted to avoid
+    reporting hybrid CPUs because Intel Turbo Boost Max 3.0.
     - See the documentation of environment variable HWLOC_CPUKINDS_MAXFREQ.
   + Hardwire the PCI locality of HPE Cray EX235a nodes.
 * Tools
