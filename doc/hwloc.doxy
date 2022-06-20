@@ -1794,7 +1794,11 @@ to a better description string (displayed by lstopo either
 in place or after the main <tt>obj->type</tt> attribute):
 <ul>
 <li>NUMA nodes:
-subtype <tt>MCDRAM</tt> (on KNL)
+subtype <tt>DRAM</tt> (for usual main memory),
+<tt>HBM</tt> (high-bandwidth memory),
+<tt>SPM</tt> (specific-purpose memory, usually reserved for some custom applications),
+<tt>NVM</tt> (non-volatile memory when used as main memory),
+<tt>MCDRAM</tt> (on KNL)
 or <tt>GPUMemory</tt> (on POWER architecture with NVIDIA GPU memory shared over NVLink).
 </li>
 <li>Groups:
@@ -1807,7 +1811,7 @@ subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
 <li>Co-processor: subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, or <tt>VectorEngine</tt>.</li>
 <li>GPU: subtype <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU).</li>
 <li>OpenFabrics: subtype <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
-<li>Block: subtype <tt>Disk</tt>, <tt>NVDIMM</tt>, <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
+<li>Block: subtype <tt>Disk</tt>, <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
 </ul>
 </li>
 <li>L3 Caches:
@@ -2116,6 +2120,16 @@ These info attributes are attached to objects specified in parentheses.
 <dd>The name of the Linux DAX device that was used to expose a non-volatile
 memory region as a volatile NUMA node.
 </dd>
+<dt>DAXType (NUMA Nodes or DAX OS devices)</dt>
+<dd>The type of memory exposed in a Linux DAX device or in the corresponding NUMA node,
+either "NVM" (non-volatile memory) or "SPM" (specific-purpose memory).
+</dd>
+<dt>DAXParent (NUMA Nodes or DAX OS devices)</dt>
+<dd>
+A string describing the Linux sysfs hierarchy that exposes the DAX device,
+for instance containing "hmem1" for specific-purpose memory or "ndbus0" for NVDIMMs.
+</dd>
+<dt>
 <dt>PCIBusID (GPUMemory NUMA Nodes)</dt>
 <dd>The PCI bus ID of the GPU whose memory is exposed in this NUMA node.
 </dd>

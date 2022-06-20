@@ -1,4 +1,4 @@
-# Copyright © 2009-2021 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -67,6 +67,7 @@ check_PROGRAMS = \
         hwloc_iodevs \
         cpuset_nodeset \
         memattrs \
+        memtiers \
         cpukinds \
         xmlbuffer \
         gl

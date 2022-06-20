@@ -169,21 +169,23 @@
         </object>
         <object type="PCIDev" pci_busid="0000:00:1f.3" pci_type="0c05 [8086:1d22] [1028:0518] 06" pci_link_speed="0.000000"/>
       </object>
-      <object type="OSDev" name="dax0.0" subtype="NVDIMM" osdev_type="0">
+      <object type="OSDev" name="dax0.0" subtype="NVM" osdev_type="0">
+        <info name="DAXType" value="NVM"/>
+        <info name="DAXParent" value="LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region0"/>
         <info name="Size" value="105281536"/>
         <info name="LinuxDeviceID" value="252:1"/>
       </object>
-      <object type="OSDev" name="pmem0.1" subtype="NVDIMM" osdev_type="0">
+      <object type="OSDev" name="pmem0.1" subtype="NVM" osdev_type="0">
         <info name="Size" value="105281536"/>
         <info name="SectorSize" value="512"/>
         <info name="LinuxDeviceID" value="259:0"/>
       </object>
-      <object type="OSDev" name="pmem0.2s" subtype="NVDIMM" osdev_type="0">
+      <object type="OSDev" name="pmem0.2s" subtype="NVM" osdev_type="0">
         <info name="Size" value="106849352"/>
         <info name="SectorSize" value="4096"/>
         <info name="LinuxDeviceID" value="259:1"/>
       </object>
-      <object type="OSDev" name="pmem0.3" subtype="NVDIMM" osdev_type="0">
+      <object type="OSDev" name="pmem0.3" subtype="NVM" osdev_type="0">
         <info name="Size" value="471859200"/>
         <info name="SectorSize" value="512"/>
         <info name="LinuxDeviceID" value="259:2"/>
@@ -321,21 +323,23 @@
         <object type="PCIDev" pci_busid="0000:80:05.2" pci_type="0880 [8086:3c2a] [1028:0518] 07" pci_link_speed="0.000000"/>
         <object type="PCIDev" pci_busid="0000:80:05.4" pci_type="0800 [8086:3c2c] [1028:0518] 07" pci_link_speed="0.000000"/>
       </object>
-      <object type="OSDev" name="dax1.3" subtype="NVDIMM" osdev_type="0">
+      <object type="OSDev" name="dax1.3" subtype="NVM" osdev_type="0">
+        <info name="DAXType" value="NVM"/>
+        <info name="DAXParent" value="LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region1/dax1.0"/>
         <info name="Size" value="61929472"/>
         <info name="LinuxDeviceID" value="252:6"/>
       </object>
-      <object type="OSDev" name="pmem1" subtype="NVDIMM" osdev_type="0">
+      <object type="OSDev" name="pmem1" subtype="NVM" osdev_type="0">
         <info name="Size" value="62914560"/>
         <info name="SectorSize" value="512"/>
         <info name="LinuxDeviceID" value="259:3"/>
       </object>
-      <object type="OSDev" name="pmem1.1s" subtype="NVDIMM" osdev_type="0">
+      <object type="OSDev" name="pmem1.1s" subtype="NVM" osdev_type="0">
         <info name="Size" value="62852124"/>
         <info name="SectorSize" value="4096"/>
         <info name="LinuxDeviceID" value="259:4"/>
       </object>
-      <object type="OSDev" name="pmem1.2" subtype="NVDIMM" osdev_type="0">
+      <object type="OSDev" name="pmem1.2" subtype="NVM" osdev_type="0">
         <info name="Size" value="61929472"/>
         <info name="SectorSize" value="512"/>
         <info name="LinuxDeviceID" value="259:5"/>

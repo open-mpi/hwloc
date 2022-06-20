@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2021 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -179,10 +179,15 @@ savebusdir() {
   local dest="$1"
   local busname="$2"
   local relpath="$3"
+  local withdriver="$4"
 
   test -d /sys/bus/$busname/devices/ || return
 
   savedir "$dest" /sys/bus/$busname/devices/
+
+  if test "x$withdriver" = x1; then
+    savedir "$dest" /sys/bus/$busname/drivers/
+  fi
 
   for dev in $(ls /sys/bus/$busname/devices/); do
     target=$(readlink /sys/bus/$busname/devices/$dev 2>/dev/null | grep -v /devices/pci)
@@ -286,7 +291,7 @@ if [ x$gatherio = x1 ]; then
   # gather class and bus links, we'll parse that the target path for PCI busids
   saveclassdir "$destdir/$basename" block
   saveclassdir "$destdir/$basename" dax
-  savebusdir "$destdir/$basename" dax ..
+  savebusdir "$destdir/$basename" dax .. 1
   saveclassdir "$destdir/$basename" dma
   saveclassdir "$destdir/$basename" drm
   saveclassdir "$destdir/$basename" infiniband
