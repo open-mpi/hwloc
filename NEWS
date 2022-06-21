@@ -26,7 +26,10 @@ Version 2.8.0
     implement them on Linux.
 * Backends
   + NUMA nodes may now have a subtype such as DRAM, HBM, SPM, or NVM
-    on heterogeneous memory platforms.
+    on heterogeneous memory platforms on Linux.
+    - Add DAXType and DAXParent attributes on Linux to tell where a
+      DAX device or its corresponding NUMA node come from (SPM for
+      Specific-Purpose or NVM for Non-Volatile Memory).
   + Detect heterogeneous caches in hybrid CPUs on MacOS X,
     thanks to Paul Bone for the help.
   + Max frequencies are not ignored in Linux cpukinds anymore (they were
@@ -34,9 +37,6 @@ Version 2.8.0
     reporting hybrid CPUs because Intel Turbo Boost Max 3.0.
     - See the documentation of environment variable HWLOC_CPUKINDS_MAXFREQ.
   + Hardwire the PCI locality of HPE Cray EX235a nodes.
-  + Add DAXType and DAXParent attributes on Linux to tell where a DAX
-    device or its corresponding NUMA node come from (SPM for Specific-Purpose
-    or NVM for Non-Volatile Memory).
 * Tools
   + lstopo and other tools may now load Linux and x86 cpuid topology files
     from a tarball.
