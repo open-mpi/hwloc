@@ -887,23 +887,25 @@ hwloc_pcidisc_find_linkspeed(const unsigned char *config,
   /*
    * These are single-direction bandwidths only.
    *
-   * Gen1 used NRZ + 8/10 encoding.
-   * PCIe Gen1 = 2.5GT/s signal-rate per lane x 8/10 = 0.25GB/s data-rate per lane
-   * PCIe Gen2 = 5  GT/s signal-rate per lane x 8/10 = 0.5 GB/s data-rate per lane
-   * Gen3 switched to NRZ + 128/130 encoding, hence the difference between signal and data is negligeable.
-   * PCIe Gen3 = 8  GT/s signal-rate per lane        = 1   GB/s data-rate per lane
-   * PCIe Gen4 = 16 GT/s signal-rate per lane        = 2   GB/s data-rate per lane
-   * PCIe Gen5 = 32 GT/s signal-rate per lane        = 4   GB/s data-rate per lane
-   * Gen6 switched to PAM with with 242/256 FLIT (still negligible).
-   * PCIe Gen6 = 64 GT/s signal-rate per lane        = 8   GB/s data-rate per lane
-   * PCIe Gen7 = 128GT/s signal-rate per lane        = 16  GB/s data-rate per lane
+   * Gen1 used NRZ with 8/10 encoding.
+   * PCIe Gen1 = 2.5GT/s signal-rate per lane x 8/10    =  0.25GB/s data-rate per lane
+   * PCIe Gen2 = 5  GT/s signal-rate per lane x 8/10    =  0.5 GB/s data-rate per lane
+   * Gen3 switched to NRZ with 128/130 encoding.
+   * PCIe Gen3 = 8  GT/s signal-rate per lane x 128/130 =  1   GB/s data-rate per lane
+   * PCIe Gen4 = 16 GT/s signal-rate per lane x 128/130 =  2   GB/s data-rate per lane
+   * PCIe Gen5 = 32 GT/s signal-rate per lane x 128/130 =  4   GB/s data-rate per lane
+   * Gen6 switched to PAM with with 242/256 FLIT (242B payload protected by 8B CRC + 6B FEC).
+   * PCIe Gen6 = 64 GT/s signal-rate per lane x 242/256 =  8   GB/s data-rate per lane
+   * PCIe Gen7 = 128GT/s signal-rate per lane x 242/256 = 16   GB/s data-rate per lane
    */
 
   /* lanespeed in Gbit/s */
   if (speed <= 2)
     lanespeed = 2.5f * speed * 0.8f;
+  else if (speed <= 5)
+    lanespeed = 8.0f * (1<<(speed-3)) * 128/130;
   else
-    lanespeed = 8.0f * (1<<(speed-3)) * 128/130; /* assume Gen8 will be 256 GT/s and so on */
+    lanespeed = 8.0f * (1<<(speed-3)) * 242/256; /* assume Gen8 will be 256 GT/s and so on */
 
   /* linkspeed in GB/s */
   *linkspeed = lanespeed * width / 8;
