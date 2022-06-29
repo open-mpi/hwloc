@@ -1,7 +1,7 @@
 /* include/hwloc/autogen/config.h.  Generated from config.h.in by configure.  */
 /* -*- c -*-
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -12,9 +12,9 @@
 #ifndef HWLOC_CONFIG_H
 #define HWLOC_CONFIG_H
 
-#define HWLOC_VERSION "2.8.0a1"
+#define HWLOC_VERSION "2.9.0a1"
 #define HWLOC_VERSION_MAJOR 2
-#define HWLOC_VERSION_MINOR 8
+#define HWLOC_VERSION_MINOR 9
 #define HWLOC_VERSION_RELEASE 0
 #define HWLOC_VERSION_GREEK "a1"
 

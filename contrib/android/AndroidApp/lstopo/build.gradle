@@ -11,7 +11,7 @@ android {
         // Official hwloc version - snapshot number - android apk version
         // Set snapshot number to 1 when the hwloc version is increased.
         // Increase the snapshot number when the hwloc code changed but not its version
-        versionName "2.8.0a1-1-1.5.1"
+        versionName "2.9.0a1-1-1.5.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
