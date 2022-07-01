@@ -58,7 +58,6 @@ sysfs_outputs = \
 		256ia64-64n2s2c.output \
 		2s390-2c.output \
 		20s390-2g6s4c.output \
-		1alpha.output \
 		2arm-2c.output \
 		nvidiagpunumanodes.output \
 		nvidiagpunumanodes.kept.output \
@@ -129,7 +128,6 @@ sysfs_tarballs = \
 		256ia64-64n2s2c.tar.bz2 \
 		2s390-2c.tar.bz2 \
 		20s390-2g6s4c.tar.bz2 \
-		1alpha.tar.bz2 \
 		2arm-2c.tar.bz2 \
 		2pa-pcidomain32bits.tar.bz2 \
 		2pa-pcidomain32bits-disabled.source \
