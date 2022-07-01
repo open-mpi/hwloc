@@ -4411,8 +4411,7 @@ hwloc_linux_cpukinds_adjust_maxfreqs(struct hwloc_linux_cpukinds *cpufreqs_max,
 
 static int
 look_sysfscpukinds(struct hwloc_topology *topology,
-                   struct hwloc_linux_backend_data_s *data,
-                   const char *path)
+                   struct hwloc_linux_backend_data_s *data)
 {
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
   int max_without_basefreq = 0; /* any cpu where we have maxfreq without basefreq? */
@@ -4446,12 +4445,12 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   hwloc_bitmap_foreach_begin(i, topology->levels[0][0]->cpuset) {
     unsigned maxfreq = 0, basefreq = 0;
     /* cpuinfo_max_freq is the hardware max. scaling_max_freq is the software policy current max */
-    sprintf(str, "%s/cpu%d/cpufreq/cpuinfo_max_freq", path, i);
+    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i);
     if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
       if (maxfreq)
         hwloc_linux_cpukinds_add(&cpufreqs_max, i, maxfreq/1000);
     /* base_frequency is intel_pstate specific */
-    sprintf(str, "%s/cpu%d/cpufreq/base_frequency", path, i);
+    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", i);
     if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0)
       if (basefreq)
         hwloc_linux_cpukinds_add(&cpufreqs_base, i, basefreq/1000);
@@ -4474,7 +4473,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   hwloc_linux_cpukinds_init(&cpu_capacity);
   hwloc_bitmap_foreach_begin(i, topology->levels[0][0]->cpuset) {
     unsigned capacity;
-    sprintf(str, "%s/cpu%d/cpu_capacity", path, i);
+    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpu_capacity", i);
     if (hwloc_read_path_as_uint(str, &capacity, data->root_fd) >= 0)
       hwloc_linux_cpukinds_add(&cpu_capacity, i, capacity);
   } hwloc_bitmap_foreach_end();
@@ -4492,7 +4491,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
 static int
 look_sysfscpu(struct hwloc_topology *topology,
 	      struct hwloc_linux_backend_data_s *data,
-	      const char *path, int old_filenames,
+	      int old_filenames,
 	      struct hwloc_linux_cpuinfo_proc * cpuinfo_Lprocs, unsigned cpuinfo_numprocs)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
@@ -4505,21 +4504,19 @@ look_sysfscpu(struct hwloc_topology *topology,
   int dont_merge_cluster_groups;
   const char *env;
 
-  hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
+  hwloc_debug("\n\n * Topology extraction from /sys/devices/system/cpu/ *\n\n");
 
   /* try to get the list of online CPUs at once.
    * otherwise we'll use individual per-CPU "online" files.
-   *
-   * don't use <path>/online, /sys/bus/cpu/devices only contains cpu%d
    */
   online_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/system/cpu/online", data->root_fd);
   if (online_set)
     hwloc_debug_bitmap("online CPUs %s\n", online_set);
 
   /* fill the cpuset of interesting cpus */
-  dir = hwloc_opendir(path, data->root_fd);
+  dir = hwloc_opendir("/sys/devices/system/cpu", data->root_fd);
   if (!dir) {
-    hwloc_debug("failed to open sysfscpu path %s (%d)\n", path, errno);
+    hwloc_debug("failed to open sysfscpu path /sys/devices/system/cpu (%d)\n", errno);
     hwloc_bitmap_free(online_set);
     return -1;
   } else {
@@ -4548,7 +4545,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	}
       } else {
 	/* /sys/devices/system/cpu/online unavailable, check the cpu online file */
-	sprintf(str, "%s/cpu%lu/online", path, cpu);
+	sprintf(str, "/sys/devices/system/cpu/cpu%lu/online", cpu);
 	if (hwloc_read_path_by_length(str, online, sizeof(online), data->root_fd) > 0) {
 	  if (!atoi(online)) {
 	    hwloc_debug("os proc %lu is offline\n", cpu);
@@ -4558,10 +4555,10 @@ look_sysfscpu(struct hwloc_topology *topology,
       }
 
       /* check whether the kernel exports topology information for this cpu */
-      sprintf(str, "%s/cpu%lu/topology", path, cpu);
+      sprintf(str, "/sys/devices/system/cpu/cpu%lu/topology", cpu);
       if (hwloc_access(str, X_OK, data->root_fd) < 0 && errno == ENOENT) {
-	hwloc_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
-		   cpu, path, cpu);
+	hwloc_debug("os proc %lu has no accessible /sys/devices/system/cpu/cpu%lu/topology\n",
+		   cpu, cpu);
 	continue;
       }
 
@@ -4590,9 +4587,9 @@ look_sysfscpu(struct hwloc_topology *topology,
       /* look at the core */
       hwloc_bitmap_t coreset;
       if (old_filenames)
-	sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+	sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
       else
-	sprintf(str, "%s/cpu%d/topology/core_cpus", path, i);
+	sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/core_cpus", i);
       coreset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (coreset) {
         unsigned mycoreid = (unsigned) -1;
@@ -4603,7 +4600,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  unsigned siblingid, siblingcoreid;
 
 	  mycoreid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/core_id", i); /* contains %d at least up to 4.19 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	    mycoreid = (unsigned) tmpint;
 	  gotcoreid = 1;
@@ -4612,7 +4609,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  if (siblingid == (unsigned) i)
 	    siblingid = hwloc_bitmap_next(coreset, i);
 	  siblingcoreid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%u/topology/core_id", path, siblingid); /* contains %d at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%u/topology/core_id", siblingid); /* contains %d at least up to 4.19 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	    siblingcoreid = (unsigned) tmpint;
 	  threadwithcoreid = (siblingcoreid != mycoreid);
@@ -4625,7 +4622,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  if (!gotcoreid) {
 	    mycoreid = (unsigned) -1;
-	    sprintf(str, "%s/cpu%d/topology/core_id", path, i); /* contains %d at least up to 4.19 */
+	    sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/core_id", i); /* contains %d at least up to 4.19 */
 	    if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	      mycoreid = (unsigned) tmpint;
 	  }
@@ -4648,7 +4645,7 @@ look_sysfscpu(struct hwloc_topology *topology,
     if (!notfirstofcore /* don't look at the cluster unless we are the first of the core */
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
       /* look at the cluster */
-      sprintf(str, "%s/cpu%d/topology/cluster_cpus", path, i);
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/cluster_cpus", i);
       clusterset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (clusterset) {
 	hwloc_bitmap_and(clusterset, clusterset, cpuset);
@@ -4672,7 +4669,7 @@ look_sysfscpu(struct hwloc_topology *topology,
     if (!notfirstofcluster /* don't look at the die unless we are the first of the core */
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_DIE)) {
       /* look at the die */
-      sprintf(str, "%s/cpu%d/topology/die_cpus", path, i);
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/die_cpus", i);
       dieset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (dieset) {
 	hwloc_bitmap_and(dieset, dieset, cpuset);
@@ -4700,9 +4697,9 @@ look_sysfscpu(struct hwloc_topology *topology,
       /* look at the package */
       hwloc_bitmap_t packageset;
       if (old_filenames)
-	sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
+	sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
       else
-	sprintf(str, "%s/cpu%d/topology/package_cpus", path, i);
+	sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/package_cpus", i);
       packageset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (packageset) {
 	hwloc_bitmap_and(packageset, packageset, cpuset);
@@ -4721,7 +4718,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  struct hwloc_obj *package;
 	  unsigned mypackageid;
 	  mypackageid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i); /* contains %d at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/physical_package_id", i); /* contains %d at least up to 4.19 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	    mypackageid = (unsigned) tmpint;
 
@@ -4748,7 +4745,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       struct hwloc_obj *cluster;
       unsigned myclusterid;
       myclusterid = (unsigned) -1;
-      sprintf(str, "%s/cpu%d/topology/cluster_id", path, i); /* contains %d when added in 5.16 */
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/cluster_id", i); /* contains %d when added in 5.16 */
       if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	myclusterid = (unsigned) tmpint;
 
@@ -4766,7 +4763,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       struct hwloc_obj *die;
       unsigned mydieid;
       mydieid = (unsigned) -1;
-      sprintf(str, "%s/cpu%d/topology/die_id", path, i); /* contains %d when added in 5.2 */
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/die_id", i); /* contains %d when added in 5.2 */
       if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0)
 	mydieid = (unsigned) tmpint;
 
@@ -4781,7 +4778,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	&& hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
       /* look at the books */
       hwloc_bitmap_t bookset, drawerset;
-      sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/book_siblings", i);
       bookset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (bookset) {
 	hwloc_bitmap_and(bookset, bookset, cpuset);
@@ -4789,7 +4786,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  struct hwloc_obj *book;
 	  unsigned mybookid;
 	  mybookid = (unsigned) -1;
-	  sprintf(str, "%s/cpu%d/topology/book_id", path, i); /* contains %d at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/book_id", i); /* contains %d at least up to 4.19 */
 	  if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
 	    mybookid = (unsigned) tmpint;
 
@@ -4806,7 +4803,7 @@ look_sysfscpu(struct hwloc_topology *topology,
         }
 	hwloc_bitmap_free(bookset);
 
-	sprintf(str, "%s/cpu%d/topology/drawer_siblings", path, i);
+	sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/drawer_siblings", i);
 	drawerset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
 	if (drawerset) {
 	  hwloc_bitmap_and(drawerset, drawerset, cpuset);
@@ -4814,7 +4811,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	    struct hwloc_obj *drawer;
 	    unsigned mydrawerid;
 	    mydrawerid = (unsigned) -1;
-	    sprintf(str, "%s/cpu%d/topology/drawer_id", path, i); /* contains %d at least up to 4.19 */
+	    sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/drawer_id", i); /* contains %d at least up to 4.19 */
 	    if (hwloc_read_path_as_int(str, &tmpint, data->root_fd) == 0) {
 	      mydrawerid = (unsigned) tmpint;
 
@@ -4852,16 +4849,16 @@ look_sysfscpu(struct hwloc_topology *topology,
       char str2[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
       hwloc_bitmap_t cacheset;
 
-      sprintf(str, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", i, j);
       cacheset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (cacheset) {
 	if (hwloc_bitmap_iszero(cacheset)) {
 	  /* ia64 returning empty L3 and L2i? use the core set instead */
 	  hwloc_bitmap_t tmpset;
 	  if (old_filenames)
-	    sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+	    sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
 	  else
-	    sprintf(str, "%s/cpu%d/topology/core_cpus", path, i);
+	    sprintf(str, "/sys/devices/system/cpu/cpu%d/topology/core_cpus", i);
 	  tmpset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
 	  /* only use it if we actually got something */
 	  if (tmpset) {
@@ -4882,14 +4879,14 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  struct hwloc_obj *cache;
 
 	  /* get the cache level depth */
-	  sprintf(str, "%s/cpu%d/cache/index%d/level", path, i, j); /* contains %u at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/level", i, j); /* contains %u at least up to 4.19 */
 	  if (hwloc_read_path_as_uint(str, &depth, data->root_fd) < 0) {
 	    hwloc_bitmap_free(cacheset);
 	    continue;
 	  }
 
 	  /* cache type */
-	  sprintf(str, "%s/cpu%d/cache/index%d/type", path, i, j);
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/type", i, j);
 	  if (hwloc_read_path_by_length(str, str2, sizeof(str2), data->root_fd) > 0) {
 	    if (!strncmp(str2, "Data", 4))
 	      ctype = HWLOC_OBJ_CACHE_DATA;
@@ -4900,7 +4897,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  }
 
           /* cache id */
-          sprintf(str, "%s/cpu%d/cache/index%d/id", path, i, j);
+          sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/id", i, j);
           hwloc_read_path_as_uint(str, &id, data->root_fd);
 
 	  otype = hwloc_cache_type_by_depth_type(depth, ctype);
@@ -4915,7 +4912,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  /* get the cache size */
 	  kB = 0;
-	  sprintf(str, "%s/cpu%d/cache/index%d/size", path, i, j); /* contains %uK at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/size", i, j); /* contains %uK at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &kB, data->root_fd);
 	  /* KNL reports L3 with size=0 and full cpuset in cpuid.
 	   * Let hwloc_linux_try_add_knl_mcdram_cache() detect it better.
@@ -4927,7 +4924,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  /* get the line size */
 	  linesize = 0;
-	  sprintf(str, "%s/cpu%d/cache/index%d/coherency_line_size", path, i, j); /* contains %u at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/coherency_line_size", i, j); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &linesize, data->root_fd);
 
 	  /* get the number of sets and lines per tag.
@@ -4935,11 +4932,11 @@ look_sysfscpu(struct hwloc_topology *topology,
 	   * some archs (ia64, ppc) put 0 there when fully-associative, while others (x86) put something like -1 there.
 	   */
 	  sets = 0;
-	  sprintf(str, "%s/cpu%d/cache/index%d/number_of_sets", path, i, j); /* contains %u at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/number_of_sets", i, j); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &sets, data->root_fd);
 
 	  lines_per_tag = 1;
-	  sprintf(str, "%s/cpu%d/cache/index%d/physical_line_partition", path, i, j); /* contains %u at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/physical_line_partition", i, j); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &lines_per_tag, data->root_fd);
 
 	  /* first cpu in this cache, add the cache */
@@ -5723,13 +5720,13 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
 		    &global_infos, &global_infos_count);
 
   /* sysfs */
-  if (look_sysfscpu(topology, data, sysfs_cpu_path, old_siblings_filenames, Lprocs, numprocs) < 0)
+  if (look_sysfscpu(topology, data, old_siblings_filenames, Lprocs, numprocs) < 0)
     /* sysfs but we failed to read cpu topology, fallback */
     hwloc_linux_fallback_pu_level(backend);
 
  cpudone:
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
-    look_sysfscpukinds(topology, data, sysfs_cpu_path);
+    look_sysfscpukinds(topology, data);
 
   /*********************
    * Memory information
