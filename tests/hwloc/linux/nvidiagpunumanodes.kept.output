@@ -106,5 +106,4 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      1    80    80    80    80    80    10    80    80
      2    80    80    80    80    80    80    10    80
      3    80    80    80    80    80    80    80    10
-144 processors not represented in topology: 0x0000ffff,0xffffffff,0xffffff00,0x00ffffff,0xffffffff,0xffff0000
 Topology not from this system
