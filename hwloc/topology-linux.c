@@ -3832,9 +3832,12 @@ list_sysfsnode(struct hwloc_topology *topology,
   }
 
   while ((dirent = readdir(dir)) != NULL) {
+    char *end;
     if (strncmp(dirent->d_name, "node", 4))
       continue;
-    osnode = strtoul(dirent->d_name+4, NULL, 0);
+    osnode = strtoul(dirent->d_name+4, &end, 0);
+    if (end == dirent->d_name+4)
+      continue;
     hwloc_bitmap_set(nodeset, osnode);
     nbnodes++;
   }
@@ -4526,10 +4529,13 @@ look_sysfscpu(struct hwloc_topology *topology,
     while ((dirent = readdir(dir)) != NULL) {
       unsigned long cpu;
       char online[2];
+      char *end;
 
       if (strncmp(dirent->d_name, "cpu", 3))
 	continue;
-      cpu = strtoul(dirent->d_name+3, NULL, 0);
+      cpu = strtoul(dirent->d_name+3, &end, 0);
+      if (end == dirent->d_name+3)
+        continue;
 
       /* Maybe we don't have topology information but at least it exists */
       hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, cpu);
