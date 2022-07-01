@@ -5557,44 +5557,6 @@ static const char *find_sysfs_cpu_path(int root_fd, int *old_filenames)
   return NULL;
 }
 
-static const char *find_sysfs_node_path(int root_fd)
-{
-  unsigned first;
-  int err;
-
-  if (!hwloc_access("/sys/bus/node/devices", R_OK|X_OK, root_fd)
-      && !hwloc_access("/sys/bus/node/devices/node0/cpumap", R_OK, root_fd))
-    return "/sys/bus/node/devices";
-
-  if (!hwloc_access("/sys/devices/system/node", R_OK|X_OK, root_fd)
-      && !hwloc_access("/sys/devices/system/node/node0/cpumap", R_OK, root_fd))
-    return "/sys/devices/system/node";
-
-  /* node0 might be offline, fallback to looking at the first online node.
-   * online contains comma-separated ranges, just read the first number.
-   */
-  hwloc_debug("Failed to find sysfs node files using node0, looking at online nodes...\n");
-  err = hwloc_read_path_as_uint("/sys/devices/system/node/online", &first, root_fd);
-  if (err) {
-    hwloc_debug("Failed to find read /sys/devices/system/node/online.\n");
-  } else {
-    char path[PATH_MAX];
-    hwloc_debug("Found node#%u as first online node\n", first);
-
-    snprintf(path, sizeof(path), "/sys/bus/node/devices/node%u/cpumap", first);
-    if (!hwloc_access("/sys/bus/node/devices", R_OK|X_OK, root_fd)
-        && !hwloc_access(path, R_OK, root_fd))
-      return "/sys/bus/node/devices";
-
-    snprintf(path, sizeof(path), "/sys/devices/system/node/node%u/cpumap", first);
-    if (!hwloc_access("/sys/devices/system/node", R_OK|X_OK, root_fd)
-        && !hwloc_access(path, R_OK, root_fd))
-      return "/sys/devices/system/node";
-  }
-
-  return NULL;
-}
-
 static int
 hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -5614,7 +5576,6 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   int already_pus;
   int already_numanodes;
   const char *sysfs_cpu_path;
-  const char *sysfs_node_path;
   int old_siblings_filenames = 0;
   int err;
 
@@ -5627,11 +5588,6 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
       fprintf(stderr, "[hwloc/linux] failed to find sysfs cpu topology directory, aborting linux discovery.\n");
     return -1;
   }
-
-  /* look for sysfs node path */
-  sysfs_node_path = find_sysfs_node_path(data->root_fd);
-  hwloc_debug("Found sysfs node files under %s\n",
-	      sysfs_node_path);
 
   already_pus = (topology->levels[0][0]->complete_cpuset != NULL
 		 && !hwloc_bitmap_iszero(topology->levels[0][0]->complete_cpuset));
@@ -5729,8 +5685,8 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   /* Get the machine memory attributes */
   hwloc_get_machine_meminfo(data, &topology->machine_memory);
 
-  /* Gather NUMA information. */
-  if (sysfs_node_path) {
+  /* Gather NUMA information if enabled in the kernel. */
+  if (!hwloc_access("/sys/devices/system/node", R_OK|X_OK, data->root_fd)) {
     if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE) > 0)
       annotate_sysfsnode(topology, data, &nbnodes);
     else
