@@ -5631,6 +5631,11 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   sysfs_cpu_path = find_sysfs_cpu_path(data->root_fd, &old_siblings_filenames);
   hwloc_debug("Found sysfs cpu files under %s with %s topology filenames\n",
 	      sysfs_cpu_path, old_siblings_filenames ? "old" : "new");
+  if (!sysfs_cpu_path) {
+    if (hwloc_hide_errors() < 2)
+      fprintf(stderr, "[hwloc/linux] failed to find sysfs cpu topology directory, aborting linux discovery.\n");
+    return -1;
+  }
 
   /* look for sysfs node path */
   sysfs_node_path = find_sysfs_node_path(data->root_fd);
@@ -5717,17 +5722,10 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
 		    &global_infos, &global_infos_count);
 
-  if (!sysfs_cpu_path) {
-    /* /sys/.../topology unavailable (before 2.6.16)
-     * or not containing anything interesting */
+  /* sysfs */
+  if (look_sysfscpu(topology, data, sysfs_cpu_path, old_siblings_filenames, Lprocs, numprocs) < 0)
+    /* sysfs but we failed to read cpu topology, fallback */
     hwloc_linux_fallback_pu_level(backend);
-
-  } else {
-    /* sysfs */
-    if (look_sysfscpu(topology, data, sysfs_cpu_path, old_siblings_filenames, Lprocs, numprocs) < 0)
-      /* sysfs but we failed to read cpu topology, fallback */
-      hwloc_linux_fallback_pu_level(backend);
-  }
 
  cpudone:
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
