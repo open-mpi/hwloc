@@ -2550,7 +2550,7 @@ hwloc_get_machine_meminfo(struct hwloc_linux_backend_data_s *data,
 
 static void
 hwloc_get_sysfs_node_meminfo(struct hwloc_linux_backend_data_s *data,
-			     const char *syspath, int node,
+			     int node,
 			     struct hwloc_numanode_attr_s *memory)
 {
   char path[SYSFS_NUMA_NODE_PATH_LEN];
@@ -2561,7 +2561,7 @@ hwloc_get_sysfs_node_meminfo(struct hwloc_linux_backend_data_s *data,
   uint64_t remaining_local_memory;
   int err;
 
-  sprintf(path, "%s/node%d/hugepages", syspath, node);
+  sprintf(path, "/sys/devices/system/node/node%d/hugepages", node);
   err = hwloc_stat(path, &st, data->root_fd);
   if (!err) {
     types = 1 /* normal non-huge size */ + st.st_nlink - 2 /* ignore . and .. */;
@@ -2583,7 +2583,7 @@ hwloc_get_sysfs_node_meminfo(struct hwloc_linux_backend_data_s *data,
   memory->page_types_len = 1; /* we'll increase it when successfully getting hugepage info */
 
   /* get the total memory */
-  sprintf(meminfopath, "%s/node%d/meminfo", syspath, node);
+  sprintf(meminfopath, "/sys/devices/system/node/node%d/meminfo", node);
   hwloc_parse_meminfo_info(data, meminfopath,
 			   &memory->local_memory);
   remaining_local_memory = memory->local_memory;
@@ -2600,7 +2600,7 @@ hwloc_get_sysfs_node_meminfo(struct hwloc_linux_backend_data_s *data,
 }
 
 static int
-hwloc_parse_nodes_distances(const char *path, unsigned nbnodes, unsigned *indexes, uint64_t *distances, int fsroot_fd)
+hwloc_parse_nodes_distances(unsigned nbnodes, unsigned *indexes, uint64_t *distances, int fsroot_fd)
 {
   size_t len = (10+1)*nbnodes;
   uint64_t *curdist = distances;
@@ -2619,7 +2619,7 @@ hwloc_parse_nodes_distances(const char *path, unsigned nbnodes, unsigned *indexe
 
     /* Linux nodeX/distance file contains distance from X to other localities (from ACPI SLIT table or so),
      * store them in slots X*N...X*N+N-1 */
-    sprintf(distancepath, "%s/node%u/distance", path, osnode);
+    sprintf(distancepath, "/sys/devices/system/node/node%u/distance", osnode);
     if (hwloc_read_path_by_length(distancepath, string, len, fsroot_fd) <= 0)
       goto out_with_string;
 
@@ -3531,8 +3531,7 @@ fixup_cpuless_node_locality_from_distances(unsigned i,
  */
 static int
 read_node_initiators(struct hwloc_linux_backend_data_s *data,
-		     hwloc_obj_t node, unsigned nbnodes, hwloc_obj_t *nodes,
-		     const char *path)
+		     hwloc_obj_t node, unsigned nbnodes, hwloc_obj_t *nodes)
 {
   char accesspath[SYSFS_NUMA_NODE_PATH_LEN];
   DIR *dir;
@@ -3542,10 +3541,10 @@ read_node_initiators(struct hwloc_linux_backend_data_s *data,
    * access0 contains the fastest of GI and CPU. access1 contains the fastest of CPU.
    * Try access1 to avoid GI if any, or fallback to access0 otherwise.
    */
-  sprintf(accesspath, "%s/node%u/access1/initiators", path, node->os_index);
+  sprintf(accesspath, "/sys/devices/system/node/node%u/access1/initiators", node->os_index);
   dir = hwloc_opendir(accesspath, data->root_fd);
   if (!dir) {
-    sprintf(accesspath, "%s/node%u/access0/initiators", path, node->os_index);
+    sprintf(accesspath, "/sys/devices/system/node/node%u/access0/initiators", node->os_index);
     dir = hwloc_opendir(accesspath, data->root_fd);
     if (!dir)
       return -1;
@@ -3573,8 +3572,7 @@ read_node_initiators(struct hwloc_linux_backend_data_s *data,
 static int
 read_node_local_memattrs(struct hwloc_topology *topology,
                          struct hwloc_linux_backend_data_s *data,
-                         hwloc_obj_t node,
-                         const char *path)
+                         hwloc_obj_t node)
 {
   char accessdirpath[SYSFS_NUMA_NODE_PATH_LEN];
   char accesspath[SYSFS_NUMA_NODE_PATH_LEN+20];
@@ -3585,9 +3583,9 @@ read_node_local_memattrs(struct hwloc_topology *topology,
    * access0 contains the fastest of GI and CPU. access1 contains the fastest of CPU.
    * Try access1 to avoid GI if any, or fallback to access0 otherwise.
    */
-  sprintf(accessdirpath, "%s/node%u/access1/initiators", path, node->os_index);
+  sprintf(accessdirpath, "/sys/devices/system/node/node%u/access1/initiators", node->os_index);
   if (hwloc_access(accessdirpath, X_OK, data->root_fd) < 0)
-    sprintf(accessdirpath, "%s/node%u/access0/initiators", path, node->os_index);
+    sprintf(accessdirpath, "/sys/devices/system/node/node%u/access0/initiators", node->os_index);
 
   loc.type = HWLOC_LOCATION_TYPE_CPUSET;
   loc.location.cpuset = node->cpuset;
@@ -3627,7 +3625,6 @@ read_node_local_memattrs(struct hwloc_topology *topology,
 static int
 read_node_mscaches(struct hwloc_topology *topology,
 		   struct hwloc_linux_backend_data_s *data,
-		   const char *path,
 		   hwloc_obj_t *treep)
 {
   hwloc_obj_t tree = *treep, node = tree;
@@ -3636,7 +3633,7 @@ read_node_mscaches(struct hwloc_topology *topology,
   DIR *mscdir;
   struct dirent *dirent;
 
-  sprintf(mscpath, "%s/node%u/memory_side_cache", path, osnode);
+  sprintf(mscpath, "/sys/devices/system/node/node%u/memory_side_cache", osnode);
   mscdir = hwloc_opendir(mscpath, data->root_fd);
   if (!mscdir)
     return -1;
@@ -3653,15 +3650,15 @@ read_node_mscaches(struct hwloc_topology *topology,
 
     depth = atoi(dirent->d_name+5);
 
-    sprintf(mscpath, "%s/node%u/memory_side_cache/index%u/size", path, osnode, depth);
+    sprintf(mscpath, "/sys/devices/system/node/node%u/memory_side_cache/index%u/size", osnode, depth);
     if (hwloc_read_path_as_uint64(mscpath, &size, data->root_fd) < 0)
       continue;
 
-    sprintf(mscpath, "%s/node%u/memory_side_cache/index%u/line_size", path, osnode, depth);
+    sprintf(mscpath, "/sys/devices/system/node/node%u/memory_side_cache/index%u/line_size", osnode, depth);
     if (hwloc_read_path_as_uint(mscpath, &line_size, data->root_fd) < 0)
       continue;
 
-    sprintf(mscpath, "%s/node%u/memory_side_cache/index%u/indexing", path, osnode, depth);
+    sprintf(mscpath, "/sys/devices/system/node/node%u/memory_side_cache/index%u/indexing", osnode, depth);
     if (hwloc_read_path_as_uint(mscpath, &associativity, data->root_fd) < 0)
       continue;
     /* 0 for direct-mapped, 1 for indexed (don't know how many ways), 2 for custom/other */
@@ -3795,7 +3792,6 @@ annotate_dax_nodes(struct hwloc_topology *topology __hwloc_attribute_unused,
 static unsigned *
 list_sysfsnode(struct hwloc_topology *topology,
 	       struct hwloc_linux_backend_data_s *data,
-	       const char *path,
 	       unsigned *nbnodesp)
 {
   DIR *dir;
@@ -3808,8 +3804,6 @@ list_sysfsnode(struct hwloc_topology *topology,
    * otherwise we'll list the entire directory.
    *
    * offline nodes don't exist at all under /sys (they are in "possible", we may ignore them).
-   *
-   * don't use <path>/online, /sys/bus/node/devices only contains node%d
    */
   nodeset = hwloc__alloc_read_path_as_cpulist("/sys/devices/system/node/online", data->root_fd);
   if (nodeset) {
@@ -3821,7 +3815,7 @@ list_sysfsnode(struct hwloc_topology *topology,
   }
 
   /* Get the list of nodes first */
-  dir = hwloc_opendir(path, data->root_fd);
+  dir = hwloc_opendir("/sys/devices/system/node", data->root_fd);
   if (!dir)
     return NULL;
 
@@ -3895,7 +3889,7 @@ list_sysfsnode(struct hwloc_topology *topology,
 static int
 annotate_sysfsnode(struct hwloc_topology *topology,
 		   struct hwloc_linux_backend_data_s *data,
-		   const char *path, unsigned *found)
+		   unsigned *found)
 {
   unsigned nbnodes;
   hwloc_obj_t * nodes; /* the array of NUMA node objects, to be used for inserting distances */
@@ -3905,7 +3899,7 @@ annotate_sysfsnode(struct hwloc_topology *topology,
   unsigned i;
 
   /* NUMA nodes cannot be filtered out */
-  indexes = list_sysfsnode(topology, data, path, &nbnodes);
+  indexes = list_sysfsnode(topology, data, &nbnodes);
   if (!indexes)
     return 0;
 
@@ -3932,7 +3926,7 @@ annotate_sysfsnode(struct hwloc_topology *topology,
 	break;
       }
 
-    hwloc_get_sysfs_node_meminfo(data, path, node->os_index, &node->attr->numanode);
+    hwloc_get_sysfs_node_meminfo(data, node->os_index, &node->attr->numanode);
   }
 
   topology->support.discovery->numa = 1;
@@ -3941,7 +3935,7 @@ annotate_sysfsnode(struct hwloc_topology *topology,
 
   if (nbnodes >= 2
       && data->use_numa_distances
-      && !hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd)
+      && !hwloc_parse_nodes_distances(nbnodes, indexes, distances, data->root_fd)
       && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)) {
     hwloc_internal_distances_add(topology, "NUMALatency", nbnodes, nodes, distances,
 				 HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
@@ -3959,7 +3953,7 @@ annotate_sysfsnode(struct hwloc_topology *topology,
 static int
 look_sysfsnode(struct hwloc_topology *topology,
 	       struct hwloc_linux_backend_data_s *data,
-	       const char *path, unsigned *found)
+	       unsigned *found)
 {
   unsigned osnode;
   unsigned nbnodes;
@@ -3975,10 +3969,10 @@ look_sysfsnode(struct hwloc_topology *topology,
   int allow_overlapping_node_cpusets = (getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS") != NULL);
   int need_memcaches = hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_MEMCACHE);
 
-  hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
+  hwloc_debug("\n\n * Topology extraction from /sys/devices/system/node *\n\n");
 
   /* NUMA nodes cannot be filtered out */
-  indexes = list_sysfsnode(topology, data, path, &nbnodes);
+  indexes = list_sysfsnode(topology, data, &nbnodes);
   if (!indexes)
     return 0;
 
@@ -4007,7 +4001,7 @@ look_sysfsnode(struct hwloc_topology *topology,
     hwloc_bitmap_t cpuset;
 
     osnode = indexes[i];
-    sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
+    sprintf(nodepath, "/sys/devices/system/node/node%u/cpumap", osnode);
     cpuset = hwloc__alloc_read_path_as_cpumask(nodepath, data->root_fd);
     if (!cpuset) {
       /* This NUMA object won't be inserted, we'll ignore distances */
@@ -4033,7 +4027,7 @@ look_sysfsnode(struct hwloc_topology *topology,
     node->cpuset = cpuset;
     node->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(node->nodeset, osnode);
-    hwloc_get_sysfs_node_meminfo(data, path, osnode, &node->attr->numanode);
+    hwloc_get_sysfs_node_meminfo(data, osnode, &node->attr->numanode);
 
     nodes[i] = node;
     hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
@@ -4107,7 +4101,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	distances = NULL;
       }
 
-      if (distances && hwloc_parse_nodes_distances(path, nbnodes, indexes, distances, data->root_fd) < 0) {
+      if (distances && hwloc_parse_nodes_distances(nbnodes, indexes, distances, data->root_fd) < 0) {
 	free(distances);
 	distances = NULL;
       }
@@ -4139,11 +4133,11 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  hwloc_obj_t tree;
 	  /* update from HMAT initiators if any */
 	  if (data->use_numa_initiators)
-	    read_node_initiators(data, node, nbnodes, nodes, path);
+	    read_node_initiators(data, node, nbnodes, nodes);
 
 	  tree = node;
 	  if (need_memcaches)
-	    read_node_mscaches(topology, data, path, &tree);
+	    read_node_mscaches(topology, data, &tree);
 	  trees[nr_trees++] = tree;
 	}
       }
@@ -4160,7 +4154,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  hwloc_obj_t tree;
 	  /* update from HMAT initiators if any */
 	  if (data->use_numa_initiators)
-	    if (!read_node_initiators(data, node, nbnodes, nodes, path))
+	    if (!read_node_initiators(data, node, nbnodes, nodes))
 	      if (!hwloc_bitmap_iszero(node->cpuset))
 		goto fixed;
 
@@ -4171,12 +4165,12 @@ look_sysfsnode(struct hwloc_topology *topology,
 	fixed:
 	  tree = node;
 	  if (need_memcaches)
-	    read_node_mscaches(topology, data, path, &tree);
+	    read_node_mscaches(topology, data, &tree);
 	  trees[nr_trees++] = tree;
 	}
         /* By the way, get their memattrs now that cpuset is fixed */
         if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
-          read_node_local_memattrs(topology, data, node, path);
+          read_node_local_memattrs(topology, data, node);
       }
 
       /* insert memory trees for real */
@@ -5738,9 +5732,9 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   /* Gather NUMA information. */
   if (sysfs_node_path) {
     if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE) > 0)
-      annotate_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
+      annotate_sysfsnode(topology, data, &nbnodes);
     else
-      look_sysfsnode(topology, data, sysfs_node_path, &nbnodes);
+      look_sysfsnode(topology, data, &nbnodes);
   } else
     nbnodes = 0;
 
