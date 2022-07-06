@@ -651,7 +651,7 @@ int main(int argc, char *argv[])
 	*next = '\0';
       if (hwloc_calc_type_depth(topology, tmp, &hierdepth[i], "--hierarchical") < 0)
 	goto out;
-      if (hierdepth[i] < 0) {
+      if (hierdepth[i] < 0 && hierdepth[i] != HWLOC_TYPE_DEPTH_NUMANODE) {
 	fprintf(stderr, "unsupported (non-normal) --hierarchical type %s\n", tmp);
 	goto out;
       }

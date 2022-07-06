@@ -154,7 +154,13 @@ For instance, if \fIpackage.core\fR is given, the output would be
 \fIPackage:1.Core:2 Package:2.Core:3\fR if the input contains the third
 core of the second package and the fourth core of the third package.
 
-Only normal CPU-side object types may be used. NUMA nodes cannot.
+Only normal CPU-side object types should be used.
+
+NUMA nodes may be used but they may cause redundancy in the output
+on heterogeneous memory platform. For instance, on a platform with both
+DRAM and HBM memory on a package, the first core will be considered both
+as first core of first NUMA node (DRAM) and
+as first core of second NUMA node (HBM).
 .TP
 \fB\-\-largest\fR
 Report (in a human readable format) the list of largest objects which exactly
