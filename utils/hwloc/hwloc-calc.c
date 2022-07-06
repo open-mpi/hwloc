@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -85,6 +85,8 @@ static hwloc_bitmap_t cpukind_cpuset = NULL;
 static int
 hwloc_calc_intersects_set(hwloc_bitmap_t set, int use_nodeset, hwloc_obj_t obj)
 {
+  while (!hwloc_obj_type_is_normal(obj->type))
+    obj = obj->parent;
   if (use_nodeset)
     return hwloc_bitmap_intersects(set, obj->nodeset);
   else
