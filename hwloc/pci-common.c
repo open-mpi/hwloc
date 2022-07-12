@@ -481,6 +481,13 @@ hwloc__pci_find_busid_parent_quirk(struct hwloc_topology *topology,
   }
 
   if (topology->pci_locality_quirks & HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A) {
+    /* AMD Trento has xGMI ports connected to individual CCDs (8 cores + L3)
+     * instead of NUMA nodes (pairs of CCDs within Trento) as is usual in AMD EPYC CPUs.
+     * This is not described by the ACPI tables, hence we need to manually hardwire
+     * the xGMI locality for the (currently single) server that currently uses that CPU.
+     * It's not clear if ACPI tables can/will ever be fixed (would require one initiator
+     * proximity domain per CCD), or if Linux can/will work around the issue.
+     */
     if (busid->domain == 0) {
       if (busid->bus >= 0xd0 && busid->bus <= 0xd1) {
         hwloc_bitmap_set_range(cpuset, 0, 7);
