@@ -461,7 +461,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
             snprintf(tmp, sizeof(tmp), "%u", k);
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
 
-            hwloc__levelzero_properties_get(subh[j], subosdevs[k], sysman_maybe_missing, NULL);
+            hwloc__levelzero_properties_get(subh[k], subosdevs[k], sysman_maybe_missing, NULL);
 
             hwloc__levelzero_cqprops_get(subh[k], subosdevs[k]);
           }
