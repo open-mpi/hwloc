@@ -55,6 +55,18 @@
 # combination of different ranges, hierarchical or not
 0x8000c000,0x000ee0c0
 
+# number of Group0 when there are 3 group levels
+2
+
+# list of Group1 near one Group0 when there are 3 group levels
+0,1
+
+# hierarchical list of Group0.Group2 near one NUMA when there are 3 group levels
+Group0:1.Group2:2 Group0:1.Group2:3
+
+# number of Group2 when there are 3 group levels
+8
+
 # Number of NUMA Nodes
 4
 
