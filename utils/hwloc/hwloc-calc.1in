@@ -130,6 +130,9 @@ in a machine.
 When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
 the nodeset is considered instead of the CPU set for finding matching objects.
 This is useful when reporting the output as a number or set of NUMA nodes.
+
+If an OS device subtype such as \fIgpu\fR  is given instead of \fIosdev\fR,
+only the os devices of that subtype will be counted.
 .TP
 \fB\-I \-\-intersect <type|depth>\fR
 Find the list of objects of the given type or depth that intersect the CPU set and
@@ -145,6 +148,9 @@ objects are strictly included inside the input objects.
 When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
 the nodeset is considered instead of the CPU set for finding matching objects.
 This is useful when reporting the output as a number or set of NUMA nodes.
+
+If an OS device subtype such as \fIgpu\fR is given instead of \fIosdev\fR,
+only the os devices of that subtype will be returned.
 .TP
 \fB\-H \-\-hierarchical <type1>.<type2>...\fR
 Find the list of objects of type <type2> that intersect the CPU set and
@@ -426,6 +432,17 @@ To export bitmask in a format that is acceptable by the resctrl Linux subsystem
     # echo 00000380,0,00000380 > /sys/fs/resctrl/test/cpus
     # cat /sys/fs/resctrl/test/cpus
     00000000,00000380,00000000,00000380   <the modified bitmask was corrected parsed by resctrl>
+
+OS devices may also be filtered by subtype. In this example, there are
+8 OS devices in the system, 4 of them are near NUMA node #1, and only
+2 of these are CoProcessors:
+
+    $ utils/hwloc/hwloc-calc -I osdev all
+    0,1,2,3,4,5,6,7,8
+    $ utils/hwloc/hwloc-calc -I osdev node:1
+    5,6,7,8
+    $ utils/hwloc/hwloc-calc -I coproc node:1
+    7,8
 
 .
 .\" **************************

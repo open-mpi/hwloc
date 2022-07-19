@@ -70,7 +70,9 @@ static int logicalo = 1;
 static int nodeseti = 0;
 static int nodeseto = 0;
 static int numberofdepth = -1;
+static union hwloc_obj_attr_u numberofattr;
 static int intersectdepth = -1;
+static union hwloc_obj_attr_u intersectattr;
 static int hiernblevels = 0;
 static int *hierdepth = NULL;
 static int local_numanodes = 0;
@@ -188,8 +190,13 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   } else if (numberofdepth != -1) {
     unsigned nb = 0;
     hwloc_obj_t obj = NULL;
-    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, numberofdepth, obj)) != NULL)
+    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, numberofdepth, obj)) != NULL) {
+      if (numberofdepth == HWLOC_TYPE_DEPTH_OS_DEVICE
+          && numberofattr.osdev.type != (hwloc_obj_osdev_type_t) -1
+          && numberofattr.osdev.type != obj->attr->osdev.type)
+        continue;
       nb++;
+    }
     printf("%u\n", nb);
   } else if (intersectdepth != -1) {
     hwloc_obj_t obj = NULL;
@@ -198,6 +205,10 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       sep = ",";
     while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, intersectdepth, obj)) != NULL) {
       unsigned idx;
+      if (intersectdepth == HWLOC_TYPE_DEPTH_OS_DEVICE
+          && intersectattr.osdev.type != (hwloc_obj_osdev_type_t) -1
+          && intersectattr.osdev.type != obj->attr->osdev.type)
+        continue;
       if (!first)
 	printf("%s", sep);
       idx = logicalo ? obj->logical_index : obj->os_index;
@@ -651,10 +662,10 @@ int main(int argc, char *argv[])
     argv += opt+1;
   }
 
-  if (numberoftype && hwloc_calc_type_depth(topology, numberoftype, &numberofdepth, NULL, "--number-of") < 0)
+  if (numberoftype && hwloc_calc_type_depth(topology, numberoftype, &numberofdepth, &numberofattr, "--number-of") < 0)
     goto out;
 
-  if (intersecttype && hwloc_calc_type_depth(topology, intersecttype, &intersectdepth, NULL, "--intersect") < 0)
+  if (intersecttype && hwloc_calc_type_depth(topology, intersecttype, &intersectdepth, &intersectattr, "--intersect") < 0)
     goto out;
 
   if (hiertype) {
