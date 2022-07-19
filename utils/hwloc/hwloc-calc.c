@@ -262,12 +262,17 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   return EXIT_SUCCESS;
 }
 
-static int hwloc_calc_type_depth(hwloc_topology_t topology, const char *string, int *depthp, const char *caller)
+static int hwloc_calc_type_depth(hwloc_topology_t topology, const char *string, int *depthp, union hwloc_obj_attr_u *attrp, const char *caller)
 {
+  union hwloc_obj_attr_u attr;
   hwloc_obj_type_t type;
   int depth;
+  int err;
 
-  if (hwloc_type_sscanf_as_depth(string, &type, topology, &depth) < 0) {
+  /* similar to hwloc_type_sscanf_as_depth() but we want to get attr as well */
+
+  err = hwloc_type_sscanf(string, &type, &attr, sizeof(attr));
+  if (err < 0) {
     char *endptr;
     depth = strtoul(string, &endptr, 0);
     if (*endptr) {
@@ -279,6 +284,21 @@ static int hwloc_calc_type_depth(hwloc_topology_t topology, const char *string, 
     return 0;
   }
 
+  depth = hwloc_get_type_depth(topology, type);
+  if (type == HWLOC_OBJ_GROUP
+      && depth == HWLOC_TYPE_DEPTH_MULTIPLE
+      && attr.group.depth != (unsigned)-1) {
+    unsigned l;
+    depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+    for(l=0; l<(unsigned) hwloc_topology_get_depth(topology); l++) {
+      hwloc_obj_t tmp = hwloc_get_obj_by_depth(topology, l, 0);
+      if (tmp->type == HWLOC_OBJ_GROUP && tmp->attr->group.depth == attr.group.depth) {
+	depth = (int)l;
+	break;
+      }
+    }
+  }
+
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     fprintf(stderr, "unavailable %s type %s\n", caller, hwloc_obj_type_string(type));
     return -1;
@@ -286,6 +306,9 @@ static int hwloc_calc_type_depth(hwloc_topology_t topology, const char *string, 
     fprintf(stderr, "cannot use %s type %s with multiple depth, please use the relevant depth\n", caller, hwloc_obj_type_string(type));
     return -1;
   }
+
+  if (attrp)
+    memcpy(attrp, &attr, sizeof(attr));
   *depthp = depth;
   return 0;
 }
@@ -626,10 +649,10 @@ int main(int argc, char *argv[])
     argv += opt+1;
   }
 
-  if (numberoftype && hwloc_calc_type_depth(topology, numberoftype, &numberofdepth, "--number-of") < 0)
+  if (numberoftype && hwloc_calc_type_depth(topology, numberoftype, &numberofdepth, NULL, "--number-of") < 0)
     goto out;
 
-  if (intersecttype && hwloc_calc_type_depth(topology, intersecttype, &intersectdepth, "--intersect") < 0)
+  if (intersecttype && hwloc_calc_type_depth(topology, intersecttype, &intersectdepth, NULL, "--intersect") < 0)
     goto out;
 
   if (hiertype) {
@@ -649,7 +672,7 @@ int main(int argc, char *argv[])
       next = strchr(tmp, '.');
       if (next)
 	*next = '\0';
-      if (hwloc_calc_type_depth(topology, tmp, &hierdepth[i], "--hierarchical") < 0)
+      if (hwloc_calc_type_depth(topology, tmp, &hierdepth[i], NULL, "--hierarchical") < 0)
 	goto out;
       if (hierdepth[i] < 0 && hierdepth[i] != HWLOC_TYPE_DEPTH_NUMANODE) {
 	fprintf(stderr, "unsupported (non-normal) --hierarchical type %s\n", tmp);
