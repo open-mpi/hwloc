@@ -192,18 +192,20 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       nb++;
     printf("%u\n", nb);
   } else if (intersectdepth != -1) {
-    hwloc_obj_t proc, prev = NULL;
+    hwloc_obj_t obj = NULL;
+    int first = 1;
     if (!sep)
       sep = ",";
-    while ((proc = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, intersectdepth, prev)) != NULL) {
-      unsigned idx = logicalo ? proc->logical_index : proc->os_index;
-      if (prev)
+    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, intersectdepth, obj)) != NULL) {
+      unsigned idx;
+      if (!first)
 	printf("%s", sep);
+      idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned)-1)
         printf("-1");
       else
         printf("%u", idx);
-      prev = proc;
+      first = 0;
     }
     printf("\n");
   } else if (hiernblevels) {
