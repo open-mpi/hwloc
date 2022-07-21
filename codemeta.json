@@ -1,0 +1,289 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "license": "https://spdx.org/licenses/BSD-3-Clause",
+    "dateCreated": "2009-02-03",
+    "datePublished": "2009-11-05",
+    "copyright": "2009",
+    "version": "2.8.0",
+    "dateModified": "2022-07-05",
+    "url": "https://github.com/open-mpi/hwloc/",
+    "readme": "https://github.com/open-mpi/hwloc/blob/master/README",
+    "codeRepository": "git+https://github.com/open-mpi/hwloc.git",
+    "downloadUrl": "https://www.open-mpi.org/software/hwloc/v2.8/",
+    "issueTracker": "https://github.com/open-mpi/hwloc/issues",
+    "name": "hwloc",
+    "description": "The Hardware Locality (hwloc) software project aims at easing the process of discovering hardware resources in parallel architectures. It offers command-line tools and a C API for consulting these resources, their locality, attributes, and interconnection. hwloc primarily aims at helping high-performance computing (HPC) applications, but is also applicable to any project seeking to exploit code and/or data locality on modern computing platforms.",
+    "applicationCategory": "HPC",
+    "developmentStatus": "active",
+    "referencePublication": "https://dx.doi.org/10.1109/PDP.2010.67",
+    "programmingLanguage": [
+        "C"
+    ],
+    "operatingSystem": [
+        "Linux",
+        "Windows",
+        "Darwin",
+        "OS X",
+        "NetBSD",
+        "FreeBSD",
+        "kFreeBSD/GNU",
+        "BlueGene/Q",
+        "AIX",
+        "Solaris",
+        "HP-UX"
+    ],
+    "author": [
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-8671-4615",
+            "givenName": "Brice",
+            "familyName": "Goglin",
+            "email": "brice.goglin@inria.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Inria"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jeff",
+            "familyName": "Squyres",
+            "email": "jsquyres@cisco.com",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Cisco"
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0001-6411-809X",
+            "givenName": "Samuel",
+            "familyName": "Thibault",
+            "email": "samuel.thibault@u-bordeaux.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "University of Bordeaux"
+            }
+        }
+    ],
+    "contributor": [
+        {
+            "@type": "Person",
+            "givenName": "Grzegorz",
+            "familyName": "Andrejczuk",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Intel"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Cédric",
+            "familyName": "Augonnet",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "University of Bordeaux"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Guillaume",
+            "familyName": "Beauchamp",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Inria"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Ahmad Boissetri",
+            "familyName": "Binzagr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Inria"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Cyril",
+            "familyName": "Bordage",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Inria"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Nicholas",
+            "familyName": "Buroker",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "UWL"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Christopher M.",
+            "familyName": "Cantalupo",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Intel"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jérôme",
+            "familyName": "Clet-Ortega",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "University of Bordeaux"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Ludovic",
+            "familyName": "Courtès",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Inria"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Clément",
+            "familyName": "Foyer",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Inria"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Nathalie",
+            "familyName": "Furmento",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "CNRS"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Bryon",
+            "familyName": "Gloden"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Gilles",
+            "familyName": "Gouaillardet",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "RIST"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Valentin",
+            "familyName": "Hoyet",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Inria"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Joshua",
+            "familyName": "Hursey",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "UWL"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Alexey",
+            "familyName": "Kardashevskiy",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "IBM"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Rob",
+            "familyName": "Latham",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "ANL"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Douglas",
+            "familyName": "MacFarland",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "UWL"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Marc",
+            "familyName": "Marí",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "BSC"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jonathan L",
+            "familyName": "Peyton",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Intel"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Piotr",
+            "familyName": "Luc",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Intel"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Antoine",
+            "familyName": "Rougier",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "intern from University of Bordeaux"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jean-Yves",
+            "familyName": "Vet",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "DDN"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Benjamin",
+            "familyName": "Worpitz"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jeff",
+            "familyName": "Zhao",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Zhaoxin"
+            }
+        }
+    ]
+}
