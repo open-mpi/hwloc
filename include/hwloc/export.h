@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -37,7 +37,13 @@ enum hwloc_topology_export_xml_flags_e {
   * However, the export may miss some details about the topology.
   * \hideinitializer
   */
- HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 = (1UL<<0)
+ HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 = (1UL<<0),
+
+ /** \brief Export XML that is loadable by hwloc v2.x.
+  * However, the export may miss some details about the topology.
+  * \hideinitializer
+  */
+ HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2 = (1UL<<1)
 };
 
 /** \brief Export the topology into an XML file.

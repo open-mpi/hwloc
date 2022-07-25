@@ -3311,10 +3311,13 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
-  if (flags & ~HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
+  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1|HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
     errno = EINVAL;
     return -1;
   }
+
+  /* TODO temp */
+  flags |= HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2;
 
   hwloc_internal_distances_refresh(topology);
 
@@ -3359,10 +3362,13 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
-  if (flags & ~HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
+  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1|HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
     errno = EINVAL;
     return -1;
   }
+
+  /* TODO temp */
+  flags |= HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2;
 
   hwloc_internal_distances_refresh(topology);
 
