@@ -132,7 +132,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
         topology->next_gp_index = obj->gp_index + 1;
     } else {
       if (hwloc__xml_verbose())
-        fprintf(stderr, "%s: unexpected id `%s' not-starting with `obj', ignoring\n", value, state->global->msgprefix);
+        fprintf(stderr, "%s: unexpected id `%s' not-starting with `obj', ignoring\n", state->global->msgprefix, value);
     }
   } else if (!strcmp(name, "cpuset")) {
     if (!obj->cpuset)
