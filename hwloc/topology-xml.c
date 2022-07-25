@@ -123,7 +123,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       fprintf(stderr, "%s: unexpected zero gp_index, topology may be invalid\n", state->global->msgprefix);
     if (obj->gp_index >= topology->next_gp_index)
       topology->next_gp_index = obj->gp_index + 1;
-  } else if (!strcmp(name, "id")) { /* forward compat */
+  } else if (!strcmp(name, "id")) { /* starting with 3.x */
     if (!strncmp(value, "obj", 3)) {
       obj->gp_index = strtoull(value+3, NULL, 10);
       if (!obj->gp_index && hwloc__xml_verbose())
@@ -2405,6 +2405,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   char *setstring = NULL, *setstring2 = NULL;
   char tmp[255];
   int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
+  int v2export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2;
   unsigned i,j;
 
   if (v1export && obj->type == HWLOC_OBJ_PACKAGE)
@@ -2499,6 +2500,10 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   if (!v1export) {
     sprintf(tmp, "%llu", (unsigned long long) obj->gp_index);
     state->new_prop(state, "gp_index", tmp);
+    if (!v2export) {
+      sprintf(tmp, "obj%llu", (unsigned long long) obj->gp_index);
+      state->new_prop(state, "id", tmp);
+    }
   }
 
   if (obj->name) {
