@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -626,7 +626,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     unsigned os_index = HWLOC_UNKNOWN_INDEX; /* no os_index except for PU and NUMANODE below */
 
     if (rs_getrad(rset, rad, sdl, i, 0)) {
-      if (hwloc_hide_errors() < 2)
+      if (HWLOC_SHOW_CRITICAL_ERRORS())
         fprintf(stderr, "hwloc/aix: rs_getrad(%d) failed: %s\n", i, strerror(errno));
       continue;
     }

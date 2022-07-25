@@ -175,7 +175,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   ret = pci_system_init();
   if (ret) {
     HWLOC_PCIACCESS_UNLOCK();
-    if (!hwloc_hide_errors())
+    if (HWLOC_SHOW_ALL_ERRORS())
       fprintf(stderr, "hwloc/pci: Failed to initialize libpciaccess with pci_system_init(): %d (%s)\n",
               ret, strerror(errno));
     return -1;
@@ -205,7 +205,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 #ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
     if (domain > 0xffff) {
       static int warned = 0;
-      if (!warned && !hwloc_hide_errors())
+      if (!warned && HWLOC_SHOW_ALL_ERRORS())
 	fprintf(stderr, "hwloc/pci: Ignoring PCI device with non-16bit domain.\nPass --enable-32bits-pci-domain to configure to support such devices\n(warning: it would break the library ABI, don't enable unless really needed).\n");
       warned = 1;
       continue;

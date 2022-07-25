@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2021 Inria.  All rights reserved.
+ * Copyright © 2012-2022 Inria.  All rights reserved.
  * Copyright © 2013, 2018 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -61,7 +61,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
 
   clret = clGetPlatformIDs(0, NULL, &nr_platforms);
   if (CL_SUCCESS != clret || !nr_platforms) {
-    if (CL_SUCCESS != clret && HWLOC_CL_PLATFORM_NOT_FOUND_KHR != clret && !hwloc_hide_errors()) {
+    if (CL_SUCCESS != clret && HWLOC_CL_PLATFORM_NOT_FOUND_KHR != clret && HWLOC_SHOW_ALL_ERRORS()) {
       fprintf(stderr, "hwloc/opencl: Failed to get number of platforms with clGetPlatformIDs(): %d\n", clret);
     }
     return -1;

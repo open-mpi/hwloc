@@ -43,7 +43,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
     case ZE_DEVICE_TYPE_MCA: type = "MCA"; break;
     case ZE_DEVICE_TYPE_VPU: type = "VPU"; break;
     default:
-      if (!hwloc_hide_errors())
+      if (HWLOC_SHOW_ALL_ERRORS())
         fprintf(stderr, "hwloc/levelzero: unexpected device type %u\n", (unsigned) prop.type);
       type = "Unknown";
     }
@@ -93,9 +93,9 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
   } else {
     static int warned = 0;
     if (!warned) {
-      if (sysman_maybe_missing == 1 && !hwloc_hide_errors())
+      if (sysman_maybe_missing == 1 && HWLOC_SHOW_ALL_ERRORS())
         fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
-      else if (sysman_maybe_missing == 2 && !hwloc_hide_errors())
+      else if (sysman_maybe_missing == 2 && HWLOC_SHOW_ALL_ERRORS())
         fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
       warned = 1;
     }
@@ -180,7 +180,7 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
 
           if (mprop.onSubdevice) {
             if (mprop.subdeviceId >= nr_osdevs || !nr_osdevs || !sub_osdevs) {
-              if (!hwloc_hide_errors())
+              if (HWLOC_SHOW_ALL_ERRORS())
                 fprintf(stderr, "LevelZero: memory module #%u on unexpected subdeviceId #%u\n", m, mprop.subdeviceId);
               osdev = NULL; /* we'll ignore it but we'll still agregate its subdevice memories into totalHBM/DDRkB */
             } else {
@@ -375,7 +375,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {
-    if (!hwloc_hide_errors()) {
+    if (HWLOC_SHOW_ALL_ERRORS()) {
       fprintf(stderr, "Failed to initialize LevelZero in ze_init(): 0x%x\n", (unsigned)res);
     }
     return 0;

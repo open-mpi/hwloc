@@ -41,7 +41,7 @@ hwloc__nvml_get_peer_obj_by_pci(struct hwloc_topology *topology, hwloc_obj_t gpu
     /* we need PCI devices to be filtered-in */
     if (pfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
       static int warned = 0;
-      if (!warned && !hwloc_hide_errors())
+      if (!warned && HWLOC_SHOW_ALL_ERRORS())
         fprintf(stderr, "hwloc failed to find NVLink peer %04x:%02x:%02x\n",
                 peer_bdf.domain, peer_bdf.bus, peer_bdf.device);
       warned = 1;
@@ -89,7 +89,7 @@ hwloc__nvml_get_peer_obj_by_pci(struct hwloc_topology *topology, hwloc_obj_t gpu
   }
   default: {
     static int warned = 0;
-    if (!warned && !hwloc_hide_errors())
+    if (!warned && HWLOC_SHOW_ALL_ERRORS())
       fprintf(stderr, "hwloc failed to recognize NVLink peer %04x:%02x:%02x class %04x vendor %04x device %04x\n",
               peer_bdf.domain, peer_bdf.bus, peer_bdf.device,
               obj->attr->pcidev.class_id, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
@@ -177,7 +177,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   ret = nvmlInit();
   if (NVML_SUCCESS != ret) {
-    if (!hwloc_hide_errors()) {
+    if (HWLOC_SHOW_ALL_ERRORS()) {
       const char *error = nvmlErrorString(ret);
       fprintf(stderr, "hwloc/nvml: Failed to initialize with nvmlInit(): %s\n", error);
     }
@@ -359,7 +359,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
           bw = 25000; /* multiple links may connect same GPUs */
         } else {
           static int warned = 0;
-          if (!warned && !hwloc_hide_errors())
+          if (!warned && HWLOC_SHOW_ALL_ERRORS())
             fprintf(stderr, "Failed to recognize NVLink version %u\n", version);
           warned = 1;
           continue;

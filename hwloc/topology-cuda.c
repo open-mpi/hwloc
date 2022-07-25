@@ -80,7 +80,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   cures = cudaGetDeviceCount(&nb);
   if (cures) {
-    if (cures != cudaErrorNoDevice && !hwloc_hide_errors()) {
+    if (cures != cudaErrorNoDevice && HWLOC_SHOW_ALL_ERRORS()) {
       const char *error = cudaGetErrorString(cures);
       fprintf(stderr, "hwloc/cuda: Failed to get number of devices with cudaGetDeviceCount(): %s\n", error);
     }

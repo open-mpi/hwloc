@@ -153,7 +153,7 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
 	  }
 	  free(buffer);
 	} else {
-          if (hwloc_hide_errors() < 2)
+          if (HWLOC_SHOW_CRITICAL_ERRORS())
             fprintf(stderr, "hwloc/pci: Ignoring HWLOC_PCI_LOCALITY file `%s' too large (%lu bytes)\n",
                     env, (unsigned long) st.st_size);
 	}
@@ -340,7 +340,7 @@ hwloc_pci_add_object(struct hwloc_obj *parent, struct hwloc_obj **parent_io_firs
     }
     case HWLOC_PCI_BUSID_EQUAL: {
       static int reported = 0;
-      if (!reported && hwloc_hide_errors() < 2) {
+      if (!reported && HWLOC_SHOW_CRITICAL_ERRORS()) {
         fprintf(stderr, "*********************************************************\n");
         fprintf(stderr, "* hwloc %s received invalid PCI information.\n", HWLOC_VERSION);
         fprintf(stderr, "*\n");
@@ -574,7 +574,7 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
     if (env) {
       static int reported = 0;
       if (!topology->pci_has_forced_locality && !reported) {
-        if (!hwloc_hide_errors())
+        if (HWLOC_SHOW_ALL_ERRORS())
           fprintf(stderr, "hwloc/pci: Environment variable %s is deprecated, please use HWLOC_PCI_LOCALITY instead.\n", env);
 	reported = 1;
       }

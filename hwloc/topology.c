@@ -114,6 +114,7 @@ int hwloc_topology_abi_check(hwloc_topology_t topology)
   return topology->topology_abi != HWLOC_TOPOLOGY_ABI ? -1 : 0;
 }
 
+/* callers should rather use wrappers HWLOC_SHOW_ALL_ERRORS() and HWLOC_SHOW_CRITICAL_ERRORS() for clarity */
 int hwloc_hide_errors(void)
 {
   static int hide = 1; /* only show critical errors by default. lstopo will show others */
@@ -168,7 +169,7 @@ static void report_insert_error(hwloc_obj_t new, hwloc_obj_t old, const char *ms
 {
   static int reported = 0;
 
-  if (reason && !reported && hwloc_hide_errors() < 2) {
+  if (reason && !reported && HWLOC_SHOW_CRITICAL_ERRORS()) {
     char newstr[512];
     char oldstr[512];
     report_insert_error_format_obj(newstr, sizeof(newstr), new);
@@ -3188,7 +3189,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
       tmpnbobjs = realloc(topology->level_nbobjects,
 			  2 * topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
       if (!tmplevels || !tmpnbobjs) {
-        if (hwloc_hide_errors() < 2)
+        if (HWLOC_SHOW_CRITICAL_ERRORS())
           fprintf(stderr, "hwloc: failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
 
 	/* if one realloc succeeded, make sure the caller will free the new buffer */
@@ -3579,17 +3580,17 @@ hwloc_discover(struct hwloc_topology *topology,
   hwloc_debug("%s", "\nRemoving empty objects\n");
   remove_empty(topology, &topology->levels[0][0]);
   if (!topology->levels[0][0]) {
-    if (hwloc_hide_errors() < 2)
+    if (HWLOC_SHOW_CRITICAL_ERRORS())
       fprintf(stderr, "hwloc: Topology became empty, aborting!\n");
     return -1;
   }
   if (hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
-    if (hwloc_hide_errors() < 2)
+    if (HWLOC_SHOW_CRITICAL_ERRORS())
       fprintf(stderr, "hwloc: Topology does not contain any PU, aborting!\n");
     return -1;
   }
   if (hwloc_bitmap_iszero(topology->levels[0][0]->nodeset)) {
-    if (hwloc_hide_errors() < 2)
+    if (HWLOC_SHOW_CRITICAL_ERRORS())
       fprintf(stderr, "hwloc: Topology does not contain any NUMA node, aborting!\n");
     return -1;
   }

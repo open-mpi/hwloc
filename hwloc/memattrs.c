@@ -1268,7 +1268,7 @@ hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology)
     } else if (!strcmp(env, "spm_is_hbm")) {
       hwloc_debug("Assuming SPM-tier is HBM, ignore bandwidth\n");
       spm_is_hbm = 1;
-    } else if (hwloc_hide_errors() < 2) {
+    } else if (HWLOC_SHOW_CRITICAL_ERRORS()) {
       fprintf(stderr, "hwloc: Failed to recognize HWLOC_MEMTIERS_GUESS value %s\n", env);
     }
   }
