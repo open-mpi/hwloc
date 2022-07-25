@@ -120,8 +120,18 @@ int hwloc_hide_errors(void)
   static int checked = 0;
   if (!checked) {
     const char *envvar = getenv("HWLOC_HIDE_ERRORS");
-    if (envvar)
+    if (envvar) {
       hide = atoi(envvar);
+#ifdef HWLOC_DEBUG
+    } else {
+      /* if debug is enabled and HWLOC_DEBUG_VERBOSE isn't forced to 0,
+       * show all errors jus like we show all debug messages.
+       */
+      envvar = getenv("HWLOC_DEBUG_VERBOSE");
+      if (!envvar || atoi(envvar))
+        hide = 0;
+#endif
+    }
     checked = 1;
   }
   return hide;
