@@ -390,6 +390,7 @@ _hwloc_diff(){
 	case "$prev" in
 	    --refname)
 		COMPREPLY=( "<reference topology identifier>" "")
+		return
 		;;
 	esac
     fi
