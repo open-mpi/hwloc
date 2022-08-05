@@ -16,7 +16,23 @@
     "description": "The Hardware Locality (hwloc) software project aims at easing the process of discovering hardware resources in parallel architectures. It offers command-line tools and a C API for consulting these resources, their locality, attributes, and interconnection. hwloc primarily aims at helping high-performance computing (HPC) applications, but is also applicable to any project seeking to exploit code and/or data locality on modern computing platforms.",
     "applicationCategory": "HPC",
     "developmentStatus": "active",
-    "referencePublication": "https://dx.doi.org/10.1109/PDP.2010.67",
+    "referencePublication": [
+         "https://dx.doi.org/10.1109/PDP.2010.67",
+         "https://hal.inria.fr/inria-00597961",
+         "https://tel.archives-ouvertes.fr/tel-00979512"
+    ],
+    "citation": [
+         "https://dx.doi.org/10.1109/ICPPW.2014.38",
+         "https://dx.doi.org/10.1145/2989081.2989115",
+         "https://dx.doi.org/10.1109/PDP.2017.35",
+         "https://dx.doi.org/10.1109/IPDPSW.2018.00201",
+         "https://doi.org/10.1145/3357526.3357546"
+    ],
+    "keywords": [
+         "topology",
+         "hardware",
+         "locality"
+    ],
     "programmingLanguage": [
         "C"
     ],
