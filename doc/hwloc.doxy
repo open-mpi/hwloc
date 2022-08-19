@@ -2296,6 +2296,7 @@ Users may also specify their own attributes and values.
 
 The memory attributes API is located in hwloc/memattrs.h,
 see \ref hwlocality_memattrs and \ref hwlocality_memattrs_manage for details.
+See also an example in doc/examples/memory-attributes.c in the source tree.
 
 
 \htmlonly

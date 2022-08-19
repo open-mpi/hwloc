@@ -54,6 +54,8 @@ extern "C" {
  * Attribute values for these nodes, if any, may then be obtained with
  * hwloc_memattr_get_value() and manually compared with the desired criteria.
  *
+ * \sa An example is available in doc/examples/memory-attributes.c in the source tree.
+ *
  * \note The API also supports specific objects as initiator,
  * but it is currently not used internally by hwloc.
  * Users may for instance use it to provide custom performance
