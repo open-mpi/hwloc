@@ -67,19 +67,19 @@ extern "C" {
 
 /** \brief Memory node attributes. */
 enum hwloc_memattr_id_e {
-  /** \brief "Capacity".
-   * The capacity is returned in bytes
-   * (local_memory attribute in objects).
+  /** \brief
+   * The \"Capacity\" is returned in bytes (local_memory attribute in objects).
    *
    * Best capacity nodes are nodes with <b>higher capacity</b>.
    *
    * No initiator is involved when looking at this attribute.
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST.
+   * \hideinitializer
    */
   HWLOC_MEMATTR_ID_CAPACITY = 0,
 
-  /** \brief "Locality".
-   * The locality is returned as the number of PUs in that locality
+  /** \brief
+   * The \"Locality\" is returned as the number of PUs in that locality
    * (e.g. the weight of its cpuset).
    *
    * Best locality nodes are nodes with <b>smaller locality</b>
@@ -89,62 +89,81 @@ enum hwloc_memattr_id_e {
    *
    * No initiator is involved when looking at this attribute.
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST.
+   * \hideinitializer
    */
   HWLOC_MEMATTR_ID_LOCALITY = 1,
 
-  /** \brief "Bandwidth".
-   * The bandwidth is returned in MiB/s, as seen from the given initiator location.
+  /** \brief
+   * The \"Bandwidth\" is returned in MiB/s, as seen from the given initiator location.
+   *
    * Best bandwidth nodes are nodes with <b>higher bandwidth</b>.
+   *
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST
    * and ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR.
    *
    * This is the average bandwidth for read and write accesses. If the platform
    * provides individual read and write bandwidths but no explicit average value,
    * hwloc computes and returns the average.
+   * \hideinitializer
    */
   HWLOC_MEMATTR_ID_BANDWIDTH = 2,
 
-  /** \brief "ReadBandwidth".
-   * The Read bandwidth is returned in MiB/s, as seen from the given initiator location.
+  /** \brief
+   * The \"ReadBandwidth\" is returned in MiB/s, as seen from the given initiator location.
+   *
    * Best bandwidth nodes are nodes with <b>higher bandwidth</b>.
+   *
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST
    * and ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR.
+   * \hideinitializer
    */
   HWLOC_MEMATTR_ID_READ_BANDWIDTH = 4,
 
-  /** \brief "WriteBandwidth".
-   * The Write bandwidth is returned in MiB/s, as seen from the given initiator location.
+  /** \brief
+   * The \"WriteBandwidth\" is returned in MiB/s, as seen from the given initiator location.
+   *
    * Best bandwidth nodes are nodes with <b>higher bandwidth</b>.
+   *
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST
    * and ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR.
+   * \hideinitializer
    */
   HWLOC_MEMATTR_ID_WRITE_BANDWIDTH = 5,
 
-  /** \brief "Latency".
-   * The latency is returned as nanoseconds, as seen from the given initiator location.
+  /** \brief
+   * The \"Latency\" is returned as nanoseconds, as seen from the given initiator location.
+   *
    * Best latency nodes are nodes with <b>smaller latency</b>.
+   *
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_LOWER_FIRST
    * and ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR.
    *
    * This is the average latency for read and write accesses. If the platform
    * provides individual read and write latencies but no explicit average value,
    * hwloc computes and returns the average.
+   * \hideinitializer
    */
   HWLOC_MEMATTR_ID_LATENCY = 3,
 
-  /** \brief "ReadLatency".
-   * The Read latency is returned as nanoseconds, as seen from the given initiator location.
+  /** \brief
+   * The \"ReadLatency\" is returned as nanoseconds, as seen from the given initiator location.
+   *
    * Best latency nodes are nodes with <b>smaller latency</b>.
+   *
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_LOWER_FIRST
    * and ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR.
+   * \hideinitializer
    */
   HWLOC_MEMATTR_ID_READ_LATENCY = 6,
 
-  /** \brief "WriteLatency".
-   * The Write latency is returned as nanoseconds, as seen from the given initiator location.
+  /** \brief
+   * The \"WriteLatency\" is returned as nanoseconds, as seen from the given initiator location.
+   *
    * Best latency nodes are nodes with <b>smaller latency</b>.
+   *
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_LOWER_FIRST
    * and ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR.
+   * \hideinitializer
    */
   HWLOC_MEMATTR_ID_WRITE_LATENCY = 7,
 
