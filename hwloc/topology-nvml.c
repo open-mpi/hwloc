@@ -357,6 +357,8 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
           bw = 20000; /* multiple links may connect same GPUs */
         } else if (version == 2) {
           bw = 25000; /* multiple links may connect same GPUs */
+        } else if (version == 3 || version == 4) {
+          bw = 50000; /* multiple links may connect same GPUs */
         } else {
           static int warned = 0;
           if (!warned && !hwloc_hide_errors())
