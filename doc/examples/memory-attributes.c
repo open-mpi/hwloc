@@ -52,7 +52,7 @@ int main(void)
                                         HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY);
     printf("Found %u local NUMA nodes\n", n);
     for(i=0; i<n; i++) {
-      uint64_t latency, bandwidth;
+      hwloc_uint64_t latency, bandwidth;
 
       printf("NUMA node L#%u P#%u (subtype %s) is local to core L#0\n", nodes[i]->logical_index, nodes[i]->os_index, nodes[i]->subtype);
 
