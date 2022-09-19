@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2020 Inria.  All rights reserved.
+ * Copyright © 2012-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -14,6 +14,14 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+
+#if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
+#include <io.h>
+#define open _open
+#define read _read
+#define close _close
+#define mktemp _mktemp
+#endif
 
 #ifndef HAVE_MKSTEMP
 #include <fcntl.h>
