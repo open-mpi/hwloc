@@ -17,6 +17,13 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.9.0
+-------------
+* Tools
+  + lstopo now switches to console mode when its output is redirected.
+    Graphical window mode may be forced back with --of window.
+
+
 Version 2.8.0
 -------------
 * API

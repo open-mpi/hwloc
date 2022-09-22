@@ -505,6 +505,8 @@ to a graphical window if possible in the current environment
 Otherwise, a text summary is displayed in the console.
 The console is also used when the program runs from a terminal
 and the output is redirected to a pipe or file.
+These default behaviors may be changed by passing \fB\-\-of console\fR
+to force console mode or \fB\-\-of window\fR for graphical window.
 .
 .PP
 The filename on the command line usually determines the format of the output.
@@ -523,6 +525,10 @@ be used with "\-\-of" or as a filename suffix.
 .TP
 .B default
 Send the output to a window or to the console depending on the environment.
+.
+.TP
+.B window
+Send the output to a graphical window.
 .
 .TP
 .B console

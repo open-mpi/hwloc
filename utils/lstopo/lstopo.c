@@ -443,14 +443,10 @@ void usage(const char *name, FILE *where)
   fprintf (where, "See lstopo(1) for more details.\n");
 
   fprintf (where, "\nDefault output is "
-#ifdef LSTOPO_HAVE_GRAPHICS
-#ifdef HWLOC_WIN_SYS
-		  "graphical"
-#elif (defined LSTOPO_HAVE_X11)
-		  "graphical (X11) if DISPLAY is set, console otherwise"
-#else
-		  "console"
-#endif
+#if (defined LSTOPO_HAVE_GRAPHICS) && (defined HWLOC_WIN_SYS)
+		  "graphical window"
+#elif (defined LSTOPO_HAVE_GRAPHICS) && (defined LSTOPO_HAVE_X11)
+		  "graphical window (X11) if DISPLAY is set, console otherwise"
 #else
 		  "console"
 #endif
@@ -661,6 +657,7 @@ void lstopo_show_interactive_cli_options(const struct lstopo_output *loutput)
 
 enum output_format {
   LSTOPO_OUTPUT_DEFAULT,
+  LSTOPO_OUTPUT_WINDOW,
   LSTOPO_OUTPUT_CONSOLE,
   LSTOPO_OUTPUT_SYNTHETIC,
   LSTOPO_OUTPUT_ASCII,
@@ -682,6 +679,8 @@ parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
 {
   if (!hwloc_strncasecmp(name, "default", 3))
     return LSTOPO_OUTPUT_DEFAULT;
+  else if (!hwloc_strncasecmp(name, "window", 3))
+    return LSTOPO_OUTPUT_WINDOW;
   else if (!hwloc_strncasecmp(name, "console", 3))
     return LSTOPO_OUTPUT_CONSOLE;
   else if (!strcasecmp(name, "synthetic"))
@@ -1518,6 +1517,22 @@ main (int argc, char *argv[])
     output_func = output_android;
 #endif
     }
+    break;
+
+  case LSTOPO_OUTPUT_WINDOW:
+#if (defined LSTOPO_HAVE_GRAPHICS) && (defined LSTOPO_HAVE_X11)
+    if (getenv("DISPLAY")) {
+      output_func = output_x11;
+    } else {
+      fprintf(stderr, "X11 graphical window output requires a DISPLAY environment variable.\n");
+      goto out;
+    }
+#elif (defined LSTOPO_HAVE_GRAPHICS) && (defined HWLOC_WIN_SYS)
+    output_func = output_windows;
+#else
+    fprintf(stderr, "Graphical window output not supported.\n");
+    goto out;
+#endif
     break;
 
   case LSTOPO_OUTPUT_CONSOLE:
