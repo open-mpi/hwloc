@@ -406,6 +406,9 @@ EOF
     fi
     AC_SUBST(HWLOC_PS_LIBS)
 
+    AC_CHECK_FUNCS([isatty])
+    AC_CHECK_FUNCS([tcgetpgrp])
+
     AC_CHECK_HEADERS([time.h], [
       AC_CHECK_FUNCS([clock_gettime])
     ])

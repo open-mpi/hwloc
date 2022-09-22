@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
@@ -574,6 +577,10 @@ void usage(const char *name, FILE *where)
 
 void lstopo_show_interactive_help(void)
 {
+  if (!isatty(STDOUT_FILENO))
+    /* don't send the interactive help when not a terminal */
+    return;
+
   printf("\n");
   printf("Keyboard shortcuts:\n");
   printf(" Zooming, scrolling and closing:\n");
@@ -1475,10 +1482,21 @@ main (int argc, char *argv[])
   }
 
   switch (output_format) {
-  case LSTOPO_OUTPUT_DEFAULT:
+  case LSTOPO_OUTPUT_DEFAULT: {
 #ifdef LSTOPO_HAVE_GRAPHICS
 #if (defined LSTOPO_HAVE_X11)
-    if (getenv("DISPLAY")) {
+    int want_console = 0;
+#if (defined HAVE_ISATTY) && (defined HAVE_TCGETPGRP)
+    /* If stdout isn't a tty, we're likely redirecting stdout, use console mode.
+     * However, if launched from the window manager, we still want graphical mode.
+     * tcgetpgrp(STDIN) should fail with ENOTTY in this case.
+     * We don't specifically check for errno==ENOTTY: if tcgetpgrp() ever fails
+     * for another reason, don't assume we're redirected, keep the graphical mode too.
+     */
+    if (!isatty(STDOUT_FILENO) && tcgetpgrp(STDIN_FILENO) != -1)
+      want_console = 1;
+#endif
+    if (getenv("DISPLAY") && !want_console) {
       output_func = output_x11;
     } else
 #endif /* LSTOPO_HAVE_X11 */
@@ -1497,6 +1515,7 @@ main (int argc, char *argv[])
     setJNIEnv();
     output_func = output_android;
 #endif
+    }
     break;
 
   case LSTOPO_OUTPUT_CONSOLE:
