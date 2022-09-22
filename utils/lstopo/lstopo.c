@@ -577,9 +577,11 @@ void usage(const char *name, FILE *where)
 
 void lstopo_show_interactive_help(void)
 {
+#ifdef HAVE_ISATTY
   if (!isatty(STDOUT_FILENO))
     /* don't send the interactive help when not a terminal */
     return;
+#endif
 
   printf("\n");
   printf("Keyboard shortcuts:\n");
