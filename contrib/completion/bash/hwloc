@@ -12,7 +12,7 @@
 
 _lstopo() {
     local INPUT_FORMAT=(xml synthetic fsroot cpuid)
-    local OUTPUT_FORMAT=(console ascii tikz fig pdf ps png svg xml synthetic)
+    local OUTPUT_FORMAT=(default console ascii tikz tex fig pdf nativesvg cairosvg ps png svg xml shmem synthetic)
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(-l --logical
