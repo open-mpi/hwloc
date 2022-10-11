@@ -1853,6 +1853,7 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
     hwloc_bitmap_free(cpuset);
   } else {
     hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, nr_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc__free_infos(infos, nr_infos);
   }
 
   return state->global->close_tag(state);
