@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -132,7 +132,7 @@ hwloc_progname(struct hwloc_topology *topology __hwloc_attribute_unused)
 #elif HAVE_DECL_GETEXECNAME
   name = getexecname(); /* Solaris */
 #elif defined HAVE_PROGRAM_INVOCATION_NAME
-  name = program_invocation_name; /* Glibc. BGQ CNK. */
+  name = program_invocation_name; /* Glibc. */
   /* could use program_invocation_short_name directly, but we have the code to remove the path below anyway */
 #elif defined HAVE___PROGNAME
   name = __progname; /* fallback for most unix, used for OpenBSD */

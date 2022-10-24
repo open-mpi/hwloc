@@ -224,10 +224,6 @@ int main(void)
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "linux:0xfffffff0");
   assert(!err);
 #endif
-#ifdef HWLOC_BGQ_SYS
-  err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "bgq");
-  assert(!err);
-#endif
 #ifdef HWLOC_DARWIN_SYS
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "darwin");
   assert(!err);

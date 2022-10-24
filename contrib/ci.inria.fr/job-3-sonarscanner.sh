@@ -79,7 +79,7 @@ test x$NO_CHECK = xtrue || scan-build -plist --intercept-first --analyze-headers
 
 # Run cppcheck analysis
 SOURCES_TO_ANALYZE="hwloc netloc tests utils"
-SOURCES_TO_EXCLUDE="-itests/hwloc/ports -ihwloc/topology-aix.c -ihwloc/topology-bgq.c -ihwloc/topology-darwin.c -ihwloc/topology-freebsd.c -ihwloc/topology-hpux.c -ihwloc/topology-netbsd.c -ihwloc/topology-solaris.c -ihwloc/topology-solaris-chiptype.c -ihwloc/topology-windows.c -ihwloc/topology-cuda.c -ihwloc/topology-gl.c -ihwloc/topology-nvml.c -ihwloc/topology-rsmi.c -ihwloc/topology-levelzero.c -ihwloc/topology-opencl.c -iutils/lstopo/lstopo-windows.c -iutils/lstopo/lstopo-android.c"
+SOURCES_TO_EXCLUDE="-itests/hwloc/ports -ihwloc/topology-aix.c -ihwloc/topology-darwin.c -ihwloc/topology-freebsd.c -ihwloc/topology-hpux.c -ihwloc/topology-netbsd.c -ihwloc/topology-solaris.c -ihwloc/topology-solaris-chiptype.c -ihwloc/topology-windows.c -ihwloc/topology-cuda.c -ihwloc/topology-gl.c -ihwloc/topology-nvml.c -ihwloc/topology-rsmi.c -ihwloc/topology-levelzero.c -ihwloc/topology-opencl.c -iutils/lstopo/lstopo-windows.c -iutils/lstopo/lstopo-android.c"
 CPPCHECK_INCLUDES="-Iinclude -Ihwloc -Iutils/lstopo -Iutils/hwloc"
 CPPCHECK="cppcheck -v -f --language=c --platform=unix64 --enable=all --xml --xml-version=2 --suppress=purgedConfiguration --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES}"
 # Main cppcheck
@@ -89,8 +89,6 @@ ${CPPCHECK} ${DEFINITIONS} ${SOURCES_TO_ANALYZE} ${SOURCES_TO_EXCLUDE} 2> hwloc-
 # cppcheck on non-Linux ports
 DEFINITIONS="-DR_THREAD=6 -DP_DEFAULT=0 -DR_L2CSDL=11 -DR_PCORESDL=12 -DR_REF1SDL=13"
 ${CPPCHECK} ${DEFINITIONS} hwloc/topology-aix.c -Itests/hwloc/ports/include/aix 2> hwloc-cppcheck-aix.xml
-DEFINITIONS=
-${CPPCHECK} ${DEFINITIONS} hwloc/topology-bgq.c -Itests/hwloc/ports/include/bgq 2> hwloc-cppcheck-bgq.xml
 DEFINITIONS=
 ${CPPCHECK} ${DEFINITIONS} hwloc/topology-darwin.c -Itests/hwloc/ports/include/darwin 2> hwloc-cppcheck-darwin.xml
 DEFINITIONS="-Dhwloc_thread_t=pthread_t -DCPU_WHICH_DOMAIN=6"

@@ -1,4 +1,4 @@
-# Copyright © 2009-2021 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2012 Oracle and/or its affiliates.  All rights reserved.
@@ -146,10 +146,6 @@ endif HWLOC_HAVE_SOLARIS
 if HWLOC_HAVE_LINUX
 sources += topology-linux.c topology-hardwired.c
 endif HWLOC_HAVE_LINUX
-
-if HWLOC_HAVE_BGQ
-sources += topology-bgq.c
-endif HWLOC_HAVE_BGQ
 
 if HWLOC_HAVE_AIX
 sources += topology-aix.c

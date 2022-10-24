@@ -843,10 +843,6 @@ hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_t
     hwloc_set_linuxfs_hooks(hooks, support);
 #    endif /* HWLOC_LINUX_SYS */
 
-#    ifdef HWLOC_BGQ_SYS
-    hwloc_set_bgq_hooks(hooks, support);
-#    endif /* HWLOC_BGQ_SYS */
-
 #    ifdef HWLOC_AIX_SYS
     hwloc_set_aix_hooks(hooks, support);
 #    endif /* HWLOC_AIX_SYS */

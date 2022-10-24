@@ -23,6 +23,8 @@ Version 3.0.0
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.
+* Backends
+  + Remove BlueGene/Q support.
 
 
 Version 2.9.0

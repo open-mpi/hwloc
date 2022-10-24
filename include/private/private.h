@@ -327,10 +327,6 @@ extern void hwloc_set_binding_hooks(struct hwloc_topology *topology);
 extern void hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_LINUX_SYS */
 
-#if defined(HWLOC_BGQ_SYS)
-extern void hwloc_set_bgq_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
-#endif /* HWLOC_BGQ_SYS */
-
 #ifdef HWLOC_SOLARIS_SYS
 extern void hwloc_set_solaris_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_SOLARIS_SYS */

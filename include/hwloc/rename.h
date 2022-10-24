@@ -761,7 +761,6 @@ extern "C" {
 #define hwloc_synthetic_component HWLOC_NAME(synthetic_component)
 
 #define hwloc_aix_component HWLOC_NAME(aix_component)
-#define hwloc_bgq_component HWLOC_NAME(bgq_component)
 #define hwloc_darwin_component HWLOC_NAME(darwin_component)
 #define hwloc_freebsd_component HWLOC_NAME(freebsd_component)
 #define hwloc_hpux_component HWLOC_NAME(hpux_component)
@@ -827,7 +826,6 @@ extern "C" {
 #define hwloc_set_binding_hooks HWLOC_NAME(set_binding_hooks)
 
 #define hwloc_set_linuxfs_hooks HWLOC_NAME(set_linuxfs_hooks)
-#define hwloc_set_bgq_hooks HWLOC_NAME(set_bgq_hooks)
 #define hwloc_set_solaris_hooks HWLOC_NAME(set_solaris_hooks)
 #define hwloc_set_aix_hooks HWLOC_NAME(set_aix_hooks)
 #define hwloc_set_windows_hooks HWLOC_NAME(set_windows_hooks)

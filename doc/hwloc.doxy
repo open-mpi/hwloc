@@ -57,7 +57,6 @@ and NumaScale NumaConnect.</li>
 <li>NetBSD</li>
 <li>HP-UX</li>
 <li>Microsoft Windows</li>
-<li>IBM BlueGene/Q Compute Node Kernel (CNK)</li>
 </ul>
 
 Since it uses standard Operating System information, hwloc's support is mostly
@@ -1306,8 +1305,6 @@ following environment variables.
   listed in those warnings so no need to document it
  HWLOC_TEST_GATHER_TOPOLOGY=0
   disable the hwloc-gather-topology test when too long on large servers
- HWLOC_FORCE_BGQ
-  makes the bgq component run even if it doesn't recognize the running platform as a BGQ/CNK
  HWLOC_PICL_HETEROGENEOUS
   don't apply PICL info from a single CPU to all CPUs since the machine isn't homogeneous
  HWLOC_DEBUG_FAKE_COMPONENT
@@ -3084,12 +3081,6 @@ environment variable (see \ref envvar).
  that may complete or replace the previously-found CPU information.
  It is statically built when supported.
 </dd>
-<dt>bgq</dt>
-<dd>
- This component is specific to IBM BlueGene/Q compute node (running CNK).
- It is built and enabled by default when <tt>\--host=powerpc64-bgq-linux</tt>
- is passed to configure (see \ref faq_bgq).
-</dd>
 <dt>no_os</dt>
 <dd>
  A basic component that just tries to detect the number of processing
@@ -4197,26 +4188,6 @@ The utility is currently unneeded on platforms without Intel Xeon Phi processors
 
 See <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
 about the location of dumped files.
-
-
-\subsection faq_bgq How do I build hwloc for BlueGene/Q?
-
-IBM BlueGene/Q machines run a standard Linux on the login/frontend nodes
-and a custom CNK (<em>Compute Node Kernel</em>) on the compute nodes.
-
-To discover the topology of a login/frontend node, hwloc should be
-configured as usual, without any BlueGene/Q-specific option.
-
-However, one would likely rather discover the topology of the compute nodes
-where parallel jobs are actually running.
-If so, hwloc must be cross-compiled with the following configuration line:
-\verbatim
-./configure --host=powerpc64-bgq-linux --disable-shared --enable-static \
-  CPPFLAGS='-I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk/'
-\endverbatim
-
-CPPFLAGS may have to be updated if your platform headers are installed
-in a different directory.
 
 
 \subsection faq_windows How do I build hwloc for Windows?

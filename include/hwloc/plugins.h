@@ -104,7 +104,7 @@ struct hwloc_disc_component {
 
 /** \brief Discovery phase */
 typedef enum hwloc_disc_phase_e {
-  /** \brief xml or synthetic, platform-specific components such as bgq.
+  /** \brief xml or synthetic, platform-specific components.
    * Discovers everything including CPU, memory, I/O and everything else.
    * A component with a Global phase usually excludes all other phases.
    * \hideinitializer */

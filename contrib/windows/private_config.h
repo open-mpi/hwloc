@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
@@ -346,9 +346,6 @@
 
 /* Define to 1 on AIX */
 /* #undef HWLOC_AIX_SYS */
-
-/* Define to 1 on BlueGene/Q */
-/* #undef HWLOC_BGQ_SYS */
 
 /* Whether C compiler supports symbol visibility or not */
 #define HWLOC_C_HAVE_VISIBILITY 0

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018-2020 Inria.  All rights reserved.
+ * Copyright © 2018-2022 Inria.  All rights reserved.
  *
  * See COPYING in top-level directory.
  */
@@ -15,7 +15,6 @@ HWLOC_DECLSPEC extern const struct hwloc_component hwloc_synthetic_component;
 
 /* CPU discovery */
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_aix_component;
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_bgq_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_darwin_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_freebsd_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_hpux_component;
