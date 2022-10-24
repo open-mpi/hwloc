@@ -202,7 +202,7 @@ int hwloc_internal_distances_dup(struct hwloc_topology *new, struct hwloc_topolo
 
 int hwloc_distances_remove(hwloc_topology_t topology)
 {
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }
@@ -219,7 +219,7 @@ int hwloc_distances_remove_by_depth(hwloc_topology_t topology, int depth)
   struct hwloc_internal_distances_s *dist, *next;
   hwloc_obj_type_t type;
 
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }
@@ -615,7 +615,7 @@ void * hwloc_distances_add_create(hwloc_topology_t topology,
                                   const char *name, unsigned long kind,
                                   unsigned long flags)
 {
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return NULL;
   }
@@ -997,7 +997,7 @@ hwloc_distances_get(hwloc_topology_t topology,
 		    unsigned *nrp, struct hwloc_distances_s **distancesp,
 		    unsigned long kind, unsigned long flags)
 {
-  if (flags || !topology->is_loaded) {
+  if (flags || !(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }
@@ -1012,7 +1012,7 @@ hwloc_distances_get_by_depth(hwloc_topology_t topology, int depth,
 {
   hwloc_obj_type_t type;
 
-  if (flags || !topology->is_loaded) {
+  if (flags || !(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }
@@ -1032,7 +1032,7 @@ hwloc_distances_get_by_name(hwloc_topology_t topology, const char *name,
 			    unsigned *nrp, struct hwloc_distances_s **distancesp,
 			    unsigned long flags)
 {
-  if (flags || !topology->is_loaded) {
+  if (flags || !(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }
@@ -1045,7 +1045,7 @@ hwloc_distances_get_by_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 			    unsigned *nrp, struct hwloc_distances_s **distancesp,
 			    unsigned long kind, unsigned long flags)
 {
-  if (flags || !topology->is_loaded) {
+  if (flags || !(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }

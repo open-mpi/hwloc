@@ -786,6 +786,10 @@ extern "C" {
 
 #define hwloc_internal_location_s HWLOC_NAME(internal_location_s)
 
+#define hwloc_topology_state_e HWLOC_NAME(topology_state_e)
+#define HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM HWLOC_NAME_CAPS(TOPOLOGY_STATE_IS_THISSYSTEM)
+#define HWLOC_TOPOLOGY_STATE_IS_LOADED HWLOC_NAME_CAPS(TOPOLOGY_STATE_IS_LOADED)
+
 #define hwloc_special_level_s HWLOC_NAME(special_level_s)
 
 #define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)

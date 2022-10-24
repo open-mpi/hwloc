@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017-2021 Inria.  All rights reserved.
+ * Copyright © 2017-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -50,23 +50,23 @@ int main(void)
     assert(offset == 0);
 
     offset = offsetof(struct hwloc_topology, adopted_shmem_addr);
-    assert(offset == 232);
+    assert(offset == 240);
 
     offset = offsetof(struct hwloc_topology, binding_hooks);
-    assert(offset == 456);
+    assert(offset == 464);
     size = sizeof(struct hwloc_binding_hooks);
     assert(size == 192);
 
     offset = offsetof(struct hwloc_topology, support);
-    assert(offset == 648);
+    assert(offset == 656);
 
     offset = offsetof(struct hwloc_topology, first_dist);
-    assert(offset == 704);
+    assert(offset == 712);
     size = sizeof(struct hwloc_internal_distances_s);
     assert(size == 88);
 
     offset = offsetof(struct hwloc_topology, memattrs);
-    assert(offset == 728);
+    assert(offset == 736);
     size = sizeof(struct hwloc_internal_memattr_s);
     assert(size == 32);
     size = sizeof(struct hwloc_internal_memattr_target_s);
@@ -77,12 +77,12 @@ int main(void)
     assert(size == 32);
 
     offset = offsetof(struct hwloc_topology, cpukinds);
-    assert(offset == 744);
+    assert(offset == 752);
     size = sizeof(struct hwloc_internal_cpukind_s);
     assert(size == 40);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 784);
+    assert(offset == 792);
 
     /* fields after this one aren't needed after discovery */
 

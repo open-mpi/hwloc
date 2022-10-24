@@ -3304,7 +3304,7 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
   int force_nolibxml;
   int ret;
 
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }
@@ -3352,7 +3352,7 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
   int force_nolibxml;
   int ret;
 
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }

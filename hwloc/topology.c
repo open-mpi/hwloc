@@ -246,7 +246,7 @@ int hwloc_get_sysctl(int name[], unsigned namelen, int64_t *ret)
 #endif
 
 /* Return the OS-provided number of processors.
- * Assumes topology->is_thissystem is true.
+ * Assumes HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM is set in topology->state.
  */
 #ifndef HWLOC_WIN_SYS /* The windows implementation is in topology-windows.c */
 int
@@ -1052,7 +1052,7 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   unsigned i;
   int err;
 
-  if (!old->is_loaded) {
+  if (!(old->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }
@@ -1063,8 +1063,7 @@ hwloc__topology_dup(hwloc_topology_t *newp,
 
   new->flags = old->flags;
   memcpy(new->type_filter, old->type_filter, sizeof(old->type_filter));
-  new->is_thissystem = old->is_thissystem;
-  new->is_loaded = 1;
+  new->state = old->state;
   new->pid = old->pid;
   new->next_gp_index = old->next_gp_index;
 
@@ -1913,7 +1912,7 @@ hwloc_alloc_setup_object(hwloc_topology_t topology,
 hwloc_obj_t
 hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
 {
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     /* this could actually work, see insert() below */
     errno = EINVAL;
     return NULL;
@@ -1938,7 +1937,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
   hwloc_obj_t res, root;
   int cmp;
 
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     /* this could actually work, we would just need to disable connect_children/levels below */
     hwloc_free_unlinked_object(obj);
     errno = EINVAL;
@@ -2045,7 +2044,7 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
     return NULL;
   }
 
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return NULL;
   }
@@ -3457,7 +3456,7 @@ hwloc_discover(struct hwloc_topology *topology,
 
   if (/* check if getting the sets of locally allowed resources is possible */
       topology->binding_hooks.get_allowed_resources
-      && topology->is_thissystem
+      && (topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM)
       /* check whether it has been done already */
       && !(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)
       /* check whether it was explicitly requested */
@@ -3710,9 +3709,8 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   hwloc_pci_discovery_init(topology); /* make sure both dup() and load() get sane variables */
 
   /* Setup topology context */
-  topology->is_loaded = 0;
+  topology->state = HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
   topology->flags = 0;
-  topology->is_thissystem = 1;
   topology->pid = 0;
   topology->userdata = NULL;
   topology->topology_abi = HWLOC_TOPOLOGY_ABI;
@@ -3757,7 +3755,7 @@ int
 hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
                        hwloc_pid_t pid __hwloc_attribute_unused)
 {
-  if (topology->is_loaded) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
     errno = EBUSY;
     return -1;
   }
@@ -3775,7 +3773,7 @@ hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
 int
 hwloc_topology_set_synthetic(struct hwloc_topology *topology, const char *description)
 {
-  if (topology->is_loaded) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
     errno = EBUSY;
     return -1;
   }
@@ -3790,7 +3788,7 @@ int
 hwloc_topology_set_xml(struct hwloc_topology *topology,
 		       const char *xmlpath)
 {
-  if (topology->is_loaded) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
     errno = EBUSY;
     return -1;
   }
@@ -3806,7 +3804,7 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology,
                              const char *xmlbuffer,
                              int size)
 {
-  if (topology->is_loaded) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
     errno = EBUSY;
     return -1;
   }
@@ -3820,7 +3818,7 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology,
 int
 hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
 {
-  if (topology->is_loaded) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
     /* actually harmless */
     errno = EBUSY;
     return -1;
@@ -3918,7 +3916,7 @@ hwloc_topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t
     errno = EINVAL;
     return -1;
   }
-  if (topology->is_loaded) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
     errno = EBUSY;
     return -1;
   }
@@ -3929,7 +3927,7 @@ int
 hwloc_topology_set_all_types_filter(struct hwloc_topology *topology, enum hwloc_type_filter_e filter)
 {
   hwloc_obj_type_t type;
-  if (topology->is_loaded) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
     errno = EBUSY;
     return -1;
   }
@@ -4026,7 +4024,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   const char *env;
   int err;
 
-  if (topology->is_loaded) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
     errno = EBUSY;
     return -1;
   }
@@ -4095,7 +4093,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   hwloc_backends_is_thissystem(topology);
   hwloc_backends_find_callbacks(topology);
   /*
-   * Now set binding hooks according to topology->is_thissystem
+   * Now set binding hooks according to HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM in topology->state
    * and what the native OS backend offers.
    */
   hwloc_set_binding_hooks(topology);
@@ -4128,7 +4126,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   hwloc_internal_memattrs_refresh(topology);
   hwloc_internal_memattrs_guess_memory_tiers(topology);
 
-  topology->is_loaded = 1;
+  topology->state |= HWLOC_TOPOLOGY_STATE_IS_LOADED;
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING) {
     /* FIXME: filter directly in backends during the discovery.
@@ -4309,7 +4307,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
 {
   hwloc_bitmap_t droppedcpuset, droppednodeset;
 
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }
@@ -4460,7 +4458,7 @@ hwloc_topology_allow(struct hwloc_topology *topology,
 		     hwloc_const_cpuset_t cpuset, hwloc_const_nodeset_t nodeset,
 		     unsigned long flags)
 {
-  if (!topology->is_loaded)
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED))
     goto einval;
 
   if (topology->adopted_shmem_addr) {
@@ -4485,7 +4483,7 @@ hwloc_topology_allow(struct hwloc_topology *topology,
   case HWLOC_ALLOW_FLAG_LOCAL_RESTRICTIONS: {
     if (cpuset || nodeset)
       goto einval;
-    if (!topology->is_thissystem)
+    if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM))
       goto einval;
     if (!topology->binding_hooks.get_allowed_resources) {
       errno = ENOSYS;
@@ -4536,7 +4534,7 @@ hwloc_topology_refresh(struct hwloc_topology *topology)
 int
 hwloc_topology_is_thissystem(struct hwloc_topology *topology)
 {
-  return topology->is_thissystem;
+  return !!(topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM);
 }
 
 int

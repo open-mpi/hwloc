@@ -453,7 +453,8 @@ hwloc_win_free_processor_groups(void)
 int
 hwloc_windows_get_nr_processor_groups(hwloc_topology_t topology, unsigned long flags)
 {
-  if (!topology->is_loaded || !topology->is_thissystem) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)
+      || !(topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM)) {
     errno = EINVAL;
     return -1;
   }
@@ -469,7 +470,8 @@ hwloc_windows_get_nr_processor_groups(hwloc_topology_t topology, unsigned long f
 int
 hwloc_windows_get_processor_group_cpuset(hwloc_topology_t topology, unsigned pg_index, hwloc_cpuset_t cpuset, unsigned long flags)
 {
-  if (!topology->is_loaded || !topology->is_thissystem) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)
+      || !(topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM)) {
     errno = EINVAL;
     return -1;
   }

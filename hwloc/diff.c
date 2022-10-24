@@ -305,7 +305,8 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 	unsigned i;
 	int err;
 
-	if (!topo1->is_loaded || !topo2->is_loaded) {
+	if (!(topo1->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)
+            || !(topo2->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
 	  errno = EINVAL;
 	  return -1;
 	}
@@ -503,7 +504,7 @@ int hwloc_topology_diff_apply(hwloc_topology_t topology,
 	hwloc_topology_diff_t tmpdiff, tmpdiff2;
 	int err, nr;
 
-	if (!topology->is_loaded) {
+	if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
 	  errno = EINVAL;
 	  return -1;
 	}

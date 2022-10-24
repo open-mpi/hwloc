@@ -5301,13 +5301,15 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
   char line[128]; /* enough for utsname fields */
   const char *env;
 
-  /* initialize to something sane, in case !is_thissystem and we can't find things in /proc/hwloc-nofile-info */
+  /* initialize to something sane, in case !HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM
+   * and we can't find things in /proc/hwloc-nofile-info
+ */
   memset(&data->utsname, 0, sizeof(data->utsname));
   data->fallback_nbprocessors = -1; /* unknown yet */
   data->pagesize = 4096;
 
   /* read thissystem info */
-  if (topology->is_thissystem) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM) {
     uname(&data->utsname);
     data->fallback_nbprocessors = hwloc_fallback_nbprocessors(0); /* errors managed in hwloc_linux_fallback_pu_level() */
     data->pagesize = hwloc_getpagesize();
@@ -5383,7 +5385,7 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 
   /* detect arch for quirks, using configure #defines if possible, or uname */
 #if (defined HWLOC_X86_32_ARCH) || (defined HWLOC_X86_64_ARCH) /* does not cover KNC */
-  if (topology->is_thissystem)
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM)
     data->arch = HWLOC_LINUX_ARCH_X86;
 #endif
   if (data->arch == HWLOC_LINUX_ARCH_UNKNOWN && *data->utsname.machine) {

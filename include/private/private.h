@@ -60,6 +60,11 @@ struct hwloc_internal_location_s {
  * should cause a bump of HWLOC_TOPOLOGY_ABI.
  *****************************************************/
 
+enum hwloc_topology_state_e {
+  HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM = (1UL<<0),
+  HWLOC_TOPOLOGY_STATE_IS_LOADED = (1UL<<1)
+};
+
 struct hwloc_topology {
   unsigned topology_abi;
 
@@ -70,9 +75,10 @@ struct hwloc_topology {
   unsigned long flags;
   int type_depth[HWLOC_OBJ_TYPE_MAX];
   enum hwloc_type_filter_e type_filter[HWLOC_OBJ_TYPE_MAX];
-  int is_thissystem;
-  int is_loaded;
-  int modified;                                         /* >0 if objects were added/removed recently, which means a reconnect is needed */
+  unsigned long state;                                  /* OR'ed enum hwloc_topology_state_e */
+  unsigned long modified;                               /* >0 if objects were added/removed recently, which means a reconnect is needed,
+                                                         * not inside "state" in case we want to store bits, numbers, etc.
+                                                         */
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
   void *userdata;
   uint64_t next_gp_index;

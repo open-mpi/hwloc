@@ -1468,7 +1468,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   if (env)
     verbose = atoi(env);
 
-  if (!topology->is_loaded) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
     errno = EINVAL;
     return -1;
   }

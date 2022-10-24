@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017-2020 Inria.  All rights reserved.
+ * Copyright © 2017-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -193,7 +193,7 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
   }
 
   /* enforced by dup() inside shmem_topology_write() */
-  assert(old->is_loaded);
+  assert(old->state & HWLOC_TOPOLOGY_STATE_IS_LOADED);
   assert(old->backends == NULL);
   assert(old->get_pci_busid_cpuset_backend == NULL);
 

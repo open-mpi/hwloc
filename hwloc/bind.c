@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2011-2015 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -876,7 +876,7 @@ hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_t
 void
 hwloc_set_binding_hooks(struct hwloc_topology *topology)
 {
-  if (topology->is_thissystem) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM) {
     hwloc_set_native_binding_hooks(&topology->binding_hooks, &topology->support);
     /* every hook not set above will return ENOSYS */
   } else {
@@ -890,7 +890,7 @@ hwloc_set_binding_hooks(struct hwloc_topology *topology)
    * and get_cpubind returns the whole system cpuset,
    * so don't report that set/get_cpubind as supported
    */
-  if (topology->is_thissystem) {
+  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM) {
 #define DO(which,kind) \
     if (topology->binding_hooks.kind) \
       topology->support.which##bind->kind = 1;

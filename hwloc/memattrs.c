@@ -884,7 +884,8 @@ hwloc__internal_memattr_set_value(hwloc_topology_t topology,
     return -1;
   }
 
-  if (topology->is_loaded && !(imattr->iflags & HWLOC_IMATTR_FLAG_CACHE_VALID))
+  if ((topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)
+      && !(imattr->iflags & HWLOC_IMATTR_FLAG_CACHE_VALID))
     /* don't refresh when adding values during load (some nodes might not be ready yet),
      * we'll refresh later
      */
