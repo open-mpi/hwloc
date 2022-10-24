@@ -1913,7 +1913,7 @@ hwloc_obj_t
 hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
 {
   if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
-    /* this could actually work, see insert() below */
+    /* this could actually work when IS_LOADING, see insert() below */
     errno = EINVAL;
     return NULL;
   }
@@ -1938,7 +1938,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
   int cmp;
 
   if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
-    /* this could actually work, we would just need to disable connect_children/levels below */
+    /* this could actually work when IS_LOADING, we would just need to disable connect_children/levels below */
     hwloc_free_unlinked_object(obj);
     errno = EINVAL;
     return NULL;
@@ -3709,7 +3709,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   hwloc_pci_discovery_init(topology); /* make sure both dup() and load() get sane variables */
 
   /* Setup topology context */
-  topology->state = HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
+  topology->state = HWLOC_TOPOLOGY_STATE_IS_INIT | HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
   topology->flags = 0;
   topology->pid = 0;
   topology->userdata = NULL;
@@ -3755,7 +3755,7 @@ int
 hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
                        hwloc_pid_t pid __hwloc_attribute_unused)
 {
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     errno = EBUSY;
     return -1;
   }
@@ -3773,7 +3773,7 @@ hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
 int
 hwloc_topology_set_synthetic(struct hwloc_topology *topology, const char *description)
 {
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     errno = EBUSY;
     return -1;
   }
@@ -3788,7 +3788,7 @@ int
 hwloc_topology_set_xml(struct hwloc_topology *topology,
 		       const char *xmlpath)
 {
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     errno = EBUSY;
     return -1;
   }
@@ -3804,7 +3804,7 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology,
                              const char *xmlbuffer,
                              int size)
 {
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     errno = EBUSY;
     return -1;
   }
@@ -3818,7 +3818,7 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology,
 int
 hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
 {
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     /* actually harmless */
     errno = EBUSY;
     return -1;
@@ -3916,7 +3916,7 @@ hwloc_topology_set_type_filter(struct hwloc_topology *topology, hwloc_obj_type_t
     errno = EINVAL;
     return -1;
   }
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     errno = EBUSY;
     return -1;
   }
@@ -3927,7 +3927,7 @@ int
 hwloc_topology_set_all_types_filter(struct hwloc_topology *topology, enum hwloc_type_filter_e filter)
 {
   hwloc_obj_type_t type;
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     errno = EBUSY;
     return -1;
   }
@@ -4024,10 +4024,12 @@ hwloc_topology_load (struct hwloc_topology *topology)
   const char *env;
   int err;
 
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     errno = EBUSY;
     return -1;
   }
+  topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_INIT;
+  topology->state |= HWLOC_TOPOLOGY_STATE_IS_LOADING;
 
   /* initialize envvar-related things */
   hwloc_internal_distances_prepare(topology);
@@ -4126,6 +4128,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   hwloc_internal_memattrs_refresh(topology);
   hwloc_internal_memattrs_guess_memory_tiers(topology);
 
+  topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_LOADING;
   topology->state |= HWLOC_TOPOLOGY_STATE_IS_LOADED;
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING) {

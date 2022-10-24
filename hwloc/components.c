@@ -652,7 +652,7 @@ hwloc_topology_set_components(struct hwloc_topology *topology,
 			      unsigned long flags,
 			      const char *name)
 {
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
     errno = EBUSY;
     return -1;
   }
@@ -676,7 +676,10 @@ hwloc_topology_set_components(struct hwloc_topology *topology,
   return hwloc_disc_component_blacklist_one(topology, name);
 }
 
-/* used by set_xml(), set_synthetic(), ... environment variables, ... to force the first backend */
+/* used by set_xml(), set_synthetic(), ... (before load),
+ * environment variables, ... (during load),
+ * to force the first backend
+ */
 int
 hwloc_disc_component_force_enable(struct hwloc_topology *topology,
 				  int envvar_forced,
@@ -686,7 +689,7 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
   struct hwloc_disc_component *comp;
   struct hwloc_backend *backend;
 
-  if (topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED) {
+  if (!(topology->state & (HWLOC_TOPOLOGY_STATE_IS_INIT|HWLOC_TOPOLOGY_STATE_IS_LOADING))) {
     errno = EBUSY;
     return -1;
   }

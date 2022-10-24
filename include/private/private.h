@@ -62,7 +62,9 @@ struct hwloc_internal_location_s {
 
 enum hwloc_topology_state_e {
   HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM = (1UL<<0),
-  HWLOC_TOPOLOGY_STATE_IS_LOADED = (1UL<<1)
+  HWLOC_TOPOLOGY_STATE_IS_LOADED = (1UL<<1),
+  HWLOC_TOPOLOGY_STATE_IS_LOADING = (1UL<<2),
+  HWLOC_TOPOLOGY_STATE_IS_INIT = (1UL<<3)
 };
 
 struct hwloc_topology {
