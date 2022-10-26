@@ -1325,7 +1325,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
           if (valueMem) {
             unsigned long long mb = strtoull(valueMem, NULL, 10) / 1024;
             snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
-                     mb >= 10240 ? "%llu GB HBM" : "%llu MB",
+                     mb >= 10240 ? "%llu GB" : "%llu MB",
                      mb >= 10240 ? mb/1024 : mb);
           }
           valueSl = hwloc_obj_get_info_by_name(obj, "LevelZeroNumSlices");
