@@ -49,8 +49,9 @@ static unsigned hwloc_cuda_cores_per_MP(int major, int minor)
     case 8:
       switch (minor) {
         case 0: return 64;
-        case 7: /* 8.7 is not documented yet, assume it's like 8.6 below */
-        case 6: return 128;
+        case 6:
+        case 7:
+        case 9: return 128;
       }
       break;
     case 9:

@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.8.1
+-------------
+* Add support for CUDA compute capability up to 9.0.
+
+
 Version 2.8.0
 -------------
 * API
