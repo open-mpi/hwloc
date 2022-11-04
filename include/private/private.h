@@ -469,14 +469,15 @@ static __hwloc_inline int hwloc_memory_size_snprintf(char *buffer, size_t bufsiz
     return snprintf(buffer, bufsize, "%llu%s", ((size>>9)+1)>>1, "KB");
   }
 
+  /* units 1024 */
   if (size < (10ULL<<20)) {
-    return snprintf(buffer, bufsize, "%llu%s", ((size>>9)+1)>>1, "KB");
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>9)+1)>>1, "KiB");
   } else if (size < (10ULL<<30)) {
-    return snprintf(buffer, bufsize, "%llu%s", ((size>>19)+1)>>1, "MB");
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>19)+1)>>1, "MiB");
   } else if (size < (10ULL<<40)) {
-    return snprintf(buffer, bufsize, "%llu%s", ((size>>29)+1)>>1, "GB");
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>29)+1)>>1, "GiB");
   } else {
-    return snprintf(buffer, bufsize, "%llu%s", ((size>>39)+1)>>1, "TB");
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>39)+1)>>1, "TiB");
   }
 }
 
