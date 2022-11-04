@@ -61,7 +61,7 @@ static void check(hwloc_topology_t topology, hwloc_obj_t obj)
   printf("    parsing hwloc_obj_type_snprintf() normal output = %s\n", buffer);
   _check(topology, obj, buffer, 1);
 
-  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, 1);
+  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
   assert(err > 0);
   printf("    parsing hwloc_obj_type_snprintf() verbose output = %s\n", buffer);
   _check(topology, obj, buffer, 1);

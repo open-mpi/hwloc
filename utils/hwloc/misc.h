@@ -500,7 +500,7 @@ hwloc_lstopo_show_summary_depth(FILE *output, size_t prefixmaxlen, hwloc_topolog
       types = hwloc_obj_type_string(type);
     } else {
       /* use verbose type name, those are identical for all objects on normal levels */
-      hwloc_obj_type_snprintf(_types, sizeof(_types), hwloc_get_obj_by_depth(topology, depth, 0), 1);
+      hwloc_obj_type_snprintf(_types, sizeof(_types), hwloc_get_obj_by_depth(topology, depth, 0), HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
       types = _types;
     }
 

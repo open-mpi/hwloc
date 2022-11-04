@@ -51,7 +51,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
   if (loutput->show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
     int len;
-    hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
+    hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode > 1 ? HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE : 0);
     if (l->subtype)
       fprintf(output, "%s(%s)", type, l->subtype);
     else
@@ -78,10 +78,10 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
       fprintf(output, " %s (%s)",
 	      busidstr, hwloc_pci_class_string(l->attr->pcidev.class_id));
     /* display attributes */
-    len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode-1);
+    len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode > 1 ? HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE : 0);
     attr = malloc(len+1);
     *attr = '\0';
-    hwloc_obj_attr_snprintf (attr, len+1, l, " ", verbose_mode-1);
+    hwloc_obj_attr_snprintf (attr, len+1, l, " ", verbose_mode > 1 ? HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE : 0);
     if (*phys || *attr) {
       fprintf(output, " (");
       if (*phys)

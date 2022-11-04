@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -11,7 +11,7 @@ include="$HWLOC_top_srcdir/include"
 misch="$HWLOC_top_srcdir/utils/hwloc/misc.h"
 
 flags_def=`grep -h _FLAG_ ${include}/hwloc.h ${include}/hwloc/*.h | grep '<<' | grep -v HWLOC_DISTRIB_FLAG \
-  | grep -v HWLOC_DISC_STATUS_FLAG | grep -v HWLOC_TOPOLOGY_COMPONENTS_FLAG | cut -d= -f1`
+  | grep -v HWLOC_DISC_STATUS_FLAG | grep -v HWLOC_TOPOLOGY_COMPONENTS_FLAG | grep -v HWLOC_OBJ_SNPRINTF_FLAG | cut -d= -f1`
 
 IFS=' ' flags=${flags_def}
 for flag in $flags

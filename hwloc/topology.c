@@ -404,12 +404,12 @@ hwloc_debug_print_object(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
   char type[64], idx[12], attr[1024], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
-  hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+  hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
   if (obj->os_index != HWLOC_UNKNOWN_INDEX)
     snprintf(idx, sizeof(idx), "#%u", obj->os_index);
   else
     *idx = '\0';
-  hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 1);
+  hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
   hwloc_debug("%s%s%s%s%s", type, idx, *attr ? "(" : "", attr, *attr ? ")" : "");
   if (obj->name)
     hwloc_debug(" name \"%s\"", obj->name);

@@ -24,6 +24,8 @@ Version 3.0.0
     using object attributes to disambiguate multiple levels with same type.
     - hwloc_type_sscanf_as_depth() is deprecated in favor of
       hwloc_type_sscanf() followed by hwloc_get_type_depth_with_attr().
+  + The verbose attribute of hwloc_obj_type/attr_snprintf() is replaced
+    by flags, where value 1 keeps the same meaning as in hwloc 2.x.
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.

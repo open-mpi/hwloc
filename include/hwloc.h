@@ -975,18 +975,19 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  *
  * The output is guaranteed to be the same for all objects of a same topology level.
  *
- * If \p verbose is 1, longer type names are used, e.g. L1Cache instead of L1.
- *
  * The output string may be parsed back by hwloc_type_sscanf().
  *
  * If \p size is 0, \p string may safely be \c NULL.
+ *
+ * Flags \p flags is a OR'ed set of the following bits:
+ * HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE is for backward compatibility with 2.x, it shows longer type names, e.g. L1Cache instead of L1.
  *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size,
 					   hwloc_obj_t obj,
-					   int verbose);
+					   unsigned long flags);
 
 /** \brief Stringify the attributes of a given topology object into a human-readable form.
  *
@@ -996,12 +997,17 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
  *
  * If \p size is 0, \p string may safely be \c NULL.
  *
+ * Flags \p flags is a OR'ed set of the following bits:
+ * HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE is for backward compatibility with 2.x, it shows additional attributes and sizes with KB unit but KiB values.
+ *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
 					   hwloc_obj_t obj, const char * __hwloc_restrict separator,
-					   int verbose);
+					   unsigned long flags);
+
+#define HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE (1ULL<<0)
 
 /** \brief Return an object type and attributes from a type string.
  *
