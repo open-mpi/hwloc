@@ -7,6 +7,7 @@
  */
 
 #include "private/autogen/config.h"
+#include "private/private.h" /* for hwloc_memory_size_snprintf() */
 #include "hwloc.h"
 
 #include <stdlib.h>
@@ -101,10 +102,11 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     free(attr);
     /* display the root total_memory if not verbose (already shown)
      * (cannot be local_memory since root cannot be a NUMA node) */
-    if (verbose_mode == 1 && !l->parent && l->total_memory)
-      fprintf(output, " (%lu%s total)",
-	      (unsigned long) hwloc_memory_size_printf_value(l->total_memory, 0),
-	      hwloc_memory_size_printf_unit(l->total_memory, 0));
+    if (verbose_mode == 1 && !l->parent && l->total_memory) {
+      char memsize[25];
+      hwloc_memory_size_snprintf(memsize, sizeof(memsize), l->total_memory, 0);
+      fprintf(output, " (%s total)", memsize);
+    }
     /* append the name */
     if (l->name && (l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2)
 	&& l->type != HWLOC_OBJ_MISC && l->type != HWLOC_OBJ_GROUP)

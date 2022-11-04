@@ -582,6 +582,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   const char *prefix = "";
   char *tmp = string;
   ssize_t tmplen = size;
+  char totalmemsize[25], localmemsize[25];
   int ret = 0;
   int res;
 
@@ -591,26 +592,21 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 
   /* print memory attributes */
   res = 0;
+  if (verbose)
+    hwloc_memory_size_snprintf(totalmemsize, sizeof(totalmemsize), obj->total_memory, flags);
+  if (obj->type == HWLOC_OBJ_NUMANODE && obj->attr->numanode.local_memory)
+    hwloc_memory_size_snprintf(localmemsize, sizeof(localmemsize), obj->attr->numanode.local_memory, flags);
   if (verbose) {
     if (obj->type == HWLOC_OBJ_NUMANODE && obj->attr->numanode.local_memory)
-      res = hwloc_snprintf(tmp, tmplen, "%slocal=%lu%s%stotal=%lu%s",
-			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->numanode.local_memory, verbose),
-			   hwloc_memory_size_printf_unit(obj->attr->numanode.local_memory, verbose),
-			   separator,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->total_memory, verbose),
-			   hwloc_memory_size_printf_unit(obj->total_memory, verbose));
+      res = hwloc_snprintf(tmp, tmplen, "%slocal=%s%stotal=%s",
+			   prefix, localmemsize, separator, totalmemsize);
     else if (obj->total_memory)
-      res = hwloc_snprintf(tmp, tmplen, "%stotal=%lu%s",
-			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->total_memory, verbose),
-			   hwloc_memory_size_printf_unit(obj->total_memory, verbose));
+      res = hwloc_snprintf(tmp, tmplen, "%stotal=%s",
+			   prefix, totalmemsize);
   } else {
     if (obj->type == HWLOC_OBJ_NUMANODE && obj->attr->numanode.local_memory)
-      res = hwloc_snprintf(tmp, tmplen, "%s%lu%s",
-			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->numanode.local_memory, verbose),
-			   hwloc_memory_size_printf_unit(obj->attr->numanode.local_memory, verbose));
+      res = hwloc_snprintf(tmp, tmplen, "%s%s",
+			   prefix, localmemsize);
   }
   if (res < 0)
     return -1;
@@ -633,7 +629,9 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_L1ICACHE:
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
-  case HWLOC_OBJ_MEMCACHE:
+  case HWLOC_OBJ_MEMCACHE: {
+    char cachesize[25];
+    hwloc_memory_size_snprintf(cachesize, sizeof(cachesize), obj->attr->cache.size, flags);
     if (verbose) {
       char assoc[32];
       if (obj->attr->cache.associativity == -1)
@@ -642,18 +640,13 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 	*assoc = '\0';
       else
 	snprintf(assoc, sizeof(assoc), "%sways=%d", separator, obj->attr->cache.associativity);
-      res = hwloc_snprintf(tmp, tmplen, "%ssize=%lu%s%slinesize=%u%s",
-			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
-			   hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose),
-			   separator, obj->attr->cache.linesize,
-			   assoc);
+      res = hwloc_snprintf(tmp, tmplen, "%ssize=%s%slinesize=%u%s",
+			   prefix, cachesize, separator, obj->attr->cache.linesize, assoc);
     } else
-      res = hwloc_snprintf(tmp, tmplen, "%s%lu%s",
-			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
-			   hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
+      res = hwloc_snprintf(tmp, tmplen, "%s%s",
+			   prefix, cachesize);
     break;
+  }
   case HWLOC_OBJ_BRIDGE:
     if (verbose) {
       char up[128], down[64];

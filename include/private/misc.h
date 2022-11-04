@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -537,11 +537,6 @@ hwloc__obj_type_is_icache(hwloc_obj_type_t type)
 #else
 #  define __hwloc_attribute_format(type, str, arg)
 #endif
-
-#define hwloc_memory_size_printf_value(_size, _verbose) \
-  ((_size) < (10ULL<<20) || (_verbose) ? (((_size)>>9)+1)>>1 : (_size) < (10ULL<<30) ? (((_size)>>19)+1)>>1 : (_size) < (10ULL<<40) ? (((_size)>>29)+1)>>1 : (((_size)>>39)+1)>>1)
-#define hwloc_memory_size_printf_unit(_size, _verbose) \
-  ((_size) < (10ULL<<20) || (_verbose) ? "KB" : (_size) < (10ULL<<30) ? "MB" : (_size) < (10ULL<<40) ? "GB" : "TB")
 
 #ifdef HWLOC_WIN_SYS
 #  ifndef HAVE_SSIZE_T

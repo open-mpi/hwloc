@@ -461,6 +461,25 @@ extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsi
 extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
 #endif
 
+/* uses HWLOC_OBJ_SNPRINTF_FLAG_ flags */
+static __hwloc_inline int hwloc_memory_size_snprintf(char *buffer, size_t bufsize, unsigned long long size, unsigned long flags)
+{
+  /* old deprecated format (KiB value with KB units) */
+  if (flags & HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE) {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>9)+1)>>1, "KB");
+  }
+
+  if (size < (10ULL<<20)) {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>9)+1)>>1, "KB");
+  } else if (size < (10ULL<<30)) {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>19)+1)>>1, "MB");
+  } else if (size < (10ULL<<40)) {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>29)+1)>>1, "GB");
+  } else {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>39)+1)>>1, "TB");
+  }
+}
+
 /* Return the name of the currently running program, if supported.
  * If not NULL, must be freed by the caller.
  */
