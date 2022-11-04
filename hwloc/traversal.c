@@ -519,7 +519,7 @@ static const char* hwloc_obj_cache_type_letter(hwloc_obj_cache_type_t type)
 int
 hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, unsigned long flags)
 {
-  int longnames = (flags & HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+  int longnames = (flags & (HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE|HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES));
   hwloc_obj_type_t type = obj->type;
   switch (type) {
   case HWLOC_OBJ_MISC:
@@ -578,7 +578,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 int
 hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * separator, unsigned long flags)
 {
-  int verbose = (flags & HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+  int verbose = (flags & (HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE|HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS));
   const char *prefix = "";
   char *tmp = string;
   ssize_t tmplen = size;

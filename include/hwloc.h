@@ -979,8 +979,8 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  *
  * If \p size is 0, \p string may safely be \c NULL.
  *
- * Flags \p flags is a OR'ed set of the following bits:
- * HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE is for backward compatibility with 2.x, it shows longer type names, e.g. L1Cache instead of L1.
+ * Flags \p flags is a OR'ed set of ::hwloc_obj_snprintf_flag_e.
+ * By default, short names are used.
  *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \\0).
@@ -997,8 +997,9 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
  *
  * If \p size is 0, \p string may safely be \c NULL.
  *
- * Flags \p flags is a OR'ed set of the following bits:
- * HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE is for backward compatibility with 2.x, it shows additional attributes and sizes with KB unit but KiB values.
+ * Flags \p flags is a OR'ed set of ::hwloc_obj_snprintf_flag_e.
+ * By default, only important attributes such as memory and cache sizes are shown.
+ * Sizes are reported in units such as GiB or KiB.
  *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \\0).
@@ -1007,7 +1008,37 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
 					   hwloc_obj_t obj, const char * __hwloc_restrict separator,
 					   unsigned long flags);
 
-#define HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE (1ULL<<0)
+/** \brief Flags to be given to hwloc_obj_type_snprintf() and hwloc_obj_attr_snprintf(). */
+enum hwloc_obj_snprintf_flag_e {
+  /** \brief Use long type names such as L2Cache instead of L2.
+   * \hideinitializer
+   */
+  HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES = 1ULL<<1,
+
+  /** \brief Display additional attributes such as
+   * cache associativity, PCI link speed, and total memory.
+   * \hideinitializer
+   */
+  HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS =1ULL<<2,
+
+  /** \brief Display memory sizes in bytes without units.
+   * \hideinitializer
+   */
+  HWLOC_OBJ_SNPRINTF_FLAG_NO_UNITS = 1ULL<<3,
+
+  /** \brief Display memory sizes in KB, MB, GB, etc
+   * i.e. divide by 1000 instead of 1024 for KiB, MiB, GiB, etc.
+   * \hideinitializer
+   */
+  HWLOC_OBJ_SNPRINTF_FLAG_UNITS_1000 = 1ULL<<4,
+
+  /** \brief Backward compatibility with hwloc 2.x verbose mode,
+   * shows additional attributes,
+   * and memory sizes with KB unit but KiB values.
+   * \hideinitializer
+   */
+  HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE = 1ULL<<0
+};
 
 /** \brief Return an object type and attributes from a type string.
  *

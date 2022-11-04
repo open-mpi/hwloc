@@ -93,7 +93,7 @@ static void print_task(hwloc_topology_t topology,
       while (obj->parent && hwloc_bitmap_isequal(obj->cpuset, obj->parent->cpuset) && !hwloc_obj_type_is_cache(obj->parent->type) )
         obj = obj->parent;
 
-      hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+      hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
       idx = logical ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
         printf("%s", type);
@@ -105,7 +105,7 @@ static void print_task(hwloc_topology_t topology,
       /* don't show a cache if there's something equivalent and nicer */
       while (hwloc_obj_type_is_cache(obj->type) && obj->arity == 1)
         obj = obj->first_child;
-      hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+      hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
       idx = logical ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
         printf("%s%s", first ? "" : " ", type);

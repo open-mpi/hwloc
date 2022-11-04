@@ -279,7 +279,7 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
                   hwloc_bitmap_asprintf(&inits, initiators[j].location.cpuset);
                 } else if (initiators[j].type == HWLOC_LOCATION_TYPE_OBJECT) {
                   char types[64];
-                  hwloc_obj_type_snprintf(types, sizeof(types), initiators[j].location.object, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+                  hwloc_obj_type_snprintf(types, sizeof(types), initiators[j].location.object, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
                   if (initiators[j].location.object->os_index != (unsigned)-1)
                     snprintf(_inits, sizeof(_inits), "%s L#%u P#%u", types, initiators[j].location.object->logical_index, initiators[j].location.object->os_index);
                   else
@@ -317,7 +317,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
   if (show_index_prefix)
     snprintf(prefix, sizeof(prefix), "%u: ", current_obj);
 
-  hwloc_obj_type_snprintf(objs, sizeof(objs), obj, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+  hwloc_obj_type_snprintf(objs, sizeof(objs), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
 
   if (show_ancestors) {
     char parents[128];
@@ -326,7 +326,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     while (parent) {
       if (show_index_prefix)
 	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
-      hwloc_obj_type_snprintf(parents, sizeof(parents), parent, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+      hwloc_obj_type_snprintf(parents, sizeof(parents), parent, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
       if (verbose < 0)
 	printf("%s%s:%u\n", prefix, parents, parent->logical_index);
       else if (level)
@@ -343,7 +343,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     hwloc_obj_t parent = obj;
     while (parent) {
       if (parent->depth == show_ancestor_depth) {
-	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
 	if (verbose < 0)
 	  printf("%s%s:%u\n", prefix, parents, parent->logical_index);
 	else
@@ -361,7 +361,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       char childs[128];
       if (show_index_prefix)
 	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-      hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+      hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
       if (verbose < 0)
 	printf("%s%s:%u\n", prefix, childs, child->logical_index);
       else
@@ -380,7 +380,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
 	char childs[128];
 	if (show_index_prefix)
 	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-	hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+	hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
 	if (verbose < 0)
 	  printf("%s%s:%u\n", prefix, childs, child->logical_index);
 	else
@@ -411,7 +411,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
 	}
 	if (show_index_prefix)
 	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-	hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+	hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
 	if (verbose < 0)
 	  printf("%s%s:%u\n", prefix, childs, child->logical_index);
 	else
@@ -461,7 +461,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
             continue;
           if (show_index_prefix)
 	    snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-          hwloc_obj_type_snprintf(nodestr, sizeof(nodestr), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+          hwloc_obj_type_snprintf(nodestr, sizeof(nodestr), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
           if (verbose < 0)
             printf("%s%s:%u\n", prefix, nodestr, nodes[i]->logical_index);
           else

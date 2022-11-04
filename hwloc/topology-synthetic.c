@@ -1318,7 +1318,7 @@ hwloc__export_synthetic_obj(struct hwloc_topology * topology, unsigned long flag
     res = hwloc_snprintf(tmp, tmplen, "%s%s", hwloc_obj_type_string(obj->type), aritys);
   } else {
     char types[64];
-    hwloc_obj_type_snprintf(types, sizeof(types), obj, HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE);
+    hwloc_obj_type_snprintf(types, sizeof(types), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
     res = hwloc_snprintf(tmp, tmplen, "%s%s", types, aritys);
   }
   if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
