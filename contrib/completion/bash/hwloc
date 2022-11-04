@@ -20,6 +20,7 @@ _lstopo() {
                    --logical-index-prefix
                    --os-index-prefix
                    --output-format --of
+		   --osf --obj-snprintf-flags
 		   -f --force
 		   --only
 		   -v --verbose
@@ -127,7 +128,7 @@ _lstopo() {
 	    --allow)
 		COMPREPLY=( `compgen -W "all local <mask> nodeset=<mask>" -- "$cur"` )
 		;;
-	    --restrict-flags | --export-xml-flags | --export-synthetic-flags | --fontsize | --gridsize | --linespacing | --thickness)
+	    --restrict-flags | --export-xml-flags | --export-synthetic-flags | --osf | --obj-snprintf-flags | --fontsize | --gridsize | --linespacing | --thickness)
 		COMPREPLY=( "<integer>" "" )
 		;;
 	    --append-legend)

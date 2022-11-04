@@ -1,5 +1,5 @@
-Machine (P#0 total=2053992KB Backend=Linux OSName=Linux OSRelease=dummy OSVersion=dummy HostName=dummy Architecture=s390x)
-  NUMANode L#0 (P#0 local=2053992KB total=2053992KB)
+Machine (P#0 total=2006MiB Backend=Linux OSName=Linux OSRelease=dummy OSVersion=dummy HostName=dummy Architecture=s390x)
+  NUMANode L#0 (P#0 local=2006MiB total=2006MiB)
   Group0(Drawer) L#0 (P#4)
     Group1(Book) L#0 (P#0)
       Package L#0

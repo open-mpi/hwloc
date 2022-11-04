@@ -980,4 +980,16 @@ hwloc_utils_parse_local_numanode_flags(char *str) {
   return hwloc_utils_parse_flags(str, possible_flags, (int) sizeof(possible_flags) / sizeof(possible_flags[0]), "local_numanode");
 }
 
+static __hwloc_inline unsigned long
+hwloc_utils_parse_obj_snprintf_flags(char *str) {
+  struct hwloc_utils_parsing_flag possible_flags[] = {
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_OBJ_SNPRINTF_FLAG_NO_UNITS),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_OBJ_SNPRINTF_FLAG_UNITS_1000)
+  };
+  return hwloc_utils_parse_flags(str, possible_flags, (int) sizeof(possible_flags) / sizeof(possible_flags[0]), "obj_snprintf");
+}
+
 #endif /* HWLOC_UTILS_MISC_H */

@@ -52,7 +52,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
   if (loutput->show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
     int len;
-    hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode > 1 ? HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE : 0);
+    hwloc_obj_type_snprintf (type, sizeof(type), l, loutput->obj_snprintf_flags);
     if (l->subtype)
       fprintf(output, "%s(%s)", type, l->subtype);
     else
@@ -79,10 +79,10 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
       fprintf(output, " %s (%s)",
 	      busidstr, hwloc_pci_class_string(l->attr->pcidev.class_id));
     /* display attributes */
-    len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode > 1 ? HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE : 0);
+    len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", loutput->obj_snprintf_flags);
     attr = malloc(len+1);
     *attr = '\0';
-    hwloc_obj_attr_snprintf (attr, len+1, l, " ", verbose_mode > 1 ? HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE : 0);
+    hwloc_obj_attr_snprintf (attr, len+1, l, " ", loutput->obj_snprintf_flags);
     if (*phys || *attr) {
       fprintf(output, " (");
       if (*phys)
@@ -104,7 +104,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
      * (cannot be local_memory since root cannot be a NUMA node) */
     if (verbose_mode == 1 && !l->parent && l->total_memory) {
       char memsize[25];
-      hwloc_memory_size_snprintf(memsize, sizeof(memsize), l->total_memory, 0);
+      hwloc_memory_size_snprintf(memsize, sizeof(memsize), l->total_memory, loutput->obj_snprintf_flags);
       fprintf(output, " (%s total)", memsize);
     }
     /* append the name */
