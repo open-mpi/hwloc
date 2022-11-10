@@ -30,6 +30,13 @@ extern "C" {
 /* backward compat with v1.10 before Node->NUMANode clarification */
 #define HWLOC_OBJ_NODE HWLOC_OBJ_NUMANODE
 
+/** \brief Get the depth from an object type.
+ *
+ * Superseded by hwloc_type_sscanf()+hwloc_get_type_depth_with_attr() in v3.0.
+ */
+HWLOC_DECLSPEC int hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
+                                              hwloc_topology_t topology, int *depthp) __hwloc_attribute_deprecated;
+
 /** \brief Add a distances structure.
  *
  * Superseded by hwloc_distances_add_create()+hwloc_distances_add_values()+hwloc_distances_add_commit()

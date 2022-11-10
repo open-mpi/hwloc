@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -734,12 +734,15 @@ main (int argc, char *argv[])
   topodepth = hwloc_topology_get_depth(topology);
 
   if (show_ancestor_type) {
-    err = hwloc_type_sscanf_as_depth(show_ancestor_type, NULL, topology, &show_ancestor_depth);
+    hwloc_obj_type_t type;
+    union hwloc_obj_attr_u attr;
+    err = hwloc_type_sscanf(show_ancestor_type, &type, &attr, sizeof(attr));
     if (err < 0) {
       fprintf(stderr, "unrecognized --ancestor type %s\n", show_ancestor_type);
       usage(callname, stderr);
       return EXIT_FAILURE;
     }
+    show_ancestor_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
     if (show_ancestor_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "unavailable --ancestor type %s\n", show_ancestor_type);
       return EXIT_FAILURE;
@@ -750,12 +753,15 @@ main (int argc, char *argv[])
     }
   }
   if (show_descendants_type) {
-    err = hwloc_type_sscanf_as_depth(show_descendants_type, NULL, topology, &show_descendants_depth);
+    hwloc_obj_type_t type;
+    union hwloc_obj_attr_u attr;
+    err = hwloc_type_sscanf(show_descendants_type, &type, &attr, sizeof(attr));
     if (err < 0) {
       fprintf(stderr, "unrecognized --descendants type %s\n", show_descendants_type);
       usage(callname, stderr);
       return EXIT_FAILURE;
     }
+    show_descendants_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
     if (show_descendants_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "unavailable --descendants type %s\n", show_descendants_type);
       return EXIT_FAILURE;

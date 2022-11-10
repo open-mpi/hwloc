@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -150,6 +150,7 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
   int verbose = lcontext->verbose;
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   hwloc_obj_type_t type;
+  union hwloc_obj_attr_u attr;
   int depth;
   char *end;
   int err;
@@ -163,11 +164,12 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
   typestring[typelen] = '\0';
 
   /* try to match a type name */
-  err = hwloc_type_sscanf_as_depth(typestring, &type, topology, &depth);
+  err = hwloc_type_sscanf(typestring, &type, &attr, sizeof(attr));
   if (!err) {
     *typep = type;
-    return depth;
+    return hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
   }
+
   if (!strcasecmp(typestring, "HBM") || !strcasecmp(typestring, "MCDRAM")) {
     if (lcontext->only_hbm == -1)
       lcontext->only_hbm = 1;

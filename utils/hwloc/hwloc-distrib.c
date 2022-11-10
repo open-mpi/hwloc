@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -246,7 +246,10 @@ int main(int argc, char *argv[])
 
     from_depth = 0;
     if (from_type) {
-      if (hwloc_type_sscanf_as_depth(from_type, NULL, topology, &from_depth) < 0 || from_depth < 0) {
+      hwloc_obj_type_t type;
+      union hwloc_obj_attr_u attr;
+      if (hwloc_type_sscanf(from_type, &type, &attr, sizeof(attr)) < 0
+          || (from_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr))) < 0) {
 	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --from, ignoring.\n", from_type);
 	return EXIT_FAILURE;
       }
@@ -254,8 +257,10 @@ int main(int argc, char *argv[])
 
     to_depth = INT_MAX;
     if (to_type) {
-      if (hwloc_type_sscanf_as_depth(to_type, NULL, topology, &to_depth) < 0 || to_depth < 0) {
-	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --to, ignoring.\n", to_type);
+      hwloc_obj_type_t type;
+      union hwloc_obj_attr_u attr;
+      if (hwloc_type_sscanf(to_type, &type, &attr, sizeof(attr)) < 0
+          || (to_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr))) < 0) {
 	return EXIT_FAILURE;
       }
     }

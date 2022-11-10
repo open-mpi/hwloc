@@ -22,6 +22,8 @@ Version 3.0.0
 * API
   + hwloc_get_type_depth_with_attr() generalizes hwloc_get_type_depth() by
     using object attributes to disambiguate multiple levels with same type.
+    - hwloc_type_sscanf_as_depth() is deprecated in favor of
+      hwloc_type_sscanf() followed by hwloc_get_type_depth_with_attr().
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.
