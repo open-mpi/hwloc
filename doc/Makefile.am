@@ -1,4 +1,4 @@
-# Copyright © 2009-2021 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009-2013, 2021 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -340,6 +340,7 @@ man3_levels_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_levels.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_type_depth_with_attr.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth_e.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \

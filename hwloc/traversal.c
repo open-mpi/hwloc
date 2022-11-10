@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -461,35 +461,47 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 }
 
 int
-hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
-			   hwloc_topology_t topology, int *depthp)
+hwloc_get_type_depth_with_attr(hwloc_topology_t topology,
+                               hwloc_obj_type_t type,
+                               union hwloc_obj_attr_u *attrp, size_t attrsize)
 {
-  union hwloc_obj_attr_u attr;
-  hwloc_obj_type_t type;
   int depth;
-  int err;
 
-  err = hwloc_type_sscanf(string, &type, &attr, sizeof(attr));
-  if (err < 0)
-    return err;
+  if (attrsize < sizeof(union hwloc_obj_attr_u))
+    /* attribute structure from old API, ignore everything */
+    attrp = NULL;
 
   depth = hwloc_get_type_depth(topology, type);
   if (type == HWLOC_OBJ_GROUP
       && depth == HWLOC_TYPE_DEPTH_MULTIPLE
-      && attr.group.depth != (unsigned)-1) {
+      && (attrp && attrp->group.depth != (unsigned)-1)) {
     unsigned l;
     depth = HWLOC_TYPE_DEPTH_UNKNOWN;
     for(l=0; l<topology->nb_levels; l++) {
       if (topology->levels[l][0]->type == HWLOC_OBJ_GROUP
-	  && topology->levels[l][0]->attr->group.depth == attr.group.depth) {
+	  && topology->levels[l][0]->attr->group.depth == attrp->group.depth) {
 	depth = (int)l;
 	break;
       }
     }
   }
 
+  return depth;
+}
+
+int hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
+                               hwloc_topology_t topology, int *depthp)
+{
+  hwloc_obj_type_t type;
+  union hwloc_obj_attr_u attr;
+  int depth, err;
+
+  err = hwloc_type_sscanf(string, &type, &attr, sizeof(attr));
+  if (err < 0)
+    return err;
   if (typep)
     *typep = type;
+  depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
   *depthp = depth;
   return 0;
 }

@@ -282,8 +282,6 @@ static int hwloc_calc_type_depth(hwloc_topology_t topology, const char *string, 
   int depth;
   int err;
 
-  /* similar to hwloc_type_sscanf_as_depth() but we want to get attr as well */
-
   err = hwloc_type_sscanf(string, &type, &attr, sizeof(attr));
   if (err < 0) {
     char *endptr;
@@ -297,21 +295,7 @@ static int hwloc_calc_type_depth(hwloc_topology_t topology, const char *string, 
     return 0;
   }
 
-  depth = hwloc_get_type_depth(topology, type);
-  if (type == HWLOC_OBJ_GROUP
-      && depth == HWLOC_TYPE_DEPTH_MULTIPLE
-      && attr.group.depth != (unsigned)-1) {
-    unsigned l;
-    depth = HWLOC_TYPE_DEPTH_UNKNOWN;
-    for(l=0; l<(unsigned) hwloc_topology_get_depth(topology); l++) {
-      hwloc_obj_t tmp = hwloc_get_obj_by_depth(topology, l, 0);
-      if (tmp->type == HWLOC_OBJ_GROUP && tmp->attr->group.depth == attr.group.depth) {
-	depth = (int)l;
-	break;
-      }
-    }
-  }
-
+  depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     fprintf(stderr, "unavailable %s type %s\n", caller, hwloc_obj_type_string(type));
     return -1;

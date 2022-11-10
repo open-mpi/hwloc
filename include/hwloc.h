@@ -806,6 +806,9 @@ HWLOC_DECLSPEC int hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict to
  * any other object depth or with the entire topology depth.
  * \sa hwloc_get_memory_parents_depth().
  *
+ * \sa hwloc_get_type_depth_with_attr() for disambiguating cases where
+ * ::HWLOC_TYPE_DEPTH_MULTIPLE is returned.
+ *
  * \sa hwloc_type_sscanf_as_depth() for returning the depth of objects
  * whose type is given as a string.
  */
@@ -821,6 +824,23 @@ enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_MISC = -7,       /**< \brief Virtual depth for Misc object. \hideinitializer */
     HWLOC_TYPE_DEPTH_MEMCACHE = -8    /**< \brief Virtual depth for MemCache object. \hideinitializer */
 };
+
+/** \brief Returns the depth of objects of type \p and attributes \p attrp.
+ *
+ * This is identical to hwloc_get_type_depth() but may disambiguate multiple levels
+ * with same type by looking at object attributes given in \p attrp
+ * (the attribute structure size should also be given in \p attrsize).
+ * For instance these attributes may specify the Group depth.
+ *
+ * These attributes may for instance have been previously obtained
+ * with hwloc_type_sscanf().
+ *
+ * If \p attrp is \c NULL and \p attrsize is \c 0, attributes are ignored
+ * and the function behaves as hwloc_get_type_depth().
+ */
+HWLOC_DECLSPEC int hwloc_get_type_depth_with_attr(hwloc_topology_t topology,
+                                                  hwloc_obj_type_t type,
+                                                  union hwloc_obj_attr_u *attrp, size_t attrsize);
 
 /** \brief Return the depth of parents where memory objects are attached.
  *

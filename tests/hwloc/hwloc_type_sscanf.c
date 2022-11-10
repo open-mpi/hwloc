@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2020 Inria.  All rights reserved.
+ * Copyright © 2016-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -35,8 +35,7 @@ static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffe
     }
   }
 
-  err = hwloc_type_sscanf_as_depth(buffer, NULL, topology, &depth);
-  assert(!err);
+  depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
   assert(depth == (int) obj->depth);
 }
 

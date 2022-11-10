@@ -20,6 +20,8 @@ bug fixes (and other actions) for each version of hwloc since version
 Version 3.0.0
 -------------
 * API
+  + hwloc_get_type_depth_with_attr() generalizes hwloc_get_type_depth() by
+    using object attributes to disambiguate multiple levels with same type.
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.
