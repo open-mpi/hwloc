@@ -1039,6 +1039,7 @@ hwloc_pci_class_string(unsigned short class_id)
       switch (class_id) {
 	case 0x0500: return "RAM";
 	case 0x0501: return "Flash";
+        case 0x0502: return "CXLMem";
       }
       return "Memory";
     case 0x06:
