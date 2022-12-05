@@ -289,6 +289,7 @@ if [ x$gatherio = x1 ]; then
   savedir "$destdir/$basename" /sys/bus/pci/slots/
   ls -d /sys/devices/pci* 2>/dev/null | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
   # gather class and bus links, we'll parse that the target path for PCI busids
+  savebusdir "$destdir/$basename" cxl . 1
   saveclassdir "$destdir/$basename" block
   saveclassdir "$destdir/$basename" dax
   savebusdir "$destdir/$basename" dax .. 1
