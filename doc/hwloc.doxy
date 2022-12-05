@@ -2238,6 +2238,21 @@ It reports 1 when there is a direct link between two distinct GPUs.
 If there is no XGMI route between them, the value is 0.
 The number of hops between a GPU and itself (on the diagonal) is 0 as well.
 </dd>
+<dt>XeLinkBandwidth (LevelZero)</dt>
+<dd>This is the matrix of unidirectional XeLink bandwidths between
+Intel GPUs (in MB/s).
+It contains 0 when there is no direct XeLink between objects.
+When there are multiple links, their bandwidth is aggregated.
+
+Values on the diagonal are artificially set to very high so
+that local access always appears faster than remote access.
+This includes bandwidths between a (sub)device and itself,
+between a subdevice and its parent device,
+or between two subdevices of the same parent.
+
+The matrix interconnects all LevelZero devices and subdevices (if any),
+even if some of them may have no link at all.
+</dd>
 <dt>NVLinkBandwidth (NVML)</dt>
 <dd>This is the matrix of unidirectional NVLink bandwidths between
 NVIDIA GPUs (in MB/s).
