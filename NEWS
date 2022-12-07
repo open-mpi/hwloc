@@ -22,9 +22,12 @@ Version 2.9.0
 * Backends
   + The LevelZero backend now reports the "XeLinkBandwidth" distance
     matrix between L0 devices (and subdevices) when available.
+  + Add support for CUDA compute capability up to 9.0.
 * Tools
   + lstopo now switches to console mode when its output is redirected.
     Graphical window mode may be forced back with --of window.
+  + hwloc-calc now accepts "numa" in -H, and I/O subtypes such as "gpu"
+    in -I and -N.
 
 
 Version 2.8.0
