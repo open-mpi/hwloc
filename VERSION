@@ -18,7 +18,7 @@ release=0
 # requirement is that it must be entirely printable ASCII characters
 # and have no white space.
 
-greek=a1
+greek=rc1
 
 # The date when this release was created
 
@@ -41,7 +41,7 @@ snapshot_version=${major}.${minor}.${release}${greek}-git
 # 2. Version numbers are described in the Libtool current:revision:age
 # format.
 
-libhwloc_so_version=0:0:0
+libhwloc_so_version=21:1:6
 libnetloc_so_version=0:0:0
 
 # Please also update the <TargetName> lines in contrib/windows/libhwloc.vcxproj
