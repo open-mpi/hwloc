@@ -1352,6 +1352,20 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 		   mb >= 10485760 ? "%llu TB" : mb >= 10240 ? "%llu GB" : "%llu MB",
 		   mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
 	}
+	value = hwloc_obj_get_info_by_name(obj, "CXLRAMSize");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		   mb >= 10485760 ? "%llu TB (RAM)" : mb >= 10240 ? "%llu GB (RAM)" : "%llu MB (RAM)",
+		   mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
+	}
+	value = hwloc_obj_get_info_by_name(obj, "CXLPMEMSize");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
+		   mb >= 10485760 ? "%llu TB (PMEM)" : mb >= 10240 ? "%llu GB (PMEM)" : "%llu MB (PMEM)",
+		   mb >= 10485760 ? mb/1048576 : mb >= 10240 ? mb/1024 : mb);
+	}
       }
     }
   }

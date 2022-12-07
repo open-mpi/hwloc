@@ -6592,6 +6592,64 @@ hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend, unsigned osdev_fla
   return 0;
 }
 
+static void
+hwloc_linuxfs_cxlmem_fillinfos(int root_fd,
+                               struct hwloc_obj *obj, const char *osdevpath)
+{
+  char path[310];
+  char tmp[64];
+  obj->subtype = strdup("CXLMem");
+
+  snprintf(path, sizeof(path), "%s/ram/size", osdevpath);
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    unsigned long long value = strtoull(tmp, NULL, 0);
+    if (value)  {
+      snprintf(tmp, sizeof(tmp), "%llu", value / 1024);
+      hwloc_obj_add_info(obj, "CXLRAMSize", tmp);
+    }
+  }
+  snprintf(path, sizeof(path), "%s/pmem/size", osdevpath);
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    unsigned long long value = strtoull(tmp, NULL, 0);
+    if (value)  {
+      snprintf(tmp, sizeof(tmp), "%llu", value / 1024);
+      hwloc_obj_add_info(obj, "CXLPMEMSize", tmp);
+    }
+  }
+}
+
+static int
+hwloc_linuxfs_lookup_cxlmem(struct hwloc_backend *backend, unsigned osdev_flags)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/bus/cxl/devices", root_fd);
+  if (dir) {
+    while ((dirent = readdir(dir)) != NULL) {
+      char path[300];
+      hwloc_obj_t obj, parent;
+
+      if (strncmp(dirent->d_name, "mem", 3))
+	continue;
+
+      snprintf(path, sizeof(path), "/sys/bus/cxl/devices/%s", dirent->d_name);
+      parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
+      if (!parent)
+	continue;
+
+      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+
+      hwloc_linuxfs_cxlmem_fillinfos(root_fd, obj, path);
+    }
+    closedir(dir);
+  }
+
+  return 0;
+}
+
 struct hwloc_firmware_dmi_mem_device_header {
   unsigned char type;
   unsigned char length;
@@ -7061,6 +7119,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_ve_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_bxi_class(backend, osdev_flags);
+    hwloc_linuxfs_lookup_cxlmem(backend, osdev_flags);
     if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
       hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
       hwloc_linuxfs_lookup_dma_class(backend, osdev_flags);
