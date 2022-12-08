@@ -1277,7 +1277,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	  value3 = hwloc_obj_get_info_by_name(obj, "CUDASharedMemorySizePerMP");
 	  if (value && value2 && value3) {
 	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
-		     "%s MP x (%s cores + %s kB)", value, value2, value3);
+		     "%s MP x (%s cores + %s KiB)", value, value2, value3);
 	  }
 
 	} else if (!strcmp(obj->subtype, "OpenCL")) {
