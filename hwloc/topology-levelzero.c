@@ -679,6 +679,15 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       continue;
     }
 
+#if 0
+    /* No interesting info attr to get from driver properties for now.
+     * 2022/12/09: Driver UUID is driver version (major>>24|minor>>16|build) | a-uuid-timestamp>>32
+     *  hence it's not stable across multiple runs
+     */
+    ze_driver_properties_t drprop;
+    res = zeDriverGetProperties(drh[i], &drprop);
+#endif
+
     for(j=0; j<nbdevices; j++) {
       zes_device_handle_t sdvh = dvh[j];
       zes_device_handle_t *subh = NULL;
