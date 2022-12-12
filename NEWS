@@ -43,6 +43,9 @@ Version 3.0.0
     - hwloc_cpuset_from_nodeset_strict()
   + HWLOC_PCI_<domain>_<bus>_LOCALCPUS environment variables,
     superseded with a single HWLOC_PCI_LOCALITY since 2.0.
+* Misc
+  + XML format switches to 3.0 by default. Exporting to 2.x is
+    possible with the new V2 XML export flag.
 
 
 Version 2.9.0

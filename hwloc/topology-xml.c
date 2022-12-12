@@ -2081,7 +2081,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   if (ret < 0)
     goto failed;
 
-  if (data->version_major > 2) {
+  if (data->version_major > 3) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: cannot import XML version %u.%u > 2\n",
 	      data->msgprefix, data->version_major, data->version_minor);
