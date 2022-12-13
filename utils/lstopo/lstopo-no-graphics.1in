@@ -116,6 +116,17 @@ only shows them if there are more than one.
 \fB\-f\fR \fB\-\-force\fR
 If the destination file already exists, overwrite it.
 .TP
+\fB\-\-osf\fR <flags>, \fB\-\-obj\-snprintf\-flags\fR <flags>
+Change object type and attribute printing flags.
+Flags may be given as numeric values or as a comma-separated list of flag names
+that are passed to \fIhwloc_obj_type_snprintf()\fR and \fIhwloc_obj_attr_snprintf()\fR.
+Those names may be substrings of actual flag names as long as a single one matches,
+for instance \fBno_units,long_names\fR.
+
+The default is \fB0\fR (or \fBnone\fR) which means short type names and units such as GiB.
+If verbose mode is enabled and the textual output is used,
+longer type names and more attributes are displayed (\fBlong_names,more_attrs\fR).
+.TP
 \fB\-l\fR \fB\-\-logical\fR
 Display hwloc logical indexes of all objects, with prefix "L#".
 .

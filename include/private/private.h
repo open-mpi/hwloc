@@ -461,6 +461,44 @@ extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsi
 extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
 #endif
 
+/* uses HWLOC_OBJ_SNPRINTF_FLAG_ flags */
+static __hwloc_inline int hwloc_memory_size_snprintf(char *buffer, size_t bufsize, unsigned long long size, unsigned long flags)
+{
+  /* no units */
+  if (flags & HWLOC_OBJ_SNPRINTF_FLAG_NO_UNITS) {
+    return snprintf(buffer, bufsize, "%llu", size);
+  }
+
+  /* old deprecated format (KiB value with KB units) */
+  if (flags & HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE) {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>9)+1)>>1, "KB");
+  }
+
+  /* units 1000 */
+  if (flags & HWLOC_OBJ_SNPRINTF_FLAG_UNITS_1000) {
+    if (size < 10000000ULL) {
+      return snprintf(buffer, bufsize, "%llu%s", ((size/500)+1)/2, "KB");
+    } else if (size < 10000000000ULL) {
+      return snprintf(buffer, bufsize, "%llu%s", ((size/500000)+1)/2, "MB");
+    } else if (size < 10000000000000ULL) {
+      return snprintf(buffer, bufsize, "%llu%s", ((size/500000000)+1)/2, "GB");
+    } else {
+      return snprintf(buffer, bufsize, "%llu%s", ((size/500000000000ULL)+1)/2, "TB");
+    }
+  }
+
+  /* units 1024 */
+  if (size < (10ULL<<20)) {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>9)+1)>>1, "KiB");
+  } else if (size < (10ULL<<30)) {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>19)+1)>>1, "MiB");
+  } else if (size < (10ULL<<40)) {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>29)+1)>>1, "GiB");
+  } else {
+    return snprintf(buffer, bufsize, "%llu%s", ((size>>39)+1)>>1, "TiB");
+  }
+}
+
 /* Return the name of the currently running program, if supported.
  * If not NULL, must be freed by the caller.
  */

@@ -122,7 +122,7 @@ hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, const 
     unsigned idx = logicalo ? logi : obj->os_index;
     if (!hwloc_bitmap_intersects(set, obj->cpuset))
      goto next;
-    hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+    hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
     if (idx == (unsigned)-1)
       snprintf(string, sizeof(string), "%s%s%s:-1", prefix, level ? "." : "", type);
     else
@@ -176,7 +176,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
         fprintf(stderr, "No object included in this cpuset\n");
         return EXIT_FAILURE;
       }
-      hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+      hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
       idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
         printf("%s%s", first ? (const char *) "" : sep, type);
@@ -254,7 +254,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
         for(i=0; i<nrnodes; i++) {
           char type[64];
           unsigned idx;
-          hwloc_obj_type_snprintf(type, sizeof(type), nodes[i], 1);
+          hwloc_obj_type_snprintf(type, sizeof(type), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
           idx = logicalo ? nodes[i]->logical_index : nodes[i]->os_index;
           printf("%s%u", i==0 ? (const char *) "" : sep, idx);
         }

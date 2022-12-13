@@ -24,9 +24,15 @@ Version 3.0.0
     using object attributes to disambiguate multiple levels with same type.
     - hwloc_type_sscanf_as_depth() is deprecated in favor of
       hwloc_type_sscanf() followed by hwloc_get_type_depth_with_attr().
+  + hwloc_obj_attr_snprintf() now displays KiB/MiB/GiB/TiB units for sizes.
+  + The verbose attribute of hwloc_obj_type/attr_snprintf() is replaced
+    by flags, where value 1 keeps the same meaning as in hwloc 2.x.
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.
+* Tools
+  + lstopo has a new --osf option to tune the displaying of object
+    attributes and units.
 * Removed features
   + BlueGene/Q support.
   + Functions that were deprecated since 2.0:

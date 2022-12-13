@@ -205,6 +205,12 @@ extern "C" {
 #define hwloc_obj_type_string HWLOC_NAME(obj_type_string )
 #define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
 #define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
+#define hwloc_obj_snprintf_flag_e HWLOC_NAME(obj_snprintf_flag_e)
+#define HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES HWLOC_NAME_CAPS(OBJ_SNPRINTF_FLAG_LONG_NAMES)
+#define HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS HWLOC_NAME_CAPS(OBJ_SNPRINTF_FLAG_MORE_ATTRS)
+#define HWLOC_OBJ_SNPRINTF_FLAG_NO_UNITS HWLOC_NAME_CAPS(OBJ_SNPRINTF_FLAG_NO_UNITS)
+#define HWLOC_OBJ_SNPRINTF_FLAG_UNITS_1000 HWLOC_NAME_CAPS(OBJ_SNPRINTF_FLAG_UNITS_1000)
+#define HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE HWLOC_NAME_CAPS(OBJ_SNPRINTF_FLAG_OLD_VERBOSE)
 #define hwloc_type_sscanf HWLOC_NAME(type_sscanf)
 
 #define hwloc_obj_get_info_by_name HWLOC_NAME(obj_get_info_by_name)
@@ -685,6 +691,9 @@ extern "C" {
 #ifndef HWLOC_HAVE_CORRECT_SNPRINTF
 #define hwloc_snprintf HWLOC_NAME(snprintf)
 #endif
+
+#define hwloc_memory_size_snprintf HWLOC_NAME(memory_size_snprintf)
+
 #define hwloc_ffsl_manual HWLOC_NAME(ffsl_manual)
 #define hwloc_ffs32 HWLOC_NAME(ffs32)
 #define hwloc_ffsl_from_ffs32 HWLOC_NAME(ffsl_from_ffs32)

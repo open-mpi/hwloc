@@ -478,6 +478,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Output options:\n");
   fprintf (where, "  --output-format <format>\n");
   fprintf (where, "  --of <format>         Force the output to use the given format\n");
+  fprintf (where, "  --obj-snprintf-flags <n>\n"
+                  "  --osflags <n>         Change object type and attribute printing flags\n");
   fprintf (where, "  -f --force            Overwrite the output file if it exists\n");
   fprintf (where, "Textual output options:\n");
   fprintf (where, "  --only <type>         Only show objects of the given type in the textual output\n");
@@ -790,6 +792,7 @@ main (int argc, char *argv[])
   struct lstopo_output loutput;
   output_method *output_func;
   hwloc_membind_policy_t policy;
+  int may_show_more_attributes = 0;
 #ifdef HAVE_CLOCK_GETTIME
   struct timespec ts1, ts2;
   unsigned long ms;
@@ -848,6 +851,7 @@ main (int argc, char *argv[])
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
   loutput.transform_distances = -1;
+  loutput.obj_snprintf_flags = 0;
 
   loutput.nr_cpukind_styles = 0;
 
@@ -1023,6 +1027,12 @@ main (int argc, char *argv[])
 	  set_icache_types_filter(filter);
 	else
 	  set_type_filter(type, filter);
+	opt = 1;
+      }
+      else if (!strcmp (argv[0], "--obj-snprintf-flags") || !strcmp (argv[0], "--osf")) {
+        loutput.obj_snprintf_flags = hwloc_utils_parse_obj_snprintf_flags(argv[1]);
+        if (loutput.obj_snprintf_flags == (unsigned long)-1)
+          goto out;
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--ignore")) {
@@ -1510,6 +1520,7 @@ main (int argc, char *argv[])
 #if !defined HWLOC_WIN_SYS || !defined LSTOPO_HAVE_GRAPHICS
     {
       output_func = output_console;
+      may_show_more_attributes = 1;
     }
 #endif
 #ifdef ANDROID
@@ -1537,6 +1548,7 @@ main (int argc, char *argv[])
 
   case LSTOPO_OUTPUT_CONSOLE:
     output_func = output_console;
+    may_show_more_attributes = 1;
     break;
   case LSTOPO_OUTPUT_SYNTHETIC:
     output_func = output_synthetic;
@@ -1590,6 +1602,12 @@ main (int argc, char *argv[])
   default:
     fprintf(stderr, "file format not supported\n");
     goto out_usagefailure;
+  }
+
+  if (loutput.verbose_mode > 1) {
+    loutput.obj_snprintf_flags |= HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES;
+    if (may_show_more_attributes)
+      loutput.obj_snprintf_flags |= HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS;
   }
 
  refresh:

@@ -104,6 +104,7 @@ struct lstopo_output {
   int show_cpuset;
   int show_taskset;
   int transform_distances;
+  unsigned long obj_snprintf_flags;
 
   /* draw config */
   char title[256];

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2021 Inria.  All rights reserved.
+ * Copyright © 2019-2022 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -32,7 +32,7 @@ static void native_android_box(struct lstopo_output *loutput, const struct lstop
 
     if(obj){
         gp_index = obj->gp_index;
-        hwloc_obj_attr_snprintf(info, 1096, obj, sep, 1);
+        hwloc_obj_attr_snprintf(info, 1096, obj, sep, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES|HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS);
     }
 
     if (cpukind_style)
