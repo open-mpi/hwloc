@@ -563,32 +563,6 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
     noquirks = 1;
   }
 
-  /* deprecated force locality variables */
-  if (!forced) {
-    const char *env;
-    char envname[256];
-    /* override the cpuset with the environment if given */
-    snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS",
-	     busid->domain, busid->bus);
-    env = getenv(envname);
-    if (env) {
-      static int reported = 0;
-      if (!topology->pci_has_forced_locality && !reported) {
-        if (HWLOC_SHOW_ALL_ERRORS())
-          fprintf(stderr, "hwloc/pci: Environment variable %s is deprecated, please use HWLOC_PCI_LOCALITY instead.\n", env);
-	reported = 1;
-      }
-      if (*env) {
-	/* force the cpuset */
-	hwloc_debug("Overriding PCI locality using %s in the environment\n", envname);
-	hwloc_bitmap_sscanf(cpuset, env);
-	forced = 1;
-      }
-      /* if env exists, even empty, don't let quirks change what the OS reports */
-      noquirks = 1;
-    }
-  }
-
   if (!forced && !noquirks && topology->pci_locality_quirks /* either quirks are unknown yet, or some are enabled */) {
     err = hwloc__pci_find_busid_parent_quirk(topology, busid, cpuset);
     if (err > 0)
