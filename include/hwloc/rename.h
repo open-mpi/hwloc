@@ -665,10 +665,6 @@ extern "C" {
 
 #define hwloc_distances_add HWLOC_NAME(distances_add)
 
-#define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
-#define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
-#define hwloc_obj_type_sscanf HWLOC_NAME(obj_type_sscanf)
-
 #define hwloc_set_membind_nodeset HWLOC_NAME(set_membind_nodeset)
 #define hwloc_get_membind_nodeset HWLOC_NAME(get_membind_nodeset)
 #define hwloc_set_proc_membind_nodeset HWLOC_NAME(set_proc_membind_nodeset)
@@ -676,9 +672,6 @@ extern "C" {
 #define hwloc_set_area_membind_nodeset HWLOC_NAME(set_area_membind_nodeset)
 #define hwloc_get_area_membind_nodeset HWLOC_NAME(get_area_membind_nodeset)
 #define hwloc_alloc_membind_nodeset HWLOC_NAME(alloc_membind_nodeset)
-
-#define hwloc_cpuset_to_nodeset_strict HWLOC_NAME(cpuset_to_nodeset_strict)
-#define hwloc_cpuset_from_nodeset_strict HWLOC_NAME(cpuset_from_nodeset_strict)
 
 /* private/debug.h */
 

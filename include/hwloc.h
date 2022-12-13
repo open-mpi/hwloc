@@ -1006,8 +1006,6 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
  *
  * \note This function is guaranteed to match any string returned by
  * hwloc_obj_type_string() or hwloc_obj_type_snprintf().
- *
- * \note This is an extended version of the now deprecated hwloc_obj_type_sscanf().
  */
 HWLOC_DECLSPEC int hwloc_type_sscanf(const char *string,
 				     hwloc_obj_type_t *typep,

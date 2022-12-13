@@ -39,69 +39,6 @@ HWLOC_DECLSPEC int hwloc_distances_add(hwloc_topology_t topology,
 				       unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,
 				       unsigned long kind, unsigned long flags) __hwloc_attribute_deprecated;
 
-/** \brief Insert a misc object by parent.
- *
- * Identical to hwloc_topology_insert_misc_object().
- */
-static __hwloc_inline hwloc_obj_t
-hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name) __hwloc_attribute_deprecated;
-static __hwloc_inline hwloc_obj_t
-hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name)
-{
-  return hwloc_topology_insert_misc_object(topology, parent, name);
-}
-
-/** \brief Stringify the cpuset containing a set of objects.
- *
- * If \p size is 0, \p string may safely be \c NULL.
- *
- * \return the number of characters that were actually written if not truncating,
- * or that would have been written (not including the ending \\0).
- */
-static __hwloc_inline int
-hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_obj * const *objs) __hwloc_attribute_deprecated;
-static __hwloc_inline int
-hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_obj * const *objs)
-{
-  hwloc_bitmap_t set = hwloc_bitmap_alloc();
-  int res;
-  unsigned i;
-
-  hwloc_bitmap_zero(set);
-  for(i=0; i<nobj; i++)
-    if (objs[i]->cpuset)
-      hwloc_bitmap_or(set, set, objs[i]->cpuset);
-
-  res = hwloc_bitmap_snprintf(str, size, set);
-  hwloc_bitmap_free(set);
-  return res;
-}
-
-/** \brief Convert a type string into a type and some attributes.
- *
- * Deprecated by hwloc_type_sscanf()
- */
-static __hwloc_inline int
-hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthattrp, void *typeattrp, size_t typeattrsize) __hwloc_attribute_deprecated;
-static __hwloc_inline int
-hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthattrp, void *typeattrp, size_t typeattrsize)
-{
-  union hwloc_obj_attr_u attr;
-  int err = hwloc_type_sscanf(string, typep, &attr, sizeof(attr));
-  if (err < 0)
-    return err;
-  if (hwloc_obj_type_is_cache(*typep)) {
-    if (depthattrp)
-      *depthattrp = (int) attr.cache.depth;
-    if (typeattrp && typeattrsize >= sizeof(hwloc_obj_cache_type_t))
-      memcpy(typeattrp, &attr.cache.type, sizeof(hwloc_obj_cache_type_t));
-  } else if (*typep == HWLOC_OBJ_GROUP) {
-    if (depthattrp)
-      *depthattrp = (int) attr.group.depth;
-  }
-  return 0;
-}
-
 /** \brief Set the default memory binding policy of the current
  * process or thread to prefer the NUMA node(s) specified by physical \p nodeset
  */
@@ -186,26 +123,6 @@ static __hwloc_inline void *
 hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   return hwloc_alloc_membind_policy(topology, len, nodeset, policy, flags | HWLOC_MEMBIND_BYNODESET);
-}
-
-/** \brief Convert a CPU set into a NUMA node set and handle non-NUMA cases
- */
-static __hwloc_inline void
-hwloc_cpuset_to_nodeset_strict(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset) __hwloc_attribute_deprecated;
-static __hwloc_inline void
-hwloc_cpuset_to_nodeset_strict(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
-{
-  hwloc_cpuset_to_nodeset(topology, _cpuset, nodeset);
-}
-
-/** \brief Convert a NUMA node set into a CPU set and handle non-NUMA cases
- */
-static __hwloc_inline void
-hwloc_cpuset_from_nodeset_strict(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset) __hwloc_attribute_deprecated;
-static __hwloc_inline void
-hwloc_cpuset_from_nodeset_strict(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
-{
-  hwloc_cpuset_from_nodeset(topology, _cpuset, nodeset);
 }
 
 

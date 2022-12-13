@@ -23,8 +23,14 @@ Version 3.0.0
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.
-* Backends
-  + Remove BlueGene/Q support.
+* Removed features
+  + BlueGene/Q support.
+  + Functions that were deprecated since 2.0:
+    - hwloc_topology_insert_misc_object_by_parent()
+    - hwloc_obj_cpuset_snprintf()
+    - hwloc_obj_type_sscanf()
+    - hwloc_cpuset_to_nodeset_strict()
+    - hwloc_cpuset_from_nodeset_strict()
 
 
 Version 2.9.0
