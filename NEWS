@@ -27,6 +27,8 @@ Version 2.13
   on heterogeneous memory systems?"
 * Drop support for Windows before 7 or Server 2008 R2.
 * hwloc-patch now has a --dry-run option.
+* Remove the HWLOC_PCI_<domain>_<bus>_LOCALCPUS environment variables,
+  superseded with a single HWLOC_PCI_LOCALITY since 2.0.
 
 
 Version 2.12.2
