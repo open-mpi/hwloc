@@ -98,6 +98,7 @@ extern "C" {
 #define hwloc_obj_t HWLOC_NAME(obj_t)
 
 #define hwloc_info_s HWLOC_NAME(info_s)
+#define hwloc_infos_s HWLOC_NAME(infos_s)
 
 #define hwloc_obj_attr_u HWLOC_NAME(obj_attr_u)
 #define hwloc_numanode_attr_s HWLOC_NAME(numanode_attr_s)

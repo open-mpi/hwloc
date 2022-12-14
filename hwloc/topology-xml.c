@@ -1832,19 +1832,19 @@ done:
   if (data->version_major <= 2) {
     unsigned i;
     /* check if root already has some backend info */
-    for(i=0; i<root->infos_count; i++)
-      if (!strcmp(root->infos[i].name, "Backend")) {
-        if (!strcmp(root->infos[i].value, "CUDA"))
+    for(i=0; i<root->infos.count; i++)
+      if (!strcmp(root->infos.array[i].name, "Backend")) {
+        if (!strcmp(root->infos.array[i].value, "CUDA"))
           data->need_cuda_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "NVML"))
+        if (!strcmp(root->infos.array[i].value, "NVML"))
           data->need_nvml_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "RSMI"))
+        if (!strcmp(root->infos.array[i].value, "RSMI"))
           data->need_rsmi_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "LevelZero"))
+        if (!strcmp(root->infos.array[i].value, "LevelZero"))
           data->need_levelzero_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "OpenCL"))
+        if (!strcmp(root->infos.array[i].value, "OpenCL"))
           data->need_opencl_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "GL"))
+        if (!strcmp(root->infos.array[i].value, "GL"))
           data->need_gl_backend_info = 0;
       }
     /* add missing backend info */
@@ -2197,8 +2197,8 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     break;
   }
 
-  for(i=0; i<obj->infos_count; i++)
-    hwloc__xml_export_info_attr(state, obj->infos[i].name, obj->infos[i].value);
+  for(i=0; i<obj->infos.count; i++)
+    hwloc__xml_export_info_attr(state, obj->infos.array[i].name, obj->infos.array[i].value);
 
   if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
     /* v2 gpus had Backend inside the object itself */

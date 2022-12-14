@@ -84,14 +84,14 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 	unsigned i,j;
 	if (clearinfos) {
 		/* this may be considered dangerous, applications should not modify objects directly */
-		for(i=0; i<obj->infos_count; i++) {
-			struct hwloc_info_s *info = &obj->infos[i];
+		for(i=0; i<obj->infos.count; i++) {
+			struct hwloc_info_s *info = &obj->infos.array[i];
 			free(info->name);
 			free(info->value);
 		}
-		free(obj->infos);
-		obj->infos = NULL;
-		obj->infos_count = 0;
+		free(obj->infos.array);
+		obj->infos.array = NULL;
+		obj->infos.count = 0;
 	}
 	if (clearuserdata) {
 		hwloc_utils_userdata_free(obj);
@@ -99,8 +99,8 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 	if (infoname) {
 		if (replaceinfos) {
 			/* this may be considered dangerous, applications should not modify objects directly */
-			for(i=0, j=0; i<obj->infos_count; i++) {
-				struct hwloc_info_s *info = &obj->infos[i];
+			for(i=0, j=0; i<obj->infos.count; i++) {
+				struct hwloc_info_s *info = &obj->infos.array[i];
 				if (!strcmp(infoname, info->name)) {
 					/* remove info */
 					free(info->name);
@@ -109,16 +109,16 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 				} else {
 					if (i != j) {
 						/* shift info to where it belongs */
-						obj->infos[j].name = info->name;
-						obj->infos[j].value = info->value;
+						obj->infos.array[j].name = info->name;
+						obj->infos.array[j].value = info->value;
 					}
 					j++;
 				}
 			}
-			obj->infos_count = j;
+			obj->infos.count = j;
 			if (!j) {
-				free(obj->infos);
-				obj->infos = NULL;
+				free(obj->infos.array);
+				obj->infos.array = NULL;
 			}
 		}
 		if (infovalue)

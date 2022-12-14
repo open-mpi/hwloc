@@ -2163,7 +2163,7 @@ static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
 
   hwloc_linux__get_allowed_resources(topology, fsroot_path, root_fd, &cpuset_name);
   if (cpuset_name) {
-    hwloc__add_info_nodup(&topology->levels[0][0]->infos, &topology->levels[0][0]->infos_count,
+    hwloc__add_info_nodup(&topology->levels[0][0]->infos.array, &topology->levels[0][0]->infos.count,
 			  "LinuxCgroup", cpuset_name, 1 /* replace */);
     free(cpuset_name);
   }
@@ -4884,7 +4884,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  if (cpuinfo_Lprocs) {
 	    for(j=0; j<(int) cpuinfo_numprocs; j++)
 	      if ((int) cpuinfo_Lprocs[j].Pproc == i) {
-		hwloc__move_infos(&package->infos, &package->infos_count,
+		hwloc__move_infos(&package->infos.array, &package->infos.count,
 				  &cpuinfo_Lprocs[j].infos, &cpuinfo_Lprocs[j].infos_count);
 	      }
 	  }
@@ -5825,7 +5825,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
     goto cpudone;
 
   /* setup root info */
-  hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
+  hwloc__move_infos(&hwloc_get_root_obj(topology)->infos.array, &hwloc_get_root_obj(topology)->infos.count,
 		    &global_infos, &global_infos_count);
 
   /* sysfs */
@@ -6986,7 +6986,7 @@ done:
 
   misc->subtype = strdup("MemoryModule");
 
-  hwloc__move_infos(&misc->infos, &misc->infos_count, &infos, &infos_count);
+  hwloc__move_infos(&misc->infos.array, &misc->infos.count, &infos, &infos_count);
   /* FIXME: find a way to identify the corresponding NUMA node and attach these objects there.
    * but it means we need to parse DeviceLocation=DIMM_B4 but these vary significantly
    * with the vendor, and it's hard to be 100% sure 'B' is second socket.

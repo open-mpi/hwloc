@@ -212,10 +212,10 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 	}
 
 	/* infos */
-	if (obj1->infos_count != obj2->infos_count)
+	if (obj1->infos.count != obj2->infos.count)
 		goto out_too_complex;
-	for(i=0; i<obj1->infos_count; i++) {
-		struct hwloc_info_s *info1 = &obj1->infos[i], *info2 = &obj2->infos[i];
+	for(i=0; i<obj1->infos.count; i++) {
+		struct hwloc_info_s *info1 = &obj1->infos.array[i], *info2 = &obj2->infos.array[i];
 		if (strcmp(info1->name, info2->name))
 			goto out_too_complex;
 		if (strcmp(info1->value, info2->value)) {
@@ -494,8 +494,8 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 			const char *newvalue = reverse ? obj_attr->diff.string.oldvalue : obj_attr->diff.string.newvalue;
 			unsigned i;
 			int found = 0;
-			for(i=0; i<obj->infos_count; i++) {
-				struct hwloc_info_s *info = &obj->infos[i];
+			for(i=0; i<obj->infos.count; i++) {
+				struct hwloc_info_s *info = &obj->infos.array[i];
 				if (!strcmp(info->name, name)
 				    && !strcmp(info->value, oldvalue)) {
 					free(info->value);

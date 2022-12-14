@@ -210,8 +210,8 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
 
   printf("%s symmetric subtree = %d\n", prefix, obj->symmetric_subtree);
 
-  for(i=0; i<obj->infos_count; i++) {
-    struct hwloc_info_s *info = &obj->infos[i];
+  for(i=0; i<obj->infos.count; i++) {
+    struct hwloc_info_s *info = &obj->infos.array[i];
     printf("%s info %s = %s\n", prefix, info->name, info->value);
   }
 

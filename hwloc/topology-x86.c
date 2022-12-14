@@ -915,19 +915,19 @@ hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int replace)
 {
   char number[12];
   if (info->cpuvendor[0])
-    hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUVendor", info->cpuvendor, replace);
+    hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUVendor", info->cpuvendor, replace);
   snprintf(number, sizeof(number), "%u", info->cpufamilynumber);
-  hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUFamilyNumber", number, replace);
+  hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUFamilyNumber", number, replace);
   snprintf(number, sizeof(number), "%u", info->cpumodelnumber);
-  hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUModelNumber", number, replace);
+  hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUModelNumber", number, replace);
   if (info->cpumodel[0]) {
     const char *c = info->cpumodel;
     while (*c == ' ')
       c++;
-    hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUModel", c, replace);
+    hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUModel", c, replace);
   }
   snprintf(number, sizeof(number), "%u", info->cpustepping);
-  hwloc__add_info_nodup(&obj->infos, &obj->infos_count, "CPUStepping", number, replace);
+  hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUStepping", number, replace);
 }
 
 static void

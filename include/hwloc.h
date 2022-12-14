@@ -416,6 +416,25 @@ HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t
 
 union hwloc_obj_attr_u;
 
+/** \brief Info attribute (name and value strings)
+ * \sa hwlocality_info_attr
+ */
+struct hwloc_info_s {
+  char *name;   /**< \brief Info name */
+  char *value;	/**< \brief Info value */
+};
+
+/** \brief Array of string info attributes (pairs of name and value).
+ *
+ * These structures may only be modified with hwloc_obj_add_info().
+ *
+ * \sa hwlocality_info_attr
+ */
+struct hwloc_infos_s {
+  struct hwloc_info_s *array;  /**< \brief Array of string pairs */
+  unsigned count;              /**< \brief Number of elements in the array. */
+};
+
 /** \brief Structure of a topology object
  *
  * Applications must not modify any field except \p hwloc_obj.userdata.
@@ -602,8 +621,7 @@ struct hwloc_obj {
                                           * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
                                           */
 
-  struct hwloc_info_s *infos;		/**< \brief Array of info attributes (name and value strings). */
-  unsigned infos_count;			/**< \brief Size of infos array. */
+  struct hwloc_infos_s infos;           /**< \brief Array of info attributes (name and value strings). */
 
   /* misc */
   void *userdata;			/**< \brief Application-given private data pointer,
@@ -685,15 +703,6 @@ union hwloc_obj_attr_u {
   struct hwloc_osdev_attr_s {
     hwloc_obj_osdev_type_t type;
   } osdev;
-};
-
-/** \brief Object info attribute (name and value strings)
- *
- * \sa hwlocality_info_attr
- */
-struct hwloc_info_s {
-  char *name;	/**< \brief Info name */
-  char *value;	/**< \brief Info value */
 };
 
 /** @} */

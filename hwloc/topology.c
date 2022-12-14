@@ -566,7 +566,7 @@ int hwloc__move_infos(struct hwloc_info_s **dst_infosp, unsigned *dst_countp,
 
 int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 {
-  return hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
+  return hwloc__add_info(&obj->infos.array, &obj->infos.count, name, value);
 }
 
 /* This function may be called with topology->tma set, it cannot free() or realloc() */
@@ -610,7 +610,7 @@ hwloc__free_object_contents(hwloc_obj_t obj)
   default:
     break;
   }
-  hwloc__free_infos(obj->infos, obj->infos_count);
+  hwloc__free_infos(obj->infos.array, obj->infos.count);
   free(obj->attr);
   free(obj->children);
   free(obj->subtype);
@@ -915,7 +915,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   newobj->nodeset = hwloc_bitmap_tma_dup(tma, src->nodeset);
   newobj->complete_nodeset = hwloc_bitmap_tma_dup(tma, src->complete_nodeset);
 
-  hwloc__tma_dup_infos(tma, &newobj->infos, &newobj->infos_count, src->infos, src->infos_count);
+  hwloc__tma_dup_infos(tma, &newobj->infos.array, &newobj->infos.count, src->infos.array, src->infos.count);
 
   /* find our level */
   if (src->depth < 0) {
@@ -1357,10 +1357,10 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
   if (old->os_index == HWLOC_UNKNOWN_INDEX)
     old->os_index = new->os_index;
 
-  if (new->infos_count) {
+  if (new->infos.count) {
     /* FIXME: dedup */
-    hwloc__move_infos(&old->infos, &old->infos_count,
-		      &new->infos, &new->infos_count);
+    hwloc__move_infos(&old->infos.array, &old->infos.count,
+		      &new->infos.array, &new->infos.count);
   }
 
   if (new->name && !old->name) {
