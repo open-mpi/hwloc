@@ -26,7 +26,7 @@ LC_ALL=C
 export LANG LC_ALL
 
 # don't let ls append special chars after symlinks etc
-unalias -a ls
+unalias ls
 
 gathercpuid=1
 gatherio=0
