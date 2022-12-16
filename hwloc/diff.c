@@ -424,10 +424,10 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
                 || ic1->efficiency != ic2->efficiency
                 || ic1->forced_efficiency != ic2->forced_efficiency
                 || ic1->ranking_value != ic2->ranking_value
-                || ic1->nr_infos != ic2->nr_infos)
+                || ic1->infos.count != ic2->infos.count)
               goto roottoocomplex;
-            for(j=0; j<ic1->nr_infos; j++) {
-              struct hwloc_info_s *info1 = &ic1->infos[j], *info2 = &ic2->infos[j];
+            for(j=0; j<ic1->infos.count; j++) {
+              struct hwloc_info_s *info1 = &ic1->infos.array[j], *info2 = &ic2->infos.array[j];
               if (strcmp(info1->name, info2->name)
                   || strcmp(info1->value, info2->value)) {
                 goto roottoocomplex;

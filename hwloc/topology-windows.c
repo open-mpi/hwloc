@@ -953,7 +953,7 @@ hwloc_win_efficiency_classes_register(hwloc_topology_t topology,
 {
   unsigned i;
   for(i=0; i<classes->nr_classes; i++) {
-    hwloc_internal_cpukinds_register(topology, classes->classes[i].cpuset, classes->classes[i].value, NULL, 0, 0);
+    hwloc_internal_cpukinds_register(topology, classes->classes[i].cpuset, classes->classes[i].value, NULL, 0);
     classes->classes[i].cpuset = NULL; /* given to cpukinds */
   }
 }

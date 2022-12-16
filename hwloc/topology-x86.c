@@ -915,19 +915,19 @@ hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int replace)
 {
   char number[12];
   if (info->cpuvendor[0])
-    hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUVendor", info->cpuvendor, replace);
+    hwloc__add_info_nodup(&obj->infos, "CPUVendor", info->cpuvendor, replace);
   snprintf(number, sizeof(number), "%u", info->cpufamilynumber);
-  hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUFamilyNumber", number, replace);
+  hwloc__add_info_nodup(&obj->infos, "CPUFamilyNumber", number, replace);
   snprintf(number, sizeof(number), "%u", info->cpumodelnumber);
-  hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUModelNumber", number, replace);
+  hwloc__add_info_nodup(&obj->infos, "CPUModelNumber", number, replace);
   if (info->cpumodel[0]) {
     const char *c = info->cpumodel;
     while (*c == ' ')
       c++;
-    hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUModel", c, replace);
+    hwloc__add_info_nodup(&obj->infos, "CPUModel", c, replace);
   }
   snprintf(number, sizeof(number), "%u", info->cpustepping);
-  hwloc__add_info_nodup(&obj->infos.array, &obj->infos.count, "CPUStepping", number, replace);
+  hwloc__add_info_nodup(&obj->infos, "CPUStepping", number, replace);
 }
 
 static void
@@ -1436,20 +1436,26 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
         }
         /* register IntelAtom set if any */
         if (!hwloc_bitmap_iszero(atomset)) {
+          struct hwloc_infos_s _infos;
           struct hwloc_info_s infoattr;
           infoattr.name = (char *) "CoreType";
           infoattr.value = (char *) "IntelAtom";
-          hwloc_internal_cpukinds_register(topology, atomset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+          _infos.array = &infoattr;
+          _infos.count = 1;
+          hwloc_internal_cpukinds_register(topology, atomset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &_infos, 0);
           /* the cpuset is given to the callee */
         } else {
           hwloc_bitmap_free(atomset);
         }
         /* register IntelCore set if any */
         if (!hwloc_bitmap_iszero(coreset)) {
+          struct hwloc_infos_s _infos;
           struct hwloc_info_s infoattr;
           infoattr.name = (char *) "CoreType";
           infoattr.value = (char *) "IntelCore";
-          hwloc_internal_cpukinds_register(topology, coreset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+          _infos.array = &infoattr;
+          _infos.count = 1;
+          hwloc_internal_cpukinds_register(topology, coreset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &_infos, 0);
           /* the cpuset is given to the callee */
         } else {
           hwloc_bitmap_free(coreset);

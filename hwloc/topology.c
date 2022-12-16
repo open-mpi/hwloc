@@ -461,142 +461,142 @@ hwloc_debug_print_objects(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 #define hwloc_debug_print_objects(indent, obj) do { /* nothing */ } while (0)
 #endif /* !HWLOC_DEBUG */
 
-void hwloc__free_infos(struct hwloc_info_s *infos, unsigned count)
+void hwloc__free_infos(struct hwloc_infos_s *infos)
 {
   unsigned i;
-  for(i=0; i<count; i++) {
-    free(infos[i].name);
-    free(infos[i].value);
+  for(i=0; i<infos->count; i++) {
+    free(infos->array[i].name);
+    free(infos->array[i].value);
   }
-  free(infos);
+  free(infos->array);
 }
 
-int hwloc__add_info(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value)
+int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value)
 {
-  unsigned count = *countp;
-  struct hwloc_info_s *infos = *infosp;
+  unsigned count = infos->count;
+  struct hwloc_info_s *array = infos->array;
 #define OBJECT_INFO_ALLOC 8
   /* nothing allocated initially, (re-)allocate by multiple of 8 */
   unsigned alloccount = (count + 1 + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
   if (count != alloccount) {
-    struct hwloc_info_s *tmpinfos = realloc(infos, alloccount*sizeof(*infos));
-    if (!tmpinfos)
+    struct hwloc_info_s *tmparray = realloc(array, alloccount*sizeof(*array));
+    if (!tmparray)
       /* failed to allocate, ignore this info */
       goto out_with_array;
-    *infosp = infos = tmpinfos;
+    infos->array = array = tmparray;
   }
-  infos[count].name = strdup(name);
-  if (!infos[count].name)
+  array[count].name = strdup(name);
+  if (!array[count].name)
     goto out_with_array;
-  infos[count].value = strdup(value);
-  if (!infos[count].value)
+  array[count].value = strdup(value);
+  if (!array[count].value)
     goto out_with_name;
-  *countp = count+1;
+  infos->count = count+1;
   return 0;
 
  out_with_name:
-  free(infos[count].name);
+  free(array[count].name);
  out_with_array:
   /* don't bother reducing the array */
   return -1;
 }
 
-int hwloc__add_info_nodup(struct hwloc_info_s **infosp, unsigned *countp,
+int hwloc__add_info_nodup(struct hwloc_infos_s *infos,
 			  const char *name, const char *value,
 			  int replace)
 {
-  struct hwloc_info_s *infos = *infosp;
-  unsigned count = *countp;
+  struct hwloc_info_s *array = infos->array;
+  unsigned count = infos->count;
   unsigned i;
   for(i=0; i<count; i++) {
-    if (!strcmp(infos[i].name, name)) {
+    if (!strcmp(array[i].name, name)) {
       if (replace) {
 	char *new = strdup(value);
 	if (!new)
 	  return -1;
-	free(infos[i].value);
-	infos[i].value = new;
+	free(array[i].value);
+	array[i].value = new;
       }
       return 0;
     }
   }
-  return hwloc__add_info(infosp, countp, name, value);
+  return hwloc__add_info(infos, name, value);
 }
 
-int hwloc__move_infos(struct hwloc_info_s **dst_infosp, unsigned *dst_countp,
-		      struct hwloc_info_s **src_infosp, unsigned *src_countp)
+int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
+		      struct hwloc_infos_s *src_infos)
 {
-  unsigned dst_count = *dst_countp;
-  struct hwloc_info_s *dst_infos = *dst_infosp;
-  unsigned src_count = *src_countp;
-  struct hwloc_info_s *src_infos = *src_infosp;
+  unsigned dst_count = dst_infos->count;
+  struct hwloc_info_s *dst_array = dst_infos->array;
+  unsigned src_count = src_infos->count;
+  struct hwloc_info_s *src_array = src_infos->array;
   unsigned i;
 #define OBJECT_INFO_ALLOC 8
   /* nothing allocated initially, (re-)allocate by multiple of 8 */
   unsigned alloccount = (dst_count + src_count + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
   if (dst_count != alloccount) {
-    struct hwloc_info_s *tmp_infos = realloc(dst_infos, alloccount*sizeof(*dst_infos));
-    if (!tmp_infos)
+    struct hwloc_info_s *tmp_array = realloc(dst_array, alloccount*sizeof(*dst_array));
+    if (!tmp_array)
       /* Failed to realloc, ignore the appended infos */
       goto drop;
-    dst_infos = tmp_infos;
+    dst_array = tmp_array;
   }
   for(i=0; i<src_count; i++, dst_count++) {
-    dst_infos[dst_count].name = src_infos[i].name;
-    dst_infos[dst_count].value = src_infos[i].value;
+    dst_array[dst_count].name = src_array[i].name;
+    dst_array[dst_count].value = src_array[i].value;
   }
-  *dst_infosp = dst_infos;
-  *dst_countp = dst_count;
-  free(src_infos);
-  *src_infosp = NULL;
-  *src_countp = 0;
+  dst_infos->array = dst_array;
+  dst_infos->count = dst_count;
+  free(src_array);
+  src_infos->array = NULL;
+  src_infos->count = 0;
   return 0;
 
  drop:
   /* drop src infos, don't modify dst_infos at all */
   for(i=0; i<src_count; i++) {
-    free(src_infos[i].name);
-    free(src_infos[i].value);
+    free(src_array[i].name);
+    free(src_array[i].value);
   }
-  free(src_infos);
-  *src_infosp = NULL;
-  *src_countp = 0;
+  free(src_array);
+  src_infos->array = NULL;
+  src_infos->count = 0;
   return -1;
 }
 
 int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 {
-  return hwloc__add_info(&obj->infos.array, &obj->infos.count, name, value);
+  return hwloc__add_info(&obj->infos, name, value);
 }
 
 /* This function may be called with topology->tma set, it cannot free() or realloc() */
 int hwloc__tma_dup_infos(struct hwloc_tma *tma,
-                         struct hwloc_info_s **newip, unsigned *newcp,
-                         struct hwloc_info_s *oldi, unsigned oldc)
+                         struct hwloc_infos_s *newi,
+                         struct hwloc_infos_s *oldi)
 {
-  struct hwloc_info_s *newi;
+  struct hwloc_info_s *newa;
   unsigned i, j;
-  newi = hwloc_tma_calloc(tma, oldc * sizeof(*newi));
-  if (!newi)
+  newa = hwloc_tma_calloc(tma, oldi->count * sizeof(*newa));
+  if (!newa)
     return -1;
-  for(i=0; i<oldc; i++) {
-    newi[i].name = hwloc_tma_strdup(tma, oldi[i].name);
-    newi[i].value = hwloc_tma_strdup(tma, oldi[i].value);
-    if (!newi[i].name || !newi[i].value)
+  for(i=0; i<oldi->count; i++) {
+    newa[i].name = hwloc_tma_strdup(tma, oldi->array[i].name);
+    newa[i].value = hwloc_tma_strdup(tma, oldi->array[i].value);
+    if (!newa[i].name || !newa[i].value)
       goto failed;
   }
-  *newip = newi;
-  *newcp = oldc;
+  newi->array = newa;
+  newi->count = oldi->count;
   return 0;
 
  failed:
   assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
   for(j=0; j<=i; j++) {
-    free(newi[i].name);
-    free(newi[i].value);
+    free(newa[i].name);
+    free(newa[i].value);
   }
-  free(newi);
-  *newip = NULL;
+  newi->array = NULL;
+  newi->count = 0;
   return -1;
 }
 
@@ -610,7 +610,7 @@ hwloc__free_object_contents(hwloc_obj_t obj)
   default:
     break;
   }
-  hwloc__free_infos(obj->infos.array, obj->infos.count);
+  hwloc__free_infos(&obj->infos);
   free(obj->attr);
   free(obj->children);
   free(obj->subtype);
@@ -915,7 +915,7 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   newobj->nodeset = hwloc_bitmap_tma_dup(tma, src->nodeset);
   newobj->complete_nodeset = hwloc_bitmap_tma_dup(tma, src->complete_nodeset);
 
-  hwloc__tma_dup_infos(tma, &newobj->infos.array, &newobj->infos.count, src->infos.array, src->infos.count);
+  hwloc__tma_dup_infos(tma, &newobj->infos, &src->infos);
 
   /* find our level */
   if (src->depth < 0) {
@@ -1359,8 +1359,8 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
 
   if (new->infos.count) {
     /* FIXME: dedup */
-    hwloc__move_infos(&old->infos.array, &old->infos.count,
-		      &new->infos.array, &new->infos.count);
+    hwloc__move_infos(&old->infos,
+		      &new->infos);
   }
 
   if (new->name && !old->name) {

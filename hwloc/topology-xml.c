@@ -1459,9 +1459,11 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
 {
   hwloc_bitmap_t cpuset = NULL;
   int forced_efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
-  unsigned nr_infos = 0;
-  struct hwloc_info_s *infos = NULL;
+  struct hwloc_infos_s infos;
   int ret;
+
+  infos.array = NULL;
+  infos.count = 0;
 
   while (1) {
     char *attrname, *attrvalue;
@@ -1495,7 +1497,7 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
       char *infovalue = NULL;
       ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
       if (!ret && infoname && infovalue)
-        hwloc__add_info(&infos, &nr_infos, infoname, infovalue);
+        hwloc__add_info(&infos, infoname, infovalue);
     } else {
       if (hwloc__xml_verbose())
         fprintf(stderr, "%s: cpukind with unrecognized child %s\n",
@@ -1517,17 +1519,17 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
   }
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS) {
-    hwloc__free_infos(infos, nr_infos);
+    hwloc__free_infos(&infos);
     hwloc_bitmap_free(cpuset);
   } else {
-    hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, nr_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
-    hwloc__free_infos(infos, nr_infos);
+    hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, &infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc__free_infos(&infos);
   }
 
   return state->global->close_tag(state);
 
  error:
-  hwloc__free_infos(infos, nr_infos);
+  hwloc__free_infos(&infos);
   hwloc_bitmap_free(cpuset);
   return -1;
 }
@@ -2508,8 +2510,8 @@ hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t top
       cstate.new_prop(&cstate, "forced_efficiency", tmp);
     }
 
-    for(j=0; j<kind->nr_infos; j++)
-      hwloc__xml_export_info_attr(&cstate, kind->infos[j].name, kind->infos[j].value);
+    for(j=0; j<kind->infos.count; j++)
+      hwloc__xml_export_info_attr(&cstate, kind->infos.array[j].name, kind->infos.array[j].value);
 
     cstate.end_object(&cstate, "cpukind");
   }
