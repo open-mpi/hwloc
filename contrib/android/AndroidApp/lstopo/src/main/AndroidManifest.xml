@@ -23,7 +23,7 @@
                 android:resource="@xml/provider_paths"/>
         </provider>
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
-        <activity android:configChanges="orientation|screenSize" android:name="com.hwloc.lstopo.MainActivity">
+        <activity android:configChanges="orientation|screenSize" android:name="com.hwloc.lstopo.MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
