@@ -60,7 +60,7 @@ if test "x$update" = "x1"; then
   sed -r -e '/define HWLOC_VERSION_MINOR /s/[0-9]+/'$official_minor'/' -i "$android_config_h"
   sed -r -e '/define HWLOC_VERSION_RELEASE /s/[0-9]+/'$official_release'/' -i "$android_config_h"
   sed -r -e '/define HWLOC_VERSION_GREEK "/s/"[0-9a-zA-Z\.-]*"/"'$official_greek'"/' -i "$android_config_h"
-  echo "Updating Android VERSION in $android_gradle ..."
+  $echo "Updating Android VERSION in $android_gradle ..."
   # replace oldversion-X-Y with newversion-1-Y since a version bump usually puts back snapshot number to 1
   suffix=$(grep -w versionName $android_gradle | grep -oP '".*"' | tr -d \" | grep -oP -- '-[0-9\.]+$')
   sed -r -e '/versionName "/s/"[0-9a-zA-Z\.-]+"/"'$official_version'-1'$suffix'"/' -i $android_gradle
