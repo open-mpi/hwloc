@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2022 Inria.  All rights reserved.
+Copyright © 2009-2023 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -50,6 +50,14 @@ Version 2.8.0
 * Misc
   + Add --disable-readme to avoid regenerating the top-level hwloc README
     file from the documentation.
+
+
+Version 2.7.2
+-------------
+* Fix a crash when LevelZero devices have multiple subdevices,
+  e.g. on PonteVecchio GPUs, thanks to Jonathan Peyton.
+* Fix a leak when importing cpukinds from XML,
+  thanks to Hui Zhou.
 
 
 Version 2.7.1
