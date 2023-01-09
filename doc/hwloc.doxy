@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -4315,8 +4315,20 @@ and <tt>HWLOC_OBJ_PACKAGE</tt> yet, you may use:
 Once a program is built against a hwloc library, it may also dynamically
 link with compatible libraries from other hwloc releases.
 The version of that runtime library may be queried with hwloc_get_api_version().
-See \ref faq_version_abi for using this function for testing ABI compatibility.
+For instance, the following code enables the topology flag ::HWLOC_TOPOLOGY_FLAG_NO_DISTANCES
+when compiling on hwloc 2.8 or later, but it disables it at runtime if running
+on an older hwloc (otherwise hwloc_topology_set_flags() would fail).
 
+\verbatim
+unsigned long topology_flags = ...; /* wanted flags that were supported before 2.8 */
+#if HWLOC_API_VERSION >= 0x20800
+if (hwloc_get_api_version() >= 0x20800)
+  topology_flags |= HWLOC_TOPOLOGY_FLAG_NO_DISTANCES; /* wanted flags only supported in 2.8+ */
+#endif
+hwloc_topology_set_flags(topology, topology_flags);
+\endverbatim
+
+See also \ref faq_version_abi for using hwloc_get_api_version() for testing ABI compatibility.
 
 
 \subsection faq_version What is the difference between API and library version numbers?
