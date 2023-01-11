@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2022 Inria.  All rights reserved.
+ * Copyright © 2015-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -313,6 +313,20 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   /* 0x1c = Last Branch Records Information on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x1c) {
     regs[0] = 0x1c; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+  }
+
+  /* 0x1d = Tile Information ; Reserved on AMD */
+  if (highest_cpuid >= 0x1d) {
+    regs[0] = 0x1d; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+    regs[0] = 0x1d; regs[2] = 1;
+    dump_one_cpuid(output, regs, 0x5);
+  }
+
+  /* 0x1e = TMUL Information ; Reserved on AMD */
+  if (highest_cpuid >= 0x1e) {
+    regs[0] = 0x1e; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
   }
 
